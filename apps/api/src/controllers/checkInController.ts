@@ -16,7 +16,8 @@ export async function createCheckInHandler(req: Request, res: Response) {
     return res.status(400).json({ errors: parseResult.error.issues });
   }
 
-  const payload: CheckInPayload = parseResult.data;
+  const { mood, notes } = parseResult.data;
+  const payload: CheckInPayload = { mood, notes };
   const result = await createCheckIn(payload);
   res.status(201).json(result);
 }
