@@ -3,13 +3,12 @@
   "private": true,
   "workspaces": ["apps/api", "apps/web"],
   "scripts": {
-    "dev": "concurrently -n api,web \"npm --workspace apps/api run dev\" \"npm --workspace apps/web run dev\"",
+    "dev": "node scripts/dev.cjs",
     "build": "npm --workspaces run build",
     "start": "npm --workspace apps/api run start",
     "typecheck": "npm --workspaces run typecheck"
   },
   "devDependencies": {
-    "concurrently": "^9.0.0",
     "typescript": "^5.6.0"
   }
 }
