@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { getToday } from '../controllers/todayController.js';
-import { createCheckInHandler } from '../controllers/checkInController.js';
+import { getToday } from '../controllers/todayController';
+import { createCheckInHandler } from '../controllers/checkInController';
 
 const router = Router();
 

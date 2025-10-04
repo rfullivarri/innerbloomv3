@@ -1,4 +1,4 @@
-import { prisma } from '../lib/db.js';
+import { prisma } from '../lib/db';
 
 export async function getTodaySummary() {
   const now = new Date();
@@ -15,7 +15,7 @@ export async function getTodaySummary() {
 }
 
 export interface CheckInPayload {
-  mood: string;
+  mood?: string;
   notes?: string;
 }
 
