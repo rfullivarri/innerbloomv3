@@ -2,10 +2,12 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { createCheckIn, type CheckInPayload } from '../services/wellnessService.js';
 
-const checkInSchema: z.ZodType<CheckInPayload> = z.object({
-  mood: z.string().min(1),
-  notes: z.string().optional()
-});
+const checkInSchema = z
+  .object({
+    mood: z.string().min(1),
+    notes: z.string().optional()
+  })
+  .strict();
 
 export async function createCheckInHandler(req: Request, res: Response) {
   const parseResult = checkInSchema.safeParse(req.body);
@@ -14,6 +16,7 @@ export async function createCheckInHandler(req: Request, res: Response) {
     return res.status(400).json({ errors: parseResult.error.issues });
   }
 
-  const result = await createCheckIn(parseResult.data);
+  const payload: CheckInPayload = parseResult.data;
+  const result = await createCheckIn(payload);
   res.status(201).json(result);
 }
