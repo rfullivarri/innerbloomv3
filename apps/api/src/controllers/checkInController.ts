@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { createCheckIn } from '../services/wellnessService.js';
+import { createCheckIn, type CheckInPayload } from '../services/wellnessService.js';
 
-const checkInSchema = z.object({
+const checkInSchema: z.ZodType<CheckInPayload> = z.object({
   mood: z.string().min(1),
   notes: z.string().optional()
 });

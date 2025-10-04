@@ -4,6 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "jsx": "react-jsx",
+    "noEmit": true,
     "types": ["vite/client"]
   },
   "include": ["src", "vite.config.ts"]
