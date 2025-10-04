@@ -1,0 +1,11 @@
+[service.api]
+command = "npm --workspace apps/api run start"
+
+  [service.api.env]
+  PORT = "8080"
+
+[service.web]
+command = "npm --workspace apps/web run preview"
+
+  [service.web.env]
+  PORT = "5173"
