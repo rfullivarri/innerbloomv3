@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  tasks     Task[]
+  checkIns  CheckIn[]
+}
+
+model Task {
+  id          String         @id @default(cuid())
+  title       String
+  description String?
+  user        User           @relation(fields: [userId], references: [id])
+  userId      String
+  instances   TaskInstance[]
+}
+
+model TaskInstance {
+  id        String   @id @default(cuid())
+  date      DateTime
+  task      Task     @relation(fields: [taskId], references: [id])
+  taskId    String
+  checkIns  CheckIn[]
+}
+
+model CheckIn {
+  id             String    @id @default(cuid())
+  createdAt      DateTime  @default(now())
+  mood           Emotion?  @relation(fields: [emotionId], references: [id])
+  emotionId      String?
+  notes          String?
+  user           User      @relation(fields: [userId], references: [id])
+  userId         String
+  taskInstance   TaskInstance? @relation(fields: [taskInstanceId], references: [id])
+  taskInstanceId String?
+}
+
+model Emotion {
+  id        String    @id @default(cuid())
+  label     String    @unique
+  checkIns  CheckIn[]
+}
+
+model Mission {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  rewards     Reward[]
+}
+
+model Reward {
+  id        String   @id @default(cuid())
+  title     String
+  points    Int
+  mission   Mission? @relation(fields: [missionId], references: [id])
+  missionId String?
+}
