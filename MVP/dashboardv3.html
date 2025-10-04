@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Self-Improvement Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Fuente + CSS (en carpeta /css) -->
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/dashboardv3.css?v=3">
+  <link rel="stylesheet" href="css/panel-rachas.overrides.css?v=1">
+  <link rel="stylesheet" href="./css/popups.css" />
+  <!-- Libs de charts ANTES de tu JS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#7d3cff">
+  <meta name="gj-worker-base" content="https://gamificationnotifications.rfullivarri22.workers.dev">
+</head>
+<body>
+  <div class="dashboard-root">
+  <!-- SPINNER -->
+  <div id="spinner-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- HEADER -->
+   <!-- <header>-->
+   <!--   <div class="logo">🎮 Gamification Life Journey</div>-->
+   <!--   <div class="menu-toggle" id="menu-toggle">☰</div>-->
+   <!-- </header>-->
+  
+    <header style="display:flex;align-items:center;justify-content:space-between;">
+    <div class="logo">🎮 Gamification Life Journey</div>
+  
+    <div style="display:flex;align-items:center;gap:16px;">
+      <!-- 🔔 CAMPANITA -->
+      <button id="gj-noti-btn" aria-label="Notificaciones" style="font-size:20px;position:relative;background:none;border:none;cursor:pointer;">
+        🔔
+        <span id="gj-noti-badge" style="position:absolute;top:-6px;right:-6px;
+          min-width:18px;height:18px;border-radius:9px;padding:0 5px;
+          background:#7d3cff;color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center;">0</span>
+      </button>
+  
+      <!-- menú hamburguesa -->
+      <div class="menu-toggle" id="menu-toggle">☰</div>
+    </div>
+  </header>
+
+  <!-- 🔽 DROPDOWN DE NOTIFICACIONES -->
+  <div id="gj-noti-dropdown" style="display:none;position:absolute;right:16px;top:56px;width:320px;max-height:60vh;overflow:auto;
+    background:#141418;border:1px solid #2a2a33;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:999;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #23232b;">
+      <strong>Notificaciones</strong>
+      <button id="gj-noti-markall" style="font-size:12px;">Marcar todo</button>
+    </div>
+    <ul id="gj-noti-list" style="list-style:none;margin:0;padding:0;"></ul>
+  </div>
+    
+ 
+  <!-- MENÚ HAMBURGUESA -->
+  <nav id="dashboard-menu">
+    <ul>
+      <li><a href="#" id="edit-avatar">Cambiar tu avatar</a></li>
+      <!--<li><a href="#" id="edit-bbdd-menu" data-link="editar-base">Editar Base</a></li>-->
+       <!--<li><a href="gamificationweblanding/index-bbdd.html" id="edit-bbdd-menu" data-keep-email>Editar Base</a></li>-->
+      <li id="li-edit-bbdd"><a href="gamificationweblanding/index-bbdd.html" id="edit-bbdd-menu" data-keep-email>Editar Base</a></li>
+      <li><a href="#" id="daily-quest">Daily Quest</a></li>
+      <li><a href="#" id="open-scheduler">Programar Daily Quest</a></li>
+      <li><a href="#" id="refresh-kv" data-action="refresh-kv">Actualizar</a></li>
+      <li><a href="indexv2.html">Cerrar sesión</a></li>
+    </ul>
+  </nav>
+
+  <!-- LAYOUT -->
+  <main>
+    <div class="dashboard-content">
+      <!-- AVISO: Falta confirmar BBDD -->
+      <div id="bbdd-warning" class="alert-card" style="display:none;">
+        <div class="alert-row">
+          <span class="alert-dot" aria-hidden="true"></span>
+          <div class="alert-text">
+            <strong>Confirmá tu base</strong>
+            <span class="muted">Abrí el menú (≡) →</span>
+          </div>
+          <a id="edit-bbdd-warning"
+             href="gamificationweblanding/index-bbdd.html"
+             class="chip chip-primary"
+             data-keep-email>Editar Base</a>
+        </div>
+        <p class="alert-hint">
+          Revisá y tocá <b>Confirmar edición</b> para generar tu Daily Quest.
+        </p>
+      </div>
+      
+      <!-- AVISO: Programar Daily Quest -->
+      <div id="scheduler-warning" class="alert-card" style="display:none;">
+        <div class="alert-row">
+          <span class="alert-dot" aria-hidden="true"></span>
+          <div class="alert-text">
+            <strong>Tu Daily Quest está listo</strong>
+            <span class="muted">Programalo para recibirlo cada día.</span>
+          </div>
+          <!-- IMPORTANTE: este id ya lo usa scheduler-controller para abrir el modal -->
+          <a id="btn-programar-dq" href="#" class="chip chip-cta" data-open-scheduler>Programar Daily Quest</a>
+<!--           <a id="open-scheduler" href="#" class="chip chip-cta">Programar Daily Quest</a> -->
+<!--           <a id="open-scheduler" href="#" class="chip chip-primary" role="button"
+             aria-controls="scheduler-modal">Programar Daily Quest</a> -->
+        </div>
+        <!-- opcional; lo dejamos vacío pero ocupa el mismo “aire” que el de BBDD -->
+        <p id="scheduler-hint" class="alert-hint"></p>
+      </div>
+      <div class="dashboard-columns">
+        <!-- IZQUIERDA -->
+        <section class="left-column">
+          <!-- XP + Level -->
+          <div class="xp-box">
+            <div class="card-title" 
+                 data-info="<strong>¿Qué ves acá?</strong><ul><li>🏆 <b>XP</b> = experiencia total acumulada.</li><li>🎯 <b>Level</b> sube al alcanzar el umbral de XP.</li><li>📊 La barra muestra el <b>progreso al próximo nivel</b>.</li><li>💡 Cada hábito suma XP: pequeños pasos, gran avance.</li></ul>">
+              <h3>🏆 Total XP: <span id="xp-actual">0</span> · 🎯 Level: <span id="nivel-actual">0</span></h3>
+            </div>
+            <div class="progress-bar"><div id="bar-nivel" class="bar-fill nivel"></div></div>
+            <p>✨ Te faltan <span id="xp-faltante">0</span> XP para el próximo nivel</p>
+          </div>
+          
+          <div class="avatar-box">
+            <img id="avatar" class="avatar-img" src="" alt="Avatar">
+          </div>
+
+          <!-- Daily Energy -->
+          <div class="energy-box">
+            <div class="card-title"
+                 data-info="<strong>¿Qué es Daily Energy?</strong><ul><li>🫀 <b>HP</b> → ligado a <b>Body</b>.</li><li>🏵️ <b>Mood</b> → ligado a <b>Soul</b>.</li><li>🧠 <b>Focus</b> → ligado a <b>Mind</b>.</li><li>🔋 Se cargan con tus actividades (últimos 7 días).</li><li>💡 Mantenerlas altas te da motivación y constancia.</li></ul>">
+              <h3>💠 Daily Energy</h3>
+            </div>
+            <!-- (barras igual) -->
+            <div class="energy-meter">
+              <span class="energy-label">HP</span>
+              <div class="energy-track"><div id="bar-hp" class="bar-fill hp"></div></div>
+            </div>
+            <div class="energy-meter">
+              <span class="energy-label">Mood</span>
+              <div class="energy-track"><div id="bar-mood" class="bar-fill mood"></div></div>
+            </div>
+            <div class="energy-meter">
+              <span class="energy-label">Focus</span>
+              <div class="energy-track"><div id="bar-focus" class="bar-fill focus"></div></div>
+            </div>
+          </div>
+          
+          <!-- Daily Cultivation -->
+          <div class="daily-cultivation-section">
+            <div class="daily-cultivation-header">
+              <div class="card-title" data-info-pos="left"
+                   data-info="<strong>¿Qué es Daily Cultivation?</strong><ul><li>📈 Muestra los <b>XP</b> que ganaste cada día del mes.</li><li>📊 El progreso <b>no siempre es lineal</b> (y está bien).</li><li>💡 Mirá tendencias y celebrá la constancia.</li></ul>">
+                <h3>🪴 Daily Cultivation</h3>
+              </div>
+              <label for="month-select">Mes:</label>
+              <select id="month-select"></select>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="xpChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- CENTRO -->
+        <section class="center-column">
+          <!-- Radar -->
+          <div class="radar-section">
+            <div class="card-title"
+                 data-info="<strong>¿Qué es el Radar Chart?</strong><ul><li>📊 Muestra tus <b>rasgos principales</b> en Body/Mind/Soul.</li><li>🧭 Cada punto refleja XP acumulada en ese rasgo.</li><li>💡 Útil para ver <b>balance</b> y detectar desequilibrios.</li></ul>">
+              <h3>🧿 Radar Chart</h3>
+            </div>
+            <div id="radarChartContainer"><canvas id="radarChart"></canvas></div>
+          </div>
+
+          <!-- Emotion Chart -->
+          <div class="emotion-box">
+            <div class="card-title"
+                 data-info="<strong>¿Qué es el Emotion Chart?</strong><ul><li>💗 Registra tus <b>emociones diarias</b>.</li><li>📅 Te deja ver cómo fuiste sintiéndote con el tiempo.</li><li>💡 Detectar patrones emocionales ayuda a tu Journey.</li></ul>">
+              <h3>💗 Emotion Chart</h3>
+            </div>
+            <div class="emotion-legend">
+              <span><span class="color-box" style="background-color:#2ECC71;"></span>Calma</span>
+              <span><span class="color-box" style="background-color:#F1C40F;"></span>Felicidad</span>
+              <span><span class="color-box" style="background-color:#9B59B6;"></span>Motivación</span>
+              <span><span class="color-box" style="background-color:#3498DB;"></span>Tristeza</span>
+              <span><span class="color-box" style="background-color:#E74C3C;"></span>Ansiedad</span>
+              <span><span class="color-box" style="background-color:#8D6E63;"></span>Frustración</span>
+              <span><span class="color-box" style="background-color:#16A085;"></span>Cansancio</span>
+            </div>
+            <div id="emotionChart" class="emotion-chart-container"></div>
+            <div id="emotion-destacada"></div>
+          </div>
+        </section>
+        
+        <!-- DERECHA -->
+        <section class="right-column">
+          <!-- 🔥 DOPAMINE PILLAR CARD (columna 3) -->
+<!--           <section id="pillar-card-root" class="pc-card gj-constancy-card"></section> -->
+          <div id="panel-rachas"></div>
+          <!-- Recompensas (como ya lo tenías) -->
+          <div id="rewardsContainer"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Misiones -->
+  <section class="missions-section">
+    <h3>🗂️ Misiones</h3>
+    <div id="missions-wrapper" class="missions-grid"></div>
+  </section>
+  
+  <!-- Popup Cambiar Avatar -->
+  <div id="avatarPopup" class="popup-overlay">
+    <div class="popup-content">
+      <button class="close-btn" id="closeAvatarPopup">✕</button>
+      <h3>📷 Cambiar tu Avatar</h3>
+  
+      <img id="currentAvatar" src="" alt="Avatar actual" class="avatar-preview" />
+      <input type="file" id="newAvatarInput" accept="image/*" />
+  
+      <div class="popup-buttons">
+        <button id="cancelAvatar" class="btn cancel">Cancelar</button>
+        <button id="confirmAvatar" class="btn confirm">Confirmar</button>
+      </div>
+      <div id="avatarStatus" style="margin-top:10px;font-size:13px;opacity:.8"></div>
+    </div>
+  </div>
+  
+  <!-- Tu JS al final -->
+  <script src="js/dashboardv3.js?v=3"></script>
+  <script type="module" src="js/scheduler-controller.js?v=3"></script>
+
+  <!-- (Opcional) helper para mantener email en links marcados -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const url = new URL(location.href);
+      let email = (url.searchParams.get('email') || localStorage.getItem('gj_email') || '').trim().toLowerCase();
+      if (!email) return;
+
+      document.querySelectorAll('a[data-keep-email]').forEach(a => {
+        const u = new URL(a.getAttribute('href'), location.origin);
+        u.searchParams.set('email', email);
+        a.setAttribute('href', u.toString());
+      });
+    });
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js', { scope: './' })
+          .then(r => console.log('[SW] registrado', r.scope))
+          .catch(e => console.error('[SW] error', e));
+      });
+    }
+</script>
+<script src="./js/noti-client.js"></script>
+<script>document.addEventListener('DOMContentLoaded', ()=> Noti.init());</script>
+<script src="js/panel-rachas.js"></script>
+<script>
+  const mapMode = (m) => {
+    const x = String(m||'FLOW').toUpperCase();
+    if (x.startsWith('LOW'))   return 'Low';
+    if (x.startsWith('CHILL')) return 'Chill';
+    if (x.startsWith('EVOL'))  return 'Evolve';
+    return 'Flow';
+  };
+
+  // Montar cuando dashboardv3 avisa que los datos están listos
+  document.addEventListener('gj:data-ready', (ev) => {
+    const d = ev.detail?.data || window.GJ_DATA;
+    PanelRachas.mount('#panel-rachas', {
+      initialState: { mode: mapMode(d.game_mode), pillar: 'Body', range: 'month' },
+      dataProvider: PanelRachas.adapters.fromDashboardV3(d)
+    });
+  });
+</script>
+<script src="./js/popups.js" defer></script>
+    
+</body>
+</html>

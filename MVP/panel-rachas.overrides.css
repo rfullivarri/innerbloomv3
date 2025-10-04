@@ -1,0 +1,238 @@
+/* ===== TOKENS del panel de rachas ===== */
+.dashboard-root{
+  --gj-glass-blur: 18px;
+  --gj-glass-bg: rgba(255,255,255,.06);
+  --gj-glass-br: rgba(255,255,255,.22);
+  --gj-glass-shadow: 0 12px 30px rgba(0,0,0,.35);
+
+  --gj-r-card: 28px;
+  --gj-r-inner: 16px;
+  --gj-r-pill: 999px;
+
+  --gj-surface-1: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.05));
+  --gj-stroke-1: rgba(255,255,255,.14);
+  --gj-track: #1f274a;
+  --gj-fill-level: linear-gradient(90deg,#FFE27A 0%, #FFC84D 55%, #F3A712 100%);
+
+  /* Ajustes rápidos */
+  --dash-gap: 16px;
+  --dash-min-col: 360px;
+  --info-pop-width: 340px;
+}
+
+/* ===== GRID (mobile-first) ===== */
+.dashboard-root .dashboard-columns{
+  display:grid !important;
+  grid-template-columns: 1fr;
+  gap: var(--dash-gap);
+  align-items:start;
+}
+@media (min-width:1180px){
+  .dashboard-root .dashboard-columns{
+    grid-template-columns: repeat(3, minmax(var(--dash-min-col), 1fr));
+  }
+}
+
+/* ===== Cards ===== */
+.dashboard-root .xp-box,
+.dashboard-root .avatar-box,
+.dashboard-root .energy-box,
+.dashboard-root .daily-cultivation-section,
+.dashboard-root .radar-section,
+.dashboard-root .emotion-box,
+.dashboard-root .missions-section,
+.dashboard-root .alert-card,
+.dashboard-root .warning-container,
+.dashboard-root #rewardsContainer{
+  position:relative;
+  background:var(--gj-glass-bg);
+  border:1px solid var(--gj-glass-br);
+  border-radius:var(--gj-r-card);
+  backdrop-filter: blur(var(--gj-glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--gj-glass-blur)) saturate(140%);
+  box-shadow:var(--gj-glass-shadow);
+  overflow:visible;
+  z-index:1;
+}
+
+/* brillo decorativo */
+.dashboard-root .xp-box::before,
+.dashboard-root .energy-box::before,
+.dashboard-root .daily-cultivation-section::before,
+.dashboard-root .radar-section::before,
+.dashboard-root .emotion-box::before{
+  content:"";
+  position:absolute; inset:-30% -8% auto -8%; height:240px;
+  background:
+    radial-gradient(140px 140px at 22% 68%, rgba(168,120,255,.18), transparent 60%),
+    radial-gradient(190px 190px at 78% 30%, rgba(55,170,255,.18), transparent 60%);
+  filter: blur(10px) saturate(120%);
+  pointer-events:none; z-index:-1;
+}
+
+/* elevar card cuando hay tooltip/chip activo */
+.dashboard-root .xp-box:hover,
+.dashboard-root .energy-box:hover,
+.dashboard-root .daily-cultivation-section:hover,
+.dashboard-root .radar-section:hover,
+.dashboard-root .emotion-box:hover,
+.dashboard-root .xp-box:focus-within,
+.dashboard-root .energy-box:focus-within,
+.dashboard-root .daily-cultivation-section:focus-within,
+.dashboard-root .radar-section:focus-within,
+.dashboard-root .emotion-box:focus-within,
+.dashboard-root .xp-box:has(.card-title .info:hover, .card-title .info-btn:hover, .card-title .info-chip:hover, .info-pop),
+.dashboard-root .energy-box:has(.card-title .info:hover, .card-title .info-btn:hover, .card-title .info-chip:hover, .info-pop),
+.dashboard-root .daily-cultivation-section:has(.card-title .info:hover, .card-title .info-btn:hover, .card-title .info-chip:hover, .info-pop),
+.dashboard-root .radar-section:has(.card-title .info:hover, .card-title .info-btn:hover, .card-title .info-chip:hover, .info-pop),
+.dashboard-root .emotion-box:has(.card-title .info:hover, .card-title .info-btn:hover, .card-title .info-chip:hover, .info-pop){
+  z-index: 9999;
+}
+
+/* contenedores internos */
+.dashboard-root .daily-cultivation-section .chart-wrapper,
+.dashboard-root .emotion-box .emotion-chart-container,
+.dashboard-root .radar-section #radarChartContainer{
+  background:var(--gj-surface-1);
+  border:1px solid var(--gj-stroke-1);
+  border-radius:var(--gj-r-inner);
+  padding:8px;
+}
+
+/* Avatar */
+.dashboard-root .avatar-box{ max-width:440px; margin:0 auto; padding:0; }
+@media (max-width:600px){ .dashboard-root .avatar-box{ max-width:320px; } }
+.dashboard-root .avatar-img{
+  display:block; width:100%; height:auto; aspect-ratio:3/4;
+  border-radius:var(--gj-r-card); border:1px solid var(--gj-glass-br);
+}
+
+/* Barras */
+.dashboard-root .progress-bar{
+  position:relative; height:20px; background:var(--gj-track);
+  border-radius:var(--gj-r-pill); overflow:hidden;
+}
+.dashboard-root .progress-bar .bar-fill,
+.dashboard-root #bar-nivel{
+  position:absolute; inset:0; height:100%;
+  background:var(--gj-fill-level); border-radius:var(--gj-r-pill);
+}
+.dashboard-root .energy-track{
+  position:relative; height:20px; background:var(--gj-track);
+  border-radius:var(--gj-r-pill); overflow:hidden;
+}
+.dashboard-root .energy-track .bar-fill{ height:100%; border-radius:var(--gj-r-pill); }
+
+/* ===== Títulos + chip ℹ ===== */
+.dashboard-root .card-title{
+  position:relative;
+  z-index:2;
+  padding-top:4px;            /* ↑ acercamos el título al borde superior */
+  padding-right:34px;         /* aire para el chip a la derecha */
+}
+.dashboard-root .card-title h3{  /* ↑ sube títulos en todos los cards */
+  margin:0 0 8px;
+}
+
+/* CHIP: más pegado al borde */
+.dashboard-root .card-title .info,
+.dashboard-root .card-title .info-btn,
+.dashboard-root .card-title .info-chip{
+  position:absolute !important;
+  top:6px; right:6px;          /* antes 10px */
+  z-index:1000 !important;     /* < pop */
+}
+
+/* POP: primer plano absoluto (ya calculado por JS) */
+.dashboard-root .info-pop{
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  max-width: var(--info-pop-width);
+  width: max-content;
+  pointer-events: auto;
+  display: none;
+  will-change: left, top, transform;
+}
+
+/* ===== EXCEPCIÓN: Daily Cultivation (chip a la izquierda) ===== */
+.dashboard-root .daily-cultivation-section .card-title{
+  padding-left:30px;           /* evita que el chip pise el título */
+  padding-top:4px;             /* subimos el título */
+}
+.dashboard-root .daily-cultivation-section .card-title .info,
+.dashboard-root .daily-cultivation-section .card-title .info-btn,
+.dashboard-root .daily-cultivation-section .card-title .info-chip{
+  left:4px; right:auto; top:4px;  /* antes 10px */
+}
+
+/* Header de Daily Cultivation */
+.daily-cultivation-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  flex-wrap:wrap;
+}
+@media (max-width:420px){
+  .daily-cultivation-header label{ display:none; }
+}
+
+/* ===== Radar & Emotion: chip arriba-derecha y títulos más altos ===== */
+.dashboard-root .radar-section .card-title,
+.dashboard-root .emotion-box .card-title{ padding-top:4px; }
+
+.dashboard-root .radar-section .card-title .info,
+.dashboard-root .radar-section .card-title .info-btn,
+.dashboard-root .radar-section .card-title .info-chip,
+.dashboard-root .emotion-box .card-title .info,
+.dashboard-root .emotion-box .card-title .info-btn,
+.dashboard-root .emotion-box .card-title .info-chip{
+  top:6px; right:6px; left:auto; /* pegados al borde */
+}
+
+/* Panel de rachas: no tapar nada por defecto */
+#panel-rachas{ position:relative; z-index:2; }
+
+/* ===== GUTTERS móviles: casi a full-bleed ===== */
+@media (max-width: 540px){
+  .dashboard-root .dashboard-content{ padding-left:2px !important; padding-right:2px !important; }
+  main{ padding-left:2px !important; padding-right:2px !important; }
+  body, .dashboard-root{ margin-left:0 !important; margin-right:0 !important; }
+}
+
+/* ===== emotion chart fix ===== */
+.month-labels{display:grid;grid-template-columns:repeat(26,12px);gap:4px;margin-bottom:6px}
+.emotion-grid{display:grid;gap:4px}
+.emotion-row{display:grid;grid-auto-flow:column;grid-auto-columns:12px;gap:4px}
+.emotion-cell{width:12px;height:12px;border-radius:4px}
+@media (max-width:420px){
+  .month-labels{grid-template-columns:repeat(26,10px);gap:3px}
+  .emotion-row{grid-auto-columns:10px;gap:3px}
+  .emotion-cell{width:10px;height:10px;border-radius:3px}
+}
+
+/* Layout uniforme de avisos */
+.alert-card { padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,0.04); }
+.alert-row { display: flex; align-items: center; gap: 12px; }
+.alert-dot { width: 10px; height: 10px; border-radius: 50%; background: #ffc107; flex: 0 0 10px; }
+.alert-text { display: flex; flex-direction: column; gap: 2px; margin-right: auto; }
+.alert-text strong { font-weight: 700; }
+.alert-text .muted { opacity: .75; font-size: .95rem; }
+
+/* Chip base y variante lila (CTA vistoso) */
+.chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 8px 14px; border-radius: 999px; text-decoration: none;
+  font-weight: 600; line-height: 1; border: 1px solid transparent;
+  transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
+}
+.chip-primary {
+  background: #7b5cf5; /* lila */
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(123,92,245,.30);
+}
+.chip-primary:hover { filter: brightness(1.05); box-shadow: 0 8px 18px rgba(123,92,245,.38); }
+.chip-primary:active { transform: translateY(1px); }
+
+/* Asegura que el CTA quede a la derecha aunque falte margin en .alert-text */
+.alert-card .chip { margin-left: auto; }

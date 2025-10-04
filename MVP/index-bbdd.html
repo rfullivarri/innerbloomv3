@@ -1,0 +1,1658 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#7d3cff">
+  <title>Edicion de Base de Datos</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0f19; --ink:#e9eef7; --muted:#9aa3b2; --accent:#7d3cff; --accent2:#9a74ff;
+      --card:#101726; --chip:#17203a; --border:#1d2743; --shadow:0 12px 28px rgba(0,0,0,.35);
+      --tap:44px; --r:14px; --actionsw:180px;
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{height:100%;}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#0b0f19 0%,#0d1324 100%);
+      color:var(--ink);
+      font:15px/1.5 "Manrope",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    a{color:inherit}
+    button,input,select{font:inherit}
+    select,button{cursor:pointer}
+
+    .hidden{display:none !important}
+
+    /* Overlay */
+    #bbdd-overlay{
+      position:fixed; inset:0; z-index:80;
+      background:rgba(4,6,12,.6);
+      backdrop-filter:blur(18px) saturate(120%);
+      -webkit-backdrop-filter:blur(18px) saturate(120%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:clamp(5px,1vh,10px);   /* MODIFIQUE */
+      overflow-y:auto;
+    }
+    .bbdd-panel{
+      width:min(960px,100%);
+      height:min(100dvh,960px);
+      max-height:100dvh;
+      background:rgba(16,23,38,.86);
+      border:1px solid rgba(125,60,255,.25);
+      border-radius:18px;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      position:relative;
+      box-shadow:0 18px 44px rgba(0,0,0,.45);
+    }
+
+    header.appbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      padding:14px clamp(14px,4vw,26px) 10px;
+      background:linear-gradient(180deg,rgba(14,20,35,.98),rgba(14,20,35,.82));
+      border-bottom:1px solid rgba(125,60,255,.22);
+    }
+    header.appbar .top-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;align-items:center;}
+    header.appbar .top-row .primary{display:flex;align-items:center;gap:12px;flex:1 1 320px;min-width:0;flex-wrap:wrap;}
+    header.appbar .top-row .primary .btn.icon{flex-shrink:0;}
+    header.appbar .title-wrap{flex:1 1 220px;min-width:0;}
+    header.appbar .title{font-weight:800;font-size:1.06rem;line-height:1.25;}
+    header.appbar .sub{font-size:.78rem;color:var(--muted);margin-top:2px;}
+    header.appbar .row-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;min-width:0;flex:0 0 auto;}
+    header.appbar .row-actions .btn{white-space:nowrap;flex:0 0 auto;}
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(125,60,255,.25);
+      background:var(--chip);
+      color:var(--ink);
+      min-height:var(--tap);
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:600;
+      transition:background .2s,border-color .2s,transform .2s;
+    }
+    .btn:hover{border-color:var(--accent2);background:rgba(125,60,255,.16);}
+    .btn.icon{width:var(--tap);display:grid;place-items:center;padding:0;font-size:18px;}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;box-shadow:0 10px 30px rgba(125,60,255,.35);}
+    .btn.primary[disabled]{opacity:.55;cursor:progress;box-shadow:none;}
+
+    details.guide{
+      margin:12px 0;
+      border:1px solid rgba(157,167,200,.25);
+      border-radius:14px;
+      background:rgba(18,27,46,.88);
+      padding:10px 14px;
+      box-shadow:0 12px 28px rgba(0,0,0,.3);
+    }
+    details.guide summary{cursor:pointer;color:#cfd6f8;font-weight:600;}
+    details.guide ul{margin:10px 0 0 18px;color:var(--muted);padding:0 0 4px 0;}
+
+    .tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 2px;}
+    .field{flex:1 1 220px;display:flex;align-items:center;gap:8px;background:rgba(18,26,44,.92);border:1px solid rgba(125,60,255,.16);border-radius:12px;padding:0 12px;min-height:42px;min-width:0;}
+    .field input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--ink);font-size:15px;}
+    .left-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .indicator{font-size:.78rem;color:#ffd166;display:flex;align-items:center;gap:6px;}
+    .indicator.hidden{display:none!important;}
+
+    #bbdd-ai{position:relative;}
+    #ai-sparkle{position:absolute;inset:-6px;pointer-events:none;background:radial-gradient(circle at top,var(--accent2),transparent 60%);opacity:0;animation:pulse 1.6s infinite;}
+    .ai-loading #ai-sparkle{opacity:1;}
+    @keyframes pulse{0%,100%{opacity:.1;}50%{opacity:.45;}}
+
+    main{
+      flex:1;
+      overflow:auto;
+      padding:0 clamp(12px,4vw,28px) clamp(96px,12vh,150px);
+      position:relative;
+      scroll-behavior:smooth;
+    }
+
+    .thead{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:.78rem;margin:6px 2px 0;gap:8px;}
+    .thead .label{flex:1 1 auto;min-width:0;}
+    .thead .add{min-height:36px;padding:0 12px;border-radius:10px;background:rgba(125,60,255,.16);border-color:rgba(125,60,255,.4);}
+
+    #table-wrap{position:relative;}
+    #bbdd-table{width:100%;border-collapse:collapse;}
+    #bbdd-table colgroup,#bbdd-table thead{display:none;}
+    #bbdd-table tbody tr{display:table-row;}
+    #bbdd-table td{border:0;padding:0;background:transparent;}
+
+    .item{position:relative;margin:6px 0;height:auto;border-radius:16px;overflow:hidden;touch-action:pan-y;}
+    .item .actions{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding-right:10px;min-width:var(--actionsw);background:linear-gradient(90deg,transparent 32%,rgba(10,14,28,.88) 100%);}
+    .item .act{width:46px;height:46px;border-radius:50%;border:1px solid rgba(125,60,255,.35);background:rgba(32,38,66,.88);color:#fff;font-size:1.24rem;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.32);}
+    .item .act.modify{border-color:#2b8fdb;background:rgba(26,48,78,.88);}
+    .item .act.improve{border-color:#8c5cff;background:rgba(39,28,78,.9);}
+    .item .act.del{border-color:#e74c3c;background:rgba(64,20,28,.92);}
+
+    .slidable{position:relative;display:flex;align-items:flex-start;gap:10px;background:var(--card);border:1px solid rgba(125,60,255,.22);border-radius:16px;padding:12px 14px;transition:transform .18s ease;will-change:transform;box-shadow:var(--shadow);}
+    .slidable .mark{width:6px;border-radius:999px;background:linear-gradient(180deg,#2a7fff,#7d3cff);align-self:stretch;}
+    .slidable .content{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;}
+    .row-main{display:flex;align-items:center;gap:10px;}
+    .task-input{flex:1;min-width:0;background:rgba(255,255,255,.02);border:1px solid rgba(125,60,255,.24);border-radius:12px;padding:10px 12px;color:var(--ink);}
+    .task-input.ai-updated{border-color:#71e6b5;box-shadow:0 0 0 1px rgba(113,230,181,.35);}
+    .task-input::placeholder{color:rgba(233,238,247,.35);}
+
+    .meta{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));background:rgba(255,255,255,.02);border:1px solid rgba(125,60,255,.18);border-radius:12px;padding:10px;opacity:0;max-height:0;overflow:hidden;transition:opacity .18s ease,max-height .18s ease;}
+    .item.expanded .meta{opacity:1;max-height:460px;}
+    .meta label{display:flex;flex-direction:column;font-size:.74rem;color:var(--muted);gap:6px;}
+    .meta select,.meta input{width:100%;background:rgba(14,24,40,.9);border:1px solid rgba(125,60,255,.22);border-radius:10px;min-height:36px;padding:6px 10px;color:var(--ink);}
+    .meta input::placeholder{color:rgba(233,238,247,.3);}
+    .meta .feedback{display:flex;gap:8px;align-items:center;justify-content:flex-start;grid-column:1 / -1;}
+    .meta .feedback button{width:40px;height:40px;border-radius:10px;border:1px solid rgba(125,60,255,.28);background:rgba(24,32,52,.9);color:var(--ink);font-size:1.1rem;display:flex;align-items:center;justify-content:center;}
+    .item:not(.expanded) .meta .feedback{display:none;}
+    .meta-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;grid-column:1 / -1;}
+    .meta-actions .meta-btn{flex:1 1 120px;min-height:36px;border-radius:10px;border:1px solid rgba(125,60,255,.22);background:rgba(18,28,48,.88);color:var(--ink);font-weight:600;font-size:.82rem;padding:6px 10px;display:flex;align-items:center;gap:8px;justify-content:center;}
+    .meta-actions .meta-btn.danger{border-color:#e74c3c;color:#ffb1b8;background:rgba(56,20,32,.92);}
+
+    .diff-chip,.more{
+      height:40px;
+      width:42px;
+      border-radius:11px;
+      border:1px solid rgba(125,60,255,.22);
+      background:rgba(22,30,50,.92);
+      color:var(--ink);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 10px;
+    }
+    .diff-chip{width:auto;gap:8px;padding:0 14px;font-weight:600;font-size:.86rem;}
+    .diff-chip .dot{width:10px;height:10px;border-radius:99px;background:#8a93a7;}
+    .diff-chip[data-v="Fácil"] .dot{background:#2ecc71;}
+    .diff-chip[data-v="Media"] .dot{background:#f1c40f;}
+    .diff-chip[data-v="Difícil"] .dot{background:#e74c3c;}
+
+    .more{font-size:20px;}
+    .item.expanded .more{background:rgba(125,60,255,.2);border-color:rgba(125,60,255,.5);}
+
+    .item.swipe-hint .slidable{animation:swipe-hint 2.6s ease-in-out infinite;}
+
+    @keyframes swipe-hint{
+      0%,60%,100%{transform:translateX(0);}
+      25%{transform:translateX(calc(-1 * var(--actionsw) * .55));}
+      45%{transform:translateX(0);}
+    }
+
+    .item.ai-improved .slidable{border-color:rgba(140,92,255,.65);box-shadow:0 0 0 1px rgba(140,92,255,.35),0 14px 34px rgba(83,57,168,.35);}
+    .item.ai-modified .slidable{border-color:rgba(113,230,181,.8);box-shadow:0 0 0 1px rgba(113,230,181,.35),0 14px 34px rgba(36,126,104,.3);}
+
+    .bbdd-footer{
+      position:absolute;
+      inset:auto 0 0 0;
+      padding:14px clamp(14px,4vw,24px) calc(env(safe-area-inset-bottom)+18px);
+      background:linear-gradient(180deg,rgba(11,16,28,.1) 0%,rgba(11,16,28,.88) 45%,rgba(11,16,28,.98) 100%);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    #status-msg{flex:1;color:#9ff7cc;font-size:.82rem;transition:opacity .2s;}
+    .bbdd-footer .btn{min-height:42px;}
+
+    #table-spinner{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:12px;
+      background:rgba(8,12,24,.82);
+      color:var(--ink);
+      font-weight:600;
+      z-index:120;
+      pointer-events:auto;
+    }
+    #table-wrap.table-loading #table-spinner{display:flex;}
+    #table-spinner .ring{
+      width:36px;height:36px;border-radius:50%;
+      border:3px solid rgba(125,60,255,.18);
+      border-top-color:var(--accent2);
+      animation:spin .9s linear infinite;
+    }
+    #ai-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,12,26,.82);color:#cfd7ff;font-weight:600;z-index:130;gap:10px;}
+    #ai-overlay .spark{font-size:1.4rem;animation:twinkle 1.6s ease-in-out infinite;}
+    .ai-loading #ai-overlay{display:flex;}
+    @keyframes twinkle{0%,100%{opacity:.4;transform:scale(1);}50%{opacity:1;transform:scale(1.2);}}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    #add-row-dup{display:none;align-items:center;justify-content:center;padding:0 12px;}
+
+    /* Responsive */
+    @media (min-width:780px){
+      body{background:#060912;}
+      header.appbar{padding:18px 40px 14px;}
+      main{padding:10px 40px 180px;}
+      .item{margin:12px 0;}
+      .slidable{gap:16px;padding:18px;}
+      .meta{grid-template-columns:repeat(3,minmax(160px,1fr));}
+    }
+
+    @media (max-width:720px){
+      header.appbar .top-row{align-items:flex-start;}
+      header.appbar .top-row .primary{width:100%;align-items:flex-start;}
+      header.appbar .top-row .primary .title-wrap{flex-basis:100%;}
+      header.appbar .top-row .row-actions{width:100%;margin-left:0;justify-content:flex-end;}
+      header.appbar .top-row .row-actions .btn{flex:1;min-width:0;}
+      .tools{flex-direction:column;align-items:stretch;gap:8px;}
+      .left-tools{width:100%;justify-content:flex-start;}
+      .field{width:100%;}
+      #bbdd-ai{width:100%;}
+      #add-row{display:none;}
+      #add-row-dup{display:inline-flex;}
+      .meta{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));}
+    }
+
+    @media (max-width:520px){
+      .slidable{padding:12px 12px 14px;}
+      .task-input{font-size:.94rem;}
+      .btn.primary{min-width:160px;}
+      .meta-actions .meta-btn{flex:1 1 100%;}
+    }
+
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;}
+    /* === Glow verde al enfocar === */
+    .slidable:has(.task-input:focus){
+      border-color:#71e6b5;
+      box-shadow:0 0 0 1px rgba(113,230,181,.45), 0 14px 34px rgba(36,126,104,.28);
+    }
+    .task-input:focus{
+      outline:0;
+      border-color:#71e6b5;
+      box-shadow:0 0 0 2px rgba(113,230,181,.30);
+    }
+    
+    /* === Tarjeta compacta + grid con barrita === */
+    .item{ margin:6px 0; }
+    
+    .slidable{
+      display:grid;
+      grid-template-columns: var(--mark-w,6px) 1fr auto auto; /* barrita | texto | chip | ... */
+      align-items:center;
+      column-gap:7px;
+      padding:5px 7px;
+    }
+    
+    /* Barrita izquierda */
+    .slidable .mark{
+      grid-column:1;
+      align-self:stretch;
+      width:var(--mark-w,6px);
+      border-radius:999px;
+      background:linear-gradient(180deg,#2a7fff,#7d3cff);
+    }
+    
+    /* Contenido de texto (se expande a tope) */
+    .slidable .content{
+      grid-column:2;
+      min-width:0;
+    }
+    .row-main{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+    }
+    .task-input{
+      flex:1 1 auto;
+      min-width:0;
+      width:100%;
+      padding:8px 10px;
+      border-radius:10px;
+    }
+    
+    /* Controles a la derecha */
+    .slidable .diff-chip{
+      grid-column:3;
+      white-space:nowrap;
+      padding:0 5px;
+    }
+    .slidable .more{
+      grid-column:4;
+      width:44px;
+      min-width:44px;
+    }
+    .diff-chip, .more{ height:34px; }
+    
+    /* Meta (bloque expandible) más denso */
+    .meta{ padding:8px; gap:8px; }
+    
+    /* === Responsive === */
+    @media (max-width:480px){
+      .slidable{ column-gap:8px; }
+      .slidable .diff-chip{ padding:0 8px; }
+      .slidable .more{ width:40px; min-width:40px; }
+      .task-input{ padding:6px 8px; }
+    }
+    @media (max-width:380px){
+      .slidable{ column-gap:6px; }
+      .slidable .diff-chip{ padding:0 6px; font-size:.92rem; }
+      .slidable .more{ width:36px; min-width:36px; }
+    }
+
+    /* Header pegado arriba que se mueve suavemente con el scroll */
+    header.appbar{
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      will-change: transform;
+      /* sin clase .hidden, la animación la controla JS */
+    }
+    
+    /* (opcional) transición cuando soltás el scroll y “encaja” en visible/oculto */
+    header.appbar.is-snapping{
+      transition: transform .18s ease;
+    }
+
+    /* --- Panel: único contenedor con scroll --- */
+    .bbdd-panel{
+      height: 100dvh;
+      overflow: auto;              /* ahora el panel scrollea */
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* main ya no scrollea */
+    .bbdd-panel > main{
+      flex: 1 1 auto;
+      overflow: visible;
+    }
+    
+    /* Appbar sticky dentro del panel + transición suave por transform */
+    header.appbar{
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      transform: translateY(var(--appbarShift, 0px));
+      transition: transform .12s linear; /* micro-suavizado cuando se frena */
+    }
+    
+    /* Botón Confirmar SIEMPRE visible (flotante) */
+    #bbdd-confirm{
+      position: fixed;                         /* flota dentro de la ventana */
+      right: clamp(12px, 3vw, 28px);
+      top: calc(12px + env(safe-area-inset-top, 0px));
+      z-index: 60;
+      box-shadow: 0 14px 34px rgba(125,60,255,.35);
+    }
+    
+    /* Un poco de margen arriba del contenido para que no quede tapado
+       por el botón flotante en pantallas chicas */
+    @media (max-width: 520px){
+      .bbdd-panel > main{ padding-top: 56px; }
+    }
+    
+    /* (Opcional) compactito para que entren más tarjetas en pantalla */
+    .item{ margin:6px 0; }
+    .slidable{ padding:10px 12px; }
+
+    /* El panel es un único scroller con header sticky y footer sticky */
+    .bbdd-panel{
+      display:flex;
+      flex-direction:column;
+      height:100dvh;              /* ocupa todo el alto del viewport */
+    }
+    
+    /* El panel es EL ÚNICO scroller */
+    .bbdd-panel{
+      height: 100dvh;
+      overflow: auto;
+    }
+    
+    /* main no scrollea */
+    .bbdd-panel main{
+      overflow: visible;            /* <- importantísimo */
+      padding-top: var(--appbar-pad, 0px); /* se ajusta desde JS */
+    }
+    
+    /* Appbar sticky que se oculta suavemente por transform */
+    header.appbar{
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      transform: translateY(var(--appbarShift, 0));
+      transition: transform .16s ease;    /* suavidad */
+    }
+    
+    /* Footer siempre visible dentro del panel */
+    .bbdd-footer{
+      position: sticky;
+      bottom: 0;
+      z-index: 15;
+    }
+
+    /* === Un solo scroller === */
+    .bbdd-panel{
+      height:100dvh;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+    }
+    
+    /* Header sticky que se oculta con transform */
+    header.appbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      transform: translateY(calc(-1 * var(--appbarHide, 0px)));
+      transition: transform .12s linear; /* suave cuando se frena */
+      will-change: transform;
+    }
+    
+    /* El contenido arranca justo debajo del header visible:
+       padding-top = altoHeader - loOcultado */
+    .bbdd-panel > main{
+      flex:1 1 auto;
+      overflow:visible;
+      padding-top: 0 !important; 
+    }
+    
+    /* Footer pegado abajo siempre visible */
+    .bbdd-footer{
+      position:sticky;
+      bottom:0;
+      z-index:15;
+    }
+    
+    /* Botón Confirmar flotante (si lo querés siempre visible) */
+    #bbdd-confirm{
+      position:fixed;
+      right:clamp(12px,3vw,28px);
+      top:calc(12px + env(safe-area-inset-top,0px));
+      z-index:60;
+    }
+    
+    /* (Opcional) tarjetas un poco más compactas */
+    .item{ margin:6px 0; }
+    .slidable{ padding:10px 12px; }
+
+
+
+    /***************** PARCHE VISUAL – copiar al final *****************/
+
+    /* 1) Ocultar el botón AI (Beta) de la barra de herramientas */
+    #bbdd-ai{ display:none !important; }
+    
+    /* 2) Confirmar: flotante, sin tapar la flecha, alineado y con ancho razonable */
+    header.appbar { position: sticky; top: 0; z-index: 30; }
+    header.appbar .row-actions { position: relative; }
+    
+    /* Botón fijo en la ventana pero con límites de tamaño y separación del notch */
+    #bbdd-confirm{
+      position: fixed;                /* siempre visible */
+      right: clamp(10px, 3vw, 20px);  /* despega del borde */
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      z-index: 60;
+      width: clamp(170px, 23vw, 270px); /* nunca ocupa todo el ancho */
+      pointer-events: auto;
+    }
+    
+    /* En pantallas angostas, deja aire a la izquierda para no tapar la flecha */
+    @media (max-width: 520px){
+      #bbdd-confirm{
+        left: unset;                 /* que mande por derecha */
+        right: 12px;
+      }
+    }
+    
+    /* 3) Ganar espacio horizontal en el overlay y en el “editor” */
+    #bbdd-overlay{
+      padding: clamp(4px, 0.8vh, 8px);                /* menos borde exterior */
+    }
+    .bbdd-panel{
+      border-radius: 14px;                             /* un poco menos de radio */
+    }
+    
+    /* Header y main más “pegados” a los bordes */
+    header.appbar{
+      padding: 10px clamp(10px, 3vw, 18px) 8px;       /* menos padding lateral/vertical */
+    }
+    main{
+      /* menos padding lateral; mantené el padding inferior del footer */
+      padding: 0 clamp(8px, 2.4vw, 14px) clamp(90px, 12vh, 150px);
+    }
+    
+    /* Cards más compactas y con menos aire a los lados */
+    .item{ margin: 6px 0; }
+    .slidable{
+      padding: 8px 10px;           /* menos padding interno */
+      column-gap: 6px;             /* controles más cerca */
+      border-radius: 14px;
+    }
+    .slidable .content{ min-width: 0; }
+    .task-input{ padding: 7px 9px; border-radius: 10px; }
+    
+    /* Chips y botón “…” más compactos */
+    .diff-chip, .more{ height: 34px; }
+    .diff-chip{ padding: 0 10px; }
+    
+    /* Barrita izquierda más finita para ganar 2 px de texto */
+    .slidable .mark{ width: 4px; }
+    
+    /* En móviles, todavía más apretado en los costados */
+    @media (max-width: 420px){
+      header.appbar{ padding: 8px 10px; }
+      main{ padding-left: 8px; padding-right: 8px; }
+      .slidable{ padding: 7px 8px; column-gap: 5px; }
+    }
+    
+    /* Opcional: afinar bordes generales del panel para ganar 1–2 px por lado */
+    .bbdd-panel{ border-width: 0.5px; }
+
+
+    /* ==========================================================Botón con spinner cuando está ocupado */
+    #bbdd-confirm {
+      position: fixed;
+      right: clamp(10px, 3vw, 20px);
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      z-index: 60;
+      width: var(--confirm-w, clamp(160px, 40vw, 300px));
+    }
+    
+    @keyframes btnspin{ to { transform: rotate(360deg); } }
+    
+    /* Mientras guarda: bloqueá interacciones del panel (excepto el botón) */
+    .bbdd-panel.saving main,
+    .bbdd-panel.saving header.appbar,
+    .bbdd-panel.saving .bbdd-footer{
+      pointer-events: none;
+      user-select: none;
+      opacity: .92;
+      filter: grayscale(.1);
+    }
+    /* re-habilitá el botón confirm (queda por arriba) */
+    .bbdd-panel.saving #bbdd-confirm{
+      pointer-events: auto;
+    }
+    
+    /* Cursor de ocupado en todo el panel */
+    .bbdd-panel[aria-busy="true"]{ cursor: progress; }
+    /* --- escudo de bloqueo global --- */
+    #saving-shield{
+      position: fixed;        /* tapa todo el panel */
+      inset: 0;
+      z-index: 55;            /* por debajo del botón */
+      background: transparent;/* no ensucia la UI */
+      display: none;
+      touch-action: none;
+      pointer-events: none;
+    }
+    .bbdd-panel.saving #saving-shield{
+      display: block;
+      pointer-events: auto;   /* bloquea clics/gestos en todo */
+      /* opcional: bloquear scroll del panel */
+      overscroll-behavior: contain;
+    }
+    
+    /* --- spinner dentro del botón --- */
+    #bbdd-confirm{
+      position: fixed;
+      right: clamp(10px, 3vw, 20px);
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      z-index: 60;                         /* por arriba del shield */
+      width: var(--confirm-w, clamp(160px, 40vw, 300px));
+      position: fixed;
+      overflow: visible;                    /* por si el spinner se acerca al borde */
+    }
+ 
+    
+    @keyframes spin{to{transform:rotate(360deg)}}
+    
+    /* asegurar que el shield bloquee todo mientras guarda */
+    .bbdd-panel.saving{ position:relative; }
+
+    /* ==== ÚNICO spinner del botón confirmar ==== */
+    #bbdd-confirm{
+      position: fixed;
+      right: clamp(10px, 3vw, 20px);
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      z-index: 60;
+      width: clamp(170px, 23vw, 270px);
+      overflow: visible; /* por si acaso */
+    }
+    
+    #bbdd-confirm.is-busy{
+      color: transparent;     /* oculto label */
+      pointer-events: none;   /* anti doble click */
+      opacity: .95;
+    }
+    
+    #bbdd-confirm.is-busy::after{
+      content:"";
+      position:absolute;
+      inset:0;                /* centra el pseudo-elemento */
+      margin:auto;
+      width:18px; height:18px;
+      border-radius:50%;
+      border:2px solid rgba(255,255,255,.35);
+      border-top-color:#fff;
+      animation: btnspin .8s linear infinite;
+    }
+    
+    @keyframes btnspin { to { transform: rotate(360deg); } }
+
+    /* ==== GLASS LIGHT PATCH (pegar al final) ==== */
+    :root{
+      --glass-bg: rgba(255,255,255,.08);     /* cuerpo de la tarjeta */
+      --glass-stroke: rgba(255,255,255,.22); /* borde claro */
+      --glass-soft: rgba(255,255,255,.06);   /* secciones internas */
+    }
+    
+    /* Overlay más claro y “blanco” */
+    #bbdd-overlay{
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+      backdrop-filter: blur(22px) saturate(160%) brightness(1.15);
+      -webkit-backdrop-filter: blur(22px) saturate(160%) brightness(1.15);
+    }
+    
+    /* Panel principal en vidrio claro */
+    .bbdd-panel{
+      background: var(--glass-bg);
+      border-color: var(--glass-stroke);
+      box-shadow: 0 20px 50px rgba(24,28,50,.35);
+    }
+    
+    /* Un glow suave en el borde superior del panel (como tus flechas verdes) */
+    .bbdd-panel::before{
+      content:"";
+      position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+      background:
+        radial-gradient(600px 160px at 15% -10%, rgba(255,255,255,.15), transparent 60%),
+        radial-gradient(600px 160px at 85% -10%, rgba(255,255,255,.12), transparent 60%);
+    }
+    
+    /* Secciones internas con vidrio claro */
+    header.appbar,
+    .slidable,
+    .meta,
+    .field,
+    details.guide{
+      background: var(--glass-soft);
+      border-color: rgba(255,255,255,.18);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), var(--shadow);
+    }
+    
+    /* Inputs más claros (sin perder contraste) */
+    .task-input{
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.22);
+    }
+    .meta select,.meta input{
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.18);
+    }
+
+    /* ===== Glass claro con SCRIM que tapa lo de atrás ===== */
+    :root{
+      --overlay-scrim: .42;   /* 0.35–0.50: cuánto oscurece el overlay sobre el fondo */
+      --panel-alpha:   .73;   /* 0.70–0.85: opacidad del panel (más alto = menos se ve atrás) */
+      --card-alpha:    .79;   /* opacidad de las tarjetas/filas (ajustá si aún ves algo) */
+    }
+    
+    /* Overlay: sigue con blur, pero le sumamos una veladura (scrim) encima */
+    #bbdd-overlay{
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      backdrop-filter: blur(22px) saturate(160%) brightness(1.12);
+      -webkit-backdrop-filter: blur(22px) saturate(160%) brightness(1.12);
+    }
+    
+    /* SCRIM que realmente tapa el contenido del dashboard detrás del overlay */
+    #bbdd-overlay::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: rgba(12,16,28,var(--overlay-scrim));  /* <- subí/bajá esta perilla */
+      z-index: 0;
+    }
+    
+    /* Todo lo de adentro (panel) por encima del scrim */
+    #bbdd-overlay > *{ position: relative; z-index: 1; }
+    
+    /* Panel principal con vidrio claro pero más “opaco” (no se ve lo de atrás) */
+    .bbdd-panel{
+      background: rgba(28,34,52,var(--panel-alpha));     /* <- perilla 2 */
+      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 20px 50px rgba(24,28,50,.35);
+    }
+    
+    /* Tarjetas/filas con un poco más de cuerpo (evita ver los 3 botones a través) */
+    .slidable{
+      background: rgba(18,24,40,var(--card-alpha));      /* <- perilla 3 */
+      border-color: rgba(255,255,255,.14);}
+
+    /* ==== Bloquear scroll horizontal y cualquier desborde ==== */
+
+    /* 1) La página completa nunca scrollea en X */
+    html, body{
+      overflow-x: hidden;                 /* <- clave */
+    }
+
+    /* ===== Ocultar acciones cuando la fila está cerrada ===== */
+    .item .actions{
+      /* que NO se vea ni reciba eventos por defecto */
+      opacity: 0;
+      pointer-events: none;
+      background: transparent !important;
+      transition: opacity .18s ease, background .18s ease;
+    }
+    
+    /* Los botones circulares por defecto: invisibles y sin borde */
+    .item .actions .act{
+      opacity: 0;
+      background: transparent !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      transition: opacity .18s ease,
+                  background .18s ease,
+                  border-color .18s ease,
+                  transform .18s ease;
+    }
+    
+    /* ===== Peek: apenas se asoman cuando arrastrás unos px ===== */
+    .item.row-peek .actions{
+      /* un velo MUY suave; podés bajar más el .5 si querés menos */
+      background: linear-gradient(90deg, transparent 55%, rgba(10,14,28,.5) 100%) !important;
+      opacity: .6;
+    }
+    .item.row-peek .actions .act{
+      opacity: .35;                                    /* se insinúan */
+      background: rgba(32,38,66,.25) !important;       /* suave */
+      border-color: rgba(125,60,255,.18) !important;   /* borde tenue */
+      box-shadow: none !important;
+    }
+    
+    /* ===== Open: ya abiertas, todo visible y clickeable ===== */
+    .item.row-open .actions{
+      opacity: 1;
+      pointer-events: auto;
+      background: linear-gradient(90deg, transparent 32%, rgba(10,14,28,.88) 100%) !important;
+    }
+    .item.row-open .actions .act{
+      opacity: 1;
+      background: rgba(32,38,66,.88) !important;
+      border-color: rgba(125,60,255,.35) !important;
+      box-shadow: 0 6px 18px rgba(0,0,0,.32) !important;
+    }
+    
+    /* Por si algún estilo previo del tema “oscurece” los botones,
+       forzamos que CERRADA/PEEK no herede sombras ni fills */
+    .item:not(.row-open) .actions .act.modify,
+    .item:not(.row-open) .actions .act.improve,
+    .item:not(.row-open) .actions .act.del{
+      box-shadow: none !important;
+    }
+
+
+
+    
+    /* ====== Anti-rebote horizontal (iOS/Android) ====== */
+    /* 1) Nada de scroll X en la página */
+    html, body{
+      max-width: 100%;
+      overflow-x: hidden;
+      overscroll-behavior-x: none;   /* evita el rubber-band lateral */
+      touch-action: pan-y;           /* solo gestos verticales a nivel página */
+    }
+    
+    /* 2) El overlay y el panel tampoco permiten desplazamiento X ni rebote */
+    #bbdd-overlay,
+    .bbdd-panel{
+      overflow-x: hidden;
+      overscroll-behavior: contain;  /* no propaga el overscroll al viewport */
+      touch-action: pan-y;           /* solo vertical aquí */
+    }
+    
+    /* 3) PERO: las tarjetas sí pueden escuchar gesto horizontal para el swipe */
+    .item .slidable{
+      touch-action: pan-x pan-y;     /* habilita el deslizamiento lateral del row */
+    }
+    
+    /* Por si algún contenedor introduce 1px de ancho de más */
+    #table-wrap, #bbdd-table{
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    /* ===== Scrollbar sutil dentro del panel ===== */
+    .bbdd-panel{
+      /* Firefox */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(180,190,220,.18) transparent;
+    }
+    /* WebKit (Chrome, Edge, Safari) */
+    .bbdd-panel::-webkit-scrollbar{
+      width: 10px;                 /* grosor total de la barra */
+    }
+    .bbdd-panel::-webkit-scrollbar-track{
+      background: transparent;     /* sin “pista” visible */
+    }
+    .bbdd-panel::-webkit-scrollbar-thumb{
+      /* pulgar casi invisible, con borde transparente para que se “adelgace” */
+      background: linear-gradient(180deg,
+                  rgba(180,190,220,.30),
+                  rgba(125,60,255,.35));
+      border-radius: 999px;
+      border: 3px solid transparent;
+      background-clip: content-box;  /* truco para que se vea finito */
+      opacity: .65;
+      transition: opacity .2s ease, background .2s ease;
+    }
+    /* al pasar el mouse por el panel, aparece un poco más */
+    .bbdd-panel:hover::-webkit-scrollbar-thumb{
+      opacity: .9;
+      background: linear-gradient(180deg,
+                  rgba(200,210,240,.45),
+                  rgba(140,92,255,.55));
+    }
+    /* esquina para macOS con ambos scrollbars */
+    .bbdd-panel::-webkit-scrollbar-corner{ background: transparent; }
+
+    /* ===== Destellos suaves (mismo lenguaje que el dashboard) ===== */
+    :root{
+      --glow-cyan:  rgba(80,180,255,.25);
+      --glow-violet:rgba(160,100,255,.22);
+      --glow-rose:  rgba(255,120,200,.16);
+    }
+    
+    /* halo en el overlay (detrás del panel) */
+    #bbdd-overlay::before{
+      content:"";
+      position:fixed;
+      inset:-20%;
+      pointer-events:none;
+      background:
+        radial-gradient(800px 400px at 20% 0%,   var(--glow-cyan),  transparent 60%),
+        radial-gradient(700px 360px at 85% -5%,  var(--glow-violet),transparent 65%),
+        radial-gradient(600px 320px at 60% 120%, var(--glow-rose),  transparent 65%);
+      filter: blur(6px);
+      z-index: 0; /* por debajo del panel */
+    }
+    
+    /* halo interno del panel (muy suave) */
+    .bbdd-panel{
+      position: relative; /* asegurar stacking */
+    }
+    .bbdd-panel::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius: inherit;
+      pointer-events:none;
+      background:
+        radial-gradient(520px 160px at 18% -8%, rgba(255,255,255,.14), transparent 60%),
+        radial-gradient(520px 160px at 82% -8%, rgba(255,255,255,.12), transparent 60%);
+      z-index: 0;
+    }
+
+
+
+  </style>
+</head>
+<body>
+  <div id="bbdd-overlay" class="bbdd-overlay hidden">
+    <div class="bbdd-panel">
+      <header class="appbar">
+        <div class="top-row">
+          <div class="primary">
+            <button class="btn icon" id="bbdd-back" title="Volver">⟵</button>
+            <div class="title-wrap">
+              <div class="title">Conf BBDD &amp; Daily Quest</div>
+              <div class="sub">Lista compacta • Swipe a la izquierda para acciones • Tap en dificultad para ciclarla</div>
+            </div>
+          </div>
+          <div class="row-actions">
+            <button id="bbdd-confirm" class="btn primary">Confirmar cambios ✓</button>
+          </div>
+        </div>
+
+        <details class="guide" open>
+          <summary>📌 Cómo escribir buenas Tasks + usar IA</summary>
+          <ul>
+            <li>Completables en un día, claras y medibles.</li>
+            <li>Evitá vaguedades. Mejor: “Preparar comida saludable” / “Meditar 10’”.</li>
+            <li>Deslizá y usá <strong>Mejorar</strong> o <strong>Modificar</strong> con IA para afinar la task.</li>
+          </ul>
+        </details>
+
+        <div class="tools">
+          <div class="left-tools">
+            <button id="add-row" class="btn">＋ Fila</button>
+            <span id="dirty-indicator" class="indicator hidden">● Cambios sin guardar</span>
+          </div>
+          <div class="field" style="flex:1">
+            <span aria-hidden="true">🔎</span>
+            <input id="search" type="search" placeholder="Filtrar tareas…" autocomplete="off" />
+          </div>
+          <button id="bbdd-ai" class="btn" title="Generar con IA">✨ AI (Beta)<span id="ai-sparkle"></span></button>
+        </div>
+
+        <div class="thead">
+          <span class="label">Task</span>
+          <button id="add-row-dup" class="btn add" type="button">＋</button>
+        </div>
+      </header>
+
+      <main>
+        <section id="table-wrap">
+          <div id="table-spinner" aria-live="polite" aria-busy="true">
+            <span class="ring" aria-hidden="true"></span>
+            <span class="txt">Cargando tus tareas…</span>
+          </div>
+          <div id="ai-overlay" role="status" aria-live="polite">
+            <span class="spark">✨</span>
+            <span>Generando tareas con IA…</span>
+          </div>
+          <table id="bbdd-table" aria-label="Tabla de tareas">
+            <colgroup>
+              <col class="col-pilar" />
+              <col class="col-rasgo" />
+              <col class="col-stat" />
+              <col class="col-task" />
+              <col class="col-dificultad" />
+              <col class="col-feedback" />
+              <col class="col-eliminar" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Pilar</th>
+                <th>Rasgo</th>
+                <th>Stat</th>
+                <th>Task</th>
+                <th>Dificultad</th>
+                <th>Feedback</th>
+                <th>Eliminar</th>
+              </tr>
+            </thead>
+            <tbody id="bbdd-tbody"></tbody>
+          </table>
+        </section>
+      </main>
+
+      <footer class="bbdd-footer">
+        <small id="status-msg"></small>
+        <button id="close-modal" class="btn">Cerrar</button>
+      </footer>
+    </div>
+  </div>
+
+
+  <script>
+    (() => {
+      const panel  = document.querySelector('.bbdd-panel');      // único scroller
+      const appbar = document.querySelector('header.appbar');
+      const main   = document.querySelector('.bbdd-panel > main');
+      if(!panel || !appbar || !main) return;
+    
+      const root = document.documentElement;
+    
+      let lastY = panel.scrollTop;
+      let hide  = 0;                 // píxeles ocultados del header
+      let H     = appbar.offsetHeight || 0;    // alto actual del header
+      let MAX   = Math.max(0, H - 6);          // cuánto podemos ocultar (deja un pelín)
+      const K         = 1;                  // sensibilidad (0.08–0.15 va bien)
+      const FRICTION  = 0.13;                  // fricción al cambiar de sentido
+    
+      // Setea variables CSS iniciales
+      function applyVars(){
+        appbar.style.setProperty('--appbarHide', hide + 'px');
+        const pad = 0; // o 6 si querés una línea de aire
+        root.style.setProperty('--appbarPad', pad + 'px');
+        main.style.setProperty('--appbarPad', pad + 'px');
+        // por si usás el valor en main
+      }
+    
+      function recalcHeader(){
+        H   = appbar.offsetHeight || 0;
+        MAX = Math.max(0, H - 6);
+        hide = Math.min(hide, MAX);
+        applyVars();
+      }
+    
+      // Recalcular cuando cambie el alto del header (responsive / details open/close)
+      new ResizeObserver(recalcHeader).observe(appbar);
+      recalcHeader();
+    
+      panel.addEventListener('scroll', () => {
+        const y  = panel.scrollTop;
+        const dy = y - lastY;
+    
+        if (dy > 0) {                // bajando: ocultar un poco
+          hide += dy * K;
+        } else if (dy < 0) {         // subiendo: mostrar con fricción
+          hide += dy * K * (1 - FRICTION);
+        }
+    
+        // límites
+        hide = Math.min(Math.max(hide, 0), MAX);
+    
+        // aplicar a CSS (mueve header y ajusta padding-top del contenido)
+        applyVars();
+    
+        // si llegaste al tope, mostrar completo
+        if (y <= 0 && hide !== 0) {
+          hide = 0;
+          applyVars();
+        }
+    
+        lastY = y;
+      }, { passive:true });
+    })();
+  </script>
+
+
+
+  <script>
+    (function(){
+      const q = new URLSearchParams(location.search);
+      const hasEmail = q.has('email') && q.get('email').trim() !== '';
+      window.BBDD_MODE = hasEmail ? 'page' : 'modal';
+    })();
+  </script>
+  <script src="js/bbdd.js"></script>
+  <script>
+    // Duplica el CTA de sumar fila en mobile
+    (function(){
+      const dup = document.getElementById('add-row-dup');
+      if(!dup) return;
+      dup.addEventListener('click', (e)=>{
+        e.preventDefault();
+        document.getElementById('add-row')?.click();
+      });
+    })();
+
+    (function(){
+      const originalAiApply = window.aiApplyResults;
+      if(typeof originalAiApply === 'function'){
+        window.aiApplyResults = function patchedAiApply(idxs, results){
+          if(Array.isArray(idxs) && window.state && Array.isArray(window.state.rows)){
+            idxs.forEach((rowIdx, pos)=>{
+              const row = window.state.rows[rowIdx];
+              if(!row) return;
+              let mode = '';
+              const res = Array.isArray(results) ? results[pos] : null;
+              if(res){
+                if(typeof res?.[5] === 'string') mode = res[5];
+                else if(typeof res?.action === 'string') mode = res.action;
+                else if(typeof res?.mode === 'string') mode = res.mode;
+              }
+              if(!mode && typeof row[5] === 'string'){
+                const hint = row[5].toLowerCase();
+                if(hint === 'improve' || hint === 'replace'){
+                  mode = hint;
+                }
+              }
+              mode = (mode || '').toLowerCase();
+              if(mode && mode.includes('modify')) mode = 'replace';
+              if(mode && mode.includes('mejor')) mode = 'improve';
+              if(mode !== 'improve' && mode !== 'replace'){
+                mode = mode.includes('replace') ? 'replace' : (mode.includes('improve') ? 'improve' : mode);
+              }
+              if(mode === 'replace' || mode === 'improve'){
+                row.__aiMode = mode;
+              } else if(!row.__aiMode){
+                row.__aiMode = 'improve';
+              }
+            });
+          }
+          return originalAiApply.apply(this, arguments);
+        };
+      }
+    })();
+
+    (function(){
+      const tbody = document.getElementById('bbdd-tbody');
+      if(!tbody) return;
+
+      const observer = new MutationObserver((mutations)=>{
+        for(const m of mutations){
+          m.addedNodes.forEach(node => {
+            if(node.nodeType === 1 && node.matches('tr')){
+              enhanceRow(node);
+            }
+          });
+        }
+        requestAnimationFrame(armSwipeHint);
+      });
+      observer.observe(tbody,{childList:true});
+
+      // Enhance already rendered rows (por si ya llegaron antes del observer)
+      requestAnimationFrame(()=>{
+        tbody.querySelectorAll('tr').forEach(enhanceRow);
+        armSwipeHint();
+      });
+
+      let opened = null;
+      let swipeHintDismissed = false;
+      let currentHintEl = null;
+
+      function enhanceRow(tr){
+        if (tr.dataset.mobileReady === '1') return;
+      
+        const cells = tr.querySelectorAll('td');
+        if (cells.length < 7) return;
+      
+        const pilarSel   = cells[0].querySelector('select[data-col="0"]');
+        const rasgoSel   = cells[1].querySelector('select[data-col="1"]');
+        const statInput  = cells[2].querySelector('input[data-col="2"]');
+        const taskInput  = cells[3].querySelector('input[data-col="3"]');
+        const diffSelect = cells[4].querySelector('select[data-col="4"]');
+        const feedbackBox= cells[5].querySelector('.feedback');
+      
+        if (!taskInput || !diffSelect || !pilarSel || !rasgoSel || !statInput) return;
+      
+        // Un solo <td> que ocupe toda la fila
+        const td = document.createElement('td');
+        td.colSpan = tr.children.length || cells.length || 7;
+      
+        const item = document.createElement('div');
+        item.className = 'item';
+      
+        // Acciones que aparecen al hacer swipe
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+        const btnModify  = makeAction('modify','🔁','Modificar', ()=> runAiForRow(tr,'replace'));
+        const btnImprove = makeAction('improve','🪄','Mejorar',   ()=> runAiForRow(tr,'improve'));
+        const btnDelete  = makeAction('del','🗑️','Eliminar',     ()=> deleteRow(tr));
+        actions.append(btnImprove, btnModify, btnDelete); // orden a gusto
+      
+        // Contenedor deslizante
+        const slidable = document.createElement('div');
+        slidable.className = 'slidable shadow';
+      
+        const mark = document.createElement('div');
+        mark.className = 'mark';
+      
+        const content = document.createElement('div');
+        content.className = 'content';
+      
+        // Barra superior de la tarjeta
+        const rowMain = document.createElement('div');
+        rowMain.className = 'row-main';
+      
+        // Input principal
+        taskInput.classList.add('task-input');
+        taskInput.setAttribute('placeholder','Nueva task…');
+      
+        // Chip de dificultad (cambia el select oculto)
+        const diffChip = document.createElement('button');
+        diffChip.type = 'button';
+        diffChip.className = 'diff-chip';
+        diffChip.title = 'Cambiar dificultad';
+        diffChip.innerHTML = '<span class="dot"></span><span class="label"></span>';
+      
+        // Botón Más (expande/colapsa meta)
+        const more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'more';
+        more.title = 'Mostrar columnas';
+        more.textContent = '⋯';
+      
+        // Empuja chip+more a la derecha
+        const spacer = document.createElement('span');
+        spacer.style.flex = '1 1 auto';
+      
+        // [taskInput] -------- [chip][more]
+        rowMain.append(taskInput, spacer, diffChip, more);
+      
+        // Meta (pilar/rasgo/stat)
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.append(
+          createMeta('Pilar', pilarSel),
+          createMeta('Rasgo', rasgoSel),
+          createMeta('Stat',  statInput)
+        );
+      
+        // Eliminamos los botoncitos chicos del feedback
+        if (feedbackBox) feedbackBox.remove();
+      
+        // CTA grandes dentro de meta
+        const metaActions = document.createElement('div');
+        metaActions.className = 'meta-actions';
+        metaActions.append(
+          makeMetaAction('🪄', 'Mejorar',   ()=> runAiForRow(tr,'improve')),
+          makeMetaAction('🔁', 'Modificar', ()=> runAiForRow(tr,'replace')),
+          makeMetaAction('🗑️', 'Eliminar',  ()=> deleteRow(tr), true)
+        );
+        meta.append(metaActions);
+      
+        // Armar tarjeta
+        content.append(rowMain, meta);
+        slidable.append(mark, content);
+        item.append(actions, slidable);
+        td.append(item);
+      
+        // Reemplaza el contenido de la fila
+        tr.innerHTML = '';
+        tr.append(td);
+        tr.dataset.mobileReady = '1';
+      
+        // Estado IA (borde violeta/verde)
+        const idx = Number(tr.dataset.index);
+        if (!Number.isNaN(idx) && typeof state !== 'undefined'){
+          if (state.aiUpdated && state.aiUpdated.has(idx)){
+            const mode = state.rows?.[idx]?.__aiMode === 'replace' ? 'replace' : 'improve';
+            item.classList.add(mode === 'replace' ? 'ai-modified' : 'ai-improved');
+          }
+        }
+      
+        // Sincroniza dificultad (oculta el select)
+        // ——— Sincroniza dificultad (oculta el select) ———
+        updateDiff(diffChip, diffSelect.value);
+        diffSelect.classList.add('sr-only');
+        
+        // ⬇️ MÍNIMO NECESARIO: escribir diff en el estado y marcar dirty
+        function pushDiffToState(){
+          if (typeof state === 'undefined' || Number.isNaN(idx)) return;
+          if (!state.rows || !state.rows[idx]) return;
+          const v = (typeof normDiff === 'function') ? normDiff(diffSelect.value) : diffSelect.value;
+          if (state.rows[idx][4] !== v) {
+            state.rows[idx][4] = v;                 // guarda la dificultad en el estado
+            if (typeof markDirty === 'function') markDirty();  // enciende el “hay cambios”
+          }
+        }
+        
+        // Ciclar con el chip
+        diffChip.addEventListener('click', ()=>{
+          cycleDiff(diffSelect);
+          updateDiff(diffChip, diffSelect.value);
+          pushDiffToState();                         // 👈 importante
+          // mantené tus eventos por compatibilidad
+          diffSelect.dispatchEvent(new Event('input',  { bubbles:true }));
+          diffSelect.dispatchEvent(new Event('change', { bubbles:true }));
+        });
+        
+        // Cambios hechos desde el <select> oculto (o por código)
+        diffSelect.addEventListener('change', ()=>{
+          updateDiff(diffChip, diffSelect.value);
+          pushDiffToState();
+        });
+        diffSelect.addEventListener('input', ()=>{
+          updateDiff(diffChip, diffSelect.value);
+          pushDiffToState();
+        });
+
+      
+        // Toggle meta con “más”
+        more.addEventListener('click', (e)=>{
+          e.preventDefault(); e.stopPropagation();
+          const willExpand = !item.classList.contains('expanded');
+          item.classList.toggle('expanded', willExpand);
+          if (willExpand) openRow(item, slidable, true);
+          else            closeRow(item, slidable);
+        });
+      
+        // Swipe lateral
+        makeSwipeable(item, slidable);
+      }
+
+
+      function makeAction(cls, icon, label, onClick){
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = `act ${cls}`;
+        b.setAttribute('aria-label', label);
+        b.innerHTML = `<span aria-hidden="true">${icon}</span><span class="sr-only">${label}</span>`;
+        b.addEventListener('click', (e)=>{
+          e.preventDefault();
+          e.stopPropagation();
+          closeAll();
+          onClick();
+        });
+        return b;
+      }
+
+      function makeMetaAction(icon, label, onClick, danger=false){
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `meta-btn${danger ? ' danger' : ''}`;
+        btn.innerHTML = `<span aria-hidden="true">${icon}</span><span>${label}</span>`;
+        btn.addEventListener('click', (e)=>{
+          e.preventDefault();
+          e.stopPropagation();
+          onClick();
+        });
+        return btn;
+      }
+
+      function createMeta(label, control){
+        const wrap = document.createElement('label');
+        wrap.textContent = label;
+        wrap.append(control);
+        return wrap;
+      }
+
+      function updateDiff(chip, value){
+        chip.dataset.v = value || '';
+        chip.querySelector('.label').textContent = value || '—';
+      }
+
+      function cycleDiff(select){
+        const opts = Array.from(select.options).map(o=>o.value).filter(Boolean);
+        if(!opts.length) return;
+        const idx = opts.indexOf(select.value);
+        const next = opts[(idx+1)%opts.length];
+        select.value = next;
+      }
+
+      function makeSwipeable(wrapper, slide){
+        const actions = wrapper.querySelector('.actions');
+        const max = () => actions ? actions.getBoundingClientRect().width + 12 : 0;
+      
+        let startX = 0;
+        let currentX = 0;
+        let dragging = false;
+        let pointerId = null;
+      
+        const PEEK_THRESHOLD = 8;   // px de arrastre para “asomar” las acciones
+        const OPEN_THRESHOLD = 60;  // tu umbral actual para abrir
+      
+        function shouldSkip(target){
+          return target.closest('input, select, textarea, button, .meta');
+        }
+      
+        function start(e){
+          const touch = e.touches ? e.touches[0] : e;
+          if(shouldSkip(e.target)) return;
+          dragging = true;
+          pointerId = touch.identifier ?? 'mouse';
+          startX = touch.clientX;
+          currentX = startX;
+          slide.style.transition = 'none';
+          // el peek se decide en move(); acá no tocamos clases
+          if(wrapper === currentHintEl){
+            dismissHint();
+          }
+        }
+      
+        function move(e){
+          if(!dragging) return;
+          const touchList = e.touches ? [...e.touches] : [e];
+          const touch = touchList.find(t => (t.identifier ?? 'mouse') === pointerId);
+          if(!touch) return;
+      
+          currentX = touch.clientX;
+          let dx = Math.min(0, currentX - startX);
+          const limit = -max();
+          if(dx < limit) dx = limit;
+      
+          slide.style.transform = `translateX(${dx}px)`;
+      
+          // 👇 Mostrar acciones al “asomar” apenas (peek)
+          wrapper.classList.toggle('row-peek', dx < -PEEK_THRESHOLD);
+        }
+      
+        function end(){
+          if(!dragging) return;
+          dragging = false;
+          slide.style.transition = '';
+          const dx = currentX - startX;
+      
+          if (dx < -OPEN_THRESHOLD){
+            openRow(wrapper, slide);
+          } else {
+            closeRow(wrapper, slide);
+          }
+          pointerId = null;
+        }
+      
+        slide.addEventListener('touchstart', start, {passive:true});
+        slide.addEventListener('touchmove',  move,  {passive:true});
+        slide.addEventListener('touchend',   end,   {passive:true});
+      
+        slide.addEventListener('mousedown', (e)=>{
+          start(e);
+          window.addEventListener('mousemove', move);
+          window.addEventListener('mouseup', upOnce, { once:true });
+        });
+      
+        function upOnce(){
+          window.removeEventListener('mousemove', move);
+          end();
+        }
+      }
+      
+      function openRow(wrapper, slide, viaMore=false){
+        closeOther(wrapper);
+        const actions = wrapper.querySelector('.actions');
+      
+        if(viaMore){
+          slide.style.transform = 'translateX(0)';
+          wrapper.classList.add('expanded');
+        }else{
+          const width = actions?.getBoundingClientRect().width
+            || parseFloat(getComputedStyle(document.documentElement)
+                 .getPropertyValue('--actionsw')) || 0;
+          slide.style.transform = `translateX(${-width - 12}px)`;
+          wrapper.classList.remove('expanded');
+        }
+      
+        wrapper.classList.add('row-open');
+        wrapper.classList.remove('row-peek');   // 👈 ya abierta, no es “peek”
+        opened = wrapper;
+      
+        if(wrapper === currentHintEl){
+          dismissHint();
+        }
+      }
+      
+      function closeRow(wrapper, slide){
+        slide.style.transform = 'translateX(0)';
+        wrapper.classList.remove('row-open', 'row-peek'); // 👈 limpiar peek y open
+        wrapper.classList.remove('expanded');
+        if(opened === wrapper) opened = null;
+      }
+
+
+      function closeAll(){
+        if(!opened) return;
+        const slide = opened.querySelector('.slidable');
+        if(slide) closeRow(opened, slide);
+      }
+
+      function closeOther(wrapper){
+        if(!opened || opened === wrapper) return;
+        const slide = opened.querySelector('.slidable');
+        if(slide) closeRow(opened, slide);
+      }
+
+      document.addEventListener('pointerdown', (e)=>{
+        if(!opened) return;
+        if(opened.contains(e.target)) return;
+        const slide = opened.querySelector('.slidable');
+        if(slide) closeRow(opened, slide);
+      });
+
+      function armSwipeHint(){
+        if(currentHintEl && !currentHintEl.isConnected){
+          currentHintEl = null;
+        }
+        if(swipeHintDismissed) return;
+        const first = tbody.querySelector('tr:first-child .item');
+        if(!first || first === currentHintEl) return;
+        if(currentHintEl){
+          currentHintEl.classList.remove('swipe-hint');
+        }
+        currentHintEl = first;
+        first.classList.add('swipe-hint');
+        const stop = (ev)=>{
+          if(!currentHintEl) return;
+          if(ev && !currentHintEl.contains(ev.target)) return;
+          dismissHint();
+        };
+        currentHintEl.addEventListener('touchstart', stop, { once:true, capture:true });
+        currentHintEl.addEventListener('pointerdown', stop, { once:true, capture:true });
+      }
+
+      function dismissHint(){
+        if(currentHintEl){
+          currentHintEl.classList.remove('swipe-hint');
+        }
+        currentHintEl = null;
+        swipeHintDismissed = true;
+      }
+
+      function deleteRow(tr){
+        if(typeof state === 'undefined') return;
+        const idx = Number(tr.dataset.index);
+        if(Number.isNaN(idx)) return;
+        state.rows.splice(idx,1);
+
+        const next = new Set();
+        for(const i of state.aiUpdated){
+          if(i < idx) next.add(i);
+          else if(i > idx) next.add(i - 1);
+        }
+        state.aiUpdated = next;
+
+        markDirty();
+        render();
+      }
+
+      async function runAiForRow(tr, mode){
+        if(typeof state === 'undefined') return;
+        const idx = Number(tr.dataset.index);
+        if(Number.isNaN(idx)) return;
+        const row = state.rows[idx];
+        if(!row) return;
+
+        try{
+          aiLoading(true);
+          row.__aiMode = mode === 'replace' ? 'replace' : 'improve';
+          const batch = [[normPilar(row[0]||''), cleanRasgo(row[1]||''), (row[2]||''), (row[3]||''), normDiff(row[4]||''), mode]];
+          const results = await aiSendBatch(email, batch);
+          aiApplyResults([idx], results);
+          markDirty();
+          render();
+          toast(mode === 'improve' ? '🪄 Task mejorada con IA' : '🔁 Task modificada con IA');
+        }catch(err){
+          console.error(err);
+          toast('Error al usar IA: ' + err.message, false);
+        }finally{
+          aiLoading(false);
+        }
+      }
+    })();
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js', { scope: './' })
+          .catch(err => console.error('[SW] registro falló', err));
+      });
+    }
+  </script>
+
+  <script>
+    (() => {
+      // ====================================================================
+      // === 1) Identificación de los elementos y función original ==========
+      // ====================================================================
+      // Buscamos el panel completo y el botón "Confirmar". Si algo falta o la
+      // función global `window.doConfirm` no existe, abandonamos silenciosamente
+      // para evitar errores en consola en vistas incompletas o tests.
+      const bbddPanel = document.querySelector('.bbdd-panel');
+      const confirmarBtn = document.getElementById('bbdd-confirm');
+      if (!bbddPanel || !confirmarBtn || typeof window.doConfirm !== 'function') {
+        return;
+      }
+
+      // Guardamos la referencia a la implementación original. La vamos a envolver
+      // para sumar la UI de bloqueo, pero queremos respetar tal cual su flujo.
+      const confirmarOriginal = window.doConfirm;
+
+      // ====================================================================
+      // === 2) Creación (o reutilización) del escudo transparente ==========
+      // ====================================================================
+      // Este "escudo" es un div transparente que se posiciona encima del panel
+      // para bloquear cualquier interacción mientras el guardado está corriendo.
+      const escudoDeGuardado = document.getElementById('saving-shield') ?? (() => {
+        const nuevoEscudo = document.createElement('div');
+        nuevoEscudo.id = 'saving-shield';
+        Object.assign(nuevoEscudo.style, {
+          position: 'absolute',
+          inset: '0',
+          zIndex: '70',
+          display: 'none',
+          background: 'transparent',
+          pointerEvents: 'auto',
+        });
+        bbddPanel.appendChild(nuevoEscudo);
+        return nuevoEscudo;
+      })();
+
+      // ====================================================================
+      // === 3) Utilidades para deshabilitar y restaurar controles ==========
+      // ====================================================================
+      // Mientras confirmamos, apagamos todos los inputs/combos/botones del panel
+      // (menos el botón ocupado) y luego sólo reactivamos los que estaban activos
+      // antes. Usamos un data-atributo para recordar quiénes estaban habilitados.
+      const desactivarControlesDelPanel = () => {
+        bbddPanel.querySelectorAll('input, select, textarea, button').forEach(control => {
+          if (control === confirmarBtn) return; // el botón ya lo maneja doConfirm
+          if (!control.disabled) control.dataset.estabaActivo = '1';
+          control.disabled = true;
+        });
+      };
+
+      const restaurarControlesDelPanel = () => {
+        bbddPanel.querySelectorAll('[data-estaba-activo="1"]').forEach(control => {
+          control.disabled = false;
+          delete control.dataset.estabaActivo;
+        });
+      };
+
+      // ====================================================================
+      // === 4) Envolvemos window.doConfirm con la lógica de bloqueo =========
+      // ====================================================================
+      // Reemplazamos la función global por una versión comentada paso a paso
+      // que agrega la protección visual. Desde `js/bbdd.js` se seguirá llamando
+      // a `doConfirm`, pero ahora este wrapper garantizará un solo disparo.
+      window.doConfirm = async function confirmarConEscudo() {
+        // Freno de seguridad por si el usuario hace doble clic real.
+        if (confirmarBtn.dataset.bloqueado === '1') return;
+        confirmarBtn.dataset.bloqueado = '1';
+
+        // Quitamos el focus del botón para evitar que quede resaltado.
+        document.activeElement?.blur?.();
+
+        // Activamos la UI de "estamos guardando": clase CSS, aria-busy y escudo.
+        bbddPanel.classList.add('saving');
+        bbddPanel.setAttribute('aria-busy', 'true');
+        escudoDeGuardado.style.display = 'block';
+        desactivarControlesDelPanel();
+
+        try {
+          // Invocamos la lógica real exactamente una vez. Usamos `call` para
+          // preservar el `this` que podría necesitar el código original.
+          await confirmarOriginal.call(this);
+        } finally {
+          // Restituimos la UI pase lo que pase (éxito o error).
+          restaurarControlesDelPanel();
+          escudoDeGuardado.style.display = 'none';
+          bbddPanel.classList.remove('saving');
+          bbddPanel.removeAttribute('aria-busy');
+          delete confirmarBtn.dataset.bloqueado;
+        }
+      };
+    })();
+  </script>
+
+
+</body>
+</html>

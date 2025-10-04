@@ -1,0 +1,221 @@
+ :root{
+    --font-heading:"Sora", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --font-body:"Manrope", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --bg:#0b0e19; --panel:#141a2c; --card:#171b31; --ring:rgba(255,255,255,.08);
+    --text:#eaf0ff; --muted:#a9b2d0; --accent:#7a66ff; --accent2:#a78bfa; --ok:#38d39f;
+    --shadow:0 24px 80px rgba(0,0,0,.40);
+    --hudH:64px; /* altura HUD desktop */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:var(--font-body);
+    color:var(--text);
+    background:
+      radial-gradient(1100px 700px at 50% -15%, rgba(122,102,255,.18), transparent 60%),
+      linear-gradient(180deg, #0b0e19, #0b0e19 30%, #0f1325 100%);
+    overflow:auto;
+    padding-top: calc(var(--hudH) + 10px); /* evita que el HUD tape títulos */
+  }
+
+  h1,h2,h3,h4,h5,h6{
+    font-family:var(--font-heading);
+    letter-spacing:-0.015em;
+  }
+
+  /* HUD (mantengo tu diseño) */
+  .hud{
+    position:fixed; inset:0 0 auto 0; z-index:20;
+    display:grid; gap:10px;
+    grid-template-columns: 1fr 1.2fr auto;
+    grid-template-areas: "brand mid xp";
+    align-items:center;
+    padding:10px 12px; background:rgba(10,12,24,.86); border-bottom:1px solid var(--ring);
+    backdrop-filter: blur(4px);
+  }
+  .brand{grid-area:brand; display:flex; align-items:center; gap:10px; font-weight:800; font-family:var(--font-heading); letter-spacing:-0.01em}
+  .dot{width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 20px var(--accent)}
+  .journey{display:flex; align-items:center; gap:10px}
+  .journey .progress{width:190px}
+  .mid{grid-area:mid; display:flex; justify-content:center; gap:18px}
+  .pill{display:flex; flex-direction:column; gap:4px; font-size:12px; min-width:110px; font-family:var(--font-body); font-weight:600}
+  .pill .row{display:flex; align-items:center; gap:6px}
+  .pill .emoji{font-size:14px}
+  .pill .label{font-weight:600}
+  progress{width:120px; height:8px; background:#0f1430; border-radius:6px}
+  progress::-webkit-progress-bar{background:#0f1430; border-radius:6px}
+  progress::-webkit-progress-value{border-radius:6px; background:linear-gradient(90deg,#6d78ff,#a78bfa)}
+  .xp{grid-area:xp; justify-self:end; font-weight:800; letter-spacing:.2px}
+  .progress{height:8px; background:#0f1430; border-radius:6px; overflow:hidden}
+  .progress .fill{height:100%; width:0%; background:linear-gradient(90deg, var(--accent), var(--accent2))}
+
+  /* HUD móvil intacto */
+  @media (max-width:720px){
+    :root{ --hudH: 104px; }
+    .hud{
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "brand brand"
+        "mid xp";
+      row-gap:8px;
+    }
+    .journey .progress{width:150px}
+    .pill{min-width:auto}
+    progress{width:80px}
+  }
+  @media (max-width:420px){
+    .journey .progress{width:120px}
+    progress{width:64px}
+  }
+
+  /* Página y tarjeta */
+  /* Importante para tu JS: necesita .overlay presente */
+  .overlay{ display:flex; justify-content:center; width:100%; }
+  .modal{
+    width:min(980px,94vw);
+    background:rgba(20,24,44,.78);
+    border:1px solid var(--ring); border-radius:18px; box-shadow:var(--shadow);
+    padding:20px;
+    overflow:hidden; /* 🔒 nada se sale del “post‑it” */
+  }
+
+  /* Screens */
+  .scr{display:none}
+  .scr.active{display:block}
+
+  /* Layout de cada pantalla */
+  .hero{
+    display:grid; gap:24px;
+    grid-template-columns: 1.05fr .95fr;
+    align-items:start;
+  }
+  @media (max-width:980px){ .hero{grid-template-columns:1fr} }
+
+
+  
+  /* Centrar la figura (imagen) dentro de la tarjeta/hero */
+    .hero > .pic{
+      /* centra la figura dentro de su celda de grid */
+      align-self: center;         /* centro vertical dentro del alto de la tarjeta */
+      justify-self: center;       /* centro horizontal dentro de la columna derecha */
+      margin: 8px auto;           /* respiro simétrico arriba/abajo e izquierda/derecha */
+      max-width: 92%;             /* deja un margen lateral dentro de la tarjeta */
+    }
+    
+    /* En mobile, que use todo el ancho disponible de la columna */
+    @media (max-width:980px){
+      .hero > .pic{ max-width: 100%; }
+    }
+
+
+  
+  /* Imágenes: contenidas y sin sobresalir */
+    .pic{
+    border-radius:14px;
+    border:1px solid var(--ring);
+    overflow:hidden;
+    background:#10142b;
+    justify-self:center;   /* 👈 centra el bloque dentro de la grilla */
+    max-width: 95%;        /* 👈 evita que llegue pegado al borde derecho */
+  }
+  
+  .pic img{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:cover;   /* la imagen llena el marco */
+    border-radius:14px; /* coincide exacto con el borde del contenedor */
+    opacity:.96;
+  }
+  /* Desktop: relación 4:3, altura acotada */
+  @media (min-width:981px){
+    .pic{
+      aspect-ratio:4 / 3;
+      height:auto;
+      max-height:min(520px, calc(100vh - var(--hudH) - 140px));
+    }
+    .pic img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+  }
+  /* Mobile: compacto */
+  @media (max-width:980px){
+    .pic{
+      height:auto;
+      max-height:clamp(260px, 42vh, 380px);
+    }
+    .pic img{ height:auto; object-fit:cover; }
+  }
+  @media (max-width:420px){
+    .pic{ max-height:320px; }
+  }
+
+  h1,h2{margin:6px 0 10px}
+  p{margin:6px 0 12px; color:#cbd3ff; line-height:1.65}
+  .note{color:#aab7ff; font-size:13px}
+
+  .xp-badge{
+    display:inline-block; font-size:12px; padding:2px 9px; border-radius:999px;
+    background:#101433; border:1px solid var(--ring); margin-left:8px; vertical-align:middle;
+  }
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin:12px 0}
+  .card{background:#171b31; border:1px solid var(--ring); border-radius:14px; padding:14px; cursor:pointer;
+    transition:transform .12s ease, background .12s ease;}
+  .card:hover{transform:translateY(-2px)}
+  .card.selected{background:rgba(122,102,255,.22); border-color:rgba(122,102,255,.45)}
+
+  .checklist{display:grid; gap:10px; margin:12px 0}
+  .chip{display:flex; gap:10px; align-items:center; padding:10px 12px; border-radius:10px;
+    border:1px solid var(--ring); background:rgba(255,255,255,.04)}
+
+  textarea, input[type="text"], input[type="email"]{
+    width:100%; padding:12px; border-radius:12px; border:1px solid var(--ring);
+    background:rgba(255,255,255,.05); color:#fff; outline:none;
+  }
+
+  .open-title{margin:14px 0 8px; font-weight:700; font-size:1.05rem; color:#e9edff}
+
+  .counter{font-size:13px; color:#c7cff1; margin-top:6px}
+  .nav{display:flex; justify-content:space-between; gap:8px; margin-top:14px}
+  .btn{background:#7a66ff; border:0; color:#fff; font-weight:800; padding:10px 16px; border-radius:10px; cursor:pointer}
+  .btn.secondary{background:transparent; border:1px solid var(--ring)}
+  .btn:disabled{opacity:.6; cursor:not-allowed}
+
+  .summary-box{background:rgba(255,255,255,.05); border:1px solid var(--ring); border-radius:14px; padding:12px}
+
+  /* Toast (necesario para el JS de XP + navegación) */
+  .toast{
+    position:absolute; right:12px; bottom:12px;
+    background:#111a39; border:1px solid var(--ring);
+    padding:8px 10px; border-radius:9px;
+    font-size:13px; color:#cfe0ff;
+    opacity:0; transform:translateY(6px);
+    transition:.2s ease;
+  }
+  .toast.show{ opacity:1; transform:none; }
+  .toast{
+  position:fixed; right:12px; background:#111a39;
+  border:1px solid var(--ring); padding:8px 10px; border-radius:9px;
+  font-size:13px; color:#cfe0ff; opacity:0; transform:translateY(6px);
+  transition:opacity .2s ease, transform .2s ease; z-index:30; pointer-events:none;
+}
+#toast13{ bottom:64px; }   /* el “de arriba” */
+#toast21{ bottom:12px; }   /* el “de abajo” */
+.toast.show{ opacity:1; transform:none; }
+#hudTitle {
+cursor: pointer;
+}
+#hudTitle:hover {
+text-decoration: underline; /* opcional, para que se note */
+}
+.btn.loading{ position:relative; }
+.btn.loading::after{
+  content:""; width:14px; height:14px; border:2px solid rgba(255,255,255,.6);
+  border-top-color: transparent; border-radius:50%;
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{ to{ transform:translateY(-50%) rotate(360deg); } }

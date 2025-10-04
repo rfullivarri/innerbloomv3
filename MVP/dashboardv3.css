@@ -1,0 +1,1374 @@
+/* TOKENS DE TIPOGRAFÍA */
+:root{
+  --font-heading:"Sora", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  --font-body:"Manrope", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+}
+
+/* RESET & BASE */
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  font-family:var(--font-body);
+  background: linear-gradient(180deg,#0A0D18 0%, #0B0F1E 100%);
+  color:#fff;
+  margin:0;
+}
+
+h1,h2,h3,h4,h5,h6{
+  font-family:var(--font-heading);
+  letter-spacing:-0.015em;
+}
+
+.dashboard-root{
+  position: relative;
+  min-height: 100vh;
+  background: transparent;   /* ← antes tenía un linear-gradient aquí */
+  color:#fff;
+  overflow-x:hidden;
+}
+
+/* Glow lilas fijos */
+.dashboard-root::before{
+  content:"";
+  position: fixed;
+  inset:0;
+  z-index: 0;                 /* ← clave: el glow queda detrás, pero visible */
+  pointer-events:none;
+  background:
+    radial-gradient(1100px 800px at 100% 0%,
+      rgba(124,77,255,.20), rgba(124,77,255,0) 70%) no-repeat,
+    radial-gradient(1200px 900px at -10% 0%,
+      rgba(50,26,99,.22), rgba(50,26,99,0) 70%) no-repeat,
+    linear-gradient(180deg,#0A0D18 0%, #0B0F1E 100%);
+  background-position: top right, top left, center;
+  background-size: 1100px 800px, 1200px 900px, cover;
+}
+/* que todo el contenido viva por encima del glow fijo */
+.dashboard-root > *{ position: relative; z-index: 1; }
+
+/* HEADER */
+header{
+  background:rgba(18,24,41,.6);
+  border-bottom:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(6px);
+  padding:12px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:40;
+}
+.logo{font-weight:900;font-family:var(--font-heading);letter-spacing:-0.01em}
+.menu-toggle{font-size:22px;cursor:pointer}
+
+/* MENÚ HAMBURGUESA */
+#dashboard-menu{
+  display:none;flex-direction:column;position:absolute;right:18px;top:56px;z-index:50;
+  background: linear-gradient(180deg, rgba(26,31,68,.95), rgba(18,22,45,.92));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.14);
+}
+#dashboard-menu.active{display:flex}
+#dashboard-menu ul{list-style:none;margin:0;padding:0}
+#dashboard-menu li{border-bottom:1px solid #4c1c7a}
+#dashboard-menu a{display:block;padding:12px 18px;color:#fff;text-decoration:none}
+#dashboard-menu a:hover{background:#501c88}
+
+
+/* —— dots para guiar —— */
+#menu-toggle,
+#li-edit-bbdd {
+  position: relative; /* necesario para anclar el puntito */
+}
+
+.dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffc107;                 /* amarillo */
+  box-shadow: 0 0 0 2px rgba(0,0,0,.5);
+  z-index: 50;
+}
+
+/* posiciones */
+#menu-toggle > .dot {
+  top: -2px;
+  right: -2px;
+}
+
+/* #li-edit-bbdd > .dot { top: 10px; right: 10px; }   en lugar de right:-12px */ 
+#li-edit-bbdd > .dot {
+  top: 50%;
+  right: 10px;              /* ajusta la distancia horizontal del borde derecho */
+  transform: translateY(-50%);
+}
+
+/* bolita girando escondida por defecto */
+#refresh-kv .spinner {
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  display: none;
+  animation: spin .8s linear infinite;
+}
+/* cuando el JS agrega .is-loading, mostramos spinner y bajamos opacidad del label */
+#refresh-kv.is-loading .spinner { display: inline-block; }
+#refresh-kv.is-loading .btn-label { opacity: .7; }
+
+/* opcional: deshabilitar clicks durante carga */
+#refresh-kv.is-loading { pointer-events: none; opacity: .85; }
+
+/* animación */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#dashboard-menu a.is-loading {
+  opacity: 0.6;
+  pointer-events: none;
+  position: relative;
+}
+
+#dashboard-menu a.is-loading::after {
+  content: "⏳";
+  position: absolute;
+  right: 10px;
+}
+
+
+/* CONTENEDOR */
+.dashboard-content{padding:10px 18px}
+
+/* Layout anti-solapamiento:
+   - columnas en flex columna con gap vertical
+   - cada card empuja a la siguiente */
+.dashboard-columns{
+  display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;
+}
+.left-column,.center-column,.right-column{
+  flex:1 1 300px;min-width:300px;padding:10px;box-sizing:border-box;
+  display:flex;flex-direction:column;gap:20px;          /* 👈 evita que se pisen */
+}
+
+/* AVATAR */
+.avatar-box{margin-bottom:0;display:flex;justify-content:center}
+.avatar-img{
+  width:220px;aspect-ratio:9/16;object-fit:cover;border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+/* CARDS BÁSICAS */
+.energy-box,.xp-box,.emotion-box,.missions-section .mission-card,
+.daily-cultivation-section,.radar-section{
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:12px;padding:14px;box-shadow:0 16px 48px rgba(0,0,0,.3);
+  position:relative;overflow:hidden;                      /* 👈 por si hay elementos internos absolutos */
+}
+
+/* /* BARRAS DE ENERGÍA */
+.progress-bar{background:#444;border-radius:8px;overflow:hidden;height:18px;margin:.3em 0 1em}
+.bar-fill{height:100%;background:#00bcd4;text-align:right;padding-right:8px;line-height:18px;font-size:12px;font-weight:800;border-radius:8px 0 0 8px}
+.bar-fill.mood{background:#ff4081}
+.bar-fill.focus{background:#b388ff}
+.bar-fill.nivel{background:#ffd54f;color:#1a1a1a} */
+
+/* RADAR */
+#radarChartContainer{
+  width:clamp(360px,100%,520px);
+  aspect-ratio:1/1;
+  margin:0 auto;
+  background:#2c2c3f;border-radius:10px;padding:10px;
+  display:flex;align-items:center;justify-content:center;
+}
+canvas{width:100% !important;height:auto !important;border-radius:10px}
+
+/* DAILY CULTIVATION */
+.daily-cultivation-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+#month-select{padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:#3c3c5a;color:#fff;outline:none}
+
+/* EMOTION CHART */
+.emotion-legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px;font-size:13px;align-items:center}
+.emotion-legend .color-box{display:inline-block;width:16px;height:16px;border-radius:4px;margin-right:6px;border:1px solid #ccc}
+
+.emotion-chart-container{
+  margin:16px auto 0;padding:16px;text-align:center;background:#2c2141;border-radius:12px;overflow-x:auto;width:100%;
+}
+.month-labels{display:flex;justify-content:center;gap:10px;margin-bottom:8px;padding-left:4px}
+.month-label{font-size:12px;color:#bbb;min-width:5px;text-align:center}
+
+.emotion-grid{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px;width:max-content;margin:0 auto 6px}
+.emotion-row{display:flex;gap:2px}
+.emotion-cell{width:12px;height:12px;border-radius:2px;background:#3c3c3c;transition:filter .2s}
+.emotion-cell:hover{filter:brightness(1.3);cursor:pointer}
+
+/* Colores por emoción */
+.emotion-cell[data-emotion="🟩"]{background:#2ECC71} /* Calma */
+.emotion-cell[data-emotion="🟨"]{background:#F1C40F} /* Felicidad */
+.emotion-cell[data-emotion="🟪"]{background:#9B59B6} /* Motivación */
+.emotion-cell[data-emotion="🟦"]{background:#3498DB} /* Tristeza */
+.emotion-cell[data-emotion="🟥"]{background:#E74C3C} /* Ansiedad */
+.emotion-cell[data-emotion="🟫"]{background:#8D6E63} /* Frustración */
+.emotion-cell[data-emotion="⬜"]{background:#A3E4D7} /* Neutral (no gris para diferenciar de vacío) */
+
+.emotion-highlight{display:flex;align-items:center;margin-top:18px;gap:14px;background:rgba(255,255,255,.05);padding:10px 14px;border-radius:12px;max-width:420px}
+.big-box{width:36px;height:36px;border-radius:8px;border:2px solid #fff}
+.emotion-name{font-weight:900}
+.emotion-info{font-size:13px;color:#cfd6ec}
+
+/* XP BOX */
+.xp-box h3{margin:.2em 0}
+
+/* MISIONES */
+.missions-section{padding:16px}
+.missions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:10px}
+.mission-card{border-left:6px solid #7e57c2}
+.mission-card button{margin-top:10px;padding:.5em 1em;background:#7d3cff;color:#fff;border:none;border-radius:8px;cursor:pointer}
+.mission-card button:hover{background:#5c28c2}
+
+/* WARNING */
+.warning-container{margin-top:10px;padding:12px;background:#fff4e5;color:#e65100;border-left:4px solid #ffa726;border-radius:8px;max-width:440px}
+.warning-text{margin:0 0 8px;font-weight:800}
+
+/* ===== Alert Card: Confirmar BBDD ===== */
+.alert-card{
+  margin:14px 0;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(125,60,255,.25);
+  background: linear-gradient(180deg, rgba(32,28,64,.75), rgba(16,18,38,.75));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 22px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06);
+  color:#fff;
+}
+
+.alert-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.alert-dot{
+  width:10px; height:10px; border-radius:50%;
+  background:#ffc107;
+  box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 10px rgba(255,193,7,.55);
+  flex:0 0 10px;
+}
+
+.alert-text{ line-height:1.1; }
+.alert-text strong{ font-weight:900; display:block; }
+.alert-text .muted{ opacity:.8; font-size:.9rem; }
+
+.chip{
+  margin-left:auto;
+  padding:8px 12px;
+  border-radius:999px;
+  background:#7d3cff;
+  color:#fff; text-decoration:none;
+  font-weight:800; font-size:.9rem;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow: 0 2px 10px rgba(125,60,255,.35);
+  transition: transform .08s ease, background .2s ease;
+}
+.chip:hover{ transform: translateY(-1px); background:#9050ff; }
+
+.alert-hint{
+  margin:8px 0 0 22px;   /* alinear con el dot */
+  font-size:.92rem; opacity:.9;
+}
+
+/* Unifica layout/altura de ambos avisos */
+.alert-card {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 16px;
+  min-height: 84px;          /* <- fuerza mismo alto “grande” */
+  box-sizing: border-box;
+}
+
+/* El texto ocupa el espacio elástico */
+.alert-card .alert-text { flex: 1 1 auto; }
+
+/* El botón siempre activo (a veces viene con reglas que lo apagan) */
+#scheduler-warning .chip,
+#btn-programar-dq {
+  opacity: 1 !important;
+  filter: none !important;
+  pointer-events: auto !important;
+}
+
+/* Solo apagado si realmente está disabled */
+#scheduler-warning .chip[disabled],
+#btn-programar-dq[disabled] {
+  opacity: .5 !important;
+  pointer-events: none !important;
+}
+/* evita que el botón se encoja y que corte línea */
+.alert-card .chip { 
+  flex: 0 0 auto; 
+  white-space: nowrap; 
+}
+
+/* ya lo tenés, pero por las dudas: el dot nunca se estira */
+.alert-dot { flex: 0 0 10px; }
+
+/* BOTONES CENTRALES */
+.dashboard-links{display:flex;justify-content:center;gap:16px;margin:12px 0 6px}
+.btn{background:#7d3cff;color:#fff;padding:10px 20px;border-radius:20px;text-decoration:none;font-weight:900;transition:background .25s;font-family:var(--font-heading);letter-spacing:-0.01em}
+.btn:hover{background:#5c28c2}
+
+/* POPUP AVATAR (estructura lista; la lógica la agregamos luego) */
+.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:100}
+.popup-overlay.visible{display:flex}
+.popup-content{background:#2b2b3d;color:#fff;padding:20px;border-radius:12px;text-align:center;width:320px;position:relative;border:1px solid rgba(255,255,255,.14)}
+.close-btn{position:absolute;right:12px;top:8px;font-size:20px;cursor:pointer}
+.avatar-preview{width:120px;height:160px;object-fit:cover;border-radius:10px;margin:10px auto;border:1px solid rgba(255,255,255,.14)}
+.popup-buttons{display:flex;gap:10px;justify-content:center;margin-top:8px}
+.btn.cancel{background:#999}.btn.confirm{background:#4CAF50}
+
+/* RESPONSIVE */
+@media (max-width:900px){
+  #radarChartContainer{width:100%}
+}
+
+#spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+.spinner {
+  border: 8px solid rgba(255, 255, 255, 0.2);
+  border-top: 8px solid #7d3cff;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+
+
+/* === Daily Energy compacto (label + barra en línea) === */
+.energy-box { padding-top: 12px; }
+
+.energy-meter{
+  display: grid;
+  grid-template-columns: 72px 1fr; /* label | barra */
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.energy-label{
+  font-weight: 700;
+  opacity: .9;
+}
+
+.energy-track{
+  position: relative;
+  height: 15px;                     /* más finita */
+  border-radius: 999px;
+  background: #2b2f3f;              /* track oscuro alineado al dashboard */
+  border: 1px solid rgba(255,255,255,.10);
+  overflow: hidden;
+}
+
+/* El JS escribe el % como texto dentro del fill.
+   Lo dejamos a la derecha, con chip legible. */
+.energy-box .bar-fill{
+  height: 100%;
+  width: 0;                         /* el JS la mueve */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #f2f4ff;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  border-radius: inherit;
+  transition: width .25s ease;
+}
+
+/* Paleta alineada al resto del dashboard */
+.energy-box .bar-fill.hp{
+  background: linear-gradient(90deg,#37B6C9,#69D6E3);    /* teal/cyan */
+}
+.energy-box .bar-fill.mood{
+  background: linear-gradient(90deg,#E74C9E,#FF6EC7);    /* magenta/pink */
+}
+.energy-box .bar-fill.focus{
+  background: linear-gradient(90deg,#8E66FF,#B17EFF);    /* violeta (tu accent) */
+}
+
+/* Separador inferior más finito para que no “pise” la card de abajo */
+.energy-box { padding-bottom: 10px; }
+.energy-box + .daily-cultivation-section { margin-top: 12px; }
+
+/* ===============================
+   PCARD – Layout y fixes finales (RESPONSIVE + BLUR)
+   =============================== */
+:root{
+  /* tunables rápidos */
+  --pc-right-col-w: clamp(180px, 28vw, 240px); /* ancho bloque derecho (🔥 + barra)  */
+  --pc-progress-h-top: 17px;                   /* alto barra en top‑cards            */
+  --pc-progress-h-list: 15px;                  /* alto barra en lista                */
+  --pc-progress-w-list: clamp(140px, 22vw, 200px); /* ancho barra en lista (desktop) */
+  --pc-xp-number-color: #DDE5FF;
+  --pc-progress-grad: linear-gradient(90deg,#7d3cff,#B17EFF);
+
+  /* acentos */
+  --pc-border: rgba(255,255,255,.08);
+  --pc-border-2: rgba(255,255,255,.06);
+  --pc-orange:#ffb86b;
+  --pc-amber:#ffcf5a;
+  --pc-chip:#1b2140;
+}
+
+/* ===== Contenedor de la card ===== */
+.pc-card{
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:12px;
+  padding:14px;
+  box-shadow:0 16px 48px rgba(0,0,0,.3);
+  position:relative;
+  overflow:visible; /* para tooltip */
+}
+
+/* ===== Topbar y tooltip ===== */
+.pc .pc-topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.pc .pc-info{position:relative;z-index:10}
+.pc .pc-info-btn{
+  width:26px;height:26px;display:grid;place-items:center;border-radius:8px;
+  background:#1a2042;border:1px solid rgba(255,255,255,.2);cursor:pointer
+}
+.pc .pc-info-bubble{
+  position:absolute;right:0;top:30px;width:min(360px,86vw);
+  background:rgba(18,23,51,.96);
+  border:1px solid rgba(255,255,255,.24);
+  border-radius:10px;padding:10px 12px;font-size:12px;color:#eaf0ff;line-height:1.35;
+  box-shadow:0 14px 36px rgba(0,0,0,.45);
+  opacity:0;transform:translateY(-6px);
+  pointer-events:none;transition:.18s;z-index:9999
+}
+.pc .pc-info:hover .pc-info-bubble{opacity:1;transform:translateY(0);pointer-events:auto}
+
+/* ===== Secciones / título ===== */
+.pc .pc-section{display:none}
+.pc .pc-section.pc-active{display:block}
+.pc .pc-h4{margin:10px 4px 6px;font-size:13px;color:#ffd9a1;font-weight:800;letter-spacing:.3px}
+
+/* ===== Top‑3 cards ===== */
+.pc .pc-top3{display:grid;grid-template-columns:1fr;gap:8px}
+.pc .pc-tcard{
+  display:grid;
+  grid-template-columns: 1fr var(--pc-right-col-w);
+  gap:12px;
+  align-items:start;
+  padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--pc-border-2)
+}
+/* 🔥 a la derecha sin posición absoluta */
+.pc .pc-thead{
+  position:static !important;
+  grid-column:2/3; grid-row:1;
+  justify-self:end; display:flex;flex-direction:column;align-items:center;margin-top:2px
+}
+.pc .pc-fire{font-size:18px;filter:drop-shadow(0 0 6px rgba(255,150,80,.6))}
+.pc .pc-streak{margin-top:2px;font-weight:900;font-size:12px;color:var(--pc-orange)}
+
+.pc .pc-tname {
+  grid-column: 1 / 2;
+  grid-row: 1;
+  margin: 0 2px 0;
+
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1.12;
+
+  min-width: 0;
+  padding-right: 7px;
+
+  overflow: hidden;
+  display: -webkit-box;          /* correcto */
+  -webkit-line-clamp: 2;         /* correcto */
+  -webkit-box-orient: vertical;  /* correcto */
+
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.pc .pc-row-mini{grid-column:1/2;grid-row:2;margin:0}
+.pc .pc-chips{display:flex;gap:8px;flex-wrap:wrap}
+.pc .pc-chip{background:var(--pc-chip);color:#dbe2ff;border:1px solid var(--pc-border-2);padding:3px 8px;border-radius:999px;font-weight:700;font-size:11px;display:inline-flex;gap:6px;align-items:center}
+.pc .pc-chip.pc-xp{background:linear-gradient(135deg,#1b2140,#1f2750)}
+.pc .pc-spark{width:7px;height:7px;border-radius:50%;background:var(--pc-amber);box-shadow:0 0 8px var(--pc-amber)}
+/* barra derecha */
+.pc .pc-tcard .pc-progress{
+  grid-column:2/3; grid-row:2; justify-self:end;
+  width:100%;
+  height:var(--pc-progress-h-top);
+  margin-top:2px;
+  position:relative;border-radius:999px;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);overflow:hidden
+}
+.pc .pc-progress-fill{position:absolute;inset:0 auto 0 0;width:0;background:var(--pc-progress-grad);transition:width .25s ease}
+.pc .pc-progress-label{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);font-size:10px;font-weight:900;text-align:center;color:#eaeaff;text-shadow:0 1px 2px rgba(0,0,0,.35);pointer-events:none}
+.pc .pc-progress-record{box-shadow:inset 0 0 0 2px rgba(255,215,0,.18)}
+
+/* ===== Lista (blur + spacing) ===== */
+.pc .pc-list{
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:12px;
+  overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  margin-top:7px;
+  margin-bottom:5px;
+}
+.pc .pc-row{
+  display:grid;
+  grid-template-columns: 1fr 90px var(--pc-progress-w-list);
+  column-gap:12px;
+  align-items:center;
+  padding:9px 10px;
+  border-top:1px solid rgba(255,255,255,.05);
+  min-height:44px;
+  font-size:13px;
+}
+.pc .pc-row:first-child{border-top:none}
+.pc .pc-row.pc-label{text-transform:uppercase;font-size:11px;letter-spacing:.4px;opacity:.7}
+.pc .pc-xp{text-align:center !important;color:var(--pc-xp-number-color) !important;font-weight:900}
+.pc .pc-right{display:flex;justify-content:flex-end}
+.pc .pc-right .pc-progress{
+  width:var(--pc-progress-w-list);
+  height:var(--pc-progress-h-list);
+  position:relative;border-radius:999px;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);overflow:hidden
+}
+/* permitir cortes de línea en nombres largos */
+.pc .pc-row > :first-child{word-break:break-word;overflow-wrap:anywhere}
+
+/* ===== Chips “otras en racha” ===== */
+.pc .pc-morestreak{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:8px 2px 2px}
+.pc .pc-morestreak-label{font-size:11px;opacity:.75;margin-right:4px}
+.pc .pc-morestreak-chip{font-size:11px;font-weight:800;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);white-space:nowrap}
+
+/* ===== Tabs ===== */
+.pc .pc-tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+.pc .pc-tab{
+  appearance:none; cursor:pointer; user-select:none;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 12px; border-radius:999px;
+  font-weight:800; font-size:12px; letter-spacing:.2px;
+  color:#eaf0ff;
+  background:linear-gradient(180deg,#232a57 0%, #1a2042 100%);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 4px 10px rgba(0,0,0,.25);
+  transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
+}
+.pc .pc-tab:hover{ transform:translateY(-1px); box-shadow:0 6px 14px rgba(0,0,0,.32); }
+.pc .pc-tab.pc-active{ background:linear-gradient(180deg,#2b3470 0%, #1f2750 100%); outline:2px solid rgba(255,255,255,.06); }
+
+/* ===== Filtro ===== */
+.pc .pc-filter{
+  width:100%; height:36px;
+  padding:8px 12px; border-radius:10px;
+  font-size:13px; font-weight:600; color:#dfe5ff;
+  margin:17px 0 13px 0;
+  background:linear-gradient(180deg,#121733,#0f1430);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+.pc .pc-filter::placeholder{ color:#9aa4c7; opacity:.95; }
+.pc .pc-filter:focus{
+  outline:none; border-color:rgba(125,60,255,.35);
+  box-shadow:0 0 0 3px rgba(125,60,255,.18);
+}
+
+/* ===== Breakpoints ===== */
+@media (max-width: 1100px){
+  :root{
+    --pc-progress-w-list: clamp(120px, 26vw, 180px);
+    --pc-right-col-w: clamp(160px, 30vw, 210px);
+  }
+}
+@media (max-width: 880px){
+  /* lista pasa a 2 filas: barra abajo y 100% */
+  .pc .pc-row{
+    grid-template-columns: 1fr 72px;
+    row-gap:6px;
+  }
+  .pc .pc-xp{ text-align:right !important; }
+  .pc .pc-right{
+    grid-column: 1 / -1;
+    justify-content: stretch;
+  }
+  .pc .pc-right .pc-progress{
+    width:100%;
+    height:var(--pc-progress-h-list);
+  }
+  /* top-cards ajustan columna derecha */
+  .pc .pc-tcard{ grid-template-columns: 1fr minmax(160px, 38vw); }
+}
+@media (max-width: 600px){
+  /* top-cards en una columna: 🔥 arriba, barra debajo */
+  .pc .pc-tcard{
+    grid-template-columns: 1fr;
+    row-gap:8px;
+  }
+  .pc .pc-thead{ justify-self:end; order:1; }
+  .pc .pc-tcard .pc-progress{ order:2; width:100%; }
+}
+
+
+
+/* ===== InfoChip v3: chip más chico + pop "global" (fixed) ===== */
+:root{
+  --info-chip-size: 24px;                 /* bajé un toque el tamaño */
+  --info-pop-z: 99999;
+  --info-pop-bg: #0f1328;
+  --info-pop-brd: rgba(122,134,255,.30);
+  --info-pop-fg: #ecedff;
+}
+
+.card-title-with-info{
+  position: relative;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title-with-info .info-chip{
+  margin-left: auto;
+  width: var(--info-chip-size); height: var(--info-chip-size);
+  border-radius: 50%;
+  border: 1px solid rgba(122,134,255,.55);
+  background: #151a33;
+  color: #e8eaff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1;
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease, color .12s ease;
+}
+.card-title-with-info .info-chip:hover{ transform: scale(1.06); background:#7d3cff; color:#fff; }
+
+/* Variante con el chip a la IZQUIERDA (si usás data-info-pos="left" o clase .info-left) */
+.card-title-with-info .info-chip.info-left{ order:-1; margin-left:0; margin-right:6px; }
+
+/* El globo ahora es FIXED (no lo recortan los contenedores) */
+.info-pop{
+  position: fixed;                        /* <— la clave */
+  left: 0; top: 0;                        /* se setean por JS al abrir */
+  display: none;                          /* se muestra con .show */
+  max-width: min(340px, 86vw);
+  background: var(--info-pop-bg);
+  border: 1px solid var(--info-pop-brd);
+  color: var(--info-pop-fg);
+  padding: 12px 14px;
+  border-radius: 12px;
+  box-shadow: 0 14px 36px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.03);
+  z-index: var(--info-pop-z);
+  font-size: 13px; line-height: 1.4;
+}
+.info-pop.show{ display:block; }
+
+/* tipografía interna */
+.info-pop strong{ display:block; margin:0 0 6px; font-size:14px; }
+.info-pop ul{ margin:0; padding-left: 1.1em; }
+
+/* versión un toque más compacta si querés usarla en alguno: */
+.info-pop.compact{ font-size:12.5px; }
+
+/* opcional: flechita simple (no imprescindible) */
+.info-pop::after{
+  content:"";
+  position: fixed;                        /* igual que el globo */
+  width: 10px; height: 10px;
+  background: var(--info-pop-bg);
+  border-left: 1px solid var(--info-pop-brd);
+  border-top: 1px solid var(--info-pop-brd);
+  transform: rotate(45deg);
+  z-index: calc(var(--info-pop-z) + 1);
+  /* la posiciona el JS con --arrow-left / --arrow-top */
+  left: var(--arrow-left, -1000px);
+  top:  var(--arrow-top,  -1000px);
+}
+
+/*=========================================================================
+/* ===== PCARD — info chip igual al resto y overlay por fuera ===== */
+.pc-card{ overflow: visible; }                 /* el pop puede “salirse” de la card */
+
+.pc .pc-info{ position: relative; z-index: 5; }/* ancla del pop */
+.pc .pc-info .info-chip{
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(122,134,255,.55);
+  background: #151a33;
+  color: #e8eaff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease, color .12s ease;
+}
+.pc .pc-info .info-chip:hover{ transform: scale(1.06); background:#7d3cff; color:#fff; }
+
+/* Popover igual al sistema global */
+.pc .pc-info .info-pop{
+  position: absolute; top: 40px; right: 0;
+  display: none;
+  max-width: 360px;
+  background: #0f1328;
+  border: 1px solid rgba(122,134,255,.28);
+  color: #ecedff;
+  padding: 12px 14px;
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
+  z-index: 9999;
+}
+.pc .pc-info .info-pop.show{ display:block; }
+.pc .pc-info .info-pop::before{
+  content:""; position:absolute; top:-8px; right:18px;
+  border:8px solid transparent; border-bottom-color: rgba(122,134,255,.28);
+}
+.pc .pc-info .info-pop::after{
+  content:""; position:absolute; top:-7px; right:19px;
+  border:7px solid transparent; border-bottom-color:#0f1328;
+}
+
+/* ===== PCARD — lista responsive (no más texto vertical) ===== */
+.pc .pc-list{ overflow-x: auto; }              /* si falta ancho, scrollea horizontal */
+.pc .pc-row{
+  display: grid;
+  grid-template-columns: minmax(220px,1fr) 64px minmax(180px, var(--pc-right-col-w));
+  gap: 12px; align-items: center;
+  writing-mode: horizontal-tb;                 /* por si algo heredó vertical */
+}
+.pc .pc-row > div:first-child{
+  white-space: normal;
+  word-break: break-word;                      /* corta por palabras, no por letras */
+  hyphens: auto;
+  min-width: 220px;
+}
+.pc .pc-row .pc-xp{ text-align: center; min-width: 48px; }
+
+/* Cabecera con mismo grid para que alinee */
+.pc .pc-row.pc-label{
+  font-weight: 700; opacity: .85;
+  grid-template-columns: minmax(220px,1fr) 64px minmax(180px, var(--pc-right-col-w));
+}
+
+/* Ajustes cuando la pantalla es chica (13") */
+@media (max-width: 1366px){
+  .pc .pc-row,
+  .pc .pc-row.pc-label{
+    grid-template-columns: minmax(180px,1fr) 56px minmax(160px,1fr);
+  }
+  .pc .pc-row > div{ font-size: clamp(12px,1.15vw,14px); }
+}
+
+
+
+
+
+
+/*========================================================================================================
+
+/* === SCOPE: sólo afecta adentro de .gj-constancy-card === */
+.gj-constancy-card {
+  container-type: inline-size;                /* habilita cqw/cqi (escala por ancho real de la card) */
+  --fs-xxs: clamp(.68rem, .64rem + .2cqw, .78rem);
+  --fs-xs:  clamp(.78rem, .72rem + .25cqw, .9rem);
+  --fs-sm:  clamp(.9rem,  .82rem + .35cqw, 1.05rem);
+  --fs-md:  clamp(1.0rem, .9rem  + .4cqw,  1.15rem);
+  --fs-lg:  clamp(1.05rem,.95rem + .45cqw, 1.25rem);
+
+  --space-1: clamp .25rem, .2rem + .2cqw, .5rem;
+  --space-2: clamp .5rem,  .45rem + .3cqw, .75rem;
+  --space-3: clamp .75rem, .6rem + .4cqw,  1rem;
+
+  --radius-1: 10px;
+  --radius-2: 14px;
+  --chip-bg: rgba(30,38,64,.9);
+  --chip-text: #cfe0ff;
+  --xp-bg: rgba(125,60,255,.18);
+  --xp-text: #e6d6ff;
+
+  /* padding simétrico de la card raíz para evitar márgenes distintos */
+  padding-inline: var(--space-2);
+}
+
+/* ====== Pestañas Body/Mind/Soul (chips superiores) ====== */
+.gj-constancy-card .tabs,
+.gj-constancy-card .pillars,
+.gj-constancy-card .filters { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+
+.gj-constancy-card .tab,
+.gj-constancy-card .pill,
+.gj-constancy-card .chip {
+  font-size: var(--fs-xs);
+  line-height: 1;
+  padding: .5em .8em;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--chip-text);
+  display: inline-flex; align-items: center; gap: .5em;
+  white-space: nowrap;
+}
+
+/* ====== Sección título “Tareas con racha de constancia” ====== */
+.gj-constancy-card .card-title,
+.gj-constancy-card h2.section-title {
+  font-size: var(--fs-md);
+  font-weight: 600;                 /* baja la negrita gigante */
+  letter-spacing: .2px;
+  margin: var(--space-2) 0 var(--space-1);
+}
+
+/* ====== Ítems con racha (las 3 cards superiores) ====== */
+.gj-constancy-card .streak-item {
+  background: rgba(17,20,33,.8);
+  border-radius: var(--radius-2);
+  padding: var(--space-2);
+  display: grid;
+  grid-template-columns: 1fr auto;     /* título a la izq, 🔥 a la derecha */
+  gap: var(--space-2);
+}
+
+.gj-constancy-card .streak-item + .streak-item { margin-top: var(--space-2); }
+
+.gj-constancy-card .streak-item .title {
+  font-size: var(--fs-sm);
+  font-weight: 600;                    /* menos gritón que 700/800 */
+  line-height: 1.2;
+}
+
+.gj-constancy-card .streak-item .meta { 
+  grid-column: 1 / -1;
+  display: flex; gap: var(--space-1); flex-wrap: wrap; align-items: center;
+}
+
+/* chips de XP y Stat */
+.gj-constancy-card .chip.xp   { background: var(--xp-bg); color: var(--xp-text); font-size: var(--fs-xxs); }
+.gj-constancy-card .chip.stat { background: var(--chip-bg); font-size: var(--fs-xxs); }
+
+/* 🔥 streak badge a la derecha */
+.gj-constancy-card .streak-item .streak-badge {
+  font-size: var(--fs-xs);
+  align-self: start; opacity: .9;
+}
+
+/* Barra de progreso consistente (altura fluida) */
+.gj-constancy-card .progress {
+  grid-column: 1 / -1;
+  height: clamp(10px, 7px + .6cqw, 14px);
+  border-radius: 999px;
+  background: rgba(90,95,120,.35);
+  overflow: clip;
+  position: relative;
+}
+.gj-constancy-card .progress > .bar {
+  height: 100%; width: var(--value, 0%);
+  background: linear-gradient(90deg, #9a5dff, #b67bff);
+}
+.gj-constancy-card .progress > .label {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-size: var(--fs-xxs); font-weight: 600; color: #f6f3ff;
+}
+
+/* ====== Filtro ====== */
+.gj-constancy-card .filter-input input,
+.gj-constancy-card input[type="search"] {
+  width: 100%;
+  padding: .7em 1em;
+  border-radius: 12px;
+  background: rgba(17,20,33,.75);
+  border: 1px solid rgba(140,150,200,.18);
+  color: #e7ecff;
+  font-size: var(--fs-xs);
+  margin: var(--space-2) 0 var(--space-2);
+}
+
+/* ====== Tabla/listado inferior (TAREA | XP | SEMANAL) ====== */
+.gj-constancy-card .task-table { 
+  background: rgba(17,20,33,.8);
+  border-radius: var(--radius-2);
+  padding: var(--space-2);
+}
+
+.gj-constancy-card .task-row {
+  display: grid;
+  grid-template-columns: 1fr auto minmax(140px, 32%);
+  align-items: center;
+  gap: var(--space-2);
+  padding-block: .55rem;
+  border-bottom: 1px solid rgba(140,150,200,.08);
+}
+.gj-constancy-card .task-row:last-child { border-bottom: 0; }
+
+.gj-constancy-card .task-row .name { font-size: var(--fs-sm); line-height: 1.2; }
+.gj-constancy-card .task-row .xp   { font-size: var(--fs-xs); font-weight: 600; opacity: .9; }
+
+/* Barra semanal dentro de la tabla */
+.gj-constancy-card .task-row .weekly { }
+.gj-constancy-card .task-row .weekly .progress { height: clamp(9px, 7px + .4cqw, 12px); }
+.gj-constancy-card .task-row .weekly .label    { font-size: var(--fs-xxs); }
+
+/* ====== COMPACT MODE automático si la card es angosta ====== */
+@container (max-width: 880px) {
+  .gj-constancy-card .card-title { font-size: var(--fs-sm); font-weight: 600; }
+  .gj-constancy-card .streak-item .title { font-size: var(--fs-xs); }
+  .gj-constancy-card .chip.stat { display: none; }          /* gana espacio: oculta “Stat: …” */
+  .gj-constancy-card .streak-badge { font-size: var(--fs-xxs); }
+  .gj-constancy-card .task-row { grid-template-columns: 1fr auto minmax(120px, 40%); gap: var(--space-1); }
+}
+
+/* ====== Extras de robustez ====== */
+.gj-constancy-card * { box-sizing: border-box; }
+.gj-constancy-card .streak-item,
+.gj-constancy-card .task-table { margin-inline: 0; }  /* equilibra márgenes izq/der */
+
+
+/* === OVERRIDE: que entre TODO sin scroll ni recortes === */
+
+/* 1) Base más compacta */
+.gj-constancy-card {
+  --fs-xxs: clamp(.6rem, .55rem + .18cqw, .72rem);
+  --fs-xs:  clamp(.7rem,  .64rem + .22cqw, .84rem);
+  --fs-sm:  clamp(.82rem, .74rem + .28cqw, .98rem);
+  --fs-md:  clamp(.92rem, .84rem + .30cqw, 1.06rem);
+}
+.gj-constancy-card .chip { padding: .3em .55em; }
+.gj-constancy-card .progress { height: clamp(8px, 6px + .35cqw, 11px); }
+
+/* 2) Tabla: sin ancho mínimo que fuerce scroll */
+.gj-constancy-card .task-table { overflow-x: visible; }
+.gj-constancy-card .task-row {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto minmax(120px, 30%);
+  gap: .5rem .75rem;
+  align-items: center;
+}
+.gj-constancy-card .task-row > * { min-width: 0; }
+.gj-constancy-card .task-row .name { 
+  word-break: break-word; 
+  overflow-wrap: anywhere;
+  font-size: var(--fs-sm);
+}
+.gj-constancy-card .task-row .xp {
+  font-size: var(--fs-xxs);
+  font-weight: 700;
+  white-space: nowrap;
+  padding: .1em .4em;
+  border-radius: 8px;
+  background: var(--xp-bg);
+  color: var(--xp-text);
+}
+
+/* 3) “Modo 2 renglones” AUTOMÁTICO en cards angostas:
+      la barra baja y ocupa todo el ancho */
+@container (max-width: 1024px) {
+  .gj-constancy-card .task-row {
+    grid-template-columns: minmax(0,1fr) auto;   /* solo 2 columnas arriba */
+    grid-auto-rows: auto;
+  }
+  .gj-constancy-card .task-row .weekly {
+    grid-column: 1 / -1;       /* barra a lo ancho abajo */
+    margin-top: .25rem;
+  }
+  .gj-constancy-card .task-row .weekly .progress { 
+    height: clamp(8px, 6px + .3cqw, 10px);
+  }
+}
+
+/* 4) Rachas (arriba): más compactas y sin “Stat:” cuando falte aire */
+@container (max-width: 1100px) {
+  .gj-constancy-card .chip.stat { display: none; }
+  .gj-constancy-card .streak-item { padding: .6rem .8rem; gap: .5rem; }
+  .gj-constancy-card .streak-item .title { font-size: var(--fs-xs); }
+  .gj-constancy-card h2.section-title { font-size: var(--fs-sm); }
+}
+
+/* ===================== OVERRIDE FINAL — DOPAMINE PILLAR CARD ===================== */
+/* Scope seguro */
+.pc-card.gj-constancy-card { display:block; width:100%; max-width:100%; box-sizing:border-box; }
+
+/* Tipografías y espacios más compactos por defecto */
+.gj-constancy-card{
+  container-type:inline-size;
+  --fs-xxs: clamp(.60rem, .56rem + .18cqw, .72rem);
+  --fs-xs:  clamp(.72rem, .66rem + .22cqw, .86rem);
+  --fs-sm:  clamp(.84rem, .76rem + .28cqw, .98rem);
+  --fs-md:  clamp(.94rem, .86rem + .30cqw, 1.08rem);
+  --space-1: clamp(.25rem, .20rem + .20cqw, .50rem);
+  --space-2: clamp(.50rem, .44rem + .28cqw, .70rem);
+  --space-3: clamp(.70rem, .60rem + .38cqw, .95rem);
+}
+
+/* -------- RACHAS (arriba) -------- */
+/* Grid donde el título usa todo el ancho hasta el 🔥 */
+.gj-constancy-card .streak-item{
+  display:grid;
+  grid-template-columns: 1fr auto;           /* título crece / fueguito a la derecha */
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-radius:14px;
+  background: rgba(17,20,33,.82);
+}
+.gj-constancy-card .streak-item .title{
+  font-size:var(--fs-sm);
+  font-weight:600;
+  line-height:1.2;
+  min-width:0;                               /* permite quebrar texto largo */
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+.gj-constancy-card .streak-item .streak-badge{
+  font-size:var(--fs-xs);
+  align-self:start;
+  white-space:nowrap;
+}
+.gj-constancy-card .streak-item .meta{
+  grid-column:1 / -1;                        /* chips debajo del título */
+  display:flex; flex-wrap:wrap; gap:.4rem;
+}
+.gj-constancy-card .chip{ padding:.32em .55em; font-size:var(--fs-xxs); line-height:1; border-radius:999px; }
+.gj-constancy-card .progress{ grid-column:1 / -1; height:clamp(8px, 6px + .35cqw, 11px); border-radius:999px; background:rgba(90,95,120,.35); position:relative; overflow:hidden; }
+.gj-constancy-card .progress>.bar{ height:100%; width:var(--value,0%); background:linear-gradient(90deg,#9a5dff,#b67bff); }
+.gj-constancy-card .progress>.label{ position:absolute; inset:0; display:grid; place-items:center; font-size:var(--fs-xxs); font-weight:700; color:#f6f3ff; }
+
+/* En contenedor angosto (típico 13" al 100%) ocultamos Stat: para ganar aire */
+@container (max-width: 1100px){
+  .gj-constancy-card .chip.stat{ display:none; }
+  .gj-constancy-card h2.section-title{ font-size:var(--fs-sm); }
+}
+
+/* -------- TABLA / LISTA (abajo) — dos niveles por fila -------- */
+/* Sin scroll horizontal: el nombre quiebra, la barra baja y ocupa 100% */
+.gj-constancy-card .task-table{ background:rgba(17,20,33,.82); border-radius:14px; padding:var(--space-2); }
+.gj-constancy-card .task-row{
+  display:grid;
+  grid-template-columns: minmax(0,1fr) auto; /* 1) arriba: TAREA | XP */
+  grid-auto-rows:auto;
+  gap:.45rem .8rem;
+  align-items:center;
+  padding:.55rem 0;
+  border-bottom:1px solid rgba(140,150,200,.08);
+}
+.gj-constancy-card .task-row:last-child{ border-bottom:0; }
+
+.gj-constancy-card .task-row > *{ min-width:0; }      /* permite contraer sin overflow */
+.gj-constancy-card .task-row .name{
+  font-size:var(--fs-sm);
+  line-height:1.2;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+.gj-constancy-card .task-row .xp{
+  font-size:var(--fs-xxs);
+  font-weight:800;
+  white-space:nowrap;
+  padding:.08em .35em;
+  border-radius:8px;
+  background: rgba(125,60,255,.18);
+  color:#e6d6ff;
+}
+
+/* 2) abajo: la barra ocupa todo el ancho */
+.gj-constancy-card .task-row .weekly{
+  grid-column:1 / -1;                          /* barra en la segunda línea */
+}
+.gj-constancy-card .task-row .weekly .progress{ height:clamp(8px, 6px + .30cqw, 10px); }
+.gj-constancy-card .task-row .weekly .label{ font-size:var(--fs-xxs); }
+
+/* Nunca scroll horizontal en la card */
+.gj-constancy-card, .gj-constancy-card *{ box-sizing:border-box; }
+.gj-constancy-card .task-table{ overflow-x:clip; }
+
+
+
+
+/*========INTENTO 100000 RESPONSIVE============
+/* ===== Lista de Tareas (tarjeta con columnas: TAREA | XP | SEMANA) ===== */
+/* Ajustá el selector raíz a tu tarjeta si difiere */
+.card-tasks, .tasks-card { overflow-x: hidden; }
+
+/* Cada fila como grid: [tarea][xp][progreso] */
+.tasks-row{
+  display: grid;
+  grid-template-columns: 1fr max-content 160px; /* texto flexible | XP angosto | barra fija */
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+}
+
+/* Columna Tarea: que nunca fuerce scroll */
+.tasks-row .col-task{
+  min-width: 0;                   /* clave para que el grid permita encoger */
+  white-space: normal;            /* permitir salto de línea */
+  word-break: break-word;         /* cortar palabras largas */
+  hyphens: auto;                  /* guiones automáticos (si el idioma lo permite) */
+  font-size: clamp(13px, 1.6vw, 15px);
+  line-height: 1.25;
+}
+
+/* Columna XP: que ocupe lo mínimo y no empuje al resto */
+.tasks-row .col-xp{
+  font-weight: 700;
+  white-space: nowrap;
+  font-size: clamp(12px, 1.4vw, 14px);
+}
+
+/* Columna Progreso: ancho fijo, que pueda encoger un poco sin romper */
+.tasks-row .col-progress{
+  min-width: 120px;               /* no menos de esto */
+  max-width: 220px;
+}
+
+/* La barrita interna (si tiene padding grande, achicar) */
+.tasks-row .col-progress .progress{
+  width: 100%;
+  min-height: 8px;
+}
+
+/* ===== Breakpoints: si falta ancho, el progreso baja a 2ª línea ===== */
+
+/* 1) Tablet angosta: reducimos el ancho del progreso */
+@media (max-width: 780px){
+  .tasks-row{ grid-template-columns: 1fr max-content 140px; gap: 10px; }
+}
+
+/* 2) Móvil / contenedor estrecho:
+      - 1ª línea: [Tarea][XP]
+      - 2ª línea (debajo): [Progreso] ocupando todo el ancho */
+@media (max-width: 640px){
+  .tasks-row{
+    grid-template-columns: 1fr max-content;
+    grid-template-rows: auto auto;
+    gap: 8px 10px;
+  }
+  .tasks-row .col-progress{
+    grid-column: 1 / -1;          /* ocupa toda la fila */
+    min-width: 0;                 /* permite que se adapte al contenedor */
+  }
+}
+
+/* 3) Muy angosto: tipografía un toque más chica y paddings compactos */
+@media (max-width: 420px){
+  .tasks-row{ padding: 8px 10px; gap: 6px 8px; }
+  .tasks-row .col-task{ font-size: clamp(12px, 3.5vw, 14px); }
+  .tasks-row .col-xp{   font-size: clamp(11px, 3.2vw, 13px); }
+}
+
+
+/* ===== Header layout (logo | campanita | menú) ===== */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+header .menu-toggle { cursor: pointer; }
+
+/* ===== Campanita ===== */
+#gj-noti-btn {
+  position: relative;
+  background: none;
+  border: 0;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+}
+#gj-noti-btn:focus { outline: 2px solid rgba(125,60,255,.4); outline-offset: 2px; }
+
+/* Badge (contador) */
+#gj-noti-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  display: none;            /* se muestra por JS si hay no leídas */
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  background: #7d3cff;
+  box-shadow: 0 0 0 2px rgba(10,10,14,.8);
+}
+
+
+
+
+
+/* =============================== Dropdown de notificaciones ===== */
+#gj-noti-dropdown {
+  position: absolute;
+  right: 16px;
+  top: 56px;
+  width: 320px;
+  max-height: 60vh;
+  overflow: auto;
+  background: #141418;
+  border: 1px solid #2a2a33;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  z-index: 999;
+  display: none;            /* toggleado por JS */
+  animation: noti-drop .12s ease-out;
+}
+@keyframes noti-drop {
+  from { transform: translateY(-6px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+#gj-noti-dropdown .dropdown-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 12px; border-bottom: 1px solid #23232b;
+}
+#gj-noti-dropdown .dropdown-header button {
+  font-size: 12px; padding: 6px 10px; border-radius: 8px; border: 1px solid #2a2a33;
+  background: #1a1a22; color: #ddd; cursor: pointer;
+}
+#gj-noti-dropdown .dropdown-header button:hover { background: #20202a; }
+
+#gj-noti-list { list-style: none; margin: 0; padding: 0; }
+#gj-noti-list li {
+  padding: 10px 12px; border-bottom: 1px solid #23232b;
+}
+#gj-noti-list li:last-child { border-bottom: 0; }
+#gj-noti-list li.unread { background: #191926; } /* no leída */
+#gj-noti-list li .title { font-weight: 600; margin-bottom: 2px; }
+#gj-noti-list li .meta  { font-size: 12px; opacity: .8; }
+
+/* Responsive: en pantallas chicas el dropdown ocupa más ancho */
+@media (max-width: 480px) {
+  #gj-noti-dropdown { right: 8px; width: calc(100vw - 16px); }
+}
+
+/*********************LISTA DE LA CARD DE CONSTACIA********************************/
+/* 1) Habilito container queries en la lista */
+.pc .pc-list{
+  container-type: inline-size; /* mide el ancho real de la lista */
+}
+
+/* 2) Layout por defecto: 3 columnas (ya lo tenés así) */
+.pc .pc-row{
+  display:grid;
+  grid-template-columns: 1fr 90px var(--pc-progress-w-list);
+  grid-template-areas: "name xp progress";
+  column-gap:12px;
+  align-items:center;
+  overflow:hidden;              /* nada se sale */
+}
+.pc .pc-row > :first-child{ grid-area:name; }
+.pc .pc-xp{ grid-area:xp; }
+.pc .pc-right{ grid-area:progress; display:flex; justify-content:flex-end; }
+.pc .pc-right .pc-progress{ width:var(--pc-progress-w-list); max-width:100%; }
+
+/* 3) Cuando el contenedor es angosto (p.ej. notebooks 11–12") 
+      —> la barra baja y ocupa 100% */
+@container (max-width: 860px){
+  .pc .pc-row{
+    grid-template-columns: 1fr 90px;
+    grid-template-areas:
+      "name xp"
+      "progress progress";
+    row-gap:6px;
+    align-items:start;
+  }
+  .pc .pc-right{
+    justify-content:stretch;     /* estira la barra */
+  }
+  .pc .pc-right .pc-progress{
+    width:100%;
+  }
+}
+
+
+/* Título en Top-3: 2 líneas, sin '…', usando todo el ancho útil */
+/* Contenedor Top-Card */
+.pc .pc-tcard{
+  display:grid;
+  grid-template-columns: minmax(0,1fr) var(--pc-right-col-w); /* 👈 clave */
+  gap:12px;
+  align-items:start;
+  padding:10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--pc-border-2);
+}
+
+/* Título de la tarea */
+.pc .pc-tname{
+  grid-column: 1 / 2;
+  grid-row: 1;
+  margin: 0 2px 0;
+
+  font-weight: 800;
+  font-size: 13px;             /* bajá a 12px si aún empuja */
+  line-height: 1.12;
+
+  min-width: 0;                 /* 👈 permite encoger hasta el borde del fuego */
+  padding-right: 9px;           /* respiro frente al 🔥 */
+
+  display: block;
+  overflow: hidden;
+  /*max-height: calc(2 * 1.12em); /* exactamente 2 líneas de alto */
+  text-overflow: clip;
+
+  white-space: nowrap;
+  /*overflow-wrap: anywhere;*/
+  /*word-break: normal;*/
+  /*hyphens: auto;*/
+}
+
+/*****CHIPS DE STAT Y EXP**************/
+/* Contenedor de chips */
+.pc .pc-chips,
+.pc .pc-chips-inline{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;   /* que bajen a la línea de abajo si no entra */
+  width: 100%;
+}
+
+/* Chip base: no se reduce por debajo de su contenido */
+.pc .pc-chip{
+  background: var(--pc-chip);
+  color: #dbe2ff;
+  border: 1px solid var(--pc-border-2);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  /* 👇 claves para que el fondo siempre cubra la palabra */
+  flex: 0 0 auto;            /* no shrink */
+  min-width: max-content;    /* ancho = contenido */
+  white-space: nowrap;       /* evita salto entre “Stat:” y el valor */
+}
+
+/* Si querés que el chip de Stat pueda estirarse a todo el ancho de la fila */
+.pc .pc-chip.pc-stat{
+  flex: 1 0 auto;            /* puede crecer, pero no se achica */
+  min-width: max-content;    /* aun estirado, nunca baja del contenido */
+}
