@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { createCheckIn, type CheckInPayload } from '../services/wellnessService.js';
+import { createCheckIn, type CheckInPayload } from '../services/wellnessService';
 
 const checkInSchema = z
   .object({
