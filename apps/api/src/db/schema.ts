@@ -1,11 +1,14 @@
 import { relations, sql } from 'drizzle-orm';
 import {
   customType,
+  date,
   index,
   integer,
   pgTable,
+  smallint,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 
@@ -76,6 +79,7 @@ export const users = pgTable(
     id: uuid('id').defaultRandom().primaryKey(),
     email: citext('email').notNull().unique(),
     displayName: text('display_name'),
+    avatarUrl: text('avatar_url'),
     ...timestamps,
   },
   (table) => ({
@@ -90,6 +94,7 @@ export const tasks = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
     pillarId: uuid('pillar_id')
       .notNull()
       .references(() => pillars.id, { onDelete: 'cascade' }),
@@ -97,14 +102,20 @@ export const tasks = pgTable(
       .references(() => traits.id, { onDelete: 'set null' }),
     statId: uuid('stat_id')
       .references(() => stats.id, { onDelete: 'set null' }),
-    title: text('title').notNull(),
+    title: text('title'),
     description: text('description'),
+    weeklyTarget: integer('weekly_target').notNull().default(1),
+    xp: smallint('xp').notNull().default(10),
     ...timestamps,
   },
   (table) => ({
     userIdx: index('tasks_user_id_idx').on(table.userId),
     pillarIdx: index('tasks_pillar_id_idx').on(table.pillarId),
     traitIdx: index('tasks_trait_id_idx').on(table.traitId),
+    userWeeklyIdx: index('tasks_user_id_weekly_target_idx').on(
+      table.userId,
+      table.weeklyTarget,
+    ),
   }),
 );
 
@@ -118,7 +129,7 @@ export const taskLogs = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    doneAt: timestamp('done_at', { withTimezone: true }).notNull(),
+    doneAt: timestamp('done_at', { withTimezone: true }).notNull().defaultNow(),
     notes: text('notes'),
     ...timestamps,
   },
@@ -144,6 +155,59 @@ export const userRewards = pgTable(
   }),
 );
 
+export const levelRules = pgTable('level_rules', {
+  level: integer('level').primaryKey(),
+  xpRequired: integer('xp_required').notNull().unique(),
+});
+
+export const achievements = pgTable(
+  'achievements',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    code: text('code').notNull().unique(),
+    title: text('title').notNull(),
+    description: text('description'),
+    points: integer('points').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    codeIdx: index('achievements_code_idx').on(table.code),
+  }),
+);
+
+export const userAchievements = pgTable(
+  'user_achievements',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    achievementCode: text('achievement_code')
+      .notNull()
+      .references(() => achievements.code),
+    earnedAt: timestamp('earned_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    uniq: uniqueIndex('user_achievements_user_id_achievement_code_idx').on(
+      table.userId,
+      table.achievementCode,
+    ),
+  }),
+);
+
+export const dailyStreaks = pgTable('daily_streaks', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  currentStreak: integer('current_streak').notNull().default(0),
+  longestStreak: integer('longest_streak').notNull().default(0),
+  lastCheckDate: date('last_check_date'),
+});
+
 export const pillarsRelations = relations(pillars, ({ many }) => ({
   traits: many(traits),
   tasks: many(tasks),
@@ -166,10 +230,12 @@ export const statsRelations = relations(stats, ({ many, one }) => ({
   tasks: many(tasks),
 }));
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   tasks: many(tasks),
   taskLogs: many(taskLogs),
   rewards: many(userRewards),
+  achievements: many(userAchievements),
+  dailyStreak: one(dailyStreaks),
 }));
 
 export const tasksRelations = relations(tasks, ({ many, one }) => ({
@@ -206,6 +272,28 @@ export const taskLogsRelations = relations(taskLogs, ({ one }) => ({
 export const userRewardsRelations = relations(userRewards, ({ one }) => ({
   user: one(users, {
     fields: [userRewards.userId],
+    references: [users.id],
+  }),
+}));
+
+export const achievementsRelations = relations(achievements, ({ many }) => ({
+  holders: many(userAchievements),
+}));
+
+export const userAchievementsRelations = relations(userAchievements, ({ one }) => ({
+  user: one(users, {
+    fields: [userAchievements.userId],
+    references: [users.id],
+  }),
+  achievement: one(achievements, {
+    fields: [userAchievements.achievementCode],
+    references: [achievements.code],
+  }),
+}));
+
+export const dailyStreaksRelations = relations(dailyStreaks, ({ one }) => ({
+  user: one(users, {
+    fields: [dailyStreaks.userId],
     references: [users.id],
   }),
 }));
