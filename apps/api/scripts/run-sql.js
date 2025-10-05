@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
-import { neon, neonConfig } from '@neondatabase/serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
 
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
 const sqlDir = resolve(currentDir, '../sql');
@@ -31,7 +31,7 @@ function ensureDatabaseUrl() {
 const databaseUrl = ensureDatabaseUrl();
 
 neonConfig.fetchConnectionCache = true;
-const client = neon(databaseUrl);
+const pool = new Pool({ connectionString: databaseUrl });
 
 const [, , maybeFile] = process.argv;
 
@@ -59,7 +59,7 @@ async function runFile(filePath) {
   console.log(`\n→ Running ${fileName}`);
 
   try {
-    await client.unsafe(sql);
+    await pool.query(sql);
     console.log(`✓ Applied ${fileName}`);
   } catch (error) {
     if (isAlreadyExistsError(error)) {
@@ -80,9 +80,15 @@ async function runFile(filePath) {
       await runFile(file);
     }
 
+    await pool.end();
     console.log('\nAll done!');
   } catch (error) {
     console.error('SQL runner stopped because of an error.', error);
+    try {
+      await pool.end();
+    } catch (closeError) {
+      console.error('Failed to close database pool cleanly.', closeError);
+    }
     process.exit(1);
   }
 })();
