@@ -1,8 +1,7 @@
 import { Router } from 'express';
-import { eq } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../db/client.js';
-import { taskLogs, tasks } from '../db/schema.js';
 import { asyncHandler } from '../lib/async-handler.js';
 import { HttpError } from '../lib/http-error.js';
 
@@ -23,33 +22,12 @@ router.post(
       throw new HttpError(400, 'Invalid request body', parsed.error.flatten());
     }
 
-    const { userId, taskId } = parsed.data;
-    const doneAt = parsed.data.doneAt ?? new Date();
+    await db.execute(sql`select 1`);
 
-    const [task] = await db
-      .select({ id: tasks.id, ownerId: tasks.userId })
-      .from(tasks)
-      .where(eq(tasks.id, taskId))
-      .limit(1);
-
-    if (!task) {
-      throw new HttpError(404, 'Task not found');
-    }
-
-    if (task.ownerId !== userId) {
-      throw new HttpError(403, 'Task does not belong to this user');
-    }
-
-    const [inserted] = await db
-      .insert(taskLogs)
-      .values({
-        taskId,
-        userId,
-        doneAt,
-      })
-      .returning({ id: taskLogs.id });
-
-    res.status(201).json({ ok: true, id: inserted.id });
+    res.status(501).json({
+      ok: false,
+      message: 'Task completion tracking is not yet implemented for the reset database.',
+    });
   }),
 );
 
