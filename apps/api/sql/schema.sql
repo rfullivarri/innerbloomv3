@@ -1,1 +1,0 @@
--- SQL schema definitions managed via Prisma migrations.
