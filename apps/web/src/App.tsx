@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const styles = `
   .app-shell {
@@ -45,6 +45,75 @@ const styles = `
   .mission-list {
     display: grid;
     gap: 0.75rem;
+  }
+
+  .mission-group {
+    background: #eef2ff;
+    border-radius: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .mission-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .mission-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .mission-header small {
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .task-item {
+    background: white;
+    border-radius: 0.85rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.15);
+  }
+
+  .task-item h4 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .task-item p {
+    margin: 0;
+    color: #475569;
+  }
+
+  .task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  .task-meta span {
+    background: rgba(79, 70, 229, 0.08);
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
   }
 
   .mission {
@@ -141,11 +210,27 @@ type Pillar = {
   statCount: number;
 };
 
+type Task = {
+  id: string;
+  title: string;
+  description: string | null;
+  pillarId: string;
+  pillarName: string;
+  traitId: string | null;
+  traitName: string | null;
+  statId: string | null;
+  statName: string | null;
+  lastCompletedAt: string | null;
+};
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
+const DEMO_USER_ID =
+  import.meta.env.VITE_DEMO_USER_ID ?? '00000000-0000-0000-0000-000000000001';
 
 function App() {
   const [showPopup, setShowPopup] = useState(false);
   const [pillars, setPillars] = useState<Pillar[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -154,31 +239,75 @@ function App() {
     setLoading(true);
     setError(null);
 
-    fetch(`${API_BASE_URL}/pillars`)
-      .then((response) => {
-        if (!response.ok) {
+    const load = async () => {
+      try {
+        const [pillarsResponse, tasksResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/pillars`),
+          fetch(`${API_BASE_URL}/tasks?userId=${encodeURIComponent(DEMO_USER_ID)}`),
+        ]);
+
+        if (!pillarsResponse.ok) {
           throw new Error('Error cargando pilares');
         }
-        return response.json() as Promise<Pillar[]>;
-      })
-      .then((data) => {
-        if (!isMounted) return;
-        setPillars(data);
-      })
-      .catch((err: unknown) => {
-        if (!isMounted) return;
-        const message = err instanceof Error ? err.message : 'Error cargando pilares';
+
+        if (!tasksResponse.ok) {
+          throw new Error('Error cargando misiones');
+        }
+
+        const [pillarsData, tasksData] = await Promise.all([
+          pillarsResponse.json() as Promise<Pillar[]>,
+          tasksResponse.json() as Promise<Task[]>,
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setPillars(pillarsData);
+        setTasks(tasksData);
+      } catch (err) {
+        if (!isMounted) {
+          return;
+        }
+        const message =
+          err instanceof Error ? err.message : 'Error cargando información del dashboard';
         setError(message);
-      })
-      .finally(() => {
-        if (!isMounted) return;
+      } finally {
+        if (!isMounted) {
+          return;
+        }
         setLoading(false);
-      });
+      }
+    };
+
+    void load();
 
     return () => {
       isMounted = false;
     };
   }, []);
+
+  const tasksByPillar = useMemo(() => {
+    return tasks.reduce<Record<string, Task[]>>((acc, task) => {
+      if (!acc[task.pillarId]) {
+        acc[task.pillarId] = [];
+      }
+      acc[task.pillarId].push(task);
+      return acc;
+    }, {});
+  }, [tasks]);
+
+  const formatLastCompleted = (isoDate: string | null) => {
+    if (!isoDate) {
+      return 'Pendiente';
+    }
+
+    const date = new Date(isoDate);
+    return date.toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  };
 
   return (
     <div className="app-shell">
@@ -210,32 +339,46 @@ function App() {
             <span>No hay pilares disponibles todavía.</span>
           )}
           {!loading && !error &&
-            pillars.map((pillar) => (
-              <div key={pillar.id} className="mission">
-                <span>
-                  {pillar.name}
-                  {pillar.description && (
-                    <small
-                      style={{ display: 'block', color: '#64748b', fontWeight: 400 }}
-                    >
-                      {pillar.description}
+            pillars.map((pillar) => {
+              const pillarTasks = tasksByPillar[pillar.id] ?? [];
+
+              return (
+                <div key={pillar.id} className="mission-group">
+                  <div className="mission-header">
+                    <div>
+                      <h3>{pillar.name}</h3>
+                      {pillar.description && <small>{pillar.description}</small>}
+                    </div>
+                    <small>
+                      {pillar.traitCount} traits · {pillar.statCount} stats
                     </small>
+                  </div>
+
+                  {pillarTasks.length ? (
+                    <ul className="task-list">
+                      {pillarTasks.map((task) => (
+                        <li key={task.id} className="task-item">
+                          <div>
+                            <h4>{task.title}</h4>
+                            {task.description && <p>{task.description}</p>}
+                          </div>
+
+                          <div className="task-meta">
+                            <span>{formatLastCompleted(task.lastCompletedAt)}</span>
+                            {task.traitName && <span>{task.traitName}</span>}
+                            {task.statName && <span>{task.statName}</span>}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p style={{ margin: 0, color: '#475569' }}>
+                      Todavía no hay misiones para este pilar.
+                    </p>
                   )}
-                </span>
-                <span
-                  style={{
-                    fontSize: '0.875rem',
-                    color: '#475569',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}
-                >
-                  {pillar.traitCount} traits · {pillar.statCount} stats
-                  <input type="checkbox" readOnly />
-                </span>
-              </div>
-            ))}
+                </div>
+              );
+            })}
         </div>
 
         <button className="popup-trigger" onClick={() => setShowPopup((prev) => !prev)}>
