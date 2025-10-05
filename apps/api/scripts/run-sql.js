@@ -58,14 +58,10 @@ async function runFile(filePath) {
 
   console.log(`\n→ Running ${fileName}`);
 
-  await client`BEGIN`;
   try {
     await client.unsafe(sql);
-    await client`COMMIT`;
     console.log(`✓ Applied ${fileName}`);
   } catch (error) {
-    await client`ROLLBACK`;
-
     if (isAlreadyExistsError(error)) {
       console.warn(`⚠️  Skipped ${fileName}: ${error.message}`);
       return;
