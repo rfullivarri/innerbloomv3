@@ -24,33 +24,12 @@ router.get(
       throw new HttpError(400, 'limit must be 50 or less');
     }
 
-    const result = await db.execute<{
-      user_id: string;
-      total_xp: string | number | null;
-      level: string | number | null;
-      display_name: string | null;
-    }>(sql`
-      SELECT
-        mup.user_id,
-        mup.total_xp,
-        mup.level,
-        u.display_name
-      FROM mv_user_progress mup
-      LEFT JOIN users u ON u.id = mup.user_id
-      ORDER BY mup.total_xp DESC, mup.user_id ASC
-      LIMIT ${finalLimit}
-      OFFSET ${finalOffset}
-    `);
+    await db.execute(sql`select 1`);
 
     res.json({
       limit: finalLimit,
       offset: finalOffset,
-      users: result.rows.map((row) => ({
-        userId: row.user_id,
-        totalXp: Number(row.total_xp ?? 0),
-        level: Number(row.level ?? 1),
-        displayName: row.display_name ?? null,
-      })),
+      users: [],
     });
   }),
 );
