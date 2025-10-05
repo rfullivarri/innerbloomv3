@@ -2,7 +2,7 @@ import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import { eq, sql as drizzleSql } from 'drizzle-orm';
 import { z } from 'zod';
-import { db } from './db/client';
+import { db } from './db/client.js';
 import {
   pillars,
   stats,
@@ -10,7 +10,7 @@ import {
   tasks,
   traits,
   users,
-} from './db/schema';
+} from './db/schema.js';
 
 class HttpError extends Error {
   constructor(

@@ -1,16 +1,22 @@
+import process from 'node:process';
 import { neon, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
-import * as schema from './schema';
+import * as schema from './schema.js';
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = (() => {
+  const rawUrl = process.env.DATABASE_URL;
 
-if (!databaseUrl) {
-  throw new Error('DATABASE_URL is required to start the database client');
-}
+  if (!rawUrl) {
+    throw new Error('DATABASE_URL is required to start the database client');
+  }
 
-if (!databaseUrl.includes('sslmode=')) {
-  console.warn('DATABASE_URL is missing sslmode requirement; Neon needs ?sslmode=require');
-}
+  const parsed = new URL(rawUrl);
+  if (!parsed.searchParams.has('sslmode')) {
+    parsed.searchParams.set('sslmode', 'require');
+  }
+
+  return parsed.toString();
+})();
 
 neonConfig.fetchConnectionCache = true;
 

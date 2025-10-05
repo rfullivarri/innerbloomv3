@@ -1,19 +1,24 @@
 {
   "name": "innerbloom-monorepo",
   "private": true,
+  "type": "module",
   "workspaces": ["apps/api", "apps/web"],
   "scripts": {
     "dev": "node scripts/dev.cjs",
-    "build": "npm --workspaces run build",
-    "start": "npm --workspace apps/api run start",
-    "typecheck": "npm --workspaces run typecheck",
+    "build": "pnpm --workspaces run build",
+    "start": "pnpm --filter @innerbloom/api start",
+    "typecheck": "pnpm --workspaces run typecheck",
     "db:generate": "pnpm --filter @innerbloom/api db:generate",
     "db:migrate": "pnpm --filter @innerbloom/api db:migrate",
     "db:push": "pnpm --filter @innerbloom/api db:push",
     "db:seed": "pnpm --filter @innerbloom/api db:seed",
-    "db:all": "pnpm --filter @innerbloom/api db:all"
+    "db:all": "pnpm --filter @innerbloom/api db:all",
+    "dev:api": "pnpm --filter @innerbloom/api dev",
+    "build:api": "pnpm --filter @innerbloom/api build",
+    "start:api": "pnpm --filter @innerbloom/api start"
   },
   "devDependencies": {
+    "tsx": "^4.19.1",
     "typescript": "^5.6.0"
   }
 }
