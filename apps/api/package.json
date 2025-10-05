@@ -3,14 +3,14 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate --config ./drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config ./drizzle.config.ts",
     "db:push": "node ./scripts/run-sql.js",
     "db:seed": "node ./scripts/run-sql.js sql/002_seed.sql",
-    "db:all": "pnpm db:generate && pnpm db:migrate && pnpm db:push && pnpm db:seed"
+    "db:all": "npm run db:generate && npm run db:migrate && npm run db:push && npm run db:seed"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.1",

@@ -14,8 +14,9 @@
     "db:seed": "pnpm --filter @innerbloom/api db:seed",
     "db:all": "pnpm --filter @innerbloom/api db:all",
     "dev:api": "pnpm --filter @innerbloom/api dev",
-    "build:api": "pnpm --filter @innerbloom/api build",
-    "start:api": "pnpm --filter @innerbloom/api start"
+    "build:api": "npm --workspace apps/api run build",
+    "start:api": "npm --workspace apps/api run start",
+    "db:all:api": "npm --workspace apps/api run db:all"
   },
   "devDependencies": {
     "tsx": "^4.19.1",
