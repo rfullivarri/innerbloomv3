@@ -11,6 +11,16 @@ Esta carpeta contiene una re-implementación moderna del landing de gamificació
 - `styles/`: Hojas de estilo globales.
 - `env.example`: Variables de entorno requeridas para desplegar la aplicación.
 
+## Instalación
+
+Este repositorio utiliza workspaces de npm, por lo que todos los paquetes comparten el `package-lock.json` de la raíz. Antes de ejecutar cualquier comando (`npm ci`, `npm run dev`, etc.) asegúrate de instalar las dependencias desde la carpeta raíz del monorepo:
+
+```bash
+npm install
+```
+
+Si ves el error `The "npm ci" command can only install with an existing package-lock.json`, significa que la instalación se ejecutó en un directorio sin `package-lock.json`. Vuelve a la raíz del proyecto (`/workspace/innerbloomv3`) o genera el archivo con `npm install` y vuelve a intentarlo.
+
 ## Variables de entorno
 
 Copia `env.example` a `.env.local` (para desarrollo local) o configúralas como variables en Railway:
