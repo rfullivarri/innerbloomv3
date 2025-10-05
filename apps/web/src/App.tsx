@@ -223,7 +223,31 @@ type Task = {
   lastCompletedAt: string | null;
 };
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
+const API_BASE_URL = (() => {
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  if (configuredBaseUrl) {
+    return configuredBaseUrl;
+  }
+
+  if (typeof window === 'undefined') {
+    return 'http://localhost:3000';
+  }
+
+  const { protocol, hostname, origin } = window.location;
+
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:3000';
+  }
+
+  if (hostname.endsWith('.up.railway.app')) {
+    const apiHostname = hostname.replace(/^web-/, 'api-');
+    if (apiHostname !== hostname) {
+      return `${protocol}//${apiHostname}`;
+    }
+  }
+
+  return origin;
+})();
 const DEMO_USER_ID =
   import.meta.env.VITE_DEMO_USER_ID ?? '00000000-0000-0000-0000-000000000001';
 
