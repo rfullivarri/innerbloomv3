@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import TaskHistory from './components/TaskHistory';
+import { API_BASE, fetchPillars, type Pillar } from './lib/api';
 
 const styles = `
   .app-shell {
@@ -202,14 +204,6 @@ const styles = `
   }
 `;
 
-type Pillar = {
-  id: string;
-  name: string;
-  description: string | null;
-  traitCount: number;
-  statCount: number;
-};
-
 type Task = {
   id: string;
   title: string;
@@ -223,38 +217,9 @@ type Task = {
   lastCompletedAt: string | null;
 };
 
-const { API_BASE_URL, API_CONFIGURATION_ERROR } = (() => {
-  const configuredBaseUrlRaw = import.meta.env.VITE_API_BASE_URL;
-  const configuredBaseUrl = configuredBaseUrlRaw
-    ? configuredBaseUrlRaw.trim().replace(/\/+$/, '')
-    : undefined;
-  if (configuredBaseUrl) {
-    return { API_BASE_URL: configuredBaseUrl, API_CONFIGURATION_ERROR: null };
-  }
-
-  if (typeof window === 'undefined') {
-    return { API_BASE_URL: 'http://localhost:3000', API_CONFIGURATION_ERROR: null };
-  }
-
-  const { hostname, origin } = window.location;
-
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return { API_BASE_URL: 'http://localhost:3000', API_CONFIGURATION_ERROR: null };
-  }
-
-  if (import.meta.env.PROD) {
-    const message =
-      'VITE_API_BASE_URL no está configurado para este despliegue. ' +
-      'Configura la variable con la URL del API para evitar problemas de conexión.';
-    console.warn(
-      message +
-        ' Las llamadas al API se han deshabilitado para evitar respuestas inesperadas.',
-    );
-    return { API_BASE_URL: null, API_CONFIGURATION_ERROR: message };
-  }
-
-  return { API_BASE_URL: origin, API_CONFIGURATION_ERROR: null };
-})();
+const API_CONFIGURATION_ERROR = API_BASE
+  ? null
+  : 'VITE_API_URL is not configured. Set it to your API origin.';
 const DEMO_USER_ID =
   import.meta.env.VITE_DEMO_USER_ID ?? '00000000-0000-0000-0000-000000000001';
 
@@ -297,24 +262,21 @@ function App() {
   const [error, setError] = useState<string | null>(API_CONFIGURATION_ERROR);
 
   useEffect(() => {
-    let isMounted = true;
-    const baseUrl = API_BASE_URL;
-
-    if (!baseUrl) {
+    if (!API_BASE) {
       setLoading(false);
-      return () => {
-        isMounted = false;
-      };
+      return;
     }
+
+    let isMounted = true;
     setLoading(true);
     setError(null);
 
     const load = async () => {
       try {
         const [pillarsData, tasksData] = await Promise.all([
-          fetchJson<Pillar[]>(`${baseUrl}/pillars`, 'pilares'),
+          fetchPillars(),
           fetchJson<Task[]>(
-            `${baseUrl}/tasks?userId=${encodeURIComponent(DEMO_USER_ID)}`,
+            `${API_BASE}/api/tasks?userId=${encodeURIComponent(DEMO_USER_ID)}`,
             'misiones',
           ),
         ]);
@@ -412,7 +374,8 @@ function App() {
                       {pillar.description && <small>{pillar.description}</small>}
                     </div>
                     <small>
-                      {pillar.traitCount} traits · {pillar.statCount} stats
+                      {pillarTasks.length}{' '}
+                      {pillarTasks.length === 1 ? 'task' : 'tasks'}
                     </small>
                   </div>
 
@@ -442,6 +405,8 @@ function App() {
               );
             })}
         </div>
+
+        <TaskHistory />
 
         <button className="popup-trigger" onClick={() => setShowPopup((prev) => !prev)}>
           {showPopup ? 'Hide coach tip' : 'Coach tip'}

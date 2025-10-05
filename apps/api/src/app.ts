@@ -1,16 +1,9 @@
-import cors, { CorsOptions } from 'cors';
+import cors, { type CorsOptions } from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
-import { eq, sql as drizzleSql } from 'drizzle-orm';
+import { desc, eq, sql as drizzleSql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from './db/client.js';
-import {
-  pillars,
-  stats,
-  taskLogs,
-  tasks,
-  traits,
-  users,
-} from './db/schema.js';
+import { pillars, stats, taskLogs, tasks, traits, users } from './db/schema.js';
 
 class HttpError extends Error {
   constructor(
@@ -23,14 +16,34 @@ class HttpError extends Error {
   }
 }
 
-type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: Request, res: Response) => Promise<void>;
 
 const asyncHandler = (handler: AsyncHandler) =>
   (req: Request, res: Response, next: NextFunction) => {
-    handler(req, res, next).catch(next);
+    handler(req, res).catch(next);
   };
 
+const allowedOrigins = [
+  'https://web-dev-dfa2.up.railway.app',
+  'http://localhost:5173',
+];
+
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    callback(null, allowedOrigins.includes(origin));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+};
+
 const tasksQuerySchema = z.object({
+  userId: z.string().uuid({ message: 'userId must be a valid UUID' }),
+});
+
+const taskLogsQuerySchema = z.object({
   userId: z.string().uuid({ message: 'userId must be a valid UUID' }),
 });
 
@@ -40,208 +53,210 @@ const createTaskLogSchema = z.object({
   doneAt: z.coerce.date({ message: 'doneAt must be a date or ISO string' }),
 });
 
-export function createApp() {
-  const app = express();
+const LOG_LIMIT = 50;
 
-  const allowedOrigins = [
-    'https://web-dev-dfa2.up.railway.app',
-    'http://localhost:5173',
-  ];
+const app = express();
 
-  const corsOptions: CorsOptions = {
-    origin: (origin, callback) => {
-      if (!origin) {
-        return callback(null, true);
-      }
+app.use(cors(corsOptions));
+app.options('*', cors());
+app.use(express.json());
 
-      return callback(null, allowedOrigins.includes(origin));
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  };
+const api = express.Router();
 
-  app.use(cors(corsOptions));
-  app.options('*', cors(corsOptions));
-  // Teach Express to understand JSON payloads.
-  app.use(express.json());
+api.get(
+  '/health/db',
+  asyncHandler(async (_req, res) => {
+    await db.execute(drizzleSql`select 1`);
+    res.json({ ok: true });
+  }),
+);
 
-  app.get(
-    '/health/db',
-    asyncHandler(async (_req, res) => {
-      await db.execute(drizzleSql`select 1`);
-      res.json({ ok: true });
-    }),
-  );
+api.get(
+  '/pillars',
+  asyncHandler(async (_req, res) => {
+    const rows = await db
+      .select({
+        id: pillars.id,
+        name: pillars.name,
+        description: pillars.description,
+      })
+      .from(pillars)
+      .orderBy(pillars.name);
 
-  app.get(
-    '/pillars',
-    asyncHandler(async (_req, res) => {
-      const rows = await db
-        .select({
-          id: pillars.id,
-          name: pillars.name,
-          description: pillars.description,
-          createdAt: pillars.createdAt,
-          updatedAt: pillars.updatedAt,
-          traitCount: drizzleSql<number>`COUNT(DISTINCT ${traits.id})`,
-          statCount: drizzleSql<number>`COUNT(DISTINCT ${stats.id})`,
-        })
-        .from(pillars)
-        .leftJoin(traits, eq(traits.pillarId, pillars.id))
-        .leftJoin(stats, eq(stats.traitId, traits.id))
-        .groupBy(
-          pillars.id,
-          pillars.name,
-          pillars.description,
-          pillars.createdAt,
-          pillars.updatedAt,
-        )
-        .orderBy(pillars.name);
+    res.json(rows);
+  }),
+);
 
-      const payload = rows.map((row) => ({
-        ...row,
-        traitCount: Number(row.traitCount),
-        statCount: Number(row.statCount),
-      }));
+api.get(
+  '/tasks',
+  asyncHandler(async (req, res) => {
+    const parsed = tasksQuerySchema.safeParse(req.query);
 
-      res.json(payload);
-    }),
-  );
-
-  app.get(
-    '/tasks',
-    asyncHandler(async (req, res) => {
-      const parsed = tasksQuerySchema.safeParse(req.query);
-
-      if (!parsed.success) {
-        throw new HttpError(400, 'Invalid query parameters', parsed.error.flatten());
-      }
-
-      const { userId } = parsed.data;
-
-      const [existingUser] = await db
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1);
-
-      if (!existingUser) {
-        throw new HttpError(404, 'User not found');
-      }
-
-      const taskRows = await db
-        .select({
-          id: tasks.id,
-          title: tasks.title,
-          description: tasks.description,
-          createdAt: tasks.createdAt,
-          updatedAt: tasks.updatedAt,
-          pillarId: tasks.pillarId,
-          pillarName: pillars.name,
-          traitId: tasks.traitId,
-          traitName: traits.name,
-          statId: tasks.statId,
-          statName: stats.name,
-        })
-        .from(tasks)
-        .innerJoin(pillars, eq(tasks.pillarId, pillars.id))
-        .leftJoin(traits, eq(tasks.traitId, traits.id))
-        .leftJoin(stats, eq(tasks.statId, stats.id))
-        .where(eq(tasks.userId, userId))
-        .orderBy(tasks.createdAt);
-
-      const taskLogRows = await db
-        .select({
-          taskId: taskLogs.taskId,
-          lastCompletedAt: drizzleSql<Date | null>`MAX(${taskLogs.doneAt})`,
-        })
-        .from(taskLogs)
-        .where(eq(taskLogs.userId, userId))
-        .groupBy(taskLogs.taskId);
-
-      const lastCompletedMap = new Map<string, Date | null>();
-      for (const row of taskLogRows) {
-        const value = row.lastCompletedAt ? new Date(row.lastCompletedAt) : null;
-        lastCompletedMap.set(row.taskId, value);
-      }
-
-      const payload = taskRows.map((task) => ({
-        ...task,
-        lastCompletedAt: lastCompletedMap.get(task.id)?.toISOString() ?? null,
-      }));
-
-      res.json(payload);
-    }),
-  );
-
-  app.post(
-    '/task-logs',
-    asyncHandler(async (req, res) => {
-      const parsed = createTaskLogSchema.safeParse(req.body);
-
-      if (!parsed.success) {
-        throw new HttpError(400, 'Invalid request body', parsed.error.flatten());
-      }
-
-      const { userId, taskId, doneAt } = parsed.data;
-
-      const [task] = await db
-        .select({ id: tasks.id, ownerId: tasks.userId })
-        .from(tasks)
-        .where(eq(tasks.id, taskId))
-        .limit(1);
-
-      if (!task) {
-        throw new HttpError(404, 'Task not found');
-      }
-
-      if (task.ownerId !== userId) {
-        throw new HttpError(403, 'Task does not belong to this user');
-      }
-
-      const inserted = await db
-        .insert(taskLogs)
-        .values({
-          taskId,
-          userId,
-          doneAt,
-        })
-        .returning();
-
-      res.status(201).json({ taskLog: inserted[0] });
-    }),
-  );
-
-  app.use((_req, _res, next) => {
-    next(new HttpError(404, 'Route not found'));
-  });
-
-  app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
-    if (error instanceof HttpError) {
-      return res.status(error.status).json({
-        error: {
-          message: error.message,
-          details: error.details,
-        },
-      });
+    if (!parsed.success) {
+      throw new HttpError(400, 'Invalid query parameters', parsed.error.flatten());
     }
 
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        error: {
-          message: 'Validation failed',
-          details: error.flatten(),
-        },
-      });
+    const { userId } = parsed.data;
+
+    const [existingUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!existingUser) {
+      throw new HttpError(404, 'User not found');
     }
 
-    console.error('Unexpected error', error);
+    const taskRows = await db
+      .select({
+        id: tasks.id,
+        title: tasks.title,
+        description: tasks.description,
+        pillarId: tasks.pillarId,
+        pillarName: pillars.name,
+        traitId: tasks.traitId,
+        traitName: traits.name,
+        statId: tasks.statId,
+        statName: stats.name,
+        createdAt: tasks.createdAt,
+        updatedAt: tasks.updatedAt,
+      })
+      .from(tasks)
+      .innerJoin(pillars, eq(tasks.pillarId, pillars.id))
+      .leftJoin(traits, eq(tasks.traitId, traits.id))
+      .leftJoin(stats, eq(tasks.statId, stats.id))
+      .where(eq(tasks.userId, userId))
+      .orderBy(tasks.createdAt);
 
-    return res.status(500).json({
+    const taskLogRows = await db
+      .select({
+        taskId: taskLogs.taskId,
+        lastCompletedAt: drizzleSql<Date | null>`MAX(${taskLogs.doneAt})`,
+      })
+      .from(taskLogs)
+      .where(eq(taskLogs.userId, userId))
+      .groupBy(taskLogs.taskId);
+
+    const lastCompletedMap = new Map<string, Date | null>();
+    for (const row of taskLogRows) {
+      lastCompletedMap.set(row.taskId, row.lastCompletedAt ? new Date(row.lastCompletedAt) : null);
+    }
+
+    const payload = taskRows.map((task) => ({
+      ...task,
+      lastCompletedAt: lastCompletedMap.get(task.id)?.toISOString() ?? null,
+    }));
+
+    res.json(payload);
+  }),
+);
+
+api.get(
+  '/task-logs',
+  asyncHandler(async (req, res) => {
+    const parsed = taskLogsQuerySchema.safeParse(req.query);
+
+    if (!parsed.success) {
+      throw new HttpError(400, 'Invalid query parameters', parsed.error.flatten());
+    }
+
+    const { userId } = parsed.data;
+
+    const rows = await db
+      .select({
+        id: taskLogs.id,
+        taskId: taskLogs.taskId,
+        taskTitle: tasks.title,
+        doneAt: taskLogs.doneAt,
+      })
+      .from(taskLogs)
+      .innerJoin(tasks, eq(taskLogs.taskId, tasks.id))
+      .where(eq(taskLogs.userId, userId))
+      .orderBy(desc(taskLogs.doneAt))
+      .limit(LOG_LIMIT);
+
+    const payload = rows.map((row) => ({
+      id: row.id,
+      taskId: row.taskId,
+      taskTitle: row.taskTitle,
+      doneAt: row.doneAt.toISOString(),
+    }));
+
+    res.json(payload);
+  }),
+);
+
+api.post(
+  '/task-logs',
+  asyncHandler(async (req, res) => {
+    const parsed = createTaskLogSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      throw new HttpError(400, 'Invalid request body', parsed.error.flatten());
+    }
+
+    const { userId, taskId, doneAt } = parsed.data;
+
+    const [task] = await db
+      .select({ id: tasks.id, ownerId: tasks.userId })
+      .from(tasks)
+      .where(eq(tasks.id, taskId))
+      .limit(1);
+
+    if (!task) {
+      throw new HttpError(404, 'Task not found');
+    }
+
+    if (task.ownerId !== userId) {
+      throw new HttpError(403, 'Task does not belong to this user');
+    }
+
+    const inserted = await db
+      .insert(taskLogs)
+      .values({
+        taskId,
+        userId,
+        doneAt,
+      })
+      .returning();
+
+    res.status(201).json({ taskLog: inserted[0] });
+  }),
+);
+
+app.use('/api', api);
+
+app.use((_req, _res, next) => {
+  next(new HttpError(404, 'Route not found'));
+});
+
+app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  if (error instanceof HttpError) {
+    return res.status(error.status).json({
       error: {
-        message: 'Something went wrong',
+        message: error.message,
+        details: error.details,
       },
     });
-  });
+  }
 
-  return app;
-}
+  if (error instanceof z.ZodError) {
+    return res.status(400).json({
+      error: {
+        message: 'Validation failed',
+        details: error.flatten(),
+      },
+    });
+  }
+
+  console.error('Unexpected error', error);
+
+  return res.status(500).json({
+    error: {
+      message: 'Something went wrong',
+    },
+  });
+});
+
+export default app;

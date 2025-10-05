@@ -1,10 +1,8 @@
 import 'dotenv/config';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
-import { createApp } from './app.js';
+import app from './app.js';
 import { dbReady } from './db/client.js';
-
-export const app = createApp();
 
 const preferredPorts = [process.env.PORT, '3000', '8080'];
 const port = Number(
@@ -42,4 +40,4 @@ if (executedDirectly) {
   void start();
 }
 
-export { start };
+export { start, app };
