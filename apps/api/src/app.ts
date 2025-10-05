@@ -24,6 +24,7 @@ const app = express();
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+app.use('/api/webhooks/clerk', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(routes);
 

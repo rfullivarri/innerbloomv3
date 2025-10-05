@@ -5,9 +5,11 @@ import legacyRoutes from './legacy.js';
 import pillarsRoutes from './pillars.js';
 import tasksRoutes from './tasks.js';
 import usersRoutes from './users.js';
+import clerkWebhookRoutes from './webhooks/clerk.js';
 
 const router = Router();
 
+router.use(clerkWebhookRoutes);
 router.use(healthRoutes);
 router.use(pillarsRoutes);
 router.use(legacyRoutes);

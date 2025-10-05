@@ -5,6 +5,10 @@ import { asyncHandler } from '../lib/async-handler.js';
 
 const router = Router();
 
+router.get('/healthz', (_req, res) => {
+  res.json({ ok: true });
+});
+
 router.get(
   '/health/db',
   asyncHandler(async (_req, res) => {
