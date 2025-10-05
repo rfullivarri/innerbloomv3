@@ -32,6 +32,15 @@
 BEGIN;
 
 -- --------------------------------------------------------------------------
+-- Asegurar que la vista materializada y sus dependencias se puedan recrear con
+-- el esquema correcto, incluso si versiones previas existían sin days_in_week.
+-- --------------------------------------------------------------------------
+DROP VIEW IF EXISTS public.v_task_week_goal;
+DROP VIEW IF EXISTS public.v_task_week_max_days;
+DROP VIEW IF EXISTS public.v_task_week_constancy;
+DROP MATERIALIZED VIEW IF EXISTS public.mv_task_weeks;
+
+-- --------------------------------------------------------------------------
 -- Materialized view semanal basada en mv_task_days.
 -- Cada fila representa una tarea con actividad en la semana (lunes-domingo ISO).
 -- --------------------------------------------------------------------------
