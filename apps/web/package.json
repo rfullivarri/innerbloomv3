@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "prestart": "npm run build",
+    "start": "vite preview",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "db:all": "node ./scripts/run-sql.cjs",
