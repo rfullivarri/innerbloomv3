@@ -1,44 +1,71 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
 import DashboardPage from './pages/Dashboard';
 import LoginPage from './pages/Login';
+import LandingPage from './pages/Landing';
+import SignUpPage from './pages/SignUp';
 import { DevBanner } from './components/layout/DevBanner';
-import { UserProvider, useUser } from './state/UserContext';
 
 function RequireUser({ children }: { children: JSX.Element }) {
-  const { userId } = useUser();
-  const location = useLocation();
+  const { isLoaded, userId } = useAuth();
+
+  if (!isLoaded) {
+    return <div className="flex min-h-screen items-center justify-center text-text">Cargando…</div>;
+  }
 
   if (!userId) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;
 }
 
-function RootRedirect() {
-  const { userId } = useUser();
-  return <Navigate to={userId ? '/dashboard' : '/login'} replace />;
+function RedirectIfSignedIn({ children }: { children: JSX.Element }) {
+  const { isLoaded, userId } = useAuth();
+
+  if (!isLoaded) {
+    return <div className="flex min-h-screen items-center justify-center text-text">Cargando…</div>;
+  }
+
+  if (userId) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
 }
 
 export default function App() {
   return (
-    <UserProvider>
-      <div className="min-h-screen bg-transparent">
-        <DevBanner />
-        <Routes>
-          <Route path="/" element={<RootRedirect />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <RequireUser>
-                <DashboardPage />
-              </RequireUser>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
-    </UserProvider>
+    <div className="min-h-screen bg-transparent">
+      <DevBanner />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route
+          path="/login"
+          element={
+            <RedirectIfSignedIn>
+              <LoginPage />
+            </RedirectIfSignedIn>
+          }
+        />
+        <Route
+          path="/sign-up"
+          element={
+            <RedirectIfSignedIn>
+              <SignUpPage />
+            </RedirectIfSignedIn>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireUser>
+              <DashboardPage />
+            </RequireUser>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </div>
   );
 }
