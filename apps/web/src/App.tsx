@@ -254,6 +254,37 @@ const API_BASE_URL = (() => {
 const DEMO_USER_ID =
   import.meta.env.VITE_DEMO_USER_ID ?? '00000000-0000-0000-0000-000000000001';
 
+async function fetchJson<T>(url: string, resourceName: string): Promise<T> {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Error cargando ${resourceName}`);
+  }
+
+  const contentType = response.headers.get('content-type') ?? '';
+
+  if (!contentType.toLowerCase().includes('application/json')) {
+    const body = await response.text();
+    console.error(
+      `La respuesta de ${url} no es JSON. Contenido recibido:`,
+      body.slice(0, 500),
+    );
+    throw new Error(
+      `Respuesta inesperada del servidor al cargar ${resourceName}. ` +
+        'Verifica la configuración del API.',
+    );
+  }
+
+  try {
+    return (await response.json()) as T;
+  } catch (err) {
+    console.error(`No se pudo parsear la respuesta de ${url} como JSON`, err);
+    throw new Error(
+      `No se pudo interpretar la respuesta del servidor al cargar ${resourceName}.`,
+    );
+  }
+}
+
 function App() {
   const [showPopup, setShowPopup] = useState(false);
   const [pillars, setPillars] = useState<Pillar[]>([]);
@@ -268,22 +299,12 @@ function App() {
 
     const load = async () => {
       try {
-        const [pillarsResponse, tasksResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/pillars`),
-          fetch(`${API_BASE_URL}/tasks?userId=${encodeURIComponent(DEMO_USER_ID)}`),
-        ]);
-
-        if (!pillarsResponse.ok) {
-          throw new Error('Error cargando pilares');
-        }
-
-        if (!tasksResponse.ok) {
-          throw new Error('Error cargando misiones');
-        }
-
         const [pillarsData, tasksData] = await Promise.all([
-          pillarsResponse.json() as Promise<Pillar[]>,
-          tasksResponse.json() as Promise<Task[]>,
+          fetchJson<Pillar[]>(`${API_BASE_URL}/pillars`, 'pilares'),
+          fetchJson<Task[]>(
+            `${API_BASE_URL}/tasks?userId=${encodeURIComponent(DEMO_USER_ID)}`,
+            'misiones',
+          ),
         ]);
 
         if (!isMounted) {
@@ -297,7 +318,9 @@ function App() {
           return;
         }
         const message =
-          err instanceof Error ? err.message : 'Error cargando información del dashboard';
+          err instanceof Error
+            ? err.message
+            : 'Error cargando información del dashboard';
         setError(message);
       } finally {
         if (!isMounted) {
