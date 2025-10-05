@@ -224,7 +224,10 @@ type Task = {
 };
 
 const API_BASE_URL = (() => {
-  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  const configuredBaseUrlRaw = import.meta.env.VITE_API_BASE_URL;
+  const configuredBaseUrl = configuredBaseUrlRaw
+    ? configuredBaseUrlRaw.trim().replace(/\/+$/, '')
+    : undefined;
   if (configuredBaseUrl) {
     return configuredBaseUrl;
   }
@@ -233,17 +236,17 @@ const API_BASE_URL = (() => {
     return 'http://localhost:3000';
   }
 
-  const { protocol, hostname, origin } = window.location;
+  const { hostname, origin } = window.location;
 
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:3000';
   }
 
-  if (hostname.endsWith('.up.railway.app')) {
-    const apiHostname = hostname.replace(/^web-/, 'api-');
-    if (apiHostname !== hostname) {
-      return `${protocol}//${apiHostname}`;
-    }
+  if (import.meta.env.PROD) {
+    console.warn(
+      'VITE_API_BASE_URL is not configured; falling back to the current origin. ' +
+        'Configure the variable in production to avoid cross-origin issues.'
+    );
   }
 
   return origin;

@@ -9,3 +9,4 @@ command = "npm --workspace apps/web run preview"
 
   [service.web.env]
   PORT = "5173"
+  VITE_API_BASE_URL = "https://innerbloom-api.up.railway.app"
