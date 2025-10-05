@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.8.1",
     "@types/node": "^20.11.30",
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",

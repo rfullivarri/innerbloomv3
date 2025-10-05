@@ -1,3 +1,4 @@
+import { useAuth } from '@clerk/clerk-react';
 import { AchievementsList } from '../components/dashboard/AchievementsList';
 import { EmotionHeatmap } from '../components/dashboard/EmotionHeatmap';
 import { LevelCard } from '../components/dashboard/LevelCard';
@@ -5,10 +6,9 @@ import { PillarsSection } from '../components/dashboard/PillarsSection';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { StreakCard } from '../components/dashboard/StreakCard';
 import { Navbar } from '../components/layout/Navbar';
-import { useUser } from '../state/UserContext';
 
 export default function DashboardPage() {
-  const { userId } = useUser();
+  const { userId } = useAuth();
 
   if (!userId) {
     return null;

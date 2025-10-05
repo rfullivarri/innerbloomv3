@@ -1,9 +1,9 @@
-import { SignIn } from '@clerk/clerk-react';
+import { SignUp } from '@clerk/clerk-react';
 
-export default function LoginPage() {
+export default function SignUpPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
-      <SignIn
+      <SignUp
         appearance={{
           variables: {
             colorPrimary: '#7d3cff',
@@ -12,9 +12,9 @@ export default function LoginPage() {
           }
         }}
         routing="path"
-        path="/login"
-        signUpUrl="/sign-up"
-        afterSignInUrl="/dashboard"
+        path="/sign-up"
+        signInUrl="/login"
+        afterSignUpUrl="/dashboard"
       />
     </div>
   );
