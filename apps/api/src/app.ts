@@ -1,4 +1,4 @@
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import { eq, sql as drizzleSql } from 'drizzle-orm';
 import { z } from 'zod';
@@ -43,8 +43,24 @@ const createTaskLogSchema = z.object({
 export function createApp() {
   const app = express();
 
-  // Allow our friends (the frontend) to talk to us.
-  app.use(cors());
+  const allowedOrigins = [
+    'https://web-dev-dfa2.up.railway.app',
+    'http://localhost:5173',
+  ];
+
+  const corsOptions: CorsOptions = {
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      return callback(null, allowedOrigins.includes(origin));
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  };
+
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
   // Teach Express to understand JSON payloads.
   app.use(express.json());
 
