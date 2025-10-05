@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "prestart": "npm run build",
-    "start": "vite preview",
+    "start": "node ./scripts/start-preview.js",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "db:all": "node ./scripts/run-sql.cjs",
