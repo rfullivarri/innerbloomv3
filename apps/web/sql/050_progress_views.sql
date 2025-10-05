@@ -1,1 +1,0 @@
--- Progress views removed while starting from an empty schema.

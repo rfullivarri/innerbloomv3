@@ -14,7 +14,7 @@ export function DevBanner() {
   const handlePing = async () => {
     if (!API_BASE) {
       setStatus('error');
-      setMessage('VITE_API_BASE_URL is not set');
+      setMessage('VITE_API_URL is not set');
       return;
     }
 

@@ -5,15 +5,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "prestart": "npm run build",
-    "start": "node ./scripts/start-preview.js",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "db:all": "node ./scripts/run-sql.cjs",
-    "dbg:env": "node ./scripts/print-env.cjs"
+    "preview": "vite preview --host 0.0.0.0 --port ${PORT:-3000}",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.9.5",
     "@clerk/clerk-react": "^5.8.1",
     "@types/node": "^20.11.30",
     "@types/react": "^18.3.10",

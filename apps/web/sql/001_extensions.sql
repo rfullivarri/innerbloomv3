@@ -1,1 +1,0 @@
--- Web SQL scripts cleared during reset.
