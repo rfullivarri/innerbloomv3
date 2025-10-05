@@ -22,6 +22,17 @@ export VITE_API_URL="https://your-api.example.com"
 
 The URL is read at runtime via `import.meta.env.VITE_API_URL`. Do not include trailing slashes.
 
+## Database utilities
+
+To apply the service-local SQL bundle, provide `DATABASE_URL` and run:
+
+```bash
+export DATABASE_URL="postgres://..."
+npm run db:all
+```
+
+Railway pre-deploy runs the same command, so successful execution locally mirrors the deploy step. Use `npm run dbg:env` to verify SQL path resolution when debugging.
+
 ## Routes
 - `/login` – Paste a user ID or continue with the shared demo account.
 - `/dashboard` – Authenticated dashboard with XP, streaks, pillars, activity, and insights.
