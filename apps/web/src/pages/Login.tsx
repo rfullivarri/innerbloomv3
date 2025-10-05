@@ -1,4 +1,5 @@
 import { SignIn } from '@clerk/clerk-react';
+import { DASHBOARD_PATH } from '../config/auth';
 
 export default function LoginPage() {
   return (
@@ -14,7 +15,7 @@ export default function LoginPage() {
         routing="path"
         path="/login"
         signUpUrl="/sign-up"
-        afterSignInUrl="/dashboard"
+        fallbackRedirectUrl={DASHBOARD_PATH}
       />
     </div>
   );
