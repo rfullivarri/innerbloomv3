@@ -37,12 +37,24 @@ BEGIN;
 CREATE OR REPLACE PROCEDURE public.sp_refresh_daily_materialized()
 LANGUAGE plpgsql
 AS $$
+DECLARE
+  is_populated boolean;
 BEGIN
   IF to_regclass('public.mv_task_days') IS NULL THEN
     RAISE NOTICE 'mv_task_days no existe, no se refresca.';
   ELSE
-    RAISE NOTICE 'Refrescando mv_task_days (CONCURRENTLY).';
-    REFRESH MATERIALIZED VIEW CONCURRENTLY public.mv_task_days;
+    SELECT relispopulated
+    INTO is_populated
+    FROM pg_class
+    WHERE oid = 'public.mv_task_days'::regclass;
+
+    IF is_populated THEN
+      RAISE NOTICE 'Refrescando mv_task_days (CONCURRENTLY).';
+      REFRESH MATERIALIZED VIEW CONCURRENTLY public.mv_task_days;
+    ELSE
+      RAISE NOTICE 'Refrescando mv_task_days (NO CONCURRENTLY, primera carga).';
+      REFRESH MATERIALIZED VIEW public.mv_task_days;
+    END IF;
   END IF;
 END;
 $$;
@@ -53,12 +65,24 @@ $$;
 CREATE OR REPLACE PROCEDURE public.sp_refresh_weekly_materialized()
 LANGUAGE plpgsql
 AS $$
+DECLARE
+  is_populated boolean;
 BEGIN
   IF to_regclass('public.mv_task_weeks') IS NULL THEN
     RAISE NOTICE 'mv_task_weeks no existe, no se refresca.';
   ELSE
-    RAISE NOTICE 'Refrescando mv_task_weeks (CONCURRENTLY).';
-    REFRESH MATERIALIZED VIEW CONCURRENTLY public.mv_task_weeks;
+    SELECT relispopulated
+    INTO is_populated
+    FROM pg_class
+    WHERE oid = 'public.mv_task_weeks'::regclass;
+
+    IF is_populated THEN
+      RAISE NOTICE 'Refrescando mv_task_weeks (CONCURRENTLY).';
+      REFRESH MATERIALIZED VIEW CONCURRENTLY public.mv_task_weeks;
+    ELSE
+      RAISE NOTICE 'Refrescando mv_task_weeks (NO CONCURRENTLY, primera carga).';
+      REFRESH MATERIALIZED VIEW public.mv_task_weeks;
+    END IF;
   END IF;
 END;
 $$;
