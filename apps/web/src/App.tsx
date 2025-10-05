@@ -217,11 +217,20 @@ type Task = {
   lastCompletedAt: string | null;
 };
 
-const API_CONFIGURATION_ERROR = API_BASE
-  ? null
-  : 'VITE_API_URL is not configured. Set it to your API origin.';
 const DEMO_USER_ID =
   import.meta.env.VITE_DEMO_USER_ID ?? '00000000-0000-0000-0000-000000000001';
+
+function MissingApiBanner() {
+  if (import.meta.env.PROD) return null;
+  if (!import.meta.env.VITE_API_URL) {
+    return (
+      <p style={{ color: 'red' }}>
+        VITE_API_URL is not configured. Set it to your API origin.
+      </p>
+    );
+  }
+  return null;
+}
 
 async function fetchJson<T>(url: string, resourceName: string): Promise<T> {
   const response = await fetch(url);
@@ -259,15 +268,18 @@ function App() {
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(API_CONFIGURATION_ERROR);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
     if (!API_BASE) {
+      setError('API base URL is not configured.');
       setLoading(false);
-      return;
+      return () => {
+        isMounted = false;
+      };
     }
 
-    let isMounted = true;
     setLoading(true);
     setError(null);
 
@@ -276,7 +288,7 @@ function App() {
         const [pillarsData, tasksData] = await Promise.all([
           fetchPillars(),
           fetchJson<Task[]>(
-            `${API_BASE}/api/tasks?userId=${encodeURIComponent(DEMO_USER_ID)}`,
+            `${API_BASE}/tasks?userId=${encodeURIComponent(DEMO_USER_ID)}`,
             'misiones',
           ),
         ]);
@@ -349,6 +361,7 @@ function App() {
       </header>
 
       <main className="card">
+        <MissingApiBanner />
         <div>
           <h2 style={{ margin: 0 }}>Today's Missions</h2>
           <p style={{ margin: '0.25rem 0 0', color: '#64748b' }}>
