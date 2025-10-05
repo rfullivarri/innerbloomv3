@@ -17,6 +17,87 @@ BEGIN
 END;
 $$;
 
+
+CREATE TYPE IF NOT EXISTS game_mode AS ENUM ('LOW','CHILL','FLOW','EVOLVE');
+
+DO $m$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_type WHERE typname = 'game_mode'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_enum e
+      JOIN pg_type t ON t.oid = e.enumtypid
+      WHERE t.typname = 'game_mode'
+        AND e.enumlabel = 'LOW'
+    ) THEN
+      EXECUTE 'ALTER TYPE game_mode ADD VALUE ''LOW''';
+    END IF;
+
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_enum e
+      JOIN pg_type t ON t.oid = e.enumtypid
+      WHERE t.typname = 'game_mode'
+        AND e.enumlabel = 'CHILL'
+    ) THEN
+      IF EXISTS (
+        SELECT 1
+        FROM pg_enum e
+        JOIN pg_type t ON t.oid = e.enumtypid
+        WHERE t.typname = 'game_mode'
+          AND e.enumlabel = 'LOW'
+      ) THEN
+        EXECUTE 'ALTER TYPE game_mode ADD VALUE ''CHILL'' AFTER ''LOW''';
+      ELSE
+        EXECUTE 'ALTER TYPE game_mode ADD VALUE ''CHILL''';
+      END IF;
+    END IF;
+
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_enum e
+      JOIN pg_type t ON t.oid = e.enumtypid
+      WHERE t.typname = 'game_mode'
+        AND e.enumlabel = 'FLOW'
+    ) THEN
+      IF EXISTS (
+        SELECT 1
+        FROM pg_enum e
+        JOIN pg_type t ON t.oid = e.enumtypid
+        WHERE t.typname = 'game_mode'
+          AND e.enumlabel = 'CHILL'
+      ) THEN
+        EXECUTE 'ALTER TYPE game_mode ADD VALUE ''FLOW'' AFTER ''CHILL''';
+      ELSE
+        EXECUTE 'ALTER TYPE game_mode ADD VALUE ''FLOW''';
+      END IF;
+    END IF;
+
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_enum e
+      JOIN pg_type t ON t.oid = e.enumtypid
+      WHERE t.typname = 'game_mode'
+        AND e.enumlabel = 'EVOLVE'
+    ) THEN
+      IF EXISTS (
+        SELECT 1
+        FROM pg_enum e
+        JOIN pg_type t ON t.oid = e.enumtypid
+        WHERE t.typname = 'game_mode'
+          AND e.enumlabel = 'FLOW'
+      ) THEN
+        EXECUTE 'ALTER TYPE game_mode ADD VALUE ''EVOLVE'' AFTER ''FLOW''';
+      ELSE
+        EXECUTE 'ALTER TYPE game_mode ADD VALUE ''EVOLVE''';
+      END IF;
+    END IF;
+  END IF;
+END;
+$m$;
+
 -- Canonical enum for game modes
 DO $$
 BEGIN
