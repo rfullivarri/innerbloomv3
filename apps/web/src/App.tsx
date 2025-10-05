@@ -223,33 +223,37 @@ type Task = {
   lastCompletedAt: string | null;
 };
 
-const API_BASE_URL = (() => {
+const { API_BASE_URL, API_CONFIGURATION_ERROR } = (() => {
   const configuredBaseUrlRaw = import.meta.env.VITE_API_BASE_URL;
   const configuredBaseUrl = configuredBaseUrlRaw
     ? configuredBaseUrlRaw.trim().replace(/\/+$/, '')
     : undefined;
   if (configuredBaseUrl) {
-    return configuredBaseUrl;
+    return { API_BASE_URL: configuredBaseUrl, API_CONFIGURATION_ERROR: null };
   }
 
   if (typeof window === 'undefined') {
-    return 'http://localhost:3000';
+    return { API_BASE_URL: 'http://localhost:3000', API_CONFIGURATION_ERROR: null };
   }
 
   const { hostname, origin } = window.location;
 
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:3000';
+    return { API_BASE_URL: 'http://localhost:3000', API_CONFIGURATION_ERROR: null };
   }
 
   if (import.meta.env.PROD) {
+    const message =
+      'VITE_API_BASE_URL no está configurado para este despliegue. ' +
+      'Configura la variable con la URL del API para evitar problemas de conexión.';
     console.warn(
-      'VITE_API_BASE_URL is not configured; falling back to the current origin. ' +
-        'Configure the variable in production to avoid cross-origin issues.'
+      message +
+        ' Las llamadas al API se han deshabilitado para evitar respuestas inesperadas.',
     );
+    return { API_BASE_URL: null, API_CONFIGURATION_ERROR: message };
   }
 
-  return origin;
+  return { API_BASE_URL: origin, API_CONFIGURATION_ERROR: null };
 })();
 const DEMO_USER_ID =
   import.meta.env.VITE_DEMO_USER_ID ?? '00000000-0000-0000-0000-000000000001';
@@ -290,19 +294,27 @@ function App() {
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(API_CONFIGURATION_ERROR);
 
   useEffect(() => {
     let isMounted = true;
+    const baseUrl = API_BASE_URL;
+
+    if (!baseUrl) {
+      setLoading(false);
+      return () => {
+        isMounted = false;
+      };
+    }
     setLoading(true);
     setError(null);
 
     const load = async () => {
       try {
         const [pillarsData, tasksData] = await Promise.all([
-          fetchJson<Pillar[]>(`${API_BASE_URL}/pillars`, 'pilares'),
+          fetchJson<Pillar[]>(`${baseUrl}/pillars`, 'pilares'),
           fetchJson<Task[]>(
-            `${API_BASE_URL}/tasks?userId=${encodeURIComponent(DEMO_USER_ID)}`,
+            `${baseUrl}/tasks?userId=${encodeURIComponent(DEMO_USER_ID)}`,
             'misiones',
           ),
         ]);
