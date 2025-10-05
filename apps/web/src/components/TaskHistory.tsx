@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { API_BASE, fetchTaskLogs, TaskLogDTO } from '../lib/api';
+import { fetchTaskLogs, TaskLogDTO } from '../lib/api';
 
-const USER_ID = '00000000-0000-0000-0000-000000000001';
+const DEMO_USER = '00000000-0000-0000-0000-000000000001';
 
 export default function TaskHistory() {
   const [data, setData] = useState<TaskLogDTO[]>([]);
@@ -9,13 +9,7 @@ export default function TaskHistory() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!API_BASE) {
-      setError('API base URL is not configured.');
-      setLoading(false);
-      return;
-    }
-
-    fetchTaskLogs(USER_ID)
+    fetchTaskLogs(DEMO_USER)
       .then(setData)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -23,6 +17,7 @@ export default function TaskHistory() {
 
   if (loading) return <p>Loading…</p>;
   if (error) return <p style={{ color: 'red' }}>Failed to fetch: {error}</p>;
+  if (!data.length) return <p>No recent activity yet.</p>;
 
   return (
     <div style={{ marginTop: 16 }}>

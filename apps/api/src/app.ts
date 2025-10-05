@@ -53,12 +53,12 @@ const createTaskLogSchema = z.object({
   doneAt: z.coerce.date({ message: 'doneAt must be a date or ISO string' }),
 });
 
-const LOG_LIMIT = 50;
+const LOG_LIMIT = 20;
 
 const app = express();
 
 app.use(cors(corsOptions));
-app.options('*', cors());
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 const api = express.Router();
@@ -66,8 +66,14 @@ const api = express.Router();
 api.get(
   '/health/db',
   asyncHandler(async (_req, res) => {
-    await db.execute(drizzleSql`select 1`);
-    res.json({ ok: true });
+    try {
+      await db.execute(drizzleSql`select 1`);
+      res.json({ ok: true });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unable to reach the database';
+      res.status(500).json({ ok: false, error: message });
+    }
   }),
 );
 
@@ -83,7 +89,12 @@ api.get(
       .from(pillars)
       .orderBy(pillars.name);
 
-    res.json(rows);
+    res.json(
+      rows.map((row) => ({
+        ...row,
+        description: row.description ?? '',
+      })),
+    );
   }),
 );
 
@@ -140,12 +151,18 @@ api.get(
 
     const lastCompletedMap = new Map<string, Date | null>();
     for (const row of taskLogRows) {
-      lastCompletedMap.set(row.taskId, row.lastCompletedAt ? new Date(row.lastCompletedAt) : null);
+      lastCompletedMap.set(
+        row.taskId,
+        row.lastCompletedAt ? new Date(row.lastCompletedAt) : null,
+      );
     }
 
     const payload = taskRows.map((task) => ({
       ...task,
       lastCompletedAt: lastCompletedMap.get(task.id)?.toISOString() ?? null,
+      pillar_id: task.pillarId,
+      trait_id: task.traitId,
+      stat_id: task.statId,
     }));
 
     res.json(payload);
@@ -225,7 +242,7 @@ api.post(
   }),
 );
 
-app.use('/api', api);
+app.use(api);
 
 app.use((_req, _res, next) => {
   next(new HttpError(404, 'Route not found'));
