@@ -18,8 +18,6 @@ END;
 $$;
 
 
-CREATE TYPE IF NOT EXISTS game_mode AS ENUM ('LOW','CHILL','FLOW','EVOLVE');
-
 DO $m$
 BEGIN
   IF EXISTS (
