@@ -1,11 +1,14 @@
 BEGIN;
 -- Consecutive-week streak calculations (current + max)
-CREATE OR REPLACE VIEW v_task_streaks_actual AS
+
+DROP VIEW IF EXISTS public.v_task_streaks_actual;
+
+CREATE VIEW public.v_task_streaks_actual AS
 WITH task_base AS (
     SELECT id AS task_id, user_id FROM tasks
 ),
 flags AS (
-    SELECT * FROM v_task_weeks_flags
+    SELECT * FROM public.v_task_weeks_flags
 ),
 latest AS (
     SELECT user_id, task_id, MAX(week_start) AS last_week
@@ -45,12 +48,14 @@ LEFT JOIN latest ON latest.user_id = tb.user_id AND latest.task_id = tb.task_id
 LEFT JOIN islands i ON i.user_id = tb.user_id AND i.task_id = tb.task_id
 GROUP BY tb.user_id, tb.task_id;
 
-CREATE OR REPLACE VIEW v_task_streaks_max AS
+DROP VIEW IF EXISTS public.v_task_streaks_max;
+
+CREATE VIEW public.v_task_streaks_max AS
 WITH task_base AS (
     SELECT id AS task_id, user_id FROM tasks
 ),
 flags AS (
-    SELECT * FROM v_task_weeks_flags
+    SELECT * FROM public.v_task_weeks_flags
 ),
 tier_weeks AS (
     SELECT 'c1s'::TEXT AS tier, user_id, task_id, week_start FROM flags WHERE c1s_ok

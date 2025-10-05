@@ -43,6 +43,17 @@ Para Neon, obtén la cadena de conexión en la consola y pégala en `DATABASE_UR
 3. Configura las variables de Clerk (publishable y secret key).
 4. Ejecuta `npm install` y `npm run build` como parte del deploy.
 
+## Deploy → Railway + Neon
+
+- **Validación local:** usa `npm run db:validate` para ejecutar todos los archivos SQL dentro de transacciones desechables y detectar errores de sintaxis antes de subir cambios.
+- **Aplicación completa:** ejecuta `npm run db:all` para aplicar los archivos de `apps/api/sql` en orden lexicográfico; también puedes pasar un archivo específico con `npm run db:file -- apps/api/sql/050_progress_views.sql`.
+- **Railway Build Command:** `npm install && npm run build`.
+- **Railway Pre-deploy Command:** `npm run db:all` (refresca la base Neon antes de cada release).
+- **Railway Start Command:** `node dist/index.js`.
+
+> [!TIP]
+> Asegúrate de que `DATABASE_URL` incluya `sslmode=require`. El runner lo añadirá automáticamente si falta para mantener la compatibilidad con Neon.
+
 ## Clerk
 
 La aplicación está integrada con Clerk mediante el middleware y los componentes que provee `@clerk/nextjs`. Las rutas bajo `/dashboard` están protegidas y requieren sesión válida.
