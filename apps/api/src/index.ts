@@ -1,34 +1,76 @@
 import 'dotenv/config';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
+import Fastify from 'fastify';
+import fastifyExpress from '@fastify/express';
+import fastifyRawBody from 'fastify-raw-body';
 import app from './app.js';
 import { dbReady } from './db/client.js';
+import { pool } from './db/pool.js';
+import clerkWebhookRoutes from './routes/webhooks/clerk.js';
+import usersMeRoutes from './routes/users.me.js';
 
-const preferredPorts = [process.env.PORT, '3000', '8080'];
-const port = Number(
-  preferredPorts.find((value) => {
-    if (!value) {
-      return false;
-    }
+const fastify = Fastify({
+  logger: true,
+});
 
-    const numeric = Number(value);
-    return Number.isFinite(numeric) && numeric > 0;
-  }) ?? 3000,
-);
+const configureServer = (async () => {
+  await fastify.register(fastifyRawBody, {
+    field: 'rawBody',
+    global: true,
+    encoding: 'utf8',
+    runFirst: true,
+  });
 
+  await fastify.register(fastifyExpress);
+  fastify.use(app);
+
+  fastify.get('/healthz', async () => ({ ok: true }));
+
+  await fastify.register(clerkWebhookRoutes);
+  await fastify.register(usersMeRoutes);
+
+  fastify.addHook('onClose', async () => {
+    await pool.end();
+  });
+})();
+
+const port = Number.parseInt(process.env.PORT ?? '3000', 10);
 const host = '0.0.0.0';
 
-async function start() {
+async function start(): Promise<void> {
   try {
+    await configureServer;
     await dbReady;
-    app.listen(port, host, () => {
-      console.log(`API listening on http://${host}:${port}`);
-    });
+    await fastify.listen({ port, host });
+    fastify.log.info(`API listening on http://${host}:${port}`);
   } catch (error) {
-    console.error('Unable to start server because the database is sad', error);
+    fastify.log.error({ err: error }, 'Unable to start server');
     process.exit(1);
   }
 }
+
+let shuttingDown = false;
+
+async function shutdown(signal: NodeJS.Signals): Promise<void> {
+  if (shuttingDown) {
+    return;
+  }
+  shuttingDown = true;
+
+  fastify.log.info({ signal }, 'Received shutdown signal');
+
+  try {
+    await fastify.close();
+    fastify.log.info('Server closed gracefully');
+  } catch (error) {
+    fastify.log.error({ err: error }, 'Error during server shutdown');
+    process.exitCode = 1;
+  }
+}
+
+process.once('SIGINT', shutdown);
+process.once('SIGTERM', shutdown);
 
 const executedDirectly = (() => {
   if (!process.argv[1]) {
@@ -42,4 +84,4 @@ if (executedDirectly) {
   void start();
 }
 
-export { start, app };
+export { start, fastify, app };
