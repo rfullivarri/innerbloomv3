@@ -123,43 +123,18 @@ export default function LandingPage() {
   const isSignedIn = Boolean(userId);
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [allowAutoplay, setAllowAutoplay] = useState(true);
 
   const testimonialCount = TESTIMONIALS.length;
 
   useEffect(() => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-    const updatePreference = (event: MediaQueryListEvent | MediaQueryList) => {
-      setAllowAutoplay(!event.matches);
-    };
-
-    updatePreference(mediaQuery);
-
-    const handleChange = (event: MediaQueryListEvent) => updatePreference(event);
-
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
-    }
-
-    mediaQuery.addListener(handleChange);
-    return () => mediaQuery.removeListener(handleChange);
-  }, []);
-
-  useEffect(() => {
-    if (paused || testimonialCount <= 1 || !allowAutoplay) {
+    if (paused || testimonialCount <= 1) {
       return;
     }
     const timer = window.setInterval(() => {
       setActiveSlide((current) => (current + 1) % testimonialCount);
     }, 4000);
     return () => window.clearInterval(timer);
-  }, [allowAutoplay, paused, testimonialCount]);
+  }, [paused, testimonialCount]);
 
   const goToSlide = (index: number) => {
     setActiveSlide((index + testimonialCount) % testimonialCount);

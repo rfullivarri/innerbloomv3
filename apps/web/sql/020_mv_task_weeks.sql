@@ -1,1 +1,0 @@
--- Historical materialized views removed; database now empty.

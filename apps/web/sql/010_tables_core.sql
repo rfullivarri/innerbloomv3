@@ -1,1 +1,0 @@
--- Core tables removed; start from empty database state.

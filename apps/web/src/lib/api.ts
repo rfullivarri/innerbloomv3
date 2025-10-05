@@ -1,18 +1,8 @@
-const rawBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
-
-export const API_BASE = rawBaseUrl.replace(/\/+$/, '');
-
-if (import.meta.env.DEV) {
-  // eslint-disable-next-line no-console
-  console.debug('[api] VITE_API_BASE_URL', API_BASE || '(not set)');
-}
+export const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
 
 function ensureBase(): string {
   if (!API_BASE) {
-    const message = 'API base URL is not configured. Set VITE_API_BASE_URL to continue.';
-    // eslint-disable-next-line no-console
-    console.error(message);
-    throw new Error(message);
+    throw new Error('API base URL is not configured. Set VITE_API_URL to continue.');
   }
   return API_BASE;
 }
