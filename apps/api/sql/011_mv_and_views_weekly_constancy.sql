@@ -31,10 +31,13 @@
 
 BEGIN;
 
--- --------------------------------------------------------------------------
 -- Asegurar que la vista materializada y sus dependencias se puedan recrear con
--- el esquema correcto, incluso si versiones previas existían sin days_in_week.
+-- el esquema correcto, incluso si versiones previas existían sin days_in_week
+-- o con vistas auxiliares antiguas (p.ej. las usadas por el frontend histórico).
 -- --------------------------------------------------------------------------
+DROP VIEW IF EXISTS public.v_task_streaks_actual;
+DROP VIEW IF EXISTS public.v_task_streaks_max;
+DROP VIEW IF EXISTS public.v_task_weeks_flags;
 DROP VIEW IF EXISTS public.v_task_week_goal;
 DROP VIEW IF EXISTS public.v_task_week_max_days;
 DROP VIEW IF EXISTS public.v_task_week_constancy;
