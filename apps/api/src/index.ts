@@ -16,11 +16,13 @@ const port = Number(
   }) ?? 3000,
 );
 
+const host = '0.0.0.0';
+
 async function start() {
   try {
     await dbReady;
-    app.listen(port, () => {
-      console.log(`API listening on port ${port}`);
+    app.listen(port, host, () => {
+      console.log(`API listening on http://${host}:${port}`);
     });
   } catch (error) {
     console.error('Unable to start server because the database is sad', error);

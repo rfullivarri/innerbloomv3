@@ -1,14 +1,16 @@
 {
-  "name": "innerbloom-monorepo",
+  "name": "innerbloom",
   "private": true,
   "type": "module",
   "workspaces": [
-    "apps/api",
-    "apps/web"
+    "apps/*"
   ],
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
-    "dev": "node scripts/dev.cjs",
-    "build": "npm run build:api && npm run build:web",
+    "dev": "concurrently -c auto -n api,web \"npm -w @innerbloom/api run dev\" \"npm -w @innerbloom/web run dev\"",
+    "build": "npm -w @innerbloom/api run build && npm -w @innerbloom/web run build",
     "start": "npm --workspace apps/api run start",
     "typecheck": "npm run typecheck:api && npm run typecheck:web",
     "db:generate": "npm --workspace apps/api run db:generate",
