@@ -10,7 +10,7 @@ import {
   isIgnorableError,
   isTransactionControlStatement,
   splitSqlStatements,
-} from './sql-utils.js';
+} from '../apps/api/scripts/sql-utils.js';
 
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
 const defaultSqlDir = resolve(currentDir, '../apps/api/sql');
