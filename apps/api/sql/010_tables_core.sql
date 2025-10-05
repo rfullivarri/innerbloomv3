@@ -61,7 +61,19 @@ ALTER TABLE tasks
     ADD COLUMN IF NOT EXISTS xp SMALLINT,
     ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
 
-UPDATE tasks SET name = COALESCE(name, title) WHERE name IS NULL;
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'tasks'
+          AND column_name = 'title'
+    ) THEN
+        EXECUTE 'UPDATE public.tasks SET name = COALESCE(name, title) WHERE name IS NULL';
+    END IF;
+END
+$$;
 UPDATE tasks SET weekly_target = 1 WHERE weekly_target IS NULL;
 UPDATE tasks SET xp = 10 WHERE xp IS NULL;
 
@@ -74,17 +86,22 @@ ALTER TABLE tasks
     ALTER COLUMN created_at SET DEFAULT now();
 
 -- Preserve optional relations if legacy columns exist
+ALTER TABLE tasks
+    ADD COLUMN IF NOT EXISTS user_id UUID;
+
+ALTER TABLE tasks
+    ALTER COLUMN user_id SET NOT NULL;
+
 DO $$
 BEGIN
     IF NOT EXISTS (
         SELECT 1
-        FROM information_schema.constraint_column_usage
-        WHERE table_name = 'tasks' AND constraint_name = 'tasks_user_id_fkey'
+        FROM pg_constraint
+        WHERE conname = 'tasks_user_id_fkey'
+          AND conrelid = 'public.tasks'::regclass
     ) THEN
-        ALTER TABLE tasks
-            ADD COLUMN IF NOT EXISTS user_id UUID,
-            ALTER COLUMN user_id SET NOT NULL,
-            ADD CONSTRAINT tasks_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+        ALTER TABLE public.tasks
+            ADD CONSTRAINT tasks_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
     END IF;
 END
 $$;
@@ -104,7 +121,27 @@ ALTER TABLE tasks
 CREATE INDEX IF NOT EXISTS tasks_user_id_idx ON tasks (user_id);
 CREATE INDEX IF NOT EXISTS tasks_pillar_id_idx ON tasks (pillar_id);
 CREATE INDEX IF NOT EXISTS tasks_trait_id_idx ON tasks (trait_id);
-CREATE INDEX IF NOT EXISTS tasks_user_id_weekly_target_idx ON tasks (user_id, weekly_target);
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'tasks'
+          AND column_name = 'weekly_target'
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM pg_indexes
+        WHERE schemaname = 'public'
+          AND tablename = 'tasks'
+          AND indexname = 'tasks_user_id_weekly_target_idx'
+    ) THEN
+        EXECUTE 'CREATE INDEX tasks_user_id_weekly_target_idx ON public.tasks (user_id, weekly_target)';
+    END IF;
+END
+$$;
 
 -- Task logs for completions
 CREATE TABLE IF NOT EXISTS task_logs (
