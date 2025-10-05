@@ -5,7 +5,7 @@
   "workspaces": ["apps/api", "apps/web"],
   "scripts": {
     "dev": "node scripts/dev.cjs",
-    "build": "pnpm --workspaces run build",
+    "build": "pnpm -r run build",
     "start": "pnpm --filter @innerbloom/api start",
     "typecheck": "pnpm --workspaces run typecheck",
     "db:generate": "pnpm --filter @innerbloom/api db:generate",
