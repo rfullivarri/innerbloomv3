@@ -43,6 +43,6 @@ SELECT
   (res).mind,
   public.fn_tz_today() AS computed_for_date
 FROM public.users u
-CROSS JOIN LATERAL public.fn_energy_today(u.id) AS res(body numeric, soul numeric, mind numeric);
+CROSS JOIN LATERAL public.fn_energy_today(u.id) AS res;
 
 COMMIT;
