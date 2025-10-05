@@ -17,8 +17,7 @@ BEGIN
 END;
 $$;
 
--- We use a custom dollar-quote tag ($m$) so nested $$ bodies do not clash and
--- cause syntax errors when the script is re-run by other tools.
+
 CREATE TYPE IF NOT EXISTS game_mode AS ENUM ('LOW','CHILL','FLOW','EVOLVE');
 
 DO $m$
@@ -98,6 +97,22 @@ BEGIN
   END IF;
 END;
 $m$;
+
+-- Canonical enum for game modes
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type WHERE typname = 'game_mode'
+  ) THEN
+    EXECUTE $$CREATE TYPE game_mode AS ENUM ('LOW','CHILL','FLOW','EVOLVE')$$;
+  END IF;
+END;
+$$;
+
+ALTER TYPE game_mode ADD VALUE IF NOT EXISTS 'LOW';
+ALTER TYPE game_mode ADD VALUE IF NOT EXISTS 'CHILL';
+ALTER TYPE game_mode ADD VALUE IF NOT EXISTS 'FLOW';
+ALTER TYPE game_mode ADD VALUE IF NOT EXISTS 'EVOLVE';
 
 -- Users table (first table in the database)
 DO $$
