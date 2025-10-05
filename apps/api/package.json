@@ -9,9 +9,9 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate --config ./drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config ./drizzle.config.ts",
-    "db:push": "node ../../scripts/run-sql.js",
-    "db:seed": "node ../../scripts/run-sql.js",
-    "db:all": "node ../../scripts/run-sql.js"
+    "db:push": "node ./scripts/run-sql.js",
+    "db:seed": "node ./scripts/run-sql.js",
+    "db:all": "node ./scripts/run-sql.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.1",
