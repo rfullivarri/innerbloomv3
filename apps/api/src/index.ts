@@ -1,21 +1,22 @@
-import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
+import dotenv from 'dotenv';
+import { createApp } from './app';
+import { dbReady } from './db/client';
 
-import apiRouter from './routes/apiRoutes.js';
+dotenv.config();
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+export const app = createApp();
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+const port = Number(process.env.PORT ?? 3000);
 
-app.use('/api', apiRouter);
-
-const port = process.env.PORT ? Number(process.env.PORT) : 8080;
-
-app.listen(port, () => {
-  console.log(`API listening on port ${port}`);
-});
+if (require.main === module) {
+  dbReady
+    .then(() => {
+      app.listen(port, () => {
+        console.log(`API listening on port ${port}`);
+      });
+    })
+    .catch((error) => {
+      console.error('Unable to start server because the database is sad', error);
+      process.exit(1);
+    });
+}
