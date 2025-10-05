@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const styles = `
   .app-shell {
@@ -133,8 +133,52 @@ const styles = `
   }
 `;
 
+type Pillar = {
+  id: string;
+  name: string;
+  description: string | null;
+  traitCount: number;
+  statCount: number;
+};
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
+
 function App() {
   const [showPopup, setShowPopup] = useState(false);
+  const [pillars, setPillars] = useState<Pillar[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    setError(null);
+
+    fetch(`${API_BASE_URL}/pillars`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Error cargando pilares');
+        }
+        return response.json() as Promise<Pillar[]>;
+      })
+      .then((data) => {
+        if (!isMounted) return;
+        setPillars(data);
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) return;
+        const message = err instanceof Error ? err.message : 'Error cargando pilares';
+        setError(message);
+      })
+      .finally(() => {
+        if (!isMounted) return;
+        setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="app-shell">
@@ -160,18 +204,38 @@ function App() {
         </div>
 
         <div className="mission-list">
-          <div className="mission">
-            <span>💬 Check in with your mood</span>
-            <input type="checkbox" readOnly />
-          </div>
-          <div className="mission">
-            <span>🚶‍♀️ Mindful walk (10 mins)</span>
-            <input type="checkbox" readOnly />
-          </div>
-          <div className="mission">
-            <span>🧘‍♂️ Breathing practice</span>
-            <input type="checkbox" readOnly />
-          </div>
+          {loading && <span>Cargando pilares…</span>}
+          {error && !loading && <span style={{ color: '#dc2626' }}>{error}</span>}
+          {!loading && !error && pillars.length === 0 && (
+            <span>No hay pilares disponibles todavía.</span>
+          )}
+          {!loading && !error &&
+            pillars.map((pillar) => (
+              <div key={pillar.id} className="mission">
+                <span>
+                  {pillar.name}
+                  {pillar.description && (
+                    <small
+                      style={{ display: 'block', color: '#64748b', fontWeight: 400 }}
+                    >
+                      {pillar.description}
+                    </small>
+                  )}
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.875rem',
+                    color: '#475569',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  {pillar.traitCount} traits · {pillar.statCount} stats
+                  <input type="checkbox" readOnly />
+                </span>
+              </div>
+            ))}
         </div>
 
         <button className="popup-trigger" onClick={() => setShowPopup((prev) => !prev)}>
