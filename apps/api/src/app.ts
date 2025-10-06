@@ -1,13 +1,22 @@
+import process from 'node:process';
 import cors, { type CorsOptions } from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import routes from './routes/index.js';
 import { HttpError, isHttpError } from './lib/http-error.js';
 
-const allowedOrigins = [
+const defaultAllowedOrigins = [
   'https://web-dev-dfa2.up.railway.app',
+  'https://web-production-734a.up.railway.app',
   'http://localhost:5173',
 ];
+
+const envAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter((origin) => origin.length > 0);
+
+const allowedOrigins = Array.from(new Set([...defaultAllowedOrigins, ...envAllowedOrigins]));
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
