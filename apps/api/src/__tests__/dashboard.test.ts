@@ -93,4 +93,32 @@ describeIfReady('Dashboard endpoints', () => {
     expect(response.body).toHaveProperty('to');
     expect(Array.isArray(response.body.emotions)).toBe(true);
   });
+
+  it('returns user state summary', async () => {
+    const response = await request(app)
+      .get(`/users/${userId}/state`)
+      .expect('Content-Type', /json/);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('date');
+    expect(response.body).toHaveProperty('mode');
+    expect(response.body).toHaveProperty('weekly_target');
+    expect(response.body).toHaveProperty('pillars');
+  });
+
+  it('returns user state timeseries', async () => {
+    const to = new Date();
+    const from = new Date(to);
+    from.setUTCDate(from.getUTCDate() - 6);
+
+    const format = (date: Date) => date.toISOString().slice(0, 10);
+
+    const response = await request(app)
+      .get(`/users/${userId}/state/timeseries`)
+      .query({ from: format(from), to: format(to) })
+      .expect('Content-Type', /json/);
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+  });
 });
