@@ -1,1 +1,0 @@
--- Energy calculation functions removed for clean start.

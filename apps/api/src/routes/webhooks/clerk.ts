@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { Webhook, type WebhookRequiredHeaders } from 'svix';
-import { pool } from '../../db/pool.js';
+import { pool } from '../../db.js';
 
 const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
@@ -116,7 +116,9 @@ export default async function clerkWebhookRoutes(fastify: FastifyInstance): Prom
     fastify.post(
       '/api/webhooks/clerk',
       async (_request: FastifyRequest, reply: FastifyReply) =>
-        reply.status(503).send({ error: 'Clerk webhook secret not configured' }),
+        reply
+          .status(503)
+          .send({ code: 'service_unavailable', message: 'Clerk webhook secret not configured' }),
     );
     return;
   }
@@ -127,12 +129,16 @@ export default async function clerkWebhookRoutes(fastify: FastifyInstance): Prom
     async (request: WebhookRequest, reply: FastifyReply) => {
       const headers = extractSvixHeaders(request.headers);
       if (!headers) {
-        return reply.status(400).send({ error: 'Missing Svix signature headers' });
+        return reply
+          .status(400)
+          .send({ code: 'invalid_signature_headers', message: 'Missing Svix signature headers' });
       }
 
       const payload = request.rawBody;
       if (payload === undefined) {
-        return reply.status(400).send({ error: 'Request body is required for signature verification' });
+        return reply
+          .status(400)
+          .send({ code: 'invalid_request', message: 'Request body is required for signature verification' });
       }
 
       const payloadString = typeof payload === 'string' ? payload : payload.toString('utf8');
@@ -142,7 +148,7 @@ export default async function clerkWebhookRoutes(fastify: FastifyInstance): Prom
         event = webhookVerifier.verify(payloadString, headers) as ClerkWebhookEvent;
       } catch (error) {
         request.log.error({ err: error }, 'Invalid Clerk webhook signature');
-        return reply.status(400).send({ error: 'Invalid signature' });
+        return reply.status(400).send({ code: 'invalid_signature', message: 'Invalid signature' });
       }
 
       const { type, data } = event;
@@ -159,10 +165,10 @@ export default async function clerkWebhookRoutes(fastify: FastifyInstance): Prom
         }
 
         request.log.warn({ eventType: type }, 'Unhandled Clerk webhook event');
-        return reply.status(422).send({ error: 'Unhandled event type' });
+        return reply.status(422).send({ code: 'unhandled_event', message: 'Unhandled event type' });
       } catch (error) {
         request.log.error({ err: error }, 'Failed processing Clerk webhook');
-        return reply.status(500).send({ error: 'Failed to process webhook' });
+        return reply.status(500).send({ code: 'internal_error', message: 'Failed to process webhook' });
       }
     },
   );

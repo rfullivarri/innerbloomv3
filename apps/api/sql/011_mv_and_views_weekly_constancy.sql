@@ -1,1 +1,0 @@
--- Weekly constancy views removed during database reset.

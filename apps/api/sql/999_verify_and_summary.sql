@@ -1,1 +1,0 @@
--- Verification script removed because no database objects remain after reset.

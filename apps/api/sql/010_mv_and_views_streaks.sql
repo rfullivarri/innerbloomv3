@@ -1,1 +1,0 @@
--- Former streak materialized views removed for reset state.

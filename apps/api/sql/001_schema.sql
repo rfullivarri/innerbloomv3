@@ -1,1 +1,0 @@
--- Schema definitions removed. Database is intentionally empty.

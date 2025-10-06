@@ -1,7 +1,5 @@
 import { Router } from 'express';
-import { sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { db } from '../db/client.js';
 import { asyncHandler } from '../lib/async-handler.js';
 import { HttpError } from '../lib/http-error.js';
 
@@ -21,20 +19,14 @@ const createTaskLogSchema = z.object({
   doneAt: z.coerce.date({ message: 'doneAt must be a date or ISO string' }),
 });
 
-async function ensureDatabaseConnection() {
-  await db.execute(sql`select 1`);
-}
-
 router.get(
   '/tasks',
   asyncHandler(async (req, res) => {
     const parsed = tasksQuerySchema.safeParse(req.query);
 
     if (!parsed.success) {
-      throw new HttpError(400, 'Invalid query parameters', parsed.error.flatten());
+      throw new HttpError(400, 'invalid_request', 'Invalid query parameters', parsed.error.flatten());
     }
-
-    await ensureDatabaseConnection();
 
     res.json([]);
   }),
@@ -46,10 +38,8 @@ router.get(
     const parsed = taskLogsQuerySchema.safeParse(req.query);
 
     if (!parsed.success) {
-      throw new HttpError(400, 'Invalid query parameters', parsed.error.flatten());
+      throw new HttpError(400, 'invalid_request', 'Invalid query parameters', parsed.error.flatten());
     }
-
-    await ensureDatabaseConnection();
 
     res.json([]);
   }),
@@ -61,13 +51,11 @@ router.post(
     const parsed = createTaskLogSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      throw new HttpError(400, 'Invalid request body', parsed.error.flatten());
+      throw new HttpError(400, 'invalid_request', 'Invalid request body', parsed.error.flatten());
     }
 
-    await ensureDatabaseConnection();
-
     res.status(501).json({
-      ok: false,
+      code: 'not_implemented',
       message: 'Legacy task logging is not available for the reset database.',
     });
   }),

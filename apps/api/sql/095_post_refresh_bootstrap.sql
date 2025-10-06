@@ -1,1 +1,0 @@
--- Post-refresh bootstrap removed as database has no seed data.

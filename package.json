@@ -13,20 +13,14 @@
     "build": "npm -w @innerbloom/api run build && npm -w @innerbloom/web run build",
     "start": "npm --workspace apps/api run start",
     "typecheck": "npm run typecheck:api && npm run typecheck:web",
-    "db:generate": "npm --workspace apps/api run db:generate",
-    "db:migrate": "npm --workspace apps/api run db:migrate",
-    "db:push": "npm --workspace apps/api run db:push",
-    "db:seed": "npm --workspace apps/api run db:seed",
-    "db:all": "node ./scripts/run-sql.js",
-    "db:file": "node ./scripts/run-sql.js",
-    "db:validate": "node ./scripts/validate-sql.js",
     "dev:api": "npm --workspace apps/api run dev",
     "build:api": "npm --workspace apps/api run build",
     "build:web": "npm --workspace apps/web run build",
     "typecheck:api": "npm --workspace apps/api run typecheck",
     "typecheck:web": "npm --workspace apps/web run typecheck",
     "start:api": "npm --workspace apps/api run start",
-    "db:all:api": "npm --workspace apps/api run db:all"
+    "lint": "npm --workspace apps/api run lint",
+    "test": "npm --workspace apps/api run test"
   },
   "devDependencies": {
     "@types/node": "^24.6.2",

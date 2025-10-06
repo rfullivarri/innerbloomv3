@@ -1,6 +1,6 @@
 import process from 'node:process';
 import cors, { type CorsOptions } from 'cors';
-import express, { NextFunction, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { z } from 'zod';
 import routes from './routes/index.js';
 import { HttpError, isHttpError } from './lib/http-error.js';
@@ -37,34 +37,36 @@ app.use(express.json());
 app.use(routes);
 
 app.use((_req, _res, next) => {
-  next(new HttpError(404, 'Route not found'));
+  next(new HttpError(404, 'not_found', 'Route not found'));
 });
 
-app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+app.use((error: unknown, _req: Request, res: Response) => {
   if (isHttpError(error)) {
+    if (error.details) {
+      console.error('Request failed', { code: error.code, details: error.details });
+    }
+
     return res.status(error.status).json({
-      error: {
-        message: error.message,
-        details: error.details,
-      },
+      code: error.code,
+      message: error.message,
     });
   }
 
   if (error instanceof z.ZodError) {
+    const [firstIssue] = error.issues;
+    const message = firstIssue?.message ?? 'Invalid request parameters';
+
     return res.status(400).json({
-      error: {
-        message: 'Validation failed',
-        details: error.flatten(),
-      },
+      code: 'validation_error',
+      message,
     });
   }
 
   console.error('Unexpected error', error);
 
   return res.status(500).json({
-    error: {
-      message: 'Something went wrong',
-    },
+    code: 'internal_error',
+    message: 'Something went wrong',
   });
 });
 

@@ -1,1 +1,0 @@
--- Energy views removed; database reset to empty state.
