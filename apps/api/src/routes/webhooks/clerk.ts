@@ -4,12 +4,6 @@ import { pool } from '../../db/pool.js';
 
 const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
-if (!webhookSecret) {
-  throw new Error('CLERK_WEBHOOK_SECRET must be configured for Clerk webhooks');
-}
-
-const webhookVerifier = new Webhook(webhookSecret);
-
 const UPSERT_SQL = `
 INSERT INTO users (clerk_user_id, email_primary, full_name, image_url, timezone, locale)
 VALUES ($1, $2, $3, $4, $5, $6)
@@ -117,9 +111,20 @@ async function handleUserDeleted(reply: FastifyReply, user: ClerkUser): Promise<
 }
 
 export default async function clerkWebhookRoutes(fastify: FastifyInstance): Promise<void> {
+  if (!webhookSecret) {
+    fastify.log.warn('Clerk webhook secret not configured; Clerk webhooks route is disabled');
+    fastify.post(
+      '/api/webhooks/clerk',
+      async (_request: FastifyRequest, reply: FastifyReply) =>
+        reply.status(503).send({ error: 'Clerk webhook secret not configured' }),
+    );
+    return;
+  }
+
+  const webhookVerifier = new Webhook(webhookSecret);
   fastify.post(
     '/api/webhooks/clerk',
-    async (request: WebhookRequest, reply) => {
+    async (request: WebhookRequest, reply: FastifyReply) => {
       const headers = extractSvixHeaders(request.headers);
       if (!headers) {
         return reply.status(400).send({ error: 'Missing Svix signature headers' });
