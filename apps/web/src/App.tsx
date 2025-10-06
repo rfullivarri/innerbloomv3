@@ -41,7 +41,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route
-          path="/login"
+          path="/login/*"
           element={
             <RedirectIfSignedIn>
               <LoginPage />
@@ -49,7 +49,7 @@ export default function App() {
           }
         />
         <Route
-          path="/sign-up"
+          path="/sign-up/*"
           element={
             <RedirectIfSignedIn>
               <SignUpPage />
