@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { pool } from '../db/pool.js';
+import { pool } from '../db.js';
 
 type UsersMeRow = {
   id: string;
@@ -21,13 +21,15 @@ export default async function usersMeRoutes(fastify: FastifyInstance): Promise<v
     const header = request.headers['x-user-id'];
 
     if (typeof header !== 'string' || header.length === 0) {
-      return reply.status(400).send({ error: 'X-User-Id header is required' });
+      return reply
+        .status(400)
+        .send({ code: 'invalid_request', message: 'X-User-Id header is required' });
     }
 
     const result = await pool.query<UsersMeRow>('SELECT * FROM users WHERE clerk_user_id = $1', [header]);
 
     if (result.rows.length === 0) {
-      return reply.status(404).send({ error: 'User not found' });
+      return reply.status(404).send({ code: 'user_not_found', message: 'User not found' });
     }
 
     return reply.status(200).send(result.rows[0]);

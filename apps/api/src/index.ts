@@ -5,8 +5,7 @@ import Fastify from 'fastify';
 import fastifyExpress from '@fastify/express';
 import fastifyRawBody from 'fastify-raw-body';
 import app from './app.js';
-import { dbReady } from './db/client.js';
-import { pool } from './db/pool.js';
+import { dbReady, pool } from './db.js';
 import clerkWebhookRoutes from './routes/webhooks/clerk.js';
 import usersMeRoutes from './routes/users.me.js';
 

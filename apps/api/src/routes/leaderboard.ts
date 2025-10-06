@@ -1,7 +1,5 @@
 import { Router } from 'express';
-import { sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { db } from '../db/client.js';
 import { asyncHandler } from '../lib/async-handler.js';
 import { HttpError } from '../lib/http-error.js';
 
@@ -21,10 +19,8 @@ router.get(
     const finalOffset = offset ?? 0;
 
     if (finalLimit > 50) {
-      throw new HttpError(400, 'limit must be 50 or less');
+      throw new HttpError(400, 'invalid_request', 'limit must be 50 or less');
     }
-
-    await db.execute(sql`select 1`);
 
     res.json({
       limit: finalLimit,

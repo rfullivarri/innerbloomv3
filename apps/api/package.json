@@ -8,21 +8,14 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate --config ./drizzle.config.ts",
-    "db:migrate": "drizzle-kit migrate --config ./drizzle.config.ts",
-    "db:push": "node ./scripts/run-sql.js",
-    "db:seed": "node ./scripts/run-sql.js",
-    "db:all": "node ./scripts/run-sql.js",
-    "db:apply": "tsx apps/api/scripts/apply-sql.ts",
-    "predeploy": "npm run db:apply",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "test": "vitest run",
     "backfill:users": "tsx apps/api/scripts/clerk-backfill.ts"
   },
   "dependencies": {
     "@fastify/express": "^4.0.2",
-    "@neondatabase/serverless": "^0.9.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "drizzle-orm": "^0.32.2",
     "express": "^4.19.2",
     "fastify": "^5.6.1",
     "fastify-raw-body": "^5.0.0",
@@ -34,8 +27,15 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.30",
-    "drizzle-kit": "^0.26.2",
+    "@types/pg": "^8.15.5",
+    "@types/supertest": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.10.0",
+    "@typescript-eslint/parser": "^8.10.0",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "supertest": "^7.0.0",
     "tsx": "^4.20.6",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.4"
   }
 }
