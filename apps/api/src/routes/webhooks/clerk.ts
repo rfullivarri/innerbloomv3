@@ -1,184 +1,108 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { Webhook, type WebhookRequiredHeaders } from 'svix';
-import { pool } from '../../db/pool.js';
+import type { Request, Response, NextFunction } from 'express';
+import express from 'express';
+import { Webhook } from 'svix';
+import { query } from '../../db/pool.js';
+import { HttpError } from '../../lib/http-error.js';
+
+const router = express.Router();
 
 const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
 if (!webhookSecret) {
-  throw new Error('CLERK_WEBHOOK_SECRET must be configured for Clerk webhooks');
+  throw new Error('CLERK_WEBHOOK_SECRET must be configured');
 }
 
-const webhookVerifier = new Webhook(webhookSecret);
+router.post(
+  '/clerk',
+  express.raw({ type: 'application/json' }),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const svixId = req.get('svix-id');
+    const svixTimestamp = req.get('svix-timestamp');
+    const svixSignature = req.get('svix-signature');
 
-const UPSERT_SQL = `
-INSERT INTO users (clerk_user_id, email_primary, full_name, image_url, timezone, locale)
-VALUES ($1, $2, $3, $4, $5, $6)
-ON CONFLICT (clerk_user_id) DO UPDATE SET
-  email_primary = EXCLUDED.email_primary,
-  full_name = EXCLUDED.full_name,
-  image_url = EXCLUDED.image_url,
-  timezone = EXCLUDED.timezone,
-  locale = EXCLUDED.locale;
-`;
-
-type SvixHeaders = Pick<WebhookRequiredHeaders, 'svix-id' | 'svix-timestamp' | 'svix-signature'>;
-
-type ClerkEmailAddress = {
-  id?: string | null;
-  email_address?: string | null;
-};
-
-type ClerkUser = {
-  id?: string;
-  email_addresses?: ClerkEmailAddress[] | null;
-  primary_email_address_id?: string | null;
-  primary_email_address?: ClerkEmailAddress | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  username?: string | null;
-  image_url?: string | null;
-  profile_image_url?: string | null;
-  timezone?: string | null;
-  locale?: string | null;
-};
-
-type ClerkWebhookEvent = {
-  data: ClerkUser;
-  type: string;
-};
-
-type WebhookRequest = FastifyRequest & { rawBody?: string | Buffer };
-
-function extractPrimaryEmail(user: ClerkUser): string | null {
-  const fromPrimaryObject = user.primary_email_address?.email_address;
-  if (typeof fromPrimaryObject === 'string' && fromPrimaryObject.length > 0) {
-    return fromPrimaryObject;
-  }
-
-  const emailAddresses = user.email_addresses ?? [];
-  const primaryId = user.primary_email_address_id;
-
-  if (primaryId) {
-    const match = emailAddresses.find((entry) => entry?.id === primaryId);
-    if (match?.email_address) {
-      return match.email_address;
+    if (!svixId || !svixTimestamp || !svixSignature) {
+      next(new HttpError(400, 'Missing Svix signature headers'));
+      return;
     }
-  }
 
-  for (const entry of emailAddresses) {
-    if (entry?.email_address) {
-      return entry.email_address;
-    }
-  }
+    const payload = req.body instanceof Buffer ? req.body.toString('utf8') : JSON.stringify(req.body);
+    const headers = {
+      'svix-id': svixId,
+      'svix-timestamp': svixTimestamp,
+      'svix-signature': svixSignature,
+    };
 
-  return null;
-}
+    const webhook = new Webhook(webhookSecret);
 
-function extractFullName(user: ClerkUser): string | null {
-  const parts = [user.first_name, user.last_name]
-    .map((value) => (typeof value === 'string' ? value.trim() : ''))
-    .filter((value) => value.length > 0);
-
-  if (parts.length > 0) {
-    return parts.join(' ');
-  }
-
-  const username = typeof user.username === 'string' ? user.username.trim() : '';
-  return username.length > 0 ? username : null;
-}
-
-function buildUpsertParams(user: ClerkUser): [string, string | null, string | null, string | null, string | null, string | null] {
-  if (!user.id) {
-    throw new Error('Clerk user is missing an id');
-  }
-
-  const email = extractPrimaryEmail(user);
-  const fullName = extractFullName(user);
-  const imageUrl = user.image_url ?? user.profile_image_url ?? null;
-  const timezone = user.timezone ?? null;
-  const locale = user.locale ?? null;
-
-  return [user.id, email, fullName, imageUrl, timezone, locale];
-}
-
-async function handleUserUpsert(reply: FastifyReply, user: ClerkUser): Promise<void> {
-  const params = buildUpsertParams(user);
-  await pool.query(UPSERT_SQL, params);
-  await reply.status(204).send();
-}
-
-async function handleUserDeleted(reply: FastifyReply, user: ClerkUser): Promise<void> {
-  if (!user.id) {
-    throw new Error('Clerk user is missing an id');
-  }
-
-  await pool.query('UPDATE users SET deleted_at = now() WHERE clerk_user_id = $1', [user.id]);
-  await reply.status(204).send();
-}
-
-export default async function clerkWebhookRoutes(fastify: FastifyInstance): Promise<void> {
-  fastify.post(
-    '/api/webhooks/clerk',
-    async (request: WebhookRequest, reply) => {
-      const headers = extractSvixHeaders(request.headers);
-      if (!headers) {
-        return reply.status(400).send({ error: 'Missing Svix signature headers' });
-      }
-
-      const payload = request.rawBody;
-      if (payload === undefined) {
-        return reply.status(400).send({ error: 'Request body is required for signature verification' });
-      }
-
-      const payloadString = typeof payload === 'string' ? payload : payload.toString('utf8');
-
-      let event: ClerkWebhookEvent;
-      try {
-        event = webhookVerifier.verify(payloadString, headers) as ClerkWebhookEvent;
-      } catch (error) {
-        request.log.error({ err: error }, 'Invalid Clerk webhook signature');
-        return reply.status(400).send({ error: 'Invalid signature' });
-      }
+    try {
+      const event = webhook.verify(payload, headers) as {
+        type: string;
+        data: {
+          id: string;
+          email_addresses?: Array<{ id: string; email_address: string }>;
+          primary_email_address_id?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          full_name?: string | null;
+          image_url?: string | null;
+        };
+      };
 
       const { type, data } = event;
+      const clerkUserId = data.id;
 
-      try {
-        if (type === 'user.created' || type === 'user.updated') {
-          await handleUserUpsert(reply, data);
-          return;
-        }
-
-        if (type === 'user.deleted') {
-          await handleUserDeleted(reply, data);
-          return;
-        }
-
-        request.log.warn({ eventType: type }, 'Unhandled Clerk webhook event');
-        return reply.status(422).send({ error: 'Unhandled event type' });
-      } catch (error) {
-        request.log.error({ err: error }, 'Failed processing Clerk webhook');
-        return reply.status(500).send({ error: 'Failed to process webhook' });
+      if (!clerkUserId) {
+        throw new HttpError(400, 'Invalid webhook payload: missing user id');
       }
-    },
-  );
-}
 
-function extractSvixHeaders(headers: WebhookRequest['headers']): SvixHeaders | null {
-  const id = headers['svix-id'];
-  const timestamp = headers['svix-timestamp'];
-  const signature = headers['svix-signature'];
+      if (type === 'user.deleted') {
+        await query(
+          'UPDATE public.users SET deleted_at = NOW() WHERE clerk_user_id = $1',
+          [clerkUserId],
+        );
 
-  if (!isSingleHeader(id) || !isSingleHeader(timestamp) || !isSingleHeader(signature)) {
-    return null;
-  }
+        res.status(204).end();
+        return;
+      }
 
-  return {
-    'svix-id': id,
-    'svix-timestamp': timestamp,
-    'svix-signature': signature,
-  };
-}
+      if (type === 'user.created' || type === 'user.updated') {
+        const email = data.email_addresses?.find((address) =>
+          address.id === data.primary_email_address_id,
+        )?.email_address
+          ?? data.email_addresses?.[0]?.email_address
+          ?? null;
 
-function isSingleHeader(value: string | string[] | undefined): value is string {
-  return typeof value === 'string' && value.length > 0;
-}
+        const fullName = data.full_name
+          ?? (([data.first_name, data.last_name].filter(Boolean).join(' ')) || null);
+        const imageUrl = data.image_url ?? null;
+
+        await query(
+          `
+            INSERT INTO public.users (clerk_user_id, email_primary, full_name, image_url)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (clerk_user_id) DO UPDATE SET
+              email_primary = COALESCE(EXCLUDED.email_primary, public.users.email_primary),
+              full_name = COALESCE(EXCLUDED.full_name, public.users.full_name),
+              image_url = COALESCE(EXCLUDED.image_url, public.users.image_url),
+              deleted_at = NULL;
+          `,
+          [clerkUserId, email, fullName, imageUrl],
+        );
+
+        res.status(204).end();
+        return;
+      }
+
+      res.status(204).end();
+    } catch (error) {
+      if (error instanceof HttpError) {
+        next(error);
+        return;
+      }
+
+      next(new HttpError(400, 'Invalid webhook signature or payload', error));
+    }
+  },
+);
+
+export default router;

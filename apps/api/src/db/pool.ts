@@ -1,23 +1,22 @@
 import process from 'node:process';
-import { Pool, type PoolClient } from 'pg';
+import { Pool, type QueryResult, type QueryResultRow } from 'pg';
 
-const databaseUrl = process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL;
 
-if (!databaseUrl) {
+if (!connectionString) {
   throw new Error('DATABASE_URL is required to create a database pool');
 }
 
-const shouldUseSsl = databaseUrl.includes('sslmode=require');
-
 export const pool = new Pool({
-  connectionString: databaseUrl,
-  ssl: shouldUseSsl
-    ? {
-        rejectUnauthorized: false,
-      }
-    : undefined,
+  connectionString,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
-export async function getClient(): Promise<PoolClient> {
-  return pool.connect();
+export function query<T extends QueryResultRow = QueryResultRow>(
+  text: string,
+  params?: unknown[],
+): Promise<QueryResult<T>> {
+  return pool.query<T>(text, params);
 }

@@ -1,87 +1,104 @@
 import 'dotenv/config';
 import process from 'node:process';
-import { pathToFileURL } from 'node:url';
-import Fastify from 'fastify';
-import fastifyExpress from '@fastify/express';
-import fastifyRawBody from 'fastify-raw-body';
-import app from './app.js';
-import { dbReady } from './db/client.js';
+import cors from 'cors';
+import express, { type NextFunction, type Request, type Response } from 'express';
+import apiRouter from './routes/api.js';
+import clerkWebhookRouter from './routes/webhooks/clerk.js';
 import { pool } from './db/pool.js';
-import clerkWebhookRoutes from './routes/webhooks/clerk.js';
-import usersMeRoutes from './routes/users.me.js';
+import { HttpError, isHttpError } from './lib/http-error.js';
 
-const fastify = Fastify({
-  logger: true,
+const app = express();
+
+app.use(cors());
+
+app.get('/healthz', (_req, res) => {
+  res.json({ ok: true });
 });
 
-const configureServer = (async () => {
-  await fastify.register(fastifyRawBody, {
-    field: 'rawBody',
-    global: true,
-    encoding: 'utf8',
-    runFirst: true,
-  });
+app.use('/api/webhooks', clerkWebhookRouter);
 
-  await fastify.register(fastifyExpress);
-  fastify.use(app);
+app.use(express.json());
 
-  fastify.get('/healthz', async () => ({ ok: true }));
+app.use('/api', apiRouter);
 
-  await fastify.register(clerkWebhookRoutes);
-  await fastify.register(usersMeRoutes);
+app.use((_req, _res, next) => {
+  next(new HttpError(404, 'Not found'));
+});
 
-  fastify.addHook('onClose', async () => {
-    await pool.end();
-  });
-})();
+function isPostgresError(error: unknown): error is { code?: string; detail?: string } {
+  return Boolean(error && typeof error === 'object' && 'code' in error);
+}
+
+app.use(
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  async (error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    if (isHttpError(error)) {
+      res.status(error.status).json({
+        error: {
+          message: error.message,
+          details: error.details ?? null,
+        },
+      });
+      return;
+    }
+
+    if (isPostgresError(error)) {
+      if (error.code === '23505') {
+        res.status(409).json({
+          error: {
+            message: 'Duplicate record',
+            details: error.detail ?? null,
+          },
+        });
+        return;
+      }
+
+      if (error.code === '23503') {
+        res.status(400).json({
+          error: {
+            message: 'Related record not found',
+            details: error.detail ?? null,
+          },
+        });
+        return;
+      }
+
+      if (error.code === '22P02') {
+        res.status(400).json({
+          error: {
+            message: 'Invalid input syntax',
+            details: error.detail ?? null,
+          },
+        });
+        return;
+      }
+    }
+
+    console.error('Unexpected error', error);
+
+    res.status(500).json({
+      error: {
+        message: 'Something went wrong',
+      },
+    });
+  },
+);
 
 const port = Number.parseInt(process.env.PORT ?? '3000', 10);
 const host = '0.0.0.0';
 
-async function start(): Promise<void> {
-  try {
-    await configureServer;
-    await dbReady;
-    await fastify.listen({ port, host });
-    fastify.log.info(`API listening on http://${host}:${port}`);
-  } catch (error) {
-    fastify.log.error({ err: error }, 'Unable to start server');
-    process.exit(1);
-  }
-}
-
-let shuttingDown = false;
+const server = app.listen(port, host, () => {
+  console.log(`API listening on http://${host}:${port}`);
+});
 
 async function shutdown(signal: NodeJS.Signals): Promise<void> {
-  if (shuttingDown) {
-    return;
-  }
-  shuttingDown = true;
-
-  fastify.log.info({ signal }, 'Received shutdown signal');
-
-  try {
-    await fastify.close();
-    fastify.log.info('Server closed gracefully');
-  } catch (error) {
-    fastify.log.error({ err: error }, 'Error during server shutdown');
-    process.exitCode = 1;
-  }
+  console.log(`Received ${signal}, closing server...`);
+  server.close(() => {
+    void pool.end();
+  });
 }
 
-process.once('SIGINT', shutdown);
-process.once('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
-const executedDirectly = (() => {
-  if (!process.argv[1]) {
-    return false;
-  }
-
-  return import.meta.url === pathToFileURL(process.argv[1]).href;
-})();
-
-if (executedDirectly) {
-  void start();
-}
-
-export { start, fastify, app };
+export default app;
