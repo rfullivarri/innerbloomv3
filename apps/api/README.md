@@ -8,6 +8,7 @@
 | `CLERK_WEBHOOK_SECRET` | ✅ | Svix signing secret provided by Clerk for the `user.*` webhook. |
 | `CLERK_API_KEY` | ➖ | Clerk Backend API key. Required only for the backfill script. |
 | `PORT` | ➖ | Port for the Fastify server (defaults to `3000`). |
+| `CORS_ALLOWED_ORIGINS` | ➖ | Comma-separated list of additional origins allowed to call the API. |
 
 ## Database migrations
 
