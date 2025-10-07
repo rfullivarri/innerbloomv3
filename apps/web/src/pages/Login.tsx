@@ -1,24 +1,20 @@
 import { SignIn } from '@clerk/clerk-react';
-import { useRef } from 'react';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { DASHBOARD_PATH } from '../config/auth';
 
 export default function LoginPage() {
-  const signInContainerRef = useRef<HTMLDivElement | null>(null);
-
   return (
     <AuthLayout
-      title="Entrar al Dashboard"
-      description="Ingresá tu correo. Si tu base ya está lista te llevo directo al Dashboard. Si no, te muestro los pasos y espero con vos."
-      primaryActionLabel="Continuar"
-      onPrimaryActionClick={() => {
-        const input = signInContainerRef.current?.querySelector<HTMLInputElement>('input');
-        input?.focus();
-      }}
+      title={
+        <div className="flex items-center gap-3 text-4xl font-semibold uppercase tracking-[0.35em] text-white md:text-5xl">
+          <span className="h-3 w-3 rounded-full bg-rose-500 md:h-4 md:w-4" />
+          innerbloom
+        </div>
+      }
       secondaryActionLabel="Volver al inicio"
       secondaryActionHref="/"
     >
-      <div ref={signInContainerRef} className="w-full max-w-md">
+      <div className="w-full max-w-md">
         <SignIn
           appearance={{
             layout: {
@@ -51,8 +47,12 @@ export default function LoginPage() {
               formFieldInputShowPasswordButton: 'text-sm text-white/60 hover:text-white',
               formButtonPrimary:
                 'mt-3 inline-flex h-12 items-center justify-center rounded-full bg-gradient-to-r from-[#8b5cf6] via-[#6366f1] to-[#0ea5e9] text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all duration-200 hover:from-[#8b5cf6] hover:to-[#0ea5e9]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40',
-              footer: 'flex flex-col items-center gap-2 text-center text-sm text-white/70',
-              footerActionLink: 'font-semibold text-white hover:text-white/80 underline-offset-4',
+              footer:
+                'mt-6 flex flex-col items-center gap-1 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-center text-xs text-white/60 backdrop-blur-xl shadow-none',
+              footerTitle: 'text-white/70',
+              footerSubtitle: 'text-white/50',
+              footerActionText: 'text-white/50',
+              footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4',
               formResendCodeLink: 'text-sm text-white hover:text-white/80',
               identityPreview: 'rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl text-white/80',
               identityPreviewTitle: 'text-white',
