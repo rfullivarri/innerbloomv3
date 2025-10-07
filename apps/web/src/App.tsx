@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import DashboardPage from './pages/Dashboard';
+import DashboardV3Page from './pages/DashboardV3';
 import LoginPage from './pages/Login';
 import LandingPage from './pages/Landing';
 import SignUpPage from './pages/SignUp';
@@ -61,6 +62,14 @@ export default function App() {
           element={
             <RequireUser>
               <DashboardPage />
+            </RequireUser>
+          }
+        />
+        <Route
+          path="/dashboard-v3"
+          element={
+            <RequireUser>
+              <DashboardV3Page />
             </RequireUser>
           }
         />
