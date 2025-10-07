@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserDailyXp, type DailyXpPoint } from '../../lib/api';
+import { asArray, dateStr } from '../../lib/safe';
 
 interface DailyCultivationSectionProps {
   userId: string;
 }
 
+type NormalizedDailyXpPoint = DailyXpPoint & { day: string };
+
 type MonthBucket = {
   label: string;
   key: string;
-  days: DailyXpPoint[];
+  days: NormalizedDailyXpPoint[];
 };
 
 const XP_NUMBER_FORMATTER = new Intl.NumberFormat('es-AR');
@@ -18,22 +21,19 @@ function formatNumber(value: number): string {
   return XP_NUMBER_FORMATTER.format(Math.round(value));
 }
 
-function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
 function createRange(daysBack: number) {
   const to = new Date();
   const from = new Date();
   from.setUTCDate(from.getUTCDate() - daysBack);
-  return { from: formatDate(from), to: formatDate(to) };
+  return { from: dateStr(from), to: dateStr(to) };
 }
 
-function groupByMonth(series: DailyXpPoint[]): MonthBucket[] {
-  const map = new Map<string, DailyXpPoint[]>();
+function groupByMonth(series: NormalizedDailyXpPoint[]): MonthBucket[] {
+  const map = new Map<string, NormalizedDailyXpPoint[]>();
 
   for (const point of series) {
-    const key = point.date.slice(0, 7);
+    const key = (point.day || point.date || '').slice(0, 7);
+    if (!key) continue;
     const arr = map.get(key) ?? [];
     arr.push(point);
     map.set(key, arr);
@@ -44,7 +44,11 @@ function groupByMonth(series: DailyXpPoint[]): MonthBucket[] {
     .map(([key, days]) => {
       const [year, month] = key.split('-');
       const formatter = new Intl.DateTimeFormat('es-AR', { month: 'short', year: 'numeric' });
-      const label = formatter.format(new Date(Number(year), Number(month) - 1));
+      const parsedYear = Number(year);
+      const parsedMonth = Number(month) - 1;
+      const label = Number.isFinite(parsedYear) && Number.isFinite(parsedMonth)
+        ? formatter.format(new Date(parsedYear, parsedMonth))
+        : key;
       return { key, label, days: days.sort((a, b) => (a.date > b.date ? 1 : -1)) } satisfies MonthBucket;
     });
 }
@@ -52,8 +56,23 @@ function groupByMonth(series: DailyXpPoint[]): MonthBucket[] {
 export function DailyCultivationSection({ userId }: DailyCultivationSectionProps) {
   const range = useMemo(() => createRange(120), []);
   const { data, status } = useRequest(() => getUserDailyXp(userId, range), [userId, range.from, range.to]);
+  const series = useMemo<NormalizedDailyXpPoint[]>(() => {
+    const rawSeries = (data as any)?.series ?? data;
+    console.info('[DASH] dataset', { keyNames: Object.keys(rawSeries ?? {}), isArray: Array.isArray(rawSeries) });
+    return asArray<DailyXpPoint>(data, 'series')
+      .map((row) => {
+        const rawDate = (row as any)?.day ?? row.date ?? (row as any)?.created_at ?? (row as any)?.timestamp;
+        const day = dateStr(rawDate);
+        return {
+          ...row,
+          day,
+          date: row.date ?? day,
+        } satisfies NormalizedDailyXpPoint;
+      })
+      .filter((row) => !!row.day);
+  }, [data]);
 
-  const buckets = useMemo(() => groupByMonth(data?.series ?? []), [data?.series]);
+  const buckets = useMemo(() => groupByMonth(series), [series]);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
   useEffect(() => {

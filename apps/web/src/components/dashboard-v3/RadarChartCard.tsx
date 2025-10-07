@@ -1,20 +1,17 @@
 import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserStateTimeseries, type EnergyTimeseriesPoint } from '../../lib/api';
+import { asArray, dateStr } from '../../lib/safe';
 
 interface RadarChartCardProps {
   userId: string;
-}
-
-function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
 }
 
 function buildRange(daysBack: number) {
   const to = new Date();
   const from = new Date();
   from.setUTCDate(from.getUTCDate() - daysBack);
-  return { from: formatDate(from), to: formatDate(to) };
+  return { from: dateStr(from), to: dateStr(to) };
 }
 
 function average(values: number[]) {
@@ -47,7 +44,11 @@ function computeDataset(series: EnergyTimeseriesPoint[] | null) {
 export function RadarChartCard({ userId }: RadarChartCardProps) {
   const range = useMemo(() => buildRange(60), []);
   const { data, status } = useRequest(() => getUserStateTimeseries(userId, range), [userId, range.from, range.to]);
-  const dataset = useMemo(() => computeDataset(data), [data]);
+  const series = useMemo(() => {
+    console.info('[DASH] dataset', { keyNames: Object.keys(data ?? {}), isArray: Array.isArray(data) });
+    return asArray<EnergyTimeseriesPoint>(data);
+  }, [data]);
+  const dataset = useMemo(() => computeDataset(series), [series]);
 
   return (
     <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">

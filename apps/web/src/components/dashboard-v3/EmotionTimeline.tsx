@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getEmotions, type EmotionSnapshot } from '../../lib/api';
+import { asArray, dateStr } from '../../lib/safe';
 
 interface EmotionTimelineProps {
   userId: string;
@@ -16,18 +17,16 @@ const EMOTION_COLORS: Record<string, string> = {
   Cansancio: '#16A085',
 };
 
-function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
+type EmotionEntry = EmotionSnapshot & { day: string };
 
 function buildRange(days: number) {
   const to = new Date();
   const from = new Date();
   from.setUTCDate(from.getUTCDate() - (days - 1));
-  return { from: formatDate(from), to: formatDate(to) };
+  return { from: dateStr(from), to: dateStr(to) };
 }
 
-function countEmotions(entries: EmotionSnapshot[]): { name: string; count: number } | null {
+function countEmotions(entries: EmotionEntry[]): { name: string; count: number } | null {
   const map = new Map<string, number>();
   for (const entry of entries) {
     if (!entry.mood) continue;
@@ -52,7 +51,21 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
   );
 
   const entries = useMemo(
-    () => (data ?? []).slice().sort((a, b) => (a.date > b.date ? 1 : -1)),
+    () => {
+      console.info('[DASH] dataset', { keyNames: Object.keys(data ?? {}), isArray: Array.isArray(data) });
+      return asArray<EmotionSnapshot>(data)
+        .map((entry) => {
+          const rawDate = (entry as any)?.day ?? entry.date ?? (entry as any)?.created_at ?? (entry as any)?.timestamp;
+          const day = dateStr(rawDate);
+          return {
+            ...entry,
+            day,
+            date: entry.date ?? day,
+          } satisfies EmotionEntry;
+        })
+        .filter((entry) => !!entry.date)
+        .sort((a, b) => (a.date > b.date ? 1 : -1));
+    },
     [data],
   );
 

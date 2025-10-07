@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
-import { getTasks } from '../../lib/api';
+import { getTasks, type UserTask } from '../../lib/api';
+import { asArray } from '../../lib/safe';
 
 interface MissionsSectionProps {
   userId: string;
@@ -7,6 +9,10 @@ interface MissionsSectionProps {
 
 export function MissionsSection({ userId }: MissionsSectionProps) {
   const { data, status } = useRequest(() => getTasks(userId), [userId]);
+  const tasks = useMemo(() => {
+    console.info('[DASH] dataset', { keyNames: Object.keys(data ?? {}), isArray: Array.isArray(data) });
+    return asArray<UserTask>(data, 'tasks');
+  }, [data]);
 
   return (
     <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
@@ -21,9 +27,9 @@ export function MissionsSection({ userId }: MissionsSectionProps) {
 
       {status === 'error' && <p className="text-sm text-rose-300">No pudimos listar las misiones.</p>}
 
-      {status === 'success' && data && data.length > 0 && (
+      {status === 'success' && tasks.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {data.slice(0, 6).map((task) => (
+          {tasks.slice(0, 6).map((task) => (
             <article key={task.task_id} className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-4">
               <h4 className="font-semibold text-white">🎯 {task.task}</h4>
               <p className="text-xs text-text-muted">Pilar: {task.pillar_id ?? '—'}</p>
@@ -41,7 +47,7 @@ export function MissionsSection({ userId }: MissionsSectionProps) {
         </div>
       )}
 
-      {status === 'success' && data && data.length === 0 && (
+      {status === 'success' && tasks.length === 0 && (
         <p className="text-sm text-text-muted">Tu base todavía no tiene misiones configuradas.</p>
       )}
 
