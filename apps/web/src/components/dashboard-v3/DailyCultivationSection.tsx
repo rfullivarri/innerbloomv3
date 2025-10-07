@@ -34,7 +34,7 @@ function groupByMonth(series: NormalizedDailyXpPoint[]): MonthBucket[] {
   for (const point of series) {
     const rawKey = point.day ?? point.date ?? '';
     const keySource = typeof rawKey === 'string' ? rawKey : dateStr(rawKey);
-    const key = keySource ? keySource.slice(0, 7) : '';
+    const key = keySource ? String(keySource).slice(0, 7) : '';
     if (!key) continue;
     const arr = map.get(key) ?? [];
     arr.push(point);
