@@ -34,7 +34,16 @@ const app = express();
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json());
-app.use(routes);
+
+const apiRouter = express.Router();
+
+apiRouter.use(routes);
+
+apiRouter.use((_req, _res, next) => {
+  next(new HttpError(404, 'not_found', 'Route not found'));
+});
+
+app.use('/api', apiRouter);
 
 app.use((_req, _res, next) => {
   next(new HttpError(404, 'not_found', 'Route not found'));
