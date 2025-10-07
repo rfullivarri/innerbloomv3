@@ -7,12 +7,14 @@ interface EmotionTimelineProps {
   userId: string;
 }
 
+const INNERBLOOM_ACCENT = '#7D3CFF';
+
 const EMOTION_COLORS: Record<string, string> = {
   Calma: '#2ECC71',
   Felicidad: '#F1C40F',
-  Motivación: '#9B59B6',
+  Motivación: INNERBLOOM_ACCENT,
   Tristeza: '#3498DB',
-  Ansiedad: '#E74C3C',
+  Ansiedad: INNERBLOOM_ACCENT,
   Frustración: '#8D6E63',
   Cansancio: '#16A085',
 };
