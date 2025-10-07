@@ -21,8 +21,8 @@ This project uses a shared PostgreSQL database hosted on [Neon](https://neon.tec
 3. Install dependencies and run the database workflow:
 
    ```bash
-   pnpm install
-   pnpm --filter @innerbloom/api db:all
+   npm install
+   npm --workspace apps/api run db:all
    ```
 
    The `db:all` script will:
@@ -40,10 +40,10 @@ This project uses a shared PostgreSQL database hosted on [Neon](https://neon.tec
 
 ## 4. Verifying the connection
 
-After running `pnpm --filter @innerbloom/api db:all`, start the API locally:
+After running `npm --workspace apps/api run db:all`, start the API locally:
 
 ```bash
-pnpm --filter @innerbloom/api dev
+npm --workspace apps/api run dev
 ```
 
 Then hit the health endpoint in another terminal:
