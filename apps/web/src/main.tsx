@@ -4,6 +4,22 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
+import { isApiLoggingEnabled, setApiLoggingEnabled } from './lib/logger';
+
+declare global {
+  interface Window {
+    setInnerbloomApiLogging?: (enabled: boolean) => void;
+    isInnerbloomApiLoggingEnabled?: () => boolean;
+  }
+}
+
+setApiLoggingEnabled(true);
+
+if (typeof window !== 'undefined') {
+  window.setInnerbloomApiLogging = setApiLoggingEnabled;
+  window.isInnerbloomApiLoggingEnabled = isApiLoggingEnabled;
+  console.info('[API] Use window.setInnerbloomApiLogging(false) to disable API logs.');
+}
 
 const rootElement = document.getElementById('root');
 
