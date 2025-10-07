@@ -1,8 +1,9 @@
-export const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+const RAW_API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? '').trim();
+export const API_BASE = RAW_API_BASE_URL.replace(/\/+$/, '');
 
 function ensureBase(): string {
   if (!API_BASE) {
-    throw new Error('API base URL is not configured. Set VITE_API_URL to continue.');
+    throw new Error('API base URL is not configured. Set VITE_API_BASE_URL (or legacy VITE_API_URL) to continue.');
   }
   return API_BASE;
 }
@@ -229,7 +230,13 @@ export async function getUserDailyXp(
 }
 
 export type UserLevelResponse = {
-  level: number;
+  user_id: string;
+  current_level: number;
+  xp_total: number;
+  xp_required_current: number;
+  xp_required_next: number | null;
+  xp_to_next: number | null;
+  progress_percent: number;
 };
 
 export async function getUserLevel(userId: string): Promise<UserLevelResponse> {
