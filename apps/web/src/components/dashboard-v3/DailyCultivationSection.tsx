@@ -159,11 +159,18 @@ interface LineChartProps {
   days: DailyXpPoint[];
 }
 
+function getIsoDateLabel(point: DailyXpPoint): string {
+  const raw = (point as any)?.day ?? point.date ?? (point as any)?.created_at ?? (point as any)?.timestamp;
+  if (!raw) return '';
+  if (typeof raw === 'string') {
+    return raw.slice(0, 10);
+  }
+  return dateStr(raw) ?? '';
+}
+
 function LineChart({ days }: LineChartProps) {
   const sorted = [...days].sort((a, b) => (a.date > b.date ? 1 : -1));
   const maxValue = Math.max(...sorted.map((day) => day.xp_day), 1);
-
-  const dayFormatter = new Intl.DateTimeFormat('es-AR', { day: 'numeric' });
 
   const width = 640;
   const height = 220;
@@ -189,26 +196,12 @@ function LineChart({ days }: LineChartProps) {
     : '';
 
   const gridLevels = [0.25, 0.5, 0.75, 1];
-  const ticks = (() => {
-    if (points.length === 0) return [] as Array<{ index: number; label: string }>;
-    const tickCount = Math.min(points.length, 5);
-    const step = points.length > 1 ? (points.length - 1) / (tickCount - 1) : 1;
-    const set = new Set<number>();
-    for (let i = 0; i < tickCount; i += 1) {
-      set.add(Math.round(i * step));
-    }
-    return Array.from(set)
-      .sort((a, b) => a - b)
-      .map((index) => {
-        const point = points[index];
-        const date = new Date(point.day.date);
-        return { index, label: dayFormatter.format(date) };
-      });
-  })();
+  const labels = points.map((point) => getIsoDateLabel(point.day));
 
   return (
     <div className="w-full">
-      <svg viewBox={`0 0 ${width} ${height}`} className="h-52 w-full">
+      <div className="relative">
+        <svg viewBox={`0 0 ${width} ${height}`} className="h-52 w-full">
         <defs>
           <linearGradient id="cultivationGradient" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="rgba(147, 197, 253, 0.8)" />
@@ -240,7 +233,7 @@ function LineChart({ days }: LineChartProps) {
 
         {points.map((point) => (
           <circle
-            key={point.day.date}
+            key={getIsoDateLabel(point.day)}
             cx={point.x}
             cy={point.y}
             r={4}
@@ -248,15 +241,39 @@ function LineChart({ days }: LineChartProps) {
             stroke="#1F2937"
             strokeWidth={1.5}
           >
-            <title>{`${point.day.date}: ${point.day.xp_day} XP`}</title>
+            <title>{`${getIsoDateLabel(point.day)}: ${point.day.xp_day} XP`}</title>
           </circle>
         ))}
       </svg>
 
-      {ticks.length > 0 && (
-        <div className="mt-2 flex w-full justify-between text-[10px] uppercase tracking-wide text-text-muted">
-          {ticks.map((tick) => (
-            <span key={tick.index}>{tick.label}</span>
+        <div className="pointer-events-none absolute inset-0">
+          {points.map((point) => (
+            <div
+              key={`${getIsoDateLabel(point.day)}-label`}
+              className="absolute flex -translate-x-1/2 flex-col items-center text-xs text-white opacity-80"
+              style={{
+                left: `${(point.x / width) * 100}%`,
+                top: `${(point.y / height) * 100}%`,
+                transform: 'translate(-50%, calc(-100% - 6px))',
+              }}
+            >
+              <span className="rounded bg-slate-900/80 px-2 py-0.5 text-[10px] font-medium leading-tight shadow-sm shadow-black/40">
+                {`${formatNumber(point.day.xp_day)} XP`}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {labels.length > 0 && (
+        <div
+          className="mt-3 grid gap-2 text-[10px] tracking-wide text-text-muted"
+          style={{ gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))` }}
+        >
+          {labels.map((label, index) => (
+            <span key={`${label}-${index}`} className="text-center">
+              {label}
+            </span>
           ))}
         </div>
       )}
