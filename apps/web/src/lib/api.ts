@@ -468,6 +468,22 @@ export async function getUserState(userId: string): Promise<UserState> {
   return response;
 }
 
+export type DailyEnergySnapshot = {
+  user_id: string;
+  hp_pct: number;
+  mood_pct: number;
+  focus_pct: number;
+  hp_norm: number;
+  mood_norm: number;
+  focus_norm: number;
+};
+
+export async function getUserDailyEnergy(userId: string): Promise<DailyEnergySnapshot> {
+  const response = await getJson<DailyEnergySnapshot>(`/users/${encodeURIComponent(userId)}/daily-energy`);
+  logShape('user-daily-energy', response);
+  return response;
+}
+
 export type EnergyTimeseriesPoint = {
   date: string;
   Body: number;
