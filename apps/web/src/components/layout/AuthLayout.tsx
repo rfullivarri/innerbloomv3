@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 
 interface AuthLayoutProps {
   children: ReactNode;
-  title: string;
-  description: string;
+  title: ReactNode;
+  description?: string;
   primaryActionLabel?: string;
   onPrimaryActionClick?: () => void;
   secondaryActionLabel?: string;
@@ -32,19 +32,34 @@ export function AuthLayout({
         <div className="flex flex-col gap-10 md:grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-16">
           <div className="flex flex-col justify-between gap-10">
             <div className="flex flex-col gap-6">
+              {secondaryActionLabel && secondaryActionHref ? (
+                <Link
+                  to={secondaryActionHref}
+                  className="inline-flex w-fit items-center justify-center rounded-full border border-white/30 px-5 py-2.5 text-sm font-semibold text-white/80 transition-colors duration-200 hover:border-white/50 hover:text-white"
+                >
+                  {secondaryActionLabel}
+                </Link>
+              ) : null}
+
               <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.4em] text-white/60">
                 <span className="h-2 w-2 rounded-full bg-rose-500" />
                 Innerbloom
               </div>
 
               <div className="space-y-4">
-                <h1 className="text-4xl font-semibold leading-tight text-white md:text-5xl">{title}</h1>
-                <p className="text-base text-white/70 md:text-lg">{description}</p>
+                {typeof title === 'string' ? (
+                  <h1 className="text-4xl font-semibold leading-tight text-white md:text-5xl">{title}</h1>
+                ) : (
+                  title
+                )}
+                {description ? (
+                  <p className="text-base text-white/70 md:text-lg">{description}</p>
+                ) : null}
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              {primaryActionLabel ? (
+            {primaryActionLabel ? (
+              <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={onPrimaryActionClick}
@@ -52,17 +67,8 @@ export function AuthLayout({
                 >
                   {primaryActionLabel}
                 </button>
-              ) : null}
-
-              {secondaryActionLabel && secondaryActionHref ? (
-                <Link
-                  to={secondaryActionHref}
-                  className="inline-flex items-center justify-center rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white/80 transition-colors duration-200 hover:border-white/50 hover:text-white"
-                >
-                  {secondaryActionLabel}
-                </Link>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="flex items-center justify-center">
