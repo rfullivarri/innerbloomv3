@@ -6,6 +6,7 @@ import { PillarsSection } from '../components/dashboard/PillarsSection';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { StreakCard } from '../components/dashboard/StreakCard';
 import { Navbar } from '../components/layout/Navbar';
+import { DevErrorBoundary } from '../components/DevErrorBoundary';
 
 export default function DashboardPage() {
   const { backendUserId, status, error, reload, clerkUserId } = useBackendUser();
@@ -18,10 +19,11 @@ export default function DashboardPage() {
   const failedToLoadProfile = status === 'error' || !backendUserId;
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1 px-4 pb-16 pt-6 md:px-8">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+    <DevErrorBoundary>
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex-1 px-4 pb-16 pt-6 md:px-8">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
           {isLoadingProfile && <LegacyDashboardSkeleton />}
 
           {failedToLoadProfile && !isLoadingProfile && (
@@ -69,9 +71,10 @@ export default function DashboardPage() {
               </section>
             </>
           )}
-        </div>
-      </main>
-    </div>
+          </div>
+        </main>
+      </div>
+    </DevErrorBoundary>
   );
 }
 

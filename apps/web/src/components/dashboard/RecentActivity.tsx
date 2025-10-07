@@ -2,8 +2,8 @@ import { Card } from '../common/Card';
 import { Skeleton } from '../common/Skeleton';
 import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
-import { getTaskLogs } from '../../lib/api';
-import { asArray, dateStr } from '../../lib/safe';
+import { getTaskLogs, type TaskLog } from '../../lib/api';
+import { asArray, dateStr, safeMap } from '../../lib/safe';
 import { ActivityItem } from './ActivityItem';
 
 interface RecentActivityProps {
@@ -14,7 +14,25 @@ export function RecentActivity({ userId }: RecentActivityProps) {
   const { data, status, error, reload } = useRequest(() => getTaskLogs(userId, { limit: 6 }), [userId]);
   const logs = useMemo(() => {
     console.info('[DASH] dataset', { keyNames: Object.keys(data ?? {}), isArray: Array.isArray(data) });
-    return asArray(data).map((row) => {
+    const resp = data as unknown;
+    const rows = Array.isArray(resp)
+      ? resp
+      : Array.isArray((resp as any)?.items)
+      ? (resp as any).items
+      : Array.isArray((resp as any)?.logs)
+      ? (resp as any).logs
+      : asArray(resp);
+
+    console.info(
+      '[TASK-LOGS] raw types',
+      rows.slice(0, 3).map((r: any) => ({
+        typeof_date: typeof (r?.date ?? r?.day ?? r?.created_at),
+        sample_date: r?.date ?? r?.day ?? r?.created_at,
+        keys: Object.keys(r ?? {}).slice(0, 8),
+      })),
+    );
+
+    return safeMap<any, TaskLog & { day: string }>(rows, (row) => {
       const rawDate =
         (row as any)?.day ??
         (row as any)?.date ??
@@ -25,7 +43,7 @@ export function RecentActivity({ userId }: RecentActivityProps) {
       return {
         ...row,
         day: dateStr(rawDate),
-      };
+      } as TaskLog & { day: string };
     });
   }, [data]);
 
