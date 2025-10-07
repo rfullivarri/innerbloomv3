@@ -444,7 +444,7 @@ export async function getUserDailyXp(
 }
 
 export type CurrentUserProfile = {
-  id: string;
+  user_id: string;
   clerk_user_id: string;
   email_primary: string | null;
   full_name: string | null;
@@ -458,12 +458,18 @@ export type CurrentUserProfile = {
   deleted_at: string | null;
 };
 
+type CurrentUserResponse = {
+  user: CurrentUserProfile;
+};
+
 export async function getCurrentUserProfile(clerkUserId: string): Promise<CurrentUserProfile> {
-  return getJson<CurrentUserProfile>('/users/me', undefined, {
+  const response = await getJson<CurrentUserResponse>('/users/me', undefined, {
     headers: {
       'X-User-Id': clerkUserId,
     },
   });
+
+  return response.user;
 }
 
 export type UserLevelResponse = {

@@ -33,7 +33,7 @@ export function useBackendUser(): BackendUserState {
 
   const normalizedStatus: AsyncStatus = enabled ? status : 'loading';
   const profile = enabled && status === 'success' ? data : null;
-  const backendUserId = profile?.id ?? null;
+  const backendUserId = profile?.user_id ?? null;
 
   return useMemo(
     () => ({

@@ -1,5 +1,6 @@
 import process from 'node:process';
 import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -17,6 +18,8 @@ export const pool = new Pool({
       }
     : undefined,
 });
+
+export const db = drizzle(pool);
 
 pool.on('connect', (client: PoolClient) => {
   client
