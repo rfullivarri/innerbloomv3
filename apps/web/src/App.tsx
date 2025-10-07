@@ -1,6 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import DashboardPage from './pages/Dashboard';
 import DashboardV3Page from './pages/DashboardV3';
 import LoginPage from './pages/Login';
 import LandingPage from './pages/Landing';
@@ -29,7 +28,7 @@ function RedirectIfSignedIn({ children }: { children: JSX.Element }) {
   }
 
   if (userId) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/dashboard-v3" replace />;
   }
 
   return children;
@@ -59,11 +58,7 @@ export default function App() {
         />
         <Route
           path="/dashboard"
-          element={
-            <RequireUser>
-              <DashboardPage />
-            </RequireUser>
-          }
+          element={<Navigate to="/dashboard-v3" replace />}
         />
         <Route
           path="/dashboard-v3"

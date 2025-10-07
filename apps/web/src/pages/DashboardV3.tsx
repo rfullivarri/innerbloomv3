@@ -14,14 +14,15 @@
 import { useUser } from '@clerk/clerk-react';
 import { Navbar } from '../components/layout/Navbar';
 import { Alerts } from '../components/dashboard-v3/Alerts';
-import { XpSummaryCard } from '../components/dashboard-v3/XpSummaryCard';
 import { EnergyCard } from '../components/dashboard-v3/EnergyCard';
 import { DailyCultivationSection } from '../components/dashboard-v3/DailyCultivationSection';
-import { RadarChartCard } from '../components/dashboard-v3/RadarChartCard';
-import { EmotionChart } from '../components/dashboard-v3/EmotionChart';
-import { StreakPanel } from '../components/dashboard-v3/StreakPanel';
 import { MissionsSection } from '../components/dashboard-v3/MissionsSection';
 import { ProfileCard } from '../components/dashboard-v3/ProfileCard';
+import { MetricHeader } from '../components/dashboard/MetricHeader';
+import { RadarChartCard } from '../components/dashboard/RadarChartCard';
+import { EmotionChartCard } from '../components/dashboard/EmotionChartCard';
+import { StreaksPanel } from '../components/dashboard/StreaksPanel';
+import { Card } from '../components/ui/Card';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
 
@@ -41,36 +42,39 @@ export default function DashboardV3Page() {
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
         <Navbar />
-        <main className="flex-1 px-4 pb-16 pt-6 md:px-8">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-          {isLoadingProfile && <ProfileSkeleton />}
+        <main className="flex-1">
+          <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-6 md:py-6 lg:px-8 lg:py-8">
+            {isLoadingProfile && <ProfileSkeleton />}
 
-          {failedToLoadProfile && !isLoadingProfile && (
-            <ProfileErrorState onRetry={reload} error={error} />
-          )}
+            {failedToLoadProfile && !isLoadingProfile && (
+              <ProfileErrorState onRetry={reload} error={error} />
+            )}
 
-          {!failedToLoadProfile && !isLoadingProfile && backendUserId && (
-            <>
-              <Alerts userId={backendUserId} />
-              <div className="grid gap-6 lg:grid-cols-[320px_1fr_320px]">
-                <div className="space-y-6">
-                  <XpSummaryCard userId={backendUserId} />
-                  <ProfileCard imageUrl={avatarUrl} />
-                  <EnergyCard userId={backendUserId} />
+            {!failedToLoadProfile && !isLoadingProfile && backendUserId && (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-12 lg:gap-6">
+                <div className="lg:col-span-12 space-y-4">
+                  <MetricHeader userId={backendUserId} />
+                  <Alerts userId={backendUserId} />
+                </div>
+
+                <div className="lg:col-span-7 space-y-4 md:space-y-5">
+                  <RadarChartCard userId={backendUserId} />
+                  <EmotionChartCard userId={backendUserId} />
                   <DailyCultivationSection userId={backendUserId} />
                 </div>
-                <div className="space-y-6">
-                  <RadarChartCard userId={backendUserId} />
-                  <EmotionChart userId={backendUserId} />
-                </div>
-                <div className="space-y-6">
-                  <StreakPanel userId={backendUserId} />
+
+                <div className="lg:col-span-5 space-y-4 md:space-y-5">
+                  <ProfileCard imageUrl={avatarUrl} />
+                  <EnergyCard userId={backendUserId} />
+                  <StreaksPanel userId={backendUserId} />
                   <RewardsPlaceholder />
                 </div>
+
+                <div className="lg:col-span-12">
+                  <MissionsSection userId={backendUserId} />
+                </div>
               </div>
-              <MissionsSection userId={backendUserId} />
-            </>
-          )}
+            )}
           </div>
         </main>
       </div>
@@ -80,12 +84,19 @@ export default function DashboardV3Page() {
 
 function ProfileSkeleton() {
   return (
-    <section className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
-      <div className="h-6 w-56 animate-pulse rounded bg-white/10" />
-      <div className="h-4 w-full animate-pulse rounded bg-white/10" />
-      <div className="h-4 w-3/4 animate-pulse rounded bg-white/10" />
-      <div className="h-32 w-full animate-pulse rounded-2xl bg-white/5" />
-    </section>
+    <div className="space-y-4">
+      <div className="h-6 w-48 animate-pulse rounded bg-white/10" />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12">
+        <div className="lg:col-span-7 space-y-4">
+          <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />
+          <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />
+        </div>
+        <div className="lg:col-span-5 space-y-4">
+          <div className="h-64 w-full animate-pulse rounded-2xl bg-white/10" />
+          <div className="h-56 w-full animate-pulse rounded-2xl bg-white/10" />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -96,33 +107,33 @@ interface ProfileErrorStateProps {
 
 function ProfileErrorState({ onRetry, error }: ProfileErrorStateProps) {
   return (
-    <section className="space-y-4 rounded-3xl border border-rose-500/30 bg-rose-500/10 p-6 text-sm text-rose-100 backdrop-blur">
-      <div>
-        <h2 className="text-lg font-semibold text-white">No pudimos conectar con tu perfil</h2>
-        <p className="mt-2 text-sm text-rose-100/80">
-          Verificá tu conexión e intentá cargar nuevamente la información de tu Daily Quest.
-        </p>
+    <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-100 shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md md:p-6">
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold text-white">No pudimos conectar con tu perfil</h2>
+          <p className="mt-1 text-sm text-rose-100/80">
+            Verificá tu conexión e intentá cargar nuevamente la información de tu Daily Quest.
+          </p>
+        </div>
+        {error?.message && <p className="text-xs text-rose-100/70">{error.message}</p>}
+        <button
+          type="button"
+          onClick={onRetry}
+          className="inline-flex items-center justify-center rounded-full border border-rose-200/50 bg-rose-200/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:border-rose-100/70 hover:bg-rose-100/20"
+        >
+          Reintentar
+        </button>
       </div>
-      {error?.message && <p className="text-xs text-rose-100/60">{error.message}</p>}
-      <button
-        type="button"
-        onClick={onRetry}
-        className="inline-flex items-center justify-center rounded-full border border-rose-300/40 bg-rose-300/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:border-rose-200/70 hover:bg-rose-200/20"
-      >
-        Reintentar
-      </button>
-    </section>
+    </div>
   );
 }
 
 function RewardsPlaceholder() {
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
-      <h3 className="text-lg font-semibold text-white">🎁 Rewards</h3>
-      <p className="mt-4 text-sm text-text-muted">
-        El módulo de recompensas del MVP todavía no tiene endpoints públicos. Lo habilitaremos en esta vista cuando esté
-        disponible.
+    <Card title="🎁 Rewards" subtitle="Muy pronto" bodyClassName="gap-3">
+      <p className="text-sm text-slate-400">
+        El módulo de recompensas del MVP todavía no tiene endpoints públicos. Lo habilitaremos en esta vista cuando esté disponible.
       </p>
-    </section>
+    </Card>
   );
 }
