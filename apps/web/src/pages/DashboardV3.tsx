@@ -22,6 +22,7 @@ import { MetricHeader } from '../components/dashboard/MetricHeader';
 import { RadarChartCard } from '../components/dashboard/RadarChartCard';
 import { EmotionChartCard } from '../components/dashboard/EmotionChartCard';
 import { StreaksPanel } from '../components/dashboard/StreaksPanel';
+import { StreakPanel } from '../components/dashboard-v3/StreakPanel';
 import { Card } from '../components/ui/Card';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
@@ -69,14 +70,15 @@ export default function DashboardV3Page() {
                   <EnergyCard userId={backendUserId} />
                   <StreaksPanel userId={backendUserId} />
 
-                <div className="space-y-6">
-                  <StreakPanel
-                    userId={backendUserId}
-                    gameMode={profile?.game_mode}
-                    weeklyTarget={profile?.weekly_target}
-                  />
+                  <div className="space-y-6">
+                    <StreakPanel
+                      userId={backendUserId}
+                      gameMode={profile?.game_mode}
+                      weeklyTarget={profile?.weekly_target}
+                    />
 
-                  <RewardsPlaceholder />
+                    <RewardsPlaceholder />
+                  </div>
                 </div>
 
                 <div className="lg:col-span-12">
