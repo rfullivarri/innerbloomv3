@@ -1,6 +1,6 @@
 import { DependencyList, useCallback, useEffect, useState } from 'react';
 
-type AsyncStatus = 'idle' | 'loading' | 'success' | 'error';
+export type AsyncStatus = 'idle' | 'loading' | 'success' | 'error';
 
 type UseRequestResult<T> = {
   data: T | null;
@@ -9,13 +9,33 @@ type UseRequestResult<T> = {
   reload: () => void;
 };
 
-export function useRequest<T>(factory: () => Promise<T>, deps: DependencyList = []): UseRequestResult<T> {
+type UseRequestOptions = {
+  enabled?: boolean;
+};
+
+export function useRequest<T>(
+  factory: () => Promise<T>,
+  deps: DependencyList = [],
+  options: UseRequestOptions = {},
+): UseRequestResult<T> {
   const [status, setStatus] = useState<AsyncStatus>('idle');
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
+  const enabled = options.enabled ?? true;
+
   const execute = useCallback(() => {
     let cancelled = false;
+
+    if (!enabled) {
+      setStatus('idle');
+      setError(null);
+      setData(null);
+      return () => {
+        cancelled = true;
+      };
+    }
+
     setStatus('loading');
     setError(null);
 
@@ -34,7 +54,7 @@ export function useRequest<T>(factory: () => Promise<T>, deps: DependencyList = 
     return () => {
       cancelled = true;
     };
-  }, deps);
+  }, [...deps, enabled]);
 
   useEffect(() => {
     const cleanup = execute();
