@@ -1,149 +1,235 @@
 import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
-import { getUserStateTimeseries, type EnergyTimeseriesPoint } from '../../lib/api';
-import { asArray, dateStr } from '../../lib/safe';
+import { getUserXpByTrait, type TraitXpEntry } from '../../lib/api';
+import { dateStr } from '../../lib/safe';
 
 interface RadarChartCardProps {
   userId: string;
 }
 
+const TRAIT_ORDER = [
+  'core',
+  'bienestar',
+  'autogestion',
+  'intelecto',
+  'psiquis',
+  'salud_fisica',
+] as const;
+
+type TraitKey = (typeof TRAIT_ORDER)[number];
+
+const TRAIT_LABELS: Record<TraitKey, string> = {
+  core: 'Core',
+  bienestar: 'Bienestar',
+  autogestion: 'Autogestión',
+  intelecto: 'Intelecto',
+  psiquis: 'Psiquis',
+  salud_fisica: 'Salud física',
+};
+
+type RadarAxis = {
+  key: TraitKey;
+  label: string;
+  xp: number;
+};
+
+type RadarDataset = {
+  axes: RadarAxis[];
+  maxValue: number;
+};
+
 function buildRange(daysBack: number) {
   const to = new Date();
   const from = new Date();
-  from.setUTCDate(from.getUTCDate() - daysBack);
+  from.setUTCDate(from.getUTCDate() - daysBack + 1);
   return { from: dateStr(from), to: dateStr(to) };
 }
 
-function average(values: number[]) {
-  if (values.length === 0) return 0;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
-function toPercent(value: number): number {
-  if (!Number.isFinite(value)) return 0;
-  if (value <= 1) return Math.round(value * 100);
-  return Math.round(Math.min(value, 120));
-}
-
-function computeDataset(series: EnergyTimeseriesPoint[] | null) {
-  if (!series || series.length === 0) {
-    return {
-      values: [0, 0, 0],
-      max: 100,
-    };
+function normalizeTraitKey(value: string | null | undefined): TraitKey | null {
+  if (!value) {
+    return null;
   }
 
-  const body = toPercent(average(series.map((row) => row.Body ?? 0)));
-  const mind = toPercent(average(series.map((row) => row.Mind ?? 0)));
-  const soul = toPercent(average(series.map((row) => row.Soul ?? 0)));
-  const max = Math.max(100, body, mind, soul);
+  const normalized = value
+    .toString()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
 
-  return { values: [body, mind, soul], max };
+  return TRAIT_ORDER.find((trait) => trait === normalized) ?? null;
+}
+
+function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
+  const totals: Record<TraitKey, number> = {
+    core: 0,
+    bienestar: 0,
+    autogestion: 0,
+    intelecto: 0,
+    psiquis: 0,
+    salud_fisica: 0,
+  };
+
+  for (const entry of entries) {
+    const key = normalizeTraitKey(entry?.trait);
+    if (!key) continue;
+
+    const xp = Number(entry?.xp ?? 0);
+    totals[key] = (totals[key] ?? 0) + (Number.isFinite(xp) ? xp : 0);
+  }
+
+  const axes: RadarAxis[] = TRAIT_ORDER.map((key) => ({
+    key,
+    label: TRAIT_LABELS[key],
+    xp: totals[key] ?? 0,
+  }));
+
+  const values = axes.map((axis) => axis.xp);
+  const maxValue = Math.max(10, ...values);
+  return { axes, maxValue };
 }
 
 export function RadarChartCard({ userId }: RadarChartCardProps) {
   const range = useMemo(() => buildRange(60), []);
-  const { data, status } = useRequest(() => getUserStateTimeseries(userId, range), [userId, range.from, range.to]);
-  const series = useMemo(() => {
-    console.info('[DASH] dataset', { keyNames: Object.keys(data ?? {}), isArray: Array.isArray(data) });
-    return asArray<EnergyTimeseriesPoint>(data);
-  }, [data]);
-  const dataset = useMemo(() => computeDataset(series), [series]);
+  const { data, status } = useRequest(() => getUserXpByTrait(userId, range), [userId, range.from, range.to]);
+  const dataset = useMemo(() => computeRadarDataset(data?.traits ?? []), [data?.traits]);
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
-      <header className="flex flex-wrap items-center justify-between gap-3 text-white">
-        <h3 className="text-lg font-semibold">🧿 Radar Chart</h3>
-        <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-text-muted">
-          Energía promedio · últimos 60 días
-        </span>
-      </header>
+    <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0b1120]/80 p-6 text-sm text-white backdrop-blur">
+      <div className="pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_top,_rgba(76,29,149,0.55)_0%,_rgba(15,23,42,0.92)_60%,_rgba(3,7,18,0.95)_100%)]" />
+      <div className="relative z-10">
+        <header className="flex flex-wrap items-center justify-between gap-3 text-white">
+          <h3 className="text-lg font-semibold">🧿 Radar Chart</h3>
+          <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/70">
+            XP · últimos 60 días
+          </span>
+        </header>
 
-      {status === 'loading' && <div className="mt-6 h-64 w-full animate-pulse rounded-2xl bg-white/10" />}
+        {status === 'loading' && <div className="mt-6 h-72 w-full animate-pulse rounded-2xl bg-white/10" />}
 
-      {status === 'error' && (
-        <p className="mt-6 text-sm text-rose-300">No pudimos construir el radar. Probá más tarde.</p>
-      )}
+        {status === 'error' && (
+          <p className="mt-6 text-sm text-rose-300">No pudimos construir el radar. Probá más tarde.</p>
+        )}
 
-      {status === 'success' && (
-        <div className="mt-6 flex flex-col items-center gap-4">
-          <Radar values={dataset.values} max={dataset.max} />
-          <p className="text-xs text-text-muted text-center">
-            Ante la falta del agregado <code className="rounded bg-white/10 px-1 py-px text-[10px]">habitos_by_rasgo</code>, usamos la
-            energía media de cada pilar como proxy visual.
-          </p>
-        </div>
-      )}
+        {status === 'success' && (
+          <div className="mt-6 flex flex-col items-center gap-5">
+            <Radar dataset={dataset} />
+            <p className="max-w-xs text-center text-xs text-white/60">
+              Distribución de XP por rasgo en los últimos 60 días. Valores tomados directamente desde los logs recientes.
+            </p>
+          </div>
+        )}
+      </div>
     </section>
   );
 }
 
 interface RadarProps {
-  values: number[];
-  max: number;
+  dataset: RadarDataset;
 }
 
-function Radar({ values, max }: RadarProps) {
-  const radius = 120;
-  const center = radius + 12;
-  const axes = ['Body', 'Mind', 'Soul'];
+function Radar({ dataset }: RadarProps) {
+  const radius = 130;
+  const center = radius + 32;
+  const { axes, maxValue } = dataset;
+  const count = axes.length;
 
-  const angleFor = (index: number) => (-Math.PI / 2) + (index * (2 * Math.PI / axes.length));
+  const angleFor = (index: number) => -Math.PI / 2 + (index * (2 * Math.PI)) / count;
 
-  const pointFor = (value: number, index: number) => {
-    const normalized = Math.max(0, Math.min(value / max, 1));
+  const pointFor = (value: number, index: number, distance = radius) => {
+    const normalized = maxValue > 0 ? Math.min(Math.max(value / maxValue, 0), 1) : 0;
+    const r = distance * normalized;
     const angle = angleFor(index);
-    const x = center + radius * normalized * Math.cos(angle);
-    const y = center + radius * normalized * Math.sin(angle);
-    return `${x},${y}`;
+    const x = center + r * Math.cos(angle);
+    const y = center + r * Math.sin(angle);
+    return { x, y };
   };
 
-  const polygonPoints = values.map((value, index) => pointFor(value, index)).join(' ');
+  const basePointFor = (distance: number, index: number) => {
+    const angle = angleFor(index);
+    const x = center + distance * Math.cos(angle);
+    const y = center + distance * Math.sin(angle);
+    return { x, y };
+  };
 
-  const gridLevels = [0.33, 0.66, 1];
+  const polygonPoints = axes
+    .map((axis, index) => {
+      const { x, y } = pointFor(axis.xp, index);
+      return `${x},${y}`;
+    })
+    .join(' ');
+
+  const gridLevels = [0.25, 0.5, 0.75, 1];
 
   return (
-    <svg width={center * 2} height={center * 2} viewBox={`0 0 ${center * 2} ${center * 2}`} className="max-w-full">
+    <svg
+      width={(center + 20) * 2}
+      height={(center + 20) * 2}
+      viewBox={`0 0 ${(center + 20) * 2} ${(center + 20) * 2}`}
+      className="max-w-full drop-shadow-[0_0_30px_rgba(59,130,246,0.15)]"
+    >
       <defs>
-        <linearGradient id="radarFill" x1="0%" x2="100%" y1="0%" y2="100%">
-          <stop offset="0%" stopColor="rgba(102, 0, 204, 0.45)" />
-          <stop offset="100%" stopColor="rgba(102, 0, 204, 0.15)" />
+        <radialGradient id="radarGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(126,58,242,0.9)" />
+          <stop offset="70%" stopColor="rgba(59,130,246,0.4)" />
+          <stop offset="100%" stopColor="rgba(59,130,246,0.15)" />
+        </radialGradient>
+        <linearGradient id="radarFill" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="rgba(139,92,246,0.55)" />
+          <stop offset="100%" stopColor="rgba(79,70,229,0.2)" />
         </linearGradient>
       </defs>
+
+      <circle cx={center} cy={center} r={radius + 24} fill="url(#radarGlow)" opacity={0.12} />
 
       {gridLevels.map((level) => {
         const points = axes
           .map((_, index) => {
-            const angle = angleFor(index);
-            const x = center + radius * level * Math.cos(angle);
-            const y = center + radius * level * Math.sin(angle);
+            const { x, y } = basePointFor(radius * level, index);
             return `${x},${y}`;
           })
           .join(' ');
-        return <polygon key={level} points={points} fill="none" stroke="rgba(255,255,255,0.12)" />;
+        return <polygon key={level} points={points} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={1} />;
       })}
 
       {axes.map((axis, index) => {
-        const angle = angleFor(index);
-        const x = center + radius * Math.cos(angle);
-        const y = center + radius * Math.sin(angle);
+        const lineEnd = basePointFor(radius, index);
+        const labelPoint = basePointFor(radius + 36, index);
+        const normalized = maxValue > 0 ? Math.min(Math.max(axis.xp / maxValue, 0), 1) : 0;
+        const valuePoint = pointFor(axis.xp, index);
+        const valueLabelPoint = basePointFor(Math.max(radius * normalized + 20, radius * 0.35), index);
+
+        const anchor = Math.abs(labelPoint.x - center) < 10 ? 'middle' : labelPoint.x > center ? 'start' : 'end';
+        const valueAnchor = Math.abs(valueLabelPoint.x - center) < 10 ? 'middle' : valueLabelPoint.x > center ? 'start' : 'end';
+
         return (
-          <g key={axis}>
-            <line x1={center} y1={center} x2={x} y2={y} stroke="rgba(255,255,255,0.12)" />
+          <g key={axis.key}>
+            <line x1={center} y1={center} x2={lineEnd.x} y2={lineEnd.y} stroke="rgba(255,255,255,0.16)" strokeWidth={1} />
             <text
-              x={center + (radius + 16) * Math.cos(angle)}
-              y={center + (radius + 16) * Math.sin(angle)}
-              textAnchor="middle"
+              x={labelPoint.x}
+              y={labelPoint.y}
+              textAnchor={anchor}
               alignmentBaseline="middle"
-              className="fill-white text-xs font-semibold"
+              className="fill-white text-xs font-semibold uppercase tracking-widest"
             >
-              {axis}
+              {axis.label}
             </text>
+            <text
+              x={valueLabelPoint.x}
+              y={valueLabelPoint.y}
+              textAnchor={valueAnchor}
+              alignmentBaseline="middle"
+              className="fill-white text-sm font-semibold"
+            >
+              {axis.xp.toLocaleString('es-AR')}
+            </text>
+            <circle cx={valuePoint.x} cy={valuePoint.y} r={5} fill="rgba(129,140,248,0.9)" stroke="rgba(255,255,255,0.6)" strokeWidth={1.5} />
           </g>
         );
       })}
 
-      <polygon points={polygonPoints} fill="url(#radarFill)" stroke="rgba(102,0,204,0.7)" strokeWidth={2} />
+      <polygon points={polygonPoints} fill="url(#radarFill)" stroke="rgba(129,140,248,0.85)" strokeWidth={2.5} />
     </svg>
   );
 }

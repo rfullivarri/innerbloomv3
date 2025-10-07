@@ -504,6 +504,30 @@ export async function getUserDailyXp(
   return response;
 }
 
+export type TraitXpEntry = {
+  trait: string;
+  xp: number;
+};
+
+export type UserXpByTraitResponse = {
+  traits: TraitXpEntry[];
+};
+
+export async function getUserXpByTrait(
+  userId: string,
+  params: { from?: string; to?: string } = {},
+): Promise<UserXpByTraitResponse> {
+  const response = await getJson<unknown>(`/users/${encodeURIComponent(userId)}/xp/by-trait`, params);
+  logShape('user-xp-by-trait', response);
+
+  const traits = extractArray<TraitXpEntry>(response, 'traits', 'items', 'data').map((item) => ({
+    trait: String((item as TraitXpEntry)?.trait ?? '').trim(),
+    xp: Number((item as TraitXpEntry)?.xp ?? 0) || 0,
+  }));
+
+  return { traits };
+}
+
 export type CurrentUserProfile = {
   user_id: string;
   clerk_user_id: string;
