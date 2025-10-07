@@ -1,25 +1,27 @@
 import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getTasks, getUserDailyXp, type DailyXpPoint, type UserTask } from '../../lib/api';
+import { asArray, dateStr } from '../../lib/safe';
 
 interface StreakPanelProps {
   userId: string;
 }
 
+type NormalizedDailyXpPoint = DailyXpPoint & { day: string };
+
 type PanelData = {
   tasks: UserTask[];
-  xpSeries: DailyXpPoint[];
+  xpSeries: NormalizedDailyXpPoint[];
 };
 
 function buildRange(daysBack: number) {
   const to = new Date();
   const from = new Date();
   from.setUTCDate(from.getUTCDate() - daysBack);
-  const format = (date: Date) => date.toISOString().slice(0, 10);
-  return { from: format(from), to: format(to) };
+  return { from: dateStr(from), to: dateStr(to) };
 }
 
-function computeWeeklyXp(series: DailyXpPoint[]): number {
+function computeWeeklyXp(series: NormalizedDailyXpPoint[]): number {
   const sorted = [...series].sort((a, b) => (a.date > b.date ? -1 : 1));
   const recent = sorted.slice(0, 7);
   return recent.reduce((sum, entry) => sum + (entry.xp_day ?? 0), 0);
@@ -33,9 +35,24 @@ export function StreakPanel({ userId }: StreakPanelProps) {
       getUserDailyXp(userId, range),
     ]);
 
+    console.info('[DASH] dataset', { keyNames: Object.keys(tasks ?? {}), isArray: Array.isArray(tasks) });
+    console.info('[DASH] dataset', { keyNames: Object.keys(xp ?? {}), isArray: Array.isArray(xp) });
+
+    const normalizedTasks = asArray<UserTask>(tasks, 'tasks');
+    const normalizedSeries = asArray<DailyXpPoint>(xp, 'series').map((row) => {
+      const rawDate = (row as any)?.day ?? row.date ?? (row as any)?.created_at ?? (row as any)?.timestamp;
+      const day = dateStr(rawDate);
+      const fallbackDate = day || row.date || '';
+      return {
+        ...row,
+        day,
+        date: fallbackDate,
+      } satisfies NormalizedDailyXpPoint;
+    });
+
     return {
-      tasks,
-      xpSeries: xp.series ?? [],
+      tasks: normalizedTasks,
+      xpSeries: normalizedSeries,
     };
   }, [userId, range.from, range.to]);
 

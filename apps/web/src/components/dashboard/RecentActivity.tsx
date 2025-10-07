@@ -1,7 +1,9 @@
 import { Card } from '../common/Card';
 import { Skeleton } from '../common/Skeleton';
+import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getTaskLogs } from '../../lib/api';
+import { asArray, dateStr } from '../../lib/safe';
 import { ActivityItem } from './ActivityItem';
 
 interface RecentActivityProps {
@@ -10,6 +12,22 @@ interface RecentActivityProps {
 
 export function RecentActivity({ userId }: RecentActivityProps) {
   const { data, status, error, reload } = useRequest(() => getTaskLogs(userId, { limit: 6 }), [userId]);
+  const logs = useMemo(() => {
+    console.info('[DASH] dataset', { keyNames: Object.keys(data ?? {}), isArray: Array.isArray(data) });
+    return asArray(data).map((row) => {
+      const rawDate =
+        (row as any)?.day ??
+        (row as any)?.date ??
+        (row as any)?.created_at ??
+        (row as any)?.timestamp ??
+        (row as any)?.completedAt ??
+        (row as any)?.doneAt;
+      return {
+        ...row,
+        day: dateStr(rawDate),
+      };
+    });
+  }, [data]);
 
   return (
     <Card
@@ -47,15 +65,15 @@ export function RecentActivity({ userId }: RecentActivityProps) {
         </div>
       )}
 
-      {status === 'success' && data && data.length > 0 && (
+      {status === 'success' && logs.length > 0 && (
         <ul className="grid gap-3">
-          {data.map((log) => (
+          {logs.map((log) => (
             <ActivityItem key={log.id} log={log} />
           ))}
         </ul>
       )}
 
-      {status === 'success' && (!data || data.length === 0) && (
+      {status === 'success' && logs.length === 0 && (
         <div className="space-y-2 text-sm text-text-subtle">
           <p>No quests logged yet.</p>
           <p className="text-xs text-text-muted">Complete your first task to start the streak.</p>
