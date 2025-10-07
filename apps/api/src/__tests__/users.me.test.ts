@@ -40,24 +40,9 @@ describe('GET /api/users/me', () => {
     expect(mockQuery).not.toHaveBeenCalled();
   });
 
-  it('returns 404 when the user is not found', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
-
-    const response = await request(app)
-      .get('/api/users/me')
-      .set('x-user-id', 'user_123');
-
-    expect(response.status).toBe(404);
-    expect(response.body).toEqual({
-      code: 'user_not_found',
-      message: 'User not found',
-    });
-    expect(mockQuery).toHaveBeenCalledWith('SELECT * FROM users WHERE clerk_user_id = $1', ['user_123']);
-  });
-
   it('returns the user when found', async () => {
     const user: CurrentUserRow = {
-      id: 'user-row-id',
+      user_id: 'user-row-id',
       clerk_user_id: 'user_456',
       email_primary: 'test@example.com',
       full_name: 'Test User',
@@ -78,6 +63,93 @@ describe('GET /api/users/me', () => {
       .set('x-user-id', 'user_456');
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(user);
+    expect(response.body).toEqual({ user });
+    expect(mockQuery).toHaveBeenCalledTimes(1);
+    expect(mockQuery).toHaveBeenCalledWith(
+      'SELECT * FROM users WHERE clerk_user_id = $1 LIMIT 1',
+      ['user_456'],
+    );
+  });
+
+  it('creates and returns the user when missing', async () => {
+    const created: CurrentUserRow = {
+      user_id: 'new-id',
+      clerk_user_id: 'user_123',
+      email_primary: null,
+      full_name: null,
+      image_url: null,
+      game_mode: null,
+      weekly_target: null,
+      timezone: null,
+      locale: null,
+      created_at: '2024-01-01T00:00:00.000Z',
+      updated_at: '2024-01-01T00:00:00.000Z',
+      deleted_at: null,
+    };
+
+    mockQuery
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [created] });
+
+    const response = await request(app)
+      .get('/api/users/me')
+      .set('x-user-id', 'user_123');
+
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual({ user: created });
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      1,
+      'SELECT * FROM users WHERE clerk_user_id = $1 LIMIT 1',
+      ['user_123'],
+    );
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      2,
+      'INSERT INTO users (clerk_user_id) VALUES ($1) ON CONFLICT (clerk_user_id) DO NOTHING RETURNING *',
+      ['user_123'],
+    );
+  });
+
+  it('falls back to selecting the user when the insert returns no rows', async () => {
+    const fetched: CurrentUserRow = {
+      user_id: 'existing-id',
+      clerk_user_id: 'user_789',
+      email_primary: 'test@example.com',
+      full_name: 'Test User',
+      image_url: null,
+      game_mode: null,
+      weekly_target: null,
+      timezone: null,
+      locale: null,
+      created_at: '2024-01-01T00:00:00.000Z',
+      updated_at: '2024-01-01T00:00:00.000Z',
+      deleted_at: null,
+    };
+
+    mockQuery
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [fetched] });
+
+    const response = await request(app)
+      .get('/api/users/me')
+      .set('x-user-id', 'user_789');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ user: fetched });
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      1,
+      'SELECT * FROM users WHERE clerk_user_id = $1 LIMIT 1',
+      ['user_789'],
+    );
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      2,
+      'INSERT INTO users (clerk_user_id) VALUES ($1) ON CONFLICT (clerk_user_id) DO NOTHING RETURNING *',
+      ['user_789'],
+    );
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      3,
+      'SELECT * FROM users WHERE clerk_user_id = $1 LIMIT 1',
+      ['user_789'],
+    );
   });
 });
