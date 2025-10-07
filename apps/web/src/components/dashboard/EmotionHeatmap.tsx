@@ -64,14 +64,16 @@ export function EmotionHeatmap({ userId }: EmotionHeatmapProps) {
           <div className="grid grid-cols-7 gap-2">
             {data.map((entry: EmotionSnapshot) => {
               const intensity = normalizeIntensity(entry.intensity ?? entry.score ?? entry.value ?? 0);
+              const moodLabelRaw = entry.mood == null ? '' : String(entry.mood);
+              const moodDisplay = moodLabelRaw ? moodLabelRaw.slice(0, 6) : '—';
               return (
                 <div
                   key={entry.date}
                   className="flex aspect-square flex-col items-center justify-center rounded-lg border border-white/5 text-center text-[10px] text-white/80"
                   style={{ background: `${tileColor(intensity)}` }}
-                  title={`${entry.mood || 'Mood'} — ${entry.note || ''}`.trim()}
+                  title={`${moodLabelRaw || 'Mood'} — ${entry.note || ''}`.trim()}
                 >
-                  <span className="font-semibold">{entry.mood?.slice(0, 6) || '—'}</span>
+                  <span className="font-semibold">{moodDisplay}</span>
                 </div>
               );
             })}

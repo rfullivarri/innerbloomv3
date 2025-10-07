@@ -22,6 +22,7 @@ import { EmotionTimeline } from '../components/dashboard-v3/EmotionTimeline';
 import { StreakPanel } from '../components/dashboard-v3/StreakPanel';
 import { MissionsSection } from '../components/dashboard-v3/MissionsSection';
 import { useBackendUser } from '../hooks/useBackendUser';
+import { DevErrorBoundary } from '../components/DevErrorBoundary';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -39,10 +40,11 @@ export default function DashboardV3Page() {
     profile?.full_name || user?.fullName || user?.primaryEmailAddress?.emailAddress || '';
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1 px-4 pb-16 pt-6 md:px-8">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <DevErrorBoundary>
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex-1 px-4 pb-16 pt-6 md:px-8">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
           {isLoadingProfile && <ProfileSkeleton />}
 
           {failedToLoadProfile && !isLoadingProfile && (
@@ -71,9 +73,10 @@ export default function DashboardV3Page() {
               <MissionsSection userId={backendUserId} />
             </>
           )}
-        </div>
-      </main>
-    </div>
+          </div>
+        </main>
+      </div>
+    </DevErrorBoundary>
   );
 }
 

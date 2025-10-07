@@ -1,5 +1,43 @@
 import { logApiDebug, logApiError } from './logger';
 
+function logShape(tag: string, value: unknown) {
+  try {
+    const shape = Array.isArray(value)
+      ? {
+          isArray: true,
+          length: value.length,
+          sample: value
+            .slice(0, 3)
+            .map((entry) => Object.fromEntries(Object.entries((entry as Record<string, unknown>) ?? {}).slice(0, 8))),
+        }
+      : {
+          isArray: false,
+          keys: Object.keys((value as Record<string, unknown>) ?? {}).slice(0, 10),
+        };
+
+    if (typeof window === 'undefined' || (window as any).__DBG !== false) {
+      console.info(`[SHAPE] ${tag}`, shape);
+    }
+  } catch (error) {
+    console.warn('[SHAPE] failed to log shape', { tag, error });
+  }
+}
+
+function extractArray<T>(source: any, ...keys: string[]): T[] {
+  if (Array.isArray(source)) {
+    return source as T[];
+  }
+
+  for (const key of keys) {
+    const value = source?.[key];
+    if (Array.isArray(value)) {
+      return value as T[];
+    }
+  }
+
+  return [];
+}
+
 const RAW_API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? '').trim();
 
 function normalizeBaseUrl(value: string): string {
@@ -245,7 +283,9 @@ export type LeaderboardEntry = {
 };
 
 export async function getLeaderboard(params: { limit?: number; offset?: number } = {}): Promise<LeaderboardEntry[]> {
-  return getJson<LeaderboardEntry[]>('/leaderboard', params);
+  const response = await getJson<unknown>('/leaderboard', params);
+  logShape('leaderboard', response);
+  return extractArray<LeaderboardEntry>(response, 'users', 'items', 'data');
 }
 
 export type Pillar = {
@@ -260,7 +300,9 @@ export type Pillar = {
 };
 
 export async function getPillars(): Promise<Pillar[]> {
-  return getJson<Pillar[]>('/pillars');
+  const response = await getJson<unknown>('/pillars');
+  logShape('pillars', response);
+  return extractArray<Pillar>(response, 'pillars', 'items', 'data');
 }
 
 export type UserTask = {
@@ -280,8 +322,9 @@ type UserTasksResponse = {
 };
 
 export async function getTasks(userId: string): Promise<UserTask[]> {
-  const response = await getJson<UserTasksResponse>(`/users/${encodeURIComponent(userId)}/tasks`);
-  return response.tasks ?? [];
+  const response = await getJson<UserTasksResponse | UserTask[]>(`/users/${encodeURIComponent(userId)}/tasks`);
+  logShape('tasks', response);
+  return extractArray<UserTask>(response, 'tasks', 'items', 'data');
 }
 
 export type TaskLog = {
@@ -296,7 +339,9 @@ export type TaskLog = {
 };
 
 export async function getTaskLogs(userId: string, params: { limit?: number } = {}): Promise<TaskLog[]> {
-  return getJson<TaskLog[]>('/task-logs', { ...params, userId });
+  const response = await getJson<unknown>('/task-logs', { ...params, userId });
+  logShape('task-logs', response);
+  return extractArray<TaskLog>(response, 'items', 'logs', 'data', 'task_logs');
 }
 
 type EmotionLogResponse = {
@@ -369,15 +414,25 @@ function buildEmotionQuery(params: EmotionQuery): Record<string, string> {
 }
 
 export async function getEmotions(userId: string, params: EmotionQuery = {}): Promise<EmotionSnapshot[]> {
-  const response = await getJson<EmotionLogResponse>(
+  const response = await getJson<EmotionLogResponse | { emotions?: unknown }>(
     `/users/${encodeURIComponent(userId)}/emotions`,
     buildEmotionQuery(params),
   );
 
-  return response.emotions.map((entry) => ({
-    date: entry.date,
-    mood: EMOTION_LABELS[String(entry.emotion_id ?? '').toLowerCase()] || entry.emotion_id || undefined,
-  }));
+  logShape('emotions', response);
+
+  const emotions = extractArray<{ date: string; emotion_id: string | null }>(response, 'emotions');
+
+  return emotions.map((entry) => {
+    const rawId = entry.emotion_id;
+    const normalized = rawId == null ? '' : String(rawId);
+    const moodLabel = normalized ? EMOTION_LABELS[normalized.toLowerCase()] ?? normalized : undefined;
+
+    return {
+      date: entry.date,
+      mood: moodLabel,
+    };
+  });
 }
 
 export type UserState = {
@@ -408,7 +463,9 @@ export type UserState = {
 };
 
 export async function getUserState(userId: string): Promise<UserState> {
-  return getJson<UserState>(`/users/${encodeURIComponent(userId)}/state`);
+  const response = await getJson<UserState>(`/users/${encodeURIComponent(userId)}/state`);
+  logShape('user-state', response);
+  return response;
 }
 
 export type EnergyTimeseriesPoint = {
@@ -422,7 +479,9 @@ export async function getUserStateTimeseries(
   userId: string,
   params: { from: string; to: string },
 ): Promise<EnergyTimeseriesPoint[]> {
-  return getJson<EnergyTimeseriesPoint[]>(`/users/${encodeURIComponent(userId)}/state/timeseries`, params);
+  const response = await getJson<unknown>(`/users/${encodeURIComponent(userId)}/state/timeseries`, params);
+  logShape('user-state-timeseries', response);
+  return extractArray<EnergyTimeseriesPoint>(response, 'series', 'items', 'data');
 }
 
 export type DailyXpPoint = {
@@ -440,7 +499,9 @@ export async function getUserDailyXp(
   userId: string,
   params: { from?: string; to?: string } = {},
 ): Promise<DailyXpResponse> {
-  return getJson<DailyXpResponse>(`/users/${encodeURIComponent(userId)}/xp/daily`, params);
+  const response = await getJson<DailyXpResponse>(`/users/${encodeURIComponent(userId)}/xp/daily`, params);
+  logShape('user-daily-xp', response);
+  return response;
 }
 
 export type CurrentUserProfile = {
@@ -469,6 +530,8 @@ export async function getCurrentUserProfile(clerkUserId: string): Promise<Curren
     },
   });
 
+  logShape('current-user', response);
+
   return response.user;
 }
 
@@ -483,7 +546,9 @@ export type UserLevelResponse = {
 };
 
 export async function getUserLevel(userId: string): Promise<UserLevelResponse> {
-  return getJson<UserLevelResponse>(`/users/${encodeURIComponent(userId)}/level`);
+  const response = await getJson<UserLevelResponse>(`/users/${encodeURIComponent(userId)}/level`);
+  logShape('user-level', response);
+  return response;
 }
 
 export type UserTotalXpResponse = {
@@ -491,7 +556,9 @@ export type UserTotalXpResponse = {
 };
 
 export async function getUserTotalXp(userId: string): Promise<UserTotalXpResponse> {
-  return getJson<UserTotalXpResponse>(`/users/${encodeURIComponent(userId)}/xp/total`);
+  const response = await getJson<UserTotalXpResponse>(`/users/${encodeURIComponent(userId)}/xp/total`);
+  logShape('user-total-xp', response);
+  return response;
 }
 
 export type UserJourneySummary = {
@@ -501,5 +568,7 @@ export type UserJourneySummary = {
 };
 
 export async function getUserJourney(userId: string): Promise<UserJourneySummary> {
-  return getJson<UserJourneySummary>(`/users/${encodeURIComponent(userId)}/journey`);
+  const response = await getJson<UserJourneySummary>(`/users/${encodeURIComponent(userId)}/journey`);
+  logShape('user-journey', response);
+  return response;
 }

@@ -44,3 +44,7 @@ export const dateStr = (v: any): string =>
     : v?.toString
     ? new Date(v).toISOString().slice(0, 10)
     : '';
+
+export const safeMap = <T, R>(value: unknown, mapper: (item: T, index: number) => R): R[] => {
+  return Array.isArray(value) ? (value as T[]).map(mapper) : [];
+};
