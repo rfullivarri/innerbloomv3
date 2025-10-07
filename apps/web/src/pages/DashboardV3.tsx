@@ -18,7 +18,7 @@ import { XpSummaryCard } from '../components/dashboard-v3/XpSummaryCard';
 import { EnergyCard } from '../components/dashboard-v3/EnergyCard';
 import { DailyCultivationSection } from '../components/dashboard-v3/DailyCultivationSection';
 import { RadarChartCard } from '../components/dashboard-v3/RadarChartCard';
-import { EmotionTimeline } from '../components/dashboard-v3/EmotionTimeline';
+import { EmotionChart } from '../components/dashboard-v3/EmotionChart';
 import { StreakPanel } from '../components/dashboard-v3/StreakPanel';
 import { MissionsSection } from '../components/dashboard-v3/MissionsSection';
 import { ProfileCard } from '../components/dashboard-v3/ProfileCard';
@@ -61,7 +61,7 @@ export default function DashboardV3Page() {
                 </div>
                 <div className="space-y-6">
                   <RadarChartCard userId={backendUserId} />
-                  <EmotionTimeline userId={backendUserId} />
+                  <EmotionChart userId={backendUserId} />
                 </div>
                 <div className="space-y-6">
                   <StreakPanel userId={backendUserId} />
