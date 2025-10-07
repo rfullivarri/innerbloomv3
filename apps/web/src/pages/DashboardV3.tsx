@@ -21,6 +21,7 @@ import { RadarChartCard } from '../components/dashboard-v3/RadarChartCard';
 import { EmotionTimeline } from '../components/dashboard-v3/EmotionTimeline';
 import { StreakPanel } from '../components/dashboard-v3/StreakPanel';
 import { MissionsSection } from '../components/dashboard-v3/MissionsSection';
+import { ProfileCard } from '../components/dashboard-v3/ProfileCard';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
 
@@ -36,9 +37,6 @@ export default function DashboardV3Page() {
   const failedToLoadProfile = status === 'error' || !backendUserId;
 
   const avatarUrl = profile?.image_url || user?.imageUrl;
-  const displayName =
-    profile?.full_name || user?.fullName || user?.primaryEmailAddress?.emailAddress || '';
-
   return (
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
@@ -57,7 +55,7 @@ export default function DashboardV3Page() {
               <div className="grid gap-6 lg:grid-cols-[320px_1fr_320px]">
                 <div className="space-y-6">
                   <XpSummaryCard userId={backendUserId} />
-                  <AvatarCard imageUrl={avatarUrl} name={displayName} email={profile?.email_primary} />
+                  <ProfileCard imageUrl={avatarUrl} />
                   <EnergyCard userId={backendUserId} />
                   <DailyCultivationSection userId={backendUserId} />
                 </div>
@@ -78,12 +76,6 @@ export default function DashboardV3Page() {
       </div>
     </DevErrorBoundary>
   );
-}
-
-interface AvatarCardProps {
-  imageUrl?: string | null;
-  name?: string | null;
-  email?: string | null;
 }
 
 function ProfileSkeleton() {
@@ -119,38 +111,6 @@ function ProfileErrorState({ onRetry, error }: ProfileErrorStateProps) {
       >
         Reintentar
       </button>
-    </section>
-  );
-}
-
-function AvatarCard({ imageUrl, name, email }: AvatarCardProps) {
-  const displayName = name?.trim() || 'Jugador/a';
-  const displayEmail = email?.trim() ?? '';
-
-  return (
-    <section className="flex flex-col items-center gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-center text-sm text-text backdrop-blur">
-      <div className="h-28 w-28 overflow-hidden rounded-full border border-white/20 bg-white/10">
-        {imageUrl ? (
-          <img src={imageUrl} alt="Avatar" className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-3xl text-white">👤</div>
-        )}
-      </div>
-      <div className="space-y-1">
-        <p className="text-sm uppercase tracking-wide text-text-muted">Tu avatar</p>
-        <p className="text-lg font-semibold text-white">{displayName}</p>
-        {displayEmail && <p className="text-xs text-text-muted">{displayEmail}</p>}
-      </div>
-      <button
-        type="button"
-        disabled
-        className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-text"
-      >
-        Próximamente: cambiar avatar
-      </button>
-      <p className="text-[11px] text-text-muted">
-        Imagen sincronizada desde tu perfil (<code className="rounded bg-white/10 px-1 py-px text-[10px]">image_url</code>).
-      </p>
     </section>
   );
 }
