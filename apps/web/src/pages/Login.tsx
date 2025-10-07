@@ -6,9 +6,9 @@ export default function LoginPage() {
   return (
     <AuthLayout
       title={
-        <div className="flex items-center gap-3 text-4xl font-semibold uppercase tracking-[0.35em] text-white md:text-5xl">
-          <span className="h-3 w-3 rounded-full bg-rose-500 md:h-4 md:w-4" />
-          innerbloom
+        <div className="flex flex-col items-center gap-3 text-center text-3xl font-semibold uppercase tracking-[0.32em] text-white sm:flex-row sm:items-center sm:justify-start sm:gap-3 sm:text-left sm:text-4xl md:text-5xl">
+          <span className="h-2.5 w-2.5 rounded-full bg-rose-500 sm:h-3 sm:w-3 md:h-4 md:w-4" />
+          dashboard
         </div>
       }
       secondaryActionLabel="Volver al inicio"
@@ -35,7 +35,7 @@ export default function LoginPage() {
             },
             elements: {
               rootBox: 'w-full',
-              card: 'flex w-full flex-col gap-6 bg-white/5 p-8 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_25px_80px_rgba(15,23,42,0.35)]',
+              card: 'flex w-full flex-col gap-6 rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_25px_80px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:p-8',
               header: 'hidden',
               socialButtons: 'hidden',
               divider: 'hidden',
@@ -46,7 +46,7 @@ export default function LoginPage() {
                 'rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-base text-white placeholder:text-white/40 shadow-[0_6px_20px_rgba(99,102,241,0.15)] focus:border-white/40 focus:outline-none focus-visible:ring-0',
               formFieldInputShowPasswordButton: 'text-sm text-white/60 hover:text-white',
               formButtonPrimary:
-                'mt-3 inline-flex h-12 items-center justify-center rounded-full bg-gradient-to-r from-[#8b5cf6] via-[#6366f1] to-[#0ea5e9] text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all duration-200 hover:from-[#8b5cf6] hover:to-[#0ea5e9]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40',
+                'mt-3 inline-flex h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-[#8b5cf6] via-[#6366f1] to-[#0ea5e9] text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all duration-200 hover:from-[#8b5cf6] hover:to-[#0ea5e9]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:w-auto',
               footer:
                 'mt-6 flex flex-col items-center gap-1 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-center text-xs text-white/60 backdrop-blur-xl shadow-none',
               footerTitle: 'text-white/70',
