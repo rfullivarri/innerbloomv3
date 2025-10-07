@@ -49,37 +49,6 @@ export async function getProgress(userId: string): Promise<ProgressSummary> {
   return getJson<ProgressSummary>(`/users/${encodeURIComponent(userId)}/progress`);
 }
 
-export type Task = {
-  id: string;
-  title: string;
-  description?: string;
-  xp?: number;
-  difficulty?: string;
-  pillarId?: string;
-  trait?: string;
-  dueAt?: string;
-  status?: 'pending' | 'completed' | 'skipped' | string;
-};
-
-export async function getTasks(userId: string): Promise<Task[]> {
-  return getJson<Task[]>(`/users/${encodeURIComponent(userId)}/tasks`);
-}
-
-export type TaskLog = {
-  id: string;
-  taskId: string;
-  taskTitle: string;
-  completedAt?: string;
-  doneAt?: string;
-  xpAwarded?: number;
-  pillar?: string;
-  mode?: string;
-};
-
-export async function getTaskLogs(userId: string, params: { limit?: number } = {}): Promise<TaskLog[]> {
-  return getJson<TaskLog[]>(`/users/${encodeURIComponent(userId)}/task-logs`, params);
-}
-
 export type StreakSummary = {
   userId: string;
   current: number;
@@ -99,10 +68,6 @@ export type EmotionSnapshot = {
   value?: number;
   note?: string;
 };
-
-export async function getEmotions(userId: string, params: { days?: number } = {}): Promise<EmotionSnapshot[]> {
-  return getJson<EmotionSnapshot[]>(`/users/${encodeURIComponent(userId)}/emotions`, params);
-}
 
 export type LeaderboardEntry = {
   userId: string;
@@ -128,4 +93,163 @@ export type Pillar = {
 
 export async function getPillars(): Promise<Pillar[]> {
   return getJson<Pillar[]>('/pillars');
+}
+
+export type UserTask = {
+  task_id: string;
+  task: string;
+  pillar_id: string | null;
+  trait_id: string | null;
+  difficulty_id: string | null;
+  xp_base: number;
+  active: boolean;
+};
+
+type UserTasksResponse = {
+  limit: number;
+  offset: number;
+  tasks: UserTask[];
+};
+
+export async function getTasks(userId: string): Promise<UserTask[]> {
+  const response = await getJson<UserTasksResponse>(`/users/${encodeURIComponent(userId)}/tasks`);
+  return response.tasks ?? [];
+}
+
+export type TaskLog = {
+  id: string;
+  taskId: string;
+  taskTitle: string;
+  completedAt?: string;
+  doneAt?: string;
+  xpAwarded?: number;
+  pillar?: string;
+  mode?: string;
+};
+
+export async function getTaskLogs(userId: string, params: { limit?: number } = {}): Promise<TaskLog[]> {
+  return getJson<TaskLog[]>(`/users/${encodeURIComponent(userId)}/task-logs`, params);
+}
+
+type EmotionLogResponse = {
+  from: string;
+  to: string;
+  emotions: Array<{ date: string; emotion_id: string | null }>;
+};
+
+const EMOTION_LABELS: Record<string, string> = {
+  calm: 'Calma',
+  calma: 'Calma',
+  happiness: 'Felicidad',
+  happy: 'Felicidad',
+  felicidad: 'Felicidad',
+  motivation: 'Motivación',
+  motivacion: 'Motivación',
+  motivated: 'Motivación',
+  sadness: 'Tristeza',
+  triste: 'Tristeza',
+  ansiedad: 'Ansiedad',
+  anxiety: 'Ansiedad',
+  frustration: 'Frustración',
+  frustracion: 'Frustración',
+  tiredness: 'Cansancio',
+  cansancio: 'Cansancio',
+};
+
+export async function getEmotions(userId: string, params: { days?: number } = {}): Promise<EmotionSnapshot[]> {
+  const response = await getJson<EmotionLogResponse>(`/users/${encodeURIComponent(userId)}/emotions`, params);
+
+  return response.emotions.map((entry) => ({
+    date: entry.date,
+    mood: EMOTION_LABELS[String(entry.emotion_id ?? '').toLowerCase()] || entry.emotion_id || undefined,
+  }));
+}
+
+export type UserState = {
+  date: string;
+  mode: string;
+  weekly_target: number;
+  grace: {
+    applied: boolean;
+    unique_days: number;
+  };
+  pillars: {
+    Body: {
+      hp?: number;
+      xp_today: number;
+      xp_obj_day: number;
+    };
+    Mind: {
+      focus?: number;
+      xp_today: number;
+      xp_obj_day: number;
+    };
+    Soul: {
+      mood?: number;
+      xp_today: number;
+      xp_obj_day: number;
+    };
+  };
+};
+
+export async function getUserState(userId: string): Promise<UserState> {
+  return getJson<UserState>(`/users/${encodeURIComponent(userId)}/state`);
+}
+
+export type EnergyTimeseriesPoint = {
+  date: string;
+  Body: number;
+  Mind: number;
+  Soul: number;
+};
+
+export async function getUserStateTimeseries(
+  userId: string,
+  params: { from: string; to: string },
+): Promise<EnergyTimeseriesPoint[]> {
+  return getJson<EnergyTimeseriesPoint[]>(`/users/${encodeURIComponent(userId)}/state/timeseries`, params);
+}
+
+export type DailyXpPoint = {
+  date: string;
+  xp_day: number;
+};
+
+export type DailyXpResponse = {
+  from: string;
+  to: string;
+  series: DailyXpPoint[];
+};
+
+export async function getUserDailyXp(
+  userId: string,
+  params: { from?: string; to?: string } = {},
+): Promise<DailyXpResponse> {
+  return getJson<DailyXpResponse>(`/users/${encodeURIComponent(userId)}/xp/daily`, params);
+}
+
+export type UserLevelResponse = {
+  level: number;
+};
+
+export async function getUserLevel(userId: string): Promise<UserLevelResponse> {
+  return getJson<UserLevelResponse>(`/users/${encodeURIComponent(userId)}/level`);
+}
+
+export type UserTotalXpResponse = {
+  total_xp: number;
+};
+
+export async function getUserTotalXp(userId: string): Promise<UserTotalXpResponse> {
+  return getJson<UserTotalXpResponse>(`/users/${encodeURIComponent(userId)}/xp/total`);
+}
+
+export type UserJourneySummary = {
+  first_date_log: string | null;
+  days_of_journey: number;
+  quantity_daily_logs: number;
+};
+
+export async function getUserJourney(userId: string): Promise<UserJourneySummary> {
+  return getJson<UserJourneySummary>(`/users/${encodeURIComponent(userId)}/journey`);
 }
