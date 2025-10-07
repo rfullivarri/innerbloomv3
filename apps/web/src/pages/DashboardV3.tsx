@@ -64,7 +64,11 @@ export default function DashboardV3Page() {
                   <EmotionChart userId={backendUserId} />
                 </div>
                 <div className="space-y-6">
-                  <StreakPanel userId={backendUserId} />
+                  <StreakPanel
+                    userId={backendUserId}
+                    gameMode={profile?.game_mode}
+                    weeklyTarget={profile?.weekly_target}
+                  />
                   <RewardsPlaceholder />
                 </div>
               </div>

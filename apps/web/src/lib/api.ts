@@ -528,6 +528,55 @@ export async function getUserXpByTrait(
   return { traits };
 }
 
+export type StreakPanelPillar = 'Body' | 'Mind' | 'Soul';
+export type StreakPanelRange = 'week' | 'month' | 'qtr';
+
+export type StreakPanelTopEntry = {
+  id: string;
+  name: string;
+  stat: string;
+  weekDone: number;
+  streakWeeks: number;
+};
+
+export type StreakPanelTask = {
+  id: string;
+  name: string;
+  stat: string;
+  weekDone: number;
+  streakWeeks: number;
+  metrics: {
+    week: { count: number; xp: number };
+    month: { count: number; xp: number; weeks: number[] };
+    qtr: { count: number; xp: number; weeks: number[] };
+  };
+};
+
+export type StreakPanelResponse = {
+  topStreaks: StreakPanelTopEntry[];
+  tasks: StreakPanelTask[];
+};
+
+export async function getUserStreakPanel(
+  userId: string,
+  params: { pillar: StreakPanelPillar; range: StreakPanelRange; mode?: string; query?: string },
+): Promise<StreakPanelResponse> {
+  const normalized: Record<string, string | undefined> = {
+    pillar: params.pillar,
+    range: params.range,
+    mode: params.mode,
+    query: params.query?.trim() ? params.query.trim() : undefined,
+  };
+
+  const response = await getJson<StreakPanelResponse>(
+    `/users/${encodeURIComponent(userId)}/streaks/panel`,
+    normalized,
+  );
+
+  logShape('user-streak-panel', response);
+  return response;
+}
+
 export type CurrentUserProfile = {
   user_id: string;
   clerk_user_id: string;
