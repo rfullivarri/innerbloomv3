@@ -9,6 +9,7 @@ import { getUserState } from '../controllers/users/get-user-state.js';
 import { getUserStateTimeseries } from '../controllers/users/get-user-state-timeseries.js';
 import { getUserTotalXp } from '../controllers/users/get-user-total-xp.js';
 import { asyncHandler } from '../lib/async-handler.js';
+import { getUserStreakPanel } from './users/streak-panel.js';
 import { getUserXpByTrait } from './users/xp-by-trait.js';
 
 const router = Router();
@@ -17,6 +18,7 @@ router.get('/users/:id/tasks', asyncHandler(getUserTasks));
 router.get('/users/:id/xp/daily', asyncHandler(getUserDailyXp));
 router.get('/users/:id/xp/total', asyncHandler(getUserTotalXp));
 router.get('/users/:id/xp/by-trait', asyncHandler(getUserXpByTrait));
+router.get('/users/:id/streaks/panel', asyncHandler(getUserStreakPanel));
 router.get('/users/:id/level', asyncHandler(getUserLevel));
 router.get('/users/:id/journey', asyncHandler(getUserJourney));
 router.get('/users/:id/emotions', asyncHandler(getUserEmotions));
