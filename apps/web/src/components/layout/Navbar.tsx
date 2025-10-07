@@ -9,7 +9,11 @@ export function Navbar() {
     await signOut({ redirectUrl: '/' });
   };
 
-  const displayName = user?.fullName || user?.primaryEmailAddress?.emailAddress || userId?.slice(0, 8);
+  const fallbackId = userId == null ? '' : typeof userId === 'string' ? userId : String(userId);
+  const displayName =
+    user?.fullName ||
+    user?.primaryEmailAddress?.emailAddress ||
+    (fallbackId ? fallbackId.slice(0, 8) : '');
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/5 bg-surface/75 backdrop-blur">
