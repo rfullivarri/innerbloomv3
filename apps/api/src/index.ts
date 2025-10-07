@@ -6,8 +6,8 @@ import fastifyExpress from '@fastify/express';
 import fastifyRawBody from 'fastify-raw-body';
 import app from './app.js';
 import { dbReady, pool } from './db.js';
+import { logRegisteredRoutes } from './lib/route-logger.js';
 import clerkWebhookRoutes from './routes/webhooks/clerk.js';
-import usersMeRoutes from './routes/users.me.js';
 
 const fastify = Fastify({
   logger: true,
@@ -27,7 +27,7 @@ const configureServer = (async () => {
   fastify.get('/healthz', async () => ({ ok: true }));
 
   await fastify.register(clerkWebhookRoutes);
-  await fastify.register(usersMeRoutes);
+  await logRegisteredRoutes({ expressApp: app, fastify });
 
   fastify.addHook('onClose', async () => {
     await pool.end();

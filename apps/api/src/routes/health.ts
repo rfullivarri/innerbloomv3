@@ -5,6 +5,13 @@ import { pool } from '../db.js';
 const router = Router();
 
 router.get(
+  '/_health',
+  asyncHandler(async (_req, res) => {
+    res.json({ ok: true });
+  }),
+);
+
+router.get(
   '/health/db',
   asyncHandler(async (_req, res) => {
     try {

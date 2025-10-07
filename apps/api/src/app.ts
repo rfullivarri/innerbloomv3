@@ -1,6 +1,6 @@
 import process from 'node:process';
 import cors, { type CorsOptions } from 'cors';
-import express, { Request, Response } from 'express';
+import express, { type NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import routes from './routes/index.js';
 import { HttpError, isHttpError } from './lib/http-error.js';
@@ -49,7 +49,7 @@ app.use((_req, _res, next) => {
   next(new HttpError(404, 'not_found', 'Route not found'));
 });
 
-app.use((error: unknown, _req: Request, res: Response) => {
+app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (isHttpError(error)) {
     if (error.details) {
       console.error('Request failed', { code: error.code, details: error.details });
