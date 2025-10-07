@@ -63,10 +63,19 @@ export default function DashboardV3Page() {
                   <DailyCultivationSection userId={backendUserId} />
                 </div>
 
+
                 <div className="lg:col-span-5 space-y-4 md:space-y-5">
                   <ProfileCard imageUrl={avatarUrl} />
                   <EnergyCard userId={backendUserId} />
                   <StreaksPanel userId={backendUserId} />
+
+                <div className="space-y-6">
+                  <StreakPanel
+                    userId={backendUserId}
+                    gameMode={profile?.game_mode}
+                    weeklyTarget={profile?.weekly_target}
+                  />
+
                   <RewardsPlaceholder />
                 </div>
 
