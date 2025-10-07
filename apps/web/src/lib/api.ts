@@ -1,5 +1,34 @@
+import { logApiDebug, logApiError } from './logger';
+
 const RAW_API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? '').trim();
-export const API_BASE = RAW_API_BASE_URL.replace(/\/+$/, '');
+
+function normalizeBaseUrl(value: string): string {
+  if (!value) {
+    return '';
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  const hasProtocol = /^https?:\/\//i.test(trimmed);
+  const withProtocol = hasProtocol ? trimmed : `https://${trimmed}`;
+
+  try {
+    const normalized = new URL(withProtocol);
+    return `${normalized.origin}${normalized.pathname.replace(/\/+$/, '')}`;
+  } catch (error) {
+    logApiError('Failed to normalize API base URL', { value, error });
+    return '';
+  }
+}
+
+export const API_BASE = normalizeBaseUrl(RAW_API_BASE_URL);
+
+if (API_BASE) {
+  logApiDebug('API base URL configured', { raw: RAW_API_BASE_URL, normalized: API_BASE });
+}
 
 function ensureBase(): string {
   if (!API_BASE) {
@@ -32,17 +61,31 @@ async function getJson<T>(
     headers.set('Accept', 'application/json');
   }
 
-  const response = await fetch(buildUrl(path, params), {
-    ...rest,
-    headers,
-  });
+  const url = buildUrl(path, params);
+  logApiDebug('API request', { path, params, url, init: { ...rest, headers: Object.fromEntries(headers.entries()) } });
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    throw new Error(`Request failed with ${response.status}: ${text || response.statusText}`);
+  try {
+    const response = await fetch(url, {
+      ...rest,
+      headers,
+    });
+
+    logApiDebug('API response received', { url, status: response.status });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      const errorMessage = `Request failed with ${response.status}: ${text || response.statusText}`;
+      logApiError('API request failed', { url, status: response.status, body: text });
+      throw new Error(errorMessage);
+    }
+
+    const json = (await response.json()) as T;
+    logApiDebug('API response parsed', { url, data: json });
+    return json;
+  } catch (error) {
+    logApiError('API request threw', { url, error });
+    throw error;
   }
-
-  return response.json() as Promise<T>;
 }
 
 export type ProgressSummary = {
@@ -55,8 +98,51 @@ export type ProgressSummary = {
   nextLevelLabel?: string;
 };
 
+function toNumber(value: unknown, fallback = 0): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function formatDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function addUtcDays(date: Date, days: number): Date {
+  const clone = new Date(date);
+  clone.setUTCDate(clone.getUTCDate() + days);
+  return clone;
+}
+
+function enumerateDateKeys(from: Date, to: Date): string[] {
+  const keys: string[] = [];
+  for (let cursor = new Date(from); cursor <= to; cursor = addUtcDays(cursor, 1)) {
+    keys.push(formatDateKey(cursor));
+  }
+  return keys;
+}
+
 export async function getProgress(userId: string): Promise<ProgressSummary> {
-  return getJson<ProgressSummary>(`/users/${encodeURIComponent(userId)}/progress`);
+  const level = await getUserLevel(userId);
+
+  const totalXp = toNumber(level.xp_total, 0);
+  const currentLevel = toNumber(level.current_level, 0);
+  const xpRequiredCurrent = toNumber(level.xp_required_current, 0);
+  const xpRequiredNext = level.xp_required_next == null ? undefined : toNumber(level.xp_required_next, 0);
+  const xpToNext = level.xp_to_next == null ? undefined : Math.max(0, toNumber(level.xp_to_next, 0));
+
+  const xpIntoLevel = xpRequiredNext != null && xpToNext != null
+    ? Math.max(0, xpRequiredNext - xpToNext)
+    : Math.max(0, totalXp - xpRequiredCurrent);
+
+  return {
+    userId,
+    totalXp,
+    level: currentLevel,
+    nextLevelXp: xpRequiredNext,
+    xpIntoLevel,
+    xpToNextLevel: xpToNext,
+    nextLevelLabel: xpRequiredNext != null ? `Level ${currentLevel + 1}` : undefined,
+  };
 }
 
 export type StreakSummary = {
@@ -67,7 +153,62 @@ export type StreakSummary = {
 };
 
 export async function getStreaks(userId: string): Promise<StreakSummary> {
-  return getJson<StreakSummary>(`/users/${encodeURIComponent(userId)}/streaks`);
+  const today = new Date();
+  const rangeEnd = formatDateKey(today);
+  const rangeStartDate = addUtcDays(today, -59);
+  const rangeStart = formatDateKey(rangeStartDate);
+
+  const dailyXp = await getUserDailyXp(userId, { from: rangeStart, to: rangeEnd });
+  const xpByDate = new Map<string, number>();
+
+  for (const point of dailyXp.series) {
+    xpByDate.set(point.date, Math.max(0, toNumber(point.xp_day, 0)));
+  }
+
+  const allDates = enumerateDateKeys(rangeStartDate, today);
+
+  let longest = 0;
+  let currentRun = 0;
+
+  for (const key of allDates) {
+    const xp = xpByDate.get(key) ?? 0;
+    if (xp > 0) {
+      currentRun += 1;
+      if (currentRun > longest) {
+        longest = currentRun;
+      }
+    } else {
+      currentRun = 0;
+    }
+  }
+
+  let current = 0;
+  let allowTrailingSkip = true;
+
+  for (let index = allDates.length - 1; index >= 0; index -= 1) {
+    const key = allDates[index];
+    const xp = xpByDate.get(key) ?? 0;
+
+    if (xp > 0) {
+      current += 1;
+      allowTrailingSkip = false;
+      continue;
+    }
+
+    if (allowTrailingSkip) {
+      allowTrailingSkip = false;
+      continue;
+    }
+
+    break;
+  }
+
+  return {
+    userId,
+    current,
+    longest,
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 export type EmotionSnapshot = {
@@ -138,7 +279,7 @@ export type TaskLog = {
 };
 
 export async function getTaskLogs(userId: string, params: { limit?: number } = {}): Promise<TaskLog[]> {
-  return getJson<TaskLog[]>(`/users/${encodeURIComponent(userId)}/task-logs`, params);
+  return getJson<TaskLog[]>('/task-logs', { ...params, userId });
 }
 
 type EmotionLogResponse = {
