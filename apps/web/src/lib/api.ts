@@ -395,7 +395,7 @@ export type CurrentUserProfile = {
 };
 
 export async function getCurrentUserProfile(clerkUserId: string): Promise<CurrentUserProfile> {
-  return getJson<CurrentUserProfile>('/api/users/me', undefined, {
+  return getJson<CurrentUserProfile>('/users/me', undefined, {
     headers: {
       'X-User-Id': clerkUserId,
     },
