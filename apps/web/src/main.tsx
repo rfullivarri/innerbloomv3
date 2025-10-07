@@ -16,7 +16,7 @@ declare global {
 setApiLoggingEnabled(true);
 
 if (typeof window !== 'undefined') {
-  (window as any).__DBG = true;
+  (window as any).__DBG ??= true;
   (window as any).setDbg = (on: boolean) => ((window as any).__DBG = !!on);
   window.setInnerbloomApiLogging = setApiLoggingEnabled;
   window.isInnerbloomApiLoggingEnabled = isApiLoggingEnabled;
