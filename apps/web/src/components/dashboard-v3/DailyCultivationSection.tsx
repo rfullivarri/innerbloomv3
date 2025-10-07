@@ -12,6 +12,12 @@ type MonthBucket = {
   days: DailyXpPoint[];
 };
 
+const XP_NUMBER_FORMATTER = new Intl.NumberFormat('es-AR');
+
+function formatNumber(value: number): string {
+  return XP_NUMBER_FORMATTER.format(Math.round(value));
+}
+
 function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
@@ -56,7 +62,20 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
     }
   }, [buckets, selectedMonth]);
 
-  const activeBucket = buckets.find((bucket) => bucket.key === selectedMonth) ?? buckets[0];
+  const activeBucket = useMemo(
+    () => buckets.find((bucket) => bucket.key === selectedMonth) ?? buckets[0],
+    [buckets, selectedMonth],
+  );
+
+  const monthlySummary = useMemo(() => {
+    if (!activeBucket || activeBucket.days.length === 0) {
+      return { total: 0, average: 0 };
+    }
+
+    const total = activeBucket.days.reduce((sum, entry) => sum + entry.xp_day, 0);
+    const average = total / activeBucket.days.length;
+    return { total, average };
+  }, [activeBucket]);
 
   return (
     <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
@@ -94,11 +113,19 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
 
       {status === 'success' && activeBucket && activeBucket.days.length > 0 && (
         <div className="mt-6 space-y-4">
-          <div className="flex items-end gap-1 rounded-2xl border border-white/10 bg-white/5 p-4">
-            <BarChart days={activeBucket.days} />
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <LineChart days={activeBucket.days} />
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-text-muted">
+            <span>
+              Total XP del mes: <span className="font-semibold text-white">{formatNumber(monthlySummary.total)}</span>
+            </span>
+            <span>
+              Promedio diario: <span className="font-semibold text-white">{formatNumber(monthlySummary.average)}</span> XP
+            </span>
           </div>
           <p className="text-xs text-text-muted">
-            Cada barra representa los XP obtenidos en el día. Replicamos la vista mensual del MVP usando los datos del endpoint
+            Replicamos la vista mensual del MVP usando los datos del endpoint
             <code className="ml-1 rounded bg-white/10 px-1 py-px text-[10px]">/users/:id/xp/daily</code>.
           </p>
         </div>
@@ -107,30 +134,111 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
   );
 }
 
-interface BarChartProps {
+interface LineChartProps {
   days: DailyXpPoint[];
 }
 
-function BarChart({ days }: BarChartProps) {
-  const maxValue = Math.max(...days.map((day) => day.xp_day), 1);
+function LineChart({ days }: LineChartProps) {
+  const sorted = [...days].sort((a, b) => (a.date > b.date ? 1 : -1));
+  const maxValue = Math.max(...sorted.map((day) => day.xp_day), 1);
+
+  const dayFormatter = new Intl.DateTimeFormat('es-AR', { day: 'numeric' });
+
+  const width = 640;
+  const height = 220;
+  const paddingX = 32;
+  const paddingY = 24;
+  const innerWidth = width - paddingX * 2;
+  const innerHeight = height - paddingY * 2;
+  const baselineY = paddingY + innerHeight;
+
+  const points = sorted.map((day, index) => {
+    const ratio = sorted.length === 1 ? 0.5 : index / (sorted.length - 1);
+    const x = paddingX + innerWidth * ratio;
+    const y = baselineY - (day.xp_day / maxValue) * innerHeight;
+    return { x, y, day };
+  });
+
+  const linePath = points
+    .map((point, index) => `${index === 0 ? 'M' : 'L'}${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
+    .join(' ');
+
+  const areaPath = points.length > 0
+    ? [`M${points[0].x.toFixed(2)} ${baselineY}`, ...points.map((point) => `L${point.x.toFixed(2)} ${point.y.toFixed(2)}`), `L${points[points.length - 1].x.toFixed(2)} ${baselineY}`, 'Z'].join(' ')
+    : '';
+
+  const gridLevels = [0.25, 0.5, 0.75, 1];
+  const ticks = (() => {
+    if (points.length === 0) return [] as Array<{ index: number; label: string }>;
+    const tickCount = Math.min(points.length, 5);
+    const step = points.length > 1 ? (points.length - 1) / (tickCount - 1) : 1;
+    const set = new Set<number>();
+    for (let i = 0; i < tickCount; i += 1) {
+      set.add(Math.round(i * step));
+    }
+    return Array.from(set)
+      .sort((a, b) => a - b)
+      .map((index) => {
+        const point = points[index];
+        const date = new Date(point.day.date);
+        return { index, label: dayFormatter.format(date) };
+      });
+  })();
 
   return (
-    <div className="flex w-full items-end gap-[6px]">
-      {days.map((day) => {
-        const height = Math.round((day.xp_day / maxValue) * 100);
-        const date = new Date(day.date);
-        const label = date.getDate();
-        return (
-          <div key={day.date} className="flex flex-1 flex-col items-center justify-end">
-            <div
-              className="flex w-full max-w-[18px] flex-col justify-end rounded-full bg-gradient-to-t from-purple-800 via-violet-500 to-violet-300"
-              style={{ height: `${height}%`, minHeight: '8px' }}
-              title={`${day.date}: ${day.xp_day} XP`}
-            />
-            <span className="mt-2 text-[10px] text-text-muted">{label}</span>
-          </div>
-        );
-      })}
+    <div className="w-full">
+      <svg viewBox={`0 0 ${width} ${height}`} className="h-52 w-full">
+        <defs>
+          <linearGradient id="cultivationGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="rgba(147, 197, 253, 0.8)" />
+            <stop offset="100%" stopColor="rgba(147, 197, 253, 0.05)" />
+          </linearGradient>
+          <linearGradient id="cultivationStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#6366F1" />
+            <stop offset="100%" stopColor="#A855F7" />
+          </linearGradient>
+        </defs>
+
+        <rect
+          x={paddingX}
+          y={paddingY}
+          width={innerWidth}
+          height={innerHeight}
+          fill="none"
+          stroke="rgba(255, 255, 255, 0.08)"
+          strokeDasharray="4 4"
+        />
+
+        {gridLevels.map((level) => {
+          const y = baselineY - innerHeight * level;
+          return <line key={level} x1={paddingX} y1={y} x2={paddingX + innerWidth} y2={y} stroke="rgba(255,255,255,0.05)" />;
+        })}
+
+        {areaPath && <path d={areaPath} fill="url(#cultivationGradient)" />}
+        {linePath && <path d={linePath} fill="none" stroke="url(#cultivationStroke)" strokeWidth={3} strokeLinecap="round" />}
+
+        {points.map((point) => (
+          <circle
+            key={point.day.date}
+            cx={point.x}
+            cy={point.y}
+            r={4}
+            fill="#FDE68A"
+            stroke="#1F2937"
+            strokeWidth={1.5}
+          >
+            <title>{`${point.day.date}: ${point.day.xp_day} XP`}</title>
+          </circle>
+        ))}
+      </svg>
+
+      {ticks.length > 0 && (
+        <div className="mt-2 flex w-full justify-between text-[10px] uppercase tracking-wide text-text-muted">
+          {ticks.map((tick) => (
+            <span key={tick.index}>{tick.label}</span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

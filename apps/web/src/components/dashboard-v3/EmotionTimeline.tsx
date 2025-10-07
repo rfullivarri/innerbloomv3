@@ -16,6 +16,17 @@ const EMOTION_COLORS: Record<string, string> = {
   Cansancio: '#16A085',
 };
 
+function formatDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function buildRange(days: number) {
+  const to = new Date();
+  const from = new Date();
+  from.setUTCDate(from.getUTCDate() - (days - 1));
+  return { from: formatDate(from), to: formatDate(to) };
+}
+
 function countEmotions(entries: EmotionSnapshot[]): { name: string; count: number } | null {
   const map = new Map<string, number>();
   for (const entry of entries) {
@@ -34,15 +45,34 @@ function countEmotions(entries: EmotionSnapshot[]): { name: string; count: numbe
 }
 
 export function EmotionTimeline({ userId }: EmotionTimelineProps) {
-  const { data, status } = useRequest(() => getEmotions(userId, { days: 30 }), [userId]);
-  const mostFrequent = useMemo(() => countEmotions(data ?? []), [data]);
+  const range = useMemo(() => buildRange(15), []);
+  const { data, status } = useRequest(
+    () => getEmotions(userId, range),
+    [userId, range.from, range.to],
+  );
+
+  const entries = useMemo(
+    () => (data ?? []).slice().sort((a, b) => (a.date > b.date ? 1 : -1)),
+    [data],
+  );
+
+  const mostFrequent = useMemo(() => countEmotions(entries), [entries]);
+  const rangeLabel = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' });
+    const fromDate = new Date(range.from);
+    const toDate = new Date(range.to);
+    if (Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime())) {
+      return '';
+    }
+    return `${formatter.format(fromDate)} – ${formatter.format(toDate)}`;
+  }, [range.from, range.to]);
 
   return (
     <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
       <header className="flex flex-wrap items-center justify-between gap-3 text-white">
         <h3 className="text-lg font-semibold">💗 Emotion Chart</h3>
         <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-text-muted">
-          Últimos 30 días
+          Últimos 15 días
         </span>
       </header>
 
@@ -52,14 +82,15 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
         <p className="mt-6 text-sm text-rose-300">Todavía no pudimos cargar tus emociones.</p>
       )}
 
-      {status === 'success' && (!data || data.length === 0) && (
+      {status === 'success' && entries.length === 0 && (
         <p className="mt-6 text-sm text-text-muted">Registrá tu primera emoción para ver la línea temporal.</p>
       )}
 
-      {status === 'success' && data && data.length > 0 && (
+      {status === 'success' && entries.length > 0 && (
         <div className="mt-6 space-y-4">
+          {rangeLabel && <p className="text-xs text-text-muted">Período analizado: {rangeLabel}</p>}
           <div className="grid grid-cols-7 gap-2">
-            {data.map((entry) => {
+            {entries.map((entry) => {
               const color = EMOTION_COLORS[entry.mood ?? ''] ?? 'rgba(255,255,255,0.2)';
               return (
                 <div
@@ -85,7 +116,7 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
               <div>
                 <p className="font-semibold text-white">{mostFrequent.name}</p>
                 <p className="text-xs text-text-muted">
-                  Emoción más frecuente en los últimos 30 días ({mostFrequent.count} registros)
+                  Emoción más frecuente en los últimos 15 días ({mostFrequent.count} registros)
                 </p>
               </div>
             </div>

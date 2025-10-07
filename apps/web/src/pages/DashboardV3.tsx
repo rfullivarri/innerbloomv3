@@ -25,7 +25,7 @@ import { useBackendUser } from '../hooks/useBackendUser';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
-  const { backendUserId, status, error, reload, clerkUserId } = useBackendUser();
+  const { backendUserId, status, error, reload, clerkUserId, profile } = useBackendUser();
 
   if (!clerkUserId) {
     return null;
@@ -33,6 +33,10 @@ export default function DashboardV3Page() {
 
   const isLoadingProfile = status === 'idle' || status === 'loading';
   const failedToLoadProfile = status === 'error' || !backendUserId;
+
+  const avatarUrl = profile?.image_url || user?.imageUrl;
+  const displayName =
+    profile?.full_name || user?.fullName || user?.primaryEmailAddress?.emailAddress || '';
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -51,7 +55,7 @@ export default function DashboardV3Page() {
               <div className="grid gap-6 lg:grid-cols-[320px_1fr_320px]">
                 <div className="space-y-6">
                   <XpSummaryCard userId={backendUserId} />
-                  <AvatarCard imageUrl={user?.imageUrl} name={user?.fullName || user?.primaryEmailAddress?.emailAddress || ''} />
+                  <AvatarCard imageUrl={avatarUrl} name={displayName} email={profile?.email_primary} />
                   <EnergyCard userId={backendUserId} />
                   <DailyCultivationSection userId={backendUserId} />
                 </div>
@@ -76,6 +80,7 @@ export default function DashboardV3Page() {
 interface AvatarCardProps {
   imageUrl?: string | null;
   name?: string | null;
+  email?: string | null;
 }
 
 function ProfileSkeleton() {
@@ -115,7 +120,10 @@ function ProfileErrorState({ onRetry, error }: ProfileErrorStateProps) {
   );
 }
 
-function AvatarCard({ imageUrl, name }: AvatarCardProps) {
+function AvatarCard({ imageUrl, name, email }: AvatarCardProps) {
+  const displayName = name?.trim() || 'Jugador/a';
+  const displayEmail = email?.trim() ?? '';
+
   return (
     <section className="flex flex-col items-center gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-center text-sm text-text backdrop-blur">
       <div className="h-28 w-28 overflow-hidden rounded-full border border-white/20 bg-white/10">
@@ -127,7 +135,8 @@ function AvatarCard({ imageUrl, name }: AvatarCardProps) {
       </div>
       <div className="space-y-1">
         <p className="text-sm uppercase tracking-wide text-text-muted">Tu avatar</p>
-        <p className="text-lg font-semibold text-white">{name || 'Jugador/a'}</p>
+        <p className="text-lg font-semibold text-white">{displayName}</p>
+        {displayEmail && <p className="text-xs text-text-muted">{displayEmail}</p>}
       </div>
       <button
         type="button"
@@ -136,6 +145,9 @@ function AvatarCard({ imageUrl, name }: AvatarCardProps) {
       >
         Próximamente: cambiar avatar
       </button>
+      <p className="text-[11px] text-text-muted">
+        Imagen sincronizada desde tu perfil (<code className="rounded bg-white/10 px-1 py-px text-[10px]">image_url</code>).
+      </p>
     </section>
   );
 }

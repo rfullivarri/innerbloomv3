@@ -55,6 +55,11 @@ export function XpSummaryCard({ userId }: XpSummaryCardProps) {
       ? 'Nivel Máximo'
       : `${formatInteger(data.xpToNext)} XP`
     : '—';
+  const xpToNextMessage = showContent
+    ? data.xpToNext === null
+      ? 'Alcanzaste el nivel máximo disponible en esta etapa.'
+      : `Te faltan ${formatInteger(data.xpToNext)} XP para el próximo nivel.`
+    : '';
 
   return (
     <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
@@ -108,6 +113,8 @@ export function XpSummaryCard({ userId }: XpSummaryCardProps) {
               />
             </div>
           </div>
+
+          {xpToNextMessage && <p className="text-xs text-text-muted">{xpToNextMessage}</p>}
         </div>
       )}
     </section>

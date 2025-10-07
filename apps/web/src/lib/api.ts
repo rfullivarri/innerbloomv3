@@ -307,8 +307,55 @@ const EMOTION_LABELS: Record<string, string> = {
   cansancio: 'Cansancio',
 };
 
-export async function getEmotions(userId: string, params: { days?: number } = {}): Promise<EmotionSnapshot[]> {
-  const response = await getJson<EmotionLogResponse>(`/users/${encodeURIComponent(userId)}/emotions`, params);
+type EmotionQuery = {
+  days?: number;
+  from?: string;
+  to?: string;
+};
+
+function buildEmotionQuery(params: EmotionQuery): Record<string, string> {
+  const query: Record<string, string> = {};
+
+  let { from, to } = params;
+  const normalizedDays =
+    params.days != null && Number.isFinite(params.days)
+      ? Math.max(1, Math.floor(Number(params.days)))
+      : null;
+
+  if (!to && normalizedDays != null) {
+    to = formatDateKey(new Date());
+  }
+
+  if (normalizedDays != null) {
+    const reference = to ? new Date(to) : new Date();
+    if (!Number.isNaN(reference.getTime())) {
+      const start = new Date(reference);
+      start.setUTCDate(start.getUTCDate() - (normalizedDays - 1));
+      if (!from) {
+        from = formatDateKey(start);
+      }
+      if (!to) {
+        to = formatDateKey(reference);
+      }
+    }
+  }
+
+  if (from) {
+    query.from = from;
+  }
+
+  if (to) {
+    query.to = to;
+  }
+
+  return query;
+}
+
+export async function getEmotions(userId: string, params: EmotionQuery = {}): Promise<EmotionSnapshot[]> {
+  const response = await getJson<EmotionLogResponse>(
+    `/users/${encodeURIComponent(userId)}/emotions`,
+    buildEmotionQuery(params),
+  );
 
   return response.emotions.map((entry) => ({
     date: entry.date,
