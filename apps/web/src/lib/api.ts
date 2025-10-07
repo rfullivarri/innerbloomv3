@@ -21,11 +21,20 @@ function buildUrl(path: string, params?: Record<string, string | number | undefi
   return url.toString();
 }
 
-async function getJson<T>(path: string, params?: Record<string, string | number | undefined>): Promise<T> {
+async function getJson<T>(
+  path: string,
+  params?: Record<string, string | number | undefined>,
+  init: RequestInit = {},
+): Promise<T> {
+  const { headers: initHeaders, ...rest } = init;
+  const headers = new Headers(initHeaders ?? {});
+  if (!headers.has('Accept')) {
+    headers.set('Accept', 'application/json');
+  }
+
   const response = await fetch(buildUrl(path, params), {
-    headers: {
-      Accept: 'application/json'
-    }
+    ...rest,
+    headers,
   });
 
   if (!response.ok) {
@@ -227,6 +236,29 @@ export async function getUserDailyXp(
   params: { from?: string; to?: string } = {},
 ): Promise<DailyXpResponse> {
   return getJson<DailyXpResponse>(`/users/${encodeURIComponent(userId)}/xp/daily`, params);
+}
+
+export type CurrentUserProfile = {
+  id: string;
+  clerk_user_id: string;
+  email_primary: string | null;
+  full_name: string | null;
+  image_url: string | null;
+  game_mode: string | null;
+  weekly_target: number | null;
+  timezone: string | null;
+  locale: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+};
+
+export async function getCurrentUserProfile(clerkUserId: string): Promise<CurrentUserProfile> {
+  return getJson<CurrentUserProfile>('/api/users/me', undefined, {
+    headers: {
+      'X-User-Id': clerkUserId,
+    },
+  });
 }
 
 export type UserLevelResponse = {

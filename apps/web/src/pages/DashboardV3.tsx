@@ -11,7 +11,7 @@
  * Derivaciones client-side: xp faltante y barra de nivel se calculan con una curva estimada; radar usa energía promedio; panel de rachas muestra métricas de XP mientras esperamos daily_log_raw.
  */
 
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
 import { Navbar } from '../components/layout/Navbar';
 import { Alerts } from '../components/dashboard-v3/Alerts';
 import { XpSummaryCard } from '../components/dashboard-v3/XpSummaryCard';
@@ -21,38 +21,52 @@ import { RadarChartCard } from '../components/dashboard-v3/RadarChartCard';
 import { EmotionTimeline } from '../components/dashboard-v3/EmotionTimeline';
 import { StreakPanel } from '../components/dashboard-v3/StreakPanel';
 import { MissionsSection } from '../components/dashboard-v3/MissionsSection';
+import { useBackendUser } from '../hooks/useBackendUser';
 
 export default function DashboardV3Page() {
-  const { userId } = useAuth();
   const { user } = useUser();
+  const { backendUserId, status, error, reload, clerkUserId } = useBackendUser();
 
-  if (!userId) {
+  if (!clerkUserId) {
     return null;
   }
+
+  const isLoadingProfile = status === 'idle' || status === 'loading';
+  const failedToLoadProfile = status === 'error' || !backendUserId;
 
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-1 px-4 pb-16 pt-6 md:px-8">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-          <Alerts userId={userId} />
-          <div className="grid gap-6 lg:grid-cols-[320px_1fr_320px]">
-            <div className="space-y-6">
-              <XpSummaryCard userId={userId} />
-              <AvatarCard imageUrl={user?.imageUrl} name={user?.fullName || user?.primaryEmailAddress?.emailAddress || ''} />
-              <EnergyCard userId={userId} />
-              <DailyCultivationSection userId={userId} />
-            </div>
-            <div className="space-y-6">
-              <RadarChartCard userId={userId} />
-              <EmotionTimeline userId={userId} />
-            </div>
-            <div className="space-y-6">
-              <StreakPanel userId={userId} />
-              <RewardsPlaceholder />
-            </div>
-          </div>
-          <MissionsSection userId={userId} />
+          {isLoadingProfile && <ProfileSkeleton />}
+
+          {failedToLoadProfile && !isLoadingProfile && (
+            <ProfileErrorState onRetry={reload} error={error} />
+          )}
+
+          {!failedToLoadProfile && !isLoadingProfile && backendUserId && (
+            <>
+              <Alerts userId={backendUserId} />
+              <div className="grid gap-6 lg:grid-cols-[320px_1fr_320px]">
+                <div className="space-y-6">
+                  <XpSummaryCard userId={backendUserId} />
+                  <AvatarCard imageUrl={user?.imageUrl} name={user?.fullName || user?.primaryEmailAddress?.emailAddress || ''} />
+                  <EnergyCard userId={backendUserId} />
+                  <DailyCultivationSection userId={backendUserId} />
+                </div>
+                <div className="space-y-6">
+                  <RadarChartCard userId={backendUserId} />
+                  <EmotionTimeline userId={backendUserId} />
+                </div>
+                <div className="space-y-6">
+                  <StreakPanel userId={backendUserId} />
+                  <RewardsPlaceholder />
+                </div>
+              </div>
+              <MissionsSection userId={backendUserId} />
+            </>
+          )}
         </div>
       </main>
     </div>
@@ -62,6 +76,43 @@ export default function DashboardV3Page() {
 interface AvatarCardProps {
   imageUrl?: string | null;
   name?: string | null;
+}
+
+function ProfileSkeleton() {
+  return (
+    <section className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
+      <div className="h-6 w-56 animate-pulse rounded bg-white/10" />
+      <div className="h-4 w-full animate-pulse rounded bg-white/10" />
+      <div className="h-4 w-3/4 animate-pulse rounded bg-white/10" />
+      <div className="h-32 w-full animate-pulse rounded-2xl bg-white/5" />
+    </section>
+  );
+}
+
+interface ProfileErrorStateProps {
+  onRetry: () => void;
+  error: Error | null;
+}
+
+function ProfileErrorState({ onRetry, error }: ProfileErrorStateProps) {
+  return (
+    <section className="space-y-4 rounded-3xl border border-rose-500/30 bg-rose-500/10 p-6 text-sm text-rose-100 backdrop-blur">
+      <div>
+        <h2 className="text-lg font-semibold text-white">No pudimos conectar con tu perfil</h2>
+        <p className="mt-2 text-sm text-rose-100/80">
+          Verificá tu conexión e intentá cargar nuevamente la información de tu Daily Quest.
+        </p>
+      </div>
+      {error?.message && <p className="text-xs text-rose-100/60">{error.message}</p>}
+      <button
+        type="button"
+        onClick={onRetry}
+        className="inline-flex items-center justify-center rounded-full border border-rose-300/40 bg-rose-300/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:border-rose-200/70 hover:bg-rose-200/20"
+      >
+        Reintentar
+      </button>
+    </section>
+  );
 }
 
 function AvatarCard({ imageUrl, name }: AvatarCardProps) {
