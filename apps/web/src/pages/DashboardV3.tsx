@@ -67,7 +67,7 @@ export default function DashboardV3Page() {
 
                 <div className="lg:col-span-5 space-y-4 md:space-y-5">
                   <ProfileCard imageUrl={avatarUrl} />
-                  <EnergyCard userId={backendUserId} />
+                  <EnergyCard userId={backendUserId} gameMode={profile?.game_mode} />
                   <StreaksPanel userId={backendUserId} />
 
                   <div className="space-y-6">
