@@ -49,72 +49,74 @@ export function XpSummaryCard({ userId }: XpSummaryCardProps) {
   const showContent = status === 'success' && data;
 
   const progressPercent = showContent ? data.progressPercent : 0;
-  const progressLabel = `${progressPercent.toFixed(1)}%`;
-  const xpToNextLabel = showContent
-    ? data.xpToNext === null
-      ? 'Nivel Máximo'
-      : `${formatInteger(data.xpToNext)} XP`
-    : '—';
+  const progressLabel = `${progressPercent.toFixed(0)}%`;
   const xpToNextMessage = showContent
     ? data.xpToNext === null
-      ? 'Alcanzaste el nivel máximo disponible en esta etapa.'
-      : `Te faltan ${formatInteger(data.xpToNext)} XP para el próximo nivel.`
+      ? '✨ Alcanzaste el nivel máximo disponible en esta etapa.'
+      : `✨ Te faltan ${formatInteger(data.xpToNext)} XP para el próximo nivel`
     : '';
+  const levelLabel = showContent ? formatInteger(data.currentLevel) : '—';
+  const totalXpLabel = showContent ? formatInteger(data.xpTotal) : '—';
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
-      <header className="flex flex-wrap items-center justify-between gap-3 text-white">
-        <h3 className="text-lg font-semibold">🏆 Total XP · 🎯 Level</h3>
+    <section className="rounded-2xl bg-[var(--card)] p-4 text-sm text-white">
+      <header className="flex items-start justify-between gap-3">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base font-medium">
+          <span className="flex items-center gap-1">
+            <span aria-hidden>🏆</span>
+            <span className="text-white/70">Total XP:</span>
+            <span className="font-semibold text-white">{totalXpLabel}</span>
+          </span>
+          <span className="text-white/40">·</span>
+          <span className="flex items-center gap-1">
+            <span aria-hidden>🎯</span>
+            <span className="text-white/70">Level:</span>
+            <span className="font-semibold text-white">{levelLabel}</span>
+          </span>
+        </p>
+
+        <span
+          aria-hidden
+          className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 text-xs text-white/70"
+        >
+          i
+        </span>
       </header>
 
       {showSkeleton && (
         <div className="mt-6 space-y-4">
-          <div className="h-8 w-40 animate-pulse rounded bg-white/10" />
-          <div className="h-3 w-full animate-pulse rounded bg-white/10" />
-          <div className="h-4 w-48 animate-pulse rounded bg-white/10" />
+          <div className="h-6 w-48 animate-pulse rounded bg-white/10" />
+          <div className="h-2 w-full animate-pulse rounded bg-white/10" />
+          <div className="h-4 w-56 animate-pulse rounded bg-white/10" />
         </div>
       )}
 
       {showError && (
-        <p className="mt-6 text-sm text-rose-300">No pudimos cargar tu progreso. Intentalo más tarde.</p>
+        <p className="mt-6 text-sm text-rose-300">
+          No pudimos cargar tu progreso. Intentalo más tarde.
+        </p>
       )}
 
       {showContent && (
-        <div className="mt-6 space-y-4 text-text-muted">
-          <p className="text-3xl font-semibold text-white">
-            XP Total: {formatInteger(data.xpTotal)}
-          </p>
-
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <span className="rounded-full bg-white/10 px-3 py-1 text-white">
-              Nivel {data.currentLevel}
-            </span>
-            <span>XP para el próximo nivel: {xpToNextLabel}</span>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs uppercase tracking-wide">
-              <span>Progreso al próximo nivel</span>
-              <span className="text-sm font-semibold text-white">{progressLabel}</span>
-            </div>
-
+        <div className="mt-6 space-y-3">
+          <div
+            className="h-2 w-full overflow-hidden rounded-full bg-white/10"
+            role="progressbar"
+            aria-label="Progreso hacia el próximo nivel"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Number(progressPercent.toFixed(1))}
+            aria-valuetext={`${progressLabel} completado`}
+          >
             <div
-              className="h-3 w-full overflow-hidden rounded-full bg-white/10"
-              role="progressbar"
-              aria-label="Progreso hacia el próximo nivel"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={Number(progressPercent.toFixed(1))}
-              aria-valuetext={`${progressLabel} completado`}
-            >
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-amber-300 via-amber-200 to-amber-100"
-                style={{ width: `${progressPercent.toFixed(1)}%` }}
-              />
-            </div>
+              className="h-full rounded-full bg-gradient-to-r from-[#f7d14a] via-[#f3b940] to-[#ef9f38]"
+              style={{ width: `${progressPercent.toFixed(1)}%` }}
+            />
           </div>
 
-          {xpToNextMessage && <p className="text-xs text-text-muted">{xpToNextMessage}</p>}
+          {xpToNextMessage && (
+            <p className="text-sm text-white/70">{xpToNextMessage}</p>
+          )}
         </div>
       )}
     </section>
