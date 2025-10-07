@@ -26,6 +26,8 @@ function normalizeBaseUrl(value: string): string {
 
 export const API_BASE = normalizeBaseUrl(RAW_API_BASE_URL);
 
+console.info('[API] BASE =', API_BASE);
+
 if (API_BASE) {
   logApiDebug('API base URL configured', { raw: RAW_API_BASE_URL, normalized: API_BASE });
 }
@@ -50,23 +52,29 @@ function buildUrl(path: string, params?: Record<string, string | number | undefi
   return url.toString();
 }
 
-async function getJson<T>(
-  path: string,
-  params?: Record<string, string | number | undefined>,
-  init: RequestInit = {},
-): Promise<T> {
+function resolveApiUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  return buildUrl(path);
+}
+
+export async function apiGet<T = unknown>(path: string, init: RequestInit = {}): Promise<T> {
   const { headers: initHeaders, ...rest } = init;
   const headers = new Headers(initHeaders ?? {});
   if (!headers.has('Accept')) {
     headers.set('Accept', 'application/json');
   }
 
-  const url = buildUrl(path, params);
-  logApiDebug('API request', { path, params, url, init: { ...rest, headers: Object.fromEntries(headers.entries()) } });
+  const url = resolveApiUrl(path);
+  console.info('[API] → GET', url, { headers: Array.from(headers.keys()) });
+  logApiDebug('API request', { path, url, init: { ...rest, headers: Object.fromEntries(headers.entries()) } });
 
   try {
     const response = await fetch(url, {
       ...rest,
+      method: 'GET',
       headers,
     });
 
@@ -86,6 +94,15 @@ async function getJson<T>(
     logApiError('API request threw', { url, error });
     throw error;
   }
+}
+
+async function getJson<T>(
+  path: string,
+  params?: Record<string, string | number | undefined>,
+  init: RequestInit = {},
+): Promise<T> {
+  const url = buildUrl(path, params);
+  return apiGet<T>(url, init);
 }
 
 export type ProgressSummary = {
