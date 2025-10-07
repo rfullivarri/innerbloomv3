@@ -7,7 +7,6 @@ export default function LoginPage() {
     <AuthLayout
       title={
         <div className="flex flex-col items-center gap-3 text-center text-3xl font-semibold uppercase tracking-[0.32em] text-white sm:flex-row sm:items-center sm:justify-start sm:gap-3 sm:text-left sm:text-4xl md:text-5xl">
-          <span className="h-2.5 w-2.5 rounded-full bg-rose-500 sm:h-3 sm:w-3 md:h-4 md:w-4" />
           dashboard
         </div>
       }

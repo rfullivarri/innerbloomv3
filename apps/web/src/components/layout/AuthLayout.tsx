@@ -41,7 +41,7 @@ export function AuthLayout({
               ) : null}
 
               <div className="flex items-center justify-center gap-2 text-sm font-semibold uppercase tracking-[0.4em] text-white/60 sm:justify-start">
-                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                <span className="h-2 w-2 rounded-full bg-[#7d3cff]" />
                 Innerbloom
               </div>
 
