@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+
 import { useRequest } from '../../hooks/useRequest';
 import { getUserDailyEnergy, type DailyEnergySnapshot } from '../../lib/api';
 
@@ -6,30 +7,59 @@ interface EnergyCardProps {
   userId: string;
 }
 
-function toPercent(value: number | undefined | null): number {
-  if (value == null) return 0;
-  if (value <= 1) {
-    return Math.round(Math.max(value, 0) * 100);
-  }
-  return Math.round(Math.max(0, Math.min(value, 100)));
-}
+const ENERGY_METRICS = [
+  {
+    key: 'hp' as const,
+    source: 'hp_pct' as const,
+    label: 'HP',
+    gradient: 'linear-gradient(90deg,#37B6C9,#69D6E3)',
+  },
+  {
+    key: 'mood' as const,
+    source: 'mood_pct' as const,
+    label: 'Mood',
+    gradient: 'linear-gradient(90deg,#E74C9E,#FF6EC7)',
+  },
+  {
+    key: 'focus' as const,
+    source: 'focus_pct' as const,
+    label: 'Focus',
+    gradient: 'linear-gradient(90deg,#8E66FF,#B17EFF)',
+  },
+] satisfies Array<{
+  key: 'hp' | 'mood' | 'focus';
+  source: keyof Pick<DailyEnergySnapshot, 'hp_pct' | 'mood_pct' | 'focus_pct'>;
+  label: string;
+  gradient: string;
+}>;
 
-interface NormalizedEnergy {
-  hp: number;
-  mood: number;
-  focus: number;
+type NormalizedEnergy = Record<(typeof ENERGY_METRICS)[number]['key'], number>;
+
+function toPercent(value: number | undefined | null): number {
+  if (value == null || Number.isNaN(value)) {
+    return 0;
+  }
+
+  const numeric = Number(value);
+  const bounded = numeric <= 1 ? Math.max(numeric, 0) * 100 : Math.max(0, Math.min(numeric, 100));
+  return Math.round(bounded);
 }
 
 function normalize(snapshot: DailyEnergySnapshot | null): NormalizedEnergy {
+  const initial: NormalizedEnergy = {
+    hp: 0,
+    mood: 0,
+    focus: 0,
+  };
+
   if (!snapshot) {
-    return { hp: 0, mood: 0, focus: 0 };
+    return initial;
   }
 
-  return {
-    hp: toPercent(snapshot.hp_pct),
-    mood: toPercent(snapshot.mood_pct),
-    focus: toPercent(snapshot.focus_pct),
-  };
+  return ENERGY_METRICS.reduce<NormalizedEnergy>((acc, metric) => {
+    acc[metric.key] = toPercent(snapshot[metric.source]);
+    return acc;
+  }, { ...initial });
 }
 
 export function EnergyCard({ userId }: EnergyCardProps) {
@@ -59,9 +89,9 @@ export function EnergyCard({ userId }: EnergyCardProps) {
 
       {status === 'success' && (
         <div className="mt-6 space-y-4">
-          <EnergyMeter label="HP" value={normalized.hp} gradient="linear-gradient(90deg,#37B6C9,#69D6E3)" />
-          <EnergyMeter label="Mood" value={normalized.mood} gradient="linear-gradient(90deg,#E74C9E,#FF6EC7)" />
-          <EnergyMeter label="Focus" value={normalized.focus} gradient="linear-gradient(90deg,#8E66FF,#B17EFF)" />
+          {ENERGY_METRICS.map(({ key, label, gradient }) => (
+            <EnergyMeter key={key} label={label} value={normalized[key]} gradient={gradient} />
+          ))}
         </div>
       )}
     </section>
