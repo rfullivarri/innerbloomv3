@@ -43,7 +43,7 @@ apiRouter.use((_req, _res, next) => {
   next(new HttpError(404, 'not_found', 'Route not found'));
 });
 
-app.use('/api', apiRouter);
+app.use(apiRouter);
 
 app.use((_req, _res, next) => {
   next(new HttpError(404, 'not_found', 'Route not found'));
