@@ -1,5 +1,3 @@
-
-export { StreaksPanel as StreakPanel } from '../dashboard/StreaksPanel';
 import { useEffect, useMemo, useState } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import {
