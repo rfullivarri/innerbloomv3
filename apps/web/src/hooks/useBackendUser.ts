@@ -1,5 +1,5 @@
 import { useAuth } from '@clerk/clerk-react';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { getCurrentUserProfile, type CurrentUserProfile } from '../lib/api';
 import { useRequest, type AsyncStatus } from './useRequest';
 
@@ -13,16 +13,25 @@ export type BackendUserState = {
 };
 
 export function useBackendUser(): BackendUserState {
-  const { userId: clerkUserId } = useAuth();
-  const enabled = Boolean(clerkUserId);
+  const { userId: clerkUserId, isSignedIn } = useAuth();
+  const enabled = Boolean(isSignedIn && clerkUserId);
+
+  const requestFactory = useCallback(() => {
+    if (!clerkUserId) {
+      return Promise.reject<CurrentUserProfile>(new Error('Missing Clerk user ID'));
+    }
+
+    console.info('[API] /users/me signedIn:', isSignedIn, 'userId:', clerkUserId);
+    return getCurrentUserProfile(clerkUserId);
+  }, [clerkUserId, isSignedIn]);
 
   const { data, status, error, reload } = useRequest(
-    () => getCurrentUserProfile(clerkUserId!),
-    [clerkUserId],
+    requestFactory,
+    [requestFactory],
     { enabled },
   );
 
-  const normalizedStatus: AsyncStatus = enabled ? status : 'idle';
+  const normalizedStatus: AsyncStatus = enabled ? status : 'loading';
   const profile = enabled && status === 'success' ? data : null;
   const backendUserId = profile?.id ?? null;
 
