@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserDailyXp, type DailyXpPoint } from '../../lib/api';
 import { asArray, dateStr } from '../../lib/safe';
+import { Card } from '../ui/Card';
 
 interface DailyCultivationSectionProps {
   userId: string;
@@ -99,14 +100,15 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
   }, [activeBucket]);
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
-      <header className="flex flex-wrap items-center justify-between gap-3 text-white">
-        <h3 className="text-lg font-semibold">🪴 Daily Cultivation</h3>
-        {buckets.length > 0 && (
-          <label className="flex items-center gap-2 text-xs uppercase tracking-wide text-text-muted">
+    <Card
+      title="🪴 Daily Cultivation"
+      subtitle="Tendencia mensual de XP"
+      rightSlot={
+        buckets.length > 0 ? (
+          <label className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-300">
             <span>Mes</span>
             <select
-              className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-white"
+              className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-100 focus:border-white/20 focus:outline-none"
               value={selectedMonth ?? ''}
               onChange={(event) => setSelectedMonth(event.target.value)}
             >
@@ -117,41 +119,41 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
               ))}
             </select>
           </label>
-        )}
-      </header>
-
+        ) : null
+      }
+    >
       {status === 'loading' && (
-        <div className="mt-6 h-48 w-full animate-pulse rounded-2xl bg-white/10" />
+        <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />
       )}
 
       {status === 'error' && (
-        <p className="mt-6 text-sm text-rose-300">No pudimos cargar tus XP diarios.</p>
+        <p className="text-sm text-rose-300">No pudimos cargar tus XP diarios.</p>
       )}
 
       {status === 'success' && (!activeBucket || activeBucket.days.length === 0) && (
-        <p className="mt-6 text-sm text-text-muted">Todavía no registraste XP este mes.</p>
+        <p className="text-sm text-slate-400">Todavía no registraste XP este mes.</p>
       )}
 
       {status === 'success' && activeBucket && activeBucket.days.length > 0 && (
-        <div className="mt-6 space-y-4">
+        <div className="space-y-4">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
             <LineChart days={activeBucket.days} />
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-text-muted">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
             <span>
-              Total XP del mes: <span className="font-semibold text-white">{formatNumber(monthlySummary.total)}</span>
+              Total XP del mes: <span className="font-semibold text-slate-100">{formatNumber(monthlySummary.total)}</span>
             </span>
             <span>
-              Promedio diario: <span className="font-semibold text-white">{formatNumber(monthlySummary.average)}</span> XP
+              Promedio diario: <span className="font-semibold text-slate-100">{formatNumber(monthlySummary.average)}</span> XP
             </span>
           </div>
-          <p className="text-xs text-text-muted">
+          <p className="text-xs text-slate-400">
             Replicamos la vista mensual del MVP usando los datos del endpoint
             <code className="ml-1 rounded bg-white/10 px-1 py-px text-[10px]">/users/:id/xp/daily</code>.
           </p>
         </div>
       )}
-    </section>
+    </Card>
   );
 }
 

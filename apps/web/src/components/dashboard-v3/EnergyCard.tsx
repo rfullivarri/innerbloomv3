@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserState, type UserState } from '../../lib/api';
+import { Card } from '../ui/Card';
 
 interface EnergyCardProps {
   userId: string;
@@ -47,16 +48,17 @@ export function EnergyCard({ userId }: EnergyCardProps) {
   const normalized = useMemo(() => normalize(data), [data]);
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
-      <header className="flex flex-wrap items-center justify-between gap-3 text-white">
-        <h3 className="text-lg font-semibold">💠 Daily Energy</h3>
-        <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-text-muted">
+    <Card
+      title="💠 Daily Energy"
+      subtitle="Seguimiento de pilares"
+      rightSlot={
+        <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
           Modo: {normalized.mode}
         </span>
-      </header>
-
+      }
+    >
       {status === 'loading' && (
-        <div className="mt-6 space-y-4">
+        <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, idx) => (
             <div key={idx} className="h-4 w-full animate-pulse rounded bg-white/10" />
           ))}
@@ -64,17 +66,17 @@ export function EnergyCard({ userId }: EnergyCardProps) {
       )}
 
       {status === 'error' && (
-        <p className="mt-6 text-sm text-rose-300">No pudimos cargar tu energía diaria.</p>
+        <p className="text-sm text-rose-300">No pudimos cargar tu energía diaria.</p>
       )}
 
       {status === 'success' && (
-        <div className="mt-6 space-y-5">
+        <div className="space-y-5">
           <EnergyMeter label="HP" value={normalized.Body.hp} xpToday={normalized.Body.xpToday} target={normalized.Body.target} />
           <EnergyMeter label="Mood" value={normalized.Soul.mood} xpToday={normalized.Soul.xpToday} target={normalized.Soul.target} />
           <EnergyMeter label="Focus" value={normalized.Mind.focus} xpToday={normalized.Mind.xpToday} target={normalized.Mind.target} />
         </div>
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -95,7 +97,7 @@ function EnergyMeter({ label, value, xpToday, target }: EnergyMeterProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-xs uppercase tracking-wide text-text-muted">
+      <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-400">
         <span>{label}</span>
         <span>{percent}%</span>
       </div>
@@ -105,7 +107,7 @@ function EnergyMeter({ label, value, xpToday, target }: EnergyMeterProps) {
           style={{ width: `${percent}%` }}
         />
       </div>
-      <p className="text-xs text-text-muted">XP hoy: {xpToday.toFixed(1)} · Objetivo diario: {target.toFixed(1)}</p>
+      <p className="text-xs text-slate-400">XP hoy: {xpToday.toFixed(1)} · Objetivo diario: {target.toFixed(1)}</p>
     </div>
   );
 }
