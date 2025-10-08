@@ -50,14 +50,32 @@ function normalizeBaseUrl(value: string): string {
     return '';
   }
 
-  const hasProtocol = /^https?:\/\//i.test(trimmed);
-  const withProtocol = hasProtocol ? trimmed : `https://${trimmed}`;
+  let absolute = trimmed;
+
+  if (trimmed.startsWith('/')) {
+    if (typeof window !== 'undefined' && window.location?.origin) {
+      absolute = `${window.location.origin}${trimmed}`;
+    } else {
+      logApiError('Cannot resolve relative API URL without window.location', { value });
+      return '';
+    }
+  } else if (trimmed.startsWith('//')) {
+    const protocol = typeof window !== 'undefined' && window.location?.protocol
+      ? window.location.protocol
+      : 'https:';
+    absolute = `${protocol}${trimmed}`;
+  } else if (!/^https?:\/\//i.test(trimmed)) {
+    const looksLikeLocalhost = /^localhost(?![^:/])|^\d{1,3}(?:\.\d{1,3}){3}(?![^:/])/i.test(trimmed);
+    const protocol = looksLikeLocalhost ? 'http://' : 'https://';
+    absolute = `${protocol}${trimmed}`;
+  }
 
   try {
-    const normalized = new URL(withProtocol);
-    return `${normalized.origin}${normalized.pathname.replace(/\/+$/, '')}`;
+    const normalized = new URL(absolute);
+    const path = normalized.pathname.replace(/\/+$/, '');
+    return `${normalized.origin}${path}`;
   } catch (error) {
-    logApiError('Failed to normalize API base URL', { value, error });
+    logApiError('Failed to normalize API base URL', { value, absolute, error });
     return '';
   }
 }
