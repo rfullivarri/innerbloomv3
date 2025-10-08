@@ -22,6 +22,12 @@
   }
 }
 
+@property --glow-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
 @layer utilities {
   .glass-card {
     @apply bg-surface-elevated/80 backdrop-blur-lg border border-white/5 shadow-glow;
@@ -30,6 +36,7 @@
   .glow-chip {
     position: relative;
     display: inline-flex;
+    --glow-angle: 0deg;
   }
 
   .glow-chip::before {
@@ -37,12 +44,24 @@
     position: absolute;
     inset: -8px;
     border-radius: 9999px;
-    background: conic-gradient(from 0deg, var(--glow-primary) 0deg, transparent 110deg, var(--glow-secondary) 220deg, transparent 360deg);
-    filter: blur(16px);
-    opacity: 0.9;
-    animation: glow-orbit 6s linear infinite;
+    background: conic-gradient(
+      from var(--glow-angle),
+      transparent 0deg 285deg,
+      var(--glow-secondary) 310deg,
+      var(--glow-primary) 345deg,
+      transparent 360deg
+    );
+    filter: blur(14px);
+    opacity: 0.95;
+    animation: glow-track 5s linear infinite;
     pointer-events: none;
     transform-origin: center;
+    mask: radial-gradient(farthest-side, rgba(255, 255, 255, 0) calc(100% - 14px), rgba(255, 255, 255, 0.9) calc(100% - 6px));
+    -webkit-mask: radial-gradient(
+      farthest-side,
+      rgba(255, 255, 255, 0) calc(100% - 14px),
+      rgba(255, 255, 255, 0.9) calc(100% - 6px)
+    );
   }
 }
 
@@ -51,12 +70,12 @@
   z-index: 1;
 }
 
-@keyframes glow-orbit {
+@keyframes glow-track {
   from {
-    transform: rotate(0deg);
+    --glow-angle: 0deg;
   }
   to {
-    transform: rotate(360deg);
+    --glow-angle: 360deg;
   }
 }
 
