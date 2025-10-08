@@ -13,6 +13,7 @@ import { asyncHandler } from '../lib/async-handler.js';
 import { getUserStreakPanel } from './users/streak-panel.js';
 import { getUserDailyEnergy } from './users/daily-energy.js';
 import { getUserXpByTrait } from './users/xp-by-trait.js';
+import { getUserPillars } from './users/pillars.js';
 
 const router = Router();
 
@@ -20,6 +21,7 @@ router.get('/users/:id/tasks', asyncHandler(getUserTasks));
 router.get('/users/:id/xp/daily', asyncHandler(getUserDailyXp));
 router.get('/users/:id/xp/total', asyncHandler(getUserTotalXp));
 router.get('/users/:id/xp/by-trait', asyncHandler(getUserXpByTrait));
+router.get('/users/:id/pillars', asyncHandler(getUserPillars));
 router.get('/users/:id/streaks/panel', asyncHandler(getUserStreakPanel));
 router.get('/users/:id/level', asyncHandler(getUserLevel));
 router.get('/users/:id/daily-energy', asyncHandler(getUserDailyEnergy));
