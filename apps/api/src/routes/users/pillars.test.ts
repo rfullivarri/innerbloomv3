@@ -1,5 +1,9 @@
 import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { HttpError } from '../../lib/http-error.js';
+
+
 import { getUserPillars } from './pillars.js';
 
 const { mockQuery } = vi.hoisted(() => ({
@@ -14,10 +18,15 @@ vi.mock('../../db.js', () => ({
 
 function createMockResponse() {
   const json = vi.fn();
+
+
+  return {
+
   const status = vi.fn().mockReturnThis();
 
   return {
     status,
+
     json,
   } as unknown as Response;
 }
@@ -26,6 +35,30 @@ describe('getUserPillars', () => {
   beforeEach(() => {
     mockQuery.mockReset();
   });
+
+
+  it('throws an error when the user does not exist', async () => {
+    mockQuery.mockResolvedValueOnce({ rowCount: 0, rows: [] });
+
+    const req = { params: { id: '2bfada59-309e-4ca8-8458-95e7071cff5a' } } as unknown as Request;
+    const res = createMockResponse();
+
+    await expect(getUserPillars(req, res, vi.fn())).rejects.toBeInstanceOf(HttpError);
+
+    expect(mockQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns pillar metrics merging totals and weekly xp', async () => {
+    mockQuery
+      .mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [{ weekly_target: 600 }],
+      })
+      .mockResolvedValueOnce({
+        rows: [
+          { pillar_code: 'BODY', xp_total: '1234.5' },
+          { pillar_code: 'MIND', xp_total: 980 },
+          { pillar_code: 'SOUL', xp_total: null },
 
   it('returns 400 when the user id is invalid', async () => {
     const req = { params: { id: 'not-a-uuid' } } as unknown as Request;
@@ -66,6 +99,7 @@ describe('getUserPillars', () => {
           {
             weekly_target: '70',
           },
+
         ],
       })
       .mockResolvedValueOnce({

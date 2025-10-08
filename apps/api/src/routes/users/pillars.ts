@@ -1,109 +1,242 @@
 import { z } from 'zod';
 import { pool } from '../../db.js';
 import type { AsyncHandler } from '../../lib/async-handler.js';
+import { HttpError } from '../../lib/http-error.js';
 import { uuidSchema } from '../../lib/validation.js';
+
+const PILLAR_CODES = ['BODY', 'MIND', 'SOUL'] as const;
+const PILLAR_ID_TO_CODE: Record<number, (typeof PILLAR_CODES)[number]> = {
+  1: 'BODY',
+  2: 'MIND',
+  3: 'SOUL',
+};
 
 const paramsSchema = z.object({
   id: uuidSchema,
 });
 
-const PILLAR_CODES = ['BODY', 'MIND', 'SOUL'] as const;
-const BASE_UNIT = 1;
+type RawRow = Record<string, unknown>;
 
-type WeeklyTargetRow = {
-  weekly_target: string | number | null;
-};
-
-type PillarProgressRow = {
-  pillar_code: string | null;
-  xp_total: string | number | null;
-  xp_week: string | number | null;
-};
-
-const toNumber = (value: string | number | null | undefined): number => {
+function toNumber(value: unknown): number {
   const parsed = Number(value);
 
   return Number.isFinite(parsed) ? parsed : 0;
-};
+}
 
-export const getUserPillars: AsyncHandler = async (req, res) => {
-  const parsed = paramsSchema.safeParse(req.params);
-
-  if (!parsed.success) {
-    return res.status(400).json({ error: 'bad_request', detail: 'invalid uuid' });
+function normalizePillarCode(value: unknown): (typeof PILLAR_CODES)[number] | null {
+  if (value === null || value === undefined) {
+    return null;
   }
 
-  const { id } = parsed.data;
+  if (typeof value === 'number') {
+    return PILLAR_ID_TO_CODE[value] ?? null;
+  }
 
-  const weeklyTargetResult = await pool.query<WeeklyTargetRow>(
-    `SELECT COALESCE(gm_id.weekly_target, gm_code.weekly_target, u.weekly_target, 0) AS weekly_target
+  if (typeof value === 'bigint') {
+    return PILLAR_ID_TO_CODE[Number(value)] ?? null;
+  }
+
+  const text = value.toString().trim();
+
+  if (text.length === 0) {
+    return null;
+  }
+
+  const upper = text.toUpperCase();
+
+  if (upper === 'BODY' || upper === 'CUERPO') {
+    return 'BODY';
+  }
+
+  if (upper === 'MIND' || upper === 'MENTE') {
+    return 'MIND';
+  }
+
+  if (upper === 'SOUL' || upper === 'ALMA') {
+    return 'SOUL';
+  }
+
+  const numeric = Number(text);
+
+  if (Number.isFinite(numeric)) {
+    return PILLAR_ID_TO_CODE[numeric] ?? null;
+  }
+
+  return null;
+}
+
+function resolvePillarCode(row: RawRow): (typeof PILLAR_CODES)[number] | null {
+  const explicitFields = [
+    'pillar_code',
+    'pillar',
+    'code',
+    'pillar_name',
+    'pillarname',
+    'pillar_id',
+    'pillarid',
+  ];
+
+  for (const field of explicitFields) {
+    if (field in row) {
+      const code = normalizePillarCode(row[field]);
+
+      if (code) {
+        return code;
+      }
+    }
+  }
+
+  for (const value of Object.values(row)) {
+    const code = normalizePillarCode(value);
+
+    if (code) {
+      return code;
+    }
+  }
+
+  return null;
+}
+
+function extractMetric(row: RawRow, { preferWeek }: { preferWeek: boolean }): number {
+  const entries = Object.entries(row);
+
+  for (const [key, value] of entries) {
+    const lowerKey = key.toLowerCase();
+
+    if (!lowerKey.includes('xp')) {
+      continue;
+    }
+
+    if (preferWeek) {
+      if (!lowerKey.includes('week') && !lowerKey.includes('7')) {
+        continue;
+      }
+    } else if (lowerKey.includes('week') || lowerKey.includes('7')) {
+      continue;
+    }
+
+    const parsed = toNumber(value);
+
+    if (parsed !== 0 || value === 0 || value === '0') {
+      return parsed;
+    }
+  }
+
+  if (preferWeek) {
+    for (const [key, value] of entries) {
+      const lowerKey = key.toLowerCase();
+
+      if (!lowerKey.includes('week')) {
+        continue;
+      }
+
+      const parsed = toNumber(value);
+
+      if (parsed !== 0 || value === 0 || value === '0') {
+        return parsed;
+      }
+    }
+  } else {
+    for (const [key, value] of entries) {
+      const lowerKey = key.toLowerCase();
+
+      if (!lowerKey.includes('total')) {
+        continue;
+      }
+
+      const parsed = toNumber(value);
+
+      if (parsed !== 0 || value === 0 || value === '0') {
+        return parsed;
+      }
+    }
+  }
+
+  return 0;
+}
+
+export const getUserPillars: AsyncHandler = async (req, res) => {
+  const { id } = paramsSchema.parse(req.params);
+
+  const userResult = await pool.query<{ weekly_target: number | null }>(
+    `SELECT COALESCE(gm.weekly_target, u.weekly_target) AS weekly_target
        FROM users u
-  LEFT JOIN cat_game_mode gm_id
-         ON gm_id.game_mode_id = u.game_mode_id
-  LEFT JOIN cat_game_mode gm_code
-         ON gm_code.code = u.game_mode
+  LEFT JOIN cat_game_mode gm
+         ON (gm.game_mode_id = u.game_mode_id)
+         OR (gm.code = u.game_mode)
       WHERE u.user_id = $1
       LIMIT 1`,
     [id],
   );
 
-  if (weeklyTargetResult.rows.length === 0) {
-    return res.status(404).json({ error: 'user_not_found' });
+  if (userResult.rowCount === 0) {
+    throw new HttpError(404, 'user_not_found', 'User not found');
   }
 
-  const weeklyTarget = toNumber(weeklyTargetResult.rows[0]?.weekly_target);
+  const weeklyTarget = toNumber(userResult.rows[0]?.weekly_target);
 
-  const pillarsResult = await pool.query<PillarProgressRow>(
-    `SELECT cp.code AS pillar_code,
-            SUM(dl.quantity * t.xp_base) AS xp_total,
-            SUM(
-              CASE
-                WHEN dl.date >= CURRENT_DATE - INTERVAL '6 days' THEN dl.quantity * t.xp_base
-                ELSE 0
-              END
-            ) AS xp_week
-       FROM daily_log dl
-       JOIN tasks t ON t.task_id = dl.task_id
-  LEFT JOIN cat_pillar cp ON cp.pillar_id = t.pillar_id
-      WHERE dl.user_id = $1
-   GROUP BY cp.code`,
-    [id],
-  );
+  const [totalsResult, weekResult] = await Promise.all([
+    pool.query<RawRow>(
+      `SELECT *
+         FROM v_user_xp_by_pillar
+        WHERE user_id = $1`,
+      [id],
+    ),
+    pool.query<RawRow>(
+      `SELECT *
+         FROM v_user_pillars_week
+        WHERE user_id = $1`,
+      [id],
+    ),
+  ]);
 
-  const totals = new Map<string, { xp: number; xpWeek: number }>();
+  const totals: Record<(typeof PILLAR_CODES)[number], number> = {
+    BODY: 0,
+    MIND: 0,
+    SOUL: 0,
+  };
 
-  for (const row of pillarsResult.rows) {
-    const code = row.pillar_code?.toUpperCase();
+  for (const row of totalsResult.rows ?? []) {
+    const code = resolvePillarCode(row);
 
-    if (!code || !PILLAR_CODES.includes(code as (typeof PILLAR_CODES)[number])) {
+    if (!code) {
       continue;
     }
 
-    totals.set(code, {
-      xp: toNumber(row.xp_total),
-      xpWeek: toNumber(row.xp_week),
-    });
+    totals[code] = extractMetric(row, { preferWeek: false });
   }
 
-  const targetForWeek = weeklyTarget * BASE_UNIT;
+  const weekly: Record<(typeof PILLAR_CODES)[number], number> = {
+    BODY: 0,
+    MIND: 0,
+    SOUL: 0,
+  };
 
-  const payload = PILLAR_CODES.map((code) => {
-    const stats = totals.get(code) ?? { xp: 0, xpWeek: 0 };
-    const progress =
-      targetForWeek > 0 ? Math.min(100, Math.round((stats.xpWeek / targetForWeek) * 100)) : 0;
+  for (const row of weekResult.rows ?? []) {
+    const code = resolvePillarCode(row);
 
-    return {
-      code,
-      xp: stats.xp,
-      xp_week: stats.xpWeek,
-      progress_pct: progress,
-    };
-  });
+    if (!code) {
+      continue;
+    }
 
-  return res.json({
+    weekly[code] = extractMetric(row, { preferWeek: true });
+  }
+
+  const response = {
     user_id: id,
-    pillars: payload,
-  });
-};
+    pillars: PILLAR_CODES.map((code) => {
+      const xp = Math.round(totals[code] ?? 0);
+      const xpWeek = Math.round(weekly[code] ?? 0);
+      const progress = weeklyTarget > 0 ? Math.round((xpWeek / weeklyTarget) * 100) : 0;
 
-export default getUserPillars;
+      return {
+        code,
+        xp,
+        xp_week: xpWeek,
+        progress_pct: Math.min(100, Math.max(0, progress)),
+      };
+    }),
+  };
+
+  return res.json(response);
+};
