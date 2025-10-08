@@ -7,14 +7,14 @@ export default function LoginPage() {
   return (
     <AuthLayout
       title={
-        <div className="flex flex-col items-center gap-2 text-center text-3xl font-semibold uppercase tracking-[0.32em] text-white sm:flex-row sm:items-center sm:justify-start sm:gap-3 sm:text-left sm:text-4xl md:text-5xl">
+        <div className="flex flex-col items-center gap-2 text-center text-2xl font-semibold uppercase tracking-[0.22em] text-white sm:flex-row sm:items-center sm:justify-start sm:gap-3 sm:text-left sm:text-4xl sm:tracking-[0.32em] md:text-5xl">
           dashboard
         </div>
       }
       secondaryActionLabel="Volver al inicio"
       secondaryActionHref="/"
     >
-      <div className="w-full max-w-md mx-auto lg:mx-0">
+      <div className="mx-auto w-full max-w-sm sm:max-w-md lg:mx-0">
         <SignIn
           appearance={createAuthAppearance({
             layout: {
