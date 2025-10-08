@@ -11,6 +11,9 @@ interface EmotionChartCardProps {
 }
 
 const GAP = 6;
+const MEDIUM_GAP = 4;
+const SMALL_GAP = 2;
+const MIN_CELL_SIZE = 4;
 const NUM_WEEKS = 26;
 const DAYS_IN_WEEK = 7;
 const LOOKBACK_FOR_HIGHLIGHT = 15;
@@ -514,6 +517,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
   const gridBoxRef = useRef<HTMLDivElement | null>(null);
   const [cellSize, setCellSize] = useState<number>(12);
+  const [cellGap, setCellGap] = useState<number>(GAP);
   const columnCount = Math.max(columns.length, 1);
 
   useEffect(() => {
@@ -523,7 +527,25 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
     const compute = () => {
       const maxWidth = box.clientWidth;
       if (!maxWidth) return;
-      const size = Math.max(4, Math.floor((maxWidth - (columnCount - 1) * GAP) / columnCount));
+      let gap = GAP;
+
+      if (maxWidth <= 480) {
+        gap = MEDIUM_GAP;
+      }
+
+      if (maxWidth <= 360) {
+        gap = SMALL_GAP;
+      }
+
+      let size = Math.floor((maxWidth - (columnCount - 1) * gap) / columnCount);
+
+      if (size < 6 && gap > SMALL_GAP) {
+        gap = Math.max(SMALL_GAP, gap - 1);
+        size = Math.floor((maxWidth - (columnCount - 1) * gap) / columnCount);
+      }
+
+      size = Math.max(MIN_CELL_SIZE, size);
+      setCellGap(gap);
       setCellSize(size);
     };
 
@@ -555,7 +577,10 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
   const showEmpty =
     status === 'success' && overrideEntries === null && (!hasRecordedEmotion || normalizedEntries.length === 0);
 
-  const gridStyle = useMemo(() => ({ '--cell': `${cellSize}px` } as CSSProperties), [cellSize]);
+  const gridStyle = useMemo(
+    () => ({ '--cell': `${cellSize}px`, '--cell-gap': `${cellGap}px` } as CSSProperties),
+    [cellGap, cellSize],
+  );
 
   return (
     <Card
