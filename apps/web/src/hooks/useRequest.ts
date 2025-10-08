@@ -69,6 +69,14 @@ export function useRequest<T>(
     status,
     reload: () => {
       execute();
-    }
+    },
   };
+}
+
+export function useQuery<T>(
+  factory: () => Promise<T>,
+  deps: DependencyList = [],
+  options: UseRequestOptions = {},
+): UseRequestResult<T> {
+  return useRequest(factory, deps, options);
 }

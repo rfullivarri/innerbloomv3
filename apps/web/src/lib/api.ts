@@ -386,10 +386,107 @@ export type Pillar = {
   focusAreas?: string[];
 };
 
-export async function getPillars(): Promise<Pillar[]> {
-  const response = await getJson<unknown>('/pillars');
+export async function getPillars(userId: string): Promise<Pillar[]> {
+  const response = await getJson<unknown>(`/users/${encodeURIComponent(userId)}/pillars`);
   logShape('pillars', response);
   return extractArray<Pillar>(response, 'pillars', 'items', 'data');
+}
+
+export type Achievement = {
+  id: string;
+  title: string;
+  description?: string;
+  status?: string;
+  unlockedAt?: string;
+  progressCurrent?: number;
+  progressTarget?: number;
+  category?: string;
+  icon?: string;
+};
+
+export async function getAchievements(userId: string): Promise<Achievement[]> {
+  const response = await getJson<unknown>(`/users/${encodeURIComponent(userId)}/achievements`);
+  logShape('achievements', response);
+
+  const achievements = extractArray<Record<string, unknown>>(response, 'achievements', 'items', 'data');
+
+  return achievements.map((entry, index) => {
+    const record = entry as Record<string, unknown>;
+    const progressSource = (record.progress as Record<string, unknown> | undefined) ?? {};
+
+    const id =
+      record.id ??
+      record.achievement_id ??
+      record.achievementId ??
+      record.slug ??
+      `achievement-${index}`;
+
+    const title = record.title ?? record.name ?? record.label ?? 'Achievement';
+    const description = record.description ?? record.details ?? record.summary;
+
+    const unlockedAt =
+      (record.unlocked_at ?? record.completed_at ?? record.earned_at ?? record.achieved_at) as string | undefined;
+
+    const status = record.status ?? record.state ?? record.phase;
+
+    const progressCurrentRaw =
+      progressSource.current ??
+      progressSource.value ??
+      record.current ??
+      record.progress;
+    const progressTargetRaw =
+      progressSource.target ??
+      progressSource.goal ??
+      record.target ??
+      record.total;
+
+    const progressCurrent =
+      progressCurrentRaw != null ? toNumber(progressCurrentRaw, Number(progressCurrentRaw) || 0) : undefined;
+    const progressTarget =
+      progressTargetRaw != null ? toNumber(progressTargetRaw, Number(progressTargetRaw) || 0) : undefined;
+
+    return {
+      id: String(id),
+      title: String(title),
+      description: typeof description === 'string' ? description : undefined,
+      status: typeof status === 'string' ? status : undefined,
+      unlockedAt: typeof unlockedAt === 'string' ? unlockedAt : undefined,
+      progressCurrent,
+      progressTarget,
+      category: typeof record.category === 'string' ? (record.category as string) : undefined,
+      icon:
+        typeof record.icon === 'string'
+          ? (record.icon as string)
+          : typeof record.badge === 'string'
+          ? (record.badge as string)
+          : undefined,
+    };
+  });
+}
+
+export type TodaySummary = {
+  xpToday: number;
+  quests: {
+    total: number;
+    completed: number;
+  };
+};
+
+export async function getTodaySummary(userId: string): Promise<TodaySummary> {
+  const response = await getJson<Record<string, unknown>>(`/users/${encodeURIComponent(userId)}/summary/today`);
+  logShape('today-summary', response);
+
+  const quests = (response?.quests ?? {}) as Record<string, unknown>;
+  const questsTotalRaw = quests.total ?? quests.available ?? quests.count;
+  const questsCompletedRaw = quests.completed ?? quests.done ?? quests.progress;
+
+  return {
+    xpToday: toNumber(response?.xp_today ?? response?.xpToday ?? response?.xp ?? 0, 0),
+    quests: {
+      total: Math.max(0, toNumber(questsTotalRaw ?? 0, 0)),
+      completed: Math.max(0, toNumber(questsCompletedRaw ?? 0, 0)),
+    },
+  };
 }
 
 export type UserTask = {
