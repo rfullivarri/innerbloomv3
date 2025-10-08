@@ -57,8 +57,8 @@ export default function DashboardV3Page() {
             {!failedToLoadProfile && !isLoadingProfile && backendUserId && (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-12 lg:gap-6">
                 <div className="lg:col-span-12 space-y-4">
-                  <MetricHeader userId={backendUserId} />
                   <Alerts userId={backendUserId} />
+                  <MetricHeader userId={backendUserId} />
                 </div>
 
                 <div className="lg:col-span-7 space-y-4 md:space-y-5">
