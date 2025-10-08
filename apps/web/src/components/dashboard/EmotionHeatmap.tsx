@@ -22,7 +22,9 @@ function tileColor(intensity: number) {
 }
 
 export function EmotionHeatmap({ userId }: EmotionHeatmapProps) {
-  const { data, status, error, reload } = useRequest(() => getEmotions(userId, { days: 14 }), [userId]);
+  const { data, status, error, reload } = useRequest(() => getEmotions(userId, { days: 14 }), [userId], {
+    enabled: Boolean(userId),
+  });
 
   return (
     <Card
@@ -84,8 +86,8 @@ export function EmotionHeatmap({ userId }: EmotionHeatmapProps) {
 
       {status === 'success' && (!data || data.length === 0) && (
         <div className="space-y-2 text-sm text-text-subtle">
-          <p>TODO: wire emotions endpoint once available.</p>
-          <p className="text-xs text-text-muted">Daily reflections will appear here after the first check-in.</p>
+          <p>No emotion check-ins yet.</p>
+          <p className="text-xs text-text-muted">Daily reflections will appear here after your first entry.</p>
         </div>
       )}
     </Card>

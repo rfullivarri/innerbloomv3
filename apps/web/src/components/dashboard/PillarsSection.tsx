@@ -4,8 +4,14 @@ import { useRequest } from '../../hooks/useRequest';
 import { getPillars } from '../../lib/api';
 import { PillarCard } from './PillarCard';
 
-export function PillarsSection() {
-  const { data, status, error, reload } = useRequest(getPillars, []);
+interface PillarsSectionProps {
+  userId: string;
+}
+
+export function PillarsSection({ userId }: PillarsSectionProps) {
+  const { data, status, error, reload } = useRequest(() => getPillars(userId), [userId], {
+    enabled: Boolean(userId),
+  });
 
   return (
     <Card
@@ -54,9 +60,9 @@ export function PillarsSection() {
       {status === 'success' && (!data || data.length === 0) && (
         <div className="space-y-2 text-sm text-text-subtle">
           <p>Pillars are configuring for this account.</p>
-          <p className="text-xs text-text-muted">Once your base is confirmed we will show Body · Mind · Soul insights.</p>
-        </div>
-      )}
-    </Card>
+          <p className="text-xs text-text-muted">Insights will appear as soon as the base plan is ready.</p>
+      </div>
+    )}
+  </Card>
   );
 }

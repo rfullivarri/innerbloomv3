@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import { useBackendUser } from '../hooks/useBackendUser';
+import { useQuery } from '../hooks/useRequest';
 import { AchievementsList } from '../components/dashboard/AchievementsList';
 import { EmotionHeatmap } from '../components/dashboard/EmotionHeatmap';
 import { LevelCard } from '../components/dashboard/LevelCard';
@@ -7,9 +9,74 @@ import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { StreakCard } from '../components/dashboard/StreakCard';
 import { Navbar } from '../components/layout/Navbar';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
+import { getTodaySummary } from '../lib/api';
+import { Skeleton } from '../components/common/Skeleton';
 
 export default function DashboardPage() {
   const { backendUserId, status, error, reload, clerkUserId } = useBackendUser();
+
+  const summaryUserId = clerkUserId ?? '';
+
+  const {
+    data: todaySummary,
+    status: todayStatus,
+    error: todayError,
+    reload: reloadToday,
+  } = useQuery(() => getTodaySummary(summaryUserId), [summaryUserId], {
+    enabled: Boolean(clerkUserId),
+  });
+
+  const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
+
+  const questsCompleted = todaySummary?.quests.completed ?? 0;
+  const questsTotal = todaySummary?.quests.total ?? 0;
+  const xpToday = todaySummary?.xpToday ?? 0;
+
+  const heroHeadline = useMemo(() => {
+    if (todayStatus === 'error') {
+      return 'Daily snapshot unavailable';
+    }
+
+    if (todayStatus === 'loading' || todayStatus === 'idle') {
+      return 'Checking your daily snapshot...';
+    }
+
+    if (questsCompleted > 0 && questsTotal > 0) {
+      return `${numberFormatter.format(questsCompleted)} of ${numberFormatter.format(questsTotal)} quests completed today`;
+    }
+
+    if (questsCompleted > 0) {
+      return `${numberFormatter.format(questsCompleted)} quests completed today`;
+    }
+
+    if (questsTotal > 0) {
+      return `${numberFormatter.format(questsTotal)} quests waiting to be cleared`;
+    }
+
+    if (xpToday > 0) {
+      return `${numberFormatter.format(xpToday)} XP logged today`;
+    }
+
+    return 'Track today’s quests and XP in real time';
+  }, [numberFormatter, questsCompleted, questsTotal, todayStatus, xpToday]);
+
+  const summaryMessage = useMemo(() => {
+    if (todayStatus === 'error') {
+      return 'We’ll keep your stats ready once the connection is back.';
+    }
+
+    if (xpToday > 0 && questsCompleted > 0) {
+      return 'Momentum is building—keep stacking Body · Mind · Soul wins.';
+    }
+
+    if (questsTotal > 0) {
+      return 'Clear your quests to collect XP across every pillar.';
+    }
+
+    return 'Complete a quest or ritual to see progress populate here.';
+  }, [questsCompleted, questsTotal, todayStatus, xpToday]);
+
+  const isSummaryLoading = todayStatus === 'idle' || todayStatus === 'loading';
 
   if (!clerkUserId) {
     return null;
@@ -35,22 +102,46 @@ export default function DashboardPage() {
               <section className="glass-card rounded-3xl border border-white/10 px-6 py-8 text-text shadow-glow">
                 <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                   <div className="space-y-3">
-                    <p className="text-xs uppercase tracking-[0.3em] text-text-subtle">Game Mode</p>
-                    <h2 className="font-display text-3xl font-semibold text-white">Chill mode engaged</h2>
-                    <p className="text-sm text-text-subtle">
-                      Keep stacking wins across Body · Mind · Soul. Your next mission summary lands every Sunday evening.
-                    </p>
+                    <p className="text-xs uppercase tracking-[0.3em] text-text-subtle">Daily quest progress</p>
+                    <h2 className="font-display text-3xl font-semibold text-white">{heroHeadline}</h2>
+                    <p className="text-sm text-text-subtle">{summaryMessage}</p>
+                    {todayStatus === 'error' && todayError?.message && (
+                      <p className="text-xs text-rose-200/80">{todayError.message}</p>
+                    )}
                   </div>
                   <div className="grid gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm text-text-subtle">
                     <div className="flex items-center justify-between gap-6">
                       <span>Daily quests</span>
-                      <strong className="text-xl text-white">3</strong>
+                      {isSummaryLoading ? (
+                        <Skeleton className="h-6 w-12" />
+                      ) : (
+                        <strong className="text-xl text-white">
+                          {questsTotal > 0
+                            ? `${numberFormatter.format(questsCompleted)}/${numberFormatter.format(questsTotal)}`
+                            : numberFormatter.format(questsCompleted)}
+                        </strong>
+                      )}
                     </div>
                     <div className="flex items-center justify-between gap-6">
                       <span>XP today</span>
-                      <strong className="text-xl text-white">—</strong>
+                      {isSummaryLoading ? (
+                        <Skeleton className="h-6 w-14" />
+                      ) : (
+                        <strong className="text-xl text-white">
+                          {xpToday > 0 ? numberFormatter.format(xpToday) : '—'}
+                        </strong>
+                      )}
                     </div>
-                    <p className="text-xs text-text-muted">TODO: Replace with live mission payload when available.</p>
+                    <div className="flex flex-col gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={reloadToday}
+                        className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-text hover:bg-white/10"
+                      >
+                        Refresh
+                      </button>
+                      <p className="text-xs text-text-muted">Stats update as soon as quests are logged.</p>
+                    </div>
                   </div>
                 </div>
               </section>
@@ -61,13 +152,13 @@ export default function DashboardPage() {
               </section>
 
               <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-                <PillarsSection />
-                <EmotionHeatmap userId={backendUserId} />
+                <PillarsSection userId={clerkUserId} />
+                <EmotionHeatmap userId={clerkUserId} />
               </section>
 
               <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
                 <RecentActivity userId={backendUserId} />
-                <AchievementsList />
+                <AchievementsList userId={clerkUserId} />
               </section>
             </>
           )}
