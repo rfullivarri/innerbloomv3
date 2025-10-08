@@ -26,8 +26,8 @@ export const getUserJourney: AsyncHandler = async (req, res) => {
             COUNT(DISTINCT dl.date) AS quantity_daily_logs,
             u.first_programmed
      FROM users u
-     LEFT JOIN daily_log dl ON dl.user_id = u.id
-     WHERE u.id = $1
+     LEFT JOIN daily_log dl ON dl.user_id = u.user_id
+     WHERE u.user_id = $1
      GROUP BY u.first_programmed`,
     [id],
   );
