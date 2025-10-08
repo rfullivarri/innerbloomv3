@@ -52,7 +52,7 @@ function normalizeDailyXp(rows: DailyXpRow[]): NormalizedDailyXp[] {
   }
 
   return Array.from(byDate.entries())
-    .map(([date, xpDay]) => ({ date, xpDay }))
+    .map(([date, xp]) => ({ date, xp }))
     .sort((a, b) => (a.date > b.date ? -1 : a.date < b.date ? 1 : 0));
 }
 
@@ -74,7 +74,7 @@ function computeCurrentStreak(rows: DailyXpRow[]): number {
     }
 
     if (previousDate === null) {
-      if (entry.xpDay <= 0) {
+      if (entry.xp <= 0) {
         break;
       }
 
@@ -90,7 +90,7 @@ function computeCurrentStreak(rows: DailyXpRow[]): number {
       break;
     }
 
-    if (entry.xpDay <= 0) {
+    if (entry.xp <= 0) {
       break;
     }
 
