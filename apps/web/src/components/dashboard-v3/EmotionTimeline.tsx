@@ -50,6 +50,13 @@ type GridComputation = {
 };
 
 const EMOTION_NORMALIZATION: Record<string, EmotionName> = {
+  '1': 'Calma',
+  '2': 'Felicidad',
+  '3': 'Motivación',
+  '4': 'Tristeza',
+  '5': 'Ansiedad',
+  '6': 'Frustración',
+  '7': 'Cansancio',
   calma: 'Calma',
   calm: 'Calma',
   calmness: 'Calma',

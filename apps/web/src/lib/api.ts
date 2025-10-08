@@ -351,6 +351,13 @@ type EmotionLogResponse = {
 };
 
 const EMOTION_LABELS: Record<string, string> = {
+  '1': 'Calma',
+  '2': 'Felicidad',
+  '3': 'Motivación',
+  '4': 'Tristeza',
+  '5': 'Ansiedad',
+  '6': 'Frustración',
+  '7': 'Cansancio',
   calm: 'Calma',
   calma: 'Calma',
   happiness: 'Felicidad',
