@@ -1,94 +1,132 @@
 # API del dashboard
 
-Este documento resume los endpoints HTTP que consume el dashboard web (versiones legacy y V3), con el método, los parámetros relevantes y un resumen del payload que espera cada vista.
+Este documento resume los endpoints HTTP disponibles en el backend del dashboard (vistas legacy y V3), indicando método, parámetros relevantes y la estructura de respuesta que espera el frontend.
+
+## Salud y utilitarios
+
+### `GET /_health`
+* **Uso:** chequeo rápido para confirmar que la API responde.
+* **Respuesta:** `{ ok: true }` cuando el servicio está operativo.
+
+### `GET /health/db`
+* **Uso:** monitoreo de conectividad con Postgres (ejecuta `SELECT 1`).
+* **Respuesta:** `{ ok: true }` si la consulta se ejecuta correctamente. Devuelve `500` con código `database_unavailable` cuando no puede acceder a la base.
 
 ## Autenticación y perfil
 
 ### `GET /users/me`
-* **Uso en frontend:** `useBackendUser` solicita el perfil asociado al usuario de Clerk para obtener el `user_id` interno, modo de juego y target semanal.
-* **Headers:** `X-User-Id` con el identificador de Clerk.
-* **Respuesta principal:** objeto `user` con campos como `user_id`, `game_mode`, `weekly_target`, `full_name`, `image_url` y metadatos (`created_at`, `updated_at`).
+* **Uso en frontend:** el hook `useBackendUser` obtiene el perfil asociado al usuario de Clerk para conocer `user_id`, `game_mode`, `weekly_target` e imagen.
+* **Headers:** `X-User-Id` obligatorio con el identificador de Clerk.
+* **Respuesta:** `{ user: { user_id, clerk_user_id, email_primary, full_name, image_url, game_mode, weekly_target, timezone, locale, created_at, updated_at } }`.
 
 ## Progreso y XP
 
+### `GET /users/:id/summary/today`
+* **Uso:** hero del dashboard legacy (`DashboardPage`) muestra XP del día y quests completadas.
+* **Respuesta:** `{ date, xp_today, quests: { total, completed } }`.
+
 ### `GET /users/:id/xp/total`
-* **Uso:** Tarjeta "Progreso general" (Dashboard V3) y lógica de nivel legacy, para mostrar el acumulado histórico de XP.
+* **Uso:** tarjeta "Progreso general" (Dashboard V3) y lógica legacy; muestra el acumulado histórico de XP.
 * **Respuesta:** `{ total_xp: number }`.
 
 ### `GET /users/:id/level`
-* **Uso:** Tarjetas de progreso (Metric Header y Level Card). Se combina con `/xp/total` para renderizar nivel actual, porcentaje al siguiente nivel y XP faltante.
-* **Respuesta:** `{ current_level, xp_total, xp_required_current, xp_required_next, xp_to_next, progress_percent }`.
+* **Uso:** tarjetas de progreso (`MetricHeader`, `LevelCard`). Complementa `/xp/total` para calcular nivel actual y XP faltante.
+* **Respuesta:** `{ user_id, current_level, xp_total, xp_required_current, xp_required_next, xp_to_next, progress_percent }`.
 
 ### `GET /users/:id/xp/daily`
 * **Uso:**
   * Sección "Daily Cultivation" (tendencia mensual de XP).
-  * Panel de rachas (cálculo de XP semanal y métricas por tarea).
-  * Cálculo de rachas legacy (`getStreaks`) y determinación de rango de fechas.
-* **Parámetros:** `from`, `to` (YYYY-MM-DD).
+  * Panel de rachas (Legacy y V3) y cálculo de rachas (`StreakCard`).
+* **Parámetros:** `from`, `to` (YYYY-MM-DD). Si no se envían se usa un rango por defecto.
 * **Respuesta:** `{ from, to, series: Array<{ date, xp_day }> }`.
 
 ### `GET /users/:id/xp/by-trait`
-* **Uso:** Tarjeta "Radar Chart" para distribuir XP acumulado por rasgo/pilar.
-* **Parámetros:** opcional `from`, `to` para acotar el periodo (no utilizados actualmente).
-* **Respuesta:** `{ traits: Array<{ trait, xp }> }`.
+* **Uso:** tarjeta "Radar Chart" distribuye el XP acumulado por rasgo/pilar.
+* **Parámetros:** opcionales `from`, `to` para acotar el periodo.
+* **Respuesta:** `{ traits: Array<{ trait, xp }> }` (los rasgos sin datos regresan `0`).
+
+### `GET /users/:id/achievements`
+* **Uso:** tarjeta legacy "Achievements" muestra hitos desbloqueados y progreso.
+* **Respuesta:** `{ user_id, achievements: Array<{ id, name, earned_at, progress: { current, target, pct } }> }`. El backend calcula el progreso con el streak y el nivel actual.
 
 ## Energía y estado
 
 ### `GET /users/:id/daily-energy`
-* **Uso:** Tarjeta "Daily Energy" muestra el promedio de HP, Mood y Focus.
-* **Respuesta:** `{ hp_pct, mood_pct, focus_pct, hp_norm, mood_norm, focus_norm }`. El frontend usa los porcentajes.
-* **Notas:** Si la API responde 404 se interpreta como "sin datos".
+* **Uso:** tarjeta "Daily Energy" (Dashboard V3) muestra promedios de HP, Mood y Focus.
+* **Respuesta:** `{ user_id, hp_pct, mood_pct, focus_pct, hp_norm, mood_norm, focus_norm }`. Si no hay datos devuelve `404`.
 
 ### `GET /users/:id/state`
-* **Uso previsto:** Estructura base para game mode y barras de energía (se consulta desde utilidades, aunque la tarjeta actual usa `/daily-energy`).
-* **Respuesta:** Snapshot con modo (`mode`), objetivo semanal (`weekly_target`), flags de gracia y métricas por pilar (`xp_today`, `xp_obj_day`).
+* **Uso previsto:** base para game mode y barras de energía. Se consulta desde utilidades aunque la tarjeta actual usa `/daily-energy`.
+* **Respuesta:** `{ date, mode, weekly_target, grace: { applied, unique_days }, pillars: { Body: { hp, xp_today, d, k, H, xp_obj_day }, Mind: { ... }, Soul: { ... } } }`.
 
 ### `GET /users/:id/state/timeseries`
-* **Uso previsto:** Radar histórico de energía (aún no montado en UI V3). Devuelve series diarias por pilar.
-* **Respuesta:** `{ series: Array<{ date, Body, Mind, Soul }> }`.
+* **Uso previsto:** radar histórico de energía (aún no montado en UI V3). Devuelve la energía propagada por día.
+* **Parámetros:** `from`, `to` (YYYY-MM-DD) obligatorios.
+* **Respuesta:** `Array<{ date, Body, Mind, Soul }>` (lista plana con valores diarios).
 
 ## Hábitos, tareas y rachas
 
 ### `GET /users/:id/tasks`
 * **Uso:**
-  * "Missions" (V3) reutiliza las tareas activas.
-  * Panel de rachas (legacy y nuevo) toma la lista para presentar métricas por misión.
-* **Respuesta:** lista de tareas `{ task_id, task, pillar_id, xp_base, active, ... }`.
+  * Sección "Missions" (V3) reutiliza las tareas activas.
+  * Panel de rachas (legacy y nuevo) utiliza la lista para mostrar métricas por misión.
+* **Parámetros:** `limit`, `offset` opcionales (paginación).
+* **Respuesta:** `{ limit, offset, tasks: Array<{ task_id, task, pillar_id, trait_id, difficulty_id, xp_base, active }> }`.
 
 ### `GET /users/:id/streaks/panel`
-* **Uso:** Panel de rachas V3 (cuando la feature flag está activa) obtiene `topStreaks` y `tasks` con métricas por rango.
+* **Uso:** panel de rachas V3 (cuando `VITE_SHOW_STREAKS_PANEL` lo habilita) obtiene `topStreaks` y `tasks` con métricas por rango.
 * **Parámetros:** `pillar` (`Body|Mind|Soul`), `range` (`week|month|qtr`), `mode` (tier actual) y `query` opcional.
-* **Respuesta:** `{ topStreaks: Array<{ id, name, stat, weekDone, streakWeeks }>, tasks: Array<{ id, name, metrics: { week, month, qtr } }> }`.
+* **Respuesta:** `{ topStreaks: Array<{ id, name, stat, weekDone, streakWeeks }>, tasks: Array<{ id, name, stat, weekDone, streakWeeks, metrics: { week: { count, xp }, month: { count, xp, weeks }, qtr: { count, xp, weeks } } }> }`.
 
 ### `GET /users/:id/streaks`
-* **Uso:** Tarjeta legacy "Streak" calcula las rachas a partir de los XP diarios (la API todavía no expone un resumen directo).
-* **Respuesta derivada:** El frontend procesa el `series` devuelto por `/xp/daily` para computar `current` y `longest`.
+* **Uso:** no existe endpoint dedicado; la tarjeta legacy calcula `current` y `longest` procesando los datos de `/xp/daily` en el cliente.
 
 ### `GET /task-logs`
-* **Uso:** Módulo "Recent Activity" lista los últimos completados.
-* **Parámetros:** `userId` obligatorio, `limit` opcional.
-* **Respuesta:** lista de logs con `id`, `taskId`, `taskTitle`, `completedAt/doneAt`, `xpAwarded`.
+* **Uso:** módulo "Recent Activity" lista las últimas quests completadas.
+* **Parámetros:** `userId` (UUID) obligatorio, `limit` opcional.
+* **Respuesta:** actualmente devuelve `[]`; el backend valida parámetros pero la restauración de logs aún no está implementada.
+
+### `POST /task-logs`
+* **Uso:** endpoint legacy pensado para registrar completados.
+* **Respuesta:** `501` con `{ code: 'not_implemented' }` (no disponible en la base reseteada).
+
+### `POST /tasks/complete`
+* **Uso:** endpoint planificado para cerrar tareas individuales.
+* **Respuesta:** `501` con `{ code: 'not_implemented' }` hasta que se conecte la lógica de escritura.
+
+## Pilares y catálogos
+
+### `GET /users/:id/pillars`
+* **Uso:** sección legacy "Pillars" muestra métricas dinámicas (`xp`, `xp_week`, `progress_pct`) para el usuario.
+* **Respuesta:** `{ user_id, pillars: Array<{ code, xp, xp_week, progress_pct }> }`.
+
+### `GET /pillars`
+* **Uso:** complementa la vista legacy con descripciones estáticas globales.
+* **Respuesta:** devuelve un arreglo de pilares `{ id, name, description, focusAreas }`. En la versión actual responde `[]`.
 
 ## Emociones y journey
 
 ### `GET /users/:id/emotions`
-* **Uso:**
-  * Tarjeta "Emotion Timeline" (V3) y heatmap legacy.
-  * Se mapea `emotion_id` → etiqueta legible (`Calma`, `Felicidad`, etc.).
-* **Parámetros:** `from`, `to` o `days` (el cliente deriva un rango si solo se pasa `days`).
-* **Respuesta:** `{ emotions: Array<{ date, emotion_id }> }`.
+* **Uso:** tarjeta "Emotion Timeline" (V3) y heatmap legacy.
+* **Parámetros:** `from`, `to` (YYYY-MM-DD) o `days` para derivar el rango.
+* **Respuesta:** `{ user_id, range: { from, to }, days: Array<{ date, emotion_id, emotion }> }`. El frontend mapea IDs y códigos a etiquetas (`Calma`, `Felicidad`, etc.).
 
 ### `GET /users/:id/journey`
-* **Uso:** Banner de alertas (V3) determina si pedir confirmación de base o activar scheduler.
-* **Respuesta:** `{ first_date_log, days_of_journey, quantity_daily_logs }`.
+* **Uso:** banner de alertas (V3) decide si mostrar recordatorios de base o scheduler.
+* **Respuesta:** `{ first_date_log, days_of_journey, quantity_daily_logs, first_programmed }` (cuando no hay logs los contadores son `0`).
 
-## Catálogos y leaderboard
-
-### `GET /pillars`
-* **Uso:** Sección legacy "Pillars" muestra descripción y foco de cada pilar.
-* **Respuesta:** `{ pillars: Array<{ id, name, description, score, focusAreas }> }`.
+## Social y leaderboard
 
 ### `GET /leaderboard`
-* **Uso previsto:** Rankings sociales (aún no montados en el dashboard actual).
-* **Respuesta:** Lista de usuarios con `userId`, `displayName`, `totalXp`, `rank`.
+* **Uso previsto:** rankings sociales (aún no visibles en UI).
+* **Respuesta:** `{ limit, offset, users: [] }`. La implementación actual responde una lista vacía.
 
+## Endpoints legacy adicionales
+
+### `GET /tasks`
+* **Uso:** endpoints de compatibilidad para herramientas antiguas que consultan tareas pasando `userId` como query string.
+* **Respuesta:** `[]` tras validar que el UUID sea correcto.
+
+### `GET /task-logs` (legacy)
+* **Uso:** versión MVP previa del módulo de actividad; recibe `userId` como query string.
+* **Respuesta:** `[]` una vez validado el parámetro. El historial completo no está habilitado en la base reseteada.
