@@ -532,10 +532,27 @@ export async function getTaskLogs(userId: string, params: { limit?: number } = {
   return extractArray<TaskLog>(response, 'items', 'logs', 'data', 'task_logs');
 }
 
+type EmotionLogEntry = {
+  date?: string | null;
+  day?: string | null;
+  emotion_id?: string | number | null;
+  emotion?: string | null;
+  mood?: string | null;
+  emocion?: string | null;
+  intensity?: number | null;
+  score?: number | null;
+  value?: number | null;
+  note?: string | null;
+  created_at?: string | null;
+  createdAt?: string | null;
+  timestamp?: string | number | null;
+};
+
 type EmotionLogResponse = {
-  from: string;
-  to: string;
-  emotions: Array<{ date: string; emotion_id: string | null }>;
+  emotions?: EmotionLogEntry[];
+  days?: EmotionLogEntry[];
+  daily_emotion?: EmotionLogEntry[];
+  data?: EmotionLogResponse;
 };
 
 const EMOTION_LABELS: Record<string, string> = {
@@ -608,26 +625,127 @@ function buildEmotionQuery(params: EmotionQuery): Record<string, string> {
   return query;
 }
 
+function resolveEmotionEntries(source: EmotionLogResponse | EmotionLogEntry[] | undefined): EmotionLogEntry[] {
+  if (!source) {
+    return [];
+  }
+
+  if (Array.isArray(source)) {
+    return source;
+  }
+
+  const direct = extractArray<EmotionLogEntry>(source, 'days', 'emotions', 'daily_emotion');
+  if (direct.length > 0) {
+    return direct;
+  }
+
+  if (source.data) {
+    return resolveEmotionEntries(source.data);
+  }
+
+  return [];
+}
+
+function normalizeEmotionLabel(raw: unknown): string | undefined {
+  if (raw == null) {
+    return undefined;
+  }
+
+  const normalized = String(raw).trim();
+  if (!normalized) {
+    return undefined;
+  }
+
+  return EMOTION_LABELS[normalized.toLowerCase()] ?? normalized;
+}
+
+function normalizeEmotionDate(raw: unknown): string | null {
+  if (!raw && raw !== 0) {
+    return null;
+  }
+
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    if (!trimmed) {
+      return null;
+    }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return trimmed;
+    }
+
+    const parsed = new Date(trimmed);
+    if (!Number.isNaN(parsed.getTime())) {
+      return formatDateKey(parsed);
+    }
+
+    return null;
+  }
+
+  if (raw instanceof Date) {
+    return formatDateKey(raw);
+  }
+
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+      return formatDateKey(parsed);
+    }
+  }
+
+  return null;
+}
+
 export async function getEmotions(userId: string, params: EmotionQuery = {}): Promise<EmotionSnapshot[]> {
-  const response = await getJson<EmotionLogResponse | { emotions?: unknown }>(
+  const response = await getJson<EmotionLogResponse | EmotionLogEntry[] | { emotions?: unknown; days?: unknown }>(
     `/users/${encodeURIComponent(userId)}/emotions`,
     buildEmotionQuery(params),
   );
 
   logShape('emotions', response);
 
-  const emotions = extractArray<{ date: string; emotion_id: string | null }>(response, 'emotions');
+  const entries = resolveEmotionEntries(response as EmotionLogResponse | EmotionLogEntry[] | undefined);
 
-  return emotions.map((entry) => {
-    const rawId = entry.emotion_id;
-    const normalized = rawId == null ? '' : String(rawId);
-    const moodLabel = normalized ? EMOTION_LABELS[normalized.toLowerCase()] ?? normalized : undefined;
+  return entries
+    .map((entry) => {
+      const date =
+        normalizeEmotionDate(entry.date) ??
+        normalizeEmotionDate(entry.day) ??
+        normalizeEmotionDate((entry as Record<string, unknown>)?.created_at) ??
+        normalizeEmotionDate((entry as Record<string, unknown>)?.createdAt) ??
+        normalizeEmotionDate((entry as Record<string, unknown>)?.timestamp);
 
-    return {
-      date: entry.date,
-      mood: moodLabel,
-    };
-  });
+      if (!date) {
+        return null;
+      }
+
+      const mood =
+        normalizeEmotionLabel(entry.emotion) ??
+        normalizeEmotionLabel(entry.mood) ??
+        normalizeEmotionLabel(entry.emocion) ??
+        normalizeEmotionLabel(entry.emotion_id);
+
+      const intensityValue = Number(entry.intensity);
+      const scoreValue = Number(entry.score);
+      const valueValue = Number(entry.value);
+      const derivedIntensity = [intensityValue, scoreValue, valueValue].find((candidate) => Number.isFinite(candidate));
+      const note = typeof entry.note === 'string' ? entry.note : undefined;
+
+      const snapshot: EmotionSnapshot = {
+        date,
+        ...(mood ? { mood } : {}),
+        ...(Number.isFinite(intensityValue) ? { intensity: intensityValue } : {}),
+        ...(Number.isFinite(scoreValue) ? { score: scoreValue } : {}),
+        ...(Number.isFinite(valueValue) ? { value: valueValue } : {}),
+        ...(note ? { note } : {}),
+      };
+
+      if (snapshot.intensity === undefined && derivedIntensity !== undefined) {
+        snapshot.intensity = derivedIntensity;
+      }
+
+      return snapshot;
+    })
+    .filter((entry): entry is EmotionSnapshot => entry !== null);
 }
 
 export type UserState = {
