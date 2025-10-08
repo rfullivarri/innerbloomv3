@@ -11,7 +11,7 @@ import { ensureUserExists } from '../users/shared.js';
 
 type EmotionRow = {
   date: string;
-  emotion_id: string | null;
+  emotion_code: string | null;
 };
 
 const paramsSchema = z.object({
@@ -24,20 +24,29 @@ export const getUserEmotions: AsyncHandler = async (req, res) => {
 
   await ensureUserExists(id);
 
-  const range = resolveDateRange({ from, to });
+  const range = resolveDateRange({ from, to }, 90);
 
   const result = await pool.query<EmotionRow>(
-    `SELECT date, emotion_id
-     FROM emotions_logs
-     WHERE user_id = $1
-       AND date BETWEEN $2 AND $3
-     ORDER BY date`,
+    `SELECT el.date,
+            ce.code AS emotion_code
+       FROM emotions_logs el
+  LEFT JOIN cat_emotion ce ON ce.emotion_id = el.emotion_id
+      WHERE el.user_id = $1
+        AND el.date BETWEEN $2 AND $3
+   ORDER BY el.date`,
     [id, formatAsDateString(range.from), formatAsDateString(range.to)],
   );
 
   res.json({
-    from: formatAsDateString(range.from),
-    to: formatAsDateString(range.to),
-    emotions: result.rows,
+    user_id: id,
+    range: {
+      from: formatAsDateString(range.from),
+      to: formatAsDateString(range.to),
+    },
+    days: result.rows.map((row) => ({
+      date: row.date,
+      emotion: row.emotion_code,
+      intensity: null,
+    })),
   });
 };
