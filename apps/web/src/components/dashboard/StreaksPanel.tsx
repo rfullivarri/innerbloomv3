@@ -291,6 +291,9 @@ const MODE_CHIP_STYLES: Record<Mode, { glowPrimary: string; glowSecondary: strin
   },
 };
 
+const TAB_BUTTON_BASE =
+  'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 md:text-xs';
+
 function normalizeMode(mode?: string | null): Mode {
   if (!mode) {
     return 'Flow';
@@ -457,21 +460,24 @@ function TaskItem({ item }: { item: DisplayTask }) {
           showHistory ? '' : 'md:items-center',
         )}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 md:flex-1 md:min-w-[220px]">
           <span
             className={cx(
-              'h-2.5 w-2.5 rounded-full',
+              'h-2.5 w-2.5 shrink-0 rounded-full',
               status === 'high' && 'bg-emerald-400',
               status === 'mid' && 'bg-amber-400',
               status === 'low' && 'bg-rose-400',
             )}
           />
-          <div className="flex-1">
-            <div className="h-2.5 overflow-hidden rounded-full bg-violet-800/40">
-              <div className="h-2.5 rounded-full bg-violet-400 transition-all" style={{ width: `${pct}%` }} />
+          <div className="min-w-0 flex-1">
+            <div className="h-2.5 overflow-hidden rounded-full bg-violet-400/20">
+              <div
+                className="h-2.5 rounded-full bg-gradient-to-r from-violet-400 via-fuchsia-400 to-sky-300 transition-all"
+                style={{ width: `${pct}%` }}
+              />
             </div>
           </div>
-          <span className="ml-2 text-xs text-slate-300 tabular-nums">
+          <span className="ml-2 shrink-0 text-xs text-slate-200 tabular-nums md:ml-3">
             {item.weeklyDone}/{item.weeklyGoal}
           </span>
         </div>
@@ -648,10 +654,11 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                 type="button"
                 onClick={() => setPillar(tab.value)}
                 className={cx(
-                  'inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300',
+                  TAB_BUTTON_BASE,
+                  'leading-none',
                   isActive
-                    ? 'bg-violet-500 text-white shadow-[0_4px_16px_rgba(139,92,246,0.4)]'
-                    : 'bg-white/10 text-slate-200 hover:bg-white/20',
+                    ? 'border-violet-300/80 bg-violet-500 text-white shadow-[0_4px_16px_rgba(139,92,246,0.45)]'
+                    : 'border-white/10 bg-white/10 text-slate-200 hover:border-white/20 hover:bg-white/15',
                 )}
                 aria-pressed={isActive}
               >
@@ -705,7 +712,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                   type="button"
                   onClick={() => setRange(tab.value)}
                   className={cx(
-                    'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300',
+                    TAB_BUTTON_BASE,
                     isActive
                       ? 'border-white/60 bg-white text-slate-900 shadow-[0_4px_16px_rgba(226,232,240,0.35)]'
                       : 'border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10',
