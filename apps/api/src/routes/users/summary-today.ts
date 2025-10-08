@@ -1,37 +1,49 @@
 import { z } from 'zod';
+import { ensureUserExists } from '../../controllers/users/shared.js';
 import { pool } from '../../db.js';
 import type { AsyncHandler } from '../../lib/async-handler.js';
-import { HttpError } from '../../lib/http-error.js';
 import { uuidSchema } from '../../lib/validation.js';
 
 const paramsSchema = z.object({
   id: uuidSchema,
 });
 
-type XpTodayRow = {
+type UserXpTodayRow = {
+  user_id: string;
+  date: string | Date | null;
   xp_today: string | number | null;
 };
 
-type AggregateXpRow = {
-  xp: string | number | null;
-};
-
-type CountRow = {
+type UserQuestsTodayRow = {
+  user_id: string;
   total: string | number | null;
-};
-
-type CompletedRow = {
   completed: string | number | null;
-};
-
-type UserTimezoneRow = {
-  timezone: string | null;
-  today: string | null;
 };
 
 const toNumber = (value: string | number | null | undefined): number => {
   const parsed = Number(value);
+
   return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const toDateString = (value: string | Date | null | undefined): string => {
+  if (value instanceof Date) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  if (typeof value === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return value;
+    }
+
+    const parsed = new Date(value);
+
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toISOString().slice(0, 10);
+    }
+  }
+
+  return new Date().toISOString().slice(0, 10);
 };
 
 export type GetUserSummaryTodayResponse = {
@@ -43,99 +55,44 @@ export type GetUserSummaryTodayResponse = {
   };
 };
 
-/**
- * @openapi
- * /users/{id}/summary/today:
- *   get:
- *     summary: Get today's hero summary for a user
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     responses:
- *       '200':
- *         description: Today's summary was found
- *       '400':
- *         description: Invalid user id
- *       '404':
- *         description: User not found
- */
 export const getUserSummaryToday: AsyncHandler = async (req, res) => {
-  const { id } = paramsSchema.parse(req.params);
+  const parsed = paramsSchema.safeParse(req.params);
 
-  const userResult = await pool.query<UserTimezoneRow>(
-    `SELECT COALESCE(timezone, 'UTC') AS timezone,
-            timezone(COALESCE(timezone, 'UTC'), now())::date::text AS today
-       FROM users
-      WHERE user_id = $1
-      LIMIT 1`,
-    [id],
-  );
-
-  if (userResult.rowCount === 0) {
-    throw new HttpError(404, 'user_not_found', 'User not found');
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'bad_request', detail: 'invalid uuid' });
   }
 
-  const today = userResult.rows[0]?.today ?? new Date().toISOString().slice(0, 10);
+  const { id } = parsed.data;
 
-  const xpTodayResult = await pool.query<XpTodayRow>(
-    `SELECT xp_today
-       FROM v_user_xp_today
-      WHERE user_id = $1
-      LIMIT 1`,
-    [id],
-  );
+  await ensureUserExists(id);
 
-  let xpToday = 0;
-
-  if ((xpTodayResult.rowCount ?? 0) > 0) {
-    xpToday = toNumber(xpTodayResult.rows[0]?.xp_today);
-  } else {
-    const xpFallbackResult = await pool.query<AggregateXpRow>(
-      `SELECT COALESCE(SUM(dl.quantity * COALESCE(t.xp_base, cd.xp_base, 0)), 0) AS xp
-         FROM daily_log dl
-         JOIN tasks t ON t.task_id = dl.task_id
-    LEFT JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
-        WHERE dl.user_id = $1
-          AND dl.date = $2`,
-      [id, today],
-    );
-
-    xpToday = toNumber(xpFallbackResult.rows[0]?.xp);
-  }
-
-  const [totalResult, completedResult] = await Promise.all([
-    pool.query<CountRow>(
-      `SELECT COUNT(*) AS total
-         FROM tasks
-        WHERE user_id = $1
-          AND active = true`,
+  const [xpResult, questsResult] = await Promise.all([
+    pool.query<UserXpTodayRow>(
+      `SELECT user_id, date, xp_today FROM v_user_xp_today WHERE user_id = $1`,
       [id],
     ),
-    pool.query<CompletedRow>(
-      `SELECT COUNT(DISTINCT dl.task_id) AS completed
-         FROM daily_log dl
-        WHERE dl.user_id = $1
-          AND dl.date = $2`,
-      [id, today],
+    pool.query<UserQuestsTodayRow>(
+      `SELECT user_id, total, completed FROM v_user_quests_today WHERE user_id = $1`,
+      [id],
     ),
   ]);
 
-  const total = toNumber(totalResult.rows[0]?.total);
-  const completed = toNumber(completedResult.rows[0]?.completed);
+  const xpRow = xpResult.rows[0];
+  const questsRow = questsResult.rows[0];
 
-  const response: GetUserSummaryTodayResponse = {
-    date: today,
+  const date = toDateString(xpRow?.date ?? new Date());
+  const xpToday = toNumber(xpRow?.xp_today);
+  const questsTotal = toNumber(questsRow?.total);
+  const questsCompleted = toNumber(questsRow?.completed);
+
+  const body: GetUserSummaryTodayResponse = {
+    date,
     xp_today: xpToday,
     quests: {
-      total,
-      completed,
+      total: questsTotal,
+      completed: questsCompleted,
     },
   };
 
-  res.json(response);
+  return res.status(200).json(body);
 };
-
