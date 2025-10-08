@@ -1,14 +1,68 @@
-import { useMemo } from 'react';
+import type { CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '../ui/Card';
 import { useRequest } from '../../hooks/useRequest';
 import { getEmotions, type EmotionSnapshot } from '../../lib/api';
-import { asArray, dateStr } from '../../lib/safe';
+import { asArray } from '../../lib/safe';
+import '../../styles/panel-rachas.overrides.css';
 
 interface EmotionChartCardProps {
   userId: string;
 }
 
-const EMOTION_COLORS: Record<string, string> = {
+const GAP = 6;
+const NUM_WEEKS = 26;
+const DAYS_IN_WEEK = 7;
+const LOOKBACK_FOR_HIGHLIGHT = 15;
+
+const EMOTION_NAMES = [
+  'Calma',
+  'Felicidad',
+  'Motivación',
+  'Tristeza',
+  'Ansiedad',
+  'Frustración',
+  'Cansancio',
+] as const;
+
+type EmotionName = (typeof EMOTION_NAMES)[number];
+type EmotionValue = EmotionName | 'Sin registro';
+
+type NormalizedEmotionEntry = {
+  key: string;
+  date: Date;
+  emotion: EmotionValue;
+};
+
+type EmotionColumn = {
+  key: string;
+  label: string;
+  cells: GridCell[];
+};
+
+type GridCell = {
+  key: string;
+  date: Date;
+  emotion: EmotionValue;
+  color: string;
+};
+
+type EmotionHighlight = {
+  emotion: EmotionName;
+  color: string;
+  count: number;
+};
+
+type EmotionMapResult = {
+  map: Map<string, EmotionValue>;
+  keys: string[];
+  minDate: Date | null;
+  maxDate: Date | null;
+};
+
+type RawEmotionArray = Array<unknown>;
+
+const EMOTION_COLORS: Record<EmotionValue, string> = {
   Calma: '#2ECC71',
   Felicidad: '#F1C40F',
   Motivación: '#9B59B6',
@@ -16,135 +70,360 @@ const EMOTION_COLORS: Record<string, string> = {
   Ansiedad: '#E74C3C',
   Frustración: '#8D6E63',
   Cansancio: '#16A085',
+  'Sin registro': '#555555',
 };
 
-const LEGEND = [
-  { name: 'Calma', color: EMOTION_COLORS.Calma },
-  { name: 'Felicidad', color: EMOTION_COLORS.Felicidad },
-  { name: 'Motivación', color: EMOTION_COLORS.Motivación },
-  { name: 'Tristeza', color: EMOTION_COLORS.Tristeza },
-  { name: 'Ansiedad', color: EMOTION_COLORS.Ansiedad },
-  { name: 'Frustración', color: EMOTION_COLORS.Frustración },
-  { name: 'Cansancio', color: EMOTION_COLORS.Cansancio },
-] satisfies Array<{ name: keyof typeof EMOTION_COLORS; color: string }>;
+const LEGEND: Array<{ name: EmotionName; color: string }> = EMOTION_NAMES.map((name) => ({
+  name,
+  color: EMOTION_COLORS[name],
+}));
 
-const NUM_WEEKS = 26;
-const DAYS_IN_WEEK = 7;
-const LOOKBACK_FOR_HIGHLIGHT = 15;
-
-function buildRange() {
-  const to = new Date();
-  const from = new Date(to);
-  from.setUTCDate(from.getUTCDate() - (NUM_WEEKS * DAYS_IN_WEEK - 1));
-  return { from: dateStr(from), to: dateStr(to) };
+function removeDiacritics(input: string): string {
+  return input.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-function normalizeMood(value: string | undefined | null): string {
-  const normalized = (value ?? '').trim();
-  if (!normalized) {
-    return '';
+function parseAnyDate(value: unknown): Date | null {
+  if (!value && value !== 0) return null;
+
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    const copy = new Date(value.getFullYear(), value.getMonth(), value.getDate());
+    copy.setHours(0, 0, 0, 0);
+    return copy;
   }
-  if (/neutral/i.test(normalized)) {
-    return 'Cansancio';
+
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    const fromTs = new Date(value);
+    if (Number.isNaN(fromTs.getTime())) return null;
+    const copy = new Date(fromTs.getFullYear(), fromTs.getMonth(), fromTs.getDate());
+    copy.setHours(0, 0, 0, 0);
+    return copy;
   }
-  return normalized;
+
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const [y, m, d] = raw.split('-').map((part) => parseInt(part, 10));
+    if (!y || !m || !d) return null;
+    return new Date(y, m - 1, d, 0, 0, 0, 0);
+  }
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(raw)) {
+    const [d, m, y] = raw.split('/').map((part) => parseInt(part, 10));
+    if (!y || !m || !d) return null;
+    return new Date(y, m - 1, d, 0, 0, 0, 0);
+  }
+
+  const isoCandidate = new Date(raw);
+  if (!Number.isNaN(isoCandidate.getTime())) {
+    const copy = new Date(isoCandidate.getFullYear(), isoCandidate.getMonth(), isoCandidate.getDate());
+    copy.setHours(0, 0, 0, 0);
+    return copy;
+  }
+
+  return null;
 }
 
-function toUtcStart(dateLike: string): Date {
-  const parsed = new Date(dateLike);
-  if (Number.isNaN(parsed.getTime())) {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    return today;
-  }
-  parsed.setUTCHours(0, 0, 0, 0);
-  return parsed;
+function ymd(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
-function startOfWeek(date: Date): Date {
-  const start = new Date(date);
-  start.setUTCHours(0, 0, 0, 0);
-  start.setUTCDate(start.getUTCDate() - start.getUTCDay());
-  return start;
+function normalizeEmotion(value: unknown): EmotionValue {
+  if (!value && value !== 0) return 'Sin registro';
+
+  const raw = removeDiacritics(String(value).trim().toLowerCase());
+  if (!raw) return 'Sin registro';
+  if (raw === 'neutral') return 'Cansancio';
+
+  const mapping: Record<string, EmotionName> = {
+    calma: 'Calma',
+    calm: 'Calma',
+    alegria: 'Felicidad',
+    felicidad: 'Felicidad',
+    feliz: 'Felicidad',
+    happiness: 'Felicidad',
+    motivacion: 'Motivación',
+    motivation: 'Motivación',
+    motivado: 'Motivación',
+    motivada: 'Motivación',
+    motivados: 'Motivación',
+    motivadas: 'Motivación',
+    tristeza: 'Tristeza',
+    triste: 'Tristeza',
+    sadness: 'Tristeza',
+    ansioso: 'Ansiedad',
+    ansiosa: 'Ansiedad',
+    ansiedad: 'Ansiedad',
+    anxiety: 'Ansiedad',
+    frustracion: 'Frustración',
+    frustracionado: 'Frustración',
+    frustration: 'Frustración',
+    frustrado: 'Frustración',
+    frustrada: 'Frustración',
+    cansancio: 'Cansancio',
+    cansado: 'Cansancio',
+    cansada: 'Cansancio',
+    tiredness: 'Cansancio',
+    tired: 'Cansancio',
+  };
+
+  const mapped = mapping[raw];
+  if (mapped) return mapped;
+
+  return 'Sin registro';
 }
 
-type NormalizedEmotion = {
-  day: string;
-  mood: string;
-};
+function normalizeEntries(entries: RawEmotionArray): NormalizedEmotionEntry[] {
+  const normalized: NormalizedEmotionEntry[] = [];
 
-type GridCell = {
-  key: string;
-  date: Date;
-  mood: string | null;
-};
+  for (const item of entries) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Record<string, unknown>;
+    const rawDate =
+      row.fecha ?? row.date ?? row.day ?? row.created_at ?? row.createdAt ?? row.timestamp ?? row.ts ?? null;
+    const date = parseAnyDate(rawDate);
+    if (!date) continue;
 
-type MonthLabel = {
-  key: string;
-  label: string;
-};
+    const key = ymd(date);
+    const rawEmotion = row.emocion ?? row.emotion ?? row.mood ?? row.emotion_id ?? row.value ?? row.name ?? null;
+    const emotion = normalizeEmotion(rawEmotion);
 
-function buildGrid(entries: NormalizedEmotion[], range: { from: string; to: string }) {
-  const emotionMap = new Map<string, string>();
-  for (const entry of entries) {
-    if (!entry.day) continue;
-    emotionMap.set(entry.day, entry.mood);
-  }
-
-  const toDate = toUtcStart(range.to);
-  const start = startOfWeek(new Date(toDate));
-  start.setUTCDate(start.getUTCDate() - (NUM_WEEKS * DAYS_IN_WEEK - 1));
-
-  const totalCells = NUM_WEEKS * DAYS_IN_WEEK;
-  const cells: GridCell[] = [];
-  for (let index = 0; index < totalCells; index += 1) {
-    const cellDate = new Date(start);
-    cellDate.setUTCDate(start.getUTCDate() + index);
-    const key = dateStr(cellDate);
-    cells.push({
-      key: `${key}-${index}`,
-      date: cellDate,
-      mood: emotionMap.get(key) ?? null,
+    normalized.push({
+      key,
+      date,
+      emotion,
     });
   }
 
-  const monthFormatter = new Intl.DateTimeFormat('es-AR', { month: 'short' });
-  const monthLabels: MonthLabel[] = [];
-  let previousMonth = -1;
-  for (let column = 0; column < NUM_WEEKS; column += 1) {
-    const labelDate = new Date(start);
-    labelDate.setUTCDate(start.getUTCDate() + column * DAYS_IN_WEEK);
-    const month = labelDate.getUTCMonth();
-    const label = month !== previousMonth ? monthFormatter.format(labelDate) : '';
-    previousMonth = month;
-    monthLabels.push({ key: `${dateStr(labelDate)}-${column}`, label: label.toLowerCase() });
-  }
+  normalized.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  return { cells, monthLabels };
+  return normalized;
 }
 
-function computeMostFrequent(entries: NormalizedEmotion[]): { name: string; count: number } | null {
-  if (entries.length === 0) {
-    return null;
-  }
+function buildEmotionByDay(entries: NormalizedEmotionEntry[]): EmotionMapResult {
+  const map = new Map<string, EmotionValue>();
+  let minDate: Date | null = null;
+  let maxDate: Date | null = null;
 
-  const sorted = [...entries].sort((a, b) => (a.day > b.day ? 1 : -1));
-  const recent = sorted.slice(-LOOKBACK_FOR_HIGHLIGHT);
-
-  const counter = new Map<string, number>();
-  for (const entry of recent) {
-    if (!entry.mood) continue;
-    counter.set(entry.mood, (counter.get(entry.mood) ?? 0) + 1);
-  }
-
-  let top: { name: string; count: number } | null = null;
-  for (const [name, count] of counter.entries()) {
-    if (!top || count > top.count) {
-      top = { name, count };
+  for (const entry of entries) {
+    map.set(entry.key, entry.emotion);
+    if (!minDate || entry.date.getTime() < minDate.getTime()) {
+      minDate = entry.date;
+    }
+    if (!maxDate || entry.date.getTime() > maxDate.getTime()) {
+      maxDate = entry.date;
     }
   }
 
-  return top;
+  const keys = Array.from(map.keys()).sort();
+
+  return { map, keys, minDate, maxDate };
+}
+
+function startOfWeekMonday(date: Date): Date {
+  const result = new Date(date);
+  result.setHours(0, 0, 0, 0);
+  const day = result.getDay();
+  const diff = (day + 6) % 7; // Monday -> 0
+  result.setDate(result.getDate() - diff);
+  return result;
+}
+
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+function computeEndDate(latest: Date | null): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (!latest || Number.isNaN(latest.getTime())) {
+    return today;
+  }
+
+  const candidate = new Date(latest);
+  candidate.setHours(0, 0, 0, 0);
+
+  return candidate.getTime() > today.getTime() ? candidate : today;
+}
+
+function buildColumns(
+  map: Map<string, EmotionValue>,
+  startMonday: Date,
+  columns: number,
+  rows: number,
+): EmotionColumn[] {
+  const result: EmotionColumn[] = [];
+  const monthFormatter = new Intl.DateTimeFormat('es-ES', { month: 'short' });
+  let previousMonth = -1;
+
+  for (let col = 0; col < columns; col += 1) {
+    const monday = addDays(startMonday, col * rows);
+    const month = monday.getMonth();
+    const label = month !== previousMonth ? monthFormatter.format(monday).toLowerCase() : '';
+    previousMonth = month;
+
+    const cells: GridCell[] = [];
+    for (let row = 0; row < rows; row += 1) {
+      const cellDate = addDays(monday, row);
+      const key = ymd(cellDate);
+      const emotion = map.get(key) ?? 'Sin registro';
+      const color = EMOTION_COLORS[emotion] ?? EMOTION_COLORS['Sin registro'];
+
+      cells.push({
+        key,
+        date: cellDate,
+        emotion,
+        color,
+      });
+    }
+
+    result.push({
+      key: ymd(monday),
+      label,
+      cells,
+    });
+  }
+
+  return result;
+}
+
+function computeHighlight(
+  map: Map<string, EmotionValue>,
+  sortedKeys: string[],
+  limit = LOOKBACK_FOR_HIGHLIGHT,
+): EmotionHighlight | null {
+  if (sortedKeys.length === 0) return null;
+
+  const recentKeys = sortedKeys
+    .filter((key) => {
+      const emotion = map.get(key);
+      return emotion && emotion !== 'Sin registro';
+    })
+    .slice(-limit);
+
+  if (recentKeys.length === 0) return null;
+
+  const counts = new Map<EmotionName, { count: number; lastKey: string }>();
+
+  for (const key of recentKeys) {
+    const emotion = map.get(key);
+    if (!emotion || emotion === 'Sin registro') continue;
+    const current = counts.get(emotion) ?? { count: 0, lastKey: '' };
+    current.count += 1;
+    current.lastKey = key;
+    counts.set(emotion, current);
+  }
+
+  let winner: { emotion: EmotionName; count: number; lastKey: string } | null = null;
+
+  for (const [emotion, info] of counts.entries()) {
+    if (!winner || info.count > winner.count || (info.count === winner.count && info.lastKey > winner.lastKey)) {
+      winner = { emotion, count: info.count, lastKey: info.lastKey };
+    }
+  }
+
+  if (!winner) return null;
+
+  return { emotion: winner.emotion, color: EMOTION_COLORS[winner.emotion], count: winner.count };
+}
+
+function formatPeriodLabel(range: { from: Date; to: Date }): string {
+  const formatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
+  return `${formatter.format(range.from)} – ${formatter.format(range.to)}`;
+}
+
+function buildRange() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = addDays(today, -(NUM_WEEKS * DAYS_IN_WEEK - 1));
+  return { from: ymd(start), to: ymd(today) };
+}
+
+function toEmotionArray(input: unknown): RawEmotionArray {
+  if (Array.isArray(input)) return input;
+  if (input && typeof input === 'object') {
+    const obj = input as Record<string, unknown>;
+    if (Array.isArray(obj.daily_emotion)) return obj.daily_emotion;
+    if (obj.data && typeof obj.data === 'object') {
+      const data = obj.data as Record<string, unknown>;
+      if (Array.isArray(data.daily_emotion)) return data.daily_emotion;
+    }
+  }
+  return [];
+}
+
+const drawListeners = new Set<(entries: NormalizedEmotionEntry[]) => void>();
+
+function notifyDrawListeners(entries: NormalizedEmotionEntry[]) {
+  drawListeners.forEach((listener) => {
+    try {
+      listener(entries);
+    } catch (error) {
+      console.error('EmotionChart listener error', error);
+    }
+  });
+}
+
+function registerDrawListener(listener: (entries: NormalizedEmotionEntry[]) => void) {
+  drawListeners.add(listener);
+  return () => {
+    drawListeners.delete(listener);
+  };
+}
+
+declare global {
+  interface Window {
+    GJEmotion?: {
+      draw: (data: unknown) => void;
+      getMode15d: (data: unknown) => EmotionHighlight | null;
+    };
+    __GJEmotionListenersMounted__?: boolean;
+    data?: { daily_emotion?: unknown };
+  }
+}
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  const draw = (input: unknown) => {
+    const entries = normalizeEntries(toEmotionArray(input));
+    notifyDrawListeners(entries);
+  };
+
+  const getMode15d = (input: unknown): EmotionHighlight | null => {
+    const entries = normalizeEntries(toEmotionArray(input));
+    const { map, keys } = buildEmotionByDay(entries);
+    return computeHighlight(map, keys, LOOKBACK_FOR_HIGHLIGHT);
+  };
+
+  window.GJEmotion = { draw, getMode15d };
+
+  if (!window.__GJEmotionListenersMounted__) {
+    window.__GJEmotionListenersMounted__ = true;
+
+    const onDomReady = () => {
+      const base = window.data?.daily_emotion;
+      if (base) draw(base);
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', onDomReady, { once: true });
+    } else {
+      onDomReady();
+    }
+
+    const onDataReady = (event: Event) => {
+      const detail = (event as CustomEvent)?.detail;
+      const payload = detail?.data?.daily_emotion ?? detail?.daily_emotion ?? detail;
+      if (payload) draw(payload);
+    };
+
+    window.addEventListener('gj:data-ready', onDataReady as EventListener);
+  }
 }
 
 export function EmotionChartCard({ userId }: EmotionChartCardProps) {
@@ -154,33 +433,81 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
     [userId, range.from, range.to],
   );
 
-  const entries = useMemo(() => {
-    return asArray<EmotionSnapshot>(data)
-      .map((row) => {
-        const rawDate = (row as any)?.day ?? row.date ?? (row as any)?.fecha ?? (row as any)?.created_at ?? (row as any)?.timestamp;
-        const day = dateStr(rawDate);
-        const normalizedMood = normalizeMood(row.mood ?? (row as any)?.emotion ?? (row as any)?.emocion);
-        return {
-          day,
-          mood: normalizedMood,
-        } satisfies NormalizedEmotion;
-      })
-      .filter((entry) => !!entry.day);
+  const normalizedFromApi = useMemo(() => {
+    return normalizeEntries(asArray<EmotionSnapshot>(data) as unknown[]);
   }, [data]);
 
-  const { cells, monthLabels } = useMemo(() => buildGrid(entries, range), [entries, range]);
-  const mostFrequent = useMemo(() => computeMostFrequent(entries), [entries]);
-  const tooltipFormatter = useMemo(() => new Intl.DateTimeFormat('es-AR', { month: 'short', day: 'numeric' }), []);
+  const [overrideEntries, setOverrideEntries] = useState<NormalizedEmotionEntry[] | null>(null);
 
-  const rangeLabel = useMemo(() => {
-    const formatter = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' });
-    const fromDate = new Date(range.from);
-    const toDate = new Date(range.to);
-    if (Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime())) {
-      return '';
+  useEffect(() => {
+    return registerDrawListener((entries) => {
+      setOverrideEntries(entries);
+    });
+  }, []);
+
+  const normalizedEntries = overrideEntries ?? normalizedFromApi;
+
+  const { columns, highlight, period, hasRecordedEmotion } = useMemo(() => {
+    const { map, keys, maxDate } = buildEmotionByDay(normalizedEntries);
+    const endDate = computeEndDate(maxDate);
+    const endMonday = startOfWeekMonday(endDate);
+    const startMonday = addDays(endMonday, -(NUM_WEEKS - 1) * DAYS_IN_WEEK);
+    const builtColumns = buildColumns(map, startMonday, NUM_WEEKS, DAYS_IN_WEEK);
+    const highlightResult = computeHighlight(map, keys, LOOKBACK_FOR_HIGHLIGHT);
+    const rangeDates = { from: startMonday, to: addDays(startMonday, NUM_WEEKS * DAYS_IN_WEEK - 1) };
+    const anyRecorded = normalizedEntries.some((entry) => entry.emotion !== 'Sin registro');
+
+    return {
+      columns: builtColumns,
+      highlight: highlightResult,
+      period: rangeDates,
+      hasRecordedEmotion: anyRecorded,
+    };
+  }, [normalizedEntries]);
+
+  const gridBoxRef = useRef<HTMLDivElement | null>(null);
+  const [cellSize, setCellSize] = useState<number>(12);
+
+  useEffect(() => {
+    const box = gridBoxRef.current;
+    if (!box) return;
+
+    const compute = () => {
+      const maxWidth = box.clientWidth;
+      if (!maxWidth) return;
+      const size = Math.max(4, Math.floor((maxWidth - (NUM_WEEKS - 1) * GAP) / NUM_WEEKS));
+      setCellSize(size);
+    };
+
+    compute();
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(compute);
+      observer.observe(box);
     }
-    return `${formatter.format(fromDate)} – ${formatter.format(toDate)}`;
-  }, [range.from, range.to]);
+
+    window.addEventListener('resize', compute);
+
+    return () => {
+      window.removeEventListener('resize', compute);
+      if (observer) observer.disconnect();
+    };
+  }, [columns.length]);
+
+  const tooltipFormatter = useMemo(
+    () => new Intl.DateTimeFormat('es-ES', { weekday: 'short', month: 'short', day: 'numeric' }),
+    [],
+  );
+
+  const rangeLabel = useMemo(() => formatPeriodLabel(period), [period]);
+
+  const showSkeleton = status === 'loading' && overrideEntries === null;
+  const showError = status === 'error' && overrideEntries === null;
+  const showEmpty =
+    status === 'success' && overrideEntries === null && (!hasRecordedEmotion || normalizedEntries.length === 0);
+
+  const gridStyle = useMemo(() => ({ '--cell': `${cellSize}px` } as CSSProperties), [cellSize]);
 
   return (
     <Card
@@ -192,17 +519,13 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
         </span>
       }
     >
-      {status === 'loading' && <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />}
+      {showSkeleton && <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />}
 
-      {status === 'error' && (
-        <p className="text-sm text-rose-300">Todavía no pudimos cargar tus emociones.</p>
-      )}
+      {showError && <p className="text-sm text-rose-300">Todavía no pudimos cargar tus emociones.</p>}
 
-      {status === 'success' && entries.length === 0 && (
-        <p className="text-sm text-slate-400">Registrá tu primera emoción para ver el mapa de calor.</p>
-      )}
+      {showEmpty && <p className="text-sm text-slate-400">Registrá tu primera emoción para ver el mapa de calor.</p>}
 
-      {status === 'success' && entries.length > 0 && (
+      {(!showSkeleton && !showError && !showEmpty) || hasRecordedEmotion ? (
         <div className="flex flex-col gap-5">
           <div className="flex flex-wrap gap-4 text-xs text-slate-400">
             {LEGEND.map((item) => (
@@ -219,48 +542,51 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
           {rangeLabel && <p className="text-xs text-slate-400">Período analizado: {rangeLabel}</p>}
 
           <div className="rounded-2xl border border-white/10 bg-[#1b1f36]/80 p-4">
-            <div className="flex flex-col gap-3">
-              <div className="grid grid-flow-col auto-cols-[14px] justify-items-center gap-1 text-[10px] uppercase tracking-wide text-slate-500">
-                {monthLabels.map((month) => (
-                  <div key={month.key} className="flex h-4 w-[14px] items-center justify-center">
-                    {month.label}
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-flow-col auto-cols-[14px] grid-rows-7 justify-items-center gap-1">
-                {cells.map((cell) => {
-                  const color = cell.mood ? EMOTION_COLORS[cell.mood] ?? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)';
-                  const dateLabel = tooltipFormatter.format(cell.date);
-                  const moodLabel = cell.mood ?? 'Sin registro';
-                  return (
-                    <div
-                      key={cell.key}
-                      className="h-3 w-3 rounded-[3px]"
-                      style={{ backgroundColor: color }}
-                      title={`${dateLabel} – ${moodLabel}`}
-                    />
-                  );
-                })}
+            <div id="emotionChart">
+              <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
+                <div className="month-row text-[10px] uppercase tracking-wide text-slate-500">
+                  {columns.map((column) => (
+                    <span key={`${column.key}-label`} className="month-chip">
+                      {column.label}
+                    </span>
+                  ))}
+                </div>
+                <div className="emotion-grid--weekcols">
+                  {columns.map((column) => (
+                    <div key={column.key} className="emotion-col">
+                      {column.cells.map((cell) => (
+                        <div
+                          key={cell.key}
+                          className="emotion-cell"
+                          style={{ backgroundColor: cell.color }}
+                          title={`${tooltipFormatter.format(cell.date)} – ${cell.emotion}`}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {mostFrequent && (
+          {highlight ? (
             <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div
-                className="h-10 w-10 rounded-full"
-                style={{ backgroundColor: EMOTION_COLORS[mostFrequent.name] ?? 'rgba(255,255,255,0.25)' }}
-              />
+              <div className="h-10 w-10 rounded-full" style={{ backgroundColor: highlight.color }} />
               <div>
-                <p className="font-semibold text-slate-100">{mostFrequent.name}</p>
+                <p className="font-semibold text-slate-100">{highlight.emotion}</p>
                 <p className="text-xs text-slate-400">
-                  Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({mostFrequent.count} registros)
+                  Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
+                  {highlight.count === 1 ? 'registro' : 'registros'})
                 </p>
               </div>
             </div>
+          ) : (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-slate-400">
+              Aún no hay suficiente información reciente para destacar una emoción.
+            </div>
           )}
         </div>
-      )}
+      ) : null}
     </Card>
   );
 }
