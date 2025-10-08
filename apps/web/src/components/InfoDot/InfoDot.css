@@ -1,5 +1,5 @@
 :root {
-  --info-dot-size: 32px;
+  --info-dot-size: 19.2px;
   --info-dot-font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --info-dot-bg: #151a33;
   --info-dot-border: rgba(122, 134, 255, 0.55);
@@ -170,7 +170,7 @@
 
 @media (max-width: 480px) {
   :root {
-    --info-dot-size: 36px;
+    --info-dot-size: 21.6px;
   }
 
   .info-dot__popover {
