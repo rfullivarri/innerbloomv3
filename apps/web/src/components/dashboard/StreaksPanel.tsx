@@ -6,6 +6,7 @@ import {
   getUserDailyXp,
   getUserStreakPanel,
   type DailyXpPoint,
+  type StreakPanelRange,
   type StreakPanelResponse,
   type StreakPanelTask,
   type UserTask,
@@ -207,6 +208,12 @@ const PILLAR_TABS: Array<{ value: Pillar; label: string; icon: string }> = [
   { value: 'Soul', label: 'Soul', icon: '🏵️' },
 ];
 
+const RANGE_TABS: Array<{ value: StreakPanelRange; label: string }> = [
+  { value: 'week', label: 'Sem' },
+  { value: 'month', label: 'Mes' },
+  { value: 'qtr', label: '3M' },
+];
+
 const PANEL_ENABLED = String(import.meta.env.VITE_SHOW_STREAKS_PANEL ?? 'true').toLowerCase() !== 'false';
 
 interface StreaksPanelProps {
@@ -215,16 +222,25 @@ interface StreaksPanelProps {
   weeklyTarget?: number | null;
 }
 
+type TaskHistory = {
+  values: number[];
+  labels?: string[];
+};
+
 type DisplayTask = {
   id: string;
   name: string;
   stat?: string;
-  done: number;
-  goal: number;
+  weeklyDone: number;
+  weeklyGoal: number;
   streakWeeks: number;
-  history: number[];
+  scopeCount: number;
+  scopeXp: number;
+  history: TaskHistory;
   highlight?: boolean;
 };
+
+const numberFormatter = new Intl.NumberFormat('es-AR');
 
 function normalizeMode(mode?: string | null): Mode {
   if (!mode) {
@@ -277,17 +293,83 @@ function getStatusColor(done: number, goal: number): 'high' | 'mid' | 'low' {
   return 'low';
 }
 
-function getRecentWeeks(task: StreakPanelTask, goal: number): number[] {
-  const weeks = task.metrics.month?.weeks ?? [];
-  const lastFive = weeks.slice(-5);
-  const padding = Math.max(0, 5 - lastFive.length);
-  const padded = Array.from({ length: padding }, () => 0);
-  return [...padded, ...lastFive];
+function getRangeMetrics(task: StreakPanelTask | undefined, range: StreakPanelRange) {
+  if (!task) {
+    return { count: 0, xp: 0, weeks: [] as number[] };
+  }
+
+  if (range === 'week') {
+    const metrics = task.metrics.week ?? { count: 0, xp: 0 };
+    return { count: metrics.count ?? 0, xp: metrics.xp ?? 0, weeks: [] as number[] };
+  }
+
+  if (range === 'month') {
+    const metrics = task.metrics.month ?? { count: 0, xp: 0, weeks: [] as number[] };
+    return { count: metrics.count ?? 0, xp: metrics.xp ?? 0, weeks: metrics.weeks ?? [] };
+  }
+
+  const metrics = task.metrics.qtr ?? { count: 0, xp: 0, weeks: [] as number[] };
+  return { count: metrics.count ?? 0, xp: metrics.xp ?? 0, weeks: metrics.weeks ?? [] };
+}
+
+function buildHistory(task: StreakPanelTask | undefined, range: StreakPanelRange): TaskHistory {
+  if (!task || range === 'week') {
+    return { values: [] };
+  }
+
+  const source = range === 'month' ? task.metrics.month?.weeks ?? [] : task.metrics.qtr?.weeks ?? [];
+  const values = source.map((value) => (Number.isFinite(value) ? Number(value) : 0));
+
+  if (values.length === 0) {
+    return { values: [] };
+  }
+
+  if (range === 'month') {
+    const labels = values.map((_, index) => String(index + 1));
+    return { values, labels };
+  }
+
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('es-AR', { month: 'short' });
+  const labels = values.map((_, index, array) => {
+    const monthsAgo = array.length - 1 - index;
+    const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - monthsAgo, 1));
+    const raw = formatter.format(date);
+    return raw.slice(0, 1).toUpperCase();
+  });
+
+  return { values, labels };
+}
+
+function buildDisplayTask(
+  task: StreakPanelTask | undefined,
+  fallback: { id: string; name: string; stat?: string; weekDone: number; streakWeeks: number },
+  range: StreakPanelRange,
+  weeklyGoal: number,
+  highlight?: boolean,
+): DisplayTask {
+  const weeklyDone = task?.metrics.week?.count ?? fallback.weekDone ?? 0;
+  const { count: scopeCount, xp: scopeXp } = getRangeMetrics(task, range);
+  const history = buildHistory(task, range);
+
+  return {
+    id: fallback.id,
+    name: fallback.name,
+    stat: fallback.stat,
+    weeklyDone,
+    weeklyGoal,
+    streakWeeks: fallback.streakWeeks ?? 0,
+    scopeCount,
+    scopeXp,
+    history,
+    highlight,
+  } satisfies DisplayTask;
 }
 
 function TaskItem({ item }: { item: DisplayTask }) {
-  const status = getStatusColor(item.done, item.goal);
-  const pct = computeProgressPercent(item.done, item.goal);
+  const status = getStatusColor(item.weeklyDone, item.weeklyGoal);
+  const pct = computeProgressPercent(item.weeklyDone, item.weeklyGoal);
+  const showHistory = item.history.values.length > 0;
 
   return (
     <article
@@ -295,9 +377,9 @@ function TaskItem({ item }: { item: DisplayTask }) {
         'flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-slate-200 shadow-[0_6px_20px_rgba(15,23,42,0.3)]',
         item.highlight && 'border-violet-400/60 bg-violet-400/10 shadow-[0_8px_26px_rgba(99,102,241,0.3)]',
       )}
-      aria-label={`Streak ${item.name}, ${item.done} of ${item.goal} this week, ${item.streakWeeks} consecutive weeks`}
+      aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${item.streakWeeks} consecutive weeks`}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 space-y-0.5">
           <div className="text-slate-200 text-sm md:text-base font-medium leading-tight truncate" title={item.name}>
             {item.name}
@@ -308,44 +390,75 @@ function TaskItem({ item }: { item: DisplayTask }) {
             </p>
           )}
         </div>
-        {item.streakWeeks >= 2 && (
-          <span className="shrink-0 rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-[11px] font-semibold text-amber-200">
-            🔥x{item.streakWeeks}
+        <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-100">
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-[11px]">
+            ✓×{numberFormatter.format(item.scopeCount)}
           </span>
-        )}
+          <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-2 py-0.5 text-[11px]">
+            +{numberFormatter.format(item.scopeXp)} XP
+          </span>
+          {item.streakWeeks >= 2 && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-[11px] text-amber-200">
+              🔥x{item.streakWeeks}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <span
-          className={cx(
-            'h-2.5 w-2.5 rounded-full',
-            status === 'high' && 'bg-emerald-400',
-            status === 'mid' && 'bg-amber-400',
-            status === 'low' && 'bg-rose-400',
-          )}
-        />
-        <div className="flex-1">
-          <div className="h-2.5 overflow-hidden rounded-full bg-violet-800/40">
-            <div className="h-2.5 rounded-full bg-violet-400 transition-all" style={{ width: `${pct}%` }} />
+      <div
+        className={cx(
+          'flex flex-col gap-3 md:flex-row md:items-end md:justify-between',
+          showHistory ? '' : 'md:items-center',
+        )}
+      >
+        <div className="flex items-center gap-3">
+          <span
+            className={cx(
+              'h-2.5 w-2.5 rounded-full',
+              status === 'high' && 'bg-emerald-400',
+              status === 'mid' && 'bg-amber-400',
+              status === 'low' && 'bg-rose-400',
+            )}
+          />
+          <div className="flex-1">
+            <div className="h-2.5 overflow-hidden rounded-full bg-violet-800/40">
+              <div className="h-2.5 rounded-full bg-violet-400 transition-all" style={{ width: `${pct}%` }} />
+            </div>
           </div>
+          <span className="ml-2 text-xs text-slate-300 tabular-nums">
+            {item.weeklyDone}/{item.weeklyGoal}
+          </span>
         </div>
-        <div className="flex items-end gap-1 pl-1">
-          {item.history.map((value, index) => {
-            const isActive = value >= item.goal;
-            return (
-              <div
-                key={index}
-                className={cx(
-                  'w-1.5 rounded-sm bg-emerald-500/70 transition-all',
-                  isActive ? 'h-4 opacity-100' : 'h-2 opacity-40',
-                )}
-              />
-            );
-          })}
-        </div>
-        <span className="ml-2 text-xs text-slate-300 tabular-nums">
-          {item.done}/{item.goal}
-        </span>
+
+        {showHistory && (
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-end gap-1">
+              {item.history.values.map((value, index) => {
+                const ratio = item.weeklyGoal > 0 ? value / item.weeklyGoal : 0;
+                const clamped = Math.max(0, Math.min(ratio, 1.6));
+                const height = 12 + clamped * 12;
+                const isHit = value >= item.weeklyGoal;
+                return (
+                  <div
+                    key={index}
+                    className={cx(
+                      'w-2 rounded-sm transition-all',
+                      isHit ? 'bg-emerald-400/80' : 'bg-slate-500/50',
+                    )}
+                    style={{ height: `${height}px` }}
+                  />
+                );
+              })}
+            </div>
+            {item.history.labels && item.history.labels.length > 0 && (
+              <div className="flex items-center gap-1 text-[10px] uppercase tracking-[0.16em] text-slate-400">
+                {item.history.labels.map((label, index) => (
+                  <span key={index}>{label}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </article>
   );
@@ -353,6 +466,7 @@ function TaskItem({ item }: { item: DisplayTask }) {
 
 export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelProps) {
   const [pillar, setPillar] = useState<Pillar>('Body');
+  const [range, setRange] = useState<StreakPanelRange>('month');
 
   const normalizedMode = useMemo(() => normalizeMode(gameMode), [gameMode]);
   const tier = useMemo(() => {
@@ -367,10 +481,10 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
     () =>
       getUserStreakPanel(userId, {
         pillar,
-        range: 'month',
+        range,
         mode: normalizedMode,
       }),
-    [userId, pillar, normalizedMode],
+    [userId, pillar, normalizedMode, range],
     { enabled: PANEL_ENABLED },
   );
 
@@ -387,19 +501,21 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
     () =>
       topStreaks.map((entry) => {
         const task = tasksById.get(entry.id);
-        const history = task ? getRecentWeeks(task, tier) : Array.from({ length: 5 }, () => 0);
-        return {
-          id: entry.id,
-          name: entry.name,
-          stat: entry.stat,
-          done: entry.weekDone,
-          goal: tier,
-          streakWeeks: entry.streakWeeks,
-          history,
-          highlight: true,
-        } satisfies DisplayTask;
+        return buildDisplayTask(
+          task,
+          {
+            id: entry.id,
+            name: entry.name,
+            stat: entry.stat,
+            weekDone: entry.weekDone,
+            streakWeeks: entry.streakWeeks,
+          },
+          range,
+          tier,
+          true,
+        );
       }),
-    [topStreaks, tasksById, tier],
+    [range, tier, tasksById, topStreaks],
   );
 
   const topIds = useMemo(() => new Set(topEntries.map((entry) => entry.id)), [topEntries]);
@@ -418,16 +534,21 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
     () =>
       sortedTasks
         .filter((task) => !topIds.has(task.id))
-        .map((task) => ({
-          id: task.id,
-          name: task.name,
-          stat: task.stat,
-          done: task.weekDone,
-          goal: tier,
-          streakWeeks: task.streakWeeks,
-          history: getRecentWeeks(task, tier),
-        } satisfies DisplayTask)),
-    [sortedTasks, topIds, tier],
+        .map((task) =>
+          buildDisplayTask(
+            task,
+            {
+              id: task.id,
+              name: task.name,
+              stat: task.stat,
+              weekDone: task.weekDone,
+              streakWeeks: task.streakWeeks,
+            },
+            range,
+            tier,
+          ),
+        ),
+    [range, sortedTasks, tier, topIds],
   );
 
   const isLoading = status === 'idle' || status === 'loading';
@@ -443,7 +564,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
       className="text-sm leading-relaxed"
     >
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
               <span aria-hidden>🎮</span>
@@ -457,7 +578,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
               i
             </button>
           </div>
-          <div className="flex flex-1 flex-wrap items-center justify-end gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {PILLAR_TABS.map((tab) => {
               const isActive = pillar === tab.value;
               return (
@@ -481,6 +602,30 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {RANGE_TABS.map((tab) => {
+              const isActive = range === tab.value;
+              return (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => setRange(tab.value)}
+                  className={cx(
+                    'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300',
+                    isActive
+                      ? 'border-white/60 bg-white text-slate-900 shadow-[0_4px_16px_rgba(226,232,240,0.35)]'
+                      : 'border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10',
+                  )}
+                  aria-pressed={isActive}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {isError && (
           <p className="text-sm text-rose-300">
             No pudimos cargar tus rachas activas
@@ -490,7 +635,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
 
         {isLoading && (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3">
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={`top-skeleton-${index}`}
@@ -498,7 +643,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                 />
               ))}
             </div>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3">
               {Array.from({ length: 4 }).map((_, index) => (
                 <div
                   key={`task-skeleton-${index}`}
@@ -519,7 +664,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                 <span className="text-xs text-slate-400 md:text-sm">— consecutive weeks completed</span>
               </div>
               {topEntries.length > 0 ? (
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3">
                   {topEntries.map((entry) => (
                     <TaskItem key={entry.id} item={entry} />
                   ))}
@@ -534,7 +679,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                 Todas las tareas
               </h4>
               {displayTasks.length > 0 ? (
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3">
                   {displayTasks.map((task) => (
                     <TaskItem key={task.id} item={task} />
                   ))}
