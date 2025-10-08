@@ -20,6 +20,17 @@ Set the API origin before starting the dev server or building:
 export VITE_API_URL="https://your-api.example.com"
 ```
 
+The value can be provided in multiple formats:
+
+```bash
+# Full URL with protocol
+export VITE_API_URL="https://api.example.com"
+
+# Local development shortcuts
+export VITE_API_URL="localhost:3000"   # defaults to http://
+export VITE_API_URL="/api"             # relative to the current origin
+```
+
 The URL is read at runtime via `import.meta.env.VITE_API_URL`. Do not include trailing slashes.
 
 ## Routes

@@ -15,6 +15,8 @@ import { getUserDailyEnergy } from './users/daily-energy.js';
 import { getUserXpByTrait } from './users/xp-by-trait.js';
 import { getUserPillars } from './users/pillars.js';
 
+import { getUserSummaryToday } from './users/summary-today.js';
+
 const router = Router();
 
 router.get('/users/:id/tasks', asyncHandler(getUserTasks));
@@ -29,6 +31,7 @@ router.get('/users/:id/journey', asyncHandler(getUserJourney));
 router.get('/users/:id/emotions', asyncHandler(getUserEmotions));
 router.get('/users/:id/state', asyncHandler(getUserState));
 router.get('/users/:id/state/timeseries', asyncHandler(getUserStateTimeseries));
+router.get('/users/:id/summary/today', asyncHandler(getUserSummaryToday));
 router.get('/users/me', asyncHandler(getCurrentUser));
 
 export default router;
