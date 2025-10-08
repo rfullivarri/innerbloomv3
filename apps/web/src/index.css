@@ -26,6 +26,38 @@
   .glass-card {
     @apply bg-surface-elevated/80 backdrop-blur-lg border border-white/5 shadow-glow;
   }
+
+  .glow-chip {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .glow-chip::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 9999px;
+    background: conic-gradient(from 0deg, var(--glow-primary) 0deg, transparent 110deg, var(--glow-secondary) 220deg, transparent 360deg);
+    filter: blur(16px);
+    opacity: 0.9;
+    animation: glow-orbit 6s linear infinite;
+    pointer-events: none;
+    transform-origin: center;
+  }
+}
+
+.glow-chip > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes glow-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @layer components {
