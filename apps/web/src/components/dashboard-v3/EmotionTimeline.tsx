@@ -17,6 +17,7 @@ const GRID_MAX_CELL_SIZE = 16;
 const GRID_MIN_CELL_SIZE = 3.5;
 const GRID_MAX_GAP = 6;
 const GRID_MIN_GAP = 1.5;
+const HEATMAP_LOOKBACK_DAYS = 365;
 
 const EMOTION_ORDER = [
   'Calma',
@@ -294,87 +295,24 @@ function buildGrid(data: unknown): GridComputation {
   const endMonday = startOfWeekMonday(effectiveEndDate);
   const futureEndMonday = addWeeks(endMonday, FUTURE_WEEKS);
   const weekDurationMs = DAYS_PER_WEEK * 24 * 60 * 60 * 1000;
-  const dayDurationMs = 24 * 60 * 60 * 1000;
 
-  const computeWindow = (candidate: Date) => {
-    let startDate = candidate;
-    let totalWeeks = clampWeeks(
+  let startDate: Date;
+  let totalWeeks: number;
+  let endDate: Date;
+
+  if (earliestDate) {
+    startDate = startOfWeekMonday(earliestDate);
+    totalWeeks = clampWeeks(
       Math.ceil((addMonths(startDate, 6).getTime() - startDate.getTime()) / weekDurationMs),
     );
     if (totalWeeks <= 0 || !Number.isFinite(totalWeeks)) {
       totalWeeks = MAX_HEATMAP_WEEKS;
     }
-
-    let endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
-
-    if (endDate.getTime() < endMonday.getTime()) {
-      const weeksToCoverEnd = Math.floor((endMonday.getTime() - endDate.getTime()) / weekDurationMs) + 1;
-      startDate = addWeeks(startDate, weeksToCoverEnd);
-      endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
-    }
-
-    const latestAllowedStart = addWeeks(futureEndMonday, -(totalWeeks - 1));
-    if (startDate.getTime() > latestAllowedStart.getTime()) {
-      startDate = latestAllowedStart;
-      endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
-    }
-
-    return { startDate, totalWeeks, endDate };
-  };
-
-  const initialCandidate = earliestDate
-    ? startOfWeekMonday(earliestDate)
-    : addWeeks(futureEndMonday, -(MAX_HEATMAP_WEEKS - 1));
-
-  let { startDate, totalWeeks, endDate } = computeWindow(initialCandidate);
-
-  const computeCoverage = (windowStart: Date, weeks: number, windowEnd: Date) => {
-    const totalCells = weeks * DAYS_PER_WEEK;
-    if (totalCells <= 0) {
-      return { filled: 0, total: 0 };
-    }
-
-    const coverageLimit = Math.min(windowEnd.getTime(), effectiveEndDate.getTime());
-    const lastCoveredIndex = Math.min(
-      totalCells,
-      coverageLimit >= windowStart.getTime()
-        ? Math.floor((coverageLimit - windowStart.getTime()) / dayDurationMs) + 1
-        : 0,
-    );
-
-    if (lastCoveredIndex <= 0) {
-      return { filled: 0, total: 0 };
-    }
-
-    let filled = 0;
-    for (let offset = 0; offset < lastCoveredIndex; offset += 1) {
-      const key = ymd(addDays(windowStart, offset));
-      if (map.get(key)) {
-        filled += 1;
-      }
-    }
-
-    return { filled, total: lastCoveredIndex };
-  };
-
-  if (earliestDate) {
-    while (true) {
-      const coverage = computeCoverage(startDate, totalWeeks, endDate);
-      if (coverage.total === 0) break;
-
-      const ratio = coverage.filled / coverage.total;
-      if (ratio < 0.75) break;
-
-      const nextCandidate = startOfWeekMonday(addMonths(startDate, 1));
-      if (nextCandidate.getTime() > effectiveEndDate.getTime()) break;
-
-      const nextWindow = computeWindow(nextCandidate);
-      if (nextWindow.startDate.getTime() <= startDate.getTime()) break;
-
-      startDate = nextWindow.startDate;
-      totalWeeks = nextWindow.totalWeeks;
-      endDate = nextWindow.endDate;
-    }
+    endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
+  } else {
+    totalWeeks = MAX_HEATMAP_WEEKS;
+    startDate = addWeeks(futureEndMonday, -(totalWeeks - 1));
+    endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
   }
 
   const columns: GridCell[][] = [];
@@ -393,7 +331,8 @@ function buildGrid(data: unknown): GridComputation {
     columns.push(weekCells);
   }
 
-  const highlight = computeHighlight(map, ymd(effectiveEndDate));
+  const highlightCutoffDate = endDate.getTime() < effectiveEndDate.getTime() ? endDate : effectiveEndDate;
+  const highlight = computeHighlight(map, ymd(highlightCutoffDate));
 
   return {
     columns,
@@ -403,10 +342,7 @@ function buildGrid(data: unknown): GridComputation {
 }
 
 export function EmotionTimeline({ userId }: EmotionTimelineProps) {
-  const { data, status } = useRequest(
-    () => getEmotions(userId, { days: MAX_HEATMAP_WEEKS * DAYS_PER_WEEK + 30 }),
-    [userId],
-  );
+  const { data, status } = useRequest(() => getEmotions(userId, { days: HEATMAP_LOOKBACK_DAYS }), [userId]);
 
   const grid = useMemo(() => buildGrid(data), [data]);
   const periodLabel = useMemo(() => formatPeriod(grid.period.from, grid.period.to), [grid.period.from, grid.period.to]);
@@ -516,7 +452,7 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
       <header className="flex flex-wrap items-start justify-between gap-3 text-white">
         <div className="space-y-1">
           <h3 className="text-lg font-semibold">💗 Emotion Chart</h3>
-          <p className="text-xs text-text-muted">Últimos 6 meses</p>
+          <p className="text-xs text-text-muted">6 meses desde tu primer registro</p>
         </div>
         <span className="rounded-full border border-white/10 bg-gradient-to-r from-white/15 via-white/5 to-white/0 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-white">
           Heatmap XP
