@@ -23,19 +23,19 @@ const gradientButtonClass =
 const baseElements = {
   rootBox: 'w-full',
   card:
-    'mx-auto flex w-full max-w-[440px] flex-col gap-6 rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_25px_80px_rgba(15,23,42,0.35)] backdrop-blur-2xl sm:p-7 md:p-8',
+    'mx-auto flex w-full max-w-full flex-col gap-6 rounded-[24px] border border-white/10 bg-white/5 p-4 shadow-[0_25px_80px_rgba(15,23,42,0.35)] backdrop-blur-2xl sm:max-w-[440px] sm:rounded-[28px] sm:p-6 md:p-8',
   header: 'hidden',
   socialButtons: 'hidden',
   divider: 'hidden',
   form: 'flex flex-col gap-4 text-left',
   formField: 'flex flex-col gap-2',
-  formFieldLabel: 'text-sm font-medium text-white/80',
+  formFieldLabel: 'text-xs font-medium text-white/75 sm:text-sm',
   formFieldInput:
     'rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-base text-white placeholder:text-white/40 shadow-[0_6px_20px_rgba(99,102,241,0.15)] focus:border-white/40 focus:outline-none focus-visible:ring-0',
   formFieldInputShowPasswordButton: 'text-sm text-white/60 hover:text-white',
   formButtonPrimary: gradientButtonClass,
   footer:
-    'mt-6 flex flex-col items-center gap-1 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-center text-xs text-white/60 backdrop-blur-xl shadow-none',
+    'mt-6 flex flex-col items-center gap-1 rounded-2xl border border-white/15 bg-white/10 px-3 py-3 text-center text-xs text-white/60 backdrop-blur-xl shadow-none sm:px-4',
   footerTitle: 'text-white/70',
   footerSubtitle: 'text-white/50',
   footerActionText: 'text-white/50',
