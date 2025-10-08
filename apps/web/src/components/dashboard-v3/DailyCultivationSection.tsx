@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserDailyXp, type DailyXpPoint } from '../../lib/api';
 import { asArray, dateStr } from '../../lib/safe';
@@ -17,9 +17,17 @@ type MonthBucket = {
 };
 
 const XP_NUMBER_FORMATTER = new Intl.NumberFormat('es-AR');
+const DAY_MONTH_FORMATTER = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short' });
 
 function formatNumber(value: number): string {
   return XP_NUMBER_FORMATTER.format(Math.round(value));
+}
+
+function formatDateLabel(value: string): string {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return DAY_MONTH_FORMATTER.format(parsed);
 }
 
 function createRange(daysBack: number) {
@@ -147,10 +155,6 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
               Promedio diario: <span className="font-semibold text-slate-100">{formatNumber(monthlySummary.average)}</span> XP
             </span>
           </div>
-          <p className="text-xs text-slate-400">
-            Replicamos la vista mensual del MVP usando los datos del endpoint
-            <code className="ml-1 rounded bg-white/10 px-1 py-px text-[10px]">/users/:id/xp/daily</code>.
-          </p>
         </div>
       )}
     </Card>
@@ -198,10 +202,42 @@ function LineChart({ days }: LineChartProps) {
     : '';
 
   const gridLevels = [0.25, 0.5, 0.75, 1];
+  const containerRef = useRef<HTMLDivElement>(null);
   const labels = points.map((point) => getIsoDateLabel(point.day));
+  const [layout, setLayout] = useState({ tickStep: 1, dataLabelFontSize: 10 });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const updateLayout = () => {
+      const elementWidth = containerRef.current?.offsetWidth ?? window.innerWidth ?? 0;
+      const clampedMax = Math.max(6, Math.min(12, Math.floor(elementWidth / 90)));
+      const tickStep = labels.length > clampedMax ? Math.ceil(labels.length / clampedMax) : 1;
+      const dataLabelFontSize = elementWidth < 640 ? 9 : 10;
+
+      setLayout((prev) => {
+        if (prev.tickStep === tickStep && prev.dataLabelFontSize === dataLabelFontSize) {
+          return prev;
+        }
+        return { tickStep, dataLabelFontSize };
+      });
+    };
+
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+    return () => window.removeEventListener('resize', updateLayout);
+    // NOTE: The layout hook adapts tick density and label font size to match the responsive spec.
+  }, [labels.length]);
+
+  const formattedLabels = labels.map((label) => formatDateLabel(label));
+  const shouldShowLabel = (index: number) => {
+    if (layout.tickStep <= 1) return true;
+    if (index === labels.length - 1) return true;
+    return index % layout.tickStep === 0;
+  };
 
   return (
-    <div className="w-full">
+    <div ref={containerRef} className="w-full">
       <div className="relative">
         <svg viewBox={`0 0 ${width} ${height}`} className="h-52 w-full">
         <defs>
@@ -259,8 +295,11 @@ function LineChart({ days }: LineChartProps) {
                 transform: 'translate(-50%, calc(-100% - 6px))',
               }}
             >
-              <span className="rounded bg-slate-900/80 px-2 py-0.5 text-[10px] font-medium leading-tight shadow-sm shadow-black/40">
-                {`${formatNumber(point.day.xp_day)} XP`}
+              <span
+                className="rounded bg-slate-900/80 px-2 py-0.5 font-medium leading-tight shadow-sm shadow-black/40"
+                style={{ fontSize: `${layout.dataLabelFontSize}px` }}
+              >
+                {formatNumber(point.day.xp_day)}
               </span>
             </div>
           ))}
@@ -272,9 +311,15 @@ function LineChart({ days }: LineChartProps) {
           className="mt-3 grid gap-2 text-[10px] tracking-wide text-text-muted"
           style={{ gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))` }}
         >
-          {labels.map((label, index) => (
-            <span key={`${label}-${index}`} className="text-center">
-              {label}
+          {formattedLabels.map((label, index) => (
+            <span key={`${label}-${index}`} className="flex h-12 items-end justify-center">
+              <span
+                className={`inline-block -rotate-45 origin-top-right text-[10px] leading-tight ${
+                  shouldShowLabel(index) ? '' : 'invisible'
+                }`}
+              >
+                {label}
+              </span>
             </span>
           ))}
         </div>
