@@ -3,6 +3,7 @@ import { useRequest } from '../../hooks/useRequest';
 import { getUserDailyXp, type DailyXpPoint } from '../../lib/api';
 import { asArray, dateStr } from '../../lib/safe';
 import { Card } from '../ui/Card';
+import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 
 interface DailyCultivationSectionProps {
   userId: string;
@@ -112,22 +113,24 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
       title="🪴 Daily Cultivation"
       subtitle="Tendencia mensual de XP"
       rightSlot={
-        buckets.length > 0 ? (
-          <label className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-300">
-            <span>Mes</span>
-            <select
-              className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-100 focus:border-white/20 focus:outline-none"
-              value={selectedMonth ?? ''}
-              onChange={(event) => setSelectedMonth(event.target.value)}
-            >
-              {buckets.map((bucket) => (
-                <option key={bucket.key} value={bucket.key}>
-                  {bucket.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : null
+        <InfoDotTarget id="dailyCultivation" placement="left" className="flex items-center gap-2">
+          {buckets.length > 0 ? (
+            <label className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-300">
+              <span>Mes</span>
+              <select
+                className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-100 focus:border-white/20 focus:outline-none"
+                value={selectedMonth ?? ''}
+                onChange={(event) => setSelectedMonth(event.target.value)}
+              >
+                {buckets.map((bucket) => (
+                  <option key={bucket.key} value={bucket.key}>
+                    {bucket.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+        </InfoDotTarget>
       }
     >
       {status === 'loading' && (

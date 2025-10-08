@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Card } from '../ui/Card';
+import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserXpByTrait, type TraitXpEntry } from '../../lib/api';
 
@@ -92,9 +93,11 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
       title="🧿 Radar Chart"
       subtitle="XP · total acumulado"
       rightSlot={
-        <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
-          Rasgos clave
-        </span>
+        <InfoDotTarget id="radar" placement="right" className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
+            Rasgos clave
+          </span>
+        </InfoDotTarget>
       }
     >
       {status === 'loading' && <div className="h-[260px] w-full animate-pulse rounded-2xl bg-white/10" />}

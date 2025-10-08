@@ -5,6 +5,7 @@ import { useRequest } from '../../hooks/useRequest';
 import { getEmotions, type EmotionSnapshot } from '../../lib/api';
 import { asArray } from '../../lib/safe';
 import '../../styles/panel-rachas.overrides.css';
+import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 
 interface EmotionChartCardProps {
   userId: string;
@@ -587,9 +588,11 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       title="💗 Emotion Chart"
       subtitle="Últimos 6 meses"
       rightSlot={
-        <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
-          Heatmap XP
-        </span>
+        <InfoDotTarget id="emotion" placement="right" className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
+            Heatmap XP
+          </span>
+        </InfoDotTarget>
       }
     >
       {showSkeleton && <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />}
