@@ -22,7 +22,7 @@ type LevelRow = {
 
 type NormalizedDailyXp = {
   date: string;
-  xpDay: number;
+  xp: number;
 };
 
 const paramsSchema = z.object({
