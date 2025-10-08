@@ -182,6 +182,11 @@ export type Achievement = {
   name: string;
   earnedAt: string | null;
   progress: AchievementProgress;
+  description?: string;
+  status?: string;
+  unlockedAt?: string | null;
+  category?: string;
+  icon?: string;
 };
 
 export type AchievementSummary = {
@@ -236,14 +241,28 @@ export async function getProgress(userId: string): Promise<ProgressSummary> {
   };
 }
 
-type RawAchievement = {
+type RawAchievement = Record<string, unknown> & {
   id?: string;
   name?: string;
+  title?: string;
+  label?: string;
+  description?: string;
+  status?: string;
+  category?: string;
+  icon?: string;
   earned_at?: string | null;
+  unlocked_at?: string | null;
+  completed_at?: string | null;
+  achieved_at?: string | null;
   progress?: {
     current?: number | string | null;
     target?: number | string | null;
+    goal?: number | string | null;
     pct?: number | string | null;
+    percent?: number | string | null;
+    progress?: number | string | null;
+    value?: number | string | null;
+    total?: number | string | null;
   } | null;
 };
 
@@ -254,19 +273,76 @@ type RawAchievementResponse = {
 
 function normalizeAchievement(raw: RawAchievement, index: number): Achievement {
   const fallbackId = raw.id ?? raw.name ?? `achievement-${index + 1}`;
-  const rawName = typeof raw.name === 'string' && raw.name.trim().length > 0 ? raw.name : null;
-  const derivedName = rawName ?? (typeof raw.id === 'string' && raw.id.trim().length > 0 ? raw.id : `Achievement ${index + 1}`);
-  const earnedAt = typeof raw.earned_at === 'string' && raw.earned_at.trim().length > 0 ? raw.earned_at : null;
-  const progress = (raw.progress ?? {}) as { current?: unknown; target?: unknown; pct?: unknown };
+  const record = raw as Record<string, unknown>;
+  const nameSource = raw.name ?? raw.title ?? raw.label ?? record.achievement_name;
+  const rawName = typeof nameSource === 'string' && nameSource.trim().length > 0 ? nameSource : null;
+  const derivedName =
+    rawName ?? (typeof raw.id === 'string' && raw.id.trim().length > 0 ? raw.id : `Achievement ${index + 1}`);
 
-  const current = toNumber(progress.current, 0);
-  const target = Math.max(0, toNumber(progress.target, 0));
-  const pct = Math.min(100, Math.max(0, toNumber(progress.pct, 0)));
+  const unlockedAtSources = [raw.unlocked_at, raw.completed_at, raw.achieved_at, record.unlockedAt];
+  const unlockedAtValue = unlockedAtSources.find(
+    (value) => typeof value === 'string' && value.trim().length > 0,
+  ) as string | undefined;
+
+  const earnedAtSources = [raw.earned_at, record.earnedAt, unlockedAtValue];
+  const earnedAtValue = earnedAtSources.find(
+    (value) => typeof value === 'string' && value.trim().length > 0,
+  ) as string | undefined;
+
+  const progressSource = (raw.progress ?? {}) as Record<string, unknown>;
+  const progressCurrentRaw =
+    progressSource.current ??
+    progressSource.value ??
+    progressSource.progress ??
+    record.current ??
+    record.progress ??
+    record.progress_current ??
+    record.progressCurrent ??
+    record.value ??
+    null;
+
+  const progressTargetRaw =
+    progressSource.target ??
+    progressSource.goal ??
+    progressSource.total ??
+    record.target ??
+    record.total ??
+    record.progress_target ??
+    record.progressTarget ??
+    record.goal ??
+    null;
+
+  const progressPctRaw =
+    progressSource.pct ??
+    progressSource.percent ??
+    record.pct ??
+    record.percent ??
+    record.progress_pct ??
+    record.progressPct ??
+    null;
+
+  const current = toNumber(progressCurrentRaw, 0);
+  const target = Math.max(0, toNumber(progressTargetRaw, 0));
+  const pctBase = target === 0 ? (current > 0 ? 100 : 0) : Math.min(100, Math.max(0, (current / target) * 100));
+  const pct =
+    progressPctRaw == null
+      ? pctBase
+      : Math.min(100, Math.max(0, toNumber(progressPctRaw, pctBase)));
+
+  const descriptionSource = raw.description ?? record.details ?? record.summary;
+  const statusSource = raw.status ?? record.state ?? record.phase;
+  const categorySource = raw.category ?? record.pillar ?? record.group;
+  const iconSource = raw.icon ?? record.badge ?? record.image;
 
   return {
     id: String(fallbackId ?? `achievement-${index + 1}`),
     name: derivedName,
-    earnedAt,
+    earnedAt: typeof earnedAtValue === 'string' ? earnedAtValue : null,
+    unlockedAt: typeof unlockedAtValue === 'string' ? unlockedAtValue : null,
+    description: typeof descriptionSource === 'string' ? descriptionSource : undefined,
+    status: typeof statusSource === 'string' ? statusSource : undefined,
+    category: typeof categorySource === 'string' ? categorySource : undefined,
+    icon: typeof iconSource === 'string' ? iconSource : undefined,
     progress: {
       current,
       target,
@@ -374,7 +450,7 @@ export async function getLeaderboard(params: { limit?: number; offset?: number }
   logShape('leaderboard', response);
   return extractArray<LeaderboardEntry>(response, 'users', 'items', 'data');
 }
-
+ 
 export type Pillar = {
   id: string;
   name: string;
@@ -390,78 +466,6 @@ export async function getPillars(userId: string): Promise<Pillar[]> {
   const response = await getJson<unknown>(`/users/${encodeURIComponent(userId)}/pillars`);
   logShape('pillars', response);
   return extractArray<Pillar>(response, 'pillars', 'items', 'data');
-}
-
-export type Achievement = {
-  id: string;
-  title: string;
-  description?: string;
-  status?: string;
-  unlockedAt?: string;
-  progressCurrent?: number;
-  progressTarget?: number;
-  category?: string;
-  icon?: string;
-};
-
-export async function getAchievements(userId: string): Promise<Achievement[]> {
-  const response = await getJson<unknown>(`/users/${encodeURIComponent(userId)}/achievements`);
-  logShape('achievements', response);
-
-  const achievements = extractArray<Record<string, unknown>>(response, 'achievements', 'items', 'data');
-
-  return achievements.map((entry, index) => {
-    const record = entry as Record<string, unknown>;
-    const progressSource = (record.progress as Record<string, unknown> | undefined) ?? {};
-
-    const id =
-      record.id ??
-      record.achievement_id ??
-      record.achievementId ??
-      record.slug ??
-      `achievement-${index}`;
-
-    const title = record.title ?? record.name ?? record.label ?? 'Achievement';
-    const description = record.description ?? record.details ?? record.summary;
-
-    const unlockedAt =
-      (record.unlocked_at ?? record.completed_at ?? record.earned_at ?? record.achieved_at) as string | undefined;
-
-    const status = record.status ?? record.state ?? record.phase;
-
-    const progressCurrentRaw =
-      progressSource.current ??
-      progressSource.value ??
-      record.current ??
-      record.progress;
-    const progressTargetRaw =
-      progressSource.target ??
-      progressSource.goal ??
-      record.target ??
-      record.total;
-
-    const progressCurrent =
-      progressCurrentRaw != null ? toNumber(progressCurrentRaw, Number(progressCurrentRaw) || 0) : undefined;
-    const progressTarget =
-      progressTargetRaw != null ? toNumber(progressTargetRaw, Number(progressTargetRaw) || 0) : undefined;
-
-    return {
-      id: String(id),
-      title: String(title),
-      description: typeof description === 'string' ? description : undefined,
-      status: typeof status === 'string' ? status : undefined,
-      unlockedAt: typeof unlockedAt === 'string' ? unlockedAt : undefined,
-      progressCurrent,
-      progressTarget,
-      category: typeof record.category === 'string' ? (record.category as string) : undefined,
-      icon:
-        typeof record.icon === 'string'
-          ? (record.icon as string)
-          : typeof record.badge === 'string'
-          ? (record.badge as string)
-          : undefined,
-    };
-  });
 }
 
 export type TodaySummary = {
