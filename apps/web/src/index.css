@@ -79,7 +79,50 @@
   }
 }
 
+@keyframes progress-typing-cursor {
+  0% {
+    transform: translateX(-60%);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateX(10%);
+    opacity: 0.65;
+  }
+  75% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
 @layer components {
+  .progress-fill--typing {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill--typing::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.55) 40%,
+      rgba(255, 255, 255, 0) 80%
+    );
+    transform: translateX(-60%);
+    animation: progress-typing-cursor 1.8s ease-in-out infinite;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0;
+  }
+
   .emotion-grid--weekcols {
     --emotion-cell-size: var(--cell-size, var(--cell, 12px));
     --emotion-cell-gap: var(--cell-gap, 6px);

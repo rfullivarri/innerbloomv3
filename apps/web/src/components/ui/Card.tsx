@@ -1,9 +1,9 @@
 import { forwardRef, useId } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 
-interface CardProps extends HTMLAttributes<HTMLElement> {
-  title?: string;
-  subtitle?: string;
+interface CardProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
+  title?: ReactNode;
+  subtitle?: ReactNode;
   rightSlot?: ReactNode;
   children: ReactNode;
   bodyClassName?: string;
@@ -45,7 +45,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
                   {title}
                 </h3>
               )}
-              {subtitle && <p className="text-sm text-slate-400">{subtitle}</p>}
+              {subtitle && <div className="text-sm text-slate-400">{subtitle}</div>}
             </div>
             {rightSlot}
           </header>
