@@ -99,9 +99,9 @@ interface EnergyMeterProps {
 }
 
 const GRADIENTS: Record<PillarKey, string> = {
-  HP: 'from-cyan-300 via-cyan-200 to-sky-200',
-  Mood: 'from-rose-300 via-pink-200 to-fuchsia-200',
-  Focus: 'from-indigo-300 via-indigo-200 to-purple-200',
+  HP: 'bg-gradient-to-r from-cyan-200 via-sky-300 to-blue-400',
+  Mood: 'bg-gradient-to-r from-rose-200 via-pink-300 to-fuchsia-400',
+  Focus: 'bg-gradient-to-r from-indigo-200 via-violet-300 to-purple-400',
 };
 
 function EnergyMeter({ label, percent }: EnergyMeterProps) {
@@ -109,14 +109,22 @@ function EnergyMeter({ label, percent }: EnergyMeterProps) {
   const width = clamped <= 4 ? 4 : clamped;
 
   return (
-    <div className="grid grid-cols-[70px_1fr] items-center gap-3">
-      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">{label}</span>
-      <div className="relative h-4 w-full overflow-hidden rounded-full border border-white/10 bg-white/5">
+    <div className="space-y-2 sm:grid sm:grid-cols-[88px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
+      <div className="flex items-center justify-between sm:block">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300">{label}</span>
+        <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-slate-200 backdrop-blur sm:hidden">
+          {clamped}%
+        </span>
+      </div>
+      <div className="relative h-2.5 w-full overflow-hidden rounded-full border border-white/5 bg-slate-900/40 shadow-[inset_0_1px_1px_rgba(15,23,42,0.45)]">
         <div
-          className={`flex h-full items-center justify-end rounded-full bg-gradient-to-r px-2 text-[11px] font-semibold text-white shadow-[inset_0_0_8px_rgba(15,23,42,0.35)] transition-[width] duration-300 ${GRADIENTS[label]}`}
-          style={{ width: `${width}%`, minWidth: clamped === 0 ? '2.75rem' : undefined }}
-        >
-          <span className="drop-shadow-sm">{clamped}%</span>
+          className={`${GRADIENTS[label]} h-full rounded-full transition-[width] duration-300 ease-out`}
+          style={{ width: `${width}%`, minWidth: clamped === 0 ? '0.75rem' : undefined }}
+        />
+        <div className="absolute inset-y-0 right-1 hidden items-center sm:flex">
+          <span className="rounded-full bg-slate-950/90 px-2 py-0.5 text-[11px] font-semibold text-slate-100 shadow-sm">
+            {clamped}%
+          </span>
         </div>
       </div>
     </div>
