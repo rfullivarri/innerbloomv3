@@ -13,6 +13,7 @@ import {
   type UserTask,
 } from '../../lib/api';
 import { asArray, dateStr } from '../../lib/safe';
+import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 
 export const FEATURE_STREAKS_PANEL_V1 = false;
 
@@ -627,7 +628,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
       bodyClassName="gap-5 p-3 text-slate-100 md:p-4"
       className="text-sm leading-relaxed"
       rightSlot={
-        <div className="flex items-center gap-2">
+        <InfoDotTarget id="streaksGuide" placement="left" className="flex items-center gap-2">
           <GlowChip
             glowPrimary={modeChip.glowPrimary}
             glowSecondary={modeChip.glowSecondary}
@@ -636,14 +637,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
             <span aria-hidden>🎮</span>
             {modeLabel}
           </GlowChip>
-          <button
-            type="button"
-            aria-label="Ayuda sobre rachas"
-            className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-white/10 text-xs font-semibold text-slate-200 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
-          >
-            i
-          </button>
-        </div>
+        </InfoDotTarget>
       }
     >
       <div className="flex flex-col gap-4">
@@ -704,7 +698,11 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
           )
         )}
 
-        <div className="flex flex-wrap items-center justify-center gap-2">
+        <InfoDotTarget
+          id="scopesGuide"
+          placement="top"
+          className="flex flex-wrap items-center justify-center gap-2"
+        >
           <div className="flex flex-wrap items-center justify-center gap-2">
             {RANGE_TABS.map((tab) => {
               const isActive = range === tab.value;
@@ -726,14 +724,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
               );
             })}
           </div>
-          <button
-            type="button"
-            aria-label="Ayuda sobre periodos de rachas"
-            className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-white/10 text-xs font-semibold text-slate-200 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
-          >
-            i
-          </button>
-        </div>
+        </InfoDotTarget>
 
         {isLoading ? (
           <div className="grid grid-cols-1 gap-3">

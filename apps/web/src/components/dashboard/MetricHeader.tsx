@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Card } from '../ui/Card';
+import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserLevel, getUserTotalXp } from '../../lib/api';
 
@@ -77,7 +78,21 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
       className="ring-1 ring-indigo-400/20"
       title="Progreso general"
       subtitle={headline}
+
+      rightSlot={
+        <InfoDotTarget
+          id="xpLevel"
+          placement="right"
+          className="flex items-center gap-2"
+        >
+          <span className="inline-flex items-center gap-1 rounded-full border border-indigo-300/30 bg-indigo-300/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-100">
+            XP Tracker
+          </span>
+        </InfoDotTarget>
+      }
+
       rightSlot={chipStyle ? <GameModeChip {...chipStyle} /> : null}
+
     >
       {showSkeleton && (
         <div className="flex flex-col gap-4">

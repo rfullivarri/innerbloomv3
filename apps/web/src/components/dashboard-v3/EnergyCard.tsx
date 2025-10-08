@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserDailyEnergy, type DailyEnergySnapshot } from '../../lib/api';
 import { Card } from '../ui/Card';
+import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 
 interface EnergyCardProps {
   userId: string;
@@ -50,11 +51,13 @@ export function EnergyCard({ userId, gameMode }: EnergyCardProps) {
       title="💠 Daily Energy"
       subtitle="Promedio últimos 7 días"
       rightSlot={
-        gameMode ? (
-          <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
-            Modo: {gameMode}
-          </span>
-        ) : null
+        <InfoDotTarget id="dailyEnergy" placement="right" className="flex items-center gap-2">
+          {gameMode ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
+              Modo: {gameMode}
+            </span>
+          ) : null}
+        </InfoDotTarget>
       }
     >
       {status === 'loading' && (

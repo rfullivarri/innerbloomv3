@@ -1,0 +1,49 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`InfoDot > matches the xpLevel snapshot 1`] = `
+<div
+  aria-labelledby=":r3:-title"
+  aria-modal="false"
+  class="info-dot__popover"
+  data-placement="bottom"
+  id=":r3:-dialog"
+  role="dialog"
+  style="top: 18px; left: 12px; --arrow-x: -11px;"
+  tabindex="-1"
+>
+  <h4
+    class="info-dot__title"
+    id=":r3:-title"
+  >
+    ¿Qué ves acá?
+  </h4>
+  <ul
+    class="info-dot__list"
+  >
+    <li>
+      🏆 
+      <strong>
+        XP
+      </strong>
+       = experiencia total acumulada.
+    </li>
+    <li>
+      🎯 
+      <strong>
+        Level
+      </strong>
+       sube al alcanzar el umbral de XP.
+    </li>
+    <li>
+      📊 La barra muestra el 
+      <strong>
+        progreso al próximo nivel
+      </strong>
+      .
+    </li>
+    <li>
+      💡 Cada hábito suma XP: pequeños pasos, gran avance.
+    </li>
+  </ul>
+</div>
+`;
