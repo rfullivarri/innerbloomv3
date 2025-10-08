@@ -15,6 +15,7 @@ const GAP = 6;
 const MEDIUM_GAP = 4;
 const SMALL_GAP = 2;
 const MIN_CELL_SIZE = 4;
+const CELL_SCALE = 0.5;
 const NUM_WEEKS = 26;
 const DAYS_IN_WEEK = 7;
 const LOOKBACK_FOR_HIGHLIGHT = 15;
@@ -489,15 +490,11 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
   const normalizedEntries = overrideEntries ?? normalizedFromApi;
 
   const { columns, highlight, period, hasRecordedEmotion } = useMemo(() => {
-    const { map, keys, minDate, maxDate } = buildEmotionByDay(normalizedEntries);
+    const { map, keys, maxDate } = buildEmotionByDay(normalizedEntries);
     const endDate = computeEndDate(maxDate);
     const endMonday = startOfWeekMonday(endDate);
-    const effectiveStartDate = minDate ?? endDate;
-    let startMonday = startOfWeekMonday(effectiveStartDate);
-
-    if (startMonday.getTime() > endMonday.getTime()) {
-      startMonday = new Date(endMonday);
-    }
+    const fixedRangeStart = addDays(endMonday, -(NUM_WEEKS - 1) * DAYS_IN_WEEK);
+    const startMonday = startOfWeekMonday(fixedRangeStart);
 
     const builtColumns = buildColumns(map, startMonday, endMonday, DAYS_IN_WEEK);
     const lastColumnMonday = builtColumns.length > 0 ? addDays(startMonday, (builtColumns.length - 1) * DAYS_IN_WEEK) : endMonday;
@@ -538,16 +535,16 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
         gap = SMALL_GAP;
       }
 
-      let size = Math.floor((maxWidth - (columnCount - 1) * gap) / columnCount);
+      let rawSize = Math.floor((maxWidth - (columnCount - 1) * gap) / columnCount);
 
-      if (size < 6 && gap > SMALL_GAP) {
+      if (rawSize * CELL_SCALE < MIN_CELL_SIZE && gap > SMALL_GAP) {
         gap = Math.max(SMALL_GAP, gap - 1);
-        size = Math.floor((maxWidth - (columnCount - 1) * gap) / columnCount);
+        rawSize = Math.floor((maxWidth - (columnCount - 1) * gap) / columnCount);
       }
 
-      size = Math.max(MIN_CELL_SIZE, size);
+      const scaledSize = Math.max(MIN_CELL_SIZE, Math.floor(rawSize * CELL_SCALE));
       setCellGap(gap);
-      setCellSize(size);
+      setCellSize(scaledSize);
     };
 
     compute();
