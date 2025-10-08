@@ -10,6 +10,8 @@ export const paginationSchema = z.object({
   offset: z.coerce.number().int().nonnegative().optional(),
 });
 
+const isoDatePattern = /^\d{4}-\d{2}-\d{2}$/;
+
 const optionalDateSchema = z
   .union([z.string(), z.undefined()])
   .transform((value, ctx) => {
@@ -21,6 +23,11 @@ const optionalDateSchema = z
 
     if (trimmed.length === 0) {
       return undefined;
+    }
+
+    if (!isoDatePattern.test(trimmed)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid date format' });
+      return z.NEVER;
     }
 
     const parsed = new Date(trimmed);
