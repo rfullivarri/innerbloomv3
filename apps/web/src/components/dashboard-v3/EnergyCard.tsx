@@ -119,10 +119,10 @@ function EnergyMeter({ label, percent }: EnergyMeterProps) {
           {clamped}%
         </span>
       </div>
-      <div className="relative h-2.5 w-full overflow-hidden rounded-full border border-white/5 bg-slate-900/40 shadow-[inset_0_1px_1px_rgba(15,23,42,0.45)]">
+      <div className="relative h-5 w-full overflow-hidden rounded-full border border-white/5 bg-slate-900/40 shadow-[inset_0_1px_1px_rgba(15,23,42,0.45)]">
         <div
           className={`${GRADIENTS[label]} h-full rounded-full transition-[width] duration-300 ease-out`}
-          style={{ width: `${width}%`, minWidth: clamped === 0 ? '0.75rem' : undefined }}
+          style={{ width: `${width}%`, minWidth: clamped === 0 ? '1.5rem' : undefined }}
         />
         <div className="absolute inset-y-0 right-1 hidden items-center sm:flex">
           <span className="rounded-full bg-slate-950/90 px-2 py-0.5 text-[11px] font-semibold text-slate-100 shadow-sm">
