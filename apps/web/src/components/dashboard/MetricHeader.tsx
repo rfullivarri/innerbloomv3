@@ -78,21 +78,20 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
       className="ring-1 ring-indigo-400/20"
       title="Progreso general"
       subtitle={headline}
-
       rightSlot={
-        <InfoDotTarget
-          id="xpLevel"
-          placement="right"
-          className="flex items-center gap-2"
-        >
-          <span className="inline-flex items-center gap-1 rounded-full border border-indigo-300/30 bg-indigo-300/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-100">
-            XP Tracker
-          </span>
-        </InfoDotTarget>
+        <div className="flex items-center gap-2">
+          <InfoDotTarget
+            id="xpLevel"
+            placement="right"
+            className="inline-flex items-center"
+          >
+            <span className="inline-flex items-center gap-1 rounded-full border border-indigo-300/30 bg-indigo-300/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-100">
+              XP Tracker
+            </span>
+          </InfoDotTarget>
+          {chipStyle ? <GameModeChip {...chipStyle} /> : null}
+        </div>
       }
-
-      rightSlot={chipStyle ? <GameModeChip {...chipStyle} /> : null}
-
     >
       {showSkeleton && (
         <div className="flex flex-col gap-4">
