@@ -91,7 +91,7 @@ export const getUserSummaryToday: AsyncHandler = async (req, res) => {
 
   let xpToday = 0;
 
-  if (xpTodayResult.rowCount > 0) {
+  if ((xpTodayResult.rowCount ?? 0) > 0) {
     xpToday = toNumber(xpTodayResult.rows[0]?.xp_today);
   } else {
     const xpFallbackResult = await pool.query<AggregateXpRow>(
