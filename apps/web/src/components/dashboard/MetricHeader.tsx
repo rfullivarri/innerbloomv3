@@ -76,22 +76,19 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
   return (
     <Card
       className="ring-1 ring-indigo-400/20"
-      title="Progreso general"
-      subtitle={headline}
-      rightSlot={
-        <div className="flex items-center gap-2">
+      title={
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <InfoDotTarget
             id="xpLevel"
             placement="right"
-            className="inline-flex items-center"
+            className="inline-flex items-center gap-2"
           >
-            <span className="inline-flex items-center gap-1 rounded-full border border-indigo-300/30 bg-indigo-300/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-100">
-              XP Tracker
-            </span>
+            <span>Progreso general</span>
           </InfoDotTarget>
           {chipStyle ? <GameModeChip {...chipStyle} /> : null}
         </div>
       }
+      subtitle={headline}
     >
       {showSkeleton && (
         <div className="flex flex-col gap-4">
@@ -114,19 +111,29 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
 
       {showContent && (
         <div className="flex flex-col gap-6">
-          <div className="grid gap-3 md:grid-cols-2">
-            <MetricStat
-              label="Total XP"
-              value={totalXpLabel}
-              helper="Acumulado histórico"
-              valueClassName="text-4xl font-semibold text-slate-50 sm:text-5xl"
-            />
-            <MetricStat
-              label="Nivel actual"
-              value={levelLabel}
-              helper="Escala estimada MVP"
-              valueClassName="text-4xl font-semibold text-slate-50 sm:text-5xl"
-            />
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 text-slate-200">
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="text-lg leading-none">🏆</span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Total XP
+                </span>
+                <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{totalXpLabel}</span>
+              </div>
+              <span className="hidden text-slate-500 sm:inline">•</span>
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="text-lg leading-none">🎯</span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Nivel
+                </span>
+                <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{levelLabel}</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium uppercase tracking-[0.22em] text-slate-500">
+              <span>Acumulado histórico</span>
+              <span className="hidden sm:inline">·</span>
+              <span>Escala estimada MVP</span>
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -150,7 +157,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
                 <div className="h-full bg-gradient-to-r from-indigo-400/20 via-fuchsia-400/25 to-amber-300/20" />
               </div>
               <div
-                className="relative h-full rounded-full bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300 transition-[width] duration-500 ease-out"
+                className="relative h-full rounded-full bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300 transition-[width] duration-500 ease-out progress-fill--typing"
                 style={{ width: `${progressPercent.toFixed(1)}%` }}
               />
               <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-950 drop-shadow-[0_1px_2px_rgba(255,255,255,0.45)]">
@@ -162,23 +169,6 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
         </div>
       )}
     </Card>
-  );
-}
-
-interface MetricStatProps {
-  label: string;
-  value: string;
-  helper: string;
-  valueClassName?: string;
-}
-
-function MetricStat({ label, value, helper, valueClassName }: MetricStatProps) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{label}</p>
-      <p className={`mt-3 leading-tight ${valueClassName ?? 'text-2xl font-semibold text-slate-100 sm:text-3xl'}`}>{value}</p>
-      <p className="mt-2 text-sm text-slate-400">{helper}</p>
-    </div>
   );
 }
 
