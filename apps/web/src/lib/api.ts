@@ -751,6 +751,7 @@ export async function getEmotions(userId: string, params: EmotionQuery = {}): Pr
 export type UserState = {
   date: string;
   mode: string;
+  mode_name?: string;
   weekly_target: number;
   grace: {
     applied: boolean;

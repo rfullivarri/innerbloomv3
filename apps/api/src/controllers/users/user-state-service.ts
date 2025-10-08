@@ -11,6 +11,7 @@ const PILLAR_ID_TO_NAME: Record<number, Pillar> = {
 export type UserProfile = {
   userId: string;
   modeCode: string;
+  modeName: string | null;
   weeklyTarget: number;
   timezone: string | null;
 };
@@ -27,10 +28,12 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
     user_id: string;
     mode_code: string | null;
     weekly_target: number | null;
+    mode_name: string | null;
     timezone: string | null;
   }>(
     `SELECT u.user_id,
             COALESCE(gm.code, u.game_mode) AS mode_code,
+            gm.name AS mode_name,
             COALESCE(gm.weekly_target, u.weekly_target) AS weekly_target,
             u.timezone
        FROM users u
@@ -51,6 +54,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
   return {
     userId: row.user_id,
     modeCode: (row.mode_code ?? 'CHILL').toUpperCase(),
+    modeName: row.mode_name,
     weeklyTarget: Number(row.weekly_target ?? 0),
     timezone: row.timezone,
   };
