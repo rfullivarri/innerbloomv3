@@ -8,4 +8,4 @@ command = "npm --workspace apps/api run start"
 command = "npm --workspace apps/web run start"
 
   [service.web.env]
-  VITE_API_BASE_URL = "https://web-dev-dfa2.up.railway.app"
+  VITE_API_BASE_URL = "https://innerbloom-api.up.railway.app"
