@@ -165,25 +165,23 @@ export function propagateEnergy({
 }
 
 export function formatDateInTimezone(date: Date, timezone?: string | null): string {
-  let timeZone = timezone ?? 'UTC';
+  const fallbackTimeZone = 'UTC';
+  const trimmed = timezone?.trim();
+  const timeZone = trimmed && trimmed.length > 0 ? trimmed : fallbackTimeZone;
 
-  try {
-    return new Intl.DateTimeFormat('en-CA', {
-      timeZone,
+  const format = (tz: string) =>
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz,
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
     }).format(date);
-  } catch (error) {
-    if (error instanceof RangeError) {
-      timeZone = 'UTC';
 
-      return new Intl.DateTimeFormat('en-CA', {
-        timeZone,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      }).format(date);
+  try {
+    return format(timeZone);
+  } catch (error) {
+    if (error instanceof RangeError || error instanceof TypeError) {
+      return format(fallbackTimeZone);
     }
 
     throw error;
