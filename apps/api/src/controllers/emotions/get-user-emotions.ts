@@ -51,6 +51,10 @@ export const getUserEmotions: AsyncHandler = async (req, res) => {
       from: formatAsDateString(range.from),
       to: formatAsDateString(range.to),
     },
-    days,
+    days: result.rows.map((row) => ({
+      date: row.date,
+      emotion: row.emotion_code,
+      intensity: null,
+    })),
   });
 };
