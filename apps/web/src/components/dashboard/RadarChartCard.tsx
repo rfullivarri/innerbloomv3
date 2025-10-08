@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { Card } from '../ui/Card';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserXpByTrait, type TraitXpEntry } from '../../lib/api';
-import { dateStr } from '../../lib/safe';
 
 interface RadarChartCardProps {
   userId: string;
@@ -38,13 +37,6 @@ type RadarDataset = {
   axes: RadarAxis[];
   maxValue: number;
 };
-
-function buildRange(daysBack: number) {
-  const to = new Date();
-  const from = new Date();
-  from.setUTCDate(from.getUTCDate() - daysBack + 1);
-  return { from: dateStr(from), to: dateStr(to) };
-}
 
 function normalizeTraitKey(value: string | null | undefined): TraitKey | null {
   if (!value) {
@@ -92,14 +84,13 @@ function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
 }
 
 export function RadarChartCard({ userId }: RadarChartCardProps) {
-  const range = useMemo(() => buildRange(60), []);
-  const { data, status } = useRequest(() => getUserXpByTrait(userId, range), [userId, range.from, range.to]);
+  const { data, status } = useRequest(() => getUserXpByTrait(userId), [userId]);
   const dataset = useMemo(() => computeRadarDataset(data?.traits ?? []), [data?.traits]);
 
   return (
     <Card
       title="🧿 Radar Chart"
-      subtitle="XP · últimos 60 días"
+      subtitle="XP · total acumulado"
       rightSlot={
         <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
           Rasgos clave
@@ -113,16 +104,16 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
       )}
 
       {status === 'success' && (
-        <div className="flex flex-col items-center gap-5">
-          <div className="relative w-full max-w-[520px] rounded-2xl border border-white/5 bg-[#0b1120]/70 p-4">
-            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top,_rgba(76,29,149,0.55)_0%,_rgba(15,23,42,0.92)_60%,_rgba(3,7,18,0.95)_100%)]" aria-hidden />
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative w-full max-w-[520px] overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:p-6">
+            <div
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.16)_0%,_rgba(15,23,42,0.85)_55%,_rgba(2,6,23,0.95)_100%)]"
+              aria-hidden
+            />
             <div className="relative flex w-full justify-center">
               <Radar dataset={dataset} />
             </div>
           </div>
-          <p className="max-w-md text-center text-xs text-slate-400">
-            Distribución de XP por rasgo en los últimos 60 días. Valores tomados directamente desde los logs recientes.
-          </p>
         </div>
       )}
     </Card>

@@ -82,7 +82,8 @@ export const getUserXpByTrait: AsyncHandler = async (req, res) => {
 
   await ensureUserExists(id);
 
-  const range = resolveDateRange({ from, to }, 60);
+  const hasExplicitRange = Boolean(from || to);
+  const range = hasExplicitRange ? resolveDateRange({ from, to }, 60) : null;
 
   const totals: Record<TraitKey, number> = {
     core: 0,
@@ -93,16 +94,26 @@ export const getUserXpByTrait: AsyncHandler = async (req, res) => {
     salud_fisica: 0,
   };
 
+  const params: string[] = [id];
+  let dateFilter = '';
+
+  if (range) {
+    const fromIndex = params.length + 1;
+    params.push(formatAsDateString(range.from));
+    const toIndex = params.length + 1;
+    params.push(formatAsDateString(range.to));
+    dateFilter = ` AND dl.date BETWEEN $${fromIndex} AND $${toIndex}`;
+  }
+
   const result = await pool.query<Row>(
     `SELECT ct.code AS trait_code,
             SUM(dl.quantity * t.xp_base) AS xp
        FROM daily_log dl
        JOIN tasks t ON t.task_id = dl.task_id
   LEFT JOIN cat_trait ct ON ct.trait_id = t.trait_id
-      WHERE dl.user_id = $1
-        AND dl.date BETWEEN $2 AND $3
+      WHERE dl.user_id = $1${dateFilter}
    GROUP BY ct.code`,
-    [id, formatAsDateString(range.from), formatAsDateString(range.to)],
+    params,
   );
 
   for (const row of result.rows) {
