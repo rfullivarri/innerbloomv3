@@ -32,6 +32,7 @@ type PillarStateResponse = {
 type StateResponse = {
   date: string;
   mode: string;
+  mode_name?: string;
   weekly_target: number;
   grace: {
     applied: boolean;
@@ -115,7 +116,8 @@ export const getUserState: AsyncHandler = async (req, res) => {
 
   const response: StateResponse = {
     date: today,
-    mode: profile.modeCode,
+    mode: profile.modeName ?? profile.modeCode,
+    ...(profile.modeName ? { mode_name: profile.modeName } : {}),
     weekly_target: profile.weeklyTarget,
     grace: {
       applied: graceApplied,

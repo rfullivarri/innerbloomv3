@@ -57,7 +57,13 @@ Este documento resume los endpoints HTTP disponibles en el backend del dashboard
 
 ### `GET /users/:id/state`
 * **Uso previsto:** base para game mode y barras de energía. Se consulta desde utilidades aunque la tarjeta actual usa `/daily-energy`.
-* **Respuesta:** `{ date, mode, weekly_target, grace: { applied, unique_days }, pillars: { Body: { hp, xp_today, d, k, H, xp_obj_day }, Mind: { ... }, Soul: { ... } } }`.
+* **Respuesta:** `{ date, mode, mode_name?, weekly_target, grace: { applied, unique_days }, pillars: { Body: { hp, xp_today, d, k, H, xp_obj_day }, Mind: { ... }, Soul: { ... } } }`. El campo `mode` refleja el `name` definido en catálogo y el backend expone `mode_name` únicamente cuando proviene de `cat_game_mode` (si falta en catálogo se usa el código heredado).
+* **Origen de datos:**
+  * `users` aporta `game_mode_id`, `game_mode`, `weekly_target` y `timezone`.
+  * `cat_game_mode` se une por `game_mode_id` **o** por `code` para resolver el modo actual, su `name` y el `weekly_target` por defecto.
+  * `tasks` (filtradas por `active = TRUE` y `tasks_group_id` del usuario) suministra el `xp_base` agrupado por `pillar_id`.
+  * `daily_log` entrega la actividad diaria (`quantity`) que, combinada con `tasks`, se transforma en XP por pilar y día.
+* **Implementación:** la ruta vive en [`apps/api/src/routes/users.ts`](../apps/api/src/routes/users.ts) y delega en [`getUserState`](../apps/api/src/controllers/users/get-user-state.ts), que a su vez usa los helpers de [`user-state-service.ts`](../apps/api/src/controllers/users/user-state-service.ts) para ejecutar las consultas SQL y propagar la energía.
 
 ### `GET /users/:id/state/timeseries`
 * **Uso previsto:** radar histórico de energía (aún no montado en UI V3). Devuelve la energía propagada por día.
