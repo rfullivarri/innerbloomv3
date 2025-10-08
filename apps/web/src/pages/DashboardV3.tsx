@@ -28,11 +28,20 @@ import {
 } from '../components/dashboard/StreaksPanel';
 import { Card } from '../components/ui/Card';
 import { useBackendUser } from '../hooks/useBackendUser';
+import { useRequest } from '../hooks/useRequest';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
+import { getUserState } from '../lib/api';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
   const { backendUserId, status, error, reload, clerkUserId, profile } = useBackendUser();
+  const { data: userState } = useRequest(
+    () => getUserState(backendUserId!),
+    [backendUserId],
+    { enabled: Boolean(backendUserId) },
+  );
+
+  const gameMode = userState?.mode_name ?? userState?.mode ?? profile?.game_mode ?? null;
 
   if (!clerkUserId) {
     return null;
@@ -58,7 +67,7 @@ export default function DashboardV3Page() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-12 lg:gap-6">
                 <div className="lg:col-span-12 space-y-4">
                   <Alerts userId={backendUserId} />
-                  <MetricHeader userId={backendUserId} gameMode={profile?.game_mode} />
+                  <MetricHeader userId={backendUserId} gameMode={gameMode} />
                 </div>
 
                 <div className="lg:col-span-7 space-y-4 md:space-y-5">
@@ -70,13 +79,13 @@ export default function DashboardV3Page() {
 
                 <div className="lg:col-span-5 space-y-4 md:space-y-5">
                   <ProfileCard imageUrl={avatarUrl} />
-                  <EnergyCard userId={backendUserId} gameMode={profile?.game_mode} />
+                  <EnergyCard userId={backendUserId} gameMode={gameMode} />
                   {FEATURE_STREAKS_PANEL_V1 && <LegacyStreaksPanel userId={backendUserId} />}
 
                   <div className="space-y-6">
                     <StreaksPanel
                       userId={backendUserId}
-                      gameMode={profile?.game_mode}
+                      gameMode={gameMode}
                       weeklyTarget={profile?.weekly_target}
                     />
 
