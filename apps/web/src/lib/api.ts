@@ -50,14 +50,32 @@ function normalizeBaseUrl(value: string): string {
     return '';
   }
 
-  const hasProtocol = /^https?:\/\//i.test(trimmed);
-  const withProtocol = hasProtocol ? trimmed : `https://${trimmed}`;
+  let absolute = trimmed;
+
+  if (trimmed.startsWith('/')) {
+    if (typeof window !== 'undefined' && window.location?.origin) {
+      absolute = `${window.location.origin}${trimmed}`;
+    } else {
+      logApiError('Cannot resolve relative API URL without window.location', { value });
+      return '';
+    }
+  } else if (trimmed.startsWith('//')) {
+    const protocol = typeof window !== 'undefined' && window.location?.protocol
+      ? window.location.protocol
+      : 'https:';
+    absolute = `${protocol}${trimmed}`;
+  } else if (!/^https?:\/\//i.test(trimmed)) {
+    const looksLikeLocalhost = /^localhost(?![^:/])|^\d{1,3}(?:\.\d{1,3}){3}(?![^:/])/i.test(trimmed);
+    const protocol = looksLikeLocalhost ? 'http://' : 'https://';
+    absolute = `${protocol}${trimmed}`;
+  }
 
   try {
-    const normalized = new URL(withProtocol);
-    return `${normalized.origin}${normalized.pathname.replace(/\/+$/, '')}`;
+    const normalized = new URL(absolute);
+    const path = normalized.pathname.replace(/\/+$/, '');
+    return `${normalized.origin}${path}`;
   } catch (error) {
-    logApiError('Failed to normalize API base URL', { value, error });
+    logApiError('Failed to normalize API base URL', { value, absolute, error });
     return '';
   }
 }
@@ -153,6 +171,24 @@ export type ProgressSummary = {
   nextLevelLabel?: string;
 };
 
+export type AchievementProgress = {
+  current: number;
+  target: number;
+  pct: number;
+};
+
+export type Achievement = {
+  id: string;
+  name: string;
+  earnedAt: string | null;
+  progress: AchievementProgress;
+};
+
+export type AchievementSummary = {
+  userId: string;
+  achievements: Achievement[];
+};
+
 function toNumber(value: unknown, fallback = 0): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -197,6 +233,57 @@ export async function getProgress(userId: string): Promise<ProgressSummary> {
     xpIntoLevel,
     xpToNextLevel: xpToNext,
     nextLevelLabel: xpRequiredNext != null ? `Level ${currentLevel + 1}` : undefined,
+  };
+}
+
+type RawAchievement = {
+  id?: string;
+  name?: string;
+  earned_at?: string | null;
+  progress?: {
+    current?: number | string | null;
+    target?: number | string | null;
+    pct?: number | string | null;
+  } | null;
+};
+
+type RawAchievementResponse = {
+  user_id?: string;
+  achievements?: RawAchievement[];
+};
+
+function normalizeAchievement(raw: RawAchievement, index: number): Achievement {
+  const fallbackId = raw.id ?? raw.name ?? `achievement-${index + 1}`;
+  const rawName = typeof raw.name === 'string' && raw.name.trim().length > 0 ? raw.name : null;
+  const derivedName = rawName ?? (typeof raw.id === 'string' && raw.id.trim().length > 0 ? raw.id : `Achievement ${index + 1}`);
+  const earnedAt = typeof raw.earned_at === 'string' && raw.earned_at.trim().length > 0 ? raw.earned_at : null;
+  const progress = (raw.progress ?? {}) as { current?: unknown; target?: unknown; pct?: unknown };
+
+  const current = toNumber(progress.current, 0);
+  const target = Math.max(0, toNumber(progress.target, 0));
+  const pct = Math.min(100, Math.max(0, toNumber(progress.pct, 0)));
+
+  return {
+    id: String(fallbackId ?? `achievement-${index + 1}`),
+    name: derivedName,
+    earnedAt,
+    progress: {
+      current,
+      target,
+      pct,
+    },
+  };
+}
+
+export async function getAchievements(userId: string): Promise<AchievementSummary> {
+  const response = await getJson<RawAchievementResponse>(`/users/${encodeURIComponent(userId)}/achievements`);
+  logShape('achievements', response);
+
+  const achievements = Array.isArray(response.achievements) ? response.achievements : [];
+
+  return {
+    userId: response.user_id ?? userId,
+    achievements: achievements.map((achievement, index) => normalizeAchievement(achievement, index)),
   };
 }
 

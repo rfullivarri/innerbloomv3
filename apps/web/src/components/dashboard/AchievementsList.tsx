@@ -1,4 +1,5 @@
 import { Card } from '../common/Card';
+import { ProgressBar } from '../common/ProgressBar';
 import { Skeleton } from '../common/Skeleton';
 import { useRequest } from '../../hooks/useRequest';
 import { getAchievements, type Achievement } from '../../lib/api';
@@ -7,87 +8,12 @@ interface AchievementsListProps {
   userId: string;
 }
 
-const numberFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
-
-function formatStatusLabel(status?: string, unlockedAt?: string) {
-  if (!status && !unlockedAt) {
-    return null;
-  }
-
-  if (status) {
-    const normalized = status.replace(/[_-]+/g, ' ').trim();
-    const capitalized = normalized
-      .split(' ')
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
-    return capitalized || null;
-  }
-
-  if (unlockedAt) {
-    try {
-      const date = new Date(unlockedAt);
-      if (!Number.isNaN(date.getTime())) {
-        return new Intl.DateTimeFormat('en-US', {
-          month: 'short',
-          day: 'numeric',
-        }).format(date);
-      }
-    } catch (error) {
-      console.warn('Failed to format unlocked date', error);
-    }
-  }
-
-  return null;
-}
-
-function AchievementItem({ achievement }: { achievement: Achievement }) {
-  const { title, description, unlockedAt, status, progressCurrent, progressTarget, category } = achievement;
-
-  const statusLabel = formatStatusLabel(status, unlockedAt);
-
-  const showProgress = progressCurrent != null && progressTarget != null && progressTarget > 0;
-  const completionRatio = showProgress ? Math.min(1, Math.max(0, progressCurrent / progressTarget)) : null;
-  const progressPercent = completionRatio != null ? Math.round(completionRatio * 100) : null;
-
-  return (
-    <li className="space-y-2 rounded-xl border border-white/5 bg-white/5 p-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <p className="font-medium text-white">{title}</p>
-          {description && <p className="text-xs text-text-subtle">{description}</p>}
-          {category && <p className="text-[11px] uppercase tracking-[0.2em] text-text-muted">{category}</p>}
-        </div>
-        {statusLabel && <span className="text-xs font-semibold uppercase tracking-wide text-emerald-300/90">{statusLabel}</span>}
-      </div>
-
-      {showProgress && (
-        <div className="space-y-1 text-xs text-text-subtle">
-          <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-text-muted">
-            <span>Progress</span>
-            <span>{progressPercent}%</span>
-          </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
-            <div
-              className="h-full rounded-full bg-emerald-400/80"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <p>
-            {numberFormatter.format(progressCurrent ?? 0)} / {numberFormatter.format(progressTarget ?? 0)}
-          </p>
-        </div>
-      )}
-    </li>
-  );
-}
-
 export function AchievementsList({ userId }: AchievementsListProps) {
   const { data, status, error, reload } = useRequest(() => getAchievements(userId), [userId], {
     enabled: Boolean(userId),
   });
 
-  const achievements = (data ?? []).filter((item) => Boolean(item?.id)) as Achievement[];
+  const achievements = data?.achievements ?? [];
 
   return (
     <Card
@@ -102,31 +28,26 @@ export function AchievementsList({ userId }: AchievementsListProps) {
           Refresh
         </button>
       }
+      className="h-full"
     >
-      {status === 'loading' && (
-        <div className="space-y-3">
-          <Skeleton className="h-5 w-1/2" />
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
-        </div>
-      )}
+      {(status === 'idle' || status === 'loading') && <AchievementSkeleton />}
 
       {status === 'error' && (
         <div className="space-y-3 text-sm text-rose-300">
-          <p>Achievements are warming up. Please try again.</p>
+          <p>We couldn’t load your achievements.</p>
           <button
             type="button"
             onClick={reload}
             className="rounded-md border border-rose-400/40 px-3 py-1 text-xs font-semibold text-rose-200 hover:border-rose-200/70"
           >
-            Retry
+            Try again
           </button>
           <p className="text-xs text-text-subtle">{error?.message}</p>
         </div>
       )}
 
       {status === 'success' && achievements.length > 0 && (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {achievements.map((achievement) => (
             <AchievementItem key={achievement.id} achievement={achievement} />
           ))}
@@ -134,11 +55,86 @@ export function AchievementsList({ userId }: AchievementsListProps) {
       )}
 
       {status === 'success' && achievements.length === 0 && (
-        <div className="space-y-2 text-sm text-text-subtle">
-          <p>No achievements yet.</p>
-          <p className="text-xs text-text-muted">Complete quests and rituals to unlock your first badges.</p>
+        <div className="space-y-3 text-sm text-text-subtle">
+          <p>No achievements yet—keep logging quests to ignite your streaks.</p>
+          <p className="text-xs text-text-muted">Daily wins power these milestones. Check back after your next streak or level up.</p>
         </div>
       )}
     </Card>
   );
+}
+
+function AchievementSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[0, 1].map((key) => (
+        <div key={key} className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="flex items-center justify-between gap-4">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-6 w-20" />
+          </div>
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-24" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AchievementItem({ achievement }: { achievement: Achievement }) {
+  const { progress } = achievement;
+  const safePct = Number.isFinite(progress.pct) ? progress.pct : 0;
+  const isUnlocked = progress.current >= progress.target && progress.target > 0;
+  const statusLabel = isUnlocked ? 'Unlocked' : 'In progress';
+  const formattedEarnedDate = formatDate(achievement.earnedAt);
+  const detailLabel = isUnlocked
+    ? formattedEarnedDate
+      ? `Unlocked on ${formattedEarnedDate}`
+      : 'Milestone reached — tracking begins soon.'
+    : `Progress ${Math.round(progress.current)} / ${progress.target}`;
+
+  return (
+    <li className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-white">{achievement.name}</p>
+          <p className="text-xs text-text-subtle">{detailLabel}</p>
+        </div>
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+            isUnlocked
+              ? 'border border-emerald-400/40 bg-emerald-400/10 text-emerald-200'
+              : 'border border-white/10 bg-white/5 text-text-subtle'
+          }`}
+        >
+          {statusLabel}
+        </span>
+      </div>
+
+      <div className="mt-4">
+        <ProgressBar value={safePct} />
+      </div>
+
+      <p className="mt-2 text-xs text-text-muted">
+        {Math.round(progress.current)} / {progress.target} complete • {safePct.toFixed(1)}%
+      </p>
+    </li>
+  );
+}
+
+function formatDate(value: string | null): string {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }

@@ -90,9 +90,11 @@ describeIfReady('Dashboard endpoints', () => {
       .expect('Content-Type', /json/);
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('from');
-    expect(response.body).toHaveProperty('to');
-    expect(Array.isArray(response.body.emotions)).toBe(true);
+    expect(response.body).toHaveProperty('user_id', userId);
+    expect(response.body).toHaveProperty('range');
+    expect(response.body.range).toHaveProperty('from');
+    expect(response.body.range).toHaveProperty('to');
+    expect(Array.isArray(response.body.days)).toBe(true);
   });
 
   it('returns user state summary', async () => {
