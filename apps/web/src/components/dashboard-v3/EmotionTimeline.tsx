@@ -9,7 +9,7 @@ interface EmotionTimelineProps {
 
 const HEATMAP_WEEKS = 26;
 const DAYS_PER_WEEK = 7;
-const EMPTY_COLOR = '#555555';
+const EMPTY_COLOR = '#1b2745';
 
 const EMOTION_ORDER = [
   'Calma',
@@ -46,7 +46,7 @@ type GridCell = {
 type GridComputation = {
   columns: GridCell[][];
   period: { from: Date; to: Date };
-  highlight: { emotion: EmotionName; color: string } | null;
+  highlight: { emotion: EmotionName; color: string; count: number } | null;
 };
 
 const EMOTION_NORMALIZATION: Record<string, EmotionName> = {
@@ -202,7 +202,9 @@ function computeHighlight(map: Map<string, EmotionName | ''>, endKey: string, li
     }
   }
 
-  return winner ? { emotion: winner.emotion, color: EMOTION_COLORS[winner.emotion] } : null;
+  return winner
+    ? { emotion: winner.emotion, color: EMOTION_COLORS[winner.emotion], count: winner.count }
+    : null;
 }
 
 function formatPeriod(from: Date, to: Date): string {
@@ -280,13 +282,17 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
 
   const grid = useMemo(() => buildGrid(data), [data]);
   const periodLabel = useMemo(() => formatPeriod(grid.period.from, grid.period.to), [grid.period.from, grid.period.to]);
+  const highlightLabel = grid.highlight?.count === 1 ? 'registro' : 'registros';
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-text backdrop-blur">
-      <header className="flex flex-wrap items-center justify-between gap-3 text-white">
-        <h3 className="text-lg font-semibold">💗 Emotion Chart</h3>
-        <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-text-muted">
-          Últimas 26 semanas
+    <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#111d3a]/80 via-[#0b1429]/70 to-[#071022]/80 p-6 text-sm text-text backdrop-blur">
+      <header className="flex flex-wrap items-start justify-between gap-3 text-white">
+        <div className="space-y-1">
+          <h3 className="text-lg font-semibold">💗 Emotion Chart</h3>
+          <p className="text-xs text-text-muted">Últimos 6 meses</p>
+        </div>
+        <span className="rounded-full border border-white/10 bg-gradient-to-r from-white/15 via-white/5 to-white/0 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-white">
+          Heatmap XP
         </span>
       </header>
 
@@ -300,7 +306,9 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
             {LEGEND_ITEMS.map((name) => (
               <span
                 key={name}
-                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] text-white/80"
+                className={`flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] ${
+                  name === 'Sin registro' ? 'text-white/60' : 'text-white/80'
+                }`}
               >
                 <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: EMOTION_COLORS[name] }} />
                 {name}
@@ -332,15 +340,19 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
           {grid.highlight && (
             <div
               id="emotion-destacada"
-              className="emotion-highlight flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-white"
+              className="emotion-highlight flex items-center gap-4 rounded-2xl border border-white/10 bg-gradient-to-r from-white/10 via-white/5 to-transparent p-4 text-white"
             >
               <div
-                className="big-box h-12 w-12 rounded-2xl border border-white/10"
+                className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 text-lg font-semibold text-white"
                 style={{ backgroundColor: grid.highlight.color }}
-              />
+              >
+                {grid.highlight.count}
+              </div>
               <div>
                 <p className="text-base font-semibold">{grid.highlight.emotion}</p>
-                <p className="text-xs text-text-muted">Emoción más frecuente en los últimos 15 días</p>
+                <p className="text-xs text-text-muted">
+                  Emoción más frecuente en los últimos 15 días ({grid.highlight.count} {highlightLabel})
+                </p>
               </div>
             </div>
           )}
