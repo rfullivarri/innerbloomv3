@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { pool } from '../../db.js';
 import type { AsyncHandler } from '../../lib/async-handler.js';
-import { HttpError } from '../../lib/http-error.js';
 import { uuidSchema } from '../../lib/validation.js';
 
 const PILLAR_CODES = ['BODY', 'MIND', 'SOUL'] as const;
@@ -156,7 +155,13 @@ function extractMetric(row: RawRow, { preferWeek }: { preferWeek: boolean }): nu
 }
 
 export const getUserPillars: AsyncHandler = async (req, res) => {
-  const { id } = paramsSchema.parse(req.params);
+  const parsedParams = paramsSchema.safeParse(req.params);
+
+  if (!parsedParams.success) {
+    return res.status(400).json({ error: 'bad_request', detail: 'invalid uuid' });
+  }
+
+  const { id } = parsedParams.data;
 
   const userResult = await pool.query<{ weekly_target: number | null }>(
     `SELECT COALESCE(gm.weekly_target, u.weekly_target) AS weekly_target
@@ -170,7 +175,7 @@ export const getUserPillars: AsyncHandler = async (req, res) => {
   );
 
   if (userResult.rowCount === 0) {
-    throw new HttpError(404, 'user_not_found', 'User not found');
+    return res.status(404).json({ error: 'user_not_found' });
   }
 
   const weeklyTarget = toNumber(userResult.rows[0]?.weekly_target);
