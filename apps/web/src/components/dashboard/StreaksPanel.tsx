@@ -431,13 +431,13 @@ function TaskItem({ item }: { item: DisplayTask }) {
       )}
       aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${item.streakWeeks} consecutive weeks`}
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-2.5">
         <div className="min-w-0 space-y-0.5">
-          <div className="text-slate-200 text-sm md:text-base font-medium leading-tight truncate" title={item.name}>
+          <div className="truncate text-sm font-medium leading-tight text-slate-200 md:text-base" title={item.name}>
             {item.name}
           </div>
           {item.stat && (
-            <p className="text-xs text-slate-400 truncate" title={item.stat}>
+            <p className="truncate text-xs text-slate-400" title={item.stat}>
               {item.stat}
             </p>
           )}
@@ -456,34 +456,45 @@ function TaskItem({ item }: { item: DisplayTask }) {
 
       <div
         className={cx(
-          'flex flex-col gap-3 md:flex-row md:items-end md:justify-between',
-          showHistory ? '' : 'md:items-center',
+          'flex flex-col gap-2.5 md:flex-row md:items-start md:justify-between',
+          showHistory ? 'md:gap-4' : 'md:items-center',
         )}
       >
-        <div className="flex items-center gap-3 md:flex-1 md:min-w-[220px]">
-          <span
-            className={cx(
-              'h-2.5 w-2.5 shrink-0 rounded-full',
-              status === 'high' && 'bg-emerald-400',
-              status === 'mid' && 'bg-amber-400',
-              status === 'low' && 'bg-rose-400',
-            )}
-          />
-          <div className="min-w-0 flex-1">
-            <div className="h-2.5 overflow-hidden rounded-full bg-violet-400/20">
-              <div
-                className="h-2.5 rounded-full bg-gradient-to-r from-violet-400 via-fuchsia-400 to-sky-300 transition-all"
-                style={{ width: `${pct}%` }}
-              />
+        <div className="flex flex-col gap-2 md:min-w-[220px] md:flex-1">
+          <div className="flex items-center gap-3">
+            <span
+              className={cx(
+                'h-2.5 w-2.5 shrink-0 rounded-full',
+                status === 'high' && 'bg-emerald-400',
+                status === 'mid' && 'bg-amber-400',
+                status === 'low' && 'bg-rose-400',
+              )}
+            />
+            <div className="min-w-0 flex-1">
+              <div className="h-2.5 overflow-hidden rounded-full bg-violet-400/20">
+                <div
+                  className="h-2.5 rounded-full bg-gradient-to-r from-violet-400 via-fuchsia-400 to-sky-300 transition-all"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
             </div>
+            <span className="ml-2 shrink-0 text-xs tabular-nums text-slate-200 md:ml-3">
+              {item.weeklyDone}/{item.weeklyGoal}
+            </span>
           </div>
-          <span className="ml-2 shrink-0 text-xs text-slate-200 tabular-nums md:ml-3">
-            {item.weeklyDone}/{item.weeklyGoal}
-          </span>
+
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-100">
+            <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-0.5">
+              ✓×{numberFormatter.format(item.scopeCount)}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-2 py-0.5">
+              +{numberFormatter.format(item.scopeXp)} XP
+            </span>
+          </div>
         </div>
 
         {showHistory && (
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-col items-end gap-1 md:min-w-[72px]">
             <div className="flex items-end gap-1">
               {item.history.values.map((value, index) => {
                 const ratio = item.weeklyGoal > 0 ? value / item.weeklyGoal : 0;
@@ -511,15 +522,6 @@ function TaskItem({ item }: { item: DisplayTask }) {
             )}
           </div>
         )}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-semibold text-slate-100">
-        <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-0.5">
-          ✓×{numberFormatter.format(item.scopeCount)}
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-2 py-0.5">
-          +{numberFormatter.format(item.scopeXp)} XP
-        </span>
       </div>
     </article>
   );
