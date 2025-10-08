@@ -165,12 +165,27 @@ export function propagateEnergy({
 }
 
 export function formatDateInTimezone(date: Date, timezone?: string | null): string {
-  const formatter = new Intl.DateTimeFormat('en-CA', {
-    timeZone: timezone ?? 'UTC',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
+  let timeZone = timezone ?? 'UTC';
 
-  return formatter.format(date);
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date);
+  } catch (error) {
+    if (error instanceof RangeError) {
+      timeZone = 'UTC';
+
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(date);
+    }
+
+    throw error;
+  }
 }
