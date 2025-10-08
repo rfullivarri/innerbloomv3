@@ -318,7 +318,7 @@ function buildGrid(data: unknown): GridComputation {
   const columns: GridCell[][] = [];
 
   for (let week = 0; week < totalWeeks; week += 1) {
-    const weekCells: GridCell[] = [];
+    const weekCells = new Array<GridCell>(DAYS_PER_WEEK);
     for (let dayIndex = 0; dayIndex < DAYS_PER_WEEK; dayIndex += 1) {
       const cellDate = addDays(startDate, week * DAYS_PER_WEEK + dayIndex);
       const key = ymd(cellDate);
@@ -326,7 +326,8 @@ function buildGrid(data: unknown): GridComputation {
       const label = emotion || 'Sin registro';
       const color = EMOTION_COLORS[emotion || 'Sin registro'];
       const tooltip = `${TOOLTIP_FORMATTER.format(cellDate)} — ${label}`;
-      weekCells.push({ key, color, label, emotion, tooltip });
+      const rowIndex = (cellDate.getDay() + 6) % 7;
+      weekCells[rowIndex] = { key, color, label, emotion, tooltip };
     }
     columns.push(weekCells);
   }
