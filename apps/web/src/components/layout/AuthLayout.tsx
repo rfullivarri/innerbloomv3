@@ -71,7 +71,7 @@ export function AuthLayout({
             ) : null}
           </div>
 
-          <div className="flex items-center justify-center">
+          <div className="flex w-full items-center justify-center">
             {children}
           </div>
         </div>
