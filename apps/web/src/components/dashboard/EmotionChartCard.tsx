@@ -108,6 +108,13 @@ function parseAnyDate(value: unknown): Date | null {
     return new Date(y, m - 1, d, 0, 0, 0, 0);
   }
 
+  const isoDateMatch = raw.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s]|$)/);
+  if (isoDateMatch) {
+    const [y, m, d] = isoDateMatch[1].split('-').map((part) => parseInt(part, 10));
+    if (!y || !m || !d) return null;
+    return new Date(y, m - 1, d, 0, 0, 0, 0);
+  }
+
   if (/^\d{2}\/\d{2}\/\d{4}$/.test(raw)) {
     const [d, m, y] = raw.split('/').map((part) => parseInt(part, 10));
     if (!y || !m || !d) return null;

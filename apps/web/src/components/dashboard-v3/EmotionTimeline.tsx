@@ -139,6 +139,13 @@ function parseAnyDate(value: unknown): Date | null {
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
+  const extendedIsoMatch = /^([0-9]{4}-[0-9]{2}-[0-9]{2})(?:[T\s]|$)/.exec(str);
+  if (extendedIsoMatch) {
+    const [y, m, d] = extendedIsoMatch[1].split('-').map((part) => Number(part));
+    const date = new Date(y, m - 1, d);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
   const esMatch = /^([0-9]{2})\/([0-9]{2})\/([0-9]{4})$/.exec(str);
   if (esMatch) {
     const [, d, m, y] = esMatch;
