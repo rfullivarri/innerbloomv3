@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Card } from '../ui/Card';
 import { useRequest } from '../../hooks/useRequest';
 import {
@@ -242,6 +243,54 @@ type DisplayTask = {
 
 const numberFormatter = new Intl.NumberFormat('es-AR');
 
+type GlowChipProps = {
+  glowPrimary: string;
+  glowSecondary: string;
+  children: ReactNode;
+  className?: string;
+  innerClassName?: string;
+};
+
+function GlowChip({ glowPrimary, glowSecondary, children, className, innerClassName }: GlowChipProps) {
+  const style = {
+    '--glow-primary': glowPrimary,
+    '--glow-secondary': glowSecondary,
+  } as CSSProperties;
+
+  return (
+    <span className={cx('glow-chip inline-flex', className)} style={style}>
+      <span className={cx('relative z-[1] inline-flex items-center', innerClassName)}>{children}</span>
+    </span>
+  );
+}
+
+const MODE_CHIP_STYLES: Record<Mode, { glowPrimary: string; glowSecondary: string; innerClassName: string }> = {
+  Low: {
+    glowPrimary: 'rgba(248, 113, 113, 0.65)',
+    glowSecondary: 'rgba(239, 68, 68, 0.35)',
+    innerClassName:
+      'gap-2 rounded-full border border-rose-400/60 bg-rose-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-50 shadow-[0_0_12px_rgba(244,63,94,0.25)]',
+  },
+  Chill: {
+    glowPrimary: 'rgba(74, 222, 128, 0.6)',
+    glowSecondary: 'rgba(34, 197, 94, 0.3)',
+    innerClassName:
+      'gap-2 rounded-full border border-emerald-400/60 bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-50 shadow-[0_0_12px_rgba(34,197,94,0.2)]',
+  },
+  Flow: {
+    glowPrimary: 'rgba(96, 165, 250, 0.6)',
+    glowSecondary: 'rgba(59, 130, 246, 0.35)',
+    innerClassName:
+      'gap-2 rounded-full border border-sky-400/60 bg-sky-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-50 shadow-[0_0_12px_rgba(59,130,246,0.25)]',
+  },
+  Evolve: {
+    glowPrimary: 'rgba(167, 139, 250, 0.65)',
+    glowSecondary: 'rgba(139, 92, 246, 0.35)',
+    innerClassName:
+      'gap-2 rounded-full border border-violet-400/60 bg-violet-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-50 shadow-[0_0_12px_rgba(139,92,246,0.25)]',
+  },
+};
+
 function normalizeMode(mode?: string | null): Mode {
   if (!mode) {
     return 'Flow';
@@ -390,19 +439,16 @@ function TaskItem({ item }: { item: DisplayTask }) {
             </p>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-100">
-          <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-[11px]">
-            ✓×{numberFormatter.format(item.scopeCount)}
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-2 py-0.5 text-[11px]">
-            +{numberFormatter.format(item.scopeXp)} XP
-          </span>
-          {item.streakWeeks >= 2 && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-[11px] text-amber-200">
-              🔥x{item.streakWeeks}
-            </span>
-          )}
-        </div>
+        {item.streakWeeks > 0 && (
+          <GlowChip
+            glowPrimary="rgba(251, 191, 36, 0.65)"
+            glowSecondary="rgba(249, 115, 22, 0.45)"
+            innerClassName="gap-1 rounded-full border border-amber-400/60 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-100 shadow-[0_0_12px_rgba(251,191,36,0.25)]"
+          >
+            <span aria-hidden>🔥</span>
+            x{numberFormatter.format(item.streakWeeks)}
+          </GlowChip>
+        )}
       </div>
 
       <div
@@ -459,6 +505,15 @@ function TaskItem({ item }: { item: DisplayTask }) {
             )}
           </div>
         )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-semibold text-slate-100">
+        <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-0.5">
+          ✓×{numberFormatter.format(item.scopeCount)}
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-2 py-0.5">
+          +{numberFormatter.format(item.scopeXp)} XP
+        </span>
       </div>
     </article>
   );
@@ -556,54 +611,92 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
   const hasContent = !isLoading && !isError;
 
   const modeLabel = `${normalizedMode.toUpperCase()} · ${tier}×/WEEK`;
+  const modeChip = MODE_CHIP_STYLES[normalizedMode];
 
   return (
     <Card
       title="🔥 Streaks"
       bodyClassName="gap-5 p-3 text-slate-100 md:p-4"
       className="text-sm leading-relaxed"
+      rightSlot={
+        <div className="flex items-center gap-2">
+          <GlowChip
+            glowPrimary={modeChip.glowPrimary}
+            glowSecondary={modeChip.glowSecondary}
+            innerClassName={modeChip.innerClassName}
+          >
+            <span aria-hidden>🎮</span>
+            {modeLabel}
+          </GlowChip>
+          <button
+            type="button"
+            aria-label="Ayuda sobre rachas"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-white/10 text-xs font-semibold text-slate-200 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
+          >
+            i
+          </button>
+        </div>
+      }
     >
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
-              <span aria-hidden>🎮</span>
-              {modeLabel}
-            </span>
-            <button
-              type="button"
-              aria-label="Ayuda sobre rachas"
-              className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-white/10 text-xs font-semibold text-slate-200 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
-            >
-              i
-            </button>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {PILLAR_TABS.map((tab) => {
-              const isActive = pillar === tab.value;
-              return (
-                <button
-                  key={tab.value}
-                  type="button"
-                  onClick={() => setPillar(tab.value)}
-                  className={cx(
-                    'inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300',
-                    isActive
-                      ? 'bg-violet-500 text-white shadow-[0_4px_16px_rgba(139,92,246,0.4)]'
-                      : 'bg-white/10 text-slate-200 hover:bg-white/20',
-                  )}
-                  aria-pressed={isActive}
-                >
-                  <span aria-hidden>{tab.icon}</span>
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+        <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
+          {PILLAR_TABS.map((tab) => {
+            const isActive = pillar === tab.value;
+            return (
+              <button
+                key={tab.value}
+                type="button"
+                onClick={() => setPillar(tab.value)}
+                className={cx(
+                  'inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300',
+                  isActive
+                    ? 'bg-violet-500 text-white shadow-[0_4px_16px_rgba(139,92,246,0.4)]'
+                    : 'bg-white/10 text-slate-200 hover:bg-white/20',
+                )}
+                aria-pressed={isActive}
+              >
+                <span aria-hidden>{tab.icon}</span>
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2">
+        {isError && (
+          <p className="text-sm text-rose-300">
+            No pudimos cargar tus rachas activas
+            {error?.message ? `: ${error.message}` : '.'}
+          </p>
+        )}
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={`top-skeleton-${index}`} className="h-24 animate-pulse rounded-xl border border-white/10 bg-white/5" />
+            ))}
+          </div>
+        ) : (
+          hasContent && (
+            <section className="space-y-3">
+              <div className="flex flex-wrap items-baseline gap-2">
+                <h4 className="text-base font-semibold leading-tight text-slate-100 md:text-lg">Top streaks</h4>
+                <span className="text-xs text-slate-400 md:text-sm">— consecutive weeks completed</span>
+              </div>
+              {topEntries.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3">
+                  {topEntries.map((entry) => (
+                    <TaskItem key={entry.id} item={entry} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400">Todavía no hay rachas destacadas.</p>
+              )}
+            </section>
+          )
+        )}
+
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {RANGE_TABS.map((tab) => {
               const isActive = range === tab.value;
               return (
@@ -624,60 +717,25 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
               );
             })}
           </div>
+          <button
+            type="button"
+            aria-label="Ayuda sobre periodos de rachas"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-white/10 text-xs font-semibold text-slate-200 transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
+          >
+            i
+          </button>
         </div>
 
-        {isError && (
-          <p className="text-sm text-rose-300">
-            No pudimos cargar tus rachas activas
-            {error?.message ? `: ${error.message}` : '.'}
-          </p>
-        )}
-
-        {isLoading && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-3">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={`top-skeleton-${index}`}
-                  className="h-24 animate-pulse rounded-xl border border-white/10 bg-white/5"
-                />
-              ))}
-            </div>
-            <div className="grid grid-cols-1 gap-3">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div
-                  key={`task-skeleton-${index}`}
-                  className="h-24 animate-pulse rounded-xl border border-white/10 bg-white/5"
-                />
-              ))}
-            </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-3">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={`task-skeleton-${index}`} className="h-24 animate-pulse rounded-xl border border-white/10 bg-white/5" />
+            ))}
           </div>
-        )}
-
-        {hasContent && (
-          <div className="space-y-5">
+        ) : (
+          hasContent && (
             <section className="space-y-3">
-              <div className="flex flex-wrap items-baseline gap-2">
-                <h4 className="text-base font-semibold leading-tight text-slate-100 md:text-lg">
-                  Top streaks
-                </h4>
-                <span className="text-xs text-slate-400 md:text-sm">— consecutive weeks completed</span>
-              </div>
-              {topEntries.length > 0 ? (
-                <div className="grid grid-cols-1 gap-3">
-                  {topEntries.map((entry) => (
-                    <TaskItem key={entry.id} item={entry} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-400">Todavía no hay rachas destacadas.</p>
-              )}
-            </section>
-
-            <section className="space-y-3">
-              <h4 className="text-base font-semibold leading-tight text-slate-100 md:text-lg">
-                Todas las tareas
-              </h4>
+              <h4 className="text-base font-semibold leading-tight text-slate-100 md:text-lg">Todas las tareas</h4>
               {displayTasks.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3">
                   {displayTasks.map((task) => (
@@ -690,7 +748,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                 </p>
               )}
             </section>
-          </div>
+          )
         )}
       </div>
     </Card>
