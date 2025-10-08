@@ -5,6 +5,7 @@ import { getUserLevel, getUserTotalXp } from '../../lib/api';
 
 interface MetricHeaderProps {
   userId: string;
+  gameMode?: string | null;
 }
 
 type XpProgressData = {
@@ -20,7 +21,7 @@ function formatInteger(value: number) {
   return NUMBER_FORMATTER.format(Math.max(0, Math.round(value)));
 }
 
-export function MetricHeader({ userId }: MetricHeaderProps) {
+export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
   const { data, status } = useRequest<XpProgressData>(async () => {
     const [total, level] = await Promise.all([
       getUserTotalXp(userId),
@@ -59,6 +60,7 @@ export function MetricHeader({ userId }: MetricHeaderProps) {
     : '';
   const levelLabel = showContent ? formatInteger(data.currentLevel) : '—';
   const totalXpLabel = showContent ? formatInteger(data.xpTotal) : '—';
+  const chipStyle = useMemo(() => buildGameModeChip(gameMode), [gameMode]);
 
   const headline = useMemo(() => {
     if (showError) {
@@ -75,18 +77,14 @@ export function MetricHeader({ userId }: MetricHeaderProps) {
       className="ring-1 ring-indigo-400/20"
       title="Progreso general"
       subtitle={headline}
-      rightSlot={
-        <span className="inline-flex items-center gap-1 rounded-full border border-indigo-300/30 bg-indigo-300/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-100">
-          XP Tracker
-        </span>
-      }
+      rightSlot={chipStyle ? <GameModeChip {...chipStyle} /> : null}
     >
       {showSkeleton && (
         <div className="flex flex-col gap-4">
           <div className="h-8 w-48 animate-pulse rounded bg-white/10" />
-          <div className="h-3 w-full animate-pulse rounded-full bg-white/10" />
-          <div className="grid gap-3 md:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, index) => (
+          <div className="h-4 w-full animate-pulse rounded-full bg-white/10" />
+          <div className="grid gap-3 md:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, index) => (
               <div key={index} className="h-20 animate-pulse rounded-2xl bg-white/5" />
             ))}
           </div>
@@ -102,15 +100,28 @@ export function MetricHeader({ userId }: MetricHeaderProps) {
 
       {showContent && (
         <div className="flex flex-col gap-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <MetricStat label="Total XP" value={totalXpLabel} helper="Acumulado histórico" />
-            <MetricStat label="Nivel actual" value={levelLabel} helper="Escala estimada MVP" />
-            <MetricStat label="Progreso" value={progressLabel} helper="Hacia el próximo nivel" />
+          <div className="grid gap-3 md:grid-cols-2">
+            <MetricStat
+              label="Total XP"
+              value={totalXpLabel}
+              helper="Acumulado histórico"
+              valueClassName="text-4xl font-semibold text-slate-50 sm:text-5xl"
+            />
+            <MetricStat
+              label="Nivel actual"
+              value={levelLabel}
+              helper="Escala estimada MVP"
+              valueClassName="text-4xl font-semibold text-slate-50 sm:text-5xl"
+            />
           </div>
 
           <div className="space-y-3">
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Progreso</p>
+              <p className="text-sm text-slate-400">Hacia el próximo nivel</p>
+            </div>
             <div
-              className="h-3 w-full overflow-hidden rounded-full bg-white/10"
+              className="relative h-4 w-full overflow-hidden rounded-full border border-white/5 bg-slate-950/60 shadow-[inset_0_2px_8px_rgba(8,15,40,0.6)] sm:h-5"
               role="progressbar"
               aria-label="Progreso hacia el próximo nivel"
               aria-valuemin={0}
@@ -119,11 +130,20 @@ export function MetricHeader({ userId }: MetricHeaderProps) {
               aria-valuetext={`${progressLabel} completado`}
             >
               <div
-                className="h-full rounded-full bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300"
+                className="absolute inset-0"
+                aria-hidden
+              >
+                <div className="h-full bg-gradient-to-r from-indigo-400/20 via-fuchsia-400/25 to-amber-300/20" />
+              </div>
+              <div
+                className="relative h-full rounded-full bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300 transition-[width] duration-500 ease-out"
                 style={{ width: `${progressPercent.toFixed(1)}%` }}
               />
+              <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-950 drop-shadow-[0_1px_2px_rgba(255,255,255,0.45)]">
+                {progressLabel}
+              </span>
             </div>
-            {xpToNextMessage && <p className="text-sm text-slate-400">{xpToNextMessage}</p>}
+            {xpToNextMessage && <p className="text-sm text-slate-300">{xpToNextMessage}</p>}
           </div>
         </div>
       )}
@@ -135,14 +155,111 @@ interface MetricStatProps {
   label: string;
   value: string;
   helper: string;
+  valueClassName?: string;
 }
 
-function MetricStat({ label, value, helper }: MetricStatProps) {
+function MetricStat({ label, value, helper, valueClassName }: MetricStatProps) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-      <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-slate-100">{value}</p>
-      <p className="mt-1 text-xs text-slate-400">{helper}</p>
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{label}</p>
+      <p className={`mt-3 leading-tight ${valueClassName ?? 'text-2xl font-semibold text-slate-100 sm:text-3xl'}`}>{value}</p>
+      <p className="mt-2 text-sm text-slate-400">{helper}</p>
     </div>
+  );
+}
+
+type NormalizedGameMode = 'Flow' | 'Chill' | 'Evolve' | 'Low';
+
+interface GameModeChipStyle {
+  label: string;
+  backgroundClass: string;
+  glowClass: string;
+  animate: boolean;
+}
+
+function normalizeGameMode(mode?: string | null): NormalizedGameMode | null {
+  if (!mode) {
+    return null;
+  }
+
+  const normalized = mode.trim().toLowerCase();
+
+  switch (normalized) {
+    case 'low':
+      return 'Low';
+    case 'chill':
+      return 'Chill';
+    case 'evolve':
+    case 'evol':
+      return 'Evolve';
+    case 'flow':
+    case 'flow mood':
+    case 'flow_mood':
+    default:
+      return 'Flow';
+  }
+}
+
+const GAME_MODE_STYLES: Record<NormalizedGameMode, GameModeChipStyle> = {
+  Flow: {
+    label: 'Modo Flow',
+    backgroundClass: 'bg-gradient-to-r from-sky-500/25 via-indigo-500/30 to-purple-500/25 text-slate-100',
+    glowClass: 'bg-sky-400/40',
+    animate: true,
+  },
+  Chill: {
+    label: 'Modo Chill',
+    backgroundClass: 'bg-gradient-to-r from-emerald-400/25 via-teal-400/30 to-cyan-400/25 text-emerald-50',
+    glowClass: 'bg-emerald-400/40',
+    animate: true,
+  },
+  Evolve: {
+    label: 'Modo Evolve',
+    backgroundClass: 'bg-gradient-to-r from-fuchsia-400/25 via-rose-400/30 to-amber-300/25 text-rose-50',
+    glowClass: 'bg-fuchsia-400/40',
+    animate: true,
+  },
+  Low: {
+    label: 'Modo Low',
+    backgroundClass: 'bg-gradient-to-r from-amber-300/25 via-orange-400/30 to-yellow-300/25 text-amber-50',
+    glowClass: 'bg-amber-400/35',
+    animate: true,
+  },
+};
+
+const DEFAULT_CHIP_STYLE: GameModeChipStyle = {
+  label: 'Modo sin definir',
+  backgroundClass: 'bg-white/10 text-slate-200',
+  glowClass: 'bg-slate-400/20',
+  animate: false,
+};
+
+function buildGameModeChip(mode?: string | null): GameModeChipStyle | null {
+  if (!mode) {
+    return DEFAULT_CHIP_STYLE;
+  }
+
+  const normalized = normalizeGameMode(mode);
+  if (!normalized) {
+    return DEFAULT_CHIP_STYLE;
+  }
+
+  return GAME_MODE_STYLES[normalized] ?? DEFAULT_CHIP_STYLE;
+}
+
+function GameModeChip({ label, backgroundClass, glowClass, animate }: GameModeChipStyle) {
+  return (
+    <span className="relative inline-flex items-center">
+      <span
+        className={`absolute -inset-1 rounded-full blur-lg ${glowClass} ${animate ? 'animate-pulse' : ''}`}
+        aria-hidden
+      />
+      <span
+        className={`relative inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] shadow-[0_0_22px_rgba(15,23,42,0.35)] backdrop-blur ${backgroundClass}`}
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
+        {label}
+      </span>
+    </span>
   );
 }

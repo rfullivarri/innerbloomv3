@@ -58,7 +58,7 @@ export default function DashboardV3Page() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-12 lg:gap-6">
                 <div className="lg:col-span-12 space-y-4">
                   <Alerts userId={backendUserId} />
-                  <MetricHeader userId={backendUserId} />
+                  <MetricHeader userId={backendUserId} gameMode={profile?.game_mode} />
                 </div>
 
                 <div className="lg:col-span-7 space-y-4 md:space-y-5">
