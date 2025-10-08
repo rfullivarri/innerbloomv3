@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getEmotions, type EmotionSnapshot } from '../../lib/api';
 import { asArray } from '../../lib/safe';
@@ -10,6 +11,10 @@ interface EmotionTimelineProps {
 const HEATMAP_WEEKS = 26;
 const DAYS_PER_WEEK = 7;
 const EMPTY_COLOR = '#1b2745';
+const GRID_MAX_CELL_SIZE = 18;
+const GRID_MIN_CELL_SIZE = 4;
+const GRID_MAX_GAP = 8;
+const GRID_MIN_GAP = 2;
 
 const EMOTION_ORDER = [
   'Calma',
@@ -324,6 +329,84 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
   const periodLabel = useMemo(() => formatPeriod(grid.period.from, grid.period.to), [grid.period.from, grid.period.to]);
   const highlightLabel = grid.highlight?.count === 1 ? 'registro' : 'registros';
   const [activeCellKey, setActiveCellKey] = useState<string | null>(null);
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const [cellSize, setCellSize] = useState<number>(14);
+  const [cellGap, setCellGap] = useState<number>(GRID_MAX_GAP);
+  const columnCount = grid.columns.length;
+
+  useEffect(() => {
+    const element = gridRef.current;
+    if (!element || columnCount === 0) return;
+
+    const computeDimensions = () => {
+      const box = gridRef.current;
+      if (!box || columnCount === 0) return;
+
+      const styles = window.getComputedStyle(box);
+      const paddingLeft = parseFloat(styles.paddingLeft) || 0;
+      const paddingRight = parseFloat(styles.paddingRight) || 0;
+      const available = box.clientWidth - paddingLeft - paddingRight;
+      if (available <= 0) return;
+
+      const segments = Math.max(0, columnCount - 1);
+
+      let nextCell = Math.min(
+        GRID_MAX_CELL_SIZE,
+        (available - segments * GRID_MIN_GAP) / columnCount,
+      );
+      if (!Number.isFinite(nextCell) || nextCell <= 0) {
+        nextCell = GRID_MAX_CELL_SIZE;
+      }
+      if (nextCell < GRID_MIN_CELL_SIZE) {
+        nextCell = GRID_MIN_CELL_SIZE;
+      }
+
+      let nextGap = segments > 0 ? (available - nextCell * columnCount) / segments : GRID_MIN_GAP;
+      if (!Number.isFinite(nextGap)) {
+        nextGap = GRID_MIN_GAP;
+      }
+      nextGap = Math.min(GRID_MAX_GAP, Math.max(GRID_MIN_GAP, nextGap));
+
+      if (segments > 0) {
+        const totalWidth = nextCell * columnCount + nextGap * segments;
+        if (totalWidth > available) {
+          const adjustedCell = (available - nextGap * segments) / columnCount;
+          if (Number.isFinite(adjustedCell)) {
+            nextCell = Math.max(
+              GRID_MIN_CELL_SIZE,
+              Math.min(GRID_MAX_CELL_SIZE, adjustedCell),
+            );
+          }
+        }
+      }
+
+      setCellSize(Number(nextCell.toFixed(2)));
+      setCellGap(Number((segments > 0 ? nextGap : 0).toFixed(2)));
+    };
+
+    computeDimensions();
+
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(computeDimensions) : null;
+    if (observer) {
+      observer.observe(element);
+    }
+
+    window.addEventListener('resize', computeDimensions);
+
+    return () => {
+      window.removeEventListener('resize', computeDimensions);
+      if (observer) observer.disconnect();
+    };
+  }, [columnCount]);
+
+  const gridStyle = useMemo(
+    () =>
+      ({
+        '--cell-size': `${cellSize}px`,
+        '--cell-gap': `${cellGap}px`,
+      }) as CSSProperties,
+    [cellGap, cellSize],
+  );
 
   useEffect(() => {
     const dismiss = () => setActiveCellKey(null);
@@ -378,7 +461,12 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
 
           <div className="space-y-3">
             <div className="overflow-x-auto pb-2">
-              <div id="emotionChart" className="emotion-grid--weekcols mx-auto min-w-max">
+              <div
+                id="emotionChart"
+                ref={gridRef}
+                className="emotion-grid--weekcols mx-auto"
+                style={gridStyle}
+              >
                 {grid.columns.map((week, weekIndex) => (
                   <div key={weekIndex} className="emotion-col">
                     {week.map((cell) => (
