@@ -81,6 +81,7 @@ describeIfReady('Dashboard endpoints', () => {
     expect(response.body).toHaveProperty('first_date_log');
     expect(typeof response.body.days_of_journey).toBe('number');
     expect(typeof response.body.quantity_daily_logs).toBe('number');
+    expect(typeof response.body.first_programmed).toBe('boolean');
   });
 
   it('returns emotion logs', async () => {

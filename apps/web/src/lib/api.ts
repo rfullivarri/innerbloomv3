@@ -670,6 +670,7 @@ export type UserJourneySummary = {
   first_date_log: string | null;
   days_of_journey: number;
   quantity_daily_logs: number;
+  first_programmed: boolean;
 };
 
 export async function getUserJourney(userId: string): Promise<UserJourneySummary> {
