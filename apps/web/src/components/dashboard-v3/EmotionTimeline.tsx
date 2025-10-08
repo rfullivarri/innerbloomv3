@@ -119,6 +119,11 @@ function addWeeks(date: Date, amount: number): Date {
   return addDays(date, amount * DAYS_PER_WEEK);
 }
 
+function addMonths(date: Date, amount: number): Date {
+  const result = new Date(date.getFullYear(), date.getMonth() + amount, date.getDate());
+  return startOfDay(result);
+}
+
 function startOfWeekMonday(date: Date): Date {
   const result = startOfDay(date);
   const day = result.getDay();
@@ -289,34 +294,87 @@ function buildGrid(data: unknown): GridComputation {
   const endMonday = startOfWeekMonday(effectiveEndDate);
   const futureEndMonday = addWeeks(endMonday, FUTURE_WEEKS);
   const weekDurationMs = DAYS_PER_WEEK * 24 * 60 * 60 * 1000;
+  const dayDurationMs = 24 * 60 * 60 * 1000;
 
-  let totalWeeks = MAX_HEATMAP_WEEKS;
-  let startDate: Date;
+  const computeWindow = (candidate: Date) => {
+    let startDate = candidate;
+    let totalWeeks = clampWeeks(
+      Math.ceil((addMonths(startDate, 6).getTime() - startDate.getTime()) / weekDurationMs),
+    );
+    if (totalWeeks <= 0 || !Number.isFinite(totalWeeks)) {
+      totalWeeks = MAX_HEATMAP_WEEKS;
+    }
+
+    let endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
+
+    if (endDate.getTime() < endMonday.getTime()) {
+      const weeksToCoverEnd = Math.floor((endMonday.getTime() - endDate.getTime()) / weekDurationMs) + 1;
+      startDate = addWeeks(startDate, weeksToCoverEnd);
+      endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
+    }
+
+    const latestAllowedStart = addWeeks(futureEndMonday, -(totalWeeks - 1));
+    if (startDate.getTime() > latestAllowedStart.getTime()) {
+      startDate = latestAllowedStart;
+      endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
+    }
+
+    return { startDate, totalWeeks, endDate };
+  };
+
+  const initialCandidate = earliestDate
+    ? startOfWeekMonday(earliestDate)
+    : addWeeks(futureEndMonday, -(MAX_HEATMAP_WEEKS - 1));
+
+  let { startDate, totalWeeks, endDate } = computeWindow(initialCandidate);
+
+  const computeCoverage = (windowStart: Date, weeks: number, windowEnd: Date) => {
+    const totalCells = weeks * DAYS_PER_WEEK;
+    if (totalCells <= 0) {
+      return { filled: 0, total: 0 };
+    }
+
+    const coverageLimit = Math.min(windowEnd.getTime(), effectiveEndDate.getTime());
+    const lastCoveredIndex = Math.min(
+      totalCells,
+      coverageLimit >= windowStart.getTime()
+        ? Math.floor((coverageLimit - windowStart.getTime()) / dayDurationMs) + 1
+        : 0,
+    );
+
+    if (lastCoveredIndex <= 0) {
+      return { filled: 0, total: 0 };
+    }
+
+    let filled = 0;
+    for (let offset = 0; offset < lastCoveredIndex; offset += 1) {
+      const key = ymd(addDays(windowStart, offset));
+      if (map.get(key)) {
+        filled += 1;
+      }
+    }
+
+    return { filled, total: lastCoveredIndex };
+  };
 
   if (earliestDate) {
-    const earliestMonday = startOfWeekMonday(earliestDate);
-    const spanToFuture = Math.floor(
-      (futureEndMonday.getTime() - earliestMonday.getTime()) / weekDurationMs,
-    ) + 1;
-    totalWeeks = clampWeeks(spanToFuture);
-    startDate = earliestMonday;
-  } else {
-    totalWeeks = MAX_HEATMAP_WEEKS;
-    startDate = addWeeks(futureEndMonday, -(totalWeeks - 1));
-  }
+    while (true) {
+      const coverage = computeCoverage(startDate, totalWeeks, endDate);
+      if (coverage.total === 0) break;
 
-  let endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
+      const ratio = coverage.filled / coverage.total;
+      if (ratio < 0.75) break;
 
-  if (endDate.getTime() < endMonday.getTime()) {
-    const weeksToCoverEnd = Math.floor((endMonday.getTime() - endDate.getTime()) / weekDurationMs) + 1;
-    startDate = addWeeks(startDate, weeksToCoverEnd);
-    endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
-  }
+      const nextCandidate = startOfWeekMonday(addMonths(startDate, 1));
+      if (nextCandidate.getTime() > effectiveEndDate.getTime()) break;
 
-  const latestAllowedStart = addWeeks(futureEndMonday, -(totalWeeks - 1));
-  if (startDate.getTime() > latestAllowedStart.getTime()) {
-    startDate = latestAllowedStart;
-    endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
+      const nextWindow = computeWindow(nextCandidate);
+      if (nextWindow.startDate.getTime() <= startDate.getTime()) break;
+
+      startDate = nextWindow.startDate;
+      totalWeeks = nextWindow.totalWeeks;
+      endDate = nextWindow.endDate;
+    }
   }
 
   const columns: GridCell[][] = [];
