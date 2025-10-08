@@ -14,11 +14,12 @@ interface EmotionChartCardProps {
 const GAP = 6;
 const MEDIUM_GAP = 4;
 const SMALL_GAP = 2;
-const MIN_CELL_SIZE = 4;
-const CELL_SCALE = 0.5;
+const MIN_CELL_SIZE = 8;
+const CELL_SCALE = 1;
 const NUM_WEEKS = 26;
 const DAYS_IN_WEEK = 7;
 const LOOKBACK_FOR_HIGHLIGHT = 15;
+const TOTAL_DAYS = NUM_WEEKS * DAYS_IN_WEEK;
 
 const EMOTION_NAMES = [
   'Calma',
@@ -242,33 +243,29 @@ function buildEmotionByDay(entries: NormalizedEmotionEntry[]): EmotionMapResult 
   return { map, keys, minDate, maxDate };
 }
 
-function startOfWeekMonday(date: Date): Date {
-  const result = new Date(date);
-  result.setHours(0, 0, 0, 0);
-  const day = result.getDay();
-  const diff = (day + 6) % 7; // Monday -> 0
-  result.setDate(result.getDate() - diff);
-  return result;
-}
-
 function addDays(date: Date, days: number): Date {
   const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
 }
 
-function computeEndDate(latest: Date | null): Date {
+function computeTimelineStart(earliest: Date | null): Date {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  if (!latest || Number.isNaN(latest.getTime())) {
+  if (!earliest || Number.isNaN(earliest.getTime())) {
     return today;
   }
 
-  const candidate = new Date(latest);
-  candidate.setHours(0, 0, 0, 0);
+  const start = new Date(earliest);
+  start.setHours(0, 0, 0, 0);
+  return start;
+}
 
-  return candidate.getTime() > today.getTime() ? candidate : today;
+function computeTimelineEnd(start: Date): Date {
+  const end = addDays(start, TOTAL_DAYS - 1);
+  end.setHours(0, 0, 0, 0);
+  return end;
 }
 
 function buildColumns(
@@ -383,7 +380,7 @@ function formatPeriodLabel(range: { from: Date; to: Date }): string {
 function buildRange() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const start = addDays(today, -(NUM_WEEKS * DAYS_IN_WEEK - 1));
+  const start = addDays(today, -(TOTAL_DAYS - 1));
   return { from: ymd(start), to: ymd(today) };
 }
 
@@ -490,18 +487,17 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
   const normalizedEntries = overrideEntries ?? normalizedFromApi;
 
   const { columns, highlight, period, hasRecordedEmotion } = useMemo(() => {
-    const { map, keys, maxDate } = buildEmotionByDay(normalizedEntries);
-    const endDate = computeEndDate(maxDate);
-    const endMonday = startOfWeekMonday(endDate);
-    const fixedRangeStart = addDays(endMonday, -(NUM_WEEKS - 1) * DAYS_IN_WEEK);
-    const startMonday = startOfWeekMonday(fixedRangeStart);
+    const { map, keys, minDate } = buildEmotionByDay(normalizedEntries);
+    const timelineStart = computeTimelineStart(minDate);
+    const timelineEnd = computeTimelineEnd(timelineStart);
+    const startColumnDate = timelineStart;
+    const endColumnDate = addDays(startColumnDate, (NUM_WEEKS - 1) * DAYS_IN_WEEK);
 
-    const builtColumns = buildColumns(map, startMonday, endMonday, DAYS_IN_WEEK);
-    const lastColumnMonday = builtColumns.length > 0 ? addDays(startMonday, (builtColumns.length - 1) * DAYS_IN_WEEK) : endMonday;
+    const builtColumns = buildColumns(map, startColumnDate, endColumnDate, DAYS_IN_WEEK);
     const highlightResult = computeHighlight(map, keys, LOOKBACK_FOR_HIGHLIGHT);
     const rangeDates = {
-      from: startMonday,
-      to: addDays(lastColumnMonday, DAYS_IN_WEEK - 1),
+      from: timelineStart,
+      to: timelineEnd,
     };
     const anyRecorded = normalizedEntries.some((entry) => entry.emotion !== 'Sin registro');
 
