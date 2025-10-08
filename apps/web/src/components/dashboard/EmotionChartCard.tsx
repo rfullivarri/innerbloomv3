@@ -269,18 +269,21 @@ function computeEndDate(latest: Date | null): Date {
 function buildColumns(
   map: Map<string, EmotionValue>,
   startMonday: Date,
-  columns: number,
+  endMonday: Date,
   rows: number,
 ): EmotionColumn[] {
   const result: EmotionColumn[] = [];
   const monthFormatter = new Intl.DateTimeFormat('es-ES', { month: 'short' });
-  let previousMonth = -1;
+  let currentMonday = new Date(startMonday);
+  const lastMondayTime = endMonday.getTime();
+  let lastLabeledMonthKey: string | null = null;
 
-  for (let col = 0; col < columns; col += 1) {
-    const monday = addDays(startMonday, col * rows);
-    const month = monday.getMonth();
-    const label = month !== previousMonth ? monthFormatter.format(monday).toLowerCase() : '';
-    previousMonth = month;
+  while (currentMonday.getTime() <= lastMondayTime) {
+    const monday = new Date(currentMonday);
+    const monthForFallback = monday.getMonth();
+    const yearForFallback = monday.getFullYear();
+    let label = '';
+    let labelMonthKey: string | null = null;
 
     const cells: GridCell[] = [];
     for (let row = 0; row < rows; row += 1) {
@@ -295,6 +298,24 @@ function buildColumns(
         emotion,
         color,
       });
+
+      if (!label) {
+        if (cellDate.getDate() === 1) {
+          labelMonthKey = `${cellDate.getFullYear()}-${cellDate.getMonth()}`;
+          if (labelMonthKey !== lastLabeledMonthKey) {
+            label = monthFormatter.format(cellDate).toLowerCase();
+          }
+        }
+      }
+    }
+
+    if (!label && lastLabeledMonthKey === null) {
+      labelMonthKey = `${yearForFallback}-${monthForFallback}`;
+      label = monthFormatter.format(monday).toLowerCase();
+    }
+
+    if (label && labelMonthKey) {
+      lastLabeledMonthKey = labelMonthKey;
     }
 
     result.push({
@@ -302,6 +323,8 @@ function buildColumns(
       label,
       cells,
     });
+
+    currentMonday = addDays(currentMonday, rows);
   }
 
   return result;
@@ -462,13 +485,23 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
   const normalizedEntries = overrideEntries ?? normalizedFromApi;
 
   const { columns, highlight, period, hasRecordedEmotion } = useMemo(() => {
-    const { map, keys, maxDate } = buildEmotionByDay(normalizedEntries);
+    const { map, keys, minDate, maxDate } = buildEmotionByDay(normalizedEntries);
     const endDate = computeEndDate(maxDate);
     const endMonday = startOfWeekMonday(endDate);
-    const startMonday = addDays(endMonday, -(NUM_WEEKS - 1) * DAYS_IN_WEEK);
-    const builtColumns = buildColumns(map, startMonday, NUM_WEEKS, DAYS_IN_WEEK);
+    const effectiveStartDate = minDate ?? endDate;
+    let startMonday = startOfWeekMonday(effectiveStartDate);
+
+    if (startMonday.getTime() > endMonday.getTime()) {
+      startMonday = new Date(endMonday);
+    }
+
+    const builtColumns = buildColumns(map, startMonday, endMonday, DAYS_IN_WEEK);
+    const lastColumnMonday = builtColumns.length > 0 ? addDays(startMonday, (builtColumns.length - 1) * DAYS_IN_WEEK) : endMonday;
     const highlightResult = computeHighlight(map, keys, LOOKBACK_FOR_HIGHLIGHT);
-    const rangeDates = { from: startMonday, to: addDays(startMonday, NUM_WEEKS * DAYS_IN_WEEK - 1) };
+    const rangeDates = {
+      from: startMonday,
+      to: addDays(lastColumnMonday, DAYS_IN_WEEK - 1),
+    };
     const anyRecorded = normalizedEntries.some((entry) => entry.emotion !== 'Sin registro');
 
     return {
@@ -481,6 +514,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
   const gridBoxRef = useRef<HTMLDivElement | null>(null);
   const [cellSize, setCellSize] = useState<number>(12);
+  const columnCount = Math.max(columns.length, 1);
 
   useEffect(() => {
     const box = gridBoxRef.current;
@@ -489,7 +523,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
     const compute = () => {
       const maxWidth = box.clientWidth;
       if (!maxWidth) return;
-      const size = Math.max(4, Math.floor((maxWidth - (NUM_WEEKS - 1) * GAP) / NUM_WEEKS));
+      const size = Math.max(4, Math.floor((maxWidth - (columnCount - 1) * GAP) / columnCount));
       setCellSize(size);
     };
 
@@ -507,7 +541,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       window.removeEventListener('resize', compute);
       if (observer) observer.disconnect();
     };
-  }, [columns.length]);
+  }, [columnCount]);
 
   const tooltipFormatter = useMemo(
     () => new Intl.DateTimeFormat('es-ES', { weekday: 'short', month: 'short', day: 'numeric' }),
