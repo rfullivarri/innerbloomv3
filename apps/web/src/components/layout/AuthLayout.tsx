@@ -22,14 +22,14 @@ export function AuthLayout({
   secondaryActionHref
 }: AuthLayoutProps) {
   return (
-    <div className="relative flex min-h-screen flex-col items-stretch justify-start overflow-hidden bg-[#040313] px-4 py-10 text-white sm:px-6 sm:py-12 lg:flex-row lg:items-center lg:justify-center lg:px-12 lg:py-14">
+    <div className="relative flex min-h-screen min-h-dvh flex-col items-stretch justify-start overflow-hidden bg-[#040313] px-4 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] pt-10 text-white sm:px-6 sm:pb-[calc(env(safe-area-inset-bottom)+3rem)] sm:pt-12 lg:flex-row lg:items-center lg:justify-center lg:px-12 lg:pb-[calc(env(safe-area-inset-bottom)+3.5rem)] lg:pt-14">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.18),transparent_55%),radial-gradient(circle_at_bottom_left,_rgba(14,165,233,0.15),transparent_60%),radial-gradient(circle_at_bottom_right,_rgba(217,70,239,0.1),transparent_65%)]" />
         <div className="absolute -left-24 top-32 h-72 w-72 rounded-full bg-[#a855f7]/30 blur-[140px]" />
         <div className="absolute -right-32 bottom-10 h-80 w-80 rounded-full bg-[#0ea5e9]/30 blur-[160px]" />
       </div>
       <div className="relative z-10 w-full max-w-5xl rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_30px_120px_rgba(15,23,42,0.45)] backdrop-blur-3xl sm:rounded-[32px] sm:p-7 md:p-10">
-        <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16">
+        <div className="flex min-w-0 flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16">
           <div className="flex flex-col justify-between gap-8 lg:gap-10">
             <div className="flex flex-col gap-5 sm:gap-6">
               {secondaryActionLabel && secondaryActionHref ? (
@@ -71,7 +71,7 @@ export function AuthLayout({
             ) : null}
           </div>
 
-          <div className="flex w-full items-center justify-center">
+          <div className="flex w-full min-w-0 items-center justify-center">
             {children}
           </div>
         </div>

@@ -21,9 +21,9 @@ const gradientButtonClass =
   'mt-3 inline-flex h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-[#8b5cf6] via-[#6366f1] to-[#0ea5e9] text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all duration-200 hover:from-[#8b5cf6] hover:to-[#0ea5e9]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:w-auto';
 
 const baseElements = {
-  rootBox: 'w-full',
+  rootBox: 'w-full min-w-0',
   card:
-    'mx-auto flex w-full max-w-full flex-col gap-6 rounded-[24px] border border-white/10 bg-white/5 p-4 shadow-[0_25px_80px_rgba(15,23,42,0.35)] backdrop-blur-2xl sm:max-w-[440px] sm:rounded-[28px] sm:p-6 md:p-8',
+    'mx-auto flex w-full min-w-0 max-w-full flex-col gap-6 rounded-[24px] border border-white/10 bg-white/5 p-4 shadow-[0_25px_80px_rgba(15,23,42,0.35)] backdrop-blur-2xl sm:max-w-[440px] sm:rounded-[28px] sm:p-6 md:p-8',
   header: 'hidden',
   socialButtons: 'hidden',
   divider: 'hidden',
