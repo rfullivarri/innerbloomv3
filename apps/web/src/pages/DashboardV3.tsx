@@ -21,8 +21,11 @@ import { ProfileCard } from '../components/dashboard-v3/ProfileCard';
 import { MetricHeader } from '../components/dashboard/MetricHeader';
 import { RadarChartCard } from '../components/dashboard/RadarChartCard';
 import { EmotionChartCard } from '../components/dashboard/EmotionChartCard';
-import { StreaksPanel } from '../components/dashboard/StreaksPanel';
-import { StreakPanel } from '../components/dashboard-v3/StreakPanel';
+import {
+  FEATURE_STREAKS_PANEL_V1,
+  LegacyStreaksPanel,
+  StreaksPanel,
+} from '../components/dashboard/StreaksPanel';
 import { Card } from '../components/ui/Card';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
@@ -44,7 +47,7 @@ export default function DashboardV3Page() {
       <div className="flex min-h-screen flex-col">
         <Navbar />
         <main className="flex-1">
-          <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-6 md:py-6 lg:px-8 lg:py-8">
+          <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             {isLoadingProfile && <ProfileSkeleton />}
 
             {failedToLoadProfile && !isLoadingProfile && (
@@ -68,10 +71,10 @@ export default function DashboardV3Page() {
                 <div className="lg:col-span-5 space-y-4 md:space-y-5">
                   <ProfileCard imageUrl={avatarUrl} />
                   <EnergyCard userId={backendUserId} gameMode={profile?.game_mode} />
-                  <StreaksPanel userId={backendUserId} />
+                  {FEATURE_STREAKS_PANEL_V1 && <LegacyStreaksPanel userId={backendUserId} />}
 
                   <div className="space-y-6">
-                    <StreakPanel
+                    <StreaksPanel
                       userId={backendUserId}
                       gameMode={profile?.game_mode}
                       weeklyTarget={profile?.weekly_target}
