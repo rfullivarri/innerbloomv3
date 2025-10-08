@@ -67,7 +67,7 @@ export default function DashboardPage() {
 
               <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
                 <RecentActivity userId={backendUserId} />
-                <AchievementsList />
+                <AchievementsList userId={backendUserId} />
               </section>
             </>
           )}
