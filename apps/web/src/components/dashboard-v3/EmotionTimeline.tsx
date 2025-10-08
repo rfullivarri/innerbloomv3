@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getEmotions, type EmotionSnapshot } from '../../lib/api';
 import { asArray } from '../../lib/safe';
@@ -36,11 +36,18 @@ const EMOTION_COLORS: Record<EmotionName | 'Sin registro', string> = {
 
 const LEGEND_ITEMS: Array<EmotionName | 'Sin registro'> = [...EMOTION_ORDER, 'Sin registro'];
 
+const TOOLTIP_FORMATTER = new Intl.DateTimeFormat('es-AR', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});
+
 type GridCell = {
   key: string;
   color: string;
   label: string;
   emotion: EmotionName | '';
+  tooltip: string;
 };
 
 type GridComputation = {
@@ -233,6 +240,7 @@ function buildGrid(data: unknown): GridComputation {
   const items = asArray<EmotionSnapshot | { fecha?: string; emocion?: string }>(data);
   const map = new Map<string, EmotionName | ''>();
   let latestDate: Date | null = null;
+  let earliestDate: Date | null = null;
 
   for (const entry of items) {
     const raw = entry as any;
@@ -249,17 +257,34 @@ function buildGrid(data: unknown): GridComputation {
     if (!latestDate || parsedDate.getTime() > latestDate.getTime()) {
       latestDate = parsedDate;
     }
+    if (!earliestDate || parsedDate.getTime() < earliestDate.getTime()) {
+      earliestDate = parsedDate;
+    }
   }
 
   const today = startOfDay(new Date());
   const effectiveEndDate = latestDate && latestDate.getTime() > today.getTime() ? latestDate : today;
   const endMonday = startOfWeekMonday(effectiveEndDate);
-  const startDate = addDays(endMonday, -DAYS_PER_WEEK * (HEATMAP_WEEKS - 1));
-  const endDate = addDays(startDate, HEATMAP_WEEKS * DAYS_PER_WEEK - 1);
+  const weekDurationMs = DAYS_PER_WEEK * 24 * 60 * 60 * 1000;
+
+  let startDate = addDays(endMonday, -DAYS_PER_WEEK * (HEATMAP_WEEKS - 1));
+  if (earliestDate) {
+    const earliestMonday = startOfWeekMonday(earliestDate);
+    const weeksBetween = Math.floor((endMonday.getTime() - earliestMonday.getTime()) / weekDurationMs) + 1;
+    if (weeksBetween > 0 && weeksBetween <= HEATMAP_WEEKS) {
+      startDate = earliestMonday;
+    }
+  }
+
+  const totalWeeks = Math.min(
+    HEATMAP_WEEKS,
+    Math.max(1, Math.floor((endMonday.getTime() - startDate.getTime()) / weekDurationMs) + 1),
+  );
+  const endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
 
   const columns: GridCell[][] = [];
 
-  for (let week = 0; week < HEATMAP_WEEKS; week += 1) {
+  for (let week = 0; week < totalWeeks; week += 1) {
     const weekCells: GridCell[] = [];
     for (let dayIndex = 0; dayIndex < DAYS_PER_WEEK; dayIndex += 1) {
       const cellDate = addDays(startDate, week * DAYS_PER_WEEK + dayIndex);
@@ -267,7 +292,8 @@ function buildGrid(data: unknown): GridComputation {
       const emotion = map.get(key) ?? '';
       const label = emotion || 'Sin registro';
       const color = EMOTION_COLORS[emotion || 'Sin registro'];
-      weekCells.push({ key, color, label, emotion });
+      const tooltip = `${TOOLTIP_FORMATTER.format(cellDate)} — ${label}`;
+      weekCells.push({ key, color, label, emotion, tooltip });
     }
     columns.push(weekCells);
   }
@@ -290,6 +316,26 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
   const grid = useMemo(() => buildGrid(data), [data]);
   const periodLabel = useMemo(() => formatPeriod(grid.period.from, grid.period.to), [grid.period.from, grid.period.to]);
   const highlightLabel = grid.highlight?.count === 1 ? 'registro' : 'registros';
+  const [activeCellKey, setActiveCellKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    const dismiss = () => setActiveCellKey(null);
+    const touchOptions: AddEventListenerOptions = { passive: true };
+    document.addEventListener('click', dismiss);
+    document.addEventListener('touchstart', dismiss, touchOptions);
+    return () => {
+      document.removeEventListener('click', dismiss);
+      document.removeEventListener('touchstart', dismiss, touchOptions);
+    };
+  }, []);
+
+  const activateCell = (key: string) => {
+    setActiveCellKey(key);
+  };
+
+  const toggleCell = (key: string) => {
+    setActiveCellKey((prev) => (prev === key ? null : key));
+  };
 
   return (
     <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#111d3a]/80 via-[#0b1429]/70 to-[#071022]/80 p-6 text-sm text-text backdrop-blur">
@@ -329,12 +375,27 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
                 {grid.columns.map((week, weekIndex) => (
                   <div key={weekIndex} className="emotion-col">
                     {week.map((cell) => (
-                      <div
+                      <button
                         key={cell.key}
                         className="emotion-cell"
                         style={{ backgroundColor: cell.color }}
-                        title={`${cell.key} — ${cell.label}`}
-                        aria-label={`${cell.key} — ${cell.label}`}
+                        type="button"
+                        title={cell.tooltip}
+                        aria-label={cell.tooltip}
+                        data-tooltip={cell.tooltip}
+                        data-active={activeCellKey === cell.key ? 'true' : undefined}
+                        onMouseEnter={() => activateCell(cell.key)}
+                        onFocus={() => activateCell(cell.key)}
+                        onMouseLeave={() => setActiveCellKey(null)}
+                        onBlur={() => setActiveCellKey(null)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          toggleCell(cell.key);
+                        }}
+                        onTouchStart={(event) => {
+                          event.stopPropagation();
+                          toggleCell(cell.key);
+                        }}
                       />
                     ))}
                   </div>
