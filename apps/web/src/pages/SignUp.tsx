@@ -19,7 +19,7 @@ export default function SignUpPage() {
       secondaryActionLabel="Volver al inicio"
       secondaryActionHref="/"
     >
-      <div ref={signUpContainerRef} className="w-full max-w-md mx-auto lg:mx-0">
+      <div ref={signUpContainerRef} className="mx-auto w-full min-w-0 max-w-md lg:mx-0">
         <SignUp
           appearance={createAuthAppearance({
             elements: {
