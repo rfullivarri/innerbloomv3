@@ -8,13 +8,15 @@ interface EmotionTimelineProps {
   userId: string;
 }
 
-const HEATMAP_WEEKS = 26;
+const MIN_HEATMAP_WEEKS = 22;
+const MAX_HEATMAP_WEEKS = 26;
+const FUTURE_WEEKS = 14;
 const DAYS_PER_WEEK = 7;
 const EMPTY_COLOR = '#1b2745';
-const GRID_MAX_CELL_SIZE = 18;
-const GRID_MIN_CELL_SIZE = 4;
-const GRID_MAX_GAP = 8;
-const GRID_MIN_GAP = 2;
+const GRID_MAX_CELL_SIZE = 16;
+const GRID_MIN_CELL_SIZE = 3.5;
+const GRID_MAX_GAP = 6;
+const GRID_MIN_GAP = 1.5;
 
 const EMOTION_ORDER = [
   'Calma',
@@ -111,6 +113,10 @@ function addDays(date: Date, amount: number): Date {
   const result = new Date(date);
   result.setDate(result.getDate() + amount);
   return result;
+}
+
+function addWeeks(date: Date, amount: number): Date {
+  return addDays(date, amount * DAYS_PER_WEEK);
 }
 
 function startOfWeekMonday(date: Date): Date {
@@ -248,6 +254,10 @@ function formatPeriod(from: Date, to: Date): string {
   return `${fromFormatter.format(from)} – ${toFormatter.format(to)}`;
 }
 
+function clampWeeks(value: number): number {
+  return Math.min(MAX_HEATMAP_WEEKS, Math.max(MIN_HEATMAP_WEEKS, value));
+}
+
 function buildGrid(data: unknown): GridComputation {
   const items = asArray<EmotionSnapshot | { fecha?: string; emocion?: string }>(data);
   const map = new Map<string, EmotionName | ''>();
@@ -277,22 +287,37 @@ function buildGrid(data: unknown): GridComputation {
   const today = startOfDay(new Date());
   const effectiveEndDate = latestDate && latestDate.getTime() > today.getTime() ? latestDate : today;
   const endMonday = startOfWeekMonday(effectiveEndDate);
+  const futureEndMonday = addWeeks(endMonday, FUTURE_WEEKS);
   const weekDurationMs = DAYS_PER_WEEK * 24 * 60 * 60 * 1000;
 
-  let startDate = addDays(endMonday, -DAYS_PER_WEEK * (HEATMAP_WEEKS - 1));
+  let totalWeeks = MAX_HEATMAP_WEEKS;
+  let startDate: Date;
+
   if (earliestDate) {
     const earliestMonday = startOfWeekMonday(earliestDate);
-    const weeksBetween = Math.floor((endMonday.getTime() - earliestMonday.getTime()) / weekDurationMs) + 1;
-    if (weeksBetween > 0 && weeksBetween <= HEATMAP_WEEKS) {
-      startDate = earliestMonday;
-    }
+    const spanToFuture = Math.floor(
+      (futureEndMonday.getTime() - earliestMonday.getTime()) / weekDurationMs,
+    ) + 1;
+    totalWeeks = clampWeeks(spanToFuture);
+    startDate = earliestMonday;
+  } else {
+    totalWeeks = MAX_HEATMAP_WEEKS;
+    startDate = addWeeks(futureEndMonday, -(totalWeeks - 1));
   }
 
-  const totalWeeks = Math.min(
-    HEATMAP_WEEKS,
-    Math.max(1, Math.floor((endMonday.getTime() - startDate.getTime()) / weekDurationMs) + 1),
-  );
-  const endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
+  let endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
+
+  if (endDate.getTime() < endMonday.getTime()) {
+    const weeksToCoverEnd = Math.floor((endMonday.getTime() - endDate.getTime()) / weekDurationMs) + 1;
+    startDate = addWeeks(startDate, weeksToCoverEnd);
+    endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
+  }
+
+  const latestAllowedStart = addWeeks(futureEndMonday, -(totalWeeks - 1));
+  if (startDate.getTime() > latestAllowedStart.getTime()) {
+    startDate = latestAllowedStart;
+    endDate = addDays(startDate, totalWeeks * DAYS_PER_WEEK - 1);
+  }
 
   const columns: GridCell[][] = [];
 
@@ -321,7 +346,7 @@ function buildGrid(data: unknown): GridComputation {
 
 export function EmotionTimeline({ userId }: EmotionTimelineProps) {
   const { data, status } = useRequest(
-    () => getEmotions(userId, { days: HEATMAP_WEEKS * DAYS_PER_WEEK + 30 }),
+    () => getEmotions(userId, { days: MAX_HEATMAP_WEEKS * DAYS_PER_WEEK + 30 }),
     [userId],
   );
 
@@ -399,14 +424,15 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
     };
   }, [columnCount]);
 
-  const gridStyle = useMemo(
-    () =>
-      ({
-        '--cell-size': `${cellSize}px`,
-        '--cell-gap': `${cellGap}px`,
-      }) as CSSProperties,
-    [cellGap, cellSize],
-  );
+  const gridStyle = useMemo(() => {
+    const gridWidth = columnCount * cellSize + Math.max(0, columnCount - 1) * cellGap;
+    return {
+      '--cell-size': `${cellSize}px`,
+      '--cell-gap': `${cellGap}px`,
+      '--grid-width': `${gridWidth}px`,
+      '--column-count': `${columnCount}`,
+    } as CSSProperties;
+  }, [cellGap, cellSize, columnCount]);
 
   useEffect(() => {
     const dismiss = () => setActiveCellKey(null);
@@ -461,12 +487,7 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
 
           <div className="space-y-3">
             <div className="overflow-x-auto pb-2">
-              <div
-                id="emotionChart"
-                ref={gridRef}
-                className="emotion-grid--weekcols mx-auto"
-                style={gridStyle}
-              >
+              <div id="emotionChart" ref={gridRef} className="emotion-grid--weekcols" style={gridStyle}>
                 {grid.columns.map((week, weekIndex) => (
                   <div key={weekIndex} className="emotion-col">
                     {week.map((cell) => (
