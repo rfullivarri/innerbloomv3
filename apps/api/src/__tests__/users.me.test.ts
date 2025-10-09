@@ -92,15 +92,12 @@ describe('GET /api/users/me', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ user });
     expect(mockQuery).toHaveBeenCalledTimes(1);
-    expect(mockQuery).toHaveBeenCalledWith(
-      'SELECT * FROM users WHERE clerk_user_id = $1 LIMIT 1',
-      ['user_456'],
-    );
+    expect(mockQuery).toHaveBeenCalledWith('SELECT * FROM users WHERE user_id = $1 LIMIT 1', ['user-row-id']);
     expect(mockVerifyToken).toHaveBeenCalledTimes(1);
     expect(mockVerifyToken).toHaveBeenCalledWith('Bearer token');
   });
 
-  it('creates and returns the user when missing', async () => {
+  it('returns 201 when the middleware marks the user as new', async () => {
     const created: CurrentUserRow = {
       user_id: 'new-id',
       clerk_user_id: 'user_123',
@@ -116,9 +113,7 @@ describe('GET /api/users/me', () => {
       deleted_at: null,
     };
 
-    mockQuery
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [created] });
+    mockQuery.mockResolvedValueOnce({ rows: [created] });
     mockVerifyToken.mockResolvedValue({
       id: 'new-id',
       clerkId: 'user_123',
@@ -132,39 +127,12 @@ describe('GET /api/users/me', () => {
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual({ user: created });
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      1,
-      'SELECT * FROM users WHERE clerk_user_id = $1 LIMIT 1',
-      ['user_123'],
-    );
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      2,
-      'INSERT INTO users (clerk_user_id, email_primary) VALUES ($1, $2) ON CONFLICT (clerk_user_id) DO NOTHING RETURNING *',
-      ['user_123', null],
-    );
+    expect(mockQuery).toHaveBeenCalledWith('SELECT * FROM users WHERE user_id = $1 LIMIT 1', ['new-id']);
     expect(mockVerifyToken).toHaveBeenCalledTimes(1);
   });
 
-  it('falls back to selecting the user when the insert returns no rows', async () => {
-    const fetched: CurrentUserRow = {
-      user_id: 'existing-id',
-      clerk_user_id: 'user_789',
-      email_primary: 'test@example.com',
-      full_name: 'Test User',
-      image_url: null,
-      game_mode: null,
-      weekly_target: null,
-      timezone: null,
-      locale: null,
-      created_at: '2024-01-01T00:00:00.000Z',
-      updated_at: '2024-01-01T00:00:00.000Z',
-      deleted_at: null,
-    };
-
-    mockQuery
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [fetched] });
+  it('returns 500 when the profile cannot be loaded from the database', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
     mockVerifyToken.mockResolvedValue({
       id: 'existing-id',
       clerkId: 'user_789',
@@ -176,23 +144,32 @@ describe('GET /api/users/me', () => {
       .get('/api/users/me')
       .set('Authorization', 'Bearer token');
 
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({ user: fetched });
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      1,
-      'SELECT * FROM users WHERE clerk_user_id = $1 LIMIT 1',
-      ['user_789'],
-    );
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      2,
-      'INSERT INTO users (clerk_user_id, email_primary) VALUES ($1, $2) ON CONFLICT (clerk_user_id) DO NOTHING RETURNING *',
-      ['user_789', 'fallback@example.com'],
-    );
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      3,
-      'SELECT * FROM users WHERE clerk_user_id = $1 LIMIT 1',
-      ['user_789'],
-    );
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({
+      code: 'user_not_found',
+      message: 'Failed to resolve current user profile',
+    });
+    expect(mockQuery).toHaveBeenCalledWith('SELECT * FROM users WHERE user_id = $1 LIMIT 1', ['existing-id']);
+    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 401 when only X-User-Id is provided without bearer token', async () => {
+    mockVerifyToken.mockImplementation(async (header?: string | null) => {
+      if (!header) {
+        throw new HttpError(401, 'unauthorized', 'Authentication required');
+      }
+
+      throw new Error('unexpected call');
+    });
+
+    const response = await request(app).get('/api/users/me').set('X-User-Id', 'user_123');
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      code: 'unauthorized',
+      message: 'Authentication required',
+    });
+    expect(mockQuery).not.toHaveBeenCalled();
     expect(mockVerifyToken).toHaveBeenCalledTimes(1);
   });
 });

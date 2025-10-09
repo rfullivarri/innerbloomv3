@@ -75,29 +75,34 @@ router.get('/users/:id/xp/total', authMiddleware, ownUserGuard, (req, res) => {
 export default router;
 ```
 
-#### Per-user authorization guard
+### Perfil del usuario autenticado
 
-Sensitive analytics routes under `/users/:id/...` require both a valid Clerk
-token and ownership of the requested ID. Mount `ownUserGuard` after the
-authentication middleware to compare `req.params.id` against the verified
-`req.user.id`.
+`GET /users/me` usa el middleware anterior y siempre responde con la forma `{ user: { ... } }` para mantener compatibilidad con el frontend actual. El objeto `user` incluye:
 
-Guarded endpoints:
+```json
+{
+  "user_id": "uuid-interno",
+  "clerk_user_id": "clerk_123",
+  "email_primary": "user@example.com",
+  "full_name": "Nombre Apellido",
+  "image_url": "https://...",
+  "game_mode": "standard",
+  "weekly_target": 1200,
+  "timezone": "America/Mexico_City",
+  "locale": "es-MX",
+  "created_at": "2024-01-01T00:00:00.000Z",
+  "updated_at": "2024-01-15T00:00:00.000Z",
+  "deleted_at": null
+}
+```
 
-* `GET /users/:id/tasks`
-* `GET /users/:id/xp/daily`
-* `GET /users/:id/xp/total`
-* `GET /users/:id/xp/by-trait`
-* `GET /users/:id/pillars`
-* `GET /users/:id/streaks/panel`
-* `GET /users/:id/level`
-* `GET /users/:id/achievements`
-* `GET /users/:id/daily-energy`
-* `GET /users/:id/journey`
-* `GET /users/:id/emotions`
-* `GET /users/:id/state`
-* `GET /users/:id/state/timeseries`
-* `GET /users/:id/summary/today`
+Ejemplo `curl` usando un token Clerk de sesión:
+
+```bash
+curl \
+  -H "Authorization: Bearer sk_test_yourClerkJwt" \
+  https://localhost:3000/api/users/me
+```
 
 ### Webhook
 
