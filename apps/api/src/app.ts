@@ -51,6 +51,7 @@ app.use((_req, _res, next) => {
 });
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  void _next;
   if (isHttpError(error)) {
     if (error.details) {
       console.error('Request failed', { code: error.code, details: error.details });

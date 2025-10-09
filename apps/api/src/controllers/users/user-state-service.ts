@@ -1,6 +1,6 @@
 import { pool } from '../../db.js';
 import { HttpError } from '../../lib/http-error.js';
-import { PILLARS, type Pillar, type XpByDate } from './user-state-utils.js';
+import { type Pillar, type XpByDate } from './user-state-utils.js';
 
 const PILLAR_ID_TO_NAME: Record<number, Pillar> = {
   1: 'Body',

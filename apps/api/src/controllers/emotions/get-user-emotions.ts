@@ -39,12 +39,6 @@ export const getUserEmotions: AsyncHandler = async (req, res) => {
     [id, formatAsDateString(range.from), formatAsDateString(range.to)],
   );
 
-  const days = result.rows.map((row) => ({
-    date: row.date,
-    emotion_id: row.emotion_id === null ? null : Number(row.emotion_id),
-    emotion: row.emotion ?? null,
-  }));
-
   res.json({
     user_id: id,
     range: {

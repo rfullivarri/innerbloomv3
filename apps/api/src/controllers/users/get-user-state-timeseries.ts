@@ -15,12 +15,12 @@ import {
   propagateEnergy,
 } from './user-state-service.js';
 
-type TimeseriesResponse = Array<{
+type TimeseriesResponse = {
   date: string;
   Body: number;
   Mind: number;
   Soul: number;
-}>;
+}[];
 
 const paramsSchema = z.object({
   id: uuidSchema,
