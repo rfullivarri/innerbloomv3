@@ -218,8 +218,9 @@ describe.each(privateRoutes)('GET /api/users/:id%s', ({ path, key }) => {
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
-      code: 'validation_error',
+      code: 'invalid_request',
       message: expect.any(String),
+      details: expect.any(Object),
     });
   });
 });

@@ -63,6 +63,11 @@ We keep Vitest suites aligned with our ESLint rules using a few simple conventio
 * Remove unused Express `NextFunction` parameters; rely on `vi.fn()` mocks when a `next` callback is required.
 * Replace empty arrow functions with `vi.fn()` or explicit return values so `no-empty-function` stays green.
 * The bootstrap in `src/tests/setup-env.ts` mocks `pg.Pool` with `vi.fn()` spies, preventing real database connections and avoiding lint warnings about empty methods.
+### User state fixtures
+
+The suites for `get-user-state` and `get-user-state-timeseries` mock the date helpers and XP series so the propagated ranges are
+deterministic. This ensures the expectations stay aligned with the grace/backfill logic used in production while keeping the
+tests hermetic.
 
 ## Clerk integration
 

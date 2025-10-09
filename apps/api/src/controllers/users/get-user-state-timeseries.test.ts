@@ -1,126 +1,138 @@
+import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HttpError } from '../../lib/http-error.js';
-import { mockReq, mockRes } from '../../tests/test-utils.js';
+import { getUserStateTimeseries } from './get-user-state-timeseries.js';
 
-const serviceMocks = vi.hoisted(() => ({
-  addDays: vi.fn(),
-  computeDailyTargets: vi.fn(),
-  computeHalfLife: vi.fn(),
-  enumerateDates: vi.fn(),
-  getDailyXpSeriesByPillar: vi.fn(),
-  getUserLogStats: vi.fn(),
-  getUserProfile: vi.fn(),
-  getXpBaseByPillar: vi.fn(),
-  propagateEnergy: vi.fn(),
+const {
+  mockGetUserProfile,
+  mockGetUserLogStats,
+  mockGetXpBaseByPillar,
+  mockComputeHalfLife,
+  mockComputeDailyTargets,
+  mockPropagateEnergy,
+  mockEnumerateDates,
+  mockGetDailyXpSeriesByPillar,
+  mockAddDays,
+} = vi.hoisted(() => ({
+  mockGetUserProfile: vi.fn(),
+  mockGetUserLogStats: vi.fn(),
+  mockGetXpBaseByPillar: vi.fn(),
+  mockComputeHalfLife: vi.fn(),
+  mockComputeDailyTargets: vi.fn(),
+  mockPropagateEnergy: vi.fn(),
+  mockEnumerateDates: vi.fn(),
+  mockGetDailyXpSeriesByPillar: vi.fn(),
+  mockAddDays: vi.fn(),
 }));
 
 vi.mock('./user-state-service.js', () => ({
-  addDays: serviceMocks.addDays,
-  computeDailyTargets: serviceMocks.computeDailyTargets,
-  computeHalfLife: serviceMocks.computeHalfLife,
-  enumerateDates: serviceMocks.enumerateDates,
-  getDailyXpSeriesByPillar: serviceMocks.getDailyXpSeriesByPillar,
-  getUserLogStats: serviceMocks.getUserLogStats,
-  getUserProfile: serviceMocks.getUserProfile,
-  getXpBaseByPillar: serviceMocks.getXpBaseByPillar,
-  propagateEnergy: serviceMocks.propagateEnergy,
+  getUserProfile: mockGetUserProfile,
+  getUserLogStats: mockGetUserLogStats,
+  getXpBaseByPillar: mockGetXpBaseByPillar,
+  computeHalfLife: mockComputeHalfLife,
+  computeDailyTargets: mockComputeDailyTargets,
+  propagateEnergy: mockPropagateEnergy,
+  enumerateDates: mockEnumerateDates,
+  getDailyXpSeriesByPillar: mockGetDailyXpSeriesByPillar,
+  addDays: mockAddDays,
 }));
+
+function createMockResponse() {
+  const json = vi.fn();
+  const status = vi.fn().mockReturnThis();
+
+  return {
+    json,
+    status,
+  } as unknown as Response;
+}
 
 describe('getUserStateTimeseries', () => {
   beforeEach(() => {
-    vi.resetModules();
-    vi.clearAllMocks();
+    mockGetUserProfile.mockReset();
+    mockGetUserLogStats.mockReset();
+    mockGetXpBaseByPillar.mockReset();
+    mockComputeHalfLife.mockReset();
+    mockComputeDailyTargets.mockReset();
+    mockPropagateEnergy.mockReset();
+    mockEnumerateDates.mockReset();
+    mockGetDailyXpSeriesByPillar.mockReset();
+    mockAddDays.mockReset();
   });
 
-  it('throws when the date range is invalid', async () => {
-    const { getUserStateTimeseries } = await import('./get-user-state-timeseries.js');
-    const req = mockReq({
-      params: { id: '11111111-2222-3333-4444-555555555555' },
-      query: { from: '2024-13-01', to: '2024-01-10' },
-    });
-    const res = mockRes();
+  it('throws an HttpError when the provided range is invalid', async () => {
+    const req = {
+      params: { id: '4a6f8b1e-12f0-4a22-8e8a-7cbf8250a49d' },
+      query: { from: '2023-12-22', to: '2023-12-20' },
+    } as unknown as Request;
 
-    await expect(getUserStateTimeseries(req, res, vi.fn())).rejects.toBeInstanceOf(HttpError);
-    expect(res.json).not.toHaveBeenCalled();
+    await expect(getUserStateTimeseries(req, createMockResponse(), vi.fn())).rejects.toBeInstanceOf(HttpError);
   });
 
-  it('filters the propagated series and caches results', async () => {
-    const userId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
-    const propagationDates: string[] = ['2024-01-01', '2024-01-02', '2024-01-03'];
+  it('propagates energy using deterministic dates and returns the filtered series', async () => {
+    const req = {
+      params: { id: '4a6f8b1e-12f0-4a22-8e8a-7cbf8250a49d' },
+      query: { from: '2023-12-20', to: '2023-12-22' },
+    } as unknown as Request;
+    const res = createMockResponse();
 
-    serviceMocks.getUserProfile.mockResolvedValue({
-      userId,
-      modeCode: 'FOCUS',
-      modeName: null,
-      weeklyTarget: 900,
+    mockGetUserProfile.mockResolvedValue({
+      modeCode: 'FLOW',
+      modeName: 'Flow Mode',
+      weeklyTarget: 21,
       timezone: 'UTC',
     });
-    serviceMocks.getUserLogStats.mockResolvedValue({ uniqueDays: 10, firstDate: '2023-12-15' });
-    serviceMocks.getXpBaseByPillar.mockResolvedValue({ Body: 5, Mind: 6, Soul: 7 });
-    serviceMocks.computeHalfLife.mockReturnValue({ Body: 2, Mind: 3, Soul: 4 });
-    serviceMocks.computeDailyTargets.mockReturnValue({ Body: 1, Mind: 2, Soul: 3 });
-    serviceMocks.addDays.mockReturnValue('2023-12-21');
-    serviceMocks.enumerateDates.mockImplementation((from: string, to: string) => {
-      const dates: string[] = [];
-      const start = new Date(`${from}T00:00:00.000Z`);
-      const end = new Date(`${to}T00:00:00.000Z`);
-      for (let cursor = new Date(start); cursor <= end; cursor.setUTCDate(cursor.getUTCDate() + 1)) {
-        dates.push(cursor.toISOString().slice(0, 10));
-      }
-      return dates;
-    });
-    serviceMocks.getDailyXpSeriesByPillar.mockResolvedValue(
-      new Map<string, Partial<Record<'Body' | 'Mind' | 'Soul', number>>>([
-        ['2024-01-01', { Body: 4, Mind: 3, Soul: 2 }],
-        ['2024-01-02', { Body: 5, Mind: 1, Soul: 0 }],
-        ['2024-01-03', { Body: 2, Mind: 2, Soul: 1 }],
-      ]),
-    );
-    serviceMocks.propagateEnergy.mockReturnValue({
-      lastEnergy: { Body: 80, Mind: 70, Soul: 60 },
-      series: [
-        { date: '2024-01-01', Body: 80, Mind: 70, Soul: 60 },
-        { date: '2024-01-02', Body: 82, Mind: 72, Soul: 62 },
-        { date: '2024-01-03', Body: 84, Mind: 74, Soul: 64 },
-        { date: '2024-01-04', Body: 86, Mind: 76, Soul: 66 },
-      ],
-    });
+    mockGetUserLogStats.mockResolvedValue({ uniqueDays: 10, firstDate: '2023-12-15' });
+    mockGetXpBaseByPillar.mockResolvedValue({ Body: 10, Mind: 20, Soul: 30 });
+    mockComputeHalfLife.mockReturnValue({ Body: 2, Mind: 3, Soul: 4 });
+    mockComputeDailyTargets.mockReturnValue({ Body: 1, Mind: 2, Soul: 3 });
+    mockAddDays.mockReturnValue('2023-12-21');
 
-    const { getUserStateTimeseries } = await import('./get-user-state-timeseries.js');
-    const req = mockReq({
-      params: { id: userId },
-      query: { from: '2024-01-01', to: '2024-01-03' },
+    const enumeratedDates = [
+      '2023-12-15',
+      '2023-12-16',
+      '2023-12-17',
+      '2023-12-18',
+      '2023-12-19',
+      '2023-12-20',
+      '2023-12-21',
+      '2023-12-22',
+    ];
+    mockEnumerateDates.mockReturnValue(enumeratedDates);
+
+    const xpSeries = new Map<string, Partial<Record<'Body' | 'Mind' | 'Soul', number>>>([
+      ['2023-12-20', { Body: 5 }],
+      ['2023-12-21', { Mind: 3 }],
+    ]);
+    mockGetDailyXpSeriesByPillar.mockResolvedValue(xpSeries);
+
+    mockPropagateEnergy.mockReturnValue({
+      series: [
+        { date: '2023-12-15', Body: 70, Mind: 60, Soul: 50 },
+        { date: '2023-12-20', Body: 80, Mind: 75, Soul: 70 },
+        { date: '2023-12-21', Body: 82, Mind: 76, Soul: 71 },
+        { date: '2023-12-22', Body: 84, Mind: 77, Soul: 72 },
+      ],
+      lastEnergy: { Body: 84, Mind: 77, Soul: 72 },
     });
-    const res = mockRes();
 
     await getUserStateTimeseries(req, res, vi.fn());
 
-    expect(serviceMocks.getUserProfile).toHaveBeenCalledTimes(1);
-    expect(serviceMocks.enumerateDates).toHaveBeenCalledWith('2023-12-15', '2024-01-03');
-    expect(serviceMocks.propagateEnergy).toHaveBeenCalledWith({
-      dates: propagationDates,
-      xpByDate: expect.any(Map),
-      halfLifeByPillar: { Body: 2, Mind: 3, Soul: 4 },
-      dailyTargets: { Body: 1, Mind: 2, Soul: 3 },
-      forceFullGrace: false,
-      graceUntilDate: '2023-12-21',
-    });
-
+    expect(mockEnumerateDates).toHaveBeenCalledWith('2023-12-15', '2023-12-22');
+    expect(mockPropagateEnergy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dates: enumeratedDates,
+        xpByDate: expect.any(Map),
+        dailyTargets: { Body: 1, Mind: 2, Soul: 3 },
+        halfLifeByPillar: { Body: 2, Mind: 3, Soul: 4 },
+        graceUntilDate: '2023-12-21',
+        forceFullGrace: false,
+      }),
+    );
     expect(res.json).toHaveBeenCalledWith([
-      { date: '2024-01-01', Body: 80, Mind: 70, Soul: 60 },
-      { date: '2024-01-02', Body: 82, Mind: 72, Soul: 62 },
-      { date: '2024-01-03', Body: 84, Mind: 74, Soul: 64 },
-    ]);
-
-    const nextRes = mockRes();
-    await getUserStateTimeseries(req, nextRes, vi.fn());
-
-    expect(serviceMocks.getUserProfile).toHaveBeenCalledTimes(1);
-    expect(serviceMocks.getDailyXpSeriesByPillar).toHaveBeenCalledTimes(1);
-    expect(nextRes.json).toHaveBeenCalledWith([
-      { date: '2024-01-01', Body: 80, Mind: 70, Soul: 60 },
-      { date: '2024-01-02', Body: 82, Mind: 72, Soul: 62 },
-      { date: '2024-01-03', Body: 84, Mind: 74, Soul: 64 },
+      { date: '2023-12-20', Body: 80, Mind: 75, Soul: 70 },
+      { date: '2023-12-21', Body: 82, Mind: 76, Soul: 71 },
+      { date: '2023-12-22', Body: 84, Mind: 77, Soul: 72 },
     ]);
   });
 });

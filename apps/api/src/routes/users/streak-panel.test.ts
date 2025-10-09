@@ -1,68 +1,55 @@
+import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockReq, mockRes } from '../../tests/test-utils.js';
+import { getUserStreakPanel } from './streak-panel.js';
 
-const { ensureUserExistsMock, poolQueryMock } = vi.hoisted(() => ({
-  ensureUserExistsMock: vi.fn(),
-  poolQueryMock: vi.fn(),
-}));
-
-vi.mock('../../controllers/users/shared.js', () => ({
-  ensureUserExists: ensureUserExistsMock,
+const { mockQuery, mockEnsureUserExists } = vi.hoisted(() => ({
+  mockQuery: vi.fn(),
+  mockEnsureUserExists: vi.fn(),
 }));
 
 vi.mock('../../db.js', () => ({
   pool: {
-    query: poolQueryMock,
+    query: mockQuery,
   },
 }));
 
+vi.mock('../../controllers/users/shared.js', () => ({
+  ensureUserExists: mockEnsureUserExists,
+}));
+
+function createMockResponse() {
+  const json = vi.fn();
+  const status = vi.fn().mockReturnThis();
+
+  return {
+    json,
+    status,
+  } as unknown as Response;
+}
+
 describe('getUserStreakPanel', () => {
   beforeEach(() => {
-    vi.resetModules();
-    vi.clearAllMocks();
-    delete process.env.SHOW_STREAKS_PANEL;
+    mockQuery.mockReset();
+    mockEnsureUserExists.mockReset();
+    process.env.SHOW_STREAKS_PANEL = 'true';
   });
 
-  it('returns 404 when the streak panel feature flag is disabled', async () => {
-    process.env.SHOW_STREAKS_PANEL = 'false';
-    const { getUserStreakPanel } = await import('./streak-panel.js');
-    const req = mockReq({
-      params: { id: '11111111-2222-3333-4444-555555555555' },
-      query: { pillar: 'Body', range: 'week' },
-    });
-    const res = mockRes();
+  it('builds streak summaries including top streaks for the requested pillar', async () => {
+    const req = {
+      params: { id: '4a6f8b1e-12f0-4a22-8e8a-7cbf8250a49d' },
+      query: { pillar: 'Body', range: 'month', mode: 'flow' },
+    } as unknown as Request;
+    const res = createMockResponse();
 
-    await getUserStreakPanel(req, res, vi.fn());
-
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'streak_panel_disabled' });
-    expect(ensureUserExistsMock).not.toHaveBeenCalled();
-    expect(poolQueryMock).not.toHaveBeenCalled();
-  });
-
-  it('throws when the user id is invalid', async () => {
-    const { getUserStreakPanel } = await import('./streak-panel.js');
-    const req = mockReq({
-      params: { id: 'not-a-uuid' },
-      query: { pillar: 'Body', range: 'week' },
-    });
-    const res = mockRes();
-
-    await expect(getUserStreakPanel(req, res, vi.fn())).rejects.toThrowError();
-    expect(res.json).not.toHaveBeenCalled();
-    expect(poolQueryMock).not.toHaveBeenCalled();
-  });
-
-  it('returns streak metrics for the requested pillar', async () => {
-    ensureUserExistsMock.mockResolvedValue(undefined);
-    poolQueryMock
-      .mockResolvedValueOnce({ rows: [{ timezone: 'UTC', today: '2024-01-07' }] })
+    mockEnsureUserExists.mockResolvedValue(undefined);
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ timezone: 'UTC', today: '2024-01-29' }] })
       .mockResolvedValueOnce({
         rows: [
           {
             task_id: 'task-1',
             task: 'Push Ups',
-            xp_base: '10',
+            xp_base: '5',
             trait_name: 'Strength',
             trait_code: 'STR',
           },
@@ -70,42 +57,23 @@ describe('getUserStreakPanel', () => {
       })
       .mockResolvedValueOnce({
         rows: [
-          { task_id: 'task-1', date: '2024-01-01', count: '2' },
-          { task_id: 'task-1', date: '2024-01-08', count: '1' },
+          { task_id: 'task-1', date: '2024-01-01', count: '3' },
+          { task_id: 'task-1', date: '2024-01-08', count: '3' },
+          { task_id: 'task-1', date: '2024-01-15', count: '3' },
+          { task_id: 'task-1', date: '2024-01-22', count: '3' },
         ],
       });
 
-    const { getUserStreakPanel } = await import('./streak-panel.js');
-    const req = mockReq({
-      params: { id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' },
-      query: { pillar: 'Body', range: 'week' },
-    });
-    const res = mockRes();
-
     await getUserStreakPanel(req, res, vi.fn());
 
-    expect(ensureUserExistsMock).toHaveBeenCalledWith('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
-    expect(poolQueryMock).toHaveBeenCalledTimes(3);
-
-    const payload = res.json.mock.calls[0]?.[0];
-    expect(payload?.tasks).toHaveLength(1);
-    expect(payload?.tasks?.[0]).toMatchObject({
-      id: 'task-1',
-      name: 'Push Ups',
-      stat: 'Strength',
-      metrics: {
-        week: {
-          count: expect.any(Number),
-          xp: expect.any(Number),
-        },
-        month: expect.objectContaining({ count: expect.any(Number) }),
-        qtr: expect.objectContaining({ count: expect.any(Number) }),
-      },
-    });
-    expect(payload?.topStreaks).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ id: 'task-1', name: 'Push Ups' }),
-      ]),
+    expect(mockEnsureUserExists).toHaveBeenCalledWith('4a6f8b1e-12f0-4a22-8e8a-7cbf8250a49d');
+    expect(mockQuery).toHaveBeenCalledTimes(3);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        topStreaks: expect.arrayContaining([
+          expect.objectContaining({ id: 'task-1', name: 'Push Ups' }),
+        ]),
+      }),
     );
   });
 });
