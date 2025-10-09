@@ -11,7 +11,7 @@
 | POST | /task-logs | inline (legacy) | Público; valida `userId` y `taskId` UUID en body | Clerk ID y task UUID en body | `legacy.ts`【F:apps/api/src/routes/legacy.ts†L48-L62】 |
 | POST | /tasks/complete | inline (tasks) | Público; valida `userId` y `taskId` UUID en body | UUID internos | `tasks.ts`【F:apps/api/src/routes/tasks.ts†L14-L28】 |
 | GET | /leaderboard | inline (leaderboard) | Público (sin auth) | N/A | `leaderboard.ts`【F:apps/api/src/routes/leaderboard.ts†L13-L30】 |
-| GET | /users/me | `getCurrentUser` | Requiere header `X-User-Id` sin verificar | Clerk ID en header (string) | `users.ts`, `get-user-me.ts`【F:apps/api/src/routes/users.ts†L35-L36】【F:apps/api/src/controllers/users/get-user-me.ts†L35-L56】 |
+| GET | /users/me | `getCurrentUser` | Protegido con `authMiddleware` (Bearer JWT) | UUID interno derivado del token | `users.ts`, `get-user-me.ts`【F:apps/api/src/routes/users.ts†L37-L37】【F:apps/api/src/controllers/users/get-user-me.ts†L5-L41】 |
 | GET | /users/:id/tasks | `getUserTasks` | Público; solo valida UUID | UUID interno en path | `users.ts`, `get-user-tasks.ts`【F:apps/api/src/routes/users.ts†L22-L23】【F:apps/api/src/controllers/tasks/get-user-tasks.ts†L23-L61】 |
 | GET | /users/:id/xp/daily | `getUserDailyXp` | Público; valida UUID | UUID interno en path | `users.ts`, `get-user-daily-xp.ts`【F:apps/api/src/routes/users.ts†L22-L24】【F:apps/api/src/controllers/logs/get-user-daily-xp.ts†L17-L49】 |
 | GET | /users/:id/xp/total | `getUserTotalXp` | Público; valida UUID | UUID interno en path | `users.ts`, `get-user-total-xp.ts`【F:apps/api/src/routes/users.ts†L23-L24】【F:apps/api/src/controllers/users/get-user-total-xp.ts†L17-L52】 |
@@ -31,31 +31,31 @@
 > El router Express se monta sin middleware de autenticación global, por lo que todas las rutas anteriores están expuestas tanto en `/api/*` como en la raíz del servidor.【F:apps/api/src/app.ts†L32-L48】
 
 ## 2. Uso de identidad
-- **Backend (`GET /users/me`)**: extrae `X-User-Id`, lo trata como `clerk_user_id` y crea/busca filas en `users` con ese valor; no valida JWT ni convierte a UUID interno dentro del request.【F:apps/api/src/controllers/users/get-user-me.ts†L5-L60】
+- **Backend (`GET /users/me`)**: usa `authMiddleware` para validar `Authorization: Bearer` y rellenar `req.user` con `{ id, clerkId }`. El handler consulta `users.user_id = req.user.id` y responde `{ user }` con `user_id`, `game_mode`, `weekly_target`, etc.【F:apps/api/src/routes/users.ts†L37-L37】【F:apps/api/src/controllers/users/get-user-me.ts†L5-L41】
 - **Rutas `/users/:id/...`**: solo verifican que `:id` sea UUID mediante esquemas Zod y consultan `users.user_id`; no comparan contra una identidad autenticada ni exigen token.【F:apps/api/src/controllers/tasks/get-user-tasks.ts†L23-L61】【F:apps/api/src/controllers/users/shared.ts†L4-L12】
 - **Frontend web**: usa Clerk React `useAuth()` para obtener `userId` de Clerk y llama a `getCurrentUserProfile`, que reenvía el header `X-User-Id` a `/users/me`, perpetuando el esquema sin JWT.【F:apps/web/src/hooks/useBackendUser.ts†L16-L46】【F:apps/web/src/lib/api.ts†L938-L947】
 
 ## 3. Tabla de cumplimiento vs política (JWT + UUID interno)
 | Componente | Identidad actual | Cumple política | Evidencia |
 | --- | --- | --- | --- |
-| `GET /users/me` | Header `X-User-Id` (Clerk ID) sin JWT | ❌ | 【F:apps/api/src/controllers/users/get-user-me.ts†L35-L56】 |
+| `GET /users/me` | `Authorization: Bearer <jwt>` validado → UUID interno | ✅ | 【F:apps/api/src/routes/users.ts†L37-L37】【F:apps/api/src/controllers/users/get-user-me.ts†L5-L41】 |
 | Rutas `/users/:id/...` | UUID en path, pero sin autenticación | ❌ | 【F:apps/api/src/routes/users.ts†L22-L35】【F:apps/api/src/controllers/users/shared.ts†L4-L12】 |
 | Endpoints legacy `/tasks*` | UUID en query/body, sin autenticación | ❌ | 【F:apps/api/src/routes/legacy.ts†L22-L62】 |
 | Endpoints públicos (health, leaderboard, pillars) | No requieren identidad | ✅ (públicos) | 【F:apps/api/src/routes/health.ts†L7-L26】【F:apps/api/src/routes/leaderboard.ts†L13-L30】 |
 | Webhook Clerk | Valida Svix y Clerk ID, no expone datos | ✅ | 【F:apps/api/src/routes/webhooks/clerk.ts†L5-L68】 |
 
 ## 4. Riesgos
-- **Suplantación de usuarios mediante header**: cualquier cliente puede invocar `/users/me` con un `X-User-Id` arbitrario y recibir/crear perfiles, pues no se valida la procedencia.【F:apps/api/src/controllers/users/get-user-me.ts†L35-L60】
+- **Suplantación de usuarios mediante header**: mitigada en `/users/me` tras exigir `Authorization: Bearer` y resolver el `user_id` internamente. Persiste el riesgo en rutas `/users/:id/...` sin middleware.【F:apps/api/src/routes/users.ts†L22-L35】
 - **Exposición de datos sensibles**: las rutas `/users/:id/...` permiten consultar métricas, energía y estados de cualquier UUID válido sin comprobar si pertenece al solicitante.【F:apps/api/src/routes/users.ts†L22-L35】【F:apps/api/src/controllers/users/shared.ts†L4-L12】
 - **Documentación y frontend refuerzan el patrón inseguro**: la librería cliente sigue enviando `X-User-Id`, lo que dificulta la adopción de JWT y facilita errores en integraciones futuras.【F:apps/web/src/hooks/useBackendUser.ts†L16-L46】【F:apps/web/src/lib/api.ts†L938-L947】
 - **TODO sin atender**: el handler de `daily-energy` reconoce la falta de middleware Clerk, evidenciando deuda técnica generalizada.【F:apps/api/src/routes/users/daily-energy.ts†L46-L53】
 
 ## 5. Acciones sugeridas
-1. **Implementar middleware Clerk JWT** que verifique firma (`svix`, `iss`, `aud`) y cargue `req.user` con `clerk_user_id` y `user_id`. Sustituir la lectura directa de `X-User-Id` en `/users/me` por este middleware.【F:apps/api/src/controllers/users/get-user-me.ts†L35-L56】
+1. **Implementar middleware Clerk JWT** que verifique firma (`svix`, `iss`, `aud`) y cargue `req.user` con `clerk_user_id` y `user_id`. ✅ `/users/me` ya lo utiliza; resta propagarlo a rutas `/users/:id/...` para cerrar accesos públicos.【F:apps/api/src/routes/users.ts†L22-L35】
 2. **Aplicar el middleware a todas las rutas privadas** (`/users/me` y `/users/:id/...`), validando que el `:id` solicitado coincida con el `user_id` autenticado o derivándolo internamente para evitar exposición masiva.【F:apps/api/src/routes/users.ts†L22-L35】
 3. **Actualizar el frontend** para consumir `getToken()` de Clerk y enviar `Authorization: Bearer <jwt>` en `apiGet`, eliminando dependencias de `X-User-Id`. Ajustar `useBackendUser` y helpers relacionados.【F:apps/web/src/hooks/useBackendUser.ts†L16-L46】【F:apps/web/src/lib/api.ts†L938-L947】
 4. **Revisar documentación interna** (`Docs/dashboard-endpoints.md`, tutoriales) para que reflejen el flujo JWT + UUID, evitando que nuevos clientes repliquen el esquema heredado.【F:Docs/dashboard-endpoints.md†L132-L145】
 5. **Evaluar endpoints legacy (`/tasks`, `/task-logs`, `/tasks/complete`)**: si continúan activos, forzar autenticación y calcular `userId` desde el token; si son obsoletos, retirarlos o aislarlos tras un gateway autenticado.【F:apps/api/src/routes/legacy.ts†L22-L62】
 
 ---
-**Estado actual:** la API Express opera sin autenticación JWT y acepta identificadores Clerk enviados manualmente; hasta que se implemente el middleware recomendado, la política "JWT + UUID interno" no se cumple en ningún endpoint de datos de usuario.
+**Estado actual:** `/users/me` ya aplica la política "JWT + UUID interno" vía `authMiddleware`. Aún falta migrar el resto de rutas `/users/:id/...` y endpoints legacy para cerrar el acceso sin token.
