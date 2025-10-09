@@ -1,4 +1,60 @@
-import { logApiDebug, logApiError } from './logger';
+import { apiLog, logApiDebug, logApiError } from './logger';
+
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    public body: any,
+    public url: string,
+    public requestId?: string,
+  ) {
+    super(body?.message || `HTTP ${status}`);
+    this.name = 'ApiError';
+  }
+}
+
+async function safeJson(res: Response) {
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function apiRequest<T = unknown>(url: string, init?: RequestInit): Promise<T> {
+  try {
+    const res = await fetch(url, init);
+
+    logApiDebug('API response received', { url, status: res.status });
+
+    if (!res.ok) {
+      const body = await safeJson(res);
+      const requestId =
+        res.headers.get('x-railway-request-id') || res.headers.get('x-request-id') || undefined;
+
+      apiLog('[API] request failed', {
+        url,
+        status: res.status,
+        code: body?.code,
+        message: body?.message,
+        requestId,
+      });
+
+      throw new ApiError(res.status, body, url, requestId);
+    }
+
+    const json = (await res.json()) as T;
+    logApiDebug('API response parsed', { url, data: json });
+    return json;
+  } catch (err) {
+    if (!(err instanceof ApiError)) {
+      apiLog('[API] request threw', {
+        url,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+    throw err;
+  }
+}
 
 function logShape(tag: string, value: unknown) {
   try {
@@ -202,29 +258,11 @@ export async function apiGet<T = unknown>(path: string, init: RequestInit = {}):
   console.info('[API] → GET', url, { headers: Array.from(headers.keys()) });
   logApiDebug('API request', { path, url, init: { ...rest, headers: Object.fromEntries(headers.entries()) } });
 
-  try {
-    const response = await fetch(url, {
-      ...rest,
-      method: 'GET',
-      headers,
-    });
-
-    logApiDebug('API response received', { url, status: response.status });
-
-    if (!response.ok) {
-      const text = await response.text().catch(() => '');
-      const errorMessage = `Request failed with ${response.status}: ${text || response.statusText}`;
-      logApiError('API request failed', { url, status: response.status, body: text });
-      throw new Error(errorMessage);
-    }
-
-    const json = (await response.json()) as T;
-    logApiDebug('API response parsed', { url, data: json });
-    return json;
-  } catch (error) {
-    logApiError('API request threw', { url, error });
-    throw error;
-  }
+  return apiRequest<T>(url, {
+    ...rest,
+    method: 'GET',
+    headers,
+  });
 }
 
 async function getJson<T>(
