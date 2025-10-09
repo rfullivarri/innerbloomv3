@@ -23,6 +23,7 @@ RETURNING (xmax = 0) AS inserted;
 type ClerkEmailAddress = {
   id?: string | null;
   email_address?: string | null;
+  reserved?: boolean | null;
 };
 
 type ClerkUser = {
@@ -41,7 +42,13 @@ type ClerkUser = {
 
 function extractPrimaryEmail(user: ClerkUser): string | null {
   const fromPrimaryObject = user.primary_email_address?.email_address;
-  if (typeof fromPrimaryObject === 'string' && fromPrimaryObject.length > 0) {
+  const primaryIsReserved = user.primary_email_address?.reserved === true;
+
+  if (
+    typeof fromPrimaryObject === 'string' &&
+    fromPrimaryObject.length > 0 &&
+    !primaryIsReserved
+  ) {
     return fromPrimaryObject;
   }
 
@@ -50,13 +57,13 @@ function extractPrimaryEmail(user: ClerkUser): string | null {
 
   if (primaryId) {
     const match = emailAddresses.find((entry) => entry?.id === primaryId);
-    if (match?.email_address) {
+    if (match?.email_address && match.reserved !== true) {
       return match.email_address;
     }
   }
 
   for (const entry of emailAddresses) {
-    if (entry?.email_address) {
+    if (entry?.email_address && entry.reserved !== true) {
       return entry.email_address;
     }
   }
