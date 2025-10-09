@@ -113,7 +113,7 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
       title="🪴 Daily Cultivation"
       subtitle="Tendencia mensual de XP"
       rightSlot={
-        <InfoDotTarget id="dailyCultivation" placement="left" className="inline-flex items-center gap-2">
+        <InfoDotTarget id="dailyCultivation" placement="left" className="ml-auto inline-flex items-center gap-2">
           {buckets.length > 0 ? (
             <label className="flex items-center gap-1.5 whitespace-nowrap text-[11px] uppercase tracking-[0.12em] text-slate-300">
               <span className="text-[11px]">Mes</span>
@@ -211,8 +211,8 @@ function LineChart({ days }: LineChartProps) {
     tickStep: 1,
     dataLabelFontSize: 10,
     axisLabelFontSize: 10,
-    axisRowHeight: 48,
-    axisMarginTop: 12,
+    axisRowHeight: 36,
+    axisMarginTop: 6,
     axisLabelYOffset: 0,
   });
 
@@ -226,9 +226,9 @@ function LineChart({ days }: LineChartProps) {
       const dataLabelFontSize = elementWidth < 640 ? 9 : 10;
       const isCompact = elementWidth < 480;
       const axisLabelFontSize = isCompact ? 9 : 10;
-      const axisRowHeight = isCompact ? 40 : 48;
-      const axisMarginTop = isCompact ? 8 : 12;
-      const axisLabelYOffset = isCompact ? -4 : 0;
+      const axisRowHeight = isCompact ? 30 : 36;
+      const axisMarginTop = isCompact ? 4 : 6;
+      const axisLabelYOffset = isCompact ? -2 : 0;
 
       setLayout((prev) => {
         if (
@@ -337,7 +337,7 @@ function LineChart({ days }: LineChartProps) {
 
       {labels.length > 0 && (
         <div
-          className="grid gap-2 text-text-muted"
+          className="grid gap-1.5 pb-3 text-text-muted"
           style={{
             gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))`,
             marginTop: `${layout.axisMarginTop}px`,
