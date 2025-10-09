@@ -61,18 +61,35 @@ export function createAuthRepository(): AuthRepository {
   };
 }
 
-function extractBearerToken(headerValue?: string | null): string | null {
-  if (!headerValue) {
+type NormalizedToken = {
+  header: string;
+  token: string;
+};
+
+function normalizeToken(input?: string | null): NormalizedToken | null {
+  if (!input) {
     return null;
   }
 
-  const [scheme, ...rest] = headerValue.trim().split(/\s+/);
-  if (!scheme || scheme.toLowerCase() !== 'bearer') {
+  const trimmed = input.trim();
+  if (!trimmed) {
     return null;
   }
 
-  const token = rest.join(' ');
-  return token.length > 0 ? token : null;
+  const bearerMatch = trimmed.match(/^Bearer\s+(.+)$/i);
+  if (bearerMatch) {
+    const token = bearerMatch[1]?.trim();
+    if (!token) {
+      return null;
+    }
+    return { header: `Bearer ${token}`, token };
+  }
+
+  if (/\s/.test(trimmed)) {
+    return null;
+  }
+
+  return { header: `Bearer ${trimmed}`, token: trimmed };
 }
 
 function resolveEmail(payload: JWTPayload): string | null {
@@ -98,20 +115,26 @@ export function createAuthService(
 
   return {
     async verifyToken(authHeader) {
-      const token = extractBearerToken(authHeader);
-      if (!token) {
+      const normalized = normalizeToken(authHeader);
+      if (!normalized) {
         throw new HttpError(401, 'unauthorized', 'Authentication required');
       }
 
       let payload: JWTPayload;
 
       try {
-        const result = await jwtVerifyFn(token, jwks, {
+        const result = await jwtVerifyFn(normalized.token, jwks, {
           issuer: config.issuer,
           audience: config.audience,
         });
         payload = result.payload;
       } catch (error) {
+        console.warn('[auth] verify failed', {
+          hasToken: Boolean(authHeader),
+          beginsWithBearer: authHeader?.startsWith('Bearer ') ?? null,
+          issuer: process.env.CLERK_JWT_ISSUER,
+          audience: process.env.CLERK_JWT_AUDIENCE,
+        });
         throw new HttpError(401, 'unauthorized', 'Invalid authentication token', {
           cause: error,
         });

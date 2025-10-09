@@ -1,8 +1,6 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CurrentUserRow } from '../controllers/users/get-user-me.js';
-import { HttpError } from '../lib/http-error.js';
-
 const { mockQuery, mockVerifyToken } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
   mockVerifyToken: vi.fn(),
@@ -42,14 +40,6 @@ describe('GET /api/users/me', () => {
   });
 
   it('returns 401 when the authentication header is missing', async () => {
-    mockVerifyToken.mockImplementation(async (header?: string | null) => {
-      if (!header) {
-        throw new HttpError(401, 'unauthorized', 'Authentication required');
-      }
-
-      throw new Error('unexpected call');
-    });
-
     const response = await request(app).get('/api/users/me');
 
     expect(response.status).toBe(401);
@@ -58,7 +48,7 @@ describe('GET /api/users/me', () => {
       message: 'Authentication required',
     });
     expect(mockQuery).not.toHaveBeenCalled();
-    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
+    expect(mockVerifyToken).not.toHaveBeenCalled();
   });
 
   it('returns the user when found', async () => {
@@ -154,14 +144,6 @@ describe('GET /api/users/me', () => {
   });
 
   it('returns 401 when only X-User-Id is provided without bearer token', async () => {
-    mockVerifyToken.mockImplementation(async (header?: string | null) => {
-      if (!header) {
-        throw new HttpError(401, 'unauthorized', 'Authentication required');
-      }
-
-      throw new Error('unexpected call');
-    });
-
     const response = await request(app).get('/api/users/me').set('X-User-Id', 'user_123');
 
     expect(response.status).toBe(401);
@@ -170,6 +152,6 @@ describe('GET /api/users/me', () => {
       message: 'Authentication required',
     });
     expect(mockQuery).not.toHaveBeenCalled();
-    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
+    expect(mockVerifyToken).not.toHaveBeenCalled();
   });
 });

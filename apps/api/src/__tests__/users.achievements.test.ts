@@ -1,8 +1,6 @@
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { HttpError } from '../lib/http-error.js';
-
 const { mockQuery, mockVerifyToken } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
   mockVerifyToken: vi.fn(),
@@ -37,8 +35,6 @@ describe('GET /api/users/:id/achievements', () => {
   });
 
   it('returns 401 when authentication is missing', async () => {
-    mockVerifyToken.mockRejectedValueOnce(new HttpError(401, 'unauthorized', 'Authentication required'));
-
     const response = await request(app).get(`/api/users/${userId}/achievements`);
 
     expect(response.status).toBe(401);
@@ -47,7 +43,7 @@ describe('GET /api/users/:id/achievements', () => {
       message: 'Authentication required',
     });
     expect(mockQuery).not.toHaveBeenCalled();
-    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
+    expect(mockVerifyToken).not.toHaveBeenCalled();
   });
 
   it('returns derived achievements for the user', async () => {

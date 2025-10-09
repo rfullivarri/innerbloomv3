@@ -88,6 +88,12 @@ Las rutas `/users/:id/state` y `/users/:id/state/timeseries` ahora delegan la va
   4. Si necesitás depurar desde consola, ejecutá `window.fetch = new Proxy(window.fetch, { apply(target, thisArg, args) { console.debug('[fetch]', args[0], args[1]?.headers); return Reflect.apply(target, thisArg, args); } });` antes de recargar para registrar los headers enviados.
 - **Fallbacks**: si `getToken()` falla o devuelve `null`, el cliente lanza `Missing Clerk session token for API request`, facilitando detectar sesiones expiradas antes de propagarlas al backend.【F:apps/web/src/lib/api.ts†L64-L115】
 
+### Troubleshooting
+
+- El backend acepta `Authorization: Bearer <jwt>` con esquema `Bearer` case-insensitive, por lo que encabezados `bearer` en minúsculas se normalizan antes de validar la sesión.
+- Para depurar encabezados en local, levantá la API con `DEBUG_AUTH=true` y consultá `GET /_debug/auth-header`; la respuesta expone si llegó `Authorization`, un recorte de los primeros caracteres, la IP y el user-agent sin mostrar el token completo.
+- Checklist rápido: verificá que `CLERK_SECRET_KEY`, `CLERK_JWT_ISSUER` y `CLERK_JWT_AUDIENCE` apunten a la misma instancia de Clerk que usa el frontend. Cualquier desalineación provocará `401` y logs `[auth] verify failed` en la API.
+
 ## Cobertura y alcance
 - **Cobertura actual (Vitest + V8)**: Statements 97.56%, Branches 84.71%, Functions 98.91%, Lines 97.56%.【335cb1†L57-L64】
 - **Foco de cobertura**: limitamos la métrica a middlewares, servicios de auth, controladores y rutas para vigilar regresiones de seguridad; se excluyen `src/index.ts`, `src/db.ts`, esquemas y scripts porque no se ejecutan durante las pruebas y no impactan la superficie de autenticación.【F:apps/api/vitest.config.ts†L13-L33】
