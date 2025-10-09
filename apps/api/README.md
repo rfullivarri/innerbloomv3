@@ -122,3 +122,46 @@ npm run backfill:users
 ```
 
 This script paginates Clerk users, performs upserts, and logs totals for inserted vs. updated rows.
+
+## Rutas protegidas por ownership
+
+Las siguientes rutas requieren un token Clerk válido **y** que el `:id` coincida con el usuario autenticado. Todas responden con `401 unauthorized` si falta o es inválido el token y con `403 forbidden` cuando el token pertenece a otro usuario.
+
+* `GET /api/users/:id/tasks`
+* `GET /api/users/:id/xp/daily`
+* `GET /api/users/:id/xp/total`
+* `GET /api/users/:id/xp/by-trait`
+* `GET /api/users/:id/pillars`
+* `GET /api/users/:id/streaks/panel`
+* `GET /api/users/:id/level`
+* `GET /api/users/:id/achievements`
+* `GET /api/users/:id/daily-energy`
+* `GET /api/users/:id/journey`
+* `GET /api/users/:id/emotions`
+* `GET /api/users/:id/state`
+* `GET /api/users/:id/state/timeseries`
+* `GET /api/users/:id/summary/today`
+
+### Ejemplos `curl`
+
+```bash
+# 200 OK - token válido para el mismo usuario
+USER_ID="11111111-2222-3333-4444-555555555555"
+VALID_TOKEN="sk_test_valid_clerk_jwt"
+curl -i \
+  -H "Authorization: Bearer ${VALID_TOKEN}" \
+  "http://localhost:3000/api/users/${USER_ID}/achievements"
+
+# 401 Unauthorized - falta token
+curl -i "http://localhost:3000/api/users/${USER_ID}/achievements"
+# HTTP/1.1 401 Unauthorized
+# {"code":"unauthorized","message":"Authentication required"}
+
+# 403 Forbidden - token válido de otro usuario
+OTHER_TOKEN="sk_test_other_user_jwt"
+curl -i \
+  -H "Authorization: Bearer ${OTHER_TOKEN}" \
+  "http://localhost:3000/api/users/${USER_ID}/achievements"
+# HTTP/1.1 403 Forbidden
+# {"code":"forbidden","message":"You do not have access to this resource"}
+```

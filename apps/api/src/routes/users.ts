@@ -20,22 +20,25 @@ import { getUserXpByTrait } from './users/xp-by-trait.js';
 import { getUserPillars } from './users/pillars.js';
 
 const router = Router();
+const userScopedRoutes = Router({ mergeParams: true });
 
-router.get('/users/:id/tasks', authMiddleware, ownUserGuard, asyncHandler(getUserTasks));
-router.get('/users/:id/xp/daily', authMiddleware, ownUserGuard, asyncHandler(getUserDailyXp));
-router.get('/users/:id/xp/total', authMiddleware, ownUserGuard, asyncHandler(getUserTotalXp));
-router.get('/users/:id/xp/by-trait', authMiddleware, ownUserGuard, asyncHandler(getUserXpByTrait));
-router.get('/users/:id/pillars', authMiddleware, ownUserGuard, asyncHandler(getUserPillars));
-router.get('/users/:id/streaks/panel', authMiddleware, ownUserGuard, asyncHandler(getUserStreakPanel));
-router.get('/users/:id/level', authMiddleware, ownUserGuard, asyncHandler(getUserLevel));
-router.get('/users/:id/achievements', authMiddleware, ownUserGuard, asyncHandler(getUserAchievements));
-router.get('/users/:id/daily-energy', authMiddleware, ownUserGuard, asyncHandler(getUserDailyEnergy));
-router.get('/users/:id/journey', authMiddleware, ownUserGuard, asyncHandler(getUserJourney));
-router.get('/users/:id/emotions', authMiddleware, ownUserGuard, asyncHandler(getUserEmotions));
-router.get('/users/:id/state', authMiddleware, ownUserGuard, asyncHandler(getUserState));
-router.get('/users/:id/state/timeseries', authMiddleware, ownUserGuard, asyncHandler(getUserStateTimeseries));
-router.get('/users/:id/summary/today', authMiddleware, ownUserGuard, asyncHandler(getUserSummaryToday));
+userScopedRoutes.get('/tasks', asyncHandler(getUserTasks));
+userScopedRoutes.get('/xp/daily', asyncHandler(getUserDailyXp));
+userScopedRoutes.get('/xp/total', asyncHandler(getUserTotalXp));
+userScopedRoutes.get('/xp/by-trait', asyncHandler(getUserXpByTrait));
+userScopedRoutes.get('/pillars', asyncHandler(getUserPillars));
+userScopedRoutes.get('/streaks/panel', asyncHandler(getUserStreakPanel));
+userScopedRoutes.get('/level', asyncHandler(getUserLevel));
+userScopedRoutes.get('/achievements', asyncHandler(getUserAchievements));
+userScopedRoutes.get('/daily-energy', asyncHandler(getUserDailyEnergy));
+userScopedRoutes.get('/journey', asyncHandler(getUserJourney));
+userScopedRoutes.get('/emotions', asyncHandler(getUserEmotions));
+userScopedRoutes.get('/state', asyncHandler(getUserState));
+userScopedRoutes.get('/state/timeseries', asyncHandler(getUserStateTimeseries));
+userScopedRoutes.get('/summary/today', asyncHandler(getUserSummaryToday));
+
 router.get('/users/me', authMiddleware, asyncHandler(getCurrentUser));
+router.use('/users/:id', authMiddleware, ownUserGuard, userScopedRoutes);
 
 export default router;
 export type { GetUserSummaryTodayResponse } from './users/summary-today.js';
