@@ -42,8 +42,8 @@ describe('getUserEmotions', () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
     mockQuery.mockResolvedValueOnce({
       rows: [
-        { date: '2024-05-31', emotion_code: 'CALM' },
-        { date: '2024-05-30', emotion_code: null },
+        { date: '2024-05-31', emotion: 'CALM' },
+        { date: '2024-05-30', emotion: null },
       ],
     });
 

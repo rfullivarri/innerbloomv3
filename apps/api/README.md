@@ -58,12 +58,18 @@ Example usage inside an Express route module:
 ```ts
 import { Router } from 'express';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
+import { ownUserGuard } from '../middlewares/own-user-guard.js';
 
 const router = Router();
 
 router.get('/users/me', authMiddleware, (req, res) => {
   const currentUser = req.user; // { id, clerkId, email, isNew }
   res.json({ userId: currentUser?.id });
+});
+
+router.get('/users/:id/xp/total', authMiddleware, ownUserGuard, (req, res) => {
+  // This handler will only run when the authenticated user owns :id.
+  res.json({ userId: req.params.id });
 });
 
 export default router;
