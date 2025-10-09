@@ -24,10 +24,10 @@ describe('ownUserGuard', () => {
     ownUserGuard(req as Request, {} as Response, next);
 
     expect(next).toHaveBeenCalledTimes(1);
-    const [error] = next.mock.calls[0] ?? [];
+    const error = next.mock.calls[0]?.[0] as HttpError | undefined;
     expect(error).toBeInstanceOf(HttpError);
-    expect((error as HttpError).status).toBe(403);
-    expect((error as HttpError).code).toBe('forbidden');
+    expect(error?.status).toBe(403);
+    expect(error?.code).toBe('forbidden');
   });
 
   it('allows the request to continue when the ids match', () => {
