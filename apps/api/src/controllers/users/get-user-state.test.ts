@@ -30,6 +30,8 @@ const {
   mockAddDays: vi.fn(),
 }));
 
+const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
 vi.mock('./user-state-service.js', () => ({
   getUserProfile: mockGetUserProfile,
   getUserLogStats: mockGetUserLogStats,
