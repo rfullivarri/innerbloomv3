@@ -4,6 +4,7 @@ import express, { type NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import routes from './routes/index.js';
 import { HttpError, isHttpError } from './lib/http-error.js';
+import clerkWebhookRouter from './webhooks/clerk.js';
 
 const defaultAllowedOrigins = [
   'https://web-dev-dfa2.up.railway.app',
@@ -33,6 +34,7 @@ const app = express();
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+app.use(clerkWebhookRouter);
 app.use(express.json());
 
 const apiRouter = express.Router();
