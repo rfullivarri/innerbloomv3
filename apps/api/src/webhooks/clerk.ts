@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import process from 'node:process';
 import type { Request, Response } from 'express';
 import express from 'express';
@@ -8,10 +9,47 @@ import {
 } from 'svix';
 import { pool } from '../db.js';
 
+const router = express.Router();
+
+const rawJsonMiddleware = express.raw({ type: 'application/json' });
+
+const ENSURE_SCHEMA_SQL = `
+ALTER TABLE users ADD COLUMN IF NOT EXISTS clerk_user_id TEXT UNIQUE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+CREATE INDEX IF NOT EXISTS idx_users_clerk_user_id ON users (clerk_user_id);
+`;
+
+const UPSERT_USER_SQL = `
+INSERT INTO users (clerk_user_id, email, first_name, last_name, avatar_url, deleted_at)
+VALUES ($1, $2, $3, $4, $5, NULL)
+ON CONFLICT (clerk_user_id) DO UPDATE
+  SET email = EXCLUDED.email,
+      first_name = EXCLUDED.first_name,
+      last_name = EXCLUDED.last_name,
+      avatar_url = EXCLUDED.avatar_url,
+      deleted_at = NULL;
+`;
+
+const SYNC_LEGACY_PROFILE_SQL = `
+UPDATE users
+SET email_primary = $2,
+    full_name = $3,
+    image_url = $4
+WHERE clerk_user_id = $1;
+`;
+
+const SOFT_DELETE_USER_SQL = `
+UPDATE users
+SET deleted_at = NOW()
+WHERE clerk_user_id = $1;
+`;
+
 type ClerkEmailAddress = {
-  id?: string | null;
   email_address?: string | null;
-  reserved?: boolean | null;
 };
 
 type ClerkEventData = {
@@ -21,8 +59,6 @@ type ClerkEventData = {
   last_name?: string | null;
   image_url?: string | null;
   profile_image_url?: string | null;
-  primary_email_address_id?: string | null;
-  username?: string | null;
 };
 
 type ClerkWebhookEvent = {
@@ -35,102 +71,92 @@ type SvixHeaders = Pick<
   'svix-id' | 'svix-timestamp' | 'svix-signature'
 >;
 
-const UPSERT_USER_SQL = `
-  INSERT INTO users (clerk_user_id, email_primary, full_name, image_url, deleted_at)
-  VALUES ($1, $2, $3, $4, NULL)
-  ON CONFLICT (clerk_user_id) DO UPDATE
-  SET email_primary = EXCLUDED.email_primary,
-      full_name = EXCLUDED.full_name,
-      image_url = EXCLUDED.image_url,
-      deleted_at = NULL;
-`;
+let ensureSchemaPromise: Promise<void> | null = null;
 
-const SOFT_DELETE_USER_SQL = `
-  UPDATE users
-  SET deleted_at = NOW()
-  WHERE clerk_user_id = $1;
-`;
+router.post(
+  '/api/webhooks/clerk',
+  rawJsonMiddleware,
+  async (req: Request, res: Response): Promise<Response> => {
+    const secret = process.env.CLERK_WEBHOOK_SECRET;
 
-const router = express.Router();
-
-const rawJsonMiddleware = express.raw({ type: 'application/json' });
-
-router.post('/api/webhooks/clerk', rawJsonMiddleware, async (req: Request, res: Response) => {
-  const secret = process.env.CLERK_WEBHOOK_SECRET;
-
-  if (!secret) {
-    console.warn('[clerk] Missing CLERK_WEBHOOK_SECRET; webhook disabled');
-    return res.status(503).json({ ok: false, error: 'Missing CLERK_WEBHOOK_SECRET' });
-  }
-
-  const payloadBuffer = req.body;
-  const headers = extractSvixHeaders(req.headers);
-
-  if (!headers) {
-    console.error('[clerk] Missing Svix signature headers');
-    return res.status(400).json({ ok: false, error: 'Missing Svix signature headers' });
-  }
-
-  const payloadString =
-    typeof payloadBuffer === 'string'
-      ? payloadBuffer
-      : Buffer.isBuffer(payloadBuffer)
-        ? payloadBuffer.toString('utf8')
-        : undefined;
-
-  if (!payloadString) {
-    console.error('[clerk] Invalid payload body received');
-    return res.status(400).json({ ok: false, error: 'Invalid payload' });
-  }
-
-  let event: ClerkWebhookEvent;
-  try {
-    const webhook = new Webhook(secret);
-    event = webhook.verify(payloadString, headers) as ClerkWebhookEvent;
-  } catch (error) {
-    if (error instanceof WebhookVerificationError) {
-      console.error('[clerk] Invalid webhook signature');
-      return res.status(400).json({ ok: false, error: 'Invalid signature' });
+    if (!secret) {
+      console.error('[clerk-webhook] Missing CLERK_WEBHOOK_SECRET');
+      return res.status(503).json({ code: 'webhook_disabled' });
     }
 
-    console.error('[clerk] Failed to verify webhook', error);
-    return res.status(500).json({ ok: false, error: 'Failed to verify webhook' });
-  }
+    const payloadString = toPayloadString(req.body);
+    if (!payloadString) {
+      console.error('[clerk-webhook] Invalid payload received');
+      return res.status(400).json({ code: 'invalid_payload' });
+    }
 
-  const eventType = event.type;
-  const data = event.data ?? {};
-  const clerkUserId = data.id;
+    const headers = extractSvixHeaders(req.headers);
+    if (!headers) {
+      console.warn('[clerk-webhook] Missing Svix signature headers');
+      return res.status(400).json({ code: 'invalid_signature' });
+    }
 
-  console.info('[clerk]', eventType, clerkUserId);
+    let event: ClerkWebhookEvent;
+    try {
+      const webhook = new Webhook(secret);
+      event = webhook.verify(payloadString, headers) as ClerkWebhookEvent;
+    } catch (error) {
+      if (error instanceof WebhookVerificationError) {
+        console.warn('[clerk-webhook] Signature verification failed');
+        return res.status(400).json({ code: 'invalid_signature' });
+      }
 
-  if (!clerkUserId) {
-    console.error('[clerk] Event missing clerk user id');
+      console.error('[clerk-webhook] Unexpected verification error', error);
+      return res.status(500).json({ code: 'verification_failed' });
+    }
+
+    const eventType = event.type;
+    const data = event.data;
+    const clerkUserId = data?.id;
+
+    if (!eventType || !clerkUserId) {
+      console.warn('[clerk-webhook] Event missing type or clerk_user_id');
+      return res.status(200).json({ ok: true });
+    }
+
+    console.info('[clerk-webhook]', eventType, clerkUserId);
+
+    try {
+      if (eventType === 'user.created' || eventType === 'user.updated') {
+        await ensureSchema();
+
+        const email = extractEmail(data?.email_addresses);
+        const firstName = normalizeName(data?.first_name);
+        const lastName = normalizeName(data?.last_name);
+        const avatarUrl = extractAvatarUrl(data?.image_url, data?.profile_image_url);
+        const fullName = buildFullName(firstName, lastName);
+
+        await pool.query(UPSERT_USER_SQL, [
+          clerkUserId,
+          email,
+          firstName,
+          lastName,
+          avatarUrl,
+        ]);
+
+        await pool.query(SYNC_LEGACY_PROFILE_SQL, [
+          clerkUserId,
+          email,
+          fullName,
+          avatarUrl,
+        ]);
+      } else if (eventType === 'user.deleted') {
+        await ensureSchema();
+        await pool.query(SOFT_DELETE_USER_SQL, [clerkUserId]);
+      }
+    } catch (error) {
+      console.error('[clerk-webhook] Failed to persist user', error);
+      return res.status(500).json({ code: 'persistence_error' });
+    }
+
     return res.status(200).json({ ok: true });
-  }
-
-  try {
-    if (eventType === 'user.created' || eventType === 'user.updated') {
-      const email =
-        extractPrimaryEmail(data.email_addresses, data.primary_email_address_id) ?? null;
-      const fullName = buildFullName(data.first_name, data.last_name, data.username) ?? null;
-      const imageUrl = data.image_url ?? data.profile_image_url ?? null;
-
-      await pool.query(UPSERT_USER_SQL, [
-        clerkUserId,
-        email,
-        fullName,
-        imageUrl,
-      ]);
-    } else if (eventType === 'user.deleted') {
-      await pool.query(SOFT_DELETE_USER_SQL, [clerkUserId]);
-    }
-  } catch (error) {
-    console.error('[clerk] Failed to persist user', error);
-    return res.status(500).json({ ok: false, error: 'Failed to persist user' });
-  }
-
-  return res.status(200).json({ ok: true });
-});
+  },
+);
 
 function extractSvixHeaders(headers: Request['headers']): SvixHeaders | null {
   const id = headers['svix-id'];
@@ -148,97 +174,90 @@ function extractSvixHeaders(headers: Request['headers']): SvixHeaders | null {
   };
 }
 
-function extractPrimaryEmail(
-  addresses: ClerkEmailAddress[] | undefined,
-  primaryEmailId: string | null | undefined,
-): string | undefined {
-  if (!addresses || addresses.length === 0) {
-    return undefined;
-  }
-
-  const normalizedPrimaryId =
-    typeof primaryEmailId === 'string' && primaryEmailId.length > 0 ? primaryEmailId : undefined;
-
-  if (normalizedPrimaryId) {
-    const match = addresses.find((address) => address?.id === normalizedPrimaryId);
-    const deliverable = extractDeliverableEmail(match);
-    if (deliverable) {
-      return deliverable;
-    }
-  }
-
-  for (const address of addresses) {
-    const deliverable = extractDeliverableEmail(address);
-    if (deliverable) {
-      return deliverable;
-    }
-  }
-
-  for (const address of addresses) {
-    const value = extractEmailValue(address);
-    if (value) {
-      return value;
-    }
-  }
-
-  return undefined;
-}
-
-function buildFullName(
-  firstName: string | null | undefined,
-  lastName: string | null | undefined,
-  username: string | null | undefined,
-): string | undefined {
-  const parts = [normalizeNamePart(firstName), normalizeNamePart(lastName)].filter(
-    (part): part is string => Boolean(part),
-  );
-
-  if (parts.length > 0) {
-    return parts.join(' ');
-  }
-
-  const fallback = normalizeNamePart(username);
-  return fallback ?? undefined;
-}
-
-function extractDeliverableEmail(address: ClerkEmailAddress | undefined | null): string | undefined {
-  if (!address) {
-    return undefined;
-  }
-
-  if (address.reserved === true) {
-    return undefined;
-  }
-
-  return extractEmailValue(address);
-}
-
-function extractEmailValue(address: ClerkEmailAddress | undefined | null): string | undefined {
-  if (!address) {
-    return undefined;
-  }
-
-  const value = address.email_address;
-
-  if (typeof value !== 'string') {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
-}
-
-function normalizeNamePart(value: string | null | undefined): string | undefined {
-  if (typeof value !== 'string') {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
-}
-
 function isSingleHeader(value: string | string[] | undefined): value is string {
   return typeof value === 'string' && value.length > 0;
+}
+
+function toPayloadString(body: unknown): string | null {
+  if (typeof body === 'string') {
+    return body;
+  }
+
+  if (Buffer.isBuffer(body)) {
+    return body.toString('utf8');
+  }
+
+  return null;
+}
+
+function extractEmail(addresses: ClerkEmailAddress[] | undefined): string | null {
+  if (!addresses || addresses.length === 0) {
+    return null;
+  }
+
+  const [first] = addresses;
+  const raw = first?.email_address;
+
+  if (typeof raw !== 'string') {
+    return null;
+  }
+
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function normalizeName(value: string | null | undefined): string {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : '';
+}
+
+function buildFullName(firstName: string, lastName: string): string | null {
+  const parts = [firstName, lastName].map((part) => part.trim()).filter((part) => part.length > 0);
+
+  if (parts.length === 0) {
+    return null;
+  }
+
+  return parts.join(' ');
+}
+
+function extractAvatarUrl(
+  imageUrl: string | null | undefined,
+  profileImageUrl: string | null | undefined,
+): string | null {
+  const primary = normalizeUrl(imageUrl);
+  if (primary) {
+    return primary;
+  }
+
+  return normalizeUrl(profileImageUrl);
+}
+
+function normalizeUrl(value: string | null | undefined): string | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+async function ensureSchema(): Promise<void> {
+  if (!ensureSchemaPromise) {
+    ensureSchemaPromise = pool
+      .query(ENSURE_SCHEMA_SQL)
+      .then(() => undefined)
+      .catch((error: unknown) => {
+        ensureSchemaPromise = null;
+        throw error;
+      });
+  }
+
+  await ensureSchemaPromise;
 }
 
 export default router;
