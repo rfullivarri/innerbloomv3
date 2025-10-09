@@ -9,6 +9,7 @@ import {
 import { pool } from '../db.js';
 
 type ClerkEmailAddress = {
+  id?: string | null;
   email_address?: string | null;
   reserved?: boolean | null;
 };
@@ -20,6 +21,8 @@ type ClerkEventData = {
   last_name?: string | null;
   image_url?: string | null;
   profile_image_url?: string | null;
+  primary_email_address_id?: string | null;
+  username?: string | null;
 };
 
 type ClerkWebhookEvent = {
@@ -33,13 +36,12 @@ type SvixHeaders = Pick<
 >;
 
 const UPSERT_USER_SQL = `
-  INSERT INTO users (clerk_user_id, email, first_name, last_name, avatar_url, deleted_at)
-  VALUES ($1, $2, $3, $4, $5, NULL)
+  INSERT INTO users (clerk_user_id, email_primary, full_name, image_url, deleted_at)
+  VALUES ($1, $2, $3, $4, NULL)
   ON CONFLICT (clerk_user_id) DO UPDATE
-  SET email = EXCLUDED.email,
-      first_name = EXCLUDED.first_name,
-      last_name = EXCLUDED.last_name,
-      avatar_url = EXCLUDED.avatar_url,
+  SET email_primary = EXCLUDED.email_primary,
+      full_name = EXCLUDED.full_name,
+      image_url = EXCLUDED.image_url,
       deleted_at = NULL;
 `;
 
@@ -108,17 +110,16 @@ router.post('/api/webhooks/clerk', rawJsonMiddleware, async (req: Request, res: 
 
   try {
     if (eventType === 'user.created' || eventType === 'user.updated') {
-      const email = extractPrimaryEmail(data.email_addresses) ?? null;
-      const firstName = data.first_name ?? null;
-      const lastName = data.last_name ?? null;
-      const avatarUrl = data.image_url ?? data.profile_image_url ?? null;
+      const email =
+        extractPrimaryEmail(data.email_addresses, data.primary_email_address_id) ?? null;
+      const fullName = buildFullName(data.first_name, data.last_name, data.username) ?? null;
+      const imageUrl = data.image_url ?? data.profile_image_url ?? null;
 
       await pool.query(UPSERT_USER_SQL, [
         clerkUserId,
         email,
-        firstName,
-        lastName,
-        avatarUrl,
+        fullName,
+        imageUrl,
       ]);
     } else if (eventType === 'user.deleted') {
       await pool.query(SOFT_DELETE_USER_SQL, [clerkUserId]);
@@ -147,18 +148,93 @@ function extractSvixHeaders(headers: Request['headers']): SvixHeaders | null {
   };
 }
 
-function extractPrimaryEmail(addresses: ClerkEmailAddress[] | undefined): string | undefined {
+function extractPrimaryEmail(
+  addresses: ClerkEmailAddress[] | undefined,
+  primaryEmailId: string | null | undefined,
+): string | undefined {
   if (!addresses || addresses.length === 0) {
     return undefined;
   }
 
+  const normalizedPrimaryId =
+    typeof primaryEmailId === 'string' && primaryEmailId.length > 0 ? primaryEmailId : undefined;
+
+  if (normalizedPrimaryId) {
+    const match = addresses.find((address) => address?.id === normalizedPrimaryId);
+    const deliverable = extractDeliverableEmail(match);
+    if (deliverable) {
+      return deliverable;
+    }
+  }
+
   for (const address of addresses) {
-    if (address?.email_address && address.reserved !== true) {
-      return address.email_address;
+    const deliverable = extractDeliverableEmail(address);
+    if (deliverable) {
+      return deliverable;
+    }
+  }
+
+  for (const address of addresses) {
+    const value = extractEmailValue(address);
+    if (value) {
+      return value;
     }
   }
 
   return undefined;
+}
+
+function buildFullName(
+  firstName: string | null | undefined,
+  lastName: string | null | undefined,
+  username: string | null | undefined,
+): string | undefined {
+  const parts = [normalizeNamePart(firstName), normalizeNamePart(lastName)].filter(
+    (part): part is string => Boolean(part),
+  );
+
+  if (parts.length > 0) {
+    return parts.join(' ');
+  }
+
+  const fallback = normalizeNamePart(username);
+  return fallback ?? undefined;
+}
+
+function extractDeliverableEmail(address: ClerkEmailAddress | undefined | null): string | undefined {
+  if (!address) {
+    return undefined;
+  }
+
+  if (address.reserved === true) {
+    return undefined;
+  }
+
+  return extractEmailValue(address);
+}
+
+function extractEmailValue(address: ClerkEmailAddress | undefined | null): string | undefined {
+  if (!address) {
+    return undefined;
+  }
+
+  const value = address.email_address;
+
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function normalizeNamePart(value: string | null | undefined): string | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
 }
 
 function isSingleHeader(value: string | string[] | undefined): value is string {
