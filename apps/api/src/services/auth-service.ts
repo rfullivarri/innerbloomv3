@@ -10,8 +10,9 @@ type JwtVerifyFunction = (
 
 export interface AuthServiceConfig {
   issuer: string;
-  audience: string;
+  audience?: string | string[] | null;
   jwksUrl: string;
+  allowedAzp?: string | null;
 }
 
 type UserRow = {
@@ -113,6 +114,11 @@ export function createAuthService(
 
   const jwks = deps?.jwks ?? createRemoteJWKSet(new URL(config.jwksUrl));
 
+  const normalizedAudience = normalizeAudience(config.audience);
+  const allowedAzp = typeof config.allowedAzp === 'string' && config.allowedAzp.trim().length > 0
+    ? config.allowedAzp.trim()
+    : undefined;
+
   return {
     async verifyToken(authHeader) {
       const normalized = normalizeToken(authHeader);
@@ -123,10 +129,15 @@ export function createAuthService(
       let payload: JWTPayload;
 
       try {
-        const result = await jwtVerifyFn(normalized.token, jwks, {
+        const verifyOptions: JWTVerifyOptions = {
           issuer: config.issuer,
-          audience: config.audience,
-        });
+        };
+
+        if (normalizedAudience) {
+          verifyOptions.audience = normalizedAudience;
+        }
+
+        const result = await jwtVerifyFn(normalized.token, jwks, verifyOptions);
         payload = result.payload;
       } catch (error) {
         console.warn('[auth] verify failed', {
@@ -134,11 +145,17 @@ export function createAuthService(
           beginsWithBearer: authHeader?.startsWith('Bearer ') ?? null,
           issuer: process.env.CLERK_JWT_ISSUER,
           audience: process.env.CLERK_JWT_AUDIENCE,
+          allowedAzp: process.env.CLERK_ALLOWED_AZP,
         });
         throw new HttpError(401, 'unauthorized', 'Invalid authentication token', {
           cause: error,
         });
       }
+
+      validateAuthorizedParty(payload, {
+        audience: normalizedAudience,
+        allowedAzp,
+      });
 
       const clerkId = typeof payload.sub === 'string' && payload.sub.length > 0 ? payload.sub : null;
       if (!clerkId) {
@@ -176,6 +193,62 @@ export function createAuthService(
   };
 }
 
+type NormalizeAudienceInput = string | string[] | null | undefined;
+
+function normalizeAudience(input: NormalizeAudienceInput): string | string[] | undefined {
+  if (Array.isArray(input)) {
+    return input.length > 0 ? input : undefined;
+  }
+
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  }
+
+  return undefined;
+}
+
+interface AuthorizedPartyValidationOptions {
+  audience?: string | string[];
+  allowedAzp?: string;
+}
+
+function hasAudienceClaim(aud: JWTPayload['aud']): boolean {
+  if (typeof aud === 'string') {
+    return aud.trim().length > 0;
+  }
+
+  if (Array.isArray(aud)) {
+    return aud.length > 0;
+  }
+
+  return false;
+}
+
+function validateAuthorizedParty(
+  payload: JWTPayload,
+  options: AuthorizedPartyValidationOptions,
+): void {
+  if (options.audience) {
+    // Audience validation handled by jose when provided.
+    return;
+  }
+
+  const allowedAzp = options.allowedAzp;
+  if (!allowedAzp) {
+    return;
+  }
+
+  if (hasAudienceClaim(payload.aud)) {
+    return;
+  }
+
+  const azpClaim = payload.azp;
+  if (typeof azpClaim !== 'string' || azpClaim.trim().length === 0 || azpClaim !== allowedAzp) {
+    throw new HttpError(401, 'unauthorized', 'Invalid authentication token');
+  }
+}
+
 let cachedService: AuthService | null = null;
 
 function requireConfigValue(name: string): string {
@@ -192,10 +265,14 @@ export function getAuthService(): AuthService {
   }
 
   const issuer = requireConfigValue('CLERK_JWT_ISSUER');
-  const audience = requireConfigValue('CLERK_JWT_AUDIENCE');
+  const rawAudience = process.env.CLERK_JWT_AUDIENCE;
+  const audience = typeof rawAudience === 'string' && rawAudience.trim().length > 0 ? rawAudience : undefined;
   const jwksUrl = process.env.CLERK_JWKS_URL ?? `${issuer.replace(/\/$/, '')}/.well-known/jwks.json`;
+  const allowedAzp = typeof process.env.CLERK_ALLOWED_AZP === 'string' && process.env.CLERK_ALLOWED_AZP.trim().length > 0
+    ? process.env.CLERK_ALLOWED_AZP
+    : undefined;
 
-  cachedService = createAuthService({ issuer, audience, jwksUrl });
+  cachedService = createAuthService({ issuer, audience, jwksUrl, allowedAzp });
   return cachedService;
 }
 
