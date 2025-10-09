@@ -3,6 +3,16 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import './Landing.css';
 
+const buttonBaseClasses =
+  'inline-flex items-center justify-center whitespace-nowrap rounded-xl px-4 py-3 font-display text-sm font-extrabold tracking-tight transition duration-150 ease-out active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
+
+const buttonVariants = {
+  primary: `${buttonBaseClasses} bg-accent-purple text-white shadow-glow hover:bg-accent-purple/90`,
+  ghost: `${buttonBaseClasses} border border-white/15 bg-white/10 text-text-muted hover:bg-white/20 hover:text-white`
+};
+
+const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => buttonVariants[variant];
+
 const NAV_LINKS = [
   { href: '#overview', label: 'Overview' },
   { href: '#why', label: 'Nuestros Pilares' },
@@ -171,17 +181,17 @@ export default function LandingPage() {
             </a>
           ))}
         </nav>
-        <nav className="nav-actions">
+        <nav className="flex flex-wrap items-center gap-2">
           {isSignedIn ? (
-            <Link className="btn" to="/dashboard">
+            <Link className={buttonClasses()} to="/dashboard">
               Ir al dashboard
             </Link>
           ) : (
             <>
-              <Link className="btn ghost" to="/sign-up">
+              <Link className={buttonClasses('ghost')} to="/sign-up">
                 Crear cuenta
               </Link>
-              <Link className="btn" to="/login">
+              <Link className={buttonClasses()} to="/login">
                 Ya tengo cuenta
               </Link>
             </>
@@ -201,17 +211,17 @@ export default function LandingPage() {
                 Tus hábitos son el mapa. Tu constancia, el nivel que alcanzas. Es tu <strong>self-improvement journey</strong> con
                 equilibrio entre <strong>🫀 Cuerpo</strong>, <strong>🧠 Mente</strong> y <strong>🏵️ Alma</strong>.
               </p>
-              <div className="cta">
+              <div className="mt-6 flex flex-wrap items-center gap-3">
                 {isSignedIn ? (
-                  <Link className="btn" to="/dashboard">
+                  <Link className={buttonClasses()} to="/dashboard">
                     Ir al dashboard
                   </Link>
                 ) : (
                   <>
-                    <Link className="btn" to="/sign-up">
+                    <Link className={buttonClasses()} to="/sign-up">
                       Comenzar mi Journey
                     </Link>
-                    <Link className="btn ghost" to="/login">
+                    <Link className={buttonClasses('ghost')} to="/login">
                       Ya tengo cuenta
                     </Link>
                   </>
@@ -390,17 +400,17 @@ export default function LandingPage() {
           <div className="container narrow center">
             <h2>Listo para empezar</h2>
             <p className="section-sub">Te guiamos paso a paso. Empezá ahora.</p>
-            <div className="cta center">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               {isSignedIn ? (
-                <Link className="btn" to="/dashboard">
+                <Link className={buttonClasses()} to="/dashboard">
                   Ir al dashboard
                 </Link>
               ) : (
                 <>
-                  <Link className="btn" to="/sign-up">
+                  <Link className={buttonClasses()} to="/sign-up">
                     Comenzar mi Journey
                   </Link>
-                  <Link className="btn ghost" to="/login">
+                  <Link className={buttonClasses('ghost')} to="/login">
                     Ya tengo cuenta
                   </Link>
                 </>
