@@ -22,18 +22,26 @@ type MockAuthService = {
   verifyToken: (authHeader?: string | null) => Promise<MockVerifiedUser>;
 };
 
-type MutableRequest = Pick<Request, 'get' | 'header'> & { user?: MockVerifiedUser };
+type HeaderValue = string | string[] | undefined;
 
-function createRequest(headers: Record<string, string | undefined> = {}): MutableRequest {
-  const store = new Map<string, string | undefined>();
+type MutableRequest = {
+  get: ReturnType<typeof vi.fn<(name: string) => HeaderValue>>;
+  header: ReturnType<typeof vi.fn<(name: string) => HeaderValue>>;
+  user?: MockVerifiedUser;
+};
+
+function createRequest(headers: Record<string, HeaderValue> = {}): MutableRequest {
+  const store = new Map<string, HeaderValue>();
 
   for (const [key, value] of Object.entries(headers)) {
     store.set(key.toLowerCase(), value);
   }
 
+  const getter = (name: string) => store.get(name.toLowerCase()) ?? undefined;
+
   return {
-    get: vi.fn((name: string) => store.get(name.toLowerCase()) ?? undefined),
-    header: vi.fn((name: string) => store.get(name.toLowerCase()) ?? undefined),
+    get: vi.fn(getter),
+    header: vi.fn(getter),
   };
 }
 
@@ -42,7 +50,7 @@ function createMiddleware(service: MockAuthService) {
 }
 
 function createNext() {
-  return vi.fn<Parameters<NextFunction>, ReturnType<NextFunction>>();
+  return vi.fn<(err?: any) => void>();
 }
 
 describe('authMiddleware', () => {
@@ -54,7 +62,7 @@ describe('authMiddleware', () => {
     const req = createRequest();
     const next = createNext();
 
-    await middleware(req as unknown as Request, {} as Response, next);
+    await middleware(req as unknown as Request, {} as Response, next as unknown as NextFunction);
 
     expect(verifyToken).toHaveBeenCalledTimes(1);
     expect(verifyToken).toHaveBeenCalledWith(undefined);
@@ -75,7 +83,7 @@ describe('authMiddleware', () => {
     const req = createRequest({ Authorization: 'Bearer invalid' });
     const next = createNext();
 
-    await middleware(req as unknown as Request, {} as Response, next);
+    await middleware(req as unknown as Request, {} as Response, next as unknown as NextFunction);
 
     expect(verifyToken).toHaveBeenCalledWith('Bearer invalid');
     expect(req.user).toBeUndefined();
@@ -95,7 +103,7 @@ describe('authMiddleware', () => {
     const req = createRequest({ Authorization: 'Bearer valid-token' });
     const next = createNext();
 
-    await middleware(req as unknown as Request, {} as Response, next);
+    await middleware(req as unknown as Request, {} as Response, next as unknown as NextFunction);
 
     expect(verifyToken).toHaveBeenCalledWith('Bearer valid-token');
     expect(req.user).toEqual(verifiedUser);

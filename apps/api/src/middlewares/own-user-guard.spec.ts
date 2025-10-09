@@ -3,17 +3,34 @@ import { describe, expect, it, vi } from 'vitest';
 import { HttpError } from '../lib/http-error.js';
 import { ownUserGuard } from './own-user-guard.js';
 
-type MutableRequest = Partial<Request> & { params: Record<string, string>; user?: { id: string } };
+type MockVerifiedUser = {
+  id: string;
+  clerkId: string;
+  email: string | null;
+  isNew: boolean;
+};
+
+type MutableRequest = {
+  params: Record<string, string>;
+  user?: MockVerifiedUser;
+};
 
 function createRequest(params: Record<string, string>, userId?: string): MutableRequest {
   return {
     params,
-    user: userId ? { id: userId } : undefined,
+    user: userId
+      ? {
+          id: userId,
+          clerkId: `clerk_${userId}`,
+          email: 'user@example.com',
+          isNew: false,
+        }
+      : undefined,
   };
 }
 
 function createNext() {
-  return vi.fn<Parameters<NextFunction>, ReturnType<NextFunction>>();
+  return vi.fn<(err?: any) => void>();
 }
 
 describe('ownUserGuard', () => {
@@ -21,7 +38,7 @@ describe('ownUserGuard', () => {
     const req = createRequest({ id: '11111111-2222-3333-4444-555555555555' }, 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
     const next = createNext();
 
-    ownUserGuard(req as Request, {} as Response, next);
+    ownUserGuard(req as unknown as Request, {} as Response, next as unknown as NextFunction);
 
     expect(next).toHaveBeenCalledTimes(1);
     const [error] = next.mock.calls[0] ?? [];
@@ -35,7 +52,7 @@ describe('ownUserGuard', () => {
     const req = createRequest({ id: userId }, userId);
     const next = createNext();
 
-    ownUserGuard(req as Request, {} as Response, next);
+    ownUserGuard(req as unknown as Request, {} as Response, next as unknown as NextFunction);
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledWith();
