@@ -155,4 +155,40 @@ describe('getUserPillars', () => {
     expect(res.status).not.toHaveBeenCalled();
     expect(next).not.toHaveBeenCalled();
   });
+
+  it('normalizes pillar identifiers from heterogeneous sources and extracts metrics reliably', async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ weekly_target: '140' }] })
+      .mockResolvedValueOnce({
+        rows: [
+          { pillarid: 1n, xp_total: '205.6', xp_week_total: '15' },
+          { code: 'mente', xp_semana: '45', something_else: 9 },
+          { pillar_name: 'alma', total_xp: '12.4' },
+          { pillar_code: '', pillar_id: 99, xp_total: '999' },
+        ],
+      })
+      .mockResolvedValueOnce({
+        rows: [
+          { pillarid: 1, xp_7_days: '30', xp_week: '22' },
+          { pillar: 'CUERPO', xp_total: '999', xp_week: '20' },
+          { pillarname: 'mente', semana_xp: '15', week_total: '9' },
+          { code: 'alma', xp_week: 'NaN' },
+        ],
+      });
+
+    const req = { params: { id: '2e1e5484-1996-4b9e-b6ef-4970739e22d6' } } as unknown as Request;
+    const res = createMockResponse();
+
+    await getUserPillars(req, res, vi.fn());
+
+    expect(mockQuery).toHaveBeenCalledTimes(3);
+    expect(res.json).toHaveBeenCalledWith({
+      user_id: '2e1e5484-1996-4b9e-b6ef-4970739e22d6',
+      pillars: [
+        { code: 'BODY', xp: 206, xp_week: 20, progress_pct: 14 },
+        { code: 'MIND', xp: 45, xp_week: 9, progress_pct: 6 },
+        { code: 'SOUL', xp: 12, xp_week: 0, progress_pct: 0 },
+      ],
+    });
+  });
 });
