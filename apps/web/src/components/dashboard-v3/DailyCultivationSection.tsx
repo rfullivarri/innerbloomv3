@@ -113,12 +113,12 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
       title="🪴 Daily Cultivation"
       subtitle="Tendencia mensual de XP"
       rightSlot={
-        <InfoDotTarget id="dailyCultivation" placement="left" className="flex items-center gap-2">
+        <InfoDotTarget id="dailyCultivation" placement="left" className="inline-flex items-center gap-2">
           {buckets.length > 0 ? (
-            <label className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-300">
-              <span>Mes</span>
+            <label className="flex items-center gap-1.5 whitespace-nowrap text-[11px] uppercase tracking-[0.12em] text-slate-300">
+              <span className="text-[11px]">Mes</span>
               <select
-                className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-100 focus:border-white/20 focus:outline-none"
+                className="w-28 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-100 focus:border-white/20 focus:outline-none sm:w-32"
                 value={selectedMonth ?? ''}
                 onChange={(event) => setSelectedMonth(event.target.value)}
               >
@@ -207,7 +207,14 @@ function LineChart({ days }: LineChartProps) {
   const gridLevels = [0.25, 0.5, 0.75, 1];
   const containerRef = useRef<HTMLDivElement>(null);
   const labels = points.map((point) => getIsoDateLabel(point.day));
-  const [layout, setLayout] = useState({ tickStep: 1, dataLabelFontSize: 10 });
+  const [layout, setLayout] = useState({
+    tickStep: 1,
+    dataLabelFontSize: 10,
+    axisLabelFontSize: 10,
+    axisRowHeight: 48,
+    axisMarginTop: 12,
+    axisLabelYOffset: 0,
+  });
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -217,12 +224,31 @@ function LineChart({ days }: LineChartProps) {
       const clampedMax = Math.max(6, Math.min(12, Math.floor(elementWidth / 90)));
       const tickStep = labels.length > clampedMax ? Math.ceil(labels.length / clampedMax) : 1;
       const dataLabelFontSize = elementWidth < 640 ? 9 : 10;
+      const isCompact = elementWidth < 480;
+      const axisLabelFontSize = isCompact ? 9 : 10;
+      const axisRowHeight = isCompact ? 40 : 48;
+      const axisMarginTop = isCompact ? 8 : 12;
+      const axisLabelYOffset = isCompact ? -4 : 0;
 
       setLayout((prev) => {
-        if (prev.tickStep === tickStep && prev.dataLabelFontSize === dataLabelFontSize) {
+        if (
+          prev.tickStep === tickStep
+          && prev.dataLabelFontSize === dataLabelFontSize
+          && prev.axisLabelFontSize === axisLabelFontSize
+          && prev.axisRowHeight === axisRowHeight
+          && prev.axisMarginTop === axisMarginTop
+          && prev.axisLabelYOffset === axisLabelYOffset
+        ) {
           return prev;
         }
-        return { tickStep, dataLabelFontSize };
+        return {
+          tickStep,
+          dataLabelFontSize,
+          axisLabelFontSize,
+          axisRowHeight,
+          axisMarginTop,
+          axisLabelYOffset,
+        };
       });
     };
 
@@ -311,15 +337,26 @@ function LineChart({ days }: LineChartProps) {
 
       {labels.length > 0 && (
         <div
-          className="mt-3 grid gap-2 text-[10px] tracking-wide text-text-muted"
-          style={{ gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))` }}
+          className="grid gap-2 text-text-muted"
+          style={{
+            gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))`,
+            marginTop: `${layout.axisMarginTop}px`,
+          }}
         >
           {formattedLabels.map((label, index) => (
-            <span key={`${label}-${index}`} className="flex h-12 items-end justify-center">
+            <span
+              key={`${label}-${index}`}
+              className="flex items-end justify-center"
+              style={{ height: `${layout.axisRowHeight}px` }}
+            >
               <span
-                className={`inline-block -rotate-45 origin-top-right text-[10px] leading-tight ${
-                  shouldShowLabel(index) ? '' : 'invisible'
-                }`}
+                className={shouldShowLabel(index) ? 'inline-block leading-tight' : 'invisible'}
+                style={{
+                  fontSize: `${layout.axisLabelFontSize}px`,
+                  letterSpacing: '0.08em',
+                  transform: `rotate(-45deg) translateY(${layout.axisLabelYOffset}px)`,
+                  transformOrigin: 'top right',
+                }}
               >
                 {label}
               </span>
