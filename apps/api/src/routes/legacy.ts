@@ -25,7 +25,7 @@ router.get(
     const parsed = tasksQuerySchema.safeParse(req.query);
 
     if (!parsed.success) {
-      throw new HttpError(400, 'invalid_request', 'Invalid query parameters', parsed.error.flatten());
+      throw new HttpError(400, 'invalid_request', 'Invalid query parameters');
     }
 
     res.json([]);
@@ -38,7 +38,7 @@ router.get(
     const parsed = taskLogsQuerySchema.safeParse(req.query);
 
     if (!parsed.success) {
-      throw new HttpError(400, 'invalid_request', 'Invalid query parameters', parsed.error.flatten());
+      throw new HttpError(400, 'invalid_request', 'Invalid query parameters');
     }
 
     res.json([]);
@@ -51,7 +51,7 @@ router.post(
     const parsed = createTaskLogSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      throw new HttpError(400, 'invalid_request', 'Invalid request body', parsed.error.flatten());
+      throw new HttpError(400, 'invalid_request', 'Invalid request body');
     }
 
     res.status(501).json({
