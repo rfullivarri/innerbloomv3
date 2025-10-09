@@ -129,11 +129,6 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
                 <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{levelLabel}</span>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium uppercase tracking-[0.22em] text-slate-500">
-              <span>Acumulado histórico</span>
-              <span className="hidden sm:inline">·</span>
-              <span>Escala estimada MVP</span>
-            </div>
           </div>
 
           <div className="space-y-3">
@@ -142,7 +137,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
               <p className="text-sm text-slate-400">Hacia el próximo nivel</p>
             </div>
             <div
-              className="relative h-4 w-full overflow-hidden rounded-full border border-white/5 bg-slate-950/60 shadow-[inset_0_2px_8px_rgba(8,15,40,0.6)] sm:h-5"
+              className="relative h-6 w-full overflow-hidden rounded-full border border-white/5 bg-slate-950/60 shadow-[inset_0_2px_8px_rgba(8,15,40,0.6)] sm:h-[30px]"
               role="progressbar"
               aria-label="Progreso hacia el próximo nivel"
               aria-valuemin={0}
@@ -255,13 +250,13 @@ function GameModeChip({ label, backgroundClass, glowClass, animate }: GameModeCh
   return (
     <span className="relative inline-flex items-center">
       <span
-        className={`absolute -inset-1 rounded-full blur-lg ${glowClass} ${animate ? 'animate-pulse' : ''}`}
+        className={`absolute -inset-[2px] rounded-full blur-md ${glowClass} ${animate ? 'animate-pulse' : ''}`}
         aria-hidden
       />
       <span
-        className={`relative inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] shadow-[0_0_22px_rgba(15,23,42,0.35)] backdrop-blur ${backgroundClass}`}
+        className={`relative inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-[0.35rem] text-[9px] font-semibold uppercase tracking-[0.16em] shadow-[0_0_18px_rgba(15,23,42,0.3)] backdrop-blur ${backgroundClass}`}
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
+        <span className="h-1 w-1 rounded-full bg-white/80" />
         {label}
       </span>
     </span>
