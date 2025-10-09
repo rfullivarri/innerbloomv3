@@ -3,9 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CurrentUserRow } from '../controllers/users/get-user-me.js';
 import { HttpError } from '../lib/http-error.js';
 
-const { mockQuery, mockVerifyToken } = vi.hoisted(() => ({
+const { mockQuery, mockVerifyToken, mockGetAuthService } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
   mockVerifyToken: vi.fn(),
+  mockGetAuthService: vi.fn(() => ({
+    verifyToken: mockVerifyToken,
+  })),
 }));
 
 const LEGACY_USER_LOOKUP_SQL =
@@ -17,9 +20,7 @@ vi.mock('../db.js', () => ({
 }));
 
 vi.mock('../services/auth-service.js', () => ({
-  getAuthService: () => ({
-    verifyToken: mockVerifyToken,
-  }),
+  getAuthService: mockGetAuthService,
   createAuthRepository: vi.fn(),
   createAuthService: vi.fn(),
   resetAuthServiceCache: vi.fn(),
@@ -51,6 +52,8 @@ describe('GET /api/users/me', () => {
     mockVerifyToken.mockReset();
     delete process.env.ALLOW_X_USER_ID_DEV;
     process.env.NODE_ENV = 'test';
+    mockGetAuthService.mockClear();
+    delete process.env.DEV_ALLOW_X_USER_ID;
   });
 
   afterEach(() => {
