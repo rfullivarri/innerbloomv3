@@ -106,7 +106,7 @@ describe('GET /api/users/me', () => {
   it('allows the legacy X-User-Id header only when the development flag is enabled locally', async () => {
     process.env.ALLOW_X_USER_ID_DEV = 'true';
 
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
     mockQuery
       .mockResolvedValueOnce({
