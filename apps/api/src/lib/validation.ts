@@ -45,6 +45,24 @@ export const dateRangeQuerySchema = z.object({
   to: optionalDateSchema,
 });
 
+export function parseWithValidation<T>(
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  data: unknown,
+  fallbackMessage?: string,
+): T {
+  const parsed = schema.safeParse(data);
+
+  if (!parsed.success) {
+    const details = parsed.error.flatten();
+    const [firstIssue] = parsed.error.issues;
+    const message = firstIssue?.message ?? fallbackMessage ?? 'Invalid request parameters';
+
+    throw new HttpError(400, 'invalid_request', message, details);
+  }
+
+  return parsed.data;
+}
+
 function normalizeToUtcDate(date: Date): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }

@@ -57,5 +57,22 @@
 4. **Revisar documentación interna** (`Docs/dashboard-endpoints.md`, tutoriales) para que reflejen el flujo JWT + UUID, evitando que nuevos clientes repliquen el esquema heredado.【F:Docs/dashboard-endpoints.md†L132-L145】
 5. **Evaluar endpoints legacy (`/tasks`, `/task-logs`, `/tasks/complete`)**: si continúan activos, forzar autenticación y calcular `userId` desde el token; si son obsoletos, retirarlos o aislarlos tras un gateway autenticado.【F:apps/api/src/routes/legacy.ts†L22-L62】
 
+### Normalización de errores y contratos de /users/state(/timeseries)
+
+Las rutas `/users/:id/state` y `/users/:id/state/timeseries` ahora delegan la validación de `params` y `query` al adaptador `parseWithValidation`, el cual convierte los `ZodError` en respuestas homogéneas `{ code: 'invalid_request', message, details }`. Esto alinea su contrato con el manejador global de errores y con rutas públicas como `/leaderboard`, que reutiliza el mismo adaptador para limitar `limit ≤ 50` sin duplicar lógica.【F:apps/api/src/lib/validation.ts†L9-L36】【F:apps/api/src/controllers/users/get-user-state.ts†L17-L108】【F:apps/api/src/controllers/users/get-user-state-timeseries.ts†L17-L110】【F:apps/api/src/routes/leaderboard.ts†L3-L26】
+
+**Ejemplo** – `GET /users/4a6f8b1e-12f0-4a22-8e8a-7cbf8250a49d/state/timeseries?from=2024-02-10&to=2024-02-01`
+
+```json
+{
+  "code": "invalid_request",
+  "message": "from must be before or equal to to",
+  "details": {
+    "fieldErrors": {},
+    "formErrors": []
+  }
+}
+```
+
 ---
 **Estado actual:** `/users/me` ya aplica la política "JWT + UUID interno" vía `authMiddleware`. Aún falta migrar el resto de rutas `/users/:id/...` y endpoints legacy para cerrar el acceso sin token.
