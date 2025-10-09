@@ -1,8 +1,6 @@
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CurrentUserRow } from '../controllers/users/get-user-me.js';
-import { HttpError } from '../lib/http-error.js';
-
 const { mockQuery, mockVerifyToken, mockGetAuthService } = vi.hoisted(() => ({
   mockQuery: vi.fn(() => undefined),
   mockVerifyToken: vi.fn(() => undefined),
@@ -90,8 +88,6 @@ describe('GET /api/users/me', () => {
   });
 
   it('returns 401 when the authorization header is missing', async () => {
-    mockVerifyToken.mockRejectedValueOnce(new HttpError(401, 'unauthorized', 'Authentication required'));
-
     const response = await request(app).get('/api/users/me');
 
     expect(response.status).toBe(401);
@@ -99,7 +95,7 @@ describe('GET /api/users/me', () => {
       code: 'unauthorized',
       message: 'Authentication required',
     });
-    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
+    expect(mockVerifyToken).not.toHaveBeenCalled();
     expect(mockQuery).not.toHaveBeenCalled();
   });
 
@@ -134,10 +130,6 @@ describe('GET /api/users/me', () => {
     warnSpy.mockRestore();
 
     delete process.env.ALLOW_X_USER_ID_DEV;
-    mockVerifyToken.mockImplementation(async () => {
-      throw new HttpError(401, 'unauthorized', 'Authentication required');
-    });
-
     mockQuery.mockReset();
 
     const rejection = await request(app)
@@ -149,16 +141,12 @@ describe('GET /api/users/me', () => {
       code: 'unauthorized',
       message: 'Authentication required',
     });
-    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
+    expect(mockVerifyToken).not.toHaveBeenCalled();
   });
 
   it('rejects the legacy header in production even when the flag is enabled', async () => {
     process.env.ALLOW_X_USER_ID_DEV = 'true';
     process.env.NODE_ENV = 'production';
-
-    mockVerifyToken.mockRejectedValueOnce(
-      new HttpError(401, 'unauthorized', 'Authentication required'),
-    );
 
     const response = await request(app)
       .get('/api/users/me')
@@ -169,7 +157,7 @@ describe('GET /api/users/me', () => {
       code: 'unauthorized',
       message: 'Authentication required',
     });
-    expect(mockVerifyToken).toHaveBeenCalledWith(undefined);
+    expect(mockVerifyToken).not.toHaveBeenCalled();
     expect(mockQuery).not.toHaveBeenCalled();
   });
 });

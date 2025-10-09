@@ -106,6 +106,34 @@ describe('createAuthService', () => {
     });
   });
 
+  it('accepts raw JWT tokens and normalizes them internally', async () => {
+    (repository.findByClerkId as vi.Mock).mockResolvedValue({
+      user_id: 'user-345',
+      clerk_user_id: 'clerk-raw',
+      email_primary: 'raw@example.com',
+    });
+
+    jwtVerifyFn.mockResolvedValue({
+      payload: {
+        sub: 'clerk-raw',
+        email: 'raw@example.com',
+      },
+    });
+
+    const result = await service.verifyToken('raw.jwt.token');
+
+    expect(jwtVerifyFn).toHaveBeenCalledWith('raw.jwt.token', jwksStub, {
+      issuer: baseConfig.issuer,
+      audience: baseConfig.audience,
+    });
+    expect(result).toEqual({
+      id: 'user-345',
+      clerkId: 'clerk-raw',
+      email: 'raw@example.com',
+      isNew: false,
+    });
+  });
+
   it('falls back to reloading the user if creation returns null', async () => {
     (repository.findByClerkId as vi.Mock)
       .mockResolvedValueOnce(null)
@@ -170,6 +198,8 @@ describe('createAuthService', () => {
   ])('wraps %s validation errors coming from jose', async (_label, underlyingError) => {
     jwtVerifyFn.mockRejectedValue(underlyingError);
 
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
     await expect(service.verifyToken('Bearer bad.jwt.token')).rejects.toMatchObject({
       status: 401,
       code: 'unauthorized',
@@ -177,8 +207,16 @@ describe('createAuthService', () => {
       details: { cause: underlyingError },
     });
 
+    expect(warnSpy).toHaveBeenCalledWith('[auth] verify failed', {
+      hasToken: true,
+      beginsWithBearer: true,
+      issuer: process.env.CLERK_JWT_ISSUER,
+      audience: process.env.CLERK_JWT_AUDIENCE,
+    });
     expect(repository.findByClerkId).not.toHaveBeenCalled();
     expect(repository.create).not.toHaveBeenCalled();
+
+    warnSpy.mockRestore();
   });
 });
 

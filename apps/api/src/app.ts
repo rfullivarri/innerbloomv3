@@ -3,6 +3,7 @@ import cors, { type CorsOptions } from 'cors';
 import express, { type NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import routes from './routes/index.js';
+import createDebugAuthRouter from './routes/debug-auth.js';
 import { HttpError, isHttpError } from './lib/http-error.js';
 import clerkWebhookRouter from './webhooks/clerk.js';
 
@@ -31,6 +32,10 @@ const corsOptions: CorsOptions = {
 };
 
 const app = express();
+
+if (process.env.DEBUG_AUTH === 'true') {
+  app.use(createDebugAuthRouter());
+}
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));

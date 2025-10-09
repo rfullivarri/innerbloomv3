@@ -22,17 +22,26 @@ export function createAuthMiddleware(getService: GetService = getAuthService) {
   ): Promise<void> {
     try {
       const service = getService();
-      const authHeader = req.get('authorization') ?? req.header('authorization');
-      if (!authHeader) {
+      const rawAuthHeader = req.get('authorization');
+      const match = rawAuthHeader?.match(/^Bearer\s+(.+)$/i);
+      const normalizedAuthHeader = match ? `Bearer ${match[1].trim()}` : undefined;
+
+      if (!normalizedAuthHeader) {
         const legacyUser = await maybeResolveLegacyUser(req);
         if (legacyUser) {
           req.user = legacyUser;
           next();
           return;
         }
+
+        console.warn('[auth] missing/invalid authorization header', {
+          hasAuth: Boolean(rawAuthHeader),
+          sample: rawAuthHeader?.slice(0, 20),
+        });
+        throw new HttpError(401, 'unauthorized', 'Authentication required');
       }
 
-      const verifiedUser = await service.verifyToken(authHeader);
+      const verifiedUser = await service.verifyToken(normalizedAuthHeader);
 
       req.user = verifiedUser;
       next();

@@ -38,17 +38,13 @@ describe('authMiddleware', () => {
   });
 
   it('calls next with a 401 error when no authorization header is present', async () => {
-    const unauthorizedError = new HttpError(401, 'unauthorized', 'Authentication required');
-    verifyTokenMock.mockRejectedValueOnce(unauthorizedError);
-
     const req = mockReq<RequestUser>();
     const res = mockRes();
     const next = mockNext();
 
     await authMiddleware(req, res, next);
 
-    expect(verifyTokenMock).toHaveBeenCalledTimes(1);
-    expect(verifyTokenMock).toHaveBeenCalledWith(undefined);
+    expect(verifyTokenMock).not.toHaveBeenCalled();
     expect(req.user).toBeUndefined();
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0]?.[0]).toBeInstanceOf(HttpError);
