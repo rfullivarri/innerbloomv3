@@ -17,6 +17,7 @@ const GRID_MAX_CELL_SIZE = 16;
 const GRID_MIN_CELL_SIZE = 3.5;
 const GRID_MAX_GAP = 6;
 const GRID_MIN_GAP = 1.5;
+const GRID_SCALE_FACTOR = 1.4;
 const HEATMAP_LOOKBACK_DAYS = 365;
 
 const EMOTION_ORDER = [
@@ -49,6 +50,12 @@ const TOOLTIP_FORMATTER = new Intl.DateTimeFormat('es-AR', {
   month: 'short',
   year: 'numeric',
 });
+
+const DEFAULT_HIGHLIGHT_COLOR = EMOTION_COLORS.Calma;
+
+type HighlightDotStyle = CSSProperties & {
+  '--highlight-rgb'?: string;
+};
 
 type GridCell = {
   key: string;
@@ -105,6 +112,38 @@ const EMOTION_NORMALIZATION: Record<string, EmotionName> = {
   fatigue: 'Cansancio',
   neutral: 'Cansancio',
 };
+
+function hexToRgb(color: string): [number, number, number] | null {
+  const hex = color.trim().replace(/^#/, '');
+  if (hex.length === 3) {
+    const r = parseInt(hex[0] + hex[0], 16);
+    const g = parseInt(hex[1] + hex[1], 16);
+    const b = parseInt(hex[2] + hex[2], 16);
+    if ([r, g, b].some((value) => Number.isNaN(value))) {
+      return null;
+    }
+    return [r, g, b];
+  }
+  if (hex.length === 6) {
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    if ([r, g, b].some((value) => Number.isNaN(value))) {
+      return null;
+    }
+    return [r, g, b];
+  }
+  return null;
+}
+
+function colorToRgbString(color: string): string {
+  const rgb = hexToRgb(color);
+  if (rgb) {
+    return `${rgb[0]} ${rgb[1]} ${rgb[2]}`;
+  }
+  const fallback = hexToRgb(DEFAULT_HIGHLIGHT_COLOR);
+  return fallback ? `${fallback[0]} ${fallback[1]} ${fallback[2]}` : '46 204 113';
+}
 
 function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -350,8 +389,8 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
   const highlightLabel = grid.highlight?.count === 1 ? 'registro' : 'registros';
   const [activeCellKey, setActiveCellKey] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
-  const [cellSize, setCellSize] = useState<number>(14);
-  const [cellGap, setCellGap] = useState<number>(GRID_MAX_GAP);
+  const [cellSize, setCellSize] = useState<number>(14 * GRID_SCALE_FACTOR);
+  const [cellGap, setCellGap] = useState<number>(GRID_MAX_GAP * GRID_SCALE_FACTOR);
   const columnCount = grid.columns.length;
 
   useEffect(() => {
@@ -400,8 +439,20 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
         }
       }
 
-      setCellSize(Number(nextCell.toFixed(2)));
-      setCellGap(Number((segments > 0 ? nextGap : 0).toFixed(2)));
+      const scaledCell = Math.max(
+        GRID_MIN_CELL_SIZE * GRID_SCALE_FACTOR,
+        Math.min(GRID_MAX_CELL_SIZE * GRID_SCALE_FACTOR, nextCell * GRID_SCALE_FACTOR),
+      );
+      const scaledGap =
+        segments > 0
+          ? Math.max(
+              GRID_MIN_GAP * GRID_SCALE_FACTOR,
+              Math.min(GRID_MAX_GAP * GRID_SCALE_FACTOR, nextGap * GRID_SCALE_FACTOR),
+            )
+          : 0;
+
+      setCellSize(Number(scaledCell.toFixed(2)));
+      setCellGap(Number(scaledGap.toFixed(2)));
     };
 
     computeDimensions();
@@ -449,15 +500,12 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
   };
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#111d3a]/80 via-[#0b1429]/70 to-[#071022]/80 p-6 text-sm text-text backdrop-blur">
-      <header className="flex flex-wrap items-start justify-between gap-3 text-white">
-        <div className="space-y-1">
-          <h3 className="text-lg font-semibold">💗 Emotion Chart</h3>
-          <p className="text-xs text-text-muted">6 meses desde tu primer registro</p>
+    <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#111d3a]/80 via-[#0b1429]/70 to-[#071022]/80 p-8 text-base text-text backdrop-blur md:p-10">
+      <header className="flex flex-wrap items-start justify-between gap-4 text-white">
+        <div className="space-y-1.5">
+          <h3 className="text-2xl font-semibold">💗 Emotion Chart</h3>
+          <p className="text-sm text-text-muted">6 meses desde tu primer registro</p>
         </div>
-        <span className="rounded-full border border-white/10 bg-gradient-to-r from-white/15 via-white/5 to-white/0 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-white">
-          Heatmap XP
-        </span>
       </header>
 
       {status === 'loading' && <div className="mt-6 h-48 w-full animate-pulse rounded-2xl bg-white/10" />}
@@ -465,12 +513,12 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
       {status === 'error' && <p className="mt-6 text-sm text-rose-300">Todavía no pudimos cargar tus emociones.</p>}
 
       {status === 'success' && (
-        <div className="mt-6 space-y-6">
-          <div className="flex flex-wrap gap-2 text-xs text-text-muted">
+        <div className="mt-8 space-y-8">
+          <div className="flex flex-wrap gap-2 text-sm text-text-muted">
             {LEGEND_ITEMS.map((name) => (
               <span
                 key={name}
-                className={`flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] ${
+                className={`flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[13px] ${
                   name === 'Sin registro' ? 'text-white/60' : 'text-white/80'
                 }`}
               >
@@ -480,7 +528,7 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
             ))}
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="overflow-x-auto pb-2">
               <div className="min-w-full flex justify-center">
                 <div id="emotionChart" ref={gridRef} className="emotion-grid--weekcols" style={gridStyle}>
@@ -515,23 +563,28 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
                 </div>
               </div>
             </div>
-            <p className="text-xs text-text-muted">Período analizado: {periodLabel}</p>
+            <p className="text-sm text-text-muted">Período analizado: {periodLabel}</p>
           </div>
 
           {grid.highlight && (
             <div
               id="emotion-destacada"
-              className="emotion-highlight flex items-center gap-4 rounded-2xl border border-white/10 bg-gradient-to-r from-white/10 via-white/5 to-transparent p-4 text-white"
+              className="emotion-highlight flex items-center gap-6 rounded-3xl border border-white/10 bg-gradient-to-r from-white/12 via-white/5 to-transparent p-6 text-white shadow-[0_20px_60px_rgba(8,20,40,0.45)]"
             >
               <div
-                className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 text-lg font-semibold text-white"
-                style={{ backgroundColor: grid.highlight.color }}
+                className="emotion-highlight-dot flex h-20 w-20 items-center justify-center rounded-3xl border border-white/20 text-2xl font-semibold text-white"
+                style={
+                  {
+                    backgroundColor: grid.highlight.color,
+                    '--highlight-rgb': colorToRgbString(grid.highlight.color),
+                  } as HighlightDotStyle
+                }
               >
-                {grid.highlight.count}
+                <span className="relative z-10 font-bold drop-shadow-[0_0_6px_rgba(0,0,0,0.35)]">{grid.highlight.count}</span>
               </div>
               <div>
-                <p className="text-base font-semibold">{grid.highlight.emotion}</p>
-                <p className="text-xs text-text-muted">
+                <p className="text-lg font-semibold">{grid.highlight.emotion}</p>
+                <p className="text-sm text-text-muted">
                   Emoción más frecuente en los últimos 15 días ({grid.highlight.count} {highlightLabel})
                 </p>
               </div>
