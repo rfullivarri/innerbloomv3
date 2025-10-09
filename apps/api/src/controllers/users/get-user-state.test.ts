@@ -56,9 +56,7 @@ function createMockResponse() {
 }
 
 describe('getUserState', () => {
-  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-  beforeEach(() => {
+  function resetMocks() {
     mockGetUserProfile.mockReset();
     mockGetUserLogStats.mockReset();
     mockGetXpBaseByPillar.mockReset();
@@ -72,7 +70,9 @@ describe('getUserState', () => {
     mockFormatDateInTimezone.mockReset();
     mockAddDays.mockReset();
     consoleErrorSpy.mockClear();
-  });
+  }
+
+  beforeEach(resetMocks);
 
   afterAll(() => {
     consoleErrorSpy.mockRestore();
