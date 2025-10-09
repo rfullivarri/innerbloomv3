@@ -71,3 +71,24 @@ La aplicación está integrada con Clerk mediante el middleware y los componente
 ## Estado actual
 
 Esta migración crea la base del proyecto moderno sin eliminar los archivos originales. Puedes continuar desarrollando nuevas funcionalidades dentro de la carpeta `npm`.
+
+## Integración continua
+
+El repositorio cuenta con un workflow de GitHub Actions que se ejecuta en cada _push_ a `main` y en los _pull requests`. El pipeline utiliza Node.js 20 y realiza las siguientes tareas de calidad:
+
+- Instala las dependencias del monorepo con `npm ci`.
+- Ejecuta los linters con `npm run lint`.
+- Corre la suite de pruebas con `npm run test`, generando reportes de cobertura y fallando si la cobertura global de líneas, funciones, ramas o sentencias baja de 80 %.
+
+### Variables de entorno en CI
+
+Las pruebas unitarias de `apps/api` se ejecutan sin configuración adicional. Las pruebas de integración de dashboard se omiten automáticamente si no están definidas las variables sensibles; configura estas variables como _secrets_ en GitHub si deseas habilitarlas en el pipeline:
+
+| Variable        | Descripción                                                                 |
+| --------------- | --------------------------------------------------------------------------- |
+| `DATABASE_URL`  | Cadena de conexión a PostgreSQL utilizada por los tests de integración.     |
+| `TEST_USER_ID`  | Identificador de usuario con datos cargados para validar los endpoints API. |
+
+### Reportes de cobertura
+
+Vitest genera un resumen de cobertura directamente en los logs del job (`Run tests with coverage`). Además, el workflow publica la carpeta `apps/api/coverage` como artefacto llamado **api-coverage** para que puedas descargar el reporte completo (incluyendo `lcov-report/index.html`) desde la pestaña **Artifacts** del run en GitHub Actions.
