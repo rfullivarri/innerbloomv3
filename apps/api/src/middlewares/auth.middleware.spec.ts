@@ -60,10 +60,10 @@ describe('authMiddleware', () => {
     expect(verifyToken).toHaveBeenCalledWith(undefined);
     expect(req.user).toBeUndefined();
 
-    const [error] = next.mock.calls[0] ?? [];
+    const error = next.mock.calls[0]?.[0] as HttpError | undefined;
     expect(error).toBeInstanceOf(HttpError);
-    expect((error as HttpError).status).toBe(401);
-    expect((error as HttpError).code).toBe('unauthorized');
+    expect(error?.status).toBe(401);
+    expect(error?.code).toBe('unauthorized');
   });
 
   it('bubbles up HttpError instances from the auth service', async () => {
