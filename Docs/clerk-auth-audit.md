@@ -33,7 +33,7 @@
 ## 2. Uso de identidad
 - **Backend (`GET /users/me`)**: usa `authMiddleware` para validar `Authorization: Bearer` y rellenar `req.user` con `{ id, clerkId }`. El handler consulta `users.user_id = req.user.id` y responde `{ user }` con `user_id`, `game_mode`, `weekly_target`, etc.【F:apps/api/src/routes/users.ts†L37-L37】【F:apps/api/src/controllers/users/get-user-me.ts†L5-L41】
 - **Rutas `/users/:id/...`**: solo verifican que `:id` sea UUID mediante esquemas Zod y consultan `users.user_id`; no comparan contra una identidad autenticada ni exigen token.【F:apps/api/src/controllers/tasks/get-user-tasks.ts†L23-L61】【F:apps/api/src/controllers/users/shared.ts†L4-L12】
-- **Frontend web**: usa Clerk React `useAuth()` para obtener `userId` de Clerk y llama a `getCurrentUserProfile`, que reenvía el header `X-User-Id` a `/users/me`, perpetuando el esquema sin JWT.【F:apps/web/src/hooks/useBackendUser.ts†L16-L46】【F:apps/web/src/lib/api.ts†L938-L947】
+- **Frontend web**: `App` instala un `ApiAuthBridge` que obtiene `getToken()` de Clerk y lo registra en el cliente REST. `useBackendUser` y los helpers de `api.ts` resuelven el token en cada request y envían `Authorization: Bearer <jwt>` hacia `/users/me` y `/users/:id/...`, eliminando `X-User-Id`.【F:apps/web/src/App.tsx†L1-L75】【F:apps/web/src/hooks/useBackendUser.ts†L1-L46】【F:apps/web/src/lib/api.ts†L1-L115】
 
 ## 3. Tabla de cumplimiento vs política (JWT + UUID interno)
 | Componente | Identidad actual | Cumple política | Evidencia |
@@ -47,13 +47,13 @@
 ## 4. Riesgos
 - **Suplantación de usuarios mediante header**: mitigada en `/users/me` tras exigir `Authorization: Bearer` y resolver el `user_id` internamente. Persiste el riesgo en rutas `/users/:id/...` sin middleware.【F:apps/api/src/routes/users.ts†L22-L35】
 - **Exposición de datos sensibles**: las rutas `/users/:id/...` permiten consultar métricas, energía y estados de cualquier UUID válido sin comprobar si pertenece al solicitante.【F:apps/api/src/routes/users.ts†L22-L35】【F:apps/api/src/controllers/users/shared.ts†L4-L12】
-- **Documentación y frontend refuerzan el patrón inseguro**: la librería cliente sigue enviando `X-User-Id`, lo que dificulta la adopción de JWT y facilita errores en integraciones futuras.【F:apps/web/src/hooks/useBackendUser.ts†L16-L46】【F:apps/web/src/lib/api.ts†L938-L947】
+- **Documentación y frontend refuerzan el patrón inseguro**: mitigado en el cliente web tras adoptar Bearer; persiste la deuda en manuales antiguos y consumidores externos que sigan copiando `X-User-Id` desde material previo.【F:Docs/clerk-auth-audit.md†L81-L89】
 - **TODO sin atender**: el handler de `daily-energy` reconoce la falta de middleware Clerk, evidenciando deuda técnica generalizada.【F:apps/api/src/routes/users/daily-energy.ts†L46-L53】
 
 ## 5. Acciones sugeridas
 1. **Implementar middleware Clerk JWT** que verifique firma (`svix`, `iss`, `aud`) y cargue `req.user` con `clerk_user_id` y `user_id`. ✅ `/users/me` ya lo utiliza; resta propagarlo a rutas `/users/:id/...` para cerrar accesos públicos.【F:apps/api/src/routes/users.ts†L22-L35】
 2. **Aplicar el middleware a todas las rutas privadas** (`/users/me` y `/users/:id/...`), validando que el `:id` solicitado coincida con el `user_id` autenticado o derivándolo internamente para evitar exposición masiva.【F:apps/api/src/routes/users.ts†L22-L35】
-3. **Actualizar el frontend** para consumir `getToken()` de Clerk y enviar `Authorization: Bearer <jwt>` en `apiGet`, eliminando dependencias de `X-User-Id`. Ajustar `useBackendUser` y helpers relacionados.【F:apps/web/src/hooks/useBackendUser.ts†L16-L46】【F:apps/web/src/lib/api.ts†L938-L947】
+3. **Actualizar el frontend** para consumir `getToken()` de Clerk y enviar `Authorization: Bearer <jwt>` en `apiGet`, eliminando dependencias de `X-User-Id`. ✅ Implementado con `ApiAuthBridge`, `getAuthorizedJson` y la renovación de `useBackendUser`.【F:apps/web/src/App.tsx†L1-L75】【F:apps/web/src/lib/api.ts†L1-L209】【F:apps/web/src/hooks/useBackendUser.ts†L1-L46】
    - **Nuevo**: existe una bandera temporal `ALLOW_X_USER_ID_DEV` (default `false`) que solo permite `X-User-Id` en `GET /users/me` cuando la API corre en entorno local (`NODE_ENV=development/test`). Cada acceso emite un warning y el soporte se retirará el **30 de septiembre de 2024**.
 4. **Revisar documentación interna** (`Docs/dashboard-endpoints.md`, tutoriales) para que reflejen el flujo JWT + UUID, evitando que nuevos clientes repliquen el esquema heredado.【F:Docs/dashboard-endpoints.md†L132-L145】
 5. **Evaluar endpoints legacy (`/tasks`, `/task-logs`, `/tasks/complete`)**: si continúan activos, forzar autenticación y calcular `userId` desde el token; si son obsoletos, retirarlos o aislarlos tras un gateway autenticado.【F:apps/api/src/routes/legacy.ts†L22-L62】
@@ -77,6 +77,16 @@ Las rutas `/users/:id/state` y `/users/:id/state/timeseries` ahora delegan la va
 
 ---
 **Estado actual:** `/users/me` ya aplica la política "JWT + UUID interno" vía `authMiddleware`. Aún falta migrar el resto de rutas `/users/:id/...` y endpoints legacy para cerrar el acceso sin token.
+
+## 6. Rutas frontend con Bearer y cómo depurarlas
+
+- **Rutas migradas**: el cliente web ahora envía `Authorization: Bearer` a `/users/me` y a todos los recursos derivados de `/users/:id/…`, incluyendo `achievements`, `tasks`, `summary/today`, `state`, `state/timeseries`, `daily-energy`, `xp/daily`, `xp/total`, `xp/by-trait`, `emotions`, `journey` y `streaks/panel`. La envoltura `getAuthorizedJson` agrega el encabezado tras resolver el token y conserva el manejo de errores (401/403) existente.【F:apps/web/src/lib/api.ts†L1-L209】
+- **Cómo verificar el header**:
+  1. Abrí la vista `DashboardV3` en el navegador y desplegá las DevTools (⌥⌘I en macOS, Ctrl+Shift+I en Windows/Linux).
+  2. En la pestaña **Network**, filtrá por `users` y refrescá la página; inspeccioná cualquier request (`/users/me`, `/users/<id>/xp/total`, etc.).
+  3. En el panel **Headers**, confirmá que `Authorization` aparece con el esquema `Bearer` y, en **Request Payload**, validá que ya no figure `X-User-Id`.
+  4. Si necesitás depurar desde consola, ejecutá `window.fetch = new Proxy(window.fetch, { apply(target, thisArg, args) { console.debug('[fetch]', args[0], args[1]?.headers); return Reflect.apply(target, thisArg, args); } });` antes de recargar para registrar los headers enviados.
+- **Fallbacks**: si `getToken()` falla o devuelve `null`, el cliente lanza `Missing Clerk session token for API request`, facilitando detectar sesiones expiradas antes de propagarlas al backend.【F:apps/web/src/lib/api.ts†L64-L115】
 
 ## Cobertura y alcance
 - **Cobertura actual (Vitest + V8)**: Statements 97.56%, Branches 84.71%, Functions 98.91%, Lines 97.56%.【335cb1†L57-L64】

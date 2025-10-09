@@ -22,7 +22,7 @@ export function useBackendUser(): BackendUserState {
     }
 
     console.info('[API] /users/me signedIn:', isSignedIn, 'userId:', clerkUserId);
-    return getCurrentUserProfile(clerkUserId);
+    return getCurrentUserProfile();
   }, [clerkUserId, isSignedIn]);
 
   const { data, status, error, reload } = useRequest(

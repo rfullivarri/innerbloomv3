@@ -1,10 +1,40 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import DashboardV3Page from './pages/DashboardV3';
 import LoginPage from './pages/Login';
 import LandingPage from './pages/Landing';
 import SignUpPage from './pages/SignUp';
 import { DevBanner } from './components/layout/DevBanner';
+import { setApiAuthTokenProvider } from './lib/api';
+
+function ApiAuthBridge() {
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) {
+      setApiAuthTokenProvider(null);
+      return;
+    }
+
+    const provider = async () => {
+      try {
+        return await getToken();
+      } catch (error) {
+        console.error('[API] Failed to retrieve Clerk token', error);
+        throw error;
+      }
+    };
+
+    setApiAuthTokenProvider(provider);
+
+    return () => {
+      setApiAuthTokenProvider(null);
+    };
+  }, [getToken, isLoaded, isSignedIn]);
+
+  return null;
+}
 
 function RequireUser({ children }: { children: JSX.Element }) {
   const { isLoaded, userId } = useAuth();
@@ -17,7 +47,12 @@ function RequireUser({ children }: { children: JSX.Element }) {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return (
+    <>
+      <ApiAuthBridge />
+      {children}
+    </>
+  );
 }
 
 function RedirectIfSignedIn({ children }: { children: JSX.Element }) {
