@@ -10,6 +10,7 @@ import { pool } from '../db.js';
 
 type ClerkEmailAddress = {
   email_address?: string | null;
+  reserved?: boolean | null;
 };
 
 type ClerkEventData = {
@@ -152,7 +153,7 @@ function extractPrimaryEmail(addresses: ClerkEmailAddress[] | undefined): string
   }
 
   for (const address of addresses) {
-    if (address?.email_address) {
+    if (address?.email_address && address.reserved !== true) {
       return address.email_address;
     }
   }
