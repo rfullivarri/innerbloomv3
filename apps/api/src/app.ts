@@ -57,19 +57,30 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
       console.error('Request failed', { code: error.code, details: error.details });
     }
 
-    return res.status(error.status).json({
+    const payload: Record<string, unknown> = {
       code: error.code,
       message: error.message,
-    });
+    };
+
+    if (typeof error.details !== 'undefined') {
+      payload.details = error.details;
+    }
+
+    return res.status(error.status).json(payload);
   }
 
   if (error instanceof z.ZodError) {
+    const details = error.flatten();
     const [firstIssue] = error.issues;
     const message = firstIssue?.message ?? 'Invalid request parameters';
+    const httpError = new HttpError(400, 'invalid_request', message, details);
 
-    return res.status(400).json({
-      code: 'validation_error',
-      message,
+    console.error('Request failed', { code: httpError.code, details });
+
+    return res.status(httpError.status).json({
+      code: httpError.code,
+      message: httpError.message,
+      details: httpError.details,
     });
   }
 

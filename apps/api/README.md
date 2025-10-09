@@ -55,6 +55,12 @@ Use the helpers in `apps/api/src/tests/test-utils.ts` when mocking Express primi
 
 These utilities keep test code free of `any` casts while matching the runtime behaviour expected by our middlewares.
 
+### User state fixtures
+
+The suites for `get-user-state` and `get-user-state-timeseries` mock the date helpers and XP series so the propagated ranges are
+deterministic. This ensures the expectations stay aligned with the grace/backfill logic used in production while keeping the
+tests hermetic.
+
 ## Clerk integration
 
 ### Authentication

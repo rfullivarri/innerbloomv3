@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { pool } from '../../db.js';
 import type { AsyncHandler } from '../../lib/async-handler.js';
 import { ensureUserExists } from '../../controllers/users/shared.js';
-import { uuidSchema } from '../../lib/validation.js';
+import { parseWithValidation, uuidSchema } from '../../lib/validation.js';
 
 const MODE_TIERS: Record<Mode, number> = {
   Low: 1,
@@ -232,8 +232,8 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
     return;
   }
 
-  const { id } = paramsSchema.parse(req.params);
-  const { pillar, range, mode: rawMode, query } = querySchema.parse(req.query);
+  const { id } = parseWithValidation(paramsSchema, req.params);
+  const { pillar, range, mode: rawMode, query } = parseWithValidation(querySchema, req.query);
 
   await ensureUserExists(id);
 
