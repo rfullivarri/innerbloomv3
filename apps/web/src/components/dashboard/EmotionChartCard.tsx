@@ -38,6 +38,8 @@ type NormalizedEmotionEntry = {
   key: string;
   date: Date;
   emotion: EmotionValue;
+  rawEmotion: string | null;
+  rawDate: string | null;
 };
 
 type EmotionColumn = {
@@ -51,6 +53,9 @@ type GridCell = {
   date: Date;
   emotion: EmotionValue;
   color: string;
+  origin: 'backend' | 'frontend';
+  rawEmotion: string | null;
+  rawDate: string | null;
 };
 
 type EmotionHighlight = {
@@ -60,7 +65,7 @@ type EmotionHighlight = {
 };
 
 type EmotionMapResult = {
-  map: Map<string, EmotionValue>;
+  map: Map<string, NormalizedEmotionEntry>;
   keys: string[];
   minDate: Date | null;
   maxDate: Date | null;
@@ -210,11 +215,15 @@ function normalizeEntries(entries: RawEmotionArray): NormalizedEmotionEntry[] {
     const key = ymd(date);
     const rawEmotion = row.emocion ?? row.emotion ?? row.mood ?? row.emotion_id ?? row.value ?? row.name ?? null;
     const emotion = normalizeEmotion(rawEmotion);
+    const rawEmotionLabel = rawEmotion == null ? null : String(rawEmotion);
+    const rawDateLabel = rawDate == null ? null : String(rawDate);
 
     normalized.push({
       key,
       date,
       emotion,
+      rawEmotion: rawEmotionLabel,
+      rawDate: rawDateLabel,
     });
   }
 
@@ -224,12 +233,12 @@ function normalizeEntries(entries: RawEmotionArray): NormalizedEmotionEntry[] {
 }
 
 function buildEmotionByDay(entries: NormalizedEmotionEntry[]): EmotionMapResult {
-  const map = new Map<string, EmotionValue>();
+  const map = new Map<string, NormalizedEmotionEntry>();
   let minDate: Date | null = null;
   let maxDate: Date | null = null;
 
   for (const entry of entries) {
-    map.set(entry.key, entry.emotion);
+    map.set(entry.key, entry);
     if (!minDate || entry.date.getTime() < minDate.getTime()) {
       minDate = entry.date;
     }
@@ -269,7 +278,7 @@ function computeTimelineEnd(start: Date): Date {
 }
 
 function buildColumns(
-  map: Map<string, EmotionValue>,
+  map: Map<string, NormalizedEmotionEntry>,
   startMonday: Date,
   endMonday: Date,
   rows: number,
@@ -291,14 +300,22 @@ function buildColumns(
     for (let row = 0; row < rows; row += 1) {
       const cellDate = addDays(monday, row);
       const key = ymd(cellDate);
-      const emotion = map.get(key) ?? 'Sin registro';
+      const entry = map.get(key) ?? null;
+      const emotion = entry?.emotion ?? 'Sin registro';
       const color = EMOTION_COLORS[emotion] ?? EMOTION_COLORS['Sin registro'];
+
+      const origin: GridCell['origin'] = entry ? 'backend' : 'frontend';
+      const rawEmotion = entry?.rawEmotion ?? null;
+      const rawDate = entry?.rawDate ?? null;
 
       cells.push({
         key,
         date: cellDate,
         emotion,
         color,
+        origin,
+        rawEmotion,
+        rawDate,
       });
 
       if (!label) {
@@ -333,7 +350,7 @@ function buildColumns(
 }
 
 function computeHighlight(
-  map: Map<string, EmotionValue>,
+  map: Map<string, NormalizedEmotionEntry>,
   sortedKeys: string[],
   limit = LOOKBACK_FOR_HIGHLIGHT,
 ): EmotionHighlight | null {
@@ -341,7 +358,8 @@ function computeHighlight(
 
   const recentKeys = sortedKeys
     .filter((key) => {
-      const emotion = map.get(key);
+      const entry = map.get(key);
+      const emotion = entry?.emotion;
       return emotion && emotion !== 'Sin registro';
     })
     .slice(-limit);
@@ -351,7 +369,7 @@ function computeHighlight(
   const counts = new Map<EmotionName, { count: number; lastKey: string }>();
 
   for (const key of recentKeys) {
-    const emotion = map.get(key);
+    const emotion = map.get(key)?.emotion;
     if (!emotion || emotion === 'Sin registro') continue;
     const current = counts.get(emotion) ?? { count: 0, lastKey: '' };
     current.count += 1;
@@ -623,14 +641,28 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
                 <div className="emotion-grid--weekcols">
                   {columns.map((column) => (
                     <div key={column.key} className="emotion-col">
-                      {column.cells.map((cell) => (
-                        <div
-                          key={cell.key}
-                          className="emotion-cell"
-                          style={{ backgroundColor: cell.color }}
-                          title={`${tooltipFormatter.format(cell.date)} – ${cell.emotion}`}
-                        />
-                      ))}
+                      {column.cells.map((cell) => {
+                        const tooltipEmotion = cell.rawEmotion ?? cell.emotion;
+                        const tooltipDateRaw = cell.rawDate;
+                        const tooltipDate =
+                          tooltipDateRaw && tooltipDateRaw !== '[object Object]'
+                            ? tooltipDateRaw
+                            : tooltipFormatter.format(cell.date);
+                        const tooltip = `${tooltipDate} – ${tooltipEmotion}`;
+                        return (
+                          <div
+                            key={cell.key}
+                            className="emotion-cell"
+                            style={{ backgroundColor: cell.color }}
+                            title={tooltip}
+                            data-tooltip={tooltip}
+                            data-origin={cell.origin}
+                            data-raw-emotion={cell.rawEmotion ?? undefined}
+                            data-raw-date={cell.rawDate ?? undefined}
+                            aria-label={tooltip}
+                          />
+                        );
+                      })}
                     </div>
                   ))}
                 </div>
