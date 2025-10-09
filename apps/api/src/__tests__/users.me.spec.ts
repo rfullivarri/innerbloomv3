@@ -4,8 +4,8 @@ import type { CurrentUserRow } from '../controllers/users/get-user-me.js';
 import { HttpError } from '../lib/http-error.js';
 
 const { mockQuery, mockVerifyToken, mockGetAuthService } = vi.hoisted(() => ({
-  mockQuery: vi.fn(),
-  mockVerifyToken: vi.fn(),
+  mockQuery: vi.fn(() => undefined),
+  mockVerifyToken: vi.fn(() => undefined),
   mockGetAuthService: vi.fn(() => ({
     verifyToken: mockVerifyToken,
   })),
@@ -18,9 +18,9 @@ vi.mock('../db.js', () => ({
 
 vi.mock('../services/auth-service.js', () => ({
   getAuthService: mockGetAuthService,
-  createAuthRepository: vi.fn(),
-  createAuthService: vi.fn(),
-  resetAuthServiceCache: vi.fn(),
+  createAuthRepository: vi.fn(() => undefined),
+  createAuthService: vi.fn(() => undefined),
+  resetAuthServiceCache: vi.fn(() => undefined),
 }));
 
 import app from '../app.js';
