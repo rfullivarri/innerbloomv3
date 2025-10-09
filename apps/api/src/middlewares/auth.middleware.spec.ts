@@ -1,79 +1,96 @@
-import type { Request, Response } from 'express';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { HttpError } from '../lib/http-error.js';
 import { mockNext, mockReq, mockRes } from '../tests/test-utils.js';
-import { createAuthMiddleware, type RequestUser } from './auth-middleware.js';
 
-type MockVerifiedUser = RequestUser;
+const verifyTokenMock = vi.hoisted(() =>
+  vi.fn(async () => ({
+    id: '11111111-2222-3333-4444-555555555555',
+    clerkId: 'clrk_1',
+    email: 'a@b.c',
+    isNew: false,
+  })),
+);
 
-type MockAuthService = {
-  verifyToken: (authHeader?: string | null) => Promise<MockVerifiedUser>;
-};
+const resolveUserIdFromClerkMock = vi.hoisted(() =>
+  vi.fn(async () => '11111111-2222-3333-4444-555555555555'),
+);
 
-type MockedRequest = Request & { user?: MockVerifiedUser };
+vi.mock('../services/auth-service', () => ({
+  getAuthService: () => ({ verifyToken: verifyTokenMock }),
+  resetAuthServiceCache: vi.fn(),
+  verifyToken: verifyTokenMock,
+  resolveUserIdFromClerk: resolveUserIdFromClerkMock,
+}));
 
-function createMiddleware(service: MockAuthService) {
-  return createAuthMiddleware(() => service);
-}
+import { authMiddleware, type RequestUser } from './auth-middleware.js';
 
 describe('authMiddleware', () => {
+  beforeEach(() => {
+    verifyTokenMock.mockReset();
+    verifyTokenMock.mockImplementation(async () => ({
+      id: '11111111-2222-3333-4444-555555555555',
+      clerkId: 'clrk_1',
+      email: 'a@b.c',
+      isNew: false,
+    } satisfies RequestUser));
+    resolveUserIdFromClerkMock.mockReset();
+    resolveUserIdFromClerkMock.mockImplementation(async () => '11111111-2222-3333-4444-555555555555');
+  });
+
   it('calls next with a 401 error when no authorization header is present', async () => {
-    const verifyToken = vi
-      .fn<MockAuthService['verifyToken']>()
-      .mockRejectedValue(new HttpError(401, 'unauthorized', 'Authentication required'));
-    const middleware = createMiddleware({ verifyToken });
-    const req = mockReq<MockVerifiedUser>();
-    const res: Response = mockRes();
+    const unauthorizedError = new HttpError(401, 'unauthorized', 'Authentication required');
+    verifyTokenMock.mockRejectedValueOnce(unauthorizedError);
+
+    const req = mockReq<RequestUser>();
+    const res = mockRes();
     const next = mockNext();
 
-    await middleware(req as MockedRequest, res, next);
+    await authMiddleware(req, res, next);
 
-    expect(verifyToken).toHaveBeenCalledTimes(1);
-    expect(verifyToken).toHaveBeenCalledWith(undefined);
+    expect(verifyTokenMock).toHaveBeenCalledTimes(1);
+    expect(verifyTokenMock).toHaveBeenCalledWith(undefined);
     expect(req.user).toBeUndefined();
-
-    const error = next.mock.calls[0]?.[0] as unknown;
-    expect(error).toBeInstanceOf(HttpError);
-    if (error instanceof HttpError) {
-      expect(error.status).toBe(401);
-      expect(error.code).toBe('unauthorized');
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(next.mock.calls[0]?.[0]).toBeInstanceOf(HttpError);
+    const forwardedError = next.mock.calls[0]?.[0];
+    if (forwardedError instanceof HttpError) {
+      expect(forwardedError.status).toBe(401);
+      expect(forwardedError.code).toBe('unauthorized');
     }
   });
 
   it('bubbles up HttpError instances from the auth service', async () => {
     const invalidTokenError = new HttpError(401, 'unauthorized', 'Invalid authentication token');
-    const verifyToken = vi
-      .fn<MockAuthService['verifyToken']>()
-      .mockRejectedValue(invalidTokenError);
-    const middleware = createMiddleware({ verifyToken });
-    const req = mockReq<MockVerifiedUser>({ headers: { Authorization: 'Bearer invalid' } });
-    const res: Response = mockRes();
+    verifyTokenMock.mockRejectedValueOnce(invalidTokenError);
+
+    const req = mockReq<RequestUser>({ headers: { Authorization: 'Bearer invalid' } });
+    const res = mockRes();
     const next = mockNext();
 
-    await middleware(req as MockedRequest, res, next);
+    await authMiddleware(req, res, next);
 
-    expect(verifyToken).toHaveBeenCalledWith('Bearer invalid');
+    expect(verifyTokenMock).toHaveBeenCalledWith('Bearer invalid');
     expect(req.user).toBeUndefined();
     expect(next).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledWith(invalidTokenError);
   });
 
   it('injects the verified user on success', async () => {
-    const verifiedUser: MockVerifiedUser = {
+    const verifiedUser: RequestUser = {
       id: 'user-123',
       clerkId: 'clerk_123',
       email: 'user@example.com',
       isNew: false,
     };
-    const verifyToken = vi.fn<MockAuthService['verifyToken']>().mockResolvedValue(verifiedUser);
-    const middleware = createMiddleware({ verifyToken });
-    const req = mockReq<MockVerifiedUser>({ headers: { Authorization: 'Bearer valid-token' } });
-    const res: Response = mockRes();
+    verifyTokenMock.mockResolvedValueOnce(verifiedUser);
+
+    const req = mockReq<RequestUser>({ headers: { Authorization: 'Bearer valid-token' } });
+    const res = mockRes();
     const next = mockNext();
 
-    await middleware(req as MockedRequest, res, next);
+    await authMiddleware(req, res, next);
 
-    expect(verifyToken).toHaveBeenCalledWith('Bearer valid-token');
+    expect(verifyTokenMock).toHaveBeenCalledWith('Bearer valid-token');
     expect(req.user).toEqual(verifiedUser);
     expect(next).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledWith();
