@@ -181,7 +181,15 @@ export function formatDateInTimezone(date: Date, timezone?: string | null): stri
     return format(timeZone);
   } catch (error) {
     if (error instanceof RangeError || error instanceof TypeError) {
-      return format(fallbackTimeZone);
+      try {
+        return format(fallbackTimeZone);
+      } catch (fallbackError) {
+        if (fallbackError instanceof RangeError || fallbackError instanceof TypeError) {
+          return date.toISOString().slice(0, 10);
+        }
+
+        throw fallbackError;
+      }
     }
 
     throw error;
