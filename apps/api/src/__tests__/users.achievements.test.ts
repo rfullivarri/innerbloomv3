@@ -1,13 +1,23 @@
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockQuery } = vi.hoisted(() => ({
+const { mockQuery, mockVerifyToken } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
+  mockVerifyToken: vi.fn(),
 }));
 
 vi.mock('../db.js', () => ({
   pool: { query: mockQuery },
   dbReady: Promise.resolve(),
+}));
+
+vi.mock('../services/auth-service.js', () => ({
+  getAuthService: () => ({
+    verifyToken: mockVerifyToken,
+  }),
+  createAuthRepository: vi.fn(),
+  createAuthService: vi.fn(),
+  resetAuthServiceCache: vi.fn(),
 }));
 
 import app from '../app.js';
@@ -17,6 +27,7 @@ const userId = '11111111-2222-3333-4444-555555555555';
 describe('GET /api/users/:id/achievements', () => {
   beforeEach(() => {
     mockQuery.mockReset();
+    mockVerifyToken.mockReset();
   });
 
   afterEach(() => {
@@ -26,6 +37,13 @@ describe('GET /api/users/:id/achievements', () => {
   it('returns derived achievements for the user', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-03-08T12:00:00.000Z'));
+
+    mockVerifyToken.mockResolvedValue({
+      id: userId,
+      clerkId: 'user_123',
+      email: 'test@example.com',
+      isNew: false,
+    });
 
     mockQuery
       .mockResolvedValueOnce({ rows: [{ user_id: userId }] })
@@ -54,7 +72,9 @@ describe('GET /api/users/:id/achievements', () => {
         ],
       });
 
-    const response = await request(app).get(`/api/users/${userId}/achievements`);
+    const response = await request(app)
+      .get(`/api/users/${userId}/achievements`)
+      .set('Authorization', 'Bearer token');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
@@ -63,14 +83,14 @@ describe('GET /api/users/:id/achievements', () => {
         {
           id: 'ach_streak_7',
           name: '7-Day Flame',
-          earned_at: '2024-03-07T00:00:00.000Z',
-          progress: { current: 8, target: 7, pct: 1 },
+          earned_at: null,
+          progress: { current: 8, target: 7, pct: 100 },
         },
         {
           id: 'ach_level_5',
           name: 'Level 5',
-          earned_at: '2024-03-07T00:00:00.000Z',
-          progress: { current: 6, target: 5, pct: 1 },
+          earned_at: null,
+          progress: { current: 6, target: 5, pct: 100 },
         },
       ],
     });
@@ -83,25 +103,34 @@ describe('GET /api/users/:id/achievements', () => {
     );
     expect(mockQuery).toHaveBeenNthCalledWith(
       2,
-      `SELECT date, xp_day\n     FROM v_user_daily_xp\n     WHERE user_id = $1\n     ORDER BY date ASC`,
+      `SELECT date, xp_day\n       FROM v_user_daily_xp\n       WHERE user_id = $1\n       ORDER BY date DESC\n       LIMIT 60`,
       [userId],
     );
     expect(mockQuery).toHaveBeenNthCalledWith(
       3,
-      `SELECT COALESCE(total_xp, 0) AS total_xp\n     FROM v_user_total_xp\n     WHERE user_id = $1`,
+      `SELECT COALESCE(total_xp, 0) AS total_xp\n       FROM v_user_total_xp\n       WHERE user_id = $1`,
       [userId],
     );
     expect(mockQuery).toHaveBeenNthCalledWith(
       4,
-      `SELECT level, xp_required\n     FROM v_user_level\n     WHERE user_id = $1\n     ORDER BY level ASC`,
+      `SELECT level, xp_required\n       FROM v_user_level\n       WHERE user_id = $1\n       ORDER BY level ASC`,
       [userId],
     );
   });
 
   it('returns 404 when the user is missing', async () => {
+    mockVerifyToken.mockResolvedValue({
+      id: userId,
+      clerkId: 'user_123',
+      email: 'test@example.com',
+      isNew: false,
+    });
+
     mockQuery.mockResolvedValueOnce({ rows: [], rowCount: 0 });
 
-    const response = await request(app).get(`/api/users/${userId}/achievements`);
+    const response = await request(app)
+      .get(`/api/users/${userId}/achievements`)
+      .set('Authorization', 'Bearer token');
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({
@@ -109,5 +138,27 @@ describe('GET /api/users/:id/achievements', () => {
       message: 'User not found',
     });
     expect(mockQuery).toHaveBeenCalledTimes(1);
+    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 403 when requesting a different user', async () => {
+    mockVerifyToken.mockResolvedValue({
+      id: 'another-user-id',
+      clerkId: 'user_999',
+      email: 'hacker@example.com',
+      isNew: false,
+    });
+
+    const response = await request(app)
+      .get(`/api/users/${userId}/achievements`)
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(403);
+    expect(response.body).toEqual({
+      code: 'forbidden',
+      message: 'You do not have access to this resource',
+    });
+    expect(mockQuery).not.toHaveBeenCalled();
+    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
   });
 });

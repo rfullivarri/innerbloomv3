@@ -58,6 +58,7 @@ Example usage inside an Express route module:
 ```ts
 import { Router } from 'express';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
+import { ownUserGuard } from '../middlewares/own-user-guard.js';
 
 const router = Router();
 
@@ -66,8 +67,37 @@ router.get('/users/me', authMiddleware, (req, res) => {
   res.json({ userId: currentUser?.id });
 });
 
+router.get('/users/:id/xp/total', authMiddleware, ownUserGuard, (req, res) => {
+  // This handler will only run when the authenticated user owns :id.
+  res.json({ userId: req.params.id });
+});
+
 export default router;
 ```
+
+#### Per-user authorization guard
+
+Sensitive analytics routes under `/users/:id/...` require both a valid Clerk
+token and ownership of the requested ID. Mount `ownUserGuard` after the
+authentication middleware to compare `req.params.id` against the verified
+`req.user.id`.
+
+Guarded endpoints:
+
+* `GET /users/:id/tasks`
+* `GET /users/:id/xp/daily`
+* `GET /users/:id/xp/total`
+* `GET /users/:id/xp/by-trait`
+* `GET /users/:id/pillars`
+* `GET /users/:id/streaks/panel`
+* `GET /users/:id/level`
+* `GET /users/:id/achievements`
+* `GET /users/:id/daily-energy`
+* `GET /users/:id/journey`
+* `GET /users/:id/emotions`
+* `GET /users/:id/state`
+* `GET /users/:id/state/timeseries`
+* `GET /users/:id/summary/today`
 
 ### Webhook
 
