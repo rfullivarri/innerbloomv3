@@ -76,16 +76,17 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
   return (
     <Card
       className="ring-1 ring-indigo-400/20"
-      title={
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+      title="Progreso general"
+      rightSlot={
+        <div className="flex items-center justify-end gap-2 sm:gap-3">
+          {chipStyle ? <GameModeChip {...chipStyle} /> : null}
           <InfoDotTarget
             id="xpLevel"
             placement="right"
-            className="inline-flex items-center gap-2"
+            className="inline-flex items-center"
           >
-            <span>Progreso general</span>
+            <span className="sr-only">Más información sobre tu progreso general</span>
           </InfoDotTarget>
-          {chipStyle ? <GameModeChip {...chipStyle} /> : null}
         </div>
       }
       subtitle={headline}
@@ -112,10 +113,10 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
       {showContent && (
         <div className="flex flex-col gap-6">
           <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-6 text-slate-200">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-slate-200">
               <div className="flex items-center gap-3">
-                <span className="text-lg leading-none">🏆</span>
-                <div className="flex flex-col">
+                <span className="text-[2.5em] leading-none">🏆</span>
+                <div className="flex flex-col items-center text-center">
                   <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{totalXpLabel}</span>
                   <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                     Total XP
@@ -123,8 +124,8 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-lg leading-none">🎯</span>
-                <div className="flex flex-col">
+                <span className="text-[2.5em] leading-none">🎯</span>
+                <div className="flex flex-col items-center text-center">
                   <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{levelLabel}</span>
                   <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                     Nivel
