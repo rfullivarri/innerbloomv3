@@ -2,6 +2,121 @@
 
 Este documento resume los endpoints HTTP disponibles en el backend del dashboard (vistas legacy y V3), indicando método, parámetros relevantes y la estructura de respuesta que espera el frontend.
 
+## Tabla de mapeo funcional
+
+| Elemento en el dashboard | Endpoint | Ejemplo de JSON devuelto |
+| --- | --- | --- |
+| Header de usuario (nombre y avatar) | `GET /users/me` | <pre><code>{
+  "user": {
+    "user_id": "45f3c8f5-4cf6-4a54-8d1e-41f2812ac012",
+    "full_name": "Alex Green",
+    "image_url": "https://images.clerk.dev/user.png",
+    "game_mode": "seedling",
+    "weekly_target": 4
+  }
+}</code></pre> |
+| Hero "XP today" y quests completadas | `GET /users/:id/summary/today` | <pre><code>{
+  "date": "2024-05-27",
+  "xp_today": 320,
+  "quests": { "total": 6, "completed": 4 }
+}</code></pre> |
+| Tarjeta "Progreso general" | `GET /users/:id/xp/total` | <pre><code>{
+  "total_xp": 18420
+}</code></pre> |
+| Tarjetas de nivel (nivel actual y XP restante) | `GET /users/:id/level` | <pre><code>{
+  "user_id": "45f3c8f5-4cf6-4a54-8d1e-41f2812ac012",
+  "current_level": 7,
+  "xp_total": 18420,
+  "xp_required_current": 15000,
+  "xp_required_next": 21000,
+  "xp_to_next": 2580,
+  "progress_percent": 63
+}</code></pre> |
+| Gráfica "Daily Cultivation" y cálculo de rachas | `GET /users/:id/xp/daily` | <pre><code>{
+  "from": "2024-04-28",
+  "to": "2024-05-27",
+  "series": [
+    { "date": "2024-05-26", "xp_day": 180 },
+    { "date": "2024-05-27", "xp_day": 320 }
+  ]
+}</code></pre> |
+| Radar de XP por rasgo | `GET /users/:id/xp/by-trait` | <pre><code>{
+  "traits": [
+    { "trait": "Body", "xp": 6200 },
+    { "trait": "Mind", "xp": 5400 },
+    { "trait": "Soul", "xp": 4820 }
+  ]
+}</code></pre> |
+| Tarjeta "Achievements" | `GET /users/:id/achievements` | <pre><code>{
+  "user_id": "45f3c8f5-4cf6-4a54-8d1e-41f2812ac012",
+  "achievements": [
+    {
+      "id": "streak_7",
+      "name": "Weekly Habit",
+      "earned_at": "2024-05-12T09:30:00Z",
+      "progress": { "current": 5, "target": 7, "pct": 71 }
+    }
+  ]
+}</code></pre> |
+| Tarjeta "Daily Energy" | `GET /users/:id/daily-energy` | <pre><code>{
+  "user_id": "45f3c8f5-4cf6-4a54-8d1e-41f2812ac012",
+  "hp_pct": 68,
+  "mood_pct": 74,
+  "focus_pct": 61,
+  "hp_norm": 0.68,
+  "mood_norm": 0.74,
+  "focus_norm": 0.61
+}</code></pre> |
+| Panel "Missions" (lista de tareas activas) | `GET /users/:id/tasks` | <pre><code>{
+  "limit": 20,
+  "offset": 0,
+  "tasks": [
+    {
+      "task_id": "b55b0e12-7d2d-4d92-8fb8-2e8a83741234",
+      "task": "Morning stretch",
+      "pillar_id": "Body",
+      "trait_id": "mobility",
+      "difficulty_id": "easy",
+      "xp_base": 80,
+      "active": true
+    }
+  ]
+}</code></pre> |
+| Panel de rachas (V3) | `GET /users/:id/streaks/panel` | <pre><code>{
+  "topStreaks": [
+    { "id": "body", "name": "Body rituals", "stat": "12 weeks", "weekDone": true, "streakWeeks": 12 }
+  ],
+  "tasks": [
+    {
+      "id": "b55b0e12-7d2d-4d92-8fb8-2e8a83741234",
+      "name": "Morning stretch",
+      "stat": "4 weeks",
+      "weekDone": true,
+      "streakWeeks": 4,
+      "metrics": {
+        "week": { "count": 3, "xp": 240 },
+        "month": { "count": 11, "xp": 880, "weeks": 4 },
+        "qtr": { "count": 30, "xp": 2400, "weeks": 12 }
+      }
+    }
+  ]
+}</code></pre> |
+| Módulo "Recent Activity" | `GET /task-logs` | <pre><code>[]</code></pre> |
+| Tarjeta "Emotion Timeline" | `GET /users/:id/emotions` | <pre><code>{
+  "user_id": "45f3c8f5-4cf6-4a54-8d1e-41f2812ac012",
+  "range": { "from": "2024-04-28", "to": "2024-05-27" },
+  "days": [
+    { "date": "2024-05-26", "emotion_id": 3, "emotion": "Calma" },
+    { "date": "2024-05-27", "emotion_id": 5, "emotion": "Energía" }
+  ]
+}</code></pre> |
+| Banner de journey y recordatorios | `GET /users/:id/journey` | <pre><code>{
+  "first_date_log": "2023-11-02",
+  "days_of_journey": 180,
+  "quantity_daily_logs": 142,
+  "first_programmed": "2023-11-05"
+}</code></pre> |
+
 ## Salud y utilitarios
 
 ### `GET /_health`
