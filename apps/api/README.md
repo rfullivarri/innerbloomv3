@@ -12,6 +12,7 @@
 | `CLERK_API_KEY` | ➖ | Clerk Backend API key. Required only for the backfill script. |
 | `PORT` | ➖ | Port for the Fastify server (defaults to `3000`). |
 | `CORS_ALLOWED_ORIGINS` | ➖ | Comma-separated list of additional origins allowed to call the API. |
+| `ALLOW_X_USER_ID_DEV` | ➖ | Enables the deprecated `X-User-Id` header for `/users/me` when running locally (defaults to `false`). The flag has no effect in production and will be removed on 2024-09-30. |
 
 ## Database migrations
 
@@ -125,6 +126,12 @@ router.get('/users/:id/xp/total', authMiddleware, ownUserGuard, (req, res) => {
 
 export default router;
 ```
+
+#### Legacy `X-User-Id` header (temporary)
+
+The legacy `X-User-Id` header is only available as a transition aid for local development. Set `ALLOW_X_USER_ID_DEV=true` when running the API with `NODE_ENV=development` (or the default `test` value used by Vitest) to accept the header on `GET /users/me`. Every accepted request logs a deprecation warning and still performs a database lookup to hydrate `req.user`.
+
+The header is ignored in production—requests must include a valid bearer token regardless of the flag state. This compatibility path will be removed on **2024-09-30**, so start migrating callers to Clerk-issued JWTs as soon as possible.
 
 ### Perfil del usuario autenticado
 

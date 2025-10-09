@@ -11,6 +11,9 @@ const { mockQuery, mockVerifyToken, mockGetAuthService } = vi.hoisted(() => ({
   })),
 }));
 
+const LEGACY_USER_LOOKUP_SQL =
+  'SELECT user_id, clerk_user_id, email_primary FROM users WHERE user_id = $1 LIMIT 1';
+
 vi.mock('../db.js', () => ({
   pool: { query: mockQuery },
   dbReady: Promise.resolve(),
@@ -40,21 +43,30 @@ const baseUser: CurrentUserRow = {
   deleted_at: null,
 };
 
-const originalDevFlag = process.env.DEV_ALLOW_X_USER_ID;
+const originalDevFlag = process.env.ALLOW_X_USER_ID_DEV;
+const originalNodeEnv = process.env.NODE_ENV;
 
 describe('GET /api/users/me', () => {
   beforeEach(() => {
     mockQuery.mockReset();
     mockVerifyToken.mockReset();
+    delete process.env.ALLOW_X_USER_ID_DEV;
+    process.env.NODE_ENV = 'test';
     mockGetAuthService.mockClear();
     delete process.env.DEV_ALLOW_X_USER_ID;
   });
 
   afterEach(() => {
     if (originalDevFlag === undefined) {
-      delete process.env.DEV_ALLOW_X_USER_ID;
+      delete process.env.ALLOW_X_USER_ID_DEV;
     } else {
-      process.env.DEV_ALLOW_X_USER_ID = originalDevFlag;
+      process.env.ALLOW_X_USER_ID_DEV = originalDevFlag;
+    }
+
+    if (originalNodeEnv === undefined) {
+      delete process.env.NODE_ENV;
+    } else {
+      process.env.NODE_ENV = originalNodeEnv;
     }
   });
 
@@ -91,22 +103,22 @@ describe('GET /api/users/me', () => {
     expect(mockQuery).not.toHaveBeenCalled();
   });
 
-  it('allows the legacy X-User-Id header only when the development flag is enabled', async () => {
-    process.env.DEV_ALLOW_X_USER_ID = 'true';
+  it('allows the legacy X-User-Id header only when the development flag is enabled locally', async () => {
+    process.env.ALLOW_X_USER_ID_DEV = 'true';
 
-    mockQuery.mockResolvedValueOnce({ rows: [baseUser] });
-    mockVerifyToken.mockImplementation(async (header?: string | null) => {
-      if (!header && process.env.DEV_ALLOW_X_USER_ID === 'true') {
-        return {
-          id: baseUser.user_id,
-          clerkId: baseUser.clerk_user_id,
-          email: baseUser.email_primary,
-          isNew: false,
-        };
-      }
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
-      throw new HttpError(401, 'unauthorized', 'Authentication required');
-    });
+    mockQuery
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            user_id: baseUser.user_id,
+            clerk_user_id: baseUser.clerk_user_id,
+            email_primary: baseUser.email_primary,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [baseUser] });
 
     const response = await request(app)
       .get('/api/users/me')
@@ -114,14 +126,19 @@ describe('GET /api/users/me', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ user: baseUser });
-    expect(mockVerifyToken).toHaveBeenCalledWith(undefined);
-    expect(mockQuery).toHaveBeenCalledWith('SELECT * FROM users WHERE user_id = $1 LIMIT 1', [baseUser.user_id]);
+    expect(mockVerifyToken).not.toHaveBeenCalled();
+    expect(mockQuery).toHaveBeenNthCalledWith(1, LEGACY_USER_LOOKUP_SQL, [baseUser.user_id]);
+    expect(mockQuery).toHaveBeenNthCalledWith(2, 'SELECT * FROM users WHERE user_id = $1 LIMIT 1', [baseUser.user_id]);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
 
-    mockVerifyToken.mockReset();
+    warnSpy.mockRestore();
+
+    delete process.env.ALLOW_X_USER_ID_DEV;
+    mockVerifyToken.mockImplementation(async () => {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    });
+
     mockQuery.mockReset();
-
-    process.env.DEV_ALLOW_X_USER_ID = 'false';
-    mockVerifyToken.mockRejectedValueOnce(new HttpError(401, 'unauthorized', 'Authentication required'));
 
     const rejection = await request(app)
       .get('/api/users/me')
@@ -132,5 +149,27 @@ describe('GET /api/users/me', () => {
       code: 'unauthorized',
       message: 'Authentication required',
     });
+    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects the legacy header in production even when the flag is enabled', async () => {
+    process.env.ALLOW_X_USER_ID_DEV = 'true';
+    process.env.NODE_ENV = 'production';
+
+    mockVerifyToken.mockRejectedValueOnce(
+      new HttpError(401, 'unauthorized', 'Authentication required'),
+    );
+
+    const response = await request(app)
+      .get('/api/users/me')
+      .set('X-User-Id', baseUser.user_id);
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      code: 'unauthorized',
+      message: 'Authentication required',
+    });
+    expect(mockVerifyToken).toHaveBeenCalledWith(undefined);
+    expect(mockQuery).not.toHaveBeenCalled();
   });
 });
