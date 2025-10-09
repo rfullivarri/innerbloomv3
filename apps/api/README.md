@@ -41,6 +41,10 @@ npm run test
 
 This delegates to `npm --workspace apps/api run test`, which executes `vitest run` inside the API workspace. The same command is used in CI once dependencies are installed (`npm ci && npm test`).
 
+### Test environment setup
+
+Vitest automatically loads `src/tests/setup-env.ts` before each suite. The helper provides safe defaults for `DATABASE_URL` and `NODE_ENV` so middleware and service tests can run without connecting to a real database. Override these variables in your shell when exercising alternative configurations locally.
+
 ### Test utilities
 
 Use the helpers in `apps/api/src/tests/test-utils.ts` when mocking Express primitives inside Vitest suites. The module exports typed factories:
