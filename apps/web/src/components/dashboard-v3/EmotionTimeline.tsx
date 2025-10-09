@@ -326,7 +326,7 @@ function buildGrid(data: unknown): GridComputation {
       const label = emotion || 'Sin registro';
       const color = EMOTION_COLORS[emotion || 'Sin registro'];
       const tooltip = `${TOOLTIP_FORMATTER.format(cellDate)} — ${label}`;
-      const rowIndex = (cellDate.getDay() + 6) % 7;
+      const rowIndex = dayIndex;
       weekCells[rowIndex] = { key, color, label, emotion, tooltip };
     }
     columns.push(weekCells);
@@ -482,35 +482,37 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
 
           <div className="space-y-3">
             <div className="overflow-x-auto pb-2">
-              <div id="emotionChart" ref={gridRef} className="emotion-grid--weekcols" style={gridStyle}>
-                {grid.columns.map((week, weekIndex) => (
-                  <div key={weekIndex} className="emotion-col">
-                    {week.map((cell) => (
-                      <button
-                        key={cell.key}
-                        className="emotion-cell"
-                        style={{ backgroundColor: cell.color }}
-                        type="button"
-                        title={cell.tooltip}
-                        aria-label={cell.tooltip}
-                        data-tooltip={cell.tooltip}
-                        data-active={activeCellKey === cell.key ? 'true' : undefined}
-                        onMouseEnter={() => activateCell(cell.key)}
-                        onFocus={() => activateCell(cell.key)}
-                        onMouseLeave={() => setActiveCellKey(null)}
-                        onBlur={() => setActiveCellKey(null)}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          toggleCell(cell.key);
-                        }}
-                        onTouchStart={(event) => {
-                          event.stopPropagation();
-                          toggleCell(cell.key);
-                        }}
-                      />
-                    ))}
-                  </div>
-                ))}
+              <div className="min-w-full flex justify-center">
+                <div id="emotionChart" ref={gridRef} className="emotion-grid--weekcols" style={gridStyle}>
+                  {grid.columns.map((week, weekIndex) => (
+                    <div key={weekIndex} className="emotion-col">
+                      {week.map((cell) => (
+                        <button
+                          key={cell.key}
+                          className="emotion-cell"
+                          style={{ backgroundColor: cell.color }}
+                          type="button"
+                          title={cell.tooltip}
+                          aria-label={cell.tooltip}
+                          data-tooltip={cell.tooltip}
+                          data-active={activeCellKey === cell.key ? 'true' : undefined}
+                          onMouseEnter={() => activateCell(cell.key)}
+                          onFocus={() => activateCell(cell.key)}
+                          onMouseLeave={() => setActiveCellKey(null)}
+                          onBlur={() => setActiveCellKey(null)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            toggleCell(cell.key);
+                          }}
+                          onTouchStart={(event) => {
+                            event.stopPropagation();
+                            toggleCell(cell.key);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             <p className="text-xs text-text-muted">Período analizado: {periodLabel}</p>
