@@ -108,11 +108,11 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
 
       {status === 'success' && (
         <div className="flex flex-col items-center gap-6">
-          <div className="relative w-full max-w-[520px] overflow-hidden rounded-3xl border border-white/10 bg-slate-950/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-2xl sm:p-6">
-            <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.22)_0%,_rgba(76,29,149,0.18)_42%,_rgba(2,6,23,0.94)_100%)]"
-              aria-hidden
-            />
+          <div className="relative w-full max-w-[520px] overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-2xl sm:p-6">
+            <div className="pointer-events-none absolute inset-0" aria-hidden>
+              <div className="absolute -left-16 bottom-6 h-64 w-64 rounded-full bg-[#a878ff]/25 blur-[90px]" />
+              <div className="absolute -right-24 -top-12 h-72 w-72 rounded-full bg-[#37aaff]/25 blur-[110px]" />
+            </div>
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/5 opacity-70" aria-hidden />
             <div className="relative flex w-full justify-center px-1 sm:px-2">
               <Radar dataset={dataset} />
