@@ -31,6 +31,16 @@ npm run dev
 
 The server exposes `GET /healthz` for health checks and mounts the existing Express routes alongside the new Fastify handlers.
 
+## Testing
+
+Run the unit and integration test suite locally from the repository root:
+
+```bash
+npm run test
+```
+
+This delegates to `npm --workspace apps/api run test`, which executes `vitest run` inside the API workspace. The same command is used in CI once dependencies are installed (`npm ci && npm test`).
+
 ## Clerk integration
 
 ### Authentication
