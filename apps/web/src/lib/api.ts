@@ -38,6 +38,81 @@ function extractArray<T>(source: any, ...keys: string[]): T[] {
   return [];
 }
 
+type AuthTokenProvider = () => Promise<string | null>;
+
+type AuthProviderWaiter = {
+  timeoutId: ReturnType<typeof setTimeout>;
+  resolve: (provider: AuthTokenProvider) => void;
+};
+
+const AUTH_PROVIDER_TIMEOUT_MS = 5_000;
+
+let authTokenProvider: AuthTokenProvider | null = null;
+const authProviderWaiters: AuthProviderWaiter[] = [];
+
+export function setApiAuthTokenProvider(provider: AuthTokenProvider | null) {
+  authTokenProvider = provider;
+
+  if (!provider) {
+    return;
+  }
+
+  const waiters = authProviderWaiters.splice(0, authProviderWaiters.length);
+  for (const waiter of waiters) {
+    clearTimeout(waiter.timeoutId);
+    waiter.resolve(provider);
+  }
+}
+
+async function resolveAuthToken(): Promise<string> {
+  const provider = authTokenProvider;
+
+  if (provider) {
+    const token = await provider();
+    if (!token) {
+      throw new Error('Missing Clerk session token for API request.');
+    }
+    return token;
+  }
+
+  const awaitedProvider = await new Promise<AuthTokenProvider>((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      const index = authProviderWaiters.findIndex((waiter) => waiter.timeoutId === timeoutId);
+      if (index >= 0) {
+        authProviderWaiters.splice(index, 1);
+      }
+      reject(new Error('Auth token provider is not ready.'));
+    }, AUTH_PROVIDER_TIMEOUT_MS);
+
+    authProviderWaiters.push({
+      timeoutId,
+      resolve: (nextProvider) => {
+        clearTimeout(timeoutId);
+        resolve(nextProvider);
+      },
+    });
+  });
+
+  const token = await awaitedProvider();
+  if (!token) {
+    throw new Error('Missing Clerk session token for API request.');
+  }
+
+  return token;
+}
+
+function applyAuthorization(init: RequestInit | undefined, authToken: string): RequestInit {
+  const headers = new Headers(init?.headers ?? {});
+  if (!headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${authToken}`);
+  }
+
+  return {
+    ...(init ?? {}),
+    headers,
+  };
+}
+
 const RAW_API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? '').trim();
 
 function normalizeBaseUrl(value: string): string {
@@ -159,6 +234,16 @@ async function getJson<T>(
 ): Promise<T> {
   const url = buildUrl(path, params);
   return apiGet<T>(url, init);
+}
+
+async function getAuthorizedJson<T>(
+  path: string,
+  params?: Record<string, string | number | undefined>,
+  init?: RequestInit,
+): Promise<T> {
+  const token = await resolveAuthToken();
+  const authedInit = applyAuthorization(init, token);
+  return getJson<T>(path, params, authedInit);
 }
 
 export type ProgressSummary = {
@@ -352,7 +437,9 @@ function normalizeAchievement(raw: RawAchievement, index: number): Achievement {
 }
 
 export async function getAchievements(userId: string): Promise<AchievementSummary> {
-  const response = await getJson<RawAchievementResponse>(`/users/${encodeURIComponent(userId)}/achievements`);
+  const response = await getAuthorizedJson<RawAchievementResponse>(
+    `/users/${encodeURIComponent(userId)}/achievements`,
+  );
   logShape('achievements', response);
 
   const achievements = Array.isArray(response.achievements) ? response.achievements : [];
@@ -463,7 +550,7 @@ export type Pillar = {
 };
 
 export async function getPillars(userId: string): Promise<Pillar[]> {
-  const response = await getJson<unknown>(`/users/${encodeURIComponent(userId)}/pillars`);
+  const response = await getAuthorizedJson<unknown>(`/users/${encodeURIComponent(userId)}/pillars`);
   logShape('pillars', response);
   return extractArray<Pillar>(response, 'pillars', 'items', 'data');
 }
@@ -477,7 +564,9 @@ export type TodaySummary = {
 };
 
 export async function getTodaySummary(userId: string): Promise<TodaySummary> {
-  const response = await getJson<Record<string, unknown>>(`/users/${encodeURIComponent(userId)}/summary/today`);
+  const response = await getAuthorizedJson<Record<string, unknown>>(
+    `/users/${encodeURIComponent(userId)}/summary/today`,
+  );
   logShape('today-summary', response);
 
   const quests = (response?.quests ?? {}) as Record<string, unknown>;
@@ -510,7 +599,9 @@ type UserTasksResponse = {
 };
 
 export async function getTasks(userId: string): Promise<UserTask[]> {
-  const response = await getJson<UserTasksResponse | UserTask[]>(`/users/${encodeURIComponent(userId)}/tasks`);
+  const response = await getAuthorizedJson<UserTasksResponse | UserTask[]>(
+    `/users/${encodeURIComponent(userId)}/tasks`,
+  );
   logShape('tasks', response);
   return extractArray<UserTask>(response, 'tasks', 'items', 'data');
 }
@@ -696,10 +787,9 @@ function normalizeEmotionDate(raw: unknown): string | null {
 }
 
 export async function getEmotions(userId: string, params: EmotionQuery = {}): Promise<EmotionSnapshot[]> {
-  const response = await getJson<EmotionLogResponse | EmotionLogEntry[] | { emotions?: unknown; days?: unknown }>(
-    `/users/${encodeURIComponent(userId)}/emotions`,
-    buildEmotionQuery(params),
-  );
+  const response = await getAuthorizedJson<
+    EmotionLogResponse | EmotionLogEntry[] | { emotions?: unknown; days?: unknown }
+  >(`/users/${encodeURIComponent(userId)}/emotions`, buildEmotionQuery(params));
 
   logShape('emotions', response);
 
@@ -777,7 +867,7 @@ export type UserState = {
 };
 
 export async function getUserState(userId: string): Promise<UserState> {
-  const response = await getJson<UserState>(`/users/${encodeURIComponent(userId)}/state`);
+  const response = await getAuthorizedJson<UserState>(`/users/${encodeURIComponent(userId)}/state`);
   logShape('user-state', response);
   return response;
 }
@@ -794,7 +884,9 @@ export type DailyEnergySnapshot = {
 
 export async function getUserDailyEnergy(userId: string): Promise<DailyEnergySnapshot | null> {
   try {
-    const response = await getJson<DailyEnergySnapshot>(`/users/${encodeURIComponent(userId)}/daily-energy`);
+    const response = await getAuthorizedJson<DailyEnergySnapshot>(
+      `/users/${encodeURIComponent(userId)}/daily-energy`,
+    );
     logShape('user-daily-energy', response);
     return response;
   } catch (error) {
@@ -818,7 +910,7 @@ export async function getUserStateTimeseries(
   userId: string,
   params: { from: string; to: string },
 ): Promise<EnergyTimeseriesPoint[]> {
-  const response = await getJson<unknown>(`/users/${encodeURIComponent(userId)}/state/timeseries`, params);
+  const response = await getAuthorizedJson<unknown>(`/users/${encodeURIComponent(userId)}/state/timeseries`, params);
   logShape('user-state-timeseries', response);
   return extractArray<EnergyTimeseriesPoint>(response, 'series', 'items', 'data');
 }
@@ -838,7 +930,10 @@ export async function getUserDailyXp(
   userId: string,
   params: { from?: string; to?: string } = {},
 ): Promise<DailyXpResponse> {
-  const response = await getJson<DailyXpResponse>(`/users/${encodeURIComponent(userId)}/xp/daily`, params);
+  const response = await getAuthorizedJson<DailyXpResponse>(
+    `/users/${encodeURIComponent(userId)}/xp/daily`,
+    params,
+  );
   logShape('user-daily-xp', response);
   return response;
 }
@@ -856,7 +951,7 @@ export async function getUserXpByTrait(
   userId: string,
   params: { from?: string; to?: string } = {},
 ): Promise<UserXpByTraitResponse> {
-  const response = await getJson<unknown>(`/users/${encodeURIComponent(userId)}/xp/by-trait`, params);
+  const response = await getAuthorizedJson<unknown>(`/users/${encodeURIComponent(userId)}/xp/by-trait`, params);
   logShape('user-xp-by-trait', response);
 
   const traits = extractArray<TraitXpEntry>(response, 'traits', 'items', 'data').map((item) => ({
@@ -907,7 +1002,7 @@ export async function getUserStreakPanel(
     query: params.query?.trim() ? params.query.trim() : undefined,
   };
 
-  const response = await getJson<StreakPanelResponse>(
+  const response = await getAuthorizedJson<StreakPanelResponse>(
     `/users/${encodeURIComponent(userId)}/streaks/panel`,
     normalized,
   );
@@ -935,12 +1030,8 @@ type CurrentUserResponse = {
   user: CurrentUserProfile;
 };
 
-export async function getCurrentUserProfile(clerkUserId: string): Promise<CurrentUserProfile> {
-  const response = await getJson<CurrentUserResponse>('/users/me', undefined, {
-    headers: {
-      'X-User-Id': clerkUserId,
-    },
-  });
+export async function getCurrentUserProfile(): Promise<CurrentUserProfile> {
+  const response = await getAuthorizedJson<CurrentUserResponse>('/users/me');
 
   logShape('current-user', response);
 
@@ -958,7 +1049,7 @@ export type UserLevelResponse = {
 };
 
 export async function getUserLevel(userId: string): Promise<UserLevelResponse> {
-  const response = await getJson<UserLevelResponse>(`/users/${encodeURIComponent(userId)}/level`);
+  const response = await getAuthorizedJson<UserLevelResponse>(`/users/${encodeURIComponent(userId)}/level`);
   logShape('user-level', response);
   return response;
 }
@@ -968,7 +1059,7 @@ export type UserTotalXpResponse = {
 };
 
 export async function getUserTotalXp(userId: string): Promise<UserTotalXpResponse> {
-  const response = await getJson<UserTotalXpResponse>(`/users/${encodeURIComponent(userId)}/xp/total`);
+  const response = await getAuthorizedJson<UserTotalXpResponse>(`/users/${encodeURIComponent(userId)}/xp/total`);
   logShape('user-total-xp', response);
   return response;
 }
@@ -981,7 +1072,7 @@ export type UserJourneySummary = {
 };
 
 export async function getUserJourney(userId: string): Promise<UserJourneySummary> {
-  const response = await getJson<UserJourneySummary>(`/users/${encodeURIComponent(userId)}/journey`);
+  const response = await getAuthorizedJson<UserJourneySummary>(`/users/${encodeURIComponent(userId)}/journey`);
   logShape('user-journey', response);
   return response;
 }
