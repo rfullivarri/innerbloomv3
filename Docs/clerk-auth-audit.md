@@ -33,7 +33,7 @@
 ## 2. Uso de identidad
 - **Backend (`GET /users/me`)**: usa `authMiddleware` para validar `Authorization: Bearer` y rellenar `req.user` con `{ id, clerkId }`. El handler consulta `users.user_id = req.user.id` y responde `{ user }` con `user_id`, `game_mode`, `weekly_target`, etc.【F:apps/api/src/routes/users.ts†L37-L37】【F:apps/api/src/controllers/users/get-user-me.ts†L5-L41】
 - **Rutas `/users/:id/...`**: solo verifican que `:id` sea UUID mediante esquemas Zod y consultan `users.user_id`; no comparan contra una identidad autenticada ni exigen token.【F:apps/api/src/controllers/tasks/get-user-tasks.ts†L23-L61】【F:apps/api/src/controllers/users/shared.ts†L4-L12】
-- **Frontend web**: `App` instala un `ApiAuthBridge` que obtiene `getToken()` de Clerk y lo registra en el cliente REST. `useBackendUser` y los helpers de `api.ts` resuelven el token en cada request y envían `Authorization: Bearer <jwt>` hacia `/users/me` y `/users/:id/...`, eliminando `X-User-Id`.【F:apps/web/src/App.tsx†L1-L75】【F:apps/web/src/hooks/useBackendUser.ts†L1-L46】【F:apps/web/src/lib/api.ts†L1-L115】
+- **Frontend web**: `App` instala un `ApiAuthBridge` que obtiene `getToken()` de Clerk (opcionalmente usando `VITE_CLERK_TOKEN_TEMPLATE` para fijar el template de JWT) y lo registra en el cliente REST. `useBackendUser` y los helpers de `api.ts` resuelven el token en cada request y envían `Authorization: Bearer <jwt>` hacia `/users/me` y `/users/:id/...`, eliminando `X-User-Id`.【F:apps/web/src/App.tsx†L1-L94】【F:apps/web/src/hooks/useBackendUser.ts†L1-L46】【F:apps/web/src/lib/api.ts†L1-L115】
 
 ## 3. Tabla de cumplimiento vs política (JWT + UUID interno)
 | Componente | Identidad actual | Cumple política | Evidencia |

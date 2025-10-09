@@ -8,6 +8,16 @@ import SignUpPage from './pages/SignUp';
 import { DevBanner } from './components/layout/DevBanner';
 import { setApiAuthTokenProvider } from './lib/api';
 
+const CLERK_TOKEN_TEMPLATE = (() => {
+  const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
+  if (typeof raw !== 'string') {
+    return null;
+  }
+
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : null;
+})();
+
 function ApiAuthBridge() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
 
@@ -19,6 +29,10 @@ function ApiAuthBridge() {
 
     const provider = async () => {
       try {
+        if (CLERK_TOKEN_TEMPLATE) {
+          return await getToken({ template: CLERK_TOKEN_TEMPLATE });
+        }
+
         return await getToken();
       } catch (error) {
         console.error('[API] Failed to retrieve Clerk token', error);
