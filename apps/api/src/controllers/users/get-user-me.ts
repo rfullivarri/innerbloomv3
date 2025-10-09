@@ -4,7 +4,7 @@ import { HttpError } from '../../lib/http-error.js';
 
 const SELECT_USER_SQL = 'SELECT * FROM users WHERE clerk_user_id = $1 LIMIT 1';
 const INSERT_USER_SQL =
-  'INSERT INTO users (clerk_user_id) VALUES ($1) ON CONFLICT (clerk_user_id) DO NOTHING RETURNING *';
+  'INSERT INTO users (clerk_user_id, email_primary) VALUES ($1, $2) ON CONFLICT (clerk_user_id) DO NOTHING RETURNING *';
 
 export type CurrentUserRow = {
   user_id: string;
@@ -26,26 +26,28 @@ async function selectUser(clerkUserId: string): Promise<CurrentUserRow | null> {
   return result.rows[0] ?? null;
 }
 
-async function insertUser(clerkUserId: string): Promise<CurrentUserRow | null> {
-  const result = await pool.query<CurrentUserRow>(INSERT_USER_SQL, [clerkUserId]);
+async function insertUser(clerkUserId: string, email: string | null): Promise<CurrentUserRow | null> {
+  const result = await pool.query<CurrentUserRow>(INSERT_USER_SQL, [clerkUserId, email]);
   return result.rows[0] ?? null;
 }
 
 export const getCurrentUser: AsyncHandler = async (req, res) => {
-  const headerValue = req.get('x-user-id') ?? req.header('x-user-id');
-  const clerkUserId = typeof headerValue === 'string' ? headerValue.trim() : '';
+  const authUser = req.user;
 
-  if (!clerkUserId) {
+  if (!authUser) {
     throw new HttpError(401, 'unauthorized', 'Authentication required');
   }
 
+  const clerkUserId = authUser.clerkId;
+
   const existingUser = await selectUser(clerkUserId);
   if (existingUser) {
-    res.status(200).json({ user: existingUser });
+    const status = authUser.isNew ? 201 : 200;
+    res.status(status).json({ user: existingUser });
     return;
   }
 
-  const createdUser = await insertUser(clerkUserId);
+  const createdUser = await insertUser(clerkUserId, authUser.email ?? null);
   if (createdUser) {
     res.status(201).json({ user: createdUser });
     return;

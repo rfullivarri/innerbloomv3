@@ -1,14 +1,25 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CurrentUserRow } from '../controllers/users/get-user-me.js';
+import { HttpError } from '../lib/http-error.js';
 
-const { mockQuery } = vi.hoisted(() => ({
+const { mockQuery, mockVerifyToken } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
+  mockVerifyToken: vi.fn(),
 }));
 
 vi.mock('../db.js', () => ({
   pool: { query: mockQuery },
   dbReady: Promise.resolve(),
+}));
+
+vi.mock('../services/auth-service.js', () => ({
+  getAuthService: () => ({
+    verifyToken: mockVerifyToken,
+  }),
+  createAuthRepository: vi.fn(),
+  createAuthService: vi.fn(),
+  resetAuthServiceCache: vi.fn(),
 }));
 
 // The Express app is created after the database module is mocked to avoid
@@ -27,9 +38,18 @@ describe('GET /api/_health', () => {
 describe('GET /api/users/me', () => {
   beforeEach(() => {
     mockQuery.mockReset();
+    mockVerifyToken.mockReset();
   });
 
   it('returns 401 when the authentication header is missing', async () => {
+    mockVerifyToken.mockImplementation(async (header?: string | null) => {
+      if (!header) {
+        throw new HttpError(401, 'unauthorized', 'Authentication required');
+      }
+
+      throw new Error('unexpected call');
+    });
+
     const response = await request(app).get('/api/users/me');
 
     expect(response.status).toBe(401);
@@ -38,6 +58,7 @@ describe('GET /api/users/me', () => {
       message: 'Authentication required',
     });
     expect(mockQuery).not.toHaveBeenCalled();
+    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
   });
 
   it('returns the user when found', async () => {
@@ -57,10 +78,16 @@ describe('GET /api/users/me', () => {
     };
 
     mockQuery.mockResolvedValueOnce({ rows: [user] });
+    mockVerifyToken.mockResolvedValue({
+      id: 'user-row-id',
+      clerkId: 'user_456',
+      email: 'test@example.com',
+      isNew: false,
+    });
 
     const response = await request(app)
       .get('/api/users/me')
-      .set('x-user-id', 'user_456');
+      .set('Authorization', 'Bearer token');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ user });
@@ -69,6 +96,8 @@ describe('GET /api/users/me', () => {
       'SELECT * FROM users WHERE clerk_user_id = $1 LIMIT 1',
       ['user_456'],
     );
+    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
+    expect(mockVerifyToken).toHaveBeenCalledWith('Bearer token');
   });
 
   it('creates and returns the user when missing', async () => {
@@ -90,10 +119,16 @@ describe('GET /api/users/me', () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [created] });
+    mockVerifyToken.mockResolvedValue({
+      id: 'new-id',
+      clerkId: 'user_123',
+      email: null,
+      isNew: true,
+    });
 
     const response = await request(app)
       .get('/api/users/me')
-      .set('x-user-id', 'user_123');
+      .set('Authorization', 'Bearer token');
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual({ user: created });
@@ -104,9 +139,10 @@ describe('GET /api/users/me', () => {
     );
     expect(mockQuery).toHaveBeenNthCalledWith(
       2,
-      'INSERT INTO users (clerk_user_id) VALUES ($1) ON CONFLICT (clerk_user_id) DO NOTHING RETURNING *',
-      ['user_123'],
+      'INSERT INTO users (clerk_user_id, email_primary) VALUES ($1, $2) ON CONFLICT (clerk_user_id) DO NOTHING RETURNING *',
+      ['user_123', null],
     );
+    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
   });
 
   it('falls back to selecting the user when the insert returns no rows', async () => {
@@ -129,10 +165,16 @@ describe('GET /api/users/me', () => {
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [fetched] });
+    mockVerifyToken.mockResolvedValue({
+      id: 'existing-id',
+      clerkId: 'user_789',
+      email: 'fallback@example.com',
+      isNew: true,
+    });
 
     const response = await request(app)
       .get('/api/users/me')
-      .set('x-user-id', 'user_789');
+      .set('Authorization', 'Bearer token');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ user: fetched });
@@ -143,13 +185,14 @@ describe('GET /api/users/me', () => {
     );
     expect(mockQuery).toHaveBeenNthCalledWith(
       2,
-      'INSERT INTO users (clerk_user_id) VALUES ($1) ON CONFLICT (clerk_user_id) DO NOTHING RETURNING *',
-      ['user_789'],
+      'INSERT INTO users (clerk_user_id, email_primary) VALUES ($1, $2) ON CONFLICT (clerk_user_id) DO NOTHING RETURNING *',
+      ['user_789', 'fallback@example.com'],
     );
     expect(mockQuery).toHaveBeenNthCalledWith(
       3,
       'SELECT * FROM users WHERE clerk_user_id = $1 LIMIT 1',
       ['user_789'],
     );
+    expect(mockVerifyToken).toHaveBeenCalledTimes(1);
   });
 });
