@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { AsyncHandler } from '../../lib/async-handler.js';
 import { HttpError } from '../../lib/http-error.js';
 import { SimpleTtlCache } from '../../lib/simple-cache.js';
-import { uuidSchema } from '../../lib/validation.js';
+import { parseWithValidation, uuidSchema } from '../../lib/validation.js';
 import {
   addDays,
   computeDailyTargets,
@@ -48,8 +48,8 @@ function assertValidDate(value: string, field: 'from' | 'to'): string {
 }
 
 export const getUserStateTimeseries: AsyncHandler = async (req, res) => {
-  const { id } = paramsSchema.parse(req.params);
-  const { from, to } = querySchema.parse(req.query);
+  const { id } = parseWithValidation(paramsSchema, req.params);
+  const { from, to } = parseWithValidation(querySchema, req.query);
 
   const fromDate = assertValidDate(from, 'from');
   const toDate = assertValidDate(to, 'to');

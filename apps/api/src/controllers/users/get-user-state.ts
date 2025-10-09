@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { AsyncHandler } from '../../lib/async-handler.js';
 import { SimpleTtlCache } from '../../lib/simple-cache.js';
-import { uuidSchema } from '../../lib/validation.js';
+import { parseWithValidation, uuidSchema } from '../../lib/validation.js';
 import {
   addDays,
   computeDailyTargets,
@@ -48,7 +48,7 @@ const paramsSchema = z.object({
 const cache = new SimpleTtlCache<StateResponse>({ ttlMs: 5 * 60 * 1000, maxEntries: 200 });
 
 export const getUserState: AsyncHandler = async (req, res) => {
-  const { id } = paramsSchema.parse(req.params);
+  const { id } = parseWithValidation(paramsSchema, req.params);
 
   const cached = cache.get(id);
 

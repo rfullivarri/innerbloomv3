@@ -17,7 +17,7 @@ router.post(
     const parsed = completeTaskSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      throw new HttpError(400, 'invalid_request', 'Invalid request body', parsed.error.flatten());
+      throw new HttpError(400, 'invalid_request', 'Invalid request body');
     }
 
     res.status(501).json({
