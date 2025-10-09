@@ -41,6 +41,16 @@ npm run test
 
 This delegates to `npm --workspace apps/api run test`, which executes `vitest run` inside the API workspace. The same command is used in CI once dependencies are installed (`npm ci && npm test`).
 
+### Test utilities
+
+Use the helpers in `apps/api/src/tests/test-utils.ts` when mocking Express primitives inside Vitest suites. The module exports typed factories:
+
+* `mockReq(overrides?: Partial<Request>)` – creates a request object with configurable headers, params, and custom fields (such as `user`).
+* `mockRes()` – returns a response mock where `status`, `json`, and `end` are chainable spies.
+* `mockNext()` – provides a `NextFunction` mock compatible with Express middleware.
+
+These utilities keep test code free of `any` casts while matching the runtime behaviour expected by our middlewares.
+
 ## Clerk integration
 
 ### Authentication
