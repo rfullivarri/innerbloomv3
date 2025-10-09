@@ -2,18 +2,31 @@ import type { NextFunction, Request, Response } from 'express';
 import { describe, expect, it, vi } from 'vitest';
 import { HttpError } from '../lib/http-error.js';
 import { ownUserGuard } from './own-user-guard.js';
+import type { VerifiedUser } from '../services/auth-service.js';
 
-type MutableRequest = Partial<Request> & { params: Record<string, string>; user?: { id: string } };
+type MutableRequest = {
+  params: Record<string, string>;
+  user?: VerifiedUser;
+};
 
 function createRequest(params: Record<string, string>, userId?: string): MutableRequest {
   return {
     params,
-    user: userId ? { id: userId } : undefined,
+    user: userId
+      ? {
+          id: userId,
+          clerkId: `clerk_${userId}`,
+          email: 'user@example.com',
+          isNew: false,
+        }
+      : undefined,
   };
 }
 
-function createNext() {
-  return vi.fn<Parameters<NextFunction>, ReturnType<NextFunction>>();
+type MockNextFunction = ReturnType<typeof vi.fn<(err?: any) => void>>;
+
+function createNext(): MockNextFunction {
+  return vi.fn<(err?: any) => void>();
 }
 
 describe('ownUserGuard', () => {
@@ -21,7 +34,7 @@ describe('ownUserGuard', () => {
     const req = createRequest({ id: '11111111-2222-3333-4444-555555555555' }, 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
     const next = createNext();
 
-    ownUserGuard(req as Request, {} as Response, next);
+    ownUserGuard(req as Request, {} as Response, next as unknown as NextFunction);
 
     expect(next).toHaveBeenCalledTimes(1);
     const [error] = next.mock.calls[0] ?? [];
@@ -35,7 +48,7 @@ describe('ownUserGuard', () => {
     const req = createRequest({ id: userId }, userId);
     const next = createNext();
 
-    ownUserGuard(req as Request, {} as Response, next);
+    ownUserGuard(req as Request, {} as Response, next as unknown as NextFunction);
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledWith();
