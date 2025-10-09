@@ -131,14 +131,54 @@ Este documento resume los endpoints HTTP disponibles en el backend del dashboard
 
 ### `GET /users/me`
 * **Uso en frontend:** el hook `useBackendUser` obtiene el perfil asociado al usuario de Clerk para conocer `user_id`, `game_mode`, `weekly_target` e imagen.
-* **Headers:** `Authorization: Bearer <jwt>` obligatorio (token de sesión Clerk). Solo en desarrollo local puede habilitarse temporalmente `ALLOW_X_USER_ID_DEV=true` para aceptar `X-User-Id` en `GET /users/me`; cada petición emite un warning y el soporte se retirará el **2024-09-30**.
+* **Headers:** `Authorization: Bearer <jwt>` obligatorio (token de sesión Clerk). Solo en desarrollo local puede habilitarse temporalmente `ALLOW_X_USER_ID_DEV=true` para aceptar `Authorization: Bearer dev_<token>` con un JWT sin firma.
 * **Respuesta:** `{ user: { user_id, clerk_user_id, email_primary, full_name, image_url, game_mode, weekly_target, timezone, locale, created_at, updated_at, deleted_at } }`.
+
+#### Ejemplos `curl`
+```bash
+# 200 OK: token válido y sesión activa
+curl -X GET \
+  https://api.innerbloom.dev/users/me \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer sk_test_valid_session_jwt"
+
+# 401 Unauthorized: token faltante
+curl -X GET \
+  https://api.innerbloom.dev/users/me \
+  -H "Accept: application/json"
+
+# 403 Forbidden: token válido para usuario sin acceso al dashboard
+curl -X GET \
+  https://api.innerbloom.dev/users/me \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer sk_test_revoked_jwt"
+```
 
 ## Progreso y XP
 
 ### `GET /users/:id/summary/today`
 * **Uso:** hero del dashboard legacy (`DashboardPage`) muestra XP del día y quests completadas.
 * **Respuesta:** `{ date, xp_today, quests: { total, completed } }`.
+
+#### Ejemplos `curl`
+```bash
+# 200 OK: UUID propio y token con permisos
+curl -X GET \
+  "https://api.innerbloom.dev/users/45f3c8f5-4cf6-4a54-8d1e-41f2812ac012/summary/today" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer sk_test_valid_session_jwt"
+
+# 401 Unauthorized: falta el JWT
+curl -X GET \
+  "https://api.innerbloom.dev/users/45f3c8f5-4cf6-4a54-8d1e-41f2812ac012/summary/today" \
+  -H "Accept: application/json"
+
+# 403 Forbidden: el JWT pertenece a otro usuario (no coincide el UUID)
+curl -X GET \
+  "https://api.innerbloom.dev/users/99999999-9999-4999-8999-999999999999/summary/today" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer sk_test_valid_session_jwt"
+```
 
 ### `GET /users/:id/xp/total`
 * **Uso:** tarjeta "Progreso general" (Dashboard V3) y lógica legacy; muestra el acumulado histórico de XP.
@@ -251,3 +291,22 @@ Este documento resume los endpoints HTTP disponibles en el backend del dashboard
 ### `GET /task-logs` (legacy)
 * **Uso:** versión MVP previa del módulo de actividad; recibe `userId` como query string.
 * **Respuesta:** `[]` una vez validado el parámetro. El historial completo no está habilitado en la base reseteada.
+
+## Tabla de cumplimiento de endpoints finales
+
+| Endpoint | Autenticación requerida | ID esperado | Cumplimiento actual |
+| --- | --- | --- | --- |
+| `GET /users/me` | `Authorization: Bearer <jwt>` obligatorio | Derivado del JWT → `user_id` interno | ✅ Cumple (auth middleware + validación de sesión) |
+| `GET /users/:id/summary/today` | `Authorization: Bearer <jwt>` obligatorio | `:id` debe coincidir con `user_id` del token | ⚠️ Parcial (requiere enforcement de coincidencia) |
+| `GET /users/:id/xp/*` (total, daily, by-trait) | `Authorization: Bearer <jwt>` obligatorio | `:id` del propietario autenticado | ⚠️ Parcial (falta middleware global) |
+| `GET /users/:id/*` (achievements, level, pillars, daily-energy, emotions, journey, state, streaks/panel) | `Authorization: Bearer <jwt>` obligatorio | `:id` del propietario autenticado | ⚠️ Parcial (validan UUID pero no identidad) |
+| Endpoints legacy `/tasks`, `/task-logs`, `/tasks/complete` | Ninguna (solo validan UUID en query/body) | UUID suministrado por el cliente | ❌ No cumplen (sin JWT ni derivación de identidad) |
+| Públicos (`/_health`, `/health/db`, `/pillars`, `/leaderboard`) | Ninguna | N/A | ✅ Públicos por diseño |
+
+## Checklist de verificación manual
+
+1. Abrir el dashboard autenticado y confirmar en DevTools → Network que todas las peticiones `GET /users/*` envían `Authorization: Bearer <jwt>`.
+2. Repetir `curl` de `/users/me` sin header `Authorization` y validar respuesta `401`.
+3. Repetir `curl` de `/users/:id/summary/today` con `:id` ajeno y JWT propio; la API debe responder `403` una vez que se implemente la verificación de identidad.
+4. Revisar los logs del backend para comprobar que no se registra el uso de `X-User-Id` ni advertencias de compatibilidad.
+5. Ejecutar `ALLOW_X_USER_ID_DEV=true pnpm --filter api dev` en local y asegurar que solo se acepta `Authorization: Bearer dev_<token>` durante pruebas controladas.

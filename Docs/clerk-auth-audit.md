@@ -54,7 +54,7 @@
 1. **Implementar middleware Clerk JWT** que verifique firma (`svix`, `iss`, `aud`) y cargue `req.user` con `clerk_user_id` y `user_id`. ✅ `/users/me` ya lo utiliza; resta propagarlo a rutas `/users/:id/...` para cerrar accesos públicos.【F:apps/api/src/routes/users.ts†L22-L35】
 2. **Aplicar el middleware a todas las rutas privadas** (`/users/me` y `/users/:id/...`), validando que el `:id` solicitado coincida con el `user_id` autenticado o derivándolo internamente para evitar exposición masiva.【F:apps/api/src/routes/users.ts†L22-L35】
 3. **Actualizar el frontend** para consumir `getToken()` de Clerk y enviar `Authorization: Bearer <jwt>` en `apiGet`, eliminando dependencias de `X-User-Id`. ✅ Implementado con `ApiAuthBridge`, `getAuthorizedJson` y la renovación de `useBackendUser`.【F:apps/web/src/App.tsx†L1-L75】【F:apps/web/src/lib/api.ts†L1-L209】【F:apps/web/src/hooks/useBackendUser.ts†L1-L46】
-   - **Nuevo**: existe una bandera temporal `ALLOW_X_USER_ID_DEV` (default `false`) que solo permite `X-User-Id` en `GET /users/me` cuando la API corre en entorno local (`NODE_ENV=development/test`). Cada acceso emite un warning y el soporte se retirará el **30 de septiembre de 2024**.
+   - **Nuevo**: existe una bandera temporal `ALLOW_X_USER_ID_DEV` (default `false`) que, solo en entornos locales (`NODE_ENV=development/test`), admite `Authorization: Bearer dev_<token>` para facilitar QA sin firmar JWT. Cada acceso emite un warning y el soporte se retirará el **30 de septiembre de 2024**.
 4. **Revisar documentación interna** (`Docs/dashboard-endpoints.md`, tutoriales) para que reflejen el flujo JWT + UUID, evitando que nuevos clientes repliquen el esquema heredado.【F:Docs/dashboard-endpoints.md†L132-L145】
 5. **Evaluar endpoints legacy (`/tasks`, `/task-logs`, `/tasks/complete`)**: si continúan activos, forzar autenticación y calcular `userId` desde el token; si son obsoletos, retirarlos o aislarlos tras un gateway autenticado.【F:apps/api/src/routes/legacy.ts†L22-L62】
 
@@ -92,3 +92,11 @@ Las rutas `/users/:id/state` y `/users/:id/state/timeseries` ahora delegan la va
 - **Cobertura actual (Vitest + V8)**: Statements 97.56%, Branches 84.71%, Functions 98.91%, Lines 97.56%.【335cb1†L57-L64】
 - **Foco de cobertura**: limitamos la métrica a middlewares, servicios de auth, controladores y rutas para vigilar regresiones de seguridad; se excluyen `src/index.ts`, `src/db.ts`, esquemas y scripts porque no se ejecutan durante las pruebas y no impactan la superficie de autenticación.【F:apps/api/vitest.config.ts†L13-L33】
 - **Nuevas pruebas relevantes**: se añadieron suites para `getUserState`, `streak-panel`, `pillars` y `xp-by-trait` que cubren flujos de gracia, modos y normalización de entradas que afectan controles de acceso y cálculos de exposición.【F:apps/api/src/controllers/users/get-user-state.test.ts†L133-L212】【F:apps/api/src/routes/users/streak-panel.test.ts†L97-L232】【F:apps/api/src/routes/users/pillars.test.ts†L129-L198】【F:apps/api/src/routes/users/xp-by-trait.test.ts†L57-L94】
+
+## Checklist de verificación manual
+
+1. Confirmar que cualquier petición manual a `/users/me` y `/users/:id/...` responde `401` cuando se omite `Authorization: Bearer <jwt>`.
+2. Ejecutar `curl` con `Authorization: Bearer dev_<token>` y `ALLOW_X_USER_ID_DEV=true` en un entorno local para validar el flujo de QA sin firma.
+3. Revisar los logs del backend (`pnpm --filter api dev`) y asegurarse de que los avisos relacionados con tokens dev se registran y que no se aceptan encabezados heredados.
+4. Verificar en DevTools → Network que no se envían encabezados `X-User-Id` y que `Authorization` aparece en todas las solicitudes protegidas.
+5. Simular un acceso cruzado (`/users/:id/...` con JWT ajeno) y documentar la respuesta (`403` esperada una vez aplicado el middleware compartido).
