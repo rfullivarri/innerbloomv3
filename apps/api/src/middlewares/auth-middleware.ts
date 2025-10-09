@@ -6,11 +6,9 @@ type GetService = () => AuthService;
 
 export type RequestUser = VerifiedUser;
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: RequestUser;
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: RequestUser;
   }
 }
 
