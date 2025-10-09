@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getUserState } from './get-user-state.js';
 
 const {
@@ -29,6 +29,11 @@ const {
   mockFormatDateInTimezone: vi.fn(),
   mockAddDays: vi.fn(),
 }));
+
+const consoleErrorSpy = vi
+  .spyOn(console, 'error')
+  .mockImplementation(() => undefined); // cuerpo de expresión, no vacío
+
 
 vi.mock('./user-state-service.js', () => ({
   getUserProfile: mockGetUserProfile,
@@ -69,9 +74,14 @@ describe('getUserState', () => {
     mockPropagateEnergy.mockReset();
     mockFormatDateInTimezone.mockReset();
     mockAddDays.mockReset();
+    consoleErrorSpy.mockClear();
   }
 
   beforeEach(resetMocks);
+
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
+  });
 
   it('returns the mode name and code following the profile priority', async () => {
     const req = {
@@ -110,5 +120,68 @@ describe('getUserState', () => {
         mode_name: 'Flow Mode',
       }),
     );
+    expect(mockComputeHalfLife).toHaveBeenCalledWith('FLOW');
+    expect(mockComputeDailyTargets).toHaveBeenCalledWith({ Body: 10, Mind: 20, Soul: 30 }, 21);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it('applies defaults when the profile is missing optional data', async () => {
+    const req = {
+      params: { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' },
+    } as unknown as Request;
+    const res = createMockResponse();
+
+    mockGetUserProfile.mockResolvedValue({
+      userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      modeCode: '',
+      modeName: null,
+      weeklyTarget: 0,
+      timezone: null,
+    });
+    mockGetUserLogStats.mockResolvedValue({ uniqueDays: 0, firstDate: null });
+    mockGetXpBaseByPillar.mockResolvedValue({ Body: 0, Mind: 0, Soul: 0 });
+    mockComputeHalfLife.mockReturnValue({ Body: 6, Mind: 8, Soul: 10 });
+    mockComputeDecayRates.mockReturnValue({ Body: 0, Mind: 0, Soul: 0 });
+    mockComputeDailyTargets.mockReturnValue({ Body: 0, Mind: 0, Soul: 0 });
+    mockComputeGainFactors.mockReturnValue({ Body: 0, Mind: 0, Soul: 0 });
+    mockEnumerateDates.mockReturnValue(['2024-05-20']);
+    mockGetDailyXpSeriesByPillar.mockResolvedValue(new Map());
+    mockPropagateEnergy.mockReturnValue({
+      lastEnergy: { Body: 0, Mind: 0, Soul: 0 },
+      series: [],
+    });
+    mockFormatDateInTimezone.mockReturnValue('2024-05-20');
+
+    await getUserState(req, res, vi.fn());
+
+    expect(mockComputeHalfLife).toHaveBeenCalledWith('FLOW');
+    expect(mockComputeDailyTargets).toHaveBeenCalledWith({ Body: 0, Mind: 0, Soul: 0 }, 700);
+    expect(mockGetDailyXpSeriesByPillar).not.toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: 'Flow',
+        weekly_target: 700,
+        grace: expect.objectContaining({ applied: true }),
+      }),
+    );
+    expect(res.json.mock.calls[0][0]).not.toHaveProperty('mode_name');
+  });
+
+  it('returns a validation error when the user id is invalid without throwing 500', async () => {
+    const req = {
+      params: { id: 'not-a-uuid' },
+    } as unknown as Request;
+    const res = createMockResponse();
+
+    await expect(getUserState(req, res, vi.fn())).rejects.toMatchObject({
+      status: 400,
+      code: 'invalid_request',
+    });
+
+    expect(res.json).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[users/state] fail', {
+      userId: 'not-a-uuid',
+      reason: 'id must be a valid UUID',
+    });
   });
 });

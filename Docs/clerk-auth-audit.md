@@ -98,6 +98,7 @@ Las rutas `/users/:id/state` y `/users/:id/state/timeseries` ahora delegan la va
 - **Cobertura actual (Vitest + V8)**: Statements 97.56%, Branches 84.71%, Functions 98.91%, Lines 97.56%.【335cb1†L57-L64】
 - **Foco de cobertura**: limitamos la métrica a middlewares, servicios de auth, controladores y rutas para vigilar regresiones de seguridad; se excluyen `src/index.ts`, `src/db.ts`, esquemas y scripts porque no se ejecutan durante las pruebas y no impactan la superficie de autenticación.【F:apps/api/vitest.config.ts†L13-L33】
 - **Nuevas pruebas relevantes**: se añadieron suites para `getUserState`, `streak-panel`, `pillars` y `xp-by-trait` que cubren flujos de gracia, modos y normalización de entradas que afectan controles de acceso y cálculos de exposición.【F:apps/api/src/controllers/users/get-user-state.test.ts†L133-L212】【F:apps/api/src/routes/users/streak-panel.test.ts†L97-L232】【F:apps/api/src/routes/users/pillars.test.ts†L129-L198】【F:apps/api/src/routes/users/xp-by-trait.test.ts†L57-L94】
+- **Refuerzo reciente**: `GET /users/:id/state` sanea `modeCode`, `mode_name` y `weekly_target` con defaults (`Flow`/`700`) y registra un único log `[users/state] fail` para evitar 500 ante datos incompletos; nuevas pruebas cubren el caso feliz, faltantes y validación de UUID.【F:apps/api/src/controllers/users/get-user-state.ts†L43-L150】【F:apps/api/src/controllers/users/get-user-state.test.ts†L45-L136】
 
 ## Checklist de verificación manual
 
