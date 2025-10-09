@@ -25,6 +25,7 @@ describe('createAuthService', () => {
     issuer: 'https://clerk.example.com',
     audience: 'api.example.com',
     jwksUrl: 'https://clerk.example.com/.well-known/jwks.json',
+    allowedAzp: undefined as string | undefined,
   };
 
   const jwksStub = {} as never;
@@ -104,6 +105,102 @@ describe('createAuthService', () => {
       email: 'fallback@example.com',
       isNew: true,
     });
+  });
+
+  it('accepts tokens without an audience when azp matches the allowed value', async () => {
+    const config = { ...baseConfig, audience: undefined, allowedAzp: 'https://app.example.com' };
+    service = createAuthService(config, {
+      repository,
+      jwtVerifyFn: jwtVerifyFn as never,
+      jwks: jwksStub,
+    });
+
+    (repository.findByClerkId as vi.Mock).mockResolvedValue({
+      user_id: 'user-azp',
+      clerk_user_id: 'clerk-azp',
+      email_primary: 'azp@example.com',
+    });
+
+    jwtVerifyFn.mockResolvedValue({
+      payload: {
+        sub: 'clerk-azp',
+        azp: 'https://app.example.com',
+      },
+    });
+
+    const result = await service.verifyToken('Bearer azp.jwt');
+
+    expect(jwtVerifyFn).toHaveBeenCalledWith('azp.jwt', jwksStub, {
+      issuer: config.issuer,
+    });
+    expect(result).toEqual({
+      id: 'user-azp',
+      clerkId: 'clerk-azp',
+      email: 'azp@example.com',
+      isNew: false,
+    });
+  });
+
+  it('rejects tokens without an audience when azp does not match the allowed value', async () => {
+    const config = { ...baseConfig, audience: undefined, allowedAzp: 'https://app.example.com' };
+    service = createAuthService(config, {
+      repository,
+      jwtVerifyFn: jwtVerifyFn as never,
+      jwks: jwksStub,
+    });
+
+    jwtVerifyFn.mockResolvedValue({
+      payload: {
+        sub: 'clerk-azp',
+        azp: 'https://other.example.com',
+      },
+    });
+
+    await expect(service.verifyToken('Bearer bad-azp.jwt')).rejects.toMatchObject({
+      status: 401,
+      code: 'unauthorized',
+      message: 'Invalid authentication token',
+    });
+    expect(repository.findByClerkId).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('accepts tokens when the audience claim matches the configured audience', async () => {
+    (repository.findByClerkId as vi.Mock).mockResolvedValue({
+      user_id: 'user-aud',
+      clerk_user_id: 'clerk-aud',
+      email_primary: 'aud@example.com',
+    });
+
+    jwtVerifyFn.mockResolvedValue({
+      payload: {
+        sub: 'clerk-aud',
+        aud: 'api.example.com',
+      },
+    });
+
+    const result = await service.verifyToken('Bearer audience.jwt');
+
+    expect(result).toEqual({
+      id: 'user-aud',
+      clerkId: 'clerk-aud',
+      email: 'aud@example.com',
+      isNew: false,
+    });
+  });
+
+  it('rejects tokens when the audience claim does not match the configured audience', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    jwtVerifyFn.mockRejectedValue(new Error('JWT audience invalid'));
+
+    await expect(service.verifyToken('Bearer mismatched-aud.jwt')).rejects.toMatchObject({
+      status: 401,
+      code: 'unauthorized',
+      message: 'Invalid authentication token',
+    });
+
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 
   it('accepts raw JWT tokens and normalizes them internally', async () => {
@@ -212,6 +309,7 @@ describe('createAuthService', () => {
       beginsWithBearer: true,
       issuer: process.env.CLERK_JWT_ISSUER,
       audience: process.env.CLERK_JWT_AUDIENCE,
+      allowedAzp: process.env.CLERK_ALLOWED_AZP,
     });
     expect(repository.findByClerkId).not.toHaveBeenCalled();
     expect(repository.create).not.toHaveBeenCalled();
