@@ -55,6 +55,15 @@ Use the helpers in `apps/api/src/tests/test-utils.ts` when mocking Express primi
 
 These utilities keep test code free of `any` casts while matching the runtime behaviour expected by our middlewares.
 
+## Tests & Lint
+
+We keep Vitest suites aligned with our ESLint rules using a few simple conventions:
+
+* Prefer the shorthand `T[]` syntax for array types in tests instead of `Array<T>` to satisfy the `@typescript-eslint/array-type` rule.
+* Remove unused Express `NextFunction` parameters; rely on `vi.fn()` mocks when a `next` callback is required.
+* Replace empty arrow functions with `vi.fn()` or explicit return values so `no-empty-function` stays green.
+* The bootstrap in `src/tests/setup-env.ts` mocks `pg.Pool` with `vi.fn()` spies, preventing real database connections and avoiding lint warnings about empty methods.
+
 ## Clerk integration
 
 ### Authentication
