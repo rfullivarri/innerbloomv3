@@ -112,30 +112,30 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
       {showContent && (
         <div className="flex flex-col gap-6">
           <div className="space-y-3">
-            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 text-slate-200">
-              <div className="flex flex-wrap items-baseline gap-2">
+            <div className="flex flex-wrap items-center gap-6 text-slate-200">
+              <div className="flex items-center gap-3">
                 <span className="text-lg leading-none">🏆</span>
-                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Total XP
-                </span>
-                <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{totalXpLabel}</span>
+                <div className="flex flex-col">
+                  <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{totalXpLabel}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    Total XP
+                  </span>
+                </div>
               </div>
-              <span className="hidden text-slate-500 sm:inline">•</span>
-              <div className="flex flex-wrap items-baseline gap-2">
+              <div className="flex items-center gap-3">
                 <span className="text-lg leading-none">🎯</span>
-                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Nivel
-                </span>
-                <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{levelLabel}</span>
+                <div className="flex flex-col">
+                  <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{levelLabel}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    Nivel
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="space-y-3">
-            <div className="space-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Progreso</p>
-              <p className="text-sm text-slate-400">Hacia el próximo nivel</p>
-            </div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Progreso</p>
             <div
               className="relative h-6 w-full overflow-hidden rounded-full border border-white/5 bg-slate-950/60 shadow-[inset_0_2px_8px_rgba(8,15,40,0.6)] sm:h-[30px]"
               role="progressbar"
@@ -254,7 +254,7 @@ function GameModeChip({ label, backgroundClass, glowClass, animate }: GameModeCh
         aria-hidden
       />
       <span
-        className={`relative inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-[0.35rem] text-[9px] font-semibold uppercase tracking-[0.16em] shadow-[0_0_18px_rgba(15,23,42,0.3)] backdrop-blur ${backgroundClass}`}
+        className={`relative inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2 py-[0.2rem] text-[8px] font-semibold uppercase tracking-[0.2em] shadow-[0_0_18px_rgba(15,23,42,0.3)] backdrop-blur ${backgroundClass}`}
       >
         <span className="h-1 w-1 rounded-full bg-white/80" />
         {label}
