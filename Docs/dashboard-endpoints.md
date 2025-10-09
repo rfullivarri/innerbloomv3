@@ -131,7 +131,7 @@ Este documento resume los endpoints HTTP disponibles en el backend del dashboard
 
 ### `GET /users/me`
 * **Uso en frontend:** el hook `useBackendUser` obtiene el perfil asociado al usuario de Clerk para conocer `user_id`, `game_mode`, `weekly_target` e imagen.
-* **Headers:** `Authorization: Bearer <jwt>` obligatorio (token de sesión Clerk). No se aceptan cabeceras `X-User-Id`.
+* **Headers:** `Authorization: Bearer <jwt>` obligatorio (token de sesión Clerk). Solo en desarrollo local puede habilitarse temporalmente `ALLOW_X_USER_ID_DEV=true` para aceptar `X-User-Id` en `GET /users/me`; cada petición emite un warning y el soporte se retirará el **2024-09-30**.
 * **Respuesta:** `{ user: { user_id, clerk_user_id, email_primary, full_name, image_url, game_mode, weekly_target, timezone, locale, created_at, updated_at, deleted_at } }`.
 
 ## Progreso y XP
