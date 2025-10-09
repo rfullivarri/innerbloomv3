@@ -13,7 +13,7 @@ function createRequest(params: Record<string, string>, userId?: string): Mutable
 }
 
 function createNext() {
-  return vi.fn<Parameters<NextFunction>, ReturnType<NextFunction>>();
+  return vi.fn<(error?: HttpError) => ReturnType<NextFunction>>();
 }
 
 describe('ownUserGuard', () => {
@@ -24,10 +24,12 @@ describe('ownUserGuard', () => {
     ownUserGuard(req as Request, {} as Response, next);
 
     expect(next).toHaveBeenCalledTimes(1);
-    const [error] = next.mock.calls[0] ?? [];
+    const error = next.mock.calls[0]?.[0];
     expect(error).toBeInstanceOf(HttpError);
-    expect((error as HttpError).status).toBe(403);
-    expect((error as HttpError).code).toBe('forbidden');
+    if (error instanceof HttpError) {
+      expect(error.status).toBe(403);
+      expect(error.code).toBe('forbidden');
+    }
   });
 
   it('allows the request to continue when the ids match', () => {

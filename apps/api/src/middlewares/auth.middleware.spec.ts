@@ -42,7 +42,7 @@ function createMiddleware(service: MockAuthService) {
 }
 
 function createNext() {
-  return vi.fn<Parameters<NextFunction>, ReturnType<NextFunction>>();
+  return vi.fn<(error?: HttpError) => ReturnType<NextFunction>>();
 }
 
 describe('authMiddleware', () => {
@@ -60,10 +60,12 @@ describe('authMiddleware', () => {
     expect(verifyToken).toHaveBeenCalledWith(undefined);
     expect(req.user).toBeUndefined();
 
-    const [error] = next.mock.calls[0] ?? [];
+    const error = next.mock.calls[0]?.[0];
     expect(error).toBeInstanceOf(HttpError);
-    expect((error as HttpError).status).toBe(401);
-    expect((error as HttpError).code).toBe('unauthorized');
+    if (error instanceof HttpError) {
+      expect(error.status).toBe(401);
+      expect(error.code).toBe('unauthorized');
+    }
   });
 
   it('bubbles up HttpError instances from the auth service', async () => {
