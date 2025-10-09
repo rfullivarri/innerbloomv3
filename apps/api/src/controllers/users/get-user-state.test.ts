@@ -56,7 +56,7 @@ function createMockResponse() {
 }
 
 describe('getUserState', () => {
-  beforeEach(() => {
+  function resetMocks() {
     mockGetUserProfile.mockReset();
     mockGetUserLogStats.mockReset();
     mockGetXpBaseByPillar.mockReset();
@@ -69,7 +69,9 @@ describe('getUserState', () => {
     mockPropagateEnergy.mockReset();
     mockFormatDateInTimezone.mockReset();
     mockAddDays.mockReset();
-  });
+  }
+
+  beforeEach(resetMocks);
 
   it('returns the mode name and code following the profile priority', async () => {
     const req = {
