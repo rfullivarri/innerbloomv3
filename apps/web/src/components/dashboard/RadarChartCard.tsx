@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type CSSProperties } from 'react';
 import { Card } from '../ui/Card';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { useRequest } from '../../hooks/useRequest';
@@ -108,12 +108,13 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
 
       {status === 'success' && (
         <div className="flex flex-col items-center gap-6">
-          <div className="relative w-full max-w-[520px] overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:p-6">
+          <div className="relative w-full max-w-[520px] overflow-hidden rounded-3xl border border-white/10 bg-slate-950/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-2xl sm:p-6">
             <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.16)_0%,_rgba(15,23,42,0.85)_55%,_rgba(2,6,23,0.95)_100%)]"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.22)_0%,_rgba(76,29,149,0.18)_42%,_rgba(2,6,23,0.94)_100%)]"
               aria-hidden
             />
-            <div className="relative flex w-full justify-center">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/5 opacity-70" aria-hidden />
+            <div className="relative flex w-full justify-center px-1 sm:px-2">
               <Radar dataset={dataset} />
             </div>
           </div>
@@ -160,6 +161,16 @@ function Radar({ dataset }: RadarProps) {
 
   const gridLevels = [0.25, 0.5, 0.75, 1];
   const viewBoxSize = (center + 20) * 2;
+  const labelStyle: CSSProperties = {
+    fontSize: 'clamp(12px, 3.6vw, 15px)',
+    fontWeight: 600,
+    letterSpacing: '0.03em',
+    paintOrder: 'stroke fill',
+    stroke: 'rgba(15,23,42,0.7)',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  };
 
   return (
     <svg
@@ -194,7 +205,7 @@ function Radar({ dataset }: RadarProps) {
 
       {axes.map((axis, index) => {
         const lineEnd = basePointFor(radius, index);
-        const labelPoint = basePointFor(radius + 36, index);
+        const labelPoint = basePointFor(radius + 30, index);
         const normalized = maxValue > 0 ? Math.min(Math.max(axis.xp / maxValue, 0), 1) : 0;
         const valuePoint = pointFor(axis.xp, index);
 
@@ -211,10 +222,10 @@ function Radar({ dataset }: RadarProps) {
             <text
               x={labelPoint.x}
               y={labelPoint.y}
-              fill="rgba(226,232,240,0.85)"
-              fontSize={12}
+              fill="rgba(226,232,240,0.9)"
               textAnchor="middle"
               dominantBaseline="middle"
+              style={labelStyle}
             >
               {axis.label}
             </text>
