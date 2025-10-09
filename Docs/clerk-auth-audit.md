@@ -76,3 +76,8 @@ Las rutas `/users/:id/state` y `/users/:id/state/timeseries` ahora delegan la va
 
 ---
 **Estado actual:** `/users/me` ya aplica la política "JWT + UUID interno" vía `authMiddleware`. Aún falta migrar el resto de rutas `/users/:id/...` y endpoints legacy para cerrar el acceso sin token.
+
+## Cobertura y alcance
+- **Cobertura actual (Vitest + V8)**: Statements 97.56%, Branches 84.71%, Functions 98.91%, Lines 97.56%.【335cb1†L57-L64】
+- **Foco de cobertura**: limitamos la métrica a middlewares, servicios de auth, controladores y rutas para vigilar regresiones de seguridad; se excluyen `src/index.ts`, `src/db.ts`, esquemas y scripts porque no se ejecutan durante las pruebas y no impactan la superficie de autenticación.【F:apps/api/vitest.config.ts†L13-L33】
+- **Nuevas pruebas relevantes**: se añadieron suites para `getUserState`, `streak-panel`, `pillars` y `xp-by-trait` que cubren flujos de gracia, modos y normalización de entradas que afectan controles de acceso y cálculos de exposición.【F:apps/api/src/controllers/users/get-user-state.test.ts†L133-L212】【F:apps/api/src/routes/users/streak-panel.test.ts†L97-L232】【F:apps/api/src/routes/users/pillars.test.ts†L129-L198】【F:apps/api/src/routes/users/xp-by-trait.test.ts†L57-L94】
