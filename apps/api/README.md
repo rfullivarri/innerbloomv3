@@ -69,6 +69,35 @@ router.get('/users/me', authMiddleware, (req, res) => {
 export default router;
 ```
 
+### Perfil del usuario autenticado
+
+`GET /users/me` usa el middleware anterior y siempre responde con la forma `{ user: { ... } }` para mantener compatibilidad con el frontend actual. El objeto `user` incluye:
+
+```json
+{
+  "user_id": "uuid-interno",
+  "clerk_user_id": "clerk_123",
+  "email_primary": "user@example.com",
+  "full_name": "Nombre Apellido",
+  "image_url": "https://...",
+  "game_mode": "standard",
+  "weekly_target": 1200,
+  "timezone": "America/Mexico_City",
+  "locale": "es-MX",
+  "created_at": "2024-01-01T00:00:00.000Z",
+  "updated_at": "2024-01-15T00:00:00.000Z",
+  "deleted_at": null
+}
+```
+
+Ejemplo `curl` usando un token Clerk de sesión:
+
+```bash
+curl \
+  -H "Authorization: Bearer sk_test_yourClerkJwt" \
+  https://localhost:3000/api/users/me
+```
+
 ### Webhook
 
 * Endpoint: `POST /api/webhooks/clerk`
