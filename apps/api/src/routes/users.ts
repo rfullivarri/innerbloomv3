@@ -10,6 +10,7 @@ import { getUserState } from '../controllers/users/get-user-state.js';
 import { getUserStateTimeseries } from '../controllers/users/get-user-state-timeseries.js';
 import { getUserTotalXp } from '../controllers/users/get-user-total-xp.js';
 import { asyncHandler } from '../lib/async-handler.js';
+import { authMiddleware } from '../middlewares/auth-middleware.js';
 
 import { getUserStreakPanel } from './users/streak-panel.js';
 import { getUserDailyEnergy } from './users/daily-energy.js';
@@ -33,7 +34,7 @@ router.get('/users/:id/emotions', asyncHandler(getUserEmotions));
 router.get('/users/:id/state', asyncHandler(getUserState));
 router.get('/users/:id/state/timeseries', asyncHandler(getUserStateTimeseries));
 router.get('/users/:id/summary/today', asyncHandler(getUserSummaryToday));
-router.get('/users/me', asyncHandler(getCurrentUser));
+router.get('/users/me', authMiddleware, asyncHandler(getCurrentUser));
 
 export default router;
 export type { GetUserSummaryTodayResponse } from './users/summary-today.js';
