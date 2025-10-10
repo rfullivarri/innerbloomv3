@@ -20,7 +20,6 @@ const NUM_WEEKS = 26;
 const DAYS_IN_WEEK = 7;
 const LOOKBACK_FOR_HIGHLIGHT = 15;
 const TOTAL_DAYS = NUM_WEEKS * DAYS_IN_WEEK;
-const GRID_SCALE = 1.4;
 
 const MONTH_ABBREVIATIONS = [
   'ENE',
@@ -652,8 +651,6 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
         '--cell-gap': `${cellGap}px`,
         '--column-count': `${columnCount}`,
         gridTemplateColumns: `repeat(${columnCount}, minmax(0, var(--cell)))`,
-        transform: `scale(${GRID_SCALE})`,
-        transformOrigin: 'top left',
       }) as CSSProperties,
     [cellGap, cellSize, columnCount],
   );
@@ -675,11 +672,12 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       const csGrid = getComputedStyle(gridBox);
       const cell = parseFloat(csGrid.getPropertyValue('--cell')) || 0;
       const gap = parseFloat(csGrid.getPropertyValue('--cell-gap')) || 0;
+      const rowGap = parseFloat(csGrid.rowGap || csGrid.getPropertyValue('row-gap') || '0');
 
       const monthChip = gridBox.querySelector<HTMLElement>('.month-row > *');
       const monthH = monthChip ? monthChip.getBoundingClientRect().height : 0;
 
-      const sevenRows = 7 * cell + 6 * gap;
+      const sevenRows = 7 * cell + 6 * rowGap;
       const safety = Math.ceil(Math.max(2, window.devicePixelRatio)) + gap;
 
       const required = Math.ceil(monthH + sevenRows + pad + border + safety);
@@ -846,19 +844,21 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
                   className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
                   style={{ backgroundColor: highlight.color }}
                 />
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-semibold text-slate-100">{highlight.emotion}</h4>
-                  <p className="summary-description text-sm text-slate-100 opacity-70">
+                <div className="summary-content">
+                  <span className="summary-title text-slate-100">{highlight.emotion}</span>
+                  <span className="summary-description text-sm text-slate-100 opacity-70">
                     Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
                     {highlight.count === 1 ? 'registro' : 'registros'})
-                  </p>
+                  </span>
                 </div>
               </div>
             ) : (
               <div className="summary-inner rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-slate-400 sm:p-4">
-                <p className="summary-description">
-                  Aún no hay suficiente información reciente para destacar una emoción.
-                </p>
+                <div className="summary-content">
+                  <span className="summary-description">
+                    Aún no hay suficiente información reciente para destacar una emoción.
+                  </span>
+                </div>
               </div>
             )}
           </div>
