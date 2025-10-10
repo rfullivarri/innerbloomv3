@@ -9,26 +9,6 @@ import {
 } from '../../lib/validation.js';
 import { ensureUserExists } from '../../controllers/users/shared.js';
 
-const TRAIT_ORDER = [
-  'core',
-  'bienestar',
-  'autogestion',
-  'intelecto',
-  'psiquis',
-  'salud_fisica',
-] as const;
-
-const TRAIT_FALLBACK_LABELS: Record<TraitKey, string> = {
-  core: 'Core',
-  bienestar: 'Bienestar',
-  autogestion: 'Autogestión',
-  intelecto: 'Intelecto',
-  psiquis: 'Psiquis',
-  salud_fisica: 'Salud física',
-};
-
-type TraitKey = (typeof TRAIT_ORDER)[number];
-
 const paramsSchema = z.object({
   id: uuidSchema,
 });
@@ -36,64 +16,21 @@ const paramsSchema = z.object({
 const querySchema = dateRangeQuerySchema;
 
 type Row = {
+  user_id: string;
+  trait_id: number;
   trait_code: string | null;
   trait_name: string | null;
+  pillar_code: string | null;
   xp: string | number | null;
 };
 
-function sanitizeTraitCode(code: string | null | undefined): string | null {
-  if (!code) {
-    return null;
-  }
-
-  const sanitized = code
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-
-  return sanitized.length > 0 ? sanitized : null;
-}
-
-function normalizeTraitCode(code: string | null | undefined): TraitKey | null {
-  const sanitized = sanitizeTraitCode(code);
-  if (!sanitized) {
-    return null;
-  }
-
-  const matched = TRAIT_ORDER.find((trait) => {
-    if (trait === sanitized) {
-      return true;
-    }
-
-    switch (trait) {
-      case 'autogestion':
-        return ['auto_gestion', 'autogestion', 'gestion', 'auto-gestion'].includes(sanitized);
-      case 'salud_fisica':
-        return [
-          'salud_fisica',
-          'saludfisica',
-          'salud_fisico',
-          'salud_fisica_total',
-          'salud-fisica',
-          'salud_fisica_foundations',
-        ].includes(sanitized);
-      case 'psiquis':
-        return ['psiquis', 'psique', 'psiquis_total'].includes(sanitized);
-      case 'bienestar':
-        return ['bienestar', 'bien_estar'].includes(sanitized);
-      case 'intelecto':
-        return ['intelecto', 'intelectual'].includes(sanitized);
-      case 'core':
-        return ['core', 'corazon', 'core_total'].includes(sanitized);
-      default:
-        return false;
-    }
-  });
-
-  return matched ?? null;
-}
+export type TraitXpRow = {
+  trait_id: number;
+  trait_code: string | null;
+  trait_name: string | null;
+  pillar_code: string | null;
+  xp: number;
+};
 
 export const getUserXpByTrait: AsyncHandler = async (req, res) => {
   const { id } = paramsSchema.parse(req.params);
@@ -104,16 +41,7 @@ export const getUserXpByTrait: AsyncHandler = async (req, res) => {
   const hasExplicitRange = Boolean(from || to);
   const range = hasExplicitRange ? resolveDateRange({ from, to }, 60) : null;
 
-  const totals: Record<TraitKey, number> = {
-    core: 0,
-    bienestar: 0,
-    autogestion: 0,
-    intelecto: 0,
-    psiquis: 0,
-    salud_fisica: 0,
-  };
-
-  const params: string[] = [id];
+  const params: (string | number)[] = [id];
   let dateFilter = '';
 
   if (range) {
@@ -125,43 +53,30 @@ export const getUserXpByTrait: AsyncHandler = async (req, res) => {
   }
 
   const result = await pool.query<Row>(
-    `SELECT ct.code AS trait_code,
-            ct.name AS trait_name,
-            SUM(dl.quantity * t.xp_base) AS xp
+    `SELECT dl.user_id,
+            ct.trait_id,
+            ct.code  AS trait_code,
+            ct.name  AS trait_name,
+            cp.code  AS pillar_code,
+            SUM(cd.xp_base * GREATEST(dl.quantity, 1)) AS xp
        FROM daily_log dl
-       JOIN tasks t ON t.task_id = dl.task_id
-  LEFT JOIN cat_trait ct ON ct.trait_id = t.trait_id
+       JOIN tasks t          ON t.task_id = dl.task_id
+       JOIN cat_trait ct     ON ct.trait_id = t.trait_id
+       JOIN cat_pillar cp    ON cp.pillar_id = t.pillar_id
+       JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
       WHERE dl.user_id = $1${dateFilter}
-   GROUP BY ct.code, ct.name`,
+   GROUP BY dl.user_id, ct.trait_id, ct.code, ct.name, cp.code
+   ORDER BY ct.trait_id`,
     params,
   );
 
-  const labels: Partial<Record<TraitKey, string>> = {};
+  const traits: TraitXpRow[] = result.rows.map((row) => ({
+    trait_id: row.trait_id,
+    trait_code: row.trait_code,
+    trait_name: row.trait_name,
+    pillar_code: row.pillar_code,
+    xp: Number(row.xp ?? 0) || 0,
+  }));
 
-  for (const row of result.rows) {
-    const trait = normalizeTraitCode(row.trait_code);
-
-    if (!trait) {
-      continue;
-    }
-
-    const xp = Number(row.xp ?? 0);
-    totals[trait] = (totals[trait] ?? 0) + (Number.isFinite(xp) ? xp : 0);
-
-    const sanitizedCode = sanitizeTraitCode(row.trait_code);
-    const isDirectMatch = sanitizedCode === trait;
-
-    const name = row.trait_name?.toString().trim();
-    if (name && isDirectMatch) {
-      labels[trait] = name;
-    }
-  }
-
-  res.json({
-    traits: TRAIT_ORDER.map((trait) => ({
-      trait,
-      name: labels[trait] ?? TRAIT_FALLBACK_LABELS[trait],
-      xp: Math.round(totals[trait] ?? 0),
-    })),
-  });
+  res.json(traits);
 };
