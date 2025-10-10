@@ -246,7 +246,8 @@ interface RadarProps {
 
 function Radar({ dataset }: RadarProps) {
   const radius = 130;
-  const center = radius + 32;
+  const outerPadding = 96;
+  const center = radius + outerPadding;
   const { axes, maxValue } = dataset;
   const count = axes.length;
 
@@ -280,12 +281,11 @@ function Radar({ dataset }: RadarProps) {
     .join(' ');
 
   const gridLevels = [0.25, 0.5, 0.75, 1];
-  const viewBoxPadding = 36;
-  const viewBoxSize = (center + viewBoxPadding) * 2;
+  const viewBoxSize = center * 2;
   const labelStyle: CSSProperties = {
     fontFamily: '"Manrope", "Inter", system-ui, sans-serif',
     fontSize: 'clamp(11px, 3.2vw, 14px)',
-    fontWeight: 600,
+    fontWeight: 500,
     letterSpacing: '0.01em',
     paintOrder: 'stroke fill',
     stroke: 'rgba(15,23,42,0.7)',
@@ -364,7 +364,7 @@ function Radar({ dataset }: RadarProps) {
               style={{
                 fontFamily: '"Manrope", "Inter", system-ui, sans-serif',
                 fontSize: 'clamp(12px, 3.4vw, 16px)',
-                fontWeight: 700,
+                fontWeight: 600,
                 letterSpacing: '0.01em',
                 paintOrder: 'stroke fill',
                 stroke: 'rgba(15,23,42,0.65)',
