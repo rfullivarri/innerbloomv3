@@ -21,6 +21,10 @@ Con la variable habilitada, podés descargar el archivo actualizado y guardarlo 
 curl -fsS https://<API>/_admin/db-snapshot -H 'Accept: application/json' -o apps/api/db-snapshot.json
 ```
 
+Cada request al endpoint vuelve a consultar la base de datos en vivo, reconstruye la metadata (tablas, columnas, vistas, índices y claves foráneas), toma hasta 50 filas de muestra por tabla y devuelve un `generated_at` nuevo. Además, el handler envía `Cache-Control: no-store`, así que no reutiliza snapshots anteriores ni se cachea en intermediarios.【F:apps/api/src/routes/debug-db-snapshot.ts†L71-L110】
+
+> **Última ejecución:** `apps/api/db-snapshot.json` fue regenerado el `2025-10-10T14:41:44.077Z` (campo `generated_at`).【F:apps/api/db-snapshot.json†L3161-L3161】
+
 ## Contenido del snapshot
 
 El JSON incluye:
