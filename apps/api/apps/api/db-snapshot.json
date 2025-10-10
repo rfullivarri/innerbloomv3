@@ -1,0 +1,2482 @@
+{
+  "schema": {
+    "tables": [
+      {
+        "table_name": "cat_difficulty",
+        "table_type": "BASE TABLE"
+      },
+      {
+        "table_name": "cat_emotion",
+        "table_type": "BASE TABLE"
+      },
+      {
+        "table_name": "cat_game_mode",
+        "table_type": "BASE TABLE"
+      },
+      {
+        "table_name": "cat_pillar",
+        "table_type": "BASE TABLE"
+      },
+      {
+        "table_name": "cat_trait",
+        "table_type": "BASE TABLE"
+      },
+      {
+        "table_name": "daily_log",
+        "table_type": "BASE TABLE"
+      },
+      {
+        "table_name": "emotions_logs",
+        "table_type": "BASE TABLE"
+      },
+      {
+        "table_name": "tasks",
+        "table_type": "BASE TABLE"
+      },
+      {
+        "table_name": "users",
+        "table_type": "BASE TABLE"
+      }
+    ],
+    "columns": [
+      {
+        "table_name": "cat_difficulty",
+        "column_name": "difficulty_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "cat_difficulty",
+        "column_name": "code",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "cat_difficulty",
+        "column_name": "name",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "cat_difficulty",
+        "column_name": "xp_base",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "cat_emotion",
+        "column_name": "emotion_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "nextval('cat_emotion_emotion_id_seq'::regclass)",
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "cat_emotion",
+        "column_name": "code",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "cat_emotion",
+        "column_name": "name",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "cat_game_mode",
+        "column_name": "game_mode_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "cat_game_mode",
+        "column_name": "code",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "cat_game_mode",
+        "column_name": "name",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "cat_game_mode",
+        "column_name": "weekly_target",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "cat_pillar",
+        "column_name": "pillar_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "cat_pillar",
+        "column_name": "code",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "cat_pillar",
+        "column_name": "name",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "cat_trait",
+        "column_name": "trait_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "nextval('cat_trait_trait_id_seq'::regclass)",
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "cat_trait",
+        "column_name": "pillar_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "cat_trait",
+        "column_name": "code",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "cat_trait",
+        "column_name": "name",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "daily_log",
+        "column_name": "log_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "daily_log",
+        "column_name": "date",
+        "data_type": "date",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "daily_log",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "daily_log",
+        "column_name": "task_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "daily_log",
+        "column_name": "quantity",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "1",
+        "ordinal_position": 5
+      },
+      {
+        "table_name": "daily_log",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 6
+      },
+      {
+        "table_name": "emotions_logs",
+        "column_name": "emotion_log_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "emotions_logs",
+        "column_name": "date",
+        "data_type": "date",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "emotions_logs",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "emotions_logs",
+        "column_name": "emotion_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "emotions_logs",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 5
+      },
+      {
+        "table_name": "tasks",
+        "column_name": "task_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "tasks",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "tasks",
+        "column_name": "tasks_group_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "tasks",
+        "column_name": "task",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "tasks",
+        "column_name": "pillar_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 5
+      },
+      {
+        "table_name": "tasks",
+        "column_name": "trait_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 6
+      },
+      {
+        "table_name": "tasks",
+        "column_name": "difficulty_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 7
+      },
+      {
+        "table_name": "tasks",
+        "column_name": "xp_base",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 8
+      },
+      {
+        "table_name": "tasks",
+        "column_name": "active",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true",
+        "ordinal_position": 9
+      },
+      {
+        "table_name": "tasks",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 10
+      },
+      {
+        "table_name": "tasks",
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 11
+      },
+      {
+        "table_name": "users",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "users",
+        "column_name": "clerk_user_id",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "users",
+        "column_name": "email_primary",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "users",
+        "column_name": "full_name",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "users",
+        "column_name": "image_url",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 5
+      },
+      {
+        "table_name": "users",
+        "column_name": "game_mode_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 6
+      },
+      {
+        "table_name": "users",
+        "column_name": "timezone",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 7
+      },
+      {
+        "table_name": "users",
+        "column_name": "tasks_group_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 8
+      },
+      {
+        "table_name": "users",
+        "column_name": "first_date_log",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 9
+      },
+      {
+        "table_name": "users",
+        "column_name": "scheduler_enabled",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false",
+        "ordinal_position": 10
+      },
+      {
+        "table_name": "users",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 19
+      },
+      {
+        "table_name": "users",
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 20
+      },
+      {
+        "table_name": "users",
+        "column_name": "user_profile",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 21
+      },
+      {
+        "table_name": "users",
+        "column_name": "channel_scheduler",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "'email'::text",
+        "ordinal_position": 22
+      },
+      {
+        "table_name": "users",
+        "column_name": "hour_scheduler",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 23
+      },
+      {
+        "table_name": "users",
+        "column_name": "status_scheduler",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "'PAUSED'::text",
+        "ordinal_position": 24
+      },
+      {
+        "table_name": "users",
+        "column_name": "last_sent_local_date_scheduler",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 25
+      },
+      {
+        "table_name": "users",
+        "column_name": "first_programmed",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false",
+        "ordinal_position": 26
+      },
+      {
+        "table_name": "users",
+        "column_name": "first_tasks_confirmed",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false",
+        "ordinal_position": 27
+      },
+      {
+        "table_name": "users",
+        "column_name": "email",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 28
+      },
+      {
+        "table_name": "users",
+        "column_name": "first_name",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 29
+      },
+      {
+        "table_name": "users",
+        "column_name": "last_name",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 30
+      },
+      {
+        "table_name": "users",
+        "column_name": "avatar_url",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 31
+      },
+      {
+        "table_name": "users",
+        "column_name": "deleted_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 32
+      },
+      {
+        "table_name": "v_user_daily_energy",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "v_user_daily_energy",
+        "column_name": "hp_pct",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "v_user_daily_energy",
+        "column_name": "mood_pct",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "v_user_daily_energy",
+        "column_name": "focus_pct",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "v_user_daily_energy",
+        "column_name": "hp_norm",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 5
+      },
+      {
+        "table_name": "v_user_daily_energy",
+        "column_name": "mood_norm",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 6
+      },
+      {
+        "table_name": "v_user_daily_energy",
+        "column_name": "focus_norm",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 7
+      },
+      {
+        "table_name": "v_user_daily_xp",
+        "column_name": "date",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "v_user_daily_xp",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "v_user_daily_xp",
+        "column_name": "xp_day",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "v_user_level",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "v_user_level",
+        "column_name": "level",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "v_user_level",
+        "column_name": "xp_required",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "v_user_pillars_week",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "v_user_pillars_week",
+        "column_name": "pillar_code",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "v_user_pillars_week",
+        "column_name": "xp_week",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "v_user_quests_today",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "v_user_quests_today",
+        "column_name": "total",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "v_user_quests_today",
+        "column_name": "completed",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "v_user_total_xp",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "v_user_total_xp",
+        "column_name": "total_xp",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "v_user_xp_by_pillar",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "v_user_xp_by_pillar",
+        "column_name": "pillar_code",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "v_user_xp_by_pillar",
+        "column_name": "xp",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "v_user_xp_today",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "v_user_xp_today",
+        "column_name": "date",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "v_user_xp_today",
+        "column_name": "xp_today",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 3
+      }
+    ],
+    "views": [
+      {
+        "view_name": "v_user_daily_energy",
+        "view_definition": " WITH RECURSIVE user_mode AS (\n         SELECT u.user_id,\n            gm.code AS mode_code,\n                CASE gm.code\n                    WHEN 'LOW'::text THEN 1.0\n                    WHEN 'CHILL'::text THEN 2.0\n                    WHEN 'FLOW'::text THEN 2.5\n                    WHEN 'EVOLVE'::text THEN 3.0\n                    ELSE 2.0\n                END AS mode_mult\n           FROM (users u\n             LEFT JOIN cat_game_mode gm ON ((gm.game_mode_id = u.game_mode_id)))\n        ), half_life AS (\n         SELECT um.user_id,\n            p.code AS pillar_code,\n            (\n                CASE um.mode_code\n                    WHEN 'LOW'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 7\n                        WHEN 'MIND'::text THEN 9\n                        WHEN 'SOUL'::text THEN 11\n                        ELSE NULL::integer\n                    END\n                    WHEN 'CHILL'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 6\n                        WHEN 'MIND'::text THEN 8\n                        WHEN 'SOUL'::text THEN 10\n                        ELSE NULL::integer\n                    END\n                    WHEN 'FLOW'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 5\n                        WHEN 'MIND'::text THEN 7\n                        WHEN 'SOUL'::text THEN 9\n                        ELSE NULL::integer\n                    END\n                    WHEN 'EVOLVE'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 4\n                        WHEN 'MIND'::text THEN 6\n                        WHEN 'SOUL'::text THEN 8\n                        ELSE NULL::integer\n                    END\n                    ELSE\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 6\n                        WHEN 'MIND'::text THEN 8\n                        WHEN 'SOUL'::text THEN 10\n                        ELSE NULL::integer\n                    END\n                END)::numeric AS h_days\n           FROM (user_mode um\n             CROSS JOIN cat_pillar p)\n          WHERE (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text]))\n        ), xp_base AS (\n         SELECT t.user_id,\n            p.code AS pillar_code,\n            COALESCE((sum(t.xp_base))::numeric, (0)::numeric) AS xp_base\n           FROM (tasks t\n             JOIN cat_pillar p ON ((p.pillar_id = t.pillar_id)))\n          WHERE ((t.active = true) AND (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text])))\n          GROUP BY t.user_id, p.code\n        ), xp_base_fixed AS (\n         SELECT xb.user_id,\n            xb.pillar_code,\n                CASE\n                    WHEN (sum(xb.xp_base) OVER (PARTITION BY xb.user_id) = (0)::numeric) THEN (60)::numeric\n                    ELSE xb.xp_base\n                END AS xp_base\n           FROM xp_base xb\n        ), targets AS (\n         SELECT um.user_id,\n            xbf.pillar_code,\n            (xbf.xp_base * um.mode_mult) AS xp_week_target,\n            ((xbf.xp_base * um.mode_mult) / 7.0) AS xp_day_target\n           FROM (xp_base_fixed xbf\n             JOIN user_mode um ON ((um.user_id = xbf.user_id)))\n        ), leak_and_k AS (\n         SELECT hl.user_id,\n            hl.pillar_code,\n                CASE\n                    WHEN (hl.h_days \u003E (0)::numeric) THEN ((1)::numeric - power(0.5, (1.0 / hl.h_days)))\n                    ELSE (0)::numeric\n                END AS d,\n                CASE\n                    WHEN (tg.xp_day_target \u003E (0)::numeric) THEN ((100.0 * ((1)::numeric - power(0.5, (1.0 / hl.h_days)))) / tg.xp_day_target)\n                    ELSE (0)::numeric\n                END AS k\n           FROM (half_life hl\n             JOIN targets tg ON (((tg.user_id = hl.user_id) AND (tg.pillar_code = hl.pillar_code))))\n        ), last7 AS (\n         SELECT (CURRENT_DATE - gs.gs) AS day\n           FROM generate_series(6, 0, '-1'::integer) gs(gs)\n        ), grid AS (\n         SELECT u.user_id,\n            l7.day,\n            p.code AS pillar_code\n           FROM ((users u\n             CROSS JOIN last7 l7)\n             CROSS JOIN cat_pillar p)\n          WHERE (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text]))\n        ), logs_xp AS (\n         SELECT dl.user_id,\n            dl.date AS day,\n            p.code AS pillar_code,\n            (COALESCE(sum((dl.quantity * t.xp_base)), (0)::bigint))::numeric AS xp\n           FROM ((daily_log dl\n             JOIN tasks t ON ((t.task_id = dl.task_id)))\n             JOIN cat_pillar p ON ((p.pillar_id = t.pillar_id)))\n          WHERE (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text]))\n          GROUP BY dl.user_id, dl.date, p.code\n        ), xp_by_day AS (\n         SELECT g.user_id,\n            g.day,\n            g.pillar_code,\n            COALESCE(lx.xp, (0)::numeric) AS xp\n           FROM (grid g\n             LEFT JOIN logs_xp lx ON (((lx.user_id = g.user_id) AND (lx.day = g.day) AND (lx.pillar_code = g.pillar_code))))\n        ), grace_window AS (\n         SELECT u.user_id,\n            COALESCE(u.first_date_log, min(dl.date)) AS first_log_date,\n            ((COALESCE(u.first_date_log, min(dl.date)) + '6 days'::interval))::date AS grace_until\n           FROM (users u\n             LEFT JOIN daily_log dl ON ((dl.user_id = u.user_id)))\n          GROUP BY u.user_id, u.first_date_log\n        ), seq AS (\n         SELECT x.user_id,\n            x.pillar_code,\n            x.day,\n            x.xp,\n            row_number() OVER (PARTITION BY x.user_id, x.pillar_code ORDER BY x.day) AS rn,\n            count(*) OVER (PARTITION BY x.user_id, x.pillar_code) AS rn_max\n           FROM xp_by_day x\n        ), energy AS (\n         SELECT s.user_id,\n            s.pillar_code,\n            s.day,\n            s.rn,\n            s.rn_max,\n                CASE\n                    WHEN (s.day \u003C= COALESCE(gw.grace_until, '-infinity'::date)) THEN 100.0\n                    ELSE 60.0\n                END AS e_prev\n           FROM (seq s\n             LEFT JOIN grace_window gw ON ((gw.user_id = s.user_id)))\n          WHERE (s.rn = 1)\n        UNION ALL\n         SELECT s.user_id,\n            s.pillar_code,\n            s.day,\n            s.rn,\n            s.rn_max,\n                CASE\n                    WHEN (s.day \u003C= COALESCE(gw.grace_until, '-infinity'::date)) THEN 100.0\n                    ELSE GREATEST(0.0, LEAST(100.0, (((1.0 - lk.d) * e.e_prev) + (lk.k * COALESCE(s.xp, (0)::numeric)))))\n                END AS e_prev\n           FROM (((energy e\n             JOIN seq s ON (((s.user_id = e.user_id) AND (s.pillar_code = e.pillar_code) AND (s.rn = (e.rn + 1)))))\n             LEFT JOIN grace_window gw ON ((gw.user_id = s.user_id)))\n             LEFT JOIN leak_and_k lk ON (((lk.user_id = s.user_id) AND (lk.pillar_code = s.pillar_code))))\n        ), today_energy AS (\n         SELECT energy.user_id,\n            energy.pillar_code,\n            energy.e_prev AS energy_0_100,\n            (energy.e_prev / 100.0) AS energy_0_1\n           FROM energy\n          WHERE (energy.rn = energy.rn_max)\n        )\n SELECT user_id,\n    max(\n        CASE\n            WHEN (pillar_code = 'BODY'::text) THEN energy_0_100\n            ELSE NULL::numeric\n        END) AS hp_pct,\n    max(\n        CASE\n            WHEN (pillar_code = 'SOUL'::text) THEN energy_0_100\n            ELSE NULL::numeric\n        END) AS mood_pct,\n    max(\n        CASE\n            WHEN (pillar_code = 'MIND'::text) THEN energy_0_100\n            ELSE NULL::numeric\n        END) AS focus_pct,\n    max(\n        CASE\n            WHEN (pillar_code = 'BODY'::text) THEN energy_0_1\n            ELSE NULL::numeric\n        END) AS hp_norm,\n    max(\n        CASE\n            WHEN (pillar_code = 'SOUL'::text) THEN energy_0_1\n            ELSE NULL::numeric\n        END) AS mood_norm,\n    max(\n        CASE\n            WHEN (pillar_code = 'MIND'::text) THEN energy_0_1\n            ELSE NULL::numeric\n        END) AS focus_norm\n   FROM today_energy te\n  GROUP BY user_id;"
+      },
+      {
+        "view_name": "v_user_daily_xp",
+        "view_definition": " SELECT dl.date,\n    dl.user_id,\n    sum((dl.quantity * t.xp_base)) AS xp_day\n   FROM (daily_log dl\n     JOIN tasks t ON ((t.task_id = dl.task_id)))\n  GROUP BY dl.date, dl.user_id;"
+      },
+      {
+        "view_name": "v_user_level",
+        "view_definition": " WITH base AS (\n         SELECT u.user_id,\n            (COALESCE(sum(COALESCE((t.xp_base)::integer, 0)), (0)::bigint))::numeric AS xp_base_sum\n           FROM (users u\n             LEFT JOIN tasks t ON (((t.user_id = u.user_id) AND (t.active = true))))\n          GROUP BY u.user_id\n        )\n SELECT b.user_id,\n    gs.level,\n    (round(\n        CASE\n            WHEN (gs.level = 0) THEN ((b.xp_base_sum * 0.4) * (7)::numeric)\n            ELSE (b.xp_base_sum * power((gs.level)::numeric, 1.3))\n        END))::bigint AS xp_required\n   FROM (base b\n     CROSS JOIN generate_series(0, 50) gs(level))\n  ORDER BY b.user_id, gs.level;"
+      },
+      {
+        "view_name": "v_user_pillars_week",
+        "view_definition": " WITH week_logs AS (\n         SELECT daily_log.log_id,\n            daily_log.date,\n            daily_log.user_id,\n            daily_log.task_id,\n            daily_log.quantity,\n            daily_log.created_at\n           FROM daily_log\n          WHERE (daily_log.date \u003E= ((CURRENT_DATE - '6 days'::interval))::date)\n        )\n SELECT wl.user_id,\n    cp.code AS pillar_code,\n    sum((cd.xp_base * GREATEST(wl.quantity, 1))) AS xp_week\n   FROM (((week_logs wl\n     JOIN tasks t ON ((t.task_id = wl.task_id)))\n     JOIN cat_difficulty cd ON ((cd.difficulty_id = t.difficulty_id)))\n     JOIN cat_pillar cp ON ((cp.pillar_id = t.pillar_id)))\n  GROUP BY wl.user_id, cp.code;"
+      },
+      {
+        "view_name": "v_user_quests_today",
+        "view_definition": " WITH active AS (\n         SELECT tasks.user_id,\n            count(*) AS total\n           FROM tasks\n          WHERE (tasks.active = true)\n          GROUP BY tasks.user_id\n        ), done_today AS (\n         SELECT dl.user_id,\n            count(DISTINCT dl.task_id) AS completed\n           FROM daily_log dl\n          WHERE (dl.date = CURRENT_DATE)\n          GROUP BY dl.user_id\n        )\n SELECT COALESCE(a.user_id, d.user_id) AS user_id,\n    COALESCE(a.total, (0)::bigint) AS total,\n    COALESCE(d.completed, (0)::bigint) AS completed\n   FROM (active a\n     FULL JOIN done_today d ON ((d.user_id = a.user_id)));"
+      },
+      {
+        "view_name": "v_user_total_xp",
+        "view_definition": " SELECT user_id,\n    sum(xp_day) AS total_xp\n   FROM v_user_daily_xp\n  GROUP BY user_id;"
+      },
+      {
+        "view_name": "v_user_xp_by_pillar",
+        "view_definition": " SELECT dl.user_id,\n    cp.code AS pillar_code,\n    sum((cd.xp_base * GREATEST(dl.quantity, 1))) AS xp\n   FROM (((daily_log dl\n     JOIN tasks t ON ((t.task_id = dl.task_id)))\n     JOIN cat_difficulty cd ON ((cd.difficulty_id = t.difficulty_id)))\n     JOIN cat_pillar cp ON ((cp.pillar_id = t.pillar_id)))\n  GROUP BY dl.user_id, cp.code;"
+      },
+      {
+        "view_name": "v_user_xp_today",
+        "view_definition": " SELECT dl.user_id,\n    dl.date,\n    sum((cd.xp_base * GREATEST(dl.quantity, 1))) AS xp_today\n   FROM ((daily_log dl\n     JOIN tasks t ON ((t.task_id = dl.task_id)))\n     JOIN cat_difficulty cd ON ((cd.difficulty_id = t.difficulty_id)))\n  WHERE (dl.date = CURRENT_DATE)\n  GROUP BY dl.user_id, dl.date;"
+      }
+    ],
+    "indexes": [
+      {
+        "table_name": "cat_difficulty",
+        "index_name": "cat_difficulty_code_key",
+        "index_definition": "CREATE UNIQUE INDEX cat_difficulty_code_key ON public.cat_difficulty USING btree (code)"
+      },
+      {
+        "table_name": "cat_difficulty",
+        "index_name": "cat_difficulty_pkey",
+        "index_definition": "CREATE UNIQUE INDEX cat_difficulty_pkey ON public.cat_difficulty USING btree (difficulty_id)"
+      },
+      {
+        "table_name": "cat_emotion",
+        "index_name": "cat_emotion_code_key",
+        "index_definition": "CREATE UNIQUE INDEX cat_emotion_code_key ON public.cat_emotion USING btree (code)"
+      },
+      {
+        "table_name": "cat_emotion",
+        "index_name": "cat_emotion_pkey",
+        "index_definition": "CREATE UNIQUE INDEX cat_emotion_pkey ON public.cat_emotion USING btree (emotion_id)"
+      },
+      {
+        "table_name": "cat_game_mode",
+        "index_name": "cat_game_mode_code_key",
+        "index_definition": "CREATE UNIQUE INDEX cat_game_mode_code_key ON public.cat_game_mode USING btree (code)"
+      },
+      {
+        "table_name": "cat_game_mode",
+        "index_name": "cat_game_mode_pkey",
+        "index_definition": "CREATE UNIQUE INDEX cat_game_mode_pkey ON public.cat_game_mode USING btree (game_mode_id)"
+      },
+      {
+        "table_name": "cat_pillar",
+        "index_name": "cat_pillar_code_key",
+        "index_definition": "CREATE UNIQUE INDEX cat_pillar_code_key ON public.cat_pillar USING btree (code)"
+      },
+      {
+        "table_name": "cat_pillar",
+        "index_name": "cat_pillar_pkey",
+        "index_definition": "CREATE UNIQUE INDEX cat_pillar_pkey ON public.cat_pillar USING btree (pillar_id)"
+      },
+      {
+        "table_name": "cat_trait",
+        "index_name": "cat_trait_pkey",
+        "index_definition": "CREATE UNIQUE INDEX cat_trait_pkey ON public.cat_trait USING btree (trait_id)"
+      },
+      {
+        "table_name": "cat_trait",
+        "index_name": "ux_cat_trait_pillar_code",
+        "index_definition": "CREATE UNIQUE INDEX ux_cat_trait_pillar_code ON public.cat_trait USING btree (pillar_id, code)"
+      },
+      {
+        "table_name": "daily_log",
+        "index_name": "daily_log_pkey",
+        "index_definition": "CREATE UNIQUE INDEX daily_log_pkey ON public.daily_log USING btree (log_id)"
+      },
+      {
+        "table_name": "daily_log",
+        "index_name": "ix_daily_log_user_date",
+        "index_definition": "CREATE INDEX ix_daily_log_user_date ON public.daily_log USING btree (user_id, date)"
+      },
+      {
+        "table_name": "daily_log",
+        "index_name": "ix_daily_log_user_task_date",
+        "index_definition": "CREATE INDEX ix_daily_log_user_task_date ON public.daily_log USING btree (user_id, task_id, date)"
+      },
+      {
+        "table_name": "emotions_logs",
+        "index_name": "emotions_logs_pkey",
+        "index_definition": "CREATE UNIQUE INDEX emotions_logs_pkey ON public.emotions_logs USING btree (emotion_log_id)"
+      },
+      {
+        "table_name": "emotions_logs",
+        "index_name": "ix_emotions_logs_user_date",
+        "index_definition": "CREATE INDEX ix_emotions_logs_user_date ON public.emotions_logs USING btree (user_id, date)"
+      },
+      {
+        "table_name": "tasks",
+        "index_name": "ix_tasks_user_group_active",
+        "index_definition": "CREATE INDEX ix_tasks_user_group_active ON public.tasks USING btree (user_id, tasks_group_id, active)"
+      },
+      {
+        "table_name": "tasks",
+        "index_name": "tasks_pkey",
+        "index_definition": "CREATE UNIQUE INDEX tasks_pkey ON public.tasks USING btree (task_id)"
+      },
+      {
+        "table_name": "users",
+        "index_name": "idx_users_clerk_user_id",
+        "index_definition": "CREATE INDEX idx_users_clerk_user_id ON public.users USING btree (clerk_user_id)"
+      },
+      {
+        "table_name": "users",
+        "index_name": "ix_users_clerk",
+        "index_definition": "CREATE INDEX ix_users_clerk ON public.users USING btree (clerk_user_id)"
+      },
+      {
+        "table_name": "users",
+        "index_name": "ix_users_email",
+        "index_definition": "CREATE INDEX ix_users_email ON public.users USING btree (email_primary)"
+      },
+      {
+        "table_name": "users",
+        "index_name": "users_clerk_user_id_key",
+        "index_definition": "CREATE UNIQUE INDEX users_clerk_user_id_key ON public.users USING btree (clerk_user_id)"
+      },
+      {
+        "table_name": "users",
+        "index_name": "users_email_primary_key",
+        "index_definition": "CREATE UNIQUE INDEX users_email_primary_key ON public.users USING btree (email_primary)"
+      },
+      {
+        "table_name": "users",
+        "index_name": "users_pkey",
+        "index_definition": "CREATE UNIQUE INDEX users_pkey ON public.users USING btree (user_id)"
+      }
+    ],
+    "foreign_keys": [
+      {
+        "constraint_name": "cat_trait_pillar_id_fkey",
+        "source_table": "cat_trait",
+        "source_column": "pillar_id",
+        "target_table": "cat_pillar",
+        "target_column": "pillar_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "daily_log_task_id_fkey",
+        "source_table": "daily_log",
+        "source_column": "task_id",
+        "target_table": "tasks",
+        "target_column": "task_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "daily_log_user_id_fkey",
+        "source_table": "daily_log",
+        "source_column": "user_id",
+        "target_table": "users",
+        "target_column": "user_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "emotions_logs_emotion_id_fkey",
+        "source_table": "emotions_logs",
+        "source_column": "emotion_id",
+        "target_table": "cat_emotion",
+        "target_column": "emotion_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "emotions_logs_user_id_fkey",
+        "source_table": "emotions_logs",
+        "source_column": "user_id",
+        "target_table": "users",
+        "target_column": "user_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "tasks_difficulty_id_fkey",
+        "source_table": "tasks",
+        "source_column": "difficulty_id",
+        "target_table": "cat_difficulty",
+        "target_column": "difficulty_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "tasks_pillar_id_fkey",
+        "source_table": "tasks",
+        "source_column": "pillar_id",
+        "target_table": "cat_pillar",
+        "target_column": "pillar_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "tasks_trait_id_fkey",
+        "source_table": "tasks",
+        "source_column": "trait_id",
+        "target_table": "cat_trait",
+        "target_column": "trait_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "tasks_user_id_fkey",
+        "source_table": "tasks",
+        "source_column": "user_id",
+        "target_table": "users",
+        "target_column": "user_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "users_game_mode_id_fkey",
+        "source_table": "users",
+        "source_column": "game_mode_id",
+        "target_table": "cat_game_mode",
+        "target_column": "game_mode_id",
+        "ordinal_position": 1
+      }
+    ]
+  },
+  "samples": {
+    "cat_difficulty": [
+      {
+        "difficulty_id": 1,
+        "code": "Easy",
+        "name": "Fácil",
+        "xp_base": 1
+      },
+      {
+        "difficulty_id": 2,
+        "code": "Medium",
+        "name": "Media",
+        "xp_base": 3
+      },
+      {
+        "difficulty_id": 3,
+        "code": "Hard",
+        "name": "Difícil",
+        "xp_base": 7
+      }
+    ],
+    "cat_emotion": [
+      {
+        "emotion_id": 1,
+        "code": "CALMA",
+        "name": "Calma"
+      },
+      {
+        "emotion_id": 2,
+        "code": "FELICIDAD",
+        "name": "Felicidad"
+      },
+      {
+        "emotion_id": 3,
+        "code": "MOTIVACION",
+        "name": "Motivación"
+      },
+      {
+        "emotion_id": 4,
+        "code": "TRISTEZA",
+        "name": "Tristeza"
+      },
+      {
+        "emotion_id": 5,
+        "code": "ANSIEDAD",
+        "name": "Ansiedad"
+      },
+      {
+        "emotion_id": 6,
+        "code": "FRUSTRACION",
+        "name": "Frustración"
+      },
+      {
+        "emotion_id": 7,
+        "code": "CANSANCIO",
+        "name": "Cansancio"
+      }
+    ],
+    "cat_game_mode": [
+      {
+        "game_mode_id": 1,
+        "code": "LOW",
+        "name": "Low Mood",
+        "weekly_target": 1
+      },
+      {
+        "game_mode_id": 2,
+        "code": "CHILL",
+        "name": "Chill Mood",
+        "weekly_target": 2
+      },
+      {
+        "game_mode_id": 3,
+        "code": "FLOW",
+        "name": "Flow Mood",
+        "weekly_target": 3
+      },
+      {
+        "game_mode_id": 4,
+        "code": "EVOLVE",
+        "name": "Evolve Mood",
+        "weekly_target": 4
+      }
+    ],
+    "cat_pillar": [
+      {
+        "pillar_id": 1,
+        "code": "BODY",
+        "name": "Cuerpo"
+      },
+      {
+        "pillar_id": 2,
+        "code": "MIND",
+        "name": "Mente"
+      },
+      {
+        "pillar_id": 3,
+        "code": "SOUL",
+        "name": "Alma"
+      }
+    ],
+    "cat_trait": [
+      {
+        "trait_id": 1,
+        "pillar_id": 1,
+        "code": "ENERGIA",
+        "name": "Energía"
+      },
+      {
+        "trait_id": 2,
+        "pillar_id": 1,
+        "code": "NUTRICION",
+        "name": "Nutrición"
+      },
+      {
+        "trait_id": 3,
+        "pillar_id": 1,
+        "code": "SUENO",
+        "name": "Sueño"
+      },
+      {
+        "trait_id": 4,
+        "pillar_id": 1,
+        "code": "RECUPERACION",
+        "name": "Recuperación"
+      },
+      {
+        "trait_id": 5,
+        "pillar_id": 1,
+        "code": "HIDRATACION",
+        "name": "Hidratación"
+      },
+      {
+        "trait_id": 6,
+        "pillar_id": 1,
+        "code": "HIGIENE",
+        "name": "Higiene"
+      },
+      {
+        "trait_id": 7,
+        "pillar_id": 1,
+        "code": "VITALIDAD",
+        "name": "Vitalidad"
+      },
+      {
+        "trait_id": 8,
+        "pillar_id": 1,
+        "code": "POSTURA",
+        "name": "Postura"
+      },
+      {
+        "trait_id": 9,
+        "pillar_id": 1,
+        "code": "MOVILIDAD",
+        "name": "Movilidad"
+      },
+      {
+        "trait_id": 10,
+        "pillar_id": 1,
+        "code": "MODERACION",
+        "name": "Moderación"
+      },
+      {
+        "trait_id": 11,
+        "pillar_id": 2,
+        "code": "ENFOQUE",
+        "name": "Enfoque"
+      },
+      {
+        "trait_id": 12,
+        "pillar_id": 2,
+        "code": "APRENDIZAJE",
+        "name": "Aprendizaje"
+      },
+      {
+        "trait_id": 13,
+        "pillar_id": 2,
+        "code": "CREATIVIDAD",
+        "name": "Creatividad"
+      },
+      {
+        "trait_id": 14,
+        "pillar_id": 2,
+        "code": "GESTION",
+        "name": "Gestión"
+      },
+      {
+        "trait_id": 15,
+        "pillar_id": 2,
+        "code": "AUTOCONTROL",
+        "name": "Autocontrol"
+      },
+      {
+        "trait_id": 16,
+        "pillar_id": 2,
+        "code": "RESILIENCIA",
+        "name": "Resiliencia"
+      },
+      {
+        "trait_id": 17,
+        "pillar_id": 2,
+        "code": "ORDEN",
+        "name": "Orden"
+      },
+      {
+        "trait_id": 18,
+        "pillar_id": 2,
+        "code": "PROYECCION",
+        "name": "Proyección"
+      },
+      {
+        "trait_id": 19,
+        "pillar_id": 2,
+        "code": "FINANZAS",
+        "name": "Finanzas"
+      },
+      {
+        "trait_id": 20,
+        "pillar_id": 2,
+        "code": "AGILIDAD",
+        "name": "Agilidad"
+      },
+      {
+        "trait_id": 21,
+        "pillar_id": 3,
+        "code": "CONEXION",
+        "name": "Conexión"
+      },
+      {
+        "trait_id": 22,
+        "pillar_id": 3,
+        "code": "ESPIRITUALIDAD",
+        "name": "Espiritualidad"
+      },
+      {
+        "trait_id": 23,
+        "pillar_id": 3,
+        "code": "PROPOSITO",
+        "name": "Propósito"
+      },
+      {
+        "trait_id": 24,
+        "pillar_id": 3,
+        "code": "VALORES",
+        "name": "Valores"
+      },
+      {
+        "trait_id": 25,
+        "pillar_id": 3,
+        "code": "ALTRUISMO",
+        "name": "Altruismo"
+      },
+      {
+        "trait_id": 26,
+        "pillar_id": 3,
+        "code": "INSIGHT",
+        "name": "Insight"
+      },
+      {
+        "trait_id": 27,
+        "pillar_id": 3,
+        "code": "GRATITUD",
+        "name": "Gratitud"
+      },
+      {
+        "trait_id": 28,
+        "pillar_id": 3,
+        "code": "NATURALEZA",
+        "name": "Naturaleza"
+      },
+      {
+        "trait_id": 29,
+        "pillar_id": 3,
+        "code": "GOZO",
+        "name": "Gozo"
+      },
+      {
+        "trait_id": 30,
+        "pillar_id": 3,
+        "code": "AUTOESTIMA",
+        "name": "Autoestima"
+      },
+      {
+        "trait_id": 32,
+        "pillar_id": 1,
+        "code": "GENERAL",
+        "name": "GENERAL"
+      },
+      {
+        "trait_id": 33,
+        "pillar_id": 2,
+        "code": "GENERAL",
+        "name": "GENERAL"
+      },
+      {
+        "trait_id": 34,
+        "pillar_id": 3,
+        "code": "GENERAL",
+        "name": "GENERAL"
+      }
+    ],
+    "daily_log": [
+      {
+        "log_id": "ded098a5-2e57-476e-85c7-2962e45b0e72",
+        "date": "2025-10-03",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "831cc161-d0cf-42b6-a942-e949ca408daa",
+        "date": "2025-10-02",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "7aebb92a-3b9c-4025-a86c-fa3ca0e78515",
+        "date": "2025-10-01",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "31431f05-f0f6-4ae3-969e-5c470572d71d",
+        "date": "2025-09-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "727e044e-f050-4c18-af72-9a3c6e787585",
+        "date": "2025-09-26",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "354985cb-57d9-4a9e-be0d-6ff38140f47e",
+        "date": "2025-09-24",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "8ec57a90-ea56-4808-bb47-5615f4e8cdc4",
+        "date": "2025-09-23",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "77e20ce5-2427-4b74-be1e-a6835254c2f0",
+        "date": "2025-09-21",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "fbcf4624-5123-4f4e-be7b-cf41e2cdc41f",
+        "date": "2025-09-20",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "d73a4f68-0319-435a-81ed-4193ea27667f",
+        "date": "2025-09-19",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "ded27671-f951-4f1f-b603-d3000c3961e1",
+        "date": "2025-09-17",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "d5db1440-8423-427e-8749-897eff32984c",
+        "date": "2025-09-16",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "3848bd86-48e8-4d4b-a07c-452202669c8b",
+        "date": "2025-09-13",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "974ded2b-88f9-420b-a462-bfa438f3be9b",
+        "date": "2025-09-11",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "ce02075d-218e-4373-b9e4-5d853948123b",
+        "date": "2025-09-09",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "82acfa11-e238-4492-ac32-8cee654547dd",
+        "date": "2025-09-07",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "c8148cc2-0829-4ba3-b5a5-20d0befeb357",
+        "date": "2025-09-06",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "ec062003-ad2d-4b1d-93f6-47fc4eed5d7f",
+        "date": "2025-09-02",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "bcdb4df9-c4d0-4b94-a4f8-0cb6bf8fdb1c",
+        "date": "2025-08-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "af73a5c5-c8af-4196-9445-93b53a509525",
+        "date": "2025-08-28",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "3de55919-3f85-4f16-af0c-2abe2918b90f",
+        "date": "2025-08-26",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "666822a9-e7ca-41eb-863d-670f0a0557cd",
+        "date": "2025-08-23",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "b3053a21-d27b-4c10-af45-8263ddac9af7",
+        "date": "2025-08-22",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "7689d059-d9f2-4bcd-8fbb-3362d778db26",
+        "date": "2025-08-21",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "c5098399-bd50-4c06-bab7-03cc54f22520",
+        "date": "2025-08-16",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "99948206-15a7-487b-b0d6-4d1df86e902d",
+        "date": "2025-08-14",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "8d84e6e0-cc62-459f-8eca-f52562c816e0",
+        "date": "2025-08-12",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "aef59655-71c1-492a-b84d-7d23ad7a6a61",
+        "date": "2025-08-11",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "e13fd593-e9d8-4cc7-ad6d-7c2b53500e2b",
+        "date": "2025-08-07",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "e544a0e3-719e-401b-a88e-4e0b4d5b8e29",
+        "date": "2025-08-06",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "c9de5842-9d6c-4e8e-8451-48b384f0f3d6",
+        "date": "2025-10-05",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "348907c1-f127-413e-9a5c-a975c68f8747",
+        "date": "2025-10-04",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "8612d936-b988-45e1-b672-0549dc9e3055",
+        "date": "2025-10-03",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "2be63f6e-545f-44b9-ac4a-94c7a3dd4e58",
+        "date": "2025-10-01",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "d73aed0c-00b4-42e4-bfff-0131215e1727",
+        "date": "2025-09-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "128146d7-58dd-48ed-b34b-28e892697258",
+        "date": "2025-09-27",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "b80aaca7-a693-46d6-8765-d3f6f440af5b",
+        "date": "2025-09-26",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "103873b4-d54c-46cf-9705-fdfc7cd101e4",
+        "date": "2025-09-24",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "e6e68a58-7275-4509-8e89-d0c830316e33",
+        "date": "2025-09-23",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "bb788880-4f98-401c-b08b-8f20368ce7bb",
+        "date": "2025-09-22",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "a99779f2-da85-4941-a91e-0d029ca042bc",
+        "date": "2025-09-21",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "85ff9f7b-7ce5-4c94-8102-d23a9912234d",
+        "date": "2025-09-20",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "56aeed22-de91-4f14-9422-602a8501fc94",
+        "date": "2025-09-19",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "906ae6ca-804a-4203-a93c-2bf6430f866c",
+        "date": "2025-09-17",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "2e56beb8-ae09-44f1-adb7-172110308a9e",
+        "date": "2025-09-16",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "08f3a0f6-498e-4d5f-b2fb-eea01da4d100",
+        "date": "2025-09-15",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "e3cbe175-311a-4fe1-815f-ecdb34a0e164",
+        "date": "2025-09-13",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "760cf84a-0027-4573-8c36-c56afc89dfec",
+        "date": "2025-09-12",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "8d00436d-82da-488d-a84c-e8f76863b2ea",
+        "date": "2025-09-11",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "90aea49a-2635-4c6d-9cd2-2586a6345635",
+        "date": "2025-09-18",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      }
+    ],
+    "emotions_logs": [
+      {
+        "emotion_log_id": "5685bf4d-f002-494a-9336-0378032bb6f9",
+        "date": "2025-08-07",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "f88da34f-2934-49f4-965b-5618023c7174",
+        "date": "2025-08-08",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "1425973f-4a0c-43ed-9d63-891cf793f0c4",
+        "date": "2025-08-11",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "69b85e4a-417c-44c4-95d9-ec7b71ab5ea9",
+        "date": "2025-08-21",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "70ebb8aa-4efd-49b4-8221-56410a53e9c0",
+        "date": "2025-08-22",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "2bb68311-4ac8-4f7b-8c20-b74ef2753687",
+        "date": "2025-08-23",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "9f19bb16-e376-4b43-96fc-acc9ae7bef9d",
+        "date": "2025-08-25",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "17b156a9-7b0b-4e5f-80e7-e4e05e5e2841",
+        "date": "2025-09-02",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "3d4648aa-93b8-4b58-913c-ed679eae239c",
+        "date": "2025-09-05",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "54a105a4-0540-434c-83f4-5e16b9e18fe4",
+        "date": "2025-09-14",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "9d8f501c-e1ba-4404-890d-15d2bf0bc77e",
+        "date": "2025-09-15",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "1406f293-cf4a-4c78-baf4-152f6a3d86f8",
+        "date": "2025-09-24",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "71c7e272-ea3a-4eb8-bf9f-9b33cf9e0da2",
+        "date": "2025-09-26",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "ba45cd30-9391-434d-aeae-b2bdd37e941e",
+        "date": "2025-09-28",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "d91a7c10-3b86-4e89-b557-e850a2183d93",
+        "date": "2025-09-29",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "7087f0b4-f863-41ef-b158-d7ad8d4ad6ad",
+        "date": "2025-10-02",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "f294a45c-734a-44ca-9354-4ab04b9af14e",
+        "date": "2025-10-06",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "fa63cdf8-e060-49f6-bc67-750cd975375f",
+        "date": "2025-07-31",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "caa7b96d-cfd9-42cf-bbd1-41c3a963c1bf",
+        "date": "2025-08-10",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "6fabce25-1188-4b4c-baf9-6fab2a863244",
+        "date": "2025-08-12",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "22633847-36b4-49fb-8958-351a4ad45e28",
+        "date": "2025-08-14",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "ada922bc-9f4e-486c-a70f-611ad187c345",
+        "date": "2025-08-15",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "8cbc621a-ca08-43cb-bc79-3e15a60df120",
+        "date": "2025-08-16",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "38a82a8f-41b3-4ef5-98f4-62117c354f6c",
+        "date": "2025-08-17",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "b99ebf9e-6531-434f-bb70-7d3e6773c7f5",
+        "date": "2025-08-20",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "6ab726ee-8681-4a1a-a7e4-96a7f504bd96",
+        "date": "2025-09-07",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "1c46c09e-46f4-4af8-8c8a-420a8590979b",
+        "date": "2025-09-19",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "36e294b1-d27c-4980-9770-cc0ed80acd52",
+        "date": "2025-09-21",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "51b35208-140c-4ad0-932a-3d50d32f1d9e",
+        "date": "2025-09-27",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "41f0a551-439e-48b2-94c4-8bfc30bc87d9",
+        "date": "2025-10-03",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "b4b90a88-2973-4cf0-8767-812d6b537f91",
+        "date": "2025-10-04",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "43446780-d15e-4622-9ba0-d3ea268a765e",
+        "date": "2025-10-05",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "ff49412a-ce7a-4a50-b05a-4470bca3f1d5",
+        "date": "2025-07-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "eaaa41e4-5045-418f-8f8b-e6bd523673ba",
+        "date": "2025-08-06",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "eb2dba4d-af5b-46e0-b270-12b9e42e8b26",
+        "date": "2025-08-18",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "5dcc37f6-e9e8-4abc-a7c9-275f3ecda1cc",
+        "date": "2025-08-19",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "4140fffa-1e26-4703-9dab-79b32062a345",
+        "date": "2025-08-27",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "1dbab671-0e6d-4f97-95a1-61293a68075d",
+        "date": "2025-08-29",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "d535a89b-057c-45ea-9fa2-8eed29f238a1",
+        "date": "2025-08-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "cb54f6a1-fad3-43de-82b3-6785f40bad76",
+        "date": "2025-09-06",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "cf82556c-f836-4d13-b714-e638f2174f11",
+        "date": "2025-09-09",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "cf5976de-d76b-46bb-9008-baf7d3c3bde4",
+        "date": "2025-09-10",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "33a355ad-50e4-44f8-8be1-01bfdad728b7",
+        "date": "2025-09-20",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "fd95b50b-57f2-4230-9dfa-b24ecd4cb655",
+        "date": "2025-09-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "e247cffa-6fee-4087-8758-ba6219986702",
+        "date": "2025-10-01",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "55aeb751-ba0c-42d9-884c-8d6f423be2e5",
+        "date": "2025-09-04",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 5,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "4ed8d52a-773e-4e0a-854d-5353f8d0e044",
+        "date": "2025-09-08",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 5,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "2ccb4097-2ca9-43be-a119-d75d91545a53",
+        "date": "2025-09-13",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 5,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "b80f3b76-6569-4c84-86aa-1cd68beb65e4",
+        "date": "2025-09-23",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 5,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "d9e80b94-729a-422e-946d-f0f37b9633e7",
+        "date": "2025-08-26",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 6,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "da3b649b-4612-46be-b39b-f4cfafea45b8",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Cocinar una receta nueva",
+        "pillar_id": 2,
+        "trait_id": 13,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "7a79000d-b7aa-443e-80c1-aca02cbfb581",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Hablar con un amig@ para saber cómo está",
+        "pillar_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "0da92dd2-4821-4e33-8f5e-be2b569cd6cf",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Jugar juegos de mesa",
+        "pillar_id": 3,
+        "trait_id": 29,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "d277d4e5-28bc-4d56-839a-3482ae90a2aa",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Leer 10 o + paginas de un libro de conocimiento",
+        "pillar_id": 2,
+        "trait_id": 12,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "812d7b9e-e864-4d62-8dbc-b36084950d6a",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Planificar gastos del mes",
+        "pillar_id": 2,
+        "trait_id": 18,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "24955b7c-882e-49bb-8a77-2ccc8cd1846d",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Dormir 8hs",
+        "pillar_id": 1,
+        "trait_id": 3,
+        "difficulty_id": 3,
+        "xp_base": 7,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "c2ea433c-d8fa-40ab-a9a2-6ad5f6ed9687",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Hablar con flia (P&P) para saber cómo está",
+        "pillar_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 3,
+        "xp_base": 7,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "d3a4a215-dac6-43ba-8719-58f1205505cb",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Revisar gastos del día",
+        "pillar_id": 2,
+        "trait_id": 15,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "ff6c11b5-1ccc-4489-9588-ae43b4a8c644",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Pintar",
+        "pillar_id": 3,
+        "trait_id": 26,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "4f8887e5-f585-4cfa-aef1-9a23ae984642",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "60` de proyectos on going",
+        "pillar_id": 2,
+        "trait_id": 18,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "95e42db8-5f62-4e1a-a912-3222cdc178d5",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Disfrutar hacer algo juntos",
+        "pillar_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "2L de agua",
+        "pillar_id": 1,
+        "trait_id": 5,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "5774fb7b-22cb-4c81-bcf2-af0954e9a5ab",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "‍️‍️10.000 pasos / Correr",
+        "pillar_id": 1,
+        "trait_id": 9,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "73259489-f35d-48b3-887a-d421a9ab8fcb",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Aprender sobre la historia de un lugar",
+        "pillar_id": 2,
+        "trait_id": 12,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "e1197b9b-55ef-44f8-b8f9-39a94ca0b5db",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Hacer algo fuera de la ZDC",
+        "pillar_id": 3,
+        "trait_id": 26,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "76631e86-53d4-4b39-8248-0efd86cc4b92",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Pasar tiempo con amigos",
+        "pillar_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "6a0f339f-0bf5-4d68-9f8f-d7e7bad7836a",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Gasto diario\u003C= 34 €",
+        "pillar_id": 2,
+        "trait_id": 15,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "7b229be0-9098-47a3-a6cb-60b15554d42a",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "20` Sin pantallas antes de dormir",
+        "pillar_id": 1,
+        "trait_id": 4,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Hacer ejercicios de estiramiento y movilidad",
+        "pillar_id": 1,
+        "trait_id": 9,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "cccf28d0-9df6-40d8-9fc2-9fa5f10f98ba",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "No dulces",
+        "pillar_id": 1,
+        "trait_id": 2,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "bad35eaa-e4fa-442a-844d-ee03a9161c24",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Cena antes de las 22hs",
+        "pillar_id": 1,
+        "trait_id": 2,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "e6049f2b-410b-45f0-8123-5ac4d68fda9a",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "‍️‍️gym",
+        "pillar_id": 1,
+        "trait_id": 1,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "8b66a57d-5a9e-4568-b2ef-73124e4f2c10",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Ver un documental",
+        "pillar_id": 2,
+        "trait_id": 12,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "ef9b9016-3ab5-4e50-994c-030f2495b263",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Ayuno hasta las 14hs",
+        "pillar_id": 1,
+        "trait_id": 2,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "1e710e42-9957-4b05-ae96-8462cc49dc9e",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Contestar todos los chats pendientes",
+        "pillar_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "55389207-da58-43fb-8011-1edde2b19b09",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Invertir en activos",
+        "pillar_id": 2,
+        "trait_id": 14,
+        "difficulty_id": 3,
+        "xp_base": 7,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "4281ca3c-0fca-4297-ad35-270b92115b80",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Videollamada con la flia",
+        "pillar_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "5f223292-fbeb-4d53-b597-445f09f5027f",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Visitar un lugar nuevo",
+        "pillar_id": 3,
+        "trait_id": 29,
+        "difficulty_id": 3,
+        "xp_base": 7,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "b6bb17fc-7ba0-4b31-9efc-534181c7a755",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Hablar en inglés",
+        "pillar_id": 2,
+        "trait_id": 12,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "fdcbe03e-00ec-40bb-94eb-5269fbe65742",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Tiempo sin pantallas cumplido",
+        "pillar_id": 1,
+        "trait_id": 4,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      }
+    ],
+    "users": [
+      {
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "clerk_user_id": "user_33a7i1Axe2UpuzuEBitjPFDhbE3",
+        "email_primary": "rfullivarri22@gmail.com",
+        "full_name": "Ramiro Fernandez",
+        "image_url": "https://i.ibb.co/4RRnX20q/Avatar1.jpg",
+        "game_mode_id": 3,
+        "timezone": "Europe/Madrid",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "first_date_log": "2025-07-14",
+        "scheduler_enabled": false,
+        "created_at": "2025-10-06 19:24:00.237698+00",
+        "updated_at": "2025-10-06 19:24:00.237698+00",
+        "user_profile": null,
+        "channel_scheduler": "email",
+        "hour_scheduler": null,
+        "status_scheduler": "PAUSED",
+        "last_sent_local_date_scheduler": null,
+        "first_programmed": true,
+        "first_tasks_confirmed": true,
+        "email": null,
+        "first_name": null,
+        "last_name": null,
+        "avatar_url": null,
+        "deleted_at": null
+      }
+    ]
+  },
+  "generated_at": "2025-10-10T10:04:55.354Z"
+}
