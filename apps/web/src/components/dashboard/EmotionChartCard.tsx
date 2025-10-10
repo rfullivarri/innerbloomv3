@@ -735,14 +735,14 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
             </div>
           </div>
           {highlight ? (
-            <div className="flex w-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:flex-row sm:items-center sm:gap-4 sm:p-4">
+            <div className="flex w-full flex-row items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:flex-row sm:items-center sm:gap-4 sm:p-4">
               <div
                 className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
                 style={{ backgroundColor: highlight.color }}
               />
-              <div className="space-y-1">
+              <div className="flex flex-col sm:space-y-1">
                 <p className="font-semibold text-slate-100">{highlight.emotion}</p>
-                <p className="text-xs text-slate-400">
+                <p className="hidden text-xs text-slate-400 sm:block">
                   Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
                   {highlight.count === 1 ? 'registro' : 'registros'})
                 </p>
