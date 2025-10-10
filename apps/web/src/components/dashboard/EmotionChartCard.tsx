@@ -20,7 +20,7 @@ const NUM_WEEKS = 26;
 const DAYS_IN_WEEK = 7;
 const LOOKBACK_FOR_HIGHLIGHT = 15;
 const TOTAL_DAYS = NUM_WEEKS * DAYS_IN_WEEK;
-const GRID_SCALE = 1.4 * 1.3;
+const GRID_SCALE = 1.4;
 
 const MONTH_ABBREVIATIONS = [
   'ENE',

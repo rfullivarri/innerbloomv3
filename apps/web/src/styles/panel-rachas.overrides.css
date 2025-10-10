@@ -9,7 +9,6 @@
   border-radius: 16px;
   background: linear-gradient(145deg, rgba(15, 33, 66, 0.65), rgba(16, 23, 45, 0.35));
   padding: clamp(6px, 3.8vw, 14px) clamp(12px, 5vw, 22px);
-  padding-bottom: clamp(1.2px, 0.76vw, 2.8px);
   overflow: hidden;
 }
 
@@ -25,7 +24,7 @@
   display: grid;
   grid-template-columns: repeat(var(--column-count, 1), minmax(0, var(--cell)));
   column-gap: var(--cell-gap, 6px);
-  row-gap: clamp(0.24px, 0.056vw, 0.48px);
+  row-gap: clamp(1.2px, 0.28vw, 2.4px);
   color: rgba(226, 232, 255, 0.45);
 }
 
