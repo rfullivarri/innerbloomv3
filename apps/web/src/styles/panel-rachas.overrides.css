@@ -5,8 +5,10 @@
 }
 
 [data-emotion-card='heatmap'] {
-  min-height: var(--emotion-equal-height, auto);
-  max-height: var(--emotion-equal-height, none);
+  /* JS setea la altura mínima exacta para 7 celdas verticales */
+  min-height: var(--emotion-heatmap-min-h, var(--emotion-equal-height));
+  /* sin límite duro que corte filas/columnas */
+  max-height: var(--emotion-heatmap-max-h, none);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable both-edges;
@@ -16,6 +18,21 @@
 [data-emotion-card='summary'] {
   min-height: fit-content;
 }
+[data-emotion-card='summary'] .summary-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+[data-emotion-card='summary'] .summary-description {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 480px) {
+  [data-emotion-card='summary'] .summary-inner {
+    padding-block: 8px;
+  }
+}
 
 #emotionChart .emotion-chart-surface {
   width: 100%;
@@ -23,6 +40,7 @@
   background: linear-gradient(145deg, rgba(15, 33, 66, 0.65), rgba(16, 23, 45, 0.35));
   padding: clamp(3px, 4.5vw, 3px) clamp(3px, 6vw, 3px);
   overflow: hidden;
+  min-height: inherit;
 }
 
 @media (max-width: 480px) {

@@ -581,6 +581,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
   }, [normalizedEntries]);
 
   const cardRef = useRef<HTMLElement | null>(null);
+  const heatmapRef = useRef<HTMLDivElement | null>(null);
   const summaryRef = useRef<HTMLDivElement | null>(null);
   const gridBoxRef = useRef<HTMLDivElement | null>(null);
   const [cellSize, setCellSize] = useState<number>(12);
@@ -656,6 +657,48 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       }) as CSSProperties,
     [cellGap, cellSize, columnCount],
   );
+
+  useEffect(() => {
+    const heatmap = heatmapRef.current;
+    const surface = heatmap?.querySelector<HTMLElement>('.emotion-chart-surface');
+    const gridBox = gridBoxRef.current;
+    if (!heatmap || !surface || !gridBox) return;
+
+    const compute = () => {
+      const csSurface = getComputedStyle(surface);
+      const pad =
+        parseFloat(csSurface.paddingTop) + parseFloat(csSurface.paddingBottom);
+
+      const csGrid = getComputedStyle(gridBox);
+      const cell = parseFloat(csGrid.getPropertyValue('--cell')) || 0;
+      const gap = parseFloat(csGrid.getPropertyValue('--cell-gap')) || 0;
+
+      const monthChip = gridBox.querySelector<HTMLElement>('.month-row > *') || gridBox;
+      const monthH = monthChip.getBoundingClientRect().height || 0;
+
+      const sevenCellsHeight = 7 * cell + 6 * gap;
+
+      const required = Math.ceil(monthH + sevenCellsHeight + pad);
+
+      heatmap.style.setProperty('--emotion-heatmap-min-h', `${required}px`);
+    };
+
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(compute) : null;
+    if (ro) {
+      ro.observe(gridBox);
+      ro.observe(surface);
+    }
+    window.addEventListener('resize', compute);
+    window.addEventListener('orientationchange', compute);
+    compute();
+    return () => {
+      if (ro) {
+        ro.disconnect();
+      }
+      window.removeEventListener('resize', compute);
+      window.removeEventListener('orientationchange', compute);
+    };
+  }, [cellGap, cellSize, columnCount, showEmpty, showError, showSkeleton, hasRecordedEmotion]);
 
   useEffect(() => {
     const cardElement = cardRef.current;
@@ -736,7 +779,11 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
           {rangeLabel && <p className="text-xs text-slate-400">Período analizado: {rangeLabel}</p>}
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-0" data-emotion-card="heatmap">
+          <div
+            className="rounded-2xl border border-white/10 bg-white/5 p-0"
+            data-emotion-card="heatmap"
+            ref={heatmapRef}
+          >
             <div id="emotionChart">
               <div className="emotion-chart-surface">
                 <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
@@ -789,22 +836,24 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
           </div>
           <div ref={summaryRef} data-emotion-card="summary">
             {highlight ? (
-              <div className="flex w-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:flex-row sm:items-center sm:gap-4 sm:p-4">
+              <div className="summary-inner w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:p-4">
                 <div
                   className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
                   style={{ backgroundColor: highlight.color }}
                 />
-                <div className="space-y-1">
-                  <p className="font-semibold text-slate-100">{highlight.emotion}</p>
-                  <p className="text-xs text-slate-400">
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-semibold text-slate-100">{highlight.emotion}</h4>
+                  <p className="summary-description text-sm text-slate-100 opacity-70">
                     Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
                     {highlight.count === 1 ? 'registro' : 'registros'})
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-slate-400 sm:p-4">
-                Aún no hay suficiente información reciente para destacar una emoción.
+              <div className="summary-inner rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-slate-400 sm:p-4">
+                <p className="summary-description">
+                  Aún no hay suficiente información reciente para destacar una emoción.
+                </p>
               </div>
             )}
           </div>
