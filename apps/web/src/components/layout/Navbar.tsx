@@ -1,7 +1,13 @@
 import { useAuth, useUser } from '@clerk/clerk-react';
+import { type RefObject } from 'react';
 import { NavLink } from 'react-router-dom';
 
-export function Navbar() {
+type NavbarProps = {
+  onDailyClick?: () => void;
+  dailyButtonRef?: RefObject<HTMLButtonElement>;
+};
+
+export function Navbar({ onDailyClick, dailyButtonRef }: NavbarProps) {
   const { userId, signOut } = useAuth();
   const { user } = useUser();
 
@@ -18,9 +24,21 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/5 bg-surface/75 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 md:px-8">
-        <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-text-muted">Innerbloom</p>
-          <h1 className="font-display text-xl font-semibold text-white md:text-2xl">Dashboard</h1>
+        <div className="flex items-center gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.35em] text-text-muted">Innerbloom</p>
+            <h1 className="font-display text-xl font-semibold text-white md:text-2xl">Dashboard</h1>
+          </div>
+          {onDailyClick && (
+            <button
+              ref={dailyButtonRef}
+              type="button"
+              onClick={onDailyClick}
+              className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/80 transition hover:border-white/20 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            >
+              Daily
+            </button>
+          )}
         </div>
         <div className="flex flex-1 items-center justify-end gap-3">
           <nav className="hidden items-center gap-2 md:flex">
