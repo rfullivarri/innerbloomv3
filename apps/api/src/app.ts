@@ -7,6 +7,7 @@ import express, { type NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import routes from './routes/index.js';
 import createDebugAuthRouter from './routes/debug-auth.js';
+import debugDbSnapshot from './routes/debug-db-snapshot.js';
 import { HttpError, isHttpError } from './lib/http-error.js';
 import clerkWebhookRouter from './webhooks/clerk.js';
 
@@ -40,6 +41,10 @@ const snapshotFilePath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '../db-snapshot.json'
 );
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use(debugDbSnapshot);
+}
 
 if (process.env.DEBUG_AUTH === 'true') {
   app.use(createDebugAuthRouter());
