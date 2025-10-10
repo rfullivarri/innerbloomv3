@@ -28,6 +28,24 @@ const TRAIT_FALLBACK_LABELS: Record<TraitKey, string> = {
   salud_fisica: 'Salud física',
 };
 
+const TRAIT_SYNONYMS: Record<TraitKey, string[]> = {
+  core: ['core', 'corazon', 'core_total'],
+  bienestar: ['bienestar', 'bien_estar'],
+  autogestion: ['autogestion', 'auto_gestion', 'auto-gestion', 'gestion'],
+  intelecto: ['intelecto', 'intelectual'],
+  psiquis: ['psiquis', 'psique', 'psiquis_total'],
+  salud_fisica: [
+    'salud_fisica',
+    'saludfisica',
+    'salud_fisico',
+    'salud-fisica',
+    'salud_fisica_total',
+    'salud_fisica_foundations',
+  ],
+};
+
+const XP_NUMBER_FORMATTER = new Intl.NumberFormat('es-AR');
+
 type RadarAxis = {
   key: TraitKey;
   label: string;
@@ -39,7 +57,7 @@ type RadarDataset = {
   maxValue: number;
 };
 
-function normalizeTraitKey(value: string | null | undefined): TraitKey | null {
+function sanitizeTraitValue(value: string | null | undefined): string | null {
   if (!value) {
     return null;
   }
@@ -52,7 +70,35 @@ function normalizeTraitKey(value: string | null | undefined): TraitKey | null {
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '');
 
-  return TRAIT_ORDER.find((trait) => trait === normalized) ?? null;
+  return normalized.length > 0 ? normalized : null;
+}
+
+function normalizeTraitKey(
+  traitValue: string | null | undefined,
+  labelValue?: string | null | undefined,
+): TraitKey | null {
+  const candidates = [traitValue, labelValue];
+
+  for (const candidate of candidates) {
+    const sanitized = sanitizeTraitValue(candidate);
+    if (!sanitized) {
+      continue;
+    }
+
+    const matched = TRAIT_ORDER.find((trait) => {
+      if (trait === sanitized) {
+        return true;
+      }
+
+      return TRAIT_SYNONYMS[trait]?.includes(sanitized) ?? false;
+    });
+
+    if (matched) {
+      return matched;
+    }
+  }
+
+  return null;
 }
 
 function normalizeLabel(value: string | null | undefined): string | null {
@@ -75,7 +121,7 @@ function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
   const labels: Partial<Record<TraitKey, string>> = {};
 
   for (const entry of entries) {
-    const key = normalizeTraitKey(entry?.trait);
+    const key = normalizeTraitKey(entry?.trait, entry?.name);
     if (!key) continue;
 
     const xp = Number(entry?.xp ?? 0);
@@ -222,6 +268,10 @@ function Radar({ dataset }: RadarProps) {
         const labelPoint = basePointFor(radius + 30, index);
         const normalized = maxValue > 0 ? Math.min(Math.max(axis.xp / maxValue, 0), 1) : 0;
         const valuePoint = pointFor(axis.xp, index);
+        const valueDistance = normalized * radius;
+        const xpLabelOffset = normalized > 0 ? 24 : 36;
+        const xpLabelPoint = basePointFor(Math.min(radius + 48, valueDistance + xpLabelOffset), index);
+        const xpLabel = `${XP_NUMBER_FORMATTER.format(Math.round(axis.xp ?? 0))} XP`;
 
         return (
           <g key={axis.key}>
@@ -242,6 +292,25 @@ function Radar({ dataset }: RadarProps) {
               style={labelStyle}
             >
               {axis.label}
+            </text>
+            <text
+              x={xpLabelPoint.x}
+              y={xpLabelPoint.y}
+              fill="rgba(148,163,184,0.95)"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              style={{
+                fontSize: 'clamp(11px, 3vw, 13px)',
+                fontWeight: 600,
+                letterSpacing: '0.02em',
+                paintOrder: 'stroke fill',
+                stroke: 'rgba(15,23,42,0.55)',
+                strokeWidth: 2,
+                strokeLinecap: 'round',
+                strokeLinejoin: 'round',
+              }}
+            >
+              {xpLabel}
             </text>
             <circle cx={valuePoint.x} cy={valuePoint.y} r={4 + normalized * 4} fill="rgba(125,211,252,0.65)" />
           </g>
