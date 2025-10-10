@@ -683,7 +683,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
           {rangeLabel && <p className="text-xs text-slate-400">Período analizado: {rangeLabel}</p>}
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-2">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-0">
             <div id="emotionChart">
               <div className="emotion-chart-surface">
                 <div ref={gridBoxRef} className="grid-box" style={gridStyle}>

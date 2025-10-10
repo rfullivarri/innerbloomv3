@@ -6,7 +6,7 @@
 
 #emotionChart .emotion-chart-surface {
   width: 100%;
-  border-radius: 28px;
+  border-radius: 16px;
   background: linear-gradient(145deg, rgba(15, 33, 66, 0.65), rgba(16, 23, 45, 0.35));
   padding: clamp(10px, 3.8vw, 18px) clamp(12px, 5vw, 22px);
   overflow: hidden;
@@ -14,7 +14,7 @@
 
 @media (max-width: 480px) {
   #emotionChart .emotion-chart-surface {
-    border-radius: 20px;
+    border-radius: 14px;
     padding: clamp(8px, 4.5vw, 14px) clamp(10px, 5.4vw, 18px);
   }
 }
