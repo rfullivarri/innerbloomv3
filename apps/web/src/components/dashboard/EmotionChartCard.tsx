@@ -647,18 +647,12 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       ({
         '--cell': `${cellSize}px`,
         '--cell-gap': `${cellGap}px`,
+        '--column-count': `${columnCount}`,
+        gridTemplateColumns: `repeat(${columnCount}, minmax(0, var(--cell)))`,
         transform: `scale(${GRID_SCALE})`,
         transformOrigin: 'top left',
       }) as CSSProperties,
-    [cellGap, cellSize],
-  );
-
-  const monthRowStyle = useMemo(
-    () =>
-      ({
-        gridTemplateColumns: `repeat(${columnCount}, minmax(0, var(--cell)))`,
-      }) as CSSProperties,
-    [columnCount],
+    [cellGap, cellSize, columnCount],
   );
 
   return (
@@ -691,25 +685,27 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
           <div className="rounded-2xl border border-white/10 bg-white/5 p-2">
             <div id="emotionChart">
-              <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
-                <div
-                  className="month-row text-[10px] uppercase tracking-wide text-slate-500"
-                  style={monthRowStyle}
-                >
-                  {monthSegments.map((segment) => (
-                    <span
-                      key={segment.key}
-                      className="month-chip"
-                      style={{ gridColumn: `${segment.startIndex + 1} / span ${segment.span}` }}
-                    >
-                      {segment.label}
-                    </span>
-                  ))}
-                </div>
-                <div className="emotion-grid--weekcols">
-                  {columns.map((column) => (
-                    <div key={column.key} className="emotion-col">
-                      {column.cells.map((cell) => {
+              <div className="emotion-chart-surface">
+                <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
+                  <div className="month-row text-[10px] uppercase tracking-wide text-slate-500">
+                    {monthSegments.map((segment) => (
+                      <span
+                        key={segment.key}
+                        className="month-chip"
+                        style={{ gridColumn: `${segment.startIndex + 1} / span ${segment.span}` }}
+                      >
+                        {segment.label}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="emotion-grid--weekcols">
+                    {columns.map((column, columnIndex) => (
+                      <div
+                        key={column.key}
+                        className="emotion-col"
+                        style={{ gridColumn: `${columnIndex + 1}` }}
+                      >
+                        {column.cells.map((cell) => {
                           const tooltipEmotion = cell.rawEmotion ?? cell.emotion;
                           const tooltipDateRaw = cell.rawDate;
                           const tooltipDate =
@@ -731,8 +727,9 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
                             />
                           );
                         })}
-                    </div>
-                  ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
