@@ -20,6 +20,7 @@ const NUM_WEEKS = 26;
 const DAYS_IN_WEEK = 7;
 const LOOKBACK_FOR_HIGHLIGHT = 15;
 const TOTAL_DAYS = NUM_WEEKS * DAYS_IN_WEEK;
+const GRID_SCALE = 1.4;
 
 const EMOTION_NAMES = [
   'Calma',
@@ -590,7 +591,13 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
     status === 'success' && overrideEntries === null && (!hasRecordedEmotion || normalizedEntries.length === 0);
 
   const gridStyle = useMemo(
-    () => ({ '--cell': `${cellSize}px`, '--cell-gap': `${cellGap}px` } as CSSProperties),
+    () =>
+      ({
+        '--cell': `${cellSize}px`,
+        '--cell-gap': `${cellGap}px`,
+        transform: `scale(${GRID_SCALE})`,
+        transformOrigin: 'top left',
+      }) as CSSProperties,
     [cellGap, cellSize],
   );
 
@@ -622,7 +629,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
           {rangeLabel && <p className="text-xs text-slate-400">Período analizado: {rangeLabel}</p>}
 
-          <div className="rounded-2xl border border-white/10 bg-[#1b1f36]/80 p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-2">
             <div id="emotionChart">
               <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
                 <div className="month-row text-[10px] uppercase tracking-wide text-slate-500">
@@ -666,7 +673,10 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
           {highlight ? (
             <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="h-10 w-10 rounded-full" style={{ backgroundColor: highlight.color }} />
+              <div
+                className="emotion-highlight-indicator h-10 w-10 rounded-full"
+                style={{ backgroundColor: highlight.color }}
+              />
               <div>
                 <p className="font-semibold text-slate-100">{highlight.emotion}</p>
                 <p className="text-xs text-slate-400">

@@ -6,7 +6,7 @@
 
 #emotionChart .grid-box {
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -17,13 +17,13 @@
   grid-auto-flow: column;
   gap: var(--cell-gap, 6px);
   color: rgba(226, 232, 255, 0.45);
-  text-align: center;
+  text-align: left;
 }
 
 #emotionChart .month-chip {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: var(--cell);
   min-height: 12px;
 }
@@ -46,6 +46,47 @@
   height: var(--cell);
   border-radius: 4px;
   background-color: #555555;
+}
+
+.emotion-highlight-indicator {
+  position: relative;
+  animation: emotionHighlightPulse 3s ease-in-out infinite;
+}
+
+.emotion-highlight-indicator::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  opacity: 0;
+  transform: scale(0.8);
+  animation: emotionHighlightRing 3s ease-in-out infinite;
+}
+
+@keyframes emotionHighlightPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes emotionHighlightRing {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
 }
 
 @media (max-width: 420px) {
