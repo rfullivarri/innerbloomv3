@@ -4,25 +4,17 @@
   gap: 9px;
 }
 
-[data-emotion-block='heatmap'] {
-  --heatmap-min-h-mobile: 220px;
-  --heatmap-min-h-desktop: 280px;
-  min-height: max(var(--heatmap-min-h-mobile), var(--emotion-equal-height, 0px));
-  max-height: none;
+[data-emotion-card='heatmap'] {
+  min-height: var(--emotion-equal-height, auto);
+  max-height: var(--emotion-equal-height, none);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable both-edges;
   -webkit-overflow-scrolling: touch;
 }
 
-[data-emotion-block='summary'] {
+[data-emotion-card='summary'] {
   min-height: fit-content;
-}
-
-@media (min-width: 768px) {
-  [data-emotion-block='heatmap'] {
-    min-height: max(var(--heatmap-min-h-desktop), var(--emotion-equal-height, 0px));
-  }
 }
 
 #emotionChart .emotion-chart-surface {
