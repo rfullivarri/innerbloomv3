@@ -11,7 +11,8 @@
  * Derivaciones client-side: xp faltante y barra de nivel se calculan con una curva estimada; panel de rachas muestra métricas de XP mientras esperamos daily_log_raw.
  */
 
-import { useUser } from '@clerk/clerk-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
+import { useEffect } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { Alerts } from '../components/dashboard-v3/Alerts';
 import { EnergyCard } from '../components/dashboard-v3/EnergyCard';
@@ -34,6 +35,7 @@ import { getUserState } from '../lib/api';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const { backendUserId, status, error, reload, clerkUserId, profile } = useBackendUser();
   const profileGameMode = deriveGameModeFromProfile(profile?.game_mode);
   const shouldFetchUserState = Boolean(backendUserId && !profileGameMode);
@@ -44,6 +46,54 @@ export default function DashboardV3Page() {
   );
 
   const gameMode = userState?.mode_name ?? userState?.mode ?? profileGameMode ?? null;
+
+  useEffect(() => {
+    if (!clerkUserId || typeof window === 'undefined') {
+      return;
+    }
+
+    let hasTimezoneBeenSet = false;
+
+    try {
+      hasTimezoneBeenSet = window.localStorage.getItem('tzSet') === 'true';
+    } catch (error) {
+      console.warn('Failed to access timezone flag in localStorage', error);
+    }
+
+    if (hasTimezoneBeenSet) {
+      return;
+    }
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+
+    const updateTimezone = async () => {
+      try {
+        const token = await getToken();
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
+        await fetch('/api/me/timezone', {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ timezone }),
+          credentials: 'include',
+        });
+      } catch (error) {
+        console.warn('Failed to update user timezone', error);
+      } finally {
+        try {
+          window.localStorage.setItem('tzSet', 'true');
+        } catch (storageError) {
+          console.warn('Failed to persist timezone flag in localStorage', storageError);
+        }
+      }
+    };
+
+    void updateTimezone();
+  }, [clerkUserId, getToken]);
 
   if (!clerkUserId) {
     return null;
