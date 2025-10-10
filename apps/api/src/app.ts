@@ -52,7 +52,9 @@ if (process.env.DEBUG_AUTH === 'true') {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
-app.use(clerkWebhookRouter);
+console.info('[boot] mounting Clerk webhook router before JSON parser');
+app.use('/api', clerkWebhookRouter);
+console.info('[boot] registering express.json() after Clerk webhook router');
 app.use(express.json());
 
 app.get('/_debug/db', (_req, res, next) => {

@@ -9,6 +9,7 @@ if (!databaseUrl) {
 }
 
 const shouldUseSsl = databaseUrl.includes('sslmode=require');
+const skipDbReady = process.env.SKIP_DB_READY === 'true';
 
 export const pool = new Pool({
   connectionString: databaseUrl,
@@ -29,15 +30,17 @@ pool.on('connect', (client: PoolClient) => {
     });
 });
 
-export const dbReady = pool
-  .query('select 1')
-  .then(() => {
-    console.log('Database connection established');
-  })
-  .catch((error: unknown) => {
-    console.error('Database connection failed during startup', error);
-    throw error;
-  });
+export const dbReady = skipDbReady
+  ? Promise.resolve()
+  : pool
+      .query('select 1')
+      .then(() => {
+        console.log('Database connection established');
+      })
+      .catch((error: unknown) => {
+        console.error('Database connection failed during startup', error);
+        throw error;
+      });
 
 export async function withClient<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
   const client = await pool.connect();

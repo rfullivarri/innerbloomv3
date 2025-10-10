@@ -68,7 +68,11 @@ describe('POST /api/webhooks/clerk', () => {
       type: 'user.created',
       data: {
         id: 'user_123',
-        email_addresses: [{ email_address: 'example@example.org' }],
+        primary_email_address_id: 'email_2',
+        email_addresses: [
+          { id: 'email_1', email_address: 'secondary@example.org' },
+          { id: 'email_2', email_address: ' example@example.org ' },
+        ],
         first_name: ' Example ',
         last_name: null,
         image_url: 'https://img.clerk.com/avatar.png',
@@ -122,7 +126,11 @@ describe('POST /api/webhooks/clerk', () => {
       type: 'user.updated',
       data: {
         id: 'user_456',
-        email_addresses: [{ email_address: 'updated@example.org' }],
+        primary_email_address_id: 'primary',
+        email_addresses: [
+          { id: 'other', email_address: null },
+          { id: 'primary', email_address: 'updated@example.org' },
+        ],
         first_name: null,
         last_name: '  Doe ',
         image_url: null,
@@ -185,12 +193,41 @@ describe('POST /api/webhooks/clerk', () => {
     expect(mockPoolQuery.mock.calls[1][0]).toContain('UPDATE users');
     expect(mockPoolQuery.mock.calls[1][1]).toEqual(['user_789']);
   });
+
+  it('returns 400 when the payload cannot be read', async () => {
+    const app = await createApp();
+
+    const response = await request(app)
+      .post('/api/webhooks/clerk')
+      .set('content-type', 'application/json')
+      .set('svix-id', 'evt-empty')
+      .set('svix-timestamp', '4444')
+      .set('svix-signature', 'v1,sig-4')
+      .send('');
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ code: 'invalid_payload' });
+    expect(mockVerify).not.toHaveBeenCalled();
+    expect(mockPoolQuery).not.toHaveBeenCalled();
+  });
+});
+
+describe('GET /api/webhooks/clerk/health', () => {
+  it('returns a success payload for health checks', async () => {
+    process.env.CLERK_WEBHOOK_SECRET = 'whsec_test_secret';
+    const app = await createApp();
+
+    const response = await request(app).get('/api/webhooks/clerk/health');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ ok: true });
+  });
 });
 
 async function createApp() {
   const { default: clerkRouter } = await import('./clerk.js');
   const app = express();
-  app.use(clerkRouter);
+  app.use('/api', clerkRouter);
   app.use(express.json());
   return app;
 }

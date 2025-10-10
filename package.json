@@ -20,7 +20,8 @@
     "typecheck:web": "npm --workspace apps/web run typecheck",
     "start:api": "npm --workspace apps/api run start",
     "lint": "npm --workspace apps/api run lint",
-    "test": "npm --workspace apps/api run test"
+    "test": "npm --workspace apps/api run test",
+    "routes:print": "npm --workspace apps/api run routes:print"
   },
   "devDependencies": {
     "@types/node": "^24.6.2",
