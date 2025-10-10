@@ -1,4 +1,7 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 import cors, { type CorsOptions } from 'cors';
 import express, { type NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
@@ -33,6 +36,11 @@ const corsOptions: CorsOptions = {
 
 const app = express();
 
+const snapshotFilePath = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../db-snapshot.json'
+);
+
 if (process.env.DEBUG_AUTH === 'true') {
   app.use(createDebugAuthRouter());
 }
@@ -41,6 +49,28 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(clerkWebhookRouter);
 app.use(express.json());
+
+app.get('/_debug/db', (_req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+
+  readFile(snapshotFilePath, 'utf-8')
+    .then((fileContents) => {
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(JSON.parse(fileContents));
+    })
+    .catch((error: unknown) => {
+      const nodeError = error as NodeJS.ErrnoException;
+
+      if (nodeError?.code === 'ENOENT') {
+        res.status(404).json({ message: 'Snapshot not found' });
+        return;
+      }
+
+      next(error);
+    });
+});
 
 const apiRouter = express.Router();
 
