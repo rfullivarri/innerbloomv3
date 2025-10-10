@@ -219,7 +219,7 @@ export const getUserState: AsyncHandler = async (req, res) => {
       return;
     }
 
-    console.error('[users/state] fail', { userId: rawUserId, reason, error });
+    console.error('[users/state] fail', { userId: rawUserId, reason });
     res.status(500).json({ code: 'internal_error', message: 'Something went wrong' });
   }
 };

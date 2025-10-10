@@ -35,3 +35,14 @@ El JSON incluye:
 ## Nota de seguridad
 
 El snapshot no incluye credenciales ni secretos, pero contiene estructura y datos sensibles de la base. **No lo ejecutes ni expongas en producción. No dejes `ENABLE_DB_SNAPSHOT` activado en entornos productivos reales.**
+
+## Validar endpoints con el snapshot
+
+Usá el archivo generado para replicar consultas locales y validar handlers sin tocar la base real. Algunos tips:
+
+- Los servicios del API apuntan a tablas y vistas existentes en el snapshot; verificá rápidamente la estructura con
+  `curl -fsS http://localhost:5173/_admin/db-snapshot | jq .schema.tables` cuando el backend expone la ruta `_admin`.
+- Reutilizá el JSON desde los tests o scripts para confirmar que la SQL en los controladores coincide con la estructura real
+  (`cat_game_mode`, `cat_trait`, `v_user_daily_energy`, etc.).
+- Antes de tocar un endpoint como `/users/:id/state` o `/users/:id/xp/by-trait`, contrastá los campos usados en las consultas con
+  los disponibles en el snapshot para evitar referencias a columnas inexistentes.

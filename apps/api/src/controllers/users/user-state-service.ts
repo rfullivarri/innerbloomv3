@@ -3,9 +3,6 @@ import { HttpError } from '../../lib/http-error.js';
 import { type Pillar, type XpByDate } from './user-state-utils.js';
 
 const DEFAULT_MODE_CODE = 'FLOW';
-const DEFAULT_WEEKLY_TARGET = 700;
-const DEFAULT_TIMEZONE = 'UTC';
-
 const PILLAR_ID_TO_NAME: Record<number, Pillar> = {
   1: 'Body',
   2: 'Mind',
@@ -31,19 +28,18 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
   const result = await pool.query<{
     user_id: string;
     mode_code: string | null;
-    weekly_target: number | null;
     mode_name: string | null;
+    weekly_target: number | null;
     timezone: string | null;
   }>(
     `SELECT u.user_id,
-            COALESCE(gm.code, u.game_mode, '${DEFAULT_MODE_CODE}') AS mode_code,
-            gm.name AS mode_name,
-            COALESCE(gm.weekly_target, u.weekly_target, ${DEFAULT_WEEKLY_TARGET}) AS weekly_target,
-            COALESCE(u.timezone, '${DEFAULT_TIMEZONE}') AS timezone
+            gm.code         AS mode_code,
+            gm.name         AS mode_name,
+            gm.weekly_target,
+            u.timezone
        FROM users u
   LEFT JOIN cat_game_mode gm
-         ON (gm.game_mode_id = u.game_mode_id)
-         OR (gm.code = u.game_mode)
+         ON gm.game_mode_id = u.game_mode_id
       WHERE u.user_id = $1
       LIMIT 1`,
     [userId],
@@ -58,9 +54,9 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
   return {
     userId: row.user_id,
     modeCode: (row.mode_code ?? DEFAULT_MODE_CODE).toUpperCase(),
-    modeName: row.mode_name,
-    weeklyTarget: Number(row.weekly_target ?? DEFAULT_WEEKLY_TARGET),
-    timezone: row.timezone ?? DEFAULT_TIMEZONE,
+    modeName: row.mode_name ?? null,
+    weeklyTarget: Number(row.weekly_target ?? 0),
+    timezone: row.timezone ?? null,
   };
 }
 

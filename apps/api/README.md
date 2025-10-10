@@ -83,6 +83,28 @@ The suites for `get-user-state` and `get-user-state-timeseries` mock the date he
 deterministic. This ensures the expectations stay aligned with the grace/backfill logic used in production while keeping the
 tests hermetic.
 
+### Game mode resolution
+
+Los endpoints que reportan el estado del usuario (por ejemplo `/users/:id/state` y `/users/:id/state/timeseries`) siempre
+resuelven el modo de juego a partir de `users.game_mode_id`. La metadata (`code`, `name`, `weekly_target`) proviene de
+`cat_game_mode`. Si `weekly_target` en la tabla de catálogo es `NULL`, el controlador aplica el objetivo semanal por defecto
+definido en la lógica de negocio (actualmente 700 XP).
+
+```sql
+SELECT u.user_id,
+       gm.code,
+       gm.name,
+       gm.weekly_target,
+       u.timezone
+  FROM users u
+  LEFT JOIN cat_game_mode gm ON gm.game_mode_id = u.game_mode_id
+ WHERE u.user_id = $1;
+```
+
+El frontend usa el `code` para calcular medias vidas y factores de ganancia, mientras que `name` se muestra cuando está presente
+en la tabla de catálogo. La zona horaria proviene directamente de `users.timezone` y puede ser `NULL`; al formatear fechas se
+normaliza a `UTC` cuando no hay valor válido.
+
 ## Clerk integration
 
 ### Authentication
@@ -199,6 +221,45 @@ Las siguientes rutas requieren un token Clerk válido **y** que el `:id` coincid
 * `GET /api/users/:id/state`
 * `GET /api/users/:id/state/timeseries`
 * `GET /api/users/:id/summary/today`
+
+### `GET /users/:id/xp/by-trait`
+
+Devuelve el total de XP acumulado por rasgo (`trait`) utilizando los registros de `daily_log` junto con los catálogos de rasgos,
+pilares y dificultades. La respuesta es un arreglo ordenado por `trait_id` con objetos que incluyen los códigos esperados por el
+Radar Chart del frontend:
+
+```json
+[
+  {
+    "trait_id": 1,
+    "trait_code": "core",
+    "trait_name": "Core",
+    "pillar_code": "body",
+    "xp": 420
+  }
+]
+```
+
+SQL base utilizada por el handler:
+
+```sql
+SELECT dl.user_id,
+       ct.trait_id,
+       ct.code  AS trait_code,
+       ct.name  AS trait_name,
+       cp.code  AS pillar_code,
+       SUM(cd.xp_base * GREATEST(dl.quantity, 1)) AS xp
+  FROM daily_log dl
+  JOIN tasks t          ON t.task_id = dl.task_id
+  JOIN cat_trait ct     ON ct.trait_id = t.trait_id
+  JOIN cat_pillar cp    ON cp.pillar_id = t.pillar_id
+  JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
+ WHERE dl.user_id = $1
+ GROUP BY dl.user_id, ct.trait_id, ct.code, ct.name, cp.code
+ ORDER BY ct.trait_id;
+```
+
+Acepta parámetros opcionales `from` y `to` (`YYYY-MM-DD`) para limitar el rango de fechas considerado.
 
 ### Ejemplos `curl`
 
