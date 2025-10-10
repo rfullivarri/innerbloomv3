@@ -993,11 +993,29 @@ export async function getUserXpByTrait(
   const response = await getAuthorizedJson<unknown>(`/users/${encodeURIComponent(userId)}/xp/by-trait`, params);
   logShape('user-xp-by-trait', response);
 
-  const traits = extractArray<TraitXpEntry>(response, 'traits', 'items', 'data').map((item) => ({
-    trait: String((item as TraitXpEntry)?.trait ?? '').trim(),
-    name: String((item as TraitXpEntry)?.name ?? '').trim() || undefined,
-    xp: Number((item as TraitXpEntry)?.xp ?? 0) || 0,
-  }));
+  const traits = extractArray<Record<string, unknown>>(response, 'traits', 'items', 'data').map((item) => {
+    const traitValue =
+      item?.trait ??
+      item?.trait_code ??
+      item?.code ??
+      item?.traitId ??
+      item?.trait_id ??
+      item?.id ??
+      '';
+
+    const nameValue = item?.name ?? item?.trait_name ?? item?.label ?? item?.display_name ?? '';
+    const xpValue = item?.xp ?? item?.total ?? item?.value ?? 0;
+
+    const trait = String(traitValue ?? '').trim();
+    const name = String(nameValue ?? '').trim();
+    const xp = Number(xpValue ?? 0);
+
+    return {
+      trait,
+      name: name.length > 0 ? name : undefined,
+      xp: Number.isFinite(xp) ? xp : 0,
+    } satisfies TraitXpEntry;
+  });
 
   return { traits };
 }

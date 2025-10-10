@@ -17,9 +17,7 @@ const TRAIT_ORDER = [
   'salud_fisica',
 ] as const;
 
-type TraitKey = (typeof TRAIT_ORDER)[number];
-
-const TRAIT_FALLBACK_LABELS: Record<TraitKey, string> = {
+const TRAIT_FALLBACK_LABELS: Record<(typeof TRAIT_ORDER)[number], string> = {
   core: 'Core',
   bienestar: 'Bienestar',
   autogestion: 'Autogestión',
@@ -28,7 +26,7 @@ const TRAIT_FALLBACK_LABELS: Record<TraitKey, string> = {
   salud_fisica: 'Salud física',
 };
 
-const TRAIT_SYNONYMS: Record<TraitKey, string[]> = {
+const TRAIT_SYNONYMS: Record<(typeof TRAIT_ORDER)[number], string[]> = {
   core: ['core', 'corazon', 'core_total'],
   bienestar: ['bienestar', 'bien_estar'],
   autogestion: ['autogestion', 'auto_gestion', 'auto-gestion', 'gestion'],
@@ -46,8 +44,30 @@ const TRAIT_SYNONYMS: Record<TraitKey, string[]> = {
 
 const XP_NUMBER_FORMATTER = new Intl.NumberFormat('es-AR');
 
+const TRAIT_SYNONYM_LOOKUP = new Map<string, string>();
+
+for (const [canonical, synonyms] of Object.entries(TRAIT_SYNONYMS)) {
+  const sanitizedCanonical = sanitizeTraitValue(canonical);
+
+  if (sanitizedCanonical) {
+    TRAIT_SYNONYM_LOOKUP.set(sanitizedCanonical, sanitizedCanonical);
+  }
+
+  for (const alias of synonyms) {
+    const sanitizedAlias = sanitizeTraitValue(alias);
+
+    if (!sanitizedAlias) {
+      continue;
+    }
+
+    TRAIT_SYNONYM_LOOKUP.set(sanitizedAlias, sanitizedCanonical ?? sanitizedAlias);
+  }
+}
+
+const TRAIT_PRIORITY = new Map(TRAIT_ORDER.map((trait, index) => [trait, index] as const));
+
 type RadarAxis = {
-  key: TraitKey;
+  key: string;
   label: string;
   xp: number;
 };
@@ -76,7 +96,7 @@ function sanitizeTraitValue(value: string | null | undefined): string | null {
 function normalizeTraitKey(
   traitValue: string | null | undefined,
   labelValue?: string | null | undefined,
-): TraitKey | null {
+): string | null {
   const candidates = [traitValue, labelValue];
 
   for (const candidate of candidates) {
@@ -85,17 +105,12 @@ function normalizeTraitKey(
       continue;
     }
 
-    const matched = TRAIT_ORDER.find((trait) => {
-      if (trait === sanitized) {
-        return true;
-      }
-
-      return TRAIT_SYNONYMS[trait]?.includes(sanitized) ?? false;
-    });
-
-    if (matched) {
-      return matched;
+    const canonical = TRAIT_SYNONYM_LOOKUP.get(sanitized);
+    if (canonical) {
+      return canonical;
     }
+
+    return sanitized;
   }
 
   return null;
@@ -108,36 +123,68 @@ function normalizeLabel(value: string | null | undefined): string | null {
   return normalized.length > 0 ? normalized : null;
 }
 
-function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
-  const totals: Record<TraitKey, number> = {
-    core: 0,
-    bienestar: 0,
-    autogestion: 0,
-    intelecto: 0,
-    psiquis: 0,
-    salud_fisica: 0,
-  };
+function formatTraitLabel(key: string, providedLabel?: string | null): string {
+  const normalized = normalizeLabel(providedLabel);
+  if (normalized) {
+    return normalized;
+  }
 
-  const labels: Partial<Record<TraitKey, string>> = {};
+  if (key in TRAIT_FALLBACK_LABELS) {
+    return TRAIT_FALLBACK_LABELS[key as keyof typeof TRAIT_FALLBACK_LABELS];
+  }
+
+  return key
+    .split(/[_\s]+/g)
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+}
+
+function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
+  const totals = new Map<string, { xp: number; label?: string | null }>();
 
   for (const entry of entries) {
     const key = normalizeTraitKey(entry?.trait, entry?.name);
     if (!key) continue;
 
     const xp = Number(entry?.xp ?? 0);
-    totals[key] = (totals[key] ?? 0) + (Number.isFinite(xp) ? xp : 0);
-
+    const previous = totals.get(key) ?? { xp: 0, label: null };
     const label = normalizeLabel(entry?.name);
-    if (label) {
-      labels[key] = label;
-    }
+
+    totals.set(key, {
+      xp: previous.xp + (Number.isFinite(xp) ? xp : 0),
+      label: previous.label ?? label,
+    });
   }
 
-  const axes: RadarAxis[] = TRAIT_ORDER.map((key) => ({
-    key,
-    label: labels[key] ?? TRAIT_FALLBACK_LABELS[key],
-    xp: totals[key] ?? 0,
-  }));
+  const axes: RadarAxis[] = Array.from(totals.entries())
+    .map(([key, { xp, label }]) => ({
+      key,
+      label: formatTraitLabel(key, label ?? undefined),
+      xp,
+    }))
+    .sort((a, b) => {
+      const priorityA = TRAIT_PRIORITY.get(a.key);
+      const priorityB = TRAIT_PRIORITY.get(b.key);
+
+      if (priorityA != null && priorityB != null) {
+        return priorityA - priorityB;
+      }
+
+      if (priorityA != null) {
+        return -1;
+      }
+
+      if (priorityB != null) {
+        return 1;
+      }
+
+      if (b.xp !== a.xp) {
+        return b.xp - a.xp;
+      }
+
+      return a.label.localeCompare(b.label);
+    });
 
   const values = axes.map((axis) => axis.xp);
   const maxValue = Math.max(10, ...values);
@@ -147,6 +194,7 @@ function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
 export function RadarChartCard({ userId }: RadarChartCardProps) {
   const { data, status } = useRequest(() => getUserXpByTrait(userId), [userId]);
   const dataset = useMemo(() => computeRadarDataset(data?.traits ?? []), [data?.traits]);
+  const hasAxes = dataset.axes.length > 0;
 
   return (
     <Card
@@ -175,7 +223,15 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
             </div>
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/5 opacity-70" aria-hidden />
             <div className="relative flex w-full justify-center px-1 sm:px-2">
-              <Radar dataset={dataset} />
+              {hasAxes ? (
+                <Radar dataset={dataset} />
+              ) : (
+                <div className="flex h-[260px] w-full max-w-[420px] items-center justify-center text-center text-sm text-slate-200/80">
+                  <p className="px-6 leading-relaxed">
+                    Todavía no registraste XP por rasgo. Completá misiones para ver cómo evoluciona tu radar.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -193,6 +249,10 @@ function Radar({ dataset }: RadarProps) {
   const center = radius + 32;
   const { axes, maxValue } = dataset;
   const count = axes.length;
+
+  if (count === 0) {
+    return null;
+  }
 
   const angleFor = (index: number) => -Math.PI / 2 + (index * (2 * Math.PI)) / count;
 

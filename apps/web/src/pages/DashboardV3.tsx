@@ -4,11 +4,11 @@
  * - GET /users/:id/level → Nivel actual; el XP restante se estima client-side con una curva cuadrática.
  * - GET /users/:id/state → Game mode y barras de Daily Energy.
  * - GET /users/:id/xp/daily → Serie diaria de XP (Daily Cultivation + XP semanal del panel de rachas).
- * - GET /users/:id/state/timeseries → Radar Chart (usa la energía promedio como proxy de XP por rasgo ante la falta de habitos_by_rasgo).
+ * - GET /users/:id/xp/by-trait → Radar Chart (XP real por rasgo/pilar principal).
  * - GET /users/:id/emotions → Línea temporal de emociones (mapa emotion_id → etiqueta legible).
  * - GET /users/:id/tasks → Tareas activas reutilizadas para panel de rachas y misiones.
  * - GET /users/:id/journey → Avisos iniciales (confirmación de base / scheduler).
- * Derivaciones client-side: xp faltante y barra de nivel se calculan con una curva estimada; radar usa energía promedio; panel de rachas muestra métricas de XP mientras esperamos daily_log_raw.
+ * Derivaciones client-side: xp faltante y barra de nivel se calculan con una curva estimada; panel de rachas muestra métricas de XP mientras esperamos daily_log_raw.
  */
 
 import { useUser } from '@clerk/clerk-react';
