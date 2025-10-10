@@ -13,14 +13,25 @@ const router = express.Router();
 const rawJson = express.raw({ type: 'application/json' });
 
 const UPSERT_USER_SQL = `
-INSERT INTO users (clerk_user_id, email, first_name, last_name, image_url, deleted_at)
-VALUES ($1, $2, $3, $4, $5, NULL)
-ON CONFLICT (clerk_user_id) DO UPDATE
-  SET email      = COALESCE(EXCLUDED.email,      users.email),
-      first_name = COALESCE(EXCLUDED.first_name, users.first_name),
-      last_name  = COALESCE(EXCLUDED.last_name,  users.last_name),
-      image_url  = COALESCE(EXCLUDED.image_url,  users.image_url),
-      deleted_at = NULL
+INSERT INTO users (clerk_user_id, email, first_name, last_name, image_url, timezone, channel_scheduler, deleted_at)
+VALUES (
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  CASE WHEN $6::boolean THEN $7 ELSE 'UTC' END,
+  CASE WHEN $8::boolean THEN $9 ELSE 'email' END,
+  NULL
+)
+ON CONFLICT (clerk_user_id) DO UPDATE SET
+  email             = COALESCE(EXCLUDED.email,             users.email),
+  first_name        = COALESCE(EXCLUDED.first_name,        users.first_name),
+  last_name         = COALESCE(EXCLUDED.last_name,         users.last_name),
+  image_url         = COALESCE(EXCLUDED.image_url,         users.image_url),
+  timezone          = COALESCE((CASE WHEN $6::boolean THEN EXCLUDED.timezone ELSE NULL END), users.timezone),
+  channel_scheduler = COALESCE((CASE WHEN $8::boolean THEN EXCLUDED.channel_scheduler ELSE NULL END), users.channel_scheduler),
+  deleted_at        = NULL
 RETURNING user_id;
 `;
 
@@ -57,6 +68,9 @@ type ClerkEventData = {
   last_name?: string | null;
   image_url?: string | null;
   profile_image_url?: string | null;
+  timezone?: string | null;
+  channel_scheduler?: string | null;
+  public_metadata?: Record<string, unknown> | null;
 };
 
 type ClerkWebhookEvent = {
@@ -153,10 +167,24 @@ router.post('/webhooks/clerk', rawJson, async (req: Request, res: Response): Pro
       const lastName = norm(data?.last_name);
       const imageUrl = norm(data?.image_url) ?? norm((data as { profile_image_url?: string | null })?.profile_image_url);
       const fullName = buildFullName(firstName, lastName);
+      const timezone = resolveTimezone(data);
+      const channelScheduler = resolveChannelScheduler(data);
+      const timezoneProvided = timezone !== null;
+      const channelSchedulerProvided = channelScheduler !== null;
 
       await pool.query('BEGIN');
       await pool.query(LOG_EVENT_SQL, [svixId, eventType, payloadString]);
-      const result = await pool.query(UPSERT_USER_SQL, [clerkId, email, firstName, lastName, imageUrl]);
+      const result = await pool.query(UPSERT_USER_SQL, [
+        clerkId,
+        email,
+        firstName,
+        lastName,
+        imageUrl,
+        timezoneProvided,
+        timezone,
+        channelSchedulerProvided,
+        channelScheduler,
+      ]);
       await pool.query(SYNC_LEGACY_SQL, [clerkId, email, fullName, imageUrl]);
       await pool.query('COMMIT');
 
@@ -232,6 +260,52 @@ function getPrimaryEmail(data: ClerkEventData | undefined): string | null {
   const hit = pid ? arr.find((address) => address?.id === pid) : arr[0];
   const raw = hit?.email_address?.trim();
   return raw && raw.length ? raw : null;
+}
+
+function resolveTimezone(data: ClerkEventData | undefined): string | null {
+  const direct = norm(data?.timezone);
+  if (direct) {
+    return direct;
+  }
+
+  const fromMetadata = extractFromMetadata(data?.public_metadata, ['timezone', 'time_zone']);
+  return fromMetadata ?? null;
+}
+
+function resolveChannelScheduler(data: ClerkEventData | undefined): string | null {
+  const direct = norm((data as { channel_scheduler?: string | null; channelScheduler?: string | null })?.channel_scheduler);
+  if (direct) {
+    return direct;
+  }
+
+  const camel = norm((data as { channelScheduler?: string | null })?.channelScheduler);
+  if (camel) {
+    return camel;
+  }
+
+  const fromMetadata = extractFromMetadata(data?.public_metadata, ['channel_scheduler', 'channelScheduler']);
+  return fromMetadata ?? null;
+}
+
+function extractFromMetadata(
+  metadata: Record<string, unknown> | null | undefined,
+  keys: string[]
+): string | null {
+  if (!metadata || typeof metadata !== 'object') {
+    return null;
+  }
+
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === 'string') {
+      const normalized = norm(value);
+      if (normalized) {
+        return normalized;
+      }
+    }
+  }
+
+  return null;
 }
 
 export default router;

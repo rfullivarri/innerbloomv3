@@ -114,14 +114,20 @@ describe('POST /api/webhooks/clerk', () => {
     expect(mockPoolQuery.mock.calls[1][0]).toContain('INSERT INTO clerk_webhook_events');
     expect(mockPoolQuery.mock.calls[1][0]).toContain('ON CONFLICT (svix_id) DO NOTHING');
     expect(mockPoolQuery.mock.calls[1][1]).toEqual(['evt-id', 'user.created', payload]);
-    expect(mockPoolQuery.mock.calls[2][0]).toContain('INSERT INTO users (clerk_user_id, email, first_name, last_name, image_url, deleted_at)');
-    expect(mockPoolQuery.mock.calls[2][0]).toContain('COALESCE(EXCLUDED.email,      users.email)');
+    expect(mockPoolQuery.mock.calls[2][0]).toContain(
+      'INSERT INTO users (clerk_user_id, email, first_name, last_name, image_url, timezone, channel_scheduler, deleted_at)'
+    );
+    expect(mockPoolQuery.mock.calls[2][0]).toContain('COALESCE(EXCLUDED.email');
     expect(mockPoolQuery.mock.calls[2][1]).toEqual([
       'user_123',
       'example@example.org',
       'Example',
       null,
       'https://img.clerk.com/avatar.png',
+      false,
+      null,
+      false,
+      null,
     ]);
     expect(mockPoolQuery.mock.calls[3][0]).toContain('UPDATE users');
     expect(mockPoolQuery.mock.calls[3][0]).toContain('COALESCE($2, email_primary)');
@@ -176,6 +182,10 @@ describe('POST /api/webhooks/clerk', () => {
       null,
       'Doe',
       'https://cdn.example.com/avatar.png',
+      false,
+      null,
+      false,
+      null,
     ]);
     expect(mockPoolQuery.mock.calls[3][1]).toEqual([
       'user_456',
