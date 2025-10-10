@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserDailyEnergy, type DailyEnergySnapshot } from '../../lib/api';
 import { Card } from '../ui/Card';
+import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 
 interface EnergyCardProps {
   userId: string;
@@ -46,7 +47,15 @@ export function EnergyCard({ userId }: EnergyCardProps) {
   const hasData = Boolean(data);
 
   return (
-    <Card title="💠 Daily Energy" subtitle="Promedio últimos 7 días">
+    <Card
+      title="💠 Daily Energy"
+      subtitle="Promedio últimos 7 días"
+      rightSlot={
+        <InfoDotTarget id="dailyEnergy" placement="right" className="inline-flex items-center">
+          <span className="sr-only">Más información sobre Daily Energy</span>
+        </InfoDotTarget>
+      }
+    >
       {status === 'loading' && (
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, index) => (
