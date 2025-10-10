@@ -14,8 +14,6 @@
 
 #emotionChart .month-row {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: var(--cell);
   gap: var(--cell-gap, 6px);
   color: rgba(226, 232, 255, 0.45);
   text-align: left;
@@ -25,8 +23,10 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  width: var(--cell);
   min-height: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .emotion-grid--weekcols {
