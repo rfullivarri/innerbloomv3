@@ -32,6 +32,12 @@ npm run dev
 
 The server exposes `GET /healthz` for health checks and mounts the existing Express routes alongside the new Fastify handlers.
 
+Print the registered Express routes without starting the Fastify server:
+
+```bash
+npm run routes:print
+```
+
 ## Testing
 
 Run the unit and integration test suite locally from the repository root:
@@ -187,11 +193,48 @@ curl \
 ### Webhook
 
 * Endpoint: `POST /api/webhooks/clerk`
+* Health check: `GET /api/webhooks/clerk/health`
 * Headers: `svix-id`, `svix-timestamp`, `svix-signature`
 * Signature verification: performed with the official Svix verifier using `CLERK_WEBHOOK_SECRET`
 * Supported events: `user.created`, `user.updated`, `user.deleted`
 
-A valid request upserts the mirrored user record in Postgres (or soft-deletes on `user.deleted`). The handler responds with HTTP `204` on success and `400/422` for invalid requests.
+A valid request upserts the mirrored user record in Postgres (or soft-deletes on `user.deleted`). The handler responds with HTTP `200` on success, `400` for invalid payloads/signatures and `503` when the secret is not configured.
+
+#### End-to-end verification
+
+1. Deploy the service to Railway and confirm the webhook routes are registered:
+   ```bash
+   npm run routes:print
+   ```
+   The output must include `POST   /api/webhooks/clerk` exactly once.
+2. Hit the health probe from your browser or `curl`:
+   ```bash
+   curl https://<api-host>/api/webhooks/clerk/health
+   ```
+   Expect `{ "ok": true }`.
+3. In Clerk → **Webhooks → Endpoints**, open the configured endpoint and send the test events (`user.created`, `user.updated`, `user.deleted`).
+4. Check Railway logs for entries similar to:
+   ```
+   [clerk-webhook] user.created user_123
+   ```
+5. Inspect Neon using `pg_stat_statements` to validate the `INSERT ... ON CONFLICT` statements ran after the test event (see SQL helpers below).
+
+   ```sql
+   -- Reset counters before issuing a test event
+   SELECT pg_stat_statements_reset();
+
+   -- Inspect INSERT/UPDATE activity executed by the webhook handler
+   SELECT total_time,
+          calls,
+          mean_time,
+          rows,
+          query
+     FROM pg_stat_statements
+    WHERE query ILIKE '%INSERT INTO users%'
+       OR query ILIKE '%UPDATE users%'
+ ORDER BY total_time DESC
+    LIMIT 20;
+   ```
 
 ### Backfill
 

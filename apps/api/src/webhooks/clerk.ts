@@ -13,6 +13,9 @@ const router = express.Router();
 
 const rawJsonMiddleware = express.raw({ type: 'application/json' });
 
+const hasSecretConfigured = Boolean(process.env.CLERK_WEBHOOK_SECRET);
+console.info('[clerk-webhook] signing secret detected', { hasSecret: hasSecretConfigured });
+
 const ENSURE_SCHEMA_SQL = `
 ALTER TABLE users ADD COLUMN IF NOT EXISTS clerk_user_id TEXT UNIQUE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
@@ -49,11 +52,13 @@ WHERE clerk_user_id = $1;
 `;
 
 type ClerkEmailAddress = {
+  id?: string | null;
   email_address?: string | null;
 };
 
 type ClerkEventData = {
   id?: string;
+  primary_email_address_id?: string | null;
   email_addresses?: ClerkEmailAddress[];
   first_name?: string | null;
   last_name?: string | null;
@@ -73,8 +78,12 @@ type SvixHeaders = Pick<
 
 let ensureSchemaPromise: Promise<void> | null = null;
 
+router.get('/webhooks/clerk/health', (_req, res) => {
+  return res.status(200).json({ ok: true });
+});
+
 router.post(
-  '/api/webhooks/clerk',
+  '/webhooks/clerk',
   rawJsonMiddleware,
   async (req: Request, res: Response): Promise<Response> => {
     const secret = process.env.CLERK_WEBHOOK_SECRET;
@@ -83,6 +92,10 @@ router.post(
       console.error('[clerk-webhook] Missing CLERK_WEBHOOK_SECRET');
       return res.status(503).json({ code: 'webhook_disabled' });
     }
+
+    console.info('[clerk-webhook] incoming event with secret configured', {
+      hasSecret: Boolean(secret),
+    });
 
     const payloadString = toPayloadString(req.body);
     if (!payloadString) {
@@ -125,7 +138,7 @@ router.post(
       if (eventType === 'user.created' || eventType === 'user.updated') {
         await ensureSchema();
 
-        const email = extractEmail(data?.email_addresses);
+        const email = getPrimaryEmail(data);
         const firstName = normalizeName(data?.first_name);
         const lastName = normalizeName(data?.last_name);
         const avatarUrl = extractAvatarUrl(data?.image_url, data?.profile_image_url);
@@ -190,13 +203,19 @@ function toPayloadString(body: unknown): string | null {
   return null;
 }
 
-function extractEmail(addresses: ClerkEmailAddress[] | undefined): string | null {
-  if (!addresses || addresses.length === 0) {
+function getPrimaryEmail(data: ClerkEventData | undefined): string | null {
+  if (!data) {
     return null;
   }
 
-  const [first] = addresses;
-  const raw = first?.email_address;
+  const primaryId = data.primary_email_address_id ?? null;
+  const addresses = Array.isArray(data.email_addresses) ? data.email_addresses : [];
+
+  const candidate = primaryId
+    ? addresses.find((address) => address?.id === primaryId)
+    : addresses[0];
+
+  const raw = candidate?.email_address;
 
   if (typeof raw !== 'string') {
     return null;

@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "test": "vitest run --coverage",
-    "backfill:users": "tsx apps/api/scripts/clerk-backfill.ts"
+    "backfill:users": "tsx apps/api/scripts/clerk-backfill.ts",
+    "routes:print": "tsx scripts/routes-print.ts"
   },
   "dependencies": {
     "@fastify/express": "^4.0.2",
