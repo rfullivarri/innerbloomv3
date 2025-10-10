@@ -17,8 +17,8 @@ const GRID_MAX_CELL_SIZE = 16;
 const GRID_MIN_CELL_SIZE = 3.5;
 const GRID_MAX_GAP = 6;
 const GRID_MIN_GAP = 1.5;
-// Display the grid 40% larger than the computed size.
-const GRID_SCALE_FACTOR = 1.4 * 1.4;
+// Display the grid about 30% larger than the previous scaled size for improved readability.
+const GRID_SCALE_FACTOR = 1.4 * 1.4 * 1.3;
 const HEATMAP_LOOKBACK_DAYS = 365;
 
 const EMOTION_ORDER = [
