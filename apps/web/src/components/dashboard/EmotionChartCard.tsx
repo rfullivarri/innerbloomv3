@@ -601,6 +601,14 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
     [cellGap, cellSize],
   );
 
+  const monthRowStyle = useMemo(
+    () =>
+      ({
+        gridTemplateColumns: `repeat(${columnCount}, var(--cell))`,
+      }) as CSSProperties,
+    [columnCount],
+  );
+
   return (
     <Card
       title="💗 Emotion Chart"
@@ -630,66 +638,70 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
           {rangeLabel && <p className="text-xs text-slate-400">Período analizado: {rangeLabel}</p>}
 
           <div className="rounded-2xl border border-white/10 bg-white/5 p-2">
-            <div id="emotionChart">
-              <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
-                <div className="month-row text-[10px] uppercase tracking-wide text-slate-500">
-                  {columns.map((column) => (
-                    <span key={`${column.key}-label`} className="month-chip">
-                      {column.label}
-                    </span>
-                  ))}
-                </div>
-                <div className="emotion-grid--weekcols">
-                  {columns.map((column) => (
-                    <div key={column.key} className="emotion-col">
-                      {column.cells.map((cell) => {
-                        const tooltipEmotion = cell.rawEmotion ?? cell.emotion;
-                        const tooltipDateRaw = cell.rawDate;
-                        const tooltipDate =
-                          tooltipDateRaw && tooltipDateRaw !== '[object Object]'
-                            ? tooltipDateRaw
-                            : tooltipFormatter.format(cell.date);
-                        const tooltip = `${tooltipDate} – ${tooltipEmotion}`;
-                        return (
-                          <div
-                            key={cell.key}
-                            className="emotion-cell"
-                            style={{ backgroundColor: cell.color }}
-                            title={tooltip}
-                            data-tooltip={tooltip}
-                            data-origin={cell.origin}
-                            data-raw-emotion={cell.rawEmotion ?? undefined}
-                            data-raw-date={cell.rawDate ?? undefined}
-                            aria-label={tooltip}
-                          />
-                        );
-                      })}
-                    </div>
-                  ))}
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <div id="emotionChart">
+                <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
+                  <div
+                    className="month-row text-[10px] uppercase tracking-wide text-slate-500"
+                    style={monthRowStyle}
+                  >
+                    {columns.map((column) => (
+                      <span key={`${column.key}-label`} className="month-chip">
+                        {column.label}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="emotion-grid--weekcols">
+                    {columns.map((column) => (
+                      <div key={column.key} className="emotion-col">
+                        {column.cells.map((cell) => {
+                          const tooltipEmotion = cell.rawEmotion ?? cell.emotion;
+                          const tooltipDateRaw = cell.rawDate;
+                          const tooltipDate =
+                            tooltipDateRaw && tooltipDateRaw !== '[object Object]'
+                              ? tooltipDateRaw
+                              : tooltipFormatter.format(cell.date);
+                          const tooltip = `${tooltipDate} – ${tooltipEmotion}`;
+                          return (
+                            <div
+                              key={cell.key}
+                              className="emotion-cell"
+                              style={{ backgroundColor: cell.color }}
+                              title={tooltip}
+                              data-tooltip={tooltip}
+                              data-origin={cell.origin}
+                              data-raw-emotion={cell.rawEmotion ?? undefined}
+                              data-raw-date={cell.rawDate ?? undefined}
+                              aria-label={tooltip}
+                            />
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
+              {highlight ? (
+                <div className="flex w-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:flex-row sm:items-center sm:gap-4 sm:p-4">
+                  <div
+                    className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
+                    style={{ backgroundColor: highlight.color }}
+                  />
+                  <div className="space-y-1">
+                    <p className="font-semibold text-slate-100">{highlight.emotion}</p>
+                    <p className="text-xs text-slate-400">
+                      Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
+                      {highlight.count === 1 ? 'registro' : 'registros'})
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-slate-400 sm:p-4">
+                  Aún no hay suficiente información reciente para destacar una emoción.
+                </div>
+              )}
             </div>
           </div>
-
-          {highlight ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div
-                className="emotion-highlight-indicator h-10 w-10 rounded-full"
-                style={{ backgroundColor: highlight.color }}
-              />
-              <div>
-                <p className="font-semibold text-slate-100">{highlight.emotion}</p>
-                <p className="text-xs text-slate-400">
-                  Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
-                  {highlight.count === 1 ? 'registro' : 'registros'})
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-slate-400">
-              Aún no hay suficiente información reciente para destacar una emoción.
-            </div>
-          )}
         </div>
       ) : null}
     </Card>

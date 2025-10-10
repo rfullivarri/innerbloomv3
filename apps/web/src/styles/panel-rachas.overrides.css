@@ -15,6 +15,7 @@
 #emotionChart .month-row {
   display: grid;
   grid-auto-flow: column;
+  grid-auto-columns: var(--cell);
   gap: var(--cell-gap, 6px);
   color: rgba(226, 232, 255, 0.45);
   text-align: left;
