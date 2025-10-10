@@ -668,17 +668,21 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       const csSurface = getComputedStyle(surface);
       const pad =
         parseFloat(csSurface.paddingTop) + parseFloat(csSurface.paddingBottom);
+      const border =
+        parseFloat(csSurface.borderTopWidth || '0') +
+        parseFloat(csSurface.borderBottomWidth || '0');
 
       const csGrid = getComputedStyle(gridBox);
       const cell = parseFloat(csGrid.getPropertyValue('--cell')) || 0;
       const gap = parseFloat(csGrid.getPropertyValue('--cell-gap')) || 0;
 
-      const monthChip = gridBox.querySelector<HTMLElement>('.month-row > *') || gridBox;
-      const monthH = monthChip.getBoundingClientRect().height || 0;
+      const monthChip = gridBox.querySelector<HTMLElement>('.month-row > *');
+      const monthH = monthChip ? monthChip.getBoundingClientRect().height : 0;
 
-      const sevenCellsHeight = 7 * cell + 6 * gap;
+      const sevenRows = 7 * cell + 6 * gap;
+      const safety = Math.ceil(Math.max(2, window.devicePixelRatio)) + gap;
 
-      const required = Math.ceil(monthH + sevenCellsHeight + pad);
+      const required = Math.ceil(monthH + sevenRows + pad + border + safety);
 
       heatmap.style.setProperty('--emotion-heatmap-min-h', `${required}px`);
     };
@@ -698,7 +702,8 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       window.removeEventListener('resize', compute);
       window.removeEventListener('orientationchange', compute);
     };
-  }, [cellGap, cellSize, columnCount, showEmpty, showError, showSkeleton, hasRecordedEmotion]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const cardElement = cardRef.current;
