@@ -1,7 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DailyQuestModal } from './DailyQuestModal';
+import { createRef } from 'react';
+import { DailyQuestModal, type DailyQuestModalHandle } from './DailyQuestModal';
 
 const { mockGetStatus, mockGetDefinition, mockSubmit } = vi.hoisted(() => ({
   mockGetStatus: vi.fn(),
@@ -153,5 +154,79 @@ describe('DailyQuestModal', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
+  });
+
+  it('locks body scroll while the modal is open and restores it on close', async () => {
+    mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
+    mockGetDefinition.mockResolvedValue(baseDefinition);
+
+    const user = userEvent.setup();
+    render(<DailyQuestModal enabled />);
+
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    expect(document.body.style.overflow).toBe('hidden');
+
+    await user.click(screen.getByRole('button', { name: /más tarde/i }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(document.body.style.overflow).not.toBe('hidden'));
+  });
+
+  it('closes when pressing Escape', async () => {
+    mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
+    mockGetDefinition.mockResolvedValue(baseDefinition);
+
+    const user = userEvent.setup();
+    render(<DailyQuestModal enabled />);
+
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(document.body.style.overflow).not.toBe('hidden'));
+  });
+
+  it('restores focus to the trigger element after closing', async () => {
+    mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
+    mockGetDefinition.mockResolvedValue(baseDefinition);
+
+    const triggerRef = createRef<HTMLButtonElement>();
+    const user = userEvent.setup();
+
+    render(
+      <>
+        <button ref={triggerRef}>Daily</button>
+        <DailyQuestModal enabled returnFocusRef={triggerRef} />
+      </>,
+    );
+
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await user.click(screen.getByLabelText(/cerrar daily quest/i));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(document.activeElement).toBe(triggerRef.current);
+  });
+
+  it('allows reopening through the exposed ref after snoozing', async () => {
+    mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
+    mockGetDefinition.mockResolvedValue(baseDefinition);
+
+    const modalRef = createRef<DailyQuestModalHandle>();
+    const user = userEvent.setup();
+
+    render(<DailyQuestModal ref={modalRef} enabled />);
+
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: /más tarde/i }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+
+    modalRef.current?.open();
+
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
   });
 });

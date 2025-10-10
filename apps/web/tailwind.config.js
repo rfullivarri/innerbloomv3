@@ -29,6 +29,9 @@ const config = {
       boxShadow: {
         glow: '0 0 0 1px rgba(139, 92, 246, 0.08), 0 16px 40px -20px rgba(56, 189, 248, 0.45)'
       },
+      zIndex: {
+        modal: '9999'
+      },
       borderRadius: {
         xl: '1.25rem'
       }

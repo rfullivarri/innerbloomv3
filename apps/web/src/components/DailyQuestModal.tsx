@@ -1,5 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useSpring } from 'framer-motion';
+import type { RefObject } from 'react';
 import { getDailyQuestDefinition, getDailyQuestStatus, submitDailyQuest } from '../lib/api';
 import { useRequest } from '../hooks/useRequest';
 
@@ -13,6 +23,12 @@ type ToastState = {
 
 type DailyQuestModalProps = {
   enabled?: boolean;
+  returnFocusRef?: RefObject<HTMLElement | null>;
+};
+
+export type DailyQuestModalHandle = {
+  open: () => void;
+  close: () => void;
 };
 
 type PendingSubmission = {
@@ -52,7 +68,8 @@ function CheckIcon({ active }: { active: boolean }) {
   );
 }
 
-export function DailyQuestModal({ enabled = false }: DailyQuestModalProps) {
+export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModalProps>(
+  function DailyQuestModal({ enabled = false, returnFocusRef }: DailyQuestModalProps, ref) {
   const [isOpen, setIsOpen] = useState(false);
   const [snoozed, setSnoozed] = useState(false);
   const [hasCompletedToday, setHasCompletedToday] = useState(false);
@@ -64,6 +81,10 @@ export function DailyQuestModal({ enabled = false }: DailyQuestModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+  const shouldRestoreFocusRef = useRef(false);
 
   const {
     data: status,
@@ -118,22 +139,6 @@ export function DailyQuestModal({ enabled = false }: DailyQuestModalProps) {
     setSelectedTasks([]);
     setNotes('');
   }, [definition?.date, pendingSubmission]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsOpen(false);
-        setSnoozed(true);
-      }
-    };
-
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [isOpen]);
 
   useEffect(() => {
     return () => {
@@ -207,6 +212,136 @@ export function DailyQuestModal({ enabled = false }: DailyQuestModalProps) {
     });
   };
 
+  const closeModal = useCallback(
+    (options?: { snooze?: boolean; restoreFocus?: boolean }) => {
+      if (options?.snooze) {
+        setSnoozed(true);
+      }
+      shouldRestoreFocusRef.current = options?.restoreFocus !== false;
+      setIsOpen(false);
+    },
+    [],
+  );
+
+  const openDailyQuest = useCallback(() => {
+    if (!enabled) {
+      return;
+    }
+    setSnoozed(false);
+    shouldRestoreFocusRef.current = false;
+    setIsOpen(true);
+  }, [enabled]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      open: openDailyQuest,
+      close: () => closeModal({ snooze: true }),
+    }),
+    [closeModal, openDailyQuest],
+  );
+
+  useEffect(() => {
+    if (!isOpen || typeof document === 'undefined') {
+      return;
+    }
+
+    previouslyFocusedElementRef.current = document.activeElement as HTMLElement | null;
+
+    const frame = window.requestAnimationFrame(() => {
+      closeButtonRef.current?.focus();
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      shouldRestoreFocusRef.current = false;
+      return;
+    }
+
+    if (!shouldRestoreFocusRef.current) {
+      return;
+    }
+
+    shouldRestoreFocusRef.current = false;
+
+    const target = returnFocusRef?.current ?? previouslyFocusedElementRef.current;
+    if (target && typeof target.focus === 'function') {
+      target.focus();
+    }
+  }, [isOpen, returnFocusRef]);
+
+  useEffect(() => {
+    if (!isOpen || typeof document === 'undefined') {
+      return;
+    }
+
+    const { body } = document;
+    const previousOverflow = body.style.overflow;
+    body.style.overflow = 'hidden';
+
+    return () => {
+      body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || typeof document === 'undefined') {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal({ snooze: true });
+        return;
+      }
+
+      if (event.key !== 'Tab') {
+        return;
+      }
+
+      const dialog = dialogRef.current;
+      if (!dialog) {
+        return;
+      }
+
+      const focusableElements = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((element) => !element.hasAttribute('data-focus-guard'));
+
+      if (focusableElements.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement as HTMLElement | null;
+
+      if (event.shiftKey) {
+        if (!activeElement || activeElement === firstElement || !dialog.contains(activeElement)) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+      } else if (activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [closeModal, isOpen]);
+
   const pushToast = (message: string, tone: ToastTone) => {
     if (toastTimer.current) {
       clearTimeout(toastTimer.current);
@@ -239,7 +374,7 @@ export function DailyQuestModal({ enabled = false }: DailyQuestModalProps) {
 
     setPendingSubmission(snapshot);
     setIsSubmitting(true);
-    setIsOpen(false);
+    closeModal({ restoreFocus: false });
 
     try {
       const response = await submitDailyQuest({
@@ -261,236 +396,266 @@ export function DailyQuestModal({ enabled = false }: DailyQuestModalProps) {
       console.error('Failed to submit daily quest', error);
       setIsSubmitting(false);
       setPendingSubmission(null);
+      shouldRestoreFocusRef.current = false;
       setIsOpen(true);
       pushToast('No pudimos guardar tu Daily Quest. Intentá nuevamente.', 'error');
     }
   };
 
   const handleSnooze = () => {
-    setSnoozed(true);
-    setIsOpen(false);
+    closeModal({ snooze: true });
     pushToast('Recordatorio pospuesto. Volvé cuando quieras completar tu Daily Quest.', 'success');
   };
 
   const isLoadingStatus = statusRequestState === 'loading' || statusRequestState === 'idle';
   const isDefinitionLoading = definitionState === 'loading' && !definition;
+  const portalTarget = typeof document !== 'undefined' ? document.body : null;
+  const showSkeleton = isLoadingStatus || isDefinitionLoading;
+  const canShowContent = Boolean(definition && !isDefinitionLoading);
 
   return (
     <>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            className="fixed inset-0 z-40 flex items-end justify-center bg-black/60 px-3 py-6 md:items-center"
-            variants={overlayVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-          >
-            <button
-              type="button"
-              className="absolute inset-0 -z-10"
-              aria-label="Cerrar Daily Quest"
-              onClick={handleSnooze}
-            />
-
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="daily-quest-title"
-              variants={modalVariants}
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              transition={{ duration: 0.24, ease: 'easeOut' }}
-              className="glass-card relative z-10 flex w-full max-w-lg flex-col gap-4 rounded-3xl p-5 shadow-2xl md:p-6"
-            >
-              <header className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Daily Quest</p>
-                  <h2 id="daily-quest-title" className="mt-1 text-2xl font-semibold text-white">
-                    Ritual diario
-                  </h2>
-                  <p className="mt-2 text-sm text-white/70">
-                    Registrá cómo te sentís y marcá los hábitos completados para sumar XP y mantener tu racha.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="rounded-full border border-white/10 bg-white/5 p-2 text-white/80 transition hover:bg-white/10"
-                  onClick={handleSnooze}
-                  aria-label="Posponer Daily Quest"
+      {portalTarget &&
+        createPortal(
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                className="fixed inset-0 z-modal flex items-stretch justify-center bg-black/70 px-0 py-0 md:px-6 md:py-10"
+                variants={overlayVariants}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+              >
+                <div
+                  role="presentation"
+                  aria-hidden="true"
+                  className="absolute inset-0"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleSnooze();
+                  }}
+                />
+                <motion.div
+                  ref={dialogRef}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="daily-quest-title"
+                  variants={modalVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                  transition={{ duration: 0.24, ease: 'easeOut' }}
+                  className="glass-card pointer-events-auto relative flex h-[100dvh] w-full max-w-lg flex-col overflow-hidden rounded-none bg-slate-900/90 text-white shadow-2xl md:h-auto md:max-h-[100dvh] md:rounded-3xl md:my-auto"
+                  style={{ maxHeight: '100dvh' }}
                 >
-                  ✕
-                </button>
-              </header>
-
-              {(isLoadingStatus || isDefinitionLoading) && (
-                <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/60">
-                  <div className="h-3 w-24 animate-pulse rounded-full bg-white/10" />
-                  <div className="h-3 w-3/4 animate-pulse rounded-full bg-white/10" />
-                  <div className="h-3 w-5/6 animate-pulse rounded-full bg-white/10" />
-                </div>
-              )}
-
-              {definition && !isDefinitionLoading && (
-                <div className="flex flex-col gap-5 overflow-y-auto pr-1" aria-live="polite">
-                  <section className="flex flex-col gap-2">
-                    <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">¿Cómo te sentís hoy?</h3>
-                    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Emociones disponibles">
-                      {definition.emotionOptions.map((option) => {
-                        const isActive = selectedEmotion === option.emotion_id;
-                        return (
-                          <motion.button
-                            key={option.emotion_id}
-                            type="button"
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setSelectedEmotion(option.emotion_id)}
-                            className={classNames(
-                              'rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70',
-                              isActive
-                                ? 'bg-primary/90 text-white shadow-glow'
-                                : 'bg-white/5 text-white/70 hover:bg-white/10',
-                            )}
-                            aria-pressed={isActive}
-                          >
-                            {option.name}
-                          </motion.button>
-                        );
-                      })}
-                    </div>
-                  </section>
-
-                  <section className="flex flex-col gap-3">
-                    <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">Checklist del día</h3>
-                    <div className="flex flex-col gap-4">
-                      {definition.pillars.map((pillar) => (
-                        <div key={pillar.pillar_code} className="flex flex-col gap-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
-                            {pillar.pillar_code === 'BODY'
-                              ? 'Cuerpo'
-                              : pillar.pillar_code === 'MIND'
-                              ? 'Mente'
-                              : pillar.pillar_code === 'SOUL'
-                              ? 'Alma'
-                              : pillar.pillar_code}
-                          </p>
-                          <div className="flex flex-col gap-2">
-                            {pillar.tasks.map((task) => {
-                              const isSelected = selectedTasks.includes(task.task_id);
-                              return (
-                                <label
-                                  key={task.task_id}
-                                  className={classNames(
-                                    'flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-4 text-left transition hover:bg-white/[0.08]',
-                                    isSelected && 'border-primary/50 bg-primary/10 shadow-glow',
-                                  )}
-                                >
-                                  <div className="flex items-start gap-3">
-                                    <motion.span
-                                      className="flex h-5 w-5 items-center justify-center rounded-full border border-white/20 text-primary"
-                                      initial={false}
-                                      animate={{
-                                        backgroundColor: isSelected
-                                          ? 'rgba(94, 234, 212, 0.12)'
-                                          : 'rgba(0, 0, 0, 0)',
-                                      }}
-                                    >
-                                      <CheckIcon active={isSelected} />
-                                    </motion.span>
-                                    <div>
-                                      <p className="font-medium text-white">{task.name}</p>
-                                      <p className="text-xs text-white/60">
-                                        {task.difficulty ? `Dificultad ${task.difficulty}` : 'Dificultad desconocida'} · {task.xp} XP
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <input
-                                    type="checkbox"
-                                    className="sr-only"
-                                    checked={isSelected}
-                                    onChange={() => toggleTask(task.task_id)}
-                                  />
-                                </label>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-
-                  <section className="flex flex-col gap-2">
-                    <label htmlFor="daily-quest-notes" className="text-sm font-semibold uppercase tracking-wide text-white/70">
-                      Notas opcionales
-                    </label>
-                    <textarea
-                      id="daily-quest-notes"
-                      value={notes}
-                      onChange={(event) => setNotes(event.target.value)}
-                      placeholder="¿Algo que quieras destacar de tu día?"
-                      className="min-h-[96px] resize-y rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white placeholder:text-white/40 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
-                    />
-                  </section>
-                </div>
-              )}
-
-              <div className="pointer-events-auto -mx-5 mt-2 rounded-b-3xl border-t border-white/5 bg-slate-900/80 px-5 py-4 backdrop-blur md:-mx-6 md:px-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="relative">
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/40">XP seleccionado</p>
-                    <div className="flex items-baseline gap-2">
-                      <motion.span
-                        data-testid="xp-counter"
-                        className="text-3xl font-semibold text-white"
-                        animate={{ opacity: 1 }}
+                  <header
+                    className="sticky z-10 border-b border-white/10 bg-slate-900/95 px-5 pb-4 md:px-6"
+                    style={{
+                      top: 'env(safe-area-inset-top, 0px)',
+                      paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.25rem)',
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Daily Quest</p>
+                        <h2 id="daily-quest-title" className="mt-1 text-2xl font-semibold text-white">
+                          Ritual diario
+                        </h2>
+                        <p className="mt-2 text-sm text-white/70">
+                          Registrá cómo te sentís y marcá los hábitos completados para sumar XP y mantener tu racha.
+                        </p>
+                      </div>
+                      <button
+                        ref={closeButtonRef}
+                        type="button"
+                        className="rounded-full border border-white/10 bg-white/5 p-2 text-white/80 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        onClick={handleSnooze}
+                        aria-label="Cerrar Daily Quest"
                       >
-                        {displayXp}
-                      </motion.span>
-                      <span className="text-sm font-semibold uppercase tracking-wide text-white/60">XP</span>
+                        ✕
+                      </button>
                     </div>
-                    <AnimatePresence>
-                      {xpBurst != null && xpBurst > 0 && (
-                        <motion.span
-                          key={xpBurst}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: -8 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ duration: 0.6, ease: 'easeOut' }}
-                          className="absolute -right-2 top-0 text-xs font-semibold text-emerald-300"
-                        >
-                          +{xpBurst} XP
-                        </motion.span>
+                  </header>
+
+                  <div
+                    className="flex-1 overflow-y-auto px-5 pb-6 pt-4 md:px-6"
+                    style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+                    aria-live="polite"
+                  >
+                    <div className="flex flex-col gap-5 pb-6">
+                      {showSkeleton && (
+                        <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/60">
+                          <div className="h-3 w-24 animate-pulse rounded-full bg-white/10" />
+                          <div className="h-3 w-3/4 animate-pulse rounded-full bg-white/10" />
+                          <div className="h-3 w-5/6 animate-pulse rounded-full bg-white/10" />
+                        </div>
                       )}
-                    </AnimatePresence>
+
+                      {canShowContent && definition && (
+                        <>
+                          <section className="flex flex-col gap-2">
+                            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">¿Cómo te sentís hoy?</h3>
+                            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Emociones disponibles">
+                              {definition.emotionOptions.map((option) => {
+                                const isActive = selectedEmotion === option.emotion_id;
+                                return (
+                                  <motion.button
+                                    key={option.emotion_id}
+                                    type="button"
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => setSelectedEmotion(option.emotion_id)}
+                                    className={classNames(
+                                      'rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70',
+                                      isActive
+                                        ? 'bg-primary/90 text-white shadow-glow'
+                                        : 'bg-white/5 text-white/70 hover:bg-white/10',
+                                    )}
+                                    aria-pressed={isActive}
+                                  >
+                                    {option.name}
+                                  </motion.button>
+                                );
+                              })}
+                            </div>
+                          </section>
+
+                          <section className="flex flex-col gap-3">
+                            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">Checklist del día</h3>
+                            <div className="flex flex-col gap-4">
+                              {definition.pillars.map((pillar) => (
+                                <div key={pillar.pillar_code} className="flex flex-col gap-3">
+                                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+                                    {pillar.pillar_code === 'BODY'
+                                      ? 'Cuerpo'
+                                      : pillar.pillar_code === 'MIND'
+                                      ? 'Mente'
+                                      : pillar.pillar_code === 'SOUL'
+                                      ? 'Alma'
+                                      : pillar.pillar_code}
+                                  </p>
+                                  <div className="flex flex-col gap-2">
+                                    {pillar.tasks.map((task) => {
+                                      const isSelected = selectedTasks.includes(task.task_id);
+                                      return (
+                                        <label
+                                          key={task.task_id}
+                                          className={classNames(
+                                            'flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-4 text-left transition hover:bg-white/[0.08]',
+                                            isSelected && 'border-primary/50 bg-primary/10 shadow-glow',
+                                          )}
+                                        >
+                                          <div className="flex items-start gap-3">
+                                            <motion.span
+                                              className="flex h-5 w-5 items-center justify-center rounded-full border border-white/20 text-primary"
+                                              initial={false}
+                                              animate={{
+                                                backgroundColor: isSelected
+                                                  ? 'rgba(94, 234, 212, 0.12)'
+                                                  : 'rgba(0, 0, 0, 0)',
+                                              }}
+                                            >
+                                              <CheckIcon active={isSelected} />
+                                            </motion.span>
+                                            <div>
+                                              <p className="font-medium text-white">{task.name}</p>
+                                              <p className="text-xs text-white/60">
+                                                {task.difficulty ? `Dificultad ${task.difficulty}` : 'Dificultad desconocida'} · {task.xp} XP
+                                              </p>
+                                            </div>
+                                          </div>
+                                          <input
+                                            type="checkbox"
+                                            className="sr-only"
+                                            checked={isSelected}
+                                            onChange={() => toggleTask(task.task_id)}
+                                          />
+                                        </label>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </section>
+
+                          <section className="flex flex-col gap-2">
+                            <label htmlFor="daily-quest-notes" className="text-sm font-semibold uppercase tracking-wide text-white/70">
+                              Notas opcionales
+                            </label>
+                            <textarea
+                              id="daily-quest-notes"
+                              value={notes}
+                              onChange={(event) => setNotes(event.target.value)}
+                              placeholder="¿Algo que quieras destacar de tu día?"
+                              className="min-h-[96px] resize-y rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white placeholder:text-white/40 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                            />
+                          </section>
+                        </>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                    <button
-                      type="button"
-                      onClick={handleSnooze}
-                      className="rounded-full border border-white/10 px-5 py-2 text-sm font-medium text-white/70 transition hover:bg-white/10"
-                    >
-                      Más tarde
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={isSubmitting || selectedEmotion == null}
-                      className={classNames(
-                        'inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-slate-900 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
-                        isSubmitting || selectedEmotion == null ? 'opacity-50' : 'hover:bg-primary/90',
-                      )}
-                    >
-                      {isSubmitting ? 'Guardando…' : 'Registrar Daily Quest'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+                  <footer
+                    className="sticky z-10 border-t border-white/10 bg-slate-900/95 px-5 pb-4 pt-3 backdrop-blur md:px-6"
+                    style={{
+                      bottom: 'env(safe-area-inset-bottom, 0px)',
+                      paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+                    }}
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="relative">
+                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/40">XP seleccionado</p>
+                        <div className="flex items-baseline gap-2">
+                          <motion.span data-testid="xp-counter" className="text-3xl font-semibold text-white" animate={{ opacity: 1 }}>
+                            {displayXp}
+                          </motion.span>
+                          <span className="text-sm font-semibold uppercase tracking-wide text-white/60">XP</span>
+                        </div>
+                        <AnimatePresence>
+                          {xpBurst != null && xpBurst > 0 && (
+                            <motion.span
+                              key={xpBurst}
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: -8 }}
+                              exit={{ opacity: 0, y: -20 }}
+                              transition={{ duration: 0.6, ease: 'easeOut' }}
+                              className="absolute -right-2 top-0 text-xs font-semibold text-emerald-300"
+                            >
+                              +{xpBurst} XP
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                        <button
+                          type="button"
+                          onClick={handleSnooze}
+                          className="rounded-full border border-white/10 px-5 py-2 text-sm font-medium text-white/70 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                        >
+                          Más tarde
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSubmit}
+                          disabled={isSubmitting || selectedEmotion == null}
+                          className={classNames(
+                            'inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-slate-900 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+                            isSubmitting || selectedEmotion == null ? 'opacity-50' : 'hover:bg-primary/90',
+                          )}
+                        >
+                          {isSubmitting ? 'Guardando…' : 'Registrar Daily Quest'}
+                        </button>
+                      </div>
+                    </div>
+                  </footer>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          portalTarget,
         )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {toast && (
@@ -515,6 +680,6 @@ export function DailyQuestModal({ enabled = false }: DailyQuestModalProps) {
       </AnimatePresence>
     </>
   );
-}
+});
 
 export default DailyQuestModal;

@@ -12,7 +12,7 @@
  */
 
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { Alerts } from '../components/dashboard-v3/Alerts';
 import { EnergyCard } from '../components/dashboard-v3/EnergyCard';
@@ -32,7 +32,7 @@ import { useBackendUser } from '../hooks/useBackendUser';
 import { useRequest } from '../hooks/useRequest';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
 import { getUserState } from '../lib/api';
-import { DailyQuestModal } from '../components/DailyQuestModal';
+import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -104,11 +104,25 @@ export default function DashboardV3Page() {
   const failedToLoadProfile = status === 'error' || !backendUserId;
 
   const avatarUrl = profile?.image_url || user?.imageUrl;
+  const dailyButtonRef = useRef<HTMLButtonElement | null>(null);
+  const dailyQuestModalRef = useRef<DailyQuestModalHandle | null>(null);
+
+  const handleOpenDaily = useCallback(() => {
+    dailyQuestModalRef.current?.open();
+  }, []);
+
   return (
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
-        <Navbar />
-        <DailyQuestModal enabled={Boolean(backendUserId)} />
+        <Navbar
+          onDailyClick={backendUserId ? handleOpenDaily : undefined}
+          dailyButtonRef={dailyButtonRef}
+        />
+        <DailyQuestModal
+          ref={dailyQuestModalRef}
+          enabled={Boolean(backendUserId)}
+          returnFocusRef={dailyButtonRef}
+        />
         <main className="flex-1">
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             {isLoadingProfile && <ProfileSkeleton />}
