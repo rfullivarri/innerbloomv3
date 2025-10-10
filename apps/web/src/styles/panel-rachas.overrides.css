@@ -1,21 +1,21 @@
 #emotionChart {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 9px;
 }
 
 #emotionChart .emotion-chart-surface {
   width: 100%;
   border-radius: 16px;
   background: linear-gradient(145deg, rgba(15, 33, 66, 0.65), rgba(16, 23, 45, 0.35));
-  padding: clamp(12px, 4.5vw, 20px) clamp(18px, 6vw, 28px);
+  padding: clamp(7px, 4.5vw, 20px) clamp(13px, 6vw, 28px);
   overflow: hidden;
 }
 
 @media (max-width: 480px) {
   #emotionChart .emotion-chart-surface {
     border-radius: 14px;
-    padding: clamp(12px, 5.5vw, 18px) clamp(16px, 6.4vw, 24px);
+    padding: clamp(7px, 5.5vw, 18px) clamp(13px, 6.4vw, 24px);
   }
 }
 
@@ -37,7 +37,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  min-height: 12px;
+  min-height: 11px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
