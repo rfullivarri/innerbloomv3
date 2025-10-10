@@ -42,6 +42,8 @@ const snapshotFilePath = path.resolve(
   '../db-snapshot.json'
 );
 
+const apiLoggingEnabled = process.env.API_LOGGING === 'true';
+
 if (process.env.ENABLE_DB_SNAPSHOT === 'true') {
   app.use(debugDbSnapshot);
 }
@@ -52,9 +54,13 @@ if (process.env.DEBUG_AUTH === 'true') {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
-console.info('[boot] mounting Clerk webhook router before JSON parser');
+if (apiLoggingEnabled) {
+  console.info('[boot] mounting Clerk webhook router before JSON parser');
+}
 app.use('/api', clerkWebhookRouter);
-console.info('[boot] registering express.json() after Clerk webhook router');
+if (apiLoggingEnabled) {
+  console.info('[boot] registering express.json() after Clerk webhook router');
+}
 app.use(express.json());
 
 app.get('/_debug/db', (_req, res, next) => {

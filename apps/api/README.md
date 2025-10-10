@@ -13,6 +13,7 @@
 | `PORT` | ➖ | Port for the Fastify server (defaults to `3000`). |
 | `CORS_ALLOWED_ORIGINS` | ➖ | Comma-separated list of additional origins allowed to call the API. |
 | `ALLOW_X_USER_ID_DEV` | ➖ | Enables the deprecated `X-User-Id` header for `/users/me` when running locally (defaults to `false`). The flag has no effect in production and will be removed on 2024-09-30. |
+| `API_LOGGING` | ➖ | Set to `true` to enable verbose console logs for the Clerk webhook and boot sequence. |
 
 ## Database migrations
 
@@ -197,6 +198,35 @@ curl \
 * Headers: `svix-id`, `svix-timestamp`, `svix-signature`
 * Signature verification: performed with the official Svix verifier using `CLERK_WEBHOOK_SECRET`
 * Supported events: `user.created`, `user.updated`, `user.deleted`
+
+#### Quick verification
+
+1. Hit the health check locally or in Railway:
+
+   ```bash
+   curl https://<web-service>/api/webhooks/clerk/health
+   # → { "ok": true }
+   ```
+
+2. In Clerk go to **Webhooks → Endpoints** and send a **Test event** (`user.created`). Confirm the webhook returns `2xx`.
+3. Inspect the replicated user in Neon:
+
+   ```sql
+   SELECT user_id, clerk_user_id, email, first_name, last_name, image_url,
+          email_primary, avatar_url, full_name, created_at, updated_at
+     FROM users
+    ORDER BY created_at DESC
+    LIMIT 5;
+   ```
+
+4. *(Optional)* Review the audit trail:
+
+   ```sql
+   SELECT svix_id, event_type, received_at
+     FROM clerk_webhook_events
+    ORDER BY id DESC
+    LIMIT 10;
+   ```
 
 A valid request upserts the mirrored user record in Postgres (or soft-deletes on `user.deleted`). The handler responds with HTTP `200` on success, `400` for invalid payloads/signatures and `503` when the secret is not configured.
 
