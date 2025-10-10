@@ -12,6 +12,7 @@ import { AnimatePresence, motion, useSpring } from 'framer-motion';
 import type { RefObject } from 'react';
 import { getDailyQuestDefinition, getDailyQuestStatus, submitDailyQuest } from '../lib/api';
 import { useRequest } from '../hooks/useRequest';
+import './DailyQuestModal.css';
 
 type ToastTone = 'success' | 'error';
 
@@ -43,8 +44,8 @@ const overlayVariants = {
 };
 
 const modalVariants = {
-  hidden: { opacity: 0, y: 24, scale: 0.98 },
-  visible: { opacity: 1, y: 0, scale: 1 },
+  hidden: { opacity: 0, scale: 0.98 },
+  visible: { opacity: 1, scale: 1 },
 };
 
 function classNames(...values: Array<string | false | null | undefined>): string {
@@ -420,17 +421,18 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
           <AnimatePresence>
             {isOpen && (
               <motion.div
-                className="fixed inset-0 z-modal flex items-stretch justify-center bg-black/70 px-0 py-0 md:px-6 md:py-10"
+                className="dailyQuestModalOverlay bg-black/70"
                 variants={overlayVariants}
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
                 transition={{ duration: 0.2, ease: 'easeOut' }}
+                layout={false}
               >
                 <div
                   role="presentation"
                   aria-hidden="true"
-                  className="absolute inset-0"
+                  className="dailyQuestModalBackdrop"
                   onClick={(event) => {
                     event.stopPropagation();
                     handleSnooze();
@@ -446,16 +448,10 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   animate="visible"
                   exit="hidden"
                   transition={{ duration: 0.24, ease: 'easeOut' }}
-                  className="glass-card pointer-events-auto relative flex h-[100dvh] w-full max-w-lg flex-col overflow-hidden rounded-none bg-slate-900/90 text-white shadow-2xl md:h-auto md:max-h-[100dvh] md:rounded-3xl md:my-auto"
-                  style={{ maxHeight: '100dvh' }}
+                  className="dailyQuestModalShell glass-card pointer-events-auto relative w-full max-w-lg flex-col bg-slate-900/90 text-white shadow-2xl"
+                  layout={false}
                 >
-                  <header
-                    className="sticky z-10 border-b border-white/10 bg-slate-900/95 px-5 pb-4 md:px-6"
-                    style={{
-                      top: 'env(safe-area-inset-top, 0px)',
-                      paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.25rem)',
-                    }}
-                  >
+                  <header className="dailyQuestModalHeader border-b border-white/10 bg-slate-900/95 px-5 pb-4 md:px-6">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Daily Quest</p>
@@ -478,11 +474,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                     </div>
                   </header>
 
-                  <div
-                    className="flex-1 overflow-y-auto px-5 pb-6 pt-4 md:px-6"
-                    style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
-                    aria-live="polite"
-                  >
+                  <div className="dailyQuestModalBody px-5 pt-4 md:px-6" aria-live="polite">
                     <div className="flex flex-col gap-5 pb-6">
                       {showSkeleton && (
                         <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/60">
@@ -596,13 +588,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                     </div>
                   </div>
 
-                  <footer
-                    className="sticky z-10 border-t border-white/10 bg-slate-900/95 px-5 pb-4 pt-3 backdrop-blur md:px-6"
-                    style={{
-                      bottom: 'env(safe-area-inset-bottom, 0px)',
-                      paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
-                    }}
-                  >
+                  <footer className="dailyQuestModalFooter border-t border-white/10 bg-slate-900/95 px-5 pb-4 pt-3 backdrop-blur md:px-6">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="relative">
                         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/40">XP seleccionado</p>
