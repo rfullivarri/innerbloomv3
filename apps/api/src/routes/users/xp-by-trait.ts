@@ -132,7 +132,7 @@ export const getUserXpByTrait: AsyncHandler = async (req, res) => {
        JOIN tasks t ON t.task_id = dl.task_id
   LEFT JOIN cat_trait ct ON ct.trait_id = t.trait_id
       WHERE dl.user_id = $1${dateFilter}
-   GROUP BY ct.code`,
+   GROUP BY ct.code, ct.name`,
     params,
   );
 
