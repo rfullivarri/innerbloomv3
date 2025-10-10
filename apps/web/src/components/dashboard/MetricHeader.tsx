@@ -202,25 +202,25 @@ function normalizeGameMode(mode?: string | null): NormalizedGameMode | null {
 
 const GAME_MODE_STYLES: Record<NormalizedGameMode, GameModeChipStyle> = {
   Flow: {
-    label: 'Modo Flow',
+    label: 'FLOW',
     backgroundClass: 'bg-gradient-to-r from-sky-500/25 via-indigo-500/30 to-purple-500/25 text-slate-100',
     glowClass: 'bg-sky-400/40',
     animate: true,
   },
   Chill: {
-    label: 'Modo Chill',
+    label: 'CHILL',
     backgroundClass: 'bg-gradient-to-r from-emerald-400/25 via-teal-400/30 to-cyan-400/25 text-emerald-50',
     glowClass: 'bg-emerald-400/40',
     animate: true,
   },
   Evolve: {
-    label: 'Modo Evolve',
+    label: 'EVOLVE',
     backgroundClass: 'bg-gradient-to-r from-fuchsia-400/25 via-rose-400/30 to-amber-300/25 text-rose-50',
     glowClass: 'bg-fuchsia-400/40',
     animate: true,
   },
   Low: {
-    label: 'Modo Low',
+    label: 'LOW',
     backgroundClass: 'bg-gradient-to-r from-amber-300/25 via-orange-400/30 to-yellow-300/25 text-amber-50',
     glowClass: 'bg-amber-400/35',
     animate: true,
@@ -255,9 +255,9 @@ function GameModeChip({ label, backgroundClass, glowClass, animate }: GameModeCh
         aria-hidden
       />
       <span
-        className={`relative inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2 py-[0.2rem] text-[8px] font-semibold uppercase tracking-[0.2em] shadow-[0_0_18px_rgba(15,23,42,0.3)] backdrop-blur ${backgroundClass}`}
+        className={`relative inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-[0.26rem] text-[10px] font-semibold uppercase tracking-[0.2em] shadow-[0_0_18px_rgba(15,23,42,0.3)] backdrop-blur ${backgroundClass}`}
       >
-        <span className="h-1 w-1 rounded-full bg-white/80" />
+        <span className="h-[0.32rem] w-[0.32rem] rounded-full bg-white/80" />
         {label}
       </span>
     </span>
