@@ -64,7 +64,7 @@ for (const [canonical, synonyms] of Object.entries(TRAIT_SYNONYMS)) {
   }
 }
 
-const TRAIT_PRIORITY = new Map(TRAIT_ORDER.map((trait, index) => [trait, index] as const));
+const TRAIT_PRIORITY = new Map<string, number>(TRAIT_ORDER.map((trait, index) => [trait, index]));
 
 type RadarAxis = {
   key: string;
