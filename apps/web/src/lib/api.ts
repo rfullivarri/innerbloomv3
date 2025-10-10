@@ -1134,3 +1134,93 @@ export async function getUserJourney(userId: string): Promise<UserJourneySummary
   logShape('user-journey', response);
   return response;
 }
+
+export type DailyQuestStatusResponse = {
+  date: string;
+  submitted: boolean;
+  submitted_at: string | null;
+};
+
+export type DailyQuestEmotionOption = {
+  emotion_id: number;
+  code: string;
+  name: string;
+};
+
+export type DailyQuestTaskDefinition = {
+  task_id: string;
+  name: string;
+  trait_id: number | null;
+  difficulty: string | null;
+  difficulty_id: number | null;
+  xp: number;
+};
+
+export type DailyQuestDefinitionResponse = DailyQuestStatusResponse & {
+  emotionOptions: DailyQuestEmotionOption[];
+  pillars: Array<{
+    pillar_code: string;
+    tasks: DailyQuestTaskDefinition[];
+  }>;
+};
+
+export type SubmitDailyQuestResponse = {
+  ok: true;
+  saved: {
+    emotion: { emotion_id: number; date: string; notes: string | null };
+    tasks: { date: string; completed: string[] };
+  };
+  xp_delta: number;
+  xp_total_today: number;
+  streaks: { daily: number; weekly: number };
+};
+
+export type SubmitDailyQuestPayload = {
+  date?: string;
+  emotion_id: number;
+  tasks_done: string[];
+  notes?: string | null;
+};
+
+export async function getDailyQuestStatus(params: { date?: string } = {}): Promise<DailyQuestStatusResponse> {
+  const response = await getAuthorizedJson<DailyQuestStatusResponse>('/daily-quest/status', params);
+  logShape('daily-quest-status', response);
+  return response;
+}
+
+export async function getDailyQuestDefinition(
+  params: { date?: string } = {},
+): Promise<DailyQuestDefinitionResponse> {
+  const response = await getAuthorizedJson<DailyQuestDefinitionResponse>('/daily-quest/definition', params);
+  logShape('daily-quest-definition', response);
+  return response;
+}
+
+export async function submitDailyQuest(payload: SubmitDailyQuestPayload): Promise<SubmitDailyQuestResponse> {
+  const token = await resolveAuthToken();
+  const url = buildUrl('/daily-quest/submit');
+  const headers = new Headers({
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  });
+
+  const body = {
+    ...(payload.date ? { date: payload.date } : {}),
+    emotion_id: payload.emotion_id,
+    tasks_done: payload.tasks_done.map((taskId) => ({ task_id: taskId })),
+    notes: payload.notes ?? null,
+  };
+
+  const init = applyAuthorization(
+    {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    },
+    token,
+  );
+
+  const response = await apiRequest<SubmitDailyQuestResponse>(url, init);
+  logShape('daily-quest-submit', response);
+  return response;
+}

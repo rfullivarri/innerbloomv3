@@ -1,57 +1,51 @@
-# Daily Quest v1 Implementation Plan
+# Daily Quest v1
 
-This repository contains the groundwork for implementing the Daily Quest v1 experience described in the specification. The changes that still need to be completed are substantial and include database migrations, API endpoints, frontend components, animations, tests, and assets. This README documents the outstanding work and the approach intended to deliver the feature end-to-end.
+Esta iteración agrega la experiencia de Daily Quest end-to-end. Incluye nuevas migraciones, endpoints protegidos por Clerk y un modal en el dashboard web con animaciones y control de estado optimista.
 
-## Pending Work Overview
+## Cómo probarlo en local
 
-1. **Database Layer**
-   - Add or update migrations to enforce the `users.tasks_group_id -> tasks_group(id)` foreign key and to ensure every task belongs to a group (either directly via `tasks_group_id` or through a pivot table).
-   - Ensure unique indexes for `emotions_logs (user_id, date)` and `daily_log (user_id, task_id, date)` exist.
-   - Confirm idempotency of migrations so that deployments to existing environments are safe.
+1. **Instalá dependencias y aplicá las migraciones**
+   ```bash
+   pnpm install
+   pnpm --filter @innerbloom/api exec drizzle-kit migrate
+   ```
+   > Las migraciones son idempotentes: crean los índices/foreign keys solo cuando faltan.
 
-2. **API (apps/api)**
-   - Introduce new routes under `/daily-quest`: `GET /status`, `GET /definition`, and `POST /submit`.
-   - Implement controller logic that:
-     - Resolves the authenticated `user_id` via Clerk and determines the date in the user's timezone.
-     - Fetches the user's task group definition and assembles the response payload grouped by `cat_pillar`.
-     - Validates request payloads (emotion selection, task membership) with the repo's validation utilities.
-     - Persists submissions idempotently to `emotions_logs` and `daily_log`, and recalculates XP/streaks using existing services.
-   - Add tests that cover authentication requirements, idempotency, task ownership validation, and defaulting dates to the user's local timezone.
+2. **Levantá los servicios**
+   ```bash
+   npm run dev:api
+   npm --workspace apps/web run dev
+   ```
+   Asegurate de configurar `DATABASE_URL`, `CLERK_*` y `VITE_API_BASE_URL` apuntando al backend local.
 
-3. **Frontend (apps/web)**
-   - Build a `DailyQuestModal` component that:
-     - Checks submission status on dashboard load and automatically opens when the daily quest is pending.
-     - Fetches the definition payload, renders emotion chips and pillar-based task checklists, and reproduces the specified animations with Framer Motion.
-     - Submits selections optimistically, handles errors with toasts, and ensures accessibility (ARIA roles, keyboard support, dark mode compatibility).
-     - Includes sticky footer call-to-action and XP counter interactions.
-   - Ensure tests cover conditional rendering, single-selection behavior for emotions, XP counter reactions, and modal closing on successful submit.
+3. **Autenticación**
+   Iniciá sesión con una cuenta Clerk. El modal se abre automáticamente cuando `GET /api/daily-quest/status` devuelve `submitted: false`.
 
-4. **Assets and Documentation**
-   - Record and include a short mobile GIF of the experience.
-   - Keep README files and developer notes up to date with setup instructions for the new feature.
+4. **Flujo completo**
+   - Completar emociones/tareas en el modal y enviar.
+   - Verificar respuesta positiva en el toast y la actualización de XP/streaks.
+   - Consultar los endpoints manualmente si querés validar el payload:
+     ```bash
+     curl -H "Authorization: Bearer <token>" \
+       'http://localhost:3000/api/daily-quest/definition?date=2024-03-10'
+     ```
 
-## Suggested Implementation Steps
+5. **Tests automáticos**
+   ```bash
+   npm --workspace apps/api run test
+   npm --workspace apps/web run test
+   ```
 
-1. **Schema Verification**
-   - Inspect existing migrations to determine whether foreign keys and unique indexes already exist and backfill missing constraints with new idempotent migrations.
-   - Provide seed data updates if necessary for testing the new flows.
+## Endpoints
 
-2. **Service Layer Updates**
-   - Reuse or extend the existing XP/streak calculation helpers so both the dashboard and the new daily quest endpoint rely on a single source of truth.
+- `GET /api/daily-quest/status?date=YYYY-MM-DD`
+- `GET /api/daily-quest/definition?date=YYYY-MM-DD`
+- `POST /api/daily-quest/submit`
 
-3. **API Routes and Validation**
-   - Add new controllers and route definitions mirroring existing conventions (e.g., `routes/dailyQuest.ts`).
-   - Reuse validation utilities like Zod schemas to keep request parsing consistent across endpoints.
+Todos exigen token Clerk y toman la fecha en la zona horaria del usuario si no se envía `date`.
 
-4. **Frontend Integration**
-   - Use existing layout components to ensure the modal integrates seamlessly with the dashboard.
-   - Follow the design tokens and animation libraries already used in the codebase.
+## Notas
 
-5. **Testing Strategy**
-   - Extend API integration tests and frontend component tests to capture the new behavior.
-   - Verify XP/streak computations against fixtures used in the dashboard tests.
-
-## Current Status
-
-No code changes have been implemented yet; this document only outlines the plan required to deliver the Daily Quest v1 feature. Future commits should incrementally introduce the database migrations, API endpoints, frontend components, and automated tests described above.
-
+- Los logs (`daily_log`, `emotions_logs`) usan upsert para mantener idempotencia.
+- El modal está optimizado para mobile (≤390px), con CTA sticky y accesibilidad básica (`aria-modal`, roles y keyboard shortcuts).
+- El contador de XP y el “+XP” flotante usan Framer Motion para micro-interacciones.
