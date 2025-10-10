@@ -12,7 +12,6 @@ import { AnimatePresence, motion, useSpring } from 'framer-motion';
 import type { RefObject } from 'react';
 import { getDailyQuestDefinition, getDailyQuestStatus, submitDailyQuest } from '../lib/api';
 import { useRequest } from '../hooks/useRequest';
-import './DailyQuestModal.css';
 
 type ToastTone = 'success' | 'error';
 
@@ -50,6 +49,146 @@ const modalVariants = {
 
 function classNames(...values: Array<string | false | null | undefined>): string {
   return values.filter(Boolean).join(' ');
+}
+
+type EmotionTheme = {
+  chipInactive: string;
+  chipActive: string;
+  chipShadow: string;
+  checkBackground: string;
+  checkBorder: string;
+  checkText: string;
+  taskGlow: string;
+};
+
+const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
+  calm: {
+    chipInactive:
+      'bg-sky-500/10 text-sky-200/70 ring-1 ring-sky-400/30 hover:bg-sky-500/15',
+    chipActive: 'bg-sky-500/20 text-sky-100 ring-1 ring-sky-400/40',
+    chipShadow: 'shadow-[0_0_24px_rgba(56,189,248,0.2)]',
+    checkBackground: 'bg-sky-500/20',
+    checkBorder: 'border-sky-300/60',
+    checkText: 'text-sky-100',
+    taskGlow: 'ring-1 ring-sky-400/40 shadow-[0_0_22px_rgba(56,189,248,0.25)]',
+  },
+  happy: {
+    chipInactive:
+      'bg-amber-500/10 text-amber-200/80 ring-1 ring-amber-400/30 hover:bg-amber-500/15',
+    chipActive: 'bg-amber-500/20 text-amber-100 ring-1 ring-amber-400/40',
+    chipShadow: 'shadow-[0_0_24px_rgba(251,191,36,0.25)]',
+    checkBackground: 'bg-amber-500/20',
+    checkBorder: 'border-amber-300/60',
+    checkText: 'text-amber-100',
+    taskGlow: 'ring-1 ring-amber-400/40 shadow-[0_0_22px_rgba(251,191,36,0.25)]',
+  },
+  motivation: {
+    chipInactive:
+      'bg-emerald-500/10 text-emerald-200/80 ring-1 ring-emerald-400/30 hover:bg-emerald-500/15',
+    chipActive: 'bg-emerald-500/20 text-emerald-100 ring-1 ring-emerald-400/40',
+    chipShadow: 'shadow-[0_0_24px_rgba(16,185,129,0.25)]',
+    checkBackground: 'bg-emerald-500/20',
+    checkBorder: 'border-emerald-300/60',
+    checkText: 'text-emerald-100',
+    taskGlow: 'ring-1 ring-emerald-400/40 shadow-[0_0_22px_rgba(16,185,129,0.25)]',
+  },
+  sad: {
+    chipInactive:
+      'bg-indigo-500/10 text-indigo-200/80 ring-1 ring-indigo-400/30 hover:bg-indigo-500/15',
+    chipActive: 'bg-indigo-500/20 text-indigo-100 ring-1 ring-indigo-400/40',
+    chipShadow: 'shadow-[0_0_24px_rgba(99,102,241,0.25)]',
+    checkBackground: 'bg-indigo-500/20',
+    checkBorder: 'border-indigo-300/60',
+    checkText: 'text-indigo-100',
+    taskGlow: 'ring-1 ring-indigo-400/40 shadow-[0_0_22px_rgba(99,102,241,0.25)]',
+  },
+  anxiety: {
+    chipInactive:
+      'bg-rose-500/10 text-rose-200/80 ring-1 ring-rose-400/30 hover:bg-rose-500/15',
+    chipActive: 'bg-rose-500/20 text-rose-100 ring-1 ring-rose-400/40',
+    chipShadow: 'shadow-[0_0_24px_rgba(244,63,94,0.25)]',
+    checkBackground: 'bg-rose-500/20',
+    checkBorder: 'border-rose-300/60',
+    checkText: 'text-rose-100',
+    taskGlow: 'ring-1 ring-rose-400/40 shadow-[0_0_22px_rgba(244,63,94,0.25)]',
+  },
+  frustration: {
+    chipInactive:
+      'bg-orange-500/10 text-orange-200/80 ring-1 ring-orange-400/30 hover:bg-orange-500/15',
+    chipActive: 'bg-orange-500/20 text-orange-100 ring-1 ring-orange-400/40',
+    chipShadow: 'shadow-[0_0_24px_rgba(249,115,22,0.25)]',
+    checkBackground: 'bg-orange-500/20',
+    checkBorder: 'border-orange-300/60',
+    checkText: 'text-orange-100',
+    taskGlow: 'ring-1 ring-orange-400/40 shadow-[0_0_22px_rgba(249,115,22,0.25)]',
+  },
+  tired: {
+    chipInactive:
+      'bg-violet-500/10 text-violet-200/80 ring-1 ring-violet-400/30 hover:bg-violet-500/15',
+    chipActive: 'bg-violet-500/20 text-violet-100 ring-1 ring-violet-400/40',
+    chipShadow: 'shadow-[0_0_24px_rgba(139,92,246,0.25)]',
+    checkBackground: 'bg-violet-500/20',
+    checkBorder: 'border-violet-300/60',
+    checkText: 'text-violet-100',
+    taskGlow: 'ring-1 ring-violet-400/40 shadow-[0_0_22px_rgba(139,92,246,0.25)]',
+  },
+};
+
+const DEFAULT_EMOTION_THEME: EmotionTheme = {
+  chipInactive: 'bg-primary/10 text-primary/80 ring-1 ring-primary/30 hover:bg-primary/15',
+  chipActive: 'bg-primary/20 text-white ring-1 ring-primary/40',
+  chipShadow: 'shadow-[0_0_24px_rgba(129,140,248,0.25)]',
+  checkBackground: 'bg-primary/20',
+  checkBorder: 'border-primary/60',
+  checkText: 'text-white',
+  taskGlow: 'ring-1 ring-primary/40 shadow-[0_0_22px_rgba(129,140,248,0.25)]',
+};
+
+type PillarTheme = {
+  taskGlow: string;
+  checkBackground: string;
+  checkBorder: string;
+  checkText: string;
+};
+
+const PILLAR_THEME_MAP: Record<string, PillarTheme> = {
+  BODY: {
+    taskGlow: 'ring-1 ring-emerald-400/40 shadow-[0_0_20px_rgba(16,185,129,0.22)]',
+    checkBackground: 'bg-emerald-500/15',
+    checkBorder: 'border-emerald-300/50',
+    checkText: 'text-emerald-100',
+  },
+  MIND: {
+    taskGlow: 'ring-1 ring-sky-400/40 shadow-[0_0_20px_rgba(56,189,248,0.22)]',
+    checkBackground: 'bg-sky-500/15',
+    checkBorder: 'border-sky-300/50',
+    checkText: 'text-sky-100',
+  },
+  SOUL: {
+    taskGlow: 'ring-1 ring-violet-400/40 shadow-[0_0_20px_rgba(139,92,246,0.22)]',
+    checkBackground: 'bg-violet-500/15',
+    checkBorder: 'border-violet-300/50',
+    checkText: 'text-violet-100',
+  },
+};
+
+const DEFAULT_PILLAR_THEME: PillarTheme = {
+  taskGlow: 'ring-1 ring-indigo-400/40 shadow-[0_0_20px_rgba(99,102,241,0.22)]',
+  checkBackground: 'bg-indigo-500/15',
+  checkBorder: 'border-indigo-300/50',
+  checkText: 'text-indigo-100',
+};
+
+function resolveEmotionTheme(code?: string, name?: string): EmotionTheme {
+  const key = (code ?? name ?? '').toLowerCase();
+  return EMOTION_THEME_MAP[key] ?? DEFAULT_EMOTION_THEME;
+}
+
+function resolvePillarTheme(code?: string): PillarTheme {
+  if (!code) {
+    return DEFAULT_PILLAR_THEME;
+  }
+  return PILLAR_THEME_MAP[code] ?? DEFAULT_PILLAR_THEME;
 }
 
 function CheckIcon({ active }: { active: boolean }) {
@@ -203,6 +342,25 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
     const timeoutId = setTimeout(() => setXpBurst(null), 700);
     return () => clearTimeout(timeoutId);
   }, [xpBurst]);
+
+  const emotionThemeById = useMemo(() => {
+    if (!definition) {
+      return new Map<number, EmotionTheme>();
+    }
+    return new Map<number, EmotionTheme>(
+      definition.emotionOptions.map((option) => [
+        option.emotion_id,
+        resolveEmotionTheme(option.code, option.name),
+      ]),
+    );
+  }, [definition]);
+
+  const selectedEmotionTheme = useMemo(() => {
+    if (selectedEmotion == null) {
+      return null;
+    }
+    return emotionThemeById.get(selectedEmotion) ?? DEFAULT_EMOTION_THEME;
+  }, [emotionThemeById, selectedEmotion]);
 
   const toggleTask = (taskId: string) => {
     setSelectedTasks((current) => {
@@ -413,6 +571,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
   const portalTarget = typeof document !== 'undefined' ? document.body : null;
   const showSkeleton = isLoadingStatus || isDefinitionLoading;
   const canShowContent = Boolean(definition && !isDefinitionLoading);
+  const isConfirmDisabled = isSubmitting || selectedEmotion == null;
+  const showEmotionHelper = selectedEmotion == null;
+  const helperTextId = 'daily-quest-confirm-helper';
 
   return (
     <>
@@ -421,7 +582,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
           <AnimatePresence>
             {isOpen && (
               <motion.div
-                className="dailyQuestModalOverlay bg-black/70"
+                className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/80 p-2 md:p-4"
                 variants={overlayVariants}
                 initial="hidden"
                 animate="visible"
@@ -432,7 +593,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                 <div
                   role="presentation"
                   aria-hidden="true"
-                  className="dailyQuestModalBackdrop"
+                  className="absolute inset-0"
                   onClick={(event) => {
                     event.stopPropagation();
                     handleSnooze();
@@ -448,33 +609,39 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   animate="visible"
                   exit="hidden"
                   transition={{ duration: 0.24, ease: 'easeOut' }}
-                  className="dailyQuestModalShell glass-card pointer-events-auto relative w-full max-w-lg flex-col bg-slate-900/90 text-white shadow-2xl"
+                  className="pointer-events-auto relative mx-auto flex h-[100dvh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-slate-900/95 text-white shadow-2xl backdrop-blur md:max-w-2xl"
                   layout={false}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
                 >
-                  <header className="dailyQuestModalHeader border-b border-white/10 bg-slate-900/95 px-5 pb-4 md:px-6">
+                  <motion.header
+                    layout={false}
+                    className="sticky top-[env(safe-area-inset-top)] z-10 flex min-h-12 flex-col justify-center border-b border-white/10 bg-slate-900/95 px-4 py-3 backdrop-blur md:min-h-14 md:py-4"
+                  >
                     <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Daily Quest</p>
-                        <h2 id="daily-quest-title" className="mt-1 text-2xl font-semibold text-white">
+                      <div className="space-y-1">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/70">Daily Quest</p>
+                        <h2 id="daily-quest-title" className="text-lg font-semibold text-white md:text-xl">
                           Ritual diario
                         </h2>
-                        <p className="mt-2 text-sm text-white/70">
+                        <p className="text-xs text-white/60 md:text-sm">
                           Registrá cómo te sentís y marcá los hábitos completados para sumar XP y mantener tu racha.
                         </p>
                       </div>
                       <button
                         ref={closeButtonRef}
                         type="button"
-                        className="rounded-full border border-white/10 bg-white/5 p-2 text-white/80 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm text-white/80 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                         onClick={handleSnooze}
                         aria-label="Cerrar Daily Quest"
                       >
                         ✕
                       </button>
                     </div>
-                  </header>
+                  </motion.header>
 
-                  <div className="dailyQuestModalBody px-5 pt-4 md:px-6" aria-live="polite">
+                  <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-24 pt-4 md:pb-28" aria-live="polite">
                     <div className="flex flex-col gap-5 pb-6">
                       {showSkeleton && (
                         <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/60">
@@ -491,17 +658,21 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                             <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Emociones disponibles">
                               {definition.emotionOptions.map((option) => {
                                 const isActive = selectedEmotion === option.emotion_id;
+                                const theme = emotionThemeById.get(option.emotion_id) ?? DEFAULT_EMOTION_THEME;
                                 return (
                                   <motion.button
                                     key={option.emotion_id}
                                     type="button"
-                                    whileTap={{ scale: 0.95 }}
+                                    initial={false}
+                                    animate={isActive ? { scale: [1, 1.04, 1] } : { scale: 1 }}
+                                    transition={{ duration: isActive ? 0.32 : 0.18, ease: 'easeOut' }}
+                                    whileTap={{ scale: 0.94 }}
                                     onClick={() => setSelectedEmotion(option.emotion_id)}
                                     className={classNames(
-                                      'rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70',
+                                      'rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
                                       isActive
-                                        ? 'bg-primary/90 text-white shadow-glow'
-                                        : 'bg-white/5 text-white/70 hover:bg-white/10',
+                                        ? classNames(theme.chipActive, theme.chipShadow)
+                                        : theme.chipInactive,
                                     )}
                                     aria-pressed={isActive}
                                   >
@@ -515,59 +686,65 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           <section className="flex flex-col gap-3">
                             <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">Checklist del día</h3>
                             <div className="flex flex-col gap-4">
-                              {definition.pillars.map((pillar) => (
-                                <div key={pillar.pillar_code} className="flex flex-col gap-3">
-                                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
-                                    {pillar.pillar_code === 'BODY'
-                                      ? 'Cuerpo'
-                                      : pillar.pillar_code === 'MIND'
-                                      ? 'Mente'
-                                      : pillar.pillar_code === 'SOUL'
-                                      ? 'Alma'
-                                      : pillar.pillar_code}
-                                  </p>
-                                  <div className="flex flex-col gap-2">
-                                    {pillar.tasks.map((task) => {
-                                      const isSelected = selectedTasks.includes(task.task_id);
-                                      return (
-                                        <label
-                                          key={task.task_id}
-                                          className={classNames(
-                                            'flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-4 text-left transition hover:bg-white/[0.08]',
-                                            isSelected && 'border-primary/50 bg-primary/10 shadow-glow',
-                                          )}
-                                        >
-                                          <div className="flex items-start gap-3">
-                                            <motion.span
-                                              className="flex h-5 w-5 items-center justify-center rounded-full border border-white/20 text-primary"
-                                              initial={false}
-                                              animate={{
-                                                backgroundColor: isSelected
-                                                  ? 'rgba(94, 234, 212, 0.12)'
-                                                  : 'rgba(0, 0, 0, 0)',
-                                              }}
-                                            >
-                                              <CheckIcon active={isSelected} />
-                                            </motion.span>
-                                            <div>
-                                              <p className="font-medium text-white">{task.name}</p>
-                                              <p className="text-xs text-white/60">
-                                                {task.difficulty ? `Dificultad ${task.difficulty}` : 'Dificultad desconocida'} · {task.xp} XP
-                                              </p>
+                              {definition.pillars.map((pillar) => {
+                                const fallbackTheme = resolvePillarTheme(pillar.pillar_code);
+                                return (
+                                  <div key={pillar.pillar_code} className="flex flex-col gap-3">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+                                      {pillar.pillar_code === 'BODY'
+                                        ? 'Cuerpo'
+                                        : pillar.pillar_code === 'MIND'
+                                        ? 'Mente'
+                                        : pillar.pillar_code === 'SOUL'
+                                        ? 'Alma'
+                                        : pillar.pillar_code}
+                                    </p>
+                                    <div className="flex flex-col gap-2">
+                                      {pillar.tasks.map((task) => {
+                                        const isSelected = selectedTasks.includes(task.task_id);
+                                        const theme = selectedEmotionTheme ?? fallbackTheme;
+                                        return (
+                                          <label
+                                            key={task.task_id}
+                                            className={classNames(
+                                              'group flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-4 text-left transition-colors duration-200 hover:bg-white/[0.08]',
+                                              isSelected && theme.taskGlow,
+                                            )}
+                                          >
+                                            <div className="flex items-start gap-3">
+                                              <motion.span
+                                                className={classNames(
+                                                  'flex h-5 w-5 items-center justify-center rounded-full border text-[10px] transition-colors duration-200',
+                                                  isSelected
+                                                    ? classNames(theme.checkBackground, theme.checkBorder, theme.checkText)
+                                                    : 'border-white/20 text-white/40',
+                                                )}
+                                                initial={false}
+                                                animate={{ scale: isSelected ? 1 : 0.92 }}
+                                                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                              >
+                                                <CheckIcon active={isSelected} />
+                                              </motion.span>
+                                              <div className="space-y-1">
+                                                <p className="font-medium text-white">{task.name}</p>
+                                                <p className="text-xs text-white/60">
+                                                  {task.difficulty ? `Dificultad ${task.difficulty}` : 'Dificultad desconocida'} · {task.xp} XP
+                                                </p>
+                                              </div>
                                             </div>
-                                          </div>
-                                          <input
-                                            type="checkbox"
-                                            className="sr-only"
-                                            checked={isSelected}
-                                            onChange={() => toggleTask(task.task_id)}
-                                          />
-                                        </label>
-                                      );
-                                    })}
+                                            <input
+                                              type="checkbox"
+                                              className="sr-only"
+                                              checked={isSelected}
+                                              onChange={() => toggleTask(task.task_id)}
+                                            />
+                                          </label>
+                                        );
+                                      })}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           </section>
 
@@ -588,23 +765,26 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                     </div>
                   </div>
 
-                  <footer className="dailyQuestModalFooter border-t border-white/10 bg-slate-900/95 px-5 pb-4 pt-3 backdrop-blur md:px-6">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="relative">
-                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/40">XP seleccionado</p>
+                  <motion.footer
+                    layout={false}
+                    className="sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t border-white/10 bg-slate-900/90 px-4 py-2 backdrop-blur md:py-3"
+                  >
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <div className="relative flex flex-col">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">XP seleccionado</p>
                         <div className="flex items-baseline gap-2">
-                          <motion.span data-testid="xp-counter" className="text-3xl font-semibold text-white" animate={{ opacity: 1 }}>
+                          <motion.span data-testid="xp-counter" className="text-2xl font-semibold text-white md:text-3xl" animate={{ opacity: 1 }}>
                             {displayXp}
                           </motion.span>
-                          <span className="text-sm font-semibold uppercase tracking-wide text-white/60">XP</span>
+                          <span className="text-xs font-semibold uppercase tracking-wide text-white/60">XP</span>
                         </div>
                         <AnimatePresence>
                           {xpBurst != null && xpBurst > 0 && (
                             <motion.span
                               key={xpBurst}
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ opacity: 1, y: -8 }}
-                              exit={{ opacity: 0, y: -20 }}
+                              initial={{ opacity: 0, y: 6 }}
+                              animate={{ opacity: 1, y: -6 }}
+                              exit={{ opacity: 0, y: -18 }}
                               transition={{ duration: 0.6, ease: 'easeOut' }}
                               className="absolute -right-2 top-0 text-xs font-semibold text-emerald-300"
                             >
@@ -614,28 +794,37 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                         </AnimatePresence>
                       </div>
 
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                        <button
-                          type="button"
-                          onClick={handleSnooze}
-                          className="rounded-full border border-white/10 px-5 py-2 text-sm font-medium text-white/70 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-                        >
-                          Más tarde
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleSubmit}
-                          disabled={isSubmitting || selectedEmotion == null}
-                          className={classNames(
-                            'inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-slate-900 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
-                            isSubmitting || selectedEmotion == null ? 'opacity-50' : 'hover:bg-primary/90',
-                          )}
-                        >
-                          {isSubmitting ? 'Guardando…' : 'Registrar Daily Quest'}
-                        </button>
+                      <div className="flex flex-1 flex-col gap-2 md:max-w-sm">
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={handleSnooze}
+                            className="h-10 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white/70 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:h-11"
+                          >
+                            Más tarde
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleSubmit}
+                            disabled={isConfirmDisabled}
+                            aria-describedby={showEmotionHelper ? helperTextId : undefined}
+                            className={classNames(
+                              'inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-sm font-semibold text-white shadow-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-50 md:h-11',
+                              !isConfirmDisabled && 'hover:from-indigo-400 hover:to-fuchsia-500',
+                              isSubmitting && 'cursor-wait',
+                            )}
+                          >
+                            {isSubmitting ? 'Guardando…' : 'Confirmar Daily Quest'}
+                          </button>
+                        </div>
+                        {showEmotionHelper && (
+                          <p id={helperTextId} className="text-[11px] text-rose-200/80">
+                            Seleccioná una emoción para confirmar.
+                          </p>
+                        )}
                       </div>
                     </div>
-                  </footer>
+                  </motion.footer>
                 </motion.div>
               </motion.div>
             )}
@@ -652,7 +841,8 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className={classNames(
-              'fixed bottom-6 left-1/2 z-50 w-[92vw] max-w-sm -translate-x-1/2 rounded-2xl border px-4 py-3 text-sm shadow-xl backdrop-blur',
+              'fixed inset-x-0 z-50 mx-auto w-fit max-w-[90vw] rounded-2xl border px-4 py-3 text-sm shadow-xl backdrop-blur',
+              'top-[calc(env(safe-area-inset-top,0)+1rem)] md:top-6',
               toast.tone === 'success'
                 ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-100'
                 : 'border-rose-400/30 bg-rose-500/15 text-rose-100',
