@@ -33,6 +33,12 @@ const {
 const consoleErrorSpy = vi
   .spyOn(console, 'error')
   .mockImplementation(() => undefined); // cuerpo de expresión, no vacío
+const consoleInfoSpy = vi
+  .spyOn(console, 'info')
+  .mockImplementation(() => undefined);
+const consoleDebugSpy = vi
+  .spyOn(console, 'debug')
+  .mockImplementation(() => undefined);
 
 
 vi.mock('./user-state-service.js', () => ({
@@ -75,12 +81,16 @@ describe('getUserState', () => {
     mockFormatDateInTimezone.mockReset();
     mockAddDays.mockReset();
     consoleErrorSpy.mockClear();
+    consoleInfoSpy.mockClear();
+    consoleDebugSpy.mockClear();
   }
 
   beforeEach(resetMocks);
 
   afterAll(() => {
     consoleErrorSpy.mockRestore();
+    consoleInfoSpy.mockRestore();
+    consoleDebugSpy.mockRestore();
   });
 
   it('returns the mode name and code following the profile priority', async () => {
@@ -123,6 +133,12 @@ describe('getUserState', () => {
     expect(mockComputeHalfLife).toHaveBeenCalledWith('FLOW');
     expect(mockComputeDailyTargets).toHaveBeenCalledWith({ Body: 10, Mind: 20, Soul: 30 }, 21);
     expect(consoleErrorSpy).not.toHaveBeenCalled();
+    expect(consoleInfoSpy).toHaveBeenCalledWith('[users/state] query', {
+      userId: '4a6f8b1e-12f0-4a22-8e8a-7cbf8250a49d',
+      from: '2023-12-15',
+      to: '2023-12-22',
+    });
+    expect(res.status).not.toHaveBeenCalled();
   });
 
   it('applies defaults when the profile is missing optional data', async () => {
@@ -165,6 +181,12 @@ describe('getUserState', () => {
       }),
     );
     expect(res.json.mock.calls[0][0]).not.toHaveProperty('mode_name');
+    expect(consoleInfoSpy).toHaveBeenCalledWith('[users/state] query', {
+      userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      from: '2024-05-20',
+      to: '2024-05-20',
+    });
+    expect(res.status).not.toHaveBeenCalled();
   });
 
   it('returns a validation error when the user id is invalid without throwing 500', async () => {
@@ -172,16 +194,71 @@ describe('getUserState', () => {
       params: { id: 'not-a-uuid' },
     } as unknown as Request;
     const res = createMockResponse();
+    const next = vi.fn();
 
-    await expect(getUserState(req, res, vi.fn())).rejects.toMatchObject({
-      status: 400,
-      code: 'invalid_request',
-    });
+    await getUserState(req, res, next);
 
-    expect(res.json).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: 'invalid_request',
+        message: 'id must be a valid UUID',
+      }),
+    );
     expect(consoleErrorSpy).toHaveBeenCalledWith('[users/state] fail', {
       userId: 'not-a-uuid',
       reason: 'id must be a valid UUID',
+      status: 400,
+      code: 'invalid_request',
+    });
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it('returns zeroed pillars when the user has no tasks or logs', async () => {
+    const req = {
+      params: { id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb' },
+    } as unknown as Request;
+    const res = createMockResponse();
+
+    mockGetUserProfile.mockResolvedValue({
+      userId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      modeCode: 'FLOW',
+      modeName: 'Flow',
+      weeklyTarget: 700,
+      timezone: 'UTC',
+    });
+    mockGetUserLogStats.mockResolvedValue({ uniqueDays: 0, firstDate: '2024-06-01' });
+    mockGetXpBaseByPillar.mockResolvedValue({ Body: 0, Mind: 0, Soul: 0 });
+    mockComputeHalfLife.mockReturnValue({ Body: 6, Mind: 8, Soul: 10 });
+    mockComputeDecayRates.mockReturnValue({ Body: 0.1, Mind: 0.2, Soul: 0.3 });
+    mockComputeDailyTargets.mockReturnValue({ Body: 0, Mind: 0, Soul: 0 });
+    mockComputeGainFactors.mockReturnValue({ Body: 0.5, Mind: 0.4, Soul: 0.3 });
+    mockEnumerateDates.mockReturnValue(['2024-06-01', '2024-06-02']);
+    mockGetDailyXpSeriesByPillar.mockResolvedValue(new Map());
+    mockPropagateEnergy.mockReturnValue({
+      lastEnergy: { Body: 0, Mind: 0, Soul: 0 },
+      series: [],
+    });
+    mockFormatDateInTimezone.mockReturnValue('2024-06-02');
+    mockAddDays.mockReturnValue('2024-06-07');
+
+    await getUserState(req, res, vi.fn());
+
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pillars: {
+          Body: expect.objectContaining({ xp_today: 0, hp: 0 }),
+          Mind: expect.objectContaining({ xp_today: 0, focus: 0 }),
+          Soul: expect.objectContaining({ xp_today: 0, mood: 0 }),
+        },
+      }),
+    );
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    expect(consoleInfoSpy).toHaveBeenCalledWith('[users/state] query', {
+      userId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      from: '2024-06-01',
+      to: '2024-06-02',
     });
   });
 });

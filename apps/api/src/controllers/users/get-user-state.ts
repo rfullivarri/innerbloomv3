@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { AsyncHandler } from '../../lib/async-handler.js';
 import { SimpleTtlCache } from '../../lib/simple-cache.js';
+import { isHttpError } from '../../lib/http-error.js';
 import { parseWithValidation, uuidSchema } from '../../lib/validation.js';
 import {
   addDays,
@@ -57,6 +58,17 @@ const MODE_LABELS: Record<string, string> = {
 
 const DEFAULT_MODE_CODE = 'FLOW';
 const DEFAULT_WEEKLY_TARGET = 700;
+const debugUserStateValue = process.env.DEBUG_USER_STATE?.toLowerCase() ?? '';
+const DEBUG_USER_STATE = ['1', 'true', 'yes', 'on'].includes(debugUserStateValue);
+
+function logDebugTiming(step: string, startedAt: number) {
+  if (!DEBUG_USER_STATE) {
+    return;
+  }
+
+  const durationMs = Date.now() - startedAt;
+  console.debug('[users/state] timing', { step, duration_ms: durationMs });
+}
 
 function normalizeModeCode(raw: string | null | undefined): string {
   if (typeof raw !== 'string') {
@@ -103,14 +115,20 @@ export const getUserState: AsyncHandler = async (req, res) => {
       return;
     }
 
+    const profileStartedAt = Date.now();
     const profile = await getUserProfile(id);
+    logDebugTiming('getUserProfile', profileStartedAt);
     const resolvedModeCode = normalizeModeCode(profile.modeCode);
     const resolvedModeName = resolveModeName(resolvedModeCode, profile.modeName);
     const resolvedWeeklyTarget = resolveWeeklyTarget(profile.weeklyTarget);
     const trimmedModeName = profile.modeName?.trim();
 
+    const logStatsStartedAt = Date.now();
     const logStats = await getUserLogStats(id);
+    logDebugTiming('getUserLogStats', logStatsStartedAt);
+    const xpBaseStartedAt = Date.now();
     const xpBaseByPillar = await getXpBaseByPillar(id);
+    logDebugTiming('getXpBaseByPillar', xpBaseStartedAt);
     const halfLifeByPillar = computeHalfLife(resolvedModeCode);
     const decayRates = computeDecayRates(halfLifeByPillar);
     const dailyTargets = computeDailyTargets(xpBaseByPillar, resolvedWeeklyTarget);
@@ -122,10 +140,14 @@ export const getUserState: AsyncHandler = async (req, res) => {
     const fromDate = logStats.firstDate ?? today;
     const dateSeries = enumerateDates(fromDate, today);
 
+    console.info('[users/state] query', { userId: id, from: fromDate, to: today });
+
     let xpSeries = new Map<string, Partial<Record<Pillar, number>>>();
 
     if (logStats.firstDate) {
+      const xpSeriesStartedAt = Date.now();
       xpSeries = await getDailyXpSeriesByPillar(id, fromDate, today);
+      logDebugTiming('getDailyXpSeriesByPillar', xpSeriesStartedAt);
     }
 
     const { lastEnergy } = propagateEnergy({
@@ -182,7 +204,22 @@ export const getUserState: AsyncHandler = async (req, res) => {
     res.json(response);
   } catch (error) {
     const reason = error instanceof Error ? error.message : 'unknown_error';
-    console.error('[users/state] fail', { userId: rawUserId, reason });
-    throw error;
+    if (isHttpError(error)) {
+      console.error('[users/state] fail', {
+        userId: rawUserId,
+        reason,
+        status: error.status,
+        code: error.code,
+      });
+      res.status(error.status).json({
+        code: error.code,
+        message: error.message,
+        ...(error.details ? { details: error.details } : {}),
+      });
+      return;
+    }
+
+    console.error('[users/state] fail', { userId: rawUserId, reason, error });
+    res.status(500).json({ code: 'internal_error', message: 'Something went wrong' });
   }
 };

@@ -2,6 +2,10 @@ import { pool } from '../../db.js';
 import { HttpError } from '../../lib/http-error.js';
 import { type Pillar, type XpByDate } from './user-state-utils.js';
 
+const DEFAULT_MODE_CODE = 'FLOW';
+const DEFAULT_WEEKLY_TARGET = 700;
+const DEFAULT_TIMEZONE = 'UTC';
+
 const PILLAR_ID_TO_NAME: Record<number, Pillar> = {
   1: 'Body',
   2: 'Mind',
@@ -32,10 +36,10 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
     timezone: string | null;
   }>(
     `SELECT u.user_id,
-            COALESCE(gm.code, u.game_mode) AS mode_code,
+            COALESCE(gm.code, u.game_mode, '${DEFAULT_MODE_CODE}') AS mode_code,
             gm.name AS mode_name,
-            COALESCE(gm.weekly_target, u.weekly_target) AS weekly_target,
-            u.timezone
+            COALESCE(gm.weekly_target, u.weekly_target, ${DEFAULT_WEEKLY_TARGET}) AS weekly_target,
+            COALESCE(u.timezone, '${DEFAULT_TIMEZONE}') AS timezone
        FROM users u
   LEFT JOIN cat_game_mode gm
          ON (gm.game_mode_id = u.game_mode_id)
@@ -53,10 +57,10 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
 
   return {
     userId: row.user_id,
-    modeCode: (row.mode_code ?? 'CHILL').toUpperCase(),
+    modeCode: (row.mode_code ?? DEFAULT_MODE_CODE).toUpperCase(),
     modeName: row.mode_name,
-    weeklyTarget: Number(row.weekly_target ?? 0),
-    timezone: row.timezone,
+    weeklyTarget: Number(row.weekly_target ?? DEFAULT_WEEKLY_TARGET),
+    timezone: row.timezone ?? DEFAULT_TIMEZONE,
   };
 }
 
@@ -67,9 +71,7 @@ export async function getXpBaseByPillar(userId: string): Promise<XpBaseByPillar>
   }>(
     `SELECT t.pillar_id, SUM(t.xp_base) AS xp_base
        FROM tasks t
-       JOIN users u ON u.user_id = t.user_id
       WHERE t.user_id = $1
-        AND t.tasks_group_id = u.tasks_group_id
         AND t.active = TRUE
    GROUP BY t.pillar_id`,
     [userId],
