@@ -69,7 +69,7 @@ function quoteIdentifier(identifier: string): string {
 }
 
 router.get('/_admin/db-snapshot', async (_req, res, next) => {
-  if (process.env.NODE_ENV === 'production' || process.env.ENABLE_DB_SNAPSHOT !== 'true') {
+  if (process.env.ENABLE_DB_SNAPSHOT !== 'true') {
     return res.status(403).json({ error: 'disabled' });
   }
 
