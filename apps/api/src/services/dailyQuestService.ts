@@ -69,6 +69,19 @@ export type SubmitDailyQuestResult = {
   streaks: DailyQuestXpSummary['streaks'];
 };
 
+type SubmitDailyQuestLogLevel = 'info' | 'warn' | 'error';
+
+export type SubmitDailyQuestLogger = (
+  level: SubmitDailyQuestLogLevel,
+  message: string,
+  data?: Record<string, unknown>,
+) => void;
+
+export type SubmitDailyQuestOptions = {
+  requestId?: string;
+  log?: SubmitDailyQuestLogger;
+};
+
 type UserContextRow = {
   tasks_group_id: string | null;
   timezone: string | null;
@@ -438,36 +451,63 @@ export async function calculateXpForDate(
   };
 }
 
-async function ensureEmotionExists(emotionId: number): Promise<void> {
+async function ensureEmotionExists(emotionId: number, log?: SubmitDailyQuestLogger): Promise<void> {
   const result = await pool.query(
     'SELECT 1 FROM cat_emotion WHERE emotion_id = $1 LIMIT 1',
     [emotionId],
   );
 
   if (result.rowCount === 0) {
-    throw new HttpError(400, 'invalid_emotion', 'Emotion not found');
+    log?.('warn', 'Daily quest validation failed', {
+      reason: 'invalid_emotion',
+      emotionId,
+    });
+    throw new HttpError(422, 'invalid_emotion', 'Emotion not found');
   }
 }
 
 export async function submitDailyQuest(
   userId: string,
   input: SubmitDailyQuestInput,
+  options: SubmitDailyQuestOptions = {},
 ): Promise<SubmitDailyQuestResult> {
+  const log = options.log;
   const context = await loadUserContext(userId);
   const date = parseDateInput(input.date, context.timezone, context.today);
   const notes = input.notes?.trim() || null;
 
-  await ensureEmotionExists(input.emotion_id);
+  await ensureEmotionExists(input.emotion_id, log);
 
   const tasks = await fetchGroupTasks(context.tasksGroupId);
   const allowedTaskIds = new Set(tasks.map((task) => task.task_id));
   const selectedTaskIds = Array.from(new Set(input.tasks_done));
 
+  log?.('info', 'Daily quest validation started', {
+    userId,
+    resolvedDate: date,
+    emotionId: input.emotion_id,
+    requestedTasks: input.tasks_done.length,
+  });
+
   for (const taskId of selectedTaskIds) {
     if (!allowedTaskIds.has(taskId)) {
-      throw new HttpError(400, 'invalid_task', 'Task does not belong to the user');
+      log?.('warn', 'Daily quest validation failed', {
+        reason: 'invalid_task',
+        taskId,
+        resolvedDate: date,
+        userId,
+      });
+      throw new HttpError(422, 'invalid_task', 'Task does not belong to the user');
     }
   }
+
+  log?.('info', 'Daily quest validation succeeded', {
+    userId,
+    resolvedDate: date,
+    emotionId: input.emotion_id,
+    tasksSelected: selectedTaskIds.length,
+    notesIncluded: Boolean(notes),
+  });
 
   const xpBefore = await calculateXpForDate(userId, date);
 
@@ -481,11 +521,11 @@ export async function submitDailyQuest(
 
     try {
       await client.query(
-        `INSERT INTO emotions_logs (user_id, date, emotion_id, notes)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO emotions_logs (user_id, date, emotion_id)
+         VALUES ($1, $2, $3)
          ON CONFLICT (user_id, date)
-         DO UPDATE SET emotion_id = EXCLUDED.emotion_id, notes = EXCLUDED.notes`,
-        [userId, date, input.emotion_id, notes],
+         DO UPDATE SET emotion_id = EXCLUDED.emotion_id`,
+        [userId, date, input.emotion_id],
       );
 
       if (tasksToDelete.length > 0) {
@@ -514,8 +554,26 @@ export async function submitDailyQuest(
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');
+      const pgError = error as { code?: string | number | null; constraint?: string | null };
+      log?.('error', 'Daily quest database error', {
+        userId,
+        resolvedDate: date,
+        message: error instanceof Error ? error.message : 'Unknown database error',
+        pgCode: pgError?.code ?? null,
+        constraint: pgError?.constraint ?? null,
+      });
       throw error;
     }
+  });
+
+  log?.('info', 'Daily quest database operations', {
+    userId,
+    resolvedDate: date,
+    upserts: {
+      emotionLog: true,
+      tasksInserted: completedTasks.length,
+      tasksDeleted: tasksToDelete.length,
+    },
   });
 
   const xpAfter = await calculateXpForDate(userId, date);
