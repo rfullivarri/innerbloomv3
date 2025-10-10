@@ -5,6 +5,7 @@
   "scripts": {
     "prestart": "npm run build",
     "dev": "tsx src/index.ts",
+    "db:snapshot": "tsx scripts/db-snapshot.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
