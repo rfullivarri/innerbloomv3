@@ -38,7 +38,14 @@ describe('POST /api/webhooks/clerk', () => {
     mockVerify.mockReset();
     createdSecrets.length = 0;
     process.env.CLERK_WEBHOOK_SECRET = 'whsec_test_secret';
-    mockPoolQuery.mockResolvedValue({ rows: [], rowCount: 0 } as never);
+    process.env.API_LOGGING = 'false';
+    mockPoolQuery.mockImplementation(async (sql: string) => {
+      if (typeof sql === 'string' && sql.includes('RETURNING user_id')) {
+        return { rows: [{ user_id: 'user-row-id' }], rowCount: 1 } as never;
+      }
+
+      return { rows: [], rowCount: 0 } as never;
+    });
   });
 
   it('returns 400 when the Svix signature is invalid', async () => {
@@ -94,7 +101,7 @@ describe('POST /api/webhooks/clerk', () => {
       .send(payload);
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ ok: true });
+    expect(response.body).toEqual({ ok: true, user_id: 'user-row-id' });
     expect(createdSecrets).toEqual(['whsec_test_secret']);
     expect(mockVerify).toHaveBeenCalledWith(payload, {
       'svix-id': 'evt-id',
@@ -102,23 +109,29 @@ describe('POST /api/webhooks/clerk', () => {
       'svix-signature': 'v1,sig',
     });
 
-    expect(mockPoolQuery).toHaveBeenCalledTimes(3);
-    expect(mockPoolQuery.mock.calls[0][0]).toContain('ALTER TABLE users ADD COLUMN IF NOT EXISTS clerk_user_id TEXT UNIQUE');
-    expect(mockPoolQuery.mock.calls[1][0]).toContain('INSERT INTO users (clerk_user_id, email, first_name, last_name, avatar_url, deleted_at)');
-    expect(mockPoolQuery.mock.calls[1][1]).toEqual([
-      'user_123',
-      'example@example.org',
-      'Example',
-      '',
-      'https://img.clerk.com/avatar.png',
-    ]);
-    expect(mockPoolQuery.mock.calls[2][0]).toContain('UPDATE users');
+    expect(mockPoolQuery).toHaveBeenCalledTimes(5);
+    expect(mockPoolQuery.mock.calls[0][0]).toBe('BEGIN');
+    expect(mockPoolQuery.mock.calls[1][0]).toContain('INSERT INTO clerk_webhook_events');
+    expect(mockPoolQuery.mock.calls[1][0]).toContain('ON CONFLICT (svix_id) DO NOTHING');
+    expect(mockPoolQuery.mock.calls[1][1]).toEqual(['evt-id', 'user.created', payload]);
+    expect(mockPoolQuery.mock.calls[2][0]).toContain('INSERT INTO users (clerk_user_id, email, first_name, last_name, image_url, deleted_at)');
+    expect(mockPoolQuery.mock.calls[2][0]).toContain('COALESCE(EXCLUDED.email,      users.email)');
     expect(mockPoolQuery.mock.calls[2][1]).toEqual([
       'user_123',
       'example@example.org',
       'Example',
+      null,
       'https://img.clerk.com/avatar.png',
     ]);
+    expect(mockPoolQuery.mock.calls[3][0]).toContain('UPDATE users');
+    expect(mockPoolQuery.mock.calls[3][0]).toContain('COALESCE($2, email_primary)');
+    expect(mockPoolQuery.mock.calls[3][1]).toEqual([
+      'user_123',
+      'example@example.org',
+      'Example',
+      'https://img.clerk.com/avatar.png',
+    ]);
+    expect(mockPoolQuery.mock.calls[4][0]).toBe('COMMIT');
   });
 
   it('upserts the user profile on user.updated events', async () => {
@@ -152,20 +165,25 @@ describe('POST /api/webhooks/clerk', () => {
       .send(payload);
 
     expect(response.status).toBe(200);
-    expect(mockPoolQuery).toHaveBeenCalledTimes(3);
-    expect(mockPoolQuery.mock.calls[1][1]).toEqual([
-      'user_456',
-      'updated@example.org',
-      '',
-      'Doe',
-      'https://cdn.example.com/avatar.png',
-    ]);
+    expect(response.body).toEqual({ ok: true, user_id: 'user-row-id' });
+    expect(mockPoolQuery).toHaveBeenCalledTimes(5);
+    expect(mockPoolQuery.mock.calls[0][0]).toBe('BEGIN');
+    expect(mockPoolQuery.mock.calls[1][0]).toContain('INSERT INTO clerk_webhook_events');
+    expect(mockPoolQuery.mock.calls[1][1]).toEqual(['evt-2', 'user.updated', payload]);
     expect(mockPoolQuery.mock.calls[2][1]).toEqual([
       'user_456',
       'updated@example.org',
+      null,
       'Doe',
       'https://cdn.example.com/avatar.png',
     ]);
+    expect(mockPoolQuery.mock.calls[3][1]).toEqual([
+      'user_456',
+      'updated@example.org',
+      'Doe',
+      'https://cdn.example.com/avatar.png',
+    ]);
+    expect(mockPoolQuery.mock.calls[4][0]).toBe('COMMIT');
   });
 
   it('soft deletes the user on user.deleted events', async () => {
@@ -189,9 +207,14 @@ describe('POST /api/webhooks/clerk', () => {
       .send(JSON.stringify(event));
 
     expect(response.status).toBe(200);
-    expect(mockPoolQuery).toHaveBeenCalledTimes(2);
-    expect(mockPoolQuery.mock.calls[1][0]).toContain('UPDATE users');
-    expect(mockPoolQuery.mock.calls[1][1]).toEqual(['user_789']);
+    expect(mockPoolQuery).toHaveBeenCalledTimes(4);
+    expect(mockPoolQuery.mock.calls[0][0]).toBe('BEGIN');
+    expect(mockPoolQuery.mock.calls[1][0]).toContain('INSERT INTO clerk_webhook_events');
+    expect(mockPoolQuery.mock.calls[1][1]).toEqual(['evt-3', 'user.deleted', JSON.stringify(event)]);
+    expect(mockPoolQuery.mock.calls[2][0]).toContain('UPDATE users');
+    expect(mockPoolQuery.mock.calls[2][0]).toContain('deleted_at = now()');
+    expect(mockPoolQuery.mock.calls[2][1]).toEqual(['user_789']);
+    expect(mockPoolQuery.mock.calls[3][0]).toBe('COMMIT');
   });
 
   it('returns 400 when the payload cannot be read', async () => {
