@@ -57,7 +57,7 @@
         <div class="row row-top">
           <div class="seg seg-right">
             <span class="chip mode ${S.mode.toLowerCase()}" data-role="modeChip">
-              🎮 ${S.mode} · <b>${MODES[S.mode]}×/sem</b>
+              ${S.mode} · <b>${MODES[S.mode]}×/sem</b>
             </span>
             <span id="rachasInfoTop"></span>
           </div>
@@ -523,7 +523,7 @@
     async function refresh(){
       const goal = MODES[S.mode] || 3;   // fallback
       els.modeChip.className = `chip mode ${S.mode.toLowerCase()}`;
-      els.modeChip.innerHTML = `🎮 ${S.mode} · <b>${goal}×/sem</b>`;
+      els.modeChip.innerHTML = `${S.mode} · <b>${goal}×/sem</b>`;
 
       const { topStreaks=[], tasks=[] } = await dataProvider({ mode:S.mode, pillar:S.pillar, range:S.range, query:S.query });
 
