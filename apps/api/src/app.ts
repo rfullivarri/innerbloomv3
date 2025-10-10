@@ -134,12 +134,21 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
     });
   }
 
-  console.error('Unexpected error', error);
-
-  return res.status(500).json({
+  const payload: Record<string, unknown> = {
     code: 'internal_error',
     message: 'Something went wrong',
-  });
+  };
+
+  const requestId = res.locals.requestId as string | undefined;
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+
+  if (isDevelopment && requestId) {
+    payload.reqId = requestId;
+  }
+
+  console.error('Unexpected error', { error, requestId });
+
+  return res.status(500).json(payload);
 });
 
 export default app;

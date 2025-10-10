@@ -123,7 +123,7 @@ describe('Daily Quest routes', () => {
         tasks_done: [{ task_id: 'bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb' }],
       });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(422);
     expect(response.body).toEqual({
       code: 'invalid_task',
       message: 'Task does not belong to the user',
@@ -218,7 +218,7 @@ describe('Daily Quest routes', () => {
     expect(mockClientQuery).toHaveBeenNthCalledWith(1, 'BEGIN');
     expect(mockClientQuery).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO emotions_logs'),
-      ['user-1', '2024-03-10', 2, 'Great day'],
+      ['user-1', '2024-03-10', 2],
     );
     expect(mockClientQuery).toHaveBeenCalledWith(
       expect.stringContaining('DELETE FROM daily_log'),
@@ -229,5 +229,185 @@ describe('Daily Quest routes', () => {
       ['user-1', 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa', '2024-03-10', 1],
     );
     expect(mockClientQuery).toHaveBeenLastCalledWith('COMMIT');
+  });
+
+  it('returns 422 when the emotion does not exist', async () => {
+    mockVerifyToken.mockResolvedValue({ id: 'user-1', clerkId: 'clerk-1', email: null, isNew: false });
+
+    mockQuery
+      .mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [
+          {
+            tasks_group_id: 'group-1',
+            timezone: 'UTC',
+            today: '2024-03-10',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rowCount: 0, rows: [] });
+
+    const response = await request(app)
+      .post('/api/daily-quest/submit')
+      .set('Authorization', 'Bearer token')
+      .send({ emotion_id: 999, tasks_done: [] });
+
+    expect(response.status).toBe(422);
+    expect(response.body).toEqual({
+      code: 'invalid_emotion',
+      message: 'Emotion not found',
+    });
+    expect(mockClientQuery).not.toHaveBeenCalled();
+  });
+
+  it('allows submitting only an emotion without tasks', async () => {
+    mockVerifyToken.mockResolvedValue({ id: 'user-1', clerkId: 'clerk-1', email: null, isNew: false });
+
+    mockQuery
+      .mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [
+          {
+            tasks_group_id: 'group-1',
+            timezone: 'UTC',
+            today: '2024-03-10',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rowCount: 1, rows: [{}] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa',
+            task: 'Hydrate',
+            trait_id: 1,
+            difficulty_id: 1,
+            difficulty_code: 'EASY',
+            xp_base: 10,
+            pillar_code: 'BODY',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [{ date: '2024-03-10', xp_day: '0' }] })
+      .mockResolvedValueOnce({ rows: [{ week_start: '2024-03-04', xp_week: '0' }] })
+      .mockResolvedValueOnce({ rows: [{ date: '2024-03-10', xp_day: '0' }] })
+      .mockResolvedValueOnce({ rows: [{ week_start: '2024-03-04', xp_week: '0' }] });
+
+    mockClientQuery.mockResolvedValue(undefined);
+
+    const response = await request(app)
+      .post('/api/daily-quest/submit')
+      .set('Authorization', 'Bearer token')
+      .send({ emotion_id: 1, tasks_done: [] });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      ok: true,
+      saved: {
+        emotion: { emotion_id: 1, date: '2024-03-10', notes: null },
+        tasks: { date: '2024-03-10', completed: [] },
+      },
+      xp_delta: 0,
+      xp_total_today: 0,
+      streaks: { daily: 0, weekly: 0 },
+    });
+
+    expect(mockClientQuery).toHaveBeenNthCalledWith(1, 'BEGIN');
+    expect(mockClientQuery).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO emotions_logs'),
+      ['user-1', '2024-03-10', 1],
+    );
+    expect(mockClientQuery).toHaveBeenCalledWith(
+      expect.stringContaining('DELETE FROM daily_log'),
+      ['user-1', '2024-03-10', ['aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa']],
+    );
+    expect(mockClientQuery).toHaveBeenLastCalledWith('COMMIT');
+  });
+
+  it('is idempotent across consecutive submissions', async () => {
+    mockVerifyToken.mockResolvedValue({ id: 'user-1', clerkId: 'clerk-1', email: null, isNew: false });
+
+    mockQuery
+      .mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [
+          {
+            tasks_group_id: 'group-1',
+            timezone: 'UTC',
+            today: '2024-03-10',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rowCount: 1, rows: [{}] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa',
+            task: 'Hydrate',
+            trait_id: 1,
+            difficulty_id: 1,
+            difficulty_code: 'EASY',
+            xp_base: 10,
+            pillar_code: 'BODY',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [{ date: '2024-03-10', xp_day: '10' }] })
+      .mockResolvedValueOnce({ rows: [{ week_start: '2024-03-04', xp_week: '15' }] })
+      .mockResolvedValueOnce({ rows: [{ date: '2024-03-10', xp_day: '25' }] })
+      .mockResolvedValueOnce({ rows: [{ week_start: '2024-03-04', xp_week: '30' }] })
+      .mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [
+          {
+            tasks_group_id: 'group-1',
+            timezone: 'UTC',
+            today: '2024-03-10',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rowCount: 1, rows: [{}] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa',
+            task: 'Hydrate',
+            trait_id: 1,
+            difficulty_id: 1,
+            difficulty_code: 'EASY',
+            xp_base: 10,
+            pillar_code: 'BODY',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [{ date: '2024-03-10', xp_day: '25' }] })
+      .mockResolvedValueOnce({ rows: [{ week_start: '2024-03-04', xp_week: '30' }] })
+      .mockResolvedValueOnce({ rows: [{ date: '2024-03-10', xp_day: '25' }] })
+      .mockResolvedValueOnce({ rows: [{ week_start: '2024-03-04', xp_week: '30' }] });
+
+    mockClientQuery.mockResolvedValue(undefined);
+
+    const payload = {
+      emotion_id: 2,
+      tasks_done: [{ task_id: 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa' }],
+    };
+
+    const firstResponse = await request(app)
+      .post('/api/daily-quest/submit')
+      .set('Authorization', 'Bearer token')
+      .send(payload);
+
+    expect(firstResponse.status).toBe(200);
+    expect(firstResponse.body.xp_delta).toBe(15);
+    expect(firstResponse.body.xp_total_today).toBe(25);
+
+    const secondResponse = await request(app)
+      .post('/api/daily-quest/submit')
+      .set('Authorization', 'Bearer token')
+      .send(payload);
+
+    expect(secondResponse.status).toBe(200);
+    expect(secondResponse.body.xp_delta).toBe(0);
+    expect(secondResponse.body.xp_total_today).toBe(25);
   });
 });

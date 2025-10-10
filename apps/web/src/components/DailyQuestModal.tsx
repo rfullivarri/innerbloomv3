@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion, useSpring } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { RefObject } from 'react';
 import { getDailyQuestDefinition, getDailyQuestStatus, submitDailyQuest } from '../lib/api';
 import { useRequest } from '../hooks/useRequest';
@@ -45,6 +45,43 @@ const overlayVariants = {
 const modalVariants = {
   hidden: { opacity: 0, scale: 0.98 },
   visible: { opacity: 1, scale: 1 },
+};
+
+const HARD_CELEBRATION_DURATION_MS = 750;
+
+const EPIC_PARTICLE_OFFSETS = [
+  { x: 0, y: -18 },
+  { x: -8, y: -26 },
+  { x: 8, y: -26 },
+  { x: -14, y: -18 },
+  { x: 14, y: -18 },
+  { x: 0, y: -34 },
+] as const;
+
+const hardGlowVariants = {
+  initial: { opacity: 0, scale: 0.95, boxShadow: '0 0 0 rgba(251,191,36,0)' },
+  animate: {
+    opacity: [0, 0.85, 0],
+    scale: [0.95, 1.05, 1],
+    boxShadow: [
+      '0 0 0 rgba(251,191,36,0)',
+      '0 0 32px rgba(251,191,36,0.35)',
+      '0 0 0 rgba(251,191,36,0)',
+    ],
+  },
+  exit: { opacity: 0, scale: 1 },
+};
+
+const particleVariants = {
+  initial: { opacity: 0, scale: 0.6, x: 0, y: 0 },
+  animate: (index: number) => ({
+    opacity: [0, 1, 0],
+    scale: [0.6, 1, 0.5],
+    x: EPIC_PARTICLE_OFFSETS[index]?.x ?? 0,
+    y: EPIC_PARTICLE_OFFSETS[index]?.y ?? -24,
+    transition: { duration: HARD_CELEBRATION_DURATION_MS / 1000, ease: 'easeOut' },
+  }),
+  exit: { opacity: 0 },
 };
 
 function classNames(...values: Array<string | false | null | undefined>): string {
@@ -219,12 +256,14 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
   const [toast, setToast] = useState<ToastState | null>(null);
   const [pendingSubmission, setPendingSubmission] = useState<PendingSubmission | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hardCelebrations, setHardCelebrations] = useState<Array<{ taskId: string; id: number }>>([]);
 
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const shouldRestoreFocusRef = useRef(false);
+  const celebrationTimeoutsRef = useRef<number[]>([]);
 
   const {
     data: status,
@@ -285,63 +324,45 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       if (toastTimer.current) {
         clearTimeout(toastTimer.current);
       }
+      for (const timeoutId of celebrationTimeoutsRef.current) {
+        clearTimeout(timeoutId);
+      }
+      celebrationTimeoutsRef.current = [];
     };
   }, []);
 
-  const xpByTask = useMemo(() => {
-    const map = new Map<string, number>();
+  const hardTaskIds = useMemo(() => {
     if (!definition) {
-      return map;
+      return new Set<string>();
     }
 
+    const identifiers: string[] = [];
     for (const pillar of definition.pillars) {
       for (const task of pillar.tasks) {
-        map.set(task.task_id, Number(task.xp ?? 0));
+        if ((task.difficulty ?? '').toUpperCase() === 'HARD') {
+          identifiers.push(task.task_id);
+        }
       }
     }
 
-    return map;
+    return new Set(identifiers);
   }, [definition]);
 
-  const selectedXp = useMemo(
-    () => selectedTasks.reduce((total, taskId) => total + (xpByTask.get(taskId) ?? 0), 0),
-    [selectedTasks, xpByTask],
+  const triggerHardCelebration = useCallback(
+    (taskId: string) => {
+      const celebrationId = Date.now() + Math.random();
+      setHardCelebrations((current) => [...current, { taskId, id: celebrationId }]);
+
+      if (typeof window !== 'undefined') {
+        const timeoutId = window.setTimeout(() => {
+          setHardCelebrations((current) => current.filter((entry) => entry.id !== celebrationId));
+          celebrationTimeoutsRef.current = celebrationTimeoutsRef.current.filter((id) => id !== timeoutId);
+        }, HARD_CELEBRATION_DURATION_MS);
+        celebrationTimeoutsRef.current = [...celebrationTimeoutsRef.current, timeoutId];
+      }
+    },
+    [],
   );
-
-  const xpSpring = useSpring(0, { stiffness: 160, damping: 24 });
-  const [displayXp, setDisplayXp] = useState(0);
-  const [xpBurst, setXpBurst] = useState<number | null>(null);
-  const previousXp = useRef(0);
-
-  useEffect(() => {
-    const unsubscribe = xpSpring.on('change', (value) => {
-      setDisplayXp(Math.round(value));
-    });
-    return () => {
-      unsubscribe();
-    };
-  }, [xpSpring]);
-
-  useEffect(() => {
-    xpSpring.set(selectedXp);
-  }, [selectedXp, xpSpring]);
-
-  useEffect(() => {
-    const delta = selectedXp - previousXp.current;
-    if (delta > 0) {
-      setXpBurst(delta);
-    }
-    previousXp.current = selectedXp;
-  }, [selectedXp]);
-
-  useEffect(() => {
-    if (xpBurst == null) {
-      return;
-    }
-
-    const timeoutId = setTimeout(() => setXpBurst(null), 700);
-    return () => clearTimeout(timeoutId);
-  }, [xpBurst]);
 
   const emotionThemeById = useMemo(() => {
     if (!definition) {
@@ -362,14 +383,22 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
     return emotionThemeById.get(selectedEmotion) ?? DEFAULT_EMOTION_THEME;
   }, [emotionThemeById, selectedEmotion]);
 
-  const toggleTask = (taskId: string) => {
-    setSelectedTasks((current) => {
-      if (current.includes(taskId)) {
-        return current.filter((id) => id !== taskId);
-      }
-      return [...current, taskId];
-    });
-  };
+  const toggleTask = useCallback(
+    (taskId: string) => {
+      setSelectedTasks((current) => {
+        if (current.includes(taskId)) {
+          return current.filter((id) => id !== taskId);
+        }
+
+        if (hardTaskIds.has(taskId)) {
+          triggerHardCelebration(taskId);
+        }
+
+        return [...current, taskId];
+      });
+    },
+    [hardTaskIds, triggerHardCelebration],
+  );
 
   const closeModal = useCallback(
     (options?: { snooze?: boolean; restoreFocus?: boolean }) => {
@@ -625,8 +654,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                         <h2 id="daily-quest-title" className="text-lg font-semibold text-white md:text-xl">
                           Ritual diario
                         </h2>
-                        <p className="text-xs text-white/60 md:text-sm">
-                          Registrá cómo te sentís y marcá los hábitos completados para sumar XP y mantener tu racha.
+                        <p className="text-[11px] text-white/60 md:text-xs">
+                          Registrá cómo te sentiste y cuál fue la emoción que predominó ayer. Marcá las tasks que
+                          lograste y seguí sumando XP y rachas.
                         </p>
                       </div>
                       <button
@@ -692,25 +722,72 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                   <div key={pillar.pillar_code} className="flex flex-col gap-3">
                                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
                                       {pillar.pillar_code === 'BODY'
-                                        ? 'Cuerpo'
+                                        ? '🫀 Cuerpo (BODY)'
                                         : pillar.pillar_code === 'MIND'
-                                        ? 'Mente'
+                                        ? '🧠 Mente (MIND)'
                                         : pillar.pillar_code === 'SOUL'
-                                        ? 'Alma'
+                                        ? '🏵️ Alma (SOUL)'
                                         : pillar.pillar_code}
                                     </p>
                                     <div className="flex flex-col gap-2">
                                       {pillar.tasks.map((task) => {
                                         const isSelected = selectedTasks.includes(task.task_id);
                                         const theme = selectedEmotionTheme ?? fallbackTheme;
+                                        const isHardTask = hardTaskIds.has(task.task_id);
+                                        const activeCelebrations = isHardTask
+                                          ? hardCelebrations.filter((entry) => entry.taskId === task.task_id)
+                                          : [];
+
                                         return (
-                                          <label
+                                          <motion.label
                                             key={task.task_id}
                                             className={classNames(
-                                              'group flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-4 text-left transition-colors duration-200 hover:bg-white/[0.08]',
+                                              'group relative flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-4 text-left transition-colors duration-200 hover:bg-white/[0.08]',
                                               isSelected && theme.taskGlow,
                                             )}
                                           >
+                                            {isHardTask && (
+                                              <AnimatePresence>
+                                                {activeCelebrations.map((entry) => (
+                                                  <motion.span
+                                                    key={`glow-${entry.id}`}
+                                                    className="pointer-events-none absolute inset-0 rounded-2xl border border-amber-300/40"
+                                                    variants={hardGlowVariants}
+                                                    initial="initial"
+                                                    animate="animate"
+                                                    exit="exit"
+                                                    transition={{ duration: HARD_CELEBRATION_DURATION_MS / 1000, ease: 'easeOut' }}
+                                                  />
+                                                ))}
+                                              </AnimatePresence>
+                                            )}
+                                            {isHardTask && (
+                                              <AnimatePresence>
+                                                {activeCelebrations.map((entry) => (
+                                                  <motion.span
+                                                    key={`burst-${entry.id}`}
+                                                    className="pointer-events-none absolute left-5 top-1 h-0 w-0"
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                    transition={{ duration: 0.2 }}
+                                                  >
+                                                    {EPIC_PARTICLE_OFFSETS.map((_, index) => (
+                                                      <motion.span
+                                                        // eslint-disable-next-line react/no-array-index-key
+                                                        key={index}
+                                                        className="absolute h-2 w-2 rounded-full bg-amber-200/90"
+                                                        variants={particleVariants}
+                                                        initial="initial"
+                                                        animate="animate"
+                                                        exit="exit"
+                                                        custom={index}
+                                                      />
+                                                    ))}
+                                                  </motion.span>
+                                                ))}
+                                              </AnimatePresence>
+                                            )}
                                             <div className="flex items-start gap-3">
                                               <motion.span
                                                 className={classNames(
@@ -738,7 +815,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                               checked={isSelected}
                                               onChange={() => toggleTask(task.task_id)}
                                             />
-                                          </label>
+                                          </motion.label>
                                         );
                                       })}
                                     </div>
@@ -769,60 +846,34 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                     layout={false}
                     className="sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t border-white/10 bg-slate-900/90 px-4 py-2 backdrop-blur md:py-3"
                   >
-                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                      <div className="relative flex flex-col">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">XP seleccionado</p>
-                        <div className="flex items-baseline gap-2">
-                          <motion.span data-testid="xp-counter" className="text-2xl font-semibold text-white md:text-3xl" animate={{ opacity: 1 }}>
-                            {displayXp}
-                          </motion.span>
-                          <span className="text-xs font-semibold uppercase tracking-wide text-white/60">XP</span>
-                        </div>
-                        <AnimatePresence>
-                          {xpBurst != null && xpBurst > 0 && (
-                            <motion.span
-                              key={xpBurst}
-                              initial={{ opacity: 0, y: 6 }}
-                              animate={{ opacity: 1, y: -6 }}
-                              exit={{ opacity: 0, y: -18 }}
-                              transition={{ duration: 0.6, ease: 'easeOut' }}
-                              className="absolute -right-2 top-0 text-xs font-semibold text-emerald-300"
-                            >
-                              +{xpBurst} XP
-                            </motion.span>
+                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                      <div className="flex w-full gap-2 md:w-auto">
+                        <button
+                          type="button"
+                          onClick={handleSnooze}
+                          className="h-10 flex-1 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white/70 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:h-11 md:flex-none md:px-6"
+                        >
+                          Más tarde
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSubmit}
+                          disabled={isConfirmDisabled}
+                          aria-describedby={showEmotionHelper ? helperTextId : undefined}
+                          className={classNames(
+                            'inline-flex h-10 flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-sm font-semibold text-white shadow-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-50 md:h-11 md:flex-none md:px-6',
+                            !isConfirmDisabled && 'hover:from-indigo-400 hover:to-fuchsia-500',
+                            isSubmitting && 'cursor-wait',
                           )}
-                        </AnimatePresence>
+                        >
+                          {isSubmitting ? 'Guardando…' : 'Confirmar Daily Quest'}
+                        </button>
                       </div>
-
-                      <div className="flex flex-1 flex-col gap-2 md:max-w-sm">
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            type="button"
-                            onClick={handleSnooze}
-                            className="h-10 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white/70 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:h-11"
-                          >
-                            Más tarde
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleSubmit}
-                            disabled={isConfirmDisabled}
-                            aria-describedby={showEmotionHelper ? helperTextId : undefined}
-                            className={classNames(
-                              'inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-sm font-semibold text-white shadow-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-50 md:h-11',
-                              !isConfirmDisabled && 'hover:from-indigo-400 hover:to-fuchsia-500',
-                              isSubmitting && 'cursor-wait',
-                            )}
-                          >
-                            {isSubmitting ? 'Guardando…' : 'Confirmar Daily Quest'}
-                          </button>
-                        </div>
-                        {showEmotionHelper && (
-                          <p id={helperTextId} className="text-[11px] text-rose-200/80">
-                            Seleccioná una emoción para confirmar.
-                          </p>
-                        )}
-                      </div>
+                      {showEmotionHelper && (
+                        <p id={helperTextId} className="text-[11px] text-rose-200/80 md:text-right">
+                          Seleccioná una emoción para confirmar.
+                        </p>
+                      )}
                     </div>
                   </motion.footer>
                 </motion.div>
