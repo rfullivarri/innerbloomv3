@@ -66,36 +66,34 @@ export default function DashboardV3Page() {
             )}
 
             {!failedToLoadProfile && !isLoadingProfile && backendUserId && (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-12 lg:gap-6">
-                <div className="lg:col-span-12 space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
+                <div className="order-1 lg:order-1 lg:col-span-12">
                   <Alerts userId={backendUserId} />
-                  <MetricHeader userId={backendUserId} gameMode={gameMode} />
                 </div>
 
-                <div className="lg:col-span-7 space-y-4 md:space-y-5">
-                  <RadarChartCard userId={backendUserId} />
-                  <EmotionChartCard userId={backendUserId} />
+                <div className="order-2 space-y-4 md:space-y-5 lg:order-2 lg:col-span-4">
+                  <MetricHeader userId={backendUserId} gameMode={gameMode} />
+                  <ProfileCard imageUrl={avatarUrl} />
+                  <EnergyCard userId={backendUserId} gameMode={gameMode} />
                   <DailyCultivationSection userId={backendUserId} />
                 </div>
 
-
-                <div className="lg:col-span-5 space-y-4 md:space-y-5">
-                  <ProfileCard imageUrl={avatarUrl} />
-                  <EnergyCard userId={backendUserId} gameMode={gameMode} />
-                  {FEATURE_STREAKS_PANEL_V1 && <LegacyStreaksPanel userId={backendUserId} />}
-
-                  <div className="space-y-6">
-                    <StreaksPanel
-                      userId={backendUserId}
-                      gameMode={gameMode}
-                      weeklyTarget={profile?.weekly_target}
-                    />
-
-                    <RewardsPlaceholder />
-                  </div>
+                <div className="order-3 space-y-4 md:space-y-5 lg:order-3 lg:col-span-4">
+                  <RadarChartCard userId={backendUserId} />
+                  <EmotionChartCard userId={backendUserId} />
                 </div>
 
-                <div className="lg:col-span-12">
+                <div className="order-4 space-y-4 md:space-y-5 lg:order-4 lg:col-span-4">
+                  {FEATURE_STREAKS_PANEL_V1 && <LegacyStreaksPanel userId={backendUserId} />}
+                  <StreaksPanel
+                    userId={backendUserId}
+                    gameMode={gameMode}
+                    weeklyTarget={profile?.weekly_target}
+                  />
+                  <RewardsPlaceholder />
+                </div>
+
+                <div className="order-5 lg:order-5 lg:col-span-12">
                   <MissionsSection userId={backendUserId} />
                 </div>
               </div>
@@ -152,14 +150,24 @@ function ProfileSkeleton() {
   return (
     <div className="space-y-4">
       <div className="h-6 w-48 animate-pulse rounded bg-white/10" />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12">
-        <div className="lg:col-span-7 space-y-4">
-          <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />
-          <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />
+      <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="lg:col-span-12">
+          <div className="h-32 w-full animate-pulse rounded-2xl bg-white/10" />
         </div>
-        <div className="lg:col-span-5 space-y-4">
+        <div className="space-y-4 md:space-y-5 lg:col-span-4">
+          <div className="h-36 w-full animate-pulse rounded-2xl bg-white/10" />
           <div className="h-64 w-full animate-pulse rounded-2xl bg-white/10" />
           <div className="h-56 w-full animate-pulse rounded-2xl bg-white/10" />
+          <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />
+        </div>
+        <div className="space-y-4 md:space-y-5 lg:col-span-4">
+          <div className="h-64 w-full animate-pulse rounded-2xl bg-white/10" />
+          <div className="h-64 w-full animate-pulse rounded-2xl bg-white/10" />
+        </div>
+        <div className="space-y-4 md:space-y-5 lg:col-span-4">
+          <div className="h-72 w-full animate-pulse rounded-2xl bg-white/10" />
+          <div className="h-72 w-full animate-pulse rounded-2xl bg-white/10" />
+          <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />
         </div>
       </div>
     </div>
