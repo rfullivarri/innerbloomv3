@@ -68,7 +68,7 @@ function quoteIdentifier(identifier: string): string {
   return `"${identifier.replace(/"/g, '""')}"`;
 }
 
-router.get('/__admin/db-snapshot', async (_req, res, next) => {
+router.get('/_admin/db-snapshot', async (_req, res, next) => {
   if (process.env.NODE_ENV === 'production' || process.env.ENABLE_DB_SNAPSHOT !== 'true') {
     return res.status(403).json({ error: 'disabled' });
   }
