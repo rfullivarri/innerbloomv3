@@ -42,7 +42,7 @@ const snapshotFilePath = path.resolve(
   '../db-snapshot.json'
 );
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.ENABLE_DB_SNAPSHOT === 'true') {
   app.use(debugDbSnapshot);
 }
 

@@ -11,6 +11,16 @@ Ejecutá cualquiera de los siguientes comandos desde la raíz del monorepo:
 
 El resultado se guarda en `apps/api/db-snapshot.json`.
 
+## Endpoint de snapshot
+
+Para habilitar temporalmente la ruta de snapshot en el backend desplegado, configurá la variable de entorno `ENABLE_DB_SNAPSHOT=true` en el servicio Web service (backend). La URL pública queda disponible en `https://<API>/_admin/db-snapshot`.
+
+Con la variable habilitada, podés descargar el archivo actualizado y guardarlo en `apps/api/db-snapshot.json` ejecutando:
+
+```bash
+curl -fsS https://<API>/_admin/db-snapshot -H 'Accept: application/json' -o apps/api/db-snapshot.json
+```
+
 ## Contenido del snapshot
 
 El JSON incluye:
@@ -24,4 +34,4 @@ El JSON incluye:
 
 ## Nota de seguridad
 
-El snapshot no incluye credenciales ni secretos, pero contiene estructura y datos sensibles de la base. **No lo ejecutes ni expongas en producción.**
+El snapshot no incluye credenciales ni secretos, pero contiene estructura y datos sensibles de la base. **No lo ejecutes ni expongas en producción. No dejes `ENABLE_DB_SNAPSHOT` activado en entornos productivos reales.**
