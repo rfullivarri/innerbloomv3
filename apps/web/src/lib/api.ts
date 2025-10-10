@@ -978,6 +978,7 @@ export async function getUserDailyXp(
 
 export type TraitXpEntry = {
   trait: string;
+  name?: string;
   xp: number;
 };
 
@@ -994,6 +995,7 @@ export async function getUserXpByTrait(
 
   const traits = extractArray<TraitXpEntry>(response, 'traits', 'items', 'data').map((item) => ({
     trait: String((item as TraitXpEntry)?.trait ?? '').trim(),
+    name: String((item as TraitXpEntry)?.name ?? '').trim() || undefined,
     xp: Number((item as TraitXpEntry)?.xp ?? 0) || 0,
   }));
 
