@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserDailyEnergy, type DailyEnergySnapshot } from '../../lib/api';
 import { Card } from '../ui/Card';
-import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 
 interface EnergyCardProps {
   userId: string;
@@ -41,25 +40,13 @@ function normalize(snapshot: DailyEnergySnapshot | null): NormalizedEnergy {
   };
 }
 
-export function EnergyCard({ userId, gameMode }: EnergyCardProps) {
+export function EnergyCard({ userId }: EnergyCardProps) {
   const { data, status } = useRequest(() => getUserDailyEnergy(userId), [userId]);
   const normalized = useMemo(() => normalize(data), [data]);
   const hasData = Boolean(data);
 
   return (
-    <Card
-      title="💠 Daily Energy"
-      subtitle="Promedio últimos 7 días"
-      rightSlot={
-        <InfoDotTarget id="dailyEnergy" placement="right" className="flex items-center gap-2">
-          {gameMode ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
-              Modo: {gameMode}
-            </span>
-          ) : null}
-        </InfoDotTarget>
-      }
-    >
+    <Card title="💠 Daily Energy" subtitle="Promedio últimos 7 días">
       {status === 'loading' && (
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, index) => (
@@ -86,10 +73,6 @@ export function EnergyCard({ userId, gameMode }: EnergyCardProps) {
           <EnergyMeter label="HP" percent={normalized.Body.percent} />
           <EnergyMeter label="Mood" percent={normalized.Soul.percent} />
           <EnergyMeter label="Focus" percent={normalized.Mind.percent} />
-          <p className="text-xs text-slate-400">
-            Replicamos la visual del MVP usando el endpoint
-            <code className="ml-1 rounded bg-white/10 px-1 py-px text-[10px]">/users/:id/daily-energy</code>.
-          </p>
         </div>
       )}
     </Card>
@@ -121,7 +104,7 @@ function EnergyMeter({ label, percent }: EnergyMeterProps) {
       </div>
       <div className="relative h-5 w-full overflow-hidden rounded-full border border-white/5 bg-slate-900/40 shadow-[inset_0_1px_1px_rgba(15,23,42,0.45)]">
         <div
-          className={`${GRADIENTS[label]} h-full rounded-full transition-[width] duration-300 ease-out`}
+          className={`${GRADIENTS[label]} h-full rounded-full transition-[width] duration-500 ease-out progress-fill--typing`}
           style={{ width: `${width}%`, minWidth: clamped === 0 ? '1.5rem' : undefined }}
         />
         <div className="absolute inset-y-0 right-1 hidden items-center sm:flex">
