@@ -32,6 +32,7 @@ import { useBackendUser } from '../hooks/useBackendUser';
 import { useRequest } from '../hooks/useRequest';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
 import { getUserState } from '../lib/api';
+import { DailyQuestModal } from '../components/DailyQuestModal';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -107,6 +108,7 @@ export default function DashboardV3Page() {
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
         <Navbar />
+        <DailyQuestModal enabled={Boolean(backendUserId)} />
         <main className="flex-1">
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             {isLoadingProfile && <ProfileSkeleton />}
