@@ -19,11 +19,25 @@
 }
 [data-emotion-card='summary'] .summary-inner {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 8px;
   padding-block: 8px;
 }
+[data-emotion-card='summary'] .summary-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+[data-emotion-card='summary'] .summary-title {
+  font-weight: 600;
+  white-space: nowrap;
+}
 [data-emotion-card='summary'] .summary-description {
+  flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
