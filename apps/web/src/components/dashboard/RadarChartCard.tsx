@@ -19,7 +19,7 @@ const TRAIT_ORDER = [
 
 type TraitKey = (typeof TRAIT_ORDER)[number];
 
-const TRAIT_LABELS: Record<TraitKey, string> = {
+const TRAIT_FALLBACK_LABELS: Record<TraitKey, string> = {
   core: 'Core',
   bienestar: 'Bienestar',
   autogestion: 'Autogestión',
@@ -55,6 +55,13 @@ function normalizeTraitKey(value: string | null | undefined): TraitKey | null {
   return TRAIT_ORDER.find((trait) => trait === normalized) ?? null;
 }
 
+function normalizeLabel(value: string | null | undefined): string | null {
+  if (!value) return null;
+
+  const normalized = value.toString().trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
 function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
   const totals: Record<TraitKey, number> = {
     core: 0,
@@ -65,17 +72,24 @@ function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
     salud_fisica: 0,
   };
 
+  const labels: Partial<Record<TraitKey, string>> = {};
+
   for (const entry of entries) {
     const key = normalizeTraitKey(entry?.trait);
     if (!key) continue;
 
     const xp = Number(entry?.xp ?? 0);
     totals[key] = (totals[key] ?? 0) + (Number.isFinite(xp) ? xp : 0);
+
+    const label = normalizeLabel(entry?.name);
+    if (label) {
+      labels[key] = label;
+    }
   }
 
   const axes: RadarAxis[] = TRAIT_ORDER.map((key) => ({
     key,
-    label: TRAIT_LABELS[key],
+    label: labels[key] ?? TRAIT_FALLBACK_LABELS[key],
     xp: totals[key] ?? 0,
   }));
 

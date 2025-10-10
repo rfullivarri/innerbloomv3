@@ -33,9 +33,9 @@ describe('getUserXpByTrait', () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
     mockPoolQuery.mockResolvedValueOnce({
       rows: [
-        { trait_code: 'Core', xp: '10' },
-        { trait_code: 'salud-fisica', xp: '5' },
-        { trait_code: null, xp: '100' },
+        { trait_code: 'Core', trait_name: 'Corazón', xp: '10' },
+        { trait_code: 'salud-fisica', trait_name: 'Salud física', xp: '5' },
+        { trait_code: null, trait_name: null, xp: '100' },
       ],
     });
 
@@ -54,8 +54,8 @@ describe('getUserXpByTrait', () => {
     );
     expect(res.json).toHaveBeenCalledWith({
       traits: expect.arrayContaining([
-        { trait: 'core', xp: 10 },
-        { trait: 'salud_fisica', xp: 5 },
+        { trait: 'core', name: 'Corazón', xp: 10 },
+        { trait: 'salud_fisica', name: 'Salud física', xp: 5 },
       ]),
     });
   });
@@ -66,8 +66,8 @@ describe('getUserXpByTrait', () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
     mockPoolQuery.mockResolvedValueOnce({
       rows: [
-        { trait_code: 'auto-gestion', xp: '7' },
-        { trait_code: 'intelectual', xp: '3' },
+        { trait_code: 'auto-gestion', trait_name: 'Autogestión', xp: '7' },
+        { trait_code: 'intelectual', trait_name: 'Intelectual', xp: '3' },
       ],
     });
 
@@ -79,8 +79,8 @@ describe('getUserXpByTrait', () => {
     expect(mockPoolQuery).toHaveBeenCalledWith(expect.any(String), ['2ef1ec4a-8960-4d27-bf93-e7b956bb6c9d']);
     expect(res.json).toHaveBeenCalledWith({
       traits: expect.arrayContaining([
-        { trait: 'autogestion', xp: 7 },
-        { trait: 'intelecto', xp: 3 },
+        { trait: 'autogestion', name: 'Autogestión', xp: 7 },
+        { trait: 'intelecto', name: 'Intelecto', xp: 3 },
       ]),
     });
   });
@@ -91,8 +91,8 @@ describe('getUserXpByTrait', () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
     mockPoolQuery.mockResolvedValueOnce({
       rows: [
-        { trait_code: '???', xp: 'NaN' },
-        { trait_code: 'core_total', xp: null },
+        { trait_code: '???', trait_name: '???', xp: 'NaN' },
+        { trait_code: 'core_total', trait_name: 'Core Total', xp: null },
       ],
     });
 
@@ -106,12 +106,12 @@ describe('getUserXpByTrait', () => {
 
     expect(res.json).toHaveBeenCalledWith({
       traits: [
-        { trait: 'core', xp: 0 },
-        { trait: 'bienestar', xp: 0 },
-        { trait: 'autogestion', xp: 0 },
-        { trait: 'intelecto', xp: 0 },
-        { trait: 'psiquis', xp: 0 },
-        { trait: 'salud_fisica', xp: 0 },
+        { trait: 'core', name: 'Core', xp: 0 },
+        { trait: 'bienestar', name: 'Bienestar', xp: 0 },
+        { trait: 'autogestion', name: 'Autogestión', xp: 0 },
+        { trait: 'intelecto', name: 'Intelecto', xp: 0 },
+        { trait: 'psiquis', name: 'Psiquis', xp: 0 },
+        { trait: 'salud_fisica', name: 'Salud física', xp: 0 },
       ],
     });
   });

@@ -18,12 +18,16 @@ const TRAIT_ORDER = [
   'salud_fisica',
 ] as const;
 
-type TraitKey = (typeof TRAIT_ORDER)[number];
-
-type Row = {
-  trait_code: string | null;
-  xp: string | number | null;
+const TRAIT_FALLBACK_LABELS: Record<TraitKey, string> = {
+  core: 'Core',
+  bienestar: 'Bienestar',
+  autogestion: 'Autogestión',
+  intelecto: 'Intelecto',
+  psiquis: 'Psiquis',
+  salud_fisica: 'Salud física',
 };
+
+type TraitKey = (typeof TRAIT_ORDER)[number];
 
 const paramsSchema = z.object({
   id: uuidSchema,
@@ -31,7 +35,13 @@ const paramsSchema = z.object({
 
 const querySchema = dateRangeQuerySchema;
 
-function normalizeTraitCode(code: string | null | undefined): TraitKey | null {
+type Row = {
+  trait_code: string | null;
+  trait_name: string | null;
+  xp: string | number | null;
+};
+
+function sanitizeTraitCode(code: string | null | undefined): string | null {
   if (!code) {
     return null;
   }
@@ -42,6 +52,15 @@ function normalizeTraitCode(code: string | null | undefined): TraitKey | null {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '');
+
+  return sanitized.length > 0 ? sanitized : null;
+}
+
+function normalizeTraitCode(code: string | null | undefined): TraitKey | null {
+  const sanitized = sanitizeTraitCode(code);
+  if (!sanitized) {
+    return null;
+  }
 
   const matched = TRAIT_ORDER.find((trait) => {
     if (trait === sanitized) {
@@ -107,6 +126,7 @@ export const getUserXpByTrait: AsyncHandler = async (req, res) => {
 
   const result = await pool.query<Row>(
     `SELECT ct.code AS trait_code,
+            ct.name AS trait_name,
             SUM(dl.quantity * t.xp_base) AS xp
        FROM daily_log dl
        JOIN tasks t ON t.task_id = dl.task_id
@@ -115,6 +135,8 @@ export const getUserXpByTrait: AsyncHandler = async (req, res) => {
    GROUP BY ct.code`,
     params,
   );
+
+  const labels: Partial<Record<TraitKey, string>> = {};
 
   for (const row of result.rows) {
     const trait = normalizeTraitCode(row.trait_code);
@@ -125,11 +147,20 @@ export const getUserXpByTrait: AsyncHandler = async (req, res) => {
 
     const xp = Number(row.xp ?? 0);
     totals[trait] = (totals[trait] ?? 0) + (Number.isFinite(xp) ? xp : 0);
+
+    const sanitizedCode = sanitizeTraitCode(row.trait_code);
+    const isDirectMatch = sanitizedCode === trait;
+
+    const name = row.trait_name?.toString().trim();
+    if (name && isDirectMatch) {
+      labels[trait] = name;
+    }
   }
 
   res.json({
     traits: TRAIT_ORDER.map((trait) => ({
       trait,
+      name: labels[trait] ?? TRAIT_FALLBACK_LABELS[trait],
       xp: Math.round(totals[trait] ?? 0),
     })),
   });
