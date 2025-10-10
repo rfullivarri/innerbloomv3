@@ -4,6 +4,19 @@
   gap: 9px;
 }
 
+[data-emotion-card='heatmap'] {
+  min-height: var(--emotion-equal-height, auto);
+  max-height: var(--emotion-equal-height, none);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
+  -webkit-overflow-scrolling: touch;
+}
+
+[data-emotion-card='summary'] {
+  min-height: fit-content;
+}
+
 #emotionChart .emotion-chart-surface {
   width: 100%;
   border-radius: 16px;

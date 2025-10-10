@@ -580,6 +580,8 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
     };
   }, [normalizedEntries]);
 
+  const cardRef = useRef<HTMLElement | null>(null);
+  const summaryRef = useRef<HTMLDivElement | null>(null);
   const gridBoxRef = useRef<HTMLDivElement | null>(null);
   const [cellSize, setCellSize] = useState<number>(12);
   const [cellGap, setCellGap] = useState<number>(GAP);
@@ -655,8 +657,59 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
     [cellGap, cellSize, columnCount],
   );
 
+  useEffect(() => {
+    const cardElement = cardRef.current;
+    const summaryElement = summaryRef.current;
+
+    if (!cardElement || !summaryElement) {
+      return;
+    }
+
+    let frame: number | null = null;
+
+    const applyHeight = () => {
+      frame = null;
+      const { height } = summaryElement.getBoundingClientRect();
+      if (!Number.isFinite(height) || height <= 0) {
+        cardElement.style.removeProperty('--emotion-equal-height');
+        return;
+      }
+      cardElement.style.setProperty('--emotion-equal-height', `${height}px`);
+    };
+
+    const schedule = () => {
+      if (frame !== null) return;
+      frame = window.requestAnimationFrame(applyHeight);
+    };
+
+    schedule();
+
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
+    if (observer) {
+      observer.observe(summaryElement);
+    }
+
+    const handleViewportChange = () => schedule();
+
+    window.addEventListener('resize', handleViewportChange);
+    window.addEventListener('orientationchange', handleViewportChange);
+
+    return () => {
+      if (frame !== null) {
+        window.cancelAnimationFrame(frame);
+      }
+      if (observer) {
+        observer.disconnect();
+      }
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('orientationchange', handleViewportChange);
+      cardElement.style.removeProperty('--emotion-equal-height');
+    };
+  }, [status, normalizedEntries, showSkeleton, showError, showEmpty]);
+
   return (
     <Card
+      ref={cardRef}
       title="💗 Emotion Chart"
       subtitle="Últimos 6 meses"
       rightSlot={<InfoDotTarget id="emotion" placement="right" className="flex items-center" />}
@@ -683,7 +736,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
           {rangeLabel && <p className="text-xs text-slate-400">Período analizado: {rangeLabel}</p>}
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-0">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-0" data-emotion-card="heatmap">
             <div id="emotionChart">
               <div className="emotion-chart-surface">
                 <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
@@ -734,25 +787,27 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
               </div>
             </div>
           </div>
-          {highlight ? (
-            <div className="flex w-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:flex-row sm:items-center sm:gap-4 sm:p-4">
-              <div
-                className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
-                style={{ backgroundColor: highlight.color }}
-              />
-              <div className="space-y-1">
-                <p className="font-semibold text-slate-100">{highlight.emotion}</p>
-                <p className="text-xs text-slate-400">
-                  Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
-                  {highlight.count === 1 ? 'registro' : 'registros'})
-                </p>
+          <div ref={summaryRef} data-emotion-card="summary">
+            {highlight ? (
+              <div className="flex w-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:flex-row sm:items-center sm:gap-4 sm:p-4">
+                <div
+                  className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
+                  style={{ backgroundColor: highlight.color }}
+                />
+                <div className="space-y-1">
+                  <p className="font-semibold text-slate-100">{highlight.emotion}</p>
+                  <p className="text-xs text-slate-400">
+                    Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
+                    {highlight.count === 1 ? 'registro' : 'registros'})
+                  </p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-slate-400 sm:p-4">
-              Aún no hay suficiente información reciente para destacar una emoción.
-            </div>
-          )}
+            ) : (
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-slate-400 sm:p-4">
+                Aún no hay suficiente información reciente para destacar una emoción.
+              </div>
+            )}
+          </div>
         </div>
       ) : null}
     </Card>
