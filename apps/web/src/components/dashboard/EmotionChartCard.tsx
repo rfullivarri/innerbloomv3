@@ -22,6 +22,23 @@ const LOOKBACK_FOR_HIGHLIGHT = 15;
 const TOTAL_DAYS = NUM_WEEKS * DAYS_IN_WEEK;
 const GRID_SCALE = 1.4;
 
+const MONTH_ABBREVIATIONS = [
+  'ENE',
+  'FEB',
+  'MAR',
+  'ABR',
+  'MAY',
+  'JUN',
+  'JUL',
+  'AGO',
+  'SEPT',
+  'OCT',
+  'NOV',
+  'DIC',
+] as const;
+
+const FALLBACK_MONTH_FORMATTER = new Intl.DateTimeFormat('es-ES', { month: 'short' });
+
 const EMOTION_NAMES = [
   'Calma',
   'Felicidad',
@@ -45,7 +62,7 @@ type NormalizedEmotionEntry = {
 
 type EmotionColumn = {
   key: string;
-  label: string;
+  startDate: Date;
   cells: GridCell[];
 };
 
@@ -63,6 +80,13 @@ type EmotionHighlight = {
   emotion: EmotionName;
   color: string;
   count: number;
+};
+
+type MonthSegment = {
+  key: string;
+  label: string;
+  startIndex: number;
+  span: number;
 };
 
 type EmotionMapResult = {
@@ -283,19 +307,13 @@ function buildColumns(
   startMonday: Date,
   endMonday: Date,
   rows: number,
-): EmotionColumn[] {
-  const result: EmotionColumn[] = [];
-  const monthFormatter = new Intl.DateTimeFormat('es-ES', { month: 'short' });
+): { columns: EmotionColumn[]; monthSegments: MonthSegment[] } {
+  const columns: EmotionColumn[] = [];
   let currentMonday = new Date(startMonday);
   const lastMondayTime = endMonday.getTime();
-  let lastLabeledMonthKey: string | null = null;
 
   while (currentMonday.getTime() <= lastMondayTime) {
     const monday = new Date(currentMonday);
-    const monthForFallback = monday.getMonth();
-    const yearForFallback = monday.getFullYear();
-    let label = '';
-    let labelMonthKey: string | null = null;
 
     const cells: GridCell[] = [];
     for (let row = 0; row < rows; row += 1) {
@@ -318,36 +336,64 @@ function buildColumns(
         rawEmotion,
         rawDate,
       });
-
-      if (!label) {
-        if (cellDate.getDate() === 1) {
-          labelMonthKey = `${cellDate.getFullYear()}-${cellDate.getMonth()}`;
-          if (labelMonthKey !== lastLabeledMonthKey) {
-            label = monthFormatter.format(cellDate).toLowerCase();
-          }
-        }
-      }
     }
 
-    if (!label && lastLabeledMonthKey === null) {
-      labelMonthKey = `${yearForFallback}-${monthForFallback}`;
-      label = monthFormatter.format(monday).toLowerCase();
-    }
-
-    if (label && labelMonthKey) {
-      lastLabeledMonthKey = labelMonthKey;
-    }
-
-    result.push({
+    columns.push({
       key: ymd(monday),
-      label,
+      startDate: monday,
       cells,
     });
 
     currentMonday = addDays(currentMonday, rows);
   }
 
-  return result;
+  const monthSegments: MonthSegment[] = [];
+
+  if (columns.length > 0) {
+    const columnAssignments: string[] = [];
+    const firstCell = columns[0].cells[0];
+    let activeMonthKey = firstCell ? `${firstCell.date.getFullYear()}-${firstCell.date.getMonth()}` : '';
+
+    for (let columnIndex = 0; columnIndex < columns.length; columnIndex += 1) {
+      const column = columns[columnIndex];
+      const dayOneCell = column.cells.find((cell) => cell.date.getDate() === 1);
+      if (dayOneCell) {
+        activeMonthKey = `${dayOneCell.date.getFullYear()}-${dayOneCell.date.getMonth()}`;
+      }
+      columnAssignments[columnIndex] = activeMonthKey;
+    }
+
+    let currentKey = columnAssignments[0] ?? '';
+    let segmentStart = 0;
+
+    for (let index = 0; index <= columnAssignments.length; index += 1) {
+      const key = columnAssignments[index] ?? '';
+      if (index === columnAssignments.length || key !== currentKey) {
+        const span = index - segmentStart;
+        if (currentKey && span > 0) {
+          const [yearPart, monthPart] = currentKey.split('-');
+          const monthIndex = Number(monthPart);
+          const label =
+            MONTH_ABBREVIATIONS[monthIndex] ??
+            FALLBACK_MONTH_FORMATTER.format(new Date(Number(yearPart), monthIndex, 1))
+              .toUpperCase()
+              .replace('.', '');
+
+          monthSegments.push({
+            key: `${currentKey}-${segmentStart}`,
+            label,
+            startIndex: segmentStart,
+            span,
+          });
+        }
+
+        segmentStart = index;
+        currentKey = key;
+      }
+    }
+  }
+
+  return { columns, monthSegments };
 }
 
 function computeHighlight(
@@ -505,14 +551,19 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
   const normalizedEntries = overrideEntries ?? normalizedFromApi;
 
-  const { columns, highlight, period, hasRecordedEmotion } = useMemo(() => {
+  const { columns, monthSegments, highlight, period, hasRecordedEmotion } = useMemo(() => {
     const { map, keys, minDate } = buildEmotionByDay(normalizedEntries);
     const timelineStart = computeTimelineStart(minDate);
     const timelineEnd = computeTimelineEnd(timelineStart);
     const startColumnDate = timelineStart;
     const endColumnDate = addDays(startColumnDate, (NUM_WEEKS - 1) * DAYS_IN_WEEK);
 
-    const builtColumns = buildColumns(map, startColumnDate, endColumnDate, DAYS_IN_WEEK);
+    const { columns: builtColumns, monthSegments: builtMonthSegments } = buildColumns(
+      map,
+      startColumnDate,
+      endColumnDate,
+      DAYS_IN_WEEK,
+    );
     const highlightResult = computeHighlight(map, keys, LOOKBACK_FOR_HIGHLIGHT);
     const rangeDates = {
       from: timelineStart,
@@ -522,6 +573,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
     return {
       columns: builtColumns,
+      monthSegments: builtMonthSegments,
       highlight: highlightResult,
       period: rangeDates,
       hasRecordedEmotion: anyRecorded,
@@ -604,7 +656,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
   const monthRowStyle = useMemo(
     () =>
       ({
-        gridTemplateColumns: `repeat(${columnCount}, var(--cell))`,
+        gridTemplateColumns: `repeat(${columnCount}, minmax(0, var(--cell)))`,
       }) as CSSProperties,
     [columnCount],
   );
@@ -638,23 +690,26 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
           {rangeLabel && <p className="text-xs text-slate-400">Período analizado: {rangeLabel}</p>}
 
           <div className="rounded-2xl border border-white/10 bg-white/5 p-2">
-            <div className="flex flex-col gap-3 sm:gap-4">
-              <div id="emotionChart">
-                <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
-                  <div
-                    className="month-row text-[10px] uppercase tracking-wide text-slate-500"
-                    style={monthRowStyle}
-                  >
-                    {columns.map((column) => (
-                      <span key={`${column.key}-label`} className="month-chip">
-                        {column.label}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="emotion-grid--weekcols">
-                    {columns.map((column) => (
-                      <div key={column.key} className="emotion-col">
-                        {column.cells.map((cell) => {
+            <div id="emotionChart">
+              <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
+                <div
+                  className="month-row text-[10px] uppercase tracking-wide text-slate-500"
+                  style={monthRowStyle}
+                >
+                  {monthSegments.map((segment) => (
+                    <span
+                      key={segment.key}
+                      className="month-chip"
+                      style={{ gridColumn: `${segment.startIndex + 1} / span ${segment.span}` }}
+                    >
+                      {segment.label}
+                    </span>
+                  ))}
+                </div>
+                <div className="emotion-grid--weekcols">
+                  {columns.map((column) => (
+                    <div key={column.key} className="emotion-col">
+                      {column.cells.map((cell) => {
                           const tooltipEmotion = cell.rawEmotion ?? cell.emotion;
                           const tooltipDateRaw = cell.rawDate;
                           const tooltipDate =
@@ -676,32 +731,31 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
                             />
                           );
                         })}
-                      </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              {highlight ? (
-                <div className="flex w-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:flex-row sm:items-center sm:gap-4 sm:p-4">
-                  <div
-                    className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
-                    style={{ backgroundColor: highlight.color }}
-                  />
-                  <div className="space-y-1">
-                    <p className="font-semibold text-slate-100">{highlight.emotion}</p>
-                    <p className="text-xs text-slate-400">
-                      Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
-                      {highlight.count === 1 ? 'registro' : 'registros'})
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-slate-400 sm:p-4">
-                  Aún no hay suficiente información reciente para destacar una emoción.
-                </div>
-              )}
             </div>
           </div>
+          {highlight ? (
+            <div className="flex w-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:flex-row sm:items-center sm:gap-4 sm:p-4">
+              <div
+                className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
+                style={{ backgroundColor: highlight.color }}
+              />
+              <div className="space-y-1">
+                <p className="font-semibold text-slate-100">{highlight.emotion}</p>
+                <p className="text-xs text-slate-400">
+                  Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
+                  {highlight.count === 1 ? 'registro' : 'registros'})
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-slate-400 sm:p-4">
+              Aún no hay suficiente información reciente para destacar una emoción.
+            </div>
+          )}
         </div>
       ) : null}
     </Card>
