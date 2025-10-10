@@ -20,6 +20,8 @@ const NUM_WEEKS = 26;
 const DAYS_IN_WEEK = 7;
 const LOOKBACK_FOR_HIGHLIGHT = 15;
 const TOTAL_DAYS = NUM_WEEKS * DAYS_IN_WEEK;
+const MAX_FILLED_RATIO = 0.75;
+const MAX_FILLED_DAYS = Math.floor(TOTAL_DAYS * MAX_FILLED_RATIO);
 const GRID_SCALE = 1.4;
 
 const MONTH_ABBREVIATIONS = [
@@ -283,23 +285,84 @@ function addDays(date: Date, days: number): Date {
   return result;
 }
 
-function computeTimelineStart(earliest: Date | null): Date {
+function computeTimelineStart(): Date {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  if (!earliest || Number.isNaN(earliest.getTime())) {
-    return today;
-  }
-
-  const start = new Date(earliest);
-  start.setHours(0, 0, 0, 0);
-  return start;
+  return addDays(today, -(TOTAL_DAYS - 1));
 }
 
 function computeTimelineEnd(start: Date): Date {
   const end = addDays(start, TOTAL_DAYS - 1);
   end.setHours(0, 0, 0, 0);
   return end;
+}
+
+function clampEntriesToRange(
+  entries: NormalizedEmotionEntry[],
+  start: Date,
+  end: Date,
+): NormalizedEmotionEntry[] {
+  const startTime = start.getTime();
+  const endTime = end.getTime();
+  return entries.filter((entry) => {
+    const time = entry.date.getTime();
+    return time >= startTime && time <= endTime;
+  });
+}
+
+function getMonthKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+function trimExcessMonths(
+  entries: NormalizedEmotionEntry[],
+  maxFilled: number,
+): NormalizedEmotionEntry[] {
+  if (entries.length === 0 || maxFilled <= 0) {
+    return [];
+  }
+
+  const sorted = [...entries].sort((a, b) => a.date.getTime() - b.date.getTime());
+  const filledCount = sorted.filter((entry) => entry.emotion !== 'Sin registro').length;
+
+  if (filledCount <= maxFilled) {
+    return sorted;
+  }
+
+  type MonthBucket = { monthKey: string; entries: NormalizedEmotionEntry[] };
+  const buckets: MonthBucket[] = [];
+
+  for (const entry of sorted) {
+    if (entry.emotion === 'Sin registro') continue;
+    const monthKey = getMonthKey(entry.date);
+    const currentBucket = buckets[buckets.length - 1];
+    if (!currentBucket || currentBucket.monthKey !== monthKey) {
+      buckets.push({ monthKey, entries: [entry] });
+    } else {
+      currentBucket.entries.push(entry);
+    }
+  }
+
+  if (buckets.length === 0) {
+    return sorted;
+  }
+
+  let remaining = filledCount;
+  const monthsToDrop = new Set<string>();
+
+  for (const bucket of buckets) {
+    if (remaining <= maxFilled) break;
+    monthsToDrop.add(bucket.monthKey);
+    remaining -= bucket.entries.length;
+  }
+
+  if (monthsToDrop.size === 0) {
+    return sorted;
+  }
+
+  return sorted.filter((entry) => !monthsToDrop.has(getMonthKey(entry.date)));
 }
 
 function buildColumns(
@@ -552,9 +615,11 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
   const normalizedEntries = overrideEntries ?? normalizedFromApi;
 
   const { columns, monthSegments, highlight, period, hasRecordedEmotion } = useMemo(() => {
-    const { map, keys, minDate } = buildEmotionByDay(normalizedEntries);
-    const timelineStart = computeTimelineStart(minDate);
+    const timelineStart = computeTimelineStart();
     const timelineEnd = computeTimelineEnd(timelineStart);
+    const entriesInRange = clampEntriesToRange(normalizedEntries, timelineStart, timelineEnd);
+    const limitedEntries = trimExcessMonths(entriesInRange, MAX_FILLED_DAYS);
+    const { map, keys } = buildEmotionByDay(limitedEntries);
     const startColumnDate = timelineStart;
     const endColumnDate = addDays(startColumnDate, (NUM_WEEKS - 1) * DAYS_IN_WEEK);
 
@@ -569,7 +634,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       from: timelineStart,
       to: timelineEnd,
     };
-    const anyRecorded = normalizedEntries.some((entry) => entry.emotion !== 'Sin registro');
+    const anyRecorded = limitedEntries.some((entry) => entry.emotion !== 'Sin registro');
 
     return {
       columns: builtColumns,
