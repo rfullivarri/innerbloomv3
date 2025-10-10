@@ -280,11 +280,13 @@ function Radar({ dataset }: RadarProps) {
     .join(' ');
 
   const gridLevels = [0.25, 0.5, 0.75, 1];
-  const viewBoxSize = (center + 20) * 2;
+  const viewBoxPadding = 36;
+  const viewBoxSize = (center + viewBoxPadding) * 2;
   const labelStyle: CSSProperties = {
-    fontSize: 'clamp(12px, 3.6vw, 15px)',
+    fontFamily: '"Manrope", "Inter", system-ui, sans-serif',
+    fontSize: 'clamp(11px, 3.2vw, 14px)',
     fontWeight: 600,
-    letterSpacing: '0.03em',
+    letterSpacing: '0.01em',
     paintOrder: 'stroke fill',
     stroke: 'rgba(15,23,42,0.7)',
     strokeWidth: 2,
@@ -331,7 +333,7 @@ function Radar({ dataset }: RadarProps) {
         const valueDistance = normalized * radius;
         const xpLabelOffset = normalized > 0 ? 24 : 36;
         const xpLabelPoint = basePointFor(Math.min(radius + 48, valueDistance + xpLabelOffset), index);
-        const xpLabel = `${XP_NUMBER_FORMATTER.format(Math.round(axis.xp ?? 0))} XP`;
+        const xpLabel = XP_NUMBER_FORMATTER.format(Math.round(axis.xp ?? 0));
 
         return (
           <g key={axis.key}>
@@ -356,15 +358,16 @@ function Radar({ dataset }: RadarProps) {
             <text
               x={xpLabelPoint.x}
               y={xpLabelPoint.y}
-              fill="rgba(148,163,184,0.95)"
+              fill="rgba(226,232,240,0.95)"
               textAnchor="middle"
               dominantBaseline="middle"
               style={{
-                fontSize: 'clamp(11px, 3vw, 13px)',
-                fontWeight: 600,
-                letterSpacing: '0.02em',
+                fontFamily: '"Manrope", "Inter", system-ui, sans-serif',
+                fontSize: 'clamp(12px, 3.4vw, 16px)',
+                fontWeight: 700,
+                letterSpacing: '0.01em',
                 paintOrder: 'stroke fill',
-                stroke: 'rgba(15,23,42,0.55)',
+                stroke: 'rgba(15,23,42,0.65)',
                 strokeWidth: 2,
                 strokeLinecap: 'round',
                 strokeLinejoin: 'round',
