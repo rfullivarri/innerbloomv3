@@ -21,6 +21,7 @@ const DAYS_IN_WEEK = 7;
 const LOOKBACK_FOR_HIGHLIGHT = 15;
 const TOTAL_DAYS = NUM_WEEKS * DAYS_IN_WEEK;
 const GRID_SCALE = 1.4;
+const SUMMARY_COMPRESSION_RATIO = 0.5;
 
 const MONTH_ABBREVIATIONS = [
   'ENE',
@@ -582,6 +583,11 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
   const cardRef = useRef<HTMLElement | null>(null);
   const summaryRef = useRef<HTMLDivElement | null>(null);
+  const summaryCompressionRef = useRef<{
+    naturalHeight: number;
+    paddingTop: number;
+    paddingBottom: number;
+  } | null>(null);
   const gridBoxRef = useRef<HTMLDivElement | null>(null);
   const [cellSize, setCellSize] = useState<number>(12);
   const [cellGap, setCellGap] = useState<number>(GAP);
@@ -665,15 +671,101 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       return;
     }
 
+    summaryCompressionRef.current = null;
+
     let frame: number | null = null;
+
+    const ensureSummaryCompression = () => {
+      const currentSummary = summaryRef.current;
+      if (!currentSummary) {
+        summaryCompressionRef.current = null;
+        return;
+      }
+
+      const contentElement = currentSummary.firstElementChild as HTMLElement | null;
+
+      if (!contentElement) {
+        currentSummary.style.removeProperty('max-height');
+        currentSummary.style.removeProperty('overflow-y');
+        summaryCompressionRef.current = null;
+        return;
+      }
+
+      if (summaryCompressionRef.current === null) {
+        const previousMaxHeight = currentSummary.style.maxHeight;
+        const previousOverflowY = currentSummary.style.overflowY;
+        const previousPaddingTop = contentElement.style.paddingTop;
+        const previousPaddingBottom = contentElement.style.paddingBottom;
+
+        currentSummary.style.removeProperty('max-height');
+        currentSummary.style.removeProperty('overflow-y');
+        contentElement.style.removeProperty('padding-top');
+        contentElement.style.removeProperty('padding-bottom');
+
+        const { height } = currentSummary.getBoundingClientRect();
+        const computed = window.getComputedStyle(contentElement);
+        const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
+        const paddingBottom = Number.parseFloat(computed.paddingBottom) || 0;
+
+        summaryCompressionRef.current = {
+          naturalHeight: height,
+          paddingTop,
+          paddingBottom,
+        };
+
+        currentSummary.style.maxHeight = previousMaxHeight;
+        currentSummary.style.overflowY = previousOverflowY;
+        contentElement.style.paddingTop = previousPaddingTop;
+        contentElement.style.paddingBottom = previousPaddingBottom;
+      }
+
+      const baseline = summaryCompressionRef.current;
+
+      if (!baseline || !Number.isFinite(baseline.naturalHeight) || baseline.naturalHeight <= 0) {
+        currentSummary.style.removeProperty('max-height');
+        currentSummary.style.removeProperty('overflow-y');
+        contentElement.style.removeProperty('padding-top');
+        contentElement.style.removeProperty('padding-bottom');
+        return;
+      }
+
+      const maxHeightValue = `${baseline.naturalHeight * SUMMARY_COMPRESSION_RATIO}px`;
+      if (currentSummary.style.maxHeight !== maxHeightValue) {
+        currentSummary.style.maxHeight = maxHeightValue;
+      }
+
+      if (currentSummary.style.overflowY !== 'auto') {
+        currentSummary.style.overflowY = 'auto';
+      }
+
+      const targetPaddingTop = `${baseline.paddingTop * SUMMARY_COMPRESSION_RATIO}px`;
+      if (contentElement.style.paddingTop !== targetPaddingTop) {
+        contentElement.style.paddingTop = targetPaddingTop;
+      }
+
+      const targetPaddingBottom = `${baseline.paddingBottom * SUMMARY_COMPRESSION_RATIO}px`;
+      if (contentElement.style.paddingBottom !== targetPaddingBottom) {
+        contentElement.style.paddingBottom = targetPaddingBottom;
+      }
+    };
 
     const applyHeight = () => {
       frame = null;
-      const { height } = summaryElement.getBoundingClientRect();
+      ensureSummaryCompression();
+
+      const currentSummary = summaryRef.current;
+      if (!currentSummary) {
+        cardElement.style.removeProperty('--emotion-equal-height');
+        return;
+      }
+
+      const { height } = currentSummary.getBoundingClientRect();
+
       if (!Number.isFinite(height) || height <= 0) {
         cardElement.style.removeProperty('--emotion-equal-height');
         return;
       }
+
       cardElement.style.setProperty('--emotion-equal-height', `${height}px`);
     };
 
@@ -684,12 +776,21 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
     schedule();
 
-    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
+    const observer =
+      typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver(() => {
+            summaryCompressionRef.current = null;
+            schedule();
+          })
+        : null;
     if (observer) {
       observer.observe(summaryElement);
     }
 
-    const handleViewportChange = () => schedule();
+    const handleViewportChange = () => {
+      summaryCompressionRef.current = null;
+      schedule();
+    };
 
     window.addEventListener('resize', handleViewportChange);
     window.addEventListener('orientationchange', handleViewportChange);
@@ -704,6 +805,19 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       window.removeEventListener('resize', handleViewportChange);
       window.removeEventListener('orientationchange', handleViewportChange);
       cardElement.style.removeProperty('--emotion-equal-height');
+
+      const cleanupSummary = summaryRef.current;
+      if (cleanupSummary) {
+        cleanupSummary.style.removeProperty('max-height');
+        cleanupSummary.style.removeProperty('overflow-y');
+        const contentElement = cleanupSummary.firstElementChild as HTMLElement | null;
+        if (contentElement) {
+          contentElement.style.removeProperty('padding-top');
+          contentElement.style.removeProperty('padding-bottom');
+        }
+      }
+
+      summaryCompressionRef.current = null;
     };
   }, [status, normalizedEntries, showSkeleton, showError, showEmpty]);
 
@@ -736,7 +850,10 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
           {rangeLabel && <p className="text-xs text-slate-400">Período analizado: {rangeLabel}</p>}
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-0" data-emotion-card="heatmap">
+          <div
+            className="rounded-2xl border border-white/10 bg-white/5 p-0"
+            data-emotion-block="heatmap"
+          >
             <div id="emotionChart">
               <div className="emotion-chart-surface">
                 <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
@@ -787,7 +904,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
               </div>
             </div>
           </div>
-          <div ref={summaryRef} data-emotion-card="summary">
+          <div ref={summaryRef} data-emotion-block="summary">
             {highlight ? (
               <div className="flex w-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:flex-row sm:items-center sm:gap-4 sm:p-4">
                 <div
