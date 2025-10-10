@@ -35,13 +35,15 @@ import { getUserState } from '../lib/api';
 export default function DashboardV3Page() {
   const { user } = useUser();
   const { backendUserId, status, error, reload, clerkUserId, profile } = useBackendUser();
+  const profileGameMode = deriveGameModeFromProfile(profile?.game_mode);
+  const shouldFetchUserState = Boolean(backendUserId && !profileGameMode);
   const { data: userState } = useRequest(
     () => getUserState(backendUserId!),
     [backendUserId],
-    { enabled: Boolean(backendUserId) },
+    { enabled: shouldFetchUserState },
   );
 
-  const gameMode = userState?.mode_name ?? userState?.mode ?? profile?.game_mode ?? null;
+  const gameMode = userState?.mode_name ?? userState?.mode ?? profileGameMode ?? null;
 
   if (!clerkUserId) {
     return null;
@@ -103,6 +105,47 @@ export default function DashboardV3Page() {
       </div>
     </DevErrorBoundary>
   );
+}
+
+function deriveGameModeFromProfile(mode?: string | null): string | null {
+  if (typeof mode !== 'string') {
+    return null;
+  }
+
+  const trimmed = mode.trim();
+
+  if (trimmed.length === 0) {
+    return null;
+  }
+
+  const normalized = trimmed.toLowerCase();
+
+  const aliasMap: Record<string, string> = {
+    'flow mood': 'flow',
+    'flow_mood': 'flow',
+    'flowmode': 'flow',
+    'standard': 'flow',
+    'seedling': 'flow',
+    'low mood': 'low',
+    'low_mood': 'low',
+    'lowmode': 'low',
+    'evol': 'evolve',
+  };
+
+  const canonical = aliasMap[normalized] ?? normalized;
+
+  switch (canonical) {
+    case 'low':
+      return 'Low';
+    case 'chill':
+      return 'Chill';
+    case 'flow':
+      return 'Flow';
+    case 'evolve':
+      return 'Evolve';
+    default:
+      return null;
+  }
 }
 
 function ProfileSkeleton() {
