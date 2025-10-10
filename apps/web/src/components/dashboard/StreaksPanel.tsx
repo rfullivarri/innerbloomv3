@@ -634,7 +634,6 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
             glowSecondary={modeChip.glowSecondary}
             innerClassName={modeChip.innerClassName}
           >
-            <span aria-hidden>🎮</span>
             {modeLabel}
           </GlowChip>
         </InfoDotTarget>
