@@ -1,13 +1,16 @@
-import { motion } from 'framer-motion';
-import { forwardRef } from 'react';
+import { motion, type HTMLMotionProps } from 'framer-motion';
+import { forwardRef, type ReactNode } from 'react';
 
-interface CardProps extends React.ComponentPropsWithoutRef<'button'> {
+type MotionButtonProps = HTMLMotionProps<'button'>;
+
+interface CardProps extends Omit<MotionButtonProps, 'children'> {
+  children: ReactNode;
   active?: boolean;
   subtitle?: string;
 }
 
 export const Card = forwardRef<HTMLButtonElement, CardProps>(function Card(
-  { children, className, active = false, subtitle, ...rest },
+  { children, className, active = false, subtitle, type = 'button', ...rest },
   ref,
 ) {
   const classes = [
@@ -23,7 +26,7 @@ export const Card = forwardRef<HTMLButtonElement, CardProps>(function Card(
   return (
     <motion.button
       ref={ref}
-      type="button"
+      type={type}
       whileTap={{ scale: 0.98 }}
       className={classes}
       {...rest}

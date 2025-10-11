@@ -22,6 +22,33 @@ export type StepId =
   | 'foundations-mind'
   | 'summary';
 
+const ALL_STEPS: StepId[] = [
+  'clerk-gate',
+  'mode-select',
+  'low-body',
+  'low-soul',
+  'low-mind',
+  'low-note',
+  'chill-open',
+  'chill-motiv',
+  'flow-goal',
+  'flow-imped',
+  'evolve-goal',
+  'evolve-trade',
+  'evolve-att',
+  'foundations-body',
+  'foundations-soul',
+  'foundations-mind',
+  'summary',
+];
+
+function createStepRecord(value = false): Record<StepId, boolean> {
+  return ALL_STEPS.reduce<Record<StepId, boolean>>((acc, step) => {
+    acc[step] = value;
+    return acc;
+  }, {} as Record<StepId, boolean>);
+}
+
 export interface XP {
   Body: number;
   Mind: number;
@@ -116,8 +143,8 @@ const initialState: OnboardingState = {
   currentStepIndex: 0,
   answers: cloneAnswers(initialAnswers),
   xp: { ...initialXP },
-  awardedChecklists: {},
-  awardedOpen: {},
+  awardedChecklists: createStepRecord(),
+  awardedOpen: createStepRecord(),
   tokenProvider: null,
 };
 
@@ -500,8 +527,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       currentStepIndex: 0,
       answers: cloneAnswers(initialAnswers),
       xp: { ...initialXP },
-      awardedChecklists: {},
-      awardedOpen: {},
+      awardedChecklists: createStepRecord(),
+      awardedOpen: createStepRecord(),
       tokenProvider: null,
     });
   }, []);
