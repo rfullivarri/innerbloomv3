@@ -1,4 +1,4 @@
-import { useEffect, useState, type KeyboardEvent } from 'react';
+import { useEffect, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import './Landing.css';
@@ -146,6 +146,43 @@ export default function LandingPage() {
     return () => window.clearInterval(timer);
   }, [paused, testimonialCount]);
 
+  useEffect(() => {
+    const elements = Array.from(
+      document.querySelectorAll<HTMLElement>('.reveal-on-scroll')
+    );
+
+    if (!elements.length) {
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+
+    if (prefersReducedMotion) {
+      elements.forEach((element) => {
+        element.classList.add('is-visible');
+      });
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -10%' }
+    );
+
+    elements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
+
   const goToSlide = (index: number) => {
     setActiveSlide((index + testimonialCount) % testimonialCount);
   };
@@ -200,7 +237,7 @@ export default function LandingPage() {
       </header>
 
       <main>
-        <section className="hero" id="overview">
+        <section className="hero reveal-on-scroll" id="overview">
           <div className="hero-grid">
             <div className="hero-copy">
               <h1>
@@ -242,7 +279,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="why section-pad" id="why">
+        <section className="why section-pad reveal-on-scroll" id="why">
           <div className="container narrow">
             <h2>Nuestros pilares fundamentales</h2>
             <p className="section-sub">
@@ -251,8 +288,12 @@ export default function LandingPage() {
               Cuando uno cae, los otros dos lo sostienen. Cuando se alinean, tu progreso se acelera.
             </p>
             <div className="cards grid-3">
-              {PILLARS.map((pillar) => (
-                <article className="card" key={pillar.title}>
+              {PILLARS.map((pillar, index) => (
+                <article
+                  className="card fade-item"
+                  key={pillar.title}
+                  style={{ '--delay': `${index * 90}ms` } as CSSProperties}
+                >
                   <h3>
                     {pillar.emoji} {pillar.title}
                   </h3>
@@ -266,13 +307,17 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="modes section-pad" id="modes">
+        <section className="modes section-pad reveal-on-scroll" id="modes">
           <div className="container">
             <h2>Modula tu modo de juego</h2>
             <p className="section-sub">Cambia según tu momento. El sistema se adapta a tu energía.</p>
             <div className="cards grid-2">
-              {MODES.map((mode) => (
-                <article className={`card mode ${mode.id}`} key={mode.id}>
+              {MODES.map((mode, index) => (
+                <article
+                  className={`card mode ${mode.id} fade-item`}
+                  key={mode.id}
+                  style={{ '--delay': `${index * 90}ms` } as CSSProperties}
+                >
                   <div className="mode-title">
                     {mode.title} <span className="dot" aria-hidden="true" />
                   </div>
@@ -288,13 +333,17 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="how section-pad" id="how">
+        <section className="how section-pad reveal-on-scroll" id="how">
           <div className="container narrow">
             <h2>Cómo funciona</h2>
             <p className="section-sub">Un flujo claro, de la activación a la constancia.</p>
             <ol className="steps">
               {HOW_STEPS.map((step, index) => (
-                <li key={step.title}>
+                <li
+                  className="fade-item"
+                  key={step.title}
+                  style={{ '--delay': `${index * 80}ms` } as CSSProperties}
+                >
                   <span className="step-badge">{index + 1}</span>
                   <div>
                     <h3>{step.title}</h3>
@@ -306,13 +355,17 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="features section-pad" id="features">
+        <section className="features section-pad reveal-on-scroll" id="features">
           <div className="container">
             <h2>Lo que desbloqueás</h2>
             <p className="section-sub">Herramientas que te dan claridad y momentum.</p>
             <div className="cards grid-3">
-              {FEATURES.map((feature) => (
-                <article className="card" key={feature.title}>
+              {FEATURES.map((feature, index) => (
+                <article
+                  className="card fade-item"
+                  key={feature.title}
+                  style={{ '--delay': `${index * 80}ms` } as CSSProperties}
+                >
                   <h3>{feature.title}</h3>
                   <p>{feature.copy}</p>
                 </article>
@@ -321,7 +374,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="testimonials section-pad" id="testimonials">
+        <section className="testimonials section-pad reveal-on-scroll" id="testimonials">
           <div className="container">
             <h2>Testimonios</h2>
             <p className="section-sub">Lo que dicen quienes ya empezaron su Journey.</p>
@@ -384,7 +437,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="faq section-pad" id="faq">
+        <section className="faq section-pad reveal-on-scroll" id="faq">
           <div className="container narrow">
             <h2>Preguntas frecuentes</h2>
             {FAQS.map((faq) => (
@@ -396,7 +449,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="next section-pad">
+        <section className="next section-pad reveal-on-scroll">
           <div className="container narrow center">
             <h2>Listo para empezar</h2>
             <p className="section-sub">Te guiamos paso a paso. Empezá ahora.</p>
