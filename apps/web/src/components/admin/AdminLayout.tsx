@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { AdminInsights, AdminLogRow, AdminUser } from '../../lib/types';
+import type { AdminInsights, AdminLogRow, AdminTaskSummaryRow, AdminUser } from '../../lib/types';
 import {
   exportAdminLogsCsv,
   fetchAdminInsights,
   fetchAdminLogs,
+  fetchAdminTaskStats,
 } from '../../lib/adminApi';
 import { AdminDataTable } from './AdminDataTable';
 import { FiltersBar, type AdminFilters } from './FiltersBar';
 import { InsightsChips } from './InsightsChips';
+import { AdminTaskSummaryTable } from './AdminTaskSummaryTable';
 import { UserPicker } from './UserPicker';
 
 const DEFAULT_FILTERS: AdminFilters = {
@@ -27,23 +29,30 @@ type LogsState = {
 
 export function AdminLayout() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [activeTab, setActiveTab] = useState<'logs' | 'taskTotals'>('logs');
   const [filters, setFilters] = useState<AdminFilters>(DEFAULT_FILTERS);
   const [insights, setInsights] = useState<AdminInsights | null>(null);
   const [logs, setLogs] = useState<LogsState>({ items: [], page: 1, pageSize: 10, total: 0 });
+  const [taskStats, setTaskStats] = useState<AdminTaskSummaryRow[]>([]);
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [loadingLogs, setLoadingLogs] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loadingTaskStats, setLoadingTaskStats] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [logsError, setLogsError] = useState<string | null>(null);
+  const [taskStatsError, setTaskStatsError] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedUser) {
       setInsights(null);
       setLogs({ items: [], page: 1, pageSize: filters.pageSize, total: 0 });
+      setTaskStats([]);
       return;
     }
 
     let cancelled = false;
     setLoadingInsights(true);
-    setError(null);
+    setInsightsError(null);
 
     fetchAdminInsights(selectedUser.id, {
       from: filters.from,
@@ -57,7 +66,7 @@ export function AdminLayout() {
       .catch((err: unknown) => {
         console.error('[admin] failed to fetch insights', err);
         if (!cancelled) {
-          setError('No se pudieron cargar los insights.');
+          setInsightsError('No se pudieron cargar los insights.');
         }
       })
       .finally(() => {
@@ -79,7 +88,7 @@ export function AdminLayout() {
 
     let cancelled = false;
     setLoadingLogs(true);
-    setError(null);
+    setLogsError(null);
 
     fetchAdminLogs(selectedUser.id, {
       from: filters.from,
@@ -101,7 +110,7 @@ export function AdminLayout() {
       .catch((err: unknown) => {
         console.error('[admin] failed to fetch logs', err);
         if (!cancelled) {
-          setError('No se pudieron cargar los logs.');
+          setLogsError('No se pudieron cargar los logs.');
         }
       })
       .finally(() => {
@@ -115,13 +124,57 @@ export function AdminLayout() {
     };
   }, [selectedUser, filters.from, filters.to, filters.q, filters.page, filters.pageSize]);
 
+  useEffect(() => {
+    if (!selectedUser) {
+      setTaskStats([]);
+      return;
+    }
+
+    if (activeTab !== 'taskTotals') {
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingTaskStats(true);
+    setTaskStatsError(null);
+
+    fetchAdminTaskStats(selectedUser.id, {
+      from: filters.from,
+      to: filters.to,
+      q: filters.q ? filters.q : undefined,
+    })
+      .then((data) => {
+        if (!cancelled) {
+          setTaskStats(data);
+        }
+      })
+      .catch((err: unknown) => {
+        console.error('[admin] failed to fetch task stats', err);
+        if (!cancelled) {
+          setTaskStatsError('No se pudieron cargar los totales de tareas.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingTaskStats(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, selectedUser, filters.from, filters.to, filters.q]);
+
   const handleSelectUser = useCallback((user: AdminUser | null) => {
     setSelectedUser(user);
     setFilters(DEFAULT_FILTERS);
+    setActiveTab('logs');
   }, []);
 
   const handleExport = useCallback(async () => {
     if (!selectedUser) return;
+
+    setExportError(null);
 
     try {
       const csv = await exportAdminLogsCsv(selectedUser.id, {
@@ -138,7 +191,7 @@ export function AdminLayout() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('[admin] failed to export CSV', err);
-      setError('No se pudo exportar el CSV.');
+      setExportError('No se pudo exportar el CSV.');
     }
   }, [filters.from, filters.to, filters.q, selectedUser]);
 
@@ -146,21 +199,48 @@ export function AdminLayout() {
     setFilters(next);
   }, []);
 
-  const emptyState = useMemo(() => {
-    if (loadingLogs) {
-      return 'Cargando registros…';
+  const errorMessages = useMemo(() => {
+    const messages: string[] = [];
+    if (insightsError) {
+      messages.push(insightsError);
     }
+    if (exportError) {
+      messages.push(exportError);
+    }
+    const tabError = activeTab === 'taskTotals' ? taskStatsError : logsError;
+    if (tabError) {
+      messages.push(tabError);
+    }
+    return messages;
+  }, [activeTab, exportError, insightsError, logsError, taskStatsError]);
 
+  const emptyState = useMemo(() => {
     if (!selectedUser) {
       return 'Seleccioná un usuario para comenzar.';
     }
 
-    if (logs.total === 0) {
-      return 'No hay registros para los filtros seleccionados.';
+    if (activeTab === 'logs') {
+      if (loadingLogs) {
+        return 'Cargando registros…';
+      }
+
+      if (logs.total === 0) {
+        return 'No hay registros para los filtros seleccionados.';
+      }
+
+      return null;
+    }
+
+    if (loadingTaskStats) {
+      return 'Cargando totales…';
+    }
+
+    if (taskStats.length === 0) {
+      return 'No hay totales para los filtros seleccionados.';
     }
 
     return null;
-  }, [loadingLogs, logs.total, selectedUser]);
+  }, [activeTab, loadingLogs, logs.total, loadingTaskStats, selectedUser, taskStats.length]);
 
   return (
     <div className="flex min-h-screen flex-col gap-6 bg-slate-900 px-4 pb-10 pt-6 text-slate-100">
@@ -173,30 +253,74 @@ export function AdminLayout() {
       </header>
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-4">
-        {error ? (
-          <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-            {error}
+        {errorMessages.length > 0 ? (
+          <div className="space-y-2">
+            {errorMessages.map((message, index) => (
+              <div
+                key={`${message}-${index}`}
+                className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100"
+              >
+                {message}
+              </div>
+            ))}
           </div>
         ) : null}
 
         <InsightsChips insights={insights} loading={loadingInsights} />
 
-        <FiltersBar filters={filters} onChange={handleFiltersChange} onExport={handleExport} />
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('logs')}
+            className={`rounded-lg border px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-500 ${
+              activeTab === 'logs'
+                ? 'border-sky-400/60 bg-sky-500/10 text-sky-100'
+                : 'border-slate-700/60 text-slate-300 hover:border-sky-400/60 hover:text-sky-100'
+            }`}
+          >
+            Registros diarios
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('taskTotals')}
+            className={`rounded-lg border px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-500 ${
+              activeTab === 'taskTotals'
+                ? 'border-sky-400/60 bg-sky-500/10 text-sky-100'
+                : 'border-slate-700/60 text-slate-300 hover:border-sky-400/60 hover:text-sky-100'
+            }`}
+          >
+            Totales por tarea
+          </button>
+        </div>
+
+        <FiltersBar
+          filters={filters}
+          onChange={handleFiltersChange}
+          onExport={handleExport}
+          showExport={activeTab === 'logs'}
+          showPageSize={activeTab === 'logs'}
+        />
 
         {emptyState ? (
           <div className="rounded-lg border border-slate-700/60 bg-slate-800/60 px-6 py-12 text-center text-sm text-slate-300">
             {emptyState}
           </div>
         ) : (
-          <AdminDataTable
-            rows={logs.items}
-            loading={loadingLogs}
-            page={logs.page}
-            pageSize={logs.pageSize}
-            total={logs.total}
-            onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
-            onPageSizeChange={(pageSize) => setFilters((prev) => ({ ...prev, pageSize }))}
-          />
+          <>
+            {activeTab === 'logs' ? (
+              <AdminDataTable
+                rows={logs.items}
+                loading={loadingLogs}
+                page={logs.page}
+                pageSize={logs.pageSize}
+                total={logs.total}
+                onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
+                onPageSizeChange={(pageSize) => setFilters((prev) => ({ ...prev, pageSize }))}
+              />
+            ) : (
+              <AdminTaskSummaryTable rows={taskStats} loading={loadingTaskStats} />
+            )}
+          </>
         )}
       </main>
     </div>

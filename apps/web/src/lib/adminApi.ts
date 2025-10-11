@@ -1,5 +1,11 @@
 import { ApiError, apiAuthorizedFetch, apiAuthorizedGet, buildApiUrl } from './api';
-import type { AdminInsights, AdminLogRow, AdminTaskRow, AdminUser } from './types';
+import type {
+  AdminInsights,
+  AdminLogRow,
+  AdminTaskRow,
+  AdminTaskSummaryRow,
+  AdminUser,
+} from './types';
 
 type PaginatedResponse<T> = {
   items: T[];
@@ -37,6 +43,15 @@ type TaskFilters = {
   q?: string;
 };
 
+type TaskStatsFilters = {
+  from?: string;
+  to?: string;
+  pillar?: string;
+  trait?: string;
+  difficulty?: string;
+  q?: string;
+};
+
 type UpdateTaskPayload = {
   weeklyTarget?: number;
   archived?: boolean;
@@ -61,6 +76,13 @@ export async function fetchAdminLogs(userId: string, params: LogFilters = {}) {
 export async function fetchAdminTasks(userId: string, params: TaskFilters = {}) {
   return apiAuthorizedGet<PaginatedResponse<AdminTaskRow>>(
     `/admin/users/${encodeURIComponent(userId)}/tasks`,
+    params,
+  );
+}
+
+export async function fetchAdminTaskStats(userId: string, params: TaskStatsFilters = {}) {
+  return apiAuthorizedGet<AdminTaskSummaryRow[]>(
+    `/admin/users/${encodeURIComponent(userId)}/task-stats`,
     params,
   );
 }

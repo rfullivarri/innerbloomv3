@@ -7,12 +7,14 @@ import {
   logsQuerySchema,
   insightQuerySchema,
   tasksQuerySchema,
+  taskStatsQuerySchema,
   updateTaskBodySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
   getUserInsights,
   getUserLogs,
+  getUserTaskStats,
   getUserTasks,
   listUsers,
   updateUserTask,
@@ -50,6 +52,13 @@ export const getAdminUserTasks = asyncHandler(async (req: Request, res: Response
   const { userId } = userIdParamSchema.parse(req.params);
   const query = tasksQuerySchema.parse(req.query);
   const result = await getUserTasks(userId, query);
+  res.json(result);
+});
+
+export const getAdminUserTaskStats = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const query = taskStatsQuerySchema.parse(req.query);
+  const result = await getUserTaskStats(userId, query);
   res.json(result);
 });
 

@@ -2,7 +2,14 @@ import { pool } from '../../db.js';
 import { buildLevelSummary } from '../../controllers/users/level-summary.js';
 import type { LevelThreshold } from '../../controllers/users/types.js';
 import { HttpError } from '../../lib/http-error.js';
-import { type InsightQuery, type ListUsersQuery, type LogsQuery, type TasksQuery, type UpdateTaskBody } from './admin.schemas.js';
+import {
+  type InsightQuery,
+  type ListUsersQuery,
+  type LogsQuery,
+  type TaskStatsQuery,
+  type TasksQuery,
+  type UpdateTaskBody,
+} from './admin.schemas.js';
 
 type AdminUserListItem = {
   id: string;
@@ -57,6 +64,20 @@ type AdminTask = {
   weeklyTarget: number | null;
   createdAt: string;
   archived: boolean;
+};
+
+type AdminTaskStat = {
+  taskId: string;
+  taskName: string;
+  pillar: string;
+  trait: string;
+  difficulty: string;
+  totalXp: number;
+  totalCompletions: number;
+  daysActive: number;
+  firstCompletedAt: string | null;
+  lastCompletedAt: string | null;
+  state: 'red' | 'yellow' | 'green';
 };
 
 type PaginatedResult<T> = {
@@ -128,6 +149,22 @@ type TaskRow = {
   difficulty_code: string | null;
   created_at: string | Date;
   active: boolean | null;
+};
+
+type TaskStatsRow = {
+  task_id: string;
+  task: string | null;
+  pillar_name: string | null;
+  pillar_code: string | null;
+  trait_name: string | null;
+  trait_code: string | null;
+  difficulty_name: string | null;
+  difficulty_code: string | null;
+  total_quantity: string | number | null;
+  active_days: string | number | null;
+  total_xp: string | number | null;
+  first_date: string | Date | null;
+  last_date: string | Date | null;
 };
 
 const PILLAR_KEYS = ['body', 'mind', 'soul'] as const;
@@ -812,6 +849,95 @@ export async function getUserLogs(
     pageSize: query.pageSize,
     total,
   };
+}
+
+export async function getUserTaskStats(userId: string, query: TaskStatsQuery): Promise<AdminTaskStat[]> {
+  const filters = ['dl.user_id = $1'];
+  const params: unknown[] = [userId];
+
+  if (query.from) {
+    params.push(query.from);
+    filters.push(`dl.date >= $${params.length}`);
+  }
+
+  if (query.to) {
+    params.push(query.to);
+    filters.push(`dl.date <= $${params.length}`);
+  }
+
+  if (query.pillar) {
+    params.push(`%${query.pillar.trim()}%`);
+    filters.push(`(cp.code ILIKE $${params.length} OR cp.name ILIKE $${params.length})`);
+  }
+
+  if (query.trait) {
+    params.push(`%${query.trait.trim()}%`);
+    filters.push(`(ct.code ILIKE $${params.length} OR ct.name ILIKE $${params.length})`);
+  }
+
+  if (query.difficulty) {
+    params.push(`%${query.difficulty.trim()}%`);
+    filters.push(`(cd.code ILIKE $${params.length} OR cd.name ILIKE $${params.length})`);
+  }
+
+  if (query.q) {
+    params.push(`%${query.q.trim()}%`);
+    const idx = params.length;
+    filters.push(`(t.task ILIKE $${idx} OR ct.name ILIKE $${idx} OR cp.name ILIKE $${idx})`);
+  }
+
+  const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+
+  const result = await pool.query<TaskStatsRow>(
+    `SELECT dl.task_id,
+            t.task,
+            cp.name AS pillar_name,
+            cp.code AS pillar_code,
+            ct.name AS trait_name,
+            ct.code AS trait_code,
+            cd.name AS difficulty_name,
+            cd.code AS difficulty_code,
+            SUM(COALESCE(dl.quantity, 1)) AS total_quantity,
+            COUNT(DISTINCT dl.date) AS active_days,
+            SUM(COALESCE(dl.quantity, 1) * COALESCE(cd.xp_base, 0)) AS total_xp,
+            MIN(dl.date) AS first_date,
+            MAX(dl.date) AS last_date
+       FROM daily_log dl
+       JOIN tasks t ON t.task_id = dl.task_id
+  LEFT JOIN cat_trait ct ON ct.trait_id = t.trait_id
+  LEFT JOIN cat_pillar cp ON cp.pillar_id = t.pillar_id
+  LEFT JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
+      ${whereClause}
+   GROUP BY dl.task_id, t.task, cp.name, cp.code, ct.name, ct.code, cd.name, cd.code
+   ORDER BY total_xp DESC NULLS LAST, t.task ASC`,
+    params,
+  );
+
+  return result.rows.map((row) => {
+    const totalXp = Math.max(0, toNumber(row.total_xp ?? 0));
+    const totalCompletions = Math.max(0, toNumber(row.total_quantity ?? 0));
+    const daysActive = Math.max(0, toNumber(row.active_days ?? 0));
+    const pillar = row.pillar_name ?? row.pillar_code ?? '—';
+    const trait = row.trait_name ?? row.trait_code ?? '—';
+    const difficulty = row.difficulty_name ?? row.difficulty_code ?? '—';
+    const firstCompletedAt = row.first_date ? formatDateOnly(row.first_date) : null;
+    const lastCompletedAt = row.last_date ? formatDateOnly(row.last_date) : null;
+    const state: 'red' | 'yellow' | 'green' = totalXp <= 0 ? 'red' : totalXp < 20 ? 'yellow' : 'green';
+
+    return {
+      taskId: row.task_id,
+      taskName: row.task ?? 'Tarea sin nombre',
+      pillar,
+      trait,
+      difficulty,
+      totalXp,
+      totalCompletions,
+      daysActive,
+      firstCompletedAt,
+      lastCompletedAt,
+      state,
+    };
+  });
 }
 
 export async function getUserTasks(
