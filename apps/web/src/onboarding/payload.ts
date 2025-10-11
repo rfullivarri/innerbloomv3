@@ -98,6 +98,14 @@ export function buildPayload(answers: Answers, xp: XP): JourneyPayload {
   const clientId = resolveClientId();
   const email = normalizeEmail(answers.email);
   const meta = resolveMeta(answers.user_id);
+  const roundedBodyXp = Math.round(Number(xp.Body || 0));
+  const roundedMindXp = Math.round(Number(xp.Mind || 0));
+  const roundedSoulXp = Math.round(Number(xp.Soul || 0));
+  const roundedTotalXp = Math.round(Number(xp.total || 0));
+  const totalXp =
+    roundedBodyXp + roundedMindXp + roundedSoulXp !== roundedTotalXp
+      ? roundedBodyXp + roundedMindXp + roundedSoulXp
+      : roundedTotalXp;
 
   return {
     ts: new Date().toISOString(),
@@ -134,10 +142,10 @@ export function buildPayload(answers: Answers, xp: XP): JourneyPayload {
       },
     },
     xp: {
-      total: Number(xp.total || 0),
-      Body: Number(xp.Body || 0),
-      Mind: Number(xp.Mind || 0),
-      Soul: Number(xp.Soul || 0),
+      total: totalXp,
+      Body: roundedBodyXp,
+      Mind: roundedMindXp,
+      Soul: roundedSoulXp,
     },
     meta,
   };
