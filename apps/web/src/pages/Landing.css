@@ -1,13 +1,7 @@
-@property --breath-shift {
-  syntax: '<percentage>';
+@property --gradient-angle {
+  syntax: '<angle>';
   inherits: false;
-  initial-value: 0%;
-}
-
-@property --breath-tilt {
-  syntax: '<percentage>';
-  inherits: false;
-  initial-value: 0%;
+  initial-value: 120deg;
 }
 
 .landing {
@@ -44,26 +38,21 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(
-      140% 85% at calc(50% + var(--breath-tilt)) calc(-18% + var(--breath-shift)),
-      color-mix(in srgb, var(--glow-1) 80%, transparent),
-      transparent 72%
-    ) no-repeat,
-    radial-gradient(
-      115% 65% at calc(50% - (var(--breath-tilt) * 0.6)) calc(24% + (var(--breath-shift) * 0.45)),
-      color-mix(in srgb, var(--glow-2) 72%, transparent),
-      transparent 76%
-    ) no-repeat,
-    linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.68) 48%, rgba(10, 14, 26, 0.92));
-  background-position: center;
-  background-size: 140% 90%, 118% 68%, 100% 100%;
+    radial-gradient(1200px 780px at 12% 8%, var(--glow-1), transparent 72%) no-repeat,
+    radial-gradient(960px 680px at 88% 6%, var(--glow-2), transparent 70%) no-repeat,
+    conic-gradient(from 120deg at 50% 40%, rgba(139, 92, 246, 0.16), rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.75), rgba(56, 189, 248, 0.18), rgba(139, 92, 246, 0.2));
+  background:
+    radial-gradient(1200px 780px at 12% 8%, color-mix(in srgb, var(--glow-1) 68%, transparent), transparent 72%) no-repeat,
+    radial-gradient(960px 680px at 88% 6%, color-mix(in srgb, var(--glow-2) 64%, transparent), transparent 70%) no-repeat,
+    conic-gradient(from var(--gradient-angle, 120deg) at 50% 40%, rgba(139, 92, 246, 0.16), rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.75), rgba(56, 189, 248, 0.18), rgba(139, 92, 246, 0.2));
+  background-position: 12% 8%, 88% 6%, center;
+  background-size: 1400px 900px, 1320px 900px, 220% 220%;
   transform: translateZ(0);
-  filter: saturate(1.08) blur(0.45px);
-  opacity: 0.88;
-  will-change: background-position, background-size, opacity;
+  filter: saturate(1.12) blur(0.4px);
+  will-change: transform, background-position, background-size;
   mix-blend-mode: screen;
-  animation: gradientBreath 18s ease-in-out infinite,
-    gradientFlow 32s ease-in-out infinite;
+  animation: auroraDrift 26s ease-in-out infinite alternate,
+    auroraRotate 48s linear infinite;
 }
 
 .landing::after {
@@ -524,33 +513,33 @@
   color: #fff;
 }
 
-@keyframes gradientBreath {
+@keyframes auroraDrift {
   0% {
-    --breath-shift: 0%;
-    background-size: 140% 90%, 118% 68%, 100% 100%;
-    opacity: 0.82;
+    background-position: 12% 8%, 88% 6%, center;
+    background-size: 1200px 820px, 1280px 960px, 180% 180%;
+    transform: scale(1.02) translate3d(0, 0, 0);
   }
-  45% {
-    --breath-shift: 18%;
-    background-size: 152% 96%, 128% 74%, 100% 100%;
-    opacity: 0.95;
+  50% {
+    background-position: 18% 16%, 80% 12%, center;
+    background-size: 1340px 900px, 1320px 940px, 192% 192%;
+    transform: scale(1.05) translate3d(0, -1.5%, 0);
   }
   100% {
-    --breath-shift: 0%;
-    background-size: 140% 90%, 118% 68%, 100% 100%;
-    opacity: 0.88;
+    background-position: 8% 10%, 92% 4%, center;
+    background-size: 1180px 800px, 1360px 980px, 176% 176%;
+    transform: scale(1.01) translate3d(0, 1%, 0);
   }
 }
 
-@keyframes gradientFlow {
+@keyframes auroraRotate {
   0% {
-    --breath-tilt: -4%;
+    --gradient-angle: 60deg;
   }
   50% {
-    --breath-tilt: 4%;
+    --gradient-angle: 320deg;
   }
   100% {
-    --breath-tilt: -4%;
+    --gradient-angle: 420deg;
   }
 }
 
