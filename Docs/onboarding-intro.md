@@ -1,5 +1,11 @@
 # Intro Journey · React + Clerk
 
+## Acceso rápido
+
+- **Ruta local**: `http://localhost:3000/intro-journey`.
+- **Ruta en producción/staging**: agrega `/intro-journey` al dominio correspondiente (ej. `https://app.innerbloom.ai/intro-journey`).
+- Requiere sesión de Clerk; si ya estás logueado irás directo al selector de modo.
+
 ## Flujo general
 
 1. **Step 0 – Clerk Gate**
