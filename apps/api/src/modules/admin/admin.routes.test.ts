@@ -73,11 +73,18 @@ describe('Admin routes', () => {
         return { rows: [] };
       }
 
-      if (sql.includes('FROM v_user_xp_by_pillar')) {
-        return { rows: [] };
-      }
+      const isPillarAggregateQuery =
+        sql.includes('SUM(COALESCE(dl.quantity') && sql.includes('GROUP BY cp.code');
 
-      if (sql.includes('FROM v_user_pillars_week')) {
+      if (isPillarAggregateQuery) {
+        if (sql.includes('AS xp_total')) {
+          return { rows: [{ pillar_code: 'BODY', pillar_name: 'Body', xp_total: '25' }] };
+        }
+
+        if (sql.includes('AS xp_week')) {
+          return { rows: [{ pillar_code: 'BODY', pillar_name: 'Body', xp_week: '10' }] };
+        }
+
         return { rows: [] };
       }
 
