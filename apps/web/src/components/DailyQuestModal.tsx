@@ -47,42 +47,66 @@ const modalVariants = {
   visible: { opacity: 1, scale: 1 },
 };
 
-const HARD_CELEBRATION_DURATION_MS = 750;
+const HARD_CELEBRATION_DURATION_MS = 900;
 
-const EPIC_PARTICLE_OFFSETS = [
-  { x: 0, y: -18 },
-  { x: -8, y: -26 },
-  { x: 8, y: -26 },
-  { x: -14, y: -18 },
-  { x: 14, y: -18 },
-  { x: 0, y: -34 },
+const CELEBRATION_PANEL_DURATION_MS = 1800;
+
+const CELEBRATION_MESSAGES = [
+  'Registro guardado. ¡Arrancaste con todo! 💥 Seguimos sumando XP hoy.',
+  'Listo el diario de ayer. ¡Hoy más fuerte! 💪✨',
+  '¡Bien! Emoción registrada y tareas checkeadas. 🚀 A por el día.',
 ] as const;
 
-const hardGlowVariants = {
-  initial: { opacity: 0, scale: 0.95, boxShadow: '0 0 0 rgba(251,191,36,0)' },
-  animate: {
-    opacity: [0, 0.85, 0],
-    scale: [0.95, 1.05, 1],
-    boxShadow: [
-      '0 0 0 rgba(251,191,36,0)',
-      '0 0 32px rgba(251,191,36,0.35)',
-      '0 0 0 rgba(251,191,36,0)',
-    ],
-  },
-  exit: { opacity: 0, scale: 1 },
+const CONFETTI_COLORS = ['#38bdf8', '#a855f7', '#fbbf24', '#34d399', '#f97316'];
+
+type ParticleConfig = {
+  id: number;
+  delay: number;
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  rotation?: number;
 };
 
-const particleVariants = {
-  initial: { opacity: 0, scale: 0.6, x: 0, y: 0 },
-  animate: (index: number) => ({
-    opacity: [0, 1, 0],
-    scale: [0.6, 1, 0.5],
-    x: EPIC_PARTICLE_OFFSETS[index]?.x ?? 0,
-    y: EPIC_PARTICLE_OFFSETS[index]?.y ?? -24,
-    transition: { duration: HARD_CELEBRATION_DURATION_MS / 1000, ease: 'easeOut' },
-  }),
-  exit: { opacity: 0 },
+type HardCelebration = { taskId: string; id: number; particles: ParticleConfig[] };
+
+type CelebrationOverlayState = {
+  id: number;
+  message: string;
+  confetti: ParticleConfig[];
+  xpDelta: number;
 };
+
+function randomBetween(min: number, max: number): number {
+  return Math.random() * (max - min) + min;
+}
+
+function generateHardParticles(): ParticleConfig[] {
+  const count = Math.floor(Math.random() * 5) + 6; // 6 - 10
+  return Array.from({ length: count }, (_, index) => ({
+    id: index,
+    delay: index * 0.02 + randomBetween(0, 0.02),
+    x: randomBetween(-28, 28),
+    y: randomBetween(-56, -32),
+    size: randomBetween(6, 10),
+    color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
+    rotation: randomBetween(-24, 24),
+  }));
+}
+
+function generateConfettiPieces(): ParticleConfig[] {
+  const count = Math.floor(Math.random() * 11) + 10; // 10 - 20
+  return Array.from({ length: count }, (_, index) => ({
+    id: index,
+    delay: randomBetween(0, 0.12) + index * 0.015,
+    x: randomBetween(-160, 160),
+    y: randomBetween(60, 140),
+    size: randomBetween(10, 18),
+    color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
+    rotation: randomBetween(-180, 180),
+  }));
+}
 
 function classNames(...values: Array<string | false | null | undefined>): string {
   return values.filter(Boolean).join(' ');
@@ -107,7 +131,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
     checkBackground: 'bg-sky-500/20',
     checkBorder: 'border-sky-300/60',
     checkText: 'text-sky-100',
-    taskGlow: 'ring-1 ring-sky-400/40 shadow-[0_0_22px_rgba(56,189,248,0.25)]',
+    taskGlow: 'ring-2 ring-sky-400/50 shadow-[0_0_28px_rgba(56,189,248,0.28)]',
   },
   happy: {
     chipInactive:
@@ -117,7 +141,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
     checkBackground: 'bg-amber-500/20',
     checkBorder: 'border-amber-300/60',
     checkText: 'text-amber-100',
-    taskGlow: 'ring-1 ring-amber-400/40 shadow-[0_0_22px_rgba(251,191,36,0.25)]',
+    taskGlow: 'ring-2 ring-amber-400/50 shadow-[0_0_28px_rgba(251,191,36,0.32)]',
   },
   motivation: {
     chipInactive:
@@ -127,7 +151,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
     checkBackground: 'bg-emerald-500/20',
     checkBorder: 'border-emerald-300/60',
     checkText: 'text-emerald-100',
-    taskGlow: 'ring-1 ring-emerald-400/40 shadow-[0_0_22px_rgba(16,185,129,0.25)]',
+    taskGlow: 'ring-2 ring-emerald-400/50 shadow-[0_0_28px_rgba(16,185,129,0.3)]',
   },
   sad: {
     chipInactive:
@@ -137,7 +161,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
     checkBackground: 'bg-indigo-500/20',
     checkBorder: 'border-indigo-300/60',
     checkText: 'text-indigo-100',
-    taskGlow: 'ring-1 ring-indigo-400/40 shadow-[0_0_22px_rgba(99,102,241,0.25)]',
+    taskGlow: 'ring-2 ring-indigo-400/50 shadow-[0_0_28px_rgba(99,102,241,0.3)]',
   },
   anxiety: {
     chipInactive:
@@ -147,7 +171,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
     checkBackground: 'bg-rose-500/20',
     checkBorder: 'border-rose-300/60',
     checkText: 'text-rose-100',
-    taskGlow: 'ring-1 ring-rose-400/40 shadow-[0_0_22px_rgba(244,63,94,0.25)]',
+    taskGlow: 'ring-2 ring-rose-400/50 shadow-[0_0_28px_rgba(244,63,94,0.32)]',
   },
   frustration: {
     chipInactive:
@@ -157,7 +181,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
     checkBackground: 'bg-orange-500/20',
     checkBorder: 'border-orange-300/60',
     checkText: 'text-orange-100',
-    taskGlow: 'ring-1 ring-orange-400/40 shadow-[0_0_22px_rgba(249,115,22,0.25)]',
+    taskGlow: 'ring-2 ring-orange-400/50 shadow-[0_0_28px_rgba(249,115,22,0.32)]',
   },
   tired: {
     chipInactive:
@@ -167,7 +191,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
     checkBackground: 'bg-violet-500/20',
     checkBorder: 'border-violet-300/60',
     checkText: 'text-violet-100',
-    taskGlow: 'ring-1 ring-violet-400/40 shadow-[0_0_22px_rgba(139,92,246,0.25)]',
+    taskGlow: 'ring-2 ring-violet-400/50 shadow-[0_0_28px_rgba(139,92,246,0.3)]',
   },
 };
 
@@ -178,7 +202,7 @@ const DEFAULT_EMOTION_THEME: EmotionTheme = {
   checkBackground: 'bg-primary/20',
   checkBorder: 'border-primary/60',
   checkText: 'text-white',
-  taskGlow: 'ring-1 ring-primary/40 shadow-[0_0_22px_rgba(129,140,248,0.25)]',
+  taskGlow: 'ring-2 ring-primary/50 shadow-[0_0_28px_rgba(129,140,248,0.3)]',
 };
 
 type PillarTheme = {
@@ -190,19 +214,19 @@ type PillarTheme = {
 
 const PILLAR_THEME_MAP: Record<string, PillarTheme> = {
   BODY: {
-    taskGlow: 'ring-1 ring-emerald-400/40 shadow-[0_0_20px_rgba(16,185,129,0.22)]',
+    taskGlow: 'ring-2 ring-emerald-400/50 shadow-[0_0_28px_rgba(16,185,129,0.32)]',
     checkBackground: 'bg-emerald-500/15',
     checkBorder: 'border-emerald-300/50',
     checkText: 'text-emerald-100',
   },
   MIND: {
-    taskGlow: 'ring-1 ring-sky-400/40 shadow-[0_0_20px_rgba(56,189,248,0.22)]',
+    taskGlow: 'ring-2 ring-sky-400/50 shadow-[0_0_28px_rgba(56,189,248,0.3)]',
     checkBackground: 'bg-sky-500/15',
     checkBorder: 'border-sky-300/50',
     checkText: 'text-sky-100',
   },
   SOUL: {
-    taskGlow: 'ring-1 ring-violet-400/40 shadow-[0_0_20px_rgba(139,92,246,0.22)]',
+    taskGlow: 'ring-2 ring-violet-400/50 shadow-[0_0_28px_rgba(139,92,246,0.3)]',
     checkBackground: 'bg-violet-500/15',
     checkBorder: 'border-violet-300/50',
     checkText: 'text-violet-100',
@@ -210,7 +234,7 @@ const PILLAR_THEME_MAP: Record<string, PillarTheme> = {
 };
 
 const DEFAULT_PILLAR_THEME: PillarTheme = {
-  taskGlow: 'ring-1 ring-indigo-400/40 shadow-[0_0_20px_rgba(99,102,241,0.22)]',
+  taskGlow: 'ring-2 ring-indigo-400/50 shadow-[0_0_28px_rgba(99,102,241,0.3)]',
   checkBackground: 'bg-indigo-500/15',
   checkBorder: 'border-indigo-300/50',
   checkText: 'text-indigo-100',
@@ -256,7 +280,10 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
   const [toast, setToast] = useState<ToastState | null>(null);
   const [pendingSubmission, setPendingSubmission] = useState<PendingSubmission | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hardCelebrations, setHardCelebrations] = useState<Array<{ taskId: string; id: number }>>([]);
+  const [hardCelebrations, setHardCelebrations] = useState<HardCelebration[]>([]);
+  const [successCelebration, setSuccessCelebration] = useState<CelebrationOverlayState | null>(null);
+  const [srAnnouncement, setSrAnnouncement] = useState('');
+  const [xpBubble, setXpBubble] = useState<{ id: number; delta: number } | null>(null);
 
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -264,6 +291,10 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const shouldRestoreFocusRef = useRef(false);
   const celebrationTimeoutsRef = useRef<number[]>([]);
+  const successCelebrationTimeoutRef = useRef<number | null>(null);
+  const successCelebrationCloseTimeoutRef = useRef<number | null>(null);
+  const xpBubbleTimeoutRef = useRef<number | null>(null);
+  const xpPreviousRef = useRef(0);
 
   const {
     data: status,
@@ -328,6 +359,18 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
         clearTimeout(timeoutId);
       }
       celebrationTimeoutsRef.current = [];
+      if (successCelebrationTimeoutRef.current) {
+        clearTimeout(successCelebrationTimeoutRef.current);
+        successCelebrationTimeoutRef.current = null;
+      }
+      if (successCelebrationCloseTimeoutRef.current) {
+        clearTimeout(successCelebrationCloseTimeoutRef.current);
+        successCelebrationCloseTimeoutRef.current = null;
+      }
+      if (xpBubbleTimeoutRef.current) {
+        clearTimeout(xpBubbleTimeoutRef.current);
+        xpBubbleTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -348,10 +391,60 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
     return new Set(identifiers);
   }, [definition]);
 
+  const xpByTaskId = useMemo(() => {
+    const map = new Map<string, number>();
+    if (!definition) {
+      return map;
+    }
+    for (const pillar of definition.pillars) {
+      for (const task of pillar.tasks) {
+        map.set(task.task_id, task.xp ?? 0);
+      }
+    }
+    return map;
+  }, [definition]);
+
+  const xpSelected = useMemo(() => {
+    return selectedTasks.reduce((total, taskId) => total + (xpByTaskId.get(taskId) ?? 0), 0);
+  }, [selectedTasks, xpByTaskId]);
+
+  useEffect(() => {
+    const previous = xpPreviousRef.current;
+    if (xpSelected > previous) {
+      const delta = xpSelected - previous;
+      setXpBubble({ id: Date.now(), delta });
+      if (xpBubbleTimeoutRef.current && typeof window !== 'undefined') {
+        clearTimeout(xpBubbleTimeoutRef.current);
+      }
+      if (typeof window !== 'undefined') {
+        xpBubbleTimeoutRef.current = window.setTimeout(() => {
+          setXpBubble(null);
+          xpBubbleTimeoutRef.current = null;
+        }, 720);
+      }
+    }
+    if (xpSelected !== previous) {
+      xpPreviousRef.current = xpSelected;
+    }
+  }, [xpSelected]);
+
+  useEffect(() => {
+    if (!srAnnouncement || typeof window === 'undefined') {
+      return;
+    }
+    const timeoutId = window.setTimeout(() => {
+      setSrAnnouncement('');
+    }, 2400);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [srAnnouncement]);
+
   const triggerHardCelebration = useCallback(
     (taskId: string) => {
       const celebrationId = Date.now() + Math.random();
-      setHardCelebrations((current) => [...current, { taskId, id: celebrationId }]);
+      const particles = generateHardParticles();
+      setHardCelebrations((current) => [...current, { taskId, id: celebrationId, particles }]);
 
       if (typeof window !== 'undefined') {
         const timeoutId = window.setTimeout(() => {
@@ -405,6 +498,16 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       if (options?.snooze) {
         setSnoozed(true);
       }
+      if (successCelebrationTimeoutRef.current) {
+        clearTimeout(successCelebrationTimeoutRef.current);
+        successCelebrationTimeoutRef.current = null;
+      }
+      if (successCelebrationCloseTimeoutRef.current) {
+        clearTimeout(successCelebrationCloseTimeoutRef.current);
+        successCelebrationCloseTimeoutRef.current = null;
+      }
+      setSuccessCelebration(null);
+      setSrAnnouncement('');
       shouldRestoreFocusRef.current = options?.restoreFocus !== false;
       setIsOpen(false);
     },
@@ -562,7 +665,6 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
     setPendingSubmission(snapshot);
     setIsSubmitting(true);
-    closeModal({ restoreFocus: false });
 
     try {
       const response = await submitDailyQuest({
@@ -574,11 +676,42 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
       setPendingSubmission(null);
       setIsSubmitting(false);
-      setHasCompletedToday(true);
       setSelectedEmotion(null);
       setSelectedTasks([]);
       setNotes('');
-      pushToast(`+${response.xp_delta} XP añadidos hoy`, 'success');
+      const celebrationId = Date.now();
+      const celebrationMessage =
+        CELEBRATION_MESSAGES[Math.floor(Math.random() * CELEBRATION_MESSAGES.length)];
+      setSuccessCelebration({
+        id: celebrationId,
+        message: celebrationMessage,
+        confetti: generateConfettiPieces(),
+        xpDelta: response.xp_delta,
+      });
+      setSrAnnouncement('Registro guardado con éxito.');
+      if (successCelebrationTimeoutRef.current) {
+        clearTimeout(successCelebrationTimeoutRef.current);
+      }
+      if (successCelebrationCloseTimeoutRef.current) {
+        clearTimeout(successCelebrationCloseTimeoutRef.current);
+      }
+      if (typeof window !== 'undefined') {
+        successCelebrationTimeoutRef.current = window.setTimeout(() => {
+          setSuccessCelebration((current) =>
+            current && current.id === celebrationId ? null : current,
+          );
+          successCelebrationTimeoutRef.current = null;
+          successCelebrationCloseTimeoutRef.current = window.setTimeout(() => {
+            setHasCompletedToday(true);
+            closeModal({ restoreFocus: true });
+            successCelebrationCloseTimeoutRef.current = null;
+          }, 220);
+        }, CELEBRATION_PANEL_DURATION_MS);
+      } else {
+        setSuccessCelebration(null);
+        setHasCompletedToday(true);
+        closeModal({ restoreFocus: true });
+      }
       void reloadStatus();
     } catch (error) {
       console.error('Failed to submit daily quest', error);
@@ -606,6 +739,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
   return (
     <>
+      <div aria-live="polite" role="status" aria-atomic="true" className="sr-only">
+        {srAnnouncement}
+      </div>
       {portalTarget &&
         createPortal(
           <AnimatePresence>
@@ -646,17 +782,17 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                 >
                   <motion.header
                     layout={false}
-                    className="sticky top-[env(safe-area-inset-top)] z-10 flex min-h-12 flex-col justify-center border-b border-white/10 bg-slate-900/95 px-4 py-3 backdrop-blur md:min-h-14 md:py-4"
+                    className="sticky top-[env(safe-area-inset-top)] z-10 flex flex-col justify-center border-b border-white/10 bg-slate-900/95 px-4 py-3 backdrop-blur md:py-4"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/70">Daily Quest</p>
                         <h2 id="daily-quest-title" className="text-lg font-semibold text-white md:text-xl">
-                          Ritual diario
+                          ☀️ Retrospectiva
                         </h2>
-                        <p className="text-[11px] text-white/60 md:text-xs">
-                          Registrá cómo te sentiste y cuál fue la emoción que predominó ayer. Marcá las tasks que
-                          lograste y seguí sumando XP y rachas.
+                        <p className="text-[11px] text-white/65 md:text-xs">
+                          Registrá cómo te sentiste ayer, elegí la emoción que predominó y marcá las tareas logradas.
+                          ¡Seguí sumando XP y rachas!
                         </p>
                       </div>
                       <button
@@ -671,8 +807,11 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                     </div>
                   </motion.header>
 
-                  <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-24 pt-4 md:pb-28" aria-live="polite">
-                    <div className="flex flex-col gap-5 pb-6">
+                  <div
+                    className="flex-1 overflow-y-auto -webkit-overflow-scrolling-touch px-4 pb-28 pt-4"
+                    aria-live="polite"
+                  >
+                    <div className="flex flex-col gap-6 pb-6">
                       {showSkeleton && (
                         <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/60">
                           <div className="h-3 w-24 animate-pulse rounded-full bg-white/10" />
@@ -699,28 +838,51 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                     whileTap={{ scale: 0.94 }}
                                     onClick={() => setSelectedEmotion(option.emotion_id)}
                                     className={classNames(
-                                      'rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+                                      'relative overflow-visible rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
                                       isActive
                                         ? classNames(theme.chipActive, theme.chipShadow)
                                         : theme.chipInactive,
                                     )}
                                     aria-pressed={isActive}
                                   >
-                                    {option.name}
+                                    <span className="relative inline-flex items-center gap-1.5">
+                                      {option.name}
+                                      <AnimatePresence>
+                                        {isActive && (
+                                          <motion.span
+                                            key="sparkle"
+                                            className="pointer-events-none absolute -top-2 -right-3 text-xs text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.65)]"
+                                            initial={{ opacity: 0, scale: 0.6, rotate: -12 }}
+                                            animate={{ opacity: 1, scale: 1.05, rotate: 0 }}
+                                            exit={{ opacity: 0, scale: 0.6, rotate: 12 }}
+                                            transition={{ duration: 0.1, ease: 'easeOut' }}
+                                            aria-hidden="true"
+                                          >
+                                            ✨
+                                          </motion.span>
+                                        )}
+                                      </AnimatePresence>
+                                    </span>
                                   </motion.button>
                                 );
                               })}
                             </div>
                           </section>
 
-                          <section className="flex flex-col gap-3">
-                            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">Checklist del día</h3>
-                            <div className="flex flex-col gap-4">
-                              {definition.pillars.map((pillar) => {
+                          <section className="flex flex-col gap-4">
+                            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/80">Checklist del día</h3>
+                            <div className="flex flex-col">
+                              {definition.pillars.map((pillar, index) => {
                                 const fallbackTheme = resolvePillarTheme(pillar.pillar_code);
+                                const headingMarginClass = index === 0 ? 'mt-4 md:mt-6' : 'mt-6 md:mt-8';
                                 return (
-                                  <div key={pillar.pillar_code} className="flex flex-col gap-3">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+                                  <section key={pillar.pillar_code} className="flex flex-col">
+                                    <h4
+                                      className={classNames(
+                                        'text-base font-semibold tracking-wide uppercase text-white/90 md:text-lg',
+                                        headingMarginClass,
+                                      )}
+                                    >
                                       {pillar.pillar_code === 'BODY'
                                         ? '🫀 Cuerpo (BODY)'
                                         : pillar.pillar_code === 'MIND'
@@ -728,8 +890,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                         : pillar.pillar_code === 'SOUL'
                                         ? '🏵️ Alma (SOUL)'
                                         : pillar.pillar_code}
-                                    </p>
-                                    <div className="flex flex-col gap-2">
+                                    </h4>
+                                    <span className="mt-2 h-1.5 w-16 rounded-full bg-gradient-to-r from-sky-400 via-fuchsia-500 to-amber-400" />
+                                    <div className="mt-3 flex flex-col gap-2">
                                       {pillar.tasks.map((task) => {
                                         const isSelected = selectedTasks.includes(task.task_id);
                                         const theme = selectedEmotionTheme ?? fallbackTheme;
@@ -741,54 +904,89 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                         return (
                                           <motion.label
                                             key={task.task_id}
+                                            whileTap={{ scale: 0.98 }}
                                             className={classNames(
-                                              'group relative flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-4 text-left transition-colors duration-200 hover:bg-white/[0.08]',
-                                              isSelected && theme.taskGlow,
+                                              'group relative flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/5 p-4 text-left transition duration-200 hover:bg-white/[0.07] focus-within:ring-2 focus-within:ring-white/60',
+                                              isSelected && 'bg-white/[0.12] backdrop-blur-sm',
                                             )}
                                           >
+                                            <AnimatePresence>
+                                              {isSelected && (
+                                                <motion.span
+                                                  key="task-halo"
+                                                  className={classNames(
+                                                    'pointer-events-none absolute inset-0 rounded-2xl',
+                                                    theme.taskGlow,
+                                                  )}
+                                                  initial={{ opacity: 0, scale: 0.96 }}
+                                                  animate={{ opacity: 1, scale: 1 }}
+                                                  exit={{ opacity: 0, scale: 1.04 }}
+                                                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                                                />
+                                              )}
+                                            </AnimatePresence>
                                             {isHardTask && (
                                               <AnimatePresence>
                                                 {activeCelebrations.map((entry) => (
-                                                  <motion.span
-                                                    key={`glow-${entry.id}`}
-                                                    className="pointer-events-none absolute inset-0 rounded-2xl border border-amber-300/40"
-                                                    variants={hardGlowVariants}
-                                                    initial="initial"
-                                                    animate="animate"
-                                                    exit="exit"
-                                                    transition={{ duration: HARD_CELEBRATION_DURATION_MS / 1000, ease: 'easeOut' }}
-                                                  />
+                                                  <motion.div
+                                                    key={`hard-badge-${entry.id}`}
+                                                    initial={{ opacity: 0, scale: 0.6, y: 8 }}
+                                                    animate={{ opacity: 1, scale: 1, y: -8 }}
+                                                    exit={{ opacity: 0, y: -24 }}
+                                                    transition={{
+                                                      type: 'spring',
+                                                      stiffness: 260,
+                                                      damping: 22,
+                                                      duration: 0.6,
+                                                    }}
+                                                    className="pointer-events-none absolute right-3 top-3 rounded-lg px-2 py-1 text-[11px] font-semibold text-amber-200 shadow-[0_12px_40px_rgba(251,191,36,0.25)] ring-1 ring-amber-400/40"
+                                                    style={{ backgroundColor: 'rgba(251, 191, 36, 0.18)' }}
+                                                  >
+                                                    HARD · +{task.xp} XP
+                                                  </motion.div>
                                                 ))}
                                               </AnimatePresence>
                                             )}
                                             {isHardTask && (
                                               <AnimatePresence>
                                                 {activeCelebrations.map((entry) => (
-                                                  <motion.span
-                                                    key={`burst-${entry.id}`}
-                                                    className="pointer-events-none absolute left-5 top-1 h-0 w-0"
+                                                  <motion.div
+                                                    key={`hard-particles-${entry.id}`}
+                                                    className="pointer-events-none absolute inset-0 z-[3]"
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
                                                     exit={{ opacity: 0 }}
-                                                    transition={{ duration: 0.2 }}
+                                                    transition={{ duration: 0.12 }}
                                                   >
-                                                    {EPIC_PARTICLE_OFFSETS.map((_, index) => (
+                                                    {entry.particles.map((particle) => (
                                                       <motion.span
-                                                        // eslint-disable-next-line react/no-array-index-key
-                                                        key={index}
-                                                        className="absolute h-2 w-2 rounded-full bg-amber-200/90"
-                                                        variants={particleVariants}
-                                                        initial="initial"
-                                                        animate="animate"
-                                                        exit="exit"
-                                                        custom={index}
+                                                        key={particle.id}
+                                                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                                                        style={{
+                                                          width: particle.size,
+                                                          height: particle.size,
+                                                          backgroundColor: particle.color,
+                                                        }}
+                                                        initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                                                        animate={{
+                                                          opacity: [0, 1, 0],
+                                                          scale: [0, 1.2, 0.8],
+                                                          x: particle.x,
+                                                          y: particle.y,
+                                                        }}
+                                                        exit={{ opacity: 0, scale: 0.6, y: particle.y - 12 }}
+                                                        transition={{
+                                                          duration: HARD_CELEBRATION_DURATION_MS / 1000,
+                                                          delay: particle.delay,
+                                                          ease: 'easeOut',
+                                                        }}
                                                       />
                                                     ))}
-                                                  </motion.span>
+                                                  </motion.div>
                                                 ))}
                                               </AnimatePresence>
                                             )}
-                                            <div className="flex items-start gap-3">
+                                            <div className="relative z-[2] flex items-start gap-3">
                                               <motion.span
                                                 className={classNames(
                                                   'flex h-5 w-5 items-center justify-center rounded-full border text-[10px] transition-colors duration-200',
@@ -819,7 +1017,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                         );
                                       })}
                                     </div>
-                                  </div>
+                                  </section>
                                 );
                               })}
                             </div>
@@ -846,12 +1044,32 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                     layout={false}
                     className="sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t border-white/10 bg-slate-900/90 px-4 py-2 backdrop-blur md:py-3"
                   >
-                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                      <div className="flex w-full gap-2 md:w-auto">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <div className="relative text-white">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">XP ganado</p>
+                        <p className="mt-1 text-2xl font-bold md:text-3xl">
+                          XP ganado: <span className="text-amber-200 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]">{xpSelected}</span>
+                        </p>
+                        <AnimatePresence>
+                          {xpBubble && (
+                            <motion.span
+                              key={xpBubble.id}
+                              className="pointer-events-none absolute -top-2 right-0 rounded-full bg-amber-500/30 px-2 py-1 text-[11px] font-semibold text-amber-100 shadow-[0_8px_22px_rgba(251,191,36,0.35)]"
+                              initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                              animate={{ opacity: 1, y: -6, scale: 1 }}
+                              exit={{ opacity: 0, y: -18, scale: 0.85 }}
+                              transition={{ duration: 0.36, ease: 'easeOut' }}
+                            >
+                              +{xpBubble.delta} XP
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                      <div className="grid w-full grid-cols-2 gap-2 md:w-auto md:grid-cols-[auto_auto]">
                         <button
                           type="button"
                           onClick={handleSnooze}
-                          className="h-10 flex-1 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white/70 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:h-11 md:flex-none md:px-6"
+                          className="h-10 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white/70 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:h-11 md:px-6"
                         >
                           Más tarde
                         </button>
@@ -861,21 +1079,68 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           disabled={isConfirmDisabled}
                           aria-describedby={showEmotionHelper ? helperTextId : undefined}
                           className={classNames(
-                            'inline-flex h-10 flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-sm font-semibold text-white shadow-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-50 md:h-11 md:flex-none md:px-6',
-                            !isConfirmDisabled && 'hover:from-indigo-400 hover:to-fuchsia-500',
+                            'inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-sky-500 via-fuchsia-500 to-amber-400 text-sm font-semibold text-white shadow-[0_12px_40px_rgba(59,130,246,0.35)] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-60 md:h-11 md:px-6',
+                            !isConfirmDisabled && 'hover:from-sky-400 hover:via-fuchsia-500 hover:to-amber-300',
                             isSubmitting && 'cursor-wait',
                           )}
                         >
-                          {isSubmitting ? 'Guardando…' : 'Confirmar Daily Quest'}
+                          {isSubmitting ? 'Guardando…' : 'Confirmar'}
                         </button>
                       </div>
-                      {showEmotionHelper && (
-                        <p id={helperTextId} className="text-[11px] text-rose-200/80 md:text-right">
-                          Seleccioná una emoción para confirmar.
-                        </p>
-                      )}
                     </div>
+                    {showEmotionHelper && (
+                      <p id={helperTextId} className="text-[11px] text-rose-200/80 md:text-right">
+                        Seleccioná una emoción para confirmar.
+                      </p>
+                    )}
                   </motion.footer>
+                  <AnimatePresence>
+                    {successCelebration && (
+                      <motion.div
+                        key={successCelebration.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.24, ease: 'easeOut' }}
+                        className="absolute inset-0 z-40 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm"
+                      >
+                        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                          {successCelebration.confetti.map((piece) => (
+                            <motion.span
+                              key={piece.id}
+                              className="absolute left-1/2 top-1/2 rounded-full"
+                              style={{
+                                width: piece.size,
+                                height: piece.size,
+                                backgroundColor: piece.color,
+                              }}
+                              initial={{ opacity: 0, x: 0, y: -40, rotate: 0 }}
+                              animate={{
+                                opacity: [0, 1, 0],
+                                x: piece.x,
+                                y: piece.y,
+                                rotate: piece.rotation ?? 0,
+                              }}
+                              exit={{ opacity: 0, y: piece.y + 20, rotate: (piece.rotation ?? 0) + 24 }}
+                              transition={{ duration: 1.1, delay: piece.delay, ease: 'easeOut' }}
+                            />
+                          ))}
+                        </div>
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.92 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.96 }}
+                          transition={{ duration: 0.28, ease: 'easeOut' }}
+                          className="relative z-10 mx-4 flex max-w-sm flex-col items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-6 py-5 text-center text-sm font-semibold text-white shadow-[0_24px_80px_rgba(56,189,248,0.35)]"
+                        >
+                          <span className="text-base md:text-lg">{successCelebration.message}</span>
+                          <span className="rounded-full bg-emerald-500/25 px-3 py-1 text-[11px] font-semibold text-emerald-100 ring-1 ring-emerald-400/40">
+                            +{successCelebration.xpDelta} XP
+                          </span>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               </motion.div>
             )}
