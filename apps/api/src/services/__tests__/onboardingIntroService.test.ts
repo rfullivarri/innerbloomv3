@@ -84,7 +84,7 @@ beforeEach(() => {
 type ExpectedXp = { total: number; body: number; mind: number; soul: number };
 
 function createSubmitExpectations(options: {
-  xpBonusRowCount: number;
+  xpBonusRowCounts: [number, number, number];
   payload?: OnboardingIntroPayload;
   expectedXp?: ExpectedXp;
 }) {
@@ -109,7 +109,65 @@ function createSubmitExpectations(options: {
   const metaJson = JSON.stringify(payload.meta);
   const serializedPayload = JSON.stringify(payload);
 
-  const expectations: Expectation[] = [
+  const foundationPayloads = [
+    {
+      pillarId: pillars.BODY,
+      items: payload.data.foundations.body,
+      openText: payload.data.foundations.bodyOpen,
+    },
+    {
+      pillarId: pillars.MIND,
+      items: payload.data.foundations.mind,
+      openText: payload.data.foundations.mindOpen,
+    },
+    {
+      pillarId: pillars.SOUL,
+      items: payload.data.foundations.soul,
+      openText: payload.data.foundations.soulOpen,
+    },
+  ] as const;
+
+  const foundationExpectations: Expectation[] = foundationPayloads.map((foundation) => ({
+    match: (sql) => sql.includes('INSERT INTO onboarding_foundations'),
+    handle: (_sql, params) => {
+      expect(params).toEqual([
+        sessionId,
+        foundation.pillarId,
+        foundation.items,
+        foundation.openText,
+      ]);
+      return { rowCount: 1 };
+    },
+  }));
+
+  const xpBonusPayloads = [
+    { pillarId: pillars.BODY, amount: expectedXp.body },
+    { pillarId: pillars.MIND, amount: expectedXp.mind },
+    { pillarId: pillars.SOUL, amount: expectedXp.soul },
+  ] as const;
+
+  const xpBonusExpectations: Expectation[] = xpBonusPayloads.map((bonus, index) => ({
+    match: (sql) => sql.includes('INSERT INTO xp_bonus'),
+    handle: (_sql, params) => {
+      expect(params).toEqual([
+        userId,
+        bonus.pillarId,
+        bonus.amount,
+        expect.any(String),
+      ]);
+
+      const meta = JSON.parse(params?.[3] as string);
+      expect(meta).toMatchObject({
+        onboarding_session_id: sessionId,
+        ts: payload.ts,
+        client_id: payload.client_id,
+      });
+
+      return { rowCount: options.xpBonusRowCounts[index] };
+    },
+  }));
+
+  return [
     {
       match: (sql) => sql === 'BEGIN',
       handle: () => ({}),
@@ -165,26 +223,7 @@ function createSubmitExpectations(options: {
         return { rowCount: 1 };
       },
     },
-    {
-      match: (sql) => sql.includes('INSERT INTO onboarding_foundations'),
-      handle: (_sql, params) => {
-        expect(params).toEqual([
-          sessionId,
-          pillars.BODY,
-          JSON.stringify(payload.data.foundations.body),
-          payload.data.foundations.bodyOpen,
-          sessionId,
-          pillars.MIND,
-          JSON.stringify(payload.data.foundations.mind),
-          payload.data.foundations.mindOpen,
-          sessionId,
-          pillars.SOUL,
-          JSON.stringify(payload.data.foundations.soul),
-          payload.data.foundations.soulOpen,
-        ]);
-        return { rowCount: 3 };
-      },
-    },
+    ...foundationExpectations,
     {
       match: (sql) => sql === 'UPDATE users SET game_mode_id = $2 WHERE user_id = $1',
       handle: (_sql, params) => {
@@ -192,46 +231,17 @@ function createSubmitExpectations(options: {
         return { rowCount: 1 };
       },
     },
-    {
-      match: (sql) => sql.includes('INSERT INTO xp_bonus'),
-      handle: (_sql, params) => {
-        expect(params).toEqual([
-          userId,
-          pillars.BODY,
-          expectedXp.body,
-          expect.any(String),
-          userId,
-          pillars.MIND,
-          expectedXp.mind,
-          expect.any(String),
-          userId,
-          pillars.SOUL,
-          expectedXp.soul,
-          expect.any(String),
-        ]);
-
-        const meta = JSON.parse(params?.[3] as string);
-        expect(meta).toMatchObject({
-          onboarding_session_id: sessionId,
-          ts: payload.ts,
-          client_id: payload.client_id,
-        });
-
-        return { rowCount: options.xpBonusRowCount };
-      },
-    },
+    ...xpBonusExpectations,
     {
       match: (sql) => sql === 'COMMIT',
       handle: () => ({}),
     },
   ];
-
-  return expectations;
 }
 
 describe('submitOnboardingIntro', () => {
   it('persists onboarding data and awards XP when inserts succeed', async () => {
-    const expectations = createSubmitExpectations({ xpBonusRowCount: 3 });
+    const expectations = createSubmitExpectations({ xpBonusRowCounts: [1, 1, 1] });
 
     mockClient.query.mockImplementation(async (sql, params) => {
       const expectation = expectations.shift();
@@ -248,7 +258,7 @@ describe('submitOnboardingIntro', () => {
   });
 
   it('returns awarded=false when XP bonus rows already exist', async () => {
-    const expectations = createSubmitExpectations({ xpBonusRowCount: 0 });
+    const expectations = createSubmitExpectations({ xpBonusRowCounts: [0, 0, 0] });
 
     mockClient.query.mockImplementation(async (sql, params) => {
       const expectation = expectations.shift();
@@ -276,7 +286,7 @@ describe('submitOnboardingIntro', () => {
     };
 
     const expectations = createSubmitExpectations({
-      xpBonusRowCount: 3,
+      xpBonusRowCounts: [1, 1, 1],
       payload,
       expectedXp: { total: 111, body: 37, mind: 37, soul: 37 },
     });

@@ -8,29 +8,20 @@ const SELECT_GAME_MODE_SQL = 'SELECT game_mode_id FROM cat_game_mode WHERE code 
 const SELECT_PILLARS_SQL =
   "SELECT pillar_id, code FROM cat_pillar WHERE code = ANY($1::text[])";
 const UPSERT_SESSION_SQL = `
-  INSERT INTO onboarding_session (
-    user_id,
-    client_id,
-    game_mode_id,
-    xp_total,
-    xp_body,
-    xp_mind,
-    xp_soul,
-    email,
-    meta
-  )
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
-  ON CONFLICT (user_id, client_id) DO UPDATE
-    SET
-      game_mode_id = EXCLUDED.game_mode_id,
-      xp_total = EXCLUDED.xp_total,
-      xp_body = EXCLUDED.xp_body,
-      xp_mind = EXCLUDED.xp_mind,
-      xp_soul = EXCLUDED.xp_soul,
-      email = EXCLUDED.email,
-      meta = EXCLUDED.meta,
-      updated_at = NOW()
-  RETURNING onboarding_session_id
+INSERT INTO onboarding_session
+  (user_id, client_id, game_mode_id, xp_total, xp_body, xp_mind, xp_soul, email, meta)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)
+ON CONFLICT (user_id, client_id)
+DO UPDATE SET
+  game_mode_id = EXCLUDED.game_mode_id,
+  xp_total     = EXCLUDED.xp_total,
+  xp_body      = EXCLUDED.xp_body,
+  xp_mind      = EXCLUDED.xp_mind,
+  xp_soul      = EXCLUDED.xp_soul,
+  email        = EXCLUDED.email,
+  meta         = EXCLUDED.meta,
+  updated_at   = now()
+RETURNING onboarding_session_id;
 `;
 const UPSERT_ANSWERS_SQL = `
   INSERT INTO onboarding_answers (onboarding_session_id, payload)
@@ -39,35 +30,21 @@ const UPSERT_ANSWERS_SQL = `
     SET payload = EXCLUDED.payload
 `;
 const UPSERT_FOUNDATIONS_SQL = `
-  INSERT INTO onboarding_foundations (
-    onboarding_session_id,
-    pillar_id,
-    items,
-    open_text
-  )
-  VALUES
-    ($1, $2, $3::jsonb, $4),
-    ($5, $6, $7::jsonb, $8),
-    ($9, $10, $11::jsonb, $12)
-  ON CONFLICT (onboarding_session_id, pillar_id) DO UPDATE
-    SET items = EXCLUDED.items,
-        open_text = EXCLUDED.open_text
+INSERT INTO onboarding_foundations
+  (onboarding_session_id, pillar_id, items, open_text)
+VALUES ($1,$2,$3,$4)
+ON CONFLICT (onboarding_session_id, pillar_id)
+DO UPDATE SET
+  items     = EXCLUDED.items,
+  open_text = EXCLUDED.open_text;
 `;
 const UPDATE_USER_GAME_MODE_SQL =
   'UPDATE users SET game_mode_id = $2 WHERE user_id = $1';
 const INSERT_XP_BONUS_SQL = `
-  INSERT INTO xp_bonus (
-    user_id,
-    pillar_id,
-    source,
-    amount,
-    meta
-  )
-  VALUES
-    ($1, $2, 'onboarding', $3, $4::jsonb),
-    ($5, $6, 'onboarding', $7, $8::jsonb),
-    ($9, $10, 'onboarding', $11, $12::jsonb)
-  ON CONFLICT (user_id, source, pillar_id) DO NOTHING
+INSERT INTO xp_bonus
+  (user_id, pillar_id, source, amount, meta)
+VALUES ($1,$2,'onboarding',$3,$4::jsonb)
+ON CONFLICT (user_id, source, pillar_id) DO NOTHING;
 `;
 const SELECT_LATEST_SESSION_SQL = `
   SELECT
@@ -311,20 +288,27 @@ async function upsertFoundations(
     throw new HttpError(409, 'missing_pillar', 'Required pillars are not configured');
   }
 
-  await client.query(UPSERT_FOUNDATIONS_SQL, [
-    sessionId,
-    bodyPillarId,
-    JSON.stringify(foundations.body),
-    foundations.bodyOpen,
-    sessionId,
-    mindPillarId,
-    JSON.stringify(foundations.mind),
-    foundations.mindOpen,
-    sessionId,
-    soulPillarId,
-    JSON.stringify(foundations.soul),
-    foundations.soulOpen,
-  ]);
+  const foundationRows = [
+    {
+      pillarId: bodyPillarId,
+      items: foundations.body,
+      openText: foundations.bodyOpen,
+    },
+    {
+      pillarId: mindPillarId,
+      items: foundations.mind,
+      openText: foundations.mindOpen,
+    },
+    {
+      pillarId: soulPillarId,
+      items: foundations.soul,
+      openText: foundations.soulOpen,
+    },
+  ];
+
+  for (const { pillarId, items, openText } of foundationRows) {
+    await client.query(UPSERT_FOUNDATIONS_SQL, [sessionId, pillarId, items, openText]);
+  }
 }
 
 async function insertXpBonus(
@@ -351,22 +335,26 @@ async function insertXpBonus(
   };
   const metaJson = JSON.stringify(xpMeta);
 
-  const result = await client.query(INSERT_XP_BONUS_SQL, [
-    userId,
-    bodyPillarId,
-    xp.body,
-    metaJson,
-    userId,
-    mindPillarId,
-    xp.mind,
-    metaJson,
-    userId,
-    soulPillarId,
-    xp.soul,
-    metaJson,
-  ]);
+  const xpBonuses = [
+    { pillarId: bodyPillarId, amount: xp.body },
+    { pillarId: mindPillarId, amount: xp.mind },
+    { pillarId: soulPillarId, amount: xp.soul },
+  ];
 
-  return (result.rowCount ?? 0) > 0;
+  let inserted = 0;
+
+  for (const bonus of xpBonuses) {
+    const result = await client.query(INSERT_XP_BONUS_SQL, [
+      userId,
+      bonus.pillarId,
+      bonus.amount,
+      metaJson,
+    ]);
+
+    inserted += result.rowCount ?? 0;
+  }
+
+  return inserted > 0;
 }
 
 function normalizeXp(xpRaw: OnboardingIntroPayload['xp'] | undefined): NormalizedXp {
