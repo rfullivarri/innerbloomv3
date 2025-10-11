@@ -34,7 +34,7 @@ describe('getUserStreakPanel', () => {
     process.env.SHOW_STREAKS_PANEL = 'true';
   });
 
-  it('builds streak summaries including top streaks for the requested pillar', async () => {
+  it('builds streak summaries for the requested pillar', async () => {
     const req = {
       params: { id: '4a6f8b1e-12f0-4a22-8e8a-7cbf8250a49d' },
       query: { pillar: 'Body', range: 'month', mode: 'flow' },
@@ -68,12 +68,84 @@ describe('getUserStreakPanel', () => {
 
     expect(mockEnsureUserExists).toHaveBeenCalledWith('4a6f8b1e-12f0-4a22-8e8a-7cbf8250a49d');
     expect(mockQuery).toHaveBeenCalledTimes(3);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        topStreaks: expect.arrayContaining([
-          expect.objectContaining({ id: 'task-1', name: 'Push Ups' }),
-        ]),
-      }),
+    const payload = res.json.mock.calls[0][0];
+    expect(payload.tasks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'task-1', name: 'Push Ups', stat: 'Strength' }),
+      ]),
     );
+    expect(Array.isArray(payload.topStreaks)).toBe(true);
+  });
+
+  it('counts consecutive daily logs to build streakDays', async () => {
+    const req = {
+      params: { id: '00000000-0000-0000-0000-000000000001' },
+      query: { pillar: 'Body', range: 'week', mode: 'flow' },
+    } as unknown as Request;
+    const res = createMockResponse();
+
+    mockEnsureUserExists.mockResolvedValue(undefined);
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ timezone: 'UTC', today: '2024-02-10' }] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: 'task-1',
+            task: 'Push Ups',
+            xp_base: '5',
+            trait_name: 'Strength',
+            trait_code: 'STR',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        rows: [
+          { task_id: 'task-1', date: '2024-02-08', count: '3' },
+          { task_id: 'task-1', date: '2024-02-09', count: '3' },
+          { task_id: 'task-1', date: '2024-02-10', count: '3' },
+        ],
+      });
+
+    await getUserStreakPanel(req, res, vi.fn());
+
+    const payload = res.json.mock.calls[0][0];
+    expect(payload.tasks[0]?.streakDays).toBe(3);
+    expect(payload.topStreaks[0]?.streakDays).toBe(3);
+  });
+
+  it('resets the streak when a day is missed even if previous weeks met the tier', async () => {
+    const req = {
+      params: { id: '00000000-0000-0000-0000-000000000002' },
+      query: { pillar: 'Body', range: 'week', mode: 'flow' },
+    } as unknown as Request;
+    const res = createMockResponse();
+
+    mockEnsureUserExists.mockResolvedValue(undefined);
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ timezone: 'UTC', today: '2024-02-10' }] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: 'task-1',
+            task: 'Push Ups',
+            xp_base: '5',
+            trait_name: 'Strength',
+            trait_code: 'STR',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        rows: [
+          { task_id: 'task-1', date: '2024-02-07', count: '3' },
+          { task_id: 'task-1', date: '2024-02-08', count: '3' },
+          { task_id: 'task-1', date: '2024-02-10', count: '3' },
+        ],
+      });
+
+    await getUserStreakPanel(req, res, vi.fn());
+
+    const payload = res.json.mock.calls[0][0];
+    expect(payload.tasks[0]?.streakDays).toBe(1);
+    expect(payload.topStreaks).toEqual([]);
   });
 });
