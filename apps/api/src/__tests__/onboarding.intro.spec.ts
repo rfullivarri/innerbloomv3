@@ -136,6 +136,7 @@ describe('POST /api/onboarding/intro', () => {
     });
 
     const { client_id: _clientId, ...invalidPayload } = createPayload();
+    void _clientId;
 
     const response = await request(app)
       .post('/api/onboarding/intro')

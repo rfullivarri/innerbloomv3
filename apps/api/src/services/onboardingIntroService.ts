@@ -357,6 +357,8 @@ function sanitizeAnswersPayload(payload: unknown): unknown {
   }
 
   const { email: _email, meta: _meta, ...rest } = payload as Record<string, unknown>;
+  void _email;
+  void _meta;
 
   return rest;
 }
