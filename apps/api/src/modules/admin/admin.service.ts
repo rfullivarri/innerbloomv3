@@ -91,6 +91,13 @@ type TotalXpRow = {
 
 type PillarMetricRow = Record<string, unknown>;
 
+type PillarAggregateRow = {
+  pillar_code: string | null;
+  pillar_name: string | null;
+  xp_total?: string | number | null;
+  xp_week?: string | number | null;
+};
+
 type EmotionRow = {
   date: string | Date;
   emotion: string | null;
@@ -535,6 +542,40 @@ function normalizeEmotionTimeline(rows: EmotionRow[]) {
   return { last7, last30, top3 };
 }
 
+async function fetchPillarMetrics(
+  userId: string,
+  options: { days?: number } = {},
+): Promise<PillarMetricRow[]> {
+  const params: unknown[] = [userId];
+  const hasWindow = typeof options.days === 'number' && Number.isFinite(options.days);
+  const alias = hasWindow ? 'xp_week' : 'xp_total';
+  let dateClause = '';
+
+  if (hasWindow) {
+    const safeDays = Math.max(0, Math.floor(options.days as number));
+    params.push(safeDays);
+    const index = params.length;
+    dateClause = `AND dl.date >= (CURRENT_DATE - ($${index}::int) * INTERVAL '1 day')`;
+  }
+
+  const result = await pool.query<PillarAggregateRow>(
+    `SELECT cp.code AS pillar_code,
+            cp.name AS pillar_name,
+            SUM(COALESCE(dl.quantity, 1) * COALESCE(cd.xp_base, 0)) AS ${alias}
+       FROM daily_log dl
+       JOIN tasks t ON t.task_id = dl.task_id
+  LEFT JOIN cat_pillar cp ON cp.pillar_id = t.pillar_id
+  LEFT JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
+      WHERE dl.user_id = $1
+        ${dateClause}
+   GROUP BY cp.code, cp.name
+   ORDER BY cp.code NULLS LAST`,
+    params,
+  );
+
+  return result.rows.map((row) => ({ ...row })) as PillarMetricRow[];
+}
+
 export async function getUserInsights(userId: string, _query: InsightQuery): Promise<AdminInsights> {
   void _query;
   const profileResult = await pool.query<UserProfileRow>(
@@ -596,19 +637,9 @@ export async function getUserInsights(userId: string, _query: InsightQuery): Pro
   const xpWindows = computeXpWindows(dailyXpMap, today);
   const streaks = computeStreaks(dailyXpMap, today.toISOString().slice(0, 10));
 
-  const [pillarTotalsResult, pillarWeekResult, emotionsResult] = await Promise.all([
-    pool.query<PillarMetricRow>(
-      `SELECT *
-         FROM v_user_xp_by_pillar
-        WHERE user_id = $1`,
-      [userId],
-    ),
-    pool.query<PillarMetricRow>(
-      `SELECT *
-         FROM v_user_pillars_week
-        WHERE user_id = $1`,
-      [userId],
-    ),
+  const [pillarTotalsRows, pillarWeekRows, emotionsResult] = await Promise.all([
+    fetchPillarMetrics(userId),
+    fetchPillarMetrics(userId, { days: 7 }),
     pool.query<EmotionRow>(
       `SELECT el.date,
               COALESCE(ce.code, ce.name) AS emotion
@@ -622,8 +653,8 @@ export async function getUserInsights(userId: string, _query: InsightQuery): Pro
     ),
   ]);
 
-  const xpByPillar = normalizePillarMetrics(pillarTotalsResult.rows ?? [], { preferWeekly: false });
-  const constancy = normalizePillarMetrics(pillarWeekResult.rows ?? [], { preferWeekly: true });
+  const xpByPillar = normalizePillarMetrics(pillarTotalsRows ?? [], { preferWeekly: false });
+  const constancy = normalizePillarMetrics(pillarWeekRows ?? [], { preferWeekly: true });
   const emotions = normalizeEmotionTimeline(emotionsResult.rows ?? []);
 
   return {
