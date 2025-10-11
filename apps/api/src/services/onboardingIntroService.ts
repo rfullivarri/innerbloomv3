@@ -384,9 +384,9 @@ function normalizeXp(xpRaw: OnboardingIntroPayload['xp'] | undefined): Normalize
     return value;
   };
 
-  let xp_body = Math.round(ensureNumber(raw.Body));
-  let xp_mind = Math.round(ensureNumber(raw.Mind));
-  let xp_soul = Math.round(ensureNumber(raw.Soul));
+  const xp_body = Math.round(ensureNumber(raw.Body));
+  const xp_mind = Math.round(ensureNumber(raw.Mind));
+  const xp_soul = Math.round(ensureNumber(raw.Soul));
   let xp_total = Math.round(ensureNumber(raw.total));
   const sum = xp_body + xp_mind + xp_soul;
   if (xp_total !== sum) xp_total = sum;
