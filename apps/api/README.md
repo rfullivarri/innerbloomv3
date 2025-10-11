@@ -5,6 +5,7 @@
 | Name | Required | Description |
 | --- | --- | --- |
 | `DATABASE_URL` | ✅ | PostgreSQL connection string used by the API and scripts. SSL is automatically enabled when `sslmode=require` is present. |
+| `ADMIN_USER_ID` | ➖ | Comma separated list of user identifiers (internal `user_id`, Clerk id or email) that should be treated as admins without touching the database. Useful for local bootstrapping. |
 | `CLERK_WEBHOOK_SECRET` | ✅ | Svix signing secret provided by Clerk for the `user.*` webhook. |
 | `CLERK_JWT_ISSUER` | ✅ | Base URL for Clerk-issued JWTs (e.g. `https://clerk.example.com`). Used to validate the `iss` claim. |
 | `CLERK_JWT_AUDIENCE` | ✅ | Expected audience value for Clerk session tokens. |
@@ -22,6 +23,23 @@ Run the idempotent SQL bundle locally (requires `DATABASE_URL`):
 ```bash
 npm run db:apply
 ```
+
+## Granting admin access
+
+Mark a user as admin directly in the database using the bundled helper script:
+
+```bash
+# match by the internal UUID
+pnpm --filter @innerbloom/api admin:grant --user-id 00000000-0000-4000-8000-000000000001
+
+# match by Clerk id
+pnpm --filter @innerbloom/api admin:grant --clerk-id user_2YqExample
+
+# match by email (case insensitive)
+pnpm --filter @innerbloom/api admin:grant --email admin@example.com
+```
+
+Add `--revoke` to remove admin rights. The command requires `DATABASE_URL` to point at the target database. For quick local testing you can also bypass the database lookup by setting `ADMIN_USER_ID` with any combination of internal ids, Clerk ids, or emails (comma separated). The middleware will treat those identifiers as admins during runtime, even if the database flag is still `false`.
 
 ## Development server
 
