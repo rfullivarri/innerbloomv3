@@ -7,6 +7,9 @@ interface HUDProps {
   stepIndex: number;
   totalSteps: number;
   xp: XP;
+  onRestart?: () => void;
+  onExit?: () => void;
+  onBrandClick?: () => void;
 }
 
 function PillarBar({ label, value }: { label: string; value: number }) {
@@ -29,14 +32,49 @@ function PillarBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function HUD({ mode, stepIndex, totalSteps, xp }: HUDProps) {
+export function HUD({ mode, stepIndex, totalSteps, xp, onRestart, onExit, onBrandClick }: HUDProps) {
   const progress = totalSteps > 1 ? Math.round((stepIndex / (totalSteps - 1)) * 100) : 0;
   const safeProgress = Math.min(100, Math.max(0, progress));
   const currentModeLabel = mode ? MODE_LABELS[mode] : 'Elegí tu Game Mode';
+  const handleBrand = onBrandClick ?? onExit;
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/5 bg-slate-900/80 backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-4 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+          {handleBrand ? (
+            <button
+              type="button"
+              onClick={handleBrand}
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-white/80 transition hover:border-white/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+            >
+              Innerbloom
+            </button>
+          ) : (
+            <p className="text-xs uppercase tracking-[0.35em] text-white/50">Innerbloom</p>
+          )}
+          <div className="flex items-center gap-2">
+            {onRestart ? (
+              <button
+                type="button"
+                onClick={onRestart}
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-white/80 transition hover:border-white/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+              >
+                ↺ Reiniciar journey
+              </button>
+            ) : null}
+            {onExit ? (
+              <button
+                type="button"
+                onClick={onExit}
+                className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-white/80 transition hover:border-white/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+                aria-label="Volver a la landing"
+              >
+                ✕
+              </button>
+            ) : null}
+          </div>
+        </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm uppercase tracking-wide text-white/50">Gamified Journey</p>

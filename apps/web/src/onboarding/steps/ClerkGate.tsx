@@ -15,6 +15,29 @@ const TAB_OPTIONS = [
 
 type TabId = (typeof TAB_OPTIONS)[number]['id'];
 
+const clerkAppearance = {
+  elements: {
+    rootBox: 'w-full',
+    card: 'bg-transparent shadow-none border-0',
+    headerTitle: 'text-white text-2xl font-semibold',
+    headerSubtitle: 'text-white/70 text-sm',
+    socialButtonsBlockButton:
+      'bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-sm font-semibold py-2',
+    formButtonPrimary:
+      'rounded-full bg-gradient-to-r from-sky-400 via-violet-500 to-fuchsia-500 text-sm font-semibold py-2 mt-2 shadow-lg shadow-sky-500/20 hover:from-sky-300 hover:via-violet-400 hover:to-fuchsia-400',
+    formFieldInput:
+      'rounded-xl border border-white/10 bg-white/10 text-white placeholder:text-white/50 focus:border-sky-400 focus:ring-2 focus:ring-sky-400',
+    formFieldLabel: 'text-white/70 text-xs uppercase tracking-[0.2em]',
+    footerActionText: 'text-white/60 text-sm',
+    footerActionLink: 'text-sky-300 hover:text-sky-200 font-semibold',
+    identityPreview: 'bg-white/10 border border-white/10 text-white/80 rounded-xl',
+    formField: 'space-y-1',
+    main: 'gap-4 flex flex-col',
+    dividerRow: 'text-white/40',
+    alert: 'bg-white/10 border-white/10 text-white/80 rounded-xl',
+  },
+} as const;
+
 export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { user } = useUser();
@@ -78,7 +101,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.24, ease: 'easeOut' }}
-      className="mx-auto w-full max-w-3xl rounded-3xl border border-white/5 bg-slate-900/70 p-6 shadow-2xl shadow-sky-500/10"
+      className="mx-auto w-full max-w-3xl rounded-3xl border border-white/5 bg-slate-900/70 p-5 shadow-2xl shadow-sky-500/10 sm:p-6"
     >
       <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
@@ -109,18 +132,10 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="rounded-2xl bg-slate-950/40 p-4"
+              className="rounded-2xl bg-slate-950/40 p-4 sm:p-6"
             >
               <SignUp
-                appearance={{
-                  elements: {
-                    rootBox: 'w-full',
-                    card: 'bg-transparent shadow-none border-0',
-                    headerTitle: 'text-white',
-                    headerSubtitle: 'text-white/70',
-                    socialButtonsBlockButton: 'bg-white text-slate-900 hover:bg-slate-100',
-                  },
-                }}
+                appearance={clerkAppearance}
                 routing="virtual"
                 signInUrl="/login"
                 afterSignUpUrl={currentUrl}
@@ -133,18 +148,10 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="rounded-2xl bg-slate-950/40 p-4"
+              className="rounded-2xl bg-slate-950/40 p-4 sm:p-6"
             >
               <SignIn
-                appearance={{
-                  elements: {
-                    rootBox: 'w-full',
-                    card: 'bg-transparent shadow-none border-0',
-                    headerTitle: 'text-white',
-                    headerSubtitle: 'text-white/70',
-                    socialButtonsBlockButton: 'bg-white text-slate-900 hover:bg-slate-100',
-                  },
-                }}
+                appearance={clerkAppearance}
                 routing="virtual"
                 signUpUrl="/sign-up"
                 afterSignInUrl={currentUrl}
