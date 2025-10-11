@@ -184,41 +184,32 @@ function sumCountsInRange(logs: TaskLog[], start: Date, endExclusive: Date): num
   return total;
 }
 
-function buildWeekCounts(logs: TaskLog[]): Map<string, number> {
-  const map = new Map<string, number>();
+function buildDayCounts(logs: TaskLog[]): Map<string, number> {
+  const counts = new Map<string, number>();
   for (const log of logs) {
-    const weekKey = formatDate(startOfWeek(log.date));
-    map.set(weekKey, (map.get(weekKey) ?? 0) + log.count);
+    const key = formatDate(log.date);
+    counts.set(key, (counts.get(key) ?? 0) + log.count);
   }
-  return map;
+  return counts;
 }
 
-function computeStreakWeeks(weekCounts: Map<string, number>, currentWeekStart: Date, tier: number): number {
+function computeStreakDays(dayCounts: Map<string, number>, referenceDate: Date, tier: number): number {
   if (tier <= 0) {
     return 0;
   }
 
   let streak = 0;
-  let cursor = new Date(currentWeekStart.getTime());
-  const currentWeekKey = formatDate(cursor);
-  const currentCount = weekCounts.get(currentWeekKey) ?? 0;
+  let cursor = new Date(referenceDate.getTime());
 
-  if (currentCount >= tier) {
-    streak += 1;
-    cursor = addDays(cursor, -7);
-  } else {
-    cursor = addDays(cursor, -7);
-  }
-
-  for (let i = 0; i < MAX_STREAK_WEEKS; i += 1) {
+  for (let i = 0; i < MAX_STREAK_WEEKS * 7; i += 1) {
     const key = formatDate(cursor);
-    const count = weekCounts.get(key) ?? 0;
+    const count = dayCounts.get(key) ?? 0;
     if (count >= tier) {
       streak += 1;
-      cursor = addDays(cursor, -7);
-    } else {
-      break;
+      cursor = addDays(cursor, -1);
+      continue;
     }
+    break;
   }
 
   return streak;
@@ -345,7 +336,7 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
 
   const tasks = filteredDefinitions.map((task) => {
     const logs = logsByTask.get(task.id) ?? [];
-    const weekCounts = buildWeekCounts(logs);
+    const dayCounts = buildDayCounts(logs);
 
     const weekCount = sumCountsInRange(logs, currentWeekStart, currentWeekEndExclusive);
     const weekXp = weekCount * task.xpBase;
@@ -363,8 +354,7 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
       let hit = 0;
 
       for (const week of weeks) {
-        const key = formatDate(startOfWeek(week.weekStart));
-        const count = weekCounts.get(key) ?? 0;
+        const count = sumCountsInRange(logs, week.rangeStart, week.rangeEnd);
         if (count >= tier) {
           hit += 1;
         }
@@ -374,14 +364,14 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
       return Number.isFinite(scaled) ? Number(scaled.toFixed(2)) : 0;
     });
 
-    const streakWeeks = computeStreakWeeks(weekCounts, currentWeekStart, tier);
+    const streakDays = computeStreakDays(dayCounts, today, tier);
 
     return {
       id: task.id,
       name: task.name,
       stat: task.stat || '—',
       weekDone: weekCount,
-      streakWeeks,
+      streakDays,
       metrics: {
         week: {
           count: weekCount,
@@ -402,15 +392,15 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
   });
 
   const topStreaks = tasks
-    .filter((task) => task.streakWeeks >= 2)
-    .sort((a, b) => b.streakWeeks - a.streakWeeks)
+    .filter((task) => task.streakDays >= 2)
+    .sort((a, b) => b.streakDays - a.streakDays)
     .slice(0, 3)
     .map((task) => ({
       id: task.id,
       name: task.name,
       stat: task.stat,
       weekDone: task.metrics.week.count,
-      streakWeeks: task.streakWeeks,
+      streakDays: task.streakDays,
     }));
 
   if (process.env.DEBUG_STREAKS_PANEL === 'true') {
