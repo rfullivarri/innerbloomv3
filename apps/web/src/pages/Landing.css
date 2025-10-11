@@ -31,13 +31,15 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(1200px 720px at 12% 10%, var(--glow-1), transparent 68%) no-repeat,
-    radial-gradient(960px 640px at 88% 4%, var(--glow-2), transparent 70%) no-repeat,
-    linear-gradient(180deg, var(--bg-2) 0%, #0b1327 100%);
-  background-position: 12% 10%, 88% 4%, center;
-  background-size: 1200px 820px, 1280px 920px, cover;
+    radial-gradient(1200px 780px at 12% 8%, var(--glow-1), transparent 68%) no-repeat,
+    radial-gradient(980px 680px at 88% 6%, var(--glow-2), transparent 70%) no-repeat,
+    conic-gradient(from 120deg at 50% 40%, rgba(139, 92, 246, 0.14), rgba(56, 189, 248, 0.08), rgba(15, 23, 42, 0.6), rgba(56, 189, 248, 0.12), rgba(139, 92, 246, 0.16));
+  background-position: 12% 8%, 88% 6%, center;
+  background-size: 1200px 820px, 1280px 960px, 180% 180%;
   transform: translateZ(0);
-  animation: auroraDrift 18s ease-in-out infinite alternate;
+  filter: saturate(1.12);
+  will-change: transform, background-position, background-size;
+  animation: auroraDrift 24s ease-in-out infinite alternate;
 }
 
 .landing::after {
@@ -46,14 +48,44 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(820px 520px at 50% 18%, rgba(148, 163, 255, 0.22), transparent 65%);
+  background:
+    radial-gradient(820px 520px at 50% 18%, rgba(148, 163, 255, 0.22), transparent 65%) no-repeat,
+    radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.28) 0, transparent 65%),
+    radial-gradient(1.5px 1.5px at 70% 62%, rgba(148, 163, 255, 0.2) 0, transparent 70%);
+  background-repeat: no-repeat, repeat, repeat;
+  background-size: 100% 100%, 420px 420px, 560px 560px;
   mix-blend-mode: screen;
-  animation: auroraPulse 8s ease-in-out infinite;
+  will-change: transform, opacity, background-position;
+  animation: auroraPulse 10s ease-in-out infinite alternate, starDrift 36s linear infinite;
 }
 
 .landing > * {
   position: relative;
   z-index: 1;
+}
+
+.landing .reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(48px);
+  transition: opacity 0.85s ease, transform 0.85s ease;
+  will-change: transform, opacity;
+}
+
+.landing .reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.landing .reveal-on-scroll .fade-item {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+  transition-delay: var(--delay, 0ms);
+}
+
+.landing .reveal-on-scroll.is-visible .fade-item {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .landing h1,
@@ -195,6 +227,8 @@
   border: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.65), rgba(17, 28, 51, 0.4));
   box-shadow: 0 24px 70px rgba(12, 18, 34, 0.55);
+  animation: float 18s ease-in-out infinite;
+  will-change: transform;
 }
 
 .landing .hero-img {
@@ -465,13 +499,28 @@
 
 @keyframes auroraDrift {
   0% {
-    background-position: 12% 10%, 88% 4%, center;
+    background-position: 12% 8%, 88% 6%, center;
+    background-size: 1200px 820px, 1280px 960px, 180% 180%;
+    transform: scale(1.02) translate3d(0, 0, 0);
   }
   50% {
-    background-position: 18% 22%, 80% 10%, center;
+    background-position: 18% 16%, 80% 12%, center;
+    background-size: 1340px 900px, 1320px 940px, 192% 192%;
+    transform: scale(1.05) translate3d(0, -1.5%, 0);
   }
   100% {
-    background-position: 10% 12%, 86% 2%, center;
+    background-position: 8% 10%, 92% 4%, center;
+    background-size: 1180px 800px, 1360px 980px, 176% 176%;
+    transform: scale(1.01) translate3d(0, 1%, 0);
+  }
+}
+
+@keyframes starDrift {
+  0% {
+    background-position: center, 0 0, 38% 58%;
+  }
+  100% {
+    background-position: center, -420px 320px, 60% 32%;
   }
 }
 
@@ -484,6 +533,34 @@
   50% {
     opacity: 0.85;
     transform: scale(1.05);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translate3d(0, -6px, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, 8px, 0) scale(1.015);
+  }
+  100% {
+    transform: translate3d(0, -6px, 0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing::before,
+  .landing::after,
+  .landing .hero-media {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .landing .reveal-on-scroll,
+  .landing .reveal-on-scroll .fade-item {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }
 
