@@ -17,8 +17,9 @@ const GRID_MAX_CELL_SIZE = 16;
 const GRID_MIN_CELL_SIZE = 3.5;
 const GRID_MAX_GAP = 6;
 const GRID_MIN_GAP = 1.5;
-// Display the grid 40% larger than the computed size.
-const GRID_SCALE_FACTOR = 1.4 * 1.4;
+// Individual growth factors applied to the computed cell size and gap.
+const CELL_GROWTH_PERCENT = 0.25;
+const GAP_GROWTH_PERCENT = 0.25;
 const HEATMAP_LOOKBACK_DAYS = 365;
 
 const EMOTION_ORDER = [
@@ -390,8 +391,8 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
   const highlightLabel = grid.highlight?.count === 1 ? 'registro' : 'registros';
   const [activeCellKey, setActiveCellKey] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
-  const [cellSize, setCellSize] = useState<number>(14 * GRID_SCALE_FACTOR);
-  const [cellGap, setCellGap] = useState<number>(GRID_MAX_GAP * GRID_SCALE_FACTOR);
+  const [cellSize, setCellSize] = useState<number>(14 * (1 + CELL_GROWTH_PERCENT));
+  const [cellGap, setCellGap] = useState<number>(GRID_MAX_GAP * (1 + GAP_GROWTH_PERCENT));
   const columnCount = grid.columns.length;
 
   useEffect(() => {
@@ -440,20 +441,20 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
         }
       }
 
-      const scaledCell = Math.max(
-        GRID_MIN_CELL_SIZE * GRID_SCALE_FACTOR,
-        Math.min(GRID_MAX_CELL_SIZE * GRID_SCALE_FACTOR, nextCell * GRID_SCALE_FACTOR),
+      const grownCell = Math.max(
+        GRID_MIN_CELL_SIZE * (1 + CELL_GROWTH_PERCENT),
+        Math.min(GRID_MAX_CELL_SIZE * (1 + CELL_GROWTH_PERCENT), nextCell * (1 + CELL_GROWTH_PERCENT)),
       );
-      const scaledGap =
+      const grownGap =
         segments > 0
           ? Math.max(
-              GRID_MIN_GAP * GRID_SCALE_FACTOR,
-              Math.min(GRID_MAX_GAP * GRID_SCALE_FACTOR, nextGap * GRID_SCALE_FACTOR),
+              GRID_MIN_GAP * (1 + GAP_GROWTH_PERCENT),
+              Math.min(GRID_MAX_GAP * (1 + GAP_GROWTH_PERCENT), nextGap * (1 + GAP_GROWTH_PERCENT)),
             )
           : 0;
 
-      setCellSize(Number(scaledCell.toFixed(2)));
-      setCellGap(Number(scaledGap.toFixed(2)));
+      setCellSize(Number(grownCell.toFixed(2)));
+      setCellGap(Number(grownGap.toFixed(2)));
     };
 
     computeDimensions();
