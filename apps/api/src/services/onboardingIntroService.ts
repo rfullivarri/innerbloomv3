@@ -196,9 +196,11 @@ export async function getLatestOnboardingSession(
       session.onboarding_session_id,
     ]);
 
+    const answersPayload = answersResult.rows[0]?.payload ?? null;
+
     return {
       session,
-      answers: answersResult.rows[0]?.payload ?? null,
+      answers: sanitizeAnswersPayload(answersPayload),
       foundations: foundationsResult.rows.map((row) => ({
         pillar_id: row.pillar_id,
         pillar_code: row.code,
@@ -241,7 +243,7 @@ async function resolvePillarMap(client: PoolClient): Promise<PillarMap> {
 
   for (const pillar of REQUIRED_PILLARS) {
     if (!map.has(pillar)) {
-      throw new HttpError(500, 'missing_pillar', `Pillar ${pillar} is not configured`);
+      throw new HttpError(409, 'missing_pillar', `Pillar ${pillar} is not configured`);
     }
   }
 
@@ -289,7 +291,7 @@ async function upsertFoundations(
   const soulPillarId = pillarMap.get('SOUL');
 
   if (!bodyPillarId || !mindPillarId || !soulPillarId) {
-    throw new HttpError(500, 'missing_pillar', 'Required pillars are not configured');
+    throw new HttpError(409, 'missing_pillar', 'Required pillars are not configured');
   }
 
   await client.query(UPSERT_FOUNDATIONS_SQL, [
@@ -320,7 +322,7 @@ async function insertXpBonus(
   const soulPillarId = pillarMap.get('SOUL');
 
   if (!bodyPillarId || !mindPillarId || !soulPillarId) {
-    throw new HttpError(500, 'missing_pillar', 'Required pillars are not configured');
+    throw new HttpError(409, 'missing_pillar', 'Required pillars are not configured');
   }
 
   const xpMeta = {
@@ -347,4 +349,16 @@ async function insertXpBonus(
   ]);
 
   return (result.rowCount ?? 0) > 0;
+}
+
+function sanitizeAnswersPayload(payload: unknown): unknown {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return payload;
+  }
+
+  const { email: _email, meta: _meta, ...rest } = payload as Record<string, unknown>;
+  void _email;
+  void _meta;
+
+  return rest;
 }

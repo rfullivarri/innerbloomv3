@@ -61,7 +61,7 @@ app.use('/api', clerkWebhookRouter);
 if (apiLoggingEnabled) {
   console.info('[boot] registering express.json() after Clerk webhook router');
 }
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 
 app.get('/_debug/db', (_req, res, next) => {
   if (process.env.NODE_ENV === 'production') {

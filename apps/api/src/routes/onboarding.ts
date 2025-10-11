@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { Router } from 'express';
 import { parseWithValidation } from '../lib/validation.js';
 import { asyncHandler } from '../lib/async-handler.js';
@@ -32,9 +33,13 @@ router.post(
 );
 
 router.get(
-  '/debug/onboarding/session',
+  '/debug/onboarding/last',
   authMiddleware,
   asyncHandler(async (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+      throw new HttpError(403, 'forbidden', 'Debug endpoint is disabled in production');
+    }
+
     const user = req.user;
 
     if (!user) {
