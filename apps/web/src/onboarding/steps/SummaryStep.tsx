@@ -5,6 +5,7 @@ import { buildPayload } from '../payload';
 import type { Answers, XP } from '../state';
 import { NavButtons } from '../ui/NavButtons';
 import { Snack } from '../ui/Snack';
+import { buildApiUrl } from '../../lib/api';
 
 interface SummaryStepProps {
   answers: Answers;
@@ -101,7 +102,7 @@ export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps)
       const payload = buildPayload(answers, xp);
       const token = (await getToken?.()) ?? '';
 
-      const response = await fetch('/api/onboarding/intro', {
+      const response = await fetch(buildApiUrl('/onboarding/intro'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
