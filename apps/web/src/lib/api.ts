@@ -171,6 +171,10 @@ function applyAuthorization(init: RequestInit | undefined, authToken: string): R
 
 const RAW_API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? '').trim();
 
+function isAbsoluteUrl(value: string): boolean {
+  return /^https?:\/\//i.test(value) || value.startsWith('//');
+}
+
 function normalizeBaseUrl(value: string): string {
   if (!value) {
     return '';
@@ -211,6 +215,48 @@ function normalizeBaseUrl(value: string): string {
   }
 }
 
+type NormalizedApiTarget = {
+  path: string;
+  isAbsolute: boolean;
+};
+
+function normalizeApiTarget(path: string): NormalizedApiTarget {
+  const trimmed = String(path ?? '').trim();
+
+  if (!trimmed) {
+    throw new Error('API path must be a non-empty string.');
+  }
+
+  if (isAbsoluteUrl(trimmed)) {
+    return { path: trimmed, isAbsolute: true };
+  }
+
+  const placeholder = new URL(trimmed, 'https://placeholder.local');
+  let pathname = placeholder.pathname || '/';
+  const search = placeholder.search;
+  const hash = placeholder.hash;
+
+  if (!/^\/api(?:\/|$)/.test(pathname)) {
+    pathname = pathname === '/' ? '/api' : `/api${pathname}`;
+  }
+
+  return {
+    path: `${pathname}${search}${hash}`,
+    isAbsolute: false,
+  };
+}
+
+function applySearchParams(url: URL, params?: Record<string, string | number | undefined>) {
+  if (!params) {
+    return;
+  }
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null || value === '') continue;
+    url.searchParams.set(key, String(value));
+  }
+}
+
 export const API_BASE = normalizeBaseUrl(RAW_API_BASE_URL);
 
 console.info('[API] BASE =', API_BASE);
@@ -228,22 +274,18 @@ function ensureBase(): string {
 
 function buildUrl(path: string, params?: Record<string, string | number | undefined>) {
   const base = ensureBase();
-  const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
-  const url = new URL(normalizedPath, `${base}/`);
-  if (params) {
-    for (const [key, value] of Object.entries(params)) {
-      if (value === undefined || value === null || value === '') continue;
-      url.searchParams.set(key, String(value));
-    }
-  }
+  const target = normalizeApiTarget(path);
+
+  const url = target.isAbsolute
+    ? new URL(target.path, `${base}/`)
+    : new URL(target.path.startsWith('/') ? target.path.slice(1) : target.path, `${base}/`);
+
+  applySearchParams(url, params);
+
   return url.toString();
 }
 
 function resolveApiUrl(path: string): string {
-  if (/^https?:\/\//i.test(path)) {
-    return path;
-  }
-
   return buildUrl(path);
 }
 
