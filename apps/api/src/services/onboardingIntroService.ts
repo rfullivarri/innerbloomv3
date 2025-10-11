@@ -11,7 +11,7 @@ const UPSERT_SESSION_SQL = `
 INSERT INTO onboarding_session
   (user_id, client_id, game_mode_id, xp_total, xp_body, xp_mind, xp_soul, email, meta)
 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)
-ON CONFLICT ON CONSTRAINT ux_onboarding_session
+ON CONFLICT (user_id, client_id)
 DO UPDATE SET
   game_mode_id = EXCLUDED.game_mode_id,
   xp_total     = EXCLUDED.xp_total,
@@ -33,7 +33,7 @@ const UPSERT_FOUNDATIONS_SQL = `
 INSERT INTO onboarding_foundations
   (onboarding_session_id, pillar_id, items, open_text)
 VALUES ($1,$2,$3,$4)
-ON CONFLICT ON CONSTRAINT ux_onb_foundations_session_pillar
+ON CONFLICT (onboarding_session_id, pillar_id)
 DO UPDATE SET
   items     = EXCLUDED.items,
   open_text = EXCLUDED.open_text;
@@ -44,8 +44,7 @@ const INSERT_XP_BONUS_SQL = `
 INSERT INTO xp_bonus
   (user_id, pillar_id, source, amount, meta)
 VALUES ($1,$2,'onboarding',$3,$4::jsonb)
-ON CONFLICT ON CONSTRAINT ux_xp_bonus_user_source_pillar
-DO NOTHING;
+ON CONFLICT (user_id, source, pillar_id) DO NOTHING;
 `;
 const SELECT_LATEST_SESSION_SQL = `
   SELECT
@@ -253,6 +252,7 @@ async function upsertSession(
     xp: NormalizedXp;
   },
 ): Promise<string> {
+  console.info('[UPSERT session] start');
   const sessionResult = await client.query<{ onboarding_session_id: string }>(UPSERT_SESSION_SQL, [
     input.userId,
     input.payload.client_id,
@@ -308,6 +308,7 @@ async function upsertFoundations(
   ];
 
   for (const { pillarId, items, openText } of foundationRows) {
+    console.info('[UPSERT foundations] start');
     await client.query(UPSERT_FOUNDATIONS_SQL, [sessionId, pillarId, items, openText]);
   }
 }
@@ -345,6 +346,7 @@ async function insertXpBonus(
   let inserted = 0;
 
   for (const bonus of xpBonuses) {
+    console.info('[INSERT bonus] start');
     const result = await client.query(INSERT_XP_BONUS_SQL, [
       userId,
       bonus.pillarId,
@@ -361,9 +363,9 @@ async function insertXpBonus(
 function normalizeXp(xpRaw: OnboardingIntroPayload['xp'] | undefined): NormalizedXp {
   const raw = xpRaw ?? ({} as OnboardingIntroPayload['xp']);
 
-  const ensureNumber = (value: unknown): number => {
+  const ensureNumber = (value: unknown): number | undefined => {
     if (value === undefined) {
-      return 0;
+      return undefined;
     }
 
     if (typeof value !== 'number' || Number.isNaN(value) || !Number.isFinite(value)) {
@@ -373,10 +375,10 @@ function normalizeXp(xpRaw: OnboardingIntroPayload['xp'] | undefined): Normalize
     return value;
   };
 
-  const xp_body = Math.round(ensureNumber(raw.Body));
-  const xp_mind = Math.round(ensureNumber(raw.Mind));
-  const xp_soul = Math.round(ensureNumber(raw.Soul));
-  let xp_total = Math.round(ensureNumber(raw.total));
+  const xp_body = Math.round(ensureNumber(raw.Body) ?? 0);
+  const xp_mind = Math.round(ensureNumber(raw.Mind) ?? 0);
+  const xp_soul = Math.round(ensureNumber(raw.Soul) ?? 0);
+  let xp_total = Math.round(ensureNumber(raw.total) ?? 0);
   const sum = xp_body + xp_mind + xp_soul;
   if (xp_total !== sum) xp_total = sum;
 
