@@ -4,11 +4,11 @@ import { useAuth } from '@clerk/clerk-react';
 import './Landing.css';
 
 const buttonBaseClasses =
-  'inline-flex items-center justify-center whitespace-nowrap rounded-xl px-4 py-3 font-display text-sm font-extrabold tracking-tight transition duration-150 ease-out active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
+  'inline-flex items-center justify-center whitespace-nowrap rounded-2xl px-5 py-3 font-display text-sm font-semibold tracking-tight transition duration-150 ease-out active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
 
 const buttonVariants = {
   primary: `${buttonBaseClasses} bg-accent-purple text-white shadow-glow hover:bg-accent-purple/90`,
-  ghost: `${buttonBaseClasses} border border-white/15 bg-white/10 text-text-muted hover:bg-white/20 hover:text-white`
+  ghost: `${buttonBaseClasses} border border-white/20 bg-white/5 text-text-subtle hover:bg-white/10 hover:text-white`
 };
 
 const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => buttonVariants[variant];
@@ -192,7 +192,7 @@ export default function LandingPage() {
                 Crear cuenta
               </Link>
               <Link className={buttonClasses()} to="/login">
-                Ya tengo cuenta
+                Iniciar sesión
               </Link>
             </>
           )}
@@ -222,7 +222,7 @@ export default function LandingPage() {
                       Comenzar mi Journey
                     </Link>
                     <Link className={buttonClasses('ghost')} to="/login">
-                      Ya tengo cuenta
+                      Iniciar sesión
                     </Link>
                   </>
                 )}
@@ -411,7 +411,7 @@ export default function LandingPage() {
                     Comenzar mi Journey
                   </Link>
                   <Link className={buttonClasses('ghost')} to="/login">
-                    Ya tengo cuenta
+                    Iniciar sesión
                   </Link>
                 </>
               )}
