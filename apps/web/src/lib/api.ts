@@ -247,6 +247,10 @@ function resolveApiUrl(path: string): string {
   return buildUrl(path);
 }
 
+export function buildApiUrl(path: string, params?: Record<string, string | number | undefined>) {
+  return buildUrl(path, params);
+}
+
 export async function apiGet<T = unknown>(path: string, init: RequestInit = {}): Promise<T> {
   const { headers: initHeaders, ...rest } = init;
   const headers = new Headers(initHeaders ?? {});
@@ -282,6 +286,21 @@ async function getAuthorizedJson<T>(
   const token = await resolveAuthToken();
   const authedInit = applyAuthorization(init, token);
   return getJson<T>(path, params, authedInit);
+}
+
+export async function apiAuthorizedGet<T>(
+  path: string,
+  params?: Record<string, string | number | undefined>,
+  init?: RequestInit,
+): Promise<T> {
+  return getAuthorizedJson<T>(path, params, init);
+}
+
+export async function apiAuthorizedFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const token = await resolveAuthToken();
+  const authedInit = applyAuthorization(init, token);
+  const url = resolveApiUrl(path);
+  return fetch(url, authedInit);
 }
 
 export type ProgressSummary = {

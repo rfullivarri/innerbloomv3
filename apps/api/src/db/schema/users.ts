@@ -1,4 +1,4 @@
-import { integer, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { boolean, integer, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const users = pgTable(
@@ -13,6 +13,7 @@ export const users = pgTable(
     weeklyTarget: integer('weekly_target'),
     timezone: text('timezone'),
     locale: text('locale'),
+    isAdmin: boolean('is_admin').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`).notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),

@@ -1,0 +1,54 @@
+export type AdminUser = {
+  id: string;
+  email: string | null;
+  name?: string | null;
+  gameMode?: string | null;
+  createdAt: string;
+};
+
+export type AdminInsights = {
+  profile: {
+    id: string;
+    email: string | null;
+    name?: string | null;
+    gameMode?: string | null;
+    createdAt: string;
+  };
+  level: { level: number; xpCurrent: number; xpToNext: number };
+  xp: {
+    total: number;
+    last30d: number;
+    last90d: number;
+    byPillar: { body: number; mind: number; soul: number };
+  };
+  streaks: { dailyCurrent: number; weeklyCurrent: number; longest: number };
+  constancyWeekly: { body: number; mind: number; soul: number };
+  emotions: { last7: string[]; last30: string[]; top3: string[] };
+};
+
+export type AdminLogRow = {
+  date: string;
+  week: string;
+  pillar: string;
+  trait: string;
+  stat?: string | null;
+  taskId: string;
+  taskName: string;
+  difficulty: string;
+  xp: number;
+  state: 'red' | 'yellow' | 'green';
+  timesInRange: number;
+  source: 'form' | 'manual' | 'import';
+  notes?: string | null;
+};
+
+export type AdminTaskRow = {
+  taskId: string;
+  taskName: string;
+  pillar: string;
+  trait: string;
+  difficulty: string;
+  weeklyTarget: number | null;
+  createdAt: string;
+  archived: boolean;
+};
