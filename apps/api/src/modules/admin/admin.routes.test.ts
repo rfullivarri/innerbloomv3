@@ -37,7 +37,81 @@ import app from '../../app.js';
 describe('Admin routes', () => {
   beforeEach(() => {
     mockQuery.mockClear();
-    mockQuery.mockResolvedValue({ rows: [{ is_admin: true }] });
+    mockQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes('SELECT is_admin FROM users WHERE user_id = $1 LIMIT 1')) {
+        return { rows: [{ is_admin: true }] };
+      }
+
+      if (sql.includes('COUNT(*) AS count') && sql.includes('FROM users u')) {
+        return { rows: [{ count: '1' }] };
+      }
+
+      if (sql.includes('FROM users u') && sql.includes('ORDER BY u.created_at DESC')) {
+        return {
+          rows: [
+            {
+              user_id: 'admin-user-id',
+              email_primary: 'admin@example.com',
+              full_name: 'Admin User',
+              game_mode: 'FLOW',
+              game_mode_code: 'FLOW',
+              created_at: new Date().toISOString(),
+            },
+          ],
+        };
+      }
+
+      if (sql.includes('FROM v_user_total_xp')) {
+        return { rows: [{ total_xp: '0' }] };
+      }
+
+      if (sql.includes('FROM v_user_level')) {
+        return { rows: [{ level: '0', xp_required: '0' }] };
+      }
+
+      if (sql.includes('FROM v_user_daily_xp')) {
+        return { rows: [] };
+      }
+
+      if (sql.includes('FROM v_user_xp_by_pillar')) {
+        return { rows: [] };
+      }
+
+      if (sql.includes('FROM v_user_pillars_week')) {
+        return { rows: [] };
+      }
+
+      if (sql.includes('FROM emotions_logs')) {
+        return { rows: [] };
+      }
+
+      if (sql.includes('COUNT(*) AS count') && sql.includes('FROM daily_log')) {
+        return { rows: [{ count: '1' }] };
+      }
+
+      if (sql.includes('FROM daily_log dl') && sql.includes('week_key')) {
+        return {
+          rows: [
+            {
+              date: '2024-11-01',
+              week_key: '2024-W44',
+              task_id: 'task-1',
+              task: 'Tarea de prueba',
+              quantity: 1,
+              pillar_name: 'Body',
+              pillar_code: 'BODY',
+              trait_name: 'Energía',
+              trait_code: 'ENERGIA',
+              difficulty_name: 'Baja',
+              difficulty_code: 'LOW',
+              xp_value: 10,
+            },
+          ],
+        };
+      }
+
+      return { rows: [] };
+    });
   });
 
   it('returns a paginated list of users', async () => {
