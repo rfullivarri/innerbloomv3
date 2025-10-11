@@ -370,7 +370,7 @@ export function IntroJourney({ onFinish }: IntroJourneyProps) {
         onRestart={handleRestart}
         onExit={handleExit}
       />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-16 pt-44 sm:px-6 sm:pt-48">
+      <main className="mx-auto w-full max-w-5xl flex-1 min-w-0 px-4 pb-16 pt-44 sm:px-6 sm:pt-48">
         <div className="space-y-8" key={stepId}>
           {renderStep()}
         </div>
