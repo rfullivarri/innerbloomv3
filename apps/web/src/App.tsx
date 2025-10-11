@@ -7,6 +7,7 @@ import LandingPage from './pages/Landing';
 import SignUpPage from './pages/SignUp';
 import { DevBanner } from './components/layout/DevBanner';
 import { setApiAuthTokenProvider } from './lib/api';
+import OnboardingIntroPage from './pages/OnboardingIntro';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -89,6 +90,7 @@ export default function App() {
       <DevBanner />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/intro-journey" element={<OnboardingIntroPage />} />
         <Route
           path="/login/*"
           element={
