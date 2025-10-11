@@ -1,0 +1,2 @@
+-- Placeholder for admin constancy views.
+-- TODO: Replace with the finalized constancy computation once available.

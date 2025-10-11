@@ -5,6 +5,7 @@ import DashboardV3Page from './pages/DashboardV3';
 import LoginPage from './pages/Login';
 import LandingPage from './pages/Landing';
 import SignUpPage from './pages/SignUp';
+import AdminRoute from './routes/admin';
 import { DevBanner } from './components/layout/DevBanner';
 import { setApiAuthTokenProvider } from './lib/api';
 import OnboardingIntroPage from './pages/OnboardingIntro';
@@ -116,6 +117,14 @@ export default function App() {
           element={
             <RequireUser>
               <DashboardV3Page />
+            </RequireUser>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <RequireUser>
+              <AdminRoute />
             </RequireUser>
           }
         />

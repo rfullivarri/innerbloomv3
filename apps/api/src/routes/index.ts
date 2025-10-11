@@ -7,6 +7,7 @@ import pillarsRoutes from './pillars.js';
 import tasksRoutes from './tasks.js';
 import usersRoutes from './users.js';
 import dailyQuestRoutes from './dailyQuest.js';
+import adminRoutes from '../modules/admin/admin.routes.js';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use(tasksRoutes);
 router.use(dailyQuestRoutes);
 router.use(usersRoutes);
 router.use(leaderboardRoutes);
+router.use(adminRoutes);
 
 export default router;

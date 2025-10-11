@@ -13,6 +13,8 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "test": "vitest run --coverage",
     "backfill:users": "tsx apps/api/scripts/clerk-backfill.ts",
+    "admin:grant": "tsx scripts/grant-admin.ts",
+    "admin:revoke": "tsx scripts/grant-admin.ts --revoke",
     "routes:print": "tsx scripts/routes-print.ts"
   },
   "dependencies": {
