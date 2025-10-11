@@ -148,7 +148,7 @@ describe('POST /api/onboarding/intro', () => {
     expect(mockSubmitOnboardingIntro).not.toHaveBeenCalled();
   });
 
-  it('returns 409 when the meta.user_id does not match the authenticated user', async () => {
+  it('returns 400 when the meta.user_id does not match the authenticated user', async () => {
     mockVerifyToken.mockResolvedValue({
       id: 'uuid-user',
       clerkId: 'user_123',
@@ -165,7 +165,7 @@ describe('POST /api/onboarding/intro', () => {
       .set('Authorization', 'Bearer token')
       .send(payload);
 
-    expect(response.status).toBe(409);
+    expect(response.status).toBe(400);
     expect(response.body).toEqual({
       code: 'user_mismatch',
       message: 'Payload user_id does not match authenticated user',

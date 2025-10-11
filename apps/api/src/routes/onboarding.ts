@@ -54,7 +54,7 @@ router.get(
 
 function validateMetaUserId(payload: OnboardingIntroPayload, clerkUserId: string): void {
   if (payload.meta.user_id !== clerkUserId) {
-    throw new HttpError(409, 'user_mismatch', 'Payload user_id does not match authenticated user');
+    throw new HttpError(400, 'user_mismatch', 'Payload user_id does not match authenticated user');
   }
 }
 
