@@ -21,6 +21,11 @@ const GRID_MIN_GAP = 1.5;
 const CELL_GROWTH_PERCENT = 0.25;
 const GAP_GROWTH_PERCENT = 0.25;
 const HEATMAP_LOOKBACK_DAYS = 365;
+const MOBILE_BREAKPOINT = 640;
+const MOBILE_CELL_INCREMENT = 4;
+const MOBILE_GAP_INCREMENT = 1.5;
+const MOBILE_MAX_CELL_SIZE = 24;
+const MOBILE_MAX_GAP = 9;
 
 const EMOTION_ORDER = [
   'Calma',
@@ -72,6 +77,14 @@ type GridComputation = {
   period: { from: Date; to: Date };
   highlight: { emotion: EmotionName; color: string; count: number } | null;
 };
+
+function isMobileViewport(): boolean {
+  if (typeof window === 'undefined') return false;
+  if (typeof window.matchMedia === 'function') {
+    return window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches;
+  }
+  return window.innerWidth <= MOBILE_BREAKPOINT;
+}
 
 const EMOTION_NORMALIZATION: Record<string, EmotionName> = {
   '1': 'Calma',
@@ -391,8 +404,14 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
   const highlightLabel = grid.highlight?.count === 1 ? 'registro' : 'registros';
   const [activeCellKey, setActiveCellKey] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
-  const [cellSize, setCellSize] = useState<number>(14 * (1 + CELL_GROWTH_PERCENT));
-  const [cellGap, setCellGap] = useState<number>(GRID_MAX_GAP * (1 + GAP_GROWTH_PERCENT));
+  const [cellSize, setCellSize] = useState<number>(() => {
+    const base = 14 * (1 + CELL_GROWTH_PERCENT);
+    return isMobileViewport() ? Math.min(base + MOBILE_CELL_INCREMENT, MOBILE_MAX_CELL_SIZE) : base;
+  });
+  const [cellGap, setCellGap] = useState<number>(() => {
+    const base = GRID_MAX_GAP * (1 + GAP_GROWTH_PERCENT);
+    return isMobileViewport() ? Math.min(base + MOBILE_GAP_INCREMENT, MOBILE_MAX_GAP) : base;
+  });
   const columnCount = grid.columns.length;
 
   useEffect(() => {
@@ -453,8 +472,23 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
             )
           : 0;
 
-      setCellSize(Number(grownCell.toFixed(2)));
-      setCellGap(Number(grownGap.toFixed(2)));
+      const mobile = isMobileViewport();
+      const adjustedCell = mobile
+        ? Math.max(
+            GRID_MIN_CELL_SIZE,
+            Math.min(MOBILE_MAX_CELL_SIZE, grownCell + MOBILE_CELL_INCREMENT),
+          )
+        : grownCell;
+      const adjustedGap =
+        mobile && segments > 0
+          ? Math.max(
+              GRID_MIN_GAP,
+              Math.min(MOBILE_MAX_GAP, grownGap + MOBILE_GAP_INCREMENT),
+            )
+          : grownGap;
+
+      setCellSize(Number(adjustedCell.toFixed(2)));
+      setCellGap(Number(adjustedGap.toFixed(2)));
     };
 
     computeDimensions();
