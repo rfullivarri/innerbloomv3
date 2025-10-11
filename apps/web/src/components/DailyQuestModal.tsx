@@ -125,84 +125,93 @@ type EmotionTheme = {
 const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   calm: {
     chipInactive:
-      'bg-sky-500/10 text-sky-200/70 ring-1 ring-sky-400/30 hover:bg-sky-500/15',
-    chipActive: 'bg-sky-500/20 text-sky-100 ring-1 ring-sky-400/40',
-    chipShadow: 'shadow-[0_0_24px_rgba(56,189,248,0.2)]',
+      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+    chipActive:
+      'bg-gradient-to-r from-sky-400/90 via-sky-500/80 to-indigo-400/80 text-white ring-1 ring-sky-300/60',
+    chipShadow: 'shadow-[0_12px_32px_rgba(56,189,248,0.45)]',
     checkBackground: 'bg-sky-500/20',
     checkBorder: 'border-sky-300/60',
     checkText: 'text-sky-100',
-    taskGlow: 'ring-2 ring-sky-400/50 shadow-[0_0_28px_rgba(56,189,248,0.28)]',
+    taskGlow: 'ring-2 ring-sky-400/55 shadow-[0_0_28px_rgba(56,189,248,0.32)]',
   },
   happy: {
     chipInactive:
-      'bg-amber-500/10 text-amber-200/80 ring-1 ring-amber-400/30 hover:bg-amber-500/15',
-    chipActive: 'bg-amber-500/20 text-amber-100 ring-1 ring-amber-400/40',
-    chipShadow: 'shadow-[0_0_24px_rgba(251,191,36,0.25)]',
+      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+    chipActive:
+      'bg-gradient-to-r from-amber-300/90 via-orange-400/80 to-rose-400/80 text-white ring-1 ring-amber-200/60',
+    chipShadow: 'shadow-[0_12px_32px_rgba(251,191,36,0.45)]',
     checkBackground: 'bg-amber-500/20',
     checkBorder: 'border-amber-300/60',
     checkText: 'text-amber-100',
-    taskGlow: 'ring-2 ring-amber-400/50 shadow-[0_0_28px_rgba(251,191,36,0.32)]',
+    taskGlow: 'ring-2 ring-amber-400/55 shadow-[0_0_28px_rgba(251,191,36,0.36)]',
   },
   motivation: {
     chipInactive:
-      'bg-emerald-500/10 text-emerald-200/80 ring-1 ring-emerald-400/30 hover:bg-emerald-500/15',
-    chipActive: 'bg-emerald-500/20 text-emerald-100 ring-1 ring-emerald-400/40',
-    chipShadow: 'shadow-[0_0_24px_rgba(16,185,129,0.25)]',
-    checkBackground: 'bg-emerald-500/20',
-    checkBorder: 'border-emerald-300/60',
-    checkText: 'text-emerald-100',
-    taskGlow: 'ring-2 ring-emerald-400/50 shadow-[0_0_28px_rgba(16,185,129,0.3)]',
-  },
-  sad: {
-    chipInactive:
-      'bg-indigo-500/10 text-indigo-200/80 ring-1 ring-indigo-400/30 hover:bg-indigo-500/15',
-    chipActive: 'bg-indigo-500/20 text-indigo-100 ring-1 ring-indigo-400/40',
-    chipShadow: 'shadow-[0_0_24px_rgba(99,102,241,0.25)]',
-    checkBackground: 'bg-indigo-500/20',
-    checkBorder: 'border-indigo-300/60',
-    checkText: 'text-indigo-100',
-    taskGlow: 'ring-2 ring-indigo-400/50 shadow-[0_0_28px_rgba(99,102,241,0.3)]',
-  },
-  anxiety: {
-    chipInactive:
-      'bg-rose-500/10 text-rose-200/80 ring-1 ring-rose-400/30 hover:bg-rose-500/15',
-    chipActive: 'bg-rose-500/20 text-rose-100 ring-1 ring-rose-400/40',
-    chipShadow: 'shadow-[0_0_24px_rgba(244,63,94,0.25)]',
-    checkBackground: 'bg-rose-500/20',
-    checkBorder: 'border-rose-300/60',
-    checkText: 'text-rose-100',
-    taskGlow: 'ring-2 ring-rose-400/50 shadow-[0_0_28px_rgba(244,63,94,0.32)]',
-  },
-  frustration: {
-    chipInactive:
-      'bg-orange-500/10 text-orange-200/80 ring-1 ring-orange-400/30 hover:bg-orange-500/15',
-    chipActive: 'bg-orange-500/20 text-orange-100 ring-1 ring-orange-400/40',
-    chipShadow: 'shadow-[0_0_24px_rgba(249,115,22,0.25)]',
-    checkBackground: 'bg-orange-500/20',
-    checkBorder: 'border-orange-300/60',
-    checkText: 'text-orange-100',
-    taskGlow: 'ring-2 ring-orange-400/50 shadow-[0_0_28px_rgba(249,115,22,0.32)]',
-  },
-  tired: {
-    chipInactive:
-      'bg-violet-500/10 text-violet-200/80 ring-1 ring-violet-400/30 hover:bg-violet-500/15',
-    chipActive: 'bg-violet-500/20 text-violet-100 ring-1 ring-violet-400/40',
-    chipShadow: 'shadow-[0_0_24px_rgba(139,92,246,0.25)]',
+      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+    chipActive:
+      'bg-gradient-to-r from-violet-400/90 via-fuchsia-500/80 to-purple-500/80 text-white ring-1 ring-violet-300/60',
+    chipShadow: 'shadow-[0_12px_32px_rgba(139,92,246,0.45)]',
     checkBackground: 'bg-violet-500/20',
     checkBorder: 'border-violet-300/60',
     checkText: 'text-violet-100',
-    taskGlow: 'ring-2 ring-violet-400/50 shadow-[0_0_28px_rgba(139,92,246,0.3)]',
+    taskGlow: 'ring-2 ring-violet-400/55 shadow-[0_0_28px_rgba(139,92,246,0.34)]',
+  },
+  sad: {
+    chipInactive:
+      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+    chipActive:
+      'bg-gradient-to-r from-indigo-400/90 via-blue-500/80 to-slate-500/80 text-white ring-1 ring-indigo-300/60',
+    chipShadow: 'shadow-[0_12px_32px_rgba(99,102,241,0.45)]',
+    checkBackground: 'bg-indigo-500/20',
+    checkBorder: 'border-indigo-300/60',
+    checkText: 'text-indigo-100',
+    taskGlow: 'ring-2 ring-indigo-400/55 shadow-[0_0_28px_rgba(99,102,241,0.34)]',
+  },
+  anxiety: {
+    chipInactive:
+      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+    chipActive:
+      'bg-gradient-to-r from-rose-400/90 via-pink-500/80 to-red-400/80 text-white ring-1 ring-rose-300/60',
+    chipShadow: 'shadow-[0_12px_32px_rgba(244,63,94,0.45)]',
+    checkBackground: 'bg-rose-500/20',
+    checkBorder: 'border-rose-300/60',
+    checkText: 'text-rose-100',
+    taskGlow: 'ring-2 ring-rose-400/55 shadow-[0_0_28px_rgba(244,63,94,0.36)]',
+  },
+  frustration: {
+    chipInactive:
+      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+    chipActive:
+      'bg-gradient-to-r from-orange-400/90 via-amber-400/80 to-red-400/80 text-white ring-1 ring-orange-300/60',
+    chipShadow: 'shadow-[0_12px_32px_rgba(249,115,22,0.45)]',
+    checkBackground: 'bg-orange-500/20',
+    checkBorder: 'border-orange-300/60',
+    checkText: 'text-orange-100',
+    taskGlow: 'ring-2 ring-orange-400/55 shadow-[0_0_28px_rgba(249,115,22,0.36)]',
+  },
+  tired: {
+    chipInactive:
+      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+    chipActive:
+      'bg-gradient-to-r from-violet-400/90 via-purple-500/80 to-slate-500/80 text-white ring-1 ring-violet-300/60',
+    chipShadow: 'shadow-[0_12px_32px_rgba(139,92,246,0.45)]',
+    checkBackground: 'bg-violet-500/20',
+    checkBorder: 'border-violet-300/60',
+    checkText: 'text-violet-100',
+    taskGlow: 'ring-2 ring-violet-400/55 shadow-[0_0_28px_rgba(139,92,246,0.34)]',
   },
 };
 
 const DEFAULT_EMOTION_THEME: EmotionTheme = {
-  chipInactive: 'bg-primary/10 text-primary/80 ring-1 ring-primary/30 hover:bg-primary/15',
-  chipActive: 'bg-primary/20 text-white ring-1 ring-primary/40',
-  chipShadow: 'shadow-[0_0_24px_rgba(129,140,248,0.25)]',
+  chipInactive:
+    'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+  chipActive:
+    'bg-gradient-to-r from-indigo-400/90 via-fuchsia-500/80 to-amber-300/80 text-white ring-1 ring-indigo-300/60',
+  chipShadow: 'shadow-[0_12px_32px_rgba(99,102,241,0.45)]',
   checkBackground: 'bg-primary/20',
   checkBorder: 'border-primary/60',
   checkText: 'text-white',
-  taskGlow: 'ring-2 ring-primary/50 shadow-[0_0_28px_rgba(129,140,248,0.3)]',
+  taskGlow: 'ring-2 ring-primary/55 shadow-[0_0_28px_rgba(129,140,248,0.34)]',
 };
 
 type PillarTheme = {
@@ -703,6 +712,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
           successCelebrationTimeoutRef.current = null;
           successCelebrationCloseTimeoutRef.current = window.setTimeout(() => {
             setHasCompletedToday(true);
+            pushToast('¡Éxitos hoy! A darlo todo. 🚀', 'success');
             closeModal({ restoreFocus: true });
             successCelebrationCloseTimeoutRef.current = null;
           }, 220);
@@ -710,6 +720,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       } else {
         setSuccessCelebration(null);
         setHasCompletedToday(true);
+        pushToast('¡Éxitos hoy! A darlo todo. 🚀', 'success');
         closeModal({ restoreFocus: true });
       }
       void reloadStatus();
@@ -823,7 +834,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                       {canShowContent && definition && (
                         <>
                           <section className="flex flex-col gap-2">
-                            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">¿Cómo te sentís hoy?</h3>
+                            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">
+                              ¿Qué sentimiento prevaleció más el día de ayer?
+                            </h3>
                             <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Emociones disponibles">
                               {definition.emotionOptions.map((option) => {
                                 const isActive = selectedEmotion === option.emotion_id;
@@ -845,23 +858,8 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                     )}
                                     aria-pressed={isActive}
                                   >
-                                    <span className="relative inline-flex items-center gap-1.5">
+                                    <span className="inline-flex items-center gap-1.5">
                                       {option.name}
-                                      <AnimatePresence>
-                                        {isActive && (
-                                          <motion.span
-                                            key="sparkle"
-                                            className="pointer-events-none absolute -top-2 -right-3 text-xs text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.65)]"
-                                            initial={{ opacity: 0, scale: 0.6, rotate: -12 }}
-                                            animate={{ opacity: 1, scale: 1.05, rotate: 0 }}
-                                            exit={{ opacity: 0, scale: 0.6, rotate: 12 }}
-                                            transition={{ duration: 0.1, ease: 'easeOut' }}
-                                            aria-hidden="true"
-                                          >
-                                            ✨
-                                          </motion.span>
-                                        )}
-                                      </AnimatePresence>
                                     </span>
                                   </motion.button>
                                 );
@@ -891,7 +889,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                         ? '🏵️ Alma (SOUL)'
                                         : pillar.pillar_code}
                                     </h4>
-                                    <span className="mt-2 h-1.5 w-16 rounded-full bg-gradient-to-r from-sky-400 via-fuchsia-500 to-amber-400" />
+                                    <span className="mt-2 h-1.5 w-16 rounded-full bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300" />
                                     <div className="mt-3 flex flex-col gap-2">
                                       {pillar.tasks.map((task) => {
                                         const isSelected = selectedTasks.includes(task.task_id);
@@ -1046,9 +1044,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <div className="relative text-white">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">XP ganado</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">Experiencia ganada</p>
                         <p className="mt-1 text-2xl font-bold md:text-3xl">
-                          XP ganado: <span className="text-amber-200 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]">{xpSelected}</span>
+                          XP: <span className="text-amber-200 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]">{xpSelected}</span>
                         </p>
                         <AnimatePresence>
                           {xpBubble && (
@@ -1079,8 +1077,8 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           disabled={isConfirmDisabled}
                           aria-describedby={showEmotionHelper ? helperTextId : undefined}
                           className={classNames(
-                            'inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-sky-500 via-fuchsia-500 to-amber-400 text-sm font-semibold text-white shadow-[0_12px_40px_rgba(59,130,246,0.35)] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-60 md:h-11 md:px-6',
-                            !isConfirmDisabled && 'hover:from-sky-400 hover:via-fuchsia-500 hover:to-amber-300',
+                            'inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-400 via-fuchsia-500 to-amber-300 text-sm font-semibold text-white shadow-[0_12px_40px_rgba(99,102,241,0.35)] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-60 md:h-11 md:px-6',
+                            !isConfirmDisabled && 'hover:from-indigo-300 hover:via-fuchsia-500 hover:to-amber-200',
                             isSubmitting && 'cursor-wait',
                           )}
                         >
