@@ -1,7 +1,10 @@
+import { useAuth } from '@clerk/nextjs';
 import { motion } from 'framer-motion';
-import type { ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { buildPayload } from '../payload';
 import type { Answers, XP } from '../state';
 import { NavButtons } from '../ui/NavButtons';
+import { Snack } from '../ui/Snack';
 
 interface SummaryStepProps {
   answers: Answers;
@@ -63,9 +66,77 @@ function TextRow({ label, value }: { label: string; value: string }) {
 
 export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps) {
   const { mode } = answers;
+  const { getToken } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = useCallback((message: string) => {
+    setToastMessage(message);
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = setTimeout(() => {
+      setToastMessage(null);
+    }, 4000);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    },
+    [],
+  );
+
+  const handleSubmit = useCallback(async () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const payload = buildPayload(answers, xp);
+      const token = (await getToken?.()) ?? '';
+
+      const response = await fetch('/api/onboarding/intro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const message =
+          typeof errorData?.message === 'string' && errorData.message.length > 0
+            ? errorData.message
+            : response.statusText || 'Error desconocido';
+        throw new Error(message);
+      }
+
+      const data = await response.json().catch(() => ({}));
+      const successMessage = data?.awarded
+        ? 'Onboarding guardado y XP acreditado'
+        : 'Onboarding actualizado';
+
+      showToast(successMessage);
+      onFinish();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error inesperado';
+      showToast(`Error al guardar: ${message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [answers, getToken, isSubmitting, onFinish, showToast, xp]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
+      <Snack message={toastMessage} />
       <div className="glass-card mx-auto max-w-5xl rounded-3xl border border-white/5 bg-slate-900/70 p-6 sm:p-8">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
           <p className="text-xs uppercase tracking-[0.35em] text-white/50">Summary</p>
@@ -134,7 +205,13 @@ export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps)
             </SummarySection>
           </aside>
         </div>
-        <NavButtons onBack={onBack} onConfirm={onFinish} confirmLabel="Generar plan" />
+        <NavButtons
+          onBack={onBack}
+          onConfirm={handleSubmit}
+          confirmLabel="Generar plan"
+          loading={isSubmitting}
+          disabled={isSubmitting}
+        />
       </div>
     </motion.div>
   );
