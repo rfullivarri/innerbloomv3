@@ -124,6 +124,13 @@ type FoundationRow = {
 
 type PillarMap = Map<string, string>;
 
+type NormalizedXp = {
+  total: number;
+  body: number;
+  mind: number;
+  soul: number;
+};
+
 export interface SubmitOnboardingResult {
   sessionId: string;
   awarded: boolean;
@@ -151,11 +158,13 @@ export async function submitOnboardingIntro(
       const userId = await resolveUserId(client, clerkUserId);
       const gameModeId = await resolveGameModeId(client, payload.mode);
       const pillarMap = await resolvePillarMap(client);
+      const normalizedXp = normalizeXp(payload.xp);
 
       const sessionId = await upsertSession(client, {
         userId,
         payload,
         gameModeId,
+        xp: normalizedXp,
       });
 
       await client.query(UPSERT_ANSWERS_SQL, [sessionId, JSON.stringify(payload)]);
@@ -164,7 +173,14 @@ export async function submitOnboardingIntro(
 
       await client.query(UPDATE_USER_GAME_MODE_SQL, [userId, gameModeId]);
 
-      const awarded = await insertXpBonus(client, userId, pillarMap, payload, sessionId);
+      const awarded = await insertXpBonus(
+        client,
+        userId,
+        pillarMap,
+        normalizedXp,
+        payload,
+        sessionId,
+      );
 
       await client.query('COMMIT');
 
@@ -256,16 +272,17 @@ async function upsertSession(
     userId: string;
     payload: OnboardingIntroPayload;
     gameModeId: string;
+    xp: NormalizedXp;
   },
 ): Promise<string> {
   const sessionResult = await client.query<{ onboarding_session_id: string }>(UPSERT_SESSION_SQL, [
     input.userId,
     input.payload.client_id,
     input.gameModeId,
-    input.payload.xp.total,
-    input.payload.xp.Body,
-    input.payload.xp.Mind,
-    input.payload.xp.Soul,
+    input.xp.total,
+    input.xp.body,
+    input.xp.mind,
+    input.xp.soul,
     input.payload.email,
     JSON.stringify(input.payload.meta),
   ]);
@@ -314,6 +331,7 @@ async function insertXpBonus(
   client: PoolClient,
   userId: string,
   pillarMap: PillarMap,
+  xp: NormalizedXp,
   payload: OnboardingIntroPayload,
   sessionId: string,
 ): Promise<boolean> {
@@ -336,19 +354,49 @@ async function insertXpBonus(
   const result = await client.query(INSERT_XP_BONUS_SQL, [
     userId,
     bodyPillarId,
-    payload.xp.Body,
+    xp.body,
     metaJson,
     userId,
     mindPillarId,
-    payload.xp.Mind,
+    xp.mind,
     metaJson,
     userId,
     soulPillarId,
-    payload.xp.Soul,
+    xp.soul,
     metaJson,
   ]);
 
   return (result.rowCount ?? 0) > 0;
+}
+
+function normalizeXp(xpRaw: OnboardingIntroPayload['xp'] | undefined): NormalizedXp {
+  const raw = xpRaw ?? ({} as OnboardingIntroPayload['xp']);
+
+  const ensureNumber = (value: unknown): number => {
+    if (value === undefined) {
+      return 0;
+    }
+
+    if (typeof value !== 'number' || Number.isNaN(value) || !Number.isFinite(value)) {
+      throw new HttpError(400, 'invalid_xp', 'xp inválido');
+    }
+
+    return value;
+  };
+
+  const xp_body = Math.round(ensureNumber(raw.Body));
+  const xp_mind = Math.round(ensureNumber(raw.Mind));
+  const xp_soul = Math.round(ensureNumber(raw.Soul));
+  let xp_total = Math.round(ensureNumber(raw.total));
+  const sum = xp_body + xp_mind + xp_soul;
+  if (xp_total !== sum) xp_total = sum;
+
+  return {
+    total: xp_total,
+    body: xp_body,
+    mind: xp_mind,
+    soul: xp_soul,
+  };
 }
 
 function sanitizeAnswersPayload(payload: unknown): unknown {

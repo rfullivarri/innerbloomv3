@@ -81,7 +81,13 @@ beforeEach(() => {
   withClientSpy.mockImplementation(async (callback) => callback(mockClient));
 });
 
-function createSubmitExpectations(options: { xpBonusRowCount: number }) {
+type ExpectedXp = { total: number; body: number; mind: number; soul: number };
+
+function createSubmitExpectations(options: {
+  xpBonusRowCount: number;
+  payload?: OnboardingIntroPayload;
+  expectedXp?: ExpectedXp;
+}) {
   const userId = 'user-1';
   const gameModeId = 'mode-1';
   const sessionId = 'session-1';
@@ -91,8 +97,17 @@ function createSubmitExpectations(options: { xpBonusRowCount: number }) {
     SOUL: 'pillar-soul',
   } as const;
 
-  const metaJson = JSON.stringify(basePayload.meta);
-  const serializedPayload = JSON.stringify(basePayload);
+  const payload = options.payload ?? basePayload;
+  const expectedXp =
+    options.expectedXp ?? ({
+      total: payload.xp.total,
+      body: payload.xp.Body,
+      mind: payload.xp.Mind,
+      soul: payload.xp.Soul,
+    } satisfies ExpectedXp);
+
+  const metaJson = JSON.stringify(payload.meta);
+  const serializedPayload = JSON.stringify(payload);
 
   const expectations: Expectation[] = [
     {
@@ -109,7 +124,7 @@ function createSubmitExpectations(options: { xpBonusRowCount: number }) {
     {
       match: (sql) => sql.includes('SELECT game_mode_id FROM cat_game_mode'),
       handle: (_sql, params) => {
-        expect(params).toEqual([basePayload.mode]);
+        expect(params).toEqual([payload.mode]);
         return { rows: [{ game_mode_id: gameModeId }] };
       },
     },
@@ -131,13 +146,13 @@ function createSubmitExpectations(options: { xpBonusRowCount: number }) {
       handle: (_sql, params) => {
         expect(params).toEqual([
           userId,
-          basePayload.client_id,
+          payload.client_id,
           gameModeId,
-          basePayload.xp.total,
-          basePayload.xp.Body,
-          basePayload.xp.Mind,
-          basePayload.xp.Soul,
-          basePayload.email,
+          expectedXp.total,
+          expectedXp.body,
+          expectedXp.mind,
+          expectedXp.soul,
+          payload.email,
           metaJson,
         ]);
         return { rows: [{ onboarding_session_id: sessionId }] };
@@ -156,16 +171,16 @@ function createSubmitExpectations(options: { xpBonusRowCount: number }) {
         expect(params).toEqual([
           sessionId,
           pillars.BODY,
-          JSON.stringify(basePayload.data.foundations.body),
-          basePayload.data.foundations.bodyOpen,
+          JSON.stringify(payload.data.foundations.body),
+          payload.data.foundations.bodyOpen,
           sessionId,
           pillars.MIND,
-          JSON.stringify(basePayload.data.foundations.mind),
-          basePayload.data.foundations.mindOpen,
+          JSON.stringify(payload.data.foundations.mind),
+          payload.data.foundations.mindOpen,
           sessionId,
           pillars.SOUL,
-          JSON.stringify(basePayload.data.foundations.soul),
-          basePayload.data.foundations.soulOpen,
+          JSON.stringify(payload.data.foundations.soul),
+          payload.data.foundations.soulOpen,
         ]);
         return { rowCount: 3 };
       },
@@ -183,23 +198,23 @@ function createSubmitExpectations(options: { xpBonusRowCount: number }) {
         expect(params).toEqual([
           userId,
           pillars.BODY,
-          basePayload.xp.Body,
+          expectedXp.body,
           expect.any(String),
           userId,
           pillars.MIND,
-          basePayload.xp.Mind,
+          expectedXp.mind,
           expect.any(String),
           userId,
           pillars.SOUL,
-          basePayload.xp.Soul,
+          expectedXp.soul,
           expect.any(String),
         ]);
 
         const meta = JSON.parse(params?.[3] as string);
         expect(meta).toMatchObject({
           onboarding_session_id: sessionId,
-          ts: basePayload.ts,
-          client_id: basePayload.client_id,
+          ts: payload.ts,
+          client_id: payload.client_id,
         });
 
         return { rowCount: options.xpBonusRowCount };
@@ -245,6 +260,37 @@ describe('submitOnboardingIntro', () => {
     const result = await submitOnboardingIntro('user_123', basePayload);
 
     expect(result).toEqual({ sessionId: 'session-1', awarded: false });
+    expect(expectations).toHaveLength(0);
+    expect(withClientSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('rounds XP values and enforces consistency before persisting', async () => {
+    const payload: OnboardingIntroPayload = {
+      ...basePayload,
+      xp: {
+        total: 109.98,
+        Body: 36.66,
+        Mind: 36.66,
+        Soul: 36.66,
+      },
+    };
+
+    const expectations = createSubmitExpectations({
+      xpBonusRowCount: 3,
+      payload,
+      expectedXp: { total: 111, body: 37, mind: 37, soul: 37 },
+    });
+
+    mockClient.query.mockImplementation(async (sql, params) => {
+      const expectation = expectations.shift();
+      expect(expectation, `Unexpected query: ${sql}`).toBeDefined();
+      expect(expectation?.match(sql)).toBe(true);
+      return expectation!.handle(sql, params);
+    });
+
+    const result = await submitOnboardingIntro('user_123', payload);
+
+    expect(result).toEqual({ sessionId: 'session-1', awarded: true });
     expect(expectations).toHaveLength(0);
     expect(withClientSpy).toHaveBeenCalledTimes(1);
   });
