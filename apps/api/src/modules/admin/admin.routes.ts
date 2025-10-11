@@ -5,6 +5,7 @@ import {
   getAdminMe,
   getAdminUserInsights,
   getAdminUserLogs,
+  getAdminUserTaskStats,
   getAdminUserTasks,
   getAdminUsers,
   patchAdminUserTask,
@@ -19,6 +20,7 @@ adminRouter.get('/users', getAdminUsers);
 adminRouter.get('/users/:userId/insights', getAdminUserInsights);
 adminRouter.get('/users/:userId/logs', getAdminUserLogs);
 adminRouter.get('/users/:userId/tasks', getAdminUserTasks);
+adminRouter.get('/users/:userId/task-stats', getAdminUserTaskStats);
 adminRouter.patch('/users/:userId/tasks/:taskId', patchAdminUserTask);
 adminRouter.get('/users/:userId/logs.csv', exportAdminUserLogsCsv);
 

@@ -40,6 +40,8 @@ export const tasksQuerySchema = z.object({
   q: z.string().trim().min(1).max(200).optional(),
 });
 
+export const taskStatsQuerySchema = logFiltersSchema.omit({ sort: true }).extend({});
+
 export const updateTaskBodySchema = z
   .object({
     weeklyTarget: z.number().int().min(0).max(10_000).optional(),
@@ -54,4 +56,5 @@ export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
 export type LogsQuery = z.infer<typeof logsQuerySchema>;
 export type InsightQuery = z.infer<typeof insightQuerySchema>;
 export type TasksQuery = z.infer<typeof tasksQuerySchema>;
+export type TaskStatsQuery = z.infer<typeof taskStatsQuerySchema>;
 export type UpdateTaskBody = z.infer<typeof updateTaskBodySchema>;

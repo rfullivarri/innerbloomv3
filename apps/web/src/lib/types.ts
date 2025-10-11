@@ -52,3 +52,17 @@ export type AdminTaskRow = {
   createdAt: string;
   archived: boolean;
 };
+
+export type AdminTaskSummaryRow = {
+  taskId: string;
+  taskName: string;
+  pillar: string;
+  trait: string;
+  difficulty: string;
+  totalXp: number;
+  totalCompletions: number;
+  daysActive: number;
+  firstCompletedAt: string | null;
+  lastCompletedAt: string | null;
+  state: 'red' | 'yellow' | 'green';
+};
