@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
 import type { Answers, XP } from '../state';
 import { NavButtons } from '../ui/NavButtons';
 
@@ -9,8 +10,55 @@ interface SummaryStepProps {
   onFinish: () => void;
 }
 
-function formatList(values: readonly string[]) {
-  return values.length > 0 ? values.join(', ') : '—';
+function SummarySection({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+      <header className="border-b border-white/5 pb-3">
+        <p className="text-xs uppercase tracking-[0.35em] text-white/50">{title}</p>
+        {subtitle ? <p className="mt-1 text-xs text-white/60">{subtitle}</p> : null}
+      </header>
+      <div className="mt-4 space-y-3 text-sm text-white/80">{children}</div>
+    </section>
+  );
+}
+
+function PillList({ label, values }: { label: string; values: readonly string[] }) {
+  const hasValues = values.length > 0;
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-wide text-white/50">{label}</p>
+      {hasValues ? (
+        <ul className="mt-2 flex flex-wrap gap-2">
+          {values.map((value) => (
+            <li
+              key={value}
+              className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white"
+            >
+              {value}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-sm text-white/50">—</p>
+      )}
+    </div>
+  );
+}
+
+function TextRow({ label, value }: { label: string; value: string }) {
+  return (
+    <p>
+      <span className="font-semibold text-white">{label}:</span> {value || '—'}
+    </p>
+  );
 }
 
 export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps) {
@@ -18,64 +66,73 @@ export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps)
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-      <div className="glass-card mx-auto max-w-3xl rounded-3xl border border-white/5 bg-slate-900/70 p-6">
+      <div className="glass-card mx-auto max-w-5xl rounded-3xl border border-white/5 bg-slate-900/70 p-6 sm:p-8">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
           <p className="text-xs uppercase tracking-[0.35em] text-white/50">Summary</p>
           <h2 className="text-3xl font-semibold text-white">Tu recorrido</h2>
           <p className="text-sm text-white/70">Revisá tu plan antes de enviarlo. Podés volver atrás para ajustar.</p>
         </header>
-        <div className="mt-6 space-y-4 text-sm text-white/80">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.35em] text-white/50">Datos base</p>
-            <p><strong>Email:</strong> {answers.email || '—'}</p>
-            <p><strong>Game Mode:</strong> {mode ?? '—'}</p>
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <div className="space-y-5">
+            <SummarySection title="Datos base">
+              <TextRow label="Email" value={answers.email} />
+              <TextRow label="Game Mode" value={mode ?? '—'} />
+            </SummarySection>
+            {mode === 'LOW' ? (
+              <SummarySection title="LOW" subtitle="Tu plan para recuperar energía">
+                <PillList label="Body" values={answers.low.body} />
+                <PillList label="Soul" values={answers.low.soul} />
+                <PillList label="Mind" values={answers.low.mind} />
+                {answers.low.note ? (
+                  <p className="rounded-2xl border border-white/10 bg-white/5 p-3 text-sm text-white/80">
+                    <span className="font-semibold text-white">Nota personal:</span> {answers.low.note}
+                  </p>
+                ) : null}
+              </SummarySection>
+            ) : null}
+            {mode === 'CHILL' ? (
+              <SummarySection title="CHILL" subtitle="Equilibrio con intención clara">
+                <TextRow label="Objetivo" value={answers.chill.oneThing} />
+                <PillList label="Motivaciones" values={answers.chill.motiv} />
+              </SummarySection>
+            ) : null}
+            {mode === 'FLOW' ? (
+              <SummarySection title="FLOW" subtitle="Entrá en ritmo sostenido">
+                <TextRow label="Objetivo" value={answers.flow.goal} />
+                <PillList label="Lo que bloquea" values={answers.flow.imped} />
+              </SummarySection>
+            ) : null}
+            {mode === 'EVOLVE' ? (
+              <SummarySection title="EVOLVE" subtitle="Transformación nivel experto">
+                <TextRow label="Objetivo" value={answers.evolve.goal} />
+                <PillList label="Ajustes" values={answers.evolve.trade} />
+                <TextRow label="Actitud" value={answers.evolve.att} />
+              </SummarySection>
+            ) : null}
+            {mode && mode !== 'LOW' ? (
+              <SummarySection title="Foundations" subtitle="Tus anclas para sostener el avance">
+                <PillList label="Body" values={answers.foundations.body} />
+                <PillList label="Soul" values={answers.foundations.soul} />
+                <PillList label="Mind" values={answers.foundations.mind} />
+              </SummarySection>
+            ) : null}
           </div>
-          {mode === 'LOW' ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.35em] text-white/50">LOW</p>
-              <p><strong>Body:</strong> {formatList(answers.low.body)}</p>
-              <p><strong>Soul:</strong> {formatList(answers.low.soul)}</p>
-              <p><strong>Mind:</strong> {formatList(answers.low.mind)}</p>
-              {answers.low.note ? <p><strong>Nota:</strong> {answers.low.note}</p> : null}
-            </div>
-          ) : null}
-          {mode === 'CHILL' ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.35em] text-white/50">CHILL</p>
-              <p><strong>Objetivo:</strong> {answers.chill.oneThing || '—'}</p>
-              <p><strong>Motivaciones:</strong> {formatList(answers.chill.motiv)}</p>
-            </div>
-          ) : null}
-          {mode === 'FLOW' ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.35em] text-white/50">FLOW</p>
-              <p><strong>Objetivo:</strong> {answers.flow.goal || '—'}</p>
-              <p><strong>Impedimentos:</strong> {formatList(answers.flow.imped)}</p>
-            </div>
-          ) : null}
-          {mode === 'EVOLVE' ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.35em] text-white/50">EVOLVE</p>
-              <p><strong>Objetivo:</strong> {answers.evolve.goal || '—'}</p>
-              <p><strong>Ajustes:</strong> {formatList(answers.evolve.trade)}</p>
-              <p><strong>Actitud:</strong> {answers.evolve.att || '—'}</p>
-            </div>
-          ) : null}
-          {mode && mode !== 'LOW' ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.35em] text-white/50">Foundations</p>
-              <p><strong>Body:</strong> {formatList(answers.foundations.body)}</p>
-              <p><strong>Soul:</strong> {formatList(answers.foundations.soul)}</p>
-              <p><strong>Mind:</strong> {formatList(answers.foundations.mind)}</p>
-            </div>
-          ) : null}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white">
-            <p className="text-xs uppercase tracking-[0.35em] text-white/50">XP</p>
-            <p><strong>Body:</strong> {Math.round(xp.Body)} XP</p>
-            <p><strong>Mind:</strong> {Math.round(xp.Mind)} XP</p>
-            <p><strong>Soul:</strong> {Math.round(xp.Soul)} XP</p>
-            <p className="mt-2 text-base font-semibold">Total: {Math.round(xp.total)} XP</p>
-          </div>
+          <aside className="space-y-5">
+            <SummarySection title="XP" subtitle="Cómo se reparte tu progreso">
+              <div className="space-y-2 text-sm text-white">
+                <p>
+                  <span className="font-semibold text-white">Body:</span> {Math.round(xp.Body)} XP
+                </p>
+                <p>
+                  <span className="font-semibold text-white">Mind:</span> {Math.round(xp.Mind)} XP
+                </p>
+                <p>
+                  <span className="font-semibold text-white">Soul:</span> {Math.round(xp.Soul)} XP
+                </p>
+                <p className="mt-3 text-base font-semibold text-white">Total: {Math.round(xp.total)} XP</p>
+              </div>
+            </SummarySection>
+          </aside>
         </div>
         <NavButtons onBack={onBack} onConfirm={onFinish} confirmLabel="Generar plan" />
       </div>

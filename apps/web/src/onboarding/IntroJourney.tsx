@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 import { STEP_XP, FORM_LABELS, CHECKLIST_LIMITS, OPEN_TEXT_XP } from './constants';
 import { buildPayload } from './payload';
 import { useOnboarding } from './state';
@@ -38,12 +39,14 @@ export function IntroJourney({ onFinish }: IntroJourneyProps) {
     setEvolveAtt,
     awardChecklist,
     awardOpen,
+    reset,
   } = useOnboarding();
   const { route, currentStepIndex, answers, xp, awardedChecklists, awardedOpen } = state;
   const stepId = route[currentStepIndex] ?? 'clerk-gate';
   const totalSteps = route.length;
   const [snack, setSnack] = useState<string | null>(null);
   const { isLoaded: authLoaded, isSignedIn } = useAuth();
+  const navigate = useNavigate();
   const hasRecordedSession = useRef(false);
   const [shouldAutoAdvance, setShouldAutoAdvance] = useState(false);
 
@@ -108,6 +111,17 @@ export function IntroJourney({ onFinish }: IntroJourneyProps) {
     const payload = buildPayload(answers, xp);
     console.log('[onboarding] payload', payload);
     onFinish?.(payload);
+  };
+
+  const handleRestart = () => {
+    reset();
+    setShouldAutoAdvance(Boolean(isSignedIn));
+    setSnack(null);
+  };
+
+  const handleExit = () => {
+    handleRestart();
+    navigate('/');
   };
 
   const renderStep = () => {
@@ -348,7 +362,14 @@ export function IntroJourney({ onFinish }: IntroJourneyProps) {
 
   return (
     <div className="relative flex min-h-screen flex-col bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-16">
-      <HUD mode={answers.mode} stepIndex={currentStepIndex} totalSteps={totalSteps} xp={xp} />
+      <HUD
+        mode={answers.mode}
+        stepIndex={currentStepIndex}
+        totalSteps={totalSteps}
+        xp={xp}
+        onRestart={handleRestart}
+        onExit={handleExit}
+      />
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6">
         <div className="space-y-8" key={stepId}>
           {renderStep()}
