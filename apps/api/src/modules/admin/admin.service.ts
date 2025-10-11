@@ -70,7 +70,6 @@ type UserProfileRow = {
   user_id: string;
   email_primary: string | null;
   full_name: string | null;
-  game_mode: string | null;
   game_mode_code: string | null;
   created_at: string | Date;
 };
@@ -325,14 +324,11 @@ export async function listUsers(query: ListUsersQuery): Promise<PaginatedResult<
     `SELECT u.user_id,
             u.email_primary,
             u.full_name,
-            u.game_mode,
-            COALESCE(gm_id.code, gm_code.code) AS game_mode_code,
+            gm_id.code AS game_mode_code,
             u.created_at
        FROM users u
   LEFT JOIN cat_game_mode gm_id
          ON gm_id.game_mode_id = u.game_mode_id
-  LEFT JOIN cat_game_mode gm_code
-         ON gm_code.code = u.game_mode
       ${whereClause}
    ORDER BY u.created_at DESC
       LIMIT $${limitIndex} OFFSET $${offsetIndex}`,
@@ -343,7 +339,7 @@ export async function listUsers(query: ListUsersQuery): Promise<PaginatedResult<
     id: row.user_id,
     email: row.email_primary ?? null,
     name: row.full_name ?? null,
-    gameMode: row.game_mode ?? row.game_mode_code ?? null,
+    gameMode: row.game_mode_code ?? null,
     createdAt: formatDate(row.created_at),
   }));
 
@@ -582,14 +578,11 @@ export async function getUserInsights(userId: string, _query: InsightQuery): Pro
     `SELECT u.user_id,
             u.email_primary,
             u.full_name,
-            u.game_mode,
-            COALESCE(gm_id.code, gm_code.code) AS game_mode_code,
+            gm_id.code AS game_mode_code,
             u.created_at
        FROM users u
   LEFT JOIN cat_game_mode gm_id
          ON gm_id.game_mode_id = u.game_mode_id
-  LEFT JOIN cat_game_mode gm_code
-         ON gm_code.code = u.game_mode
       WHERE u.user_id = $1
       LIMIT 1`,
     [userId],
@@ -662,7 +655,7 @@ export async function getUserInsights(userId: string, _query: InsightQuery): Pro
       id: profileRow.user_id,
       email: profileRow.email_primary ?? null,
       name: profileRow.full_name ?? null,
-      gameMode: profileRow.game_mode ?? profileRow.game_mode_code ?? null,
+      gameMode: profileRow.game_mode_code ?? null,
       createdAt: formatDate(profileRow.created_at),
     },
     level: {

@@ -167,8 +167,7 @@ export const getUserPillars: AsyncHandler = async (req, res) => {
     `SELECT COALESCE(gm.weekly_target, u.weekly_target) AS weekly_target
        FROM users u
   LEFT JOIN cat_game_mode gm
-         ON (gm.game_mode_id = u.game_mode_id)
-         OR (gm.code = u.game_mode)
+         ON gm.game_mode_id = u.game_mode_id
       WHERE u.user_id = $1
       LIMIT 1`,
     [id],
