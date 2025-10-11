@@ -480,7 +480,10 @@ function normalizePillarMetrics(rows: PillarMetricRow[], { preferWeekly }: { pre
   mind: number;
   soul: number;
 } {
-  const totals: Record<(typeof PILLAR_KEYS)[number], number> = { body: 0, mind: 0, soul: 0 };
+  const totals = Object.fromEntries(PILLAR_KEYS.map((pillar) => [pillar, 0])) as Record<
+    (typeof PILLAR_KEYS)[number],
+    number
+  >;
 
   for (const row of rows) {
     const pillar = pillarFromRow(row);
@@ -533,6 +536,7 @@ function normalizeEmotionTimeline(rows: EmotionRow[]) {
 }
 
 export async function getUserInsights(userId: string, _query: InsightQuery): Promise<AdminInsights> {
+  void _query;
   const profileResult = await pool.query<UserProfileRow>(
     `SELECT u.user_id,
             u.email_primary,
@@ -855,6 +859,9 @@ export async function updateUserTask(
   _taskId: string,
   _body: UpdateTaskBody,
 ): Promise<{ ok: true }> {
+  void _userId;
+  void _taskId;
+  void _body;
   // TODO: Implement task editing once the admin workflow is finalized.
   return { ok: true };
 }
