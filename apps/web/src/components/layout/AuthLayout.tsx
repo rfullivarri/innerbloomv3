@@ -28,7 +28,7 @@ export function AuthLayout({
         <div className="absolute -left-24 top-32 h-72 w-72 rounded-full bg-[#a855f7]/30 blur-[140px]" />
         <div className="absolute -right-32 bottom-10 h-80 w-80 rounded-full bg-[#0ea5e9]/30 blur-[160px]" />
       </div>
-      <div className="relative z-10 mx-auto w-full min-w-0 max-w-5xl rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_30px_120px_rgba(15,23,42,0.45)] backdrop-blur-3xl sm:rounded-[32px] sm:p-7 md:p-10">
+      <div className="relative z-10 mx-auto w-full min-w-0 max-w-5xl overflow-hidden rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_30px_120px_rgba(15,23,42,0.45)] backdrop-blur-3xl sm:rounded-[32px] sm:p-7 md:p-10">
         <div className="flex min-w-0 flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16">
           <div className="flex flex-col justify-between gap-8 lg:gap-10">
             <div className="flex flex-col gap-5 sm:gap-6">
