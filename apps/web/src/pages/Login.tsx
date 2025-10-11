@@ -17,9 +17,6 @@ export default function LoginPage() {
       <div className="mx-auto w-full min-w-0 max-w-[min(100%,420px)]">
         <SignIn
           appearance={createAuthAppearance({
-            layout: {
-              showOptionalFields: false
-            },
             elements: {
               footerActionText: 'text-white/50',
               footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4'
