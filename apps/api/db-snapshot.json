@@ -34,11 +34,27 @@
         "table_type": "BASE TABLE"
       },
       {
+        "table_name": "onboarding_answers",
+        "table_type": "BASE TABLE"
+      },
+      {
+        "table_name": "onboarding_foundations",
+        "table_type": "BASE TABLE"
+      },
+      {
+        "table_name": "onboarding_session",
+        "table_type": "BASE TABLE"
+      },
+      {
         "table_name": "tasks",
         "table_type": "BASE TABLE"
       },
       {
         "table_name": "users",
+        "table_type": "BASE TABLE"
+      },
+      {
+        "table_name": "xp_bonus",
         "table_type": "BASE TABLE"
       }
     ],
@@ -232,7 +248,7 @@
         "column_name": "log_id",
         "data_type": "uuid",
         "is_nullable": "NO",
-        "column_default": null,
+        "column_default": "gen_random_uuid()",
         "ordinal_position": 1
       },
       {
@@ -280,7 +296,7 @@
         "column_name": "emotion_log_id",
         "data_type": "uuid",
         "is_nullable": "NO",
-        "column_default": null,
+        "column_default": "gen_random_uuid()",
         "ordinal_position": 1
       },
       {
@@ -314,6 +330,182 @@
         "is_nullable": "NO",
         "column_default": "now()",
         "ordinal_position": 5
+      },
+      {
+        "table_name": "onboarding_answers",
+        "column_name": "onboarding_answers_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "onboarding_answers",
+        "column_name": "onboarding_session_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "onboarding_answers",
+        "column_name": "payload",
+        "data_type": "jsonb",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "onboarding_answers",
+        "column_name": "version",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "'v1'::text",
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "onboarding_answers",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 5
+      },
+      {
+        "table_name": "onboarding_foundations",
+        "column_name": "onboarding_foundations_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "onboarding_foundations",
+        "column_name": "onboarding_session_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "onboarding_foundations",
+        "column_name": "pillar_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "onboarding_foundations",
+        "column_name": "items",
+        "data_type": "ARRAY",
+        "is_nullable": "NO",
+        "column_default": "'{}'::text[]",
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "onboarding_foundations",
+        "column_name": "open_text",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "''::text",
+        "ordinal_position": 5
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "onboarding_session_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "client_id",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "game_mode_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "xp_total",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "0",
+        "ordinal_position": 5
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "xp_body",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "0",
+        "ordinal_position": 6
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "xp_mind",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "0",
+        "ordinal_position": 7
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "xp_soul",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "0",
+        "ordinal_position": 8
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "email",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 9
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "meta",
+        "data_type": "jsonb",
+        "is_nullable": "NO",
+        "column_default": "'{}'::jsonb",
+        "ordinal_position": 10
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 11
+      },
+      {
+        "table_name": "onboarding_session",
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 12
       },
       {
         "table_name": "pg_stat_statements",
@@ -1172,6 +1364,22 @@
         "ordinal_position": 2
       },
       {
+        "table_name": "v_user_total_xp_plus",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "v_user_total_xp_plus",
+        "column_name": "total_xp",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
         "table_name": "v_user_xp_by_pillar",
         "column_name": "user_id",
         "data_type": "uuid",
@@ -1189,6 +1397,30 @@
       },
       {
         "table_name": "v_user_xp_by_pillar",
+        "column_name": "xp",
+        "data_type": "bigint",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "v_user_xp_by_pillar_plus",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "v_user_xp_by_pillar_plus",
+        "column_name": "pillar_code",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "v_user_xp_by_pillar_plus",
         "column_name": "xp",
         "data_type": "bigint",
         "is_nullable": "YES",
@@ -1322,6 +1554,62 @@
         "is_nullable": "YES",
         "column_default": null,
         "ordinal_position": 13
+      },
+      {
+        "table_name": "xp_bonus",
+        "column_name": "xp_bonus_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "ordinal_position": 1
+      },
+      {
+        "table_name": "xp_bonus",
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "table_name": "xp_bonus",
+        "column_name": "pillar_id",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "table_name": "xp_bonus",
+        "column_name": "source",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "table_name": "xp_bonus",
+        "column_name": "amount",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 5
+      },
+      {
+        "table_name": "xp_bonus",
+        "column_name": "meta",
+        "data_type": "jsonb",
+        "is_nullable": "NO",
+        "column_default": "'{}'::jsonb",
+        "ordinal_position": 6
+      },
+      {
+        "table_name": "xp_bonus",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 7
       }
     ],
     "views": [
@@ -1358,8 +1646,16 @@
         "view_definition": " SELECT user_id,\n    sum(xp_day) AS total_xp\n   FROM v_user_daily_xp\n  GROUP BY user_id;"
       },
       {
+        "view_name": "v_user_total_xp_plus",
+        "view_definition": " SELECT u.user_id,\n    ((COALESCE(v.total_xp, (0)::numeric))::bigint + COALESCE(b.bonus_total, (0)::bigint)) AS total_xp\n   FROM ((users u\n     LEFT JOIN v_user_total_xp v ON ((v.user_id = u.user_id)))\n     LEFT JOIN ( SELECT xp_bonus.user_id,\n            sum(xp_bonus.amount) AS bonus_total\n           FROM xp_bonus\n          GROUP BY xp_bonus.user_id) b ON ((b.user_id = u.user_id)));"
+      },
+      {
         "view_name": "v_user_xp_by_pillar",
         "view_definition": " SELECT dl.user_id,\n    cp.code AS pillar_code,\n    sum((cd.xp_base * GREATEST(dl.quantity, 1))) AS xp\n   FROM (((daily_log dl\n     JOIN tasks t ON ((t.task_id = dl.task_id)))\n     JOIN cat_difficulty cd ON ((cd.difficulty_id = t.difficulty_id)))\n     JOIN cat_pillar cp ON ((cp.pillar_id = t.pillar_id)))\n  GROUP BY dl.user_id, cp.code;"
+      },
+      {
+        "view_name": "v_user_xp_by_pillar_plus",
+        "view_definition": " WITH base AS (\n         SELECT v_user_xp_by_pillar.user_id,\n            v_user_xp_by_pillar.pillar_code,\n            v_user_xp_by_pillar.xp\n           FROM v_user_xp_by_pillar\n        ), bonus AS (\n         SELECT xb.user_id,\n            cp.code AS pillar_code,\n            sum(xb.amount) AS xp\n           FROM (xp_bonus xb\n             JOIN cat_pillar cp ON ((cp.pillar_id = xb.pillar_id)))\n          GROUP BY xb.user_id, cp.code\n        )\n SELECT COALESCE(b.user_id, bn.user_id) AS user_id,\n    COALESCE(b.pillar_code, bn.pillar_code) AS pillar_code,\n    (COALESCE(b.xp, (0)::bigint) + COALESCE(bn.xp, (0)::bigint)) AS xp\n   FROM (base b\n     FULL JOIN bonus bn ON (((bn.user_id = b.user_id) AND (bn.pillar_code = b.pillar_code))));"
       },
       {
         "view_name": "v_user_xp_today",
@@ -1438,13 +1734,13 @@
       },
       {
         "table_name": "daily_log",
-        "index_name": "ix_daily_log_user_date",
-        "index_definition": "CREATE INDEX ix_daily_log_user_date ON public.daily_log USING btree (user_id, date)"
+        "index_name": "daily_log_user_task_date_key",
+        "index_definition": "CREATE UNIQUE INDEX daily_log_user_task_date_key ON public.daily_log USING btree (user_id, task_id, date)"
       },
       {
         "table_name": "daily_log",
-        "index_name": "ix_daily_log_user_task_date",
-        "index_definition": "CREATE INDEX ix_daily_log_user_task_date ON public.daily_log USING btree (user_id, task_id, date)"
+        "index_name": "ix_daily_log_user_date",
+        "index_definition": "CREATE INDEX ix_daily_log_user_date ON public.daily_log USING btree (user_id, date)"
       },
       {
         "table_name": "emotions_logs",
@@ -1453,8 +1749,38 @@
       },
       {
         "table_name": "emotions_logs",
-        "index_name": "ix_emotions_logs_user_date",
-        "index_definition": "CREATE INDEX ix_emotions_logs_user_date ON public.emotions_logs USING btree (user_id, date)"
+        "index_name": "emotions_logs_user_date_key",
+        "index_definition": "CREATE UNIQUE INDEX emotions_logs_user_date_key ON public.emotions_logs USING btree (user_id, date)"
+      },
+      {
+        "table_name": "onboarding_answers",
+        "index_name": "onboarding_answers_pkey",
+        "index_definition": "CREATE UNIQUE INDEX onboarding_answers_pkey ON public.onboarding_answers USING btree (onboarding_answers_id)"
+      },
+      {
+        "table_name": "onboarding_foundations",
+        "index_name": "onboarding_foundations_pkey",
+        "index_definition": "CREATE UNIQUE INDEX onboarding_foundations_pkey ON public.onboarding_foundations USING btree (onboarding_foundations_id)"
+      },
+      {
+        "table_name": "onboarding_foundations",
+        "index_name": "ux_onb_foundations_session_pillar",
+        "index_definition": "CREATE UNIQUE INDEX ux_onb_foundations_session_pillar ON public.onboarding_foundations USING btree (onboarding_session_id, pillar_id)"
+      },
+      {
+        "table_name": "onboarding_session",
+        "index_name": "ix_onb_session_user",
+        "index_definition": "CREATE INDEX ix_onb_session_user ON public.onboarding_session USING btree (user_id)"
+      },
+      {
+        "table_name": "onboarding_session",
+        "index_name": "onboarding_session_pkey",
+        "index_definition": "CREATE UNIQUE INDEX onboarding_session_pkey ON public.onboarding_session USING btree (onboarding_session_id)"
+      },
+      {
+        "table_name": "onboarding_session",
+        "index_name": "ux_onboarding_session",
+        "index_definition": "CREATE UNIQUE INDEX ux_onboarding_session ON public.onboarding_session USING btree (user_id, client_id)"
       },
       {
         "table_name": "tasks",
@@ -1505,6 +1831,21 @@
         "table_name": "users",
         "index_name": "users_tasks_group_id_uq",
         "index_definition": "CREATE UNIQUE INDEX users_tasks_group_id_uq ON public.users USING btree (tasks_group_id)"
+      },
+      {
+        "table_name": "xp_bonus",
+        "index_name": "ix_xp_bonus_user",
+        "index_definition": "CREATE INDEX ix_xp_bonus_user ON public.xp_bonus USING btree (user_id)"
+      },
+      {
+        "table_name": "xp_bonus",
+        "index_name": "ux_xp_bonus_user_source_pillar",
+        "index_definition": "CREATE UNIQUE INDEX ux_xp_bonus_user_source_pillar ON public.xp_bonus USING btree (user_id, source, pillar_id)"
+      },
+      {
+        "table_name": "xp_bonus",
+        "index_name": "xp_bonus_pkey",
+        "index_definition": "CREATE UNIQUE INDEX xp_bonus_pkey ON public.xp_bonus USING btree (xp_bonus_id)"
       }
     ],
     "foreign_keys": [
@@ -1549,6 +1890,46 @@
         "ordinal_position": 1
       },
       {
+        "constraint_name": "onboarding_answers_onboarding_session_id_fkey",
+        "source_table": "onboarding_answers",
+        "source_column": "onboarding_session_id",
+        "target_table": "onboarding_session",
+        "target_column": "onboarding_session_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "onboarding_foundations_onboarding_session_id_fkey",
+        "source_table": "onboarding_foundations",
+        "source_column": "onboarding_session_id",
+        "target_table": "onboarding_session",
+        "target_column": "onboarding_session_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "onboarding_foundations_pillar_id_fkey",
+        "source_table": "onboarding_foundations",
+        "source_column": "pillar_id",
+        "target_table": "cat_pillar",
+        "target_column": "pillar_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "onboarding_session_game_mode_id_fkey",
+        "source_table": "onboarding_session",
+        "source_column": "game_mode_id",
+        "target_table": "cat_game_mode",
+        "target_column": "game_mode_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "onboarding_session_user_id_fkey",
+        "source_table": "onboarding_session",
+        "source_column": "user_id",
+        "target_table": "users",
+        "target_column": "user_id",
+        "ordinal_position": 1
+      },
+      {
         "constraint_name": "tasks_difficulty_id_fkey",
         "source_table": "tasks",
         "source_column": "difficulty_id",
@@ -1586,6 +1967,22 @@
         "source_column": "game_mode_id",
         "target_table": "cat_game_mode",
         "target_column": "game_mode_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "xp_bonus_pillar_id_fkey",
+        "source_table": "xp_bonus",
+        "source_column": "pillar_id",
+        "target_table": "cat_pillar",
+        "target_column": "pillar_id",
+        "ordinal_position": 1
+      },
+      {
+        "constraint_name": "xp_bonus_user_id_fkey",
+        "source_table": "xp_bonus",
+        "source_column": "user_id",
+        "target_table": "users",
+        "target_column": "user_id",
         "ordinal_position": 1
       }
     ]
@@ -1955,6 +2352,29 @@
           }
         },
         "received_at": "2025-10-10 14:02:03.927153+00"
+      },
+      {
+        "id": "5",
+        "svix_id": "msg_33w1cdIMKW9LUzUGXGpN8iD2v5b",
+        "event_type": "user.deleted",
+        "payload": {
+          "data": {
+            "id": "user_33pDtRRpyRIcHtMHzdAfHb4LHoT",
+            "object": "user",
+            "deleted": true
+          },
+          "type": "user.deleted",
+          "object": "event",
+          "timestamp": 1760213400594,
+          "instance_id": "ins_33ZxGnRAjDabYXW8HTspY2znjCZ",
+          "event_attributes": {
+            "http_request": {
+              "client_ip": "2600:1900:0:2d05::601",
+              "user_agent": "clerk/clerk-sdk-go@v3.0.0"
+            }
+          }
+        },
+        "received_at": "2025-10-11 20:10:01.768157+00"
       }
     ],
     "daily_log": [
@@ -2711,6 +3131,9 @@
         "created_at": "2025-10-06 21:58:09.489889+00"
       }
     ],
+    "onboarding_answers": [],
+    "onboarding_foundations": [],
+    "onboarding_session": [],
     "tasks": [
       {
         "task_id": "da3b649b-4612-46be-b39b-f4cfafea45b8",
@@ -3156,7 +3579,8 @@
         "avatar_url": "https://img.clerk.com/xxxxxx",
         "deleted_at": null
       }
-    ]
+    ],
+    "xp_bonus": []
   },
-  "generated_at": "2025-10-10T14:41:44.077Z"
+  "generated_at": "2025-10-11T20:12:04.015Z"
 }
