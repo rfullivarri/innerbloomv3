@@ -11,7 +11,7 @@ const UPSERT_SESSION_SQL = `
 INSERT INTO onboarding_session
   (user_id, client_id, game_mode_id, xp_total, xp_body, xp_mind, xp_soul, email, meta)
 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)
-ON CONFLICT (user_id, client_id)
+ON CONFLICT ON CONSTRAINT ux_onboarding_session
 DO UPDATE SET
   game_mode_id = EXCLUDED.game_mode_id,
   xp_total     = EXCLUDED.xp_total,
@@ -33,7 +33,7 @@ const UPSERT_FOUNDATIONS_SQL = `
 INSERT INTO onboarding_foundations
   (onboarding_session_id, pillar_id, items, open_text)
 VALUES ($1,$2,$3,$4)
-ON CONFLICT (onboarding_session_id, pillar_id)
+ON CONFLICT ON CONSTRAINT ux_onb_foundations_session_pillar
 DO UPDATE SET
   items     = EXCLUDED.items,
   open_text = EXCLUDED.open_text;
@@ -44,7 +44,8 @@ const INSERT_XP_BONUS_SQL = `
 INSERT INTO xp_bonus
   (user_id, pillar_id, source, amount, meta)
 VALUES ($1,$2,'onboarding',$3,$4::jsonb)
-ON CONFLICT (user_id, source, pillar_id) DO NOTHING;
+ON CONFLICT ON CONSTRAINT ux_xp_bonus_user_source_pillar
+DO NOTHING;
 `;
 const SELECT_LATEST_SESSION_SQL = `
   SELECT
