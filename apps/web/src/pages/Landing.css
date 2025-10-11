@@ -1,3 +1,9 @@
+@property --gradient-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 120deg;
+}
+
 .landing {
   --font-heading: 'Sora', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   --font-body: 'Manrope', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
@@ -22,6 +28,7 @@
   font-family: var(--font-body);
   color: var(--ink);
   background: var(--bg);
+  isolation: isolate;
 }
 
 .landing::before {
@@ -31,15 +38,21 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(1200px 780px at 12% 8%, var(--glow-1), transparent 68%) no-repeat,
-    radial-gradient(980px 680px at 88% 6%, var(--glow-2), transparent 70%) no-repeat,
-    conic-gradient(from 120deg at 50% 40%, rgba(139, 92, 246, 0.14), rgba(56, 189, 248, 0.08), rgba(15, 23, 42, 0.6), rgba(56, 189, 248, 0.12), rgba(139, 92, 246, 0.16));
+    radial-gradient(1200px 780px at 12% 8%, var(--glow-1), transparent 72%) no-repeat,
+    radial-gradient(960px 680px at 88% 6%, var(--glow-2), transparent 70%) no-repeat,
+    conic-gradient(from 120deg at 50% 40%, rgba(139, 92, 246, 0.16), rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.75), rgba(56, 189, 248, 0.18), rgba(139, 92, 246, 0.2));
+  background:
+    radial-gradient(1200px 780px at 12% 8%, color-mix(in srgb, var(--glow-1) 68%, transparent), transparent 72%) no-repeat,
+    radial-gradient(960px 680px at 88% 6%, color-mix(in srgb, var(--glow-2) 64%, transparent), transparent 70%) no-repeat,
+    conic-gradient(from var(--gradient-angle, 120deg) at 50% 40%, rgba(139, 92, 246, 0.16), rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.75), rgba(56, 189, 248, 0.18), rgba(139, 92, 246, 0.2));
   background-position: 12% 8%, 88% 6%, center;
-  background-size: 1200px 820px, 1280px 960px, 180% 180%;
+  background-size: 1400px 900px, 1320px 900px, 220% 220%;
   transform: translateZ(0);
-  filter: saturate(1.12);
+  filter: saturate(1.12) blur(0.4px);
   will-change: transform, background-position, background-size;
-  animation: auroraDrift 24s ease-in-out infinite alternate;
+  mix-blend-mode: screen;
+  animation: auroraDrift 26s ease-in-out infinite alternate,
+    auroraRotate 48s linear infinite;
 }
 
 .landing::after {
@@ -51,12 +64,15 @@
   background:
     radial-gradient(820px 520px at 50% 18%, rgba(148, 163, 255, 0.22), transparent 65%) no-repeat,
     radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.28) 0, transparent 65%),
-    radial-gradient(1.5px 1.5px at 70% 62%, rgba(148, 163, 255, 0.2) 0, transparent 70%);
-  background-repeat: no-repeat, repeat, repeat;
-  background-size: 100% 100%, 420px 420px, 560px 560px;
+    radial-gradient(1.5px 1.5px at 70% 62%, rgba(148, 163, 255, 0.2) 0, transparent 70%),
+    radial-gradient(900px 640px at 62% 80%, rgba(139, 92, 246, 0.25), transparent 70%) no-repeat;
+  background-repeat: no-repeat, repeat, repeat, no-repeat;
+  background-size: 100% 100%, 420px 420px, 560px 560px, 1200px 820px;
   mix-blend-mode: screen;
-  will-change: transform, opacity, background-position;
-  animation: auroraPulse 10s ease-in-out infinite alternate, starDrift 36s linear infinite;
+  will-change: transform, opacity, background-position, background-size;
+  animation: auroraPulse 12s ease-in-out infinite alternate,
+    starDrift 36s linear infinite,
+    auroraWave 32s ease-in-out infinite;
 }
 
 .landing > * {
@@ -515,12 +531,47 @@
   }
 }
 
+@keyframes auroraRotate {
+  0% {
+    --gradient-angle: 60deg;
+  }
+  50% {
+    --gradient-angle: 320deg;
+  }
+  100% {
+    --gradient-angle: 420deg;
+  }
+}
+
 @keyframes starDrift {
   0% {
     background-position: center, 0 0, 38% 58%;
   }
   100% {
     background-position: center, -420px 320px, 60% 32%;
+  }
+}
+
+@keyframes auroraWave {
+  0% {
+    background-position: 50% 18%, 0 0, 38% 58%, 62% 80%;
+    background-size: 100% 100%, 420px 420px, 560px 560px, 1200px 820px;
+    opacity: 0.6;
+  }
+  40% {
+    background-position: 48% 20%, -160px 180px, 52% 44%, 58% 74%;
+    background-size: 104% 104%, 430px 430px, 600px 600px, 1260px 880px;
+    opacity: 0.78;
+  }
+  70% {
+    background-position: 54% 16%, -220px -140px, 60% 36%, 66% 86%;
+    background-size: 102% 102%, 410px 410px, 540px 540px, 1180px 840px;
+    opacity: 0.72;
+  }
+  100% {
+    background-position: 50% 18%, 0 0, 38% 58%, 62% 80%;
+    background-size: 100% 100%, 420px 420px, 560px 560px, 1200px 820px;
+    opacity: 0.6;
   }
 }
 
