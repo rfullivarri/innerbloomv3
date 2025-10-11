@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { NavButtons } from '../ui/NavButtons';
+import { SelectableCheck } from '../ui/SelectableCheck';
 
 interface ChoiceStepProps {
   title: string;
@@ -38,21 +39,14 @@ export function ChoiceStep({
                 key={choice}
                 type="button"
                 onClick={() => onChange(choice)}
-                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm transition ${
-                  active
-                    ? 'border-violet-400/70 bg-violet-500/10 text-white shadow-inner shadow-violet-500/20'
-                    : 'border-white/10 bg-white/5 text-white/80 hover:border-white/25 hover:bg-white/10'
-                }`}
+                data-selected={active ? 'true' : undefined}
+                className={`inline-flex w-full items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-white/80 transition hover:border-white/25 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/60 data-[selected=true]:border-violet-400/70 data-[selected=true]:bg-violet-500/10 data-[selected=true]:text-white data-[selected=true]:shadow-inner data-[selected=true]:shadow-violet-500/20`}
               >
-                <span>{choice}</span>
-                <span
-                  aria-hidden
-                  className={`ml-4 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
-                    active ? 'bg-violet-400 text-slate-900' : 'bg-white/10 text-white/60'
-                  }`}
-                >
-                  {active ? '✓' : ''}
-                </span>
+                <SelectableCheck
+                  selected={active}
+                  toneClassName="data-[selected=true]:border-transparent data-[selected=true]:bg-violet-400 data-[selected=true]:text-slate-900"
+                />
+                <span className="flex-1 truncate">{choice}</span>
               </button>
             );
           })}
