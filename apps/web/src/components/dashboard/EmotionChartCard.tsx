@@ -284,10 +284,34 @@ function addDays(date: Date, days: number): Date {
   return result;
 }
 
-function computeTimelineStart(): Date {
+function startOfDay(date: Date): Date {
+  const normalized = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+}
+
+function findFirstEntryDate(entries: NormalizedEmotionEntry[]): Date | null {
+  let first: Date | null = null;
+
+  for (const entry of entries) {
+    const entryTime = entry.date.getTime();
+    if (Number.isNaN(entryTime)) continue;
+    if (!first || entryTime < first.getTime()) {
+      first = entry.date;
+    }
+  }
+
+  return first ? startOfDay(first) : null;
+}
+
+function computeDefaultTimelineStart(): Date {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return addDays(today, -(TOTAL_DAYS - 1));
+}
+
+function computeTimelineStart(entries: NormalizedEmotionEntry[]): Date {
+  return findFirstEntryDate(entries) ?? computeDefaultTimelineStart();
 }
 
 function computeTimelineEnd(start: Date): Date {
@@ -373,6 +397,8 @@ function buildColumns(
   const columns: EmotionColumn[] = [];
   let currentMonday = new Date(startMonday);
   const lastMondayTime = endMonday.getTime();
+  const today = startOfDay(new Date());
+  const todayTime = today.getTime();
 
   while (currentMonday.getTime() <= lastMondayTime) {
     const monday = new Date(currentMonday);
@@ -381,7 +407,8 @@ function buildColumns(
     for (let row = 0; row < rows; row += 1) {
       const cellDate = addDays(monday, row);
       const key = ymd(cellDate);
-      const entry = map.get(key) ?? null;
+      const isFuture = cellDate.getTime() > todayTime;
+      const entry = isFuture ? null : map.get(key) ?? null;
       const emotion = entry?.emotion ?? 'Sin registro';
       const color = EMOTION_COLORS[emotion] ?? EMOTION_COLORS['Sin registro'];
 
@@ -614,18 +641,37 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
   const normalizedEntries = overrideEntries ?? normalizedFromApi;
 
   const { columns, monthSegments, highlight, period, hasRecordedEmotion } = useMemo(() => {
-    const timelineStart = computeTimelineStart();
-    const timelineEnd = computeTimelineEnd(timelineStart);
-    const entriesInRange = clampEntriesToRange(normalizedEntries, timelineStart, timelineEnd);
-    const limitedEntries = trimExcessMonths(entriesInRange, MAX_FILLED_DAYS);
+    let timelineStart = computeTimelineStart(normalizedEntries);
+    let timelineEnd = computeTimelineEnd(timelineStart);
+
+    const recalcEntries = (start: Date, end: Date) => {
+      const entriesInRange = clampEntriesToRange(normalizedEntries, start, end);
+      const limited = trimExcessMonths(entriesInRange, MAX_FILLED_DAYS);
+      return { entriesInRange, limited };
+    };
+
+    let { limited: limitedEntries } = recalcEntries(timelineStart, timelineEnd);
+
+    if (limitedEntries.length > 0) {
+      let adjusted = true;
+      while (adjusted) {
+        adjusted = false;
+        const earliestLimited = findFirstEntryDate(limitedEntries);
+        if (earliestLimited && earliestLimited.getTime() > timelineStart.getTime()) {
+          timelineStart = earliestLimited;
+          timelineEnd = computeTimelineEnd(timelineStart);
+          ({ limited: limitedEntries } = recalcEntries(timelineStart, timelineEnd));
+          adjusted = limitedEntries.length > 0;
+        }
+      }
+    }
+
     const { map, keys } = buildEmotionByDay(limitedEntries);
-    const startColumnDate = timelineStart;
-    const endColumnDate = addDays(startColumnDate, (NUM_WEEKS - 1) * DAYS_IN_WEEK);
 
     const { columns: builtColumns, monthSegments: builtMonthSegments } = buildColumns(
       map,
-      startColumnDate,
-      endColumnDate,
+      timelineStart,
+      timelineEnd,
       DAYS_IN_WEEK,
     );
     const highlightResult = computeHighlight(map, keys, LOOKBACK_FOR_HIGHLIGHT);
