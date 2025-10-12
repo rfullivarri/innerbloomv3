@@ -1,6 +1,7 @@
 import { useAuth } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { buildPayload } from '../payload';
 import type { Answers, XP } from '../state';
 import { NavButtons } from '../ui/NavButtons';
@@ -70,7 +71,9 @@ export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps)
   const { getToken } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigate = useNavigate();
 
   const showToast = useCallback((message: string) => {
     setToastMessage(message);
@@ -120,12 +123,13 @@ export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps)
         throw new Error(message);
       }
 
-      const data = await response.json().catch(() => ({}));
-      const successMessage = data?.awarded
-        ? 'Onboarding guardado y XP acreditado'
-        : 'Onboarding actualizado';
-
-      showToast(successMessage);
+      await response.json().catch(() => ({}));
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = null;
+      }
+      setToastMessage(null);
+      setShowConfirmation(true);
       onFinish();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error inesperado';
@@ -135,9 +139,51 @@ export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps)
     }
   }, [answers, getToken, isSubmitting, onFinish, showToast, xp]);
 
+  const handleGoToLanding = useCallback(() => {
+    navigate('/');
+  }, [navigate]);
+
+  const handleGoToLogin = useCallback(() => {
+    navigate('/login');
+  }, [navigate]);
+
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
       <Snack message={toastMessage} />
+      {showConfirmation ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="w-full max-w-md rounded-3xl border border-white/10 bg-slate-900/90 p-6 text-center text-white shadow-2xl"
+          >
+            <h3 className="text-2xl font-semibold text-white">¡Tu plan está en marcha!</h3>
+            <p className="mt-3 text-sm text-white/70">
+              Procesamos tu información. En unos minutos te llegará un mail de confirmación de tu base de datos. Mientras
+              tanto podés ir ingresando para hacer login.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <button
+                type="button"
+                onClick={handleGoToLanding}
+                className="inline-flex items-center justify-center rounded-full border border-white/20 px-5 py-2 text-sm font-medium text-white/80 transition hover:border-white/40 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300"
+              >
+                Volver a la landing
+              </button>
+              <button
+                type="button"
+                onClick={handleGoToLogin}
+                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-sky-400 via-violet-500 to-fuchsia-500 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300"
+              >
+                Ir a login
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      ) : null}
       <div className="glass-card mx-auto max-w-5xl rounded-3xl border border-white/5 bg-slate-900/70 p-6 sm:p-8">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
           <p className="text-xs uppercase tracking-[0.35em] text-white/50">Summary</p>
@@ -211,7 +257,8 @@ export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps)
           onConfirm={handleSubmit}
           confirmLabel="Generar plan"
           loading={isSubmitting}
-          disabled={isSubmitting}
+          disabled={isSubmitting || showConfirmation}
+          showBack={!showConfirmation}
         />
       </div>
     </motion.div>
