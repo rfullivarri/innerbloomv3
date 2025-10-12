@@ -33,6 +33,7 @@ import { useRequest } from '../hooks/useRequest';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
 import { getUserState } from '../lib/api';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
+import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -46,7 +47,9 @@ export default function DashboardV3Page() {
     { enabled: shouldFetchUserState },
   );
 
-  const gameMode = userState?.mode_name ?? userState?.mode ?? profileGameMode ?? null;
+  const rawGameMode = userState?.mode_name ?? userState?.mode ?? profileGameMode ?? null;
+  const normalizedGameMode = normalizeGameModeValue(rawGameMode);
+  const gameMode = normalizedGameMode ?? (typeof rawGameMode === 'string' ? rawGameMode : null);
 
   useEffect(() => {
     if (!clerkUserId || typeof window === 'undefined') {
@@ -171,45 +174,8 @@ export default function DashboardV3Page() {
   );
 }
 
-function deriveGameModeFromProfile(mode?: string | null): string | null {
-  if (typeof mode !== 'string') {
-    return null;
-  }
-
-  const trimmed = mode.trim();
-
-  if (trimmed.length === 0) {
-    return null;
-  }
-
-  const normalized = trimmed.toLowerCase();
-
-  const aliasMap: Record<string, string> = {
-    'flow mood': 'flow',
-    'flow_mood': 'flow',
-    'flowmode': 'flow',
-    'standard': 'flow',
-    'seedling': 'flow',
-    'low mood': 'low',
-    'low_mood': 'low',
-    'lowmode': 'low',
-    'evol': 'evolve',
-  };
-
-  const canonical = aliasMap[normalized] ?? normalized;
-
-  switch (canonical) {
-    case 'low':
-      return 'Low';
-    case 'chill':
-      return 'Chill';
-    case 'flow':
-      return 'Flow';
-    case 'evolve':
-      return 'Evolve';
-    default:
-      return null;
-  }
+function deriveGameModeFromProfile(mode?: string | null): GameMode | null {
+  return normalizeGameModeValue(mode);
 }
 
 function ProfileSkeleton() {

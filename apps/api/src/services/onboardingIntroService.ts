@@ -4,7 +4,8 @@ import { HttpError } from '../lib/http-error.js';
 import type { OnboardingIntroPayload } from '../schemas/onboarding.js';
 
 const SELECT_USER_SQL = 'SELECT user_id FROM users WHERE clerk_user_id = $1 LIMIT 1';
-const SELECT_GAME_MODE_SQL = 'SELECT game_mode_id FROM cat_game_mode WHERE code = $1 LIMIT 1';
+const SELECT_GAME_MODE_SQL =
+  'SELECT game_mode_id, code FROM cat_game_mode WHERE code = $1 LIMIT 1';
 const SELECT_PILLARS_SQL =
   "SELECT pillar_id, code FROM cat_pillar WHERE code = ANY($1::text[])";
 const UPSERT_SESSION_SQL = `
@@ -52,7 +53,7 @@ SELECT $1,$2,$3,$4
 WHERE NOT EXISTS (SELECT 1 FROM upd);
 `;
 const UPDATE_USER_GAME_MODE_SQL =
-  'UPDATE users SET game_mode_id = $2 WHERE user_id = $1';
+  'UPDATE users SET game_mode_id = $2, game_mode = $3 WHERE user_id = $1';
 const INSERT_XP_BONUS_SQL = `
 INSERT INTO xp_bonus
   (user_id, pillar_id, source, amount, meta)
@@ -92,7 +93,7 @@ const SELECT_SESSION_FOUNDATIONS_SQL = `
 const REQUIRED_PILLARS = ['BODY', 'MIND', 'SOUL'] as const;
 
 type UserRow = { user_id: string };
-type GameModeRow = { game_mode_id: string };
+type GameModeRow = { game_mode_id: string; code: string | null };
 type PillarRow = { pillar_id: string; code: string };
 type SessionRow = {
   onboarding_session_id: string;
@@ -149,7 +150,10 @@ export async function submitOnboardingIntro(
 
     try {
       const userId = await resolveUserId(client, clerkUserId);
-      const gameModeId = await resolveGameModeId(client, payload.mode);
+      const { id: gameModeId, code: gameModeCode } = await resolveGameMode(
+        client,
+        payload.mode,
+      );
       const pillarMap = await resolvePillarMap(client);
       const normalizedXp = normalizeXp(payload.xp);
 
@@ -164,7 +168,11 @@ export async function submitOnboardingIntro(
 
       await upsertFoundations(client, sessionId, pillarMap, payload);
 
-      await client.query(UPDATE_USER_GAME_MODE_SQL, [userId, gameModeId]);
+      await client.query(UPDATE_USER_GAME_MODE_SQL, [
+        userId,
+        gameModeId,
+        gameModeCode,
+      ]);
 
       const awarded = await insertXpBonus(
         client,
@@ -231,7 +239,10 @@ async function resolveUserId(client: PoolClient, clerkUserId: string): Promise<s
   return row.user_id;
 }
 
-async function resolveGameModeId(client: PoolClient, code: string): Promise<string> {
+async function resolveGameMode(
+  client: PoolClient,
+  code: string,
+): Promise<{ id: string; code: string }> {
   const result = await client.query<GameModeRow>(SELECT_GAME_MODE_SQL, [code]);
   const row = result.rows[0];
 
@@ -239,7 +250,13 @@ async function resolveGameModeId(client: PoolClient, code: string): Promise<stri
     throw new HttpError(409, 'invalid_game_mode', 'Invalid onboarding mode');
   }
 
-  return row.game_mode_id;
+  const normalizedCode = typeof row.code === 'string' ? row.code.trim() : '';
+  const fallbackCode = code.trim().toUpperCase();
+
+  return {
+    id: row.game_mode_id,
+    code: normalizedCode.length > 0 ? normalizedCode.toUpperCase() : fallbackCode,
+  };
 }
 
 async function resolvePillarMap(client: PoolClient): Promise<PillarMap> {

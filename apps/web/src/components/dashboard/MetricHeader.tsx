@@ -3,6 +3,7 @@ import { Card } from '../ui/Card';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserLevel, getUserTotalXp } from '../../lib/api';
+import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 
 interface MetricHeaderProps {
   userId: string;
@@ -168,8 +169,6 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
   );
 }
 
-type NormalizedGameMode = 'Flow' | 'Chill' | 'Evolve' | 'Low';
-
 interface GameModeChipStyle {
   label: string;
   backgroundClass: string;
@@ -177,30 +176,7 @@ interface GameModeChipStyle {
   animate: boolean;
 }
 
-function normalizeGameMode(mode?: string | null): NormalizedGameMode | null {
-  if (!mode) {
-    return null;
-  }
-
-  const normalized = mode.trim().toLowerCase();
-
-  switch (normalized) {
-    case 'low':
-      return 'Low';
-    case 'chill':
-      return 'Chill';
-    case 'evolve':
-    case 'evol':
-      return 'Evolve';
-    case 'flow':
-    case 'flow mood':
-    case 'flow_mood':
-    default:
-      return 'Flow';
-  }
-}
-
-const GAME_MODE_STYLES: Record<NormalizedGameMode, GameModeChipStyle> = {
+const GAME_MODE_STYLES: Record<GameMode, GameModeChipStyle> = {
   Flow: {
     label: 'FLOW',
     backgroundClass: 'bg-gradient-to-r from-sky-500/25 via-indigo-500/30 to-purple-500/25 text-slate-100',
@@ -239,7 +215,7 @@ function buildGameModeChip(mode?: string | null): GameModeChipStyle | null {
     return DEFAULT_CHIP_STYLE;
   }
 
-  const normalized = normalizeGameMode(mode);
+  const normalized = normalizeGameModeValue(mode);
   if (!normalized) {
     return DEFAULT_CHIP_STYLE;
   }

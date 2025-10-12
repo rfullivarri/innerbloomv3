@@ -14,6 +14,7 @@ import {
 } from '../../lib/api';
 import { asArray, dateStr } from '../../lib/safe';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
+import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 
 export const FEATURE_STREAKS_PANEL_V1 = false;
 
@@ -195,7 +196,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
 
-type Mode = 'Low' | 'Chill' | 'Flow' | 'Evolve';
+type Mode = GameMode;
 
 const MODE_TIERS: Record<Mode, number> = {
   Low: 1,
@@ -296,26 +297,7 @@ const TAB_BUTTON_BASE =
   'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 md:text-xs';
 
 function normalizeMode(mode?: string | null): Mode {
-  if (!mode) {
-    return 'Flow';
-  }
-
-  const normalized = mode.trim().toLowerCase();
-
-  switch (normalized) {
-    case 'low':
-      return 'Low';
-    case 'chill':
-      return 'Chill';
-    case 'evolve':
-    case 'evol':
-      return 'Evolve';
-    case 'flow':
-    case 'flow mood':
-    case 'flow_mood':
-    default:
-      return 'Flow';
-  }
+  return normalizeGameModeValue(mode) ?? 'Flow';
 }
 
 function computeProgressPercent(done: number, goal: number): number {
