@@ -8,19 +8,24 @@ const SELECT_GAME_MODE_SQL = 'SELECT game_mode_id FROM cat_game_mode WHERE code 
 const SELECT_PILLARS_SQL =
   "SELECT pillar_id, code FROM cat_pillar WHERE code = ANY($1::text[])";
 const UPSERT_SESSION_SQL = `
+WITH upd AS (
+  UPDATE onboarding_session
+  SET
+    game_mode_id = $3,
+    xp_total     = $4,
+    xp_body      = $5,
+    xp_mind      = $6,
+    xp_soul      = $7,
+    email        = $8,
+    meta         = $9::jsonb,
+    updated_at   = now()
+  WHERE user_id = $1 AND client_id = $2
+  RETURNING onboarding_session_id
+)
 INSERT INTO onboarding_session
   (user_id, client_id, game_mode_id, xp_total, xp_body, xp_mind, xp_soul, email, meta)
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)
-ON CONFLICT (user_id, client_id)
-DO UPDATE SET
-  game_mode_id = EXCLUDED.game_mode_id,
-  xp_total     = EXCLUDED.xp_total,
-  xp_body      = EXCLUDED.xp_body,
-  xp_mind      = EXCLUDED.xp_mind,
-  xp_soul      = EXCLUDED.xp_soul,
-  email        = EXCLUDED.email,
-  meta         = EXCLUDED.meta,
-  updated_at   = now()
+SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb
+WHERE NOT EXISTS (SELECT 1 FROM upd)
 RETURNING onboarding_session_id;
 `;
 const UPSERT_ANSWERS_SQL = `
@@ -30,21 +35,27 @@ const UPSERT_ANSWERS_SQL = `
     SET payload = EXCLUDED.payload
 `;
 const UPSERT_FOUNDATIONS_SQL = `
+WITH upd AS (
+  UPDATE onboarding_foundations
+  SET items = $3, open_text = $4
+  WHERE onboarding_session_id = $1 AND pillar_id = $2
+  RETURNING 1
+)
 INSERT INTO onboarding_foundations
   (onboarding_session_id, pillar_id, items, open_text)
-VALUES ($1,$2,$3,$4)
-ON CONFLICT (onboarding_session_id, pillar_id)
-DO UPDATE SET
-  items     = EXCLUDED.items,
-  open_text = EXCLUDED.open_text;
+SELECT $1,$2,$3,$4
+WHERE NOT EXISTS (SELECT 1 FROM upd);
 `;
 const UPDATE_USER_GAME_MODE_SQL =
   'UPDATE users SET game_mode_id = $2 WHERE user_id = $1';
 const INSERT_XP_BONUS_SQL = `
 INSERT INTO xp_bonus
   (user_id, pillar_id, source, amount, meta)
-VALUES ($1,$2,'onboarding',$3,$4::jsonb)
-ON CONFLICT (user_id, source, pillar_id) DO NOTHING;
+SELECT $1,$2,'onboarding',$3,$4::jsonb
+WHERE NOT EXISTS (
+  SELECT 1 FROM xp_bonus
+  WHERE user_id = $1 AND pillar_id = $2 AND source = 'onboarding'
+);
 `;
 const SELECT_LATEST_SESSION_SQL = `
   SELECT
@@ -252,7 +263,6 @@ async function upsertSession(
     xp: NormalizedXp;
   },
 ): Promise<string> {
-  console.info('[UPSERT session] start');
   const sessionResult = await client.query<{ onboarding_session_id: string }>(UPSERT_SESSION_SQL, [
     input.userId,
     input.payload.client_id,
@@ -270,6 +280,8 @@ async function upsertSession(
   if (!sessionRow) {
     throw new HttpError(500, 'session_upsert_failed', 'Failed to persist onboarding session');
   }
+
+  console.info('[session upsert] done', { sessionId: sessionRow.onboarding_session_id });
 
   return sessionRow.onboarding_session_id;
 }
@@ -308,9 +320,10 @@ async function upsertFoundations(
   ];
 
   for (const { pillarId, items, openText } of foundationRows) {
-    console.info('[UPSERT foundations] start');
     await client.query(UPSERT_FOUNDATIONS_SQL, [sessionId, pillarId, items, openText]);
   }
+
+  console.info('[foundations upsert] body/mind/soul done');
 }
 
 async function insertXpBonus(
@@ -346,7 +359,6 @@ async function insertXpBonus(
   let inserted = 0;
 
   for (const bonus of xpBonuses) {
-    console.info('[INSERT bonus] start');
     const result = await client.query(INSERT_XP_BONUS_SQL, [
       userId,
       bonus.pillarId,
@@ -356,6 +368,8 @@ async function insertXpBonus(
 
     inserted += result.rowCount ?? 0;
   }
+
+  console.info('[bonus insert] attempted');
 
   return inserted > 0;
 }
