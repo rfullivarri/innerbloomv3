@@ -3215,9 +3215,151 @@
         "created_at": "2025-10-06 21:58:09.489889+00"
       }
     ],
-    "onboarding_answers": [],
-    "onboarding_foundations": [],
-    "onboarding_session": [],
+    "onboarding_answers": [
+      {
+        "onboarding_answers_id": "1d07668b-37c3-4ebe-96f4-85ef03fc8e1a",
+        "onboarding_session_id": "d0888868-aa9e-4530-8928-590e09f6e8d3",
+        "payload": {
+          "ts": "2025-10-12T08:43:06.726Z",
+          "xp": {
+            "Body": 32,
+            "Mind": 32,
+            "Soul": 32,
+            "total": 96
+          },
+          "data": {
+            "low": {
+              "body": [],
+              "mind": [],
+              "note": "",
+              "soul": []
+            },
+            "flow": {
+              "goal": "",
+              "imped": []
+            },
+            "chill": {
+              "motiv": [
+                "🌱 Crecer como persona / desarrollo personal",
+                "🤝 Sentirme más conectado con otras personas",
+                "🏆 Superarme a mí mismo y romper mis límites",
+                "✨ Sentirme más feliz y satisfecho con mi día a día",
+                "🗺️ Tener más experiencias y aventuras",
+                "🛠️ Crear o construir algo (proyectos, arte, emprendimientos)",
+                "🎯 Lograr metas concretas que me propongo"
+              ],
+              "oneThing": "mejorar mis hábitos"
+            },
+            "evolve": {
+              "att": "",
+              "goal": "",
+              "trade": []
+            },
+            "foundations": {
+              "body": [
+                "💺 Mejorar tu postura y ergonomía (Postura)",
+                "🥗 Alimentación saludable (Nutrición)",
+                "🏃‍♂️ Actividad física regular (Energía)",
+                "😴 Dormir y descansar mejor (Sueño)",
+                "🧘‍♂️ Flexibilidad y movilidad corporal (Movilidad)"
+              ],
+              "mind": [
+                "🎯 Mejorar tu enfoque y productividad diaria (Enfoque)",
+                "🎨 Desarrollar tu creatividad e ideas nuevas (Creatividad)",
+                "🗂️ Tener tus tareas o espacios mentales más organizados (Orden)",
+                "💪 Ser más resiliente frente a desafíos (Resiliencia)",
+                "😵‍💫 Manejar mejor el estrés o ansiedad (Gestión)"
+              ],
+              "soul": [
+                "⚖️ Vivir más alineado a tus valores (Valores)",
+                "🎯 Definir tu propósito y dirección en la vida (Propósito)",
+                "💗 Ayudar a otros o aportar a una causa (Altruismo)",
+                "🙏 Practicar gratitud o tener una actitud positiva (Gratitud)",
+                "🌳 Conectarte más con la naturaleza (Naturaleza)"
+              ],
+              "bodyOpen": "",
+              "mindOpen": "",
+              "soulOpen": ""
+            }
+          },
+          "meta": {
+            "tz": "Europe/Madrid",
+            "lang": "es-us",
+            "device": "desktop",
+            "user_id": "user_33w3rQdVxK6WHFsyWmsmIaLzivs",
+            "version": "forms-intro-react"
+          },
+          "mode": "CHILL",
+          "email": "ramagpt23@gmail.com",
+          "client_id": "759c1b2d-254f-4122-97ad-453a26aa94df"
+        },
+        "version": "v1",
+        "created_at": "2025-10-12 08:43:05.868558+00"
+      }
+    ],
+    "onboarding_foundations": [
+      {
+        "onboarding_foundations_id": "8ba2d094-9a67-4319-a79d-27cf1e4e45f3",
+        "onboarding_session_id": "d0888868-aa9e-4530-8928-590e09f6e8d3",
+        "pillar_id": 1,
+        "items": [
+          "💺 Mejorar tu postura y ergonomía (Postura)",
+          "🥗 Alimentación saludable (Nutrición)",
+          "🏃‍♂️ Actividad física regular (Energía)",
+          "😴 Dormir y descansar mejor (Sueño)",
+          "🧘‍♂️ Flexibilidad y movilidad corporal (Movilidad)"
+        ],
+        "open_text": ""
+      },
+      {
+        "onboarding_foundations_id": "538cca40-db66-41da-a16f-d913234c4cd9",
+        "onboarding_session_id": "d0888868-aa9e-4530-8928-590e09f6e8d3",
+        "pillar_id": 2,
+        "items": [
+          "🎯 Mejorar tu enfoque y productividad diaria (Enfoque)",
+          "🎨 Desarrollar tu creatividad e ideas nuevas (Creatividad)",
+          "🗂️ Tener tus tareas o espacios mentales más organizados (Orden)",
+          "💪 Ser más resiliente frente a desafíos (Resiliencia)",
+          "😵‍💫 Manejar mejor el estrés o ansiedad (Gestión)"
+        ],
+        "open_text": ""
+      },
+      {
+        "onboarding_foundations_id": "8b61ba81-7122-4d58-9f49-a939381f5879",
+        "onboarding_session_id": "d0888868-aa9e-4530-8928-590e09f6e8d3",
+        "pillar_id": 3,
+        "items": [
+          "⚖️ Vivir más alineado a tus valores (Valores)",
+          "🎯 Definir tu propósito y dirección en la vida (Propósito)",
+          "💗 Ayudar a otros o aportar a una causa (Altruismo)",
+          "🙏 Practicar gratitud o tener una actitud positiva (Gratitud)",
+          "🌳 Conectarte más con la naturaleza (Naturaleza)"
+        ],
+        "open_text": ""
+      }
+    ],
+    "onboarding_session": [
+      {
+        "onboarding_session_id": "d0888868-aa9e-4530-8928-590e09f6e8d3",
+        "user_id": "319a0fab-4fb1-42ee-93a9-3be1b9a55a5b",
+        "client_id": "759c1b2d-254f-4122-97ad-453a26aa94df",
+        "game_mode_id": 2,
+        "xp_total": 96,
+        "xp_body": 32,
+        "xp_mind": 32,
+        "xp_soul": 32,
+        "email": "ramagpt23@gmail.com",
+        "meta": {
+          "tz": "Europe/Madrid",
+          "lang": "es-us",
+          "device": "desktop",
+          "user_id": "user_33w3rQdVxK6WHFsyWmsmIaLzivs",
+          "version": "forms-intro-react"
+        },
+        "created_at": "2025-10-12 08:43:05.868558+00",
+        "updated_at": "2025-10-12 08:43:05.868558+00"
+      }
+    ],
     "tasks": [
       {
         "task_id": "da3b649b-4612-46be-b39b-f4cfafea45b8",
@@ -3669,7 +3811,7 @@
         "email_primary": "ramagpt23@gmail.com",
         "full_name": "Rama Ramita",
         "image_url": "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18zM1p4R25SQWpEYWJZWFc4SFRzcFkyem5qQ1oiLCJyaWQiOiJ1c2VyXzMzdzNyUWRWeEs2V0hGc3lXbXNtSWFMeml2cyIsImluaXRpYWxzIjoiUlIifQ",
-        "game_mode_id": null,
+        "game_mode_id": 2,
         "timezone": "UTC",
         "tasks_group_id": "7fa9618a-c016-46dd-a0fd-f4aa568cece4",
         "first_date_log": null,
@@ -3690,7 +3832,62 @@
         "deleted_at": null
       }
     ],
-    "xp_bonus": []
+    "xp_bonus": [
+      {
+        "xp_bonus_id": "2be067b7-05e5-429e-a613-c0e25e3bad81",
+        "user_id": "319a0fab-4fb1-42ee-93a9-3be1b9a55a5b",
+        "pillar_id": 1,
+        "source": "onboarding",
+        "amount": 32,
+        "meta": {
+          "ts": "2025-10-12T08:43:06.726Z",
+          "tz": "Europe/Madrid",
+          "lang": "es-us",
+          "device": "desktop",
+          "user_id": "user_33w3rQdVxK6WHFsyWmsmIaLzivs",
+          "version": "forms-intro-react",
+          "client_id": "759c1b2d-254f-4122-97ad-453a26aa94df",
+          "onboarding_session_id": "d0888868-aa9e-4530-8928-590e09f6e8d3"
+        },
+        "created_at": "2025-10-12 08:43:05.868558+00"
+      },
+      {
+        "xp_bonus_id": "c9ebc6dc-1c72-4a1c-8d78-e8822b9cb167",
+        "user_id": "319a0fab-4fb1-42ee-93a9-3be1b9a55a5b",
+        "pillar_id": 2,
+        "source": "onboarding",
+        "amount": 32,
+        "meta": {
+          "ts": "2025-10-12T08:43:06.726Z",
+          "tz": "Europe/Madrid",
+          "lang": "es-us",
+          "device": "desktop",
+          "user_id": "user_33w3rQdVxK6WHFsyWmsmIaLzivs",
+          "version": "forms-intro-react",
+          "client_id": "759c1b2d-254f-4122-97ad-453a26aa94df",
+          "onboarding_session_id": "d0888868-aa9e-4530-8928-590e09f6e8d3"
+        },
+        "created_at": "2025-10-12 08:43:05.868558+00"
+      },
+      {
+        "xp_bonus_id": "bb3bae4b-5ca9-48de-9bad-f0251ffca154",
+        "user_id": "319a0fab-4fb1-42ee-93a9-3be1b9a55a5b",
+        "pillar_id": 3,
+        "source": "onboarding",
+        "amount": 32,
+        "meta": {
+          "ts": "2025-10-12T08:43:06.726Z",
+          "tz": "Europe/Madrid",
+          "lang": "es-us",
+          "device": "desktop",
+          "user_id": "user_33w3rQdVxK6WHFsyWmsmIaLzivs",
+          "version": "forms-intro-react",
+          "client_id": "759c1b2d-254f-4122-97ad-453a26aa94df",
+          "onboarding_session_id": "d0888868-aa9e-4530-8928-590e09f6e8d3"
+        },
+        "created_at": "2025-10-12 08:43:05.868558+00"
+      }
+    ]
   },
-  "generated_at": "2025-10-11T22:57:07.432Z"
+  "generated_at": "2025-10-12T08:44:54.101Z"
 }
