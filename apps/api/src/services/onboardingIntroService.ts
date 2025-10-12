@@ -29,10 +29,15 @@ WHERE NOT EXISTS (SELECT 1 FROM upd)
 RETURNING onboarding_session_id;
 `;
 const UPSERT_ANSWERS_SQL = `
-  INSERT INTO onboarding_answers (onboarding_session_id, payload)
-  VALUES ($1, $2::jsonb)
-  ON CONFLICT (onboarding_session_id) DO UPDATE
-    SET payload = EXCLUDED.payload
+WITH upd AS (
+  UPDATE onboarding_answers
+  SET payload = $2::jsonb
+  WHERE onboarding_session_id = $1
+  RETURNING 1
+)
+INSERT INTO onboarding_answers (onboarding_session_id, payload)
+SELECT $1, $2::jsonb
+WHERE NOT EXISTS (SELECT 1 FROM upd);
 `;
 const UPSERT_FOUNDATIONS_SQL = `
 WITH upd AS (
