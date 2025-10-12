@@ -2375,6 +2375,90 @@
           }
         },
         "received_at": "2025-10-11 20:10:01.768157+00"
+      },
+      {
+        "id": "6",
+        "svix_id": "msg_33w3rQhIKTiA4OSzVwXcpO9QV4B",
+        "event_type": "user.created",
+        "payload": {
+          "data": {
+            "id": "user_33w3rQdVxK6WHFsyWmsmIaLzivs",
+            "banned": false,
+            "locale": null,
+            "locked": false,
+            "object": "user",
+            "passkeys": [],
+            "username": null,
+            "has_image": false,
+            "image_url": "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18zM1p4R25SQWpEYWJZWFc4SFRzcFkyem5qQ1oiLCJyaWQiOiJ1c2VyXzMzdzNyUWRWeEs2V0hGc3lXbXNtSWFMeml2cyIsImluaXRpYWxzIjoiUlIifQ",
+            "last_name": "Ramita",
+            "created_at": 1760214505005,
+            "first_name": "Rama",
+            "updated_at": 1760214505019,
+            "external_id": null,
+            "totp_enabled": false,
+            "web3_wallets": [],
+            "phone_numbers": [],
+            "saml_accounts": [],
+            "last_active_at": 1760214505004,
+            "mfa_enabled_at": null,
+            "email_addresses": [
+              {
+                "id": "idn_33w3pgvegU9IW815nTsW3uGKu9r",
+                "object": "email_address",
+                "reserved": false,
+                "linked_to": [],
+                "created_at": 1760214491463,
+                "updated_at": 1760214505008,
+                "verification": {
+                  "object": "verification_otp",
+                  "status": "verified",
+                  "attempts": 1,
+                  "strategy": "email_code",
+                  "expire_at": 1760215091996
+                },
+                "email_address": "ramagpt23@gmail.com",
+                "matches_sso_connection": false
+              }
+            ],
+            "last_sign_in_at": null,
+            "mfa_disabled_at": null,
+            "public_metadata": {
+
+            },
+            "unsafe_metadata": {
+
+            },
+            "password_enabled": true,
+            "private_metadata": {
+
+            },
+            "external_accounts": [],
+            "legal_accepted_at": null,
+            "profile_image_url": "https://www.gravatar.com/avatar?d=mp",
+            "two_factor_enabled": false,
+            "backup_code_enabled": false,
+            "delete_self_enabled": true,
+            "enterprise_accounts": [],
+            "primary_web3_wallet_id": null,
+            "primary_phone_number_id": null,
+            "primary_email_address_id": "idn_33w3pgvegU9IW815nTsW3uGKu9r",
+            "lockout_expires_in_seconds": null,
+            "create_organization_enabled": true,
+            "verification_attempts_remaining": 100
+          },
+          "type": "user.created",
+          "object": "event",
+          "timestamp": 1760214505040,
+          "instance_id": "ins_33ZxGnRAjDabYXW8HTspY2znjCZ",
+          "event_attributes": {
+            "http_request": {
+              "client_ip": "2a09:bac2:3116:191::28:119",
+              "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0.1 Mobile/15E148 Safari/604.1"
+            }
+          }
+        },
+        "received_at": "2025-10-11 20:28:26.158781+00"
       }
     ],
     "daily_log": [
@@ -3578,9 +3662,35 @@
         "last_name": "Doe",
         "avatar_url": "https://img.clerk.com/xxxxxx",
         "deleted_at": null
+      },
+      {
+        "user_id": "319a0fab-4fb1-42ee-93a9-3be1b9a55a5b",
+        "clerk_user_id": "user_33w3rQdVxK6WHFsyWmsmIaLzivs",
+        "email_primary": "ramagpt23@gmail.com",
+        "full_name": "Rama Ramita",
+        "image_url": "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18zM1p4R25SQWpEYWJZWFc4SFRzcFkyem5qQ1oiLCJyaWQiOiJ1c2VyXzMzdzNyUWRWeEs2V0hGc3lXbXNtSWFMeml2cyIsImluaXRpYWxzIjoiUlIifQ",
+        "game_mode_id": null,
+        "timezone": "UTC",
+        "tasks_group_id": "7fa9618a-c016-46dd-a0fd-f4aa568cece4",
+        "first_date_log": null,
+        "scheduler_enabled": false,
+        "created_at": "2025-10-11 20:28:26.158781+00",
+        "updated_at": "2025-10-11 20:28:26.158781+00",
+        "user_profile": null,
+        "channel_scheduler": "email",
+        "hour_scheduler": null,
+        "status_scheduler": "PAUSED",
+        "last_sent_local_date_scheduler": null,
+        "first_programmed": false,
+        "first_tasks_confirmed": false,
+        "email": "ramagpt23@gmail.com",
+        "first_name": "Rama",
+        "last_name": "Ramita",
+        "avatar_url": "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18zM1p4R25SQWpEYWJZWFc4SFRzcFkyem5qQ1oiLCJyaWQiOiJ1c2VyXzMzdzNyUWRWeEs2V0hGc3lXbXNtSWFMeml2cyIsImluaXRpYWxzIjoiUlIifQ",
+        "deleted_at": null
       }
     ],
     "xp_bonus": []
   },
-  "generated_at": "2025-10-11T20:12:04.015Z"
+  "generated_at": "2025-10-11T22:57:07.432Z"
 }
