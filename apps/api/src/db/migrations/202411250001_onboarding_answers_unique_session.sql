@@ -1,3 +1,0 @@
-ALTER TABLE public.onboarding_answers
-ADD CONSTRAINT onboarding_answers_onboarding_session_id_key
-UNIQUE (onboarding_session_id);

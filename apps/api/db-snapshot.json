@@ -1758,11 +1758,6 @@
         "index_definition": "CREATE UNIQUE INDEX onboarding_answers_pkey ON public.onboarding_answers USING btree (onboarding_answers_id)"
       },
       {
-        "table_name": "onboarding_answers",
-        "index_name": "onboarding_answers_onboarding_session_id_key",
-        "index_definition": "CREATE UNIQUE INDEX onboarding_answers_onboarding_session_id_key ON public.onboarding_answers USING btree (onboarding_session_id)"
-      },
-      {
         "table_name": "onboarding_foundations",
         "index_name": "onboarding_foundations_pkey",
         "index_definition": "CREATE UNIQUE INDEX onboarding_foundations_pkey ON public.onboarding_foundations USING btree (onboarding_foundations_id)"
@@ -3697,5 +3692,5 @@
     ],
     "xp_bonus": []
   },
-  "generated_at": "2025-10-12T00:13:25.909Z"
+  "generated_at": "2025-10-11T22:57:07.432Z"
 }
