@@ -52,8 +52,7 @@ INSERT INTO onboarding_foundations
 SELECT $1,$2,$3,$4
 WHERE NOT EXISTS (SELECT 1 FROM upd);
 `;
-const UPDATE_USER_GAME_MODE_SQL =
-  'UPDATE users SET game_mode_id = $2, game_mode = $3 WHERE user_id = $1';
+const UPDATE_USER_GAME_MODE_SQL = 'UPDATE users SET game_mode_id = $2 WHERE user_id = $1';
 const INSERT_XP_BONUS_SQL = `
 INSERT INTO xp_bonus
   (user_id, pillar_id, source, amount, meta)
@@ -150,7 +149,7 @@ export async function submitOnboardingIntro(
 
     try {
       const userId = await resolveUserId(client, clerkUserId);
-      const { id: gameModeId, code: gameModeCode } = await resolveGameMode(
+      const { id: gameModeId } = await resolveGameMode(
         client,
         payload.mode,
       );
@@ -168,11 +167,7 @@ export async function submitOnboardingIntro(
 
       await upsertFoundations(client, sessionId, pillarMap, payload);
 
-      await client.query(UPDATE_USER_GAME_MODE_SQL, [
-        userId,
-        gameModeId,
-        gameModeCode,
-      ]);
+      await client.query(UPDATE_USER_GAME_MODE_SQL, [userId, gameModeId]);
 
       const awarded = await insertXpBonus(
         client,
@@ -239,10 +234,7 @@ async function resolveUserId(client: PoolClient, clerkUserId: string): Promise<s
   return row.user_id;
 }
 
-async function resolveGameMode(
-  client: PoolClient,
-  code: string,
-): Promise<{ id: string; code: string }> {
+async function resolveGameMode(client: PoolClient, code: string): Promise<{ id: string }> {
   const result = await client.query<GameModeRow>(SELECT_GAME_MODE_SQL, [code]);
   const row = result.rows[0];
 
@@ -250,12 +242,8 @@ async function resolveGameMode(
     throw new HttpError(409, 'invalid_game_mode', 'Invalid onboarding mode');
   }
 
-  const normalizedCode = typeof row.code === 'string' ? row.code.trim() : '';
-  const fallbackCode = code.trim().toUpperCase();
-
   return {
     id: row.game_mode_id,
-    code: normalizedCode.length > 0 ? normalizedCode.toUpperCase() : fallbackCode,
   };
 }
 

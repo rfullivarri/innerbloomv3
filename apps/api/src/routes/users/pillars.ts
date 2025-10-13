@@ -164,7 +164,7 @@ export const getUserPillars: AsyncHandler = async (req, res) => {
   const { id } = parsedParams.data;
 
   const userResult = await pool.query<{ weekly_target: number | null }>(
-    `SELECT COALESCE(gm.weekly_target, u.weekly_target) AS weekly_target
+    `SELECT gm.weekly_target AS weekly_target
        FROM users u
   LEFT JOIN cat_game_mode gm
          ON gm.game_mode_id = u.game_mode_id

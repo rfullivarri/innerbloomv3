@@ -2,7 +2,23 @@ import { pool } from '../../db.js';
 import type { AsyncHandler } from '../../lib/async-handler.js';
 import { HttpError } from '../../lib/http-error.js';
 
-const SELECT_USER_SQL = 'SELECT * FROM users WHERE user_id = $1 LIMIT 1';
+export const SELECT_USER_SQL = `SELECT u.user_id,
+       u.clerk_user_id,
+       u.email_primary,
+       u.full_name,
+       u.image_url,
+       gm.code AS game_mode,
+       gm.weekly_target AS weekly_target,
+       u.timezone,
+       NULL::text AS locale,
+       u.created_at,
+       u.updated_at,
+       u.deleted_at
+  FROM users u
+  LEFT JOIN cat_game_mode gm
+         ON gm.game_mode_id = u.game_mode_id
+ WHERE u.user_id = $1
+ LIMIT 1`;
 
 export type CurrentUserRow = {
   user_id: string;

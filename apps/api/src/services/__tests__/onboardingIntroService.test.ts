@@ -98,7 +98,6 @@ function createSubmitExpectations(options: {
   } as const;
 
   const payload = options.payload ?? basePayload;
-  const gameModeCode = payload.mode.toUpperCase();
   const expectedXp =
     options.expectedXp ?? ({
       total: payload.xp.total,
@@ -226,10 +225,9 @@ function createSubmitExpectations(options: {
     },
     ...foundationExpectations,
     {
-      match: (sql) =>
-        sql === 'UPDATE users SET game_mode_id = $2, game_mode = $3 WHERE user_id = $1',
+      match: (sql) => sql === 'UPDATE users SET game_mode_id = $2 WHERE user_id = $1',
       handle: (_sql, params) => {
-        expect(params).toEqual([userId, gameModeId, gameModeCode]);
+        expect(params).toEqual([userId, gameModeId]);
         return { rowCount: 1 };
       },
     },
