@@ -204,7 +204,7 @@ function computeStreakDays(dayCounts: Map<string, number>, referenceDate: Date, 
   for (let i = 0; i < MAX_STREAK_WEEKS * 7; i += 1) {
     const key = formatDate(cursor);
     const count = dayCounts.get(key) ?? 0;
-    if (count >= tier) {
+    if (count > 0) {
       streak += 1;
       cursor = addDays(cursor, -1);
       continue;

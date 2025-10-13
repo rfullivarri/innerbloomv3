@@ -113,6 +113,42 @@ describe('getUserStreakPanel', () => {
     expect(payload.topStreaks[0]?.streakDays).toBe(3);
   });
 
+  it('counts streakDays when the daily logs are below the weekly tier but still consecutive', async () => {
+    const req = {
+      params: { id: '00000000-0000-0000-0000-000000000010' },
+      query: { pillar: 'Body', range: 'week', mode: 'flow' },
+    } as unknown as Request;
+    const res = createMockResponse();
+
+    mockEnsureUserExists.mockResolvedValue(undefined);
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ timezone: 'UTC', today: '2024-02-10' }] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: 'task-1',
+            task: 'Push Ups',
+            xp_base: '5',
+            trait_name: 'Strength',
+            trait_code: 'STR',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        rows: [
+          { task_id: 'task-1', date: '2024-02-08', count: '1' },
+          { task_id: 'task-1', date: '2024-02-09', count: '1' },
+          { task_id: 'task-1', date: '2024-02-10', count: '1' },
+        ],
+      });
+
+    await getUserStreakPanel(req, res, vi.fn());
+
+    const payload = res.json.mock.calls[0][0];
+    expect(payload.tasks[0]?.streakDays).toBe(3);
+    expect(payload.topStreaks[0]?.streakDays).toBe(3);
+  });
+
   it('resets the streak when a day is missed even if previous weeks met the tier', async () => {
     const req = {
       params: { id: '00000000-0000-0000-0000-000000000002' },
