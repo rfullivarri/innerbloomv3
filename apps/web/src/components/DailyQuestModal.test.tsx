@@ -151,9 +151,19 @@ describe('DailyQuestModal', () => {
       });
     });
 
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    });
+    await new Promise((resolve) => setTimeout(resolve, 2300));
+
+    await waitFor(
+      () => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
+    expect(
+      await screen.findByRole('button', { name: /mantené presionado/i }, { timeout: 4000 }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('¡Éxitos hoy! A darlo todo. 🚀')).toBeInTheDocument();
   });
 
   it('locks body scroll while the modal is open and restores it on close', async () => {
