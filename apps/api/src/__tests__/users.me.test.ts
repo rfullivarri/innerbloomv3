@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { CurrentUserRow } from '../controllers/users/get-user-me.js';
+import { SELECT_USER_SQL, type CurrentUserRow } from '../controllers/users/get-user-me.js';
 const { mockQuery, mockVerifyToken } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
   mockVerifyToken: vi.fn(),
@@ -82,7 +82,7 @@ describe('GET /api/users/me', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ user });
     expect(mockQuery).toHaveBeenCalledTimes(1);
-    expect(mockQuery).toHaveBeenCalledWith('SELECT * FROM users WHERE user_id = $1 LIMIT 1', ['user-row-id']);
+    expect(mockQuery).toHaveBeenCalledWith(SELECT_USER_SQL, ['user-row-id']);
     expect(mockVerifyToken).toHaveBeenCalledTimes(1);
     expect(mockVerifyToken).toHaveBeenCalledWith('Bearer token');
   });
@@ -117,7 +117,7 @@ describe('GET /api/users/me', () => {
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual({ user: created });
-    expect(mockQuery).toHaveBeenCalledWith('SELECT * FROM users WHERE user_id = $1 LIMIT 1', ['new-id']);
+    expect(mockQuery).toHaveBeenCalledWith(SELECT_USER_SQL, ['new-id']);
     expect(mockVerifyToken).toHaveBeenCalledTimes(1);
   });
 
@@ -139,7 +139,7 @@ describe('GET /api/users/me', () => {
       code: 'user_not_found',
       message: 'Failed to resolve current user profile',
     });
-    expect(mockQuery).toHaveBeenCalledWith('SELECT * FROM users WHERE user_id = $1 LIMIT 1', ['existing-id']);
+    expect(mockQuery).toHaveBeenCalledWith(SELECT_USER_SQL, ['existing-id']);
     expect(mockVerifyToken).toHaveBeenCalledTimes(1);
   });
 

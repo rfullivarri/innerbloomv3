@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { CurrentUserRow } from '../controllers/users/get-user-me.js';
+import { SELECT_USER_SQL, type CurrentUserRow } from '../controllers/users/get-user-me.js';
 const { mockQuery, mockVerifyToken, mockGetAuthService } = vi.hoisted(() => ({
   mockQuery: vi.fn(() => undefined),
   mockVerifyToken: vi.fn(() => undefined),
@@ -84,7 +84,7 @@ describe('GET /api/users/me', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ user: baseUser });
     expect(mockVerifyToken).toHaveBeenCalledWith('Bearer token');
-    expect(mockQuery).toHaveBeenCalledWith('SELECT * FROM users WHERE user_id = $1 LIMIT 1', [baseUser.user_id]);
+    expect(mockQuery).toHaveBeenCalledWith(SELECT_USER_SQL, [baseUser.user_id]);
   });
 
   it('returns 401 when the authorization header is missing', async () => {
@@ -124,7 +124,7 @@ describe('GET /api/users/me', () => {
     expect(response.body).toEqual({ user: baseUser });
     expect(mockVerifyToken).not.toHaveBeenCalled();
     expect(mockQuery).toHaveBeenNthCalledWith(1, LEGACY_USER_LOOKUP_SQL, [baseUser.user_id]);
-    expect(mockQuery).toHaveBeenNthCalledWith(2, 'SELECT * FROM users WHERE user_id = $1 LIMIT 1', [baseUser.user_id]);
+    expect(mockQuery).toHaveBeenNthCalledWith(2, SELECT_USER_SQL, [baseUser.user_id]);
     expect(warnSpy).toHaveBeenCalledTimes(1);
 
     warnSpy.mockRestore();
