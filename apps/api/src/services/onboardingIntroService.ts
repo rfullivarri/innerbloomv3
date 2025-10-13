@@ -3,6 +3,31 @@ import { withClient } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 import type { OnboardingIntroPayload } from '../schemas/onboarding.js';
 
+const ONBOARDING_MODE_IMAGE_PATHS: Record<OnboardingIntroPayload['mode'], string> = {
+  LOW: '/LowMood.jpg',
+  CHILL: '/Chill-Mood.jpg',
+  FLOW: '/FlowMood.jpg',
+  EVOLVE: '/Evolve-Mood.jpg',
+} as const;
+
+export function resolveModeImageUrl(mode: OnboardingIntroPayload['mode']): string | null {
+  const path = ONBOARDING_MODE_IMAGE_PATHS[mode];
+
+  if (!path) {
+    return null;
+  }
+
+  const baseUrl = process.env.WEB_PUBLIC_BASE_URL;
+
+  if (!baseUrl) {
+    return path;
+  }
+
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+
+  return `${normalizedBaseUrl}${path}`;
+}
+
 const SELECT_USER_SQL = 'SELECT user_id FROM users WHERE clerk_user_id = $1 LIMIT 1';
 const SELECT_GAME_MODE_SQL =
   'SELECT game_mode_id, code FROM cat_game_mode WHERE code = $1 LIMIT 1';
@@ -52,7 +77,8 @@ INSERT INTO onboarding_foundations
 SELECT $1,$2,$3,$4
 WHERE NOT EXISTS (SELECT 1 FROM upd);
 `;
-const UPDATE_USER_GAME_MODE_SQL = 'UPDATE users SET game_mode_id = $2 WHERE user_id = $1';
+const UPDATE_USER_GAME_MODE_SQL =
+  'UPDATE users SET game_mode_id = $2, image_url = $3, avatar_url = $3 WHERE user_id = $1';
 const INSERT_XP_BONUS_SQL = `
 INSERT INTO xp_bonus
   (user_id, pillar_id, source, amount, meta)
@@ -153,6 +179,11 @@ export async function submitOnboardingIntro(
         client,
         payload.mode,
       );
+      const imageUrl = resolveModeImageUrl(payload.mode);
+
+      if (!imageUrl) {
+        throw new HttpError(500, 'missing_mode_image', 'Missing mood image for onboarding mode');
+      }
       const pillarMap = await resolvePillarMap(client);
       const normalizedXp = normalizeXp(payload.xp);
 
@@ -167,7 +198,7 @@ export async function submitOnboardingIntro(
 
       await upsertFoundations(client, sessionId, pillarMap, payload);
 
-      await client.query(UPDATE_USER_GAME_MODE_SQL, [userId, gameModeId]);
+      await client.query(UPDATE_USER_GAME_MODE_SQL, [userId, gameModeId, imageUrl]);
 
       const awarded = await insertXpBonus(
         client,
