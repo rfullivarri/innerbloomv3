@@ -82,6 +82,9 @@ type CelebrationOverlayState = {
   xpDelta: number;
 };
 
+type TimeoutHandle = ReturnType<typeof setTimeout> | number;
+type AnimationFrameHandle = number | TimeoutHandle;
+
 function randomBetween(min: number, max: number): number {
   return Math.random() * (max - min) + min;
 }
@@ -301,40 +304,46 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
   const [toastAnimationState, setToastAnimationState] = useState<'enter' | 'pop'>('enter');
   const [isToastHolding, setIsToastHolding] = useState(false);
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const toastHoldAnimationRef = useRef<number | null>(null);
+  const toastTimer = useRef<TimeoutHandle | null>(null);
+  const toastHoldAnimationRef = useRef<AnimationFrameHandle | null>(null);
   const toastHoldStartRef = useRef<number | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const shouldRestoreFocusRef = useRef(false);
-  const celebrationTimeoutsRef = useRef<number[]>([]);
-  const successCelebrationTimeoutRef = useRef<number | null>(null);
-  const successCelebrationCloseTimeoutRef = useRef<number | null>(null);
-  const xpBubbleTimeoutRef = useRef<number | null>(null);
-  const toastPopTimeoutRef = useRef<number | null>(null);
+  const celebrationTimeoutsRef = useRef<TimeoutHandle[]>([]);
+  const successCelebrationTimeoutRef = useRef<TimeoutHandle | null>(null);
+  const successCelebrationCloseTimeoutRef = useRef<TimeoutHandle | null>(null);
+  const xpBubbleTimeoutRef = useRef<TimeoutHandle | null>(null);
+  const toastPopTimeoutRef = useRef<TimeoutHandle | null>(null);
 
-  const requestToastFrame = useCallback((callback: FrameRequestCallback): number => {
-    if (typeof window !== 'undefined') {
-      if (typeof window.requestAnimationFrame === 'function') {
-        return window.requestAnimationFrame(callback);
+  const requestToastFrame = useCallback(
+    (callback: FrameRequestCallback): AnimationFrameHandle => {
+      if (typeof window !== 'undefined') {
+        if (typeof window.requestAnimationFrame === 'function') {
+          return window.requestAnimationFrame(callback);
+        }
+        return window.setTimeout(() => callback(performance.now()), 16);
       }
-      return window.setTimeout(() => callback(performance.now()), 16);
-    }
-    return setTimeout(() => callback(performance.now()), 16);
-  }, []);
+      return setTimeout(() => callback(performance.now()), 16);
+    },
+    [],
+  );
 
-  const cancelToastFrame = useCallback((handle: number) => {
-    if (typeof window !== 'undefined') {
-      if (typeof window.cancelAnimationFrame === 'function') {
+  const cancelToastFrame = useCallback(
+    (handle: AnimationFrameHandle) => {
+      if (
+        typeof window !== 'undefined' &&
+        typeof window.cancelAnimationFrame === 'function' &&
+        typeof handle === 'number'
+      ) {
         window.cancelAnimationFrame(handle);
         return;
       }
       clearTimeout(handle);
-      return;
-    }
-    clearTimeout(handle);
-  }, []);
+    },
+    [],
+  );
   const xpPreviousRef = useRef(0);
 
   const {
@@ -477,7 +486,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       setSrAnnouncement('');
     }, 2400);
     return () => {
-      window.clearTimeout(timeoutId);
+      clearTimeout(timeoutId);
     };
   }, [srAnnouncement]);
 
