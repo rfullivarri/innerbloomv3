@@ -84,15 +84,15 @@ Este documento resume los endpoints HTTP disponibles en el backend del dashboard
 }</code></pre> |
 | Panel de rachas (V3) | `GET /users/:id/streaks/panel` | <pre><code>{
   "topStreaks": [
-    { "id": "body", "name": "Body rituals", "stat": "12 weeks", "weekDone": true, "streakWeeks": 12 }
+    { "id": "body", "name": "Body rituals", "stat": "12 días", "weekDone": true, "streakDays": 12 }
   ],
   "tasks": [
     {
       "id": "b55b0e12-7d2d-4d92-8fb8-2e8a83741234",
       "name": "Morning stretch",
-      "stat": "4 weeks",
+      "stat": "4 días",
       "weekDone": true,
-      "streakWeeks": 4,
+      "streakDays": 4,
       "metrics": {
         "week": { "count": 3, "xp": 240 },
         "month": { "count": 11, "xp": 880, "weeks": 4 },
@@ -237,7 +237,7 @@ curl -X GET \
 ### `GET /users/:id/streaks/panel`
 * **Uso:** panel de rachas V3 (cuando `VITE_SHOW_STREAKS_PANEL` lo habilita) obtiene `topStreaks` y `tasks` con métricas por rango.
 * **Parámetros:** `pillar` (`Body|Mind|Soul`), `range` (`week|month|qtr`), `mode` (tier actual) y `query` opcional.
-* **Respuesta:** `{ topStreaks: Array<{ id, name, stat, weekDone, streakWeeks }>, tasks: Array<{ id, name, stat, weekDone, streakWeeks, metrics: { week: { count, xp }, month: { count, xp, weeks }, qtr: { count, xp, weeks } } }> }`.
+* **Respuesta:** `{ topStreaks: Array<{ id, name, stat, weekDone, streakDays }>, tasks: Array<{ id, name, stat, weekDone, streakDays, metrics: { week: { count, xp }, month: { count, xp, weeks }, qtr: { count, xp, weeks } } }> }`.
 
 ### `GET /users/:id/streaks`
 * **Uso:** no existe endpoint dedicado; la tarjeta legacy calcula `current` y `longest` procesando los datos de `/xp/daily` en el cliente.
