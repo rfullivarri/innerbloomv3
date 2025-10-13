@@ -33,14 +33,14 @@ interface StreakPanelResponse {
     name: string;
     stat: string;
     weekDone: number;
-    streakWeeks: number;
+    streakDays: number;
   }>;
   tasks: Array<{
     id: string;
     name: string;
     stat: string;
     weekDone: number;
-    streakWeeks: number;
+    streakDays: number;
     metrics: {
       week: { count: number; xp: number };
       month: { count: number; xp: number; weeks: number[] };
@@ -60,9 +60,9 @@ interface StreakPanelResponse {
 * **Quarter (3M)** — Considers the current month and the previous two. For each month we count how many of its weekly buckets hit the
 tier, then scale to the goal: `value = (weeksHit / totalWeeks) * tier`. `qtr.count` and `qtr.xp` sum all completions inside the
 three-month window.
-* **Streaks** — `streakWeeks` is the number of consecutive weeks meeting the tier, anchored on the current week (which only counts if
-  it already meets the target). History looks back up to 52 weeks per task.
-* **Top streaks** — Tasks with `streakWeeks >= 2`, ordered by `streakWeeks` descending, returning the first three entries.
+* **Daily streaks** — `streakDays` is the number of consecutive days with at least one completion, anchored on the user's
+  current day. History looks back up to 52 weeks (364 days) per task.
+* **Top streaks** — Tasks with `streakDays >= 2`, ordered by `streakDays` descending, returning the first three entries.
 
 ### Example requests
 
@@ -77,9 +77,9 @@ curl -s "https://api.example.com/users/00000000-0000-0000-0000-000000000000/stre
 ```json
 {
   "topStreaks": [
-    { "id": "a1", "name": "Ayuno", "stat": "Hábitos", "weekDone": 3, "streakWeeks": 12 },
-    { "id": "b2", "name": "2L de agua", "stat": "Salud", "weekDone": 4, "streakWeeks": 8 },
-    { "id": "c3", "name": "Leer 20m", "stat": "Crecimiento", "weekDone": 2, "streakWeeks": 6 }
+    { "id": "a1", "name": "Ayuno", "stat": "Hábitos", "weekDone": 3, "streakDays": 12 },
+    { "id": "b2", "name": "2L de agua", "stat": "Salud", "weekDone": 4, "streakDays": 8 },
+    { "id": "c3", "name": "Leer 20m", "stat": "Crecimiento", "weekDone": 2, "streakDays": 6 }
   ],
   "tasks": [
     {
@@ -87,7 +87,7 @@ curl -s "https://api.example.com/users/00000000-0000-0000-0000-000000000000/stre
       "name": "Ayuno 16:8",
       "stat": "Pilar:1",
       "weekDone": 3,
-      "streakWeeks": 12,
+      "streakDays": 12,
       "metrics": {
         "week":  { "count": 3, "xp": 60 },
         "month": { "count": 12, "xp": 240, "weeks": [3, 2, 4, 3] },

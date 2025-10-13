@@ -193,18 +193,14 @@ function buildDayCounts(logs: TaskLog[]): Map<string, number> {
   return counts;
 }
 
-function computeStreakDays(dayCounts: Map<string, number>, referenceDate: Date, tier: number): number {
-  if (tier <= 0) {
-    return 0;
-  }
-
+function computeStreakDays(dayCounts: Map<string, number>, referenceDate: Date): number {
   let streak = 0;
   let cursor = new Date(referenceDate.getTime());
 
   for (let i = 0; i < MAX_STREAK_WEEKS * 7; i += 1) {
     const key = formatDate(cursor);
     const count = dayCounts.get(key) ?? 0;
-    if (count >= tier) {
+    if (count > 0) {
       streak += 1;
       cursor = addDays(cursor, -1);
       continue;
@@ -364,7 +360,7 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
       return Number.isFinite(scaled) ? Number(scaled.toFixed(2)) : 0;
     });
 
-    const streakDays = computeStreakDays(dayCounts, today, tier);
+    const streakDays = computeStreakDays(dayCounts, today);
 
     return {
       id: task.id,

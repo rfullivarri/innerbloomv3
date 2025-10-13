@@ -236,7 +236,7 @@ type DisplayTask = {
   stat?: string;
   weeklyDone: number;
   weeklyGoal: number;
-  streakWeeks: number;
+  streakDays: number;
   scopeCount: number;
   scopeXp: number;
   history: TaskHistory;
@@ -378,7 +378,7 @@ function buildHistory(task: StreakPanelTask | undefined, range: StreakPanelRange
 
 function buildDisplayTask(
   task: StreakPanelTask | undefined,
-  fallback: { id: string; name: string; stat?: string; weekDone: number; streakWeeks: number },
+  fallback: { id: string; name: string; stat?: string; weekDone: number; streakDays: number },
   range: StreakPanelRange,
   weeklyGoal: number,
   highlight?: boolean,
@@ -393,7 +393,7 @@ function buildDisplayTask(
     stat: fallback.stat,
     weeklyDone,
     weeklyGoal,
-    streakWeeks: fallback.streakWeeks ?? 0,
+    streakDays: fallback.streakDays ?? 0,
     scopeCount,
     scopeXp,
     history,
@@ -412,7 +412,7 @@ function TaskItem({ item }: { item: DisplayTask }) {
         'flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-slate-200 shadow-[0_6px_20px_rgba(15,23,42,0.3)]',
         item.highlight && 'border-violet-400/60 bg-violet-400/10 shadow-[0_8px_26px_rgba(99,102,241,0.3)]',
       )}
-      aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${item.streakWeeks} consecutive weeks`}
+      aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${item.streakDays} consecutive days`}
     >
       <div className="flex flex-wrap items-start justify-between gap-2.5">
         <div className="min-w-0 space-y-0.5">
@@ -425,14 +425,14 @@ function TaskItem({ item }: { item: DisplayTask }) {
             </p>
           )}
         </div>
-        {item.streakWeeks > 0 && (
+        {item.streakDays > 0 && (
           <GlowChip
             glowPrimary="rgba(251, 191, 36, 0.65)"
             glowSecondary="rgba(249, 115, 22, 0.45)"
             innerClassName="gap-1 rounded-full border border-amber-400/60 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-100 shadow-[0_0_12px_rgba(251,191,36,0.25)]"
           >
             <span aria-hidden>🔥</span>
-            x{numberFormatter.format(item.streakWeeks)}
+            x{numberFormatter.format(item.streakDays)}
           </GlowChip>
         )}
       </div>
@@ -554,7 +554,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
             name: entry.name,
             stat: entry.stat,
             weekDone: entry.weekDone,
-            streakWeeks: entry.streakWeeks,
+            streakDays: entry.streakDays,
           },
           range,
           tier,
@@ -588,7 +588,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
               name: task.name,
               stat: task.stat,
               weekDone: task.weekDone,
-              streakWeeks: task.streakWeeks,
+              streakDays: task.streakDays,
             },
             range,
             tier,
@@ -664,7 +664,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
             <section className="space-y-3">
               <div className="flex flex-wrap items-baseline gap-2">
                 <h4 className="text-base font-semibold leading-tight text-slate-100 md:text-lg">Top streaks</h4>
-                <span className="text-xs text-slate-400 md:text-sm">— consecutive weeks completed</span>
+                <span className="text-xs text-slate-400 md:text-sm">— días consecutivos sin cortar</span>
               </div>
               {topEntries.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3">

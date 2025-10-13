@@ -1089,7 +1089,7 @@ export type StreakPanelTopEntry = {
   name: string;
   stat: string;
   weekDone: number;
-  streakWeeks: number;
+  streakDays: number;
 };
 
 export type StreakPanelTask = {
@@ -1097,7 +1097,7 @@ export type StreakPanelTask = {
   name: string;
   stat: string;
   weekDone: number;
-  streakWeeks: number;
+  streakDays: number;
   metrics: {
     week: { count: number; xp: number };
     month: { count: number; xp: number; weeks: number[] };
