@@ -405,6 +405,9 @@ function TaskItem({ item }: { item: DisplayTask }) {
   const status = getStatusColor(item.weeklyDone, item.weeklyGoal);
   const pct = computeProgressPercent(item.weeklyDone, item.weeklyGoal);
   const showHistory = item.history.values.length > 0;
+  const streakDays = Math.max(0, Number.isFinite(item.streakDays) ? Math.floor(item.streakDays) : 0);
+  const showFireBadge = streakDays >= 2;
+  const showStreakMultiplier = item.highlight && streakDays >= 2;
 
   return (
     <article
@@ -412,7 +415,7 @@ function TaskItem({ item }: { item: DisplayTask }) {
         'flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-slate-200 shadow-[0_6px_20px_rgba(15,23,42,0.3)]',
         item.highlight && 'border-violet-400/60 bg-violet-400/10 shadow-[0_8px_26px_rgba(99,102,241,0.3)]',
       )}
-      aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${item.streakDays} consecutive days`}
+      aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${streakDays} consecutive days`}
     >
       <div className="flex flex-wrap items-start justify-between gap-2.5">
         <div className="min-w-0 space-y-0.5">
@@ -425,14 +428,18 @@ function TaskItem({ item }: { item: DisplayTask }) {
             </p>
           )}
         </div>
-        {item.streakDays > 0 && (
+        {showFireBadge && (
           <GlowChip
             glowPrimary="rgba(251, 191, 36, 0.65)"
             glowSecondary="rgba(249, 115, 22, 0.45)"
             innerClassName="gap-1 rounded-full border border-amber-400/60 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-100 shadow-[0_0_12px_rgba(251,191,36,0.25)]"
           >
             <span aria-hidden>🔥</span>
-            x{numberFormatter.format(item.streakDays)}
+            {showStreakMultiplier ? (
+              <>x{numberFormatter.format(streakDays)}</>
+            ) : (
+              <span className="sr-only">{`${numberFormatter.format(streakDays)} días consecutivos`}</span>
+            )}
           </GlowChip>
         )}
       </div>
@@ -543,9 +550,19 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
 
   const tasksById = useMemo(() => new Map(tasks.map((task) => [task.id, task])), [tasks]);
 
+  const streakHighlights = useMemo(
+    () => topStreaks.filter((entry) => (entry?.streakDays ?? 0) >= 2),
+    [topStreaks],
+  );
+
+  const streakHighlightMap = useMemo(
+    () => new Map(streakHighlights.map((entry) => [entry.id, entry])),
+    [streakHighlights],
+  );
+
   const topEntries: DisplayTask[] = useMemo(
     () =>
-      topStreaks.map((entry) => {
+      streakHighlights.slice(0, 3).map((entry) => {
         const task = tasksById.get(entry.id);
         return buildDisplayTask(
           task,
@@ -561,7 +578,12 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
           true,
         );
       }),
-    [range, tier, tasksById, topStreaks],
+    [range, tasksById, tier, streakHighlights],
+  );
+
+  const overflowHighlights = useMemo(
+    () => streakHighlights.slice(3),
+    [streakHighlights],
   );
 
   const topIds = useMemo(() => new Set(topEntries.map((entry) => entry.id)), [topEntries]);
@@ -578,23 +600,50 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
 
   const displayTasks: DisplayTask[] = useMemo(
     () =>
-      sortedTasks
-        .filter((task) => !topIds.has(task.id))
-        .map((task) =>
-          buildDisplayTask(
-            task,
-            {
-              id: task.id,
-              name: task.name,
-              stat: task.stat,
-              weekDone: task.weekDone,
-              streakDays: task.streakDays,
-            },
-            range,
-            tier,
+      [
+        ...sortedTasks
+          .filter((task) => !topIds.has(task.id))
+          .map((task) => {
+            const fallback = streakHighlightMap.get(task.id);
+            return buildDisplayTask(
+              task,
+              {
+                id: task.id,
+                name: fallback?.name ?? task.name,
+                stat: fallback?.stat ?? task.stat,
+                weekDone: fallback?.weekDone ?? task.weekDone,
+                streakDays: fallback?.streakDays ?? task.streakDays,
+              },
+              range,
+              tier,
+            );
+          }),
+        ...overflowHighlights
+          .filter((entry) => !tasksById.has(entry.id))
+          .map((entry) =>
+            buildDisplayTask(
+              undefined,
+              {
+                id: entry.id,
+                name: entry.name,
+                stat: entry.stat,
+                weekDone: entry.weekDone,
+                streakDays: entry.streakDays,
+              },
+              range,
+              tier,
+            ),
           ),
-        ),
-    [range, sortedTasks, tier, topIds],
+      ],
+    [
+      overflowHighlights,
+      range,
+      sortedTasks,
+      streakHighlightMap,
+      tasksById,
+      tier,
+      topIds,
+    ],
   );
 
   const isLoading = status === 'idle' || status === 'loading';
