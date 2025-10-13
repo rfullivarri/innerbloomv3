@@ -198,8 +198,6 @@ export async function submitOnboardingIntro(
 
       await upsertFoundations(client, sessionId, pillarMap, payload);
 
-      await client.query(UPDATE_USER_GAME_MODE_SQL, [userId, gameModeId, imageUrl]);
-
       const awarded = await insertXpBonus(
         client,
         userId,
@@ -208,6 +206,9 @@ export async function submitOnboardingIntro(
         payload,
         sessionId,
       );
+
+      // Update the user's mode imagery after all onboarding data has been persisted.
+      await client.query(UPDATE_USER_GAME_MODE_SQL, [userId, gameModeId, imageUrl]);
 
       await client.query('COMMIT');
 

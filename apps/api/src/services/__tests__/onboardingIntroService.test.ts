@@ -250,6 +250,7 @@ function createSubmitExpectations(options: {
       },
     },
     ...foundationExpectations,
+    ...xpBonusExpectations,
     {
       match: (sql) =>
         sql ===
@@ -259,7 +260,6 @@ function createSubmitExpectations(options: {
         return { rowCount: 1 };
       },
     },
-    ...xpBonusExpectations,
     {
       match: (sql) => sql === 'COMMIT',
       handle: () => ({}),
