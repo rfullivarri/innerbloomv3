@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { OnboardingIntroPayload } from '../../schemas/onboarding.js';
-import { getLatestOnboardingSession, submitOnboardingIntro } from '../onboardingIntroService.js';
+import {
+  getLatestOnboardingSession,
+  resolveModeImageUrl,
+  submitOnboardingIntro,
+} from '../onboardingIntroService.js';
 
 const { mockClient, withClientSpy } = vi.hoisted(() => {
   const client = {
@@ -79,9 +83,26 @@ beforeEach(() => {
   mockClient.query.mockReset();
   withClientSpy.mockReset();
   withClientSpy.mockImplementation(async (callback) => callback(mockClient));
+  delete process.env.WEB_PUBLIC_BASE_URL;
 });
 
 type ExpectedXp = { total: number; body: number; mind: number; soul: number };
+
+describe('resolveModeImageUrl', () => {
+  it('returns a relative path when no base URL is configured', () => {
+    expect(resolveModeImageUrl('LOW')).toBe('/LowMood.jpg');
+  });
+
+  it('prefixes the base URL when configured', () => {
+    process.env.WEB_PUBLIC_BASE_URL = 'https://example.com/app';
+    expect(resolveModeImageUrl('CHILL')).toBe('https://example.com/app/Chill-Mood.jpg');
+  });
+
+  it('trims trailing slashes from the base URL', () => {
+    process.env.WEB_PUBLIC_BASE_URL = 'https://example.com/';
+    expect(resolveModeImageUrl('FLOW')).toBe('https://example.com/FlowMood.jpg');
+  });
+});
 
 function createSubmitExpectations(options: {
   xpBonusRowCounts: [number, number, number];
@@ -108,6 +129,11 @@ function createSubmitExpectations(options: {
 
   const metaJson = JSON.stringify(payload.meta);
   const serializedPayload = JSON.stringify(payload);
+  const expectedImageUrl = resolveModeImageUrl(payload.mode);
+
+  if (!expectedImageUrl) {
+    throw new Error('Expected onboarding mode image URL in test setup');
+  }
 
   const foundationPayloads = [
     {
@@ -224,14 +250,16 @@ function createSubmitExpectations(options: {
       },
     },
     ...foundationExpectations,
+    ...xpBonusExpectations,
     {
-      match: (sql) => sql === 'UPDATE users SET game_mode_id = $2 WHERE user_id = $1',
+      match: (sql) =>
+        sql ===
+        'UPDATE users SET game_mode_id = $2, image_url = $3, avatar_url = $3 WHERE user_id = $1',
       handle: (_sql, params) => {
-        expect(params).toEqual([userId, gameModeId]);
+        expect(params).toEqual([userId, gameModeId, expectedImageUrl]);
         return { rowCount: 1 };
       },
     },
-    ...xpBonusExpectations,
     {
       match: (sql) => sql === 'COMMIT',
       handle: () => ({}),
