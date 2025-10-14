@@ -42,6 +42,8 @@ const snapshotFilePath = path.resolve(
   '../db-snapshot.json'
 );
 
+app.use('/exports', express.static(path.resolve('exports')));
+
 const apiLoggingEnabled = process.env.API_LOGGING === 'true';
 
 if (process.env.ENABLE_DB_SNAPSHOT === 'true') {
