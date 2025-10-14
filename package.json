@@ -1,7 +1,7 @@
 {
   "name": "innerbloom",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "workspaces": [
     "apps/*"
   ],
@@ -26,7 +26,12 @@
   "devDependencies": {
     "@types/node": "^24.6.2",
     "concurrently": "^9.2.1",
+    "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "openai": "^6.3.0"
   }
 }
