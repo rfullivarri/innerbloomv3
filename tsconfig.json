@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "ts-node": {
+    "esm": false,
+    "compilerOptions": {
+      "module": "CommonJS",
+      "moduleResolution": "Node"
+    }
+  }
+}
