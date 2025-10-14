@@ -9,6 +9,7 @@ import usersRoutes from './users.js';
 import dailyQuestRoutes from './dailyQuest.js';
 import adminRoutes from '../modules/admin/admin.routes.js';
 import onboardingRoutes from './onboarding.js';
+import taskgenBypassRoutes from './taskgen-bypass.js';
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use(usersRoutes);
 router.use(leaderboardRoutes);
 router.use(adminRoutes);
 router.use(onboardingRoutes);
+if (process.env.ENABLE_TASKGEN_TRIGGER === 'true') router.use(taskgenBypassRoutes);
 
 export default router;
