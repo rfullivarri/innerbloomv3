@@ -1,17 +1,11 @@
 import request from 'supertest';
 import { EventEmitter } from 'node:events';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 class MockChildProcess extends EventEmitter {
   stdout = new EventEmitter();
   stderr = new EventEmitter();
 }
-
-const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(currentDir, '../../../..');
-const SCRIPT_PATH = path.resolve(REPO_ROOT, 'scripts/generateTasks.ts');
 
 const spawnMock = vi.fn<
   [string, string[], { cwd: string; env: NodeJS.ProcessEnv; stdio: 'pipe' }],
@@ -56,6 +50,8 @@ describe('GET /api/taskgen/dry-run/:user_id', () => {
     });
 
     const { default: app } = await import('../app.js');
+    const { __test } = await import('./taskgen-bypass.js');
+    const context = __test.getCliContext();
 
     const response = await request(app)
       .get('/api/taskgen/dry-run/test-user')
@@ -77,12 +73,12 @@ describe('GET /api/taskgen/dry-run/:user_id', () => {
     expect(spawnMock.mock.calls[0]?.[0]).toBe('pnpm');
     expect(spawnMock.mock.calls[0]?.[1]).toEqual([
       'ts-node',
-      SCRIPT_PATH,
+      context.scriptPath,
       '--user',
       'test-user',
     ]);
     expect(spawnMock.mock.calls[0]?.[2]).toEqual({
-      cwd: REPO_ROOT,
+      cwd: context.repoRoot,
       env: expect.any(Object),
       stdio: 'pipe',
     });
@@ -92,12 +88,12 @@ describe('GET /api/taskgen/dry-run/:user_id', () => {
       'exec',
       '--',
       'ts-node',
-      SCRIPT_PATH,
+      context.scriptPath,
       '--user',
       'test-user',
     ]);
     expect(spawnMock.mock.calls[1]?.[2]).toEqual({
-      cwd: REPO_ROOT,
+      cwd: context.repoRoot,
       env: expect.any(Object),
       stdio: 'pipe',
     });
@@ -132,6 +128,8 @@ describe('GET /api/taskgen/dry-run/:user_id', () => {
     });
 
     const { default: app } = await import('../app.js');
+    const { __test } = await import('./taskgen-bypass.js');
+    const context = __test.getCliContext();
 
     const response = await request(app)
       .get('/api/taskgen/dry-run/test-user')
@@ -144,6 +142,35 @@ describe('GET /api/taskgen/dry-run/:user_id', () => {
       mode: null,
       message: 'Failed to launch task generation CLI: spawn pnpm ENOENT; spawn npm ENOENT',
       error_log: '/exports/errors.log',
+    });
+
+    expect(spawnMock).toHaveBeenCalledTimes(2);
+    expect(spawnMock.mock.calls[0]?.[0]).toBe('pnpm');
+    expect(spawnMock.mock.calls[0]?.[1]).toEqual([
+      'ts-node',
+      context.scriptPath,
+      '--user',
+      'test-user',
+    ]);
+    expect(spawnMock.mock.calls[0]?.[2]).toEqual({
+      cwd: context.repoRoot,
+      env: expect.any(Object),
+      stdio: 'pipe',
+    });
+
+    expect(spawnMock.mock.calls[1]?.[0]).toBe(process.platform === 'win32' ? 'npm.cmd' : 'npm');
+    expect(spawnMock.mock.calls[1]?.[1]).toEqual([
+      'exec',
+      '--',
+      'ts-node',
+      context.scriptPath,
+      '--user',
+      'test-user',
+    ]);
+    expect(spawnMock.mock.calls[1]?.[2]).toEqual({
+      cwd: context.repoRoot,
+      env: expect.any(Object),
+      stdio: 'pipe',
     });
   });
 });
