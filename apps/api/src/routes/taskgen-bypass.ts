@@ -7,6 +7,14 @@ const router = Router();
 
 const ALLOWED_MODES = new Set(['low', 'chill', 'flow', 'evolve']);
 
+type ErrorWithCode = {
+  code?: string | number;
+};
+
+function hasErrorCode(value: unknown): value is ErrorWithCode {
+  return typeof value === 'object' && value !== null && 'code' in value;
+}
+
 function extractModeFromOutput(output: string, userId: string): string | undefined {
   const escapedUserId = userId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp(`${escapedUserId}\\.(low|chill|flow|evolve)`, 'i');
@@ -48,7 +56,7 @@ function runCliCommand(command: string, args: string[]): Promise<GenerateTasksCl
           ? String(error.message).trim()
           : 'Unknown error';
       const errorCode =
-        typeof error === 'object' && error && 'code' in error ? String((error as any).code) : undefined;
+        hasErrorCode(error) && error.code !== undefined ? String(error.code) : undefined;
 
       if (settled) {
         return;
