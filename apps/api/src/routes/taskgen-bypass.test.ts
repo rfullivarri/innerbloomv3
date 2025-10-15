@@ -1,11 +1,17 @@
 import request from 'supertest';
 import { EventEmitter } from 'node:events';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 class MockChildProcess extends EventEmitter {
   stdout = new EventEmitter();
   stderr = new EventEmitter();
 }
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(currentDir, '../../../..');
+const SCRIPT_PATH = path.resolve(REPO_ROOT, 'scripts/generateTasks.ts');
 
 const spawnMock = vi.fn<
   [string, string[], { cwd: string; env: NodeJS.ProcessEnv; stdio: 'pipe' }],
@@ -71,20 +77,30 @@ describe('GET /api/taskgen/dry-run/:user_id', () => {
     expect(spawnMock.mock.calls[0]?.[0]).toBe('pnpm');
     expect(spawnMock.mock.calls[0]?.[1]).toEqual([
       'ts-node',
-      'scripts/generateTasks.ts',
+      SCRIPT_PATH,
       '--user',
       'test-user',
     ]);
+    expect(spawnMock.mock.calls[0]?.[2]).toEqual({
+      cwd: REPO_ROOT,
+      env: expect.any(Object),
+      stdio: 'pipe',
+    });
 
     expect(spawnMock.mock.calls[1]?.[0]).toBe(process.platform === 'win32' ? 'npm.cmd' : 'npm');
     expect(spawnMock.mock.calls[1]?.[1]).toEqual([
       'exec',
       '--',
       'ts-node',
-      'scripts/generateTasks.ts',
+      SCRIPT_PATH,
       '--user',
       'test-user',
     ]);
+    expect(spawnMock.mock.calls[1]?.[2]).toEqual({
+      cwd: REPO_ROOT,
+      env: expect.any(Object),
+      stdio: 'pipe',
+    });
   });
 
   it('returns a combined error when pnpm and npm exec are unavailable', async () => {

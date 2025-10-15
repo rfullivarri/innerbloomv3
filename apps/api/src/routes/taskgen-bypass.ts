@@ -2,8 +2,13 @@ import { Router } from 'express';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 const router = Router();
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(currentDir, '../../../..');
+const SCRIPT_PATH = path.resolve(REPO_ROOT, 'scripts/generateTasks.ts');
 
 const ALLOWED_MODES = new Set(['low', 'chill', 'flow', 'evolve']);
 
@@ -33,7 +38,7 @@ type GenerateTasksCliResult = {
 function runCliCommand(command: string, args: string[]): Promise<GenerateTasksCliResult> {
   return new Promise<GenerateTasksCliResult>((resolve) => {
     const child = spawn(command, args, {
-      cwd: path.resolve('.'),
+      cwd: REPO_ROOT,
       env: { ...process.env },
       stdio: 'pipe',
     });
@@ -90,7 +95,7 @@ function normaliseSpawnError(message?: string): string | undefined {
 }
 
 function createScriptArgs(userId: string, mode?: string): string[] {
-  const args = ['scripts/generateTasks.ts', '--user', userId];
+  const args = [SCRIPT_PATH, '--user', userId];
   if (mode) {
     args.push('--mode', mode);
   }
