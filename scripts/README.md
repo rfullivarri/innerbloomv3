@@ -1,6 +1,6 @@
 # Task Generation Dry-Run CLI
 
-This folder hosts the `generateTasks.ts` utility that creates dry-run task batches using the TaskGen prompts.
+The task generation CLI now lives under `apps/api/scripts/generateTasks.ts` alongside the API codebase. It creates dry-run task batches using the TaskGen prompts.
 
 ## Requirements
 
@@ -14,7 +14,7 @@ This folder hosts the `generateTasks.ts` utility that creates dry-run task batch
 Generate tasks for a single user:
 
 ```bash
-pnpm ts-node scripts/generateTasks.ts --user <user_id>
+pnpm ts-node apps/api/scripts/generateTasks.ts --user <user_id>
 ```
 
 Optional flags:

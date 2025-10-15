@@ -7,7 +7,7 @@
     "dev": "tsx src/index.ts",
     "db:snapshot": "tsx scripts/db-snapshot.ts",
     "db:create-daily-quest-indexes": "tsx scripts/create-daily-quest-indexes.ts",
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-taskgen-assets.mjs",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
