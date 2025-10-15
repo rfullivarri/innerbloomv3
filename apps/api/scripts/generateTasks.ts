@@ -1,9 +1,12 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import process from 'process';
+import { fileURLToPath } from 'url';
 import Ajv from 'ajv';
 import OpenAI from 'openai';
 
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const PROMPTS_DIR = path.resolve(SCRIPT_DIR, '../prompts');
 const EXPORTS_DIR = path.resolve('exports');
 const SNAPSHOT_PATH = path.resolve('apps/api/db-snapshot.json');
 
@@ -215,7 +218,7 @@ function normalisePrompt(raw: string): PromptFile {
 }
 
 async function loadPrompt(mode: Mode): Promise<PromptFile> {
-  const promptPath = path.resolve('prompts', MODE_FILES[mode]);
+  const promptPath = path.resolve(PROMPTS_DIR, MODE_FILES[mode]);
   const raw = await fs.readFile(promptPath, 'utf8');
   return normalisePrompt(raw);
 }
