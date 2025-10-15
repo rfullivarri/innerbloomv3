@@ -7,6 +7,14 @@ const router = Router();
 
 const ALLOWED_MODES = new Set(['low', 'chill', 'flow', 'evolve']);
 
+type ErrorWithCode = {
+  code?: string | number;
+};
+
+function hasErrorCode(value: unknown): value is ErrorWithCode {
+  return typeof value === 'object' && value !== null && 'code' in value;
+}
+
 function extractModeFromOutput(output: string, userId: string): string | undefined {
   const escapedUserId = userId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp(`${escapedUserId}\\.(low|chill|flow|evolve)`, 'i');
@@ -19,16 +27,12 @@ type GenerateTasksCliResult = {
   stdout: string;
   stderr: string;
   spawnError?: string;
+  spawnErrorCode?: string;
 };
 
-async function runGenerateTasksCli(userId: string, mode?: string): Promise<GenerateTasksCliResult> {
-  const args = ['ts-node', 'scripts/generateTasks.ts', '--user', userId];
-  if (mode) {
-    args.push('--mode', mode);
-  }
-
-  return await new Promise<GenerateTasksCliResult>((resolve) => {
-    const child = spawn('pnpm', args, {
+function runCliCommand(command: string, args: string[]): Promise<GenerateTasksCliResult> {
+  return new Promise<GenerateTasksCliResult>((resolve) => {
+    const child = spawn(command, args, {
       cwd: path.resolve('.'),
       env: { ...process.env },
       stdio: 'pipe',
@@ -51,6 +55,8 @@ async function runGenerateTasksCli(userId: string, mode?: string): Promise<Gener
         typeof error === 'object' && error && 'message' in error
           ? String(error.message).trim()
           : 'Unknown error';
+      const errorCode =
+        hasErrorCode(error) && error.code !== undefined ? String(error.code) : undefined;
 
       if (settled) {
         return;
@@ -62,6 +68,7 @@ async function runGenerateTasksCli(userId: string, mode?: string): Promise<Gener
         stdout: stdoutChunks.join(''),
         stderr: stderrChunks.join(''),
         spawnError: `Failed to launch task generation CLI: ${sanitisedMessage}`,
+        spawnErrorCode: errorCode,
       });
     });
 
@@ -73,6 +80,54 @@ async function runGenerateTasksCli(userId: string, mode?: string): Promise<Gener
       resolve({ code, stdout: stdoutChunks.join(''), stderr: stderrChunks.join('') });
     });
   });
+}
+
+function normaliseSpawnError(message?: string): string | undefined {
+  if (!message) {
+    return undefined;
+  }
+  return message.replace(/^Failed to launch task generation CLI:\s*/u, '').trim();
+}
+
+function createScriptArgs(userId: string, mode?: string): string[] {
+  const args = ['scripts/generateTasks.ts', '--user', userId];
+  if (mode) {
+    args.push('--mode', mode);
+  }
+  return args;
+}
+
+function getNpmCommand(): string {
+  return process.platform === 'win32' ? 'npm.cmd' : 'npm';
+}
+
+async function runGenerateTasksCli(userId: string, mode?: string): Promise<GenerateTasksCliResult> {
+  const scriptArgs = createScriptArgs(userId, mode);
+  const pnpmResult = await runCliCommand('pnpm', ['ts-node', ...scriptArgs]);
+
+  if (pnpmResult.spawnError && pnpmResult.spawnErrorCode === 'ENOENT') {
+    const npmResult = await runCliCommand(getNpmCommand(), ['exec', '--', 'ts-node', ...scriptArgs]);
+
+    if (npmResult.spawnError) {
+      const combinedMessage = [
+        normaliseSpawnError(pnpmResult.spawnError),
+        normaliseSpawnError(npmResult.spawnError),
+      ]
+        .filter(Boolean)
+        .join('; ');
+
+      return {
+        ...npmResult,
+        spawnError: combinedMessage
+          ? `Failed to launch task generation CLI: ${combinedMessage}`
+          : npmResult.spawnError,
+      };
+    }
+
+    return npmResult;
+  }
+
+  return pnpmResult;
 }
 
 router.get('/taskgen/dry-run/:user_id', async (req, res, next) => {
