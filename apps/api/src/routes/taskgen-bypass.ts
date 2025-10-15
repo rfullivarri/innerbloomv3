@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -7,8 +8,61 @@ import { fileURLToPath } from 'node:url';
 const router = Router();
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(currentDir, '../../../..');
-const SCRIPT_PATH = path.resolve(REPO_ROOT, 'scripts/generateTasks.ts');
+
+type CliContext = {
+  repoRoot: string;
+  scriptPath: string;
+};
+
+const SCRIPT_RELATIVE_PATHS = ['scripts/generateTasks.ts', 'apps/api/scripts/generateTasks.ts'];
+
+function findCliContext(startDir: string, visited: Set<string>): CliContext | undefined {
+  let cursor = path.resolve(startDir);
+
+  while (!visited.has(cursor)) {
+    visited.add(cursor);
+
+    for (const relative of SCRIPT_RELATIVE_PATHS) {
+      const candidate = path.resolve(cursor, relative);
+      if (existsSync(candidate)) {
+        return { repoRoot: cursor, scriptPath: candidate };
+      }
+    }
+
+    const parent = path.dirname(cursor);
+    if (parent === cursor) {
+      break;
+    }
+    cursor = parent;
+  }
+
+  return undefined;
+}
+
+function resolveCliContext(): CliContext {
+  const visited = new Set<string>();
+  const searchStarts = [currentDir, process.cwd()];
+
+  for (const start of searchStarts) {
+    const context = findCliContext(start, visited);
+    if (context) {
+      return context;
+    }
+  }
+
+  throw new Error(
+    'Task generation CLI script not found. Ensure scripts/generateTasks.ts is available in the deployed bundle.',
+  );
+}
+
+let cachedCliContext: CliContext | undefined;
+
+function getCliContext(): CliContext {
+  if (!cachedCliContext) {
+    cachedCliContext = resolveCliContext();
+  }
+  return cachedCliContext;
+}
 
 const ALLOWED_MODES = new Set(['low', 'chill', 'flow', 'evolve']);
 
@@ -35,10 +89,10 @@ type GenerateTasksCliResult = {
   spawnErrorCode?: string;
 };
 
-function runCliCommand(command: string, args: string[]): Promise<GenerateTasksCliResult> {
+function runCliCommand(command: string, args: string[], repoRoot: string): Promise<GenerateTasksCliResult> {
   return new Promise<GenerateTasksCliResult>((resolve) => {
     const child = spawn(command, args, {
-      cwd: REPO_ROOT,
+      cwd: repoRoot,
       env: { ...process.env },
       stdio: 'pipe',
     });
@@ -94,8 +148,8 @@ function normaliseSpawnError(message?: string): string | undefined {
   return message.replace(/^Failed to launch task generation CLI:\s*/u, '').trim();
 }
 
-function createScriptArgs(userId: string, mode?: string): string[] {
-  const args = [SCRIPT_PATH, '--user', userId];
+function createScriptArgs(scriptPath: string, userId: string, mode?: string): string[] {
+  const args = [scriptPath, '--user', userId];
   if (mode) {
     args.push('--mode', mode);
   }
@@ -106,12 +160,20 @@ function getNpmCommand(): string {
   return process.platform === 'win32' ? 'npm.cmd' : 'npm';
 }
 
-async function runGenerateTasksCli(userId: string, mode?: string): Promise<GenerateTasksCliResult> {
-  const scriptArgs = createScriptArgs(userId, mode);
-  const pnpmResult = await runCliCommand('pnpm', ['ts-node', ...scriptArgs]);
+async function runGenerateTasksCli(
+  context: CliContext,
+  userId: string,
+  mode?: string,
+): Promise<GenerateTasksCliResult> {
+  const scriptArgs = createScriptArgs(context.scriptPath, userId, mode);
+  const pnpmResult = await runCliCommand('pnpm', ['ts-node', ...scriptArgs], context.repoRoot);
 
   if (pnpmResult.spawnError && pnpmResult.spawnErrorCode === 'ENOENT') {
-    const npmResult = await runCliCommand(getNpmCommand(), ['exec', '--', 'ts-node', ...scriptArgs]);
+    const npmResult = await runCliCommand(
+      getNpmCommand(),
+      ['exec', '--', 'ts-node', ...scriptArgs],
+      context.repoRoot,
+    );
 
     if (npmResult.spawnError) {
       const combinedMessage = [
@@ -164,7 +226,26 @@ router.get('/taskgen/dry-run/:user_id', async (req, res, next) => {
       });
     }
 
-    const { code, stdout, stderr, spawnError } = await runGenerateTasksCli(userId, requestedMode);
+    let cliContext: CliContext;
+    try {
+      cliContext = getCliContext();
+    } catch (contextError) {
+      const errorMessage =
+        contextError instanceof Error ? contextError.message : 'Task generation CLI unavailable';
+      return res.status(500).json({
+        status: 'error',
+        user_id: userId,
+        mode: requestedMode ?? null,
+        message: errorMessage,
+        error_log: '/exports/errors.log',
+      });
+    }
+
+    const { code, stdout, stderr, spawnError } = await runGenerateTasksCli(
+      cliContext,
+      userId,
+      requestedMode,
+    );
 
     if (spawnError) {
       return res.status(500).json({
@@ -212,3 +293,10 @@ router.get('/taskgen/dry-run/:user_id', async (req, res, next) => {
 });
 
 export default router;
+
+export const __test = {
+  getCliContext,
+  resetCliContextCache: () => {
+    cachedCliContext = undefined;
+  },
+};
