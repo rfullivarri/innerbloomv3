@@ -14,13 +14,20 @@ function extractModeFromOutput(output: string, userId: string): string | undefin
   return match?.[1]?.toLowerCase();
 }
 
-async function runGenerateTasksCli(userId: string, mode?: string) {
+type GenerateTasksCliResult = {
+  code: number | null;
+  stdout: string;
+  stderr: string;
+  spawnError?: string;
+};
+
+async function runGenerateTasksCli(userId: string, mode?: string): Promise<GenerateTasksCliResult> {
   const args = ['ts-node', 'scripts/generateTasks.ts', '--user', userId];
   if (mode) {
     args.push('--mode', mode);
   }
 
-  return await new Promise<{ code: number | null; stdout: string; stderr: string }>((resolve, reject) => {
+  return await new Promise<GenerateTasksCliResult>((resolve) => {
     const child = spawn('pnpm', args, {
       cwd: path.resolve('.'),
       env: { ...process.env },
@@ -29,6 +36,7 @@ async function runGenerateTasksCli(userId: string, mode?: string) {
 
     const stdoutChunks: string[] = [];
     const stderrChunks: string[] = [];
+    let settled = false;
 
     child.stdout?.on('data', (chunk) => {
       stdoutChunks.push(chunk.toString());
@@ -39,10 +47,29 @@ async function runGenerateTasksCli(userId: string, mode?: string) {
     });
 
     child.on('error', (error) => {
-      reject(error);
+      const sanitisedMessage =
+        typeof error === 'object' && error && 'message' in error
+          ? String(error.message).trim()
+          : 'Unknown error';
+
+      if (settled) {
+        return;
+      }
+      settled = true;
+
+      resolve({
+        code: null,
+        stdout: stdoutChunks.join(''),
+        stderr: stderrChunks.join(''),
+        spawnError: `Failed to launch task generation CLI: ${sanitisedMessage}`,
+      });
     });
 
     child.on('close', (code) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
       resolve({ code, stdout: stdoutChunks.join(''), stderr: stderrChunks.join('') });
     });
   });
@@ -77,7 +104,17 @@ router.get('/taskgen/dry-run/:user_id', async (req, res, next) => {
       });
     }
 
-    const { code, stdout, stderr } = await runGenerateTasksCli(userId, requestedMode);
+    const { code, stdout, stderr, spawnError } = await runGenerateTasksCli(userId, requestedMode);
+
+    if (spawnError) {
+      return res.status(500).json({
+        status: 'error',
+        user_id: userId,
+        mode: requestedMode ?? null,
+        message: spawnError,
+        error_log: '/exports/errors.log',
+      });
+    }
 
     if (code !== 0) {
       const message = stderr.trim() || stdout.trim() || 'Task generation failed';
