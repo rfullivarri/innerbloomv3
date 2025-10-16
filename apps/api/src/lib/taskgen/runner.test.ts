@@ -10,12 +10,10 @@ const TEST_USER_ID = '11111111-2222-4333-8444-555555555555';
 describe('getSnapshotOrMock', () => {
   beforeEach(() => {
     delete process.env.DB_SNAPSHOT_PATH;
-    delete process.env.TASKGEN_BYPASS;
   });
 
   afterEach(() => {
     delete process.env.DB_SNAPSHOT_PATH;
-    delete process.env.TASKGEN_BYPASS;
     vi.restoreAllMocks();
   });
 
@@ -50,6 +48,57 @@ describe('getSnapshotOrMock', () => {
 
     expect(result.source).toBe('mock');
     expect(result.snapshot.users?.[0]?.user_id).toBe(TEST_USER_ID);
+  });
+
+  it('returns the mock snapshot when explicitly requested', async () => {
+    const result = await getSnapshotOrMock({ requestedSource: 'mock', userId: TEST_USER_ID });
+
+    expect(result.source).toBe('mock');
+    expect(result.snapshot.users?.[0]?.user_id).toBe(TEST_USER_ID);
+  });
+
+  it('loads the static fixture when explicitly requested', async () => {
+    const fixturePayload = {
+      snapshot: {
+        users: [{ user_id: TEST_USER_ID }],
+        cat_game_mode: [],
+        cat_pillar: [],
+        cat_trait: [],
+        cat_difficulty: [],
+        onboarding_session: [],
+      },
+      payload: {
+        user_id: TEST_USER_ID,
+        tasks_group_id: 'group',
+        tasks: [],
+      },
+    };
+    const originalReadFile = fs.readFile.bind(fs);
+    vi.spyOn(fs, 'readFile').mockImplementation(
+      async (
+        targetPath: Parameters<typeof fs.readFile>[0],
+        options: Parameters<typeof fs.readFile>[1],
+      ) => {
+        const resolved =
+          typeof targetPath === 'string'
+            ? targetPath
+            : targetPath instanceof URL
+            ? targetPath.toString()
+            : typeof targetPath === 'object' && targetPath !== null && 'toString' in targetPath
+            ? (targetPath as { toString(): string }).toString()
+            : '';
+        if (resolved.endsWith('taskgen.static.json')) {
+          return JSON.stringify(fixturePayload);
+        }
+        return originalReadFile(targetPath, options);
+      },
+    );
+
+    const result = await getSnapshotOrMock({ requestedSource: 'static', userId: TEST_USER_ID });
+
+    expect(result.source).toBe('static');
+    expect(result.snapshot.users?.[0]?.user_id).toBe(TEST_USER_ID);
+    expect(result.payloadFromFixture?.tasks_group_id).toBe('group');
   });
 
   it('uses the bundled snapshot sample when present', async () => {
