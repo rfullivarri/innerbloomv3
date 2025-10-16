@@ -54,13 +54,25 @@ describe('getSnapshotOrMock', () => {
 
   it('uses the bundled snapshot sample when present', async () => {
     const originalReadFile = fs.readFile.bind(fs);
-    vi.spyOn(fs, 'readFile').mockImplementation(async (targetPath: any, options?: any) => {
-      const resolved = typeof targetPath === 'string' ? targetPath : targetPath?.toString?.() ?? '';
+    vi.spyOn(fs, 'readFile').mockImplementation(
+      async (
+        targetPath: Parameters<typeof fs.readFile>[0],
+        options: Parameters<typeof fs.readFile>[1],
+      ) => {
+        const resolved =
+          typeof targetPath === 'string'
+            ? targetPath
+            : targetPath instanceof URL
+            ? targetPath.toString()
+            : typeof targetPath === 'object' && targetPath !== null && 'toString' in targetPath
+            ? (targetPath as { toString(): string }).toString()
+            : '';
       if (resolved.endsWith('db-snapshot.json')) {
         throw Object.assign(new Error('forced ENOENT'), { code: 'ENOENT' });
       }
-      return originalReadFile(targetPath as any, options as any);
-    });
+        return originalReadFile(targetPath, options);
+      },
+    );
 
     const result = await getSnapshotOrMock({ requestedSource: 'snapshot', userId: TEST_USER_ID });
 

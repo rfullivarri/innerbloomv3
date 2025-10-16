@@ -4,6 +4,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import Ajv from 'ajv';
+import type { AnySchema } from 'ajv';
 import OpenAI from 'openai';
 
 const LOG_PREFIX = '[taskgen]';
@@ -189,15 +190,22 @@ type PromptMessage = {
   content: string;
 };
 
+type PromptResponseFormat = {
+  json_schema?: {
+    schema?: AnySchema;
+  };
+  [key: string]: unknown;
+};
+
 type PromptFile = {
-  response_format: any;
+  response_format?: PromptResponseFormat;
   messages: PromptMessage[];
 };
 
 type TaskPayload = {
   user_id: string;
   tasks_group_id: string;
-  tasks: Array<{
+  tasks: {
     task: string;
     pillar_code: string;
     trait_code: string;
@@ -205,7 +213,7 @@ type TaskPayload = {
     difficulty_code: string;
     friction_score: number;
     friction_tier: string;
-  }>;
+  }[];
 };
 
 export type TaskgenResult = {
@@ -263,7 +271,7 @@ function normalisePrompt(raw: string): PromptFile {
   const parsed = JSON.parse(normalised);
 
   const messages: PromptMessage[] = [];
-  for (const entry of parsed.messages as Array<Record<string, unknown>>) {
+  for (const entry of parsed.messages as Record<string, unknown>[]) {
     if (typeof entry.system === 'string') {
       messages.push({ role: 'system', content: entry.system });
     }
@@ -273,7 +281,7 @@ function normalisePrompt(raw: string): PromptFile {
   }
 
   return {
-    response_format: parsed.response_format,
+    response_format: parsed.response_format as PromptResponseFormat | undefined,
     messages,
   };
 }
@@ -472,16 +480,18 @@ async function appendErrorLog(message: string): Promise<string | undefined> {
 
 function validatePayload(
   payload: TaskPayload,
-  schema: any,
+  schema: AnySchema | undefined,
   catalogs: ReturnType<typeof buildCatalogStrings>,
   placeholders: Record<string, string>,
 ): { valid: boolean; errors: string[] } {
   const ajv = new Ajv({ allErrors: true, strict: false });
-  const validate = ajv.compile(schema);
-  const valid = validate(payload);
-  if (!valid) {
-    const errors = (validate.errors ?? []).map((err) => `${err.instancePath} ${err.message ?? ''}`.trim());
-    return { valid: false, errors };
+  if (schema) {
+    const validate = ajv.compile(schema);
+    const valid = validate(payload);
+    if (!valid) {
+      const errors = (validate.errors ?? []).map((err) => `${err.instancePath} ${err.message ?? ''}`.trim());
+      return { valid: false, errors };
+    }
   }
 
   const expectedUserId = placeholders.USER_ID;
@@ -750,7 +760,7 @@ function mergeFixturePayload(base: TaskPayload, overrides: { userId: string; tas
   return {
     user_id: overrides.userId,
     tasks_group_id: overrides.tasksGroupId,
-    tasks: base.tasks.map((task, index) => ({
+    tasks: base.tasks.map((task) => ({
       ...task,
       task: task.task.includes('{{USER_ID}}') ? task.task.replace('{{USER_ID}}', overrides.userId) : task.task,
       friction_score: task.friction_score,
