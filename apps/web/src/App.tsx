@@ -5,6 +5,7 @@ import DashboardV3Page from './pages/DashboardV3';
 import LoginPage from './pages/Login';
 import LandingPage from './pages/Landing';
 import SignUpPage from './pages/SignUp';
+import DebugAiTaskgenPage from './pages/DebugAiTaskgen';
 import AdminRoute from './routes/admin';
 import { DevBanner } from './components/layout/DevBanner';
 import { setApiAuthTokenProvider } from './lib/api';
@@ -86,6 +87,7 @@ function RedirectIfSignedIn({ children }: { children: JSX.Element }) {
 }
 
 export default function App() {
+  const enableTaskgen = String(import.meta.env.VITE_ENABLE_TASKGEN_TRIGGER ?? 'false').toLowerCase() === 'true';
   return (
     <div className="min-h-screen bg-transparent">
       <DevBanner />
@@ -128,6 +130,9 @@ export default function App() {
             </RequireUser>
           }
         />
+        {enableTaskgen ? (
+          <Route path="/_debug/ai-taskgen" element={<DebugAiTaskgenPage />} />
+        ) : null}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
