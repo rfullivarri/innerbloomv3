@@ -9,6 +9,39 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROMPTS_DIR = path.resolve(SCRIPT_DIR, '../prompts');
 const EXPORTS_DIR = path.resolve('exports');
 const SNAPSHOT_PATH = path.resolve('apps/api/db-snapshot.json');
+const LOG_PREFIX = '[taskgen]';
+
+type LogMetadata = Record<string, unknown> | string | undefined;
+
+function log(message: string, metadata?: LogMetadata) {
+  const timestamp = new Date().toISOString();
+  if (metadata === undefined) {
+    console.log(`${LOG_PREFIX} ${timestamp} ${message}`);
+    return;
+  }
+
+  if (typeof metadata === 'string') {
+    console.log(`${LOG_PREFIX} ${timestamp} ${message}: ${metadata}`);
+    return;
+  }
+
+  console.log(`${LOG_PREFIX} ${timestamp} ${message}`, metadata);
+}
+
+function logError(message: string, metadata?: LogMetadata) {
+  const timestamp = new Date().toISOString();
+  if (metadata === undefined) {
+    console.error(`${LOG_PREFIX} ${timestamp} ${message}`);
+    return;
+  }
+
+  if (typeof metadata === 'string') {
+    console.error(`${LOG_PREFIX} ${timestamp} ${message}: ${metadata}`);
+    return;
+  }
+
+  console.error(`${LOG_PREFIX} ${timestamp} ${message}`, metadata);
+}
 
 const MODE_FILES = {
   low: 'low.json',
@@ -115,6 +148,7 @@ type CLIOptions = {
 };
 
 function parseArgs(argv: string[]): CLIOptions {
+  log('Parsing CLI arguments', { argv });
   const options: CLIOptions = {};
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -176,6 +210,7 @@ function parseArgs(argv: string[]): CLIOptions {
     console.warn('--limit is ignored without --all');
   }
 
+  log('Finished parsing CLI arguments', options);
   return options;
 }
 
@@ -184,12 +219,22 @@ function isMode(value: string): value is Mode {
 }
 
 async function loadSnapshot(): Promise<SnapshotData> {
+  log('Loading snapshot file', { path: SNAPSHOT_PATH });
   const raw = await fs.readFile(SNAPSHOT_PATH, 'utf8');
   const data = JSON.parse(raw);
   if (!data.samples) {
     throw new Error('Snapshot file missing `samples` key.');
   }
-  return data.samples as SnapshotData;
+  const snapshot = data.samples as SnapshotData;
+  log('Snapshot loaded', {
+    users: snapshot.users?.length ?? 0,
+    gameModes: snapshot.cat_game_mode?.length ?? 0,
+    pillars: snapshot.cat_pillar?.length ?? 0,
+    traits: snapshot.cat_trait?.length ?? 0,
+    difficulties: snapshot.cat_difficulty?.length ?? 0,
+    onboardingSessions: snapshot.onboarding_session?.length ?? 0,
+  });
+  return snapshot;
 }
 
 function normalisePrompt(raw: string): PromptFile {
@@ -219,8 +264,11 @@ function normalisePrompt(raw: string): PromptFile {
 
 async function loadPrompt(mode: Mode): Promise<PromptFile> {
   const promptPath = path.resolve(PROMPTS_DIR, MODE_FILES[mode]);
+  log('Loading prompt file', { mode, promptPath });
   const raw = await fs.readFile(promptPath, 'utf8');
-  return normalisePrompt(raw);
+  const prompt = normalisePrompt(raw);
+  log('Prompt file loaded', { mode, messageCount: prompt.messages.length });
+  return prompt;
 }
 
 function buildCatalogStrings(snapshot: SnapshotData) {
@@ -281,7 +329,7 @@ function buildCatalogStrings(snapshot: SnapshotData) {
     .map((d) => `${d.code}${d.name ? ` (${d.name})` : ''}${d.xp_base ? ` — xp_base ${d.xp_base}` : ''}`)
     .join(', ');
 
-  return {
+  const result = {
     catalogPillars,
     catalogTraits,
     catalogStats,
@@ -292,6 +340,15 @@ function buildCatalogStrings(snapshot: SnapshotData) {
     statCodes,
     difficultyCodes,
   };
+
+  log('Catalog data prepared', {
+    pillars: pillars.length,
+    traits: traits.length,
+    stats: stats.length,
+    difficulties: difficulties.length,
+  });
+
+  return result;
 }
 
 function buildUserMiniProfile(user: UserRow, onboarding: OnboardingSessionRow | undefined, gameMode: GameModeRow | undefined) {
@@ -360,10 +417,12 @@ function buildMessages(prompt: PromptFile, placeholders: Record<string, string>)
 }
 
 async function ensureExportsDir() {
+  log('Ensuring exports directory exists', { path: EXPORTS_DIR });
   await fs.mkdir(EXPORTS_DIR, { recursive: true });
 }
 
 async function writeExports(basePath: string, payload: TaskPayload) {
+  log('Writing export files', { basePath, taskCount: payload.tasks.length });
   const jsonPath = `${basePath}.json`;
   const jsonlPath = `${basePath}.jsonl`;
   const csvPath = `${basePath}.csv`;
@@ -393,11 +452,13 @@ async function writeExports(basePath: string, payload: TaskPayload) {
 }
 
 async function writeRawResponse(basePath: string, raw: string) {
+  log('Writing raw response', { basePath, length: raw.length });
   const rawPath = `${basePath}.raw_response.txt`;
   await fs.writeFile(rawPath, `${raw}\n`, 'utf8');
 }
 
 async function appendErrorLog(message: string) {
+  log('Appending to error log', message);
   const logPath = path.join(EXPORTS_DIR, 'errors.log');
   const timestamp = new Date().toISOString();
   await fs.appendFile(logPath, `[${timestamp}] ${message}\n`, 'utf8');
@@ -467,6 +528,11 @@ async function runForUser(
   mode: Mode,
   overrideGameMode?: GameModeRow,
 ) {
+  log('Preparing task generation for user', {
+    userId: user.user_id,
+    mode,
+    overrideMode: overrideGameMode?.code ?? null,
+  });
   const gameModes = snapshot.cat_game_mode ?? [];
   const gameModeById = new Map(gameModes.map((gm) => [gm.game_mode_id, gm]));
   const onboardingSessions = snapshot.onboarding_session ?? [];
@@ -482,6 +548,12 @@ async function runForUser(
 
   const messages = buildMessages(prompt, placeholders);
 
+  log('Sending request to OpenAI', {
+    userId: user.user_id,
+    mode,
+    messageCount: messages.length,
+    temperature: MODE_TEMPERATURE[mode],
+  });
   const response = await client.responses.create({
     model: DEFAULT_MODEL,
     temperature: MODE_TEMPERATURE[mode],
@@ -497,6 +569,12 @@ async function runForUser(
   const basePath = path.join(EXPORTS_DIR, `${user.user_id}.${mode}`);
 
   const outputText = response.output_text ?? '';
+
+  log('Received response from OpenAI', {
+    userId: user.user_id,
+    mode,
+    outputLength: outputText.length,
+  });
 
   let payload: TaskPayload | undefined;
 
@@ -517,17 +595,24 @@ async function runForUser(
   }
 
   await writeExports(basePath, payload);
+  log('Task payload validated successfully', {
+    userId: user.user_id,
+    mode,
+    tasks: payload.tasks.length,
+  });
   console.log(`Exported tasks for user ${user.user_id} (${mode}) to ${basePath}.{json,jsonl,csv}`);
 }
 
 async function main() {
   try {
+    log('Task generation CLI started');
     const options = parseArgs(process.argv.slice(2));
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY is not set. Aborting.');
     }
+    log('OPENAI_API_KEY detected');
 
     const snapshot = await loadSnapshot();
 
@@ -535,11 +620,14 @@ async function main() {
     if (!users.length) {
       throw new Error('No users found in snapshot.');
     }
+    log('Users loaded from snapshot', { count: users.length });
 
     const gameModes = snapshot.cat_game_mode ?? [];
     const modeByCode = new Map(gameModes.map((gm) => [gm.code.toLowerCase(), gm]));
+    log('Game modes index created', { available: gameModes.length });
 
     const client = new OpenAI({ apiKey });
+    log('OpenAI client initialised', { model: DEFAULT_MODEL });
 
     await ensureExportsDir();
 
@@ -548,8 +636,14 @@ async function main() {
     if (!targetUsers.length) {
       throw new Error(options.all ? 'No users available to process.' : `User not found: ${options.user}`);
     }
+    log('Target users resolved', {
+      requestedAll: Boolean(options.all),
+      requestedUser: options.user ?? null,
+      targetCount: targetUsers.length,
+    });
 
     const limit = options.all && options.limit ? options.limit : targetUsers.length;
+    log('Processing limit determined', { limit });
 
     let exitWithError = false;
 
@@ -560,7 +654,7 @@ async function main() {
       })();
 
       if (!mode || !isMode(mode)) {
-        console.error(`Skipping user ${user.user_id}: unable to resolve game mode.`);
+        logError('Skipping user due to unresolved game mode', { userId: user.user_id, rawMode: user.game_mode_id });
         exitWithError = true;
         continue;
       }
@@ -571,15 +665,22 @@ async function main() {
         await runForUser(client, snapshot, user, mode, overrideGameMode);
       } catch (error) {
         exitWithError = true;
-        console.error(error instanceof Error ? error.message : error);
+        logError('Error while generating tasks for user', {
+          userId: user.user_id,
+          mode,
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
 
     if (exitWithError) {
       process.exitCode = 1;
+      logError('Finished with errors. Exit code set to 1.');
+    } else {
+      log('Task generation completed successfully');
     }
   } catch (error) {
-    console.error(error instanceof Error ? error.message : error);
+    logError('Fatal error in task generation CLI', error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 }
