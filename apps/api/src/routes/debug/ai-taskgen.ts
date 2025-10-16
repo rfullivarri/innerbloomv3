@@ -6,6 +6,8 @@ import { createDebugTaskgenRunner, type DebugTaskgenInput } from '../../services
 
 const router = express.Router();
 
+router.use(express.json({ limit: '1mb' }));
+
 const requestSchema = z.object({
   user_id: z.string().uuid({ message: 'user_id must be a valid UUID' }),
   mode: z.enum(['low', 'chill', 'flow', 'evolve']).optional(),
