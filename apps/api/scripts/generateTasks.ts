@@ -8,7 +8,10 @@ import OpenAI from 'openai';
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROMPTS_DIR = path.resolve(SCRIPT_DIR, '../prompts');
 const EXPORTS_DIR = path.resolve('exports');
-const SNAPSHOT_PATH = path.resolve('apps/api/db-snapshot.json');
+const PRIMARY_SNAPSHOT_PATH = process.env.DB_SNAPSHOT_PATH
+  ? path.resolve(process.env.DB_SNAPSHOT_PATH)
+  : path.resolve('apps/api/db-snapshot.json');
+const SNAPSHOT_FALLBACK_PATH = path.resolve('apps/api/db-snapshot.sample.json');
 const LOG_PREFIX = '[taskgen]';
 
 type LogMetadata = Record<string, unknown> | string | undefined;
@@ -43,6 +46,25 @@ function logError(message: string, metadata?: LogMetadata) {
   console.error(`${LOG_PREFIX} ${timestamp} ${message}`, metadata);
 }
 
+function logWarn(message: string, metadata?: LogMetadata) {
+  const timestamp = new Date().toISOString();
+  if (metadata === undefined) {
+    console.warn(`${LOG_PREFIX} ${timestamp} ${message}`);
+    return;
+  }
+
+  if (typeof metadata === 'string') {
+    console.warn(`${LOG_PREFIX} ${timestamp} ${message}: ${metadata}`);
+    return;
+  }
+
+  console.warn(`${LOG_PREFIX} ${timestamp} ${message}`, metadata);
+}
+
+function isErrnoWithCode(value: unknown): value is NodeJS.ErrnoException {
+  return typeof value === 'object' && value !== null && 'code' in value;
+}
+
 const MODE_FILES = {
   low: 'low.json',
   chill: 'chill.json',
@@ -65,12 +87,31 @@ type SnapshotTable<T> = T[] | undefined;
 
 type UserRow = {
   user_id: string;
+  clerk_user_id?: string | null;
+  email_primary?: string | null;
   full_name?: string | null;
+  image_url?: string | null;
   game_mode_id?: number | null;
+  timezone?: string | null;
   tasks_group_id?: string | null;
+  first_date_log?: string | null;
+  scheduler_enabled?: boolean | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  user_profile?: string | null;
+  channel_scheduler?: string | null;
+  hour_scheduler?: string | null;
+  status_scheduler?: string | null;
+  last_sent_local_date_scheduler?: string | null;
+  first_programmed?: boolean | null;
+  first_tasks_confirmed?: boolean | null;
+  email?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  avatar_url?: string | null;
+  deleted_at?: string | null;
   preferred_language?: string | null;
   preferred_timezone?: string | null;
-  timezone?: string | null;
 };
 
 type GameModeRow = {
@@ -101,10 +142,18 @@ type DifficultyRow = {
 };
 
 type OnboardingSessionRow = {
-  session_id?: string;
+  onboarding_session_id?: string;
   user_id?: string;
+  client_id?: string | null;
   game_mode_id?: number | null;
+  xp_total?: number | null;
+  xp_body?: number | null;
+  xp_mind?: number | null;
+  xp_soul?: number | null;
+  email?: string | null;
   meta?: unknown;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 type SnapshotData = {
@@ -218,23 +267,63 @@ function isMode(value: string): value is Mode {
   return value in MODE_FILES;
 }
 
-async function loadSnapshot(): Promise<SnapshotData> {
-  log('Loading snapshot file', { path: SNAPSHOT_PATH });
-  const raw = await fs.readFile(SNAPSHOT_PATH, 'utf8');
-  const data = JSON.parse(raw);
-  if (!data.samples) {
-    throw new Error('Snapshot file missing `samples` key.');
+async function tryLoadSnapshot(pathCandidate: string): Promise<SnapshotData | undefined> {
+  const resolvedPath = path.resolve(pathCandidate);
+  try {
+    log('Loading snapshot file', { path: resolvedPath });
+    const raw = await fs.readFile(resolvedPath, 'utf8');
+    const data = JSON.parse(raw);
+    if (!data.samples) {
+      throw new Error('Snapshot file missing `samples` key.');
+    }
+    const snapshot = data.samples as SnapshotData;
+    log('Snapshot loaded', {
+      path: resolvedPath,
+      users: snapshot.users?.length ?? 0,
+      gameModes: snapshot.cat_game_mode?.length ?? 0,
+      pillars: snapshot.cat_pillar?.length ?? 0,
+      traits: snapshot.cat_trait?.length ?? 0,
+      difficulties: snapshot.cat_difficulty?.length ?? 0,
+      onboardingSessions: snapshot.onboarding_session?.length ?? 0,
+    });
+    return snapshot;
+  } catch (error) {
+    if (isErrnoWithCode(error) && error.code === 'ENOENT') {
+      logWarn('Snapshot file not found', { path: resolvedPath });
+      return undefined;
+    }
+    throw error;
   }
-  const snapshot = data.samples as SnapshotData;
-  log('Snapshot loaded', {
-    users: snapshot.users?.length ?? 0,
-    gameModes: snapshot.cat_game_mode?.length ?? 0,
-    pillars: snapshot.cat_pillar?.length ?? 0,
-    traits: snapshot.cat_trait?.length ?? 0,
-    difficulties: snapshot.cat_difficulty?.length ?? 0,
-    onboardingSessions: snapshot.onboarding_session?.length ?? 0,
-  });
-  return snapshot;
+}
+
+async function loadSnapshot(): Promise<SnapshotData> {
+  const candidates = [PRIMARY_SNAPSHOT_PATH];
+  if (PRIMARY_SNAPSHOT_PATH !== SNAPSHOT_FALLBACK_PATH) {
+    candidates.push(SNAPSHOT_FALLBACK_PATH);
+  }
+
+  const triedPaths = new Set<string>();
+
+  for (const candidate of candidates) {
+    const resolvedCandidate = path.resolve(candidate);
+    if (triedPaths.has(resolvedCandidate)) {
+      continue;
+    }
+    triedPaths.add(resolvedCandidate);
+
+    const snapshot = await tryLoadSnapshot(resolvedCandidate);
+    if (snapshot) {
+      if (resolvedCandidate !== path.resolve(PRIMARY_SNAPSHOT_PATH)) {
+        logWarn('Using fallback snapshot file', { path: resolvedCandidate });
+      }
+      return snapshot;
+    }
+  }
+
+  const triedList = Array.from(triedPaths).join(', ');
+  throw new Error(
+    `Snapshot file not found. Tried paths: ${triedList}. Generate one with "pnpm --filter api run db:snapshot" or set DB_SNAPSHOT_PATH.`,
+  );
 }
 
 function normalisePrompt(raw: string): PromptFile {
@@ -360,6 +449,9 @@ function buildUserMiniProfile(user: UserRow, onboarding: OnboardingSessionRow | 
   if (user.tasks_group_id) {
     parts.push(`Tasks Group: ${user.tasks_group_id}`);
   }
+  if (user.email_primary) {
+    parts.push(`Primary email: ${user.email_primary}`);
+  }
   if (user.preferred_language) {
     parts.push(`Preferred language: ${user.preferred_language}`);
   }
@@ -369,8 +461,23 @@ function buildUserMiniProfile(user: UserRow, onboarding: OnboardingSessionRow | 
   if (user.timezone) {
     parts.push(`Timezone: ${user.timezone}`);
   }
+  if (typeof user.scheduler_enabled === 'boolean') {
+    parts.push(`Scheduler enabled: ${user.scheduler_enabled ? 'yes' : 'no'}`);
+  }
+  if (user.channel_scheduler) {
+    parts.push(`Scheduler channel: ${user.channel_scheduler}`);
+  }
+  if (user.status_scheduler) {
+    parts.push(`Scheduler status: ${user.status_scheduler}`);
+  }
+  if (user.user_profile) {
+    parts.push(`Profile tag: ${user.user_profile}`);
+  }
   if (onboarding?.meta && typeof onboarding.meta === 'object') {
     parts.push(`Onboarding meta: ${JSON.stringify(onboarding.meta)}`);
+  }
+  if (onboarding?.client_id) {
+    parts.push(`Onboarding client: ${onboarding.client_id}`);
   }
   if (gameMode?.code) {
     parts.push(`Current mode: ${gameMode.code}`);

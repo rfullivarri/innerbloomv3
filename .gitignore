@@ -5,4 +5,3 @@ dist
 coverage
 .turbo
 .DS_Store
-apps/api/db-snapshot.json

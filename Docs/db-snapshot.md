@@ -11,6 +11,11 @@ Ejecutá cualquiera de los siguientes comandos desde la raíz del monorepo:
 
 El resultado se guarda en `apps/api/db-snapshot.json`.
 
+> En el repo se versiona un snapshot sanitizado con datos **sintéticos** que replica la estructura completa de la base
+> productiva. También existe `apps/api/db-snapshot.sample.json`, que contiene el mismo esquema y se usa como
+> **fallback** automático cuando el archivo principal no está disponible. Para refrescar el snapshot compartido,
+> regeneralo localmente contra la base real y commiteá el resultado (`pnpm --filter api run db:snapshot`).
+
 ## Endpoint de snapshot
 
 Para habilitar temporalmente la ruta de snapshot en el backend desplegado, configurá la variable de entorno `ENABLE_DB_SNAPSHOT=true` en el servicio Web service (backend). La URL pública queda disponible en `https://<API>/_admin/db-snapshot`.
@@ -23,7 +28,7 @@ curl -fsS https://<API>/_admin/db-snapshot -H 'Accept: application/json' -o apps
 
 Cada request al endpoint vuelve a consultar la base de datos en vivo, reconstruye la metadata (tablas, columnas, vistas, índices y claves foráneas), toma hasta 50 filas de muestra por tabla y devuelve un `generated_at` nuevo. Además, el handler envía `Cache-Control: no-store`, así que no reutiliza snapshots anteriores ni se cachea en intermediarios.【F:apps/api/src/routes/debug-db-snapshot.ts†L71-L110】
 
-> **Última ejecución:** `apps/api/db-snapshot.json` fue regenerado el `2025-10-10T14:41:44.077Z` (campo `generated_at`).【F:apps/api/db-snapshot.json†L3161-L3161】
+> **Última ejecución:** `apps/api/db-snapshot.json` fue regenerado el `2025-10-16T09:28:25.075Z` (campo `generated_at`).【F:apps/api/db-snapshot.json†L2592-L2592】
 
 ## Contenido del snapshot
 
