@@ -627,11 +627,11 @@ export async function getSnapshotOrMock(args: {
   requestedSource: TaskgenSource;
   userId: string;
 }): Promise<SnapshotResolution> {
-  const bypass = process.env.TASKGEN_BYPASS;
-  const forced = bypass === 'mock' || bypass === 'static' ? (bypass as TaskgenSource) : undefined;
-  const effectiveSource = forced ?? args.requestedSource;
+  if (args.requestedSource === 'mock') {
+    return { snapshot: createMockSnapshot(args.userId), source: 'mock' };
+  }
 
-  if (effectiveSource === 'static') {
+  if (args.requestedSource === 'static') {
     const fixture = await loadStaticFixture();
     if (fixture) {
       log('Loaded static fixture snapshot', { path: fixture.path });
@@ -651,14 +651,14 @@ export async function getSnapshotOrMock(args: {
     const snapshot = await tryLoadSnapshot(candidate);
     if (snapshot) {
       log('Loaded snapshot', { path: candidate });
-      return { snapshot, source: forced ?? 'snapshot', path: candidate };
+      return { snapshot, source: 'snapshot', path: candidate };
     }
   }
 
   const sample = await loadJsonFile<{ samples: SnapshotData }>(SNAPSHOT_SAMPLE_CANDIDATES);
   if (sample?.value?.samples) {
     logWarn('Using snapshot sample as fallback', { path: sample.path });
-    return { snapshot: sample.value.samples, source: forced ?? 'snapshot', path: sample.path };
+    return { snapshot: sample.value.samples, source: 'snapshot', path: sample.path };
   }
 
   logWarn('Snapshot not found, using mock snapshot');
@@ -780,14 +780,14 @@ export async function runTaskGeneration(args: {
   try {
     const snapshotResolution = await getSnapshotOrMock({ requestedSource: args.source, userId: args.userId });
     let snapshot = snapshotResolution.snapshot;
-    let effectiveSource = snapshotResolution.source;
+    let resolvedSource = snapshotResolution.source;
 
     let user = findUser(snapshot, args.userId);
-    if (!user && effectiveSource !== 'mock') {
+    if (!user && resolvedSource !== 'mock') {
       logWarn('User not found in snapshot, switching to mock snapshot', { userId: args.userId });
       const mockSnapshot = createMockSnapshot(args.userId);
       user = findUser(mockSnapshot, args.userId);
-      effectiveSource = 'mock';
+      resolvedSource = 'mock';
       snapshot = mockSnapshot;
     } else if (!user) {
       user = createMockSnapshot(args.userId).users?.[0];
@@ -820,7 +820,7 @@ export async function runTaskGeneration(args: {
         status: validation.valid ? 'ok' : 'error',
         user_id: placeholders.USER_ID,
         mode: args.mode,
-        source: effectiveSource,
+        source: resolvedSource,
         seed: args.seed,
         placeholders,
         prompt_preview: promptPreview,
@@ -835,7 +835,7 @@ export async function runTaskGeneration(args: {
       };
     }
 
-    if (effectiveSource === 'static' && basePayloadFromFixture) {
+    if (resolvedSource === 'static' && basePayloadFromFixture) {
       const validation = validatePayload(
         basePayloadFromFixture,
         prompt.response_format?.json_schema?.schema,
@@ -847,7 +847,7 @@ export async function runTaskGeneration(args: {
         status: validation.valid ? 'ok' : 'error',
         user_id: placeholders.USER_ID,
         mode: args.mode,
-        source: effectiveSource,
+        source: resolvedSource,
         seed: args.seed,
         placeholders,
         prompt_preview: promptPreview,
@@ -901,7 +901,7 @@ export async function runTaskGeneration(args: {
           status: 'error',
           user_id: placeholders.USER_ID,
           mode: args.mode,
-          source: effectiveSource,
+          source: resolvedSource,
           seed: args.seed,
           placeholders,
           prompt_preview: promptPreview,
@@ -920,7 +920,7 @@ export async function runTaskGeneration(args: {
         status: 'ok',
         user_id: placeholders.USER_ID,
         mode: args.mode,
-        source: effectiveSource,
+        source: resolvedSource,
         seed: args.seed,
         placeholders,
         prompt_preview: promptPreview,
@@ -941,7 +941,7 @@ export async function runTaskGeneration(args: {
         status: 'error',
         user_id: placeholders.USER_ID,
         mode: args.mode,
-        source: effectiveSource,
+        source: resolvedSource,
         seed: args.seed,
         placeholders,
         prompt_preview: promptPreview,
