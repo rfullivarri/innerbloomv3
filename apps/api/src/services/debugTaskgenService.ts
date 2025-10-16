@@ -682,7 +682,8 @@ async function callOpenAiDefault(args: {
     const start = Date.now();
     const response = await client.responses.create(requestBody, { signal: controller.signal });
     const durationMs = Date.now() - start;
-    return { raw: response.output_text ?? '', model: requestBody.model, durationMs };
+    const resolvedModel = requestBody.model ?? DEFAULT_MODEL;
+    return { raw: response.output_text ?? '', model: String(resolvedModel), durationMs };
   } finally {
     clearTimeout(timeoutId);
   }
