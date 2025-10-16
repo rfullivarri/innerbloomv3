@@ -209,7 +209,7 @@ function normalizeRecord(value: unknown): Record<string, unknown> | null {
 }
 
 function pickFirstString(
-  sources: Array<Record<string, unknown> | null | undefined>,
+  sources: (Record<string, unknown> | null | undefined)[],
   key: string,
 ): string | null {
   for (const source of sources) {
