@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@fastify/express": "^4.0.2",
+    "ajv": "^8.17.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.33.0",
@@ -26,6 +27,7 @@
     "fastify": "^5.6.1",
     "fastify-raw-body": "^5.0.0",
     "jose": "^6.1.0",
+    "openai": "^6.3.0",
     "pg": "^8.16.3",
     "svix": "^1.76.1",
     "zod": "^3.23.8"
