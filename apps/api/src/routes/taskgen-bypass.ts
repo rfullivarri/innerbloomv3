@@ -15,6 +15,8 @@ type CliContext = {
 };
 
 const SCRIPT_RELATIVE_PATHS = [
+  'dist/taskgen/generateTasks.ts',
+  'scripts/generateTasks.ts',
   'apps/api/dist/taskgen/generateTasks.ts',
   'apps/api/scripts/generateTasks.ts',
 ];
@@ -54,7 +56,7 @@ function resolveCliContext(): CliContext {
   }
 
   throw new Error(
-    'Task generation CLI script not found. Ensure apps/api/scripts/generateTasks.ts is available in the deployed bundle.',
+    'Task generation CLI script not found. Ensure dist/taskgen/generateTasks.ts (or scripts/generateTasks.ts) is available in the deployed bundle.',
   );
 }
 
