@@ -9,8 +9,6 @@ import usersRoutes from './users.js';
 import dailyQuestRoutes from './dailyQuest.js';
 import adminRoutes from '../modules/admin/admin.routes.js';
 import onboardingRoutes from './onboarding.js';
-import taskgenBypassRoutes from './taskgen-bypass.js';
-import debugTaskgenRoutes from './_debug.taskgen.js'; // #REMOVE_ME_DEBUG_BYPASS
 
 const router = Router();
 
@@ -24,9 +22,5 @@ router.use(usersRoutes);
 router.use(leaderboardRoutes);
 router.use(adminRoutes);
 router.use(onboardingRoutes);
-if (process.env.ENABLE_TASKGEN_TRIGGER === 'true') router.use(taskgenBypassRoutes);
-if (process.env.ENABLE_TASKGEN_TRIGGER === 'true' && process.env.NODE_ENV !== 'production') {
-  router.use(debugTaskgenRoutes); // #REMOVE_ME_DEBUG_BYPASS
-}
 
 export default router;

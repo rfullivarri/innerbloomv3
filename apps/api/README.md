@@ -255,18 +255,17 @@ A valid request upserts the mirrored user record in Postgres (or soft-deletes on
    npm run routes:print
    ```
    The output must include `POST   /api/webhooks/clerk` exactly once.
-2. <!-- #REMOVE_ME_DEBUG_BYPASS -->If `ENABLE_TASKGEN_TRIGGER=true`, double-check the `/exports` directory is not publicly exposed by any CDN or static file mount.
-3. Hit the health probe from your browser or `curl`:
+2. Hit the health probe from your browser or `curl`:
    ```bash
    curl https://<api-host>/api/webhooks/clerk/health
    ```
    Expect `{ "ok": true }`.
-4. In Clerk → **Webhooks → Endpoints**, open the configured endpoint and send the test events (`user.created`, `user.updated`, `user.deleted`).
-5. Check Railway logs for entries similar to:
+3. In Clerk → **Webhooks → Endpoints**, open the configured endpoint and send the test events (`user.created`, `user.updated`, `user.deleted`).
+4. Check Railway logs for entries similar to:
    ```
    [clerk-webhook] user.created user_123
    ```
-6. Inspect Neon using `pg_stat_statements` to validate the `INSERT ... ON CONFLICT` statements ran after the test event (see SQL helpers below).
+5. Inspect Neon using `pg_stat_statements` to validate the `INSERT ... ON CONFLICT` statements ran after the test event (see SQL helpers below).
 
    ```sql
    -- Reset counters before issuing a test event
@@ -294,32 +293,6 @@ npm run backfill:users
 ```
 
 This script paginates Clerk users, performs upserts, and logs totals for inserted vs. updated rows.
-
-<!-- #REMOVE_ME_DEBUG_BYPASS -->
-## Debug task generation trigger
-
-<!-- #REMOVE_ME_DEBUG_BYPASS -->
-Temporal endpoint to experiment with the task generation pipeline without relying on the CLI snapshot:
-
-<!-- #REMOVE_ME_DEBUG_BYPASS -->
-* `ENABLE_TASKGEN_TRIGGER=true` mounts both the legacy CLI bridge and the new `GET /_debug/taskgen` route when `NODE_ENV !== 'production'`.
-<!-- #REMOVE_ME_DEBUG_BYPASS -->
-* `ADMIN_TRIGGER_TOKEN` **must** be set; callers have to include it via the `x-admin-token` header.
-<!-- #REMOVE_ME_DEBUG_BYPASS -->
-* `TASKGEN_BYPASS` (optional) forces the source used by the debug endpoint. Accepted values: `mock` or `static`.
-<!-- #REMOVE_ME_DEBUG_BYPASS -->
-* `DB_SNAPSHOT_PATH` remains optional; when omitted the handler falls back to the bundled `db-snapshot.sample.json` or an in-memory mock.
-<!-- #REMOVE_ME_DEBUG_BYPASS -->
-* `/exports/errors.log` captures validation/runtime issues. Ensure the `/exports` directory stays internal when deploying (never expose it via static hosting).
-
-<!-- #REMOVE_ME_DEBUG_BYPASS -->
-Dry run example (no OpenAI traffic):
-
-<!-- #REMOVE_ME_DEBUG_BYPASS -->
-```bash
-curl -H "x-admin-token: $ADMIN_TRIGGER_TOKEN" \
-  "https://<API_HOST>/_debug/taskgen?user_id=<UUID>&mode=evolve&source=mock&dry_run=true"
-```
 
 ## Rutas protegidas por ownership
 
