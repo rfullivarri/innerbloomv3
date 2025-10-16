@@ -8,6 +8,7 @@ import { z } from 'zod';
 import routes from './routes/index.js';
 import createDebugAuthRouter from './routes/debug-auth.js';
 import debugDbSnapshot from './routes/debug-db-snapshot.js';
+import debugAiTaskgen from './routes/debug/ai-taskgen.js';
 import { HttpError, isHttpError } from './lib/http-error.js';
 import clerkWebhookRouter from './webhooks/clerk.js';
 
@@ -52,6 +53,14 @@ if (process.env.ENABLE_DB_SNAPSHOT === 'true') {
 
 if (process.env.DEBUG_AUTH === 'true') {
   app.use(createDebugAuthRouter());
+}
+
+if (process.env.ENABLE_TASKGEN_TRIGGER === 'true') {
+  const allowInProd = String(process.env.DEBUG_ALLOW_IN_PROD ?? 'false').toLowerCase() === 'true';
+  const isProduction = process.env.NODE_ENV === 'production';
+  if (!isProduction || allowInProd) {
+    app.use('/_debug/ai-taskgen', debugAiTaskgen);
+  }
 }
 
 app.use(cors(corsOptions));
