@@ -3,9 +3,13 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
-import Ajv from 'ajv';
-import type { AnySchema } from 'ajv';
+import { Ajv, type AnySchema, type ErrorObject } from 'ajv';
 import OpenAI from 'openai';
+import type {
+  ResponseCreateParamsNonStreaming,
+  ResponseFormatTextConfig,
+  ResponseFormatTextJSONSchemaConfig,
+} from 'openai/resources/responses/responses';
 
 const LOG_PREFIX = '[taskgen]';
 const MODE_FILES = {
@@ -190,12 +194,21 @@ type PromptMessage = {
   content: string;
 };
 
-type PromptResponseFormat = {
-  json_schema?: {
-    schema?: AnySchema;
-  };
+type PromptJsonSchemaConfig = {
+  name?: string;
+  schema?: AnySchema;
+  description?: string;
+  strict?: boolean | null;
   [key: string]: unknown;
 };
+
+type PromptResponseFormat =
+  | ({
+      type: 'json_schema';
+      json_schema?: PromptJsonSchemaConfig;
+    } & Record<string, unknown>)
+  | ({ type: 'text' } & Record<string, unknown>)
+  | ({ type: 'json_object' } & Record<string, unknown>);
 
 type PromptFile = {
   response_format?: PromptResponseFormat;
@@ -448,6 +461,58 @@ function buildMessages(prompt: PromptFile, placeholders: Record<string, string>)
   }));
 }
 
+function extractPromptJsonSchema(format: PromptResponseFormat | undefined): AnySchema | undefined {
+  if (format?.type !== 'json_schema') {
+    return undefined;
+  }
+
+  return format.json_schema?.schema;
+}
+
+function buildResponseFormatConfig(format: PromptResponseFormat | undefined): ResponseFormatTextConfig | undefined {
+  if (!format) {
+    return undefined;
+  }
+
+  if (format.type === 'json_schema') {
+    const jsonSchema = format.json_schema;
+    if (!jsonSchema?.schema) {
+      return undefined;
+    }
+
+    const schemaValue = jsonSchema.schema;
+    if (typeof schemaValue !== 'object' || schemaValue === null) {
+      return undefined;
+    }
+
+    const config: ResponseFormatTextJSONSchemaConfig = {
+      type: 'json_schema',
+      name: typeof jsonSchema.name === 'string' ? jsonSchema.name : 'TaskPayload',
+      schema: schemaValue as { [key: string]: unknown },
+    };
+
+    if (typeof jsonSchema.description === 'string') {
+      config.description = jsonSchema.description;
+    }
+
+    if (typeof jsonSchema.strict === 'boolean' || jsonSchema.strict === null) {
+      config.strict = jsonSchema.strict;
+    }
+
+    return config;
+  }
+
+  if (format.type === 'text') {
+    return { type: 'text' };
+  }
+
+  if (format.type === 'json_object') {
+    return { type: 'json_object' };
+  }
+
+  return undefined;
+}
+
 async function ensureExportsDir(): Promise<string> {
   for (const candidate of exportsCandidates) {
     try {
@@ -489,7 +554,7 @@ function validatePayload(
     const validate = ajv.compile(schema);
     const valid = validate(payload);
     if (!valid) {
-      const errors = (validate.errors ?? []).map((err) => `${err.instancePath} ${err.message ?? ''}`.trim());
+      const errors = (validate.errors ?? []).map((err: ErrorObject) => `${err.instancePath} ${err.message ?? ''}`.trim());
       return { valid: false, errors };
     }
   }
@@ -814,7 +879,12 @@ export async function runTaskGeneration(args: {
 
     if (args.dryRun) {
       const payload = basePayloadFromFixture ?? buildDryRunPayload({ placeholders, snapshot });
-      const validation = validatePayload(payload, prompt.response_format?.json_schema?.schema, catalogs, placeholders);
+      const validation = validatePayload(
+        payload,
+        extractPromptJsonSchema(prompt.response_format),
+        catalogs,
+        placeholders,
+      );
       const total = Date.now() - start;
       return {
         status: validation.valid ? 'ok' : 'error',
@@ -838,7 +908,7 @@ export async function runTaskGeneration(args: {
     if (resolvedSource === 'static' && basePayloadFromFixture) {
       const validation = validatePayload(
         basePayloadFromFixture,
-        prompt.response_format?.json_schema?.schema,
+        extractPromptJsonSchema(prompt.response_format),
         catalogs,
         placeholders,
       );
@@ -876,24 +946,30 @@ export async function runTaskGeneration(args: {
 
     let openaiStart = 0;
     let openaiDuration = 0;
+    const responseFormat = buildResponseFormatConfig(prompt.response_format);
     try {
       openaiStart = Date.now();
-      const response = await client.responses.create({
+      const requestBody: ResponseCreateParamsNonStreaming = {
         model: DEFAULT_MODEL,
         temperature: MODE_TEMPERATURE[args.mode],
         input: messages.map((message) => ({
           role: message.role,
           content: message.content,
         })),
-        text: {
-          format: prompt.response_format,
-        },
-        signal: controller.signal,
-      });
+      };
+      if (responseFormat) {
+        requestBody.text = { format: responseFormat };
+      }
+      const response = await client.responses.create(requestBody, { signal: controller.signal });
       openaiDuration = Date.now() - openaiStart;
       const outputText = response.output_text ?? '';
       const payload = JSON.parse(outputText) as TaskPayload;
-      const validation = validatePayload(payload, prompt.response_format?.json_schema?.schema, catalogs, placeholders);
+      const validation = validatePayload(
+        payload,
+        extractPromptJsonSchema(prompt.response_format),
+        catalogs,
+        placeholders,
+      );
       const total = Date.now() - start;
       if (!validation.valid) {
         const errorLog = await appendErrorLog(validation.errors.join('; '));
