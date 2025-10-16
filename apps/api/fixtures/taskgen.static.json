@@ -1,0 +1,188 @@
+{
+  "snapshot": {
+    "users": [
+      {
+        "user_id": "00000000-0000-0000-0000-000000000000",
+        "full_name": "Static Fixture User",
+        "email_primary": "static@example.com",
+        "tasks_group_id": "static-group",
+        "preferred_language": "en",
+        "preferred_timezone": "UTC",
+        "scheduler_enabled": true,
+        "channel_scheduler": "email",
+        "status_scheduler": "active",
+        "game_mode_id": 201
+      }
+    ],
+    "cat_game_mode": [
+      { "game_mode_id": 201, "code": "FLOW", "name": "Flow", "weekly_target": 3 }
+    ],
+    "cat_pillar": [
+      { "pillar_id": 1, "code": "BODY", "name": "Body" },
+      { "pillar_id": 2, "code": "MIND", "name": "Mind" },
+      { "pillar_id": 3, "code": "SOUL", "name": "Soul" }
+    ],
+    "cat_trait": [
+      { "trait_id": 1, "pillar_id": 1, "code": "BODY_MOBILITY", "name": "Mobility" },
+      { "trait_id": 2, "pillar_id": 1, "code": "BODY_STAMINA", "name": "Stamina" },
+      { "trait_id": 3, "pillar_id": 2, "code": "MIND_FOCUS", "name": "Focus" },
+      { "trait_id": 4, "pillar_id": 2, "code": "MIND_CLARITY", "name": "Clarity" },
+      { "trait_id": 5, "pillar_id": 3, "code": "SOUL_CONNECTION", "name": "Connection" }
+    ],
+    "cat_difficulty": [
+      { "difficulty_id": 1, "code": "Easy", "name": "Easy", "xp_base": 10 },
+      { "difficulty_id": 2, "code": "Medium", "name": "Medium", "xp_base": 20 },
+      { "difficulty_id": 3, "code": "Hard", "name": "Hard", "xp_base": 30 }
+    ],
+    "onboarding_session": [
+      {
+        "onboarding_session_id": "static-0001",
+        "user_id": "00000000-0000-0000-0000-000000000000",
+        "client_id": "static-client",
+        "game_mode_id": 201,
+        "meta": { "fixture": true }
+      }
+    ]
+  },
+  "payload": {
+    "user_id": "{{USER_ID}}",
+    "tasks_group_id": "static-group",
+    "tasks": [
+      {
+        "task": "Static mobility flow for {{USER_ID}} — hold deep lunge 2x60s",
+        "pillar_code": "BODY",
+        "trait_code": "BODY_MOBILITY",
+        "stat_code": "BODY_MOBILITY",
+        "difficulty_code": "Easy",
+        "friction_score": 24,
+        "friction_tier": "E-F"
+      },
+      {
+        "task": "Static stamina primer — brisk walk 12 min",
+        "pillar_code": "BODY",
+        "trait_code": "BODY_STAMINA",
+        "stat_code": "BODY_STAMINA",
+        "difficulty_code": "Easy",
+        "friction_score": 26,
+        "friction_tier": "E-F"
+      },
+      {
+        "task": "Static focus sprint — 15 min single-task sprint",
+        "pillar_code": "MIND",
+        "trait_code": "MIND_FOCUS",
+        "stat_code": "MIND_FOCUS",
+        "difficulty_code": "Easy",
+        "friction_score": 23,
+        "friction_tier": "E-F"
+      },
+      {
+        "task": "Static clarity pulse — journal top blocker in 3 bullets",
+        "pillar_code": "MIND",
+        "trait_code": "MIND_CLARITY",
+        "stat_code": "MIND_CLARITY",
+        "difficulty_code": "Easy",
+        "friction_score": 20,
+        "friction_tier": "E-F"
+      },
+      {
+        "task": "Static soul ping — send voice note to accountability buddy",
+        "pillar_code": "SOUL",
+        "trait_code": "SOUL_CONNECTION",
+        "stat_code": "SOUL_CONNECTION",
+        "difficulty_code": "Easy",
+        "friction_score": 25,
+        "friction_tier": "E-F"
+      },
+      {
+        "task": "Static strength set — split squats 3x10 per side",
+        "pillar_code": "BODY",
+        "trait_code": "BODY_STAMINA",
+        "stat_code": "BODY_STAMINA",
+        "difficulty_code": "Medium",
+        "friction_score": 48,
+        "friction_tier": "M-F"
+      },
+      {
+        "task": "Static tempo run — 3 rounds 4 min fast / 2 min easy",
+        "pillar_code": "BODY",
+        "trait_code": "BODY_STAMINA",
+        "stat_code": "BODY_STAMINA",
+        "difficulty_code": "Medium",
+        "friction_score": 47,
+        "friction_tier": "M-F"
+      },
+      {
+        "task": "Static deep work — focus block 25 min + 5 min review",
+        "pillar_code": "MIND",
+        "trait_code": "MIND_FOCUS",
+        "stat_code": "MIND_FOCUS",
+        "difficulty_code": "Medium",
+        "friction_score": 46,
+        "friction_tier": "M-F"
+      },
+      {
+        "task": "Static clarity sprint — map tomorrow's top 3 outcomes",
+        "pillar_code": "MIND",
+        "trait_code": "MIND_CLARITY",
+        "stat_code": "MIND_CLARITY",
+        "difficulty_code": "Medium",
+        "friction_score": 45,
+        "friction_tier": "M-F"
+      },
+      {
+        "task": "Static soul check-in — 15 min walk call with mentor",
+        "pillar_code": "SOUL",
+        "trait_code": "SOUL_CONNECTION",
+        "stat_code": "SOUL_CONNECTION",
+        "difficulty_code": "Medium",
+        "friction_score": 49,
+        "friction_tier": "M-F"
+      },
+      {
+        "task": "Static power push — kettlebell swings 4x12",
+        "pillar_code": "BODY",
+        "trait_code": "BODY_STAMINA",
+        "stat_code": "BODY_STAMINA",
+        "difficulty_code": "Hard",
+        "friction_score": 74,
+        "friction_tier": "D-F"
+      },
+      {
+        "task": "Static interval finisher — rower 5x2 min strong pace",
+        "pillar_code": "BODY",
+        "trait_code": "BODY_STAMINA",
+        "stat_code": "BODY_STAMINA",
+        "difficulty_code": "Hard",
+        "friction_score": 77,
+        "friction_tier": "D-F"
+      },
+      {
+        "task": "Static focus gauntlet — 2x30 min sprint with mid review",
+        "pillar_code": "MIND",
+        "trait_code": "MIND_FOCUS",
+        "stat_code": "MIND_FOCUS",
+        "difficulty_code": "Hard",
+        "friction_score": 72,
+        "friction_tier": "D-F"
+      },
+      {
+        "task": "Static clarity challenge — 30 min strategy teardown",
+        "pillar_code": "MIND",
+        "trait_code": "MIND_CLARITY",
+        "stat_code": "MIND_CLARITY",
+        "difficulty_code": "Hard",
+        "friction_score": 71,
+        "friction_tier": "D-F"
+      },
+      {
+        "task": "Static soul expansion — host 45 min mastermind session",
+        "pillar_code": "SOUL",
+        "trait_code": "SOUL_CONNECTION",
+        "stat_code": "SOUL_CONNECTION",
+        "difficulty_code": "Hard",
+        "friction_score": 78,
+        "friction_tier": "D-F"
+      }
+    ]
+  }
+}
