@@ -488,7 +488,7 @@ function buildResponseFormatConfig(format: PromptResponseFormat | undefined): Re
     const config: ResponseFormatTextJSONSchemaConfig = {
       type: 'json_schema',
       name: typeof jsonSchema.name === 'string' ? jsonSchema.name : 'TaskPayload',
-      schema: schemaValue as { [key: string]: unknown },
+      schema: schemaValue as Record<string, unknown>,
     };
 
     if (typeof jsonSchema.description === 'string') {
