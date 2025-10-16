@@ -276,7 +276,7 @@ async function parsePromptOverride(raw: string): Promise<{ prompt: PromptFile; s
   try {
     const parsed = normalizePrompt(trimmed);
     return { prompt: parsed, source: 'override:json' };
-  } catch (error) {
+  } catch {
     // Treat as plain text template (single user message)
     return {
       prompt: {
