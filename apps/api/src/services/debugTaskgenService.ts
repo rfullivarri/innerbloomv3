@@ -52,6 +52,8 @@ type UserRow = {
   preferred_timezone?: string | null;
 };
 
+type DbUserRow = Omit<UserRow, 'preferred_language' | 'preferred_timezone'>;
+
 type GameModeRow = {
   game_mode_id: number;
   code: string;
@@ -91,6 +93,10 @@ type OnboardingSessionRow = {
   email?: string | null;
   meta?: unknown;
   created_at?: string | null;
+};
+
+type OnboardingAnswersRow = {
+  payload?: unknown;
 };
 
 type Catalogs = {
@@ -184,6 +190,44 @@ type DebugTaskgenDeps = {
 };
 
 const LOG_PREFIX = '[aitaskgen]';
+
+function normalizeRecord(value: unknown): Record<string, unknown> | null {
+  if (typeof value === 'string') {
+    try {
+      return normalizeRecord(JSON.parse(value));
+    } catch (error) {
+      void error;
+      return null;
+    }
+  }
+
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function pickFirstString(
+  sources: (Record<string, unknown> | null | undefined)[],
+  key: string,
+): string | null {
+  for (const source of sources) {
+    if (!source) {
+      continue;
+    }
+
+    const rawValue = source[key];
+    if (typeof rawValue === 'string') {
+      const trimmed = rawValue.trim();
+      if (trimmed) {
+        return trimmed;
+      }
+    }
+  }
+
+  return null;
+}
 
 function log(message: string, meta?: Record<string, unknown>) {
   if (meta) {
@@ -562,18 +606,17 @@ function validatePayload(
 
 async function getContextFromDb(userId: string): Promise<UserContext> {
   return withClient(async (client) => {
-    const userResult = await client.query<UserRow>(
+    const userResult = await client.query<DbUserRow>(
       `SELECT user_id, email_primary, full_name, image_url, game_mode_id, timezone, tasks_group_id,
-              first_date_log, scheduler_enabled, user_profile, channel_scheduler, status_scheduler,
-              preferred_language, preferred_timezone
+              first_date_log, scheduler_enabled, user_profile, channel_scheduler, status_scheduler
          FROM users
         WHERE user_id = $1
         LIMIT 1`,
       [userId],
     );
 
-    const user = userResult.rows[0];
-    if (!user) {
+    const dbUser = userResult.rows[0];
+    if (!dbUser) {
       throw new Error('User not found');
     }
 
@@ -586,9 +629,32 @@ async function getContextFromDb(userId: string): Promise<UserContext> {
       [userId],
     );
 
-    const catalogs = await loadCatalogs(client);
-
     const onboarding = onboardingResult.rows[0];
+
+    let answersPayload: Record<string, unknown> | null = null;
+    let answersMeta: Record<string, unknown> | null = null;
+    if (onboarding?.onboarding_session_id) {
+      const answersResult = await client.query<OnboardingAnswersRow>(
+        `SELECT payload FROM onboarding_answers WHERE onboarding_session_id = $1 ORDER BY created_at DESC NULLS LAST LIMIT 1`,
+        [onboarding.onboarding_session_id],
+      );
+
+      answersPayload = normalizeRecord(answersResult.rows[0]?.payload);
+      answersMeta = answersPayload ? normalizeRecord(answersPayload['meta']) : null;
+    }
+
+    const onboardingMeta = normalizeRecord(onboarding?.meta);
+    const preferenceSources = [onboardingMeta, answersMeta, answersPayload];
+    const preferred_language = pickFirstString(preferenceSources, 'lang');
+    const preferred_timezone = pickFirstString(preferenceSources, 'tz');
+
+    const user: UserRow = {
+      ...dbUser,
+      preferred_language,
+      preferred_timezone,
+    };
+
+    const catalogs = await loadCatalogs(client);
 
     const gameMode = (() => {
       if (user.game_mode_id) {
