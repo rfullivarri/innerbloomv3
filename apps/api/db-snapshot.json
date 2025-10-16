@@ -1623,7 +1623,7 @@
       },
       {
         "view_name": "v_user_daily_energy",
-        "view_definition": " WITH RECURSIVE user_mode AS (\n         SELECT u.user_id,\n            gm.code AS mode_code,\n                CASE gm.code\n                    WHEN 'LOW'::text THEN 1.0\n                    WHEN 'CHILL'::text THEN 2.0\n                    WHEN 'FLOW'::text THEN 2.5\n                    WHEN 'EVOLVE'::text THEN 3.0\n                    ELSE 2.0\n                END AS mode_mult\n           FROM (users u\n             LEFT JOIN cat_game_mode gm ON ((gm.game_mode_id = u.game_mode_id)))\n        ), half_life AS (\n         SELECT um.user_id,\n            p.code AS pillar_code,\n            (\n                CASE um.mode_code\n                    WHEN 'LOW'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 7\n                        WHEN 'MIND'::text THEN 9\n                        WHEN 'SOUL'::text THEN 11\n                        ELSE NULL::integer\n                    END\n                    WHEN 'CHILL'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 6\n                        WHEN 'MIND'::text THEN 8\n                        WHEN 'SOUL'::text THEN 10\n                        ELSE NULL::integer\n                    END\n                    WHEN 'FLOW'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 5\n                        WHEN 'MIND'::text THEN 7\n                        WHEN 'SOUL'::text THEN 9\n                        ELSE NULL::integer\n                    END\n                    WHEN 'EVOLVE'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 4\n                        WHEN 'MIND'::text THEN 6\n                        WHEN 'SOUL'::text THEN 8\n                        ELSE NULL::integer\n                    END\n                    ELSE\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 6\n                        WHEN 'MIND'::text THEN 8\n                        WHEN 'SOUL'::text THEN 10\n                        ELSE NULL::integer\n                    END\n                END)::numeric AS h_days\n           FROM (user_mode um\n             CROSS JOIN cat_pillar p)\n          WHERE (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text]))\n        ), xp_base AS (\n         SELECT t.user_id,\n            p.code AS pillar_code,\n            COALESCE((sum(t.xp_base))::numeric, (0)::numeric) AS xp_base\n           FROM (tasks t\n             JOIN cat_pillar p ON ((p.pillar_id = t.pillar_id)))\n          WHERE ((t.active = true) AND (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text])))\n          GROUP BY t.user_id, p.code\n        ), xp_base_fixed AS (\n         SELECT xb.user_id,\n            xb.pillar_code,\n                CASE\n                    WHEN (sum(xb.xp_base) OVER (PARTITION BY xb.user_id) = (0)::numeric) THEN (60)::numeric\n                    ELSE xb.xp_base\n                END AS xp_base\n           FROM xp_base xb\n        ), targets AS (\n         SELECT um.user_id,\n            xbf.pillar_code,\n            (xbf.xp_base * um.mode_mult) AS xp_week_target,\n            ((xbf.xp_base * um.mode_mult) / 7.0) AS xp_day_target\n           FROM (xp_base_fixed xbf\n             JOIN user_mode um ON ((um.user_id = xbf.user_id)))\n        ), leak_and_k AS (\n         SELECT hl.user_id,\n            hl.pillar_code,\n                CASE\n                    WHEN (hl.h_days > (0)::numeric) THEN ((1)::numeric - power(0.5, (1.0 / hl.h_days)))\n                    ELSE (0)::numeric\n                END AS d,\n                CASE\n                    WHEN (tg.xp_day_target > (0)::numeric) THEN ((100.0 * ((1)::numeric - power(0.5, (1.0 / hl.h_days)))) / tg.xp_day_target)\n                    ELSE (0)::numeric\n                END AS k\n           FROM (half_life hl\n             JOIN targets tg ON (((tg.user_id = hl.user_id) AND (tg.pillar_code = hl.pillar_code))))\n        ), last7 AS (\n         SELECT (CURRENT_DATE - gs.gs) AS day\n           FROM generate_series(6, 0, '-1'::integer) gs(gs)\n        ), grid AS (\n         SELECT u.user_id,\n            l7.day,\n            p.code AS pillar_code\n           FROM ((users u\n             CROSS JOIN last7 l7)\n             CROSS JOIN cat_pillar p)\n          WHERE (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text]))\n        ), logs_xp AS (\n         SELECT dl.user_id,\n            dl.date AS day,\n            p.code AS pillar_code,\n            (COALESCE(sum((dl.quantity * t.xp_base)), (0)::bigint))::numeric AS xp\n           FROM ((daily_log dl\n             JOIN tasks t ON ((t.task_id = dl.task_id)))\n             JOIN cat_pillar p ON ((p.pillar_id = t.pillar_id)))\n          WHERE (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text]))\n          GROUP BY dl.user_id, dl.date, p.code\n        ), xp_by_day AS (\n         SELECT g.user_id,\n            g.day,\n            g.pillar_code,\n            COALESCE(lx.xp, (0)::numeric) AS xp\n           FROM (grid g\n             LEFT JOIN logs_xp lx ON (((lx.user_id = g.user_id) AND (lx.day = g.day) AND (lx.pillar_code = g.pillar_code))))\n        ), grace_window AS (\n         SELECT u.user_id,\n            COALESCE(u.first_date_log, min(dl.date)) AS first_log_date,\n            ((COALESCE(u.first_date_log, min(dl.date)) + '6 days'::interval))::date AS grace_until\n           FROM (users u\n             LEFT JOIN daily_log dl ON ((dl.user_id = u.user_id)))\n          GROUP BY u.user_id, u.first_date_log\n        ), seq AS (\n         SELECT x.user_id,\n            x.pillar_code,\n            x.day,\n            x.xp,\n            row_number() OVER (PARTITION BY x.user_id, x.pillar_code ORDER BY x.day) AS rn,\n            count(*) OVER (PARTITION BY x.user_id, x.pillar_code) AS rn_max\n           FROM xp_by_day x\n        ), energy AS (\n         SELECT s.user_id,\n            s.pillar_code,\n            s.day,\n            s.rn,\n            s.rn_max,\n                CASE\n                    WHEN (s.day <= COALESCE(gw.grace_until, '-infinity'::date)) THEN 100.0\n                    ELSE 60.0\n                END AS e_prev\n           FROM (seq s\n             LEFT JOIN grace_window gw ON ((gw.user_id = s.user_id)))\n          WHERE (s.rn = 1)\n        UNION ALL\n         SELECT s.user_id,\n            s.pillar_code,\n            s.day,\n            s.rn,\n            s.rn_max,\n                CASE\n                    WHEN (s.day <= COALESCE(gw.grace_until, '-infinity'::date)) THEN 100.0\n                    ELSE GREATEST(0.0, LEAST(100.0, (((1.0 - lk.d) * e.e_prev) + (lk.k * COALESCE(s.xp, (0)::numeric)))))\n                END AS e_prev\n           FROM (((energy e\n             JOIN seq s ON (((s.user_id = e.user_id) AND (s.pillar_code = e.pillar_code) AND (s.rn = (e.rn + 1)))))\n             LEFT JOIN grace_window gw ON ((gw.user_id = s.user_id)))\n             LEFT JOIN leak_and_k lk ON (((lk.user_id = s.user_id) AND (lk.pillar_code = s.pillar_code))))\n        ), today_energy AS (\n         SELECT energy.user_id,\n            energy.pillar_code,\n            energy.e_prev AS energy_0_100,\n            (energy.e_prev / 100.0) AS energy_0_1\n           FROM energy\n          WHERE (energy.rn = energy.rn_max)\n        )\n SELECT user_id,\n    max(\n        CASE\n            WHEN (pillar_code = 'BODY'::text) THEN energy_0_100\n            ELSE NULL::numeric\n        END) AS hp_pct,\n    max(\n        CASE\n            WHEN (pillar_code = 'SOUL'::text) THEN energy_0_100\n            ELSE NULL::numeric\n        END) AS mood_pct,\n    max(\n        CASE\n            WHEN (pillar_code = 'MIND'::text) THEN energy_0_100\n            ELSE NULL::numeric\n        END) AS focus_pct,\n    max(\n        CASE\n            WHEN (pillar_code = 'BODY'::text) THEN energy_0_1\n            ELSE NULL::numeric\n        END) AS hp_norm,\n    max(\n        CASE\n            WHEN (pillar_code = 'SOUL'::text) THEN energy_0_1\n            ELSE NULL::numeric\n        END) AS mood_norm,\n    max(\n        CASE\n            WHEN (pillar_code = 'MIND'::text) THEN energy_0_1\n            ELSE NULL::numeric\n        END) AS focus_norm\n   FROM today_energy te\n  GROUP BY user_id;"
+        "view_definition": " WITH RECURSIVE user_mode AS (\n         SELECT u.user_id,\n            gm.code AS mode_code,\n                CASE gm.code\n                    WHEN 'LOW'::text THEN 1.0\n                    WHEN 'CHILL'::text THEN 2.0\n                    WHEN 'FLOW'::text THEN 2.5\n                    WHEN 'EVOLVE'::text THEN 3.0\n                    ELSE 2.0\n                END AS mode_mult\n           FROM (users u\n             LEFT JOIN cat_game_mode gm ON ((gm.game_mode_id = u.game_mode_id)))\n        ), half_life AS (\n         SELECT um.user_id,\n            p.code AS pillar_code,\n            (\n                CASE um.mode_code\n                    WHEN 'LOW'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 7\n                        WHEN 'MIND'::text THEN 9\n                        WHEN 'SOUL'::text THEN 11\n                        ELSE NULL::integer\n                    END\n                    WHEN 'CHILL'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 6\n                        WHEN 'MIND'::text THEN 8\n                        WHEN 'SOUL'::text THEN 10\n                        ELSE NULL::integer\n                    END\n                    WHEN 'FLOW'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 5\n                        WHEN 'MIND'::text THEN 7\n                        WHEN 'SOUL'::text THEN 9\n                        ELSE NULL::integer\n                    END\n                    WHEN 'EVOLVE'::text THEN\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 4\n                        WHEN 'MIND'::text THEN 6\n                        WHEN 'SOUL'::text THEN 8\n                        ELSE NULL::integer\n                    END\n                    ELSE\n                    CASE p.code\n                        WHEN 'BODY'::text THEN 6\n                        WHEN 'MIND'::text THEN 8\n                        WHEN 'SOUL'::text THEN 10\n                        ELSE NULL::integer\n                    END\n                END)::numeric AS h_days\n           FROM (user_mode um\n             CROSS JOIN cat_pillar p)\n          WHERE (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text]))\n        ), xp_base AS (\n         SELECT t.user_id,\n            p.code AS pillar_code,\n            COALESCE((sum(t.xp_base))::numeric, (0)::numeric) AS xp_base\n           FROM (tasks t\n             JOIN cat_pillar p ON ((p.pillar_id = t.pillar_id)))\n          WHERE ((t.active = true) AND (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text])))\n          GROUP BY t.user_id, p.code\n        ), xp_base_fixed AS (\n         SELECT xb.user_id,\n            xb.pillar_code,\n                CASE\n                    WHEN (sum(xb.xp_base) OVER (PARTITION BY xb.user_id) = (0)::numeric) THEN (60)::numeric\n                    ELSE xb.xp_base\n                END AS xp_base\n           FROM xp_base xb\n        ), targets AS (\n         SELECT um.user_id,\n            xbf.pillar_code,\n            (xbf.xp_base * um.mode_mult) AS xp_week_target,\n            ((xbf.xp_base * um.mode_mult) / 7.0) AS xp_day_target\n           FROM (xp_base_fixed xbf\n             JOIN user_mode um ON ((um.user_id = xbf.user_id)))\n        ), leak_and_k AS (\n         SELECT hl.user_id,\n            hl.pillar_code,\n                CASE\n                    WHEN (hl.h_days \u003E (0)::numeric) THEN ((1)::numeric - power(0.5, (1.0 / hl.h_days)))\n                    ELSE (0)::numeric\n                END AS d,\n                CASE\n                    WHEN (tg.xp_day_target \u003E (0)::numeric) THEN ((100.0 * ((1)::numeric - power(0.5, (1.0 / hl.h_days)))) / tg.xp_day_target)\n                    ELSE (0)::numeric\n                END AS k\n           FROM (half_life hl\n             JOIN targets tg ON (((tg.user_id = hl.user_id) AND (tg.pillar_code = hl.pillar_code))))\n        ), last7 AS (\n         SELECT (CURRENT_DATE - gs.gs) AS day\n           FROM generate_series(6, 0, '-1'::integer) gs(gs)\n        ), grid AS (\n         SELECT u.user_id,\n            l7.day,\n            p.code AS pillar_code\n           FROM ((users u\n             CROSS JOIN last7 l7)\n             CROSS JOIN cat_pillar p)\n          WHERE (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text]))\n        ), logs_xp AS (\n         SELECT dl.user_id,\n            dl.date AS day,\n            p.code AS pillar_code,\n            (COALESCE(sum((dl.quantity * t.xp_base)), (0)::bigint))::numeric AS xp\n           FROM ((daily_log dl\n             JOIN tasks t ON ((t.task_id = dl.task_id)))\n             JOIN cat_pillar p ON ((p.pillar_id = t.pillar_id)))\n          WHERE (p.code = ANY (ARRAY['BODY'::text, 'MIND'::text, 'SOUL'::text]))\n          GROUP BY dl.user_id, dl.date, p.code\n        ), xp_by_day AS (\n         SELECT g.user_id,\n            g.day,\n            g.pillar_code,\n            COALESCE(lx.xp, (0)::numeric) AS xp\n           FROM (grid g\n             LEFT JOIN logs_xp lx ON (((lx.user_id = g.user_id) AND (lx.day = g.day) AND (lx.pillar_code = g.pillar_code))))\n        ), grace_window AS (\n         SELECT u.user_id,\n            COALESCE(u.first_date_log, min(dl.date)) AS first_log_date,\n            ((COALESCE(u.first_date_log, min(dl.date)) + '6 days'::interval))::date AS grace_until\n           FROM (users u\n             LEFT JOIN daily_log dl ON ((dl.user_id = u.user_id)))\n          GROUP BY u.user_id, u.first_date_log\n        ), seq AS (\n         SELECT x.user_id,\n            x.pillar_code,\n            x.day,\n            x.xp,\n            row_number() OVER (PARTITION BY x.user_id, x.pillar_code ORDER BY x.day) AS rn,\n            count(*) OVER (PARTITION BY x.user_id, x.pillar_code) AS rn_max\n           FROM xp_by_day x\n        ), energy AS (\n         SELECT s.user_id,\n            s.pillar_code,\n            s.day,\n            s.rn,\n            s.rn_max,\n                CASE\n                    WHEN (s.day \u003C= COALESCE(gw.grace_until, '-infinity'::date)) THEN 100.0\n                    ELSE 60.0\n                END AS e_prev\n           FROM (seq s\n             LEFT JOIN grace_window gw ON ((gw.user_id = s.user_id)))\n          WHERE (s.rn = 1)\n        UNION ALL\n         SELECT s.user_id,\n            s.pillar_code,\n            s.day,\n            s.rn,\n            s.rn_max,\n                CASE\n                    WHEN (s.day \u003C= COALESCE(gw.grace_until, '-infinity'::date)) THEN 100.0\n                    ELSE GREATEST(0.0, LEAST(100.0, (((1.0 - lk.d) * e.e_prev) + (lk.k * COALESCE(s.xp, (0)::numeric)))))\n                END AS e_prev\n           FROM (((energy e\n             JOIN seq s ON (((s.user_id = e.user_id) AND (s.pillar_code = e.pillar_code) AND (s.rn = (e.rn + 1)))))\n             LEFT JOIN grace_window gw ON ((gw.user_id = s.user_id)))\n             LEFT JOIN leak_and_k lk ON (((lk.user_id = s.user_id) AND (lk.pillar_code = s.pillar_code))))\n        ), today_energy AS (\n         SELECT energy.user_id,\n            energy.pillar_code,\n            energy.e_prev AS energy_0_100,\n            (energy.e_prev / 100.0) AS energy_0_1\n           FROM energy\n          WHERE (energy.rn = energy.rn_max)\n        )\n SELECT user_id,\n    max(\n        CASE\n            WHEN (pillar_code = 'BODY'::text) THEN energy_0_100\n            ELSE NULL::numeric\n        END) AS hp_pct,\n    max(\n        CASE\n            WHEN (pillar_code = 'SOUL'::text) THEN energy_0_100\n            ELSE NULL::numeric\n        END) AS mood_pct,\n    max(\n        CASE\n            WHEN (pillar_code = 'MIND'::text) THEN energy_0_100\n            ELSE NULL::numeric\n        END) AS focus_pct,\n    max(\n        CASE\n            WHEN (pillar_code = 'BODY'::text) THEN energy_0_1\n            ELSE NULL::numeric\n        END) AS hp_norm,\n    max(\n        CASE\n            WHEN (pillar_code = 'SOUL'::text) THEN energy_0_1\n            ELSE NULL::numeric\n        END) AS mood_norm,\n    max(\n        CASE\n            WHEN (pillar_code = 'MIND'::text) THEN energy_0_1\n            ELSE NULL::numeric\n        END) AS focus_norm\n   FROM today_energy te\n  GROUP BY user_id;"
       },
       {
         "view_name": "v_user_daily_xp",
@@ -1631,11 +1631,11 @@
       },
       {
         "view_name": "v_user_level",
-        "view_definition": " WITH base AS (\n         SELECT u.user_id,\n            (COALESCE(sum(\n                CASE\n                    WHEN t.active THEN t.xp_base\n                    ELSE NULL::smallint\n                END), (0)::bigint))::numeric AS xp_base_sum\n           FROM (users u\n             LEFT JOIN tasks t ON ((t.user_id = u.user_id)))\n          GROUP BY u.user_id\n        )\n SELECT b.user_id,\n    gs.level,\n    (round(\n        CASE\n            WHEN (gs.level = 0) THEN ((b.xp_base_sum * 0.4) * (7)::numeric)\n            ELSE (b.xp_base_sum * power((gs.level)::numeric, 1.3))\n        END))::bigint AS xp_required\n   FROM (base b\n     JOIN generate_series(0, 50) gs(level) ON ((b.xp_base_sum > (0)::numeric)))\n  ORDER BY b.user_id, gs.level;"
+        "view_definition": " WITH base AS (\n         SELECT u.user_id,\n            (COALESCE(sum(\n                CASE\n                    WHEN t.active THEN t.xp_base\n                    ELSE NULL::smallint\n                END), (0)::bigint))::numeric AS xp_base_sum\n           FROM (users u\n             LEFT JOIN tasks t ON ((t.user_id = u.user_id)))\n          GROUP BY u.user_id\n        )\n SELECT b.user_id,\n    gs.level,\n    (round(\n        CASE\n            WHEN (gs.level = 0) THEN ((b.xp_base_sum * 0.4) * (7)::numeric)\n            ELSE (b.xp_base_sum * power((gs.level)::numeric, 1.3))\n        END))::bigint AS xp_required\n   FROM (base b\n     JOIN generate_series(0, 50) gs(level) ON ((b.xp_base_sum \u003E (0)::numeric)))\n  ORDER BY b.user_id, gs.level;"
       },
       {
         "view_name": "v_user_pillars_week",
-        "view_definition": " WITH week_logs AS (\n         SELECT daily_log.log_id,\n            daily_log.date,\n            daily_log.user_id,\n            daily_log.task_id,\n            daily_log.quantity,\n            daily_log.created_at\n           FROM daily_log\n          WHERE (daily_log.date >= ((CURRENT_DATE - '6 days'::interval))::date)\n        )\n SELECT wl.user_id,\n    cp.code AS pillar_code,\n    sum((cd.xp_base * GREATEST(wl.quantity, 1))) AS xp_week\n   FROM (((week_logs wl\n     JOIN tasks t ON ((t.task_id = wl.task_id)))\n     JOIN cat_difficulty cd ON ((cd.difficulty_id = t.difficulty_id)))\n     JOIN cat_pillar cp ON ((cp.pillar_id = t.pillar_id)))\n  GROUP BY wl.user_id, cp.code;"
+        "view_definition": " WITH week_logs AS (\n         SELECT daily_log.log_id,\n            daily_log.date,\n            daily_log.user_id,\n            daily_log.task_id,\n            daily_log.quantity,\n            daily_log.created_at\n           FROM daily_log\n          WHERE (daily_log.date \u003E= ((CURRENT_DATE - '6 days'::interval))::date)\n        )\n SELECT wl.user_id,\n    cp.code AS pillar_code,\n    sum((cd.xp_base * GREATEST(wl.quantity, 1))) AS xp_week\n   FROM (((week_logs wl\n     JOIN tasks t ON ((t.task_id = wl.task_id)))\n     JOIN cat_difficulty cd ON ((cd.difficulty_id = t.difficulty_id)))\n     JOIN cat_pillar cp ON ((cp.pillar_id = t.pillar_id)))\n  GROUP BY wl.user_id, cp.code;"
       },
       {
         "view_name": "v_user_quests_today",
@@ -2290,225 +2290,1718 @@
     ],
     "clerk_webhook_events": [
       {
-        "id": "1",
-        "svix_id": "msg_demo_welcome",
+        "id": "4",
+        "svix_id": "msg_33sTkWiT9W68EJnykjxbLsRHXUF",
         "event_type": "user.created",
         "payload": {
-          "object": "event",
-          "type": "user.created",
           "data": {
-            "id": "user_demo_low",
-            "object": "user",
-            "username": null,
+            "id": "user_2g7np7Hrk0SN6kj5EDMLDaKNL0S",
             "banned": false,
             "locked": false,
-            "has_image": true,
-            "image_url": "https://img.innerbloom.local/demo-low.png",
-            "last_name": "Momentum",
-            "first_name": "Demo",
-            "email_addresses": [
-              {
-                "id": "idn_demo_low",
-                "email_address": "demo.low@example.com",
-                "verification": {
-                  "status": "verified"
-                }
-              }
-            ],
-            "primary_email_address_id": "idn_demo_low",
-            "external_accounts": [],
-            "public_metadata": {},
-            "unsafe_metadata": {},
-            "private_metadata": null,
-            "two_factor_enabled": false,
-            "password_enabled": true,
-            "last_sign_in_at": 1704448800000,
-            "created_at": 1704096000000,
-            "updated_at": 1704448800000,
-            "last_active_at": 1704448800000,
+            "object": "user",
             "passkeys": [],
-            "phone_numbers": [],
-            "web3_wallets": [],
-            "saml_accounts": [],
-            "enterprise_accounts": [],
+            "username": null,
+            "has_image": true,
+            "image_url": "https://img.clerk.com/xxxxxx",
+            "last_name": "Doe",
+            "created_at": 1716883200000,
+            "first_name": "John",
+            "updated_at": 1716883200000,
             "external_id": null,
             "totp_enabled": false,
+            "web3_wallets": [],
+            "phone_numbers": [],
+            "saml_accounts": [],
+            "last_active_at": 1716883200000,
             "mfa_enabled_at": null,
+            "email_addresses": [],
+            "last_sign_in_at": 1716883200000,
             "mfa_disabled_at": null,
-            "legal_accepted_at": 1704096000000,
-            "delete_self_enabled": true,
+            "public_metadata": {
+
+            },
+            "unsafe_metadata": {
+
+            },
+            "password_enabled": true,
+            "private_metadata": null,
+            "external_accounts": [],
+            "legal_accepted_at": 1716883200000,
+            "profile_image_url": "https://img.clerk.com/xxxxxx",
+            "two_factor_enabled": false,
             "backup_code_enabled": false,
-            "create_organizations_limit": null,
-            "create_organization_enabled": true,
-            "verification_attempts_remaining": null,
-            "lockout_expires_in_seconds": null,
-            "primary_phone_number_id": null,
+            "delete_self_enabled": true,
+            "enterprise_accounts": [],
             "primary_web3_wallet_id": null,
-            "profile_image_url": "https://img.innerbloom.local/demo-low.png"
+            "primary_phone_number_id": null,
+            "primary_email_address_id": "idn_2g7np7Hrk0SN6kj5EDMLDaKNL0S",
+            "create_organizations_limit": null,
+            "lockout_expires_in_seconds": null,
+            "create_organization_enabled": true,
+            "verification_attempts_remaining": null
           },
-          "timestamp": 1704448800,
-          "instance_id": "ins_demo",
+          "type": "user.created",
+          "object": "event",
+          "timestamp": 1716883200,
+          "instance_id": "ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S",
           "event_attributes": {
             "http_request": {
-              "client_ip": "127.0.0.1",
-              "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) DemoBrowser/1.0"
+              "client_ip": "192.168.1.100",
+              "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
             }
           }
         },
-        "received_at": "2024-01-05 10:00:00+00"
+        "received_at": "2025-10-10 14:02:03.927153+00"
+      },
+      {
+        "id": "5",
+        "svix_id": "msg_33w1cdIMKW9LUzUGXGpN8iD2v5b",
+        "event_type": "user.deleted",
+        "payload": {
+          "data": {
+            "id": "user_33pDtRRpyRIcHtMHzdAfHb4LHoT",
+            "object": "user",
+            "deleted": true
+          },
+          "type": "user.deleted",
+          "object": "event",
+          "timestamp": 1760213400594,
+          "instance_id": "ins_33ZxGnRAjDabYXW8HTspY2znjCZ",
+          "event_attributes": {
+            "http_request": {
+              "client_ip": "2600:1900:0:2d05::601",
+              "user_agent": "clerk/clerk-sdk-go@v3.0.0"
+            }
+          }
+        },
+        "received_at": "2025-10-11 20:10:01.768157+00"
+      },
+      {
+        "id": "6",
+        "svix_id": "msg_33w3rQhIKTiA4OSzVwXcpO9QV4B",
+        "event_type": "user.created",
+        "payload": {
+          "data": {
+            "id": "user_33w3rQdVxK6WHFsyWmsmIaLzivs",
+            "banned": false,
+            "locale": null,
+            "locked": false,
+            "object": "user",
+            "passkeys": [],
+            "username": null,
+            "has_image": false,
+            "image_url": "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18zM1p4R25SQWpEYWJZWFc4SFRzcFkyem5qQ1oiLCJyaWQiOiJ1c2VyXzMzdzNyUWRWeEs2V0hGc3lXbXNtSWFMeml2cyIsImluaXRpYWxzIjoiUlIifQ",
+            "last_name": "Ramita",
+            "created_at": 1760214505005,
+            "first_name": "Rama",
+            "updated_at": 1760214505019,
+            "external_id": null,
+            "totp_enabled": false,
+            "web3_wallets": [],
+            "phone_numbers": [],
+            "saml_accounts": [],
+            "last_active_at": 1760214505004,
+            "mfa_enabled_at": null,
+            "email_addresses": [
+              {
+                "id": "idn_33w3pgvegU9IW815nTsW3uGKu9r",
+                "object": "email_address",
+                "reserved": false,
+                "linked_to": [],
+                "created_at": 1760214491463,
+                "updated_at": 1760214505008,
+                "verification": {
+                  "object": "verification_otp",
+                  "status": "verified",
+                  "attempts": 1,
+                  "strategy": "email_code",
+                  "expire_at": 1760215091996
+                },
+                "email_address": "ramagpt23@gmail.com",
+                "matches_sso_connection": false
+              }
+            ],
+            "last_sign_in_at": null,
+            "mfa_disabled_at": null,
+            "public_metadata": {
+
+            },
+            "unsafe_metadata": {
+
+            },
+            "password_enabled": true,
+            "private_metadata": {
+
+            },
+            "external_accounts": [],
+            "legal_accepted_at": null,
+            "profile_image_url": "https://www.gravatar.com/avatar?d=mp",
+            "two_factor_enabled": false,
+            "backup_code_enabled": false,
+            "delete_self_enabled": true,
+            "enterprise_accounts": [],
+            "primary_web3_wallet_id": null,
+            "primary_phone_number_id": null,
+            "primary_email_address_id": "idn_33w3pgvegU9IW815nTsW3uGKu9r",
+            "lockout_expires_in_seconds": null,
+            "create_organization_enabled": true,
+            "verification_attempts_remaining": 100
+          },
+          "type": "user.created",
+          "object": "event",
+          "timestamp": 1760214505040,
+          "instance_id": "ins_33ZxGnRAjDabYXW8HTspY2znjCZ",
+          "event_attributes": {
+            "http_request": {
+              "client_ip": "2a09:bac2:3116:191::28:119",
+              "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0.1 Mobile/15E148 Safari/604.1"
+            }
+          }
+        },
+        "received_at": "2025-10-11 20:28:26.158781+00"
+      },
+      {
+        "id": "8",
+        "svix_id": "msg_340fbdPfuik6sJzEMn6JC3TaxHb",
+        "event_type": "user.deleted",
+        "payload": {
+          "data": {
+            "id": "user_33w3rQdVxK6WHFsyWmsmIaLzivs",
+            "object": "user",
+            "deleted": true
+          },
+          "type": "user.deleted",
+          "object": "event",
+          "timestamp": 1760355481932,
+          "instance_id": "ins_33ZxGnRAjDabYXW8HTspY2znjCZ",
+          "event_attributes": {
+            "http_request": {
+              "client_ip": "2600:1900:0:2d05::700",
+              "user_agent": "clerk/clerk-sdk-go@v3.0.0"
+            }
+          }
+        },
+        "received_at": "2025-10-13 11:38:03.264333+00"
+      },
+      {
+        "id": "9",
+        "svix_id": "msg_340qzIbhTr591gjR8ZtM2jdiC7j",
+        "event_type": "user.created",
+        "payload": {
+          "data": {
+            "id": "user_340qzGKJE1K0yFFhHAHGrXzmSjL",
+            "banned": false,
+            "locale": null,
+            "locked": false,
+            "object": "user",
+            "passkeys": [],
+            "username": null,
+            "has_image": false,
+            "image_url": "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18zM1p4R25SQWpEYWJZWFc4SFRzcFkyem5qQ1oiLCJyaWQiOiJ1c2VyXzM0MHF6R0tKRTFLMHlGRmhIQUhHclh6bVNqTCIsImluaXRpYWxzIjoiUlIifQ",
+            "last_name": "Ramita",
+            "created_at": 1760361097451,
+            "first_name": "Rama",
+            "updated_at": 1760361097467,
+            "external_id": null,
+            "totp_enabled": false,
+            "web3_wallets": [],
+            "phone_numbers": [],
+            "saml_accounts": [],
+            "last_active_at": 1760361097450,
+            "mfa_enabled_at": null,
+            "email_addresses": [
+              {
+                "id": "idn_340qxVTa4hVRuIC22nEj8PwYFJc",
+                "object": "email_address",
+                "reserved": false,
+                "linked_to": [],
+                "created_at": 1760361083062,
+                "updated_at": 1760361097455,
+                "verification": {
+                  "object": "verification_otp",
+                  "status": "verified",
+                  "attempts": 1,
+                  "strategy": "email_code",
+                  "expire_at": 1760361683603
+                },
+                "email_address": "ramagpt23@gmail.com",
+                "matches_sso_connection": false
+              }
+            ],
+            "last_sign_in_at": null,
+            "mfa_disabled_at": null,
+            "public_metadata": {
+
+            },
+            "unsafe_metadata": {
+
+            },
+            "password_enabled": true,
+            "private_metadata": {
+
+            },
+            "external_accounts": [],
+            "legal_accepted_at": null,
+            "profile_image_url": "https://www.gravatar.com/avatar?d=mp",
+            "two_factor_enabled": false,
+            "backup_code_enabled": false,
+            "delete_self_enabled": true,
+            "enterprise_accounts": [],
+            "primary_web3_wallet_id": null,
+            "primary_phone_number_id": null,
+            "primary_email_address_id": "idn_340qxVTa4hVRuIC22nEj8PwYFJc",
+            "lockout_expires_in_seconds": null,
+            "create_organization_enabled": true,
+            "verification_attempts_remaining": 100
+          },
+          "type": "user.created",
+          "object": "event",
+          "timestamp": 1760361097494,
+          "instance_id": "ins_33ZxGnRAjDabYXW8HTspY2znjCZ",
+          "event_attributes": {
+            "http_request": {
+              "client_ip": "2a02:26f7:ef10:5901:0:e800::",
+              "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0.1 Mobile/15E148 Safari/604.1"
+            }
+          }
+        },
+        "received_at": "2025-10-13 13:11:38.660871+00"
+      },
+      {
+        "id": "10",
+        "svix_id": "msg_3417xWty2sCLCFTEhXwANjJNH0Z",
+        "event_type": "user.deleted",
+        "payload": {
+          "data": {
+            "id": "user_340qzGKJE1K0yFFhHAHGrXzmSjL",
+            "object": "user",
+            "deleted": true
+          },
+          "type": "user.deleted",
+          "object": "event",
+          "timestamp": 1760369470572,
+          "instance_id": "ins_33ZxGnRAjDabYXW8HTspY2znjCZ",
+          "event_attributes": {
+            "http_request": {
+              "client_ip": "2600:1900:0:2d05::3101",
+              "user_agent": "clerk/clerk-sdk-go@v3.0.0"
+            }
+          }
+        },
+        "received_at": "2025-10-13 15:31:11.790838+00"
+      },
+      {
+        "id": "11",
+        "svix_id": "msg_3418cBgPNx2uHbGaW4HRqmCdCJj",
+        "event_type": "user.created",
+        "payload": {
+          "data": {
+            "id": "user_3418cENuuj6ad96ciTqKsobDq4t",
+            "banned": false,
+            "locale": null,
+            "locked": false,
+            "object": "user",
+            "passkeys": [],
+            "username": null,
+            "has_image": false,
+            "image_url": "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18zM1p4R25SQWpEYWJZWFc4SFRzcFkyem5qQ1oiLCJyaWQiOiJ1c2VyXzM0MThjRU51dWo2YWQ5NmNpVHFLc29iRHE0dCIsImluaXRpYWxzIjoiUlIifQ",
+            "last_name": "Ramita",
+            "created_at": 1760369794030,
+            "first_name": "Rama",
+            "updated_at": 1760369794056,
+            "external_id": null,
+            "totp_enabled": false,
+            "web3_wallets": [],
+            "phone_numbers": [],
+            "saml_accounts": [],
+            "last_active_at": 1760369794029,
+            "mfa_enabled_at": null,
+            "email_addresses": [
+              {
+                "id": "idn_3418awoK0mqFORSkOUuUkNQ8FHo",
+                "object": "email_address",
+                "reserved": false,
+                "linked_to": [],
+                "created_at": 1760369784775,
+                "updated_at": 1760369794033,
+                "verification": {
+                  "object": "verification_otp",
+                  "status": "verified",
+                  "attempts": 1,
+                  "strategy": "email_code",
+                  "expire_at": 1760370385445
+                },
+                "email_address": "ramagpt23@gmail.com",
+                "matches_sso_connection": false
+              }
+            ],
+            "last_sign_in_at": null,
+            "mfa_disabled_at": null,
+            "public_metadata": {
+
+            },
+            "unsafe_metadata": {
+
+            },
+            "password_enabled": true,
+            "private_metadata": {
+
+            },
+            "external_accounts": [],
+            "legal_accepted_at": null,
+            "profile_image_url": "https://www.gravatar.com/avatar?d=mp",
+            "two_factor_enabled": false,
+            "backup_code_enabled": false,
+            "delete_self_enabled": true,
+            "enterprise_accounts": [],
+            "primary_web3_wallet_id": null,
+            "primary_phone_number_id": null,
+            "primary_email_address_id": "idn_3418awoK0mqFORSkOUuUkNQ8FHo",
+            "lockout_expires_in_seconds": null,
+            "create_organization_enabled": true,
+            "verification_attempts_remaining": 100
+          },
+          "type": "user.created",
+          "object": "event",
+          "timestamp": 1760369794088,
+          "instance_id": "ins_33ZxGnRAjDabYXW8HTspY2znjCZ",
+          "event_attributes": {
+            "http_request": {
+              "client_ip": "2a09:bac3:3110:191::28:131",
+              "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0.1 Mobile/15E148 Safari/604.1"
+            }
+          }
+        },
+        "received_at": "2025-10-13 15:36:35.302124+00"
       }
     ],
     "daily_log": [
       {
-        "log_id": "daily-log-5f369996-f09b-412a-85ba-8c4aa8446af6",
-        "date": "2024-01-06",
-        "user_id": "11111111-1111-4111-8111-111111111111",
-        "task_id": "77777777-7777-4777-8777-777777777777",
+        "log_id": "ded098a5-2e57-476e-85c7-2962e45b0e72",
+        "date": "2025-10-03",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
         "quantity": 1,
-        "created_at": "2024-01-06 09:00:00+00"
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "831cc161-d0cf-42b6-a942-e949ca408daa",
+        "date": "2025-10-02",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "7aebb92a-3b9c-4025-a86c-fa3ca0e78515",
+        "date": "2025-10-01",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "31431f05-f0f6-4ae3-969e-5c470572d71d",
+        "date": "2025-09-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "727e044e-f050-4c18-af72-9a3c6e787585",
+        "date": "2025-09-26",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "354985cb-57d9-4a9e-be0d-6ff38140f47e",
+        "date": "2025-09-24",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "8ec57a90-ea56-4808-bb47-5615f4e8cdc4",
+        "date": "2025-09-23",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "77e20ce5-2427-4b74-be1e-a6835254c2f0",
+        "date": "2025-09-21",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "fbcf4624-5123-4f4e-be7b-cf41e2cdc41f",
+        "date": "2025-09-20",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "d73a4f68-0319-435a-81ed-4193ea27667f",
+        "date": "2025-09-19",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "ded27671-f951-4f1f-b603-d3000c3961e1",
+        "date": "2025-09-17",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "d5db1440-8423-427e-8749-897eff32984c",
+        "date": "2025-09-16",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "3848bd86-48e8-4d4b-a07c-452202669c8b",
+        "date": "2025-09-13",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "974ded2b-88f9-420b-a462-bfa438f3be9b",
+        "date": "2025-09-11",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "ce02075d-218e-4373-b9e4-5d853948123b",
+        "date": "2025-09-09",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "82acfa11-e238-4492-ac32-8cee654547dd",
+        "date": "2025-09-07",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "c8148cc2-0829-4ba3-b5a5-20d0befeb357",
+        "date": "2025-09-06",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "ec062003-ad2d-4b1d-93f6-47fc4eed5d7f",
+        "date": "2025-09-02",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "bcdb4df9-c4d0-4b94-a4f8-0cb6bf8fdb1c",
+        "date": "2025-08-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "af73a5c5-c8af-4196-9445-93b53a509525",
+        "date": "2025-08-28",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "3de55919-3f85-4f16-af0c-2abe2918b90f",
+        "date": "2025-08-26",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "666822a9-e7ca-41eb-863d-670f0a0557cd",
+        "date": "2025-08-23",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "b3053a21-d27b-4c10-af45-8263ddac9af7",
+        "date": "2025-08-22",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "7689d059-d9f2-4bcd-8fbb-3362d778db26",
+        "date": "2025-08-21",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "c5098399-bd50-4c06-bab7-03cc54f22520",
+        "date": "2025-08-16",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "99948206-15a7-487b-b0d6-4d1df86e902d",
+        "date": "2025-08-14",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "8d84e6e0-cc62-459f-8eca-f52562c816e0",
+        "date": "2025-08-12",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "aef59655-71c1-492a-b84d-7d23ad7a6a61",
+        "date": "2025-08-11",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "e13fd593-e9d8-4cc7-ad6d-7c2b53500e2b",
+        "date": "2025-08-07",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "e544a0e3-719e-401b-a88e-4e0b4d5b8e29",
+        "date": "2025-08-06",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "c9de5842-9d6c-4e8e-8451-48b384f0f3d6",
+        "date": "2025-10-05",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "348907c1-f127-413e-9a5c-a975c68f8747",
+        "date": "2025-10-04",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "8612d936-b988-45e1-b672-0549dc9e3055",
+        "date": "2025-10-03",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "2be63f6e-545f-44b9-ac4a-94c7a3dd4e58",
+        "date": "2025-10-01",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "d73aed0c-00b4-42e4-bfff-0131215e1727",
+        "date": "2025-09-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "128146d7-58dd-48ed-b34b-28e892697258",
+        "date": "2025-09-27",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "b80aaca7-a693-46d6-8765-d3f6f440af5b",
+        "date": "2025-09-26",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "103873b4-d54c-46cf-9705-fdfc7cd101e4",
+        "date": "2025-09-24",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "e6e68a58-7275-4509-8e89-d0c830316e33",
+        "date": "2025-09-23",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "bb788880-4f98-401c-b08b-8f20368ce7bb",
+        "date": "2025-09-22",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "a99779f2-da85-4941-a91e-0d029ca042bc",
+        "date": "2025-09-21",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "85ff9f7b-7ce5-4c94-8102-d23a9912234d",
+        "date": "2025-09-20",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "56aeed22-de91-4f14-9422-602a8501fc94",
+        "date": "2025-09-19",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "906ae6ca-804a-4203-a93c-2bf6430f866c",
+        "date": "2025-09-17",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "2e56beb8-ae09-44f1-adb7-172110308a9e",
+        "date": "2025-09-16",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "08f3a0f6-498e-4d5f-b2fb-eea01da4d100",
+        "date": "2025-09-15",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "e3cbe175-311a-4fe1-815f-ecdb34a0e164",
+        "date": "2025-09-13",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "760cf84a-0027-4573-8c36-c56afc89dfec",
+        "date": "2025-09-12",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "8d00436d-82da-488d-a84c-e8f76863b2ea",
+        "date": "2025-09-11",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
+      },
+      {
+        "log_id": "90aea49a-2635-4c6d-9cd2-2586a6345635",
+        "date": "2025-09-18",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "quantity": 1,
+        "created_at": "2025-10-06 21:44:19.83434+00"
       }
     ],
     "emotions_logs": [
       {
-        "emotion_log_id": "emotion-log-ee8d16ec-aea2-46e8-83fe-103b4f78b8cc",
-        "date": "2024-01-06",
-        "user_id": "11111111-1111-4111-8111-111111111111",
+        "emotion_log_id": "5685bf4d-f002-494a-9336-0378032bb6f9",
+        "date": "2025-08-07",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
         "emotion_id": 1,
-        "created_at": "2024-01-06 08:30:00+00"
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "f88da34f-2934-49f4-965b-5618023c7174",
+        "date": "2025-08-08",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "1425973f-4a0c-43ed-9d63-891cf793f0c4",
+        "date": "2025-08-11",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "69b85e4a-417c-44c4-95d9-ec7b71ab5ea9",
+        "date": "2025-08-21",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "70ebb8aa-4efd-49b4-8221-56410a53e9c0",
+        "date": "2025-08-22",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "2bb68311-4ac8-4f7b-8c20-b74ef2753687",
+        "date": "2025-08-23",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "9f19bb16-e376-4b43-96fc-acc9ae7bef9d",
+        "date": "2025-08-25",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "17b156a9-7b0b-4e5f-80e7-e4e05e5e2841",
+        "date": "2025-09-02",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "3d4648aa-93b8-4b58-913c-ed679eae239c",
+        "date": "2025-09-05",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "54a105a4-0540-434c-83f4-5e16b9e18fe4",
+        "date": "2025-09-14",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "9d8f501c-e1ba-4404-890d-15d2bf0bc77e",
+        "date": "2025-09-15",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "1406f293-cf4a-4c78-baf4-152f6a3d86f8",
+        "date": "2025-09-24",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "71c7e272-ea3a-4eb8-bf9f-9b33cf9e0da2",
+        "date": "2025-09-26",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "ba45cd30-9391-434d-aeae-b2bdd37e941e",
+        "date": "2025-09-28",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "d91a7c10-3b86-4e89-b557-e850a2183d93",
+        "date": "2025-09-29",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "7087f0b4-f863-41ef-b158-d7ad8d4ad6ad",
+        "date": "2025-10-02",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "f294a45c-734a-44ca-9354-4ab04b9af14e",
+        "date": "2025-10-06",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 1,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "fa63cdf8-e060-49f6-bc67-750cd975375f",
+        "date": "2025-07-31",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "caa7b96d-cfd9-42cf-bbd1-41c3a963c1bf",
+        "date": "2025-08-10",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "6fabce25-1188-4b4c-baf9-6fab2a863244",
+        "date": "2025-08-12",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "22633847-36b4-49fb-8958-351a4ad45e28",
+        "date": "2025-08-14",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "ada922bc-9f4e-486c-a70f-611ad187c345",
+        "date": "2025-08-15",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "8cbc621a-ca08-43cb-bc79-3e15a60df120",
+        "date": "2025-08-16",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "38a82a8f-41b3-4ef5-98f4-62117c354f6c",
+        "date": "2025-08-17",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "b99ebf9e-6531-434f-bb70-7d3e6773c7f5",
+        "date": "2025-08-20",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "6ab726ee-8681-4a1a-a7e4-96a7f504bd96",
+        "date": "2025-09-07",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "1c46c09e-46f4-4af8-8c8a-420a8590979b",
+        "date": "2025-09-19",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "36e294b1-d27c-4980-9770-cc0ed80acd52",
+        "date": "2025-09-21",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "51b35208-140c-4ad0-932a-3d50d32f1d9e",
+        "date": "2025-09-27",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "41f0a551-439e-48b2-94c4-8bfc30bc87d9",
+        "date": "2025-10-03",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "b4b90a88-2973-4cf0-8767-812d6b537f91",
+        "date": "2025-10-04",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "43446780-d15e-4622-9ba0-d3ea268a765e",
+        "date": "2025-10-05",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 2,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "ff49412a-ce7a-4a50-b05a-4470bca3f1d5",
+        "date": "2025-07-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "eaaa41e4-5045-418f-8f8b-e6bd523673ba",
+        "date": "2025-08-06",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "eb2dba4d-af5b-46e0-b270-12b9e42e8b26",
+        "date": "2025-08-18",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "5dcc37f6-e9e8-4abc-a7c9-275f3ecda1cc",
+        "date": "2025-08-19",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "4140fffa-1e26-4703-9dab-79b32062a345",
+        "date": "2025-08-27",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "1dbab671-0e6d-4f97-95a1-61293a68075d",
+        "date": "2025-08-29",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "d535a89b-057c-45ea-9fa2-8eed29f238a1",
+        "date": "2025-08-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "cb54f6a1-fad3-43de-82b3-6785f40bad76",
+        "date": "2025-09-06",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "cf82556c-f836-4d13-b714-e638f2174f11",
+        "date": "2025-09-09",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "cf5976de-d76b-46bb-9008-baf7d3c3bde4",
+        "date": "2025-09-10",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "33a355ad-50e4-44f8-8be1-01bfdad728b7",
+        "date": "2025-09-20",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "fd95b50b-57f2-4230-9dfa-b24ecd4cb655",
+        "date": "2025-09-30",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "e247cffa-6fee-4087-8758-ba6219986702",
+        "date": "2025-10-01",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 3,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "55aeb751-ba0c-42d9-884c-8d6f423be2e5",
+        "date": "2025-09-04",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 5,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "4ed8d52a-773e-4e0a-854d-5353f8d0e044",
+        "date": "2025-09-08",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 5,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "2ccb4097-2ca9-43be-a119-d75d91545a53",
+        "date": "2025-09-13",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 5,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "b80f3b76-6569-4c84-86aa-1cd68beb65e4",
+        "date": "2025-09-23",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 5,
+        "created_at": "2025-10-06 21:58:09.489889+00"
+      },
+      {
+        "emotion_log_id": "d9e80b94-729a-422e-946d-f0f37b9633e7",
+        "date": "2025-08-26",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "emotion_id": 6,
+        "created_at": "2025-10-06 21:58:09.489889+00"
       }
     ],
     "onboarding_answers": [
       {
-        "onboarding_answers_id": "onboarding-answer-627cb7e4-1756-4049-a5c2-4080d515883e",
-        "onboarding_session_id": "44444444-4444-4444-8444-444444444444",
+        "onboarding_answers_id": "9eb53698-9356-478d-86ca-08603d5258cf",
+        "onboarding_session_id": "8b511862-1977-428e-bebc-c034dcf8718b",
         "payload": {
-          "energy_baseline": "steady",
-          "availability": "weekdays_mornings"
+          "ts": "2025-10-13T15:38:12.120Z",
+          "xp": {
+            "Body": 39,
+            "Mind": 39,
+            "Soul": 39,
+            "total": 117
+          },
+          "data": {
+            "low": {
+              "body": [],
+              "mind": [],
+              "note": "",
+              "soul": []
+            },
+            "flow": {
+              "goal": "",
+              "imped": []
+            },
+            "chill": {
+              "motiv": [],
+              "oneThing": ""
+            },
+            "evolve": {
+              "att": "Me cuesta mantener constancia pero quiero intentar",
+              "goal": "Migrar correctamente mi MVP a un producto digital",
+              "trade": [
+                "Mis rutinas de descanso",
+                "Mi tiempo libre",
+                "Mis creencias y bloqueos mentales"
+              ]
+            },
+            "foundations": {
+              "body": [
+                "🏃‍♂️ Actividad física regular (Energía)",
+                "😴 Dormir y descansar mejor (Sueño)",
+                "💺 Mejorar tu postura y ergonomía (Postura)",
+                "🥗 Alimentación saludable (Nutrición)",
+                "🌅 Sentirte con más energía y vitalidad al despertar (Vitalidad)"
+              ],
+              "mind": [
+                "🎯 Mejorar tu enfoque y productividad diaria (Enfoque)",
+                "📚 Aprender cosas nuevas o estudiar mejor (Aprendizaje)",
+                "🎨 Desarrollar tu creatividad e ideas nuevas (Creatividad)",
+                "🧠 Regular tus emociones y reacciones (Autocontrol)",
+                "🚀 Desarrollarte profesionalmente o avanzar en tu carrera (Proyección)"
+              ],
+              "soul": [
+                "🤝 Fortalecer relaciones y vínculos personales (Conexión)",
+                "🎯 Definir tu propósito y dirección en la vida (Propósito)",
+                "🔍 Conocerte más profundamente (Insight)",
+                "🎉 Jugar, reír y divertirte sin culpa (Gozo)",
+                "🪞 Trabajar tu autoestima y hablarte con más amabilidad (Autoestima)"
+              ],
+              "bodyOpen": "",
+              "mindOpen": "",
+              "soulOpen": ""
+            }
+          },
+          "meta": {
+            "tz": "Europe/Madrid",
+            "lang": "en-gb",
+            "device": "mobile",
+            "user_id": "user_3418cENuuj6ad96ciTqKsobDq4t",
+            "version": "forms-intro-react"
+          },
+          "mode": "EVOLVE",
+          "email": "ramagpt23@gmail.com",
+          "client_id": "e1dc2d6d-1455-4523-99e6-e73e58a8730a"
         },
         "version": "v1",
-        "created_at": "2024-01-02 12:00:00+00"
+        "created_at": "2025-10-13 15:38:13.988266+00"
       }
     ],
     "onboarding_foundations": [
       {
-        "onboarding_foundations_id": "onboarding-foundation-7cb0496a-292d-4848-ae8d-11bab3693576",
-        "onboarding_session_id": "44444444-4444-4444-8444-444444444444",
+        "onboarding_foundations_id": "a2059b57-1175-4717-b308-cd990cf7cc4b",
+        "onboarding_session_id": "8b511862-1977-428e-bebc-c034dcf8718b",
         "pillar_id": 1,
         "items": [
-          "journal",
-          "hydrate"
+          "🏃‍♂️ Actividad física regular (Energía)",
+          "😴 Dormir y descansar mejor (Sueño)",
+          "💺 Mejorar tu postura y ergonomía (Postura)",
+          "🥗 Alimentación saludable (Nutrición)",
+          "🌅 Sentirte con más energía y vitalidad al despertar (Vitalidad)"
         ],
-        "open_text": "Focus on gentle routines to regain confidence."
+        "open_text": ""
+      },
+      {
+        "onboarding_foundations_id": "06c29476-abc8-494f-a58c-0d62d58e011b",
+        "onboarding_session_id": "8b511862-1977-428e-bebc-c034dcf8718b",
+        "pillar_id": 2,
+        "items": [
+          "🎯 Mejorar tu enfoque y productividad diaria (Enfoque)",
+          "📚 Aprender cosas nuevas o estudiar mejor (Aprendizaje)",
+          "🎨 Desarrollar tu creatividad e ideas nuevas (Creatividad)",
+          "🧠 Regular tus emociones y reacciones (Autocontrol)",
+          "🚀 Desarrollarte profesionalmente o avanzar en tu carrera (Proyección)"
+        ],
+        "open_text": ""
+      },
+      {
+        "onboarding_foundations_id": "f9772cc9-95e3-44f3-a235-6b312709e021",
+        "onboarding_session_id": "8b511862-1977-428e-bebc-c034dcf8718b",
+        "pillar_id": 3,
+        "items": [
+          "🤝 Fortalecer relaciones y vínculos personales (Conexión)",
+          "🎯 Definir tu propósito y dirección en la vida (Propósito)",
+          "🔍 Conocerte más profundamente (Insight)",
+          "🎉 Jugar, reír y divertirte sin culpa (Gozo)",
+          "🪞 Trabajar tu autoestima y hablarte con más amabilidad (Autoestima)"
+        ],
+        "open_text": ""
       }
     ],
     "onboarding_session": [
       {
-        "onboarding_session_id": "44444444-4444-4444-8444-444444444444",
-        "user_id": "11111111-1111-4111-8111-111111111111",
-        "client_id": "web-demo",
-        "game_mode_id": 1,
-        "xp_total": 0,
-        "xp_body": 0,
-        "xp_mind": 0,
-        "xp_soul": 0,
-        "email": "demo.low@example.com",
+        "onboarding_session_id": "8b511862-1977-428e-bebc-c034dcf8718b",
+        "user_id": "c299a7d2-a05c-4106-8b41-6cd1dc49e297",
+        "client_id": "e1dc2d6d-1455-4523-99e6-e73e58a8730a",
+        "game_mode_id": 4,
+        "xp_total": 117,
+        "xp_body": 39,
+        "xp_mind": 39,
+        "xp_soul": 39,
+        "email": "ramagpt23@gmail.com",
         "meta": {
-          "entry_point": "bypass",
-          "language": "en"
+          "tz": "Europe/Madrid",
+          "lang": "en-gb",
+          "device": "mobile",
+          "user_id": "user_3418cENuuj6ad96ciTqKsobDq4t",
+          "version": "forms-intro-react"
         },
-        "created_at": "2024-01-02 11:00:00+00",
-        "updated_at": "2024-01-02 11:00:00+00"
-      },
-      {
-        "onboarding_session_id": "55555555-5555-4555-8555-555555555555",
-        "user_id": "22222222-2222-4222-8222-222222222222",
-        "client_id": "web-demo",
-        "game_mode_id": 2,
-        "xp_total": 0,
-        "xp_body": 0,
-        "xp_mind": 0,
-        "xp_soul": 0,
-        "email": "demo.chill@example.com",
-        "meta": {
-          "entry_point": "bypass",
-          "language": "es"
-        },
-        "created_at": "2024-02-10 15:30:00+00",
-        "updated_at": "2024-02-10 15:30:00+00"
-      },
-      {
-        "onboarding_session_id": "66666666-6666-4666-8666-666666666666",
-        "user_id": "33333333-3333-4333-8333-333333333333",
-        "client_id": "mobile-demo",
-        "game_mode_id": 3,
-        "xp_total": 12,
-        "xp_body": 4,
-        "xp_mind": 4,
-        "xp_soul": 4,
-        "email": "demo.flow@example.com",
-        "meta": {
-          "entry_point": "mobile",
-          "language": "en"
-        },
-        "created_at": "2024-03-05 09:45:00+00",
-        "updated_at": "2024-03-05 09:45:00+00"
+        "created_at": "2025-10-13 15:38:13.988266+00",
+        "updated_at": "2025-10-13 15:38:13.988266+00"
       }
     ],
     "tasks": [
       {
-        "task_id": "77777777-7777-4777-8777-777777777777",
-        "user_id": "11111111-1111-4111-8111-111111111111",
-        "tasks_group_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-        "task": "Take a five-minute breathing break after breakfast.",
+        "task_id": "da3b649b-4612-46be-b39b-f4cfafea45b8",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Cocinar una receta nueva",
         "pillar_id": 2,
         "trait_id": 13,
         "difficulty_id": 1,
         "xp_base": 1,
         "active": true,
-        "created_at": "2024-01-06 08:00:00+00",
-        "updated_at": "2024-01-06 08:00:00+00"
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
       },
       {
-        "task_id": "88888888-8888-4888-8888-888888888888",
-        "user_id": "22222222-2222-4222-8222-222222222222",
-        "tasks_group_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
-        "task": "Schedule a mid-week stretch session.",
+        "task_id": "7a79000d-b7aa-443e-80c1-aca02cbfb581",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Hablar con un amig@ para saber cómo está",
+        "pillar_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "0da92dd2-4821-4e33-8f5e-be2b569cd6cf",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Jugar juegos de mesa",
+        "pillar_id": 3,
+        "trait_id": 29,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "d277d4e5-28bc-4d56-839a-3482ae90a2aa",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Leer 10 o + paginas de un libro de conocimiento",
+        "pillar_id": 2,
+        "trait_id": 12,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "812d7b9e-e864-4d62-8dbc-b36084950d6a",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Planificar gastos del mes",
+        "pillar_id": 2,
+        "trait_id": 18,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "24955b7c-882e-49bb-8a77-2ccc8cd1846d",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Dormir 8hs",
+        "pillar_id": 1,
+        "trait_id": 3,
+        "difficulty_id": 3,
+        "xp_base": 7,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "c2ea433c-d8fa-40ab-a9a2-6ad5f6ed9687",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Hablar con flia (P&P) para saber cómo está",
+        "pillar_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 3,
+        "xp_base": 7,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "d3a4a215-dac6-43ba-8719-58f1205505cb",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Revisar gastos del día",
+        "pillar_id": 2,
+        "trait_id": 15,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "ff6c11b5-1ccc-4489-9588-ae43b4a8c644",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Pintar",
+        "pillar_id": 3,
+        "trait_id": 26,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "4f8887e5-f585-4cfa-aef1-9a23ae984642",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "60` de proyectos on going",
+        "pillar_id": 2,
+        "trait_id": 18,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "95e42db8-5f62-4e1a-a912-3222cdc178d5",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Disfrutar hacer algo juntos",
+        "pillar_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "862257d0-5145-451d-b6da-3d7aafde1a8b",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "2L de agua",
+        "pillar_id": 1,
+        "trait_id": 5,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "5774fb7b-22cb-4c81-bcf2-af0954e9a5ab",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "‍️‍️10.000 pasos / Correr",
+        "pillar_id": 1,
+        "trait_id": 9,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "73259489-f35d-48b3-887a-d421a9ab8fcb",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Aprender sobre la historia de un lugar",
+        "pillar_id": 2,
+        "trait_id": 12,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "e1197b9b-55ef-44f8-b8f9-39a94ca0b5db",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Hacer algo fuera de la ZDC",
+        "pillar_id": 3,
+        "trait_id": 26,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "76631e86-53d4-4b39-8248-0efd86cc4b92",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Pasar tiempo con amigos",
+        "pillar_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "6a0f339f-0bf5-4d68-9f8f-d7e7bad7836a",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Gasto diario\u003C= 34 €",
+        "pillar_id": 2,
+        "trait_id": 15,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "7b229be0-9098-47a3-a6cb-60b15554d42a",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "20` Sin pantallas antes de dormir",
+        "pillar_id": 1,
+        "trait_id": 4,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "3e646e50-ee87-4c21-bde3-4a67a672d6f2",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Hacer ejercicios de estiramiento y movilidad",
+        "pillar_id": 1,
+        "trait_id": 9,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "cccf28d0-9df6-40d8-9fc2-9fa5f10f98ba",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "No dulces",
         "pillar_id": 1,
         "trait_id": 2,
         "difficulty_id": 2,
         "xp_base": 3,
         "active": true,
-        "created_at": "2024-02-12 18:15:00+00",
-        "updated_at": "2024-02-12 18:15:00+00"
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
       },
       {
-        "task_id": "99999999-9999-4999-8999-999999999999",
-        "user_id": "33333333-3333-4333-8333-333333333333",
-        "tasks_group_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
-        "task": "Design a weekend activity that combines body and mind pillars.",
+        "task_id": "bad35eaa-e4fa-442a-844d-ee03a9161c24",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Cena antes de las 22hs",
+        "pillar_id": 1,
+        "trait_id": 2,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "e6049f2b-410b-45f0-8123-5ac4d68fda9a",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "‍️‍️gym",
+        "pillar_id": 1,
+        "trait_id": 1,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "8b66a57d-5a9e-4568-b2ef-73124e4f2c10",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Ver un documental",
+        "pillar_id": 2,
+        "trait_id": 12,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "ef9b9016-3ab5-4e50-994c-030f2495b263",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Ayuno hasta las 14hs",
+        "pillar_id": 1,
+        "trait_id": 2,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "1e710e42-9957-4b05-ae96-8462cc49dc9e",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Contestar todos los chats pendientes",
         "pillar_id": 3,
-        "trait_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "55389207-da58-43fb-8011-1edde2b19b09",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Invertir en activos",
+        "pillar_id": 2,
+        "trait_id": 14,
         "difficulty_id": 3,
         "xp_base": 7,
         "active": true,
-        "created_at": "2024-03-07 07:45:00+00",
-        "updated_at": "2024-03-07 07:45:00+00"
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "4281ca3c-0fca-4297-ad35-270b92115b80",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Videollamada con la flia",
+        "pillar_id": 3,
+        "trait_id": 21,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "5f223292-fbeb-4d53-b597-445f09f5027f",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Visitar un lugar nuevo",
+        "pillar_id": 3,
+        "trait_id": 29,
+        "difficulty_id": 3,
+        "xp_base": 7,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "b6bb17fc-7ba0-4b31-9efc-534181c7a755",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Hablar en inglés",
+        "pillar_id": 2,
+        "trait_id": 12,
+        "difficulty_id": 2,
+        "xp_base": 3,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
+      },
+      {
+        "task_id": "fdcbe03e-00ec-40bb-94eb-5269fbe65742",
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "task": "Tiempo sin pantallas cumplido",
+        "pillar_id": 1,
+        "trait_id": 4,
+        "difficulty_id": 1,
+        "xp_base": 1,
+        "active": true,
+        "created_at": "2025-10-06 21:37:03.581561+00",
+        "updated_at": "2025-10-06 21:37:03.581561+00"
       }
     ],
     "users": [
       {
-        "user_id": "11111111-1111-4111-8111-111111111111",
-        "clerk_user_id": "clerk_demo_low",
-        "email_primary": "demo.low@example.com",
-        "full_name": "Demo Low Momentum",
-        "image_url": "https://img.innerbloom.local/demo-low.png",
-        "game_mode_id": 1,
-        "timezone": "America/New_York",
-        "tasks_group_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-        "first_date_log": "2024-01-06",
+        "user_id": "c299a7d2-a05c-4106-8b41-6cd1dc49e297",
+        "clerk_user_id": "user_3418cENuuj6ad96ciTqKsobDq4t",
+        "email_primary": "ramagpt23@gmail.com",
+        "full_name": "Rama Ramita",
+        "image_url": "/Evolve-Mood.jpg",
+        "game_mode_id": 4,
+        "timezone": "UTC",
+        "tasks_group_id": "0de0eec2-69e8-4b40-b257-28689de17381",
+        "first_date_log": null,
         "scheduler_enabled": false,
-        "created_at": "2024-01-01 08:00:00+00",
-        "updated_at": "2024-01-06 08:00:00+00",
+        "created_at": "2025-10-13 15:36:35.302124+00",
+        "updated_at": "2025-10-13 15:36:35.302124+00",
+        "user_profile": null,
+        "channel_scheduler": "email",
+        "hour_scheduler": null,
+        "status_scheduler": "PAUSED",
+        "last_sent_local_date_scheduler": null,
+        "first_programmed": false,
+        "first_tasks_confirmed": false,
+        "email": "ramagpt23@gmail.com",
+        "first_name": "Rama",
+        "last_name": "Ramita",
+        "avatar_url": "/Evolve-Mood.jpg",
+        "deleted_at": null
+      },
+      {
+        "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
+        "clerk_user_id": "user_33a7i1Axe2UpuzuEBitjPFDhbE3",
+        "email_primary": "rfullivarri22@gmail.com",
+        "full_name": "Ramiro Fernandez",
+        "image_url": "https://i.ibb.co/4RRnX20q/Avatar1.jpg",
+        "game_mode_id": 3,
+        "timezone": "Europe/Madrid",
+        "tasks_group_id": "34cb4c76-a37c-4b46-affd-42777dfcf567",
+        "first_date_log": "2025-07-14",
+        "scheduler_enabled": false,
+        "created_at": "2025-10-06 19:24:00.237698+00",
+        "updated_at": "2025-10-06 19:24:00.237698+00",
         "user_profile": null,
         "channel_scheduler": "email",
         "hour_scheduler": null,
@@ -2516,78 +4009,69 @@
         "last_sent_local_date_scheduler": null,
         "first_programmed": true,
         "first_tasks_confirmed": true,
-        "email": "demo.low@example.com",
-        "first_name": "Demo",
-        "last_name": "Momentum",
-        "avatar_url": "https://img.innerbloom.local/demo-low.png",
-        "deleted_at": null
-      },
-      {
-        "user_id": "22222222-2222-4222-8222-222222222222",
-        "clerk_user_id": "clerk_demo_chill",
-        "email_primary": "demo.chill@example.com",
-        "full_name": "Demo Chill Momentum",
-        "image_url": "https://img.innerbloom.local/demo-chill.png",
-        "game_mode_id": 2,
-        "timezone": "Europe/Madrid",
-        "tasks_group_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
-        "first_date_log": "2024-02-12",
-        "scheduler_enabled": true,
-        "created_at": "2024-02-01 10:30:00+00",
-        "updated_at": "2024-02-12 18:15:00+00",
-        "user_profile": "Explorer",
-        "channel_scheduler": "email",
-        "hour_scheduler": "2024-02-12 07:30:00+00",
-        "status_scheduler": "RUNNING",
-        "last_sent_local_date_scheduler": "2024-02-11",
-        "first_programmed": true,
-        "first_tasks_confirmed": true,
-        "email": "demo.chill@example.com",
-        "first_name": "Demo",
-        "last_name": "Chill",
-        "avatar_url": "https://img.innerbloom.local/demo-chill.png",
-        "deleted_at": null
-      },
-      {
-        "user_id": "33333333-3333-4333-8333-333333333333",
-        "clerk_user_id": "clerk_demo_flow",
-        "email_primary": "demo.flow@example.com",
-        "full_name": "Demo Flow Momentum",
-        "image_url": "https://img.innerbloom.local/demo-flow.png",
-        "game_mode_id": 3,
-        "timezone": "America/Los_Angeles",
-        "tasks_group_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
-        "first_date_log": "2024-03-07",
-        "scheduler_enabled": true,
-        "created_at": "2024-03-01 07:45:00+00",
-        "updated_at": "2024-03-07 07:45:00+00",
-        "user_profile": "Strategist",
-        "channel_scheduler": "push",
-        "hour_scheduler": "2024-03-07 14:00:00+00",
-        "status_scheduler": "RUNNING",
-        "last_sent_local_date_scheduler": "2024-03-06",
-        "first_programmed": true,
-        "first_tasks_confirmed": true,
-        "email": "demo.flow@example.com",
-        "first_name": "Demo",
-        "last_name": "Flow",
-        "avatar_url": "https://img.innerbloom.local/demo-flow.png",
+        "email": null,
+        "first_name": null,
+        "last_name": null,
+        "avatar_url": null,
         "deleted_at": null
       }
     ],
     "xp_bonus": [
       {
-        "xp_bonus_id": "xp-bonus-74bcd9bb-a084-4819-ae3a-eb44aa0c004b",
-        "user_id": "33333333-3333-4333-8333-333333333333",
+        "xp_bonus_id": "b3186ef7-75f1-44ed-952e-eed0c49a8a8d",
+        "user_id": "c299a7d2-a05c-4106-8b41-6cd1dc49e297",
         "pillar_id": 1,
-        "source": "onboarding_completion",
-        "amount": 10,
+        "source": "onboarding",
+        "amount": 39,
         "meta": {
-          "note": "Awarded after completing onboarding foundations."
+          "ts": "2025-10-13T15:38:12.120Z",
+          "tz": "Europe/Madrid",
+          "lang": "en-gb",
+          "device": "mobile",
+          "user_id": "user_3418cENuuj6ad96ciTqKsobDq4t",
+          "version": "forms-intro-react",
+          "client_id": "e1dc2d6d-1455-4523-99e6-e73e58a8730a",
+          "onboarding_session_id": "8b511862-1977-428e-bebc-c034dcf8718b"
         },
-        "created_at": "2024-03-08 09:00:00+00"
+        "created_at": "2025-10-13 15:38:13.988266+00"
+      },
+      {
+        "xp_bonus_id": "eab60c87-6ab1-4676-8c8b-47e2e340bd7e",
+        "user_id": "c299a7d2-a05c-4106-8b41-6cd1dc49e297",
+        "pillar_id": 2,
+        "source": "onboarding",
+        "amount": 39,
+        "meta": {
+          "ts": "2025-10-13T15:38:12.120Z",
+          "tz": "Europe/Madrid",
+          "lang": "en-gb",
+          "device": "mobile",
+          "user_id": "user_3418cENuuj6ad96ciTqKsobDq4t",
+          "version": "forms-intro-react",
+          "client_id": "e1dc2d6d-1455-4523-99e6-e73e58a8730a",
+          "onboarding_session_id": "8b511862-1977-428e-bebc-c034dcf8718b"
+        },
+        "created_at": "2025-10-13 15:38:13.988266+00"
+      },
+      {
+        "xp_bonus_id": "dc8cf4b1-56d9-4c7d-90fb-c0f9aa564f21",
+        "user_id": "c299a7d2-a05c-4106-8b41-6cd1dc49e297",
+        "pillar_id": 3,
+        "source": "onboarding",
+        "amount": 39,
+        "meta": {
+          "ts": "2025-10-13T15:38:12.120Z",
+          "tz": "Europe/Madrid",
+          "lang": "en-gb",
+          "device": "mobile",
+          "user_id": "user_3418cENuuj6ad96ciTqKsobDq4t",
+          "version": "forms-intro-react",
+          "client_id": "e1dc2d6d-1455-4523-99e6-e73e58a8730a",
+          "onboarding_session_id": "8b511862-1977-428e-bebc-c034dcf8718b"
+        },
+        "created_at": "2025-10-13 15:38:13.988266+00"
       }
     ]
   },
-  "generated_at": "2025-10-16T09:28:25.075Z"
+  "generated_at": "2025-10-16T21:06:47.212Z"
 }
