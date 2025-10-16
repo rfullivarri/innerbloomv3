@@ -1,4 +1,5 @@
 import request from 'supertest';
+import path from 'node:path';
 import { EventEmitter } from 'node:events';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -20,6 +21,61 @@ afterEach(() => {
   delete process.env.ADMIN_TRIGGER_TOKEN;
   delete process.env.ENABLE_TASKGEN_TRIGGER;
   spawnMock.mockReset();
+});
+
+describe('getCliContext path resolution', () => {
+  afterEach(() => {
+    vi.resetModules();
+    vi.doUnmock('node:fs');
+  });
+
+  function normalise(candidate: string): string {
+    return candidate.split(path.sep).join('/');
+  }
+
+  it('prefers API-rooted bundles when the package is deployed as the filesystem root', async () => {
+    const existsSync = vi.fn((candidate: string) => {
+      const normalised = normalise(candidate);
+      return (
+        normalised.endsWith('/dist/taskgen/generateTasks.ts') && !normalised.includes('/apps/api/dist/taskgen')
+      );
+    });
+
+    vi.doMock('node:fs', () => ({
+      existsSync,
+    }));
+
+    const { __test } = await import('./taskgen-bypass.js');
+    __test.resetCliContextCache();
+
+    const context = __test.getCliContext();
+
+    expect(context.scriptPath.split(path.sep).join('/')).toContain('/dist/taskgen/generateTasks.ts');
+    expect(context.scriptPath.split(path.sep).join('/')).not.toContain('/apps/api/dist/taskgen');
+    expect(existsSync).toHaveBeenCalled();
+  });
+
+  it('falls back to monorepo paths when bundle-relative files do not exist', async () => {
+    const existsSync = vi.fn((candidate: string) => {
+      const normalised = normalise(candidate);
+      if (normalised.includes('/dist/taskgen/generateTasks.ts')) {
+        return false;
+      }
+      return normalised.endsWith('/apps/api/scripts/generateTasks.ts');
+    });
+
+    vi.doMock('node:fs', () => ({
+      existsSync,
+    }));
+
+    const { __test } = await import('./taskgen-bypass.js');
+    __test.resetCliContextCache();
+
+    const context = __test.getCliContext();
+
+    expect(context.scriptPath.split(path.sep).join('/')).toContain('/apps/api/scripts/generateTasks.ts');
+    expect(existsSync).toHaveBeenCalled();
+  });
 });
 
 describe('GET /api/taskgen/dry-run/:user_id', () => {
