@@ -17,7 +17,7 @@ process.env.TASKGEN_PROMPTS_PATH = PROMPT_TEST_DIR;
 vi.mock('openai', () => {
   class OpenAI {
     responses = { create: mockResponsesCreate };
-    constructor(_: unknown) {
+    constructor() {
       // no-op
     }
   }
