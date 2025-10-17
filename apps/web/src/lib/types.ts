@@ -67,13 +67,52 @@ export type AdminTaskSummaryRow = {
   state: 'red' | 'yellow' | 'green';
 };
 
-export type TaskgenTraceEvent = {
-  at: string;
-  level: 'info' | 'warn' | 'error';
-  event: string;
-  correlationId: string;
+export type TaskgenJob = {
+  id: string;
   userId: string;
-  mode?: string | null;
-  origin?: string | null;
-  data?: Record<string, unknown> | null;
+  userEmail: string | null;
+  mode: string | null;
+  status: string;
+  tasksInserted: number | null;
+  errorCode: string | null;
+  createdAt: string;
+  startedAt: string | null;
+  completedAt: string | null;
+  correlationId: string | null;
+  durationMs: number | null;
+};
+
+export type TaskgenJobsSummary = {
+  total: number;
+  successRate: number;
+  errorCounts: Record<string, number>;
+  averageDurationMs: number | null;
+  p95DurationMs: number | null;
+};
+
+export type TaskgenJobsResponse = {
+  items: TaskgenJob[];
+  total: number;
+  hasMore: boolean;
+  summary: TaskgenJobsSummary;
+};
+
+export type TaskgenJobLog = {
+  id: string;
+  jobId: string;
+  createdAt: string;
+  level: string;
+  event: string;
+  data: unknown | null;
+};
+
+export type TaskgenUserOverview = {
+  userId: string;
+  userEmail: string | null;
+  totalJobs: number;
+  successRate: number;
+  lastJobStatus: string | null;
+  lastJobCreatedAt: string | null;
+  lastTaskInsertedAt: string | null;
+  latestJob: TaskgenJob | null;
 };

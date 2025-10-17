@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import { AdminLayout } from '../../components/admin/AdminLayout';
+import { AdminShell } from '../../components/admin/AdminShell';
 import { verifyAdminAccess } from '../../lib/adminApi';
 
 export default function AdminRoute() {
@@ -54,5 +54,5 @@ export default function AdminRoute() {
     return <Navigate to="/" replace />;
   }
 
-  return <AdminLayout />;
+  return <AdminShell />;
 }

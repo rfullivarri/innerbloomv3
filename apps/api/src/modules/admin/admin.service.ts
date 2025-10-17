@@ -2,6 +2,7 @@ import { pool } from '../../db.js';
 import { buildLevelSummary } from '../../controllers/users/level-summary.js';
 import type { LevelThreshold } from '../../controllers/users/types.js';
 import { HttpError } from '../../lib/http-error.js';
+import { triggerTaskGenerationForUser } from '../../services/taskgenTriggerService.js';
 import {
   type InsightQuery,
   type ListUsersQuery,
@@ -9,6 +10,8 @@ import {
   type TaskStatsQuery,
   type TasksQuery,
   type UpdateTaskBody,
+  type TaskgenJobsQuery,
+  type TaskgenForceRunBody,
 } from './admin.schemas.js';
 
 type AdminUserListItem = {
@@ -80,6 +83,56 @@ type AdminTaskStat = {
   state: 'red' | 'yellow' | 'green';
 };
 
+type TaskgenJobListItem = {
+  id: string;
+  userId: string;
+  userEmail: string | null;
+  mode: string | null;
+  status: string;
+  tasksInserted: number | null;
+  errorCode: string | null;
+  createdAt: string;
+  startedAt: string | null;
+  completedAt: string | null;
+  correlationId: string | null;
+  durationMs: number | null;
+};
+
+type TaskgenJobsSummary = {
+  total: number;
+  successRate: number;
+  errorCounts: Record<string, number>;
+  averageDurationMs: number | null;
+  p95DurationMs: number | null;
+};
+
+type TaskgenJobsResult = {
+  items: TaskgenJobListItem[];
+  total: number;
+  hasMore: boolean;
+  summary: TaskgenJobsSummary;
+};
+
+type TaskgenJobLog = {
+  id: string;
+  jobId: string;
+  createdAt: string;
+  level: string;
+  event: string;
+  data: unknown | null;
+};
+
+type TaskgenUserOverviewResult = {
+  userId: string;
+  userEmail: string | null;
+  totalJobs: number;
+  successRate: number;
+  lastJobStatus: string | null;
+  lastJobCreatedAt: string | null;
+  lastTaskInsertedAt: string | null;
+  latestJob: TaskgenJobListItem | null;
+};
+
 type PaginatedResult<T> = {
   items: T[];
   page: number;
@@ -121,6 +174,49 @@ type PillarAggregateRow = {
 type EmotionRow = {
   date: string | Date;
   emotion: string | null;
+};
+
+type TaskgenJobRow = {
+  id: string;
+  user_id: string;
+  user_email: string | null;
+  mode: string | null;
+  status: string | null;
+  tasks_inserted: number | string | null;
+  error_code: string | null;
+  created_at: string | Date;
+  started_at: string | Date | null;
+  completed_at: string | Date | null;
+  correlation_id: string | null;
+  duration_ms: number | string | null;
+};
+
+type TaskgenJobLogRow = {
+  id: string;
+  job_id: string;
+  created_at: string | Date;
+  level: string | null;
+  event: string | null;
+  data: unknown;
+};
+
+type TaskgenErrorCountRow = {
+  error_code: string | null;
+  count: string | number | null;
+};
+
+type TaskgenSummaryRow = {
+  total: string | number | null;
+  completed: string | number | null;
+  average_duration_ms: string | number | null;
+  p95_duration_ms: string | number | null;
+};
+
+type TaskgenUserSummaryRow = {
+  total_jobs: string | number | null;
+  completed_jobs: string | number | null;
+  last_job_created_at: string | Date | null;
+  last_task_inserted_at: string | Date | null;
 };
 
 type LogQueryRow = {
@@ -169,6 +265,8 @@ type TaskStatsRow = {
 
 const PILLAR_KEYS = ['body', 'mind', 'soul'] as const;
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function toNumber(value: unknown): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -185,6 +283,82 @@ function formatDate(value: string | Date): string {
   }
 
   return date.toISOString();
+}
+
+function isUuid(value: string): boolean {
+  return UUID_REGEX.test(value);
+}
+
+function mapTaskgenJobRow(row: TaskgenJobRow): TaskgenJobListItem {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    userEmail: row.user_email ?? null,
+    mode: row.mode ? String(row.mode).toUpperCase() : null,
+    status: row.status ? String(row.status).toUpperCase() : 'UNKNOWN',
+    tasksInserted:
+      row.tasks_inserted === null || row.tasks_inserted === undefined
+        ? null
+        : Number(row.tasks_inserted),
+    errorCode: row.error_code ?? null,
+    createdAt: formatDate(row.created_at),
+    startedAt: row.started_at ? formatDate(row.started_at) : null,
+    completedAt: row.completed_at ? formatDate(row.completed_at) : null,
+    correlationId: row.correlation_id ?? null,
+    durationMs:
+      row.duration_ms === null || row.duration_ms === undefined
+        ? null
+        : Number(row.duration_ms),
+  };
+}
+
+function buildTaskgenWhereClause(query: TaskgenJobsQuery): { clause: string; values: unknown[] } {
+  const { status, mode, user, from, to } = query;
+  const conditions: string[] = [];
+  const values: unknown[] = [];
+
+  if (status) {
+    values.push(status.toUpperCase());
+    conditions.push(`UPPER(j.status) = $${values.length}`);
+  }
+
+  if (mode) {
+    values.push(mode.toUpperCase());
+    conditions.push(`UPPER(j.mode) = $${values.length}`);
+  }
+
+  if (user) {
+    const trimmed = user.trim();
+    if (isUuid(trimmed)) {
+      values.push(trimmed);
+      conditions.push(`j.user_id = $${values.length}`);
+    } else {
+      values.push(`%${trimmed}%`);
+      const placeholder = `$${values.length}`;
+      conditions.push(
+        `(COALESCE(u.email_primary, '') ILIKE ${placeholder} OR COALESCE(u.full_name, '') ILIKE ${placeholder})`,
+      );
+    }
+  }
+
+  if (from) {
+    values.push(from);
+    conditions.push(`j.created_at >= $${values.length}`);
+  }
+
+  if (to) {
+    values.push(to);
+    conditions.push(`j.created_at <= $${values.length}`);
+  }
+
+  return { clause: conditions.length ? `WHERE ${conditions.join(' AND ')}` : '', values };
+}
+
+function getUtcDayBounds(): { from: string; to: string } {
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1);
+  return { from: start.toISOString(), to: end.toISOString() };
 }
 
 function formatDateOnly(value: string | Date): string {
@@ -1002,6 +1176,213 @@ export async function getUserTasks(
     pageSize: items.length || 1,
     total: items.length,
   };
+}
+
+export async function listTaskgenJobs(query: TaskgenJobsQuery): Promise<TaskgenJobsResult> {
+  const limit = Math.min(Math.max(query.limit ?? 50, 1), 1_000);
+  const baseFilters = buildTaskgenWhereClause(query);
+
+  const listSql = `
+    SELECT
+      j.id,
+      j.user_id,
+      u.email_primary AS user_email,
+      j.mode,
+      j.status,
+      j.tasks_inserted,
+      j.error_code,
+      j.created_at,
+      j.started_at,
+      j.completed_at,
+      j.correlation_id,
+      EXTRACT(EPOCH FROM (j.completed_at - j.started_at)) * 1000 AS duration_ms
+    FROM taskgen_jobs j
+    LEFT JOIN users u ON u.user_id = j.user_id
+    ${baseFilters.clause}
+    ORDER BY j.created_at DESC
+    LIMIT $${baseFilters.values.length + 1}
+  `;
+
+  const listResult = await pool.query<TaskgenJobRow>(listSql, [...baseFilters.values, limit]);
+  const items = listResult.rows.map(mapTaskgenJobRow);
+
+  const countSql = `
+    SELECT COUNT(*) AS count
+    FROM taskgen_jobs j
+    LEFT JOIN users u ON u.user_id = j.user_id
+    ${baseFilters.clause}
+  `;
+  const countResult = await pool.query<{ count: string | number | null }>(countSql, baseFilters.values);
+  const total = Number(countResult.rows[0]?.count ?? 0);
+
+  const { from: defaultFrom, to: defaultTo } = getUtcDayBounds();
+  const summaryFilters = buildTaskgenWhereClause({
+    ...query,
+    from: query.from ?? defaultFrom,
+    to: query.to ?? defaultTo,
+  });
+
+  const summarySql = `
+    SELECT
+      COUNT(*) AS total,
+      COUNT(*) FILTER (WHERE UPPER(j.status) = 'COMPLETED') AS completed,
+      AVG(EXTRACT(EPOCH FROM (j.completed_at - j.started_at)) * 1000)
+        FILTER (WHERE j.completed_at IS NOT NULL AND j.started_at IS NOT NULL AND UPPER(j.status) = 'COMPLETED')
+        AS average_duration_ms,
+      PERCENTILE_DISC(0.95) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (j.completed_at - j.started_at)) * 1000)
+        FILTER (WHERE j.completed_at IS NOT NULL AND j.started_at IS NOT NULL AND UPPER(j.status) = 'COMPLETED')
+        AS p95_duration_ms
+    FROM taskgen_jobs j
+    LEFT JOIN users u ON u.user_id = j.user_id
+    ${summaryFilters.clause}
+  `;
+
+  const summaryResult = await pool.query<TaskgenSummaryRow>(summarySql, summaryFilters.values);
+  const summaryRow = summaryResult.rows[0];
+
+  const errorsSql = `
+    SELECT COALESCE(j.error_code, 'NONE') AS error_code, COUNT(*) AS count
+    FROM taskgen_jobs j
+    LEFT JOIN users u ON u.user_id = j.user_id
+    ${summaryFilters.clause}
+    GROUP BY COALESCE(j.error_code, 'NONE')
+  `;
+  const errorResult = await pool.query<TaskgenErrorCountRow>(errorsSql, summaryFilters.values);
+
+  const errorCounts: Record<string, number> = {};
+  for (const row of errorResult.rows) {
+    const key = row.error_code ?? 'NONE';
+    errorCounts[key] = Number(row.count ?? 0);
+  }
+
+  const totalSummary = Number(summaryRow?.total ?? 0);
+  const completedSummary = Number(summaryRow?.completed ?? 0);
+  const averageDurationMs = summaryRow?.average_duration_ms == null ? null : Number(summaryRow.average_duration_ms);
+  const p95DurationMs = summaryRow?.p95_duration_ms == null ? null : Number(summaryRow.p95_duration_ms);
+
+  return {
+    items,
+    total,
+    hasMore: total > limit,
+    summary: {
+      total: totalSummary,
+      successRate: totalSummary > 0 ? completedSummary / totalSummary : 0,
+      errorCounts,
+      averageDurationMs,
+      p95DurationMs,
+    },
+  };
+}
+
+export async function getTaskgenJobLogs(jobId: string): Promise<TaskgenJobLog[]> {
+  const result = await pool.query<TaskgenJobLogRow>(
+    `SELECT id, job_id, created_at, level, event, data
+     FROM taskgen_job_logs
+     WHERE job_id = $1
+     ORDER BY created_at ASC`,
+    [jobId],
+  );
+
+  return result.rows.map((row) => ({
+    id: row.id,
+    jobId: row.job_id,
+    createdAt: formatDate(row.created_at),
+    level: (row.level ?? 'INFO').toUpperCase(),
+    event: row.event ?? '',
+    data: row.data ?? null,
+  }));
+}
+
+export async function getTaskgenUserOverview(userId: string): Promise<TaskgenUserOverviewResult> {
+  const summaryResult = await pool.query<TaskgenUserSummaryRow>(
+    `SELECT
+        COUNT(*) AS total_jobs,
+        COUNT(*) FILTER (WHERE UPPER(status) = 'COMPLETED') AS completed_jobs,
+        MAX(created_at) AS last_job_created_at,
+        MAX(completed_at) FILTER (WHERE tasks_inserted IS NOT NULL AND tasks_inserted > 0 AND UPPER(status) = 'COMPLETED')
+          AS last_task_inserted_at
+      FROM taskgen_jobs
+      WHERE user_id = $1`,
+    [userId],
+  );
+
+  const summaryRow = summaryResult.rows[0];
+  const totalJobs = Number(summaryRow?.total_jobs ?? 0);
+  const completedJobs = Number(summaryRow?.completed_jobs ?? 0);
+  const lastJobCreatedAt = summaryRow?.last_job_created_at ? formatDate(summaryRow.last_job_created_at) : null;
+  const lastTaskInsertedAt = summaryRow?.last_task_inserted_at ? formatDate(summaryRow.last_task_inserted_at) : null;
+
+  const latestResult = await pool.query<TaskgenJobRow>(
+    `SELECT
+        j.id,
+        j.user_id,
+        u.email_primary AS user_email,
+        j.mode,
+        j.status,
+        j.tasks_inserted,
+        j.error_code,
+        j.created_at,
+        j.started_at,
+        j.completed_at,
+        j.correlation_id,
+        EXTRACT(EPOCH FROM (j.completed_at - j.started_at)) * 1000 AS duration_ms
+      FROM taskgen_jobs j
+      LEFT JOIN users u ON u.user_id = j.user_id
+      WHERE j.user_id = $1
+      ORDER BY j.created_at DESC
+      LIMIT 1`,
+    [userId],
+  );
+
+  const latestJobRow = latestResult.rows[0] ?? null;
+  const latestJob = latestJobRow ? mapTaskgenJobRow(latestJobRow) : null;
+
+  let userEmail = latestJob?.userEmail ?? null;
+  if (!userEmail) {
+    const userResult = await pool.query<{ email_primary: string | null }>(
+      'SELECT email_primary FROM users WHERE user_id = $1 LIMIT 1',
+      [userId],
+    );
+    userEmail = userResult.rows[0]?.email_primary ?? null;
+  }
+
+  return {
+    userId,
+    userEmail,
+    totalJobs,
+    successRate: totalJobs > 0 ? completedJobs / totalJobs : 0,
+    lastJobStatus: latestJob?.status ?? null,
+    lastJobCreatedAt,
+    lastTaskInsertedAt,
+    latestJob,
+  };
+}
+
+export async function retryTaskgenJob(jobId: string): Promise<{ ok: true }> {
+  const result = await pool.query<{ user_id: string; mode: string | null }>(
+    'SELECT user_id, mode FROM taskgen_jobs WHERE id = $1 LIMIT 1',
+    [jobId],
+  );
+
+  const job = result.rows[0];
+  if (!job) {
+    throw new HttpError(404, 'not_found', 'TaskGen job not found');
+  }
+
+  triggerTaskGenerationForUser({ userId: job.user_id, mode: job.mode ?? undefined });
+  return { ok: true };
+}
+
+export async function forceRunTaskgenForUser(body: TaskgenForceRunBody): Promise<{ ok: true }> {
+  const { userId, mode } = body;
+  const userCheck = await pool.query('SELECT 1 FROM users WHERE user_id = $1 LIMIT 1', [userId]);
+
+  if (userCheck.rowCount === 0) {
+    throw new HttpError(404, 'not_found', 'User not found');
+  }
+
+  triggerTaskGenerationForUser({ userId, mode: mode ?? undefined });
+  return { ok: true };
 }
 
 export async function updateUserTask(
