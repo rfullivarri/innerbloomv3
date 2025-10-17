@@ -21,6 +21,8 @@ vi.mock('../services/auth-service.js', () => ({
 }));
 
 import app from '../app.js';
+import { computeThresholdsFromBaseXp } from '../controllers/users/level-thresholds.js';
+import { buildLevelSummary } from '../controllers/users/level-summary.js';
 
 const userId = '11111111-2222-3333-4444-555555555555';
 
@@ -172,5 +174,63 @@ describe('GET /api/users/:id/achievements', () => {
     });
     expect(mockQuery).not.toHaveBeenCalled();
     expect(mockVerifyToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('derives level thresholds from tasks when the view is empty', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-03-08T12:00:00.000Z'));
+
+    mockVerifyToken.mockResolvedValue({
+      id: userId,
+      clerkId: 'user_123',
+      email: 'test@example.com',
+      isNew: false,
+    });
+
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ user_id: userId }] })
+      .mockResolvedValueOnce({ rows: [{ date: '2024-03-08', xp_day: '120' }] })
+      .mockResolvedValueOnce({ rows: [{ total_xp: '147' }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ xp_base_sum: '42' }] });
+
+    const fallbackThresholds = computeThresholdsFromBaseXp('42');
+    const levelSummary = buildLevelSummary(147, fallbackThresholds);
+
+    const expectedAchievements = [
+      {
+        id: 'ach_streak_7',
+        name: '7-Day Flame',
+        earned_at: null,
+        progress: { current: 1, target: 7, pct: 14.3 },
+      },
+      {
+        id: 'ach_level_5',
+        name: 'Level 5',
+        earned_at: null,
+        progress: {
+          current: levelSummary.currentLevel,
+          target: 5,
+          pct: Math.round(Math.min(100, (levelSummary.currentLevel / 5) * 100) * 10) / 10,
+        },
+      },
+    ];
+
+    const response = await request(app)
+      .get(`/api/users/${userId}/achievements`)
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      user_id: userId,
+      achievements: expectedAchievements,
+    });
+
+    expect(mockQuery).toHaveBeenCalledTimes(5);
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      5,
+      `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum\n       FROM tasks\n       WHERE user_id = $1`,
+      [userId],
+    );
   });
 });
