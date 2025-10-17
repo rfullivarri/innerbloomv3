@@ -26,12 +26,6 @@ import {
   retryTaskgenJob,
   forceRunTaskgenForUser,
 } from './admin.service.js';
-import {
-  getTaskgenEventsByCorrelation,
-  getTaskgenEventsByUser,
-  getTaskgenEventsGlobal,
-} from '../../services/taskgenTraceService.js';
-import { triggerTaskGenerationForUser } from '../../services/taskgenTriggerService.js';
 
 const userIdParamSchema = z.object({
   userId: z.string().uuid({ message: 'Invalid user id' }),
