@@ -88,7 +88,7 @@ beforeEach(() => {
 
 function createDeps() {
   return {
-    triggerTaskGenerationForUser: vi.fn(),
+    triggerTaskGenerationForUser: vi.fn(() => 'corr-123'),
   } as const;
 }
 
@@ -288,12 +288,20 @@ describe('submitOnboardingIntro', () => {
 
     const result = await submitOnboardingIntro('user_123', basePayload, deps);
 
-    expect(result).toEqual({ sessionId: 'session-1', awarded: true, userId: 'user-1', mode: 'flow' });
+    expect(result).toEqual({
+      sessionId: 'session-1',
+      awarded: true,
+      userId: 'user-1',
+      mode: 'flow',
+      taskgenCorrelationId: 'corr-123',
+    });
     expect(expectations).toHaveLength(0);
     expect(withClientSpy).toHaveBeenCalledTimes(1);
     expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledWith({
       userId: 'user-1',
       mode: 'flow',
+      origin: 'onboarding:intro',
+      metadata: { sessionId: 'session-1' },
     });
     expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledTimes(1);
   });
@@ -312,12 +320,20 @@ describe('submitOnboardingIntro', () => {
 
     const result = await submitOnboardingIntro('user_123', basePayload, deps);
 
-    expect(result).toEqual({ sessionId: 'session-1', awarded: false, userId: 'user-1', mode: 'flow' });
+    expect(result).toEqual({
+      sessionId: 'session-1',
+      awarded: false,
+      userId: 'user-1',
+      mode: 'flow',
+      taskgenCorrelationId: 'corr-123',
+    });
     expect(expectations).toHaveLength(0);
     expect(withClientSpy).toHaveBeenCalledTimes(1);
     expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledWith({
       userId: 'user-1',
       mode: 'flow',
+      origin: 'onboarding:intro',
+      metadata: { sessionId: 'session-1' },
     });
     expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledTimes(1);
   });
@@ -350,12 +366,20 @@ describe('submitOnboardingIntro', () => {
 
     const result = await submitOnboardingIntro('user_123', payload, deps);
 
-    expect(result).toEqual({ sessionId: 'session-1', awarded: true, userId: 'user-1', mode: 'flow' });
+    expect(result).toEqual({
+      sessionId: 'session-1',
+      awarded: true,
+      userId: 'user-1',
+      mode: 'flow',
+      taskgenCorrelationId: 'corr-123',
+    });
     expect(expectations).toHaveLength(0);
     expect(withClientSpy).toHaveBeenCalledTimes(1);
     expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledWith({
       userId: 'user-1',
       mode: 'flow',
+      origin: 'onboarding:intro',
+      metadata: { sessionId: 'session-1' },
     });
     expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledTimes(1);
   });

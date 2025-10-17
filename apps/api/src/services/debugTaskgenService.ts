@@ -165,7 +165,7 @@ type DebugTaskgenResult = {
   error?: string;
 };
 
-type DebugTaskgenDeps = {
+export type DebugTaskgenDeps = {
   getContext: (userId: string) => Promise<UserContext>;
   resolveMode: (requested: Mode | undefined, context: UserContext) => Mode;
   loadPrompt: (mode: Mode) => Promise<{ prompt: PromptFile; path: string }>;
@@ -797,19 +797,27 @@ async function storeTasksDefault(args: { user: UserRow; catalogs: Catalogs; task
   });
 }
 
+export function createDefaultDebugTaskgenDeps(): DebugTaskgenDeps {
+  return {
+    getContext: getContextFromDb,
+    resolveMode: resolveModeFromContext,
+    loadPrompt: loadPromptFile,
+    parseOverride: parsePromptOverride,
+    buildPlaceholders: buildPlaceholdersFromContext,
+    buildMessages: buildMessagesFromPrompt,
+    buildPromptPreview: buildPromptPreview,
+    callOpenAI: callOpenAiDefault,
+    validateTasks: (payload, catalogs, placeholders, schema) =>
+      validatePayload(payload, schema, catalogs, placeholders),
+    storeTasks: storeTasksDefault,
+  };
+}
+
 export function createDebugTaskgenRunner(overrides?: Partial<DebugTaskgenDeps>) {
+  const base = createDefaultDebugTaskgenDeps();
   const deps: DebugTaskgenDeps = {
-    getContext: overrides?.getContext ?? getContextFromDb,
-    resolveMode: overrides?.resolveMode ?? resolveModeFromContext,
-    loadPrompt: overrides?.loadPrompt ?? loadPromptFile,
-    parseOverride: overrides?.parseOverride ?? parsePromptOverride,
-    buildPlaceholders: overrides?.buildPlaceholders ?? buildPlaceholdersFromContext,
-    buildMessages: overrides?.buildMessages ?? buildMessagesFromPrompt,
-    buildPromptPreview: overrides?.buildPromptPreview ?? buildPromptPreview,
-    callOpenAI: overrides?.callOpenAI ?? callOpenAiDefault,
-    validateTasks: overrides?.validateTasks ?? ((payload, catalogs, placeholders, schema) =>
-      validatePayload(payload, schema, catalogs, placeholders)),
-    storeTasks: overrides?.storeTasks ?? storeTasksDefault,
+    ...base,
+    ...overrides,
   };
 
   return async function runDebugTaskgen(input: DebugTaskgenInput): Promise<DebugTaskgenResult> {

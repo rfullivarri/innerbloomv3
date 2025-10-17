@@ -10,7 +10,9 @@ import {
   taskStatsQuerySchema,
   updateTaskBodySchema,
   taskgenJobsQuerySchema,
-  taskgenForceRunBodySchema,
+  taskgenTraceQuerySchema,
+  taskgenTraceByCorrelationParamsSchema,
+  taskgenTraceGlobalQuerySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -24,8 +26,34 @@ import {
   getTaskgenJobLogs,
   getTaskgenUserOverview,
   retryTaskgenJob,
-  forceRunTaskgenForUser,
 } from './admin.service.js';
+import {
+  getTaskgenEventsByCorrelation,
+  getTaskgenEventsByUser,
+  getTaskgenEventsGlobal,
+} from '../../services/taskgenTraceService.js';
+import { triggerTaskGenerationForUser } from '../../services/taskgenTriggerService.js';
+
+const taskgenForceRunRequestSchema = z
+  .object({
+    user_id: z.string().uuid({ message: 'Invalid user id' }).optional(),
+    userId: z.string().uuid({ message: 'Invalid user id' }).optional(),
+    mode: z
+      .string()
+      .trim()
+      .min(1)
+      .max(50)
+      .optional()
+      .transform((value) => (value ? value.toLowerCase() : undefined)),
+  })
+  .refine((value) => value.user_id ?? value.userId, {
+    message: 'user_id is required',
+    path: ['user_id'],
+  })
+  .transform((value) => ({
+    user_id: value.user_id ?? value.userId!,
+    mode: value.mode,
+  }));
 
 const userIdParamSchema = z.object({
   userId: z.string().uuid({ message: 'Invalid user id' }),
@@ -122,8 +150,33 @@ export const retryTaskgenJobHandler = asyncHandler(async (req: Request, res: Res
   res.json(result);
 });
 
-export const forceRunTaskgenHandler = asyncHandler(async (req: Request, res: Response) => {
-  const body = taskgenForceRunBodySchema.parse(req.body);
-  const result = await forceRunTaskgenForUser(body);
-  res.json(result);
+export const getTaskgenTraceForUser = asyncHandler(async (req: Request, res: Response) => {
+  const query = taskgenTraceQuerySchema.parse(req.query);
+  const events = getTaskgenEventsByUser(query.user_id).slice(0, query.limit);
+  res.json({ events });
+});
+
+export const getTaskgenTraceByCorrelation = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = taskgenTraceByCorrelationParamsSchema.parse(req.params);
+  const events = getTaskgenEventsByCorrelation(id);
+  res.json({ events });
+});
+
+export const getTaskgenTraceGlobal = asyncHandler(async (req: Request, res: Response) => {
+  const query = taskgenTraceGlobalQuerySchema.parse(req.query);
+  const events = getTaskgenEventsGlobal(query.limit);
+  res.json({ events });
+});
+
+export const postTaskgenForceRun = asyncHandler(async (req: Request, res: Response) => {
+  const parsed = taskgenForceRunRequestSchema.parse(req.body);
+
+  const correlationId = triggerTaskGenerationForUser({
+    userId: parsed.user_id,
+    mode: parsed.mode,
+    origin: 'admin:force-run',
+    metadata: { requestedMode: parsed.mode ?? null },
+  });
+
+  res.json({ ok: true, correlation_id: correlationId });
 });

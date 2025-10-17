@@ -15,6 +15,9 @@
 | `CORS_ALLOWED_ORIGINS` | ➖ | Comma-separated list of additional origins allowed to call the API. |
 | `ALLOW_X_USER_ID_DEV` | ➖ | Enables the deprecated `X-User-Id` header for `/users/me` when running locally (defaults to `false`). The flag has no effect in production and will be removed on 2024-09-30. |
 | `API_LOGGING` | ➖ | Set to `true` to enable verbose console logs for the Clerk webhook and boot sequence. |
+| `OPENAI_API_KEY` | ➖ | Required for AI TaskGen to call OpenAI. When missing the runner records `OPENAI_MISCONFIGURED` and skips task creation. |
+| `OPENAI_MODEL` | ➖ | Optional override for the OpenAI Responses API model used by TaskGen (defaults to `gpt-4.1-mini`). |
+| `TASKGEN_OPENAI_TIMEOUT` | ➖ | Timeout in milliseconds for the OpenAI request (defaults to `45000`). |
 
 ## Database migrations
 
@@ -40,6 +43,17 @@ pnpm --filter @innerbloom/api admin:grant --email admin@example.com
 ```
 
 Add `--revoke` to remove admin rights. The command requires `DATABASE_URL` to point at the target database. For quick local testing you can also bypass the database lookup by setting `ADMIN_USER_ID` with any combination of internal ids, Clerk ids, or emails (comma separated). The middleware will treat those identifiers as admins during runtime, even if the database flag is still `false`.
+
+## AI TaskGen traces
+
+The API keeps an in-memory ring buffer with the latest AI TaskGen events. Admin users can inspect it from the web UI (`/admin` → “AI TaskGen” tab) or via dedicated endpoints:
+
+* `GET /api/admin/taskgen/trace?user_id=<uuid>` – events for a specific user.
+* `GET /api/admin/taskgen/trace/by-correlation/<uuid>` – events scoped to a correlation id.
+* `GET /api/admin/taskgen/trace/global?limit=50` – most recent global events (default limit 100).
+* `POST /api/admin/taskgen/force-run` – trigger a background regeneration (`{ "user_id": "…", "mode": "flow" }`). Returns the correlation id used for tracing.
+
+When `OPENAI_API_KEY` is not configured the runner emits `OPENAI_MISCONFIGURED` and skips task inserts. Successful runs log `TASKS_STORED` along with the number of tasks written. The `/admin` UI exposes quick filters by user id and correlation id and allows forcing a re-run without hitting the HTTP endpoints manually.
 
 ## Development server
 

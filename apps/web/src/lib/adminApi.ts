@@ -5,6 +5,7 @@ import type {
   AdminTaskRow,
   AdminTaskSummaryRow,
   AdminUser,
+  TaskgenTraceEvent,
 } from './types';
 
 type PaginatedResponse<T> = {
@@ -138,4 +139,44 @@ export async function exportAdminLogsCsv(userId: string, params: LogFilters = {}
 
 export async function verifyAdminAccess() {
   return apiAuthorizedGet<{ ok: boolean }>('/admin/me');
+}
+
+type TaskgenTraceResponse = { events: TaskgenTraceEvent[] };
+
+export async function fetchTaskgenTraceByUser(userId: string) {
+  return apiAuthorizedGet<TaskgenTraceResponse>('/admin/taskgen/trace', { user_id: userId });
+}
+
+export async function fetchTaskgenTraceByCorrelation(correlationId: string) {
+  return apiAuthorizedGet<TaskgenTraceResponse>(
+    `/admin/taskgen/trace/by-correlation/${encodeURIComponent(correlationId)}`,
+  );
+}
+
+export async function fetchTaskgenTraceGlobal(limit?: number) {
+  const params = typeof limit === 'number' ? { limit } : undefined;
+  return apiAuthorizedGet<TaskgenTraceResponse>('/admin/taskgen/trace/global', params);
+}
+
+export async function postTaskgenForceRun(payload: { userId: string; mode?: string }) {
+  const response = await apiAuthorizedFetch(buildApiUrl('/admin/taskgen/force-run'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ user_id: payload.userId, mode: payload.mode }),
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, buildApiUrl('/admin/taskgen/force-run'));
+  }
+
+  return response.json() as Promise<{ ok: boolean; correlation_id: string }>;
 }

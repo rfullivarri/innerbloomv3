@@ -11,6 +11,7 @@ import { FiltersBar, type AdminFilters } from './FiltersBar';
 import { InsightsChips } from './InsightsChips';
 import { AdminTaskSummaryTable } from './AdminTaskSummaryTable';
 import { UserPicker } from './UserPicker';
+import { TaskgenTracePanel } from './TaskgenTracePanel';
 
 const DEFAULT_FILTERS: AdminFilters = {
   from: undefined,
@@ -29,7 +30,7 @@ type LogsState = {
 
 export function AdminLayout() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [activeTab, setActiveTab] = useState<'logs' | 'taskTotals'>('logs');
+  const [activeTab, setActiveTab] = useState<'logs' | 'taskTotals' | 'taskgen'>('logs');
   const [filters, setFilters] = useState<AdminFilters>(DEFAULT_FILTERS);
   const [insights, setInsights] = useState<AdminInsights | null>(null);
   const [logs, setLogs] = useState<LogsState>({ items: [], page: 1, pageSize: 10, total: 0 });
@@ -231,6 +232,10 @@ export function AdminLayout() {
       return null;
     }
 
+    if (activeTab === 'taskgen') {
+      return null;
+    }
+
     if (loadingTaskStats) {
       return 'Cargando totales…';
     }
@@ -291,17 +296,32 @@ export function AdminLayout() {
           >
             Totales por tarea
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('taskgen')}
+            className={`rounded-lg border px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-500 ${
+              activeTab === 'taskgen'
+                ? 'border-sky-400/60 bg-sky-500/10 text-sky-100'
+                : 'border-slate-700/60 text-slate-300 hover:border-sky-400/60 hover:text-sky-100'
+            }`}
+          >
+            AI TaskGen
+          </button>
         </div>
 
-        <FiltersBar
-          filters={filters}
-          onChange={handleFiltersChange}
-          onExport={handleExport}
-          showExport={activeTab === 'logs'}
-          showPageSize={activeTab === 'logs'}
-        />
+        {activeTab !== 'taskgen' ? (
+          <FiltersBar
+            filters={filters}
+            onChange={handleFiltersChange}
+            onExport={handleExport}
+            showExport={activeTab === 'logs'}
+            showPageSize={activeTab === 'logs'}
+          />
+        ) : null}
 
-        {emptyState ? (
+        {activeTab === 'taskgen' ? (
+          <TaskgenTracePanel selectedUserId={selectedUser?.id ?? null} />
+        ) : emptyState ? (
           <div className="rounded-lg border border-slate-700/60 bg-slate-800/60 px-6 py-12 text-center text-sm text-slate-300">
             {emptyState}
           </div>

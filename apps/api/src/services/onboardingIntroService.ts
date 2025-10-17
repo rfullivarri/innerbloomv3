@@ -158,6 +158,7 @@ export interface SubmitOnboardingResult {
   awarded: boolean;
   userId: string;
   mode: NormalizedMode;
+  taskgenCorrelationId?: string | null;
 }
 
 type SubmitOnboardingIntroDeps = {
@@ -227,9 +228,14 @@ export async function submitOnboardingIntro(
       await client.query('COMMIT');
 
       const normalizedMode = payload.mode.toLowerCase() as NormalizedMode;
-      deps.triggerTaskGenerationForUser({ userId, mode: normalizedMode });
+      const correlationId = deps.triggerTaskGenerationForUser({
+        userId,
+        mode: normalizedMode,
+        origin: 'onboarding:intro',
+        metadata: { sessionId },
+      });
 
-      return { sessionId, awarded, userId, mode: normalizedMode };
+      return { sessionId, awarded, userId, mode: normalizedMode, taskgenCorrelationId: correlationId };
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
