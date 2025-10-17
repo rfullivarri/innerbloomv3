@@ -79,6 +79,19 @@ export const taskgenForceRunBodySchema = z.object({
     .transform((value) => (value ? value.toLowerCase() : undefined)),
 });
 
+export const taskgenTraceQuerySchema = z.object({
+  user_id: z.string().uuid({ message: 'Invalid user id' }),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+});
+
+export const taskgenTraceByCorrelationParamsSchema = z.object({
+  id: z.string().uuid({ message: 'Invalid correlation id' }),
+});
+
+export const taskgenTraceGlobalQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+});
+
 export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
 export type LogsQuery = z.infer<typeof logsQuerySchema>;
 export type InsightQuery = z.infer<typeof insightQuerySchema>;
@@ -87,3 +100,5 @@ export type TaskStatsQuery = z.infer<typeof taskStatsQuerySchema>;
 export type UpdateTaskBody = z.infer<typeof updateTaskBodySchema>;
 export type TaskgenJobsQuery = z.infer<typeof taskgenJobsQuerySchema>;
 export type TaskgenForceRunBody = z.infer<typeof taskgenForceRunBodySchema>;
+export type TaskgenTraceQuery = z.infer<typeof taskgenTraceQuerySchema>;
+export type TaskgenTraceGlobalQuery = z.infer<typeof taskgenTraceGlobalQuerySchema>;
