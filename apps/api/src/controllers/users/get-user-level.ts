@@ -47,12 +47,36 @@ export const getUserLevel: AsyncHandler = async (req, res) => {
     [id],
   );
 
-  let thresholds: LevelThreshold[] = thresholdsResult.rows.map((row) => ({
-    level: Number(row.level ?? 0),
-    xpRequired: Number(row.xp_required ?? 0),
-  }));
+  let thresholds: LevelThreshold[] = thresholdsResult.rows
+    .map((row) => {
+      const levelInput = row.level;
+      const levelNumber =
+        levelInput === null || levelInput === undefined ? null : Number(levelInput);
+      const level =
+        levelNumber === null || !Number.isFinite(levelNumber) || levelNumber < 0
+          ? null
+          : levelNumber;
 
-  if (thresholds.length === 0) {
+      const xpInput = row.xp_required;
+      const xpNumber = xpInput === null || xpInput === undefined ? null : Number(xpInput);
+      const xpRequired =
+        xpNumber === null || !Number.isFinite(xpNumber) ? null : xpNumber;
+
+      return {
+        level,
+        xpRequired,
+      };
+    })
+    .filter((row): row is { level: number; xpRequired: number | null } => row.level !== null)
+    .map((row) => ({
+      level: Math.round(row.level),
+      xpRequired: row.level === 0 ? 0 : Math.max(0, Number(row.xpRequired ?? 0)),
+    }))
+    .filter((threshold) => threshold.level === 0 || threshold.xpRequired > 0);
+
+  const hasProgression = thresholds.some((threshold) => threshold.level > 0);
+
+  if (thresholds.length === 0 || !hasProgression) {
     const fallbackResult = await pool.query<XpBaseRow>(
       `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum
        FROM tasks
