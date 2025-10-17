@@ -2,6 +2,7 @@ import type { PoolClient } from 'pg';
 import { withClient } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 import type { OnboardingIntroPayload } from '../schemas/onboarding.js';
+import { triggerTaskGenerationForUser } from './taskgenTriggerService.js';
 
 const ONBOARDING_MODE_IMAGE_PATHS: Record<OnboardingIntroPayload['mode'], string> = {
   LOW: '/LowMood.jpg',
@@ -150,10 +151,22 @@ type NormalizedXp = {
   soul: number;
 };
 
+type NormalizedMode = Lowercase<OnboardingIntroPayload['mode']>;
+
 export interface SubmitOnboardingResult {
   sessionId: string;
   awarded: boolean;
+  userId: string;
+  mode: NormalizedMode;
 }
+
+type SubmitOnboardingIntroDeps = {
+  triggerTaskGenerationForUser: typeof triggerTaskGenerationForUser;
+};
+
+const defaultSubmitOnboardingIntroDeps: SubmitOnboardingIntroDeps = {
+  triggerTaskGenerationForUser,
+};
 
 export interface DebugOnboardingSession {
   session: SessionRow;
@@ -169,6 +182,7 @@ export interface DebugOnboardingSession {
 export async function submitOnboardingIntro(
   clerkUserId: string,
   payload: OnboardingIntroPayload,
+  deps: SubmitOnboardingIntroDeps = defaultSubmitOnboardingIntroDeps,
 ): Promise<SubmitOnboardingResult> {
   return withClient(async (client) => {
     await client.query('BEGIN');
@@ -212,7 +226,10 @@ export async function submitOnboardingIntro(
 
       await client.query('COMMIT');
 
-      return { sessionId, awarded };
+      const normalizedMode = payload.mode.toLowerCase() as NormalizedMode;
+      deps.triggerTaskGenerationForUser({ userId, mode: normalizedMode });
+
+      return { sessionId, awarded, userId, mode: normalizedMode };
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;

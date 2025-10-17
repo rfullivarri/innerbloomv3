@@ -9,6 +9,7 @@ import {
   getLatestOnboardingSession,
   submitOnboardingIntro,
 } from '../services/onboardingIntroService.js';
+import { triggerTaskGenerationForUser } from '../services/taskgenTriggerService.js';
 
 const router = Router();
 
@@ -26,7 +27,9 @@ router.post(
 
     validateMetaUserId(payload, user.clerkId);
 
-    const result = await submitOnboardingIntro(user.clerkId, payload);
+    const result = await submitOnboardingIntro(user.clerkId, payload, {
+      triggerTaskGenerationForUser,
+    });
 
     res.json({ ok: true, session_id: result.sessionId, awarded: result.awarded });
   }),
