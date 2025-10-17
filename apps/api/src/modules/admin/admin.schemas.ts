@@ -52,9 +52,38 @@ export const updateTaskBodySchema = z
     message: 'At least one property must be provided',
   });
 
+const upperTrimmed = z
+  .string()
+  .trim()
+  .min(1)
+  .max(50)
+  .transform((value) => value.toUpperCase());
+
+export const taskgenJobsQuerySchema = z.object({
+  status: upperTrimmed.optional(),
+  mode: upperTrimmed.optional(),
+  user: z.string().trim().min(1).max(200).optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  limit: z.coerce.number().int().min(1).max(1_000).default(50),
+});
+
+export const taskgenForceRunBodySchema = z.object({
+  userId: z.string().uuid({ message: 'Invalid user id' }),
+  mode: z
+    .string()
+    .trim()
+    .min(1)
+    .max(50)
+    .optional()
+    .transform((value) => (value ? value.toLowerCase() : undefined)),
+});
+
 export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
 export type LogsQuery = z.infer<typeof logsQuerySchema>;
 export type InsightQuery = z.infer<typeof insightQuerySchema>;
 export type TasksQuery = z.infer<typeof tasksQuerySchema>;
 export type TaskStatsQuery = z.infer<typeof taskStatsQuerySchema>;
 export type UpdateTaskBody = z.infer<typeof updateTaskBodySchema>;
+export type TaskgenJobsQuery = z.infer<typeof taskgenJobsQuerySchema>;
+export type TaskgenForceRunBody = z.infer<typeof taskgenForceRunBodySchema>;
