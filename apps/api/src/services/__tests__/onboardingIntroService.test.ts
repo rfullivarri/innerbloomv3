@@ -86,6 +86,12 @@ beforeEach(() => {
   delete process.env.WEB_PUBLIC_BASE_URL;
 });
 
+function createDeps() {
+  return {
+    triggerTaskGenerationForUser: vi.fn(),
+  } as const;
+}
+
 type ExpectedXp = { total: number; body: number; mind: number; soul: number };
 
 describe('resolveModeImageUrl', () => {
@@ -278,11 +284,18 @@ describe('submitOnboardingIntro', () => {
       return expectation!.handle(sql, params);
     });
 
-    const result = await submitOnboardingIntro('user_123', basePayload);
+    const deps = createDeps();
 
-    expect(result).toEqual({ sessionId: 'session-1', awarded: true });
+    const result = await submitOnboardingIntro('user_123', basePayload, deps);
+
+    expect(result).toEqual({ sessionId: 'session-1', awarded: true, userId: 'user-1', mode: 'flow' });
     expect(expectations).toHaveLength(0);
     expect(withClientSpy).toHaveBeenCalledTimes(1);
+    expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledWith({
+      userId: 'user-1',
+      mode: 'flow',
+    });
+    expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledTimes(1);
   });
 
   it('returns awarded=false when XP bonus rows already exist', async () => {
@@ -295,11 +308,18 @@ describe('submitOnboardingIntro', () => {
       return expectation!.handle(sql, params);
     });
 
-    const result = await submitOnboardingIntro('user_123', basePayload);
+    const deps = createDeps();
 
-    expect(result).toEqual({ sessionId: 'session-1', awarded: false });
+    const result = await submitOnboardingIntro('user_123', basePayload, deps);
+
+    expect(result).toEqual({ sessionId: 'session-1', awarded: false, userId: 'user-1', mode: 'flow' });
     expect(expectations).toHaveLength(0);
     expect(withClientSpy).toHaveBeenCalledTimes(1);
+    expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledWith({
+      userId: 'user-1',
+      mode: 'flow',
+    });
+    expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledTimes(1);
   });
 
   it('rounds XP values and enforces consistency before persisting', async () => {
@@ -326,11 +346,18 @@ describe('submitOnboardingIntro', () => {
       return expectation!.handle(sql, params);
     });
 
-    const result = await submitOnboardingIntro('user_123', payload);
+    const deps = createDeps();
 
-    expect(result).toEqual({ sessionId: 'session-1', awarded: true });
+    const result = await submitOnboardingIntro('user_123', payload, deps);
+
+    expect(result).toEqual({ sessionId: 'session-1', awarded: true, userId: 'user-1', mode: 'flow' });
     expect(expectations).toHaveLength(0);
     expect(withClientSpy).toHaveBeenCalledTimes(1);
+    expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledWith({
+      userId: 'user-1',
+      mode: 'flow',
+    });
+    expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -5,15 +5,21 @@ const {
   mockSubmitOnboardingIntro,
   mockGetLatestOnboardingSession,
   mockVerifyToken,
+  mockTriggerTaskGenerationForUser,
 } = vi.hoisted(() => ({
   mockSubmitOnboardingIntro: vi.fn(),
   mockGetLatestOnboardingSession: vi.fn(),
   mockVerifyToken: vi.fn(),
+  mockTriggerTaskGenerationForUser: vi.fn(),
 }));
 
 vi.mock('../services/onboardingIntroService.js', () => ({
   submitOnboardingIntro: mockSubmitOnboardingIntro,
   getLatestOnboardingSession: mockGetLatestOnboardingSession,
+}));
+
+vi.mock('../services/taskgenTriggerService.js', () => ({
+  triggerTaskGenerationForUser: mockTriggerTaskGenerationForUser,
 }));
 
 vi.mock('../services/auth-service.js', () => ({
@@ -104,6 +110,7 @@ describe('POST /api/onboarding/intro', () => {
     mockSubmitOnboardingIntro.mockReset();
     mockGetLatestOnboardingSession.mockReset();
     mockVerifyToken.mockReset();
+    mockTriggerTaskGenerationForUser.mockReset();
     process.env.NODE_ENV = 'test';
   });
 
@@ -180,7 +187,10 @@ describe('POST /api/onboarding/intro', () => {
       email: 'user@example.com',
       isNew: false,
     });
-    mockSubmitOnboardingIntro.mockResolvedValue({ sessionId: 'session-1', awarded: true });
+    mockSubmitOnboardingIntro.mockImplementation(async (_userId, _payload, deps) => {
+      deps?.triggerTaskGenerationForUser?.({ userId: 'db-user-1', mode: 'flow' });
+      return { sessionId: 'session-1', awarded: true, userId: 'db-user-1', mode: 'flow' };
+    });
 
     const payload = createPayload();
 
@@ -191,7 +201,12 @@ describe('POST /api/onboarding/intro', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ ok: true, session_id: 'session-1', awarded: true });
-    expect(mockSubmitOnboardingIntro).toHaveBeenCalledWith('user_123', payload);
+    expect(mockSubmitOnboardingIntro).toHaveBeenCalledWith(
+      'user_123',
+      payload,
+      expect.objectContaining({ triggerTaskGenerationForUser: mockTriggerTaskGenerationForUser }),
+    );
+    expect(mockTriggerTaskGenerationForUser).toHaveBeenCalledWith({ userId: 'db-user-1', mode: 'flow' });
   });
 
   it('returns 200 and awarded=false for subsequent submissions', async () => {
@@ -201,7 +216,10 @@ describe('POST /api/onboarding/intro', () => {
       email: 'user@example.com',
       isNew: false,
     });
-    mockSubmitOnboardingIntro.mockResolvedValue({ sessionId: 'session-1', awarded: false });
+    mockSubmitOnboardingIntro.mockImplementation(async (_userId, _payload, deps) => {
+      deps?.triggerTaskGenerationForUser?.({ userId: 'db-user-1', mode: 'flow' });
+      return { sessionId: 'session-1', awarded: false, userId: 'db-user-1', mode: 'flow' };
+    });
 
     const payload = createPayload();
 
@@ -212,7 +230,12 @@ describe('POST /api/onboarding/intro', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ ok: true, session_id: 'session-1', awarded: false });
-    expect(mockSubmitOnboardingIntro).toHaveBeenCalledWith('user_123', payload);
+    expect(mockSubmitOnboardingIntro).toHaveBeenCalledWith(
+      'user_123',
+      payload,
+      expect.objectContaining({ triggerTaskGenerationForUser: mockTriggerTaskGenerationForUser }),
+    );
+    expect(mockTriggerTaskGenerationForUser).toHaveBeenCalledWith({ userId: 'db-user-1', mode: 'flow' });
   });
 });
 
