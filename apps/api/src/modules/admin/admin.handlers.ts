@@ -9,6 +9,10 @@ import {
   tasksQuerySchema,
   taskStatsQuerySchema,
   updateTaskBodySchema,
+  taskgenTraceUserQuerySchema,
+  taskgenTraceCorrelationParamSchema,
+  taskgenTraceGlobalQuerySchema,
+  taskgenForceRunBodySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -19,6 +23,12 @@ import {
   listUsers,
   updateUserTask,
 } from './admin.service.js';
+import {
+  getTaskgenEventsByCorrelation,
+  getTaskgenEventsByUser,
+  getTaskgenEventsGlobal,
+} from '../../services/taskgenTraceService.js';
+import { triggerTaskGenerationForUser } from '../../services/taskgenTriggerService.js';
 
 const userIdParamSchema = z.object({
   userId: z.string().uuid({ message: 'Invalid user id' }),
@@ -85,4 +95,33 @@ export const exportAdminUserLogsCsv = asyncHandler(async (req: Request, res: Res
 
 export const getAdminMe = asyncHandler(async (_req: Request, res: Response) => {
   res.json({ ok: true });
+});
+
+export const getTaskgenTraceForUser = asyncHandler(async (req: Request, res: Response) => {
+  const query = taskgenTraceUserQuerySchema.parse(req.query);
+  const events = getTaskgenEventsByUser(query.user_id);
+  res.json({ events });
+});
+
+export const getTaskgenTraceByCorrelation = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = taskgenTraceCorrelationParamSchema.parse(req.params);
+  const events = getTaskgenEventsByCorrelation(id);
+  res.json({ events });
+});
+
+export const getTaskgenTraceGlobal = asyncHandler(async (req: Request, res: Response) => {
+  const query = taskgenTraceGlobalQuerySchema.parse(req.query);
+  const events = getTaskgenEventsGlobal(query.limit);
+  res.json({ events });
+});
+
+export const postTaskgenForceRun = asyncHandler(async (req: Request, res: Response) => {
+  const body = taskgenForceRunBodySchema.parse(req.body);
+  const correlationId = triggerTaskGenerationForUser({
+    userId: body.user_id,
+    mode: body.mode,
+    origin: 'admin:force-run',
+    metadata: { requestedMode: body.mode ?? null },
+  });
+  res.json({ ok: true, correlation_id: correlationId });
 });

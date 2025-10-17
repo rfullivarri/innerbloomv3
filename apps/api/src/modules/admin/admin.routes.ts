@@ -9,6 +9,10 @@ import {
   getAdminUserTasks,
   getAdminUsers,
   patchAdminUserTask,
+  getTaskgenTraceForUser,
+  getTaskgenTraceByCorrelation,
+  getTaskgenTraceGlobal,
+  postTaskgenForceRun,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
 
@@ -23,6 +27,10 @@ adminRouter.get('/users/:userId/tasks', getAdminUserTasks);
 adminRouter.get('/users/:userId/task-stats', getAdminUserTaskStats);
 adminRouter.patch('/users/:userId/tasks/:taskId', patchAdminUserTask);
 adminRouter.get('/users/:userId/logs.csv', exportAdminUserLogsCsv);
+adminRouter.get('/taskgen/trace', getTaskgenTraceForUser);
+adminRouter.get('/taskgen/trace/by-correlation/:id', getTaskgenTraceByCorrelation);
+adminRouter.get('/taskgen/trace/global', getTaskgenTraceGlobal);
+adminRouter.post('/taskgen/force-run', postTaskgenForceRun);
 
 router.use('/admin', authMiddleware, requireAdmin, adminRouter);
 

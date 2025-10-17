@@ -1,10 +1,11 @@
 import request from 'supertest';
 import type { NextFunction, Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { clearTaskgenEvents, recordTaskgenEvent } from '../../services/taskgenTraceService.js';
 
 type QueryRow = { is_admin: boolean | null };
 
-const { mockQuery, authMiddlewareMock } = vi.hoisted(() => ({
+const { mockQuery, authMiddlewareMock, mockTrigger } = vi.hoisted(() => ({
   mockQuery: vi.fn<(sql: string, params?: unknown[]) => Promise<{ rows: QueryRow[] }>>(),
   authMiddlewareMock: (req: Request, _res: Response, next: NextFunction) => {
     (req as Request & {
@@ -22,6 +23,7 @@ const { mockQuery, authMiddlewareMock } = vi.hoisted(() => ({
     };
     next();
   },
+  mockTrigger: vi.fn(() => 'corr-force'),
 }));
 
 vi.mock('../../db.js', () => ({
@@ -32,11 +34,18 @@ vi.mock('../../middlewares/auth-middleware.js', () => ({
   authMiddleware: authMiddlewareMock,
 }));
 
+vi.mock('../../services/taskgenTriggerService.js', () => ({
+  triggerTaskGenerationForUser: mockTrigger,
+}));
+
 import app from '../../app.js';
 
 describe('Admin routes', () => {
   beforeEach(() => {
     mockQuery.mockClear();
+    mockTrigger.mockClear();
+    mockTrigger.mockReturnValue('corr-force');
+    clearTaskgenEvents();
     mockQuery.mockImplementation(async (sql: string) => {
       if (sql.includes('SELECT is_admin FROM users WHERE user_id = $1 LIMIT 1')) {
         return { rows: [{ is_admin: true }] };
@@ -151,5 +160,76 @@ describe('Admin routes', () => {
     expect(response.status).toBe(200);
     expect(response.type).toBe('text/csv');
     expect(response.text.split('\n')[0]).toContain('date');
+  });
+
+  it('returns taskgen traces by user id', async () => {
+    recordTaskgenEvent({
+      level: 'info',
+      event: 'TRIGGER_RECEIVED',
+      correlationId: '00000000-0000-4000-8000-0000000000aa',
+      userId: '00000000-0000-4000-8000-000000000001',
+      origin: 'test',
+    });
+
+    const response = await request(app)
+      .get('/api/admin/taskgen/trace')
+      .query({ user_id: '00000000-0000-4000-8000-000000000001' })
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.events).toHaveLength(1);
+  });
+
+  it('returns taskgen traces by correlation id', async () => {
+    recordTaskgenEvent({
+      level: 'info',
+      event: 'TRIGGER_RECEIVED',
+      correlationId: '00000000-0000-4000-8000-0000000000bb',
+      userId: '00000000-0000-4000-8000-000000000002',
+      origin: 'test',
+    });
+
+    const response = await request(app)
+      .get('/api/admin/taskgen/trace/by-correlation/00000000-0000-4000-8000-0000000000bb')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.events).toHaveLength(1);
+  });
+
+  it('returns global taskgen traces with limit', async () => {
+    recordTaskgenEvent({
+      level: 'info',
+      event: 'TRIGGER_RECEIVED',
+      correlationId: '00000000-0000-4000-8000-0000000000cc',
+      userId: '00000000-0000-4000-8000-000000000003',
+      origin: 'test',
+    });
+
+    const response = await request(app)
+      .get('/api/admin/taskgen/trace/global')
+      .query({ limit: 5 })
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.events.length).toBeGreaterThan(0);
+  });
+
+  it('forces a new task generation run', async () => {
+    mockTrigger.mockReturnValue('corr-test');
+
+    const response = await request(app)
+      .post('/api/admin/taskgen/force-run')
+      .set('Authorization', 'Bearer token')
+      .send({ user_id: '00000000-0000-4000-8000-000000000001', mode: 'flow' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ ok: true, correlation_id: 'corr-test' });
+    expect(mockTrigger).toHaveBeenCalledWith({
+      userId: '00000000-0000-4000-8000-000000000001',
+      mode: 'flow',
+      origin: 'admin:force-run',
+      metadata: { requestedMode: 'flow' },
+    });
   });
 });

@@ -66,3 +66,14 @@ export type AdminTaskSummaryRow = {
   lastCompletedAt: string | null;
   state: 'red' | 'yellow' | 'green';
 };
+
+export type TaskgenTraceEvent = {
+  at: string;
+  level: 'info' | 'warn' | 'error';
+  event: string;
+  correlationId: string;
+  userId: string;
+  mode?: string | null;
+  origin?: string | null;
+  data?: Record<string, unknown> | null;
+};

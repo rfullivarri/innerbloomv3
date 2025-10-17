@@ -31,7 +31,12 @@ router.post(
       triggerTaskGenerationForUser,
     });
 
-    res.json({ ok: true, session_id: result.sessionId, awarded: result.awarded });
+    res.json({
+      ok: true,
+      session_id: result.sessionId,
+      awarded: result.awarded,
+      taskgen_correlation_id: result.taskgenCorrelationId ?? null,
+    });
   }),
 );
 

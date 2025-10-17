@@ -111,6 +111,7 @@ describe('POST /api/onboarding/intro', () => {
     mockGetLatestOnboardingSession.mockReset();
     mockVerifyToken.mockReset();
     mockTriggerTaskGenerationForUser.mockReset();
+    mockTriggerTaskGenerationForUser.mockReturnValue('corr-mock');
     process.env.NODE_ENV = 'test';
   });
 
@@ -189,7 +190,13 @@ describe('POST /api/onboarding/intro', () => {
     });
     mockSubmitOnboardingIntro.mockImplementation(async (_userId, _payload, deps) => {
       deps?.triggerTaskGenerationForUser?.({ userId: 'db-user-1', mode: 'flow' });
-      return { sessionId: 'session-1', awarded: true, userId: 'db-user-1', mode: 'flow' };
+      return {
+        sessionId: 'session-1',
+        awarded: true,
+        userId: 'db-user-1',
+        mode: 'flow',
+        taskgenCorrelationId: 'corr-123',
+      };
     });
 
     const payload = createPayload();
@@ -200,7 +207,12 @@ describe('POST /api/onboarding/intro', () => {
       .send(payload);
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ ok: true, session_id: 'session-1', awarded: true });
+    expect(response.body).toEqual({
+      ok: true,
+      session_id: 'session-1',
+      awarded: true,
+      taskgen_correlation_id: 'corr-123',
+    });
     expect(mockSubmitOnboardingIntro).toHaveBeenCalledWith(
       'user_123',
       payload,
@@ -218,7 +230,13 @@ describe('POST /api/onboarding/intro', () => {
     });
     mockSubmitOnboardingIntro.mockImplementation(async (_userId, _payload, deps) => {
       deps?.triggerTaskGenerationForUser?.({ userId: 'db-user-1', mode: 'flow' });
-      return { sessionId: 'session-1', awarded: false, userId: 'db-user-1', mode: 'flow' };
+      return {
+        sessionId: 'session-1',
+        awarded: false,
+        userId: 'db-user-1',
+        mode: 'flow',
+        taskgenCorrelationId: 'corr-456',
+      };
     });
 
     const payload = createPayload();
@@ -229,7 +247,12 @@ describe('POST /api/onboarding/intro', () => {
       .send(payload);
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ ok: true, session_id: 'session-1', awarded: false });
+    expect(response.body).toEqual({
+      ok: true,
+      session_id: 'session-1',
+      awarded: false,
+      taskgen_correlation_id: 'corr-456',
+    });
     expect(mockSubmitOnboardingIntro).toHaveBeenCalledWith(
       'user_123',
       payload,
