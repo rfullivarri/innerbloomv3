@@ -4,7 +4,7 @@ describe('triggerTaskGenerationForUser', () => {
   it('normalizes the mode, disables dry runs, and persists tasks', async () => {
     vi.resetModules();
 
-    const storeTasksSpy = vi.fn(async () => {});
+    const storeTasksSpy = vi.fn(async () => undefined);
     const tasks = [
       {
         task: 'Drink water',
