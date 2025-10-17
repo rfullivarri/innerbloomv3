@@ -8,6 +8,7 @@ The task generation CLI now lives under `apps/api/scripts/generateTasks.ts` alon
 - `pnpm install` to ensure dependencies (including `ts-node`, `openai`, and `ajv`) are available.
 - `OPENAI_API_KEY` must be present in the environment. The CLI exits with an error if it is missing.
 - Optional: `ENABLE_DB_SNAPSHOT` (defaults to snapshot usage when missing).
+- Optional: `OPENAI_MODEL` to override the model requested from OpenAI (e.g. `OPENAI_MODEL=gpt-5.0`).
 
 ## Usage
 

@@ -26,7 +26,7 @@ const MODE_TEMPERATURE: Record<Mode, number> = {
   evolve: 0.65,
 };
 
-const DEFAULT_MODEL = 'gpt-4.1-mini';
+const DEFAULT_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4.1-mini';
 
 const runtimeDir = path.dirname(fileURLToPath(import.meta.url));
 const appRootCandidates = [
@@ -949,8 +949,9 @@ export async function runTaskGeneration(args: {
     const responseFormat = buildResponseFormatConfig(prompt.response_format);
     try {
       openaiStart = Date.now();
+      const model = process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
       const requestBody: ResponseCreateParamsNonStreaming = {
-        model: DEFAULT_MODEL,
+        model,
         temperature: MODE_TEMPERATURE[args.mode],
         input: messages.map((message) => ({
           role: message.role,
@@ -962,6 +963,12 @@ export async function runTaskGeneration(args: {
       }
       const response = await client.responses.create(requestBody, { signal: controller.signal });
       openaiDuration = Date.now() - openaiStart;
+      log('OpenAI invocation succeeded', {
+        model,
+        userId: placeholders.USER_ID,
+        mode: args.mode,
+        openai_duration_ms: openaiDuration,
+      });
       const outputText = response.output_text ?? '';
       const payload = JSON.parse(outputText) as TaskPayload;
       const validation = validatePayload(
@@ -1012,7 +1019,14 @@ export async function runTaskGeneration(args: {
       const message = error instanceof Error ? error.message : String(error);
       const errorLog = await appendErrorLog(message);
       const total = Date.now() - start;
-      logError('OpenAI invocation failed', { message });
+      const model = process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
+      logError('OpenAI invocation failed', {
+        message,
+        model,
+        userId: placeholders.USER_ID,
+        mode: args.mode,
+        openai_duration_ms: openaiDuration,
+      });
       return {
         status: 'error',
         user_id: placeholders.USER_ID,
