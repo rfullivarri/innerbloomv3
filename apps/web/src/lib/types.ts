@@ -116,3 +116,28 @@ export type TaskgenUserOverview = {
   lastTaskInsertedAt: string | null;
   latestJob: TaskgenJob | null;
 };
+
+export type TaskgenEventLevel = 'info' | 'warn' | 'error';
+export type TaskgenEventName =
+  | 'TRIGGER_RECEIVED'
+  | 'RUNNER_STARTED'
+  | 'CONTEXT_READY'
+  | 'OPENAI_REQUEST'
+  | 'OPENAI_RESPONSE'
+  | 'VALIDATION_OK'
+  | 'VALIDATION_FAILED'
+  | 'TASKS_STORED'
+  | 'OPENAI_MISCONFIGURED'
+  | 'RUNNER_EXCEPTION'
+  | 'RUNNER_ENDED';
+
+export type TaskgenTraceEvent = {
+  at: string;
+  level: TaskgenEventLevel;
+  event: TaskgenEventName;
+  userId: string;
+  correlationId: string;
+  mode?: string | null;
+  origin?: string | null;
+  data?: Record<string, unknown>;
+};
