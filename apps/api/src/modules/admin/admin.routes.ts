@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { authMiddleware } from '../../middlewares/auth-middleware.js';
 import {
   exportAdminUserLogsCsv,
-  forceRunTaskgenHandler,
   getAdminMe,
   getAdminUserInsights,
   getAdminUserLogs,
@@ -13,6 +12,10 @@ import {
   getTaskgenJobs,
   getTaskgenUserOverviewHandler,
   patchAdminUserTask,
+  getTaskgenTraceForUser,
+  getTaskgenTraceByCorrelation,
+  getTaskgenTraceGlobal,
+  postTaskgenForceRun,
   retryTaskgenJobHandler,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
@@ -25,7 +28,6 @@ adminRouter.get('/users', getAdminUsers);
 adminRouter.get('/taskgen/jobs', getTaskgenJobs);
 adminRouter.get('/taskgen/jobs/:jobId/logs', getTaskgenJobLogsHandler);
 adminRouter.post('/taskgen/jobs/:jobId/retry', retryTaskgenJobHandler);
-adminRouter.post('/taskgen/force-run', forceRunTaskgenHandler);
 adminRouter.get('/users/:userId/insights', getAdminUserInsights);
 adminRouter.get('/users/:userId/logs', getAdminUserLogs);
 adminRouter.get('/users/:userId/tasks', getAdminUserTasks);
