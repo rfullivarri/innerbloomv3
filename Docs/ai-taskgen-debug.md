@@ -32,6 +32,8 @@ OPENAI_MODEL="gpt-4.1-mini"
 DEBUG_ALLOW_IN_PROD=false
 ```
 
+> 💡 Para seleccionar modelos más recientes (por ejemplo, GPT-5), exporta `OPENAI_MODEL="gpt-5.0"` antes de levantar el API o ejecutar el CLI. Cualquier valor presente en la variable tomará prioridad sobre el default `gpt-4.1-mini`.
+
 ### Flujo desde el navegador (desarrollo)
 
 1. Levanta `apps/api` (`pnpm --filter api dev`) y `apps/web` (`pnpm --filter web dev`).

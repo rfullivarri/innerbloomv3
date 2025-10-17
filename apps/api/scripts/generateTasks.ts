@@ -79,7 +79,7 @@ const MODE_TEMPERATURE: Record<Mode, number> = {
   evolve: 0.65,
 };
 
-const DEFAULT_MODEL = 'gpt-4.1-mini';
+const DEFAULT_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4.1-mini';
 
 type Mode = keyof typeof MODE_FILES;
 
@@ -655,14 +655,16 @@ async function runForUser(
 
   const messages = buildMessages(prompt, placeholders);
 
+  const model = process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
   log('Sending request to OpenAI', {
     userId: user.user_id,
     mode,
     messageCount: messages.length,
     temperature: MODE_TEMPERATURE[mode],
+    model,
   });
   const response = await client.responses.create({
-    model: DEFAULT_MODEL,
+    model,
     temperature: MODE_TEMPERATURE[mode],
     input: messages.map((message) => ({
       role: message.role,
@@ -681,6 +683,7 @@ async function runForUser(
     userId: user.user_id,
     mode,
     outputLength: outputText.length,
+    model,
   });
 
   let payload: TaskPayload | undefined;
@@ -734,7 +737,7 @@ async function main() {
     log('Game modes index created', { available: gameModes.length });
 
     const client = new OpenAI({ apiKey });
-    log('OpenAI client initialised', { model: DEFAULT_MODEL });
+    log('OpenAI client initialised', { model: process.env.OPENAI_MODEL ?? DEFAULT_MODEL });
 
     await ensureExportsDir();
 
