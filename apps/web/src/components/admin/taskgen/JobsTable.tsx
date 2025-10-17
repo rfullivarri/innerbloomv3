@@ -1,6 +1,5 @@
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import type { TaskgenJob } from '../../../lib/types';
 
 const DATE_TIME_FORMATTER = new Intl.DateTimeFormat('es-AR', {
@@ -111,15 +110,6 @@ export function JobsTable({
   onRetry,
   onCopyCorrelation,
 }: JobsTableProps) {
-  const shouldVirtualize = jobs.length > 500;
-  const scrollParentRef = useRef<HTMLDivElement | null>(null);
-
-  const rowVirtualizer = useVirtualizer({
-    count: shouldVirtualize ? jobs.length : 0,
-    getScrollElement: () => scrollParentRef.current,
-    estimateSize: () => 72,
-    overscan: 12,
-  });
 
   const emptyState = useMemo(() => {
     if (loading) {
@@ -239,35 +229,6 @@ export function JobsTable({
         {header}
         {emptyState ? (
           <div className="px-6 py-12 text-center text-sm text-slate-400">{emptyState}</div>
-        ) : shouldVirtualize ? (
-          <div ref={scrollParentRef} className="relative max-h-[640px] overflow-auto">
-            <div
-              style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-                position: 'relative',
-              }}
-            >
-              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                const job = jobs[virtualRow.index];
-                return (
-                  <div
-                    key={job.id}
-                    className={rowClass}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      transform: `translateY(${virtualRow.start}px)`,
-                      height: `${virtualRow.size}px`,
-                    }}
-                  >
-                    {renderRowContent(job)}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         ) : (
           <div>
             {jobs.map((job) => (
