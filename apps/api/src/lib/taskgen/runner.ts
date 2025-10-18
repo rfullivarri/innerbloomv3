@@ -28,6 +28,19 @@ const MODE_TEMPERATURE: Record<Mode, number> = {
 
 const DEFAULT_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4.1-mini';
 
+function modelSupportsTemperature(model: string): boolean {
+  const normalized = model.trim().toLowerCase();
+  if (!normalized) {
+    return true;
+  }
+
+  return !(
+    normalized.startsWith('o1') ||
+    normalized.startsWith('o3') ||
+    normalized.startsWith('o4')
+  );
+}
+
 const runtimeDir = path.dirname(fileURLToPath(import.meta.url));
 const appRootCandidates = [
   process.cwd(),
@@ -952,12 +965,17 @@ export async function runTaskGeneration(args: {
       const model = process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
       const requestBody: ResponseCreateParamsNonStreaming = {
         model,
-        temperature: MODE_TEMPERATURE[args.mode],
         input: messages.map((message) => ({
           role: message.role,
           content: message.content,
         })),
       };
+      const temperature = MODE_TEMPERATURE[args.mode];
+      if (modelSupportsTemperature(model)) {
+        requestBody.temperature = temperature;
+      } else {
+        log('Skipping temperature parameter for model', { model, mode: args.mode });
+      }
       if (responseFormat) {
         requestBody.text = { format: responseFormat };
       }

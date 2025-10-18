@@ -4,6 +4,7 @@ import process from 'process';
 import { fileURLToPath } from 'url';
 import Ajv from 'ajv';
 import OpenAI from 'openai';
+import type { ResponseCreateParamsNonStreaming } from 'openai/resources/responses/responses';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROMPTS_DIR = path.resolve(SCRIPT_DIR, '../prompts');
@@ -80,6 +81,19 @@ const MODE_TEMPERATURE: Record<Mode, number> = {
 };
 
 const DEFAULT_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4.1-mini';
+
+function modelSupportsTemperature(model: string): boolean {
+  const normalized = model.trim().toLowerCase();
+  if (!normalized) {
+    return true;
+  }
+
+  return !(
+    normalized.startsWith('o1') ||
+    normalized.startsWith('o3') ||
+    normalized.startsWith('o4')
+  );
+}
 
 type Mode = keyof typeof MODE_FILES;
 
@@ -656,24 +670,34 @@ async function runForUser(
   const messages = buildMessages(prompt, placeholders);
 
   const model = process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
+  const temperature = MODE_TEMPERATURE[mode];
+
   log('Sending request to OpenAI', {
     userId: user.user_id,
     mode,
     messageCount: messages.length,
-    temperature: MODE_TEMPERATURE[mode],
+    temperature: modelSupportsTemperature(model) ? temperature : null,
     model,
   });
-  const response = await client.responses.create({
+  const requestBody: ResponseCreateParamsNonStreaming = {
     model,
-    temperature: MODE_TEMPERATURE[mode],
     input: messages.map((message) => ({
       role: message.role,
       content: message.content,
     })),
-    text: {
-      format: prompt.response_format,
-    },
-  });
+  };
+
+  if (modelSupportsTemperature(model)) {
+    requestBody.temperature = temperature;
+  } else {
+    log('Skipping temperature parameter for model', { model, mode });
+  }
+
+  requestBody.text = {
+    format: prompt.response_format,
+  };
+
+  const response = await client.responses.create(requestBody);
 
   const basePath = path.join(EXPORTS_DIR, `${user.user_id}.${mode}`);
 
