@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import Ajv from 'ajv';
 import OpenAI from 'openai';
 import type { ResponseCreateParamsNonStreaming } from 'openai/resources/responses/responses';
+import { isReasoningModel, sanitizeReasoningParameters } from '../src/lib/taskgen/openaiPayload.js';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROMPTS_DIR = path.resolve(SCRIPT_DIR, '../prompts');
@@ -83,16 +84,7 @@ const MODE_TEMPERATURE: Record<Mode, number> = {
 const DEFAULT_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4.1-mini';
 
 function modelSupportsTemperature(model: string): boolean {
-  const normalized = model.trim().toLowerCase();
-  if (!normalized) {
-    return true;
-  }
-
-  return !(
-    normalized.startsWith('o1') ||
-    normalized.startsWith('o3') ||
-    normalized.startsWith('o4')
-  );
+  return !isReasoningModel(model);
 }
 
 type Mode = keyof typeof MODE_FILES;
@@ -672,12 +664,14 @@ async function runForUser(
   const model = process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
   const temperature = MODE_TEMPERATURE[mode];
 
+  const temperatureSupported = modelSupportsTemperature(model);
   log('Sending request to OpenAI', {
     userId: user.user_id,
     mode,
     messageCount: messages.length,
-    temperature: modelSupportsTemperature(model) ? temperature : null,
+    temperature: temperatureSupported ? temperature : null,
     model,
+    paramFilter: isReasoningModel(model) ? 'on' : 'off',
   });
   const requestBody: ResponseCreateParamsNonStreaming = {
     model,
@@ -687,7 +681,7 @@ async function runForUser(
     })),
   };
 
-  if (modelSupportsTemperature(model)) {
+  if (temperatureSupported) {
     requestBody.temperature = temperature;
   } else {
     log('Skipping temperature parameter for model', { model, mode });
@@ -697,7 +691,19 @@ async function runForUser(
     format: prompt.response_format,
   };
 
-  const response = await client.responses.create(requestBody);
+  const { body: sanitizedRequestBody, removedKeys } = sanitizeReasoningParameters(requestBody, model);
+  const paramFilterApplied = removedKeys.length > 0 || isReasoningModel(model);
+  log('OPENAI_REQUEST', {
+    userId: user.user_id,
+    mode,
+    model,
+    messageCount: messages.length,
+    response_format: prompt.response_format?.type ?? null,
+    paramFilter: paramFilterApplied ? 'on' : 'off',
+    filteredParams: removedKeys,
+  });
+
+  const response = await client.responses.create(sanitizedRequestBody);
 
   const basePath = path.join(EXPORTS_DIR, `${user.user_id}.${mode}`);
 

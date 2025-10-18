@@ -183,5 +183,9 @@ describe('triggerTaskGenerationForUser', () => {
     const runnerStart = events.find((event) => event.event === 'RUNNER_STARTED');
     expect(runnerStart).toBeDefined();
     expect(runnerStart?.mode).toBe('flow');
+
+    const openaiRequest = events.find((event) => event.event === 'OPENAI_REQUEST');
+    expect(openaiRequest).toBeDefined();
+    expect(openaiRequest?.data?.paramFilter).toBe('off');
   });
 });

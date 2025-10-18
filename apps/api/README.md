@@ -55,6 +55,8 @@ The API keeps an in-memory ring buffer with the latest AI TaskGen events. Admin 
 
 When `OPENAI_API_KEY` is not configured the runner emits `OPENAI_MISCONFIGURED` and skips task inserts. Successful runs log `TASKS_STORED` along with the number of tasks written. The `/admin` UI exposes quick filters by user id and correlation id and allows forcing a re-run without hitting the HTTP endpoints manually.
 
+Reasoning-family models (GPT-5, `o`-series) automatically strip unsupported sampling parameters before reaching OpenAI. The trace log for `OPENAI_REQUEST` includes `paramFilter=on` whenever the sanitization runs, helping correlate payload adjustments with downstream responses.
+
 ## Development server
 
 Start the API locally:
