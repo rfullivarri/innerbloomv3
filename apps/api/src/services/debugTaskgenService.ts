@@ -8,6 +8,7 @@ import { Ajv, type AnySchema, type ErrorObject } from 'ajv';
 import type { PoolClient } from 'pg';
 import OpenAI from 'openai';
 import type { ResponseCreateParamsNonStreaming, ResponseFormatTextConfig } from 'openai/resources/responses/responses';
+import { isReasoningModel, sanitizeReasoningParameters } from '../lib/taskgen/openaiPayload.js';
 import { withClient } from '../db.js';
 
 type Mode = 'low' | 'chill' | 'flow' | 'evolve';
@@ -255,16 +256,7 @@ const MODE_FILES: Record<Mode, string> = {
 const DEFAULT_MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
 
 function modelSupportsTemperature(model: string): boolean {
-  const normalized = model.trim().toLowerCase();
-  if (!normalized) {
-    return true;
-  }
-
-  return !(
-    normalized.startsWith('o1') ||
-    normalized.startsWith('o3') ||
-    normalized.startsWith('o4')
-  );
+  return !isReasoningModel(model);
 }
 
 const runtimeDir = path.dirname(fileURLToPath(import.meta.url));
@@ -764,8 +756,21 @@ async function callOpenAiDefault(args: {
       requestBody.text = { format: responseFormat };
     }
 
+    const { body: sanitizedRequestBody, removedKeys } = sanitizeReasoningParameters(
+      requestBody,
+      requestBody.model,
+    );
+    const paramFilterApplied = removedKeys.length > 0 || isReasoningModel(requestBody.model);
+    log('OPENAI_REQUEST', {
+      model: requestBody.model,
+      messageCount: args.messages.length,
+      response_format: responseFormat?.type ?? null,
+      paramFilter: paramFilterApplied ? 'on' : 'off',
+      filteredParams: removedKeys,
+    });
+
     const start = Date.now();
-    const response = await client.responses.create(requestBody, { signal: controller.signal });
+    const response = await client.responses.create(sanitizedRequestBody, { signal: controller.signal });
     const durationMs = Date.now() - start;
     const resolvedModel = requestBody.model ?? DEFAULT_MODEL;
     return { raw: response.output_text ?? '', model: String(resolvedModel), durationMs };

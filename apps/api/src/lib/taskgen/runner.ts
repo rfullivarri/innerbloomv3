@@ -10,6 +10,7 @@ import type {
   ResponseFormatTextConfig,
   ResponseFormatTextJSONSchemaConfig,
 } from 'openai/resources/responses/responses';
+import { isReasoningModel, sanitizeReasoningParameters } from './openaiPayload.js';
 
 const LOG_PREFIX = '[taskgen]';
 const MODE_FILES = {
@@ -29,16 +30,7 @@ const MODE_TEMPERATURE: Record<Mode, number> = {
 const DEFAULT_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4.1-mini';
 
 function modelSupportsTemperature(model: string): boolean {
-  const normalized = model.trim().toLowerCase();
-  if (!normalized) {
-    return true;
-  }
-
-  return !(
-    normalized.startsWith('o1') ||
-    normalized.startsWith('o3') ||
-    normalized.startsWith('o4')
-  );
+  return !isReasoningModel(model);
 }
 
 const runtimeDir = path.dirname(fileURLToPath(import.meta.url));
@@ -979,13 +971,23 @@ export async function runTaskGeneration(args: {
       if (responseFormat) {
         requestBody.text = { format: responseFormat };
       }
-      const response = await client.responses.create(requestBody, { signal: controller.signal });
+      const { body: sanitizedRequestBody, removedKeys } = sanitizeReasoningParameters(requestBody, model);
+      const paramFilterApplied = removedKeys.length > 0 || isReasoningModel(model);
+      log('OPENAI_REQUEST', {
+        model,
+        messageCount: messages.length,
+        response_format: responseFormat?.type ?? null,
+        paramFilter: paramFilterApplied ? 'on' : 'off',
+        filteredParams: removedKeys,
+      });
+      const response = await client.responses.create(sanitizedRequestBody, { signal: controller.signal });
       openaiDuration = Date.now() - openaiStart;
       log('OpenAI invocation succeeded', {
         model,
         userId: placeholders.USER_ID,
         mode: args.mode,
         openai_duration_ms: openaiDuration,
+        paramFilter: paramFilterApplied ? 'on' : 'off',
       });
       const outputText = response.output_text ?? '';
       const payload = JSON.parse(outputText) as TaskPayload;
@@ -1044,6 +1046,7 @@ export async function runTaskGeneration(args: {
         userId: placeholders.USER_ID,
         mode: args.mode,
         openai_duration_ms: openaiDuration,
+        paramFilter: isReasoningModel(model) ? 'on' : 'off',
       });
       return {
         status: 'error',

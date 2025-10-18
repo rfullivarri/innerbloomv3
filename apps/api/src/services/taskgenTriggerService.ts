@@ -6,6 +6,7 @@ import {
   type DebugTaskgenDeps,
   type Mode,
 } from './debugTaskgenService.js';
+import { isReasoningModel } from '../lib/taskgen/openaiPayload.js';
 import {
   recordTaskgenEvent,
   type TaskgenEventLevel,
@@ -216,6 +217,8 @@ function createInstrumentedRunner(options: {
     buildMessages: baseDeps.buildMessages,
     buildPromptPreview: baseDeps.buildPromptPreview,
     callOpenAI: async (input) => {
+      const targetModel = process.env.OPENAI_MODEL ?? 'gpt-4.1-mini';
+      const paramFilter = isReasoningModel(targetModel) ? 'on' : 'off';
       emitEvent({
         level: 'info',
         event: 'OPENAI_REQUEST',
@@ -224,8 +227,10 @@ function createInstrumentedRunner(options: {
         mode: options.mode,
         origin: options.origin,
         data: {
+          model: targetModel,
           messageCount: input.messages.length,
           responseFormat: input.responseFormat ? (input.responseFormat as Record<string, unknown>).type ?? null : null,
+          paramFilter,
         },
       });
 

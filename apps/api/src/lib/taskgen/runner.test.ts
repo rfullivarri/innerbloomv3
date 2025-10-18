@@ -3,6 +3,8 @@ import { promises as fs, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ResponseCreateParamsNonStreaming } from 'openai/resources/responses/responses';
+import { isReasoningModel, sanitizeReasoningParameters } from './openaiPayload.js';
 const mockResponsesCreate = vi.fn();
 
 const PROMPT_TEST_DIR = mkdtempSync(path.join(os.tmpdir(), 'taskgen-prompts-static-'));
@@ -157,6 +159,50 @@ describe('getSnapshotOrMock', () => {
   });
 });
 
+describe('sanitizeReasoningParameters', () => {
+  it('removes sampling parameters for reasoning models', () => {
+    const baseRequest = {
+      model: 'gpt-5.1-mini',
+      input: [],
+      temperature: 0.4,
+      top_p: 0.8,
+    } as ResponseCreateParamsNonStreaming & Record<string, unknown>;
+    baseRequest.logprobs = 2;
+    baseRequest.logit_bias = { one: 1 };
+
+    const { body, removedKeys } = sanitizeReasoningParameters(baseRequest, baseRequest.model);
+
+    expect(removedKeys).toEqual(
+      expect.arrayContaining(['temperature', 'top_p', 'logprobs', 'logit_bias']),
+    );
+    expect('temperature' in body).toBe(false);
+    expect('top_p' in body).toBe(false);
+    expect('logprobs' in body).toBe(false);
+    expect('logit_bias' in body).toBe(false);
+  });
+
+  it('keeps sampling parameters for non-reasoning models', () => {
+    const baseRequest = {
+      model: 'gpt-4.1-mini',
+      input: [],
+      temperature: 0.7,
+      top_p: 0.8,
+    } as ResponseCreateParamsNonStreaming & Record<string, unknown>;
+
+    const { body, removedKeys } = sanitizeReasoningParameters(baseRequest, baseRequest.model);
+
+    expect(removedKeys).toEqual([]);
+    expect(body.temperature).toBe(0.7);
+    expect(body.top_p).toBe(0.8);
+  });
+
+  it('detects reasoning models by prefix and keyword', () => {
+    expect(isReasoningModel('gpt-5.0')).toBe(true);
+    expect(isReasoningModel('my-reasoning-model')).toBe(true);
+    expect(isReasoningModel('gpt-4.1-mini')).toBe(false);
+  });
+});
+
 describe('runTaskGeneration', () => {
   afterEach(async () => {
     delete process.env.OPENAI_API_KEY;
@@ -201,6 +247,45 @@ describe('runTaskGeneration', () => {
     const [requestBody] = mockResponsesCreate.mock.calls[0];
     expect(requestBody.model).toBe('gpt-vitest');
     expect(result.status).toBe('ok');
+  });
+
+  it('filters sampling parameters for reasoning models', async () => {
+    process.env.OPENAI_API_KEY = 'test-key';
+    process.env.OPENAI_MODEL = 'gpt-5.1-mini';
+
+    mockResponsesCreate.mockReset();
+
+    const mockPayload = {
+      user_id: TEST_USER_ID,
+      tasks_group_id: 'debug-group',
+      tasks: [
+        {
+          task: 'Reasoning safe task',
+          pillar_code: 'BODY',
+          trait_code: 'BODY_MOBILITY',
+          stat_code: 'BODY_MOBILITY',
+          difficulty_code: 'Easy',
+          friction_score: 1,
+          friction_tier: 'LOW',
+        },
+      ],
+    };
+
+    mockResponsesCreate.mockResolvedValue({ output_text: JSON.stringify(mockPayload) });
+
+    const { runTaskGeneration } = await loadRunnerModule();
+
+    const result = await runTaskGeneration({
+      userId: TEST_USER_ID,
+      mode: 'flow',
+      source: 'mock',
+      dryRun: false,
+    });
+
+    expect(result.status).toBe('ok');
+    expect(mockResponsesCreate).toHaveBeenCalledTimes(1);
+    const [requestBody] = mockResponsesCreate.mock.calls[0];
+    expect('temperature' in requestBody).toBe(false);
   });
 });
 
