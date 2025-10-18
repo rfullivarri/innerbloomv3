@@ -204,9 +204,20 @@ describe('sanitizeReasoningParameters', () => {
 });
 
 describe('runTaskGeneration', () => {
+  beforeEach(() => {
+    process.env.TASKGEN_OPENAI_TIMEOUT = '1000';
+    process.env.TASKGEN_OPENAI_MAX_ATTEMPTS = '3';
+    process.env.TASKGEN_OPENAI_RETRY_BASE_DELAY = '0';
+    process.env.TASKGEN_OPENAI_RETRY_JITTER = '0';
+  });
+
   afterEach(async () => {
     delete process.env.OPENAI_API_KEY;
     delete process.env.OPENAI_MODEL;
+    delete process.env.TASKGEN_OPENAI_TIMEOUT;
+    delete process.env.TASKGEN_OPENAI_MAX_ATTEMPTS;
+    delete process.env.TASKGEN_OPENAI_RETRY_BASE_DELAY;
+    delete process.env.TASKGEN_OPENAI_RETRY_JITTER;
     mockResponsesCreate.mockReset();
   });
 
@@ -286,6 +297,71 @@ describe('runTaskGeneration', () => {
     expect(mockResponsesCreate).toHaveBeenCalledTimes(1);
     const [requestBody] = mockResponsesCreate.mock.calls[0];
     expect('temperature' in requestBody).toBe(false);
+  });
+
+  it('retries aborted OpenAI attempts before succeeding', async () => {
+    process.env.OPENAI_API_KEY = 'test-key';
+    process.env.OPENAI_MODEL = 'gpt-vitest';
+
+    mockResponsesCreate.mockReset();
+    const abortError = Object.assign(new Error('Request was aborted.'), { name: 'AbortError' });
+    mockResponsesCreate.mockRejectedValueOnce(abortError);
+    mockResponsesCreate.mockRejectedValueOnce(abortError);
+
+    const mockPayload = {
+      user_id: TEST_USER_ID,
+      tasks_group_id: 'debug-group',
+      tasks: [
+        {
+          task: 'Recovered task',
+          pillar_code: 'BODY',
+          trait_code: 'BODY_MOBILITY',
+          stat_code: 'BODY_MOBILITY',
+          difficulty_code: 'Easy',
+          friction_score: 1,
+          friction_tier: 'LOW',
+        },
+      ],
+    };
+
+    mockResponsesCreate.mockResolvedValueOnce({ output_text: JSON.stringify(mockPayload) });
+
+    const { runTaskGeneration } = await loadRunnerModule();
+
+    const result = await runTaskGeneration({
+      userId: TEST_USER_ID,
+      mode: 'flow',
+      source: 'mock',
+      dryRun: false,
+    });
+
+    expect(result.status).toBe('ok');
+    expect(result.meta.timings_ms.openai).toBeGreaterThanOrEqual(0);
+    expect(mockResponsesCreate).toHaveBeenCalledTimes(3);
+  });
+
+  it('marks timeout failures with ABORTED_BY_TIMEOUT', async () => {
+    process.env.OPENAI_API_KEY = 'test-key';
+    process.env.OPENAI_MODEL = 'gpt-vitest';
+
+    mockResponsesCreate.mockReset();
+    const abortError = Object.assign(new Error('Request was aborted.'), { name: 'AbortError' });
+    mockResponsesCreate.mockRejectedValue(abortError);
+
+    const { runTaskGeneration } = await loadRunnerModule();
+
+    const result = await runTaskGeneration({
+      userId: TEST_USER_ID,
+      mode: 'flow',
+      source: 'mock',
+      dryRun: false,
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.error_code).toBe('ABORTED_BY_TIMEOUT');
+    expect(result.meta.validation.valid).toBe(false);
+    expect(result.errors?.[0]).toContain('OpenAI request timed out or was aborted');
+    expect(mockResponsesCreate).toHaveBeenCalledTimes(3);
   });
 });
 

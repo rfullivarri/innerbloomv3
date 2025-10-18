@@ -4,13 +4,14 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { Ajv, type AnySchema, type ErrorObject } from 'ajv';
-import OpenAI from 'openai';
 import type {
+  Response as OpenAIResponse,
   ResponseCreateParamsNonStreaming,
   ResponseFormatTextConfig,
   ResponseFormatTextJSONSchemaConfig,
 } from 'openai/resources/responses/responses';
 import { isReasoningModel, sanitizeReasoningParameters } from './openaiPayload.js';
+import { callOpenAiWithRetry, resolveOpenAiRequestConfigFromEnv } from './openaiClient.js';
 
 const LOG_PREFIX = '[taskgen]';
 const MODE_FILES = {
@@ -28,6 +29,7 @@ const MODE_TEMPERATURE: Record<Mode, number> = {
 };
 
 const DEFAULT_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4.1-mini';
+const ABORTED_BY_TIMEOUT_ERROR_CODE = 'ABORTED_BY_TIMEOUT';
 
 function modelSupportsTemperature(model: string): boolean {
   return !isReasoningModel(model);
@@ -250,6 +252,7 @@ export type TaskgenResult = {
   };
   errors?: string[];
   error_log?: string;
+  error_code?: string;
 };
 
 type SnapshotResolution = {
@@ -942,53 +945,65 @@ export async function runTaskGeneration(args: {
       throw new Error('OPENAI_API_KEY is not configured');
     }
 
-    const client = new OpenAI({ apiKey });
-    const controller = new AbortController();
-    const timeout = Number.parseInt(process.env.TASKGEN_OPENAI_TIMEOUT ?? '45000', 10);
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-    }, timeout);
-
-    let openaiStart = 0;
+    const { timeoutMs, maxAttempts, baseDelayMs, jitterMs } = resolveOpenAiRequestConfigFromEnv();
     let openaiDuration = 0;
     const responseFormat = buildResponseFormatConfig(prompt.response_format);
-    try {
-      openaiStart = Date.now();
-      const model = process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
-      const requestBody: ResponseCreateParamsNonStreaming = {
+    const model = process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
+    const requestBody: ResponseCreateParamsNonStreaming = {
+      model,
+      input: messages.map((message) => ({
+        role: message.role,
+        content: message.content,
+      })),
+    };
+    const temperature = MODE_TEMPERATURE[args.mode];
+    if (modelSupportsTemperature(model)) {
+      requestBody.temperature = temperature;
+    } else {
+      log('Skipping temperature parameter for model', { model, mode: args.mode });
+    }
+    if (responseFormat) {
+      requestBody.text = { format: responseFormat };
+    }
+    const { body: sanitizedRequestBody, removedKeys } = sanitizeReasoningParameters(requestBody, model);
+    const paramFilterApplied = removedKeys.length > 0 || isReasoningModel(model);
+    log('OPENAI_REQUEST', {
+      model,
+      messageCount: messages.length,
+      response_format: responseFormat?.type ?? null,
+      paramFilter: paramFilterApplied ? 'on' : 'off',
+      filteredParams: removedKeys,
+      attempts: maxAttempts,
+      timeout_ms: timeoutMs,
+    });
+
+    const openAiOutcome = await callOpenAiWithRetry({
+      apiKey,
+      requestBody: sanitizedRequestBody,
+      timeoutMs,
+      maxAttempts,
+      baseDelayMs,
+      jitterMs,
+      logger: { info: log, warn: logWarn, error: logError },
+      logContext: {
         model,
-        input: messages.map((message) => ({
-          role: message.role,
-          content: message.content,
-        })),
-      };
-      const temperature = MODE_TEMPERATURE[args.mode];
-      if (modelSupportsTemperature(model)) {
-        requestBody.temperature = temperature;
-      } else {
-        log('Skipping temperature parameter for model', { model, mode: args.mode });
-      }
-      if (responseFormat) {
-        requestBody.text = { format: responseFormat };
-      }
-      const { body: sanitizedRequestBody, removedKeys } = sanitizeReasoningParameters(requestBody, model);
-      const paramFilterApplied = removedKeys.length > 0 || isReasoningModel(model);
-      log('OPENAI_REQUEST', {
-        model,
-        messageCount: messages.length,
-        response_format: responseFormat?.type ?? null,
-        paramFilter: paramFilterApplied ? 'on' : 'off',
-        filteredParams: removedKeys,
-      });
-      const response = await client.responses.create(sanitizedRequestBody, { signal: controller.signal });
-      openaiDuration = Date.now() - openaiStart;
+        userId: placeholders.USER_ID,
+        mode: args.mode,
+      },
+    });
+
+    if (openAiOutcome.ok) {
+      openaiDuration = openAiOutcome.durationMs;
       log('OpenAI invocation succeeded', {
         model,
         userId: placeholders.USER_ID,
         mode: args.mode,
         openai_duration_ms: openaiDuration,
+        attempts: openAiOutcome.attempts,
+        request_id: openAiOutcome.requestId,
         paramFilter: paramFilterApplied ? 'on' : 'off',
       });
+      const response = openAiOutcome.response as OpenAIResponse;
       const outputText = response.output_text ?? '';
       const payload = JSON.parse(outputText) as TaskPayload;
       const validation = validatePayload(
@@ -1034,39 +1049,41 @@ export async function runTaskGeneration(args: {
           timings_ms: { total: Date.now() - start, openai: openaiDuration },
         },
       };
-    } catch (error) {
-      openaiDuration = openaiDuration || (openaiStart ? Date.now() - openaiStart : 0);
-      const message = error instanceof Error ? error.message : String(error);
-      const errorLog = await appendErrorLog(message);
-      const total = Date.now() - start;
-      const model = process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
-      logError('OpenAI invocation failed', {
-        message,
-        model,
-        userId: placeholders.USER_ID,
-        mode: args.mode,
-        openai_duration_ms: openaiDuration,
-        paramFilter: isReasoningModel(model) ? 'on' : 'off',
-      });
-      return {
-        status: 'error',
-        user_id: placeholders.USER_ID,
-        mode: args.mode,
-        source: resolvedSource,
-        seed: args.seed,
-        placeholders,
-        prompt_preview: promptPreview,
-        meta: {
-          schema_version: 'v1',
-          validation: { valid: false, errors: [message] },
-          timings_ms: { total, openai: openaiDuration },
-        },
-        errors: [message],
-        error_log: errorLog,
-      };
-    } finally {
-      clearTimeout(timeoutId);
     }
+
+    openaiDuration = openAiOutcome.durationMs;
+    const total = Date.now() - start;
+    const failureMessage = openAiOutcome.abortedByTimeout
+      ? `OpenAI request timed out or was aborted after ${openAiOutcome.attempts} attempts: ${openAiOutcome.reason}`
+      : `OpenAI request failed after ${openAiOutcome.attempts} attempts: ${openAiOutcome.reason}`;
+    const errorLog = await appendErrorLog(failureMessage);
+    logError('OpenAI invocation failed', {
+      message: failureMessage,
+      model,
+      userId: placeholders.USER_ID,
+      mode: args.mode,
+      openai_duration_ms: openaiDuration,
+      attempts: openAiOutcome.attempts,
+      request_id: openAiOutcome.requestId,
+      paramFilter: paramFilterApplied ? 'on' : 'off',
+    });
+    return {
+      status: 'error',
+      user_id: placeholders.USER_ID,
+      mode: args.mode,
+      source: resolvedSource,
+      seed: args.seed,
+      placeholders,
+      prompt_preview: promptPreview,
+      meta: {
+        schema_version: 'v1',
+        validation: { valid: false, errors: [failureMessage] },
+        timings_ms: { total, openai: openaiDuration },
+      },
+      errors: [failureMessage],
+      error_log: errorLog,
+      error_code: openAiOutcome.abortedByTimeout ? ABORTED_BY_TIMEOUT_ERROR_CODE : undefined,
+    };
   } catch (error) {
     const total = Date.now() - start;
     const message = error instanceof Error ? error.message : String(error);
