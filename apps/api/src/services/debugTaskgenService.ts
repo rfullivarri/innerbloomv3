@@ -6,9 +6,13 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { Ajv, type AnySchema, type ErrorObject } from 'ajv';
 import type { PoolClient } from 'pg';
-import OpenAI from 'openai';
-import type { ResponseCreateParamsNonStreaming, ResponseFormatTextConfig } from 'openai/resources/responses/responses';
+import type {
+  Response as OpenAIResponse,
+  ResponseCreateParamsNonStreaming,
+  ResponseFormatTextConfig,
+} from 'openai/resources/responses/responses';
 import { isReasoningModel, sanitizeReasoningParameters } from '../lib/taskgen/openaiPayload.js';
+import { callOpenAiWithRetry, resolveOpenAiRequestConfigFromEnv } from '../lib/taskgen/openaiClient.js';
 import { withClient } from '../db.js';
 
 type Mode = 'low' | 'chill' | 'flow' | 'evolve';
@@ -236,6 +240,14 @@ function log(message: string, meta?: Record<string, unknown>) {
     return;
   }
   console.info(LOG_PREFIX, message);
+}
+
+function logWarn(message: string, meta?: Record<string, unknown>) {
+  if (meta) {
+    console.warn(LOG_PREFIX, message, meta);
+    return;
+  }
+  console.warn(LOG_PREFIX, message);
 }
 
 function logError(message: string, meta?: Record<string, unknown>) {
@@ -728,55 +740,87 @@ async function callOpenAiDefault(args: {
     throw new Error('OPENAI_API_KEY is not configured');
   }
 
-  const client = new OpenAI({ apiKey });
-  const controller = new AbortController();
-  const timeout = Number.parseInt(process.env.TASKGEN_OPENAI_TIMEOUT ?? '45000', 10);
-  const timeoutId = setTimeout(() => {
-    controller.abort();
-  }, timeout);
+  const { timeoutMs, maxAttempts, baseDelayMs, jitterMs } = resolveOpenAiRequestConfigFromEnv();
+  const requestBody: ResponseCreateParamsNonStreaming = {
+    model: DEFAULT_MODEL,
+    input: args.messages.map((message) => ({
+      role: message.role,
+      content: message.content,
+    })),
+  };
 
-  try {
-    const requestBody: ResponseCreateParamsNonStreaming = {
-      model: DEFAULT_MODEL,
-      input: args.messages.map((message) => ({
-        role: message.role,
-        content: message.content,
-      })),
-    };
-
-    const temperature = args.mode === 'flow' || args.mode === 'evolve' ? 0.65 : 0.5;
-    if (modelSupportsTemperature(DEFAULT_MODEL)) {
-      requestBody.temperature = temperature;
-    } else {
-      log('Skipping temperature parameter for model', { model: DEFAULT_MODEL, mode: args.mode });
-    }
-
-    const responseFormat = buildResponseFormatConfig(args.responseFormat);
-    if (responseFormat) {
-      requestBody.text = { format: responseFormat };
-    }
-
-    const { body: sanitizedRequestBody, removedKeys } = sanitizeReasoningParameters(
-      requestBody,
-      requestBody.model,
-    );
-    const paramFilterApplied = removedKeys.length > 0 || isReasoningModel(requestBody.model);
-    log('OPENAI_REQUEST', {
-      model: requestBody.model,
-      messageCount: args.messages.length,
-      response_format: responseFormat?.type ?? null,
-      paramFilter: paramFilterApplied ? 'on' : 'off',
-      filteredParams: removedKeys,
-    });
-
-    const start = Date.now();
-    const response = await client.responses.create(sanitizedRequestBody, { signal: controller.signal });
-    const durationMs = Date.now() - start;
-    const resolvedModel = requestBody.model ?? DEFAULT_MODEL;
-    return { raw: response.output_text ?? '', model: String(resolvedModel), durationMs };
-  } finally {
-    clearTimeout(timeoutId);
+  const temperature = args.mode === 'flow' || args.mode === 'evolve' ? 0.65 : 0.5;
+  if (modelSupportsTemperature(DEFAULT_MODEL)) {
+    requestBody.temperature = temperature;
+  } else {
+    log('Skipping temperature parameter for model', { model: DEFAULT_MODEL, mode: args.mode });
   }
+
+  const responseFormat = buildResponseFormatConfig(args.responseFormat);
+  if (responseFormat) {
+    requestBody.text = { format: responseFormat };
+  }
+
+  const { body: sanitizedRequestBody, removedKeys } = sanitizeReasoningParameters(
+    requestBody,
+    requestBody.model,
+  );
+  const paramFilterApplied = removedKeys.length > 0 || isReasoningModel(requestBody.model);
+  log('OPENAI_REQUEST', {
+    model: requestBody.model,
+    messageCount: args.messages.length,
+    response_format: responseFormat?.type ?? null,
+    paramFilter: paramFilterApplied ? 'on' : 'off',
+    filteredParams: removedKeys,
+    attempts: maxAttempts,
+    timeout_ms: timeoutMs,
+  });
+
+  const openAiOutcome = await callOpenAiWithRetry({
+    apiKey,
+    requestBody: sanitizedRequestBody,
+    timeoutMs,
+    maxAttempts,
+    baseDelayMs,
+    jitterMs,
+    logger: { info: log, warn: logWarn, error: logError },
+    logContext: {
+      model: requestBody.model,
+      mode: args.mode,
+    },
+  });
+
+  if (!openAiOutcome.ok) {
+    const failureMessage = openAiOutcome.abortedByTimeout
+      ? `OpenAI request timed out or was aborted after ${openAiOutcome.attempts} attempts: ${openAiOutcome.reason}`
+      : `OpenAI request failed after ${openAiOutcome.attempts} attempts: ${openAiOutcome.reason}`;
+    logError('OpenAI invocation failed', {
+      message: failureMessage,
+      model: requestBody.model,
+      mode: args.mode,
+      openai_duration_ms: openAiOutcome.durationMs,
+      attempts: openAiOutcome.attempts,
+      request_id: openAiOutcome.requestId,
+      paramFilter: paramFilterApplied ? 'on' : 'off',
+    });
+    if (openAiOutcome.error instanceof Error) {
+      throw new Error(failureMessage, { cause: openAiOutcome.error });
+    }
+    throw new Error(failureMessage);
+  }
+
+  log('OpenAI invocation succeeded', {
+    model: requestBody.model,
+    mode: args.mode,
+    openai_duration_ms: openAiOutcome.durationMs,
+    attempts: openAiOutcome.attempts,
+    request_id: openAiOutcome.requestId,
+    paramFilter: paramFilterApplied ? 'on' : 'off',
+  });
+
+  const resolvedModel = requestBody.model ?? DEFAULT_MODEL;
+  const response = openAiOutcome.response as OpenAIResponse;
+  return { raw: response.output_text ?? '', model: String(resolvedModel), durationMs: openAiOutcome.durationMs };
 }
 
 async function storeTasksDefault(args: { user: UserRow; catalogs: Catalogs; tasks: DebugTask[] }): Promise<void> {
