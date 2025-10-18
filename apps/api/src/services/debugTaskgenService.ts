@@ -254,6 +254,19 @@ const MODE_FILES: Record<Mode, string> = {
 
 const DEFAULT_MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
 
+function modelSupportsTemperature(model: string): boolean {
+  const normalized = model.trim().toLowerCase();
+  if (!normalized) {
+    return true;
+  }
+
+  return !(
+    normalized.startsWith('o1') ||
+    normalized.startsWith('o3') ||
+    normalized.startsWith('o4')
+  );
+}
+
 const runtimeDir = path.dirname(fileURLToPath(import.meta.url));
 const appRootCandidates = [
   process.cwd(),
@@ -733,12 +746,18 @@ async function callOpenAiDefault(args: {
   try {
     const requestBody: ResponseCreateParamsNonStreaming = {
       model: DEFAULT_MODEL,
-      temperature: args.mode === 'flow' || args.mode === 'evolve' ? 0.65 : 0.5,
       input: args.messages.map((message) => ({
         role: message.role,
         content: message.content,
       })),
     };
+
+    const temperature = args.mode === 'flow' || args.mode === 'evolve' ? 0.65 : 0.5;
+    if (modelSupportsTemperature(DEFAULT_MODEL)) {
+      requestBody.temperature = temperature;
+    } else {
+      log('Skipping temperature parameter for model', { model: DEFAULT_MODEL, mode: args.mode });
+    }
 
     const responseFormat = buildResponseFormatConfig(args.responseFormat);
     if (responseFormat) {
