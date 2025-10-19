@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { DevErrorBoundary } from '../../components/DevErrorBoundary';
 import { Navbar } from '../../components/layout/Navbar';
@@ -17,12 +17,7 @@ import {
   type DashboardSectionConfig,
 } from '../dashboardSections';
 
-type TaskBoardGroup = {
-  key: string;
-  name: string;
-  code: string;
-  tasks: UserTask[];
-};
+export const FEATURE_TASK_EDITOR_MOBILE_LIST_V1 = true;
 
 export default function TaskEditorPage() {
   const location = useLocation();
@@ -50,8 +45,11 @@ export default function TaskEditorPage() {
   const [editGroupKey, setEditGroupKey] = useState<string | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<UserTask | null>(null);
   const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(null);
+  const [pageToast, setPageToast] = useState<ToastMessage | null>(null);
+  const [duplicatingTaskId, setDuplicatingTaskId] = useState<string | null>(null);
 
   const { deleteTask, status: deleteStatus } = useDeleteTask();
+  const { createTask: duplicateTask } = useCreateTask();
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const isBackendReady = backendStatus === 'success' && Boolean(backendUserId);
@@ -223,95 +221,41 @@ export default function TaskEditorPage() {
   }, [normalizedSearch, selectedPillar, tasks]);
 
   const sortedTasks = useMemo(() => {
-    const defaultOrder = pillarGrouping.canonicalOrder.size + 1;
-
-    return filteredTasks
-      .map((task, index) => ({ task, index }))
-      .sort((a, b) => {
-        const normalizedA = (a.task.pillarId ?? '').trim().toLowerCase();
-        const normalizedB = (b.task.pillarId ?? '').trim().toLowerCase();
-        const canonicalA =
-          pillarGrouping.normalizedToCanonical.get(normalizedA) ?? (normalizedA.length > 0 ? normalizedA : '__unknown__');
-        const canonicalB =
-          pillarGrouping.normalizedToCanonical.get(normalizedB) ?? (normalizedB.length > 0 ? normalizedB : '__unknown__');
-
-        const orderA = pillarGrouping.canonicalOrder.get(canonicalA) ?? defaultOrder;
-        const orderB = pillarGrouping.canonicalOrder.get(canonicalB) ?? defaultOrder;
-
-        if (orderA !== orderB) {
-          return orderA - orderB;
-        }
-
-        return a.index - b.index;
-      })
-      .map((entry) => entry.task);
-  }, [filteredTasks, pillarGrouping]);
-
-  const groupedTasks = useMemo(() => {
-    const groups: TaskBoardGroup[] = [];
-    const groupsByKey = new Map<string, TaskBoardGroup>();
-
-    for (const pillar of pillars) {
-      const meta = pillarGrouping.metaByCanonical.get(pillar.id) ?? {
-        name: pillar.name,
-        code: pillar.code ?? pillar.id,
-      };
-
-      const group: TaskBoardGroup = {
-        key: pillar.id,
-        name: meta.name,
-        code: meta.code,
-        tasks: [],
-      };
-
-      groups.push(group);
-      groupsByKey.set(group.key, group);
+    if (!FEATURE_TASK_EDITOR_MOBILE_LIST_V1) {
+      return filteredTasks;
     }
 
-    const unknownGroup: TaskBoardGroup = {
-      key: '__unknown__',
-      name: 'Sin asignar',
-      code: 'UNKNOWN',
-      tasks: [],
-    };
+    const entries = filteredTasks.map((task) => ({
+      task,
+      pillarName: pillarNamesById.get(task.pillarId ?? '') ?? '',
+    }));
 
-    for (const task of sortedTasks) {
-      const normalized = (task.pillarId ?? '').trim().toLowerCase();
-      const canonical = pillarGrouping.normalizedToCanonical.get(normalized);
-      if (canonical && groupsByKey.has(canonical)) {
-        groupsByKey.get(canonical)!.tasks.push(task);
-        continue;
+    entries.sort((a, b) => {
+      if (a.pillarName === b.pillarName) {
+        return a.task.title.localeCompare(b.task.title, 'es', { sensitivity: 'base' });
       }
 
-      if (normalized.length > 0 && groupsByKey.has(normalized)) {
-        groupsByKey.get(normalized)!.tasks.push(task);
-        continue;
+      if (!a.pillarName) {
+        return 1;
       }
 
-      unknownGroup.tasks.push(task);
-    }
+      if (!b.pillarName) {
+        return -1;
+      }
 
-    if (unknownGroup.tasks.length > 0) {
-      groups.push(unknownGroup);
-      groupsByKey.set(unknownGroup.key, unknownGroup);
-    }
+      return a.pillarName.localeCompare(b.pillarName, 'es', { sensitivity: 'base' });
+    });
 
-    return { groups, groupsByKey };
-  }, [pillarGrouping, pillars, sortedTasks]);
-
-  const tasksById = useMemo(() => {
-    const map = new Map<string, UserTask>();
-    for (const task of sortedTasks) {
-      map.set(task.id, task);
-    }
-    return map;
-  }, [sortedTasks]);
+    return entries.map((entry) => entry.task);
+  }, [filteredTasks, pillarNamesById]);
 
   const hasActiveFilters = normalizedSearch.length > 0 || selectedPillar.length > 0;
   const isDeletingTask = deleteStatus === 'loading';
 
   const isTaskListEmpty = !isLoadingTasks && !combinedError && tasks.length === 0;
-  const isFilteredEmpty = !isLoadingTasks && !combinedError && tasks.length > 0 && filteredTasks.length === 0;
+  const visibleTasks = FEATURE_TASK_EDITOR_MOBILE_LIST_V1 ? sortedTasks : filteredTasks;
+  const isFilteredEmpty =
+    !isLoadingTasks && !combinedError && tasks.length > 0 && visibleTasks.length === 0;
 
   const handleRetry = () => {
     reloadProfile();
@@ -352,66 +296,63 @@ export default function TaskEditorPage() {
   }, [backendUserId, deleteTask, taskToDelete]);
 
   useEffect(() => {
-    if (!taskToEdit) {
+    if (!pageToast) {
       return;
     }
 
-    const latestTask = tasksById.get(taskToEdit.id);
+    const timeoutId = window.setTimeout(() => setPageToast(null), 4000);
+    return () => window.clearTimeout(timeoutId);
+  }, [pageToast]);
 
-    if (!latestTask) {
-      setTaskToEdit(null);
-      setEditGroupKey(null);
-      return;
-    }
+  const handleDuplicateTask = useCallback(
+    async (task: UserTask) => {
+      if (!backendUserId) {
+        setPageToast({
+          type: 'error',
+          text: 'No se pudo identificar tu usuario. Intenta más tarde.',
+        });
+        return;
+      }
 
-    const sameTitle = (latestTask.title ?? '') === (taskToEdit.title ?? '');
-    const sameDifficulty = (latestTask.difficultyId ?? '') === (taskToEdit.difficultyId ?? '');
-    const sameNotes = (latestTask.notes ?? '') === (taskToEdit.notes ?? '');
-    const sameStatus = Boolean(latestTask.isActive) === Boolean(taskToEdit.isActive);
-    const sameUpdatedAt = (latestTask.updatedAt ?? '') === (taskToEdit.updatedAt ?? '');
+      setDuplicatingTaskId(task.id);
 
-    if (sameTitle && sameDifficulty && sameNotes && sameStatus && sameUpdatedAt) {
-      return;
-    }
-
-    setTaskToEdit(latestTask);
-  }, [taskToEdit, tasksById]);
-
-  const handleOpenEditModal = useCallback((task: UserTask) => {
-    setEditVariant('modal');
-    setEditGroupKey(null);
-    setTaskToEdit(task);
-  }, []);
-
-  const handleOpenEditPanel = useCallback((task: UserTask, groupKey: string) => {
-    setEditVariant('panel');
-    setEditGroupKey(groupKey);
-    setTaskToEdit(task);
-  }, []);
-
-  const handleCloseEdit = useCallback(() => {
-    setTaskToEdit(null);
-    setEditGroupKey(null);
-    setEditVariant('modal');
-  }, []);
-
-  const handleNavigatePanelTask = useCallback(
-    (taskId: string) => {
-      const nextTask = tasksById.get(taskId);
-      if (nextTask) {
-        setTaskToEdit(nextTask);
+      try {
+        const normalizedTitle = task.title?.trim() ?? '';
+        const title = normalizedTitle.length > 0 ? `${normalizedTitle} (copia)` : 'Tarea duplicada';
+        await duplicateTask(backendUserId, {
+          title,
+          pillarId: task.pillarId ?? null,
+          traitId: task.traitId ?? null,
+          statId: task.statId ?? null,
+          difficultyId: task.difficultyId ?? null,
+          notes: task.notes ?? null,
+          isActive: task.isActive ?? true,
+        });
+        setPageToast({ type: 'success', text: 'Tarea duplicada correctamente.' });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'No se pudo duplicar la tarea.';
+        setPageToast({ type: 'error', text: message });
+      } finally {
+        setDuplicatingTaskId(null);
       }
     },
-    [tasksById],
+    [backendUserId, duplicateTask],
   );
 
-  const handleDeleteTask = useCallback((task: UserTask) => {
-    setTaskToDelete(task);
-  }, []);
+  const handleImproveTask = useCallback(
+    (task: UserTask) => {
+      if (!task) {
+        return;
+      }
 
-  const navigationTasks =
-    editVariant === 'panel' && editGroupKey ? groupedTasks.groupsByKey.get(editGroupKey)?.tasks ?? [] : [];
-  const activeTaskId = editVariant === 'panel' && taskToEdit ? taskToEdit.id : null;
+      // TODO: conectar con el flujo de mejora por IA cuando esté disponible en el editor.
+      setPageToast({
+        type: 'info',
+        text: 'Pronto podrás mejorar tareas con IA desde aquí.',
+      });
+    },
+    [],
+  );
 
   return (
     <DevErrorBoundary>
@@ -422,6 +363,9 @@ export default function TaskEditorPage() {
             <SectionHeader section={taskEditorSection} />
             <Card>
               <div className="flex flex-col gap-5">
+                {pageToast && (
+                  <ToastBanner tone={pageToast.type} message={pageToast.text} className="px-3" />
+                )}
                 <TaskFilters
                   searchTerm={searchTerm}
                   onSearchChange={setSearchTerm}
@@ -453,28 +397,19 @@ export default function TaskEditorPage() {
                   />
                 )}
 
-                {!isLoadingTasks && !combinedError && filteredTasks.length > 0 && (
-                  <>
-                    <div className="lg:hidden">
-                      <TaskList
-                        tasks={sortedTasks}
-                        pillarNamesById={pillarNamesById}
-                        traitNamesById={traitNamesMap}
-                        statNamesById={statNamesMap}
-                        difficultyNamesById={difficultyNamesById}
-                        onEditTask={handleOpenEditModal}
-                        onDeleteTask={handleDeleteTask}
-                      />
-                    </div>
-                    <TaskBoard
-                      groups={groupedTasks.groups}
-                      difficultyNamesById={difficultyNamesById}
-                      pillarNamesById={pillarNamesById}
-                      activeTaskId={activeTaskId}
-                      onSelectTask={handleOpenEditPanel}
-                      onDeleteTask={handleDeleteTask}
-                    />
-                  </>
+                {!isLoadingTasks && !combinedError && visibleTasks.length > 0 && (
+                  <TaskList
+                    tasks={visibleTasks}
+                    pillarNamesById={pillarNamesById}
+                    traitNamesById={traitNamesMap}
+                    statNamesById={statNamesMap}
+                    difficultyNamesById={difficultyNamesById}
+                    onEditTask={(task) => setTaskToEdit(task)}
+                    onDeleteTask={(task) => setTaskToDelete(task)}
+                    onDuplicateTask={FEATURE_TASK_EDITOR_MOBILE_LIST_V1 ? handleDuplicateTask : undefined}
+                    onImproveTask={FEATURE_TASK_EDITOR_MOBILE_LIST_V1 ? handleImproveTask : undefined}
+                    duplicatingTaskId={FEATURE_TASK_EDITOR_MOBILE_LIST_V1 ? duplicatingTaskId : null}
+                  />
                 )}
               </div>
             </Card>
@@ -576,50 +511,154 @@ function TaskFilters({
   pillarsError,
   onRetryPillars,
 }: TaskFiltersProps) {
+  if (!FEATURE_TASK_EDITOR_MOBILE_LIST_V1) {
+    return (
+      <div className="flex flex-col gap-3 md:flex-row md:items-end">
+        <label className="flex w-full flex-col gap-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+            Búsqueda
+          </span>
+          <div className="relative flex items-center">
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder="Buscar por título"
+              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+            />
+          </div>
+        </label>
+        <label className="flex w-full flex-col gap-2 md:max-w-xs">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+            Pilar
+          </span>
+          <select
+            value={selectedPillar}
+            onChange={(event) => onPillarChange(event.target.value)}
+            className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+          >
+            {pillars.map((pillar) => (
+              <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-slate-100">
+                {pillar.label}
+              </option>
+            ))}
+          </select>
+          {isLoadingPillars && (
+            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando pilares…</span>
+          )}
+          {pillarsError && !isLoadingPillars && (
+            <button
+              type="button"
+              onClick={onRetryPillars}
+              className="self-start text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300"
+            >
+              Reintentar cargar pilares
+            </button>
+          )}
+        </label>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-3 md:flex-row md:items-end">
-      <label className="flex w-full flex-col gap-2">
-        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-          Búsqueda
-        </span>
-        <div className="relative flex items-center">
-          <input
-            type="search"
-            value={searchTerm}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Buscar por título"
-            className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
-          />
+    <div className="flex flex-col gap-4">
+      <div className="md:hidden">
+        <div className="sticky -mx-6 -mt-6 px-6 pt-6 pb-3 top-[4.5rem] z-30 space-y-3 rounded-t-2xl bg-surface/95 backdrop-blur">
+          <label className="flex flex-col gap-1">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+              Buscar tareas
+            </span>
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder="Buscar por título"
+              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+            />
+          </label>
+          <div className="space-y-2">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Pilares
+            </span>
+            <div className="flex gap-2 overflow-x-auto pb-1 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
+              {pillars.map((pillar) => {
+                const isActive = pillar.value === selectedPillar;
+                return (
+                  <button
+                    key={pillar.value || 'all'}
+                    type="button"
+                    onClick={() => onPillarChange(pillar.value)}
+                    className={`inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60 ${
+                      isActive
+                        ? 'border-indigo-400/70 bg-indigo-400/15 text-indigo-100'
+                        : 'border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10'
+                    }`}
+                    aria-pressed={isActive}
+                  >
+                    {pillar.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </label>
-      <label className="flex w-full flex-col gap-2 md:max-w-xs">
-        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-          Pilar
-        </span>
-        <select
-          value={selectedPillar}
-          onChange={(event) => onPillarChange(event.target.value)}
-          className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
-        >
-          {pillars.map((pillar) => (
-            <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-slate-100">
-              {pillar.label}
-            </option>
-          ))}
-        </select>
         {isLoadingPillars && (
-          <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando pilares…</span>
+          <p className="px-1 text-[10px] uppercase tracking-[0.28em] text-slate-500">Cargando pilares…</p>
         )}
         {pillarsError && !isLoadingPillars && (
           <button
             type="button"
             onClick={onRetryPillars}
-            className="self-start text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300"
+            className="px-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-300"
           >
             Reintentar cargar pilares
           </button>
         )}
-      </label>
+      </div>
+      <div className="hidden flex-col gap-3 md:flex md:flex-row md:items-end">
+        <label className="flex w-full flex-col gap-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+            Búsqueda
+          </span>
+          <div className="relative flex items-center">
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder="Buscar por título"
+              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+            />
+          </div>
+        </label>
+        <label className="flex w-full flex-col gap-2 md:max-w-xs">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+            Pilar
+          </span>
+          <select
+            value={selectedPillar}
+            onChange={(event) => onPillarChange(event.target.value)}
+            className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+          >
+            {pillars.map((pillar) => (
+              <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-slate-100">
+                {pillar.label}
+              </option>
+            ))}
+          </select>
+          {isLoadingPillars && (
+            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando pilares…</span>
+          )}
+          {pillarsError && !isLoadingPillars && (
+            <button
+              type="button"
+              onClick={onRetryPillars}
+              className="self-start text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300"
+            >
+              Reintentar cargar pilares
+            </button>
+          )}
+        </label>
+      </div>
     </div>
   );
 }
@@ -632,6 +671,9 @@ function TaskList({
   difficultyNamesById,
   onEditTask,
   onDeleteTask,
+  onDuplicateTask,
+  onImproveTask,
+  duplicatingTaskId = null,
 }: {
   tasks: UserTask[];
   pillarNamesById: Map<string, string>;
@@ -640,22 +682,264 @@ function TaskList({
   difficultyNamesById: Map<string, string>;
   onEditTask: (task: UserTask) => void;
   onDeleteTask: (task: UserTask) => void;
+  onDuplicateTask?: (task: UserTask) => void;
+  onImproveTask?: (task: UserTask) => void;
+  duplicatingTaskId?: string | null;
 }) {
+  if (!FEATURE_TASK_EDITOR_MOBILE_LIST_V1) {
+    return (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {tasks.map((task) => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            pillarName={pillarNamesById.get(task.pillarId ?? '') ?? null}
+            traitName={task.traitId ? traitNamesById.get(task.traitId) ?? null : null}
+            statName={task.statId ? statNamesById.get(task.statId) ?? null : null}
+            difficultyName={task.difficultyId ? difficultyNamesById.get(task.difficultyId) ?? null : null}
+            onEdit={() => onEditTask(task)}
+            onDelete={() => onDeleteTask(task)}
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {tasks.map((task) => (
-        <TaskCard
-          key={task.id}
-          task={task}
-          pillarName={pillarNamesById.get(task.pillarId ?? '') ?? null}
-          traitName={task.traitId ? traitNamesById.get(task.traitId) ?? null : null}
-          statName={task.statId ? statNamesById.get(task.statId) ?? null : null}
-          difficultyName={task.difficultyId ? difficultyNamesById.get(task.difficultyId) ?? null : null}
-          onEdit={() => onEditTask(task)}
-          onDelete={() => onDeleteTask(task)}
+    <>
+      <div className="md:hidden">
+        <TaskListMobile
+          tasks={tasks}
+          pillarNamesById={pillarNamesById}
+          difficultyNamesById={difficultyNamesById}
+          onEditTask={onEditTask}
+          onDeleteTask={onDeleteTask}
+          onDuplicateTask={onDuplicateTask}
+          onImproveTask={onImproveTask}
+          duplicatingTaskId={duplicatingTaskId}
         />
-      ))}
-    </div>
+      </div>
+      <div className="hidden grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 md:grid">
+        {tasks.map((task) => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            pillarName={pillarNamesById.get(task.pillarId ?? '') ?? null}
+            traitName={task.traitId ? traitNamesById.get(task.traitId) ?? null : null}
+            statName={task.statId ? statNamesById.get(task.statId) ?? null : null}
+            difficultyName={task.difficultyId ? difficultyNamesById.get(task.difficultyId) ?? null : null}
+            onEdit={() => onEditTask(task)}
+            onDelete={() => onDeleteTask(task)}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function TaskListMobile({
+  tasks,
+  pillarNamesById,
+  difficultyNamesById,
+  onEditTask,
+  onDeleteTask,
+  onDuplicateTask,
+  onImproveTask,
+  duplicatingTaskId,
+}: {
+  tasks: UserTask[];
+  pillarNamesById: Map<string, string>;
+  difficultyNamesById: Map<string, string>;
+  onEditTask: (task: UserTask) => void;
+  onDeleteTask: (task: UserTask) => void;
+  onDuplicateTask?: (task: UserTask) => void;
+  onImproveTask?: (task: UserTask) => void;
+  duplicatingTaskId: string | null;
+}) {
+  const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null);
+  const menuContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!openMenuTaskId) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const container = menuContainerRef.current;
+      if (!container) {
+        return;
+      }
+      if (container.contains(event.target as Node)) {
+        return;
+      }
+      setOpenMenuTaskId(null);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpenMenuTaskId(null);
+      }
+    };
+
+    window.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [openMenuTaskId]);
+
+  useEffect(() => {
+    if (!openMenuTaskId) {
+      menuContainerRef.current = null;
+    }
+  }, [openMenuTaskId]);
+
+  const resolveDifficulty = useCallback(
+    (task: UserTask) => {
+      const difficultyId = task.difficultyId ?? '';
+      const name = difficultyId ? difficultyNamesById.get(difficultyId) ?? difficultyId : 'Sin dificultad';
+      const reference = (difficultyId || name).toLowerCase();
+      let tone = 'bg-slate-400';
+      if (reference.includes('easy') || reference.includes('baja') || reference.includes('low')) {
+        tone = 'bg-emerald-400';
+      } else if (reference.includes('medium') || reference.includes('media')) {
+        tone = 'bg-amber-400';
+      } else if (reference.includes('hard') || reference.includes('alta') || reference.includes('high')) {
+        tone = 'bg-rose-400';
+      }
+
+      return { label: name || 'Sin dificultad', tone };
+    },
+    [difficultyNamesById],
+  );
+
+  // TODO: incorporar gestos de swipe cuando exista infraestructura compartida en el proyecto.
+  return (
+    <ul className="divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+      {tasks.map((task) => {
+        const { label: difficultyLabel, tone } = resolveDifficulty(task);
+        const pillarLabel = pillarNamesById.get(task.pillarId ?? '') ?? task.pillarId ?? 'Sin pilar';
+        const isMenuOpen = openMenuTaskId === task.id;
+        const isDuplicating = duplicatingTaskId === task.id;
+
+        return (
+          <li key={task.id} className="relative">
+            <button
+              type="button"
+              onClick={() => onEditTask(task)}
+              className="flex w-full flex-col gap-2 px-4 py-2.5 text-left transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <p className="line-clamp-1 text-sm font-semibold text-white">{task.title}</p>
+                <span
+                  className={`ml-3 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                    task.isActive
+                      ? 'bg-emerald-500/15 text-emerald-200'
+                      : 'bg-slate-600/20 text-slate-300'
+                  }`}
+                >
+                  {task.isActive ? 'Activa' : 'Inactiva'}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-300">
+                <span className="inline-flex items-center gap-1">
+                  <span className={`h-1.5 w-1.5 rounded-full ${tone}`} aria-hidden />
+                  <span>{difficultyLabel}</span>
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-100">
+                  {pillarLabel || 'Sin pilar'}
+                </span>
+              </div>
+            </button>
+            <div
+              className="pointer-events-auto absolute right-2 top-2"
+              ref={(node) => {
+                if (isMenuOpen) {
+                  menuContainerRef.current = node;
+                }
+              }}
+            >
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={isMenuOpen}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setOpenMenuTaskId((current) => (current === task.id ? null : task.id));
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-base text-slate-200 transition hover:border-white/30 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+              >
+                <span aria-hidden>⋯</span>
+                <span className="sr-only">Más acciones</span>
+              </button>
+              {isMenuOpen && (
+                <div className="absolute right-0 top-10 z-40 w-44 rounded-xl border border-white/10 bg-slate-900/95 p-1 shadow-[0_10px_30px_rgba(15,23,42,0.6)]">
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setOpenMenuTaskId(null);
+                      onEditTask(task);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-100 transition hover:bg-white/10"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!onDuplicateTask || isDuplicating}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setOpenMenuTaskId(null);
+                      if (onDuplicateTask) {
+                        void onDuplicateTask(task);
+                      }
+                    }}
+                    className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
+                      !onDuplicateTask
+                        ? 'cursor-not-allowed text-slate-500'
+                        : 'text-slate-100 hover:bg-white/10'
+                    } ${isDuplicating ? 'opacity-70' : ''}`.trim()}
+                  >
+                    {isDuplicating ? 'Duplicando…' : 'Duplicar'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!onImproveTask}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setOpenMenuTaskId(null);
+                      if (onImproveTask) {
+                        onImproveTask(task);
+                      }
+                    }}
+                    className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
+                      onImproveTask
+                        ? 'text-slate-100 hover:bg-white/10'
+                        : 'cursor-not-allowed text-slate-500'
+                    }`}
+                  >
+                    Mejorar con IA
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setOpenMenuTaskId(null);
+                      onDeleteTask(task);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-rose-200 transition hover:bg-rose-500/10"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -1093,7 +1377,7 @@ function formatDateLabel(value: string | null): string {
   return parsed.toLocaleDateString();
 }
 
-type ToastMessage = { type: 'success' | 'error'; text: string };
+type ToastMessage = { type: 'success' | 'error' | 'info'; text: string };
 
 interface CreateTaskModalProps {
   open: boolean;
