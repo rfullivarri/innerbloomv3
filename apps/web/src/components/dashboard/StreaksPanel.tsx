@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Card } from '../ui/Card';
 import { useRequest } from '../../hooks/useRequest';
 import {
-  getTasks,
+  getUserTasks,
   getUserDailyXp,
   getUserStreakPanel,
   type DailyXpPoint,
@@ -62,7 +62,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
   const range = useMemo(() => legacyBuildRange(30), []);
   const { data, status } = useRequest<LegacyPanelData>(async () => {
     const [tasks, xp] = await Promise.all([
-      getTasks(userId),
+      getUserTasks(userId),
       getUserDailyXp(userId, range),
     ]);
 
@@ -93,7 +93,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
     if (!data?.tasks) return [];
     return data.tasks.filter((task) => {
       if (!pillarFilter) return true;
-      return (task.pillar_id ?? '').toString().toLowerCase().includes(pillarFilter.toLowerCase());
+      return (task.pillarId ?? '').toString().toLowerCase().includes(pillarFilter.toLowerCase());
     });
   }, [data?.tasks, pillarFilter]);
 
@@ -170,14 +170,14 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
 
           <div className="space-y-3">
             {filteredTasks.slice(0, 8).map((task) => (
-              <article key={task.task_id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <article key={task.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-slate-100">{task.task}</p>
-                    <p className="text-xs text-slate-400">Pilar: {task.pillar_id ?? '—'}</p>
+                    <p className="font-semibold text-slate-100">{task.title}</p>
+                    <p className="text-xs text-slate-400">Pilar: {task.pillarId ?? '—'}</p>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-slate-300">
-                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-100">+{task.xp_base} XP</span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-100">+{task.xp ?? 0} XP</span>
                     <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">✓×—</span>
                   </div>
                 </div>
