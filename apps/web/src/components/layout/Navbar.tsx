@@ -39,7 +39,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: Navbar
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/5 bg-surface/75 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-3 py-3 sm:px-4 md:px-8 md:py-4">
+      <div className="flex w-full items-center justify-between px-3 py-3 sm:px-4 md:px-8 md:py-4">
         <div className="flex flex-1 flex-col items-center gap-2 text-center md:flex-row md:items-center md:gap-3 md:text-left">
           <div className="min-w-0">
             <p className="text-[0.55rem] uppercase tracking-[0.35em] text-text-muted md:text-xs">Innerbloom</p>
