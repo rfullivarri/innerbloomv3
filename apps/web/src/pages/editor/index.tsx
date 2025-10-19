@@ -326,7 +326,7 @@ function TaskList({
   onDeleteTask: (task: UserTask) => void;
 }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {tasks.map((task) => (
         <TaskCard
           key={task.id}
@@ -355,9 +355,9 @@ function TaskCard({
 
   return (
     <article className="group relative flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_8px_24px_rgba(15,23,42,0.35)] transition hover:border-white/20">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <h3 className="font-semibold text-slate-100">{task.title}</h3>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
           <span
             className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
               task.isActive
