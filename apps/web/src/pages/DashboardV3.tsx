@@ -36,6 +36,7 @@ import { getUserState } from '../lib/api';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
 import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
+import { Card } from '../components/common/Card';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -133,7 +134,10 @@ export default function DashboardV3Page() {
             {isLoadingProfile && <ProfileSkeleton />}
 
             {failedToLoadProfile && !isLoadingProfile && (
-              <ProfileErrorState onRetry={reload} error={error} />
+              <>
+                <ProfileErrorState onRetry={reload} error={error} />
+                <DashboardFallback />
+              </>
             )}
 
             {!failedToLoadProfile && !isLoadingProfile && backendUserId && (
@@ -394,6 +398,101 @@ function ProfileErrorState({ onRetry, error }: ProfileErrorStateProps) {
           Reintentar
         </button>
       </div>
+    </div>
+  );
+}
+
+function DashboardFallback() {
+  return (
+    <div className="mt-8 space-y-6">
+      <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-slate-200 shadow-glow">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Vista previa sin conexión</p>
+        <h2 className="mt-3 font-display text-2xl font-semibold text-white">Estamos preparando tu Dashboard</h2>
+        <p className="mt-2 text-sm text-slate-300">
+          Conservá esta ventana abierta: los datos de XP, emociones y misiones aparecerán automáticamente cuando recuperemos la conexión con el servidor.
+        </p>
+      </section>
+
+      <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="space-y-4 md:space-y-5 lg:col-span-4">
+          <Card
+            title="XP diario"
+            subtitle="Se actualizará al reconectar"
+            className="min-h-[180px]"
+          >
+            <div className="space-y-3 text-sm text-slate-200">
+              <FallbackMetric label="Quests completadas" value="0 / —" />
+              <FallbackMetric label="XP hoy" value="—" />
+              <p className="text-xs text-slate-400">Tu progreso diario aparece acá cuando la API responde.</p>
+            </div>
+          </Card>
+
+          <Card title="Perfil" subtitle="Foto y game mode" className="min-h-[180px]">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-full border border-white/10 bg-white/10" />
+              <div className="space-y-2 text-xs text-slate-300">
+                <div className="h-3 w-24 rounded bg-white/10" />
+                <div className="h-3 w-16 rounded bg-white/10" />
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-slate-400">Mostramos tus datos personales en cuanto podamos sincronizar tu perfil.</p>
+          </Card>
+        </div>
+
+        <div className="space-y-4 md:space-y-5 lg:col-span-4">
+          <Card title="Pilares" subtitle="Body · Mind · Soul" className="min-h-[180px]">
+            <div className="grid grid-cols-3 gap-3 text-xs">
+              {['Body', 'Mind', 'Soul'].map((pillar) => (
+                <div
+                  key={pillar}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-3 text-center text-slate-200"
+                >
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{pillar}</p>
+                  <p className="mt-2 text-lg font-semibold text-white">—</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-slate-400">Las barras de XP por pilar se activan cuando recuperemos datos.</p>
+          </Card>
+
+          <Card title="Emociones" subtitle="Últimos 7 días" className="min-h-[180px]">
+            <div className="h-24 rounded-2xl border border-white/10 bg-gradient-to-r from-slate-800/60 via-slate-900/40 to-slate-800/60" />
+            <p className="text-xs text-slate-400">El mapa emocional vuelve automáticamente una vez que la API responda.</p>
+          </Card>
+        </div>
+
+        <div className="space-y-4 md:space-y-5 lg:col-span-4">
+          <Card title="Rachas" subtitle="Seguimiento semanal" className="min-h-[180px]">
+            <div className="space-y-3 text-xs text-slate-300">
+              <FallbackMetric label="Daily Quest" value="En espera" />
+              <FallbackMetric label="Weekly XP" value="Sin datos" />
+              <p className="text-xs text-slate-400">Apenas detectemos actividad, tus rachas se renderizan acá.</p>
+            </div>
+          </Card>
+
+          <Card title="Rewards" subtitle="Logros desbloqueados" className="min-h-[180px]">
+            <div className="space-y-2 text-xs text-slate-200">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Siguiente badge</p>
+                <p className="mt-2 text-sm text-white">Disponible al reconectar</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Último logro</p>
+                <p className="mt-2 text-sm text-white">Sincronizando…</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FallbackMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+      <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-400">{label}</span>
+      <span className="text-sm font-semibold text-white">{value}</span>
     </div>
   );
 }
