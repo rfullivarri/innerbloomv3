@@ -412,12 +412,12 @@ function TaskItem({ item }: { item: DisplayTask }) {
   return (
     <article
       className={cx(
-        'flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-slate-200 shadow-[0_6px_20px_rgba(15,23,42,0.3)]',
+        'flex flex-col gap-1.5 rounded-xl border border-white/10 bg-white/5 p-2.5 text-slate-200 shadow-[0_6px_20px_rgba(15,23,42,0.3)] md:gap-2 md:p-3',
         item.highlight && 'border-violet-400/60 bg-violet-400/10 shadow-[0_8px_26px_rgba(99,102,241,0.3)]',
       )}
       aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${streakDays} consecutive days`}
     >
-      <div className="flex flex-wrap items-start justify-between gap-2.5">
+      <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 space-y-0.5">
           <div className="truncate text-sm font-medium leading-tight text-slate-200 md:text-base" title={item.name}>
             {item.name}
@@ -446,11 +446,11 @@ function TaskItem({ item }: { item: DisplayTask }) {
 
       <div
         className={cx(
-          'flex flex-col gap-2.5 md:flex-row md:items-start md:justify-between',
-          showHistory ? 'md:gap-4' : 'md:items-center',
+          'grid gap-2 md:flex md:flex-row md:items-start md:justify-between',
+          showHistory ? 'grid-cols-[minmax(0,1fr)_auto] md:gap-4' : 'grid-cols-1 md:items-center',
         )}
       >
-        <div className="flex flex-col gap-2 md:min-w-[220px] md:flex-1">
+        <div className="flex flex-col gap-1.5 md:min-w-[220px] md:flex-1">
           <div className="flex items-center gap-3">
             <span
               className={cx(
@@ -484,7 +484,7 @@ function TaskItem({ item }: { item: DisplayTask }) {
         </div>
 
         {showHistory && (
-          <div className="flex flex-col items-end gap-1 md:min-w-[72px]">
+          <div className="flex flex-col items-end gap-1 justify-self-end md:min-w-[72px] md:justify-self-auto">
             <div className="flex items-end gap-1">
               {item.history.values.map((value, index) => {
                 const ratio = item.weeklyGoal > 0 ? value / item.weeklyGoal : 0;
