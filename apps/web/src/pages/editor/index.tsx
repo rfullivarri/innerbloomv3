@@ -4,6 +4,7 @@ import { DevErrorBoundary } from '../../components/DevErrorBoundary';
 import { Navbar } from '../../components/layout/Navbar';
 import { MobileBottomNav } from '../../components/layout/MobileBottomNav';
 import { Card } from '../../components/common/Card';
+import { ToastBanner } from '../../components/common/ToastBanner';
 import { useBackendUser } from '../../hooks/useBackendUser';
 import { useCreateTask, useDeleteTask, useUpdateTask, useUserTasks } from '../../hooks/useUserTasks';
 import { useDifficulties, usePillars, useStats, useTraits } from '../../hooks/useCatalogs';
@@ -967,17 +968,7 @@ function CreateTaskModal({
 
             {errors.user && <p className="text-xs text-rose-300">{errors.user}</p>}
 
-            {toast && (
-              <div
-                className={`rounded-xl border px-3 py-2 text-sm ${
-                  toast.type === 'success'
-                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100'
-                    : 'border-rose-500/40 bg-rose-500/10 text-rose-100'
-                }`}
-              >
-                {toast.text}
-              </div>
-            )}
+            {toast && <ToastBanner tone={toast.type} message={toast.text} className="px-3" />}
 
             <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
               <button
@@ -1278,17 +1269,7 @@ function EditTaskModal({ open, onClose, userId, task, pillars }: EditTaskModalPr
             {errors.user && <p className="text-xs text-rose-300">{errors.user}</p>}
             {errors.task && <p className="text-xs text-rose-300">{errors.task}</p>}
 
-            {toast && (
-              <div
-                className={`rounded-xl border px-3 py-2 text-sm ${
-                  toast.type === 'success'
-                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100'
-                    : 'border-rose-500/40 bg-rose-500/10 text-rose-100'
-                }`}
-              >
-                {toast.text}
-              </div>
-            )}
+            {toast && <ToastBanner tone={toast.type} message={toast.text} className="px-3" />}
 
             <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
               <button
