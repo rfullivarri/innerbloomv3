@@ -8,6 +8,7 @@ import {
   type UpdateUserTaskInput,
   type UserTask,
 } from '../lib/api';
+import { emitDbEditorEvent } from '../lib/telemetry';
 import type { AsyncStatus } from './useRequest';
 
 export type UserTaskListState = {
@@ -29,6 +30,7 @@ type StoreEntry = {
 };
 
 const userTaskStore = new Map<string, StoreEntry>();
+const openedUsers = new Set<string>();
 
 function ensureEntry(userId: string): StoreEntry {
   let entry = userTaskStore.get(userId);
@@ -115,6 +117,8 @@ async function loadUserTasks(userId: string, options: { force?: boolean } = {}) 
     error: null,
   }));
 
+  const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+
   const request = getUserTasks(userId)
     .then((tasks) => {
       mutateState(userId, () => ({
@@ -122,6 +126,15 @@ async function loadUserTasks(userId: string, options: { force?: boolean } = {}) 
         status: 'success',
         error: null,
       }));
+      if (!openedUsers.has(userId)) {
+        const endTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+        emitDbEditorEvent('dbeditor_opened', {
+          userId,
+          latencyMs: endTime - startTime,
+          status: 'success',
+        });
+        openedUsers.add(userId);
+      }
     })
     .catch((error) => {
       const normalized = error instanceof Error ? error : new Error('Failed to load tasks');
@@ -130,6 +143,14 @@ async function loadUserTasks(userId: string, options: { force?: boolean } = {}) 
         status: 'error',
         error: normalized,
       }));
+      const endTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      emitDbEditorEvent('dbeditor_error', {
+        userId,
+        latencyMs: endTime - startTime,
+        status: 'error',
+        errorMessage: normalized.message,
+        context: 'load_tasks',
+      });
     })
     .finally(() => {
       if (entry.inflight === request) {
@@ -382,20 +403,44 @@ export function useCreateTask(): CreateTaskMutation {
       const missing = new Error('userId is required to create a task.');
       setStatus('error');
       setError(missing);
+      emitDbEditorEvent('dbeditor_error', {
+        userId: userId ?? '',
+        latencyMs: 0,
+        status: 'error',
+        errorMessage: missing.message,
+        context: 'create_task_validation',
+      });
       throw missing;
     }
 
     setStatus('loading');
     setError(null);
 
+    const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+
     try {
       const created = await createTaskOptimistic(userId, payload);
       setStatus('success');
+      const endTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      emitDbEditorEvent('dbeditor_task_created', {
+        userId,
+        taskId: created.id,
+        latencyMs: endTime - startTime,
+        status: 'success',
+      });
       return created;
     } catch (err) {
       const normalized = err instanceof Error ? err : new Error('Failed to create task');
       setStatus('error');
       setError(normalized);
+      const endTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      emitDbEditorEvent('dbeditor_error', {
+        userId,
+        latencyMs: endTime - startTime,
+        status: 'error',
+        errorMessage: normalized.message,
+        context: 'create_task',
+      });
       throw normalized;
     }
   }, []);
@@ -425,6 +470,14 @@ export function useUpdateTask(): UpdateTaskMutation {
       const missing = new Error('userId is required to update a task.');
       setStatus('error');
       setError(missing);
+      emitDbEditorEvent('dbeditor_error', {
+        userId: userId ?? '',
+        taskId,
+        latencyMs: 0,
+        status: 'error',
+        errorMessage: missing.message,
+        context: 'update_task_validation',
+      });
       throw missing;
     }
 
@@ -432,20 +485,46 @@ export function useUpdateTask(): UpdateTaskMutation {
       const missing = new Error('taskId is required to update a task.');
       setStatus('error');
       setError(missing);
+      emitDbEditorEvent('dbeditor_error', {
+        userId,
+        taskId: taskId ?? '',
+        latencyMs: 0,
+        status: 'error',
+        errorMessage: missing.message,
+        context: 'update_task_validation',
+      });
       throw missing;
     }
 
     setStatus('loading');
     setError(null);
 
+    const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+
     try {
       const updated = await updateTaskOptimistic(userId, taskId, payload);
       setStatus('success');
+      const endTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      emitDbEditorEvent('dbeditor_task_updated', {
+        userId,
+        taskId: updated.id,
+        latencyMs: endTime - startTime,
+        status: 'success',
+      });
       return updated;
     } catch (err) {
       const normalized = err instanceof Error ? err : new Error('Failed to update task');
       setStatus('error');
       setError(normalized);
+      const endTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      emitDbEditorEvent('dbeditor_error', {
+        userId,
+        taskId,
+        latencyMs: endTime - startTime,
+        status: 'error',
+        errorMessage: normalized.message,
+        context: 'update_task',
+      });
       throw normalized;
     }
   }, []);
@@ -475,6 +554,14 @@ export function useDeleteTask(): DeleteTaskMutation {
       const missing = new Error('userId is required to delete a task.');
       setStatus('error');
       setError(missing);
+      emitDbEditorEvent('dbeditor_error', {
+        userId: userId ?? '',
+        taskId,
+        latencyMs: 0,
+        status: 'error',
+        errorMessage: missing.message,
+        context: 'delete_task_validation',
+      });
       throw missing;
     }
 
@@ -482,19 +569,45 @@ export function useDeleteTask(): DeleteTaskMutation {
       const missing = new Error('taskId is required to delete a task.');
       setStatus('error');
       setError(missing);
+      emitDbEditorEvent('dbeditor_error', {
+        userId,
+        taskId: taskId ?? '',
+        latencyMs: 0,
+        status: 'error',
+        errorMessage: missing.message,
+        context: 'delete_task_validation',
+      });
       throw missing;
     }
 
     setStatus('loading');
     setError(null);
 
+    const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+
     try {
       await deleteTaskOptimistic(userId, taskId);
       setStatus('success');
+      const endTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      emitDbEditorEvent('dbeditor_task_deleted', {
+        userId,
+        taskId,
+        latencyMs: endTime - startTime,
+        status: 'success',
+      });
     } catch (err) {
       const normalized = err instanceof Error ? err : new Error('Failed to delete task');
       setStatus('error');
       setError(normalized);
+      const endTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      emitDbEditorEvent('dbeditor_error', {
+        userId,
+        taskId,
+        latencyMs: endTime - startTime,
+        status: 'error',
+        errorMessage: normalized.message,
+        context: 'delete_task',
+      });
       throw normalized;
     }
   }, []);

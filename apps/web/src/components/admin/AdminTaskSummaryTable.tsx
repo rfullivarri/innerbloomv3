@@ -1,4 +1,5 @@
 import type { AdminTaskSummaryRow } from '../../lib/types';
+import { Skeleton } from '../common/Skeleton';
 
 type AdminTaskSummaryTableProps = {
   rows: AdminTaskSummaryRow[];
@@ -68,7 +69,7 @@ export function AdminTaskSummaryTable({ rows, loading }: AdminTaskSummaryTablePr
         </table>
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-900/60">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
+            <Skeleton className="h-10 w-10 rounded-full" />
           </div>
         ) : null}
       </div>

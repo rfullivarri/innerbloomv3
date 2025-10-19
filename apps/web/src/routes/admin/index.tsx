@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { AdminShell } from '../../components/admin/AdminShell';
 import { verifyAdminAccess } from '../../lib/adminApi';
+import { Skeleton } from '../../components/common/Skeleton';
 
 export default function AdminRoute() {
   const { isLoaded, userId } = useAuth();
@@ -43,7 +44,7 @@ export default function AdminRoute() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-200">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-12 w-12 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
+          <Skeleton className="h-12 w-12 rounded-full" />
           <p className="text-sm text-slate-400">Verificando acceso…</p>
         </div>
       </div>

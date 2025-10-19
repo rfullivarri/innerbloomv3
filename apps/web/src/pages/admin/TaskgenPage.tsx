@@ -10,6 +10,7 @@ import {
   type TaskgenJobsParams,
 } from '../../lib/api/taskgen';
 import type { TaskgenJob, TaskgenJobLog, TaskgenJobsSummary } from '../../lib/types';
+import { ToastBanner } from '../../components/common/ToastBanner';
 
 const DEFAULT_FILTERS: TaskgenFilterState = {
   status: 'ALL',
@@ -235,17 +236,7 @@ export function TaskgenPage() {
         </p>
       </header>
 
-      {toast ? (
-        <div
-          className={`rounded-lg border px-4 py-3 text-sm ${
-            toast.type === 'success'
-              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200'
-              : 'border-red-500/40 bg-red-500/10 text-red-200'
-          }`}
-        >
-          {toast.text}
-        </div>
-      ) : null}
+      {toast ? <ToastBanner tone={toast.type} message={toast.text} /> : null}
 
       {error ? (
         <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</div>
