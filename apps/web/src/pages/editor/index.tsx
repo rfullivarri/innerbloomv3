@@ -5,7 +5,7 @@ import { Navbar } from '../../components/layout/Navbar';
 import { MobileBottomNav } from '../../components/layout/MobileBottomNav';
 import { Card } from '../../components/common/Card';
 import { useBackendUser } from '../../hooks/useBackendUser';
-import { useCreateTask, useUpdateTask, useUserTasks } from '../../hooks/useUserTasks';
+import { useCreateTask, useDeleteTask, useUpdateTask, useUserTasks } from '../../hooks/useUserTasks';
 import { useDifficulties, usePillars, useStats, useTraits } from '../../hooks/useCatalogs';
 import { type UserTask } from '../../lib/api';
 import { type Pillar } from '../../lib/api/catalogs';
@@ -34,12 +34,22 @@ export default function TaskEditorPage() {
   const [selectedPillar, setSelectedPillar] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<UserTask | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<UserTask | null>(null);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(null);
+
+  const { deleteTask, status: deleteStatus } = useDeleteTask();
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const isBackendReady = backendStatus === 'success' && Boolean(backendUserId);
   const isLoadingTasks =
     !isBackendReady || tasksStatus === 'loading' || (isBackendReady && tasksStatus === 'idle');
   const combinedError = backendError ?? tasksError;
+
+  useEffect(() => {
+    if (!taskToDelete) {
+      setDeleteErrorMessage(null);
+    }
+  }, [taskToDelete]);
 
   const pillarOptions = useMemo(() => {
     return [
@@ -67,6 +77,7 @@ export default function TaskEditorPage() {
   }, [normalizedSearch, selectedPillar, tasks]);
 
   const hasActiveFilters = normalizedSearch.length > 0 || selectedPillar.length > 0;
+  const isDeletingTask = deleteStatus === 'loading';
 
   const isTaskListEmpty = !isLoadingTasks && !combinedError && tasks.length === 0;
   const isFilteredEmpty = !isLoadingTasks && !combinedError && tasks.length > 0 && filteredTasks.length === 0;
@@ -79,6 +90,35 @@ export default function TaskEditorPage() {
   const handleCreateClick = () => {
     setShowCreateModal(true);
   };
+
+  const handleDeleteModalClose = useCallback(() => {
+    if (isDeletingTask) {
+      return;
+    }
+    setTaskToDelete(null);
+  }, [isDeletingTask]);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!taskToDelete) {
+      setDeleteErrorMessage('No se encontró la tarea que deseas eliminar.');
+      return;
+    }
+
+    if (!backendUserId) {
+      setDeleteErrorMessage('No se pudo identificar tu usuario. Intenta más tarde.');
+      return;
+    }
+
+    setDeleteErrorMessage(null);
+
+    try {
+      await deleteTask(backendUserId, taskToDelete.id);
+      setTaskToDelete(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo eliminar la tarea.';
+      setDeleteErrorMessage(message);
+    }
+  }, [backendUserId, deleteTask, taskToDelete]);
 
   return (
     <DevErrorBoundary>
@@ -125,6 +165,7 @@ export default function TaskEditorPage() {
                     tasks={filteredTasks}
                     pillarNamesById={pillarNamesById}
                     onEditTask={(task) => setTaskToEdit(task)}
+                    onDeleteTask={(task) => setTaskToDelete(task)}
                   />
                 )}
               </div>
@@ -167,6 +208,14 @@ export default function TaskEditorPage() {
           userId={backendUserId ?? null}
           task={taskToEdit}
           pillars={pillars}
+        />
+        <DeleteTaskModal
+          open={taskToDelete != null}
+          onClose={handleDeleteModalClose}
+          task={taskToDelete}
+          isDeleting={isDeletingTask}
+          errorMessage={deleteErrorMessage}
+          onConfirm={handleConfirmDelete}
         />
       </div>
     </DevErrorBoundary>
@@ -261,10 +310,12 @@ function TaskList({
   tasks,
   pillarNamesById,
   onEditTask,
+  onDeleteTask,
 }: {
   tasks: UserTask[];
   pillarNamesById: Map<string, string>;
   onEditTask: (task: UserTask) => void;
+  onDeleteTask: (task: UserTask) => void;
 }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -274,6 +325,7 @@ function TaskList({
           task={task}
           pillarName={pillarNamesById.get(task.pillarId ?? '') ?? null}
           onEdit={() => onEditTask(task)}
+          onDelete={() => onDeleteTask(task)}
         />
       ))}
     </div>
@@ -284,10 +336,12 @@ function TaskCard({
   task,
   pillarName,
   onEdit,
+  onDelete,
 }: {
   task: UserTask;
   pillarName: string | null;
   onEdit: () => void;
+  onDelete: () => void;
 }) {
   const hasNotes = Boolean(task.notes && task.notes.trim().length > 0);
 
@@ -311,6 +365,13 @@ function TaskCard({
             className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 hover:text-white"
           >
             Editar
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="rounded-full border border-rose-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-200 transition hover:border-rose-400 hover:text-rose-100"
+          >
+            Eliminar
           </button>
         </div>
       </div>
@@ -345,6 +406,107 @@ function TaskCard({
         Actualizada: {formatDateLabel(task.updatedAt)}
       </p>
     </article>
+  );
+}
+
+interface DeleteTaskModalProps {
+  open: boolean;
+  onClose: () => void;
+  task: UserTask | null;
+  isDeleting: boolean;
+  errorMessage: string | null;
+  onConfirm: () => Promise<void>;
+}
+
+function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConfirm }: DeleteTaskModalProps) {
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isDeleting) {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, isDeleting, onClose]);
+
+  if (!open) {
+    return null;
+  }
+
+  const handleConfirmClick = async () => {
+    if (isDeleting) {
+      return;
+    }
+    await onConfirm();
+  };
+
+  const normalizedTitle = task?.title?.trim() ?? '';
+  const displayTitle = normalizedTitle.length > 0 ? `“${normalizedTitle}”` : 'esta tarea';
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
+      <button
+        type="button"
+        aria-label="Cerrar"
+        onClick={() => {
+          if (!isDeleting) {
+            onClose();
+          }
+        }}
+        className="absolute inset-0 h-full w-full"
+      />
+      <div className="relative z-10 w-full max-w-md p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="space-y-5 rounded-2xl border border-white/10 bg-slate-900/95 p-6 text-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <header className="space-y-1">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Confirmar eliminación</p>
+            <h2 className="text-xl font-semibold text-white">Eliminar tarea</h2>
+          </header>
+          <p className="text-sm text-slate-300">
+            ¿Seguro que quieres eliminar {displayTitle}? Esta acción quitará la tarea de tu lista inmediatamente.
+          </p>
+          {errorMessage && (
+            <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
+              {errorMessage}
+            </div>
+          )}
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                if (!isDeleting) {
+                  onClose();
+                }
+              }}
+              disabled={isDeleting}
+              className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmClick}
+              disabled={isDeleting}
+              className="inline-flex items-center justify-center rounded-full bg-rose-600/90 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(225,29,72,0.3)] transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isDeleting ? 'Eliminando…' : 'Eliminar'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
