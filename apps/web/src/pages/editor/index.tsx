@@ -588,7 +588,7 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
   const displayTitle = normalizedTitle.length > 0 ? `“${normalizedTitle}”` : 'esta tarea';
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
       <button
         type="button"
         aria-label="Cerrar"
@@ -881,7 +881,7 @@ function CreateTaskModal({
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
       <button
         type="button"
         aria-label="Cerrar"
@@ -1284,7 +1284,7 @@ function EditTaskModal({ open, onClose, userId, task, pillars }: EditTaskModalPr
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
       <button
         type="button"
         aria-label="Cerrar"
