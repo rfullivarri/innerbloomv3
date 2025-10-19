@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useRequest } from '../../hooks/useRequest';
-import { getTasks, type UserTask } from '../../lib/api';
+import { getUserTasks, type UserTask } from '../../lib/api';
 import { asArray } from '../../lib/safe';
 import { Card } from '../ui/Card';
 
@@ -9,7 +9,7 @@ interface MissionsSectionProps {
 }
 
 export function MissionsSection({ userId }: MissionsSectionProps) {
-  const { data, status } = useRequest(() => getTasks(userId), [userId]);
+  const { data, status } = useRequest(() => getUserTasks(userId), [userId]);
   const tasks = useMemo(() => {
     console.info('[DASH] dataset', { keyNames: Object.keys(data ?? {}), isArray: Array.isArray(data) });
     return asArray<UserTask>(data, 'tasks');
@@ -32,10 +32,14 @@ export function MissionsSection({ userId }: MissionsSectionProps) {
       {status === 'success' && tasks.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {tasks.slice(0, 6).map((task) => (
-            <article key={task.task_id} className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <h4 className="font-semibold text-slate-100">🎯 {task.task}</h4>
-              <p className="text-xs text-slate-400">Pilar: {task.pillar_id ?? '—'}</p>
-              <p className="text-xs text-slate-400">XP base: {task.xp_base}</p>
+            <article key={task.id} className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <h4 className="font-semibold text-slate-100">🎯 {task.title}</h4>
+              <p className="text-xs text-slate-400">Pilar: {task.pillarId ?? '—'}</p>
+              <p className="text-xs text-slate-400">Rasgo: {task.traitId ?? '—'}</p>
+              <p className="text-xs text-slate-400">Stat: {task.statId ?? '—'}</p>
+              {task.xp != null && (
+                <p className="text-xs text-slate-400">XP base: {task.xp}</p>
+              )}
               <p className="text-xs text-slate-400">Constancia requerida: próximamente</p>
               <button
                 type="button"

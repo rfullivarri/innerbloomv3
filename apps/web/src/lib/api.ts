@@ -754,27 +754,379 @@ export async function getTodaySummary(userId: string): Promise<TodaySummary> {
 }
 
 export type UserTask = {
-  task_id: string;
-  task: string;
-  pillar_id: string | null;
-  trait_id: string | null;
-  difficulty_id: string | null;
-  xp_base: number;
-  active: boolean;
+  id: string;
+  title: string;
+  pillarId: string | null;
+  traitId: string | null;
+  statId: string | null;
+  difficultyId: string | null;
+  notes: string | null;
+  isActive: boolean;
+  xp: number | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  completedAt: string | null;
+  archivedAt: string | null;
 };
+
+type RawUserTask = Record<string, unknown>;
 
 type UserTasksResponse = {
-  limit: number;
-  offset: number;
-  tasks: UserTask[];
+  limit?: number;
+  offset?: number;
+  tasks?: RawUserTask[];
+  items?: RawUserTask[];
+  data?: RawUserTask[];
 };
 
-export async function getTasks(userId: string): Promise<UserTask[]> {
-  const response = await getAuthorizedJson<UserTasksResponse | UserTask[]>(
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function pickString(value: unknown): string | null {
+  if (value == null) {
+    return null;
+  }
+
+  const normalized = String(value ?? '').trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function pickNumber(value: unknown): number | null {
+  if (value == null) {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function pickBoolean(value: unknown, fallback: boolean): boolean {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    return value !== 0;
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) {
+      return fallback;
+    }
+
+    if (['1', 'true', 'yes', 'active', 'enabled', 'on'].includes(normalized)) {
+      return true;
+    }
+
+    if (['0', 'false', 'no', 'inactive', 'disabled', 'off'].includes(normalized)) {
+      return false;
+    }
+  }
+
+  return fallback;
+}
+
+function normalizeUserTask(raw: RawUserTask): UserTask {
+  const id =
+    pickString(raw.id) ??
+    pickString((raw as Record<string, unknown> | undefined)?.task_id) ??
+    pickString((raw as Record<string, unknown> | undefined)?.taskId);
+
+  if (!id) {
+    throw new Error('User task payload is missing an id.');
+  }
+
+  const title =
+    pickString(raw.title) ??
+    pickString((raw as Record<string, unknown> | undefined)?.task) ??
+    pickString((raw as Record<string, unknown> | undefined)?.name) ??
+    pickString((raw as Record<string, unknown> | undefined)?.label) ??
+    `Tarea ${id}`;
+
+  const pillarId =
+    pickString(raw.pillarId) ??
+    pickString((raw as Record<string, unknown> | undefined)?.pillar_id) ??
+    pickString((raw as Record<string, unknown> | undefined)?.pillar) ??
+    null;
+
+  const traitId =
+    pickString(raw.traitId) ??
+    pickString((raw as Record<string, unknown> | undefined)?.trait_id) ??
+    pickString((raw as Record<string, unknown> | undefined)?.trait) ??
+    null;
+
+  const statId =
+    pickString(raw.statId) ??
+    pickString((raw as Record<string, unknown> | undefined)?.stat_id) ??
+    pickString((raw as Record<string, unknown> | undefined)?.stat) ??
+    null;
+
+  const difficultyId =
+    pickString(raw.difficultyId) ??
+    pickString((raw as Record<string, unknown> | undefined)?.difficulty_id) ??
+    pickString((raw as Record<string, unknown> | undefined)?.difficulty) ??
+    null;
+
+  const notes =
+    pickString(raw.notes) ??
+    pickString((raw as Record<string, unknown> | undefined)?.note) ??
+    pickString((raw as Record<string, unknown> | undefined)?.description) ??
+    null;
+
+  const createdAt =
+    pickString(raw.createdAt) ??
+    pickString((raw as Record<string, unknown> | undefined)?.created_at) ??
+    pickString((raw as Record<string, unknown> | undefined)?.inserted_at) ??
+    null;
+
+  const updatedAt =
+    pickString(raw.updatedAt) ??
+    pickString((raw as Record<string, unknown> | undefined)?.updated_at) ??
+    null;
+
+  const completedAt =
+    pickString(raw.completedAt) ??
+    pickString((raw as Record<string, unknown> | undefined)?.completed_at) ??
+    pickString((raw as Record<string, unknown> | undefined)?.last_completed_at) ??
+    pickString((raw as Record<string, unknown> | undefined)?.done_at) ??
+    null;
+
+  const archivedAt =
+    pickString(raw.archivedAt) ??
+    pickString((raw as Record<string, unknown> | undefined)?.archived_at) ??
+    pickString((raw as Record<string, unknown> | undefined)?.deleted_at) ??
+    pickString((raw as Record<string, unknown> | undefined)?.deactivated_at) ??
+    null;
+
+  const xp =
+    pickNumber(raw.xp) ??
+    pickNumber((raw as Record<string, unknown> | undefined)?.xp_base) ??
+    pickNumber((raw as Record<string, unknown> | undefined)?.base_xp) ??
+    pickNumber((raw as Record<string, unknown> | undefined)?.xpValue) ??
+    null;
+
+  const isActive = pickBoolean(
+    raw.isActive ??
+      (raw as Record<string, unknown> | undefined)?.is_active ??
+      (raw as Record<string, unknown> | undefined)?.active ??
+      (raw as Record<string, unknown> | undefined)?.enabled,
+    true,
+  );
+
+  return {
+    id,
+    title,
+    pillarId,
+    traitId,
+    statId,
+    difficultyId,
+    notes,
+    isActive,
+    xp,
+    createdAt,
+    updatedAt,
+    completedAt,
+    archivedAt,
+  } satisfies UserTask;
+}
+
+function normalizeUserTaskList(source: unknown): UserTask[] {
+  if (!source) {
+    return [];
+  }
+
+  const items: RawUserTask[] = Array.isArray(source)
+    ? (source.filter(isRecord) as RawUserTask[])
+    : extractArray<RawUserTask>(source, 'tasks', 'items', 'data').filter(isRecord);
+
+  return items.map(normalizeUserTask);
+}
+
+function normalizeUserTaskSingle(source: unknown): UserTask | null {
+  if (!source) {
+    return null;
+  }
+
+  if (Array.isArray(source) && source.length > 0) {
+    const [first] = source;
+    if (isRecord(first)) {
+      return normalizeUserTask(first as RawUserTask);
+    }
+    return null;
+  }
+
+  if (!isRecord(source)) {
+    return null;
+  }
+
+  if (source.task && isRecord(source.task)) {
+    return normalizeUserTask(source.task as RawUserTask);
+  }
+
+  if (source.data && isRecord(source.data)) {
+    return normalizeUserTask(source.data as RawUserTask);
+  }
+
+  if (source.item && isRecord(source.item)) {
+    return normalizeUserTask(source.item as RawUserTask);
+  }
+
+  if ('id' in source || 'task_id' in source || 'taskId' in source) {
+    return normalizeUserTask(source as RawUserTask);
+  }
+
+  return null;
+}
+
+export async function getUserTasks(userId: string): Promise<UserTask[]> {
+  const response = await getAuthorizedJson<UserTasksResponse | RawUserTask[] | null>(
     `/users/${encodeURIComponent(userId)}/tasks`,
   );
-  logShape('tasks', response);
-  return extractArray<UserTask>(response, 'tasks', 'items', 'data');
+  logShape('user-tasks', response);
+  return normalizeUserTaskList(response);
+}
+
+export type CreateUserTaskInput = {
+  title: string;
+  pillarId?: string | null;
+  traitId?: string | null;
+  statId?: string | null;
+  difficultyId?: string | null;
+  notes?: string | null;
+  isActive?: boolean;
+};
+
+export type UpdateUserTaskInput = {
+  title?: string;
+  pillarId?: string | null;
+  traitId?: string | null;
+  statId?: string | null;
+  difficultyId?: string | null;
+  notes?: string | null;
+  isActive?: boolean;
+};
+
+function buildUserTaskPayload(
+  payload: CreateUserTaskInput | UpdateUserTaskInput,
+  options: { requireTitle?: boolean } = {},
+): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+
+  if ('title' in payload) {
+    const title = pickString(payload.title);
+    if (options.requireTitle && !title) {
+      throw new Error('Task title is required.');
+    }
+    if (title != null) {
+      body.title = title;
+    }
+  } else if (options.requireTitle) {
+    throw new Error('Task title is required.');
+  }
+
+  if ('pillarId' in payload) {
+    body.pillar_id = payload.pillarId ?? null;
+  }
+
+  if ('traitId' in payload) {
+    body.trait_id = payload.traitId ?? null;
+  }
+
+  if ('statId' in payload) {
+    body.stat_id = payload.statId ?? null;
+  }
+
+  if ('difficultyId' in payload) {
+    body.difficulty_id = payload.difficultyId ?? null;
+  }
+
+  if ('notes' in payload) {
+    const notes = pickString(payload.notes ?? null);
+    body.notes = notes ?? null;
+  }
+
+  if ('isActive' in payload) {
+    body.is_active = Boolean(payload.isActive);
+  }
+
+  return body;
+}
+
+async function submitUserTaskRequest(
+  userId: string,
+  taskId: string | null,
+  method: 'POST' | 'PATCH' | 'DELETE',
+  payload?: Record<string, unknown>,
+): Promise<Response> {
+  const basePath = `/users/${encodeURIComponent(userId)}/tasks`;
+  const url = buildApiUrl(taskId ? `${basePath}/${encodeURIComponent(taskId)}` : basePath);
+
+  const init: RequestInit = {
+    method,
+    headers: {
+      Accept: 'application/json',
+    },
+  };
+
+  if (payload) {
+    init.headers = {
+      ...init.headers,
+      'Content-Type': 'application/json',
+    };
+    init.body = JSON.stringify(payload);
+  }
+
+  const response = await apiAuthorizedFetch(url, init);
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response;
+}
+
+export async function createUserTask(userId: string, payload: CreateUserTaskInput): Promise<UserTask> {
+  const body = buildUserTaskPayload(payload, { requireTitle: true });
+  const response = await submitUserTaskRequest(userId, null, 'POST', body);
+  const json = await response.json().catch(() => null);
+  logShape('user-task-create', json);
+
+  const normalized = normalizeUserTaskSingle(json);
+  if (!normalized) {
+    throw new Error('API response did not include the created task.');
+  }
+
+  return normalized;
+}
+
+export async function updateUserTask(
+  userId: string,
+  taskId: string,
+  payload: UpdateUserTaskInput,
+): Promise<UserTask> {
+  const body = buildUserTaskPayload(payload);
+  const response = await submitUserTaskRequest(userId, taskId, 'PATCH', body);
+  const json = await response.json().catch(() => null);
+  logShape('user-task-update', json);
+
+  const normalized = normalizeUserTaskSingle(json);
+  if (!normalized) {
+    throw new Error('API response did not include the updated task.');
+  }
+
+  return normalized;
+}
+
+export async function deleteUserTask(userId: string, taskId: string): Promise<void> {
+  await submitUserTaskRequest(userId, taskId, 'DELETE');
 }
 
 export type TaskLog = {
