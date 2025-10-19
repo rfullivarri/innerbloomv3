@@ -43,9 +43,9 @@ type DashboardSectionKey = 'dashboard' | 'missions' | 'rewards';
 interface DashboardSectionConfig extends NavbarSection {
   key: DashboardSectionKey;
   pageTitle: string;
-  eyebrow: string;
+  eyebrow?: string;
   contentTitle: string;
-  description: string;
+  description?: string;
   icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
 }
 
@@ -56,9 +56,7 @@ const DASHBOARD_SECTIONS: DashboardSectionConfig[] = [
     to: '/dashboard-v3',
     end: true,
     pageTitle: 'Dashboard',
-    eyebrow: 'Panel principal',
     contentTitle: 'Dashboard',
-    description: 'Visualizá tu progreso general, energía diaria y estado emocional.',
     icon: DashboardIcon,
   },
   {
@@ -318,9 +316,9 @@ function RewardsView({ userId, section }: { userId: string; section: DashboardSe
 }
 
 interface SectionHeaderProps {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
-  description: string;
+  description?: string;
   pageTitle: string;
 }
 
@@ -330,15 +328,25 @@ function SectionHeader({ eyebrow, title, description, pageTitle }: SectionHeader
   const shouldShowTitle =
     normalizedTitle.length > 0 &&
     normalizedTitle.toLowerCase() !== normalizedPageTitle.toLowerCase();
+  const normalizedEyebrow = eyebrow?.trim() ?? '';
+  const shouldShowEyebrow = normalizedEyebrow.length > 0;
+  const normalizedDescription = description?.trim() ?? '';
+  const shouldShowDescription = normalizedDescription.length > 0;
 
   return (
     <header className="space-y-2">
       <h1 className="sr-only">{pageTitle}</h1>
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{eyebrow}</p>
+      {shouldShowEyebrow && (
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          {normalizedEyebrow}
+        </p>
+      )}
       {shouldShowTitle && (
         <h2 className="font-display text-2xl font-semibold text-white sm:text-3xl">{title}</h2>
       )}
-      <p className="text-sm text-slate-400">{description}</p>
+      {shouldShowDescription && (
+        <p className="text-sm text-slate-400">{normalizedDescription}</p>
+      )}
     </header>
   );
 }
