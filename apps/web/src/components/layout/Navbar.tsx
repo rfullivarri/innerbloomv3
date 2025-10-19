@@ -39,18 +39,20 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: Navbar
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/5 bg-surface/75 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 md:px-8">
-        <div className="flex flex-1 items-center gap-3">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-3 py-3 sm:px-4 md:px-8 md:py-4">
+        <div className="flex flex-1 flex-col items-center gap-2 text-center md:flex-row md:items-center md:gap-3 md:text-left">
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-[0.35em] text-text-muted">Innerbloom</p>
-            <h1 className="font-display text-xl font-semibold text-white md:text-2xl">{resolvedTitle}</h1>
+            <p className="text-[0.55rem] uppercase tracking-[0.35em] text-text-muted md:text-xs">Innerbloom</p>
+            <h1 className="font-display text-[1.05rem] font-semibold text-white md:text-xl lg:text-2xl">
+              {resolvedTitle}
+            </h1>
           </div>
           {onDailyClick && (
             <button
               ref={dailyButtonRef}
               type="button"
               onClick={onDailyClick}
-              className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/80 transition hover:border-white/20 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+              className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/80 transition hover:border-white/20 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 md:px-3 md:text-xs"
             >
               Daily
             </button>
@@ -59,7 +61,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: Navbar
         {hasSections ? (
           <nav
             aria-label="Navegación principal en vista desktop"
-            className="hidden flex-1 justify-center gap-2 md:flex"
+            className="hidden flex-1 justify-center gap-1.5 md:flex lg:gap-2"
           >
             {sections?.map((section) => (
               <NavLink
@@ -68,7 +70,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: Navbar
                 end={section.end}
                 className={({ isActive }) =>
                   combine(
-                    'inline-flex items-center rounded-full border px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.3em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+                    'inline-flex items-center rounded-full border px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
                     isActive
                       ? 'border-white/40 bg-white/20 text-white shadow-[0_8px_24px_rgba(148,163,184,0.35)]'
                       : 'border-white/10 bg-white/5 text-text hover:border-white/20 hover:bg-white/10',
