@@ -70,7 +70,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: Navbar
                 end={section.end}
                 className={({ isActive }) =>
                   combine(
-                    'inline-flex items-center rounded-full border px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+                    'inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
                     isActive
                       ? 'border-white/40 bg-white/20 text-white shadow-[0_8px_24px_rgba(148,163,184,0.35)]'
                       : 'border-white/10 bg-white/5 text-text hover:border-white/20 hover:bg-white/10',
