@@ -127,6 +127,32 @@ Este documento resume los endpoints HTTP disponibles en el backend del dashboard
 * **Uso:** monitoreo de conectividad con Postgres (ejecuta `SELECT 1`).
 * **Respuesta:** `{ ok: true }` si la consulta se ejecuta correctamente. Devuelve `500` con código `database_unavailable` cuando no puede acceder a la base.
 
+## Catálogos para el editor de tareas
+
+Los catálogos alimentan los selects del editor React (`apps/web/src/lib/api/catalogs.ts`) y están protegidos con el mismo middleware de autenticación JWT que el resto de rutas privadas.
+
+### `GET /catalog/pillars`
+* **Uso en frontend:** `fetchCatalogPillars()` obtiene la lista base de pilares antes de renderizar columnas.
+* **Autenticación:** `Authorization: Bearer <jwt>` obligatorio.
+* **Respuesta:** arreglo de objetos `{ id, pillar_id, code, name, description }` ordenados por `pillar_id`.
+
+### `GET /catalog/traits`
+* **Uso en frontend:** `fetchCatalogTraits(pillarId)` carga los rasgos asociados al pilar seleccionado.
+* **Parámetros:** `pillar_id` (string) acepta el ID numérico (`"1"`) o el código (`"BODY"`).
+* **Autenticación:** `Authorization: Bearer <jwt>` obligatorio.
+* **Respuesta:** arreglo de objetos `{ id, trait_id, pillar_id, code, name, description }` filtrados por pilar.
+
+### `GET /catalog/stats`
+* **Uso en frontend:** `fetchCatalogStats(traitId)` muestra las métricas disponibles para el rasgo activo.
+* **Parámetros:** `trait_id` (string) acepta el ID numérico o el código del rasgo.
+* **Autenticación:** `Authorization: Bearer <jwt>` obligatorio.
+* **Respuesta:** arreglo de objetos `{ id, stat_id, trait_id, pillar_id, code, name, description, unit }` derivados del catálogo de rasgos.
+
+### `GET /catalog/difficulty`
+* **Uso en frontend:** `fetchCatalogDifficulties()` nutre el select de dificultad del editor.
+* **Autenticación:** `Authorization: Bearer <jwt>` obligatorio.
+* **Respuesta:** arreglo de objetos `{ id, difficulty_id, code, name, description, xp_base }` ordenados por dificultad.
+
 ## Autenticación y perfil
 
 ### `GET /users/me`

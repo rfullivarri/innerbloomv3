@@ -7,6 +7,7 @@ import pillarsRoutes from './pillars.js';
 import tasksRoutes from './tasks.js';
 import usersRoutes from './users.js';
 import dailyQuestRoutes from './dailyQuest.js';
+import catalogRoutes from './catalog.js';
 import adminRoutes from '../modules/admin/admin.routes.js';
 import onboardingRoutes from './onboarding.js';
 
@@ -15,6 +16,7 @@ const router = Router();
 router.use(healthRoutes);
 router.use(pillarsRoutes);
 router.use(legacyRoutes);
+router.use(catalogRoutes);
 router.use(meRoutes);
 router.use(tasksRoutes);
 router.use(dailyQuestRoutes);
