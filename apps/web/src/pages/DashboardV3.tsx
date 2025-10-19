@@ -11,9 +11,11 @@
  * Derivaciones client-side: xp faltante y barra de nivel se calculan con una curva estimada; panel de rachas muestra métricas de XP mientras esperamos daily_log_raw.
  */
 
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, type SVGProps } from 'react';
 import { Navbar } from '../components/layout/Navbar';
+import { MobileBottomNav } from '../components/layout/MobileBottomNav';
 import { Alerts } from '../components/dashboard-v3/Alerts';
 import { EnergyCard } from '../components/dashboard-v3/EnergyCard';
 import { DailyCultivationSection } from '../components/dashboard-v3/DailyCultivationSection';
@@ -27,13 +29,13 @@ import {
   LegacyStreaksPanel,
   StreaksPanel,
 } from '../components/dashboard/StreaksPanel';
-import { Card } from '../components/ui/Card';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { useRequest } from '../hooks/useRequest';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
 import { getUserState } from '../lib/api';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
+import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -126,7 +128,7 @@ export default function DashboardV3Page() {
           enabled={Boolean(backendUserId)}
           returnFocusRef={dailyButtonRef}
         />
-        <main className="flex-1">
+        <main className="flex-1 pb-24 md:pb-0">
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             {isLoadingProfile && <ProfileSkeleton />}
 
@@ -135,42 +137,198 @@ export default function DashboardV3Page() {
             )}
 
             {!failedToLoadProfile && !isLoadingProfile && backendUserId && (
-              <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
-                <div className="order-1 lg:order-1 lg:col-span-12">
-                  <Alerts userId={backendUserId} />
-                </div>
-
-                <div className="order-2 space-y-4 md:space-y-5 lg:order-2 lg:col-span-4">
-                  <MetricHeader userId={backendUserId} gameMode={gameMode} />
-                  <ProfileCard imageUrl={avatarUrl} />
-                  <EnergyCard userId={backendUserId} gameMode={gameMode} />
-                  <DailyCultivationSection userId={backendUserId} />
-                </div>
-
-                <div className="order-3 space-y-4 md:space-y-5 lg:order-3 lg:col-span-4">
-                  <RadarChartCard userId={backendUserId} />
-                  <EmotionChartCard userId={backendUserId} />
-                </div>
-
-                <div className="order-4 space-y-4 md:space-y-5 lg:order-4 lg:col-span-4">
-                  {FEATURE_STREAKS_PANEL_V1 && <LegacyStreaksPanel userId={backendUserId} />}
-                  <StreaksPanel
-                    userId={backendUserId}
-                    gameMode={gameMode}
-                    weeklyTarget={profile?.weekly_target}
-                  />
-                  <RewardsPlaceholder />
-                </div>
-
-                <div className="order-5 lg:order-5 lg:col-span-12">
-                  <MissionsSection userId={backendUserId} />
-                </div>
-              </div>
+              <Routes>
+                <Route
+                  index
+                  element={
+                    <DashboardOverview
+                      userId={backendUserId}
+                      avatarUrl={avatarUrl}
+                      gameMode={gameMode}
+                      weeklyTarget={profile?.weekly_target ?? null}
+                    />
+                  }
+                />
+                <Route path="missions" element={<MissionsView userId={backendUserId} />} />
+                <Route path="rewards" element={<RewardsView userId={backendUserId} />} />
+                <Route path="*" element={<Navigate to="/dashboard-v3" replace />} />
+              </Routes>
             )}
           </div>
         </main>
+        <MobileBottomNav
+          items={[
+            {
+              key: 'dashboard',
+              label: 'Dashboard',
+              to: '/dashboard-v3',
+              icon: <DashboardIcon className="h-5 w-5" />,
+              end: true,
+            },
+            {
+              key: 'missions',
+              label: 'Misiones',
+              to: '/dashboard-v3/missions',
+              icon: <MissionsIcon className="h-5 w-5" />,
+            },
+            {
+              key: 'rewards',
+              label: 'Rewards',
+              to: '/dashboard-v3/rewards',
+              icon: <RewardsIcon className="h-5 w-5" />,
+            },
+          ]}
+        />
       </div>
     </DevErrorBoundary>
+  );
+}
+
+interface DashboardOverviewProps {
+  userId: string;
+  avatarUrl?: string | null;
+  gameMode: GameMode | string | null;
+  weeklyTarget: number | null;
+}
+
+function DashboardOverview({ userId, avatarUrl, gameMode, weeklyTarget }: DashboardOverviewProps) {
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        eyebrow="Panel principal"
+        title="Dashboard"
+        description="Visualizá tu progreso general, energía diaria y estado emocional."
+      />
+      <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="order-1 lg:col-span-12">
+          <Alerts userId={userId} />
+        </div>
+
+        <div className="order-2 space-y-4 md:space-y-5 lg:order-2 lg:col-span-4">
+          <MetricHeader userId={userId} gameMode={gameMode} />
+          <ProfileCard imageUrl={avatarUrl} />
+          <EnergyCard userId={userId} gameMode={gameMode} />
+          <DailyCultivationSection userId={userId} />
+        </div>
+
+        <div className="order-3 space-y-4 md:space-y-5 lg:order-3 lg:col-span-4">
+          <RadarChartCard userId={userId} />
+          <EmotionChartCard userId={userId} />
+        </div>
+
+        <div className="order-4 space-y-4 md:space-y-5 lg:order-4 lg:col-span-4">
+          {FEATURE_STREAKS_PANEL_V1 && <LegacyStreaksPanel userId={userId} />}
+          <StreaksPanel userId={userId} gameMode={gameMode} weeklyTarget={weeklyTarget} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MissionsView({ userId }: { userId: string }) {
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        eyebrow="Misiones"
+        title="Tus misiones activas"
+        description="Accedé rápidamente a misiones diarias, semanales y eventos especiales."
+      />
+      <MissionsSection userId={userId} />
+    </div>
+  );
+}
+
+function RewardsView({ userId }: { userId: string }) {
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        eyebrow="Rewards"
+        title="Logros y badges desbloqueados"
+        description="Revisá los hitos alcanzados y lo que falta para tu próxima recompensa."
+      />
+      <RewardsSection userId={userId} />
+    </div>
+  );
+}
+
+interface SectionHeaderProps {
+  eyebrow: string;
+  title: string;
+  description: string;
+}
+
+function SectionHeader({ eyebrow, title, description }: SectionHeaderProps) {
+  return (
+    <header className="space-y-2">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{eyebrow}</p>
+      <h1 className="font-display text-2xl font-semibold text-white sm:text-3xl">{title}</h1>
+      <p className="text-sm text-slate-400">{description}</p>
+    </header>
+  );
+}
+
+function DashboardIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M4 13a8 8 0 0 1 16 0v4a1 1 0 0 1-1 1h-4.5" />
+      <path d="M12 7v5.5l3 2.5" />
+      <circle cx={12} cy={13} r={0.6} fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function MissionsIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <circle cx={12} cy={12} r={5.5} />
+      <path d="M12 3v2.5" />
+      <path d="M12 18.5V21" />
+      <path d="M3 12h2.5" />
+      <path d="M18.5 12H21" />
+      <path d="M12 12l2.5-1.5" />
+    </svg>
+  );
+}
+
+function RewardsIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M7 5a2 2 0 1 1 4 0c0 1-1 3-3 3" />
+      <path d="M17 5a2 2 0 1 0-4 0c0 1 1 3 3 3" />
+      <path d="M3 8.5h18" />
+      <path d="M12 8.5V21" />
+      <path d="M5 8.5V19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5" />
+    </svg>
   );
 }
 
@@ -234,12 +392,3 @@ function ProfileErrorState({ onRetry, error }: ProfileErrorStateProps) {
   );
 }
 
-function RewardsPlaceholder() {
-  return (
-    <Card title="🎁 Rewards" subtitle="Muy pronto" bodyClassName="gap-3">
-      <p className="text-sm text-slate-400">
-        El módulo de recompensas del MVP todavía no tiene endpoints públicos. Lo habilitaremos en esta vista cuando esté disponible.
-      </p>
-    </Card>
-  );
-}
