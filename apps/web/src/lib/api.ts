@@ -257,7 +257,52 @@ function applySearchParams(url: URL, params?: Record<string, string | number | u
   }
 }
 
-export const API_BASE = normalizeBaseUrl(RAW_API_BASE_URL);
+function resolveRuntimeOrigin(): string | null {
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  const globalLocation = typeof globalThis !== 'undefined' ? (globalThis as { location?: Location }) : undefined;
+  if (!globalLocation?.location) {
+    return null;
+  }
+
+  const { location } = globalLocation;
+
+  if (typeof location.origin === 'string' && location.origin) {
+    return location.origin;
+  }
+
+  if (typeof location.href === 'string' && location.href) {
+    try {
+      return new URL(location.href).origin;
+    } catch (error) {
+      logApiError('Failed to resolve origin from global location href', { href: location.href, error });
+    }
+  }
+
+  return null;
+}
+
+function resolveApiBase(): string {
+  const configured = normalizeBaseUrl(RAW_API_BASE_URL);
+  if (configured) {
+    return configured;
+  }
+
+  const fallbackOrigin = resolveRuntimeOrigin();
+  if (fallbackOrigin) {
+    const normalizedFallback = normalizeBaseUrl(fallbackOrigin);
+    if (normalizedFallback) {
+      logApiDebug('API base URL fallback', { origin: fallbackOrigin });
+      return normalizedFallback;
+    }
+  }
+
+  return '';
+}
+
+export const API_BASE = resolveApiBase();
 
 console.info('[API] BASE =', API_BASE);
 
