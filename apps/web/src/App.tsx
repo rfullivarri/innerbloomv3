@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
+import DashboardPage from './pages/Dashboard';
 import DashboardV3Page from './pages/DashboardV3';
 import TaskEditorPage from './pages/editor';
 import LoginPage from './pages/Login';
@@ -11,6 +12,7 @@ import AdminRoute from './routes/admin';
 import { DevBanner } from './components/layout/DevBanner';
 import { setApiAuthTokenProvider } from './lib/api';
 import OnboardingIntroPage from './pages/OnboardingIntro';
+import { DASHBOARD_PATH } from './config/auth';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -89,6 +91,18 @@ function RedirectIfSignedIn({ children }: { children: JSX.Element }) {
 
 export default function App() {
   const enableTaskgen = String(import.meta.env.VITE_ENABLE_TASKGEN_TRIGGER ?? 'false').toLowerCase() === 'true';
+  const rawDashboardPath = DASHBOARD_PATH || '/dashboard';
+  const normalizedDashboardPath = rawDashboardPath.startsWith('/') ? rawDashboardPath : `/${rawDashboardPath}`;
+  const trimmedDashboardPath = normalizedDashboardPath.replace(/\/+$/, '') || '/dashboard';
+  const dashboardSegments = trimmedDashboardPath.split('/').filter(Boolean);
+  const primaryDashboardPath = dashboardSegments.length > 0 ? `/${dashboardSegments[0]}` : '/dashboard';
+  const isDashboardV3Default = primaryDashboardPath === '/dashboard-v3';
+  const fallbackDashboardPath = trimmedDashboardPath || '/dashboard';
+  const dashboardBasePath = isDashboardV3Default ? '/dashboard-v3' : fallbackDashboardPath;
+  const dashboardRoutePath = isDashboardV3Default
+    ? `${dashboardBasePath}/*`
+    : fallbackDashboardPath;
+
   return (
     <div className="min-h-screen bg-transparent">
       <DevBanner />
@@ -111,18 +125,31 @@ export default function App() {
             </RedirectIfSignedIn>
           }
         />
-        <Route
-          path="/dashboard"
-          element={<Navigate to="/dashboard-v3" replace />}
-        />
-        <Route
-          path="/dashboard-v3/*"
-          element={
-            <RequireUser>
-              <DashboardV3Page />
-            </RequireUser>
-          }
-        />
+        {isDashboardV3Default ? (
+          <>
+            <Route
+              path={dashboardRoutePath}
+              element={
+                <RequireUser>
+                  <DashboardV3Page />
+                </RequireUser>
+              }
+            />
+            <Route path="/dashboard" element={<Navigate to={trimmedDashboardPath} replace />} />
+          </>
+        ) : (
+          <>
+            <Route
+              path={dashboardRoutePath}
+              element={
+                <RequireUser>
+                  <DashboardPage />
+                </RequireUser>
+              }
+            />
+            <Route path="/dashboard-v3/*" element={<Navigate to={trimmedDashboardPath} replace />} />
+          </>
+        )}
         <Route
           path="/editor"
           element={

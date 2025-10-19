@@ -1,6 +1,7 @@
 import { matchPath } from 'react-router-dom';
 import type { SVGProps } from 'react';
 import type { NavbarSection } from '../components/layout/Navbar';
+import { DASHBOARD_PATH } from '../config/auth';
 
 export type DashboardSectionKey = 'dashboard' | 'missions' | 'rewards' | 'editor';
 
@@ -98,51 +99,71 @@ function TaskEditorIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   );
 }
 
-export const DASHBOARD_SECTIONS: DashboardSectionConfig[] = [
-  {
-    key: 'dashboard',
-    label: 'Dashboard',
-    to: '/dashboard-v3',
-    end: true,
-    pageTitle: 'Dashboard',
-    contentTitle: 'Dashboard',
-    icon: DashboardIcon,
-  },
-  {
-    key: 'missions',
-    label: 'Misiones',
-    to: '/dashboard-v3/missions',
-    pageTitle: 'Misiones',
-    eyebrow: 'Misiones',
-    contentTitle: 'Tus misiones activas',
-    description: 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.',
-    icon: MissionsIcon,
-  },
-  {
-    key: 'rewards',
-    label: 'Rewards',
-    to: '/dashboard-v3/rewards',
-    pageTitle: 'Rewards',
-    eyebrow: 'Rewards',
-    contentTitle: 'Logros y badges desbloqueados',
-    description: 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.',
-    icon: RewardsIcon,
-  },
-  {
-    key: 'editor',
-    label: 'Task Editor',
-    to: '/editor',
-    end: true,
-    pageTitle: 'Task Editor',
-    eyebrow: 'Task Editor',
-    contentTitle: '',
-    description: '',
-    icon: TaskEditorIcon,
-  },
-];
+const rawDashboardPath = DASHBOARD_PATH || '/dashboard';
+const normalizedDashboardPath = rawDashboardPath.startsWith('/') ? rawDashboardPath : `/${rawDashboardPath}`;
+const trimmedDashboardPath = normalizedDashboardPath.replace(/\/+$/, '') || '/dashboard';
+const dashboardSegments = trimmedDashboardPath.split('/').filter(Boolean);
+const primaryDashboardPath = dashboardSegments.length > 0 ? `/${dashboardSegments[0]}` : '/dashboard';
+const isDashboardV3Enabled = primaryDashboardPath === '/dashboard-v3';
+const fallbackDashboardPath = trimmedDashboardPath || '/dashboard';
+const dashboardBasePath = isDashboardV3Enabled ? primaryDashboardPath : fallbackDashboardPath;
 
-export const [dashboardSection, missionsSection, rewardsSection, taskEditorSection] =
-  DASHBOARD_SECTIONS;
+function joinDashboardPath(segment?: string): string {
+  if (!segment) {
+    return dashboardBasePath;
+  }
+
+  const normalizedSegment = segment.startsWith('/') ? segment : `/${segment}`;
+  return `${dashboardBasePath}${normalizedSegment}`;
+}
+
+export const dashboardSection: DashboardSectionConfig = {
+  key: 'dashboard',
+  label: 'Dashboard',
+  to: dashboardBasePath,
+  end: true,
+  pageTitle: 'Dashboard',
+  contentTitle: 'Dashboard',
+  icon: DashboardIcon,
+};
+
+export const missionsSection: DashboardSectionConfig = {
+  key: 'missions',
+  label: 'Misiones',
+  to: joinDashboardPath('missions'),
+  pageTitle: 'Misiones',
+  eyebrow: 'Misiones',
+  contentTitle: 'Tus misiones activas',
+  description: 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.',
+  icon: MissionsIcon,
+};
+
+export const rewardsSection: DashboardSectionConfig = {
+  key: 'rewards',
+  label: 'Rewards',
+  to: joinDashboardPath('rewards'),
+  pageTitle: 'Rewards',
+  eyebrow: 'Rewards',
+  contentTitle: 'Logros y badges desbloqueados',
+  description: 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.',
+  icon: RewardsIcon,
+};
+
+export const taskEditorSection: DashboardSectionConfig = {
+  key: 'editor',
+  label: 'Task Editor',
+  to: '/editor',
+  end: true,
+  pageTitle: 'Task Editor',
+  eyebrow: 'Task Editor',
+  contentTitle: '',
+  description: '',
+  icon: TaskEditorIcon,
+};
+
+export const DASHBOARD_SECTIONS: DashboardSectionConfig[] = isDashboardV3Enabled
+  ? [dashboardSection, missionsSection, rewardsSection, taskEditorSection]
+  : [dashboardSection, taskEditorSection];
 
 export function isSectionActive(section: DashboardSectionConfig, pathname: string) {
   return matchPath({ path: section.to, end: section.end ?? false }, pathname) != null;

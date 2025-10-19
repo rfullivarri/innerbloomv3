@@ -2,7 +2,7 @@ import type { PoolClient } from 'pg';
 import { pool, withClient } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 import { formatDateInTimezone } from '../controllers/users/user-state-service.js';
-import { markDailyCompletion } from '../modules/missions-v2/board-store.js';
+import { applyHuntXpBoost } from './missionsV2Service.js';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -583,8 +583,13 @@ export async function submitDailyQuest(
 
   const xpAfter = await calculateXpForDate(userId, date);
 
-  const xp_delta = xpAfter.xp_total_today - xpBefore.xp_total_today;
-  const missionsV2BonusReady = markDailyCompletion(userId);
+  const booster = await applyHuntXpBoost({
+    userId,
+    date,
+    completedTaskIds: completedTasks,
+    baseXpDelta: xpAfter.xp_total_today - xpBefore.xp_total_today,
+    xpTotalToday: xpAfter.xp_total_today,
+  });
 
   return {
     ok: true,
@@ -599,8 +604,8 @@ export async function submitDailyQuest(
         completed: completedTasks,
       },
     },
-    xp_delta,
-    xp_total_today: xpAfter.xp_total_today,
+    xp_delta: booster.xp_delta,
+    xp_total_today: booster.xp_total_today,
     streaks: xpAfter.streaks,
     missions_v2: {
       bonus_ready: missionsV2BonusReady,
