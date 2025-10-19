@@ -114,18 +114,15 @@ describe('Task editor components', () => {
       />,
     );
 
-    expect(screen.getByText('Registrar hábitos')).toBeInTheDocument();
-    expect(screen.getByText('Cuerpo')).toBeInTheDocument();
+    expect(screen.getAllByText('Registrar hábitos')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Cuerpo')[0]).toBeInTheDocument();
 
-    const card = screen.getByText('Registrar hábitos').closest('article');
-    if (!card) {
-      throw new Error('Task card not found');
-    }
+    const [desktopCard] = screen.getAllByRole('article');
 
-    await user.click(within(card).getByRole('button', { name: 'Editar' }));
+    await user.click(within(desktopCard).getByRole('button', { name: 'Editar' }));
     expect(handleEdit).toHaveBeenCalledWith(tasks[0]);
 
-    await user.click(within(card).getByRole('button', { name: 'Eliminar' }));
+    await user.click(within(desktopCard).getByRole('button', { name: 'Eliminar' }));
     expect(handleDelete).toHaveBeenCalledWith(tasks[0]);
   });
 
