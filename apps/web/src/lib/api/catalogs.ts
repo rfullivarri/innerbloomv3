@@ -1,4 +1,4 @@
-import { apiGet, buildApiUrl } from '../api';
+import { apiAuthorizedGet } from '../api';
 
 export type Pillar = {
   id: string;
@@ -203,30 +203,28 @@ function normalizeDifficulty(raw: RawDifficulty): Difficulty | null {
 }
 
 export async function fetchCatalogPillars(): Promise<Pillar[]> {
-  const response = await apiGet<unknown>('/catalog/pillars');
+  const response = await apiAuthorizedGet<unknown>('/catalog/pillars');
   return ensureArray<RawPillar>(response)
     .map((raw) => normalizePillar(raw))
     .filter((pillar): pillar is Pillar => Boolean(pillar));
 }
 
 export async function fetchCatalogTraits(pillarId: string): Promise<Trait[]> {
-  const url = buildApiUrl('/catalog/traits', { pillar_id: pillarId });
-  const response = await apiGet<unknown>(url);
+  const response = await apiAuthorizedGet<unknown>('/catalog/traits', { pillar_id: pillarId });
   return ensureArray<RawTrait>(response)
     .map((raw) => normalizeTrait(raw))
     .filter((trait): trait is Trait => Boolean(trait));
 }
 
 export async function fetchCatalogStats(traitId: string): Promise<Stat[]> {
-  const url = buildApiUrl('/catalog/stats', { trait_id: traitId });
-  const response = await apiGet<unknown>(url);
+  const response = await apiAuthorizedGet<unknown>('/catalog/stats', { trait_id: traitId });
   return ensureArray<RawStat>(response)
     .map((raw) => normalizeStat(raw))
     .filter((stat): stat is Stat => Boolean(stat));
 }
 
 export async function fetchCatalogDifficulties(): Promise<Difficulty[]> {
-  const response = await apiGet<unknown>('/catalog/difficulty');
+  const response = await apiAuthorizedGet<unknown>('/catalog/difficulty');
   return ensureArray<RawDifficulty>(response)
     .map((raw) => normalizeDifficulty(raw))
     .filter((difficulty): difficulty is Difficulty => Boolean(difficulty));
