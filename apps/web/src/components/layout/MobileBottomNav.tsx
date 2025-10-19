@@ -24,12 +24,12 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-transparent pb-1.5 md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-transparent px-4 pb-1.5 md:hidden"
       aria-label="Navegación principal en vista móvil"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
     >
       <ul
-        className="flex w-full max-w-[16rem] items-center justify-evenly gap-1 rounded-[2rem] border border-white/15 bg-white/10 px-1.5 py-1 shadow-[0_12px_28px_rgba(15,23,42,0.5)] backdrop-blur-3xl backdrop-saturate-150"
+        className="flex w-full items-center justify-evenly gap-1 rounded-[2rem] border border-white/15 bg-white/10 px-1.5 py-1 shadow-[0_12px_28px_rgba(15,23,42,0.5)] backdrop-blur-3xl backdrop-saturate-150"
       >
         {items.map((item) => (
           <li key={item.key} className="flex flex-1 justify-center">
