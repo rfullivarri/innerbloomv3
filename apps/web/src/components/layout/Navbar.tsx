@@ -38,11 +38,11 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: Navbar
   const hasSections = Boolean(sections && sections.length > 0);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/5 bg-surface/75 backdrop-blur">
-      <div className="flex w-full items-center justify-between px-3 py-3 sm:px-4 md:px-8 md:py-4">
-        <div className="flex flex-1 flex-col items-center gap-2 text-center md:flex-row md:items-center md:gap-3 md:text-left">
+    <header className="sticky top-0 z-40 border-b border-white/5 bg-surface/60 backdrop-blur-xl">
+      <div className="flex w-full flex-wrap items-center justify-between gap-2 px-3 py-3 sm:px-4 md:flex-nowrap md:px-8 md:py-4">
+        <div className="flex flex-1 min-w-0 flex-wrap items-center justify-start gap-x-2 gap-y-1 text-left sm:gap-x-3 md:flex-row">
           <div className="min-w-0">
-            <p className="text-[0.55rem] uppercase tracking-[0.35em] text-text-muted md:text-xs">Innerbloom</p>
+            <p className="text-[0.6rem] uppercase tracking-[0.35em] text-text-muted md:text-xs">Innerbloom</p>
             <h1 className="font-display text-[1.05rem] font-semibold text-white md:text-xl lg:text-2xl">
               {resolvedTitle}
             </h1>
@@ -52,7 +52,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: Navbar
               ref={dailyButtonRef}
               type="button"
               onClick={onDailyClick}
-              className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/80 transition hover:border-white/20 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 md:px-3 md:text-xs"
+              className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/80 backdrop-blur transition hover:border-white/30 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 md:px-3 md:text-xs"
             >
               Daily
             </button>
@@ -84,7 +84,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: Navbar
         ) : (
           <div className="hidden flex-1 md:flex" aria-hidden="true" />
         )}
-        <div className="flex flex-1 items-center justify-end gap-3">
+        <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
           {displayName && (
             <span className="hidden rounded-full bg-white/10 px-3 py-1 text-xs text-text-muted md:inline-flex">
               {displayName}
@@ -93,7 +93,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: Navbar
           <button
             type="button"
             onClick={handleSignOut}
-            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-text transition hover:border-white/20 hover:bg-white/10"
+            className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/90 backdrop-blur transition hover:border-white/30 hover:bg-white/20"
           >
             Cerrar sesión
           </button>
