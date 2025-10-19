@@ -96,6 +96,9 @@ describe('Task editor components', () => {
     ];
 
     const pillarNames = new Map<string, string>([['pillar-1', 'Cuerpo']]);
+    const traitNames = new Map<string, string>([['trait-1', 'Enfoque']]);
+    const statNames = new Map<string, string>();
+    const difficultyNames = new Map<string, string>([['easy', 'Fácil']]);
     const handleEdit = vi.fn();
     const handleDelete = vi.fn();
 
@@ -103,6 +106,9 @@ describe('Task editor components', () => {
       <TaskList
         tasks={tasks}
         pillarNamesById={pillarNames}
+        traitNamesById={traitNames}
+        statNamesById={statNames}
+        difficultyNamesById={difficultyNames}
         onEditTask={handleEdit}
         onDeleteTask={handleDelete}
       />,
