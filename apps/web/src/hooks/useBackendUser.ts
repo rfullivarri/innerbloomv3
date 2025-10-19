@@ -1,6 +1,11 @@
 import { useAuth } from '@clerk/clerk-react';
-import { useCallback, useMemo } from 'react';
-import { getCurrentUserProfile, type CurrentUserProfile } from '../lib/api';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  getCurrentUserProfile,
+  isApiAuthTokenProviderReady,
+  onApiAuthTokenProviderChange,
+  type CurrentUserProfile,
+} from '../lib/api';
 import { useRequest, type AsyncStatus } from './useRequest';
 
 export type BackendUserState = {
@@ -14,7 +19,16 @@ export type BackendUserState = {
 
 export function useBackendUser(): BackendUserState {
   const { userId: clerkUserId, isSignedIn } = useAuth();
-  const enabled = Boolean(isSignedIn && clerkUserId);
+  const [isAuthReady, setIsAuthReady] = useState(isApiAuthTokenProviderReady());
+
+  useEffect(() => {
+    setIsAuthReady(isApiAuthTokenProviderReady());
+    return onApiAuthTokenProviderChange((provider) => {
+      setIsAuthReady(Boolean(provider));
+    });
+  }, []);
+
+  const enabled = Boolean(isSignedIn && clerkUserId && isAuthReady);
 
   const requestFactory = useCallback(() => {
     if (!clerkUserId) {

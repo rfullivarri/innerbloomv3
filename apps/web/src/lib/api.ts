@@ -101,15 +101,40 @@ type AuthProviderWaiter = {
   resolve: (provider: AuthTokenProvider) => void;
 };
 
+type AuthProviderListener = (provider: AuthTokenProvider | null) => void;
+
 const AUTH_PROVIDER_TIMEOUT_MS = 5_000;
 
 let authTokenProvider: AuthTokenProvider | null = null;
 const authProviderWaiters: AuthProviderWaiter[] = [];
+const authProviderListeners = new Set<AuthProviderListener>();
+
+function notifyAuthProviderChange(provider: AuthTokenProvider | null) {
+  for (const listener of authProviderListeners) {
+    try {
+      listener(provider);
+    } catch (error) {
+      logApiError('Auth provider listener failed', { error });
+    }
+  }
+}
+
+export function onApiAuthTokenProviderChange(listener: AuthProviderListener): () => void {
+  authProviderListeners.add(listener);
+  return () => {
+    authProviderListeners.delete(listener);
+  };
+}
+
+export function isApiAuthTokenProviderReady(): boolean {
+  return authTokenProvider !== null;
+}
 
 export function setApiAuthTokenProvider(provider: AuthTokenProvider | null) {
   authTokenProvider = provider;
 
   if (!provider) {
+    notifyAuthProviderChange(null);
     return;
   }
 
@@ -118,6 +143,8 @@ export function setApiAuthTokenProvider(provider: AuthTokenProvider | null) {
     clearTimeout(waiter.timeoutId);
     waiter.resolve(provider);
   }
+
+  notifyAuthProviderChange(provider);
 }
 
 async function resolveAuthToken(): Promise<string> {
