@@ -115,7 +115,7 @@ export default function App() {
           element={<Navigate to="/dashboard-v3" replace />}
         />
         <Route
-          path="/dashboard-v3"
+          path="/dashboard-v3/*"
           element={
             <RequireUser>
               <DashboardV3Page />
