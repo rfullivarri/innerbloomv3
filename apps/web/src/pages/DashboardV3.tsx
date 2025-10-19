@@ -36,6 +36,7 @@ import { getUserState } from '../lib/api';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
 import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
+import { MissionsV2Placeholder } from '../components/dashboard-v3/MissionsV2Placeholder';
 import { Card } from '../components/common/Card';
 import {
   DASHBOARD_SECTIONS,
@@ -45,6 +46,7 @@ import {
   rewardsSection,
   type DashboardSectionConfig,
 } from './dashboardSections';
+import { FEATURE_MISSIONS_V2 } from '../lib/featureFlags';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -171,6 +173,10 @@ export default function DashboardV3Page() {
                   element={<MissionsView userId={backendUserId} section={missionsSection} />}
                 />
                 <Route
+                  path="missions-v2"
+                  element={<MissionsV2Route userId={backendUserId} />}
+                />
+                <Route
                   path="rewards"
                   element={<RewardsView userId={backendUserId} section={rewardsSection} />}
                 />
@@ -250,6 +256,28 @@ function MissionsView({ userId, section }: { userId: string; section: DashboardS
         pageTitle={section.pageTitle}
       />
       <MissionsSection userId={userId} />
+    </div>
+  );
+}
+
+function MissionsV2Route({ userId }: { userId: string }) {
+  if (!FEATURE_MISSIONS_V2) {
+    return <Navigate to=".." replace />;
+  }
+
+  return <MissionsV2View userId={userId} />;
+}
+
+function MissionsV2View({ userId }: { userId: string }) {
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        eyebrow="Misiones"
+        title="Misiones v2 (preview)"
+        description="Ruta aislada para validar contratos y UI. No impacta el dashboard actual."
+        pageTitle="Misiones v2"
+      />
+      <MissionsV2Placeholder userId={userId} />
     </div>
   );
 }

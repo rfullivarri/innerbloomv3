@@ -49,3 +49,31 @@ export function emitDbEditorEvent(event: DbEditorEventName, payload: DbEditorEve
     logApiDebug('[analytics] dbeditor event', normalizedPayload);
   }
 }
+
+export type MissionsV2EventName =
+  | 'missions_v2_view'
+  | 'missions_v2_claim_open'
+  | 'missions_v2_select_open';
+
+export interface MissionsV2EventPayload {
+  userId?: string | null;
+  slot?: string | null;
+  source?: string | null;
+  timestamp?: string;
+}
+
+export function emitMissionsV2Event(event: MissionsV2EventName, payload: MissionsV2EventPayload = {}) {
+  const normalizedUserId = typeof payload.userId === 'string' ? payload.userId.trim() : '';
+  const normalizedSlot = typeof payload.slot === 'string' ? payload.slot.trim().toLowerCase() : '';
+  const normalizedSource = typeof payload.source === 'string' ? payload.source.trim() : '';
+
+  const normalizedPayload = {
+    event,
+    user_id: normalizedUserId.length > 0 ? normalizedUserId : undefined,
+    slot: normalizedSlot.length > 0 ? normalizedSlot : undefined,
+    source: normalizedSource.length > 0 ? normalizedSource : undefined,
+    timestamp: payload.timestamp ?? new Date().toISOString(),
+  } satisfies Record<string, unknown>;
+
+  logApiDebug('[analytics] missions v2 event', normalizedPayload);
+}
