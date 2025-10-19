@@ -5,7 +5,7 @@ import { Navbar } from '../../components/layout/Navbar';
 import { MobileBottomNav } from '../../components/layout/MobileBottomNav';
 import { Card } from '../../components/common/Card';
 import { useBackendUser } from '../../hooks/useBackendUser';
-import { useCreateTask, useUserTasks } from '../../hooks/useUserTasks';
+import { useCreateTask, useUpdateTask, useUserTasks } from '../../hooks/useUserTasks';
 import { useDifficulties, usePillars, useStats, useTraits } from '../../hooks/useCatalogs';
 import { type UserTask } from '../../lib/api';
 import { type Pillar } from '../../lib/api/catalogs';
@@ -33,6 +33,7 @@ export default function TaskEditorPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPillar, setSelectedPillar] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState<UserTask | null>(null);
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const isBackendReady = backendStatus === 'success' && Boolean(backendUserId);
@@ -120,7 +121,11 @@ export default function TaskEditorPage() {
                 )}
 
                 {!isLoadingTasks && !combinedError && filteredTasks.length > 0 && (
-                  <TaskList tasks={filteredTasks} pillarNamesById={pillarNamesById} />
+                  <TaskList
+                    tasks={filteredTasks}
+                    pillarNamesById={pillarNamesById}
+                    onEditTask={(task) => setTaskToEdit(task)}
+                  />
                 )}
               </div>
             </Card>
@@ -155,6 +160,13 @@ export default function TaskEditorPage() {
           isLoadingPillars={isLoadingPillars}
           pillarsError={pillarsError}
           onRetryPillars={reloadPillars}
+        />
+        <EditTaskModal
+          open={taskToEdit != null}
+          onClose={() => setTaskToEdit(null)}
+          userId={backendUserId ?? null}
+          task={taskToEdit}
+          pillars={pillars}
         />
       </div>
     </DevErrorBoundary>
@@ -248,35 +260,59 @@ function TaskFilters({
 function TaskList({
   tasks,
   pillarNamesById,
+  onEditTask,
 }: {
   tasks: UserTask[];
   pillarNamesById: Map<string, string>;
+  onEditTask: (task: UserTask) => void;
 }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {tasks.map((task) => (
-        <TaskCard key={task.id} task={task} pillarName={pillarNamesById.get(task.pillarId ?? '') ?? null} />
+        <TaskCard
+          key={task.id}
+          task={task}
+          pillarName={pillarNamesById.get(task.pillarId ?? '') ?? null}
+          onEdit={() => onEditTask(task)}
+        />
       ))}
     </div>
   );
 }
 
-function TaskCard({ task, pillarName }: { task: UserTask; pillarName: string | null }) {
+function TaskCard({
+  task,
+  pillarName,
+  onEdit,
+}: {
+  task: UserTask;
+  pillarName: string | null;
+  onEdit: () => void;
+}) {
   const hasNotes = Boolean(task.notes && task.notes.trim().length > 0);
 
   return (
     <article className="group relative flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_8px_24px_rgba(15,23,42,0.35)] transition hover:border-white/20">
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-semibold text-slate-100">{task.title}</h3>
-        <span
-          className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
-            task.isActive
-              ? 'bg-emerald-500/15 text-emerald-300'
-              : 'bg-slate-500/20 text-slate-300'
-          }`}
-        >
-          {task.isActive ? 'Activa' : 'Inactiva'}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
+              task.isActive
+                ? 'bg-emerald-500/15 text-emerald-300'
+                : 'bg-slate-500/20 text-slate-300'
+            }`}
+          >
+            {task.isActive ? 'Activa' : 'Inactiva'}
+          </span>
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 hover:text-white"
+          >
+            Editar
+          </button>
+        </div>
       </div>
       <dl className="grid gap-1 text-xs text-slate-400">
         <div className="flex items-center justify-between gap-4">
@@ -800,6 +836,326 @@ function CreateTaskModal({
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+interface EditTaskModalProps {
+  open: boolean;
+  onClose: () => void;
+  userId: string | null;
+  task: UserTask | null;
+  pillars: Pillar[];
+}
+
+function EditTaskModal({ open, onClose, userId, task, pillars }: EditTaskModalProps) {
+  const [title, setTitle] = useState('');
+  const [difficultyId, setDifficultyId] = useState('');
+  const [notes, setNotes] = useState('');
+  const [isActive, setIsActive] = useState(true);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  const clearError = useCallback((field: string) => {
+    setErrors((prev) => {
+      if (!prev[field]) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }, []);
+
+  const { updateTask, status: updateStatus } = useUpdateTask();
+  const { data: difficulties, isLoading: isLoadingDifficulties, error: difficultiesError, reload: reloadDifficulties } =
+    useDifficulties();
+
+  const currentPillarId = open && task?.pillarId ? task.pillarId : null;
+  const currentTraitId = open && task?.traitId ? task.traitId : null;
+  const { data: traits } = useTraits(currentPillarId);
+  const { data: stats } = useStats(currentTraitId);
+
+  const sortedDifficulties = useMemo(() => {
+    return [...difficulties].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  }, [difficulties]);
+
+  const pillarName = useMemo(() => {
+    if (!task?.pillarId) {
+      return '—';
+    }
+    return pillars.find((pillar) => pillar.id === task.pillarId)?.name ?? task.pillarId;
+  }, [pillars, task?.pillarId]);
+
+  const traitName = useMemo(() => {
+    if (!task?.traitId) {
+      return '—';
+    }
+    return traits.find((trait) => trait.id === task.traitId)?.name ?? task.traitId;
+  }, [traits, task?.traitId]);
+
+  const statName = useMemo(() => {
+    if (!task?.statId) {
+      return '—';
+    }
+    return stats.find((stat) => stat.id === task.statId)?.name ?? task.statId;
+  }, [stats, task?.statId]);
+
+  const isSubmitting = updateStatus === 'loading';
+
+  const handleClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!open) {
+      setTitle('');
+      setDifficultyId('');
+      setNotes('');
+      setIsActive(true);
+      setErrors({});
+      setToast(null);
+      return;
+    }
+
+    if (task) {
+      setTitle(task.title ?? '');
+      setDifficultyId(task.difficultyId ?? '');
+      setNotes(task.notes ?? '');
+      setIsActive(Boolean(task.isActive));
+      setErrors({});
+      setToast(null);
+    }
+  }, [open, task]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        handleClose();
+      }
+    };
+
+    if (open) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+
+    return undefined;
+  }, [open, handleClose]);
+
+  useEffect(() => {
+    if (toast) {
+      const timeout = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timeout);
+    }
+    return undefined;
+  }, [toast]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const validationErrors: Record<string, string> = {};
+
+    if (!title.trim()) {
+      validationErrors.title = 'El título es obligatorio.';
+    }
+
+    if (!userId) {
+      validationErrors.user = 'No se pudo identificar tu usuario. Intenta más tarde.';
+    }
+
+    if (!task) {
+      validationErrors.task = 'No se encontró la tarea que deseas editar.';
+    }
+
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0 || !task || !userId) {
+      return;
+    }
+
+    try {
+      await updateTask(userId, task.id, {
+        title: title.trim(),
+        difficultyId: difficultyId || null,
+        notes: notes.trim() || null,
+        isActive,
+      });
+      setToast({ type: 'success', text: 'Tarea actualizada correctamente.' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo actualizar la tarea.';
+      setToast({ type: 'error', text: message });
+    }
+  };
+
+  if (!open || !task) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
+      <button
+        type="button"
+        aria-label="Cerrar"
+        onClick={handleClose}
+        className="absolute inset-0 h-full w-full"
+      />
+      <div className="relative z-10 w-full max-w-2xl p-4">
+        <form
+          onSubmit={handleSubmit}
+          className="max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-slate-900/95 p-6 text-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="space-y-6">
+            <header className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Editar tarea</p>
+              <h2 className="text-xl font-semibold text-white">Actualiza los detalles de tu tarea</h2>
+              <p className="text-sm text-slate-300">
+                Ajusta el título, dificultad, notas y estado. Los campos de pilar, rasgo y stat permanecen bloqueados.
+              </p>
+            </header>
+
+            <section className="space-y-4">
+              <div className="space-y-2">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  Contexto
+                </span>
+                <div className="grid gap-3 md:grid-cols-3">
+                  <ReadOnlyField label="Pilar" value={pillarName} />
+                  <ReadOnlyField label="Rasgo" value={traitName} />
+                  <ReadOnlyField label="Stat" value={statName} />
+                </div>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Estos campos no se pueden editar.</p>
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <div className="space-y-2">
+                <label className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Título de la tarea</span>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(event) => {
+                      setTitle(event.target.value);
+                      clearError('title');
+                    }}
+                    placeholder="Ej. Entrenar 30 minutos"
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  />
+                </label>
+                {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Dificultad</span>
+                  <select
+                    value={difficultyId}
+                    onChange={(event) => setDifficultyId(event.target.value)}
+                    className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    disabled={isLoadingDifficulties}
+                  >
+                    <option value="" className="bg-slate-900 text-slate-100">
+                      Sin dificultad asignada
+                    </option>
+                    {sortedDifficulties.map((difficulty) => (
+                      <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-slate-100">
+                        {difficulty.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {isLoadingDifficulties && (
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando dificultades…</p>
+                )}
+                {difficultiesError && (
+                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                    <p>No se pudieron cargar las dificultades.</p>
+                    <button
+                      type="button"
+                      onClick={reloadDifficulties}
+                      className="font-semibold text-rose-200 underline decoration-dotted"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Notas (opcional)</span>
+                  <textarea
+                    value={notes}
+                    onChange={(event) => setNotes(event.target.value)}
+                    rows={3}
+                    placeholder="Agrega detalles, condiciones o recordatorios."
+                    className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  />
+                </label>
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Estado</span>
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={(event) => setIsActive(event.target.checked)}
+                    className="h-4 w-4 rounded border-white/30 bg-white/10 text-indigo-500 focus:ring-indigo-400"
+                  />
+                  <span className="text-sm text-slate-200">{isActive ? 'Activa' : 'Inactiva'}</span>
+                </label>
+              </div>
+            </section>
+
+            {errors.user && <p className="text-xs text-rose-300">{errors.user}</p>}
+            {errors.task && <p className="text-xs text-rose-300">{errors.task}</p>}
+
+            {toast && (
+              <div
+                className={`rounded-xl border px-3 py-2 text-sm ${
+                  toast.type === 'success'
+                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100'
+                    : 'border-rose-500/40 bg-rose-500/10 text-rose-100'
+                }`}
+              >
+                {toast.text}
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:text-white"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(79,70,229,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? 'Guardando…' : 'Guardar cambios'}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function ReadOnlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-1">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{label}</span>
+      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">{value}</div>
     </div>
   );
 }
