@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { DevErrorBoundary } from '../../components/DevErrorBoundary';
 import { Navbar } from '../../components/layout/Navbar';
@@ -16,6 +16,13 @@ import {
   taskEditorSection,
   type DashboardSectionConfig,
 } from '../dashboardSections';
+
+type TaskBoardGroup = {
+  key: string;
+  name: string;
+  code: string;
+  tasks: UserTask[];
+};
 
 export default function TaskEditorPage() {
   const location = useLocation();
@@ -39,6 +46,8 @@ export default function TaskEditorPage() {
   const [selectedPillar, setSelectedPillar] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<UserTask | null>(null);
+  const [editVariant, setEditVariant] = useState<'modal' | 'panel'>('modal');
+  const [editGroupKey, setEditGroupKey] = useState<string | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<UserTask | null>(null);
   const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(null);
 
@@ -177,6 +186,32 @@ export default function TaskEditorPage() {
     return map;
   }, [difficulties]);
 
+  const pillarGrouping = useMemo(() => {
+    const canonicalOrder = new Map<string, number>();
+    const normalizedToCanonical = new Map<string, string>();
+    const metaByCanonical = new Map<string, { name: string; code: string }>();
+
+    pillars.forEach((pillar, index) => {
+      const canonicalId = pillar.id;
+      const normalizedId = canonicalId.trim().toLowerCase();
+      const code = (pillar.code ?? pillar.id).trim();
+      const normalizedCode = code.toLowerCase();
+
+      canonicalOrder.set(canonicalId, index);
+      metaByCanonical.set(canonicalId, { name: pillar.name, code });
+
+      if (normalizedId.length > 0) {
+        normalizedToCanonical.set(normalizedId, canonicalId);
+      }
+
+      if (normalizedCode.length > 0) {
+        normalizedToCanonical.set(normalizedCode, canonicalId);
+      }
+    });
+
+    return { canonicalOrder, normalizedToCanonical, metaByCanonical };
+  }, [pillars]);
+
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
       const matchesSearch =
@@ -186,6 +221,91 @@ export default function TaskEditorPage() {
       return matchesSearch && matchesPillar;
     });
   }, [normalizedSearch, selectedPillar, tasks]);
+
+  const sortedTasks = useMemo(() => {
+    const defaultOrder = pillarGrouping.canonicalOrder.size + 1;
+
+    return filteredTasks
+      .map((task, index) => ({ task, index }))
+      .sort((a, b) => {
+        const normalizedA = (a.task.pillarId ?? '').trim().toLowerCase();
+        const normalizedB = (b.task.pillarId ?? '').trim().toLowerCase();
+        const canonicalA =
+          pillarGrouping.normalizedToCanonical.get(normalizedA) ?? (normalizedA.length > 0 ? normalizedA : '__unknown__');
+        const canonicalB =
+          pillarGrouping.normalizedToCanonical.get(normalizedB) ?? (normalizedB.length > 0 ? normalizedB : '__unknown__');
+
+        const orderA = pillarGrouping.canonicalOrder.get(canonicalA) ?? defaultOrder;
+        const orderB = pillarGrouping.canonicalOrder.get(canonicalB) ?? defaultOrder;
+
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+
+        return a.index - b.index;
+      })
+      .map((entry) => entry.task);
+  }, [filteredTasks, pillarGrouping]);
+
+  const groupedTasks = useMemo(() => {
+    const groups: TaskBoardGroup[] = [];
+    const groupsByKey = new Map<string, TaskBoardGroup>();
+
+    for (const pillar of pillars) {
+      const meta = pillarGrouping.metaByCanonical.get(pillar.id) ?? {
+        name: pillar.name,
+        code: pillar.code ?? pillar.id,
+      };
+
+      const group: TaskBoardGroup = {
+        key: pillar.id,
+        name: meta.name,
+        code: meta.code,
+        tasks: [],
+      };
+
+      groups.push(group);
+      groupsByKey.set(group.key, group);
+    }
+
+    const unknownGroup: TaskBoardGroup = {
+      key: '__unknown__',
+      name: 'Sin asignar',
+      code: 'UNKNOWN',
+      tasks: [],
+    };
+
+    for (const task of sortedTasks) {
+      const normalized = (task.pillarId ?? '').trim().toLowerCase();
+      const canonical = pillarGrouping.normalizedToCanonical.get(normalized);
+      if (canonical && groupsByKey.has(canonical)) {
+        groupsByKey.get(canonical)!.tasks.push(task);
+        continue;
+      }
+
+      if (normalized.length > 0 && groupsByKey.has(normalized)) {
+        groupsByKey.get(normalized)!.tasks.push(task);
+        continue;
+      }
+
+      unknownGroup.tasks.push(task);
+    }
+
+    if (unknownGroup.tasks.length > 0) {
+      groups.push(unknownGroup);
+      groupsByKey.set(unknownGroup.key, unknownGroup);
+    }
+
+    return { groups, groupsByKey };
+  }, [pillarGrouping, pillars, sortedTasks]);
+
+  const tasksById = useMemo(() => {
+    const map = new Map<string, UserTask>();
+    for (const task of sortedTasks) {
+      map.set(task.id, task);
+    }
+    return map;
+  }, [sortedTasks]);
 
   const hasActiveFilters = normalizedSearch.length > 0 || selectedPillar.length > 0;
   const isDeletingTask = deleteStatus === 'loading';
@@ -231,6 +351,68 @@ export default function TaskEditorPage() {
     }
   }, [backendUserId, deleteTask, taskToDelete]);
 
+  useEffect(() => {
+    if (!taskToEdit) {
+      return;
+    }
+
+    const latestTask = tasksById.get(taskToEdit.id);
+
+    if (!latestTask) {
+      setTaskToEdit(null);
+      setEditGroupKey(null);
+      return;
+    }
+
+    const sameTitle = (latestTask.title ?? '') === (taskToEdit.title ?? '');
+    const sameDifficulty = (latestTask.difficultyId ?? '') === (taskToEdit.difficultyId ?? '');
+    const sameNotes = (latestTask.notes ?? '') === (taskToEdit.notes ?? '');
+    const sameStatus = Boolean(latestTask.isActive) === Boolean(taskToEdit.isActive);
+    const sameUpdatedAt = (latestTask.updatedAt ?? '') === (taskToEdit.updatedAt ?? '');
+
+    if (sameTitle && sameDifficulty && sameNotes && sameStatus && sameUpdatedAt) {
+      return;
+    }
+
+    setTaskToEdit(latestTask);
+  }, [taskToEdit, tasksById]);
+
+  const handleOpenEditModal = useCallback((task: UserTask) => {
+    setEditVariant('modal');
+    setEditGroupKey(null);
+    setTaskToEdit(task);
+  }, []);
+
+  const handleOpenEditPanel = useCallback((task: UserTask, groupKey: string) => {
+    setEditVariant('panel');
+    setEditGroupKey(groupKey);
+    setTaskToEdit(task);
+  }, []);
+
+  const handleCloseEdit = useCallback(() => {
+    setTaskToEdit(null);
+    setEditGroupKey(null);
+    setEditVariant('modal');
+  }, []);
+
+  const handleNavigatePanelTask = useCallback(
+    (taskId: string) => {
+      const nextTask = tasksById.get(taskId);
+      if (nextTask) {
+        setTaskToEdit(nextTask);
+      }
+    },
+    [tasksById],
+  );
+
+  const handleDeleteTask = useCallback((task: UserTask) => {
+    setTaskToDelete(task);
+  }, []);
+
+  const navigationTasks =
+    editVariant === 'panel' && editGroupKey ? groupedTasks.groupsByKey.get(editGroupKey)?.tasks ?? [] : [];
+  const activeTaskId = editVariant === 'panel' && taskToEdit ? taskToEdit.id : null;
+
   return (
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
@@ -272,15 +454,27 @@ export default function TaskEditorPage() {
                 )}
 
                 {!isLoadingTasks && !combinedError && filteredTasks.length > 0 && (
-                  <TaskList
-                    tasks={filteredTasks}
-                    pillarNamesById={pillarNamesById}
-                    traitNamesById={traitNamesMap}
-                    statNamesById={statNamesMap}
-                    difficultyNamesById={difficultyNamesById}
-                    onEditTask={(task) => setTaskToEdit(task)}
-                    onDeleteTask={(task) => setTaskToDelete(task)}
-                  />
+                  <>
+                    <div className="lg:hidden">
+                      <TaskList
+                        tasks={sortedTasks}
+                        pillarNamesById={pillarNamesById}
+                        traitNamesById={traitNamesMap}
+                        statNamesById={statNamesMap}
+                        difficultyNamesById={difficultyNamesById}
+                        onEditTask={handleOpenEditModal}
+                        onDeleteTask={handleDeleteTask}
+                      />
+                    </div>
+                    <TaskBoard
+                      groups={groupedTasks.groups}
+                      difficultyNamesById={difficultyNamesById}
+                      pillarNamesById={pillarNamesById}
+                      activeTaskId={activeTaskId}
+                      onSelectTask={handleOpenEditPanel}
+                      onDeleteTask={handleDeleteTask}
+                    />
+                  </>
                 )}
               </div>
             </Card>
@@ -318,10 +512,13 @@ export default function TaskEditorPage() {
         />
         <EditTaskModal
           open={taskToEdit != null}
-          onClose={() => setTaskToEdit(null)}
+          onClose={handleCloseEdit}
           userId={backendUserId ?? null}
           task={taskToEdit}
           pillars={pillars}
+          variant={editVariant}
+          navigationTasks={navigationTasks}
+          onNavigateTask={handleNavigatePanelTask}
         />
         <DeleteTaskModal
           open={taskToDelete != null}
@@ -542,6 +739,206 @@ function TaskCard({
         Actualizada: {formatDateLabel(task.updatedAt)}
       </p>
     </article>
+  );
+}
+
+interface TaskBoardProps {
+  groups: TaskBoardGroup[];
+  difficultyNamesById: Map<string, string>;
+  pillarNamesById: Map<string, string>;
+  activeTaskId: string | null;
+  onSelectTask: (task: UserTask, groupKey: string) => void;
+  onDeleteTask: (task: UserTask) => void;
+}
+
+const PILLAR_STYLE_MAP: Record<string, { headerText: string; badgeBg: string; badgeText: string; bullet: string; ring: string }>
+ = {
+  BODY: {
+    headerText: 'text-emerald-300',
+    badgeBg: 'bg-emerald-500/15 border border-emerald-400/40',
+    badgeText: 'text-emerald-100',
+    bullet: 'text-emerald-300',
+    ring: 'ring-emerald-400/40',
+  },
+  MIND: {
+    headerText: 'text-sky-300',
+    badgeBg: 'bg-sky-500/15 border border-sky-400/40',
+    badgeText: 'text-sky-100',
+    bullet: 'text-sky-300',
+    ring: 'ring-sky-400/40',
+  },
+  SOUL: {
+    headerText: 'text-violet-300',
+    badgeBg: 'bg-violet-500/15 border border-violet-400/40',
+    badgeText: 'text-violet-100',
+    bullet: 'text-violet-300',
+    ring: 'ring-violet-400/40',
+  },
+};
+
+const DEFAULT_PILLAR_STYLE = {
+  headerText: 'text-indigo-300',
+  badgeBg: 'bg-indigo-500/15 border border-indigo-400/40',
+  badgeText: 'text-indigo-100',
+  bullet: 'text-indigo-300',
+  ring: 'ring-indigo-400/40',
+};
+
+function resolvePillarStyle(code: string | undefined) {
+  if (!code) {
+    return DEFAULT_PILLAR_STYLE;
+  }
+  return PILLAR_STYLE_MAP[code.toUpperCase()] ?? DEFAULT_PILLAR_STYLE;
+}
+
+function TaskBoard({
+  groups,
+  difficultyNamesById,
+  pillarNamesById,
+  activeTaskId,
+  onSelectTask,
+  onDeleteTask,
+}: TaskBoardProps) {
+  if (groups.length === 0) {
+    return <div className="hidden lg:block" />;
+  }
+
+  return (
+    <div className="hidden gap-4 lg:grid lg:grid-cols-3">
+      {groups.map((group) => {
+        const style = resolvePillarStyle(group.code);
+        const displayCode = group.code === 'UNKNOWN' ? 'Sin pilar' : group.code;
+
+        return (
+          <section
+            key={group.key}
+            className="flex min-h-[260px] flex-col rounded-2xl border border-white/10 bg-white/5 p-4"
+          >
+            <header className="flex items-center justify-between border-b border-white/5 pb-3">
+              <div className="space-y-1">
+                <p className={`text-xs font-semibold uppercase tracking-[0.24em] ${style.headerText}`}>
+                  {group.name}
+                </p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{displayCode}</p>
+              </div>
+              <span
+                className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${style.badgeBg} ${style.badgeText}`}
+              >
+                {group.tasks.length}
+              </span>
+            </header>
+            <div className="mt-3 flex-1 space-y-2">
+              {group.tasks.length === 0 ? (
+                <p className="rounded-xl border border-white/5 bg-white/5 px-3 py-6 text-center text-xs text-slate-500">
+                  Sin tareas en este pilar.
+                </p>
+              ) : (
+                group.tasks.map((task) => (
+                  <TaskBoardItem
+                    key={task.id}
+                    task={task}
+                    groupKey={group.key}
+                    pillarName=
+                      {group.key === '__unknown__'
+                        ? pillarNamesById.get(task.pillarId ?? '') ?? 'Sin pilar'
+                        : group.name}
+                    difficultyName={task.difficultyId ? difficultyNamesById.get(task.difficultyId) ?? null : null}
+                    isActiveTask={activeTaskId === task.id}
+                    onSelectTask={onSelectTask}
+                    onDeleteTask={onDeleteTask}
+                    bulletClass={style.bullet}
+                    ringClass={style.ring}
+                  />
+                ))
+              )}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+interface TaskBoardItemProps {
+  task: UserTask;
+  groupKey: string;
+  pillarName: string;
+  difficultyName: string | null;
+  isActiveTask: boolean;
+  onSelectTask: (task: UserTask, groupKey: string) => void;
+  onDeleteTask: (task: UserTask) => void;
+  bulletClass: string;
+  ringClass: string;
+}
+
+function TaskBoardItem({
+  task,
+  groupKey,
+  pillarName,
+  difficultyName,
+  isActiveTask,
+  onSelectTask,
+  onDeleteTask,
+  bulletClass,
+  ringClass,
+}: TaskBoardItemProps) {
+  const handleClick = () => {
+    onSelectTask(task, groupKey);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelectTask(task, groupKey);
+    }
+  };
+
+  const containerClasses = [
+    'group relative cursor-pointer rounded-xl border border-white/10 bg-slate-900/60 p-3 transition hover:border-white/25 hover:bg-slate-900/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
+    isActiveTask ? `border-white/30 bg-slate-900/80 ring-2 ${ringClass}` : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={containerClasses}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      aria-pressed={isActiveTask}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-slate-100">{task.title}</p>
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${
+                task.isActive ? 'bg-emerald-500/10 text-emerald-200' : 'bg-slate-700/20 text-slate-300'
+              }`}
+            >
+              {task.isActive ? 'Activa' : 'Inactiva'}
+            </span>
+            <span className="flex items-center gap-1 text-slate-400">
+              <span className={`text-base leading-none ${bulletClass}`}>•</span>
+              {difficultyName ?? 'Sin dificultad'}
+            </span>
+            <span className="text-slate-500">{pillarName}</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onDeleteTask(task);
+          }}
+          className="rounded-full border border-rose-500/40 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200 transition hover:border-rose-400 hover:text-rose-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/50"
+        >
+          Eliminar
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -1134,9 +1531,21 @@ interface EditTaskModalProps {
   userId: string | null;
   task: UserTask | null;
   pillars: Pillar[];
+  variant?: 'modal' | 'panel';
+  navigationTasks?: UserTask[];
+  onNavigateTask?: (taskId: string) => void;
 }
 
-function EditTaskModal({ open, onClose, userId, task, pillars }: EditTaskModalProps) {
+function EditTaskModal({
+  open,
+  onClose,
+  userId,
+  task,
+  pillars,
+  variant = 'modal',
+  navigationTasks = [],
+  onNavigateTask,
+}: EditTaskModalProps) {
   const [title, setTitle] = useState('');
   const [difficultyId, setDifficultyId] = useState('');
   const [notes, setNotes] = useState('');
@@ -1283,6 +1692,207 @@ function EditTaskModal({ open, onClose, userId, task, pillars }: EditTaskModalPr
     return null;
   }
 
+  const showNavigation = variant === 'panel' && navigationTasks.length > 0 && task != null;
+  const activeIndex = showNavigation ? navigationTasks.findIndex((entry) => entry.id === task.id) : -1;
+  const previousTask = showNavigation && activeIndex > 0 ? navigationTasks[activeIndex - 1] : null;
+  const nextTask =
+    showNavigation && activeIndex >= 0 && activeIndex < navigationTasks.length - 1
+      ? navigationTasks[activeIndex + 1]
+      : null;
+  const navigationLabel = showNavigation
+    ? `${activeIndex + 1}/${navigationTasks.length}`
+    : navigationTasks.length > 0
+      ? `—/${navigationTasks.length}`
+      : '—';
+
+  const handleNavigate = useCallback(
+    (target: UserTask | null) => {
+      if (target && onNavigateTask) {
+        onNavigateTask(target.id);
+      }
+    },
+    [onNavigateTask],
+  );
+
+  const formBody = (
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Editar tarea</p>
+        <h2 className="text-xl font-semibold text-white">Actualiza los detalles de tu tarea</h2>
+        <p className="text-sm text-slate-300">
+          Ajusta el título, dificultad, notas y estado. Los campos de pilar, rasgo y stat permanecen bloqueados.
+        </p>
+      </header>
+
+      <section className="space-y-4">
+        <div className="space-y-2">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Contexto</span>
+          <div className="grid gap-3 md:grid-cols-3">
+            <ReadOnlyField label="Pilar" value={pillarName} />
+            <ReadOnlyField label="Rasgo" value={traitName} />
+            <ReadOnlyField label="Stat" value={statName} />
+          </div>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Estos campos no se pueden editar.</p>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div className="space-y-2">
+          <label className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Título de la tarea</span>
+            <input
+              type="text"
+              value={title}
+              onChange={(event) => {
+                setTitle(event.target.value);
+                clearError('title');
+              }}
+              placeholder="Ej. Entrenar 30 minutos"
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+            />
+          </label>
+          {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <label className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Dificultad</span>
+            <select
+              value={difficultyId}
+              onChange={(event) => setDifficultyId(event.target.value)}
+              className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+              disabled={isLoadingDifficulties}
+            >
+              <option value="" className="bg-slate-900 text-slate-100">
+                Sin dificultad asignada
+              </option>
+              {sortedDifficulties.map((difficulty) => (
+                <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-slate-100">
+                  {difficulty.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {isLoadingDifficulties && (
+            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando dificultades…</p>
+          )}
+          {difficultiesError && (
+            <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+              <p>No se pudieron cargar las dificultades.</p>
+              <button
+                type="button"
+                onClick={reloadDifficulties}
+                className="font-semibold text-rose-200 underline decoration-dotted"
+              >
+                Reintentar
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <label className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Notas (opcional)</span>
+            <textarea
+              value={notes}
+              onChange={(event) => setNotes(event.target.value)}
+              rows={3}
+              placeholder="Agrega detalles, condiciones o recordatorios."
+              className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+            />
+          </label>
+        </div>
+
+        <div className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Estado</span>
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={isActive}
+              onChange={(event) => setIsActive(event.target.checked)}
+              className="h-4 w-4 rounded border-white/30 bg-white/10 text-indigo-500 focus:ring-indigo-400"
+            />
+            <span className="text-sm text-slate-200">{isActive ? 'Activa' : 'Inactiva'}</span>
+          </label>
+        </div>
+      </section>
+
+      {errors.user && <p className="text-xs text-rose-300">{errors.user}</p>}
+      {errors.task && <p className="text-xs text-rose-300">{errors.task}</p>}
+
+      {toast && <ToastBanner tone={toast.type} message={toast.text} className="px-3" />}
+
+      <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          onClick={handleClose}
+          className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:text-white"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(79,70,229,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? 'Guardando…' : 'Guardar cambios'}
+        </button>
+      </div>
+    </div>
+  );
+
+  if (variant === 'panel') {
+    return (
+      <div className="fixed inset-0 z-[60] flex">
+        <button
+          type="button"
+          aria-label="Cerrar"
+          onClick={handleClose}
+          className="flex-1 bg-slate-950/60 backdrop-blur-sm"
+        />
+        <aside className="flex h-full w-full max-w-xl flex-col border-l border-white/10 bg-slate-950/95 text-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.65)]">
+          <form onSubmit={handleSubmit} className="flex h-full flex-col overflow-hidden">
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-6 py-4">
+              {showNavigation ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate(previousTask)}
+                    disabled={!previousTask}
+                    className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Anterior
+                  </button>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    {navigationLabel}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate(nextTask)}
+                    disabled={!nextTask}
+                    className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              ) : (
+                <p className="text-sm font-semibold text-slate-200">Editar tarea</p>
+              )}
+              <button
+                type="button"
+                onClick={handleClose}
+                className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 hover:text-white"
+              >
+                Cerrar
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 py-6">{formBody}</div>
+          </form>
+        </aside>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
       <button
@@ -1297,132 +1907,7 @@ function EditTaskModal({ open, onClose, userId, task, pillars }: EditTaskModalPr
           className="max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-slate-900/95 p-6 text-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="space-y-6">
-            <header className="space-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Editar tarea</p>
-              <h2 className="text-xl font-semibold text-white">Actualiza los detalles de tu tarea</h2>
-              <p className="text-sm text-slate-300">
-                Ajusta el título, dificultad, notas y estado. Los campos de pilar, rasgo y stat permanecen bloqueados.
-              </p>
-            </header>
-
-            <section className="space-y-4">
-              <div className="space-y-2">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  Contexto
-                </span>
-                <div className="grid gap-3 md:grid-cols-3">
-                  <ReadOnlyField label="Pilar" value={pillarName} />
-                  <ReadOnlyField label="Rasgo" value={traitName} />
-                  <ReadOnlyField label="Stat" value={statName} />
-                </div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Estos campos no se pueden editar.</p>
-              </div>
-            </section>
-
-            <section className="space-y-4">
-              <div className="space-y-2">
-                <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Título de la tarea</span>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(event) => {
-                      setTitle(event.target.value);
-                      clearError('title');
-                    }}
-                    placeholder="Ej. Entrenar 30 minutos"
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
-                  />
-                </label>
-                {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Dificultad</span>
-                  <select
-                    value={difficultyId}
-                    onChange={(event) => setDifficultyId(event.target.value)}
-                    className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
-                    disabled={isLoadingDifficulties}
-                  >
-                    <option value="" className="bg-slate-900 text-slate-100">
-                      Sin dificultad asignada
-                    </option>
-                    {sortedDifficulties.map((difficulty) => (
-                      <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-slate-100">
-                        {difficulty.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                {isLoadingDifficulties && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando dificultades…</p>
-                )}
-                {difficultiesError && (
-                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-                    <p>No se pudieron cargar las dificultades.</p>
-                    <button
-                      type="button"
-                      onClick={reloadDifficulties}
-                      className="font-semibold text-rose-200 underline decoration-dotted"
-                    >
-                      Reintentar
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Notas (opcional)</span>
-                  <textarea
-                    value={notes}
-                    onChange={(event) => setNotes(event.target.value)}
-                    rows={3}
-                    placeholder="Agrega detalles, condiciones o recordatorios."
-                    className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
-                  />
-                </label>
-              </div>
-
-              <div className="space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Estado</span>
-                <label className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={isActive}
-                    onChange={(event) => setIsActive(event.target.checked)}
-                    className="h-4 w-4 rounded border-white/30 bg-white/10 text-indigo-500 focus:ring-indigo-400"
-                  />
-                  <span className="text-sm text-slate-200">{isActive ? 'Activa' : 'Inactiva'}</span>
-                </label>
-              </div>
-            </section>
-
-            {errors.user && <p className="text-xs text-rose-300">{errors.user}</p>}
-            {errors.task && <p className="text-xs text-rose-300">{errors.task}</p>}
-
-            {toast && <ToastBanner tone={toast.type} message={toast.text} className="px-3" />}
-
-            <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:text-white"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(79,70,229,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSubmitting ? 'Guardando…' : 'Guardar cambios'}
-              </button>
-            </div>
-          </div>
+          {formBody}
         </form>
       </div>
     </div>
