@@ -71,22 +71,24 @@ export function useTraits(pillarId?: string | null): CatalogHookResult<Trait> {
     reload();
   }, [enabled, reload]);
 
-  if (!enabled) {
-    return disabledResult;
-  }
-
   const traits = (data ?? EMPTY_ARRAY) as Trait[];
   const isLoading = status === 'loading';
 
   return useMemo(
-    () => ({
-      data: traits,
-      status,
-      error,
-      isLoading,
-      reload: guardedReload,
-    }),
-    [traits, status, error, isLoading, guardedReload],
+    () => {
+      if (!enabled) {
+        return disabledResult;
+      }
+
+      return {
+        data: traits,
+        status,
+        error,
+        isLoading,
+        reload: guardedReload,
+      } satisfies CatalogHookResult<Trait>;
+    },
+    [disabledResult, enabled, traits, status, error, isLoading, guardedReload],
   );
 }
 
@@ -109,22 +111,24 @@ export function useStats(traitId?: string | null): CatalogHookResult<Stat> {
     reload();
   }, [enabled, reload]);
 
-  if (!enabled) {
-    return disabledResult;
-  }
-
   const stats = (data ?? EMPTY_ARRAY) as Stat[];
   const isLoading = status === 'loading';
 
   return useMemo(
-    () => ({
-      data: stats,
-      status,
-      error,
-      isLoading,
-      reload: guardedReload,
-    }),
-    [stats, status, error, isLoading, guardedReload],
+    () => {
+      if (!enabled) {
+        return disabledResult;
+      }
+
+      return {
+        data: stats,
+        status,
+        error,
+        isLoading,
+        reload: guardedReload,
+      } satisfies CatalogHookResult<Stat>;
+    },
+    [disabledResult, enabled, stats, status, error, isLoading, guardedReload],
   );
 }
 
