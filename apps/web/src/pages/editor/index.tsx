@@ -131,9 +131,9 @@ export default function TaskEditorPage() {
 
             return {
               key: section.key,
-              label: section.label,
+              label: section.key === 'editor' ? 'Editor' : section.label,
               to: section.to,
-              icon: <Icon className="h-5 w-5" />,
+              icon: <Icon className="h-4 w-4" />,
               end: section.end,
             };
           })}
