@@ -1,13 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { DevErrorBoundary } from '../../components/DevErrorBoundary';
 import { Navbar } from '../../components/layout/Navbar';
 import { MobileBottomNav } from '../../components/layout/MobileBottomNav';
 import { Card } from '../../components/common/Card';
 import { useBackendUser } from '../../hooks/useBackendUser';
-import { useUserTasks } from '../../hooks/useUserTasks';
-import { usePillars } from '../../hooks/useCatalogs';
+import { useCreateTask, useUserTasks } from '../../hooks/useUserTasks';
+import { useDifficulties, usePillars, useStats, useTraits } from '../../hooks/useCatalogs';
 import { type UserTask } from '../../lib/api';
+import { type Pillar } from '../../lib/api/catalogs';
 import {
   DASHBOARD_SECTIONS,
   getActiveSection,
@@ -31,7 +32,7 @@ export default function TaskEditorPage() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPillar, setSelectedPillar] = useState('');
-  const [showCreatePlaceholder, setShowCreatePlaceholder] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const isBackendReady = backendStatus === 'success' && Boolean(backendUserId);
@@ -75,7 +76,7 @@ export default function TaskEditorPage() {
   };
 
   const handleCreateClick = () => {
-    setShowCreatePlaceholder(true);
+    setShowCreateModal(true);
   };
 
   return (
@@ -146,7 +147,15 @@ export default function TaskEditorPage() {
           <span aria-hidden className="text-lg leading-none">＋</span>
           Nueva tarea
         </button>
-        <CreateTaskPlaceholder open={showCreatePlaceholder} onClose={() => setShowCreatePlaceholder(false)} />
+        <CreateTaskModal
+          open={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          userId={backendUserId ?? null}
+          pillars={pillars}
+          isLoadingPillars={isLoadingPillars}
+          pillarsError={pillarsError}
+          onRetryPillars={reloadPillars}
+        />
       </div>
     </DevErrorBoundary>
   );
@@ -353,7 +362,186 @@ function formatDateLabel(value: string | null): string {
   return parsed.toLocaleDateString();
 }
 
-function CreateTaskPlaceholder({ open, onClose }: { open: boolean; onClose: () => void }) {
+type ToastMessage = { type: 'success' | 'error'; text: string };
+
+interface CreateTaskModalProps {
+  open: boolean;
+  onClose: () => void;
+  userId: string | null;
+  pillars: Pillar[];
+  isLoadingPillars: boolean;
+  pillarsError: Error | null;
+  onRetryPillars: () => void;
+}
+
+function CreateTaskModal({
+  open,
+  onClose,
+  userId,
+  pillars,
+  isLoadingPillars,
+  pillarsError,
+  onRetryPillars,
+}: CreateTaskModalProps) {
+  const [selectedPillarId, setSelectedPillarId] = useState('');
+  const [selectedTraitId, setSelectedTraitId] = useState('');
+  const [selectedStatId, setSelectedStatId] = useState('');
+  const [title, setTitle] = useState('');
+  const [difficultyId, setDifficultyId] = useState('');
+  const [notes, setNotes] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  const clearError = useCallback((field: string) => {
+    setErrors((prev) => {
+      if (!prev[field]) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }, []);
+
+  const { createTask, status: createStatus } = useCreateTask();
+  const {
+    data: traits,
+    isLoading: isLoadingTraits,
+    error: traitsError,
+    reload: reloadTraits,
+  } = useTraits(open ? selectedPillarId : null);
+  const {
+    data: stats,
+    isLoading: isLoadingStats,
+    error: statsError,
+    reload: reloadStats,
+  } = useStats(open ? selectedTraitId : null);
+  const {
+    data: difficulties,
+    isLoading: isLoadingDifficulties,
+    error: difficultiesError,
+    reload: reloadDifficulties,
+  } = useDifficulties();
+
+  const handleClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedPillarId('');
+      setSelectedTraitId('');
+      setSelectedStatId('');
+      setTitle('');
+      setDifficultyId('');
+      setNotes('');
+      setErrors({});
+      setToast(null);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        handleClose();
+      }
+    };
+
+    if (open) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+
+    return undefined;
+  }, [open, handleClose]);
+
+  useEffect(() => {
+    if (toast) {
+      const timeout = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timeout);
+    }
+    return undefined;
+  }, [toast]);
+
+  useEffect(() => {
+    setSelectedTraitId('');
+    setSelectedStatId('');
+    clearError('trait');
+    clearError('stat');
+  }, [selectedPillarId, clearError]);
+
+  useEffect(() => {
+    setSelectedStatId('');
+    clearError('stat');
+  }, [selectedTraitId, clearError]);
+
+  const sortedPillars = useMemo(() => {
+    return [...pillars].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  }, [pillars]);
+
+  const filteredTraits = useMemo(() => {
+    return traits.filter((trait) => trait.pillarId === selectedPillarId);
+  }, [traits, selectedPillarId]);
+
+  const filteredStats = useMemo(() => {
+    return stats.filter((stat) => stat.traitId === selectedTraitId);
+  }, [stats, selectedTraitId]);
+
+  const sortedDifficulties = useMemo(() => {
+    return [...difficulties].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  }, [difficulties]);
+
+  const isSubmitting = createStatus === 'loading';
+  const isSubmitDisabled =
+    isSubmitting || !selectedPillarId || !selectedTraitId || title.trim().length === 0 || !userId;
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const validationErrors: Record<string, string> = {};
+    if (!selectedPillarId) {
+      validationErrors.pillar = 'Selecciona un pilar para continuar.';
+    }
+    if (!selectedTraitId) {
+      validationErrors.trait = 'Selecciona un rasgo para continuar.';
+    }
+    if (title.trim().length === 0) {
+      validationErrors.title = 'El título es obligatorio.';
+    }
+    if (!userId) {
+      validationErrors.user = 'No se pudo identificar tu usuario. Intenta más tarde.';
+    }
+
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+      return;
+    }
+
+    try {
+      await createTask(userId!, {
+        title: title.trim(),
+        pillarId: selectedPillarId,
+        traitId: selectedTraitId,
+        statId: selectedStatId || null,
+        difficultyId: difficultyId || null,
+        notes: notes.trim() || null,
+      });
+      setToast({ type: 'success', text: 'Tarea creada correctamente.' });
+      setTitle('');
+      setNotes('');
+      setDifficultyId('');
+      setSelectedStatId('');
+      setErrors({});
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo crear la tarea.';
+      setToast({ type: 'error', text: message });
+    }
+  };
+
   if (!open) {
     return null;
   }
@@ -363,23 +551,254 @@ function CreateTaskPlaceholder({ open, onClose }: { open: boolean; onClose: () =
       <button
         type="button"
         aria-label="Cerrar"
-        onClick={onClose}
+        onClick={handleClose}
         className="absolute inset-0 h-full w-full"
       />
-      <div className="relative z-10 w-full max-w-md p-4">
-        <div className="rounded-2xl border border-white/10 bg-slate-900/90 p-6 text-center text-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.65)]">
-          <h2 className="text-lg font-semibold text-white">Crear nueva tarea</h2>
-          <p className="mt-3 text-sm text-slate-300">
-            Estamos afinando el flujo de creación. Muy pronto podrás diseñar misiones personalizadas desde aquí.
-          </p>
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-6 inline-flex items-center justify-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white/20"
-          >
-            Cerrar
-          </button>
-        </div>
+      <div className="relative z-10 w-full max-w-2xl p-4">
+        <form
+          onSubmit={handleSubmit}
+          className="max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-slate-900/95 p-6 text-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="space-y-6">
+            <header className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Nueva tarea</p>
+              <h2 className="text-xl font-semibold text-white">Crear tarea personalizada</h2>
+              <p className="text-sm text-slate-300">
+                Define el pilar, rasgo y stat para desbloquear campos específicos de tu misión.
+              </p>
+            </header>
+
+            <section className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 1 · Pilar</p>
+                <label className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Selecciona un pilar</span>
+                  <select
+                    value={selectedPillarId}
+                    onChange={(event) => {
+                      setSelectedPillarId(event.target.value);
+                      clearError('pillar');
+                    }}
+                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    disabled={isLoadingPillars || pillarsError != null}
+                  >
+                    <option value="" className="bg-slate-900 text-slate-100">
+                      Selecciona un pilar…
+                    </option>
+                    {sortedPillars.map((pillar) => (
+                      <option key={pillar.id} value={pillar.id} className="bg-slate-900 text-slate-100">
+                        {pillar.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {isLoadingPillars && (
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando pilares…</p>
+                )}
+                {pillarsError && (
+                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                    <p>No se pudieron cargar los pilares.</p>
+                    <button
+                      type="button"
+                      onClick={onRetryPillars}
+                      className="font-semibold text-rose-200 underline decoration-dotted"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                )}
+                {errors.pillar && <p className="text-xs text-rose-300">{errors.pillar}</p>}
+                {!isLoadingPillars && !pillarsError && sortedPillars.length === 0 && (
+                  <p className="text-xs text-slate-400">No encontramos pilares disponibles por ahora.</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 2 · Rasgo</p>
+                <label className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Selecciona un rasgo</span>
+                  <select
+                    value={selectedTraitId}
+                    onChange={(event) => {
+                      setSelectedTraitId(event.target.value);
+                      clearError('trait');
+                    }}
+                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    disabled={!selectedPillarId || isLoadingTraits}
+                  >
+                    <option value="" className="bg-slate-900 text-slate-100">
+                      {selectedPillarId ? 'Selecciona un rasgo…' : 'Selecciona primero un pilar'}
+                    </option>
+                    {filteredTraits.map((trait) => (
+                      <option key={trait.id} value={trait.id} className="bg-slate-900 text-slate-100">
+                        {trait.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {isLoadingTraits && (
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando rasgos…</p>
+                )}
+                {traitsError && (
+                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                    <p>No se pudieron cargar los rasgos.</p>
+                    <button
+                      type="button"
+                      onClick={reloadTraits}
+                      className="font-semibold text-rose-200 underline decoration-dotted"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                )}
+                {errors.trait && <p className="text-xs text-rose-300">{errors.trait}</p>}
+                {selectedPillarId && !isLoadingTraits && filteredTraits.length === 0 && !traitsError && (
+                  <p className="text-xs text-slate-400">Este pilar aún no tiene rasgos disponibles.</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 3 · Stat</p>
+                <label className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Selecciona un stat (opcional)</span>
+                  <select
+                    value={selectedStatId}
+                    onChange={(event) => setSelectedStatId(event.target.value)}
+                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    disabled={!selectedTraitId || isLoadingStats}
+                  >
+                    <option value="" className="bg-slate-900 text-slate-100">
+                      {selectedTraitId ? 'Selecciona un stat…' : 'Selecciona primero un rasgo'}
+                    </option>
+                    {filteredStats.map((stat) => (
+                      <option key={stat.id} value={stat.id} className="bg-slate-900 text-slate-100">
+                        {stat.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {isLoadingStats && (
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando stats…</p>
+                )}
+                {statsError && (
+                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                    <p>No se pudieron cargar los stats.</p>
+                    <button
+                      type="button"
+                      onClick={reloadStats}
+                      className="font-semibold text-rose-200 underline decoration-dotted"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                )}
+                {selectedTraitId && !isLoadingStats && filteredStats.length === 0 && !statsError && (
+                  <p className="text-xs text-slate-400">Este rasgo aún no tiene stats asociados.</p>
+                )}
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <div className="space-y-2">
+                <label className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Título de la tarea</span>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(event) => {
+                      setTitle(event.target.value);
+                      clearError('title');
+                    }}
+                    placeholder="Ej. Entrenar 30 minutos"
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  />
+                </label>
+                {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Dificultad</span>
+                  <select
+                    value={difficultyId}
+                    onChange={(event) => setDifficultyId(event.target.value)}
+                    className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    disabled={isLoadingDifficulties}
+                  >
+                    <option value="" className="bg-slate-900 text-slate-100">
+                      Selecciona una dificultad…
+                    </option>
+                    {sortedDifficulties.map((difficulty) => (
+                      <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-slate-100">
+                        {difficulty.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {isLoadingDifficulties && (
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando dificultades…</p>
+                )}
+                {difficultiesError && (
+                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                    <p>No se pudieron cargar las dificultades.</p>
+                    <button
+                      type="button"
+                      onClick={reloadDifficulties}
+                      className="font-semibold text-rose-200 underline decoration-dotted"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Notas (opcional)</span>
+                  <textarea
+                    value={notes}
+                    onChange={(event) => setNotes(event.target.value)}
+                    rows={3}
+                    placeholder="Agrega detalles, condiciones o recordatorios."
+                    className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  />
+                </label>
+              </div>
+            </section>
+
+            {errors.user && <p className="text-xs text-rose-300">{errors.user}</p>}
+
+            {toast && (
+              <div
+                className={`rounded-xl border px-3 py-2 text-sm ${
+                  toast.type === 'success'
+                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100'
+                    : 'border-rose-500/40 bg-rose-500/10 text-rose-100'
+                }`}
+              >
+                {toast.text}
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:text-white"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitDisabled}
+                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(79,70,229,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? 'Creando…' : 'Crear tarea'}
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );
