@@ -139,7 +139,7 @@ export default function DashboardV3Page() {
             {!failedToLoadProfile && !isLoadingProfile && backendUserId && (
               <Routes>
                 <Route
-                  index
+                  path="/dashboard-v3"
                   element={
                     <DashboardOverview
                       userId={backendUserId}
@@ -149,8 +149,14 @@ export default function DashboardV3Page() {
                     />
                   }
                 />
-                <Route path="missions" element={<MissionsView userId={backendUserId} />} />
-                <Route path="rewards" element={<RewardsView userId={backendUserId} />} />
+                <Route
+                  path="/dashboard-v3/missions"
+                  element={<MissionsView userId={backendUserId} />}
+                />
+                <Route
+                  path="/dashboard-v3/rewards"
+                  element={<RewardsView userId={backendUserId} />}
+                />
                 <Route path="*" element={<Navigate to="/dashboard-v3" replace />} />
               </Routes>
             )}
