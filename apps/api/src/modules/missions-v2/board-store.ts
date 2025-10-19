@@ -100,12 +100,12 @@ type SerializedSlot = {
     target: number;
     percent: number;
   } | null;
-  actions: Array<{
+  actions: {
     id: string;
     type: 'link_daily' | 'special_strike' | 'submit_evidence';
     label: string;
     enabled: boolean;
-  }>;
+  }[];
   claim: {
     available: boolean;
     enabled: boolean;
@@ -162,17 +162,17 @@ type SerializedBoard = {
   weekly_selection: {
     status: WeeklySelectionState['status'];
     expires_at: string | null;
-    slots: Array<{
+    slots: {
       slot: MissionSlotKey;
       proposals: SerializedProposal[];
       rerolls_remaining: number;
-    }>;
+    }[];
   } | null;
-  communications: Array<{
+  communications: {
     id: string;
     type: 'daily' | 'weekly' | 'biweekly' | 'seasonal';
     message: string;
-  }>;
+  }[];
   gating: {
     claim_url: string;
   };
