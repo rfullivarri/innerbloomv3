@@ -10,6 +10,7 @@ import dailyQuestRoutes from './dailyQuest.js';
 import catalogRoutes from './catalog.js';
 import adminRoutes from '../modules/admin/admin.routes.js';
 import onboardingRoutes from './onboarding.js';
+import missionsRoutes from './missions.js';
 
 const router = Router();
 
@@ -20,6 +21,7 @@ router.use(catalogRoutes);
 router.use(meRoutes);
 router.use(tasksRoutes);
 router.use(dailyQuestRoutes);
+router.use(missionsRoutes);
 router.use(usersRoutes);
 router.use(leaderboardRoutes);
 router.use(adminRoutes);
