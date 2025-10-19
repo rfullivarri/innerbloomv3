@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import DashboardV3Page from './pages/DashboardV3';
+import TaskEditorPage from './pages/editor';
 import LoginPage from './pages/Login';
 import LandingPage from './pages/Landing';
 import SignUpPage from './pages/SignUp';
@@ -119,6 +120,14 @@ export default function App() {
           element={
             <RequireUser>
               <DashboardV3Page />
+            </RequireUser>
+          }
+        />
+        <Route
+          path="/editor"
+          element={
+            <RequireUser>
+              <TaskEditorPage />
             </RequireUser>
           }
         />

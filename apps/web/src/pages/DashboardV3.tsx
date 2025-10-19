@@ -11,10 +11,10 @@
  * Derivaciones client-side: xp faltante y barra de nivel se calculan con una curva estimada; panel de rachas muestra métricas de XP mientras esperamos daily_log_raw.
  */
 
-import { Navigate, Route, Routes, matchPath, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { useCallback, useEffect, useRef, type SVGProps } from 'react';
-import { Navbar, type NavbarSection } from '../components/layout/Navbar';
+import { useCallback, useEffect, useRef } from 'react';
+import { Navbar } from '../components/layout/Navbar';
 import { MobileBottomNav } from '../components/layout/MobileBottomNav';
 import { Alerts } from '../components/dashboard-v3/Alerts';
 import { EnergyCard } from '../components/dashboard-v3/EnergyCard';
@@ -37,61 +37,14 @@ import { DailyQuestModal, type DailyQuestModalHandle } from '../components/Daily
 import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
 import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
 import { Card } from '../components/common/Card';
-
-type DashboardSectionKey = 'dashboard' | 'missions' | 'rewards';
-
-interface DashboardSectionConfig extends NavbarSection {
-  key: DashboardSectionKey;
-  pageTitle: string;
-  eyebrow?: string;
-  contentTitle: string;
-  description?: string;
-  icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
-}
-
-const DASHBOARD_SECTIONS: DashboardSectionConfig[] = [
-  {
-    key: 'dashboard',
-    label: 'Dashboard',
-    to: '/dashboard-v3',
-    end: true,
-    pageTitle: 'Dashboard',
-    contentTitle: 'Dashboard',
-    icon: DashboardIcon,
-  },
-  {
-    key: 'missions',
-    label: 'Misiones',
-    to: '/dashboard-v3/missions',
-    pageTitle: 'Misiones',
-    eyebrow: 'Misiones',
-    contentTitle: 'Tus misiones activas',
-    description: 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.',
-    icon: MissionsIcon,
-  },
-  {
-    key: 'rewards',
-    label: 'Rewards',
-    to: '/dashboard-v3/rewards',
-    pageTitle: 'Rewards',
-    eyebrow: 'Rewards',
-    contentTitle: 'Logros y badges desbloqueados',
-    description: 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.',
-    icon: RewardsIcon,
-  },
-];
-
-const [dashboardSection, missionsSection, rewardsSection] = DASHBOARD_SECTIONS;
-
-function getActiveSection(pathname: string): DashboardSectionConfig {
-  return (
-    DASHBOARD_SECTIONS.find((section) => isSectionActive(section, pathname)) ?? dashboardSection
-  );
-}
-
-function isSectionActive(section: DashboardSectionConfig, pathname: string) {
-  return matchPath({ path: section.to, end: section.end ?? false }, pathname) != null;
-}
+import {
+  DASHBOARD_SECTIONS,
+  dashboardSection,
+  getActiveSection,
+  missionsSection,
+  rewardsSection,
+  type DashboardSectionConfig,
+} from './dashboardSections';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -348,71 +301,6 @@ function SectionHeader({ eyebrow, title, description, pageTitle }: SectionHeader
         <p className="text-sm text-slate-400">{normalizedDescription}</p>
       )}
     </header>
-  );
-}
-
-function DashboardIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-      {...props}
-    >
-      <path d="M4 13a8 8 0 0 1 16 0v4a1 1 0 0 1-1 1h-4.5" />
-      <path d="M12 7v5.5l3 2.5" />
-      <circle cx={12} cy={13} r={0.6} fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function MissionsIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-      {...props}
-    >
-      <circle cx={12} cy={12} r={5.5} />
-      <path d="M12 3v2.5" />
-      <path d="M12 18.5V21" />
-      <path d="M3 12h2.5" />
-      <path d="M18.5 12H21" />
-      <path d="M12 12l2.5-1.5" />
-    </svg>
-  );
-}
-
-function RewardsIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-      {...props}
-    >
-      <path d="M7 5a2 2 0 1 1 4 0c0 1-1 3-3 3" />
-      <path d="M17 5a2 2 0 1 0-4 0c0 1 1 3 3 3" />
-      <path d="M3 8.5h18" />
-      <path d="M12 8.5V21" />
-      <path d="M5 8.5V19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5" />
-    </svg>
   );
 }
 
