@@ -25,7 +25,7 @@ const MODE_TO_HUNT_TARGET: Record<string, number> = {
 
 const slotTemplates: Record<
   MissionSlotKey,
-  Array<Omit<MissionProposal, 'id'> & { templateId: string }>
+  (Omit<MissionProposal, 'id'> & { templateId: string })[]
 > = {
   main: [
     {
