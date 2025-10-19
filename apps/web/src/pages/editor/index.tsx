@@ -9,7 +9,7 @@ import { useBackendUser } from '../../hooks/useBackendUser';
 import { useCreateTask, useDeleteTask, useUpdateTask, useUserTasks } from '../../hooks/useUserTasks';
 import { useDifficulties, usePillars, useStats, useTraits } from '../../hooks/useCatalogs';
 import { type UserTask } from '../../lib/api';
-import { type Pillar } from '../../lib/api/catalogs';
+import { fetchCatalogStats, fetchCatalogTraits, type Pillar } from '../../lib/api/catalogs';
 import {
   DASHBOARD_SECTIONS,
   getActiveSection,
@@ -30,6 +30,10 @@ export default function TaskEditorPage() {
     error: pillarsError,
     reload: reloadPillars,
   } = usePillars();
+  const { data: difficulties } = useDifficulties();
+
+  const [traitNamesById, setTraitNamesById] = useState<Record<string, string>>({});
+  const [statNamesById, setStatNamesById] = useState<Record<string, string>>({});
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPillar, setSelectedPillar] = useState('');
@@ -52,6 +56,102 @@ export default function TaskEditorPage() {
     }
   }, [taskToDelete]);
 
+  useEffect(() => {
+    const missingTraitsByPillar = new Map<string, Set<string>>();
+
+    for (const task of tasks) {
+      const pillarId = task.pillarId?.trim();
+      const traitId = task.traitId?.trim();
+      if (!pillarId || !traitId || traitNamesById[traitId]) {
+        continue;
+      }
+
+      if (!missingTraitsByPillar.has(pillarId)) {
+        missingTraitsByPillar.set(pillarId, new Set());
+      }
+      missingTraitsByPillar.get(pillarId)!.add(traitId);
+    }
+
+    if (missingTraitsByPillar.size === 0) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadTraits = async () => {
+      const updates: Record<string, string> = {};
+
+      for (const [pillarId] of missingTraitsByPillar) {
+        try {
+          const traits = await fetchCatalogTraits(pillarId);
+          for (const trait of traits) {
+            updates[trait.id] = trait.name;
+          }
+        } catch (error) {
+          console.error('Failed to load traits for pillar', pillarId, error);
+        }
+      }
+
+      if (!isCancelled && Object.keys(updates).length > 0) {
+        setTraitNamesById((previous) => ({ ...previous, ...updates }));
+      }
+    };
+
+    void loadTraits();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [tasks, traitNamesById]);
+
+  useEffect(() => {
+    const missingStatsByTrait = new Map<string, Set<string>>();
+
+    for (const task of tasks) {
+      const traitId = task.traitId?.trim();
+      const statId = task.statId?.trim();
+      if (!traitId || !statId || statNamesById[statId]) {
+        continue;
+      }
+
+      if (!missingStatsByTrait.has(traitId)) {
+        missingStatsByTrait.set(traitId, new Set());
+      }
+      missingStatsByTrait.get(traitId)!.add(statId);
+    }
+
+    if (missingStatsByTrait.size === 0) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadStats = async () => {
+      const updates: Record<string, string> = {};
+
+      for (const [traitId] of missingStatsByTrait) {
+        try {
+          const stats = await fetchCatalogStats(traitId);
+          for (const stat of stats) {
+            updates[stat.id] = stat.name;
+          }
+        } catch (error) {
+          console.error('Failed to load stats for trait', traitId, error);
+        }
+      }
+
+      if (!isCancelled && Object.keys(updates).length > 0) {
+        setStatNamesById((previous) => ({ ...previous, ...updates }));
+      }
+    };
+
+    void loadStats();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [tasks, statNamesById]);
+
   const pillarOptions = useMemo(() => {
     return [
       { value: '', label: 'Todos los pilares' },
@@ -66,6 +166,16 @@ export default function TaskEditorPage() {
     }
     return map;
   }, [pillars]);
+
+  const traitNamesMap = useMemo(() => new Map(Object.entries(traitNamesById)), [traitNamesById]);
+  const statNamesMap = useMemo(() => new Map(Object.entries(statNamesById)), [statNamesById]);
+  const difficultyNamesById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const difficulty of difficulties) {
+      map.set(difficulty.id, difficulty.name);
+    }
+    return map;
+  }, [difficulties]);
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
@@ -165,6 +275,9 @@ export default function TaskEditorPage() {
                   <TaskList
                     tasks={filteredTasks}
                     pillarNamesById={pillarNamesById}
+                    traitNamesById={traitNamesMap}
+                    statNamesById={statNamesMap}
+                    difficultyNamesById={difficultyNamesById}
                     onEditTask={(task) => setTaskToEdit(task)}
                     onDeleteTask={(task) => setTaskToDelete(task)}
                   />
@@ -317,11 +430,17 @@ function TaskFilters({
 function TaskList({
   tasks,
   pillarNamesById,
+  traitNamesById,
+  statNamesById,
+  difficultyNamesById,
   onEditTask,
   onDeleteTask,
 }: {
   tasks: UserTask[];
   pillarNamesById: Map<string, string>;
+  traitNamesById: Map<string, string>;
+  statNamesById: Map<string, string>;
+  difficultyNamesById: Map<string, string>;
   onEditTask: (task: UserTask) => void;
   onDeleteTask: (task: UserTask) => void;
 }) {
@@ -332,6 +451,9 @@ function TaskList({
           key={task.id}
           task={task}
           pillarName={pillarNamesById.get(task.pillarId ?? '') ?? null}
+          traitName={task.traitId ? traitNamesById.get(task.traitId) ?? null : null}
+          statName={task.statId ? statNamesById.get(task.statId) ?? null : null}
+          difficultyName={task.difficultyId ? difficultyNamesById.get(task.difficultyId) ?? null : null}
           onEdit={() => onEditTask(task)}
           onDelete={() => onDeleteTask(task)}
         />
@@ -343,11 +465,17 @@ function TaskList({
 function TaskCard({
   task,
   pillarName,
+  traitName,
+  statName,
+  difficultyName,
   onEdit,
   onDelete,
 }: {
   task: UserTask;
   pillarName: string | null;
+  traitName: string | null;
+  statName: string | null;
+  difficultyName: string | null;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -390,15 +518,15 @@ function TaskCard({
         </div>
         <div className="flex items-center justify-between gap-4">
           <dt className="font-medium text-slate-300">Rasgo</dt>
-          <dd className="truncate text-right">{task.traitId ?? '—'}</dd>
+          <dd className="truncate text-right">{traitName ?? task.traitId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
           <dt className="font-medium text-slate-300">Stat</dt>
-          <dd className="truncate text-right">{task.statId ?? '—'}</dd>
+          <dd className="truncate text-right">{statName ?? task.statId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
           <dt className="font-medium text-slate-300">Dificultad</dt>
-          <dd className="truncate text-right">{task.difficultyId ?? '—'}</dd>
+          <dd className="truncate text-right">{difficultyName ?? task.difficultyId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
           <dt className="font-medium text-slate-300">XP base</dt>
