@@ -226,13 +226,20 @@ export default function TaskEditorPage() {
 function SectionHeader({ section }: { section: DashboardSectionConfig }) {
   const normalizedTitle = section.contentTitle.trim();
   const normalizedDescription = section.description?.trim() ?? '';
+  const shouldShowTitle = normalizedTitle.length > 0;
   const shouldShowDescription = normalizedDescription.length > 0;
+
+  if (!shouldShowTitle && !shouldShowDescription) {
+    return null;
+  }
 
   return (
     <header className="mb-6 space-y-2 md:mb-8">
-      <h1 className="font-display text-2xl font-semibold text-white sm:text-3xl">
-        {normalizedTitle}
-      </h1>
+      {shouldShowTitle && (
+        <h1 className="font-display text-2xl font-semibold text-white sm:text-3xl">
+          {normalizedTitle}
+        </h1>
+      )}
       {shouldShowDescription && <p className="text-sm text-slate-400">{normalizedDescription}</p>}
     </header>
   );

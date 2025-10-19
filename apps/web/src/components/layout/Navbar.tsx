@@ -93,7 +93,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: Navbar
           <button
             type="button"
             onClick={handleSignOut}
-            className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/90 backdrop-blur transition hover:border-white/30 hover:bg-white/20"
+            className="rounded-full border border-white/20 bg-white/10 px-[0.45rem] py-[0.225rem] text-[0.4125rem] font-semibold uppercase tracking-[0.168em] text-white/90 backdrop-blur transition hover:border-white/30 hover:bg-white/20"
           >
             Cerrar sesión
           </button>

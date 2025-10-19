@@ -135,8 +135,8 @@ export const DASHBOARD_SECTIONS: DashboardSectionConfig[] = [
     end: true,
     pageTitle: 'Task Editor',
     eyebrow: 'Task Editor',
-    contentTitle: 'Task Editor',
-    description: 'Crea y edita tareas personalizadas para tus jugadores.',
+    contentTitle: '',
+    description: '',
     icon: TaskEditorIcon,
   },
 ];
