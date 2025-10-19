@@ -11,10 +11,10 @@
  * Derivaciones client-side: xp faltante y barra de nivel se calculan con una curva estimada; panel de rachas muestra métricas de XP mientras esperamos daily_log_raw.
  */
 
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, matchPath, useLocation } from 'react-router-dom';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { useCallback, useEffect, useRef, type SVGProps } from 'react';
-import { Navbar } from '../components/layout/Navbar';
+import { Navbar, type NavbarSection } from '../components/layout/Navbar';
 import { MobileBottomNav } from '../components/layout/MobileBottomNav';
 import { Alerts } from '../components/dashboard-v3/Alerts';
 import { EnergyCard } from '../components/dashboard-v3/EnergyCard';
@@ -38,10 +38,69 @@ import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
 import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
 import { Card } from '../components/common/Card';
 
+type DashboardSectionKey = 'dashboard' | 'missions' | 'rewards';
+
+interface DashboardSectionConfig extends NavbarSection {
+  key: DashboardSectionKey;
+  pageTitle: string;
+  eyebrow: string;
+  contentTitle: string;
+  description: string;
+  icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
+}
+
+const DASHBOARD_SECTIONS: DashboardSectionConfig[] = [
+  {
+    key: 'dashboard',
+    label: 'Dashboard',
+    to: '/dashboard-v3',
+    end: true,
+    pageTitle: 'Dashboard',
+    eyebrow: 'Panel principal',
+    contentTitle: 'Dashboard',
+    description: 'Visualizá tu progreso general, energía diaria y estado emocional.',
+    icon: DashboardIcon,
+  },
+  {
+    key: 'missions',
+    label: 'Misiones',
+    to: '/dashboard-v3/missions',
+    pageTitle: 'Misiones',
+    eyebrow: 'Misiones',
+    contentTitle: 'Tus misiones activas',
+    description: 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.',
+    icon: MissionsIcon,
+  },
+  {
+    key: 'rewards',
+    label: 'Rewards',
+    to: '/dashboard-v3/rewards',
+    pageTitle: 'Rewards',
+    eyebrow: 'Rewards',
+    contentTitle: 'Logros y badges desbloqueados',
+    description: 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.',
+    icon: RewardsIcon,
+  },
+];
+
+const [dashboardSection, missionsSection, rewardsSection] = DASHBOARD_SECTIONS;
+
+function getActiveSection(pathname: string): DashboardSectionConfig {
+  return (
+    DASHBOARD_SECTIONS.find((section) => isSectionActive(section, pathname)) ?? dashboardSection
+  );
+}
+
+function isSectionActive(section: DashboardSectionConfig, pathname: string) {
+  return matchPath({ path: section.to, end: section.end ?? false }, pathname) != null;
+}
+
 export default function DashboardV3Page() {
   const { user } = useUser();
   const { getToken } = useAuth();
   const { backendUserId, status, error, reload, clerkUserId, profile } = useBackendUser();
+  const location = useLocation();
+  const activeSection = getActiveSection(location.pathname);
   const profileGameMode = deriveGameModeFromProfile(profile?.game_mode);
   const shouldFetchUserState = Boolean(backendUserId && !profileGameMode);
   const { data: userState } = useRequest(
@@ -123,6 +182,8 @@ export default function DashboardV3Page() {
         <Navbar
           onDailyClick={backendUserId ? handleOpenDaily : undefined}
           dailyButtonRef={dailyButtonRef}
+          title={activeSection.pageTitle}
+          sections={DASHBOARD_SECTIONS}
         />
         <DailyQuestModal
           ref={dailyQuestModalRef}
@@ -150,38 +211,35 @@ export default function DashboardV3Page() {
                       avatarUrl={avatarUrl}
                       gameMode={gameMode}
                       weeklyTarget={profile?.weekly_target ?? null}
+                      section={dashboardSection}
                     />
                   }
                 />
-                <Route path="missions" element={<MissionsView userId={backendUserId} />} />
-                <Route path="rewards" element={<RewardsView userId={backendUserId} />} />
+                <Route
+                  path="missions"
+                  element={<MissionsView userId={backendUserId} section={missionsSection} />}
+                />
+                <Route
+                  path="rewards"
+                  element={<RewardsView userId={backendUserId} section={rewardsSection} />}
+                />
                 <Route path="*" element={<Navigate to="." replace />} />
               </Routes>
             )}
           </div>
         </main>
         <MobileBottomNav
-          items={[
-            {
-              key: 'dashboard',
-              label: 'Dashboard',
-              to: '/dashboard-v3',
-              icon: <DashboardIcon className="h-5 w-5" />,
-              end: true,
-            },
-            {
-              key: 'missions',
-              label: 'Misiones',
-              to: '/dashboard-v3/missions',
-              icon: <MissionsIcon className="h-5 w-5" />,
-            },
-            {
-              key: 'rewards',
-              label: 'Rewards',
-              to: '/dashboard-v3/rewards',
-              icon: <RewardsIcon className="h-5 w-5" />,
-            },
-          ]}
+          items={DASHBOARD_SECTIONS.map((section) => {
+            const Icon = section.icon;
+
+            return {
+              key: section.key,
+              label: section.label,
+              to: section.to,
+              icon: <Icon className="h-5 w-5" />,
+              end: section.end,
+            };
+          })}
         />
       </div>
     </DevErrorBoundary>
@@ -193,15 +251,17 @@ interface DashboardOverviewProps {
   avatarUrl?: string | null;
   gameMode: GameMode | string | null;
   weeklyTarget: number | null;
+  section: DashboardSectionConfig;
 }
 
-function DashboardOverview({ userId, avatarUrl, gameMode, weeklyTarget }: DashboardOverviewProps) {
+function DashboardOverview({ userId, avatarUrl, gameMode, weeklyTarget, section }: DashboardOverviewProps) {
   return (
     <div className="space-y-6">
       <SectionHeader
-        eyebrow="Panel principal"
-        title="Dashboard"
-        description="Visualizá tu progreso general, energía diaria y estado emocional."
+        eyebrow={section.eyebrow}
+        title={section.contentTitle}
+        description={section.description}
+        pageTitle={section.pageTitle}
       />
       <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="order-1 lg:col-span-12">
@@ -229,26 +289,28 @@ function DashboardOverview({ userId, avatarUrl, gameMode, weeklyTarget }: Dashbo
   );
 }
 
-function MissionsView({ userId }: { userId: string }) {
+function MissionsView({ userId, section }: { userId: string; section: DashboardSectionConfig }) {
   return (
     <div className="space-y-6">
       <SectionHeader
-        eyebrow="Misiones"
-        title="Tus misiones activas"
-        description="Accedé rápidamente a misiones diarias, semanales y eventos especiales."
+        eyebrow={section.eyebrow}
+        title={section.contentTitle}
+        description={section.description}
+        pageTitle={section.pageTitle}
       />
       <MissionsSection userId={userId} />
     </div>
   );
 }
 
-function RewardsView({ userId }: { userId: string }) {
+function RewardsView({ userId, section }: { userId: string; section: DashboardSectionConfig }) {
   return (
     <div className="space-y-6">
       <SectionHeader
-        eyebrow="Rewards"
-        title="Logros y badges desbloqueados"
-        description="Revisá los hitos alcanzados y lo que falta para tu próxima recompensa."
+        eyebrow={section.eyebrow}
+        title={section.contentTitle}
+        description={section.description}
+        pageTitle={section.pageTitle}
       />
       <RewardsSection userId={userId} />
     </div>
@@ -259,13 +321,23 @@ interface SectionHeaderProps {
   eyebrow: string;
   title: string;
   description: string;
+  pageTitle: string;
 }
 
-function SectionHeader({ eyebrow, title, description }: SectionHeaderProps) {
+function SectionHeader({ eyebrow, title, description, pageTitle }: SectionHeaderProps) {
+  const normalizedTitle = title.trim();
+  const normalizedPageTitle = pageTitle.trim();
+  const shouldShowTitle =
+    normalizedTitle.length > 0 &&
+    normalizedTitle.toLowerCase() !== normalizedPageTitle.toLowerCase();
+
   return (
     <header className="space-y-2">
+      <h1 className="sr-only">{pageTitle}</h1>
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{eyebrow}</p>
-      <h1 className="font-display text-2xl font-semibold text-white sm:text-3xl">{title}</h1>
+      {shouldShowTitle && (
+        <h2 className="font-display text-2xl font-semibold text-white sm:text-3xl">{title}</h2>
+      )}
       <p className="text-sm text-slate-400">{description}</p>
     </header>
   );
