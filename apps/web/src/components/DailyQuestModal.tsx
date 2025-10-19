@@ -15,10 +15,17 @@ import { useRequest } from '../hooks/useRequest';
 
 type ToastTone = 'success' | 'error';
 
+type ToastAction = {
+  label: string;
+  href: string;
+};
+
 type ToastState = {
   id: number;
   message: string;
   tone: ToastTone;
+  detail?: string;
+  action?: ToastAction;
   requiresHoldToClose?: boolean;
   holdDurationMs?: number;
 };
@@ -686,7 +693,12 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
   const pushToast = (
     message: string,
     tone: ToastTone,
-    options?: { requiresHoldToClose?: boolean; holdDurationMs?: number },
+    options?: {
+      requiresHoldToClose?: boolean;
+      holdDurationMs?: number;
+      detail?: string;
+      action?: ToastAction;
+    },
   ) => {
     if (toastTimer.current) {
       clearTimeout(toastTimer.current);
@@ -705,6 +717,8 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       id: Date.now(),
       message,
       tone,
+      detail: options?.detail,
+      action: options?.action,
       requiresHoldToClose: options?.requiresHoldToClose,
       holdDurationMs: options?.holdDurationMs,
     };
@@ -873,6 +887,23 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       setSelectedEmotion(null);
       setSelectedTasks([]);
       setNotes('');
+      const missionsBonus = response.missions_v2;
+      const toastOptions: {
+        requiresHoldToClose: boolean;
+        holdDurationMs: number;
+        detail?: string;
+        action?: ToastAction;
+      } = {
+        requiresHoldToClose: true,
+        holdDurationMs: DEFAULT_HOLD_TO_CLOSE_DURATION_MS,
+      };
+      if (missionsBonus?.bonus_ready) {
+        toastOptions.detail = 'Bonus listo para reclamar.';
+        toastOptions.action = {
+          label: 'Ir a Misiones v2',
+          href: missionsBonus.redirect_url || '/dashboard-v3/missions-v2',
+        };
+      }
       const celebrationId = Date.now();
       const celebrationMessage =
         CELEBRATION_MESSAGES[Math.floor(Math.random() * CELEBRATION_MESSAGES.length)];
@@ -897,10 +928,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
           successCelebrationTimeoutRef.current = null;
           successCelebrationCloseTimeoutRef.current = window.setTimeout(() => {
             setHasCompletedToday(true);
-            pushToast('¡Éxitos hoy! A darlo todo. 🚀', 'success', {
-              requiresHoldToClose: true,
-              holdDurationMs: DEFAULT_HOLD_TO_CLOSE_DURATION_MS,
-            });
+            pushToast('¡Éxitos hoy! A darlo todo. 🚀', 'success', toastOptions);
             closeModal({ restoreFocus: true });
             successCelebrationCloseTimeoutRef.current = null;
           }, 220);
@@ -908,10 +936,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       } else {
         setSuccessCelebration(null);
         setHasCompletedToday(true);
-        pushToast('¡Éxitos hoy! A darlo todo. 🚀', 'success', {
-          requiresHoldToClose: true,
-          holdDurationMs: DEFAULT_HOLD_TO_CLOSE_DURATION_MS,
-        });
+        pushToast('¡Éxitos hoy! A darlo todo. 🚀', 'success', toastOptions);
         closeModal({ restoreFocus: true });
       }
       void reloadStatus();
@@ -1387,6 +1412,17 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
           >
             <div className="flex flex-col items-center gap-3 text-center">
               <p className="text-base font-semibold leading-snug md:text-lg">{toast.message}</p>
+              {toast.detail && (
+                <p className="text-sm text-white/85 md:text-base">{toast.detail}</p>
+              )}
+              {toast.action && (
+                <a
+                  href={toast.action.href}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-white shadow-sm transition hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                >
+                  {toast.action.label}
+                </a>
+              )}
               {toast.requiresHoldToClose && (
                 <div className="flex w-full flex-col items-center gap-2 text-[12px] text-white/80" id="daily-quest-toast-hold-instructions">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/70">

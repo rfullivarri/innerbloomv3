@@ -1658,6 +1658,7 @@ export type SubmitDailyQuestResponse = {
   xp_delta: number;
   xp_total_today: number;
   streaks: { daily: number; weekly: number };
+  missions_v2: { bonus_ready: boolean; redirect_url: string };
 };
 
 export type SubmitDailyQuestPayload = {
@@ -1707,5 +1708,260 @@ export async function submitDailyQuest(payload: SubmitDailyQuestPayload): Promis
 
   const response = await apiRequest<SubmitDailyQuestResponse>(url, init);
   logShape('daily-quest-submit', response);
+  return response;
+}
+
+export type MissionsV2CommunicationType = 'daily' | 'weekly' | 'biweekly' | 'seasonal';
+
+export type MissionsV2SlotKey = 'main' | 'hunt' | 'skill';
+
+export type MissionsV2ActionType = 'link_daily' | 'special_strike' | 'submit_evidence';
+
+export type MissionsV2Mission = {
+  id: string;
+  title: string;
+  summary: string;
+  meta: string;
+  xp_reward: number;
+  difficulty: 'normal' | 'hard';
+  type: MissionsV2SlotKey;
+  friction_id: string | null;
+};
+
+export type MissionsV2Progress = {
+  type: 'bar' | 'icons';
+  current: number;
+  target: number;
+  percent: number;
+};
+
+export type MissionsV2Action = {
+  id: string;
+  type: MissionsV2ActionType;
+  label: string;
+  enabled: boolean;
+};
+
+export type MissionsV2Slot = {
+  slot: MissionsV2SlotKey;
+  title: string;
+  meta: string;
+  status: 'empty' | 'active' | 'claimable' | 'cooldown';
+  mission: MissionsV2Mission | null;
+  progress: MissionsV2Progress | null;
+  actions: MissionsV2Action[];
+  claim: {
+    available: boolean;
+    enabled: boolean;
+    label: string;
+    gating_url: string;
+    rewards_preview: {
+      xp: number;
+      loot: string[];
+    };
+    blocked_reason: string | null;
+  };
+  future_note: {
+    friction_id: string;
+    label: string;
+    saved_note: string | null;
+    prompt: string;
+  } | null;
+};
+
+export type MissionsV2Proposal = {
+  id: string;
+  title: string;
+  summary: string;
+  meta: string;
+  xp_reward: number;
+  difficulty: 'normal' | 'hard';
+  friction_id: string | null;
+};
+
+export type MissionsV2WeeklySelection =
+  | {
+      status: 'pending';
+      expires_at: string | null;
+      slots: Array<{
+        slot: MissionsV2SlotKey;
+        proposals: MissionsV2Proposal[];
+        rerolls_remaining: number;
+      }>;
+    }
+  | {
+      status: 'completed' | 'locked';
+      expires_at: string | null;
+      slots: [];
+    };
+
+export type MissionsV2Boss = {
+  label: string;
+  description: string;
+  state: 'upcoming' | 'active' | 'phase_two_ready' | 'defeated';
+  shield: {
+    current: number;
+    max: number;
+  };
+  phase_two: {
+    available: boolean;
+    enabled: boolean;
+    label: string;
+  };
+};
+
+export type MissionsV2Campfire = {
+  active: boolean;
+  expires_at: string | null;
+  message: string;
+  emotes: string[];
+};
+
+export type MissionsV2Communication = {
+  id: string;
+  type: MissionsV2CommunicationType;
+  message: string;
+};
+
+export type MissionsV2BoardResponse = {
+  season_id: string;
+  refresh_at: string | null;
+  slots: MissionsV2Slot[];
+  boss: MissionsV2Boss;
+  campfire: MissionsV2Campfire | null;
+  weekly_selection: MissionsV2WeeklySelection | null;
+  communications: MissionsV2Communication[];
+  gating: {
+    claim_url: string;
+  };
+};
+
+export type MissionsV2ClaimResponse = {
+  board: MissionsV2BoardResponse;
+  rewards: {
+    xp: number;
+    loot: string[];
+    message: string;
+  };
+  future_note_prompt?: {
+    friction_id: string;
+    label: string;
+    prompt: string;
+    saved_note: string | null;
+  };
+};
+
+export type MissionsV2FutureNoteResponse = {
+  friction_id: string;
+  note: string | null;
+  updated_at: string;
+};
+
+function missionsV2BasePath(userId: string): string {
+  return `/users/${encodeURIComponent(userId)}/missions/v2`;
+}
+
+async function missionsV2Post<T>(
+  userId: string,
+  path: string,
+  body: Record<string, unknown> | undefined,
+): Promise<T> {
+  const token = await resolveAuthToken();
+  const headers = new Headers({
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  });
+  const init = applyAuthorization(
+    {
+      method: 'POST',
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    },
+    token,
+  );
+
+  return getJson<T>(`${missionsV2BasePath(userId)}${path}`, undefined, init);
+}
+
+export async function getMissionsV2Board(userId: string): Promise<MissionsV2BoardResponse> {
+  const response = await getAuthorizedJson<MissionsV2BoardResponse>(missionsV2BasePath(userId));
+  logShape('missions-v2-board', response);
+  return response;
+}
+
+export async function selectMissionsV2Proposal(
+  userId: string,
+  slot: MissionsV2SlotKey,
+  missionId: string,
+): Promise<MissionsV2BoardResponse> {
+  const response = await missionsV2Post<MissionsV2BoardResponse>(userId, '/select', {
+    slot,
+    mission_id: missionId,
+  });
+  logShape('missions-v2-select', response);
+  return response;
+}
+
+export async function rerollMissionsV2Slot(
+  userId: string,
+  slot: MissionsV2SlotKey,
+): Promise<MissionsV2BoardResponse> {
+  const response = await missionsV2Post<MissionsV2BoardResponse>(userId, '/reroll', { slot });
+  logShape('missions-v2-reroll', response);
+  return response;
+}
+
+export async function linkMissionsV2Daily(
+  userId: string,
+  slot: MissionsV2SlotKey,
+): Promise<MissionsV2BoardResponse> {
+  const response = await missionsV2Post<MissionsV2BoardResponse>(userId, '/link-daily', { slot });
+  logShape('missions-v2-link-daily', response);
+  return response;
+}
+
+export async function triggerMissionsV2SpecialStrike(
+  userId: string,
+  slot: MissionsV2SlotKey,
+): Promise<MissionsV2BoardResponse> {
+  const response = await missionsV2Post<MissionsV2BoardResponse>(userId, '/special-strike', { slot });
+  logShape('missions-v2-special-strike', response);
+  return response;
+}
+
+export async function submitMissionsV2Evidence(
+  userId: string,
+  slot: MissionsV2SlotKey,
+): Promise<MissionsV2BoardResponse> {
+  const response = await missionsV2Post<MissionsV2BoardResponse>(userId, '/submit-evidence', { slot });
+  logShape('missions-v2-submit-evidence', response);
+  return response;
+}
+
+export async function activateMissionsV2PhaseTwo(userId: string): Promise<MissionsV2BoardResponse> {
+  const response = await missionsV2Post<MissionsV2BoardResponse>(userId, '/phase2', {});
+  logShape('missions-v2-phase2', response);
+  return response;
+}
+
+export async function claimMissionsV2Slot(
+  userId: string,
+  slot: MissionsV2SlotKey,
+): Promise<MissionsV2ClaimResponse> {
+  const response = await missionsV2Post<MissionsV2ClaimResponse>(userId, '/claim', { slot });
+  logShape('missions-v2-claim', response);
+  return response;
+}
+
+export async function saveMissionsV2FutureNote(
+  userId: string,
+  frictionId: string,
+  note: string | null,
+): Promise<MissionsV2FutureNoteResponse> {
+  const response = await missionsV2Post<MissionsV2FutureNoteResponse>(userId, '/future-note', {
+    friction_id: frictionId,
+    note,
+  });
+  logShape('missions-v2-future-note', response);
   return response;
 }

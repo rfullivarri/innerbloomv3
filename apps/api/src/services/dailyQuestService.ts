@@ -2,6 +2,7 @@ import type { PoolClient } from 'pg';
 import { pool, withClient } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 import { formatDateInTimezone } from '../controllers/users/user-state-service.js';
+import { markDailyCompletion } from '../modules/missions-v2/board-store.js';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -67,6 +68,10 @@ export type SubmitDailyQuestResult = {
   xp_delta: number;
   xp_total_today: number;
   streaks: DailyQuestXpSummary['streaks'];
+  missions_v2: {
+    bonus_ready: boolean;
+    redirect_url: string;
+  };
 };
 
 type SubmitDailyQuestLogLevel = 'info' | 'warn' | 'error';
@@ -579,6 +584,7 @@ export async function submitDailyQuest(
   const xpAfter = await calculateXpForDate(userId, date);
 
   const xp_delta = xpAfter.xp_total_today - xpBefore.xp_total_today;
+  const missionsV2BonusReady = markDailyCompletion(userId);
 
   return {
     ok: true,
@@ -596,5 +602,9 @@ export async function submitDailyQuest(
     xp_delta,
     xp_total_today: xpAfter.xp_total_today,
     streaks: xpAfter.streaks,
+    missions_v2: {
+      bonus_ready: missionsV2BonusReady,
+      redirect_url: '/dashboard-v3/missions-v2',
+    },
   } satisfies SubmitDailyQuestResult;
 }

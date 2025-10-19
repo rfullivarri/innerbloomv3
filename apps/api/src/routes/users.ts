@@ -18,6 +18,7 @@ import { getUserDailyEnergy } from './users/daily-energy.js';
 import { getUserSummaryToday } from './users/summary-today.js';
 import { getUserXpByTrait } from './users/xp-by-trait.js';
 import { getUserPillars } from './users/pillars.js';
+import missionsV2Router from '../modules/missions-v2/missions-v2.routes.js';
 
 const router = Router();
 const userScopedRoutes = Router({ mergeParams: true });
@@ -36,6 +37,7 @@ userScopedRoutes.get('/emotions', asyncHandler(getUserEmotions));
 userScopedRoutes.get('/state', asyncHandler(getUserState));
 userScopedRoutes.get('/state/timeseries', asyncHandler(getUserStateTimeseries));
 userScopedRoutes.get('/summary/today', asyncHandler(getUserSummaryToday));
+userScopedRoutes.use('/missions/v2', missionsV2Router);
 
 router.get('/users/me', authMiddleware, asyncHandler(getCurrentUser));
 router.use('/users/:id', authMiddleware, ownUserGuard, userScopedRoutes);
