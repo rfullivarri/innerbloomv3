@@ -722,6 +722,76 @@
   color: rgba(148, 163, 184, 0.9);
 }
 
+.missions-market-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.missions-market-card__tags span {
+  border-radius: 9999px;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(148, 163, 184, 0.12);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.72);
+}
+
+.missions-market-card__meta {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.missions-market-card__meta li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.missions-market-card__meta li::before {
+  content: '•';
+  color: rgba(96, 165, 250, 0.7);
+  font-size: 0.8rem;
+}
+
+.dev-user-chip {
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.45);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.78);
+  transition: background 0.2s ease, border 0.2s ease, color 0.2s ease;
+}
+
+.dev-user-chip:hover,
+.dev-user-chip:focus-visible {
+  border-color: rgba(148, 163, 184, 0.6);
+  background: rgba(30, 41, 59, 0.6);
+  color: rgba(226, 232, 240, 0.92);
+  outline: none;
+}
+
+.dev-user-chip--active {
+  border-color: rgba(96, 165, 250, 0.85);
+  background: rgba(37, 99, 235, 0.3);
+  color: rgba(191, 219, 254, 0.96);
+}
+
+.dev-user-chip:disabled {
+  cursor: default;
+  opacity: 0.9;
+}
+
 @media (min-width: 768px) {
   .missions-market {
     display: grid;

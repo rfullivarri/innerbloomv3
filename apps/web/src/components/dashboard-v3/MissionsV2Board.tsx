@@ -4,9 +4,12 @@ import {
   claimMissionsV2Mission,
   getMissionsV2Board,
   linkMissionsV2Daily,
+  onDevUserOverrideChange,
   postMissionsV2Heartbeat,
   type MissionsV2Action,
   type MissionsV2BoardResponse,
+  type MissionsV2MarketProposal,
+  type MissionsV2MarketSlot,
   type MissionsV2Slot,
 } from '../../lib/api';
 import { useRequest } from '../../hooks/useRequest';
@@ -71,52 +74,6 @@ const STATE_LABELS: Record<MissionsV2Slot['state'], { label: string; tone: 'neut
     cooldown: { label: 'ENFRIAMIENTO', tone: 'cooldown' },
     claimed: { label: 'CLAIM LISTO', tone: 'claimed' },
   };
-
-const MARKET_PREVIEWS: Array<{
-  id: string;
-  slot: MissionsV2Slot['slot'];
-  title: string;
-  summary: string;
-  reward: string;
-  requirements: string[];
-  icon: string;
-  rarity: Rarity;
-  difficulty: string;
-}> = [
-  {
-    id: 'market-main-preview',
-    slot: 'main',
-    title: 'Juramento del Acto II',
-    summary: 'Sellá tu compromiso público con evidencia narrada en 48h.',
-    reward: '320 XP · Medalla de Acto',
-    requirements: ['Requiere objetivo activo', 'Boss: Acto 2'],
-    icon: '🛡️',
-    rarity: 'legendary',
-    difficulty: 'Legendaria · storytelling',
-  },
-  {
-    id: 'market-hunt-preview',
-    slot: 'hunt',
-    title: 'Cadena Heroica',
-    summary: '3 sesiones con booster activo. Sin Heartbeat = pétalo perdido.',
-    reward: '200 XP · Cofre de Cacería',
-    requirements: ['Booster activo mañana', 'Vinculá la Daily'],
-    icon: '🔥',
-    rarity: 'epic',
-    difficulty: 'Experta · ritmo sostenido',
-  },
-  {
-    id: 'market-skill-preview',
-    slot: 'skill',
-    title: 'Ruta Focus · Nodo 1',
-    summary: 'Activa micro-nodos de Focus y compartí síntesis rápida.',
-    reward: '140 XP · Aura +1 Focus',
-    requirements: ['Heartbeat diario', 'Slot libre requerido'],
-    icon: '🧠',
-    rarity: 'rare',
-    difficulty: 'Avanzada · constancia',
-  },
-];
 
 const PETAL_FIELD = [
   { top: '8%', left: '12%', delay: '0s', scale: 1 },
@@ -194,6 +151,19 @@ function getSlotRarity(slot: MissionsV2Slot): Rarity {
   return 'common';
 }
 
+function getMarketRarity(slot: MissionsV2Slot['slot']): Rarity {
+  if (slot === 'main') {
+    return 'legendary';
+  }
+  if (slot === 'hunt') {
+    return 'epic';
+  }
+  if (slot === 'skill') {
+    return 'rare';
+  }
+  return 'common';
+}
+
 function getRewardCopy(slot: MissionsV2Slot): string {
   const reward = slot.mission?.reward;
   if (!reward) {
@@ -204,6 +174,45 @@ function getRewardCopy(slot: MissionsV2Slot): string {
   return `${reward.xp} XP · ${currency} Monedas${items}`;
 }
 
+function formatProposalReward(proposal: MissionsV2MarketProposal): string {
+  const { reward } = proposal;
+  const currency = reward.currency ?? 0;
+  const items = reward.items.length > 0 ? ` · ${reward.items.join(' + ')}` : '';
+  return `${reward.xp} XP · ${currency} Monedas${items}`;
+}
+
+function extractProposalMetadata(proposal: MissionsV2MarketProposal): string[] {
+  const metadataEntries: string[] = [];
+  const metadata = proposal.metadata ?? {};
+
+  for (const [rawKey, rawValue] of Object.entries(metadata)) {
+    if (rawValue === null || rawValue === undefined || rawValue === '') {
+      continue;
+    }
+
+    const keyLabel = rawKey
+      .split(/[_-]/)
+      .filter(Boolean)
+      .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+      .join(' ');
+
+    if (typeof rawValue === 'number') {
+      if (rawKey.toLowerCase().includes('multiplier')) {
+        metadataEntries.push(`${keyLabel}: x${rawValue}`);
+      } else {
+        metadataEntries.push(`${keyLabel}: ${rawValue}`);
+      }
+      continue;
+    }
+
+    if (typeof rawValue === 'string' || typeof rawValue === 'boolean') {
+      metadataEntries.push(`${keyLabel}: ${rawValue}`);
+    }
+  }
+
+  return metadataEntries;
+}
+
 function formatCountdown(label: string): string {
   if (!label) {
     return 'Countdown pendiente';
@@ -211,12 +220,23 @@ function formatCountdown(label: string): string {
   return label;
 }
 
-function buildHeroLine(slot: MissionsV2Slot): string {
+type MarketBySlot = Partial<Record<MissionsV2Slot['slot'], MissionsV2MarketProposal[]>>;
+
+function buildHeroLine(slot: MissionsV2Slot, market: MarketBySlot): string {
   if (slot.mission?.summary) {
     return slot.mission.summary;
   }
-  const preview = MARKET_PREVIEWS.find((item) => item.slot === slot.slot);
-  return preview?.summary ?? 'Slot vacío. Elegí tu reto.';
+  const proposals = market[slot.slot] ?? [];
+  if (proposals.length > 0) {
+    const [first] = proposals;
+    if (first.summary) {
+      return first.summary;
+    }
+    if (first.objectives.length > 0) {
+      return first.objectives[0] ?? 'Slot vacío. Elegí tu reto.';
+    }
+  }
+  return 'Slot vacío. Elegí tu reto.';
 }
 
 function usePrefersReducedMotion(): boolean {
@@ -461,6 +481,19 @@ export function MissionsV2Board({ userId }: { userId: string }) {
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
   const marketRef = useRef<HTMLElement | null>(null);
 
+  const marketBySlot = useMemo<MarketBySlot>(() => {
+    const map: MarketBySlot = {};
+    if (!board) {
+      return map;
+    }
+
+    for (const entry of board.market ?? []) {
+      map[entry.slot] = entry.proposals;
+    }
+
+    return map;
+  }, [board]);
+
   useEffect(() => {
     if (status === 'success' && data) {
       setBoard(data);
@@ -518,6 +551,16 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     const timeout = window.setTimeout(() => setShowHeartbeatToast(false), 3200);
     return () => window.clearTimeout(timeout);
   }, [showHeartbeatToast]);
+
+  useEffect(() => {
+    const unsubscribe = onDevUserOverrideChange(() => {
+      setBoard(null);
+      setBusyMap({});
+      setExpandedSlotId(null);
+      reload();
+    });
+    return unsubscribe;
+  }, [reload]);
 
   useEffect(() => {
     if (!hasTrackedView.current && status === 'success' && data) {
@@ -688,7 +731,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     const stateConfig = STATE_LABELS[slot.state];
     const requirementChips = buildRequirementChips(slot);
     const heartbeatPending = !slot.heartbeat_today;
-    const heroLine = buildHeroLine(slot);
+    const heroLine = buildHeroLine(slot, marketBySlot);
     const rewardCopy = getRewardCopy(slot);
     const heartbeatAction = slot.actions.find((action) => action.type === 'heartbeat');
     const linkAction = slot.actions.find((action) => action.type === 'link_daily');
@@ -992,6 +1035,11 @@ export function MissionsV2Board({ userId }: { userId: string }) {
 
   const shield = parseShieldLabel(board.boss.countdown.label) ?? { current: 6, max: 6 };
 
+  const orderedMarketSlots: MissionsV2MarketSlot[] = SLOT_ORDER.map((slotKey) => {
+    const entry = board.market.find((marketSlot) => marketSlot.slot === slotKey);
+    return entry ?? ({ slot: slotKey, proposals: [] as MissionsV2MarketProposal[] } as MissionsV2MarketSlot);
+  });
+
   const firstClaimableSlot = orderedSlots.find((slot) => {
     if (!slot.mission) {
       return false;
@@ -1102,43 +1150,70 @@ export function MissionsV2Board({ userId }: { userId: string }) {
           ref={marketRef}
         >
           <div className="missions-market">
-            {MARKET_PREVIEWS.map((preview) => (
-              <article
-                key={preview.id}
-                className="missions-market-card"
-                data-rarity={preview.rarity}
-                tabIndex={0}
-                aria-label={`${preview.title}. ${preview.summary}`}
-              >
-                <div className="missions-market-card__front">
-                  <header className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{SLOT_DETAILS[preview.slot].label}</p>
-                      <h4 className="text-base font-semibold text-slate-100">{preview.title}</h4>
+            {orderedMarketSlots.flatMap((entry) =>
+              entry.proposals.map((proposal, index) => {
+                const details = SLOT_DETAILS[entry.slot];
+                const rewardPreview = formatProposalReward(proposal);
+                const metadataEntries = extractProposalMetadata(proposal);
+                const objectives = proposal.objectives.length > 0 ? proposal.objectives : [proposal.objective];
+                const tags = proposal.tags.length > 0 ? proposal.tags : [];
+                const rarity = getMarketRarity(entry.slot);
+
+                return (
+                  <article
+                    key={`${entry.slot}-${proposal.id}`}
+                    className="missions-market-card"
+                    data-rarity={rarity}
+                    tabIndex={0}
+                    aria-label={`${proposal.name}. ${proposal.summary}`}
+                  >
+                    <div className="missions-market-card__front">
+                      <header className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{details.label}</p>
+                          <h4 className="text-base font-semibold text-slate-100">
+                            #{index + 1} · {proposal.name}
+                          </h4>
+                        </div>
+                        <span className="missions-market-card__icon" aria-hidden="true">
+                          {details.emoji}
+                        </span>
+                      </header>
+                      <p className="missions-market-card__summary">{proposal.summary}</p>
+                      {tags.length > 0 && (
+                        <div className="missions-market-card__tags">
+                          {tags.map((tag) => (
+                            <span key={`${proposal.id}-tag-${tag}`}>{tag}</span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="missions-market-card__reward">{rewardPreview}</div>
+                      <ul className="missions-market-card__requirements">
+                        {objectives.map((item) => (
+                          <li key={`${proposal.id}-objective-${item}`}>{item}</li>
+                        ))}
+                      </ul>
+                      {metadataEntries.length > 0 && (
+                        <ul className="missions-market-card__meta">
+                          {metadataEntries.map((entryLabel) => (
+                            <li key={`${proposal.id}-meta-${entryLabel}`}>{entryLabel}</li>
+                          ))}
+                        </ul>
+                      )}
+                      <button type="button" className="missions-market-card__cta" disabled>
+                        Activar en slot {details.label}
+                      </button>
                     </div>
-                    <span className="missions-market-card__icon" aria-hidden="true">
-                      {preview.icon}
-                    </span>
-                  </header>
-                  <p className="missions-market-card__summary">{preview.summary}</p>
-                  <div className="missions-market-card__reward">{preview.reward}</div>
-                  <ul className="missions-market-card__requirements">
-                    {preview.requirements.map((item) => (
-                      <li key={`${preview.id}-${item}`}>{item}</li>
-                    ))}
-                  </ul>
-                  <button type="button" className="missions-market-card__cta" disabled>
-                    Activar en slot {SLOT_DETAILS[preview.slot].label}
-                  </button>
-                </div>
-                <div className="missions-market-card__back" aria-hidden="true">
-                  <p className="missions-market-card__back-label">Dificultad</p>
-                  <p className="missions-market-card__back-value">{preview.difficulty}</p>
-                  <p className="missions-market-card__back-label">Recompensa</p>
-                  <p className="missions-market-card__back-value">{preview.reward}</p>
-                </div>
-              </article>
-            ))}
+                    <div className="missions-market-card__back" aria-hidden="true">
+                      <p className="missions-market-card__back-label">Dificultad</p>
+                      <p className="missions-market-card__back-value">{proposal.difficulty}</p>
+                      <p className="missions-market-card__back-label">Recompensa</p>
+                      <p className="missions-market-card__back-value">{rewardPreview}</p>
+                    </div>
+                  </article>
+                );
+              }),
+            )}
           </div>
         </Card>
       </div>

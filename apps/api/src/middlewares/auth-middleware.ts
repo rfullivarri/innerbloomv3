@@ -26,6 +26,13 @@ export function createAuthMiddleware(getService: GetService = getAuthService) {
       const match = rawAuthHeader?.match(/^Bearer\s+(.+)$/i);
       const normalizedAuthHeader = match ? `Bearer ${match[1].trim()}` : undefined;
 
+      const devUser = maybeResolveDevUser(req);
+      if (devUser) {
+        req.user = devUser;
+        next();
+        return;
+      }
+
       if (!normalizedAuthHeader) {
         const legacyUser = await maybeResolveLegacyUser(req);
         if (legacyUser) {
@@ -69,6 +76,8 @@ type LegacyUserRow = {
   clerk_user_id: string;
   email_primary: string | null;
 };
+
+const DEV_USER_HEADER = 'X-Innerbloom-Demo-User';
 
 function isLocalEnvironment(): boolean {
   const env = (process.env.NODE_ENV ?? 'development').toLowerCase();
@@ -134,4 +143,33 @@ async function maybeResolveLegacyUser(req: Request): Promise<RequestUser | null>
 
     throw new HttpError(401, 'unauthorized', 'Authentication required', { cause: error });
   }
+}
+
+function maybeResolveDevUser(req: Request): RequestUser | null {
+  const devSwitchEnabled = String(process.env.ALLOW_DEV_USER_SWITCH ?? 'true').toLowerCase() === 'true';
+
+  if (!devSwitchEnabled) {
+    return null;
+  }
+
+  if (!isLocalEnvironment()) {
+    return null;
+  }
+
+  const header = req.get(DEV_USER_HEADER);
+  if (!header) {
+    return null;
+  }
+
+  const userId = header.trim();
+  if (!userId) {
+    throw new HttpError(401, 'unauthorized', 'Authentication required');
+  }
+
+  return {
+    id: userId,
+    clerkId: `dev:${userId}`,
+    email: `${userId}@demo.local`,
+    isNew: false,
+  } satisfies RequestUser;
 }

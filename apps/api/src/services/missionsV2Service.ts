@@ -18,6 +18,8 @@ import {
   type MissionsBoard,
   type MissionsBoardCommunication,
   type MissionsBoardGating,
+  type MissionsBoardMarketProposal,
+  type MissionsBoardMarketSlot,
   type MissionsBoardResponse,
   type MissionsBoardRewardSummary,
   type MissionsBoardRewards,
@@ -254,6 +256,9 @@ function hydrateMissionDefinition(definition: MissionDefinition): MissionDefinit
       items: definition.reward.items ? [...definition.reward.items] : [],
     },
     tasks: definition.tasks.map((task) => ({ ...task })),
+    metadata: definition.metadata ? { ...definition.metadata } : undefined,
+    objectives: definition.objectives ? [...definition.objectives] : undefined,
+    tags: definition.tags ? [...definition.tags] : undefined,
   };
   return mission;
 }
@@ -763,6 +768,37 @@ function buildBoardResponse(
     claim_url: CLAIM_VIEW_PATH,
   };
 
+  const market: MissionsBoardMarketSlot[] = board.slots.map((slot) => {
+    const proposals: MissionsBoardMarketProposal[] = slot.proposals.map((proposal) => {
+      const hydrated = hydrateMissionDefinition(proposal);
+      const objectives = hydrated.objectives && hydrated.objectives.length > 0
+        ? [...hydrated.objectives]
+        : hydrated.objective
+        ? [hydrated.objective]
+        : [];
+      const tags = hydrated.tags && hydrated.tags.length > 0
+        ? [...hydrated.tags]
+        : hydrated.tasks.map((task) => task.tag).filter((tag): tag is string => Boolean(tag));
+
+      return {
+        id: hydrated.id,
+        slot: hydrated.slot,
+        name: hydrated.name,
+        summary: hydrated.summary,
+        requirements: hydrated.requirements,
+        objective: hydrated.objective,
+        objectives,
+        reward: hydrated.reward,
+        difficulty: hydrated.difficulty,
+        tags,
+        metadata: hydrated.metadata ? { ...hydrated.metadata } : {},
+        duration_days: hydrated.durationDays,
+      };
+    });
+
+    return { slot: slot.slot, proposals };
+  });
+
   return {
     season_id: board.seasonId,
     generated_at: board.generatedAt,
@@ -771,6 +807,7 @@ function buildBoardResponse(
     rewards,
     gating,
     communications,
+    market,
   };
 }
 
@@ -1213,7 +1250,8 @@ export async function applyHuntXpBoost({
 export async function runWeeklyAutoSelection(userId: string): Promise<MissionsBoardResponse> {
   const state = await ensureBoardState(userId);
   const reference = new Date();
-  const profile = await getUserProfile(userId).catch(() => null);
+  const skipProfileLookup = String(process.env.MISSIONS_V2_SKIP_PROFILE ?? 'false').toLowerCase() === 'true';
+  const profile = skipProfileLookup ? null : await getUserProfile(userId).catch(() => null);
   const mode = profile?.modeCode?.toUpperCase() ?? null;
 
   for (const slotKey of MISSION_SLOT_KEYS) {

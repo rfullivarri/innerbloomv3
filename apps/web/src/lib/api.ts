@@ -20,9 +20,112 @@ async function safeJson(res: Response) {
   }
 }
 
+const DEV_USER_HEADER = 'X-Innerbloom-Demo-User';
+const DEV_USER_SWITCH_ENABLED =
+  import.meta.env.DEV &&
+  String(import.meta.env.VITE_ENABLE_DEV_USER_SWITCH ?? 'false').toLowerCase() === 'true';
+
+export const DEV_USER_SWITCH_OPTIONS = [
+  { id: 'user_demo_active', label: 'Active' },
+  { id: 'user_demo_claim', label: 'Claim' },
+  { id: 'user_demo_cooldown', label: 'Cooldown' },
+  { id: 'user_demo_idle', label: 'Idle' },
+] as const;
+
+type DevUserOption = (typeof DEV_USER_SWITCH_OPTIONS)[number]['id'];
+
+let devUserOverride: DevUserOption | null = DEV_USER_SWITCH_ENABLED
+  ? DEV_USER_SWITCH_OPTIONS[0]?.id ?? null
+  : null;
+
+type DevUserListener = (userId: string | null) => void;
+const devUserListeners = new Set<DevUserListener>();
+let devBoardCache: Record<string, MissionsV2BoardResponse> | null = null;
+
+function notifyDevUserListeners(userId: string | null) {
+  for (const listener of devUserListeners) {
+    try {
+      listener(userId);
+    } catch (error) {
+      logApiError('Dev user listener failed', { error });
+    }
+  }
+}
+
+function applyDevUserOverride(init?: RequestInit): RequestInit {
+  if (!DEV_USER_SWITCH_ENABLED || !devUserOverride) {
+    return init ?? {};
+  }
+
+  const headers = new Headers(init?.headers ?? {});
+  headers.set(DEV_USER_HEADER, devUserOverride);
+
+  return {
+    ...(init ?? {}),
+    headers,
+  };
+}
+
+export function getDevUserOverride(): string | null {
+  return DEV_USER_SWITCH_ENABLED ? devUserOverride : null;
+}
+
+export function setDevUserOverride(nextUser: DevUserOption | null): void {
+  if (!DEV_USER_SWITCH_ENABLED) {
+    devUserOverride = null;
+    notifyDevUserListeners(null);
+    return;
+  }
+
+  const normalized = nextUser ?? null;
+  if (devUserOverride === normalized) {
+    return;
+  }
+
+  devUserOverride = normalized;
+  notifyDevUserListeners(devUserOverride);
+}
+
+export function onDevUserOverrideChange(listener: DevUserListener): () => void {
+  devUserListeners.add(listener);
+  return () => {
+    devUserListeners.delete(listener);
+  };
+}
+
+export const DEV_USER_SWITCH_ACTIVE = DEV_USER_SWITCH_ENABLED;
+
+async function loadDevBoard(userId: string | null): Promise<MissionsV2BoardResponse | null> {
+  if (!DEV_USER_SWITCH_ENABLED) {
+    return null;
+  }
+
+  if (!userId) {
+    return null;
+  }
+
+  if (devBoardCache) {
+    return devBoardCache[userId] ?? null;
+  }
+
+  try {
+    const response = await fetch('/demo/missions_v2_boards.json', { cache: 'no-store' });
+    if (!response.ok) {
+      return null;
+    }
+    const data = (await response.json()) as Record<string, MissionsV2BoardResponse>;
+    devBoardCache = data;
+    return data[userId] ?? null;
+  } catch (error) {
+    logApiError('Failed to load missions demo boards', { error });
+    return null;
+  }
+}
+
 export async function apiRequest<T = unknown>(url: string, init?: RequestInit): Promise<T> {
   try {
-    const res = await fetch(url, init);
+    const requestInit = applyDevUserOverride(init);
+    const res = await fetch(url, requestInit);
 
     logApiDebug('API response received', { url, status: res.status });
 
@@ -1738,12 +1841,15 @@ export type MissionsV2Mission = {
   summary: string;
   requirements: string;
   objective: string;
+  objectives?: string[];
   reward: {
     xp: number;
     currency?: number;
     items?: string[];
   };
   tasks: MissionsV2MissionTask[];
+  tags?: string[];
+  metadata?: Record<string, unknown>;
 };
 
 export type MissionsV2ActionType =
@@ -1796,6 +1902,27 @@ export type MissionsV2BoardResponse = {
   boss: MissionsV2Boss;
   gating: { claim_url: string };
   communications: MissionsV2Communication[];
+  market: MissionsV2MarketSlot[];
+};
+
+export type MissionsV2MarketProposal = {
+  id: string;
+  slot: MissionsV2SlotKey;
+  name: string;
+  summary: string;
+  requirements: string;
+  objective: string;
+  objectives: string[];
+  reward: { xp: number; currency: number; items: string[] };
+  difficulty: 'low' | 'medium' | 'high' | 'epic';
+  tags: string[];
+  metadata: Record<string, unknown>;
+  duration_days: number;
+};
+
+export type MissionsV2MarketSlot = {
+  slot: MissionsV2SlotKey;
+  proposals: MissionsV2MarketProposal[];
 };
 
 export type MissionsV2ClaimResponse = {
@@ -1839,6 +1966,13 @@ async function missionsV2AuthorizedPost<T>(path: string, body?: Record<string, u
 }
 
 export async function getMissionsV2Board(): Promise<MissionsV2BoardResponse> {
+  if (DEV_USER_SWITCH_ENABLED) {
+    const board = await loadDevBoard(getDevUserOverride());
+    if (board) {
+      logShape('missions-v2-board-dev', board);
+      return board;
+    }
+  }
   const response = await getAuthorizedJson<MissionsV2BoardResponse>('/missions/board');
   logShape('missions-v2-board', response);
   return response;

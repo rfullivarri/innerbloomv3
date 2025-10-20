@@ -8,9 +8,10 @@ import LoginPage from './pages/Login';
 import LandingPage from './pages/Landing';
 import SignUpPage from './pages/SignUp';
 import DebugAiTaskgenPage from './pages/DebugAiTaskgen';
+import DevMissionsPage from './pages/DevMissionsPage';
 import AdminRoute from './routes/admin';
 import { DevBanner } from './components/layout/DevBanner';
-import { setApiAuthTokenProvider } from './lib/api';
+import { DEV_USER_SWITCH_ACTIVE, setApiAuthTokenProvider } from './lib/api';
 import OnboardingIntroPage from './pages/OnboardingIntro';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
 
@@ -28,6 +29,13 @@ function ApiAuthBridge() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
 
   useEffect(() => {
+    if (DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV) {
+      setApiAuthTokenProvider(async () => 'dev-token');
+      return () => {
+        setApiAuthTokenProvider(null);
+      };
+    }
+
     if (!isLoaded || !isSignedIn) {
       setApiAuthTokenProvider(null);
       return;
@@ -58,6 +66,16 @@ function ApiAuthBridge() {
 
 function RequireUser({ children }: { children: JSX.Element }) {
   const { isLoaded, userId } = useAuth();
+  const devBypass = DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV;
+
+  if (devBypass) {
+    return (
+      <>
+        <ApiAuthBridge />
+        {children}
+      </>
+    );
+  }
 
   if (!isLoaded) {
     return <div className="flex min-h-screen items-center justify-center text-text">Cargando…</div>;
@@ -171,6 +189,7 @@ export default function App() {
         {enableTaskgen ? (
           <Route path="/_debug/ai-taskgen" element={<DebugAiTaskgenPage />} />
         ) : null}
+        {DEV_USER_SWITCH_ACTIVE ? <Route path="/_dev/missions-v2" element={<DevMissionsPage />} /> : null}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
