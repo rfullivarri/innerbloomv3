@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react';
 import { useLocation } from 'react-router-dom';
 import { DevErrorBoundary } from '../../components/DevErrorBoundary';
 import { Navbar } from '../../components/layout/Navbar';
@@ -352,6 +360,34 @@ export default function TaskEditorPage() {
       });
     },
     [],
+  );
+
+  const navigationTasks = useMemo(() => {
+    if (editVariant !== 'panel') {
+      return [] as UserTask[];
+    }
+
+    return visibleTasks;
+  }, [editVariant, visibleTasks]);
+
+  const handleCloseEdit = useCallback(() => {
+    setTaskToEdit(null);
+    setEditVariant('modal');
+    setEditGroupKey(null);
+  }, []);
+
+  const handleNavigatePanelTask = useCallback(
+    (taskId: string) => {
+      if (editVariant !== 'panel') {
+        return;
+      }
+
+      const targetTask = navigationTasks.find((entry) => entry.id === taskId);
+      if (targetTask) {
+        setTaskToEdit(targetTask);
+      }
+    },
+    [editVariant, navigationTasks],
   );
 
   return (
@@ -1026,6 +1062,13 @@ function TaskCard({
   );
 }
 
+interface TaskBoardGroup {
+  key: string;
+  code: string;
+  name: string;
+  tasks: UserTask[];
+}
+
 interface TaskBoardProps {
   groups: TaskBoardGroup[];
   difficultyNamesById: Map<string, string>;
@@ -1117,7 +1160,7 @@ function TaskBoard({
                   Sin tareas en este pilar.
                 </p>
               ) : (
-                group.tasks.map((task) => (
+                group.tasks.map((task: UserTask) => (
                   <TaskBoardItem
                     key={task.id}
                     task={task}
@@ -1170,7 +1213,7 @@ function TaskBoardItem({
     onSelectTask(task, groupKey);
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       onSelectTask(task, groupKey);
