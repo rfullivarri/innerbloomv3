@@ -1,20 +1,43 @@
-import { randomUUID, createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   MISSION_SLOT_KEYS,
+  type BossPhase2Response,
   type BossState,
+  type BossStateResponse,
+  type MissionAction,
+  type MissionClaimResponse,
+  type MissionClaimState,
+  type MissionDailyLinkResponse,
+  type MissionHeartbeatResponse,
+  type MissionPetals,
   type MissionProposal,
   type MissionSelectionState,
   type MissionSlotKey,
   type MissionSlotState,
   type MissionsBoard,
+  type MissionsBoardCommunication,
+  type MissionsBoardGating,
+  type MissionsBoardResponse,
+  type MissionsBoardRewardSummary,
+  type MissionsBoardRewards,
+  type MissionsBoardSlotResponse,
+  type MissionsBoardState,
+  type MissionClaimStatus,
 } from './missionsV2Types.js';
 import { recordMissionsV2Event } from './missionsV2Telemetry.js';
+import {
+  clearMissionsV2States,
+  loadMissionsV2State,
+  saveMissionsV2State,
+} from './missionsV2Repository.js';
 import { getUserProfile } from '../controllers/users/user-state-service.js';
 
 const REROLL_LIMIT = 1;
 const REROLL_COOLDOWN_DAYS = 7;
 const HUNT_SHIELD_MAX = 6;
 const HUNT_BOOSTER_MULTIPLIER = 1.5;
+const DEFAULT_PETALS = 3;
+const CLAIM_VIEW_PATH = '/dashboard-v3/missions-v2';
 
 const MODE_TO_HUNT_TARGET: Record<string, number> = {
   LOW: 1,
@@ -22,6 +45,8 @@ const MODE_TO_HUNT_TARGET: Record<string, number> = {
   FLOW: 3,
   EVOLVE: 4,
 };
+
+const boardStore = new Map<string, MissionsBoardState>();
 
 const slotTemplates: Record<
   MissionSlotKey,
@@ -197,21 +222,12 @@ const slotTemplates: Record<
   ],
 };
 
-type BoosterState = {
-  multiplier: number;
-  targetTaskId: string | null;
-  appliedKeys: Set<string>;
-};
-
-type MissionsBoardState = {
-  board: MissionsBoard;
-  booster: BoosterState;
-};
-
-const boardStore = new Map<string, MissionsBoardState>();
-
 function nowIso(): string {
   return new Date().toISOString();
+}
+
+function todayKey(reference = new Date()): string {
+  return reference.toISOString().slice(0, 10);
 }
 
 function addDays(date: Date, days: number): Date {
@@ -263,18 +279,38 @@ function createSlotState(slot: MissionSlotKey, proposals: MissionProposal[]): Mi
       remaining: REROLL_LIMIT,
       total: REROLL_LIMIT,
     },
+    cooldownUntil: null,
   };
 }
 
-function deepCloneBoard(board: MissionsBoard): MissionsBoard {
-  return JSON.parse(JSON.stringify(board)) as MissionsBoard;
+async function persistState(userId: string, state: MissionsBoardState): Promise<void> {
+  await saveMissionsV2State(userId, JSON.parse(JSON.stringify(state)) as MissionsBoardState);
 }
 
-function ensureBoardState(userId: string): MissionsBoardState {
+function hydrateState(raw: MissionsBoardState): MissionsBoardState {
+  return {
+    board: raw.board,
+    booster: {
+      multiplier: raw.booster.multiplier,
+      targetTaskId: raw.booster.targetTaskId,
+      appliedKeys: Array.from(new Set(raw.booster.appliedKeys ?? [])),
+    },
+  };
+}
+
+async function ensureBoardState(userId: string): Promise<MissionsBoardState> {
   const existing = boardStore.get(userId);
   if (existing) {
     refreshRerolls(existing.board);
     return existing;
+  }
+
+  const stored = await loadMissionsV2State(userId);
+  if (stored) {
+    const hydrated = hydrateState(stored);
+    refreshRerolls(hydrated.board);
+    boardStore.set(userId, hydrated);
+    return hydrated;
   }
 
   const proposalsBySlot = Object.fromEntries(
@@ -301,11 +337,12 @@ function ensureBoardState(userId: string): MissionsBoardState {
     booster: {
       multiplier: HUNT_BOOSTER_MULTIPLIER,
       targetTaskId: null,
-      appliedKeys: new Set(),
+      appliedKeys: [],
     },
   };
 
   boardStore.set(userId, state);
+  await persistState(userId, state);
   return state;
 }
 
@@ -349,6 +386,28 @@ function resolveProposal(slot: MissionSlotState, missionId: string): MissionProp
   return slot.proposals.find((proposal) => proposal.id === missionId);
 }
 
+function ensureProposals(state: MissionsBoardState, slotKey: MissionSlotKey, reason: string): MissionProposal[] {
+  const slot = findSlot(state, slotKey);
+
+  if (slot.proposals.length > 0) {
+    return slot.proposals;
+  }
+
+  const proposals = slotTemplates[slotKey].map((template) => cloneProposal(template, state.board.userId));
+  slot.proposals = proposals;
+
+  recordMissionsV2Event('missions_v2_proposals_created', {
+    userId: state.board.userId,
+    data: { slot: slotKey, reason, proposals: proposals.map((proposal) => proposal.id) },
+  });
+
+  return proposals;
+}
+
+function createPetalState(): MissionPetals {
+  return { total: DEFAULT_PETALS, remaining: DEFAULT_PETALS };
+}
+
 function assignSelection(
   state: MissionsBoardState,
   slotKey: MissionSlotKey,
@@ -373,13 +432,16 @@ function assignSelection(
       unit: mission.objectives[0]?.unit ?? 'tasks',
       updatedAt: now,
     },
+    petals: createPetalState(),
+    heartbeatLog: [],
   };
 
   slot.selected = selection;
+  slot.cooldownUntil = null;
 
   if (slotKey === 'hunt') {
     state.booster.targetTaskId = null;
-    state.booster.appliedKeys.clear();
+    state.booster.appliedKeys = [];
     if (mission.metadata?.boosterMultiplier && typeof mission.metadata.boosterMultiplier === 'number') {
       state.booster.multiplier = mission.metadata.boosterMultiplier;
     } else {
@@ -400,40 +462,261 @@ function assignSelection(
   });
 
   state.board.generatedAt = now;
-
   return selection;
 }
 
-function ensureProposals(state: MissionsBoardState, slotKey: MissionSlotKey, reason: string): MissionProposal[] {
-  const slot = findSlot(state, slotKey);
-
-  if (slot.proposals.length > 0) {
-    return slot.proposals;
+function toPercent(numerator: number, denominator: number): number {
+  if (denominator <= 0) {
+    return 0;
   }
-
-  const proposals = slotTemplates[slotKey].map((template) => cloneProposal(template, state.board.userId));
-  slot.proposals = proposals;
-
-  recordMissionsV2Event('missions_v2_proposals_created', {
-    userId: state.board.userId,
-    data: { slot: slotKey, reason, proposals: proposals.map((proposal) => proposal.id) },
-  });
-
-  return proposals;
+  return Math.min(100, Math.round((numerator / denominator) * 100));
 }
 
-export async function getMissionBoard(userId: string): Promise<MissionsBoard> {
-  const state = ensureBoardState(userId);
+function deriveSlotState(selection: MissionSelectionState | null): 'idle' | 'active' | 'succeeded' | 'failed' | 'claimed' {
+  if (!selection) {
+    return 'idle';
+  }
+
+  if (selection.status === 'completed') {
+    return 'succeeded';
+  }
+
+  return selection.status;
+}
+
+function computeClaimState(
+  selection: MissionSelectionState | null,
+  options: { claimAllowed: boolean },
+): MissionClaimState {
+  if (!selection) {
+    return {
+      enabled: false,
+      status: 'locked',
+      cooldown_until: null,
+      claimed_at: null,
+    };
+  }
+
+  const claimedAt = selection.claim?.claimedAt ?? null;
+  const baseReward = selection.claim?.reward ?? selection.mission.reward;
+  let status: MissionClaimStatus = 'locked';
+
+  if (selection.status === 'claimed') {
+    status = 'claimed';
+  } else if (selection.status === 'completed') {
+    status = 'ready';
+  }
+
+  const enabled = options.claimAllowed && status === 'ready';
+
+  return {
+    enabled,
+    status,
+    cooldown_until: selection.status === 'failed' ? selection.expiresAt : null,
+    claimed_at: claimedAt,
+    reward: status === 'claimed' || status === 'ready' ? baseReward : undefined,
+  };
+}
+
+function buildSlotActions(
+  slot: MissionSlotState,
+  selection: MissionSelectionState | null,
+  boss: BossState,
+): MissionAction[] {
+  const actions: MissionAction[] = [];
+
+  actions.push({
+    type: 'select',
+    available: selection === null,
+    proposals: slot.proposals,
+  });
+
+  actions.push({
+    type: 'reroll',
+    available: slot.reroll.remaining > 0,
+    remaining: slot.reroll.remaining,
+    next_reset_at: slot.reroll.nextResetAt,
+  });
+
+  if (selection) {
+    actions.push({
+      type: 'heartbeat',
+      available: selection.status === 'active' || selection.status === 'completed',
+      last_marked_at: selection.heartbeatLog.at(-1) ?? null,
+    });
+  }
+
+  if (slot.slot === 'hunt') {
+    actions.push({
+      type: 'link_daily',
+      available: selection !== null,
+      linked_task_id: boss.linkedDailyTaskId,
+    });
+
+    actions.push({
+      type: 'special_strike',
+      available: selection?.status === 'completed',
+      ready: boss.phase2.ready,
+    });
+  }
+
+  return actions;
+}
+
+function buildBossResponse(boss: BossState): BossStateResponse {
+  return {
+    phase: boss.phase,
+    shield: boss.shield,
+    linked_daily_task_id: boss.linkedDailyTaskId,
+    linked_at: boss.linkedAt,
+    phase2: {
+      ready: boss.phase2.ready,
+      proof_submitted_at: boss.phase2.submittedAt,
+    },
+  };
+}
+
+function buildBoardResponse(
+  state: MissionsBoardState,
+  options?: { claimAccess?: 'allowed' | 'blocked' },
+): MissionsBoardResponse {
+  const claimAllowed = (options?.claimAccess ?? 'allowed') !== 'blocked';
+  const board = state.board;
+  const today = todayKey();
+
+  const rewards: MissionsBoardRewards = {
+    pending: [],
+    claimed: [],
+  };
+
+  const slots: MissionsBoardSlotResponse[] = board.slots.map((slot) => {
+    const selection = slot.selected;
+    const mission = selection?.mission ?? null;
+    const petals: MissionPetals = selection?.petals ?? createPetalState();
+    const heartbeatLog = selection?.heartbeatLog ?? [];
+    const heartbeatToday = heartbeatLog.some((stamp) => stamp.startsWith(today));
+    const countdown = {
+      ends_at: selection?.expiresAt ?? null,
+      cooldown_until: slot.cooldownUntil,
+    };
+    const progress = selection
+      ? {
+          current: selection.progress.current,
+          target: selection.progress.target,
+          percent: toPercent(selection.progress.current, selection.progress.target),
+        }
+      : { current: 0, target: 0, percent: 0 };
+
+    const claim = computeClaimState(selection, { claimAllowed });
+
+    if (selection && mission) {
+      const summary: MissionsBoardRewardSummary = {
+        mission_id: mission.id,
+        slot: slot.slot,
+        reward: selection.claim?.reward ?? mission.reward,
+        status: claim.status === 'claimed' ? 'claimed' : 'pending',
+        updated_at: selection.updatedAt,
+      };
+
+      if (claim.status === 'claimed') {
+        rewards.claimed.push(summary);
+      } else if (claim.status === 'ready') {
+        rewards.pending.push(summary);
+      }
+    }
+
+    return {
+      id: `${board.userId}:${slot.slot}`,
+      slot: slot.slot,
+      mission,
+      state: deriveSlotState(selection),
+      petals,
+      heartbeat_today: heartbeatToday,
+      heartbeat_log: heartbeatLog,
+      progress,
+      countdown,
+      actions: buildSlotActions(slot, selection, board.boss),
+      claim,
+      proposals: slot.proposals,
+    };
+  });
+
+  const communications: MissionsBoardCommunication[] = [];
+
+  const gating: MissionsBoardGating = {
+    claim: {
+      enabled: claimAllowed,
+      url: CLAIM_VIEW_PATH,
+    },
+  };
+
+  return {
+    season_id: board.seasonId,
+    generated_at: board.generatedAt,
+    slots,
+    boss: buildBossResponse(board.boss),
+    rewards,
+    gating,
+    communications,
+  };
+}
+
+export async function getMissionBoard(
+  userId: string,
+  options?: { claimAccess?: 'allowed' | 'blocked' },
+): Promise<MissionsBoardResponse> {
+  const state = await ensureBoardState(userId);
   refreshRerolls(state.board);
-  return deepCloneBoard(state.board);
+  await persistState(userId, state);
+  return buildBoardResponse(state, options);
+}
+
+export async function registerMissionHeartbeat(
+  userId: string,
+  missionId: string,
+): Promise<MissionHeartbeatResponse> {
+  const state = await ensureBoardState(userId);
+  const slot = state.board.slots.find((entry) => entry.selected?.mission.id === missionId);
+
+  if (!slot || !slot.selected) {
+    throw new Error('Mission is not active for this user');
+  }
+
+  if (slot.selected.status !== 'active' && slot.selected.status !== 'completed') {
+    throw new Error('Mission is not eligible for heartbeat');
+  }
+
+  const now = nowIso();
+  const key = todayKey(new Date(now));
+  const alreadyMarked = slot.selected.heartbeatLog.some((stamp) => stamp.startsWith(key));
+
+  if (!alreadyMarked) {
+    slot.selected.heartbeatLog.push(now);
+    slot.selected.updatedAt = now;
+    state.board.generatedAt = now;
+  }
+
+  recordMissionsV2Event('missions_v2_heartbeat', {
+    userId,
+    data: { missionId, slot: slot.slot, heartbeatCount: slot.selected.heartbeatLog.length },
+  });
+
+  await persistState(userId, state);
+
+  return {
+    mission_id: missionId,
+    petals_remaining: slot.selected.petals.remaining,
+    heartbeat_timestamps: [...slot.selected.heartbeatLog],
+    updated_at: slot.selected.updatedAt,
+  };
 }
 
 export async function selectMission(
   userId: string,
   slotKey: MissionSlotKey,
   missionId: string,
-): Promise<MissionSelectionState> {
-  const state = ensureBoardState(userId);
+): Promise<MissionsBoardResponse> {
+  const state = await ensureBoardState(userId);
   const slot = findSlot(state, slotKey);
 
   const mission = resolveProposal(slot, missionId);
@@ -442,11 +725,13 @@ export async function selectMission(
     throw new Error(`Mission ${missionId} not found for slot ${slotKey}`);
   }
 
-  return assignSelection(state, slotKey, mission, { reason: 'manual_select', auto: false });
+  assignSelection(state, slotKey, mission, { reason: 'manual_select', auto: false });
+  await persistState(userId, state);
+  return buildBoardResponse(state);
 }
 
-export async function rerollMissionSlot(userId: string, slotKey: MissionSlotKey): Promise<MissionSlotState> {
-  const state = ensureBoardState(userId);
+export async function rerollMissionSlot(userId: string, slotKey: MissionSlotKey): Promise<MissionsBoardResponse> {
+  const state = await ensureBoardState(userId);
   const slot = findSlot(state, slotKey);
 
   refreshRerolls(state.board);
@@ -475,16 +760,16 @@ export async function rerollMissionSlot(userId: string, slotKey: MissionSlotKey)
   });
 
   state.board.generatedAt = nowIso();
-
-  return deepCloneBoard(state.board).slots.find((entry) => entry.slot === slotKey)!;
+  await persistState(userId, state);
+  return buildBoardResponse(state);
 }
 
 export async function regenerateMissionProposals(
   userId: string,
   slotKey: MissionSlotKey,
   reason: string,
-): Promise<MissionSlotState> {
-  const state = ensureBoardState(userId);
+): Promise<MissionsBoardResponse> {
+  const state = await ensureBoardState(userId);
   const proposals = slotTemplates[slotKey].map((template) => cloneProposal(template, userId));
   const slot = findSlot(state, slotKey);
   slot.proposals = proposals;
@@ -498,16 +783,16 @@ export async function regenerateMissionProposals(
   });
 
   state.board.generatedAt = nowIso();
-
-  return deepCloneBoard(state.board).slots.find((entry) => entry.slot === slotKey)!;
+  await persistState(userId, state);
+  return buildBoardResponse(state);
 }
 
 export async function linkDailyToHuntMission(
   userId: string,
   missionId: string,
   dailyTaskId: string,
-): Promise<{ missionId: string; taskId: string; linkedAt: string }> {
-  const state = ensureBoardState(userId);
+): Promise<MissionDailyLinkResponse> {
+  const state = await ensureBoardState(userId);
   const huntSlot = findSlot(state, 'hunt');
 
   if (!huntSlot.selected || huntSlot.selected.mission.id !== missionId) {
@@ -516,7 +801,7 @@ export async function linkDailyToHuntMission(
 
   const linkedAt = nowIso();
   state.booster.targetTaskId = dailyTaskId;
-  state.booster.appliedKeys.clear();
+  state.booster.appliedKeys = [];
   state.board.boss.linkedDailyTaskId = dailyTaskId;
   state.board.boss.linkedAt = linkedAt;
   state.board.boss.phase = 1;
@@ -533,14 +818,21 @@ export async function linkDailyToHuntMission(
     },
   });
 
-  return { missionId, taskId: dailyTaskId, linkedAt };
+  await persistState(userId, state);
+
+  return {
+    mission_id: missionId,
+    task_id: dailyTaskId,
+    linked_at: linkedAt,
+    board: buildBoardResponse(state),
+  };
 }
 
 export async function registerBossPhase2(
   userId: string,
   payload: { missionId: string; proof: string },
-): Promise<BossState> {
-  const state = ensureBoardState(userId);
+): Promise<BossPhase2Response> {
+  const state = await ensureBoardState(userId);
   const huntSlot = findSlot(state, 'hunt');
 
   if (!huntSlot.selected || huntSlot.selected.mission.id !== payload.missionId) {
@@ -552,7 +844,14 @@ export async function registerBossPhase2(
   }
 
   if (state.board.boss.phase2.proof) {
-    return deepCloneBoard(state.board).boss;
+    return {
+      boss_state: buildBossResponse(state.board.boss),
+      rewards_preview: {
+        xp: huntSlot.selected.mission.reward.xp,
+        currency: huntSlot.selected.mission.reward.currency ?? 0,
+        items: huntSlot.selected.mission.reward.items ?? [],
+      },
+    };
   }
 
   state.board.boss.phase = 2;
@@ -568,14 +867,23 @@ export async function registerBossPhase2(
     },
   });
 
-  return deepCloneBoard(state.board).boss;
+  await persistState(userId, state);
+
+  return {
+    boss_state: buildBossResponse(state.board.boss),
+    rewards_preview: {
+      xp: huntSlot.selected.mission.reward.xp,
+      currency: huntSlot.selected.mission.reward.currency ?? 0,
+      items: huntSlot.selected.mission.reward.items ?? [],
+    },
+  };
 }
 
 export async function claimMissionReward(
   userId: string,
   missionId: string,
-): Promise<MissionSelectionState> {
-  const state = ensureBoardState(userId);
+): Promise<MissionClaimResponse> {
+  const state = await ensureBoardState(userId);
 
   const slot = state.board.slots.find((entry) => entry.selected?.mission.id === missionId);
 
@@ -589,33 +897,45 @@ export async function claimMissionReward(
     throw new Error('Mission is not ready to be claimed');
   }
 
-  if (selection.status === 'claimed') {
-    return deepCloneBoard(state.board).slots.find((entry) => entry.selected?.mission.id === missionId)!.selected!;
+  if (selection.status !== 'claimed') {
+    const claimedAt = nowIso();
+    selection.status = 'claimed';
+    selection.updatedAt = claimedAt;
+    selection.claim = {
+      claimedAt,
+      reward: selection.mission.reward,
+    };
+
+    recordMissionsV2Event('missions_v2_reward_claimed', {
+      userId,
+      data: {
+        missionId,
+        slot: slot.slot,
+        reward: selection.mission.reward,
+      },
+    });
+
+    state.board.generatedAt = claimedAt;
   }
 
-  const claimedAt = nowIso();
-  selection.status = 'claimed';
-  selection.updatedAt = claimedAt;
-  selection.claim = {
-    claimedAt,
-    reward: selection.mission.reward,
-  };
+  await persistState(userId, state);
+  const board = buildBoardResponse(state);
+  const slotResponse = board.slots.find((entry) => entry.mission?.id === missionId);
 
-  recordMissionsV2Event('missions_v2_reward_claimed', {
-    userId,
-    data: {
-      missionId,
-      slot: slot.slot,
-      reward: selection.mission.reward,
+  return {
+    mission_id: missionId,
+    claim: slotResponse?.claim ?? {
+      enabled: false,
+      status: 'locked',
+      cooldown_until: null,
+      claimed_at: selection.claim?.claimedAt ?? null,
+      reward: selection.claim?.reward,
     },
-  });
-
-  state.board.generatedAt = claimedAt;
-
-  return deepCloneBoard(state.board).slots.find((entry) => entry.selected?.mission.id === missionId)!.selected!;
+    board,
+  };
 }
 
-type HuntBoosterInput = {
+export type HuntBoosterInput = {
   userId: string;
   date: string;
   completedTaskIds: string[];
@@ -623,7 +943,7 @@ type HuntBoosterInput = {
   xpTotalToday: number;
 };
 
-type HuntBoosterResult = {
+export type HuntBoosterResult = {
   xp_delta: number;
   xp_total_today: number;
   boosterApplied: boolean;
@@ -637,7 +957,7 @@ export async function applyHuntXpBoost({
   baseXpDelta,
   xpTotalToday,
 }: HuntBoosterInput): Promise<HuntBoosterResult> {
-  const state = ensureBoardState(userId);
+  const state = await ensureBoardState(userId);
   const huntSlot = findSlot(state, 'hunt');
 
   if (!huntSlot.selected || !state.booster.targetTaskId) {
@@ -662,7 +982,7 @@ export async function applyHuntXpBoost({
 
   const submissionKey = `${date}:${targetTaskId}`;
 
-  if (state.booster.appliedKeys.has(submissionKey)) {
+  if (state.booster.appliedKeys.includes(submissionKey)) {
     return {
       xp_delta: baseXpDelta,
       xp_total_today: xpTotalToday,
@@ -671,7 +991,7 @@ export async function applyHuntXpBoost({
     };
   }
 
-  state.booster.appliedKeys.add(submissionKey);
+  state.booster.appliedKeys.push(submissionKey);
 
   const multiplier = state.booster.multiplier;
   const bonus = Math.round(baseXpDelta * (multiplier - 1));
@@ -722,6 +1042,7 @@ export async function applyHuntXpBoost({
   }
 
   state.board.generatedAt = progress.updatedAt;
+  await persistState(userId, state);
 
   return {
     xp_delta: newXpDelta,
@@ -731,8 +1052,8 @@ export async function applyHuntXpBoost({
   };
 }
 
-export async function runWeeklyAutoSelection(userId: string): Promise<MissionsBoard> {
-  const state = ensureBoardState(userId);
+export async function runWeeklyAutoSelection(userId: string): Promise<MissionsBoardResponse> {
+  const state = await ensureBoardState(userId);
   const profile = await getUserProfile(userId).catch(() => null);
   const modeCode = profile?.modeCode ?? null;
 
@@ -770,11 +1091,12 @@ export async function runWeeklyAutoSelection(userId: string): Promise<MissionsBo
   }
 
   state.board.generatedAt = nowIso();
-  return deepCloneBoard(state.board);
+  await persistState(userId, state);
+  return buildBoardResponse(state);
 }
 
-export async function runFortnightlyBossMaintenance(userId: string): Promise<MissionsBoard> {
-  const state = ensureBoardState(userId);
+export async function runFortnightlyBossMaintenance(userId: string): Promise<MissionsBoardResponse> {
+  const state = await ensureBoardState(userId);
 
   if (state.board.boss.shield.current === 0 && state.board.boss.phase2.proof) {
     state.board.boss.shield.current = HUNT_SHIELD_MAX;
@@ -791,9 +1113,11 @@ export async function runFortnightlyBossMaintenance(userId: string): Promise<Mis
   }
 
   state.board.generatedAt = nowIso();
-  return deepCloneBoard(state.board);
+  await persistState(userId, state);
+  return buildBoardResponse(state);
 }
 
-export function resetMissionsState(): void {
+export async function resetMissionsState(): Promise<void> {
   boardStore.clear();
+  await clearMissionsV2States();
 }

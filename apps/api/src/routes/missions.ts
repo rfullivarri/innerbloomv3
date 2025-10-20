@@ -5,13 +5,14 @@ import { HttpError } from '../lib/http-error.js';
 import { parseWithValidation } from '../lib/validation.js';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
 import {
-  claimMissionReward,
   getMissionBoard,
+  claimMissionReward,
   linkDailyToHuntMission,
   registerBossPhase2,
   rerollMissionSlot,
   runFortnightlyBossMaintenance,
   runWeeklyAutoSelection,
+  registerMissionHeartbeat,
   selectMission,
 } from '../services/missionsV2Service.js';
 import { MISSION_SLOT_KEYS, type MissionSlotKey } from '../services/missionsV2Types.js';
@@ -22,7 +23,7 @@ const slotEnum = z.enum(MISSION_SLOT_KEYS);
 
 const selectBodySchema = z.object({
   slot: slotEnum,
-  missionId: z.string().min(1),
+  mission_id: z.string().min(1),
 });
 
 const rerollBodySchema = z.object({
@@ -30,14 +31,21 @@ const rerollBodySchema = z.object({
 });
 
 const linkDailyBodySchema = z.object({
-  missionId: z.string().min(1),
-  taskId: z.string().uuid({ message: 'taskId must be a valid UUID' }),
+  mission_id: z.string().min(1),
+  task_id: z.string().uuid({ message: 'task_id must be a valid UUID' }),
 });
 
 const phase2BodySchema = z.object({
-  missionId: z.string().min(1),
+  mission_id: z.string().min(1),
   proof: z.string().min(8, 'Proof must contain details about the special hit'),
 });
+
+const heartbeatBodySchema = z.object({
+  mission_id: z.string().min(1),
+});
+
+const CLAIM_SOURCE_HEADER = 'x-missions-claim-source';
+const CLAIM_ALLOWED_PATH = '/dashboard-v3/missions-v2';
 
 function normalizeError(error: unknown, message: string, status = 400): never {
   if (error instanceof HttpError) {
@@ -63,6 +71,27 @@ router.get(
 );
 
 router.post(
+  '/missions/heartbeat',
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    if (!user) {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    }
+
+    const { mission_id } = parseWithValidation(heartbeatBodySchema, req.body, 'Invalid heartbeat payload');
+
+    try {
+      const heartbeat = await registerMissionHeartbeat(user.id, mission_id);
+      res.json(heartbeat);
+    } catch (error) {
+      normalizeError(error, 'Unable to register heartbeat');
+    }
+  }),
+);
+
+router.post(
   '/missions/select',
   authMiddleware,
   asyncHandler(async (req, res) => {
@@ -72,11 +101,11 @@ router.post(
       throw new HttpError(401, 'unauthorized', 'Authentication required');
     }
 
-    const { slot, missionId } = parseWithValidation(selectBodySchema, req.body, 'Invalid select payload');
+    const { slot, mission_id } = parseWithValidation(selectBodySchema, req.body, 'Invalid select payload');
 
     try {
-      const selection = await selectMission(user.id, slot as MissionSlotKey, missionId);
-      res.json(selection);
+      const board = await selectMission(user.id, slot as MissionSlotKey, mission_id);
+      res.json(board);
     } catch (error) {
       normalizeError(error, 'Unable to select mission');
     }
@@ -96,8 +125,8 @@ router.post(
     const { slot } = parseWithValidation(rerollBodySchema, req.body, 'Invalid reroll payload');
 
     try {
-      const state = await rerollMissionSlot(user.id, slot as MissionSlotKey);
-      res.json(state);
+      const board = await rerollMissionSlot(user.id, slot as MissionSlotKey);
+      res.json(board);
     } catch (error) {
       normalizeError(error, 'Unable to reroll slot');
     }
@@ -114,10 +143,10 @@ router.post(
       throw new HttpError(401, 'unauthorized', 'Authentication required');
     }
 
-    const { missionId, taskId } = parseWithValidation(linkDailyBodySchema, req.body, 'Invalid link payload');
+    const { mission_id, task_id } = parseWithValidation(linkDailyBodySchema, req.body, 'Invalid link payload');
 
     try {
-      const result = await linkDailyToHuntMission(user.id, missionId, taskId);
+      const result = await linkDailyToHuntMission(user.id, mission_id, task_id);
       res.json(result);
     } catch (error) {
       normalizeError(error, 'Unable to link daily task to mission');
@@ -138,7 +167,10 @@ router.post(
     const parsed = parseWithValidation(phase2BodySchema, req.body, 'Invalid boss payload');
 
     try {
-      const boss = await registerBossPhase2(user.id, parsed);
+      const boss = await registerBossPhase2(user.id, {
+        missionId: parsed.mission_id,
+        proof: parsed.proof,
+      });
       res.json(boss);
     } catch (error) {
       normalizeError(error, 'Unable to register boss phase 2');
@@ -157,6 +189,25 @@ router.post(
     }
 
     const missionId = z.string().min(1).parse(req.params.id);
+
+    const claimSource = req.get(CLAIM_SOURCE_HEADER) ?? req.get('referer') ?? '';
+    const claimAllowed =
+      typeof claimSource === 'string' && claimSource.toLowerCase().includes(CLAIM_ALLOWED_PATH.toLowerCase());
+
+    if (!claimAllowed) {
+      const board = await getMissionBoard(user.id, { claimAccess: 'blocked' });
+      res.json({
+        mission_id: missionId,
+        claim: {
+          enabled: false,
+          status: 'locked',
+          cooldown_until: null,
+          claimed_at: null,
+        },
+        board,
+      });
+      return;
+    }
 
     try {
       const result = await claimMissionReward(user.id, missionId);
