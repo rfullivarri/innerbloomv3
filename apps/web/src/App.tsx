@@ -12,7 +12,7 @@ import AdminRoute from './routes/admin';
 import { DevBanner } from './components/layout/DevBanner';
 import { setApiAuthTokenProvider } from './lib/api';
 import OnboardingIntroPage from './pages/OnboardingIntro';
-import { DASHBOARD_PATH } from './config/auth';
+import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -97,13 +97,13 @@ function RedirectIfSignedIn({
 
 export default function App() {
   const enableTaskgen = String(import.meta.env.VITE_ENABLE_TASKGEN_TRIGGER ?? 'false').toLowerCase() === 'true';
-  const rawDashboardPath = DASHBOARD_PATH || '/dashboard';
+  const rawDashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
   const normalizedDashboardPath = rawDashboardPath.startsWith('/') ? rawDashboardPath : `/${rawDashboardPath}`;
-  const trimmedDashboardPath = normalizedDashboardPath.replace(/\/+$/, '') || '/dashboard';
+  const trimmedDashboardPath = normalizedDashboardPath.replace(/\/+$/, '') || DEFAULT_DASHBOARD_PATH;
   const dashboardSegments = trimmedDashboardPath.split('/').filter(Boolean);
-  const primaryDashboardPath = dashboardSegments.length > 0 ? `/${dashboardSegments[0]}` : '/dashboard';
+  const primaryDashboardPath = dashboardSegments.length > 0 ? `/${dashboardSegments[0]}` : DEFAULT_DASHBOARD_PATH;
   const isDashboardV3Default = primaryDashboardPath === '/dashboard-v3';
-  const fallbackDashboardPath = trimmedDashboardPath || '/dashboard';
+  const fallbackDashboardPath = trimmedDashboardPath || DEFAULT_DASHBOARD_PATH;
   const dashboardBasePath = isDashboardV3Default ? '/dashboard-v3' : fallbackDashboardPath;
   const dashboardRoutePath = isDashboardV3Default
     ? `${dashboardBasePath}/*`

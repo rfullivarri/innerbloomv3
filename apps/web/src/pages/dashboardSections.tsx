@@ -1,7 +1,7 @@
 import { matchPath } from 'react-router-dom';
 import type { SVGProps } from 'react';
 import type { NavbarSection } from '../components/layout/Navbar';
-import { DASHBOARD_PATH } from '../config/auth';
+import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 
 export type DashboardSectionKey = 'dashboard' | 'missions' | 'rewards' | 'editor';
 
@@ -99,13 +99,13 @@ function TaskEditorIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   );
 }
 
-const rawDashboardPath = DASHBOARD_PATH || '/dashboard';
+const rawDashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
 const normalizedDashboardPath = rawDashboardPath.startsWith('/') ? rawDashboardPath : `/${rawDashboardPath}`;
-const trimmedDashboardPath = normalizedDashboardPath.replace(/\/+$/, '') || '/dashboard';
+const trimmedDashboardPath = normalizedDashboardPath.replace(/\/+$/, '') || DEFAULT_DASHBOARD_PATH;
 const dashboardSegments = trimmedDashboardPath.split('/').filter(Boolean);
-const primaryDashboardPath = dashboardSegments.length > 0 ? `/${dashboardSegments[0]}` : '/dashboard';
+const primaryDashboardPath = dashboardSegments.length > 0 ? `/${dashboardSegments[0]}` : DEFAULT_DASHBOARD_PATH;
 const isDashboardV3Enabled = primaryDashboardPath === '/dashboard-v3';
-const fallbackDashboardPath = trimmedDashboardPath || '/dashboard';
+const fallbackDashboardPath = trimmedDashboardPath || DEFAULT_DASHBOARD_PATH;
 const DASHBOARD_V3_BASE_PATH = '/dashboard-v3';
 
 function isDashboardV3Path(pathname: string): boolean {
