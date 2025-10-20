@@ -121,10 +121,14 @@ router.post(
       throw new HttpError(401, 'unauthorized', 'Authentication required');
     }
 
-    const { missionId, taskId } = parseWithValidation(linkDailyBodySchema, req.body, 'Invalid link payload');
+    const { mission_id, task_id } = parseWithValidation(
+      linkDailyBodySchema,
+      req.body,
+      'Invalid link payload',
+    );
 
     try {
-      const result = await linkDailyToHuntMission(user.id, missionId, taskId);
+      const result = await linkDailyToHuntMission(user.id, mission_id, task_id);
       res.json(result);
     } catch (error) {
       normalizeError(error, 'Unable to link daily task to mission');
