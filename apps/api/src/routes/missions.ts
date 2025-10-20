@@ -39,10 +39,6 @@ const phase2BodySchema = z.object({
   proof: z.string().min(8, 'Proof must contain details about the special hit'),
 });
 
-const heartbeatBodySchema = z.object({
-  missionId: z.string().min(1),
-});
-
 const CLAIM_SOURCE_HEADER = 'x-missions-claim-source';
 const CLAIM_ALLOWED_PATH = '/dashboard-v3/missions-v2';
 

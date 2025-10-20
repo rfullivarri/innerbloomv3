@@ -42,8 +42,6 @@ type MissionBoardUpdate = {
   dirty: boolean;
 };
 
-type MissionProposal = MissionDefinition;
-
 export type HuntBoosterInput = {
   userId: string;
   date: string;
@@ -245,11 +243,6 @@ function findSlot(state: MissionsBoardState, slotKey: MissionSlotKey): MissionSl
   }
 
   return slot;
-}
-
-function resolveProposal(slot: MissionSlotState, missionId: string): MissionProposal | null {
-  const proposal = slot.proposals.find((candidate) => candidate.id === missionId);
-  return proposal ? { ...proposal, tasks: proposal.tasks.map((task) => ({ ...task })) } : null;
 }
 
 function hydrateMissionDefinition(definition: MissionDefinition): MissionDefinition {
@@ -1054,7 +1047,7 @@ export async function registerBossPhase2(
 export async function claimMissionReward(userId: string, missionId: string): Promise<MissionClaimResponse> {
   const state = await ensureBoardState(userId);
   const reference = new Date();
-  const update = applyDailyPetalDecay(state, reference);
+  applyDailyPetalDecay(state, reference);
   const slot = state.board.slots.find((entry) => entry.selected?.mission.id === missionId);
 
   if (!slot || !slot.selected) {
