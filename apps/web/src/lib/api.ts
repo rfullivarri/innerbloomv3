@@ -1880,7 +1880,8 @@ async function missionsV2Post<T>(
     token,
   );
 
-  return getJson<T>(`${missionsV2BasePath(userId)}${path}`, undefined, init);
+  const url = buildUrl(`${missionsV2BasePath(userId)}${path}`);
+  return apiRequest<T>(url, init);
 }
 
 export async function getMissionsV2Board(userId: string): Promise<MissionsV2BoardResponse> {
