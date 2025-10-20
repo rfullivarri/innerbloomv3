@@ -346,44 +346,22 @@ async function ensureBoardState(userId: string): Promise<MissionsBoardState> {
   return state;
 }
 
-function refreshRerolls(board: MissionsBoard): void {
-  const now = Date.now();
-
-  for (const slot of board.slots) {
-    const { reroll } = slot;
-    if (reroll.remaining > 0) {
-      continue;
-    }
-
-    const resetAtIso = reroll.nextResetAt ?? (reroll.usedAt ? addDays(new Date(reroll.usedAt), REROLL_COOLDOWN_DAYS).toISOString() : null);
-
-    if (!resetAtIso) {
-      reroll.remaining = reroll.total;
-      reroll.usedAt = null;
-      reroll.nextResetAt = null;
-      continue;
-    }
-
-    const resetAt = new Date(resetAtIso).getTime();
-
-    if (Number.isNaN(resetAt) || now >= resetAt) {
-      reroll.remaining = reroll.total;
-      reroll.usedAt = null;
-      reroll.nextResetAt = null;
-    }
+async function ensureBoard(userId: string): Promise<MissionsBoard> {
+  const cached = boardCache.get(userId);
+  if (cached) {
+    return cached;
   }
-}
 
-function findSlot(state: MissionsBoardState, slotKey: MissionSlotKey): MissionSlotState {
-  const slot = state.board.slots.find((entry) => entry.slot === slotKey);
-  if (!slot) {
-    throw new Error(`Missing slot state for ${slotKey}`);
+  const persisted = await getPersistedBoard(userId);
+  if (persisted) {
+    boardCache.set(userId, persisted);
+    return persisted;
   }
-  return slot;
-}
 
-function resolveProposal(slot: MissionSlotState, missionId: string): MissionProposal | undefined {
-  return slot.proposals.find((proposal) => proposal.id === missionId);
+  const created = createDefaultBoard();
+  boardCache.set(userId, created);
+  await savePersistedBoard(userId, created);
+  return created;
 }
 
 function ensureProposals(state: MissionsBoardState, slotKey: MissionSlotKey, reason: string): MissionProposal[] {
@@ -810,12 +788,7 @@ export async function linkDailyToHuntMission(
 
   recordMissionsV2Event('missions_v2_progress_tick', {
     userId,
-    data: {
-      slot: 'hunt',
-      missionId,
-      action: 'link_daily',
-      taskId: dailyTaskId,
-    },
+    data: { slot: 'hunt', missionId, action: 'link_daily', taskId },
   });
 
   await persistState(userId, state);
@@ -839,8 +812,10 @@ export async function registerBossPhase2(
     throw new Error('Mission is not the active Hunt for this user');
   }
 
-  if (!state.board.boss.phase2.ready) {
-    throw new Error('Boss is not ready for phase 2');
+  board.boss.status = 'ready';
+  const action = board.boss.actions.find((item) => item.type === 'special_strike');
+  if (action) {
+    action.enabled = true;
   }
 
   if (state.board.boss.phase2.proof) {
@@ -861,10 +836,7 @@ export async function registerBossPhase2(
 
   recordMissionsV2Event('missions_v2_boss_phase2_finish', {
     userId,
-    data: {
-      missionId: payload.missionId,
-      proofLength: payload.proof.length,
-    },
+    data: { missionId: payload.missionId, proofLength: payload.proof.length },
   });
 
   await persistState(userId, state);
@@ -890,10 +862,7 @@ export async function claimMissionReward(
   if (!slot || !slot.selected) {
     throw new Error('Mission is not active for this user');
   }
-
-  const selection = slot.selected;
-
-  if (selection.status !== 'completed' && selection.status !== 'claimed') {
+  if (!slot.claim.available || !slot.claim.enabled) {
     throw new Error('Mission is not ready to be claimed');
   }
 
@@ -960,34 +929,39 @@ export async function applyHuntXpBoost({
   const state = await ensureBoardState(userId);
   const huntSlot = findSlot(state, 'hunt');
 
-  if (!huntSlot.selected || !state.booster.targetTaskId) {
-    return {
-      xp_delta: baseXpDelta,
-      xp_total_today: xpTotalToday,
-      boosterApplied: false,
-      multiplier: state.booster.multiplier,
-    };
+    if (slot.progress.current >= slot.progress.target) {
+      slot.state = 'succeeded';
+      slot.claim.available = true;
+      slot.claim.enabled = true;
+    }
+
+    board.generated_at = nowIso();
+    await persistBoard(userId, board);
+
+    recordMissionsV2Event('missions_v2_heartbeat', {
+      userId,
+      data: {
+        missionId,
+        slot: slot.slot,
+        progress: slot.progress.current,
+        target: slot.progress.target,
+      },
+    });
   }
 
-  const targetTaskId = state.booster.targetTaskId;
-
-  if (!completedTaskIds.includes(targetTaskId)) {
-    return {
-      xp_delta: baseXpDelta,
-      xp_total_today: xpTotalToday,
-      boosterApplied: false,
-      multiplier: state.booster.multiplier,
-    };
-  }
-
-  const submissionKey = `${date}:${targetTaskId}`;
+  return {
+    status: 'ok',
+    petals_remaining: slot.petals.remaining,
+    heartbeat_date: board.generated_at,
+  };
+}
 
   if (state.booster.appliedKeys.includes(submissionKey)) {
     return {
       xp_delta: baseXpDelta,
       xp_total_today: xpTotalToday,
       boosterApplied: false,
-      multiplier: state.booster.multiplier,
+      multiplier: 1,
     };
   }
 
@@ -1023,31 +997,27 @@ export async function applyHuntXpBoost({
     state.board.boss.shield.current = Math.max(0, state.board.boss.shield.current - 1);
     state.board.boss.shield.updatedAt = progress.updatedAt;
 
-    recordMissionsV2Event('missions_v2_boss_phase1_tick', {
+  if (bonusReady) {
+    recordMissionsV2Event('missions_v2_progress_tick', {
       userId,
       data: {
-        missionId: huntSlot.selected.mission.id,
-        shieldRemaining: state.board.boss.shield.current,
+        slot: 'hunt',
+        missionId: huntSlot.mission.id,
+        boostApplied: true,
+        multiplier,
+        baseXpDelta,
+        bonusXp: 0,
       },
     });
-
-    if (state.board.boss.shield.current === 0) {
-      state.board.boss.phase = 2;
-      state.board.boss.phase2.ready = true;
-    }
-  }
-
-  if (progress.current >= progress.target) {
-    huntSlot.selected.status = 'completed';
   }
 
   state.board.generatedAt = progress.updatedAt;
   await persistState(userId, state);
 
   return {
-    xp_delta: newXpDelta,
-    xp_total_today: newXpTotal,
-    boosterApplied: true,
+    xp_delta: baseXpDelta,
+    xp_total_today: xpTotalToday,
+    boosterApplied: bonusReady,
     multiplier,
   };
 }

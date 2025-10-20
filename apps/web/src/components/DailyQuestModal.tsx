@@ -898,7 +898,15 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
         holdDurationMs: DEFAULT_HOLD_TO_CLOSE_DURATION_MS,
       };
       if (missionsBonus?.bonus_ready) {
-        toastOptions.detail = 'Bonus listo para reclamar.';
+        const missionTasks = missionsBonus.tasks ?? [];
+        if (missionTasks.length > 0) {
+          const summary = missionTasks
+            .map((task) => `${task.mission_name}: ${task.task_name}`)
+            .join(' · ');
+          toastOptions.detail = `Tareas de Misión: ${summary}`;
+        } else {
+          toastOptions.detail = 'Bonus listo para reclamar.';
+        }
         toastOptions.action = {
           label: 'Ir a Misiones v2',
           href: missionsBonus.redirect_url || '/dashboard-v3/missions-v2',
