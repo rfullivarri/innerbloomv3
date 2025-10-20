@@ -855,7 +855,6 @@ function TaskListMobile({
     <ul className="divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
       {tasks.map((task) => {
         const { label: difficultyLabel, tone } = resolveDifficulty(task);
-        const pillarLabel = pillarNamesById.get(task.pillarId ?? '') ?? task.pillarId ?? 'Sin pilar';
         const isMenuOpen = openMenuTaskId === task.id;
         const isDuplicating = duplicatingTaskId === task.id;
 
@@ -867,29 +866,17 @@ function TaskListMobile({
               className="flex w-full flex-col gap-2 px-4 py-2.5 text-left transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
             >
               <div className="flex items-start justify-between gap-3">
-                <p className="line-clamp-1 text-sm font-semibold text-white">{task.title}</p>
-                <span
-                  className={`ml-3 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] ${
-                    task.isActive
-                      ? 'bg-emerald-500/15 text-emerald-200'
-                      : 'bg-slate-600/20 text-slate-300'
-                  }`}
-                >
-                  {task.isActive ? 'Activa' : 'Inactiva'}
-                </span>
+                <p className="line-clamp-1 pr-8 text-sm font-semibold text-white">{task.title}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-300">
-                <span className="inline-flex items-center gap-1">
+                <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-2 py-0.5 font-semibold uppercase tracking-[0.18em] text-slate-100">
                   <span className={`h-1.5 w-1.5 rounded-full ${tone}`} aria-hidden />
                   <span>{difficultyLabel}</span>
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-100">
-                  {pillarLabel || 'Sin pilar'}
                 </span>
               </div>
             </button>
             <div
-              className="pointer-events-auto absolute right-2 top-2"
+              className="pointer-events-auto absolute right-2 bottom-2"
               ref={(node) => {
                 if (isMenuOpen) {
                   menuContainerRef.current = node;
