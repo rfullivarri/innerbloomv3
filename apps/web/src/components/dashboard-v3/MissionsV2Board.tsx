@@ -81,6 +81,7 @@ const MARKET_PREVIEWS: Array<{
   requirements: string[];
   icon: string;
   rarity: Rarity;
+  difficulty: string;
 }> = [
   {
     id: 'market-main-preview',
@@ -91,6 +92,7 @@ const MARKET_PREVIEWS: Array<{
     requirements: ['Requiere objetivo activo', 'Boss: Acto 2'],
     icon: '🛡️',
     rarity: 'legendary',
+    difficulty: 'Legendaria · storytelling',
   },
   {
     id: 'market-hunt-preview',
@@ -101,6 +103,7 @@ const MARKET_PREVIEWS: Array<{
     requirements: ['Booster activo mañana', 'Vinculá la Daily'],
     icon: '🔥',
     rarity: 'epic',
+    difficulty: 'Experta · ritmo sostenido',
   },
   {
     id: 'market-skill-preview',
@@ -111,6 +114,7 @@ const MARKET_PREVIEWS: Array<{
     requirements: ['Heartbeat diario', 'Slot libre requerido'],
     icon: '🧠',
     rarity: 'rare',
+    difficulty: 'Avanzada · constancia',
   },
 ];
 
@@ -298,19 +302,20 @@ function ClaimModal({
               <span className="missions-claim-chest__lid" />
               <span className="missions-claim-chest__base" />
             </div>
+            {!prefersReducedMotion && <span className="missions-claim-confetti" aria-hidden="true" />}
             <p className="text-sm text-slate-200">
               Tesoro protegido: XP, amuletos y monedas listos para tu vitrina.
             </p>
-            <ul className="w-full space-y-2 text-left text-sm text-slate-100">
-              <li className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2">
+            <ul className="missions-claim-loot">
+              <li className="missions-claim-loot__item">
                 <span className="font-semibold">XP</span>
                 <span>{state.rewards.xp}</span>
               </li>
-              <li className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2">
+              <li className="missions-claim-loot__item">
                 <span className="font-semibold">Monedas</span>
                 <span>{state.rewards.currency}</span>
               </li>
-              <li className="rounded-xl border border-white/10 bg-white/5 px-4 py-2">
+              <li className="missions-claim-loot__item missions-claim-loot__item--stacked">
                 <span className="font-semibold">Loot</span>
                 <p className="mt-1 text-xs text-slate-300">
                   {state.rewards.items.length > 0
@@ -367,9 +372,20 @@ function MissionProgress({ slot, prefersReducedMotion }: { slot: MissionsV2Slot;
   );
 }
 
-function MissionPetals({ slot, prefersReducedMotion }: { slot: MissionsV2Slot; prefersReducedMotion: boolean }) {
+function MissionPetals({
+  slot,
+  prefersReducedMotion,
+  highlight,
+}: {
+  slot: MissionsV2Slot;
+  prefersReducedMotion: boolean;
+  highlight: boolean;
+}) {
   return (
-    <div className="missions-petals" aria-label={`Pétalos restantes: ${slot.petals.remaining} de ${slot.petals.total}`}>
+    <div
+      className={classNames('missions-petals', highlight && 'missions-petals--highlight')}
+      aria-label={`Pétalos restantes: ${slot.petals.remaining} de ${slot.petals.total}`}
+    >
       {Array.from({ length: slot.petals.total }).map((_, index) => {
         const remaining = slot.petals.remaining;
         const alive = index < remaining;
@@ -380,6 +396,7 @@ function MissionPetals({ slot, prefersReducedMotion }: { slot: MissionsV2Slot; p
               'missions-petal',
               alive ? 'missions-petal--alive' : 'missions-petal--withered',
               prefersReducedMotion && 'missions-petal--static',
+              highlight && alive && 'missions-petal--bloom',
             )}
             aria-hidden="true"
           />
@@ -389,14 +406,14 @@ function MissionPetals({ slot, prefersReducedMotion }: { slot: MissionsV2Slot; p
   );
 }
 
-function MissionPetalsMini({ slot }: { slot: MissionsV2Slot }) {
+function MissionPetalsMini({ slot, highlight }: { slot: MissionsV2Slot; highlight: boolean }) {
   const total = slot.petals.total || 0;
   const ratio = total > 0 ? slot.petals.remaining / total : 0;
   const lit = Math.round(ratio * 3);
 
   return (
     <div
-      className="missions-petals-mini"
+      className={classNames('missions-petals-mini', highlight && 'missions-petals-mini--highlight')}
       aria-label={`Pétalos protegidos: ${slot.petals.remaining} de ${slot.petals.total}`}
     >
       {Array.from({ length: 3 }).map((_, index) => (
@@ -413,12 +430,13 @@ function MissionPetalsMini({ slot }: { slot: MissionsV2Slot }) {
   );
 }
 
-function MissionHeartbeatStatus({ pending }: { pending: boolean }) {
+function MissionHeartbeatStatus({ pending, highlight }: { pending: boolean; highlight: boolean }) {
   return (
     <span
       className={classNames(
         'missions-heartbeat-indicator',
         pending ? 'missions-heartbeat-indicator--pending' : 'missions-heartbeat-indicator--done',
+        highlight && 'missions-heartbeat-indicator--pulse',
       )}
     >
       <span aria-hidden="true" className="missions-heartbeat-indicator__dot" />
@@ -436,6 +454,9 @@ export function MissionsV2Board({ userId }: { userId: string }) {
   const [busyMap, setBusyMap] = useState<Record<string, boolean>>({});
   const [claimModal, setClaimModal] = useState<ClaimModalState | null>(null);
   const [expandedSlotId, setExpandedSlotId] = useState<string | null>(null);
+  const [heartbeatFeedback, setHeartbeatFeedback] = useState<{ slotId: string; at: number } | null>(null);
+  const [showHeartbeatToast, setShowHeartbeatToast] = useState(false);
+  const [heartbeatToastKey, setHeartbeatToastKey] = useState<number | null>(null);
   const hasTrackedView = useRef(false);
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
   const marketRef = useRef<HTMLElement | null>(null);
@@ -454,6 +475,49 @@ export function MissionsV2Board({ userId }: { userId: string }) {
       setExpandedSlotId(null);
     }
   }, [board, expandedSlotId]);
+
+  useEffect(() => {
+    if (!heartbeatFeedback) {
+      return;
+    }
+
+    setHeartbeatToastKey(heartbeatFeedback.at);
+    if (typeof window === 'undefined') {
+      setShowHeartbeatToast(true);
+      return;
+    }
+
+    setShowHeartbeatToast(false);
+    const raf = window.requestAnimationFrame(() => setShowHeartbeatToast(true));
+    return () => window.cancelAnimationFrame(raf);
+  }, [heartbeatFeedback]);
+
+  useEffect(() => {
+    if (!heartbeatFeedback) {
+      return;
+    }
+
+    if (prefersReducedMotion || typeof window === 'undefined') {
+      setHeartbeatFeedback(null);
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setHeartbeatFeedback(null), 900);
+    return () => window.clearTimeout(timeout);
+  }, [heartbeatFeedback, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!showHeartbeatToast) {
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setShowHeartbeatToast(false), 3200);
+    return () => window.clearTimeout(timeout);
+  }, [showHeartbeatToast]);
 
   useEffect(() => {
     if (!hasTrackedView.current && status === 'success' && data) {
@@ -494,6 +558,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
           slot: slot.slot,
           missionId,
         });
+        setHeartbeatFeedback({ slotId: slot.id, at: Date.now() });
         await refreshBoard();
       } catch (err) {
         console.error('Failed to mark heartbeat', err);
@@ -630,6 +695,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     const expandable = Boolean(mission);
     const isExpanded = expandedSlotId === slot.id;
     const detailsId = `${slot.id}-details`;
+    const heartbeatHighlight = heartbeatFeedback?.slotId === slot.id;
 
     type PrimaryAction = {
       key: string;
@@ -714,6 +780,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
           !prefersReducedMotion && 'transition-transform duration-200 ease-out hover:-translate-y-0.5',
           slot.state === 'cooldown' && 'missions-card--frozen',
           slot.state === 'succeeded' && canClaim && 'missions-card--claim-ready',
+          heartbeatHighlight && 'missions-card--heartbeat',
         )}
         data-rarity={rarity}
         data-slot={slot.slot}
@@ -747,8 +814,8 @@ export function MissionsV2Board({ userId }: { userId: string }) {
             </div>
           </button>
           <div className="missions-slot-card__status">
-            <MissionPetalsMini slot={slot} />
-            <MissionHeartbeatStatus pending={heartbeatPending} />
+            <MissionPetalsMini slot={slot} highlight={Boolean(heartbeatHighlight)} />
+            <MissionHeartbeatStatus pending={heartbeatPending} highlight={Boolean(heartbeatHighlight)} />
           </div>
           <div className="missions-slot-card__cta">
             <button
@@ -761,7 +828,11 @@ export function MissionsV2Board({ userId }: { userId: string }) {
                   ? 'missions-slot-card__cta-btn--primary'
                   : 'missions-slot-card__cta-btn--neutral',
                 (primaryAction.disabled || busy) && 'missions-slot-card__cta-btn--disabled',
+                heartbeatAction && primaryAction.key === heartbeatAction.id && 'missions-slot-card__cta-btn--heartbeat',
               )}
+              data-highlight={
+                heartbeatAction && primaryAction.key === heartbeatAction.id && heartbeatHighlight ? 'true' : undefined
+              }
             >
               {primaryAction.label}
             </button>
@@ -786,7 +857,11 @@ export function MissionsV2Board({ userId }: { userId: string }) {
           </div>
           <div className="missions-slot-card__progress-expanded">
             <MissionProgress slot={slot} prefersReducedMotion={prefersReducedMotion} />
-            <MissionPetals slot={slot} prefersReducedMotion={prefersReducedMotion} />
+            <MissionPetals
+              slot={slot}
+              prefersReducedMotion={prefersReducedMotion}
+              highlight={Boolean(heartbeatHighlight)}
+            />
           </div>
           <div className="missions-slot-card__reward">
             <span className="missions-slot-card__section-label">Botín base</span>
@@ -811,6 +886,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
                         isDisabled && 'missions-heartbeat-btn--disabled',
                         prefersReducedMotion && 'missions-heartbeat-btn--static',
                       )}
+                      data-highlight={heartbeatHighlight ? 'true' : undefined}
                     >
                       <span aria-hidden="true">💓</span>
                       {action.label}
@@ -955,6 +1031,15 @@ export function MissionsV2Board({ userId }: { userId: string }) {
           </div>
         )}
 
+        {showHeartbeatToast && (
+          <ToastBanner
+            key={heartbeatToastKey ?? 'missions-heartbeat-toast'}
+            tone="success"
+            message="Latido registrado"
+            className="missions-toast missions-toast--heartbeat"
+          />
+        )}
+
         {actionError && <ToastBanner tone="error" message={actionError} />}
 
         <Card
@@ -964,7 +1049,13 @@ export function MissionsV2Board({ userId }: { userId: string }) {
           bodyClassName="missions-card__body missions-card__body--boss"
         >
           <div className="missions-boss-header">
-            <div className="missions-boss-shield" role="img" aria-label={`Escudo del boss ${shield.current} de ${shield.max}`}>
+            <div
+              key={`shield-${shield.current}`}
+              className="missions-boss-shield"
+              role="img"
+              aria-label={`Escudo del boss ${shield.current} de ${shield.max}`}
+              data-crack-level={shield.max - shield.current}
+            >
               {Array.from({ length: shield.max }).map((_, index) => {
                 const cracked = index >= shield.current;
                 return (
@@ -1012,26 +1103,40 @@ export function MissionsV2Board({ userId }: { userId: string }) {
         >
           <div className="missions-market">
             {MARKET_PREVIEWS.map((preview) => (
-              <article key={preview.id} className="missions-market-card" data-rarity={preview.rarity}>
-                <header className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{SLOT_DETAILS[preview.slot].label}</p>
-                    <h4 className="text-base font-semibold text-slate-100">{preview.title}</h4>
-                  </div>
-                  <span className="missions-market-card__icon" aria-hidden="true">
-                    {preview.icon}
-                  </span>
-                </header>
-                <p className="missions-market-card__summary">{preview.summary}</p>
-                <div className="missions-market-card__reward">{preview.reward}</div>
-                <ul className="missions-market-card__requirements">
-                  {preview.requirements.map((item) => (
-                    <li key={`${preview.id}-${item}`}>{item}</li>
-                  ))}
-                </ul>
-                <button type="button" className="missions-market-card__cta" disabled>
-                  Activar en slot {SLOT_DETAILS[preview.slot].label}
-                </button>
+              <article
+                key={preview.id}
+                className="missions-market-card"
+                data-rarity={preview.rarity}
+                tabIndex={0}
+                aria-label={`${preview.title}. ${preview.summary}`}
+              >
+                <div className="missions-market-card__front">
+                  <header className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{SLOT_DETAILS[preview.slot].label}</p>
+                      <h4 className="text-base font-semibold text-slate-100">{preview.title}</h4>
+                    </div>
+                    <span className="missions-market-card__icon" aria-hidden="true">
+                      {preview.icon}
+                    </span>
+                  </header>
+                  <p className="missions-market-card__summary">{preview.summary}</p>
+                  <div className="missions-market-card__reward">{preview.reward}</div>
+                  <ul className="missions-market-card__requirements">
+                    {preview.requirements.map((item) => (
+                      <li key={`${preview.id}-${item}`}>{item}</li>
+                    ))}
+                  </ul>
+                  <button type="button" className="missions-market-card__cta" disabled>
+                    Activar en slot {SLOT_DETAILS[preview.slot].label}
+                  </button>
+                </div>
+                <div className="missions-market-card__back" aria-hidden="true">
+                  <p className="missions-market-card__back-label">Dificultad</p>
+                  <p className="missions-market-card__back-value">{preview.difficulty}</p>
+                  <p className="missions-market-card__back-label">Recompensa</p>
+                  <p className="missions-market-card__back-value">{preview.reward}</p>
+                </div>
               </article>
             ))}
           </div>

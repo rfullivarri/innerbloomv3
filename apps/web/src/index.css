@@ -7,6 +7,13 @@
 @layer base {
   :root {
     color-scheme: dark;
+    --motion-duration-fast: 120ms;
+    --motion-duration-base: 200ms;
+    --motion-duration-slow: 360ms;
+    --motion-ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+    --motion-ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
+    --motion-ease-emphasis: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   body {
@@ -19,6 +26,14 @@
 
   #root {
     @apply min-h-screen min-h-dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-fast: 0ms;
+    --motion-duration-base: 0ms;
+    --motion-duration-slow: 0ms;
   }
 }
 
@@ -443,18 +458,31 @@
   gap: 0.25rem;
 }
 
+.missions-petals-mini--highlight {
+  animation: missionsPetalsMiniPulse var(--motion-duration-base) var(--motion-ease-emphasis);
+}
+
+.missions-petals-mini--highlight .missions-petals-mini__dot--alive {
+  transform: scale(1.25);
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.55);
+}
+
 .missions-petals-mini__dot {
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 9999px;
   border: 1px solid rgba(148, 163, 184, 0.5);
   background: rgba(30, 41, 59, 0.7);
+  transition:
+    transform var(--motion-duration-base) var(--motion-ease-enter),
+    box-shadow var(--motion-duration-base) var(--motion-ease-enter);
 }
 
 .missions-petals-mini__dot--alive {
   border-color: rgba(244, 114, 182, 0.8);
   background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.8), rgba(244, 114, 182, 0.28));
   box-shadow: 0 0 6px rgba(236, 72, 153, 0.4);
+  transform: scale(1);
 }
 
 .missions-heartbeat-indicator {
@@ -465,6 +493,7 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  transition: transform var(--motion-duration-base) var(--motion-ease-enter);
 }
 
 .missions-heartbeat-indicator__dot {
@@ -472,6 +501,7 @@
   height: 0.45rem;
   border-radius: 9999px;
   box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.9);
+  transition: transform var(--motion-duration-base) var(--motion-ease-enter);
 }
 
 .missions-heartbeat-indicator--pending {
@@ -490,6 +520,14 @@
   background: radial-gradient(circle, rgba(52, 211, 153, 0.9), rgba(22, 163, 74, 0.85));
 }
 
+.missions-heartbeat-indicator--pulse {
+  animation: missionsHeartbeatBadge var(--motion-duration-slow) var(--motion-ease-emphasis);
+}
+
+.missions-heartbeat-indicator--pulse .missions-heartbeat-indicator__dot {
+  animation: missionsHeartbeatDot var(--motion-duration-slow) var(--motion-ease-emphasis);
+}
+
 .missions-slot-card__cta {
   display: flex;
 }
@@ -502,13 +540,21 @@
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition:
+    transform var(--motion-duration-base) var(--motion-ease-enter),
+    filter var(--motion-duration-fast) var(--motion-ease-enter),
+    box-shadow var(--motion-duration-base) var(--motion-ease-standard);
 }
 
 .missions-slot-card__cta-btn--primary {
   border: 1px solid rgba(96, 165, 250, 0.5);
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.22), rgba(59, 130, 246, 0.28));
   color: rgba(224, 242, 254, 0.96);
+}
+
+.missions-slot-card__cta-btn--heartbeat {
+  position: relative;
+  box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.35);
 }
 
 .missions-slot-card__cta-btn--neutral {
@@ -522,10 +568,42 @@
   filter: brightness(1.05);
 }
 
+.missions-slot-card__cta-btn[data-highlight='true'] {
+  animation: missionsHeartbeatTap var(--motion-duration-slow) var(--motion-ease-emphasis);
+}
+
+.missions-slot-card__cta-btn--heartbeat::after {
+  content: '';
+  position: absolute;
+  inset: -18%;
+  border-radius: 9999px;
+  border: 1px solid rgba(236, 72, 153, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-enter),
+    transform var(--motion-duration-slow) var(--motion-ease-enter);
+}
+
+.missions-slot-card__cta-btn--heartbeat[data-highlight='true']::after {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
 .missions-slot-card__cta-btn--disabled,
 .missions-slot-card__cta-btn:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.missions-toast {
+  margin-top: 0.75rem;
+  animation: missionsToastSlide var(--motion-duration-slow) var(--motion-ease-enter);
+}
+
+.missions-toast--heartbeat {
+  border-color: rgba(236, 72, 153, 0.35);
+  box-shadow: 0 12px 24px rgba(236, 72, 153, 0.18);
 }
 
 .missions-slot-card__details {
@@ -738,6 +816,12 @@
   background: linear-gradient(140deg, rgba(71, 85, 105, 0.55), rgba(30, 41, 59, 0.92));
 }
 
+.missions-card--heartbeat {
+  position: relative;
+  box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.35);
+  animation: missionsCardHeartbeat var(--motion-duration-slow) var(--motion-ease-emphasis);
+}
+
 .missions-card--claim-ready::after {
   animation-duration: 6s;
 }
@@ -824,8 +908,14 @@
   border-radius: 9999px;
   border: 1px solid rgba(148, 163, 184, 0.35);
   background: rgba(30, 41, 59, 0.8);
-  transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  transition:
+    transform var(--motion-duration-base) var(--motion-ease-enter),
+    background var(--motion-duration-fast) var(--motion-ease-enter),
+    border-color var(--motion-duration-base) var(--motion-ease-enter),
+    box-shadow var(--motion-duration-base) var(--motion-ease-enter);
   box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.6);
+  will-change: transform, box-shadow;
 }
 
 .missions-progress__node--lit {
@@ -833,6 +923,7 @@
   border-color: rgba(96, 165, 250, 0.9);
   transform: scale(1.15);
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+  animation: missionsNodePop var(--motion-duration-base) var(--motion-ease-emphasis);
 }
 
 .missions-progress__node--hunt {
@@ -844,14 +935,48 @@
   border-width: 2px;
 }
 
+.missions-progress__node--final::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  border: 1px solid rgba(250, 204, 21, 0.55);
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.missions-progress__node--lit.missions-progress__node--final::after {
+  animation: missionsNodeFlash var(--motion-duration-slow) var(--motion-ease-emphasis);
+}
+
+.missions-progress__node--lit.missions-progress__node--hunt::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.22), transparent 65%);
+  opacity: 0.85;
+  animation: missionsHuntAura 1.2s var(--motion-ease-standard) infinite;
+}
+
 .missions-progress__node--static {
   transition-duration: 0s;
+  animation: none !important;
+}
+
+.missions-progress__node--static::before,
+.missions-progress__node--static::after {
+  animation: none !important;
 }
 
 .missions-petals {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.missions-petals--highlight {
+  animation: missionsPetalsHalo var(--motion-duration-slow) var(--motion-ease-emphasis);
 }
 
 .missions-petal {
@@ -861,7 +986,13 @@
   border: 1px solid rgba(248, 113, 166, 0.4);
   background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.65), rgba(236, 72, 153, 0.15));
   box-shadow: 0 0 12px rgba(236, 72, 153, 0.25);
-  animation: missionsPetalPulse 4s ease-in-out infinite;
+  animation: missionsPetalPulse 4s var(--motion-ease-standard) infinite;
+  transform-origin: center;
+  transition:
+    transform var(--motion-duration-base) var(--motion-ease-enter),
+    filter var(--motion-duration-base) var(--motion-ease-enter),
+    opacity var(--motion-duration-base) var(--motion-ease-exit);
+  will-change: transform, filter;
 }
 
 .missions-petal--withered {
@@ -869,10 +1000,18 @@
   border-color: rgba(148, 163, 184, 0.35);
   background: radial-gradient(circle at 30% 30%, rgba(148, 163, 184, 0.45), rgba(100, 116, 139, 0.1));
   box-shadow: none;
+  filter: blur(1px);
+  transform: scale(0.95);
+  animation: missionsPetalWither var(--motion-duration-slow) var(--motion-ease-exit);
 }
 
 .missions-petal--static {
-  animation: none;
+  animation: none !important;
+  transition: none;
+}
+
+.missions-petal--bloom {
+  animation: missionsPetalBloom var(--motion-duration-base) var(--motion-ease-emphasis);
 }
 
 .missions-heartbeat-chip {
@@ -915,8 +1054,12 @@
   border: 1px solid rgba(236, 72, 153, 0.5);
   background: linear-gradient(135deg, rgba(236, 72, 153, 0.28), rgba(251, 113, 133, 0.22));
   color: rgba(255, 228, 230, 0.95);
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition:
+    transform var(--motion-duration-base) var(--motion-ease-enter),
+    filter var(--motion-duration-fast) var(--motion-ease-enter),
+    box-shadow var(--motion-duration-base) var(--motion-ease-emphasis);
   box-shadow: 0 0 12px rgba(236, 72, 153, 0.35);
+  will-change: transform;
 }
 
 .missions-heartbeat-btn::after {
@@ -925,7 +1068,7 @@
   inset: -20%;
   border-radius: 9999px;
   border: 1px solid rgba(236, 72, 153, 0.45);
-  animation: missionsHeartbeatPulse 2.2s ease-in-out infinite;
+  animation: missionsHeartbeatPulse 2.2s var(--motion-ease-standard) infinite;
   pointer-events: none;
 }
 
@@ -937,6 +1080,18 @@
 .missions-heartbeat-btn:hover {
   transform: translateY(-1px);
   filter: brightness(1.05);
+}
+
+.missions-heartbeat-btn:active {
+  transform: scale(0.98);
+}
+
+.missions-heartbeat-btn[data-highlight='true'] {
+  animation: missionsHeartbeatTap var(--motion-duration-slow) var(--motion-ease-emphasis);
+}
+
+.missions-heartbeat-btn[data-highlight='true']::after {
+  animation: missionsHeartbeatRing var(--motion-duration-slow) var(--motion-ease-emphasis);
 }
 
 .missions-heartbeat-btn--disabled,
@@ -1052,6 +1207,17 @@
   letter-spacing: 0.24em;
   font-weight: 700;
   color: rgba(226, 232, 240, 0.8);
+  animation: missionsCooldownFade var(--motion-duration-base) var(--motion-ease-enter);
+  overflow: hidden;
+}
+
+.missions-cooldown-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(226, 232, 240, 0.15), transparent 45%, rgba(148, 163, 184, 0.12) 70%, transparent 90%);
+  transform: translateX(-40%);
+  animation: missionsFrostShimmer 2.4s var(--motion-ease-standard) infinite;
 }
 
 .missions-slot-empty {
@@ -1128,6 +1294,11 @@
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.5rem;
+  transition: transform var(--motion-duration-base) var(--motion-ease-emphasis);
+}
+
+.missions-boss-shield[data-crack-level]:not([data-crack-level='0']) {
+  animation: missionsShieldShake var(--motion-duration-base) var(--motion-ease-emphasis);
 }
 
 .missions-boss-shield__segment {
@@ -1136,13 +1307,18 @@
   border: 1px solid rgba(251, 191, 36, 0.4);
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.8), rgba(245, 158, 11, 0.6));
   box-shadow: 0 0 12px rgba(251, 191, 36, 0.35);
-  transition: filter 0.3s ease, opacity 0.3s ease;
+  transition:
+    filter var(--motion-duration-base) var(--motion-ease-exit),
+    opacity var(--motion-duration-base) var(--motion-ease-exit),
+    box-shadow var(--motion-duration-base) var(--motion-ease-exit);
 }
 
 .missions-boss-shield__segment--cracked {
   filter: grayscale(0.7);
   opacity: 0.35;
   background: linear-gradient(135deg, rgba(148, 163, 184, 0.45), rgba(71, 85, 105, 0.5));
+  box-shadow: 0 0 6px rgba(148, 163, 184, 0.28);
+  animation: missionsShieldCrack var(--motion-duration-fast) var(--motion-ease-emphasis);
 }
 
 .missions-boss-countdown {
@@ -1169,6 +1345,7 @@
   font-family: 'Sora', 'Manrope', system-ui;
   font-size: 1.15rem;
   letter-spacing: 0.08em;
+  animation: missionsCountdownBeat 1s var(--motion-ease-emphasis) infinite;
 }
 
 .missions-boss-actions {
@@ -1209,19 +1386,82 @@
 
 .missions-market-card {
   position: relative;
+  display: grid;
+  gap: 0;
+  padding: 0;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  background: transparent;
+  transform-style: preserve-3d;
+  perspective: 1200px;
+  transition:
+    transform var(--motion-duration-slow) var(--motion-ease-emphasis),
+    box-shadow var(--motion-duration-base) var(--motion-ease-enter),
+    border-color var(--motion-duration-base) var(--motion-ease-enter);
+  cursor: pointer;
+}
+
+.missions-market-card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+}
+
+.missions-market-card__front,
+.missions-market-card__back {
+  grid-area: 1 / 1;
+  border-radius: inherit;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  padding: 1.25rem;
-  border-radius: 1.1rem;
-  border: 1px solid rgba(59, 130, 246, 0.28);
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.9));
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  backface-visibility: hidden;
+  transition:
+    opacity var(--motion-duration-fast) var(--motion-ease-enter),
+    transform var(--motion-duration-base) var(--motion-ease-enter);
 }
 
-.missions-market-card:hover {
-  transform: translateY(-2px);
+.missions-market-card__back {
+  justify-content: center;
+  align-items: flex-start;
+  opacity: 0;
+  transform: rotateY(180deg);
+  background: linear-gradient(145deg, rgba(17, 24, 39, 0.9), rgba(30, 41, 59, 0.95));
+}
+
+.missions-market-card__back-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.missions-market-card__back-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.missions-market-card:hover,
+.missions-market-card:focus-visible,
+.missions-market-card:active {
+  transform: rotateY(180deg);
   border-color: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 20px 45px rgba(14, 165, 233, 0.18);
+}
+
+.missions-market-card:hover .missions-market-card__front,
+.missions-market-card:focus-visible .missions-market-card__front,
+.missions-market-card:active .missions-market-card__front {
+  opacity: 0;
+  transform: rotateY(180deg);
+}
+
+.missions-market-card:hover .missions-market-card__back,
+.missions-market-card:focus-visible .missions-market-card__back,
+.missions-market-card:active .missions-market-card__back {
+  opacity: 1;
+  transform: rotateY(360deg);
 }
 
 .missions-market-card__icon {
@@ -1349,6 +1589,60 @@
   animation: none;
 }
 
+.missions-claim-confetti {
+  position: relative;
+  display: block;
+  width: 140%;
+  height: 0;
+  pointer-events: none;
+}
+
+.missions-claim-confetti::before,
+.missions-claim-confetti::after {
+  content: '';
+  position: absolute;
+  inset: -12px 0;
+  margin: 0 auto;
+  width: 100%;
+  height: 80px;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(250, 204, 21, 0.9) 0%, transparent 55%),
+    radial-gradient(circle at 70% 25%, rgba(236, 72, 153, 0.85) 0%, transparent 55%),
+    radial-gradient(circle at 40% 75%, rgba(59, 130, 246, 0.85) 0%, transparent 55%),
+    radial-gradient(circle at 80% 60%, rgba(16, 185, 129, 0.75) 0%, transparent 55%);
+  opacity: 0;
+  filter: blur(0.5px);
+  animation: missionsClaimConfetti var(--motion-duration-slow) var(--motion-ease-emphasis) both;
+}
+
+.missions-claim-loot {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+  text-transform: none;
+  font-size: 0.85rem;
+  color: rgba(241, 245, 249, 0.95);
+  animation: missionsLootList var(--motion-duration-slow) var(--motion-ease-enter);
+}
+
+.missions-claim-loot__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.65rem 1rem;
+  gap: 0.75rem;
+}
+
+.missions-claim-loot__item--stacked {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 @keyframes missionsPetalFloat {
   0%,
   100% {
@@ -1454,6 +1748,253 @@
   }
 }
 
+@keyframes missionsCardHeartbeat {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.35);
+  }
+  55% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 14px rgba(236, 72, 153, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.35);
+  }
+}
+
+@keyframes missionsHeartbeatTap {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes missionsHeartbeatRing {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.85);
+  }
+  70% {
+    opacity: 0.15;
+    transform: scale(1.35);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+@keyframes missionsNodePop {
+  0% {
+    transform: scale(0.7);
+  }
+  60% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1.15);
+  }
+}
+
+@keyframes missionsNodeFlash {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes missionsHuntAura {
+  0% {
+    opacity: 0.35;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 0.35;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes missionsPetalBloom {
+  0% {
+    transform: scale(0.92);
+  }
+  55% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes missionsPetalWither {
+  0% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.35;
+    filter: blur(1px);
+    transform: scale(0.95);
+  }
+}
+
+@keyframes missionsPetalsHalo {
+  0% {
+    filter: drop-shadow(0 0 0 rgba(236, 72, 153, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.35));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 rgba(236, 72, 153, 0));
+  }
+}
+
+@keyframes missionsPetalsMiniPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes missionsHeartbeatBadge {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  55% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes missionsHeartbeatDot {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.45);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes missionsToastSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes missionsCooldownFade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes missionsFrostShimmer {
+  0% {
+    opacity: 0;
+    transform: translateX(-60%);
+  }
+  40% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}
+
+@keyframes missionsClaimConfetti {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+  }
+  35% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-70px) scale(1.1);
+  }
+}
+
+@keyframes missionsLootList {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes missionsShieldShake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes missionsShieldCrack {
+  0% {
+    opacity: 1;
+    filter: grayscale(0.2);
+    transform: scale(1.08);
+  }
+  60% {
+    opacity: 0.5;
+    filter: grayscale(0.6);
+  }
+  100% {
+    opacity: 0.35;
+    filter: grayscale(0.7);
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .missions-bg-petal,
   .missions-card::after,
@@ -1464,6 +2005,27 @@
   .missions-claim-chest,
   .missions-claim-chest__lid {
     animation: none !important;
+  }
+
+  .missions-card,
+  .missions-card--heartbeat,
+  .missions-slot-card__cta-btn,
+  .missions-heartbeat-btn,
+  .missions-heartbeat-indicator,
+  .missions-petals,
+  .missions-petals-mini,
+  .missions-toast,
+  .missions-market-card,
+  .missions-market-card__front,
+  .missions-market-card__back,
+  .missions-cooldown-overlay,
+  .missions-claim-confetti,
+  .missions-claim-loot,
+  .missions-boss-shield,
+  .missions-boss-countdown__value {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 }
 
