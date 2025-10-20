@@ -71,13 +71,13 @@ export type SubmitDailyQuestResult = {
   missions_v2: {
     bonus_ready: boolean;
     redirect_url: string;
-    tasks: Array<{
+    tasks: {
       mission_id: string;
       mission_name: string;
       slot: string;
       task_id: string;
       task_name: string;
-    }>;
+    }[];
   };
 };
 
