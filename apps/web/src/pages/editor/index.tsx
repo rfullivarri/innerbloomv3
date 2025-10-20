@@ -265,24 +265,6 @@ export default function TaskEditorPage() {
   const isFilteredEmpty =
     !isLoadingTasks && !combinedError && tasks.length > 0 && visibleTasks.length === 0;
 
-  const handleCloseEdit = useCallback(() => {
-    setTaskToEdit(null);
-    setEditVariant('modal');
-    setEditGroupKey(null);
-  }, []);
-
-  const navigationTasks = useMemo(() => visibleTasks, [visibleTasks]);
-
-  const handleNavigatePanelTask = useCallback(
-    (taskId: string) => {
-      const target = navigationTasks.find((task) => task.id === taskId);
-      if (target) {
-        setTaskToEdit(target);
-      }
-    },
-    [navigationTasks],
-  );
-
   const handleRetry = () => {
     reloadProfile();
     reloadTasks();
