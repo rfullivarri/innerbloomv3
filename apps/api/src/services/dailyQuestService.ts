@@ -3,6 +3,7 @@ import { pool, withClient } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 import { formatDateInTimezone } from '../controllers/users/user-state-service.js';
 import { applyHuntXpBoost, getMissionBoard } from './missionsV2Service.js';
+import type { MissionObjective } from './missionsV2Types.js';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -607,8 +608,11 @@ export async function submitDailyQuest(
     }
 
     return mission.objectives
-      .filter((objective): objective is { id: string; label: string } =>
-        Boolean(objective?.id) && Boolean(objective?.label),
+      .filter((objective): objective is MissionObjective =>
+        typeof objective?.id === 'string' &&
+        typeof objective?.label === 'string' &&
+        typeof objective?.target === 'number' &&
+        typeof objective?.unit === 'string',
       )
       .map((objective) => ({
         mission_id: mission.id,
