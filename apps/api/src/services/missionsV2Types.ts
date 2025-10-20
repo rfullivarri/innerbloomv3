@@ -18,42 +18,46 @@ export type MissionReward = {
   items?: string[];
 };
 
-export type MissionObjective = {
+export type MissionTask = {
   id: string;
-  label: string;
-  target: number;
-  unit: 'tasks' | 'sessions' | 'minutes' | 'points';
+  name: string;
+  tag: string;
 };
 
-export type MissionProposal = {
+export type MissionDefinition = {
   id: string;
   slot: MissionSlotKey;
-  title: string;
+  name: string;
   summary: string;
-  difficulty: 'low' | 'medium' | 'high' | 'epic';
+  requirements: string;
+  objective: string;
   reward: MissionReward;
-  objectives: MissionObjective[];
-  tags?: {
-    pillar?: string;
-    trait?: string;
-    mode?: string;
-  };
+  tasks: MissionTask[];
+  difficulty: 'low' | 'medium' | 'high' | 'epic';
   metadata?: Record<string, unknown>;
+  durationDays: number;
 };
 
 export type MissionProgress = {
   current: number;
   target: number;
-  unit: MissionObjective['unit'];
+  unit: 'tasks' | 'sessions' | 'minutes' | 'points';
   updatedAt: string;
 };
 
+export type MissionPetals = {
+  total: number;
+  remaining: number;
+  lastEvaluatedAt?: string | null;
+};
+
 export type MissionSelectionState = {
-  mission: MissionProposal;
-  status: 'active' | 'completed' | 'claimed' | 'failed';
+  mission: MissionDefinition;
+  status: 'active' | 'succeeded' | 'failed' | 'claimed';
   selectedAt: string;
   updatedAt: string;
   expiresAt: string | null;
+  cooldownUntil: string | null;
   progress: MissionProgress;
   petals: MissionPetals;
   heartbeatLog: string[];
@@ -61,11 +65,13 @@ export type MissionSelectionState = {
     claimedAt: string;
     reward: MissionReward;
   };
+  completionAt?: string | null;
+  failureAt?: string | null;
 };
 
 export type MissionSlotState = {
   slot: MissionSlotKey;
-  proposals: MissionProposal[];
+  proposals: MissionDefinition[];
   selected: MissionSelectionState | null;
   reroll: {
     usedAt: string | null;
@@ -74,6 +80,17 @@ export type MissionSlotState = {
     total: number;
   };
   cooldownUntil: string | null;
+};
+
+export type MissionEffect = {
+  id: string;
+  type: 'amulet' | 'aura';
+  name: string;
+  description: string;
+  appliedAt: string;
+  expiresAt: string | null;
+  payload: Record<string, unknown>;
+  consumedAt?: string | null;
 };
 
 export type BossState = {
@@ -100,75 +117,50 @@ export type MissionsBoard = {
   boss: BossState;
 };
 
-export type MissionPetals = {
-  total: number;
-  remaining: number;
-};
-
 export type BoosterState = {
   multiplier: number;
   targetTaskId: string | null;
   appliedKeys: string[];
+  nextActivationDate?: string | null;
 };
 
 export type MissionsBoardState = {
   board: MissionsBoard;
   booster: BoosterState;
+  effects: MissionEffect[];
 };
 
-export type MissionActionHeartbeat = {
-  type: 'heartbeat';
-  available: boolean;
-  last_marked_at: string | null;
+export type MissionAction = {
+  id: string;
+  type: 'heartbeat' | 'link_daily' | 'special_strike' | 'submit_evidence' | 'abandon' | 'claim';
+  label: string;
+  enabled: boolean;
 };
-
-export type MissionActionSelect = {
-  type: 'select';
-  available: boolean;
-  proposals: MissionProposal[];
-};
-
-export type MissionActionReroll = {
-  type: 'reroll';
-  available: boolean;
-  remaining: number;
-  next_reset_at: string | null;
-};
-
-export type MissionActionLinkDaily = {
-  type: 'link_daily';
-  available: boolean;
-  linked_task_id: string | null;
-};
-
-export type MissionActionSpecialStrike = {
-  type: 'special_strike';
-  available: boolean;
-  ready: boolean;
-};
-
-export type MissionAction =
-  | MissionActionHeartbeat
-  | MissionActionSelect
-  | MissionActionReroll
-  | MissionActionLinkDaily
-  | MissionActionSpecialStrike;
-
-export type MissionClaimStatus = 'locked' | 'ready' | 'claimed';
 
 export type MissionClaimState = {
+  available: boolean;
   enabled: boolean;
-  status: MissionClaimStatus;
   cooldown_until: string | null;
   claimed_at: string | null;
   reward?: MissionReward;
 };
 
+export type MissionSummary = {
+  id: string;
+  name: string;
+  type: MissionSlotKey;
+  summary: string;
+  requirements: string;
+  objective: string;
+  reward: MissionReward;
+  tasks: MissionTask[];
+};
+
 export type MissionsBoardSlotResponse = {
   id: string;
   slot: MissionSlotKey;
-  mission: MissionProposal | null;
-  state: 'idle' | 'active' | 'succeeded' | 'failed' | 'claimed';
+  mission: MissionSummary | null;
+  state: 'idle' | 'active' | 'succeeded' | 'failed' | 'cooldown' | 'claimed';
   petals: MissionPetals;
   heartbeat_today: boolean;
   heartbeat_log: string[];
@@ -180,10 +172,10 @@ export type MissionsBoardSlotResponse = {
   countdown: {
     ends_at: string | null;
     cooldown_until: string | null;
+    label: string;
   };
   actions: MissionAction[];
   claim: MissionClaimState;
-  proposals: MissionProposal[];
 };
 
 export type MissionsBoardRewardSummary = {
@@ -206,21 +198,19 @@ export type MissionsBoardCommunication = {
 };
 
 export type MissionsBoardGating = {
-  claim: {
-    enabled: boolean;
-    url: string;
-  };
+  claim_url: string;
 };
 
 export type BossStateResponse = {
-  phase: BossState['phase'];
-  shield: BossState['shield'];
-  linked_daily_task_id: string | null;
-  linked_at: string | null;
-  phase2: {
-    ready: boolean;
-    proof_submitted_at: string | null;
+  id: string;
+  name: string;
+  status: 'locked' | 'available' | 'ready' | 'defeated';
+  description: string;
+  countdown: {
+    ends_at: string | null;
+    label: string;
   };
+  actions: MissionAction[];
 };
 
 export type MissionsBoardResponse = {
@@ -234,16 +224,16 @@ export type MissionsBoardResponse = {
 };
 
 export type MissionHeartbeatResponse = {
+  status: 'ok';
   mission_id: string;
   petals_remaining: number;
-  heartbeat_timestamps: string[];
-  updated_at: string;
+  heartbeat_date: string;
 };
 
 export type MissionDailyLinkResponse = {
-  mission_id: string;
-  task_id: string;
-  linked_at: string;
+  missionId: string;
+  taskId: string;
+  linkedAt: string;
   board: MissionsBoardResponse;
 };
 
@@ -257,7 +247,10 @@ export type BossPhase2Response = {
 };
 
 export type MissionClaimResponse = {
-  mission_id: string;
-  claim: MissionClaimState;
   board: MissionsBoardResponse;
+  rewards: {
+    xp: number;
+    currency: number;
+    items: string[];
+  };
 };
