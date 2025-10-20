@@ -36,7 +36,7 @@ import { getUserState } from '../lib/api';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
 import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
-import { MissionsV2Placeholder } from '../components/dashboard-v3/MissionsV2Placeholder';
+import { MissionsV2Board } from '../components/dashboard-v3/MissionsV2Board';
 import { Card } from '../components/common/Card';
 import {
   DASHBOARD_SECTIONS,
@@ -277,7 +277,7 @@ function MissionsV2View({ userId }: { userId: string }) {
         description="Ruta aislada para validar contratos y UI. No impacta el dashboard actual."
         pageTitle="Misiones v2"
       />
-      <MissionsV2Placeholder userId={userId} />
+      <MissionsV2Board userId={userId} />
     </div>
   );
 }

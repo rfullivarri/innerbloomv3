@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react';
 import { useLocation } from 'react-router-dom';
 import { DevErrorBoundary } from '../../components/DevErrorBoundary';
 import { Navbar } from '../../components/layout/Navbar';
@@ -256,6 +264,24 @@ export default function TaskEditorPage() {
   const visibleTasks = FEATURE_TASK_EDITOR_MOBILE_LIST_V1 ? sortedTasks : filteredTasks;
   const isFilteredEmpty =
     !isLoadingTasks && !combinedError && tasks.length > 0 && visibleTasks.length === 0;
+
+  const handleCloseEdit = useCallback(() => {
+    setTaskToEdit(null);
+    setEditVariant('modal');
+    setEditGroupKey(null);
+  }, []);
+
+  const navigationTasks = useMemo(() => visibleTasks, [visibleTasks]);
+
+  const handleNavigatePanelTask = useCallback(
+    (taskId: string) => {
+      const target = navigationTasks.find((task) => task.id === taskId);
+      if (target) {
+        setTaskToEdit(target);
+      }
+    },
+    [navigationTasks],
+  );
 
   const handleRetry = () => {
     reloadProfile();
@@ -1026,6 +1052,13 @@ function TaskCard({
   );
 }
 
+interface TaskBoardGroup {
+  key: string;
+  code: string;
+  name: string;
+  tasks: UserTask[];
+}
+
 interface TaskBoardProps {
   groups: TaskBoardGroup[];
   difficultyNamesById: Map<string, string>;
@@ -1170,7 +1203,7 @@ function TaskBoardItem({
     onSelectTask(task, groupKey);
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       onSelectTask(task, groupKey);
