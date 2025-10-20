@@ -213,6 +213,7 @@ describe('Daily Quest routes', () => {
       xp_delta: 15,
       xp_total_today: 25,
       streaks: { daily: 2, weekly: 1 },
+      missions_v2: { bonus_ready: false, redirect_url: '/dashboard-v3/missions-v2' },
     });
 
     expect(mockClientQuery).toHaveBeenNthCalledWith(1, 'BEGIN');
@@ -310,6 +311,7 @@ describe('Daily Quest routes', () => {
       xp_delta: 0,
       xp_total_today: 0,
       streaks: { daily: 0, weekly: 0 },
+      missions_v2: { bonus_ready: false, redirect_url: '/dashboard-v3/missions-v2' },
     });
 
     expect(mockClientQuery).toHaveBeenNthCalledWith(1, 'BEGIN');
