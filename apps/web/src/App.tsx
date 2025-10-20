@@ -75,7 +75,13 @@ function RequireUser({ children }: { children: JSX.Element }) {
   );
 }
 
-function RedirectIfSignedIn({ children }: { children: JSX.Element }) {
+function RedirectIfSignedIn({
+  children,
+  redirectPath,
+}: {
+  children: JSX.Element;
+  redirectPath: string;
+}) {
   const { isLoaded, userId } = useAuth();
 
   if (!isLoaded) {
@@ -83,7 +89,7 @@ function RedirectIfSignedIn({ children }: { children: JSX.Element }) {
   }
 
   if (userId) {
-    return <Navigate to="/dashboard-v3" replace />;
+    return <Navigate to={redirectPath} replace />;
   }
 
   return children;
@@ -102,6 +108,7 @@ export default function App() {
   const dashboardRoutePath = isDashboardV3Default
     ? `${dashboardBasePath}/*`
     : fallbackDashboardPath;
+  const signedInRedirectPath = trimmedDashboardPath;
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -112,7 +119,7 @@ export default function App() {
         <Route
           path="/login/*"
           element={
-            <RedirectIfSignedIn>
+            <RedirectIfSignedIn redirectPath={signedInRedirectPath}>
               <LoginPage />
             </RedirectIfSignedIn>
           }
@@ -120,35 +127,30 @@ export default function App() {
         <Route
           path="/sign-up/*"
           element={
-            <RedirectIfSignedIn>
+            <RedirectIfSignedIn redirectPath={signedInRedirectPath}>
               <SignUpPage />
             </RedirectIfSignedIn>
           }
         />
+        <Route
+          path={dashboardRoutePath}
+          element={
+            <RequireUser>
+              {isDashboardV3Default ? <DashboardV3Page /> : <DashboardPage />}
+            </RequireUser>
+          }
+        />
         {isDashboardV3Default ? (
-          <>
-            <Route
-              path={dashboardRoutePath}
-              element={
-                <RequireUser>
-                  <DashboardV3Page />
-                </RequireUser>
-              }
-            />
-            <Route path="/dashboard" element={<Navigate to={trimmedDashboardPath} replace />} />
-          </>
+          <Route path="/dashboard" element={<Navigate to={trimmedDashboardPath} replace />} />
         ) : (
-          <>
-            <Route
-              path={dashboardRoutePath}
-              element={
-                <RequireUser>
-                  <DashboardPage />
-                </RequireUser>
-              }
-            />
-            <Route path="/dashboard-v3/*" element={<Navigate to={trimmedDashboardPath} replace />} />
-          </>
+          <Route
+            path="/dashboard-v3/*"
+            element={
+              <RequireUser>
+                <DashboardV3Page />
+              </RequireUser>
+            }
+          />
         )}
         <Route
           path="/editor"
