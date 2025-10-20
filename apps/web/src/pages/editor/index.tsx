@@ -19,9 +19,9 @@ import { useDifficulties, usePillars, useStats, useTraits } from '../../hooks/us
 import { type UserTask } from '../../lib/api';
 import { fetchCatalogStats, fetchCatalogTraits, type Pillar } from '../../lib/api/catalogs';
 import {
-  DASHBOARD_SECTIONS,
   getActiveSection,
-  taskEditorSection,
+  getDashboardSectionConfig,
+  getDashboardSections,
   type DashboardSectionConfig,
 } from '../dashboardSections';
 
@@ -29,7 +29,9 @@ export const FEATURE_TASK_EDITOR_MOBILE_LIST_V1 = true;
 
 export default function TaskEditorPage() {
   const location = useLocation();
-  const activeSection = getActiveSection(location.pathname);
+  const sections = getDashboardSections(location.pathname);
+  const activeSection = getActiveSection(location.pathname, sections);
+  const taskEditorSection = getDashboardSectionConfig('editor', location.pathname);
   const { backendUserId, status: backendStatus, error: backendError, reload: reloadProfile } =
     useBackendUser();
   const { tasks, status: tasksStatus, error: tasksError, reload: reloadTasks } =
@@ -393,7 +395,7 @@ export default function TaskEditorPage() {
   return (
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
-        <Navbar title={activeSection.pageTitle} sections={DASHBOARD_SECTIONS} />
+        <Navbar title={activeSection.pageTitle} sections={sections} />
         <main className="flex-1 pb-24 md:pb-0">
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             <SectionHeader section={taskEditorSection} />
@@ -452,7 +454,7 @@ export default function TaskEditorPage() {
           </div>
         </main>
         <MobileBottomNav
-          items={DASHBOARD_SECTIONS.map((section) => {
+          items={sections.map((section) => {
             const Icon = section.icon;
 
             return {

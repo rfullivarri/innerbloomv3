@@ -39,11 +39,9 @@ import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
 import { MissionsV2Board } from '../components/dashboard-v3/MissionsV2Board';
 import { Card } from '../components/common/Card';
 import {
-  DASHBOARD_SECTIONS,
-  dashboardSection,
   getActiveSection,
-  missionsSection,
-  rewardsSection,
+  getDashboardSectionConfig,
+  getDashboardSections,
   type DashboardSectionConfig,
 } from './dashboardSections';
 import { FEATURE_MISSIONS_V2 } from '../lib/featureFlags';
@@ -53,7 +51,11 @@ export default function DashboardV3Page() {
   const { getToken } = useAuth();
   const { backendUserId, status, error, reload, clerkUserId, profile } = useBackendUser();
   const location = useLocation();
-  const activeSection = getActiveSection(location.pathname);
+  const sections = getDashboardSections(location.pathname);
+  const activeSection = getActiveSection(location.pathname, sections);
+  const overviewSection = getDashboardSectionConfig('dashboard', location.pathname);
+  const missionsSection = getDashboardSectionConfig('missions', location.pathname);
+  const rewardsSection = getDashboardSectionConfig('rewards', location.pathname);
   const profileGameMode = deriveGameModeFromProfile(profile?.game_mode);
   const shouldFetchUserState = Boolean(backendUserId && !profileGameMode);
   const { data: userState } = useRequest(
@@ -136,7 +138,7 @@ export default function DashboardV3Page() {
           onDailyClick={backendUserId ? handleOpenDaily : undefined}
           dailyButtonRef={dailyButtonRef}
           title={activeSection.pageTitle}
-          sections={DASHBOARD_SECTIONS}
+          sections={sections}
         />
         <DailyQuestModal
           ref={dailyQuestModalRef}
@@ -164,7 +166,7 @@ export default function DashboardV3Page() {
                       avatarUrl={avatarUrl}
                       gameMode={gameMode}
                       weeklyTarget={profile?.weekly_target ?? null}
-                      section={dashboardSection}
+                      section={overviewSection}
                     />
                   }
                 />
@@ -186,7 +188,7 @@ export default function DashboardV3Page() {
           </div>
         </main>
         <MobileBottomNav
-          items={DASHBOARD_SECTIONS.map((section) => {
+          items={sections.map((section) => {
             const Icon = section.icon;
 
             return {

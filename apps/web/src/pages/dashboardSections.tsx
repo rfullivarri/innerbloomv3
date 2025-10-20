@@ -106,71 +106,127 @@ const dashboardSegments = trimmedDashboardPath.split('/').filter(Boolean);
 const primaryDashboardPath = dashboardSegments.length > 0 ? `/${dashboardSegments[0]}` : '/dashboard';
 const isDashboardV3Enabled = primaryDashboardPath === '/dashboard-v3';
 const fallbackDashboardPath = trimmedDashboardPath || '/dashboard';
-const dashboardBasePath = isDashboardV3Enabled ? primaryDashboardPath : fallbackDashboardPath;
+const DASHBOARD_V3_BASE_PATH = '/dashboard-v3';
 
-function joinDashboardPath(segment?: string): string {
+function isDashboardV3Path(pathname: string): boolean {
+  if (!pathname) {
+    return false;
+  }
+
+  if (pathname === DASHBOARD_V3_BASE_PATH) {
+    return true;
+  }
+
+  return pathname.startsWith(`${DASHBOARD_V3_BASE_PATH}/`);
+}
+
+function resolveDashboardBasePath(currentPath?: string): string {
+  if (isDashboardV3Enabled) {
+    return primaryDashboardPath;
+  }
+
+  if (currentPath && isDashboardV3Path(currentPath)) {
+    return DASHBOARD_V3_BASE_PATH;
+  }
+
+  if (typeof window !== 'undefined' && isDashboardV3Path(window.location.pathname)) {
+    return DASHBOARD_V3_BASE_PATH;
+  }
+
+  return fallbackDashboardPath;
+}
+
+function joinDashboardPath(basePath: string, segment?: string): string {
   if (!segment) {
-    return dashboardBasePath;
+    return basePath;
   }
 
   const normalizedSegment = segment.startsWith('/') ? segment : `/${segment}`;
-  return `${dashboardBasePath}${normalizedSegment}`;
+  return `${basePath}${normalizedSegment}`;
 }
 
-export const dashboardSection: DashboardSectionConfig = {
-  key: 'dashboard',
-  label: 'Dashboard',
-  to: dashboardBasePath,
-  end: true,
-  pageTitle: 'Dashboard',
-  contentTitle: 'Dashboard',
-  icon: DashboardIcon,
-};
+function buildDashboardSections(basePath: string): Record<DashboardSectionKey, DashboardSectionConfig> {
+  return {
+    dashboard: {
+      key: 'dashboard',
+      label: 'Dashboard',
+      to: joinDashboardPath(basePath),
+      end: true,
+      pageTitle: 'Dashboard',
+      contentTitle: 'Dashboard',
+      icon: DashboardIcon,
+    },
+    missions: {
+      key: 'missions',
+      label: 'Misiones',
+      to: joinDashboardPath(basePath, 'missions'),
+      pageTitle: 'Misiones',
+      eyebrow: 'Misiones',
+      contentTitle: 'Tus misiones activas',
+      description: 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.',
+      icon: MissionsIcon,
+    },
+    rewards: {
+      key: 'rewards',
+      label: 'Rewards',
+      to: joinDashboardPath(basePath, 'rewards'),
+      pageTitle: 'Rewards',
+      eyebrow: 'Rewards',
+      contentTitle: 'Logros y badges desbloqueados',
+      description: 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.',
+      icon: RewardsIcon,
+    },
+    editor: {
+      key: 'editor',
+      label: 'Task Editor',
+      to: '/editor',
+      end: true,
+      pageTitle: 'Task Editor',
+      eyebrow: 'Task Editor',
+      contentTitle: '',
+      description: '',
+      icon: TaskEditorIcon,
+    },
+  };
+}
 
-export const missionsSection: DashboardSectionConfig = {
-  key: 'missions',
-  label: 'Misiones',
-  to: joinDashboardPath('missions'),
-  pageTitle: 'Misiones',
-  eyebrow: 'Misiones',
-  contentTitle: 'Tus misiones activas',
-  description: 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.',
-  icon: MissionsIcon,
-};
+function createDashboardSections(currentPath?: string) {
+  const basePath = resolveDashboardBasePath(currentPath);
+  const sectionsByKey = buildDashboardSections(basePath);
+  const shouldIncludeMissions = basePath === DASHBOARD_V3_BASE_PATH;
 
-export const rewardsSection: DashboardSectionConfig = {
-  key: 'rewards',
-  label: 'Rewards',
-  to: joinDashboardPath('rewards'),
-  pageTitle: 'Rewards',
-  eyebrow: 'Rewards',
-  contentTitle: 'Logros y badges desbloqueados',
-  description: 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.',
-  icon: RewardsIcon,
-};
+  const sections: DashboardSectionConfig[] = [sectionsByKey.dashboard];
 
-export const taskEditorSection: DashboardSectionConfig = {
-  key: 'editor',
-  label: 'Task Editor',
-  to: '/editor',
-  end: true,
-  pageTitle: 'Task Editor',
-  eyebrow: 'Task Editor',
-  contentTitle: '',
-  description: '',
-  icon: TaskEditorIcon,
-};
+  if (shouldIncludeMissions) {
+    sections.push(sectionsByKey.missions, sectionsByKey.rewards);
+  }
 
-export const DASHBOARD_SECTIONS: DashboardSectionConfig[] = isDashboardV3Enabled
-  ? [dashboardSection, missionsSection, rewardsSection, taskEditorSection]
-  : [dashboardSection, taskEditorSection];
+  sections.push(sectionsByKey.editor);
+
+  return { sections, sectionsByKey };
+}
+
+export function getDashboardSections(currentPath?: string): DashboardSectionConfig[] {
+  return createDashboardSections(currentPath).sections;
+}
+
+export function getDashboardSectionConfig(
+  key: DashboardSectionKey,
+  currentPath?: string,
+): DashboardSectionConfig {
+  const { sectionsByKey } = createDashboardSections(currentPath);
+  return sectionsByKey[key];
+}
 
 export function isSectionActive(section: DashboardSectionConfig, pathname: string) {
   return matchPath({ path: section.to, end: section.end ?? false }, pathname) != null;
 }
 
-export function getActiveSection(pathname: string): DashboardSectionConfig {
-  return (
-    DASHBOARD_SECTIONS.find((section) => isSectionActive(section, pathname)) ?? dashboardSection
-  );
+export function getActiveSection(
+  pathname: string,
+  sections: DashboardSectionConfig[] = getDashboardSections(pathname),
+): DashboardSectionConfig {
+  const activeSection = sections.find((section) => isSectionActive(section, pathname));
+
+  return activeSection ?? getDashboardSectionConfig('dashboard', pathname);
 }
