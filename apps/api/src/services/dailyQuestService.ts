@@ -71,13 +71,13 @@ export type SubmitDailyQuestResult = {
   missions_v2: {
     bonus_ready: boolean;
     redirect_url: string;
-    tasks: Array<{
+    tasks: {
       mission_id: string;
       mission_name: string;
       slot: string;
       task_id: string;
       task_name: string;
-    }>;
+    }[];
   };
 };
 
@@ -599,20 +599,33 @@ export async function submitDailyQuest(
   });
 
   const board = await getMissionBoard(userId);
-  const missionTasks = board.slots.flatMap((slot) =>
-    (slot.mission?.tasks ?? []).map((task) => ({
-      mission_id: slot.mission.id,
-      mission_name: slot.mission.name,
-      slot: slot.slot,
-      task_id: task.id,
-      task_name: task.name,
-    })),
-  );
+  const missionTasks = board.slots.flatMap((slot) => {
+    const mission = slot.mission ?? slot.proposals[0] ?? null;
+
+    if (!mission) {
+      return [];
+    }
+
+    return mission.objectives
+      .filter((objective): objective is { id: string; label: string } =>
+        Boolean(objective?.id) && Boolean(objective?.label),
+      )
+      .map((objective) => ({
+        mission_id: mission.id,
+        mission_name: mission.title,
+        slot: slot.slot,
+        task_id: objective.id,
+        task_name: objective.label,
+      }));
+  });
   const heartbeatReady = board.slots.some((slot) =>
-    slot.actions?.some((action) => action.type === 'heartbeat' && action.enabled),
+    slot.actions?.some((action) => action.type === 'heartbeat' && action.available),
+  );
+  const selectionReady = board.slots.some((slot) =>
+    slot.actions?.some((action) => action.type === 'select' && action.available),
   );
 
-  const missionsV2BonusReady = heartbeatReady;
+  const missionsV2BonusReady = heartbeatReady || missionTasks.length > 0 || selectionReady;
 
   return {
     ok: true,
