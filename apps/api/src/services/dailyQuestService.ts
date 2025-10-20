@@ -2,7 +2,7 @@ import type { PoolClient } from 'pg';
 import { pool, withClient } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 import { formatDateInTimezone } from '../controllers/users/user-state-service.js';
-import { applyHuntXpBoost, getMissionBoard } from './missionsV2Service.js';
+import { applyHuntXpBoost, getMissionBoard, runWeeklyAutoSelection } from './missionsV2Service.js';
 import type { MissionTask } from './missionsV2Types.js';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -599,7 +599,10 @@ export async function submitDailyQuest(
     xpTotalToday: xpAfter.xp_total_today,
   });
 
-  const board = await getMissionBoard(userId);
+  let board = await getMissionBoard(userId);
+  if (board.slots.every((slot) => slot.mission === null)) {
+    board = await runWeeklyAutoSelection(userId);
+  }
   const missionTasks = board.slots.flatMap((slot) => {
     const mission = slot.mission;
 
