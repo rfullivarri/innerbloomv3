@@ -68,6 +68,10 @@ export type SubmitDailyQuestResult = {
   xp_delta: number;
   xp_total_today: number;
   streaks: DailyQuestXpSummary['streaks'];
+  missions_v2: {
+    bonus_ready: boolean;
+    redirect_url: string;
+  };
 };
 
 type SubmitDailyQuestLogLevel = 'info' | 'warn' | 'error';
@@ -587,6 +591,8 @@ export async function submitDailyQuest(
     xpTotalToday: xpAfter.xp_total_today,
   });
 
+  const missionsV2BonusReady = booster.boosterApplied;
+
   return {
     ok: true,
     saved: {
@@ -603,5 +609,9 @@ export async function submitDailyQuest(
     xp_delta: booster.xp_delta,
     xp_total_today: booster.xp_total_today,
     streaks: xpAfter.streaks,
+    missions_v2: {
+      bonus_ready: missionsV2BonusReady,
+      redirect_url: '/dashboard-v3/missions-v2',
+    },
   } satisfies SubmitDailyQuestResult;
 }
