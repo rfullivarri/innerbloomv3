@@ -9,6 +9,7 @@ import {
   claimMissionReward,
   linkDailyToHuntMission,
   registerBossPhase2,
+  registerMissionHeartbeat,
   rerollMissionSlot,
   runFortnightlyBossMaintenance,
   runWeeklyAutoSelection,
@@ -38,6 +39,15 @@ const phase2BodySchema = z.object({
   mission_id: z.string().min(1),
   proof: z.string().min(8, 'Proof must contain details about the special hit'),
 });
+
+const heartbeatBodySchema = z
+  .object({
+    missionId: z.string().min(1, 'Invalid heartbeat payload').optional(),
+    mission_id: z.string().min(1, 'Invalid heartbeat payload').optional(),
+  })
+  .refine((value) => Boolean(value.missionId ?? value.mission_id), {
+    message: 'Invalid heartbeat payload',
+  });
 
 const CLAIM_SOURCE_HEADER = 'x-missions-claim-source';
 const CLAIM_ALLOWED_PATH = '/dashboard-v3/missions-v2';
@@ -152,6 +162,32 @@ router.post(
       res.json(boss);
     } catch (error) {
       normalizeError(error, 'Unable to register boss phase 2');
+    }
+  }),
+);
+
+router.post(
+  '/missions/heartbeat',
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    if (!user) {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    }
+
+    const parsed = parseWithValidation(heartbeatBodySchema, req.body, 'Invalid heartbeat payload');
+    const missionId = parsed.missionId ?? parsed.mission_id;
+
+    if (!missionId) {
+      throw new HttpError(400, 'invalid_request', 'Invalid heartbeat payload');
+    }
+
+    try {
+      const payload = await registerMissionHeartbeat(user.id, missionId);
+      res.json(payload);
+    } catch (error) {
+      normalizeError(error, 'Unable to register mission heartbeat');
     }
   }),
 );
