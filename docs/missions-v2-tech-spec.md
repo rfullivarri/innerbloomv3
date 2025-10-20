@@ -22,6 +22,7 @@ Misiones v2 reutiliza la infraestructura actual de Dashboard v3, Daily Quest y l
   - `apps/api/src/services/dailyQuestService.ts` ya calcula bonus y llama a `applyHuntXpBoost`, devolviendo redirect a Misiones v2 tras submit.【F:apps/api/src/services/dailyQuestService.ts†L586-L616】
   - `apps/web/src/lib/api.ts` expone helpers para board, select, reroll, heartbeat, claim; se mantiene la capa central cambiando únicamente las rutas base.【F:apps/web/src/lib/api.ts†L1826-L1967】
   - `apps/web/src/components/dashboard-v3/MissionsV2Board.tsx` contiene la UI del tablero con modales y telemetría reutilizable.【F:apps/web/src/components/dashboard-v3/MissionsV2Board.tsx†L1-L170】
+  - `apps/api/src/services/missionsV2Repository.ts` abstrae la persistencia (`FileMissionsRepository` ↔ `SqlMissionsRepository`) y utiliza `apps/api/data/missions_v2_store.json` mientras la tabla SQL queda desactivada por env.【F:apps/api/src/services/missionsV2Repository.ts†L1-L140】【F:apps/api/data/missions_v2_store.json†L1-L200】
 - Feature flags, auth, tracking y notificaciones:
   - `apps/web/src/lib/featureFlags.ts` controla `missionsV2`; se conserva para gatear ruta y UI.【F:apps/web/src/lib/featureFlags.ts†L1-L59】
   - `apps/web/src/App.tsx` + `apps/api/src/middlewares/auth-middleware.ts` aseguran acceso Clerk y verificación Bearer en todas las rutas protegidas.【F:apps/web/src/App.tsx†L98-L175】【F:apps/api/src/middlewares/auth-middleware.ts†L1-L110】
@@ -65,7 +66,8 @@ Misiones v2 reutiliza la infraestructura actual de Dashboard v3, Daily Quest y l
 7. Datos y persistencia
 
 - Datos reutilizables: `daily_log` captura tareas completadas por usuario/día (clave para heartbeat y boosters).【F:apps/api/db-snapshot.sample.json†L248-L306】 Las vistas `v_user_daily_xp`, `v_user_quests_today`, `v_user_total_xp`, `v_user_xp_by_pillar` sustentan métricas de XP, adherencia y progreso mostradas en Dashboard/Rewards.【F:apps/api/src/controllers/logs/get-user-daily-xp.ts†L21-L47】【F:apps/api/src/routes/users/summary-today.ts†L58-L97】【F:apps/api/src/controllers/users/get-user-total-xp.ts†L15-L29】【F:apps/api/src/routes/users/pillars.ts†L166-L245】 El tablero usa `xp_bonus` para sumar recompensas extras.【F:apps/api/db-snapshot.sample.json†L1560-L1604】
-- Gaps detectados: no existe tabla persistente para board/slots (el servicio usa `Map` en memoria), ni registros de heartbeat, pétalos, cooldowns, claims o amuletos/aura. Tampoco hay mapeo de boss progress ni enlace a daily tasks más allá del booster in-memory.【F:apps/api/src/services/missionsV2Service.ts†L200-L479】 Se documentan los DDL propuestos y estrategia en `docs/missions-v2-db-gaps.md`.
+- Persistencia POC: `FileMissionsRepository` lee/escribe `apps/api/data/missions_v2_store.json`; `SqlMissionsRepository` replica la interfaz y apunta a la tabla `missions_v2_state` cuando `MISSIONS_REPO=SQL`, manteniendo el feature desactivado por defecto.【F:apps/api/src/services/missionsV2Repository.ts†L1-L140】【F:apps/api/data/missions_v2_store.json†L1-L200】
+- Gaps detectados: no existe tabla persistente para board/slots (el servicio usa `Map` en memoria), ni registros de heartbeat, pétalos, cooldowns, claims o amuletos/aura. Tampoco hay mapeo de boss progress ni enlace a daily tasks más allá del booster in-memory.【F:apps/api/src/services/missionsV2Service.ts†L200-L479】 Los DDL y plan de migración se consolidan en `docs/missions-v2-db-gaps.md`.
 
 8. Seguridad y permisos
 
@@ -87,3 +89,120 @@ Misiones v2 reutiliza la infraestructura actual de Dashboard v3, Daily Quest y l
 3. Integrar UI definitiva (slots, cards, gating de claim) y la sección Daily “Tareas de Misión”, reforzando exclusividad de claims vía ruta.【F:apps/web/src/components/dashboard-v3/MissionsV2Board.tsx†L19-L170】【F:apps/web/src/components/DailyQuestModal.tsx†L889-L926】
 4. Paralelizables: backend de persistencia vs. rediseño UI (mientras usen contratos simulados); telemetría puede activarse junto a la API. Daily integration depende del endpoint heartbeat.
 5. Criterios de aceptación MVP: board con tres slots y Market operativo, heartbeat diario funcional, boss fase 1+2 con shield, claim idempotente exclusivo, integración con Daily que muestra tareas de misión y CTA de heartbeat, telemetría completa registrada en ambos extremos.
+
+11. Contratos definitivos (REST)
+
+- `GET /api/missions/board`
+
+  **Request**: sin body. Header `Authorization: Bearer` y Clerk session obligatorios.
+
+  **Response** (`200`):
+
+  ```json
+  {
+    "season_id": "2025-Q1",
+    "generated_at": "2025-01-04T10:00:00Z",
+    "slots": [
+      {
+        "id": "run-main-123",
+        "slot": "main",
+        "mission": {
+          "id": "mission-main",
+          "name": "Acto 2: Mensaje",
+          "type": "main",
+          "summary": "Convertí la intención en acto público",
+          "requirements": "Acto 1 completado",
+          "objective": "Registrar evidencia",
+          "reward": { "xp": 320, "currency": 20, "items": ["Aura"] },
+          "tasks": [
+            { "id": "task-1", "name": "Reflexión", "tag": "reflection" },
+            { "id": "task-2", "name": "Evidencia", "tag": "proof" }
+          ]
+        },
+        "state": "active",
+        "petals": { "total": 3, "remaining": 2, "lastEvaluatedAt": "2025-01-03" },
+        "heartbeat_today": false,
+        "heartbeat_log": ["2025-01-02", "2025-01-03"],
+        "progress": { "current": 2, "target": 5, "percent": 40 },
+        "countdown": { "ends_at": "2025-01-14T23:59:59Z", "cooldown_until": null, "label": "11d restantes" },
+        "actions": [
+          { "id": "heartbeat", "type": "heartbeat", "label": "Marcar Heartbeat", "enabled": true }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": null,
+          "claimed_at": null
+        }
+      }
+    ],
+    "boss": {
+      "phase": 1,
+      "shield": { "current": 6, "max": 6, "updatedAt": "2025-01-03T23:00:00Z" },
+      "linkedDailyTaskId": null,
+      "linkedAt": null,
+      "phase2": { "ready": false, "proof": null, "submittedAt": null }
+    },
+    "gating": { "claim_path": "/dashboard-v3/missions-v2", "claim_enabled": true },
+    "communications": []
+  }
+  ```
+
+- `POST /api/missions/select`
+
+  **Request**:
+
+  ```json
+  { "slot": "hunt", "mission_id": "mission-hunt-001" }
+  ```
+
+  **Response** (`200`): `{ "board": { ...misma forma que GET /board... } }`
+
+- `POST /api/missions/reroll`
+
+  **Request**: `{ "slot": "skill" }`
+
+  **Response** (`200`): `{ "board": { ... } }` con `slots[n].proposals` actualizados y `slots[n].reroll.remaining` decreciendo.
+
+- `POST /api/missions/heartbeat`
+
+  **Request**: `{ "mission_id": "run-main-123" }`
+
+  **Response** (`200`): `{ "status": "ok", "petals_remaining": 2, "heartbeat_date": "2025-01-04" }`
+
+- `POST /api/missions/link-daily`
+
+  **Request**: `{ "slot": "hunt", "task_id": "daily-task-abc" }`
+
+  **Response** (`200`): `{ "board": { ... }, "linked_task_id": "daily-task-abc" }`
+
+- `POST /api/boss/phase2`
+
+  **Request**: `{ "mission_id": "run-main-123", "proof": "https://example.com/proof" }`
+
+  **Response** (`200`): `{ "boss_state": { ... }, "rewards_preview": { "xp": 400, "items": ["Medalla"], "currency": 30 } }`
+
+- `POST /api/missions/:id/claim`
+
+  **Request**: sin body; path param `:id` = `mission_id` activo.
+
+  **Response** (`200`): `{ "rewards": { "xp": 320, "currency": 20, "items": ["Aura"] }, "board": { ... } }`
+
+Todos los contratos devuelven `401` cuando falta sesión, `403` por ownership y `409` ante estados inválidos (slot ocupado, reroll sin intentos, claim fuera de `/dashboard-v3/missions-v2`). Los mensajes de error mantienen el shape `{ error: { code, message } }` reutilizado en el router de Misiones.【F:apps/api/src/routes/missions.ts†L47-L169】
+
+12. Matriz de eventos Misiones v2
+
+| Evento | Emisor | Path/Hook | Payload base |
+| --- | --- | --- | --- |
+| `missions_v2_view` | Front (`apps/web/src/components/dashboard-v3/MissionsV2Board.tsx`) | `useEffect` al montar board | `{ userId, source: 'dashboard_v3' }` |
+| `missions_v2_select_open` | Front (Market modal) | `openMissionMarket` | `{ slot, proposals }` |
+| `missions_v2_selected` | Backend (`apps/api/src/services/missionsV2Service.ts`) | `selectMissionForSlot` | `{ userId, slot, missionId }` |
+| `missions_v2_reroll` | Backend | `rerollMissionSlot` | `{ userId, slot, remaining }` |
+| `missions_v2_heartbeat` | Backend | `markMissionHeartbeat` | `{ userId, slot, missionId, date }` |
+| `missions_v2_progress_tick` | Backend | `updateMissionProgress` / daily submit | `{ userId, slot, missionId, progress }` |
+| `missions_v2_boss_phase1_tick` | Backend | `registerBossShieldHit` | `{ userId, missionId, shieldRemaining }` |
+| `missions_v2_boss_phase2_finish` | Backend | `completeBossPhase2` | `{ userId, missionId, proofProvided }` |
+| `missions_v2_reward_claimed` | Backend | `claimMissionReward` | `{ userId, missionId, reward }` |
+| `missions_v2_proposals_created` | Backend | `seedSlotProposals` | `{ userId, slot, reason }` |
+
+Los eventos se registran en `apps/web/src/lib/telemetry.ts` y `apps/api/src/services/missionsV2Telemetry.ts`, reutilizando la infraestructura existente de logging/analytics para evitar duplicación.【F:apps/web/src/lib/telemetry.ts†L54-L75】【F:apps/api/src/services/missionsV2Telemetry.ts†L1-L37】 La matriz facilita auditorías post-release y el backfill descrito en `docs/missions-v2-db-gaps.md`.

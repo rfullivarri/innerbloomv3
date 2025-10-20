@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import { fileURLToPath } from 'url';
+import type { Pool } from 'pg';
 import type { MissionsBoardState } from './missionsV2Types.js';
 
 export interface MissionsRepository {
@@ -81,36 +82,73 @@ class FileMissionsRepository implements MissionsRepository {
 }
 
 class SqlMissionsRepository implements MissionsRepository {
-  async load(_userId: string): Promise<MissionsBoardState | null> {
-    void _userId;
-    throw new Error('SqlMissionsRepository.load is not implemented yet');
+  private static readonly TABLE_NAME = 'missions_v2_state';
+  private readonly poolPromise: Promise<Pool>;
+
+  constructor(pool?: Pool) {
+    if (pool) {
+      this.poolPromise = Promise.resolve(pool);
+    } else {
+      this.poolPromise = import('../db.js').then((module) => module.pool);
+    }
   }
 
-  async save(_userId: string, _state: MissionsBoardState): Promise<void> {
-    void _userId;
-    void _state;
-    throw new Error('SqlMissionsRepository.save is not implemented yet');
+  private async resolvePool(): Promise<Pool> {
+    return this.poolPromise;
   }
 
-  async delete(_userId: string): Promise<void> {
-    void _userId;
-    throw new Error('SqlMissionsRepository.delete is not implemented yet');
+  private static normalizeState(value: unknown): MissionsBoardState {
+    const raw = typeof value === 'string' ? (JSON.parse(value) as MissionsBoardState) : (value as MissionsBoardState);
+    return cloneState(raw);
+  }
+
+  async load(userId: string): Promise<MissionsBoardState | null> {
+    const pool = await this.resolvePool();
+    const result = await pool.query<{ state: unknown }>(
+      `SELECT state FROM ${SqlMissionsRepository.TABLE_NAME} WHERE user_id = $1 LIMIT 1;`,
+      [userId],
+    );
+    const row = result.rows[0];
+    if (!row) {
+      return null;
+    }
+    return SqlMissionsRepository.normalizeState(row.state);
+  }
+
+  async save(userId: string, state: MissionsBoardState): Promise<void> {
+    const pool = await this.resolvePool();
+    const snapshot = cloneState(state);
+    await pool.query(
+      `
+        INSERT INTO ${SqlMissionsRepository.TABLE_NAME} (user_id, state, updated_at)
+        VALUES ($1, $2::jsonb, now())
+        ON CONFLICT (user_id)
+        DO UPDATE SET state = EXCLUDED.state, updated_at = EXCLUDED.updated_at;
+      `,
+      [userId, JSON.stringify(snapshot)],
+    );
+  }
+
+  async delete(userId: string): Promise<void> {
+    const pool = await this.resolvePool();
+    await pool.query(`DELETE FROM ${SqlMissionsRepository.TABLE_NAME} WHERE user_id = $1;`, [userId]);
   }
 
   async clear(): Promise<void> {
-    throw new Error('SqlMissionsRepository.clear is not implemented yet');
+    const pool = await this.resolvePool();
+    await pool.query(`TRUNCATE ${SqlMissionsRepository.TABLE_NAME};`);
   }
 }
 
-function createRepository(): MissionsRepository {
-  const repoKind = (process.env.MISSIONS_REPO ?? 'FILE').toUpperCase();
+function createMissionsRepository(kind: string | undefined = process.env.MISSIONS_REPO, options?: { pool?: Pool }): MissionsRepository {
+  const repoKind = (kind ?? 'FILE').toUpperCase();
   if (repoKind === 'SQL') {
-    return new SqlMissionsRepository();
+    return new SqlMissionsRepository(options?.pool);
   }
   return new FileMissionsRepository();
 }
 
-const repository = createRepository();
+const repository = createMissionsRepository();
 
 export async function loadMissionsV2State(userId: string): Promise<MissionsBoardState | null> {
   return repository.load(userId);
@@ -132,4 +170,4 @@ export function getMissionsV2DataFilePath(): string {
   return DATA_FILE_PATH;
 }
 
-export { FileMissionsRepository, SqlMissionsRepository };
+export { FileMissionsRepository, SqlMissionsRepository, createMissionsRepository };
