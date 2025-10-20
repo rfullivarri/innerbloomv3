@@ -1857,8 +1857,8 @@ export async function linkMissionsV2Daily(
   taskId: string,
 ): Promise<MissionsV2LinkDailyResponse> {
   const response = await missionsV2AuthorizedPost<MissionsV2LinkDailyResponse>('/missions/link-daily', {
-    missionId,
-    taskId,
+    mission_id: missionId,
+    task_id: taskId,
   });
   logShape('missions-v2-link-daily', response);
   return response;
