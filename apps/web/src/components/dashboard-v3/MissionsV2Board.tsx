@@ -389,6 +389,44 @@ function MissionPetals({ slot, prefersReducedMotion }: { slot: MissionsV2Slot; p
   );
 }
 
+function MissionPetalsMini({ slot }: { slot: MissionsV2Slot }) {
+  const total = slot.petals.total || 0;
+  const ratio = total > 0 ? slot.petals.remaining / total : 0;
+  const lit = Math.round(ratio * 3);
+
+  return (
+    <div
+      className="missions-petals-mini"
+      aria-label={`Pétalos protegidos: ${slot.petals.remaining} de ${slot.petals.total}`}
+    >
+      {Array.from({ length: 3 }).map((_, index) => (
+        <span
+          key={`${slot.id}-petal-mini-${index}`}
+          className={classNames(
+            'missions-petals-mini__dot',
+            index < lit ? 'missions-petals-mini__dot--alive' : 'missions-petals-mini__dot--lost',
+          )}
+          aria-hidden="true"
+        />
+      ))}
+    </div>
+  );
+}
+
+function MissionHeartbeatStatus({ pending }: { pending: boolean }) {
+  return (
+    <span
+      className={classNames(
+        'missions-heartbeat-indicator',
+        pending ? 'missions-heartbeat-indicator--pending' : 'missions-heartbeat-indicator--done',
+      )}
+    >
+      <span aria-hidden="true" className="missions-heartbeat-indicator__dot" />
+      {pending ? 'Heartbeat pendiente' : 'Heartbeat sellado'}
+    </span>
+  );
+}
+
 export function MissionsV2Board({ userId }: { userId: string }) {
   const location = useLocation();
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -397,13 +435,25 @@ export function MissionsV2Board({ userId }: { userId: string }) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [busyMap, setBusyMap] = useState<Record<string, boolean>>({});
   const [claimModal, setClaimModal] = useState<ClaimModalState | null>(null);
+  const [expandedSlotId, setExpandedSlotId] = useState<string | null>(null);
   const hasTrackedView = useRef(false);
+  const slotRefs = useRef<Record<string, HTMLElement | null>>({});
+  const marketRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (status === 'success' && data) {
       setBoard(data);
     }
   }, [status, data]);
+
+  useEffect(() => {
+    if (!board || !expandedSlotId) {
+      return;
+    }
+    if (!board.slots.some((slot) => slot.id === expandedSlotId)) {
+      setExpandedSlotId(null);
+    }
+  }, [board, expandedSlotId]);
 
   useEffect(() => {
     if (!hasTrackedView.current && status === 'success' && data) {
@@ -541,6 +591,28 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     }
   }, []);
 
+  const scrollToMarket = useCallback(() => {
+    marketRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  const focusSlot = useCallback(
+    (slot: MissionsV2Slot) => {
+      const element = slotRefs.current[slot.id];
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      setExpandedSlotId(slot.id);
+    },
+    [],
+  );
+
+  const registerSlotRef = useCallback(
+    (slotId: string) => (element: HTMLElement | null) => {
+      slotRefs.current[slotId] = element;
+    },
+    [],
+  );
+
   const renderSlotCard = (slot: MissionsV2Slot) => {
     const mission = slot.mission;
     const busy = Boolean(busyMap[slot.id]);
@@ -553,6 +625,84 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     const heartbeatPending = !slot.heartbeat_today;
     const heroLine = buildHeroLine(slot);
     const rewardCopy = getRewardCopy(slot);
+    const heartbeatAction = slot.actions.find((action) => action.type === 'heartbeat');
+    const linkAction = slot.actions.find((action) => action.type === 'link_daily');
+    const expandable = Boolean(mission);
+    const isExpanded = expandedSlotId === slot.id;
+    const detailsId = `${slot.id}-details`;
+
+    type PrimaryAction = {
+      key: string;
+      label: string;
+      onClick?: () => void;
+      disabled: boolean;
+      tone: 'primary' | 'neutral';
+    };
+
+    let primaryAction: PrimaryAction | null = null;
+    let primaryActionId: string | null = null;
+
+    if (canClaim) {
+      primaryAction = {
+        key: 'claim',
+        label: 'Abrir cofre',
+        onClick: () => handleClaim(slot),
+        disabled: busy,
+        tone: 'primary',
+      };
+      primaryActionId = 'claim';
+    } else if (heartbeatAction) {
+      primaryAction = {
+        key: heartbeatAction.id,
+        label: heartbeatAction.label,
+        onClick: () => handleHeartbeat(slot),
+        disabled: busy || !heartbeatAction.enabled || !mission,
+        tone: 'primary',
+      };
+      primaryActionId = heartbeatAction.id;
+    } else if (linkAction) {
+      primaryAction = {
+        key: linkAction.id,
+        label: 'Vincular Daily',
+        onClick: () => handleLinkDaily(slot),
+        disabled: busy || !linkAction.enabled || !mission,
+        tone: 'primary',
+      };
+      primaryActionId = linkAction.id;
+    } else if (mission && slot.actions.length > 0) {
+      const [firstAction] = slot.actions.filter((action) => action.type !== 'claim');
+      if (firstAction) {
+        primaryAction = {
+          key: firstAction.id,
+          label: firstAction.label,
+          onClick: firstAction.enabled ? () => handleUnavailableAction(firstAction) : undefined,
+          disabled: !firstAction.enabled || busy,
+          tone: 'neutral',
+        };
+        primaryActionId = firstAction.id;
+      }
+    }
+
+    if (!primaryAction) {
+      primaryAction = {
+        key: 'market',
+        label: 'Ir al market',
+        onClick: scrollToMarket,
+        disabled: false,
+        tone: 'neutral',
+      };
+      primaryActionId = 'market';
+    }
+
+    const secondaryActions = slot.actions.filter((action) => {
+      if (action.type === 'claim') {
+        return false;
+      }
+      if (primaryActionId && action.id === primaryActionId) {
+        return false;
+      }
+      return true;
+    });
 
     return (
       <Card
@@ -567,119 +717,138 @@ export function MissionsV2Board({ userId }: { userId: string }) {
         )}
         data-rarity={rarity}
         data-slot={slot.slot}
-        bodyClassName="gap-6"
+        ref={registerSlotRef(slot.id)}
+        bodyClassName={classNames(
+          'missions-card__body missions-card__body--slot',
+          isExpanded && 'missions-card__body--expanded',
+        )}
         title={`${details.emoji} ${details.label}`}
-        subtitle={mission?.name ?? 'Slot vacío. Elegí tu reto.'}
+        subtitle={
+          <p className="missions-card__subtitle">{mission?.name ?? 'Slot vacío. Elegí tu reto.'}</p>
+        }
         rightSlot={
           <span className={classNames('missions-chip', `missions-chip--${stateConfig.tone}`)}>
             {stateConfig.label}
           </span>
         }
       >
-        <p className="text-sm font-semibold text-slate-100">{heroLine}</p>
-        <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300">
-          {requirementChips.map((chip) => (
-            <span key={`${slot.id}-req-${chip}`} className="missions-requirement">
-              {chip}
-            </span>
-          ))}
-        </div>
-        <div className="space-y-3">
-          <div className="flex flex-col gap-1 text-xs text-slate-300">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Objetivo</span>
-            <p className="text-sm text-slate-100">{mission?.objective ?? 'Activa una misión del market para este slot.'}</p>
-            <p className="text-xs text-slate-400">{formatCountdown(slot.countdown.label)}</p>
-          </div>
-          <MissionProgress slot={slot} prefersReducedMotion={prefersReducedMotion} />
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-200">
-          <MissionPetals slot={slot} prefersReducedMotion={prefersReducedMotion} />
-          <span
-            className={classNames(
-              'missions-heartbeat-chip',
-              heartbeatPending ? 'missions-heartbeat-chip--pending' : 'missions-heartbeat-chip--done',
-            )}
-          >
-            Heartbeat {heartbeatPending ? 'pendiente' : 'sellado hoy'}
-          </span>
-        </div>
-        <div className="flex flex-col gap-3">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Botín</p>
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100">
-            {rewardCopy}
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {slot.actions.map((action) => {
-            const isHeartbeat = action.type === 'heartbeat';
-            const isLinkDaily = action.type === 'link_daily';
-            const isDisabled = !action.enabled || busy || !mission;
-
-            if (isHeartbeat) {
-              return (
-                <button
-                  key={action.id}
-                  type="button"
-                  disabled={isDisabled}
-                  onClick={() => handleHeartbeat(slot)}
-                  className={classNames(
-                    'missions-heartbeat-btn',
-                    isDisabled && 'missions-heartbeat-btn--disabled',
-                    prefersReducedMotion && 'missions-heartbeat-btn--static',
-                  )}
-                >
-                  <span aria-hidden="true">💓</span>
-                  {action.label}
-                </button>
-              );
-            }
-
-            if (isLinkDaily) {
-              return (
-                <button
-                  key={action.id}
-                  type="button"
-                  disabled={isDisabled}
-                  onClick={() => handleLinkDaily(slot)}
-                  className={classNames(
-                    'missions-action-btn missions-action-btn--link',
-                    isDisabled && 'missions-action-btn--disabled',
-                  )}
-                >
-                  Vincular Daily
-                </button>
-              );
-            }
-
-            if (action.type === 'claim') {
-              return null;
-            }
-
-            return (
-              <button
-                key={action.id}
-                type="button"
-                disabled
-                onClick={() => handleUnavailableAction(action)}
-                className="missions-action-btn missions-action-btn--disabled"
-              >
-                {action.label}
-              </button>
-            );
-          })}
+        <div className="missions-slot-card__summary">
           <button
             type="button"
-            disabled={!canClaim || busy}
-            onClick={() => handleClaim(slot)}
-            className={classNames(
-              'missions-claim-btn',
-              (!canClaim || busy) && 'missions-claim-btn--disabled',
-              prefersReducedMotion && 'missions-claim-btn--static',
-            )}
+            className="missions-slot-card__toggle"
+            onClick={() => (expandable ? setExpandedSlotId(isExpanded ? null : slot.id) : null)}
+            aria-expanded={isExpanded}
+            aria-controls={detailsId}
+            disabled={!expandable}
           >
-            <span aria-hidden="true" className="missions-claim-btn__icon" />
-            Abrir cofre
+            <p className="missions-slot-card__hero">{heroLine}</p>
+            <div className="missions-slot-card__progress">
+              <MissionProgress slot={slot} prefersReducedMotion={prefersReducedMotion} />
+            </div>
           </button>
+          <div className="missions-slot-card__status">
+            <MissionPetalsMini slot={slot} />
+            <MissionHeartbeatStatus pending={heartbeatPending} />
+          </div>
+          <div className="missions-slot-card__cta">
+            <button
+              type="button"
+              onClick={primaryAction.onClick}
+              disabled={primaryAction.disabled}
+              className={classNames(
+                'missions-slot-card__cta-btn',
+                primaryAction.tone === 'primary'
+                  ? 'missions-slot-card__cta-btn--primary'
+                  : 'missions-slot-card__cta-btn--neutral',
+                (primaryAction.disabled || busy) && 'missions-slot-card__cta-btn--disabled',
+              )}
+            >
+              {primaryAction.label}
+            </button>
+          </div>
+        </div>
+        <div
+          id={detailsId}
+          className="missions-slot-card__details"
+          data-open={isExpanded ? 'true' : 'false'}
+        >
+          <div className="missions-slot-card__chips">
+            {requirementChips.map((chip) => (
+              <span key={`${slot.id}-req-${chip}`} className="missions-requirement">
+                {chip}
+              </span>
+            ))}
+          </div>
+          <div className="missions-slot-card__objective">
+            <span className="missions-slot-card__section-label">Objetivo</span>
+            <p>{mission?.objective ?? 'Activa una misión del market para este slot.'}</p>
+            <p className="missions-slot-card__countdown">{formatCountdown(slot.countdown.label)}</p>
+          </div>
+          <div className="missions-slot-card__progress-expanded">
+            <MissionProgress slot={slot} prefersReducedMotion={prefersReducedMotion} />
+            <MissionPetals slot={slot} prefersReducedMotion={prefersReducedMotion} />
+          </div>
+          <div className="missions-slot-card__reward">
+            <span className="missions-slot-card__section-label">Botín base</span>
+            <div className="missions-slot-card__reward-pill">{rewardCopy}</div>
+          </div>
+          {secondaryActions.length > 0 && (
+            <div className="missions-slot-card__secondary-actions">
+              {secondaryActions.map((action) => {
+                const isHeartbeat = action.type === 'heartbeat';
+                const isLinkDaily = action.type === 'link_daily';
+                const isDisabled = !action.enabled || busy || !mission;
+
+                if (isHeartbeat) {
+                  return (
+                    <button
+                      key={action.id}
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => handleHeartbeat(slot)}
+                      className={classNames(
+                        'missions-heartbeat-btn',
+                        isDisabled && 'missions-heartbeat-btn--disabled',
+                        prefersReducedMotion && 'missions-heartbeat-btn--static',
+                      )}
+                    >
+                      <span aria-hidden="true">💓</span>
+                      {action.label}
+                    </button>
+                  );
+                }
+
+                if (isLinkDaily) {
+                  return (
+                    <button
+                      key={action.id}
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => handleLinkDaily(slot)}
+                      className={classNames(
+                        'missions-action-btn missions-action-btn--link',
+                        isDisabled && 'missions-action-btn--disabled',
+                      )}
+                    >
+                      Vincular Daily
+                    </button>
+                  );
+                }
+
+                return (
+                  <button
+                    key={action.id}
+                    type="button"
+                    disabled
+                    onClick={() => handleUnavailableAction(action)}
+                    className="missions-action-btn missions-action-btn--disabled"
+                  >
+                    {action.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
         {slot.state === 'cooldown' && (
           <div className="missions-cooldown-overlay" aria-live="polite">
@@ -747,6 +916,28 @@ export function MissionsV2Board({ userId }: { userId: string }) {
 
   const shield = parseShieldLabel(board.boss.countdown.label) ?? { current: 6, max: 6 };
 
+  const firstClaimableSlot = orderedSlots.find((slot) => {
+    if (!slot.mission) {
+      return false;
+    }
+    const canClaim =
+      FEATURE_MISSIONS_V2 &&
+      isOnMissionsRoute &&
+      slot.claim.available &&
+      slot.claim.enabled;
+    return canClaim && !busyMap[slot.id];
+  });
+
+  const firstHeartbeatSlot = orderedSlots.find((slot) => {
+    if (!slot.mission || busyMap[slot.id]) {
+      return false;
+    }
+    const heartbeatAction = slot.actions.find((action) => action.type === 'heartbeat');
+    return Boolean(heartbeatAction && heartbeatAction.enabled);
+  });
+
+  const showStickyBar = Boolean(firstClaimableSlot || firstHeartbeatSlot);
+
   return (
     <div className="missions-board" data-reduced-motion={prefersReducedMotion ? 'true' : 'false'}>
       <div className="missions-board__background" aria-hidden="true" />
@@ -769,8 +960,8 @@ export function MissionsV2Board({ userId }: { userId: string }) {
         <Card
           className="missions-card missions-card--boss"
           title="Boss quincenal"
-          subtitle={board.boss.name}
-          bodyClassName="gap-6"
+          subtitle={<p className="missions-card__subtitle">{board.boss.name}</p>}
+          bodyClassName="missions-card__body missions-card__body--boss"
         >
           <div className="missions-boss-header">
             <div className="missions-boss-shield" role="img" aria-label={`Escudo del boss ${shield.current} de ${shield.max}`}>
@@ -793,7 +984,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
               <span className="missions-boss-countdown__value">{board.boss.countdown.label}</span>
             </div>
           </div>
-          <p className="text-sm text-slate-200">
+          <p className="missions-boss-copy">
             Derribá el escudo sosteniendo Heartbeat y prepará el golpe final. El Boss sólo responde si tu Main llegó al Acto 2.
           </p>
           <div className="missions-boss-actions">
@@ -816,9 +1007,10 @@ export function MissionsV2Board({ userId }: { userId: string }) {
           className="missions-card missions-card--market"
           title="Market de misiones"
           subtitle="Activa propuestas cuando liberes un slot"
-          bodyClassName="gap-5"
+          bodyClassName="missions-card__body missions-card__body--market"
+          ref={marketRef}
         >
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="missions-market">
             {MARKET_PREVIEWS.map((preview) => (
               <article key={preview.id} className="missions-market-card" data-rarity={preview.rarity}>
                 <header className="flex items-start justify-between gap-2">
@@ -830,7 +1022,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
                     {preview.icon}
                   </span>
                 </header>
-                <p className="text-sm text-slate-300">{preview.summary}</p>
+                <p className="missions-market-card__summary">{preview.summary}</p>
                 <div className="missions-market-card__reward">{preview.reward}</div>
                 <ul className="missions-market-card__requirements">
                   {preview.requirements.map((item) => (
@@ -845,6 +1037,48 @@ export function MissionsV2Board({ userId }: { userId: string }) {
           </div>
         </Card>
       </div>
+
+      {showStickyBar && (
+        <div className="missions-sticky-cta" role="toolbar" aria-label="Acciones rápidas de misiones">
+          <button
+            type="button"
+            className="missions-sticky-cta__btn missions-sticky-cta__btn--claim"
+            disabled={!firstClaimableSlot}
+            onClick={() => {
+              if (!firstClaimableSlot) {
+                return;
+              }
+              focusSlot(firstClaimableSlot);
+              handleClaim(firstClaimableSlot);
+            }}
+          >
+            Claim
+          </button>
+          <button
+            type="button"
+            className="missions-sticky-cta__btn missions-sticky-cta__btn--heartbeat"
+            disabled={!firstHeartbeatSlot}
+            onClick={() => {
+              if (!firstHeartbeatSlot) {
+                return;
+              }
+              focusSlot(firstHeartbeatSlot);
+              handleHeartbeat(firstHeartbeatSlot);
+            }}
+          >
+            Heartbeat
+          </button>
+          <button
+            type="button"
+            className="missions-sticky-cta__btn missions-sticky-cta__btn--market"
+            onClick={() => {
+              scrollToMarket();
+            }}
+          >
+            Market
+          </button>
+        </div>
+      )}
 
       {claimModal ? (
         <ClaimModal
