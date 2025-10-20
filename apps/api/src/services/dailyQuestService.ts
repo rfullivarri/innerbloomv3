@@ -599,17 +599,23 @@ export async function submitDailyQuest(
   });
 
   const board = await getMissionBoard(userId);
-  const missionTasks = board.slots.flatMap((slot) =>
-    (slot.mission?.tasks ?? []).map((task) => ({
-      mission_id: slot.mission.id,
-      mission_name: slot.mission.name,
+  const missionTasks = board.slots.flatMap((slot) => {
+    const mission = slot.mission;
+
+    if (!mission) {
+      return [];
+    }
+
+    return mission.objectives.map((objective) => ({
+      mission_id: mission.id,
+      mission_name: mission.title,
       slot: slot.slot,
-      task_id: task.id,
-      task_name: task.name,
-    })),
-  );
+      task_id: objective.id,
+      task_name: objective.label,
+    }));
+  });
   const heartbeatReady = board.slots.some((slot) =>
-    slot.actions?.some((action) => action.type === 'heartbeat' && action.enabled),
+    slot.actions?.some((action) => action.type === 'heartbeat' && action.available),
   );
 
   const missionsV2BonusReady = heartbeatReady;
