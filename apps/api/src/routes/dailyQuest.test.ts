@@ -204,7 +204,7 @@ describe('Daily Quest routes', () => {
       });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
+    expect(response.body).toMatchObject({
       ok: true,
       saved: {
         emotion: { emotion_id: 2, date: '2024-03-10', notes: 'Great day' },
@@ -213,8 +213,18 @@ describe('Daily Quest routes', () => {
       xp_delta: 15,
       xp_total_today: 25,
       streaks: { daily: 2, weekly: 1 },
-      missions_v2: { bonus_ready: false, redirect_url: '/dashboard-v3/missions-v2' },
+      missions_v2: { bonus_ready: true, redirect_url: '/dashboard-v3/missions-v2' },
     });
+    expect(Array.isArray(response.body.missions_v2.tasks)).toBe(true);
+    expect(response.body.missions_v2.tasks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          mission_name: expect.any(String),
+          task_name: expect.any(String),
+          slot: expect.any(String),
+        }),
+      ]),
+    );
 
     expect(mockClientQuery).toHaveBeenNthCalledWith(1, 'BEGIN');
     expect(mockClientQuery).toHaveBeenCalledWith(
@@ -302,7 +312,7 @@ describe('Daily Quest routes', () => {
       .send({ emotion_id: 1, tasks_done: [] });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
+    expect(response.body).toMatchObject({
       ok: true,
       saved: {
         emotion: { emotion_id: 1, date: '2024-03-10', notes: null },
@@ -311,8 +321,10 @@ describe('Daily Quest routes', () => {
       xp_delta: 0,
       xp_total_today: 0,
       streaks: { daily: 0, weekly: 0 },
-      missions_v2: { bonus_ready: false, redirect_url: '/dashboard-v3/missions-v2' },
+      missions_v2: { bonus_ready: true, redirect_url: '/dashboard-v3/missions-v2' },
     });
+    expect(Array.isArray(response.body.missions_v2.tasks)).toBe(true);
+    expect(response.body.missions_v2.tasks.length).toBeGreaterThan(0);
 
     expect(mockClientQuery).toHaveBeenNthCalledWith(1, 'BEGIN');
     expect(mockClientQuery).toHaveBeenCalledWith(

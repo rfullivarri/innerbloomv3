@@ -2,7 +2,7 @@ import type { PoolClient } from 'pg';
 import { pool, withClient } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 import { formatDateInTimezone } from '../controllers/users/user-state-service.js';
-import { applyHuntXpBoost } from './missionsV2Service.js';
+import { applyHuntXpBoost, getMissionBoard } from './missionsV2Service.js';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -71,6 +71,13 @@ export type SubmitDailyQuestResult = {
   missions_v2: {
     bonus_ready: boolean;
     redirect_url: string;
+    tasks: Array<{
+      mission_id: string;
+      mission_name: string;
+      slot: string;
+      task_id: string;
+      task_name: string;
+    }>;
   };
 };
 
@@ -591,7 +598,21 @@ export async function submitDailyQuest(
     xpTotalToday: xpAfter.xp_total_today,
   });
 
-  const missionsV2BonusReady = booster.boosterApplied;
+  const board = await getMissionBoard(userId);
+  const missionTasks = board.slots.flatMap((slot) =>
+    (slot.mission?.tasks ?? []).map((task) => ({
+      mission_id: slot.mission.id,
+      mission_name: slot.mission.name,
+      slot: slot.slot,
+      task_id: task.id,
+      task_name: task.name,
+    })),
+  );
+  const heartbeatReady = board.slots.some((slot) =>
+    slot.actions?.some((action) => action.type === 'heartbeat' && action.enabled),
+  );
+
+  const missionsV2BonusReady = heartbeatReady;
 
   return {
     ok: true,
@@ -612,6 +633,7 @@ export async function submitDailyQuest(
     missions_v2: {
       bonus_ready: missionsV2BonusReady,
       redirect_url: '/dashboard-v3/missions-v2',
+      tasks: missionTasks,
     },
   } satisfies SubmitDailyQuestResult;
 }

@@ -9,6 +9,7 @@ import {
   getMissionBoard,
   linkDailyToHuntMission,
   registerBossPhase2,
+  registerMissionHeartbeat,
   rerollMissionSlot,
   runFortnightlyBossMaintenance,
   runWeeklyAutoSelection,
@@ -32,6 +33,10 @@ const rerollBodySchema = z.object({
 const linkDailyBodySchema = z.object({
   missionId: z.string().min(1),
   taskId: z.string().uuid({ message: 'taskId must be a valid UUID' }),
+});
+
+const heartbeatBodySchema = z.object({
+  missionId: z.string().min(1),
 });
 
 const phase2BodySchema = z.object({
@@ -100,6 +105,27 @@ router.post(
       res.json(state);
     } catch (error) {
       normalizeError(error, 'Unable to reroll slot');
+    }
+  }),
+);
+
+router.post(
+  '/missions/heartbeat',
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    if (!user) {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    }
+
+    const { missionId } = parseWithValidation(heartbeatBodySchema, req.body, 'Invalid heartbeat payload');
+
+    try {
+      const result = await registerMissionHeartbeat(user.id, missionId);
+      res.json(result);
+    } catch (error) {
+      normalizeError(error, 'Unable to register mission heartbeat');
     }
   }),
 );
