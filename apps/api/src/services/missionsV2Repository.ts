@@ -82,14 +82,18 @@ class FileMissionsRepository implements MissionsRepository {
 
 class SqlMissionsRepository implements MissionsRepository {
   async load(_userId: string): Promise<MissionsBoardState | null> {
+    void _userId;
     throw new Error('SqlMissionsRepository.load is not implemented yet');
   }
 
   async save(_userId: string, _state: MissionsBoardState): Promise<void> {
+    void _userId;
+    void _state;
     throw new Error('SqlMissionsRepository.save is not implemented yet');
   }
 
   async delete(_userId: string): Promise<void> {
+    void _userId;
     throw new Error('SqlMissionsRepository.delete is not implemented yet');
   }
 
