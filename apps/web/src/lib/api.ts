@@ -1764,7 +1764,7 @@ export type MissionsV2Action = {
 export type MissionsV2Slot = {
   id: string;
   slot: MissionsV2SlotKey;
-  mission: MissionsV2Mission;
+  mission: MissionsV2Mission | null;
   state: 'idle' | 'active' | 'succeeded' | 'failed' | 'cooldown' | 'claimed';
   petals: { total: number; remaining: number };
   heartbeat_today: boolean;

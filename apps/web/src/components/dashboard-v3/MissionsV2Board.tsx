@@ -66,84 +66,106 @@ export function MissionsV2Board({ userId }: MissionsV2BoardProps) {
 
   const isOnMissionsRoute = useMemo(() => location.pathname.endsWith('/missions-v2'), [location.pathname]);
 
-  const setMissionBusy = useCallback((missionId: string, value: boolean) => {
-    setBusyMap((current) => ({ ...current, [missionId]: value }));
+  const setSlotBusy = useCallback((slotId: string, value: boolean) => {
+    setBusyMap((current) => ({ ...current, [slotId]: value }));
   }, []);
 
   const handleHeartbeat = useCallback(
     async (slot: MissionsV2Slot) => {
-      setMissionBusy(slot.mission.id, true);
+      const missionId = slot.mission?.id;
+
+      if (!missionId) {
+        setActionError('Esta misión no está disponible en este momento.');
+        return;
+      }
+
+      setSlotBusy(slot.id, true);
       setActionError(null);
       try {
-        await postMissionsV2Heartbeat(slot.mission.id);
+        await postMissionsV2Heartbeat(missionId);
         emitMissionsV2Event('missions_v2_heartbeat', {
           userId,
           slot: slot.slot,
-          missionId: slot.mission.id,
+          missionId,
         });
         await refreshBoard();
       } catch (err) {
         console.error('Failed to mark heartbeat', err);
         setActionError('No pudimos registrar el Heartbeat. Intentá nuevamente.');
       } finally {
-        setMissionBusy(slot.mission.id, false);
+        setSlotBusy(slot.id, false);
       }
     },
-    [refreshBoard, setMissionBusy, userId],
+    [refreshBoard, setSlotBusy, userId],
   );
 
   const handleLinkDaily = useCallback(
     async (slot: MissionsV2Slot) => {
-      setMissionBusy(slot.mission.id, true);
+      const mission = slot.mission;
+
+      if (!mission) {
+        setActionError('Esta misión no está disponible en este momento.');
+        return;
+      }
+
+      const missionId = mission.id;
+      setSlotBusy(slot.id, true);
       setActionError(null);
-      const [firstTask] = slot.mission.tasks;
+      const [firstTask] = mission.tasks;
 
       if (!firstTask) {
         setActionError('No hay tareas vinculables para esta misión.');
-        setMissionBusy(slot.mission.id, false);
+        setSlotBusy(slot.id, false);
         return;
       }
 
       try {
-        const response = await linkMissionsV2Daily(slot.mission.id, firstTask.id);
+        const response = await linkMissionsV2Daily(missionId, firstTask.id);
         setBoard(response.board);
         emitMissionsV2Event('missions_v2_select_open', {
           userId,
           slot: slot.slot,
-          missionId: slot.mission.id,
+          missionId,
           source: 'link_daily',
         });
       } catch (err) {
         console.error('Failed to link daily task', err);
         setActionError('No pudimos vincular la Daily con esta misión.');
       } finally {
-        setMissionBusy(slot.mission.id, false);
+        setSlotBusy(slot.id, false);
       }
     },
-    [setMissionBusy, userId],
+    [setSlotBusy, userId],
   );
 
   const handleClaim = useCallback(
     async (slot: MissionsV2Slot) => {
-      setMissionBusy(slot.mission.id, true);
+      const missionId = slot.mission?.id;
+
+      if (!missionId) {
+        setActionError('Esta misión no está disponible en este momento.');
+        return;
+      }
+
+      setSlotBusy(slot.id, true);
       setActionError(null);
       try {
-        const response = await claimMissionsV2Mission(slot.mission.id);
+        const response = await claimMissionsV2Mission(missionId);
         setBoard(response.board);
         emitMissionsV2Event('missions_v2_reward_claimed', {
           userId,
           slot: slot.slot,
-          missionId: slot.mission.id,
+          missionId,
           reward: response.rewards,
         });
       } catch (err) {
         console.error('Failed to claim mission reward', err);
         setActionError('No pudimos procesar el claim. Intentá más tarde.');
       } finally {
-        setMissionBusy(slot.mission.id, false);
+        setSlotBusy(slot.id, false);
       }
     },
-    [userId, setMissionBusy],
+    [userId, setSlotBusy],
   );
 
   const handleUnavailableAction = useCallback((action: MissionsV2Action) => {
@@ -162,7 +184,7 @@ export function MissionsV2Board({ userId }: MissionsV2BoardProps) {
           const filled = index < remaining;
           return (
             <span
-              key={`${slot.mission.id}-petal-${index}`}
+              key={`${slot.id}-petal-${index}`}
               className={classNames(
                 'inline-flex h-6 w-6 items-center justify-center rounded-full border text-sm transition',
                 filled ? 'border-pink-400/70 bg-pink-500/20 text-pink-100' : 'border-white/15 bg-white/5 text-white/40',
@@ -177,18 +199,24 @@ export function MissionsV2Board({ userId }: MissionsV2BoardProps) {
   };
 
   const renderSlotCard = (slot: MissionsV2Slot) => {
-    const busy = Boolean(busyMap[slot.mission.id]);
+    const mission = slot.mission;
+    const busy = Boolean(busyMap[slot.id]);
     const canClaim =
+      Boolean(mission) &&
       FEATURE_MISSIONS_V2 &&
       isOnMissionsRoute &&
       slot.claim.available &&
       slot.claim.enabled;
 
+    const rewardText = mission
+      ? `${mission.reward.xp} XP · ${mission.reward.currency ?? 0} Monedas`
+      : 'Recompensa disponible próximamente';
+
     return (
       <Card
-        key={slot.mission.id}
+        key={slot.id}
         title={`${SLOT_EMOJIS[slot.slot]} ${SLOT_LABELS[slot.slot]}`}
-        subtitle={slot.mission.name}
+        subtitle={mission?.name ?? 'Misión no disponible'}
         rightSlot={
           <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-200">
             {slot.state === 'succeeded'
@@ -207,10 +235,14 @@ export function MissionsV2Board({ userId }: MissionsV2BoardProps) {
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <p className="text-sm text-slate-100">{slot.mission.summary}</p>
-            <p className="text-xs text-slate-300">Requisitos: {slot.mission.requirements}</p>
-            <p className="text-xs text-slate-300">Objetivo: {slot.mission.objective}</p>
-            <p className="text-xs text-slate-400">Recompensa: {slot.mission.reward.xp} XP · {slot.mission.reward.currency ?? 0} Monedas</p>
+            <p className="text-sm text-slate-100">
+              {mission?.summary ?? 'Todavía no hay una misión asignada a este slot.'}
+            </p>
+            <p className="text-xs text-slate-300">
+              Requisitos: {mission?.requirements ?? 'A confirmar'}
+            </p>
+            <p className="text-xs text-slate-300">Objetivo: {mission?.objective ?? 'A confirmar'}</p>
+            <p className="text-xs text-slate-400">Recompensa: {rewardText}</p>
             <p className="text-xs text-slate-400">{slot.countdown.label}</p>
           </div>
 
@@ -235,7 +267,7 @@ export function MissionsV2Board({ userId }: MissionsV2BoardProps) {
             {slot.actions.map((action) => {
               const isHeartbeat = action.type === 'heartbeat';
               const isLinkDaily = action.type === 'link_daily';
-              const isDisabled = !action.enabled || busy;
+              const isDisabled = !action.enabled || busy || !mission;
 
               if (isHeartbeat) {
                 return (
