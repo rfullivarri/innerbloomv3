@@ -53,12 +53,16 @@ export function emitDbEditorEvent(event: DbEditorEventName, payload: DbEditorEve
 export type MissionsV2EventName =
   | 'missions_v2_view'
   | 'missions_v2_claim_open'
-  | 'missions_v2_select_open';
+  | 'missions_v2_select_open'
+  | 'missions_v2_heartbeat'
+  | 'missions_v2_reward_claimed';
 
 export interface MissionsV2EventPayload {
   userId?: string | null;
   slot?: string | null;
   source?: string | null;
+  missionId?: string | null;
+  reward?: unknown;
   timestamp?: string;
 }
 
@@ -66,14 +70,20 @@ export function emitMissionsV2Event(event: MissionsV2EventName, payload: Mission
   const normalizedUserId = typeof payload.userId === 'string' ? payload.userId.trim() : '';
   const normalizedSlot = typeof payload.slot === 'string' ? payload.slot.trim().toLowerCase() : '';
   const normalizedSource = typeof payload.source === 'string' ? payload.source.trim() : '';
+  const normalizedMissionId = typeof payload.missionId === 'string' ? payload.missionId.trim() : '';
 
-  const normalizedPayload = {
+  const normalizedPayload: Record<string, unknown> = {
     event,
     user_id: normalizedUserId.length > 0 ? normalizedUserId : undefined,
     slot: normalizedSlot.length > 0 ? normalizedSlot : undefined,
     source: normalizedSource.length > 0 ? normalizedSource : undefined,
+    mission_id: normalizedMissionId.length > 0 ? normalizedMissionId : undefined,
     timestamp: payload.timestamp ?? new Date().toISOString(),
-  } satisfies Record<string, unknown>;
+  };
+
+  if (payload.reward !== undefined) {
+    normalizedPayload.reward = payload.reward;
+  }
 
   logApiDebug('[analytics] missions v2 event', normalizedPayload);
 }

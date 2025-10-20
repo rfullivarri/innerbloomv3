@@ -3,6 +3,7 @@ import { pool, withClient } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 import { formatDateInTimezone } from '../controllers/users/user-state-service.js';
 import { applyHuntXpBoost, getMissionBoard } from './missionsV2Service.js';
+import type { MissionObjective } from './missionsV2Types.js';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -71,13 +72,13 @@ export type SubmitDailyQuestResult = {
   missions_v2: {
     bonus_ready: boolean;
     redirect_url: string;
-    tasks: Array<{
+    tasks: {
       mission_id: string;
       mission_name: string;
       slot: string;
       task_id: string;
       task_name: string;
-    }>;
+    }[];
   };
 };
 
@@ -600,24 +601,35 @@ export async function submitDailyQuest(
 
   const board = await getMissionBoard(userId);
   const missionTasks = board.slots.flatMap((slot) => {
-    const mission = slot.mission;
+    const mission = slot.mission ?? slot.proposals[0] ?? null;
+
     if (!mission) {
       return [];
     }
 
-    return mission.tasks.map((task) => ({
-      mission_id: mission.id,
-      mission_name: mission.name,
-      slot: slot.slot,
-      task_id: task.id,
-      task_name: task.name,
-    }));
+    return mission.objectives
+      .filter((objective): objective is MissionObjective =>
+        typeof objective?.id === 'string' &&
+        typeof objective?.label === 'string' &&
+        typeof objective?.target === 'number' &&
+        typeof objective?.unit === 'string',
+      )
+      .map((objective) => ({
+        mission_id: mission.id,
+        mission_name: mission.title,
+        slot: slot.slot,
+        task_id: objective.id,
+        task_name: objective.label,
+      }));
   });
   const heartbeatReady = board.slots.some((slot) =>
-    slot.actions?.some((action) => action.type === 'heartbeat' && action.enabled),
+    slot.actions?.some((action) => action.type === 'heartbeat' && action.available),
+  );
+  const selectionReady = board.slots.some((slot) =>
+    slot.actions?.some((action) => action.type === 'select' && action.available),
   );
 
-  const missionsV2BonusReady = heartbeatReady;
+  const missionsV2BonusReady = heartbeatReady || missionTasks.length > 0 || selectionReady;
 
   return {
     ok: true,

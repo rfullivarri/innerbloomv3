@@ -201,8 +201,46 @@ function createSlotState(slot: MissionSlotKey, userId: string): MissionSlotState
   };
 }
 
-function createBossState(): BossState {
-  const now = nowIso();
+async function persistState(userId: string, state: MissionsBoardState): Promise<void> {
+  await saveMissionsV2State(userId, JSON.parse(JSON.stringify(state)) as MissionsBoardState);
+}
+
+function refreshRerolls(board: MissionsBoard): void {
+  const now = new Date();
+
+  for (const slot of board.slots) {
+    if (!slot.reroll.usedAt) {
+      continue;
+    }
+
+    const usedAt = new Date(slot.reroll.usedAt);
+    const resetAt = addDays(usedAt, REROLL_COOLDOWN_DAYS);
+
+    if (resetAt <= now) {
+      slot.reroll.remaining = slot.reroll.total;
+      slot.reroll.usedAt = null;
+      slot.reroll.nextResetAt = null;
+    } else {
+      slot.reroll.nextResetAt = resetAt.toISOString();
+    }
+  }
+}
+
+function findSlot(state: MissionsBoardState, slotKey: MissionSlotKey): MissionSlotState {
+  const slot = state.board.slots.find((entry) => entry.slot === slotKey);
+
+  if (!slot) {
+    throw new Error(`Slot ${slotKey} not found`);
+  }
+
+  return slot;
+}
+
+function resolveProposal(slot: MissionSlotState, missionId: string): MissionProposal | null {
+  return slot.proposals.find((proposal) => proposal.id === missionId) ?? null;
+}
+
+function hydrateState(raw: MissionsBoardState): MissionsBoardState {
   return {
     phase: 1,
     shield: { current: BOSS_SHIELD_MAX, max: BOSS_SHIELD_MAX, updatedAt: now },
@@ -255,68 +293,8 @@ async function ensureBoardState(userId: string): Promise<MissionsBoardState> {
   return state;
 }
 
-function hydrateState(raw: MissionsBoardState): MissionsBoardState {
-  const board: MissionsBoard = {
-    ...raw.board,
-    generatedAt: raw.board.generatedAt ?? nowIso(),
-    slots: raw.board.slots.map((slot) => ({
-      ...slot,
-      proposals: slot.proposals.map((proposal) => ({ ...proposal, tasks: proposal.tasks.map((task) => ({ ...task })) })),
-      selected: slot.selected
-        ? {
-            ...slot.selected,
-            mission: { ...slot.selected.mission, tasks: slot.selected.mission.tasks.map((task) => ({ ...task })) },
-            petals: {
-              total: slot.selected.petals.total,
-              remaining: slot.selected.petals.remaining,
-              lastEvaluatedAt: slot.selected.petals.lastEvaluatedAt ?? todayKey(),
-            },
-            heartbeatLog: [...slot.selected.heartbeatLog],
-          }
-        : null,
-    })),
-    boss: { ...raw.board.boss },
-  };
-
-  return {
-    board,
-    booster: {
-      multiplier: raw.booster?.multiplier ?? HUNT_BOOSTER_MULTIPLIER,
-      targetTaskId: raw.booster?.targetTaskId ?? null,
-      appliedKeys: [...(raw.booster?.appliedKeys ?? [])],
-      nextActivationDate: raw.booster?.nextActivationDate ?? null,
-    },
-    effects: (raw.effects ?? []).map((effect) => ({
-      ...effect,
-      payload: { ...effect.payload },
-    })),
-  };
-}
-
-async function persistState(userId: string, state: MissionsBoardState, update?: MissionBoardUpdate): Promise<void> {
-  if (update?.dirty) {
-    state.board.generatedAt = nowIso();
-  }
-  await saveMissionsV2State(userId, state);
-}
-
-function applyPetalEffects(state: MissionsBoardState, selection: MissionSelectionState, reference: Date): void {
-  const activeEffects = state.effects.filter((effect) => effect.type === 'amulet' && !effect.consumedAt);
-  const extraPetal = activeEffects.find((effect) => effect.payload?.kind === 'petal_extra');
-  if (extraPetal && selection.petals.total === DEFAULT_PETALS) {
-    selection.petals.total += 1;
-    selection.petals.remaining = Math.min(selection.petals.remaining + 1, selection.petals.total);
-    extraPetal.consumedAt = reference.toISOString();
-  }
-}
-
-function computeCooldownDate(base: Date, effects: MissionEffect[]): Date {
-  let cooldownUntil = addDays(base, COOLDOWN_DAYS);
-  const shortcut = effects.find((effect) => effect.payload?.kind === 'cooldown_shortcut' && !effect.consumedAt);
-  if (shortcut) {
-    cooldownUntil = addDays(base, Math.max(0, COOLDOWN_DAYS - 5));
-    shortcut.consumedAt = base.toISOString();
-  }
+function ensureProposals(state: MissionsBoardState, slotKey: MissionSlotKey, reason: string): MissionProposal[] {
+  const slot = findSlot(state, slotKey);
 
   const thaw = effects.find((effect) => effect.payload?.kind === 'cooldown_thaw' && !effect.consumedAt);
   if (thaw) {
@@ -905,7 +883,7 @@ export async function linkDailyToHuntMission(
 
   recordMissionsV2Event('missions_v2_progress_tick', {
     userId,
-    data: { missionId, slot: 'hunt', action: 'link_daily', taskId: dailyTaskId },
+    data: { slot: 'hunt', missionId, action: 'link_daily', taskId: dailyTaskId },
   });
 
   await persistState(userId, state, { dirty: true });
@@ -929,12 +907,20 @@ export async function registerBossPhase2(
     throw new Error('Mission is not the active Hunt for this user');
   }
 
-  if (!state.board.boss.phase2.ready) {
-    throw new Error('Boss is not ready for phase 2');
+  if (state.board.boss.phase2.proof) {
+    return {
+      boss_state: buildBossResponse(state.board.boss),
+      rewards_preview: {
+        xp: huntSlot.selected.mission.reward.xp,
+        currency: huntSlot.selected.mission.reward.currency ?? 0,
+        items: huntSlot.selected.mission.reward.items ?? [],
+      },
+    };
   }
 
   state.board.boss.phase2.ready = false;
   state.board.boss.phase = 2;
+  state.board.boss.phase2.ready = false;
   state.board.boss.phase2.proof = payload.proof;
   state.board.boss.phase2.submittedAt = reference.toISOString();
 
@@ -977,7 +963,8 @@ export async function claimMissionReward(userId: string, missionId: string): Pro
   }
 
   const selection = slot.selected;
-  if (selection.status !== 'succeeded') {
+
+  if (selection.status !== 'completed' && selection.status !== 'claimed') {
     throw new Error('Mission is not ready to be claimed');
   }
 
@@ -1011,45 +998,49 @@ export async function applyHuntXpBoost({
   xpTotalToday,
 }: HuntBoosterInput): Promise<HuntBoosterResult> {
   const state = await ensureBoardState(userId);
-  const reference = new Date(date);
-  const huntSlot = state.board.slots.find((entry) => entry.slot === 'hunt');
+  const huntSlot = findSlot(state, 'hunt');
 
-  if (!huntSlot?.selected || huntSlot.selected.status !== 'active') {
-    return { xp_delta: baseXpDelta, xp_total_today: xpTotalToday, boosterApplied: false, multiplier: 1 };
+  const multiplier = state.booster.multiplier;
+
+  if (!huntSlot.selected) {
+    return {
+      xp_delta: baseXpDelta,
+      xp_total_today: xpTotalToday,
+      boosterApplied: false,
+      multiplier,
+    };
   }
 
-  const nextActivation = state.booster.nextActivationDate;
-  const submissionKey = `${date}:${state.booster.targetTaskId ?? 'any'}`;
+  if (!state.booster.targetTaskId) {
+    return {
+      xp_delta: baseXpDelta,
+      xp_total_today: xpTotalToday,
+      boosterApplied: false,
+      multiplier,
+    };
+  }
 
-  const boosterReady =
-    nextActivation === date &&
-    !state.booster.appliedKeys.includes(submissionKey) &&
-    (state.booster.targetTaskId === null || completedTaskIds.includes(state.booster.targetTaskId));
+  const submissionKey = `${date}:${[...completedTaskIds].sort().join(',')}`;
+  const bonusReady = completedTaskIds.includes(state.booster.targetTaskId);
+
+  if (!bonusReady || state.booster.appliedKeys.includes(submissionKey)) {
+    return {
+      xp_delta: baseXpDelta,
+      xp_total_today: xpTotalToday,
+      boosterApplied: false,
+      multiplier,
+    };
+  }
 
   if (!boosterReady) {
     return { xp_delta: baseXpDelta, xp_total_today: xpTotalToday, boosterApplied: false, multiplier: 1 };
   }
 
-  const multiplier = state.booster.multiplier;
   const bonus = Math.round(baseXpDelta * (multiplier - 1));
-  const fallback = Math.max(Math.round(huntSlot.selected.mission.reward.xp * 0.1), 10);
-  const appliedBonus = bonus > 0 ? bonus : fallback;
-
-  const updatedXpDelta = baseXpDelta + appliedBonus;
-  const updatedTotal = xpTotalToday + appliedBonus;
-
-  huntSlot.selected.progress.current = clamp(
-    huntSlot.selected.progress.current + 1,
-    0,
-    huntSlot.selected.progress.target,
-  );
-  huntSlot.selected.progress.updatedAt = reference.toISOString();
-  huntSlot.selected.updatedAt = huntSlot.selected.progress.updatedAt;
-
-  if (huntSlot.selected.progress.current >= huntSlot.selected.progress.target) {
-    huntSlot.selected.status = 'succeeded';
-    huntSlot.selected.completionAt = huntSlot.selected.updatedAt;
-  }
+  const appliedBonus =
+    Number.isFinite(bonus) && bonus > 0
+      ? bonus
+      : Math.max(Math.round(huntSlot.selected.mission.reward.xp * 0.1), 10);
 
   if (state.board.boss.shield.current > 0 && state.board.boss.linkedDailyTaskId) {
     state.board.boss.shield.current = Math.max(0, state.board.boss.shield.current - 1);
@@ -1062,6 +1053,10 @@ export async function applyHuntXpBoost({
 
   state.booster.appliedKeys.push(submissionKey);
   state.booster.nextActivationDate = null;
+
+  if (progress.current >= progress.target) {
+    huntSlot.selected.status = 'completed';
+  }
 
   recordMissionsV2Event('missions_v2_progress_tick', {
     userId,
@@ -1077,11 +1072,30 @@ export async function applyHuntXpBoost({
     },
   });
 
-  await persistState(userId, state, { dirty: true });
+  if (state.board.boss.shield.current > 0) {
+    state.board.boss.shield.current = Math.max(0, state.board.boss.shield.current - 1);
+    state.board.boss.shield.updatedAt = progress.updatedAt;
+
+    if (state.board.boss.shield.current === 0) {
+      state.board.boss.phase2.ready = true;
+    }
+
+    recordMissionsV2Event('missions_v2_boss_phase1_tick', {
+      userId,
+      data: {
+        missionId: huntSlot.selected.mission.id,
+        shield: state.board.boss.shield.current,
+        linkedTaskId: state.board.boss.linkedDailyTaskId,
+      },
+    });
+  }
+
+  state.board.generatedAt = progress.updatedAt;
+  await persistState(userId, state);
 
   return {
-    xp_delta: updatedXpDelta,
-    xp_total_today: updatedTotal,
+    xp_delta: newXpDelta,
+    xp_total_today: newXpTotal,
     boosterApplied: true,
     multiplier,
   };
