@@ -788,6 +788,20 @@ function ensureProposals(state: MissionsBoardState, slotKey: MissionSlotKey, use
   }
 }
 
+function resolveMissionProposal(slot: MissionSlotState, missionId: string): MissionDefinition | null {
+  if (!missionId) {
+    return null;
+  }
+
+  const index = slot.proposals.findIndex((proposal) => proposal.id === missionId);
+  if (index === -1) {
+    return null;
+  }
+
+  const [proposal] = slot.proposals.splice(index, 1);
+  return proposal ?? null;
+}
+
 export async function getMissionBoard(
   userId: string,
   options?: { claimAccess?: 'allowed' | 'blocked' },
