@@ -9,6 +9,7 @@ type JourneyRow = {
   days_of_journey: string | number | null;
   quantity_daily_logs: string | number | null;
   first_programmed: boolean | null;
+  first_tasks_confirmed: boolean | null;
 };
 
 const paramsSchema = z.object({
@@ -24,17 +25,19 @@ export const getUserJourney: AsyncHandler = async (req, res) => {
     `SELECT MIN(dl.date) AS first_date_log,
             (CURRENT_DATE - MIN(dl.date))::int AS days_of_journey,
             COUNT(DISTINCT dl.date) AS quantity_daily_logs,
-            u.first_programmed
+            u.first_programmed,
+            u.first_tasks_confirmed
      FROM users u
      LEFT JOIN daily_log dl ON dl.user_id = u.user_id
      WHERE u.user_id = $1
-     GROUP BY u.first_programmed`,
+     GROUP BY u.first_programmed, u.first_tasks_confirmed`,
     [id],
   );
 
   const [row] = result.rows;
 
   const firstProgrammed = Boolean(row?.first_programmed);
+  const firstTasksConfirmed = Boolean(row?.first_tasks_confirmed);
 
   if (!row || !row.first_date_log) {
     res.json({
@@ -42,6 +45,7 @@ export const getUserJourney: AsyncHandler = async (req, res) => {
       days_of_journey: 0,
       quantity_daily_logs: 0,
       first_programmed: firstProgrammed,
+      first_tasks_confirmed: firstTasksConfirmed,
     });
     return;
   }
@@ -51,5 +55,6 @@ export const getUserJourney: AsyncHandler = async (req, res) => {
     days_of_journey: Number(row.days_of_journey ?? 0),
     quantity_daily_logs: Number(row.quantity_daily_logs ?? 0),
     first_programmed: firstProgrammed,
+    first_tasks_confirmed: firstTasksConfirmed,
   });
 };
