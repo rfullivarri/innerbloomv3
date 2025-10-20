@@ -591,6 +591,8 @@ export async function submitDailyQuest(
     xpTotalToday: xpAfter.xp_total_today,
   });
 
+  const missionsV2BonusReady = booster.boosterApplied;
+
   return {
     ok: true,
     saved: {
