@@ -39,10 +39,6 @@ const phase2BodySchema = z.object({
   proof: z.string().min(8, 'Proof must contain details about the special hit'),
 });
 
-const heartbeatBodySchema = z.object({
-  missionId: z.string().min(1),
-});
-
 const CLAIM_SOURCE_HEADER = 'x-missions-claim-source';
 const CLAIM_ALLOWED_PATH = '/dashboard-v3/missions-v2';
 
@@ -121,10 +117,14 @@ router.post(
       throw new HttpError(401, 'unauthorized', 'Authentication required');
     }
 
-    const { missionId, taskId } = parseWithValidation(linkDailyBodySchema, req.body, 'Invalid link payload');
+    const { mission_id, task_id } = parseWithValidation(
+      linkDailyBodySchema,
+      req.body,
+      'Invalid link payload',
+    );
 
     try {
-      const result = await linkDailyToHuntMission(user.id, missionId, taskId);
+      const result = await linkDailyToHuntMission(user.id, mission_id, task_id);
       res.json(result);
     } catch (error) {
       normalizeError(error, 'Unable to link daily task to mission');

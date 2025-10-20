@@ -2,8 +2,8 @@ import type { PoolClient } from 'pg';
 import { pool, withClient } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 import { formatDateInTimezone } from '../controllers/users/user-state-service.js';
-import { applyHuntXpBoost, getMissionBoard } from './missionsV2Service.js';
-import type { MissionObjective } from './missionsV2Types.js';
+import { applyHuntXpBoost, getMissionBoard, runWeeklyAutoSelection } from './missionsV2Service.js';
+import type { MissionTask } from './missionsV2Types.js';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -599,37 +599,36 @@ export async function submitDailyQuest(
     xpTotalToday: xpAfter.xp_total_today,
   });
 
-  const board = await getMissionBoard(userId);
+  let board = await getMissionBoard(userId);
+  if (board.slots.every((slot) => slot.mission === null)) {
+    board = await runWeeklyAutoSelection(userId);
+  }
   const missionTasks = board.slots.flatMap((slot) => {
-    const mission = slot.mission ?? slot.proposals[0] ?? null;
+    const mission = slot.mission;
 
     if (!mission) {
       return [];
     }
 
-    return mission.objectives
-      .filter((objective): objective is MissionObjective =>
-        typeof objective?.id === 'string' &&
-        typeof objective?.label === 'string' &&
-        typeof objective?.target === 'number' &&
-        typeof objective?.unit === 'string',
-      )
-      .map((objective) => ({
+    return mission.tasks
+      .filter((task): task is MissionTask => typeof task?.id === 'string' && typeof task?.name === 'string')
+      .map((task) => ({
         mission_id: mission.id,
-        mission_name: mission.title,
+        mission_name: mission.name,
         slot: slot.slot,
-        task_id: objective.id,
-        task_name: objective.label,
+        task_id: task.id,
+        task_name: task.name,
       }));
   });
+
   const heartbeatReady = board.slots.some((slot) =>
-    slot.actions?.some((action) => action.type === 'heartbeat' && action.available),
+    slot.actions.some((action) => action.type === 'heartbeat' && action.enabled),
   );
-  const selectionReady = board.slots.some((slot) =>
-    slot.actions?.some((action) => action.type === 'select' && action.available),
+  const linkDailyReady = board.slots.some((slot) =>
+    slot.actions.some((action) => action.type === 'link_daily' && action.enabled),
   );
 
-  const missionsV2BonusReady = heartbeatReady || missionTasks.length > 0 || selectionReady;
+  const missionsV2BonusReady = heartbeatReady || missionTasks.length > 0 || linkDailyReady;
 
   return {
     ok: true,

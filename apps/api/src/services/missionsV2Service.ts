@@ -24,6 +24,7 @@ import {
   type MissionsBoardSlotResponse,
   type MissionsBoardState,
   type MissionSummary,
+  type BoosterState,
 } from './missionsV2Types.js';
 import { recordMissionsV2Event } from './missionsV2Telemetry.js';
 import {
@@ -59,6 +60,7 @@ export type HuntBoosterResult = {
 const CLAIM_VIEW_PATH = '/dashboard-v3/missions-v2';
 const DEFAULT_PETALS = 3;
 const COOLDOWN_DAYS = 15;
+const REROLL_COOLDOWN_DAYS = 7;
 const HUNT_BOOSTER_MULTIPLIER = 1.5;
 const BOSS_SHIELD_MAX = 6;
 const DURATION_BY_SLOT: Record<MissionSlotKey, number> = {
@@ -201,13 +203,20 @@ function createSlotState(slot: MissionSlotKey, userId: string): MissionSlotState
   };
 }
 
-async function persistState(userId: string, state: MissionsBoardState): Promise<void> {
-  await saveMissionsV2State(userId, JSON.parse(JSON.stringify(state)) as MissionsBoardState);
+async function persistState(
+  userId: string,
+  state: MissionsBoardState,
+  update?: MissionBoardUpdate,
+): Promise<void> {
+  if (update && !update.dirty) {
+    return;
+  }
+
+  const snapshot = JSON.parse(JSON.stringify(state)) as MissionsBoardState;
+  await saveMissionsV2State(userId, snapshot);
 }
 
-function refreshRerolls(board: MissionsBoard): void {
-  const now = new Date();
-
+function refreshRerolls(board: MissionsBoard, reference: Date = new Date()): void {
   for (const slot of board.slots) {
     if (!slot.reroll.usedAt) {
       continue;
@@ -216,7 +225,7 @@ function refreshRerolls(board: MissionsBoard): void {
     const usedAt = new Date(slot.reroll.usedAt);
     const resetAt = addDays(usedAt, REROLL_COOLDOWN_DAYS);
 
-    if (resetAt <= now) {
+    if (resetAt <= reference) {
       slot.reroll.remaining = slot.reroll.total;
       slot.reroll.usedAt = null;
       slot.reroll.nextResetAt = null;
@@ -236,18 +245,75 @@ function findSlot(state: MissionsBoardState, slotKey: MissionSlotKey): MissionSl
   return slot;
 }
 
-function resolveProposal(slot: MissionSlotState, missionId: string): MissionProposal | null {
-  return slot.proposals.find((proposal) => proposal.id === missionId) ?? null;
+function hydrateMissionDefinition(definition: MissionDefinition): MissionDefinition {
+  const mission: MissionDefinition = {
+    ...definition,
+    reward: {
+      xp: definition.reward.xp,
+      currency: definition.reward.currency ?? 0,
+      items: definition.reward.items ? [...definition.reward.items] : [],
+    },
+    tasks: definition.tasks.map((task) => ({ ...task })),
+  };
+  return mission;
+}
+
+function hydrateSelection(selection: MissionSelectionState | null): MissionSelectionState | null {
+  if (!selection) {
+    return null;
+  }
+
+  return {
+    ...selection,
+    mission: hydrateMissionDefinition(selection.mission),
+    progress: { ...selection.progress },
+    petals: { ...selection.petals },
+    heartbeatLog: [...selection.heartbeatLog],
+    claim: selection.claim
+      ? {
+          claimedAt: selection.claim.claimedAt,
+          reward: {
+            xp: selection.claim.reward.xp,
+            currency: selection.claim.reward.currency ?? 0,
+            items: selection.claim.reward.items ? [...selection.claim.reward.items] : [],
+          },
+        }
+      : undefined,
+  };
 }
 
 function hydrateState(raw: MissionsBoardState): MissionsBoardState {
-  return {
-    phase: 1,
-    shield: { current: BOSS_SHIELD_MAX, max: BOSS_SHIELD_MAX, updatedAt: now },
-    linkedDailyTaskId: null,
-    linkedAt: null,
-    phase2: { ready: false, proof: null, submittedAt: null },
+  const reference = new Date();
+  const board: MissionsBoard = {
+    ...raw.board,
+    slots: raw.board.slots.map((slot) => ({
+      ...slot,
+      proposals: slot.proposals.map(hydrateMissionDefinition),
+      selected: hydrateSelection(slot.selected),
+      reroll: { ...slot.reroll },
+    })),
+    boss: {
+      ...raw.board.boss,
+      shield: { ...raw.board.boss.shield },
+      phase2: { ...raw.board.boss.phase2 },
+    },
   };
+
+  refreshRerolls(board, reference);
+
+  const booster: BoosterState = {
+    multiplier: raw.booster.multiplier ?? HUNT_BOOSTER_MULTIPLIER,
+    targetTaskId: raw.booster.targetTaskId ?? null,
+    appliedKeys: [...(raw.booster.appliedKeys ?? [])],
+    nextActivationDate: raw.booster.nextActivationDate ?? null,
+  };
+
+  const effects = raw.effects.map((effect) => ({
+    ...effect,
+    payload: { ...(effect.payload ?? {}) },
+  }));
+
+  return { board, booster, effects };
 }
 
 function computeSeasonId(reference = new Date()): string {
@@ -263,6 +329,16 @@ function createBoard(userId: string): MissionsBoard {
     generatedAt: nowIso(),
     slots: MISSION_SLOT_KEYS.map((slot) => createSlotState(slot, userId)),
     boss: createBossState(),
+  };
+}
+
+function createBossState(): BossState {
+  return {
+    phase: 1,
+    shield: { current: BOSS_SHIELD_MAX, max: BOSS_SHIELD_MAX, updatedAt: nowIso() },
+    linkedDailyTaskId: null,
+    linkedAt: null,
+    phase2: { ready: false, proof: null, submittedAt: null },
   };
 }
 
@@ -291,18 +367,6 @@ async function ensureBoardState(userId: string): Promise<MissionsBoardState> {
   const state = createInitialState(userId);
   await saveMissionsV2State(userId, state);
   return state;
-}
-
-function ensureProposals(state: MissionsBoardState, slotKey: MissionSlotKey, reason: string): MissionProposal[] {
-  const slot = findSlot(state, slotKey);
-
-  const thaw = effects.find((effect) => effect.payload?.kind === 'cooldown_thaw' && !effect.consumedAt);
-  if (thaw) {
-    cooldownUntil = base;
-    thaw.consumedAt = base.toISOString();
-  }
-
-  return cooldownUntil;
 }
 
 function pruneExpiredEffects(state: MissionsBoardState, reference: Date): void {
@@ -379,6 +443,40 @@ function isCooldownActive(slot: MissionSlotState, reference: Date): boolean {
   return new Date(slot.cooldownUntil) > reference;
 }
 
+function computeCooldownDate(reference: Date, effects: MissionEffect[]): Date {
+  let base = addDays(reference, COOLDOWN_DAYS);
+  const thaw = effects.find((effect) => effect.payload?.kind === 'cooldown_thaw' && !effect.consumedAt);
+
+  if (thaw) {
+    const reduction = typeof thaw.payload?.days === 'number' ? thaw.payload.days : COOLDOWN_DAYS;
+    const adjusted = addDays(reference, Math.max(0, COOLDOWN_DAYS - reduction));
+    thaw.consumedAt = reference.toISOString();
+    base = adjusted;
+  }
+
+  return base;
+}
+
+function applyPetalEffects(
+  state: MissionsBoardState,
+  selection: MissionSelectionState,
+  reference: Date,
+): void {
+  const bonus = state.effects.find((effect) => effect.payload?.kind === 'petal_shield' && !effect.consumedAt);
+  const bonusPetals = typeof bonus?.payload?.bonus === 'number' ? Math.max(0, bonus.payload.bonus) : 0;
+  const total = DEFAULT_PETALS + bonusPetals;
+
+  selection.petals = {
+    total,
+    remaining: Math.min(total, selection.petals.remaining + bonusPetals),
+    lastEvaluatedAt: todayKey(reference),
+  };
+
+  if (bonus) {
+    bonus.consumedAt = reference.toISOString();
+  }
+}
+
 function createSelection(mission: MissionDefinition, reference: Date): MissionSelectionState {
   const now = reference.toISOString();
   ensureMissionReward(mission);
@@ -406,11 +504,6 @@ function ensureMissionReward(mission: MissionDefinition): void {
     currency: mission.reward.currency ?? 0,
     items: mission.reward.items ? [...mission.reward.items] : [],
   };
-}
-
-function resolveMissionProposal(slot: MissionSlotState, missionId: string): MissionDefinition | null {
-  const proposal = slot.proposals.find((candidate) => candidate.id === missionId);
-  return proposal ? { ...proposal, tasks: proposal.tasks.map((task) => ({ ...task })) } : null;
 }
 
 function buildMissionSummary(selection: MissionSelectionState | null): MissionSummary | null {
@@ -909,7 +1002,7 @@ export async function registerBossPhase2(
 
   if (state.board.boss.phase2.proof) {
     return {
-      boss_state: buildBossResponse(state.board.boss),
+      boss_state: buildBossResponse(state.board, reference),
       rewards_preview: {
         xp: huntSlot.selected.mission.reward.xp,
         currency: huntSlot.selected.mission.reward.currency ?? 0,
@@ -918,7 +1011,6 @@ export async function registerBossPhase2(
     };
   }
 
-  state.board.boss.phase2.ready = false;
   state.board.boss.phase = 2;
   state.board.boss.phase2.ready = false;
   state.board.boss.phase2.proof = payload.proof;
@@ -955,7 +1047,7 @@ export async function registerBossPhase2(
 export async function claimMissionReward(userId: string, missionId: string): Promise<MissionClaimResponse> {
   const state = await ensureBoardState(userId);
   const reference = new Date();
-  const update = applyDailyPetalDecay(state, reference);
+  applyDailyPetalDecay(state, reference);
   const slot = state.board.slots.find((entry) => entry.selected?.mission.id === missionId);
 
   if (!slot || !slot.selected) {
@@ -964,7 +1056,7 @@ export async function claimMissionReward(userId: string, missionId: string): Pro
 
   const selection = slot.selected;
 
-  if (selection.status !== 'completed' && selection.status !== 'claimed') {
+  if (selection.status !== 'succeeded' && selection.status !== 'claimed') {
     throw new Error('Mission is not ready to be claimed');
   }
 
@@ -1032,8 +1124,11 @@ export async function applyHuntXpBoost({
     };
   }
 
+  const activationDate = state.booster.nextActivationDate;
+  const boosterReady = !activationDate || activationDate <= date;
+
   if (!boosterReady) {
-    return { xp_delta: baseXpDelta, xp_total_today: xpTotalToday, boosterApplied: false, multiplier: 1 };
+    return { xp_delta: baseXpDelta, xp_total_today: xpTotalToday, boosterApplied: false, multiplier };
   }
 
   const bonus = Math.round(baseXpDelta * (multiplier - 1));
@@ -1042,10 +1137,20 @@ export async function applyHuntXpBoost({
       ? bonus
       : Math.max(Math.round(huntSlot.selected.mission.reward.xp * 0.1), 10);
 
-  if (state.board.boss.shield.current > 0 && state.board.boss.linkedDailyTaskId) {
-    state.board.boss.shield.current = Math.max(0, state.board.boss.shield.current - 1);
-    state.board.boss.shield.updatedAt = huntSlot.selected.updatedAt;
-    if (state.board.boss.shield.current === 0) {
+  const progress = huntSlot.selected.progress;
+  progress.current = Math.min(progress.target, progress.current + 1);
+  progress.updatedAt = new Date().toISOString();
+
+  if (progress.current >= progress.target && huntSlot.selected.status === 'active') {
+    huntSlot.selected.status = 'succeeded';
+    huntSlot.selected.completionAt = progress.updatedAt;
+  }
+
+  const shield = state.board.boss.shield;
+  if (shield.current > 0 && state.board.boss.linkedDailyTaskId) {
+    shield.current = Math.max(0, shield.current - 1);
+    shield.updatedAt = progress.updatedAt;
+    if (shield.current === 0) {
       state.board.boss.phase = 2;
       state.board.boss.phase2.ready = true;
     }
@@ -1054,17 +1159,13 @@ export async function applyHuntXpBoost({
   state.booster.appliedKeys.push(submissionKey);
   state.booster.nextActivationDate = null;
 
-  if (progress.current >= progress.target) {
-    huntSlot.selected.status = 'completed';
-  }
-
   recordMissionsV2Event('missions_v2_progress_tick', {
     userId,
     data: {
       slot: 'hunt',
       missionId: huntSlot.selected.mission.id,
-      progress: huntSlot.selected.progress.current,
-      target: huntSlot.selected.progress.target,
+      progress: progress.current,
+      target: progress.target,
       boostApplied: true,
       multiplier,
       baseXpDelta,
@@ -1072,26 +1173,20 @@ export async function applyHuntXpBoost({
     },
   });
 
-  if (state.board.boss.shield.current > 0) {
-    state.board.boss.shield.current = Math.max(0, state.board.boss.shield.current - 1);
-    state.board.boss.shield.updatedAt = progress.updatedAt;
+  recordMissionsV2Event('missions_v2_boss_phase1_tick', {
+    userId,
+    data: {
+      missionId: huntSlot.selected.mission.id,
+      shield: shield.current,
+      linkedTaskId: state.board.boss.linkedDailyTaskId,
+    },
+  });
 
-    if (state.board.boss.shield.current === 0) {
-      state.board.boss.phase2.ready = true;
-    }
-
-    recordMissionsV2Event('missions_v2_boss_phase1_tick', {
-      userId,
-      data: {
-        missionId: huntSlot.selected.mission.id,
-        shield: state.board.boss.shield.current,
-        linkedTaskId: state.board.boss.linkedDailyTaskId,
-      },
-    });
-  }
+  const newXpDelta = baseXpDelta + appliedBonus;
+  const newXpTotal = xpTotalToday + appliedBonus;
 
   state.board.generatedAt = progress.updatedAt;
-  await persistState(userId, state);
+  await persistState(userId, state, { dirty: true });
 
   return {
     xp_delta: newXpDelta,
