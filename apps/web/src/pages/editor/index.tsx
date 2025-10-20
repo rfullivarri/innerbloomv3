@@ -380,6 +380,34 @@ export default function TaskEditorPage() {
     [],
   );
 
+  const navigationTasks = useMemo(() => {
+    if (editVariant !== 'panel') {
+      return [] as UserTask[];
+    }
+
+    return visibleTasks;
+  }, [editVariant, visibleTasks]);
+
+  const handleCloseEdit = useCallback(() => {
+    setTaskToEdit(null);
+    setEditVariant('modal');
+    setEditGroupKey(null);
+  }, []);
+
+  const handleNavigatePanelTask = useCallback(
+    (taskId: string) => {
+      if (editVariant !== 'panel') {
+        return;
+      }
+
+      const targetTask = navigationTasks.find((entry) => entry.id === taskId);
+      if (targetTask) {
+        setTaskToEdit(targetTask);
+      }
+    },
+    [editVariant, navigationTasks],
+  );
+
   return (
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
@@ -1150,7 +1178,7 @@ function TaskBoard({
                   Sin tareas en este pilar.
                 </p>
               ) : (
-                group.tasks.map((task) => (
+                group.tasks.map((task: UserTask) => (
                   <TaskBoardItem
                     key={task.id}
                     task={task}
