@@ -935,14 +935,22 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     [board, setBoard, setActionError, setExpandedSlotId, userId],
   );
 
-  const scrollCarouselToIndex = useCallback((index: number) => {
-    const container = carouselRef.current;
-    if (!container) {
-      return;
-    }
-    const element = container.querySelector<HTMLElement>(`[data-carousel-index='${index}']`);
-    element?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  }, []);
+  const scrollCarouselToIndex = useCallback(
+    (index: number) => {
+      if (!prefersReducedMotion) {
+        return;
+      }
+
+      const container = carouselRef.current;
+      if (!container) {
+        return;
+      }
+
+      const element = container.querySelector<HTMLElement>(`[data-carousel-index='${index}']`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    },
+    [prefersReducedMotion],
+  );
 
   const handleCarouselStep = useCallback(
     (direction: 'next' | 'prev') => {
@@ -1660,12 +1668,29 @@ export function MissionsV2Board({ userId }: { userId: string }) {
                       const isActiveCard = index === activeMarketIndex;
                       const canActivateThisCard = canActivate && isActiveCard;
                       const coverSrc = MARKET_COVER_BY_SLOT[slot] ?? '/mainflow2.png';
-                      const distance = Math.abs(index - activeMarketIndex);
-                      const clampedDistance = Math.min(distance, 3);
-                      const translateX = (index - activeMarketIndex) * 68;
-                      const translateY = clampedDistance * 14;
-                      const scale = Math.max(0.74, 1 - clampedDistance * 0.14);
-                      const opacity = Math.max(0.4, 1 - clampedDistance * 0.18);
+                      const totalCards = marketCards.length;
+                      let relativeOffset = index - activeMarketIndex;
+                      if (totalCards > 1) {
+                        const half = totalCards / 2;
+                        if (relativeOffset > half) {
+                          relativeOffset -= totalCards;
+                        } else if (relativeOffset < -half) {
+                          relativeOffset += totalCards;
+                        }
+                      }
+                      const maxVisibleOffset = 3;
+                      const limitedOffset = Math.max(
+                        Math.min(relativeOffset, maxVisibleOffset),
+                        -maxVisibleOffset,
+                      );
+                      const angle = (Math.PI / 6) * limitedOffset;
+                      const depth = Math.cos(angle);
+                      const translateX = Math.sin(angle) * 52;
+                      const translateY = (1 - depth) * 120;
+                      const scale = 0.82 + 0.18 * depth;
+                      const opacity = 0.45 + 0.55 * depth;
+                      const rotate = Math.sin(angle) * -6;
+                      const zIndex = Math.round((depth + 1) * 50) + (isActiveCard ? 100 : 0);
                       const itemStyle: CSSProperties = prefersReducedMotion
                         ? {
                             transform: 'none',
@@ -1673,9 +1698,9 @@ export function MissionsV2Board({ userId }: { userId: string }) {
                             zIndex: isActiveCard ? 2 : 1,
                           }
                         : {
-                            transform: `translateX(${translateX}%) translateY(${translateY}px) scale(${scale})`,
+                            transform: `translateX(${translateX}%) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
                             opacity,
-                            zIndex: 100 - clampedDistance * 10,
+                            zIndex,
                           };
 
                       return (
