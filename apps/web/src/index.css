@@ -1100,8 +1100,12 @@
 
 
 .missions-active-carousel__track {
+  --missions-active-carousel-default-height: clamp(320px, calc(100dvh - 160px), 480px);
   @apply relative flex w-full items-center justify-center overflow-hidden py-4 sm:py-6;
-  min-height: clamp(320px, calc(100dvh - 160px), 480px);
+  min-height: var(
+    --missions-active-carousel-height,
+    var(--missions-active-carousel-default-height)
+  );
 }
 
 .missions-active-carousel__item {
@@ -1118,7 +1122,7 @@
 
 @media (max-width: 480px) {
   .missions-active-carousel__track {
-    min-height: clamp(300px, calc(100dvh - 140px), 420px);
+    --missions-active-carousel-default-height: clamp(300px, calc(100dvh - 140px), 420px);
   }
 }
 
