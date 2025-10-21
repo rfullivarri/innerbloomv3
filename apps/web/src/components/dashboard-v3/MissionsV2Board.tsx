@@ -2245,12 +2245,13 @@ export function MissionsV2Board({
           hidden={viewMode !== 'market'}
           className="missions-board__panel"
         >
-          <Card
-            className="missions-card missions-card--market"
-            title="Market de misiones"
-            subtitle="Deslizá, elegí y activá tu próxima propuesta"
-            bodyClassName="missions-card__body missions-card__body--market"
-          >
+          <div className="missions-market-view">
+            <header className="missions-market-view__intro">
+              <h3 className="missions-market-view__title">Market de misiones</h3>
+              <p className="missions-market-view__subtitle">
+                Deslizá, elegí y activá tu próxima propuesta
+              </p>
+            </header>
             <div className="missions-market-carousel">
               <div className="missions-market-carousel__controls">
                 <p className="missions-market-carousel__hint">
@@ -2331,19 +2332,19 @@ export function MissionsV2Board({
                           relativeOffset += totalCards;
                         }
                       }
-                      const maxVisibleOffset = 3;
+                      const maxVisibleOffset = Math.min(2, Math.max(totalCards - 1, 1));
                       const limitedOffset = Math.max(
                         Math.min(relativeOffset, maxVisibleOffset),
                         -maxVisibleOffset,
                       );
-                      const angle = (Math.PI / 6) * limitedOffset;
+                      const angle = (Math.PI / 8) * limitedOffset;
                       const depth = Math.cos(angle);
-                      const translateX = Math.sin(angle) * 40;
-                      const translateY = (1 - depth) * 80;
-                      const scale = 0.82 + 0.12 * depth;
-                      const opacity = 0.45 + 0.55 * depth;
-                      const rotate = Math.sin(angle) * -6;
-                      const zIndex = Math.round((depth + 1) * 50) + (isActiveCard ? 100 : 0);
+                      const translateX = Math.sin(angle) * 34;
+                      const translateY = (1 - depth) * 60;
+                      const scale = 0.82 + 0.14 * depth;
+                      const opacity = 0.5 + 0.5 * depth;
+                      const rotate = Math.sin(angle) * -4.5;
+                      const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
                       const itemStyle: CSSProperties = prefersReducedMotion
                         ? {
                             transform: 'none',
@@ -2532,7 +2533,7 @@ export function MissionsV2Board({
                 </>
               )}
             </div>
-          </Card>
+          </div>
         </div>
       </div>
 
