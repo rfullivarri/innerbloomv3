@@ -2186,9 +2186,9 @@ export function MissionsV2Board({
                     );
                     const angle = (Math.PI / 8) * limitedOffset;
                     const depth = Math.cos(angle);
-                    const translateX = Math.sin(angle) * 46;
-                    const translateY = (1 - depth) * 90;
-                    const scale = 0.86 + 0.14 * depth;
+                    const translateX = Math.sin(angle) * 34;
+                    const translateY = (1 - depth) * 60;
+                    const scale = 0.82 + 0.14 * depth;
                     const opacity = 0.5 + 0.5 * depth;
                     const rotate = Math.sin(angle) * -4.5;
                     const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
@@ -2338,9 +2338,9 @@ export function MissionsV2Board({
                       );
                       const angle = (Math.PI / 6) * limitedOffset;
                       const depth = Math.cos(angle);
-                      const translateX = Math.sin(angle) * 52;
-                      const translateY = (1 - depth) * 120;
-                      const scale = 0.82 + 0.18 * depth;
+                      const translateX = Math.sin(angle) * 40;
+                      const translateY = (1 - depth) * 80;
+                      const scale = 0.82 + 0.12 * depth;
                       const opacity = 0.45 + 0.55 * depth;
                       const rotate = Math.sin(angle) * -6;
                       const zIndex = Math.round((depth + 1) * 50) + (isActiveCard ? 100 : 0);

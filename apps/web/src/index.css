@@ -1173,16 +1173,16 @@
   display: grid;
   place-items: center;
   width: 100%;
-  padding: clamp(0.75rem, 3vw, 1.15rem) 0 clamp(1.75rem, 6vw, 2.75rem);
+  padding: clamp(0.5rem, 2.5vw, 0.85rem) 0 clamp(1.25rem, 5vw, 2.25rem);
   margin: 0;
-  min-height: clamp(360px, calc(100dvh - 140px), 520px);
-  overflow: visible;
+  min-height: clamp(320px, calc(100dvh - 160px), 480px);
+  overflow: hidden;
 }
 
 .missions-active-carousel__item {
   grid-area: 1 / 1;
-  width: clamp(240px, 82vw, 340px);
-  max-width: 360px;
+  width: clamp(240px, 78vw, 320px);
+  max-width: 320px;
   display: flex;
   justify-content: center;
   cursor: pointer;
@@ -1194,18 +1194,19 @@
 
 @media (min-width: 768px) {
   .missions-active-carousel__item {
-    width: clamp(280px, 34vw, 380px);
+    width: clamp(280px, 30vw, 340px);
+    max-width: 340px;
   }
 }
 
 @media (max-width: 480px) {
   .missions-active-carousel__track {
-    min-height: clamp(340px, calc(100dvh - 120px), 480px);
+    min-height: clamp(300px, calc(100dvh - 140px), 420px);
   }
 
   .missions-active-carousel__item {
-    width: clamp(228px, 84vw, 320px);
-    max-width: 86vw;
+    width: clamp(220px, 82vw, 300px);
+    max-width: 82vw;
   }
 }
 
@@ -1233,7 +1234,7 @@
 [data-reduced-motion='true'] .missions-active-carousel__item {
   grid-area: auto;
   flex: 0 0 auto;
-  width: clamp(240px, 68vw, 360px);
+  width: clamp(240px, 68vw, 320px);
   scroll-snap-align: center;
 }
 
