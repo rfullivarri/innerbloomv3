@@ -691,6 +691,151 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     [userId, setSlotBusy],
   );
 
+  const handleActivateProposal = useCallback(
+    (slotKey: MissionsV2Slot['slot'], proposal: MissionsV2MarketProposal) => {
+      let errorMessage: string | null = null;
+      let activatedSlot: MissionsV2Slot | null = null;
+
+      setBoard((current) => {
+        if (!current) {
+          errorMessage = 'No pudimos preparar el tablero.';
+          return current;
+        }
+
+        const slotIndex = current.slots.findIndex((slot) => slot.slot === slotKey);
+        if (slotIndex === -1) {
+          errorMessage = 'No encontramos un slot compatible para esta misión.';
+          return current;
+        }
+
+        const slot = current.slots[slotIndex];
+
+        if (slot.mission) {
+          errorMessage = 'Este slot ya tiene una misión activa.';
+          return current;
+        }
+
+        if (slot.state !== 'idle') {
+          errorMessage = 'Liberá el slot antes de activar una nueva misión.';
+          return current;
+        }
+
+        const missionId = `market-${proposal.id}`;
+        const objectives = proposal.objectives.length > 0 ? proposal.objectives : [proposal.objective];
+        const progressTarget = Math.max(objectives.length, 3);
+        const countdownDays = proposal.duration_days ?? 0;
+        const countdownLabel = countdownDays > 0 ? `Termina en ${countdownDays}d` : 'Sin límite';
+        const endsAt = countdownDays > 0 ? new Date(Date.now() + countdownDays * 86_400_000).toISOString() : null;
+
+        const nextSlot: MissionsV2Slot = {
+          ...slot,
+          mission: {
+            id: missionId,
+            name: proposal.name,
+            type: slotKey,
+            summary: proposal.summary,
+            requirements: proposal.requirements,
+            objective: proposal.objective,
+            objectives,
+            reward: {
+              xp: proposal.reward.xp,
+              currency: proposal.reward.currency,
+              items: [...proposal.reward.items],
+            },
+            tasks: [],
+            tags: proposal.tags,
+            metadata: proposal.metadata,
+          },
+          state: 'active',
+          heartbeat_today: false,
+          progress: {
+            current: 0,
+            target: progressTarget,
+            percent: 0,
+          },
+          countdown: {
+            ...slot.countdown,
+            ends_at: endsAt,
+            label: countdownLabel,
+          },
+          actions: [
+            {
+              id: `${missionId}:heartbeat`,
+              type: 'heartbeat',
+              label: 'Registrar Heartbeat',
+              enabled: true,
+            },
+            {
+              id: `${missionId}:link_daily`,
+              type: 'link_daily',
+              label: 'Vincular Daily',
+              enabled: true,
+            },
+            {
+              id: `${missionId}:claim`,
+              type: 'claim',
+              label: 'Reclamar botín',
+              enabled: false,
+            },
+          ],
+          claim: {
+            ...slot.claim,
+            available: false,
+            enabled: false,
+          },
+        };
+
+        const nextSlots = [...current.slots];
+        nextSlots[slotIndex] = nextSlot;
+
+        const nextMarket = current.market.map((entry) =>
+          entry.slot === slotKey
+            ? {
+                ...entry,
+                proposals: entry.proposals.filter((item) => item.id !== proposal.id),
+              }
+            : entry,
+        );
+
+        activatedSlot = nextSlot;
+
+        return {
+          ...current,
+          slots: nextSlots,
+          market: nextMarket,
+        };
+      });
+
+      if (errorMessage) {
+        setActionError(errorMessage);
+        return;
+      }
+
+      if (!activatedSlot) {
+        return;
+      }
+
+      setActionError(null);
+      setExpandedSlotId(activatedSlot.id);
+      if (typeof window !== 'undefined') {
+        window.requestAnimationFrame(() => {
+          const element = slotRefs.current[activatedSlot?.id ?? ''];
+          element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      } else {
+        const element = slotRefs.current[activatedSlot?.id ?? ''];
+        element?.scrollIntoView({ block: 'center' });
+      }
+      emitMissionsV2Event('missions_v2_market_activate', {
+        userId,
+        slot: activatedSlot.slot,
+        missionId: activatedSlot.mission?.id,
+        proposalId: proposal.id,
+      });
+    },
+    [setBoard, setActionError, setExpandedSlotId, userId],
+  );
+
   const handleUnavailableAction = useCallback((action: MissionsV2Action) => {
     if (action.type === 'special_strike' || action.type === 'submit_evidence') {
       setActionError('Esta acción estará disponible en la próxima iteración del tablero.');
@@ -1158,6 +1303,8 @@ export function MissionsV2Board({ userId }: { userId: string }) {
                 const objectives = proposal.objectives.length > 0 ? proposal.objectives : [proposal.objective];
                 const tags = proposal.tags.length > 0 ? proposal.tags : [];
                 const rarity = getMarketRarity(entry.slot);
+                const slotState = board?.slots.find((slot) => slot.slot === entry.slot);
+                const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
 
                 return (
                   <article
@@ -1200,7 +1347,16 @@ export function MissionsV2Board({ userId }: { userId: string }) {
                           ))}
                         </ul>
                       )}
-                      <button type="button" className="missions-market-card__cta" disabled>
+                      <button
+                        type="button"
+                        className="missions-market-card__cta"
+                        disabled={!canActivate}
+                        onClick={() => {
+                          if (canActivate) {
+                            handleActivateProposal(entry.slot, proposal);
+                          }
+                        }}
+                      >
                         Activar en slot {details.label}
                       </button>
                     </div>
