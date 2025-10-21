@@ -503,9 +503,11 @@ export function MissionsV2Board({ userId }: { userId: string }) {
   const [marketCoverAspect, setMarketCoverAspect] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<'active' | 'market'>('active');
   const [activeMarketIndex, setActiveMarketIndex] = useState(0);
+  const [activeSlotIndex, setActiveSlotIndex] = useState(0);
   const hasTrackedView = useRef(false);
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
   const carouselRef = useRef<HTMLDivElement | null>(null);
+  const slotCarouselRef = useRef<HTMLDivElement | null>(null);
 
   const marketBySlot = useMemo<MarketBySlot>(() => {
     const map: MarketBySlot = {};
@@ -528,6 +530,14 @@ export function MissionsV2Board({ userId }: { userId: string }) {
       (a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot),
     );
   }, [board]);
+
+  const slotIndexById = useMemo(() => {
+    const map = new Map<string, number>();
+    orderedSlots.forEach((slot, index) => {
+      map.set(slot.id, index);
+    });
+    return map;
+  }, [orderedSlots]);
 
   const orderedMarketSlots = useMemo(() => {
     return SLOT_ORDER.map((slotKey) => {
@@ -558,6 +568,19 @@ export function MissionsV2Board({ userId }: { userId: string }) {
       setBoard(data);
     }
   }, [status, data]);
+
+  useEffect(() => {
+    if (orderedSlots.length === 0) {
+      setActiveSlotIndex(0);
+      return;
+    }
+    setActiveSlotIndex((current) => {
+      if (current < orderedSlots.length) {
+        return current;
+      }
+      return Math.max(0, orderedSlots.length - 1);
+    });
+  }, [orderedSlots]);
 
   useEffect(() => {
     if (marketCards.length === 0) {
@@ -803,6 +826,25 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     [userId, setSlotBusy],
   );
 
+  const scrollSlotCarouselToIndex = useCallback(
+    (index: number) => {
+      if (!prefersReducedMotion) {
+        return;
+      }
+
+      const container = slotCarouselRef.current;
+      if (!container) {
+        return;
+      }
+
+      const element = container.querySelector<HTMLElement>(
+        `[data-slot-carousel-index='${index}']`,
+      );
+      element?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    },
+    [prefersReducedMotion],
+  );
+
   const handleActivateProposal = useCallback(
     (slotKey: MissionsV2Slot['slot'], proposal: MissionsV2MarketProposal) => {
       if (!board) {
@@ -810,13 +852,13 @@ export function MissionsV2Board({ userId }: { userId: string }) {
         return;
       }
 
-      const slotIndex = board.slots.findIndex((slot) => slot.slot === slotKey);
-      if (slotIndex === -1) {
+      const slotIndexInBoard = board.slots.findIndex((slot) => slot.slot === slotKey);
+      if (slotIndexInBoard === -1) {
         setActionError('No encontramos un slot compatible para esta misión.');
         return;
       }
 
-      const slot = board.slots[slotIndex];
+      const slot = board.slots[slotIndexInBoard];
 
       if (slot.mission) {
         setActionError('Este slot ya tiene una misión activa.');
@@ -894,7 +936,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
       };
 
       const nextSlots = [...board.slots];
-      nextSlots[slotIndex] = nextSlot;
+      nextSlots[slotIndexInBoard] = nextSlot;
 
       const nextMarket = board.market.map((entry): MissionsV2MarketSlot =>
         entry.slot === slotKey
@@ -915,6 +957,11 @@ export function MissionsV2Board({ userId }: { userId: string }) {
       setViewMode('active');
 
       setActionError(null);
+      const nextSlotIndex = slotIndexById.get(nextSlot.id);
+      if (nextSlotIndex != null) {
+        setActiveSlotIndex(nextSlotIndex);
+        scrollSlotCarouselToIndex(nextSlotIndex);
+      }
       setExpandedSlotId(nextSlot.id);
       if (typeof window !== 'undefined') {
         window.requestAnimationFrame(() => {
@@ -932,7 +979,16 @@ export function MissionsV2Board({ userId }: { userId: string }) {
         proposalId: proposal.id,
       });
     },
-    [board, setBoard, setActionError, setExpandedSlotId, userId],
+    [
+      board,
+      setBoard,
+      setActionError,
+      setExpandedSlotId,
+      slotIndexById,
+      scrollSlotCarouselToIndex,
+      setActiveSlotIndex,
+      userId,
+    ],
   );
 
   const scrollCarouselToIndex = useCallback(
@@ -963,6 +1019,57 @@ export function MissionsV2Board({ userId }: { userId: string }) {
       scrollCarouselToIndex(nextIndex);
     },
     [activeMarketIndex, marketCards.length, scrollCarouselToIndex],
+  );
+
+  const handleSlotCarouselStep = useCallback(
+    (direction: 'next' | 'prev') => {
+      if (orderedSlots.length === 0) {
+        return;
+      }
+      const delta = direction === 'next' ? 1 : -1;
+      const nextIndex = (activeSlotIndex + delta + orderedSlots.length) % orderedSlots.length;
+      setActiveSlotIndex(nextIndex);
+      scrollSlotCarouselToIndex(nextIndex);
+    },
+    [activeSlotIndex, orderedSlots.length, scrollSlotCarouselToIndex],
+  );
+
+  const handleSlotCardSelect = useCallback(
+    (index: number) => {
+      if (index === activeSlotIndex) {
+        return;
+      }
+      setActiveSlotIndex(index);
+      scrollSlotCarouselToIndex(index);
+    },
+    [activeSlotIndex, scrollSlotCarouselToIndex],
+  );
+
+  const handleSlotCardKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLElement>, slotId: string, index: number) => {
+      if (event.defaultPrevented || event.target !== event.currentTarget) {
+        return;
+      }
+
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        handleSlotCarouselStep('next');
+        return;
+      }
+
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        handleSlotCarouselStep('prev');
+        return;
+      }
+
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleSlotCardSelect(index);
+        setExpandedSlotId((current) => (current === slotId ? null : slotId));
+      }
+    },
+    [handleSlotCarouselStep, handleSlotCardSelect],
   );
 
   const handleMarketCardToggle = useCallback(
@@ -1014,12 +1121,17 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     (cardKey: string, event: SyntheticEvent<HTMLImageElement>) => {
       const image = event.currentTarget;
       if (image.naturalWidth > 0 && image.naturalHeight > 0) {
-        const ratio = `${image.naturalWidth} / ${image.naturalHeight}`;
+        const ratio = image.naturalWidth / image.naturalHeight;
+        if (!Number.isFinite(ratio) || ratio <= 0) {
+          return;
+        }
+        const clamped = Math.min(Math.max(ratio, 0.56), 0.72);
+        const value = clamped.toFixed(4);
         setMarketCoverAspect((prev) => {
-          if (prev[cardKey] === ratio) {
+          if (prev[cardKey] === value) {
             return prev;
           }
-          return { ...prev, [cardKey]: ratio };
+          return { ...prev, [cardKey]: value };
         });
       }
     },
@@ -1054,13 +1166,19 @@ export function MissionsV2Board({ userId }: { userId: string }) {
 
   const focusSlot = useCallback(
     (slot: MissionsV2Slot) => {
+      const slotIndex = slotIndexById.get(slot.id);
+      if (slotIndex != null) {
+        setActiveSlotIndex(slotIndex);
+        scrollSlotCarouselToIndex(slotIndex);
+      }
+
       const element = slotRefs.current[slot.id];
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       setExpandedSlotId(slot.id);
     },
-    [],
+    [scrollSlotCarouselToIndex, setActiveSlotIndex, slotIndexById],
   );
 
   const registerSlotRef = useCallback(
@@ -1141,6 +1259,37 @@ export function MissionsV2Board({ userId }: { userId: string }) {
 
     return () => window.cancelAnimationFrame(raf);
   }, [viewMode, activeMarketIndex, marketCards.length, scrollCarouselToIndex]);
+
+  useEffect(() => {
+    if (viewMode !== 'active') {
+      return;
+    }
+    if (orderedSlots.length === 0) {
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      scrollSlotCarouselToIndex(activeSlotIndex);
+      return;
+    }
+
+    const raf = window.requestAnimationFrame(() => {
+      scrollSlotCarouselToIndex(activeSlotIndex);
+    });
+
+    return () => window.cancelAnimationFrame(raf);
+  }, [viewMode, activeSlotIndex, orderedSlots.length, scrollSlotCarouselToIndex]);
+
+  useEffect(() => {
+    if (!expandedSlotId) {
+      return;
+    }
+    const slotIndex = slotIndexById.get(expandedSlotId);
+    if (slotIndex != null) {
+      setActiveSlotIndex((current) => (current === slotIndex ? current : slotIndex));
+      scrollSlotCarouselToIndex(slotIndex);
+    }
+  }, [expandedSlotId, slotIndexById, scrollSlotCarouselToIndex]);
 
   const renderSlotCard = (slot: MissionsV2Slot) => {
     const mission = slot.mission;
@@ -1452,6 +1601,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
 
   const shield = parseShieldLabel(board.boss.countdown.label) ?? { current: 6, max: 6 };
   const activeMarketCard = marketCards[activeMarketIndex] ?? null;
+  const activeSlotCard = orderedSlots[activeSlotIndex] ?? null;
 
   const firstClaimableSlot = orderedSlots.find((slot) => {
     if (!slot.mission) {
@@ -1593,8 +1743,116 @@ export function MissionsV2Board({ userId }: { userId: string }) {
             </div>
           </Card>
 
-          <div className="missions-slots">
-            {orderedSlots.map((slot) => renderSlotCard(slot))}
+          <div className="missions-active-carousel">
+            <div className="missions-active-carousel__controls">
+              <p className="missions-active-carousel__hint">
+                Deslizá para navegar tus slots activos.
+              </p>
+              <div className="missions-active-carousel__buttons">
+                <button
+                  type="button"
+                  className="missions-active-carousel__button"
+                  onClick={() => handleSlotCarouselStep('prev')}
+                  aria-label="Ver slot anterior"
+                  disabled={orderedSlots.length === 0}
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  className="missions-active-carousel__button"
+                  onClick={() => handleSlotCarouselStep('next')}
+                  aria-label="Ver siguiente slot"
+                  disabled={orderedSlots.length === 0}
+                >
+                  →
+                </button>
+              </div>
+            </div>
+
+            {orderedSlots.length === 0 ? (
+              <div className="missions-active-carousel__empty">
+                <p className="missions-active-carousel__empty-title">Sin misiones activas</p>
+                <p className="missions-active-carousel__empty-copy">
+                  Activá una propuesta desde el market para ver tu progreso acá.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div
+                  className="missions-active-carousel__track"
+                  ref={slotCarouselRef}
+                  role="listbox"
+                  aria-label="Slots de misiones activas"
+                >
+                  {orderedSlots.map((slot, index) => {
+                    const isActiveCard = index === activeSlotIndex;
+                    const totalSlots = orderedSlots.length;
+                    let relativeOffset = index - activeSlotIndex;
+                    if (totalSlots > 1) {
+                      const half = totalSlots / 2;
+                      if (relativeOffset > half) {
+                        relativeOffset -= totalSlots;
+                      } else if (relativeOffset < -half) {
+                        relativeOffset += totalSlots;
+                      }
+                    }
+                    const maxVisibleOffset = Math.min(2, Math.max(totalSlots - 1, 1));
+                    const limitedOffset = Math.max(
+                      Math.min(relativeOffset, maxVisibleOffset),
+                      -maxVisibleOffset,
+                    );
+                    const angle = (Math.PI / 8) * limitedOffset;
+                    const depth = Math.cos(angle);
+                    const translateX = Math.sin(angle) * 46;
+                    const translateY = (1 - depth) * 90;
+                    const scale = 0.86 + 0.14 * depth;
+                    const opacity = 0.5 + 0.5 * depth;
+                    const rotate = Math.sin(angle) * -4.5;
+                    const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
+                    const itemStyle: CSSProperties = prefersReducedMotion
+                      ? {
+                          transform: 'none',
+                          opacity: 1,
+                          zIndex: isActiveCard ? 2 : 1,
+                        }
+                      : {
+                          transform: `translateX(${translateX}%) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
+                          opacity,
+                          zIndex,
+                        };
+
+                    return (
+                      <div
+                        key={slot.id}
+                        className="missions-active-carousel__item"
+                        data-slot-carousel-index={index}
+                        data-active={isActiveCard ? 'true' : 'false'}
+                        style={itemStyle}
+                        role="option"
+                        aria-selected={isActiveCard}
+                        tabIndex={isActiveCard ? 0 : -1}
+                        onClick={() => handleSlotCardSelect(index)}
+                        onKeyDown={(event) => handleSlotCardKeyDown(event, slot.id, index)}
+                      >
+                        <div className="missions-active-carousel__card">{renderSlotCard(slot)}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {activeSlotCard && (
+                  <div className="missions-active-carousel__status" aria-live="polite">
+                    <span className="missions-active-carousel__status-slot">
+                      {SLOT_DETAILS[activeSlotCard.slot].emoji}{' '}
+                      {SLOT_DETAILS[activeSlotCard.slot].label}
+                    </span>
+                    <span className="missions-active-carousel__status-count">
+                      {activeSlotIndex + 1} / {orderedSlots.length}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
 
