@@ -508,9 +508,9 @@
         "slot": "skill",
         "proposals": [
           {
-            "id": "mst_skill_market_focus",
+            "id": "mst_skill_market_focus_1",
             "slot": "skill",
-            "name": "Skill Route · Focus Profundo",
+            "name": "#1 · Skill Route · Focus",
             "summary": "Elevar Focus completando cuatro micro-nodos y síntesis accionable.",
             "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
             "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
@@ -535,71 +535,74 @@
             "metadata": {
               "cadence": "weekly",
               "stat": "Focus",
-              "track": "deep_work"
+              "track": "deep_work",
+              "sequence": 1
             },
             "duration_days": 7
           },
           {
-            "id": "mst_skill_market_story",
+            "id": "mst_skill_market_focus_2",
             "slot": "skill",
-            "name": "Skill Route · Storytelling",
-            "summary": "Practicar narrativa con micro-nodos cortos y feedback inmediato.",
-            "requirements": "Slot Skill libre y disponibilidad para feedback asincrónico.",
-            "objective": "Desarrollar storytelling aplicándolo a misiones activas.",
+            "name": "#2 · Skill Route · Focus",
+            "summary": "Repetí la ruta de Focus para reforzar síntesis accionables.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
             "objectives": [
-              "Completar tres micro-nodos de Storytelling con ejemplos propios.",
-              "Compartir borradores con un aliado y recibir feedback expresivo.",
-              "Publicar una síntesis narrativa en tu canal personal."
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
             ],
             "reward": {
-              "xp": 170,
-              "currency": 9,
+              "xp": 150,
+              "currency": 8,
               "items": [
-                "Pluma Resonante"
+                "Cristal de Focus"
               ]
             },
             "difficulty": "medium",
             "tags": [
-              "storytelling",
-              "feedback",
-              "creatividad"
+              "focus",
+              "constancia",
+              "ritual"
             ],
             "metadata": {
               "cadence": "weekly",
-              "stat": "Storytelling",
-              "track": "communication"
+              "stat": "Focus",
+              "track": "deep_work",
+              "sequence": 2
             },
             "duration_days": 7
           },
           {
-            "id": "mst_skill_market_resilience",
+            "id": "mst_skill_market_focus_3",
             "slot": "skill",
-            "name": "Skill Route · Resilience Lab",
-            "summary": "Entrenar resiliencia con micro-retos y debrief emocional.",
-            "requirements": "Slot Skill libre y compromiso de 4 sesiones cortas.",
-            "objective": "Aumentar resiliencia aplicando micro-retos y registro emocional.",
+            "name": "#3 · Skill Route · Focus",
+            "summary": "Una tercera misión espejo para seguir expandiendo tu Focus.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
             "objectives": [
-              "Ejecutar cuatro micro-retos que expandan tu zona de confort.",
-              "Completar un debrief emocional guiado tras cada reto.",
-              "Compartir conclusiones y señales de alerta con el squad."
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
             ],
             "reward": {
-              "xp": 190,
-              "currency": 11,
+              "xp": 150,
+              "currency": 8,
               "items": [
-                "Amuleto de Resistencia"
+                "Cristal de Focus"
               ]
             },
-            "difficulty": "high",
+            "difficulty": "medium",
             "tags": [
-              "resilience",
-              "emotions",
-              "growth"
+              "focus",
+              "constancia",
+              "ritual"
             ],
             "metadata": {
               "cadence": "weekly",
-              "stat": "Resilience",
-              "track": "inner_game"
+              "stat": "Focus",
+              "track": "deep_work",
+              "sequence": 3
             },
             "duration_days": 7
           }
@@ -1162,9 +1165,9 @@
         "slot": "skill",
         "proposals": [
           {
-            "id": "mst_skill_market_focus",
+            "id": "mst_skill_market_focus_1",
             "slot": "skill",
-            "name": "Skill Route · Focus Profundo",
+            "name": "#1 · Skill Route · Focus",
             "summary": "Elevar Focus completando cuatro micro-nodos y síntesis accionable.",
             "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
             "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
@@ -1189,71 +1192,74 @@
             "metadata": {
               "cadence": "weekly",
               "stat": "Focus",
-              "track": "deep_work"
+              "track": "deep_work",
+              "sequence": 1
             },
             "duration_days": 7
           },
           {
-            "id": "mst_skill_market_story",
+            "id": "mst_skill_market_focus_2",
             "slot": "skill",
-            "name": "Skill Route · Storytelling",
-            "summary": "Practicar narrativa con micro-nodos cortos y feedback inmediato.",
-            "requirements": "Slot Skill libre y disponibilidad para feedback asincrónico.",
-            "objective": "Desarrollar storytelling aplicándolo a misiones activas.",
+            "name": "#2 · Skill Route · Focus",
+            "summary": "Repetí la ruta de Focus para reforzar síntesis accionables.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
             "objectives": [
-              "Completar tres micro-nodos de Storytelling con ejemplos propios.",
-              "Compartir borradores con un aliado y recibir feedback expresivo.",
-              "Publicar una síntesis narrativa en tu canal personal."
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
             ],
             "reward": {
-              "xp": 170,
-              "currency": 9,
+              "xp": 150,
+              "currency": 8,
               "items": [
-                "Pluma Resonante"
+                "Cristal de Focus"
               ]
             },
             "difficulty": "medium",
             "tags": [
-              "storytelling",
-              "feedback",
-              "creatividad"
+              "focus",
+              "constancia",
+              "ritual"
             ],
             "metadata": {
               "cadence": "weekly",
-              "stat": "Storytelling",
-              "track": "communication"
+              "stat": "Focus",
+              "track": "deep_work",
+              "sequence": 2
             },
             "duration_days": 7
           },
           {
-            "id": "mst_skill_market_resilience",
+            "id": "mst_skill_market_focus_3",
             "slot": "skill",
-            "name": "Skill Route · Resilience Lab",
-            "summary": "Entrenar resiliencia con micro-retos y debrief emocional.",
-            "requirements": "Slot Skill libre y compromiso de 4 sesiones cortas.",
-            "objective": "Aumentar resiliencia aplicando micro-retos y registro emocional.",
+            "name": "#3 · Skill Route · Focus",
+            "summary": "Una tercera misión espejo para seguir expandiendo tu Focus.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
             "objectives": [
-              "Ejecutar cuatro micro-retos que expandan tu zona de confort.",
-              "Completar un debrief emocional guiado tras cada reto.",
-              "Compartir conclusiones y señales de alerta con el squad."
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
             ],
             "reward": {
-              "xp": 190,
-              "currency": 11,
+              "xp": 150,
+              "currency": 8,
               "items": [
-                "Amuleto de Resistencia"
+                "Cristal de Focus"
               ]
             },
-            "difficulty": "high",
+            "difficulty": "medium",
             "tags": [
-              "resilience",
-              "emotions",
-              "growth"
+              "focus",
+              "constancia",
+              "ritual"
             ],
             "metadata": {
               "cadence": "weekly",
-              "stat": "Resilience",
-              "track": "inner_game"
+              "stat": "Focus",
+              "track": "deep_work",
+              "sequence": 3
             },
             "duration_days": 7
           }
@@ -1721,9 +1727,9 @@
         "slot": "skill",
         "proposals": [
           {
-            "id": "mst_skill_market_focus",
+            "id": "mst_skill_market_focus_1",
             "slot": "skill",
-            "name": "Skill Route · Focus Profundo",
+            "name": "#1 · Skill Route · Focus",
             "summary": "Elevar Focus completando cuatro micro-nodos y síntesis accionable.",
             "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
             "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
@@ -1748,71 +1754,74 @@
             "metadata": {
               "cadence": "weekly",
               "stat": "Focus",
-              "track": "deep_work"
+              "track": "deep_work",
+              "sequence": 1
             },
             "duration_days": 7
           },
           {
-            "id": "mst_skill_market_story",
+            "id": "mst_skill_market_focus_2",
             "slot": "skill",
-            "name": "Skill Route · Storytelling",
-            "summary": "Practicar narrativa con micro-nodos cortos y feedback inmediato.",
-            "requirements": "Slot Skill libre y disponibilidad para feedback asincrónico.",
-            "objective": "Desarrollar storytelling aplicándolo a misiones activas.",
+            "name": "#2 · Skill Route · Focus",
+            "summary": "Repetí la ruta de Focus para reforzar síntesis accionables.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
             "objectives": [
-              "Completar tres micro-nodos de Storytelling con ejemplos propios.",
-              "Compartir borradores con un aliado y recibir feedback expresivo.",
-              "Publicar una síntesis narrativa en tu canal personal."
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
             ],
             "reward": {
-              "xp": 170,
-              "currency": 9,
+              "xp": 150,
+              "currency": 8,
               "items": [
-                "Pluma Resonante"
+                "Cristal de Focus"
               ]
             },
             "difficulty": "medium",
             "tags": [
-              "storytelling",
-              "feedback",
-              "creatividad"
+              "focus",
+              "constancia",
+              "ritual"
             ],
             "metadata": {
               "cadence": "weekly",
-              "stat": "Storytelling",
-              "track": "communication"
+              "stat": "Focus",
+              "track": "deep_work",
+              "sequence": 2
             },
             "duration_days": 7
           },
           {
-            "id": "mst_skill_market_resilience",
+            "id": "mst_skill_market_focus_3",
             "slot": "skill",
-            "name": "Skill Route · Resilience Lab",
-            "summary": "Entrenar resiliencia con micro-retos y debrief emocional.",
-            "requirements": "Slot Skill libre y compromiso de 4 sesiones cortas.",
-            "objective": "Aumentar resiliencia aplicando micro-retos y registro emocional.",
+            "name": "#3 · Skill Route · Focus",
+            "summary": "Una tercera misión espejo para seguir expandiendo tu Focus.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
             "objectives": [
-              "Ejecutar cuatro micro-retos que expandan tu zona de confort.",
-              "Completar un debrief emocional guiado tras cada reto.",
-              "Compartir conclusiones y señales de alerta con el squad."
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
             ],
             "reward": {
-              "xp": 190,
-              "currency": 11,
+              "xp": 150,
+              "currency": 8,
               "items": [
-                "Amuleto de Resistencia"
+                "Cristal de Focus"
               ]
             },
-            "difficulty": "high",
+            "difficulty": "medium",
             "tags": [
-              "resilience",
-              "emotions",
-              "growth"
+              "focus",
+              "constancia",
+              "ritual"
             ],
             "metadata": {
               "cadence": "weekly",
-              "stat": "Resilience",
-              "track": "inner_game"
+              "stat": "Focus",
+              "track": "deep_work",
+              "sequence": 3
             },
             "duration_days": 7
           }
@@ -2173,9 +2182,9 @@
         "slot": "skill",
         "proposals": [
           {
-            "id": "mst_skill_market_focus",
+            "id": "mst_skill_market_focus_1",
             "slot": "skill",
-            "name": "Skill Route · Focus Profundo",
+            "name": "#1 · Skill Route · Focus",
             "summary": "Elevar Focus completando cuatro micro-nodos y síntesis accionable.",
             "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
             "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
@@ -2200,71 +2209,74 @@
             "metadata": {
               "cadence": "weekly",
               "stat": "Focus",
-              "track": "deep_work"
+              "track": "deep_work",
+              "sequence": 1
             },
             "duration_days": 7
           },
           {
-            "id": "mst_skill_market_story",
+            "id": "mst_skill_market_focus_2",
             "slot": "skill",
-            "name": "Skill Route · Storytelling",
-            "summary": "Practicar narrativa con micro-nodos cortos y feedback inmediato.",
-            "requirements": "Slot Skill libre y disponibilidad para feedback asincrónico.",
-            "objective": "Desarrollar storytelling aplicándolo a misiones activas.",
+            "name": "#2 · Skill Route · Focus",
+            "summary": "Repetí la ruta de Focus para reforzar síntesis accionables.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
             "objectives": [
-              "Completar tres micro-nodos de Storytelling con ejemplos propios.",
-              "Compartir borradores con un aliado y recibir feedback expresivo.",
-              "Publicar una síntesis narrativa en tu canal personal."
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
             ],
             "reward": {
-              "xp": 170,
-              "currency": 9,
+              "xp": 150,
+              "currency": 8,
               "items": [
-                "Pluma Resonante"
+                "Cristal de Focus"
               ]
             },
             "difficulty": "medium",
             "tags": [
-              "storytelling",
-              "feedback",
-              "creatividad"
+              "focus",
+              "constancia",
+              "ritual"
             ],
             "metadata": {
               "cadence": "weekly",
-              "stat": "Storytelling",
-              "track": "communication"
+              "stat": "Focus",
+              "track": "deep_work",
+              "sequence": 2
             },
             "duration_days": 7
           },
           {
-            "id": "mst_skill_market_resilience",
+            "id": "mst_skill_market_focus_3",
             "slot": "skill",
-            "name": "Skill Route · Resilience Lab",
-            "summary": "Entrenar resiliencia con micro-retos y debrief emocional.",
-            "requirements": "Slot Skill libre y compromiso de 4 sesiones cortas.",
-            "objective": "Aumentar resiliencia aplicando micro-retos y registro emocional.",
+            "name": "#3 · Skill Route · Focus",
+            "summary": "Una tercera misión espejo para seguir expandiendo tu Focus.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
             "objectives": [
-              "Ejecutar cuatro micro-retos que expandan tu zona de confort.",
-              "Completar un debrief emocional guiado tras cada reto.",
-              "Compartir conclusiones y señales de alerta con el squad."
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
             ],
             "reward": {
-              "xp": 190,
-              "currency": 11,
+              "xp": 150,
+              "currency": 8,
               "items": [
-                "Amuleto de Resistencia"
+                "Cristal de Focus"
               ]
             },
-            "difficulty": "high",
+            "difficulty": "medium",
             "tags": [
-              "resilience",
-              "emotions",
-              "growth"
+              "focus",
+              "constancia",
+              "ritual"
             ],
             "metadata": {
               "cadence": "weekly",
-              "stat": "Resilience",
-              "track": "inner_game"
+              "stat": "Focus",
+              "track": "deep_work",
+              "sequence": 3
             },
             "duration_days": 7
           }
