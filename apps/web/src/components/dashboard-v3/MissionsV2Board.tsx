@@ -1497,7 +1497,7 @@ export function MissionsV2Board({
         if (!Number.isFinite(ratio) || ratio <= 0) {
           return;
         }
-        const clamped = Math.min(Math.max(ratio, 0.56), 0.72);
+        const clamped = Math.min(Math.max(ratio, 0.56), 0.75);
         const value = clamped.toFixed(4);
         setMarketCoverAspect((prev) => {
           if (prev[cardKey] === value) {
