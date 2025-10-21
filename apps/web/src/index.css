@@ -416,6 +416,17 @@
   isolation: isolate;
 }
 
+.missions-card.missions-active-card {
+  background: #0f172a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.missions-card.missions-active-card::before,
+.missions-card.missions-active-card::after {
+  content: none;
+}
+
 .missions-card::before {
   content: '';
   position: absolute;

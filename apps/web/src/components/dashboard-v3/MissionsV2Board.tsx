@@ -1840,8 +1840,9 @@ export function MissionsV2Board({
     const card = (
       <Card
         key={slot.id}
+        variant="plain"
         className={classNames(
-          'missions-card',
+          'missions-card missions-active-card',
           details.gradient,
           details.aura,
           !prefersReducedMotion && 'transition-transform duration-200 ease-out hover:-translate-y-0.5',
