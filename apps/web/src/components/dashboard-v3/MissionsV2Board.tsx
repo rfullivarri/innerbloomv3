@@ -852,6 +852,38 @@ export function MissionsV2Board({
     });
   }, [orderedMarketSlots]);
 
+  useEffect(() => {
+    const activeCard = marketCards[activeMarketIndex] ?? null;
+    setFlippedMarketCards((prev) => {
+      if (!activeCard) {
+        if (Object.keys(prev).length === 0) {
+          return prev;
+        }
+        return {};
+      }
+
+      const activeKey = activeCard.key;
+      const hasActiveKey = Object.prototype.hasOwnProperty.call(prev, activeKey);
+      if (!hasActiveKey) {
+        if (Object.keys(prev).length === 0) {
+          return prev;
+        }
+        return {};
+      }
+
+      const next: Record<string, boolean> = { [activeKey]: prev[activeKey] ?? false };
+      const prevKeys = Object.keys(prev);
+      if (prevKeys.length === 1 && prevKeys[0] === activeKey) {
+        const prevValue = prev[activeKey] ?? false;
+        if (prevValue === next[activeKey]) {
+          return prev;
+        }
+      }
+
+      return next;
+    });
+  }, [activeMarketIndex, marketCards]);
+
   const updateViewMode = useCallback(
     (mode: 'active' | 'market', options?: { replace?: boolean }) => {
       setViewModeState((current) => (current === mode ? current : mode));
