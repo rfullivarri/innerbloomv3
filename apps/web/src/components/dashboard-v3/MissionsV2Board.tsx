@@ -106,6 +106,14 @@ type MarketProposalTransition = 'forward' | 'backward' | null;
 
 const DEFAULT_MISSION_ART_MODE: GameMode = 'Flow';
 
+type PrimaryAction = {
+  key: string;
+  label: string;
+  onClick?: () => void;
+  disabled: boolean;
+  tone: 'primary' | 'neutral';
+};
+
 const MISSION_ART_BY_SLOT_AND_MODE: Record<MissionArtSlot, Record<GameMode, string>> = {
   main: {
     Flow: '/missions/missions_main_flow.png',
@@ -534,6 +542,158 @@ function MissionHeartbeatStatus({ pending, highlight }: { pending: boolean; high
       <span aria-hidden="true" className="missions-heartbeat-indicator__dot" />
       {pending ? 'Heartbeat pendiente' : 'Heartbeat sellado'}
     </span>
+  );
+}
+
+type ActiveMissionCardProps = {
+  slot: MissionsV2Slot;
+  heroLine: string;
+  requirementChips: string[];
+  rewardCopy: string;
+  primaryAction: PrimaryAction;
+  secondaryActions: MissionsV2Action[];
+  heartbeatActionId?: string;
+  heartbeatHighlight: boolean;
+  heartbeatPending: boolean;
+  prefersReducedMotion: boolean;
+  busy: boolean;
+  onHeartbeat: (slot: MissionsV2Slot) => void;
+  onLinkDaily: (slot: MissionsV2Slot) => void;
+  onUnavailableAction: (action: MissionsV2Action) => void;
+};
+
+function ActiveMissionCard({
+  slot,
+  heroLine,
+  requirementChips,
+  rewardCopy,
+  primaryAction,
+  secondaryActions,
+  heartbeatActionId,
+  heartbeatHighlight,
+  heartbeatPending,
+  prefersReducedMotion,
+  busy,
+  onHeartbeat,
+  onLinkDaily,
+  onUnavailableAction,
+}: ActiveMissionCardProps) {
+  return (
+    <div className="missions-active-card">
+      <div className="missions-active-card__header">
+        <div className="missions-active-card__primary">
+          <p className="missions-active-card__hero">{heroLine}</p>
+          <div className="missions-active-card__chips">
+            {requirementChips.map((chip) => (
+              <span key={`${slot.id}-req-${chip}`} className="missions-requirement">
+                {chip}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="missions-active-card__progress">
+        <MissionProgress slot={slot} prefersReducedMotion={prefersReducedMotion} />
+        <MissionPetals slot={slot} prefersReducedMotion={prefersReducedMotion} highlight={heartbeatHighlight} />
+      </div>
+      <div className="missions-active-card__details">
+        <div className="missions-active-card__objective">
+          <span className="missions-active-card__section-label">Objetivo</span>
+          <p>{slot.mission?.objective ?? 'Activa una misión del market para este slot.'}</p>
+          <p className="missions-active-card__countdown">{formatCountdown(slot.countdown.label)}</p>
+        </div>
+        <div className="missions-active-card__reward">
+          <span className="missions-active-card__section-label">Botín base</span>
+          <div className="missions-active-card__reward-pill">{rewardCopy}</div>
+        </div>
+      </div>
+      <div className="missions-active-card__footer">
+        <div className="missions-active-card__rail">
+          <div className="missions-active-card__meta">
+            <MissionPetalsMini slot={slot} highlight={heartbeatHighlight} />
+            <MissionHeartbeatStatus pending={heartbeatPending} highlight={heartbeatHighlight} />
+          </div>
+          {secondaryActions.length > 0 && (
+            <div className="missions-active-card__secondary-actions">
+              {secondaryActions.map((action) => {
+                const isHeartbeat = action.type === 'heartbeat';
+                const isLinkDaily = action.type === 'link_daily';
+                const isDisabled = !action.enabled || busy || !slot.mission;
+
+                if (isHeartbeat) {
+                  return (
+                    <button
+                      key={action.id}
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => onHeartbeat(slot)}
+                      className={classNames(
+                        'missions-heartbeat-btn',
+                        isDisabled && 'missions-heartbeat-btn--disabled',
+                        prefersReducedMotion && 'missions-heartbeat-btn--static',
+                      )}
+                      data-highlight={heartbeatHighlight ? 'true' : undefined}
+                    >
+                      <span aria-hidden="true">💓</span>
+                      {action.label}
+                    </button>
+                  );
+                }
+
+                if (isLinkDaily) {
+                  return (
+                    <button
+                      key={action.id}
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => onLinkDaily(slot)}
+                      className={classNames(
+                        'missions-action-btn missions-action-btn--link',
+                        isDisabled && 'missions-action-btn--disabled',
+                      )}
+                    >
+                      Vincular Daily
+                    </button>
+                  );
+                }
+
+                return (
+                  <button
+                    key={action.id}
+                    type="button"
+                    disabled
+                    onClick={() => onUnavailableAction(action)}
+                    className="missions-action-btn missions-action-btn--disabled"
+                  >
+                    {action.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+        <div className="missions-active-card__cta">
+          <button
+            type="button"
+            onClick={primaryAction.onClick}
+            disabled={primaryAction.disabled}
+            className={classNames(
+              'missions-active-card__cta-btn',
+              primaryAction.tone === 'primary'
+                ? 'missions-active-card__cta-btn--primary'
+                : 'missions-active-card__cta-btn--neutral',
+              (primaryAction.disabled || busy) && 'missions-active-card__cta-btn--disabled',
+              heartbeatActionId && primaryAction.key === heartbeatActionId && 'missions-active-card__cta-btn--heartbeat',
+            )}
+            data-highlight={
+              heartbeatActionId && primaryAction.key === heartbeatActionId && heartbeatHighlight ? 'true' : undefined
+            }
+          >
+            {primaryAction.label}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1749,14 +1909,6 @@ export function MissionsV2Board({
     const isActiveSlot = slotIndex === activeSlotIndex;
     const heartbeatHighlight = heartbeatFeedback?.slotId === slot.id;
 
-    type PrimaryAction = {
-      key: string;
-      label: string;
-      onClick?: () => void;
-      disabled: boolean;
-      tone: 'primary' | 'neutral';
-    };
-
     let primaryAction: PrimaryAction | null = null;
     let primaryActionId: string | null = null;
 
@@ -1822,6 +1974,9 @@ export function MissionsV2Board({
       return true;
     });
 
+    const heartbeatActionId = heartbeatAction?.id;
+    const resolvedPrimaryAction = primaryAction!;
+
     const slotCardStyle: MissionCardStyle = {
       ...buildMissionCardStyle(slot.slot, normalizedGameMode),
       ...(viewMode === 'active'
@@ -1861,121 +2016,22 @@ export function MissionsV2Board({
         }
       >
         {hasMission ? (
-          <>
-            <div className="missions-slot-card__summary">
-              <div className="missions-slot-card__summary-header">
-                <div className="missions-slot-card__summary-main">
-                  <p className="missions-slot-card__hero">{heroLine}</p>
-                  <div className="missions-slot-card__chips">
-                    {requirementChips.map((chip) => (
-                      <span key={`${slot.id}-req-${chip}`} className="missions-requirement">
-                        {chip}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="missions-slot-card__status">
-                  <MissionPetalsMini slot={slot} highlight={Boolean(heartbeatHighlight)} />
-                  <MissionHeartbeatStatus pending={heartbeatPending} highlight={Boolean(heartbeatHighlight)} />
-                </div>
-              </div>
-              <div className="missions-slot-card__progress-expanded">
-                <MissionProgress slot={slot} prefersReducedMotion={prefersReducedMotion} />
-                <MissionPetals
-                  slot={slot}
-                  prefersReducedMotion={prefersReducedMotion}
-                  highlight={Boolean(heartbeatHighlight)}
-                />
-              </div>
-              <div className="missions-slot-card__objective">
-                <span className="missions-slot-card__section-label">Objetivo</span>
-                <p>{mission?.objective ?? 'Activa una misión del market para este slot.'}</p>
-                <p className="missions-slot-card__countdown">{formatCountdown(slot.countdown.label)}</p>
-              </div>
-              <div className="missions-slot-card__reward">
-                <span className="missions-slot-card__section-label">Botín base</span>
-                <div className="missions-slot-card__reward-pill">{rewardCopy}</div>
-              </div>
-              {secondaryActions.length > 0 && (
-                <div className="missions-slot-card__secondary-actions">
-                  {secondaryActions.map((action) => {
-                    const isHeartbeat = action.type === 'heartbeat';
-                    const isLinkDaily = action.type === 'link_daily';
-                    const isDisabled = !action.enabled || busy || !hasMission;
-
-                    if (isHeartbeat) {
-                      return (
-                        <button
-                          key={action.id}
-                          type="button"
-                          disabled={isDisabled}
-                          onClick={() => handleHeartbeat(slot)}
-                          className={classNames(
-                            'missions-heartbeat-btn',
-                            isDisabled && 'missions-heartbeat-btn--disabled',
-                            prefersReducedMotion && 'missions-heartbeat-btn--static',
-                          )}
-                          data-highlight={heartbeatHighlight ? 'true' : undefined}
-                        >
-                          <span aria-hidden="true">💓</span>
-                          {action.label}
-                        </button>
-                      );
-                    }
-
-                    if (isLinkDaily) {
-                      return (
-                        <button
-                          key={action.id}
-                          type="button"
-                          disabled={isDisabled}
-                          onClick={() => handleLinkDaily(slot)}
-                          className={classNames(
-                            'missions-action-btn missions-action-btn--link',
-                            isDisabled && 'missions-action-btn--disabled',
-                          )}
-                        >
-                          Vincular Daily
-                        </button>
-                      );
-                    }
-
-                    return (
-                      <button
-                        key={action.id}
-                        type="button"
-                        disabled
-                        onClick={() => handleUnavailableAction(action)}
-                        className="missions-action-btn missions-action-btn--disabled"
-                      >
-                        {action.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-              <div className="missions-slot-card__cta">
-                <button
-                  type="button"
-                  onClick={primaryAction.onClick}
-                  disabled={primaryAction.disabled}
-                  className={classNames(
-                    'missions-slot-card__cta-btn',
-                    primaryAction.tone === 'primary'
-                      ? 'missions-slot-card__cta-btn--primary'
-                      : 'missions-slot-card__cta-btn--neutral',
-                    (primaryAction.disabled || busy) && 'missions-slot-card__cta-btn--disabled',
-                    heartbeatAction && primaryAction.key === heartbeatAction.id && 'missions-slot-card__cta-btn--heartbeat',
-                  )}
-                  data-highlight={
-                    heartbeatAction && primaryAction.key === heartbeatAction.id && heartbeatHighlight ? 'true' : undefined
-                  }
-                >
-                  {primaryAction.label}
-                </button>
-              </div>
-            </div>
-          </>
+          <ActiveMissionCard
+            slot={slot}
+            heroLine={heroLine}
+            requirementChips={requirementChips}
+            rewardCopy={rewardCopy}
+            primaryAction={resolvedPrimaryAction}
+            secondaryActions={secondaryActions}
+            heartbeatActionId={heartbeatActionId}
+            heartbeatHighlight={Boolean(heartbeatHighlight)}
+            heartbeatPending={heartbeatPending}
+            prefersReducedMotion={prefersReducedMotion}
+            busy={busy}
+            onHeartbeat={handleHeartbeat}
+            onLinkDaily={handleLinkDaily}
+            onUnavailableAction={handleUnavailableAction}
+          />
         ) : (
           <div className="missions-slot-card__empty-shell" aria-hidden="true" />
         )}
