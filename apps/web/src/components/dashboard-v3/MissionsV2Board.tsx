@@ -603,6 +603,12 @@ export function MissionsV2Board({
     hunt: 0,
     skill: 0,
   });
+  type MarketDragState = { pointerId: number | null; lastY: number; accumulated: number };
+  const marketDragState = useRef<Record<MissionsV2Slot['slot'], MarketDragState>>({
+    main: { pointerId: null, lastY: 0, accumulated: 0 },
+    hunt: { pointerId: null, lastY: 0, accumulated: 0 },
+    skill: { pointerId: null, lastY: 0, accumulated: 0 },
+  });
   const slotStackWheelDelta = useRef<Record<string, number>>({});
   const previousActiveSlotIdRef = useRef<string | null>(null);
 
@@ -778,6 +784,78 @@ export function MissionsV2Board({
       }
     },
     [handleMarketProposalStep, marketBySlot],
+  );
+
+  const resetMarketDragState = useCallback((slotKey: MissionsV2Slot['slot']) => {
+    marketDragState.current[slotKey] = { pointerId: null, lastY: 0, accumulated: 0 };
+  }, []);
+
+  const handleMarketStackPointerDown = useCallback(
+    (slotKey: MissionsV2Slot['slot'], event: React.PointerEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+
+      const proposals = marketBySlot[slotKey] ?? [];
+      if (proposals.length <= 1) {
+        return;
+      }
+
+      const state = marketDragState.current[slotKey];
+      state.pointerId = event.pointerId;
+      state.lastY = event.clientY;
+      state.accumulated = 0;
+
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
+    },
+    [marketBySlot],
+  );
+
+  const handleMarketStackPointerMove = useCallback(
+    (slotKey: MissionsV2Slot['slot'], event: React.PointerEvent<HTMLDivElement>) => {
+      const proposals = marketBySlot[slotKey] ?? [];
+      if (proposals.length <= 1) {
+        return;
+      }
+
+      const state = marketDragState.current[slotKey];
+      if (state.pointerId !== event.pointerId) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const delta = state.lastY - event.clientY;
+      state.lastY = event.clientY;
+      state.accumulated += delta;
+
+      const threshold = 40;
+      if (Math.abs(state.accumulated) >= threshold) {
+        const direction = state.accumulated > 0 ? 1 : -1;
+        state.accumulated -= direction * threshold;
+        handleMarketProposalStep(slotKey, direction);
+      }
+    },
+    [handleMarketProposalStep, marketBySlot],
+  );
+
+  const handleMarketStackPointerEnd = useCallback(
+    (slotKey: MissionsV2Slot['slot'], event: React.PointerEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+
+      const state = marketDragState.current[slotKey];
+      if (state.pointerId !== event.pointerId) {
+        return;
+      }
+
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+
+      resetMarketDragState(slotKey);
+    },
+    [resetMarketDragState],
   );
 
   const handleSlotStackStep = useCallback((slotId: string, delta: number, totalPanels: number) => {
@@ -1454,8 +1532,9 @@ export function MissionsV2Board({
       });
 
       marketWheelDelta.current[slotKey] = 0;
+      resetMarketDragState(slotKey);
     },
-    [activeMarketIndex, flippedMarketCards, scrollCarouselToIndex],
+    [activeMarketIndex, flippedMarketCards, resetMarketDragState, scrollCarouselToIndex],
   );
 
   const handleMarketCardKeyDown = useCallback(
@@ -2344,22 +2423,11 @@ export function MissionsV2Board({
                       const coverSrc = getMissionArt(slot, normalizedGameMode);
                       const activeProposalIndex = activeMarketProposalBySlot[slot] ?? 0;
                       const activeProposal = proposals[activeProposalIndex] ?? null;
-                      const activeRewardPreview = activeProposal
-                        ? formatProposalReward(activeProposal)
-                        : null;
                       const hasMultipleProposals = proposals.length > 1;
                       const hasPrevProposal = hasMultipleProposals;
                       const hasNextProposal = hasMultipleProposals;
                       const proposalRevision = marketProposalRevisionBySlot[slot] ?? 0;
                       const transitionDirection = marketProposalTransitionBySlot[slot];
-                      const activeObjectives = activeProposal
-                        ? activeProposal.objectives.length > 0
-                          ? activeProposal.objectives
-                          : [activeProposal.objective]
-                        : [];
-                      const activeMetadataEntries = activeProposal
-                        ? extractProposalMetadata(activeProposal)
-                        : [];
                       const cardLabel = activeProposal
                         ? `${activeProposal.name}. ${activeProposal.summary}`
                         : `Sin propuestas disponibles para ${details.label}`;
@@ -2450,77 +2518,108 @@ export function MissionsV2Board({
                                   className="missions-market-card__stack"
                                   role="group"
                                   aria-label={`Propuestas para ${details.label}`}
+                                  aria-live="polite"
                                   data-has-prev={hasPrevProposal ? 'true' : undefined}
                                   data-has-next={hasNextProposal ? 'true' : undefined}
                                   data-transition={transitionDirection ?? undefined}
                                   onClick={(event) => event.stopPropagation()}
                                   onWheel={(event) => handleMarketStackWheel(slot, event)}
+                                  onPointerDown={(event) => handleMarketStackPointerDown(slot, event)}
+                                  onPointerMove={(event) => handleMarketStackPointerMove(slot, event)}
+                                  onPointerUp={(event) => handleMarketStackPointerEnd(slot, event)}
+                                  onPointerCancel={(event) => handleMarketStackPointerEnd(slot, event)}
+                                  onPointerLeave={(event) => handleMarketStackPointerEnd(slot, event)}
                                 >
-                                  {activeProposal ? (
-                                    <article
-                                      key={`${slot}-${activeProposal.id}-${proposalRevision}`}
-                                      className="missions-market-card__proposal"
-                                      data-active="true"
-                                      role="group"
+                                  {proposals.length > 0 ? (
+                                    <div
+                                      key={`${slot}-${proposalRevision}`}
+                                      className="missions-market-card__stack-track"
+                                      style={{
+                                        '--market-stack-index': activeProposalIndex,
+                                      } as CSSProperties}
                                     >
-                                      <header className="missions-market-card__proposal-header">
-                                        <span className="missions-market-card__proposal-index">
-                                          #{activeProposalIndex + 1}
-                                        </span>
-                                        <div className="missions-market-card__proposal-heading">
-                                          <h5>{activeProposal.name}</h5>
-                                        </div>
-                                      </header>
-                                      <p className="missions-market-card__proposal-summary">
-                                        {activeProposal.summary}
-                                      </p>
-                                      <div className="missions-market-card__key-stats">
-                                        <div className="missions-market-card__stat missions-market-card__stat--highlight">
-                                          <p className="missions-market-card__stat-label">Recompensa</p>
-                                          <p className="missions-market-card__stat-value">
-                                            {activeRewardPreview ?? '—'}
-                                          </p>
-                                        </div>
-                                        <div className="missions-market-card__stat">
-                                          <p className="missions-market-card__stat-label">Dificultad</p>
-                                          <p className="missions-market-card__stat-value">
-                                            {activeProposal?.difficulty ?? '—'}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      {activeProposal.tags.length > 0 && (
-                                        <div className="missions-market-card__tags">
-                                          {activeProposal.tags.map((tag) => (
-                                            <span key={`${activeProposal.id}-tag-${tag}`}>{tag}</span>
-                                          ))}
-                                        </div>
-                                      )}
-                                      <ul className="missions-market-card__requirements">
-                                        {activeObjectives.map((itemLabel) => (
-                                          <li key={`${activeProposal.id}-objective-${itemLabel}`}>{itemLabel}</li>
-                                        ))}
-                                      </ul>
-                                      {activeMetadataEntries.length > 0 && (
-                                        <ul className="missions-market-card__meta">
-                                          {activeMetadataEntries.map((entryLabel) => (
-                                            <li key={`${activeProposal.id}-meta-${entryLabel}`}>{entryLabel}</li>
-                                          ))}
-                                        </ul>
-                                      )}
-                                      <button
-                                        type="button"
-                                        className="missions-market-card__cta"
-                                        disabled={!canActivateThisCard}
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          if (canActivateThisCard) {
-                                            handleActivateProposal(slot, activeProposal);
-                                          }
-                                        }}
-                                      >
-                                        Activar en slot {details.label}
-                                      </button>
-                                    </article>
+                                      {proposals.map((proposal, proposalIndex) => {
+                                        const isActiveProposal = proposalIndex === activeProposalIndex;
+                                        const rewardPreview = formatProposalReward(proposal);
+                                        const objectives = proposal.objectives.length > 0
+                                          ? proposal.objectives
+                                          : [proposal.objective];
+                                        const metadataEntries = extractProposalMetadata(proposal);
+
+                                        return (
+                                          <article
+                                            key={`${slot}-${proposal.id}`}
+                                            className="missions-market-card__proposal"
+                                            data-active={isActiveProposal ? 'true' : 'false'}
+                                            role="group"
+                                            aria-hidden={isActiveProposal ? undefined : 'true'}
+                                          >
+                                            <header className="missions-market-card__proposal-header">
+                                              <span className="missions-market-card__proposal-index">
+                                                #{proposalIndex + 1}
+                                              </span>
+                                              <div className="missions-market-card__proposal-heading">
+                                                <h5>{proposal.name}</h5>
+                                                {rewardPreview && (
+                                                  <div className="missions-market-card__reward-badge">
+                                                    {rewardPreview}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </header>
+                                            <p className="missions-market-card__proposal-summary">
+                                              {proposal.summary}
+                                            </p>
+                                            {proposal.tags.length > 0 && (
+                                              <div className="missions-market-card__tags">
+                                                {proposal.tags.map((tag) => (
+                                                  <span key={`${proposal.id}-tag-${tag}`}>{tag}</span>
+                                                ))}
+                                              </div>
+                                            )}
+                                            <ul className="missions-market-card__requirements">
+                                              {objectives.map((itemLabel) => (
+                                                <li key={`${proposal.id}-objective-${itemLabel}`}>{itemLabel}</li>
+                                              ))}
+                                            </ul>
+                                            {metadataEntries.length > 0 && (
+                                              <ul className="missions-market-card__meta">
+                                                {metadataEntries.map((entryLabel) => (
+                                                  <li key={`${proposal.id}-meta-${entryLabel}`}>{entryLabel}</li>
+                                                ))}
+                                              </ul>
+                                            )}
+                                            <div className="missions-market-card__insights">
+                                              <div className="missions-market-card__insight">
+                                                <p className="missions-market-card__back-label">Dificultad</p>
+                                                <p className="missions-market-card__back-value">
+                                                  {proposal.difficulty ?? '—'}
+                                                </p>
+                                              </div>
+                                              <div className="missions-market-card__insight">
+                                                <p className="missions-market-card__back-label">Recompensa</p>
+                                                <p className="missions-market-card__back-value">
+                                                  {rewardPreview ?? '—'}
+                                                </p>
+                                              </div>
+                                            </div>
+                                            <button
+                                              type="button"
+                                              className="missions-market-card__cta"
+                                              disabled={!canActivateThisCard || !isActiveProposal}
+                                              onClick={(event) => {
+                                                event.stopPropagation();
+                                                if (canActivateThisCard && isActiveProposal) {
+                                                  handleActivateProposal(slot, proposal);
+                                                }
+                                              }}
+                                            >
+                                              Activar en slot {details.label}
+                                            </button>
+                                          </article>
+                                        );
+                                      })}
+                                    </div>
                                   ) : (
                                     <div className="missions-market-card__proposal missions-market-card__proposal--empty">
                                       <p>Sin propuestas disponibles. Volvé pronto.</p>

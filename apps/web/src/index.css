@@ -2040,13 +2040,25 @@
 }
 
 .missions-market-card__stack {
+  --market-stack-gap: clamp(0.75rem, 2.4vw, 1.1rem);
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.75rem, 2.4vw, 1.1rem);
   margin-top: clamp(0.75rem, 2.2vw, 1rem);
+  height: clamp(200px, 46vh, 240px);
   min-height: clamp(200px, 46vh, 240px);
   overflow: hidden;
+  touch-action: none;
+}
+
+.missions-market-card__stack-track {
+  display: flex;
+  flex-direction: column;
+  gap: var(--market-stack-gap);
+  height: 100%;
+  width: 100%;
+  transition: transform var(--motion-duration-slow) var(--motion-ease-enter);
+  transform: translateY(calc(-1 * var(--market-stack-index, 0) * (100% + var(--market-stack-gap))));
 }
 
 .missions-market-card__stack::before,
@@ -2108,6 +2120,9 @@
   .missions-market-card__stack[data-transition] .missions-market-card__proposal[data-active='true'] {
     animation: none;
   }
+  .missions-market-card__stack-track {
+    transition: none;
+  }
 }
 
 .missions-market-card__stack[data-has-prev='true']::before {
@@ -2133,7 +2148,8 @@
     box-shadow var(--motion-duration-base) var(--motion-ease-enter),
     background var(--motion-duration-base) var(--motion-ease-enter),
     opacity var(--motion-duration-base) var(--motion-ease-enter);
-  min-height: clamp(200px, 46vh, 240px);
+  min-height: auto;
+  height: 100%;
 }
 
 .missions-market-card__proposal[data-active='true'] {
@@ -2211,11 +2227,8 @@
 
 @media (min-width: 768px) {
   .missions-market-card__stack {
+    height: clamp(260px, 48vh, 360px);
     max-height: clamp(260px, 48vh, 360px);
-  }
-
-  .missions-market-card__proposal {
-    min-height: clamp(200px, 34vh, 260px);
   }
 }
 
