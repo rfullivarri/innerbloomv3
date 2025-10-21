@@ -1640,6 +1640,10 @@ export function MissionsV2Board({
   }, [activeSlotIndex, orderedSlots]);
 
   useEffect(() => {
+    if (!prefersReducedMotion) {
+      return;
+    }
+
     if (viewMode !== 'market') {
       return;
     }
@@ -1689,7 +1693,7 @@ export function MissionsV2Board({
         window.cancelAnimationFrame(raf);
       }
     };
-  }, [activeMarketIndex, viewMode, marketCards]);
+  }, [activeMarketIndex, viewMode, marketCards, prefersReducedMotion]);
 
   useEffect(() => {
     if (viewMode !== 'market') {
