@@ -237,7 +237,7 @@ export function getActiveSection(
 
     return {
       ...missionsSection,
-      pageTitle: 'Misiones /missions-v2',
+      pageTitle: 'Misiones',
     };
   }
 

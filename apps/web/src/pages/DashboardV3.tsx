@@ -285,7 +285,7 @@ function MissionsV2View({
 }) {
   return (
     <div className="space-y-6">
-      <h1 className="sr-only">Misiones /missions-v2</h1>
+      <h1 className="sr-only">Misiones</h1>
       <MissionsV2Board userId={userId} gameMode={gameMode} />
     </div>
   );
