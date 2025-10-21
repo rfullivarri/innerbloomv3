@@ -285,12 +285,7 @@ function MissionsV2View({
 }) {
   return (
     <div className="space-y-6">
-      <SectionHeader
-        eyebrow="Misiones"
-        title="Misiones v2 (preview)"
-        description="Ruta aislada para validar contratos y UI. No impacta el dashboard actual."
-        pageTitle="Misiones v2"
-      />
+      <h1 className="sr-only">Misiones /missions-v2</h1>
       <MissionsV2Board userId={userId} gameMode={gameMode} />
     </div>
   );

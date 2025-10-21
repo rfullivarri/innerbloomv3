@@ -228,5 +228,18 @@ export function getActiveSection(
 ): DashboardSectionConfig {
   const activeSection = sections.find((section) => isSectionActive(section, pathname));
 
-  return activeSection ?? getDashboardSectionConfig('dashboard', pathname);
+  if (activeSection) {
+    return activeSection;
+  }
+
+  if (pathname.includes('/missions-v2')) {
+    const missionsSection = getDashboardSectionConfig('missions', pathname);
+
+    return {
+      ...missionsSection,
+      pageTitle: 'Misiones /missions-v2',
+    };
+  }
+
+  return getDashboardSectionConfig('dashboard', pathname);
 }
