@@ -548,7 +548,6 @@ export function MissionsV2Board({
   const [actionError, setActionError] = useState<string | null>(null);
   const [busyMap, setBusyMap] = useState<Record<string, boolean>>({});
   const [claimModal, setClaimModal] = useState<ClaimModalState | null>(null);
-  const [expandedSlotId, setExpandedSlotId] = useState<string | null>(null);
   const [heartbeatFeedback, setHeartbeatFeedback] = useState<{ slotId: string; at: number } | null>(null);
   const [showHeartbeatToast, setShowHeartbeatToast] = useState(false);
   const [heartbeatToastKey, setHeartbeatToastKey] = useState<number | null>(null);
@@ -967,36 +966,6 @@ export function MissionsV2Board({
   }, [marketCards]);
 
   useEffect(() => {
-    if (!board || !expandedSlotId) {
-      return;
-    }
-    if (!board.slots.some((slot) => slot.id === expandedSlotId)) {
-      setExpandedSlotId(null);
-    }
-  }, [board, expandedSlotId]);
-
-  useEffect(() => {
-    if (!expandedSlotId) {
-      return;
-    }
-    const slotIndex = slotIndexById.get(expandedSlotId);
-    if (slotIndex == null) {
-      setExpandedSlotId(null);
-      return;
-    }
-    if (slotIndex !== activeSlotIndex) {
-      setExpandedSlotId(null);
-    }
-  }, [activeSlotIndex, expandedSlotId, slotIndexById]);
-
-  useEffect(() => {
-    if (viewMode === 'active' || !expandedSlotId) {
-      return;
-    }
-    setExpandedSlotId(null);
-  }, [expandedSlotId, viewMode]);
-
-  useEffect(() => {
     if (!heartbeatFeedback) {
       return;
     }
@@ -1043,7 +1012,6 @@ export function MissionsV2Board({
     const unsubscribe = onDevUserOverrideChange(() => {
       setBoard(null);
       setBusyMap({});
-      setExpandedSlotId(null);
       reload();
     });
     return unsubscribe;
@@ -1314,7 +1282,6 @@ export function MissionsV2Board({
         setActiveSlotIndex(nextSlotIndex);
         scrollSlotCarouselToIndex(nextSlotIndex);
       }
-      setExpandedSlotId(nextSlot.id);
       if (typeof window !== 'undefined') {
         window.requestAnimationFrame(() => {
           const element = slotRefs.current[nextSlot.id] ?? null;
@@ -1335,7 +1302,6 @@ export function MissionsV2Board({
       board,
       setBoard,
       setActionError,
-      setExpandedSlotId,
       slotIndexById,
       scrollSlotCarouselToIndex,
       setActiveSlotIndex,
@@ -1433,17 +1399,9 @@ export function MissionsV2Board({
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         handleSlotCardSelect(index);
-        setExpandedSlotId((current) => (current === slotId ? null : slotId));
       }
     },
-    [
-      bossEnabled,
-      handleSlotCarouselStep,
-      handleSlotCardSelect,
-      handleSlotStackStep,
-      orderedSlots,
-      setExpandedSlotId,
-    ],
+    [bossEnabled, handleSlotCarouselStep, handleSlotCardSelect, handleSlotStackStep, orderedSlots],
   );
 
   const handleMarketCardToggle = useCallback(
@@ -1564,23 +1522,6 @@ export function MissionsV2Board({
     });
   }, [activeMarketIndex, marketCards.length, scrollCarouselToIndex, updateViewMode]);
 
-  const focusSlot = useCallback(
-    (slot: MissionsV2Slot) => {
-      const slotIndex = slotIndexById.get(slot.id);
-      if (slotIndex != null) {
-        setActiveSlotIndex(slotIndex);
-        scrollSlotCarouselToIndex(slotIndex);
-      }
-
-      const element = slotRefs.current[slot.id];
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      setExpandedSlotId(slot.id);
-    },
-    [scrollSlotCarouselToIndex, setActiveSlotIndex, slotIndexById],
-  );
-
   const registerSlotRef = useCallback(
     (slotId: string) => (element: HTMLElement | null) => {
       slotRefs.current[slotId] = element;
@@ -1680,17 +1621,6 @@ export function MissionsV2Board({
     return () => window.cancelAnimationFrame(raf);
   }, [viewMode, activeSlotIndex, orderedSlots.length, scrollSlotCarouselToIndex]);
 
-  useEffect(() => {
-    if (!expandedSlotId) {
-      return;
-    }
-    const slotIndex = slotIndexById.get(expandedSlotId);
-    if (slotIndex != null) {
-      setActiveSlotIndex((current) => (current === slotIndex ? current : slotIndex));
-      scrollSlotCarouselToIndex(slotIndex);
-    }
-  }, [expandedSlotId, slotIndexById, scrollSlotCarouselToIndex]);
-
   const renderSlotCard = (slot: MissionsV2Slot) => {
     const mission = slot.mission;
     const busy = Boolean(busyMap[slot.id]);
@@ -1705,11 +1635,8 @@ export function MissionsV2Board({
     const rewardCopy = getRewardCopy(slot);
     const heartbeatAction = slot.actions.find((action) => action.type === 'heartbeat');
     const linkAction = slot.actions.find((action) => action.type === 'link_daily');
-    const expandable = Boolean(mission);
     const slotIndex = slotIndexById.get(slot.id) ?? -1;
     const isActiveSlot = slotIndex === activeSlotIndex;
-    const isExpanded = isActiveSlot && expandedSlotId === slot.id;
-    const detailsId = `${slot.id}-details`;
     const heartbeatHighlight = heartbeatFeedback?.slotId === slot.id;
 
     type PrimaryAction = {
@@ -1786,6 +1713,7 @@ export function MissionsV2Board({
     });
 
     const slotCardStyle = buildMissionCardStyle(slot.slot, normalizedGameMode);
+    const hasMission = Boolean(mission);
 
     const card = (
       <Card
@@ -1803,10 +1731,7 @@ export function MissionsV2Board({
         data-slot={slot.slot}
         style={slotCardStyle}
         ref={registerSlotRef(slot.id)}
-        bodyClassName={classNames(
-          'missions-card__body missions-card__body--slot',
-          isExpanded && 'missions-card__body--expanded',
-        )}
+        bodyClassName="missions-card__body missions-card__body--slot"
         title={`${details.emoji} ${details.label}`}
         subtitle={
           <p className="missions-card__subtitle">{mission?.name ?? 'Slot vacío. Elegí tu reto.'}</p>
@@ -1818,60 +1743,21 @@ export function MissionsV2Board({
         }
       >
         <div className="missions-slot-card__summary">
-          <button
-            type="button"
-            className="missions-slot-card__toggle"
-            onClick={() => (expandable ? setExpandedSlotId(isExpanded ? null : slot.id) : null)}
-            aria-expanded={isExpanded}
-            aria-controls={detailsId}
-            disabled={!expandable}
-          >
-            <p className="missions-slot-card__hero">{heroLine}</p>
-            <div className="missions-slot-card__progress">
-              <MissionProgress slot={slot} prefersReducedMotion={prefersReducedMotion} />
+          <div className="missions-slot-card__summary-header">
+            <div className="missions-slot-card__summary-main">
+              <p className="missions-slot-card__hero">{heroLine}</p>
+              <div className="missions-slot-card__chips">
+                {requirementChips.map((chip) => (
+                  <span key={`${slot.id}-req-${chip}`} className="missions-requirement">
+                    {chip}
+                  </span>
+                ))}
+              </div>
             </div>
-          </button>
-          <div className="missions-slot-card__status">
-            <MissionPetalsMini slot={slot} highlight={Boolean(heartbeatHighlight)} />
-            <MissionHeartbeatStatus pending={heartbeatPending} highlight={Boolean(heartbeatHighlight)} />
-          </div>
-          <div className="missions-slot-card__cta">
-            <button
-              type="button"
-              onClick={primaryAction.onClick}
-              disabled={primaryAction.disabled}
-              className={classNames(
-                'missions-slot-card__cta-btn',
-                primaryAction.tone === 'primary'
-                  ? 'missions-slot-card__cta-btn--primary'
-                  : 'missions-slot-card__cta-btn--neutral',
-                (primaryAction.disabled || busy) && 'missions-slot-card__cta-btn--disabled',
-                heartbeatAction && primaryAction.key === heartbeatAction.id && 'missions-slot-card__cta-btn--heartbeat',
-              )}
-              data-highlight={
-                heartbeatAction && primaryAction.key === heartbeatAction.id && heartbeatHighlight ? 'true' : undefined
-              }
-            >
-              {primaryAction.label}
-            </button>
-          </div>
-        </div>
-        <div
-          id={detailsId}
-          className="missions-slot-card__details"
-          data-open={isExpanded ? 'true' : 'false'}
-        >
-          <div className="missions-slot-card__chips">
-            {requirementChips.map((chip) => (
-              <span key={`${slot.id}-req-${chip}`} className="missions-requirement">
-                {chip}
-              </span>
-            ))}
-          </div>
-          <div className="missions-slot-card__objective">
-            <span className="missions-slot-card__section-label">Objetivo</span>
-            <p>{mission?.objective ?? 'Activa una misión del market para este slot.'}</p>
-            <p className="missions-slot-card__countdown">{formatCountdown(slot.countdown.label)}</p>
+            <div className="missions-slot-card__status">
+              <MissionPetalsMini slot={slot} highlight={Boolean(heartbeatHighlight)} />
+              <MissionHeartbeatStatus pending={heartbeatPending} highlight={Boolean(heartbeatHighlight)} />
+            </div>
           </div>
           <div className="missions-slot-card__progress-expanded">
             <MissionProgress slot={slot} prefersReducedMotion={prefersReducedMotion} />
@@ -1880,6 +1766,11 @@ export function MissionsV2Board({
               prefersReducedMotion={prefersReducedMotion}
               highlight={Boolean(heartbeatHighlight)}
             />
+          </div>
+          <div className="missions-slot-card__objective">
+            <span className="missions-slot-card__section-label">Objetivo</span>
+            <p>{mission?.objective ?? 'Activa una misión del market para este slot.'}</p>
+            <p className="missions-slot-card__countdown">{formatCountdown(slot.countdown.label)}</p>
           </div>
           <div className="missions-slot-card__reward">
             <span className="missions-slot-card__section-label">Botín base</span>
@@ -1890,7 +1781,7 @@ export function MissionsV2Board({
               {secondaryActions.map((action) => {
                 const isHeartbeat = action.type === 'heartbeat';
                 const isLinkDaily = action.type === 'link_daily';
-                const isDisabled = !action.enabled || busy || !mission;
+                const isDisabled = !action.enabled || busy || !hasMission;
 
                 if (isHeartbeat) {
                   return (
@@ -1943,6 +1834,26 @@ export function MissionsV2Board({
               })}
             </div>
           )}
+          <div className="missions-slot-card__cta">
+            <button
+              type="button"
+              onClick={primaryAction.onClick}
+              disabled={primaryAction.disabled}
+              className={classNames(
+                'missions-slot-card__cta-btn',
+                primaryAction.tone === 'primary'
+                  ? 'missions-slot-card__cta-btn--primary'
+                  : 'missions-slot-card__cta-btn--neutral',
+                (primaryAction.disabled || busy) && 'missions-slot-card__cta-btn--disabled',
+                heartbeatAction && primaryAction.key === heartbeatAction.id && 'missions-slot-card__cta-btn--heartbeat',
+              )}
+              data-highlight={
+                heartbeatAction && primaryAction.key === heartbeatAction.id && heartbeatHighlight ? 'true' : undefined
+              }
+            >
+              {primaryAction.label}
+            </button>
+          </div>
         </div>
         {slot.state === 'cooldown' && (
           <div className="missions-cooldown-overlay" aria-live="polite">
