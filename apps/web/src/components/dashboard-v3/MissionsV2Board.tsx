@@ -4,7 +4,9 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type SyntheticEvent,
 } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
@@ -170,6 +172,19 @@ function getMarketRarity(slot: MissionsV2Slot['slot']): Rarity {
   }
   return 'common';
 }
+
+const MARKET_COVER_BY_SLOT: Record<MissionsV2Slot['slot'], string> = {
+  main: '/MainFlow.png',
+  hunt: '/FlowMood.jpg',
+  skill: '/Evolve-Mood.jpg',
+};
+
+type MarketCardItem = {
+  slot: MissionsV2Slot['slot'];
+  proposal: MissionsV2MarketProposal;
+  key: string;
+  index: number;
+};
 
 function getRewardCopy(slot: MissionsV2Slot): string {
   const reward = slot.mission?.reward;
@@ -485,9 +500,12 @@ export function MissionsV2Board({ userId }: { userId: string }) {
   const [showHeartbeatToast, setShowHeartbeatToast] = useState(false);
   const [heartbeatToastKey, setHeartbeatToastKey] = useState<number | null>(null);
   const [flippedMarketCards, setFlippedMarketCards] = useState<Record<string, boolean>>({});
+  const [marketCoverAspect, setMarketCoverAspect] = useState<Record<string, string>>({});
+  const [viewMode, setViewMode] = useState<'active' | 'market'>('active');
+  const [activeMarketIndex, setActiveMarketIndex] = useState(0);
   const hasTrackedView = useRef(false);
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
-  const marketRef = useRef<HTMLElement | null>(null);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
 
   const marketBySlot = useMemo<MarketBySlot>(() => {
     const map: MarketBySlot = {};
@@ -502,11 +520,97 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     return map;
   }, [board]);
 
+  const orderedSlots = useMemo(() => {
+    if (!board) {
+      return [] as MissionsV2Slot[];
+    }
+    return [...board.slots].sort(
+      (a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot),
+    );
+  }, [board]);
+
+  const orderedMarketSlots = useMemo(() => {
+    return SLOT_ORDER.map((slotKey) => {
+      const entry = board?.market.find((marketSlot) => marketSlot.slot === slotKey);
+      return (
+        entry ?? ({ slot: slotKey, proposals: [] as MissionsV2MarketProposal[] } as MissionsV2MarketSlot)
+      );
+    });
+  }, [board]);
+
+  const marketCards = useMemo<MarketCardItem[]>(() => {
+    const cards: MarketCardItem[] = [];
+    for (const entry of orderedMarketSlots) {
+      entry.proposals.forEach((proposal, proposalIndex) => {
+        cards.push({
+          slot: entry.slot,
+          proposal,
+          key: `${entry.slot}-${proposal.id}`,
+          index: proposalIndex,
+        });
+      });
+    }
+    return cards;
+  }, [orderedMarketSlots]);
+
   useEffect(() => {
     if (status === 'success' && data) {
       setBoard(data);
     }
   }, [status, data]);
+
+  useEffect(() => {
+    if (marketCards.length === 0) {
+      setActiveMarketIndex(0);
+      return;
+    }
+    setActiveMarketIndex((current) => {
+      if (current < marketCards.length) {
+        return current;
+      }
+      return Math.max(0, marketCards.length - 1);
+    });
+  }, [marketCards]);
+
+  useEffect(() => {
+    setFlippedMarketCards((prev) => {
+      const validKeys = new Set(marketCards.map((card) => card.key));
+      const next: Record<string, boolean> = {};
+      validKeys.forEach((key) => {
+        if (prev[key]) {
+          next[key] = true;
+        }
+      });
+      const prevKeys = Object.keys(prev);
+      const nextKeys = Object.keys(next);
+      if (prevKeys.length === nextKeys.length && nextKeys.every((key) => prev[key])) {
+        return prev;
+      }
+      return next;
+    });
+  }, [marketCards]);
+
+  useEffect(() => {
+    setMarketCoverAspect((prev) => {
+      const validKeys = new Set(marketCards.map((card) => card.key));
+      const next: Record<string, string> = {};
+      validKeys.forEach((key) => {
+        const value = prev[key];
+        if (value) {
+          next[key] = value;
+        }
+      });
+      const prevKeys = Object.keys(prev);
+      const nextKeys = Object.keys(next);
+      if (
+        prevKeys.length === nextKeys.length &&
+        nextKeys.every((key) => prev[key] === next[key])
+      ) {
+        return prev;
+      }
+      return next;
+    });
+  }, [marketCards]);
 
   useEffect(() => {
     if (!board || !expandedSlotId) {
@@ -807,6 +911,9 @@ export function MissionsV2Board({ userId }: { userId: string }) {
         market: nextMarket,
       });
 
+      setFlippedMarketCards({});
+      setViewMode('active');
+
       setActionError(null);
       setExpandedSlotId(nextSlot.id);
       if (typeof window !== 'undefined') {
@@ -828,25 +935,87 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     [board, setBoard, setActionError, setExpandedSlotId, userId],
   );
 
-  const toggleMarketCard = useCallback((cardKey: string) => {
-    setFlippedMarketCards((prev) => ({
-      ...prev,
-      [cardKey]: !prev[cardKey],
-    }));
+  const scrollCarouselToIndex = useCallback((index: number) => {
+    const container = carouselRef.current;
+    if (!container) {
+      return;
+    }
+    const element = container.querySelector<HTMLElement>(`[data-carousel-index='${index}']`);
+    element?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, []);
 
+  const handleCarouselStep = useCallback(
+    (direction: 'next' | 'prev') => {
+      if (marketCards.length === 0) {
+        return;
+      }
+      const delta = direction === 'next' ? 1 : -1;
+      const nextIndex = (activeMarketIndex + delta + marketCards.length) % marketCards.length;
+      setActiveMarketIndex(nextIndex);
+      scrollCarouselToIndex(nextIndex);
+    },
+    [activeMarketIndex, marketCards.length, scrollCarouselToIndex],
+  );
+
+  const handleMarketCardToggle = useCallback(
+    (cardKey: string, index: number) => {
+      if (index !== activeMarketIndex) {
+        setActiveMarketIndex(index);
+        scrollCarouselToIndex(index);
+        return;
+      }
+
+      setFlippedMarketCards((prev) => {
+        const isOpen = Boolean(prev[cardKey]);
+        if (isOpen) {
+          return {};
+        }
+        return { [cardKey]: true };
+      });
+    },
+    [activeMarketIndex, scrollCarouselToIndex],
+  );
+
   const handleMarketCardKeyDown = useCallback(
-    (event: ReactKeyboardEvent<HTMLElement>, cardKey: string) => {
+    (event: ReactKeyboardEvent<HTMLElement>, cardKey: string, index: number) => {
       if (event.defaultPrevented || event.target !== event.currentTarget) {
         return;
       }
 
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        toggleMarketCard(cardKey);
+        handleMarketCardToggle(cardKey, index);
+        return;
+      }
+
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        handleCarouselStep('next');
+        return;
+      }
+
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        handleCarouselStep('prev');
       }
     },
-    [toggleMarketCard],
+    [handleMarketCardToggle, handleCarouselStep],
+  );
+
+  const handleMarketCoverLoad = useCallback(
+    (cardKey: string, event: SyntheticEvent<HTMLImageElement>) => {
+      const image = event.currentTarget;
+      if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+        const ratio = `${image.naturalWidth} / ${image.naturalHeight}`;
+        setMarketCoverAspect((prev) => {
+          if (prev[cardKey] === ratio) {
+            return prev;
+          }
+          return { ...prev, [cardKey]: ratio };
+        });
+      }
+    },
+    [],
   );
 
   const handleUnavailableAction = useCallback((action: MissionsV2Action) => {
@@ -858,8 +1027,22 @@ export function MissionsV2Board({ userId }: { userId: string }) {
   }, []);
 
   const scrollToMarket = useCallback(() => {
-    marketRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
+    setViewMode('market');
+    if (marketCards.length === 0) {
+      return;
+    }
+    if (typeof window === 'undefined') {
+      scrollCarouselToIndex(activeMarketIndex);
+      return;
+    }
+    window.requestAnimationFrame(() => {
+      scrollCarouselToIndex(activeMarketIndex);
+      const element = carouselRef.current?.querySelector<HTMLElement>(
+        `[data-carousel-index='${activeMarketIndex}'] article`,
+      );
+      element?.focus({ preventScroll: true });
+    });
+  }, [activeMarketIndex, marketCards.length, scrollCarouselToIndex]);
 
   const focusSlot = useCallback(
     (slot: MissionsV2Slot) => {
@@ -878,6 +1061,78 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     },
     [],
   );
+
+  useEffect(() => {
+    if (viewMode !== 'market') {
+      return;
+    }
+    const container = carouselRef.current;
+    if (!container) {
+      return;
+    }
+
+    let raf = 0;
+    const updateActive = () => {
+      const items = container.querySelectorAll<HTMLElement>('[data-carousel-index]');
+      if (items.length === 0) {
+        return;
+      }
+      const nodes = Array.from(items);
+      const { left, width } = container.getBoundingClientRect();
+      const center = left + width / 2;
+      let closestIndex = activeMarketIndex;
+      let closestDistance = Number.POSITIVE_INFINITY;
+      nodes.forEach((node) => {
+        const rect = node.getBoundingClientRect();
+        const nodeCenter = rect.left + rect.width / 2;
+        const distance = Math.abs(center - nodeCenter);
+        if (distance < closestDistance - 0.5) {
+          closestDistance = distance;
+          const value = node.getAttribute('data-carousel-index');
+          closestIndex = value ? Number.parseInt(value, 10) : 0;
+        }
+      });
+      setActiveMarketIndex((current) => (current === closestIndex ? current : closestIndex));
+    };
+
+    updateActive();
+
+    const handleScroll = () => {
+      if (raf) {
+        cancelAnimationFrame(raf);
+      }
+      raf = window.requestAnimationFrame(updateActive);
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      if (raf) {
+        window.cancelAnimationFrame(raf);
+      }
+    };
+  }, [activeMarketIndex, viewMode, marketCards]);
+
+  useEffect(() => {
+    if (viewMode !== 'market') {
+      return;
+    }
+    if (marketCards.length === 0) {
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      scrollCarouselToIndex(activeMarketIndex);
+      return;
+    }
+
+    const raf = window.requestAnimationFrame(() => {
+      scrollCarouselToIndex(activeMarketIndex);
+    });
+
+    return () => window.cancelAnimationFrame(raf);
+  }, [viewMode, activeMarketIndex, marketCards.length, scrollCarouselToIndex]);
 
   const renderSlotCard = (slot: MissionsV2Slot) => {
     const mission = slot.mission;
@@ -1187,16 +1442,8 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     );
   }
 
-  const orderedSlots = [...board.slots].sort(
-    (a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot),
-  );
-
   const shield = parseShieldLabel(board.boss.countdown.label) ?? { current: 6, max: 6 };
-
-  const orderedMarketSlots: MissionsV2MarketSlot[] = SLOT_ORDER.map((slotKey) => {
-    const entry = board.market.find((marketSlot) => marketSlot.slot === slotKey);
-    return entry ?? ({ slot: slotKey, proposals: [] as MissionsV2MarketProposal[] } as MissionsV2MarketSlot);
-  });
+  const activeMarketCard = marketCards[activeMarketIndex] ?? null;
 
   const firstClaimableSlot = orderedSlots.find((slot) => {
     if (!slot.mission) {
@@ -1248,165 +1495,307 @@ export function MissionsV2Board({ userId }: { userId: string }) {
 
         {actionError && <ToastBanner tone="error" message={actionError} />}
 
-        <Card
-          className="missions-card missions-card--boss"
-          title="Boss quincenal"
-          subtitle={<p className="missions-card__subtitle">{board.boss.name}</p>}
-          bodyClassName="missions-card__body missions-card__body--boss"
+        <div
+          className="missions-view-toggle"
+          role="tablist"
+          aria-label="Secciones del tablero de misiones"
         >
-          <div className="missions-boss-header">
-            <div
-              key={`shield-${shield.current}`}
-              className="missions-boss-shield"
-              role="img"
-              aria-label={`Escudo del boss ${shield.current} de ${shield.max}`}
-              data-crack-level={shield.max - shield.current}
-            >
-              {Array.from({ length: shield.max }).map((_, index) => {
-                const cracked = index >= shield.current;
-                return (
-                  <span
-                    key={`shield-${index}`}
-                    className={classNames(
-                      'missions-boss-shield__segment',
-                      cracked && 'missions-boss-shield__segment--cracked',
-                    )}
-                    aria-hidden="true"
-                  />
-                );
-              })}
-            </div>
-            <div className="missions-boss-countdown" aria-live="polite">
-              <span className="missions-boss-countdown__label">Escudo</span>
-              <span className="missions-boss-countdown__value">{board.boss.countdown.label}</span>
-            </div>
-          </div>
-          <p className="missions-boss-copy">
-            Derribá el escudo sosteniendo Heartbeat y prepará el golpe final. El Boss sólo responde si tu Main llegó al Acto 2.
-          </p>
-          <div className="missions-boss-actions">
-            <button
-              type="button"
-              className="missions-boss-cta"
-              disabled
-              aria-disabled="true"
-            >
-              GOLPE ESPECIAL (ACTO 2 REQUERIDO)
-            </button>
-          </div>
-        </Card>
-
-        <div className="missions-slots">
-          {orderedSlots.map((slot) => renderSlotCard(slot))}
+          <button
+            type="button"
+            role="tab"
+            id="missions-v2-tab-active"
+            aria-selected={viewMode === 'active'}
+            aria-controls="missions-v2-panel-active"
+            className={classNames(
+              'missions-view-toggle__chip',
+              viewMode === 'active' && 'missions-view-toggle__chip--active',
+            )}
+            onClick={() => setViewMode('active')}
+          >
+            Misiones activas
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="missions-v2-tab-market"
+            aria-selected={viewMode === 'market'}
+            aria-controls="missions-v2-panel-market"
+            className={classNames(
+              'missions-view-toggle__chip',
+              viewMode === 'market' && 'missions-view-toggle__chip--active',
+            )}
+            onClick={() => setViewMode('market')}
+          >
+            Market de misiones
+          </button>
         </div>
 
-        <Card
-          className="missions-card missions-card--market"
-          title="Market de misiones"
-          subtitle="Activa propuestas cuando liberes un slot"
-          bodyClassName="missions-card__body missions-card__body--market"
-          ref={marketRef}
+        <div
+          id="missions-v2-panel-active"
+          role="tabpanel"
+          aria-labelledby="missions-v2-tab-active"
+          hidden={viewMode !== 'active'}
+          className="missions-board__panel"
         >
-          <div className="missions-market">
-            {orderedMarketSlots.flatMap((entry) =>
-              entry.proposals.map((proposal, index) => {
-                const details = SLOT_DETAILS[entry.slot];
-                const rewardPreview = formatProposalReward(proposal);
-                const metadataEntries = extractProposalMetadata(proposal);
-                const objectives = proposal.objectives.length > 0 ? proposal.objectives : [proposal.objective];
-                const tags = proposal.tags.length > 0 ? proposal.tags : [];
-                const rarity = getMarketRarity(entry.slot);
-                const slotState = board?.slots.find((slot) => slot.slot === entry.slot);
-                const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
-                const cardKey = `${entry.slot}-${proposal.id}`;
-                const isFlipped = Boolean(flippedMarketCards[cardKey]);
+          <Card
+            className="missions-card missions-card--boss"
+            title="Boss quincenal"
+            subtitle={<p className="missions-card__subtitle">{board.boss.name}</p>}
+            bodyClassName="missions-card__body missions-card__body--boss"
+          >
+            <div className="missions-boss-header">
+              <div
+                key={`shield-${shield.current}`}
+                className="missions-boss-shield"
+                role="img"
+                aria-label={`Escudo del boss ${shield.current} de ${shield.max}`}
+                data-crack-level={shield.max - shield.current}
+              >
+                {Array.from({ length: shield.max }).map((_, index) => {
+                  const cracked = index >= shield.current;
+                  return (
+                    <span
+                      key={`shield-${index}`}
+                      className={classNames(
+                        'missions-boss-shield__segment',
+                        cracked && 'missions-boss-shield__segment--cracked',
+                      )}
+                      aria-hidden="true"
+                    />
+                  );
+                })}
+              </div>
+              <div className="missions-boss-countdown" aria-live="polite">
+                <span className="missions-boss-countdown__label">Escudo</span>
+                <span className="missions-boss-countdown__value">{board.boss.countdown.label}</span>
+              </div>
+            </div>
+            <p className="missions-boss-copy">
+              Derribá el escudo sosteniendo Heartbeat y prepará el golpe final. El Boss sólo responde si tu Main llegó al Acto 2.
+            </p>
+            <div className="missions-boss-actions">
+              <button
+                type="button"
+                className="missions-boss-cta"
+                disabled
+                aria-disabled="true"
+              >
+                GOLPE ESPECIAL (ACTO 2 REQUERIDO)
+              </button>
+            </div>
+          </Card>
 
-                return (
-                  <article
-                    key={`${entry.slot}-${proposal.id}`}
-                    className="missions-market-card"
-                    data-rarity={rarity}
-                    data-flipped={isFlipped}
-                    tabIndex={0}
-                    role="button"
-                    aria-pressed={isFlipped}
-                    aria-label={`${proposal.name}. ${proposal.summary}`}
-                    onClick={() => {
-                      toggleMarketCard(cardKey);
-                    }}
-                    onKeyDown={(event) => {
-                      handleMarketCardKeyDown(event, cardKey);
-                    }}
-                  >
-                    <div className="missions-market-card__front" aria-hidden={isFlipped}>
-                      <img
-                        src="/mainflow2.png"
-                        alt="Carta de tarot Main"
-                        className="missions-market-card__cover"
-                        draggable={false}
-                      />
-                    </div>
-                    <div className="missions-market-card__back" aria-hidden={!isFlipped}>
-                      <div className="missions-market-card__details">
-                        <header className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{details.label}</p>
-                            <h4 className="text-base font-semibold text-slate-100">
-                              #{index + 1} · {proposal.name}
-                            </h4>
-                          </div>
-                          <span className="missions-market-card__icon" aria-hidden="true">
-                            {details.emoji}
-                          </span>
-                        </header>
-                        <p className="missions-market-card__summary">{proposal.summary}</p>
-                        {tags.length > 0 && (
-                          <div className="missions-market-card__tags">
-                            {tags.map((tag) => (
-                              <span key={`${proposal.id}-tag-${tag}`}>{tag}</span>
-                            ))}
-                          </div>
-                        )}
-                        <div className="missions-market-card__reward">{rewardPreview}</div>
-                        <ul className="missions-market-card__requirements">
-                          {objectives.map((item) => (
-                            <li key={`${proposal.id}-objective-${item}`}>{item}</li>
-                          ))}
-                        </ul>
-                        {metadataEntries.length > 0 && (
-                          <ul className="missions-market-card__meta">
-                            {metadataEntries.map((entryLabel) => (
-                              <li key={`${proposal.id}-meta-${entryLabel}`}>{entryLabel}</li>
-                            ))}
-                          </ul>
-                        )}
-                        <button
-                          type="button"
-                          className="missions-market-card__cta"
-                          disabled={!canActivate}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            if (canActivate) {
-                              handleActivateProposal(entry.slot, proposal);
-                            }
-                          }}
-                        >
-                          Activar en slot {details.label}
-                        </button>
-                      </div>
-                      <div className="missions-market-card__insight">
-                        <p className="missions-market-card__back-label">Dificultad</p>
-                        <p className="missions-market-card__back-value">{proposal.difficulty}</p>
-                        <p className="missions-market-card__back-label">Recompensa</p>
-                        <p className="missions-market-card__back-value">{rewardPreview}</p>
-                      </div>
-                    </div>
-                  </article>
-                );
-              }),
-            )}
+          <div className="missions-slots">
+            {orderedSlots.map((slot) => renderSlotCard(slot))}
           </div>
-        </Card>
+        </div>
+
+        <div
+          id="missions-v2-panel-market"
+          role="tabpanel"
+          aria-labelledby="missions-v2-tab-market"
+          hidden={viewMode !== 'market'}
+          className="missions-board__panel"
+        >
+          <Card
+            className="missions-card missions-card--market"
+            title="Market de misiones"
+            subtitle="Deslizá, elegí y activá tu próxima propuesta"
+            bodyClassName="missions-card__body missions-card__body--market"
+          >
+            <div className="missions-market-carousel">
+              <div className="missions-market-carousel__controls">
+                <p className="missions-market-carousel__hint">
+                  Deslizá las cartas para ver propuestas disponibles por slot.
+                </p>
+                <div className="missions-market-carousel__buttons">
+                  <button
+                    type="button"
+                    className="missions-market-carousel__button"
+                    onClick={() => handleCarouselStep('prev')}
+                    aria-label="Ver propuesta anterior"
+                    disabled={marketCards.length === 0}
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    className="missions-market-carousel__button"
+                    onClick={() => handleCarouselStep('next')}
+                    aria-label="Ver propuesta siguiente"
+                    disabled={marketCards.length === 0}
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
+
+              {marketCards.length === 0 ? (
+                <div className="missions-market-carousel__empty">
+                  <p className="missions-market-carousel__empty-title">Sin propuestas disponibles</p>
+                  <p className="missions-market-carousel__empty-copy">
+                    Liberá un slot activo para que aparezcan nuevas cartas en el market.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div
+                    className="missions-market-carousel__track"
+                    ref={carouselRef}
+                    role="listbox"
+                    aria-label="Marketplace de misiones disponibles"
+                  >
+                    {marketCards.map((item, index) => {
+                      const { proposal, slot, key: cardKey } = item;
+                      const details = SLOT_DETAILS[slot];
+                      const rewardPreview = formatProposalReward(proposal);
+                      const metadataEntries = extractProposalMetadata(proposal);
+                      const objectives =
+                        proposal.objectives.length > 0 ? proposal.objectives : [proposal.objective];
+                      const tags = proposal.tags.length > 0 ? proposal.tags : [];
+                      const rarity = getMarketRarity(slot);
+                      const slotState = board.slots.find((slotEntry) => slotEntry.slot === slot);
+                      const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
+                      const isFlipped = Boolean(flippedMarketCards[cardKey]);
+                      const isActiveCard = index === activeMarketIndex;
+                      const canActivateThisCard = canActivate && isActiveCard;
+                      const coverSrc = MARKET_COVER_BY_SLOT[slot] ?? '/mainflow2.png';
+                      const distance = Math.abs(index - activeMarketIndex);
+                      const clampedDistance = Math.min(distance, 3);
+                      const translateX = (index - activeMarketIndex) * 68;
+                      const translateY = clampedDistance * 14;
+                      const scale = Math.max(0.74, 1 - clampedDistance * 0.14);
+                      const opacity = Math.max(0.4, 1 - clampedDistance * 0.18);
+                      const itemStyle: CSSProperties = prefersReducedMotion
+                        ? {
+                            transform: 'none',
+                            opacity: 1,
+                            zIndex: isActiveCard ? 2 : 1,
+                          }
+                        : {
+                            transform: `translateX(${translateX}%) translateY(${translateY}px) scale(${scale})`,
+                            opacity,
+                            zIndex: 100 - clampedDistance * 10,
+                          };
+
+                      return (
+                        <div
+                          key={cardKey}
+                          className="missions-market-carousel__item"
+                          data-carousel-index={index}
+                          data-active={isActiveCard ? 'true' : 'false'}
+                          style={itemStyle}
+                        >
+                          <article
+                            className="missions-market-card"
+                            data-rarity={rarity}
+                            data-flipped={isFlipped}
+                            data-active={isActiveCard ? 'true' : 'false'}
+                            role="option"
+                            aria-selected={isActiveCard}
+                            aria-expanded={isFlipped}
+                            tabIndex={isActiveCard ? 0 : -1}
+                            aria-label={`${proposal.name}. ${proposal.summary}`}
+                            style={{
+                              '--market-card-aspect': marketCoverAspect[cardKey] ?? '3 / 4',
+                            } as CSSProperties}
+                            onClick={() => handleMarketCardToggle(cardKey, index)}
+                            onKeyDown={(event) => handleMarketCardKeyDown(event, cardKey, index)}
+                          >
+                            <div className="missions-market-card__front" aria-hidden={isFlipped}>
+                              <span className="missions-market-card__slot-chip" data-slot={slot}>
+                                {details.label}
+                              </span>
+                              <img
+                                src={coverSrc}
+                                alt={`Carta de ${details.label}`}
+                                className="missions-market-card__cover"
+                                draggable={false}
+                                loading="lazy"
+                                onLoad={(event) => handleMarketCoverLoad(cardKey, event)}
+                              />
+                            </div>
+                            <div className="missions-market-card__back" aria-hidden={!isFlipped}>
+                              <span className="missions-market-card__slot-chip" data-slot={slot}>
+                                {details.label}
+                              </span>
+                              <div className="missions-market-card__details">
+                                <header className="flex items-start justify-between gap-2">
+                                  <div>
+                                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                                      {details.label}
+                                    </p>
+                                    <h4 className="text-base font-semibold text-slate-100">
+                                      #{item.index + 1} · {proposal.name}
+                                    </h4>
+                                  </div>
+                                  <span className="missions-market-card__icon" aria-hidden="true">
+                                    {details.emoji}
+                                  </span>
+                                </header>
+                                <p className="missions-market-card__summary">{proposal.summary}</p>
+                                {tags.length > 0 && (
+                                  <div className="missions-market-card__tags">
+                                    {tags.map((tag) => (
+                                      <span key={`${proposal.id}-tag-${tag}`}>{tag}</span>
+                                    ))}
+                                  </div>
+                                )}
+                                <div className="missions-market-card__reward">{rewardPreview}</div>
+                                <ul className="missions-market-card__requirements">
+                                  {objectives.map((itemLabel) => (
+                                    <li key={`${proposal.id}-objective-${itemLabel}`}>{itemLabel}</li>
+                                  ))}
+                                </ul>
+                                {metadataEntries.length > 0 && (
+                                  <ul className="missions-market-card__meta">
+                                    {metadataEntries.map((entryLabel) => (
+                                      <li key={`${proposal.id}-meta-${entryLabel}`}>{entryLabel}</li>
+                                    ))}
+                                  </ul>
+                                )}
+                                <button
+                                  type="button"
+                                  className="missions-market-card__cta"
+                                  disabled={!canActivateThisCard}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    if (canActivateThisCard) {
+                                      handleActivateProposal(slot, proposal);
+                                    }
+                                  }}
+                                >
+                                  Activar en slot {details.label}
+                                </button>
+                              </div>
+                              <div className="missions-market-card__insight">
+                                <p className="missions-market-card__back-label">Dificultad</p>
+                                <p className="missions-market-card__back-value">{proposal.difficulty}</p>
+                                <p className="missions-market-card__back-label">Recompensa</p>
+                                <p className="missions-market-card__back-value">{rewardPreview}</p>
+                              </div>
+                            </div>
+                          </article>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {activeMarketCard && (
+                    <div className="missions-market-carousel__status" aria-live="polite">
+                      <span className="missions-market-carousel__status-slot">
+                        {SLOT_DETAILS[activeMarketCard.slot].emoji}{' '}
+                        {SLOT_DETAILS[activeMarketCard.slot].label}
+                      </span>
+                      <span className="missions-market-carousel__status-count">
+                        {activeMarketIndex + 1} / {marketCards.length}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </Card>
+        </div>
       </div>
 
       {showStickyBar && (
