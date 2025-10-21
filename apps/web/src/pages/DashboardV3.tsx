@@ -176,7 +176,7 @@ export default function DashboardV3Page() {
                 />
                 <Route
                   path="missions-v2"
-                  element={<MissionsV2Route userId={backendUserId} />}
+                  element={<MissionsV2Route userId={backendUserId} gameMode={gameMode} />}
                 />
                 <Route
                   path="rewards"
@@ -262,15 +262,27 @@ function MissionsView({ userId, section }: { userId: string; section: DashboardS
   );
 }
 
-function MissionsV2Route({ userId }: { userId: string }) {
+function MissionsV2Route({
+  userId,
+  gameMode,
+}: {
+  userId: string;
+  gameMode: GameMode | string | null;
+}) {
   if (!FEATURE_MISSIONS_V2) {
     return <Navigate to=".." replace />;
   }
 
-  return <MissionsV2View userId={userId} />;
+  return <MissionsV2View userId={userId} gameMode={gameMode} />;
 }
 
-function MissionsV2View({ userId }: { userId: string }) {
+function MissionsV2View({
+  userId,
+  gameMode,
+}: {
+  userId: string;
+  gameMode: GameMode | string | null;
+}) {
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -279,7 +291,7 @@ function MissionsV2View({ userId }: { userId: string }) {
         description="Ruta aislada para validar contratos y UI. No impacta el dashboard actual."
         pageTitle="Misiones v2"
       />
-      <MissionsV2Board userId={userId} />
+      <MissionsV2Board userId={userId} gameMode={gameMode} />
     </div>
   );
 }
