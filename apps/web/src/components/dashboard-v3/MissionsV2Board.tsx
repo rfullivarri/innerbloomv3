@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   claimMissionsV2Mission,
@@ -477,6 +484,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
   const [heartbeatFeedback, setHeartbeatFeedback] = useState<{ slotId: string; at: number } | null>(null);
   const [showHeartbeatToast, setShowHeartbeatToast] = useState(false);
   const [heartbeatToastKey, setHeartbeatToastKey] = useState<number | null>(null);
+  const [flippedMarketCards, setFlippedMarketCards] = useState<Record<string, boolean>>({});
   const hasTrackedView = useRef(false);
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
   const marketRef = useRef<HTMLElement | null>(null);
@@ -818,6 +826,27 @@ export function MissionsV2Board({ userId }: { userId: string }) {
       });
     },
     [board, setBoard, setActionError, setExpandedSlotId, userId],
+  );
+
+  const toggleMarketCard = useCallback((cardKey: string) => {
+    setFlippedMarketCards((prev) => ({
+      ...prev,
+      [cardKey]: !prev[cardKey],
+    }));
+  }, []);
+
+  const handleMarketCardKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLElement>, cardKey: string) => {
+      if (event.defaultPrevented || event.target !== event.currentTarget) {
+        return;
+      }
+
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleMarketCard(cardKey);
+      }
+    },
+    [toggleMarketCard],
   );
 
   const handleUnavailableAction = useCallback((action: MissionsV2Action) => {
@@ -1289,66 +1318,88 @@ export function MissionsV2Board({ userId }: { userId: string }) {
                 const rarity = getMarketRarity(entry.slot);
                 const slotState = board?.slots.find((slot) => slot.slot === entry.slot);
                 const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
+                const cardKey = `${entry.slot}-${proposal.id}`;
+                const isFlipped = Boolean(flippedMarketCards[cardKey]);
 
                 return (
                   <article
                     key={`${entry.slot}-${proposal.id}`}
                     className="missions-market-card"
                     data-rarity={rarity}
+                    data-flipped={isFlipped}
                     tabIndex={0}
+                    role="button"
+                    aria-pressed={isFlipped}
                     aria-label={`${proposal.name}. ${proposal.summary}`}
+                    onClick={() => {
+                      toggleMarketCard(cardKey);
+                    }}
+                    onKeyDown={(event) => {
+                      handleMarketCardKeyDown(event, cardKey);
+                    }}
                   >
-                    <div className="missions-market-card__front">
-                      <header className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{details.label}</p>
-                          <h4 className="text-base font-semibold text-slate-100">
-                            #{index + 1} · {proposal.name}
-                          </h4>
-                        </div>
-                        <span className="missions-market-card__icon" aria-hidden="true">
-                          {details.emoji}
-                        </span>
-                      </header>
-                      <p className="missions-market-card__summary">{proposal.summary}</p>
-                      {tags.length > 0 && (
-                        <div className="missions-market-card__tags">
-                          {tags.map((tag) => (
-                            <span key={`${proposal.id}-tag-${tag}`}>{tag}</span>
-                          ))}
-                        </div>
-                      )}
-                      <div className="missions-market-card__reward">{rewardPreview}</div>
-                      <ul className="missions-market-card__requirements">
-                        {objectives.map((item) => (
-                          <li key={`${proposal.id}-objective-${item}`}>{item}</li>
-                        ))}
-                      </ul>
-                      {metadataEntries.length > 0 && (
-                        <ul className="missions-market-card__meta">
-                          {metadataEntries.map((entryLabel) => (
-                            <li key={`${proposal.id}-meta-${entryLabel}`}>{entryLabel}</li>
+                    <div className="missions-market-card__front" aria-hidden={isFlipped}>
+                      <img
+                        src="/mainflow2.png"
+                        alt="Carta de tarot Main"
+                        className="missions-market-card__cover"
+                        draggable={false}
+                      />
+                    </div>
+                    <div className="missions-market-card__back" aria-hidden={!isFlipped}>
+                      <div className="missions-market-card__details">
+                        <header className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{details.label}</p>
+                            <h4 className="text-base font-semibold text-slate-100">
+                              #{index + 1} · {proposal.name}
+                            </h4>
+                          </div>
+                          <span className="missions-market-card__icon" aria-hidden="true">
+                            {details.emoji}
+                          </span>
+                        </header>
+                        <p className="missions-market-card__summary">{proposal.summary}</p>
+                        {tags.length > 0 && (
+                          <div className="missions-market-card__tags">
+                            {tags.map((tag) => (
+                              <span key={`${proposal.id}-tag-${tag}`}>{tag}</span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="missions-market-card__reward">{rewardPreview}</div>
+                        <ul className="missions-market-card__requirements">
+                          {objectives.map((item) => (
+                            <li key={`${proposal.id}-objective-${item}`}>{item}</li>
                           ))}
                         </ul>
-                      )}
-                      <button
-                        type="button"
-                        className="missions-market-card__cta"
-                        disabled={!canActivate}
-                        onClick={() => {
-                          if (canActivate) {
-                            handleActivateProposal(entry.slot, proposal);
-                          }
-                        }}
-                      >
-                        Activar en slot {details.label}
-                      </button>
-                    </div>
-                    <div className="missions-market-card__back" aria-hidden="true">
-                      <p className="missions-market-card__back-label">Dificultad</p>
-                      <p className="missions-market-card__back-value">{proposal.difficulty}</p>
-                      <p className="missions-market-card__back-label">Recompensa</p>
-                      <p className="missions-market-card__back-value">{rewardPreview}</p>
+                        {metadataEntries.length > 0 && (
+                          <ul className="missions-market-card__meta">
+                            {metadataEntries.map((entryLabel) => (
+                              <li key={`${proposal.id}-meta-${entryLabel}`}>{entryLabel}</li>
+                            ))}
+                          </ul>
+                        )}
+                        <button
+                          type="button"
+                          className="missions-market-card__cta"
+                          disabled={!canActivate}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            if (canActivate) {
+                              handleActivateProposal(entry.slot, proposal);
+                            }
+                          }}
+                        >
+                          Activar en slot {details.label}
+                        </button>
+                      </div>
+                      <div className="missions-market-card__insight">
+                        <p className="missions-market-card__back-label">Dificultad</p>
+                        <p className="missions-market-card__back-value">{proposal.difficulty}</p>
+                        <p className="missions-market-card__back-label">Recompensa</p>
+                        <p className="missions-market-card__back-value">{rewardPreview}</p>
+                      </div>
                     </div>
                   </article>
                 );
