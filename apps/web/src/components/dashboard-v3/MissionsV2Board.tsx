@@ -2033,28 +2033,6 @@ export function MissionsV2Board({
   const activeMarketCard = marketCards[activeMarketIndex] ?? null;
   const activeSlotCard = orderedSlots[activeSlotIndex] ?? null;
 
-  const firstClaimableSlot = orderedSlots.find((slot) => {
-    if (!slot.mission) {
-      return false;
-    }
-    const canClaim =
-      FEATURE_MISSIONS_V2 &&
-      isOnMissionsRoute &&
-      slot.claim.available &&
-      slot.claim.enabled;
-    return canClaim && !busyMap[slot.id];
-  });
-
-  const firstHeartbeatSlot = orderedSlots.find((slot) => {
-    if (!slot.mission || busyMap[slot.id]) {
-      return false;
-    }
-    const heartbeatAction = slot.actions.find((action) => action.type === 'heartbeat');
-    return Boolean(heartbeatAction && heartbeatAction.enabled);
-  });
-
-  const showStickyBar = Boolean(firstClaimableSlot || firstHeartbeatSlot);
-
   return (
     <div className="missions-board" data-reduced-motion={prefersReducedMotion ? 'true' : 'false'}>
       <div className="missions-board__background" aria-hidden="true" />
@@ -2535,48 +2513,6 @@ export function MissionsV2Board({
           </Card>
         </div>
       </div>
-
-      {showStickyBar && (
-        <div className="missions-sticky-cta" role="toolbar" aria-label="Acciones rápidas de misiones">
-          <button
-            type="button"
-            className="missions-sticky-cta__btn missions-sticky-cta__btn--claim"
-            disabled={!firstClaimableSlot}
-            onClick={() => {
-              if (!firstClaimableSlot) {
-                return;
-              }
-              focusSlot(firstClaimableSlot);
-              handleClaim(firstClaimableSlot);
-            }}
-          >
-            Claim
-          </button>
-          <button
-            type="button"
-            className="missions-sticky-cta__btn missions-sticky-cta__btn--heartbeat"
-            disabled={!firstHeartbeatSlot}
-            onClick={() => {
-              if (!firstHeartbeatSlot) {
-                return;
-              }
-              focusSlot(firstHeartbeatSlot);
-              handleHeartbeat(firstHeartbeatSlot);
-            }}
-          >
-            Heartbeat
-          </button>
-          <button
-            type="button"
-            className="missions-sticky-cta__btn missions-sticky-cta__btn--market"
-            onClick={() => {
-              scrollToMarket();
-            }}
-          >
-            Market
-          </button>
-        </div>
-      )}
 
       {claimModal ? (
         <ClaimModal
