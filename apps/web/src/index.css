@@ -945,7 +945,7 @@
 
 .missions-market-carousel__track {
   @apply relative flex w-full items-center justify-center overflow-hidden py-4 sm:py-6;
-  min-height: clamp(320px, 76vw, 420px);
+  min-height: clamp(360px, calc(100dvh - 140px), 560px);
 }
 
 .missions-market-carousel__item {
