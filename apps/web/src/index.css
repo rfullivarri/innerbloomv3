@@ -945,7 +945,7 @@
 
 .missions-market-carousel__track {
   @apply relative flex w-full items-center justify-center overflow-hidden py-4 sm:py-6;
-  min-height: clamp(280px, 80vw, 380px);
+  min-height: clamp(320px, 76vw, 420px);
 }
 
 .missions-market-carousel__item {
@@ -1917,7 +1917,7 @@
   padding: 0;
   width: 100%;
   aspect-ratio: var(--market-card-aspect, 3 / 4);
-  min-height: clamp(340px, calc(100dvh - 140px), 500px);
+  min-height: clamp(360px, calc(100dvh - 140px), 540px);
   border-radius: 1.1rem;
   border: 1px solid rgba(59, 130, 246, 0.28);
   background: transparent;
@@ -1928,6 +1928,17 @@
     border-color var(--motion-duration-base) var(--motion-ease-enter);
   cursor: pointer;
   overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .missions-market-carousel__track {
+    min-height: clamp(380px, calc(100dvh - 120px), 640px);
+  }
+
+  .missions-market-card {
+    aspect-ratio: auto;
+    min-height: clamp(380px, calc(100dvh - 140px), 620px);
+  }
 }
 
 .missions-market-card:focus-visible {
