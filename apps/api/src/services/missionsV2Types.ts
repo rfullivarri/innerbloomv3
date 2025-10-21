@@ -10,7 +10,8 @@ export type MissionsV2EventName =
   | 'missions_v2_progress_tick'
   | 'missions_v2_boss_phase1_tick'
   | 'missions_v2_boss_phase2_finish'
-  | 'missions_v2_reward_claimed';
+  | 'missions_v2_reward_claimed'
+  | 'missions_v2_market_activate';
 
 export type MissionReward = {
   xp: number;

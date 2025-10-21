@@ -55,7 +55,8 @@ export type MissionsV2EventName =
   | 'missions_v2_claim_open'
   | 'missions_v2_select_open'
   | 'missions_v2_heartbeat'
-  | 'missions_v2_reward_claimed';
+  | 'missions_v2_reward_claimed'
+  | 'missions_v2_market_activate';
 
 export interface MissionsV2EventPayload {
   userId?: string | null;
@@ -64,6 +65,7 @@ export interface MissionsV2EventPayload {
   missionId?: string | null;
   reward?: unknown;
   timestamp?: string;
+  proposalId?: string | null;
 }
 
 export function emitMissionsV2Event(event: MissionsV2EventName, payload: MissionsV2EventPayload = {}) {
@@ -71,6 +73,7 @@ export function emitMissionsV2Event(event: MissionsV2EventName, payload: Mission
   const normalizedSlot = typeof payload.slot === 'string' ? payload.slot.trim().toLowerCase() : '';
   const normalizedSource = typeof payload.source === 'string' ? payload.source.trim() : '';
   const normalizedMissionId = typeof payload.missionId === 'string' ? payload.missionId.trim() : '';
+  const normalizedProposalId = typeof payload.proposalId === 'string' ? payload.proposalId.trim() : '';
 
   const normalizedPayload: Record<string, unknown> = {
     event,
@@ -80,6 +83,10 @@ export function emitMissionsV2Event(event: MissionsV2EventName, payload: Mission
     mission_id: normalizedMissionId.length > 0 ? normalizedMissionId : undefined,
     timestamp: payload.timestamp ?? new Date().toISOString(),
   };
+
+  if (normalizedProposalId.length > 0) {
+    normalizedPayload.proposal_id = normalizedProposalId;
+  }
 
   if (payload.reward !== undefined) {
     normalizedPayload.reward = payload.reward;
