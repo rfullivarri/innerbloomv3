@@ -317,6 +317,10 @@
   gap: 1.5rem;
 }
 
+.missions-board__panel[hidden] {
+  display: none;
+}
+
 @media (max-width: 640px) {
   .missions-board__panel {
     gap: 1.2rem;
