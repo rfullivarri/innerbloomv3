@@ -1940,8 +1940,9 @@
   }
 
   .missions-market-card {
-    aspect-ratio: auto;
-    min-height: clamp(380px, calc(100dvh - 140px), 620px);
+    aspect-ratio: var(--market-card-aspect, 3 / 4);
+    flex: 1 1 auto;
+    max-height: clamp(380px, calc(100dvh - 140px), 620px);
   }
 }
 
