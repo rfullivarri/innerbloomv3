@@ -31,9 +31,11 @@ export type MissionDefinition = {
   summary: string;
   requirements: string;
   objective: string;
+  objectives?: string[];
   reward: MissionReward;
   tasks: MissionTask[];
   difficulty: 'low' | 'medium' | 'high' | 'epic';
+  tags?: string[];
   metadata?: Record<string, unknown>;
   durationDays: number;
 };
@@ -221,6 +223,27 @@ export type MissionsBoardResponse = {
   rewards: MissionsBoardRewards;
   gating: MissionsBoardGating;
   communications: MissionsBoardCommunication[];
+  market: MissionsBoardMarketSlot[];
+};
+
+export type MissionsBoardMarketProposal = {
+  id: string;
+  slot: MissionSlotKey;
+  name: string;
+  summary: string;
+  requirements: string;
+  objective: string;
+  objectives: string[];
+  reward: MissionReward;
+  difficulty: MissionDefinition['difficulty'];
+  tags: string[];
+  metadata: Record<string, unknown>;
+  duration_days: number;
+};
+
+export type MissionsBoardMarketSlot = {
+  slot: MissionSlotKey;
+  proposals: MissionsBoardMarketProposal[];
 };
 
 export type MissionHeartbeatResponse = {

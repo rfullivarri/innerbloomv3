@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
+import { DEV_USER_SWITCH_ACTIVE } from './lib/api';
 import { isApiLoggingEnabled, setApiLoggingEnabled } from './lib/logger';
 
 declare global {
@@ -29,7 +30,8 @@ if (!rootElement) {
   throw new Error('Root element not found');
 }
 
-const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const publishableKey =
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || (DEV_USER_SWITCH_ACTIVE ? 'dev-placeholder' : undefined);
 
 if (!publishableKey) {
   throw new Error('VITE_CLERK_PUBLISHABLE_KEY is not set');

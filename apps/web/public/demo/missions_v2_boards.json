@@ -1,0 +1,2275 @@
+{
+  "user_demo_active": {
+    "season_id": "2025-Q4",
+    "generated_at": "2025-10-20T20:16:51.351Z",
+    "slots": [
+      {
+        "id": "user_demo_active:main",
+        "slot": "main",
+        "mission": {
+          "id": "mst_main_active_act2",
+          "name": "Acto 2: Mensaje y Primer Envío",
+          "type": "main",
+          "summary": "Convertí tu intención en un acto público dentro de la quincena.",
+          "requirements": "Necesitás haber completado el Acto 1 y sostener Heartbeat por 7 días.",
+          "objective": "Entregar la evidencia del acto central y registrar el aprendizaje clave.",
+          "reward": {
+            "xp": 320,
+            "currency": 20,
+            "items": [
+              "Medalla de Acto",
+              "Aura del Mensaje"
+            ]
+          },
+          "tasks": [
+            {
+              "id": "11111111-1111-4111-8111-111111111111",
+              "name": "Reflexión diaria del Acto",
+              "tag": "reflection"
+            },
+            {
+              "id": "11111111-1111-4111-8111-111111111112",
+              "name": "Subir evidencia del Acto",
+              "tag": "proof"
+            }
+          ]
+        },
+        "state": "active",
+        "petals": {
+          "total": 3,
+          "remaining": 3,
+          "lastEvaluatedAt": "2025-10-20"
+        },
+        "heartbeat_today": true,
+        "heartbeat_log": [
+          "2025-10-18T20:16:51.351Z",
+          "2025-10-19T20:16:51.351Z",
+          "2025-10-20T20:16:51.351Z"
+        ],
+        "progress": {
+          "current": 3,
+          "target": 5,
+          "percent": 60
+        },
+        "countdown": {
+          "ends_at": "2025-10-22T20:16:51.351Z",
+          "cooldown_until": null,
+          "label": "Termina en 2d"
+        },
+        "actions": [
+          {
+            "id": "mst_main_active_act2:heartbeat",
+            "type": "heartbeat",
+            "label": "Heartbeat registrado",
+            "enabled": false
+          },
+          {
+            "id": "mst_main_active_act2:submit_evidence",
+            "type": "submit_evidence",
+            "label": "Entregar evidencia",
+            "enabled": false
+          },
+          {
+            "id": "mst_main_active_act2:claim",
+            "type": "claim",
+            "label": "Reclamar botín",
+            "enabled": false
+          },
+          {
+            "id": "main:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": null,
+          "claimed_at": null
+        }
+      },
+      {
+        "id": "user_demo_active:hunt",
+        "slot": "hunt",
+        "mission": {
+          "id": "mst_hunt_active_chain",
+          "name": "Cadena de Fricción",
+          "type": "hunt",
+          "summary": "Atacá la tarea con mayor fricción y mantené la cadena activa.",
+          "requirements": "Vinculá la tarea desde el Daily y activá el booster con Heartbeat.",
+          "objective": "Lograr 3 sesiones consecutivas con booster activo.",
+          "reward": {
+            "xp": 200,
+            "currency": 12,
+            "items": [
+              "Cofre de Cacería",
+              "Amuleto Solar"
+            ]
+          },
+          "tasks": [
+            {
+              "id": "22222222-2222-4222-8222-222222222221",
+              "name": "Sesión de Hunt con booster",
+              "tag": "session"
+            },
+            {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "name": "Vincular Daily a la Hunt",
+              "tag": "link"
+            }
+          ]
+        },
+        "state": "active",
+        "petals": {
+          "total": 3,
+          "remaining": 2,
+          "lastEvaluatedAt": "2025-10-20"
+        },
+        "heartbeat_today": false,
+        "heartbeat_log": [
+          "2025-10-18T20:16:51.351Z",
+          "2025-10-19T20:16:51.351Z"
+        ],
+        "progress": {
+          "current": 1,
+          "target": 3,
+          "percent": 33
+        },
+        "countdown": {
+          "ends_at": "2025-10-21T20:16:51.351Z",
+          "cooldown_until": null,
+          "label": "Termina en 1d"
+        },
+        "actions": [
+          {
+            "id": "mst_hunt_active_chain:heartbeat",
+            "type": "heartbeat",
+            "label": "Marcar Heartbeat",
+            "enabled": true
+          },
+          {
+            "id": "mst_hunt_active_chain:link_daily",
+            "type": "link_daily",
+            "label": "Vincular Daily",
+            "enabled": true
+          },
+          {
+            "id": "mst_hunt_active_chain:special_strike",
+            "type": "special_strike",
+            "label": "Golpe Especial",
+            "enabled": false
+          },
+          {
+            "id": "mst_hunt_active_chain:submit_evidence",
+            "type": "submit_evidence",
+            "label": "Entregar evidencia",
+            "enabled": false
+          },
+          {
+            "id": "mst_hunt_active_chain:claim",
+            "type": "claim",
+            "label": "Reclamar botín",
+            "enabled": false
+          },
+          {
+            "id": "hunt:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": null,
+          "claimed_at": null
+        }
+      },
+      {
+        "id": "user_demo_active:skill",
+        "slot": "skill",
+        "mission": {
+          "id": "mst_skill_active_focus",
+          "name": "Skill Route · Focus",
+          "type": "skill",
+          "summary": "Entrená tu Focus completando micro-nodos guiados.",
+          "requirements": "Elegí un horario y sostené Heartbeat diario.",
+          "objective": "Completar 4 micro-nodos de Focus y compartir síntesis.",
+          "reward": {
+            "xp": 140,
+            "currency": 7,
+            "items": [
+              "Cristal de Focus"
+            ]
+          },
+          "tasks": [
+            {
+              "id": "33333333-3333-4333-8333-333333333331",
+              "name": "Micro-nodo de Focus",
+              "tag": "skill_node"
+            },
+            {
+              "id": "33333333-3333-4333-8333-333333333332",
+              "name": "Compartir síntesis de avance",
+              "tag": "proof"
+            }
+          ]
+        },
+        "state": "active",
+        "petals": {
+          "total": 3,
+          "remaining": 1,
+          "lastEvaluatedAt": "2025-10-20"
+        },
+        "heartbeat_today": false,
+        "heartbeat_log": [
+          "2025-10-17T20:16:51.351Z",
+          "2025-10-19T20:16:51.351Z"
+        ],
+        "progress": {
+          "current": 2,
+          "target": 5,
+          "percent": 40
+        },
+        "countdown": {
+          "ends_at": "2025-10-22T20:16:51.351Z",
+          "cooldown_until": null,
+          "label": "Termina en 2d"
+        },
+        "actions": [
+          {
+            "id": "mst_skill_active_focus:heartbeat",
+            "type": "heartbeat",
+            "label": "Marcar Heartbeat",
+            "enabled": true
+          },
+          {
+            "id": "mst_skill_active_focus:submit_evidence",
+            "type": "submit_evidence",
+            "label": "Entregar evidencia",
+            "enabled": false
+          },
+          {
+            "id": "mst_skill_active_focus:claim",
+            "type": "claim",
+            "label": "Reclamar botín",
+            "enabled": false
+          },
+          {
+            "id": "skill:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": null,
+          "claimed_at": null
+        }
+      }
+    ],
+    "boss": {
+      "id": "missions-boss",
+      "name": "Boss Quincenal",
+      "status": "locked",
+      "description": "Derribá el escudo con tus dailies vinculadas y rematá con el golpe especial.",
+      "countdown": {
+        "ends_at": "2025-10-22T20:16:51.351Z",
+        "label": "Escudo 3/6"
+      },
+      "actions": [
+        {
+          "id": "boss:special_strike",
+          "type": "special_strike",
+          "label": "Golpe Especial",
+          "enabled": false
+        }
+      ]
+    },
+    "rewards": {
+      "pending": [],
+      "claimed": []
+    },
+    "gating": {
+      "claim_url": "/dashboard-v3/missions-v2"
+    },
+    "communications": [],
+    "market": [
+      {
+        "slot": "main",
+        "proposals": [
+          {
+            "id": "mst_main_market_vow",
+            "slot": "main",
+            "name": "Acto II · Juramento de Impacto",
+            "summary": "Sellá tu declaración pública con testigos y evidencia en 48 horas.",
+            "requirements": "Haber completado el Acto 1 y sostener Heartbeat por 7 días.",
+            "objective": "Completar el ritual público del Acto II con evidencia documentada.",
+            "objectives": [
+              "Publicá tu mensaje en un espacio abierto antes de 48 horas.",
+              "Recolectá evidencia visual o escrita de la publicación.",
+              "Registrar el aprendizaje clave en tu bitácora del Acto."
+            ],
+            "reward": {
+              "xp": 320,
+              "currency": 20,
+              "items": [
+                "Medalla de Acto",
+                "Carta Testimonial"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "acto",
+              "storytelling",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "narrative": "acto_central",
+              "spotlight": "public_pledge"
+            },
+            "duration_days": 14
+          },
+          {
+            "id": "mst_main_market_signal",
+            "slot": "main",
+            "name": "Acto II · Señal Amplificada",
+            "summary": "Transformá tu mensaje en una pieza compartible y midé la resonancia.",
+            "requirements": "Acto 1 finalizado y dos días consecutivos de Heartbeat activo.",
+            "objective": "Amplificar el mensaje central del Acto con feedback de la comunidad.",
+            "objectives": [
+              "Diseñá una pieza comunicacional (video, hilo o carta) y compartila con aliados.",
+              "Solicitá feedback de al menos 3 personas clave.",
+              "Documentá ajustes y aprendizajes en la bitácora del Acto."
+            ],
+            "reward": {
+              "xp": 280,
+              "currency": 18,
+              "items": [
+                "Aura Prisma",
+                "Sticker de Comunidad"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "acto",
+              "comunidad",
+              "feedback"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "narrative": "acto_central",
+              "channel": "community"
+            },
+            "duration_days": 14
+          },
+          {
+            "id": "mst_main_market_legacy",
+            "slot": "main",
+            "name": "Acto III · Primer Legado",
+            "summary": "Prepará la evidencia del legado inicial y planificá la siguiente iteración.",
+            "requirements": "Acto 2 completado y boss fase 1 derribado.",
+            "objective": "Consolidar el legado inicial y entregar síntesis con próximos pasos.",
+            "objectives": [
+              "Curá el material clave del Acto y generá un entregable de legado.",
+              "Facilitá una mini-reunión de revisión con tu círculo de apoyo.",
+              "Esbozá próximos pasos y bloqueos para el Acto siguiente."
+            ],
+            "reward": {
+              "xp": 420,
+              "currency": 28,
+              "items": [
+                "Cofre del Legado",
+                "Aura de Continuidad"
+              ]
+            },
+            "difficulty": "epic",
+            "tags": [
+              "acto",
+              "legado",
+              "planificación"
+            ],
+            "metadata": {
+              "cadence": "monthly",
+              "narrative": "acto_final",
+              "spotlight": "legacy_review"
+            },
+            "duration_days": 21
+          }
+        ]
+      },
+      {
+        "slot": "hunt",
+        "proposals": [
+          {
+            "id": "mst_hunt_market_chain",
+            "slot": "hunt",
+            "name": "Hunt · Cadena Heroica",
+            "summary": "Mantener 3 sesiones consecutivas con booster activo y sin perder pétalos.",
+            "requirements": "Booster apuntado a la tarea crítica y Heartbeat previo activado.",
+            "objective": "Encadenar sesiones con booster activo para quebrar la fricción principal.",
+            "objectives": [
+              "Planificá tres sesiones consecutivas en la semana y confirmá horarios con aliados.",
+              "Activá el booster antes de iniciar cada sesión y registrá el Heartbeat.",
+              "Documentá fricción, aprendizajes y próxima acción inmediata."
+            ],
+            "reward": {
+              "xp": 210,
+              "currency": 14,
+              "items": [
+                "Cofre Prismático",
+                "Token de Momentum"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "booster",
+              "momentum",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "boosterMultiplier": 1.5,
+              "window": "3 sesiones"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_hunt_market_sprint",
+            "slot": "hunt",
+            "name": "Hunt · Sprint Nocturno",
+            "summary": "Cerrar dos micro-sprints nocturnos y reportar evidencia antes de dormir.",
+            "requirements": "Slot de Hunt libre y daily vinculada antes de las 22:00.",
+            "objective": "Ejecutar sprints cortos con booster activo para despejar backlog urgente.",
+            "objectives": [
+              "Prepará un checklist breve para cada sprint nocturno.",
+              "Realizá la sesión con booster + Heartbeat antes de las 22:30.",
+              "Enviá evidencia o resumen rápido en el canal designado."
+            ],
+            "reward": {
+              "xp": 180,
+              "currency": 12,
+              "items": [
+                "Amuleto de Velocidad"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "booster",
+              "ritmo",
+              "nocturno"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "boosterMultiplier": 1.3,
+              "window": "2 noches"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_hunt_market_analysis",
+            "slot": "hunt",
+            "name": "Hunt · Informe de Bloqueos",
+            "summary": "Mapeá los bloqueos de la Hunt y diseñá un protocolo de salida.",
+            "requirements": "Haber activado booster al menos una vez esta semana.",
+            "objective": "Analizar fricciones de la Hunt y pactar un protocolo anti-bloqueo.",
+            "objectives": [
+              "Registrá cada bloqueo encontrado durante dos sesiones.",
+              "Proponé una acción correctiva para cada bloqueo detectado.",
+              "Compartí el informe con un aliado y acordá seguimiento."
+            ],
+            "reward": {
+              "xp": 230,
+              "currency": 16,
+              "items": [
+                "Kit Anti-Fricción"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "diagnóstico",
+              "booster",
+              "reflexión"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "boosterMultiplier": 1.5,
+              "report": "friction_map"
+            },
+            "duration_days": 10
+          }
+        ]
+      },
+      {
+        "slot": "skill",
+        "proposals": [
+          {
+            "id": "mst_skill_market_focus",
+            "slot": "skill",
+            "name": "Skill Route · Focus Profundo",
+            "summary": "Elevar Focus completando cuatro micro-nodos y síntesis accionable.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
+            "objectives": [
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
+            ],
+            "reward": {
+              "xp": 150,
+              "currency": 8,
+              "items": [
+                "Cristal de Focus"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "focus",
+              "constancia",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Focus",
+              "track": "deep_work"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_skill_market_story",
+            "slot": "skill",
+            "name": "Skill Route · Storytelling",
+            "summary": "Practicar narrativa con micro-nodos cortos y feedback inmediato.",
+            "requirements": "Slot Skill libre y disponibilidad para feedback asincrónico.",
+            "objective": "Desarrollar storytelling aplicándolo a misiones activas.",
+            "objectives": [
+              "Completar tres micro-nodos de Storytelling con ejemplos propios.",
+              "Compartir borradores con un aliado y recibir feedback expresivo.",
+              "Publicar una síntesis narrativa en tu canal personal."
+            ],
+            "reward": {
+              "xp": 170,
+              "currency": 9,
+              "items": [
+                "Pluma Resonante"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "storytelling",
+              "feedback",
+              "creatividad"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Storytelling",
+              "track": "communication"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_skill_market_resilience",
+            "slot": "skill",
+            "name": "Skill Route · Resilience Lab",
+            "summary": "Entrenar resiliencia con micro-retos y debrief emocional.",
+            "requirements": "Slot Skill libre y compromiso de 4 sesiones cortas.",
+            "objective": "Aumentar resiliencia aplicando micro-retos y registro emocional.",
+            "objectives": [
+              "Ejecutar cuatro micro-retos que expandan tu zona de confort.",
+              "Completar un debrief emocional guiado tras cada reto.",
+              "Compartir conclusiones y señales de alerta con el squad."
+            ],
+            "reward": {
+              "xp": 190,
+              "currency": 11,
+              "items": [
+                "Amuleto de Resistencia"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "resilience",
+              "emotions",
+              "growth"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Resilience",
+              "track": "inner_game"
+            },
+            "duration_days": 7
+          }
+        ]
+      }
+    ]
+  },
+  "user_demo_claim": {
+    "season_id": "2025-Q4",
+    "generated_at": "2025-10-20T19:16:51.351Z",
+    "slots": [
+      {
+        "id": "user_demo_claim:main",
+        "slot": "main",
+        "mission": {
+          "id": "mst_main_claim_act2",
+          "name": "Acto 2: Mensaje y Primer Envío",
+          "type": "main",
+          "summary": "Convertí tu intención en un acto público dentro de la quincena.",
+          "requirements": "Necesitás haber completado el Acto 1 y sostener Heartbeat por 7 días.",
+          "objective": "Entregar la evidencia del acto central y registrar el aprendizaje clave.",
+          "reward": {
+            "xp": 360,
+            "currency": 25,
+            "items": [
+              "Cofre del Acto",
+              "Medalla de Honor",
+              "Aura Prisma"
+            ]
+          },
+          "tasks": [
+            {
+              "id": "11111111-1111-4111-8111-111111111111",
+              "name": "Reflexión diaria del Acto",
+              "tag": "reflection"
+            },
+            {
+              "id": "11111111-1111-4111-8111-111111111112",
+              "name": "Subir evidencia del Acto",
+              "tag": "proof"
+            }
+          ]
+        },
+        "state": "succeeded",
+        "petals": {
+          "total": 3,
+          "remaining": 1,
+          "lastEvaluatedAt": "2025-10-20"
+        },
+        "heartbeat_today": false,
+        "heartbeat_log": [
+          "2025-10-15T20:16:51.351Z",
+          "2025-10-17T20:16:51.351Z",
+          "2025-10-19T20:16:51.351Z"
+        ],
+        "progress": {
+          "current": 4,
+          "target": 4,
+          "percent": 100
+        },
+        "countdown": {
+          "ends_at": "2025-10-21T20:16:51.351Z",
+          "cooldown_until": null,
+          "label": "Termina en 1d"
+        },
+        "actions": [
+          {
+            "id": "mst_main_claim_act2:heartbeat",
+            "type": "heartbeat",
+            "label": "Marcar Heartbeat",
+            "enabled": false
+          },
+          {
+            "id": "mst_main_claim_act2:submit_evidence",
+            "type": "submit_evidence",
+            "label": "Entregar evidencia",
+            "enabled": true
+          },
+          {
+            "id": "mst_main_claim_act2:claim",
+            "type": "claim",
+            "label": "Reclamar botín",
+            "enabled": true
+          },
+          {
+            "id": "main:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": true,
+          "enabled": true,
+          "cooldown_until": null,
+          "claimed_at": null,
+          "reward": {
+            "xp": 360,
+            "currency": 25,
+            "items": [
+              "Cofre del Acto",
+              "Medalla de Honor",
+              "Aura Prisma"
+            ]
+          }
+        }
+      },
+      {
+        "id": "user_demo_claim:hunt",
+        "slot": "hunt",
+        "mission": {
+          "id": "mst_hunt_claim_chain",
+          "name": "Cadena de Fricción",
+          "type": "hunt",
+          "summary": "Atacá la tarea con mayor fricción y mantené la cadena activa.",
+          "requirements": "Vinculá la tarea desde el Daily y activá el booster con Heartbeat.",
+          "objective": "Lograr 3 sesiones consecutivas con booster activo.",
+          "reward": {
+            "xp": 220,
+            "currency": 15,
+            "items": [
+              "Cofre de Cacería"
+            ]
+          },
+          "tasks": [
+            {
+              "id": "22222222-2222-4222-8222-222222222221",
+              "name": "Sesión de Hunt con booster",
+              "tag": "session"
+            },
+            {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "name": "Vincular Daily a la Hunt",
+              "tag": "link"
+            }
+          ]
+        },
+        "state": "active",
+        "petals": {
+          "total": 3,
+          "remaining": 3,
+          "lastEvaluatedAt": "2025-10-20"
+        },
+        "heartbeat_today": false,
+        "heartbeat_log": [
+          "2025-10-19T20:16:51.351Z"
+        ],
+        "progress": {
+          "current": 2,
+          "target": 3,
+          "percent": 67
+        },
+        "countdown": {
+          "ends_at": "2025-10-22T20:16:51.351000Z",
+          "cooldown_until": null,
+          "label": "Termina en 2d"
+        },
+        "actions": [
+          {
+            "id": "mst_hunt_claim_chain:heartbeat",
+            "type": "heartbeat",
+            "label": "Marcar Heartbeat",
+            "enabled": true
+          },
+          {
+            "id": "mst_hunt_claim_chain:link_daily",
+            "type": "link_daily",
+            "label": "Vincular Daily",
+            "enabled": true
+          },
+          {
+            "id": "mst_hunt_claim_chain:special_strike",
+            "type": "special_strike",
+            "label": "Golpe Especial",
+            "enabled": true
+          },
+          {
+            "id": "mst_hunt_claim_chain:submit_evidence",
+            "type": "submit_evidence",
+            "label": "Entregar evidencia",
+            "enabled": false
+          },
+          {
+            "id": "mst_hunt_claim_chain:claim",
+            "type": "claim",
+            "label": "Reclamar botín",
+            "enabled": false
+          },
+          {
+            "id": "hunt:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": null,
+          "claimed_at": null
+        }
+      },
+      {
+        "id": "user_demo_claim:skill",
+        "slot": "skill",
+        "mission": {
+          "id": "mst_skill_claim_focus",
+          "name": "Skill Route · Focus",
+          "type": "skill",
+          "summary": "Entrená tu Focus completando micro-nodos guiados.",
+          "requirements": "Elegí un horario y sostené Heartbeat diario.",
+          "objective": "Completar 4 micro-nodos de Focus y compartir síntesis.",
+          "reward": {
+            "xp": 160,
+            "currency": 9,
+            "items": [
+              "Manual de Focus"
+            ]
+          },
+          "tasks": [
+            {
+              "id": "33333333-3333-4333-8333-333333333331",
+              "name": "Micro-nodo de Focus",
+              "tag": "skill_node"
+            },
+            {
+              "id": "33333333-3333-4333-8333-333333333332",
+              "name": "Compartir síntesis de avance",
+              "tag": "proof"
+            }
+          ]
+        },
+        "state": "claimed",
+        "petals": {
+          "total": 3,
+          "remaining": 2,
+          "lastEvaluatedAt": "2025-10-20"
+        },
+        "heartbeat_today": false,
+        "heartbeat_log": [
+          "2025-10-14T20:16:51.351Z",
+          "2025-10-16T20:16:51.351Z",
+          "2025-10-18T20:16:51.351Z"
+        ],
+        "progress": {
+          "current": 5,
+          "target": 5,
+          "percent": 100
+        },
+        "countdown": {
+          "ends_at": "2025-10-19T20:16:51.351Z",
+          "cooldown_until": null,
+          "label": "Último día"
+        },
+        "actions": [
+          {
+            "id": "mst_skill_claim_focus:heartbeat",
+            "type": "heartbeat",
+            "label": "Marcar Heartbeat",
+            "enabled": false
+          },
+          {
+            "id": "mst_skill_claim_focus:submit_evidence",
+            "type": "submit_evidence",
+            "label": "Entregar evidencia",
+            "enabled": false
+          },
+          {
+            "id": "mst_skill_claim_focus:claim",
+            "type": "claim",
+            "label": "Reclamar botín",
+            "enabled": false
+          },
+          {
+            "id": "skill:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": "2025-10-22T20:16:51.351Z",
+          "claimed_at": "2025-10-19T20:16:51.351Z",
+          "reward": {
+            "xp": 160,
+            "currency": 9,
+            "items": [
+              "Manual de Focus"
+            ]
+          }
+        }
+      }
+    ],
+    "boss": {
+      "id": "missions-boss",
+      "name": "Boss Quincenal",
+      "status": "ready",
+      "description": "Derribá el escudo con tus dailies vinculadas y rematá con el golpe especial.",
+      "countdown": {
+        "ends_at": "2025-10-21T20:16:51.351Z",
+        "label": "Golpe especial disponible"
+      },
+      "actions": [
+        {
+          "id": "boss:special_strike",
+          "type": "special_strike",
+          "label": "Golpe Especial",
+          "enabled": true
+        }
+      ]
+    },
+    "rewards": {
+      "pending": [
+        {
+          "mission_id": "mst_main_claim_act2",
+          "slot": "main",
+          "reward": {
+            "xp": 360,
+            "currency": 25,
+            "items": [
+              "Cofre del Acto",
+              "Medalla de Honor",
+              "Aura Prisma"
+            ]
+          },
+          "status": "pending",
+          "updated_at": "2025-10-20T18:16:51.351Z"
+        }
+      ],
+      "claimed": [
+        {
+          "mission_id": "mst_skill_claim_focus",
+          "slot": "skill",
+          "reward": {
+            "xp": 160,
+            "currency": 9,
+            "items": [
+              "Manual de Focus"
+            ]
+          },
+          "status": "claimed",
+          "updated_at": "2025-10-20T10:16:51.351Z"
+        }
+      ]
+    },
+    "gating": {
+      "claim_url": "/dashboard-v3/missions-v2"
+    },
+    "communications": [],
+    "market": [
+      {
+        "slot": "main",
+        "proposals": [
+          {
+            "id": "mst_main_market_vow",
+            "slot": "main",
+            "name": "Acto II · Juramento de Impacto",
+            "summary": "Sellá tu declaración pública con testigos y evidencia en 48 horas.",
+            "requirements": "Haber completado el Acto 1 y sostener Heartbeat por 7 días.",
+            "objective": "Completar el ritual público del Acto II con evidencia documentada.",
+            "objectives": [
+              "Publicá tu mensaje en un espacio abierto antes de 48 horas.",
+              "Recolectá evidencia visual o escrita de la publicación.",
+              "Registrar el aprendizaje clave en tu bitácora del Acto."
+            ],
+            "reward": {
+              "xp": 320,
+              "currency": 20,
+              "items": [
+                "Medalla de Acto",
+                "Carta Testimonial"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "acto",
+              "storytelling",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "narrative": "acto_central",
+              "spotlight": "public_pledge"
+            },
+            "duration_days": 14
+          },
+          {
+            "id": "mst_main_market_signal",
+            "slot": "main",
+            "name": "Acto II · Señal Amplificada",
+            "summary": "Transformá tu mensaje en una pieza compartible y midé la resonancia.",
+            "requirements": "Acto 1 finalizado y dos días consecutivos de Heartbeat activo.",
+            "objective": "Amplificar el mensaje central del Acto con feedback de la comunidad.",
+            "objectives": [
+              "Diseñá una pieza comunicacional (video, hilo o carta) y compartila con aliados.",
+              "Solicitá feedback de al menos 3 personas clave.",
+              "Documentá ajustes y aprendizajes en la bitácora del Acto."
+            ],
+            "reward": {
+              "xp": 280,
+              "currency": 18,
+              "items": [
+                "Aura Prisma",
+                "Sticker de Comunidad"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "acto",
+              "comunidad",
+              "feedback"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "narrative": "acto_central",
+              "channel": "community"
+            },
+            "duration_days": 14
+          },
+          {
+            "id": "mst_main_market_legacy",
+            "slot": "main",
+            "name": "Acto III · Primer Legado",
+            "summary": "Prepará la evidencia del legado inicial y planificá la siguiente iteración.",
+            "requirements": "Acto 2 completado y boss fase 1 derribado.",
+            "objective": "Consolidar el legado inicial y entregar síntesis con próximos pasos.",
+            "objectives": [
+              "Curá el material clave del Acto y generá un entregable de legado.",
+              "Facilitá una mini-reunión de revisión con tu círculo de apoyo.",
+              "Esbozá próximos pasos y bloqueos para el Acto siguiente."
+            ],
+            "reward": {
+              "xp": 420,
+              "currency": 28,
+              "items": [
+                "Cofre del Legado",
+                "Aura de Continuidad"
+              ]
+            },
+            "difficulty": "epic",
+            "tags": [
+              "acto",
+              "legado",
+              "planificación"
+            ],
+            "metadata": {
+              "cadence": "monthly",
+              "narrative": "acto_final",
+              "spotlight": "legacy_review"
+            },
+            "duration_days": 21
+          }
+        ]
+      },
+      {
+        "slot": "hunt",
+        "proposals": [
+          {
+            "id": "mst_hunt_market_chain",
+            "slot": "hunt",
+            "name": "Hunt · Cadena Heroica",
+            "summary": "Mantener 3 sesiones consecutivas con booster activo y sin perder pétalos.",
+            "requirements": "Booster apuntado a la tarea crítica y Heartbeat previo activado.",
+            "objective": "Encadenar sesiones con booster activo para quebrar la fricción principal.",
+            "objectives": [
+              "Planificá tres sesiones consecutivas en la semana y confirmá horarios con aliados.",
+              "Activá el booster antes de iniciar cada sesión y registrá el Heartbeat.",
+              "Documentá fricción, aprendizajes y próxima acción inmediata."
+            ],
+            "reward": {
+              "xp": 210,
+              "currency": 14,
+              "items": [
+                "Cofre Prismático",
+                "Token de Momentum"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "booster",
+              "momentum",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "boosterMultiplier": 1.5,
+              "window": "3 sesiones"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_hunt_market_sprint",
+            "slot": "hunt",
+            "name": "Hunt · Sprint Nocturno",
+            "summary": "Cerrar dos micro-sprints nocturnos y reportar evidencia antes de dormir.",
+            "requirements": "Slot de Hunt libre y daily vinculada antes de las 22:00.",
+            "objective": "Ejecutar sprints cortos con booster activo para despejar backlog urgente.",
+            "objectives": [
+              "Prepará un checklist breve para cada sprint nocturno.",
+              "Realizá la sesión con booster + Heartbeat antes de las 22:30.",
+              "Enviá evidencia o resumen rápido en el canal designado."
+            ],
+            "reward": {
+              "xp": 180,
+              "currency": 12,
+              "items": [
+                "Amuleto de Velocidad"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "booster",
+              "ritmo",
+              "nocturno"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "boosterMultiplier": 1.3,
+              "window": "2 noches"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_hunt_market_analysis",
+            "slot": "hunt",
+            "name": "Hunt · Informe de Bloqueos",
+            "summary": "Mapeá los bloqueos de la Hunt y diseñá un protocolo de salida.",
+            "requirements": "Haber activado booster al menos una vez esta semana.",
+            "objective": "Analizar fricciones de la Hunt y pactar un protocolo anti-bloqueo.",
+            "objectives": [
+              "Registrá cada bloqueo encontrado durante dos sesiones.",
+              "Proponé una acción correctiva para cada bloqueo detectado.",
+              "Compartí el informe con un aliado y acordá seguimiento."
+            ],
+            "reward": {
+              "xp": 230,
+              "currency": 16,
+              "items": [
+                "Kit Anti-Fricción"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "diagnóstico",
+              "booster",
+              "reflexión"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "boosterMultiplier": 1.5,
+              "report": "friction_map"
+            },
+            "duration_days": 10
+          }
+        ]
+      },
+      {
+        "slot": "skill",
+        "proposals": [
+          {
+            "id": "mst_skill_market_focus",
+            "slot": "skill",
+            "name": "Skill Route · Focus Profundo",
+            "summary": "Elevar Focus completando cuatro micro-nodos y síntesis accionable.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
+            "objectives": [
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
+            ],
+            "reward": {
+              "xp": 150,
+              "currency": 8,
+              "items": [
+                "Cristal de Focus"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "focus",
+              "constancia",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Focus",
+              "track": "deep_work"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_skill_market_story",
+            "slot": "skill",
+            "name": "Skill Route · Storytelling",
+            "summary": "Practicar narrativa con micro-nodos cortos y feedback inmediato.",
+            "requirements": "Slot Skill libre y disponibilidad para feedback asincrónico.",
+            "objective": "Desarrollar storytelling aplicándolo a misiones activas.",
+            "objectives": [
+              "Completar tres micro-nodos de Storytelling con ejemplos propios.",
+              "Compartir borradores con un aliado y recibir feedback expresivo.",
+              "Publicar una síntesis narrativa en tu canal personal."
+            ],
+            "reward": {
+              "xp": 170,
+              "currency": 9,
+              "items": [
+                "Pluma Resonante"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "storytelling",
+              "feedback",
+              "creatividad"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Storytelling",
+              "track": "communication"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_skill_market_resilience",
+            "slot": "skill",
+            "name": "Skill Route · Resilience Lab",
+            "summary": "Entrenar resiliencia con micro-retos y debrief emocional.",
+            "requirements": "Slot Skill libre y compromiso de 4 sesiones cortas.",
+            "objective": "Aumentar resiliencia aplicando micro-retos y registro emocional.",
+            "objectives": [
+              "Ejecutar cuatro micro-retos que expandan tu zona de confort.",
+              "Completar un debrief emocional guiado tras cada reto.",
+              "Compartir conclusiones y señales de alerta con el squad."
+            ],
+            "reward": {
+              "xp": 190,
+              "currency": 11,
+              "items": [
+                "Amuleto de Resistencia"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "resilience",
+              "emotions",
+              "growth"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Resilience",
+              "track": "inner_game"
+            },
+            "duration_days": 7
+          }
+        ]
+      }
+    ]
+  },
+  "user_demo_cooldown": {
+    "season_id": "2025-Q4",
+    "generated_at": "2025-10-20T18:16:51.351Z",
+    "slots": [
+      {
+        "id": "user_demo_cooldown:main",
+        "slot": "main",
+        "mission": {
+          "id": "mst_main_cooldown_fall",
+          "name": "Acto 2: Mensaje y Primer Envío",
+          "type": "main",
+          "summary": "Convertí tu intención en un acto público dentro de la quincena.",
+          "requirements": "Necesitás haber completado el Acto 1 y sostener Heartbeat por 7 días.",
+          "objective": "Entregar la evidencia del acto central y registrar el aprendizaje clave.",
+          "reward": {
+            "xp": 320,
+            "currency": 20,
+            "items": [
+              "Medalla Rota"
+            ]
+          },
+          "tasks": [
+            {
+              "id": "11111111-1111-4111-8111-111111111111",
+              "name": "Reflexión diaria del Acto",
+              "tag": "reflection"
+            },
+            {
+              "id": "11111111-1111-4111-8111-111111111112",
+              "name": "Subir evidencia del Acto",
+              "tag": "proof"
+            }
+          ]
+        },
+        "state": "failed",
+        "petals": {
+          "total": 3,
+          "remaining": 0,
+          "lastEvaluatedAt": "2025-10-18"
+        },
+        "heartbeat_today": false,
+        "heartbeat_log": [
+          "2025-10-12T20:16:51.351Z",
+          "2025-10-13T20:16:51.351Z",
+          "2025-10-14T20:16:51.351Z"
+        ],
+        "progress": {
+          "current": 1,
+          "target": 5,
+          "percent": 20
+        },
+        "countdown": {
+          "ends_at": null,
+          "cooldown_until": "2025-11-04T20:16:51.351Z",
+          "label": "Cooldown listo"
+        },
+        "actions": [
+          {
+            "id": "mst_main_cooldown_fall:heartbeat",
+            "type": "heartbeat",
+            "label": "Marcar Heartbeat",
+            "enabled": false
+          },
+          {
+            "id": "mst_main_cooldown_fall:submit_evidence",
+            "type": "submit_evidence",
+            "label": "Entregar evidencia",
+            "enabled": false
+          },
+          {
+            "id": "mst_main_cooldown_fall:claim",
+            "type": "claim",
+            "label": "Reclamar botín",
+            "enabled": false
+          },
+          {
+            "id": "main:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": "2025-11-04T20:16:51.351Z",
+          "claimed_at": null
+        }
+      },
+      {
+        "id": "user_demo_cooldown:hunt",
+        "slot": "hunt",
+        "mission": {
+          "id": "mst_hunt_cooldown_chain",
+          "name": "Cadena de Fricción",
+          "type": "hunt",
+          "summary": "Atacá la tarea con mayor fricción y mantené la cadena activa.",
+          "requirements": "Vinculá la tarea desde el Daily y activá el booster con Heartbeat.",
+          "objective": "Lograr 3 sesiones consecutivas con booster activo.",
+          "reward": {
+            "xp": 200,
+            "currency": 12,
+            "items": [
+              "Cofre Resquebrajado"
+            ]
+          },
+          "tasks": [
+            {
+              "id": "22222222-2222-4222-8222-222222222221",
+              "name": "Sesión de Hunt con booster",
+              "tag": "session"
+            },
+            {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "name": "Vincular Daily a la Hunt",
+              "tag": "link"
+            }
+          ]
+        },
+        "state": "failed",
+        "petals": {
+          "total": 3,
+          "remaining": 0,
+          "lastEvaluatedAt": "2025-10-18"
+        },
+        "heartbeat_today": false,
+        "heartbeat_log": [
+          "2025-10-11T20:16:51.351Z",
+          "2025-10-12T20:16:51.351Z"
+        ],
+        "progress": {
+          "current": 0,
+          "target": 3,
+          "percent": 0
+        },
+        "countdown": {
+          "ends_at": null,
+          "cooldown_until": "2025-11-04T20:16:51.351Z",
+          "label": "Cooldown listo"
+        },
+        "actions": [
+          {
+            "id": "mst_hunt_cooldown_chain:heartbeat",
+            "type": "heartbeat",
+            "label": "Marcar Heartbeat",
+            "enabled": false
+          },
+          {
+            "id": "mst_hunt_cooldown_chain:link_daily",
+            "type": "link_daily",
+            "label": "Vincular Daily",
+            "enabled": true
+          },
+          {
+            "id": "mst_hunt_cooldown_chain:special_strike",
+            "type": "special_strike",
+            "label": "Golpe Especial",
+            "enabled": false
+          },
+          {
+            "id": "mst_hunt_cooldown_chain:submit_evidence",
+            "type": "submit_evidence",
+            "label": "Entregar evidencia",
+            "enabled": false
+          },
+          {
+            "id": "mst_hunt_cooldown_chain:claim",
+            "type": "claim",
+            "label": "Reclamar botín",
+            "enabled": false
+          },
+          {
+            "id": "hunt:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": "2025-11-04T20:16:51.351Z",
+          "claimed_at": null
+        }
+      },
+      {
+        "id": "user_demo_cooldown:skill",
+        "slot": "skill",
+        "mission": null,
+        "state": "cooldown",
+        "petals": {
+          "total": 3,
+          "remaining": 3,
+          "lastEvaluatedAt": "2025-10-20"
+        },
+        "heartbeat_today": false,
+        "heartbeat_log": [],
+        "progress": {
+          "current": 0,
+          "target": 0,
+          "percent": 0
+        },
+        "countdown": {
+          "ends_at": null,
+          "cooldown_until": null,
+          "label": "Sin límite"
+        },
+        "actions": [
+          {
+            "id": "skill:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": null,
+          "claimed_at": null
+        }
+      }
+    ],
+    "boss": {
+      "id": "missions-boss",
+      "name": "Boss Quincenal",
+      "status": "locked",
+      "description": "Derribá el escudo con tus dailies vinculadas y rematá con el golpe especial.",
+      "countdown": {
+        "ends_at": "2025-10-18T20:16:51.351Z",
+        "label": "Escudo 6/6"
+      },
+      "actions": [
+        {
+          "id": "boss:special_strike",
+          "type": "special_strike",
+          "label": "Golpe Especial",
+          "enabled": false
+        }
+      ]
+    },
+    "rewards": {
+      "pending": [],
+      "claimed": []
+    },
+    "gating": {
+      "claim_url": "/dashboard-v3/missions-v2"
+    },
+    "communications": [],
+    "market": [
+      {
+        "slot": "main",
+        "proposals": [
+          {
+            "id": "mst_main_market_vow",
+            "slot": "main",
+            "name": "Acto II · Juramento de Impacto",
+            "summary": "Sellá tu declaración pública con testigos y evidencia en 48 horas.",
+            "requirements": "Haber completado el Acto 1 y sostener Heartbeat por 7 días.",
+            "objective": "Completar el ritual público del Acto II con evidencia documentada.",
+            "objectives": [
+              "Publicá tu mensaje en un espacio abierto antes de 48 horas.",
+              "Recolectá evidencia visual o escrita de la publicación.",
+              "Registrar el aprendizaje clave en tu bitácora del Acto."
+            ],
+            "reward": {
+              "xp": 320,
+              "currency": 20,
+              "items": [
+                "Medalla de Acto",
+                "Carta Testimonial"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "acto",
+              "storytelling",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "narrative": "acto_central",
+              "spotlight": "public_pledge"
+            },
+            "duration_days": 14
+          },
+          {
+            "id": "mst_main_market_signal",
+            "slot": "main",
+            "name": "Acto II · Señal Amplificada",
+            "summary": "Transformá tu mensaje en una pieza compartible y midé la resonancia.",
+            "requirements": "Acto 1 finalizado y dos días consecutivos de Heartbeat activo.",
+            "objective": "Amplificar el mensaje central del Acto con feedback de la comunidad.",
+            "objectives": [
+              "Diseñá una pieza comunicacional (video, hilo o carta) y compartila con aliados.",
+              "Solicitá feedback de al menos 3 personas clave.",
+              "Documentá ajustes y aprendizajes en la bitácora del Acto."
+            ],
+            "reward": {
+              "xp": 280,
+              "currency": 18,
+              "items": [
+                "Aura Prisma",
+                "Sticker de Comunidad"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "acto",
+              "comunidad",
+              "feedback"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "narrative": "acto_central",
+              "channel": "community"
+            },
+            "duration_days": 14
+          },
+          {
+            "id": "mst_main_market_legacy",
+            "slot": "main",
+            "name": "Acto III · Primer Legado",
+            "summary": "Prepará la evidencia del legado inicial y planificá la siguiente iteración.",
+            "requirements": "Acto 2 completado y boss fase 1 derribado.",
+            "objective": "Consolidar el legado inicial y entregar síntesis con próximos pasos.",
+            "objectives": [
+              "Curá el material clave del Acto y generá un entregable de legado.",
+              "Facilitá una mini-reunión de revisión con tu círculo de apoyo.",
+              "Esbozá próximos pasos y bloqueos para el Acto siguiente."
+            ],
+            "reward": {
+              "xp": 420,
+              "currency": 28,
+              "items": [
+                "Cofre del Legado",
+                "Aura de Continuidad"
+              ]
+            },
+            "difficulty": "epic",
+            "tags": [
+              "acto",
+              "legado",
+              "planificación"
+            ],
+            "metadata": {
+              "cadence": "monthly",
+              "narrative": "acto_final",
+              "spotlight": "legacy_review"
+            },
+            "duration_days": 21
+          }
+        ]
+      },
+      {
+        "slot": "hunt",
+        "proposals": [
+          {
+            "id": "mst_hunt_market_chain",
+            "slot": "hunt",
+            "name": "Hunt · Cadena Heroica",
+            "summary": "Mantener 3 sesiones consecutivas con booster activo y sin perder pétalos.",
+            "requirements": "Booster apuntado a la tarea crítica y Heartbeat previo activado.",
+            "objective": "Encadenar sesiones con booster activo para quebrar la fricción principal.",
+            "objectives": [
+              "Planificá tres sesiones consecutivas en la semana y confirmá horarios con aliados.",
+              "Activá el booster antes de iniciar cada sesión y registrá el Heartbeat.",
+              "Documentá fricción, aprendizajes y próxima acción inmediata."
+            ],
+            "reward": {
+              "xp": 210,
+              "currency": 14,
+              "items": [
+                "Cofre Prismático",
+                "Token de Momentum"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "booster",
+              "momentum",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "boosterMultiplier": 1.5,
+              "window": "3 sesiones"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_hunt_market_sprint",
+            "slot": "hunt",
+            "name": "Hunt · Sprint Nocturno",
+            "summary": "Cerrar dos micro-sprints nocturnos y reportar evidencia antes de dormir.",
+            "requirements": "Slot de Hunt libre y daily vinculada antes de las 22:00.",
+            "objective": "Ejecutar sprints cortos con booster activo para despejar backlog urgente.",
+            "objectives": [
+              "Prepará un checklist breve para cada sprint nocturno.",
+              "Realizá la sesión con booster + Heartbeat antes de las 22:30.",
+              "Enviá evidencia o resumen rápido en el canal designado."
+            ],
+            "reward": {
+              "xp": 180,
+              "currency": 12,
+              "items": [
+                "Amuleto de Velocidad"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "booster",
+              "ritmo",
+              "nocturno"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "boosterMultiplier": 1.3,
+              "window": "2 noches"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_hunt_market_analysis",
+            "slot": "hunt",
+            "name": "Hunt · Informe de Bloqueos",
+            "summary": "Mapeá los bloqueos de la Hunt y diseñá un protocolo de salida.",
+            "requirements": "Haber activado booster al menos una vez esta semana.",
+            "objective": "Analizar fricciones de la Hunt y pactar un protocolo anti-bloqueo.",
+            "objectives": [
+              "Registrá cada bloqueo encontrado durante dos sesiones.",
+              "Proponé una acción correctiva para cada bloqueo detectado.",
+              "Compartí el informe con un aliado y acordá seguimiento."
+            ],
+            "reward": {
+              "xp": 230,
+              "currency": 16,
+              "items": [
+                "Kit Anti-Fricción"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "diagnóstico",
+              "booster",
+              "reflexión"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "boosterMultiplier": 1.5,
+              "report": "friction_map"
+            },
+            "duration_days": 10
+          }
+        ]
+      },
+      {
+        "slot": "skill",
+        "proposals": [
+          {
+            "id": "mst_skill_market_focus",
+            "slot": "skill",
+            "name": "Skill Route · Focus Profundo",
+            "summary": "Elevar Focus completando cuatro micro-nodos y síntesis accionable.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
+            "objectives": [
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
+            ],
+            "reward": {
+              "xp": 150,
+              "currency": 8,
+              "items": [
+                "Cristal de Focus"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "focus",
+              "constancia",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Focus",
+              "track": "deep_work"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_skill_market_story",
+            "slot": "skill",
+            "name": "Skill Route · Storytelling",
+            "summary": "Practicar narrativa con micro-nodos cortos y feedback inmediato.",
+            "requirements": "Slot Skill libre y disponibilidad para feedback asincrónico.",
+            "objective": "Desarrollar storytelling aplicándolo a misiones activas.",
+            "objectives": [
+              "Completar tres micro-nodos de Storytelling con ejemplos propios.",
+              "Compartir borradores con un aliado y recibir feedback expresivo.",
+              "Publicar una síntesis narrativa en tu canal personal."
+            ],
+            "reward": {
+              "xp": 170,
+              "currency": 9,
+              "items": [
+                "Pluma Resonante"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "storytelling",
+              "feedback",
+              "creatividad"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Storytelling",
+              "track": "communication"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_skill_market_resilience",
+            "slot": "skill",
+            "name": "Skill Route · Resilience Lab",
+            "summary": "Entrenar resiliencia con micro-retos y debrief emocional.",
+            "requirements": "Slot Skill libre y compromiso de 4 sesiones cortas.",
+            "objective": "Aumentar resiliencia aplicando micro-retos y registro emocional.",
+            "objectives": [
+              "Ejecutar cuatro micro-retos que expandan tu zona de confort.",
+              "Completar un debrief emocional guiado tras cada reto.",
+              "Compartir conclusiones y señales de alerta con el squad."
+            ],
+            "reward": {
+              "xp": 190,
+              "currency": 11,
+              "items": [
+                "Amuleto de Resistencia"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "resilience",
+              "emotions",
+              "growth"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Resilience",
+              "track": "inner_game"
+            },
+            "duration_days": 7
+          }
+        ]
+      }
+    ]
+  },
+  "user_demo_idle": {
+    "season_id": "2025-Q4",
+    "generated_at": "2025-10-20T17:16:51.351Z",
+    "slots": [
+      {
+        "id": "user_demo_idle:main",
+        "slot": "main",
+        "mission": null,
+        "state": "idle",
+        "petals": {
+          "total": 3,
+          "remaining": 3,
+          "lastEvaluatedAt": "2025-10-20"
+        },
+        "heartbeat_today": false,
+        "heartbeat_log": [],
+        "progress": {
+          "current": 0,
+          "target": 0,
+          "percent": 0
+        },
+        "countdown": {
+          "ends_at": null,
+          "cooldown_until": null,
+          "label": "Sin límite"
+        },
+        "actions": [
+          {
+            "id": "main:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": null,
+          "claimed_at": null
+        }
+      },
+      {
+        "id": "user_demo_idle:hunt",
+        "slot": "hunt",
+        "mission": null,
+        "state": "idle",
+        "petals": {
+          "total": 3,
+          "remaining": 3,
+          "lastEvaluatedAt": "2025-10-20"
+        },
+        "heartbeat_today": false,
+        "heartbeat_log": [],
+        "progress": {
+          "current": 0,
+          "target": 0,
+          "percent": 0
+        },
+        "countdown": {
+          "ends_at": null,
+          "cooldown_until": null,
+          "label": "Sin límite"
+        },
+        "actions": [
+          {
+            "id": "hunt:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": null,
+          "claimed_at": null
+        }
+      },
+      {
+        "id": "user_demo_idle:skill",
+        "slot": "skill",
+        "mission": null,
+        "state": "idle",
+        "petals": {
+          "total": 3,
+          "remaining": 3,
+          "lastEvaluatedAt": "2025-10-20"
+        },
+        "heartbeat_today": false,
+        "heartbeat_log": [],
+        "progress": {
+          "current": 0,
+          "target": 0,
+          "percent": 0
+        },
+        "countdown": {
+          "ends_at": null,
+          "cooldown_until": null,
+          "label": "Sin límite"
+        },
+        "actions": [
+          {
+            "id": "skill:abandon",
+            "type": "abandon",
+            "label": "Abandono honroso",
+            "enabled": false
+          }
+        ],
+        "claim": {
+          "available": false,
+          "enabled": false,
+          "cooldown_until": null,
+          "claimed_at": null
+        }
+      }
+    ],
+    "boss": {
+      "id": "missions-boss",
+      "name": "Boss Quincenal",
+      "status": "locked",
+      "description": "Derribá el escudo con tus dailies vinculadas y rematá con el golpe especial.",
+      "countdown": {
+        "ends_at": null,
+        "label": "Escudo 6/6"
+      },
+      "actions": [
+        {
+          "id": "boss:special_strike",
+          "type": "special_strike",
+          "label": "Golpe Especial",
+          "enabled": false
+        }
+      ]
+    },
+    "rewards": {
+      "pending": [],
+      "claimed": []
+    },
+    "gating": {
+      "claim_url": "/dashboard-v3/missions-v2"
+    },
+    "communications": [],
+    "market": [
+      {
+        "slot": "main",
+        "proposals": [
+          {
+            "id": "mst_main_market_vow",
+            "slot": "main",
+            "name": "Acto II · Juramento de Impacto",
+            "summary": "Sellá tu declaración pública con testigos y evidencia en 48 horas.",
+            "requirements": "Haber completado el Acto 1 y sostener Heartbeat por 7 días.",
+            "objective": "Completar el ritual público del Acto II con evidencia documentada.",
+            "objectives": [
+              "Publicá tu mensaje en un espacio abierto antes de 48 horas.",
+              "Recolectá evidencia visual o escrita de la publicación.",
+              "Registrar el aprendizaje clave en tu bitácora del Acto."
+            ],
+            "reward": {
+              "xp": 320,
+              "currency": 20,
+              "items": [
+                "Medalla de Acto",
+                "Carta Testimonial"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "acto",
+              "storytelling",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "narrative": "acto_central",
+              "spotlight": "public_pledge"
+            },
+            "duration_days": 14
+          },
+          {
+            "id": "mst_main_market_signal",
+            "slot": "main",
+            "name": "Acto II · Señal Amplificada",
+            "summary": "Transformá tu mensaje en una pieza compartible y midé la resonancia.",
+            "requirements": "Acto 1 finalizado y dos días consecutivos de Heartbeat activo.",
+            "objective": "Amplificar el mensaje central del Acto con feedback de la comunidad.",
+            "objectives": [
+              "Diseñá una pieza comunicacional (video, hilo o carta) y compartila con aliados.",
+              "Solicitá feedback de al menos 3 personas clave.",
+              "Documentá ajustes y aprendizajes en la bitácora del Acto."
+            ],
+            "reward": {
+              "xp": 280,
+              "currency": 18,
+              "items": [
+                "Aura Prisma",
+                "Sticker de Comunidad"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "acto",
+              "comunidad",
+              "feedback"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "narrative": "acto_central",
+              "channel": "community"
+            },
+            "duration_days": 14
+          },
+          {
+            "id": "mst_main_market_legacy",
+            "slot": "main",
+            "name": "Acto III · Primer Legado",
+            "summary": "Prepará la evidencia del legado inicial y planificá la siguiente iteración.",
+            "requirements": "Acto 2 completado y boss fase 1 derribado.",
+            "objective": "Consolidar el legado inicial y entregar síntesis con próximos pasos.",
+            "objectives": [
+              "Curá el material clave del Acto y generá un entregable de legado.",
+              "Facilitá una mini-reunión de revisión con tu círculo de apoyo.",
+              "Esbozá próximos pasos y bloqueos para el Acto siguiente."
+            ],
+            "reward": {
+              "xp": 420,
+              "currency": 28,
+              "items": [
+                "Cofre del Legado",
+                "Aura de Continuidad"
+              ]
+            },
+            "difficulty": "epic",
+            "tags": [
+              "acto",
+              "legado",
+              "planificación"
+            ],
+            "metadata": {
+              "cadence": "monthly",
+              "narrative": "acto_final",
+              "spotlight": "legacy_review"
+            },
+            "duration_days": 21
+          }
+        ]
+      },
+      {
+        "slot": "hunt",
+        "proposals": [
+          {
+            "id": "mst_hunt_market_chain",
+            "slot": "hunt",
+            "name": "Hunt · Cadena Heroica",
+            "summary": "Mantener 3 sesiones consecutivas con booster activo y sin perder pétalos.",
+            "requirements": "Booster apuntado a la tarea crítica y Heartbeat previo activado.",
+            "objective": "Encadenar sesiones con booster activo para quebrar la fricción principal.",
+            "objectives": [
+              "Planificá tres sesiones consecutivas en la semana y confirmá horarios con aliados.",
+              "Activá el booster antes de iniciar cada sesión y registrá el Heartbeat.",
+              "Documentá fricción, aprendizajes y próxima acción inmediata."
+            ],
+            "reward": {
+              "xp": 210,
+              "currency": 14,
+              "items": [
+                "Cofre Prismático",
+                "Token de Momentum"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "booster",
+              "momentum",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "boosterMultiplier": 1.5,
+              "window": "3 sesiones"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_hunt_market_sprint",
+            "slot": "hunt",
+            "name": "Hunt · Sprint Nocturno",
+            "summary": "Cerrar dos micro-sprints nocturnos y reportar evidencia antes de dormir.",
+            "requirements": "Slot de Hunt libre y daily vinculada antes de las 22:00.",
+            "objective": "Ejecutar sprints cortos con booster activo para despejar backlog urgente.",
+            "objectives": [
+              "Prepará un checklist breve para cada sprint nocturno.",
+              "Realizá la sesión con booster + Heartbeat antes de las 22:30.",
+              "Enviá evidencia o resumen rápido en el canal designado."
+            ],
+            "reward": {
+              "xp": 180,
+              "currency": 12,
+              "items": [
+                "Amuleto de Velocidad"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "booster",
+              "ritmo",
+              "nocturno"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "boosterMultiplier": 1.3,
+              "window": "2 noches"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_hunt_market_analysis",
+            "slot": "hunt",
+            "name": "Hunt · Informe de Bloqueos",
+            "summary": "Mapeá los bloqueos de la Hunt y diseñá un protocolo de salida.",
+            "requirements": "Haber activado booster al menos una vez esta semana.",
+            "objective": "Analizar fricciones de la Hunt y pactar un protocolo anti-bloqueo.",
+            "objectives": [
+              "Registrá cada bloqueo encontrado durante dos sesiones.",
+              "Proponé una acción correctiva para cada bloqueo detectado.",
+              "Compartí el informe con un aliado y acordá seguimiento."
+            ],
+            "reward": {
+              "xp": 230,
+              "currency": 16,
+              "items": [
+                "Kit Anti-Fricción"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "diagnóstico",
+              "booster",
+              "reflexión"
+            ],
+            "metadata": {
+              "cadence": "biweekly",
+              "boosterMultiplier": 1.5,
+              "report": "friction_map"
+            },
+            "duration_days": 10
+          }
+        ]
+      },
+      {
+        "slot": "skill",
+        "proposals": [
+          {
+            "id": "mst_skill_market_focus",
+            "slot": "skill",
+            "name": "Skill Route · Focus Profundo",
+            "summary": "Elevar Focus completando cuatro micro-nodos y síntesis accionable.",
+            "requirements": "Elegir horario fijo y sostener Heartbeat diario.",
+            "objective": "Consolidar el hábito de Focus con entregables visibles cada sesión.",
+            "objectives": [
+              "Completar cuatro micro-nodos guiados de Focus.",
+              "Registrar síntesis accionable al cierre de cada sesión.",
+              "Compartir un resumen semanal con tu squad."
+            ],
+            "reward": {
+              "xp": 150,
+              "currency": 8,
+              "items": [
+                "Cristal de Focus"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "focus",
+              "constancia",
+              "ritual"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Focus",
+              "track": "deep_work"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_skill_market_story",
+            "slot": "skill",
+            "name": "Skill Route · Storytelling",
+            "summary": "Practicar narrativa con micro-nodos cortos y feedback inmediato.",
+            "requirements": "Slot Skill libre y disponibilidad para feedback asincrónico.",
+            "objective": "Desarrollar storytelling aplicándolo a misiones activas.",
+            "objectives": [
+              "Completar tres micro-nodos de Storytelling con ejemplos propios.",
+              "Compartir borradores con un aliado y recibir feedback expresivo.",
+              "Publicar una síntesis narrativa en tu canal personal."
+            ],
+            "reward": {
+              "xp": 170,
+              "currency": 9,
+              "items": [
+                "Pluma Resonante"
+              ]
+            },
+            "difficulty": "medium",
+            "tags": [
+              "storytelling",
+              "feedback",
+              "creatividad"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Storytelling",
+              "track": "communication"
+            },
+            "duration_days": 7
+          },
+          {
+            "id": "mst_skill_market_resilience",
+            "slot": "skill",
+            "name": "Skill Route · Resilience Lab",
+            "summary": "Entrenar resiliencia con micro-retos y debrief emocional.",
+            "requirements": "Slot Skill libre y compromiso de 4 sesiones cortas.",
+            "objective": "Aumentar resiliencia aplicando micro-retos y registro emocional.",
+            "objectives": [
+              "Ejecutar cuatro micro-retos que expandan tu zona de confort.",
+              "Completar un debrief emocional guiado tras cada reto.",
+              "Compartir conclusiones y señales de alerta con el squad."
+            ],
+            "reward": {
+              "xp": 190,
+              "currency": 11,
+              "items": [
+                "Amuleto de Resistencia"
+              ]
+            },
+            "difficulty": "high",
+            "tags": [
+              "resilience",
+              "emotions",
+              "growth"
+            ],
+            "metadata": {
+              "cadence": "weekly",
+              "stat": "Resilience",
+              "track": "inner_game"
+            },
+            "duration_days": 7
+          }
+        ]
+      }
+    ]
+  }
+}
