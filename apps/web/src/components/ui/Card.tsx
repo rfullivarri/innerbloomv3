@@ -7,6 +7,7 @@ interface CardProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
   rightSlot?: ReactNode;
   children: ReactNode;
   bodyClassName?: string;
+  variant?: 'default' | 'plain';
 }
 
 function combine(...classes: Array<string | false | null | undefined>) {
@@ -14,7 +15,16 @@ function combine(...classes: Array<string | false | null | undefined>) {
 }
 
 export const Card = forwardRef<HTMLElement, CardProps>(function Card(
-  { title, subtitle, rightSlot, children, className, bodyClassName, ...sectionProps },
+  {
+    title,
+    subtitle,
+    rightSlot,
+    children,
+    className,
+    bodyClassName,
+    variant = 'default',
+    ...sectionProps
+  },
   ref,
 ) {
   const headingId = useId();
@@ -26,7 +36,9 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
       role="region"
       aria-labelledby={labelledBy}
       className={combine(
-        'relative overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(ellipse_at_top,_rgba(35,43,76,0.35),_rgba(17,24,39,0.55))] backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.35)]',
+        'relative overflow-hidden rounded-2xl border border-white/10',
+        variant === 'default' &&
+          'bg-[radial-gradient(ellipse_at_top,_rgba(35,43,76,0.35),_rgba(17,24,39,0.55))] backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.35)]',
         className,
       )}
       {...sectionProps}
@@ -59,14 +71,21 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
 interface CardSectionProps extends HTMLAttributes<HTMLElement> {
   children: ReactNode;
   bodyClassName?: string;
+  variant?: CardProps['variant'];
 }
 
 export const CardSection = forwardRef<HTMLElement, CardSectionProps>(function CardSection(
-  { children, className, bodyClassName, ...props },
+  { children, className, bodyClassName, variant, ...props },
   ref,
 ) {
   return (
-    <Card ref={ref} className={className} bodyClassName={bodyClassName} {...props}>
+    <Card
+      ref={ref}
+      className={className}
+      bodyClassName={bodyClassName}
+      variant={variant}
+      {...props}
+    >
       {children}
     </Card>
   );
