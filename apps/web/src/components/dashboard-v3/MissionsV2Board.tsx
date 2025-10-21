@@ -2383,6 +2383,20 @@ export function MissionsV2Board({
                                           ))}
                                         </ul>
                                       )}
+                                      <div className="missions-market-card__insights">
+                                        <div className="missions-market-card__insight">
+                                          <p className="missions-market-card__back-label">Dificultad</p>
+                                          <p className="missions-market-card__back-value">
+                                            {activeProposal?.difficulty ?? '—'}
+                                          </p>
+                                        </div>
+                                        <div className="missions-market-card__insight">
+                                          <p className="missions-market-card__back-label">Recompensa</p>
+                                          <p className="missions-market-card__back-value">
+                                            {activeRewardPreview ?? '—'}
+                                          </p>
+                                        </div>
+                                      </div>
                                       <button
                                         type="button"
                                         className="missions-market-card__cta"
@@ -2434,12 +2448,6 @@ export function MissionsV2Board({
                                     </button>
                                   </div>
                                 )}
-                              </div>
-                              <div className="missions-market-card__insight">
-                                <p className="missions-market-card__back-label">Dificultad</p>
-                                <p className="missions-market-card__back-value">{activeProposal?.difficulty ?? '—'}</p>
-                                <p className="missions-market-card__back-label">Recompensa</p>
-                                <p className="missions-market-card__back-value">{activeRewardPreview ?? '—'}</p>
                               </div>
                             </div>
                           </article>
