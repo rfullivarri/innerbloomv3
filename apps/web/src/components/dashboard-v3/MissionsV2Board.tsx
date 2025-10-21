@@ -693,147 +693,131 @@ export function MissionsV2Board({ userId }: { userId: string }) {
 
   const handleActivateProposal = useCallback(
     (slotKey: MissionsV2Slot['slot'], proposal: MissionsV2MarketProposal) => {
-      let errorMessage: string | null = null;
-      let activatedSlot: MissionsV2Slot | null = null;
+      if (!board) {
+        setActionError('No pudimos preparar el tablero.');
+        return;
+      }
 
-      setBoard((current) => {
-        if (!current) {
-          errorMessage = 'No pudimos preparar el tablero.';
-          return current;
-        }
+      const slotIndex = board.slots.findIndex((slot) => slot.slot === slotKey);
+      if (slotIndex === -1) {
+        setActionError('No encontramos un slot compatible para esta misión.');
+        return;
+      }
 
-        const slotIndex = current.slots.findIndex((slot) => slot.slot === slotKey);
-        if (slotIndex === -1) {
-          errorMessage = 'No encontramos un slot compatible para esta misión.';
-          return current;
-        }
+      const slot = board.slots[slotIndex];
 
-        const slot = current.slots[slotIndex];
+      if (slot.mission) {
+        setActionError('Este slot ya tiene una misión activa.');
+        return;
+      }
 
-        if (slot.mission) {
-          errorMessage = 'Este slot ya tiene una misión activa.';
-          return current;
-        }
+      if (slot.state !== 'idle') {
+        setActionError('Liberá el slot antes de activar una nueva misión.');
+        return;
+      }
 
-        if (slot.state !== 'idle') {
-          errorMessage = 'Liberá el slot antes de activar una nueva misión.';
-          return current;
-        }
+      const missionId = `market-${proposal.id}`;
+      const objectives = proposal.objectives.length > 0 ? proposal.objectives : [proposal.objective];
+      const progressTarget = Math.max(objectives.length, 3);
+      const countdownDays = proposal.duration_days ?? 0;
+      const countdownLabel = countdownDays > 0 ? `Termina en ${countdownDays}d` : 'Sin límite';
+      const endsAt = countdownDays > 0 ? new Date(Date.now() + countdownDays * 86_400_000).toISOString() : null;
 
-        const missionId = `market-${proposal.id}`;
-        const objectives = proposal.objectives.length > 0 ? proposal.objectives : [proposal.objective];
-        const progressTarget = Math.max(objectives.length, 3);
-        const countdownDays = proposal.duration_days ?? 0;
-        const countdownLabel = countdownDays > 0 ? `Termina en ${countdownDays}d` : 'Sin límite';
-        const endsAt = countdownDays > 0 ? new Date(Date.now() + countdownDays * 86_400_000).toISOString() : null;
-
-        const nextSlot: MissionsV2Slot = {
-          ...slot,
-          mission: {
-            id: missionId,
-            name: proposal.name,
-            type: slotKey,
-            summary: proposal.summary,
-            requirements: proposal.requirements,
-            objective: proposal.objective,
-            objectives,
-            reward: {
-              xp: proposal.reward.xp,
-              currency: proposal.reward.currency,
-              items: [...proposal.reward.items],
-            },
-            tasks: [],
-            tags: proposal.tags,
-            metadata: proposal.metadata,
+      const nextSlot: MissionsV2Slot = {
+        ...slot,
+        mission: {
+          id: missionId,
+          name: proposal.name,
+          type: slotKey,
+          summary: proposal.summary,
+          requirements: proposal.requirements,
+          objective: proposal.objective,
+          objectives,
+          reward: {
+            xp: proposal.reward.xp,
+            currency: proposal.reward.currency,
+            items: [...proposal.reward.items],
           },
-          state: 'active',
-          heartbeat_today: false,
-          progress: {
-            current: 0,
-            target: progressTarget,
-            percent: 0,
+          tasks: [],
+          tags: proposal.tags,
+          metadata: proposal.metadata,
+        },
+        state: 'active',
+        heartbeat_today: false,
+        progress: {
+          current: 0,
+          target: progressTarget,
+          percent: 0,
+        },
+        countdown: {
+          ...slot.countdown,
+          ends_at: endsAt,
+          label: countdownLabel,
+        },
+        actions: [
+          {
+            id: `${missionId}:heartbeat`,
+            type: 'heartbeat',
+            label: 'Registrar Heartbeat',
+            enabled: true,
           },
-          countdown: {
-            ...slot.countdown,
-            ends_at: endsAt,
-            label: countdownLabel,
+          {
+            id: `${missionId}:link_daily`,
+            type: 'link_daily',
+            label: 'Vincular Daily',
+            enabled: true,
           },
-          actions: [
-            {
-              id: `${missionId}:heartbeat`,
-              type: 'heartbeat',
-              label: 'Registrar Heartbeat',
-              enabled: true,
-            },
-            {
-              id: `${missionId}:link_daily`,
-              type: 'link_daily',
-              label: 'Vincular Daily',
-              enabled: true,
-            },
-            {
-              id: `${missionId}:claim`,
-              type: 'claim',
-              label: 'Reclamar botín',
-              enabled: false,
-            },
-          ],
-          claim: {
-            ...slot.claim,
-            available: false,
+          {
+            id: `${missionId}:claim`,
+            type: 'claim',
+            label: 'Reclamar botín',
             enabled: false,
           },
-        };
+        ],
+        claim: {
+          ...slot.claim,
+          available: false,
+          enabled: false,
+        },
+      };
 
-        const nextSlots = [...current.slots];
-        nextSlots[slotIndex] = nextSlot;
+      const nextSlots = [...board.slots];
+      nextSlots[slotIndex] = nextSlot;
 
-        const nextMarket = current.market.map((entry) =>
-          entry.slot === slotKey
-            ? {
-                ...entry,
-                proposals: entry.proposals.filter((item) => item.id !== proposal.id),
-              }
-            : entry,
-        );
+      const nextMarket = board.market.map((entry): MissionsV2MarketSlot =>
+        entry.slot === slotKey
+          ? {
+              ...entry,
+              proposals: entry.proposals.filter((item) => item.id !== proposal.id),
+            }
+          : entry,
+      );
 
-        activatedSlot = nextSlot;
-
-        return {
-          ...current,
-          slots: nextSlots,
-          market: nextMarket,
-        };
+      setBoard({
+        ...board,
+        slots: nextSlots,
+        market: nextMarket,
       });
 
-      if (errorMessage) {
-        setActionError(errorMessage);
-        return;
-      }
-
-      if (!activatedSlot) {
-        return;
-      }
-
       setActionError(null);
-      setExpandedSlotId(activatedSlot.id);
+      setExpandedSlotId(nextSlot.id);
       if (typeof window !== 'undefined') {
         window.requestAnimationFrame(() => {
-          const element = slotRefs.current[activatedSlot?.id ?? ''];
+          const element = slotRefs.current[nextSlot.id] ?? null;
           element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
       } else {
-        const element = slotRefs.current[activatedSlot?.id ?? ''];
+        const element = slotRefs.current[nextSlot.id] ?? null;
         element?.scrollIntoView({ block: 'center' });
       }
       emitMissionsV2Event('missions_v2_market_activate', {
         userId,
-        slot: activatedSlot.slot,
-        missionId: activatedSlot.mission?.id,
+        slot: nextSlot.slot,
+        missionId: nextSlot.mission?.id ?? null,
         proposalId: proposal.id,
       });
     },
-    [setBoard, setActionError, setExpandedSlotId, userId],
+    [board, setBoard, setActionError, setExpandedSlotId, userId],
   );
 
   const handleUnavailableAction = useCallback((action: MissionsV2Action) => {
