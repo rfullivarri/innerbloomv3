@@ -2116,7 +2116,7 @@ export function MissionsV2Board({
                           zIndex: isActiveCard ? 2 : 1,
                         }
                       : {
-                          transform: `translateX(${translateX}%) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
+                          transform: `translate(-50%, -50%) translateX(${translateX}%) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
                           opacity,
                           zIndex,
                         };
@@ -2272,7 +2272,7 @@ export function MissionsV2Board({
                             zIndex: isActiveCard ? 2 : 1,
                           }
                         : {
-                            transform: `translateX(${translateX}%) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
+                            transform: `translate(-50%, -50%) translateX(${translateX}%) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
                             opacity,
                             zIndex,
                           };
