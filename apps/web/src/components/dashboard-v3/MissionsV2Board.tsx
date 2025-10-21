@@ -2396,41 +2396,13 @@ export function MissionsV2Board({
                             <div className="missions-market-card__back" aria-hidden={!isFlipped}>
                               <div className="missions-market-card__details">
                                 <header className="flex items-start justify-between gap-2">
-                                  <div>
-                                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-                                      {details.label}
-                                    </p>
-                                    <h4 className="text-base font-semibold text-slate-100">
-                                      {activeProposal
-                                        ? `#${activeProposalIndex + 1} · ${activeProposal.name}`
-                                        : 'Sin propuestas disponibles'}
-                                    </h4>
-                                  </div>
+                                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                                    {details.label}
+                                  </p>
                                   <span className="missions-market-card__icon" aria-hidden="true">
                                     {details.emoji}
                                   </span>
                                 </header>
-                                {activeRewardPreview && (
-                                  <div className="missions-market-card__reward-badge">
-                                    {activeRewardPreview}
-                                  </div>
-                                )}
-                                {activeProposal ? (
-                                  <>
-                                    <p className="missions-market-card__summary">{activeProposal.summary}</p>
-                                    {activeProposal.tags.length > 0 && (
-                                      <div className="missions-market-card__tags">
-                                        {activeProposal.tags.map((tag) => (
-                                          <span key={`${activeProposal.id}-tag-${tag}`}>{tag}</span>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </>
-                                ) : (
-                                  <p className="missions-market-card__summary">
-                                    No hay propuestas disponibles para este slot.
-                                  </p>
-                                )}
                                 <div
                                   className="missions-market-card__stack"
                                   role="group"
@@ -2451,11 +2423,25 @@ export function MissionsV2Board({
                                         <span className="missions-market-card__proposal-index">
                                           #{activeProposalIndex + 1}
                                         </span>
-                                        <h5>{activeProposal.name}</h5>
+                                        <div className="missions-market-card__proposal-heading">
+                                          <h5>{activeProposal.name}</h5>
+                                          {activeRewardPreview && (
+                                            <div className="missions-market-card__reward-badge">
+                                              {activeRewardPreview}
+                                            </div>
+                                          )}
+                                        </div>
                                       </header>
                                       <p className="missions-market-card__proposal-summary">
                                         {activeProposal.summary}
                                       </p>
+                                      {activeProposal.tags.length > 0 && (
+                                        <div className="missions-market-card__tags">
+                                          {activeProposal.tags.map((tag) => (
+                                            <span key={`${activeProposal.id}-tag-${tag}`}>{tag}</span>
+                                          ))}
+                                        </div>
+                                      )}
                                       <ul className="missions-market-card__requirements">
                                         {activeObjectives.map((itemLabel) => (
                                           <li key={`${activeProposal.id}-objective-${itemLabel}`}>{itemLabel}</li>
