@@ -768,7 +768,7 @@ export function MissionsV2Board({
       event.stopPropagation();
 
       const threshold = 40;
-      const pending = (marketWheelDelta.current[slotKey] ?? 0) - event.deltaY;
+      const pending = (marketWheelDelta.current[slotKey] ?? 0) + event.deltaY;
       if (Math.abs(pending) >= threshold) {
         const direction = pending > 0 ? 1 : -1;
         marketWheelDelta.current[slotKey] = pending - direction * threshold;
