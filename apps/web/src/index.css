@@ -2221,7 +2221,7 @@
 
 .missions-market-card__key-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: clamp(0.65rem, 2.6vw, 0.9rem);
   margin-top: clamp(0.8rem, 2.4vw, 1.1rem);
   padding: clamp(0.75rem, 2.6vw, 1rem);
