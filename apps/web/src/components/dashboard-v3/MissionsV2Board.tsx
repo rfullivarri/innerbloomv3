@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -288,6 +289,10 @@ function formatCountdown(label: string): string {
 }
 
 type MarketBySlot = Partial<Record<MissionsV2Slot['slot'], MissionsV2MarketProposal[]>>;
+
+type CarouselTrackStyle = CSSProperties & {
+  '--missions-active-carousel-height'?: string;
+};
 
 function buildHeroLine(slot: MissionsV2Slot, market: MarketBySlot): string {
   if (slot.mission?.summary) {
@@ -588,6 +593,7 @@ export function MissionsV2Board({
     skill: 0,
   });
   const [activeSlotStackBySlot, setActiveSlotStackBySlot] = useState<Record<string, number>>({});
+  const [activeSlotCardHeight, setActiveSlotCardHeight] = useState<number | null>(null);
   const hasTrackedView = useRef(false);
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
   const carouselRef = useRef<HTMLDivElement | null>(null);
@@ -598,6 +604,7 @@ export function MissionsV2Board({
     skill: 0,
   });
   const slotStackWheelDelta = useRef<Record<string, number>>({});
+  const previousActiveSlotIdRef = useRef<string | null>(null);
 
   const marketBySlot = useMemo<MarketBySlot>(() => {
     const map: MarketBySlot = {};
@@ -645,6 +652,19 @@ export function MissionsV2Board({
       key: entry.slot,
     }));
   }, [orderedMarketSlots]);
+
+  const slotCarouselStyle = useMemo<CarouselTrackStyle | undefined>(() => {
+    if (prefersReducedMotion || viewMode !== 'active') {
+      return undefined;
+    }
+    if (activeSlotCardHeight == null) {
+      return undefined;
+    }
+    const paddedHeight = Math.max(Math.round(activeSlotCardHeight + 64), 360);
+    return {
+      '--missions-active-carousel-height': `${paddedHeight}px`,
+    };
+  }, [activeSlotCardHeight, prefersReducedMotion, viewMode]);
 
   useEffect(() => {
     const nextView = getViewModeFromLocation(location);
@@ -1524,10 +1544,100 @@ export function MissionsV2Board({
 
   const registerSlotRef = useCallback(
     (slotId: string) => (element: HTMLElement | null) => {
-      slotRefs.current[slotId] = element;
+      if (element) {
+        slotRefs.current[slotId] = element;
+      } else {
+        delete slotRefs.current[slotId];
+      }
     },
     [],
   );
+
+  useLayoutEffect(() => {
+    if (viewMode !== 'active' || prefersReducedMotion) {
+      setActiveSlotCardHeight(null);
+      return;
+    }
+
+    const activeSlot = orderedSlots[activeSlotIndex];
+    if (!activeSlot) {
+      setActiveSlotCardHeight(null);
+      return;
+    }
+
+    const element = slotRefs.current[activeSlot.id] ?? null;
+    if (!element) {
+      setActiveSlotCardHeight(null);
+      return;
+    }
+
+    let frame = 0;
+    const updateHeight = () => {
+      frame = 0;
+      const { height } = element.getBoundingClientRect();
+      setActiveSlotCardHeight((current) => {
+        if (current != null && Math.abs(current - height) < 1) {
+          return current;
+        }
+        return height;
+      });
+    };
+
+    updateHeight();
+
+    const win = typeof window !== 'undefined' ? window : null;
+    if (!win) {
+      return;
+    }
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => {
+        if (frame) {
+          win.cancelAnimationFrame(frame);
+        }
+        frame = win.requestAnimationFrame(updateHeight);
+      });
+      observer.observe(element);
+      return () => {
+        observer.disconnect();
+        if (frame) {
+          win.cancelAnimationFrame(frame);
+        }
+      };
+    }
+
+    const handleResize = () => {
+      if (frame) {
+        win.cancelAnimationFrame(frame);
+      }
+      frame = win.requestAnimationFrame(updateHeight);
+    };
+
+    win.addEventListener('resize', handleResize);
+
+    return () => {
+      win.removeEventListener('resize', handleResize);
+      if (frame) {
+        win.cancelAnimationFrame(frame);
+      }
+    };
+  }, [activeSlotIndex, orderedSlots, prefersReducedMotion, viewMode]);
+
+  useEffect(() => {
+    const previousSlotId = previousActiveSlotIdRef.current;
+    const nextSlot = orderedSlots[activeSlotIndex] ?? null;
+
+    if (previousSlotId && previousSlotId !== nextSlot?.id) {
+      setActiveSlotStackBySlot((prev) => {
+        if ((prev[previousSlotId] ?? 0) === 0) {
+          return prev;
+        }
+        return { ...prev, [previousSlotId]: 0 };
+      });
+    }
+
+    previousActiveSlotIdRef.current = nextSlot?.id ?? null;
+  }, [activeSlotIndex, orderedSlots]);
 
   useEffect(() => {
     if (viewMode !== 'market') {
@@ -1731,7 +1841,6 @@ export function MissionsV2Board({
         data-rarity={rarity}
         data-slot={slot.slot}
         style={slotCardStyle}
-        ref={registerSlotRef(slot.id)}
         bodyClassName="missions-card__body missions-card__body--slot"
         title={`${details.emoji} ${details.label}`}
         subtitle={
@@ -2090,6 +2199,7 @@ export function MissionsV2Board({
                   ref={slotCarouselRef}
                   role="listbox"
                   aria-label="Slots de misiones activas"
+                  style={slotCarouselStyle}
                 >
                   {orderedSlots.map((slot, index) => {
                     const isActiveCard = index === activeSlotIndex;
@@ -2141,7 +2251,12 @@ export function MissionsV2Board({
                         onClick={() => handleSlotCardSelect(index)}
                         onKeyDown={(event) => handleSlotCardKeyDown(event, slot.id, index)}
                       >
-                        <div className="missions-active-carousel__card">{renderSlotCard(slot)}</div>
+                        <div
+                          className="missions-active-carousel__card"
+                          ref={registerSlotRef(slot.id)}
+                        >
+                          {renderSlotCard(slot)}
+                        </div>
                       </div>
                     );
                   })}
