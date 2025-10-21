@@ -429,6 +429,12 @@
   transition: opacity 200ms ease;
 }
 
+@media (max-width: 640px) {
+  .missions-card::before {
+    background-size: contain;
+  }
+}
+
 .missions-card::after {
   content: '';
   position: absolute;
