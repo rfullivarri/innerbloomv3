@@ -1299,22 +1299,6 @@
   color: rgba(148, 163, 184, 0.85);
 }
 
-.missions-market-card__summary {
-  position: relative;
-  font-size: clamp(0.82rem, 2.8vw, 0.92rem);
-  line-height: 1.45;
-  color: rgba(203, 213, 225, 0.92);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.missions-market-card__summary::after {
-  content: ' … ver más';
-  color: rgba(148, 163, 184, 0.9);
-}
-
 .missions-market-card__tags {
   display: flex;
   flex-wrap: wrap;
@@ -2247,6 +2231,18 @@
   font-size: clamp(0.85rem, 2.6vw, 0.95rem);
   font-weight: 600;
   color: rgba(226, 232, 240, 0.95);
+}
+
+.missions-market-card__proposal-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(0.35rem, 1.6vw, 0.55rem);
+  min-width: 0;
+}
+
+.missions-market-card__proposal-heading h5 {
+  width: 100%;
 }
 
 .missions-market-card__proposal-index {
