@@ -101,6 +101,8 @@ type MissionCardStyle = CSSProperties & {
   '--missions-card-art-opacity'?: string;
 };
 
+type MarketProposalTransition = 'forward' | 'backward' | null;
+
 const DEFAULT_MISSION_ART_MODE: GameMode = 'Flow';
 
 const MISSION_ART_BY_SLOT_AND_MODE: Record<MissionArtSlot, Record<GameMode, string>> = {
@@ -572,6 +574,20 @@ export function MissionsV2Board({
     hunt: 0,
     skill: 0,
   }));
+  const [marketProposalTransitionBySlot, setMarketProposalTransitionBySlot] = useState<
+    Record<MissionsV2Slot['slot'], MarketProposalTransition>
+  >({
+    main: null,
+    hunt: null,
+    skill: null,
+  });
+  const [marketProposalRevisionBySlot, setMarketProposalRevisionBySlot] = useState<
+    Record<MissionsV2Slot['slot'], number>
+  >({
+    main: 0,
+    hunt: 0,
+    skill: 0,
+  });
   const [activeSlotStackBySlot, setActiveSlotStackBySlot] = useState<Record<string, number>>({});
   const hasTrackedView = useRef(false);
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -696,18 +712,30 @@ export function MissionsV2Board({
       setActiveMarketProposalBySlot((prev) => {
         const proposals = marketBySlot[slotKey] ?? [];
         const total = proposals.length;
-        if (total === 0) {
+        if (total <= 1 || delta === 0) {
           return prev;
         }
+
         const current = prev[slotKey] ?? 0;
-        const next = Math.min(Math.max(current + delta, 0), total - 1);
+        const next = ((current + delta) % total + total) % total;
         if (next === current) {
           return prev;
         }
+
+        setMarketProposalTransitionBySlot((transitionPrev) => ({
+          ...transitionPrev,
+          [slotKey]: delta > 0 ? 'forward' : 'backward',
+        }));
+
+        setMarketProposalRevisionBySlot((revisionPrev) => ({
+          ...revisionPrev,
+          [slotKey]: (revisionPrev[slotKey] ?? 0) + 1,
+        }));
+
         return { ...prev, [slotKey]: next };
       });
     },
-    [marketBySlot],
+    [marketBySlot, setMarketProposalTransitionBySlot, setMarketProposalRevisionBySlot],
   );
 
   const handleMarketStackWheel = useCallback(
@@ -721,7 +749,7 @@ export function MissionsV2Board({
       event.stopPropagation();
 
       const threshold = 40;
-      const pending = (marketWheelDelta.current[slotKey] ?? 0) + event.deltaY;
+      const pending = (marketWheelDelta.current[slotKey] ?? 0) - event.deltaY;
       if (Math.abs(pending) >= threshold) {
         const direction = pending > 0 ? 1 : -1;
         marketWheelDelta.current[slotKey] = pending - direction * threshold;
@@ -2307,8 +2335,11 @@ export function MissionsV2Board({
                       const activeRewardPreview = activeProposal
                         ? formatProposalReward(activeProposal)
                         : null;
-                      const hasPrevProposal = activeProposalIndex > 0;
-                      const hasNextProposal = activeProposalIndex < proposals.length - 1;
+                      const hasMultipleProposals = proposals.length > 1;
+                      const hasPrevProposal = hasMultipleProposals;
+                      const hasNextProposal = hasMultipleProposals;
+                      const proposalRevision = marketProposalRevisionBySlot[slot] ?? 0;
+                      const transitionDirection = marketProposalTransitionBySlot[slot];
                       const activeObjectives = activeProposal
                         ? activeProposal.objectives.length > 0
                           ? activeProposal.objectives
@@ -2409,12 +2440,13 @@ export function MissionsV2Board({
                                   aria-label={`Propuestas para ${details.label}`}
                                   data-has-prev={hasPrevProposal ? 'true' : undefined}
                                   data-has-next={hasNextProposal ? 'true' : undefined}
+                                  data-transition={transitionDirection ?? undefined}
                                   onClick={(event) => event.stopPropagation()}
                                   onWheel={(event) => handleMarketStackWheel(slot, event)}
                                 >
                                   {activeProposal ? (
                                     <article
-                                      key={`${slot}-${activeProposal.id}`}
+                                      key={`${slot}-${activeProposal.id}-${proposalRevision}`}
                                       className="missions-market-card__proposal"
                                       data-active="true"
                                       role="group"
