@@ -27,6 +27,7 @@ import { ProgressBar } from '../common/ProgressBar';
 import { ToastBanner } from '../common/ToastBanner';
 import { emitMissionsV2Event } from '../../lib/telemetry';
 import { FEATURE_MISSIONS_V2 } from '../../lib/featureFlags';
+import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 
 type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 
@@ -92,6 +93,55 @@ const PETAL_FIELD = [
   { top: '42%', left: '52%', delay: '1.8s', scale: 0.9 },
   { top: '88%', left: '28%', delay: '2.9s', scale: 0.75 },
 ];
+
+type MissionArtSlot = MissionsV2Slot['slot'] | 'boss';
+
+type MissionCardStyle = CSSProperties & {
+  '--missions-card-art'?: string;
+  '--missions-card-art-opacity'?: string;
+};
+
+const DEFAULT_MISSION_ART_MODE: GameMode = 'Flow';
+
+const MISSION_ART_BY_SLOT_AND_MODE: Record<MissionArtSlot, Record<GameMode, string>> = {
+  main: {
+    Flow: '/missions/missions_main_flow.png',
+    Chill: '/missions/missions_main_chill.png',
+    Low: '/missions/missions_main_low.png',
+    Evolve: '/missions/missions_main_evolve.png',
+  },
+  hunt: {
+    Flow: '/missions/missions_hunt_flow.png',
+    Chill: '/missions/missions_hunt_chill.png',
+    Low: '/missions/missions_hunt_low.png',
+    Evolve: '/missions/missions_hunt_evolve.png',
+  },
+  skill: {
+    Flow: '/missions/missions_skill_flow.png',
+    Chill: '/missions/missions_skill_chill.png',
+    Low: '/missions/missions_skill_low.png',
+    Evolve: '/missions/missions_skill_evolve.png',
+  },
+  boss: {
+    Flow: '/missions/missions_boss_flow.png',
+    Chill: '/missions/missions_boss_chill.png',
+    Low: '/missions/missions_boss_low.png',
+    Evolve: '/missions/missions_boss_evolve.png',
+  },
+};
+
+function getMissionArt(slot: MissionArtSlot, gameMode: GameMode | null): string {
+  const normalizedMode = gameMode ?? DEFAULT_MISSION_ART_MODE;
+  const artByMode = MISSION_ART_BY_SLOT_AND_MODE[slot];
+  return artByMode?.[normalizedMode] ?? artByMode[DEFAULT_MISSION_ART_MODE];
+}
+
+function buildMissionCardStyle(slot: MissionArtSlot, gameMode: GameMode | null): MissionCardStyle {
+  return {
+    '--missions-card-art': `url(${getMissionArt(slot, gameMode)})`,
+    '--missions-card-art-opacity': slot === 'boss' ? '0.55' : '0.7',
+  };
+}
 
 function classNames(...values: Array<string | false | null | undefined>): string {
   return values.filter(Boolean).join(' ');
@@ -172,12 +222,6 @@ function getMarketRarity(slot: MissionsV2Slot['slot']): Rarity {
   }
   return 'common';
 }
-
-const MARKET_COVER_BY_SLOT: Record<MissionsV2Slot['slot'], string> = {
-  main: '/MainFlow.png',
-  hunt: '/FlowMood.jpg',
-  skill: '/Evolve-Mood.jpg',
-};
 
 type MarketCardItem = {
   slot: MissionsV2Slot['slot'];
@@ -486,10 +530,17 @@ function MissionHeartbeatStatus({ pending, highlight }: { pending: boolean; high
   );
 }
 
-export function MissionsV2Board({ userId }: { userId: string }) {
+export function MissionsV2Board({
+  userId,
+  gameMode,
+}: {
+  userId: string;
+  gameMode?: GameMode | string | null;
+}) {
   const location = useLocation();
   const navigate = useNavigate();
   const prefersReducedMotion = usePrefersReducedMotion();
+  const normalizedGameMode = useMemo(() => normalizeGameModeValue(gameMode ?? null), [gameMode]);
   const { data, status, error, reload } = useRequest(() => getMissionsV2Board(), []);
   const [board, setBoard] = useState<MissionsV2BoardResponse | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -753,6 +804,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
     }
 
     const shield = parseShieldLabel(board.boss.countdown.label) ?? { current: 6, max: 6 };
+    const bossCardStyle = buildMissionCardStyle('boss', normalizedGameMode);
 
     return (
       <Card
@@ -760,6 +812,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
         title="Boss quincenal"
         subtitle={<p className="missions-card__subtitle">{board.boss.name}</p>}
         bodyClassName="missions-card__body missions-card__body--boss"
+        style={bossCardStyle}
       >
         <div className="missions-boss-header">
           <div
@@ -1667,6 +1720,8 @@ export function MissionsV2Board({ userId }: { userId: string }) {
       return true;
     });
 
+    const slotCardStyle = buildMissionCardStyle(slot.slot, normalizedGameMode);
+
     const card = (
       <Card
         key={slot.id}
@@ -1681,6 +1736,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
         )}
         data-rarity={rarity}
         data-slot={slot.slot}
+        style={slotCardStyle}
         ref={registerSlotRef(slot.id)}
         bodyClassName={classNames(
           'missions-card__body missions-card__body--slot',
@@ -2165,7 +2221,7 @@ export function MissionsV2Board({ userId }: { userId: string }) {
                       const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
                       const isFlipped = Boolean(flippedMarketCards[cardKey]);
                       const isActiveCard = index === activeMarketIndex;
-                      const coverSrc = MARKET_COVER_BY_SLOT[slot] ?? '/mainflow2.png';
+                      const coverSrc = getMissionArt(slot, normalizedGameMode);
                       const activeProposalIndex = activeMarketProposalBySlot[slot] ?? 0;
                       const activeProposal = proposals[activeProposalIndex] ?? null;
                       const activeRewardPreview = activeProposal
