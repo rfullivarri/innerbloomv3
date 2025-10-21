@@ -327,27 +327,45 @@
 }
 
 .missions-view-toggle {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: center;
   gap: 0.75rem;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
 }
 
 .missions-view-toggle__chip {
+  flex: 1 1 0;
+  min-width: 0;
   border-radius: 9999px;
   border: 1px solid rgba(148, 163, 184, 0.38);
   background: rgba(30, 41, 59, 0.65);
-  padding: 0.45rem 1.15rem;
-  font-size: 0.75rem;
+  padding: clamp(0.4rem, 2.2vw, 0.55rem) clamp(0.75rem, 4vw, 1.15rem);
+  font-size: clamp(0.65rem, 2.4vw, 0.75rem);
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: clamp(0.18em, 1vw, 0.22em);
   text-transform: uppercase;
   color: rgba(226, 232, 240, 0.8);
+  text-align: center;
+  white-space: nowrap;
   transition:
     background var(--motion-duration-base) var(--motion-ease-enter),
     border-color var(--motion-duration-base) var(--motion-ease-enter),
     color var(--motion-duration-base) var(--motion-ease-enter),
     transform var(--motion-duration-base) var(--motion-ease-enter);
+}
+
+@media (max-width: 480px) {
+  .missions-view-toggle {
+    gap: 0.5rem;
+  }
+
+  .missions-view-toggle__chip {
+    letter-spacing: clamp(0.14em, 0.8vw, 0.2em);
+  }
 }
 
 .missions-view-toggle__chip:hover,
@@ -805,35 +823,60 @@
 }
 
 .missions-market-carousel__track {
-  display: flex;
-  align-items: stretch;
-  gap: 1.5rem;
-  overflow-x: auto;
-  padding: 0.5rem 0.75rem 1.5rem;
-  margin: 0 -0.75rem;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
-}
-
-.missions-market-carousel__track::-webkit-scrollbar {
-  height: 6px;
-}
-
-.missions-market-carousel__track::-webkit-scrollbar-thumb {
-  background: rgba(96, 165, 250, 0.35);
-  border-radius: 9999px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  padding: 1rem 0 2.5rem;
+  margin: 0;
+  min-height: clamp(280px, 80vw, 380px);
+  overflow: visible;
 }
 
 .missions-market-carousel__item {
-  flex: 0 0 auto;
-  width: clamp(220px, 58vw, 320px);
-  scroll-snap-align: center;
+  grid-area: 1 / 1;
+  width: clamp(240px, 70vw, 320px);
+  max-width: 360px;
   display: flex;
   justify-content: center;
   transition:
     transform 420ms var(--motion-ease-emphasis),
     opacity 320ms var(--motion-ease-enter),
     filter 320ms var(--motion-ease-enter);
+}
+
+@media (min-width: 768px) {
+  .missions-market-carousel__item {
+    width: clamp(260px, 32vw, 340px);
+  }
+}
+
+[data-reduced-motion='true'] .missions-market-carousel__track {
+  display: flex;
+  align-items: stretch;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.75rem 1.5rem;
+  margin: 0 -0.75rem;
+  min-height: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+
+[data-reduced-motion='true'] .missions-market-carousel__track::-webkit-scrollbar {
+  height: 6px;
+}
+
+[data-reduced-motion='true'] .missions-market-carousel__track::-webkit-scrollbar-thumb {
+  background: rgba(96, 165, 250, 0.35);
+  border-radius: 9999px;
+}
+
+[data-reduced-motion='true'] .missions-market-carousel__item {
+  grid-area: auto;
+  flex: 0 0 auto;
+  width: clamp(220px, 58vw, 320px);
+  scroll-snap-align: center;
 }
 
 .missions-market-carousel__item[data-active='false'] {
@@ -900,10 +943,11 @@
 
 .missions-market-card__summary {
   position: relative;
-  font-size: 0.85rem;
+  font-size: clamp(0.82rem, 2.8vw, 0.92rem);
+  line-height: 1.45;
   color: rgba(203, 213, 225, 0.92);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -917,26 +961,26 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: clamp(0.35rem, 1.5vw, 0.6rem);
 }
 
 .missions-market-card__tags span {
   border-radius: 9999px;
-  padding: 0.15rem 0.5rem;
+  padding: 0.18rem clamp(0.45rem, 2vw, 0.6rem);
   border: 1px solid rgba(148, 163, 184, 0.25);
   background: rgba(148, 163, 184, 0.12);
-  font-size: 0.6rem;
-  letter-spacing: 0.12em;
+  font-size: clamp(0.56rem, 1.8vw, 0.62rem);
+  letter-spacing: clamp(0.1em, 0.8vw, 0.14em);
   text-transform: uppercase;
   color: rgba(226, 232, 240, 0.72);
 }
 
 .missions-market-card__meta {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: clamp(0.4rem, 1.6vw, 0.6rem);
+  margin-bottom: clamp(0.4rem, 1.6vw, 0.6rem);
   display: grid;
   gap: 0.25rem;
-  font-size: 0.7rem;
+  font-size: clamp(0.68rem, 2vw, 0.74rem);
   color: rgba(148, 163, 184, 0.9);
 }
 
@@ -1676,10 +1720,10 @@
   grid-area: 1 / 1;
   border-radius: inherit;
   min-height: 100%;
-  padding: 1.25rem;
+  padding: clamp(1rem, 3.5vw, 1.35rem);
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: clamp(0.75rem, 2.6vw, 1.15rem);
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.9));
   backface-visibility: hidden;
   transition:
@@ -1750,7 +1794,7 @@
 .missions-market-card__details {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: clamp(0.75rem, 2.5vw, 1.05rem);
 }
 
 .missions-market-card__insight {
@@ -1790,8 +1834,8 @@
 
 .missions-market-card__icon {
   display: inline-flex;
-  width: 2rem;
-  height: 2rem;
+  width: clamp(1.75rem, 6vw, 2rem);
+  height: clamp(1.75rem, 6vw, 2rem);
   align-items: center;
   justify-content: center;
   border-radius: 0.75rem;
@@ -1803,8 +1847,8 @@
   border-radius: 0.9rem;
   border: 1px solid rgba(250, 204, 21, 0.35);
   background: rgba(250, 204, 21, 0.15);
-  padding: 0.6rem 0.85rem;
-  font-size: 0.85rem;
+  padding: clamp(0.5rem, 2.2vw, 0.7rem) clamp(0.75rem, 3vw, 0.95rem);
+  font-size: clamp(0.82rem, 2.6vw, 0.92rem);
   font-weight: 600;
   color: rgba(255, 237, 213, 0.95);
 }
@@ -1813,16 +1857,16 @@
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  font-size: 0.75rem;
+  font-size: clamp(0.72rem, 2.2vw, 0.78rem);
   color: rgba(148, 163, 184, 0.88);
 }
 
 .missions-market-card__cta {
   border-radius: 9999px;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.7rem;
+  padding: clamp(0.5rem, 2.4vw, 0.7rem) clamp(1rem, 4vw, 1.3rem);
+  font-size: clamp(0.64rem, 2vw, 0.72rem);
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: clamp(0.18em, 0.9vw, 0.22em);
   text-transform: uppercase;
   border: 1px solid rgba(56, 189, 248, 0.4);
   background: rgba(56, 189, 248, 0.16);
