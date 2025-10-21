@@ -1822,7 +1822,15 @@ export function MissionsV2Board({
       return true;
     });
 
-    const slotCardStyle = buildMissionCardStyle(slot.slot, normalizedGameMode);
+    const slotCardStyle: MissionCardStyle = {
+      ...buildMissionCardStyle(slot.slot, normalizedGameMode),
+      ...(viewMode === 'active'
+        ? {
+            '--missions-card-art': 'none',
+            '--missions-card-art-opacity': '0',
+          }
+        : {}),
+    };
     const hasMission = Boolean(mission);
 
     const card = (
@@ -2222,8 +2230,9 @@ export function MissionsV2Board({
                     const depth = Math.cos(angle);
                     const translateX = Math.sin(angle) * 34;
                     const translateY = (1 - depth) * 60;
-                    const scale = 0.82 + 0.14 * depth;
-                    const opacity = 0.5 + 0.5 * depth;
+                    const distance = Math.abs(limitedOffset);
+                    const scale = Math.max(0.72, 1 - 0.18 * distance);
+                    const opacity = Math.max(0.4, 1 - 0.45 * distance);
                     const rotate = Math.sin(angle) * -4.5;
                     const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
                     const itemStyle: CSSProperties = prefersReducedMotion
