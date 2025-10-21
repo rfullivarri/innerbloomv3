@@ -10,6 +10,7 @@
     --motion-duration-fast: 120ms;
     --motion-duration-base: 200ms;
     --motion-duration-slow: 360ms;
+    --missions-market-flip-duration: 520ms;
     --motion-ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
     --motion-ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
     --motion-ease-emphasis: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -34,6 +35,7 @@
     --motion-duration-fast: 0ms;
     --motion-duration-base: 0ms;
     --motion-duration-slow: 0ms;
+    --missions-market-flip-duration: 0ms;
   }
 }
 
@@ -1465,7 +1467,7 @@
   transform-style: preserve-3d;
   perspective: 1200px;
   transition:
-    transform var(--motion-duration-slow) var(--motion-ease-emphasis),
+    transform var(--missions-market-flip-duration) var(--motion-ease-emphasis),
     box-shadow var(--motion-duration-base) var(--motion-ease-enter),
     border-color var(--motion-duration-base) var(--motion-ease-enter);
   cursor: pointer;
@@ -1480,6 +1482,7 @@
 .missions-market-card__back {
   grid-area: 1 / 1;
   border-radius: inherit;
+  min-height: 100%;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
@@ -1487,16 +1490,46 @@
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.9));
   backface-visibility: hidden;
   transition:
-    opacity var(--motion-duration-fast) var(--motion-ease-enter),
-    transform var(--motion-duration-base) var(--motion-ease-enter);
+    opacity var(--missions-market-flip-duration) var(--motion-ease-enter),
+    transform var(--missions-market-flip-duration) var(--motion-ease-enter);
+}
+
+.missions-market-card__front {
+  padding: 0;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.82), rgba(30, 41, 59, 0.94));
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.missions-market-card__cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  pointer-events: none;
+  user-select: none;
 }
 
 .missions-market-card__back {
-  justify-content: center;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: stretch;
   opacity: 0;
   transform: rotateY(180deg);
   background: linear-gradient(145deg, rgba(17, 24, 39, 0.9), rgba(30, 41, 59, 0.95));
+}
+
+.missions-market-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.missions-market-card__insight {
+  display: grid;
+  gap: 0.35rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .missions-market-card__back-label {
@@ -1512,24 +1545,18 @@
   color: rgba(226, 232, 240, 0.92);
 }
 
-.missions-market-card:hover,
-.missions-market-card:focus-visible,
-.missions-market-card:active {
+.missions-market-card[data-flipped='true'] {
   transform: rotateY(180deg);
   border-color: rgba(96, 165, 250, 0.5);
   box-shadow: 0 20px 45px rgba(14, 165, 233, 0.18);
 }
 
-.missions-market-card:hover .missions-market-card__front,
-.missions-market-card:focus-visible .missions-market-card__front,
-.missions-market-card:active .missions-market-card__front {
+.missions-market-card[data-flipped='true'] .missions-market-card__front {
   opacity: 0;
   transform: rotateY(180deg);
 }
 
-.missions-market-card:hover .missions-market-card__back,
-.missions-market-card:focus-visible .missions-market-card__back,
-.missions-market-card:active .missions-market-card__back {
+.missions-market-card[data-flipped='true'] .missions-market-card__back {
   opacity: 1;
   transform: rotateY(360deg);
 }
