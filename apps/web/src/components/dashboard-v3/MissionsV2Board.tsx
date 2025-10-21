@@ -2469,16 +2469,25 @@ export function MissionsV2Board({
                                         </span>
                                         <div className="missions-market-card__proposal-heading">
                                           <h5>{activeProposal.name}</h5>
-                                          {activeRewardPreview && (
-                                            <div className="missions-market-card__reward-badge">
-                                              {activeRewardPreview}
-                                            </div>
-                                          )}
                                         </div>
                                       </header>
                                       <p className="missions-market-card__proposal-summary">
                                         {activeProposal.summary}
                                       </p>
+                                      <div className="missions-market-card__key-stats">
+                                        <div className="missions-market-card__stat missions-market-card__stat--highlight">
+                                          <p className="missions-market-card__stat-label">Recompensa</p>
+                                          <p className="missions-market-card__stat-value">
+                                            {activeRewardPreview ?? '—'}
+                                          </p>
+                                        </div>
+                                        <div className="missions-market-card__stat">
+                                          <p className="missions-market-card__stat-label">Dificultad</p>
+                                          <p className="missions-market-card__stat-value">
+                                            {activeProposal?.difficulty ?? '—'}
+                                          </p>
+                                        </div>
+                                      </div>
                                       {activeProposal.tags.length > 0 && (
                                         <div className="missions-market-card__tags">
                                           {activeProposal.tags.map((tag) => (
@@ -2498,20 +2507,6 @@ export function MissionsV2Board({
                                           ))}
                                         </ul>
                                       )}
-                                      <div className="missions-market-card__insights">
-                                        <div className="missions-market-card__insight">
-                                          <p className="missions-market-card__back-label">Dificultad</p>
-                                          <p className="missions-market-card__back-value">
-                                            {activeProposal?.difficulty ?? '—'}
-                                          </p>
-                                        </div>
-                                        <div className="missions-market-card__insight">
-                                          <p className="missions-market-card__back-label">Recompensa</p>
-                                          <p className="missions-market-card__back-value">
-                                            {activeRewardPreview ?? '—'}
-                                          </p>
-                                        </div>
-                                      </div>
                                       <button
                                         type="button"
                                         className="missions-market-card__cta"
