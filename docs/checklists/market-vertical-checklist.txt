@@ -1,0 +1,5 @@
+- [ ] Garantizar que solo una `mission-proposal-card` sea visible y centrada en el stack ajustando alturas/snap en apps/web/src/index.css (`.missions-market-card__stack`, `.mission-proposal-card`).
+- [ ] Revisar gestos para que el scroll vertical no se bloquee permitiendo `pan-y` efectivo y limitando pointer capture en apps/web/src/index.css (`.missions-market-carousel*`) y apps/web/src/components/dashboard-v3/MissionsV2Board.tsx (`handleCarouselPointer*`).
+- [ ] Ajustar las alturas basadas en `100dvh` para que el track/carta respeten el viewport y safe-areas móviles en apps/web/src/index.css (`.missions-market-carousel__track`, `.missions-market-card`).
+- [ ] Asegurar visibilidad constante de la CTA (sticky o con margen seguro) en apps/web/src/components/dashboard-v3/MissionsV2Board.tsx y estilos `.mpc-cta` / `.mission-proposal-card` de apps/web/src/index.css.
+- [ ] Reintegrar el orden esperado de contenido (pétalos, progreso, heartbeat) dentro de `mission-proposal-card` en apps/web/src/components/dashboard-v3/MissionsV2Board.tsx.
