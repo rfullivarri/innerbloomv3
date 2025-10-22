@@ -79,6 +79,112 @@ const SLOT_DETAILS: Record<
   },
 };
 
+const DEMO_SLOT_CONTENT: Record<
+  MissionsV2Slot['slot'],
+  {
+    name: string;
+    summary: string;
+    requirements: string;
+    objective: string;
+    objectives?: string[];
+    reward: { xp: number; currency?: number; items?: string[] };
+    tasks: Array<{ name: string; tag: string }>;
+    tags?: string[];
+  }
+> = {
+  main: {
+    name: 'Demo Main Quest',
+    summary: 'Probá el carrusel completando pasos simulados de la Main Quest.',
+    requirements: 'Solo necesitás habilitar el modo demo.',
+    objective: 'Recorrer el carrusel hasta el final y volver al inicio.',
+    reward: { xp: 150, currency: 10, items: ['Token de Prueba'] },
+    tasks: [
+      { name: 'Registrar un heartbeat ficticio', tag: 'heartbeat' },
+      { name: 'Contar qué viste en el carrusel', tag: 'reflection' },
+    ],
+    tags: ['demo', 'main'],
+  },
+  hunt: {
+    name: 'Demo Hunt',
+    summary: 'Explorá la navegación lateral del carrusel con una Hunt inventada.',
+    requirements: 'Mantener el foco en modo prueba.',
+    objective: 'Moverte entre las tarjetas y validar animaciones.',
+    reward: { xp: 120, currency: 8, items: ['Cofre Fantasma'] },
+    tasks: [
+      { name: 'Mover el carrusel hacia la Hunt', tag: 'session' },
+      { name: 'Confirmar que la posición marca 2/3', tag: 'check' },
+    ],
+    tags: ['demo', 'hunt'],
+  },
+  skill: {
+    name: 'Demo Skill Route',
+    summary: 'Simulá la Skill Route para ver el estado 3/3 del carrusel.',
+    requirements: 'Seguir en entorno demo con datos inventados.',
+    objective: 'Chequear textos y estilos finales de la tarjeta.',
+    objectives: [
+      'Revisar el CTA principal deshabilitado.',
+      'Validar que el indicador marque 3/3.',
+      'Confirmar que la UI reacciona al volver a 1/3.',
+    ],
+    reward: { xp: 140, currency: 9, items: ['Cristal Placeholder'] },
+    tasks: [
+      { name: 'Navegar al último slide', tag: 'navigation' },
+      { name: 'Compartir feedback de estilos', tag: 'feedback' },
+    ],
+    tags: ['demo', 'skill'],
+  },
+};
+
+function makeDemoSlot(slotKey: MissionsV2Slot['slot'], position: number): MissionsV2Slot {
+  const content = DEMO_SLOT_CONTENT[slotKey];
+  const slotId = `demo-${slotKey}-slot-${position}`;
+  const missionId = `${slotId}-mission`;
+  const totalPetals = 3;
+  const completedPetals = Math.min(position - 1, totalPetals);
+  const percent = Math.round((completedPetals / totalPetals) * 100);
+
+  return {
+    id: slotId,
+    slot: slotKey,
+    mission: {
+      id: missionId,
+      type: slotKey,
+      name: content.name,
+      summary: content.summary,
+      requirements: content.requirements,
+      objective: content.objective,
+      objectives: content.objectives,
+      reward: content.reward,
+      tasks: content.tasks.map((task, taskIndex) => ({
+        id: `${missionId}-task-${taskIndex + 1}`,
+        name: task.name,
+        tag: task.tag,
+      })),
+      tags: content.tags,
+    },
+    state: 'active',
+    petals: { total: totalPetals, remaining: Math.max(totalPetals - completedPetals, 0) },
+    heartbeat_today: false,
+    progress: { current: completedPetals, target: totalPetals, percent },
+    countdown: { ends_at: null, label: 'Demo listo' },
+    actions: [
+      {
+        id: `${slotId}-heartbeat`,
+        type: 'heartbeat',
+        label: 'Demo heartbeat',
+        enabled: false,
+      },
+      {
+        id: `${slotId}-claim`,
+        type: 'claim',
+        label: 'Demo claim',
+        enabled: false,
+      },
+    ],
+    claim: { available: false, enabled: false, cooldown_until: null },
+  };
+}
+
 const STATE_LABELS: Record<MissionsV2Slot['state'], { label: string; tone: 'neutral' | 'active' | 'success' | 'error' | 'cooldown' | 'claimed' }>
   = {
     idle: { label: 'PENDIENTE', tone: 'neutral' },
@@ -992,9 +1098,23 @@ export function MissionsV2Board({
     if (!board) {
       return [] as MissionsV2Slot[];
     }
-    return [...board.slots].sort(
+
+    const sorted = [...board.slots].sort(
       (a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot),
     );
+
+    const hasAllSlots = SLOT_ORDER.every((slotKey) =>
+      sorted.some((slot) => slot.slot === slotKey),
+    );
+
+    if (hasAllSlots) {
+      return sorted;
+    }
+
+    return SLOT_ORDER.map((slotKey, index) => {
+      const existingSlot = sorted.find((slot) => slot.slot === slotKey);
+      return existingSlot ?? makeDemoSlot(slotKey, index + 1);
+    });
   }, [board]);
 
   const slotIndexById = useMemo(() => {
