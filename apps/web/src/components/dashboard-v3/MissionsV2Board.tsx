@@ -341,6 +341,151 @@ function extractProposalMetadata(proposal: MarketProposal): string[] {
   return metadataEntries;
 }
 
+const MOCK_PROPOSAL_COUNTS: Record<MissionsV2Slot['slot'], number> = {
+  main: 7,
+  hunt: 6,
+  skill: 6,
+};
+
+const MOCK_TITLE_PREFIXES: Record<MissionsV2Slot['slot'], string[]> = {
+  main: ['Cadena', 'Operación', 'Ruta', 'Operativo', 'Proyecto', 'Expedición'],
+  hunt: ['Cacería', 'Rastreo', 'Búsqueda', 'Operación', 'Pista', 'Emboscada'],
+  skill: ['Laboratorio', 'Taller', 'Sprint', 'Ruta', 'Dojo', 'Simulación'],
+};
+
+const MOCK_TITLE_SUFFIXES = [
+  'de Fricción',
+  'Aurora',
+  'Horizonte',
+  'Vanguardia',
+  'Equilibrio',
+  'Nebulosa',
+  'Ascenso',
+  'Catalizador',
+];
+
+const MOCK_SUMMARIES: Record<MissionsV2Slot['slot'], string[]> = {
+  main: [
+    'Atacá los cuellos de botella clave y mantené la racha viva.',
+    'Coordiná al squad para cerrar los gaps del trimestre.',
+    'Empujá el objetivo estratégico hasta lograr momentum.',
+  ],
+  hunt: [
+    'Detectá oportunidades rápidas y convertílas en victorias.',
+    'Desbloqueá conversaciones pendientes con stakeholders críticos.',
+    'Buscá nuevas rutas para sostener el flujo del equipo.',
+  ],
+  skill: [
+    'Subí el nivel del craft con ejercicios cortos y medibles.',
+    'Consolidá hábitos técnicos con sesiones breves y enfocadas.',
+    'Mejorá la ejecución con entrenamientos de precisión.',
+  ],
+};
+
+const MOCK_OBJECTIVES: Record<MissionsV2Slot['slot'], string[][]> = {
+  main: [
+    ['Ganá 3 sesiones Flow', 'Mantené activo el escudo'],
+    ['Lográ 2 claims consecutivos', 'Compartí reporte con el squad'],
+    ['Cerrá 4 heartbeats', 'Subí evidencia clave'],
+    ['Activá un booster y extendé la racha'],
+  ],
+  hunt: [
+    ['Convencé a 3 aliados', 'Abrí 2 pistas nuevas'],
+    ['Resolvé 4 micro-retos', 'Reportá un hallazgo'],
+    ['Vinculá una daily y completá la misión'],
+    ['Traqueá 5 leads útiles', 'Garantizá seguimiento'],
+  ],
+  skill: [
+    ['Entrená 20 minutos', 'Documentá un aprendizaje'],
+    ['Subí 2 PRs de práctica', 'Pedí feedback rápido'],
+    ['Completar 3 drills técnicos', 'Registrar progreso'],
+    ['Prepará una demo corta', 'Compartí insights'],
+  ],
+};
+
+const MOCK_TAGS: Record<MissionsV2Slot['slot'], string[][]> = {
+  main: [
+    ['Activa', 'Impacto Alto'],
+    ['Sinergia', 'Sprint'],
+    ['Foco Equipo', 'Momentum'],
+  ],
+  hunt: [
+    ['Exploración', 'Tiempo Limitado'],
+    ['Velocidad', 'Stakeholders'],
+    ['Investigación', 'Radar'],
+  ],
+  skill: [
+    ['Entrenamiento', 'Micro'],
+    ['Feedback', 'Iteración'],
+    ['Práctica', 'XP Boost'],
+  ],
+};
+
+const MOCK_REWARD_PRESETS: Array<{ xp: number; currency: number; items: string[] }> = [
+  { xp: 180, currency: 12, items: [] },
+  { xp: 220, currency: 18, items: ['Booster x1'] },
+  { xp: 260, currency: 24, items: ['Shard Azul'] },
+  { xp: 200, currency: 16, items: ['Token Insight'] },
+];
+
+const MOCK_DIFFICULTIES: Array<MissionsV2MarketProposal['difficulty']> = [
+  'medium',
+  'high',
+  'epic',
+  'low',
+];
+
+const MOCK_FOCUS: string[] = ['Foco Squad', 'Solo Push', 'Review Diario', 'Check-in Async'];
+const MOCK_TIME_ESTIMATE: string[] = ['25m', '40m', '55m', '35m'];
+
+function cycleValue<T>(values: T[], index: number): T {
+  return values[index % values.length]!;
+}
+
+function makeMockMarketProposals(slotKey: MissionsV2Slot['slot']): MarketProposal[] {
+  const count = MOCK_PROPOSAL_COUNTS[slotKey] ?? 6;
+  const slotOffset = SLOT_ORDER.indexOf(slotKey) * 11 + 3;
+
+  return Array.from({ length: count }, (_, index) => {
+    const seed = slotOffset + index * 5;
+    const titlePrefix = cycleValue(MOCK_TITLE_PREFIXES[slotKey], seed);
+    const titleSuffix = cycleValue(MOCK_TITLE_SUFFIXES, seed + index);
+    const summary = cycleValue(MOCK_SUMMARIES[slotKey], seed + 2);
+    const objectiveGroup = cycleValue(MOCK_OBJECTIVES[slotKey], seed + 3);
+    const primaryObjective = objectiveGroup[0] ?? 'Lográ el objetivo principal.';
+    const rewardPreset = cycleValue(MOCK_REWARD_PRESETS, seed + 4);
+    const difficulty = cycleValue(MOCK_DIFFICULTIES, seed + 5);
+    const mockTags = [...cycleValue(MOCK_TAGS[slotKey], seed + 1)];
+    const reward = {
+      xp: rewardPreset.xp + (seed % 25),
+      currency: rewardPreset.currency + (index % 7),
+      items: [...rewardPreset.items],
+    };
+    const isActive = index === 0;
+    const isLocked = !isActive && (index === 1 || (index % 4 === (slotOffset % 3)));
+
+    return {
+      id: `mock-${slotKey}-${index}`,
+      slot: slotKey,
+      name: `${titlePrefix} ${titleSuffix}`,
+      summary,
+      requirements: objectiveGroup.join(' · '),
+      objective: primaryObjective,
+      objectives: [...objectiveGroup],
+      reward,
+      difficulty,
+      tags: mockTags,
+      metadata: {
+        focus: cycleValue(MOCK_FOCUS, seed + 2),
+        estimated_time: cycleValue(MOCK_TIME_ESTIMATE, seed + 1),
+      },
+      duration_days: 3 + ((seed + index) % 4),
+      locked: isLocked,
+      isActive,
+    };
+  });
+}
+
 function formatCountdown(label: string): string {
   if (!label) {
     return 'Countdown pendiente';
@@ -931,6 +1076,15 @@ export function MissionsV2Board({
     return map;
   }, [board]);
 
+  const renderMarketBySlot = useMemo<MarketBySlot>(() => {
+    const map: MarketBySlot = {};
+    for (const slotKey of SLOT_ORDER) {
+      const proposals = marketBySlot[slotKey] ?? [];
+      map[slotKey] = proposals.length > 0 ? proposals : makeMockMarketProposals(slotKey);
+    }
+    return map;
+  }, [marketBySlot]);
+
   const orderedSlots = useMemo(() => {
     if (!board) {
       return [] as MissionsV2Slot[];
@@ -952,10 +1106,10 @@ export function MissionsV2Board({
     return SLOT_ORDER.map((slotKey) => {
       return {
         slot: slotKey,
-        proposals: marketBySlot[slotKey] ?? [],
+        proposals: renderMarketBySlot[slotKey] ?? [],
       };
     });
-  }, [marketBySlot]);
+  }, [renderMarketBySlot]);
 
   const marketCards = useMemo<MarketCardItem[]>(() => {
     return orderedMarketSlots.map((entry) => ({
@@ -1085,7 +1239,7 @@ export function MissionsV2Board({
 
   const handleMarketProposalStep = useCallback(
     (slotKey: MissionsV2Slot['slot'], delta: number) => {
-      const proposals = marketBySlot[slotKey] ?? [];
+      const proposals = renderMarketBySlot[slotKey] ?? [];
       setActiveMarketProposalBySlot((prev) => {
         const total = proposals.length;
         if (total <= 1 || delta === 0) {
@@ -1118,7 +1272,7 @@ export function MissionsV2Board({
       });
     },
     [
-      marketBySlot,
+      renderMarketBySlot,
       setMarketProposalTransitionBySlot,
       setMarketProposalRevisionBySlot,
       userId,
@@ -1127,7 +1281,7 @@ export function MissionsV2Board({
 
   const handleMarketStackScroll = useCallback(
     (slotKey: MissionsV2Slot['slot'], event: ReactUIEvent<HTMLDivElement>) => {
-      const proposals = marketBySlot[slotKey] ?? [];
+      const proposals = renderMarketBySlot[slotKey] ?? [];
       if (proposals.length <= 1) {
         return;
       }
@@ -1191,7 +1345,7 @@ export function MissionsV2Board({
       });
     },
     [
-      marketBySlot,
+      renderMarketBySlot,
       setMarketProposalRevisionBySlot,
       setMarketProposalTransitionBySlot,
       userId,
@@ -1242,7 +1396,7 @@ export function MissionsV2Board({
         return;
       }
 
-      const proposals = marketBySlot[slotKey] ?? [];
+      const proposals = renderMarketBySlot[slotKey] ?? [];
       if (proposals.length === 0) {
         if (container.scrollTop !== 0) {
           container.scrollTop = 0;
@@ -1270,7 +1424,7 @@ export function MissionsV2Board({
         container.scrollTop = targetTop;
       }
     });
-  }, [activeMarketProposalBySlot, marketBySlot, prefersReducedMotion]);
+  }, [activeMarketProposalBySlot, prefersReducedMotion, renderMarketBySlot]);
 
   const bossEnabled = useMemo(() => {
     if (!board) {
@@ -2177,7 +2331,7 @@ export function MissionsV2Board({
       }
 
       if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-        const proposals = marketBySlot[slotKey] ?? [];
+        const proposals = renderMarketBySlot[slotKey] ?? [];
         if (proposals.length <= 1) {
           return;
         }
@@ -2186,7 +2340,12 @@ export function MissionsV2Board({
         handleMarketProposalStep(slotKey, direction);
       }
     },
-    [handleMarketCardToggle, handleCarouselStep, handleMarketProposalStep, marketBySlot],
+    [
+      handleMarketCardToggle,
+      handleCarouselStep,
+      handleMarketProposalStep,
+      renderMarketBySlot,
+    ],
   );
 
   const handleMarketCoverLoad = useCallback(
