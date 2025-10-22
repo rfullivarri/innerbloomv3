@@ -2086,6 +2086,8 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  opacity: 1;
+  transform: rotateY(0deg);
 }
 
 .missions-market-card__cover {
@@ -2142,6 +2144,16 @@
   transform: rotateY(180deg);
   background: linear-gradient(145deg, rgba(17, 24, 39, 0.9), rgba(30, 41, 59, 0.95));
   min-height: 0;
+}
+
+.missions-market-card[data-flipped='true'] .missions-market-card__front {
+  opacity: 0;
+  transform: rotateY(180deg);
+}
+
+.missions-market-card[data-flipped='true'] .missions-market-card__back {
+  opacity: 1;
+  transform: rotateY(0deg);
 }
 
 .missions-market-card__back-header {
