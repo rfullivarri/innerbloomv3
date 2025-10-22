@@ -46,6 +46,7 @@ type ClaimModalState = {
 };
 
 const SLOT_ORDER: Array<MissionsV2Slot['slot']> = ['main', 'hunt', 'skill'];
+const ACTIVE_CAROUSEL_HEIGHT_SCALE = 1.8;
 
 const SLOT_DETAILS: Record<
   MissionsV2Slot['slot'],
@@ -1149,7 +1150,10 @@ export function MissionsV2Board({
     if (activeSlotCardHeight == null) {
       return undefined;
     }
-    const paddedHeight = Math.max(Math.round(activeSlotCardHeight + 64), 360);
+    const baseHeight = Math.round(activeSlotCardHeight + 64);
+    const scaledHeight = Math.round(baseHeight * ACTIVE_CAROUSEL_HEIGHT_SCALE);
+    const minimumHeight = Math.round(360 * ACTIVE_CAROUSEL_HEIGHT_SCALE);
+    const paddedHeight = Math.max(scaledHeight, minimumHeight);
     return {
       '--missions-active-carousel-height': `${paddedHeight}px`,
     };

@@ -1085,7 +1085,7 @@
 
 .missions-market-carousel__track {
   @apply relative flex w-full items-center justify-center overflow-hidden py-4 sm:py-6;
-  min-height: clamp(360px, calc(100dvh - 140px), 560px);
+  min-height: clamp(648px, calc((100dvh - 140px) * 1.8), 1008px);
   touch-action: pan-x;
   cursor: grab;
 }
@@ -1251,7 +1251,11 @@
 
 
 .missions-active-carousel__track {
-  --missions-active-carousel-default-height: clamp(320px, calc(100dvh - 160px), 480px);
+  --missions-active-carousel-default-height: clamp(
+    576px,
+    calc((100dvh - 160px) * 1.8),
+    864px
+  );
   @apply relative flex w-full items-center justify-center overflow-hidden py-4 sm:py-6;
   min-height: var(
     --missions-active-carousel-height,
@@ -1273,7 +1277,11 @@
 
 @media (max-width: 480px) {
   .missions-active-carousel__track {
-    --missions-active-carousel-default-height: clamp(300px, calc(100dvh - 140px), 420px);
+    --missions-active-carousel-default-height: clamp(
+      540px,
+      calc((100dvh - 140px) * 1.8),
+      756px
+    );
   }
 }
 
