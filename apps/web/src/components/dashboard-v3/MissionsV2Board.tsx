@@ -2665,6 +2665,9 @@ export function MissionsV2Board({
                         hasMultipleProposals && activeProposalIndex < proposals.length - 1;
                       const proposalRevision = marketProposalRevisionBySlot[slot] ?? 0;
                       const transitionDirection = marketProposalTransitionBySlot[slot];
+                      const activeRewardPreview = activeProposal
+                        ? formatProposalReward(activeProposal)
+                        : null;
                       const activeObjectives = activeProposal
                         ? activeProposal.objectives.length > 0
                           ? activeProposal.objectives
@@ -2846,7 +2849,7 @@ export function MissionsV2Board({
                                           : `Activar en slot ${details.label}`}
                                       </button>
                                     </article>
-                                  ) : (
+                                  ) : proposals.length === 0 ? (
                                     <div className="missions-market-card__proposal missions-market-card__proposal--empty">
                                       <p>Sin propuestas disponibles. Volvé pronto.</p>
                                     </div>
