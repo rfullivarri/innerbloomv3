@@ -1085,7 +1085,7 @@
 .missions-market-carousel__track {
   @apply relative flex w-full items-center justify-center overflow-hidden py-4 sm:py-6;
   min-height: clamp(360px, calc(100dvh - 140px), 560px);
-  touch-action: pan-y;
+  touch-action: pan-x;
   cursor: grab;
 }
 
@@ -2182,12 +2182,48 @@
   min-height: 0;
 }
 
+.missions-market-card__back-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(0.6rem, 2vw, 0.9rem);
+}
+
+.missions-market-card__back-title {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.15rem, 1.2vw, 0.3rem);
+}
+
+.missions-market-card__back-label {
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.78);
+}
+
+.missions-market-card__back-meta {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.45rem, 2vw, 0.75rem);
+}
+
+.missions-market-card__scroll-hint {
+  font-size: clamp(0.64rem, 1.9vw, 0.72rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.7);
+  white-space: nowrap;
+}
+
 .missions-market-card__details {
   display: flex;
   flex-direction: column;
   gap: clamp(0.75rem, 2.5vw, 1.05rem);
   flex: 1 1 auto;
   min-height: 0;
+  --card-body-available: min(60vh, 100%);
 }
 
 .missions-market-card__stack {
@@ -2196,9 +2232,10 @@
   grid-auto-flow: row;
   gap: clamp(0.75rem, 2.4vw, 1.1rem);
   margin-top: clamp(0.75rem, 2.2vw, 1rem);
-  height: clamp(220px, 48vh, 260px);
+  max-height: calc(var(--card-body-available, 60vh));
   padding: clamp(0.5rem, 1.8vw, 0.75rem) clamp(0.35rem, 1.6vw, 0.65rem) clamp(0.75rem, 2vw, 1.1rem)
     clamp(0.35rem, 1.6vw, 0.65rem);
+  padding-bottom: clamp(1.1rem, 3vw, 1.6rem);
   overflow-y: auto;
   overflow-x: hidden;
   scroll-snap-type: y mandatory;
@@ -2332,6 +2369,31 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.65rem;
+}
+
+.missions-market-card__proposal-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.missions-market-card__proposal-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: clamp(0.62rem, 1.9vw, 0.72rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(59, 130, 246, 0.22);
+  color: rgba(219, 234, 254, 0.9);
+}
+
+.missions-market-card__proposal-badge--active {
+  background: rgba(16, 185, 129, 0.28);
+  color: rgba(209, 250, 229, 0.95);
 }
 
 .missions-market-card__proposal-header h5 {

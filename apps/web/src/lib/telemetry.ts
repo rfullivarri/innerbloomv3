@@ -56,7 +56,14 @@ export type MissionsV2EventName =
   | 'missions_v2_select_open'
   | 'missions_v2_heartbeat'
   | 'missions_v2_reward_claimed'
-  | 'missions_v2_market_activate';
+  | 'missions_v2_market_activate'
+  | 'missions_v2_market_view'
+  | 'missions_v2_market_nav_prev'
+  | 'missions_v2_market_nav_next'
+  | 'missions_v2_market_flip_open'
+  | 'missions_v2_market_flip_close'
+  | 'missions_v2_market_inner_scroll'
+  | 'missions_v2_market_proposal_select';
 
 export interface MissionsV2EventPayload {
   userId?: string | null;
