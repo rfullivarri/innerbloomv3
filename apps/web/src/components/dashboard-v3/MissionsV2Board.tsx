@@ -586,7 +586,12 @@ function ActiveMissionCard({
 
   return (
     <div className={classNames('missions-active-card', !expanded && 'missions-active-card--collapsed')}>
-      <div className="missions-active-card__header">
+      <button
+        type="button"
+        className="missions-active-card__header missions-active-card__header-button"
+        aria-expanded={expanded}
+        onClick={() => onToggle(slot)}
+      >
         <div className="missions-active-card__header-row">
           <div className="missions-active-card__primary">
             <p className="missions-active-card__hero">{heroLine}</p>
@@ -600,29 +605,22 @@ function ActiveMissionCard({
               </div>
             )}
           </div>
-          <button
-            type="button"
-            className="missions-active-card__toggle"
-            aria-expanded={expanded}
-            onClick={() => onToggle(slot)}
-          >
-            {expanded ? 'Ocultar' : 'Ver detalles'}
+          <span className="missions-active-card__toggle" aria-hidden="true">
             <svg
               className={classNames(
                 'missions-active-card__toggle-icon',
                 expanded && 'missions-active-card__toggle-icon--expanded',
               )}
               viewBox="0 0 16 16"
-              aria-hidden="true"
             >
               <path
                 d="M3.22 5.97a.75.75 0 0 1 1.06 0L8 9.69l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.22 7.03a.75.75 0 0 1 0-1.06Z"
                 fill="currentColor"
               />
             </svg>
-          </button>
+          </span>
         </div>
-      </div>
+      </button>
       <div className="missions-active-card__progress">
         <MissionProgress slot={slot} prefersReducedMotion={prefersReducedMotion} />
         {expanded && (
@@ -1879,6 +1877,15 @@ export function MissionsV2Board({
   }, [activeSlotIndex, orderedSlots]);
 
   useEffect(() => {
+    setExpandedSlots((prev) => {
+      if (Object.keys(prev).length === 0) {
+        return prev;
+      }
+      return {};
+    });
+  }, [activeSlotIndex]);
+
+  useEffect(() => {
     if (!prefersReducedMotion) {
       return;
     }
@@ -1976,8 +1983,13 @@ export function MissionsV2Board({
 
   const toggleSlotExpansion = useCallback((slot: MissionsV2Slot) => {
     setExpandedSlots((prev) => {
-      const current = prev[slot.id] ?? true;
-      return { ...prev, [slot.id]: !current };
+      const isExpanded = Boolean(prev[slot.id]);
+      if (isExpanded) {
+        const next = { ...prev };
+        delete next[slot.id];
+        return next;
+      }
+      return { [slot.id]: true };
     });
   }, []);
 
@@ -2077,7 +2089,7 @@ export function MissionsV2Board({
         : {}),
     };
     const hasMission = Boolean(mission);
-    const isExpanded = expandedSlots[slot.id] ?? true;
+    const isExpanded = expandedSlots[slot.id] ?? false;
 
     const card = (
       <Card
