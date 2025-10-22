@@ -2195,9 +2195,10 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   gap: clamp(0.75rem, 2.4vw, 1.1rem);
   margin-top: clamp(0.75rem, 2.2vw, 1rem);
-  max-height: calc(var(--card-body-available, 60vh));
+  min-height: 0;
   padding: clamp(0.5rem, 1.8vw, 0.75rem) clamp(0.35rem, 1.6vw, 0.65rem) clamp(0.75rem, 2vw, 1.1rem)
     clamp(0.35rem, 1.6vw, 0.65rem);
   padding-bottom: clamp(1.1rem, 3vw, 1.6rem);
@@ -2207,6 +2208,9 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
   -webkit-overflow-scrolling: touch;
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: clamp(0.5rem, 1.8vw, 0.75rem);
+  scroll-padding-bottom: clamp(1.1rem, 3vw, 1.6rem);
 }
 
 .missions-market-card__stack::-webkit-scrollbar {
@@ -2306,6 +2310,8 @@
     box-shadow var(--motion-duration-base) var(--motion-ease-enter),
     background var(--motion-duration-base) var(--motion-ease-enter),
     opacity var(--motion-duration-base) var(--motion-ease-enter);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   min-height: clamp(200px, 46vh, 240px);
 }
 
@@ -2544,7 +2550,7 @@
 
 @media (min-width: 768px) {
   .missions-market-card__stack {
-    max-height: min(calc(var(--card-body-available, 60vh)), clamp(260px, 46vh, 340px));
+    max-height: none;
   }
 
   .mission-proposal-card {
