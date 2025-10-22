@@ -113,6 +113,16 @@ const MARKET_CAROUSEL_DRAG_START_THRESHOLD = 10;
 const MARKET_CAROUSEL_STEP_THRESHOLD_MOUSE = 60;
 const MARKET_CAROUSEL_STEP_THRESHOLD_TOUCH = 40;
 
+type CarouselDragState = {
+  pointerId: number | null;
+  startX: number;
+  lastX: number;
+  accumulatedX: number;
+  isDragging: boolean;
+  hasSwiped: boolean;
+  pointerType: string;
+};
+
 type PrimaryAction = {
   key: string;
   label: string;
@@ -867,6 +877,15 @@ export function MissionsV2Board({
     main: null,
     hunt: null,
     skill: null,
+  });
+  const carouselDragStateRef = useRef<CarouselDragState>({
+    pointerId: null,
+    startX: 0,
+    lastX: 0,
+    accumulatedX: 0,
+    isDragging: false,
+    hasSwiped: false,
+    pointerType: '',
   });
   const slotStackWheelDelta = useRef<Record<string, number>>({});
   const previousActiveSlotIdRef = useRef<string | null>(null);
