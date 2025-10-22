@@ -2449,7 +2449,7 @@
 
 @media (min-width: 768px) {
   .missions-market-card__stack {
-    height: clamp(260px, 46vh, 340px);
+    max-height: min(calc(var(--card-body-available, 60vh)), clamp(260px, 46vh, 340px));
   }
 
   .missions-market-card__proposal {
