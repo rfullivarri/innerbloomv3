@@ -8,6 +8,7 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   type SyntheticEvent,
   type UIEvent as ReactUIEvent,
 } from 'react';
@@ -107,6 +108,10 @@ type MissionCardStyle = CSSProperties & {
 type MarketProposalTransition = 'forward' | 'backward' | null;
 
 const DEFAULT_MISSION_ART_MODE: GameMode = 'Flow';
+
+const MARKET_CAROUSEL_DRAG_START_THRESHOLD = 10;
+const MARKET_CAROUSEL_STEP_THRESHOLD_MOUSE = 60;
+const MARKET_CAROUSEL_STEP_THRESHOLD_TOUCH = 40;
 
 type PrimaryAction = {
   key: string;
@@ -1726,17 +1731,33 @@ export function MissionsV2Board({
     [prefersReducedMotion],
   );
 
-  const handleCarouselStep = useCallback(
-    (direction: 'next' | 'prev') => {
-      if (marketCards.length === 0) {
+  const stepMarketCarousel = useCallback(
+    (delta: number) => {
+      if (marketCards.length === 0 || delta === 0) {
         return;
       }
-      const delta = direction === 'next' ? 1 : -1;
-      const nextIndex = (activeMarketIndex + delta + marketCards.length) % marketCards.length;
-      setActiveMarketIndex(nextIndex);
-      scrollCarouselToIndex(nextIndex);
+
+      setActiveMarketIndex((current) => {
+        const total = marketCards.length;
+        if (total === 0) {
+          return current;
+        }
+        const next = (current + delta + total) % total;
+        if (next !== current) {
+          scrollCarouselToIndex(next);
+        }
+        return next;
+      });
     },
-    [activeMarketIndex, marketCards.length, scrollCarouselToIndex],
+    [marketCards.length, scrollCarouselToIndex],
+  );
+
+  const handleCarouselStep = useCallback(
+    (direction: 'next' | 'prev') => {
+      const delta = direction === 'next' ? 1 : -1;
+      stepMarketCarousel(delta);
+    },
+    [stepMarketCarousel],
   );
 
   const handleSlotCarouselStep = useCallback(
@@ -1834,6 +1855,154 @@ export function MissionsV2Board({
       });
     },
     [activeMarketIndex, flippedMarketCards, scrollCarouselToIndex],
+  );
+
+  const handleMarketCardClick = useCallback(
+    (slotKey: MissionsV2Slot['slot'], index: number) => {
+      if (carouselDragStateRef.current.hasSwiped) {
+        carouselDragStateRef.current.hasSwiped = false;
+        return;
+      }
+
+      handleMarketCardToggle(slotKey, index);
+      carouselDragStateRef.current.hasSwiped = false;
+    },
+    [handleMarketCardToggle],
+  );
+
+  const resetCarouselDragState = useCallback(
+    (target: HTMLDivElement | null, options?: { cancel?: boolean }) => {
+      const state = carouselDragStateRef.current;
+      const pointerId = state.pointerId;
+      if (pointerId != null && target) {
+        try {
+          target.releasePointerCapture(pointerId);
+        } catch {
+          // ignore if pointer capture is not available
+        }
+      }
+
+      if (target) {
+        delete target.dataset.dragging;
+      }
+
+      state.pointerId = null;
+      state.startX = 0;
+      state.lastX = 0;
+      state.accumulatedX = 0;
+      state.isDragging = false;
+      state.pointerType = '';
+      if (options?.cancel) {
+        state.hasSwiped = false;
+      }
+    },
+    [],
+  );
+
+  const handleCarouselPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) {
+        return;
+      }
+
+      const state = carouselDragStateRef.current;
+      state.pointerId = event.pointerId;
+      state.startX = event.clientX;
+      state.lastX = event.clientX;
+      state.accumulatedX = 0;
+      state.isDragging = false;
+      state.hasSwiped = false;
+      state.pointerType = event.pointerType;
+
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // ignore if pointer capture is not available
+      }
+    },
+    [],
+  );
+
+  const handleCarouselPointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const state = carouselDragStateRef.current;
+      if (state.pointerId !== event.pointerId) {
+        return;
+      }
+
+      const totalDelta = event.clientX - state.startX;
+      if (!state.isDragging && Math.abs(totalDelta) >= MARKET_CAROUSEL_DRAG_START_THRESHOLD) {
+        state.isDragging = true;
+        event.currentTarget.dataset.dragging = 'true';
+      }
+
+      if (!state.isDragging) {
+        state.lastX = event.clientX;
+        return;
+      }
+
+      event.preventDefault();
+
+      const deltaX = event.clientX - state.lastX;
+      state.lastX = event.clientX;
+      state.accumulatedX += deltaX;
+
+      const threshold =
+        state.pointerType === 'touch' || state.pointerType === 'pen'
+          ? MARKET_CAROUSEL_STEP_THRESHOLD_TOUCH
+          : MARKET_CAROUSEL_STEP_THRESHOLD_MOUSE;
+
+      while (state.accumulatedX >= threshold) {
+        stepMarketCarousel(-1);
+        state.accumulatedX -= threshold;
+        state.hasSwiped = true;
+      }
+
+      while (state.accumulatedX <= -threshold) {
+        stepMarketCarousel(1);
+        state.accumulatedX += threshold;
+        state.hasSwiped = true;
+      }
+    },
+    [stepMarketCarousel],
+  );
+
+  const handleCarouselPointerUp = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const state = carouselDragStateRef.current;
+      if (state.pointerId !== event.pointerId) {
+        return;
+      }
+
+      if (state.isDragging) {
+        event.preventDefault();
+      }
+
+      resetCarouselDragState(event.currentTarget);
+    },
+    [resetCarouselDragState],
+  );
+
+  const handleCarouselPointerLeave = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (carouselDragStateRef.current.pointerId == null) {
+        return;
+      }
+
+      resetCarouselDragState(event.currentTarget, { cancel: true });
+    },
+    [resetCarouselDragState],
+  );
+
+  const handleCarouselPointerCancel = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (carouselDragStateRef.current.pointerId !== event.pointerId) {
+        return;
+      }
+
+      resetCarouselDragState(event.currentTarget, { cancel: true });
+    },
+    [resetCarouselDragState],
   );
 
   const handleMarketCardKeyDown = useCallback(
@@ -2647,6 +2816,11 @@ export function MissionsV2Board({
                     ref={carouselRef}
                     role="listbox"
                     aria-label="Marketplace de misiones disponibles"
+                    onPointerDown={handleCarouselPointerDown}
+                    onPointerMove={handleCarouselPointerMove}
+                    onPointerUp={handleCarouselPointerUp}
+                    onPointerLeave={handleCarouselPointerLeave}
+                    onPointerCancel={handleCarouselPointerCancel}
                   >
                     {marketCards.map((item, index) => {
                       const { slot, proposals, key: cardKey } = item;
@@ -2733,13 +2907,13 @@ export function MissionsV2Board({
                             aria-selected={isActiveCard}
                             aria-expanded={isFlipped}
                             tabIndex={isActiveCard ? 0 : -1}
-                            aria-label={cardLabel}
-                            style={{
-                              '--market-card-aspect': marketCoverAspect[cardKey] ?? '3 / 4',
-                            } as CSSProperties}
-                            onClick={() => handleMarketCardToggle(slot, index)}
-                            onKeyDown={(event) => handleMarketCardKeyDown(event, slot, index)}
-                          >
+                          aria-label={cardLabel}
+                          style={{
+                            '--market-card-aspect': marketCoverAspect[cardKey] ?? '3 / 4',
+                          } as CSSProperties}
+                          onClick={() => handleMarketCardClick(slot, index)}
+                          onKeyDown={(event) => handleMarketCardKeyDown(event, slot, index)}
+                        >
                             <div className="missions-market-card__front" aria-hidden={isFlipped}>
                               <span className="missions-market-card__slot-chip" data-slot={slot}>
                                 {details.label}
