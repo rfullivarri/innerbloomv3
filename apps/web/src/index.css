@@ -520,31 +520,43 @@
   gap: 0.75rem;
 }
 
-.missions-active-card__toggle {
+.missions-active-card__header-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  color: inherit;
+  cursor: pointer;
+}
+
+.missions-active-card__header-button:focus-visible {
+  outline: 2px solid rgba(148, 163, 184, 0.55);
+  outline-offset: 2px;
+}
+
+.missions-active-card__header-button .missions-active-card__toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  justify-content: center;
   padding: 0.35rem 0.75rem;
   border-radius: 9999px;
   border: 1px solid rgba(148, 163, 184, 0.35);
   background: rgba(148, 163, 184, 0.12);
   color: rgba(226, 232, 240, 0.85);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
   transition: background-color var(--motion-duration-fast) var(--motion-ease-enter),
     border-color var(--motion-duration-fast) var(--motion-ease-enter),
     color var(--motion-duration-fast) var(--motion-ease-enter);
 }
 
-.missions-active-card__toggle:hover {
+.missions-active-card__header-button:hover .missions-active-card__toggle,
+.missions-active-card__header-button:focus-visible .missions-active-card__toggle {
   background: rgba(148, 163, 184, 0.2);
   color: rgba(241, 245, 249, 0.95);
-}
-
-.missions-active-card__toggle:focus-visible {
-  outline: 2px solid rgba(148, 163, 184, 0.55);
-  outline-offset: 2px;
 }
 
 .missions-active-card__toggle-icon {
