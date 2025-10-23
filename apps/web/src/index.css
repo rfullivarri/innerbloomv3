@@ -1028,6 +1028,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
 }
 
 .missions-market-view__intro {
@@ -2262,6 +2263,7 @@
   --market-stack-padding-inline: clamp(0.3rem, 1.4vw, 0.55rem);
   --market-stack-padding-block: clamp(0.45rem, 1.6vw, 0.65rem);
   --market-stack-safe-area: max(env(safe-area-inset-bottom, 0px), 0.5rem);
+  --market-stack-header-height: 0px;
   padding: var(--market-stack-padding-block) var(--market-stack-padding-inline);
   padding-bottom: calc(var(--market-stack-padding-block) + var(--market-stack-safe-area));
   overflow-y: auto;
@@ -2271,7 +2273,7 @@
   scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: y mandatory;
-  scroll-padding-top: var(--market-stack-padding-block);
+  scroll-padding-top: calc(var(--market-stack-padding-block) + var(--market-stack-header-height));
   scroll-padding-bottom: calc(var(--market-stack-padding-block) + var(--market-stack-safe-area));
 }
 
@@ -2375,6 +2377,7 @@
     opacity var(--motion-duration-base) var(--motion-ease-enter);
   scroll-snap-align: start;
   scroll-snap-stop: always;
+  scroll-margin-top: var(--market-stack-header-height, 0px);
   min-height: calc(100% - var(--market-stack-gap, 0px));
   max-height: 100%;
 }

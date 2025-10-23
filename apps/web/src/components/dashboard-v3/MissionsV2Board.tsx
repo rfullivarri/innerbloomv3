@@ -1023,6 +1023,16 @@ export function MissionsV2Board({
     hunt: false,
     skill: false,
   });
+  const marketStackHeaderRefs = useRef<Record<MissionsV2Slot['slot'], HTMLElement | null>>({
+    main: null,
+    hunt: null,
+    skill: null,
+  });
+  const marketStackHeaderObservers = useRef<Record<MissionsV2Slot['slot'], ResizeObserver | null>>({
+    main: null,
+    hunt: null,
+    skill: null,
+  });
   const previousActiveProposalBySlotRef = useRef<Record<MissionsV2Slot['slot'], number>>({
     main: 0,
     hunt: 0,
@@ -1320,6 +1330,50 @@ export function MissionsV2Board({
     ],
   );
 
+  const updateMarketStackHeaderOffset = useCallback(
+    (slotKey: MissionsV2Slot['slot']) => {
+      const stack = marketStackRefs.current[slotKey];
+      if (!stack) {
+        return;
+      }
+
+      const header = marketStackHeaderRefs.current[slotKey];
+      const headerHeight = header ? header.getBoundingClientRect().height : 0;
+      stack.style.setProperty('--market-stack-header-height', `${headerHeight}px`);
+    },
+    [],
+  );
+
+  const registerMarketStackHeader = useCallback(
+    (slotKey: MissionsV2Slot['slot'], node: HTMLElement | null) => {
+      const previousObserver = marketStackHeaderObservers.current[slotKey];
+      if (previousObserver) {
+        previousObserver.disconnect();
+        marketStackHeaderObservers.current[slotKey] = null;
+      }
+
+      marketStackHeaderRefs.current[slotKey] = node;
+
+      if (node) {
+        if (typeof ResizeObserver !== 'undefined') {
+          const observer = new ResizeObserver(() => {
+            updateMarketStackHeaderOffset(slotKey);
+          });
+          observer.observe(node);
+          marketStackHeaderObservers.current[slotKey] = observer;
+        }
+
+        updateMarketStackHeaderOffset(slotKey);
+      } else {
+        const stack = marketStackRefs.current[slotKey];
+        if (stack) {
+          stack.style.removeProperty('--market-stack-header-height');
+        }
+      }
+    },
+    [updateMarketStackHeaderOffset],
+  );
+
   const updateMarketStackFade = useCallback(
     (slotKey: MissionsV2Slot['slot'], element: HTMLDivElement | null) => {
       if (!element) {
@@ -1340,6 +1394,20 @@ export function MissionsV2Board({
     [],
   );
 
+  useEffect(() => {
+    return () => {
+      (Object.keys(marketStackHeaderObservers.current) as MissionsV2Slot['slot'][]).forEach(
+        (slotKey) => {
+          const observer = marketStackHeaderObservers.current[slotKey];
+          if (observer) {
+            observer.disconnect();
+            marketStackHeaderObservers.current[slotKey] = null;
+          }
+        },
+      );
+    };
+  }, []);
+
   const handleMarketStackScroll = useCallback(
     (slotKey: MissionsV2Slot['slot'], event: ReactUIEvent<HTMLDivElement>) => {
       const proposals = renderMarketBySlot[slotKey] ?? [];
@@ -1350,11 +1418,18 @@ export function MissionsV2Board({
       }
       const isTrusted = event.nativeEvent.isTrusted;
       let containerPaddingTop = 0;
+      let containerHeaderOffset = 0;
       if (typeof window !== 'undefined') {
         const style = window.getComputedStyle(container);
         containerPaddingTop = Number.parseFloat(style.paddingTop) || 0;
+        const headerHeightValue = Number.parseFloat(
+          style.getPropertyValue('--market-stack-header-height'),
+        );
+        if (Number.isFinite(headerHeightValue)) {
+          containerHeaderOffset = headerHeightValue;
+        }
       }
-      const targetPosition = container.scrollTop + containerPaddingTop;
+      const targetPosition = container.scrollTop + containerPaddingTop + containerHeaderOffset;
       const children = Array.from(container.children) as HTMLElement[];
       if (children.length === 0) {
         return;
@@ -3131,7 +3206,10 @@ export function MissionsV2Board({
                               />
                             </div>
                             <div className="missions-market-card__back" aria-hidden={!isFlipped}>
-                                <header className="missions-market-card__back-header">
+                                <header
+                                  className="missions-market-card__back-header"
+                                  ref={(node) => registerMarketStackHeader(slot, node)}
+                                >
                                   <div className="missions-market-card__back-title">
                                     <p className="missions-market-card__back-label">{details.label}</p>
                                   </div>
@@ -3163,6 +3241,7 @@ export function MissionsV2Board({
                                   ref={(node) => {
                                     marketStackRefs.current[slot] = node;
                                     updateMarketStackFade(slot, node);
+                                    updateMarketStackHeaderOffset(slot);
                                   }}
                                 >
                                   {proposalList.map((proposal, proposalIndex) => {
@@ -3234,7 +3313,7 @@ export function MissionsV2Board({
                                     return (
                                       <article
                                         key={proposalKey}
-                                        className="mission-proposal-card"
+                                        className="mission-proposal-card missions-market-card__proposal"
                                         data-active={isActiveProposal ? 'true' : 'false'}
                                         data-locked={isProposalLocked ? 'true' : undefined}
                                         role="group"
