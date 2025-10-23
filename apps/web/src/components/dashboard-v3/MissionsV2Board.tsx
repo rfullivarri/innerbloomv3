@@ -2043,7 +2043,7 @@ export function MissionsV2Board({
       element.scrollIntoView({
         behavior,
         block: 'nearest',
-        inline: 'start',
+        inline: 'center',
         ...options,
       });
     },
