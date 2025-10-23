@@ -3263,9 +3263,10 @@ export function MissionsV2Board({
                                       : proposal.difficulty
                                       ? `${proposal.difficulty.slice(0, 1).toUpperCase()}${proposal.difficulty.slice(1)}`
                                       : '—';
-                                    const normalizedDifficulty = difficultyValue
-                                      ? difficultyValue.toLowerCase()
-                                      : null;
+                                    const normalizedDifficulty =
+                                      difficultyValue && difficultyValue !== '—'
+                                        ? difficultyValue.toLowerCase()
+                                        : null;
                                     const difficultyChipLabel = difficultyValue || '—';
                                     const isActiveProposal = proposalIndex === activeProposalIndex;
                                     const isProposalLocked = isRealProposal
@@ -3284,21 +3285,6 @@ export function MissionsV2Board({
                                     const petalsTotal = slotMetrics.petals?.total ?? 0;
                                     const petalsRemaining = slotMetrics.petals?.remaining ?? 0;
                                     const showPetals = petalsTotal > 0;
-                                    const hasProgressData = slotMetrics.progress != null;
-                                    const rawProgressPercent = hasProgressData
-                                      ? slotMetrics.progress?.percent ?? 0
-                                      : 0;
-                                    const progressPercent = Number.isFinite(rawProgressPercent)
-                                      ? Math.min(Math.max(rawProgressPercent, 0), 100)
-                                      : 0;
-                                    const progressCurrent = hasProgressData
-                                      ? slotMetrics.progress?.current ?? 0
-                                      : 0;
-                                    const progressTarget = hasProgressData
-                                      ? slotMetrics.progress?.target ?? 0
-                                      : 0;
-                                    const showProgressMeter = hasProgressData;
-                                    const progressPercentRounded = Math.round(progressPercent);
                                     const hasHeartbeatIndicator = slotMetrics.actions.some(
                                       (action: MissionsV2Action) => action.type === 'heartbeat',
                                     );
@@ -3346,8 +3332,7 @@ export function MissionsV2Board({
                                                 data-difficulty={normalizedDifficulty ?? undefined}
                                                 aria-label={`Dificultad: ${difficultyChipLabel}`}
                                               >
-                                                <span className="mpc-difficulty-chip__label">Dificultad</span>
-                                                <span className="mpc-difficulty-chip__value">{difficultyChipLabel}</span>
+                                                {difficultyChipLabel}
                                               </span>
                                             </div>
                                             <div className="mpc-reward">
@@ -3387,33 +3372,6 @@ export function MissionsV2Board({
                                                 </span>
                                               </div>
                                             ) : null}
-                                            {showProgressMeter ? (
-                                              <div className="mpc-meter">
-                                                <div className="mpc-meter__row">
-                                                  <span>Progreso</span>
-                                                  <span>{progressPercentRounded}%</span>
-                                                </div>
-                                                <div
-                                                  className="mpc-progress-bar"
-                                                  role="progressbar"
-                                                  aria-valuenow={progressPercentRounded}
-                                                  aria-valuemin={0}
-                                                  aria-valuemax={100}
-                                                  aria-valuetext={`${progressPercentRounded}% completado`}
-                                                >
-                                                  <span
-                                                    className="mpc-progress-bar__fill"
-                                                    style={{ width: `${progressPercent}%` }}
-                                                    aria-hidden="true"
-                                                  />
-                                                </div>
-                                                {progressTarget > 0 ? (
-                                                  <p className="mpc-meter__detail">
-                                                    {progressCurrent} / {progressTarget}
-                                                  </p>
-                                                ) : null}
-                                              </div>
-                                            ) : null}
                                             {hasHeartbeatIndicator ? (
                                               <div className="mpc-heartbeat">
                                                 <MissionHeartbeatStatus
@@ -3439,17 +3397,6 @@ export function MissionsV2Board({
                                               }}
                                             >
                                               {buttonLabel}
-                                            </button>
-                                            <button
-                                              type="button"
-                                              className="mpc-cta-secondary"
-                                              onClick={(event) => {
-                                                event.stopPropagation();
-                                              }}
-                                              disabled
-                                              data-market-collapse-on-swap="true"
-                                            >
-                                              Ver detalles
                                             </button>
                                           </div>
                                         </div>
