@@ -1153,6 +1153,31 @@ export function MissionsV2Board({
     hasTrackedMarketView.current = true;
   }, [activeMarketIndex, marketCards, userId, viewMode]);
 
+  const collapseMarketProposalExpansions = useCallback(
+    (slotKey: MissionsV2Slot['slot']) => {
+      const container = marketStackRefs.current[slotKey];
+      if (!container) {
+        return;
+      }
+
+      const collapsibleSelectors =
+        '[data-proposal-collapsible][aria-expanded="true"], [data-proposal-collapsible][data-expanded="true"], [data-market-collapse-on-swap="true"][aria-expanded="true"], [data-market-collapse-on-swap="true"][data-expanded="true"]';
+      const expandedElements = container.querySelectorAll<HTMLElement>(collapsibleSelectors);
+      expandedElements.forEach((element) => {
+        element.setAttribute('aria-expanded', 'false');
+        if (element.dataset.expanded === 'true') {
+          element.dataset.expanded = 'false';
+        }
+      });
+
+      const openDetails = container.querySelectorAll('details[open]');
+      openDetails.forEach((detailsElement) => {
+        detailsElement.removeAttribute('open');
+      });
+    },
+    [],
+  );
+
   useEffect(() => {
     setActiveMarketProposalBySlot((prev) => {
       let changed = false;
@@ -1247,31 +1272,6 @@ export function MissionsV2Board({
       );
     },
     [location.hash, location.pathname, location.search, navigate],
-  );
-
-  const collapseMarketProposalExpansions = useCallback(
-    (slotKey: MissionsV2Slot['slot']) => {
-      const container = marketStackRefs.current[slotKey];
-      if (!container) {
-        return;
-      }
-
-      const collapsibleSelectors =
-        '[data-proposal-collapsible][aria-expanded="true"], [data-proposal-collapsible][data-expanded="true"], [data-market-collapse-on-swap="true"][aria-expanded="true"], [data-market-collapse-on-swap="true"][data-expanded="true"]';
-      const expandedElements = container.querySelectorAll<HTMLElement>(collapsibleSelectors);
-      expandedElements.forEach((element) => {
-        element.setAttribute('aria-expanded', 'false');
-        if (element.dataset.expanded === 'true') {
-          element.dataset.expanded = 'false';
-        }
-      });
-
-      const openDetails = container.querySelectorAll('details[open]');
-      openDetails.forEach((detailsElement) => {
-        detailsElement.removeAttribute('open');
-      });
-    },
-    [],
   );
 
   const handleMarketProposalStep = useCallback(
