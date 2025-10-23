@@ -100,11 +100,20 @@
 - **P2 — Jerarquía de contenido incompleta** (`mission-proposal-card` render en `MissionsV2Board.tsx`). Faltan secciones de pétalos/progreso/heartbeat, desalineando expectativas y marcadores de estado.
 
 ## Checklist para corrección (Market vertical)
-1. Garantizar que solo una `mission-proposal-card` sea visible y centrada en el stack, ajustando alturas/snap en `apps/web/src/index.css` (`.missions-market-card__stack`, `.mission-proposal-card`).
-2. Revisar gestos para que el scroll vertical no se bloquee: permitir `pan-y` efectivo y limitar pointer capture en `apps/web/src/index.css` (`.missions-market-carousel*`) y `MissionsV2Board.tsx` (`handleCarouselPointer*`).
-3. Revisar alturas calculadas con `100dvh` para que el track/carta se adapten al viewport y safe-areas móviles (`index.css` `.missions-market-carousel__track`, `.missions-market-card`).
-4. Asegurar visibilidad constante de la CTA (sticky dentro del artículo o margen seguro) en `MissionsV2Board.tsx` y estilos `.mpc-cta` / `.mission-proposal-card`.
-5. Reintegrar el orden esperado de contenido (pétalos, progreso, heartbeat) o documentar placeholder dentro de `mission-proposal-card` en `MissionsV2Board.tsx`.
+- [x] Garantizar que solo una `mission-proposal-card` sea visible y centrada en el stack ajustando alturas/snap (`apps/web/src/index.css`, `apps/web/src/components/dashboard-v3/MissionsV2Board.tsx`).
+  - Se recalibraron `min-height`, `scroll-snap-align` y paddings del stack/card para forzar una tarjeta por viewport con centrado vertical.
+- [x] Revisar gestos para que el scroll vertical no se bloquee permitiendo `pan-y` efectivo y limitando pointer capture (`apps/web/src/index.css`, `MissionsV2Board.tsx`).
+  - Se habilitó `touch-action: pan-y pan-x` y se captura el puntero solo al confirmar desplazamiento horizontal.
+- [x] Revisar alturas basadas en `100dvh` para adaptar track/carta al viewport y safe-areas móviles (`apps/web/src/index.css`).
+  - Nuevos clamps usan offsets reducidos y `env(safe-area-inset-bottom)` en el stack.
+- [x] Asegurar visibilidad constante de la CTA sticky dentro del artículo (`apps/web/src/index.css`, `MissionsV2Board.tsx`).
+  - El footer interno ahora es `position: sticky` con safe-area y CTA secundaria alineada.
+- [x] Reintegrar orden de contenido (pétalos, progreso, heartbeat) dentro de `mission-proposal-card` (`MissionsV2Board.tsx`).
+  - Se añadieron pétalos compactos, barra de progreso y estado de heartbeat siguiendo la jerarquía solicitada.
+
+
+## Hallazgos nuevos en implementación (Market vertical)
+- El dataset actual del market no expone una acción secundaria para cada propuesta. Se dejó un botón "Ver detalles" deshabilitado dentro de `mission-proposal-card` como placeholder visual para mantener la jerarquía solicitada hasta que exista la acción real.
 
 ## Riesgos y dependencias
 - El efecto 3D (`transform: translate/scale/rotate`) en `.missions-market-carousel__item` crea nuevos stacking contexts; cambios a overflow/sticky deben validar que no se rompa la animación.

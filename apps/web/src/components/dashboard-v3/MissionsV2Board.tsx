@@ -231,6 +231,7 @@ type CarouselDragState = {
   hasSwiped: boolean;
   pointerType: string;
   didPreventDefault: boolean;
+  pointerCaptured: boolean;
 };
 
 type PrimaryAction = {
@@ -1051,6 +1052,7 @@ export function MissionsV2Board({
     hasSwiped: false,
     pointerType: '',
     didPreventDefault: false,
+    pointerCaptured: false,
   });
   const slotStackWheelDelta = useRef<Record<string, number>>({});
   const previousActiveSlotIdRef = useRef<string | null>(null);
@@ -2208,7 +2210,7 @@ export function MissionsV2Board({
     (target: HTMLDivElement | null, options?: { cancel?: boolean }) => {
       const state = carouselDragStateRef.current;
       const pointerId = state.pointerId;
-      if (pointerId != null && target) {
+      if (pointerId != null && target && state.pointerCaptured) {
         try {
           target.releasePointerCapture(pointerId);
         } catch {
@@ -2229,6 +2231,7 @@ export function MissionsV2Board({
       state.isDragging = false;
       state.pointerType = '';
       state.didPreventDefault = false;
+      state.pointerCaptured = false;
       if (options?.cancel) {
         state.hasSwiped = false;
       }
@@ -2260,12 +2263,7 @@ export function MissionsV2Board({
       state.hasSwiped = false;
       state.pointerType = event.pointerType;
       state.didPreventDefault = false;
-
-      try {
-        event.currentTarget.setPointerCapture(event.pointerId);
-      } catch {
-        // ignore if pointer capture is not available
-      }
+      state.pointerCaptured = false;
     },
     [],
   );
@@ -2297,6 +2295,14 @@ export function MissionsV2Board({
 
         if (horizontalDominates) {
           state.isDragging = true;
+          if (!state.pointerCaptured) {
+            try {
+              event.currentTarget.setPointerCapture(event.pointerId);
+              state.pointerCaptured = true;
+            } catch {
+              // ignore if pointer capture is not available
+            }
+          }
           event.currentTarget.dataset.dragging = 'true';
           if (!state.didPreventDefault) {
             event.preventDefault();
@@ -2310,6 +2316,14 @@ export function MissionsV2Board({
       } else if (!state.didPreventDefault && absDeltaX > absDeltaY) {
         event.preventDefault();
         state.didPreventDefault = true;
+        if (!state.pointerCaptured) {
+          try {
+            event.currentTarget.setPointerCapture(event.pointerId);
+            state.pointerCaptured = true;
+          } catch {
+            // ignore if pointer capture is not available
+          }
+        }
       }
 
       const deltaX = event.clientX - state.lastX;
@@ -3202,6 +3216,7 @@ export function MissionsV2Board({
                       const details = SLOT_DETAILS[slot];
                       const rarity = getMarketRarity(slot);
                       const slotState = board.slots.find((slotEntry) => slotEntry.slot === slot);
+                      const slotMetrics = slotState ?? makeDemoSlot(slot, index + 1);
                       const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
                       const isFlipped = Boolean(flippedMarketCards[cardKey]);
                       const isActiveCard = index === activeMarketIndex;
@@ -3367,6 +3382,28 @@ export function MissionsV2Board({
                                       canActivateThisCard &&
                                       isActiveProposal &&
                                       !isProposalLocked;
+                                    const petalsTotal = slotMetrics.petals?.total ?? 0;
+                                    const petalsRemaining = slotMetrics.petals?.remaining ?? 0;
+                                    const showPetals = petalsTotal > 0;
+                                    const hasProgressData = slotMetrics.progress != null;
+                                    const rawProgressPercent = hasProgressData
+                                      ? slotMetrics.progress?.percent ?? 0
+                                      : 0;
+                                    const progressPercent = Number.isFinite(rawProgressPercent)
+                                      ? Math.min(Math.max(rawProgressPercent, 0), 100)
+                                      : 0;
+                                    const progressCurrent = hasProgressData
+                                      ? slotMetrics.progress?.current ?? 0
+                                      : 0;
+                                    const progressTarget = hasProgressData
+                                      ? slotMetrics.progress?.target ?? 0
+                                      : 0;
+                                    const showProgressMeter = hasProgressData;
+                                    const progressPercentRounded = Math.round(progressPercent);
+                                    const hasHeartbeatIndicator = slotMetrics.actions.some(
+                                      (action: MissionsV2Action) => action.type === 'heartbeat',
+                                    );
+                                    const heartbeatPending = !slotMetrics.heartbeat_today;
                                     const proposalKey = `${slot}-${proposal.id}-${
                                       isActiveProposal ? proposalRevision : 'static'
                                     }`;
@@ -3382,70 +3419,136 @@ export function MissionsV2Board({
                                         data-locked={isProposalLocked ? 'true' : undefined}
                                         role="group"
                                       >
-                                        <header className="mpc-header">
-                                          <span className="mpc-index">#{proposalIndex + 1}</span>
-                                          <div className="mpc-heading">
-                                            <h5>{isRealProposal ? proposal.name : proposal.title}</h5>
-                                            {(showActiveBadge || isProposalLocked || showAvailableBadge) && (
-                                              <div className="mpc-badges">
-                                                {showActiveBadge ? (
-                                                  <span className="mpc-badge mpc-badge--active">Activa</span>
-                                                ) : null}
-                                                {isProposalLocked && !showActiveBadge ? (
-                                                  <span className="mpc-badge">En progreso</span>
-                                                ) : null}
-                                                {showAvailableBadge ? (
-                                                  <span className="mpc-badge">Disponible</span>
-                                                ) : null}
+                                        <div className="mission-proposal-card__content">
+                                          <div className="mission-proposal-card__body">
+                                            <header className="mpc-header">
+                                              <span className="mpc-index">#{proposalIndex + 1}</span>
+                                              <div className="mpc-heading">
+                                                <h5>{isRealProposal ? proposal.name : proposal.title}</h5>
+                                                {(showActiveBadge || isProposalLocked || showAvailableBadge) && (
+                                                  <div className="mpc-badges">
+                                                    {showActiveBadge ? (
+                                                      <span className="mpc-badge mpc-badge--active">Activa</span>
+                                                    ) : null}
+                                                    {isProposalLocked && !showActiveBadge ? (
+                                                      <span className="mpc-badge">En progreso</span>
+                                                    ) : null}
+                                                    {showAvailableBadge ? (
+                                                      <span className="mpc-badge">Disponible</span>
+                                                    ) : null}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </header>
+                                            <p className="mpc-summary">{summaryText}</p>
+                                            <div className="mpc-stats">
+                                              <span className="mpc-stat mpc-stat--reward">
+                                                <span className="mpc-stat-label">Recompensa</span>
+                                                <span className="mpc-stat-value">{rewardPreview ?? '—'}</span>
+                                              </span>
+                                              <span className="mpc-stat mpc-stat--difficulty">
+                                                <span className="mpc-stat-label">Dificultad</span>
+                                                <span className="mpc-stat-value">{difficultyValue || '—'}</span>
+                                              </span>
+                                            </div>
+                                            {requirements.length > 0 && (
+                                              <ul className="mpc-req">
+                                                {requirements.map((itemLabel) => (
+                                                  <li key={`${proposal.id}-req-${itemLabel}`}>{itemLabel}</li>
+                                                ))}
+                                              </ul>
+                                            )}
+                                            {metadataEntries.length > 0 && (
+                                              <ul className="mpc-meta">
+                                                {metadataEntries.map((entryLabel) => (
+                                                  <li key={`${proposal.id}-meta-${entryLabel}`}>{entryLabel}</li>
+                                                ))}
+                                              </ul>
+                                            )}
+                                            {tags.length > 0 && (
+                                              <div className="mpc-tags">
+                                                {tags.map((tag) => (
+                                                  <span key={`${proposal.id}-tag-${tag}`}>{tag}</span>
+                                                ))}
                                               </div>
                                             )}
+                                            {showPetals ? (
+                                              <div className="mpc-petals">
+                                                <span className="mpc-petals-label">Pétalos</span>
+                                                <MissionPetalsMini
+                                                  slot={slotMetrics}
+                                                  highlight={isActiveProposal}
+                                                />
+                                                <span className="mpc-meter__detail">
+                                                  {petalsRemaining} / {petalsTotal}
+                                                </span>
+                                              </div>
+                                            ) : null}
+                                            {showProgressMeter ? (
+                                              <div className="mpc-meter">
+                                                <div className="mpc-meter__row">
+                                                  <span>Progreso</span>
+                                                  <span>{progressPercentRounded}%</span>
+                                                </div>
+                                                <div
+                                                  className="mpc-progress-bar"
+                                                  role="progressbar"
+                                                  aria-valuenow={progressPercentRounded}
+                                                  aria-valuemin={0}
+                                                  aria-valuemax={100}
+                                                  aria-valuetext={`${progressPercentRounded}% completado`}
+                                                >
+                                                  <span
+                                                    className="mpc-progress-bar__fill"
+                                                    style={{ width: `${progressPercent}%` }}
+                                                    aria-hidden="true"
+                                                  />
+                                                </div>
+                                                {progressTarget > 0 ? (
+                                                  <p className="mpc-meter__detail">
+                                                    {progressCurrent} / {progressTarget}
+                                                  </p>
+                                                ) : null}
+                                              </div>
+                                            ) : null}
+                                            {hasHeartbeatIndicator ? (
+                                              <div className="mpc-heartbeat">
+                                                <MissionHeartbeatStatus
+                                                  pending={heartbeatPending}
+                                                  highlight={isActiveProposal}
+                                                />
+                                                <span className="mpc-meter__detail">
+                                                  {heartbeatPending ? 'Pendiente' : 'Sellado'}
+                                                </span>
+                                              </div>
+                                            ) : null}
                                           </div>
-                                        </header>
-                                        <p className="mpc-summary">{summaryText}</p>
-                                        <div className="mpc-stats">
-                                          <span className="mpc-stat mpc-stat--reward">
-                                            <span className="mpc-stat-label">Recompensa</span>
-                                            <span className="mpc-stat-value">{rewardPreview ?? '—'}</span>
-                                          </span>
-                                          <span className="mpc-stat mpc-stat--difficulty">
-                                            <span className="mpc-stat-label">Dificultad</span>
-                                            <span className="mpc-stat-value">{difficultyValue || '—'}</span>
-                                          </span>
+                                          <div className="mission-proposal-card__footer">
+                                            <button
+                                              type="button"
+                                              className="mpc-cta"
+                                              disabled={!canActivateThisProposal}
+                                              onClick={(event) => {
+                                                event.stopPropagation();
+                                                if (canActivateThisProposal && isRealProposal) {
+                                                  handleActivateProposal(slot, proposal);
+                                                }
+                                              }}
+                                            >
+                                              {buttonLabel}
+                                            </button>
+                                            <button
+                                              type="button"
+                                              className="mpc-cta-secondary"
+                                              onClick={(event) => {
+                                                event.stopPropagation();
+                                              }}
+                                              disabled
+                                            >
+                                              Ver detalles
+                                            </button>
+                                          </div>
                                         </div>
-                                        {tags.length > 0 && (
-                                          <div className="mpc-tags">
-                                            {tags.map((tag) => (
-                                              <span key={`${proposal.id}-tag-${tag}`}>{tag}</span>
-                                            ))}
-                                          </div>
-                                        )}
-                                        {requirements.length > 0 && (
-                                          <ul className="mpc-req">
-                                            {requirements.map((itemLabel) => (
-                                              <li key={`${proposal.id}-req-${itemLabel}`}>{itemLabel}</li>
-                                            ))}
-                                          </ul>
-                                        )}
-                                        {metadataEntries.length > 0 && (
-                                          <ul className="mpc-meta">
-                                            {metadataEntries.map((entryLabel) => (
-                                              <li key={`${proposal.id}-meta-${entryLabel}`}>{entryLabel}</li>
-                                            ))}
-                                          </ul>
-                                        )}
-                                        <button
-                                          type="button"
-                                          className="mpc-cta"
-                                          disabled={!canActivateThisProposal}
-                                          onClick={(event) => {
-                                            event.stopPropagation();
-                                            if (canActivateThisProposal && isRealProposal) {
-                                              handleActivateProposal(slot, proposal);
-                                            }
-                                          }}
-                                        >
-                                          {buttonLabel}
-                                        </button>
                                       </article>
                                     );
                                   })}
