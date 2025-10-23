@@ -3184,6 +3184,9 @@ export function MissionsV2Board({
                                       : proposal.difficulty
                                       ? `${proposal.difficulty.slice(0, 1).toUpperCase()}${proposal.difficulty.slice(1)}`
                                       : '—';
+                                    const normalizedDifficulty = difficultyValue
+                                      ? difficultyValue.toLowerCase()
+                                      : null;
                                     const difficultyChipLabel = difficultyValue || '—';
                                     const isActiveProposal = proposalIndex === activeProposalIndex;
                                     const isProposalLocked = isRealProposal
@@ -3257,16 +3260,20 @@ export function MissionsV2Board({
                                                 )}
                                               </div>
                                             </header>
-                                            <p className="mpc-summary">{summaryText}</p>
-                                            <span className="mpc-difficulty">
-                                              <span className="mpc-difficulty__label">Dificultad</span>
-                                              <span className="mpc-difficulty__value">{difficultyChipLabel}</span>
-                                            </span>
-                                            <div className="mpc-stats">
-                                              <span className="mpc-stat mpc-stat--reward">
-                                                <span className="mpc-stat-label">Recompensa</span>
-                                                <span className="mpc-stat-value">{rewardPreview ?? '—'}</span>
+                                            <div className="mpc-summary">
+                                              <p className="mpc-summary__text">{summaryText}</p>
+                                              <span
+                                                className="mpc-difficulty-chip"
+                                                data-difficulty={normalizedDifficulty ?? undefined}
+                                                aria-label={`Dificultad: ${difficultyChipLabel}`}
+                                              >
+                                                <span className="mpc-difficulty-chip__label">Dificultad</span>
+                                                <span className="mpc-difficulty-chip__value">{difficultyChipLabel}</span>
                                               </span>
+                                            </div>
+                                            <div className="mpc-reward">
+                                              <span className="mpc-reward__label">Recompensa</span>
+                                              <span className="mpc-reward__value">{rewardPreview ?? '—'}</span>
                                             </div>
                                             {requirements.length > 0 && (
                                               <ul className="mpc-req">
@@ -3361,6 +3368,7 @@ export function MissionsV2Board({
                                                 event.stopPropagation();
                                               }}
                                               disabled
+                                              data-market-collapse-on-swap="true"
                                             >
                                               Ver detalles
                                             </button>
