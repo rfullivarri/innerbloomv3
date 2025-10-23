@@ -1363,6 +1363,7 @@
 
 .missions-active-carousel__card {
   width: 100%;
+  touch-action: pan-y pinch-zoom;
   pointer-events: none;
 }
 
@@ -2104,6 +2105,7 @@
   transition:
     box-shadow var(--motion-duration-base) var(--motion-ease-enter),
     border-color var(--motion-duration-base) var(--motion-ease-enter);
+  touch-action: pan-y pinch-zoom;
   cursor: pointer;
   overflow: hidden;
 }
