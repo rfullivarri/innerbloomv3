@@ -1084,23 +1084,55 @@
 }
 
 .missions-market-carousel__track {
-  @apply relative flex w-full items-center justify-center overflow-hidden py-3 sm:py-5;
-  min-height: clamp(520px, calc(100dvh - 5.5rem), 760px);
+  --market-carousel-padding-start: max(1.25rem, env(safe-area-inset-left));
+  --market-carousel-padding-end: max(1.25rem, env(safe-area-inset-right));
+  --market-carousel-gap: clamp(1rem, 4vw, 1.5rem);
+  --market-carousel-inline-available: calc(
+    100vw - var(--market-carousel-padding-start) - var(--market-carousel-padding-end)
+  );
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+  gap: var(--market-carousel-gap);
+  padding-block: 0.75rem;
+  padding-inline: var(--market-carousel-padding-start) var(--market-carousel-padding-end);
+  min-height: clamp(500px, calc(100dvh - 5rem), 760px);
   touch-action: pan-y pan-x;
   cursor: grab;
+  overflow-x: auto;
+  overflow-y: visible;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--market-carousel-padding-start) var(--market-carousel-padding-end);
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 
-.missions-market-carousel__track[data-dragging='true'] {
-  overflow: visible;
+.missions-market-carousel__track:active {
   cursor: grabbing;
 }
 
-[data-reduced-motion='true'] .missions-market-carousel__track[data-dragging='true'] {
-  overflow-x: auto;
+@media (min-width: 640px) {
+  .missions-market-carousel__track {
+    padding-block: 1.25rem;
+  }
+}
+
+.missions-market-carousel__track::-webkit-scrollbar {
+  display: none;
 }
 
 .missions-market-carousel__item {
-  @apply absolute left-1/2 top-1/2 flex w-full max-w-xs justify-center transition duration-500 ease-out md:max-w-sm;
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  width: clamp(260px, var(--market-carousel-inline-available), 360px);
+  max-width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  transition: opacity var(--motion-duration-base) var(--motion-ease-enter);
 }
 
 .missions-market-carousel__item[data-active='false'] {
@@ -1111,29 +1143,13 @@
   @apply opacity-100 saturate-100;
 }
 
+
 [data-reduced-motion='true'] .missions-market-carousel__track {
-  @apply relative flex min-h-0 items-stretch gap-5 overflow-x-auto px-4 py-5;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
-}
-
-[data-reduced-motion='true'] .missions-market-carousel__track::-webkit-scrollbar {
-  height: 6px;
-}
-
-[data-reduced-motion='true'] .missions-market-carousel__track::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-sky-400/35;
+  scroll-behavior: auto;
 }
 
 [data-reduced-motion='true'] .missions-market-carousel__item {
-  @apply static flex-none snap-center transition-none;
-  width: clamp(220px, 58vw, 320px);
-  transform: none !important;
-  opacity: 1 !important;
-}
-
-[data-reduced-motion='true'] .missions-market-carousel__item {
-  transition: opacity var(--motion-duration-base) var(--motion-ease-enter);
+  transition: none;
 }
 
 .missions-market-carousel__status {
@@ -2120,6 +2136,16 @@
   transition:
     opacity var(--motion-duration-base) var(--motion-ease-enter),
     transform var(--motion-duration-base) var(--motion-ease-enter);
+}
+
+@media (max-width: 400px) {
+  .missions-market-card__slot-chip {
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+  }
 }
 
 .missions-market-card__slot-chip[data-slot='main'] {

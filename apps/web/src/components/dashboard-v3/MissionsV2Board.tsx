@@ -8,7 +8,6 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
-  type PointerEvent as ReactPointerEvent,
   type SyntheticEvent,
   type UIEvent as ReactUIEvent,
 } from 'react';
@@ -216,23 +215,6 @@ type MarketProposalTransition = 'forward' | 'backward' | null;
 
 const DEFAULT_MISSION_ART_MODE: GameMode = 'Flow';
 
-const MARKET_CAROUSEL_DRAG_START_THRESHOLD = 10;
-const MARKET_CAROUSEL_STEP_THRESHOLD_MOUSE = 60;
-const MARKET_CAROUSEL_STEP_THRESHOLD_TOUCH = 40;
-
-type CarouselDragState = {
-  pointerId: number | null;
-  startX: number;
-  startY: number;
-  lastX: number;
-  lastY: number;
-  accumulatedX: number;
-  isDragging: boolean;
-  hasSwiped: boolean;
-  pointerType: string;
-  didPreventDefault: boolean;
-  pointerCaptured: boolean;
-};
 
 type PrimaryAction = {
   key: string;
@@ -1040,19 +1022,6 @@ export function MissionsV2Board({
     main: false,
     hunt: false,
     skill: false,
-  });
-  const carouselDragStateRef = useRef<CarouselDragState>({
-    pointerId: null,
-    startX: 0,
-    startY: 0,
-    lastX: 0,
-    lastY: 0,
-    accumulatedX: 0,
-    isDragging: false,
-    hasSwiped: false,
-    pointerType: '',
-    didPreventDefault: false,
-    pointerCaptured: false,
   });
   const slotStackWheelDelta = useRef<Record<string, number>>({});
   const previousActiveSlotIdRef = useRef<string | null>(null);
@@ -2003,18 +1972,24 @@ export function MissionsV2Board({
   );
 
   const scrollCarouselToIndex = useCallback(
-    (index: number) => {
-      if (!prefersReducedMotion) {
-        return;
-      }
-
+    (index: number, options?: ScrollIntoViewOptions) => {
       const container = carouselRef.current;
       if (!container) {
         return;
       }
 
       const element = container.querySelector<HTMLElement>(`[data-carousel-index='${index}']`);
-      element?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      if (!element) {
+        return;
+      }
+
+      const behavior = prefersReducedMotion ? 'auto' : 'smooth';
+      element.scrollIntoView({
+        behavior,
+        block: 'nearest',
+        inline: 'start',
+        ...options,
+      });
     },
     [prefersReducedMotion],
   );
@@ -2195,199 +2170,11 @@ export function MissionsV2Board({
 
   const handleMarketCardClick = useCallback(
     (slotKey: MissionsV2Slot['slot'], index: number) => {
-      if (carouselDragStateRef.current.hasSwiped) {
-        carouselDragStateRef.current.hasSwiped = false;
-        return;
-      }
-
       handleMarketCardToggle(slotKey, index);
-      carouselDragStateRef.current.hasSwiped = false;
     },
     [handleMarketCardToggle],
   );
 
-  const resetCarouselDragState = useCallback(
-    (target: HTMLDivElement | null, options?: { cancel?: boolean }) => {
-      const state = carouselDragStateRef.current;
-      const pointerId = state.pointerId;
-      if (pointerId != null && target && state.pointerCaptured) {
-        try {
-          target.releasePointerCapture(pointerId);
-        } catch {
-          // ignore if pointer capture is not available
-        }
-      }
-
-      if (target) {
-        delete target.dataset.dragging;
-      }
-
-      state.pointerId = null;
-      state.startX = 0;
-      state.startY = 0;
-      state.lastX = 0;
-      state.lastY = 0;
-      state.accumulatedX = 0;
-      state.isDragging = false;
-      state.pointerType = '';
-      state.didPreventDefault = false;
-      state.pointerCaptured = false;
-      if (options?.cancel) {
-        state.hasSwiped = false;
-      }
-    },
-    [],
-  );
-
-  const handleCarouselPointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
-      const inStack = (event.target as Element | null)?.closest(
-        '.missions-market-card__stack',
-      );
-      if (inStack) {
-        return;
-      }
-
-      if (event.pointerType === 'mouse' && event.button !== 0) {
-        return;
-      }
-
-      const state = carouselDragStateRef.current;
-      state.pointerId = event.pointerId;
-      state.startX = event.clientX;
-      state.startY = event.clientY;
-      state.lastX = event.clientX;
-      state.lastY = event.clientY;
-      state.accumulatedX = 0;
-      state.isDragging = false;
-      state.hasSwiped = false;
-      state.pointerType = event.pointerType;
-      state.didPreventDefault = false;
-      state.pointerCaptured = false;
-    },
-    [],
-  );
-
-  const handleCarouselPointerMove = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
-      const state = carouselDragStateRef.current;
-      if (state.pointerId !== event.pointerId) {
-        return;
-      }
-
-      const totalDeltaX = event.clientX - state.startX;
-      const totalDeltaY = event.clientY - state.startY;
-      const absDeltaX = Math.abs(totalDeltaX);
-      const absDeltaY = Math.abs(totalDeltaY);
-
-      if (!state.isDragging) {
-        if (
-          absDeltaY > absDeltaX * 1.2 &&
-          (state.pointerType === 'touch' || state.pointerType === 'pen')
-        ) {
-          state.lastX = event.clientX;
-          state.lastY = event.clientY;
-          return;
-        }
-
-        const horizontalDominates =
-          absDeltaX >= MARKET_CAROUSEL_DRAG_START_THRESHOLD && absDeltaX > absDeltaY;
-
-        if (horizontalDominates) {
-          state.isDragging = true;
-          if (!state.pointerCaptured) {
-            try {
-              event.currentTarget.setPointerCapture(event.pointerId);
-              state.pointerCaptured = true;
-            } catch {
-              // ignore if pointer capture is not available
-            }
-          }
-          event.currentTarget.dataset.dragging = 'true';
-          if (!state.didPreventDefault) {
-            event.preventDefault();
-            state.didPreventDefault = true;
-          }
-        } else {
-          state.lastX = event.clientX;
-          state.lastY = event.clientY;
-          return;
-        }
-      } else if (!state.didPreventDefault && absDeltaX > absDeltaY) {
-        event.preventDefault();
-        state.didPreventDefault = true;
-        if (!state.pointerCaptured) {
-          try {
-            event.currentTarget.setPointerCapture(event.pointerId);
-            state.pointerCaptured = true;
-          } catch {
-            // ignore if pointer capture is not available
-          }
-        }
-      }
-
-      const deltaX = event.clientX - state.lastX;
-      state.lastX = event.clientX;
-      state.lastY = event.clientY;
-      state.accumulatedX += deltaX;
-
-      const threshold =
-        state.pointerType === 'touch' || state.pointerType === 'pen'
-          ? MARKET_CAROUSEL_STEP_THRESHOLD_TOUCH
-          : MARKET_CAROUSEL_STEP_THRESHOLD_MOUSE;
-
-      while (state.accumulatedX >= threshold) {
-        stepMarketCarousel(-1);
-        state.accumulatedX -= threshold;
-        state.hasSwiped = true;
-      }
-
-      while (state.accumulatedX <= -threshold) {
-        stepMarketCarousel(1);
-        state.accumulatedX += threshold;
-        state.hasSwiped = true;
-      }
-    },
-    [stepMarketCarousel],
-  );
-
-  const handleCarouselPointerUp = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
-      const state = carouselDragStateRef.current;
-      if (state.pointerId !== event.pointerId) {
-        return;
-      }
-
-      if (state.isDragging && state.hasSwiped && !state.didPreventDefault) {
-        event.preventDefault();
-      }
-
-      resetCarouselDragState(event.currentTarget);
-    },
-    [resetCarouselDragState],
-  );
-
-  const handleCarouselPointerLeave = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
-      if (carouselDragStateRef.current.pointerId == null) {
-        return;
-      }
-
-      resetCarouselDragState(event.currentTarget, { cancel: true });
-    },
-    [resetCarouselDragState],
-  );
-
-  const handleCarouselPointerCancel = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
-      if (carouselDragStateRef.current.pointerId !== event.pointerId) {
-        return;
-      }
-
-      resetCarouselDragState(event.currentTarget, { cancel: true });
-    },
-    [resetCarouselDragState],
-  );
 
   const handleMarketCardKeyDown = useCallback(
     (event: ReactKeyboardEvent<HTMLElement>, slotKey: MissionsV2Slot['slot'], index: number) => {
@@ -2585,10 +2372,15 @@ export function MissionsV2Board({
   }, [activeSlotIndex]);
 
   useEffect(() => {
-    if (!prefersReducedMotion) {
-      return;
-    }
+    setExpandedSlots((prev) => {
+      if (Object.keys(prev).length === 0) {
+        return prev;
+      }
+      return {};
+    });
+  }, [activeMarketIndex]);
 
+  useEffect(() => {
     if (viewMode !== 'market') {
       return;
     }
@@ -2638,7 +2430,7 @@ export function MissionsV2Board({
         window.cancelAnimationFrame(raf);
       }
     };
-  }, [activeMarketIndex, viewMode, marketCards, prefersReducedMotion]);
+  }, [activeMarketIndex, viewMode, marketCards]);
 
   useEffect(() => {
     if (viewMode !== 'market') {
@@ -3205,11 +2997,6 @@ export function MissionsV2Board({
                     ref={carouselRef}
                     role="listbox"
                     aria-label="Marketplace de misiones disponibles"
-                    onPointerDown={handleCarouselPointerDown}
-                    onPointerMove={handleCarouselPointerMove}
-                    onPointerUp={handleCarouselPointerUp}
-                    onPointerLeave={handleCarouselPointerLeave}
-                    onPointerCancel={handleCarouselPointerCancel}
                   >
                     {marketCards.map((item, index) => {
                       const { slot, proposals, key: cardKey } = item;
@@ -3242,40 +3029,6 @@ export function MissionsV2Board({
                         ? `${activeProposalTitle}${activeSummary ? `. ${activeSummary}` : ''}`
                         : `Sin propuestas disponibles para ${details.label}`;
                       const canActivateThisCard = canActivate && isActiveCard;
-                      const totalCards = marketCards.length;
-                      let relativeOffset = index - activeMarketIndex;
-                      if (totalCards > 1) {
-                        const half = totalCards / 2;
-                        if (relativeOffset > half) {
-                          relativeOffset -= totalCards;
-                        } else if (relativeOffset < -half) {
-                          relativeOffset += totalCards;
-                        }
-                      }
-                      const maxVisibleOffset = Math.min(2, Math.max(totalCards - 1, 1));
-                      const limitedOffset = Math.max(
-                        Math.min(relativeOffset, maxVisibleOffset),
-                        -maxVisibleOffset,
-                      );
-                      const angle = (Math.PI / 8) * limitedOffset;
-                      const depth = Math.cos(angle);
-                      const translateX = Math.sin(angle) * 34;
-                      const translateY = (1 - depth) * 60;
-                      const scale = 0.82 + 0.14 * depth;
-                      const opacity = 0.5 + 0.5 * depth;
-                      const rotate = Math.sin(angle) * -4.5;
-                      const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
-                      const itemStyle: CSSProperties = prefersReducedMotion
-                        ? {
-                            transform: 'none',
-                            opacity: 1,
-                            zIndex: isActiveCard ? 2 : 1,
-                          }
-                        : {
-                            transform: `translate(-50%, -50%) translateX(${translateX}%) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
-                            opacity,
-                            zIndex,
-                          };
 
                       return (
                         <div
@@ -3283,7 +3036,6 @@ export function MissionsV2Board({
                           className="missions-market-carousel__item"
                           data-carousel-index={index}
                           data-active={isActiveCard ? 'true' : 'false'}
-                          style={itemStyle}
                         >
                           <article
                             className="missions-market-card"
