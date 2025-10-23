@@ -123,3 +123,6 @@ Carrusel V
 - Ninguna proposal requiere scroll interno adicional para ver CTA + bloques esenciales (resumen, recompensa, dificultad, progreso) en viewport móvil estándar (iPhone 12 mini ~780px alto).
 - RECOMPENSA y DIFICULTAD ocupan una única fila compacta (sin box-shadow expansivo) y permiten que CTA quede visible sin desplazamiento extra.
 - CTA principal queda por encima del bottom-nav/safe-area en todo momento y responde al tap sin cerrar la carta involuntariamente.
+
+9. Hallazgos nuevos en implementación (V)
+- Se implementó un colapso automático de expansiones al cambiar de proposal. Los elementos desplegables dentro de `mission-proposal-card` deben marcarse con `data-proposal-collapsible` (o usar `<details>` nativo) para cerrar su estado cuando se navega a otra propuesta.

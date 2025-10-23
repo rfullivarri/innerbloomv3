@@ -1023,6 +1023,11 @@ export function MissionsV2Board({
     hunt: false,
     skill: false,
   });
+  const previousActiveProposalBySlotRef = useRef<Record<MissionsV2Slot['slot'], number>>({
+    main: 0,
+    hunt: 0,
+    skill: 0,
+  });
   const slotStackWheelDelta = useRef<Record<string, number>>({});
   const previousActiveSlotIdRef = useRef<string | null>(null);
 
@@ -1151,6 +1156,7 @@ export function MissionsV2Board({
   useEffect(() => {
     setActiveMarketProposalBySlot((prev) => {
       let changed = false;
+      const updatedSlots: MissionsV2Slot['slot'][] = [];
       const next: Record<MissionsV2Slot['slot'], number> = {
         main: prev.main ?? 0,
         hunt: prev.hunt ?? 0,
@@ -1162,12 +1168,20 @@ export function MissionsV2Board({
         const safeIndex = proposals.length > 0 ? Math.min(current, proposals.length - 1) : 0;
         if (safeIndex !== current) {
           next[entry.slot] = safeIndex;
+          updatedSlots.push(entry.slot);
           changed = true;
         }
       }
-      return changed ? next : prev;
+      if (!changed) {
+        return prev;
+      }
+      updatedSlots.forEach((slotKey) => {
+        collapseMarketProposalExpansions(slotKey);
+        previousActiveProposalBySlotRef.current[slotKey] = next[slotKey] ?? 0;
+      });
+      return next;
     });
-  }, [orderedMarketSlots]);
+  }, [orderedMarketSlots, collapseMarketProposalExpansions]);
 
   useEffect(() => {
     const activeCard = marketCards[activeMarketIndex] ?? null;
@@ -1235,6 +1249,31 @@ export function MissionsV2Board({
     [location.hash, location.pathname, location.search, navigate],
   );
 
+  const collapseMarketProposalExpansions = useCallback(
+    (slotKey: MissionsV2Slot['slot']) => {
+      const container = marketStackRefs.current[slotKey];
+      if (!container) {
+        return;
+      }
+
+      const collapsibleSelectors =
+        '[data-proposal-collapsible][aria-expanded="true"], [data-proposal-collapsible][data-expanded="true"], [data-market-collapse-on-swap="true"][aria-expanded="true"], [data-market-collapse-on-swap="true"][data-expanded="true"]';
+      const expandedElements = container.querySelectorAll<HTMLElement>(collapsibleSelectors);
+      expandedElements.forEach((element) => {
+        element.setAttribute('aria-expanded', 'false');
+        if (element.dataset.expanded === 'true') {
+          element.dataset.expanded = 'false';
+        }
+      });
+
+      const openDetails = container.querySelectorAll('details[open]');
+      openDetails.forEach((detailsElement) => {
+        detailsElement.removeAttribute('open');
+      });
+    },
+    [],
+  );
+
   const handleMarketProposalStep = useCallback(
     (slotKey: MissionsV2Slot['slot'], delta: number) => {
       const proposals = renderMarketBySlot[slotKey] ?? [];
@@ -1266,6 +1305,9 @@ export function MissionsV2Board({
           proposalId: proposals[next]?.id ?? null,
         });
 
+        collapseMarketProposalExpansions(slotKey);
+        previousActiveProposalBySlotRef.current[slotKey] = next;
+
         return { ...prev, [slotKey]: next };
       });
     },
@@ -1273,6 +1315,7 @@ export function MissionsV2Board({
       renderMarketBySlot,
       setMarketProposalTransitionBySlot,
       setMarketProposalRevisionBySlot,
+      collapseMarketProposalExpansions,
       userId,
     ],
   );
@@ -1283,7 +1326,7 @@ export function MissionsV2Board({
         return;
       }
 
-      const atTop = element.scrollTop <= 0;
+      const atTop = element.scrollTop <= 1;
       const atBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 1;
 
       setMarketStackFadeBySlot((prev) => {
@@ -1306,7 +1349,12 @@ export function MissionsV2Board({
         return;
       }
       const isTrusted = event.nativeEvent.isTrusted;
-      const targetPosition = container.scrollTop + container.clientHeight / 2;
+      let containerPaddingTop = 0;
+      if (typeof window !== 'undefined') {
+        const style = window.getComputedStyle(container);
+        containerPaddingTop = Number.parseFloat(style.paddingTop) || 0;
+      }
+      const targetPosition = container.scrollTop + containerPaddingTop;
       const children = Array.from(container.children) as HTMLElement[];
       if (children.length === 0) {
         return;
@@ -1318,9 +1366,7 @@ export function MissionsV2Board({
       for (let index = 0; index < children.length; index += 1) {
         const child = children[index];
         const itemTop = child.offsetTop;
-        const itemHeight = child.clientHeight;
-        const itemCenter = itemTop + itemHeight / 2;
-        const distance = Math.abs(itemCenter - targetPosition);
+        const distance = Math.abs(itemTop - targetPosition);
         if (distance < closestDistance) {
           closestDistance = distance;
           closestIndex = index;
@@ -1359,6 +1405,9 @@ export function MissionsV2Board({
           });
         }
 
+        collapseMarketProposalExpansions(slotKey);
+        previousActiveProposalBySlotRef.current[slotKey] = closestIndex;
+
         return { ...prev, [slotKey]: closestIndex };
       });
     },
@@ -1367,6 +1416,7 @@ export function MissionsV2Board({
       setMarketProposalRevisionBySlot,
       setMarketProposalTransitionBySlot,
       updateMarketStackFade,
+      collapseMarketProposalExpansions,
       userId,
     ],
   );
@@ -1425,13 +1475,19 @@ export function MissionsV2Board({
       }
 
       const targetIndex = activeMarketProposalBySlot[slotKey] ?? 0;
+      previousActiveProposalBySlotRef.current[slotKey] = targetIndex;
       const targetChild = container.children.item(targetIndex) as HTMLElement | null;
       if (!targetChild) {
         updateMarketStackFade(slotKey, container);
         return;
       }
 
-      const targetTop = targetChild.offsetTop;
+      let paddingTop = 0;
+      if (typeof window !== 'undefined') {
+        const containerStyle = window.getComputedStyle(container);
+        paddingTop = Number.parseFloat(containerStyle.paddingTop) || 0;
+      }
+      const targetTop = Math.max(targetChild.offsetTop - paddingTop, 0);
       if (Math.abs(container.scrollTop - targetTop) <= 1) {
         updateMarketStackFade(slotKey, container);
         return;
@@ -2162,10 +2218,18 @@ export function MissionsV2Board({
         if ((prev[slotKey] ?? 0) === 0) {
           return prev;
         }
+        collapseMarketProposalExpansions(slotKey);
+        previousActiveProposalBySlotRef.current[slotKey] = 0;
         return { ...prev, [slotKey]: 0 };
       });
     },
-    [activeMarketIndex, flippedMarketCards, scrollCarouselToIndex, userId],
+    [
+      activeMarketIndex,
+      collapseMarketProposalExpansions,
+      flippedMarketCards,
+      scrollCarouselToIndex,
+      userId,
+    ],
   );
 
   const handleMarketCardClick = useCallback(
@@ -3120,6 +3184,7 @@ export function MissionsV2Board({
                                       : proposal.difficulty
                                       ? `${proposal.difficulty.slice(0, 1).toUpperCase()}${proposal.difficulty.slice(1)}`
                                       : '—';
+                                    const difficultyChipLabel = difficultyValue || '—';
                                     const isActiveProposal = proposalIndex === activeProposalIndex;
                                     const isProposalLocked = isRealProposal
                                       ? Boolean(proposal.locked ?? proposal.isActive)
@@ -3193,14 +3258,14 @@ export function MissionsV2Board({
                                               </div>
                                             </header>
                                             <p className="mpc-summary">{summaryText}</p>
+                                            <span className="mpc-difficulty">
+                                              <span className="mpc-difficulty__label">Dificultad</span>
+                                              <span className="mpc-difficulty__value">{difficultyChipLabel}</span>
+                                            </span>
                                             <div className="mpc-stats">
                                               <span className="mpc-stat mpc-stat--reward">
                                                 <span className="mpc-stat-label">Recompensa</span>
                                                 <span className="mpc-stat-value">{rewardPreview ?? '—'}</span>
-                                              </span>
-                                              <span className="mpc-stat mpc-stat--difficulty">
-                                                <span className="mpc-stat-label">Dificultad</span>
-                                                <span className="mpc-stat-value">{difficultyValue || '—'}</span>
                                               </span>
                                             </div>
                                             {requirements.length > 0 && (
