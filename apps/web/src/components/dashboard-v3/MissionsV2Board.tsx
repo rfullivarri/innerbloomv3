@@ -1419,13 +1419,11 @@ export function MissionsV2Board({
       const isTrusted = event.nativeEvent.isTrusted;
       let containerPaddingTop = 0;
       let containerHeaderOffset = 0;
-      let computedStyle: CSSStyleDeclaration | null = null;
-      const header = marketStackHeaderRefs.current[slotKey];
       if (typeof window !== 'undefined') {
-        computedStyle = window.getComputedStyle(container);
-        containerPaddingTop = Number.parseFloat(computedStyle.paddingTop) || 0;
+        const style = window.getComputedStyle(container);
+        containerPaddingTop = Number.parseFloat(style.paddingTop) || 0;
         const headerHeightValue = Number.parseFloat(
-          computedStyle.getPropertyValue('--market-stack-header-height'),
+          style.getPropertyValue('--market-stack-header-height'),
         );
         if (Number.isFinite(headerHeightValue)) {
           containerHeaderOffset = headerHeightValue;
@@ -1435,51 +1433,6 @@ export function MissionsV2Board({
       const children = Array.from(container.children) as HTMLElement[];
       if (children.length === 0) {
         return;
-      }
-
-      if (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined') {
-        const stackRect = container.getBoundingClientRect();
-        const headerRect = header?.getBoundingClientRect();
-        const activeProposal = container.querySelector<HTMLElement>(
-          '.missions-market-card__proposal[data-active="true"]',
-        );
-        const activeRect = activeProposal?.getBoundingClientRect();
-        const activeRelativeTop = activeRect ? activeRect.top - stackRect.top : null;
-
-        const debugRows = [
-          {
-            element: 'stack',
-            top: Number(stackRect.top.toFixed(2)),
-            bottom: Number(stackRect.bottom.toFixed(2)),
-          },
-          {
-            element: 'back-header',
-            height: headerRect ? Number(headerRect.height.toFixed(2)) : null,
-          },
-          {
-            element: 'active-proposal',
-            relativeTop: activeRelativeTop !== null ? Number(activeRelativeTop.toFixed(2)) : null,
-          },
-        ];
-
-        console.table(debugRows);
-
-        if (computedStyle) {
-          const activeStyles =
-            activeProposal && window.getComputedStyle(activeProposal);
-          console.debug('missions-market stack snap config', {
-            scrollSnapType: computedStyle.scrollSnapType,
-            scrollPaddingTop: computedStyle.scrollPaddingTop,
-            scrollPaddingBottom: computedStyle.scrollPaddingBottom,
-            webkitOverflowScrolling: computedStyle.webkitOverflowScrolling,
-          });
-          if (activeStyles) {
-            console.debug('missions-market stack active snap settings', {
-              scrollSnapAlign: activeStyles.scrollSnapAlign,
-              scrollSnapStop: activeStyles.scrollSnapStop,
-            });
-          }
-        }
       }
 
       let closestIndex = 0;
