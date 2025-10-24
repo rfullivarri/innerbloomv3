@@ -2228,7 +2228,7 @@
   margin-top: clamp(0.3rem, 1.3vw, 0.5rem);
   min-height: 0;
   --market-stack-padding-inline: clamp(0.3rem, 1.4vw, 0.55rem);
-  --market-stack-padding-block: clamp(0.57rem, 1.7vw, 0.73rem);
+  --market-stack-padding-block: clamp(0.63rem, 1.3vw, 0.77rem);
   --market-stack-safe-area: max(env(safe-area-inset-bottom, 0px), 0.5rem);
   --market-stack-header-height: 32px;
   padding: var(--market-stack-padding-block) var(--market-stack-padding-inline);
