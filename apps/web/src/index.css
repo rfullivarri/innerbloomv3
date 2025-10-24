@@ -1087,7 +1087,7 @@
 .missions-market-carousel__track {
   --market-carousel-shell-top: var(--missions-shell-topbar-height, 56px);
   --market-carousel-shell-bottom: var(--missions-shell-bottomnav-height, 72px);
-  --market-carousel-track-padding-block: clamp(0.75rem, 2.4vw, 1.25rem);
+  --market-carousel-track-padding-block: clamp(0.55rem, 1.8vw, 1rem);
   --market-carousel-safe-gap: 24px;
   --missions-market-carousel-fallback: min(
     clamp(26rem, 74dvh, 38rem),
@@ -1283,7 +1283,7 @@
       100dvh - var(--missions-carousel-shell-top) - var(--missions-carousel-shell-bottom) - var(--missions-carousel-safe-gap)
     )
   );
-  @apply relative flex w-full items-center justify-center overflow-hidden py-4 sm:py-6;
+  @apply relative flex w-full items-center justify-center overflow-hidden py-3 sm:py-5;
   min-height: var(--missions-active-carousel-height, var(--missions-active-carousel-fallback));
 }
 
