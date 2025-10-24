@@ -3685,6 +3685,37 @@ export function MissionsV2Board({
                                     const buttonLabel = isProposalLocked
                                       ? 'Misión en progreso'
                                       : `Activar en slot ${details.label}`;
+                                    const petalsRemaining = slotMetrics.petals.remaining ?? 0;
+                                    const petalsTotal = slotMetrics.petals.total ?? 0;
+                                    const showPetals = petalsTotal > 0;
+                                    const heartbeatPending = !slotMetrics.heartbeat_today;
+                                    const metaSegments: Array<{ key: string; content: ReactNode }> = [];
+                                    const countdownLabel = formatCountdown(slotMetrics.countdown?.label ?? '');
+
+                                    if (countdownLabel) {
+                                      metaSegments.push({
+                                        key: 'countdown',
+                                        content: (
+                                          <span className="mpc-inline-meta__segment">
+                                            <span className="mpc-inline-meta__label">Cuenta regresiva</span>
+                                            <span className="mpc-inline-meta__value">{countdownLabel}</span>
+                                          </span>
+                                        ),
+                                      });
+                                    }
+
+                                    metaSegments.push({
+                                      key: 'heartbeat',
+                                      content: (
+                                        <span className="mpc-inline-meta__segment">
+                                          <span className="mpc-inline-meta__label">Heartbeat</span>
+                                          <span className="mpc-inline-meta__value">
+                                            {heartbeatPending ? 'Pendiente' : 'Registrado'}
+                                          </span>
+                                        </span>
+                                      ),
+                                    });
+
                                     return (
                                       <article
                                         key={proposalKey}
