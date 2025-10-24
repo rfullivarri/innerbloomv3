@@ -1094,22 +1094,22 @@
     --missions-active-carousel-height,
     var(--missions-active-carousel-default-height)
   );
+  --market-carousel-shell-top: var(--missions-shell-topbar-height, 56px);
+  --market-carousel-shell-bottom: var(--missions-shell-bottomnav-height, 72px);
   --market-carousel-track-padding-block: clamp(0.75rem, 2.4vw, 1.25rem);
-  @apply relative flex w-full items-stretch gap-6 overflow-x-auto px-5 py-[var(--market-carousel-track-padding-block)] sm:px-8;
+  --market-carousel-available-height: min(
+    clamp(70dvh, 73dvh, 76dvh),
+    calc(100dvh - var(--market-carousel-shell-top) - var(--market-carousel-shell-bottom) - 24px)
+  );
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding-block: var(--market-carousel-track-padding-block);
   min-height: var(--missions-market-carousel-height);
   touch-action: pan-y;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: calc(env(safe-area-inset-left, 0px) + 1.5rem);
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
-}
-
-.missions-market-carousel__track::-webkit-scrollbar {
-  height: 6px;
-}
-
-.missions-market-carousel__track::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-slate-400/35;
+  overflow: visible;
 }
 
 @media (max-width: 480px) {
@@ -1119,15 +1119,26 @@
       calc((100dvh - 140px) * 1.8),
       756px
     );
-    scroll-padding-inline: calc(env(safe-area-inset-left, 0px) + 1.25rem);
   }
 }
 
+[data-reduced-motion='true'] .missions-market-carousel__track {
+  padding-block: var(--market-carousel-track-padding-block);
+  scroll-padding-inline: 48%;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+[data-reduced-motion='true'] .missions-market-carousel__track::-webkit-scrollbar {
+  height: 6px;
+}
+
+[data-reduced-motion='true'] .missions-market-carousel__track::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-slate-400/35;
+}
+
 .missions-market-carousel__item {
-  @apply relative flex h-full flex-none transition-opacity duration-300 ease-out;
-  width: clamp(260px, 72vw, 360px);
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
+  transition: opacity var(--motion-duration-base) var(--motion-ease-enter);
 }
 
 .missions-market-carousel__item[data-active='false'] {
@@ -1136,6 +1147,11 @@
 
 .missions-market-carousel__item[data-active='true'] {
   @apply opacity-100 saturate-100;
+}
+
+
+[data-reduced-motion='true'] .missions-market-carousel__track {
+  scroll-behavior: auto;
 }
 
 .missions-market-carousel__status {
@@ -1258,31 +1274,15 @@
     calc((100dvh - 160px) * 1.8),
     864px
   );
-  @apply relative flex w-full items-stretch gap-5 overflow-x-auto px-5 py-5 sm:px-8 sm:py-6;
+  @apply relative flex w-full items-center justify-center overflow-hidden py-4 sm:py-6;
   min-height: var(
     --missions-active-carousel-height,
     var(--missions-active-carousel-default-height)
   );
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: calc(env(safe-area-inset-left, 0px) + 1.5rem);
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
-  touch-action: pan-y;
-}
-
-.missions-active-carousel__track::-webkit-scrollbar {
-  height: 6px;
-}
-
-.missions-active-carousel__track::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-slate-400/35;
 }
 
 .missions-active-carousel__item {
-  @apply relative flex h-full flex-none cursor-pointer justify-center transition-opacity duration-300 ease-out;
-  width: clamp(240px, 68vw, 320px);
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
+  @apply absolute left-1/2 top-1/2 flex w-full max-w-xs cursor-pointer justify-center transition duration-500 ease-out md:max-w-sm;
 }
 
 .missions-active-carousel__item[data-active='false'] {
@@ -1300,8 +1300,32 @@
       calc((100dvh - 140px) * 1.8),
       756px
     );
-    scroll-padding-inline: calc(env(safe-area-inset-left, 0px) + 1.25rem);
   }
+}
+
+[data-reduced-motion='true'] .missions-active-carousel__track {
+  @apply relative flex min-h-0 items-stretch gap-5 overflow-x-auto px-4 py-5;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+
+[data-reduced-motion='true'] .missions-active-carousel__track::-webkit-scrollbar {
+  height: 6px;
+}
+
+[data-reduced-motion='true'] .missions-active-carousel__track::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-slate-400/35;
+}
+
+[data-reduced-motion='true'] .missions-active-carousel__item {
+  @apply static flex-none snap-center transition-none;
+  width: clamp(240px, 68vw, 320px);
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+[data-reduced-motion='true'] .missions-active-carousel__item {
+  transition: opacity var(--motion-duration-base) var(--motion-ease-enter);
 }
 
 .missions-active-carousel__card {
@@ -1311,6 +1335,10 @@
 
 .missions-active-carousel__item[data-active='true'] .missions-active-carousel__card {
   pointer-events: auto;
+}
+
+[data-reduced-motion='true'] .missions-active-carousel__item {
+  transition: opacity var(--motion-duration-base) var(--motion-ease-enter);
 }
 
 .missions-active-carousel__status {
