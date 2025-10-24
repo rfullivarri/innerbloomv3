@@ -1,4 +1,5 @@
 import {
+  Fragment,
   useCallback,
   useEffect,
   useId,
@@ -8,6 +9,7 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
   type SyntheticEvent,
   type UIEvent as ReactUIEvent,
 } from 'react';
@@ -3676,13 +3678,6 @@ export function MissionsV2Board({
                                       canActivateThisCard &&
                                       isActiveProposal &&
                                       !isProposalLocked;
-                                    const petalsTotal = slotMetrics.petals?.total ?? 0;
-                                    const petalsRemaining = slotMetrics.petals?.remaining ?? 0;
-                                    const showPetals = petalsTotal > 0;
-                                    const hasHeartbeatIndicator = slotMetrics.actions.some(
-                                      (action: MissionsV2Action) => action.type === 'heartbeat',
-                                    );
-                                    const heartbeatPending = !slotMetrics.heartbeat_today;
                                     const proposalKey = `${slot}-${proposal.id}-${
                                       isActiveProposal ? proposalRevision : 'static'
                                     }`;
@@ -3776,16 +3771,19 @@ export function MissionsV2Board({
                                                 </span>
                                               </div>
                                             ) : null}
-                                            {hasHeartbeatIndicator ? (
-                                              <div className="mpc-heartbeat">
-                                                <MissionHeartbeatStatus
-                                                  pending={heartbeatPending}
-                                                  highlight={isActiveProposal}
-                                                />
-                                                <span className="mpc-meter__detail">
-                                                  {heartbeatPending ? 'Pendiente' : 'Sellado'}
-                                                </span>
-                                              </div>
+                                            {metaSegments.length > 0 ? (
+                                              <ul className="mpc-inline-meta">
+                                                <li>
+                                                  {metaSegments.map((segment, segmentIndex) => (
+                                                    <Fragment key={`${proposal.id}-${segment.key}`}>
+                                                      {segmentIndex > 0 ? (
+                                                        <span className="mpc-inline-meta__separator">·</span>
+                                                      ) : null}
+                                                      {segment.content}
+                                                    </Fragment>
+                                                  ))}
+                                                </li>
+                                              </ul>
                                             ) : null}
                                           </div>
                                           <div className="mission-proposal-card__footer">
