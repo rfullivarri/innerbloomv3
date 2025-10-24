@@ -2102,6 +2102,9 @@ export function MissionsV2Board({
     ],
   );
 
+  const carouselPointerDownRef = useRef(false);
+  const carouselPreventClickRef = useRef(false);
+
   const scrollCarouselToIndex = useCallback(
     (index: number, options?: ScrollIntoViewOptions) => {
       const container = carouselRef.current;
@@ -2114,12 +2117,16 @@ export function MissionsV2Board({
         return;
       }
 
-      const behavior = prefersReducedMotion ? 'auto' : 'smooth';
-      element.scrollIntoView({
+      const behavior = options?.behavior ?? (prefersReducedMotion ? 'auto' : 'smooth');
+      const containerWidth = container.clientWidth;
+      const elementWidth = element.clientWidth;
+      const targetOffset = element.offsetLeft - (containerWidth - elementWidth) / 2;
+      const maxScroll = container.scrollWidth - containerWidth;
+      const nextScrollLeft = Math.min(Math.max(targetOffset, 0), Math.max(maxScroll, 0));
+
+      container.scrollTo({
+        left: nextScrollLeft,
         behavior,
-        block: 'nearest',
-        inline: 'center',
-        ...options,
       });
     },
     [prefersReducedMotion],
@@ -2309,6 +2316,10 @@ export function MissionsV2Board({
 
   const handleMarketCardClick = useCallback(
     (slotKey: MissionsV2Slot['slot'], index: number) => {
+      if (carouselPreventClickRef.current) {
+        carouselPreventClickRef.current = false;
+        return;
+      }
       handleMarketCardToggle(slotKey, index);
     },
     [handleMarketCardToggle],
@@ -2520,6 +2531,42 @@ export function MissionsV2Board({
   }, [activeMarketIndex]);
 
   useEffect(() => {
+    const container = carouselRef.current;
+    if (!container) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) {
+        return;
+      }
+      carouselPointerDownRef.current = true;
+      carouselPreventClickRef.current = false;
+    };
+
+    const resetPointerState = () => {
+      carouselPointerDownRef.current = false;
+    };
+
+    container.addEventListener('pointerdown', handlePointerDown);
+    container.addEventListener('pointerup', resetPointerState);
+    container.addEventListener('pointercancel', resetPointerState);
+    container.addEventListener('pointerleave', resetPointerState);
+
+    return () => {
+      container.removeEventListener('pointerdown', handlePointerDown);
+      container.removeEventListener('pointerup', resetPointerState);
+      container.removeEventListener('pointercancel', resetPointerState);
+      container.removeEventListener('pointerleave', resetPointerState);
+    };
+  }, []);
+
+  useEffect(() => {
+    carouselPreventClickRef.current = false;
+    carouselPointerDownRef.current = false;
+  }, [viewMode]);
+
+  useEffect(() => {
     if (viewMode !== 'market') {
       return;
     }
@@ -2555,6 +2602,9 @@ export function MissionsV2Board({
     updateActive();
 
     const handleScroll = () => {
+      if (carouselPointerDownRef.current) {
+        carouselPreventClickRef.current = true;
+      }
       if (raf) {
         cancelAnimationFrame(raf);
       }
