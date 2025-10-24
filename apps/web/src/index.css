@@ -2277,7 +2277,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  height: clamp(1rem, 4vw, 1.8rem);
+  height: clamp(0.5rem, 2vw, 1rem);
   pointer-events: none;
   z-index: 2;
   opacity: 0;
@@ -2286,12 +2286,12 @@
 }
 
 .missions-market-card__stack::before {
-  top: 0;
+  top: var(--market-stack-padding-block);
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0));
 }
 
 .missions-market-card__stack::after {
-  bottom: 0;
+  bottom: calc(var(--market-stack-padding-block) + var(--market-stack-safe-area));
   background: linear-gradient(0deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0));
 }
 
