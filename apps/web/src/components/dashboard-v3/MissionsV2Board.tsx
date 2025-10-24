@@ -45,7 +45,6 @@ type ClaimModalState = {
 };
 
 const SLOT_ORDER: Array<MissionsV2Slot['slot']> = ['main', 'hunt', 'skill'];
-const ACTIVE_CAROUSEL_HEIGHT_SCALE = 1.8;
 
 const SLOT_DETAILS: Record<
   MissionsV2Slot['slot'],
@@ -482,6 +481,7 @@ type MarketDisplayBySlot = Partial<Record<MissionsV2Slot['slot'], MarketProposal
 
 type CarouselTrackStyle = CSSProperties & {
   '--missions-active-carousel-height'?: string;
+  '--missions-market-carousel-height'?: string;
 };
 
 function buildHeroLine(slot: MissionsV2Slot, market: MarketBySlot): string {
@@ -1007,6 +1007,7 @@ export function MissionsV2Board({
   });
   const [activeSlotStackBySlot, setActiveSlotStackBySlot] = useState<Record<string, number>>({});
   const [activeSlotCardHeight, setActiveSlotCardHeight] = useState<number | null>(null);
+  const [marketCardHeightBySlot, setMarketCardHeightBySlot] = useState<Record<string, number>>({});
   const [expandedSlots, setExpandedSlots] = useState<Record<string, boolean>>({});
   const hasTrackedView = useRef(false);
   const hasTrackedMarketView = useRef(false);
@@ -1137,18 +1138,82 @@ export function MissionsV2Board({
       return undefined;
     }
     const baseHeight = Math.round(activeSlotCardHeight + 64);
-    const scaledHeight = Math.round(baseHeight * ACTIVE_CAROUSEL_HEIGHT_SCALE);
-    const minimumHeight = Math.round(360 * ACTIVE_CAROUSEL_HEIGHT_SCALE);
-    const paddedHeight = Math.max(scaledHeight, minimumHeight);
+    const minimumHeight = 360;
+    const paddedHeight = Math.max(baseHeight, minimumHeight);
     return {
       '--missions-active-carousel-height': `${paddedHeight}px`,
     };
   }, [activeSlotCardHeight, prefersReducedMotion, viewMode]);
 
+  const marketCarouselStyle = useMemo<CarouselTrackStyle | undefined>(() => {
+    if (prefersReducedMotion || viewMode !== 'market') {
+      return undefined;
+    }
+    const activeCard = marketCards[activeMarketIndex];
+    if (!activeCard) {
+      return undefined;
+    }
+    const measuredHeight = marketCardHeightBySlot[activeCard.key];
+    if (measuredHeight == null) {
+      return undefined;
+    }
+    const baseHeight = Math.round(measuredHeight + 64);
+    const minimumHeight = 360;
+    const paddedHeight = Math.max(baseHeight, minimumHeight);
+    return {
+      '--missions-market-carousel-height': `${paddedHeight}px`,
+    };
+  }, [
+    activeMarketIndex,
+    marketCardHeightBySlot,
+    marketCards,
+    prefersReducedMotion,
+    viewMode,
+  ]);
+
   useEffect(() => {
     const nextView = getViewModeFromLocation(location);
     setViewModeState((current) => (current === nextView ? current : nextView));
   }, [getViewModeFromLocation, location]);
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion || viewMode !== 'market') {
+      return;
+    }
+    const activeCard = marketCards[activeMarketIndex];
+    if (!activeCard) {
+      return;
+    }
+    const carouselNode = carouselRef.current;
+    if (!carouselNode) {
+      return;
+    }
+    const cardNode = carouselNode.querySelector<HTMLElement>(
+      `[data-carousel-index='${activeMarketIndex}'] article.missions-market-card`,
+    );
+    if (!cardNode) {
+      return;
+    }
+    const rect = cardNode.getBoundingClientRect();
+    if (!Number.isFinite(rect.height) || rect.height <= 0) {
+      return;
+    }
+    const nextHeight = Math.round(rect.height);
+    setMarketCardHeightBySlot((prev) => {
+      if (prev[activeCard.key] === nextHeight) {
+        return prev;
+      }
+      return { ...prev, [activeCard.key]: nextHeight };
+    });
+  }, [
+    activeMarketIndex,
+    activeMarketProposalBySlot,
+    flippedMarketCards,
+    marketCards,
+    marketProposalRevisionBySlot,
+    prefersReducedMotion,
+    viewMode,
+  ]);
 
   useEffect(() => {
     if (viewMode !== 'market' || hasTrackedMarketView.current) {
@@ -2397,24 +2462,43 @@ export function MissionsV2Board({
   );
 
   const handleMarketCoverLoad = useCallback(
-    (cardKey: MissionsV2Slot['slot'], event: SyntheticEvent<HTMLImageElement>) => {
+    (cardKey: MissionsV2Slot['slot'], cardIndex: number, event: SyntheticEvent<HTMLImageElement>) => {
       const image = event.currentTarget;
       if (image.naturalWidth > 0 && image.naturalHeight > 0) {
         const ratio = image.naturalWidth / image.naturalHeight;
-        if (!Number.isFinite(ratio) || ratio <= 0) {
-          return;
+        if (Number.isFinite(ratio) && ratio > 0) {
+          const clamped = Math.min(Math.max(ratio, 0.56), 0.75);
+          const value = clamped.toFixed(4);
+          setMarketCoverAspect((prev) => {
+            if (prev[cardKey] === value) {
+              return prev;
+            }
+            return { ...prev, [cardKey]: value };
+          });
         }
-        const clamped = Math.min(Math.max(ratio, 0.56), 0.75);
-        const value = clamped.toFixed(4);
-        setMarketCoverAspect((prev) => {
-          if (prev[cardKey] === value) {
-            return prev;
-          }
-          return { ...prev, [cardKey]: value };
-        });
       }
+
+      if (cardIndex !== activeMarketIndex) {
+        return;
+      }
+
+      const cardElement = image.closest<HTMLElement>('.missions-market-card');
+      if (!cardElement) {
+        return;
+      }
+      const rect = cardElement.getBoundingClientRect();
+      if (!Number.isFinite(rect.height) || rect.height <= 0) {
+        return;
+      }
+      const nextHeight = Math.round(rect.height);
+      setMarketCardHeightBySlot((prev) => {
+        if (prev[cardKey] === nextHeight) {
+          return prev;
+        }
+        return { ...prev, [cardKey]: nextHeight };
+      });
     },
-    [],
+    [activeMarketIndex],
   );
 
   const handleUnavailableAction = useCallback((action: MissionsV2Action) => {
@@ -3355,6 +3439,7 @@ export function MissionsV2Board({
                     ref={carouselRef}
                     role="listbox"
                     aria-label="Marketplace de misiones disponibles"
+                    style={marketCarouselStyle}
                   >
                     {marketCards.map((item, index) => {
                       const { slot, proposals, key: cardKey } = item;
@@ -3458,7 +3543,7 @@ export function MissionsV2Board({
                                 className="missions-market-card__cover"
                                 draggable={false}
                                 loading="lazy"
-                                onLoad={(event) => handleMarketCoverLoad(slot, event)}
+                                onLoad={(event) => handleMarketCoverLoad(slot, index, event)}
                               />
                             </div>
                             <div className="missions-market-card__back" aria-hidden={!isFlipped}>

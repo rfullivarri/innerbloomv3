@@ -1085,21 +1085,25 @@
 }
 
 .missions-market-carousel__track {
-  --missions-active-carousel-default-height: clamp(
-    576px,
-    calc((100dvh - 160px) * 1.8),
-    864px
-  );
-  --missions-market-carousel-height: var(
-    --missions-active-carousel-height,
-    var(--missions-active-carousel-default-height)
-  );
   --market-carousel-shell-top: var(--missions-shell-topbar-height, 56px);
   --market-carousel-shell-bottom: var(--missions-shell-bottomnav-height, 72px);
   --market-carousel-track-padding-block: clamp(0.75rem, 2.4vw, 1.25rem);
+  --market-carousel-safe-gap: 24px;
+  --missions-market-carousel-fallback: min(
+    clamp(26rem, 74dvh, 38rem),
+    calc(
+      100dvh - var(--market-carousel-shell-top) - var(--market-carousel-shell-bottom) - var(--market-carousel-safe-gap)
+    )
+  );
+  --missions-active-carousel-height: var(
+    --missions-market-carousel-height,
+    var(--missions-market-carousel-fallback)
+  );
   --market-carousel-available-height: min(
     clamp(70dvh, 73dvh, 76dvh),
-    calc(100dvh - var(--market-carousel-shell-top) - var(--market-carousel-shell-bottom) - 24px)
+    calc(
+      100dvh - var(--market-carousel-shell-top) - var(--market-carousel-shell-bottom) - var(--market-carousel-safe-gap)
+    )
   );
   position: relative;
   display: flex;
@@ -1107,17 +1111,18 @@
   align-items: center;
   justify-content: center;
   padding-block: var(--market-carousel-track-padding-block);
-  min-height: var(--missions-market-carousel-height);
+  min-height: var(--missions-active-carousel-height);
   touch-action: pan-y;
   overflow: visible;
 }
 
 @media (max-width: 480px) {
   .missions-market-carousel__track {
-    --missions-active-carousel-default-height: clamp(
-      540px,
-      calc((100dvh - 140px) * 1.8),
-      756px
+    --missions-market-carousel-fallback: min(
+      clamp(24rem, 70dvh, 34rem),
+      calc(
+        100dvh - var(--market-carousel-shell-top) - var(--market-carousel-shell-bottom) - var(--market-carousel-safe-gap)
+      )
     );
   }
 }
@@ -1269,16 +1274,17 @@
 
 
 .missions-active-carousel__track {
-  --missions-active-carousel-default-height: clamp(
-    576px,
-    calc((100dvh - 160px) * 1.8),
-    864px
+  --missions-carousel-shell-top: var(--missions-shell-topbar-height, 56px);
+  --missions-carousel-shell-bottom: var(--missions-shell-bottomnav-height, 72px);
+  --missions-carousel-safe-gap: 24px;
+  --missions-active-carousel-fallback: min(
+    clamp(27rem, 72dvh, 36rem),
+    calc(
+      100dvh - var(--missions-carousel-shell-top) - var(--missions-carousel-shell-bottom) - var(--missions-carousel-safe-gap)
+    )
   );
   @apply relative flex w-full items-center justify-center overflow-hidden py-4 sm:py-6;
-  min-height: var(
-    --missions-active-carousel-height,
-    var(--missions-active-carousel-default-height)
-  );
+  min-height: var(--missions-active-carousel-height, var(--missions-active-carousel-fallback));
 }
 
 .missions-active-carousel__item {
@@ -1295,10 +1301,11 @@
 
 @media (max-width: 480px) {
   .missions-active-carousel__track {
-    --missions-active-carousel-default-height: clamp(
-      540px,
-      calc((100dvh - 140px) * 1.8),
-      756px
+    --missions-active-carousel-fallback: min(
+      clamp(24rem, 68dvh, 32rem),
+      calc(
+        100dvh - var(--missions-carousel-shell-top) - var(--missions-carousel-shell-bottom) - var(--missions-carousel-safe-gap)
+      )
     );
   }
 }
