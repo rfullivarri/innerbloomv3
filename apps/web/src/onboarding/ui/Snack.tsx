@@ -7,7 +7,7 @@ interface SnackProps {
 export function Snack({ message }: SnackProps) {
   return (
     <div aria-live="assertive" className="pointer-events-none fixed inset-x-0 top-16 z-40 flex justify-center">
-      <AnimatePresence>
+      <AnimatePresence presenceAffectsLayout={false}>
         {message ? (
           <motion.div
             key={message}
