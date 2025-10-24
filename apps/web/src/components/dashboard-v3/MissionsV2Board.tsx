@@ -3645,15 +3645,17 @@ export function MissionsV2Board({
                                       });
                                     }
 
-                                    const normalizedRequirement = requirementText?.trim();
-                                    const requirementValue = normalizedRequirement?.length
-                                      ? normalizedRequirement
-                                      : 'Revisión manual';
-                                    inlineMetaItems.push({
-                                      key: 'requirement',
-                                      label: 'Requisito',
-                                      value: requirementValue,
-                                    });
+                                    if (slot === 'main') {
+                                      const normalizedRequirement = requirementText?.trim();
+                                      const requirementValue = normalizedRequirement?.length
+                                        ? normalizedRequirement
+                                        : 'Revisión manual';
+                                      inlineMetaItems.push({
+                                        key: 'requirement',
+                                        label: 'Requisito',
+                                        value: requirementValue,
+                                      });
+                                    }
                                     const difficultyValue = isRealProposal
                                       ? proposal.difficulty ?? '—'
                                       : proposal.difficulty
@@ -3685,9 +3687,6 @@ export function MissionsV2Board({
                                     const buttonLabel = isProposalLocked
                                       ? 'Misión en progreso'
                                       : `Activar en slot ${details.label}`;
-                                    const petalsRemaining = slotMetrics.petals.remaining ?? 0;
-                                    const petalsTotal = slotMetrics.petals.total ?? 0;
-                                    const showPetals = petalsTotal > 0;
                                     const heartbeatPending = !slotMetrics.heartbeat_today;
                                     const metaSegments: Array<{ key: string; content: ReactNode }> = [];
                                     const countdownLabel = formatCountdown(slotMetrics.countdown?.label ?? '');
@@ -3790,18 +3789,6 @@ export function MissionsV2Board({
                                                 ))}
                                               </ul>
                                             )}
-                                            {showPetals ? (
-                                              <div className="mpc-petals">
-                                                <span className="mpc-petals-label">Pétalos</span>
-                                                <MissionPetalsMini
-                                                  slot={slotMetrics}
-                                                  highlight={isActiveProposal}
-                                                />
-                                                <span className="mpc-meter__detail">
-                                                  {petalsRemaining} / {petalsTotal}
-                                                </span>
-                                              </div>
-                                            ) : null}
                                             {metaSegments.length > 0 ? (
                                               <ul className="mpc-inline-meta">
                                                 <li>
