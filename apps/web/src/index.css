@@ -1052,7 +1052,7 @@
 
 .missions-market-carousel {
   @apply flex flex-col gap-5;
-  touch-action: pan-y pan-x;
+  touch-action: pan-y;
 }
 
 .missions-market-carousel__controls {
@@ -1085,88 +1085,59 @@
 }
 
 .missions-market-carousel__track {
-  --market-carousel-safe-start: max(1rem, env(safe-area-inset-left));
-  --market-carousel-safe-end: max(1rem, env(safe-area-inset-right));
-  --market-carousel-item-width: clamp(82vw, 84vw, 88vw);
-  --market-carousel-gap: clamp(0.5rem, 2vw, 0.75rem);
-  --market-carousel-fade-width: clamp(16px, 6vw, 24px);
+  --missions-active-carousel-default-height: clamp(
+    576px,
+    calc((100dvh - 160px) * 1.8),
+    864px
+  );
+  --missions-market-carousel-height: var(
+    --missions-active-carousel-height,
+    var(--missions-active-carousel-default-height)
+  );
   --market-carousel-shell-top: var(--missions-shell-topbar-height, 56px);
   --market-carousel-shell-bottom: var(--missions-shell-bottomnav-height, 72px);
+  --market-carousel-track-padding-block: clamp(0.75rem, 2.4vw, 1.25rem);
   --market-carousel-available-height: min(
     clamp(70dvh, 73dvh, 76dvh),
     calc(100dvh - var(--market-carousel-shell-top) - var(--market-carousel-shell-bottom) - 24px)
   );
-  --market-carousel-track-padding-block: clamp(0.75rem, 2.2vw, 1rem);
-  --market-carousel-center-padding: calc((100vw - var(--market-carousel-item-width)) / 2);
-  --market-carousel-padding-start: max(var(--market-carousel-safe-start), var(--market-carousel-center-padding));
-  --market-carousel-padding-end: max(var(--market-carousel-safe-end), var(--market-carousel-center-padding));
   position: relative;
   display: flex;
   width: 100%;
-  align-items: stretch;
-  gap: var(--market-carousel-gap);
+  align-items: center;
+  justify-content: center;
   padding-block: var(--market-carousel-track-padding-block);
-  padding-inline: var(--market-carousel-padding-start) var(--market-carousel-padding-end);
-  min-height: var(--market-carousel-available-height);
-  touch-action: pan-y pan-x;
-  cursor: grab;
-  overflow-x: auto;
-  overflow-y: visible;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: var(--market-carousel-padding-start) var(--market-carousel-padding-end);
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  mask-image: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 1) var(--market-carousel-fade-width),
-    rgba(0, 0, 0, 1) calc(100% - var(--market-carousel-fade-width)),
-    rgba(0, 0, 0, 0) 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 1) var(--market-carousel-fade-width),
-    rgba(0, 0, 0, 1) calc(100% - var(--market-carousel-fade-width)),
-    rgba(0, 0, 0, 0) 100%
-  );
+  min-height: var(--missions-market-carousel-height);
+  touch-action: pan-y;
+  overflow: visible;
 }
 
-.missions-market-carousel__track:active {
-  cursor: grabbing;
-}
-
-@media (min-width: 640px) {
+@media (max-width: 480px) {
   .missions-market-carousel__track {
-    --market-carousel-track-padding-block: 1.25rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .missions-market-carousel__track {
-    --market-carousel-item-width: clamp(260px, 28vw, 360px);
-    --market-carousel-center-padding: max(
-      var(--market-carousel-safe-start),
-      calc((100% - var(--market-carousel-item-width)) / 2)
+    --missions-active-carousel-default-height: clamp(
+      540px,
+      calc((100dvh - 140px) * 1.8),
+      756px
     );
   }
 }
 
-.missions-market-carousel__track::-webkit-scrollbar {
-  display: none;
+[data-reduced-motion='true'] .missions-market-carousel__track {
+  padding-block: var(--market-carousel-track-padding-block);
+  scroll-padding-inline: 48%;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+[data-reduced-motion='true'] .missions-market-carousel__track::-webkit-scrollbar {
+  height: 6px;
+}
+
+[data-reduced-motion='true'] .missions-market-carousel__track::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-slate-400/35;
 }
 
 .missions-market-carousel__item {
-  position: relative;
-  display: flex;
-  flex: 0 0 auto;
-  justify-content: center;
-  width: var(--market-carousel-item-width);
-  max-width: 100%;
-  flex-basis: var(--market-carousel-item-width);
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
   transition: opacity var(--motion-duration-base) var(--motion-ease-enter);
 }
 
@@ -1181,10 +1152,6 @@
 
 [data-reduced-motion='true'] .missions-market-carousel__track {
   scroll-behavior: auto;
-}
-
-[data-reduced-motion='true'] .missions-market-carousel__item {
-  transition: none;
 }
 
 .missions-market-carousel__status {
