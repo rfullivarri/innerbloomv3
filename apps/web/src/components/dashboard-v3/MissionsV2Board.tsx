@@ -45,7 +45,9 @@ type ClaimModalState = {
 };
 
 const SLOT_ORDER: Array<MissionsV2Slot['slot']> = ['main', 'hunt', 'skill'];
-const ACTIVE_CAROUSEL_HEIGHT_SCALE = 1.8;
+const ACTIVE_CAROUSEL_MIN_HEIGHT = 520;
+const ACTIVE_CAROUSEL_VERTICAL_PADDING = 160;
+const ACTIVE_CAROUSEL_ITEM_OFFSET = 120;
 
 const SLOT_DETAILS: Record<
   MissionsV2Slot['slot'],
@@ -1136,10 +1138,8 @@ export function MissionsV2Board({
     if (activeSlotCardHeight == null) {
       return undefined;
     }
-    const baseHeight = Math.round(activeSlotCardHeight + 64);
-    const scaledHeight = Math.round(baseHeight * ACTIVE_CAROUSEL_HEIGHT_SCALE);
-    const minimumHeight = Math.round(360 * ACTIVE_CAROUSEL_HEIGHT_SCALE);
-    const paddedHeight = Math.max(scaledHeight, minimumHeight);
+    const baseHeight = Math.round(activeSlotCardHeight + ACTIVE_CAROUSEL_VERTICAL_PADDING);
+    const paddedHeight = Math.max(baseHeight, ACTIVE_CAROUSEL_MIN_HEIGHT);
     return {
       '--missions-active-carousel-height': `${paddedHeight}px`,
     };
@@ -3105,41 +3105,18 @@ export function MissionsV2Board({
                 >
                   {orderedSlots.map((slot, index) => {
                     const isActiveCard = index === activeSlotIndex;
-                    const totalSlots = orderedSlots.length;
-                    let relativeOffset = index - activeSlotIndex;
-                    if (totalSlots > 1) {
-                      const half = totalSlots / 2;
-                      if (relativeOffset > half) {
-                        relativeOffset -= totalSlots;
-                      } else if (relativeOffset < -half) {
-                        relativeOffset += totalSlots;
-                      }
+                    const relativeOffset = index - activeSlotIndex;
+                    const translateYPercent = relativeOffset * ACTIVE_CAROUSEL_ITEM_OFFSET;
+                    const itemStyle: CSSProperties = {
+                      transform: `translateY(${translateYPercent}%)`,
+                      opacity: isActiveCard ? 1 : 0,
+                      pointerEvents: isActiveCard ? 'auto' : 'none',
+                      zIndex: isActiveCard ? 3 : 1,
+                    };
+
+                    if (prefersReducedMotion) {
+                      itemStyle.transition = 'none';
                     }
-                    const maxVisibleOffset = Math.min(2, Math.max(totalSlots - 1, 1));
-                    const limitedOffset = Math.max(
-                      Math.min(relativeOffset, maxVisibleOffset),
-                      -maxVisibleOffset,
-                    );
-                    const angle = (Math.PI / 8) * limitedOffset;
-                    const depth = Math.cos(angle);
-                    const translateX = Math.sin(angle) * 34;
-                    const translateY = (1 - depth) * 60;
-                    const distance = Math.abs(limitedOffset);
-                    const scale = Math.max(0.72, 1 - 0.18 * distance);
-                    const opacity = Math.max(0.4, 1 - 0.45 * distance);
-                    const rotate = Math.sin(angle) * -4.5;
-                    const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
-                    const itemStyle: CSSProperties = prefersReducedMotion
-                      ? {
-                          transform: 'none',
-                          opacity: 1,
-                          zIndex: isActiveCard ? 2 : 1,
-                        }
-                      : {
-                          transform: `translate(-50%, -50%) translateX(${translateX}%) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
-                          opacity,
-                          zIndex,
-                        };
 
                     return (
                       <div

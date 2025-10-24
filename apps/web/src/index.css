@@ -408,12 +408,20 @@
 
 .missions-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border-radius: 1.25rem;
   border: 1px solid rgba(148, 163, 184, 0.14);
   backdrop-filter: blur(18px);
   background: linear-gradient(140deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.82));
   isolation: isolate;
+}
+
+.missions-card > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .missions-card.missions-active-card {
@@ -1270,11 +1278,11 @@
 
 .missions-active-carousel__track {
   --missions-active-carousel-default-height: clamp(
-    576px,
-    calc((100dvh - 160px) * 1.8),
-    864px
+    480px,
+    calc(100dvh - 220px),
+    720px
   );
-  @apply relative flex w-full items-center justify-center overflow-hidden py-4 sm:py-6;
+  @apply relative flex w-full items-stretch justify-center overflow-hidden py-4 sm:py-6;
   min-height: var(
     --missions-active-carousel-height,
     var(--missions-active-carousel-default-height)
@@ -1282,11 +1290,11 @@
 }
 
 .missions-active-carousel__item {
-  @apply absolute left-1/2 top-1/2 flex w-full max-w-xs cursor-pointer justify-center transition duration-500 ease-out md:max-w-sm;
+  @apply absolute inset-0 flex w-full cursor-pointer justify-center px-4 transition duration-500 ease-out sm:px-6;
 }
 
 .missions-active-carousel__item[data-active='false'] {
-  @apply opacity-70 saturate-[0.85];
+  @apply opacity-0 saturate-[0.85];
 }
 
 .missions-active-carousel__item[data-active='true'] {
@@ -1296,41 +1304,21 @@
 @media (max-width: 480px) {
   .missions-active-carousel__track {
     --missions-active-carousel-default-height: clamp(
-      540px,
-      calc((100dvh - 140px) * 1.8),
-      756px
+      440px,
+      calc(100dvh - 200px),
+      640px
     );
   }
 }
 
-[data-reduced-motion='true'] .missions-active-carousel__track {
-  @apply relative flex min-h-0 items-stretch gap-5 overflow-x-auto px-4 py-5;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
-}
-
-[data-reduced-motion='true'] .missions-active-carousel__track::-webkit-scrollbar {
-  height: 6px;
-}
-
-[data-reduced-motion='true'] .missions-active-carousel__track::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-slate-400/35;
-}
-
-[data-reduced-motion='true'] .missions-active-carousel__item {
-  @apply static flex-none snap-center transition-none;
-  width: clamp(240px, 68vw, 320px);
-  transform: none !important;
-  opacity: 1 !important;
-}
-
-[data-reduced-motion='true'] .missions-active-carousel__item {
-  transition: opacity var(--motion-duration-base) var(--motion-ease-enter);
-}
-
 .missions-active-carousel__card {
-  width: 100%;
+  width: min(100%, 38rem);
+  display: flex;
   pointer-events: none;
+}
+
+.missions-active-carousel__card > * {
+  flex: 1 1 auto;
 }
 
 .missions-active-carousel__item[data-active='true'] .missions-active-carousel__card {
@@ -1338,7 +1326,7 @@
 }
 
 [data-reduced-motion='true'] .missions-active-carousel__item {
-  transition: opacity var(--motion-duration-base) var(--motion-ease-enter);
+  @apply transition-none;
 }
 
 .missions-active-carousel__status {
