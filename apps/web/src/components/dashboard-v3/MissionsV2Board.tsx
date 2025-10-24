@@ -2106,6 +2106,10 @@ export function MissionsV2Board({
   const carouselPreventClickRef = useRef(false);
   const carouselPointerStartRef = useRef<number | null>(null);
   const carouselSwipeTriggeredRef = useRef(false);
+  const slotCarouselPointerDownRef = useRef(false);
+  const slotCarouselPreventClickRef = useRef(false);
+  const slotCarouselPointerStartRef = useRef<number | null>(null);
+  const slotCarouselSwipeTriggeredRef = useRef(false);
 
   const scrollCarouselToIndex = useCallback(
     (index: number, options?: ScrollIntoViewOptions) => {
@@ -2211,6 +2215,17 @@ export function MissionsV2Board({
       scrollSlotCarouselToIndex(index);
     },
     [activeSlotIndex, scrollSlotCarouselToIndex],
+  );
+
+  const handleSlotCardClick = useCallback(
+    (index: number) => {
+      if (slotCarouselPreventClickRef.current) {
+        slotCarouselPreventClickRef.current = false;
+        return;
+      }
+      handleSlotCardSelect(index);
+    },
+    [handleSlotCardSelect],
   );
 
   const handleSlotCardKeyDown = useCallback(
@@ -2526,6 +2541,104 @@ export function MissionsV2Board({
       return {};
     });
   }, [activeSlotIndex]);
+
+  useEffect(() => {
+    if (viewMode !== 'active') {
+      slotCarouselPointerDownRef.current = false;
+      slotCarouselPreventClickRef.current = false;
+      slotCarouselPointerStartRef.current = null;
+      slotCarouselSwipeTriggeredRef.current = false;
+      return;
+    }
+
+    const container = slotCarouselRef.current;
+    if (!container) {
+      return;
+    }
+
+    const resetPointerState = () => {
+      slotCarouselPointerDownRef.current = false;
+      slotCarouselPointerStartRef.current = null;
+      slotCarouselSwipeTriggeredRef.current = false;
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) {
+        return;
+      }
+      slotCarouselPointerDownRef.current = true;
+      slotCarouselPreventClickRef.current = false;
+      slotCarouselSwipeTriggeredRef.current = false;
+      slotCarouselPointerStartRef.current = prefersReducedMotion ? null : event.clientX;
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (
+        prefersReducedMotion ||
+        !slotCarouselPointerDownRef.current ||
+        slotCarouselSwipeTriggeredRef.current ||
+        slotCarouselPointerStartRef.current == null
+      ) {
+        return;
+      }
+
+      const deltaX = event.clientX - slotCarouselPointerStartRef.current;
+      if (Math.abs(deltaX) < 32) {
+        return;
+      }
+
+      slotCarouselSwipeTriggeredRef.current = true;
+      slotCarouselPreventClickRef.current = true;
+      slotCarouselPointerDownRef.current = false;
+      handleSlotCarouselStep(deltaX < 0 ? 'next' : 'prev');
+    };
+
+    const handlePointerUp = (event: PointerEvent) => {
+      if (
+        !prefersReducedMotion &&
+        !slotCarouselSwipeTriggeredRef.current &&
+        slotCarouselPointerStartRef.current != null
+      ) {
+        const deltaX = event.clientX - slotCarouselPointerStartRef.current;
+        if (Math.abs(deltaX) >= 48) {
+          slotCarouselPreventClickRef.current = true;
+          handleSlotCarouselStep(deltaX < 0 ? 'next' : 'prev');
+        }
+      }
+
+      resetPointerState();
+    };
+
+    const handlePointerCancel = () => {
+      slotCarouselPreventClickRef.current = false;
+      resetPointerState();
+    };
+
+    const handleClickCapture = (event: Event) => {
+      if (!slotCarouselPreventClickRef.current) {
+        return;
+      }
+      slotCarouselPreventClickRef.current = false;
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    container.addEventListener('pointerdown', handlePointerDown);
+    container.addEventListener('pointermove', handlePointerMove, { passive: true });
+    container.addEventListener('pointerup', handlePointerUp);
+    container.addEventListener('pointercancel', handlePointerCancel);
+    container.addEventListener('pointerleave', handlePointerCancel);
+    container.addEventListener('click', handleClickCapture, true);
+
+    return () => {
+      container.removeEventListener('pointerdown', handlePointerDown);
+      container.removeEventListener('pointermove', handlePointerMove);
+      container.removeEventListener('pointerup', handlePointerUp);
+      container.removeEventListener('pointercancel', handlePointerCancel);
+      container.removeEventListener('pointerleave', handlePointerCancel);
+      container.removeEventListener('click', handleClickCapture, true);
+    };
+  }, [handleSlotCarouselStep, prefersReducedMotion, viewMode]);
 
   useEffect(() => {
     setExpandedSlots((prev) => {
@@ -3151,7 +3264,7 @@ export function MissionsV2Board({
                         role="option"
                         aria-selected={isActiveCard}
                         tabIndex={isActiveCard ? 0 : -1}
-                        onClick={() => handleSlotCardSelect(index)}
+                        onClick={() => handleSlotCardClick(index)}
                         onKeyDown={(event) => handleSlotCardKeyDown(event, slot.id, index)}
                       >
                         <div
