@@ -2104,9 +2104,15 @@ export function MissionsV2Board({
 
   const carouselPointerDownRef = useRef(false);
   const carouselPreventClickRef = useRef(false);
+  const carouselPointerStartRef = useRef<number | null>(null);
+  const carouselSwipeTriggeredRef = useRef(false);
 
   const scrollCarouselToIndex = useCallback(
     (index: number, options?: ScrollIntoViewOptions) => {
+      if (!prefersReducedMotion) {
+        return;
+      }
+
       const container = carouselRef.current;
       if (!container) {
         return;
@@ -2117,7 +2123,7 @@ export function MissionsV2Board({
         return;
       }
 
-      const behavior = options?.behavior ?? (prefersReducedMotion ? 'auto' : 'smooth');
+      const behavior = options?.behavior ?? 'smooth';
       const containerWidth = container.clientWidth;
       const elementWidth = element.clientWidth;
       const targetOffset = element.offsetLeft - (containerWidth - elementWidth) / 2;
@@ -2536,30 +2542,73 @@ export function MissionsV2Board({
       return;
     }
 
+    const resetPointerState = () => {
+      carouselPointerDownRef.current = false;
+      carouselPointerStartRef.current = null;
+      carouselSwipeTriggeredRef.current = false;
+    };
+
     const handlePointerDown = (event: PointerEvent) => {
       if (event.pointerType === 'mouse' && event.button !== 0) {
         return;
       }
       carouselPointerDownRef.current = true;
       carouselPreventClickRef.current = false;
+      carouselSwipeTriggeredRef.current = false;
+      carouselPointerStartRef.current = prefersReducedMotion ? null : event.clientX;
     };
 
-    const resetPointerState = () => {
+    const handlePointerMove = (event: PointerEvent) => {
+      if (
+        prefersReducedMotion ||
+        !carouselPointerDownRef.current ||
+        carouselSwipeTriggeredRef.current ||
+        carouselPointerStartRef.current == null
+      ) {
+        return;
+      }
+
+      const deltaX = event.clientX - carouselPointerStartRef.current;
+      if (Math.abs(deltaX) < 32) {
+        return;
+      }
+
+      carouselSwipeTriggeredRef.current = true;
+      carouselPreventClickRef.current = true;
       carouselPointerDownRef.current = false;
+      stepMarketCarousel(deltaX < 0 ? 1 : -1);
+    };
+
+    const handlePointerUp = (event: PointerEvent) => {
+      if (
+        !prefersReducedMotion &&
+        !carouselSwipeTriggeredRef.current &&
+        carouselPointerStartRef.current != null
+      ) {
+        const deltaX = event.clientX - carouselPointerStartRef.current;
+        if (Math.abs(deltaX) >= 48) {
+          carouselPreventClickRef.current = true;
+          stepMarketCarousel(deltaX < 0 ? 1 : -1);
+        }
+      }
+
+      resetPointerState();
     };
 
     container.addEventListener('pointerdown', handlePointerDown);
-    container.addEventListener('pointerup', resetPointerState);
+    container.addEventListener('pointermove', handlePointerMove, { passive: true });
+    container.addEventListener('pointerup', handlePointerUp);
     container.addEventListener('pointercancel', resetPointerState);
     container.addEventListener('pointerleave', resetPointerState);
 
     return () => {
       container.removeEventListener('pointerdown', handlePointerDown);
-      container.removeEventListener('pointerup', resetPointerState);
+      container.removeEventListener('pointermove', handlePointerMove);
+      container.removeEventListener('pointerup', handlePointerUp);
       container.removeEventListener('pointercancel', resetPointerState);
       container.removeEventListener('pointerleave', resetPointerState);
     };
-  }, []);
+  }, [prefersReducedMotion, stepMarketCarousel]);
 
   useEffect(() => {
     carouselPreventClickRef.current = false;
@@ -2567,7 +2616,7 @@ export function MissionsV2Board({
   }, [viewMode]);
 
   useEffect(() => {
-    if (viewMode !== 'market') {
+    if (viewMode !== 'market' || !prefersReducedMotion) {
       return;
     }
     const container = carouselRef.current;
@@ -2619,7 +2668,7 @@ export function MissionsV2Board({
         window.cancelAnimationFrame(raf);
       }
     };
-  }, [activeMarketIndex, viewMode, marketCards]);
+  }, [activeMarketIndex, viewMode, marketCards, prefersReducedMotion]);
 
   useEffect(() => {
     if (viewMode !== 'market') {
@@ -3182,7 +3231,7 @@ export function MissionsV2Board({
               ) : (
                 <>
                   <div
-                    className="missions-market-carousel__track"
+                    className="missions-market-carousel__track missions-active-carousel__track"
                     ref={carouselRef}
                     role="listbox"
                     aria-label="Marketplace de misiones disponibles"
@@ -3218,30 +3267,67 @@ export function MissionsV2Board({
                         ? `${activeProposalTitle}${activeSummary ? `. ${activeSummary}` : ''}`
                         : `Sin propuestas disponibles para ${details.label}`;
                       const canActivateThisCard = canActivate && isActiveCard;
+                      const totalCards = marketCards.length;
+                      let relativeOffset = index - activeMarketIndex;
+                      if (totalCards > 1) {
+                        const half = totalCards / 2;
+                        if (relativeOffset > half) {
+                          relativeOffset -= totalCards;
+                        } else if (relativeOffset < -half) {
+                          relativeOffset += totalCards;
+                        }
+                      }
+                      const maxVisibleOffset = Math.min(2, Math.max(totalCards - 1, 1));
+                      const limitedOffset = Math.max(
+                        Math.min(relativeOffset, maxVisibleOffset),
+                        -maxVisibleOffset,
+                      );
+                      const angle = (Math.PI / 8) * limitedOffset;
+                      const depth = Math.cos(angle);
+                      const translateX = Math.sin(angle) * 34;
+                      const translateY = (1 - depth) * 60;
+                      const distance = Math.abs(limitedOffset);
+                      const scale = Math.max(0.72, 1 - 0.18 * distance);
+                      const opacity = Math.max(0.4, 1 - 0.45 * distance);
+                      const rotate = Math.sin(angle) * -4.5;
+                      const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
+                      const itemStyle: CSSProperties = prefersReducedMotion
+                        ? {
+                            transform: 'none',
+                            opacity: 1,
+                            zIndex: isActiveCard ? 2 : 1,
+                          }
+                        : {
+                            transform: `translate(-50%, -50%) translateX(${translateX}%) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
+                            opacity,
+                            zIndex,
+                          };
 
                       return (
                         <div
                           key={cardKey}
-                          className="missions-market-carousel__item"
+                          className="missions-market-carousel__item missions-active-carousel__item"
                           data-carousel-index={index}
                           data-active={isActiveCard ? 'true' : 'false'}
+                          style={prefersReducedMotion ? undefined : itemStyle}
                         >
-                          <article
-                            className="missions-market-card"
-                            data-rarity={rarity}
-                            data-flipped={isFlipped}
-                            data-active={isActiveCard ? 'true' : 'false'}
-                            role="option"
-                            aria-selected={isActiveCard}
-                            aria-expanded={isFlipped}
-                            tabIndex={isActiveCard ? 0 : -1}
-                          aria-label={cardLabel}
-                          style={{
-                            '--market-card-aspect': marketCoverAspect[cardKey] ?? '3 / 4',
-                          } as CSSProperties}
-                          onClick={() => handleMarketCardClick(slot, index)}
-                          onKeyDown={(event) => handleMarketCardKeyDown(event, slot, index)}
-                        >
+                          <div className="missions-active-carousel__card">
+                            <article
+                              className="missions-market-card"
+                              data-rarity={rarity}
+                              data-flipped={isFlipped}
+                              data-active={isActiveCard ? 'true' : 'false'}
+                              role="option"
+                              aria-selected={isActiveCard}
+                              aria-expanded={isFlipped}
+                              tabIndex={isActiveCard ? 0 : -1}
+                              aria-label={cardLabel}
+                              style={{
+                                '--market-card-aspect': marketCoverAspect[cardKey] ?? '3 / 4',
+                              } as CSSProperties}
+                              onClick={() => handleMarketCardClick(slot, index)}
+                              onKeyDown={(event) => handleMarketCardKeyDown(event, slot, index)}
+                            >
                             <div className="missions-market-card__front" aria-hidden={isFlipped}>
                               <span className="missions-market-card__slot-chip" data-slot={slot}>
                                 {details.label}
@@ -3454,8 +3540,9 @@ export function MissionsV2Board({
                                     );
                                   })}
                                 </div>
-                            </div>
-                          </article>
+                              </div>
+                            </article>
+                          </div>
                         </div>
                       );
                     })}
