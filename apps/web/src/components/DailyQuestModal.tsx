@@ -979,7 +979,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       </div>
       {portalTarget &&
         createPortal(
-          <AnimatePresence>
+          <AnimatePresence presenceAffectsLayout={false}>
             {isOpen && (
               <motion.div
                 className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/80 p-2 md:p-4"
@@ -1132,7 +1132,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                               isSelected && 'bg-white/[0.12] backdrop-blur-sm',
                                             )}
                                           >
-                                            <AnimatePresence>
+                                            <AnimatePresence presenceAffectsLayout={false}>
                                               {isSelected && (
                                                 <motion.span
                                                   key="task-halo"
@@ -1148,7 +1148,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                               )}
                                             </AnimatePresence>
                                             {isHardTask && (
-                                              <AnimatePresence>
+                                              <AnimatePresence presenceAffectsLayout={false}>
                                                 {activeCelebrations.map((entry) => (
                                                   <motion.div
                                                     key={`hard-badge-${entry.id}`}
@@ -1170,7 +1170,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                               </AnimatePresence>
                                             )}
                                             {isHardTask && (
-                                              <AnimatePresence>
+                                              <AnimatePresence presenceAffectsLayout={false}>
                                                 {activeCelebrations.map((entry) => (
                                                   <motion.div
                                                     key={`hard-particles-${entry.id}`}
@@ -1278,7 +1278,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                             {xpSelected}
                           </span>
                         </p>
-                        <AnimatePresence>
+                        <AnimatePresence presenceAffectsLayout={false}>
                           {xpBubble && (
                             <motion.span
                               key={xpBubble.id}
@@ -1323,7 +1323,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                       </p>
                     )}
                   </motion.footer>
-                  <AnimatePresence>
+                  <AnimatePresence presenceAffectsLayout={false}>
                     {successCelebration && (
                       <motion.div
                         key={successCelebration.id}
@@ -1377,7 +1377,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
           portalTarget,
         )}
 
-      <AnimatePresence>
+      <AnimatePresence presenceAffectsLayout={false}>
         {toast && (
           <motion.div
             key={toast.id}

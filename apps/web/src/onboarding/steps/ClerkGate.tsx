@@ -124,7 +124,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
         ))}
       </div>
       <div className="mt-6">
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="wait" initial={false} presenceAffectsLayout={false}>
           {tab === 'sign-up' ? (
             <motion.div
               key="sign-up"
