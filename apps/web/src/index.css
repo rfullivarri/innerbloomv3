@@ -2237,9 +2237,9 @@
   flex-direction: column;
   flex: 1 1 auto;
   border-radius: inherit;
-  --market-stack-gap: clamp(0.87rem, 3.33vw, 1.37rem);
+  --market-stack-gap: clamp(0.97rem, 3.37vw, 1.47rem);
   gap: var(--market-stack-gap);
-  margin-top: clamp(0.87rem, 3.33vw, 1.37rem);
+  margin-top: clamp(0.97rem, 3.37vw, 1.47rem);
   min-height: 0;
   --market-stack-padding-inline: clamp(0.3rem, 1.4vw, 0.55rem);
   --market-stack-padding-block: clamp(0.63rem, 1.3vw, 0.77rem);
