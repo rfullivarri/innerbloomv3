@@ -351,9 +351,11 @@ type MockMissionProposal = {
   summary: string;
   reward: string;
   difficulty: string;
-  chips: string[];
-  requirements: string[];
-  meta: string[];
+  objective: string;
+  objectives: string[];
+  requirement: string;
+  features: string[];
+  durationLabel: string;
   state: 'active' | 'available';
 };
 
@@ -413,36 +415,57 @@ function formatProposalReward(proposal: RealMarketProposal): string {
   return `${reward.xp} XP · ${currency} Monedas${items}`;
 }
 
-function extractProposalMetadata(proposal: RealMarketProposal): string[] {
-  const metadataEntries: string[] = [];
+function humanizeMetadataValue(value: string): string {
+  return value
+    .split(/[_-]/)
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+}
+
+function formatDurationDays(days: number | null | undefined): string {
+  if (!days || days <= 0) {
+    return 'Flexible';
+  }
+  if (days === 1) {
+    return '1 día';
+  }
+  return `${days} días`;
+}
+
+function formatMultiplier(multiplier: number): string {
+  if (Number.isInteger(multiplier)) {
+    return `x${multiplier}`;
+  }
+  return `x${multiplier.toFixed(1)}`;
+}
+
+function buildProposalFeatureChips(proposal: RealMarketProposal): string[] {
+  const chips: string[] = [];
   const metadata = proposal.metadata ?? {};
 
-  for (const [rawKey, rawValue] of Object.entries(metadata)) {
-    if (rawValue === null || rawValue === undefined || rawValue === '') {
-      continue;
-    }
-
-    const keyLabel = rawKey
-      .split(/[_-]/)
-      .filter(Boolean)
-      .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-      .join(' ');
-
-    if (typeof rawValue === 'number') {
-      if (rawKey.toLowerCase().includes('multiplier')) {
-        metadataEntries.push(`${keyLabel}: x${rawValue}`);
-      } else {
-        metadataEntries.push(`${keyLabel}: ${rawValue}`);
-      }
-      continue;
-    }
-
-    if (typeof rawValue === 'string' || typeof rawValue === 'boolean') {
-      metadataEntries.push(`${keyLabel}: ${rawValue}`);
+  if (proposal.slot === 'main') {
+    const spotlight = metadata.spotlight;
+    if (typeof spotlight === 'string' && spotlight.trim()) {
+      chips.push(`Spotlight · ${humanizeMetadataValue(spotlight)}`);
     }
   }
 
-  return metadataEntries;
+  if (proposal.slot === 'hunt') {
+    const multiplier = metadata.boosterMultiplier;
+    if (typeof multiplier === 'number' && Number.isFinite(multiplier)) {
+      chips.push(`Booster ${formatMultiplier(multiplier)}`);
+    }
+  }
+
+  if (proposal.slot === 'skill') {
+    const stat = metadata.stat;
+    if (typeof stat === 'string' && stat.trim()) {
+      chips.push(`Stat · ${stat}`);
+    }
+  }
+
+  return chips;
 }
 
 const MOCK_MISSION_TITLES = [
@@ -461,9 +484,11 @@ function makeMockProposals(slot: MissionsV2Slot['slot']): MockMissionProposal[] 
     summary: 'Brief one-sentence mission summary.',
     reward: `${(index + 1) * 50} XP • ${8 + index} Coins`,
     difficulty: ['easy', 'medium', 'high'][index % 3]!,
-    chips: ['REFLECTION', 'PROOF'].slice(0, 1 + (index % 2)),
-    requirements: ['Deliver proof', 'Log key learning'],
-    meta: ['Cadence: weekly', 'Narrative: central_act'],
+    objective: 'Complete the core objective for this mock mission.',
+    objectives: ['Primer entregable', 'Segundo entregable'],
+    requirement: 'Requisito de elegibilidad para la misión.',
+    features: ['Chip destacado', 'Boost x1.5'].slice(0, 1 + (index % 2)),
+    durationLabel: `${7 + index} días`,
     state: index === 0 ? 'active' : 'available',
   }));
 }
@@ -3593,15 +3618,17 @@ export function MissionsV2Board({
                                     const rewardPreview = isRealProposal
                                       ? formatProposalReward(proposal)
                                       : proposal.reward;
-                                    const requirements = isRealProposal
-                                      ? (proposal.objectives.length > 0
-                                          ? proposal.objectives
-                                          : [proposal.objective]).filter(Boolean)
-                                      : proposal.requirements;
-                                    const metadataEntries = isRealProposal
-                                      ? extractProposalMetadata(proposal)
-                                      : proposal.meta;
-                                    const tags = isRealProposal ? proposal.tags ?? [] : proposal.chips;
+                                    const primaryObjective = proposal.objective;
+                                    const objectiveDetails = proposal.objectives.filter(Boolean);
+                                    const requirementText = isRealProposal
+                                      ? proposal.requirements
+                                      : proposal.requirement;
+                                    const durationLabel = isRealProposal
+                                      ? formatDurationDays(proposal.duration_days)
+                                      : proposal.durationLabel;
+                                    const featureChips = isRealProposal
+                                      ? buildProposalFeatureChips(proposal)
+                                      : proposal.features;
                                     const difficultyValue = isRealProposal
                                       ? proposal.difficulty ?? '—'
                                       : proposal.difficulty
@@ -3683,24 +3710,40 @@ export function MissionsV2Board({
                                               <span className="mpc-reward__label">Recompensa</span>
                                               <span className="mpc-reward__value">{rewardPreview ?? '—'}</span>
                                             </div>
-                                            {requirements.length > 0 && (
-                                              <ul className="mpc-req">
-                                                {requirements.map((itemLabel) => (
-                                                  <li key={`${proposal.id}-req-${itemLabel}`}>{itemLabel}</li>
+                                            <div className="mpc-objective">
+                                              <span className="mpc-section-label">Objetivo</span>
+                                              <p>{primaryObjective || '—'}</p>
+                                            </div>
+                                            {objectiveDetails.length > 0 && (
+                                              <div className="mpc-objective-list">
+                                                {objectiveDetails.map((detail) => (
+                                                  <div
+                                                    key={`${proposal.id}-objective-${detail}`}
+                                                    className="mpc-objective-list__item"
+                                                  >
+                                                    {detail}
+                                                  </div>
                                                 ))}
-                                              </ul>
+                                              </div>
                                             )}
-                                            {metadataEntries.length > 0 && (
-                                              <ul className="mpc-meta">
-                                                {metadataEntries.map((entryLabel) => (
-                                                  <li key={`${proposal.id}-meta-${entryLabel}`}>{entryLabel}</li>
-                                                ))}
-                                              </ul>
-                                            )}
-                                            {tags.length > 0 && (
-                                              <div className="mpc-tags">
-                                                {tags.map((tag) => (
-                                                  <span key={`${proposal.id}-tag-${tag}`}>{tag}</span>
+                                            <div className="mpc-info-grid">
+                                              <div className="mpc-info">
+                                                <span className="mpc-section-label">Duración</span>
+                                                <span className="mpc-info__value">{durationLabel}</span>
+                                              </div>
+                                              <div className="mpc-info">
+                                                <span className="mpc-section-label">Requisitos</span>
+                                                <span className="mpc-info__value">
+                                                  {requirementText || 'Revisión manual'}
+                                                </span>
+                                              </div>
+                                            </div>
+                                            {featureChips.length > 0 && (
+                                              <div className="mpc-chipset">
+                                                {featureChips.map((chipLabel) => (
+                                                  <span key={`${proposal.id}-chip-${chipLabel}`} className="mpc-chip">
+                                                    {chipLabel}
+                                                  </span>
                                                 ))}
                                               </div>
                                             )}
