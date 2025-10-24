@@ -3622,7 +3622,6 @@ export function MissionsV2Board({
                                       : proposal.reward;
                                     const primaryObjective = proposal.objective;
                                     const objectiveDetails = (proposal.objectives ?? []).filter(Boolean);
-                                    const primaryObjectiveDetail = objectiveDetails[0] ?? null;
                                     const requirementText = isRealProposal
                                       ? proposal.requirements
                                       : proposal.requirement;
@@ -3631,47 +3630,29 @@ export function MissionsV2Board({
                                       : proposal.durationLabel;
                                     const featureChips = isRealProposal
                                       ? buildProposalFeatureChips(proposal)
-                                      : proposal.features ?? [];
-                                    const metaSegments: Array<{
+                                      : proposal.features;
+                                    const inlineMetaItems: Array<{
                                       key: string;
-                                      content: ReactNode;
+                                      label: string;
+                                      value: string;
                                     }> = [];
 
                                     if (durationLabel) {
-                                      metaSegments.push({
+                                      inlineMetaItems.push({
                                         key: 'duration',
-                                        content: (
-                                          <span className="mpc-inline-meta__segment">
-                                            <span className="mpc-inline-meta__label">Duración</span>
-                                            <span className="mpc-inline-meta__value">{durationLabel}</span>
-                                          </span>
-                                        ),
+                                        label: 'Duración',
+                                        value: durationLabel,
                                       });
                                     }
-
-                                    featureChips.forEach((chipLabel, chipIndex) => {
-                                      metaSegments.push({
-                                        key: `chip-${chipIndex}`,
-                                        content: (
-                                          <span className="mpc-inline-meta__segment mpc-inline-meta__segment--chip">
-                                            <span className="mpc-chip">{chipLabel}</span>
-                                          </span>
-                                        ),
-                                      });
-                                    });
 
                                     const normalizedRequirement = requirementText?.trim();
                                     const requirementValue = normalizedRequirement?.length
                                       ? normalizedRequirement
                                       : 'Revisión manual';
-                                    metaSegments.push({
+                                    inlineMetaItems.push({
                                       key: 'requirement',
-                                      content: (
-                                        <span className="mpc-inline-meta__segment">
-                                          <span className="mpc-inline-meta__label">Requisito</span>
-                                          <span className="mpc-inline-meta__value">{requirementValue}</span>
-                                        </span>
-                                      ),
+                                      label: 'Requisito',
+                                      value: requirementValue,
                                     });
                                     const difficultyValue = isRealProposal
                                       ? proposal.difficulty ?? '—'
@@ -3751,12 +3732,44 @@ export function MissionsV2Board({
                                               <span className="mpc-objective__label">Objetivo</span>
                                               <p className="mpc-objective__text">{primaryObjective || '—'}</p>
                                             </div>
-                                            {primaryObjectiveDetail ? (
+                                            {objectiveDetails.length > 0 && (
                                               <ul className="mpc-objective-list">
-                                                <li key={`${proposal.id}-objective-${primaryObjectiveDetail}`}>
-                                                  {primaryObjectiveDetail}
-                                                </li>
+                                                {objectiveDetails.map((detail) => (
+                                                  <li key={`${proposal.id}-objective-${detail}`}>
+                                                    {detail}
+                                                  </li>
+                                                ))}
                                               </ul>
+                                            )}
+                                            {(inlineMetaItems.length > 0 || featureChips.length > 0) && (
+                                              <ul className="mpc-inline-meta">
+                                                {inlineMetaItems.map((item) => (
+                                                  <li key={`${proposal.id}-${item.key}`}>
+                                                    <span className="mpc-inline-meta__label">{item.label}</span>
+                                                    <span className="mpc-inline-meta__value">{item.value}</span>
+                                                  </li>
+                                                ))}
+                                                {featureChips.map((chipLabel) => (
+                                                  <li
+                                                    key={`${proposal.id}-chip-${chipLabel}`}
+                                                    className="mpc-inline-meta__chip"
+                                                  >
+                                                    <span className="mpc-chip">{chipLabel}</span>
+                                                  </li>
+                                                ))}
+                                              </ul>
+                                            )}
+                                            {showPetals ? (
+                                              <div className="mpc-petals">
+                                                <span className="mpc-petals-label">Pétalos</span>
+                                                <MissionPetalsMini
+                                                  slot={slotMetrics}
+                                                  highlight={isActiveProposal}
+                                                />
+                                                <span className="mpc-meter__detail">
+                                                  {petalsRemaining} / {petalsTotal}
+                                                </span>
+                                              </div>
                                             ) : null}
                                             {metaSegments.length > 0 ? (
                                               <ul className="mpc-inline-meta">
