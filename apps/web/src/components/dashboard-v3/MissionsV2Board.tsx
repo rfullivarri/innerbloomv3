@@ -1558,11 +1558,18 @@ export function MissionsV2Board({
       }
 
       let paddingTop = 0;
+      let headerOffset = 0;
       if (typeof window !== 'undefined') {
         const containerStyle = window.getComputedStyle(container);
         paddingTop = Number.parseFloat(containerStyle.paddingTop) || 0;
+        const headerOffsetValue = Number.parseFloat(
+          containerStyle.getPropertyValue('--market-stack-header-height'),
+        );
+        if (Number.isFinite(headerOffsetValue)) {
+          headerOffset = headerOffsetValue;
+        }
       }
-      const targetTop = Math.max(targetChild.offsetTop - paddingTop, 0);
+      const targetTop = Math.max(targetChild.offsetTop - paddingTop - headerOffset, 0);
       if (Math.abs(container.scrollTop - targetTop) <= 1) {
         updateMarketStackFade(slotKey, container);
         return;

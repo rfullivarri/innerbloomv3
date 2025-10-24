@@ -2344,7 +2344,12 @@
     opacity var(--motion-duration-base) var(--motion-ease-enter);
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  scroll-margin-top: var(--market-stack-header-height, 0px);
+  scroll-margin-top: calc(
+    var(--market-stack-header-height, 0px) + var(--market-stack-padding-block, 0px)
+  );
+  scroll-margin-bottom: calc(
+    var(--market-stack-padding-block, 0px) + var(--market-stack-safe-area, 0px)
+  );
   min-height: calc(100% - var(--market-stack-gap, 0px));
   max-height: 100%;
 }
