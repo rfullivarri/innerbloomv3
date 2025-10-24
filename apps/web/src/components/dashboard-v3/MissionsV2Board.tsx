@@ -1194,11 +1194,11 @@ export function MissionsV2Board({
     if (!cardNode) {
       return;
     }
-    const rect = cardNode.getBoundingClientRect();
-    if (!Number.isFinite(rect.height) || rect.height <= 0) {
+    const height = cardNode.offsetHeight || cardNode.clientHeight;
+    if (!height || !Number.isFinite(height) || height <= 0) {
       return;
     }
-    const nextHeight = Math.round(rect.height);
+    const nextHeight = Math.round(height);
     setMarketCardHeightBySlot((prev) => {
       if (prev[activeCard.key] === nextHeight) {
         return prev;
@@ -2486,11 +2486,11 @@ export function MissionsV2Board({
       if (!cardElement) {
         return;
       }
-      const rect = cardElement.getBoundingClientRect();
-      if (!Number.isFinite(rect.height) || rect.height <= 0) {
+      const height = cardElement.offsetHeight || cardElement.clientHeight;
+      if (!height || !Number.isFinite(height) || height <= 0) {
         return;
       }
-      const nextHeight = Math.round(rect.height);
+      const nextHeight = Math.round(height);
       setMarketCardHeightBySlot((prev) => {
         if (prev[cardKey] === nextHeight) {
           return prev;
@@ -2559,7 +2559,10 @@ export function MissionsV2Board({
     let frame = 0;
     const updateHeight = () => {
       frame = 0;
-      const { height } = element.getBoundingClientRect();
+      const height = element.offsetHeight || element.clientHeight;
+      if (!height || !Number.isFinite(height) || height <= 0) {
+        return;
+      }
       setActiveSlotCardHeight((current) => {
         if (current != null && Math.abs(current - height) < 1) {
           return current;
