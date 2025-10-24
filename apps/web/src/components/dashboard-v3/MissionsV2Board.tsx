@@ -1,5 +1,4 @@
 import {
-  Fragment,
   useCallback,
   useEffect,
   useId,
@@ -9,7 +8,6 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
-  type ReactNode,
   type SyntheticEvent,
   type UIEvent as ReactUIEvent,
 } from 'react';
@@ -3631,19 +3629,15 @@ export function MissionsV2Board({
                                     const featureChips = isRealProposal
                                       ? buildProposalFeatureChips(proposal)
                                       : proposal.features;
+                                    const chipLabels = [
+                                      ...(durationLabel ? [`Duración · ${durationLabel}`] : []),
+                                      ...featureChips,
+                                    ];
                                     const inlineMetaItems: Array<{
                                       key: string;
                                       label: string;
                                       value: string;
                                     }> = [];
-
-                                    if (durationLabel) {
-                                      inlineMetaItems.push({
-                                        key: 'duration',
-                                        label: 'Duración',
-                                        value: durationLabel,
-                                      });
-                                    }
 
                                     if (slot === 'main') {
                                       const normalizedRequirement = requirementText?.trim();
@@ -3687,34 +3681,6 @@ export function MissionsV2Board({
                                     const buttonLabel = isProposalLocked
                                       ? 'Misión en progreso'
                                       : `Activar en slot ${details.label}`;
-                                    const heartbeatPending = !slotMetrics.heartbeat_today;
-                                    const metaSegments: Array<{ key: string; content: ReactNode }> = [];
-                                    const countdownLabel = formatCountdown(slotMetrics.countdown?.label ?? '');
-
-                                    if (countdownLabel) {
-                                      metaSegments.push({
-                                        key: 'countdown',
-                                        content: (
-                                          <span className="mpc-inline-meta__segment">
-                                            <span className="mpc-inline-meta__label">Cuenta regresiva</span>
-                                            <span className="mpc-inline-meta__value">{countdownLabel}</span>
-                                          </span>
-                                        ),
-                                      });
-                                    }
-
-                                    metaSegments.push({
-                                      key: 'heartbeat',
-                                      content: (
-                                        <span className="mpc-inline-meta__segment">
-                                          <span className="mpc-inline-meta__label">Heartbeat</span>
-                                          <span className="mpc-inline-meta__value">
-                                            {heartbeatPending ? 'Pendiente' : 'Registrado'}
-                                          </span>
-                                        </span>
-                                      ),
-                                    });
-
                                     return (
                                       <article
                                         key={proposalKey}
@@ -3771,7 +3737,7 @@ export function MissionsV2Board({
                                                 ))}
                                               </ul>
                                             )}
-                                            {(inlineMetaItems.length > 0 || featureChips.length > 0) && (
+                                            {(inlineMetaItems.length > 0 || chipLabels.length > 0) && (
                                               <ul className="mpc-inline-meta">
                                                 {inlineMetaItems.map((item) => (
                                                   <li key={`${proposal.id}-${item.key}`}>
@@ -3779,7 +3745,7 @@ export function MissionsV2Board({
                                                     <span className="mpc-inline-meta__value">{item.value}</span>
                                                   </li>
                                                 ))}
-                                                {featureChips.map((chipLabel) => (
+                                                {chipLabels.map((chipLabel) => (
                                                   <li
                                                     key={`${proposal.id}-chip-${chipLabel}`}
                                                     className="mpc-inline-meta__chip"
@@ -3789,20 +3755,6 @@ export function MissionsV2Board({
                                                 ))}
                                               </ul>
                                             )}
-                                            {metaSegments.length > 0 ? (
-                                              <ul className="mpc-inline-meta">
-                                                <li>
-                                                  {metaSegments.map((segment, segmentIndex) => (
-                                                    <Fragment key={`${proposal.id}-${segment.key}`}>
-                                                      {segmentIndex > 0 ? (
-                                                        <span className="mpc-inline-meta__separator">·</span>
-                                                      ) : null}
-                                                      {segment.content}
-                                                    </Fragment>
-                                                  ))}
-                                                </li>
-                                              </ul>
-                                            ) : null}
                                           </div>
                                           <div className="mission-proposal-card__footer">
                                             <button
