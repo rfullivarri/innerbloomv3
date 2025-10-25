@@ -513,6 +513,11 @@ type CarouselTrackStyle = CSSProperties & {
   '--missions-market-carousel-height'?: string;
 };
 
+// Extra vertical room we add to the carousel tracks so cards never feel cramped.
+// We subtract this padding from measured heights to avoid feedback loops where
+// stretched flex items artificially grow the track on every measurement.
+const CAROUSEL_HEIGHT_PADDING = 64;
+
 function buildHeroLine(slot: MissionsV2Slot, market: MarketBySlot): string {
   if (slot.mission?.summary) {
     return slot.mission.summary;
@@ -1169,7 +1174,7 @@ export function MissionsV2Board({
     if (activeSlotCardHeight == null) {
       return undefined;
     }
-    const baseHeight = Math.round(activeSlotCardHeight + 64);
+    const baseHeight = Math.round(activeSlotCardHeight + CAROUSEL_HEIGHT_PADDING);
     const minimumHeight = 360;
     const paddedHeight = Math.max(baseHeight, minimumHeight);
     return {
@@ -1185,11 +1190,11 @@ export function MissionsV2Board({
     if (!activeCard) {
       return undefined;
     }
-    const measuredHeight = marketCardHeightBySlot[activeCard.key];
-    if (measuredHeight == null) {
+    const normalizedHeight = marketCardHeightBySlot[activeCard.key];
+    if (normalizedHeight == null) {
       return undefined;
     }
-    const baseHeight = Math.round(measuredHeight + 64);
+    const baseHeight = Math.round(normalizedHeight + CAROUSEL_HEIGHT_PADDING);
     const minimumHeight = 360;
     const paddedHeight = Math.max(baseHeight, minimumHeight);
     return {
@@ -1230,11 +1235,12 @@ export function MissionsV2Board({
     if (!cardNode) {
       return;
     }
-    const height = cardNode.offsetHeight || cardNode.clientHeight;
+    const height = cardNode.scrollHeight || cardNode.offsetHeight || cardNode.clientHeight;
     if (!height || !Number.isFinite(height) || height <= 0) {
       return;
     }
-    const nextHeight = Math.round(height);
+    const normalizedHeight = Math.max(0, height - CAROUSEL_HEIGHT_PADDING);
+    const nextHeight = Math.round(normalizedHeight);
     setMarketCardHeightBySlot((prev) => {
       if (prev[activeCard.key] === nextHeight) {
         return prev;
@@ -2498,11 +2504,13 @@ export function MissionsV2Board({
       if (!cardElement) {
         return;
       }
-      const height = cardElement.offsetHeight || cardElement.clientHeight;
+      const height =
+        cardElement.scrollHeight || cardElement.offsetHeight || cardElement.clientHeight;
       if (!height || !Number.isFinite(height) || height <= 0) {
         return;
       }
-      const nextHeight = Math.round(height);
+      const normalizedHeight = Math.max(0, height - CAROUSEL_HEIGHT_PADDING);
+      const nextHeight = Math.round(normalizedHeight);
       setMarketCardHeightBySlot((prev) => {
         if (prev[cardKey] === nextHeight) {
           return prev;
@@ -2571,15 +2579,16 @@ export function MissionsV2Board({
     let frame = 0;
     const updateHeight = () => {
       frame = 0;
-      const height = element.offsetHeight || element.clientHeight;
+      const height = element.scrollHeight || element.offsetHeight || element.clientHeight;
       if (!height || !Number.isFinite(height) || height <= 0) {
         return;
       }
+      const normalizedHeight = Math.max(0, height - CAROUSEL_HEIGHT_PADDING);
       setActiveSlotCardHeight((current) => {
-        if (current != null && Math.abs(current - height) < 1) {
+        if (current != null && Math.abs(current - normalizedHeight) < 1) {
           return current;
         }
-        return height;
+        return normalizedHeight;
       });
     };
 
