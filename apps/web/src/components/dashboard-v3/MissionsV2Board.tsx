@@ -347,7 +347,7 @@ function getMarketRarity(slot: MissionsV2Slot['slot']): Rarity {
   return 'common';
 }
 
-type RealMarketProposal = MissionsV2MarketProposal & { locked?: boolean; isActive?: boolean };
+type RealMarketProposal = MissionsV2MarketProposal;
 
 type MockMissionProposal = {
   id: string;
@@ -409,6 +409,7 @@ function missionToMarketProposal(slot: MissionsV2Slot): RealMarketProposal | nul
     duration_days: 0,
     locked: true,
     isActive: true,
+    available_at: null,
   };
 }
 

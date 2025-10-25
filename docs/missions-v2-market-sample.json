@@ -1,0 +1,208 @@
+{
+  "market": [
+    {
+      "slot": "main",
+      "proposals": [
+        {
+          "id": "mission-main-001",
+          "slot": "main",
+          "name": "Guardianes del Bloom",
+          "summary": "Defiende la flor central completando tareas coordinadas.",
+          "requirements": "Completar briefing semanal · Equipo de 3 agentes",
+          "objective": "Resistir tres oleadas de amenazas al núcleo.",
+          "objectives": [
+            "Completar la ronda de reconocimiento",
+            "Entregar reporte de vulnerabilidades",
+            "Coordinar defensa con el squad"
+          ],
+          "reward": { "xp": 450, "currency": 120, "items": ["Llave Prisma"] },
+          "difficulty": "high",
+          "tags": ["story", "team"],
+          "metadata": { "spotlight": true, "boosterMultiplier": 1.5 },
+          "duration_days": 5,
+          "locked": true,
+          "isActive": true,
+          "available_at": "2024-12-02T03:04:05.000Z"
+        },
+        {
+          "id": "mission-main-002",
+          "slot": "main",
+          "name": "Custodia del Archivo",
+          "summary": "Recuperá documentos históricos antes de que se desvanezcan.",
+          "requirements": "Investigar sala de archivos · Desbloquear cofres",
+          "objective": "Obtener tres reliquias únicas del archivo.",
+          "objectives": [
+            "Descifrar el panel ancestral",
+            "Conseguir la reliquia solar",
+            "Reportar hallazgos en canal #missions"
+          ],
+          "reward": { "xp": 380, "currency": 95, "items": ["Papiro Antiguo"] },
+          "difficulty": "medium",
+          "tags": ["exploration"],
+          "metadata": { "boosterMultiplier": 1.25, "stat": "wisdom" },
+          "duration_days": 4,
+          "locked": false,
+          "isActive": false,
+          "available_at": null
+        },
+        {
+          "id": "mission-main-003",
+          "slot": "main",
+          "name": "Frente a la Tormenta",
+          "summary": "Dirigí la defensa durante la tormenta de fragmentos.",
+          "requirements": "Coordinar brigadas · Activar escudos temporales",
+          "objective": "Mantener los escudos activos por cuatro turnos.",
+          "objectives": [
+            "Revisar el radar intermitente",
+            "Anclar dos generadores de energía",
+            "Emitir reporte de estabilidad"
+          ],
+          "reward": { "xp": 520, "currency": 140, "items": ["Fragmento Estelar"] },
+          "difficulty": "epic",
+          "tags": ["challenge", "timed"],
+          "metadata": { "spotlight": false, "boosterMultiplier": 1.7 },
+          "duration_days": 6,
+          "locked": false,
+          "isActive": false,
+          "available_at": null
+        }
+      ]
+    },
+    {
+      "slot": "hunt",
+      "proposals": [
+        {
+          "id": "mission-hunt-001",
+          "slot": "hunt",
+          "name": "Rastreo Fantasma",
+          "summary": "Sigue las huellas digitales en el distrito olvidado.",
+          "requirements": "Analizar 3 pistas · Operar en modo sigiloso",
+          "objective": "Descubrir quién alteró los registros nocturnos.",
+          "objectives": [
+            "Investigar cámaras del distrito",
+            "Detectar patrones anómalos",
+            "Capturar evidencia principal"
+          ],
+          "reward": { "xp": 260, "currency": 70, "items": ["Sensor Ámbar"] },
+          "difficulty": "medium",
+          "tags": ["stealth"],
+          "metadata": { "stat": "perception" },
+          "duration_days": 3,
+          "locked": true,
+          "isActive": true,
+          "available_at": "2024-12-01T21:04:05.000Z"
+        },
+        {
+          "id": "mission-hunt-002",
+          "slot": "hunt",
+          "name": "Sendero Inverso",
+          "summary": "Recrea los pasos de un agente perdido.",
+          "requirements": "Recolectar firmas · Revisar testimonios",
+          "objective": "Volver a trazar el mapa de desplazamiento.",
+          "objectives": [
+            "Levantar mapa 3D",
+            "Analizar señalización",
+            "Confirmar paradero final"
+          ],
+          "reward": { "xp": 310, "currency": 80, "items": ["Mapa Prismático"] },
+          "difficulty": "high",
+          "tags": ["investigation"],
+          "metadata": { "boosterMultiplier": 1.35 },
+          "duration_days": 4,
+          "locked": false,
+          "isActive": false,
+          "available_at": null
+        },
+        {
+          "id": "mission-hunt-003",
+          "slot": "hunt",
+          "name": "Eco Nocturno",
+          "summary": "Intercepta transmisiones que cruzan la frontera oscura.",
+          "requirements": "Sincronizar antenas · Mantener sigilo",
+          "objective": "Mapear la red clandestina antes del amanecer.",
+          "objectives": [
+            "Reparar antena oeste",
+            "Decodificar señal beta",
+            "Emitir alerta final"
+          ],
+          "reward": { "xp": 285, "currency": 75, "items": ["Chip Resonante"] },
+          "difficulty": "medium",
+          "tags": ["signal"],
+          "metadata": { "stat": "intuition" },
+          "duration_days": 3,
+          "locked": false,
+          "isActive": false,
+          "available_at": null
+        }
+      ]
+    },
+    {
+      "slot": "skill",
+      "proposals": [
+        {
+          "id": "mission-skill-001",
+          "slot": "skill",
+          "name": "Forja de Sincronía",
+          "summary": "Optimiza tus habilidades en el laboratorio comunitario.",
+          "requirements": "Aprobar taller base · Presentar prototipo",
+          "objective": "Completar tres módulos de la forja colaborativa.",
+          "objectives": [
+            "Diseñar blueprint inicial",
+            "Iterar mejoras",
+            "Exponer el resultado"
+          ],
+          "reward": { "xp": 210, "currency": 55, "items": ["Catalizador Lunar"] },
+          "difficulty": "medium",
+          "tags": ["crafting"],
+          "metadata": { "stat": "creation" },
+          "duration_days": 3,
+          "locked": false,
+          "isActive": false,
+          "available_at": null
+        },
+        {
+          "id": "mission-skill-002",
+          "slot": "skill",
+          "name": "Bitácora de Maestría",
+          "summary": "Documenta y enseña un truco avanzado a la comunidad.",
+          "requirements": "Registrar video · Compartir aprendizajes",
+          "objective": "Publicar guía con tres ejemplos prácticos.",
+          "objectives": [
+            "Planificar guion",
+            "Grabar demostración",
+            "Publicar entrega final"
+          ],
+          "reward": { "xp": 240, "currency": 60, "items": ["Glifo Instruccional"] },
+          "difficulty": "high",
+          "tags": ["teaching"],
+          "metadata": { "boosterMultiplier": 1.2 },
+          "duration_days": 5,
+          "locked": false,
+          "isActive": false,
+          "available_at": null
+        },
+        {
+          "id": "mission-skill-003",
+          "slot": "skill",
+          "name": "Simulación Aurora",
+          "summary": "Ejecuta la simulación estratégica de la temporada Aurora.",
+          "requirements": "Completar tutorial · Coordinar con dos agentes",
+          "objective": "Obtener una puntuación perfecta en la simulación.",
+          "objectives": [
+            "Revisar briefing táctico",
+            "Calibrar indicadores",
+            "Compartir conclusiones"
+          ],
+          "reward": { "xp": 280, "currency": 70, "items": ["Módulo Aurora"] },
+          "difficulty": "epic",
+          "tags": ["simulation"],
+          "metadata": { "spotlight": true },
+          "duration_days": 4,
+          "locked": false,
+          "isActive": false,
+          "available_at": null
+        }
+      ]
+    }
+  ]
+}

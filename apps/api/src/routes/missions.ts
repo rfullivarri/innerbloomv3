@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { FEATURE_MISSIONS_V2 } from '../config/feature-flags.js';
 import { asyncHandler } from '../lib/async-handler.js';
 import { HttpError } from '../lib/http-error.js';
 import { parseWithValidation } from '../lib/validation.js';
@@ -16,6 +17,12 @@ import {
   selectMission,
 } from '../services/missionsV2Service.js';
 import { MISSION_SLOT_KEYS, type MissionSlotKey } from '../services/missionsV2Types.js';
+import {
+  createMissionsV2BoardResponse,
+  createMissionsV2ClaimResponse,
+  createMissionsV2HeartbeatResponse,
+  createMissionsV2MarketResponse,
+} from '../modules/missions-v2/missions-v2.stubs.js';
 
 const router = Router();
 
@@ -49,6 +56,16 @@ const heartbeatBodySchema = z
     message: 'Invalid heartbeat payload',
   });
 
+const activateBodySchema = z.object({
+  slot: slotEnum,
+  proposal_id: z.string().min(1),
+});
+
+const abandonBodySchema = z.object({
+  slot: slotEnum,
+  mission_id: z.string().min(1),
+});
+
 const CLAIM_SOURCE_HEADER = 'x-missions-claim-source';
 const CLAIM_ALLOWED_PATH = '/dashboard-v3/missions-v2';
 
@@ -70,8 +87,31 @@ router.get(
       throw new HttpError(401, 'unauthorized', 'Authentication required');
     }
 
+    if (FEATURE_MISSIONS_V2) {
+      res.json(createMissionsV2BoardResponse());
+      return;
+    }
+
     const board = await getMissionBoard(user.id);
     res.json(board);
+  }),
+);
+
+router.get(
+  '/missions/market',
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    if (!user) {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    }
+
+    if (!FEATURE_MISSIONS_V2) {
+      throw new HttpError(404, 'not_found', 'Missions v2 is disabled');
+    }
+
+    res.json(createMissionsV2MarketResponse());
   }),
 );
 
@@ -183,6 +223,11 @@ router.post(
       throw new HttpError(400, 'invalid_request', 'Invalid heartbeat payload');
     }
 
+    if (FEATURE_MISSIONS_V2) {
+      res.json(createMissionsV2HeartbeatResponse());
+      return;
+    }
+
     try {
       const payload = await registerMissionHeartbeat(user.id, missionId);
       res.json(payload);
@@ -209,11 +254,24 @@ router.post(
       typeof claimSource === 'string' && claimSource.toLowerCase().includes(CLAIM_ALLOWED_PATH.toLowerCase());
 
     if (!claimAllowed) {
+      if (FEATURE_MISSIONS_V2) {
+        res.json({
+          board: createMissionsV2BoardResponse(),
+          rewards: { xp: 0, currency: 0, items: [] },
+        });
+        return;
+      }
+
       const board = await getMissionBoard(user.id, { claimAccess: 'blocked' });
       res.json({
         board,
         rewards: { xp: 0, currency: 0, items: [] },
       });
+      return;
+    }
+
+    if (FEATURE_MISSIONS_V2) {
+      res.json(createMissionsV2ClaimResponse());
       return;
     }
 
@@ -223,6 +281,44 @@ router.post(
     } catch (error) {
       normalizeError(error, 'Unable to claim mission reward');
     }
+  }),
+);
+
+router.post(
+  '/missions/activate',
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    if (!user) {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    }
+
+    if (!FEATURE_MISSIONS_V2) {
+      throw new HttpError(404, 'not_found', 'Missions v2 is disabled');
+    }
+
+    parseWithValidation(activateBodySchema, req.body, 'Invalid activate payload');
+    res.json(createMissionsV2BoardResponse());
+  }),
+);
+
+router.post(
+  '/missions/abandon',
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    if (!user) {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    }
+
+    if (!FEATURE_MISSIONS_V2) {
+      throw new HttpError(404, 'not_found', 'Missions v2 is disabled');
+    }
+
+    parseWithValidation(abandonBodySchema, req.body, 'Invalid abandon payload');
+    res.json(createMissionsV2BoardResponse());
   }),
 );
 
