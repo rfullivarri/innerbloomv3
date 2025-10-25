@@ -292,7 +292,7 @@ function buildRequirementChips(slot: MissionsV2Slot): string[] {
     mission.requirements
       .split(/[·\n]/)
       .map((rawValue: string) => rawValue.trim())
-      .filter((value): value is string => value.length > 0)
+      .filter((value: string): value is string => value.length > 0)
       .forEach((value: string) => chips.add(value));
   }
 
@@ -1706,7 +1706,9 @@ export function MissionsV2Board({
     if (!board) {
       return false;
     }
-    const mainSlotState = board.slots.find((slot) => slot.slot === 'main');
+    const mainSlotState = board.slots.find(
+      (slot: MissionsV2Slot) => slot.slot === 'main',
+    );
     if (!mainSlotState || !mainSlotState.mission) {
       return false;
     }
