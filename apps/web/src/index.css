@@ -1105,18 +1105,36 @@
       100dvh - var(--market-carousel-shell-top) - var(--market-carousel-shell-bottom) - var(--market-carousel-safe-gap)
     )
   );
+  --market-carousel-inline-padding: clamp(1.1rem, 6vw, 3rem);
+  --missions-carousel-card-width: clamp(240px, 72vw, 336px);
   position: relative;
   display: flex;
   width: 100%;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: clamp(1.25rem, 4vw, 2.5rem);
   padding-block: var(--market-carousel-track-padding-block);
+  padding-inline-start: max(
+    var(--market-carousel-inline-padding),
+    env(safe-area-inset-left, 0px)
+  );
+  padding-inline-end: max(
+    var(--market-carousel-inline-padding),
+    env(safe-area-inset-right, 0px)
+  );
   min-height: var(--missions-active-carousel-height);
-  touch-action: pan-x;
+  touch-action: pan-y pan-x;
   overflow-x: auto;
   overflow-y: visible;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 48%;
+  scroll-padding-inline: max(
+      var(--market-carousel-inline-padding),
+      env(safe-area-inset-left, 0px)
+    )
+    max(
+      var(--market-carousel-inline-padding),
+      env(safe-area-inset-right, 0px)
+    );
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
 }
@@ -1133,8 +1151,7 @@
 }
 
 [data-reduced-motion='true'] .missions-market-carousel__track {
-  padding-block: var(--market-carousel-track-padding-block);
-  scroll-padding-inline: 48%;
+  scroll-behavior: auto;
   overscroll-behavior-x: contain;
   scrollbar-width: thin;
 }
@@ -1148,8 +1165,12 @@
 }
 
 .missions-market-carousel__item {
-  transition: opacity var(--motion-duration-base) var(--motion-ease-enter);
+  flex: 0 0 auto;
+  width: var(--missions-carousel-card-width, clamp(240px, 72vw, 336px));
+  transition: opacity var(--motion-duration-base) var(--motion-ease-enter),
+    transform var(--motion-duration-medium) var(--motion-ease-enter);
   scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
 
 .missions-market-carousel__item[data-active='false'] {
@@ -1289,20 +1310,47 @@
       100dvh - var(--missions-carousel-shell-top) - var(--missions-carousel-shell-bottom) - var(--missions-carousel-safe-gap)
     )
   );
-  @apply relative flex w-full items-center justify-center overflow-hidden py-3 sm:py-5;
+  --missions-active-carousel-inline-padding: clamp(1rem, 6vw, 2.75rem);
+  --missions-carousel-card-width: clamp(240px, 70vw, 320px);
+  @apply relative flex w-full items-stretch;
+  gap: clamp(1.25rem, 4vw, 2.25rem);
   min-height: var(--missions-active-carousel-height, var(--missions-active-carousel-fallback));
-  touch-action: pan-x;
+  padding-block: clamp(1.25rem, 4vw, 1.75rem);
+  padding-inline-start: max(
+    var(--missions-active-carousel-inline-padding),
+    env(safe-area-inset-left, 0px)
+  );
+  padding-inline-end: max(
+    var(--missions-active-carousel-inline-padding),
+    env(safe-area-inset-right, 0px)
+  );
+  touch-action: pan-y pan-x;
   overflow-x: auto;
   overflow-y: visible;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 48%;
+  scroll-padding-inline: max(
+      var(--missions-active-carousel-inline-padding),
+      env(safe-area-inset-left, 0px)
+    )
+    max(
+      var(--missions-active-carousel-inline-padding),
+      env(safe-area-inset-right, 0px)
+    );
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
 }
 
 .missions-active-carousel__item {
-  @apply absolute left-1/2 top-1/2 flex w-full max-w-xs cursor-pointer justify-center transition duration-500 ease-out md:max-w-sm;
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  width: var(--missions-carousel-card-width, clamp(240px, 70vw, 320px));
+  cursor: pointer;
+  transition: opacity var(--motion-duration-base) var(--motion-ease-enter),
+    transform var(--motion-duration-medium) var(--motion-ease-enter);
   scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
 
 .missions-active-carousel__item[data-active='false'] {
@@ -1325,8 +1373,7 @@
 }
 
 [data-reduced-motion='true'] .missions-active-carousel__track {
-  @apply relative flex min-h-0 items-stretch gap-5 overflow-x-auto px-4 py-5;
-  scroll-snap-type: x mandatory;
+  scroll-behavior: auto;
   scrollbar-width: thin;
 }
 
@@ -1339,13 +1386,7 @@
 }
 
 [data-reduced-motion='true'] .missions-active-carousel__item {
-  @apply static flex-none snap-center transition-none;
-  width: clamp(240px, 68vw, 320px);
   transform: none !important;
-  opacity: 1 !important;
-}
-
-[data-reduced-motion='true'] .missions-active-carousel__item {
   transition: opacity var(--motion-duration-base) var(--motion-ease-enter);
 }
 
