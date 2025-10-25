@@ -3,6 +3,7 @@ import {
   type MissionsV2ClaimResponse,
   type MissionsV2HeartbeatResponse,
   type MissionsV2MarketResponse,
+  type MissionsV2MarketProposal,
   type MissionsV2MarketSlot,
   type MissionsV2Slot,
   type MissionsV2SlotKey,
@@ -251,9 +252,9 @@ const marketBase: MissionsV2MarketSlot[] = [
 ];
 
 function cloneMarket(): MissionsV2MarketSlot[] {
-  return marketBase.map((slot) => ({
+  return marketBase.map((slot: MissionsV2MarketSlot) => ({
     slot: slot.slot,
-    proposals: slot.proposals.map((proposal) => ({ ...proposal })),
+    proposals: slot.proposals.map((proposal: MissionsV2MarketProposal) => ({ ...proposal })),
   }));
 }
 

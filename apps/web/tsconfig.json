@@ -7,7 +7,11 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"]
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
+    "baseUrl": ".",
+    "paths": {
+      "@innerbloom/missions-v2-contracts": ["../../packages/missions-v2-contracts/src/index.d.ts"]
+    }
   },
   "include": ["src"]
 }
