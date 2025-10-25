@@ -253,7 +253,9 @@ const marketBase: MissionsV2MarketSlot[] = [
 function cloneMarket(): MissionsV2MarketSlot[] {
   return marketBase.map((slot) => ({
     slot: slot.slot,
-    proposals: slot.proposals.map((proposal) => ({ ...proposal })),
+    proposals: slot.proposals.map((proposal: MissionsV2MarketSlot['proposals'][number]) => ({
+      ...proposal,
+    })),
   }));
 }
 
