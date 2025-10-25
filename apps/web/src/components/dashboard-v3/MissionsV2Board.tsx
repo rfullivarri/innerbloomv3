@@ -20,8 +20,10 @@ import {
   postMissionsV2Heartbeat,
   type MissionsV2Action,
   type MissionsV2BoardResponse,
+  type MissionsV2Communication,
   type MissionsV2MarketProposal,
   type MissionsV2MarketSlot,
+  type MissionsV2MissionTask,
   type MissionsV2Slot,
 } from '../../lib/api';
 import { useRequest } from '../../hooks/useRequest';
@@ -289,9 +291,9 @@ function buildRequirementChips(slot: MissionsV2Slot): string[] {
   if (mission?.requirements) {
     mission.requirements
       .split(/[·\n]/)
-      .map((value) => value.trim())
-      .filter(Boolean)
-      .forEach((value) => chips.add(value));
+      .map((rawValue: string) => rawValue.trim())
+      .filter((value): value is string => value.length > 0)
+      .forEach((value: string) => chips.add(value));
   }
 
   if (slot.slot === 'main') {
@@ -388,7 +390,7 @@ function missionToMarketProposal(slot: MissionsV2Slot): RealMarketProposal | nul
   }
 
   const reward = mission.reward ?? { xp: 0 };
-  const objectives = mission.objectives ?? mission.tasks.map((task) => task.name);
+  const objectives = mission.objectives ?? mission.tasks.map((task: MissionsV2MissionTask) => task.name);
 
   return {
     id: mission.id,
@@ -424,7 +426,7 @@ function humanizeMetadataValue(value: string): string {
   return value
     .split(/[_-]/)
     .filter(Boolean)
-    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .map((segment: string) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(' ');
 }
 
@@ -1095,13 +1097,13 @@ export function MissionsV2Board({
     }
 
     for (const slotKey of SLOT_ORDER) {
-      const entry = board.market?.find((marketSlot) => marketSlot.slot === slotKey);
-      const proposals: RealMarketProposal[] = (entry?.proposals ?? []).map((proposal) => ({
+      const entry = board.market?.find((marketSlot: MissionsV2MarketSlot) => marketSlot.slot === slotKey);
+      const proposals: RealMarketProposal[] = (entry?.proposals ?? []).map((proposal: MissionsV2MarketProposal) => ({
         ...proposal,
       }));
       const activeProposal = activeBySlot.get(slotKey);
       if (activeProposal) {
-        const deduped = proposals.filter((proposal) => proposal.id !== activeProposal.id);
+        const deduped = proposals.filter((proposal: RealMarketProposal) => proposal.id !== activeProposal.id);
         map[slotKey] = [activeProposal, ...deduped];
       } else {
         map[slotKey] = proposals;
@@ -1145,7 +1147,7 @@ export function MissionsV2Board({
 
   const slotIndexById = useMemo(() => {
     const map = new Map<string, number>();
-    orderedSlots.forEach((slot, index) => {
+    orderedSlots.forEach((slot: MissionsV2Slot, index) => {
       map.set(slot.id, index);
     });
     return map;
@@ -1718,7 +1720,7 @@ export function MissionsV2Board({
     setActiveSlotStackBySlot((prev) => {
       const next: Record<string, number> = {};
       let changed = false;
-      orderedSlots.forEach((slot) => {
+      orderedSlots.forEach((slot: MissionsV2Slot) => {
         const panelCount = slot.slot === 'main' && bossEnabled ? 2 : 1;
         const current = prev[slot.id] ?? 0;
         const clamped = Math.min(Math.max(current, 0), Math.max(0, panelCount - 1));
@@ -1730,7 +1732,7 @@ export function MissionsV2Board({
       return changed ? next : prev;
     });
 
-    slotStackWheelDelta.current = orderedSlots.reduce<Record<string, number>>((acc, slot) => {
+    slotStackWheelDelta.current = orderedSlots.reduce<Record<string, number>>((acc, slot: MissionsV2Slot) => {
       acc[slot.id] = slotStackWheelDelta.current[slot.id] ?? 0;
       return acc;
     }, {});
@@ -2077,7 +2079,7 @@ export function MissionsV2Board({
         return;
       }
 
-      const slotIndexInBoard = board.slots.findIndex((slot) => slot.slot === slotKey);
+      const slotIndexInBoard = board.slots.findIndex((slot: MissionsV2Slot) => slot.slot === slotKey);
       if (slotIndexInBoard === -1) {
         setActionError('No encontramos un slot compatible para esta misión.');
         return;
@@ -2163,11 +2165,11 @@ export function MissionsV2Board({
       const nextSlots = [...board.slots];
       nextSlots[slotIndexInBoard] = nextSlot;
 
-      const nextMarket = board.market.map((entry): MissionsV2MarketSlot =>
+      const nextMarket = board.market.map((entry: MissionsV2MarketSlot): MissionsV2MarketSlot =>
         entry.slot === slotKey
           ? {
               ...entry,
-              proposals: entry.proposals.filter((item) => item.id !== proposal.id),
+              proposals: entry.proposals.filter((item: MissionsV2MarketProposal) => item.id !== proposal.id),
             }
           : entry,
       );
@@ -2887,8 +2889,8 @@ export function MissionsV2Board({
     const heartbeatPending = !slot.heartbeat_today;
     const heroLine = buildHeroLine(slot, marketBySlot);
     const rewardCopy = getRewardCopy(slot);
-    const heartbeatAction = slot.actions.find((action) => action.type === 'heartbeat');
-    const linkAction = slot.actions.find((action) => action.type === 'link_daily');
+    const heartbeatAction = slot.actions.find((action: MissionsV2Action) => action.type === 'heartbeat');
+    const linkAction = slot.actions.find((action: MissionsV2Action) => action.type === 'link_daily');
     const slotIndex = slotIndexById.get(slot.id) ?? -1;
     const isActiveSlot = slotIndex === activeSlotIndex;
     const heartbeatHighlight = heartbeatFeedback?.slotId === slot.id;
@@ -2924,7 +2926,7 @@ export function MissionsV2Board({
       };
       primaryActionId = linkAction.id;
     } else if (mission && slot.actions.length > 0) {
-      const [firstAction] = slot.actions.filter((action) => action.type !== 'claim');
+      const [firstAction] = slot.actions.filter((action: MissionsV2Action) => action.type !== 'claim');
       if (firstAction) {
         primaryAction = {
           key: firstAction.id,
@@ -2948,7 +2950,7 @@ export function MissionsV2Board({
       primaryActionId = 'market';
     }
 
-    const secondaryActions = slot.actions.filter((action) => {
+    const secondaryActions = slot.actions.filter((action: MissionsV2Action) => {
       if (action.type === 'claim') {
         return false;
       }
@@ -3150,7 +3152,7 @@ export function MissionsV2Board({
       <div className="missions-board__content">
         {board.communications.length > 0 && (
           <div className="space-y-3">
-            {board.communications.map((comm) => (
+            {board.communications.map((comm: MissionsV2Communication) => (
               <ToastBanner
                 key={comm.id}
                 tone={comm.type === 'daily' ? 'success' : 'info'}
@@ -3393,7 +3395,7 @@ export function MissionsV2Board({
                       const { slot, proposals, key: cardKey } = item;
                       const details = SLOT_DETAILS[slot];
                       const rarity = getMarketRarity(slot);
-                      const slotState = board.slots.find((slotEntry) => slotEntry.slot === slot);
+                      const slotState = board.slots.find((slotEntry: MissionsV2Slot) => slotEntry.slot === slot);
                       const slotMetrics = slotState ?? makeDemoSlot(slot, index + 1);
                       const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
                       const isFlipped = Boolean(flippedMarketCards[cardKey]);
@@ -3649,7 +3651,7 @@ export function MissionsV2Board({
                                             </div>
                                             {objectiveDetails.length > 0 && (
                                               <ul className="mpc-objective-list">
-                                                {objectiveDetails.map((detail) => (
+                                                {objectiveDetails.map((detail: string) => (
                                                   <li key={`${proposal.id}-objective-${detail}`}>
                                                     {detail}
                                                   </li>
@@ -3658,13 +3660,13 @@ export function MissionsV2Board({
                                             )}
                                             {(inlineMetaItems.length > 0 || chipLabels.length > 0) && (
                                               <ul className="mpc-inline-meta">
-                                                {inlineMetaItems.map((item) => (
+                                                {inlineMetaItems.map((item: { key: string; label: string; value: string }) => (
                                                   <li key={`${proposal.id}-${item.key}`}>
                                                     <span className="mpc-inline-meta__label">{item.label}</span>
                                                     <span className="mpc-inline-meta__value">{item.value}</span>
                                                   </li>
                                                 ))}
-                                                {chipLabels.map((chipLabel) => (
+                                                {chipLabels.map((chipLabel: string) => (
                                                   <li
                                                     key={`${proposal.id}-chip-${chipLabel}`}
                                                     className="mpc-inline-meta__chip"
