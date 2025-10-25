@@ -28,7 +28,11 @@ import { useRequest } from '../../hooks/useRequest';
 import { Card } from '../ui/Card';
 import { ProgressBar } from '../common/ProgressBar';
 import { ToastBanner } from '../common/ToastBanner';
-import { emitMissionsV2Event } from '../../lib/telemetry';
+import {
+  emitMissionsV2Event,
+  getUserAgentHash,
+  getViewportSnapshot,
+} from '../../lib/telemetry';
 import { FEATURE_MISSIONS_V2 } from '../../lib/featureFlags';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 
@@ -1034,6 +1038,7 @@ export function MissionsV2Board({
   const [activeSlotCardHeight, setActiveSlotCardHeight] = useState<number | null>(null);
   const [marketCardHeightBySlot, setMarketCardHeightBySlot] = useState<Record<string, number>>({});
   const [expandedSlots, setExpandedSlots] = useState<Record<string, boolean>>({});
+  const [userAgentHash, setUserAgentHash] = useState<string | null>(null);
   const hasTrackedView = useRef(false);
   const hasTrackedMarketView = useRef(false);
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -1066,6 +1071,8 @@ export function MissionsV2Board({
   });
   const slotStackWheelDelta = useRef<Record<string, number>>({});
   const previousActiveSlotIdRef = useRef<string | null>(null);
+  const hasInitializedActiveSnapRef = useRef(false);
+  const previousActiveSnapIndexRef = useRef<number | null>(null);
 
   const marketBySlot = useMemo<MarketBySlot>(() => {
     const map: MarketBySlot = {};
@@ -1200,6 +1207,10 @@ export function MissionsV2Board({
     const nextView = getViewModeFromLocation(location);
     setViewModeState((current) => (current === nextView ? current : nextView));
   }, [getViewModeFromLocation, location]);
+
+  useEffect(() => {
+    setUserAgentHash(getUserAgentHash());
+  }, []);
 
   useLayoutEffect(() => {
     if (prefersReducedMotion || viewMode !== 'market') {
@@ -2857,7 +2868,7 @@ export function MissionsV2Board({
     }
 
     let raf = 0;
-    const updateActive = () => {
+    const updateActive = (origin: 'initial' | 'scroll') => {
       const items = container.querySelectorAll<HTMLElement>('[data-carousel-index]');
       if (items.length === 0) {
         return;
@@ -2877,10 +2888,30 @@ export function MissionsV2Board({
           closestIndex = value ? Number.parseInt(value, 10) : 0;
         }
       });
-      setActiveMarketIndex((current) => (current === closestIndex ? current : closestIndex));
+
+      let shouldEmit = false;
+      setActiveMarketIndex((current) => {
+        if (current === closestIndex) {
+          return current;
+        }
+        shouldEmit = true;
+        return closestIndex;
+      });
+
+      if (!shouldEmit || origin !== 'scroll') {
+        return;
+      }
+
+      const viewport = getViewportSnapshot();
+      emitMissionsV2Event('missions_v2_scroll_market_snap', {
+        track: 'market',
+        cardIndex: closestIndex,
+        viewport: viewport ?? null,
+        userAgentHash: userAgentHash ?? null,
+      });
     };
 
-    updateActive();
+    updateActive('initial');
 
     const handleScroll = () => {
       if (carouselPointerDownRef.current) {
@@ -2889,7 +2920,7 @@ export function MissionsV2Board({
       if (raf) {
         cancelAnimationFrame(raf);
       }
-      raf = window.requestAnimationFrame(updateActive);
+      raf = window.requestAnimationFrame(() => updateActive('scroll'));
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });
@@ -2900,7 +2931,7 @@ export function MissionsV2Board({
         window.cancelAnimationFrame(raf);
       }
     };
-  }, [activeMarketIndex, viewMode, marketCards, prefersReducedMotion]);
+  }, [activeMarketIndex, viewMode, marketCards, prefersReducedMotion, userAgentHash]);
 
   useEffect(() => {
     if (viewMode !== 'market') {
@@ -2941,6 +2972,32 @@ export function MissionsV2Board({
 
     return () => window.cancelAnimationFrame(raf);
   }, [viewMode, activeSlotIndex, orderedSlots.length, scrollSlotCarouselToIndex]);
+
+  useEffect(() => {
+    if (viewMode !== 'active' || prefersReducedMotion) {
+      return;
+    }
+
+    if (!hasInitializedActiveSnapRef.current) {
+      hasInitializedActiveSnapRef.current = true;
+      previousActiveSnapIndexRef.current = activeSlotIndex;
+      return;
+    }
+
+    if (previousActiveSnapIndexRef.current === activeSlotIndex) {
+      return;
+    }
+
+    previousActiveSnapIndexRef.current = activeSlotIndex;
+
+    const viewport = getViewportSnapshot();
+    emitMissionsV2Event('missions_v2_scroll_active_snap', {
+      track: 'active',
+      cardIndex: activeSlotIndex,
+      viewport: viewport ?? null,
+      userAgentHash: userAgentHash ?? null,
+    });
+  }, [activeSlotIndex, prefersReducedMotion, userAgentHash, viewMode]);
 
   const toggleSlotExpansion = useCallback((slot: MissionsV2Slot) => {
     setExpandedSlots((prev) => {
