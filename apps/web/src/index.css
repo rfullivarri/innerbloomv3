@@ -1106,7 +1106,7 @@
     )
   );
   --market-carousel-inline-padding: clamp(1.1rem, 6vw, 3rem);
-  --missions-carousel-card-width: clamp(240px, 72vw, 336px);
+  --missions-carousel-card-width: clamp(280px, 82vw, 360px);
   position: relative;
   display: flex;
   width: 100%;
@@ -1166,7 +1166,7 @@
 
 .missions-market-carousel__item {
   flex: 0 0 auto;
-  width: var(--missions-carousel-card-width, clamp(240px, 72vw, 336px));
+  width: var(--missions-carousel-card-width, clamp(280px, 82vw, 360px));
   transition: opacity var(--motion-duration-base) var(--motion-ease-enter),
     transform var(--motion-duration-medium) var(--motion-ease-enter);
   scroll-snap-align: center;
@@ -1311,7 +1311,7 @@
     )
   );
   --missions-active-carousel-inline-padding: clamp(1rem, 6vw, 2.75rem);
-  --missions-carousel-card-width: clamp(240px, 70vw, 320px);
+  --missions-carousel-card-width: clamp(280px, 82vw, 360px);
   @apply relative flex w-full items-stretch;
   gap: clamp(1.25rem, 4vw, 2.25rem);
   min-height: var(--missions-active-carousel-height, var(--missions-active-carousel-fallback));
@@ -1345,7 +1345,7 @@
   flex: 0 0 auto;
   display: flex;
   justify-content: center;
-  width: var(--missions-carousel-card-width, clamp(240px, 70vw, 320px));
+  width: var(--missions-carousel-card-width, clamp(280px, 82vw, 360px));
   cursor: pointer;
   transition: opacity var(--motion-duration-base) var(--motion-ease-enter),
     transform var(--motion-duration-medium) var(--motion-ease-enter);
