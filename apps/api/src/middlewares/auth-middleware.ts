@@ -8,12 +8,6 @@ type GetService = () => AuthService;
 
 export type RequestUser = VerifiedUser;
 
-declare module 'express-serve-static-core' {
-  interface Request {
-    user?: RequestUser;
-  }
-}
-
 export function createAuthMiddleware(getService: GetService = getAuthService) {
   return async function authMiddleware(
     req: Request,

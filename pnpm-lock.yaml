@@ -36,6 +36,9 @@ importers:
       '@fastify/express':
         specifier: ^4.0.2
         version: 4.0.2
+      '@innerbloom/missions-v2-contracts':
+        specifier: workspace:*
+        version: link:../../packages/missions-v2-contracts
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -130,6 +133,9 @@ importers:
       '@clerk/clerk-react':
         specifier: ^5.8.1
         version: 5.50.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@innerbloom/missions-v2-contracts':
+        specifier: workspace:*
+        version: link:../../packages/missions-v2-contracts
       '@tanstack/react-virtual':
         specifier: ^3.13.12
         version: 3.13.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -191,6 +197,8 @@ importers:
       vitest:
         specifier: ^1.6.0
         version: 1.6.1(@types/node@20.19.19)(jsdom@24.1.3)
+
+  packages/missions-v2-contracts: {}
 
 packages:
 

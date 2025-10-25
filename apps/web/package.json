@@ -19,7 +19,8 @@
     "framer-motion": "^11.0.17",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.9.3"
+    "react-router-dom": "^7.9.3",
+    "@innerbloom/missions-v2-contracts": "workspace:*"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.6",

@@ -1,4 +1,40 @@
 import { apiLog, logApiDebug, logApiError } from './logger';
+import type {
+  MissionsV2AbandonPayload,
+  MissionsV2ActivatePayload,
+  MissionsV2BoardResponse,
+  MissionsV2ClaimPayload,
+  MissionsV2ClaimResponse,
+  MissionsV2HeartbeatPayload,
+  MissionsV2HeartbeatResponse,
+  MissionsV2LinkDailyResponse,
+  MissionsV2MarketResponse,
+  MissionsV2MarketSlot,
+  MissionsV2Slot,
+} from '@innerbloom/missions-v2-contracts';
+export type {
+  MissionsV2CommunicationType,
+  MissionsV2SlotKey,
+  MissionsV2MissionTask,
+  MissionsV2Mission,
+  MissionsV2ActionType,
+  MissionsV2Action,
+  MissionsV2Slot,
+  MissionsV2Boss,
+  MissionsV2Communication,
+  MissionsV2BoardResponse,
+  MissionsV2MarketProposalDifficulty,
+  MissionsV2MarketProposal,
+  MissionsV2MarketSlot,
+  MissionsV2MarketResponse,
+  MissionsV2ClaimResponse,
+  MissionsV2HeartbeatResponse,
+  MissionsV2LinkDailyResponse,
+  MissionsV2ActivatePayload,
+  MissionsV2AbandonPayload,
+  MissionsV2HeartbeatPayload,
+  MissionsV2ClaimPayload,
+} from '@innerbloom/missions-v2-contracts';
 
 export class ApiError extends Error {
   constructor(
@@ -1824,127 +1860,6 @@ export async function submitDailyQuest(payload: SubmitDailyQuestPayload): Promis
   return response;
 }
 
-export type MissionsV2CommunicationType = 'daily' | 'weekly' | 'biweekly' | 'seasonal';
-
-export type MissionsV2SlotKey = 'main' | 'hunt' | 'skill';
-
-export type MissionsV2MissionTask = {
-  id: string;
-  name: string;
-  tag: string;
-};
-
-export type MissionsV2Mission = {
-  id: string;
-  name: string;
-  type: MissionsV2SlotKey;
-  summary: string;
-  requirements: string;
-  objective: string;
-  objectives?: string[];
-  reward: {
-    xp: number;
-    currency?: number;
-    items?: string[];
-  };
-  tasks: MissionsV2MissionTask[];
-  tags?: string[];
-  metadata?: Record<string, unknown>;
-};
-
-export type MissionsV2ActionType =
-  | 'heartbeat'
-  | 'link_daily'
-  | 'special_strike'
-  | 'submit_evidence'
-  | 'abandon'
-  | 'claim';
-
-export type MissionsV2Action = {
-  id: string;
-  type: MissionsV2ActionType;
-  label: string;
-  enabled: boolean;
-};
-
-export type MissionsV2Slot = {
-  id: string;
-  slot: MissionsV2SlotKey;
-  mission: MissionsV2Mission | null;
-  state: 'idle' | 'active' | 'succeeded' | 'failed' | 'cooldown' | 'claimed';
-  petals: { total: number; remaining: number };
-  heartbeat_today: boolean;
-  progress: { current: number; target: number; percent: number };
-  countdown: { ends_at: string | null; label: string };
-  actions: MissionsV2Action[];
-  claim: { available: boolean; enabled: boolean; cooldown_until: string | null };
-};
-
-export type MissionsV2Boss = {
-  id: string;
-  name: string;
-  status: 'locked' | 'available' | 'ready' | 'defeated';
-  description: string;
-  countdown: { ends_at: string | null; label: string };
-  actions: MissionsV2Action[];
-};
-
-export type MissionsV2Communication = {
-  id: string;
-  type: MissionsV2CommunicationType;
-  message: string;
-};
-
-export type MissionsV2BoardResponse = {
-  season_id: string;
-  generated_at: string;
-  slots: MissionsV2Slot[];
-  boss: MissionsV2Boss;
-  gating: { claim_url: string };
-  communications: MissionsV2Communication[];
-  market: MissionsV2MarketSlot[];
-};
-
-export type MissionsV2MarketProposal = {
-  id: string;
-  slot: MissionsV2SlotKey;
-  name: string;
-  summary: string;
-  requirements: string;
-  objective: string;
-  objectives: string[];
-  reward: { xp: number; currency: number; items: string[] };
-  difficulty: 'low' | 'medium' | 'high' | 'epic';
-  tags: string[];
-  metadata: Record<string, unknown>;
-  duration_days: number;
-};
-
-export type MissionsV2MarketSlot = {
-  slot: MissionsV2SlotKey;
-  proposals: MissionsV2MarketProposal[];
-};
-
-export type MissionsV2ClaimResponse = {
-  board: MissionsV2BoardResponse;
-  rewards: {
-    xp: number;
-    currency: number;
-    items: string[];
-  };
-};
-
-export type MissionsV2HeartbeatResponse = {
-  status: 'ok';
-  petals_remaining: number;
-  heartbeat_date: string;
-};
-
-export type MissionsV2LinkDailyResponse = {
-  board: MissionsV2BoardResponse;
-  missionId: string;
-  taskId: string;
-};
 
 async function missionsV2AuthorizedPost<T>(path: string, body?: Record<string, unknown>): Promise<T> {
   const token = await resolveAuthToken();
