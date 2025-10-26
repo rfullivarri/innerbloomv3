@@ -3439,25 +3439,33 @@ export function MissionsV2Board({
                         Math.min(relativeOffset, maxVisibleOffset),
                         -maxVisibleOffset,
                       );
-                      const angle = (Math.PI / 8) * limitedOffset;
-                      const depth = Math.cos(angle);
-                      const translateY = (1 - depth) * 48;
                       const distance = Math.abs(limitedOffset);
-                      const scale = Math.max(0.72, 1 - 0.18 * distance);
-                      const opacity = Math.max(0.4, 1 - 0.45 * distance);
-                      const tiltX = Math.sin(angle) * 4.5;
-                      const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
+                      const translateX = limitedOffset * 36;
+                      const translateY = distance * 18 + (isActiveCard ? 0 : 6);
+                      const rotateY = limitedOffset * -18;
+                      const scale = Math.max(0.72, 1 - 0.16 * distance);
+                      const opacity = Math.max(0.38, 1 - 0.32 * distance);
+                      const blur = Math.min(8, Math.max(0, distance - 0.25) * 3.2);
+                      const shadowOffset = 36 + distance * 18;
+                      const shadowBlur = 64 + distance * 28;
+                      const shadowStrength = Math.min(0.62, 0.42 + (1 - Math.min(distance, 2) / 2) * 0.2);
+                      const zIndex = Math.round((3 - distance) * 20) + (isActiveCard ? 80 : 0);
                       const itemStyle: CSSProperties = prefersReducedMotion
                         ? {
                             transform: 'none',
                             opacity: 1,
                             zIndex: isActiveCard ? 2 : 1,
                           }
-                        : {
-                            transform: `translateY(${translateY}px) scale(${scale}) rotateX(${tiltX}deg)`,
+                        : ({
+                            transform: `translateX(${translateX}px) translateY(${translateY}px) scale(${scale}) rotateY(${rotateY}deg)`,
                             opacity,
                             zIndex,
-                          };
+                            '--market-card-blur': `${blur}px`,
+                            '--market-card-layer-opacity': `${opacity}`,
+                            '--market-card-shadow-offset': `${shadowOffset}px`,
+                            '--market-card-shadow-blur': `${shadowBlur}px`,
+                            '--market-card-shadow-opacity': `${shadowStrength}`,
+                          } as CSSProperties);
 
                       return (
                         <div
