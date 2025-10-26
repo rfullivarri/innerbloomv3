@@ -58,6 +58,7 @@ type ClaimModalState = {
 
 
 const SLOT_ORDER: Array<MissionsV2Slot['slot']> = ['main', 'hunt', 'skill'];
+const DEFAULT_MARKET_INDEX = SLOT_ORDER.length > 2 ? 1 : 0;
 
 const SLOT_DETAILS: Record<
   MissionsV2Slot['slot'],
@@ -1020,7 +1021,7 @@ export function MissionsV2Board({
     [],
   );
   const [viewMode, setViewModeState] = useState<'active' | 'market'>(() => getViewModeFromLocation(location));
-  const [activeMarketIndex, setActiveMarketIndex] = useState(0);
+  const [activeMarketIndex, setActiveMarketIndex] = useState(DEFAULT_MARKET_INDEX);
   const [activeSlotIndex, setActiveSlotIndex] = useState(0);
   const [activeMarketProposalBySlot, setActiveMarketProposalBySlot] = useState<
     Record<MissionsV2Slot['slot'], number>
@@ -1062,7 +1063,8 @@ export function MissionsV2Board({
   const marketSwiperRef = useRef<SwiperType | null>(null);
   const marketSwiperPrevRef = useRef<HTMLButtonElement | null>(null);
   const marketSwiperNextRef = useRef<HTMLButtonElement | null>(null);
-  const previousMarketSwiperIndexRef = useRef(0);
+  const previousMarketSwiperIndexRef = useRef(DEFAULT_MARKET_INDEX);
+  const pendingMarketFlipRef = useRef<MissionsV2Slot['slot'] | null>(null);
   const slotCarouselRef = useRef<HTMLDivElement | null>(null);
   const marketStackRefs = useRef<Record<MissionsV2Slot['slot'], HTMLDivElement | null>>({
     main: null,
@@ -2296,11 +2298,34 @@ export function MissionsV2Board({
       }
 
       setActiveMarketIndex((current) => (current === nextIndex ? current : nextIndex));
+
+      const pendingSlot = pendingMarketFlipRef.current;
+      if (pendingSlot) {
+        const nextCard = marketCards[nextIndex] ?? null;
+        if (nextCard && nextCard.slot === pendingSlot) {
+          pendingMarketFlipRef.current = null;
+          setFlippedMarketCards({ [pendingSlot]: true });
+          emitMissionsV2Event('missions_v2_market_flip_open', {
+            userId,
+            slot: pendingSlot,
+          });
+          setActiveMarketProposalBySlot((prev) => {
+            if ((prev[pendingSlot] ?? 0) === 0) {
+              return prev;
+            }
+            collapseMarketProposalExpansions(pendingSlot);
+            previousActiveProposalBySlotRef.current[pendingSlot] = 0;
+            return { ...prev, [pendingSlot]: 0 };
+          });
+        }
+      }
     },
     [
       emitMissionsV2Event,
       flippedMarketCards,
+      collapseMarketProposalExpansions,
       marketCards,
+      setActiveMarketProposalBySlot,
       userId,
     ],
   );
@@ -2416,10 +2441,12 @@ export function MissionsV2Board({
             slot: openSlot,
           });
         }
+        pendingMarketFlipRef.current = slotKey;
         scrollCarouselToIndex(index);
         return;
       }
 
+      pendingMarketFlipRef.current = null;
       const wasOpen = Boolean(flippedMarketCards[slotKey]);
 
       setFlippedMarketCards((prev) => {
@@ -3628,6 +3655,7 @@ export function MissionsV2Board({
                     effect="cards"
                     loop
                     grabCursor
+                    initialSlide={Math.min(DEFAULT_MARKET_INDEX, Math.max(marketCards.length - 1, 0))}
                     role="listbox"
                     aria-label="Marketplace de misiones disponibles"
                     style={marketCarouselStyle}
@@ -3635,7 +3663,13 @@ export function MissionsV2Board({
                     onSwiper={(instance: SwiperType) => {
                       marketSwiperRef.current = instance;
                       carouselRef.current = instance.el as HTMLDivElement;
-                      previousMarketSwiperIndexRef.current = instance.realIndex ?? instance.activeIndex ?? 0;
+                      const resolvedIndex = Number.isFinite(instance.realIndex)
+                        ? instance.realIndex
+                        : instance.activeIndex ?? DEFAULT_MARKET_INDEX;
+                      previousMarketSwiperIndexRef.current = resolvedIndex;
+                      setActiveMarketIndex((current) =>
+                        current === resolvedIndex ? current : resolvedIndex,
+                      );
                     }}
                     onSlideChange={handleMarketSwiperChange}
                     navigation={false}
