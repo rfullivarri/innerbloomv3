@@ -1072,6 +1072,16 @@ export function MissionsV2Board({
     hunt: null,
     skill: null,
   });
+  const marketStackCtaRefs = useRef<Record<MissionsV2Slot['slot'], HTMLElement | null>>({
+    main: null,
+    hunt: null,
+    skill: null,
+  });
+  const marketStackCtaObservers = useRef<Record<MissionsV2Slot['slot'], ResizeObserver | null>>({
+    main: null,
+    hunt: null,
+    skill: null,
+  });
   const previousActiveProposalBySlotRef = useRef<Record<MissionsV2Slot['slot'], number>>({
     main: 0,
     hunt: 0,
@@ -1454,6 +1464,17 @@ export function MissionsV2Board({
     [],
   );
 
+  const updateMarketStackCtaOffset = useCallback((slotKey: MissionsV2Slot['slot']) => {
+    const stack = marketStackRefs.current[slotKey];
+    if (!stack) {
+      return;
+    }
+
+    const cta = marketStackCtaRefs.current[slotKey];
+    const ctaHeight = cta ? cta.getBoundingClientRect().height : 0;
+    stack.style.setProperty('--market-stack-cta-height', `${ctaHeight}px`);
+  }, []);
+
   const registerMarketStackHeader = useCallback(
     (slotKey: MissionsV2Slot['slot'], node: HTMLElement | null) => {
       const previousObserver = marketStackHeaderObservers.current[slotKey];
@@ -1482,6 +1503,36 @@ export function MissionsV2Board({
       }
     },
     [updateMarketStackHeaderOffset],
+  );
+
+  const registerMarketStackCta = useCallback(
+    (slotKey: MissionsV2Slot['slot'], node: HTMLElement | null) => {
+      const previousObserver = marketStackCtaObservers.current[slotKey];
+      if (previousObserver) {
+        previousObserver.disconnect();
+        marketStackCtaObservers.current[slotKey] = null;
+      }
+
+      marketStackCtaRefs.current[slotKey] = node;
+
+      if (node) {
+        if (typeof ResizeObserver !== 'undefined') {
+          const observer = new ResizeObserver(() => {
+            updateMarketStackCtaOffset(slotKey);
+          });
+          observer.observe(node);
+          marketStackCtaObservers.current[slotKey] = observer;
+        }
+
+        updateMarketStackCtaOffset(slotKey);
+      } else {
+        const stack = marketStackRefs.current[slotKey];
+        if (stack) {
+          stack.style.removeProperty('--market-stack-cta-height');
+        }
+      }
+    },
+    [updateMarketStackCtaOffset],
   );
 
   const updateMarketStackFade = useCallback(
@@ -1515,6 +1566,13 @@ export function MissionsV2Board({
           }
         },
       );
+      (Object.keys(marketStackCtaObservers.current) as MissionsV2Slot['slot'][]).forEach((slotKey) => {
+        const observer = marketStackCtaObservers.current[slotKey];
+        if (observer) {
+          observer.disconnect();
+          marketStackCtaObservers.current[slotKey] = null;
+        }
+      });
     };
   }, []);
 
@@ -1532,24 +1590,33 @@ export function MissionsV2Board({
       if (typeof window !== 'undefined') {
         const style = window.getComputedStyle(container);
         containerPaddingTop = Number.parseFloat(style.paddingTop) || 0;
-        const headerHeightValue = Number.parseFloat(
-          style.getPropertyValue('--market-stack-header-height'),
+        const headerOffsetValue = Number.parseFloat(
+          style.getPropertyValue('--market-stack-header-offset'),
         );
-        if (Number.isFinite(headerHeightValue)) {
-          containerHeaderOffset = headerHeightValue;
+        if (Number.isFinite(headerOffsetValue)) {
+          containerHeaderOffset = headerOffsetValue;
+        } else {
+          const headerHeightValue = Number.parseFloat(
+            style.getPropertyValue('--market-stack-header-height'),
+          );
+          if (Number.isFinite(headerHeightValue)) {
+            containerHeaderOffset = headerHeightValue;
+          }
         }
       }
       const targetPosition = container.scrollTop + containerPaddingTop + containerHeaderOffset;
-      const children = Array.from(container.children) as HTMLElement[];
-      if (children.length === 0) {
+      const proposalNodes = Array.from(
+        container.querySelectorAll<HTMLElement>(':scope > .missions-market-card__proposal'),
+      );
+      if (proposalNodes.length === 0) {
         return;
       }
 
       let closestIndex = 0;
       let closestDistance = Number.POSITIVE_INFINITY;
 
-      for (let index = 0; index < children.length; index += 1) {
-        const child = children[index];
+      for (let index = 0; index < proposalNodes.length; index += 1) {
+        const child = proposalNodes[index];
         const itemTop = child.offsetTop;
         const distance = Math.abs(itemTop - targetPosition);
         if (distance < closestDistance) {
@@ -1661,7 +1728,10 @@ export function MissionsV2Board({
 
       const targetIndex = activeMarketProposalBySlot[slotKey] ?? 0;
       previousActiveProposalBySlotRef.current[slotKey] = targetIndex;
-      const targetChild = container.children.item(targetIndex) as HTMLElement | null;
+      const proposalNodes = container.querySelectorAll<HTMLElement>(
+        ':scope > .missions-market-card__proposal',
+      );
+      const targetChild = proposalNodes.item(targetIndex);
       if (!targetChild) {
         updateMarketStackFade(slotKey, container);
         return;
@@ -1673,10 +1743,17 @@ export function MissionsV2Board({
         const containerStyle = window.getComputedStyle(container);
         paddingTop = Number.parseFloat(containerStyle.paddingTop) || 0;
         const headerOffsetValue = Number.parseFloat(
-          containerStyle.getPropertyValue('--market-stack-header-height'),
+          containerStyle.getPropertyValue('--market-stack-header-offset'),
         );
         if (Number.isFinite(headerOffsetValue)) {
           headerOffset = headerOffsetValue;
+        } else {
+          const headerHeightValue = Number.parseFloat(
+            containerStyle.getPropertyValue('--market-stack-header-height'),
+          );
+          if (Number.isFinite(headerHeightValue)) {
+            headerOffset = headerHeightValue;
+          }
         }
       }
       const targetTop = Math.max(targetChild.offsetTop - paddingTop - headerOffset, 0);
@@ -3424,6 +3501,24 @@ export function MissionsV2Board({
                         ? `${activeProposalTitle}${activeSummary ? `. ${activeSummary}` : ''}`
                         : `Sin propuestas disponibles para ${details.label}`;
                       const canActivateThisCard = canActivate && isActiveCard;
+                      const activeRealProposal =
+                        activeProposal && 'name' in activeProposal
+                          ? (activeProposal as RealMarketProposal)
+                          : null;
+                      const activeProposalState =
+                        activeProposal && 'state' in activeProposal ? activeProposal.state : null;
+                      const activeProposalLocked = activeProposal
+                        ? activeRealProposal
+                          ? Boolean(activeRealProposal.locked ?? activeRealProposal.isActive)
+                          : activeProposalState !== 'available'
+                        : false;
+                      const activeProposalCtaLabel = activeProposal
+                        ? activeProposalLocked
+                          ? 'Misión en progreso'
+                          : `Activar en slot ${details.label}`
+                        : `Activar en slot ${details.label}`;
+                      const canActivateActiveProposal =
+                        Boolean(activeRealProposal) && canActivateThisCard && !activeProposalLocked;
                       const totalCards = marketCards.length;
                       let relativeOffset = index - activeMarketIndex;
                       if (totalCards > 1) {
@@ -3484,220 +3579,220 @@ export function MissionsV2Board({
                               onClick={() => handleMarketCardClick(slot, index)}
                               onKeyDown={(event) => handleMarketCardKeyDown(event, slot, index)}
                             >
-                            <div className="missions-market-card__front" aria-hidden={isFlipped}>
-                              <span className="missions-market-card__slot-chip" data-slot={slot}>
-                                {details.label}
-                              </span>
-                              <img
-                                src={coverSrc}
-                                alt={`Carta de ${details.label}`}
-                                className="missions-market-card__cover"
-                                draggable={false}
-                                loading="lazy"
-                                onLoad={(event) => handleMarketCoverLoad(slot, index, event)}
-                              />
-                            </div>
-                            <div className="missions-market-card__back" aria-hidden={!isFlipped}>
-                                <header
-                                  className="missions-market-card__back-header"
-                                  ref={(node) => registerMarketStackHeader(slot, node)}
-                                >
-                                  <div className="missions-market-card__back-title">
-                                    <p className="missions-market-card__back-label">{details.label}</p>
-                                  </div>
-                                  <div className="missions-market-card__back-meta">
-                                    {totalProposals > 0 ? (
-                                      <span className="missions-market-card__stack-counter">
-                                        {activeProposalIndex + 1} / {totalProposals}
-                                      </span>
-                                    ) : null}
-                                    {hasMultipleProposals ? (
-                                      <span className="missions-market-card__scroll-hint">
-                                        Deslizá para ver más
-                                      </span>
-                                    ) : null}
-                                    <span className="missions-market-card__icon" aria-hidden="true">
-                                      {details.emoji}
-                                    </span>
-                                  </div>
-                                </header>
-                                <div
-                                  className="missions-market-card__stack"
-                                  role="group"
-                                  aria-label={`Propuestas para ${details.label}`}
-                                  data-has-prev={canScrollUp ? 'true' : undefined}
-                                  data-has-next={canScrollDown ? 'true' : undefined}
-                                  data-transition={transitionDirection ?? undefined}
-                                  onClick={(event) => event.stopPropagation()}
-                                  onScroll={(event) => handleMarketStackScroll(slot, event)}
-                                  ref={(node) => {
-                                    marketStackRefs.current[slot] = node;
-                                    updateMarketStackFade(slot, node);
-                                    updateMarketStackHeaderOffset(slot);
-                                  }}
-                                >
-                                  {proposalList.map((proposal, proposalIndex) => {
-                                    const isRealProposal = 'name' in proposal;
-                                    const rewardPreview = isRealProposal
-                                      ? formatProposalReward(proposal)
-                                      : proposal.reward;
-                                    const primaryObjective = proposal.objective;
-                                    const objectiveDetails = (proposal.objectives ?? []).filter(Boolean);
-                                    const requirementText = isRealProposal
-                                      ? proposal.requirements
-                                      : proposal.requirement;
-                                    const durationLabel = isRealProposal
-                                      ? formatDurationDays(proposal.duration_days)
-                                      : proposal.durationLabel;
-                                    const featureChips = isRealProposal
-                                      ? buildProposalFeatureChips(proposal)
-                                      : proposal.features;
-                                    const chipLabels = [
-                                      ...(durationLabel ? [`Duración · ${durationLabel}`] : []),
-                                      ...featureChips,
-                                    ];
-                                    const inlineMetaItems: Array<{
-                                      key: string;
-                                      label: string;
-                                      value: string;
-                                    }> = [];
+                              <div className="missions-market-card__faces">
+                                <div className="missions-market-card__front" aria-hidden={isFlipped}>
+                                  <span className="missions-market-card__slot-chip" data-slot={slot}>
+                                    {details.label}
+                                  </span>
+                                  <img
+                                    src={coverSrc}
+                                    alt={`Carta de ${details.label}`}
+                                    className="missions-market-card__cover"
+                                    draggable={false}
+                                    loading="lazy"
+                                    onLoad={(event) => handleMarketCoverLoad(slot, index, event)}
+                                  />
+                                </div>
+                                <div className="missions-market-card__back" aria-hidden={!isFlipped}>
+                                  <div
+                                    className="missions-market-card__stack"
+                                    role="group"
+                                    aria-label={`Propuestas para ${details.label}`}
+                                    data-has-prev={canScrollUp ? 'true' : undefined}
+                                    data-has-next={canScrollDown ? 'true' : undefined}
+                                    data-transition={transitionDirection ?? undefined}
+                                    onClick={(event) => event.stopPropagation()}
+                                    onScroll={(event) => handleMarketStackScroll(slot, event)}
+                                    ref={(node) => {
+                                      marketStackRefs.current[slot] = node;
+                                      updateMarketStackFade(slot, node);
+                                      updateMarketStackHeaderOffset(slot);
+                                      updateMarketStackCtaOffset(slot);
+                                    }}
+                                  >
+                                    <header
+                                      className="missions-market-card__back-header"
+                                      ref={(node) => registerMarketStackHeader(slot, node)}
+                                    >
+                                      <div className="missions-market-card__back-title">
+                                        <p className="missions-market-card__back-label">{details.label}</p>
+                                      </div>
+                                      <div className="missions-market-card__back-meta">
+                                        {totalProposals > 0 ? (
+                                          <span className="missions-market-card__stack-counter">
+                                            {activeProposalIndex + 1} / {totalProposals}
+                                          </span>
+                                        ) : null}
+                                        {hasMultipleProposals ? (
+                                          <span className="missions-market-card__scroll-hint">
+                                            Deslizá para ver más
+                                          </span>
+                                        ) : null}
+                                        <span className="missions-market-card__icon" aria-hidden="true">
+                                          {details.emoji}
+                                        </span>
+                                      </div>
+                                    </header>
+                                    {proposalList.map((proposal, proposalIndex) => {
+                                      const isRealProposal = 'name' in proposal;
+                                      const rewardPreview = isRealProposal
+                                        ? formatProposalReward(proposal)
+                                        : proposal.reward;
+                                      const primaryObjective = proposal.objective;
+                                      const objectiveDetails = (proposal.objectives ?? []).filter(Boolean);
+                                      const requirementText = isRealProposal
+                                        ? proposal.requirements
+                                        : proposal.requirement;
+                                      const durationLabel = isRealProposal
+                                        ? formatDurationDays(proposal.duration_days)
+                                        : proposal.durationLabel;
+                                      const featureChips = isRealProposal
+                                        ? buildProposalFeatureChips(proposal)
+                                        : proposal.features;
+                                      const chipLabels = [
+                                        ...(durationLabel ? [`Duración · ${durationLabel}`] : []),
+                                        ...featureChips,
+                                      ];
+                                      const inlineMetaItems: Array<{
+                                        key: string;
+                                        label: string;
+                                        value: string;
+                                      }> = [];
 
-                                    if (slot === 'main') {
-                                      const normalizedRequirement = requirementText?.trim();
-                                      const requirementValue = normalizedRequirement?.length
-                                        ? normalizedRequirement
-                                        : 'Revisión manual';
-                                      inlineMetaItems.push({
-                                        key: 'requirement',
-                                        label: 'Requisito',
-                                        value: requirementValue,
-                                      });
-                                    }
-                                    const difficultyValue = isRealProposal
-                                      ? proposal.difficulty ?? '—'
-                                      : proposal.difficulty
-                                      ? `${proposal.difficulty.slice(0, 1).toUpperCase()}${proposal.difficulty.slice(1)}`
-                                      : '—';
-                                    const normalizedDifficulty =
-                                      difficultyValue && difficultyValue !== '—'
-                                        ? difficultyValue.toLowerCase()
-                                        : null;
-                                    const difficultyChipLabel = difficultyValue || '—';
-                                    const isActiveProposal = proposalIndex === activeProposalIndex;
-                                    const isProposalLocked = isRealProposal
-                                      ? Boolean(proposal.locked ?? proposal.isActive)
-                                      : proposal.state !== 'available';
-                                    const showActiveBadge = isRealProposal
-                                      ? Boolean(proposal.isActive)
-                                      : proposal.state === 'active';
-                                    const showAvailableBadge =
-                                      !isRealProposal && proposal.state === 'available';
-                                    const canActivateThisProposal =
-                                      isRealProposal &&
-                                      canActivateThisCard &&
-                                      isActiveProposal &&
-                                      !isProposalLocked;
-                                    const proposalKey = `${slot}-${proposal.id}-${
-                                      isActiveProposal ? proposalRevision : 'static'
-                                    }`;
-                                    const summaryText = proposal.summary ?? '—';
-                                    const buttonLabel = isProposalLocked
-                                      ? 'Misión en progreso'
-                                      : `Activar en slot ${details.label}`;
-                                    return (
-                                      <article
-                                        key={proposalKey}
-                                        className="mission-proposal-card missions-market-card__proposal"
-                                        data-active={isActiveProposal ? 'true' : 'false'}
-                                        data-locked={isProposalLocked ? 'true' : undefined}
-                                        role="group"
-                                      >
-                                        <div className="mission-proposal-card__content">
-                                          <div className="mission-proposal-card__body">
-                                            <header className="mpc-header">
-                                              <span className="mpc-index">#{proposalIndex + 1}</span>
-                                              <div className="mpc-heading">
-                                                <h5>{isRealProposal ? proposal.name : proposal.title}</h5>
-                                                {(showActiveBadge || isProposalLocked || showAvailableBadge) && (
-                                                  <div className="mpc-badges">
-                                                    {showActiveBadge ? (
-                                                      <span className="mpc-badge mpc-badge--active">Activa</span>
-                                                    ) : null}
-                                                    {isProposalLocked && !showActiveBadge ? (
-                                                      <span className="mpc-badge">En progreso</span>
-                                                    ) : null}
-                                                    {showAvailableBadge ? (
-                                                      <span className="mpc-badge">Disponible</span>
-                                                    ) : null}
-                                                  </div>
-                                                )}
+                                      if (slot === 'main') {
+                                        const normalizedRequirement = requirementText?.trim();
+                                        const requirementValue = normalizedRequirement?.length
+                                          ? normalizedRequirement
+                                          : 'Revisión manual';
+                                        inlineMetaItems.push({
+                                          key: 'requirement',
+                                          label: 'Requisito',
+                                          value: requirementValue,
+                                        });
+                                      }
+                                      const difficultyValue = isRealProposal
+                                        ? proposal.difficulty ?? '—'
+                                        : proposal.difficulty
+                                        ? `${proposal.difficulty.slice(0, 1).toUpperCase()}${proposal.difficulty.slice(1)}`
+                                        : '—';
+                                      const normalizedDifficulty =
+                                        difficultyValue && difficultyValue !== '—'
+                                          ? difficultyValue.toLowerCase()
+                                          : null;
+                                      const difficultyChipLabel = difficultyValue || '—';
+                                      const isActiveProposal = proposalIndex === activeProposalIndex;
+                                      const isProposalLocked = isRealProposal
+                                        ? Boolean(proposal.locked ?? proposal.isActive)
+                                        : proposal.state !== 'available';
+                                      const showActiveBadge = isRealProposal
+                                        ? Boolean(proposal.isActive)
+                                        : proposal.state === 'active';
+                                      const showAvailableBadge =
+                                        !isRealProposal && proposal.state === 'available';
+                                      const proposalKey = `${slot}-${proposal.id}-${
+                                        isActiveProposal ? proposalRevision : 'static'
+                                      }`;
+                                      const summaryText = proposal.summary ?? '—';
+                                      return (
+                                        <article
+                                          key={proposalKey}
+                                          className="mission-proposal-card missions-market-card__proposal"
+                                          data-active={isActiveProposal ? 'true' : 'false'}
+                                          data-locked={isProposalLocked ? 'true' : undefined}
+                                          role="group"
+                                        >
+                                          <div className="mission-proposal-card__content">
+                                            <div className="mission-proposal-card__body">
+                                              <header className="mpc-header">
+                                                <span className="mpc-index">#{proposalIndex + 1}</span>
+                                                <div className="mpc-heading">
+                                                  <h5>{isRealProposal ? proposal.name : proposal.title}</h5>
+                                                  {(showActiveBadge || isProposalLocked || showAvailableBadge) && (
+                                                    <div className="mpc-badges">
+                                                      {showActiveBadge ? (
+                                                        <span className="mpc-badge mpc-badge--active">Activa</span>
+                                                      ) : null}
+                                                      {isProposalLocked && !showActiveBadge ? (
+                                                        <span className="mpc-badge">En progreso</span>
+                                                      ) : null}
+                                                      {showAvailableBadge ? (
+                                                        <span className="mpc-badge">Disponible</span>
+                                                      ) : null}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </header>
+                                              <div className="mpc-summary">
+                                                <p className="mpc-summary__text">{summaryText}</p>
+                                                <span
+                                                  className="mpc-difficulty-chip"
+                                                  data-difficulty={normalizedDifficulty ?? undefined}
+                                                  aria-label={`Dificultad: ${difficultyChipLabel}`}
+                                                >
+                                                  {difficultyChipLabel}
+                                                </span>
                                               </div>
-                                            </header>
-                                            <div className="mpc-summary">
-                                              <p className="mpc-summary__text">{summaryText}</p>
-                                              <span
-                                                className="mpc-difficulty-chip"
-                                                data-difficulty={normalizedDifficulty ?? undefined}
-                                                aria-label={`Dificultad: ${difficultyChipLabel}`}
-                                              >
-                                                {difficultyChipLabel}
-                                              </span>
+                                              <div className="mpc-reward">
+                                                <span className="mpc-reward__label">Recompensa</span>
+                                                <span className="mpc-reward__value">{rewardPreview ?? '—'}</span>
+                                              </div>
+                                              <div className="mpc-objective">
+                                                <span className="mpc-objective__label">Objetivo</span>
+                                                <p className="mpc-objective__text">{primaryObjective || '—'}</p>
+                                              </div>
+                                              {objectiveDetails.length > 0 && (
+                                                <ul className="mpc-objective-list">
+                                                  {objectiveDetails.map((detail: string) => (
+                                                    <li key={`${proposal.id}-objective-${detail}`}>
+                                                      {detail}
+                                                    </li>
+                                                  ))}
+                                                </ul>
+                                              )}
+                                              {(inlineMetaItems.length > 0 || chipLabels.length > 0) && (
+                                                <ul className="mpc-inline-meta">
+                                                  {inlineMetaItems.map((item: { key: string; label: string; value: string }) => (
+                                                    <li key={`${proposal.id}-${item.key}`}>
+                                                      <span className="mpc-inline-meta__label">{item.label}</span>
+                                                      <span className="mpc-inline-meta__value">{item.value}</span>
+                                                    </li>
+                                                  ))}
+                                                  {chipLabels.map((chipLabel: string) => (
+                                                    <li
+                                                      key={`${proposal.id}-chip-${chipLabel}`}
+                                                      className="mpc-inline-meta__chip"
+                                                    >
+                                                      <span className="mpc-chip">{chipLabel}</span>
+                                                    </li>
+                                                  ))}
+                                                </ul>
+                                              )}
                                             </div>
-                                            <div className="mpc-reward">
-                                              <span className="mpc-reward__label">Recompensa</span>
-                                              <span className="mpc-reward__value">{rewardPreview ?? '—'}</span>
-                                            </div>
-                                            <div className="mpc-objective">
-                                              <span className="mpc-objective__label">Objetivo</span>
-                                              <p className="mpc-objective__text">{primaryObjective || '—'}</p>
-                                            </div>
-                                            {objectiveDetails.length > 0 && (
-                                              <ul className="mpc-objective-list">
-                                                {objectiveDetails.map((detail: string) => (
-                                                  <li key={`${proposal.id}-objective-${detail}`}>
-                                                    {detail}
-                                                  </li>
-                                                ))}
-                                              </ul>
-                                            )}
-                                            {(inlineMetaItems.length > 0 || chipLabels.length > 0) && (
-                                              <ul className="mpc-inline-meta">
-                                                {inlineMetaItems.map((item: { key: string; label: string; value: string }) => (
-                                                  <li key={`${proposal.id}-${item.key}`}>
-                                                    <span className="mpc-inline-meta__label">{item.label}</span>
-                                                    <span className="mpc-inline-meta__value">{item.value}</span>
-                                                  </li>
-                                                ))}
-                                                {chipLabels.map((chipLabel: string) => (
-                                                  <li
-                                                    key={`${proposal.id}-chip-${chipLabel}`}
-                                                    className="mpc-inline-meta__chip"
-                                                  >
-                                                    <span className="mpc-chip">{chipLabel}</span>
-                                                  </li>
-                                                ))}
-                                              </ul>
-                                            )}
                                           </div>
-                                          <div className="mission-proposal-card__footer">
-                                            <button
-                                              type="button"
-                                              className="mpc-cta"
-                                              disabled={!canActivateThisProposal}
-                                              onClick={(event) => {
-                                                event.stopPropagation();
-                                                if (canActivateThisProposal && isRealProposal) {
-                                                  handleActivateProposal(slot, proposal);
-                                                }
-                                              }}
-                                            >
-                                              {buttonLabel}
-                                            </button>
-                                          </div>
-                                        </div>
-                                      </article>
-                                    );
-                                  })}
+                                        </article>
+                                      );
+                                    })}
+                                    {activeProposal ? (
+                                      <div
+                                        className="missions-market-card__cta"
+                                        ref={(node) => registerMarketStackCta(slot, node)}
+                                      >
+                                        <button
+                                          type="button"
+                                          className="mpc-cta"
+                                          disabled={!canActivateActiveProposal}
+                                          onClick={(event) => {
+                                            event.stopPropagation();
+                                            if (canActivateActiveProposal && activeRealProposal) {
+                                              handleActivateProposal(slot, activeRealProposal);
+                                            }
+                                          }}
+                                        >
+                                          {activeProposalCtaLabel}
+                                        </button>
+                                      </div>
+                                    ) : null}
+                                  </div>
                                 </div>
                               </div>
                             </article>
