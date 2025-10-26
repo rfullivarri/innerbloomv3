@@ -1,5 +1,14 @@
 {
   "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@innerbloom/missions-v2-contracts": [
+        "./packages/missions-v2-contracts/src/index.d.ts",
+        "./packages/missions-v2-contracts/src/index.ts"
+      ]
+    }
+  },
   "ts-node": {
     "esm": false,
     "compilerOptions": {
