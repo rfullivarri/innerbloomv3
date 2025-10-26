@@ -10,8 +10,14 @@
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
     "baseUrl": ".",
     "paths": {
-      "@innerbloom/missions-v2-contracts": ["../../packages/missions-v2-contracts/src/index.d.ts"],
-      "@innerbloom/missions-v2-contracts/*": ["../../packages/missions-v2-contracts/src/*.d.ts"]
+      "@innerbloom/missions-v2-contracts": [
+        "../../packages/missions-v2-contracts/src/index.ts",
+        "../../packages/missions-v2-contracts/src/index.d.ts"
+      ],
+      "@innerbloom/missions-v2-contracts/*": [
+        "../../packages/missions-v2-contracts/src/*.ts",
+        "../../packages/missions-v2-contracts/src/*.d.ts"
+      ]
     }
   },
   "include": ["src", "../../packages/missions-v2-contracts/src/index.d.ts"]
