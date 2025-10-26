@@ -39,7 +39,7 @@ import {
   getUserAgentHash,
   getViewportSnapshot,
 } from '../../lib/telemetry';
-import { FEATURE_MISSIONS_V2, isFeatureEnabled } from '../../lib/featureFlags';
+import { FEATURE_MISSIONS_V2 } from '../../lib/featureFlags';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 import 'swiper/css';
 import 'swiper/css/effect-cards';
@@ -56,8 +56,6 @@ type ClaimModalState = {
   };
 };
 
-const FEATURE_MARKET_COVERFLOW = isFeatureEnabled('missionsV2MarketCoverflow');
-const FEATURE_MARKET_SWIPER_CARDS = isFeatureEnabled('missionsV2MarketSwiperCards');
 
 const SLOT_ORDER: Array<MissionsV2Slot['slot']> = ['main', 'hunt', 'skill'];
 
@@ -1010,7 +1008,7 @@ export function MissionsV2Board({
   const [heartbeatToastKey, setHeartbeatToastKey] = useState<number | null>(null);
   const [flippedMarketCards, setFlippedMarketCards] = useState<Record<string, boolean>>({});
   const [marketCoverAspect, setMarketCoverAspect] = useState<Record<string, string>>({});
-  const isMarketSwiperCardsEnabled = FEATURE_MARKET_SWIPER_CARDS;
+  const isMarketSwiperCardsEnabled = true;
   const getViewModeFromLocation = useCallback(
     (loc: typeof location): 'active' | 'market' => {
       if (loc.hash.replace('#', '') === 'market') {
@@ -2232,36 +2230,9 @@ export function MissionsV2Board({
     ],
   );
 
-  const scrollCarouselToIndex = useCallback(
-    (index: number, options?: ScrollIntoViewOptions) => {
-      if (isMarketSwiperCardsEnabled) {
-        marketSwiperRef.current?.slideToLoop(index);
-        return;
-      }
-      const container = carouselRef.current;
-      if (!container) {
-        return;
-      }
-
-      const element = container.querySelector<HTMLElement>(`[data-carousel-index='${index}']`);
-      if (!element) {
-        return;
-      }
-
-      const behavior = options?.behavior ?? (prefersReducedMotion ? 'auto' : 'smooth');
-      const containerWidth = container.clientWidth;
-      const elementWidth = element.clientWidth;
-      const targetOffset = element.offsetLeft - (containerWidth - elementWidth) / 2;
-      const maxScroll = container.scrollWidth - containerWidth;
-      const nextScrollLeft = Math.min(Math.max(targetOffset, 0), Math.max(maxScroll, 0));
-
-      container.scrollTo({
-        left: nextScrollLeft,
-        behavior,
-      });
-    },
-    [isMarketSwiperCardsEnabled, prefersReducedMotion],
-  );
+  const scrollCarouselToIndex = useCallback((index: number) => {
+    marketSwiperRef.current?.slideToLoop(index);
+  }, []);
 
   const stepMarketCarousel = useCallback(
     (delta: number) => {
@@ -2269,50 +2240,14 @@ export function MissionsV2Board({
         return;
       }
 
-      if (isMarketSwiperCardsEnabled) {
-        if (delta > 0) {
-          marketSwiperRef.current?.slideNext();
-        } else {
-          marketSwiperRef.current?.slidePrev();
-        }
-        return;
+      if (delta > 0) {
+        marketSwiperRef.current?.slideNext();
+      } else {
+        marketSwiperRef.current?.slidePrev();
       }
-
-      const total = marketCards.length;
-      const currentIndex = activeMarketIndex;
-      const nextIndex = (currentIndex + delta + total) % total;
-      if (nextIndex === currentIndex) {
-        return;
-      }
-
-      setActiveMarketIndex(nextIndex);
-      scrollCarouselToIndex(nextIndex);
-
-      const openSlot = Object.keys(flippedMarketCards)[0] ?? null;
-      if (openSlot) {
-        setFlippedMarketCards({});
-        emitMissionsV2Event('missions_v2_market_flip_close', {
-          userId,
-          slot: openSlot,
-        });
-      }
-
-      const directionEvent =
-        delta > 0 ? 'missions_v2_market_nav_next' : 'missions_v2_market_nav_prev';
-      const nextCard = marketCards[nextIndex] ?? null;
-      emitMissionsV2Event(directionEvent, {
-        userId,
-        slot: nextCard?.slot ?? null,
-      });
     },
     [
-      activeMarketIndex,
-      emitMissionsV2Event,
-      isMarketSwiperCardsEnabled,
-      flippedMarketCards,
       marketCards,
-      scrollCarouselToIndex,
-      userId,
     ],
   );
 
@@ -2326,9 +2261,6 @@ export function MissionsV2Board({
 
   const handleMarketSwiperChange = useCallback(
     (instance: SwiperType) => {
-      if (!isMarketSwiperCardsEnabled) {
-        return;
-      }
       const total = marketCards.length;
       const nextIndex = Number.isFinite(instance.realIndex)
         ? instance.realIndex
@@ -2368,23 +2300,16 @@ export function MissionsV2Board({
     [
       emitMissionsV2Event,
       flippedMarketCards,
-      isMarketSwiperCardsEnabled,
       marketCards,
       userId,
     ],
   );
 
   useEffect(() => {
-    if (!isMarketSwiperCardsEnabled) {
-      return;
-    }
     previousMarketSwiperIndexRef.current = activeMarketIndex;
-  }, [activeMarketIndex, isMarketSwiperCardsEnabled]);
+  }, [activeMarketIndex]);
 
   useEffect(() => {
-    if (!isMarketSwiperCardsEnabled) {
-      return;
-    }
     const swiper = marketSwiperRef.current;
     if (!swiper) {
       return;
@@ -2406,7 +2331,7 @@ export function MissionsV2Board({
       swiper.navigation.init();
       swiper.navigation.update();
     }
-  }, [isMarketSwiperCardsEnabled, marketCards.length, viewMode]);
+  }, [marketCards.length, viewMode]);
 
   const handleSlotCarouselStep = useCallback(
     (direction: 'next' | 'prev') => {
@@ -2491,12 +2416,7 @@ export function MissionsV2Board({
             slot: openSlot,
           });
         }
-        if (isMarketSwiperCardsEnabled) {
-          scrollCarouselToIndex(index);
-        } else {
-          setActiveMarketIndex(index);
-          scrollCarouselToIndex(index);
-        }
+        scrollCarouselToIndex(index);
         return;
       }
 
@@ -2545,7 +2465,6 @@ export function MissionsV2Board({
       activeMarketIndex,
       collapseMarketProposalExpansions,
       flippedMarketCards,
-      isMarketSwiperCardsEnabled,
       scrollCarouselToIndex,
       userId,
     ],
@@ -2880,78 +2799,16 @@ export function MissionsV2Board({
         </div>
       );
 
-      if (isMarketSwiperCardsEnabled) {
-        return (
-          <SwiperSlide key={cardKey}>
-            <div
-              className="missions-market-carousel__item missions-active-carousel__item"
-              data-carousel-index={index}
-              data-active={isActiveCard ? 'true' : 'false'}
-            >
-              {cardNode}
-            </div>
-          </SwiperSlide>
-        );
-      }
-
-      let itemStyle: CSSProperties | undefined;
-      if (!prefersReducedMotion) {
-        const totalCards = marketCards.length;
-        let relativeOffset = index - activeMarketIndex;
-        if (totalCards > 1) {
-          const half = totalCards / 2;
-          if (relativeOffset > half) {
-            relativeOffset -= totalCards;
-          } else if (relativeOffset < -half) {
-            relativeOffset += totalCards;
-          }
-        }
-        const maxVisibleOffset = Math.min(2, Math.max(totalCards - 1, 1));
-        const limitedOffset = Math.max(Math.min(relativeOffset, maxVisibleOffset), -maxVisibleOffset);
-        const classicAngle = (Math.PI / 8) * limitedOffset;
-        const classicDepth = Math.cos(classicAngle);
-        const classicTranslateY = (1 - classicDepth) * 48;
-        const classicDistance = Math.abs(limitedOffset);
-        const classicScale = Math.max(0.72, 1 - 0.18 * classicDistance);
-        const classicOpacity = Math.max(0.4, 1 - 0.45 * classicDistance);
-        const classicTiltX = Math.sin(classicAngle) * 4.5;
-        const classicZIndex = Math.round((classicDepth + 1) * 40) + (isActiveCard ? 80 : 0);
-        const classicStyle: CSSProperties = {
-          transform: `translateY(${classicTranslateY}px) scale(${classicScale}) rotateX(${classicTiltX}deg)`,
-          opacity: classicOpacity,
-          zIndex: classicZIndex,
-        };
-
-        const coverflowDistance = Math.abs(limitedOffset);
-        const coverflowDirection = limitedOffset === 0 ? 0 : limitedOffset / coverflowDistance;
-        const coverflowTranslateX = limitedOffset * (32 + coverflowDistance * 8);
-        const coverflowTranslateY = coverflowDistance * 10;
-        const coverflowTranslateZ = -coverflowDistance * 140;
-        const coverflowRotateY = limitedOffset * -28;
-        const coverflowScale = Math.max(0.72, 1 - coverflowDistance * 0.12);
-        const coverflowOpacity = Math.max(0.36, 1 - coverflowDistance * 0.3);
-        const coverflowZIndexBase = 120 - coverflowDistance * 12;
-        const coverflowZIndex =
-          Math.round(coverflowZIndexBase) + (isActiveCard ? 80 : 0) + (coverflowDirection < 0 ? 1 : 0);
-        const coverflowStyle: CSSProperties = {
-          transform: `translate3d(${coverflowTranslateX}%, ${coverflowTranslateY}px, ${coverflowTranslateZ}px) rotateY(${coverflowRotateY}deg) scale(${coverflowScale})`,
-          opacity: coverflowOpacity,
-          zIndex: coverflowZIndex,
-        };
-
-        itemStyle = FEATURE_MARKET_COVERFLOW ? coverflowStyle : classicStyle;
-      }
-
       return (
-        <div
-          key={cardKey}
-          className="missions-market-carousel__item missions-active-carousel__item"
-          data-carousel-index={index}
-          data-active={isActiveCard ? 'true' : 'false'}
-          style={prefersReducedMotion ? undefined : itemStyle}
-        >
-          {cardNode}
-        </div>
+        <SwiperSlide key={cardKey}>
+          <div
+            className="missions-market-carousel__item missions-active-carousel__item"
+            data-carousel-index={index}
+            data-active={isActiveCard ? 'true' : 'false'}
+          >
+            {cardNode}
+          </div>
+        </SwiperSlide>
       );
     },
     [
@@ -2969,9 +2826,6 @@ export function MissionsV2Board({
       handleMarketCoverLoad,
       handleActivateProposal,
       handleMarketStackScroll,
-      isMarketSwiperCardsEnabled,
-      marketCards,
-      prefersReducedMotion,
       registerMarketStackHeader,
       updateMarketStackFade,
       updateMarketStackHeaderOffset,
@@ -3180,88 +3034,6 @@ export function MissionsV2Board({
       }
     };
   }, [activeSlotIndex, orderedSlots.length, viewMode]);
-
-  useEffect(() => {
-    if (viewMode !== 'market') {
-      return;
-    }
-    if (isMarketSwiperCardsEnabled) {
-      return;
-    }
-    const container = carouselRef.current;
-    if (!container) {
-      return;
-    }
-
-    let raf = 0;
-    const updateActive = (origin: 'initial' | 'scroll') => {
-      const items = container.querySelectorAll<HTMLElement>('[data-carousel-index]');
-      if (items.length === 0) {
-        return;
-      }
-      const nodes = Array.from(items);
-      const { left, width } = container.getBoundingClientRect();
-      const center = left + width / 2;
-      let closestIndex = activeMarketIndex;
-      let closestDistance = Number.POSITIVE_INFINITY;
-      nodes.forEach((node) => {
-        const rect = node.getBoundingClientRect();
-        const nodeCenter = rect.left + rect.width / 2;
-        const distance = Math.abs(center - nodeCenter);
-        if (distance < closestDistance - 0.5) {
-          closestDistance = distance;
-          const value = node.getAttribute('data-carousel-index');
-          closestIndex = value ? Number.parseInt(value, 10) : 0;
-        }
-      });
-
-      let shouldEmit = false;
-      setActiveMarketIndex((current) => {
-        if (current === closestIndex) {
-          return current;
-        }
-        shouldEmit = true;
-        return closestIndex;
-      });
-
-      if (!shouldEmit || origin !== 'scroll') {
-        return;
-      }
-
-      const viewport = getViewportSnapshot();
-      emitMissionsV2Event('missions_v2_scroll_market_snap', {
-        track: 'market',
-        cardIndex: closestIndex,
-        viewport: viewport ?? null,
-        userAgentHash: userAgentHash ?? null,
-      });
-    };
-
-    updateActive('initial');
-
-    const handleScroll = () => {
-      if (raf) {
-        cancelAnimationFrame(raf);
-      }
-      raf = window.requestAnimationFrame(() => updateActive('scroll'));
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      if (raf) {
-        window.cancelAnimationFrame(raf);
-      }
-    };
-  }, [
-    activeMarketIndex,
-    isMarketSwiperCardsEnabled,
-    viewMode,
-    marketCards,
-    prefersReducedMotion,
-    userAgentHash,
-  ]);
 
   useEffect(() => {
     if (viewMode !== 'market') {
@@ -3850,40 +3622,27 @@ export function MissionsV2Board({
                 </div>
               ) : (
                 <>
-                    {isMarketSwiperCardsEnabled ? (
-                      <Swiper
-                        className="missions-market-carousel__track missions-active-carousel__track"
-                        modules={[EffectCards, Navigation]}
-                        effect="cards"
-                        loop
-                        grabCursor
-                        role="listbox"
-                        aria-label="Marketplace de misiones disponibles"
-                        style={marketCarouselStyle}
-                        data-feature="swiper-cards"
-                        onSwiper={(instance) => {
-                          marketSwiperRef.current = instance;
-                          carouselRef.current = instance.el as HTMLDivElement;
-                          previousMarketSwiperIndexRef.current = instance.realIndex ?? instance.activeIndex ?? 0;
-                        }}
-                        onSlideChange={handleMarketSwiperChange}
-                        navigation={false}
-                        cardsEffect={{ slideShadows: false }}
-                      >
-                        {marketCards.map(renderMarketCard)}
-                      </Swiper>
-                    ) : (
-                      <div
-                        className="missions-market-carousel__track missions-active-carousel__track"
-                        ref={carouselRef}
-                        role="listbox"
-                        aria-label="Marketplace de misiones disponibles"
-                        style={marketCarouselStyle}
-                        data-feature={FEATURE_MARKET_COVERFLOW ? 'coverflow' : undefined}
-                      >
-                        {marketCards.map(renderMarketCard)}
-                      </div>
-                    )}
+                  <Swiper
+                    className="missions-market-carousel__track missions-active-carousel__track"
+                    modules={[EffectCards, Navigation]}
+                    effect="cards"
+                    loop
+                    grabCursor
+                    role="listbox"
+                    aria-label="Marketplace de misiones disponibles"
+                    style={marketCarouselStyle}
+                    data-feature={isMarketSwiperCardsEnabled ? 'swiper-cards' : undefined}
+                    onSwiper={(instance: SwiperType) => {
+                      marketSwiperRef.current = instance;
+                      carouselRef.current = instance.el as HTMLDivElement;
+                      previousMarketSwiperIndexRef.current = instance.realIndex ?? instance.activeIndex ?? 0;
+                    }}
+                    onSlideChange={handleMarketSwiperChange}
+                    navigation={false}
+                    cardsEffect={{ slideShadows: false }}
+                  >
+                    {marketCards.map(renderMarketCard)}
+                  </Swiper>
                   {activeMarketCard && (
                     <div className="missions-market-carousel__status" aria-live="polite">
                       <span className="missions-market-carousel__status-slot">
