@@ -2855,17 +2855,6 @@ export function MissionsV2Board({
                           )}
                         </div>
                         <footer className="mission-proposal-card__footer">
-                          <div className="mission-proposal-card__status">
-                            <span className="mission-proposal-card__status-label">Estado</span>
-                            <div className="mission-proposal-card__status-value">
-                              <span className="mission-proposal-card__status-pill" data-state={slotMetrics.state}>
-                                {STATE_LABELS[slotMetrics.state].label}
-                              </span>
-                              <span className="mission-proposal-card__status-petals">
-                                {slotMetrics.petals?.remaining ?? 0}/{slotMetrics.petals?.total ?? 0}
-                              </span>
-                            </div>
-                          </div>
                           <button
                             type="button"
                             className="mission-proposal-card__cta"

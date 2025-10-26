@@ -978,6 +978,7 @@
     color var(--motion-duration-base) var(--motion-ease-enter),
     transform var(--motion-duration-fast) var(--motion-ease-enter);
 }
+}
 
 .missions-slot-stack__control:not(:disabled):hover,
 .missions-slot-stack__control:not(:disabled):focus-visible {
@@ -2875,6 +2876,7 @@
   padding-bottom: calc(var(--market-stack-safe-area) + clamp(0.1rem, 0.8vw, 0.25rem));
 }
 
+.mission-proposal-card__cta,
 .mpc-cta {
   border-radius: 9999px;
   padding: clamp(0.48rem, 1.8vw, 0.58rem) clamp(0.78rem, 2.6vw, 0.95rem);
@@ -2893,6 +2895,14 @@
     transform var(--motion-duration-fast) var(--motion-ease-enter);
 }
 
+.mission-proposal-card__cta[data-variant='ghost'] {
+  border-color: rgba(148, 163, 184, 0.35);
+  background: rgba(30, 41, 59, 0.55);
+  color: rgba(203, 213, 225, 0.88);
+}
+
+.mission-proposal-card__cta:not(:disabled):hover,
+.mission-proposal-card__cta:not(:disabled):focus-visible,
 .mpc-cta:not(:disabled):hover,
 .mpc-cta:not(:disabled):focus-visible {
   border-color: rgba(56, 189, 248, 0.65);
@@ -2902,6 +2912,14 @@
   outline: none;
 }
 
+.mission-proposal-card__cta[data-variant='ghost']:not(:disabled):hover,
+.mission-proposal-card__cta[data-variant='ghost']:not(:disabled):focus-visible {
+  border-color: rgba(148, 163, 184, 0.45);
+  background: rgba(30, 41, 59, 0.7);
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.mission-proposal-card__cta:disabled,
 .mpc-cta:disabled {
   cursor: not-allowed;
   opacity: 0.7;
