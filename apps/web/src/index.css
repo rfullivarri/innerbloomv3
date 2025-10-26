@@ -1105,14 +1105,14 @@
       100dvh - var(--market-carousel-shell-top) - var(--market-carousel-shell-bottom) - var(--market-carousel-safe-gap)
     )
   );
-  --market-carousel-inline-padding: clamp(0.75rem, 5vw, 2.5rem);
-  --missions-carousel-card-width: clamp(260px, 78vw, 368px);
+  --market-carousel-inline-padding: clamp(0.5rem, 4.5vw, 2.25rem);
+  --missions-carousel-card-width: clamp(252px, 74vw, 352px);
   position: relative;
   display: flex;
   width: 100%;
   align-items: stretch;
   justify-content: flex-start;
-  gap: clamp(0.9rem, 3.5vw, 2.25rem);
+  gap: clamp(0.75rem, 3vw, 2rem);
   padding-block: var(--market-carousel-track-padding-block);
   padding-inline-start: max(
     var(--market-carousel-inline-padding),
@@ -1310,10 +1310,10 @@
       100dvh - var(--missions-carousel-shell-top) - var(--missions-carousel-shell-bottom) - var(--missions-carousel-safe-gap)
     )
   );
-  --missions-active-carousel-inline-padding: clamp(1rem, 6vw, 2.75rem);
-  --missions-carousel-card-width: clamp(240px, 70vw, 320px);
+  --missions-active-carousel-inline-padding: clamp(0.85rem, 5.5vw, 2.5rem);
+  --missions-carousel-card-width: clamp(236px, 66vw, 312px);
   @apply relative flex w-full items-stretch;
-  gap: clamp(1.25rem, 4vw, 2.25rem);
+  gap: clamp(1rem, 3.5vw, 2rem);
   min-height: var(--missions-active-carousel-height, var(--missions-active-carousel-fallback));
   padding-block: clamp(1.25rem, 4vw, 1.75rem);
   padding-inline-start: max(
