@@ -37,7 +37,7 @@ importers:
         specifier: ^4.0.2
         version: 4.0.2
       '@innerbloom/missions-v2-contracts':
-        specifier: workspace:*
+        specifier: file:../../packages/missions-v2-contracts
         version: link:../../packages/missions-v2-contracts
       ajv:
         specifier: ^8.17.1
@@ -134,7 +134,7 @@ importers:
         specifier: ^5.8.1
         version: 5.50.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@innerbloom/missions-v2-contracts':
-        specifier: workspace:*
+        specifier: file:../../packages/missions-v2-contracts
         version: link:../../packages/missions-v2-contracts
       '@tanstack/react-virtual':
         specifier: ^3.13.12
