@@ -12,6 +12,10 @@ import {
   type UIEvent as ReactUIEvent,
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { EffectCards, Navigation } from 'swiper/modules';
+import type { Swiper as SwiperType } from 'swiper';
+import type { NavigationOptions } from 'swiper/types';
 import {
   claimMissionsV2Mission,
   getMissionsV2Board,
@@ -37,6 +41,8 @@ import {
 } from '../../lib/telemetry';
 import { FEATURE_MISSIONS_V2, isFeatureEnabled } from '../../lib/featureFlags';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
+import 'swiper/css';
+import 'swiper/css/effect-cards';
 
 type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 
@@ -51,6 +57,7 @@ type ClaimModalState = {
 };
 
 const FEATURE_MARKET_COVERFLOW = isFeatureEnabled('missionsV2MarketCoverflow');
+const FEATURE_MARKET_SWIPER_CARDS = isFeatureEnabled('missionsV2MarketSwiperCards');
 
 const SLOT_ORDER: Array<MissionsV2Slot['slot']> = ['main', 'hunt', 'skill'];
 
@@ -1003,6 +1010,7 @@ export function MissionsV2Board({
   const [heartbeatToastKey, setHeartbeatToastKey] = useState<number | null>(null);
   const [flippedMarketCards, setFlippedMarketCards] = useState<Record<string, boolean>>({});
   const [marketCoverAspect, setMarketCoverAspect] = useState<Record<string, string>>({});
+  const isMarketSwiperCardsEnabled = FEATURE_MARKET_SWIPER_CARDS;
   const getViewModeFromLocation = useCallback(
     (loc: typeof location): 'active' | 'market' => {
       if (loc.hash.replace('#', '') === 'market') {
@@ -1053,6 +1061,10 @@ export function MissionsV2Board({
   const hasTrackedMarketView = useRef(false);
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
   const carouselRef = useRef<HTMLDivElement | null>(null);
+  const marketSwiperRef = useRef<SwiperType | null>(null);
+  const marketSwiperPrevRef = useRef<HTMLButtonElement | null>(null);
+  const marketSwiperNextRef = useRef<HTMLButtonElement | null>(null);
+  const previousMarketSwiperIndexRef = useRef(0);
   const slotCarouselRef = useRef<HTMLDivElement | null>(null);
   const marketStackRefs = useRef<Record<MissionsV2Slot['slot'], HTMLDivElement | null>>({
     main: null,
@@ -2222,6 +2234,10 @@ export function MissionsV2Board({
 
   const scrollCarouselToIndex = useCallback(
     (index: number, options?: ScrollIntoViewOptions) => {
+      if (isMarketSwiperCardsEnabled) {
+        marketSwiperRef.current?.slideToLoop(index);
+        return;
+      }
       const container = carouselRef.current;
       if (!container) {
         return;
@@ -2244,12 +2260,21 @@ export function MissionsV2Board({
         behavior,
       });
     },
-    [prefersReducedMotion],
+    [isMarketSwiperCardsEnabled, prefersReducedMotion],
   );
 
   const stepMarketCarousel = useCallback(
     (delta: number) => {
       if (marketCards.length === 0 || delta === 0) {
+        return;
+      }
+
+      if (isMarketSwiperCardsEnabled) {
+        if (delta > 0) {
+          marketSwiperRef.current?.slideNext();
+        } else {
+          marketSwiperRef.current?.slidePrev();
+        }
         return;
       }
 
@@ -2283,6 +2308,7 @@ export function MissionsV2Board({
     [
       activeMarketIndex,
       emitMissionsV2Event,
+      isMarketSwiperCardsEnabled,
       flippedMarketCards,
       marketCards,
       scrollCarouselToIndex,
@@ -2297,6 +2323,90 @@ export function MissionsV2Board({
     },
     [stepMarketCarousel],
   );
+
+  const handleMarketSwiperChange = useCallback(
+    (instance: SwiperType) => {
+      if (!isMarketSwiperCardsEnabled) {
+        return;
+      }
+      const total = marketCards.length;
+      const nextIndex = Number.isFinite(instance.realIndex)
+        ? instance.realIndex
+        : instance.activeIndex ?? 0;
+      const previousIndex = previousMarketSwiperIndexRef.current;
+
+      if (total > 0 && nextIndex !== previousIndex) {
+        let delta = nextIndex - previousIndex;
+        if (Math.abs(delta) > total / 2) {
+          delta = delta > 0 ? delta - total : delta + total;
+        }
+        const directionEvent =
+          delta > 0 ? 'missions_v2_market_nav_next' : 'missions_v2_market_nav_prev';
+        const nextCard = marketCards[nextIndex] ?? null;
+        emitMissionsV2Event(directionEvent, {
+          userId,
+          slot: nextCard?.slot ?? null,
+        });
+      }
+
+      previousMarketSwiperIndexRef.current = nextIndex;
+
+      const openSlot = Object.keys(flippedMarketCards)[0] ?? null;
+      if (openSlot) {
+        const nextCard = marketCards[nextIndex] ?? null;
+        if (!nextCard || nextCard.slot !== openSlot) {
+          setFlippedMarketCards({});
+          emitMissionsV2Event('missions_v2_market_flip_close', {
+            userId,
+            slot: openSlot,
+          });
+        }
+      }
+
+      setActiveMarketIndex((current) => (current === nextIndex ? current : nextIndex));
+    },
+    [
+      emitMissionsV2Event,
+      flippedMarketCards,
+      isMarketSwiperCardsEnabled,
+      marketCards,
+      userId,
+    ],
+  );
+
+  useEffect(() => {
+    if (!isMarketSwiperCardsEnabled) {
+      return;
+    }
+    previousMarketSwiperIndexRef.current = activeMarketIndex;
+  }, [activeMarketIndex, isMarketSwiperCardsEnabled]);
+
+  useEffect(() => {
+    if (!isMarketSwiperCardsEnabled) {
+      return;
+    }
+    const swiper = marketSwiperRef.current;
+    if (!swiper) {
+      return;
+    }
+    const prevEl = marketSwiperPrevRef.current;
+    const nextEl = marketSwiperNextRef.current;
+    if (!prevEl || !nextEl) {
+      return;
+    }
+
+    const navigationParams: NavigationOptions = {
+      enabled: true,
+      prevEl,
+      nextEl,
+    };
+    swiper.params.navigation = navigationParams;
+    if (swiper.navigation) {
+      swiper.navigation.destroy();
+      swiper.navigation.init();
+      swiper.navigation.update();
+    }
+  }, [isMarketSwiperCardsEnabled, marketCards.length, viewMode]);
 
   const handleSlotCarouselStep = useCallback(
     (direction: 'next' | 'prev') => {
@@ -2381,8 +2491,12 @@ export function MissionsV2Board({
             slot: openSlot,
           });
         }
-        setActiveMarketIndex(index);
-        scrollCarouselToIndex(index);
+        if (isMarketSwiperCardsEnabled) {
+          scrollCarouselToIndex(index);
+        } else {
+          setActiveMarketIndex(index);
+          scrollCarouselToIndex(index);
+        }
         return;
       }
 
@@ -2431,6 +2545,7 @@ export function MissionsV2Board({
       activeMarketIndex,
       collapseMarketProposalExpansions,
       flippedMarketCards,
+      isMarketSwiperCardsEnabled,
       scrollCarouselToIndex,
       userId,
     ],
@@ -2526,6 +2641,352 @@ export function MissionsV2Board({
       });
     },
     [activeMarketIndex],
+  );
+
+  const renderMarketCard = useCallback(
+    (item: MarketCardItem, index: number) => {
+      const { slot, proposals, key: cardKey } = item;
+      const details = SLOT_DETAILS[slot];
+      const rarity = getMarketRarity(slot);
+      const slotState = board?.slots.find((slotEntry: MissionsV2Slot) => slotEntry.slot === slot);
+      const slotMetrics = slotState ?? makeDemoSlot(slot, index + 1);
+      const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
+      const isFlipped = Boolean(flippedMarketCards[cardKey]);
+      const isActiveCard = index === activeMarketIndex;
+      const coverSrc = getMissionArt(slot, normalizedGameMode);
+      const activeProposalIndex = activeMarketProposalBySlot[slot] ?? 0;
+      const proposalList = proposals;
+      const totalProposals = proposalList.length;
+      const hasMultipleProposals = totalProposals > 1;
+      const stackFade = marketStackFadeBySlot[slot] ?? { atTop: true, atBottom: true };
+      const canScrollUp = !stackFade.atTop;
+      const canScrollDown = !stackFade.atBottom;
+      const activeProposal = proposalList[activeProposalIndex] ?? proposalList[0] ?? null;
+      const proposalRevision = marketProposalRevisionBySlot[slot] ?? 0;
+      const transitionDirection = marketProposalTransitionBySlot[slot];
+      const activeProposalTitle =
+        activeProposal && 'name' in activeProposal
+          ? activeProposal.name
+          : activeProposal && 'title' in activeProposal
+          ? activeProposal.title
+          : null;
+      const activeSummary = activeProposal?.summary ?? '';
+      const cardLabel = activeProposalTitle
+        ? `${activeProposalTitle}${activeSummary ? `. ${activeSummary}` : ''}`
+        : `Sin propuestas disponibles para ${details.label}`;
+      const canActivateThisCard = canActivate && isActiveCard;
+      const cardNode = (
+        <div className="missions-active-carousel__card">
+          <article
+            className="missions-market-card"
+            data-rarity={rarity}
+            data-flipped={isFlipped}
+            data-active={isActiveCard ? 'true' : 'false'}
+            role="option"
+            aria-selected={isActiveCard}
+            aria-expanded={isFlipped}
+            tabIndex={isActiveCard ? 0 : -1}
+            aria-label={cardLabel}
+            style={{ '--market-card-aspect': marketCoverAspect[cardKey] ?? '3 / 4' } as CSSProperties}
+            onClick={() => handleMarketCardClick(slot, index)}
+            onKeyDown={(event) => handleMarketCardKeyDown(event, slot, index)}
+          >
+            <div className="missions-market-card__front" aria-hidden={isFlipped}>
+              <span className="missions-market-card__slot-chip" data-slot={slot}>
+                {details.label}
+              </span>
+              <img
+                src={coverSrc}
+                alt={`Carta de ${details.label}`}
+                className="missions-market-card__cover"
+                draggable={false}
+                loading="lazy"
+                onLoad={(event) => handleMarketCoverLoad(slot, index, event)}
+              />
+            </div>
+            <div className="missions-market-card__back" aria-hidden={!isFlipped}>
+              <header className="missions-market-card__back-header" ref={(node) => registerMarketStackHeader(slot, node)}>
+                <div className="missions-market-card__back-title">
+                  <p className="missions-market-card__back-label">{details.label}</p>
+                </div>
+                <div className="missions-market-card__back-meta">
+                  {totalProposals > 0 ? (
+                    <span className="missions-market-card__stack-counter">
+                      {activeProposalIndex + 1} / {totalProposals}
+                    </span>
+                  ) : null}
+                  {hasMultipleProposals ? (
+                    <span className="missions-market-card__scroll-hint">Deslizá para ver más</span>
+                  ) : null}
+                  <span className="missions-market-card__icon" aria-hidden="true">
+                    {details.emoji}
+                  </span>
+                </div>
+              </header>
+              <div
+                className="missions-market-card__stack"
+                role="group"
+                aria-label={`Propuestas para ${details.label}`}
+                data-has-prev={canScrollUp ? 'true' : undefined}
+                data-has-next={canScrollDown ? 'true' : undefined}
+                data-transition={transitionDirection ?? undefined}
+                onClick={(event) => event.stopPropagation()}
+                onScroll={(event) => handleMarketStackScroll(slot, event)}
+                ref={(node) => {
+                  marketStackRefs.current[slot] = node;
+                  updateMarketStackFade(slot, node);
+                  updateMarketStackHeaderOffset(slot);
+                }}
+              >
+                {proposalList.map((proposal, proposalIndex) => {
+                  const isRealProposal = 'name' in proposal;
+                  const rewardPreview = isRealProposal ? formatProposalReward(proposal) : proposal.reward;
+                  const primaryObjective = proposal.objective;
+                  const objectiveDetails = (proposal.objectives ?? []).filter(Boolean);
+                  const requirementText = isRealProposal ? proposal.requirements : proposal.requirement;
+                  const durationLabel = isRealProposal
+                    ? formatDurationDays(proposal.duration_days)
+                    : proposal.durationLabel;
+                  const featureChips = isRealProposal
+                    ? buildProposalFeatureChips(proposal)
+                    : proposal.features;
+                  const chipLabels = [
+                    ...(durationLabel ? [`Duración · ${durationLabel}`] : []),
+                    ...featureChips,
+                  ];
+                  const inlineMetaItems: Array<{ key: string; label: string; value: string }> = [];
+
+                  if (slot === 'main') {
+                    const normalizedRequirement = requirementText?.trim();
+                    const requirementValue = normalizedRequirement?.length
+                      ? normalizedRequirement
+                      : 'Revisión manual';
+                    inlineMetaItems.push({
+                      key: 'requirement',
+                      label: 'Requisito',
+                      value: requirementValue,
+                    });
+                  }
+                  const difficultyValue = isRealProposal
+                    ? proposal.difficulty ?? '—'
+                    : proposal.difficulty
+                    ? `${proposal.difficulty.slice(0, 1).toUpperCase()}${proposal.difficulty.slice(1)}`
+                    : '—';
+                  const normalizedDifficulty =
+                    difficultyValue && difficultyValue !== '—' ? difficultyValue.toLowerCase() : null;
+                  const difficultyChipLabel = difficultyValue || '—';
+                  const isActiveProposal = proposalIndex === activeProposalIndex;
+                  const isProposalLocked = isRealProposal
+                    ? Boolean(proposal.locked ?? proposal.isActive)
+                    : proposal.state !== 'available';
+                  const showActiveBadge = isRealProposal
+                    ? Boolean(proposal.isActive)
+                    : proposal.state === 'active';
+                  const showAvailableBadge = !isRealProposal && proposal.state === 'available';
+                  const canActivateThisProposal =
+                    isRealProposal && canActivateThisCard && isActiveProposal && !isProposalLocked;
+                  const proposalKey = `${slot}-${proposal.id}-${isActiveProposal ? proposalRevision : 'static'}`;
+                  const summaryText = proposal.summary ?? '—';
+                  const buttonLabel = isProposalLocked ? 'Misión en progreso' : `Activar en slot ${details.label}`;
+                  return (
+                    <article
+                      key={proposalKey}
+                      className="mission-proposal-card missions-market-card__proposal"
+                      data-active={isActiveProposal ? 'true' : 'false'}
+                      data-locked={isProposalLocked ? 'true' : undefined}
+                      role="group"
+                    >
+                      <div className="mission-proposal-card__content">
+                        <div className="mission-proposal-card__body">
+                          <header className="mpc-header">
+                            <span className="mpc-index">#{proposalIndex + 1}</span>
+                            <div className="mpc-heading">
+                              <h5>{isRealProposal ? proposal.name : proposal.title}</h5>
+                              {(showActiveBadge || isProposalLocked || showAvailableBadge) && (
+                                <div className="mpc-badges">
+                                  {showActiveBadge ? <span className="mpc-badge mpc-badge--active">Activa</span> : null}
+                                  {isProposalLocked && !showActiveBadge ? (
+                                    <span className="mpc-badge">En progreso</span>
+                                  ) : null}
+                                  {showAvailableBadge ? <span className="mpc-badge">Disponible</span> : null}
+                                </div>
+                              )}
+                            </div>
+                          </header>
+                          <div className="mpc-summary">
+                            <p className="mpc-summary__text">{summaryText}</p>
+                            <span
+                              className="mpc-difficulty-chip"
+                              data-difficulty={normalizedDifficulty ?? undefined}
+                              aria-label={`Dificultad: ${difficultyChipLabel}`}
+                            >
+                              {difficultyChipLabel}
+                            </span>
+                          </div>
+                          <div className="mpc-reward">
+                            <span className="mpc-reward__label">Recompensa</span>
+                            <span className="mpc-reward__value">{rewardPreview ?? '—'}</span>
+                          </div>
+                          <div className="mpc-objective">
+                            <span className="mpc-objective__label">Objetivo</span>
+                            <p className="mpc-objective__text">{primaryObjective || '—'}</p>
+                          </div>
+                          {objectiveDetails.length > 0 && (
+                            <ul className="mpc-objective-list">
+                              {objectiveDetails.map((detail: string) => (
+                                <li key={`${proposal.id}-objective-${detail}`}>{detail}</li>
+                              ))}
+                            </ul>
+                          )}
+                          {(inlineMetaItems.length > 0 || chipLabels.length > 0) && (
+                            <ul className="mpc-inline-meta">
+                              {inlineMetaItems.map((item: { key: string; label: string; value: string }) => (
+                                <li key={`${proposal.id}-${item.key}`}>
+                                  <span className="mpc-inline-meta__label">{item.label}</span>
+                                  <span className="mpc-inline-meta__value">{item.value}</span>
+                                </li>
+                              ))}
+                              {chipLabels.map((chipLabel: string) => (
+                                <li key={`${proposal.id}-chip-${chipLabel}`} className="mpc-inline-meta__chip">
+                                  <span className="mpc-chip">{chipLabel}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                        <footer className="mission-proposal-card__footer">
+                          <div className="mission-proposal-card__status">
+                            <span className="mission-proposal-card__status-label">Estado</span>
+                            <div className="mission-proposal-card__status-value">
+                              <span className="mission-proposal-card__status-pill" data-state={slotMetrics.state}>
+                                {STATE_LABELS[slotMetrics.state].label}
+                              </span>
+                              <span className="mission-proposal-card__status-petals">
+                                {slotMetrics.petals?.remaining ?? 0}/{slotMetrics.petals?.total ?? 0}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            className="mission-proposal-card__cta"
+                            data-variant={canActivateThisProposal ? 'primary' : 'ghost'}
+                            disabled={!canActivateThisProposal}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              if (canActivateThisProposal && isRealProposal) {
+                                handleActivateProposal(slot, proposal);
+                              }
+                            }}
+                          >
+                            {buttonLabel}
+                          </button>
+                        </footer>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          </article>
+        </div>
+      );
+
+      if (isMarketSwiperCardsEnabled) {
+        return (
+          <SwiperSlide key={cardKey}>
+            <div
+              className="missions-market-carousel__item missions-active-carousel__item"
+              data-carousel-index={index}
+              data-active={isActiveCard ? 'true' : 'false'}
+            >
+              {cardNode}
+            </div>
+          </SwiperSlide>
+        );
+      }
+
+      let itemStyle: CSSProperties | undefined;
+      if (!prefersReducedMotion) {
+        const totalCards = marketCards.length;
+        let relativeOffset = index - activeMarketIndex;
+        if (totalCards > 1) {
+          const half = totalCards / 2;
+          if (relativeOffset > half) {
+            relativeOffset -= totalCards;
+          } else if (relativeOffset < -half) {
+            relativeOffset += totalCards;
+          }
+        }
+        const maxVisibleOffset = Math.min(2, Math.max(totalCards - 1, 1));
+        const limitedOffset = Math.max(Math.min(relativeOffset, maxVisibleOffset), -maxVisibleOffset);
+        const classicAngle = (Math.PI / 8) * limitedOffset;
+        const classicDepth = Math.cos(classicAngle);
+        const classicTranslateY = (1 - classicDepth) * 48;
+        const classicDistance = Math.abs(limitedOffset);
+        const classicScale = Math.max(0.72, 1 - 0.18 * classicDistance);
+        const classicOpacity = Math.max(0.4, 1 - 0.45 * classicDistance);
+        const classicTiltX = Math.sin(classicAngle) * 4.5;
+        const classicZIndex = Math.round((classicDepth + 1) * 40) + (isActiveCard ? 80 : 0);
+        const classicStyle: CSSProperties = {
+          transform: `translateY(${classicTranslateY}px) scale(${classicScale}) rotateX(${classicTiltX}deg)`,
+          opacity: classicOpacity,
+          zIndex: classicZIndex,
+        };
+
+        const coverflowDistance = Math.abs(limitedOffset);
+        const coverflowDirection = limitedOffset === 0 ? 0 : limitedOffset / coverflowDistance;
+        const coverflowTranslateX = limitedOffset * (32 + coverflowDistance * 8);
+        const coverflowTranslateY = coverflowDistance * 10;
+        const coverflowTranslateZ = -coverflowDistance * 140;
+        const coverflowRotateY = limitedOffset * -28;
+        const coverflowScale = Math.max(0.72, 1 - coverflowDistance * 0.12);
+        const coverflowOpacity = Math.max(0.36, 1 - coverflowDistance * 0.3);
+        const coverflowZIndexBase = 120 - coverflowDistance * 12;
+        const coverflowZIndex =
+          Math.round(coverflowZIndexBase) + (isActiveCard ? 80 : 0) + (coverflowDirection < 0 ? 1 : 0);
+        const coverflowStyle: CSSProperties = {
+          transform: `translate3d(${coverflowTranslateX}%, ${coverflowTranslateY}px, ${coverflowTranslateZ}px) rotateY(${coverflowRotateY}deg) scale(${coverflowScale})`,
+          opacity: coverflowOpacity,
+          zIndex: coverflowZIndex,
+        };
+
+        itemStyle = FEATURE_MARKET_COVERFLOW ? coverflowStyle : classicStyle;
+      }
+
+      return (
+        <div
+          key={cardKey}
+          className="missions-market-carousel__item missions-active-carousel__item"
+          data-carousel-index={index}
+          data-active={isActiveCard ? 'true' : 'false'}
+          style={prefersReducedMotion ? undefined : itemStyle}
+        >
+          {cardNode}
+        </div>
+      );
+    },
+    [
+      board,
+      flippedMarketCards,
+      activeMarketIndex,
+      normalizedGameMode,
+      activeMarketProposalBySlot,
+      marketStackFadeBySlot,
+      marketProposalRevisionBySlot,
+      marketProposalTransitionBySlot,
+      marketCoverAspect,
+      handleMarketCardClick,
+      handleMarketCardKeyDown,
+      handleMarketCoverLoad,
+      handleActivateProposal,
+      handleMarketStackScroll,
+      isMarketSwiperCardsEnabled,
+      marketCards,
+      prefersReducedMotion,
+      registerMarketStackHeader,
+      updateMarketStackFade,
+      updateMarketStackHeaderOffset,
+    ],
   );
 
   const handleUnavailableAction = useCallback((action: MissionsV2Action) => {
@@ -2735,6 +3196,9 @@ export function MissionsV2Board({
     if (viewMode !== 'market') {
       return;
     }
+    if (isMarketSwiperCardsEnabled) {
+      return;
+    }
     const container = carouselRef.current;
     if (!container) {
       return;
@@ -2801,7 +3265,14 @@ export function MissionsV2Board({
         window.cancelAnimationFrame(raf);
       }
     };
-  }, [activeMarketIndex, viewMode, marketCards, prefersReducedMotion, userAgentHash]);
+  }, [
+    activeMarketIndex,
+    isMarketSwiperCardsEnabled,
+    viewMode,
+    marketCards,
+    prefersReducedMotion,
+    userAgentHash,
+  ]);
 
   useEffect(() => {
     if (viewMode !== 'market') {
@@ -3361,6 +3832,7 @@ export function MissionsV2Board({
                   <button
                     type="button"
                     className="missions-market-carousel__button"
+                    ref={marketSwiperPrevRef}
                     onClick={() => handleCarouselStep('prev')}
                     aria-label="Ver propuesta anterior"
                     disabled={marketCards.length === 0}
@@ -3370,6 +3842,7 @@ export function MissionsV2Board({
                   <button
                     type="button"
                     className="missions-market-carousel__button"
+                    ref={marketSwiperNextRef}
                     onClick={() => handleCarouselStep('next')}
                     aria-label="Ver propuesta siguiente"
                     disabled={marketCards.length === 0}
@@ -3388,340 +3861,40 @@ export function MissionsV2Board({
                 </div>
               ) : (
                 <>
-                  <div
-                    className="missions-market-carousel__track missions-active-carousel__track"
-                    ref={carouselRef}
-                    role="listbox"
-                    aria-label="Marketplace de misiones disponibles"
-                    style={marketCarouselStyle}
-                    data-feature={FEATURE_MARKET_COVERFLOW ? 'coverflow' : undefined}
-                  >
-                    {marketCards.map((item, index) => {
-                      const { slot, proposals, key: cardKey } = item;
-                      const details = SLOT_DETAILS[slot];
-                      const rarity = getMarketRarity(slot);
-                      const slotState = board.slots.find((slotEntry: MissionsV2Slot) => slotEntry.slot === slot);
-                      const slotMetrics = slotState ?? makeDemoSlot(slot, index + 1);
-                      const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
-                      const isFlipped = Boolean(flippedMarketCards[cardKey]);
-                      const isActiveCard = index === activeMarketIndex;
-                      const coverSrc = getMissionArt(slot, normalizedGameMode);
-                      const activeProposalIndex = activeMarketProposalBySlot[slot] ?? 0;
-                      const proposalList = proposals;
-                      const totalProposals = proposalList.length;
-                      const hasMultipleProposals = totalProposals > 1;
-                      const stackFade = marketStackFadeBySlot[slot] ?? { atTop: true, atBottom: true };
-                      const canScrollUp = !stackFade.atTop;
-                      const canScrollDown = !stackFade.atBottom;
-                      const activeProposal = proposalList[activeProposalIndex] ?? proposalList[0] ?? null;
-                      const proposalRevision = marketProposalRevisionBySlot[slot] ?? 0;
-                      const transitionDirection = marketProposalTransitionBySlot[slot];
-                      const activeProposalTitle =
-                        activeProposal && 'name' in activeProposal
-                          ? activeProposal.name
-                          : activeProposal && 'title' in activeProposal
-                          ? activeProposal.title
-                          : null;
-                      const activeSummary = activeProposal?.summary ?? '';
-                      const cardLabel = activeProposalTitle
-                        ? `${activeProposalTitle}${activeSummary ? `. ${activeSummary}` : ''}`
-                        : `Sin propuestas disponibles para ${details.label}`;
-                      const canActivateThisCard = canActivate && isActiveCard;
-                      const totalCards = marketCards.length;
-                      let relativeOffset = index - activeMarketIndex;
-                      if (totalCards > 1) {
-                        const half = totalCards / 2;
-                        if (relativeOffset > half) {
-                          relativeOffset -= totalCards;
-                        } else if (relativeOffset < -half) {
-                          relativeOffset += totalCards;
-                        }
-                      }
-                      const maxVisibleOffset = Math.min(2, Math.max(totalCards - 1, 1));
-                      const limitedOffset = Math.max(
-                        Math.min(relativeOffset, maxVisibleOffset),
-                        -maxVisibleOffset,
-                      );
-                      const classicAngle = (Math.PI / 8) * limitedOffset;
-                      const classicDepth = Math.cos(classicAngle);
-                      const classicTranslateY = (1 - classicDepth) * 48;
-                      const classicDistance = Math.abs(limitedOffset);
-                      const classicScale = Math.max(0.72, 1 - 0.18 * classicDistance);
-                      const classicOpacity = Math.max(0.4, 1 - 0.45 * classicDistance);
-                      const classicTiltX = Math.sin(classicAngle) * 4.5;
-                      const classicZIndex = Math.round((classicDepth + 1) * 40) + (isActiveCard ? 80 : 0);
-                      const classicStyle: CSSProperties = {
-                        transform: `translateY(${classicTranslateY}px) scale(${classicScale}) rotateX(${classicTiltX}deg)`,
-                        opacity: classicOpacity,
-                        zIndex: classicZIndex,
-                      };
-
-                      const coverflowDistance = Math.abs(limitedOffset);
-                      const coverflowDirection = limitedOffset === 0 ? 0 : limitedOffset / coverflowDistance;
-                      const coverflowTranslateX = limitedOffset * (32 + coverflowDistance * 8);
-                      const coverflowTranslateY = coverflowDistance * 10;
-                      const coverflowTranslateZ = -coverflowDistance * 140;
-                      const coverflowRotateY = limitedOffset * -28;
-                      const coverflowScale = Math.max(0.72, 1 - coverflowDistance * 0.12);
-                      const coverflowOpacity = Math.max(0.36, 1 - coverflowDistance * 0.3);
-                      const coverflowZIndexBase = 120 - coverflowDistance * 12;
-                      const coverflowZIndex =
-                        Math.round(coverflowZIndexBase) + (isActiveCard ? 80 : 0) + (coverflowDirection < 0 ? 1 : 0);
-                      const coverflowStyle: CSSProperties = {
-                        transform: `translate3d(${coverflowTranslateX}%, ${coverflowTranslateY}px, ${coverflowTranslateZ}px) rotateY(${coverflowRotateY}deg) scale(${coverflowScale})`,
-                        opacity: coverflowOpacity,
-                        zIndex: coverflowZIndex,
-                      };
-
-                      const itemStyle = FEATURE_MARKET_COVERFLOW ? coverflowStyle : classicStyle;
-
-                      return (
-                        <div
-                          key={cardKey}
-                          className="missions-market-carousel__item missions-active-carousel__item"
-                          data-carousel-index={index}
-                          data-active={isActiveCard ? 'true' : 'false'}
-                          style={prefersReducedMotion ? undefined : itemStyle}
-                        >
-                          <div className="missions-active-carousel__card">
-                            <article
-                              className="missions-market-card"
-                              data-rarity={rarity}
-                              data-flipped={isFlipped}
-                              data-active={isActiveCard ? 'true' : 'false'}
-                              role="option"
-                              aria-selected={isActiveCard}
-                              aria-expanded={isFlipped}
-                              tabIndex={isActiveCard ? 0 : -1}
-                              aria-label={cardLabel}
-                              style={{
-                                '--market-card-aspect': marketCoverAspect[cardKey] ?? '3 / 4',
-                              } as CSSProperties}
-                              onClick={() => handleMarketCardClick(slot, index)}
-                              onKeyDown={(event) => handleMarketCardKeyDown(event, slot, index)}
-                            >
-                            <div className="missions-market-card__front" aria-hidden={isFlipped}>
-                              <span className="missions-market-card__slot-chip" data-slot={slot}>
-                                {details.label}
-                              </span>
-                              <img
-                                src={coverSrc}
-                                alt={`Carta de ${details.label}`}
-                                className="missions-market-card__cover"
-                                draggable={false}
-                                loading="lazy"
-                                onLoad={(event) => handleMarketCoverLoad(slot, index, event)}
-                              />
-                            </div>
-                            <div className="missions-market-card__back" aria-hidden={!isFlipped}>
-                                <header
-                                  className="missions-market-card__back-header"
-                                  ref={(node) => registerMarketStackHeader(slot, node)}
-                                >
-                                  <div className="missions-market-card__back-title">
-                                    <p className="missions-market-card__back-label">{details.label}</p>
-                                  </div>
-                                  <div className="missions-market-card__back-meta">
-                                    {totalProposals > 0 ? (
-                                      <span className="missions-market-card__stack-counter">
-                                        {activeProposalIndex + 1} / {totalProposals}
-                                      </span>
-                                    ) : null}
-                                    {hasMultipleProposals ? (
-                                      <span className="missions-market-card__scroll-hint">
-                                        Deslizá para ver más
-                                      </span>
-                                    ) : null}
-                                    <span className="missions-market-card__icon" aria-hidden="true">
-                                      {details.emoji}
-                                    </span>
-                                  </div>
-                                </header>
-                                <div
-                                  className="missions-market-card__stack"
-                                  role="group"
-                                  aria-label={`Propuestas para ${details.label}`}
-                                  data-has-prev={canScrollUp ? 'true' : undefined}
-                                  data-has-next={canScrollDown ? 'true' : undefined}
-                                  data-transition={transitionDirection ?? undefined}
-                                  onClick={(event) => event.stopPropagation()}
-                                  onScroll={(event) => handleMarketStackScroll(slot, event)}
-                                  ref={(node) => {
-                                    marketStackRefs.current[slot] = node;
-                                    updateMarketStackFade(slot, node);
-                                    updateMarketStackHeaderOffset(slot);
-                                  }}
-                                >
-                                  {proposalList.map((proposal, proposalIndex) => {
-                                    const isRealProposal = 'name' in proposal;
-                                    const rewardPreview = isRealProposal
-                                      ? formatProposalReward(proposal)
-                                      : proposal.reward;
-                                    const primaryObjective = proposal.objective;
-                                    const objectiveDetails = (proposal.objectives ?? []).filter(Boolean);
-                                    const requirementText = isRealProposal
-                                      ? proposal.requirements
-                                      : proposal.requirement;
-                                    const durationLabel = isRealProposal
-                                      ? formatDurationDays(proposal.duration_days)
-                                      : proposal.durationLabel;
-                                    const featureChips = isRealProposal
-                                      ? buildProposalFeatureChips(proposal)
-                                      : proposal.features;
-                                    const chipLabels = [
-                                      ...(durationLabel ? [`Duración · ${durationLabel}`] : []),
-                                      ...featureChips,
-                                    ];
-                                    const inlineMetaItems: Array<{
-                                      key: string;
-                                      label: string;
-                                      value: string;
-                                    }> = [];
-
-                                    if (slot === 'main') {
-                                      const normalizedRequirement = requirementText?.trim();
-                                      const requirementValue = normalizedRequirement?.length
-                                        ? normalizedRequirement
-                                        : 'Revisión manual';
-                                      inlineMetaItems.push({
-                                        key: 'requirement',
-                                        label: 'Requisito',
-                                        value: requirementValue,
-                                      });
-                                    }
-                                    const difficultyValue = isRealProposal
-                                      ? proposal.difficulty ?? '—'
-                                      : proposal.difficulty
-                                      ? `${proposal.difficulty.slice(0, 1).toUpperCase()}${proposal.difficulty.slice(1)}`
-                                      : '—';
-                                    const normalizedDifficulty =
-                                      difficultyValue && difficultyValue !== '—'
-                                        ? difficultyValue.toLowerCase()
-                                        : null;
-                                    const difficultyChipLabel = difficultyValue || '—';
-                                    const isActiveProposal = proposalIndex === activeProposalIndex;
-                                    const isProposalLocked = isRealProposal
-                                      ? Boolean(proposal.locked ?? proposal.isActive)
-                                      : proposal.state !== 'available';
-                                    const showActiveBadge = isRealProposal
-                                      ? Boolean(proposal.isActive)
-                                      : proposal.state === 'active';
-                                    const showAvailableBadge =
-                                      !isRealProposal && proposal.state === 'available';
-                                    const canActivateThisProposal =
-                                      isRealProposal &&
-                                      canActivateThisCard &&
-                                      isActiveProposal &&
-                                      !isProposalLocked;
-                                    const proposalKey = `${slot}-${proposal.id}-${
-                                      isActiveProposal ? proposalRevision : 'static'
-                                    }`;
-                                    const summaryText = proposal.summary ?? '—';
-                                    const buttonLabel = isProposalLocked
-                                      ? 'Misión en progreso'
-                                      : `Activar en slot ${details.label}`;
-                                    return (
-                                      <article
-                                        key={proposalKey}
-                                        className="mission-proposal-card missions-market-card__proposal"
-                                        data-active={isActiveProposal ? 'true' : 'false'}
-                                        data-locked={isProposalLocked ? 'true' : undefined}
-                                        role="group"
-                                      >
-                                        <div className="mission-proposal-card__content">
-                                          <div className="mission-proposal-card__body">
-                                            <header className="mpc-header">
-                                              <span className="mpc-index">#{proposalIndex + 1}</span>
-                                              <div className="mpc-heading">
-                                                <h5>{isRealProposal ? proposal.name : proposal.title}</h5>
-                                                {(showActiveBadge || isProposalLocked || showAvailableBadge) && (
-                                                  <div className="mpc-badges">
-                                                    {showActiveBadge ? (
-                                                      <span className="mpc-badge mpc-badge--active">Activa</span>
-                                                    ) : null}
-                                                    {isProposalLocked && !showActiveBadge ? (
-                                                      <span className="mpc-badge">En progreso</span>
-                                                    ) : null}
-                                                    {showAvailableBadge ? (
-                                                      <span className="mpc-badge">Disponible</span>
-                                                    ) : null}
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </header>
-                                            <div className="mpc-summary">
-                                              <p className="mpc-summary__text">{summaryText}</p>
-                                              <span
-                                                className="mpc-difficulty-chip"
-                                                data-difficulty={normalizedDifficulty ?? undefined}
-                                                aria-label={`Dificultad: ${difficultyChipLabel}`}
-                                              >
-                                                {difficultyChipLabel}
-                                              </span>
-                                            </div>
-                                            <div className="mpc-reward">
-                                              <span className="mpc-reward__label">Recompensa</span>
-                                              <span className="mpc-reward__value">{rewardPreview ?? '—'}</span>
-                                            </div>
-                                            <div className="mpc-objective">
-                                              <span className="mpc-objective__label">Objetivo</span>
-                                              <p className="mpc-objective__text">{primaryObjective || '—'}</p>
-                                            </div>
-                                            {objectiveDetails.length > 0 && (
-                                              <ul className="mpc-objective-list">
-                                                {objectiveDetails.map((detail: string) => (
-                                                  <li key={`${proposal.id}-objective-${detail}`}>
-                                                    {detail}
-                                                  </li>
-                                                ))}
-                                              </ul>
-                                            )}
-                                            {(inlineMetaItems.length > 0 || chipLabels.length > 0) && (
-                                              <ul className="mpc-inline-meta">
-                                                {inlineMetaItems.map((item: { key: string; label: string; value: string }) => (
-                                                  <li key={`${proposal.id}-${item.key}`}>
-                                                    <span className="mpc-inline-meta__label">{item.label}</span>
-                                                    <span className="mpc-inline-meta__value">{item.value}</span>
-                                                  </li>
-                                                ))}
-                                                {chipLabels.map((chipLabel: string) => (
-                                                  <li
-                                                    key={`${proposal.id}-chip-${chipLabel}`}
-                                                    className="mpc-inline-meta__chip"
-                                                  >
-                                                    <span className="mpc-chip">{chipLabel}</span>
-                                                  </li>
-                                                ))}
-                                              </ul>
-                                            )}
-                                          </div>
-                                          <div className="mission-proposal-card__footer">
-                                            <button
-                                              type="button"
-                                              className="mpc-cta"
-                                              disabled={!canActivateThisProposal}
-                                              onClick={(event) => {
-                                                event.stopPropagation();
-                                                if (canActivateThisProposal && isRealProposal) {
-                                                  handleActivateProposal(slot, proposal);
-                                                }
-                                              }}
-                                            >
-                                              {buttonLabel}
-                                            </button>
-                                          </div>
-                                        </div>
-                                      </article>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            </article>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                    {isMarketSwiperCardsEnabled ? (
+                      <Swiper
+                        className="missions-market-carousel__track missions-active-carousel__track"
+                        modules={[EffectCards, Navigation]}
+                        effect="cards"
+                        loop
+                        grabCursor
+                        role="listbox"
+                        aria-label="Marketplace de misiones disponibles"
+                        style={marketCarouselStyle}
+                        data-feature="swiper-cards"
+                        onSwiper={(instance) => {
+                          marketSwiperRef.current = instance;
+                          carouselRef.current = instance.el as HTMLDivElement;
+                          previousMarketSwiperIndexRef.current = instance.realIndex ?? instance.activeIndex ?? 0;
+                        }}
+                        onSlideChange={handleMarketSwiperChange}
+                        navigation={false}
+                        cardsEffect={{ slideShadows: false }}
+                      >
+                        {marketCards.map(renderMarketCard)}
+                      </Swiper>
+                    ) : (
+                      <div
+                        className="missions-market-carousel__track missions-active-carousel__track"
+                        ref={carouselRef}
+                        role="listbox"
+                        aria-label="Marketplace de misiones disponibles"
+                        style={marketCarouselStyle}
+                        data-feature={FEATURE_MARKET_COVERFLOW ? 'coverflow' : undefined}
+                      >
+                        {marketCards.map(renderMarketCard)}
+                      </div>
+                    )}
                   {activeMarketCard && (
                     <div className="missions-market-carousel__status" aria-live="polite">
                       <span className="missions-market-carousel__status-slot">
