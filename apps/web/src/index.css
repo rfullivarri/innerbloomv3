@@ -1317,7 +1317,7 @@
       100dvh - var(--missions-carousel-shell-top) - var(--missions-carousel-shell-bottom) - var(--missions-carousel-safe-gap)
     )
   );
-  --missions-active-carousel-inline-padding: clamp(0.51rem, 3.3vw, 1.5rem);
+  --missions-active-carousel-inline-padding: clamp(0.85rem, 5.5vw, 2.5rem);
   --missions-carousel-card-width: clamp(
     calc(236px * 1.23),
     calc(66vw * 1.23),
