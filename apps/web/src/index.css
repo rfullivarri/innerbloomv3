@@ -2245,6 +2245,8 @@
 .missions-market-card__back {
   justify-content: space-between;
   align-items: stretch;
+  gap: clamp(0.35rem, 1.1vw, 0.6rem);
+  padding-top: clamp(0.55rem, 1.8vw, 0.75rem);
   opacity: 0;
   transform: rotateY(180deg);
   background: linear-gradient(145deg, rgba(17, 24, 39, 0.9), rgba(30, 41, 59, 0.95));
@@ -2304,7 +2306,7 @@
   border-radius: inherit;
   --market-stack-gap: clamp(1rem, 3.37vw, 1.53rem);
   gap: var(--market-stack-gap);
-  margin-top: clamp(1rem, 3.37vw, 1.53rem);
+  margin-top: 0;
   min-height: 0;
   --market-stack-padding-inline: clamp(0.3rem, 1.4vw, 0.55rem);
   --market-stack-padding-block: clamp(0.63rem, 1.3vw, 0.77rem);
@@ -2431,8 +2433,8 @@
   scroll-margin-bottom: calc(
     var(--market-stack-padding-block, 0px) + var(--market-stack-safe-area, 0px)
   );
-  min-height: calc(100% - var(--market-stack-gap, 0px));
-  max-height: 100%;
+  min-height: 100%;
+  max-height: none;
 }
 
 .mission-proposal-card[data-active='true'] {
