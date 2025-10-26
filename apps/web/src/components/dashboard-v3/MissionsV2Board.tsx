@@ -35,7 +35,7 @@ import {
   getUserAgentHash,
   getViewportSnapshot,
 } from '../../lib/telemetry';
-import { FEATURE_MISSIONS_V2 } from '../../lib/featureFlags';
+import { FEATURE_MISSIONS_V2, isFeatureEnabled } from '../../lib/featureFlags';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 
 type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
@@ -49,6 +49,8 @@ type ClaimModalState = {
     items: string[];
   };
 };
+
+const FEATURE_MARKET_COVERFLOW = isFeatureEnabled('missionsV2MarketCoverflow');
 
 const SLOT_ORDER: Array<MissionsV2Slot['slot']> = ['main', 'hunt', 'skill'];
 
@@ -3392,6 +3394,7 @@ export function MissionsV2Board({
                     role="listbox"
                     aria-label="Marketplace de misiones disponibles"
                     style={marketCarouselStyle}
+                    data-feature={FEATURE_MARKET_COVERFLOW ? 'coverflow' : undefined}
                   >
                     {marketCards.map((item, index) => {
                       const { slot, proposals, key: cardKey } = item;
@@ -3439,25 +3442,38 @@ export function MissionsV2Board({
                         Math.min(relativeOffset, maxVisibleOffset),
                         -maxVisibleOffset,
                       );
-                      const angle = (Math.PI / 8) * limitedOffset;
-                      const depth = Math.cos(angle);
-                      const translateY = (1 - depth) * 48;
-                      const distance = Math.abs(limitedOffset);
-                      const scale = Math.max(0.72, 1 - 0.18 * distance);
-                      const opacity = Math.max(0.4, 1 - 0.45 * distance);
-                      const tiltX = Math.sin(angle) * 4.5;
-                      const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
-                      const itemStyle: CSSProperties = prefersReducedMotion
-                        ? {
-                            transform: 'none',
-                            opacity: 1,
-                            zIndex: isActiveCard ? 2 : 1,
-                          }
-                        : {
-                            transform: `translateY(${translateY}px) scale(${scale}) rotateX(${tiltX}deg)`,
-                            opacity,
-                            zIndex,
-                          };
+                      const classicAngle = (Math.PI / 8) * limitedOffset;
+                      const classicDepth = Math.cos(classicAngle);
+                      const classicTranslateY = (1 - classicDepth) * 48;
+                      const classicDistance = Math.abs(limitedOffset);
+                      const classicScale = Math.max(0.72, 1 - 0.18 * classicDistance);
+                      const classicOpacity = Math.max(0.4, 1 - 0.45 * classicDistance);
+                      const classicTiltX = Math.sin(classicAngle) * 4.5;
+                      const classicZIndex = Math.round((classicDepth + 1) * 40) + (isActiveCard ? 80 : 0);
+                      const classicStyle: CSSProperties = {
+                        transform: `translateY(${classicTranslateY}px) scale(${classicScale}) rotateX(${classicTiltX}deg)`,
+                        opacity: classicOpacity,
+                        zIndex: classicZIndex,
+                      };
+
+                      const coverflowDistance = Math.abs(limitedOffset);
+                      const coverflowDirection = limitedOffset === 0 ? 0 : limitedOffset / coverflowDistance;
+                      const coverflowTranslateX = limitedOffset * (32 + coverflowDistance * 8);
+                      const coverflowTranslateY = coverflowDistance * 10;
+                      const coverflowTranslateZ = -coverflowDistance * 140;
+                      const coverflowRotateY = limitedOffset * -28;
+                      const coverflowScale = Math.max(0.72, 1 - coverflowDistance * 0.12);
+                      const coverflowOpacity = Math.max(0.36, 1 - coverflowDistance * 0.3);
+                      const coverflowZIndexBase = 120 - coverflowDistance * 12;
+                      const coverflowZIndex =
+                        Math.round(coverflowZIndexBase) + (isActiveCard ? 80 : 0) + (coverflowDirection < 0 ? 1 : 0);
+                      const coverflowStyle: CSSProperties = {
+                        transform: `translate3d(${coverflowTranslateX}%, ${coverflowTranslateY}px, ${coverflowTranslateZ}px) rotateY(${coverflowRotateY}deg) scale(${coverflowScale})`,
+                        opacity: coverflowOpacity,
+                        zIndex: coverflowZIndex,
+                      };
+
+                      const itemStyle = FEATURE_MARKET_COVERFLOW ? coverflowStyle : classicStyle;
 
                       return (
                         <div
