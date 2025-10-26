@@ -3283,7 +3283,7 @@ export function MissionsV2Board({
                     const distance = Math.abs(limitedOffset);
                     const scale = Math.max(0.72, 1 - 0.18 * distance);
                     const opacity = Math.max(0.4, 1 - 0.45 * distance);
-                    const rotate = Math.sin(angle) * -4.5;
+                    const tiltX = Math.sin(angle) * 4.5;
                     const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
                     const itemStyle: CSSProperties = prefersReducedMotion
                       ? {
@@ -3292,7 +3292,7 @@ export function MissionsV2Board({
                           zIndex: isActiveCard ? 2 : 1,
                         }
                       : {
-                          transform: `translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
+                          transform: `translateY(${translateY}px) scale(${scale}) rotateX(${tiltX}deg)`,
                           opacity,
                           zIndex,
                         };
@@ -3445,7 +3445,7 @@ export function MissionsV2Board({
                       const distance = Math.abs(limitedOffset);
                       const scale = Math.max(0.72, 1 - 0.18 * distance);
                       const opacity = Math.max(0.4, 1 - 0.45 * distance);
-                      const rotate = Math.sin(angle) * -4.5;
+                      const tiltX = Math.sin(angle) * 4.5;
                       const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
                       const itemStyle: CSSProperties = prefersReducedMotion
                         ? {
@@ -3454,7 +3454,7 @@ export function MissionsV2Board({
                             zIndex: isActiveCard ? 2 : 1,
                           }
                         : {
-                            transform: `translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
+                            transform: `translateY(${translateY}px) scale(${scale}) rotateX(${tiltX}deg)`,
                             opacity,
                             zIndex,
                           };

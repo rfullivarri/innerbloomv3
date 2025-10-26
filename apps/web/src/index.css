@@ -1117,6 +1117,7 @@
   align-items: stretch;
   justify-content: flex-start;
   gap: clamp(0.75rem, 3vw, 2rem);
+  perspective: 1200px;
   padding-block: var(--market-carousel-track-padding-block);
   padding-inline-start: max(
     var(--market-carousel-inline-padding),
@@ -1325,6 +1326,7 @@
   );
   @apply relative flex w-full items-stretch;
   gap: clamp(1rem, 3.5vw, 2rem);
+  perspective: 1200px;
   min-height: var(--missions-active-carousel-height, var(--missions-active-carousel-fallback));
   padding-block: clamp(1.25rem, 4vw, 1.75rem);
   padding-inline-start: max(
@@ -1360,6 +1362,7 @@
     --missions-carousel-card-width,
     clamp(calc(240px * 1.23), calc(70vw * 1.23), calc(320px * 1.23))
   );
+  transform-origin: center bottom;
   cursor: pointer;
   transition: opacity var(--motion-duration-base) var(--motion-ease-enter),
     transform var(--motion-duration-medium) var(--motion-ease-enter);
@@ -2147,7 +2150,7 @@
   border: 1px solid rgba(59, 130, 246, 0.28);
   background: transparent;
   transform-style: preserve-3d;
-  perspective: 1200px;
+  transform-origin: center bottom;
   transition:
     box-shadow var(--motion-duration-base) var(--motion-ease-enter),
     border-color var(--motion-duration-base) var(--motion-ease-enter);
