@@ -978,7 +978,6 @@
     color var(--motion-duration-base) var(--motion-ease-enter),
     transform var(--motion-duration-fast) var(--motion-ease-enter);
 }
-}
 
 .missions-slot-stack__control:not(:disabled):hover,
 .missions-slot-stack__control:not(:disabled):focus-visible {
