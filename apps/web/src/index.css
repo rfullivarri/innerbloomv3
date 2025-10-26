@@ -2375,6 +2375,10 @@
   scroll-padding-bottom: calc(var(--market-stack-padding-block) + var(--market-stack-safe-area));
 }
 
+.missions-market-card__stack > .mission-proposal-card:first-child {
+  margin-top: calc(var(--market-stack-padding-block, 0px) * -1);
+}
+
 .missions-market-card__stack::-webkit-scrollbar {
   width: 6px;
 }
