@@ -205,6 +205,18 @@ function makeDemoSlot(slotKey: MissionsV2Slot['slot'], position: number): Missio
   };
 }
 
+function resolveSwiperIndex(instance: SwiperType): number {
+  if (typeof instance.realIndex === 'number' && Number.isFinite(instance.realIndex)) {
+    return instance.realIndex;
+  }
+
+  if (typeof instance.activeIndex === 'number' && Number.isFinite(instance.activeIndex)) {
+    return instance.activeIndex;
+  }
+
+  return 0;
+}
+
 const STATE_LABELS: Record<MissionsV2Slot['state'], { label: string; tone: 'neutral' | 'active' | 'success' | 'error' | 'cooldown' | 'claimed' }>
   = {
     idle: { label: 'PENDIENTE', tone: 'neutral' },
@@ -1075,6 +1087,7 @@ export function MissionsV2Board({
   const marketSwiperNextRef = useRef<HTMLButtonElement | null>(null);
   const previousMarketSwiperIndexRef = useRef(DEFAULT_MARKET_INDEX);
   const pendingMarketFlipRef = useRef<MissionsV2Slot['slot'] | null>(null);
+  const pendingMarketFlipTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const slotCarouselRef = useRef<HTMLDivElement | null>(null);
   const marketStackRefs = useRef<Record<MissionsV2Slot['slot'], HTMLDivElement | null>>({
     main: null,
@@ -2255,6 +2268,71 @@ export function MissionsV2Board({
     ],
   );
 
+  const clearPendingMarketFlipTimeout = useCallback(() => {
+    if (pendingMarketFlipTimeoutRef.current != null) {
+      clearTimeout(pendingMarketFlipTimeoutRef.current);
+      pendingMarketFlipTimeoutRef.current = null;
+    }
+  }, []);
+
+  const finalizeMarketFlip = useCallback(
+    (slotKey: MissionsV2Slot['slot'], index: number) => {
+      const nextCard = marketCards[index] ?? null;
+      if (!nextCard || nextCard.slot !== slotKey) {
+        pendingMarketFlipRef.current = null;
+        clearPendingMarketFlipTimeout();
+        return;
+      }
+
+      pendingMarketFlipRef.current = null;
+      clearPendingMarketFlipTimeout();
+
+      setActiveMarketIndex((current) => (current === index ? current : index));
+      setFlippedMarketCards({ [slotKey]: true });
+
+      emitMissionsV2Event('missions_v2_market_flip_open', {
+        userId,
+        slot: slotKey,
+      });
+
+      setActiveMarketProposalBySlot((prev) => {
+        if ((prev[slotKey] ?? 0) === 0) {
+          return prev;
+        }
+        collapseMarketProposalExpansions(slotKey);
+        previousActiveProposalBySlotRef.current[slotKey] = 0;
+        return { ...prev, [slotKey]: 0 };
+      });
+    },
+    [
+      collapseMarketProposalExpansions,
+      marketCards,
+      setActiveMarketIndex,
+      setActiveMarketProposalBySlot,
+      setFlippedMarketCards,
+      clearPendingMarketFlipTimeout,
+      emitMissionsV2Event,
+      userId,
+    ],
+  );
+
+  const schedulePendingMarketFlipFallback = useCallback(
+    (slotKey: MissionsV2Slot['slot'], index: number) => {
+      clearPendingMarketFlipTimeout();
+
+      const timeout = setTimeout(() => {
+        if (pendingMarketFlipRef.current !== slotKey) {
+          return;
+        }
+
+        finalizeMarketFlip(slotKey, index);
+      }, 250);
+
+      pendingMarketFlipTimeoutRef.current = timeout;
+    },
+    [clearPendingMarketFlipTimeout, finalizeMarketFlip],
+  );
+
   const scrollCarouselToIndex = useCallback((index: number) => {
     const instance = marketSwiperRef.current;
     if (!instance) {
@@ -2297,9 +2375,7 @@ export function MissionsV2Board({
   const handleMarketSwiperChange = useCallback(
     (instance: SwiperType) => {
       const total = marketCards.length;
-      const nextIndex = Number.isFinite(instance.realIndex)
-        ? instance.realIndex
-        : instance.activeIndex ?? 0;
+      const nextIndex = resolveSwiperIndex(instance);
       const previousIndex = previousMarketSwiperIndexRef.current;
 
       if (total > 0 && nextIndex !== previousIndex) {
@@ -2336,29 +2412,16 @@ export function MissionsV2Board({
       if (pendingSlot) {
         const nextCard = marketCards[nextIndex] ?? null;
         if (nextCard && nextCard.slot === pendingSlot) {
-          pendingMarketFlipRef.current = null;
-          setFlippedMarketCards({ [pendingSlot]: true });
-          emitMissionsV2Event('missions_v2_market_flip_open', {
-            userId,
-            slot: pendingSlot,
-          });
-          setActiveMarketProposalBySlot((prev) => {
-            if ((prev[pendingSlot] ?? 0) === 0) {
-              return prev;
-            }
-            collapseMarketProposalExpansions(pendingSlot);
-            previousActiveProposalBySlotRef.current[pendingSlot] = 0;
-            return { ...prev, [pendingSlot]: 0 };
-          });
+          finalizeMarketFlip(pendingSlot, nextIndex);
         }
       }
     },
     [
-      emitMissionsV2Event,
       flippedMarketCards,
-      collapseMarketProposalExpansions,
+      finalizeMarketFlip,
       marketCards,
-      setActiveMarketProposalBySlot,
+      emitMissionsV2Event,
+      setFlippedMarketCards,
       userId,
     ],
   );
@@ -2366,6 +2429,12 @@ export function MissionsV2Board({
   useEffect(() => {
     previousMarketSwiperIndexRef.current = activeMarketIndex;
   }, [activeMarketIndex]);
+
+  useEffect(() => {
+    return () => {
+      clearPendingMarketFlipTimeout();
+    };
+  }, [clearPendingMarketFlipTimeout]);
 
   useEffect(() => {
     const swiper = marketSwiperRef.current;
@@ -2465,6 +2534,8 @@ export function MissionsV2Board({
 
   const handleMarketCardToggle = useCallback(
     (slotKey: MissionsV2Slot['slot'], index: number) => {
+      clearPendingMarketFlipTimeout();
+
       if (index !== activeMarketIndex) {
         const openSlot = Object.keys(flippedMarketCards)[0] ?? null;
         if (openSlot) {
@@ -2478,32 +2549,17 @@ export function MissionsV2Board({
         if (swiper) {
           pendingMarketFlipRef.current = slotKey;
           scrollCarouselToIndex(index);
-          return;
-        }
-
-        const nextCard = marketCards[index] ?? null;
-        setActiveMarketIndex((current) => (current === index ? current : index));
-        pendingMarketFlipRef.current = null;
-
-        if (!nextCard || nextCard.slot !== slotKey) {
-          return;
-        }
-
-        setFlippedMarketCards({ [slotKey]: true });
-
-        emitMissionsV2Event('missions_v2_market_flip_open', {
-          userId,
-          slot: slotKey,
-        });
-
-        setActiveMarketProposalBySlot((prev) => {
-          if ((prev[slotKey] ?? 0) === 0) {
-            return prev;
+          const resolvedIndex = resolveSwiperIndex(swiper);
+          if (resolvedIndex === index) {
+            finalizeMarketFlip(slotKey, index);
+            return;
           }
-          collapseMarketProposalExpansions(slotKey);
-          previousActiveProposalBySlotRef.current[slotKey] = 0;
-          return { ...prev, [slotKey]: 0 };
-        });
+
+          schedulePendingMarketFlipFallback(slotKey, index);
+          return;
+        }
+
+        finalizeMarketFlip(slotKey, index);
         return;
       }
 
@@ -2551,10 +2607,15 @@ export function MissionsV2Board({
     },
     [
       activeMarketIndex,
+      clearPendingMarketFlipTimeout,
       collapseMarketProposalExpansions,
+      emitMissionsV2Event,
+      finalizeMarketFlip,
       flippedMarketCards,
-      marketCards,
+      schedulePendingMarketFlipFallback,
       scrollCarouselToIndex,
+      setActiveMarketProposalBySlot,
+      setFlippedMarketCards,
       userId,
     ],
   );
