@@ -8,6 +8,7 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type MutableRefObject,
   type SyntheticEvent,
   type UIEvent as ReactUIEvent,
 } from 'react';
@@ -55,6 +56,12 @@ type ClaimModalState = {
     items: string[];
   };
 };
+
+type MissionsWindow = Window &
+  typeof globalThis & {
+    __IB_DISABLE_MARKET_SWIPER__?: boolean;
+    __IB_MARKET_SWIPER_REF__?: MutableRefObject<SwiperType | null>;
+  };
 
 
 const SLOT_ORDER: Array<MissionsV2Slot['slot']> = ['main', 'hunt', 'skill'];
@@ -1010,6 +1017,9 @@ export function MissionsV2Board({
   const [flippedMarketCards, setFlippedMarketCards] = useState<Record<string, boolean>>({});
   const [marketCoverAspect, setMarketCoverAspect] = useState<Record<string, string>>({});
   const isMarketSwiperCardsEnabled = true;
+  const missionsWindow =
+    typeof window === 'undefined' ? null : (window as unknown as MissionsWindow | null);
+  const shouldDisableMarketSwiper = Boolean(prefersReducedMotion || missionsWindow?.__IB_DISABLE_MARKET_SWIPER__);
   const getViewModeFromLocation = useCallback(
     (loc: typeof location): 'active' | 'market' => {
       if (loc.hash.replace('#', '') === 'market') {
@@ -1095,6 +1105,19 @@ export function MissionsV2Board({
   const previousActiveSlotIdRef = useRef<string | null>(null);
   const hasInitializedActiveSnapRef = useRef(false);
   const previousActiveSnapIndexRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const missionsWindow = window as unknown as MissionsWindow;
+    missionsWindow.__IB_MARKET_SWIPER_REF__ = marketSwiperRef;
+    return () => {
+      if (missionsWindow.__IB_MARKET_SWIPER_REF__ === marketSwiperRef) {
+        delete missionsWindow.__IB_MARKET_SWIPER_REF__;
+      }
+    };
+  }, []);
 
   const marketBySlot = useMemo<MarketBySlot>(() => {
     const map: MarketBySlot = {};
@@ -2451,8 +2474,36 @@ export function MissionsV2Board({
             slot: openSlot,
           });
         }
-        pendingMarketFlipRef.current = slotKey;
-        scrollCarouselToIndex(index);
+        const swiper = marketSwiperRef.current;
+        if (swiper) {
+          pendingMarketFlipRef.current = slotKey;
+          scrollCarouselToIndex(index);
+          return;
+        }
+
+        const nextCard = marketCards[index] ?? null;
+        setActiveMarketIndex((current) => (current === index ? current : index));
+        pendingMarketFlipRef.current = null;
+
+        if (!nextCard || nextCard.slot !== slotKey) {
+          return;
+        }
+
+        setFlippedMarketCards({ [slotKey]: true });
+
+        emitMissionsV2Event('missions_v2_market_flip_open', {
+          userId,
+          slot: slotKey,
+        });
+
+        setActiveMarketProposalBySlot((prev) => {
+          if ((prev[slotKey] ?? 0) === 0) {
+            return prev;
+          }
+          collapseMarketProposalExpansions(slotKey);
+          previousActiveProposalBySlotRef.current[slotKey] = 0;
+          return { ...prev, [slotKey]: 0 };
+        });
         return;
       }
 
@@ -2502,6 +2553,7 @@ export function MissionsV2Board({
       activeMarketIndex,
       collapseMarketProposalExpansions,
       flippedMarketCards,
+      marketCards,
       scrollCarouselToIndex,
       userId,
     ],
@@ -3674,7 +3726,11 @@ export function MissionsV2Board({
                     style={marketCarouselStyle}
                     data-feature={isMarketSwiperCardsEnabled ? 'swiper-cards' : undefined}
                     onSwiper={(instance: SwiperType) => {
-                      marketSwiperRef.current = instance;
+                      if (shouldDisableMarketSwiper) {
+                        marketSwiperRef.current = null;
+                      } else {
+                        marketSwiperRef.current = instance;
+                      }
                       carouselRef.current = instance.el as HTMLDivElement;
                       const resolvedIndex = Number.isFinite(instance.realIndex)
                         ? instance.realIndex
