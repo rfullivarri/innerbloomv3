@@ -2233,7 +2233,17 @@ export function MissionsV2Board({
   );
 
   const scrollCarouselToIndex = useCallback((index: number) => {
-    marketSwiperRef.current?.slideToLoop(index);
+    const instance = marketSwiperRef.current;
+    if (!instance) {
+      return;
+    }
+
+    if (instance.params.loop) {
+      instance.slideToLoop(index);
+      return;
+    }
+
+    instance.slideTo(index);
   }, []);
 
   const stepMarketCarousel = useCallback(
@@ -3653,7 +3663,8 @@ export function MissionsV2Board({
                     className="missions-market-carousel__track missions-active-carousel__track"
                     modules={[EffectCards, Navigation]}
                     effect="cards"
-                    loop
+                    loop={false}
+                    rewind
                     grabCursor
                     preventClicks={false}
                     preventClicksPropagation={false}
