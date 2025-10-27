@@ -3655,6 +3655,8 @@ export function MissionsV2Board({
                     effect="cards"
                     loop
                     grabCursor
+                    preventClicks={false}
+                    preventClicksPropagation={false}
                     initialSlide={Math.min(DEFAULT_MARKET_INDEX, Math.max(marketCards.length - 1, 0))}
                     role="listbox"
                     aria-label="Marketplace de misiones disponibles"
