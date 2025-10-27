@@ -159,4 +159,64 @@ test.describe('Mobile carousel behaviour', () => {
     expect(afterBackIndex).not.toBeNull();
     expect(afterBackIndex).not.toBe(beforeBackIndex);
   });
+
+  test('market: flipping works after swapping cards without swiper instance', async ({ page }) => {
+    await page.goto('about:blank');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.addInitScript(() => {
+      (window as typeof window & { __IB_DISABLE_MARKET_SWIPER__?: boolean }).__IB_DISABLE_MARKET_SWIPER__ = true;
+    });
+
+    await navigateToMissions(page);
+
+    await page.getByRole('tab', { name: 'Market de misiones' }).click();
+    await page.waitForSelector(MARKET_TRACK_SELECTOR, { state: 'visible' });
+    await scrollUntilSnap(page, MARKET_TRACK_SELECTOR, { timeout: 5_000 });
+
+    const totalCards = await page.locator(`${MARKET_TRACK_SELECTOR} [data-carousel-index]`).count();
+    expect(totalCards).toBeGreaterThan(1);
+
+    const initialIndex = await getActiveCarouselIndex(page, MARKET_TRACK_SELECTOR);
+    expect(initialIndex).not.toBeNull();
+
+    const targetIndex = ((initialIndex ?? 0) + 1) % totalCards;
+
+    const hadSwiperInstance = await page.evaluate(() => {
+      const missionsWindow = window as typeof window & {
+        __IB_MARKET_SWIPER_REF__?: { current: unknown };
+      };
+      return Boolean(missionsWindow.__IB_MARKET_SWIPER_REF__?.current);
+    });
+    expect(hadSwiperInstance).toBe(true);
+
+    await page.evaluate(() => {
+      const missionsWindow = window as typeof window & {
+        __IB_MARKET_SWIPER_REF__?: { current: unknown };
+      };
+      if (!missionsWindow.__IB_MARKET_SWIPER_REF__) {
+        throw new Error('Market swiper ref not found');
+      }
+      missionsWindow.__IB_MARKET_SWIPER_REF__.current = null;
+    });
+
+    const targetCard = page.locator(
+      `${MARKET_TRACK_SELECTOR} [data-carousel-index='${targetIndex}'] .missions-market-card`,
+    );
+    await targetCard.scrollIntoViewIfNeeded();
+    await targetCard.click({ force: true });
+
+    await expect.poll(async () => getActiveCarouselIndex(page, MARKET_TRACK_SELECTOR)).toBe(targetIndex);
+
+    await page.waitForSelector(
+      `${MARKET_TRACK_SELECTOR} [data-carousel-index='${targetIndex}'] .missions-market-card[data-flipped='true']`,
+    );
+
+    const pendingSwiper = await page.evaluate(() => {
+      const missionsWindow = window as typeof window & {
+        __IB_MARKET_SWIPER_REF__?: { current: unknown };
+      };
+      return missionsWindow.__IB_MARKET_SWIPER_REF__?.current ?? null;
+    });
+    expect(pendingSwiper).toBeNull();
+  });
 });
