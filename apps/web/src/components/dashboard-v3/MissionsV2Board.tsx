@@ -1066,6 +1066,7 @@ export function MissionsV2Board({
   const [marketCardHeightBySlot, setMarketCardHeightBySlot] = useState<Record<string, number>>({});
   const [expandedSlots, setExpandedSlots] = useState<Record<string, boolean>>({});
   const [userAgentHash, setUserAgentHash] = useState<string | null>(null);
+  const [marketCarouselElement, setMarketCarouselElement] = useState<HTMLDivElement | null>(null);
   const hasTrackedView = useRef(false);
   const hasTrackedMarketView = useRef(false);
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -1266,7 +1267,7 @@ export function MissionsV2Board({
     if (!activeCard) {
       return;
     }
-    const carouselNode = carouselRef.current;
+    const carouselNode = marketCarouselElement;
     if (!carouselNode) {
       return;
     }
@@ -1293,6 +1294,7 @@ export function MissionsV2Board({
     activeMarketProposalBySlot,
     flippedMarketCards,
     marketCards,
+    marketCarouselElement,
     marketProposalRevisionBySlot,
     prefersReducedMotion,
     viewMode,
@@ -3136,7 +3138,7 @@ export function MissionsV2Board({
       return;
     }
 
-    const container = carouselRef.current;
+    const container = marketCarouselElement;
     if (!container) {
       return;
     }
@@ -3193,7 +3195,14 @@ export function MissionsV2Board({
         window.cancelAnimationFrame(raf);
       }
     };
-  }, [activeMarketIndex, marketCards.length, marketSwiperInstance, shouldDisableMarketSwiper, viewMode]);
+  }, [
+    activeMarketIndex,
+    marketCards.length,
+    marketCarouselElement,
+    marketSwiperInstance,
+    shouldDisableMarketSwiper,
+    viewMode,
+  ]);
 
   useEffect(() => {
     if (viewMode !== 'market') {
@@ -3802,7 +3811,9 @@ export function MissionsV2Board({
                       } else {
                         marketSwiperRef.current = instance;
                       }
-                      carouselRef.current = instance.el as HTMLDivElement;
+                      const element = instance.el as HTMLDivElement;
+                      carouselRef.current = element;
+                      setMarketCarouselElement(element);
                       const resolvedIndex = Number.isFinite(instance.realIndex)
                         ? instance.realIndex
                         : instance.activeIndex ?? DEFAULT_MARKET_INDEX;
