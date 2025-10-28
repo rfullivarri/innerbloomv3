@@ -3451,44 +3451,6 @@ export function MissionsV3Board({
     return card;
   };
 
-  if (status === 'loading' || status === 'idle') {
-    return (
-      <div className="missions-board" data-reduced-motion={prefersReducedMotion ? 'true' : 'false'}>
-        <div className="missions-board__background" aria-hidden="true" />
-        <PetalField disabled={prefersReducedMotion} />
-        <div className="missions-board__content">
-          <Card title="Misiones v3" subtitle="Cargando tablero" className="missions-card" bodyClassName="gap-6">
-            <div className="missions-skeleton" />
-            <div className="missions-skeleton missions-skeleton--thin" />
-            <div className="missions-skeleton missions-skeleton--thin" />
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (status === 'error' || !board) {
-    return (
-      <div className="missions-board" data-reduced-motion={prefersReducedMotion ? 'true' : 'false'}>
-        <div className="missions-board__background" aria-hidden="true" />
-        <PetalField disabled={prefersReducedMotion} />
-        <div className="missions-board__content space-y-4">
-          <ToastBanner tone="error" message="No pudimos cargar Misiones v3. Recargá la página para reintentar." />
-          {error && (
-            <pre className="missions-error-log">{String(error)}</pre>
-          )}
-          <button
-            type="button"
-            onClick={reload}
-            className="missions-action-btn missions-action-btn--retry"
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const activeMarketCard = marketCards[activeMarketIndex] ?? null;
   const activeSlotCard = orderedSlots[activeSlotIndex] ?? null;
 
@@ -3528,21 +3490,6 @@ export function MissionsV3Board({
   );
 
   const heroHasMission = Boolean(activeSlotCard?.mission);
-  const heroRequirementChips = activeSlotCard && heroHasMission ? buildRequirementChips(activeSlotCard) : [];
-  const heroRewardCopy = activeSlotCard ? getRewardCopy(activeSlotCard) : 'Activá una misión para ver el botín.';
-  const heroHeroLine = activeSlotCard
-    ? buildHeroLine(activeSlotCard, marketBySlot)
-    : 'Definí una misión para convertir tu foco diario en progreso tangible.';
-  const heroCountdown = formatCountdown(activeSlotCard?.countdown?.label ?? 'Sin misión activa');
-  const heroDetails = activeSlotCard ? SLOT_DETAILS[activeSlotCard.slot] : null;
-  const heroState = activeSlotCard ? STATE_LABELS[activeSlotCard.state] : null;
-  const heroPetalHighlight = activeSlotCard ? heartbeatFeedback?.slotId === activeSlotCard.id : false;
-  const heroHeartbeatPending = activeSlotCard ? !activeSlotCard.heartbeat_today : false;
-  const heroBossStatusLabel = bossEnabled
-    ? board.boss.status === 'locked'
-      ? 'Desbloquealo llevando la Main al Acto 2'
-      : board.boss.countdown.label
-    : 'Boss no disponible';
 
   const heroPrimaryAction = useMemo<PrimaryAction>(() => {
     if (!activeSlotCard || !heroHasMission) {
@@ -3634,6 +3581,60 @@ export function MissionsV3Board({
     orderedSlots,
     scrollToMarket,
   ]);
+
+  if (status === 'loading' || status === 'idle') {
+    return (
+      <div className="missions-board" data-reduced-motion={prefersReducedMotion ? 'true' : 'false'}>
+        <div className="missions-board__background" aria-hidden="true" />
+        <PetalField disabled={prefersReducedMotion} />
+        <div className="missions-board__content">
+          <Card title="Misiones v3" subtitle="Cargando tablero" className="missions-card" bodyClassName="gap-6">
+            <div className="missions-skeleton" />
+            <div className="missions-skeleton missions-skeleton--thin" />
+            <div className="missions-skeleton missions-skeleton--thin" />
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'error' || !board) {
+    return (
+      <div className="missions-board" data-reduced-motion={prefersReducedMotion ? 'true' : 'false'}>
+        <div className="missions-board__background" aria-hidden="true" />
+        <PetalField disabled={prefersReducedMotion} />
+        <div className="missions-board__content space-y-4">
+          <ToastBanner tone="error" message="No pudimos cargar Misiones v3. Recargá la página para reintentar." />
+          {error && (
+            <pre className="missions-error-log">{String(error)}</pre>
+          )}
+          <button
+            type="button"
+            onClick={reload}
+            className="missions-action-btn missions-action-btn--retry"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const heroRequirementChips = activeSlotCard && heroHasMission ? buildRequirementChips(activeSlotCard) : [];
+  const heroRewardCopy = activeSlotCard ? getRewardCopy(activeSlotCard) : 'Activá una misión para ver el botín.';
+  const heroHeroLine = activeSlotCard
+    ? buildHeroLine(activeSlotCard, marketBySlot)
+    : 'Definí una misión para convertir tu foco diario en progreso tangible.';
+  const heroCountdown = formatCountdown(activeSlotCard?.countdown?.label ?? 'Sin misión activa');
+  const heroDetails = activeSlotCard ? SLOT_DETAILS[activeSlotCard.slot] : null;
+  const heroState = activeSlotCard ? STATE_LABELS[activeSlotCard.state] : null;
+  const heroPetalHighlight = activeSlotCard ? heartbeatFeedback?.slotId === activeSlotCard.id : false;
+  const heroHeartbeatPending = activeSlotCard ? !activeSlotCard.heartbeat_today : false;
+  const heroBossStatusLabel = bossEnabled
+    ? board.boss.status === 'locked'
+      ? 'Desbloquealo llevando la Main al Acto 2'
+      : board.boss.countdown.label
+    : 'Boss no disponible';
 
   return (
     <div className="missions-board" data-reduced-motion={prefersReducedMotion ? 'true' : 'false'}>
