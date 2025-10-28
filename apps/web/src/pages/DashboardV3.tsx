@@ -37,6 +37,7 @@ import { DailyQuestModal, type DailyQuestModalHandle } from '../components/Daily
 import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
 import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
 import { MissionsV2Board } from '../components/dashboard-v3/MissionsV2Board';
+import { MissionsV3Board } from '../components/dashboard-v3/MissionsV3Board';
 import { Card } from '../components/common/Card';
 import {
   getActiveSection,
@@ -179,6 +180,10 @@ export default function DashboardV3Page() {
                   element={<MissionsV2Route userId={backendUserId} gameMode={gameMode} />}
                 />
                 <Route
+                  path="missions-v3"
+                  element={<MissionsV3Route userId={backendUserId} gameMode={gameMode} />}
+                />
+                <Route
                   path="rewards"
                   element={<RewardsView userId={backendUserId} section={rewardsSection} />}
                 />
@@ -287,6 +292,35 @@ function MissionsV2View({
     <div className="space-y-6">
       <h1 className="sr-only">Misiones</h1>
       <MissionsV2Board userId={userId} gameMode={gameMode} />
+    </div>
+  );
+}
+
+function MissionsV3Route({
+  userId,
+  gameMode,
+}: {
+  userId: string;
+  gameMode: GameMode | string | null;
+}) {
+  if (!FEATURE_MISSIONS_V2) {
+    return <Navigate to=".." replace />;
+  }
+
+  return <MissionsV3View userId={userId} gameMode={gameMode} />;
+}
+
+function MissionsV3View({
+  userId,
+  gameMode,
+}: {
+  userId: string;
+  gameMode: GameMode | string | null;
+}) {
+  return (
+    <div className="space-y-6">
+      <h1 className="sr-only">Misiones v3</h1>
+      <MissionsV3Board userId={userId} gameMode={gameMode} />
     </div>
   );
 }
