@@ -327,6 +327,315 @@
   }
 }
 
+.missions-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.missions-hero__card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.85));
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.45);
+}
+
+.missions-hero__card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 12% 20%, rgba(59, 130, 246, 0.16), transparent 50%),
+    radial-gradient(circle at 88% 12%, rgba(236, 72, 153, 0.12), transparent 55%);
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.missions-hero__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.missions-hero__top {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .missions-hero__top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+}
+
+.missions-hero__intro {
+  max-width: 36rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.missions-hero__eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.75);
+}
+
+.missions-hero__title {
+  font-family: var(--font-display, 'Plus Jakarta Sans'), ui-rounded, system-ui;
+  font-weight: 600;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.missions-hero__subtitle {
+  font-size: clamp(0.85rem, 2.4vw, 0.95rem);
+  line-height: 1.6;
+  color: rgba(203, 213, 225, 0.88);
+}
+
+.missions-hero__cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .missions-hero__cta {
+    align-items: flex-end;
+    text-align: right;
+  }
+}
+
+.missions-hero__cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: transform 180ms ease, box-shadow 220ms ease, background 220ms ease, color 220ms ease;
+}
+
+.missions-hero__cta-btn--primary {
+  background: linear-gradient(120deg, rgba(56, 189, 248, 0.95), rgba(99, 102, 241, 0.9));
+  color: rgba(15, 23, 42, 0.92);
+  box-shadow: 0 14px 30px rgba(59, 130, 246, 0.35);
+}
+
+.missions-hero__cta-btn--neutral {
+  background: rgba(15, 23, 42, 0.65);
+  color: rgba(226, 232, 240, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.45);
+}
+
+.missions-hero__cta-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.missions-hero__cta-btn:not(:disabled):hover,
+.missions-hero__cta-btn:not(:disabled):focus-visible {
+  transform: translateY(-1px);
+}
+
+.missions-hero__cta-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.45);
+}
+
+.missions-hero__cta-hint {
+  font-size: 0.7rem;
+  color: rgba(148, 163, 184, 0.8);
+  max-width: 18rem;
+}
+
+.missions-hero__focus {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .missions-hero__focus {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    align-items: start;
+  }
+}
+
+.missions-hero__focus-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.missions-hero__focus-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(148, 163, 184, 0.78);
+}
+
+.missions-hero__focus-title {
+  font-size: clamp(1.1rem, 3vw, 1.45rem);
+  font-weight: 600;
+  color: rgba(241, 245, 249, 0.96);
+}
+
+.missions-hero__focus-hero {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(203, 213, 225, 0.9);
+}
+
+.missions-hero__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.missions-hero__focus-metrics {
+  display: grid;
+  gap: 0.9rem;
+}
+
+@media (min-width: 640px) {
+  .missions-hero__focus-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+  }
+}
+
+.missions-hero__metric {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.8rem 1rem;
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  min-height: 3.75rem;
+}
+
+.missions-hero__metric-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(148, 163, 184, 0.78);
+}
+
+.missions-hero__metric-value {
+  font-size: clamp(0.95rem, 2.6vw, 1.1rem);
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.missions-hero__metric--status {
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.missions-hero__metric-placeholder {
+  font-size: 0.75rem;
+  color: rgba(148, 163, 184, 0.8);
+}
+
+.missions-hero__boss {
+  margin-top: 0.5rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(14, 165, 233, 0.28);
+  background: rgba(13, 148, 136, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.missions-hero__boss-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(236, 252, 203, 0.9);
+}
+
+.missions-hero__boss-countdown {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(236, 252, 203, 0.88);
+}
+
+.missions-hero__stats-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .missions-hero__stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .missions-hero__stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.missions-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  min-height: 3.5rem;
+}
+
+.missions-summary__icon {
+  font-size: 1.4rem;
+}
+
+.missions-summary__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.missions-summary__label {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.8);
+}
+
+.missions-summary__value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.missions-summary__hint {
+  font-size: 0.7rem;
+  color: rgba(148, 163, 184, 0.75);
+}
+
 .missions-view-toggle {
   display: flex;
   flex-wrap: nowrap;

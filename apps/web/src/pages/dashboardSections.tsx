@@ -232,7 +232,7 @@ export function getActiveSection(
     return activeSection;
   }
 
-  if (pathname.includes('/missions-v2')) {
+  if (pathname.includes('/missions-v2') || pathname.includes('/missions-v3')) {
     const missionsSection = getDashboardSectionConfig('missions', pathname);
 
     return {
