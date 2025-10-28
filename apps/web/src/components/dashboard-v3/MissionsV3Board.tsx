@@ -1093,6 +1093,7 @@ export function MissionsV3Board({
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const marketSwiperRef = useRef<SwiperType | null>(null);
+  const marketSwiperInstance = marketSwiperRef.current;
   const marketSwiperPrevRef = useRef<HTMLButtonElement | null>(null);
   const marketSwiperNextRef = useRef<HTMLButtonElement | null>(null);
   const previousMarketSwiperIndexRef = useRef(DEFAULT_MARKET_INDEX);
@@ -3145,6 +3146,76 @@ export function MissionsV3Board({
       }
     };
   }, [activeSlotIndex, orderedSlots.length, viewMode]);
+
+  useEffect(() => {
+    if (viewMode !== 'market') {
+      return;
+    }
+    if (marketCards.length === 0) {
+      return;
+    }
+    if (!shouldDisableMarketSwiper && marketSwiperInstance) {
+      return;
+    }
+
+    const container = carouselRef.current;
+    if (!container) {
+      return;
+    }
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    let raf = 0;
+
+    const updateActive = () => {
+      const items = container.querySelectorAll<HTMLElement>('[data-carousel-index]');
+      if (items.length === 0) {
+        return;
+      }
+
+      const { left, width } = container.getBoundingClientRect();
+      const center = left + width / 2;
+      let closestIndex = activeMarketIndex;
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      items.forEach((item) => {
+        const rect = item.getBoundingClientRect();
+        const itemCenter = rect.left + rect.width / 2;
+        const distance = Math.abs(center - itemCenter);
+
+        if (distance < closestDistance - 0.5) {
+          const raw = item.getAttribute('data-carousel-index');
+          const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN;
+
+          if (!Number.isNaN(parsed)) {
+            closestDistance = distance;
+            closestIndex = parsed;
+          }
+        }
+      });
+
+      setActiveMarketIndex((current) => (current === closestIndex ? current : closestIndex));
+    };
+
+    const handleScroll = () => {
+      if (raf) {
+        window.cancelAnimationFrame(raf);
+      }
+      raf = window.requestAnimationFrame(updateActive);
+    };
+
+    updateActive();
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      if (raf) {
+        window.cancelAnimationFrame(raf);
+      }
+    };
+  }, [activeMarketIndex, marketCards.length, marketSwiperInstance, shouldDisableMarketSwiper, viewMode]);
 
   useEffect(() => {
     if (viewMode !== 'market') {

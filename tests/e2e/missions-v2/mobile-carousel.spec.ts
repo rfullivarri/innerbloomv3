@@ -176,11 +176,6 @@ test.describe('Mobile carousel behaviour', () => {
     const totalCards = await page.locator(`${MARKET_TRACK_SELECTOR} [data-carousel-index]`).count();
     expect(totalCards).toBeGreaterThan(1);
 
-    const initialIndex = await getActiveCarouselIndex(page, MARKET_TRACK_SELECTOR);
-    expect(initialIndex).not.toBeNull();
-
-    const targetIndex = ((initialIndex ?? 0) + 1) % totalCards;
-
     const hadSwiperInstance = await page.evaluate(() => {
       const missionsWindow = window as typeof window & {
         __IB_MARKET_SWIPER_REF__?: { current: unknown };
@@ -199,13 +194,49 @@ test.describe('Mobile carousel behaviour', () => {
       missionsWindow.__IB_MARKET_SWIPER_REF__.current = null;
     });
 
-    const targetCard = page.locator(
-      `${MARKET_TRACK_SELECTOR} [data-carousel-index='${targetIndex}'] .missions-market-card`,
-    );
-    await targetCard.scrollIntoViewIfNeeded();
-    await targetCard.click({ force: true });
+    const cardMetadata = await page.evaluate(
+      ({ selector }) =>
+        Array.from(
+          document.querySelectorAll<HTMLElement>(`${selector} [data-carousel-index]`),
+        ).map((node) => {
+          const rawIndex = node.getAttribute('data-carousel-index');
+          const parsedIndex = rawIndex ? Number.parseInt(rawIndex, 10) : Number.NaN;
+          const slotChip = node.querySelector<HTMLElement>('.missions-market-card__slot-chip');
 
-    await expect.poll(async () => getActiveCarouselIndex(page, MARKET_TRACK_SELECTOR)).toBe(targetIndex);
+          return {
+            index: Number.isNaN(parsedIndex) ? null : parsedIndex,
+            slot: slotChip?.dataset.slot ?? null,
+          };
+        }),
+      { selector: MARKET_TRACK_SELECTOR },
+    );
+
+    const huntEntry = cardMetadata.find((entry) => entry.slot === 'hunt' && entry.index != null) ?? null;
+    const skillEntry = cardMetadata.find((entry) => entry.slot === 'skill' && entry.index != null) ?? null;
+
+    expect(huntEntry?.index).not.toBeNull();
+    expect(skillEntry?.index).not.toBeNull();
+
+    for (const entry of [huntEntry, skillEntry]) {
+      if (!entry) {
+        continue;
+      }
+      const { index } = entry;
+      if (index == null) {
+        continue;
+      }
+      const card = page.locator(
+        `${MARKET_TRACK_SELECTOR} [data-carousel-index='${index}'] .missions-market-card`,
+      );
+      await card.scrollIntoViewIfNeeded();
+      await card.click();
+      await expect.poll(async () => getActiveCarouselIndex(page, MARKET_TRACK_SELECTOR)).toBe(index);
+    }
+
+    if (!skillEntry || skillEntry.index == null) {
+      throw new Error('Skill card index not found');
+    }
+    const targetIndex = skillEntry.index;
 
     await page.waitForSelector(
       `${MARKET_TRACK_SELECTOR} [data-carousel-index='${targetIndex}'] .missions-market-card[data-flipped='true']`,
