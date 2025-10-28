@@ -99,6 +99,16 @@ const SLOT_DETAILS: Record<
   },
 };
 
+const resolveSwiperIndex = (instance: SwiperType): number => {
+  if (Number.isFinite(instance.snapIndex)) {
+    return instance.snapIndex;
+  }
+  if (Number.isFinite(instance.activeIndex)) {
+    return instance.activeIndex;
+  }
+  return 0;
+};
+
 const DEMO_SLOT_CONTENT: Record<
   MissionsV2Slot['slot'],
   {
@@ -2298,9 +2308,7 @@ export function MissionsV2Board({
   const handleMarketSwiperChange = useCallback(
     (instance: SwiperType) => {
       const total = marketCards.length;
-      const nextIndex = Number.isFinite(instance.realIndex)
-        ? instance.realIndex
-        : instance.activeIndex ?? 0;
+      const nextIndex = resolveSwiperIndex(instance);
       const previousIndex = previousMarketSwiperIndexRef.current;
 
       if (total > 0 && nextIndex !== previousIndex) {
@@ -3803,9 +3811,7 @@ export function MissionsV2Board({
                         marketSwiperRef.current = instance;
                       }
                       carouselRef.current = instance.el as HTMLDivElement;
-                      const resolvedIndex = Number.isFinite(instance.realIndex)
-                        ? instance.realIndex
-                        : instance.activeIndex ?? DEFAULT_MARKET_INDEX;
+                      const resolvedIndex = resolveSwiperIndex(instance);
                       previousMarketSwiperIndexRef.current = resolvedIndex;
                       setActiveMarketIndex((current) =>
                         current === resolvedIndex ? current : resolvedIndex,
