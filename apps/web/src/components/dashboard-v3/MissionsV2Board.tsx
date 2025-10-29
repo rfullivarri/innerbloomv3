@@ -8,6 +8,7 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type MutableRefObject,
   type SyntheticEvent,
   type UIEvent as ReactUIEvent,
@@ -2569,10 +2570,30 @@ export function MissionsV2Board({
   );
 
   const handleMarketCardClick = useCallback(
-    (slotKey: MissionsV2Slot['slot'], index: number) => {
-      handleMarketCardToggle(slotKey, index);
+    (event: ReactMouseEvent<HTMLElement>, slotKey: MissionsV2Slot['slot'], index: number) => {
+      const currentTarget = event.currentTarget as HTMLElement;
+      const resolvedSlot =
+        (currentTarget.dataset.cardKey as MissionsV2Slot['slot'] | undefined) ?? slotKey;
+
+      let resolvedIndex = index;
+      const wrapper = currentTarget.closest<HTMLElement>('[data-carousel-index]');
+      if (wrapper) {
+        const wrapperIndex = Number.parseInt(wrapper.getAttribute('data-carousel-index') ?? '', 10);
+        if (Number.isFinite(wrapperIndex)) {
+          resolvedIndex = wrapperIndex;
+        }
+      }
+
+      if (!Number.isFinite(resolvedIndex) || resolvedIndex < 0) {
+        const fallbackIndex = marketCards.findIndex((card) => card.key === resolvedSlot);
+        if (fallbackIndex >= 0) {
+          resolvedIndex = fallbackIndex;
+        }
+      }
+
+      handleMarketCardToggle(resolvedSlot, resolvedIndex);
     },
-    [handleMarketCardToggle],
+    [handleMarketCardToggle, marketCards],
   );
 
 
@@ -2702,13 +2723,14 @@ export function MissionsV2Board({
             data-rarity={rarity}
             data-flipped={isFlipped}
             data-active={isActiveCard ? 'true' : 'false'}
+            data-card-key={cardKey}
             role="option"
             aria-selected={isActiveCard}
             aria-expanded={isFlipped}
             tabIndex={isActiveCard ? 0 : -1}
             aria-label={cardLabel}
             style={{ '--market-card-aspect': marketCoverAspect[cardKey] ?? '3 / 4' } as CSSProperties}
-            onClick={() => handleMarketCardClick(slot, index)}
+            onClick={(event) => handleMarketCardClick(event, slot, index)}
             onKeyDown={(event) => handleMarketCardKeyDown(event, slot, index)}
           >
             <div className="missions-market-card__front" aria-hidden={isFlipped}>
