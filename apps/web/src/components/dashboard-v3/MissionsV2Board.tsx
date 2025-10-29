@@ -10,6 +10,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
   type MutableRefObject,
+  type PointerEvent as ReactPointerEvent,
   type SyntheticEvent,
   type UIEvent as ReactUIEvent,
 } from 'react';
@@ -109,6 +110,8 @@ const resolveSwiperIndex = (instance: SwiperType): number => {
   }
   return 0;
 };
+
+const MARKET_TAP_SLOP_PX = 6;
 
 const DEMO_SLOT_CONTENT: Record<
   MissionsV2Slot['slot'],
@@ -1113,6 +1116,15 @@ export function MissionsV2Board({
     hunt: 0,
     skill: 0,
   });
+  const marketCardTapRef = useRef<{
+    pointerId: number;
+    slot: MissionsV2Slot['slot'];
+    index: number;
+    x: number;
+    y: number;
+    moved: boolean;
+  } | null>(null);
+  const skipNextMarketClickRef = useRef(false);
   const slotStackWheelDelta = useRef<Record<string, number>>({});
   const previousActiveSlotIdRef = useRef<string | null>(null);
   const hasInitializedActiveSnapRef = useRef(false);
@@ -2569,9 +2581,8 @@ export function MissionsV2Board({
     ],
   );
 
-  const handleMarketCardClick = useCallback(
-    (event: ReactMouseEvent<HTMLElement>, slotKey: MissionsV2Slot['slot'], index: number) => {
-      const currentTarget = event.currentTarget as HTMLElement;
+  const resolveMarketCardTarget = useCallback(
+    (currentTarget: HTMLElement, slotKey: MissionsV2Slot['slot'], index: number) => {
       const resolvedSlot =
         (currentTarget.dataset.cardKey as MissionsV2Slot['slot'] | undefined) ?? slotKey;
 
@@ -2591,9 +2602,92 @@ export function MissionsV2Board({
         }
       }
 
-      handleMarketCardToggle(resolvedSlot, resolvedIndex);
+      return { slot: resolvedSlot, index: resolvedIndex };
     },
-    [handleMarketCardToggle, marketCards],
+    [marketCards],
+  );
+
+  const handleMarketCardClick = useCallback(
+    (event: ReactMouseEvent<HTMLElement>, slotKey: MissionsV2Slot['slot'], index: number) => {
+      if (skipNextMarketClickRef.current) {
+        skipNextMarketClickRef.current = false;
+        return;
+      }
+
+      const currentTarget = event.currentTarget as HTMLElement;
+      const { slot, index: resolvedIndex } = resolveMarketCardTarget(currentTarget, slotKey, index);
+
+      handleMarketCardToggle(slot, resolvedIndex);
+    },
+    [handleMarketCardToggle, resolveMarketCardTarget],
+  );
+
+  const handleMarketCardPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLElement>, slotKey: MissionsV2Slot['slot'], index: number) => {
+      if (event.pointerType !== 'touch') {
+        marketCardTapRef.current = null;
+        return;
+      }
+
+      marketCardTapRef.current = {
+        pointerId: event.pointerId,
+        slot: slotKey,
+        index,
+        x: event.clientX,
+        y: event.clientY,
+        moved: false,
+      };
+    },
+    [],
+  );
+
+  const handleMarketCardPointerMove = useCallback((event: ReactPointerEvent<HTMLElement>) => {
+    const tapState = marketCardTapRef.current;
+    if (!tapState || tapState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const deltaX = Math.abs(event.clientX - tapState.x);
+    const deltaY = Math.abs(event.clientY - tapState.y);
+    if (deltaX > MARKET_TAP_SLOP_PX || deltaY > MARKET_TAP_SLOP_PX) {
+      tapState.moved = true;
+    }
+  }, []);
+
+  const handleMarketCardPointerCancel = useCallback((event: ReactPointerEvent<HTMLElement>) => {
+    const tapState = marketCardTapRef.current;
+    if (tapState && tapState.pointerId === event.pointerId) {
+      marketCardTapRef.current = null;
+    }
+  }, []);
+
+  const handleMarketCardPointerUp = useCallback(
+    (event: ReactPointerEvent<HTMLElement>, slotKey: MissionsV2Slot['slot'], index: number) => {
+      const tapState = marketCardTapRef.current;
+      if (!tapState || tapState.pointerId !== event.pointerId || event.pointerType !== 'touch') {
+        marketCardTapRef.current = null;
+        return;
+      }
+
+      const deltaX = Math.abs(event.clientX - tapState.x);
+      const deltaY = Math.abs(event.clientY - tapState.y);
+      const moved = tapState.moved || deltaX > MARKET_TAP_SLOP_PX || deltaY > MARKET_TAP_SLOP_PX;
+
+      if (!moved) {
+        event.preventDefault();
+        const currentTarget = event.currentTarget as HTMLElement;
+        const { slot, index: resolvedIndex } = resolveMarketCardTarget(
+          currentTarget,
+          tapState.slot,
+          tapState.index,
+        );
+        skipNextMarketClickRef.current = true;
+        handleMarketCardToggle(slot, resolvedIndex);
+      }
+
+      marketCardTapRef.current = null;
+    },
+    [handleMarketCardToggle, resolveMarketCardTarget],
   );
 
 
@@ -2731,6 +2825,10 @@ export function MissionsV2Board({
             aria-label={cardLabel}
             style={{ '--market-card-aspect': marketCoverAspect[cardKey] ?? '3 / 4' } as CSSProperties}
             onClick={(event) => handleMarketCardClick(event, slot, index)}
+            onPointerDown={(event) => handleMarketCardPointerDown(event, slot, index)}
+            onPointerMove={handleMarketCardPointerMove}
+            onPointerUp={(event) => handleMarketCardPointerUp(event, slot, index)}
+            onPointerCancel={handleMarketCardPointerCancel}
             onKeyDown={(event) => handleMarketCardKeyDown(event, slot, index)}
           >
             <div className="missions-market-card__front" aria-hidden={isFlipped}>
@@ -3824,6 +3922,8 @@ export function MissionsV2Board({
                     loop={false}
                     rewind
                     grabCursor
+                    touchStartPreventDefault={false}
+                    touchStartForcePreventDefault={false}
                     preventClicks={false}
                     preventClicksPropagation={false}
                     initialSlide={Math.min(DEFAULT_MARKET_INDEX, Math.max(marketCards.length - 1, 0))}
