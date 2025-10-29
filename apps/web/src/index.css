@@ -1750,10 +1750,6 @@
 
 .missions-active-carousel__card {
   width: 100%;
-  pointer-events: none;
-}
-
-.missions-active-carousel__item[data-active='true'] .missions-active-carousel__card {
   pointer-events: auto;
 }
 

@@ -2670,6 +2670,9 @@ export function MissionsV2Board({
       const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
       const isFlipped = Boolean(flippedMarketCards[cardKey]);
       const isActiveCard = index === activeMarketIndex;
+      const relativeOffset = index - activeMarketIndex;
+      const deckPosition =
+        relativeOffset === 0 ? 'active' : relativeOffset < 0 ? 'before' : 'after';
       const coverSrc = getMissionArt(slot, normalizedGameMode);
       const activeProposalIndex = activeMarketProposalBySlot[slot] ?? 0;
       const proposalList = proposals;
@@ -2903,6 +2906,8 @@ export function MissionsV2Board({
             className="missions-market-carousel__item missions-active-carousel__item"
             data-carousel-index={index}
             data-active={isActiveCard ? 'true' : 'false'}
+            data-position={deckPosition}
+            data-offset={relativeOffset}
           >
             {cardNode}
           </div>
