@@ -2730,53 +2730,54 @@ export function MissionsV3Board({
             onClick={() => handleMarketCardClick(slot, index)}
             onKeyDown={(event) => handleMarketCardKeyDown(event, slot, index)}
           >
-            <div className="missions-market-card__front" aria-hidden={isFlipped}>
-              <span className="missions-market-card__slot-chip" data-slot={slot}>
-                {details.label}
-              </span>
-              <img
-                src={coverSrc}
-                alt={`Carta de ${details.label}`}
-                className="missions-market-card__cover"
-                draggable={false}
-                loading="lazy"
-                onLoad={(event) => handleMarketCoverLoad(slot, index, event)}
-              />
-            </div>
-            <div className="missions-market-card__back" aria-hidden={!isFlipped}>
-              <header className="missions-market-card__back-header" ref={(node) => registerMarketStackHeader(slot, node)}>
-                <div className="missions-market-card__back-title">
-                  <p className="missions-market-card__back-label">{details.label}</p>
-                </div>
-                <div className="missions-market-card__back-meta">
-                  {totalProposals > 0 ? (
-                    <span className="missions-market-card__stack-counter">
-                      {activeProposalIndex + 1} / {totalProposals}
+            <div className={`missions-market-card__inner${isFlipped ? ' is-flipped' : ''}`}>
+              <div className="missions-market-card__front" aria-hidden={isFlipped}>
+                <span className="missions-market-card__slot-chip" data-slot={slot}>
+                  {details.label}
+                </span>
+                <img
+                  src={coverSrc}
+                  alt={`Carta de ${details.label}`}
+                  className="missions-market-card__cover"
+                  draggable={false}
+                  loading="lazy"
+                  onLoad={(event) => handleMarketCoverLoad(slot, index, event)}
+                />
+              </div>
+              <div className="missions-market-card__back" aria-hidden={!isFlipped}>
+                <header className="missions-market-card__back-header" ref={(node) => registerMarketStackHeader(slot, node)}>
+                  <div className="missions-market-card__back-title">
+                    <p className="missions-market-card__back-label">{details.label}</p>
+                  </div>
+                  <div className="missions-market-card__back-meta">
+                    {totalProposals > 0 ? (
+                      <span className="missions-market-card__stack-counter">
+                        {activeProposalIndex + 1} / {totalProposals}
+                      </span>
+                    ) : null}
+                    {hasMultipleProposals ? (
+                      <span className="missions-market-card__scroll-hint">Deslizá para ver más</span>
+                    ) : null}
+                    <span className="missions-market-card__icon" aria-hidden="true">
+                      {details.emoji}
                     </span>
-                  ) : null}
-                  {hasMultipleProposals ? (
-                    <span className="missions-market-card__scroll-hint">Deslizá para ver más</span>
-                  ) : null}
-                  <span className="missions-market-card__icon" aria-hidden="true">
-                    {details.emoji}
-                  </span>
-                </div>
-              </header>
-              <div
-                className="missions-market-card__stack"
-                role="group"
-                aria-label={`Propuestas para ${details.label}`}
-                data-has-prev={canScrollUp ? 'true' : undefined}
-                data-has-next={canScrollDown ? 'true' : undefined}
-                data-transition={transitionDirection ?? undefined}
-                onClick={(event) => event.stopPropagation()}
-                onScroll={(event) => handleMarketStackScroll(slot, event)}
-                ref={(node) => {
-                  marketStackRefs.current[slot] = node;
-                  updateMarketStackFade(slot, node);
-                  updateMarketStackHeaderOffset(slot);
-                }}
-              >
+                  </div>
+                </header>
+                <div
+                  className="missions-market-card__stack"
+                  role="group"
+                  aria-label={`Propuestas para ${details.label}`}
+                  data-has-prev={canScrollUp ? 'true' : undefined}
+                  data-has-next={canScrollDown ? 'true' : undefined}
+                  data-transition={transitionDirection ?? undefined}
+                  onClick={(event) => event.stopPropagation()}
+                  onScroll={(event) => handleMarketStackScroll(slot, event)}
+                  ref={(node) => {
+                    marketStackRefs.current[slot] = node;
+                    updateMarketStackFade(slot, node);
+                    updateMarketStackHeaderOffset(slot);
+                  }}
+                >
                 {proposalList.map((proposal, proposalIndex) => {
                   const isRealProposal = 'name' in proposal;
                   const rewardPreview = isRealProposal ? formatProposalReward(proposal) : proposal.reward;
