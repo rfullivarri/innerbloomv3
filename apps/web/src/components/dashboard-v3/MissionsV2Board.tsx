@@ -2617,9 +2617,29 @@ export function MissionsV2Board({
       const currentTarget = event.currentTarget as HTMLElement;
       const { slot, index: resolvedIndex } = resolveMarketCardTarget(currentTarget, slotKey, index);
 
+      const eventTarget = event.target as HTMLElement | null;
+      const resolvedTarget = eventTarget instanceof Element ? eventTarget : currentTarget;
+      let zIndex = 'n/a';
+      let pointerEvents = 'n/a';
+
+      if (typeof window !== 'undefined') {
+        const computed = window.getComputedStyle(resolvedTarget);
+        zIndex = computed.zIndex ?? 'n/a';
+        pointerEvents = computed.pointerEvents ?? 'n/a';
+      }
+
+      console.info('[missions-market][flip-diag] click', {
+        slideIndex: resolvedIndex,
+        activeIndex: activeMarketIndex,
+        isActive: resolvedIndex === activeMarketIndex,
+        targetClassName: eventTarget instanceof Element ? eventTarget.className : null,
+        zIndex,
+        pointerEvents,
+      });
+
       handleMarketCardToggle(slot, resolvedIndex);
     },
-    [handleMarketCardToggle, resolveMarketCardTarget],
+    [activeMarketIndex, handleMarketCardToggle, resolveMarketCardTarget],
   );
 
   const handleMarketCardPointerDown = useCallback(
@@ -2681,13 +2701,34 @@ export function MissionsV2Board({
           tapState.slot,
           tapState.index,
         );
+
+        const eventTarget = event.target as HTMLElement | null;
+        const resolvedTarget = eventTarget instanceof Element ? eventTarget : currentTarget;
+        let zIndex = 'n/a';
+        let pointerEvents = 'n/a';
+
+        if (typeof window !== 'undefined') {
+          const computed = window.getComputedStyle(resolvedTarget);
+          zIndex = computed.zIndex ?? 'n/a';
+          pointerEvents = computed.pointerEvents ?? 'n/a';
+        }
+
+        console.info('[missions-market][flip-diag] tap', {
+          slideIndex: resolvedIndex,
+          activeIndex: activeMarketIndex,
+          isActive: resolvedIndex === activeMarketIndex,
+          targetClassName: eventTarget instanceof Element ? eventTarget.className : null,
+          zIndex,
+          pointerEvents,
+        });
+
         skipNextMarketClickRef.current = true;
         handleMarketCardToggle(slot, resolvedIndex);
       }
 
       marketCardTapRef.current = null;
     },
-    [handleMarketCardToggle, resolveMarketCardTarget],
+    [activeMarketIndex, handleMarketCardToggle, resolveMarketCardTarget],
   );
 
 
@@ -3028,6 +3069,12 @@ export function MissionsV2Board({
             data-active={isActiveCard ? 'true' : 'false'}
             data-position={deckPosition}
             data-offset={relativeOffset}
+            style={{
+              outline: isActiveCard
+                ? '3px solid rgba(56, 189, 248, 0.85)'
+                : '3px solid transparent',
+              outlineOffset: '6px',
+            }}
           >
             {cardNode}
           </div>
