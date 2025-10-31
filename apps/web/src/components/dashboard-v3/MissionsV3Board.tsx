@@ -2916,21 +2916,22 @@ export function MissionsV3Board({
                 })}
               </div>
             </div>
-          </article>
-        </div>
-      );
-
-      return (
-        <SwiperSlide key={cardKey}>
-          <div
-            className="missions-market-carousel__item missions-active-carousel__item"
-            data-carousel-index={index}
-            data-active={isActiveCard ? 'true' : 'false'}
-          >
-            {cardNode}
           </div>
-        </SwiperSlide>
-      );
+        </article>
+      </div>
+    );
+
+    return (
+      <SwiperSlide key={cardKey}>
+        <div
+          className="missions-market-carousel__item missions-active-carousel__item"
+          data-carousel-index={index}
+          data-active={isActiveCard ? 'true' : 'false'}
+        >
+          {cardNode}
+        </div>
+      </SwiperSlide>
+    );
     },
     [
       board,
