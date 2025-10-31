@@ -1530,6 +1530,16 @@
   @apply opacity-100 saturate-100;
 }
 
+.missions-market-carousel__item[data-active='false'] .missions-market-card,
+.missions-active-carousel__item[data-active='false'] .missions-market-card {
+  pointer-events: none;
+}
+
+.missions-market-carousel__item[data-active='true'] .missions-market-card,
+.missions-active-carousel__item[data-active='true'] .missions-market-card {
+  pointer-events: auto;
+}
+
 
 [data-reduced-motion='true'] .missions-market-carousel__track {
   scroll-behavior: auto;
@@ -2493,6 +2503,15 @@
     border-color var(--motion-duration-base) var(--motion-ease-enter);
   cursor: pointer;
   overflow: hidden;
+}
+
+.missions-market-card::before,
+.missions-market-card::after,
+.missions-market-card__front::before,
+.missions-market-card__front::after,
+.missions-market-card__back::before,
+.missions-market-card__back::after {
+  pointer-events: none;
 }
 
 .missions-market-card[data-active='true'] {
