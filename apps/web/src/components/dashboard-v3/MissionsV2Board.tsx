@@ -102,6 +102,9 @@ const SLOT_DETAILS: Record<
 };
 
 const resolveSwiperIndex = (instance: SwiperType): number => {
+  if (Number.isFinite(instance.realIndex)) {
+    return instance.realIndex;
+  }
   if (Number.isFinite(instance.snapIndex)) {
     return instance.snapIndex;
   }
