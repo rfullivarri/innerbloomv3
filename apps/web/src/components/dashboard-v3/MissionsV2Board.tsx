@@ -1402,7 +1402,7 @@ export function MissionsV2Board({
         return {};
       }
 
-      const activeKey = activeCard.key;
+      const activeKey = activeCard.slot;
       const hasActiveKey = Object.prototype.hasOwnProperty.call(prev, activeKey);
       if (!hasActiveKey) {
         if (Object.keys(prev).length === 0) {
@@ -1898,16 +1898,14 @@ export function MissionsV2Board({
 
   useEffect(() => {
     setFlippedMarketCards((prev) => {
-      const validKeys = new Set(marketCards.map((card) => card.key));
+      const validSlots = new Set(marketCards.map((card) => card.slot));
       const next: Record<string, boolean> = {};
-      validKeys.forEach((key) => {
-        if (prev[key]) {
-          next[key] = true;
-        }
+      validSlots.forEach((slot) => {
+        if (prev[slot]) next[slot] = true;
       });
       const prevKeys = Object.keys(prev);
       const nextKeys = Object.keys(next);
-      if (prevKeys.length === nextKeys.length && nextKeys.every((key) => prev[key])) {
+      if (prevKeys.length === nextKeys.length && nextKeys.every((k) => prev[k])) {
         return prev;
       }
       return next;
