@@ -3055,12 +3055,11 @@ export function MissionsV2Board({
                     </article>
                   );
                 })}
+                </div>
               </div>
-            </div>
+            </article>
           </div>
-        </article>
-      </div>
-    );
+        );
 
     return (
       <SwiperSlide key={cardKey}>
