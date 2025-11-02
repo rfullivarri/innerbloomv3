@@ -2913,12 +2913,11 @@ export function MissionsV3Board({
                     </article>
                   );
                 })}
+                </div>
               </div>
-            </div>
+            </article>
           </div>
-        </article>
-      </div>
-    );
+        );
 
     return (
       <SwiperSlide key={cardKey}>
