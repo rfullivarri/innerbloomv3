@@ -3058,30 +3058,29 @@ export function MissionsV2Board({
                 })}
               </div>
             </div>
-          </div>
-        </article>
-      </div>
-    );
-
-    return (
-      <SwiperSlide key={cardKey}>
-        <div
-          className="missions-market-carousel__item missions-active-carousel__item"
-          data-carousel-index={index}
-          data-active={isActiveCard ? 'true' : 'false'}
-          data-position={deckPosition}
-          data-offset={relativeOffset}
-          style={{
-            outline: isActiveCard
-              ? '3px solid rgba(56, 189, 248, 0.85)'
-              : '3px solid transparent',
-            outlineOffset: '6px',
-          }}
-        >
-          {cardNode}
+          </article>
         </div>
-      </SwiperSlide>
-    );
+      );
+
+      return (
+        <SwiperSlide key={cardKey}>
+          <div
+            className="missions-market-carousel__item missions-active-carousel__item"
+            data-carousel-index={index}
+            data-active={isActiveCard ? 'true' : 'false'}
+            data-position={deckPosition}
+            data-offset={relativeOffset}
+            style={{
+              outline: isActiveCard
+                ? '3px solid rgba(56, 189, 248, 0.85)'
+                : '3px solid transparent',
+              outlineOffset: '6px',
+            }}
+          >
+            {cardNode}
+          </div>
+        </SwiperSlide>
+      );
     },
     [
       board,
