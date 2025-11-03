@@ -9,16 +9,11 @@ import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
-  type MutableRefObject,
   type PointerEvent as ReactPointerEvent,
   type SyntheticEvent,
   type UIEvent as ReactUIEvent,
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { EffectCards, Navigation } from 'swiper/modules';
-import type { Swiper as SwiperType } from 'swiper';
-import type { NavigationOptions } from 'swiper/types';
 import {
   claimMissionsV2Mission,
   getMissionsV2Board,
@@ -44,9 +39,6 @@ import {
 } from '../../lib/telemetry';
 import { FEATURE_MISSIONS_V2 } from '../../lib/featureFlags';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
-import 'swiper/css';
-import 'swiper/css/effect-cards';
-
 type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 
 type ClaimModalState = {
@@ -58,13 +50,6 @@ type ClaimModalState = {
     items: string[];
   };
 };
-
-type MissionsWindow = Window &
-  typeof globalThis & {
-    __IB_DISABLE_MARKET_SWIPER__?: boolean;
-    __IB_MARKET_SWIPER_REF__?: MutableRefObject<SwiperType | null>;
-  };
-
 
 const SLOT_ORDER: Array<MissionsV2Slot['slot']> = ['main', 'hunt', 'skill'];
 const DEFAULT_MARKET_INDEX = SLOT_ORDER.length > 2 ? 1 : 0;
@@ -101,20 +86,7 @@ const SLOT_DETAILS: Record<
   },
 };
 
-const resolveSwiperIndex = (instance: SwiperType): number => {
-  if (Number.isFinite(instance.realIndex)) {
-    return instance.realIndex;
-  }
-  if (Number.isFinite(instance.snapIndex)) {
-    return instance.snapIndex;
-  }
-  if (Number.isFinite(instance.activeIndex)) {
-    return instance.activeIndex;
-  }
-  return 0;
-};
-
-const MARKET_TAP_SLOP_PX = 6;
+const MARKET_TAP_SLOP_PX = 8;
 
 const DEMO_SLOT_CONTENT: Record<
   MissionsV2Slot['slot'],
@@ -1033,10 +1005,6 @@ export function MissionsV2Board({
   const [heartbeatToastKey, setHeartbeatToastKey] = useState<number | null>(null);
   const [flippedMarketCards, setFlippedMarketCards] = useState<Record<string, boolean>>({});
   const [marketCoverAspect, setMarketCoverAspect] = useState<Record<string, string>>({});
-  const isMarketSwiperCardsEnabled = true;
-  const missionsWindow =
-    typeof window === 'undefined' ? null : (window as unknown as MissionsWindow | null);
-  const shouldDisableMarketSwiper = Boolean(prefersReducedMotion || missionsWindow?.__IB_DISABLE_MARKET_SWIPER__);
   const getViewModeFromLocation = useCallback(
     (loc: typeof location): 'active' | 'market' => {
       if (loc.hash.replace('#', '') === 'market') {
@@ -1087,11 +1055,7 @@ export function MissionsV2Board({
   const hasTrackedMarketView = useRef(false);
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
   const carouselRef = useRef<HTMLDivElement | null>(null);
-  const marketSwiperRef = useRef<SwiperType | null>(null);
-  const marketSwiperInstance = marketSwiperRef.current;
-  const marketSwiperPrevRef = useRef<HTMLButtonElement | null>(null);
-  const marketSwiperNextRef = useRef<HTMLButtonElement | null>(null);
-  const previousMarketSwiperIndexRef = useRef(DEFAULT_MARKET_INDEX);
+  const previousMarketIndexRef = useRef(DEFAULT_MARKET_INDEX);
   const pendingMarketFlipRef = useRef<MissionsV2Slot['slot'] | null>(null);
   const slotCarouselRef = useRef<HTMLDivElement | null>(null);
   const marketStackRefs = useRef<Record<MissionsV2Slot['slot'], HTMLDivElement | null>>({
@@ -1126,25 +1090,13 @@ export function MissionsV2Board({
     x: number;
     y: number;
     moved: boolean;
+    horizontalDrag: boolean;
   } | null>(null);
   const skipNextMarketClickRef = useRef(false);
   const slotStackWheelDelta = useRef<Record<string, number>>({});
   const previousActiveSlotIdRef = useRef<string | null>(null);
   const hasInitializedActiveSnapRef = useRef(false);
   const previousActiveSnapIndexRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    const missionsWindow = window as unknown as MissionsWindow;
-    missionsWindow.__IB_MARKET_SWIPER_REF__ = marketSwiperRef;
-    return () => {
-      if (missionsWindow.__IB_MARKET_SWIPER_REF__ === marketSwiperRef) {
-        delete missionsWindow.__IB_MARKET_SWIPER_REF__;
-      }
-    };
-  }, []);
 
   const marketBySlot = useMemo<MarketBySlot>(() => {
     const map: MarketBySlot = {};
@@ -2280,19 +2232,21 @@ export function MissionsV2Board({
     ],
   );
 
-  const scrollCarouselToIndex = useCallback((index: number) => {
-    const instance = marketSwiperRef.current;
-    if (!instance) {
-      return;
-    }
+  const scrollCarouselToIndex = useCallback(
+    (index: number) => {
+      const container = carouselRef.current;
+      if (!container) {
+        return;
+      }
 
-    if (instance.params.loop) {
-      instance.slideToLoop(index);
-      return;
-    }
-
-    instance.slideTo(index);
-  }, []);
+      const element = container.querySelector<HTMLElement>(
+        `[data-carousel-index='${index}']`,
+      );
+      const behavior = prefersReducedMotion ? 'auto' : 'smooth';
+      element?.scrollIntoView({ behavior, block: 'nearest', inline: 'center' });
+    },
+    [prefersReducedMotion],
+  );
 
   const stepMarketCarousel = useCallback(
     (delta: number) => {
@@ -2300,15 +2254,16 @@ export function MissionsV2Board({
         return;
       }
 
-      if (delta > 0) {
-        marketSwiperRef.current?.slideNext();
-      } else {
-        marketSwiperRef.current?.slidePrev();
+      const total = marketCards.length;
+      let nextIndex = (activeMarketIndex + delta) % total;
+      if (nextIndex < 0) {
+        nextIndex += total;
       }
+
+      setActiveMarketIndex((current) => (current === nextIndex ? current : nextIndex));
+      scrollCarouselToIndex(nextIndex);
     },
-    [
-      marketCards,
-    ],
+    [activeMarketIndex, marketCards.length, scrollCarouselToIndex],
   );
 
   const handleCarouselStep = useCallback(
@@ -2319,27 +2274,29 @@ export function MissionsV2Board({
     [stepMarketCarousel],
   );
 
-  const handleMarketSwiperChange = useCallback(
-    (instance: SwiperType) => {
-      const total = marketCards.length;
-      const nextIndex = resolveSwiperIndex(instance);
-      const previousIndex = previousMarketSwiperIndexRef.current;
+  useEffect(() => {
+    const previousIndex = previousMarketIndexRef.current;
+    const nextIndex = activeMarketIndex;
 
-      if (total > 0 && nextIndex !== previousIndex) {
+    if (previousIndex !== nextIndex) {
+      const total = marketCards.length;
+      if (total > 0) {
         let delta = nextIndex - previousIndex;
         if (Math.abs(delta) > total / 2) {
           delta = delta > 0 ? delta - total : delta + total;
         }
-        const directionEvent =
-          delta > 0 ? 'missions_v2_market_nav_next' : 'missions_v2_market_nav_prev';
-        const nextCard = marketCards[nextIndex] ?? null;
-        emitMissionsV2Event(directionEvent, {
-          userId,
-          slot: nextCard?.slot ?? null,
-        });
+        if (delta !== 0) {
+          const directionEvent =
+            delta > 0 ? 'missions_v2_market_nav_next' : 'missions_v2_market_nav_prev';
+          const nextCard = marketCards[nextIndex] ?? null;
+          emitMissionsV2Event(directionEvent, {
+            userId,
+            slot: nextCard?.slot ?? null,
+          });
+        }
       }
 
-      previousMarketSwiperIndexRef.current = nextIndex;
+      previousMarketIndexRef.current = nextIndex;
 
       const openSlot = Object.keys(flippedMarketCards)[0] ?? null;
       if (openSlot) {
@@ -2352,8 +2309,6 @@ export function MissionsV2Board({
           });
         }
       }
-
-      setActiveMarketIndex((current) => (current === nextIndex ? current : nextIndex));
 
       const pendingSlot = pendingMarketFlipRef.current;
       if (pendingSlot) {
@@ -2375,44 +2330,16 @@ export function MissionsV2Board({
           });
         }
       }
-    },
-    [
-      emitMissionsV2Event,
-      flippedMarketCards,
-      collapseMarketProposalExpansions,
-      marketCards,
-      setActiveMarketProposalBySlot,
-      userId,
-    ],
-  );
-
-  useEffect(() => {
-    previousMarketSwiperIndexRef.current = activeMarketIndex;
-  }, [activeMarketIndex]);
-
-  useEffect(() => {
-    const swiper = marketSwiperRef.current;
-    if (!swiper) {
-      return;
     }
-    const prevEl = marketSwiperPrevRef.current;
-    const nextEl = marketSwiperNextRef.current;
-    if (!prevEl || !nextEl) {
-      return;
-    }
-
-    const navigationParams: NavigationOptions = {
-      enabled: true,
-      prevEl,
-      nextEl,
-    };
-    swiper.params.navigation = navigationParams;
-    if (swiper.navigation) {
-      swiper.navigation.destroy();
-      swiper.navigation.init();
-      swiper.navigation.update();
-    }
-  }, [marketCards.length, viewMode]);
+  }, [
+    activeMarketIndex,
+    collapseMarketProposalExpansions,
+    emitMissionsV2Event,
+    flippedMarketCards,
+    marketCards,
+    setActiveMarketProposalBySlot,
+    userId,
+  ]);
 
   const handleSlotCarouselStep = useCallback(
     (direction: 'next' | 'prev') => {
@@ -2488,6 +2415,9 @@ export function MissionsV2Board({
 
   const handleMarketCardToggle = useCallback(
     (slotKey: MissionsV2Slot['slot'], index: number) => {
+      const slotState = board?.slots.find((slotEntry: MissionsV2Slot) => slotEntry.slot === slotKey);
+      const isCooldown = slotState?.state === 'cooldown';
+
       if (index !== activeMarketIndex) {
         const openSlot = Object.keys(flippedMarketCards)[0] ?? null;
         if (openSlot) {
@@ -2497,36 +2427,14 @@ export function MissionsV2Board({
             slot: openSlot,
           });
         }
-        const swiper = marketSwiperRef.current;
-        if (swiper) {
-          pendingMarketFlipRef.current = slotKey;
-          scrollCarouselToIndex(index);
-          return;
-        }
-
-        const nextCard = marketCards[index] ?? null;
+        pendingMarketFlipRef.current = slotKey;
         setActiveMarketIndex((current) => (current === index ? current : index));
+        scrollCarouselToIndex(index);
+        return;
+      }
+
+      if (isCooldown) {
         pendingMarketFlipRef.current = null;
-
-        if (!nextCard || nextCard.slot !== slotKey) {
-          return;
-        }
-
-        setFlippedMarketCards({ [slotKey]: true });
-
-        emitMissionsV2Event('missions_v2_market_flip_open', {
-          userId,
-          slot: slotKey,
-        });
-
-        setActiveMarketProposalBySlot((prev) => {
-          if ((prev[slotKey] ?? 0) === 0) {
-            return prev;
-          }
-          collapseMarketProposalExpansions(slotKey);
-          previousActiveProposalBySlotRef.current[slotKey] = 0;
-          return { ...prev, [slotKey]: 0 };
-        });
         return;
       }
 
@@ -2573,6 +2481,7 @@ export function MissionsV2Board({
       });
     },
     [
+      board,
       activeMarketIndex,
       collapseMarketProposalExpansions,
       flippedMarketCards,
@@ -2584,11 +2493,12 @@ export function MissionsV2Board({
 
   const resolveMarketCardTarget = useCallback(
     (currentTarget: HTMLElement, slotKey: MissionsV2Slot['slot'], index: number) => {
+      const cardNode = currentTarget.closest<HTMLElement>('.missions-market-card') ?? currentTarget;
       const resolvedSlot =
-        (currentTarget.dataset.cardKey as MissionsV2Slot['slot'] | undefined) ?? slotKey;
+        (cardNode.dataset.cardKey as MissionsV2Slot['slot'] | undefined) ?? slotKey;
 
       let resolvedIndex = index;
-      const wrapper = currentTarget.closest<HTMLElement>('[data-carousel-index]');
+      const wrapper = cardNode.closest<HTMLElement>('[data-carousel-index]');
       if (wrapper) {
         const wrapperIndex = Number.parseInt(wrapper.getAttribute('data-carousel-index') ?? '', 10);
         if (Number.isFinite(wrapperIndex)) {
@@ -2615,11 +2525,14 @@ export function MissionsV2Board({
         return;
       }
 
-      const currentTarget = event.currentTarget as HTMLElement;
-      const { slot, index: resolvedIndex } = resolveMarketCardTarget(currentTarget, slotKey, index);
+      const fallbackTarget = event.currentTarget as HTMLElement;
+      const cardNode =
+        (event.target as HTMLElement | null)?.closest<HTMLElement>('.missions-market-card') ??
+        fallbackTarget;
+      const { slot, index: resolvedIndex } = resolveMarketCardTarget(cardNode, slotKey, index);
 
       const eventTarget = event.target as HTMLElement | null;
-      const resolvedTarget = eventTarget instanceof Element ? eventTarget : currentTarget;
+      const resolvedTarget = eventTarget instanceof Element ? eventTarget : cardNode;
       let zIndex = 'n/a';
       let pointerEvents = 'n/a';
 
@@ -2657,6 +2570,7 @@ export function MissionsV2Board({
         x: event.clientX,
         y: event.clientY,
         moved: false,
+        horizontalDrag: false,
       };
     },
     [],
@@ -2670,6 +2584,9 @@ export function MissionsV2Board({
 
     const deltaX = Math.abs(event.clientX - tapState.x);
     const deltaY = Math.abs(event.clientY - tapState.y);
+    if (deltaX > MARKET_TAP_SLOP_PX) {
+      tapState.horizontalDrag = true;
+    }
     if (deltaX > MARKET_TAP_SLOP_PX || deltaY > MARKET_TAP_SLOP_PX) {
       tapState.moved = true;
     }
@@ -2692,19 +2609,28 @@ export function MissionsV2Board({
 
       const deltaX = Math.abs(event.clientX - tapState.x);
       const deltaY = Math.abs(event.clientY - tapState.y);
-      const moved = tapState.moved || deltaX > MARKET_TAP_SLOP_PX || deltaY > MARKET_TAP_SLOP_PX;
+      const horizontalDrag = tapState.horizontalDrag || deltaX > MARKET_TAP_SLOP_PX;
+      const moved = tapState.moved || deltaY > MARKET_TAP_SLOP_PX;
+
+      if (horizontalDrag) {
+        marketCardTapRef.current = null;
+        return;
+      }
 
       if (!moved) {
         event.preventDefault();
-        const currentTarget = event.currentTarget as HTMLElement;
+        const fallbackTarget = event.currentTarget as HTMLElement;
+        const cardNode =
+          (event.target as HTMLElement | null)?.closest<HTMLElement>('.missions-market-card') ??
+          fallbackTarget;
         const { slot, index: resolvedIndex } = resolveMarketCardTarget(
-          currentTarget,
+          cardNode,
           tapState.slot,
           tapState.index,
         );
 
         const eventTarget = event.target as HTMLElement | null;
-        const resolvedTarget = eventTarget instanceof Element ? eventTarget : currentTarget;
+        const resolvedTarget = eventTarget instanceof Element ? eventTarget : cardNode;
         let zIndex = 'n/a';
         let pointerEvents = 'n/a';
 
@@ -3063,23 +2989,22 @@ export function MissionsV2Board({
         );
 
     return (
-      <SwiperSlide key={cardKey}>
-        <div
-          className="missions-market-carousel__item missions-active-carousel__item"
-          data-carousel-index={index}
-          data-active={isActiveCard ? 'true' : 'false'}
-          data-position={deckPosition}
-          data-offset={relativeOffset}
-          style={{
-            outline: isActiveCard
-              ? '3px solid rgba(56, 189, 248, 0.85)'
-              : '3px solid transparent',
-            outlineOffset: '6px',
-          }}
-        >
-          {cardNode}
-        </div>
-      </SwiperSlide>
+      <div
+        key={cardKey}
+        className="missions-market-carousel__item missions-active-carousel__item"
+        data-carousel-index={index}
+        data-active={isActiveCard ? 'true' : 'false'}
+        data-position={deckPosition}
+        data-offset={relativeOffset}
+        style={{
+          outline: isActiveCard
+            ? '3px solid rgba(56, 189, 248, 0.85)'
+            : '3px solid transparent',
+          outlineOffset: '6px',
+        }}
+      >
+        {cardNode}
+      </div>
     );
     },
     [
@@ -3313,10 +3238,6 @@ export function MissionsV2Board({
     if (marketCards.length === 0) {
       return;
     }
-    if (!shouldDisableMarketSwiper && marketSwiperInstance) {
-      return;
-    }
-
     const container = carouselRef.current;
     if (!container) {
       return;
@@ -3374,7 +3295,7 @@ export function MissionsV2Board({
         window.cancelAnimationFrame(raf);
       }
     };
-  }, [activeMarketIndex, marketCards.length, marketSwiperInstance, shouldDisableMarketSwiper, viewMode]);
+  }, [activeMarketIndex, marketCards.length, viewMode]);
 
   useEffect(() => {
     if (viewMode !== 'market') {
@@ -3934,7 +3855,6 @@ export function MissionsV2Board({
                   <button
                     type="button"
                     className="missions-market-carousel__button"
-                    ref={marketSwiperPrevRef}
                     onClick={() => handleCarouselStep('prev')}
                     aria-label="Ver propuesta anterior"
                     disabled={marketCards.length === 0}
@@ -3944,7 +3864,6 @@ export function MissionsV2Board({
                   <button
                     type="button"
                     className="missions-market-carousel__button"
-                    ref={marketSwiperNextRef}
                     onClick={() => handleCarouselStep('next')}
                     aria-label="Ver propuesta siguiente"
                     disabled={marketCards.length === 0}
@@ -3963,41 +3882,15 @@ export function MissionsV2Board({
                 </div>
               ) : (
                 <>
-                  <Swiper
+                  <div
                     className="missions-market-carousel__track missions-active-carousel__track"
-                    modules={[EffectCards, Navigation]}
-                    effect="cards"
-                    loop={false}
-                    rewind
-                    grabCursor
-                    touchStartPreventDefault={false}
-                    touchStartForcePreventDefault={false}
-                    preventClicks={false}
-                    preventClicksPropagation={false}
-                    initialSlide={Math.min(DEFAULT_MARKET_INDEX, Math.max(marketCards.length - 1, 0))}
+                    ref={carouselRef}
                     role="listbox"
                     aria-label="Marketplace de misiones disponibles"
                     style={marketCarouselStyle}
-                    data-feature={isMarketSwiperCardsEnabled ? 'swiper-cards' : undefined}
-                    onSwiper={(instance: SwiperType) => {
-                      if (shouldDisableMarketSwiper) {
-                        marketSwiperRef.current = null;
-                      } else {
-                        marketSwiperRef.current = instance;
-                      }
-                      carouselRef.current = instance.el as HTMLDivElement;
-                      const resolvedIndex = resolveSwiperIndex(instance);
-                      previousMarketSwiperIndexRef.current = resolvedIndex;
-                      setActiveMarketIndex((current) =>
-                        current === resolvedIndex ? current : resolvedIndex,
-                      );
-                    }}
-                    onSlideChange={handleMarketSwiperChange}
-                    navigation={false}
-                    cardsEffect={{ slideShadows: false }}
                   >
                     {marketCards.map(renderMarketCard)}
-                  </Swiper>
+                  </div>
                   {activeMarketCard && (
                     <div className="missions-market-carousel__status" aria-live="polite">
                       <span className="missions-market-carousel__status-slot">
