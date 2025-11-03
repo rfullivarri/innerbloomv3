@@ -1420,12 +1420,21 @@
     calc(74vw * 1.23),
     calc(352px * 1.23)
   );
+  --missions-carousel-gap: clamp(0.75rem, 3vw, 2rem);
+  --missions-carousel-peek: max(
+      var(--market-carousel-inline-padding),
+      env(safe-area-inset-left, 0px)
+    )
+    max(
+      var(--market-carousel-inline-padding),
+      env(safe-area-inset-right, 0px)
+    );
   position: relative;
   display: flex;
   width: 100%;
   align-items: stretch;
   justify-content: flex-start;
-  gap: clamp(0.75rem, 3vw, 2rem);
+  gap: var(--missions-carousel-gap);
   perspective: 1200px;
   padding-block: var(--market-carousel-track-padding-block);
   padding-inline-start: max(
@@ -1441,48 +1450,9 @@
   overflow-x: auto;
   overflow-y: visible;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: max(
-      var(--market-carousel-inline-padding),
-      env(safe-area-inset-left, 0px)
-    )
-    max(
-      var(--market-carousel-inline-padding),
-      env(safe-area-inset-right, 0px)
-    );
+  scroll-padding-inline: var(--missions-carousel-peek);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
-}
-
-[data-feature='swiper-cards'].missions-market-carousel__track {
-  --peek: var(--market-carousel-inline-padding);
-  --gutter: clamp(0.75rem, 3vw, 2rem);
-  overflow: visible;
-  overflow-x: visible;
-  scroll-snap-type: none;
-  touch-action: pan-y;
-  padding-inline-start: max(var(--peek), env(safe-area-inset-left, 0px));
-  padding-inline-end: max(var(--peek), env(safe-area-inset-right, 0px));
-}
-
-[data-feature='swiper-cards'].missions-market-carousel__track .swiper-wrapper {
-  display: flex;
-  align-items: stretch;
-}
-
-[data-feature='swiper-cards'].missions-market-carousel__track .swiper-slide {
-  width: var(
-    --missions-carousel-card-width,
-    clamp(calc(240px * 1.23), calc(72vw * 1.23), calc(336px * 1.23))
-  );
-  padding-inline: calc(var(--gutter) / 2);
-  box-sizing: content-box;
-  display: flex;
-  justify-content: center;
-  transform-origin: center bottom;
-}
-
-[data-feature='swiper-cards'].missions-market-carousel__track .missions-market-carousel__item {
-  width: 100%;
 }
 
 @media (max-width: 480px) {
@@ -2502,7 +2472,7 @@
     box-shadow var(--motion-duration-base) var(--motion-ease-enter),
     border-color var(--motion-duration-base) var(--motion-ease-enter);
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .missions-market-card::before,
