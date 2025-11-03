@@ -398,6 +398,12 @@ type MarketCardItem = {
   key: MissionsV2Slot['slot'];
 };
 
+type MarketCardView = {
+  key: string;
+  isActive: boolean;
+  node: JSX.Element;
+};
+
 function getRewardCopy(slot: MissionsV2Slot): string {
   const reward = slot.mission?.reward;
   if (!reward) {
@@ -1051,7 +1057,10 @@ export function MissionsV3Board({
   const isMarketSwiperCardsEnabled = true;
   const missionsWindow =
     typeof window === 'undefined' ? null : (window as unknown as MissionsWindow | null);
-  const shouldDisableMarketSwiper = Boolean(prefersReducedMotion || missionsWindow?.__IB_DISABLE_MARKET_SWIPER__);
+  const shouldDisableMarketSwiper = Boolean(
+    prefersReducedMotion || missionsWindow?.__IB_DISABLE_MARKET_SWIPER__,
+  );
+  const usingMarketSwiper = isMarketSwiperCardsEnabled && !shouldDisableMarketSwiper;
   const getViewModeFromLocation = useCallback(
     (loc: typeof location): 'active' | 'market' => {
       if (loc.hash.replace('#', '') === 'market') {
@@ -1151,6 +1160,12 @@ export function MissionsV3Board({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!usingMarketSwiper) {
+      marketSwiperRef.current = null;
+    }
+  }, [usingMarketSwiper]);
 
   const marketBySlot = useMemo<MarketBySlot>(() => {
     const map: MarketBySlot = {};
@@ -2286,19 +2301,40 @@ export function MissionsV3Board({
     ],
   );
 
-  const scrollCarouselToIndex = useCallback((index: number) => {
-    const instance = marketSwiperRef.current;
-    if (!instance) {
-      return;
-    }
+  const scrollCarouselToIndex = useCallback(
+    (index: number) => {
+      if (usingMarketSwiper) {
+        const instance = marketSwiperRef.current;
+        if (!instance) {
+          return;
+        }
 
-    if (instance.params.loop) {
-      instance.slideToLoop(index);
-      return;
-    }
+        if (instance.params.loop) {
+          instance.slideToLoop(index);
+          return;
+        }
 
-    instance.slideTo(index);
-  }, []);
+        instance.slideTo(index);
+        return;
+      }
+
+      const container = carouselRef.current;
+      if (!container) {
+        return;
+      }
+
+      const target = container.querySelector<HTMLElement>(
+        `[data-carousel-index='${index}']`,
+      );
+      if (!target) {
+        return;
+      }
+
+      const behavior = prefersReducedMotion ? 'auto' : 'smooth';
+      target.scrollIntoView({ behavior, block: 'nearest', inline: 'center' });
+    },
+    [prefersReducedMotion, usingMarketSwiper],
+  );
 
   const stepMarketCarousel = useCallback(
     (delta: number) => {
@@ -2306,15 +2342,21 @@ export function MissionsV3Board({
         return;
       }
 
-      if (delta > 0) {
-        marketSwiperRef.current?.slideNext();
-      } else {
-        marketSwiperRef.current?.slidePrev();
+      if (usingMarketSwiper) {
+        if (delta > 0) {
+          marketSwiperRef.current?.slideNext();
+        } else {
+          marketSwiperRef.current?.slidePrev();
+        }
+        return;
       }
+
+      const total = marketCards.length;
+      const nextIndex = (activeMarketIndex + delta + total) % total;
+      setActiveMarketIndex(nextIndex);
+      scrollCarouselToIndex(nextIndex);
     },
-    [
-      marketCards,
-    ],
+    [activeMarketIndex, marketCards.length, scrollCarouselToIndex, usingMarketSwiper],
   );
 
   const handleCarouselStep = useCallback(
@@ -2397,6 +2439,9 @@ export function MissionsV3Board({
   }, [activeMarketIndex]);
 
   useEffect(() => {
+    if (!usingMarketSwiper) {
+      return;
+    }
     const swiper = marketSwiperRef.current;
     if (!swiper) {
       return;
@@ -2418,7 +2463,7 @@ export function MissionsV3Board({
       swiper.navigation.init();
       swiper.navigation.update();
     }
-  }, [marketCards.length, viewMode]);
+  }, [marketCards.length, usingMarketSwiper, viewMode]);
 
   const handleSlotCarouselStep = useCallback(
     (direction: 'next' | 'prev') => {
@@ -2510,6 +2555,7 @@ export function MissionsV3Board({
           return;
         }
 
+        scrollCarouselToIndex(index);
         const nextCard = marketCards[index] ?? null;
         setActiveMarketIndex((current) => (current === index ? current : index));
         pendingMarketFlipRef.current = null;
@@ -2680,8 +2726,8 @@ export function MissionsV3Board({
     [activeMarketIndex],
   );
 
-  const renderMarketCard = useCallback(
-    (item: MarketCardItem, index: number) => {
+  const buildMarketCardView = useCallback(
+    (item: MarketCardItem, index: number): MarketCardView => {
       const { slot, proposals, key: cardKey } = item;
       const details = SLOT_DETAILS[slot];
       const rarity = getMarketRarity(slot);
@@ -2917,17 +2963,22 @@ export function MissionsV3Board({
           </div>
         );
 
-    return (
-      <SwiperSlide key={cardKey}>
+      const wrappedNode = (
         <div
+          key={cardKey}
           className="missions-market-carousel__item missions-active-carousel__item"
           data-carousel-index={index}
           data-active={isActiveCard ? 'true' : 'false'}
         >
           {cardNode}
         </div>
-      </SwiperSlide>
-    );
+      );
+
+      return {
+        key: cardKey,
+        isActive: isActiveCard,
+        node: wrappedNode,
+      };
     },
     [
       board,
@@ -2985,6 +3036,15 @@ export function MissionsV3Board({
       }
     },
     [],
+  );
+
+  const assignCarouselRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (!usingMarketSwiper) {
+        carouselRef.current = node;
+      }
+    },
+    [usingMarketSwiper],
   );
 
   useLayoutEffect(() => {
@@ -3530,6 +3590,10 @@ export function MissionsV3Board({
 
   const activeMarketCard = marketCards[activeMarketIndex] ?? null;
   const activeSlotCard = orderedSlots[activeSlotIndex] ?? null;
+  const renderedMarketCards = useMemo(
+    () => marketCards.map((item, index) => buildMarketCardView(item, index)),
+    [buildMarketCardView, marketCards],
+  );
 
   const slotMetrics = useMemo(
     () => {
@@ -4084,39 +4148,56 @@ export function MissionsV3Board({
                 </div>
               ) : (
                 <>
-                  <Swiper
-                    className="missions-market-carousel__track missions-active-carousel__track"
-                    modules={[EffectCards, Navigation]}
-                    effect="cards"
-                    loop={false}
-                    rewind
-                    grabCursor
-                    preventClicks={false}
-                    preventClicksPropagation={false}
-                    initialSlide={Math.min(DEFAULT_MARKET_INDEX, Math.max(marketCards.length - 1, 0))}
-                    role="listbox"
-                    aria-label="Marketplace de misiones disponibles"
-                    style={marketCarouselStyle}
-                    data-feature={isMarketSwiperCardsEnabled ? 'swiper-cards' : undefined}
-                    onSwiper={(instance: SwiperType) => {
-                      if (shouldDisableMarketSwiper) {
-                        marketSwiperRef.current = null;
-                      } else {
-                        marketSwiperRef.current = instance;
-                      }
-                      carouselRef.current = instance.el as HTMLDivElement;
-                      const resolvedIndex = resolveSwiperIndex(instance);
-                      previousMarketSwiperIndexRef.current = resolvedIndex;
-                      setActiveMarketIndex((current) =>
-                        current === resolvedIndex ? current : resolvedIndex,
-                      );
-                    }}
-                    onSlideChange={handleMarketSwiperChange}
-                    navigation={false}
-                    cardsEffect={{ slideShadows: false }}
-                  >
-                    {marketCards.map(renderMarketCard)}
-                  </Swiper>
+                  {usingMarketSwiper ? (
+                    <Swiper
+                      className="missions-market-carousel__track missions-active-carousel__track"
+                      modules={[EffectCards, Navigation]}
+                      effect="cards"
+                      loop={false}
+                      rewind
+                      grabCursor
+                      preventClicks={false}
+                      preventClicksPropagation={false}
+                      initialSlide={Math.min(
+                        DEFAULT_MARKET_INDEX,
+                        Math.max(marketCards.length - 1, 0),
+                      )}
+                      role="listbox"
+                      aria-label="Marketplace de misiones disponibles"
+                      style={marketCarouselStyle}
+                      data-feature={isMarketSwiperCardsEnabled ? 'swiper-cards' : undefined}
+                      onSwiper={(instance: SwiperType) => {
+                        if (shouldDisableMarketSwiper) {
+                          marketSwiperRef.current = null;
+                        } else {
+                          marketSwiperRef.current = instance;
+                        }
+                        carouselRef.current = instance.el as HTMLDivElement;
+                        const resolvedIndex = resolveSwiperIndex(instance);
+                        previousMarketSwiperIndexRef.current = resolvedIndex;
+                        setActiveMarketIndex((current) =>
+                          current === resolvedIndex ? current : resolvedIndex,
+                        );
+                      }}
+                      onSlideChange={handleMarketSwiperChange}
+                      navigation={false}
+                      cardsEffect={{ slideShadows: false }}
+                    >
+                      {renderedMarketCards.map((card) => (
+                        <SwiperSlide key={card.key}>{card.node}</SwiperSlide>
+                      ))}
+                    </Swiper>
+                  ) : (
+                    <div
+                      className="missions-market-carousel__track missions-active-carousel__track"
+                      role="listbox"
+                      aria-label="Marketplace de misiones disponibles"
+                      style={marketCarouselStyle}
+                      ref={assignCarouselRef}
+                    >
+                      {renderedMarketCards.map((card) => card.node)}
+                    </div>
+                  )}
                   {activeMarketCard && (
                     <div className="missions-market-carousel__status" aria-live="polite">
                       <span className="missions-market-carousel__status-slot">
