@@ -2464,13 +2464,14 @@
   );
   --missions-market-card-radius: 1.1rem;
   border-radius: var(--missions-market-card-radius);
-  border: 1px solid rgba(59, 130, 246, 0.28);
+  border: none;
   background: transparent;
   transform-style: preserve-3d;
   transform-origin: center bottom;
-  transition:
-    box-shadow var(--motion-duration-base) var(--motion-ease-enter),
-    border-color var(--motion-duration-base) var(--motion-ease-enter);
+  transition: box-shadow var(--motion-duration-base) var(--motion-ease-enter);
+  --missions-market-card-shadow-base: 0 0 0 0 rgba(0, 0, 0, 0);
+  --missions-market-card-shadow-glow: 0 0 0 0 rgba(0, 0, 0, 0);
+  box-shadow: var(--missions-market-card-shadow-base), var(--missions-market-card-shadow-glow);
   cursor: pointer;
   overflow: visible;
 }
@@ -2487,12 +2488,12 @@
 .missions-market-card[data-active='true'] {
   position: relative;
   z-index: 5;
-  box-shadow: 0 24px 48px rgba(8, 15, 32, 0.4);
+  --missions-market-card-shadow-base: 0 24px 48px rgba(8, 15, 32, 0.4);
 }
 
 .missions-market-card:not([data-active='true']) {
   z-index: 1;
-  box-shadow: none;
+  --missions-market-card-shadow-base: 0 0 0 0 rgba(0, 0, 0, 0);
 }
 
 .missions-market-card:focus-visible {
@@ -3304,15 +3305,15 @@
 
 
 .missions-market-card[data-rarity='legendary'] {
-  border-color: rgba(250, 204, 21, 0.4);
+  --missions-market-card-shadow-glow: 0 0 34px rgba(250, 204, 21, 0.3);
 }
 
 .missions-market-card[data-rarity='epic'] {
-  border-color: rgba(139, 92, 246, 0.35);
+  --missions-market-card-shadow-glow: 0 0 30px rgba(139, 92, 246, 0.26);
 }
 
 .missions-market-card[data-rarity='rare'] {
-  border-color: rgba(56, 189, 248, 0.32);
+  --missions-market-card-shadow-glow: 0 0 28px rgba(56, 189, 248, 0.24);
 }
 
 .missions-claim-modal {

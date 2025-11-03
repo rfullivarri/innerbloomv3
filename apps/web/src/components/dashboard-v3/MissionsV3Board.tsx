@@ -588,6 +588,31 @@ function usePrefersReducedMotion(): boolean {
   return prefersReducedMotion;
 }
 
+function useMediaQuery(query: string, defaultValue = false): boolean {
+  const [matches, setMatches] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return defaultValue;
+    }
+
+    return window.matchMedia(query).matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia(query);
+    const update = () => setMatches(mediaQuery.matches);
+    update();
+
+    mediaQuery.addEventListener('change', update);
+    return () => mediaQuery.removeEventListener('change', update);
+  }, [query]);
+
+  return matches;
+}
+
 function PetalField({ disabled }: { disabled: boolean }) {
   if (disabled) {
     return null;
@@ -1043,6 +1068,8 @@ export function MissionsV3Board({
   const location = useLocation();
   const navigate = useNavigate();
   const prefersReducedMotion = usePrefersReducedMotion();
+  const hasCoarsePointer = useMediaQuery('(pointer: coarse)', true);
+  const isLargeViewport = useMediaQuery('(min-width: 1024px)');
   const normalizedGameMode = useMemo(() => normalizeGameModeValue(gameMode ?? null), [gameMode]);
   const { data, status, error, reload } = useRequest(() => getMissionsV2Board(), []);
   const [board, setBoard] = useState<MissionsV2BoardResponse | null>(null);
@@ -1054,11 +1081,11 @@ export function MissionsV3Board({
   const [heartbeatToastKey, setHeartbeatToastKey] = useState<number | null>(null);
   const [flippedMarketCards, setFlippedMarketCards] = useState<Record<string, boolean>>({});
   const [marketCoverAspect, setMarketCoverAspect] = useState<Record<string, string>>({});
-  const isMarketSwiperCardsEnabled = true;
+  const isMarketSwiperCardsEnabled = isLargeViewport && !hasCoarsePointer;
   const missionsWindow =
     typeof window === 'undefined' ? null : (window as unknown as MissionsWindow | null);
   const shouldDisableMarketSwiper = Boolean(
-    prefersReducedMotion || missionsWindow?.__IB_DISABLE_MARKET_SWIPER__,
+    prefersReducedMotion || hasCoarsePointer || missionsWindow?.__IB_DISABLE_MARKET_SWIPER__,
   );
   const usingMarketSwiper = isMarketSwiperCardsEnabled && !shouldDisableMarketSwiper;
   const getViewModeFromLocation = useCallback(
