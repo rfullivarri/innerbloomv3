@@ -8,15 +8,10 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
-  type MutableRefObject,
   type SyntheticEvent,
   type UIEvent as ReactUIEvent,
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { EffectCards, Navigation } from 'swiper/modules';
-import type { Swiper as SwiperType } from 'swiper';
-import type { NavigationOptions } from 'swiper/types';
 import {
   claimMissionsV2Mission,
   getMissionsV2Board,
@@ -42,9 +37,6 @@ import {
 } from '../../lib/telemetry';
 import { FEATURE_MISSIONS_V2 } from '../../lib/featureFlags';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
-import 'swiper/css';
-import 'swiper/css/effect-cards';
-
 type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 
 type ClaimModalState = {
@@ -56,13 +48,6 @@ type ClaimModalState = {
     items: string[];
   };
 };
-
-type MissionsWindow = Window &
-  typeof globalThis & {
-    __IB_DISABLE_MARKET_SWIPER__?: boolean;
-    __IB_MARKET_SWIPER_REF__?: MutableRefObject<SwiperType | null>;
-  };
-
 
 const SLOT_ORDER: Array<MissionsV2Slot['slot']> = ['main', 'hunt', 'skill'];
 const DEFAULT_MARKET_INDEX = SLOT_ORDER.length > 2 ? 1 : 0;
@@ -97,16 +82,6 @@ const SLOT_DETAILS: Record<
     aura: 'shadow-[0_0_24px_rgba(56,189,248,0.28)]',
     gradient: 'bg-[linear-gradient(140deg,rgba(56,189,248,0.16),rgba(30,64,175,0.28))]',
   },
-};
-
-const resolveSwiperIndex = (instance: SwiperType): number => {
-  if (Number.isFinite(instance.snapIndex)) {
-    return instance.snapIndex;
-  }
-  if (Number.isFinite(instance.activeIndex)) {
-    return instance.activeIndex;
-  }
-  return 0;
 };
 
 const DEMO_SLOT_CONTENT: Record<
@@ -1048,10 +1023,6 @@ export function MissionsV3Board({
   const [heartbeatToastKey, setHeartbeatToastKey] = useState<number | null>(null);
   const [flippedMarketCards, setFlippedMarketCards] = useState<Record<string, boolean>>({});
   const [marketCoverAspect, setMarketCoverAspect] = useState<Record<string, string>>({});
-  const isMarketSwiperCardsEnabled = true;
-  const missionsWindow =
-    typeof window === 'undefined' ? null : (window as unknown as MissionsWindow | null);
-  const shouldDisableMarketSwiper = Boolean(prefersReducedMotion || missionsWindow?.__IB_DISABLE_MARKET_SWIPER__);
   const getViewModeFromLocation = useCallback(
     (loc: typeof location): 'active' | 'market' => {
       if (loc.hash.replace('#', '') === 'market') {
@@ -1102,11 +1073,7 @@ export function MissionsV3Board({
   const hasTrackedMarketView = useRef(false);
   const slotRefs = useRef<Record<string, HTMLElement | null>>({});
   const carouselRef = useRef<HTMLDivElement | null>(null);
-  const marketSwiperRef = useRef<SwiperType | null>(null);
-  const marketSwiperInstance = marketSwiperRef.current;
-  const marketSwiperPrevRef = useRef<HTMLButtonElement | null>(null);
-  const marketSwiperNextRef = useRef<HTMLButtonElement | null>(null);
-  const previousMarketSwiperIndexRef = useRef(DEFAULT_MARKET_INDEX);
+  const previousMarketIndexRef = useRef(DEFAULT_MARKET_INDEX);
   const pendingMarketFlipRef = useRef<MissionsV2Slot['slot'] | null>(null);
   const slotCarouselRef = useRef<HTMLDivElement | null>(null);
   const marketStackRefs = useRef<Record<MissionsV2Slot['slot'], HTMLDivElement | null>>({
@@ -1138,19 +1105,6 @@ export function MissionsV3Board({
   const previousActiveSlotIdRef = useRef<string | null>(null);
   const hasInitializedActiveSnapRef = useRef(false);
   const previousActiveSnapIndexRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    const missionsWindow = window as unknown as MissionsWindow;
-    missionsWindow.__IB_MARKET_SWIPER_REF__ = marketSwiperRef;
-    return () => {
-      if (missionsWindow.__IB_MARKET_SWIPER_REF__ === marketSwiperRef) {
-        delete missionsWindow.__IB_MARKET_SWIPER_REF__;
-      }
-    };
-  }, []);
 
   const marketBySlot = useMemo<MarketBySlot>(() => {
     const map: MarketBySlot = {};
@@ -2286,19 +2240,21 @@ export function MissionsV3Board({
     ],
   );
 
-  const scrollCarouselToIndex = useCallback((index: number) => {
-    const instance = marketSwiperRef.current;
-    if (!instance) {
-      return;
-    }
+  const scrollMarketCarouselToIndex = useCallback(
+    (index: number) => {
+      const container = carouselRef.current;
+      if (!container) {
+        return;
+      }
 
-    if (instance.params.loop) {
-      instance.slideToLoop(index);
-      return;
-    }
-
-    instance.slideTo(index);
-  }, []);
+      const element = container.querySelector<HTMLElement>(
+        `[data-carousel-index='${index}']`,
+      );
+      const behavior = prefersReducedMotion ? 'auto' : 'smooth';
+      element?.scrollIntoView({ behavior, block: 'nearest', inline: 'center' });
+    },
+    [prefersReducedMotion],
+  );
 
   const stepMarketCarousel = useCallback(
     (delta: number) => {
@@ -2306,15 +2262,11 @@ export function MissionsV3Board({
         return;
       }
 
-      if (delta > 0) {
-        marketSwiperRef.current?.slideNext();
-      } else {
-        marketSwiperRef.current?.slidePrev();
-      }
+      const nextIndex = (activeMarketIndex + delta + marketCards.length) % marketCards.length;
+      setActiveMarketIndex(nextIndex);
+      scrollMarketCarouselToIndex(nextIndex);
     },
-    [
-      marketCards,
-    ],
+    [activeMarketIndex, marketCards, scrollMarketCarouselToIndex],
   );
 
   const handleCarouselStep = useCallback(
@@ -2325,100 +2277,75 @@ export function MissionsV3Board({
     [stepMarketCarousel],
   );
 
-  const handleMarketSwiperChange = useCallback(
-    (instance: SwiperType) => {
-      const total = marketCards.length;
-      const nextIndex = resolveSwiperIndex(instance);
-      const previousIndex = previousMarketSwiperIndexRef.current;
+  useEffect(() => {
+    const total = marketCards.length;
+    const nextIndex = Math.min(activeMarketIndex, total > 0 ? total - 1 : 0);
+    const previousIndex = previousMarketIndexRef.current;
 
-      if (total > 0 && nextIndex !== previousIndex) {
-        let delta = nextIndex - previousIndex;
-        if (Math.abs(delta) > total / 2) {
-          delta = delta > 0 ? delta - total : delta + total;
-        }
+    if (total === 0) {
+      previousMarketIndexRef.current = 0;
+      return;
+    }
+
+    if (nextIndex !== previousIndex) {
+      const forward = (nextIndex - previousIndex + total) % total;
+      const backward = (previousIndex - nextIndex + total) % total;
+      if (forward !== 0 || backward !== 0) {
         const directionEvent =
-          delta > 0 ? 'missions_v2_market_nav_next' : 'missions_v2_market_nav_prev';
+          forward !== 0 && (backward === 0 || forward <= backward)
+            ? 'missions_v2_market_nav_next'
+            : 'missions_v2_market_nav_prev';
         const nextCard = marketCards[nextIndex] ?? null;
         emitMissionsV2Event(directionEvent, {
           userId,
           slot: nextCard?.slot ?? null,
         });
       }
+    }
 
-      previousMarketSwiperIndexRef.current = nextIndex;
-
-      const openSlot = Object.keys(flippedMarketCards)[0] ?? null;
-      if (openSlot) {
-        const nextCard = marketCards[nextIndex] ?? null;
-        if (!nextCard || nextCard.slot !== openSlot) {
-          setFlippedMarketCards({});
-          emitMissionsV2Event('missions_v2_market_flip_close', {
-            userId,
-            slot: openSlot,
-          });
-        }
+    const openSlot = Object.keys(flippedMarketCards)[0] ?? null;
+    if (openSlot) {
+      const nextCard = marketCards[nextIndex] ?? null;
+      if (!nextCard || nextCard.slot !== openSlot) {
+        setFlippedMarketCards({});
+        emitMissionsV2Event('missions_v2_market_flip_close', {
+          userId,
+          slot: openSlot,
+        });
       }
+    }
 
-      setActiveMarketIndex((current) => (current === nextIndex ? current : nextIndex));
-
-      const pendingSlot = pendingMarketFlipRef.current;
-      if (pendingSlot) {
-        const nextCard = marketCards[nextIndex] ?? null;
-        if (nextCard && nextCard.slot === pendingSlot) {
-          pendingMarketFlipRef.current = null;
-          setFlippedMarketCards({ [pendingSlot]: true });
-          emitMissionsV2Event('missions_v2_market_flip_open', {
-            userId,
-            slot: pendingSlot,
-          });
-          setActiveMarketProposalBySlot((prev) => {
-            if ((prev[pendingSlot] ?? 0) === 0) {
-              return prev;
-            }
-            collapseMarketProposalExpansions(pendingSlot);
-            previousActiveProposalBySlotRef.current[pendingSlot] = 0;
-            return { ...prev, [pendingSlot]: 0 };
-          });
-        }
+    const pendingSlot = pendingMarketFlipRef.current;
+    if (pendingSlot) {
+      const nextCard = marketCards[nextIndex] ?? null;
+      if (nextCard && nextCard.slot === pendingSlot) {
+        pendingMarketFlipRef.current = null;
+        setFlippedMarketCards({ [pendingSlot]: true });
+        emitMissionsV2Event('missions_v2_market_flip_open', {
+          userId,
+          slot: pendingSlot,
+        });
+        setActiveMarketProposalBySlot((prev) => {
+          if ((prev[pendingSlot] ?? 0) === 0) {
+            return prev;
+          }
+          collapseMarketProposalExpansions(pendingSlot);
+          previousActiveProposalBySlotRef.current[pendingSlot] = 0;
+          return { ...prev, [pendingSlot]: 0 };
+        });
       }
-    },
-    [
-      emitMissionsV2Event,
-      flippedMarketCards,
-      collapseMarketProposalExpansions,
-      marketCards,
-      setActiveMarketProposalBySlot,
-      userId,
-    ],
-  );
-
-  useEffect(() => {
-    previousMarketSwiperIndexRef.current = activeMarketIndex;
-  }, [activeMarketIndex]);
-
-  useEffect(() => {
-    const swiper = marketSwiperRef.current;
-    if (!swiper) {
-      return;
-    }
-    const prevEl = marketSwiperPrevRef.current;
-    const nextEl = marketSwiperNextRef.current;
-    if (!prevEl || !nextEl) {
-      return;
     }
 
-    const navigationParams: NavigationOptions = {
-      enabled: true,
-      prevEl,
-      nextEl,
-    };
-    swiper.params.navigation = navigationParams;
-    if (swiper.navigation) {
-      swiper.navigation.destroy();
-      swiper.navigation.init();
-      swiper.navigation.update();
-    }
-  }, [marketCards.length, viewMode]);
+    previousMarketIndexRef.current = nextIndex;
+  }, [
+    activeMarketIndex,
+    collapseMarketProposalExpansions,
+    emitMissionsV2Event,
+    flippedMarketCards,
+    marketCards,
+    setActiveMarketProposalBySlot,
+    userId,
+  ]);
 
   const handleSlotCarouselStep = useCallback(
     (direction: 'next' | 'prev') => {
@@ -2503,36 +2430,9 @@ export function MissionsV3Board({
             slot: openSlot,
           });
         }
-        const swiper = marketSwiperRef.current;
-        if (swiper) {
-          pendingMarketFlipRef.current = slotKey;
-          scrollCarouselToIndex(index);
-          return;
-        }
-
-        const nextCard = marketCards[index] ?? null;
+        pendingMarketFlipRef.current = slotKey;
         setActiveMarketIndex((current) => (current === index ? current : index));
-        pendingMarketFlipRef.current = null;
-
-        if (!nextCard || nextCard.slot !== slotKey) {
-          return;
-        }
-
-        setFlippedMarketCards({ [slotKey]: true });
-
-        emitMissionsV2Event('missions_v2_market_flip_open', {
-          userId,
-          slot: slotKey,
-        });
-
-        setActiveMarketProposalBySlot((prev) => {
-          if ((prev[slotKey] ?? 0) === 0) {
-            return prev;
-          }
-          collapseMarketProposalExpansions(slotKey);
-          previousActiveProposalBySlotRef.current[slotKey] = 0;
-          return { ...prev, [slotKey]: 0 };
-        });
+        scrollMarketCarouselToIndex(index);
         return;
       }
 
@@ -2583,7 +2483,7 @@ export function MissionsV3Board({
       collapseMarketProposalExpansions,
       flippedMarketCards,
       marketCards,
-      scrollCarouselToIndex,
+      scrollMarketCarouselToIndex,
       userId,
     ],
   );
@@ -2690,6 +2590,45 @@ export function MissionsV3Board({
       const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
       const isFlipped = Boolean(flippedMarketCards[cardKey]);
       const isActiveCard = index === activeMarketIndex;
+      const relativeOffset = index - activeMarketIndex;
+      const totalCards = marketCards.length;
+      let wrappedOffset = relativeOffset;
+      if (totalCards > 1) {
+        const half = totalCards / 2;
+        if (wrappedOffset > half) {
+          wrappedOffset -= totalCards;
+        } else if (wrappedOffset < -half) {
+          wrappedOffset += totalCards;
+        }
+      }
+      const maxVisibleOffset = Math.min(2, Math.max(totalCards - 1, 1));
+      const limitedOffset = Math.max(Math.min(wrappedOffset, maxVisibleOffset), -maxVisibleOffset);
+      const angle = (Math.PI / 8) * limitedOffset;
+      const depth = Math.cos(angle);
+      const translateY = (1 - depth) * 48;
+      const distance = Math.abs(limitedOffset);
+      const scale = Math.max(0.72, 1 - 0.18 * distance);
+      const opacity = Math.max(0.4, 1 - 0.45 * distance);
+      const tiltX = Math.sin(angle) * 4.5;
+      const zIndex = Math.round((depth + 1) * 40) + (isActiveCard ? 80 : 0);
+      const baseItemStyle: CSSProperties = prefersReducedMotion
+        ? {
+            transform: 'none',
+            opacity: 1,
+            zIndex: isActiveCard ? 2 : 1,
+          }
+        : {
+            transform: `translateY(${translateY}px) scale(${scale}) rotateX(${tiltX}deg)`,
+            opacity,
+            zIndex,
+          };
+      const itemStyle: CSSProperties = {
+        ...baseItemStyle,
+        outline: isActiveCard ? '3px solid rgba(56, 189, 248, 0.85)' : '3px solid transparent',
+        outlineOffset: '6px',
+      };
+      const deckPosition =
+        relativeOffset === 0 ? 'active' : relativeOffset < 0 ? 'before' : 'after';
       const coverSrc = getMissionArt(slot, normalizedGameMode);
       const activeProposalIndex = activeMarketProposalBySlot[slot] ?? 0;
       const proposalList = proposals;
@@ -2918,15 +2857,17 @@ export function MissionsV3Board({
         );
 
     return (
-      <SwiperSlide key={cardKey}>
-        <div
-          className="missions-market-carousel__item missions-active-carousel__item"
-          data-carousel-index={index}
-          data-active={isActiveCard ? 'true' : 'false'}
-        >
-          {cardNode}
-        </div>
-      </SwiperSlide>
+      <div
+        key={cardKey}
+        className="missions-market-carousel__item missions-active-carousel__item"
+        data-carousel-index={index}
+        data-active={isActiveCard ? 'true' : 'false'}
+        data-position={deckPosition}
+        data-offset={relativeOffset}
+        style={itemStyle}
+      >
+        {cardNode}
+      </div>
     );
     },
     [
@@ -2947,6 +2888,8 @@ export function MissionsV3Board({
       registerMarketStackHeader,
       updateMarketStackFade,
       updateMarketStackHeaderOffset,
+      marketCards.length,
+      prefersReducedMotion,
     ],
   );
 
@@ -2964,17 +2907,17 @@ export function MissionsV3Board({
       return;
     }
     if (typeof window === 'undefined') {
-      scrollCarouselToIndex(activeMarketIndex);
+      scrollMarketCarouselToIndex(activeMarketIndex);
       return;
     }
     window.requestAnimationFrame(() => {
-      scrollCarouselToIndex(activeMarketIndex);
+      scrollMarketCarouselToIndex(activeMarketIndex);
       const element = carouselRef.current?.querySelector<HTMLElement>(
         `[data-carousel-index='${activeMarketIndex}'] article`,
       );
       element?.focus({ preventScroll: true });
     });
-  }, [activeMarketIndex, marketCards.length, scrollCarouselToIndex, updateViewMode]);
+  }, [activeMarketIndex, marketCards.length, scrollMarketCarouselToIndex, updateViewMode]);
 
   const registerSlotRef = useCallback(
     (slotId: string) => (element: HTMLElement | null) => {
@@ -3160,10 +3103,6 @@ export function MissionsV3Board({
     if (marketCards.length === 0) {
       return;
     }
-    if (!shouldDisableMarketSwiper && marketSwiperInstance) {
-      return;
-    }
-
     const container = carouselRef.current;
     if (!container) {
       return;
@@ -3221,7 +3160,7 @@ export function MissionsV3Board({
         window.cancelAnimationFrame(raf);
       }
     };
-  }, [activeMarketIndex, marketCards.length, marketSwiperInstance, shouldDisableMarketSwiper, viewMode]);
+  }, [activeMarketIndex, marketCards.length, viewMode]);
 
   useEffect(() => {
     if (viewMode !== 'market') {
@@ -3232,16 +3171,16 @@ export function MissionsV3Board({
     }
 
     if (typeof window === 'undefined') {
-      scrollCarouselToIndex(activeMarketIndex);
+      scrollMarketCarouselToIndex(activeMarketIndex);
       return;
     }
 
     const raf = window.requestAnimationFrame(() => {
-      scrollCarouselToIndex(activeMarketIndex);
+      scrollMarketCarouselToIndex(activeMarketIndex);
     });
 
     return () => window.cancelAnimationFrame(raf);
-  }, [viewMode, activeMarketIndex, marketCards.length, scrollCarouselToIndex]);
+  }, [viewMode, activeMarketIndex, marketCards.length, scrollMarketCarouselToIndex]);
 
   useEffect(() => {
     if (viewMode !== 'active') {
@@ -4055,7 +3994,6 @@ export function MissionsV3Board({
                   <button
                     type="button"
                     className="missions-market-carousel__button"
-                    ref={marketSwiperPrevRef}
                     onClick={() => handleCarouselStep('prev')}
                     aria-label="Ver propuesta anterior"
                     disabled={marketCards.length === 0}
@@ -4065,7 +4003,6 @@ export function MissionsV3Board({
                   <button
                     type="button"
                     className="missions-market-carousel__button"
-                    ref={marketSwiperNextRef}
                     onClick={() => handleCarouselStep('next')}
                     aria-label="Ver propuesta siguiente"
                     disabled={marketCards.length === 0}
@@ -4084,39 +4021,15 @@ export function MissionsV3Board({
                 </div>
               ) : (
                 <>
-                  <Swiper
+                  <div
                     className="missions-market-carousel__track missions-active-carousel__track"
-                    modules={[EffectCards, Navigation]}
-                    effect="cards"
-                    loop={false}
-                    rewind
-                    grabCursor
-                    preventClicks={false}
-                    preventClicksPropagation={false}
-                    initialSlide={Math.min(DEFAULT_MARKET_INDEX, Math.max(marketCards.length - 1, 0))}
+                    ref={carouselRef}
                     role="listbox"
                     aria-label="Marketplace de misiones disponibles"
                     style={marketCarouselStyle}
-                    data-feature={isMarketSwiperCardsEnabled ? 'swiper-cards' : undefined}
-                    onSwiper={(instance: SwiperType) => {
-                      if (shouldDisableMarketSwiper) {
-                        marketSwiperRef.current = null;
-                      } else {
-                        marketSwiperRef.current = instance;
-                      }
-                      carouselRef.current = instance.el as HTMLDivElement;
-                      const resolvedIndex = resolveSwiperIndex(instance);
-                      previousMarketSwiperIndexRef.current = resolvedIndex;
-                      setActiveMarketIndex((current) =>
-                        current === resolvedIndex ? current : resolvedIndex,
-                      );
-                    }}
-                    onSlideChange={handleMarketSwiperChange}
-                    navigation={false}
-                    cardsEffect={{ slideShadows: false }}
                   >
                     {marketCards.map(renderMarketCard)}
-                  </Swiper>
+                  </div>
                   {activeMarketCard && (
                     <div className="missions-market-carousel__status" aria-live="polite">
                       <span className="missions-market-carousel__status-slot">
