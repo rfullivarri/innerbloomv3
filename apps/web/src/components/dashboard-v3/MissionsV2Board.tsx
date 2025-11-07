@@ -29,6 +29,7 @@ import {
   type MissionsV2Slot,
 } from '../../lib/api';
 import { useRequest } from '../../hooks/useRequest';
+import { useCarouselSelection } from '../../hooks/useCarouselSelection';
 import { Card } from '../ui/Card';
 import { ProgressBar } from '../common/ProgressBar';
 import { ToastBanner } from '../common/ToastBanner';
@@ -1016,8 +1017,6 @@ export function MissionsV2Board({
     [],
   );
   const [viewMode, setViewModeState] = useState<'active' | 'market'>(() => getViewModeFromLocation(location));
-  const [activeMarketIndex, setActiveMarketIndex] = useState(DEFAULT_MARKET_INDEX);
-  const [activeSlotIndex, setActiveSlotIndex] = useState(0);
   const [activeMarketProposalBySlot, setActiveMarketProposalBySlot] = useState<
     Record<MissionsV2Slot['slot'], number>
   >(() => ({
@@ -1058,6 +1057,26 @@ export function MissionsV2Board({
   const previousMarketIndexRef = useRef(DEFAULT_MARKET_INDEX);
   const pendingMarketFlipRef = useRef<MissionsV2Slot['slot'] | null>(null);
   const slotCarouselRef = useRef<HTMLDivElement | null>(null);
+  const {
+    activeIndex: activeMarketIndex,
+    setActiveIndex: setActiveMarketIndex,
+    handleTrackScroll: handleMarketTrackScroll,
+    getItemFromEventTarget: getMarketItemFromEvent,
+  } = useCarouselSelection<HTMLDivElement>({
+    itemAttribute: 'data-carousel-index',
+    trackRef: carouselRef,
+    initialIndex: DEFAULT_MARKET_INDEX,
+  });
+  const {
+    activeIndex: activeSlotIndex,
+    setActiveIndex: setActiveSlotIndex,
+    handleTrackScroll: handleSlotTrackScroll,
+    getItemFromEventTarget: getSlotItemFromEvent,
+  } = useCarouselSelection<HTMLDivElement>({
+    itemAttribute: 'data-slot-carousel-index',
+    trackRef: slotCarouselRef,
+    initialIndex: 0,
+  });
   const marketStackRefs = useRef<Record<MissionsV2Slot['slot'], HTMLDivElement | null>>({
     main: null,
     hunt: null,
@@ -2263,7 +2282,7 @@ export function MissionsV2Board({
       setActiveMarketIndex((current) => (current === nextIndex ? current : nextIndex));
       scrollCarouselToIndex(nextIndex);
     },
-    [activeMarketIndex, marketCards.length, scrollCarouselToIndex],
+    [activeMarketIndex, marketCards.length, scrollCarouselToIndex, setActiveMarketIndex],
   );
 
   const handleCarouselStep = useCallback(
@@ -2351,7 +2370,7 @@ export function MissionsV2Board({
       setActiveSlotIndex(nextIndex);
       scrollSlotCarouselToIndex(nextIndex);
     },
-    [activeSlotIndex, orderedSlots.length, scrollSlotCarouselToIndex],
+    [activeSlotIndex, orderedSlots.length, scrollSlotCarouselToIndex, setActiveSlotIndex],
   );
 
   const handleSlotCardSelect = useCallback(
@@ -2362,14 +2381,19 @@ export function MissionsV2Board({
       setActiveSlotIndex(index);
       scrollSlotCarouselToIndex(index);
     },
-    [activeSlotIndex, scrollSlotCarouselToIndex],
+    [activeSlotIndex, scrollSlotCarouselToIndex, setActiveSlotIndex],
   );
 
-  const handleSlotCardClick = useCallback(
-    (index: number) => {
-      handleSlotCardSelect(index);
+  const handleSlotTrackClick = useCallback(
+    (event: ReactMouseEvent<HTMLDivElement>) => {
+      const meta = getSlotItemFromEvent(event.target);
+      if (!meta) {
+        return;
+      }
+      console.debug('[carousel] tap -> index:', meta.index);
+      handleSlotCardSelect(meta.index);
     },
-    [handleSlotCardSelect],
+    [getSlotItemFromEvent, handleSlotCardSelect],
   );
 
   const handleSlotCardKeyDown = useCallback(
@@ -2487,93 +2511,62 @@ export function MissionsV2Board({
       flippedMarketCards,
       marketCards,
       scrollCarouselToIndex,
+      setActiveMarketIndex,
       userId,
     ],
   );
-
-  const resolveMarketCardTarget = useCallback(
-    (currentTarget: HTMLElement, slotKey: MissionsV2Slot['slot'], index: number) => {
-      const cardNode = currentTarget.closest<HTMLElement>('.missions-market-card') ?? currentTarget;
-      const resolvedSlot =
-        (cardNode.dataset.cardKey as MissionsV2Slot['slot'] | undefined) ?? slotKey;
-
-      let resolvedIndex = index;
-      const wrapper = cardNode.closest<HTMLElement>('[data-carousel-index]');
-      if (wrapper) {
-        const wrapperIndex = Number.parseInt(wrapper.getAttribute('data-carousel-index') ?? '', 10);
-        if (Number.isFinite(wrapperIndex)) {
-          resolvedIndex = wrapperIndex;
-        }
+  const resolveMarketItemFromEvent = useCallback(
+    (
+      target: EventTarget | null,
+      fallbackSlot?: MissionsV2Slot['slot'],
+      fallbackIndex?: number,
+    ) => {
+      const meta = getMarketItemFromEvent(target);
+      const slotAttr =
+        (meta?.element.getAttribute('data-card-slot') as MissionsV2Slot['slot'] | null) ??
+        fallbackSlot ??
+        null;
+      const indexValue = meta?.index ?? fallbackIndex ?? null;
+      if (slotAttr == null || indexValue == null) {
+        return null;
       }
 
-      if (!Number.isFinite(resolvedIndex) || resolvedIndex < 0) {
-        const fallbackIndex = marketCards.findIndex((card) => card.key === resolvedSlot);
-        if (fallbackIndex >= 0) {
-          resolvedIndex = fallbackIndex;
-        }
+      let element = meta?.element ?? null;
+      if (!element && carouselRef.current) {
+        element = carouselRef.current.querySelector<HTMLElement>(
+          `[data-carousel-index='${indexValue}']`,
+        );
       }
 
-      return { slot: resolvedSlot, index: resolvedIndex };
+      return { slot: slotAttr, index: indexValue, element };
     },
-    [marketCards],
-  );
-
-  const handleMarketCardClick = useCallback(
-    (event: ReactMouseEvent<HTMLElement>, slotKey: MissionsV2Slot['slot'], index: number) => {
-      if (skipNextMarketClickRef.current) {
-        skipNextMarketClickRef.current = false;
-        return;
-      }
-
-      const fallbackTarget = event.currentTarget as HTMLElement;
-      const cardNode =
-        (event.target as HTMLElement | null)?.closest<HTMLElement>('.missions-market-card') ??
-        fallbackTarget;
-      const { slot, index: resolvedIndex } = resolveMarketCardTarget(cardNode, slotKey, index);
-
-      const eventTarget = event.target as HTMLElement | null;
-      const resolvedTarget = eventTarget instanceof Element ? eventTarget : cardNode;
-      let zIndex = 'n/a';
-      let pointerEvents = 'n/a';
-
-      if (typeof window !== 'undefined') {
-        const computed = window.getComputedStyle(resolvedTarget);
-        zIndex = computed.zIndex ?? 'n/a';
-        pointerEvents = computed.pointerEvents ?? 'n/a';
-      }
-
-      console.info('[missions-market][flip-diag] click', {
-        slideIndex: resolvedIndex,
-        activeIndex: activeMarketIndex,
-        isActive: resolvedIndex === activeMarketIndex,
-        targetClassName: eventTarget instanceof Element ? eventTarget.className : null,
-        zIndex,
-        pointerEvents,
-      });
-
-      handleMarketCardToggle(slot, resolvedIndex);
-    },
-    [activeMarketIndex, handleMarketCardToggle, resolveMarketCardTarget],
+    [carouselRef, getMarketItemFromEvent],
   );
 
   const handleMarketCardPointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLElement>, slotKey: MissionsV2Slot['slot'], index: number) => {
+    (event: ReactPointerEvent<HTMLElement>) => {
       if (event.pointerType !== 'touch') {
+        marketCardTapRef.current = null;
+        return;
+      }
+
+      const resolved = resolveMarketItemFromEvent(event.target);
+      if (!resolved) {
         marketCardTapRef.current = null;
         return;
       }
 
       marketCardTapRef.current = {
         pointerId: event.pointerId,
-        slot: slotKey,
-        index,
+        slot: resolved.slot,
+        index: resolved.index,
         x: event.clientX,
         y: event.clientY,
         moved: false,
         horizontalDrag: false,
       };
     },
-    [],
+    [resolveMarketItemFromEvent],
   );
 
   const handleMarketCardPointerMove = useCallback((event: ReactPointerEvent<HTMLElement>) => {
@@ -2600,7 +2593,7 @@ export function MissionsV2Board({
   }, []);
 
   const handleMarketCardPointerUp = useCallback(
-    (event: ReactPointerEvent<HTMLElement>, slotKey: MissionsV2Slot['slot'], index: number) => {
+    (event: ReactPointerEvent<HTMLElement>) => {
       const tapState = marketCardTapRef.current;
       if (!tapState || tapState.pointerId !== event.pointerId || event.pointerType !== 'touch') {
         marketCardTapRef.current = null;
@@ -2619,43 +2612,58 @@ export function MissionsV2Board({
 
       if (!moved) {
         event.preventDefault();
-        const fallbackTarget = event.currentTarget as HTMLElement;
-        const cardNode =
-          (event.target as HTMLElement | null)?.closest<HTMLElement>('.missions-market-card') ??
-          fallbackTarget;
-        const { slot, index: resolvedIndex } = resolveMarketCardTarget(
-          cardNode,
-          tapState.slot,
-          tapState.index,
-        );
+        const resolved = resolveMarketItemFromEvent(event.target, tapState.slot, tapState.index);
+        if (!resolved) {
+          marketCardTapRef.current = null;
+          return;
+        }
 
+        console.debug('[carousel] tap -> index:', resolved.index);
         const eventTarget = event.target as HTMLElement | null;
-        const resolvedTarget = eventTarget instanceof Element ? eventTarget : cardNode;
+        const resolvedTarget = eventTarget instanceof Element ? eventTarget : resolved.element;
         let zIndex = 'n/a';
         let pointerEvents = 'n/a';
 
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && resolvedTarget) {
           const computed = window.getComputedStyle(resolvedTarget);
           zIndex = computed.zIndex ?? 'n/a';
           pointerEvents = computed.pointerEvents ?? 'n/a';
         }
 
         console.info('[missions-market][flip-diag] tap', {
-          slideIndex: resolvedIndex,
+          slideIndex: resolved.index,
           activeIndex: activeMarketIndex,
-          isActive: resolvedIndex === activeMarketIndex,
+          isActive: resolved.index === activeMarketIndex,
           targetClassName: eventTarget instanceof Element ? eventTarget.className : null,
           zIndex,
           pointerEvents,
         });
 
         skipNextMarketClickRef.current = true;
-        handleMarketCardToggle(slot, resolvedIndex);
+        handleMarketCardToggle(resolved.slot, resolved.index);
       }
 
       marketCardTapRef.current = null;
     },
-    [activeMarketIndex, handleMarketCardToggle, resolveMarketCardTarget],
+    [activeMarketIndex, handleMarketCardToggle, resolveMarketItemFromEvent],
+  );
+
+  const handleMarketTrackClick = useCallback(
+    (event: ReactMouseEvent<HTMLDivElement>) => {
+      if (skipNextMarketClickRef.current) {
+        skipNextMarketClickRef.current = false;
+        return;
+      }
+
+      const resolved = resolveMarketItemFromEvent(event.target);
+      if (!resolved) {
+        return;
+      }
+
+      console.debug('[carousel] tap -> index:', resolved.index);
+      handleMarketCardToggle(resolved.slot, resolved.index);
+    },
+    [handleMarketCardToggle, resolveMarketItemFromEvent],
   );
 
 
@@ -2792,10 +2800,9 @@ export function MissionsV2Board({
             tabIndex={isActiveCard ? 0 : -1}
             aria-label={cardLabel}
             style={{ '--market-card-aspect': marketCoverAspect[cardKey] ?? '3 / 4' } as CSSProperties}
-            onClick={(event) => handleMarketCardClick(event, slot, index)}
-            onPointerDown={(event) => handleMarketCardPointerDown(event, slot, index)}
+            onPointerDown={handleMarketCardPointerDown}
             onPointerMove={handleMarketCardPointerMove}
-            onPointerUp={(event) => handleMarketCardPointerUp(event, slot, index)}
+            onPointerUp={handleMarketCardPointerUp}
             onPointerCancel={handleMarketCardPointerCancel}
             onKeyDown={(event) => handleMarketCardKeyDown(event, slot, index)}
           >
@@ -2991,17 +2998,15 @@ export function MissionsV2Board({
     return (
       <div
         key={cardKey}
-        className="missions-market-carousel__item missions-active-carousel__item"
+        className={classNames(
+          'missions-market-carousel__item missions-active-carousel__item',
+          isActiveCard && 'is-selected',
+        )}
         data-carousel-index={index}
+        data-card-slot={slot}
         data-active={isActiveCard ? 'true' : 'false'}
         data-position={deckPosition}
         data-offset={relativeOffset}
-        style={{
-          outline: isActiveCard
-            ? '3px solid rgba(56, 189, 248, 0.85)'
-            : '3px solid transparent',
-          outlineOffset: '6px',
-        }}
       >
         {cardNode}
       </div>
@@ -3017,7 +3022,10 @@ export function MissionsV2Board({
       marketProposalRevisionBySlot,
       marketProposalTransitionBySlot,
       marketCoverAspect,
-      handleMarketCardClick,
+      handleMarketCardPointerDown,
+      handleMarketCardPointerMove,
+      handleMarketCardPointerUp,
+      handleMarketCardPointerCancel,
       handleMarketCardKeyDown,
       handleMarketCoverLoad,
       handleActivateProposal,
@@ -3172,130 +3180,6 @@ export function MissionsV2Board({
       return {};
     });
   }, [activeMarketIndex]);
-
-  useEffect(() => {
-    if (viewMode !== 'active') {
-      return;
-    }
-
-    const container = slotCarouselRef.current;
-    if (!container) {
-      return;
-    }
-
-    let raf = 0;
-    const updateActive = () => {
-      const items = container.querySelectorAll<HTMLElement>('[data-slot-carousel-index]');
-      if (items.length === 0) {
-        return;
-      }
-
-      const { left, width } = container.getBoundingClientRect();
-      const center = left + width / 2;
-      let closestIndex = activeSlotIndex;
-      let closestDistance = Number.POSITIVE_INFINITY;
-
-      items.forEach((item) => {
-        const rect = item.getBoundingClientRect();
-        const itemCenter = rect.left + rect.width / 2;
-        const distance = Math.abs(center - itemCenter);
-        if (distance < closestDistance - 0.5) {
-          const raw = item.getAttribute('data-slot-carousel-index');
-          const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN;
-          if (!Number.isNaN(parsed)) {
-            closestDistance = distance;
-            closestIndex = parsed;
-          }
-        }
-      });
-
-      setActiveSlotIndex((current) => (current === closestIndex ? current : closestIndex));
-    };
-
-    updateActive();
-
-    const handleScroll = () => {
-      if (raf) {
-        cancelAnimationFrame(raf);
-      }
-      raf = window.requestAnimationFrame(() => updateActive());
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      if (raf) {
-        window.cancelAnimationFrame(raf);
-      }
-    };
-  }, [activeSlotIndex, orderedSlots.length, viewMode]);
-
-  useEffect(() => {
-    if (viewMode !== 'market') {
-      return;
-    }
-    if (marketCards.length === 0) {
-      return;
-    }
-    const container = carouselRef.current;
-    if (!container) {
-      return;
-    }
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    let raf = 0;
-
-    const updateActive = () => {
-      const items = container.querySelectorAll<HTMLElement>('[data-carousel-index]');
-      if (items.length === 0) {
-        return;
-      }
-
-      const { left, width } = container.getBoundingClientRect();
-      const center = left + width / 2;
-      let closestIndex = activeMarketIndex;
-      let closestDistance = Number.POSITIVE_INFINITY;
-
-      items.forEach((item) => {
-        const rect = item.getBoundingClientRect();
-        const itemCenter = rect.left + rect.width / 2;
-        const distance = Math.abs(center - itemCenter);
-
-        if (distance < closestDistance - 0.5) {
-          const raw = item.getAttribute('data-carousel-index');
-          const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN;
-
-          if (!Number.isNaN(parsed)) {
-            closestDistance = distance;
-            closestIndex = parsed;
-          }
-        }
-      });
-
-      setActiveMarketIndex((current) => (current === closestIndex ? current : closestIndex));
-    };
-
-    const handleScroll = () => {
-      if (raf) {
-        window.cancelAnimationFrame(raf);
-      }
-      raf = window.requestAnimationFrame(updateActive);
-    };
-
-    updateActive();
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      if (raf) {
-        window.cancelAnimationFrame(raf);
-      }
-    };
-  }, [activeMarketIndex, marketCards.length, viewMode]);
 
   useEffect(() => {
     if (viewMode !== 'market') {
@@ -3755,6 +3639,8 @@ export function MissionsV2Board({
                   role="listbox"
                   aria-label="Slots de misiones activas"
                   style={slotCarouselStyle}
+                  onScroll={() => handleSlotTrackScroll()}
+                  onClick={handleSlotTrackClick}
                 >
                   {orderedSlots.map((slot, index) => {
                     const isActiveCard = index === activeSlotIndex;
@@ -3796,14 +3682,16 @@ export function MissionsV2Board({
                     return (
                       <div
                         key={slot.id}
-                        className="missions-active-carousel__item"
+                        className={classNames(
+                          'missions-active-carousel__item',
+                          isActiveCard && 'is-selected',
+                        )}
                         data-slot-carousel-index={index}
                         data-active={isActiveCard ? 'true' : 'false'}
                         style={itemStyle}
                         role="option"
                         aria-selected={isActiveCard}
                         tabIndex={isActiveCard ? 0 : -1}
-                        onClick={() => handleSlotCardClick(index)}
                         onKeyDown={(event) => handleSlotCardKeyDown(event, slot.id, index)}
                       >
                         <div
@@ -3888,6 +3776,8 @@ export function MissionsV2Board({
                     role="listbox"
                     aria-label="Marketplace de misiones disponibles"
                     style={marketCarouselStyle}
+                    onScroll={() => handleMarketTrackScroll()}
+                    onClick={handleMarketTrackClick}
                   >
                     {marketCards.map(renderMarketCard)}
                   </div>

@@ -1500,13 +1500,14 @@
   @apply opacity-100 saturate-100;
 }
 
-.missions-market-carousel__item[data-active='false'] .missions-market-card,
-.missions-active-carousel__item[data-active='false'] .missions-market-card {
-  pointer-events: none;
+.missions-market-carousel__item.is-selected,
+.missions-active-carousel__item.is-selected {
+  outline: 3px solid rgba(56, 189, 248, 0.85);
+  outline-offset: 6px;
 }
 
-.missions-market-carousel__item[data-active='true'] .missions-market-card,
-.missions-active-carousel__item[data-active='true'] .missions-market-card {
+.missions-market-carousel__item,
+.missions-active-carousel__item {
   pointer-events: auto;
 }
 
