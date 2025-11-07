@@ -159,7 +159,7 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
     missions: {
       key: 'missions',
       label: 'Misiones',
-      to: joinDashboardPath(basePath, 'missions'),
+      to: joinDashboardPath(basePath, 'missions-v2'),
       pageTitle: 'Misiones',
       eyebrow: 'Misiones',
       contentTitle: 'Tus misiones activas',
@@ -232,7 +232,9 @@ export function getActiveSection(
     return activeSection;
   }
 
-  if (pathname.includes('/missions-v2') || pathname.includes('/missions-v3')) {
+  const missionsBasePath = joinDashboardPath(DASHBOARD_V3_BASE_PATH, 'missions');
+
+  if (pathname.startsWith(missionsBasePath)) {
     const missionsSection = getDashboardSectionConfig('missions', pathname);
 
     return {
