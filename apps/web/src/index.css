@@ -1512,7 +1512,7 @@
 
 .missions-market-carousel__item.is-selected,
 .missions-active-carousel__item.is-selected {
-  outline: 3px solid rgba(56, 189, 248, 0.85);
+  outline: 3px solid transparent;
   outline-offset: 6px;
 }
 
