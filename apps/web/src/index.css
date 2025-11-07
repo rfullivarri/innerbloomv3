@@ -25,6 +25,16 @@
       linear-gradient(180deg, rgba(15, 23, 42, 0.96), #0f172a 58%, #0b1220);
   }
 
+  *::selection {
+    background-color: transparent;
+    color: inherit;
+  }
+
+  *::-moz-selection {
+    background-color: transparent;
+    color: inherit;
+  }
+
   #root {
     @apply min-h-screen min-h-dvh;
   }
