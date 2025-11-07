@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.8.1",
+    "@clerk/types": "^4.27.0",
     "@innerbloom/missions-v2-contracts": "file:../../packages/missions-v2-contracts",
     "@tanstack/react-virtual": "^3.13.12",
     "@types/node": "^20.11.30",
