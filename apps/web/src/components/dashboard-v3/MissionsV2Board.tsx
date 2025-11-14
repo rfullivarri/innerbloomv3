@@ -40,6 +40,7 @@ import {
 } from '../../lib/telemetry';
 import { FEATURE_MISSIONS_V2 } from '../../lib/featureFlags';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
+import { subscribeToMediaQuery } from '../../lib/mediaQuery';
 type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 
 type ClaimModalState = {
@@ -555,8 +556,7 @@ function usePrefersReducedMotion(): boolean {
     const update = () => setPrefersReducedMotion(mediaQuery.matches);
     update();
 
-    mediaQuery.addEventListener('change', update);
-    return () => mediaQuery.removeEventListener('change', update);
+    return subscribeToMediaQuery(mediaQuery, update);
   }, []);
 
   return prefersReducedMotion;
