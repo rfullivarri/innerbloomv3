@@ -42,6 +42,7 @@ import {
 } from '../../lib/telemetry';
 import { FEATURE_MISSIONS_V2 } from '../../lib/featureFlags';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
+import { subscribeToMediaQuery } from '../../lib/mediaQuery';
 import 'swiper/css';
 import 'swiper/css/effect-cards';
 
@@ -581,8 +582,7 @@ function usePrefersReducedMotion(): boolean {
     const update = () => setPrefersReducedMotion(mediaQuery.matches);
     update();
 
-    mediaQuery.addEventListener('change', update);
-    return () => mediaQuery.removeEventListener('change', update);
+    return subscribeToMediaQuery(mediaQuery, update);
   }, []);
 
   return prefersReducedMotion;
@@ -606,8 +606,7 @@ function useMediaQuery(query: string, defaultValue = false): boolean {
     const update = () => setMatches(mediaQuery.matches);
     update();
 
-    mediaQuery.addEventListener('change', update);
-    return () => mediaQuery.removeEventListener('change', update);
+    return subscribeToMediaQuery(mediaQuery, update);
   }, [query]);
 
   return matches;
