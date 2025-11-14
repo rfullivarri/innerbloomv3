@@ -127,6 +127,7 @@ export const createUserTask: AsyncHandler = async (req, res) => {
   const active = isActive ?? true;
   const taskId = randomUUID();
   const normalizedNotes = normalizeNotes(notesInput);
+  const resolvedStatId = statId != null ? statId : traitId != null ? traitId : null;
 
   const insertResult = await pool.query<TaskRow>(
     `INSERT INTO tasks (
@@ -166,7 +167,7 @@ export const createUserTask: AsyncHandler = async (req, res) => {
       title,
       pillarId,
       traitId,
-      statId,
+      resolvedStatId,
       difficultyId,
       xpBase,
       normalizedNotes,
