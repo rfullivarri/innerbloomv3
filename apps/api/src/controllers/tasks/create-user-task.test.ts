@@ -145,6 +145,75 @@ describe('POST /api/users/:id/tasks', () => {
     );
   });
 
+  it('defaults stat_id to trait_id when none is provided', async () => {
+    const taskId = 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff';
+    mockRandomUUID.mockReturnValueOnce(taskId);
+    mockVerifyToken.mockResolvedValueOnce({
+      id: userId,
+      clerkId: 'user_456',
+      email: 'test@example.com',
+      isNew: false,
+    });
+    mockEnsureUserExists.mockResolvedValueOnce(undefined);
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ tasks_group_id: 'group-2' }] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: taskId,
+            user_id: userId,
+            tasks_group_id: 'group-2',
+            task: 'Write reflection',
+            pillar_id: 3,
+            trait_id: 8,
+            stat_id: 8,
+            difficulty_id: null,
+            xp_base: 0,
+            notes: null,
+            active: true,
+            created_at: '2024-01-01T00:00:00.000Z',
+            updated_at: '2024-01-01T00:00:00.000Z',
+            completed_at: null,
+            archived_at: null,
+          },
+        ],
+      });
+
+    const response = await request(app)
+      .post(`/api/users/${userId}/tasks`)
+      .set('Authorization', 'Bearer token')
+      .send({
+        title: 'Write reflection',
+        pillar_id: 3,
+        trait_id: 8,
+        notes: null,
+        is_active: true,
+      });
+
+    expect(response.status).toBe(201);
+    expect(mockQuery).toHaveBeenCalledTimes(2);
+
+    const insertCall = mockQuery.mock.calls[1];
+    expect(insertCall?.[0]).toContain('INSERT INTO tasks');
+    expect(insertCall?.[1]).toEqual([
+      taskId,
+      userId,
+      'group-2',
+      'Write reflection',
+      3,
+      8,
+      8,
+      null,
+      0,
+      null,
+      true,
+    ]);
+
+    expect(response.body.task).toMatchObject({
+      stat_id: 8,
+    });
+  });
+
   it('returns 400 when the title is missing', async () => {
     mockVerifyToken.mockResolvedValueOnce({
       id: userId,
