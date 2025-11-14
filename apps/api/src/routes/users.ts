@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getUserEmotions } from '../controllers/emotions/get-user-emotions.js';
 import { getUserDailyXp } from '../controllers/logs/get-user-daily-xp.js';
 import { getUserJourney } from '../controllers/logs/get-user-journey.js';
+import { createUserTask } from '../controllers/tasks/create-user-task.js';
 import { getUserTasks } from '../controllers/tasks/get-user-tasks.js';
 import { getCurrentUser } from '../controllers/users/get-user-me.js';
 import { getUserAchievements } from '../controllers/users/get-user-achievements.js';
@@ -24,6 +25,7 @@ const router = Router();
 const userScopedRoutes = Router({ mergeParams: true });
 
 userScopedRoutes.get('/tasks', asyncHandler(getUserTasks));
+userScopedRoutes.post('/tasks', asyncHandler(createUserTask));
 userScopedRoutes.get('/xp/daily', asyncHandler(getUserDailyXp));
 userScopedRoutes.get('/xp/total', asyncHandler(getUserTotalXp));
 userScopedRoutes.get('/xp/by-trait', asyncHandler(getUserXpByTrait));
