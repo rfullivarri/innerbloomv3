@@ -58,6 +58,7 @@ describe('POST /api/users/:id/tasks', () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [{ tasks_group_id: 'group-1' }] })
       .mockResolvedValueOnce({ rows: [{ xp_base: 15 }] })
+      .mockResolvedValueOnce({ rows: [{ exists: true }] })
       .mockResolvedValueOnce({
         rows: [
           {
@@ -115,7 +116,7 @@ describe('POST /api/users/:id/tasks', () => {
     });
 
     expect(mockEnsureUserExists).toHaveBeenCalledWith(userId);
-    expect(mockQuery).toHaveBeenCalledTimes(3);
+    expect(mockQuery).toHaveBeenCalledTimes(4);
     expect(mockQuery).toHaveBeenNthCalledWith(
       1,
       'SELECT tasks_group_id FROM users WHERE user_id = $1 LIMIT 1',
@@ -128,6 +129,11 @@ describe('POST /api/users/:id/tasks', () => {
     );
     expect(mockQuery).toHaveBeenNthCalledWith(
       3,
+      expect.stringContaining('information_schema.columns'),
+      ['tasks', 'stat_id'],
+    );
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      4,
       expect.stringContaining('INSERT INTO tasks'),
       [
         taskId,
@@ -157,6 +163,7 @@ describe('POST /api/users/:id/tasks', () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
     mockQuery
       .mockResolvedValueOnce({ rows: [{ tasks_group_id: 'group-2' }] })
+      .mockResolvedValueOnce({ rows: [{ exists: true }] })
       .mockResolvedValueOnce({
         rows: [
           {
@@ -191,9 +198,9 @@ describe('POST /api/users/:id/tasks', () => {
       });
 
     expect(response.status).toBe(201);
-    expect(mockQuery).toHaveBeenCalledTimes(2);
+    expect(mockQuery).toHaveBeenCalledTimes(3);
 
-    const insertCall = mockQuery.mock.calls[1];
+    const insertCall = mockQuery.mock.calls[2];
     expect(insertCall?.[0]).toContain('INSERT INTO tasks');
     expect(insertCall?.[1]).toEqual([
       taskId,
@@ -211,6 +218,81 @@ describe('POST /api/users/:id/tasks', () => {
 
     expect(response.body.task).toMatchObject({
       stat_id: 8,
+    });
+  });
+
+  it('omits stat_id from the insert when the column is missing', async () => {
+    const taskId = 'cccccccc-dddd-eeee-ffff-000000000000';
+    mockRandomUUID.mockReturnValueOnce(taskId);
+    mockVerifyToken.mockResolvedValueOnce({
+      id: userId,
+      clerkId: 'user_789',
+      email: 'test@example.com',
+      isNew: false,
+    });
+    mockEnsureUserExists.mockResolvedValueOnce(undefined);
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ tasks_group_id: 'group-3' }] })
+      .mockResolvedValueOnce({ rows: [{ exists: false }] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: taskId,
+            user_id: userId,
+            tasks_group_id: 'group-3',
+            task: 'Practice breathing',
+            pillar_id: 4,
+            trait_id: 9,
+            difficulty_id: null,
+            xp_base: 0,
+            notes: null,
+            active: true,
+            created_at: '2024-01-01T00:00:00.000Z',
+            updated_at: '2024-01-01T00:00:00.000Z',
+            completed_at: null,
+            archived_at: null,
+          },
+        ],
+      });
+
+    const response = await request(app)
+      .post(`/api/users/${userId}/tasks`)
+      .set('Authorization', 'Bearer token')
+      .send({
+        title: 'Practice breathing',
+        pillar_id: 4,
+        trait_id: 9,
+        stat_id: 33,
+        notes: '',
+        is_active: true,
+      });
+
+    expect(response.status).toBe(201);
+    expect(mockQuery).toHaveBeenCalledTimes(3);
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('information_schema.columns'),
+      ['tasks', 'stat_id'],
+    );
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      3,
+      expect.stringContaining('INSERT INTO tasks'),
+      [
+        taskId,
+        userId,
+        'group-3',
+        'Practice breathing',
+        4,
+        9,
+        null,
+        0,
+        null,
+        true,
+      ],
+    );
+    expect(response.body.task).toMatchObject({
+      stat_id: 33,
+      notes: null,
     });
   });
 

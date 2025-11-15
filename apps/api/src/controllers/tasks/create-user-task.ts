@@ -55,6 +55,10 @@ type DifficultyRow = {
   xp_base: number | string | null;
 };
 
+type ColumnExistsRow = {
+  exists: boolean | string | number | null;
+};
+
 type TaskRow = {
   task_id: string;
   user_id: string;
@@ -72,6 +76,44 @@ type TaskRow = {
   completed_at?: string | null;
   archived_at?: string | null;
 };
+
+async function supportsTasksStatIdColumn(): Promise<boolean> {
+  try {
+    const result = await pool.query<ColumnExistsRow>(
+      `SELECT EXISTS (
+         SELECT 1
+           FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND table_name = $1
+            AND column_name = $2
+       ) AS exists`,
+      ['tasks', 'stat_id'],
+    );
+
+    const rawValue = result.rows[0]?.exists;
+
+    if (typeof rawValue === 'boolean') {
+      return rawValue;
+    }
+
+    if (rawValue == null) {
+      return false;
+    }
+
+    if (typeof rawValue === 'number') {
+      return rawValue === 1;
+    }
+
+    if (typeof rawValue === 'string') {
+      return rawValue === 't' || rawValue === 'true' || rawValue === '1';
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Failed to verify tasks.stat_id column, defaulting to false', error);
+    return false;
+  }
+}
 
 function normalizeNotes(value: unknown): string | null {
   if (typeof value !== 'string') {
@@ -129,53 +171,83 @@ export const createUserTask: AsyncHandler = async (req, res) => {
   const normalizedNotes = normalizeNotes(notesInput);
   const resolvedStatId = statId != null ? statId : traitId != null ? traitId : null;
 
+  const supportsStatId = await supportsTasksStatIdColumn();
+
+  const insertColumns = [
+    'task_id',
+    'user_id',
+    'tasks_group_id',
+    'task',
+    'pillar_id',
+    'trait_id',
+    ...(supportsStatId ? ['stat_id'] : []),
+    'difficulty_id',
+    'xp_base',
+    'notes',
+    'active',
+  ];
+
+  const returningColumns = [
+    'task_id',
+    'user_id',
+    'tasks_group_id',
+    'task',
+    'pillar_id',
+    'trait_id',
+    ...(supportsStatId ? ['stat_id'] : []),
+    'difficulty_id',
+    'xp_base',
+    'notes',
+    'active',
+    'created_at',
+    'updated_at',
+    'completed_at',
+    'archived_at',
+  ];
+
+  const values: unknown[] = supportsStatId
+    ? [
+        taskId,
+        id,
+        userRow.tasks_group_id,
+        title,
+        pillarId,
+        traitId,
+        resolvedStatId,
+        difficultyId,
+        xpBase,
+        normalizedNotes,
+        active,
+      ]
+    : [
+        taskId,
+        id,
+        userRow.tasks_group_id,
+        title,
+        pillarId,
+        traitId,
+        difficultyId,
+        xpBase,
+        normalizedNotes,
+        active,
+      ];
+
+  const placeholders = insertColumns
+    .map((_, index) => `$${index + 1}`)
+    .join(', ');
+
   const insertResult = await pool.query<TaskRow>(
-    `INSERT INTO tasks (
-       task_id,
-       user_id,
-       tasks_group_id,
-       task,
-       pillar_id,
-       trait_id,
-       stat_id,
-       difficulty_id,
-       xp_base,
-       notes,
-       active
-     )
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-     RETURNING
-       task_id,
-       user_id,
-       tasks_group_id,
-       task,
-       pillar_id,
-       trait_id,
-       stat_id,
-       difficulty_id,
-       xp_base,
-       notes,
-       active,
-       created_at,
-       updated_at,
-       completed_at,
-       archived_at`,
-    [
-      taskId,
-      id,
-      userRow.tasks_group_id,
-      title,
-      pillarId,
-      traitId,
-      resolvedStatId,
-      difficultyId,
-      xpBase,
-      normalizedNotes,
-      active,
-    ],
+    `INSERT INTO tasks (${insertColumns.join(', ')})
+     VALUES (${placeholders})
+     RETURNING ${returningColumns.join(', ')}`,
+    values,
   );
 
-  const createdTask = insertResult.rows[0];
+  const createdTask = insertResult.rows[0]
+    ? supportsStatId
+      ? insertResult.rows[0]
+      : { ...insertResult.rows[0], stat_id: resolvedStatId }
+    : undefined;
 
   if (!createdTask) {
     throw new HttpError(500, 'internal_error', 'Failed to create task');
