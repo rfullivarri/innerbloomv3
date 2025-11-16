@@ -7,7 +7,6 @@ type TaskRecord = {
   traitId: string | null;
   statId: string | null;
   difficultyId: string | null;
-  notes: string | null;
   isActive: boolean;
   xp: number | null;
   createdAt: string;
@@ -52,7 +51,6 @@ test.describe('Task editor smoke test', () => {
         traitId: 'trait-1',
         statId: 'stat-1',
         difficultyId: 'easy',
-        notes: 'Practica durante cinco minutos.',
         isActive: true,
         xp: 15,
         createdAt: '2024-01-01T00:00:00Z',
@@ -62,15 +60,14 @@ test.describe('Task editor smoke test', () => {
 
     const jsonHeaders = { 'Content-Type': 'application/json' };
 
-    const toApiTask = (task: TaskRecord) => ({
-      id: task.id,
-      title: task.title,
-      pillar_id: task.pillarId,
-      trait_id: task.traitId,
-      stat_id: task.statId,
-      difficulty_id: task.difficultyId,
-      notes: task.notes,
-      is_active: task.isActive,
+  const toApiTask = (task: TaskRecord) => ({
+    id: task.id,
+    title: task.title,
+    pillar_id: task.pillarId,
+    trait_id: task.traitId,
+    stat_id: task.statId,
+    difficulty_id: task.difficultyId,
+    is_active: task.isActive,
       xp: task.xp,
       created_at: task.createdAt,
       updated_at: task.updatedAt,
@@ -160,10 +157,6 @@ test.describe('Task editor smoke test', () => {
           traitId: (payload.trait_id as string | null) ?? null,
           statId: (payload.stat_id as string | null) ?? null,
           difficultyId: (payload.difficulty_id as string | null) ?? null,
-          notes:
-            typeof payload.notes === 'string' && payload.notes.trim().length > 0
-              ? payload.notes.trim()
-              : null,
           isActive: true,
           xp: null,
           createdAt: now,
@@ -190,10 +183,6 @@ test.describe('Task editor smoke test', () => {
               ? payload.title.trim()
               : current.title,
           difficultyId: (payload.difficulty_id as string | null) ?? null,
-          notes:
-            typeof payload.notes === 'string' && payload.notes.trim().length > 0
-              ? payload.notes.trim()
-              : null,
           isActive:
             typeof payload.is_active === 'boolean'
               ? payload.is_active
@@ -235,9 +224,6 @@ test.describe('Task editor smoke test', () => {
     await traitSelect.selectOption('trait-1');
     await createModal.getByPlaceholder('Ej. Entrenar 30 minutos').fill('Meditación matutina');
     await createModal.getByLabel('Dificultad').selectOption('easy');
-    await createModal
-      .getByLabel('Notas (opcional)')
-      .fill('Empieza con sesiones de 10 minutos.');
     await createModal.getByRole('button', { name: 'Crear tarea' }).click();
 
     await expect(page.getByText('Tarea creada correctamente.')).toBeVisible();
@@ -253,7 +239,6 @@ test.describe('Task editor smoke test', () => {
     await expect(editModal).toBeVisible();
     await editModal.getByLabel('Título de la tarea').fill('Meditación avanzada');
     await editModal.getByLabel('Dificultad').selectOption('hard');
-    await editModal.getByLabel('Notas (opcional)').fill('Añade ejercicios de visualización.');
     await editModal.getByLabel('Activa').uncheck();
     await editModal.getByRole('button', { name: 'Guardar cambios' }).click();
     await expect(page.getByText('Tarea actualizada correctamente.')).toBeVisible();

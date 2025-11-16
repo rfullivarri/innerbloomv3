@@ -71,7 +71,6 @@ describe('POST /api/users/:id/tasks', () => {
             stat_id: 7,
             difficulty_id: 3,
             xp_base: 15,
-            notes: 'Evening reading',
             active: true,
             created_at: '2024-01-01T00:00:00.000Z',
             updated_at: '2024-01-01T00:00:00.000Z',
@@ -90,7 +89,6 @@ describe('POST /api/users/:id/tasks', () => {
         trait_id: 5,
         stat_id: 7,
         difficulty_id: 3,
-        notes: 'Evening reading',
         is_active: true,
       });
 
@@ -106,7 +104,6 @@ describe('POST /api/users/:id/tasks', () => {
         stat_id: 7,
         difficulty_id: 3,
         xp_base: 15,
-        notes: 'Evening reading',
         active: true,
         created_at: '2024-01-01T00:00:00.000Z',
         updated_at: '2024-01-01T00:00:00.000Z',
@@ -145,7 +142,6 @@ describe('POST /api/users/:id/tasks', () => {
         7,
         3,
         15,
-        'Evening reading',
         true,
       ],
     );
@@ -176,7 +172,6 @@ describe('POST /api/users/:id/tasks', () => {
             stat_id: 8,
             difficulty_id: null,
             xp_base: 0,
-            notes: null,
             active: true,
             created_at: '2024-01-01T00:00:00.000Z',
             updated_at: '2024-01-01T00:00:00.000Z',
@@ -193,7 +188,6 @@ describe('POST /api/users/:id/tasks', () => {
         title: 'Write reflection',
         pillar_id: 3,
         trait_id: 8,
-        notes: null,
         is_active: true,
       });
 
@@ -212,7 +206,6 @@ describe('POST /api/users/:id/tasks', () => {
       8,
       null,
       0,
-      null,
       true,
     ]);
 
@@ -245,7 +238,6 @@ describe('POST /api/users/:id/tasks', () => {
             trait_id: 9,
             difficulty_id: null,
             xp_base: 0,
-            notes: null,
             active: true,
             created_at: '2024-01-01T00:00:00.000Z',
             updated_at: '2024-01-01T00:00:00.000Z',
@@ -263,7 +255,6 @@ describe('POST /api/users/:id/tasks', () => {
         pillar_id: 4,
         trait_id: 9,
         stat_id: 33,
-        notes: '',
         is_active: true,
       });
 
@@ -286,13 +277,11 @@ describe('POST /api/users/:id/tasks', () => {
         9,
         null,
         0,
-        null,
         true,
       ],
     );
     expect(response.body.task).toMatchObject({
       stat_id: 33,
-      notes: null,
     });
   });
 

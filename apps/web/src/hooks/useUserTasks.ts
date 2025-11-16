@@ -173,7 +173,6 @@ function buildOptimisticTask(payload: CreateUserTaskInput): UserTask {
     traitId: payload.traitId ?? null,
     statId: payload.statId ?? null,
     difficultyId: payload.difficultyId ?? null,
-    notes: normalizeString(payload.notes) ?? null,
     isActive: payload.isActive ?? true,
     xp: null,
     createdAt: now,
@@ -207,10 +206,6 @@ function applyTaskChanges(task: UserTask, payload: UpdateUserTaskInput): UserTas
 
   if (payload.difficultyId !== undefined) {
     next.difficultyId = payload.difficultyId ?? null;
-  }
-
-  if (payload.notes !== undefined) {
-    next.notes = normalizeString(payload.notes) ?? null;
   }
 
   if (payload.isActive !== undefined) {

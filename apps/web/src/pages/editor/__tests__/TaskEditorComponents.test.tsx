@@ -85,7 +85,6 @@ describe('Task editor components', () => {
         traitId: 'trait-1',
         statId: null,
         difficultyId: 'easy',
-        notes: 'Hazlo todas las mañanas',
         isActive: true,
         xp: 10,
         createdAt: '2024-01-01T00:00:00Z',
@@ -138,7 +137,6 @@ describe('Task editor components', () => {
       traitId: null,
       statId: null,
       difficultyId: null,
-      notes: null,
       isActive: true,
       xp: null,
       createdAt: '2024-01-01T00:00:00Z',
@@ -209,7 +207,6 @@ describe('Task editor components', () => {
       traitId: 'trait-1',
       statId: null,
       difficultyId: 'easy',
-      notes: null,
       isActive: true,
       xp: null,
       createdAt: '2024-01-01T00:00:00Z',
@@ -244,7 +241,6 @@ describe('Task editor components', () => {
         traitId: 'trait-1',
         statId: null,
         difficultyId: 'easy',
-        notes: null,
       });
     });
 
@@ -264,7 +260,6 @@ describe('Task editor components', () => {
       traitId: 'trait-1',
       statId: 'stat-1',
       difficultyId: 'easy',
-      notes: 'Notas actuales',
       isActive: true,
       xp: null,
       createdAt: '2024-01-01T00:00:00Z',
@@ -295,8 +290,6 @@ describe('Task editor components', () => {
 
     await user.type(screen.getByLabelText('Título de la tarea'), 'Título actualizado');
     await user.selectOptions(screen.getByLabelText('Dificultad'), 'hard');
-    await user.clear(screen.getByLabelText('Notas (opcional)'));
-    await user.type(screen.getByLabelText('Notas (opcional)'), 'Notas nuevas');
     await user.click(screen.getByLabelText('Activa'));
 
     updateTaskMock.mockResolvedValueOnce({ ...task, title: 'Título actualizado', isActive: false });
@@ -307,7 +300,6 @@ describe('Task editor components', () => {
       expect(updateTaskMock).toHaveBeenCalledWith('user-123', 'task-3', {
         title: 'Título actualizado',
         difficultyId: 'hard',
-        notes: 'Notas nuevas',
         isActive: false,
       });
     });

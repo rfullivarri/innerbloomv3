@@ -33,17 +33,6 @@ const bodySchema = z.object({
   trait_id: optionalNumericId,
   stat_id: optionalNumericId,
   difficulty_id: optionalNumericId,
-  notes: z
-    .union([z.string(), z.null(), z.undefined()])
-    .transform((value) => {
-      if (typeof value !== 'string') {
-        return null;
-      }
-
-      const trimmed = value.trim();
-      return trimmed.length > 0 ? trimmed : null;
-    })
-    .optional(),
   is_active: z.boolean().optional(),
 });
 
@@ -69,7 +58,6 @@ type TaskRow = {
   stat_id?: number | string | null;
   difficulty_id: number | string | null;
   xp_base: number | string | null;
-  notes?: string | null;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -115,15 +103,6 @@ async function supportsTasksStatIdColumn(): Promise<boolean> {
   }
 }
 
-function normalizeNotes(value: unknown): string | null {
-  if (typeof value !== 'string') {
-    return null;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
-
 export const createUserTask: AsyncHandler = async (req, res) => {
   const { id } = paramsSchema.parse(req.params);
   const {
@@ -132,7 +111,6 @@ export const createUserTask: AsyncHandler = async (req, res) => {
     trait_id: traitId,
     stat_id: statId,
     difficulty_id: difficultyId,
-    notes: notesInput,
     is_active: isActive,
   } = bodySchema.parse(req.body);
 
@@ -168,7 +146,6 @@ export const createUserTask: AsyncHandler = async (req, res) => {
 
   const active = isActive ?? true;
   const taskId = randomUUID();
-  const normalizedNotes = normalizeNotes(notesInput);
   const resolvedStatId = statId != null ? statId : traitId != null ? traitId : null;
 
   const supportsStatId = await supportsTasksStatIdColumn();
@@ -183,7 +160,6 @@ export const createUserTask: AsyncHandler = async (req, res) => {
     ...(supportsStatId ? ['stat_id'] : []),
     'difficulty_id',
     'xp_base',
-    'notes',
     'active',
   ];
 
@@ -197,7 +173,6 @@ export const createUserTask: AsyncHandler = async (req, res) => {
     ...(supportsStatId ? ['stat_id'] : []),
     'difficulty_id',
     'xp_base',
-    'notes',
     'active',
     'created_at',
     'updated_at',
@@ -216,7 +191,6 @@ export const createUserTask: AsyncHandler = async (req, res) => {
         resolvedStatId,
         difficultyId,
         xpBase,
-        normalizedNotes,
         active,
       ]
     : [
@@ -228,7 +202,6 @@ export const createUserTask: AsyncHandler = async (req, res) => {
         traitId,
         difficultyId,
         xpBase,
-        normalizedNotes,
         active,
       ];
 
@@ -256,7 +229,6 @@ export const createUserTask: AsyncHandler = async (req, res) => {
   res.status(201).json({
     task: {
       ...createdTask,
-      notes: normalizeNotes(createdTask.notes),
     },
   });
 };
