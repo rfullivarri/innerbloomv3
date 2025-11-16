@@ -42,14 +42,41 @@ export const tasksQuerySchema = z.object({
 
 export const taskStatsQuerySchema = logFiltersSchema.omit({ sort: true }).extend({});
 
+const optionalNumericId = z.union([z.coerce.number().int().positive(), z.null()]).optional();
+
+const userTaskUpdateKeys = [
+  'title',
+  'pillar_id',
+  'trait_id',
+  'stat_id',
+  'difficulty_id',
+  'is_active',
+] as const;
+
 export const updateTaskBodySchema = z
   .object({
-    weeklyTarget: z.number().int().min(0).max(10_000).optional(),
-    archived: z.boolean().optional(),
-    notes: z.string().trim().max(5_000).optional(),
+    title: z
+      .string({
+        invalid_type_error: 'title must be a string',
+      })
+      .trim()
+      .min(1, 'title is required')
+      .optional(),
+    pillar_id: optionalNumericId,
+    trait_id: optionalNumericId,
+    stat_id: optionalNumericId,
+    difficulty_id: optionalNumericId,
+    is_active: z.boolean().optional(),
   })
-  .refine((value) => Object.keys(value).length > 0, {
-    message: 'At least one property must be provided',
+  .superRefine((value, ctx) => {
+    const hasAny = userTaskUpdateKeys.some((key) => key in value);
+    if (!hasAny) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'At least one property must be provided',
+        path: [],
+      });
+    }
   });
 
 const upperTrimmed = z
