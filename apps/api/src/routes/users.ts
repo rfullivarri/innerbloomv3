@@ -10,6 +10,7 @@ import { getUserLevel } from '../controllers/users/get-user-level.js';
 import { getUserState } from '../controllers/users/get-user-state.js';
 import { getUserStateTimeseries } from '../controllers/users/get-user-state-timeseries.js';
 import { getUserTotalXp } from '../controllers/users/get-user-total-xp.js';
+import { updateUserTask } from '../controllers/tasks/update-user-task.js';
 import { asyncHandler } from '../lib/async-handler.js';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
 import { ownUserGuard } from '../middlewares/own-user-guard.js';
@@ -26,6 +27,7 @@ const userScopedRoutes = Router({ mergeParams: true });
 
 userScopedRoutes.get('/tasks', asyncHandler(getUserTasks));
 userScopedRoutes.post('/tasks', asyncHandler(createUserTask));
+userScopedRoutes.patch('/tasks/:taskId', asyncHandler(updateUserTask));
 userScopedRoutes.get('/xp/daily', asyncHandler(getUserDailyXp));
 userScopedRoutes.get('/xp/total', asyncHandler(getUserTotalXp));
 userScopedRoutes.get('/xp/by-trait', asyncHandler(getUserXpByTrait));

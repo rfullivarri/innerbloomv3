@@ -3,6 +3,7 @@ import { buildLevelSummary } from '../../controllers/users/level-summary.js';
 import type { LevelThreshold } from '../../controllers/users/types.js';
 import { HttpError } from '../../lib/http-error.js';
 import { triggerTaskGenerationForUser } from '../../services/taskgenTriggerService.js';
+import { updateUserTaskRow } from '../../services/user-tasks.service.js';
 import {
   type InsightQuery,
   type ListUsersQuery,
@@ -1386,15 +1387,12 @@ export async function forceRunTaskgenForUser(body: TaskgenForceRunBody): Promise
 }
 
 export async function updateUserTask(
-  _userId: string,
-  _taskId: string,
-  _body: UpdateTaskBody,
-): Promise<{ ok: true }> {
-  void _userId;
-  void _taskId;
-  void _body;
-  // TODO: Implement task editing once the admin workflow is finalized.
-  return { ok: true };
+  userId: string,
+  taskId: string,
+  body: UpdateTaskBody,
+): Promise<{ task: Awaited<ReturnType<typeof updateUserTaskRow>> }> {
+  const task = await updateUserTaskRow(userId, taskId, body);
+  return { task };
 }
 
 export async function exportUserLogsCsv(userId: string, query: LogsQuery): Promise<string> {
