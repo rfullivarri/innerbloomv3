@@ -33,7 +33,7 @@ const corsOptions: CorsOptions = {
 
     callback(null, allowedOrigins.includes(origin));
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 };
 
 const app = express();
