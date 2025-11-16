@@ -48,24 +48,7 @@ type ColumnExistsRow = {
   exists: boolean | string | number | null;
 };
 
-type TaskRow = {
-  task_id: string;
-  user_id: string;
-  tasks_group_id: string | null;
-  task: string;
-  pillar_id: number | string | null;
-  trait_id: number | string | null;
-  stat_id?: number | string | null;
-  difficulty_id: number | string | null;
-  xp_base: number | string | null;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
-  completed_at?: string | null;
-  archived_at?: string | null;
-};
-
-async function supportsTasksStatIdColumn(): Promise<boolean> {
+async function supportsColumn(tableName: string, columnName: string): Promise<boolean> {
   try {
     const result = await pool.query<ColumnExistsRow>(
       `SELECT EXISTS (
@@ -75,7 +58,7 @@ async function supportsTasksStatIdColumn(): Promise<boolean> {
             AND table_name = $1
             AND column_name = $2
        ) AS exists`,
-      ['tasks', 'stat_id'],
+      [tableName, columnName],
     );
 
     const rawValue = result.rows[0]?.exists;
@@ -98,9 +81,41 @@ async function supportsTasksStatIdColumn(): Promise<boolean> {
 
     return false;
   } catch (error) {
-    console.error('Failed to verify tasks.stat_id column, defaulting to false', error);
+    console.error(
+      `Failed to verify ${tableName}.${columnName} column, defaulting to false`,
+      error,
+    );
     return false;
   }
+}
+
+type TaskRow = {
+  task_id: string;
+  user_id: string;
+  tasks_group_id: string | null;
+  task: string;
+  pillar_id: number | string | null;
+  trait_id: number | string | null;
+  stat_id?: number | string | null;
+  difficulty_id: number | string | null;
+  xp_base: number | string | null;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string | null;
+  archived_at?: string | null;
+};
+
+async function supportsTasksStatIdColumn(): Promise<boolean> {
+  return supportsColumn('tasks', 'stat_id');
+}
+
+async function supportsTasksCompletedAtColumn(): Promise<boolean> {
+  return supportsColumn('tasks', 'completed_at');
+}
+
+async function supportsTasksArchivedAtColumn(): Promise<boolean> {
+  return supportsColumn('tasks', 'archived_at');
 }
 
 export const createUserTask: AsyncHandler = async (req, res) => {
@@ -148,7 +163,11 @@ export const createUserTask: AsyncHandler = async (req, res) => {
   const taskId = randomUUID();
   const resolvedStatId = statId != null ? statId : traitId != null ? traitId : null;
 
-  const supportsStatId = await supportsTasksStatIdColumn();
+  const [supportsStatId, supportsCompletedAt, supportsArchivedAt] = await Promise.all([
+    supportsTasksStatIdColumn(),
+    supportsTasksCompletedAtColumn(),
+    supportsTasksArchivedAtColumn(),
+  ]);
 
   const insertColumns = [
     'task_id',
@@ -176,8 +195,8 @@ export const createUserTask: AsyncHandler = async (req, res) => {
     'active',
     'created_at',
     'updated_at',
-    'completed_at',
-    'archived_at',
+    ...(supportsCompletedAt ? ['completed_at'] : []),
+    ...(supportsArchivedAt ? ['archived_at'] : []),
   ];
 
   const values: unknown[] = supportsStatId
