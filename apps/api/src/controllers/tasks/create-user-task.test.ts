@@ -58,7 +58,13 @@ describe('POST /api/users/:id/tasks', () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [{ tasks_group_id: 'group-1' }] })
       .mockResolvedValueOnce({ rows: [{ xp_base: 15 }] })
-      .mockResolvedValueOnce({ rows: [{ exists: true }] })
+      .mockResolvedValueOnce({
+        rows: [
+          { column_name: 'stat_id' },
+          { column_name: 'completed_at' },
+          { column_name: 'archived_at' },
+        ],
+      })
       .mockResolvedValueOnce({
         rows: [
           {
@@ -127,7 +133,10 @@ describe('POST /api/users/:id/tasks', () => {
     expect(mockQuery).toHaveBeenNthCalledWith(
       3,
       expect.stringContaining('information_schema.columns'),
-      ['tasks', 'stat_id'],
+      [
+        'tasks',
+        ['stat_id', 'completed_at', 'archived_at'],
+      ],
     );
     expect(mockQuery).toHaveBeenNthCalledWith(
       4,
@@ -159,7 +168,13 @@ describe('POST /api/users/:id/tasks', () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
     mockQuery
       .mockResolvedValueOnce({ rows: [{ tasks_group_id: 'group-2' }] })
-      .mockResolvedValueOnce({ rows: [{ exists: true }] })
+      .mockResolvedValueOnce({
+        rows: [
+          { column_name: 'stat_id' },
+          { column_name: 'completed_at' },
+          { column_name: 'archived_at' },
+        ],
+      })
       .mockResolvedValueOnce({
         rows: [
           {
@@ -226,7 +241,12 @@ describe('POST /api/users/:id/tasks', () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
     mockQuery
       .mockResolvedValueOnce({ rows: [{ tasks_group_id: 'group-3' }] })
-      .mockResolvedValueOnce({ rows: [{ exists: false }] })
+      .mockResolvedValueOnce({
+        rows: [
+          { column_name: 'completed_at' },
+          { column_name: 'archived_at' },
+        ],
+      })
       .mockResolvedValueOnce({
         rows: [
           {
@@ -263,7 +283,10 @@ describe('POST /api/users/:id/tasks', () => {
     expect(mockQuery).toHaveBeenNthCalledWith(
       2,
       expect.stringContaining('information_schema.columns'),
-      ['tasks', 'stat_id'],
+      [
+        'tasks',
+        ['stat_id', 'completed_at', 'archived_at'],
+      ],
     );
     expect(mockQuery).toHaveBeenNthCalledWith(
       3,
@@ -282,6 +305,55 @@ describe('POST /api/users/:id/tasks', () => {
     );
     expect(response.body.task).toMatchObject({
       stat_id: 33,
+    });
+  });
+
+  it('falls back to null when completed_at or archived_at columns are missing', async () => {
+    const taskId = 'dddddddd-eeee-ffff-0000-111111111111';
+    mockRandomUUID.mockReturnValueOnce(taskId);
+    mockVerifyToken.mockResolvedValueOnce({
+      id: userId,
+      clerkId: 'user_111',
+      email: 'test@example.com',
+      isNew: false,
+    });
+    mockEnsureUserExists.mockResolvedValueOnce(undefined);
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ tasks_group_id: 'group-4' }] })
+      .mockResolvedValueOnce({
+        rows: [{ column_name: 'stat_id' }],
+      })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: taskId,
+            user_id: userId,
+            tasks_group_id: 'group-4',
+            task: 'Plan the week',
+            pillar_id: null,
+            trait_id: null,
+            stat_id: null,
+            difficulty_id: null,
+            xp_base: 0,
+            active: true,
+            created_at: '2024-01-01T00:00:00.000Z',
+            updated_at: '2024-01-01T00:00:00.000Z',
+          },
+        ],
+      });
+
+    const response = await request(app)
+      .post(`/api/users/${userId}/tasks`)
+      .set('Authorization', 'Bearer token')
+      .send({
+        title: 'Plan the week',
+        is_active: false,
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.task).toMatchObject({
+      completed_at: null,
+      archived_at: null,
     });
   });
 
