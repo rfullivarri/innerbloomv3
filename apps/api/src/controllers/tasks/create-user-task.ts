@@ -44,51 +44,6 @@ type DifficultyRow = {
   xp_base: number | string | null;
 };
 
-type ColumnExistsRow = {
-  exists: boolean | string | number | null;
-};
-
-async function supportsColumn(tableName: string, columnName: string): Promise<boolean> {
-  try {
-    const result = await pool.query<ColumnExistsRow>(
-      `SELECT EXISTS (
-         SELECT 1
-           FROM information_schema.columns
-          WHERE table_schema = 'public'
-            AND table_name = $1
-            AND column_name = $2
-       ) AS exists`,
-      [tableName, columnName],
-    );
-
-    const rawValue = result.rows[0]?.exists;
-
-    if (typeof rawValue === 'boolean') {
-      return rawValue;
-    }
-
-    if (rawValue == null) {
-      return false;
-    }
-
-    if (typeof rawValue === 'number') {
-      return rawValue === 1;
-    }
-
-    if (typeof rawValue === 'string') {
-      return rawValue === 't' || rawValue === 'true' || rawValue === '1';
-    }
-
-    return false;
-  } catch (error) {
-    console.error(
-      `Failed to verify ${tableName}.${columnName} column, defaulting to false`,
-      error,
-    );
-    return false;
-  }
-}
-
 type TaskRow = {
   task_id: string;
   user_id: string;
@@ -96,27 +51,12 @@ type TaskRow = {
   task: string;
   pillar_id: number | string | null;
   trait_id: number | string | null;
-  stat_id?: number | string | null;
   difficulty_id: number | string | null;
   xp_base: number | string | null;
   active: boolean;
   created_at: string;
   updated_at: string;
-  completed_at?: string | null;
-  archived_at?: string | null;
 };
-
-async function supportsTasksStatIdColumn(): Promise<boolean> {
-  return supportsColumn('tasks', 'stat_id');
-}
-
-async function supportsTasksCompletedAtColumn(): Promise<boolean> {
-  return supportsColumn('tasks', 'completed_at');
-}
-
-async function supportsTasksArchivedAtColumn(): Promise<boolean> {
-  return supportsColumn('tasks', 'archived_at');
-}
 
 export const createUserTask: AsyncHandler = async (req, res) => {
   const { id } = paramsSchema.parse(req.params);
@@ -124,10 +64,12 @@ export const createUserTask: AsyncHandler = async (req, res) => {
     title,
     pillar_id: pillarId,
     trait_id: traitId,
-    stat_id: statId,
+    stat_id: _statId,
     difficulty_id: difficultyId,
     is_active: isActive,
   } = bodySchema.parse(req.body);
+
+  void _statId;
 
   await ensureUserExists(id);
 
@@ -161,85 +103,34 @@ export const createUserTask: AsyncHandler = async (req, res) => {
 
   const active = isActive ?? true;
   const taskId = randomUUID();
-  const resolvedStatId = statId != null ? statId : traitId != null ? traitId : null;
-
-  const [supportsStatId, supportsCompletedAt, supportsArchivedAt] = await Promise.all([
-    supportsTasksStatIdColumn(),
-    supportsTasksCompletedAtColumn(),
-    supportsTasksArchivedAtColumn(),
-  ]);
-
-  const insertColumns = [
-    'task_id',
-    'user_id',
-    'tasks_group_id',
-    'task',
-    'pillar_id',
-    'trait_id',
-    ...(supportsStatId ? ['stat_id'] : []),
-    'difficulty_id',
-    'xp_base',
-    'active',
-  ];
-
-  const returningColumns = [
-    'task_id',
-    'user_id',
-    'tasks_group_id',
-    'task',
-    'pillar_id',
-    'trait_id',
-    ...(supportsStatId ? ['stat_id'] : []),
-    'difficulty_id',
-    'xp_base',
-    'active',
-    'created_at',
-    'updated_at',
-    ...(supportsCompletedAt ? ['completed_at'] : []),
-    ...(supportsArchivedAt ? ['archived_at'] : []),
-  ];
-
-  const values: unknown[] = supportsStatId
-    ? [
-        taskId,
-        id,
-        userRow.tasks_group_id,
-        title,
-        pillarId,
-        traitId,
-        resolvedStatId,
-        difficultyId,
-        xpBase,
-        active,
-      ]
-    : [
-        taskId,
-        id,
-        userRow.tasks_group_id,
-        title,
-        pillarId,
-        traitId,
-        difficultyId,
-        xpBase,
-        active,
-      ];
-
-  const placeholders = insertColumns
-    .map((_, index) => `$${index + 1}`)
-    .join(', ');
-
   const insertResult = await pool.query<TaskRow>(
-    `INSERT INTO tasks (${insertColumns.join(', ')})
-     VALUES (${placeholders})
-     RETURNING ${returningColumns.join(', ')}`,
-    values,
+    `INSERT INTO tasks (
+        task_id,
+        user_id,
+        tasks_group_id,
+        task,
+        pillar_id,
+        trait_id,
+        difficulty_id,
+        xp_base,
+        active
+     )
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     RETURNING task_id, user_id, tasks_group_id, task, pillar_id, trait_id, difficulty_id, xp_base, active, created_at, updated_at`,
+    [
+      taskId,
+      id,
+      userRow.tasks_group_id,
+      title,
+      pillarId,
+      traitId,
+      difficultyId,
+      xpBase,
+      active,
+    ],
   );
 
-  const createdTask = insertResult.rows[0]
-    ? supportsStatId
-      ? insertResult.rows[0]
-      : { ...insertResult.rows[0], stat_id: resolvedStatId }
-    : undefined;
+  const createdTask = insertResult.rows[0];
 
   if (!createdTask) {
     throw new HttpError(500, 'internal_error', 'Failed to create task');
