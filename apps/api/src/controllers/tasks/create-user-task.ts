@@ -57,12 +57,14 @@ type TaskRow = {
   active: boolean;
   created_at: string;
   updated_at: string;
-  completed_at: string | null;
-  archived_at: string | null;
+  completed_at?: string | null;
+  archived_at?: string | null;
 };
 
-type StatColumnResult = {
-  exists: boolean;
+type OptionalTaskColumn = 'stat_id' | 'completed_at' | 'archived_at';
+
+type TaskColumnRow = {
+  column_name: OptionalTaskColumn;
 };
 
 export const createUserTask: AsyncHandler = async (req, res) => {
@@ -108,17 +110,24 @@ export const createUserTask: AsyncHandler = async (req, res) => {
     }
   }
 
-  const statColumnResult = await pool.query<StatColumnResult>(
-    `SELECT EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = $1
-          AND column_name = $2
-      ) AS exists`,
-    ['tasks', 'stat_id'],
+  const optionalColumns: OptionalTaskColumn[] = [
+    'stat_id',
+    'completed_at',
+    'archived_at',
+  ];
+
+  const columnResult = await pool.query<TaskColumnRow>(
+    `SELECT column_name
+       FROM information_schema.columns
+      WHERE table_name = $1
+        AND column_name = ANY($2::text[])`,
+    ['tasks', optionalColumns],
   );
 
-  const hasStatColumn = Boolean(statColumnResult.rows[0]?.exists);
+  const existingColumns = new Set(columnResult.rows.map((row) => row.column_name));
+  const hasStatColumn = existingColumns.has('stat_id');
+  const hasCompletedColumn = existingColumns.has('completed_at');
+  const hasArchivedColumn = existingColumns.has('archived_at');
 
   let resolvedStatId = _statId ?? null;
   if (resolvedStatId == null && traitId != null) {
@@ -167,15 +176,15 @@ export const createUserTask: AsyncHandler = async (req, res) => {
     returningColumns.push('stat_id');
   }
 
-  returningColumns.push(
-    'difficulty_id',
-    'xp_base',
-    'active',
-    'created_at',
-    'updated_at',
-    'completed_at',
-    'archived_at',
-  );
+  returningColumns.push('difficulty_id', 'xp_base', 'active', 'created_at', 'updated_at');
+
+  if (hasCompletedColumn) {
+    returningColumns.push('completed_at');
+  }
+
+  if (hasArchivedColumn) {
+    returningColumns.push('archived_at');
+  }
 
   const placeholders = insertColumns.map((_, index) => `$${index + 1}`).join(', ');
 
@@ -200,6 +209,8 @@ export const createUserTask: AsyncHandler = async (req, res) => {
     task: {
       ...createdTask,
       stat_id: responseStatId,
+      completed_at: hasCompletedColumn ? createdTask.completed_at ?? null : null,
+      archived_at: hasArchivedColumn ? createdTask.archived_at ?? null : null,
     },
   });
 };
