@@ -137,7 +137,7 @@ export const createUserTask: AsyncHandler = async (req, res) => {
     'trait_id',
   ];
 
-  const insertValues: Array<string | number | boolean | null> = [
+  const insertValues: (string | number | boolean | null)[] = [
     taskId,
     id,
     userRow.tasks_group_id,
