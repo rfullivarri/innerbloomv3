@@ -899,7 +899,6 @@ export type UserTask = {
   traitId: string | null;
   statId: string | null;
   difficultyId: string | null;
-  notes: string | null;
   isActive: boolean;
   xp: number | null;
   createdAt: string | null;
@@ -1008,12 +1007,6 @@ function normalizeUserTask(raw: RawUserTask): UserTask {
     pickString((raw as Record<string, unknown> | undefined)?.difficulty) ??
     null;
 
-  const notes =
-    pickString(raw.notes) ??
-    pickString((raw as Record<string, unknown> | undefined)?.note) ??
-    pickString((raw as Record<string, unknown> | undefined)?.description) ??
-    null;
-
   const createdAt =
     pickString(raw.createdAt) ??
     pickString((raw as Record<string, unknown> | undefined)?.created_at) ??
@@ -1061,7 +1054,6 @@ function normalizeUserTask(raw: RawUserTask): UserTask {
     traitId,
     statId,
     difficultyId,
-    notes,
     isActive,
     xp,
     createdAt,
@@ -1133,7 +1125,6 @@ export type CreateUserTaskInput = {
   traitId?: string | null;
   statId?: string | null;
   difficultyId?: string | null;
-  notes?: string | null;
   isActive?: boolean;
 };
 
@@ -1143,7 +1134,6 @@ export type UpdateUserTaskInput = {
   traitId?: string | null;
   statId?: string | null;
   difficultyId?: string | null;
-  notes?: string | null;
   isActive?: boolean;
 };
 
@@ -1179,11 +1169,6 @@ function buildUserTaskPayload(
 
   if ('difficultyId' in payload) {
     body.difficulty_id = payload.difficultyId ?? null;
-  }
-
-  if ('notes' in payload) {
-    const notes = pickString(payload.notes ?? null);
-    body.notes = notes ?? null;
   }
 
   if ('isActive' in payload) {

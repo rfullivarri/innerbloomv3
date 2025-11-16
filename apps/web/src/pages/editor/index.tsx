@@ -335,7 +335,6 @@ export default function TaskEditorPage() {
           traitId: task.traitId ?? null,
           statId: task.statId ?? null,
           difficultyId: task.difficultyId ?? null,
-          notes: task.notes ?? null,
           isActive: task.isActive ?? true,
         });
         setPageToast({ type: 'success', text: 'Tarea duplicada correctamente.' });
@@ -985,8 +984,6 @@ function TaskCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const hasNotes = Boolean(task.notes && task.notes.trim().length > 0);
-
   return (
     <article className="group relative flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_8px_24px_rgba(15,23,42,0.35)] transition hover:border-white/20">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -1039,11 +1036,6 @@ function TaskCard({
           <dd className="truncate text-right">{task.xp != null ? task.xp : '—'}</dd>
         </div>
       </dl>
-      {hasNotes && (
-        <p className="mt-1 rounded-xl bg-slate-900/40 p-3 text-sm leading-relaxed text-slate-200">
-          {task.notes}
-        </p>
-      )}
       <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
         Actualizada: {formatDateLabel(task.updatedAt)}
       </p>
@@ -1435,7 +1427,6 @@ function CreateTaskModal({
   const [selectedStatId, setSelectedStatId] = useState('');
   const [title, setTitle] = useState('');
   const [difficultyId, setDifficultyId] = useState('');
-  const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
@@ -1481,7 +1472,6 @@ function CreateTaskModal({
       setSelectedStatId('');
       setTitle('');
       setDifficultyId('');
-      setNotes('');
       setErrors({});
       setToast(null);
     }
@@ -1575,11 +1565,9 @@ function CreateTaskModal({
         traitId: selectedTraitId,
         statId: selectedStatId || null,
         difficultyId: difficultyId || null,
-        notes: notes.trim() || null,
       });
       setToast({ type: 'success', text: 'Tarea creada correctamente.' });
       setTitle('');
-      setNotes('');
       setDifficultyId('');
       setSelectedStatId('');
       setErrors({});
@@ -1800,18 +1788,6 @@ function CreateTaskModal({
                 )}
               </div>
 
-              <div className="space-y-2">
-                <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Notas (opcional)</span>
-                  <textarea
-                    value={notes}
-                    onChange={(event) => setNotes(event.target.value)}
-                    rows={3}
-                    placeholder="Agrega detalles, condiciones o recordatorios."
-                    className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
-                  />
-                </label>
-              </div>
             </section>
 
             {errors.user && <p className="text-xs text-rose-300">{errors.user}</p>}
@@ -1864,7 +1840,6 @@ function EditTaskModal({
 }: EditTaskModalProps) {
   const [title, setTitle] = useState('');
   const [difficultyId, setDifficultyId] = useState('');
-  const [notes, setNotes] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<ToastMessage | null>(null);
@@ -1924,7 +1899,6 @@ function EditTaskModal({
     if (!open) {
       setTitle('');
       setDifficultyId('');
-      setNotes('');
       setIsActive(true);
       setErrors({});
       setToast(null);
@@ -1934,7 +1908,6 @@ function EditTaskModal({
     if (task) {
       setTitle(task.title ?? '');
       setDifficultyId(task.difficultyId ?? '');
-      setNotes(task.notes ?? '');
       setIsActive(Boolean(task.isActive));
       setErrors({});
       setToast(null);
@@ -1994,7 +1967,6 @@ function EditTaskModal({
       await updateTask(userId, task.id, {
         title: title.trim(),
         difficultyId: difficultyId || null,
-        notes: notes.trim() || null,
         isActive,
       });
       setToast({ type: 'success', text: 'Tarea actualizada correctamente.' });
@@ -2036,7 +2008,7 @@ function EditTaskModal({
         <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Editar tarea</p>
         <h2 className="text-xl font-semibold text-white">Actualiza los detalles de tu tarea</h2>
         <p className="text-sm text-slate-300">
-          Ajusta el título, dificultad, notas y estado. Los campos de pilar, rasgo y stat permanecen bloqueados.
+          Ajusta el título, dificultad y estado. Los campos de pilar, rasgo y stat permanecen bloqueados.
         </p>
       </header>
 
@@ -2104,19 +2076,6 @@ function EditTaskModal({
               </button>
             </div>
           )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Notas (opcional)</span>
-            <textarea
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
-              rows={3}
-              placeholder="Agrega detalles, condiciones o recordatorios."
-              className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
-            />
-          </label>
         </div>
 
         <div className="space-y-2">
