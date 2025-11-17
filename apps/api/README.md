@@ -14,6 +14,9 @@
 | `PORT` | ➖ | Port for the Fastify server (defaults to `3000`). |
 | `CORS_ALLOWED_ORIGINS` | ➖ | Comma-separated list of additional origins allowed to call the API. |
 | `ALLOW_X_USER_ID_DEV` | ➖ | Enables the deprecated `X-User-Id` header for `/users/me` when running locally (defaults to `false`). The flag has no effect in production and will be removed on 2024-09-30. |
+| `EMAIL_PROVIDER_NAME` | ➖ | Selects the email provider. Use `resend` for production delivery or `console` (default) to log payloads locally. |
+| `EMAIL_PROVIDER_API_KEY` | ➖ | Required when `EMAIL_PROVIDER_NAME=resend`; pass the Resend API key used to send transactional emails. |
+| `EMAIL_FROM` | ➖ | Required when `EMAIL_PROVIDER_NAME=resend`. Sets the default `From` header, e.g. `Innerbloom <daily-quest@example.com>`. |
 | `API_LOGGING` | ➖ | Set to `true` to enable verbose console logs for the Clerk webhook and boot sequence. |
 | `OPENAI_API_KEY` | ➖ | Required for AI TaskGen to call OpenAI. When missing the runner records `OPENAI_MISCONFIGURED` and skips task creation. |
 | `OPENAI_MODEL` | ➖ | Optional override for the OpenAI Responses API model used by TaskGen (defaults to `gpt-4.1-mini`). |
