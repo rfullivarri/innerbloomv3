@@ -14,3 +14,11 @@ vi.mock('pg', () => {
   }
   return { Pool: MockPool };
 });
+
+vi.mock('resend', () => ({
+  Resend: vi.fn(() => ({
+    emails: {
+      send: vi.fn(),
+    },
+  })),
+}));
