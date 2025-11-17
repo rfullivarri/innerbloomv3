@@ -11,6 +11,7 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { RefObject } from 'react';
 import { getDailyQuestDefinition, getDailyQuestStatus, submitDailyQuest } from '../lib/api';
+import { useHoldToClose } from '../hooks/useHoldToClose';
 import { useRequest } from '../hooks/useRequest';
 
 type ToastTone = 'success' | 'error';
@@ -26,8 +27,6 @@ type ToastState = {
   tone: ToastTone;
   detail?: string;
   action?: ToastAction;
-  requiresHoldToClose?: boolean;
-  holdDurationMs?: number;
 };
 
 type DailyQuestModalProps = {
@@ -87,10 +86,11 @@ type CelebrationOverlayState = {
   message: string;
   confetti: ParticleConfig[];
   xpDelta: number;
+  detail?: string;
+  action?: ToastAction;
 };
 
 type TimeoutHandle = ReturnType<typeof setTimeout> | number;
-type AnimationFrameHandle = number | TimeoutHandle;
 
 function randomBetween(min: number, max: number): number {
   return Math.random() * (max - min) + min;
@@ -307,50 +307,24 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
   const [successCelebration, setSuccessCelebration] = useState<CelebrationOverlayState | null>(null);
   const [srAnnouncement, setSrAnnouncement] = useState('');
   const [xpBubble, setXpBubble] = useState<{ id: number; delta: number } | null>(null);
-  const [toastHoldProgress, setToastHoldProgress] = useState(0);
-  const [toastAnimationState, setToastAnimationState] = useState<'enter' | 'pop'>('enter');
-  const [isToastHolding, setIsToastHolding] = useState(false);
+  const [isCelebrationHoldReady, setIsCelebrationHoldReady] = useState(false);
+
+  const {
+    progress: celebrationHoldProgress,
+    isHolding: isCelebrationHolding,
+    startHold: startCelebrationHold,
+    cancelHold: cancelCelebrationHold,
+    resetHold: resetCelebrationHold,
+  } = useHoldToClose();
 
   const toastTimer = useRef<TimeoutHandle | null>(null);
-  const toastHoldAnimationRef = useRef<AnimationFrameHandle | null>(null);
-  const toastHoldStartRef = useRef<number | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const shouldRestoreFocusRef = useRef(false);
   const celebrationTimeoutsRef = useRef<TimeoutHandle[]>([]);
   const successCelebrationTimeoutRef = useRef<TimeoutHandle | null>(null);
-  const successCelebrationCloseTimeoutRef = useRef<TimeoutHandle | null>(null);
   const xpBubbleTimeoutRef = useRef<TimeoutHandle | null>(null);
-  const toastPopTimeoutRef = useRef<TimeoutHandle | null>(null);
-
-  const requestToastFrame = useCallback(
-    (callback: FrameRequestCallback): AnimationFrameHandle => {
-      if (typeof window !== 'undefined') {
-        if (typeof window.requestAnimationFrame === 'function') {
-          return window.requestAnimationFrame(callback);
-        }
-        return window.setTimeout(() => callback(performance.now()), 16);
-      }
-      return setTimeout(() => callback(performance.now()), 16);
-    },
-    [],
-  );
-
-  const cancelToastFrame = useCallback(
-    (handle: AnimationFrameHandle) => {
-      if (
-        typeof window !== 'undefined' &&
-        typeof window.cancelAnimationFrame === 'function' &&
-        typeof handle === 'number'
-      ) {
-        window.cancelAnimationFrame(handle);
-        return;
-      }
-      clearTimeout(handle);
-    },
-    [],
-  );
   const xpPreviousRef = useRef(0);
 
   const {
@@ -420,16 +394,19 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
         clearTimeout(successCelebrationTimeoutRef.current);
         successCelebrationTimeoutRef.current = null;
       }
-      if (successCelebrationCloseTimeoutRef.current) {
-        clearTimeout(successCelebrationCloseTimeoutRef.current);
-        successCelebrationCloseTimeoutRef.current = null;
-      }
       if (xpBubbleTimeoutRef.current) {
         clearTimeout(xpBubbleTimeoutRef.current);
         xpBubbleTimeoutRef.current = null;
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!successCelebration) {
+      resetCelebrationHold();
+      setIsCelebrationHoldReady(false);
+    }
+  }, [resetCelebrationHold, successCelebration]);
 
   const hardTaskIds = useMemo(() => {
     if (!definition) {
@@ -559,17 +536,27 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
         clearTimeout(successCelebrationTimeoutRef.current);
         successCelebrationTimeoutRef.current = null;
       }
-      if (successCelebrationCloseTimeoutRef.current) {
-        clearTimeout(successCelebrationCloseTimeoutRef.current);
-        successCelebrationCloseTimeoutRef.current = null;
-      }
+      resetCelebrationHold();
+      setIsCelebrationHoldReady(false);
       setSuccessCelebration(null);
       setSrAnnouncement('');
       shouldRestoreFocusRef.current = options?.restoreFocus !== false;
       setIsOpen(false);
     },
-    [],
+    [resetCelebrationHold],
   );
+
+  const completeSuccessCelebration = useCallback(() => {
+    if (successCelebrationTimeoutRef.current) {
+      clearTimeout(successCelebrationTimeoutRef.current);
+      successCelebrationTimeoutRef.current = null;
+    }
+    resetCelebrationHold();
+    setIsCelebrationHoldReady(false);
+    setSuccessCelebration(null);
+    setHasCompletedToday(true);
+    closeModal({ restoreFocus: true });
+  }, [closeModal, resetCelebrationHold]);
 
   const openDailyQuest = useCallback(() => {
     if (!enabled) {
@@ -694,8 +681,6 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
     message: string,
     tone: ToastTone,
     options?: {
-      requiresHoldToClose?: boolean;
-      holdDurationMs?: number;
       detail?: string;
       action?: ToastAction;
     },
@@ -704,155 +689,28 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       clearTimeout(toastTimer.current);
     }
 
-    if (toastHoldAnimationRef.current != null) {
-      cancelToastFrame(toastHoldAnimationRef.current);
-      toastHoldAnimationRef.current = null;
-    }
-    toastHoldStartRef.current = null;
-    setToastHoldProgress(0);
-    setIsToastHolding(false);
-    setToastAnimationState('enter');
-
     const next: ToastState = {
       id: Date.now(),
       message,
       tone,
       detail: options?.detail,
       action: options?.action,
-      requiresHoldToClose: options?.requiresHoldToClose,
-      holdDurationMs: options?.holdDurationMs,
     };
     setToast(next);
 
-    if (!options?.requiresHoldToClose) {
-      toastTimer.current = setTimeout(() => {
-        setToast(null);
-      }, 3600);
-    }
+    toastTimer.current = setTimeout(() => {
+      setToast((current) => (current && current.id === next.id ? null : current));
+      toastTimer.current = null;
+    }, 3600);
   };
-
-  const resetToastHold = useCallback(() => {
-    if (toastHoldAnimationRef.current != null) {
-      cancelToastFrame(toastHoldAnimationRef.current);
-      toastHoldAnimationRef.current = null;
-    }
-    toastHoldStartRef.current = null;
-    setIsToastHolding(false);
-    setToastHoldProgress(0);
-  }, [cancelToastFrame]);
-
-  const finishToastHold = useCallback(
-    (holdToast?: ToastState | null) => {
-      const activeToast = holdToast ?? toast;
-      if (!activeToast) {
-        return;
-      }
-
-      if (toastPopTimeoutRef.current) {
-        clearTimeout(toastPopTimeoutRef.current);
-        toastPopTimeoutRef.current = null;
-      }
-
-      if (toastHoldAnimationRef.current != null) {
-        cancelToastFrame(toastHoldAnimationRef.current);
-        toastHoldAnimationRef.current = null;
-      }
-
-      toastHoldStartRef.current = null;
-      setToastHoldProgress(1);
-      setIsToastHolding(false);
-      setToastAnimationState('pop');
-
-      if (typeof window !== 'undefined') {
-        toastPopTimeoutRef.current = window.setTimeout(() => {
-          setToast((current) => (current && current.id === activeToast.id ? null : current));
-          setToastHoldProgress(0);
-          toastPopTimeoutRef.current = null;
-        }, 340);
-      } else {
-        setToast((current) => (current && current.id === activeToast.id ? null : current));
-        setToastHoldProgress(0);
-      }
-    },
-    [cancelToastFrame, toast],
-  );
-
-  const startToastHold = useCallback(() => {
-    if (!toast || !toast.requiresHoldToClose) {
-      return;
-    }
-
-    if (toastHoldAnimationRef.current != null) {
-      return;
-    }
-
-    const duration = toast.holdDurationMs ?? DEFAULT_HOLD_TO_CLOSE_DURATION_MS;
-
-    if (duration <= 0) {
-      finishToastHold(toast);
-      return;
-    }
-
-    if (typeof window === 'undefined') {
-      finishToastHold(toast);
-      return;
-    }
-
-    setIsToastHolding(true);
-    toastHoldStartRef.current = performance.now();
-
-    const tick = (now: number) => {
-      if (!toastHoldStartRef.current) {
-        return;
-      }
-
-      const elapsed = now - toastHoldStartRef.current;
-      const progress = Math.min(elapsed / duration, 1);
-      setToastHoldProgress(progress);
-
-      if (progress >= 1) {
-        toastHoldAnimationRef.current = null;
-        finishToastHold(toast);
-        return;
-      }
-
-      toastHoldAnimationRef.current = requestToastFrame(tick);
-    };
-
-    toastHoldAnimationRef.current = requestToastFrame(tick);
-  }, [finishToastHold, requestToastFrame, toast]);
-
-  const cancelToastHold = useCallback(() => {
-    if (!toast || !toast.requiresHoldToClose) {
-      return;
-    }
-
-    if (toastAnimationState === 'pop') {
-      return;
-    }
-
-    resetToastHold();
-  }, [resetToastHold, toast, toastAnimationState]);
-
-  useEffect(() => {
-    if (!toast || !toast.requiresHoldToClose) {
-      resetToastHold();
-    }
-  }, [resetToastHold, toast]);
 
   useEffect(() => {
     return () => {
       if (toastTimer.current) {
         clearTimeout(toastTimer.current);
       }
-      if (toastHoldAnimationRef.current != null) {
-        cancelToastFrame(toastHoldAnimationRef.current);
-      }
-      if (toastPopTimeoutRef.current) {
-        clearTimeout(toastPopTimeoutRef.current);
-      }
     };
-  }, [cancelToastFrame]);
+  }, []);
 
   const handleSubmit = async () => {
     if (!currentDate || !definition) {
@@ -888,26 +746,21 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       setSelectedTasks([]);
       setNotes('');
       const missionsBonus = response.missions_v2;
-      const toastOptions: {
-        requiresHoldToClose: boolean;
-        holdDurationMs: number;
+      const celebrationExtras: {
         detail?: string;
         action?: ToastAction;
-      } = {
-        requiresHoldToClose: true,
-        holdDurationMs: DEFAULT_HOLD_TO_CLOSE_DURATION_MS,
-      };
+      } = {};
       if (missionsBonus?.bonus_ready) {
         const missionTasks = missionsBonus.tasks ?? [];
         if (missionTasks.length > 0) {
           const summary = missionTasks
             .map((task) => `${task.mission_name}: ${task.task_name}`)
             .join(' · ');
-          toastOptions.detail = `Tareas de Misión: ${summary}`;
+          celebrationExtras.detail = `Tareas de Misión: ${summary}`;
         } else {
-          toastOptions.detail = 'Bonus listo para reclamar.';
+          celebrationExtras.detail = 'Bonus listo para reclamar.';
         }
-        toastOptions.action = {
+        celebrationExtras.action = {
           label: 'Ir a Misiones v2',
           href: missionsBonus.redirect_url || '/dashboard-v3/missions-v2',
         };
@@ -920,32 +773,23 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
         message: celebrationMessage,
         confetti: generateConfettiPieces(),
         xpDelta: response.xp_delta,
+        detail: celebrationExtras.detail,
+        action: celebrationExtras.action,
       });
+      resetCelebrationHold();
+      setIsCelebrationHoldReady(false);
       setSrAnnouncement('Registro guardado con éxito.');
       if (successCelebrationTimeoutRef.current) {
         clearTimeout(successCelebrationTimeoutRef.current);
       }
-      if (successCelebrationCloseTimeoutRef.current) {
-        clearTimeout(successCelebrationCloseTimeoutRef.current);
-      }
       if (typeof window !== 'undefined') {
         successCelebrationTimeoutRef.current = window.setTimeout(() => {
-          setSuccessCelebration((current) =>
-            current && current.id === celebrationId ? null : current,
-          );
+          setIsCelebrationHoldReady(true);
           successCelebrationTimeoutRef.current = null;
-          successCelebrationCloseTimeoutRef.current = window.setTimeout(() => {
-            setHasCompletedToday(true);
-            pushToast('¡Éxitos hoy! A darlo todo. 🚀', 'success', toastOptions);
-            closeModal({ restoreFocus: true });
-            successCelebrationCloseTimeoutRef.current = null;
-          }, 220);
         }, CELEBRATION_PANEL_DURATION_MS);
       } else {
-        setSuccessCelebration(null);
-        setHasCompletedToday(true);
-        pushToast('¡Éxitos hoy! A darlo todo. 🚀', 'success', toastOptions);
-        closeModal({ restoreFocus: true });
+        setIsCelebrationHoldReady(true);
+        completeSuccessCelebration();
       }
       void reloadStatus();
     } catch (error) {
@@ -1366,6 +1210,77 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           <span className="rounded-full bg-emerald-500/25 px-3 py-1 text-[11px] font-semibold text-emerald-100 ring-1 ring-emerald-400/40">
                             +{successCelebration.xpDelta} XP
                           </span>
+                          {successCelebration.detail && (
+                            <p className="text-sm font-normal text-white/90">
+                              {successCelebration.detail}
+                            </p>
+                          )}
+                          {successCelebration.action && (
+                            <a
+                              href={successCelebration.action.href}
+                              className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-white shadow-sm transition hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                            >
+                              {successCelebration.action.label}
+                            </a>
+                          )}
+                          {isCelebrationHoldReady && (
+                            <div className="mt-1 flex w-full flex-col items-center gap-2 text-[12px] text-white/80" id="daily-quest-celebration-hold-instructions">
+                              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/70">
+                                Mantené presionado 3 segundos para cerrar
+                              </span>
+                              <motion.button
+                                type="button"
+                                className="relative flex w-full max-w-xs items-center justify-center overflow-hidden rounded-full border border-white/25 bg-white/10 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.3em] text-white shadow-[0_18px_38px_rgba(16,185,129,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                                onPointerDown={(event) => {
+                                  event.preventDefault();
+                                  startCelebrationHold({
+                                    durationMs: DEFAULT_HOLD_TO_CLOSE_DURATION_MS,
+                                    onComplete: completeSuccessCelebration,
+                                  });
+                                }}
+                                onPointerUp={cancelCelebrationHold}
+                                onPointerCancel={cancelCelebrationHold}
+                                onPointerLeave={cancelCelebrationHold}
+                                onKeyDown={(event) => {
+                                  if (event.key === ' ' || event.key === 'Enter') {
+                                    event.preventDefault();
+                                    startCelebrationHold({
+                                      durationMs: DEFAULT_HOLD_TO_CLOSE_DURATION_MS,
+                                      onComplete: completeSuccessCelebration,
+                                    });
+                                  }
+                                }}
+                                onKeyUp={(event) => {
+                                  if (event.key === ' ' || event.key === 'Enter') {
+                                    event.preventDefault();
+                                    cancelCelebrationHold();
+                                  }
+                                }}
+                                aria-describedby="daily-quest-celebration-hold-instructions"
+                                animate={{ scale: isCelebrationHolding ? 1.05 : 1 }}
+                                transition={{ duration: 0.18, ease: 'easeOut' }}
+                              >
+                                <motion.span
+                                  className="absolute inset-0 rounded-full bg-white/20"
+                                  initial={false}
+                                  animate={{
+                                    opacity: celebrationHoldProgress > 0 ? 0.65 : 0,
+                                    scale: celebrationHoldProgress > 0 ? 1.08 : 1,
+                                  }}
+                                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                                />
+                                <span className="relative z-10">Mantené presionado</span>
+                              </motion.button>
+                              <div className="h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-white/15">
+                                <motion.div
+                                  className="h-full rounded-full bg-white/90"
+                                  initial={{ width: '0%' }}
+                                  animate={{ width: `${Math.min(Math.max(celebrationHoldProgress, 0), 1) * 100}%` }}
+                                  transition={{ duration: 0.1, ease: 'linear' }}
+                                />
+                              </div>
+                            </div>
+                          )}
                         </motion.div>
                       </motion.div>
                     )}
@@ -1381,33 +1296,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
         {toast && (
           <motion.div
             key={toast.id}
-            variants={{
-              initial: { opacity: 0, y: 16, scale: 0.94 },
-              enter: {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                transition: { duration: 0.26, ease: 'easeOut' },
-              },
-              exit: {
-                opacity: 0,
-                y: 16,
-                scale: 0.94,
-                transition: { duration: 0.22, ease: 'easeInOut' },
-              },
-              pop: {
-                scale: [1, 1.1, 0.92, 1.32],
-                opacity: [1, 1, 1, 0],
-                transition: {
-                  duration: 0.36,
-                  ease: 'easeIn',
-                  times: [0, 0.42, 0.72, 1],
-                },
-              },
-            }}
-            initial="initial"
-            animate={toastAnimationState === 'pop' ? 'pop' : 'enter'}
-            exit={toastAnimationState === 'pop' ? { opacity: 0, scale: 0.8, transition: { duration: 0.18 } } : 'exit'}
+            initial={{ opacity: 0, y: 16, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: 0.26, ease: 'easeOut' } }}
+            exit={{ opacity: 0, y: 16, scale: 0.94, transition: { duration: 0.22, ease: 'easeInOut' } }}
             className={classNames(
               'fixed inset-x-0 z-50 mx-auto w-fit max-w-[92vw] rounded-2xl border px-5 py-4 text-sm shadow-2xl backdrop-blur',
               'top-[calc(env(safe-area-inset-top,0)+1rem)] md:top-6',
@@ -1430,55 +1321,6 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                 >
                   {toast.action.label}
                 </a>
-              )}
-              {toast.requiresHoldToClose && (
-                <div className="flex w-full flex-col items-center gap-2 text-[12px] text-white/80" id="daily-quest-toast-hold-instructions">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/70">
-                    Mantené presionado 3 segundos para cerrar
-                  </span>
-                  <motion.button
-                    type="button"
-                    className="relative flex w-full max-w-xs items-center justify-center overflow-hidden rounded-full border border-white/25 bg-white/10 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.3em] text-white shadow-[0_18px_38px_rgba(16,185,129,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                    onPointerDown={(event) => {
-                      event.preventDefault();
-                      startToastHold();
-                    }}
-                    onPointerUp={cancelToastHold}
-                    onPointerCancel={cancelToastHold}
-                    onPointerLeave={cancelToastHold}
-                    onKeyDown={(event) => {
-                      if (event.key === ' ' || event.key === 'Enter') {
-                        event.preventDefault();
-                        startToastHold();
-                      }
-                    }}
-                    onKeyUp={(event) => {
-                      if (event.key === ' ' || event.key === 'Enter') {
-                        event.preventDefault();
-                        cancelToastHold();
-                      }
-                    }}
-                    aria-describedby="daily-quest-toast-hold-instructions"
-                    animate={{ scale: isToastHolding ? 1.05 : 1 }}
-                    transition={{ duration: 0.18, ease: 'easeOut' }}
-                  >
-                    <motion.span
-                      className="absolute inset-0 rounded-full bg-white/20"
-                      initial={false}
-                      animate={{ opacity: toastHoldProgress > 0 ? 0.65 : 0, scale: toastHoldProgress > 0 ? 1.08 : 1 }}
-                      transition={{ duration: 0.18, ease: 'easeOut' }}
-                    />
-                    <span className="relative z-10">Mantené presionado</span>
-                  </motion.button>
-                  <div className="h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-white/15">
-                    <motion.div
-                      className="h-full rounded-full bg-white/90"
-                      initial={{ width: '0%' }}
-                      animate={{ width: `${Math.min(Math.max(toastHoldProgress, 0), 1) * 100}%` }}
-                      transition={{ duration: 0.1, ease: 'linear' }}
-                    />
-                  </div>
-                </div>
               )}
             </div>
           </motion.div>
