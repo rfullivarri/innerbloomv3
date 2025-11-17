@@ -11,6 +11,7 @@ import catalogRoutes from './catalog.js';
 import adminRoutes from '../modules/admin/admin.routes.js';
 import onboardingRoutes from './onboarding.js';
 import missionsRoutes from './missions.js';
+import internalRoutes from './internal.js';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use(usersRoutes);
 router.use(leaderboardRoutes);
 router.use(adminRoutes);
 router.use(onboardingRoutes);
+router.use(internalRoutes);
 
 export default router;

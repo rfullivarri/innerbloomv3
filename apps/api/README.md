@@ -17,6 +17,8 @@
 | `EMAIL_PROVIDER_NAME` | ➖ | Selects the email provider. Use `resend` for production delivery or `console` (default) to log payloads locally. |
 | `EMAIL_PROVIDER_API_KEY` | ➖ | Required when `EMAIL_PROVIDER_NAME=resend`; pass the Resend API key used to send transactional emails. |
 | `EMAIL_FROM` | ➖ | Required when `EMAIL_PROVIDER_NAME=resend`. Sets the default `From` header, e.g. `Innerbloom <daily-quest@example.com>`. |
+| `CRON_SECRET` | ➖ | Shared secret required by the cron endpoint (`POST /internal/cron/daily-reminders`). |
+| `DAILY_REMINDER_CTA_URL` | ➖ | Optional override for the link included in reminder emails. Defaults to `https://innerbloom.app/daily-quest`. |
 | `API_LOGGING` | ➖ | Set to `true` to enable verbose console logs for the Clerk webhook and boot sequence. |
 | `OPENAI_API_KEY` | ➖ | Required for AI TaskGen to call OpenAI. When missing the runner records `OPENAI_MISCONFIGURED` and skips task creation. |
 | `OPENAI_MODEL` | ➖ | Optional override for the OpenAI Responses API model used by TaskGen (defaults to `gpt-4.1-mini`). |
