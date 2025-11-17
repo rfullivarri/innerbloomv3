@@ -1,7 +1,6 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import DashboardPage from './pages/Dashboard';
 import DashboardV3Page from './pages/DashboardV3';
 import TaskEditorPage from './pages/editor';
 import LoginPage from './pages/Login';
@@ -119,15 +118,11 @@ export default function App() {
   const rawDashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
   const normalizedDashboardPath = rawDashboardPath.startsWith('/') ? rawDashboardPath : `/${rawDashboardPath}`;
   const trimmedDashboardPath = normalizedDashboardPath.replace(/\/+$/, '') || DEFAULT_DASHBOARD_PATH;
-  const dashboardSegments = trimmedDashboardPath.split('/').filter(Boolean);
-  const primaryDashboardPath = dashboardSegments.length > 0 ? `/${dashboardSegments[0]}` : DEFAULT_DASHBOARD_PATH;
-  const isDashboardV3Default = primaryDashboardPath === '/dashboard-v3';
-  const fallbackDashboardPath = trimmedDashboardPath || DEFAULT_DASHBOARD_PATH;
-  const dashboardBasePath = isDashboardV3Default ? '/dashboard-v3' : fallbackDashboardPath;
-  const dashboardRoutePath = isDashboardV3Default
-    ? `${dashboardBasePath}/*`
-    : fallbackDashboardPath;
+  const dashboardRoutePath = `${trimmedDashboardPath}/*`;
   const signedInRedirectPath = trimmedDashboardPath;
+  const dashboardAliases = ['/dashboard', '/dashboard-v3'].filter(
+    (alias) => alias !== trimmedDashboardPath,
+  );
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -155,22 +150,17 @@ export default function App() {
           path={dashboardRoutePath}
           element={
             <RequireUser>
-              {isDashboardV3Default ? <DashboardV3Page /> : <DashboardPage />}
+              <DashboardV3Page />
             </RequireUser>
           }
         />
-        {isDashboardV3Default ? (
-          <Route path="/dashboard" element={<Navigate to={trimmedDashboardPath} replace />} />
-        ) : (
+        {dashboardAliases.map((alias) => (
           <Route
-            path="/dashboard-v3/*"
-            element={
-              <RequireUser>
-                <DashboardV3Page />
-              </RequireUser>
-            }
+            key={alias}
+            path={`${alias}/*`}
+            element={<DashboardAliasRedirect from={alias} to={trimmedDashboardPath} />}
           />
-        )}
+        ))}
         <Route
           path="/editor"
           element={
@@ -203,4 +193,18 @@ export default function App() {
       </Routes>
     </div>
   );
+}
+
+function DashboardAliasRedirect({ from, to }: { from: string; to: string }) {
+  const location = useLocation();
+  const pathname = location.pathname;
+  let suffix = pathname.startsWith(from) ? pathname.slice(from.length) : '';
+  if (suffix === '/') {
+    suffix = '';
+  }
+  const normalizedSuffix = suffix.startsWith('/') ? suffix : suffix ? `/${suffix}` : '';
+  const target = `${to}${normalizedSuffix}` || to;
+  const search = location.search || '';
+  const hash = location.hash || '';
+  return <Navigate to={`${target}${search}${hash}`} replace />;
 }

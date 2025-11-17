@@ -4,6 +4,7 @@ import { getUserJourney, type UserJourneySummary } from '../../lib/api';
 
 interface AlertsProps {
   userId: string;
+  onScheduleClick?: () => void;
 }
 
 function shouldShowBbddWarning(journey: UserJourneySummary | null): boolean {
@@ -20,11 +21,12 @@ function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean
   return logs > 0 && days >= 7;
 }
 
-export function Alerts({ userId }: AlertsProps) {
+export function Alerts({ userId, onScheduleClick }: AlertsProps) {
   const { data, status } = useRequest(() => getUserJourney(userId), [userId]);
 
   const showBbdd = useMemo(() => shouldShowBbddWarning(data), [data]);
   const showScheduler = useMemo(() => shouldShowSchedulerWarning(data), [data]);
+  const canSchedule = typeof onScheduleClick === 'function';
 
   if (status === 'loading') {
     return (
@@ -46,16 +48,18 @@ export function Alerts({ userId }: AlertsProps) {
                 Programá tu recordatorio para recibirlo automáticamente cada día.
               </p>
             </div>
-            <button
-              type="button"
-              className="ml-auto inline-flex rounded-full border border-indigo-200/50 bg-indigo-200/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur"
-              disabled
-            >
-              Programar Daily Quest
-            </button>
+            {canSchedule && (
+              <button
+                type="button"
+                onClick={onScheduleClick}
+                className="ml-auto inline-flex rounded-full border border-indigo-200/50 bg-indigo-200/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur transition hover:border-indigo-200/80 hover:bg-indigo-200/20"
+              >
+                Programar Daily Quest
+              </button>
+            )}
           </div>
           <p className="mt-2 text-xs text-indigo-100/70">
-            El programador todavía no está conectado en esta vista, pero el aviso replica el flujo del MVP.
+            Configurá tu recordatorio desde el scheduler que está más abajo en el dashboard.
           </p>
         </div>
       )}
@@ -82,7 +86,6 @@ export function Alerts({ userId }: AlertsProps) {
           </p>
         </div>
       )}
-
     </div>
   );
 }
