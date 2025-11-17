@@ -13,7 +13,7 @@
 
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { useCallback, useEffect, useRef } from 'react';
+import { forwardRef, useCallback, useEffect, useRef } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { MobileBottomNav } from '../components/layout/MobileBottomNav';
 import { Alerts } from '../components/dashboard-v3/Alerts';
@@ -38,7 +38,11 @@ import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
 import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
 import { MissionsV2Board } from '../components/dashboard-v3/MissionsV2Board';
 import { MissionsV3Board } from '../components/dashboard-v3/MissionsV3Board';
-import { Card } from '../components/common/Card';
+import { Card as LegacyCard } from '../components/common/Card';
+import { Card } from '../components/ui/Card';
+import { PillarsSection } from '../components/dashboard/PillarsSection';
+import { RecentActivity } from '../components/dashboard/RecentActivity';
+import { DailyReminderSettings } from '../components/settings/DailyReminderSettings';
 import {
   getActiveSection,
   getDashboardSectionConfig,
@@ -164,6 +168,7 @@ export default function DashboardV3Page() {
                   element={
                     <DashboardOverview
                       userId={backendUserId}
+                      clerkUserId={clerkUserId}
                       avatarUrl={avatarUrl}
                       gameMode={gameMode}
                       weeklyTarget={profile?.weekly_target ?? null}
@@ -212,13 +217,31 @@ export default function DashboardV3Page() {
 
 interface DashboardOverviewProps {
   userId: string;
+  clerkUserId: string;
   avatarUrl?: string | null;
   gameMode: GameMode | string | null;
   weeklyTarget: number | null;
   section: DashboardSectionConfig;
 }
 
-function DashboardOverview({ userId, avatarUrl, gameMode, weeklyTarget, section }: DashboardOverviewProps) {
+function DashboardOverview({ userId, clerkUserId, avatarUrl, gameMode, weeklyTarget, section }: DashboardOverviewProps) {
+  const reminderCardRef = useRef<HTMLElement | null>(null);
+  const handleScheduleClick = useCallback(() => {
+    const target = reminderCardRef.current;
+    if (!target) {
+      return;
+    }
+    try {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (error) {
+      console.warn('Failed to smoothly scroll to scheduler card', error);
+      target.scrollIntoView();
+    }
+    if (typeof target.focus === 'function') {
+      target.focus({ preventScroll: true });
+    }
+  }, []);
+
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -228,8 +251,9 @@ function DashboardOverview({ userId, avatarUrl, gameMode, weeklyTarget, section 
         pageTitle={section.pageTitle}
       />
       <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
-        <div className="order-1 lg:col-span-12">
-          <Alerts userId={userId} />
+        <div className="order-1 space-y-4 lg:col-span-12">
+          <Alerts userId={userId} onScheduleClick={handleScheduleClick} />
+          <ReminderSchedulerCard ref={reminderCardRef} />
         </div>
 
         <div className="order-2 space-y-4 md:space-y-5 lg:order-2 lg:col-span-4">
@@ -247,6 +271,15 @@ function DashboardOverview({ userId, avatarUrl, gameMode, weeklyTarget, section 
         <div className="order-4 space-y-4 md:space-y-5 lg:order-4 lg:col-span-4">
           {FEATURE_STREAKS_PANEL_V1 && <LegacyStreaksPanel userId={userId} />}
           <StreaksPanel userId={userId} gameMode={gameMode} weeklyTarget={weeklyTarget} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="order-5 space-y-4 md:space-y-5 lg:order-5 lg:col-span-7">
+          <RecentActivity userId={userId} />
+        </div>
+        <div className="order-6 space-y-4 md:space-y-5 lg:order-6 lg:col-span-5">
+          <PillarsSection userId={clerkUserId} />
         </div>
       </div>
     </div>
@@ -338,6 +371,25 @@ function RewardsView({ userId, section }: { userId: string; section: DashboardSe
     </div>
   );
 }
+
+type ReminderSchedulerCardProps = {};
+
+const ReminderSchedulerCard = forwardRef<HTMLElement, ReminderSchedulerCardProps>(function ReminderSchedulerCard(
+  _,
+  ref,
+) {
+  return (
+    <Card
+      ref={ref}
+      tabIndex={-1}
+      title="⏰ Scheduler diario"
+      subtitle="Activá o pausá el recordatorio automático del Daily Quest"
+      bodyClassName="gap-6"
+    >
+      <DailyReminderSettings />
+    </Card>
+  );
+});
 
 interface SectionHeaderProps {
   eyebrow?: string;
@@ -448,7 +500,7 @@ function DashboardFallback() {
 
       <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <Card
+          <LegacyCard
             title="XP diario"
             subtitle="Se actualizará al reconectar"
             className="min-h-[180px]"
@@ -458,9 +510,9 @@ function DashboardFallback() {
               <FallbackMetric label="XP hoy" value="—" />
               <p className="text-xs text-slate-400">Tu progreso diario aparece acá cuando la API responde.</p>
             </div>
-          </Card>
+          </LegacyCard>
 
-          <Card title="Perfil" subtitle="Foto y game mode" className="min-h-[180px]">
+          <LegacyCard title="Perfil" subtitle="Foto y game mode" className="min-h-[180px]">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-full border border-white/10 bg-white/10" />
               <div className="space-y-2 text-xs text-slate-300">
@@ -469,11 +521,11 @@ function DashboardFallback() {
               </div>
             </div>
             <p className="mt-4 text-xs text-slate-400">Mostramos tus datos personales en cuanto podamos sincronizar tu perfil.</p>
-          </Card>
+          </LegacyCard>
         </div>
 
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <Card title="Pilares" subtitle="Body · Mind · Soul" className="min-h-[180px]">
+          <LegacyCard title="Pilares" subtitle="Body · Mind · Soul" className="min-h-[180px]">
             <div className="grid grid-cols-3 gap-3 text-xs">
               {['Body', 'Mind', 'Soul'].map((pillar) => (
                 <div
@@ -486,24 +538,24 @@ function DashboardFallback() {
               ))}
             </div>
             <p className="mt-3 text-xs text-slate-400">Las barras de XP por pilar se activan cuando recuperemos datos.</p>
-          </Card>
+          </LegacyCard>
 
-          <Card title="Emociones" subtitle="Últimos 7 días" className="min-h-[180px]">
+          <LegacyCard title="Emociones" subtitle="Últimos 7 días" className="min-h-[180px]">
             <div className="h-24 rounded-2xl border border-white/10 bg-gradient-to-r from-slate-800/60 via-slate-900/40 to-slate-800/60" />
             <p className="text-xs text-slate-400">El mapa emocional vuelve automáticamente una vez que la API responda.</p>
-          </Card>
+          </LegacyCard>
         </div>
 
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <Card title="Rachas" subtitle="Seguimiento semanal" className="min-h-[180px]">
+          <LegacyCard title="Rachas" subtitle="Seguimiento semanal" className="min-h-[180px]">
             <div className="space-y-3 text-xs text-slate-300">
               <FallbackMetric label="Daily Quest" value="En espera" />
               <FallbackMetric label="Weekly XP" value="Sin datos" />
               <p className="text-xs text-slate-400">Apenas detectemos actividad, tus rachas se renderizan acá.</p>
             </div>
-          </Card>
+          </LegacyCard>
 
-          <Card title="Rewards" subtitle="Logros desbloqueados" className="min-h-[180px]">
+          <LegacyCard title="Rewards" subtitle="Logros desbloqueados" className="min-h-[180px]">
             <div className="space-y-2 text-xs text-slate-200">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Siguiente badge</p>
@@ -514,7 +566,7 @@ function DashboardFallback() {
                 <p className="mt-2 text-sm text-white">Sincronizando…</p>
               </div>
             </div>
-          </Card>
+          </LegacyCard>
         </div>
       </div>
     </div>

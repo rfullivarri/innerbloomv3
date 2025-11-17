@@ -102,38 +102,30 @@ function TaskEditorIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
 const rawDashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
 const normalizedDashboardPath = rawDashboardPath.startsWith('/') ? rawDashboardPath : `/${rawDashboardPath}`;
 const trimmedDashboardPath = normalizedDashboardPath.replace(/\/+$/, '') || DEFAULT_DASHBOARD_PATH;
-const dashboardSegments = trimmedDashboardPath.split('/').filter(Boolean);
-const primaryDashboardPath = dashboardSegments.length > 0 ? `/${dashboardSegments[0]}` : DEFAULT_DASHBOARD_PATH;
-const isDashboardV3Enabled = primaryDashboardPath === '/dashboard-v3';
-const fallbackDashboardPath = trimmedDashboardPath || DEFAULT_DASHBOARD_PATH;
-const DASHBOARD_V3_BASE_PATH = '/dashboard-v3';
+const DASHBOARD_BASE_PATH = trimmedDashboardPath;
 
-function isDashboardV3Path(pathname: string): boolean {
+function isDashboardPath(pathname: string): boolean {
   if (!pathname) {
     return false;
   }
 
-  if (pathname === DASHBOARD_V3_BASE_PATH) {
+  if (pathname === DASHBOARD_BASE_PATH) {
     return true;
   }
 
-  return pathname.startsWith(`${DASHBOARD_V3_BASE_PATH}/`);
+  return pathname.startsWith(`${DASHBOARD_BASE_PATH}/`);
 }
 
 function resolveDashboardBasePath(currentPath?: string): string {
-  if (isDashboardV3Enabled) {
-    return primaryDashboardPath;
+  if (currentPath && isDashboardPath(currentPath)) {
+    return DASHBOARD_BASE_PATH;
   }
 
-  if (currentPath && isDashboardV3Path(currentPath)) {
-    return DASHBOARD_V3_BASE_PATH;
+  if (typeof window !== 'undefined' && isDashboardPath(window.location.pathname)) {
+    return DASHBOARD_BASE_PATH;
   }
 
-  if (typeof window !== 'undefined' && isDashboardV3Path(window.location.pathname)) {
-    return DASHBOARD_V3_BASE_PATH;
-  }
-
-  return fallbackDashboardPath;
+  return DASHBOARD_BASE_PATH;
 }
 
 function joinDashboardPath(basePath: string, segment?: string): string {
@@ -193,15 +185,12 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
 function createDashboardSections(currentPath?: string) {
   const basePath = resolveDashboardBasePath(currentPath);
   const sectionsByKey = buildDashboardSections(basePath);
-  const shouldIncludeMissions = basePath === DASHBOARD_V3_BASE_PATH;
-
-  const sections: DashboardSectionConfig[] = [sectionsByKey.dashboard];
-
-  if (shouldIncludeMissions) {
-    sections.push(sectionsByKey.missions, sectionsByKey.rewards);
-  }
-
-  sections.push(sectionsByKey.editor);
+  const sections: DashboardSectionConfig[] = [
+    sectionsByKey.dashboard,
+    sectionsByKey.missions,
+    sectionsByKey.rewards,
+    sectionsByKey.editor,
+  ];
 
   return { sections, sectionsByKey };
 }
@@ -232,7 +221,7 @@ export function getActiveSection(
     return activeSection;
   }
 
-  const missionsBasePath = joinDashboardPath(DASHBOARD_V3_BASE_PATH, 'missions');
+  const missionsBasePath = joinDashboardPath(DASHBOARD_BASE_PATH, 'missions');
 
   if (pathname.startsWith(missionsBasePath)) {
     const missionsSection = getDashboardSectionConfig('missions', pathname);
