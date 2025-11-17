@@ -104,7 +104,7 @@ export async function deleteUserDailyReminder(id: string): Promise<boolean> {
     `DELETE FROM ${TABLE_NAME} WHERE user_daily_reminder_id = $1 RETURNING user_daily_reminder_id;`,
     [id],
   );
-  return result.rowCount > 0;
+  return (result.rowCount ?? 0) > 0;
 }
 
 export async function updateUserDailyReminder(
