@@ -68,6 +68,23 @@ Para Neon, obtén la cadena de conexión en la consola y pégala en `DATABASE_UR
 
 La aplicación está integrada con Clerk mediante el middleware y los componentes que provee `@clerk/nextjs`. Las rutas bajo `/dashboard` están protegidas y requieren sesión válida.
 
+## Recordatorios diarios por email
+
+El worker de recordatorios vive en `apps/api`. Para habilitar los envíos necesitas:
+
+1. Definir `EMAIL_PROVIDER_NAME`. Usa `console` en desarrollo para imprimir los payloads y `resend` en producción para entregar correos reales.
+2. Cuando `EMAIL_PROVIDER_NAME=resend`, también debes definir `EMAIL_PROVIDER_API_KEY` (API key de Resend) y `EMAIL_FROM` (por ejemplo `Innerbloom <daily-quest@example.com>`).
+3. Configurar `DAILY_REMINDER_CTA_URL` si querés personalizar el enlace del botón (default `https://innerbloom.app/daily-quest`).
+4. Establecer `CRON_SECRET` tanto en el servicio API como en el scheduler que dispare el job.
+
+### Cron en producción
+
+- Configura un HTTP cron (Railway, GitHub Actions, etc.) que ejecute `POST https://<tu-api>/internal/cron/daily-reminders` con la cabecera `X-CRON-SECRET: <CRON_SECRET>` cada 5 minutos (`*/5 * * * *`).
+- El endpoint devuelve `attempted`, `sent`, `skipped` y `errors` para auditar cada corrida. Ante fallos, sólo los recordatorios entregados actualizan `last_sent_at`, por lo que los pendientes se reintentará automáticamente en la siguiente ejecución.
+- Puedes reprocesar manualmente una ventana puntual con `curl -X POST -H "X-CRON-SECRET: $CRON_SECRET" https://<tu-api>/internal/cron/daily-reminders`.
+
+Consulta `docs/daily-reminders.md` para una descripción completa de la arquitectura y el flujo de datos del job.
+
 ## Estado actual
 
 Esta migración crea la base del proyecto moderno sin eliminar los archivos originales. Puedes continuar desarrollando nuevas funcionalidades dentro de la carpeta `npm`.
