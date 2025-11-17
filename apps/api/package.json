@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@fastify/express": "^4.0.2",
+    "@innerbloom/missions-v2-contracts": "file:../../packages/missions-v2-contracts",
     "ajv": "^8.17.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -29,10 +30,10 @@
     "jose": "^6.1.0",
     "openai": "^6.3.0",
     "pg": "^8.16.3",
+    "resend": "^6.4.2",
     "svix": "^1.76.1",
     "undici": "^6.22.0",
-    "zod": "^3.23.8",
-    "@innerbloom/missions-v2-contracts": "file:../../packages/missions-v2-contracts"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
