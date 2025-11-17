@@ -1,10 +1,10 @@
-import { GmailClient, type GmailClientOptions } from './gmailClient.js';
+import { GmailClient, type GmailClientOptions } from './gmailClient';
 import {
   DAILY_QUEST_REMINDER_SUBJECT,
   type DailyQuestReminderTemplateParams,
   renderDailyQuestReminderHtml,
   renderDailyQuestReminderText,
-} from './templates/dailyQuestReminder.js';
+} from './templates/dailyQuestReminder';
 
 type MailerServiceOptions = {
   gmailClient?: GmailClient;
