@@ -127,4 +127,103 @@ describe('runDailyReminderJob', () => {
     expect(result.sent).toBe(0);
     expect(result.errors[0]).toEqual({ reminderId: 'r3', reason: 'SMTP down' });
   });
+
+  it('formats the reminder copy using the effective timezone and local time label', async () => {
+    const now = new Date('2024-03-15T12:00:00Z');
+    const reminder = {
+      user_daily_reminder_id: 'tz-1',
+      user_id: 'user-1',
+      channel: 'email',
+      status: 'active',
+      timezone: 'America/Argentina/Buenos_Aires',
+      local_time: '09:30:00',
+      last_sent_at: null,
+      created_at: now,
+      updated_at: now,
+      email_primary: 'argentina@example.com',
+      email: null,
+      first_name: 'Ludmila',
+      full_name: 'Ludmila Test',
+      effective_timezone: 'America/Argentina/Buenos_Aires',
+    } as const;
+
+    mockFindPendingReminders.mockResolvedValueOnce([reminder]);
+
+    const { runDailyReminderJob } = await import('../dailyReminderJob.js');
+
+    await runDailyReminderJob(now);
+
+    expect(mockSendEmail).toHaveBeenCalledTimes(1);
+    const payload = mockSendEmail.mock.calls[0]?.[0];
+    const friendlyDate = new Intl.DateTimeFormat('es-AR', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      timeZone: reminder.effective_timezone,
+    }).format(now);
+    const [hours, minutes, seconds] = reminder.local_time.split(':').map((part) => Number(part));
+    const reference = new Date('2024-01-01T00:00:00Z');
+    reference.setUTCHours(hours ?? 0, minutes ?? 0, seconds ?? 0, 0);
+    const friendlyTime = new Intl.DateTimeFormat('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: reminder.effective_timezone,
+    }).format(reference);
+
+    expect(payload?.html).toContain(`Tu Daily Quest de ${friendlyDate} ya está lista.`);
+    expect(payload?.html).toContain(`<strong>${friendlyTime}</strong> (${reminder.effective_timezone})`);
+  });
+
+  it('only updates last_sent_at for reminders that were actually delivered', async () => {
+    const now = new Date('2024-02-01T09:00:00Z');
+    mockFindPendingReminders.mockResolvedValueOnce([
+      {
+        user_daily_reminder_id: 'delivered',
+        user_id: 'user-good',
+        channel: 'email',
+        status: 'active',
+        timezone: 'UTC',
+        local_time: '06:00:00',
+        last_sent_at: null,
+        created_at: now,
+        updated_at: now,
+        email_primary: 'ok@example.com',
+        email: null,
+        first_name: 'Ok',
+        full_name: 'Ok User',
+        effective_timezone: 'UTC',
+      },
+      {
+        user_daily_reminder_id: 'failed',
+        user_id: 'user-bad',
+        channel: 'email',
+        status: 'active',
+        timezone: 'UTC',
+        local_time: '06:00:00',
+        last_sent_at: null,
+        created_at: now,
+        updated_at: now,
+        email_primary: 'broken@example.com',
+        email: null,
+        first_name: 'Broken',
+        full_name: 'Broken User',
+        effective_timezone: 'UTC',
+      },
+    ]);
+
+    mockSendEmail.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('provider_error'));
+
+    const { runDailyReminderJob } = await import('../dailyReminderJob.js');
+
+    const result = await runDailyReminderJob(now);
+
+    expect(mockMarkAsSent).toHaveBeenCalledTimes(1);
+    expect(mockMarkAsSent).toHaveBeenCalledWith(['delivered'], now);
+    expect(result).toMatchObject({
+      attempted: 2,
+      sent: 1,
+      skipped: 0,
+      errors: [{ reminderId: 'failed', reason: 'provider_error' }],
+    });
+  });
 });
