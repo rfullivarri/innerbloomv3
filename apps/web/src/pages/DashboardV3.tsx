@@ -168,7 +168,6 @@ export default function DashboardV3Page() {
                   element={
                     <DashboardOverview
                       userId={backendUserId}
-                      clerkUserId={clerkUserId}
                       avatarUrl={avatarUrl}
                       gameMode={gameMode}
                       weeklyTarget={profile?.weekly_target ?? null}
@@ -217,14 +216,13 @@ export default function DashboardV3Page() {
 
 interface DashboardOverviewProps {
   userId: string;
-  clerkUserId: string;
   avatarUrl?: string | null;
   gameMode: GameMode | string | null;
   weeklyTarget: number | null;
   section: DashboardSectionConfig;
 }
 
-function DashboardOverview({ userId, clerkUserId, avatarUrl, gameMode, weeklyTarget, section }: DashboardOverviewProps) {
+function DashboardOverview({ userId, avatarUrl, gameMode, weeklyTarget, section }: DashboardOverviewProps) {
   const reminderCardRef = useRef<HTMLElement | null>(null);
   const handleScheduleClick = useCallback(() => {
     const target = reminderCardRef.current;
@@ -279,7 +277,7 @@ function DashboardOverview({ userId, clerkUserId, avatarUrl, gameMode, weeklyTar
           <RecentActivity userId={userId} />
         </div>
         <div className="order-6 space-y-4 md:space-y-5 lg:order-6 lg:col-span-5">
-          <PillarsSection userId={clerkUserId} />
+          <PillarsSection userId={userId} />
         </div>
       </div>
     </div>
