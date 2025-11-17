@@ -12,7 +12,7 @@ export type DailyReminderJobResult = {
   attempted: number;
   sent: number;
   skipped: number;
-  errors: Array<{ reminderId: string; reason: string }>;
+  errors: { reminderId: string; reason: string }[];
 };
 
 function resolveRecipient(row: PendingEmailReminderRow): string | null {
@@ -100,7 +100,7 @@ export async function runDailyReminderJob(now: Date = new Date()): Promise<Daily
 
   const provider = getEmailProvider();
   const sent: string[] = [];
-  const errors: Array<{ reminderId: string; reason: string }> = [];
+  const errors: { reminderId: string; reason: string }[] = [];
   let skipped = 0;
 
   for (const reminder of reminders) {
