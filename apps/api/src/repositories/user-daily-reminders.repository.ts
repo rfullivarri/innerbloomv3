@@ -1,6 +1,58 @@
 import { pool } from '../db.js';
 
 const TABLE_NAME = 'user_daily_reminders';
+const SHOULD_BOOTSTRAP_TABLE =
+  process.env.NODE_ENV !== 'test' && process.env.USER_DAILY_REMINDERS_AUTO_BOOTSTRAP !== 'false';
+
+let ensureTablePromise: Promise<void> | null = null;
+
+async function ensureTableExists(): Promise<void> {
+  if (!SHOULD_BOOTSTRAP_TABLE) {
+    return;
+  }
+
+  if (!ensureTablePromise) {
+    ensureTablePromise = (async () => {
+      await pool.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+      await pool.query(
+        `
+          CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
+            user_daily_reminder_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id uuid NOT NULL,
+            channel text NOT NULL DEFAULT 'email',
+            status text NOT NULL DEFAULT 'active',
+            timezone text NOT NULL DEFAULT 'UTC',
+            local_time time without time zone NOT NULL,
+            last_sent_at timestamptz,
+            created_at timestamptz NOT NULL DEFAULT now(),
+            updated_at timestamptz NOT NULL DEFAULT now(),
+            CONSTRAINT user_daily_reminders_user_id_fkey FOREIGN KEY (user_id)
+              REFERENCES users(user_id)
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+          );
+        `,
+      );
+      await pool.query(
+        `
+          CREATE UNIQUE INDEX IF NOT EXISTS user_daily_reminders_user_channel_key
+            ON ${TABLE_NAME} (user_id, channel);
+        `,
+      );
+      await pool.query(
+        `
+          CREATE INDEX IF NOT EXISTS user_daily_reminders_status_channel_idx
+            ON ${TABLE_NAME} (status, channel);
+        `,
+      );
+    })().catch((error) => {
+      ensureTablePromise = null;
+      throw error;
+    });
+  }
+
+  await ensureTablePromise;
+}
 
 export type UserDailyReminderRow = {
   user_daily_reminder_id: string;
@@ -66,6 +118,7 @@ function mapRow(row: UserDailyReminderRow | undefined): UserDailyReminderRow | n
 export async function createUserDailyReminder(
   input: CreateUserDailyReminderInput,
 ): Promise<UserDailyReminderRow> {
+  await ensureTableExists();
   const localTime = normalizeLocalTime(input.localTime);
   const result = await pool.query<UserDailyReminderRow>(
     `
@@ -84,6 +137,7 @@ export async function createUserDailyReminder(
 }
 
 export async function findUserDailyReminderById(id: string): Promise<UserDailyReminderRow | null> {
+  await ensureTableExists();
   const result = await pool.query<UserDailyReminderRow>(
     `SELECT * FROM ${TABLE_NAME} WHERE user_daily_reminder_id = $1 LIMIT 1;`,
     [id],
@@ -92,6 +146,7 @@ export async function findUserDailyReminderById(id: string): Promise<UserDailyRe
 }
 
 export async function findUserDailyRemindersByUser(userId: string): Promise<UserDailyReminderRow[]> {
+  await ensureTableExists();
   const result = await pool.query<UserDailyReminderRow>(
     `SELECT * FROM ${TABLE_NAME} WHERE user_id = $1 ORDER BY channel;`,
     [userId],
@@ -103,6 +158,7 @@ export async function findUserDailyReminderByUserAndChannel(
   userId: string,
   channel: string,
 ): Promise<UserDailyReminderRow | null> {
+  await ensureTableExists();
   const result = await pool.query<UserDailyReminderRow>(
     `SELECT * FROM ${TABLE_NAME} WHERE user_id = $1 AND channel = $2 LIMIT 1;`,
     [userId, channel],
@@ -111,6 +167,7 @@ export async function findUserDailyReminderByUserAndChannel(
 }
 
 export async function deleteUserDailyReminder(id: string): Promise<boolean> {
+  await ensureTableExists();
   const result = await pool.query<UserDailyReminderRow>(
     `DELETE FROM ${TABLE_NAME} WHERE user_daily_reminder_id = $1 RETURNING user_daily_reminder_id;`,
     [id],
@@ -122,6 +179,7 @@ export async function updateUserDailyReminder(
   id: string,
   patch: UpdateUserDailyReminderInput,
 ): Promise<UserDailyReminderRow | null> {
+  await ensureTableExists();
   const assignments: string[] = [];
   const values: unknown[] = [id];
 
@@ -165,6 +223,7 @@ export async function updateUserDailyReminder(
 }
 
 export async function findPendingEmailReminders(now: Date): Promise<PendingEmailReminderRow[]> {
+  await ensureTableExists();
   const result = await pool.query<PendingEmailReminderRow>(
     `
       WITH reminder_context AS (
@@ -208,6 +267,7 @@ export async function markRemindersAsSent(reminderIds: string[], sentAt: Date): 
     return;
   }
 
+  await ensureTableExists();
   await pool.query(
     `
       UPDATE ${TABLE_NAME}
