@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useId, useMemo, useState } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import {
   DailyReminderSettingsResponse,
+  UpdateDailyReminderSettingsPayload,
   getDailyReminderSettings,
   updateDailyReminderSettings,
 } from '../../lib/api';
@@ -183,7 +184,7 @@ export function DailyReminderSettings() {
     setSubmitStatus('saving');
     setSubmitError(null);
     try {
-      const payload = {
+      const payload: UpdateDailyReminderSettingsPayload = {
         status: formState.enabled ? 'active' : 'paused',
         local_time: formState.localTime || DEFAULT_TIME,
         timezone: formState.timezone || defaultTimezone,
