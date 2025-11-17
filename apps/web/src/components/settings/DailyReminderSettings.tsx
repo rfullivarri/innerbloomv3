@@ -184,8 +184,9 @@ export function DailyReminderSettings() {
     setSubmitStatus('saving');
     setSubmitError(null);
     try {
+      const status: UpdateDailyReminderSettingsPayload['status'] = formState.enabled ? 'active' : 'paused';
       const payload: UpdateDailyReminderSettingsPayload = {
-        status: formState.enabled ? 'active' : 'paused',
+        status,
         local_time: formState.localTime || DEFAULT_TIME,
         timezone: formState.timezone || defaultTimezone,
       };
