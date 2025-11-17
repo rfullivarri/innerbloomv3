@@ -1744,6 +1744,60 @@ export async function getUserJourney(userId: string): Promise<UserJourneySummary
   return response;
 }
 
+export type DailyReminderSettingsResponse = {
+  user_daily_reminder_id?: string | null;
+  reminder_id?: string | null;
+  channel?: string | null;
+  local_time?: string | null;
+  localTime?: string | null;
+  timezone?: string | null;
+  timeZone?: string | null;
+  time_zone?: string | null;
+  status?: 'active' | 'paused' | 'disabled' | null;
+  enabled?: boolean | null;
+  last_sent_at?: string | null;
+  delivery_strategy?: string | null;
+};
+
+export type UpdateDailyReminderSettingsPayload = {
+  status: 'active' | 'paused';
+  local_time: string;
+  timezone: string;
+};
+
+const DAILY_REMINDER_CHANNEL = 'email';
+
+export async function getDailyReminderSettings(
+  channel = DAILY_REMINDER_CHANNEL,
+): Promise<DailyReminderSettingsResponse> {
+  const response = await getAuthorizedJson<DailyReminderSettingsResponse>('/me/daily-reminder', { channel });
+  logShape('daily-reminder-settings', response);
+  return response;
+}
+
+export async function updateDailyReminderSettings(
+  payload: UpdateDailyReminderSettingsPayload,
+  channel = DAILY_REMINDER_CHANNEL,
+): Promise<DailyReminderSettingsResponse> {
+  const token = await resolveAuthToken();
+  const headers = new Headers({
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  });
+  const init = applyAuthorization(
+    {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(payload),
+    },
+    token,
+  );
+  const url = buildUrl('/me/daily-reminder', { channel });
+  const response = await apiRequest<DailyReminderSettingsResponse>(url, init);
+  logShape('daily-reminder-settings-update', response);
+  return response;
+}
+
 export type DailyQuestStatusResponse = {
   date: string;
   submitted: boolean;
