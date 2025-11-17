@@ -2417,7 +2417,7 @@
                   "strategy": "email_code",
                   "expire_at": 1760215091996
                 },
-                "email_address": "ramagpt23@gmail.com",
+                "email_address": "debug-user@example.com",
                 "matches_sso_connection": false
               }
             ],
@@ -2524,7 +2524,7 @@
                   "strategy": "email_code",
                   "expire_at": 1760361683603
                 },
-                "email_address": "ramagpt23@gmail.com",
+                "email_address": "debug-user@example.com",
                 "matches_sso_connection": false
               }
             ],
@@ -2631,7 +2631,7 @@
                   "strategy": "email_code",
                   "expire_at": 1760370385445
                 },
-                "email_address": "ramagpt23@gmail.com",
+                "email_address": "debug-user@example.com",
                 "matches_sso_connection": false
               }
             ],
@@ -3500,7 +3500,7 @@
             "version": "forms-intro-react"
           },
           "mode": "EVOLVE",
-          "email": "ramagpt23@gmail.com",
+          "email": "debug-user@example.com",
           "client_id": "e1dc2d6d-1455-4523-99e6-e73e58a8730a"
         },
         "version": "v1",
@@ -3558,7 +3558,7 @@
         "xp_body": 39,
         "xp_mind": 39,
         "xp_soul": 39,
-        "email": "ramagpt23@gmail.com",
+        "email": "debug-user@example.com",
         "meta": {
           "tz": "Europe/Madrid",
           "lang": "en-gb",
@@ -3966,7 +3966,7 @@
       {
         "user_id": "c299a7d2-a05c-4106-8b41-6cd1dc49e297",
         "clerk_user_id": "user_3418cENuuj6ad96ciTqKsobDq4t",
-        "email_primary": "ramagpt23@gmail.com",
+        "email_primary": "debug-user@example.com",
         "full_name": "Rama Ramita",
         "image_url": "/Evolve-Mood.jpg",
         "game_mode_id": 4,
@@ -3983,7 +3983,7 @@
         "last_sent_local_date_scheduler": null,
         "first_programmed": false,
         "first_tasks_confirmed": false,
-        "email": "ramagpt23@gmail.com",
+        "email": "debug-user@example.com",
         "first_name": "Rama",
         "last_name": "Ramita",
         "avatar_url": "/Evolve-Mood.jpg",
@@ -3992,7 +3992,7 @@
       {
         "user_id": "dedb5d95-244c-47b7-922c-c256d8930723",
         "clerk_user_id": "user_33a7i1Axe2UpuzuEBitjPFDhbE3",
-        "email_primary": "rfullivarri22@gmail.com",
+        "email_primary": "legacy-user@example.com",
         "full_name": "Ramiro Fernandez",
         "image_url": "https://i.ibb.co/4RRnX20q/Avatar1.jpg",
         "game_mode_id": 3,

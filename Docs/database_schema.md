@@ -81,7 +81,7 @@ Este documento resume la estructura actual de la base de datos según el inventa
 |--------------------------------|--------------------------|------------------------------------------|
 | user_id                        | uuid                     | dedb5d95-244c-47b7-922c-c256d8930723     |
 | clerk_user_id                  | text                     | user_33a7i1Axe2UpuzuEBitjPFDhbE3         |
-| email_primary                  | text                     | rfullivarri22@gmail.com                  |
+| email_primary                  | text                     | legacy-user@example.com                  |
 | full_name                      | text                     | Ramiro Fernandez                         |
 | image_url                      | text                     | https://i.ibb.co/4RRnX20q/Avatar1.jpg    |
 | game_mode_id                   | smallint                 | 3                                        |
