@@ -1,8 +1,8 @@
 import type { AsyncHandler } from '../../lib/async-handler.js';
 import { pool } from '../../db.js';
 import { HttpError } from '../../lib/http-error.js';
+import { isValidTimezone, VALIDATE_TIMEZONE_SQL } from '../../lib/timezones.js';
 
-const VALIDATE_TIMEZONE_SQL = 'SELECT 1 FROM pg_timezone_names WHERE name = $1 LIMIT 1';
 const UPDATE_TIMEZONE_SQL = 'UPDATE users SET timezone = $1 WHERE clerk_user_id = $2';
 
 export const updateUserTimezone: AsyncHandler = async (req, res) => {
@@ -18,9 +18,9 @@ export const updateUserTimezone: AsyncHandler = async (req, res) => {
     return res.status(400).json({ error: 'invalid_timezone' });
   }
 
-  const { rows } = await pool.query(VALIDATE_TIMEZONE_SQL, [timezone]);
+  const timezoneExists = await isValidTimezone(timezone);
 
-  if (rows.length === 0) {
+  if (!timezoneExists) {
     return res.status(400).json({ error: 'unknown_timezone' });
   }
 
