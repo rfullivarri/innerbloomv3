@@ -18,48 +18,6 @@
 | `OPENAI_API_KEY` | ➖ | Required for AI TaskGen to call OpenAI. When missing the runner records `OPENAI_MISCONFIGURED` and skips task creation. |
 | `OPENAI_MODEL` | ➖ | Optional override for the OpenAI Responses API model used by TaskGen (defaults to `gpt-4.1-mini`). |
 | `TASKGEN_OPENAI_TIMEOUT` | ➖ | Timeout in milliseconds for the OpenAI request (defaults to `45000`). |
-| `GMAIL_CLIENT_ID` | ➖ | OAuth 2.0 client id used by the Gmail mailer. Required when sending daily quest reminders. |
-| `GMAIL_CLIENT_SECRET` | ➖ | OAuth 2.0 client secret that pairs with `GMAIL_CLIENT_ID`. |
-| `GMAIL_REFRESH_TOKEN` | ➖ | Long-lived refresh token issued for `selfimgames@gmail.com` with the `gmail.send` scope. |
-| `GMAIL_SENDER` | ➖ | Email address that appears in the `From` header (e.g. `Innerbloom <selfimgames@gmail.com>`). |
-| `GMAIL_REPLY_TO` | ➖ | Optional Reply-To address forwarded to Gmail when reminders are sent. |
-
-## Gmail mailer setup
-
-Daily Quest reminder jobs use Gmail's REST API. Provide all `GMAIL_*` variables listed above before instantiating the mailer service so the OAuth 2.0 client can refresh access tokens automatically. The sender account is `selfimgames@gmail.com` and must keep the Gmail API enabled inside Google Cloud Console.
-
-### Generating the refresh token for `selfimgames@gmail.com`
-
-1. Create (or reuse) an OAuth 2.0 **Desktop** client in the Google Cloud project that owns `selfimgames@gmail.com`. Enable the Gmail API and download the credentials JSON.
-2. Export the `GMAIL_CLIENT_ID`/`GMAIL_CLIENT_SECRET` values from that JSON in your shell.
-3. Run the following helper to authenticate the account locally via `@google-cloud/local-auth` and capture the refresh token:
-
-   ```bash
-   GMAIL_CLIENT_ID=... GMAIL_CLIENT_SECRET=... \
-   pnpm --filter @innerbloom/api exec tsx <<'TS'
-   import { authenticate } from '@google-cloud/local-auth';
-   import { google } from 'googleapis';
-
-   const auth = await authenticate({
-     scopes: ['https://www.googleapis.com/auth/gmail.send'],
-     clientOptions: {
-       clientId: process.env.GMAIL_CLIENT_ID!,
-       clientSecret: process.env.GMAIL_CLIENT_SECRET!,
-     },
-   });
-
-   const gmail = google.gmail({ version: 'v1', auth });
-   await gmail.users.getProfile({ userId: 'me' });
-
-   if (!auth.credentials.refresh_token) {
-     throw new Error('Missing refresh token. Make sure to approve offline access.');
-   }
-
-   console.log('GMAIL_REFRESH_TOKEN=', auth.credentials.refresh_token);
-   TS
-   ```
-
-4. Paste the printed value into `GMAIL_REFRESH_TOKEN`. The refresh token remains valid until revoked from the Google account.
 
 ## Database migrations
 
