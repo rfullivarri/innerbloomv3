@@ -99,6 +99,17 @@ export async function findUserDailyRemindersByUser(userId: string): Promise<User
   return result.rows;
 }
 
+export async function findUserDailyReminderByUserAndChannel(
+  userId: string,
+  channel: string,
+): Promise<UserDailyReminderRow | null> {
+  const result = await pool.query<UserDailyReminderRow>(
+    `SELECT * FROM ${TABLE_NAME} WHERE user_id = $1 AND channel = $2 LIMIT 1;`,
+    [userId, channel],
+  );
+  return mapRow(result.rows[0]);
+}
+
 export async function deleteUserDailyReminder(id: string): Promise<boolean> {
   const result = await pool.query<UserDailyReminderRow>(
     `DELETE FROM ${TABLE_NAME} WHERE user_daily_reminder_id = $1 RETURNING user_daily_reminder_id;`,
