@@ -16,7 +16,6 @@ vi.mock('googleapis', () => ({
     auth: {
       OAuth2: class {
         setCredentials = setCredentialsSpy;
-        constructor() {}
       },
     },
     gmail: gmailFactorySpy,
