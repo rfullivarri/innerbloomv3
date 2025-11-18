@@ -53,16 +53,19 @@ describe('ResendEmailProvider', () => {
       .mockResolvedValueOnce(buildErrorResult(createError(500, 'Internal error')))
       .mockResolvedValueOnce(buildSuccessResult());
 
+    const sleepMock = vi.fn<[number], Promise<void>>().mockResolvedValue(undefined);
+
     const provider = new ResendEmailProvider({
       apiKey: 'test',
       defaultFrom: 'Innerbloom <daily@example.com>',
       client: createClient(sendMock),
-      sleep: async () => {},
+      sleep: sleepMock,
     });
 
     await provider.sendEmail(baseMessage);
 
     expect(sendMock).toHaveBeenCalledTimes(2);
+    expect(sleepMock).toHaveBeenCalledTimes(1);
   });
 
   it('stops retrying for non-retryable errors', async () => {
@@ -70,15 +73,18 @@ describe('ResendEmailProvider', () => {
       buildErrorResult(createError(400, 'Bad Request')),
     );
 
+    const sleepMock = vi.fn<[number], Promise<void>>().mockResolvedValue(undefined);
+
     const provider = new ResendEmailProvider({
       apiKey: 'test',
       defaultFrom: 'Innerbloom <daily@example.com>',
       client: createClient(sendMock),
-      sleep: async () => {},
+      sleep: sleepMock,
     });
 
     await expect(provider.sendEmail(baseMessage)).rejects.toThrow(/Bad Request/);
     expect(sendMock).toHaveBeenCalledTimes(1);
+    expect(sleepMock).not.toHaveBeenCalled();
   });
 
   it('throws after exhausting retry attempts', async () => {
@@ -86,14 +92,17 @@ describe('ResendEmailProvider', () => {
       .fn<[], Promise<SendResult>>()
       .mockResolvedValue(buildErrorResult(createError(500, 'Internal error')));
 
+    const sleepMock = vi.fn<[number], Promise<void>>().mockResolvedValue(undefined);
+
     const provider = new ResendEmailProvider({
       apiKey: 'test',
       defaultFrom: 'Innerbloom <daily@example.com>',
       client: createClient(sendMock),
-      sleep: async () => {},
+      sleep: sleepMock,
     });
 
     await expect(provider.sendEmail(baseMessage)).rejects.toThrow(/Internal error/);
     expect(sendMock).toHaveBeenCalledTimes(3);
+    expect(sleepMock).toHaveBeenCalledTimes(2);
   });
 });
