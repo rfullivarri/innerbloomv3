@@ -39,8 +39,6 @@ import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
 import { MissionsV2Board } from '../components/dashboard-v3/MissionsV2Board';
 import { MissionsV3Board } from '../components/dashboard-v3/MissionsV3Board';
 import { Card as LegacyCard } from '../components/common/Card';
-import { PillarsSection } from '../components/dashboard/PillarsSection';
-import { RecentActivity } from '../components/dashboard/RecentActivity';
 import {
   getActiveSection,
   getDashboardSectionConfig,
@@ -280,14 +278,6 @@ function DashboardOverview({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
-        <div className="order-5 space-y-4 md:space-y-5 lg:order-5 lg:col-span-7">
-          <RecentActivity userId={userId} />
-        </div>
-        <div className="order-6 space-y-4 md:space-y-5 lg:order-6 lg:col-span-5">
-          <PillarsSection userId={userId} />
-        </div>
-      </div>
     </div>
   );
 }
@@ -512,21 +502,6 @@ function DashboardFallback() {
         </div>
 
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <LegacyCard title="Pilares" subtitle="Body · Mind · Soul" className="min-h-[180px]">
-            <div className="grid grid-cols-3 gap-3 text-xs">
-              {['Body', 'Mind', 'Soul'].map((pillar) => (
-                <div
-                  key={pillar}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-3 text-center text-slate-200"
-                >
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{pillar}</p>
-                  <p className="mt-2 text-lg font-semibold text-white">—</p>
-                </div>
-              ))}
-            </div>
-            <p className="mt-3 text-xs text-slate-400">Las barras de XP por pilar se activan cuando recuperemos datos.</p>
-          </LegacyCard>
-
           <LegacyCard title="Emociones" subtitle="Últimos 7 días" className="min-h-[180px]">
             <div className="h-24 rounded-2xl border border-white/10 bg-gradient-to-r from-slate-800/60 via-slate-900/40 to-slate-800/60" />
             <p className="text-xs text-slate-400">El mapa emocional vuelve automáticamente una vez que la API responda.</p>

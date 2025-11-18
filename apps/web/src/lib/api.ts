@@ -848,23 +848,6 @@ export async function getLeaderboard(params: { limit?: number; offset?: number }
   return extractArray<LeaderboardEntry>(response, 'users', 'items', 'data');
 }
  
-export type Pillar = {
-  id: string;
-  name: string;
-  description?: string;
-  score?: number;
-  progress?: number;
-  totalXp?: number;
-  xp?: number;
-  focusAreas?: string[];
-};
-
-export async function getPillars(userId: string): Promise<Pillar[]> {
-  const response = await getAuthorizedJson<unknown>(`/users/${encodeURIComponent(userId)}/pillars`);
-  logShape('pillars', response);
-  return extractArray<Pillar>(response, 'pillars', 'items', 'data');
-}
-
 export type TodaySummary = {
   xpToday: number;
   quests: {
