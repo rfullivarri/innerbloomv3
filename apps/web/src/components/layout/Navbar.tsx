@@ -22,12 +22,8 @@ function combine(...classes: Array<string | false | null | undefined>) {
 }
 
 export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot }: NavbarProps) {
-  const { userId, signOut } = useAuth();
+  const { userId } = useAuth();
   const { user } = useUser();
-
-  const handleSignOut = async () => {
-    await signOut({ redirectUrl: '/' });
-  };
 
   const fallbackId = userId == null ? '' : typeof userId === 'string' ? userId : String(userId);
   const displayName =
@@ -92,13 +88,6 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
               {displayName}
             </span>
           )}
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="rounded-full border border-white/20 bg-white/10 px-[0.45rem] py-[0.225rem] text-[0.4125rem] font-semibold uppercase tracking-[0.168em] text-white/90 backdrop-blur transition hover:border-white/30 hover:bg-white/20"
-          >
-            Cerrar sesión
-          </button>
         </div>
       </div>
     </header>
