@@ -10,7 +10,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface DashboardMenuProps {
   onOpenScheduler?: () => void;
@@ -46,7 +45,6 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
   const { user } = useUser();
   const { openUserProfile } = useClerk();
   const { signOut } = useAuth();
-  const navigate = useNavigate();
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -87,11 +85,6 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
       triggerRef.current?.focus({ preventScroll: true });
     });
   }, []);
-
-  const handleNavigateSettings = useCallback(() => {
-    navigate('/settings/notifications');
-    handleClose();
-  }, [navigate, handleClose]);
 
   const handleOpenProfile = useCallback(() => {
     if (typeof openUserProfile === 'function') {
@@ -211,30 +204,6 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                       className="mt-4 w-full rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 transition hover:border-white/40 hover:bg-white/15"
                     >
                       Gestionar perfil
-                    </button>
-                  </section>
-                  <section className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-[0.65rem] uppercase tracking-[0.3em] text-text-muted">Configuraciones</p>
-                    <p className="mt-1 text-sm text-text-muted">
-                      Ajustá tus preferencias de notificaciones y recordatorios.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleNavigateSettings}
-                      className="mt-4 flex w-full items-center justify-between rounded-2xl border border-white/15 bg-gradient-to-r from-white/10 to-white/5 px-4 py-3 text-left text-sm font-semibold text-white/90 transition hover:border-white/30 hover:from-white/15 hover:to-white/10"
-                    >
-                      <span>Notificaciones y preferencias</span>
-                      <svg
-                        aria-hidden="true"
-                        className="h-4 w-4 text-white/70"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                      >
-                        <path d="M9 6l6 6-6 6" />
-                      </svg>
                     </button>
                   </section>
                   <section className="rounded-3xl border border-emerald-400/20 bg-emerald-400/5 p-4">
