@@ -50,6 +50,7 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -265,4 +266,4 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
       )}
     </>
   );
-});
+}
