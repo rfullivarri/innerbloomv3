@@ -45,10 +45,36 @@ function formatLocalDate(now: Date, timezone: string): string {
   }
 }
 
+function formatLocalTime(localTime: string | null, timezone: string): string | null {
+  if (!localTime) {
+    return null;
+  }
+
+  const [hours, minutes, seconds] = localTime.split(':').map((part) => Number(part));
+  if ([hours, minutes, seconds].some((value) => Number.isNaN(value))) {
+    return null;
+  }
+
+  const reference = new Date('2024-01-01T00:00:00Z');
+  reference.setUTCHours(hours ?? 0, minutes ?? 0, seconds ?? 0, 0);
+
+  try {
+    return new Intl.DateTimeFormat('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: timezone,
+    }).format(reference);
+  } catch (error) {
+    console.warn({ error }, 'Failed to format local time for reminder email');
+    return null;
+  }
+}
+
 function buildReminderEmail(row: PendingEmailReminderRow, now: Date): EmailMessage {
   const name = resolveDisplayName(row);
   const ctaUrl = DEFAULT_CTA_URL;
   const friendlyDate = formatLocalDate(now, row.effective_timezone);
+  const friendlyTime = formatLocalTime(row.local_time, row.effective_timezone);
   const subject = `${name}, tu Daily Quest ya te espera ✨`;
   const intro = `Tu Daily Quest de ${friendlyDate} ya está lista.`;
   const html = `<!doctype html>
@@ -70,8 +96,13 @@ function buildReminderEmail(row: PendingEmailReminderRow, now: Date): EmailMessa
                   <span style="font-size:16px;">Innerbloom</span>
                 </div>
                 <p style="margin:0 0 12px;font-size:16px;color:#cbd5f5;">Hola ${name} 👋</p>
-                <h1 style="margin:0 0 16px;font-size:26px;line-height:1.25;color:#f8fafc;">Tu Daily Quest de ${friendlyDate} ya está lista ✨</h1>
+                <h1 style="margin:0 0 16px;font-size:26px;line-height:1.25;color:#f8fafc;">${intro} ✨</h1>
                 <p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:#e2e8f0;">Es un gran momento para registrar cómo te sentiste y sumar XP a tu streak. Cada check-in mantiene tu energía en movimiento. 💪</p>
+                ${
+                  friendlyTime
+                    ? `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#cbd5f5;">Te escribimos a las <strong>${friendlyTime}</strong> (${row.effective_timezone}) para acompañarte en tu hábito diario.</p>`
+                    : ''
+                }
                 <div style="margin:0 0 28px;padding:18px 20px;border-radius:20px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.78);">
                   <p style="margin:0;font-size:15px;line-height:1.6;color:#cbd5f5;">Respirá profundo, elegí tu emoción del día y celebrá cada avance — incluso los pasos pequeños suman. 🌟</p>
                 </div>
@@ -89,9 +120,12 @@ function buildReminderEmail(row: PendingEmailReminderRow, now: Date): EmailMessa
   const text = [
     `Hola ${name} 👋`,
     `${intro} Sumá XP registrando cómo te sentiste, marcando tus hábitos y manteniendo viva tu streak.`,
+    friendlyTime ? `Te escribimos a las ${friendlyTime} (${row.effective_timezone}) para acompañarte.` : null,
     'Cada check cuenta. 💫',
     `Abrir Daily Quest: ${ctaUrl}`,
-  ].join('\n\n');
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join('\n\n');
 
   return { to: resolveRecipient(row) ?? '', subject, html, text };
 }
