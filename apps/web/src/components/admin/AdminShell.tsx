@@ -2,10 +2,12 @@ import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { AdminLayout } from './AdminLayout';
 import { TaskgenPage } from '../../pages/admin/TaskgenPage';
 import { TaskgenUserPage } from '../../pages/admin/TaskgenUserPage';
+import { FeedbackManagerPage } from '../../pages/admin/FeedbackManagerPage';
 
 const NAV_LINKS = [
   { to: '/admin', label: 'Control Center' },
   { to: '/admin/taskgen', label: 'TaskGen Monitor' },
+  { to: '/admin/feedback-manager', label: 'Feedback & Notifs' },
 ];
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
@@ -56,6 +58,7 @@ export function AdminShell() {
           <Routes>
             <Route index element={<AdminLayout />} />
             <Route path="taskgen" element={<TaskgenPage />} />
+            <Route path="feedback-manager" element={<FeedbackManagerPage />} />
             <Route path="users/:userId/taskgen" element={<TaskgenUserPage />} />
             <Route path="*" element={<Navigate to="." replace />} />
           </Routes>
