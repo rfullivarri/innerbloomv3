@@ -13,7 +13,7 @@
 
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { forwardRef, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { MobileBottomNav } from '../components/layout/MobileBottomNav';
 import { Alerts } from '../components/dashboard-v3/Alerts';
@@ -39,10 +39,8 @@ import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
 import { MissionsV2Board } from '../components/dashboard-v3/MissionsV2Board';
 import { MissionsV3Board } from '../components/dashboard-v3/MissionsV3Board';
 import { Card as LegacyCard } from '../components/common/Card';
-import { Card } from '../components/ui/Card';
 import { PillarsSection } from '../components/dashboard/PillarsSection';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
-import { DailyReminderSettings } from '../components/settings/DailyReminderSettings';
 import {
   getActiveSection,
   getDashboardSectionConfig,
@@ -50,6 +48,11 @@ import {
   type DashboardSectionConfig,
 } from './dashboardSections';
 import { FEATURE_MISSIONS_V2 } from '../lib/featureFlags';
+import { DashboardMenu } from '../components/dashboard-v3/DashboardMenu';
+import {
+  ReminderSchedulerDialog,
+  type ReminderSchedulerDialogHandle,
+} from '../components/dashboard-v3/ReminderSchedulerDialog';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -131,9 +134,14 @@ export default function DashboardV3Page() {
   const avatarUrl = profile?.image_url || user?.imageUrl;
   const dailyButtonRef = useRef<HTMLButtonElement | null>(null);
   const dailyQuestModalRef = useRef<DailyQuestModalHandle | null>(null);
+  const reminderSchedulerDialogRef = useRef<ReminderSchedulerDialogHandle | null>(null);
 
   const handleOpenDaily = useCallback(() => {
     dailyQuestModalRef.current?.open();
+  }, []);
+
+  const handleOpenReminderScheduler = useCallback(() => {
+    reminderSchedulerDialogRef.current?.open();
   }, []);
 
   return (
@@ -144,11 +152,16 @@ export default function DashboardV3Page() {
           dailyButtonRef={dailyButtonRef}
           title={activeSection.pageTitle}
           sections={sections}
+          menuSlot={<DashboardMenu onOpenScheduler={handleOpenReminderScheduler} />}
         />
         <DailyQuestModal
           ref={dailyQuestModalRef}
           enabled={Boolean(backendUserId)}
           returnFocusRef={dailyButtonRef}
+        />
+        <ReminderSchedulerDialog
+          ref={reminderSchedulerDialogRef}
+          enabled={Boolean(backendUserId)}
         />
         <main className="flex-1 pb-24 md:pb-0">
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
@@ -172,6 +185,7 @@ export default function DashboardV3Page() {
                       gameMode={gameMode}
                       weeklyTarget={profile?.weekly_target ?? null}
                       section={overviewSection}
+                      onOpenReminderScheduler={handleOpenReminderScheduler}
                     />
                   }
                 />
@@ -220,25 +234,20 @@ interface DashboardOverviewProps {
   gameMode: GameMode | string | null;
   weeklyTarget: number | null;
   section: DashboardSectionConfig;
+  onOpenReminderScheduler: () => void;
 }
 
-function DashboardOverview({ userId, avatarUrl, gameMode, weeklyTarget, section }: DashboardOverviewProps) {
-  const reminderCardRef = useRef<HTMLElement | null>(null);
+function DashboardOverview({
+  userId,
+  avatarUrl,
+  gameMode,
+  weeklyTarget,
+  section,
+  onOpenReminderScheduler,
+}: DashboardOverviewProps) {
   const handleScheduleClick = useCallback(() => {
-    const target = reminderCardRef.current;
-    if (!target) {
-      return;
-    }
-    try {
-      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } catch (error) {
-      console.warn('Failed to smoothly scroll to scheduler card', error);
-      target.scrollIntoView();
-    }
-    if (typeof target.focus === 'function') {
-      target.focus({ preventScroll: true });
-    }
-  }, []);
+    onOpenReminderScheduler();
+  }, [onOpenReminderScheduler]);
 
   return (
     <div className="space-y-6">
@@ -251,7 +260,6 @@ function DashboardOverview({ userId, avatarUrl, gameMode, weeklyTarget, section 
       <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="order-1 space-y-4 lg:col-span-12">
           <Alerts userId={userId} onScheduleClick={handleScheduleClick} />
-          <ReminderSchedulerCard ref={reminderCardRef} />
         </div>
 
         <div className="order-2 space-y-4 md:space-y-5 lg:order-2 lg:col-span-4">
@@ -369,25 +377,6 @@ function RewardsView({ userId, section }: { userId: string; section: DashboardSe
     </div>
   );
 }
-
-type ReminderSchedulerCardProps = {};
-
-const ReminderSchedulerCard = forwardRef<HTMLElement, ReminderSchedulerCardProps>(function ReminderSchedulerCard(
-  _,
-  ref,
-) {
-  return (
-    <Card
-      ref={ref}
-      tabIndex={-1}
-      title="⏰ Scheduler diario"
-      subtitle="Activá o pausá el recordatorio automático del Daily Quest"
-      bodyClassName="gap-6"
-    >
-      <DailyReminderSettings />
-    </Card>
-  );
-});
 
 interface SectionHeaderProps {
   eyebrow?: string;

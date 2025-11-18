@@ -1,5 +1,5 @@
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { type RefObject } from 'react';
+import { type ReactNode, type RefObject } from 'react';
 import { NavLink } from 'react-router-dom';
 
 export interface NavbarSection {
@@ -14,13 +14,14 @@ type NavbarProps = {
   dailyButtonRef?: RefObject<HTMLButtonElement>;
   title?: string;
   sections?: NavbarSection[];
+  menuSlot?: ReactNode;
 };
 
 function combine(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
 
-export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: NavbarProps) {
+export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot }: NavbarProps) {
   const { userId, signOut } = useAuth();
   const { user } = useUser();
 
@@ -85,6 +86,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections }: Navbar
           <div className="hidden flex-1 md:flex" aria-hidden="true" />
         )}
         <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
+          {menuSlot}
           {displayName && (
             <span className="hidden rounded-full bg-white/10 px-3 py-1 text-xs text-text-muted md:inline-flex">
               {displayName}
