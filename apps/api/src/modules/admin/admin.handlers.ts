@@ -13,6 +13,7 @@ import {
   taskgenTraceQuerySchema,
   taskgenTraceByCorrelationParamsSchema,
   taskgenTraceGlobalQuerySchema,
+  reminderSendBodySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -26,6 +27,7 @@ import {
   getTaskgenJobLogs,
   getTaskgenUserOverview,
   retryTaskgenJob,
+  sendDailyReminderPreview,
 } from './admin.service.js';
 import {
   getTaskgenEventsByCorrelation,
@@ -66,6 +68,8 @@ const taskIdParamSchema = userIdParamSchema.extend({
 const jobIdParamSchema = z.object({
   jobId: z.string().uuid({ message: 'Invalid job id' }),
 });
+
+const reminderSendBody = reminderSendBodySchema.default({ channel: 'email' });
 
 export const getAdminUsers = asyncHandler(async (req: Request, res: Response) => {
   const query = listUsersQuerySchema.parse(req.query);
@@ -120,6 +124,13 @@ export const exportAdminUserLogsCsv = asyncHandler(async (req: Request, res: Res
   res.type('text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="user-logs.csv"');
   res.send(csv);
+});
+
+export const postAdminSendReminder = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const body = reminderSendBody.parse(req.body ?? {});
+  const result = await sendDailyReminderPreview(userId, body.channel ?? 'email');
+  res.json(result);
 });
 
 export const getAdminMe = asyncHandler(async (_req: Request, res: Response) => {

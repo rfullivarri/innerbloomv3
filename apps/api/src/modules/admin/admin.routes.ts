@@ -17,6 +17,7 @@ import {
   getTaskgenTraceGlobal,
   postTaskgenForceRun,
   retryTaskgenJobHandler,
+  postAdminSendReminder,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
 
@@ -35,6 +36,7 @@ adminRouter.get('/users/:userId/task-stats', getAdminUserTaskStats);
 adminRouter.get('/users/:userId/taskgen/latest', getTaskgenUserOverviewHandler);
 adminRouter.patch('/users/:userId/tasks/:taskId', patchAdminUserTask);
 adminRouter.get('/users/:userId/logs.csv', exportAdminUserLogsCsv);
+adminRouter.post('/users/:userId/daily-reminder/send', postAdminSendReminder);
 adminRouter.get('/taskgen/trace', getTaskgenTraceForUser);
 adminRouter.get('/taskgen/trace/by-correlation/:id', getTaskgenTraceByCorrelation);
 adminRouter.get('/taskgen/trace/global', getTaskgenTraceGlobal);

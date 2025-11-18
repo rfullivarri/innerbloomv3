@@ -5,7 +5,7 @@ import { clearTaskgenEvents, recordTaskgenEvent } from '../../services/taskgenTr
 
 type QueryRow = { is_admin: boolean | null };
 
-const { mockQuery, authMiddlewareMock, mockTrigger } = vi.hoisted(() => ({
+const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail } = vi.hoisted(() => ({
   mockQuery: vi.fn<(sql: string, params?: unknown[]) => Promise<{ rows: QueryRow[] }>>(),
   authMiddlewareMock: (req: Request, _res: Response, next: NextFunction) => {
     (req as Request & {
@@ -24,6 +24,7 @@ const { mockQuery, authMiddlewareMock, mockTrigger } = vi.hoisted(() => ({
     next();
   },
   mockTrigger: vi.fn(() => 'corr-force'),
+  mockSendEmail: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('../../db.js', () => ({
@@ -38,12 +39,19 @@ vi.mock('../../services/taskgenTriggerService.js', () => ({
   triggerTaskGenerationForUser: mockTrigger,
 }));
 
+vi.mock('../../services/email/index.js', () => ({
+  getEmailProvider: () => ({
+    sendEmail: mockSendEmail,
+  }),
+}));
+
 import app from '../../app.js';
 
 describe('Admin routes', () => {
   beforeEach(() => {
     mockQuery.mockClear();
     mockTrigger.mockClear();
+    mockSendEmail.mockClear();
     mockTrigger.mockReturnValue('corr-force');
     clearTaskgenEvents();
     mockQuery.mockImplementation(async (sql: string) => {
@@ -80,6 +88,29 @@ describe('Admin routes', () => {
 
       if (sql.includes('FROM v_user_daily_xp')) {
         return { rows: [] };
+      }
+
+      if (sql.includes('FROM user_daily_reminders') && sql.includes('JOIN users u ON u.user_id = r.user_id')) {
+        return {
+          rows: [
+            {
+              user_daily_reminder_id: 'rem-1',
+              user_id: '00000000-0000-4000-8000-000000000001',
+              channel: 'email',
+              status: 'active',
+              timezone: 'UTC',
+              local_time: '12:00:00',
+              last_sent_at: null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              email_primary: 'admin@example.com',
+              email: null,
+              first_name: 'Admin',
+              full_name: 'Admin User',
+              effective_timezone: 'UTC',
+            },
+          ],
+        } as never;
       }
 
       const isPillarAggregateQuery =
@@ -231,5 +262,19 @@ describe('Admin routes', () => {
       origin: 'admin:force-run',
       metadata: { requestedMode: 'flow' },
     });
+  });
+
+  it('sends a one-off daily reminder email for testing', async () => {
+    const response = await request(app)
+      .post('/api/admin/users/00000000-0000-4000-8000-000000000001/daily-reminder/send')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      ok: true,
+      reminder_id: 'rem-1',
+      recipient: 'admin@example.com',
+    });
+    expect(mockSendEmail).toHaveBeenCalledWith(expect.objectContaining({ to: 'admin@example.com' }));
   });
 });

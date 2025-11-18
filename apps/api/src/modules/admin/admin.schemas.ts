@@ -119,6 +119,10 @@ export const taskgenTraceGlobalQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).default(50),
 });
 
+export const reminderSendBodySchema = z.object({
+  channel: z.literal('email').optional().default('email'),
+});
+
 export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
 export type LogsQuery = z.infer<typeof logsQuerySchema>;
 export type InsightQuery = z.infer<typeof insightQuerySchema>;
@@ -129,3 +133,4 @@ export type TaskgenJobsQuery = z.infer<typeof taskgenJobsQuerySchema>;
 export type TaskgenForceRunBody = z.infer<typeof taskgenForceRunBodySchema>;
 export type TaskgenTraceQuery = z.infer<typeof taskgenTraceQuerySchema>;
 export type TaskgenTraceGlobalQuery = z.infer<typeof taskgenTraceGlobalQuerySchema>;
+export type ReminderSendBody = z.infer<typeof reminderSendBodySchema>;

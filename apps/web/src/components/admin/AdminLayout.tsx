@@ -5,6 +5,7 @@ import {
   fetchAdminInsights,
   fetchAdminLogs,
   fetchAdminTaskStats,
+  sendAdminDailyReminder,
 } from '../../lib/adminApi';
 import { AdminDataTable } from './AdminDataTable';
 import { FiltersBar, type AdminFilters } from './FiltersBar';
@@ -42,6 +43,9 @@ export function AdminLayout() {
   const [logsError, setLogsError] = useState<string | null>(null);
   const [taskStatsError, setTaskStatsError] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [sendingReminder, setSendingReminder] = useState(false);
+  const [reminderSuccess, setReminderSuccess] = useState<string | null>(null);
+  const [reminderError, setReminderError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedUser) {
@@ -170,7 +174,31 @@ export function AdminLayout() {
     setSelectedUser(user);
     setFilters(DEFAULT_FILTERS);
     setActiveTab('logs');
+    setReminderSuccess(null);
+    setReminderError(null);
   }, []);
+
+  const handleSendReminder = useCallback(async () => {
+    if (!selectedUser) {
+      return;
+    }
+
+    setSendingReminder(true);
+    setReminderError(null);
+
+    try {
+      const response = await sendAdminDailyReminder(selectedUser.id);
+      const sentAt = new Date(response.sent_at);
+      const friendlyTime = sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setReminderSuccess(`Enviado a ${response.recipient} · ${friendlyTime}`);
+    } catch (error) {
+      console.error('[admin] failed to send daily reminder', error);
+      setReminderSuccess(null);
+      setReminderError('No se pudo enviar el recordatorio. Verificá las credenciales de correo.');
+    } finally {
+      setSendingReminder(false);
+    }
+  }, [selectedUser]);
 
   const handleExport = useCallback(async () => {
     if (!selectedUser) return;
@@ -255,6 +283,34 @@ export function AdminLayout() {
           Explorá la actividad de los usuarios, exportá registros y ajustá tareas con una interfaz ligera.
         </p>
         <UserPicker onSelect={handleSelectUser} selectedUserId={selectedUser?.id ?? null} />
+        {selectedUser ? (
+          <div className="flex flex-col gap-3 rounded-xl border border-slate-800/70 bg-slate-900/60 p-4 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Recordatorio puntual</p>
+              <p className="text-sm text-slate-300">
+                Enviá el correo diario al instante para revisar el HTML y confirmar que llegó a la bandeja.
+              </p>
+              {reminderSuccess ? (
+                <p className="text-xs font-semibold text-emerald-300">{reminderSuccess}</p>
+              ) : null}
+              {reminderError ? (
+                <p className="text-xs font-semibold text-rose-300">{reminderError}</p>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={handleSendReminder}
+              disabled={sendingReminder}
+              className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-500 ${
+                sendingReminder
+                  ? 'cursor-not-allowed border border-slate-700/60 bg-slate-800 text-slate-400'
+                  : 'border border-slate-700/60 bg-slate-800/80 text-slate-100 hover:border-sky-400/60 hover:text-sky-100'
+              }`}
+            >
+              {sendingReminder ? 'Enviando…' : 'Probar correo'}
+            </button>
+          </div>
+        ) : null}
       </header>
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-4">
