@@ -168,7 +168,6 @@ export function DailyReminderSettings() {
     (initialState.enabled !== formState.enabled ||
       initialState.localTime !== formState.localTime ||
       initialState.timezone !== formState.timezone);
-  const toggleLabel = formState.enabled ? 'Daily Quest activa' : 'Daily Quest pausada';
 
   const handleToggle = () => {
     if (isInitialLoading || isSaving) {
@@ -237,14 +236,14 @@ export function DailyReminderSettings() {
     <form onSubmit={handleSubmit} className="space-y-6 text-base text-text">
       <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-5">
         <div>
-          <p className="text-sm font-semibold text-white">{toggleLabel}</p>
+          <p className="text-sm font-semibold text-white">Recordatorio diario por email</p>
           <p className="text-xs text-text-subtle">{REMINDER_DESCRIPTION}</p>
         </div>
         <button
           type="button"
           role="switch"
           aria-checked={formState.enabled}
-          aria-label={toggleLabel}
+          aria-label="Recordatorio diario por email"
           onClick={handleToggle}
           disabled={isSaving}
           className={combine(
