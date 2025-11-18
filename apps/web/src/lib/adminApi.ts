@@ -180,3 +180,34 @@ export async function postTaskgenForceRun(payload: { userId: string; mode?: stri
 
   return response.json() as Promise<{ ok: boolean; correlation_id: string }>;
 }
+
+type ReminderSendResponse = {
+  ok: boolean;
+  reminder_id: string;
+  recipient: string;
+  sent_at: string;
+};
+
+export async function sendAdminDailyReminder(userId: string) {
+  const url = buildApiUrl(`/admin/users/${encodeURIComponent(userId)}/daily-reminder/send`);
+  const response = await apiAuthorizedFetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ channel: 'email' }),
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response.json() as Promise<ReminderSendResponse>;
+}

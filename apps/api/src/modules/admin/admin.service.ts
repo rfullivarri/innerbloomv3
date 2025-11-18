@@ -4,6 +4,9 @@ import type { LevelThreshold } from '../../controllers/users/types.js';
 import { HttpError } from '../../lib/http-error.js';
 import { triggerTaskGenerationForUser } from '../../services/taskgenTriggerService.js';
 import { updateUserTaskRow } from '../../services/user-tasks.service.js';
+import { findReminderContextForUser } from '../../repositories/user-daily-reminders.repository.js';
+import { buildReminderEmail, resolveRecipient } from '../../services/dailyReminderJob.js';
+import { getEmailProvider } from '../../services/email/index.js';
 import {
   type InsightQuery,
   type ListUsersQuery,
@@ -1357,6 +1360,32 @@ export async function getTaskgenUserOverview(userId: string): Promise<TaskgenUse
     lastTaskInsertedAt,
     latestJob,
   };
+}
+
+export async function sendDailyReminderPreview(
+  userId: string,
+  channel: string = 'email',
+): Promise<{ ok: true; reminder_id: string; recipient: string; sent_at: string }> {
+  if (channel !== 'email') {
+    throw new HttpError(400, 'invalid_channel', 'Only email reminders are supported');
+  }
+
+  const reminder = await findReminderContextForUser(userId, channel);
+  if (!reminder) {
+    throw new HttpError(404, 'reminder_not_found', 'The user does not have an email reminder configured');
+  }
+
+  const recipient = resolveRecipient(reminder);
+  if (!recipient) {
+    throw new HttpError(400, 'missing_recipient', 'The user does not have an email address to send the reminder');
+  }
+
+  const provider = getEmailProvider();
+  const now = new Date();
+  const message = buildReminderEmail(reminder, now);
+  await provider.sendEmail({ ...message, to: recipient });
+
+  return { ok: true, reminder_id: reminder.user_daily_reminder_id, recipient, sent_at: now.toISOString() };
 }
 
 export async function retryTaskgenJob(jobId: string): Promise<{ ok: true }> {

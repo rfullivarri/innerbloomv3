@@ -262,6 +262,39 @@ export async function findPendingEmailReminders(now: Date): Promise<PendingEmail
   return result.rows;
 }
 
+export async function findReminderContextForUser(
+  userId: string,
+  channel: string,
+): Promise<PendingEmailReminderRow | null> {
+  await ensureTableExists();
+  const result = await pool.query<PendingEmailReminderRow>(
+    `
+      SELECT
+        r.user_daily_reminder_id,
+        r.user_id,
+        r.channel,
+        r.status,
+        r.timezone,
+        r.local_time,
+        r.last_sent_at,
+        r.created_at,
+        r.updated_at,
+        u.email_primary,
+        u.email,
+        u.first_name,
+        u.full_name,
+        COALESCE(NULLIF(r.timezone, ''), NULLIF(u.timezone, ''), 'UTC') AS effective_timezone
+      FROM ${TABLE_NAME} r
+      JOIN users u ON u.user_id = r.user_id
+      WHERE r.user_id = $1 AND r.channel = $2
+      LIMIT 1;
+    `,
+    [userId, channel],
+  );
+
+  return result.rows[0] ?? null;
+}
+
 export async function markRemindersAsSent(reminderIds: string[], sentAt: Date): Promise<void> {
   if (reminderIds.length === 0) {
     return;

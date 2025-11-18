@@ -16,7 +16,7 @@ export type DailyReminderJobResult = {
   errors: { reminderId: string; reason: string }[];
 };
 
-function resolveRecipient(row: PendingEmailReminderRow): string | null {
+export function resolveRecipient(row: PendingEmailReminderRow): string | null {
   const primary = row.email_primary?.trim();
   if (primary) {
     return primary;
@@ -70,7 +70,7 @@ function formatLocalTime(localTime: string | null, timezone: string): string | n
   }
 }
 
-function buildReminderEmail(row: PendingEmailReminderRow, now: Date): EmailMessage {
+export function buildReminderEmail(row: PendingEmailReminderRow, now: Date): EmailMessage {
   const name = resolveDisplayName(row);
   const ctaUrl = DEFAULT_CTA_URL;
   const friendlyDate = formatLocalDate(now, row.effective_timezone);
