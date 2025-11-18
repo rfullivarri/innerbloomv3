@@ -18,6 +18,17 @@ const DELIVERY_STRATEGY = 'user_local_time';
 const SUPPORTED_CHANNELS = new Set(['email']);
 const SELECT_USER_TIMEZONE_SQL = 'SELECT timezone FROM users WHERE user_id = $1 LIMIT 1';
 
+const LEGACY_TIMESTAMP_ANCHOR = { year: 2000, month: 1, day: 1 };
+const UPDATE_LEGACY_SCHEDULER_SQL = `
+  UPDATE users
+     SET scheduler_enabled = $2,
+         channel_scheduler = $3,
+         hour_scheduler = make_timestamptz($4, $5, $6, $7, $8, $9, $10),
+         status_scheduler = $11,
+         updated_at = now()
+   WHERE user_id = $1;
+`;
+
 const updateBodySchema = z.object({
   status: z.enum(['active', 'paused']),
   local_time: z.string().min(1),
@@ -95,20 +106,64 @@ async function persistReminder(
   const existing = await findUserDailyReminderByUserAndChannel(userId, channel);
 
   if (existing) {
-    return updateUserDailyReminder(existing.user_daily_reminder_id, {
+    const updated = await updateUserDailyReminder(existing.user_daily_reminder_id, {
       status: body.status,
       timezone: overrides.timezone,
       localTime: overrides.localTime,
     });
+
+    await syncLegacySchedulerColumns({
+      userId,
+      channel,
+      localTime: overrides.localTime,
+      timezone: overrides.timezone,
+      status: body.status,
+    });
+
+    return updated;
   }
 
-  return createUserDailyReminder({
+  const created = await createUserDailyReminder({
     userId,
     channel,
     status: body.status,
     timezone: overrides.timezone,
     localTime: overrides.localTime,
   });
+
+  await syncLegacySchedulerColumns({
+    userId,
+    channel,
+    localTime: overrides.localTime,
+    timezone: overrides.timezone,
+    status: body.status,
+  });
+
+  return created;
+}
+
+async function syncLegacySchedulerColumns(input: {
+  userId: string;
+  channel: ReminderChannel;
+  localTime: string;
+  timezone: string;
+  status: UpdateBody['status'];
+}): Promise<void> {
+  const { hours, minutes, seconds } = extractTimeParts(input.localTime);
+
+  await pool.query(UPDATE_LEGACY_SCHEDULER_SQL, [
+    input.userId,
+    input.status === 'active',
+    input.channel,
+    LEGACY_TIMESTAMP_ANCHOR.year,
+    LEGACY_TIMESTAMP_ANCHOR.month,
+    LEGACY_TIMESTAMP_ANCHOR.day,
+    hours,
+    minutes,
+    seconds,
+    input.timezone,
+    toLegacyStatus(input.status),
+  ]);
 }
 
 function resolveChannel(query: Request['query']): ReminderChannel {
@@ -164,6 +219,19 @@ function sanitizeTimezone(value?: string | null): string | null {
 async function resolveUserTimezone(userId: string): Promise<string> {
   const result = await pool.query<{ timezone: string | null }>(SELECT_USER_TIMEZONE_SQL, [userId]);
   return sanitizeTimezone(result.rows[0]?.timezone) ?? DEFAULT_TIMEZONE;
+}
+
+function extractTimeParts(value: string): { hours: number; minutes: number; seconds: number } {
+  const [rawHours = '0', rawMinutes = '0', rawSeconds = '0'] = value.split(':');
+  return {
+    hours: Number(rawHours),
+    minutes: Number(rawMinutes),
+    seconds: Number(rawSeconds),
+  };
+}
+
+function toLegacyStatus(status: UpdateBody['status']): 'ACTIVE' | 'PAUSED' {
+  return status === 'active' ? 'ACTIVE' : 'PAUSED';
 }
 
 function serializeReminder(
