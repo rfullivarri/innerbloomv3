@@ -18,6 +18,8 @@ import {
   postTaskgenForceRun,
   retryTaskgenJobHandler,
   postAdminSendReminder,
+  getAdminFeedbackDefinitions,
+  patchAdminFeedbackDefinition,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
 
@@ -41,6 +43,8 @@ adminRouter.get('/taskgen/trace', getTaskgenTraceForUser);
 adminRouter.get('/taskgen/trace/by-correlation/:id', getTaskgenTraceByCorrelation);
 adminRouter.get('/taskgen/trace/global', getTaskgenTraceGlobal);
 adminRouter.post('/taskgen/force-run', postTaskgenForceRun);
+adminRouter.get('/feedback/definitions', getAdminFeedbackDefinitions);
+adminRouter.patch('/feedback/definitions/:id', patchAdminFeedbackDefinition);
 
 router.use('/admin', authMiddleware, requireAdmin, adminRouter);
 

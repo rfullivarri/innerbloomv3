@@ -141,3 +141,25 @@ export type TaskgenTraceEvent = {
   origin?: string | null;
   data?: Record<string, unknown>;
 };
+
+export type FeedbackDefinition = {
+  id: string;
+  notificationKey: string;
+  label: string;
+  type: string;
+  scope: string[];
+  trigger: string;
+  channel: string;
+  frequency: string;
+  status: 'active' | 'paused' | 'draft' | 'deprecated';
+  priority: number;
+  copy: string;
+  cta: { label: string; href: string | null } | null;
+  previewVariables: Record<string, string>;
+  metrics: {
+    lastFiredAt: string | null;
+    fires7d: number;
+    fires30d: number;
+    ctr30d: number;
+  };
+};
