@@ -13,7 +13,6 @@ import { DevBanner } from './components/layout/DevBanner';
 import { DEV_USER_SWITCH_ACTIVE, setApiAuthTokenProvider } from './lib/api';
 import OnboardingIntroPage from './pages/OnboardingIntro';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
-import SettingsNotificationsPage from './pages/settings/Notifications';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -166,14 +165,6 @@ export default function App() {
           element={
             <RequireUser>
               <TaskEditorPage />
-            </RequireUser>
-          }
-        />
-        <Route
-          path="/settings/notifications"
-          element={
-            <RequireUser>
-              <SettingsNotificationsPage />
             </RequireUser>
           }
         />
