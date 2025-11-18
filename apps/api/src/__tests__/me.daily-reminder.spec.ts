@@ -195,7 +195,20 @@ describe('PUT /api/me/daily-reminder', () => {
       verifiedUser.id,
       'email',
     ]);
-    expect(mockQuery).toHaveBeenLastCalledWith(expect.stringContaining('UPDATE users'), expect.any(Array));
+    expect(mockQuery).toHaveBeenNthCalledWith(4, expect.stringContaining('UPDATE users'), [
+      verifiedUser.id,
+      false,
+      'email',
+      2000,
+      1,
+      1,
+      10,
+      0,
+      0,
+      'America/Bogota',
+      'PAUSED',
+      false,
+    ]);
   });
 
   it('updates an existing reminder', async () => {
@@ -250,6 +263,19 @@ describe('PUT /api/me/daily-reminder', () => {
       verifiedUser.id,
       'email',
     ]);
-    expect(mockQuery).toHaveBeenLastCalledWith(expect.stringContaining('UPDATE users'), expect.any(Array));
+    expect(mockQuery).toHaveBeenNthCalledWith(4, expect.stringContaining('UPDATE users'), [
+      verifiedUser.id,
+      true,
+      'email',
+      2000,
+      1,
+      1,
+      7,
+      30,
+      0,
+      'America/New_York',
+      'ACTIVE',
+      true,
+    ]);
   });
 });
