@@ -14,6 +14,7 @@ import {
   taskgenTraceByCorrelationParamsSchema,
   taskgenTraceGlobalQuerySchema,
   reminderSendBodySchema,
+  feedbackDefinitionUpdateSchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -28,6 +29,8 @@ import {
   getTaskgenUserOverview,
   retryTaskgenJob,
   sendDailyReminderPreview,
+  listFeedbackDefinitions,
+  updateFeedbackDefinition,
 } from './admin.service.js';
 import {
   getTaskgenEventsByCorrelation,
@@ -70,6 +73,7 @@ const jobIdParamSchema = z.object({
 });
 
 const reminderSendBody = reminderSendBodySchema.default({ channel: 'email' });
+const feedbackDefinitionParamsSchema = z.object({ id: z.string().min(1) });
 
 export const getAdminUsers = asyncHandler(async (req: Request, res: Response) => {
   const query = listUsersQuerySchema.parse(req.query);
@@ -190,4 +194,16 @@ export const postTaskgenForceRun = asyncHandler(async (req: Request, res: Respon
   });
 
   res.json({ ok: true, correlation_id: correlationId });
+});
+
+export const getAdminFeedbackDefinitions = asyncHandler(async (_req: Request, res: Response) => {
+  const items = await listFeedbackDefinitions();
+  res.json({ items, total: items.length, syncedAt: new Date().toISOString() });
+});
+
+export const patchAdminFeedbackDefinition = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = feedbackDefinitionParamsSchema.parse(req.params);
+  const body = feedbackDefinitionUpdateSchema.parse(req.body);
+  const item = await updateFeedbackDefinition(id, body);
+  res.json({ item });
 });

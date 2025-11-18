@@ -123,6 +123,49 @@ export const reminderSendBodySchema = z.object({
   channel: z.literal('email').optional().default('email'),
 });
 
+const feedbackStatusSchema = z.enum(['active', 'paused', 'draft', 'deprecated']);
+
+const feedbackCtaSchema = z
+  .object({
+    label: z.string().trim().min(1).max(120),
+    href: z
+      .string()
+      .trim()
+      .min(1)
+      .max(500)
+      .optional()
+      .nullable()
+      .transform((value) => value ?? null),
+  })
+  .transform((value) => ({ label: value.label, href: value.href ?? null }));
+
+export const feedbackDefinitionUpdateSchema = z
+  .object({
+    label: z.string().trim().min(1).max(200).optional(),
+    copy: z.string().trim().min(1).max(2000).optional(),
+    trigger: z.string().trim().min(1).max(500).optional(),
+    channel: z.string().trim().min(1).max(120).optional(),
+    type: z.string().trim().min(1).max(100).optional(),
+    frequency: z.string().trim().min(1).max(120).optional(),
+    scope: z
+      .array(z.string().trim().min(1).max(80))
+      .min(1)
+      .max(8)
+      .optional(),
+    status: feedbackStatusSchema.optional(),
+    priority: z.coerce.number().int().min(0).max(100).optional(),
+    cta: feedbackCtaSchema.nullable().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (!Object.keys(value).length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'At least one property must be provided',
+        path: [],
+      });
+    }
+  });
+
 export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
 export type LogsQuery = z.infer<typeof logsQuerySchema>;
 export type InsightQuery = z.infer<typeof insightQuerySchema>;
@@ -134,3 +177,4 @@ export type TaskgenForceRunBody = z.infer<typeof taskgenForceRunBodySchema>;
 export type TaskgenTraceQuery = z.infer<typeof taskgenTraceQuerySchema>;
 export type TaskgenTraceGlobalQuery = z.infer<typeof taskgenTraceGlobalQuerySchema>;
 export type ReminderSendBody = z.infer<typeof reminderSendBodySchema>;
+export type FeedbackDefinitionUpdateInput = z.infer<typeof feedbackDefinitionUpdateSchema>;
