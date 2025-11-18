@@ -22,7 +22,7 @@ Este documento resume cómo funcionan los recordatorios diarios por correo, qué
 | `CRON_SECRET` | Secreta compartida entre el scheduler y `POST /internal/cron/daily-reminders`. La ruta responde `401` si el header `X-CRON-SECRET` no coincide. |
 | `EMAIL_PROVIDER_NAME` | `console` (default) imprime payloads en logs. `resend` habilita envíos reales. |
 | `EMAIL_PROVIDER_API_KEY` | Requerida cuando `EMAIL_PROVIDER_NAME=resend`. API key de Resend. |
-| `EMAIL_FROM` | Dirección usada como remitente cuando `EMAIL_PROVIDER_NAME=resend`. Ej: `Innerbloom <daily-quest@example.com>`. |
+| `EMAIL_FROM` | Dirección usada como remitente cuando `EMAIL_PROVIDER_NAME=resend`. Debe usar un dominio verificado en Resend o el sandbox `onboarding@resend.dev` (las direcciones de Gmail/Outlook se rechazan). Ej: `Innerbloom <daily-quest@example.com>`. |
 | `DAILY_REMINDER_CTA_URL` | URL personalizada para el botón "Abrir Innerbloom" dentro del mail (default `https://innerbloom.app/daily-quest`). |
 
 > [!TIP]

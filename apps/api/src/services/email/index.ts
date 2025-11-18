@@ -26,6 +26,8 @@ function createResendProvider(): EmailProvider {
     throw new Error('EMAIL_FROM is required when EMAIL_PROVIDER_NAME=resend');
   }
 
+  assertValidResendFromAddress(from);
+
   return new ResendEmailProvider({ apiKey, defaultFrom: from });
 }
 
@@ -56,3 +58,51 @@ export function resetEmailProviderCache(): void {
 }
 
 export type { EmailMessage, EmailProvider } from './email-provider.js';
+
+const DISALLOWED_FROM_DOMAINS = new Set([
+  'gmail.com',
+  'googlemail.com',
+  'hotmail.com',
+  'outlook.com',
+  'live.com',
+  'msn.com',
+  'yahoo.com',
+  'icloud.com',
+]);
+
+function assertValidResendFromAddress(from: string): void {
+  const email = extractEmailAddress(from);
+
+  if (!email) {
+    throw new Error('EMAIL_FROM must include a valid email address when EMAIL_PROVIDER_NAME=resend');
+  }
+
+  const domain = email.split('@')[1]?.toLowerCase();
+
+  if (!domain) {
+    throw new Error('EMAIL_FROM must include a valid domain when EMAIL_PROVIDER_NAME=resend');
+  }
+
+  if (DISALLOWED_FROM_DOMAINS.has(domain)) {
+    throw new Error(
+      `EMAIL_FROM cannot use addresses from ${domain} when EMAIL_PROVIDER_NAME=resend. ` +
+        'Resend only delivers from verified domains that you own. Use onboarding@resend.dev or verify your domain at https://resend.com/domains.',
+    );
+  }
+}
+
+function extractEmailAddress(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const bracketMatch = trimmed.match(/<([^>]+)>/);
+  const candidate = (bracketMatch ? bracketMatch[1] : trimmed).trim();
+
+  if (!candidate.includes('@')) {
+    return null;
+  }
+
+  return candidate.toLowerCase();
+}
