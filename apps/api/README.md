@@ -16,7 +16,7 @@
 | `ALLOW_X_USER_ID_DEV` | ➖ | Enables the deprecated `X-User-Id` header for `/users/me` when running locally (defaults to `false`). The flag has no effect in production and will be removed on 2024-09-30. |
 | `EMAIL_PROVIDER_NAME` | ➖ | Selects the email provider. Use `resend` for production delivery or `console` (default) to log payloads locally. |
 | `EMAIL_PROVIDER_API_KEY` | ➖ | Required when `EMAIL_PROVIDER_NAME=resend`; pass the Resend API key used to send transactional emails. |
-| `EMAIL_FROM` | ➖ | Required when `EMAIL_PROVIDER_NAME=resend`. Sets the default `From` header, e.g. `Innerbloom <daily-quest@example.com>`. |
+| `EMAIL_FROM` | ➖ | Required when `EMAIL_PROVIDER_NAME=resend`. Must belong to a domain verified in Resend (or `onboarding@resend.dev`); consumer inboxes like Gmail/Outlook are rejected. Example: `Innerbloom <daily-quest@example.com>`. |
 | `CRON_SECRET` | ➖ | Shared secret required by the cron endpoint (`POST /internal/cron/daily-reminders`). |
 | `DAILY_REMINDER_CTA_URL` | ➖ | Optional override for the link included in reminder emails. Defaults to `https://innerbloom.app/daily-quest`. |
 | `API_LOGGING` | ➖ | Set to `true` to enable verbose console logs for the Clerk webhook and boot sequence. |
