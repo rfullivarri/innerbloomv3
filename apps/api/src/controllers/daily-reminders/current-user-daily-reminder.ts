@@ -17,14 +17,6 @@ const DEFAULT_STATUS = 'paused';
 const DELIVERY_STRATEGY = 'user_local_time';
 const SUPPORTED_CHANNELS = new Set(['email']);
 const SELECT_USER_TIMEZONE_SQL = 'SELECT timezone FROM users WHERE user_id = $1 LIMIT 1';
-const UPDATE_USER_FIRST_PROGRAMMED_SQL = `
-  UPDATE users
-     SET first_programmed = true,
-         updated_at = now()
-   WHERE user_id = $1
-     AND (first_programmed IS DISTINCT FROM true);
-`;
-
 const LEGACY_TIMESTAMP_ANCHOR = { year: 2000, month: 1, day: 1 };
 const UPDATE_LEGACY_SCHEDULER_SQL = `
   UPDATE users
@@ -32,6 +24,10 @@ const UPDATE_LEGACY_SCHEDULER_SQL = `
          channel_scheduler = $3,
          hour_scheduler = make_timestamptz($4, $5, $6, $7, $8, $9, $10),
          status_scheduler = $11,
+         first_programmed = CASE
+           WHEN $12 THEN true
+           ELSE first_programmed
+         END,
          updated_at = now()
    WHERE user_id = $1;
 `;
@@ -138,7 +134,6 @@ async function persistReminder(
       timezone: overrides.timezone,
       status: body.status,
     });
-    await ensureUserFirstProgrammed(userId);
 
     return updated;
   }
@@ -158,7 +153,6 @@ async function persistReminder(
     timezone: overrides.timezone,
     status: body.status,
   });
-  await ensureUserFirstProgrammed(userId);
 
   return created;
 }
@@ -184,11 +178,8 @@ async function syncLegacySchedulerColumns(input: {
     seconds,
     input.timezone,
     toLegacyStatus(input.status),
+    input.status === 'active',
   ]);
-}
-
-async function ensureUserFirstProgrammed(userId: string): Promise<void> {
-  await pool.query(UPDATE_USER_FIRST_PROGRAMMED_SQL, [userId]);
 }
 
 function resolveChannel(query: Request['query']): ReminderChannel {
