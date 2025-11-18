@@ -8,8 +8,7 @@ Este documento resume cómo funcionan los recordatorios diarios por correo, qué
 2. **`internal` route** (`apps/api/src/routes/internal.ts`): valida `CRON_SECRET` y ejecuta `runDailyReminderJob(now)`.
 3. **Servicio** (`apps/api/src/services/dailyReminderJob.ts`):
    - Lee los recordatorios pendientes con `findPendingEmailReminders(now)`.
-   - Construye el contenido del mail usando `Intl.DateTimeFormat` para convertir `now` al huso horario efectivo de cada usuario y mostrar la fecha local.
-   - Toma el `local_time` almacenado en UTC y lo transforma a la hora legible del usuario (`formatLocalTimeLabel`).
+   - Construye el contenido del mail usando `Intl.DateTimeFormat` para convertir `now` al huso horario efectivo de cada usuario, mostrar la fecha local y aplicar el layout oscuro de Innerbloom.
    - Envía el mensaje con el proveedor configurado y actualiza `last_sent_at` vía `markRemindersAsSent` sólo para los IDs enviados con éxito.
 4. **Repositorio** (`apps/api/src/repositories/user-daily-reminders.repository.ts`): la query `findPendingEmailReminders` convierte `now` a la zona horaria efectiva (`timezone(COALESCE(...), $1)`) y filtra:
    - `timezone(..., now)::time >= local_time` asegura que sólo se retorne el horario ya alcanzado en la franja local.
@@ -23,7 +22,7 @@ Este documento resume cómo funcionan los recordatorios diarios por correo, qué
 | `EMAIL_PROVIDER_NAME` | `console` (default) imprime payloads en logs. `resend` habilita envíos reales. |
 | `EMAIL_PROVIDER_API_KEY` | Requerida cuando `EMAIL_PROVIDER_NAME=resend`. API key de Resend. |
 | `EMAIL_FROM` | Dirección usada como remitente cuando `EMAIL_PROVIDER_NAME=resend`. Debe usar un dominio verificado en Resend o el sandbox `onboarding@resend.dev` (las direcciones de Gmail/Outlook se rechazan). Ej: `Innerbloom <daily-quest@example.com>`. |
-| `DAILY_REMINDER_CTA_URL` | URL personalizada para el botón "Abrir Innerbloom" dentro del mail (default `https://innerbloom.app/daily-quest`). |
+| `DAILY_REMINDER_CTA_URL` | URL personalizada para el botón "Abrir Innerbloom" dentro del mail (default `https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open`). |
 
 > [!TIP]
 > Añade `EMAIL_PROVIDER_NAME=console` en desarrollo para ver el HTML en la terminal y evitar llamadas externas.

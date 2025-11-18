@@ -133,6 +133,7 @@ export default function DashboardV3Page() {
   const dailyButtonRef = useRef<HTMLButtonElement | null>(null);
   const dailyQuestModalRef = useRef<DailyQuestModalHandle | null>(null);
   const reminderSchedulerDialogRef = useRef<ReminderSchedulerDialogHandle | null>(null);
+  const hasAutoOpenedDailyQuestRef = useRef(false);
 
   const handleOpenDaily = useCallback(() => {
     dailyQuestModalRef.current?.open();
@@ -141,6 +142,35 @@ export default function DashboardV3Page() {
   const handleOpenReminderScheduler = useCallback(() => {
     reminderSchedulerDialogRef.current?.open();
   }, []);
+
+  useEffect(() => {
+    if (!backendUserId || hasAutoOpenedDailyQuestRef.current) {
+      return;
+    }
+
+    const searchParams = new URLSearchParams(location.search);
+    const queryParamName = searchParams.has('daily-quest')
+      ? 'daily-quest'
+      : searchParams.has('dailyQuest')
+        ? 'dailyQuest'
+        : null;
+    const rawValue = queryParamName ? searchParams.get(queryParamName) : null;
+    const normalizedValue = rawValue?.trim().toLowerCase();
+    const allowedValues = new Set(['1', 'true', 'open', 'yes']);
+    const hasEmptyValue = queryParamName != null && (!rawValue || rawValue.trim() === '');
+    const shouldOpenFromQuery = Boolean(
+      queryParamName && (hasEmptyValue || (normalizedValue && allowedValues.has(normalizedValue))),
+    );
+    const normalizedHash = location.hash?.toLowerCase() ?? '';
+    const shouldOpenFromHash = normalizedHash === '#daily-quest';
+
+    if (!shouldOpenFromQuery && !shouldOpenFromHash) {
+      return;
+    }
+
+    hasAutoOpenedDailyQuestRef.current = true;
+    dailyQuestModalRef.current?.open();
+  }, [backendUserId, location.hash, location.search]);
 
   return (
     <DevErrorBoundary>

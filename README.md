@@ -74,7 +74,7 @@ El worker de recordatorios vive en `apps/api`. Para habilitar los envíos necesi
 
 1. Definir `EMAIL_PROVIDER_NAME`. Usa `console` en desarrollo para imprimir los payloads y `resend` en producción para entregar correos reales.
 2. Cuando `EMAIL_PROVIDER_NAME=resend`, también debes definir `EMAIL_PROVIDER_API_KEY` (API key de Resend) y `EMAIL_FROM` (por ejemplo `Innerbloom <daily-quest@example.com>`). Este remitente debe pertenecer a un dominio verificado en Resend o usar el sandbox `onboarding@resend.dev`; las direcciones de Gmail, Outlook, etc. son rechazadas porque esos dominios no pueden verificarse desde tu cuenta.
-3. Configurar `DAILY_REMINDER_CTA_URL` si querés personalizar el enlace del botón (default `https://innerbloom.app/daily-quest`).
+3. Configurar `DAILY_REMINDER_CTA_URL` si querés personalizar el enlace del botón (default `https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open`).
 4. Establecer `CRON_SECRET` tanto en el servicio API como en el scheduler que dispare el job.
 
 ### Cron en producción
