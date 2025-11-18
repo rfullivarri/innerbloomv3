@@ -14,11 +14,8 @@ function shouldShowBbddWarning(journey: UserJourneySummary | null): boolean {
 
 function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean {
   if (!journey) return false;
-  if (journey.first_programmed) return false;
-
-  const logs = journey.quantity_daily_logs ?? 0;
-  const days = journey.days_of_journey ?? 0;
-  return logs > 0 && days >= 7;
+  // The blue banner must only depend on whether the user ever programmed the scheduler.
+  return journey.first_programmed === false;
 }
 
 export function Alerts({ userId, onScheduleClick }: AlertsProps) {
