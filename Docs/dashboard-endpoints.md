@@ -101,7 +101,6 @@ Este documento resume los endpoints HTTP disponibles en el backend del dashboard
     }
   ]
 }</code></pre> |
-| Módulo "Recent Activity" | `GET /task-logs` | <pre><code>[]</code></pre> |
 | Tarjeta "Emotion Timeline" | `GET /users/:id/emotions` | <pre><code>{
   "user_id": "45f3c8f5-4cf6-4a54-8d1e-41f2812ac012",
   "range": { "from": "2024-04-28", "to": "2024-05-27" },
@@ -269,7 +268,6 @@ curl -X GET \
 * **Uso:** no existe endpoint dedicado; la tarjeta legacy calcula `current` y `longest` procesando los datos de `/xp/daily` en el cliente.
 
 ### `GET /task-logs`
-* **Uso:** módulo "Recent Activity" lista las últimas quests completadas.
 * **Parámetros:** `userId` (UUID) obligatorio, `limit` opcional.
 * **Respuesta:** actualmente devuelve `[]`; el backend valida parámetros pero la restauración de logs aún no está implementada.
 

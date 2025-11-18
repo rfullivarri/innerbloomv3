@@ -31,7 +31,7 @@ El endpoint `/users/:id/emotions` puede devolver `emotion_id` como número o ide
 - **`components/DevErrorBoundary.tsx`** + **`pages/Dashboard*.tsx`** + **`main.tsx`**: ErrorBoundary global y flag `__DBG`/`setDbg` para evitar pantallas en blanco y controlar el logging.
 - **`lib/api.ts`**: helper `logShape`, normalización defensiva (`extractArray`) y shape-logs por endpoint (`task-logs`, `emotions`, `tasks`, `user-daily-xp`, etc.). El mapeo de emociones ahora fuerza strings.
 - **`lib/safe.ts`**: helper `safeMap` para evitar `.map` sobre no-arrays.
-- **`components/dashboard/RecentActivity.tsx`**: dataset protegido (`rows` normalizado), log `[TASK-LOGS] raw types`, `safeMap` + `dateStr` en vez de accesos directos.
+- **(Legacy) `components/dashboard/RecentActivity.tsx`**: dataset protegido (`rows` normalizado), log `[TASK-LOGS] raw types`, `safeMap` + `dateStr` en vez de accesos directos (el módulo fue eliminado posteriormente del dashboard principal).
 - **`components/dashboard/EmotionHeatmap.tsx`**: normalización de `mood` a string antes de truncar.
 
 Con esto, cualquier dataset inesperado queda registrado, el UI se mantiene visible gracias al `DevErrorBoundary` y los `.slice(...)` sólo se ejecutan sobre strings válidos.

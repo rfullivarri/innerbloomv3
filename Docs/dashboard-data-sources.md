@@ -13,11 +13,8 @@
 | `GET /users/:id/tasks` | "Missions" (V3) · `MissionsSection` | Lista de tareas activas (`task`, `pillar_id`, `xp_base`) | Presenta el backlog de misiones hasta que exista un endpoint dedicado a quests. |
 | `GET /users/:id/tasks` | Panel de rachas legacy · `LegacyStreaksPanel` | Lista de tareas activas | Muestra las misiones filtrables por pilar junto al XP base. |
 | `GET /users/:id/daily-energy` | Tarjeta "Daily Energy" (V3) · `EnergyCard` | Porcentajes normalizados de HP, Mood y Focus | Dibuja las barras de energía con el promedio móvil de 7 días. |
-| `GET /users/:id/pillars` | Sección legacy "Pillars" · `PillarsSection` | Totales `xp`, progreso semanal y `focusAreas` por pilar | Presenta la información dinámica de cada pilar para el usuario autenticado. |
 | `GET /users/:id/xp/by-trait` | Tarjeta "Radar Chart" (V3) · `RadarChartCard` | Totales de XP por rasgo/pilar | Calcula el polígono de fuerzas (Body/Mind/Soul) con acumulados por trait. |
 | `GET /users/:id/emotions` | "Emotion Timeline" (V3) · `EmotionChartCard` | Lista `{ date, emotion_id }` | Genera el heatmap y resumen de emociones destacadas en el periodo seleccionado. |
 | `GET /users/:id/emotions` | Heatmap legacy · `EmotionHeatmap` | Lista `{ date, emotion_id }` | Replica la cuadrícula de estados de ánimo usada en el MVP. |
-| `GET /task-logs` | "Recent Activity" · `RecentActivity` | Logs (`taskTitle`, `completedAt`, `xpAwarded`) | Lista las últimas quests completadas con fecha normalizada. |
 | `GET /users/:id/achievements` | Tarjeta legacy "Achievements" · `AchievementsList` | Array de logros con progreso (`current`, `target`, `pct`) | Muestra hitos desbloqueados y el avance hacia los próximos objetivos. |
 | `GET /users/:id/journey` | Banner de alertas (V3) · `Alerts` | `days_of_journey`, `quantity_daily_logs` | Decide si mostrar recordatorios para confirmar base o agendar Daily Quest. |
-| `GET /pillars` | Sección legacy "Pillars" · `PillarsSection` | Catálogo de pilares (`name`, `description`, `focusAreas`) | Complementa la info dinámica con descripciones estáticas del catálogo global. |
