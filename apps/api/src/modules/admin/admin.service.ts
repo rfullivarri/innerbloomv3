@@ -1364,7 +1364,7 @@ export async function getTaskgenUserOverview(userId: string): Promise<TaskgenUse
 
 export async function sendDailyReminderPreview(
   userId: string,
-  channel: string = 'email',
+  channel = 'email',
 ): Promise<{ ok: true; reminder_id: string; recipient: string; sent_at: string }> {
   if (channel !== 'email') {
     throw new HttpError(400, 'invalid_channel', 'Only email reminders are supported');
