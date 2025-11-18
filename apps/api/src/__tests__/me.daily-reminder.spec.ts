@@ -167,7 +167,8 @@ describe('PUT /api/me/daily-reminder', () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [{ exists: true }] })
       .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [created] });
+      .mockResolvedValueOnce({ rows: [created] })
+      .mockResolvedValueOnce({ rowCount: 1 });
 
     const response = await request(app)
       .put('/api/me/daily-reminder')
@@ -194,6 +195,7 @@ describe('PUT /api/me/daily-reminder', () => {
       verifiedUser.id,
       'email',
     ]);
+    expect(mockQuery).toHaveBeenLastCalledWith(expect.stringContaining('UPDATE users'), expect.any(Array));
   });
 
   it('updates an existing reminder', async () => {
@@ -220,7 +222,8 @@ describe('PUT /api/me/daily-reminder', () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [{ exists: true }] })
       .mockResolvedValueOnce({ rows: [existing] })
-      .mockResolvedValueOnce({ rows: [updated] });
+      .mockResolvedValueOnce({ rows: [updated] })
+      .mockResolvedValueOnce({ rowCount: 1 });
 
     const response = await request(app)
       .put('/api/me/daily-reminder')
@@ -247,5 +250,6 @@ describe('PUT /api/me/daily-reminder', () => {
       verifiedUser.id,
       'email',
     ]);
+    expect(mockQuery).toHaveBeenLastCalledWith(expect.stringContaining('UPDATE users'), expect.any(Array));
   });
 });
