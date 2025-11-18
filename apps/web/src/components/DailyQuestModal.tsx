@@ -59,7 +59,7 @@ const HARD_CELEBRATION_DURATION_MS = 900;
 
 const CELEBRATION_PANEL_DURATION_MS = 1800;
 
-const DEFAULT_HOLD_TO_CLOSE_DURATION_MS = 3000;
+const DEFAULT_HOLD_TO_CLOSE_DURATION_MS = 2000;
 
 const CELEBRATION_MESSAGES = [
   'Registro guardado. ¡Arrancaste con todo! 💥 Seguimos sumando XP hoy.',
@@ -359,13 +359,18 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       return;
     }
 
+    if (successCelebration) {
+      setIsOpen(true);
+      return;
+    }
+
     if (status.submitted || hasCompletedToday || snoozed) {
       setIsOpen(false);
       return;
     }
 
     setIsOpen(true);
-  }, [enabled, status, hasCompletedToday, snoozed, pendingSubmission]);
+  }, [enabled, status, hasCompletedToday, snoozed, pendingSubmission, successCelebration]);
 
   useEffect(() => {
     if (!definition) {
@@ -1226,7 +1231,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           {isCelebrationHoldReady && (
                             <div className="mt-1 flex w-full flex-col items-center gap-2 text-[12px] text-white/80" id="daily-quest-celebration-hold-instructions">
                               <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/70">
-                                Mantené presionado 3 segundos para cerrar
+                                Mantené presionado 2 segundos para cerrar
                               </span>
                               <motion.button
                                 type="button"

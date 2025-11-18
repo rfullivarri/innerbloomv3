@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRef } from 'react';
@@ -118,8 +118,10 @@ describe('DailyQuestModal', () => {
     });
   });
 
-  it('submits the quest and closes the modal on success', async () => {
-    mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
+  it('keeps the celebration visible after submitting so it only closes via the CTA', async () => {
+    mockGetStatus
+      .mockResolvedValueOnce({ date: '2024-03-10', submitted: false, submitted_at: null })
+      .mockResolvedValue({ date: '2024-03-10', submitted: true, submitted_at: '2024-03-10T12:00:00Z' });
     mockGetDefinition.mockResolvedValue(baseDefinition);
     mockSubmit.mockResolvedValue({
       ok: true,
@@ -151,20 +153,19 @@ describe('DailyQuestModal', () => {
       });
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 2300));
+    await screen.findByRole('button', { name: /mantené presionado/i }, { timeout: 4000 });
 
-    await waitFor(
-      () => {
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-      },
-      { timeout: 5000 },
-    );
+    expect(screen.getByText('Mantené presionado 2 segundos para cerrar')).toBeInTheDocument();
+    expect(screen.getByText('+10 XP')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
 
-    expect(
-      await screen.findByRole('button', { name: /mantené presionado/i }, { timeout: 4000 }),
-    ).toBeInTheDocument();
-    expect(screen.getByText('¡Éxitos hoy! A darlo todo. 🚀')).toBeInTheDocument();
-  });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 4000));
+    });
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /mantené presionado/i })).toBeInTheDocument();
+  }, 15000);
 
   it('locks body scroll while the modal is open and restores it on close', async () => {
     mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
