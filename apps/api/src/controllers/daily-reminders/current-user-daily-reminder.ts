@@ -17,6 +17,15 @@ const DEFAULT_STATUS = 'paused';
 const DELIVERY_STRATEGY = 'user_local_time';
 const SUPPORTED_CHANNELS = new Set(['email']);
 const SELECT_USER_TIMEZONE_SQL = 'SELECT timezone FROM users WHERE user_id = $1 LIMIT 1';
+const SELECT_USER_SCHEDULER_STATE_SQL =
+  'SELECT scheduler_enabled, status_scheduler FROM users WHERE user_id = $1 LIMIT 1';
+const UPDATE_USER_FIRST_PROGRAMMED_SQL = `
+  UPDATE users
+     SET first_programmed = true,
+         updated_at = now()
+   WHERE user_id = $1
+     AND (first_programmed IS DISTINCT FROM true);
+`;
 
 const LEGACY_TIMESTAMP_ANCHOR = { year: 2000, month: 1, day: 1 };
 const UPDATE_LEGACY_SCHEDULER_SQL = `
@@ -54,6 +63,11 @@ type SerializedReminder = {
   delivery_strategy: string;
 };
 
+type LegacySchedulerStateRow = {
+  scheduler_enabled: boolean | null;
+  status_scheduler: string | null;
+};
+
 export const getCurrentUserDailyReminderSettings: AsyncHandler = async (req, res) => {
   const authUser = req.user;
 
@@ -63,9 +77,10 @@ export const getCurrentUserDailyReminderSettings: AsyncHandler = async (req, res
 
   const channel = resolveChannel(req.query);
   const reminder = await findUserDailyReminderByUserAndChannel(authUser.id, channel);
+  const legacyState = await resolveLegacySchedulerState(authUser.id);
   const fallbackTimezone = sanitizeTimezone(reminder?.timezone) ?? (await resolveUserTimezone(authUser.id));
 
-  return res.json(serializeReminder(reminder, channel, fallbackTimezone));
+  return res.json(serializeReminder(reminder, channel, fallbackTimezone, legacyState));
 };
 
 export const updateCurrentUserDailyReminderSettings: AsyncHandler = async (req, res) => {
@@ -94,7 +109,14 @@ export const updateCurrentUserDailyReminderSettings: AsyncHandler = async (req, 
     throw new HttpError(500, 'reminder_persist_failed', 'Failed to persist reminder settings');
   }
 
-  return res.json(serializeReminder(reminder, channel, normalizedTimezone));
+  const legacyState: LegacySchedulerStateRow = {
+    scheduler_enabled: body.status === 'active',
+    status_scheduler: toLegacyStatus(body.status),
+  };
+
+  // Keeping the serialized response in sync with the legacy columns ensures the
+  // scheduler toggle always reflects what we persist in the users table.
+  return res.json(serializeReminder(reminder, channel, normalizedTimezone, legacyState));
 };
 
 async function persistReminder(
@@ -119,6 +141,7 @@ async function persistReminder(
       timezone: overrides.timezone,
       status: body.status,
     });
+    await ensureUserFirstProgrammed(userId);
 
     return updated;
   }
@@ -138,6 +161,7 @@ async function persistReminder(
     timezone: overrides.timezone,
     status: body.status,
   });
+  await ensureUserFirstProgrammed(userId);
 
   return created;
 }
@@ -164,6 +188,10 @@ async function syncLegacySchedulerColumns(input: {
     input.timezone,
     toLegacyStatus(input.status),
   ]);
+}
+
+async function ensureUserFirstProgrammed(userId: string): Promise<void> {
+  await pool.query(UPDATE_USER_FIRST_PROGRAMMED_SQL, [userId]);
 }
 
 function resolveChannel(query: Request['query']): ReminderChannel {
@@ -221,6 +249,11 @@ async function resolveUserTimezone(userId: string): Promise<string> {
   return sanitizeTimezone(result.rows[0]?.timezone) ?? DEFAULT_TIMEZONE;
 }
 
+async function resolveLegacySchedulerState(userId: string): Promise<LegacySchedulerStateRow> {
+  const result = await pool.query<LegacySchedulerStateRow>(SELECT_USER_SCHEDULER_STATE_SQL, [userId]);
+  return result.rows[0] ?? { scheduler_enabled: null, status_scheduler: null };
+}
+
 function extractTimeParts(value: string): { hours: number; minutes: number; seconds: number } {
   const [rawHours = '0', rawMinutes = '0', rawSeconds = '0'] = value.split(':');
   return {
@@ -238,17 +271,22 @@ function serializeReminder(
   reminder: UserDailyReminderRow | null,
   channel: ReminderChannel,
   fallbackTimezone: string,
+  legacyState?: LegacySchedulerStateRow | null,
 ): SerializedReminder {
-  const status = reminder?.status ?? DEFAULT_STATUS;
+  const normalizedLegacyStatus = normalizeLegacyStatus(legacyState?.status_scheduler);
+  const normalizedReminderStatus = normalizeReminderStatus(reminder?.status);
+  const status = normalizedLegacyStatus ?? normalizedReminderStatus ?? DEFAULT_STATUS;
   const timezone = sanitizeTimezone(reminder?.timezone) ?? fallbackTimezone ?? DEFAULT_TIMEZONE;
   const localTime = reminder?.local_time ?? DEFAULT_LOCAL_TIME;
+  const enabledFromLegacy = normalizeLegacyEnabled(legacyState?.scheduler_enabled);
+  const enabled = enabledFromLegacy ?? (status === 'active');
 
   return {
     user_daily_reminder_id: reminder?.user_daily_reminder_id ?? null,
     reminder_id: reminder?.user_daily_reminder_id ?? null,
     channel,
     status,
-    enabled: status === 'active',
+    enabled,
     timezone,
     timeZone: timezone,
     time_zone: timezone,
@@ -257,6 +295,43 @@ function serializeReminder(
     last_sent_at: toIsoString(reminder?.last_sent_at),
     delivery_strategy: DELIVERY_STRATEGY,
   };
+}
+
+function normalizeLegacyStatus(value?: string | null): 'active' | 'paused' | null {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.trim().toLowerCase();
+
+  if (['active', 'running', 'on'].includes(normalized)) {
+    return 'active';
+  }
+
+  if (['paused', 'post', 'off'].includes(normalized)) {
+    return 'paused';
+  }
+
+  return null;
+}
+
+function normalizeReminderStatus(value?: string | null): 'active' | 'paused' | null {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (normalized === 'active') {
+    return 'active';
+  }
+  if (normalized === 'paused') {
+    return 'paused';
+  }
+  return null;
+}
+
+function normalizeLegacyEnabled(value?: boolean | null): boolean | null {
+  return typeof value === 'boolean' ? value : null;
 }
 
 function toIsoString(value: Date | string | null | undefined): string | null {
