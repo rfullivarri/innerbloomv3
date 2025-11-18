@@ -17,8 +17,6 @@ const DEFAULT_STATUS = 'paused';
 const DELIVERY_STRATEGY = 'user_local_time';
 const SUPPORTED_CHANNELS = new Set(['email']);
 const SELECT_USER_TIMEZONE_SQL = 'SELECT timezone FROM users WHERE user_id = $1 LIMIT 1';
-const SELECT_USER_SCHEDULER_STATE_SQL =
-  'SELECT scheduler_enabled, status_scheduler FROM users WHERE user_id = $1 LIMIT 1';
 const UPDATE_USER_FIRST_PROGRAMMED_SQL = `
   UPDATE users
      SET first_programmed = true,
@@ -77,10 +75,9 @@ export const getCurrentUserDailyReminderSettings: AsyncHandler = async (req, res
 
   const channel = resolveChannel(req.query);
   const reminder = await findUserDailyReminderByUserAndChannel(authUser.id, channel);
-  const legacyState = await resolveLegacySchedulerState(authUser.id);
   const fallbackTimezone = sanitizeTimezone(reminder?.timezone) ?? (await resolveUserTimezone(authUser.id));
 
-  return res.json(serializeReminder(reminder, channel, fallbackTimezone, legacyState));
+  return res.json(serializeReminder(reminder, channel, fallbackTimezone));
 };
 
 export const updateCurrentUserDailyReminderSettings: AsyncHandler = async (req, res) => {
@@ -247,11 +244,6 @@ function sanitizeTimezone(value?: string | null): string | null {
 async function resolveUserTimezone(userId: string): Promise<string> {
   const result = await pool.query<{ timezone: string | null }>(SELECT_USER_TIMEZONE_SQL, [userId]);
   return sanitizeTimezone(result.rows[0]?.timezone) ?? DEFAULT_TIMEZONE;
-}
-
-async function resolveLegacySchedulerState(userId: string): Promise<LegacySchedulerStateRow> {
-  const result = await pool.query<LegacySchedulerStateRow>(SELECT_USER_SCHEDULER_STATE_SQL, [userId]);
-  return result.rows[0] ?? { scheduler_enabled: null, status_scheduler: null };
 }
 
 function extractTimeParts(value: string): { hours: number; minutes: number; seconds: number } {
