@@ -111,18 +111,19 @@ export const ReminderSchedulerDialog = forwardRef<
           exit={{ opacity: 0 }}
           onClick={handleOverlayClick}
         >
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            className="absolute inset-x-4 bottom-6 flex max-h-[80vh] flex-col rounded-3xl border border-white/10 bg-surface/95 p-5 shadow-2xl md:inset-auto md:left-1/2 md:top-1/2 md:w-[92vw] md:max-h-[85vh] md:max-w-[560px] md:-translate-x-1/2 md:-translate-y-1/2"
-            initial={{ opacity: 0, y: 64 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 64 }}
-          >
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[0.65rem] uppercase tracking-[0.32em] text-text-muted">Scheduler diario</p>
+          <div className="absolute inset-x-4 bottom-6 md:inset-auto md:left-1/2 md:top-1/2 md:w-[92vw] md:max-w-[560px]">
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              className="flex max-h-[80vh] flex-col rounded-3xl border border-white/10 bg-surface/95 p-5 shadow-2xl md:max-h-[85vh] md:-translate-x-1/2 md:-translate-y-1/2"
+              initial={{ opacity: 0, y: 64 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 64 }}
+            >
+              <div className="mb-4 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[0.65rem] uppercase tracking-[0.32em] text-text-muted">Scheduler diario</p>
                 <h2 id={titleId} className="font-display text-2xl font-semibold text-white">
                   Recordatorios inteligentes
                 </h2>
@@ -153,7 +154,8 @@ export const ReminderSchedulerDialog = forwardRef<
             <div className="flex-1 overflow-y-auto pr-1">
               <DailyReminderSettings />
             </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </motion.div>
       ) : null}
     </AnimatePresence>,
