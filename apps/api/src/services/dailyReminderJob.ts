@@ -49,8 +49,19 @@ export function buildReminderEmail(row: PendingEmailReminderRow, now: Date): Ema
   const name = resolveDisplayName(row);
   const ctaUrl = DEFAULT_CTA_URL;
   const friendlyDate = formatLocalDate(now, row.effective_timezone);
-  const subject = `${name}, tu Daily Quest ya te espera ✨`;
+  const subject = `${name}, tu Daily Quest de ${friendlyDate} ya está lista ✨`;
   const intro = `Tu Daily Quest de ${friendlyDate} ya está lista.`;
+  let sendTime: string;
+  try {
+    sendTime = new Intl.DateTimeFormat('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: row.effective_timezone,
+    }).format(now);
+  } catch (error) {
+    console.warn({ error }, 'Failed to format send time for reminder email');
+    sendTime = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }).format(now);
+  }
   const html = `<!doctype html>
 <html lang="es">
   <head>
@@ -71,6 +82,7 @@ export function buildReminderEmail(row: PendingEmailReminderRow, now: Date): Ema
                 <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#e2e8f0;">Sumá XP registrando tu emoción del día y marcando los hábitos completados. Cada check-in cuenta. 💫</p>
                 <a href="${ctaUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;background-image:linear-gradient(120deg,#8b5cf6,#38bdf8);color:#ffffff;padding:14px 36px;border-radius:999px;text-decoration:none;font-weight:700;font-size:16px;letter-spacing:0.02em;">Abrir Daily Quest</a>
                 <p style="margin:24px 0 0;font-size:12px;line-height:1.5;color:#94a3b8;">Si el botón no funciona, copiá y pegá este enlace en tu navegador:<br /><a href="${ctaUrl}" style="color:#a5b4fc;text-decoration:none;">${ctaUrl}</a></p>
+                <p style="margin:12px 0 0;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#475569;">Recordatorio enviado ${friendlyDate} · ${sendTime}</p>
               </td>
             </tr>
           </table>
@@ -84,6 +96,7 @@ export function buildReminderEmail(row: PendingEmailReminderRow, now: Date): Ema
     `${intro} Sumá XP registrando tu emoción del día y marcando tus hábitos completados.`,
     'Cada check cuenta. 💫',
     `Abrir Daily Quest: ${ctaUrl}`,
+    `Recordatorio enviado ${friendlyDate} · ${sendTime}`,
   ].join('\n\n');
 
   return { to: resolveRecipient(row) ?? '', subject, html, text };
