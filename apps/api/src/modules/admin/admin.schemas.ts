@@ -155,6 +155,7 @@ export const feedbackDefinitionUpdateSchema = z
     status: feedbackStatusSchema.optional(),
     priority: z.coerce.number().int().min(0).max(100).optional(),
     cta: feedbackCtaSchema.nullable().optional(),
+    config: z.record(z.any()).optional(),
   })
   .superRefine((value, ctx) => {
     if (!Object.keys(value).length) {

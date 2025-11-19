@@ -15,6 +15,13 @@ import type { AdminUser, FeedbackDefinition } from '../../lib/types';
 import { ToastBanner } from '../../components/common/ToastBanner';
 import { UserPicker } from '../../components/admin/UserPicker';
 import { Skeleton } from '../../components/common/Skeleton';
+import { NotificationPopup } from '../../components/feedback/NotificationPopup';
+import {
+  buildPreviewLevelPayload,
+  buildPreviewStreakPayload,
+  formatLevelNotification,
+  formatStreakNotification,
+} from '../../lib/notifications';
 
 type TabId = 'global' | 'user';
 
@@ -22,6 +29,17 @@ const TABS: { id: TabId; label: string; helper: string }[] = [
   { id: 'global', label: 'Vista global', helper: 'Lista de notificaciones', },
   { id: 'user', label: 'Vista por usuario', helper: 'Foco en un usuario concreto', },
 ];
+
+const LEVEL_UP_NOTIFICATION_KEY = 'inapp_level_up_popup';
+const STREAK_NOTIFICATION_KEY = 'inapp_streak_fire_popup';
+const DEFAULT_LEVEL_TITLE = '¡Subiste de nivel!';
+const DEFAULT_LEVEL_TEMPLATE = 'Acabás de llegar al nivel {{level}}. Seguí así.';
+const DEFAULT_LEVEL_EMOJI = '🏆';
+const DEFAULT_STREAK_TITLE = 'Racha encendida 🔥';
+const DEFAULT_STREAK_SINGLE_TEMPLATE = '🔥 {{taskName}} lleva {{streakDays}} días.';
+const DEFAULT_STREAK_AGGREGATE_TEMPLATE = '🔥 Tenés {{count}} tareas arriba de {{threshold}} días.';
+const DEFAULT_STREAK_EMOJI = '🔥';
+const DEFAULT_STREAK_THRESHOLD = 3;
 
 export function FeedbackManagerPage() {
   const [activeTab, setActiveTab] = useState<TabId>('global');
@@ -843,7 +861,9 @@ type NotificationPreviewModalProps = {
 };
 
 function NotificationPreviewModal({ definition, onClose }: NotificationPreviewModalProps) {
-  const previewCopy = formatPreviewCopy(definition.copy, definition.previewVariables);
+  const previewCopy = formatPreviewCopy(definition.copy, definition.previewVariables ?? {});
+  const inlinePreview = buildInAppPreview(definition, onClose);
+  const hasInlinePreview = Boolean(inlinePreview);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-6">
       <div className="absolute inset-0" aria-hidden onClick={onClose} />
@@ -863,19 +883,44 @@ function NotificationPreviewModal({ definition, onClose }: NotificationPreviewMo
           </button>
         </header>
         <div className="mt-5 space-y-4">
-          <p className="whitespace-pre-line text-sm text-slate-100">{previewCopy}</p>
+          {hasInlinePreview ? (
+            <>
+              <div
+                className="rounded-3xl border border-white/10 bg-slate-950/40 p-4"
+                onClickCapture={(event) => {
+                  const target = event.target as HTMLElement | null;
+                  if (target?.closest('a')) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }
+                }}
+              >
+                {inlinePreview}
+              </div>
+              <p className="text-xs text-slate-500">Texto base: {previewCopy}</p>
+            </>
+          ) : (
+            <p className="whitespace-pre-line text-sm text-slate-100">{previewCopy}</p>
+          )}
           <p className="text-xs text-slate-500">Trigger: {definition.trigger}</p>
           {definition.cta ? (
-            <div>
-              <p className="text-xs text-slate-400">CTA:</p>
-              <button
-                type="button"
-                className="mt-2 w-full rounded-lg bg-sky-500/80 px-4 py-2 text-sm font-semibold text-slate-950"
-              >
-                {definition.cta.label}
-              </button>
-              <p className="mt-1 text-[11px] text-slate-500">Destino: {definition.cta.href ?? 'Sin ruta'}</p>
-            </div>
+            hasInlinePreview ? (
+              <p className="text-xs text-slate-500">
+                CTA configurada: <span className="font-semibold text-slate-100">{definition.cta.label}</span> · Destino:{' '}
+                {definition.cta.href ?? 'Sin ruta'}
+              </p>
+            ) : (
+              <div>
+                <p className="text-xs text-slate-400">CTA:</p>
+                <button
+                  type="button"
+                  className="mt-2 w-full rounded-lg bg-sky-500/80 px-4 py-2 text-sm font-semibold text-slate-950"
+                >
+                  {definition.cta.label}
+                </button>
+                <p className="mt-1 text-[11px] text-slate-500">Destino: {definition.cta.href ?? 'Sin ruta'}</p>
+              </div>
+            )
           ) : (
             <p className="text-xs text-slate-500">Sin CTA configurada</p>
           )}
@@ -883,6 +928,47 @@ function NotificationPreviewModal({ definition, onClose }: NotificationPreviewMo
       </article>
     </div>
   );
+}
+
+function buildInAppPreview(definition: FeedbackDefinition, onClose: () => void) {
+  if (definition.channel !== 'in_app_popup') {
+    return null;
+  }
+  if (definition.notificationKey === LEVEL_UP_NOTIFICATION_KEY) {
+    const payload = buildPreviewLevelPayload(definition);
+    const formatted = formatLevelNotification(definition, payload);
+    return (
+      <NotificationPopup
+        inline
+        open
+        title={formatted.title}
+        message={formatted.message}
+        emoji={formatted.emoji}
+        emojiAnimation={formatted.emojiAnimation}
+        tasks={formatted.tasks}
+        cta={definition.cta}
+        onClose={onClose}
+      />
+    );
+  }
+  if (definition.notificationKey === STREAK_NOTIFICATION_KEY) {
+    const payload = buildPreviewStreakPayload(definition);
+    const formatted = formatStreakNotification(definition, payload);
+    return (
+      <NotificationPopup
+        inline
+        open
+        title={formatted.title}
+        message={formatted.message}
+        emoji={formatted.emoji}
+        emojiAnimation={formatted.emojiAnimation}
+        tasks={formatted.tasks}
+        cta={definition.cta}
+        onClose={onClose}
+      />
+    );
+  }
+  return null;
 }
 
 type NotificationEditorPanelProps = {
@@ -904,6 +990,15 @@ type EditorFormState = {
   scope: string;
   ctaLabel: string;
   ctaHref: string;
+  levelUpTitle?: string;
+  levelUpMessage?: string;
+  levelUpEmoji?: string;
+  streakTitle?: string;
+  streakSingleTemplate?: string;
+  streakAggregateTemplate?: string;
+  streakEmoji?: string;
+  streakThreshold?: string;
+  streakListMode?: 'auto' | 'single' | 'aggregate';
 };
 
 function NotificationEditorPanel({ definition, onClose, onSave, saving }: NotificationEditorPanelProps) {
@@ -920,12 +1015,12 @@ function NotificationEditorPanel({ definition, onClose, onSave, saving }: Notifi
       event.preventDefault();
       setLocalError(null);
       try {
-        await onSave(definition.id, buildEditorPayload(formState));
+        await onSave(definition.id, buildEditorPayload(definition, formState));
       } catch {
         setLocalError('No se pudo guardar. Revisá los campos e intentá nuevamente.');
       }
     },
-    [definition.id, formState, onSave],
+    [definition, formState, onSave],
   );
 
   return (
@@ -1053,6 +1148,103 @@ function NotificationEditorPanel({ definition, onClose, onSave, saving }: Notifi
               />
             </div>
           </div>
+          {definition.notificationKey === LEVEL_UP_NOTIFICATION_KEY ? (
+            <div className="mt-6 space-y-3 rounded-2xl border border-slate-800/60 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Config pop-up nivel</p>
+              <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Título
+                <input
+                  value={formState.levelUpTitle ?? ''}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, levelUpTitle: event.target.value }))}
+                  className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                />
+              </label>
+              <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Mensaje
+                <textarea
+                  value={formState.levelUpMessage ?? ''}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, levelUpMessage: event.target.value }))}
+                  rows={3}
+                  className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                />
+              </label>
+              <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Emoji
+                <input
+                  value={formState.levelUpEmoji ?? ''}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, levelUpEmoji: event.target.value }))}
+                  className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                />
+              </label>
+            </div>
+          ) : null}
+          {definition.notificationKey === STREAK_NOTIFICATION_KEY ? (
+            <div className="mt-6 space-y-3 rounded-2xl border border-slate-800/60 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Config pop-up streaks</p>
+              <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Título
+                <input
+                  value={formState.streakTitle ?? ''}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, streakTitle: event.target.value }))}
+                  className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                />
+              </label>
+              <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Texto una tarea
+                <textarea
+                  value={formState.streakSingleTemplate ?? ''}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, streakSingleTemplate: event.target.value }))}
+                  rows={2}
+                  className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                />
+              </label>
+              <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Texto agrupado
+                <textarea
+                  value={formState.streakAggregateTemplate ?? ''}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, streakAggregateTemplate: event.target.value }))}
+                  rows={2}
+                  className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                />
+              </label>
+              <div className="grid gap-3 md:grid-cols-2">
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  Umbral (días)
+                  <input
+                    type="number"
+                    value={formState.streakThreshold ?? ''}
+                    onChange={(event) => setFormState((prev) => ({ ...prev, streakThreshold: event.target.value }))}
+                    className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                  />
+                </label>
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  Modo de lista
+                  <select
+                    value={formState.streakListMode ?? 'auto'}
+                    onChange={(event) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        streakListMode: event.target.value as EditorFormState['streakListMode'],
+                      }))
+                    }
+                    className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                  >
+                    <option value="auto">Auto</option>
+                    <option value="single">Solo individual</option>
+                    <option value="aggregate">Siempre agrupado</option>
+                  </select>
+                </label>
+              </div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Emoji
+                <input
+                  value={formState.streakEmoji ?? ''}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, streakEmoji: event.target.value }))}
+                  className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                />
+              </label>
+            </div>
+          ) : null}
         </div>
         <div className="mt-6 flex gap-3">
           <button
@@ -1076,7 +1268,7 @@ function NotificationEditorPanel({ definition, onClose, onSave, saving }: Notifi
 }
 
 function buildEditorFormState(definition: FeedbackDefinition): EditorFormState {
-  return {
+  const base: EditorFormState = {
     label: definition.label,
     copy: definition.copy,
     trigger: definition.trigger,
@@ -1089,9 +1281,41 @@ function buildEditorFormState(definition: FeedbackDefinition): EditorFormState {
     ctaLabel: definition.cta?.label ?? '',
     ctaHref: definition.cta?.href ?? '',
   };
+
+  const config = definition.config ?? {};
+  const preview = definition.previewVariables ?? {};
+
+  if (definition.notificationKey === LEVEL_UP_NOTIFICATION_KEY) {
+    base.levelUpTitle = getStringOrUndefined(config.title) ?? DEFAULT_LEVEL_TITLE;
+    const messageFallback =
+      getStringOrUndefined(config.messageTemplate) ?? getStringOrUndefined(definition.copy) ?? DEFAULT_LEVEL_TEMPLATE;
+    base.levelUpMessage = messageFallback;
+    base.levelUpEmoji = getStringOrUndefined(config.emoji) ?? DEFAULT_LEVEL_EMOJI;
+  }
+
+  if (definition.notificationKey === STREAK_NOTIFICATION_KEY) {
+    const thresholdFromConfig = coercePositiveIntValue(config.threshold);
+    const thresholdFromPreview = coercePositiveIntValue(preview.threshold);
+    const threshold = thresholdFromConfig ?? thresholdFromPreview ?? DEFAULT_STREAK_THRESHOLD;
+    const singleTemplateFallback =
+      getStringOrUndefined(config.singleTemplate) ?? getStringOrUndefined(definition.copy) ?? DEFAULT_STREAK_SINGLE_TEMPLATE;
+    const aggregateTemplateFallback =
+      getStringOrUndefined(config.aggregateTemplate) ?? DEFAULT_STREAK_AGGREGATE_TEMPLATE;
+    base.streakTitle = getStringOrUndefined(config.title) ?? DEFAULT_STREAK_TITLE;
+    base.streakSingleTemplate = singleTemplateFallback;
+    base.streakAggregateTemplate = aggregateTemplateFallback;
+    base.streakEmoji = getStringOrUndefined(config.emoji) ?? DEFAULT_STREAK_EMOJI;
+    base.streakThreshold = String(threshold);
+    base.streakListMode = parseStreakListMode(config.listMode) ?? 'auto';
+  }
+
+  return base;
 }
 
-function buildEditorPayload(state: EditorFormState): FeedbackDefinitionUpdatePayload {
+function buildEditorPayload(
+  definition: FeedbackDefinition,
+  state: EditorFormState,
+): FeedbackDefinitionUpdatePayload {
   const scopeValues = state.scope
     .split(',')
     .map((value) => value.trim())
@@ -1120,7 +1344,81 @@ function buildEditorPayload(state: EditorFormState): FeedbackDefinitionUpdatePay
   const ctaHref = state.ctaHref.trim();
   payload.cta = ctaLabel ? { label: ctaLabel, href: ctaHref || null } : null;
 
+  const config = definition.config ?? {};
+
+  if (definition.notificationKey === LEVEL_UP_NOTIFICATION_KEY) {
+    payload.config = {
+      ...config,
+      title: sanitizeInputString(state.levelUpTitle, getStringOrUndefined(config.title) ?? DEFAULT_LEVEL_TITLE),
+      messageTemplate: sanitizeInputString(
+        state.levelUpMessage,
+        getStringOrUndefined(config.messageTemplate) ?? getStringOrUndefined(definition.copy) ?? DEFAULT_LEVEL_TEMPLATE,
+      ),
+      emoji: sanitizeInputString(state.levelUpEmoji, getStringOrUndefined(config.emoji) ?? DEFAULT_LEVEL_EMOJI),
+    };
+  } else if (definition.notificationKey === STREAK_NOTIFICATION_KEY) {
+    const thresholdFallback = coercePositiveIntValue(config.threshold) ?? DEFAULT_STREAK_THRESHOLD;
+    const threshold = Math.max(1, coercePositiveIntValue(state.streakThreshold) ?? thresholdFallback);
+    payload.config = {
+      ...config,
+      title: sanitizeInputString(state.streakTitle, getStringOrUndefined(config.title) ?? DEFAULT_STREAK_TITLE),
+      singleTemplate: sanitizeInputString(
+        state.streakSingleTemplate,
+        getStringOrUndefined(config.singleTemplate) ?? getStringOrUndefined(definition.copy) ?? DEFAULT_STREAK_SINGLE_TEMPLATE,
+      ),
+      aggregateTemplate: sanitizeInputString(
+        state.streakAggregateTemplate,
+        getStringOrUndefined(config.aggregateTemplate) ?? DEFAULT_STREAK_AGGREGATE_TEMPLATE,
+      ),
+      threshold,
+      listMode: parseStreakListMode(state.streakListMode) ?? 'auto',
+      emoji: sanitizeInputString(state.streakEmoji, getStringOrUndefined(config.emoji) ?? DEFAULT_STREAK_EMOJI),
+    };
+  }
+
   return payload;
+}
+
+function getStringOrUndefined(value: unknown): string | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function coercePositiveIntValue(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.max(1, Math.round(value));
+  }
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Number(value.trim());
+    if (Number.isFinite(parsed)) {
+      return Math.max(1, Math.round(parsed));
+    }
+  }
+  return null;
+}
+
+function parseStreakListMode(value: unknown): EditorFormState['streakListMode'] | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const normalized = value.trim().toLowerCase();
+  if (normalized === 'single' || normalized === 'aggregate' || normalized === 'auto') {
+    return normalized;
+  }
+  return undefined;
+}
+
+function sanitizeInputString(value: string | undefined, fallback: string): string {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.length > 0) {
+      return trimmed;
+    }
+  }
+  return fallback;
 }
 
 function formatRelativeTimestamp(value: string) {

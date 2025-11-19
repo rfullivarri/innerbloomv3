@@ -18,6 +18,7 @@ export const DEFAULT_FEEDBACK_DEFINITION = {
     friendly_date: 'lunes',
     cta_url: 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
   },
+  config: {},
 } as const;
 
 let feedbackDefinitionsReady: Promise<void> | null = null;
@@ -39,9 +40,15 @@ async function bootstrapFeedbackDefinitionsSchema(): Promise<void> {
       cta_label text,
       cta_href text,
       preview_variables jsonb NOT NULL DEFAULT '{}'::jsonb,
+      config jsonb NOT NULL DEFAULT '{}'::jsonb,
       created_at timestamptz NOT NULL DEFAULT now(),
       updated_at timestamptz NOT NULL DEFAULT now()
     );
+  `);
+
+  await pool.query(`
+    ALTER TABLE feedback_definitions
+      ADD COLUMN IF NOT EXISTS config jsonb NOT NULL DEFAULT '{}'::jsonb;
   `);
 
   await pool.query(`
@@ -66,7 +73,8 @@ async function bootstrapFeedbackDefinitionsSchema(): Promise<void> {
         copy,
         cta_label,
         cta_href,
-        preview_variables
+        preview_variables,
+        config
       )
       VALUES (
         $1,
@@ -81,7 +89,8 @@ async function bootstrapFeedbackDefinitionsSchema(): Promise<void> {
         $10,
         $11,
         $12,
-        $13::jsonb
+        $13::jsonb,
+        $14::jsonb
       )
       ON CONFLICT (notification_key) DO NOTHING;
     `,
@@ -99,6 +108,7 @@ async function bootstrapFeedbackDefinitionsSchema(): Promise<void> {
       seed.ctaLabel,
       seed.ctaHref,
       JSON.stringify(seed.previewVariables),
+      JSON.stringify(seed.config ?? {}),
     ],
   );
 }
@@ -129,6 +139,7 @@ export type FeedbackDefinitionRow = {
   cta_label: string | null;
   cta_href: string | null;
   preview_variables: Record<string, string>;
+  config: Record<string, unknown>;
   created_at: Date;
   updated_at: Date;
 };
@@ -145,6 +156,7 @@ export type FeedbackDefinitionUpdateDbInput = Partial<{
   type: string;
   cta_label: string | null;
   cta_href: string | null;
+  config: Record<string, unknown>;
 }>;
 
 export async function listFeedbackDefinitionRows(): Promise<FeedbackDefinitionRow[]> {
@@ -201,6 +213,9 @@ export async function updateFeedbackDefinitionRow(
   if (Object.prototype.hasOwnProperty.call(patch, 'cta_href')) {
     setColumn('cta_href', patch.cta_href);
   }
+  if (Object.prototype.hasOwnProperty.call(patch, 'config')) {
+    setColumn('config', JSON.stringify(patch.config ?? {}), 'jsonb');
+  }
 
   if (assignments.length === 0) {
     const lookup = await pool.query<FeedbackDefinitionRow>(
@@ -234,4 +249,18 @@ export async function findFeedbackDefinitionByNotificationKey(
     [notificationKey],
   );
   return result.rows[0] ?? null;
+}
+
+export async function listActiveInAppFeedbackDefinitions(): Promise<FeedbackDefinitionRow[]> {
+  await ensureFeedbackDefinitionsReady();
+  const result = await pool.query<FeedbackDefinitionRow>(
+    `
+      SELECT *
+        FROM feedback_definitions
+       WHERE channel = 'in_app_popup'
+         AND status = 'active'
+    ORDER BY priority DESC, created_at DESC;
+    `,
+  );
+  return result.rows;
 }
