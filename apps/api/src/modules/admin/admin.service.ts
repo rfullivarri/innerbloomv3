@@ -8,6 +8,12 @@ import { findReminderContextForUser } from '../../repositories/user-daily-remind
 import { buildReminderEmail, resolveRecipient } from '../../services/dailyReminderJob.js';
 import { getEmailProvider } from '../../services/email/index.js';
 import {
+  listFeedbackDefinitionRows,
+  updateFeedbackDefinitionRow,
+  type FeedbackDefinitionRow,
+  type FeedbackDefinitionUpdateDbInput,
+} from '../../repositories/feedback-definitions.repository.js';
+import {
   type InsightQuery,
   type ListUsersQuery,
   type LogsQuery,
@@ -1490,182 +1496,133 @@ export type FeedbackDefinition = {
   };
 };
 
-const feedbackDefinitions: FeedbackDefinition[] = [
-  {
-    id: 'welcome_modal_v1',
-    notificationKey: 'welcome_modal_v1',
-    label: 'Modal de bienvenida',
-    type: 'onboarding',
-    scope: ['onboarding', 'dashboard'],
-    trigger: 'Evento SIGNUP_COMPLETED con perfil incompleto',
-    channel: 'modal',
-    frequency: 'once',
-    status: 'active',
-    priority: 90,
-    copy: 'Hola {{user_name}}, desbloqueaste Innerbloom nivel {{current_level}}. Configurá tus pilares para recibir misiones.',
-    cta: { label: 'Configurar pilares', href: '/onboarding/pillars' },
-    previewVariables: {
-      user_name: 'Lucía',
-      current_level: '02',
-    },
-    metrics: {
-      lastFiredAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-      fires7d: 126,
-      fires30d: 540,
-      ctr30d: 0.64,
-    },
-  },
-  {
-    id: 'streak_toast_lvlup',
-    notificationKey: 'streak_toast_lvlup',
-    label: 'Toast streak x3',
-    type: 'streak',
-    scope: ['daily quest', 'scheduler'],
-    trigger: 'Evento DAILY_TASK_COMPLETED con streak >= 3',
-    channel: 'toast',
-    frequency: 'per_day',
-    status: 'paused',
-    priority: 70,
-    copy: '🔥 Mantenés {{streak_days}} días de constancia. Sumá XP extra hoy.',
-    cta: { label: 'Abrir Daily Quest', href: '/daily-quest' },
-    previewVariables: {
-      user_name: 'Ariel',
-      streak_days: '4',
-    },
-    metrics: {
-      lastFiredAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-      fires7d: 312,
-      fires30d: 1210,
-      ctr30d: 0.38,
-    },
-  },
-  {
-    id: 'level_up_banner_v2',
-    notificationKey: 'level_up_banner_v2',
-    label: 'Banner Level Up',
-    type: 'level_up',
-    scope: ['missions', 'dashboard'],
-    trigger: 'Evento XP_LEVEL_UP con delta >= 1',
-    channel: 'banner',
-    frequency: 'per_level',
-    status: 'draft',
-    priority: 60,
-    copy: 'Nivel {{current_level}} desbloqueado. Reclamá tu recompensa y elegí la próxima misión.',
-    cta: { label: 'Ver recompensas', href: '/missions/rewards' },
-    previewVariables: {
-      user_name: 'Diego',
-      current_level: '07',
-    },
-    metrics: {
-      lastFiredAt: null,
-      fires7d: 0,
-      fires30d: 0,
-      ctr30d: 0,
-    },
-  },
-  {
-    id: 'scheduler_daily_reminder_email',
-    notificationKey: 'scheduler_daily_reminder_email',
-    label: 'Email recordatorio diario',
-    type: 'daily_reminder',
-    scope: ['email', 'scheduler'],
-    trigger: 'Job DAILY_REMINDER con hábitos pendientes',
-    channel: 'email',
-    frequency: 'daily',
-    status: 'active',
-    priority: 50,
-    copy: 'Hola {{user_name}}, hoy tus pilares {{pending_pillars}} esperan una acción. Sumá {{xp_available}} XP.',
-    cta: { label: 'Ver scheduler', href: '/scheduler' },
-    previewVariables: {
-      user_name: 'Majo',
-      pending_pillars: 'Mind & Soul',
-      xp_available: '120',
-    },
-    metrics: {
-      lastFiredAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-      fires7d: 980,
-      fires30d: 3980,
-      ctr30d: 0.22,
-    },
-  },
-  {
-    id: 'missions_boss_unlocked',
-    notificationKey: 'missions_boss_unlocked',
-    label: 'Modal boss unlocked',
-    type: 'missions',
-    scope: ['missions', 'boss'],
-    trigger: 'Evento BOSS_UNLOCKED con boss_available = true',
-    channel: 'modal',
-    frequency: 'per_boss',
-    status: 'deprecated',
-    priority: 40,
-    copy: '¡Boss disponible! {{user_name}}, enfrentá a {{boss_name}} para multiplicar tu XP.',
-    cta: { label: 'Ir al boss', href: '/missions/boss' },
-    previewVariables: {
-      user_name: 'Bel',
-      boss_name: 'La Procrastinadora',
-    },
-    metrics: {
-      lastFiredAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9).toISOString(),
-      fires7d: 0,
-      fires30d: 15,
-      ctr30d: 0.18,
-    },
-  },
-];
 
-function cloneFeedbackDefinition(definition: FeedbackDefinition): FeedbackDefinition {
+const DEFAULT_FEEDBACK_METRICS: FeedbackDefinition['metrics'] = {
+  lastFiredAt: null,
+  fires7d: 0,
+  fires30d: 0,
+  ctr30d: 0,
+};
+
+type FeedbackMetricsLoader = () => Promise<FeedbackDefinition['metrics']>;
+
+async function loadDailyReminderMetrics(): Promise<FeedbackDefinition['metrics']> {
+  const now = new Date();
+  const result = await pool.query<{
+    last_fired_at: Date | string | null;
+    fires_7d: string | number | null;
+    fires_30d: string | number | null;
+  }>(
+    `
+      SELECT
+        MAX(last_sent_at) AS last_fired_at,
+        COUNT(*) FILTER (WHERE last_sent_at >= $1::timestamptz - INTERVAL '7 days') AS fires_7d,
+        COUNT(*) FILTER (WHERE last_sent_at >= $1::timestamptz - INTERVAL '30 days') AS fires_30d
+      FROM user_daily_reminders
+      WHERE channel = 'email' AND status = 'active';
+    `,
+    [now],
+  );
+
+  const row = result.rows[0];
+  const lastFiredAt = row?.last_fired_at ? new Date(row.last_fired_at).toISOString() : null;
+  const fires7d = row?.fires_7d != null ? Number(row.fires_7d) : 0;
+  const fires30d = row?.fires_30d != null ? Number(row.fires_30d) : 0;
+
   return {
-    ...definition,
-    scope: [...definition.scope],
-    previewVariables: { ...definition.previewVariables },
-    cta: definition.cta ? { ...definition.cta } : null,
+    lastFiredAt,
+    fires7d,
+    fires30d,
+    ctr30d: 0,
   };
 }
 
+const feedbackMetricsLoaders: Record<string, FeedbackMetricsLoader> = {
+  scheduler_daily_reminder_email: loadDailyReminderMetrics,
+};
+
+function mapRowToDefinition(row: FeedbackDefinitionRow): Omit<FeedbackDefinition, 'metrics'> {
+  return {
+    id: row.feedback_definition_id,
+    notificationKey: row.notification_key,
+    label: row.label,
+    type: row.type,
+    scope: Array.isArray(row.scope) ? row.scope : [],
+    trigger: row.trigger,
+    channel: row.channel,
+    frequency: row.frequency,
+    status: row.status as FeedbackDefinition['status'],
+    priority: row.priority,
+    copy: row.copy,
+    cta: row.cta_label ? { label: row.cta_label, href: row.cta_href } : null,
+    previewVariables: row.preview_variables ?? {},
+  };
+}
+
+async function hydrateFeedbackDefinition(row: FeedbackDefinitionRow): Promise<FeedbackDefinition> {
+  const metricsLoader = feedbackMetricsLoaders[row.notification_key];
+  const metrics = metricsLoader ? await metricsLoader() : DEFAULT_FEEDBACK_METRICS;
+  return {
+    ...mapRowToDefinition(row),
+    metrics,
+  };
+}
+
+function mapUpdateInputToDb(input: FeedbackDefinitionUpdateInput): FeedbackDefinitionUpdateDbInput {
+  const patch: FeedbackDefinitionUpdateDbInput = {};
+
+  if (typeof input.label !== 'undefined') {
+    patch.label = input.label;
+  }
+  if (typeof input.copy !== 'undefined') {
+    patch.copy = input.copy;
+  }
+  if (typeof input.trigger !== 'undefined') {
+    patch.trigger = input.trigger;
+  }
+  if (typeof input.channel !== 'undefined') {
+    patch.channel = input.channel;
+  }
+  if (typeof input.frequency !== 'undefined') {
+    patch.frequency = input.frequency;
+  }
+  if (typeof input.status !== 'undefined') {
+    patch.status = input.status;
+  }
+  if (typeof input.priority !== 'undefined') {
+    patch.priority = input.priority;
+  }
+  if (typeof input.scope !== 'undefined') {
+    patch.scope = input.scope;
+  }
+  if (typeof input.type !== 'undefined') {
+    patch.type = input.type;
+  }
+  if (Object.prototype.hasOwnProperty.call(input, 'cta')) {
+    patch.cta_label = input.cta ? input.cta.label : null;
+    patch.cta_href = input.cta ? input.cta.href : null;
+  }
+
+  return patch;
+}
+
 export async function listFeedbackDefinitions(): Promise<FeedbackDefinition[]> {
-  return feedbackDefinitions.map(cloneFeedbackDefinition);
+  const rows = await listFeedbackDefinitionRows();
+  const items = await Promise.all(rows.map((row) => hydrateFeedbackDefinition(row)));
+  return items;
 }
 
 export async function updateFeedbackDefinition(
   id: string,
   patch: FeedbackDefinitionUpdateInput,
 ): Promise<FeedbackDefinition> {
-  const definition = feedbackDefinitions.find((item) => item.id === id);
-  if (!definition) {
+  const dbPatch = mapUpdateInputToDb(patch);
+  const updated = await updateFeedbackDefinitionRow(id, dbPatch);
+
+  if (!updated) {
     throw new HttpError(404, 'not_found', 'Notification definition not found');
   }
 
-  if (patch.label !== undefined) {
-    definition.label = patch.label;
-  }
-  if (patch.copy !== undefined) {
-    definition.copy = patch.copy;
-  }
-  if (patch.trigger !== undefined) {
-    definition.trigger = patch.trigger;
-  }
-  if (patch.channel !== undefined) {
-    definition.channel = patch.channel;
-  }
-  if (patch.frequency !== undefined) {
-    definition.frequency = patch.frequency;
-  }
-  if (patch.status !== undefined) {
-    definition.status = patch.status;
-  }
-  if (patch.priority !== undefined) {
-    definition.priority = patch.priority;
-  }
-  if (patch.scope !== undefined) {
-    definition.scope = [...patch.scope];
-  }
-  if (patch.type !== undefined) {
-    definition.type = patch.type;
-  }
-  if (Object.prototype.hasOwnProperty.call(patch, 'cta')) {
-    definition.cta = patch.cta ? { ...patch.cta } : null;
-  }
-
-  return cloneFeedbackDefinition(definition);
+  return hydrateFeedbackDefinition(updated);
 }
+
