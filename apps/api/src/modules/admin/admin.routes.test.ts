@@ -59,6 +59,68 @@ describe('Admin routes', () => {
         return { rows: [{ is_admin: true }] };
       }
 
+      if (sql.includes('UPDATE feedback_definitions')) {
+        return {
+          rows: [
+            {
+              feedback_definition_id: 'def-1',
+              notification_key: 'scheduler_daily_reminder_email',
+              label: 'Email recordatorio diario (updated)',
+              type: 'daily_reminder',
+              scope: ['email', 'daily_quest'],
+              trigger: 'Cron /internal/cron/daily-reminders',
+              channel: 'email',
+              frequency: 'daily',
+              status: 'active',
+              priority: 50,
+              copy: 'Hola {{user_name}}, tu Daily Quest está lista.',
+              cta_label: 'Abrir Daily Quest',
+              cta_href: 'https://example.com',
+              preview_variables: { user_name: 'Majo' },
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+          ],
+        } as never;
+      }
+
+      if (sql.includes('FROM feedback_definitions')) {
+        return {
+          rows: [
+            {
+              feedback_definition_id: 'def-1',
+              notification_key: 'scheduler_daily_reminder_email',
+              label: 'Email recordatorio diario',
+              type: 'daily_reminder',
+              scope: ['email', 'daily_quest'],
+              trigger: 'Cron /internal/cron/daily-reminders',
+              channel: 'email',
+              frequency: 'daily',
+              status: 'active',
+              priority: 50,
+              copy: 'Hola {{user_name}}, tu Daily Quest está lista.',
+              cta_label: 'Abrir Daily Quest',
+              cta_href: 'https://example.com',
+              preview_variables: { user_name: 'Majo' },
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+          ],
+        } as never;
+      }
+
+      if (sql.includes('MAX(last_sent_at) AS last_fired_at')) {
+        return {
+          rows: [
+            {
+              last_fired_at: new Date('2024-12-01T12:00:00Z').toISOString(),
+              fires_7d: '5',
+              fires_30d: '22',
+            },
+          ],
+        } as never;
+      }
+
       if (sql.includes('COUNT(*) AS count') && sql.includes('FROM users u')) {
         return { rows: [{ count: '1' }] };
       }
@@ -276,5 +338,28 @@ describe('Admin routes', () => {
       recipient: 'admin@example.com',
     });
     expect(mockSendEmail).toHaveBeenCalledWith(expect.objectContaining({ to: 'admin@example.com' }));
+  });
+
+  it('returns feedback definitions with real metrics', async () => {
+    const response = await request(app)
+      .get('/api/admin/feedback/definitions')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.items).toHaveLength(1);
+    expect(response.body.items[0]).toMatchObject({
+      notificationKey: 'scheduler_daily_reminder_email',
+      metrics: { fires7d: 5, fires30d: 22 },
+    });
+  });
+
+  it('updates a feedback definition', async () => {
+    const response = await request(app)
+      .patch('/api/admin/feedback/definitions/def-1')
+      .set('Authorization', 'Bearer token')
+      .send({ label: 'Email recordatorio diario (updated)', scope: ['email'] });
+
+    expect(response.status).toBe(200);
+    expect(response.body.item.label).toBe('Email recordatorio diario (updated)');
   });
 });
