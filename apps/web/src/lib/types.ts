@@ -156,6 +156,7 @@ export type FeedbackDefinition = {
   copy: string;
   cta: { label: string; href: string | null } | null;
   previewVariables: Record<string, string>;
+  config: Record<string, unknown>;
   metrics: {
     lastFiredAt: string | null;
     fires7d: number;

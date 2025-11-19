@@ -4,8 +4,15 @@ import { HttpError } from '../lib/http-error.js';
 import { formatDateInTimezone } from '../controllers/users/user-state-service.js';
 import { applyHuntXpBoost, getMissionBoard, runWeeklyAutoSelection } from './missionsV2Service.js';
 import type { MissionTask } from './missionsV2Types.js';
+import {
+  findFeedbackDefinitionByNotificationKey,
+  type FeedbackDefinitionRow,
+} from '../repositories/feedback-definitions.repository.js';
+import { loadUserLevelSummary } from './userLevelSummaryService.js';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const LEVEL_UP_NOTIFICATION_KEY = 'inapp_level_up_popup';
+const STREAK_FIRE_NOTIFICATION_KEY = 'inapp_streak_fire_popup';
 
 export type DailyQuestStatus = {
   date: string;
@@ -80,7 +87,23 @@ export type SubmitDailyQuestResult = {
       task_name: string;
     }[];
   };
+  feedback_events: SubmitDailyQuestFeedbackEvent[];
 };
+
+export type SubmitDailyQuestFeedbackEvent =
+  | {
+      type: 'level_up';
+      notificationKey: typeof LEVEL_UP_NOTIFICATION_KEY;
+      payload: { level: number; previousLevel: number };
+    }
+  | {
+      type: 'streak_milestone';
+      notificationKey: typeof STREAK_FIRE_NOTIFICATION_KEY;
+      payload: {
+        threshold: number;
+        tasks: Array<{ id: string; name: string; streakDays: number }>;
+      };
+    };
 
 type SubmitDailyQuestLogLevel = 'info' | 'warn' | 'error';
 
@@ -375,6 +398,99 @@ function addUtcDays(base: Date, amount: number): Date {
   return next;
 }
 
+function isActiveInAppDefinition(row?: FeedbackDefinitionRow | null): row is FeedbackDefinitionRow {
+  return Boolean(row && row.channel === 'in_app_popup' && row.status === 'active');
+}
+
+function resolveStreakThreshold(config: unknown): number {
+  const fallback = 3;
+  if (!config || typeof config !== 'object') {
+    return fallback;
+  }
+  const raw = (config as Record<string, unknown>).threshold;
+  const parsed = typeof raw === 'number' ? raw : Number(raw);
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+  return Math.max(1, Math.round(parsed));
+}
+
+async function loadTaskEntriesForDate(
+  userId: string,
+  taskIds: string[],
+  date: string,
+): Promise<Set<string>> {
+  const set = new Set<string>();
+  if (taskIds.length === 0) {
+    return set;
+  }
+  const result = await pool.query<{ task_id: string }>(
+    `SELECT task_id FROM daily_log WHERE user_id = $1 AND date = $2::date AND task_id = ANY($3::uuid[])`,
+    [userId, date, taskIds],
+  );
+  for (const row of result.rows) {
+    if (row.task_id) {
+      set.add(row.task_id);
+    }
+  }
+  return set;
+}
+
+async function loadTaskStreakSnapshot(
+  userId: string,
+  taskIds: string[],
+  date: string,
+  lookbackDays: number,
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (taskIds.length === 0) {
+    return map;
+  }
+
+  const lookbackStart = formatDateKey(addUtcDays(parseDateKey(date), -Math.max(lookbackDays, 1)));
+  const result = await pool.query<{ task_id: string; date: string }>(
+    `
+      SELECT task_id, date::text AS date
+        FROM daily_log
+       WHERE user_id = $1
+         AND task_id = ANY($2::uuid[])
+         AND date < $3::date
+         AND date >= $4::date
+    ORDER BY task_id, date DESC;
+    `,
+    [userId, taskIds, date, lookbackStart],
+  );
+
+  const grouped = new Map<string, Set<string>>();
+  for (const row of result.rows) {
+    if (!row.task_id || !row.date) {
+      continue;
+    }
+    const normalizedDate = normalizeDate(row.date);
+    const existing = grouped.get(row.task_id) ?? new Set<string>();
+    existing.add(normalizedDate);
+    grouped.set(row.task_id, existing);
+  }
+
+  for (const taskId of taskIds) {
+    const dates = grouped.get(taskId) ?? new Set<string>();
+    let streak = 0;
+    let cursor = addUtcDays(parseDateKey(date), -1);
+    while (true) {
+      const key = formatDateKey(cursor);
+      if (dates.has(key)) {
+        streak += 1;
+        cursor = addUtcDays(cursor, -1);
+      } else {
+        break;
+      }
+    }
+    map.set(taskId, streak);
+  }
+
+  return map;
+}
+
 async function fetchDailyXp(userId: string, date: string): Promise<Map<string, number>> {
   const result = await pool.query<DailyXpRow>(
     `SELECT date::text AS date, xp_day
@@ -492,6 +608,7 @@ export async function submitDailyQuest(
   await ensureEmotionExists(input.emotion_id, log);
 
   const tasks = await fetchGroupTasks(context.tasksGroupId);
+  const taskLookup = new Map(tasks.map((task) => [task.task_id, task]));
   const allowedTaskIds = new Set(tasks.map((task) => task.task_id));
   const selectedTaskIds = Array.from(new Set(input.tasks_done));
 
@@ -522,9 +639,34 @@ export async function submitDailyQuest(
     notesIncluded: Boolean(notes),
   });
 
-  const xpBefore = await calculateXpForDate(userId, date);
-
   const completedTasks = selectedTaskIds;
+  const [levelDefinitionRow, streakDefinitionRow] = await Promise.all([
+    findFeedbackDefinitionByNotificationKey(LEVEL_UP_NOTIFICATION_KEY),
+    findFeedbackDefinitionByNotificationKey(STREAK_FIRE_NOTIFICATION_KEY),
+  ]);
+
+  const shouldTrackLevel = isActiveInAppDefinition(levelDefinitionRow);
+  const shouldTrackStreak =
+    isActiveInAppDefinition(streakDefinitionRow) && completedTasks.length > 0;
+
+  const levelSummaryBefore = shouldTrackLevel
+    ? await loadUserLevelSummary(userId)
+    : null;
+
+  let streakThreshold = 3;
+  let loggedToday = new Set<string>();
+  let previousTaskStreaks = new Map<string, number>();
+
+  if (shouldTrackStreak) {
+    streakThreshold = resolveStreakThreshold(streakDefinitionRow?.config);
+    const lookbackDays = Math.max(streakThreshold + 5, 30);
+    [loggedToday, previousTaskStreaks] = await Promise.all([
+      loadTaskEntriesForDate(userId, completedTasks, date),
+      loadTaskStreakSnapshot(userId, completedTasks, date, lookbackDays),
+    ]);
+  }
+
+  const xpBefore = await calculateXpForDate(userId, date);
   const tasksToDelete = tasks
     .map((task) => task.task_id)
     .filter((taskId) => !completedTasks.includes(taskId));
@@ -630,6 +772,48 @@ export async function submitDailyQuest(
 
   const missionsV2BonusReady = heartbeatReady || missionTasks.length > 0 || linkDailyReady;
 
+  const feedbackEvents: SubmitDailyQuestFeedbackEvent[] = [];
+
+  if (shouldTrackLevel && levelSummaryBefore) {
+    const levelSummaryAfter = await loadUserLevelSummary(userId);
+    if (levelSummaryAfter.currentLevel > levelSummaryBefore.currentLevel) {
+      feedbackEvents.push({
+        type: 'level_up',
+        notificationKey: LEVEL_UP_NOTIFICATION_KEY,
+        payload: {
+          level: levelSummaryAfter.currentLevel,
+          previousLevel: levelSummaryBefore.currentLevel,
+        },
+      });
+    }
+  }
+
+  if (shouldTrackStreak) {
+    const tasksLoggedFirstTime = completedTasks.filter((taskId) => !loggedToday.has(taskId));
+    const triggeredTasks = tasksLoggedFirstTime
+      .map((taskId) => {
+        const previous = previousTaskStreaks.get(taskId) ?? 0;
+        return { taskId, previous, current: previous + 1 };
+      })
+      .filter((entry) => entry.previous < streakThreshold && entry.current >= streakThreshold)
+      .map((entry) => ({
+        id: entry.taskId,
+        name: taskLookup.get(entry.taskId)?.name ?? 'Tarea',
+        streakDays: entry.current,
+      }));
+
+    if (triggeredTasks.length > 0) {
+      feedbackEvents.push({
+        type: 'streak_milestone',
+        notificationKey: STREAK_FIRE_NOTIFICATION_KEY,
+        payload: {
+          threshold: streakThreshold,
+          tasks: triggeredTasks,
+        },
+      });
+    }
+  }
+
   return {
     ok: true,
     saved: {
@@ -651,5 +835,6 @@ export async function submitDailyQuest(
       redirect_url: '/dashboard-v3/missions-v2',
       tasks: missionTasks,
     },
+    feedback_events: feedbackEvents,
   } satisfies SubmitDailyQuestResult;
 }

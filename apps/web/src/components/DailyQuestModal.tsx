@@ -10,7 +10,12 @@ import {
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { RefObject } from 'react';
-import { getDailyQuestDefinition, getDailyQuestStatus, submitDailyQuest } from '../lib/api';
+import {
+  getDailyQuestDefinition,
+  getDailyQuestStatus,
+  submitDailyQuest,
+  type SubmitDailyQuestResponse,
+} from '../lib/api';
 import { useHoldToClose } from '../hooks/useHoldToClose';
 import { useRequest } from '../hooks/useRequest';
 
@@ -32,6 +37,7 @@ type ToastState = {
 type DailyQuestModalProps = {
   enabled?: boolean;
   returnFocusRef?: RefObject<HTMLElement | null>;
+  onComplete?: (response: SubmitDailyQuestResponse) => void;
 };
 
 export type DailyQuestModalHandle = {
@@ -293,7 +299,7 @@ function CheckIcon({ active }: { active: boolean }) {
 }
 
 export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModalProps>(
-  function DailyQuestModal({ enabled = false, returnFocusRef }: DailyQuestModalProps, ref) {
+  function DailyQuestModal({ enabled = false, returnFocusRef, onComplete }: DailyQuestModalProps, ref) {
   const [isOpen, setIsOpen] = useState(false);
   const [snoozed, setSnoozed] = useState(false);
   const [hasCompletedToday, setHasCompletedToday] = useState(false);
@@ -781,6 +787,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
         detail: celebrationExtras.detail,
         action: celebrationExtras.action,
       });
+      onComplete?.(response);
       resetCelebrationHold();
       setIsCelebrationHoldReady(false);
       setSrAnnouncement('Registro guardado con éxito.');

@@ -12,6 +12,7 @@ import adminRoutes from '../modules/admin/admin.routes.js';
 import onboardingRoutes from './onboarding.js';
 import missionsRoutes from './missions.js';
 import internalRoutes from './internal.js';
+import feedbackRoutes from './feedback.js';
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use(leaderboardRoutes);
 router.use(adminRoutes);
 router.use(onboardingRoutes);
 router.use(internalRoutes);
+router.use(feedbackRoutes);
 
 export default router;

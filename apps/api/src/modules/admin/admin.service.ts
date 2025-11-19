@@ -1489,6 +1489,7 @@ export type FeedbackDefinition = {
   copy: string;
   cta: { label: string; href: string | null } | null;
   previewVariables: Record<string, string>;
+  config: Record<string, unknown>;
   metrics: {
     lastFiredAt: string | null;
     fires7d: number;
@@ -1557,6 +1558,7 @@ function mapRowToDefinition(row: FeedbackDefinitionRow): Omit<FeedbackDefinition
     copy: row.copy,
     cta: row.cta_label ? { label: row.cta_label, href: row.cta_href } : null,
     previewVariables: row.preview_variables ?? {},
+    config: row.config ?? {},
   };
 }
 
@@ -1602,6 +1604,9 @@ function mapUpdateInputToDb(input: FeedbackDefinitionUpdateInput): FeedbackDefin
   if (Object.prototype.hasOwnProperty.call(input, 'cta')) {
     patch.cta_label = input.cta ? input.cta.label : null;
     patch.cta_href = input.cta ? input.cta.href : null;
+  }
+  if (typeof input.config !== 'undefined') {
+    patch.config = input.config;
   }
 
   return patch;

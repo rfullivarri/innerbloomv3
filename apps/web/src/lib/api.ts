@@ -1830,7 +1830,23 @@ export type SubmitDailyQuestResponse = {
       task_name: string;
     }>;
   };
+  feedback_events?: SubmitDailyQuestFeedbackEvent[];
 };
+
+export type SubmitDailyQuestFeedbackEvent =
+  | {
+      type: 'level_up';
+      notificationKey: 'inapp_level_up_popup';
+      payload: { level: number; previousLevel: number };
+    }
+  | {
+      type: 'streak_milestone';
+      notificationKey: 'inapp_streak_fire_popup';
+      payload: {
+        threshold: number;
+        tasks: Array<{ id: string; name: string; streakDays: number }>;
+      };
+    };
 
 export type SubmitDailyQuestPayload = {
   date?: string;

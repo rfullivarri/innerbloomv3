@@ -51,6 +51,8 @@ import {
   ReminderSchedulerDialog,
   type ReminderSchedulerDialogHandle,
 } from '../components/dashboard-v3/ReminderSchedulerDialog';
+import { NotificationPopup } from '../components/feedback/NotificationPopup';
+import { useFeedbackNotifications } from '../hooks/useFeedbackNotifications';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -134,6 +136,10 @@ export default function DashboardV3Page() {
   const dailyQuestModalRef = useRef<DailyQuestModalHandle | null>(null);
   const reminderSchedulerDialogRef = useRef<ReminderSchedulerDialogHandle | null>(null);
   const hasAutoOpenedDailyQuestRef = useRef(false);
+  const feedbackNotifications = useFeedbackNotifications({
+    userId: backendUserId,
+    enabled: Boolean(backendUserId),
+  });
 
   const handleOpenDaily = useCallback(() => {
     dailyQuestModalRef.current?.open();
@@ -186,11 +192,24 @@ export default function DashboardV3Page() {
           ref={dailyQuestModalRef}
           enabled={Boolean(backendUserId)}
           returnFocusRef={dailyButtonRef}
+          onComplete={feedbackNotifications.handleDailyQuestResult}
         />
         <ReminderSchedulerDialog
           ref={reminderSchedulerDialogRef}
           enabled={Boolean(backendUserId)}
         />
+        {feedbackNotifications.activePopup ? (
+          <NotificationPopup
+            open
+            title={feedbackNotifications.activePopup.title}
+            message={feedbackNotifications.activePopup.message}
+            emoji={feedbackNotifications.activePopup.emoji}
+            emojiAnimation={feedbackNotifications.activePopup.emojiAnimation}
+            cta={feedbackNotifications.activePopup.cta}
+            tasks={feedbackNotifications.activePopup.tasks}
+            onClose={feedbackNotifications.dismissActivePopup}
+          />
+        ) : null}
         <main className="flex-1 pb-24 md:pb-0">
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             {isLoadingProfile && <ProfileSkeleton />}

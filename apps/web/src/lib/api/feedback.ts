@@ -18,6 +18,7 @@ export type FeedbackDefinitionUpdatePayload = {
   status?: FeedbackDefinition['status'];
   priority?: number;
   cta?: FeedbackDefinition['cta'];
+  config?: Record<string, unknown>;
 };
 
 export async function fetchFeedbackDefinitions() {

@@ -194,3 +194,22 @@ export function getViewportSnapshot(): TelemetryViewport | null {
 
   return { width, height };
 }
+
+export type FeedbackNotificationEventName =
+  | 'notification_level_up_shown'
+  | 'notification_streak_shown';
+
+export function emitFeedbackNotificationEvent(
+  event: FeedbackNotificationEventName,
+  payload: Record<string, unknown> = {},
+) {
+  const userId = typeof payload.userId === 'string' ? payload.userId.trim() : '';
+  const sanitizedPayload = { ...payload };
+  delete sanitizedPayload.userId;
+  logApiDebug('[analytics] feedback notification event', {
+    event,
+    user_id: userId.length > 0 ? userId : undefined,
+    timestamp: new Date().toISOString(),
+    ...sanitizedPayload,
+  });
+}
