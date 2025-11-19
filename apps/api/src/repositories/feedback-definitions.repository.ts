@@ -1,5 +1,119 @@
 import { pool } from '../db.js';
 
+const DEFAULT_FEEDBACK_DEFINITION = {
+  notificationKey: 'scheduler_daily_reminder_email',
+  label: 'Email recordatorio diario',
+  type: 'daily_reminder',
+  scope: ['email', 'daily_quest', 'scheduler'],
+  trigger: 'Cron /internal/cron/daily-reminders con usuarios activos',
+  channel: 'email',
+  frequency: 'daily',
+  status: 'active',
+  priority: 50,
+  copy: 'Hola {{user_name}}, tu Daily Quest de {{friendly_date}} ya está lista. Sumá XP registrando tu emoción del día y marcando tus hábitos completados.',
+  ctaLabel: 'Abrir Daily Quest',
+  ctaHref: 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
+  previewVariables: {
+    user_name: 'Majo',
+    friendly_date: 'lunes',
+    cta_url: 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
+  },
+} as const;
+
+let feedbackDefinitionsReady: Promise<void> | null = null;
+
+async function bootstrapFeedbackDefinitionsSchema(): Promise<void> {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS feedback_definitions (
+      feedback_definition_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      notification_key text NOT NULL UNIQUE,
+      label text NOT NULL,
+      type text NOT NULL,
+      scope text[] NOT NULL DEFAULT ARRAY[]::text[],
+      trigger text NOT NULL,
+      channel text NOT NULL,
+      frequency text NOT NULL,
+      status text NOT NULL DEFAULT 'draft',
+      priority integer NOT NULL DEFAULT 0,
+      copy text NOT NULL,
+      cta_label text,
+      cta_href text,
+      preview_variables jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    );
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS feedback_definitions_notification_key_idx
+      ON feedback_definitions (notification_key);
+  `);
+
+  const seed = DEFAULT_FEEDBACK_DEFINITION;
+
+  await pool.query(
+    `
+      INSERT INTO feedback_definitions (
+        notification_key,
+        label,
+        type,
+        scope,
+        trigger,
+        channel,
+        frequency,
+        status,
+        priority,
+        copy,
+        cta_label,
+        cta_href,
+        preview_variables
+      )
+      VALUES (
+        $1,
+        $2,
+        $3,
+        $4::text[],
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        $12,
+        $13::jsonb
+      )
+      ON CONFLICT (notification_key) DO NOTHING;
+    `,
+    [
+      seed.notificationKey,
+      seed.label,
+      seed.type,
+      seed.scope,
+      seed.trigger,
+      seed.channel,
+      seed.frequency,
+      seed.status,
+      seed.priority,
+      seed.copy,
+      seed.ctaLabel,
+      seed.ctaHref,
+      JSON.stringify(seed.previewVariables),
+    ],
+  );
+}
+
+async function ensureFeedbackDefinitionsReady(): Promise<void> {
+  if (!feedbackDefinitionsReady) {
+    feedbackDefinitionsReady = bootstrapFeedbackDefinitionsSchema().catch((error) => {
+      feedbackDefinitionsReady = null;
+      throw error;
+    });
+  }
+
+  await feedbackDefinitionsReady;
+}
+
 export type FeedbackDefinitionRow = {
   feedback_definition_id: string;
   notification_key: string;
@@ -34,6 +148,7 @@ export type FeedbackDefinitionUpdateDbInput = Partial<{
 }>;
 
 export async function listFeedbackDefinitionRows(): Promise<FeedbackDefinitionRow[]> {
+  await ensureFeedbackDefinitionsReady();
   const result = await pool.query<FeedbackDefinitionRow>(
     `SELECT * FROM feedback_definitions ORDER BY priority DESC, created_at DESC;`,
   );
@@ -44,6 +159,7 @@ export async function updateFeedbackDefinitionRow(
   id: string,
   patch: FeedbackDefinitionUpdateDbInput,
 ): Promise<FeedbackDefinitionRow | null> {
+  await ensureFeedbackDefinitionsReady();
   const assignments: string[] = [];
   const values: unknown[] = [];
 
