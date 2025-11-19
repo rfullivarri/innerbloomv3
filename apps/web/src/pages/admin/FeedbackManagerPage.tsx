@@ -931,44 +931,72 @@ function NotificationPreviewModal({ definition, onClose }: NotificationPreviewMo
 }
 
 function buildInAppPreview(definition: FeedbackDefinition, onClose: () => void) {
-  if (definition.channel !== 'in_app_popup') {
+  if (definition.channel?.trim() !== 'in_app_popup') {
     return null;
   }
-  if (definition.notificationKey === LEVEL_UP_NOTIFICATION_KEY) {
+
+  const renderPopup = (formatted: ReturnType<typeof formatLevelNotification>) => (
+    <NotificationPopup
+      inline
+      open
+      title={formatted.title}
+      message={formatted.message}
+      emoji={formatted.emoji}
+      emojiAnimation={formatted.emojiAnimation}
+      tasks={formatted.tasks}
+      cta={definition.cta}
+      onClose={onClose}
+    />
+  );
+
+  if (
+    definition.notificationKey === LEVEL_UP_NOTIFICATION_KEY ||
+    definition.notificationKey.startsWith('inapp_level_')
+  ) {
     const payload = buildPreviewLevelPayload(definition);
     const formatted = formatLevelNotification(definition, payload);
-    return (
-      <NotificationPopup
-        inline
-        open
-        title={formatted.title}
-        message={formatted.message}
-        emoji={formatted.emoji}
-        emojiAnimation={formatted.emojiAnimation}
-        tasks={formatted.tasks}
-        cta={definition.cta}
-        onClose={onClose}
-      />
-    );
+    return renderPopup(formatted);
   }
-  if (definition.notificationKey === STREAK_NOTIFICATION_KEY) {
+
+  if (
+    definition.notificationKey === STREAK_NOTIFICATION_KEY ||
+    definition.notificationKey.startsWith('inapp_streak_')
+  ) {
     const payload = buildPreviewStreakPayload(definition);
     const formatted = formatStreakNotification(definition, payload);
-    return (
-      <NotificationPopup
-        inline
-        open
-        title={formatted.title}
-        message={formatted.message}
-        emoji={formatted.emoji}
-        emojiAnimation={formatted.emojiAnimation}
-        tasks={formatted.tasks}
-        cta={definition.cta}
-        onClose={onClose}
-      />
-    );
+    return renderPopup(formatted);
   }
-  return null;
+
+  const config = definition.config ?? {};
+  const preview = definition.previewVariables ?? {};
+  const title =
+    getStringOrUndefined(config.title) ?? getStringOrUndefined(preview.title) ?? definition.label;
+  const messageTemplate =
+    getStringOrUndefined(config.messageTemplate) ?? getStringOrUndefined(preview.messageTemplate) ?? definition.copy;
+  const message = formatPreviewCopy(messageTemplate, preview);
+  const emoji =
+    getStringOrUndefined(config.emoji) ?? getStringOrUndefined(preview.emoji) ?? '✨';
+  const hasPreviewTasks =
+    typeof preview.tasks_json === 'string' ||
+    typeof preview.tasksJson === 'string' ||
+    typeof preview.tasks === 'string' ||
+    typeof preview.task_name === 'string' ||
+    typeof preview.taskName === 'string';
+  const fallbackTasks = hasPreviewTasks ? buildPreviewStreakPayload(definition).tasks : undefined;
+
+  return (
+    <NotificationPopup
+      inline
+      open
+      title={title}
+      message={message}
+      emoji={emoji}
+      emojiAnimation="bounce"
+      tasks={fallbackTasks}
+      cta={definition.cta}
+      onClose={onClose}
+    />
+  );
 }
 
 type NotificationEditorPanelProps = {
