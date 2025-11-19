@@ -128,7 +128,7 @@ describe('runDailyReminderJob', () => {
     expect(result.errors[0]).toEqual({ reminderId: 'r3', reason: 'SMTP down' });
   });
 
-  it('formats the reminder copy using the effective timezone and local time label', async () => {
+  it('formats the reminder copy using the effective timezone for the local date', async () => {
     const now = new Date('2024-03-15T12:00:00Z');
     const reminder = {
       user_daily_reminder_id: 'tz-1',
@@ -161,17 +161,9 @@ describe('runDailyReminderJob', () => {
       day: 'numeric',
       timeZone: reminder.effective_timezone,
     }).format(now);
-    const [hours, minutes, seconds] = reminder.local_time.split(':').map((part) => Number(part));
-    const reference = new Date('2024-01-01T00:00:00Z');
-    reference.setUTCHours(hours ?? 0, minutes ?? 0, seconds ?? 0, 0);
-    const friendlyTime = new Intl.DateTimeFormat('es-AR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: reminder.effective_timezone,
-    }).format(reference);
 
     expect(payload?.html).toContain(`Tu Daily Quest de ${friendlyDate} ya está lista.`);
-    expect(payload?.html).toContain(`<strong>${friendlyTime}</strong> (${reminder.effective_timezone})`);
+    expect(payload?.html).toContain('Sumá XP registrando tu emoción del día');
   });
 
   it('only updates last_sent_at for reminders that were actually delivered', async () => {
