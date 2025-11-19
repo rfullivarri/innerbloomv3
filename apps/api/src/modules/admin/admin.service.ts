@@ -5,7 +5,7 @@ import { HttpError } from '../../lib/http-error.js';
 import { triggerTaskGenerationForUser } from '../../services/taskgenTriggerService.js';
 import { updateUserTaskRow } from '../../services/user-tasks.service.js';
 import { findReminderContextForUser } from '../../repositories/user-daily-reminders.repository.js';
-import { buildReminderEmail, resolveRecipient } from '../../services/dailyReminderJob.js';
+import { buildReminderEmail, loadReminderTemplate, resolveRecipient } from '../../services/dailyReminderJob.js';
 import { getEmailProvider } from '../../services/email/index.js';
 import {
   listFeedbackDefinitionRows,
@@ -1389,7 +1389,8 @@ export async function sendDailyReminderPreview(
 
   const provider = getEmailProvider();
   const now = new Date();
-  const message = buildReminderEmail(reminder, now);
+  const template = await loadReminderTemplate();
+  const message = buildReminderEmail(reminder, now, template);
   await provider.sendEmail({ ...message, to: recipient });
 
   return { ok: true, reminder_id: reminder.user_daily_reminder_id, recipient, sent_at: now.toISOString() };

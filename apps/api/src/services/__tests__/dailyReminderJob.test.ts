@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockFindPendingReminders, mockMarkAsSent, mockSendEmail } = vi.hoisted(() => ({
+const { mockFindPendingReminders, mockMarkAsSent, mockSendEmail, mockFindFeedbackDefinition } = vi.hoisted(() => ({
   mockFindPendingReminders: vi.fn(),
   mockMarkAsSent: vi.fn(),
   mockSendEmail: vi.fn(),
+  mockFindFeedbackDefinition: vi.fn(),
 }));
 
 vi.mock('../../repositories/user-daily-reminders.repository.js', () => ({
@@ -17,11 +18,32 @@ vi.mock('../email/index.js', () => ({
   }),
 }));
 
+vi.mock('../../repositories/feedback-definitions.repository.js', () => ({
+  DEFAULT_FEEDBACK_DEFINITION: {
+    notificationKey: 'scheduler_daily_reminder_email',
+    label: 'Email recordatorio diario',
+    type: 'daily_reminder',
+    scope: ['email'],
+    trigger: 'cron',
+    channel: 'email',
+    frequency: 'daily',
+    status: 'active',
+    priority: 50,
+    copy: 'Hola {{user_name}}, tu Daily Quest de {{friendly_date}} ya está lista. Sumá XP registrando tu emoción del día y marcando tus hábitos completados.',
+    ctaLabel: 'Abrir Daily Quest',
+    ctaHref: 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
+    previewVariables: {},
+  },
+  findFeedbackDefinitionByNotificationKey: (...args: unknown[]) => mockFindFeedbackDefinition(...args),
+}));
+
 describe('runDailyReminderJob', () => {
   beforeEach(() => {
     mockFindPendingReminders.mockReset();
     mockMarkAsSent.mockReset();
     mockSendEmail.mockReset();
+    mockFindFeedbackDefinition.mockReset();
+    mockFindFeedbackDefinition.mockResolvedValue(null);
   });
 
   it('returns early when there are no reminders', async () => {
@@ -164,6 +186,43 @@ describe('runDailyReminderJob', () => {
 
     expect(payload?.html).toContain(`Tu Daily Quest de ${friendlyDate} ya está lista.`);
     expect(payload?.html).toContain('Sumá XP registrando tu emoción del día');
+  });
+
+  it('uses the admin-defined template copy and CTA when available', async () => {
+    const now = new Date('2024-06-10T15:00:00Z');
+    mockFindFeedbackDefinition.mockResolvedValueOnce({
+      copy: 'Recordatorio especial para {{user_name}} el {{friendly_date}}. Respirar y luego abrir la app.',
+      cta_label: 'Reabrir Innerbloom',
+      cta_href: 'https://example.com/custom',
+    } as never);
+    mockFindPendingReminders.mockResolvedValueOnce([
+      {
+        user_daily_reminder_id: 'templated',
+        user_id: 'u-temp',
+        channel: 'email',
+        status: 'active',
+        timezone: 'UTC',
+        local_time: '08:00:00',
+        last_sent_at: null,
+        created_at: now,
+        updated_at: now,
+        email_primary: 'template@example.com',
+        email: null,
+        first_name: 'Mate',
+        full_name: 'Mate Test',
+        effective_timezone: 'UTC',
+      },
+    ]);
+
+    const { runDailyReminderJob } = await import('../dailyReminderJob.js');
+
+    await runDailyReminderJob(now);
+
+    const payload = mockSendEmail.mock.calls[0]?.[0];
+    expect(payload?.html).toContain('Recordatorio especial para Mate');
+    expect(payload?.html).toContain('Reabrir Innerbloom');
+    expect(payload?.html).toContain('https://example.com/custom');
+    expect(payload?.text).toContain('Reabrir Innerbloom: https://example.com/custom');
   });
 
   it('only updates last_sent_at for reminders that were actually delivered', async () => {
