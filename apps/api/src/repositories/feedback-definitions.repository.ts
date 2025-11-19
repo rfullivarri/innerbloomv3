@@ -1,6 +1,6 @@
 import { pool } from '../db.js';
 
-const DEFAULT_FEEDBACK_DEFINITION = {
+export const DEFAULT_FEEDBACK_DEFINITION = {
   notificationKey: 'scheduler_daily_reminder_email',
   label: 'Email recordatorio diario',
   type: 'daily_reminder',
@@ -222,5 +222,16 @@ export async function updateFeedbackDefinitionRow(
     [...values, id],
   );
 
+  return result.rows[0] ?? null;
+}
+
+export async function findFeedbackDefinitionByNotificationKey(
+  notificationKey: string,
+): Promise<FeedbackDefinitionRow | null> {
+  await ensureFeedbackDefinitionsReady();
+  const result = await pool.query<FeedbackDefinitionRow>(
+    `SELECT * FROM feedback_definitions WHERE notification_key = $1 LIMIT 1;`,
+    [notificationKey],
+  );
   return result.rows[0] ?? null;
 }
