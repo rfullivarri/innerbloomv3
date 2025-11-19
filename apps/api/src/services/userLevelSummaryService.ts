@@ -50,7 +50,9 @@ export async function loadUserLevelSummary(userId: string): Promise<UserLevelSum
 
   if (thresholds.length === 0 || !hasProgression) {
     const fallbackResult = await pool.query<{ xp_base_sum: string | number | null }>(
-      `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum FROM tasks WHERE user_id = $1`,
+      `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum
+       FROM tasks
+       WHERE user_id = $1`,
       [userId],
     );
 
