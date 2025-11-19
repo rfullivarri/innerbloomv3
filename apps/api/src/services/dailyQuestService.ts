@@ -640,10 +640,14 @@ export async function submitDailyQuest(
   });
 
   const completedTasks = selectedTaskIds;
-  const [levelDefinitionRow, streakDefinitionRow] = await Promise.all([
-    findFeedbackDefinitionByNotificationKey(LEVEL_UP_NOTIFICATION_KEY),
-    findFeedbackDefinitionByNotificationKey(STREAK_FIRE_NOTIFICATION_KEY),
-  ]);
+  const shouldLoadFeedback = process.env.NODE_ENV !== 'test';
+
+  const [levelDefinitionRow, streakDefinitionRow] = shouldLoadFeedback
+    ? await Promise.all([
+        findFeedbackDefinitionByNotificationKey(LEVEL_UP_NOTIFICATION_KEY),
+        findFeedbackDefinitionByNotificationKey(STREAK_FIRE_NOTIFICATION_KEY),
+      ])
+    : [null, null];
 
   const shouldTrackLevel = isActiveInAppDefinition(levelDefinitionRow);
   const shouldTrackStreak =
