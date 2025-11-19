@@ -2,7 +2,6 @@
   "name": "@innerbloom/mobile",
   "private": true,
   "version": "0.1.0",
-  "type": "module",
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
