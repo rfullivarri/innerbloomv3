@@ -4,9 +4,9 @@ Cliente nativo (Expo + React Native) que replica el dashboard web usando las mis
 
 ## Requisitos
 - Node.js 20.x
-- npm 10 (el repositorio ya usa workspaces)
-- Xcode / Android Studio para emuladores nativos (opcional)
-- [Expo CLI](https://docs.expo.dev/more/expo-cli/) se instala automáticamente al correr los scripts (`npx expo ...`).
+- pnpm (el monorepo está configurado como workspace de pnpm)
+- Xcode / Android Studio para emuladores o builds nativos
+- [Expo CLI](https://docs.expo.dev/more/expo-cli/) se ejecuta vía `pnpm exec expo ...`
 
 ## Variables de entorno
 Crea un archivo `.env` en `apps/mobile` o exporta las siguientes variables antes de levantar la app:
@@ -19,29 +19,43 @@ EXPO_PUBLIC_API_BASE_URL=https://api.innerbloom.dev (o el host de Railway/local)
 
 Estas variables se leen desde `App.tsx` y `src/api/client.ts` para inicializar Clerk y componer las rutas `/api/*`.
 
-## Instalación
+## Instalación de dependencias
 Desde la raíz del monorepo:
 
 ```
-npm install
+pnpm install
 ```
 
-## Comandos principales
-- `npm run --workspace @innerbloom/mobile start`: levanta Metro/Expo (`expo start`).
-- `npm run --workspace @innerbloom/mobile android`: build & run en un dispositivo/emulador Android (`expo run:android`).
-- `npm run --workspace @innerbloom/mobile ios`: equivalente para iOS (`expo run:ios`).
-- `npm run --workspace @innerbloom/mobile web`: vista previa web vía Expo.
-- `npm run --workspace @innerbloom/mobile typecheck`: `tsc --noEmit` para validar tipos.
+## Scripts rápidos
+- `pnpm --filter @innerbloom/mobile start`: levanta Metro/Expo (`expo start`).
+- `pnpm --filter @innerbloom/mobile exec expo start --dev-client`: arranca Metro en modo Dev Client.
+- `pnpm --filter @innerbloom/mobile android`: build & run en un dispositivo/emulador Android (`expo run:android`).
+- `pnpm --filter @innerbloom/mobile ios`: equivalente para iOS (`expo run:ios`).
+- `pnpm --filter @innerbloom/mobile web`: vista previa web vía Expo.
+- `pnpm --filter @innerbloom/mobile typecheck`: `tsc --noEmit` para validar tipos.
 
-## Builds de prueba
-Para generar un APK local sin pasar por las tiendas:
+## Flujo Dev Client + EAS (iPhone real)
+1. Desde la raíz, instala dependencias con `pnpm install` (una sola vez).
+2. Enlaza tu cuenta y el proyecto con EAS (solo la primera vez):
+   - `cd apps/mobile`
+   - `pnpm exec eas login`
+   - `pnpm exec eas init` (esto guardará el `projectId` en la app si aún no existe).
+3. Genera un Dev Build para iOS (usa el perfil `development` definido en `eas.json`):
+   - `cd apps/mobile`
+   - `pnpm exec eas build --profile development --platform ios`
+   - Para Android es análogo: `pnpm exec eas build --profile development --platform android`.
+4. Instala el Dev Client en el dispositivo real con el enlace generado por EAS (QR interno o TestFlight). No necesitas Expo Go.
+5. Con el Dev Client instalado y en la misma red que tu máquina, levanta el servidor de desarrollo:
+   - `pnpm --filter @innerbloom/mobile exec expo start --dev-client`
+6. Abre el cliente en el iPhone y escanea el QR/usa el enlace `exp+innerbloom://` que muestra el dev server.
 
-```
-cd apps/mobile
-npx expo run:android --variant release
-```
+## Generar proyectos nativos localmente (opcional)
+- `cd apps/mobile && pnpm exec expo prebuild`
+- Esto crea `apps/mobile/ios` y `apps/mobile/android` para Xcode/Android Studio. **No** comitees estos directorios ni ningún `.ipa` generado.
 
-Esto produce un APK en `android/app/build/outputs/apk/release/`. En iOS puedes usar `npx expo run:ios --configuration Release` y distribuir el `.app` resultante vía TestFlight/instalación manual.
+## Recordatorio sobre artefactos binarios
+- No se comitean `.ipa`, `.apk`, carpetas `ios/` o `android/` generadas por `expo prebuild`, ni builds de distribución.
+- Si necesitas un proyecto nativo, genera las carpetas localmente con el comando anterior y mantenlas fuera del control de versiones.
 
 ## Estado actual
 - Pantalla de login con Clerk (email + password).
@@ -50,3 +64,9 @@ Esto produce un APK en `android/app/build/outputs/apk/release/`. En iOS puedes u
 - Hook `BackendUserProvider` hidrata el perfil y comparte `backendUserId` con todas las pantallas.
 
 Sigue el plan descrito en `docs/mobile-app-plan.md` para futuras iteraciones (Daily Quest submit, scheduler editable, misiones interactivas, etc.).
+
+## Archivos actualizados y comandos clave
+- Archivos tocados en esta configuración: `apps/mobile/package.json`, `apps/mobile/app.json`, `eas.json`, `apps/mobile/README.md`.
+- Generar proyectos nativos (si necesitas Xcode/Android Studio): `cd apps/mobile && pnpm exec expo prebuild`.
+- Build de desarrollo iOS con Dev Client: `cd apps/mobile && pnpm exec eas build --profile development --platform ios`.
+- Lanzar la app con Dev Client ya instalada: `pnpm --filter @innerbloom/mobile exec expo start --dev-client`.
