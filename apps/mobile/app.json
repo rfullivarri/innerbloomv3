@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Innerbloom Mobile",
+    "slug": "innerbloom-mobile",
+    "scheme": "innerbloom",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.innerbloom.mobile"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
