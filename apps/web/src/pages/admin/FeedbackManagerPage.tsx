@@ -1,53 +1,26 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   fetchFeedbackDefinitions,
+  fetchFeedbackUserHistory,
+  fetchFeedbackUserState,
   patchFeedbackDefinition,
+  patchFeedbackUserNotificationState,
   type FeedbackDefinitionUpdatePayload,
+  type FeedbackUserHistoryResponse,
+  type FeedbackUserHistoryEntry,
+  type FeedbackUserNotificationState,
+  type FeedbackUserStateResponse,
 } from '../../lib/api/feedback';
-import type { FeedbackDefinition } from '../../lib/types';
+import type { AdminUser, FeedbackDefinition } from '../../lib/types';
 import { ToastBanner } from '../../components/common/ToastBanner';
+import { UserPicker } from '../../components/admin/UserPicker';
+import { Skeleton } from '../../components/common/Skeleton';
 
 type TabId = 'global' | 'user';
-
-type UserNotification = {
-  id: string;
-  title: string;
-  channel: string;
-  timestamp: string;
-  state: 'enviado' | 'visto' | 'pendiente';
-  result: string;
-};
 
 const TABS: { id: TabId; label: string; helper: string }[] = [
   { id: 'global', label: 'Vista global', helper: 'Lista de notificaciones', },
   { id: 'user', label: 'Vista por usuario', helper: 'Foco en un usuario concreto', },
-];
-
-const MOCK_USER_NOTIFICATIONS: UserNotification[] = [
-  {
-    id: 'evt-1',
-    title: 'Pop-up bienvenida',
-    channel: 'Modal in-app',
-    timestamp: 'Hoy · 09:18',
-    state: 'visto',
-    result: 'Clic en CTA principal',
-  },
-  {
-    id: 'evt-2',
-    title: 'Banner logros desbloqueados',
-    channel: 'Banner superior',
-    timestamp: 'Ayer · 18:21',
-    state: 'enviado',
-    result: 'Sin interacción (TODO: métricas reales)',
-  },
-  {
-    id: 'evt-3',
-    title: 'Mensaje pilares inactivos',
-    channel: 'Toast lateral',
-    timestamp: '05 Oct · 11:07',
-    state: 'pendiente',
-    result: 'Esperando trigger de hábitos',
-  },
 ];
 
 export function FeedbackManagerPage() {
@@ -445,102 +418,420 @@ function GlobalNotificationsView() {
 }
 
 function UserNotificationsView() {
-  const [userQuery, setUserQuery] = useState('user.demo@innerbloom');
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [userState, setUserState] = useState<FeedbackUserStateResponse | null>(null);
+  const [history, setHistory] = useState<FeedbackUserHistoryResponse | null>(null);
+  const [stateLoading, setStateLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [stateError, setStateError] = useState<string | null>(null);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [stateRefreshToken, setStateRefreshToken] = useState(0);
+  const [historyRefreshToken, setHistoryRefreshToken] = useState(0);
+  const [updatingNotificationKey, setUpdatingNotificationKey] = useState<string | null>(null);
+  const [banner, setBanner] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const mockUser = useMemo(
-    () => ({
-      email: userQuery || 'user.demo@innerbloom',
-      id: 'user_demo',
-      activeExperiments: ['Onboarding XP', 'Nudge hábitos pilares'],
-    }),
-    [userQuery],
+  useEffect(() => {
+    if (!selectedUser) {
+      setUserState(null);
+      return;
+    }
+
+    let cancelled = false;
+    setStateLoading(true);
+    setStateError(null);
+
+    fetchFeedbackUserState(selectedUser.id)
+      .then((data) => {
+        if (!cancelled) {
+          setUserState(data);
+        }
+      })
+      .catch((err: unknown) => {
+        console.error('[admin][feedback] failed to load user state', err);
+        if (!cancelled) {
+          setStateError('No se pudo cargar el estado del usuario.');
+          setUserState(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setStateLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedUser?.id, stateRefreshToken]);
+
+  useEffect(() => {
+    if (!selectedUser) {
+      setHistory(null);
+      return;
+    }
+
+    let cancelled = false;
+    setHistoryLoading(true);
+    setHistoryError(null);
+
+    fetchFeedbackUserHistory(selectedUser.id)
+      .then((data) => {
+        if (!cancelled) {
+          setHistory(data);
+        }
+      })
+      .catch((err: unknown) => {
+        console.error('[admin][feedback] failed to load user history', err);
+        if (!cancelled) {
+          setHistoryError('No se pudo cargar el historial.');
+          setHistory(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setHistoryLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedUser?.id, historyRefreshToken]);
+
+  useEffect(() => {
+    if (!banner) {
+      return;
+    }
+    const timeout = setTimeout(() => setBanner(null), 4000);
+    return () => clearTimeout(timeout);
+  }, [banner]);
+
+  const handleUserSelect = useCallback((user: AdminUser | null) => {
+    setSelectedUser(user);
+    setUserState(null);
+    setHistory(null);
+    setStateError(null);
+    setHistoryError(null);
+  }, []);
+
+  const handleNotificationStateChange = useCallback(
+    async (notificationKey: string, nextState: 'active' | 'muted') => {
+      if (!selectedUser) {
+        return;
+      }
+      setUpdatingNotificationKey(notificationKey);
+      try {
+        await patchFeedbackUserNotificationState(selectedUser.id, { notificationKey, state: nextState });
+        setBanner({
+          type: 'success',
+          text:
+            nextState === 'muted'
+              ? 'Notificación muteada para este usuario.'
+              : 'Notificación reactivada para este usuario.',
+        });
+        setStateRefreshToken((token) => token + 1);
+      } catch (error) {
+        console.error('[admin][feedback] failed to update notification state', error);
+        setBanner({ type: 'error', text: 'No se pudo actualizar la notificación.' });
+      } finally {
+        setUpdatingNotificationKey(null);
+      }
+    },
+    [selectedUser?.id],
   );
+
+  const userProfile = userState?.user ?? null;
+  const email = userProfile?.email ?? selectedUser?.email ?? 'Sin email';
+  const displayName =
+    userProfile?.name?.trim() ||
+    userProfile?.alias?.trim() ||
+    selectedUser?.name ||
+    selectedUser?.email ||
+    'Sin nombre';
+
+  const notifications = userState?.notifications ?? [];
+  const historyItems = history?.items ?? [];
+
+  const summaryCards = [
+    {
+      label: 'Mostradas (7d)',
+      value:
+        typeof history?.summary?.notifsShownLast7d === 'number'
+          ? history.summary.notifsShownLast7d.toLocaleString('es-AR')
+          : '—',
+      helper: 'notifs_shown_last_7d',
+    },
+    {
+      label: 'Clicks (7d)',
+      value:
+        typeof history?.summary?.notifsClickedLast7d === 'number'
+          ? history.summary.notifsClickedLast7d.toLocaleString('es-AR')
+          : '—',
+      helper: 'notifs_clicked_last_7d',
+    },
+    {
+      label: 'Momentos críticos (30d)',
+      value:
+        typeof history?.summary?.notifsCriticalLast30d === 'number'
+          ? history.summary.notifsCriticalLast30d.toLocaleString('es-AR')
+          : '—',
+      helper: 'notifs_critical_last_30d',
+    },
+    {
+      label: 'Click rate (30d)',
+      value: formatPercent(history?.summary?.clickRateLast30d),
+      helper: 'click_rate_last_30d',
+    },
+  ];
 
   return (
     <div className="grid gap-5 lg:grid-cols-[320px,1fr]">
-      <aside className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-5 shadow-inner shadow-slate-950/20">
+      <aside className="flex flex-col gap-4 rounded-2xl border border-slate-800/70 bg-slate-900/60 p-5 shadow-inner shadow-slate-950/20">
         <header>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Selección de usuario</p>
-          <p className="mt-1 text-sm text-slate-300">TODO: conectar con buscador real del Admin.</p>
+          <p className="mt-1 text-sm text-slate-300">Buscá por email o ID para enfocar la vista.</p>
         </header>
-        <div className="mt-4 space-y-3">
-          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Email o ID</label>
-          <input
-            value={userQuery}
-            onChange={(event) => setUserQuery(event.target.value)}
-            placeholder="Buscar usuario…"
-            className="w-full rounded-lg border border-slate-700/60 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-          />
-          <button
-            type="button"
-            className="w-full rounded-lg bg-sky-500/90 px-3 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
-          >
-            Guardar foco
-          </button>
-          <div className="rounded-lg border border-slate-800/60 bg-slate-900/40 px-3 py-2 text-xs text-slate-400">
-            Mostrando vista mock para <span className="font-semibold text-slate-100">{mockUser.email}</span>
+        <UserPicker onSelect={handleUserSelect} selectedUserId={selectedUser?.id ?? null} />
+        {selectedUser ? (
+          <div className="rounded-xl border border-slate-800/60 bg-slate-900/70 px-4 py-3 text-xs text-slate-300">
+            <p className="font-semibold text-slate-100">{selectedUser.email ?? 'Sin email'}</p>
+            <p className="text-[11px] text-slate-500">user_id: {selectedUser.id}</p>
           </div>
-        </div>
+        ) : (
+          <p className="text-xs text-slate-500">Todavía no hay un usuario seleccionado.</p>
+        )}
       </aside>
 
       <section className="space-y-5">
-        <article className="rounded-2xl border border-slate-800/60 bg-slate-900/80 p-5 shadow-slate-950/30">
-          <header className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-slate-100">Estado general</p>
-              <p className="text-xs text-slate-400">Experiencias activas &amp; últimas interacciones</p>
-            </div>
-            <span className="rounded-full border border-slate-800/80 px-3 py-1 text-xs text-slate-300">TODO: métricas reales</span>
-          </header>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <div className="rounded-xl border border-slate-800/70 bg-slate-900/40 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Experimentos</p>
-              <ul className="mt-2 space-y-1 text-sm text-slate-200">
-                {mockUser.activeExperiments.map((experiment) => (
-                  <li key={experiment} className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-sky-400" aria-hidden />
-                    {experiment}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-xl border border-slate-800/70 bg-slate-900/40 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Siguiente acción sugerida</p>
-              <p className="mt-2 text-sm text-slate-100">Enviar nudge sobre pilares &amp; desbloquear nuevo modal.</p>
-              <p className="text-xs text-slate-500">Basado en hábitos incompletos (mock).</p>
-            </div>
-          </div>
-        </article>
+        {banner ? <ToastBanner tone={banner.type} message={banner.text} /> : null}
 
-        <article className="overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-900/60 shadow-lg shadow-slate-950/30">
-          <header className="flex items-center justify-between border-b border-slate-800/70 px-4 py-4">
-            <div>
-              <p className="text-sm font-semibold text-slate-100">Timeline de notificaciones</p>
-              <p className="text-xs text-slate-400">Datos mockeados hasta conectar con el backend.</p>
-            </div>
-            <button
-              type="button"
-              className="rounded-lg border border-slate-700/60 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:border-sky-400/60 hover:text-sky-100"
-            >
-              Refrescar
-            </button>
-          </header>
-          <div className="divide-y divide-slate-800/60">
-            {MOCK_USER_NOTIFICATIONS.map((notification) => (
-              <div key={notification.id} className="flex flex-col gap-2 px-4 py-4 md:flex-row md:items-center md:justify-between">
+        {!selectedUser ? (
+          <article className="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-6 text-sm text-slate-300">
+            <p className="font-semibold text-slate-100">Seleccioná un usuario</p>
+            <p className="mt-2 text-xs text-slate-400">
+              Usá el buscador de la izquierda para elegir un usuario específico y ver su estado de notificaciones.
+            </p>
+          </article>
+        ) : (
+          <>
+            <article className="rounded-2xl border border-slate-800/70 bg-slate-900/80 p-5 shadow-slate-950/30">
+              <header className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-slate-100">{notification.title}</p>
-                  <p className="text-xs text-slate-400">{notification.channel}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Vista por usuario</p>
+                  <h2 className="mt-1 text-2xl font-semibold text-slate-50">{displayName}</h2>
+                  <p className="text-sm text-slate-400">{email}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-sm">
-                  <span className="text-xs text-slate-500">{notification.timestamp}</span>
-                  <span className={stateBadgeClass(notification.state)}>{notification.state.toUpperCase()}</span>
-                  <span className="text-xs text-slate-400">{notification.result}</span>
+                <div className="text-right">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">user_id</p>
+                  <p className="font-mono text-xs text-slate-200">{userProfile?.id ?? selectedUser.id}</p>
+                </div>
+              </header>
+              <dl className="mt-4 grid gap-4 text-sm text-slate-200 sm:grid-cols-3">
+                <div>
+                  <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">Game Mode</dt>
+                  <dd className="mt-1 text-base text-slate-100">{userProfile?.gameMode ?? selectedUser.gameMode ?? '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">Nivel actual</dt>
+                  <dd className="mt-1 text-base text-slate-100">{userProfile?.level ?? '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">Última actividad</dt>
+                  <dd className="mt-1 text-base text-slate-100">{formatOptionalDateTime(userProfile?.lastSeenAt)}</dd>
+                </div>
+              </dl>
+            </article>
+
+            <article className="overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-900/70 shadow-lg shadow-slate-950/30">
+              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/70 px-4 py-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-100">Bloque A — Notificaciones activas</p>
+                  <p className="text-xs text-slate-400">Estado individual: active / muted / suppressed</p>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setStateRefreshToken((token) => token + 1)}
+                    className="rounded-lg border border-slate-700/60 px-3 py-2 font-semibold text-slate-100 transition hover:border-sky-400/60 hover:text-sky-100"
+                  >
+                    Refrescar
+                  </button>
+                </div>
+              </header>
+              {stateError ? (
+                <p className="px-4 py-3 text-xs text-rose-200">{stateError}</p>
+              ) : null}
+              <div className="relative max-h-[420px] overflow-auto">
+                <table className="min-w-full border-collapse text-left text-sm text-slate-100">
+                  <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
+                    <tr>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">notification_key</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Nombre</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Tipo</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Canal</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Estado</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">mute_until</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">last_fired_for_user_at</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">last_interaction</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {notifications.map((notification) => {
+                      const isUpdating = updatingNotificationKey === notification.notificationKey;
+                      return (
+                        <tr key={notification.notificationKey} className="border-t border-slate-800/60">
+                          <td className="px-3 py-3 font-mono text-xs text-slate-300">{notification.notificationKey}</td>
+                          <td className="px-3 py-3">
+                            <p className="font-medium text-slate-100">{notification.name}</p>
+                          </td>
+                          <td className="px-3 py-3 text-xs text-slate-300">{notification.type}</td>
+                          <td className="px-3 py-3 text-xs text-slate-300">{notification.channel}</td>
+                          <td className="px-3 py-3">
+                            <span className={notificationStateBadgeClass(notification.state)}>
+                              {notification.state}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-xs text-slate-300">{formatOptionalDateTime(notification.muteUntil)}</td>
+                          <td className="px-3 py-3 text-xs text-slate-300">{formatOptionalDateTime(notification.lastFiredForUserAt)}</td>
+                          <td className="px-3 py-3 text-xs text-slate-300">
+                            {formatInteractionLabel(notification.lastInteractionType)}
+                          </td>
+                          <td className="px-3 py-3 text-xs">
+                            <div className="flex flex-wrap gap-2">
+                              {notification.state === 'muted' ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleNotificationStateChange(notification.notificationKey, 'active')}
+                                  disabled={isUpdating}
+                                  className="rounded-lg border border-emerald-500/60 px-3 py-1 text-xs font-semibold text-emerald-100 transition hover:border-emerald-300 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  Re-activar
+                                </button>
+                              ) : null}
+                              {notification.state === 'active' ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleNotificationStateChange(notification.notificationKey, 'muted')}
+                                  disabled={isUpdating}
+                                  className="rounded-lg border border-amber-500/60 px-3 py-1 text-xs font-semibold text-amber-100 transition hover:border-amber-300 hover:text-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  Mutear
+                                </button>
+                              ) : null}
+                              {notification.state === 'suppressed_by_rule' ? (
+                                <span className="rounded-lg border border-slate-800/80 px-3 py-1 text-[11px] text-slate-400">
+                                  Supeditado a reglas
+                                </span>
+                              ) : null}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {notifications.length === 0 && !stateLoading ? (
+                      <tr>
+                        <td colSpan={9} className="px-3 py-6 text-center text-xs text-slate-400">
+                          No hay notificaciones personalizadas para este usuario.
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+                {stateLoading ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/70">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                  </div>
+                ) : null}
+              </div>
+            </article>
+
+            <article className="overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-900/70 shadow-lg shadow-slate-950/30">
+              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/70 px-4 py-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-100">Bloque B — Historial de disparos</p>
+                  <p className="text-xs text-slate-400">Timeline de eventos recientes</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setHistoryRefreshToken((token) => token + 1)}
+                  className="rounded-lg border border-slate-700/60 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:border-sky-400/60 hover:text-sky-100"
+                >
+                  Refrescar
+                </button>
+              </header>
+              <div className="border-b border-slate-800/70 bg-slate-950/30 px-4 py-4">
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                  {summaryCards.map((card) => (
+                    <div key={card.helper} className="rounded-xl border border-slate-800/60 bg-slate-900/60 px-3 py-2">
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{card.label}</p>
+                      <p className="mt-1 text-xl font-semibold text-slate-50">{card.value}</p>
+                      <p className="text-[10px] text-slate-500">{card.helper}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </article>
+              {historyError ? (
+                <p className="px-4 py-3 text-xs text-rose-200">{historyError}</p>
+              ) : null}
+              <div className="relative max-h-[420px] overflow-auto">
+                <table className="min-w-full border-collapse text-left text-sm text-slate-100">
+                  <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
+                    <tr>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">timestamp</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Notificación</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Tipo</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Canal</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Contexto</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Acción</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Critical</th>
+                      <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">critical_tag</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historyItems.map((entry) => (
+                      <tr key={entry.id} className="border-t border-slate-800/60">
+                        <td className="px-3 py-3 text-xs text-slate-300">{formatOptionalDateTime(entry.timestamp)}</td>
+                        <td className="px-3 py-3">
+                          <p className="font-medium text-slate-100">{entry.name}</p>
+                          <p className="text-xs font-mono text-slate-500">{entry.notificationKey}</p>
+                        </td>
+                        <td className="px-3 py-3 text-xs text-slate-300">{entry.type}</td>
+                        <td className="px-3 py-3 text-xs text-slate-300">{entry.channel}</td>
+                        <td className="px-3 py-3 text-xs text-slate-300">{entry.context ?? '—'}</td>
+                        <td className="px-3 py-3 text-xs text-slate-100">{formatHistoryAction(entry.action)}</td>
+                        <td className="px-3 py-3">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-1 text-[11px] font-semibold ${
+                              entry.isCriticalMoment
+                                ? 'bg-rose-500/20 text-rose-100'
+                                : 'bg-slate-800/80 text-slate-200'
+                            }`}
+                          >
+                            {entry.isCriticalMoment ? 'Sí' : 'No'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-xs text-slate-300">{entry.criticalTag ?? '—'}</td>
+                      </tr>
+                    ))}
+                    {historyItems.length === 0 && !historyLoading ? (
+                      <tr>
+                        <td colSpan={8} className="px-3 py-6 text-center text-xs text-slate-400">
+                          Aún no registramos eventos en el período seleccionado.
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+                {historyLoading ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/70">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                  </div>
+                ) : null}
+              </div>
+            </article>
+          </>
+        )}
       </section>
     </div>
   );
@@ -847,13 +1138,71 @@ function formatPreviewCopy(copy: string, variables: Record<string, string>) {
   return copy.replace(/{{(.*?)}}/g, (_, key) => variables[key.trim()] ?? '•••');
 }
 
-function stateBadgeClass(state: UserNotification['state']) {
-  switch (state) {
-    case 'visto':
-      return 'inline-flex items-center rounded-full bg-sky-500/20 px-3 py-1 text-[11px] font-semibold text-sky-100';
-    case 'enviado':
-      return 'inline-flex items-center rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] font-semibold text-emerald-100';
-    default:
-      return 'inline-flex items-center rounded-full bg-slate-700/70 px-3 py-1 text-[11px] font-semibold text-slate-200';
+function formatOptionalDateTime(value?: string | null) {
+  if (!value) {
+    return '—';
   }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return new Intl.DateTimeFormat('es-AR', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date);
+}
+
+function notificationStateBadgeClass(state: FeedbackUserNotificationState['state']) {
+  switch (state) {
+    case 'active':
+      return 'inline-flex rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] font-semibold uppercase text-emerald-100';
+    case 'muted':
+      return 'inline-flex rounded-full bg-amber-500/20 px-3 py-1 text-[11px] font-semibold uppercase text-amber-100';
+    default:
+      return 'inline-flex rounded-full bg-slate-800/80 px-3 py-1 text-[11px] font-semibold uppercase text-slate-200';
+  }
+}
+
+function formatInteractionLabel(action: FeedbackUserNotificationState['lastInteractionType']) {
+  if (!action) {
+    return '—';
+  }
+  switch (action) {
+    case 'clicked':
+      return 'clicked';
+    case 'dismissed':
+      return 'dismissed';
+    case 'ignored':
+      return 'ignored';
+    case 'auto_closed':
+      return 'auto_closed';
+    default:
+      return 'shown';
+  }
+}
+
+function formatHistoryAction(action: FeedbackUserHistoryEntry['action']) {
+  switch (action) {
+    case 'clicked':
+      return 'Clicked';
+    case 'dismissed':
+      return 'Dismissed';
+    case 'ignored':
+      return 'Ignored';
+    case 'auto_closed':
+      return 'Auto closed';
+    default:
+      return 'Shown';
+  }
+}
+
+function formatPercent(value?: number | null) {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return '—';
+  }
+  const normalized = value > 1 ? value / 100 : value;
+  return new Intl.NumberFormat('es-AR', {
+    style: 'percent',
+    maximumFractionDigits: 1,
+  }).format(normalized);
 }
