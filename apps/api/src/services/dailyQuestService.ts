@@ -101,7 +101,7 @@ export type SubmitDailyQuestFeedbackEvent =
       notificationKey: typeof STREAK_FIRE_NOTIFICATION_KEY;
       payload: {
         threshold: number;
-        tasks: Array<{ id: string; name: string; streakDays: number }>;
+        tasks: { id: string; name: string; streakDays: number }[];
       };
     };
 
