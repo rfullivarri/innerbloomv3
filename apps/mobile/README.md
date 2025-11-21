@@ -21,6 +21,14 @@ La configuración se carga en `app.config.ts` usando `dotenv` y se expone en `Co
 
 > Xcode/Android Studio: si prefieres inyectar las claves desde los esquemas nativos, puedes definir `EXPO_PUBLIC_*` o usar el formato `EXPO_EXTRA_*` (por ejemplo `EXPO_EXTRA_CLERK_PUBLISHABLE_KEY`, `EXPO_EXTRA_API_BASE_URL`). Expo las propagará a `extra` durante los builds nativos.
 
+### Apuntar la app al backend local o de Railway
+
+- **Backend de producción**: usa `https://api.innerbloom.dev` en `EXPO_PUBLIC_API_BASE_URL` (requiere HTTPS, no necesita excepciones ATS).
+- **Backend de Railway**: coloca la URL del servicio Railway (generalmente HTTPS). No requiere cambios adicionales si la URL es segura.
+- **Backend local**: usa `http://localhost:3000` o `http://127.0.0.1:3000` para los simuladores. Las builds de desarrollo/preview habilitan una excepción de ATS automáticamente para permitir HTTP en iOS.
+
+Cuando quieras probar llamadas HTTP en el simulador iOS, asegúrate de ejecutar con un perfil de desarrollo o preview (`pnpm --filter @innerbloom/mobile exec expo start --dev-client` o `pnpm exec eas build --profile development --platform ios`). Las builds de producción mantienen ATS con HTTPS obligatorio.
+
 ## Instalación de dependencias
 Desde la raíz del monorepo:
 
@@ -54,6 +62,14 @@ pnpm install
 ## Generar proyectos nativos localmente (opcional)
 - `cd apps/mobile && pnpm exec expo prebuild`
 - Esto crea `apps/mobile/ios` y `apps/mobile/android` para Xcode/Android Studio. **No** comitees estos directorios ni ningún `.ipa` generado.
+
+## Abrir el proyecto iOS en Xcode y correr el simulador
+1. Genera el proyecto nativo con `pnpm exec expo prebuild --clean --platform ios` (no se comitea la carpeta `ios/`).
+2. Abre `apps/mobile/ios/Innerbloom Mobile.xcworkspace` en Xcode (`open ios/Innerbloom\ Mobile.xcworkspace` desde `apps/mobile`).
+3. En la pestaña **Signing & Capabilities** selecciona tu _Team_ para que Xcode configure automáticamente el provisioning profile.
+4. Elige un dispositivo de simulador en la barra superior (por ejemplo, *iPhone 16 Pro*).
+5. Corre la app con **Product → Run** (`⌘ + R`); puedes detenerla con `⌘ + .` y limpiar la build con `⇧ + ⌘ + K` si cambias de bundle ID.
+6. Cada vez que regeneres el proyecto, verifica que la carpeta `ios/` y su `Podfile` sigan fuera del control de versiones.
 
 ## Recordatorio sobre artefactos binarios
 - No se comitean `.ipa`, `.apk`, carpetas `ios/` o `android/` generadas por `expo prebuild`, ni builds de distribución.
