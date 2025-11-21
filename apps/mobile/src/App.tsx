@@ -2,6 +2,7 @@ import 'react-native-gesture-handler';
 import { ClerkProvider } from '@clerk/clerk-expo';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Constants from 'expo-constants';
 import RootNavigator from './navigation/RootNavigator';
 import { tokenCache } from './lib/tokenCache';
 
@@ -19,10 +20,13 @@ const AppTheme = {
 };
 
 export default function App() {
-  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const publishableKey = (
+    process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ??
+    (Constants.expoConfig?.extra as { clerkPublishableKey?: string } | undefined)?.clerkPublishableKey
+  )?.trim();
 
   if (!publishableKey) {
-    throw new Error('EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY is not set');
+    throw new Error('Clerk publishable key is not set');
   }
 
   return (

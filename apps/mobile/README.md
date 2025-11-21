@@ -9,7 +9,7 @@ Cliente nativo (Expo + React Native) que replica el dashboard web usando las mis
 - [Expo CLI](https://docs.expo.dev/more/expo-cli/) se ejecuta vía `pnpm exec expo ...`
 
 ## Variables de entorno
-Crea un archivo `.env` en `apps/mobile` o exporta las siguientes variables antes de levantar la app:
+Crea un archivo `.env` en `apps/mobile` (hay un `.env.example` de referencia) o exporta las siguientes variables antes de levantar la app:
 
 ```
 EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=<tu publishable key>
@@ -17,7 +17,9 @@ EXPO_PUBLIC_CLERK_TOKEN_TEMPLATE=<opcional: template de Clerk>
 EXPO_PUBLIC_API_BASE_URL=https://api.innerbloom.dev (o el host de Railway/local)
 ```
 
-Estas variables se leen desde `App.tsx` y `src/api/client.ts` para inicializar Clerk y componer las rutas `/api/*`.
+La configuración se carga en `app.config.ts` usando `dotenv` y se expone en `Constants.expoConfig.extra` para que la consuman `App.tsx` y `src/api/client.ts` al inicializar Clerk y componer las rutas `/api/*`.
+
+> Xcode/Android Studio: si prefieres inyectar las claves desde los esquemas nativos, puedes definir `EXPO_PUBLIC_*` o usar el formato `EXPO_EXTRA_*` (por ejemplo `EXPO_EXTRA_CLERK_PUBLISHABLE_KEY`, `EXPO_EXTRA_API_BASE_URL`). Expo las propagará a `extra` durante los builds nativos.
 
 ## Instalación de dependencias
 Desde la raíz del monorepo:
