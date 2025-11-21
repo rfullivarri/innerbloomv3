@@ -2,8 +2,8 @@ import Constants from 'expo-constants';
 import type { MissionsV2BoardResponse } from '@innerbloom/missions-v2-contracts';
 import type { GetTokenOptions } from '@clerk/types';
 
-const fallbackBase = (Constants.expoConfig?.extra as { apiBaseUrl?: string } | undefined)?.apiBaseUrl ?? '';
-const RAW_API_BASE = (process.env.EXPO_PUBLIC_API_BASE_URL ?? fallbackBase ?? '').trim();
+const extraConfig = (Constants.expoConfig?.extra as { apiBaseUrl?: string } | undefined) ?? {};
+const RAW_API_BASE = (extraConfig.apiBaseUrl ?? process.env.EXPO_PUBLIC_API_BASE_URL ?? '').trim();
 const API_BASE = RAW_API_BASE.replace(/\/+$/, '');
 
 export class ApiError extends Error {

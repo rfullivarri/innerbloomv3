@@ -1,68 +1,58 @@
-import { ConfigContext, ExpoConfig } from 'expo/config';
+import type { ExpoConfig } from 'expo/config';
+import { config as loadEnv } from 'dotenv';
+import path from 'path';
 
-const projectId = 'a069a65b-a9b9-42a8-a756-07551e2bc094';
-const bundleIdentifier = 'com.innerbloom.mobile';
+loadEnv({ path: path.resolve(__dirname, '.env') });
 
-export default ({ config }: ConfigContext): ExpoConfig => {
-  const isDevOrPreview =
-    process.env.EAS_BUILD_PROFILE === 'development' ||
-    process.env.EAS_BUILD_PROFILE === 'preview' ||
-    process.env.NODE_ENV !== 'production';
+const DEFAULT_API_BASE_URL = 'https://api.innerbloom.dev';
 
-  const baseConfig: ExpoConfig = {
-    ...config,
-    name: 'Innerbloom Mobile',
-    slug: 'innerbloom-mobile',
-    scheme: 'innerbloom',
-    version: '1.0.0',
-    orientation: 'portrait',
-    sdkVersion: '54.0.0',
-    userInterfaceStyle: 'light',
-    assetBundlePatterns: ['**/*'],
-    ios: {
-      supportsTablet: false,
-      bundleIdentifier,
-      infoPlist: {
-        ITSAppUsesNonExemptEncryption: false,
-      },
+const apiBaseUrl =
+  process.env.EXPO_PUBLIC_API_BASE_URL ??
+  process.env.EXPO_EXTRA_API_BASE_URL ??
+  DEFAULT_API_BASE_URL;
+
+const clerkPublishableKey =
+  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ??
+  process.env.EXPO_EXTRA_CLERK_PUBLISHABLE_KEY ??
+  '';
+
+const clerkTokenTemplate =
+  process.env.EXPO_PUBLIC_CLERK_TOKEN_TEMPLATE ??
+  process.env.EXPO_EXTRA_CLERK_TOKEN_TEMPLATE ??
+  '';
+
+const config: ExpoConfig = {
+  name: 'Innerbloom Mobile',
+  slug: 'innerbloom-mobile',
+  scheme: 'innerbloom',
+  version: '1.0.0',
+  orientation: 'portrait',
+  sdkVersion: '54.0.0',
+  userInterfaceStyle: 'light',
+  assetBundlePatterns: ['**/*'],
+  ios: {
+    supportsTablet: false,
+    bundleIdentifier: 'com.innerbloom.mobile',
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
     },
-    android: {
-      package: bundleIdentifier,
+  },
+  android: {
+    package: 'com.innerbloom.mobile',
+  },
+  web: {
+    bundler: 'metro',
+  },
+  plugins: ['expo-secure-store', 'expo-dev-client'],
+  extra: {
+    apiBaseUrl: apiBaseUrl || DEFAULT_API_BASE_URL,
+    clerkPublishableKey,
+    clerkTokenTemplate,
+    eas: {
+      projectId: 'a069a65b-a9b9-42a8-a756-07551e2bc094',
     },
-    web: {
-      bundler: 'metro',
-    },
-    plugins: ['expo-secure-store', 'expo-dev-client'],
-    extra: {
-      eas: {
-        projectId,
-      },
-    },
-    owner: 'rfullivarri',
-  };
-
-  if (isDevOrPreview) {
-    baseConfig.ios = {
-      ...baseConfig.ios,
-      infoPlist: {
-        ...baseConfig.ios?.infoPlist,
-        NSAppTransportSecurity: {
-          NSAllowsArbitraryLoads: true,
-          NSAllowsLocalNetworking: true,
-          NSExceptionDomains: {
-            localhost: {
-              NSExceptionAllowsInsecureHTTPLoads: true,
-              NSIncludesSubdomains: true,
-            },
-            '127.0.0.1': {
-              NSExceptionAllowsInsecureHTTPLoads: true,
-              NSIncludesSubdomains: true,
-            },
-          },
-        },
-      },
-    };
-  }
-
-  return baseConfig;
+  },
+  owner: 'rfullivarri',
 };
+
+export default config;
