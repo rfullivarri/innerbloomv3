@@ -19,6 +19,14 @@ EXPO_PUBLIC_API_BASE_URL=https://api.innerbloom.dev (o el host de Railway/local)
 
 Estas variables se leen desde `App.tsx` y `src/api/client.ts` para inicializar Clerk y componer las rutas `/api/*`.
 
+### Apuntar la app al backend local o de Railway
+
+- **Backend de producción**: usa `https://api.innerbloom.dev` en `EXPO_PUBLIC_API_BASE_URL` (requiere HTTPS, no necesita excepciones ATS).
+- **Backend de Railway**: coloca la URL del servicio Railway (generalmente HTTPS). No requiere cambios adicionales si la URL es segura.
+- **Backend local**: usa `http://localhost:3000` o `http://127.0.0.1:3000` para los simuladores. Las builds de desarrollo/preview habilitan una excepción de ATS automáticamente para permitir HTTP en iOS.
+
+Cuando quieras probar llamadas HTTP en el simulador iOS, asegúrate de ejecutar con un perfil de desarrollo o preview (`pnpm --filter @innerbloom/mobile exec expo start --dev-client` o `pnpm exec eas build --profile development --platform ios`). Las builds de producción mantienen ATS con HTTPS obligatorio.
+
 ## Instalación de dependencias
 Desde la raíz del monorepo:
 
