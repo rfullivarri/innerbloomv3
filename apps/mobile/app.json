@@ -12,7 +12,10 @@
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.innerbloom.mobile"
+      "bundleIdentifier": "com.innerbloom.mobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.innerbloom.mobile"
@@ -23,6 +26,12 @@
     "plugins": [
       "expo-secure-store",
       "expo-dev-client"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a069a65b-a9b9-42a8-a756-07551e2bc094"
+      }
+    },
+    "owner": "rfullivarri"
   }
 }
