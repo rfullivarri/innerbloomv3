@@ -71,6 +71,8 @@ pnpm install
 5. Corre la app con **Product → Run** (`⌘ + R`); puedes detenerla con `⌘ + .` y limpiar la build con `⇧ + ⌘ + K` si cambias de bundle ID.
 6. Cada vez que regeneres el proyecto, verifica que la carpeta `ios/` y su `Podfile` sigan fuera del control de versiones.
 
+> **Troubleshooting (Xcode / CocoaPods)**: Después de `pnpm exec expo prebuild`, ejecuta `cd ios && pod install --repo-update` (CocoaPods 1.15+) para bajar los pods recientes como `ReactAppDependencyProvider`. Si ves el error `Unable to find a specification for ReactAppDependencyProvider`, prueba de nuevo con `arch -x86_64 pod install --repo-update` en Macs Apple Silicon que usen Ruby x86.
+
 ## Recordatorio sobre artefactos binarios
 - No se comitean `.ipa`, `.apk`, carpetas `ios/` o `android/` generadas por `expo prebuild`, ni builds de distribución.
 - Si necesitas un proyecto nativo, genera las carpetas localmente con el comando anterior y mantenlas fuera del control de versiones.
