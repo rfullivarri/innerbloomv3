@@ -61,7 +61,7 @@ pnpm install
 
 ## Generar proyectos nativos localmente (opcional)
 - `cd apps/mobile && pnpm exec expo prebuild`
-- Esto crea `apps/mobile/ios` y `apps/mobile/android` para Xcode/Android Studio. **No** comitees estos directorios ni ningún `.ipa` generado.
+- Esto crea `apps/mobile/ios` y `apps/mobile/android` para Xcode/Android Studio. **No** comitees estos directorios ni ningún `.ipa` generado: la carpeta `ios/` está en `.gitignore` y debe regenerarse cuando se necesite con `pnpm exec expo prebuild --clean --platform ios`.
 
 ## Abrir el proyecto iOS en Xcode y correr el simulador
 1. Genera el proyecto nativo con `pnpm exec expo prebuild --clean --platform ios` (no se comitea la carpeta `ios/`).
