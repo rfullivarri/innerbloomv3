@@ -2,6 +2,8 @@
 
 Cliente nativo (Expo + React Native) que replica el dashboard web usando las mismas APIs y autenticación de Clerk.
 
+👉 Si solo quieres ver la app rápido en un simulador o en Expo Go, usa la **Opción A** de abajo. Si necesitas probar el binario nativo con Xcode/Android Studio o Dev Client, sigue la **Opción B/C**.
+
 ## Requisitos
 - Node.js 20.x
 - pnpm (el monorepo está configurado como workspace de pnpm)
@@ -27,7 +29,7 @@ La configuración se carga en `app.config.ts` usando `dotenv` y se expone en `Co
 - **Backend de Railway**: coloca la URL del servicio Railway (generalmente HTTPS). No requiere cambios adicionales si la URL es segura.
 - **Backend local**: usa `http://localhost:3000` o `http://127.0.0.1:3000` para los simuladores. Las builds de desarrollo/preview habilitan una excepción de ATS automáticamente para permitir HTTP en iOS.
 
-Cuando quieras probar llamadas HTTP en el simulador iOS, asegúrate de ejecutar con un perfil de desarrollo o preview (`pnpm --filter @innerbloom/mobile exec expo start --dev-client` o `pnpm exec eas build --profile development --platform ios`). Las builds de producción mantienen ATS con HTTPS obligatorio.
+Cuando quieras probar llamadas HTTP en el simulador iOS, asegúrate de ejecutar con un perfil de desarrollo o preview (`pnpm --filter @innerbloom/mobile run start:dev-client` o `pnpm exec eas build --profile development --platform ios`). Las builds de producción mantienen ATS con HTTPS obligatorio.
 
 ## Instalación de dependencias
 Desde la raíz del monorepo:
@@ -37,14 +39,21 @@ pnpm install
 ```
 
 ## Scripts rápidos
-- `pnpm --filter @innerbloom/mobile start`: levanta Metro/Expo (`expo start`).
-- `pnpm --filter @innerbloom/mobile exec expo start --dev-client`: arranca Metro en modo Dev Client.
+- `pnpm --filter @innerbloom/mobile start`: levanta Metro/Expo para Expo Go o simuladores (no requiere Dev Client).
+- `pnpm --filter @innerbloom/mobile run start:dev-client`: arranca Metro en modo Dev Client.
 - `pnpm --filter @innerbloom/mobile android`: build & run en un dispositivo/emulador Android (`expo run:android`).
 - `pnpm --filter @innerbloom/mobile ios`: equivalente para iOS (`expo run:ios`).
 - `pnpm --filter @innerbloom/mobile web`: vista previa web vía Expo.
 - `pnpm --filter @innerbloom/mobile typecheck`: `tsc --noEmit` para validar tipos.
 
-## Flujo Dev Client + EAS (iPhone real)
+## Opción A: Probar rápido con Expo Go o el simulador (sin Dev Client)
+1. Copia las variables de ejemplo: `cp apps/mobile/.env.example apps/mobile/.env` y ajusta las claves de Clerk y la URL de API.
+2. Desde la raíz del repo: `pnpm --filter @innerbloom/mobile start`.
+3. Escanea el QR con Expo Go (iOS/Android) o pulsa `i`/`a` en la terminal para abrir un simulador/emulador. No necesitas Xcode/Android Studio instalado previamente si ya tienes los simuladores configurados.
+
+> ¿No ves datos? Verifica que `EXPO_PUBLIC_API_BASE_URL` apunte a tu backend (HTTPS en producción/Railway o `http://localhost:3000` para el simulador local). Las builds de desarrollo permiten HTTP en iOS.
+
+## Opción B: Dev Client + EAS (iPhone real)
 1. Desde la raíz, instala dependencias con `pnpm install` (una sola vez).
 2. Enlaza tu cuenta y el proyecto con EAS (solo la primera vez):
    - `cd apps/mobile`
@@ -56,8 +65,10 @@ pnpm install
    - Para Android es análogo: `pnpm exec eas build --profile development --platform android`.
 4. Instala el Dev Client en el dispositivo real con el enlace generado por EAS (QR interno o TestFlight). No necesitas Expo Go.
 5. Con el Dev Client instalado y en la misma red que tu máquina, levanta el servidor de desarrollo:
-   - `pnpm --filter @innerbloom/mobile exec expo start --dev-client`
+   - `pnpm --filter @innerbloom/mobile run start:dev-client`
 6. Abre el cliente en el iPhone y escanea el QR/usa el enlace `exp+innerbloom://` que muestra el dev server.
+
+> Para usar el simulador iOS con Dev Client, abre la build `development` en Xcode/Simulator y deja corriendo `pnpm --filter @innerbloom/mobile run start:dev-client`.
 
 ## Generar proyectos nativos localmente (opcional)
 - `cd apps/mobile && pnpm exec expo prebuild`
@@ -89,4 +100,4 @@ Sigue el plan descrito en `docs/mobile-app-plan.md` para futuras iteraciones (Da
 - Archivos tocados en esta configuración: `apps/mobile/package.json`, `apps/mobile/app.json`, `eas.json`, `apps/mobile/README.md`.
 - Generar proyectos nativos (si necesitas Xcode/Android Studio): `cd apps/mobile && pnpm exec expo prebuild`.
 - Build de desarrollo iOS con Dev Client: `cd apps/mobile && pnpm exec eas build --profile development --platform ios`.
-- Lanzar la app con Dev Client ya instalada: `pnpm --filter @innerbloom/mobile exec expo start --dev-client`.
+- Lanzar la app con Dev Client ya instalada: `pnpm --filter @innerbloom/mobile run start:dev-client`.
