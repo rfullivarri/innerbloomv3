@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import type { TokenCache } from '@clerk/clerk-expo';
 
 export const tokenCache: TokenCache = {
-  async getToken(key) {
+  async getToken(key: string): Promise<string | null> {
     try {
       return await SecureStore.getItemAsync(key);
     } catch (error) {
@@ -10,7 +10,7 @@ export const tokenCache: TokenCache = {
       return null;
     }
   },
-  async saveToken(key, value) {
+  async saveToken(key: string, value: string | null): Promise<void> {
     if (!value) {
       await SecureStore.deleteItemAsync(key);
       return;
