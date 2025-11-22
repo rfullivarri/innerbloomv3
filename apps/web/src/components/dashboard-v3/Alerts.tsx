@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserJourney, type UserJourneySummary } from '../../lib/api';
 
@@ -7,9 +7,26 @@ interface AlertsProps {
   onScheduleClick?: () => void;
 }
 
-function shouldShowBbddWarning(journey: UserJourneySummary | null): boolean {
+type BbddWarningTracker = {
+  lastLogCount: number;
+  loginCount: number;
+};
+
+const BBDD_WARNING_STORAGE_PREFIX = 'bbdd-warning:v1:';
+
+function shouldShowBbddWarning(
+  journey: UserJourneySummary | null,
+  tracker: BbddWarningTracker | null,
+): boolean {
   if (!journey) return false;
-  return (journey.quantity_daily_logs ?? 0) === 0;
+  if (journey.first_tasks_confirmed) return false;
+
+  const dailyLogs = journey.quantity_daily_logs ?? 0;
+  if (dailyLogs === 0) return true;
+
+  if (!tracker) return false;
+
+  return tracker.loginCount >= 3;
 }
 
 function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean {
@@ -21,7 +38,78 @@ function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean
 export function Alerts({ userId, onScheduleClick }: AlertsProps) {
   const { data, status } = useRequest(() => getUserJourney(userId), [userId]);
 
-  const showBbdd = useMemo(() => shouldShowBbddWarning(data), [data]);
+  const [bbddTracker, setBbddTracker] = useState<BbddWarningTracker | null>(null);
+  const processedLogCountRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    processedLogCountRef.current = null;
+  }, [userId]);
+
+  useEffect(() => {
+    if (status !== 'success' || !data) return;
+
+    const currentLogCount = data.quantity_daily_logs ?? 0;
+    const storageKey = `${BBDD_WARNING_STORAGE_PREFIX}${userId}`;
+
+    let tracker: BbddWarningTracker = {
+      lastLogCount: currentLogCount,
+      loginCount: 0,
+    };
+
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = window.localStorage.getItem(storageKey);
+        if (raw) {
+          const parsed = JSON.parse(raw) as Partial<BbddWarningTracker>;
+          if (
+            typeof parsed.lastLogCount === 'number' &&
+            Number.isFinite(parsed.lastLogCount) &&
+            typeof parsed.loginCount === 'number' &&
+            Number.isFinite(parsed.loginCount)
+          ) {
+            tracker = {
+              lastLogCount: parsed.lastLogCount,
+              loginCount: parsed.loginCount,
+            };
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to read BBDD warning tracker from localStorage', error);
+      }
+    }
+
+    let shouldIncrementLoginCount = false;
+
+    if (tracker.lastLogCount !== currentLogCount) {
+      tracker = {
+        lastLogCount: currentLogCount,
+        loginCount: 0,
+      };
+    } else if (processedLogCountRef.current !== currentLogCount) {
+      shouldIncrementLoginCount = true;
+    }
+
+    processedLogCountRef.current = currentLogCount;
+
+    if (shouldIncrementLoginCount) {
+      tracker = {
+        lastLogCount: tracker.lastLogCount,
+        loginCount: tracker.loginCount + 1,
+      };
+    }
+
+    setBbddTracker(tracker);
+
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify(tracker));
+      } catch (error) {
+        console.warn('Failed to persist BBDD warning tracker in localStorage', error);
+      }
+    }
+  }, [status, data, userId]);
+
+  const showBbdd = useMemo(() => shouldShowBbddWarning(data, bbddTracker), [data, bbddTracker]);
   const showScheduler = useMemo(() => shouldShowSchedulerWarning(data), [data]);
   const canSchedule = typeof onScheduleClick === 'function';
 
@@ -79,7 +167,8 @@ export function Alerts({ userId, onScheduleClick }: AlertsProps) {
             </a>
           </div>
           <p className="mt-2 text-xs text-amber-100/70">
-            Este aviso desaparece cuando tu registro diario queda confirmado en la nueva app.
+            Este aviso desaparece cuando tu registro diario queda confirmado en la nueva app y, si todavía no
+            editaste tu base, volverá a aparecer después de tres ingresos.
           </p>
         </div>
       )}

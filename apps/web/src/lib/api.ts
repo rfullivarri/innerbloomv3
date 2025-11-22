@@ -1719,6 +1719,7 @@ export type UserJourneySummary = {
   days_of_journey: number;
   quantity_daily_logs: number;
   first_programmed: boolean;
+  first_tasks_confirmed: boolean;
 };
 
 export async function getUserJourney(userId: string): Promise<UserJourneySummary> {
