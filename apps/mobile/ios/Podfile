@@ -1,0 +1,4 @@
+source 'https://cdn.cocoapods.org/'
+
+# Placeholder Podfile for the iOS project.
+# Add your targets and pod dependencies once the iOS project is generated.
