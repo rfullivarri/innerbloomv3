@@ -10,6 +10,24 @@ Cliente nativo (Expo + React Native) que replica el dashboard web usando las mis
 - Xcode / Android Studio para emuladores o builds nativos
 - [Expo CLI](https://docs.expo.dev/more/expo-cli/) se ejecuta vía `pnpm exec expo ...`
 
+## Partir de cero si ya probaste antes (limpiar restos locales)
+1. Cierra cualquier Metro/Expo que siga corriendo en la terminal.
+2. Borra artefactos previos y proyectos nativos que no se versionan:
+   ```bash
+   cd apps/mobile
+   rm -rf .expo .expo-shared ios android node_modules
+   ```
+3. Desde la raíz del repo, instala dependencias frescas del monorepo:
+   ```bash
+   pnpm install
+   ```
+4. Limpia la caché de Metro/Expo al levantar de nuevo:
+   ```bash
+   pnpm --filter @innerbloom/mobile start -- --clear
+   ```
+   (usa `i` o `a` para abrir un simulador al momento).
+
+
 ## Variables de entorno
 Crea un archivo `.env` en `apps/mobile` (hay un `.env.example` de referencia) o exporta las siguientes variables antes de levantar la app:
 
@@ -22,6 +40,13 @@ EXPO_PUBLIC_API_BASE_URL=https://api.innerbloom.dev (o el host de Railway/local)
 La configuración se carga en `app.config.ts` usando `dotenv` y se expone en `Constants.expoConfig.extra` para que la consuman `App.tsx` y `src/api/client.ts` al inicializar Clerk y componer las rutas `/api/*`.
 
 > Xcode/Android Studio: si prefieres inyectar las claves desde los esquemas nativos, puedes definir `EXPO_PUBLIC_*` o usar el formato `EXPO_EXTRA_*` (por ejemplo `EXPO_EXTRA_CLERK_PUBLISHABLE_KEY`, `EXPO_EXTRA_API_BASE_URL`). Expo las propagará a `extra` durante los builds nativos.
+
+### Paso a paso (receta limpia) para iOS simulador
+1. Sigue la sección anterior de "Partir de cero" para limpiar restos y reinstalar dependencias.
+2. Copia y ajusta las variables: `cp apps/mobile/.env.example apps/mobile/.env` y completa tus claves.
+3. Inicia Metro limpio desde la raíz: `pnpm --filter @innerbloom/mobile start -- --clear`.
+4. Pulsa `i` en la terminal para abrir el simulador iOS con Expo Go. Si ya tienes Dev Client instalado, usa `pnpm --filter @innerbloom/mobile run start:dev-client` y abre el QR en el cliente.
+5. Si necesitas un proyecto nativo para Xcode, ejecuta (tras tener el simulador funcionando) `cd apps/mobile && pnpm exec expo prebuild --clean --platform ios` y abre `ios/Innerbloom\ Mobile.xcworkspace`.
 
 ### Apuntar la app al backend local o de Railway
 
