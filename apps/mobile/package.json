@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@babel/runtime": "^7.28.4",
     "@clerk/clerk-expo": "^2.19.4",
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/native": "^7.0.3",
