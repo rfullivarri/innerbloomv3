@@ -142,6 +142,9 @@ importers:
       '@clerk/clerk-react':
         specifier: ^5.56.2
         version: 5.56.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/shared':
+        specifier: ^3.35.2
+        version: 3.35.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@expo/vector-icons':
         specifier: ^14.0.2
         version: 14.1.0(expo-font@14.0.9(expo@54.0.25)(react-native@0.76.5(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.27)(react@18.3.1))(react@18.3.1))(react-native@0.76.5(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.27)(react@18.3.1))(react@18.3.1)
@@ -172,6 +175,9 @@ importers:
       expo-constants:
         specifier: ~16.0.2
         version: 16.0.2(expo@54.0.25)
+      expo-crypto:
+        specifier: ~15.0.7
+        version: 15.0.7(expo@54.0.25)
       expo-dev-client:
         specifier: ~4.0.29
         version: 4.0.29(expo@54.0.25)
