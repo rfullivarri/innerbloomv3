@@ -4,7 +4,8 @@
   "compilerOptions": {
     "module": "esnext",
     "moduleResolution": "bundler",
-    "jsx": "react-native",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "allowJs": false,
     "noEmit": true,
     "types": ["react", "react-native", "node"],
