@@ -103,10 +103,8 @@ function buildPopups(
 ): PopupDescriptor[] {
   return events
     .map((event) => {
-      const definition = definitionMap.get(event.notificationKey);
-      if (!definition) {
-        return null;
-      }
+      const definition =
+        definitionMap.get(event.notificationKey) ?? createFallbackDefinition(event.notificationKey, event.type);
       if (event.type === 'level_up') {
         return buildLevelPopup(definition, event);
       }
@@ -169,5 +167,18 @@ function createBaseDescriptor(
     emojiAnimation: formatted.emojiAnimation,
     cta: definition.cta ?? null,
     tasks: formatted.tasks,
+  };
+}
+
+function createFallbackDefinition(notificationKey: string, type: SubmitDailyQuestFeedbackEvent['type']): InAppNotificationDefinition {
+  return {
+    notificationKey,
+    type,
+    channel: 'in_app',
+    priority: 1,
+    copy: '',
+    cta: null,
+    previewVariables: {},
+    config: {},
   };
 }
