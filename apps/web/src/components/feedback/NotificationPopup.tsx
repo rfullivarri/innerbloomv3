@@ -96,14 +96,23 @@ export function NotificationPopup({
               ))}
             </ul>
           ) : null}
-          {cta?.label ? (
-            <a
-              href={cta.href ?? '#'}
-              className="mt-3 inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:opacity-95"
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            {cta?.label ? (
+              <a
+                href={cta.href ?? '#'}
+                className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:opacity-95"
+              >
+                {cta.label}
+              </a>
+            ) : null}
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex w-full items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-sky-300/60 hover:bg-white/10"
             >
-              {cta.label}
-            </a>
-          ) : null}
+              Cerrar
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -120,18 +129,23 @@ export function NotificationPopup({
   return (
     <AnimatePresence>
       {open ? (
-        <motion.div
-          key="notification-popup"
-          className="fixed left-1/2 top-6 z-50 w-full max-w-sm -translate-x-1/2 px-3 sm:right-6 sm:left-auto sm:translate-x-0"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          transition={{ type: 'spring', stiffness: 220, damping: 24 }}
-          data-testid={dataTestId}
+        <div
+          className="pointer-events-none fixed inset-x-3 top-0 z-50 flex justify-center sm:left-auto sm:right-6 sm:inset-x-auto sm:justify-end"
+          style={{ top: 'calc(env(safe-area-inset-top, 0px) + 14px)' }}
         >
-          {card}
-        </motion.div>
+          <motion.div
+            key="notification-popup"
+            className="w-full max-w-sm pointer-events-auto"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            transition={{ type: 'spring', stiffness: 220, damping: 24 }}
+            data-testid={dataTestId}
+          >
+            {card}
+          </motion.div>
+        </div>
       ) : null}
     </AnimatePresence>
   );
