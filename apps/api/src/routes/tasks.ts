@@ -75,14 +75,14 @@ type InsightsResponse = {
   };
   month: {
     totalCount: number;
-    days: Array<{ date: string; count: number }>;
+    days: { date: string; count: number }[];
   };
   weeks: {
     weeklyGoal: number;
     completionRate: number;
     currentStreak: number;
     bestStreak: number;
-    timeline: Array<{ weekStart: string; weekEnd: string; count: number; hit: boolean }>;
+    timeline: { weekStart: string; weekEnd: string; count: number; hit: boolean }[];
   };
 };
 
@@ -243,7 +243,7 @@ router.get(
       return map;
     }, new Map<string, number>());
 
-    const monthDays: Array<{ date: string; count: number }> = [];
+    const monthDays: { date: string; count: number }[] = [];
     let monthTotal = 0;
     for (let cursor = monthStart; cursor < monthEndExclusive; cursor = addDays(cursor, 1)) {
       const key = formatDate(cursor);
