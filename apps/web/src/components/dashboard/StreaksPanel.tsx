@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Card } from '../ui/Card';
 import { useRequest } from '../../hooks/useRequest';
@@ -15,6 +15,7 @@ import {
 import { asArray, dateStr } from '../../lib/safe';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
+import { TaskInsightsModal } from './StreakTaskInsightsModal';
 
 export const FEATURE_STREAKS_PANEL_V1 = false;
 
@@ -401,7 +402,7 @@ function buildDisplayTask(
   } satisfies DisplayTask;
 }
 
-function TaskItem({ item }: { item: DisplayTask }) {
+function TaskItem({ item, onSelect }: { item: DisplayTask; onSelect?: (task: DisplayTask) => void }) {
   const status = getStatusColor(item.weeklyDone, item.weeklyGoal);
   const pct = computeProgressPercent(item.weeklyDone, item.weeklyGoal);
   const showHistory = item.history.values.length > 0;
@@ -409,13 +410,24 @@ function TaskItem({ item }: { item: DisplayTask }) {
   const showFireBadge = streakDays >= 2;
   const showStreakMultiplier = item.highlight && streakDays >= 2;
 
+  const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelect?.(item);
+    }
+  };
+
   return (
     <article
       className={cx(
-        'flex flex-col gap-1.5 rounded-xl border border-white/10 bg-white/5 p-2.5 text-slate-200 shadow-[0_6px_20px_rgba(15,23,42,0.3)] md:gap-2 md:p-3',
+        'flex flex-col gap-1.5 rounded-xl border border-white/10 bg-white/5 p-2.5 text-slate-200 shadow-[0_6px_20px_rgba(15,23,42,0.3)] transition hover:border-violet-300/50 hover:bg-white/10 md:gap-2 md:p-3',
         item.highlight && 'border-violet-400/60 bg-violet-400/10 shadow-[0_8px_26px_rgba(99,102,241,0.3)]',
       )}
       aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${streakDays} consecutive days`}
+      role={onSelect ? 'button' : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+      onClick={onSelect ? () => onSelect(item) : undefined}
+      onKeyDown={onSelect ? handleKeyDown : undefined}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 space-y-0.5">
@@ -520,6 +532,7 @@ function TaskItem({ item }: { item: DisplayTask }) {
 export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelProps) {
   const [pillar, setPillar] = useState<Pillar>('Body');
   const [range, setRange] = useState<StreakPanelRange>('month');
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const normalizedMode = useMemo(() => normalizeMode(gameMode), [gameMode]);
   const tier = useMemo(() => {
@@ -554,6 +567,14 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
     () => topStreaks.filter((entry) => (entry?.streakDays ?? 0) >= 2),
     [topStreaks],
   );
+
+  const handleSelectTask = useCallback((task: DisplayTask) => {
+    setSelectedTaskId(task.id);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedTaskId(null);
+  }, []);
 
   const streakHighlightMap = useMemo(
     () => new Map(streakHighlights.map((entry) => [entry.id, entry])),
@@ -646,6 +667,27 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
     ],
   );
 
+  const selectedTaskMeta = useMemo(() => {
+    if (!selectedTaskId) return null;
+
+    const base = tasksById.get(selectedTaskId);
+    if (base) {
+      return { id: base.id, name: base.name, stat: base.stat };
+    }
+
+    const inDisplay = displayTasks.find((task) => task.id === selectedTaskId);
+    if (inDisplay) {
+      return { id: inDisplay.id, name: inDisplay.name, stat: inDisplay.stat };
+    }
+
+    const inTop = topEntries.find((task) => task.id === selectedTaskId);
+    if (inTop) {
+      return { id: inTop.id, name: inTop.name, stat: inTop.stat };
+    }
+
+    return null;
+  }, [displayTasks, selectedTaskId, tasksById, topEntries]);
+
   const isLoading = status === 'idle' || status === 'loading';
   const isError = status === 'error';
   const hasContent = !isLoading && !isError;
@@ -654,23 +696,24 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
   const modeChip = MODE_CHIP_STYLES[normalizedMode];
 
   return (
-    <Card
-      title="🔥 Streaks"
-      bodyClassName="gap-5 p-3 text-slate-100 md:p-4"
-      className="text-sm leading-relaxed"
-      rightSlot={
-        <InfoDotTarget id="streaksGuide" placement="left" className="flex items-center gap-2">
-          <GlowChip
-            glowPrimary={modeChip.glowPrimary}
-            glowSecondary={modeChip.glowSecondary}
-            innerClassName={modeChip.innerClassName}
-          >
-            {modeLabel}
-          </GlowChip>
-        </InfoDotTarget>
-      }
-    >
-      <div className="flex flex-col gap-4">
+    <>
+      <Card
+        title="🔥 Streaks"
+        bodyClassName="gap-5 p-3 text-slate-100 md:p-4"
+        className="text-sm leading-relaxed"
+        rightSlot={
+          <InfoDotTarget id="streaksGuide" placement="left" className="flex items-center gap-2">
+            <GlowChip
+              glowPrimary={modeChip.glowPrimary}
+              glowSecondary={modeChip.glowSecondary}
+              innerClassName={modeChip.innerClassName}
+            >
+              {modeLabel}
+            </GlowChip>
+          </InfoDotTarget>
+        }
+      >
+        <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
           {PILLAR_TABS.map((tab) => {
             const isActive = pillar === tab.value;
@@ -715,15 +758,15 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                 <h4 className="text-base font-semibold leading-tight text-slate-100 md:text-lg">Top streaks</h4>
                 <span className="text-xs text-slate-400 md:text-sm">— días consecutivos sin cortar</span>
               </div>
-              {topEntries.length > 0 ? (
-                <div className="grid grid-cols-1 gap-3">
-                  {topEntries.map((entry) => (
-                    <TaskItem key={entry.id} item={entry} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-400">Todavía no hay rachas destacadas.</p>
-              )}
+                {topEntries.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-3">
+                    {topEntries.map((entry) => (
+                      <TaskItem key={entry.id} item={entry} onSelect={handleSelectTask} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-400">Todavía no hay rachas destacadas.</p>
+                )}
             </section>
           )
         )}
@@ -766,21 +809,29 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
           hasContent && (
             <section className="space-y-3">
               <h4 className="text-base font-semibold leading-tight text-slate-100 md:text-lg">Todas las tareas</h4>
-              {displayTasks.length > 0 ? (
-                <div className="grid grid-cols-1 gap-3">
-                  {displayTasks.map((task) => (
-                    <TaskItem key={task.id} item={task} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-400">
-                  No encontramos tareas activas para este pilar en las últimas semanas.
-                </p>
-              )}
-            </section>
-          )
-        )}
-      </div>
-    </Card>
+                {displayTasks.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-3">
+                    {displayTasks.map((task) => (
+                      <TaskItem key={task.id} item={task} onSelect={handleSelectTask} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-400">
+                    No encontramos tareas activas para este pilar en las últimas semanas.
+                  </p>
+                )}
+              </section>
+            )
+          )}
+        </div>
+      </Card>
+      <TaskInsightsModal
+        taskId={selectedTaskId}
+        weeklyGoal={tier}
+        mode={normalizedMode}
+        fallbackTask={selectedTaskMeta}
+        onClose={handleCloseModal}
+      />
+    </>
   );
 }
