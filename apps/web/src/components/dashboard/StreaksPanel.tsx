@@ -410,9 +410,24 @@ function TaskItem({ item, onSelect }: { item: DisplayTask; onSelect?: (task: Dis
   const showFireBadge = streakDays >= 2;
   const showStreakMultiplier = item.highlight && streakDays >= 2;
 
+  const handleClick = () => {
+    console.info('[StreaksPanel][TaskItem] Tap on task item', {
+      taskId: item.id,
+      taskName: item.name,
+      streakDays,
+      weeklyDone: item.weeklyDone,
+      weeklyGoal: item.weeklyGoal,
+    });
+    onSelect?.(item);
+  };
+
   const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
+      console.info('[StreaksPanel][TaskItem] Keyboard select on task item', {
+        taskId: item.id,
+        taskName: item.name,
+      });
       onSelect?.(item);
     }
   };
@@ -426,7 +441,7 @@ function TaskItem({ item, onSelect }: { item: DisplayTask; onSelect?: (task: Dis
       aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${streakDays} consecutive days`}
       role={onSelect ? 'button' : undefined}
       tabIndex={onSelect ? 0 : undefined}
-      onClick={onSelect ? () => onSelect(item) : undefined}
+      onClick={onSelect ? handleClick : undefined}
       onKeyDown={onSelect ? handleKeyDown : undefined}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -569,7 +584,14 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
   );
 
   const handleSelectTask = useCallback((task: DisplayTask) => {
-    setSelectedTaskId(task.id);
+    setSelectedTaskId((prev) => {
+      console.info('[StreaksPanel] handleSelectTask invoked', {
+        previousSelectedTaskId: prev,
+        nextSelectedTaskId: task.id,
+        taskName: task.name,
+      });
+      return task.id;
+    });
   }, []);
 
   const handleCloseModal = useCallback(() => {

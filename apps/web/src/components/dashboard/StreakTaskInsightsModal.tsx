@@ -120,10 +120,19 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
   useEscToClose(Boolean(taskId), onClose);
 
   const { data, status, error } = useRequest<TaskInsightsResponse>(
-    () => getTaskInsights(taskId!, { mode, weeklyGoal, range }),
+    () => {
+      console.info('[TaskInsightsModal] getTaskInsights request', { taskId, weeklyGoal, mode, range });
+      return getTaskInsights(taskId!, { mode, weeklyGoal, range });
+    },
     [taskId, mode, range, weeklyGoal],
     { enabled: Boolean(taskId) },
   );
+
+  useEffect(() => {
+    if (taskId) {
+      console.info('[TaskInsightsModal] Mounted overlay', { taskId, weeklyGoal, mode, range });
+    }
+  }, [mode, range, taskId, weeklyGoal]);
 
   const timeline = data?.weeks.timeline ?? [];
   const stats = useMemo(() => {
