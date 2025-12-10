@@ -1675,7 +1675,7 @@ export async function getUserStreakPanel(
 
 export async function getTaskInsights(
   taskId: string,
-  params?: { mode?: string | null; weeklyGoal?: number | null },
+  params?: { mode?: string | null; weeklyGoal?: number | null; range?: StreakPanelRange },
 ): Promise<TaskInsightsResponse> {
   const normalized: Record<string, string | undefined> = {
     mode: params?.mode ?? undefined,
@@ -1683,6 +1683,7 @@ export async function getTaskInsights(
       params?.weeklyGoal != null && Number.isFinite(params.weeklyGoal) && params.weeklyGoal > 0
         ? String(params.weeklyGoal)
         : undefined,
+    range: params?.range,
   };
 
   const response = await getAuthorizedJson<TaskInsightsResponse>(

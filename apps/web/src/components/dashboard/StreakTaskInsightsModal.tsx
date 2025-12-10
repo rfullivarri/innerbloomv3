@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom';
 import { useEffect, useMemo, useRef } from 'react';
-import type { StreakPanelTask } from '../../lib/api';
+import type { StreakPanelRange, StreakPanelTask } from '../../lib/api';
 import { getTaskInsights, type TaskInsightsResponse } from '../../lib/api';
 import { useRequest } from '../../hooks/useRequest';
 import type { GameMode } from '../../lib/gameMode';
@@ -15,6 +15,7 @@ type TaskInsightsModalProps = {
   taskId: string | null;
   weeklyGoal: number;
   mode: GameMode;
+  range: StreakPanelRange;
   onClose: () => void;
   fallbackTask?: TaskSummary | null;
 };
@@ -114,13 +115,13 @@ function MonthMiniChart({ days }: { days: Array<{ date: string; count: number }>
   );
 }
 
-export function TaskInsightsModal({ taskId, weeklyGoal, mode, onClose, fallbackTask }: TaskInsightsModalProps) {
+export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fallbackTask }: TaskInsightsModalProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   useEscToClose(Boolean(taskId), onClose);
 
   const { data, status, error } = useRequest<TaskInsightsResponse>(
-    () => getTaskInsights(taskId!, { mode, weeklyGoal }),
-    [taskId, mode, weeklyGoal],
+    () => getTaskInsights(taskId!, { mode, weeklyGoal, range }),
+    [taskId, mode, range, weeklyGoal],
     { enabled: Boolean(taskId) },
   );
 

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { StreakPanelResponse, TaskInsightsResponse } from '../../../lib/api';
 
@@ -101,6 +101,10 @@ vi.mock('../../../lib/api', async () => {
 import { StreaksPanel } from '../StreaksPanel';
 
 describe('StreaksPanel', () => {
+  beforeEach(() => {
+    getTaskInsightsMock.mockClear();
+  });
+
   test('muestra modal de insights al seleccionar una tarea y bloquea el scroll', async () => {
     const user = userEvent.setup();
 
@@ -123,5 +127,22 @@ describe('StreaksPanel', () => {
     expect(overlay).toBeInTheDocument();
     expect(overlay?.className).toContain('fixed');
     expect(document.body.style.overflow).toBe('hidden');
+  });
+
+  test('abre el modal de insights al seleccionar una tarea en otro scope', async () => {
+    const user = userEvent.setup();
+
+    render(<StreaksPanel userId="user-1" gameMode="Flow" weeklyTarget={3} />);
+
+    const quarterlyScope = await screen.findByRole('button', { name: /3m/i });
+    await user.click(quarterlyScope);
+
+    const taskCard = (await screen.findByText('Primera tarea')).closest('article');
+    expect(taskCard).toBeTruthy();
+
+    await user.click(taskCard!);
+
+    expect(getTaskInsightsMock).toHaveBeenCalled();
+    expect(getTaskInsightsMock.mock.calls.at(-1)?.[1]?.range).toBe('qtr');
   });
 });
