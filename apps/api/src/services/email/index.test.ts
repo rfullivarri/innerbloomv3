@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createEmailProvider, resetEmailProviderCache } from './index.js';
 
 const originalEnv = { ...process.env };
@@ -8,19 +8,29 @@ afterEach(() => {
   process.env = { ...originalEnv };
 });
 
-function setResendEnv(from: string): void {
+function setResendEnv(from?: string): void {
   process.env.EMAIL_PROVIDER_NAME = 'resend';
   process.env.EMAIL_PROVIDER_API_KEY = 'test-api-key';
-  process.env.EMAIL_FROM = from;
+
+  if (from === undefined) {
+    delete process.env.EMAIL_FROM;
+  } else {
+    process.env.EMAIL_FROM = from;
+  }
 }
 
 describe('createEmailProvider', () => {
-  it('rejects gmail senders when using Resend', () => {
+  it('falls back to the Resend sandbox when the sender is a consumer domain', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     setResendEnv('Innerbloom <dailyquest@gmail.com>');
 
-    expect(() => createEmailProvider()).toThrowError(
-      /EMAIL_FROM cannot use addresses from gmail.com when EMAIL_PROVIDER_NAME=resend/,
+    const provider = createEmailProvider();
+
+    expect(provider).toBeDefined();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('EMAIL_FROM uses the consumer domain gmail.com, which Resend rejects.'),
     );
+    warnSpy.mockRestore();
   });
 
   it('rejects when the from field does not contain an email address', () => {
@@ -37,5 +47,18 @@ describe('createEmailProvider', () => {
     const provider = createEmailProvider();
 
     expect(provider).toBeDefined();
+  });
+
+  it('uses the Resend sandbox when EMAIL_FROM is not provided', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    setResendEnv();
+
+    const provider = createEmailProvider();
+
+    expect(provider).toBeDefined();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('EMAIL_FROM is not set. Falling back to Innerbloom <onboarding@resend.dev>.'),
+    );
+    warnSpy.mockRestore();
   });
 });
