@@ -9,6 +9,7 @@ import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type MutableRefObject,
+  type ReactElement,
   type SyntheticEvent,
   type UIEvent as ReactUIEvent,
 } from 'react';
@@ -402,7 +403,7 @@ type MarketCardItem = {
 type MarketCardView = {
   key: string;
   isActive: boolean;
-  node: JSX.Element;
+  node: ReactElement;
 };
 
 function getRewardCopy(slot: MissionsV2Slot): string {

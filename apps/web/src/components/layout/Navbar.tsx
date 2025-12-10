@@ -11,7 +11,7 @@ export interface NavbarSection {
 
 type NavbarProps = {
   onDailyClick?: () => void;
-  dailyButtonRef?: RefObject<HTMLButtonElement>;
+  dailyButtonRef?: RefObject<HTMLButtonElement | null>;
   title?: string;
   sections?: NavbarSection[];
   menuSlot?: ReactNode;
@@ -65,7 +65,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
                 key={section.key}
                 to={section.to}
                 end={section.end}
-                className={({ isActive }) =>
+                className={({ isActive }: { isActive: boolean }) =>
                   combine(
                     'inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
                     isActive

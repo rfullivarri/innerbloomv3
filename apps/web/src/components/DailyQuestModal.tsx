@@ -6,6 +6,9 @@ import {
   useMemo,
   useRef,
   useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -850,7 +853,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   role="presentation"
                   aria-hidden="true"
                   className="absolute inset-0"
-                  onClick={(event) => {
+                  onClick={(event: MouseEvent<HTMLDivElement>) => {
                     event.stopPropagation();
                     handleSnooze();
                   }}
@@ -867,7 +870,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   transition={{ duration: 0.24, ease: 'easeOut' }}
                   className="pointer-events-auto relative mx-auto flex h-[100dvh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-slate-900/95 text-white shadow-2xl backdrop-blur md:max-w-2xl"
                   layout={false}
-                  onClick={(event) => {
+                  onClick={(event: MouseEvent<HTMLDivElement>) => {
                     event.stopPropagation();
                   }}
                 >
@@ -1243,7 +1246,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                               <motion.button
                                 type="button"
                                 className="relative flex w-full max-w-xs items-center justify-center overflow-hidden rounded-full border border-white/25 bg-white/10 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.3em] text-white shadow-[0_18px_38px_rgba(16,185,129,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                                onPointerDown={(event) => {
+                                onPointerDown={(event: PointerEvent<HTMLButtonElement>) => {
                                   event.preventDefault();
                                   startCelebrationHold({
                                     durationMs: DEFAULT_HOLD_TO_CLOSE_DURATION_MS,
@@ -1253,7 +1256,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                 onPointerUp={cancelCelebrationHold}
                                 onPointerCancel={cancelCelebrationHold}
                                 onPointerLeave={cancelCelebrationHold}
-                                onKeyDown={(event) => {
+                                onKeyDown={(event: ReactKeyboardEvent<HTMLButtonElement>) => {
                                   if (event.key === ' ' || event.key === 'Enter') {
                                     event.preventDefault();
                                     startCelebrationHold({
@@ -1262,7 +1265,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                     });
                                   }
                                 }}
-                                onKeyUp={(event) => {
+                                onKeyUp={(event: ReactKeyboardEvent<HTMLButtonElement>) => {
                                   if (event.key === ' ' || event.key === 'Enter') {
                                     event.preventDefault();
                                     cancelCelebrationHold();
