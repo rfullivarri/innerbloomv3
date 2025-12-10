@@ -164,13 +164,16 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
   return createPortal(
     <div
       ref={containerRef}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 px-3 py-4 backdrop-blur-sm md:items-center"
+      className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/70 px-3 py-4 backdrop-blur-sm md:items-center"
       onClick={onClose}
       role="presentation"
     >
       <div
         className="w-full max-w-2xl rounded-t-3xl border border-white/10 bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 p-4 shadow-2xl ring-1 ring-white/5 md:rounded-2xl"
         onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal
+        aria-label="Detalle de tarea"
       >
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1">
