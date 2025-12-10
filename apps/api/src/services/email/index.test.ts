@@ -21,7 +21,7 @@ function setResendEnv(from?: string): void {
 
 describe('createEmailProvider', () => {
   it('falls back to the Resend sandbox when the sender is a consumer domain', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     setResendEnv('Innerbloom <dailyquest@gmail.com>');
 
     const provider = createEmailProvider();
@@ -50,7 +50,7 @@ describe('createEmailProvider', () => {
   });
 
   it('uses the Resend sandbox when EMAIL_FROM is not provided', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     setResendEnv();
 
     const provider = createEmailProvider();
