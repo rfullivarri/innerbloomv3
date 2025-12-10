@@ -829,6 +829,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
         taskId={selectedTaskId}
         weeklyGoal={tier}
         mode={normalizedMode}
+        range={range}
         fallbackTask={selectedTaskMeta}
         onClose={handleCloseModal}
       />
