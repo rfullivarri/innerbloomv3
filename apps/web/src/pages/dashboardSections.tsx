@@ -1,5 +1,5 @@
 import { matchPath } from 'react-router-dom';
-import type { SVGProps } from 'react';
+import type { ReactElement, SVGProps } from 'react';
 import type { NavbarSection } from '../components/layout/Navbar';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 
@@ -11,7 +11,7 @@ export interface DashboardSectionConfig extends NavbarSection {
   eyebrow?: string;
   contentTitle: string;
   description?: string;
-  icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
+  icon: (props: SVGProps<SVGSVGElement>) => ReactElement;
 }
 
 function DashboardIcon({ className, ...props }: SVGProps<SVGSVGElement>) {

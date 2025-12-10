@@ -694,17 +694,17 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
 
     const base = tasksById.get(selectedTaskId);
     if (base) {
-      return { id: base.id, name: base.name, stat: base.stat };
+      return { id: base.id, name: base.name, stat: base.stat ?? '' };
     }
 
     const inDisplay = displayTasks.find((task) => task.id === selectedTaskId);
     if (inDisplay) {
-      return { id: inDisplay.id, name: inDisplay.name, stat: inDisplay.stat };
+      return { id: inDisplay.id, name: inDisplay.name, stat: inDisplay.stat ?? '' };
     }
 
     const inTop = topEntries.find((task) => task.id === selectedTaskId);
     if (inTop) {
-      return { id: inTop.id, name: inTop.name, stat: inTop.stat };
+      return { id: inTop.id, name: inTop.name, stat: inTop.stat ?? '' };
     }
 
     return null;

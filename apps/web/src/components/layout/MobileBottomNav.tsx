@@ -36,7 +36,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
             <NavLink
               to={item.to}
               end={item.end}
-              className={({ isActive }) =>
+              className={({ isActive }: { isActive: boolean }) =>
                 combine(
                   'group flex w-full flex-col items-center gap-0.5 rounded-[1.5rem] px-1 py-0.5 text-[7px] font-semibold uppercase tracking-[0.26em] transition',
                   isActive
@@ -45,7 +45,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                 )
               }
             >
-              {({ isActive }) => (
+              {({ isActive }: { isActive: boolean }) => (
                 <>
                   <span
                     className={combine(

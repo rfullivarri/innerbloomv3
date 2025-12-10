@@ -40,7 +40,7 @@ export function AdminShell() {
               key={item.to}
               to={item.to}
               end={item.to === '/admin'}
-              className={({ isActive }) =>
+              className={({ isActive }: { isActive: boolean }) =>
                 [
                   'rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide',
                   isActive

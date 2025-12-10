@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, type ReactElement } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import DashboardV3Page from './pages/DashboardV3';
 import TaskEditorPage from './pages/editor';
@@ -63,7 +63,7 @@ function ApiAuthBridge() {
   return null;
 }
 
-function RequireUser({ children }: { children: JSX.Element }) {
+function RequireUser({ children }: { children: ReactElement }) {
   const { isLoaded, userId } = useAuth();
   const devBypass = DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV;
 
@@ -96,7 +96,7 @@ function RedirectIfSignedIn({
   children,
   redirectPath,
 }: {
-  children: JSX.Element;
+  children: ReactElement;
   redirectPath: string;
 }) {
   const { isLoaded, userId } = useAuth();

@@ -8,7 +8,7 @@ type CarouselSelectionOptions<T extends HTMLElement> = {
   /**
    * Track ref. When omitted, the hook will manage its own ref instance.
    */
-  trackRef?: React.RefObject<T>;
+  trackRef?: React.RefObject<T | null>;
   /**
    * Initial index selected for the carousel.
    */
@@ -23,7 +23,7 @@ type CarouselItemMeta = {
 type CarouselSelectionResult<T extends HTMLElement> = {
   activeIndex: number;
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
-  trackRef: React.RefObject<T>;
+  trackRef: React.RefObject<T | null>;
   handleTrackScroll: () => void;
   refreshActiveIndex: () => number | null;
   getItemFromEventTarget: (target: EventTarget | null) => CarouselItemMeta | null;

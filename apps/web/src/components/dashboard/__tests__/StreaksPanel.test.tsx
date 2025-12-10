@@ -143,6 +143,9 @@ describe('StreaksPanel', () => {
     await user.click(taskCard!);
 
     expect(getTaskInsightsMock).toHaveBeenCalled();
-    expect(getTaskInsightsMock.mock.calls.at(-1)?.[1]?.range).toBe('qtr');
+    const lastCall = getTaskInsightsMock.mock.calls.at(-1) as
+      | [string, { range?: string }]
+      | undefined;
+    expect(lastCall?.[1]?.range).toBe('qtr');
   });
 });
