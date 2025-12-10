@@ -1641,6 +1641,18 @@ export type StreakPanelResponse = {
   tasks: StreakPanelTask[];
 };
 
+export type TaskInsightsResponse = {
+  task: { id: string; name: string; stat: string | null; description: string | null };
+  month: { totalCount: number; days: Array<{ date: string; count: number }> };
+  weeks: {
+    weeklyGoal: number;
+    completionRate: number;
+    currentStreak: number;
+    bestStreak: number;
+    timeline: Array<{ weekStart: string; weekEnd: string; count: number; hit: boolean }>;
+  };
+};
+
 export async function getUserStreakPanel(
   userId: string,
   params: { pillar: StreakPanelPillar; range: StreakPanelRange; mode?: string; query?: string },
@@ -1658,6 +1670,27 @@ export async function getUserStreakPanel(
   );
 
   logShape('user-streak-panel', response);
+  return response;
+}
+
+export async function getTaskInsights(
+  taskId: string,
+  params?: { mode?: string | null; weeklyGoal?: number | null },
+): Promise<TaskInsightsResponse> {
+  const normalized: Record<string, string | undefined> = {
+    mode: params?.mode ?? undefined,
+    weeklyGoal:
+      params?.weeklyGoal != null && Number.isFinite(params.weeklyGoal) && params.weeklyGoal > 0
+        ? String(params.weeklyGoal)
+        : undefined,
+  };
+
+  const response = await getAuthorizedJson<TaskInsightsResponse>(
+    `/tasks/${encodeURIComponent(taskId)}/insights`,
+    normalized,
+  );
+
+  logShape('task-insights', response);
   return response;
 }
 
