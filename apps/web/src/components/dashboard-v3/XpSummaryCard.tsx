@@ -1,1 +1,1 @@
-export { MetricHeader as XpSummaryCard } from '../dashboard/MetricHeader';
+export { MetricHeader as XpSummaryCard } from './MetricHeader';

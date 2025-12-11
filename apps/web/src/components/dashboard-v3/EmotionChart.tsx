@@ -1,1 +1,1 @@
-export { EmotionChart } from '../dashboard/EmotionChartCard';
+export { EmotionChart } from './EmotionChartCard';
