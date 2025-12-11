@@ -169,13 +169,13 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
       role="presentation"
     >
       <div
-        className="w-full max-w-2xl rounded-t-3xl border border-white/10 bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 p-4 shadow-2xl ring-1 ring-white/5 md:rounded-2xl"
+        className="flex w-full max-h-[92vh] max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-white/10 bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 shadow-2xl ring-1 ring-white/5 md:rounded-2xl"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal
         aria-label="Detalle de tarea"
       >
-        <div className="flex items-start justify-between gap-2">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-2 border-b border-white/5 bg-slate-900/90 p-4 backdrop-blur supports-[backdrop-filter]:bg-slate-900/75">
           <div className="space-y-1">
             <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Detalle de tarea</p>
             <h3 className="text-lg font-semibold leading-tight text-slate-50 md:text-xl">{activeTask?.name ?? 'Tarea'}</h3>
@@ -187,61 +187,63 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-sm text-slate-200 transition hover:border-white/25 hover:bg-white/10"
+            className="shrink-0 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-sm text-slate-200 transition hover:border-white/25 hover:bg-white/10"
             aria-label="Cerrar detalle"
           >
             ✕
           </button>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Veces este mes</p>
-            <p className="mt-1 text-2xl font-semibold text-slate-50">{monthTotal}</p>
-            <p className="text-xs text-slate-400">Promueve consistencia semanal.</p>
+        <div className="flex-1 overflow-y-auto px-4 pb-5 pt-2">
+          <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Veces este mes</p>
+              <p className="mt-1 text-2xl font-semibold text-slate-50">{monthTotal}</p>
+              <p className="text-xs text-slate-400">Promueve consistencia semanal.</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">% semanas OK</p>
+              <span
+                className={cx(
+                  'mt-1 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold',
+                  STATUS_COLORS[completionColor],
+                )}
+              >
+                {stats.completionRate}%
+                <span className="text-[11px] uppercase tracking-[0.18em] text-slate-700">hit</span>
+              </span>
+              <p className="text-xs text-slate-400">Meta semanal ≥ {weeklyGoal} veces.</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Rachas semanales</p>
+              <p className="mt-1 text-2xl font-semibold text-slate-50">{stats.currentStreak}🔥</p>
+              <p className="text-xs text-slate-400">Mejor racha: {stats.bestStreak} semanas.</p>
+            </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">% semanas OK</p>
-            <span
-              className={cx(
-                'mt-1 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold',
-                STATUS_COLORS[completionColor],
+
+          <div className="mt-4 space-y-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-slate-100">Timeline semanal</p>
+                <span className="text-xs text-slate-400">Objetivo: {weeklyGoal}x/sem</span>
+              </div>
+              {status === 'loading' && (
+                <div className="mt-3 h-20 animate-pulse rounded-xl bg-white/10" aria-hidden />
               )}
-            >
-              {stats.completionRate}%
-              <span className="text-[11px] uppercase tracking-[0.18em] text-slate-700">hit</span>
-            </span>
-            <p className="text-xs text-slate-400">Meta semanal ≥ {weeklyGoal} veces.</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Rachas semanales</p>
-            <p className="mt-1 text-2xl font-semibold text-slate-50">{stats.currentStreak}🔥</p>
-            <p className="text-xs text-slate-400">Mejor racha: {stats.bestStreak} semanas.</p>
-          </div>
-        </div>
-
-        <div className="mt-5 space-y-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-semibold text-slate-100">Timeline semanal</p>
-              <span className="text-xs text-slate-400">Objetivo: {weeklyGoal}x/sem</span>
+              {status === 'error' && (
+                <p className="mt-2 text-sm text-rose-300">No pudimos cargar la serie semanal: {error?.message}</p>
+              )}
+              {status === 'success' && <WeekTimeline timeline={timeline} weeklyGoal={weeklyGoal} />}
             </div>
-            {status === 'loading' && (
-              <div className="mt-3 h-20 animate-pulse rounded-xl bg-white/10" aria-hidden />
-            )}
-            {status === 'error' && (
-              <p className="mt-2 text-sm text-rose-300">No pudimos cargar la serie semanal: {error?.message}</p>
-            )}
-            {status === 'success' && <WeekTimeline timeline={timeline} weeklyGoal={weeklyGoal} />}
-          </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-semibold text-slate-100">Actividad del mes</p>
-              <span className="text-xs text-slate-400">Días con registro</span>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-slate-100">Actividad del mes</p>
+                <span className="text-xs text-slate-400">Días con registro</span>
+              </div>
+              {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-white/10" aria-hidden />}
+              {status === 'success' && <MonthMiniChart days={monthDays} />}
             </div>
-            {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-white/10" aria-hidden />}
-            {status === 'success' && <MonthMiniChart days={monthDays} />}
           </div>
         </div>
       </div>
