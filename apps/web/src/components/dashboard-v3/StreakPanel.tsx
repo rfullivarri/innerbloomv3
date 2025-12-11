@@ -1,1 +1,1 @@
-export { StreaksPanel as StreakPanel } from '../dashboard/StreaksPanel';
+export { StreaksPanel as StreakPanel } from './StreaksPanel';

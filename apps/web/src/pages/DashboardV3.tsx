@@ -28,7 +28,7 @@ import {
   FEATURE_STREAKS_PANEL_V1,
   LegacyStreaksPanel,
   StreaksPanel,
-} from '../components/dashboard/StreaksPanel';
+} from '../components/dashboard-v3/StreaksPanel';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { useRequest } from '../hooks/useRequest';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
