@@ -21,9 +21,9 @@ import { EnergyCard } from '../components/dashboard-v3/EnergyCard';
 import { DailyCultivationSection } from '../components/dashboard-v3/DailyCultivationSection';
 import { MissionsSection } from '../components/dashboard-v3/MissionsSection';
 import { ProfileCard } from '../components/dashboard-v3/ProfileCard';
-import { MetricHeader } from '../components/dashboard/MetricHeader';
-import { RadarChartCard } from '../components/dashboard/RadarChartCard';
-import { EmotionChartCard } from '../components/dashboard/EmotionChartCard';
+import { MetricHeader } from '../components/dashboard-v3/MetricHeader';
+import { RadarChartCard } from '../components/dashboard-v3/RadarChartCard';
+import { EmotionChartCard } from '../components/dashboard-v3/EmotionChartCard';
 import {
   FEATURE_STREAKS_PANEL_V1,
   LegacyStreaksPanel,
