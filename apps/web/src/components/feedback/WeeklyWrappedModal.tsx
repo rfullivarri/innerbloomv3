@@ -8,6 +8,8 @@ const PILLAR_ICONS: Record<string, string> = {
   Soul: '🏵️',
 };
 
+const HABIT_ICONS = ['🔥', '✨', '🌿', '⚡️'];
+
 const PILLAR_GRADIENTS: Record<string, string> = {
   Mind: 'from-sky-400/30 via-sky-500/10 to-indigo-500/20',
   Body: 'from-emerald-400/30 via-lime-400/10 to-cyan-500/20',
@@ -103,7 +105,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               description={sectionsByKey.habits?.body ?? 'Estos hábitos mantuvieron tu semana.'}
               items={habitsItems.map((item, idx) => ({
                 ...item,
-                icon: habitIcons[idx % habitIcons.length],
+                icon: item.icon || HABIT_ICONS[idx % HABIT_ICONS.length],
               }))}
               entered={entered}
               startIndex={1}
