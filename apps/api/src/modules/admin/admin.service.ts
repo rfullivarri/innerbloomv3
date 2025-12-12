@@ -1720,10 +1720,12 @@ async function ensureFeedbackEventsReady(): Promise<void> {
         CREATE INDEX IF NOT EXISTS feedback_events_created_at_idx
           ON feedback_events (created_at DESC);
       `),
-    ]).catch((error) => {
-      feedbackEventsReady = null;
-      throw error;
-    });
+    ])
+      .then(() => undefined)
+      .catch((error) => {
+        feedbackEventsReady = null;
+        throw error;
+      });
   }
 
   await feedbackEventsReady;
@@ -1749,10 +1751,12 @@ async function ensureFeedbackUserStatesReady(): Promise<void> {
         CREATE INDEX IF NOT EXISTS feedback_user_notification_states_user_idx
           ON feedback_user_notification_states (user_id);
       `),
-    ]).catch((error) => {
-      feedbackUserStatesReady = null;
-      throw error;
-    });
+    ])
+      .then(() => undefined)
+      .catch((error) => {
+        feedbackUserStatesReady = null;
+        throw error;
+      });
   }
 
   await feedbackUserStatesReady;
