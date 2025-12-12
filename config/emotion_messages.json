@@ -1,0 +1,44 @@
+{
+  "felicidad": {
+    "label": "Felicidad",
+    "tone": "positivo",
+    "weekly_message": "La felicidad estuvo muy presente esta semana. Disfrutar este estado también es parte del progreso.",
+    "biweekly_context": "En los últimos días este ánimo aparece con frecuencia. Seguir por este camino ayuda a consolidarlo."
+  },
+  "motivacion": {
+    "label": "Motivación",
+    "tone": "positivo",
+    "weekly_message": "La motivación fue tu motor esta semana. Aprovechá este envión para seguir avanzando.",
+    "biweekly_context": "Este impulso viene sosteniéndose en el tiempo. Usalo con foco y sin quemarte."
+  },
+  "calma": {
+    "label": "Calma",
+    "tone": "neutro",
+    "weekly_message": "La calma marcó tu semana. Un ritmo estable también es una forma de avanzar.",
+    "biweekly_context": "Este estado aparece de forma constante. Cuidar el equilibrio te va a ayudar a sostenerlo."
+  },
+  "cansancio": {
+    "label": "Cansancio",
+    "tone": "neutro",
+    "weekly_message": "El cansancio estuvo presente. Escucharlo a tiempo también es parte del proceso.",
+    "biweekly_context": "En las últimas semanas este estado se repite. Ajustar el ritmo puede marcar la diferencia."
+  },
+  "ansiedad": {
+    "label": "Ansiedad",
+    "tone": "desafiante",
+    "weekly_message": "La ansiedad apareció esta semana. Seguir registrando y avanzando ya es una forma de regularla.",
+    "biweekly_context": "Este estado se viene repitiendo. Tomarlo con calma y sostener pequeñas acciones ayuda a atravesarlo."
+  },
+  "tristeza": {
+    "label": "Tristeza",
+    "tone": "desafiante",
+    "weekly_message": "La tristeza estuvo presente. Reconocerlo sin frenar el camino también es progreso.",
+    "biweekly_context": "Este ánimo apareció en distintos momentos. Avanzar de a poco sigue siendo avanzar."
+  },
+  "frustracion": {
+    "label": "Frustración",
+    "tone": "desafiante",
+    "weekly_message": "La frustración se hizo notar. No todo avance es lineal, y eso también está bien.",
+    "biweekly_context": "Este estado aparece cuando hay expectativas altas. Ajustar sin abandonar es parte del aprendizaje."
+  }
+}

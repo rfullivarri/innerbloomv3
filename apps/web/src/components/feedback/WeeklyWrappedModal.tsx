@@ -42,8 +42,8 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
   }, [payload.sections]);
 
   const habitsItems = sectionsByKey.habits?.items ?? [];
-  const highlight = sectionsByKey.highlight?.body ?? payload.summary.highlight;
   const pillarDominant = payload.summary.pillarDominant;
+  const emotionHighlight = payload.emotions;
 
   const habitIcons = ['🔥', '💧', '🧘'];
 
@@ -94,7 +94,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
             <ProgressBlock
               improvement={sectionsByKey.improvement}
               pillar={sectionsByKey.pillar}
-              highlight={highlight}
+              emotionHighlight={emotionHighlight}
               pillarDominant={pillarDominant}
               entered={entered}
               index={habitsItems.length + 2}
@@ -251,13 +251,13 @@ function HabitsBlock({ title, description, items, entered, startIndex }: HabitsB
 type ProgressBlockProps = {
   improvement?: WeeklyWrappedSection;
   pillar?: WeeklyWrappedSection;
-  highlight?: string | null;
+  emotionHighlight: WeeklyWrappedPayload['emotions'];
   pillarDominant: string | null;
   entered: boolean;
   index: number;
 };
 
-function ProgressBlock({ improvement, pillar, highlight, pillarDominant, entered, index }: ProgressBlockProps) {
+function ProgressBlock({ improvement, pillar, emotionHighlight, pillarDominant, entered, index }: ProgressBlockProps) {
   const pillarColors: Record<string, string> = {
     Mind: 'from-sky-400/30 via-sky-500/10 to-indigo-500/20',
     Body: 'from-emerald-400/30 via-lime-400/10 to-cyan-500/20',
@@ -265,6 +265,15 @@ function ProgressBlock({ improvement, pillar, highlight, pillarDominant, entered
   };
 
   const pillarAura = pillarDominant && pillarColors[pillarDominant] ? pillarColors[pillarDominant] : 'from-emerald-400/25 via-cyan-400/10 to-indigo-500/20';
+  const weeklyEmotion = emotionHighlight.weekly;
+  const biweeklyEmotion = emotionHighlight.biweekly ?? weeklyEmotion;
+  const weeklyColor = weeklyEmotion?.color ?? '#fbbf24';
+  const weeklyLabel = weeklyEmotion?.label ?? 'Sin emoción dominante';
+  const weeklyMessage =
+    weeklyEmotion?.weeklyMessage ?? 'Registrá tus emociones para detectar cuál lideró la semana.';
+  const biweeklyLabel = biweeklyEmotion?.label ?? 'Seguimos observando';
+  const biweeklyContext =
+    biweeklyEmotion?.biweeklyContext ?? 'Con más registros vamos a mostrar la tendencia de los últimos 15 días.';
 
   return (
     <SectionShell index={index} entered={entered} auraIndex={2}>
@@ -291,9 +300,19 @@ function ProgressBlock({ improvement, pillar, highlight, pillarDominant, entered
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/25 via-orange-400/10 to-rose-400/20 p-4 shadow-lg shadow-amber-400/25">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-amber-50">Highlight 🔥</p>
-          <p className="mt-2 text-lg font-semibold text-slate-950 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]">{highlight ?? 'Momentum listo para el próximo salto.'}</p>
-          <p className="mt-1 text-sm text-amber-50/90">La chispa de la semana marca el camino.</p>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-amber-50">Highlight emocional</p>
+          <div className="mt-2 flex items-center gap-2">
+            <span
+              className="h-2.5 w-2.5 rounded-full shadow-[0_0_0_4px_rgba(255,255,255,0.15)]"
+              style={{ backgroundColor: weeklyColor }}
+            />
+            <p className="text-lg font-semibold text-slate-950 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]">{weeklyLabel}</p>
+          </div>
+          <p className="mt-2 text-sm text-slate-950/90">{weeklyMessage}</p>
+          <div className="mt-3 rounded-xl border border-white/10 bg-slate-950/40 p-3 text-left text-slate-50 shadow-inner shadow-amber-500/10">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-amber-100">Contexto 15d · {biweeklyLabel}</p>
+            <p className="mt-1 text-sm text-amber-50/90">{biweeklyContext}</p>
+          </div>
         </div>
       </div>
     </SectionShell>
