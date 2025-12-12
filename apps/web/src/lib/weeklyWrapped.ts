@@ -1,12 +1,17 @@
-import emotionMessages from 'config/emotion_messages.json';
-
-import type { EmotionSnapshot } from './api';
+import type { EmotionSnapshot, UserLevelResponse } from './api';
 import type { AdminInsights, AdminLogRow } from './types';
 import { fetchAdminInsights, fetchAdminLogs } from './adminApi';
-import { getEmotions } from './api';
+import { getEmotions, getUserLevel } from './api';
 import { logApiError } from './logger';
 
-type EmotionMessageKey = keyof typeof emotionMessages;
+type EmotionMessageKey =
+  | 'felicidad'
+  | 'motivacion'
+  | 'calma'
+  | 'cansancio'
+  | 'ansiedad'
+  | 'tristeza'
+  | 'frustracion';
 
 type EmotionHighlightEntry = {
   key: EmotionMessageKey;
@@ -40,12 +45,14 @@ export type WeeklyWrappedPayload = {
     highlight: string | null;
   };
   emotions: EmotionHighlight;
+  levelUp: LevelUpHighlight;
   sections: WeeklyWrappedSection[];
 };
 
 type BuildOptions = {
   userId: string;
   dataSource: 'real' | 'mock';
+  forceLevelUpMock?: boolean;
 };
 
 type NormalizedLog = AdminLogRow & {
@@ -82,23 +89,101 @@ const EMOTION_COLORS: Record<EmotionMessageKey, string> = {
   cansancio: '#16A085',
 };
 
+const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
+  felicidad: {
+    key: 'felicidad',
+    label: 'Felicidad',
+    tone: 'positiva',
+    color: EMOTION_COLORS.felicidad,
+    weeklyMessage: 'La alegría lideró tu semana. Anotá qué la impulsó y repetilo.',
+    biweeklyContext: 'En las últimas dos semanas tu energía se mantuvo luminosa. Aprovechá ese envión.',
+  },
+  motivacion: {
+    key: 'motivacion',
+    label: 'Motivación',
+    tone: 'positiva',
+    color: EMOTION_COLORS.motivacion,
+    weeklyMessage: 'La motivación estuvo al frente. ¿Qué objetivo te movió? Sostenelo.',
+    biweeklyContext: '15 días orientados a avanzar. Elegí la próxima misión y seguí subiendo.',
+  },
+  calma: {
+    key: 'calma',
+    label: 'Calma',
+    tone: 'neutral',
+    color: EMOTION_COLORS.calma,
+    weeklyMessage: 'Predominó la calma. Protegé los espacios que la generaron.',
+    biweeklyContext: 'Dos semanas con aire liviano. Podés sumar pequeños retos sin perder serenidad.',
+  },
+  cansancio: {
+    key: 'cansancio',
+    label: 'Cansancio',
+    tone: 'neutral',
+    color: EMOTION_COLORS.cansancio,
+    weeklyMessage: 'El cansancio marcó el ritmo. Respetá el descanso y elegí micro acciones.',
+    biweeklyContext: 'Quincena exigente. Bajá la vara y priorizá recuperación.',
+  },
+  ansiedad: {
+    key: 'ansiedad',
+    label: 'Ansiedad',
+    tone: 'desafiante',
+    color: EMOTION_COLORS.ansiedad,
+    weeklyMessage: 'La ansiedad tomó espacio. Anclate con respiraciones cortas y tareas simples.',
+    biweeklyContext: 'En 15 días se repitió la tensión. Sumá pausas activas para soltarla.',
+  },
+  tristeza: {
+    key: 'tristeza',
+    label: 'Tristeza',
+    tone: 'desafiante',
+    color: EMOTION_COLORS.tristeza,
+    weeklyMessage: 'Apareció tristeza. Elegí una acción amable y compartila con alguien de confianza.',
+    biweeklyContext: 'La tendencia quincenal fue baja. Apoyate en Mind/Soul y en pequeños gestos.',
+  },
+  frustracion: {
+    key: 'frustracion',
+    label: 'Frustración',
+    tone: 'desafiante',
+    color: EMOTION_COLORS.frustracion,
+    weeklyMessage: 'La frustración dijo presente. Reconocé el avance mínimo y volvé a intentar.',
+    biweeklyContext: 'Varias señales de freno estas dos semanas. Ajustá expectativas y buscá apoyo.',
+  },
+};
+
+type LevelUpHighlight = {
+  happened: boolean;
+  currentLevel: number | null;
+  previousLevel: number | null;
+  xpGained: number;
+  forced: boolean;
+};
+
+type LevelSummary = {
+  level: number;
+  xpTotal: number;
+  xpRequiredCurrent: number;
+  xpRequiredNext: number | null;
+  xpToNext: number | null;
+};
+
 export async function buildWeeklyWrappedPreviewPayload(
   options: BuildOptions,
 ): Promise<WeeklyWrappedPayload> {
   if (options.dataSource === 'mock') {
-    return buildMockWeeklyWrapped();
+    return buildMockWeeklyWrapped(options.forceLevelUpMock);
   }
 
-  const [insights, logs, emotions] = await Promise.all([
+  const [insights, logs, emotions, levelSummary] = await Promise.all([
     fetchAdminInsights(options.userId),
     fetchLogsForRange(options.userId, {
       from: toDateInput(daysAgo(6)),
       to: toDateInput(new Date()),
     }),
     getEmotions(options.userId, { days: 15 }),
+    fetchLevelSummary(options.userId),
   ]);
 
-  return buildWeeklyWrappedFromData(insights, logs, emotions);
+  return buildWeeklyWrappedFromData(insights, logs, emotions, levelSummary, {
+    forceLevelUpMock: options.forceLevelUpMock ?? false,
+  });
 }
 
 async function fetchLogsForRange(
@@ -127,6 +212,17 @@ async function fetchLogsForRange(
   }
 
   return items;
+}
+
+async function fetchLevelSummary(userId: string): Promise<LevelSummary | null> {
+  try {
+    const response = await getUserLevel(userId);
+
+    return normalizeLevelSummary(response);
+  } catch (error) {
+    logApiError('[admin][weekly-wrapped] failed to fetch level summary', { error });
+    return null;
+  }
 }
 
 export function normalizeLogs(logs: AdminLogRow[]): NormalizedLog[] {
@@ -169,6 +265,8 @@ export function buildWeeklyWrappedFromData(
   insights: AdminInsights,
   logs: AdminLogRow[],
   emotions: EmotionSnapshot[],
+  levelSummary: LevelSummary | null,
+  options: { forceLevelUpMock?: boolean } = {},
 ): WeeklyWrappedPayload {
   const normalizedLogs = normalizeLogs(logs);
   const latestLog = normalizedLogs.reduce<Date | null>((latest, log) => {
@@ -186,6 +284,7 @@ export function buildWeeklyWrappedFromData(
   const xpTotal = normalizedLogs
     .filter((log) => log.state !== 'red')
     .reduce((acc, log) => acc + Math.max(0, Number(log.xp ?? 0)), 0);
+  const levelUp = detectLevelUp(levelSummary, xpTotal, options.forceLevelUpMock === true);
 
   const topHabits = habitCounts.slice(0, 3);
   const pillarDominant = dominantPillar(insights) ?? null;
@@ -207,6 +306,16 @@ export function buildWeeklyWrappedFromData(
       body: `Tu semana (${periodLabel}) está lista. Respirá y recorré tus logros.`,
       accent: 'Celebrá el recorrido',
     },
+    levelUp.happened
+      ? {
+          key: 'level-up',
+          title: 'Subida de nivel',
+          body: `Llegaste al nivel ${levelUp.currentLevel ?? 'nuevo'}. ${
+            levelUp.forced ? 'Celebración mockeada para validar la experiencia.' : 'Impulso real para tu semana.'
+          }`,
+          accent: 'Level Up',
+        }
+      : null,
     {
       key: 'achievements',
       title: 'Logros principales',
@@ -261,16 +370,20 @@ export function buildWeeklyWrappedFromData(
       title: 'Highlight emocional',
       body: weeklyEmotionMessage,
       accent: emotionAccent,
-      items:
-        biweeklyEmotionMessage
-          ? [
-              {
-                title: 'Contexto 15 días',
-                body: biweeklyEmotionMessage,
-                badge: emotionHighlight.biweekly?.tone,
-              },
-            ]
-          : undefined,
+      items: [
+        {
+          title: 'Emoción 7 días',
+          body: weeklyEmotionMessage,
+          badge: emotionHighlight.weekly?.tone,
+          pillar: emotionHighlight.weekly?.label ?? undefined,
+        },
+        {
+          title: 'Emoción 15 días',
+          body: biweeklyEmotionMessage,
+          badge: emotionHighlight.biweekly?.tone ?? undefined,
+          pillar: emotionHighlight.biweekly?.label ?? undefined,
+        },
+      ],
     },
     {
       key: 'closing',
@@ -278,7 +391,7 @@ export function buildWeeklyWrappedFromData(
       body: 'Seguimos. Mañana vuelve el Daily Quest para sumar más.',
       accent: 'Mañana hay más',
     },
-  ];
+  ].filter((section): section is WeeklyWrappedSection => Boolean(section));
 
   return {
     mode: 'preview',
@@ -287,6 +400,7 @@ export function buildWeeklyWrappedFromData(
     weekRange: { start: startDate.toISOString(), end: endDate.toISOString() },
     summary: { pillarDominant, highlight },
     emotions: emotionHighlight,
+    levelUp,
     sections,
   };
 }
@@ -345,12 +459,19 @@ function dominantPillar(insights: AdminInsights): string | undefined {
   return top.code;
 }
 
-function buildMockWeeklyWrapped(): WeeklyWrappedPayload {
+function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayload {
   const start = daysAgo(6);
   const end = new Date();
   const mockEmotions: EmotionHighlight = {
     weekly: buildEmotionEntry('felicidad'),
     biweekly: buildEmotionEntry('motivacion'),
+  };
+  const mockLevelUp: LevelUpHighlight = {
+    happened: forceLevelUpMock ?? true,
+    currentLevel: 12,
+    previousLevel: 11,
+    xpGained: 650,
+    forced: Boolean(forceLevelUpMock),
   };
 
   return {
@@ -363,6 +484,7 @@ function buildMockWeeklyWrapped(): WeeklyWrappedPayload {
       highlight: 'Meditación al amanecer',
     },
     emotions: mockEmotions,
+    levelUp: mockLevelUp,
     sections: [
       {
         key: 'intro',
@@ -370,6 +492,14 @@ function buildMockWeeklyWrapped(): WeeklyWrappedPayload {
         body: `Tu semana (${formatDate(start)} – ${formatDate(end)}) está lista. Respirá y recorré tus logros.`,
         accent: 'Vista previa mock',
       },
+      mockLevelUp.happened
+        ? {
+            key: 'level-up',
+            title: 'Subida de nivel',
+            body: 'Llegaste al nivel 12. Cada misión empujó este salto.',
+            accent: 'Level Up',
+          }
+        : null,
       {
         key: 'achievements',
         title: 'Logros principales',
@@ -425,7 +555,7 @@ function buildMockWeeklyWrapped(): WeeklyWrappedPayload {
         body: 'Seguimos. Mañana vuelve el Daily Quest para sumar más.',
         accent: 'Mañana hay más',
       },
-    ],
+    ].filter((section): section is WeeklyWrappedSection => Boolean(section)),
   };
 }
 
@@ -487,14 +617,14 @@ function computeEmotionDominant(
 }
 
 function buildEmotionEntry(key: EmotionMessageKey): EmotionHighlightEntry {
-  const message = emotionMessages[key];
+  const message = EMOTION_REFLECTIONS[key];
   return {
     key,
     label: message.label,
     tone: message.tone,
     color: EMOTION_COLORS[key] ?? '#0ea5e9',
-    weeklyMessage: message.weekly_message,
-    biweeklyContext: message.biweekly_context,
+    weeklyMessage: message.weeklyMessage,
+    biweeklyContext: message.biweeklyContext,
   };
 }
 
@@ -567,6 +697,56 @@ function daysAgoFrom(reference: Date, days: number): Date {
   const copy = new Date(reference);
   copy.setDate(copy.getDate() - days);
   return copy;
+}
+
+function normalizeLevelSummary(response: UserLevelResponse): LevelSummary | null {
+  const level = Number(response.current_level);
+  const xpTotal = Number(response.xp_total);
+  const xpRequiredCurrent = Number(response.xp_required_current ?? 0);
+  const xpRequiredNext =
+    response.xp_required_next === null || response.xp_required_next === undefined
+      ? null
+      : Number(response.xp_required_next);
+  const xpToNext = response.xp_to_next == null ? null : Math.max(0, Number(response.xp_to_next));
+
+  if (!Number.isFinite(level) || !Number.isFinite(xpTotal)) {
+    return null;
+  }
+
+  return {
+    level: Math.max(0, Math.round(level)),
+    xpTotal: Math.max(0, xpTotal),
+    xpRequiredCurrent: Math.max(0, xpRequiredCurrent),
+    xpRequiredNext: xpRequiredNext == null || Number.isNaN(xpRequiredNext) ? null : Math.max(0, xpRequiredNext),
+    xpToNext,
+  } satisfies LevelSummary;
+}
+
+function detectLevelUp(summary: LevelSummary | null, xpGained: number, forced: boolean): LevelUpHighlight {
+  if (forced) {
+    return {
+      happened: true,
+      currentLevel: summary?.level ?? null,
+      previousLevel: summary ? Math.max(0, summary.level - 1) : null,
+      xpGained,
+      forced,
+    };
+  }
+
+  if (!summary) {
+    return { happened: false, currentLevel: null, previousLevel: null, xpGained, forced };
+  }
+
+  const xpStart = Math.max(0, summary.xpTotal - xpGained);
+  const leveledUp = xpStart < summary.xpRequiredCurrent;
+
+  return {
+    happened: leveledUp,
+    currentLevel: summary.level,
+    previousLevel: leveledUp ? Math.max(0, summary.level - 1) : summary.level,
+    xpGained,
+    forced,
+  };
 }
 
 export function logWeeklyWrappedError(error: unknown) {

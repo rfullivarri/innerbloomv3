@@ -64,6 +64,11 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
   }));
   const pillarDominant = payload.summary.pillarDominant;
   const emotionHighlight = payload.emotions;
+  const levelUp = payload.levelUp;
+  const showLevelUp = levelUp?.happened;
+  const habitsStartIndex = showLevelUp ? 2 : 1;
+  const progressIndex = habitsStartIndex + 1;
+  const closingIndex = progressIndex + 1;
 
   return (
     <div className="fixed inset-0 z-50 flex bg-slate-950/95 backdrop-blur" role="dialog" aria-modal>
@@ -98,6 +103,8 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               index={0}
             />
 
+            {showLevelUp ? <LevelUpBlock levelUp={levelUp} index={1} entered={entered} /> : null}
+
             <HabitsBlock
               title={sectionsByKey.habits?.title ?? 'Hábitos constantes'}
               description={sectionsByKey.habits?.body ?? 'Estos hábitos mantuvieron tu semana.'}
@@ -106,7 +113,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
                 icon: habitIcons[idx % habitIcons.length],
               }))}
               entered={entered}
-              startIndex={1}
+              startIndex={habitsStartIndex}
             />
 
             <ProgressBlock
@@ -115,7 +122,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               emotionHighlight={emotionHighlight}
               pillarDominant={pillarDominant}
               entered={entered}
-              index={habitsItems.length + 2}
+              index={progressIndex}
             />
 
             <ClosingBlock
@@ -123,7 +130,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               accent={sectionsByKey.closing?.accent ?? 'Mañana hay más'}
               onClose={onClose}
               entered={entered}
-              index={habitsItems.length + 3}
+              index={closingIndex}
             />
           </div>
         </div>
@@ -221,11 +228,12 @@ type HabitsBlockProps = {
 };
 
 function HabitsBlock({ title, description, items, entered, startIndex }: HabitsBlockProps) {
+  const slideLabel = `Slide ${startIndex + 1} · Ritmo constante`;
   return (
     <SectionShell index={startIndex} entered={entered} auraIndex={1}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">Slide 2 · Ritmo constante</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
           <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">{title}</h3>
           <p className="mt-2 text-sm text-slate-200">{description}</p>
         </div>
@@ -266,6 +274,51 @@ function HabitsBlock({ title, description, items, entered, startIndex }: HabitsB
   );
 }
 
+type LevelUpBlockProps = { levelUp: WeeklyWrappedPayload['levelUp']; entered: boolean; index: number };
+
+function LevelUpBlock({ levelUp, entered, index }: LevelUpBlockProps) {
+  const levelLabel = levelUp.currentLevel ?? 'nuevo';
+  const previousLabel = levelUp.previousLevel ?? Math.max(0, Number(levelLabel) - 1);
+
+  return (
+    <SectionShell index={index} entered={entered} auraIndex={2}>
+      <div className="relative overflow-hidden rounded-3xl border border-transparent bg-slate-950/70 p-[2px]">
+        <div className="absolute inset-0 animate-pulse bg-[conic-gradient(at_30%_40%,#a855f7,#22d3ee,#22c55e,#f59e0b,#f472b6,#22d3ee)] opacity-70 blur" />
+        <div className="relative rounded-[26px] border border-white/10 bg-gradient-to-br from-slate-950/80 via-emerald-950/50 to-indigo-950/60 p-6 shadow-[0_20px_60px_rgba(34,197,94,0.2)]">
+          <div className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-emerald-400/20 blur-3xl" aria-hidden />
+          <div className="absolute -left-10 -bottom-10 h-36 w-36 rounded-full bg-sky-400/15 blur-3xl" aria-hidden />
+          <div className="flex flex-col gap-4 text-slate-50 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-100">Slide especial · Level Up</p>
+              <h3 className="text-3xl font-semibold drop-shadow-[0_0_30px_rgba(16,185,129,0.45)]">Subiste a Nivel {levelLabel}</h3>
+              <p className="max-w-2xl text-sm text-emerald-50/90">
+                {levelUp.forced
+                  ? 'Mock activado para validar la celebración sin afectar métricas.'
+                  : 'Semana con salto real: cada misión empujó tu progreso.'}
+              </p>
+              <div className="flex flex-wrap gap-3 text-xs text-slate-200">
+                <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
+                  +{levelUp.xpGained.toLocaleString('es-AR')} XP esta semana
+                </span>
+                <span className="rounded-full border border-white/15 bg-emerald-500/20 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
+                  {previousLabel} → {levelLabel}
+                </span>
+              </div>
+            </div>
+            <div className="relative flex h-32 w-full max-w-xs items-center justify-center">
+              <div className="absolute h-28 w-28 animate-[ping_2.4s_ease-out_infinite] rounded-full bg-emerald-400/30" aria-hidden />
+              <div className="absolute h-24 w-24 animate-[pulse_3s_ease-in-out_infinite] rounded-full bg-sky-400/20" aria-hidden />
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-400 text-3xl font-bold text-slate-950 shadow-[0_0_40px_rgba(56,189,248,0.4)]">
+                {levelLabel}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </SectionShell>
+  );
+}
+
 type ProgressBlockProps = {
   improvement?: WeeklyWrappedSection;
   pillar?: WeeklyWrappedSection;
@@ -291,12 +344,13 @@ function ProgressBlock({ improvement, pillar, emotionHighlight, pillarDominant, 
   const biweeklyLabel = biweeklyEmotion?.label ?? 'Seguimos observando';
   const biweeklyContext =
     biweeklyEmotion?.biweeklyContext ?? 'Con más registros vamos a mostrar la tendencia de los últimos 15 días.';
+  const slideLabel = `Slide ${index + 1} · Progreso y foco`;
 
   return (
     <SectionShell index={index} entered={entered} auraIndex={2}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">Slide 3 · Progreso y foco</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
           <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">Progreso y foco</h3>
         </div>
         <span className="rounded-full border border-emerald-300/30 bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
@@ -321,17 +375,25 @@ function ProgressBlock({ improvement, pillar, emotionHighlight, pillarDominant, 
 
         <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/25 via-orange-400/10 to-rose-400/20 p-4 shadow-lg shadow-amber-400/25">
           <p className="text-[11px] uppercase tracking-[0.2em] text-amber-50">Highlight emocional</p>
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             <span
               className="h-2.5 w-2.5 rounded-full shadow-[0_0_0_4px_rgba(255,255,255,0.15)]"
               style={{ backgroundColor: weeklyColor }}
             />
             <p className="text-lg font-semibold text-slate-950 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]">{weeklyLabel}</p>
+            <span className="rounded-full bg-white/20 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-900">
+              Semana · 7d
+            </span>
           </div>
-          <p className="mt-2 text-sm text-slate-950/90">{weeklyMessage}</p>
-          <div className="mt-3 rounded-xl border border-white/10 bg-slate-950/40 p-3 text-left text-slate-50 shadow-inner shadow-amber-500/10">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-amber-100">Contexto 15d · {biweeklyLabel}</p>
-            <p className="mt-1 text-sm text-amber-50/90">{biweeklyContext}</p>
+          <p className="mt-3 rounded-xl border border-white/10 bg-white/80 p-3 text-sm text-amber-900 shadow-inner shadow-amber-500/10">
+            {weeklyMessage}
+          </p>
+          <div className="mt-3 space-y-2 rounded-xl border border-white/10 bg-slate-950/40 p-3 text-left text-slate-50 shadow-inner shadow-amber-500/10">
+            <div className="flex items-center gap-2 text-sm font-semibold text-amber-100">
+              <span className="h-2 w-2 rounded-full bg-white/70" aria-hidden />
+              <p className="uppercase tracking-[0.16em]">Emoción 15d · {biweeklyLabel}</p>
+            </div>
+            <p className="text-sm text-amber-50/90">{biweeklyContext}</p>
           </div>
         </div>
       </div>
@@ -348,10 +410,11 @@ type ClosingBlockProps = {
 };
 
 function ClosingBlock({ message, accent, onClose, entered, index }: ClosingBlockProps) {
+  const slideLabel = `Slide ${index + 1} · Cierre`;
   return (
     <SectionShell index={index} entered={entered} auraIndex={0}>
       <div className="flex flex-col items-start gap-4 text-slate-50">
-        <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">Slide 4 · Cierre</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
         <h3 className="text-3xl font-semibold drop-shadow-[0_0_22px_rgba(16,185,129,0.35)]">{accent}</h3>
         <p className="max-w-2xl text-lg leading-relaxed text-slate-100">{message}</p>
         <div className="flex flex-wrap gap-3">
