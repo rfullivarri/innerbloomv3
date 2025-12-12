@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import type { WeeklyWrappedPayload, WeeklyWrappedSection } from '../../lib/weeklyWrapped';
 
 const ANIMATION_DELAY = 80;
@@ -33,6 +33,20 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
     return base;
   }, [payload]);
 
+  const sectionsByKey = useMemo(() => {
+    const map: Record<string, WeeklyWrappedSection> = {};
+    for (const section of payload.sections) {
+      map[section.key] = section;
+    }
+    return map;
+  }, [payload.sections]);
+
+  const habitsItems = sectionsByKey.habits?.items ?? [];
+  const highlight = sectionsByKey.highlight?.body ?? payload.summary.highlight;
+  const pillarDominant = payload.summary.pillarDominant;
+
+  const habitIcons = ['🔥', '💧', '🧘'];
+
   return (
     <div className="fixed inset-0 z-50 flex bg-slate-950/95 backdrop-blur" role="dialog" aria-modal>
       <div className="absolute inset-0" onClick={onClose} aria-hidden />
@@ -43,96 +57,289 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
         <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_20%_10%,rgba(110,231,183,0.12),transparent),radial-gradient(90%_80%_at_80%_20%,rgba(94,234,212,0.08),transparent),radial-gradient(80%_120%_at_40%_80%,rgba(192,132,252,0.12),transparent)]" />
       </div>
 
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-4xl flex-col gap-4 overflow-y-auto px-4 py-6">
-        <header className="flex items-start justify-between gap-4 rounded-3xl border border-white/15 bg-slate-900/80 px-4 py-3 shadow-2xl shadow-emerald-500/10 backdrop-blur">
-          <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">Weekly Wrapped · Preview</p>
-            <h2 className="mt-1 text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(16,185,129,0.35)]">
-              {formatRange(payload.weekRange)}
-            </h2>
-            <div className="mt-2 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-100">
-              {badges.map((badge) => (
-                <span
-                  key={badge}
-                  className="rounded-full border border-emerald-300/30 bg-emerald-500/15 px-3 py-1 text-[10px] font-semibold text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.2),0_10px_30px_rgba(16,185,129,0.25)]"
-                >
-                  {badge}
-                </span>
-              ))}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-50 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-400/20 hover:text-slate-950"
-          >
-            Cerrar
-          </button>
-        </header>
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-5xl flex-col px-2 py-4 sm:px-4 sm:py-6">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 z-20 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-50 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-400/30 hover:text-slate-950"
+        >
+          Cerrar
+        </button>
 
-        <div className="space-y-3 pb-6">
-          {payload.sections.map((section, index) => (
-            <WrappedSectionCard
-              key={section.key}
-              section={section}
-              index={index}
+        <div className="relative flex-1 overflow-hidden rounded-[30px] border border-white/10 bg-slate-900/80 shadow-2xl shadow-emerald-500/15">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-emerald-500/5 to-slate-900/50" aria-hidden />
+          <div className="relative h-full snap-y snap-mandatory overflow-y-auto scroll-smooth">
+            <SectionBlock
+              title="Weekly Wrapped · Preview"
+              accent={formatRange(payload.weekRange)}
+              badges={badges}
+              description={sectionsByKey.intro?.body ?? 'Tu semana está lista. Respirá y recorré tus logros.'}
+              kicker={sectionsByKey.achievements?.accent ?? 'Impulso sostenido'}
+              highlightText={sectionsByKey.achievements?.body}
               entered={entered}
+              index={0}
             />
-          ))}
+
+            <HabitsBlock
+              title={sectionsByKey.habits?.title ?? 'Hábitos constantes'}
+              description={sectionsByKey.habits?.body ?? 'Estos hábitos mantuvieron tu semana.'}
+              items={habitsItems.map((item, idx) => ({
+                ...item,
+                icon: habitIcons[idx % habitIcons.length],
+              }))}
+              entered={entered}
+              startIndex={1}
+            />
+
+            <ProgressBlock
+              improvement={sectionsByKey.improvement}
+              pillar={sectionsByKey.pillar}
+              highlight={highlight}
+              pillarDominant={pillarDominant}
+              entered={entered}
+              index={habitsItems.length + 2}
+            />
+
+            <ClosingBlock
+              message={sectionsByKey.closing?.body ?? 'Seguimos sumando: mañana vuelve el Daily Quest.'}
+              accent={sectionsByKey.closing?.accent ?? 'Mañana hay más'}
+              onClose={onClose}
+              entered={entered}
+              index={habitsItems.length + 3}
+            />
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-type SectionCardProps = {
-  section: WeeklyWrappedSection;
+type SectionShellProps = {
+  children: ReactNode;
   index: number;
   entered: boolean;
+  auraIndex?: number;
 };
 
-function WrappedSectionCard({ section, index, entered }: SectionCardProps) {
+function SectionShell({ children, index, entered, auraIndex = 0 }: SectionShellProps) {
   const delay = `${ANIMATION_DELAY * index}ms`;
-  const auraClasses = GRADIENT_RING_CLASSES[index % GRADIENT_RING_CLASSES.length];
+  const auraClasses = GRADIENT_RING_CLASSES[auraIndex % GRADIENT_RING_CLASSES.length];
   return (
-    <article
-      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-emerald-500/10 ring-1 ring-white/5 transition-all duration-700 ${
-        entered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-      }`}
-      style={{ transitionDelay: delay }}
+    <section
+      className="relative flex min-h-[92vh] snap-start items-center px-4 py-10 sm:px-8"
+      aria-live="polite"
     >
-      <div className={`pointer-events-none absolute inset-0 opacity-60 blur-3xl transition duration-700 group-hover:opacity-100 ${`bg-gradient-to-br ${auraClasses}`}`} aria-hidden />
-      <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 animate-[spin_14s_linear_infinite] rounded-full bg-gradient-to-br from-emerald-400/60 via-cyan-400/40 to-sky-500/40 blur-3xl" aria-hidden />
-
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-100">{section.accent ?? 'Slide'}</p>
-          <h3 className="text-xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(16,185,129,0.25)]">{section.title}</h3>
-        </div>
-        {section.key === 'highlight' ? <Burst /> : null}
+      <div
+        className={`relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/60 p-6 shadow-xl shadow-emerald-500/15 transition duration-700 ${
+          entered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
+        style={{ transitionDelay: delay }}
+      >
+        <div className={`pointer-events-none absolute inset-0 opacity-70 blur-3xl ${`bg-gradient-to-br ${auraClasses}`}`} aria-hidden />
+        <div className="relative z-10 space-y-4">{children}</div>
       </div>
-      <p className="mt-2 text-sm leading-relaxed text-slate-100 drop-shadow-[0_0_12px_rgba(56,189,248,0.2)]">{section.body}</p>
-      {section.items?.length ? (
-        <div className="mt-4 space-y-3">
-          {section.items.map((item) => (
+    </section>
+  );
+}
+
+type SectionBlockProps = {
+  title: string;
+  accent: string;
+  badges: string[];
+  description: string;
+  kicker: string;
+  highlightText?: string;
+  entered: boolean;
+  index: number;
+};
+
+function SectionBlock({ title, accent, badges, description, kicker, highlightText, entered, index }: SectionBlockProps) {
+  return (
+    <SectionShell index={index} entered={entered} auraIndex={0}>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">{title}</p>
+          <h2 className="mt-1 text-3xl font-semibold text-slate-50 drop-shadow-[0_0_22px_rgba(16,185,129,0.4)]">{accent}</h2>
+          <div className="mt-3 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-100">
+            {badges.map((badge) => (
+              <span
+                key={badge}
+                className="rounded-full border border-emerald-300/30 bg-emerald-500/15 px-3 py-1 text-[10px] font-semibold text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.2),0_10px_30px_rgba(16,185,129,0.25)]"
+              >
+                {badge}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-full border border-emerald-300/30 bg-emerald-500/15 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.2),0_10px_30px_rgba(16,185,129,0.25)]">
+          Apertura
+        </div>
+      </header>
+
+      <div className="grid gap-6 md:grid-cols-[1.2fr,0.9fr] md:items-center">
+        <div className="space-y-3 text-lg leading-relaxed text-slate-100">
+          <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">{kicker}</p>
+          <p className="text-lg md:text-xl">{highlightText ?? 'Impulso listo para recorrer la semana.'}</p>
+          <p className="text-base text-slate-200">{description}</p>
+        </div>
+        <div className="relative rounded-3xl border border-white/10 bg-gradient-to-br from-emerald-400/20 via-cyan-400/10 to-indigo-500/20 p-5 text-slate-50 shadow-[0_20px_70px_rgba(16,185,129,0.25)]">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50">Portada / bienvenida</p>
+          <p className="mt-2 text-2xl font-semibold">Semana lista para celebrar 🎧</p>
+          <p className="mt-3 text-sm text-emerald-50/90">Scrolleá para recorrer la historia completa.</p>
+        </div>
+      </div>
+    </SectionShell>
+  );
+}
+
+type HabitItem = { title: string; body: string; badge?: string; icon: string };
+
+type HabitsBlockProps = {
+  title: string;
+  description: string;
+  items: HabitItem[];
+  entered: boolean;
+  startIndex: number;
+};
+
+function HabitsBlock({ title, description, items, entered, startIndex }: HabitsBlockProps) {
+  return (
+    <SectionShell index={startIndex} entered={entered} auraIndex={1}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">Slide 2 · Ritmo constante</p>
+          <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">{title}</h3>
+          <p className="mt-2 text-sm text-slate-200">{description}</p>
+        </div>
+        <span className="rounded-full border border-emerald-300/30 bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
+          Hábitos constantes
+        </span>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {items.length > 0 ? (
+          items.map((item, idx) => (
             <div
               key={item.title}
-              className="rounded-2xl border border-white/10 bg-gradient-to-r from-emerald-500/10 via-slate-900/60 to-indigo-500/10 px-4 py-3 shadow-inner shadow-emerald-500/20 transition duration-500 hover:shadow-[0_8px_40px_rgba(16,185,129,0.25)]"
+              className="group rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/70 via-emerald-500/10 to-indigo-500/10 p-4 shadow-lg shadow-emerald-500/15 transition duration-700"
+              style={{ transitionDelay: `${ANIMATION_DELAY * (startIndex + idx)}ms` }}
             >
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-semibold text-slate-50">{item.title}</p>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-slate-50">
+                  <span className="text-xl">{item.icon}</span>
+                  <p className="text-sm font-semibold">{item.title}</p>
+                </div>
                 {item.badge ? (
-                  <span className="rounded-full border border-emerald-300/40 bg-emerald-500/20 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.35)]">
+                  <span className="rounded-full border border-emerald-300/40 bg-emerald-500/25 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.35)]">
                     {item.badge}
                   </span>
                 ) : null}
               </div>
-              <p className="text-xs text-slate-100 drop-shadow-[0_0_10px_rgba(14,165,233,0.25)]">{item.body}</p>
+              <p className="mt-2 text-sm text-slate-100">{item.body}</p>
             </div>
-          ))}
+          ))
+        ) : (
+          <p className="rounded-2xl border border-dashed border-white/15 bg-slate-900/70 p-4 text-sm text-slate-300">
+            Sin hábitos destacados aún, pero la pista está lista para vos.
+          </p>
+        )}
+      </div>
+    </SectionShell>
+  );
+}
+
+type ProgressBlockProps = {
+  improvement?: WeeklyWrappedSection;
+  pillar?: WeeklyWrappedSection;
+  highlight?: string | null;
+  pillarDominant: string | null;
+  entered: boolean;
+  index: number;
+};
+
+function ProgressBlock({ improvement, pillar, highlight, pillarDominant, entered, index }: ProgressBlockProps) {
+  const pillarColors: Record<string, string> = {
+    Mind: 'from-sky-400/30 via-sky-500/10 to-indigo-500/20',
+    Body: 'from-emerald-400/30 via-lime-400/10 to-cyan-500/20',
+    Soul: 'from-fuchsia-400/30 via-rose-400/10 to-amber-400/20',
+  };
+
+  const pillarAura = pillarDominant && pillarColors[pillarDominant] ? pillarColors[pillarDominant] : 'from-emerald-400/25 via-cyan-400/10 to-indigo-500/20';
+
+  return (
+    <SectionShell index={index} entered={entered} auraIndex={2}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">Slide 3 · Progreso y foco</p>
+          <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">Progreso y foco</h3>
         </div>
-      ) : null}
-    </article>
+        <span className="rounded-full border border-emerald-300/30 bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
+          Momentum 🔥
+        </span>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-500/20 via-slate-900/80 to-indigo-500/10 p-4 shadow-lg shadow-emerald-500/20">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-50">Level up suave</p>
+          <p className="mt-2 text-lg font-semibold text-slate-50">{improvement?.body ?? 'Mini mejora registrada. Seguís afinando tu ritmo.'}</p>
+        </div>
+
+        <div className={`rounded-2xl border border-white/10 bg-gradient-to-br ${pillarAura} p-4 shadow-lg shadow-emerald-500/20`}>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-50">Pilar dominante</p>
+          <p className="mt-2 text-lg font-semibold text-slate-50">{pillar?.accent ?? pillarDominant ?? 'Mind / Body / Soul'}</p>
+          <p className="mt-1 text-sm text-slate-100">{pillar?.body ?? 'El foco de la semana te sostuvo. Seguimos apoyándonos ahí.'}</p>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/25 via-orange-400/10 to-rose-400/20 p-4 shadow-lg shadow-amber-400/25">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-amber-50">Highlight 🔥</p>
+          <p className="mt-2 text-lg font-semibold text-slate-950 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]">{highlight ?? 'Momentum listo para el próximo salto.'}</p>
+          <p className="mt-1 text-sm text-amber-50/90">La chispa de la semana marca el camino.</p>
+        </div>
+      </div>
+    </SectionShell>
+  );
+}
+
+type ClosingBlockProps = {
+  message: string;
+  accent: string;
+  onClose: () => void;
+  entered: boolean;
+  index: number;
+};
+
+function ClosingBlock({ message, accent, onClose, entered, index }: ClosingBlockProps) {
+  return (
+    <SectionShell index={index} entered={entered} auraIndex={0}>
+      <div className="flex flex-col items-start gap-4 text-slate-50">
+        <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">Slide 4 · Cierre</p>
+        <h3 className="text-3xl font-semibold drop-shadow-[0_0_22px_rgba(16,185,129,0.35)]">{accent}</h3>
+        <p className="max-w-2xl text-lg leading-relaxed text-slate-100">{message}</p>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full bg-gradient-to-r from-emerald-400/90 to-cyan-400/90 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5"
+          >
+            Cerrar
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-white/25 bg-white/10 px-5 py-2 text-sm font-semibold text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300/50 hover:bg-emerald-400/20 hover:text-slate-950"
+          >
+            Seguir
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-emerald-300/30 bg-emerald-500/20 px-5 py-2 text-sm font-semibold text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-200/60 hover:bg-emerald-400/30 hover:text-slate-950"
+          >
+            Ir al Daily Quest
+          </button>
+        </div>
+      </div>
+    </SectionShell>
   );
 }
 
@@ -140,16 +347,4 @@ function formatRange(range: WeeklyWrappedPayload['weekRange']): string {
   const start = new Date(range.start);
   const end = new Date(range.end);
   return `${start.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`;
-}
-
-function Burst() {
-  return (
-    <div className="relative h-10 w-10">
-      <div className="absolute inset-0 animate-ping rounded-full bg-amber-400/25" aria-hidden />
-      <div className="absolute inset-1 rounded-full bg-gradient-to-br from-amber-400/70 via-orange-500/70 to-rose-500/70 blur-sm" aria-hidden />
-      <div className="relative flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-amber-300 via-amber-400 to-rose-400 text-slate-900 shadow-lg shadow-amber-400/40">
-        ✨
-      </div>
-    </div>
-  );
 }
