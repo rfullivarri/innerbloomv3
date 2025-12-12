@@ -28,6 +28,7 @@ type BuildOptions = {
 };
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+const MAX_LOG_PAGE_SIZE = 100;
 
 export async function buildWeeklyWrappedPreviewPayload(
   options: BuildOptions,
@@ -38,14 +39,41 @@ export async function buildWeeklyWrappedPreviewPayload(
 
   const [insights, logs] = await Promise.all([
     fetchAdminInsights(options.userId),
-    fetchAdminLogs(options.userId, {
+    fetchLogsForRange(options.userId, {
       from: toDateInput(daysAgo(6)),
       to: toDateInput(new Date()),
-      pageSize: 200,
     }),
   ]);
 
-  return buildWeeklyWrappedFromData(insights, logs.items ?? []);
+  return buildWeeklyWrappedFromData(insights, logs);
+}
+
+async function fetchLogsForRange(
+  userId: string,
+  params: { from: string; to: string },
+): Promise<AdminLogRow[]> {
+  const items: AdminLogRow[] = [];
+  let page = 1;
+  let total = Infinity;
+
+  while (items.length < total) {
+    const response = await fetchAdminLogs(userId, {
+      ...params,
+      page,
+      pageSize: MAX_LOG_PAGE_SIZE,
+    });
+
+    items.push(...(response.items ?? []));
+    total = response.total;
+
+    if ((response.items?.length ?? 0) < MAX_LOG_PAGE_SIZE) {
+      break;
+    }
+
+    page += 1;
+  }
+
+  return items;
 }
 
 function buildWeeklyWrappedFromData(
