@@ -2,6 +2,23 @@ import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import type { WeeklyWrappedPayload, WeeklyWrappedSection } from '../../lib/weeklyWrapped';
 
 const ANIMATION_DELAY = 80;
+const PILLAR_ICONS: Record<string, string> = {
+  Body: '🫀',
+  Mind: '🧠',
+  Soul: '🏵️',
+};
+
+const PILLAR_GRADIENTS: Record<string, string> = {
+  Mind: 'from-sky-400/30 via-sky-500/10 to-indigo-500/20',
+  Body: 'from-emerald-400/30 via-lime-400/10 to-cyan-500/20',
+  Soul: 'from-fuchsia-400/30 via-rose-400/10 to-amber-400/20',
+};
+
+const PILLAR_TEXT_TONES: Record<string, string> = {
+  Mind: 'text-sky-50',
+  Body: 'text-emerald-50',
+  Soul: 'text-fuchsia-50',
+};
 
 type WeeklyWrappedModalProps = {
   payload: WeeklyWrappedPayload;
@@ -28,7 +45,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
       payload.variant === 'light' ? 'semana liviana' : 'semana completa',
     ];
     if (payload.summary.pillarDominant) {
-      base.push(payload.summary.pillarDominant);
+      base.push(formatPillarLabel(payload.summary.pillarDominant));
     }
     return base;
   }, [payload]);
@@ -41,11 +58,12 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
     return map;
   }, [payload.sections]);
 
-  const habitsItems = sectionsByKey.habits?.items ?? [];
+  const habitsItems = (sectionsByKey.habits?.items ?? []).map((item) => ({
+    ...item,
+    icon: getPillarIcon(item.pillar),
+  }));
   const pillarDominant = payload.summary.pillarDominant;
   const emotionHighlight = payload.emotions;
-
-  const habitIcons = ['🔥', '💧', '🧘'];
 
   return (
     <div className="fixed inset-0 z-50 flex bg-slate-950/95 backdrop-blur" role="dialog" aria-modal>
@@ -192,7 +210,7 @@ function SectionBlock({ title, accent, badges, description, kicker, highlightTex
   );
 }
 
-type HabitItem = { title: string; body: string; badge?: string; icon: string };
+type HabitItem = { title: string; body: string; badge?: string; icon?: string; pillar?: string | null };
 
 type HabitsBlockProps = {
   title: string;
@@ -226,7 +244,7 @@ function HabitsBlock({ title, description, items, entered, startIndex }: HabitsB
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-slate-50">
-                  <span className="text-xl">{item.icon}</span>
+                  {item.icon ? <span className="text-xl" aria-hidden>{item.icon}</span> : null}
                   <p className="text-sm font-semibold">{item.title}</p>
                 </div>
                 {item.badge ? (
@@ -258,13 +276,12 @@ type ProgressBlockProps = {
 };
 
 function ProgressBlock({ improvement, pillar, emotionHighlight, pillarDominant, entered, index }: ProgressBlockProps) {
-  const pillarColors: Record<string, string> = {
-    Mind: 'from-sky-400/30 via-sky-500/10 to-indigo-500/20',
-    Body: 'from-emerald-400/30 via-lime-400/10 to-cyan-500/20',
-    Soul: 'from-fuchsia-400/30 via-rose-400/10 to-amber-400/20',
-  };
-
-  const pillarAura = pillarDominant && pillarColors[pillarDominant] ? pillarColors[pillarDominant] : 'from-emerald-400/25 via-cyan-400/10 to-indigo-500/20';
+  const pillarAura =
+    pillarDominant && PILLAR_GRADIENTS[pillarDominant]
+      ? PILLAR_GRADIENTS[pillarDominant]
+      : 'from-emerald-400/25 via-cyan-400/10 to-indigo-500/20';
+  const pillarTone = pillarDominant && PILLAR_TEXT_TONES[pillarDominant] ? PILLAR_TEXT_TONES[pillarDominant] : 'text-slate-50';
+  const pillarIcon = getPillarIcon(pillarDominant);
   const weeklyEmotion = emotionHighlight.weekly;
   const biweeklyEmotion = emotionHighlight.biweekly ?? weeklyEmotion;
   const weeklyColor = weeklyEmotion?.color ?? '#fbbf24';
@@ -295,7 +312,10 @@ function ProgressBlock({ improvement, pillar, emotionHighlight, pillarDominant, 
 
         <div className={`rounded-2xl border border-white/10 bg-gradient-to-br ${pillarAura} p-4 shadow-lg shadow-emerald-500/20`}>
           <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-50">Pilar dominante</p>
-          <p className="mt-2 text-lg font-semibold text-slate-50">{pillar?.accent ?? pillarDominant ?? 'Mind / Body / Soul'}</p>
+          <div className="mt-2 flex items-center gap-2 text-lg font-semibold">
+            {pillarIcon ? <span aria-hidden>{pillarIcon}</span> : null}
+            <span className={pillarTone}>{pillar?.accent ?? pillarDominant ?? 'Mind / Body / Soul'}</span>
+          </div>
           <p className="mt-1 text-sm text-slate-100">{pillar?.body ?? 'El foco de la semana te sostuvo. Seguimos apoyándonos ahí.'}</p>
         </div>
 
@@ -366,4 +386,14 @@ function formatRange(range: WeeklyWrappedPayload['weekRange']): string {
   const start = new Date(range.start);
   const end = new Date(range.end);
   return `${start.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`;
+}
+
+function getPillarIcon(pillar?: string | null): string {
+  if (!pillar) return '';
+  return PILLAR_ICONS[pillar] ?? '';
+}
+
+function formatPillarLabel(pillar: string): string {
+  const icon = getPillarIcon(pillar);
+  return icon ? `${icon} ${pillar}` : pillar;
 }
