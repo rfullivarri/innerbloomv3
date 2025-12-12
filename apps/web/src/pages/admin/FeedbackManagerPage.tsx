@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   fetchFeedbackDefinitions,
+  fetchFeedbackDefinitionPreview,
   fetchFeedbackUserHistory,
   fetchFeedbackUserState,
   patchFeedbackDefinition,
@@ -21,6 +22,8 @@ import {
   buildPreviewStreakPayload,
   formatLevelNotification,
   formatStreakNotification,
+  type LevelNotificationPayload,
+  type StreakNotificationPayload,
 } from '../../lib/notifications';
 
 type TabId = 'global' | 'user';
@@ -862,8 +865,50 @@ type NotificationPreviewModalProps = {
 
 function NotificationPreviewModal({ definition, onClose }: NotificationPreviewModalProps) {
   const previewCopy = formatPreviewCopy(definition.copy, definition.previewVariables ?? {});
-  const inlinePreview = buildInAppPreview(definition, onClose);
+  const [previewPayload, setPreviewPayload] = useState<Record<string, unknown> | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPreviewLoading(true);
+    setPreviewError(null);
+    setPreviewPayload(null);
+
+    fetchFeedbackDefinitionPreview(definition.id)
+      .then((response) => {
+        if (!cancelled) {
+          setPreviewPayload(response.payload ?? null);
+        }
+      })
+      .catch((error) => {
+        console.error('[admin][feedback] failed to load preview payload', error);
+        if (!cancelled) {
+          setPreviewError('No se pudo cargar el preview desde el backend.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setPreviewLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [definition.id]);
+
+  const inlinePreview = useMemo(() => {
+    if (!previewPayload) {
+      return null;
+    }
+    return buildInAppPreview(definition, previewPayload, onClose);
+  }, [definition, onClose, previewPayload]);
   const hasInlinePreview = Boolean(inlinePreview);
+  const fallbackPreviewMessage = previewError ??
+    (!previewLoading && !hasInlinePreview
+      ? 'No pudimos generar un preview con los datos recibidos del backend.'
+      : null);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-6">
       <div className="absolute inset-0" aria-hidden onClick={onClose} />
@@ -883,25 +928,29 @@ function NotificationPreviewModal({ definition, onClose }: NotificationPreviewMo
           </button>
         </header>
         <div className="mt-5 space-y-4">
+          {previewLoading ? (
+            <div className="rounded-3xl border border-white/10 bg-slate-950/40 p-4 text-sm text-slate-400">
+              Generando preview…
+            </div>
+          ) : null}
           {hasInlinePreview ? (
-            <>
-              <div
-                className="rounded-3xl border border-white/10 bg-slate-950/40 p-4"
-                onClickCapture={(event) => {
-                  const target = event.target as HTMLElement | null;
-                  if (target?.closest('a')) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }
-                }}
-              >
-                {inlinePreview}
-              </div>
-              <p className="text-xs text-slate-500">Texto base: {previewCopy}</p>
-            </>
-          ) : (
-            <p className="whitespace-pre-line text-sm text-slate-100">{previewCopy}</p>
-          )}
+            <div
+              className="rounded-3xl border border-white/10 bg-slate-950/40 p-4"
+              onClickCapture={(event) => {
+                const target = event.target as HTMLElement | null;
+                if (target?.closest('a')) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+              }}
+            >
+              {inlinePreview}
+            </div>
+          ) : null}
+          {!previewLoading && !hasInlinePreview ? (
+            <p className="whitespace-pre-line text-sm text-amber-200">{fallbackPreviewMessage}</p>
+          ) : null}
+          <p className="text-xs text-slate-500">Texto base: {previewCopy}</p>
           <p className="text-xs text-slate-500">Trigger: {definition.trigger}</p>
           {definition.cta ? (
             hasInlinePreview ? (
@@ -930,12 +979,19 @@ function NotificationPreviewModal({ definition, onClose }: NotificationPreviewMo
   );
 }
 
-function buildInAppPreview(definition: FeedbackDefinition, onClose: () => void) {
+function buildInAppPreview(
+  definition: FeedbackDefinition,
+  previewPayload: Record<string, unknown>,
+  onClose: () => void,
+) {
   if (definition.channel !== 'in_app_popup') {
     return null;
   }
   if (definition.notificationKey === LEVEL_UP_NOTIFICATION_KEY) {
-    const payload = buildPreviewLevelPayload(definition);
+    const payload = buildPreviewLevelPayload(definition, previewPayload as Partial<LevelNotificationPayload>);
+    if (!payload) {
+      return null;
+    }
     const formatted = formatLevelNotification(definition, payload);
     return (
       <NotificationPopup
@@ -952,7 +1008,10 @@ function buildInAppPreview(definition: FeedbackDefinition, onClose: () => void) 
     );
   }
   if (definition.notificationKey === STREAK_NOTIFICATION_KEY) {
-    const payload = buildPreviewStreakPayload(definition);
+    const payload = buildPreviewStreakPayload(definition, previewPayload as Partial<StreakNotificationPayload>);
+    if (!payload) {
+      return null;
+    }
     const formatted = formatStreakNotification(definition, payload);
     return (
       <NotificationPopup
