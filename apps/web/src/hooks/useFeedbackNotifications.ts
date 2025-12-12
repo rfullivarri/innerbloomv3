@@ -5,6 +5,8 @@ import type { NotificationPopupTask } from '../components/feedback/NotificationP
 import { formatLevelNotification, formatStreakNotification } from '../lib/notifications';
 import { emitFeedbackNotificationEvent } from '../lib/telemetry';
 
+const STREAK_MILESTONES = [3, 5, 7];
+
 type PopupDescriptor = {
   id: number;
   title: string;
@@ -109,6 +111,9 @@ function buildPopups(
         return buildLevelPopup(definition, event);
       }
       if (event.type === 'streak_milestone') {
+        if (!STREAK_MILESTONES.includes(event.payload.threshold)) {
+          return null;
+        }
         return buildStreakPopup(definition, event);
       }
       return null;

@@ -41,14 +41,15 @@ export function NotificationPopup({
   inline = false,
 }: NotificationPopupProps) {
   useEffect(() => {
-    if (!open || autoDismissMs <= 0 || inline) {
+    const hasTasks = Boolean(tasks && tasks.length > 0);
+    if (!open || autoDismissMs <= 0 || inline || hasTasks) {
       return undefined;
     }
     const timeout = window.setTimeout(() => {
       onClose();
     }, autoDismissMs);
     return () => window.clearTimeout(timeout);
-  }, [autoDismissMs, onClose, open, inline]);
+  }, [autoDismissMs, onClose, open, inline, tasks]);
 
   const emojiVariants =
     emojiAnimation === 'pulse'
@@ -81,16 +82,17 @@ export function NotificationPopup({
               ✕
             </button>
           </div>
-          <p className="mt-2 text-sm text-slate-200">{message}</p>
+          <p className="mt-3 text-sm text-slate-200">{message}</p>
           {tasks && tasks.length > 0 ? (
-            <ul className="mt-3 space-y-1 rounded-2xl border border-white/10 bg-white/5 p-3 text-sm text-slate-100">
+            <ul className="mt-3 space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3 text-sm text-slate-100">
               {tasks.map((task) => (
-                <li key={task.id} className="flex items-center justify-between gap-3">
-                  <span className="font-medium">{task.name}</span>
+                <li key={task.id} className="flex items-center gap-3">
+                  <span aria-hidden className="text-lg leading-none">
+                    🔥
+                  </span>
+                  <span className="min-w-0 flex-1 truncate font-medium">{task.name}</span>
                   {typeof task.streakDays === 'number' ? (
-                    <span className="inline-flex items-center rounded-full bg-white/10 px-2 py-0.5 text-xs text-amber-200">
-                      🔥 {task.streakDays}d
-                    </span>
+                    <span className="whitespace-nowrap text-xs font-semibold text-amber-200">{task.streakDays}d</span>
                   ) : null}
                 </li>
               ))}
@@ -135,7 +137,7 @@ export function NotificationPopup({
         >
           <motion.div
             key="notification-popup"
-            className="w-full max-w-sm pointer-events-auto"
+            className="w-full max-w-md pointer-events-auto"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
