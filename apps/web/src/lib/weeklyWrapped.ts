@@ -1,6 +1,6 @@
 import type { AdminInsights, AdminLogRow } from './types';
 import { fetchAdminInsights, fetchAdminLogs } from './adminApi';
-import { logger } from './logger';
+import { logApiError } from './logger';
 
 export type WeeklyWrappedSection = {
   key: string;
@@ -277,5 +277,5 @@ function daysAgoFrom(reference: Date, days: number): Date {
 }
 
 export function logWeeklyWrappedError(error: unknown) {
-  logger.error('[admin][weekly-wrapped] failed to build preview', { error });
+  logApiError('[admin][weekly-wrapped] failed to build preview', { error });
 }
