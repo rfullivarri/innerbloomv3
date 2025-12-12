@@ -1572,6 +1572,8 @@ export type TraitXpEntry = {
   trait: string;
   name?: string;
   xp: number;
+  pillar?: string;
+  sortOrder?: number;
 };
 
 export type UserXpByTraitResponse = {
@@ -1597,15 +1599,33 @@ export async function getUserXpByTrait(
 
     const nameValue = item?.name ?? item?.trait_name ?? item?.label ?? item?.display_name ?? '';
     const xpValue = item?.xp ?? item?.total ?? item?.value ?? 0;
+    const pillarValue =
+      item?.pillar ??
+      item?.pillar_code ??
+      item?.pillar_name ??
+      item?.pillarId ??
+      item?.pillar_id ??
+      '';
+    const sortOrderValue =
+      item?.sort_order ??
+      item?.sortOrder ??
+      item?.order ??
+      item?.order_index ??
+      item?.orderIndex ??
+      null;
 
     const trait = String(traitValue ?? '').trim();
     const name = String(nameValue ?? '').trim();
     const xp = Number(xpValue ?? 0);
+    const pillar = String(pillarValue ?? '').trim();
+    const sortOrder = Number(sortOrderValue ?? Number.NaN);
 
     return {
       trait,
       name: name.length > 0 ? name : undefined,
       xp: Number.isFinite(xp) ? xp : 0,
+      pillar: pillar.length > 0 ? pillar : undefined,
+      sortOrder: Number.isFinite(sortOrder) ? sortOrder : undefined,
     } satisfies TraitXpEntry;
   });
 

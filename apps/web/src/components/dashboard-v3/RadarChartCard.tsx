@@ -64,12 +64,14 @@ for (const [canonical, synonyms] of Object.entries(TRAIT_SYNONYMS)) {
   }
 }
 
-const TRAIT_PRIORITY = new Map<string, number>(TRAIT_ORDER.map((trait, index) => [trait, index]));
+const PILLAR_ORDER = ['Body', 'Mind', 'Soul'] as const;
 
 type RadarAxis = {
   key: string;
   label: string;
   xp: number;
+  pillar?: string | null;
+  sortOrder?: number | null;
 };
 
 type RadarDataset = {
@@ -123,6 +125,33 @@ function normalizeLabel(value: string | null | undefined): string | null {
   return normalized.length > 0 ? normalized : null;
 }
 
+function normalizePillar(value: string | null | undefined): string | null {
+  if (!value) return null;
+
+  const normalized = value.toString().trim();
+  if (!normalized) return null;
+
+  const normalizedTitle = normalized.charAt(0).toUpperCase() + normalized.slice(1).toLowerCase();
+  const matchedPillar = PILLAR_ORDER.find(
+    (pillar) => pillar.toLowerCase() === normalized.toLowerCase(),
+  );
+
+  return matchedPillar ?? normalizedTitle;
+}
+
+function normalizeSortOrder(value: unknown): number | null {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : null;
+}
+
+function getPillarOrderIndex(pillar: string | null | undefined): number {
+  if (!pillar) return Number.POSITIVE_INFINITY;
+
+  const normalized = normalizePillar(pillar);
+  const index = normalized ? PILLAR_ORDER.indexOf(normalized as (typeof PILLAR_ORDER)[number]) : -1;
+  return index >= 0 ? index : Number.POSITIVE_INFINITY;
+}
+
 function formatTraitLabel(key: string, providedLabel?: string | null): string {
   const normalized = normalizeLabel(providedLabel);
   if (normalized) {
@@ -141,7 +170,10 @@ function formatTraitLabel(key: string, providedLabel?: string | null): string {
 }
 
 function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
-  const totals = new Map<string, { xp: number; label?: string | null }>();
+  const totals = new Map<
+    string,
+    { xp: number; label?: string | null; pillar?: string | null; sortOrder?: number | null }
+  >();
 
   for (const entry of entries) {
     const key = normalizeTraitKey(entry?.trait, entry?.name);
@@ -154,33 +186,32 @@ function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
     totals.set(key, {
       xp: previous.xp + (Number.isFinite(xp) ? xp : 0),
       label: previous.label ?? label,
+      pillar: previous.pillar ?? normalizePillar(entry?.pillar),
+      sortOrder: previous.sortOrder ?? normalizeSortOrder(entry?.sortOrder),
     });
   }
 
   const axes: RadarAxis[] = Array.from(totals.entries())
-    .map(([key, { xp, label }]) => ({
+    .map(([key, { xp, label, pillar, sortOrder }]) => ({
       key,
       label: formatTraitLabel(key, label ?? undefined),
       xp,
+      pillar: pillar ?? null,
+      sortOrder: sortOrder ?? null,
     }))
     .sort((a, b) => {
-      const priorityA = TRAIT_PRIORITY.get(a.key);
-      const priorityB = TRAIT_PRIORITY.get(b.key);
+      const pillarIndexA = getPillarOrderIndex(a.pillar);
+      const pillarIndexB = getPillarOrderIndex(b.pillar);
 
-      if (priorityA != null && priorityB != null) {
-        return priorityA - priorityB;
+      if (pillarIndexA !== pillarIndexB) {
+        return pillarIndexA - pillarIndexB;
       }
 
-      if (priorityA != null) {
-        return -1;
-      }
+      const sortOrderA = normalizeSortOrder(a.sortOrder);
+      const sortOrderB = normalizeSortOrder(b.sortOrder);
 
-      if (priorityB != null) {
-        return 1;
-      }
-
-      if (b.xp !== a.xp) {
-        return b.xp - a.xp;
+      if (sortOrderA != null || sortOrderB != null) {
+        return (sortOrderA ?? Number.POSITIVE_INFINITY) - (sortOrderB ?? Number.POSITIVE_INFINITY);
       }
 
       return a.label.localeCompare(b.label);
