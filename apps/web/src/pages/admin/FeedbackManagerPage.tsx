@@ -899,10 +899,7 @@ function NotificationPreviewModal({ definition, onClose }: NotificationPreviewMo
   }, [definition.id]);
 
   const inlinePreview = useMemo(() => {
-    if (!previewPayload) {
-      return null;
-    }
-    return buildInAppPreview(definition, previewPayload, onClose);
+    return buildInAppPreview(definition, previewPayload ?? {}, onClose);
   }, [definition, onClose, previewPayload]);
   const hasInlinePreview = Boolean(inlinePreview);
   const fallbackPreviewMessage = previewError ??
@@ -950,6 +947,11 @@ function NotificationPreviewModal({ definition, onClose }: NotificationPreviewMo
           {!previewLoading && !hasInlinePreview ? (
             <p className="whitespace-pre-line text-sm text-amber-200">{fallbackPreviewMessage}</p>
           ) : null}
+          {previewError ? (
+            <p className="text-xs text-amber-200">
+              Mostrando la estructura con placeholders porque el backend no devolvió datos de preview.
+            </p>
+          ) : null}
           <p className="text-xs text-slate-500">Texto base: {previewCopy}</p>
           <p className="text-xs text-slate-500">Trigger: {definition.trigger}</p>
           {definition.cta ? (
@@ -988,10 +990,9 @@ function buildInAppPreview(
     return null;
   }
   if (definition.notificationKey === LEVEL_UP_NOTIFICATION_KEY) {
-    const payload = buildPreviewLevelPayload(definition, previewPayload as Partial<LevelNotificationPayload>);
-    if (!payload) {
-      return null;
-    }
+    const payload =
+      buildPreviewLevelPayload(definition, previewPayload as Partial<LevelNotificationPayload>) ??
+      { level: 5, previousLevel: 4 };
     const formatted = formatLevelNotification(definition, payload);
     return (
       <NotificationPopup
@@ -1008,10 +1009,15 @@ function buildInAppPreview(
     );
   }
   if (definition.notificationKey === STREAK_NOTIFICATION_KEY) {
-    const payload = buildPreviewStreakPayload(definition, previewPayload as Partial<StreakNotificationPayload>);
-    if (!payload) {
-      return null;
-    }
+    const fallbackThreshold = coercePositiveIntValue(definition.config?.threshold) ?? DEFAULT_STREAK_THRESHOLD;
+    const payload =
+      buildPreviewStreakPayload(definition, previewPayload as Partial<StreakNotificationPayload>) ?? {
+        threshold: fallbackThreshold,
+        tasks: [
+          { id: 'preview-task-1', name: 'Tarea ejemplo', streakDays: fallbackThreshold },
+          { id: 'preview-task-2', name: 'Otra tarea', streakDays: fallbackThreshold + 1 },
+        ],
+      };
     const formatted = formatStreakNotification(definition, payload);
     return (
       <NotificationPopup
