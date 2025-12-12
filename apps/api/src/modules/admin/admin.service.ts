@@ -1687,7 +1687,7 @@ async function fetchFeedbackUserProfile(userId: string): Promise<FeedbackUserPro
             u.full_name,
             gm.code AS game_mode_code,
             lvl.level AS level,
-            u.last_seen_at
+            u.updated_at AS last_seen_at
        FROM users u
   LEFT JOIN cat_game_mode gm ON gm.game_mode_id = u.game_mode_id
   LEFT JOIN v_user_level lvl ON lvl.user_id = u.user_id
