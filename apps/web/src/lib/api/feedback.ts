@@ -21,6 +21,10 @@ export type FeedbackDefinitionUpdatePayload = {
   config?: Record<string, unknown>;
 };
 
+export type FeedbackPreviewPayloadResponse = {
+  payload: Record<string, unknown> | null;
+};
+
 export async function fetchFeedbackDefinitions() {
   return apiAuthorizedGet<FeedbackDefinitionsResponse>('/admin/feedback/definitions');
 }
@@ -47,6 +51,12 @@ export async function patchFeedbackDefinition(id: string, payload: FeedbackDefin
   }
 
   return response.json() as Promise<{ item: FeedbackDefinition }>;
+}
+
+export async function fetchFeedbackDefinitionPreview(definitionId: string) {
+  return apiAuthorizedGet<FeedbackPreviewPayloadResponse>(
+    `/admin/feedback/definitions/${encodeURIComponent(definitionId)}/preview`,
+  );
 }
 
 export type FeedbackUserNotificationState = {

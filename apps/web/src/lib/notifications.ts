@@ -77,26 +77,38 @@ export function formatStreakNotification(
 export function buildPreviewLevelPayload(
   definition: NotificationDefinitionLike,
   overrides: Partial<LevelNotificationPayload> = {},
-): LevelNotificationPayload {
+): LevelNotificationPayload | null {
   const preview = definition.previewVariables ?? {};
-  const level = Math.max(1, overrides.level ?? coerceInteger(preview.level) ?? coerceInteger(preview.current_level) ?? 5);
+  const level = coerceInteger(overrides.level ?? preview.level ?? preview.current_level);
+  if (level === null) {
+    return null;
+  }
+
   const previousCandidate = overrides.previousLevel ?? coerceInteger(preview.previous_level);
-  const previousLevel = Math.max(0, Math.min(previousCandidate ?? level - 1, level - 1));
+  const previousLevel =
+    typeof previousCandidate === 'number'
+      ? Math.max(0, Math.min(previousCandidate, level - 1))
+      : Math.max(0, level - 1);
+
   return { level, previousLevel };
 }
 
 export function buildPreviewStreakPayload(
   definition: NotificationDefinitionLike,
   overrides: Partial<StreakNotificationPayload> = {},
-): StreakNotificationPayload {
+): StreakNotificationPayload | null {
   const preview = definition.previewVariables ?? {};
   const config = definition.config ?? {};
-  const threshold = Math.max(
-    1,
-    overrides.threshold ?? coerceInteger(preview.threshold) ?? coerceInteger(config.threshold) ?? 3,
-  );
-  const previewTasks = overrides.tasks ?? parsePreviewTasks(preview, threshold);
-  const tasks = previewTasks.length > 0 ? previewTasks : buildDefaultPreviewTasks(threshold);
+  const threshold = coerceInteger(overrides.threshold ?? preview.threshold ?? config.threshold);
+  if (!threshold || threshold < 1) {
+    return null;
+  }
+
+  const tasks = overrides.tasks ?? parsePreviewTasks(preview, threshold);
+  if (!tasks.length) {
+    return null;
+  }
+
   return { threshold, tasks };
 }
 
@@ -175,19 +187,4 @@ function buildTaskFromPreview(
   const streakCandidate = record.streakDays ?? record.streak_days;
   const streakDays = Math.max(1, coerceInteger(streakCandidate) ?? fallbackStreak);
   return { id, name, streakDays };
-}
-
-function buildDefaultPreviewTasks(threshold: number): NotificationPopupTask[] {
-  return [
-    {
-      id: 'preview-default-1',
-      name: 'Meditación Focus',
-      streakDays: threshold,
-    },
-    {
-      id: 'preview-default-2',
-      name: 'Respirar 5 minutos',
-      streakDays: threshold + 1,
-    },
-  ];
 }
