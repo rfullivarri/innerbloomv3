@@ -45,38 +45,73 @@ function formatDateLabel(value: string): string {
   return Number.isFinite(day) ? String(day) : value;
 }
 
-function WeekTimeline({
+function WeeklyCompletionDonut({
   timeline,
   weeklyGoal,
+  currentStreak,
+  bestStreak,
 }: {
   timeline: TaskInsightsResponse['weeks']['timeline'];
   weeklyGoal: number;
+  currentStreak: number;
+  bestStreak: number;
 }) {
+  const totalWeeks = timeline.length;
+  const completedWeeks = timeline.filter((week) => week.hit).length;
+  const completionPercent = totalWeeks > 0 ? Math.round((completedWeeks / totalWeeks) * 100) : 0;
+
   if (!timeline.length) {
     return <p className="text-sm text-slate-400">Aún no registramos semanas para esta tarea.</p>;
   }
 
+  const radius = 50;
+  const strokeWidth = 10;
+  const circumference = 2 * Math.PI * radius;
+  const progress = Math.min(100, Math.max(0, completionPercent));
+  const offset = circumference * (1 - progress / 100);
+
   return (
-    <div className="space-y-1">
-      <div className="flex flex-wrap gap-1.5">
-        {timeline.map((week) => (
-          <div
-            key={week.weekStart}
-            className={cx(
-              'flex min-w-[54px] flex-1 items-center justify-between rounded-lg border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] shadow-sm transition',
-              week.hit
-                ? 'border-emerald-200/60 bg-emerald-300/15 text-emerald-50 shadow-[0_0_12px_rgba(16,185,129,0.2)]'
-                : 'border-white/10 bg-white/5 text-slate-200',
-            )}
-          >
-            <span className="text-[10px] text-slate-300">S{week.weekStart.slice(5)}</span>
-            <span className={week.hit ? 'text-emerald-100' : 'text-slate-300'}>
-              {week.count}/{weeklyGoal}
-            </span>
-          </div>
-        ))}
+    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
+      <svg
+        className="h-36 w-36 drop-shadow-[0_0_25px_rgba(52,211,153,0.2)]"
+        viewBox="0 0 120 120"
+        role="img"
+        aria-label={`Progreso semanal: ${progress}%`}
+      >
+        <circle
+          cx="60"
+          cy="60"
+          r={radius}
+          strokeWidth={strokeWidth}
+          className="fill-none stroke-white/10"
+        />
+        <circle
+          cx="60"
+          cy="60"
+          r={radius}
+          strokeWidth={strokeWidth}
+          strokeDasharray={`${circumference} ${circumference}`}
+          strokeDashoffset={offset}
+          className="fill-none stroke-emerald-300 transition-[stroke-dashoffset] duration-500 ease-out"
+          strokeLinecap="round"
+          transform="rotate(-90 60 60)"
+        />
+        <text
+          x="60"
+          y="60"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className="fill-slate-50 text-[20px] font-semibold"
+        >
+          {progress}%
+        </text>
+      </svg>
+
+      <div className="space-y-1 text-center text-xs text-slate-300 sm:text-left">
+        <p className="text-slate-100">Racha actual: {currentStreak} semanas</p>
+        <p>Mejor racha: {bestStreak} semanas</p>
+        <p>Meta semanal: {weeklyGoal} veces</p>
       </div>
-      <p className="text-[11px] text-slate-400">Últimas {timeline.length} semanas (OK si supera la meta semanal).</p>
     </div>
   );
 }
@@ -224,16 +259,23 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
           <div className="mt-4 space-y-4">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-slate-100">Timeline semanal</p>
+                <p className="text-sm font-semibold text-slate-100">Progreso semanal</p>
                 <span className="text-xs text-slate-400">Objetivo: {weeklyGoal}x/sem</span>
               </div>
               {status === 'loading' && (
-                <div className="mt-3 h-20 animate-pulse rounded-xl bg-white/10" aria-hidden />
+                <div className="mt-3 h-28 animate-pulse rounded-xl bg-white/10" aria-hidden />
               )}
               {status === 'error' && (
                 <p className="mt-2 text-sm text-rose-300">No pudimos cargar la serie semanal: {error?.message}</p>
               )}
-              {status === 'success' && <WeekTimeline timeline={timeline} weeklyGoal={weeklyGoal} />}
+              {status === 'success' && (
+                <WeeklyCompletionDonut
+                  timeline={timeline}
+                  weeklyGoal={weeklyGoal}
+                  currentStreak={stats.currentStreak}
+                  bestStreak={stats.bestStreak}
+                />
+              )}
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
