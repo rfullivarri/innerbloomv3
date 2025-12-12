@@ -17,6 +17,7 @@ import { ToastBanner } from '../../components/common/ToastBanner';
 import { UserPicker } from '../../components/admin/UserPicker';
 import { Skeleton } from '../../components/common/Skeleton';
 import { NotificationPopup } from '../../components/feedback/NotificationPopup';
+import { WeeklyWrappedModal } from '../../components/feedback/WeeklyWrappedModal';
 import {
   buildPreviewLevelPayload,
   buildPreviewStreakPayload,
@@ -25,6 +26,11 @@ import {
   type LevelNotificationPayload,
   type StreakNotificationPayload,
 } from '../../lib/notifications';
+import {
+  buildWeeklyWrappedPreviewPayload,
+  logWeeklyWrappedError,
+  type WeeklyWrappedPayload,
+} from '../../lib/weeklyWrapped';
 
 type TabId = 'global' | 'user';
 
@@ -450,6 +456,10 @@ function UserNotificationsView() {
   const [historyRefreshToken, setHistoryRefreshToken] = useState(0);
   const [updatingNotificationKey, setUpdatingNotificationKey] = useState<string | null>(null);
   const [banner, setBanner] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [weeklyPreviewPayload, setWeeklyPreviewPayload] = useState<WeeklyWrappedPayload | null>(null);
+  const [weeklyPreviewSource, setWeeklyPreviewSource] = useState<'real' | 'mock'>('real');
+  const [weeklyPreviewLoading, setWeeklyPreviewLoading] = useState(false);
+  const [weeklyPreviewError, setWeeklyPreviewError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedUser) {
@@ -533,6 +543,8 @@ function UserNotificationsView() {
     setHistory(null);
     setStateError(null);
     setHistoryError(null);
+    setWeeklyPreviewPayload(null);
+    setWeeklyPreviewError(null);
   }, []);
 
   const handleNotificationStateChange = useCallback(
@@ -560,6 +572,26 @@ function UserNotificationsView() {
     },
     [selectedUser?.id],
   );
+
+  const handlePreviewWeeklyWrapped = useCallback(async () => {
+    if (!selectedUser) {
+      return;
+    }
+    setWeeklyPreviewLoading(true);
+    setWeeklyPreviewError(null);
+    try {
+      const payload = await buildWeeklyWrappedPreviewPayload({
+        userId: selectedUser.id,
+        dataSource: weeklyPreviewSource,
+      });
+      setWeeklyPreviewPayload(payload);
+    } catch (error) {
+      logWeeklyWrappedError(error);
+      setWeeklyPreviewError('No pudimos generar el preview. Revisá si el usuario tiene datos recientes.');
+    } finally {
+      setWeeklyPreviewLoading(false);
+    }
+  }, [selectedUser?.id, weeklyPreviewSource]);
 
   const userProfile = userState?.user ?? null;
   const email = userProfile?.email ?? selectedUser?.email ?? 'Sin email';
@@ -661,6 +693,56 @@ function UserNotificationsView() {
                   <dd className="mt-1 text-base text-slate-100">{formatOptionalDateTime(userProfile?.lastSeenAt)}</dd>
                 </div>
               </dl>
+            </article>
+
+            <article className="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-5 shadow-lg shadow-slate-950/20">
+              <header className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Preview · Weekly Wrapped</p>
+                  <h3 className="text-xl font-semibold text-slate-50">Testear narrativa semanal</h3>
+                  <p className="text-xs text-slate-400">
+                    Usa el usuario activo y elegí si querés datos reales (últimos 7 días) o mock. No persiste métricas ni consumed.
+                  </p>
+                </div>
+                <div className="text-right text-xs text-slate-400">
+                  <p>Fuente: {weeklyPreviewSource === 'real' ? 'Datos reales' : 'Mock'}</p>
+                  {weeklyPreviewPayload ? (
+                    <p className="text-emerald-200">Último preview: {weeklyPreviewPayload.variant === 'light' ? 'Semana liviana' : 'Completa'}</p>
+                  ) : null}
+                </div>
+              </header>
+              <div className="mt-4 grid gap-4 md:grid-cols-[1fr,220px] md:items-end">
+                <div className="space-y-2 text-sm text-slate-300">
+                  <p>
+                    Usuario activo: <span className="font-semibold text-slate-50">{displayName}</span>
+                  </p>
+                  <p className="text-xs text-slate-400">Al cerrar el modal no se guarda ningún estado.</p>
+                  {weeklyPreviewError ? (
+                    <p className="text-xs text-rose-200">{weeklyPreviewError}</p>
+                  ) : null}
+                </div>
+                <div className="flex flex-col gap-2 md:items-end">
+                  <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    Data source
+                    <select
+                      value={weeklyPreviewSource}
+                      onChange={(event) => setWeeklyPreviewSource(event.target.value as 'real' | 'mock')}
+                      className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                    >
+                      <option value="real">Real (última semana)</option>
+                      <option value="mock">Mock</option>
+                    </select>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handlePreviewWeeklyWrapped}
+                    disabled={!selectedUser || weeklyPreviewLoading}
+                    className="w-full rounded-lg bg-gradient-to-r from-sky-500/80 to-blue-500/80 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:from-sky-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
+                  >
+                    {weeklyPreviewLoading ? 'Generando preview…' : 'Preview'}
+                  </button>
+                </div>
+              </div>
             </article>
 
             <article className="overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-900/70 shadow-lg shadow-slate-950/30">
@@ -854,6 +936,12 @@ function UserNotificationsView() {
           </>
         )}
       </section>
+      {weeklyPreviewPayload ? (
+        <WeeklyWrappedModal
+          payload={weeklyPreviewPayload}
+          onClose={() => setWeeklyPreviewPayload(null)}
+        />
+      ) : null}
     </div>
   );
 }

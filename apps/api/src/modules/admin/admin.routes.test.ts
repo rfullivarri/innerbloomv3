@@ -105,6 +105,25 @@ describe('Admin routes', () => {
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             },
+            {
+              feedback_definition_id: 'def-2',
+              notification_key: 'inapp_weekly_wrapped_preview',
+              label: 'Weekly Wrapped (MVP)',
+              type: 'WRAPPED_WEEKLY',
+              scope: ['in_app', 'weekly'],
+              trigger: 'Lunes post Daily Quest (pendiente de automatizar)',
+              channel: 'in_app_modal',
+              frequency: 'weekly',
+              status: 'draft',
+              priority: 40,
+              copy: 'Tu semana en Innerbloom está lista. Respirá y recorré tus logros.',
+              cta_label: 'Ver resumen',
+              cta_href: null,
+              preview_variables: { user_name: 'Majo', week_range: 'lun-dom' },
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              config: { mode: 'preview', dataSource: 'real' },
+            },
           ],
         } as never;
       }
@@ -346,11 +365,14 @@ describe('Admin routes', () => {
       .set('Authorization', 'Bearer token');
 
     expect(response.status).toBe(200);
-    expect(response.body.items).toHaveLength(1);
+    expect(response.body.items.length).toBeGreaterThanOrEqual(2);
     expect(response.body.items[0]).toMatchObject({
       notificationKey: 'scheduler_daily_reminder_email',
       metrics: { fires7d: 5, fires30d: 22 },
     });
+    expect(
+      response.body.items.some((item: { type: string }) => item.type === 'WRAPPED_WEEKLY')
+    ).toBe(true);
   });
 
   it('updates a feedback definition', async () => {
