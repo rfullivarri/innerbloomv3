@@ -70,7 +70,8 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
   const showLevelUp = levelUp?.happened;
   const habitsStartIndex = showLevelUp ? 2 : 1;
   const progressIndex = habitsStartIndex + 1;
-  const closingIndex = progressIndex + 1;
+  const emotionIndex = progressIndex + 1;
+  const closingIndex = emotionIndex + 1;
 
   return (
     <div className="fixed inset-0 z-50 flex bg-slate-950/95 backdrop-blur" role="dialog" aria-modal>
@@ -121,11 +122,12 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
             <ProgressBlock
               improvement={sectionsByKey.improvement}
               pillar={sectionsByKey.pillar}
-              emotionHighlight={emotionHighlight}
               pillarDominant={pillarDominant}
               entered={entered}
               index={progressIndex}
             />
+
+            <EmotionHighlightBlock emotionHighlight={emotionHighlight} entered={entered} index={emotionIndex} />
 
             <ClosingBlock
               message={sectionsByKey.closing?.body ?? 'Seguimos sumando: mañana vuelve el Daily Quest.'}
@@ -153,17 +155,17 @@ function SectionShell({ children, index, entered, auraIndex = 0 }: SectionShellP
   const auraClasses = GRADIENT_RING_CLASSES[auraIndex % GRADIENT_RING_CLASSES.length];
   return (
     <section
-      className="relative flex min-h-[92vh] snap-start items-center px-4 py-10 sm:px-8"
+      className="relative flex min-h-[100dvh] snap-start items-center px-3 py-12 sm:px-8 sm:py-16"
       aria-live="polite"
     >
       <div
-        className={`relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/60 p-6 shadow-xl shadow-emerald-500/15 transition duration-700 ${
+        className={`relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/60 p-7 shadow-xl shadow-emerald-500/15 transition duration-700 sm:p-10 ${
           entered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
         }`}
         style={{ transitionDelay: delay }}
       >
         <div className={`pointer-events-none absolute inset-0 opacity-70 blur-3xl ${`bg-gradient-to-br ${auraClasses}`}`} aria-hidden />
-        <div className="relative z-10 space-y-4">{children}</div>
+        <div className="relative z-10 space-y-5 sm:space-y-6">{children}</div>
       </div>
     </section>
   );
@@ -310,7 +312,7 @@ function LevelUpBlock({ levelUp, entered, index }: LevelUpBlockProps) {
             <div className="relative flex h-32 w-full max-w-xs items-center justify-center">
               <div className="absolute h-28 w-28 animate-[ping_2.4s_ease-out_infinite] rounded-full bg-emerald-400/30" aria-hidden />
               <div className="absolute h-24 w-24 animate-[pulse_3s_ease-in-out_infinite] rounded-full bg-sky-400/20" aria-hidden />
-              <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-400 text-3xl font-bold text-slate-950 shadow-[0_0_40px_rgba(56,189,248,0.4)]">
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-400 text-center text-3xl font-bold leading-none text-slate-950 shadow-[0_0_40px_rgba(56,189,248,0.4)]">
                 {levelLabel}
               </div>
             </div>
@@ -324,28 +326,18 @@ function LevelUpBlock({ levelUp, entered, index }: LevelUpBlockProps) {
 type ProgressBlockProps = {
   improvement?: WeeklyWrappedSection;
   pillar?: WeeklyWrappedSection;
-  emotionHighlight: WeeklyWrappedPayload['emotions'];
   pillarDominant: string | null;
   entered: boolean;
   index: number;
 };
 
-function ProgressBlock({ improvement, pillar, emotionHighlight, pillarDominant, entered, index }: ProgressBlockProps) {
+function ProgressBlock({ improvement, pillar, pillarDominant, entered, index }: ProgressBlockProps) {
   const pillarAura =
     pillarDominant && PILLAR_GRADIENTS[pillarDominant]
       ? PILLAR_GRADIENTS[pillarDominant]
       : 'from-emerald-400/25 via-cyan-400/10 to-indigo-500/20';
   const pillarTone = pillarDominant && PILLAR_TEXT_TONES[pillarDominant] ? PILLAR_TEXT_TONES[pillarDominant] : 'text-slate-50';
   const pillarIcon = getPillarIcon(pillarDominant);
-  const weeklyEmotion = emotionHighlight.weekly;
-  const biweeklyEmotion = emotionHighlight.biweekly ?? weeklyEmotion;
-  const weeklyColor = weeklyEmotion?.color ?? '#fbbf24';
-  const weeklyLabel = weeklyEmotion?.label ?? 'Sin emoción dominante';
-  const weeklyMessage =
-    weeklyEmotion?.weeklyMessage ?? 'Registrá tus emociones para detectar cuál lideró la semana.';
-  const biweeklyLabel = biweeklyEmotion?.label ?? 'Seguimos observando';
-  const biweeklyContext =
-    biweeklyEmotion?.biweeklyContext ?? 'Con más registros vamos a mostrar la tendencia de los últimos 15 días.';
   const slideLabel = `Slide ${index + 1} · Progreso y foco`;
 
   return (
@@ -360,7 +352,7 @@ function ProgressBlock({ improvement, pillar, emotionHighlight, pillarDominant, 
         </span>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-500/20 via-slate-900/80 to-indigo-500/10 p-4 shadow-lg shadow-emerald-500/20">
           <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-50">Level up suave</p>
           <p className="mt-2 text-lg font-semibold text-slate-50">{improvement?.body ?? 'Mini mejora registrada. Seguís afinando tu ritmo.'}</p>
@@ -374,28 +366,90 @@ function ProgressBlock({ improvement, pillar, emotionHighlight, pillarDominant, 
           </div>
           <p className="mt-1 text-sm text-slate-100">{pillar?.body ?? 'El foco de la semana te sostuvo. Seguimos apoyándonos ahí.'}</p>
         </div>
+      </div>
+    </SectionShell>
+  );
+}
 
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/25 via-orange-400/10 to-rose-400/20 p-4 shadow-lg shadow-amber-400/25">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-amber-50">Highlight emocional</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
+type EmotionHighlightBlockProps = {
+  emotionHighlight: WeeklyWrappedPayload['emotions'];
+  entered: boolean;
+  index: number;
+};
+
+function EmotionHighlightBlock({ emotionHighlight, entered, index }: EmotionHighlightBlockProps) {
+  const weeklyEmotion = emotionHighlight.weekly;
+  const biweeklyEmotion = emotionHighlight.biweekly ?? weeklyEmotion;
+  const weeklyColor = weeklyEmotion?.color ?? '#fbbf24';
+  const biweeklyColor = biweeklyEmotion?.color ?? weeklyColor;
+  const weeklyLabel = weeklyEmotion?.label ?? 'Sin emoción dominante';
+  const weeklyMessage =
+    weeklyEmotion?.weeklyMessage ?? 'Registrá tus emociones para detectar cuál lideró la semana.';
+  const biweeklyLabel = biweeklyEmotion?.label ?? 'Seguimos observando';
+  const biweeklyContext =
+    biweeklyEmotion?.biweeklyContext ?? 'Con más registros vamos a mostrar la tendencia de los últimos 15 días.';
+  const slideLabel = `Slide ${index + 1} · Highlight emocional`;
+
+  return (
+    <SectionShell index={index} entered={entered} auraIndex={1}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
+          <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(251,191,36,0.35)]">Emoción en foco</h3>
+          <p className="mt-2 text-sm text-slate-200">Movimiento semanal y tendencia de los últimos 15 días.</p>
+        </div>
+        <span className="rounded-full border border-amber-200/40 bg-amber-400/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-900 shadow-[0_0_0_1px_rgba(251,191,36,0.35)]">
+          Highlight
+        </span>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-[1.1fr,0.9fr]">
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/25 via-orange-400/10 to-rose-500/20 p-4 shadow-lg shadow-amber-400/20">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-amber-50">Emoción que lideró la semana</p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             <span
-              className="h-2.5 w-2.5 rounded-full shadow-[0_0_0_4px_rgba(255,255,255,0.15)]"
+              className="h-3 w-3 rounded-full shadow-[0_0_0_6px_rgba(255,255,255,0.14)]"
               style={{ backgroundColor: weeklyColor }}
             />
-            <p className="text-lg font-semibold text-slate-950 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]">{weeklyLabel}</p>
+            <p className="text-xl font-semibold text-slate-950 drop-shadow-[0_0_18px_rgba(251,191,36,0.35)]">{weeklyLabel}</p>
             <span className="rounded-full bg-white/20 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-900">
               Semana · 7d
             </span>
           </div>
-          <p className="mt-3 rounded-xl border border-white/10 bg-white/80 p-3 text-sm text-amber-900 shadow-inner shadow-amber-500/10">
+          <p className="mt-4 rounded-xl border border-white/10 bg-white/80 p-3 text-sm text-amber-900 shadow-inner shadow-amber-500/10">
             {weeklyMessage}
           </p>
-          <div className="mt-3 space-y-2 rounded-xl border border-white/10 bg-slate-950/40 p-3 text-left text-slate-50 shadow-inner shadow-amber-500/10">
-            <div className="flex items-center gap-2 text-sm font-semibold text-amber-100">
-              <span className="h-2 w-2 rounded-full bg-white/70" aria-hidden />
-              <p className="uppercase tracking-[0.16em]">Emoción 15d · {biweeklyLabel}</p>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/10 p-4 shadow-lg shadow-emerald-500/15">
+          <div className="flex items-center gap-3">
+            <div className="relative h-12 w-12">
+              <span
+                className="absolute inset-0 animate-ping rounded-full opacity-40"
+                style={{ backgroundColor: biweeklyColor }}
+                aria-hidden
+              />
+              <span
+                className="absolute inset-2 rounded-full opacity-60"
+                style={{ backgroundColor: `${biweeklyColor}66` }}
+                aria-hidden
+              />
+              <span
+                className="relative flex h-full w-full items-center justify-center rounded-full bg-white/90 text-xs font-semibold text-slate-900"
+                style={{ color: biweeklyColor }}
+              >
+                15d
+              </span>
             </div>
-            <p className="text-sm text-amber-50/90">{biweeklyContext}</p>
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-100">Emoción 15 días</p>
+              <p className="text-lg font-semibold text-slate-50">{biweeklyLabel}</p>
+            </div>
+          </div>
+          <p className="mt-3 text-sm text-slate-100">{biweeklyContext}</p>
+          <div className="mt-3 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.16em] text-slate-200">
+            <span className="rounded-full border border-white/15 bg-white/5 px-2 py-1">Semana actual</span>
+            <span className="rounded-full border border-emerald-300/25 bg-emerald-500/10 px-2 py-1">Últimos 15 días</span>
           </div>
         </div>
       </div>
