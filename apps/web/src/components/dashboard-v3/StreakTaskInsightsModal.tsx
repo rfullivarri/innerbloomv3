@@ -20,11 +20,39 @@ type TaskInsightsModalProps = {
   fallbackTask?: TaskSummary | null;
 };
 
-const STATUS_COLORS = {
-  positive: 'bg-emerald-400/90 text-emerald-950 border-emerald-100/60',
-  caution: 'bg-amber-400/90 text-amber-950 border-amber-100/60',
-  negative: 'bg-rose-400/90 text-rose-950 border-rose-100/60',
-};
+type HabitHealthLevel = 'early' | 'strong' | 'medium' | 'weak';
+
+function getHabitHealth(weeklyHitRatePct: number, weeksSample: number): {
+  level: HabitHealthLevel;
+  label: string;
+} {
+  if (weeksSample < 4) return { level: 'early', label: 'Aún es pronto para medir' };
+  if (weeklyHitRatePct >= 80) return { level: 'strong', label: 'Hábito fuerte' };
+  if (weeklyHitRatePct >= 55) return { level: 'medium', label: 'Hábito en construcción' };
+  return { level: 'weak', label: 'Hábito frágil' };
+}
+
+function DifficultyInsight({
+  difficultyLabel,
+  habitHealthLevel,
+}: {
+  difficultyLabel: string;
+  habitHealthLevel: HabitHealthLevel;
+}) {
+  const normalized = difficultyLabel.toLowerCase();
+  const isHard = normalized.includes('difícil') || normalized.includes('dificil') || normalized.includes('hard');
+  const isEasy = normalized.includes('fácil') || normalized.includes('facil') || normalized.includes('easy');
+
+  if (isHard && habitHealthLevel === 'strong') {
+    return <p className="text-xs text-slate-200">Se comporta como un hábito estable. Podría considerarse menos difícil.</p>;
+  }
+
+  if (isEasy && habitHealthLevel === 'weak') {
+    return <p className="text-xs text-slate-200">Está marcada como fácil, pero te cuesta sostenerla.</p>;
+  }
+
+  return null;
+}
 
 function useEscToClose(enabled: boolean, onClose: () => void) {
   useEffect(() => {
@@ -50,15 +78,27 @@ function WeeklyCompletionDonut({
   weeklyGoal,
   currentStreak,
   bestStreak,
+  completionRate,
+  difficultyLabel,
 }: {
   timeline: TaskInsightsResponse['weeks']['timeline'];
   weeklyGoal: number;
   currentStreak: number;
   bestStreak: number;
+  completionRate: number;
+  difficultyLabel?: string | null;
 }) {
   const totalWeeks = timeline.length;
   const completedWeeks = timeline.filter((week) => week.hit).length;
-  const completionPercent = totalWeeks > 0 ? Math.round((completedWeeks / totalWeeks) * 100) : 0;
+  const completionPercent = Number.isFinite(completionRate) ? Math.round(completionRate) : 0;
+  const habitHealth = getHabitHealth(completionPercent, totalWeeks);
+
+  const healthStyles: Record<HabitHealthLevel, string> = {
+    early: 'bg-slate-200/70 text-slate-900',
+    strong: 'bg-emerald-300 text-emerald-950',
+    medium: 'bg-amber-300 text-amber-950',
+    weak: 'bg-rose-300 text-rose-950',
+  };
 
   if (!timeline.length) {
     return <p className="text-sm text-slate-400">Aún no registramos semanas para esta tarea.</p>;
@@ -92,11 +132,11 @@ function WeeklyCompletionDonut({
           strokeWidth={strokeWidth}
           strokeDasharray={`${circumference} ${circumference}`}
           strokeDashoffset={offset}
-          className="fill-none stroke-emerald-300 transition-[stroke-dashoffset] duration-500 ease-out"
-          strokeLinecap="round"
-          transform="rotate(-90 60 60)"
-        />
-        <text
+      className="fill-none stroke-emerald-300 transition-[stroke-dashoffset] duration-500 ease-out"
+      strokeLinecap="round"
+      transform="rotate(-90 60 60)"
+    />
+    <text
           x="60"
           y="60"
           textAnchor="middle"
@@ -107,10 +147,33 @@ function WeeklyCompletionDonut({
         </text>
       </svg>
 
-      <div className="space-y-1 text-center text-xs text-slate-300 sm:text-left">
-        <p className="text-slate-100">Racha actual: {currentStreak} semanas</p>
-        <p>Mejor racha: {bestStreak} semanas</p>
-        <p>Meta semanal: {weeklyGoal} veces</p>
+      <div className="flex-1 space-y-2 text-center text-xs text-slate-300 sm:text-left">
+        <div className="space-y-1">
+          <span className={cx('inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold', healthStyles[habitHealth.level])}>
+            {habitHealth.label}
+          </span>
+          <p className="text-xs text-slate-200">Cumplís tu meta en {completedWeeks} de {totalWeeks} semanas.</p>
+        </div>
+
+        <div className="space-y-0.5 text-slate-100">
+          <p>Racha actual: {currentStreak} semanas</p>
+          <p>Mejor racha: {bestStreak} semanas</p>
+          <p>Meta semanal: {weeklyGoal} veces</p>
+          {currentStreak === bestStreak && bestStreak > 0 && (
+            <p className="text-xs text-emerald-100">Estás empatando tu récord.</p>
+          )}
+          {currentStreak + 1 === bestStreak && (
+            <p className="text-xs text-amber-100">Estás a 1 semana de superar tu récord.</p>
+          )}
+        </div>
+
+        {difficultyLabel && (
+          <div className="rounded-xl border border-white/10 bg-white/5 p-2 text-left text-slate-100">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Dificultad actual</p>
+            <p className="text-sm font-semibold text-slate-50">{difficultyLabel}</p>
+            <DifficultyInsight difficultyLabel={difficultyLabel} habitHealthLevel={habitHealth.level} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -194,7 +257,9 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
   const activeTask = data?.task ?? fallbackTask;
   const monthDays = data?.month.days ?? [];
   const monthTotal = data?.month.totalCount ?? 0;
-  const completionColor = stats.completionRate >= 70 ? 'positive' : stats.completionRate >= 40 ? 'caution' : 'negative';
+  const difficultyLabel =
+    (activeTask as { difficultyLabel?: string | null })?.difficultyLabel ??
+    (activeTask as { difficulty?: string | null })?.difficulty;
 
   return createPortal(
     <div
@@ -231,39 +296,13 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
 
         <div className="flex-1 overflow-y-auto px-4 pb-5 pt-2">
           <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Veces este mes</p>
-              <p className="mt-1 text-2xl font-semibold text-slate-50">{monthTotal}</p>
-              <p className="text-xs text-slate-400">Promueve consistencia semanal.</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">% semanas OK</p>
-              <span
-                className={cx(
-                  'mt-1 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold',
-                  STATUS_COLORS[completionColor],
-                )}
-              >
-                {stats.completionRate}%
-                <span className="text-[11px] uppercase tracking-[0.18em] text-slate-700">hit</span>
-              </span>
-              <p className="text-xs text-slate-400">Meta semanal ≥ {weeklyGoal} veces.</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Rachas semanales</p>
-              <p className="mt-1 text-2xl font-semibold text-slate-50">{stats.currentStreak}🔥</p>
-              <p className="text-xs text-slate-400">Mejor racha: {stats.bestStreak} semanas.</p>
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+            <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-slate-100">Progreso semanal</p>
                 <span className="text-xs text-slate-400">Objetivo: {weeklyGoal}x/sem</span>
               </div>
               {status === 'loading' && (
-                <div className="mt-3 h-28 animate-pulse rounded-xl bg-white/10" aria-hidden />
+                <div className="mt-3 h-36 animate-pulse rounded-xl bg-white/10" aria-hidden />
               )}
               {status === 'error' && (
                 <p className="mt-2 text-sm text-rose-300">No pudimos cargar la serie semanal: {error?.message}</p>
@@ -274,18 +313,26 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
                   weeklyGoal={weeklyGoal}
                   currentStreak={stats.currentStreak}
                   bestStreak={stats.bestStreak}
+                  completionRate={stats.completionRate}
+                  difficultyLabel={difficultyLabel}
                 />
               )}
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-slate-100">Actividad del mes</p>
-                <span className="text-xs text-slate-400">Días con registro</span>
-              </div>
-              {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-white/10" aria-hidden />}
-              {status === 'success' && <MonthMiniChart days={monthDays} />}
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Rachas semanales</p>
+              <p className="mt-2 text-3xl font-semibold text-slate-50">🔥 {stats.bestStreak}</p>
+              <p className="text-xs text-slate-400">Máxima racha lograda hasta ahora.</p>
             </div>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-slate-100">Actividad del mes</p>
+              <span className="text-xs text-slate-400">Veces este mes: {monthTotal} · Objetivo: {weeklyGoal}x/sem</span>
+            </div>
+            {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-white/10" aria-hidden />}
+            {status === 'success' && <MonthMiniChart days={monthDays} />}
           </div>
         </div>
       </div>
