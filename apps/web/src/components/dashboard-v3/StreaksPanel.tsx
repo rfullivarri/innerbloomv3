@@ -402,7 +402,11 @@ function buildDisplayTask(
   } satisfies DisplayTask;
 }
 
-function TaskItem({ item, onSelect }: { item: DisplayTask; onSelect?: (task: DisplayTask) => void }) {
+function TaskItem({
+  item,
+  range,
+  onSelect,
+}: { item: DisplayTask; range: StreakPanelRange; onSelect?: (task: DisplayTask) => void }) {
   const status = getStatusColor(item.weeklyDone, item.weeklyGoal);
   const pct = computeProgressPercent(item.weeklyDone, item.weeklyGoal);
   const showHistory = item.history.values.length > 0;
@@ -517,7 +521,8 @@ function TaskItem({ item, onSelect }: { item: DisplayTask; onSelect?: (task: Dis
                 const ratio = item.weeklyGoal > 0 ? value / item.weeklyGoal : 0;
                 const clamped = Math.max(0, Math.min(ratio, 1.6));
                 const height = 12 + clamped * 12;
-                const isHit = value >= item.weeklyGoal;
+                const monthlyTarget = range === 'qtr' ? item.weeklyGoal - 0.001 : item.weeklyGoal;
+                const isHit = item.weeklyGoal > 0 && value >= monthlyTarget;
                 return (
                   <div
                     key={index}
@@ -783,7 +788,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                 {topEntries.length > 0 ? (
                   <div className="grid grid-cols-1 gap-3">
                     {topEntries.map((entry) => (
-                      <TaskItem key={entry.id} item={entry} onSelect={handleSelectTask} />
+                      <TaskItem key={entry.id} item={entry} range={range} onSelect={handleSelectTask} />
                     ))}
                   </div>
                 ) : (
@@ -834,7 +839,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                 {displayTasks.length > 0 ? (
                   <div className="grid grid-cols-1 gap-3">
                     {displayTasks.map((task) => (
-                      <TaskItem key={task.id} item={task} onSelect={handleSelectTask} />
+                      <TaskItem key={task.id} item={task} range={range} onSelect={handleSelectTask} />
                     ))}
                   </div>
                 ) : (
