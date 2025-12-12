@@ -1,4 +1,4 @@
-import emotionMessages from 'config/emotion_messages.json';
+import emotionMessages from '../../../../config/emotion_messages.json';
 
 import type { EmotionSnapshot } from './api';
 import type { AdminInsights, AdminLogRow } from './types';
@@ -46,6 +46,13 @@ export type WeeklyWrappedPayload = {
 type BuildOptions = {
   userId: string;
   dataSource: 'real' | 'mock';
+};
+
+type NormalizedLog = AdminLogRow & {
+  parsedDate: Date;
+  dateKey: string | null;
+  quantity: number;
+  state: 'red' | 'yellow' | 'green';
 };
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
@@ -122,12 +129,48 @@ async function fetchLogsForRange(
   return items;
 }
 
-function buildWeeklyWrappedFromData(
+export function normalizeLogs(logs: AdminLogRow[]): NormalizedLog[] {
+  return logs
+    .map((log) => {
+      const parsedDate = parseDateKey(log.date);
+      const dateKey = normalizeDateKey(log.date);
+      const quantity = Math.max(1, Number(log.timesInRange ?? 1));
+      const normalizedState = (log.state ?? '').toLowerCase();
+      const state: 'red' | 'yellow' | 'green' =
+        normalizedState === 'red'
+          ? 'red'
+          : normalizedState === 'yellow'
+            ? 'yellow'
+            : 'green';
+
+      return {
+        ...log,
+        parsedDate: parsedDate ?? new Date(NaN),
+        dateKey,
+        quantity,
+        state,
+      } satisfies NormalizedLog;
+    })
+    .filter((log) => Number.isFinite(log.parsedDate.getTime()));
+}
+
+export function summarizeWeeklyActivity(logs: NormalizedLog[]): {
+  completions: number;
+  habitCounts: ReturnType<typeof aggregateHabits>;
+} {
+  const meaningfulLogs = logs.filter((log) => log.state !== 'red' && log.dateKey);
+  const completions = meaningfulLogs.reduce((acc, log) => acc + log.quantity, 0);
+  const habitCounts = aggregateHabits(meaningfulLogs);
+
+  return { completions, habitCounts };
+}
+
+export function buildWeeklyWrappedFromData(
   insights: AdminInsights,
   logs: AdminLogRow[],
   emotions: EmotionSnapshot[],
 ): WeeklyWrappedPayload {
-  const normalizedLogs = logs.map((log) => ({ ...log, parsedDate: new Date(`${log.date}T00:00:00Z`) }));
+  const normalizedLogs = normalizeLogs(logs);
   const latestLog = normalizedLogs.reduce<Date | null>((latest, log) => {
     if (!latest || log.parsedDate > latest) {
       return log.parsedDate;
@@ -139,11 +182,11 @@ function buildWeeklyWrappedFromData(
   const startDate = daysAgoFrom(endDate, 6);
   const periodLabel = `${formatDate(startDate)} – ${formatDate(endDate)}`;
 
-  const meaningfulLogs = normalizedLogs.filter((log) => (log.state ?? '').toLowerCase() !== 'red');
-  const completions = meaningfulLogs.length;
-  const xpTotal = meaningfulLogs.reduce((acc, log) => acc + Math.max(0, Number(log.xp ?? 0)), 0);
+  const { completions, habitCounts } = summarizeWeeklyActivity(normalizedLogs);
+  const xpTotal = normalizedLogs
+    .filter((log) => log.state !== 'red')
+    .reduce((acc, log) => acc + Math.max(0, Number(log.xp ?? 0)), 0);
 
-  const habitCounts = aggregateHabits(meaningfulLogs);
   const topHabits = habitCounts.slice(0, 3);
   const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
@@ -184,7 +227,12 @@ function buildWeeklyWrappedFromData(
         topHabits.length > 0
           ? topHabits.map((habit) => ({
               title: habit.title,
-              body: `${habit.count}/7 días en marcha. ${habit.pillar ? `${habit.pillar} te acompañó.` : 'Constancia pura.'}`,
+              body:
+                habit.daysActive > 0
+                  ? `${habit.daysActive}/7 días en marcha. ${
+                      habit.pillar ? `${habit.pillar} te acompañó.` : 'Constancia pura.'
+                    }`
+                  : `Ritmo sólido esta semana. ${habit.pillar ? `${habit.pillar} te acompañó.` : 'Constancia pura.'}`,
               badge: habit.badge,
             }))
           : undefined,
@@ -242,31 +290,45 @@ function buildWeeklyWrappedFromData(
   };
 }
 
-function aggregateHabits(logs: (AdminLogRow & { parsedDate: Date })[]) {
+function aggregateHabits(logs: NormalizedLog[]) {
   const map = new Map<
     string,
-    { title: string; count: number; pillar: string | null; badge: string | undefined }
+    { title: string; days: Set<string>; completions: number; pillar: string | null; badge: string | undefined }
   >();
 
   for (const log of logs) {
+    if (!log.dateKey) {
+      continue;
+    }
+
     const key = log.taskName || log.taskId;
     if (!key) {
       continue;
     }
     const current = map.get(key) ?? {
       title: log.taskName || 'Hábito sin nombre',
-      count: 0,
+      days: new Set<string>(),
+      completions: 0,
       pillar: log.pillar ?? null,
       badge: undefined,
     };
-    current.count += 1;
-    if (!current.badge && current.count >= 5) {
+    current.days.add(log.dateKey);
+    current.completions += log.quantity;
+    if (!current.badge && current.days.size >= 5) {
       current.badge = 'racha activa';
     }
     map.set(key, current);
   }
 
-  return Array.from(map.values()).sort((a, b) => b.count - a.count);
+  return Array.from(map.values())
+    .map((entry) => ({
+      title: entry.title,
+      daysActive: entry.days.size,
+      pillar: entry.pillar,
+      badge: entry.badge,
+      completions: entry.completions,
+    }))
+    .sort((a, b) => b.daysActive - a.daysActive || b.completions - a.completions);
 }
 
 function dominantPillar(insights: AdminInsights): string | undefined {
