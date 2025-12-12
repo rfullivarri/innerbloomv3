@@ -271,6 +271,22 @@ type TaskgenSummaryRow = {
   p95_duration_ms: string | number | null;
 };
 
+type FeedbackEventRow = {
+  event_id: string;
+  user_id: string;
+  notification_key: string;
+  action: FeedbackUserHistoryEntry['action'];
+  is_critical_moment: boolean | null;
+  critical_tag: string | null;
+  created_at: string | Date;
+};
+
+type FeedbackUserNotificationStateRow = {
+  notification_key: string;
+  state: 'active' | 'muted';
+  mute_until: string | Date | null;
+};
+
 type TaskgenUserSummaryRow = {
   total_jobs: string | number | null;
   completed_jobs: string | number | null;
@@ -1680,6 +1696,68 @@ export async function updateFeedbackDefinition(
   return hydrateFeedbackDefinition(updated);
 }
 
+let feedbackEventsReady: Promise<void> | null = null;
+
+async function ensureFeedbackEventsReady(): Promise<void> {
+  if (!feedbackEventsReady) {
+    feedbackEventsReady = Promise.all([
+      pool.query(`
+        CREATE TABLE IF NOT EXISTS feedback_events (
+          event_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id uuid NOT NULL,
+          notification_key text NOT NULL,
+          action text NOT NULL,
+          is_critical_moment boolean NOT NULL DEFAULT false,
+          critical_tag text,
+          created_at timestamptz NOT NULL DEFAULT now()
+        );
+      `),
+      pool.query(`
+        CREATE INDEX IF NOT EXISTS feedback_events_user_id_idx
+          ON feedback_events (user_id);
+      `),
+      pool.query(`
+        CREATE INDEX IF NOT EXISTS feedback_events_created_at_idx
+          ON feedback_events (created_at DESC);
+      `),
+    ]).catch((error) => {
+      feedbackEventsReady = null;
+      throw error;
+    });
+  }
+
+  await feedbackEventsReady;
+}
+
+let feedbackUserStatesReady: Promise<void> | null = null;
+
+async function ensureFeedbackUserStatesReady(): Promise<void> {
+  if (!feedbackUserStatesReady) {
+    feedbackUserStatesReady = Promise.all([
+      pool.query(`
+        CREATE TABLE IF NOT EXISTS feedback_user_notification_states (
+          user_id uuid NOT NULL,
+          notification_key text NOT NULL,
+          state text NOT NULL,
+          mute_until timestamptz,
+          created_at timestamptz NOT NULL DEFAULT now(),
+          updated_at timestamptz NOT NULL DEFAULT now(),
+          PRIMARY KEY (user_id, notification_key)
+        );
+      `),
+      pool.query(`
+        CREATE INDEX IF NOT EXISTS feedback_user_notification_states_user_idx
+          ON feedback_user_notification_states (user_id);
+      `),
+    ]).catch((error) => {
+      feedbackUserStatesReady = null;
+      throw error;
+    });
+  }
+
+  await feedbackUserStatesReady;
+}
+
 async function fetchFeedbackUserProfile(userId: string): Promise<FeedbackUserProfile> {
   const profileResult = await pool.query<UserProfileRow>(
     `SELECT u.user_id,
@@ -1721,40 +1799,168 @@ export async function getFeedbackUserState(userId: string): Promise<{
     listFeedbackDefinitionRows(),
   ]);
 
-  const notifications: FeedbackUserNotificationState[] = definitions.map((definition) => ({
-    notificationKey: definition.notification_key,
-    name: definition.label,
-    type: definition.type,
-    channel: definition.channel,
-    state: definition.status === 'active' ? 'active' : 'suppressed_by_rule',
-    muteUntil: null,
-    lastFiredForUserAt: null,
-    lastInteractionType: null,
-  }));
+  await Promise.all([ensureFeedbackUserStatesReady(), ensureFeedbackEventsReady()]);
+
+  const [userStatesResult, lastInteractionsResult, lastShownResult] = await Promise.all([
+    pool.query<FeedbackUserNotificationStateRow>(
+      `SELECT notification_key, state, mute_until FROM feedback_user_notification_states WHERE user_id = $1;`,
+      [userId],
+    ),
+    pool.query<{ notification_key: string; action: FeedbackUserHistoryEntry['action']; created_at: Date | string }>(
+      `
+        SELECT DISTINCT ON (notification_key)
+               notification_key,
+               action,
+               created_at
+          FROM feedback_events
+         WHERE user_id = $1
+         ORDER BY notification_key, created_at DESC;
+      `,
+      [userId],
+    ),
+    pool.query<{ notification_key: string; last_shown_at: Date | string | null }>(
+      `
+        SELECT notification_key, MAX(created_at) AS last_shown_at
+          FROM feedback_events
+         WHERE user_id = $1 AND action = 'shown'
+         GROUP BY notification_key;
+      `,
+      [userId],
+    ),
+  ]);
+
+  const userStates = new Map(userStatesResult.rows.map((row) => [row.notification_key, row]));
+  const lastInteractions = new Map(
+    lastInteractionsResult.rows.map((row) => [row.notification_key, { action: row.action, createdAt: row.created_at }]),
+  );
+  const lastShown = new Map(
+    lastShownResult.rows.map((row) => [row.notification_key, row.last_shown_at ? new Date(row.last_shown_at).toISOString() : null]),
+  );
+
+  const notifications: FeedbackUserNotificationState[] = definitions.map((definition) => {
+    const baseState: FeedbackUserNotificationState['state'] =
+      definition.status === 'active' ? 'active' : 'suppressed_by_rule';
+    const userState = userStates.get(definition.notification_key);
+    const state = userState ? userState.state : baseState;
+    const muteUntil = userState?.mute_until ? new Date(userState.mute_until).toISOString() : null;
+    const interaction = lastInteractions.get(definition.notification_key);
+
+    return {
+      notificationKey: definition.notification_key,
+      name: definition.label,
+      type: definition.type,
+      channel: definition.channel,
+      state,
+      muteUntil,
+      lastFiredForUserAt: lastShown.get(definition.notification_key) ?? null,
+      lastInteractionType: interaction ? interaction.action : null,
+    };
+  });
 
   return { user: profile, notifications };
 }
 
-export async function getFeedbackUserHistory(_userId: string): Promise<FeedbackUserHistory> {
-  void _userId;
+export async function getFeedbackUserHistory(userId: string): Promise<FeedbackUserHistory> {
+  const [profile, definitions] = await Promise.all([
+    fetchFeedbackUserProfile(userId),
+    listFeedbackDefinitionRows(),
+    ensureFeedbackEventsReady(),
+  ]);
+
+  void profile;
+
+  const result = await pool.query<FeedbackEventRow>(
+    `
+      SELECT event_id,
+             user_id,
+             notification_key,
+             action,
+             is_critical_moment,
+             critical_tag,
+             created_at
+        FROM feedback_events
+       WHERE user_id = $1
+       ORDER BY created_at DESC;
+    `,
+    [userId],
+  );
+
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  let shownLast7d = 0;
+  let clickedLast7d = 0;
+  let criticalLast30d = 0;
+  let shownLast30d = 0;
+  let clickedLast30d = 0;
+
+  const definitionMap = new Map(definitions.map((definition) => [definition.notification_key, definition]));
+
+  const items: FeedbackUserHistoryEntry[] = result.rows.map((row) => {
+    const definition = definitionMap.get(row.notification_key);
+    const createdAt = new Date(row.created_at);
+
+    if (!Number.isNaN(createdAt.getTime())) {
+      if (createdAt >= sevenDaysAgo && row.action === 'shown') {
+        shownLast7d += 1;
+      }
+      if (createdAt >= sevenDaysAgo && row.action === 'clicked') {
+        clickedLast7d += 1;
+      }
+      if (createdAt >= thirtyDaysAgo && row.is_critical_moment) {
+        criticalLast30d += 1;
+      }
+      if (createdAt >= thirtyDaysAgo && row.action === 'shown') {
+        shownLast30d += 1;
+      }
+      if (createdAt >= thirtyDaysAgo && row.action === 'clicked') {
+        clickedLast30d += 1;
+      }
+    }
+
+    return {
+      id: row.event_id,
+      timestamp: formatDate(row.created_at),
+      notificationKey: row.notification_key,
+      name: definition?.label ?? row.notification_key,
+      type: definition?.type ?? 'unknown',
+      channel: definition?.channel ?? 'unknown',
+      context: null,
+      action: row.action,
+      isCriticalMoment: Boolean(row.is_critical_moment),
+      criticalTag: row.critical_tag ?? null,
+    };
+  });
+
   const summary: FeedbackUserHistorySummary = {
-    notifsShownLast7d: 0,
-    notifsClickedLast7d: 0,
-    notifsCriticalLast30d: 0,
-    clickRateLast30d: 0,
+    notifsShownLast7d: shownLast7d,
+    notifsClickedLast7d: clickedLast7d,
+    notifsCriticalLast30d: criticalLast30d,
+    clickRateLast30d: shownLast30d > 0 ? clickedLast30d / shownLast30d : 0,
   };
 
-  return { summary, items: [] };
+  return { summary, items };
 }
 
 export async function updateFeedbackUserNotificationState(
   userId: string,
-  payload: { notificationKey: string; state: 'active' | 'muted' },
+  payload: { notificationKey: string; state: 'active' | 'muted'; muteUntil?: string | null },
 ): Promise<{ ok: boolean }> {
-  // The system currently does not persist per-user notification preferences.
-  // We still validate the user exists to keep the API consistent.
-  await fetchFeedbackUserProfile(userId);
-  void payload;
+  await Promise.all([fetchFeedbackUserProfile(userId), ensureFeedbackUserStatesReady()]);
+
+  await pool.query(
+    `
+      INSERT INTO feedback_user_notification_states (user_id, notification_key, state, mute_until)
+      VALUES ($1, $2, $3, $4::timestamptz)
+      ON CONFLICT (user_id, notification_key) DO UPDATE
+        SET state = EXCLUDED.state,
+            mute_until = EXCLUDED.mute_until,
+            updated_at = now();
+    `,
+    [userId, payload.notificationKey, payload.state, payload.muteUntil ?? null],
+  );
+
   return { ok: true };
 }
 

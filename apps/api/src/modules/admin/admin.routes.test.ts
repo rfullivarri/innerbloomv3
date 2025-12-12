@@ -55,6 +55,32 @@ describe('Admin routes', () => {
     mockTrigger.mockReturnValue('corr-force');
     clearTaskgenEvents();
     mockQuery.mockImplementation(async (sql: string) => {
+      const now = new Date();
+      const oneDayMs = 24 * 60 * 60 * 1000;
+      const shownAt = new Date(now.getTime() - oneDayMs).toISOString();
+      const clickedAt = new Date(now.getTime() - 2 * oneDayMs).toISOString();
+      const dismissedAt = new Date(now.getTime() - 40 * oneDayMs).toISOString();
+
+      if (sql.includes('CREATE TABLE IF NOT EXISTS feedback_events')) {
+        return { rows: [] } as never;
+      }
+
+      if (sql.includes('CREATE INDEX IF NOT EXISTS feedback_events_user_id_idx')) {
+        return { rows: [] } as never;
+      }
+
+      if (sql.includes('CREATE INDEX IF NOT EXISTS feedback_events_created_at_idx')) {
+        return { rows: [] } as never;
+      }
+
+      if (sql.includes('CREATE TABLE IF NOT EXISTS feedback_user_notification_states')) {
+        return { rows: [] } as never;
+      }
+
+      if (sql.includes('CREATE INDEX IF NOT EXISTS feedback_user_notification_states_user_idx')) {
+        return { rows: [] } as never;
+      }
+
       if (sql.includes('SELECT is_admin FROM users WHERE user_id = $1 LIMIT 1')) {
         return { rows: [{ is_admin: true }] };
       }
@@ -123,6 +149,90 @@ describe('Admin routes', () => {
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
               config: { mode: 'preview', dataSource: 'real' },
+            },
+          ],
+        } as never;
+      }
+
+      if (sql.includes('FROM feedback_user_notification_states WHERE user_id')) {
+        return { rows: [] } as never;
+      }
+
+      if (sql.includes('FROM users u') && sql.includes('LEFT JOIN cat_game_mode gm')) {
+        return {
+          rows: [
+            {
+              user_id: '00000000-0000-4000-8000-000000000001',
+              email_primary: 'admin@example.com',
+              full_name: 'Admin User',
+              game_mode_code: 'FLOW',
+              level: '1',
+              last_seen_at: new Date().toISOString(),
+            },
+          ],
+        } as never;
+      }
+
+      if (sql.includes('DISTINCT ON (notification_key)') && sql.includes('FROM feedback_events')) {
+        return {
+          rows: [
+            {
+              notification_key: 'scheduler_daily_reminder_email',
+              action: 'clicked',
+              created_at: clickedAt,
+            },
+            {
+              notification_key: 'inapp_weekly_wrapped_preview',
+              action: 'dismissed',
+              created_at: dismissedAt,
+            },
+          ],
+        } as never;
+      }
+
+      if (
+        sql.includes('SELECT notification_key, MAX(created_at) AS last_shown_at') &&
+        sql.includes('FROM feedback_events')
+      ) {
+        return {
+          rows: [
+            {
+              notification_key: 'scheduler_daily_reminder_email',
+              last_shown_at: shownAt,
+            },
+          ],
+        } as never;
+      }
+
+      if (sql.includes('FROM feedback_events') && sql.includes('ORDER BY created_at DESC')) {
+        return {
+          rows: [
+            {
+              event_id: 'evt-3',
+              user_id: '00000000-0000-4000-8000-000000000001',
+              notification_key: 'scheduler_daily_reminder_email',
+              action: 'shown',
+              is_critical_moment: false,
+              critical_tag: null,
+              created_at: shownAt,
+            },
+            {
+              event_id: 'evt-2',
+              user_id: '00000000-0000-4000-8000-000000000001',
+              notification_key: 'scheduler_daily_reminder_email',
+              action: 'clicked',
+              is_critical_moment: true,
+              critical_tag: 'daily_quest',
+              created_at: clickedAt,
+            },
+            {
+              event_id: 'evt-1',
+              user_id: '00000000-0000-4000-8000-000000000001',
+              notification_key: 'inapp_weekly_wrapped_preview',
+              action: 'dismissed',
+              is_critical_moment: false,
+              critical_tag: null,
+              created_at: dismissedAt,
             },
           ],
         } as never;
@@ -373,6 +483,31 @@ describe('Admin routes', () => {
     expect(
       response.body.items.some((item: { type: string }) => item.type === 'WRAPPED_WEEKLY')
     ).toBe(true);
+  });
+
+  it('returns feedback history with summary', async () => {
+    const response = await request(app)
+      .get('/api/admin/feedback/users/00000000-0000-4000-8000-000000000001/history')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.summary).toEqual({
+      notifsShownLast7d: 1,
+      notifsClickedLast7d: 1,
+      notifsCriticalLast30d: 1,
+      clickRateLast30d: 1,
+    });
+    expect(response.body.items).toHaveLength(3);
+    expect(response.body.items[0]).toMatchObject({
+      notificationKey: 'scheduler_daily_reminder_email',
+      action: 'shown',
+    });
+    expect(response.body.items[1]).toMatchObject({
+      notificationKey: 'scheduler_daily_reminder_email',
+      action: 'clicked',
+      isCriticalMoment: true,
+      criticalTag: 'daily_quest',
+    });
   });
 
   it('updates a feedback definition', async () => {
