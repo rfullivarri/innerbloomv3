@@ -156,9 +156,6 @@ function WeeklyCompletionDonut({
         </div>
 
         <div className="space-y-0.5 text-slate-100">
-          <p>Racha actual: {currentStreak} semanas</p>
-          <p>Mejor racha: {bestStreak} semanas</p>
-          <p>Meta semanal: {weeklyGoal} veces</p>
           {currentStreak === bestStreak && bestStreak > 0 && (
             <p className="text-xs text-emerald-100">Estás empatando tu récord.</p>
           )}
@@ -295,8 +292,8 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-5 pt-2">
-          <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
+          <div className="mt-2 space-y-3">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-slate-100">Progreso semanal</p>
                 <span className="text-xs text-slate-400">Objetivo: {weeklyGoal}x/sem</span>
@@ -319,20 +316,27 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
               )}
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Rachas semanales</p>
-              <p className="mt-2 text-3xl font-semibold text-slate-50">🔥 {stats.bestStreak}</p>
-              <p className="text-xs text-slate-400">Máxima racha lograda hasta ahora.</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Racha actual</p>
+                <p className="mt-1 text-3xl font-semibold text-slate-50">🔥 {stats.currentStreak}</p>
+                <p className="text-xs text-slate-400">semanas seguidas</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Mejor racha</p>
+                <p className="mt-1 text-3xl font-semibold text-slate-50">{stats.bestStreak}</p>
+                <p className="text-xs text-slate-400">máxima racha lograda</p>
+              </div>
             </div>
-          </div>
 
-          <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-3">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-semibold text-slate-100">Actividad del mes</p>
-              <span className="text-xs text-slate-400">Veces este mes: {monthTotal} · Objetivo: {weeklyGoal}x/sem</span>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-slate-100">Actividad del mes</p>
+                <span className="text-xs text-slate-400">Veces este mes: {monthTotal} · Objetivo: {weeklyGoal}x/sem</span>
+              </div>
+              {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-white/10" aria-hidden />}
+              {status === 'success' && <MonthMiniChart days={monthDays} />}
             </div>
-            {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-white/10" aria-hidden />}
-            {status === 'success' && <MonthMiniChart days={monthDays} />}
           </div>
         </div>
       </div>
