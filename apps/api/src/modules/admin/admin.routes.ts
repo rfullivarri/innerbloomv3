@@ -20,6 +20,9 @@ import {
   postAdminSendReminder,
   getAdminFeedbackDefinitions,
   patchAdminFeedbackDefinition,
+  getAdminFeedbackUserHistory,
+  getAdminFeedbackUserState,
+  patchAdminFeedbackUserState,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
 
@@ -45,6 +48,9 @@ adminRouter.get('/taskgen/trace/global', getTaskgenTraceGlobal);
 adminRouter.post('/taskgen/force-run', postTaskgenForceRun);
 adminRouter.get('/feedback/definitions', getAdminFeedbackDefinitions);
 adminRouter.patch('/feedback/definitions/:id', patchAdminFeedbackDefinition);
+adminRouter.get('/feedback/users/:userId/state', getAdminFeedbackUserState);
+adminRouter.patch('/feedback/users/:userId/state', patchAdminFeedbackUserState);
+adminRouter.get('/feedback/users/:userId/history', getAdminFeedbackUserHistory);
 
 router.use('/admin', authMiddleware, requireAdmin, adminRouter);
 

@@ -167,6 +167,12 @@ export const feedbackDefinitionUpdateSchema = z
     }
   });
 
+export const feedbackUserNotificationUpdateSchema = z.object({
+  notificationKey: z.string().trim().min(1),
+  state: z.enum(['active', 'muted']),
+  muteUntil: z.string().datetime().nullable().optional(),
+});
+
 export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
 export type LogsQuery = z.infer<typeof logsQuerySchema>;
 export type InsightQuery = z.infer<typeof insightQuerySchema>;
@@ -179,3 +185,4 @@ export type TaskgenTraceQuery = z.infer<typeof taskgenTraceQuerySchema>;
 export type TaskgenTraceGlobalQuery = z.infer<typeof taskgenTraceGlobalQuerySchema>;
 export type ReminderSendBody = z.infer<typeof reminderSendBodySchema>;
 export type FeedbackDefinitionUpdateInput = z.infer<typeof feedbackDefinitionUpdateSchema>;
+export type FeedbackUserNotificationUpdateInput = z.infer<typeof feedbackUserNotificationUpdateSchema>;

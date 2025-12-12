@@ -15,6 +15,7 @@ import {
   taskgenTraceGlobalQuerySchema,
   reminderSendBodySchema,
   feedbackDefinitionUpdateSchema,
+  feedbackUserNotificationUpdateSchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -31,6 +32,9 @@ import {
   sendDailyReminderPreview,
   listFeedbackDefinitions,
   updateFeedbackDefinition,
+  getFeedbackUserState,
+  getFeedbackUserHistory,
+  updateFeedbackUserNotificationState,
 } from './admin.service.js';
 import {
   getTaskgenEventsByCorrelation,
@@ -206,4 +210,23 @@ export const patchAdminFeedbackDefinition = asyncHandler(async (req: Request, re
   const body = feedbackDefinitionUpdateSchema.parse(req.body);
   const item = await updateFeedbackDefinition(id, body);
   res.json({ item });
+});
+
+export const getAdminFeedbackUserState = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const result = await getFeedbackUserState(userId);
+  res.json(result);
+});
+
+export const getAdminFeedbackUserHistory = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const result = await getFeedbackUserHistory(userId);
+  res.json(result);
+});
+
+export const patchAdminFeedbackUserState = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const body = feedbackUserNotificationUpdateSchema.parse(req.body);
+  const result = await updateFeedbackUserNotificationState(userId, body);
+  res.json(result);
 });
