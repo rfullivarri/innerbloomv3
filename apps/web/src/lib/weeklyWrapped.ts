@@ -299,99 +299,101 @@ export function buildWeeklyWrappedFromData(
     'En cuanto registremos más emociones, vamos a mostrar la tendencia de las últimas dos semanas.';
   const emotionAccent = emotionHighlight.weekly?.label ?? emotionHighlight.biweekly?.label ?? 'Sin emoción dominante';
 
-  const sections: WeeklyWrappedSection[] = [
-    {
-      key: 'intro',
-      title: 'Weekly Wrapped',
-      body: `Tu semana (${periodLabel}) está lista. Respirá y recorré tus logros.`,
-      accent: 'Celebrá el recorrido',
-    },
-    levelUp.happened
-      ? {
-          key: 'level-up',
-          title: 'Subida de nivel',
-          body: `Llegaste al nivel ${levelUp.currentLevel ?? 'nuevo'}. ${
-            levelUp.forced ? 'Celebración mockeada para validar la experiencia.' : 'Impulso real para tu semana.'
-          }`,
-          accent: 'Level Up',
-        }
-      : null,
-    {
-      key: 'achievements',
-      title: 'Logros principales',
-      body:
-        completions > 0
-          ? `Completaste ${completions} misiones y hábitos, sumando ${xpTotal.toLocaleString('es-AR')} XP.`
-          : 'Semana tranquila: sin registros fuertes, pero el reset también suma.',
-      accent: completions > 0 ? 'Impulso sostenido' : 'Ritmo liviano',
-    },
-    {
-      key: 'habits',
-      title: 'Hábitos constantes',
-      body:
-        topHabits.length > 0
-          ? 'Estos hábitos marcaron tu ritmo y mantuvieron la semana en movimiento.'
-          : 'Aún no registramos hábitos destacados esta semana, pero estás a un clic de retomarlos.',
-      items:
-        topHabits.length > 0
-          ? topHabits.map((habit) => ({
-              title: habit.title,
-              body:
-                habit.daysActive > 0
-                  ? `${habit.daysActive}/7 días en marcha. ${
-                      habit.pillar ? `${habit.pillar} te acompañó.` : 'Constancia pura.'
-                    }`
-                  : `Ritmo sólido esta semana. ${habit.pillar ? `${habit.pillar} te acompañó.` : 'Constancia pura.'}`,
-              badge: habit.badge,
-              pillar: habit.pillar,
-            }))
-          : undefined,
-    },
-    {
-      key: 'improvement',
-      title: 'Movimiento y mejoras',
-      body:
-        highlight
-          ? `${highlight} tuvo su mini salto esta semana. Pequeñas mejoras que sostienen el largo plazo.`
-          : 'No vimos mejoras claras, así que priorizamos el descanso y volvemos a empujar mañana.',
-      accent: highlight ? 'Nivel up suave' : 'Preparando la próxima racha',
-    },
-    {
-      key: 'pillar',
-      title: 'Pilar dominante',
-      body:
-        pillarDominant
-          ? `${pillarDominant} lideró tu energía estos días. Seguí apoyándote en ese foco.`
-          : 'Sin un pilar dominante esta semana: espacio abierto para explorar Body, Mind o Soul.',
-      accent: pillarDominant ?? 'Balanceado',
-    },
-    {
-      key: 'highlight',
-      title: 'Highlight emocional',
-      body: weeklyEmotionMessage,
-      accent: emotionAccent,
-      items: [
-        {
-          title: 'Emoción 7 días',
-          body: weeklyEmotionMessage,
-          badge: emotionHighlight.weekly?.tone,
-          pillar: emotionHighlight.weekly?.label ?? undefined,
-        },
-        {
-          title: 'Emoción 15 días',
-          body: biweeklyEmotionMessage,
-          badge: emotionHighlight.biweekly?.tone ?? undefined,
-          pillar: emotionHighlight.biweekly?.label ?? undefined,
-        },
-      ],
-    },
-    {
-      key: 'closing',
-      title: 'Cierre',
-      body: 'Seguimos. Mañana vuelve el Daily Quest para sumar más.',
-      accent: 'Mañana hay más',
-    },
-  ].filter((section): section is WeeklyWrappedSection => Boolean(section));
+  const sections: WeeklyWrappedSection[] = (
+    [
+      {
+        key: 'intro',
+        title: 'Weekly Wrapped',
+        body: `Tu semana (${periodLabel}) está lista. Respirá y recorré tus logros.`,
+        accent: 'Celebrá el recorrido',
+      },
+      levelUp.happened
+        ? {
+            key: 'level-up',
+            title: 'Subida de nivel',
+            body: `Llegaste al nivel ${levelUp.currentLevel ?? 'nuevo'}. ${
+              levelUp.forced ? 'Celebración mockeada para validar la experiencia.' : 'Impulso real para tu semana.'
+            }`,
+            accent: 'Level Up',
+          }
+        : null,
+      {
+        key: 'achievements',
+        title: 'Logros principales',
+        body:
+          completions > 0
+            ? `Completaste ${completions} misiones y hábitos, sumando ${xpTotal.toLocaleString('es-AR')} XP.`
+            : 'Semana tranquila: sin registros fuertes, pero el reset también suma.',
+        accent: completions > 0 ? 'Impulso sostenido' : 'Ritmo liviano',
+      },
+      {
+        key: 'habits',
+        title: 'Hábitos constantes',
+        body:
+          topHabits.length > 0
+            ? 'Estos hábitos marcaron tu ritmo y mantuvieron la semana en movimiento.'
+            : 'Aún no registramos hábitos destacados esta semana, pero estás a un clic de retomarlos.',
+        items:
+          topHabits.length > 0
+            ? topHabits.map((habit) => ({
+                title: habit.title,
+                body:
+                  habit.daysActive > 0
+                    ? `${habit.daysActive}/7 días en marcha. ${
+                        habit.pillar ? `${habit.pillar} te acompañó.` : 'Constancia pura.'
+                      }`
+                    : `Ritmo sólido esta semana. ${habit.pillar ? `${habit.pillar} te acompañó.` : 'Constancia pura.'}`,
+                badge: habit.badge,
+                pillar: habit.pillar,
+              }))
+            : undefined,
+      },
+      {
+        key: 'improvement',
+        title: 'Movimiento y mejoras',
+        body:
+          highlight
+            ? `${highlight} tuvo su mini salto esta semana. Pequeñas mejoras que sostienen el largo plazo.`
+            : 'No vimos mejoras claras, así que priorizamos el descanso y volvemos a empujar mañana.',
+        accent: highlight ? 'Nivel up suave' : 'Preparando la próxima racha',
+      },
+      {
+        key: 'pillar',
+        title: 'Pilar dominante',
+        body:
+          pillarDominant
+            ? `${pillarDominant} lideró tu energía estos días. Seguí apoyándote en ese foco.`
+            : 'Sin un pilar dominante esta semana: espacio abierto para explorar Body, Mind o Soul.',
+        accent: pillarDominant ?? 'Balanceado',
+      },
+      {
+        key: 'highlight',
+        title: 'Highlight emocional',
+        body: weeklyEmotionMessage,
+        accent: emotionAccent,
+        items: [
+          {
+            title: 'Emoción 7 días',
+            body: weeklyEmotionMessage,
+            badge: emotionHighlight.weekly?.tone,
+            pillar: emotionHighlight.weekly?.label ?? undefined,
+          },
+          {
+            title: 'Emoción 15 días',
+            body: biweeklyEmotionMessage,
+            badge: emotionHighlight.biweekly?.tone ?? undefined,
+            pillar: emotionHighlight.biweekly?.label ?? undefined,
+          },
+        ],
+      },
+      {
+        key: 'closing',
+        title: 'Cierre',
+        body: 'Seguimos. Mañana vuelve el Daily Quest para sumar más.',
+        accent: 'Mañana hay más',
+      },
+    ] as (WeeklyWrappedSection | null)[]
+  ).filter((section): section is WeeklyWrappedSection => section !== null);
 
   return {
     mode: 'preview',
@@ -485,77 +487,79 @@ function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayloa
     },
     emotions: mockEmotions,
     levelUp: mockLevelUp,
-    sections: [
-      {
-        key: 'intro',
-        title: 'Weekly Wrapped',
-        body: `Tu semana (${formatDate(start)} – ${formatDate(end)}) está lista. Respirá y recorré tus logros.`,
-        accent: 'Vista previa mock',
-      },
-      mockLevelUp.happened
-        ? {
-            key: 'level-up',
-            title: 'Subida de nivel',
-            body: 'Llegaste al nivel 12. Cada misión empujó este salto.',
-            accent: 'Level Up',
-          }
-        : null,
-      {
-        key: 'achievements',
-        title: 'Logros principales',
-        body: '3 misiones completadas y +320 XP. Cerraste la semana con energía.',
-        accent: 'Impulso sostenido',
-      },
-      {
-        key: 'habits',
-        title: 'Hábitos constantes',
-        body: 'Estos hábitos mantuvieron la llama encendida.',
-        items: [
-          {
-            title: 'Respiración consciente',
-            body: '7/7 días. Ritmo impecable.',
-            badge: 'racha activa',
-            pillar: 'Mind',
-          },
-          { title: 'Hidratación', body: '5/7 días. Más energía durante el día.', pillar: 'Body' },
-          { title: 'Stretch ligero', body: '4/7 días. Tu cuerpo lo agradece.', pillar: 'Body' },
-        ],
-      },
-      {
-        key: 'improvement',
-        title: 'Movimiento y mejoras',
-        body: 'Sumaste una mejora: le diste forma a “Cierre digital” y lo repetiste 3 veces.',
-        accent: 'Nivel up suave',
-      },
-      {
-        key: 'pillar',
-        title: 'Pilar dominante',
-        body: 'Mind dominó tu semana: más foco, menos ruido.',
-        accent: 'Mind',
-      },
-      {
-        key: 'highlight',
-        title: 'Highlight emocional',
-        body: mockEmotions.weekly?.weeklyMessage ?? 'Estado emocional en construcción.',
-        accent: mockEmotions.weekly?.label ?? 'Emoción dominante',
-        items:
-          mockEmotions.biweekly?.biweeklyContext
-            ? [
-                {
-                  title: 'Contexto 15 días',
-                  body: mockEmotions.biweekly.biweeklyContext,
-                  badge: mockEmotions.biweekly.tone,
-                },
-              ]
-            : undefined,
-      },
-      {
-        key: 'closing',
-        title: 'Cierre',
-        body: 'Seguimos. Mañana vuelve el Daily Quest para sumar más.',
-        accent: 'Mañana hay más',
-      },
-    ].filter((section): section is WeeklyWrappedSection => Boolean(section)),
+    sections: (
+      [
+        {
+          key: 'intro',
+          title: 'Weekly Wrapped',
+          body: `Tu semana (${formatDate(start)} – ${formatDate(end)}) está lista. Respirá y recorré tus logros.`,
+          accent: 'Vista previa mock',
+        },
+        mockLevelUp.happened
+          ? {
+              key: 'level-up',
+              title: 'Subida de nivel',
+              body: 'Llegaste al nivel 12. Cada misión empujó este salto.',
+              accent: 'Level Up',
+            }
+          : null,
+        {
+          key: 'achievements',
+          title: 'Logros principales',
+          body: '3 misiones completadas y +320 XP. Cerraste la semana con energía.',
+          accent: 'Impulso sostenido',
+        },
+        {
+          key: 'habits',
+          title: 'Hábitos constantes',
+          body: 'Estos hábitos mantuvieron la llama encendida.',
+          items: [
+            {
+              title: 'Respiración consciente',
+              body: '7/7 días. Ritmo impecable.',
+              badge: 'racha activa',
+              pillar: 'Mind',
+            },
+            { title: 'Hidratación', body: '5/7 días. Más energía durante el día.', pillar: 'Body' },
+            { title: 'Stretch ligero', body: '4/7 días. Tu cuerpo lo agradece.', pillar: 'Body' },
+          ],
+        },
+        {
+          key: 'improvement',
+          title: 'Movimiento y mejoras',
+          body: 'Sumaste una mejora: le diste forma a “Cierre digital” y lo repetiste 3 veces.',
+          accent: 'Nivel up suave',
+        },
+        {
+          key: 'pillar',
+          title: 'Pilar dominante',
+          body: 'Mind dominó tu semana: más foco, menos ruido.',
+          accent: 'Mind',
+        },
+        {
+          key: 'highlight',
+          title: 'Highlight emocional',
+          body: mockEmotions.weekly?.weeklyMessage ?? 'Estado emocional en construcción.',
+          accent: mockEmotions.weekly?.label ?? 'Emoción dominante',
+          items:
+            mockEmotions.biweekly?.biweeklyContext
+              ? [
+                  {
+                    title: 'Contexto 15 días',
+                    body: mockEmotions.biweekly.biweeklyContext,
+                    badge: mockEmotions.biweekly.tone,
+                  },
+                ]
+              : undefined,
+        },
+        {
+          key: 'closing',
+          title: 'Cierre',
+          body: 'Seguimos. Mañana vuelve el Daily Quest para sumar más.',
+          accent: 'Mañana hay más',
+        },
+      ] as (WeeklyWrappedSection | null)[]
+    ).filter((section): section is WeeklyWrappedSection => section !== null),
   };
 }
 
