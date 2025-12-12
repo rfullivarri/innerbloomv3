@@ -1,25 +1,48 @@
 import { pool } from '../db.js';
 
-export const DEFAULT_FEEDBACK_DEFINITION = {
-  notificationKey: 'scheduler_daily_reminder_email',
-  label: 'Email recordatorio diario',
-  type: 'daily_reminder',
-  scope: ['email', 'daily_quest', 'scheduler'],
-  trigger: 'Cron /internal/cron/daily-reminders con usuarios activos',
-  channel: 'email',
-  frequency: 'daily',
-  status: 'active',
-  priority: 50,
-  copy: 'Hola {{user_name}}, tu Daily Quest de {{friendly_date}} ya está lista. Sumá XP registrando tu emoción del día y marcando tus hábitos completados.',
-  ctaLabel: 'Abrir Daily Quest',
-  ctaHref: 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
-  previewVariables: {
-    user_name: 'Majo',
-    friendly_date: 'lunes',
-    cta_url: 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
+export const DEFAULT_FEEDBACK_DEFINITIONS = [
+  {
+    notificationKey: 'scheduler_daily_reminder_email',
+    label: 'Email recordatorio diario',
+    type: 'daily_reminder',
+    scope: ['email', 'daily_quest', 'scheduler'],
+    trigger: 'Cron /internal/cron/daily-reminders con usuarios activos',
+    channel: 'email',
+    frequency: 'daily',
+    status: 'active',
+    priority: 50,
+    copy: 'Hola {{user_name}}, tu Daily Quest de {{friendly_date}} ya está lista. Sumá XP registrando tu emoción del día y marcando tus hábitos completados.',
+    ctaLabel: 'Abrir Daily Quest',
+    ctaHref: 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
+    previewVariables: {
+      user_name: 'Majo',
+      friendly_date: 'lunes',
+      cta_url: 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
+    },
+    config: {},
   },
-  config: {},
-} as const;
+  {
+    notificationKey: 'inapp_weekly_wrapped_preview',
+    label: 'Weekly Wrapped (MVP)',
+    type: 'WRAPPED_WEEKLY',
+    scope: ['in_app', 'weekly', 'wrapped'],
+    trigger: 'Lunes post Daily Quest (pendiente de automatizar)',
+    channel: 'in_app_modal',
+    frequency: 'weekly',
+    status: 'draft',
+    priority: 40,
+    copy: 'Tu semana en Innerbloom está lista. Respirá y recorré tus logros.',
+    ctaLabel: 'Ver resumen',
+    ctaHref: null,
+    previewVariables: {
+      user_name: 'Majo',
+      week_range: 'lun-dom',
+    },
+    config: { mode: 'preview', dataSource: 'real' },
+  },
+] as const;
+
+export const DEFAULT_FEEDBACK_DEFINITION = DEFAULT_FEEDBACK_DEFINITIONS[0];
 
 let feedbackDefinitionsReady: Promise<void> | null = null;
 
@@ -56,61 +79,61 @@ async function bootstrapFeedbackDefinitionsSchema(): Promise<void> {
       ON feedback_definitions (notification_key);
   `);
 
-  const seed = DEFAULT_FEEDBACK_DEFINITION;
-
-  await pool.query(
-    `
-      INSERT INTO feedback_definitions (
-        notification_key,
-        label,
-        type,
-        scope,
-        trigger,
-        channel,
-        frequency,
-        status,
-        priority,
-        copy,
-        cta_label,
-        cta_href,
-        preview_variables,
-        config
-      )
-      VALUES (
-        $1,
-        $2,
-        $3,
-        $4::text[],
-        $5,
-        $6,
-        $7,
-        $8,
-        $9,
-        $10,
-        $11,
-        $12,
-        $13::jsonb,
-        $14::jsonb
-      )
-      ON CONFLICT (notification_key) DO NOTHING;
-    `,
-    [
-      seed.notificationKey,
-      seed.label,
-      seed.type,
-      seed.scope,
-      seed.trigger,
-      seed.channel,
-      seed.frequency,
-      seed.status,
-      seed.priority,
-      seed.copy,
-      seed.ctaLabel,
-      seed.ctaHref,
-      JSON.stringify(seed.previewVariables),
-      JSON.stringify(seed.config ?? {}),
-    ],
-  );
+  for (const seed of DEFAULT_FEEDBACK_DEFINITIONS) {
+    await pool.query(
+      `
+        INSERT INTO feedback_definitions (
+          notification_key,
+          label,
+          type,
+          scope,
+          trigger,
+          channel,
+          frequency,
+          status,
+          priority,
+          copy,
+          cta_label,
+          cta_href,
+          preview_variables,
+          config
+        )
+        VALUES (
+          $1,
+          $2,
+          $3,
+          $4::text[],
+          $5,
+          $6,
+          $7,
+          $8,
+          $9,
+          $10,
+          $11,
+          $12,
+          $13::jsonb,
+          $14::jsonb
+        )
+        ON CONFLICT (notification_key) DO NOTHING;
+      `,
+      [
+        seed.notificationKey,
+        seed.label,
+        seed.type,
+        seed.scope,
+        seed.trigger,
+        seed.channel,
+        seed.frequency,
+        seed.status,
+        seed.priority,
+        seed.copy,
+        seed.ctaLabel,
+        seed.ctaHref,
+        JSON.stringify(seed.previewVariables),
+        JSON.stringify(seed.config ?? {}),
+      ],
+    );
+  }
 }
 
 async function ensureFeedbackDefinitionsReady(): Promise<void> {
