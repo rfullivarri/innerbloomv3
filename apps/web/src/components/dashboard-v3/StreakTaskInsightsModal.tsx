@@ -316,7 +316,7 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
               )}
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Racha actual</p>
                 <p className="mt-1 text-3xl font-semibold text-slate-50">🔥 {stats.currentStreak}</p>
