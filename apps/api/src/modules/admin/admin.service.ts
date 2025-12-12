@@ -157,6 +157,8 @@ type UserProfileRow = {
   full_name: string | null;
   game_mode_code: string | null;
   created_at: string | Date;
+  last_seen_at?: string | Date | null;
+  level?: string | number | null;
 };
 
 type DailyXpRow = {
@@ -180,6 +182,52 @@ type PillarAggregateRow = {
   pillar_name: string | null;
   xp_total?: string | number | null;
   xp_week?: string | number | null;
+};
+
+type FeedbackUserProfile = {
+  id: string;
+  email: string | null;
+  name: string | null;
+  alias: string | null;
+  gameMode: string | null;
+  level: number | null;
+  lastSeenAt: string | null;
+};
+
+type FeedbackUserNotificationState = {
+  notificationKey: string;
+  name: string;
+  type: string;
+  channel: string;
+  state: 'active' | 'muted' | 'suppressed_by_rule';
+  muteUntil: string | null;
+  lastFiredForUserAt: string | null;
+  lastInteractionType: 'shown' | 'clicked' | 'dismissed' | 'ignored' | 'auto_closed' | null;
+};
+
+type FeedbackUserHistorySummary = {
+  notifsShownLast7d: number;
+  notifsClickedLast7d: number;
+  notifsCriticalLast30d: number;
+  clickRateLast30d: number;
+};
+
+type FeedbackUserHistoryEntry = {
+  id: string;
+  timestamp: string;
+  notificationKey: string;
+  name: string;
+  type: string;
+  channel: string;
+  context: string | null;
+  action: 'shown' | 'clicked' | 'dismissed' | 'ignored' | 'auto_closed';
+  isCriticalMoment: boolean;
+  criticalTag?: string | null;
+};
+
+type FeedbackUserHistory = {
+  summary: FeedbackUserHistorySummary;
+  items: FeedbackUserHistoryEntry[];
 };
 
 type EmotionRow = {
@@ -1630,5 +1678,83 @@ export async function updateFeedbackDefinition(
   }
 
   return hydrateFeedbackDefinition(updated);
+}
+
+async function fetchFeedbackUserProfile(userId: string): Promise<FeedbackUserProfile> {
+  const profileResult = await pool.query<UserProfileRow>(
+    `SELECT u.user_id,
+            u.email_primary,
+            u.full_name,
+            gm.code AS game_mode_code,
+            lvl.level AS level,
+            u.last_seen_at
+       FROM users u
+  LEFT JOIN cat_game_mode gm ON gm.game_mode_id = u.game_mode_id
+  LEFT JOIN v_user_level lvl ON lvl.user_id = u.user_id
+      WHERE u.user_id = $1
+      LIMIT 1`,
+    [userId],
+  );
+
+  const profile = profileResult.rows[0];
+  if (!profile) {
+    throw new HttpError(404, 'user_not_found', 'User not found');
+  }
+
+  return {
+    id: profile.user_id,
+    email: profile.email_primary ?? null,
+    name: profile.full_name ?? null,
+    alias: null,
+    gameMode: profile.game_mode_code ?? null,
+    level: profile.level != null ? Number(profile.level) : null,
+    lastSeenAt: profile.last_seen_at ? formatDate(profile.last_seen_at) : null,
+  };
+}
+
+export async function getFeedbackUserState(userId: string): Promise<{
+  user: FeedbackUserProfile;
+  notifications: FeedbackUserNotificationState[];
+}> {
+  const [profile, definitions] = await Promise.all([
+    fetchFeedbackUserProfile(userId),
+    listFeedbackDefinitionRows(),
+  ]);
+
+  const notifications: FeedbackUserNotificationState[] = definitions.map((definition) => ({
+    notificationKey: definition.notification_key,
+    name: definition.label,
+    type: definition.type,
+    channel: definition.channel,
+    state: definition.status === 'active' ? 'active' : 'suppressed_by_rule',
+    muteUntil: null,
+    lastFiredForUserAt: null,
+    lastInteractionType: null,
+  }));
+
+  return { user: profile, notifications };
+}
+
+export async function getFeedbackUserHistory(_userId: string): Promise<FeedbackUserHistory> {
+  void _userId;
+  const summary: FeedbackUserHistorySummary = {
+    notifsShownLast7d: 0,
+    notifsClickedLast7d: 0,
+    notifsCriticalLast30d: 0,
+    clickRateLast30d: 0,
+  };
+
+  return { summary, items: [] };
+}
+
+export async function updateFeedbackUserNotificationState(
+  userId: string,
+  payload: { notificationKey: string; state: 'active' | 'muted' },
+): Promise<{ ok: boolean }> {
+  // The system currently does not persist per-user notification preferences.
+  // We still validate the user exists to keep the API consistent.
+  await fetchFeedbackUserProfile(userId);
+  void payload;
+  return { ok: true };
 }
 
