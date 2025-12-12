@@ -3,7 +3,7 @@
 Esta versión del Weekly Wrapped incorpora un highlight emocional basado en los datos reales del **Emotion Chart**.
 
 ## Fuente de mensajes
-- Los textos curados viven en `config/emotion_messages.json`.
+- Los textos curados viven en `apps/web/src/config/emotion_messages.json`.
 - Cada emoción define `weekly_message` (7 días) y `biweekly_context` (15 días) junto al tono y label.
 
 ## Cálculo de emociones dominantes

@@ -1,4 +1,4 @@
-import emotionMessages from 'config/emotion_messages.json';
+import emotionMessages from '../config/emotion_messages.json';
 
 import type { EmotionSnapshot } from './api';
 import type { AdminInsights, AdminLogRow } from './types';

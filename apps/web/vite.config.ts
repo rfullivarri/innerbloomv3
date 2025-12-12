@@ -9,7 +9,6 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      config: fileURLToPath(new URL('../../config', import.meta.url)),
       ...(useMockClerk
         ? {
             '@clerk/clerk-react': fileURLToPath(
