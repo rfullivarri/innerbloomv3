@@ -460,6 +460,7 @@ function UserNotificationsView() {
   const [weeklyPreviewSource, setWeeklyPreviewSource] = useState<'real' | 'mock'>('real');
   const [weeklyPreviewLoading, setWeeklyPreviewLoading] = useState(false);
   const [weeklyPreviewError, setWeeklyPreviewError] = useState<string | null>(null);
+  const [forceLevelUpMock, setForceLevelUpMock] = useState(false);
 
   useEffect(() => {
     if (!selectedUser) {
@@ -545,6 +546,7 @@ function UserNotificationsView() {
     setHistoryError(null);
     setWeeklyPreviewPayload(null);
     setWeeklyPreviewError(null);
+    setForceLevelUpMock(false);
   }, []);
 
   const handleNotificationStateChange = useCallback(
@@ -583,6 +585,7 @@ function UserNotificationsView() {
       const payload = await buildWeeklyWrappedPreviewPayload({
         userId: selectedUser.id,
         dataSource: weeklyPreviewSource,
+        forceLevelUpMock,
       });
       setWeeklyPreviewPayload(payload);
     } catch (error) {
@@ -591,7 +594,7 @@ function UserNotificationsView() {
     } finally {
       setWeeklyPreviewLoading(false);
     }
-  }, [selectedUser?.id, weeklyPreviewSource]);
+    }, [selectedUser?.id, weeklyPreviewSource, forceLevelUpMock]);
 
   const userProfile = userState?.user ?? null;
   const email = userProfile?.email ?? selectedUser?.email ?? 'Sin email';
@@ -732,6 +735,15 @@ function UserNotificationsView() {
                       <option value="real">Real (última semana)</option>
                       <option value="mock">Mock</option>
                     </select>
+                  </label>
+                  <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-emerald-400 focus:ring-emerald-400"
+                      checked={forceLevelUpMock}
+                      onChange={(event) => setForceLevelUpMock(event.target.checked)}
+                    />
+                    Forzar slide de Level Up
                   </label>
                   <button
                     type="button"
