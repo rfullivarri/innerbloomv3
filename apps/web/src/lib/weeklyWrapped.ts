@@ -1,6 +1,26 @@
+import emotionMessages from 'config/emotion_messages.json';
+
+import type { EmotionSnapshot } from './api';
 import type { AdminInsights, AdminLogRow } from './types';
 import { fetchAdminInsights, fetchAdminLogs } from './adminApi';
+import { getEmotions } from './api';
 import { logApiError } from './logger';
+
+type EmotionMessageKey = keyof typeof emotionMessages;
+
+type EmotionHighlightEntry = {
+  key: EmotionMessageKey;
+  label: string;
+  tone: string;
+  color: string;
+  weeklyMessage: string;
+  biweeklyContext: string;
+};
+
+type EmotionHighlight = {
+  weekly: EmotionHighlightEntry | null;
+  biweekly: EmotionHighlightEntry | null;
+};
 
 export type WeeklyWrappedSection = {
   key: string;
@@ -19,6 +39,7 @@ export type WeeklyWrappedPayload = {
     pillarDominant: string | null;
     highlight: string | null;
   };
+  emotions: EmotionHighlight;
   sections: WeeklyWrappedSection[];
 };
 
@@ -30,6 +51,30 @@ type BuildOptions = {
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
 const MAX_LOG_PAGE_SIZE = 100;
 
+const EMOTION_KEY_BY_LABEL: Record<string, EmotionMessageKey> = {
+  Calma: 'calma',
+  Felicidad: 'felicidad',
+  Motivación: 'motivacion',
+  Tristeza: 'tristeza',
+  Ansiedad: 'ansiedad',
+  Frustración: 'frustracion',
+  Cansancio: 'cansancio',
+};
+
+const EMOTION_KEY_BY_NORMALIZED_LABEL: Record<string, EmotionMessageKey> = Object.fromEntries(
+  Object.entries(EMOTION_KEY_BY_LABEL).map(([label, key]) => [normalizeText(label), key]),
+);
+
+const EMOTION_COLORS: Record<EmotionMessageKey, string> = {
+  calma: '#2ECC71',
+  felicidad: '#F1C40F',
+  motivacion: '#9B59B6',
+  tristeza: '#3498DB',
+  ansiedad: '#E74C3C',
+  frustracion: '#8D6E63',
+  cansancio: '#16A085',
+};
+
 export async function buildWeeklyWrappedPreviewPayload(
   options: BuildOptions,
 ): Promise<WeeklyWrappedPayload> {
@@ -37,15 +82,16 @@ export async function buildWeeklyWrappedPreviewPayload(
     return buildMockWeeklyWrapped();
   }
 
-  const [insights, logs] = await Promise.all([
+  const [insights, logs, emotions] = await Promise.all([
     fetchAdminInsights(options.userId),
     fetchLogsForRange(options.userId, {
       from: toDateInput(daysAgo(6)),
       to: toDateInput(new Date()),
     }),
+    getEmotions(options.userId, { days: 15 }),
   ]);
 
-  return buildWeeklyWrappedFromData(insights, logs);
+  return buildWeeklyWrappedFromData(insights, logs, emotions);
 }
 
 async function fetchLogsForRange(
@@ -79,6 +125,7 @@ async function fetchLogsForRange(
 function buildWeeklyWrappedFromData(
   insights: AdminInsights,
   logs: AdminLogRow[],
+  emotions: EmotionSnapshot[],
 ): WeeklyWrappedPayload {
   const normalizedLogs = logs.map((log) => ({ ...log, parsedDate: new Date(`${log.date}T00:00:00Z`) }));
   const latestLog = normalizedLogs.reduce<Date | null>((latest, log) => {
@@ -101,6 +148,14 @@ function buildWeeklyWrappedFromData(
   const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
   const highlight = topHabits[0]?.title ?? null;
+  const emotionHighlight = buildEmotionHighlight(emotions);
+  const weeklyEmotionMessage =
+    emotionHighlight.weekly?.weeklyMessage ??
+    'Necesitamos más registros recientes en el Emotion Chart para destacar tu ánimo de la semana.';
+  const biweeklyEmotionMessage =
+    emotionHighlight.biweekly?.biweeklyContext ??
+    'En cuanto registremos más emociones, vamos a mostrar la tendencia de las últimas dos semanas.';
+  const emotionAccent = emotionHighlight.weekly?.label ?? emotionHighlight.biweekly?.label ?? 'Sin emoción dominante';
 
   const sections: WeeklyWrappedSection[] = [
     {
@@ -154,12 +209,19 @@ function buildWeeklyWrappedFromData(
     },
     {
       key: 'highlight',
-      title: 'Highlight de la semana',
-      body:
-        highlight
-          ? `Tu momento destacado: ${highlight}. Guardá ese recuerdo para arrancar la próxima misión.`
-          : 'Todavía no hay un highlight definido, pero ya tenemos el lienzo listo para el próximo.',
-      accent: highlight ? '🔥 Momentum' : 'Listo para despegar',
+      title: 'Highlight emocional',
+      body: weeklyEmotionMessage,
+      accent: emotionAccent,
+      items:
+        biweeklyEmotionMessage
+          ? [
+              {
+                title: 'Contexto 15 días',
+                body: biweeklyEmotionMessage,
+                badge: emotionHighlight.biweekly?.tone,
+              },
+            ]
+          : undefined,
     },
     {
       key: 'closing',
@@ -175,6 +237,7 @@ function buildWeeklyWrappedFromData(
     variant,
     weekRange: { start: startDate.toISOString(), end: endDate.toISOString() },
     summary: { pillarDominant, highlight },
+    emotions: emotionHighlight,
     sections,
   };
 }
@@ -222,6 +285,10 @@ function dominantPillar(insights: AdminInsights): string | undefined {
 function buildMockWeeklyWrapped(): WeeklyWrappedPayload {
   const start = daysAgo(6);
   const end = new Date();
+  const mockEmotions: EmotionHighlight = {
+    weekly: buildEmotionEntry('felicidad'),
+    biweekly: buildEmotionEntry('motivacion'),
+  };
 
   return {
     mode: 'preview',
@@ -232,6 +299,7 @@ function buildMockWeeklyWrapped(): WeeklyWrappedPayload {
       pillarDominant: 'Mind',
       highlight: 'Meditación al amanecer',
     },
+    emotions: mockEmotions,
     sections: [
       {
         key: 'intro',
@@ -269,9 +337,19 @@ function buildMockWeeklyWrapped(): WeeklyWrappedPayload {
       },
       {
         key: 'highlight',
-        title: 'Highlight de la semana',
-        body: 'Rompiste la barrera: 5 días seguidos meditando. Tu constancia ya es un hábito.',
-        accent: '🔥 Momentum',
+        title: 'Highlight emocional',
+        body: mockEmotions.weekly?.weeklyMessage ?? 'Estado emocional en construcción.',
+        accent: mockEmotions.weekly?.label ?? 'Emoción dominante',
+        items:
+          mockEmotions.biweekly?.biweeklyContext
+            ? [
+                {
+                  title: 'Contexto 15 días',
+                  body: mockEmotions.biweekly.biweeklyContext,
+                  badge: mockEmotions.biweekly.tone,
+                },
+              ]
+            : undefined,
       },
       {
         key: 'closing',
@@ -281,6 +359,125 @@ function buildMockWeeklyWrapped(): WeeklyWrappedPayload {
       },
     ],
   };
+}
+
+function buildEmotionHighlight(entries: EmotionSnapshot[]): EmotionHighlight {
+  const map = new Map<string, EmotionMessageKey>();
+
+  for (const entry of entries) {
+    const dateKey = normalizeDateKey(entry?.date);
+    const emotionKey = normalizeEmotionKey(entry?.mood);
+    if (dateKey && emotionKey) {
+      map.set(dateKey, emotionKey);
+    }
+  }
+
+  if (map.size === 0) {
+    return { weekly: null, biweekly: null };
+  }
+
+  const latestKey = Array.from(map.keys()).sort().pop() ?? toDateKeyUTC(new Date());
+
+  return {
+    weekly: computeEmotionDominant(map, latestKey, 7),
+    biweekly: computeEmotionDominant(map, latestKey, 15),
+  };
+}
+
+function computeEmotionDominant(
+  map: Map<string, EmotionMessageKey>,
+  endKey: string,
+  windowDays: number,
+): EmotionHighlightEntry | null {
+  const endDate = parseDateKey(endKey) ?? new Date();
+  const startDate = daysAgoFrom(endDate, windowDays - 1);
+  const startKey = toDateKeyUTC(startDate);
+  const endRangeKey = toDateKeyUTC(endDate);
+
+  const filtered = Array.from(map.entries())
+    .filter(([key]) => key >= startKey && key <= endRangeKey)
+    .sort(([a], [b]) => (a < b ? -1 : 1));
+
+  if (filtered.length === 0) {
+    return null;
+  }
+
+  const counts = new Map<EmotionMessageKey, { count: number; lastKey: string }>();
+  for (const [key, emotion] of filtered) {
+    const prev = counts.get(emotion);
+    counts.set(emotion, { count: (prev?.count ?? 0) + 1, lastKey: key });
+  }
+
+  let winner: { key: EmotionMessageKey; count: number; lastKey: string } | null = null;
+  for (const [key, info] of counts.entries()) {
+    if (!winner || info.count > winner.count || (info.count === winner.count && info.lastKey > winner.lastKey)) {
+      winner = { key, count: info.count, lastKey: info.lastKey };
+    }
+  }
+
+  return winner ? buildEmotionEntry(winner.key) : null;
+}
+
+function buildEmotionEntry(key: EmotionMessageKey): EmotionHighlightEntry {
+  const message = emotionMessages[key];
+  return {
+    key,
+    label: message.label,
+    tone: message.tone,
+    color: EMOTION_COLORS[key] ?? '#0ea5e9',
+    weeklyMessage: message.weekly_message,
+    biweeklyContext: message.biweekly_context,
+  };
+}
+
+function normalizeEmotionKey(label: unknown): EmotionMessageKey | null {
+  if (!label || typeof label !== 'string') {
+    return null;
+  }
+
+  const normalized = normalizeText(label);
+  return EMOTION_KEY_BY_NORMALIZED_LABEL[normalized] ?? null;
+}
+
+function normalizeDateKey(raw: unknown): string | null {
+  if (!raw) {
+    return null;
+  }
+
+  const asString = String(raw).trim();
+  if (!asString) {
+    return null;
+  }
+
+  const match = asString.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (match) {
+    return match[1];
+  }
+
+  const parsed = new Date(asString);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  return toDateKeyUTC(parsed);
+}
+
+function parseDateKey(key: string): Date | null {
+  const normalized = normalizeDateKey(key);
+  if (!normalized) {
+    return null;
+  }
+
+  const parsed = new Date(`${normalized}T00:00:00Z`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function toDateKeyUTC(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function normalizeText(value: string): string {
+  return value.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').trim();
 }
 
 function formatDate(date: Date): string {
