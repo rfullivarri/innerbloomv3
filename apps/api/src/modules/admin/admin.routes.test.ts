@@ -370,7 +370,9 @@ describe('Admin routes', () => {
       notificationKey: 'scheduler_daily_reminder_email',
       metrics: { fires7d: 5, fires30d: 22 },
     });
-    expect(response.body.items.some((item: any) => item.type === 'WRAPPED_WEEKLY')).toBe(true);
+    expect(
+      response.body.items.some((item: { type: string }) => item.type === 'WRAPPED_WEEKLY')
+    ).toBe(true);
   });
 
   it('updates a feedback definition', async () => {
