@@ -18,7 +18,8 @@
       "@innerbloom/missions-v2-contracts/*": [
         "../../packages/missions-v2-contracts/src/*.ts",
         "../../packages/missions-v2-contracts/src/*.d.ts"
-      ]
+      ],
+      "config/*": ["src/config/*"]
     }
   },
   "include": ["src", "../../packages/missions-v2-contracts/src/index.d.ts"]
