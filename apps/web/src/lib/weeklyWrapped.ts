@@ -27,7 +27,7 @@ export type WeeklyWrappedSection = {
   title: string;
   body: string;
   accent?: string;
-  items?: { title: string; body: string; badge?: string }[];
+  items?: { title: string; body: string; badge?: string; pillar?: string | null }[];
 };
 
 export type WeeklyWrappedPayload = {
@@ -234,6 +234,7 @@ export function buildWeeklyWrappedFromData(
                     }`
                   : `Ritmo sólido esta semana. ${habit.pillar ? `${habit.pillar} te acompañó.` : 'Constancia pura.'}`,
               badge: habit.badge,
+              pillar: habit.pillar,
             }))
           : undefined,
     },
@@ -380,9 +381,14 @@ function buildMockWeeklyWrapped(): WeeklyWrappedPayload {
         title: 'Hábitos constantes',
         body: 'Estos hábitos mantuvieron la llama encendida.',
         items: [
-          { title: 'Respiración consciente', body: '7/7 días. Ritmo impecable.', badge: 'racha activa' },
-          { title: 'Hidratación', body: '5/7 días. Más energía durante el día.' },
-          { title: 'Stretch ligero', body: '4/7 días. Tu cuerpo lo agradece.' },
+          {
+            title: 'Respiración consciente',
+            body: '7/7 días. Ritmo impecable.',
+            badge: 'racha activa',
+            pillar: 'Mind',
+          },
+          { title: 'Hidratación', body: '5/7 días. Más energía durante el día.', pillar: 'Body' },
+          { title: 'Stretch ligero', body: '4/7 días. Tu cuerpo lo agradece.', pillar: 'Body' },
         ],
       },
       {
