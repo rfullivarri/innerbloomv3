@@ -12,6 +12,7 @@ import {
   type TaskgenEventLevel,
   type TaskgenEventName,
 } from './taskgenTraceService.js';
+import { notifyTasksReadyEmail } from './tasksReadyEmailService.js';
 
 type TriggerInput = {
   userId: string;
@@ -21,7 +22,11 @@ type TriggerInput = {
   correlationId?: string;
 };
 
-type StoreArgs = Parameters<DebugTaskgenDeps['storeTasks']>[0];
+type StoreArgs = Parameters<DebugTaskgenDeps['storeTasks']>[0] & {
+  correlationId?: string;
+  origin?: string;
+  mode?: Mode;
+};
 
 type StoreOutcome = {
   inserted: number;
@@ -171,6 +176,27 @@ async function storeTasksWithIdempotency(args: StoreArgs): Promise<StoreOutcome>
       }
 
       await client.query('COMMIT');
+
+      if (inserted > 0) {
+        notifyTasksReadyEmail({
+          userId: user.user_id,
+          tasksGroupId,
+          to: user.email_primary ?? user.email ?? null,
+          displayName: user.first_name ?? user.full_name ?? null,
+          timezone: user.timezone ?? null,
+          taskCount: inserted,
+          origin: args.origin,
+          correlationId: args.correlationId,
+        }).catch((error: unknown) => {
+          console.error(LOG_PREFIX, {
+            event: 'TASKS_READY_EMAIL_FAILED',
+            userId: user.user_id,
+            tasksGroupId,
+            error: getErrorMessage(error),
+          });
+        });
+      }
+
       return {
         inserted,
         skipped: Math.max(tasks.length - inserted, 0),
@@ -282,7 +308,14 @@ function createInstrumentedRunner(options: {
       return result;
     },
     storeTasks: async ({ user, catalogs, tasks }) => {
-      const outcome = await storeTasksWithIdempotency({ user, catalogs, tasks });
+      const outcome = await storeTasksWithIdempotency({
+        user,
+        catalogs,
+        tasks,
+        correlationId: options.correlationId,
+        origin: options.origin,
+        mode: options.mode,
+      });
       emitEvent({
         level: outcome.inserted > 0 ? 'info' : 'warn',
         event: 'TASKS_STORED',

@@ -624,7 +624,7 @@ function validatePayload(
 async function getContextFromDb(userId: string): Promise<UserContext> {
   return withClient(async (client) => {
     const userResult = await client.query<DbUserRow>(
-      `SELECT user_id, email_primary, full_name, image_url, game_mode_id, timezone, tasks_group_id,
+      `SELECT user_id, email_primary, email, first_name, last_name, full_name, image_url, game_mode_id, timezone, tasks_group_id,
               first_date_log, scheduler_enabled, user_profile, channel_scheduler, status_scheduler
          FROM users
         WHERE user_id = $1
