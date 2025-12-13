@@ -9,6 +9,7 @@ import {
   type FeedbackDefinitionRow,
 } from '../repositories/feedback-definitions.repository.js';
 import { loadUserLevelSummary } from './userLevelSummaryService.js';
+import { maybeGenerateWeeklyWrappedForDate } from './weeklyWrappedService.js';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const LEVEL_UP_NOTIFICATION_KEY = 'inapp_level_up_popup';
@@ -816,6 +817,16 @@ export async function submitDailyQuest(
         },
       });
     }
+  }
+
+  try {
+    await maybeGenerateWeeklyWrappedForDate(userId, date);
+  } catch (error) {
+    log?.('warn', 'Failed to build weekly wrapped after daily quest submit', {
+      userId,
+      date,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 
   return {

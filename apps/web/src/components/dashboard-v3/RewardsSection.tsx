@@ -2,18 +2,38 @@ import { useMemo } from 'react';
 import { Card } from '../ui/Card';
 import { ProgressBar } from '../common/ProgressBar';
 import { useRequest } from '../../hooks/useRequest';
-import { getAchievements, type Achievement } from '../../lib/api';
+import { getAchievements, type Achievement, type WeeklyWrappedRecord } from '../../lib/api';
+import type { WeeklyWrappedPayload } from '../../lib/weeklyWrapped';
 
 interface RewardsSectionProps {
   userId: string;
+  weeklyWrappedCurrent?: WeeklyWrappedRecord | null;
+  weeklyWrappedPrevious?: WeeklyWrappedRecord | null;
+  onOpenWeeklyWrapped?: (record?: WeeklyWrappedRecord | null) => void;
 }
 
-export function RewardsSection({ userId }: RewardsSectionProps) {
+export function RewardsSection({
+  userId,
+  weeklyWrappedCurrent,
+  weeklyWrappedPrevious,
+  onOpenWeeklyWrapped,
+}: RewardsSectionProps) {
   const { data, status, error, reload } = useRequest(() => getAchievements(userId), [userId], {
     enabled: Boolean(userId),
   });
 
   const achievements = data?.achievements ?? [];
+
+  const weeklyWrappedItems = useMemo(() => {
+    const items: { label: string; record: WeeklyWrappedRecord }[] = [];
+    if (weeklyWrappedCurrent) {
+      items.push({ label: 'Semana en curso', record: weeklyWrappedCurrent });
+    }
+    if (weeklyWrappedPrevious) {
+      items.push({ label: 'Semana anterior', record: weeklyWrappedPrevious });
+    }
+    return items;
+  }, [weeklyWrappedCurrent, weeklyWrappedPrevious]);
 
   const { unlockedCount, inProgressCount } = useMemo(() => {
     let unlocked = 0;
@@ -71,6 +91,10 @@ export function RewardsSection({ userId }: RewardsSectionProps) {
 
       {showContent && (
         <div className="space-y-5">
+          <WeeklyWrappedShelf
+            items={weeklyWrappedItems}
+            onOpen={onOpenWeeklyWrapped}
+          />
           <div className="grid gap-3 sm:grid-cols-2">
             <RewardsSummaryCard label="Completados" value={unlockedCount} accent="emerald" />
             <RewardsSummaryCard label="En progreso" value={inProgressCount} accent="sky" />
@@ -111,6 +135,81 @@ function RewardsSkeleton() {
       </div>
     </div>
   );
+}
+
+type WeeklyWrappedShelfProps = {
+  items: { label: string; record: WeeklyWrappedRecord }[];
+  onOpen?: (record?: WeeklyWrappedRecord | null) => void;
+};
+
+function WeeklyWrappedShelf({ items, onOpen }: WeeklyWrappedShelfProps) {
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_1px_12px_rgba(15,23,42,0.45)]">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Weekly Wrapped</p>
+          <p className="text-sm text-slate-200">Tus últimos resúmenes semanales</p>
+        </div>
+        {onOpen && items[0] ? (
+          <button
+            type="button"
+            onClick={() => onOpen(items[0]?.record)}
+            className="inline-flex items-center justify-center rounded-full border border-emerald-300/50 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-50 transition hover:border-emerald-200/70 hover:bg-emerald-400/20 hover:text-slate-950"
+          >
+            Ver resumen
+          </button>
+        ) : null}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {items.map((item) => (
+          <WeeklyWrappedCard key={item.record.id} label={item.label} record={item.record} onOpen={onOpen} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function WeeklyWrappedCard({
+  label,
+  record,
+  onOpen,
+}: {
+  label: string;
+  record: WeeklyWrappedRecord;
+  onOpen?: (record?: WeeklyWrappedRecord | null) => void;
+}) {
+  const accent = record.payload.summary.pillarDominant ?? record.payload.summary.highlight ?? 'Weekly Wrapped';
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-slate-950/40 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.35)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{label}</p>
+          <p className="text-base font-semibold text-white">{accent}</p>
+          <p className="text-xs text-slate-400">{formatWeekRange(record.payload)}</p>
+        </div>
+        <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-100">
+          {record.payload.variant === 'full' ? 'Completo' : 'Liviano'}
+        </span>
+      </div>
+      <button
+        type="button"
+        onClick={() => onOpen?.(record)}
+        className="inline-flex items-center justify-center rounded-full border border-white/20 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:-translate-y-0.5 hover:border-emerald-300/50 hover:bg-emerald-400/10 hover:text-emerald-50"
+      >
+        Ver detalles
+      </button>
+    </div>
+  );
+}
+
+function formatWeekRange(payload: WeeklyWrappedPayload): string {
+  const start = new Date(payload.weekRange.start);
+  const end = new Date(payload.weekRange.end);
+  return `${start.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`;
 }
 
 function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {
