@@ -120,24 +120,24 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
       <div className="absolute inset-0" onClick={onClose} aria-hidden />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-10 left-6 h-64 w-64 animate-[spin_22s_linear_infinite] bg-[radial-gradient(circle_at_center,_rgba(99,179,237,0.18),_transparent_55%)] blur-2xl" />
-        <div className="absolute bottom-12 right-10 h-72 w-72 animate-[spin_26s_linear_reverse_infinite] bg-[radial-gradient(circle_at_center,_rgba(236,72,153,0.16),_transparent_55%)] blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_20%_10%,rgba(110,231,183,0.12),transparent),radial-gradient(90%_80%_at_80%_20%,rgba(94,234,212,0.08),transparent),radial-gradient(80%_120%_at_40%_80%,rgba(192,132,252,0.12),transparent)]" />
+        <div className="absolute -top-16 left-6 h-64 w-64 animate-[spin_22s_linear_infinite] bg-[radial-gradient(circle_at_center,_rgba(99,179,237,0.18),_transparent_55%)] blur-2xl" />
+        <div className="absolute bottom-6 right-10 h-80 w-80 animate-[spin_26s_linear_reverse_infinite] bg-[radial-gradient(circle_at_center,_rgba(236,72,153,0.18),_transparent_55%)] blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_20%_10%,rgba(110,231,183,0.16),transparent),radial-gradient(90%_80%_at_80%_20%,rgba(94,234,212,0.12),transparent),radial-gradient(80%_120%_at_40%_80%,rgba(192,132,252,0.14),transparent)]" />
       </div>
 
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-5xl flex-col px-2 py-4 sm:px-4 sm:py-6">
+      <div className="relative z-10 flex h-[100dvh] w-full flex-col">
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 z-20 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-50 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-400/30 hover:text-slate-950"
+          className="absolute right-5 top-5 z-20 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-50 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-400/30 hover:text-slate-950"
+          style={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}
         >
           Cerrar
         </button>
 
-        <div className="relative flex-1 overflow-hidden rounded-[30px] border border-white/10 bg-slate-900/80 shadow-2xl shadow-emerald-500/15">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-emerald-500/5 to-slate-900/50" aria-hidden />
+        <div className="relative h-full w-full overflow-hidden">
           <div
-            className="relative h-full snap-y snap-mandatory overflow-y-auto scroll-smooth"
+            className="relative h-[100dvh] w-full snap-y snap-mandatory overflow-y-auto scroll-smooth"
             ref={containerRef}
           >
             <SectionBlock
@@ -217,24 +217,40 @@ type SectionShellProps = {
   registerSectionRef?: (el: HTMLDivElement | null) => void;
 };
 
+/**
+ * Layout contract
+ * - WeeklyWrappedModal locks the viewport height with a scroll-snap stack (100dvh).
+ * - Each SectionShell is full-bleed (100vw x 100dvh) with overflow hidden and an internal content scroller.
+ * - Safe areas are handled in the content container to avoid clipping on devices with notches.
+ */
 function SectionShell({ children, index, entered, active = false, auraIndex = 0, registerSectionRef }: SectionShellProps) {
   const delay = `${ANIMATION_DELAY * index}ms`;
   const auraClasses = GRADIENT_RING_CLASSES[auraIndex % GRADIENT_RING_CLASSES.length];
+  const safeAreaStyle = {
+    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 20px)',
+    paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
+  };
+
   return (
     <section
-      className="relative flex h-[100dvh] w-full snap-start items-center overflow-hidden px-3 py-10 sm:px-8 sm:py-14"
+      className="relative flex h-[100dvh] min-h-[100dvh] w-[100vw] flex-none snap-start overflow-hidden"
       aria-live="polite"
       data-index={index}
       ref={registerSectionRef}
     >
+      <div className="absolute inset-0 bg-slate-950" aria-hidden />
+      <div className={`pointer-events-none absolute inset-[-15%] bg-gradient-to-br opacity-80 blur-3xl ${auraClasses}`} aria-hidden />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_120%_at_30%_20%,rgba(16,185,129,0.14),transparent),radial-gradient(110%_110%_at_70%_80%,rgba(79,70,229,0.12),transparent)]" aria-hidden />
+
       <div
-        className={`relative flex h-full w-full flex-col overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/60 p-7 shadow-xl shadow-emerald-500/15 transition duration-700 sm:p-10 ${
-          entered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-        } ${active ? 'scale-[1.01] shadow-emerald-500/30 ring-1 ring-emerald-300/50' : 'opacity-90'}`}
-        style={{ transitionDelay: delay }}
+        className={`relative z-10 mx-auto flex h-full w-full max-w-5xl flex-col px-5 transition duration-700 sm:px-10 ${
+          entered ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+        } ${active ? 'scale-[1.01]' : 'opacity-95'}`}
+        style={{ transitionDelay: delay, ...safeAreaStyle }}
       >
-        <div className={`pointer-events-none absolute inset-0 opacity-70 blur-3xl ${`bg-gradient-to-br ${auraClasses}`}`} aria-hidden />
-        <div className="relative z-10 flex flex-1 flex-col space-y-5 overflow-y-auto sm:space-y-6">{children}</div>
+        <div className="relative flex h-full flex-col overflow-hidden">
+          <div className="relative flex flex-1 flex-col gap-6 overflow-y-auto">{children}</div>
+        </div>
       </div>
     </section>
   );
@@ -273,27 +289,29 @@ function SectionBlock({
       active={active}
       registerSectionRef={registerSectionRef}
     >
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">{label}</p>
-          <h2 className="mt-1 text-3xl font-semibold text-slate-50 drop-shadow-[0_0_22px_rgba(16,185,129,0.4)]">{headline}</h2>
-          <div className="mt-3 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-100">
+      <div className="flex h-full flex-col justify-between gap-8">
+        <header className="flex flex-col gap-4">
+          <p className="text-[11px] uppercase tracking-[0.3em] text-emerald-100">{label}</p>
+          <h2 className="text-4xl font-semibold leading-tight text-slate-50 drop-shadow-[0_0_28px_rgba(16,185,129,0.35)] sm:text-5xl">
+            {headline}
+          </h2>
+          <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.18em] text-emerald-50/90">
             {badges.map((badge) => (
               <span
                 key={badge}
-                className="rounded-full border border-emerald-300/30 bg-emerald-500/15 px-3 py-1 text-[10px] font-semibold text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.2),0_10px_30px_rgba(16,185,129,0.25)]"
+                className="rounded-full border border-emerald-300/30 bg-emerald-500/20 px-3 py-1 text-[10px] font-semibold shadow-[0_0_0_1px_rgba(16,185,129,0.2),0_10px_30px_rgba(16,185,129,0.25)]"
               >
                 {badge}
               </span>
             ))}
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="space-y-3 text-lg leading-relaxed text-slate-100">
-        {kicker ? <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">{kicker}</p> : null}
-        {highlightText ? <p className="text-lg md:text-xl">{highlightText}</p> : null}
-        <p className="text-base text-slate-200">{description}</p>
+        <div className="flex flex-1 flex-col justify-center gap-4 text-lg leading-relaxed text-slate-100">
+          {kicker ? <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">{kicker}</p> : null}
+          {highlightText ? <p className="text-xl font-semibold text-slate-50 sm:text-2xl">{highlightText}</p> : null}
+          <p className="max-w-3xl text-lg text-slate-200 sm:text-xl">{description}</p>
+        </div>
       </div>
     </SectionShell>
   );
@@ -597,22 +615,25 @@ function ClosingBlock({ message, accent, onClose, entered, index, active, regist
       active={active}
       registerSectionRef={registerSectionRef}
     >
-      <div className="flex flex-col items-start gap-4 text-slate-50">
-        <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
-        <h3 className="text-3xl font-semibold drop-shadow-[0_0_22px_rgba(16,185,129,0.35)]">{accent}</h3>
-        <p className="max-w-2xl text-lg leading-relaxed text-slate-100">{message}</p>
-        <div className="flex flex-wrap gap-3">
+      <div className="flex h-full flex-col justify-between gap-10 text-slate-50">
+        <div className="space-y-4">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-emerald-100">{slideLabel}</p>
+          <h3 className="text-4xl font-semibold leading-tight drop-shadow-[0_0_28px_rgba(16,185,129,0.35)] sm:text-5xl">{accent}</h3>
+          <p className="max-w-3xl text-xl leading-relaxed text-slate-100 sm:text-[22px]">{message}</p>
+        </div>
+
+        <div className="flex flex-wrap gap-4">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full bg-gradient-to-r from-emerald-400/90 to-cyan-400/90 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5"
+            className="rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 px-6 py-3 text-base font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5"
           >
             Ir al Daily Quest
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-white/25 bg-white/10 px-5 py-2 text-sm font-semibold text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300/50 hover:bg-emerald-400/20 hover:text-slate-950"
+            className="rounded-full border border-white/25 bg-white/10 px-6 py-3 text-base font-semibold text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300/50 hover:bg-emerald-400/20 hover:text-slate-950"
           >
             Cerrar
           </button>
