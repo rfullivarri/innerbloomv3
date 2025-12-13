@@ -446,7 +446,6 @@ function GlobalNotificationsView() {
 
 function UserNotificationsView() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [userPanelOpen, setUserPanelOpen] = useState(true);
   const [userState, setUserState] = useState<FeedbackUserStateResponse | null>(null);
   const [history, setHistory] = useState<FeedbackUserHistoryResponse | null>(null);
   const [stateLoading, setStateLoading] = useState(false);
@@ -642,146 +641,127 @@ function UserNotificationsView() {
   ];
 
   return (
-    <div className={`grid min-w-0 gap-5 ${userPanelOpen ? 'lg:grid-cols-[minmax(280px,360px),1fr]' : 'lg:grid-cols-1'}`}>
-      <aside
-        className={`${
-          userPanelOpen ? 'flex' : 'hidden'
-        } flex-col gap-4 rounded-2xl border border-slate-800/70 bg-slate-900/50 p-5 shadow-inner shadow-slate-950/20 lg:flex`}
-      >
-        <header className="flex items-start justify-between gap-3">
+    <div className="min-w-0 space-y-5">
+      <section className="rounded-2xl border border-slate-800/70 bg-slate-900/50 p-5 shadow-inner shadow-slate-950/20">
+        <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Selección de usuario</p>
             <p className="mt-1 text-sm text-slate-300">Buscá por email o ID para enfocar la vista.</p>
           </div>
-          <button
-            type="button"
-            className="inline-flex items-center rounded-lg border border-slate-700/70 px-2 py-1 text-[11px] font-semibold text-slate-200 transition hover:border-sky-400/70 hover:text-sky-100 lg:hidden"
-            onClick={() => setUserPanelOpen(false)}
-          >
-            Ocultar
-          </button>
+          {banner ? <ToastBanner tone={banner.type} message={banner.text} /> : null}
         </header>
-        <UserPicker onSelect={handleUserSelect} selectedUserId={selectedUser?.id ?? null} />
-        {selectedUser ? (
+        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(340px,420px),1fr] lg:items-start">
+          <UserPicker onSelect={handleUserSelect} selectedUserId={selectedUser?.id ?? null} />
           <div className="rounded-xl border border-slate-800/60 bg-slate-900/60 px-4 py-3 text-xs text-slate-300">
-            <p className="font-semibold text-slate-100">{selectedUser.email ?? 'Sin email'}</p>
-            <p className="text-[11px] text-slate-500">user_id: {selectedUser.id}</p>
+            {selectedUser ? (
+              <>
+                <p className="font-semibold text-slate-100">{selectedUser.email ?? 'Sin email'}</p>
+                <p className="text-[11px] text-slate-500">user_id: {selectedUser.id}</p>
+              </>
+            ) : (
+              <p className="text-xs text-slate-500">Todavía no hay un usuario seleccionado.</p>
+            )}
           </div>
-        ) : (
-          <p className="text-xs text-slate-500">Todavía no hay un usuario seleccionado.</p>
-        )}
-      </aside>
-
-      <section className="space-y-5 min-w-0">
-        {banner ? <ToastBanner tone={banner.type} message={banner.text} /> : null}
-
-        <div className="flex items-center justify-end lg:hidden">
-          <button
-            type="button"
-            onClick={() => setUserPanelOpen((open) => !open)}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-700/70 bg-slate-800/60 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:border-sky-400/70 hover:text-sky-50"
-          >
-            {userPanelOpen ? 'Ocultar panel de usuarios' : 'Mostrar panel de usuarios'}
-          </button>
         </div>
+      </section>
 
-        {!selectedUser ? (
-          <article className="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-6 text-sm text-slate-300">
-            <p className="font-semibold text-slate-100">Seleccioná un usuario</p>
-            <p className="mt-2 text-xs text-slate-400">
-              Usá el buscador de la izquierda para elegir un usuario específico y ver su estado de notificaciones.
-            </p>
-          </article>
-        ) : (
-          <>
-            <article className="rounded-2xl border border-slate-800/70 bg-slate-900/80 p-5 shadow-slate-950/30">
-              <header className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Vista por usuario</p>
-                  <h2 className="mt-1 text-2xl font-semibold text-slate-50">{displayName}</h2>
-                  <p className="text-sm text-slate-400">{email}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">user_id</p>
-                  <p className="font-mono text-xs text-slate-200">{userProfile?.id ?? selectedUser.id}</p>
-                </div>
-              </header>
-              <dl className="mt-4 grid gap-4 text-sm text-slate-200 sm:grid-cols-3">
-                <div>
-                  <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">Game Mode</dt>
-                  <dd className="mt-1 text-base text-slate-100">{userProfile?.gameMode ?? selectedUser.gameMode ?? '—'}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">Nivel actual</dt>
-                  <dd className="mt-1 text-base text-slate-100">{userProfile?.level ?? '—'}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">Última actividad</dt>
-                  <dd className="mt-1 text-base text-slate-100">{formatOptionalDateTime(userProfile?.lastSeenAt)}</dd>
-                </div>
-              </dl>
-            </article>
-
-            <article className="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-5 shadow-lg shadow-slate-950/20">
-              <header className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Preview · Weekly Wrapped</p>
-                  <h3 className="text-xl font-semibold text-slate-50">Testear narrativa semanal</h3>
-                  <p className="text-xs text-slate-400">
-                    Usa el usuario activo y elegí si querés datos reales (últimos 7 días) o mock. No persiste métricas ni consumed.
-                  </p>
-                </div>
-                <div className="text-right text-xs text-slate-400">
-                  <p>Fuente: {weeklyPreviewSource === 'real' ? 'Datos reales' : 'Mock'}</p>
-                  {weeklyPreviewPayload ? (
-                    <p className="text-emerald-200">Último preview: {weeklyPreviewPayload.variant === 'light' ? 'Semana liviana' : 'Completa'}</p>
-                  ) : null}
-                </div>
-              </header>
-              <div className="mt-4 grid gap-4 md:grid-cols-[1fr,220px] md:items-end">
-                <div className="space-y-2 text-sm text-slate-300">
-                  <p>
-                    Usuario activo: <span className="font-semibold text-slate-50">{displayName}</span>
-                  </p>
-                  <p className="text-xs text-slate-400">Al cerrar el modal no se guarda ningún estado.</p>
-                  {weeklyPreviewError ? (
-                    <p className="text-xs text-rose-200">{weeklyPreviewError}</p>
-                  ) : null}
-                </div>
-                <div className="flex flex-col gap-2 md:items-end">
-                  <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    Data source
-                    <select
-                      value={weeklyPreviewSource}
-                      onChange={(event) => setWeeklyPreviewSource(event.target.value as 'real' | 'mock')}
-                      className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
-                    >
-                      <option value="real">Real (última semana)</option>
-                      <option value="mock">Mock</option>
-                    </select>
-                  </label>
-                  <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-emerald-400 focus:ring-emerald-400"
-                      checked={forceLevelUpMock}
-                      onChange={(event) => setForceLevelUpMock(event.target.checked)}
-                    />
-                    Forzar slide de Level Up
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handlePreviewWeeklyWrapped}
-                    disabled={!selectedUser || weeklyPreviewLoading}
-                    className="w-full rounded-lg bg-gradient-to-r from-sky-500/80 to-blue-500/80 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:from-sky-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
-                  >
-                    {weeklyPreviewLoading ? 'Generando preview…' : 'Preview'}
-                  </button>
-                </div>
+      {!selectedUser ? (
+        <article className="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-6 text-sm text-slate-300">
+          <p className="font-semibold text-slate-100">Seleccioná un usuario</p>
+          <p className="mt-2 text-xs text-slate-400">
+            Usá el buscador de arriba para elegir un usuario específico y ver su estado de notificaciones.
+          </p>
+        </article>
+      ) : (
+        <>
+          <article className="rounded-2xl border border-slate-800/70 bg-slate-900/80 p-5 shadow-slate-950/30">
+            <header className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Vista por usuario</p>
+                <h2 className="mt-1 text-2xl font-semibold text-slate-50">{displayName}</h2>
+                <p className="text-sm text-slate-400">{email}</p>
               </div>
-            </article>
+              <div className="text-right">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">user_id</p>
+                <p className="font-mono text-xs text-slate-200">{userProfile?.id ?? selectedUser.id}</p>
+              </div>
+            </header>
+            <dl className="mt-4 grid gap-4 text-sm text-slate-200 sm:grid-cols-3">
+              <div>
+                <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">Game Mode</dt>
+                <dd className="mt-1 text-base text-slate-100">{userProfile?.gameMode ?? selectedUser.gameMode ?? '—'}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">Nivel actual</dt>
+                <dd className="mt-1 text-base text-slate-100">{userProfile?.level ?? '—'}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-[0.2em] text-slate-500">Última actividad</dt>
+                <dd className="mt-1 text-base text-slate-100">{formatOptionalDateTime(userProfile?.lastSeenAt)}</dd>
+              </div>
+            </dl>
+          </article>
 
-            <div className="grid gap-5 xl:grid-cols-2 xl:items-start">
+          <article className="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-5 shadow-lg shadow-slate-950/20">
+            <header className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Preview · Weekly Wrapped</p>
+                <h3 className="text-xl font-semibold text-slate-50">Testear narrativa semanal</h3>
+                <p className="text-xs text-slate-400">
+                  Usa el usuario activo y elegí si querés datos reales (últimos 7 días) o mock. No persiste métricas ni consumed.
+                </p>
+              </div>
+              <div className="text-right text-xs text-slate-400">
+                <p>Fuente: {weeklyPreviewSource === 'real' ? 'Datos reales' : 'Mock'}</p>
+                {weeklyPreviewPayload ? (
+                  <p className="text-emerald-200">Último preview: {weeklyPreviewPayload.variant === 'light' ? 'Semana liviana' : 'Completa'}</p>
+                ) : null}
+              </div>
+            </header>
+            <div className="mt-4 grid gap-4 md:grid-cols-[1fr,220px] md:items-end">
+              <div className="space-y-2 text-sm text-slate-300">
+                <p>
+                  Usuario activo: <span className="font-semibold text-slate-50">{displayName}</span>
+                </p>
+                <p className="text-xs text-slate-400">Al cerrar el modal no se guarda ningún estado.</p>
+                {weeklyPreviewError ? (
+                  <p className="text-xs text-rose-200">{weeklyPreviewError}</p>
+                ) : null}
+              </div>
+              <div className="flex flex-col gap-2 md:items-end">
+                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  Data source
+                  <select
+                    value={weeklyPreviewSource}
+                    onChange={(event) => setWeeklyPreviewSource(event.target.value as 'real' | 'mock')}
+                    className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                  >
+                    <option value="real">Real (última semana)</option>
+                    <option value="mock">Mock</option>
+                  </select>
+                </label>
+                <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-emerald-400 focus:ring-emerald-400"
+                    checked={forceLevelUpMock}
+                    onChange={(event) => setForceLevelUpMock(event.target.checked)}
+                  />
+                  Forzar slide de Level Up
+                </label>
+                <button
+                  type="button"
+                  onClick={handlePreviewWeeklyWrapped}
+                  disabled={!selectedUser || weeklyPreviewLoading}
+                  className="w-full rounded-lg bg-gradient-to-r from-sky-500/80 to-blue-500/80 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:from-sky-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
+                >
+                  {weeklyPreviewLoading ? 'Generando preview…' : 'Preview'}
+                </button>
+              </div>
+            </div>
+          </article>
+
+          <div className="space-y-5">
             <article className="min-w-0 overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-800/60 shadow-lg shadow-slate-900/30">
               <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/70 px-4 py-4">
                 <div>
@@ -970,10 +950,9 @@ function UserNotificationsView() {
                 ) : null}
               </div>
             </article>
-            </div>
-          </>
-        )}
-      </section>
+          </div>
+        </>
+      )}
       {weeklyPreviewPayload ? (
         <WeeklyWrappedModal
           payload={weeklyPreviewPayload}
