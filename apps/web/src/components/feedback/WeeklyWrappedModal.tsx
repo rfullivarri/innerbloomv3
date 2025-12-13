@@ -8,7 +8,11 @@ const PILLAR_ICONS: Record<string, string> = {
   Soul: '🏵️',
 };
 
-const HABIT_ICONS = ['🔥', '✨', '🌿', '⚡️'];
+const HABIT_ICON_SETS: Record<string, string[]> = {
+  Body: ['🏃‍♂️', '💪', '🥗', '🔥'],
+  Mind: ['📚', '🎯', '✍️', '🧩'],
+  Soul: ['🌱', '🧘', '✨', '🌙'],
+};
 
 const PILLAR_GRADIENTS: Record<string, string> = {
   Mind: 'from-sky-400/30 via-sky-500/10 to-indigo-500/20',
@@ -98,9 +102,9 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
     return map;
   }, [payload.sections]);
 
-  const habitsItems = (sectionsByKey.habits?.items ?? []).map((item) => ({
+  const habitsItems = (sectionsByKey.habits?.items ?? []).map((item, idx) => ({
     ...item,
-    icon: getPillarIcon(item.pillar),
+    icon: getHabitIcon(item.pillar, idx),
   }));
   const pillarDominant = payload.summary.pillarDominant;
   const emotionHighlight = payload.emotions;
@@ -137,12 +141,10 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
             ref={containerRef}
           >
             <SectionBlock
-              title="Weekly Wrapped · Preview"
-              accent={formatRange(payload.weekRange)}
-              badges={badges}
-              description={sectionsByKey.intro?.body ?? 'Tu semana está lista. Respirá y recorré tus logros.'}
-              kicker={sectionsByKey.achievements?.accent ?? 'Impulso sostenido'}
-              highlightText={sectionsByKey.achievements?.body}
+              label={sectionsByKey.intro?.title ?? 'Weekly Wrapped · Preview'}
+              headline={sectionsByKey.intro?.body ?? 'Tu semana, en movimiento'}
+              badges={[formatRange(payload.weekRange), ...badges]}
+              description={sectionsByKey.achievements?.body ?? 'Completaste 0 tareas y sumaste 0 XP esta semana.'}
               entered={entered}
               index={0}
               active={activeIndex === 0}
@@ -160,11 +162,11 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
             ) : null}
 
             <HabitsBlock
-              title={sectionsByKey.habits?.title ?? 'Hábitos constantes'}
-              description={sectionsByKey.habits?.body ?? 'Estos hábitos mantuvieron tu semana.'}
+              title={sectionsByKey.habits?.title ?? 'Ritmo que se sostiene'}
+              description={sectionsByKey.habits?.body ?? 'Estos hábitos aparecieron de forma consistente y mantuvieron tu semana en movimiento.'}
               items={habitsItems.map((item, idx) => ({
                 ...item,
-                icon: item.icon || HABIT_ICONS[idx % HABIT_ICONS.length],
+                icon: item.icon || getHabitIcon(item.pillar, idx),
               }))}
               entered={entered}
               startIndex={habitsStartIndex}
@@ -239,11 +241,11 @@ function SectionShell({ children, index, entered, active = false, auraIndex = 0,
 }
 
 type SectionBlockProps = {
-  title: string;
-  accent: string;
+  label: string;
+  headline: string;
   badges: string[];
   description: string;
-  kicker: string;
+  kicker?: string;
   highlightText?: string;
   entered: boolean;
   index: number;
@@ -252,8 +254,8 @@ type SectionBlockProps = {
 };
 
 function SectionBlock({
-  title,
-  accent,
+  label,
+  headline,
   badges,
   description,
   kicker,
@@ -273,8 +275,8 @@ function SectionBlock({
     >
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">{title}</p>
-          <h2 className="mt-1 text-3xl font-semibold text-slate-50 drop-shadow-[0_0_22px_rgba(16,185,129,0.4)]">{accent}</h2>
+          <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">{label}</p>
+          <h2 className="mt-1 text-3xl font-semibold text-slate-50 drop-shadow-[0_0_22px_rgba(16,185,129,0.4)]">{headline}</h2>
           <div className="mt-3 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-100">
             {badges.map((badge) => (
               <span
@@ -286,22 +288,12 @@ function SectionBlock({
             ))}
           </div>
         </div>
-        <div className="rounded-full border border-emerald-300/30 bg-emerald-500/15 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.2),0_10px_30px_rgba(16,185,129,0.25)]">
-          Apertura
-        </div>
       </header>
 
-      <div className="grid gap-6 md:grid-cols-[1.2fr,0.9fr] md:items-center">
-        <div className="space-y-3 text-lg leading-relaxed text-slate-100">
-          <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">{kicker}</p>
-          <p className="text-lg md:text-xl">{highlightText ?? 'Impulso listo para recorrer la semana.'}</p>
-          <p className="text-base text-slate-200">{description}</p>
-        </div>
-        <div className="relative rounded-3xl border border-white/10 bg-gradient-to-br from-emerald-400/20 via-cyan-400/10 to-indigo-500/20 p-5 text-slate-50 shadow-[0_20px_70px_rgba(16,185,129,0.25)]">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50">Portada / bienvenida</p>
-          <p className="mt-2 text-2xl font-semibold">Semana lista para celebrar 🎧</p>
-          <p className="mt-3 text-sm text-emerald-50/90">Scrolleá para recorrer la historia completa.</p>
-        </div>
+      <div className="space-y-3 text-lg leading-relaxed text-slate-100">
+        {kicker ? <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">{kicker}</p> : null}
+        {highlightText ? <p className="text-lg md:text-xl">{highlightText}</p> : null}
+        <p className="text-base text-slate-200">{description}</p>
       </div>
     </SectionShell>
   );
@@ -320,7 +312,7 @@ type HabitsBlockProps = {
 };
 
 function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef }: HabitsBlockProps) {
-  const slideLabel = `Slide ${startIndex + 1} · Ritmo constante`;
+  const slideLabel = 'CONSTANCIA';
   return (
     <SectionShell
       index={startIndex}
@@ -336,7 +328,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
           <p className="mt-2 text-sm text-slate-200">{description}</p>
         </div>
         <span className="rounded-full border border-emerald-300/30 bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
-          Hábitos constantes
+          Constancia 🔁
         </span>
       </div>
 
@@ -446,7 +438,7 @@ function ProgressBlock({ improvement, pillar, pillarDominant, entered, index, ac
       : 'from-emerald-400/25 via-cyan-400/10 to-indigo-500/20';
   const pillarTone = pillarDominant && PILLAR_TEXT_TONES[pillarDominant] ? PILLAR_TEXT_TONES[pillarDominant] : 'text-slate-50';
   const pillarIcon = getPillarIcon(pillarDominant);
-  const slideLabel = `Slide ${index + 1} · Progreso y foco`;
+  const slideLabel = 'PROGRESO Y FOCO';
 
   return (
     <SectionShell
@@ -459,7 +451,7 @@ function ProgressBlock({ improvement, pillar, pillarDominant, entered, index, ac
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
-          <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">Progreso y foco</h3>
+          <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">Pequeños avances que suman</h3>
         </div>
         <span className="rounded-full border border-emerald-300/30 bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
           Momentum 🔥
@@ -468,7 +460,7 @@ function ProgressBlock({ improvement, pillar, pillarDominant, entered, index, ac
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-500/20 via-slate-900/80 to-indigo-500/10 p-4 shadow-lg shadow-emerald-500/20">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-50">Level up suave</p>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-50">Progreso clave</p>
           <p className="mt-2 text-lg font-semibold text-slate-50">{improvement?.body ?? 'Mini mejora registrada. Seguís afinando tu ritmo.'}</p>
         </div>
 
@@ -504,7 +496,7 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
   const biweeklyLabel = biweeklyEmotion?.label ?? 'Seguimos observando';
   const biweeklyContext =
     biweeklyEmotion?.biweeklyContext ?? 'Con más registros vamos a mostrar la tendencia de los últimos 15 días.';
-  const slideLabel = `Slide ${index + 1} · Highlight emocional`;
+  const slideLabel = 'HIGHLIGHT EMOCIONAL';
 
   return (
     <SectionShell
@@ -518,30 +510,32 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
           <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(251,191,36,0.35)]">Emoción en foco</h3>
-          <p className="mt-2 text-sm text-slate-200">Movimiento semanal y tendencia de los últimos 15 días.</p>
+          <p className="mt-2 text-sm text-slate-200">Movimiento semanal y clima de los últimos días.</p>
         </div>
         <span className="rounded-full border border-amber-200/40 bg-amber-400/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-900 shadow-[0_0_0_1px_rgba(251,191,36,0.35)]">
           Highlight
         </span>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[1.1fr,0.9fr]">
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/25 via-orange-400/10 to-rose-500/20 p-4 shadow-lg shadow-amber-400/20">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-amber-50">Emoción que lideró la semana</p>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <span
-              className="h-3 w-3 rounded-full shadow-[0_0_0_6px_rgba(255,255,255,0.14)]"
-              style={{ backgroundColor: weeklyColor }}
-            />
-            <p className="text-xl font-semibold text-slate-950 drop-shadow-[0_0_18px_rgba(251,191,36,0.35)]">{weeklyLabel}</p>
-            <span className="rounded-full bg-white/20 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-900">
-              Semana · 7d
-            </span>
+        <div className="grid gap-4 md:grid-cols-[1.1fr,0.9fr]">
+          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/25 via-orange-400/10 to-rose-500/20 p-4 shadow-lg shadow-amber-400/20">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-amber-50">Lo que marcó tu semana</p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <span
+                className="h-3 w-3 rounded-full shadow-[0_0_0_6px_rgba(255,255,255,0.14)]"
+                style={{ backgroundColor: weeklyColor }}
+              />
+              <p className="text-xl font-semibold text-slate-950 drop-shadow-[0_0_18px_rgba(251,191,36,0.35)]">{weeklyLabel}</p>
+              <span className="rounded-full bg-white/20 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-900">
+                Semana actual · 7d
+              </span>
+            </div>
+            <p className="mt-4 rounded-xl border border-white/10 bg-white/80 p-3 text-sm text-amber-900 shadow-inner shadow-amber-500/10">
+              {weeklyEmotion
+                ? `La ${weeklyLabel.toLowerCase()} estuvo al frente. ¿Qué objetivo te movió esta semana? Sostenelo.`
+                : weeklyMessage}
+            </p>
           </div>
-          <p className="mt-4 rounded-xl border border-white/10 bg-white/80 p-3 text-sm text-amber-900 shadow-inner shadow-amber-500/10">
-            {weeklyMessage}
-          </p>
-        </div>
 
         <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/10 p-4 shadow-lg shadow-emerald-500/15">
           <div className="flex items-center gap-3">
@@ -564,13 +558,17 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
               </span>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-100">Emoción 15 días</p>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-100">Clima emocional reciente</p>
               <p className="text-lg font-semibold text-slate-50">{biweeklyLabel}</p>
             </div>
           </div>
-          <p className="mt-3 text-sm text-slate-100">{biweeklyContext}</p>
+          <p className="mt-3 text-sm text-slate-100">
+            {biweeklyEmotion
+              ? `En las últimas dos semanas tu energía se inclinó hacia ${biweeklyLabel.toLowerCase()}. Aprovechá ese envión.`
+              : biweeklyContext}
+          </p>
           <div className="mt-3 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.16em] text-slate-200">
-            <span className="rounded-full border border-white/15 bg-white/5 px-2 py-1">Semana actual</span>
+            <span className="rounded-full border border-white/15 bg-white/5 px-2 py-1">Semana actual · 7d</span>
             <span className="rounded-full border border-emerald-300/25 bg-emerald-500/10 px-2 py-1">Últimos 15 días</span>
           </div>
         </div>
@@ -590,7 +588,7 @@ type ClosingBlockProps = {
 };
 
 function ClosingBlock({ message, accent, onClose, entered, index, active, registerSectionRef }: ClosingBlockProps) {
-  const slideLabel = `Slide ${index + 1} · Cierre`;
+  const slideLabel = 'CIERRE';
   return (
     <SectionShell
       index={index}
@@ -609,21 +607,14 @@ function ClosingBlock({ message, accent, onClose, entered, index, active, regist
             onClick={onClose}
             className="rounded-full bg-gradient-to-r from-emerald-400/90 to-cyan-400/90 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5"
           >
-            Cerrar
+            Ir al Daily Quest
           </button>
           <button
             type="button"
             onClick={onClose}
             className="rounded-full border border-white/25 bg-white/10 px-5 py-2 text-sm font-semibold text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300/50 hover:bg-emerald-400/20 hover:text-slate-950"
           >
-            Seguir
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-emerald-300/30 bg-emerald-500/20 px-5 py-2 text-sm font-semibold text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-200/60 hover:bg-emerald-400/30 hover:text-slate-950"
-          >
-            Ir al Daily Quest
+            Cerrar
           </button>
         </div>
       </div>
@@ -635,6 +626,15 @@ function formatRange(range: WeeklyWrappedPayload['weekRange']): string {
   const start = new Date(range.start);
   const end = new Date(range.end);
   return `${start.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`;
+}
+
+function getHabitIcon(pillar?: string | null, index = 0): string {
+  if (!pillar) return HABIT_ICON_SETS.Body[index % HABIT_ICON_SETS.Body.length];
+  const set = HABIT_ICON_SETS[pillar];
+  if (!set || set.length === 0) {
+    return HABIT_ICON_SETS.Body[index % HABIT_ICON_SETS.Body.length];
+  }
+  return set[index % set.length];
 }
 
 function getPillarIcon(pillar?: string | null): string {
