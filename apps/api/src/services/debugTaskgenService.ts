@@ -43,6 +43,9 @@ type PromptFile = {
 type UserRow = {
   user_id: string;
   email_primary?: string | null;
+  email?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
   full_name?: string | null;
   image_url?: string | null;
   game_mode_id?: number | null;

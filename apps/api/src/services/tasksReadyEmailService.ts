@@ -34,7 +34,7 @@ function sanitizeName(value?: string | null): string {
   return trimmed && trimmed.length > 0 ? trimmed.split(/\s+/u)[0] : 'Innerbloomer';
 }
 
-function buildEmailMessage(params: Required<Pick<TasksReadyEmailParams, 'to'>> & {
+function buildEmailMessage(params: { to: string } & {
   displayName?: string | null;
   timezone?: string | null;
   taskCount?: number | null;
