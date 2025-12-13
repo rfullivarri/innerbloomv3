@@ -9,6 +9,17 @@
   --admin-active-bg: rgba(14, 165, 233, 0.18);
   --admin-active-text: #e0f2fe;
   --admin-accent: #38bdf8;
+  --admin-layer-strong: color-mix(in srgb, var(--admin-surface) 96%, transparent);
+  --admin-layer: color-mix(in srgb, var(--admin-surface) 90%, transparent);
+  --admin-layer-muted: color-mix(in srgb, var(--admin-surface-muted) 92%, transparent);
+  --admin-border-strong: color-mix(in srgb, var(--admin-border) 90%, transparent);
+  --admin-border-soft: color-mix(in srgb, var(--admin-border) 72%, transparent);
+  --admin-text-strong: var(--admin-text);
+  --admin-text-soft: color-mix(in srgb, var(--admin-text) 80%, var(--admin-bg));
+  --admin-text-subtle: color-mix(in srgb, var(--admin-muted) 78%, var(--admin-bg));
+  --admin-contrast: #0b1220;
+  color: var(--admin-text);
+  background-color: var(--admin-bg);
 }
 
 .admin-theme[data-theme='light'] {
@@ -22,4 +33,106 @@
   --admin-active-bg: #dbeafe;
   --admin-active-text: #1d4ed8;
   --admin-accent: #2563eb;
+  --admin-contrast: #ffffff;
+}
+
+.admin-theme .text-slate-50,
+.admin-theme .text-slate-100 {
+  color: var(--admin-text-strong);
+}
+
+.admin-theme .text-slate-200,
+.admin-theme .text-slate-300 {
+  color: var(--admin-text-soft);
+}
+
+.admin-theme .text-slate-400,
+.admin-theme .text-slate-500 {
+  color: var(--admin-text-subtle);
+}
+
+.admin-theme .text-slate-900 {
+  color: var(--admin-contrast);
+}
+
+.admin-theme .border-slate-950\/80,
+.admin-theme .border-slate-900\/80,
+.admin-theme .border-slate-900\/70,
+.admin-theme .border-slate-900\/60,
+.admin-theme .border-slate-900,
+.admin-theme .border-slate-800\/80,
+.admin-theme .border-slate-800\/70,
+.admin-theme .border-slate-800\/60,
+.admin-theme .border-slate-800\/50,
+.admin-theme .border-slate-800,
+.admin-theme .border-slate-700\/60,
+.admin-theme .border-slate-700\/50,
+.admin-theme .border-slate-700,
+.admin-theme .border-slate-600,
+.admin-theme .border-slate-500 {
+  border-color: var(--admin-border-strong);
+}
+
+.admin-theme .border-slate-400,
+.admin-theme .border-slate-300,
+.admin-theme .border-slate-200,
+.admin-theme .border-slate-100 {
+  border-color: var(--admin-border-soft);
+}
+
+.admin-theme .bg-slate-950\/95,
+.admin-theme .bg-slate-950\/90,
+.admin-theme .bg-slate-950\/80,
+.admin-theme .bg-slate-950\/70,
+.admin-theme .bg-slate-950,
+.admin-theme .bg-slate-900\/95,
+.admin-theme .bg-slate-900\/90,
+.admin-theme .bg-slate-900\/80,
+.admin-theme .bg-slate-900\/70,
+.admin-theme .bg-slate-900\/60,
+.admin-theme .bg-slate-900\/50,
+.admin-theme .bg-slate-900\/40,
+.admin-theme .bg-slate-900 {
+  background-color: var(--admin-layer-strong);
+}
+
+.admin-theme .bg-slate-800\/80,
+.admin-theme .bg-slate-800\/70,
+.admin-theme .bg-slate-800\/60,
+.admin-theme .bg-slate-800\/50,
+.admin-theme .bg-slate-800\/40,
+.admin-theme .bg-slate-800 {
+  background-color: var(--admin-layer-muted);
+}
+
+.admin-theme .bg-slate-900\/70::selection,
+.admin-theme .bg-slate-900\/60::selection,
+.admin-theme .bg-slate-800\/70::selection,
+.admin-theme .bg-slate-800\/60::selection {
+  background-color: var(--admin-layer);
+}
+
+.admin-theme .bg-sky-500,
+.admin-theme .bg-sky-500\/80,
+.admin-theme .bg-sky-500\/60,
+.admin-theme .bg-sky-500\/40,
+.admin-theme .bg-sky-500\/20,
+.admin-theme .bg-blue-500\/10,
+.admin-theme .bg-blue-500\/20,
+.admin-theme .bg-blue-500\/80,
+.admin-theme .bg-blue-500 {
+  background-color: color-mix(in srgb, var(--admin-accent) 88%, transparent);
+}
+
+.admin-theme .text-sky-100,
+.admin-theme .text-sky-200 {
+  color: color-mix(in srgb, var(--admin-accent) 38%, var(--admin-text-strong));
+}
+
+.admin-theme .border-sky-500,
+.admin-theme .border-sky-400,
+.admin-theme .border-sky-400\/70,
+.admin-theme .border-sky-400\/60,
+.admin-theme .border-sky-300 {
+  border-color: color-mix(in srgb, var(--admin-accent) 70%, transparent);
 }
