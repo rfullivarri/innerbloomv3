@@ -28,6 +28,16 @@ export class DevErrorBoundary extends Component<DevErrorBoundaryProps, DevErrorB
   }
 
   componentDidCatch(err: unknown, info: ErrorInfo) {
+    const message = extractMessage(err);
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.groupCollapsed('[DevErrorBoundary] Crash capturado');
+      console.error('Mensaje legible:', message);
+      console.error('Stack del componente:', info.componentStack);
+      console.error('Error bruto:', err);
+      console.groupEnd();
+    }
+
     console.error('[ERRBOUNDARY]', { err, info });
   }
 

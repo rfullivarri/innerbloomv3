@@ -1977,6 +1977,15 @@ function EditTaskModal({
     }
   };
 
+  const handleNavigate = useCallback(
+    (target: UserTask | null) => {
+      if (target && onNavigateTask) {
+        onNavigateTask(target.id);
+      }
+    },
+    [onNavigateTask],
+  );
+
   if (!open || !task) {
     return null;
   }
@@ -1993,15 +2002,6 @@ function EditTaskModal({
     : navigationTasks.length > 0
       ? `—/${navigationTasks.length}`
       : '—';
-
-  const handleNavigate = useCallback(
-    (target: UserTask | null) => {
-      if (target && onNavigateTask) {
-        onNavigateTask(target.id);
-      }
-    },
-    [onNavigateTask],
-  );
 
   const formBody = (
     <div className="space-y-6">
