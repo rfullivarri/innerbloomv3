@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type MutableRefObject, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import type { WeeklyWrappedPayload, WeeklyWrappedSection } from '../../lib/weeklyWrapped';
 
 const ANIMATION_DELAY = 80;
@@ -35,10 +35,48 @@ const GRADIENT_RING_CLASSES = [
 
 export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps) {
   const [entered, setEntered] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setEntered(true));
     return () => cancelAnimationFrame(raf);
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        let bestMatch: { index: number; ratio: number } | null = null;
+
+        for (const entry of entries) {
+          const indexAttr = entry.target.getAttribute('data-index');
+          if (!indexAttr) continue;
+          const index = Number(indexAttr);
+          const ratio = entry.intersectionRatio;
+
+          if (!bestMatch || ratio > bestMatch.ratio) {
+            bestMatch = { index, ratio };
+          }
+        }
+
+        if (bestMatch) {
+          setActiveIndex(bestMatch.index);
+        }
+      },
+      {
+        root: containerRef.current,
+        threshold: [0.4, 0.55, 0.7],
+      },
+    );
+
+    sectionRefs.current.forEach((section) => {
+      if (section) observer.observe(section);
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   const badges = useMemo(() => {
@@ -94,7 +132,10 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
 
         <div className="relative flex-1 overflow-hidden rounded-[30px] border border-white/10 bg-slate-900/80 shadow-2xl shadow-emerald-500/15">
           <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-emerald-500/5 to-slate-900/50" aria-hidden />
-          <div className="relative h-full snap-y snap-mandatory overflow-y-auto scroll-smooth">
+          <div
+            className="relative h-full snap-y snap-mandatory overflow-y-auto scroll-smooth"
+            ref={containerRef}
+          >
             <SectionBlock
               title="Weekly Wrapped · Preview"
               accent={formatRange(payload.weekRange)}
@@ -104,9 +145,19 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               highlightText={sectionsByKey.achievements?.body}
               entered={entered}
               index={0}
+              active={activeIndex === 0}
+              registerSectionRef={(el) => (sectionRefs.current[0] = el)}
             />
 
-            {showLevelUp ? <LevelUpBlock levelUp={levelUp} index={1} entered={entered} /> : null}
+            {showLevelUp ? (
+              <LevelUpBlock
+                levelUp={levelUp}
+                index={1}
+                entered={entered}
+                active={activeIndex === 1}
+                registerSectionRef={(el) => (sectionRefs.current[1] = el)}
+              />
+            ) : null}
 
             <HabitsBlock
               title={sectionsByKey.habits?.title ?? 'Hábitos constantes'}
@@ -117,6 +168,8 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               }))}
               entered={entered}
               startIndex={habitsStartIndex}
+              activeIndex={activeIndex}
+              registerSectionRef={sectionRefs}
             />
 
             <ProgressBlock
@@ -125,9 +178,17 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               pillarDominant={pillarDominant}
               entered={entered}
               index={progressIndex}
+              active={activeIndex === progressIndex}
+              registerSectionRef={(el) => (sectionRefs.current[progressIndex] = el)}
             />
 
-            <EmotionHighlightBlock emotionHighlight={emotionHighlight} entered={entered} index={emotionIndex} />
+            <EmotionHighlightBlock
+              emotionHighlight={emotionHighlight}
+              entered={entered}
+              index={emotionIndex}
+              active={activeIndex === emotionIndex}
+              registerSectionRef={(el) => (sectionRefs.current[emotionIndex] = el)}
+            />
 
             <ClosingBlock
               message={sectionsByKey.closing?.body ?? 'Seguimos sumando: mañana vuelve el Daily Quest.'}
@@ -135,6 +196,8 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               onClose={onClose}
               entered={entered}
               index={closingIndex}
+              active={activeIndex === closingIndex}
+              registerSectionRef={(el) => (sectionRefs.current[closingIndex] = el)}
             />
           </div>
         </div>
@@ -147,21 +210,25 @@ type SectionShellProps = {
   children: ReactNode;
   index: number;
   entered: boolean;
+  active?: boolean;
   auraIndex?: number;
+  registerSectionRef?: (el: HTMLDivElement | null) => void;
 };
 
-function SectionShell({ children, index, entered, auraIndex = 0 }: SectionShellProps) {
+function SectionShell({ children, index, entered, active = false, auraIndex = 0, registerSectionRef }: SectionShellProps) {
   const delay = `${ANIMATION_DELAY * index}ms`;
   const auraClasses = GRADIENT_RING_CLASSES[auraIndex % GRADIENT_RING_CLASSES.length];
   return (
     <section
       className="relative flex min-h-[100dvh] snap-start items-center px-3 py-12 sm:px-8 sm:py-16"
       aria-live="polite"
+      data-index={index}
+      ref={registerSectionRef}
     >
       <div
         className={`relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/60 p-7 shadow-xl shadow-emerald-500/15 transition duration-700 sm:p-10 ${
           entered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-        }`}
+        } ${active ? 'scale-[1.01] shadow-emerald-500/30 ring-1 ring-emerald-300/50' : 'opacity-90'}`}
         style={{ transitionDelay: delay }}
       >
         <div className={`pointer-events-none absolute inset-0 opacity-70 blur-3xl ${`bg-gradient-to-br ${auraClasses}`}`} aria-hidden />
@@ -180,11 +247,30 @@ type SectionBlockProps = {
   highlightText?: string;
   entered: boolean;
   index: number;
+  active?: boolean;
+  registerSectionRef?: (el: HTMLDivElement | null) => void;
 };
 
-function SectionBlock({ title, accent, badges, description, kicker, highlightText, entered, index }: SectionBlockProps) {
+function SectionBlock({
+  title,
+  accent,
+  badges,
+  description,
+  kicker,
+  highlightText,
+  entered,
+  index,
+  active,
+  registerSectionRef,
+}: SectionBlockProps) {
   return (
-    <SectionShell index={index} entered={entered} auraIndex={0}>
+    <SectionShell
+      index={index}
+      entered={entered}
+      auraIndex={0}
+      active={active}
+      registerSectionRef={registerSectionRef}
+    >
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">{title}</p>
@@ -229,12 +315,20 @@ type HabitsBlockProps = {
   items: HabitItem[];
   entered: boolean;
   startIndex: number;
+  activeIndex: number;
+  registerSectionRef: MutableRefObject<(HTMLDivElement | null)[]>;
 };
 
-function HabitsBlock({ title, description, items, entered, startIndex }: HabitsBlockProps) {
+function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef }: HabitsBlockProps) {
   const slideLabel = `Slide ${startIndex + 1} · Ritmo constante`;
   return (
-    <SectionShell index={startIndex} entered={entered} auraIndex={1}>
+    <SectionShell
+      index={startIndex}
+      entered={entered}
+      auraIndex={1}
+      active={activeIndex === startIndex}
+      registerSectionRef={(el) => (registerSectionRef.current[startIndex] = el)}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
@@ -278,14 +372,26 @@ function HabitsBlock({ title, description, items, entered, startIndex }: HabitsB
   );
 }
 
-type LevelUpBlockProps = { levelUp: WeeklyWrappedPayload['levelUp']; entered: boolean; index: number };
+type LevelUpBlockProps = {
+  levelUp: WeeklyWrappedPayload['levelUp'];
+  entered: boolean;
+  index: number;
+  active?: boolean;
+  registerSectionRef?: (el: HTMLDivElement | null) => void;
+};
 
-function LevelUpBlock({ levelUp, entered, index }: LevelUpBlockProps) {
+function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef }: LevelUpBlockProps) {
   const levelLabel = levelUp.currentLevel ?? 'nuevo';
   const previousLabel = levelUp.previousLevel ?? Math.max(0, Number(levelLabel) - 1);
 
   return (
-    <SectionShell index={index} entered={entered} auraIndex={2}>
+    <SectionShell
+      index={index}
+      entered={entered}
+      auraIndex={2}
+      active={active}
+      registerSectionRef={registerSectionRef}
+    >
       <div className="relative overflow-hidden rounded-3xl border border-transparent bg-slate-950/70 p-[2px]">
         <div className="absolute inset-0 animate-pulse bg-[conic-gradient(at_30%_40%,#a855f7,#22d3ee,#22c55e,#f59e0b,#f472b6,#22d3ee)] opacity-70 blur" />
         <div className="relative rounded-[26px] border border-white/10 bg-gradient-to-br from-slate-950/80 via-emerald-950/50 to-indigo-950/60 p-6 shadow-[0_20px_60px_rgba(34,197,94,0.2)]">
@@ -329,9 +435,11 @@ type ProgressBlockProps = {
   pillarDominant: string | null;
   entered: boolean;
   index: number;
+  active?: boolean;
+  registerSectionRef?: (el: HTMLDivElement | null) => void;
 };
 
-function ProgressBlock({ improvement, pillar, pillarDominant, entered, index }: ProgressBlockProps) {
+function ProgressBlock({ improvement, pillar, pillarDominant, entered, index, active, registerSectionRef }: ProgressBlockProps) {
   const pillarAura =
     pillarDominant && PILLAR_GRADIENTS[pillarDominant]
       ? PILLAR_GRADIENTS[pillarDominant]
@@ -341,7 +449,13 @@ function ProgressBlock({ improvement, pillar, pillarDominant, entered, index }: 
   const slideLabel = `Slide ${index + 1} · Progreso y foco`;
 
   return (
-    <SectionShell index={index} entered={entered} auraIndex={2}>
+    <SectionShell
+      index={index}
+      entered={entered}
+      auraIndex={2}
+      active={active}
+      registerSectionRef={registerSectionRef}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
@@ -375,9 +489,11 @@ type EmotionHighlightBlockProps = {
   emotionHighlight: WeeklyWrappedPayload['emotions'];
   entered: boolean;
   index: number;
+  active?: boolean;
+  registerSectionRef?: (el: HTMLDivElement | null) => void;
 };
 
-function EmotionHighlightBlock({ emotionHighlight, entered, index }: EmotionHighlightBlockProps) {
+function EmotionHighlightBlock({ emotionHighlight, entered, index, active, registerSectionRef }: EmotionHighlightBlockProps) {
   const weeklyEmotion = emotionHighlight.weekly;
   const biweeklyEmotion = emotionHighlight.biweekly ?? weeklyEmotion;
   const weeklyColor = weeklyEmotion?.color ?? '#fbbf24';
@@ -391,7 +507,13 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index }: EmotionHigh
   const slideLabel = `Slide ${index + 1} · Highlight emocional`;
 
   return (
-    <SectionShell index={index} entered={entered} auraIndex={1}>
+    <SectionShell
+      index={index}
+      entered={entered}
+      auraIndex={1}
+      active={active}
+      registerSectionRef={registerSectionRef}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
@@ -463,12 +585,20 @@ type ClosingBlockProps = {
   onClose: () => void;
   entered: boolean;
   index: number;
+  active?: boolean;
+  registerSectionRef?: (el: HTMLDivElement | null) => void;
 };
 
-function ClosingBlock({ message, accent, onClose, entered, index }: ClosingBlockProps) {
+function ClosingBlock({ message, accent, onClose, entered, index, active, registerSectionRef }: ClosingBlockProps) {
   const slideLabel = `Slide ${index + 1} · Cierre`;
   return (
-    <SectionShell index={index} entered={entered} auraIndex={0}>
+    <SectionShell
+      index={index}
+      entered={entered}
+      auraIndex={0}
+      active={active}
+      registerSectionRef={registerSectionRef}
+    >
       <div className="flex flex-col items-start gap-4 text-slate-50">
         <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
         <h3 className="text-3xl font-semibold drop-shadow-[0_0_22px_rgba(16,185,129,0.35)]">{accent}</h3>
