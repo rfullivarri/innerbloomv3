@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/clerk-react';
 import { AdminShell } from '../../components/admin/AdminShell';
 import { verifyAdminAccess } from '../../lib/adminApi';
 import { Skeleton } from '../../components/common/Skeleton';
+import { AdminThemeProvider } from '../../components/admin/AdminThemeProvider';
 
 export default function AdminRoute() {
   const { isLoaded, userId } = useAuth();
@@ -55,5 +56,9 @@ export default function AdminRoute() {
     return <Navigate to="/" replace />;
   }
 
-  return <AdminShell />;
+  return (
+    <AdminThemeProvider>
+      <AdminShell />
+    </AdminThemeProvider>
+  );
 }
