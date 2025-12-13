@@ -222,19 +222,19 @@ function SectionShell({ children, index, entered, active = false, auraIndex = 0,
   const auraClasses = GRADIENT_RING_CLASSES[auraIndex % GRADIENT_RING_CLASSES.length];
   return (
     <section
-      className="relative flex min-h-[100dvh] snap-start items-center px-3 py-12 sm:px-8 sm:py-16"
+      className="relative flex h-[100dvh] w-full snap-start items-center overflow-hidden px-3 py-10 sm:px-8 sm:py-14"
       aria-live="polite"
       data-index={index}
       ref={registerSectionRef}
     >
       <div
-        className={`relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/60 p-7 shadow-xl shadow-emerald-500/15 transition duration-700 sm:p-10 ${
+        className={`relative flex h-full w-full flex-col overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/60 p-7 shadow-xl shadow-emerald-500/15 transition duration-700 sm:p-10 ${
           entered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
         } ${active ? 'scale-[1.01] shadow-emerald-500/30 ring-1 ring-emerald-300/50' : 'opacity-90'}`}
         style={{ transitionDelay: delay }}
       >
         <div className={`pointer-events-none absolute inset-0 opacity-70 blur-3xl ${`bg-gradient-to-br ${auraClasses}`}`} aria-hidden />
-        <div className="relative z-10 space-y-5 sm:space-y-6">{children}</div>
+        <div className="relative z-10 flex flex-1 flex-col space-y-5 overflow-y-auto sm:space-y-6">{children}</div>
       </div>
     </section>
   );
