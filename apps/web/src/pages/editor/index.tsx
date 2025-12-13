@@ -302,6 +302,7 @@ export default function TaskEditorPage() {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo eliminar la tarea.';
       setDeleteErrorMessage(message);
+      setPageToast({ type: 'error', text: message });
     }
   }, [backendUserId, deleteTask, taskToDelete]);
 

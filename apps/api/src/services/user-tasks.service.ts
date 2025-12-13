@@ -38,6 +38,23 @@ export type UpdateUserTaskPayload = {
   is_active?: boolean;
 };
 
+export async function deleteUserTaskRow(userId: string, taskId: string): Promise<void> {
+  const result = await pool.query<{ task_id: string }>(
+    `DELETE FROM tasks t
+      USING users u
+     WHERE t.task_id = $1
+       AND t.user_id = $2
+       AND u.user_id = $2
+       AND t.tasks_group_id = u.tasks_group_id
+     RETURNING t.task_id`,
+    [taskId, userId],
+  );
+
+  if (result.rowCount === 0) {
+    throw new HttpError(404, 'task_not_found', 'Task not found');
+  }
+}
+
 function hasUpdate(payload: UpdateUserTaskPayload): boolean {
   const keys: (keyof UpdateUserTaskPayload)[] = [
     'title',
