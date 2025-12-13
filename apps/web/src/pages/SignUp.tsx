@@ -1,7 +1,6 @@
 import { SignUp } from '@clerk/clerk-react';
 import { useRef } from 'react';
 import { AuthLayout } from '../components/layout/AuthLayout';
-import { DASHBOARD_PATH } from '../config/auth';
 import { createAuthAppearance } from '../lib/clerkAppearance';
 
 export default function SignUpPage() {
@@ -35,7 +34,8 @@ export default function SignUpPage() {
           routing="path"
           path="/sign-up"
           signInUrl="/login"
-          fallbackRedirectUrl={DASHBOARD_PATH}
+          // post-signup must continue onboarding
+          fallbackRedirectUrl="/intro-journey"
         />
       </div>
     </AuthLayout>
