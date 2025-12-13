@@ -23,7 +23,7 @@ const LOG_PREFIX = '[tasks-ready-email]';
 const DEFAULT_CTA_URL =
   process.env.TASKS_READY_CTA_URL?.trim() ||
   process.env.DAILY_REMINDER_CTA_URL?.trim() ||
-  'https://web-dev-dfa2.up.railway.app/dashboard-v3?tasks=open';
+  'https://web-dev-dfa2.up.railway.app/login';
 
 function sanitizeRecipient(value?: string | null): string | null {
   const trimmed = value?.trim();
@@ -43,17 +43,14 @@ function buildEmailMessage(params: { to: string } & {
 }): EmailMessage {
   const name = sanitizeName(params.displayName);
   const ctaUrl = params.ctaUrl?.trim() || DEFAULT_CTA_URL;
-  const subject = 'Tus tareas ya están listas';
+  const subject = 'Tu journey está a punto de comenzar';
   const bodyLines = [
     `Hola ${name},`,
-    'Ya generamos tu set inicial de tareas. Podés revisarlas y editarlas cuando quieras.',
+    'Ya generamos tu set inicial de tareas usando IA, diseñado según tus objetivos y tu momento actual.',
+    'Todo está listo. Este es el primer paso de tu camino en Innerbloom.',
+    '',
+    `Iniciar mi Journey: ${ctaUrl}`,
   ];
-
-  if (typeof params.taskCount === 'number' && params.taskCount > 0) {
-    bodyLines.push(`Preparamos ${params.taskCount} opciones para que empieces.`);
-  }
-
-  bodyLines.push('', `Abrir tus tareas: ${ctaUrl}`);
 
   const text = bodyLines.join('\n');
   const html = `<!doctype html>
@@ -62,19 +59,19 @@ function buildEmailMessage(params: { to: string } & {
     <meta charset="utf-8" />
     <title>${subject}</title>
   </head>
-  <body style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;padding:24px;">
-    <table role="presentation" width="100%" style="max-width:640px;margin:0 auto;background:#111827;border-radius:18px;padding:28px;border:1px solid rgba(148,163,184,0.35);">
+  <body style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#0f172a;padding:24px;">
+    <table role="presentation" width="100%" style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;border:1px solid #e2e8f0;">
       <tr>
         <td>
-          <p style="margin:0 0 12px;font-size:16px;">Hola ${name},</p>
-          <p style="margin:0 0 16px;font-size:16px;line-height:1.5;">Ya generamos tu set inicial de tareas. Podés revisarlas y editarlas cuando quieras.</p>
-          ${
-            typeof params.taskCount === 'number' && params.taskCount > 0
-              ? `<p style="margin:0 0 16px;font-size:14px;color:#cbd5e1;">Preparamos ${params.taskCount} opciones para que empieces.</p>`
-              : ''
-          }
-          <a href="${ctaUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#6366f1;color:#ffffff;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:700;">Abrir mis tareas</a>
-          <p style="margin:18px 0 0;font-size:13px;color:#94a3b8;">Si el botón no funciona, copiá y pegá este enlace en tu navegador:<br /><a href="${ctaUrl}" style="color:#a5b4fc;">${ctaUrl}</a></p>
+          <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.24em;font-weight:700;text-transform:uppercase;color:#94a3b8;text-align:center;">Innerbloom</p>
+          <p style="margin:0 0 16px;font-size:16px;text-align:center;">Hola ${name},</p>
+          <h1 style="margin:0 0 12px;font-size:28px;line-height:1.3;text-align:center;">Tu journey está a punto de comenzar</h1>
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.6;text-align:center;">Ya generamos tu set inicial de tareas usando IA, diseñado según tus objetivos y tu momento actual.</p>
+          <p style="margin:0 0 24px;font-size:16px;line-height:1.6;text-align:center;">Todo está listo. Este es el primer paso de tu camino en Innerbloom.</p>
+          <div style="text-align:center;">
+            <a href="${ctaUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#111827;color:#ffffff;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:700;">Iniciar mi Journey</a>
+          </div>
+          <p style="margin:24px 0 0;font-size:14px;color:#94a3b8;text-align:center;">Si el botón no funciona, copiá y pegá este enlace en tu navegador:<br /><a href="${ctaUrl}" style="color:#6366f1;">${ctaUrl}</a></p>
         </td>
       </tr>
     </table>
