@@ -188,6 +188,14 @@ type ReminderSendResponse = {
   sent_at: string;
 };
 
+type TasksReadySendResponse = {
+  ok: boolean;
+  tasks_group_id: string;
+  recipient: string;
+  sent_at: string;
+  task_count: number;
+};
+
 export async function sendAdminDailyReminder(userId: string) {
   const url = buildApiUrl(`/admin/users/${encodeURIComponent(userId)}/daily-reminder/send`);
   const response = await apiAuthorizedFetch(url, {
@@ -210,4 +218,27 @@ export async function sendAdminDailyReminder(userId: string) {
   }
 
   return response.json() as Promise<ReminderSendResponse>;
+}
+
+export async function sendAdminTasksReadyEmail(userId: string) {
+  const url = buildApiUrl(`/admin/users/${encodeURIComponent(userId)}/tasks-ready/send`);
+  const response = await apiAuthorizedFetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response.json() as Promise<TasksReadySendResponse>;
 }

@@ -29,6 +29,7 @@ import {
   getTaskgenJobLogs,
   getTaskgenUserOverview,
   retryTaskgenJob,
+  sendTasksReadyPreview,
   sendDailyReminderPreview,
   listFeedbackDefinitions,
   updateFeedbackDefinition,
@@ -138,6 +139,12 @@ export const postAdminSendReminder = asyncHandler(async (req: Request, res: Resp
   const { userId } = userIdParamSchema.parse(req.params);
   const body = reminderSendBody.parse(req.body ?? {});
   const result = await sendDailyReminderPreview(userId, body.channel ?? 'email');
+  res.json(result);
+});
+
+export const postAdminSendTasksReady = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const result = await sendTasksReadyPreview(userId);
   res.json(result);
 });
 

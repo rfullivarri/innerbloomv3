@@ -6,6 +6,7 @@ import {
   fetchAdminLogs,
   fetchAdminTaskStats,
   sendAdminDailyReminder,
+  sendAdminTasksReadyEmail,
 } from '../../lib/adminApi';
 import { AdminDataTable } from './AdminDataTable';
 import { FiltersBar, type AdminFilters } from './FiltersBar';
@@ -46,6 +47,9 @@ export function AdminLayout() {
   const [sendingReminder, setSendingReminder] = useState(false);
   const [reminderSuccess, setReminderSuccess] = useState<string | null>(null);
   const [reminderError, setReminderError] = useState<string | null>(null);
+  const [sendingTasksReady, setSendingTasksReady] = useState(false);
+  const [tasksReadySuccess, setTasksReadySuccess] = useState<string | null>(null);
+  const [tasksReadyError, setTasksReadyError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedUser) {
@@ -176,6 +180,8 @@ export function AdminLayout() {
     setActiveTab('logs');
     setReminderSuccess(null);
     setReminderError(null);
+    setTasksReadySuccess(null);
+    setTasksReadyError(null);
   }, []);
 
   const handleSendReminder = useCallback(async () => {
@@ -197,6 +203,28 @@ export function AdminLayout() {
       setReminderError('No se pudo enviar el recordatorio. Verificá las credenciales de correo.');
     } finally {
       setSendingReminder(false);
+    }
+  }, [selectedUser]);
+
+  const handleSendTasksReadyEmail = useCallback(async () => {
+    if (!selectedUser) {
+      return;
+    }
+
+    setSendingTasksReady(true);
+    setTasksReadyError(null);
+
+    try {
+      const response = await sendAdminTasksReadyEmail(selectedUser.id);
+      const sentAt = new Date(response.sent_at);
+      const friendlyTime = sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setTasksReadySuccess(`Enviado a ${response.recipient} · ${friendlyTime}`);
+    } catch (error) {
+      console.error('[admin] failed to send tasks ready email', error);
+      setTasksReadySuccess(null);
+      setTasksReadyError('No se pudo enviar el correo de tareas AI. Verificá las credenciales de correo.');
+    } finally {
+      setSendingTasksReady(false);
     }
   }, [selectedUser]);
 
@@ -284,31 +312,60 @@ export function AdminLayout() {
         </p>
         <UserPicker onSelect={handleSelectUser} selectedUserId={selectedUser?.id ?? null} />
         {selectedUser ? (
-          <div className="flex flex-col gap-3 rounded-xl border border-slate-800/70 bg-slate-900/60 p-4 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Recordatorio puntual</p>
-              <p className="text-sm text-slate-300">
-                Enviá el correo diario al instante para revisar el HTML y confirmar que llegó a la bandeja.
-              </p>
-              {reminderSuccess ? (
-                <p className="text-xs font-semibold text-emerald-300">{reminderSuccess}</p>
-              ) : null}
-              {reminderError ? (
-                <p className="text-xs font-semibold text-rose-300">{reminderError}</p>
-              ) : null}
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 rounded-xl border border-slate-800/70 bg-slate-900/60 p-4 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Recordatorio puntual</p>
+                <p className="text-sm text-slate-300">
+                  Enviá el correo diario al instante para revisar el HTML y confirmar que llegó a la bandeja.
+                </p>
+                {reminderSuccess ? (
+                  <p className="text-xs font-semibold text-emerald-300">{reminderSuccess}</p>
+                ) : null}
+                {reminderError ? (
+                  <p className="text-xs font-semibold text-rose-300">{reminderError}</p>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                onClick={handleSendReminder}
+                disabled={sendingReminder}
+                className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-500 ${
+                  sendingReminder
+                    ? 'cursor-not-allowed border border-slate-700/60 bg-slate-800 text-slate-400'
+                    : 'border border-slate-700/60 bg-slate-800/80 text-slate-100 hover:border-sky-400/60 hover:text-sky-100'
+                }`}
+              >
+                {sendingReminder ? 'Enviando…' : 'Probar correo'}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handleSendReminder}
-              disabled={sendingReminder}
-              className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-500 ${
-                sendingReminder
-                  ? 'cursor-not-allowed border border-slate-700/60 bg-slate-800 text-slate-400'
-                  : 'border border-slate-700/60 bg-slate-800/80 text-slate-100 hover:border-sky-400/60 hover:text-sky-100'
-              }`}
-            >
-              {sendingReminder ? 'Enviando…' : 'Probar correo'}
-            </button>
+
+            <div className="flex flex-col gap-3 rounded-xl border border-slate-800/70 bg-slate-900/60 p-4 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Correo tareas AI</p>
+                <p className="text-sm text-slate-300">
+                  Reenviá el correo que avisa que las tareas generadas por AI ya están listas para revisar y loguearse.
+                </p>
+                {tasksReadySuccess ? (
+                  <p className="text-xs font-semibold text-emerald-300">{tasksReadySuccess}</p>
+                ) : null}
+                {tasksReadyError ? (
+                  <p className="text-xs font-semibold text-rose-300">{tasksReadyError}</p>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                onClick={handleSendTasksReadyEmail}
+                disabled={sendingTasksReady}
+                className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-500 ${
+                  sendingTasksReady
+                    ? 'cursor-not-allowed border border-slate-700/60 bg-slate-800 text-slate-400'
+                    : 'border border-slate-700/60 bg-slate-800/80 text-slate-100 hover:border-sky-400/60 hover:text-sky-100'
+                }`}
+              >
+                {sendingTasksReady ? 'Enviando…' : 'Probar correo AI'}
+              </button>
+            </div>
           </div>
         ) : null}
       </header>

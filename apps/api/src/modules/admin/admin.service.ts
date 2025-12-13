@@ -7,6 +7,7 @@ import { updateUserTaskRow } from '../../services/user-tasks.service.js';
 import { findReminderContextForUser } from '../../repositories/user-daily-reminders.repository.js';
 import { buildReminderEmail, loadReminderTemplate, resolveRecipient } from '../../services/dailyReminderJob.js';
 import { getEmailProvider } from '../../services/email/index.js';
+import { sendTasksReadyEmailPreview } from '../../services/tasksReadyEmailService.js';
 import {
   listFeedbackDefinitionRows,
   updateFeedbackDefinitionRow,
@@ -1430,6 +1431,54 @@ export async function getTaskgenUserOverview(userId: string): Promise<TaskgenUse
     lastJobCreatedAt,
     lastTaskInsertedAt,
     latestJob,
+  };
+}
+
+export async function sendTasksReadyPreview(
+  userId: string,
+): Promise<{ ok: true; tasks_group_id: string; recipient: string; sent_at: string; task_count: number }> {
+  const [userResult, tasksResult] = await Promise.all([
+    pool.query<{
+      email_primary: string | null;
+      email: string | null;
+      first_name: string | null;
+      full_name: string | null;
+      timezone: string | null;
+    }>('SELECT email_primary, email, first_name, full_name, timezone FROM users WHERE user_id = $1 LIMIT 1', [userId]),
+    pool.query<{ tasks_group_id: string; task_count: number }>(
+      `SELECT tasks_group_id, COUNT(*)::int as task_count
+         FROM tasks
+        WHERE user_id = $1
+        GROUP BY tasks_group_id
+        ORDER BY MAX(created_at) DESC
+        LIMIT 1`,
+      [userId],
+    ),
+  ]);
+
+  const user = userResult.rows[0];
+  if (!user) {
+    throw new HttpError(404, 'not_found', 'User not found');
+  }
+
+  const latestGroup = tasksResult.rows[0];
+  if (!latestGroup) {
+    throw new HttpError(404, 'tasks_not_found', 'No tasks found for the user');
+  }
+
+  const preview = await sendTasksReadyEmailPreview({
+    to: user.email_primary ?? user.email ?? null,
+    displayName: user.first_name ?? user.full_name ?? null,
+    timezone: user.timezone,
+    taskCount: latestGroup.task_count,
+  });
+
+  return {
+    ok: true,
+    tasks_group_id: latestGroup.tasks_group_id,
+    recipient: preview.recipient,
+    sent_at: preview.sent_at,
+    task_count: preview.task_count ?? latestGroup.task_count,
   };
 }
 
