@@ -36,7 +36,7 @@ export type WeeklyWrappedSection = {
 };
 
 export type WeeklyWrappedPayload = {
-  mode: 'preview';
+  mode: 'preview' | 'final';
   dataSource: 'real' | 'mock';
   variant: 'full' | 'light';
   weekRange: { start: string; end: string };

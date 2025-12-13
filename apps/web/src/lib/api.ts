@@ -1,4 +1,5 @@
 import { apiLog, logApiDebug, logApiError } from './logger';
+import type { WeeklyWrappedPayload } from './weeklyWrapped';
 import type {
   MissionsV2AbandonPayload,
   MissionsV2ActivatePayload,
@@ -760,11 +761,35 @@ export async function getAchievements(userId: string): Promise<AchievementSummar
   };
 }
 
+export async function getWeeklyWrappedLatest(userId: string): Promise<WeeklyWrappedRecord | null> {
+  const response = await getAuthorizedJson<{ item: WeeklyWrappedRecord | null }>(
+    `/users/${encodeURIComponent(userId)}/weekly-wrapped/latest`,
+  );
+  return response.item ?? null;
+}
+
+export async function getWeeklyWrappedPrevious(userId: string): Promise<WeeklyWrappedRecord | null> {
+  const response = await getAuthorizedJson<{ item: WeeklyWrappedRecord | null }>(
+    `/users/${encodeURIComponent(userId)}/weekly-wrapped/previous`,
+  );
+  return response.item ?? null;
+}
+
 export type StreakSummary = {
   userId: string;
   current: number;
   longest: number;
   updatedAt?: string;
+};
+
+export type WeeklyWrappedRecord = {
+  id: string;
+  userId: string;
+  weekStart: string;
+  weekEnd: string;
+  payload: WeeklyWrappedPayload;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export async function getStreaks(userId: string): Promise<StreakSummary> {

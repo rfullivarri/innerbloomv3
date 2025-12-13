@@ -53,6 +53,8 @@ import {
 } from '../components/dashboard-v3/ReminderSchedulerDialog';
 import { NotificationPopup } from '../components/feedback/NotificationPopup';
 import { useFeedbackNotifications } from '../hooks/useFeedbackNotifications';
+import { useWeeklyWrapped } from '../hooks/useWeeklyWrapped';
+import { WeeklyWrappedModal } from '../components/feedback/WeeklyWrappedModal';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -75,6 +77,7 @@ export default function DashboardV3Page() {
   const rawGameMode = userState?.mode_name ?? userState?.mode ?? profileGameMode ?? null;
   const normalizedGameMode = normalizeGameModeValue(rawGameMode);
   const gameMode = normalizedGameMode ?? (typeof rawGameMode === 'string' ? rawGameMode : null);
+  const weeklyWrapped = useWeeklyWrapped(backendUserId);
 
   useEffect(() => {
     if (!clerkUserId || typeof window === 'undefined') {
@@ -210,6 +213,9 @@ export default function DashboardV3Page() {
             onClose={feedbackNotifications.dismissActivePopup}
           />
         ) : null}
+        {weeklyWrapped.isModalOpen && weeklyWrapped.activeRecord ? (
+          <WeeklyWrappedModal payload={weeklyWrapped.activeRecord.payload} onClose={weeklyWrapped.closeModal} />
+        ) : null}
         <main className="flex-1 pb-24 md:pb-0">
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             {isLoadingProfile && <ProfileSkeleton />}
@@ -250,7 +256,13 @@ export default function DashboardV3Page() {
                 />
                 <Route
                   path="rewards"
-                  element={<RewardsView userId={backendUserId} section={rewardsSection} />}
+                  element={
+                    <RewardsView
+                      userId={backendUserId}
+                      section={rewardsSection}
+                      weeklyWrapped={weeklyWrapped}
+                    />
+                  }
                 />
                 <Route path="*" element={<Navigate to="." replace />} />
               </Routes>
@@ -403,7 +415,15 @@ function MissionsV3View({
   );
 }
 
-function RewardsView({ userId, section }: { userId: string; section: DashboardSectionConfig }) {
+function RewardsView({
+  userId,
+  section,
+  weeklyWrapped,
+}: {
+  userId: string;
+  section: DashboardSectionConfig;
+  weeklyWrapped: ReturnType<typeof useWeeklyWrapped>;
+}) {
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -412,7 +432,12 @@ function RewardsView({ userId, section }: { userId: string; section: DashboardSe
         description={section.description}
         pageTitle={section.pageTitle}
       />
-      <RewardsSection userId={userId} />
+      <RewardsSection
+        userId={userId}
+        weeklyWrappedCurrent={weeklyWrapped.latest}
+        weeklyWrappedPrevious={weeklyWrapped.previous}
+        onOpenWeeklyWrapped={weeklyWrapped.openModal}
+      />
     </div>
   );
 }
