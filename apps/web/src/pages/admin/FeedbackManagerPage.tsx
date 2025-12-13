@@ -54,7 +54,7 @@ export function FeedbackManagerPage() {
   const [activeTab, setActiveTab] = useState<TabId>('global');
 
   return (
-    <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-6 overflow-x-hidden px-4 py-6 text-slate-100 lg:px-8">
+    <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-6 overflow-x-hidden px-4 py-6 text-slate-100 lg:px-8">
       <header className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Admin · Feedback</p>
         <div>
@@ -642,7 +642,7 @@ function UserNotificationsView() {
   ];
 
   return (
-    <div className={`grid gap-5 ${userPanelOpen ? 'lg:grid-cols-[minmax(280px,360px),1fr]' : 'lg:grid-cols-1'}`}>
+    <div className={`grid min-w-0 gap-5 ${userPanelOpen ? 'lg:grid-cols-[minmax(280px,360px),1fr]' : 'lg:grid-cols-1'}`}>
       <aside
         className={`${
           userPanelOpen ? 'flex' : 'hidden'
@@ -672,7 +672,7 @@ function UserNotificationsView() {
         )}
       </aside>
 
-      <section className="space-y-5">
+      <section className="space-y-5 min-w-0">
         {banner ? <ToastBanner tone={banner.type} message={banner.text} /> : null}
 
         <div className="flex items-center justify-end lg:hidden">
@@ -781,7 +781,8 @@ function UserNotificationsView() {
               </div>
             </article>
 
-            <article className="overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-800/60 shadow-lg shadow-slate-900/30">
+            <div className="grid gap-5 xl:grid-cols-2 xl:items-start">
+            <article className="min-w-0 overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-800/60 shadow-lg shadow-slate-900/30">
               <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/70 px-4 py-4">
                 <div>
                   <p className="text-sm font-semibold text-slate-100">Bloque A — Notificaciones activas</p>
@@ -801,7 +802,7 @@ function UserNotificationsView() {
                 <p className="px-4 py-3 text-xs text-rose-200">{stateError}</p>
               ) : null}
               <div className="relative max-h-[420px] overflow-auto overflow-x-auto">
-                <table className="min-w-full border-collapse text-left text-sm text-slate-100">
+                <table className="min-w-[960px] border-collapse text-left text-sm text-slate-100">
                   <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
                     <tr>
                       <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">notification_key</th>
@@ -885,7 +886,7 @@ function UserNotificationsView() {
               </div>
             </article>
 
-            <article className="overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-800/60 shadow-lg shadow-slate-900/30">
+            <article className="min-w-0 overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-800/60 shadow-lg shadow-slate-900/30">
               <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/70 px-4 py-4">
                 <div>
                   <p className="text-sm font-semibold text-slate-100">Bloque B — Historial de disparos</p>
@@ -914,7 +915,7 @@ function UserNotificationsView() {
                 <p className="px-4 py-3 text-xs text-rose-200">{historyError}</p>
               ) : null}
               <div className="relative max-h-[420px] overflow-auto overflow-x-auto">
-                <table className="min-w-full border-collapse text-left text-sm text-slate-100">
+                <table className="min-w-[960px] border-collapse text-left text-sm text-slate-100">
                   <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
                     <tr>
                       <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">timestamp</th>
@@ -969,6 +970,7 @@ function UserNotificationsView() {
                 ) : null}
               </div>
             </article>
+            </div>
           </>
         )}
       </section>

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { AdminLayout } from './AdminLayout';
 import { TaskgenPage } from '../../pages/admin/TaskgenPage';
@@ -10,9 +11,10 @@ const NAV_LINKS = [
   { to: '/admin/feedback-manager', label: 'Feedback & Notifs' },
 ];
 
-function navLinkClass({ isActive }: { isActive: boolean }) {
+function navLinkClass({ isActive, collapsed }: { isActive: boolean; collapsed: boolean }) {
   return [
     'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+    collapsed ? 'justify-center px-2 py-3 text-xs' : '',
     isActive
       ? 'bg-sky-500/10 text-sky-200 shadow-inner shadow-sky-500/20'
       : 'text-slate-300 hover:bg-slate-800/60 hover:text-sky-100',
@@ -20,14 +22,36 @@ function navLinkClass({ isActive }: { isActive: boolean }) {
 }
 
 export function AdminShell() {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
-      <aside className="hidden w-60 flex-col border-r border-slate-800/60 bg-slate-900/60 px-3 py-6 md:flex">
-        <div className="px-3 pb-6 text-lg font-semibold tracking-tight text-slate-100">Admin</div>
-        <nav className="flex flex-1 flex-col gap-1">
+      <aside
+        className={`hidden flex-col border-r border-slate-800/60 bg-slate-900/60 px-3 py-4 transition-all duration-200 md:flex ${
+          collapsed ? 'w-16' : 'w-60'
+        }`}
+      >
+        <div className="mb-4 flex items-center justify-between gap-2 px-1">
+          <span className={`font-semibold tracking-tight text-slate-100 ${collapsed ? 'text-sm' : 'text-lg'}`}>Admin</span>
+          <button
+            type="button"
+            aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+            onClick={() => setCollapsed((value) => !value)}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-700/70 bg-slate-800/70 text-xs font-semibold text-slate-200 transition hover:border-sky-500/60 hover:text-sky-100"
+          >
+            {collapsed ? '›' : '‹'}
+          </button>
+        </div>
+        <nav className={`flex flex-1 flex-col gap-1 ${collapsed ? 'items-center' : ''}`}>
           {NAV_LINKS.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.to === '/admin'} className={navLinkClass}>
-              {item.label}
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/admin'}
+              className={({ isActive }: { isActive: boolean }) => navLinkClass({ isActive, collapsed })}
+              title={item.label}
+            >
+              {collapsed ? <span className="text-xs font-semibold uppercase">{item.label.slice(0, 2)}</span> : item.label}
             </NavLink>
           ))}
         </nav>
