@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useRequest } from '../../hooks/useRequest';
-import { getUserJourney, type UserJourneySummary } from '../../lib/api';
+import { getUserJourney, getUserTasks, type UserJourneySummary } from '../../lib/api';
 
 interface AlertsProps {
   userId: string;
@@ -20,16 +20,44 @@ function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean
 }
 
 export function Alerts({ userId, onScheduleClick }: AlertsProps) {
-  const { data, status } = useRequest(() => getUserJourney(userId), [userId]);
+  const { data: tasks, status: tasksStatus } = useRequest(() => getUserTasks(userId), [userId]);
+  const hasTasks = useMemo(() => (tasks?.length ?? 0) > 0, [tasks]);
+
+  const shouldLoadJourney = tasksStatus === 'success' ? hasTasks : tasksStatus === 'error';
+
+  const {
+    data,
+    status: journeyStatus,
+  } = useRequest(() => getUserJourney(userId), [userId], { enabled: shouldLoadJourney });
 
   const showBbdd = useMemo(() => shouldShowBbddWarning(data), [data]);
   const showScheduler = useMemo(() => shouldShowSchedulerWarning(data), [data]);
   const canSchedule = typeof onScheduleClick === 'function';
 
-  if (status === 'loading') {
+  if (tasksStatus === 'loading' || (shouldLoadJourney && journeyStatus === 'loading')) {
     return (
       <div className="space-y-3">
         <div className="animate-pulse rounded-2xl border border-white/5 bg-white/5/40 p-4" />
+      </div>
+    );
+  }
+
+  if (tasksStatus === 'success' && !hasTasks) {
+    return (
+      <div className="rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 text-sm text-sky-100">
+        <div className="flex items-start gap-3">
+          <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-sky-300" aria-hidden />
+          <div className="space-y-1">
+            <p className="font-semibold text-white">Completá tu onboarding</p>
+            <p className="text-sky-100/80">Necesitamos generar tus tareas para habilitar Innerbloom.</p>
+          </div>
+          <Link
+            to="/intro-journey"
+            className="ml-auto inline-flex rounded-full border border-sky-200/50 bg-sky-200/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur"
+          >
+            Hacer onboarding
+          </Link>
+        </div>
       </div>
     );
   }
