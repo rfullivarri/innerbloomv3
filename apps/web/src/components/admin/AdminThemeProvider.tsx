@@ -4,6 +4,7 @@ import {
   useEffect,
   useMemo,
   useCallback,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -37,6 +38,7 @@ function resolveInitialTheme(): { theme: AdminTheme; hasStoredPreference: boolea
 
 export function AdminThemeProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState(resolveInitialTheme);
+  const previousRootTheme = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !state.hasStoredPreference) {
@@ -58,6 +60,35 @@ export function AdminThemeProvider({ children }: { children: ReactNode }) {
     media.addEventListener('change', handler);
     return () => media.removeEventListener('change', handler);
   }, [state.hasStoredPreference]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const root = document.documentElement;
+    if (previousRootTheme.current === null) {
+      previousRootTheme.current = root.getAttribute('data-theme');
+    }
+
+    root.setAttribute('data-theme', state.theme);
+  }, [state.theme]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const root = document.documentElement;
+
+    return () => {
+      if (previousRootTheme.current === null) {
+        root.removeAttribute('data-theme');
+      } else {
+        root.setAttribute('data-theme', previousRootTheme.current);
+      }
+    };
+  }, []);
 
   const setTheme = useCallback((theme: AdminTheme) => setState({ theme, hasStoredPreference: true }), []);
 
