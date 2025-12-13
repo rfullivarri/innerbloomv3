@@ -854,7 +854,7 @@ function TaskListMobile({
 
   // TODO: incorporar gestos de swipe cuando exista infraestructura compartida en el proyecto.
   return (
-    <ul className="divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+    <ul className="divide-y divide-white/5 overflow-visible rounded-2xl border border-white/10 bg-white/5">
       {tasks.map((task) => {
         const { label: difficultyLabel, tone } = resolveDifficulty(task);
         const isMenuOpen = openMenuTaskId === task.id;
