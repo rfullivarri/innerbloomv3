@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserJourney, type UserJourneySummary } from '../../lib/api';
 
@@ -71,12 +72,12 @@ export function Alerts({ userId, onScheduleClick }: AlertsProps) {
                 Abrí el menú y revisá tu base para que podamos generar tu próxima Daily Quest.
               </p>
             </div>
-            <a
-              href="/MVP/gamificationweblanding/index-bbdd.html"
+            <Link
+              to="/editor"
               className="ml-auto inline-flex rounded-full border border-amber-200/50 bg-amber-200/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur"
             >
               Editar base
-            </a>
+            </Link>
           </div>
           <p className="mt-2 text-xs text-amber-100/70">
             Este aviso desaparece cuando tu registro diario queda confirmado en la nueva app.
