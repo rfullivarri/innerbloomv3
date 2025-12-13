@@ -1,5 +1,6 @@
 import { getEmailProvider } from './email/index.js';
 import type { EmailMessage } from './email/index.js';
+import { HttpError } from '../lib/http-error.js';
 import {
   claimTasksReadyNotification,
   hasTasksReadyNotification,
@@ -81,6 +82,38 @@ function buildEmailMessage(params: { to: string } & {
 </html>`;
 
   return { to: params.to, subject, html, text };
+}
+
+type TasksReadyPreviewParams = {
+  to?: string | null;
+  displayName?: string | null;
+  timezone?: string | null;
+  taskCount?: number | null;
+  ctaUrl?: string | null;
+};
+
+export async function sendTasksReadyEmailPreview(
+  params: TasksReadyPreviewParams,
+): Promise<{ ok: true; recipient: string; sent_at: string; task_count: number | null }> {
+  const recipient = sanitizeRecipient(params.to);
+
+  if (!recipient) {
+    throw new HttpError(400, 'missing_recipient', 'The user does not have an email address to send the tasks ready email');
+  }
+
+  const provider = getEmailProvider();
+  const now = new Date();
+  const message = buildEmailMessage({
+    to: recipient,
+    displayName: params.displayName,
+    timezone: params.timezone,
+    taskCount: params.taskCount ?? null,
+    ctaUrl: params.ctaUrl ?? undefined,
+  });
+
+  await provider.sendEmail(message);
+
+  return { ok: true, recipient, sent_at: now.toISOString(), task_count: params.taskCount ?? null };
 }
 
 function logSkip(reason: string, meta: Record<string, unknown>): void {
