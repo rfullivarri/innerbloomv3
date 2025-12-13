@@ -54,7 +54,7 @@ export function FeedbackManagerPage() {
   const [activeTab, setActiveTab] = useState<TabId>('global');
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 text-slate-100 lg:px-8">
+    <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-6 overflow-x-hidden px-4 py-6 text-slate-100 lg:px-8">
       <header className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Admin · Feedback</p>
         <div>
@@ -65,7 +65,7 @@ export function FeedbackManagerPage() {
         </div>
       </header>
 
-      <section className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-2 shadow-inner shadow-slate-950/30">
+      <section className="rounded-2xl border border-slate-700/60 bg-slate-800/60 p-2 shadow-inner shadow-slate-950/20">
         <div className="grid grid-cols-2 gap-2">
           {TABS.map((tab) => {
             const isActive = tab.id === activeTab;
@@ -244,7 +244,7 @@ function GlobalNotificationsView() {
         {summaryCards.map((card) => (
           <article
             key={card.label}
-            className="rounded-xl border border-slate-800/60 bg-slate-900/80 px-4 py-4 shadow-md shadow-slate-950/20"
+            className="rounded-xl border border-slate-700/50 bg-slate-800/70 px-4 py-4 shadow-md shadow-slate-900/20"
           >
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">{card.label}</p>
             <p className="mt-3 text-3xl font-semibold text-slate-50">{card.value}</p>
@@ -253,7 +253,7 @@ function GlobalNotificationsView() {
         ))}
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-900/60 shadow-lg shadow-slate-950/30">
+      <section className="overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-800/60 shadow-lg shadow-slate-900/20">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/70 px-4 py-4">
           <div>
             <p className="text-sm font-semibold text-slate-100">Inventario de notificaciones</p>
@@ -311,7 +311,7 @@ function GlobalNotificationsView() {
           {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
         </div>
 
-        <div className="max-h-[540px] overflow-auto">
+        <div className="max-h-[540px] overflow-auto overflow-x-auto">
           <table className="min-w-full border-collapse text-left text-sm">
             <thead className="sticky top-0 bg-slate-900/95 text-xs uppercase tracking-[0.2em] text-slate-400">
               <tr>
@@ -446,6 +446,7 @@ function GlobalNotificationsView() {
 
 function UserNotificationsView() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [userPanelOpen, setUserPanelOpen] = useState(true);
   const [userState, setUserState] = useState<FeedbackUserStateResponse | null>(null);
   const [history, setHistory] = useState<FeedbackUserHistoryResponse | null>(null);
   const [stateLoading, setStateLoading] = useState(false);
@@ -641,15 +642,28 @@ function UserNotificationsView() {
   ];
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[320px,1fr]">
-      <aside className="flex flex-col gap-4 rounded-2xl border border-slate-800/70 bg-slate-900/60 p-5 shadow-inner shadow-slate-950/20">
-        <header>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Selección de usuario</p>
-          <p className="mt-1 text-sm text-slate-300">Buscá por email o ID para enfocar la vista.</p>
+    <div className={`grid gap-5 ${userPanelOpen ? 'lg:grid-cols-[minmax(280px,360px),1fr]' : 'lg:grid-cols-1'}`}>
+      <aside
+        className={`${
+          userPanelOpen ? 'flex' : 'hidden'
+        } flex-col gap-4 rounded-2xl border border-slate-800/70 bg-slate-900/50 p-5 shadow-inner shadow-slate-950/20 lg:flex`}
+      >
+        <header className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Selección de usuario</p>
+            <p className="mt-1 text-sm text-slate-300">Buscá por email o ID para enfocar la vista.</p>
+          </div>
+          <button
+            type="button"
+            className="inline-flex items-center rounded-lg border border-slate-700/70 px-2 py-1 text-[11px] font-semibold text-slate-200 transition hover:border-sky-400/70 hover:text-sky-100 lg:hidden"
+            onClick={() => setUserPanelOpen(false)}
+          >
+            Ocultar
+          </button>
         </header>
         <UserPicker onSelect={handleUserSelect} selectedUserId={selectedUser?.id ?? null} />
         {selectedUser ? (
-          <div className="rounded-xl border border-slate-800/60 bg-slate-900/70 px-4 py-3 text-xs text-slate-300">
+          <div className="rounded-xl border border-slate-800/60 bg-slate-900/60 px-4 py-3 text-xs text-slate-300">
             <p className="font-semibold text-slate-100">{selectedUser.email ?? 'Sin email'}</p>
             <p className="text-[11px] text-slate-500">user_id: {selectedUser.id}</p>
           </div>
@@ -660,6 +674,16 @@ function UserNotificationsView() {
 
       <section className="space-y-5">
         {banner ? <ToastBanner tone={banner.type} message={banner.text} /> : null}
+
+        <div className="flex items-center justify-end lg:hidden">
+          <button
+            type="button"
+            onClick={() => setUserPanelOpen((open) => !open)}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-700/70 bg-slate-800/60 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:border-sky-400/70 hover:text-sky-50"
+          >
+            {userPanelOpen ? 'Ocultar panel de usuarios' : 'Mostrar panel de usuarios'}
+          </button>
+        </div>
 
         {!selectedUser ? (
           <article className="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-6 text-sm text-slate-300">
@@ -757,7 +781,7 @@ function UserNotificationsView() {
               </div>
             </article>
 
-            <article className="overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-900/70 shadow-lg shadow-slate-950/30">
+            <article className="overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-800/60 shadow-lg shadow-slate-900/30">
               <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/70 px-4 py-4">
                 <div>
                   <p className="text-sm font-semibold text-slate-100">Bloque A — Notificaciones activas</p>
@@ -776,7 +800,7 @@ function UserNotificationsView() {
               {stateError ? (
                 <p className="px-4 py-3 text-xs text-rose-200">{stateError}</p>
               ) : null}
-              <div className="relative max-h-[420px] overflow-auto">
+              <div className="relative max-h-[420px] overflow-auto overflow-x-auto">
                 <table className="min-w-full border-collapse text-left text-sm text-slate-100">
                   <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
                     <tr>
@@ -861,7 +885,7 @@ function UserNotificationsView() {
               </div>
             </article>
 
-            <article className="overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-900/70 shadow-lg shadow-slate-950/30">
+            <article className="overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-800/60 shadow-lg shadow-slate-900/30">
               <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/70 px-4 py-4">
                 <div>
                   <p className="text-sm font-semibold text-slate-100">Bloque B — Historial de disparos</p>
@@ -889,7 +913,7 @@ function UserNotificationsView() {
               {historyError ? (
                 <p className="px-4 py-3 text-xs text-rose-200">{historyError}</p>
               ) : null}
-              <div className="relative max-h-[420px] overflow-auto">
+              <div className="relative max-h-[420px] overflow-auto overflow-x-auto">
                 <table className="min-w-full border-collapse text-left text-sm text-slate-100">
                   <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
                     <tr>
