@@ -39,9 +39,27 @@ export type UpdateUserTaskPayload = {
 };
 
 export async function deleteUserTaskRow(userId: string, taskId: string): Promise<void> {
+  const columnResult = await pool.query<TaskColumnRow>(
+    `SELECT column_name
+       FROM information_schema.columns
+      WHERE table_name = $1
+        AND column_name = ANY($2::text[])`,
+    ['tasks', optionalColumns],
+  );
+
+  const existingColumns = new Set(columnResult.rows.map((row) => row.column_name));
+  const hasArchivedColumn = existingColumns.has('archived_at');
+
+  const setClauses = ['active = FALSE', 'updated_at = NOW()'];
+
+  if (hasArchivedColumn) {
+    setClauses.unshift('archived_at = COALESCE(archived_at, NOW())');
+  }
+
   const result = await pool.query<{ task_id: string }>(
-    `DELETE FROM tasks t
-      USING users u
+    `UPDATE tasks t
+        SET ${setClauses.join(', ')}
+      FROM users u
      WHERE t.task_id = $1
        AND t.user_id = $2
        AND u.user_id = $2

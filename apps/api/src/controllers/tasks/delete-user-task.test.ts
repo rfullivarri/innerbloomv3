@@ -47,7 +47,9 @@ describe('DELETE /api/users/:id/tasks/:taskId', () => {
       isNew: false,
     });
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
-    mockQuery.mockResolvedValueOnce({ rowCount: 1, rows: [{ task_id: taskId }] });
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ column_name: 'archived_at' }] })
+      .mockResolvedValueOnce({ rowCount: 1, rows: [{ task_id: taskId }] });
 
     const response = await request(app)
       .delete(`/api/users/${userId}/tasks/${taskId}`)
@@ -56,9 +58,15 @@ describe('DELETE /api/users/:id/tasks/:taskId', () => {
     expect(response.status).toBe(204);
     expect(response.body).toEqual({});
     expect(mockEnsureUserExists).toHaveBeenCalledWith(userId);
-    expect(mockQuery).toHaveBeenCalledTimes(1);
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining('DELETE FROM tasks'),
+    expect(mockQuery).toHaveBeenCalledTimes(2);
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('information_schema.columns'),
+      ['tasks', ['stat_id', 'completed_at', 'archived_at']],
+    );
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('UPDATE tasks'),
       [taskId, userId],
     );
   });
@@ -71,7 +79,9 @@ describe('DELETE /api/users/:id/tasks/:taskId', () => {
       isNew: false,
     });
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
-    mockQuery.mockResolvedValueOnce({ rowCount: 0, rows: [] });
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ column_name: 'archived_at' }] })
+      .mockResolvedValueOnce({ rowCount: 0, rows: [] });
 
     const response = await request(app)
       .delete(`/api/users/${userId}/tasks/${taskId}`)
@@ -79,5 +89,16 @@ describe('DELETE /api/users/:id/tasks/:taskId', () => {
 
     expect(response.status).toBe(404);
     expect(response.body).toEqual({ code: 'task_not_found', message: 'Task not found' });
+    expect(mockQuery).toHaveBeenCalledTimes(2);
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('information_schema.columns'),
+      ['tasks', ['stat_id', 'completed_at', 'archived_at']],
+    );
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('UPDATE tasks'),
+      [taskId, userId],
+    );
   });
 });
