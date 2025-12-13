@@ -303,9 +303,9 @@ export function buildWeeklyWrappedFromData(
     [
       {
         key: 'intro',
-        title: 'Weekly Wrapped',
-        body: `Tu semana (${periodLabel}) está lista. Respirá y recorré tus logros.`,
-        accent: 'Celebrá el recorrido',
+        title: 'Weekly Wrapped · Preview',
+        body: 'Tu semana, en movimiento.',
+        accent: `Semana ${periodLabel}`,
       },
       levelUp.happened
         ? {
@@ -319,19 +319,19 @@ export function buildWeeklyWrappedFromData(
         : null,
       {
         key: 'achievements',
-        title: 'Logros principales',
+        title: 'Resumen semanal',
         body:
           completions > 0
-            ? `Completaste ${completions} misiones y hábitos, sumando ${xpTotal.toLocaleString('es-AR')} XP.`
+            ? `Completaste ${completions} tareas y sumaste ${xpTotal.toLocaleString('es-AR')} XP esta semana.`
             : 'Semana tranquila: sin registros fuertes, pero el reset también suma.',
-        accent: completions > 0 ? 'Impulso sostenido' : 'Ritmo liviano',
+        accent: completions > 0 ? 'Datos reales' : 'Semana liviana',
       },
       {
         key: 'habits',
-        title: 'Hábitos constantes',
+        title: 'Ritmo que se sostiene',
         body:
           topHabits.length > 0
-            ? 'Estos hábitos marcaron tu ritmo y mantuvieron la semana en movimiento.'
+            ? 'Estos hábitos aparecieron de forma consistente y mantuvieron tu semana en movimiento.'
             : 'Aún no registramos hábitos destacados esta semana, pero estás a un clic de retomarlos.',
         items:
           topHabits.length > 0
@@ -339,10 +339,8 @@ export function buildWeeklyWrappedFromData(
                 title: habit.title,
                 body:
                   habit.daysActive > 0
-                    ? `${habit.daysActive}/7 días en marcha. ${
-                        habit.pillar ? `${habit.pillar} te acompañó.` : 'Constancia pura.'
-                      }`
-                    : `Ritmo sólido esta semana. ${habit.pillar ? `${habit.pillar} te acompañó.` : 'Constancia pura.'}`,
+                    ? `${habit.daysActive}/7 días. Sostuviste el compromiso.`
+                    : 'Ritmo sólido esta semana. Constancia pura.',
                 badge: habit.badge,
                 pillar: habit.pillar,
               }))
@@ -350,19 +348,19 @@ export function buildWeeklyWrappedFromData(
       },
       {
         key: 'improvement',
-        title: 'Movimiento y mejoras',
+        title: 'Progreso y foco',
         body:
           highlight
-            ? `${highlight} tuvo su mini salto esta semana. Pequeñas mejoras que sostienen el largo plazo.`
-            : 'No vimos mejoras claras, así que priorizamos el descanso y volvemos a empujar mañana.',
-        accent: highlight ? 'Nivel up suave' : 'Preparando la próxima racha',
+            ? `${highlight} fue el avance más claro: un paso breve que suma momentum.`
+            : 'Sin mejoras fuertes: prioricemos el descanso y mañana volvemos a empujar.',
+        accent: 'Momentum',
       },
       {
         key: 'pillar',
         title: 'Pilar dominante',
         body:
           pillarDominant
-            ? `${pillarDominant} lideró tu energía estos días. Seguí apoyándote en ese foco.`
+            ? `${getPillarIcon(pillarDominant)} ${pillarDominant} lideró tu energía estos días. Seguí apoyándote en ese foco.`
             : 'Sin un pilar dominante esta semana: espacio abierto para explorar Body, Mind o Soul.',
         accent: pillarDominant ?? 'Balanceado',
       },
@@ -386,12 +384,12 @@ export function buildWeeklyWrappedFromData(
           },
         ],
       },
-      {
-        key: 'closing',
-        title: 'Cierre',
-        body: 'Seguimos. Mañana vuelve el Daily Quest para sumar más.',
-        accent: 'Mañana hay más',
-      },
+        {
+          key: 'closing',
+          title: 'Cierre',
+          body: 'Seguimos. Mañana vuelve el Daily Quest para sumar otro paso.',
+          accent: 'Mañana hay más',
+        },
     ] as (WeeklyWrappedSection | null)[]
   ).filter((section): section is WeeklyWrappedSection => section !== null);
 
@@ -461,6 +459,15 @@ function dominantPillar(insights: AdminInsights): string | undefined {
   return top.code;
 }
 
+function getPillarIcon(pillar: string): string {
+  const icons: Record<string, string> = {
+    Body: '🫀',
+    Mind: '🧠',
+    Soul: '🌿',
+  };
+  return icons[pillar] ?? '';
+}
+
 function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayload {
   const start = daysAgo(6);
   const end = new Date();
@@ -491,9 +498,9 @@ function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayloa
       [
         {
           key: 'intro',
-          title: 'Weekly Wrapped',
-          body: `Tu semana (${formatDate(start)} – ${formatDate(end)}) está lista. Respirá y recorré tus logros.`,
-          accent: 'Vista previa mock',
+          title: 'Weekly Wrapped · Preview',
+          body: 'Tu semana, en movimiento.',
+          accent: `Semana ${formatDate(start)} – ${formatDate(end)}`,
         },
         mockLevelUp.happened
           ? {
@@ -505,35 +512,35 @@ function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayloa
           : null,
         {
           key: 'achievements',
-          title: 'Logros principales',
-          body: '3 misiones completadas y +320 XP. Cerraste la semana con energía.',
-          accent: 'Impulso sostenido',
+          title: 'Resumen semanal',
+          body: 'Completaste 3 tareas y sumaste 320 XP esta semana.',
+          accent: 'Datos reales',
         },
         {
           key: 'habits',
-          title: 'Hábitos constantes',
-          body: 'Estos hábitos mantuvieron la llama encendida.',
+          title: 'Ritmo que se sostiene',
+          body: 'Estos hábitos aparecieron de forma consistente y mantuvieron tu semana en movimiento.',
           items: [
             {
               title: 'Respiración consciente',
-              body: '7/7 días. Ritmo impecable.',
+              body: '7/7 días. Sostuviste el compromiso.',
               badge: 'racha activa',
               pillar: 'Mind',
             },
-            { title: 'Hidratación', body: '5/7 días. Más energía durante el día.', pillar: 'Body' },
-            { title: 'Stretch ligero', body: '4/7 días. Tu cuerpo lo agradece.', pillar: 'Body' },
+            { title: 'Hidratación', body: '5/7 días. Sostuviste el compromiso.', pillar: 'Body' },
+            { title: 'Stretch ligero', body: '4/7 días. Sostuviste el compromiso.', pillar: 'Body' },
           ],
         },
         {
           key: 'improvement',
-          title: 'Movimiento y mejoras',
-          body: 'Sumaste una mejora: le diste forma a “Cierre digital” y lo repetiste 3 veces.',
-          accent: 'Nivel up suave',
+          title: 'Progreso y foco',
+          body: '“Cierre digital” fue el avance más claro: un paso breve que suma momentum.',
+          accent: 'Momentum',
         },
         {
           key: 'pillar',
           title: 'Pilar dominante',
-          body: 'Mind dominó tu semana: más foco, menos ruido.',
+          body: '🧠 Mind dominó tu semana: más foco, menos ruido.',
           accent: 'Mind',
         },
         {
@@ -555,7 +562,7 @@ function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayloa
         {
           key: 'closing',
           title: 'Cierre',
-          body: 'Seguimos. Mañana vuelve el Daily Quest para sumar más.',
+          body: 'Seguimos. Mañana vuelve el Daily Quest para sumar otro paso.',
           accent: 'Mañana hay más',
         },
       ] as (WeeklyWrappedSection | null)[]
