@@ -43,6 +43,8 @@ export type WeeklyWrappedPayload = {
   summary: {
     pillarDominant: string | null;
     highlight: string | null;
+    completions: number;
+    xpTotal: number;
   };
   emotions: EmotionHighlight;
   levelUp: LevelUpHighlight;
@@ -398,7 +400,7 @@ export function buildWeeklyWrappedFromData(
     dataSource: 'real',
     variant,
     weekRange: { start: startDate.toISOString(), end: endDate.toISOString() },
-    summary: { pillarDominant, highlight },
+    summary: { pillarDominant, highlight, completions, xpTotal },
     emotions: emotionHighlight,
     levelUp,
     sections,
@@ -491,6 +493,8 @@ function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayloa
     summary: {
       pillarDominant: 'Mind',
       highlight: 'Meditación al amanecer',
+      completions: 3,
+      xpTotal: 320,
     },
     emotions: mockEmotions,
     levelUp: mockLevelUp,

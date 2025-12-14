@@ -341,7 +341,7 @@ async function buildWeeklyWrappedPayload(
     dataSource: 'real',
     variant,
     weekRange: { start: startDate.toISOString(), end: endDate.toISOString() },
-    summary: { pillarDominant, highlight },
+    summary: { pillarDominant, highlight, completions, xpTotal },
     emotions: emotionHighlight,
     levelUp,
     sections,
