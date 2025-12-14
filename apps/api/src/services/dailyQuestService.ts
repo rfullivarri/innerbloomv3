@@ -166,6 +166,21 @@ type DailyQuestUserContext = {
   today: string;
 };
 
+type SubmissionCacheEntry = {
+  date: string;
+  requestedDate: string | null;
+  emotionId: number;
+  tasks: string[];
+  notes: string | null;
+  result: SubmitDailyQuestResult;
+};
+
+const lastSubmissionCache = new Map<string, SubmissionCacheEntry>();
+
+function areArraysEqual(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
 function parseDateInput(raw: unknown, timezone: string, fallback: string): string {
   if (typeof raw !== 'string') {
     return fallback;
@@ -602,17 +617,44 @@ export async function submitDailyQuest(
   options: SubmitDailyQuestOptions = {},
 ): Promise<SubmitDailyQuestResult> {
   const log = options.log;
+  const requestedDate = typeof input.date === 'string' ? input.date.trim() : null;
+  const normalizedNotes = input.notes?.trim() || null;
+  const selectedTaskIds = Array.from(new Set(input.tasks_done));
+
+  const cached = lastSubmissionCache.get(userId);
+  if (
+    cached &&
+    cached.emotionId === input.emotion_id &&
+    areArraysEqual(selectedTaskIds, cached.tasks) &&
+    cached.notes === normalizedNotes &&
+    (requestedDate === null || requestedDate === cached.date || requestedDate === cached.requestedDate)
+  ) {
+    log?.('info', 'Daily quest submission reused cached result', {
+      userId,
+      resolvedDate: cached.date,
+      emotionId: input.emotion_id,
+      tasksSelected: selectedTaskIds.length,
+    });
+
+    return {
+      ...cached.result,
+      saved: {
+        ...cached.result.saved,
+        emotion: { ...cached.result.saved.emotion, notes: normalizedNotes },
+      },
+      xp_delta: 0,
+    } satisfies SubmitDailyQuestResult;
+  }
+
   const context = await loadUserContext(userId);
   const date = parseDateInput(input.date, context.timezone, context.today);
-  const notes = input.notes?.trim() || null;
+  const notes = normalizedNotes;
 
   await ensureEmotionExists(input.emotion_id, log);
 
   const tasks = await fetchGroupTasks(context.tasksGroupId);
   const taskLookup = new Map(tasks.map((task) => [task.task_id, task]));
   const allowedTaskIds = new Set(tasks.map((task) => task.task_id));
-  const selectedTaskIds = Array.from(new Set(input.tasks_done));
-
   log?.('info', 'Daily quest validation started', {
     userId,
     resolvedDate: date,
@@ -829,7 +871,7 @@ export async function submitDailyQuest(
     });
   }
 
-  return {
+  const result: SubmitDailyQuestResult = {
     ok: true,
     saved: {
       emotion: {
@@ -852,4 +894,15 @@ export async function submitDailyQuest(
     },
     feedback_events: feedbackEvents,
   } satisfies SubmitDailyQuestResult;
+
+  lastSubmissionCache.set(userId, {
+    date,
+    requestedDate,
+    emotionId: input.emotion_id,
+    tasks: completedTasks,
+    notes,
+    result,
+  });
+
+  return result;
 }
