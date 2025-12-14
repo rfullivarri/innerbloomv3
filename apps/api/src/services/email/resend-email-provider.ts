@@ -86,7 +86,23 @@ function formatResendError(error: ErrorResponse): string {
     details.push(`code=${error.name}`);
   }
 
+  if (isTestModeRestriction(error)) {
+    details.push(
+      'hint=Resend only allows sending to your account email in test mode. Verify a domain at https://resend.com/domains and set EMAIL_FROM to use that domain, or switch EMAIL_PROVIDER_NAME=console while testing.',
+    );
+  }
+
   return `Failed to send email via Resend: ${details.join(' | ')}`;
+}
+
+function isTestModeRestriction(error: ErrorResponse): boolean {
+  return (
+    error.statusCode === 403 &&
+    typeof error.name === 'string' &&
+    error.name.toLowerCase() === 'validation_error' &&
+    typeof error.message === 'string' &&
+    error.message.toLowerCase().includes('testing emails')
+  );
 }
 
 function getBackoffDelay(attempt: number): number {
