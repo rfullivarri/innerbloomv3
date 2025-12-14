@@ -615,25 +615,25 @@ function ClosingBlock({ message, accent, onClose, entered, index, active, regist
       active={active}
       registerSectionRef={registerSectionRef}
     >
-      <div className="flex h-full flex-col justify-between gap-10 text-slate-50">
+      <div className="flex h-full flex-col items-center justify-center gap-10 text-center text-slate-50">
         <div className="space-y-4">
           <p className="text-[11px] uppercase tracking-[0.25em] text-emerald-100">{slideLabel}</p>
           <h3 className="text-4xl font-semibold leading-tight drop-shadow-[0_0_28px_rgba(16,185,129,0.35)] sm:text-5xl">{accent}</h3>
           <p className="max-w-3xl text-xl leading-relaxed text-slate-100 sm:text-[22px]">{message}</p>
         </div>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 px-6 py-3 text-base font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5"
+            className="w-full min-w-[220px] rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 px-6 py-3 text-base font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 sm:w-auto"
           >
             Ir al Daily Quest
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-white/25 bg-white/10 px-6 py-3 text-base font-semibold text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300/50 hover:bg-emerald-400/20 hover:text-slate-950"
+            className="w-full min-w-[220px] rounded-full border border-white/25 bg-white/10 px-6 py-3 text-base font-semibold text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300/50 hover:bg-emerald-400/20 hover:text-slate-950 sm:w-auto"
           >
             Cerrar
           </button>
