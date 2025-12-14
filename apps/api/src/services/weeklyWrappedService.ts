@@ -202,12 +202,18 @@ export async function maybeGenerateWeeklyWrappedForDate(
   const { start, end } = resolveWeekRange(referenceDate);
   const existing = await findWeeklyWrappedByWeek(userId, end);
   if (existing) {
-    return existing;
+    return existing as WeeklyWrappedEntry;
   }
 
   const payload = await buildWeeklyWrappedPayload(userId, { start, end });
 
-  return insertWeeklyWrapped({ userId, weekStart: start, weekEnd: end, payload, summary: payload.summary });
+  return insertWeeklyWrapped({
+    userId,
+    weekStart: start,
+    weekEnd: end,
+    payload,
+    summary: payload.summary,
+  }) as Promise<WeeklyWrappedEntry>;
 }
 
 export async function getRecentWeeklyWrapped(userId: string, limit = 2): Promise<WeeklyWrappedEntry[]> {
