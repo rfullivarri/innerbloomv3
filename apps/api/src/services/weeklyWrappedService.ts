@@ -2,69 +2,22 @@ import { formatDateInTimezone } from '../controllers/users/user-state-service.js
 import type { InsightQuery, LogsQuery } from '../modules/admin/admin.schemas.js';
 import { getUserInsights, getUserLogs } from '../modules/admin/admin.service.js';
 import { HttpError } from '../lib/http-error.js';
-import { loadUserLevelSummary, type UserLevelSummary } from './userLevelSummaryService.js';
 import {
   findWeeklyWrappedByWeek,
   insertWeeklyWrapped,
   listActiveUsersWithLogs,
   listRecentWeeklyWrapped,
 } from '../repositories/weekly-wrapped.repository.js';
-
-export type WeeklyWrappedSection = {
-  key: string;
-  title: string;
-  body: string;
-  accent?: string;
-  items?: { title: string; body: string; badge?: string; pillar?: string | null }[];
-};
-
-export type WeeklyWrappedPayload = {
-  mode: 'final' | 'preview';
-  dataSource: 'real' | 'mock';
-  variant: 'full' | 'light';
-  weekRange: { start: string; end: string };
-  summary: {
-    pillarDominant: string | null;
-    highlight: string | null;
-  };
-  emotions: EmotionHighlight;
-  levelUp: LevelUpHighlight;
-  sections: WeeklyWrappedSection[];
-};
-
-export type WeeklyWrappedEntry = {
-  id: string;
-  userId: string;
-  weekStart: string;
-  weekEnd: string;
-  payload: WeeklyWrappedPayload;
-  summary: unknown | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type EmotionHighlightEntry = {
-  key: EmotionMessageKey;
-  label: string;
-  tone: string;
-  color: string;
-  weeklyMessage: string;
-  biweeklyContext: string;
-};
-
-type EmotionHighlight = {
-  weekly: EmotionHighlightEntry | null;
-  biweekly: EmotionHighlightEntry | null;
-};
-
-type EmotionMessageKey =
-  | 'felicidad'
-  | 'motivacion'
-  | 'calma'
-  | 'cansancio'
-  | 'ansiedad'
-  | 'tristeza'
-  | 'frustracion';
+import type {
+  EmotionHighlight,
+  EmotionHighlightEntry,
+  EmotionMessageKey,
+  LevelUpHighlight,
+  WeeklyWrappedEntry,
+  WeeklyWrappedPayload,
+  WeeklyWrappedSection,
+} from '../types/weeklyWrapped.js';
+import { loadUserLevelSummary, type UserLevelSummary } from './userLevelSummaryService.js';
 
 type EmotionSnapshot = { date: string; emotions: string[] };
 
@@ -74,14 +27,6 @@ type NormalizedLog = AdminLogRow & {
   dateKey: string | null;
   quantity: number;
   state: 'red' | 'yellow' | 'green';
-};
-
-type LevelUpHighlight = {
-  happened: boolean;
-  currentLevel: number | null;
-  previousLevel: number | null;
-  xpGained: number;
-  forced: boolean;
 };
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };

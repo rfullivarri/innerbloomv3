@@ -1,4 +1,5 @@
 import { pool } from '../db.js';
+import type { WeeklyWrappedEntry, WeeklyWrappedPayload } from '../types/weeklyWrapped.js';
 
 export type WeeklyWrappedRow = {
   weekly_wrapped_id: string;
@@ -40,13 +41,13 @@ async function ensureWeeklyWrappedReady(): Promise<void> {
   await readyPromise;
 }
 
-function mapRow(row: WeeklyWrappedRow) {
+function mapRow(row: WeeklyWrappedRow): WeeklyWrappedEntry {
   return {
     id: row.weekly_wrapped_id,
     userId: row.user_id,
     weekStart: row.week_start,
     weekEnd: row.week_end,
-    payload: row.payload,
+    payload: row.payload as WeeklyWrappedPayload,
     summary: row.summary ?? null,
     createdAt: row.created_at?.toISOString?.() ?? new Date(row.created_at).toISOString(),
     updatedAt: row.updated_at?.toISOString?.() ?? new Date(row.updated_at).toISOString(),
@@ -76,7 +77,7 @@ export async function insertWeeklyWrapped(input: {
   userId: string;
   weekStart: string;
   weekEnd: string;
-  payload: unknown;
+  payload: WeeklyWrappedPayload;
   summary?: unknown | null;
 }): Promise<ReturnType<typeof mapRow>> {
   await ensureWeeklyWrappedReady();
