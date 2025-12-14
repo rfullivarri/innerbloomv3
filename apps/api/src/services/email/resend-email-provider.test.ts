@@ -22,11 +22,11 @@ function createClient(sendMock: SendMock): Resend {
   } as unknown as Resend;
 }
 
-function createError(statusCode: number, message = 'boom'): ErrorResponse {
+function createError(statusCode: number, message = 'boom', name: ErrorResponse['name'] = 'application_error'): ErrorResponse {
   return {
     message,
     statusCode,
-    name: 'application_error',
+    name,
   };
 }
 
@@ -104,5 +104,25 @@ describe('ResendEmailProvider', () => {
     await expect(provider.sendEmail(baseMessage)).rejects.toThrow(/Internal error/);
     expect(sendMock).toHaveBeenCalledTimes(3);
     expect(sleepMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('adds a helpful hint when Resend rejects sends in test mode', async () => {
+    const sendMock = vi.fn<[], Promise<SendResult>>().mockResolvedValueOnce(
+      buildErrorResult(
+        createError(
+          403,
+          'You can only send testing emails to your own email address (rfullivarri22@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.',
+          'validation_error',
+        ),
+      ),
+    );
+
+    const provider = new ResendEmailProvider({
+      apiKey: 'test',
+      defaultFrom: 'Innerbloom <daily@example.com>',
+      client: createClient(sendMock),
+    });
+
+    await expect(provider.sendEmail(baseMessage)).rejects.toThrow(/hint=Resend only allows sending to your account email in test mode/);
   });
 });
