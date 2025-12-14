@@ -626,14 +626,14 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
       </div>
 
         <div className="grid gap-4 md:grid-cols-[1.1fr,0.9fr]">
-          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/25 via-orange-400/10 to-rose-500/20 p-4 shadow-lg shadow-amber-400/20">
+          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-200/20 via-amber-400/15 to-rose-400/20 p-4 shadow-lg shadow-amber-300/25">
             <p className="text-[11px] uppercase tracking-[0.2em] text-amber-50">Lo que marcó tu semana</p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <span
-                className="h-3 w-3 rounded-full shadow-[0_0_0_6px_rgba(255,255,255,0.14)]"
+                className="h-4 w-4 rounded-full shadow-[0_0_0_6px_rgba(255,255,255,0.16)]"
                 style={{ backgroundColor: weeklyColor }}
               />
-              <p className="text-xl font-semibold text-slate-950 drop-shadow-[0_0_18px_rgba(251,191,36,0.35)]">{weeklyLabel}</p>
+              <p className="text-xl font-semibold text-slate-900 drop-shadow-[0_0_18px_rgba(251,191,36,0.35)]">{weeklyLabel}</p>
               <span className="rounded-full bg-white/20 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-900">
                 Semana actual · 7d
               </span>
@@ -645,16 +645,16 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
             </p>
           </div>
 
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/10 p-4 shadow-lg shadow-emerald-500/15">
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-4 shadow-lg shadow-emerald-400/20">
           <div className="flex items-center gap-3">
-            <div className="relative h-12 w-12">
+            <div className="relative h-14 w-14">
               <span
                 className="absolute inset-0 animate-ping rounded-full opacity-40"
                 style={{ backgroundColor: biweeklyColor }}
                 aria-hidden
               />
               <span
-                className="absolute inset-2 rounded-full opacity-60"
+                className="absolute inset-[6px] rounded-full opacity-60"
                 style={{ backgroundColor: `${biweeklyColor}66` }}
                 aria-hidden
               />
@@ -676,8 +676,7 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
               : biweeklyContext}
           </p>
           <div className="mt-3 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.16em] text-slate-200">
-            <span className="rounded-full border border-white/15 bg-white/5 px-2 py-1">Semana actual · 7d</span>
-            <span className="rounded-full border border-emerald-300/25 bg-emerald-500/10 px-2 py-1">Últimos 15 días</span>
+            <span className="rounded-full border border-emerald-300/25 bg-emerald-500/15 px-2 py-1">Últimos 15 días</span>
           </div>
         </div>
       </div>
