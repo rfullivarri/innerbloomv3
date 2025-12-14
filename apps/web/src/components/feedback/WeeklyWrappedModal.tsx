@@ -102,6 +102,12 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
     return map;
   }, [payload.sections]);
 
+  const achievementsMetrics = extractSummaryMetrics(sectionsByKey.achievements?.body);
+
+  const completions = payload.summary?.completions ?? achievementsMetrics?.completions ?? 0;
+  const xpTotal = payload.summary?.xpTotal ?? achievementsMetrics?.xpTotal ?? 0;
+  const hasAchievementStats = completions > 0 || xpTotal > 0 || Boolean(achievementsMetrics);
+
   const habitsItems = (sectionsByKey.habits?.items ?? []).map((item, idx) => ({
     ...item,
     icon: getHabitIcon(item.pillar, idx),
@@ -144,11 +150,16 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               label={sectionsByKey.intro?.title ?? 'Weekly Wrapped · Preview'}
               headline={sectionsByKey.intro?.body ?? 'Tu semana, en movimiento'}
               badges={[formatRange(payload.weekRange), ...badges]}
-              description={sectionsByKey.achievements?.body ?? 'Completaste 0 tareas y sumaste 0 XP esta semana.'}
+              description={
+                hasAchievementStats
+                  ? undefined
+                  : sectionsByKey.achievements?.body ??
+                    'Completaste 0 tareas y sumaste 0 XP esta semana.'
+              }
               kicker={sectionsByKey.achievements?.accent}
               stats={{
-                completions: payload.summary?.completions ?? 0,
-                xpTotal: payload.summary?.xpTotal ?? 0,
+                completions,
+                xpTotal,
               }}
               entered={entered}
               index={0}
@@ -265,7 +276,7 @@ type SectionBlockProps = {
   label: string;
   headline: string;
   badges: string[];
-  description: string;
+  description?: string;
   kicker?: string;
   highlightText?: string;
   stats?: { completions: number; xpTotal: number };
@@ -326,7 +337,9 @@ function SectionBlock({
             <>
               {kicker ? <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">{kicker}</p> : null}
               {highlightText ? <p className="text-xl font-semibold text-slate-50 sm:text-2xl">{highlightText}</p> : null}
-              <p className="max-w-3xl text-lg text-slate-200 sm:text-xl">{description}</p>
+              {description ? (
+                <p className="max-w-3xl text-lg text-slate-200 sm:text-xl">{description}</p>
+              ) : null}
             </>
           )}
         </div>
@@ -343,7 +356,7 @@ function WeeklyKPIHighlight({
 }: {
   completions: number;
   xpTotal: number;
-  description: string;
+  description?: string;
   kicker?: string;
 }) {
   const formatter = new Intl.NumberFormat('es-AR');
@@ -367,10 +380,30 @@ function WeeklyKPIHighlight({
 
         <div className="h-px w-full bg-gradient-to-r from-emerald-400/30 via-white/30 to-sky-400/30" aria-hidden />
 
-        <p className="max-w-3xl text-base text-slate-50 sm:text-lg">{description}</p>
+        {description ? (
+          <p className="max-w-3xl text-base text-slate-50 sm:text-lg">{description}</p>
+        ) : null}
       </div>
     </div>
   );
+}
+
+function extractSummaryMetrics(
+  text?: string | null,
+): { completions: number; xpTotal: number } | null {
+  if (!text) return null;
+
+  const match = text.match(/Completaste\s+([\d\.]+)\s+tareas.*?sumaste\s+([\d\.]+)\s*XP/i);
+  if (!match) return null;
+
+  const completions = Number.parseInt(match[1]?.replace(/\./g, '') ?? '', 10);
+  const xpTotal = Number.parseInt(match[2]?.replace(/\./g, '') ?? '', 10);
+
+  if (!Number.isFinite(completions) || !Number.isFinite(xpTotal)) {
+    return null;
+  }
+
+  return { completions, xpTotal };
 }
 
 function KPIStat({
