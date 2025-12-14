@@ -145,6 +145,11 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               headline={sectionsByKey.intro?.body ?? 'Tu semana, en movimiento'}
               badges={[formatRange(payload.weekRange), ...badges]}
               description={sectionsByKey.achievements?.body ?? 'Completaste 0 tareas y sumaste 0 XP esta semana.'}
+              kicker={sectionsByKey.achievements?.accent}
+              stats={{
+                completions: payload.summary?.completions ?? 0,
+                xpTotal: payload.summary?.xpTotal ?? 0,
+              }}
               entered={entered}
               index={0}
               active={activeIndex === 0}
@@ -263,6 +268,7 @@ type SectionBlockProps = {
   description: string;
   kicker?: string;
   highlightText?: string;
+  stats?: { completions: number; xpTotal: number };
   entered: boolean;
   index: number;
   active?: boolean;
@@ -276,6 +282,7 @@ function SectionBlock({
   description,
   kicker,
   highlightText,
+  stats,
   entered,
   index,
   active,
@@ -308,12 +315,95 @@ function SectionBlock({
         </header>
 
         <div className="flex flex-1 flex-col justify-center gap-4 text-lg leading-relaxed text-slate-100">
-          {kicker ? <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">{kicker}</p> : null}
-          {highlightText ? <p className="text-xl font-semibold text-slate-50 sm:text-2xl">{highlightText}</p> : null}
-          <p className="max-w-3xl text-lg text-slate-200 sm:text-xl">{description}</p>
+          {stats ? (
+            <WeeklyKPIHighlight
+              completions={stats.completions}
+              xpTotal={stats.xpTotal}
+              description={description}
+              kicker={kicker}
+            />
+          ) : (
+            <>
+              {kicker ? <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">{kicker}</p> : null}
+              {highlightText ? <p className="text-xl font-semibold text-slate-50 sm:text-2xl">{highlightText}</p> : null}
+              <p className="max-w-3xl text-lg text-slate-200 sm:text-xl">{description}</p>
+            </>
+          )}
         </div>
       </div>
     </SectionShell>
+  );
+}
+
+function WeeklyKPIHighlight({
+  completions,
+  xpTotal,
+  description,
+  kicker,
+}: {
+  completions: number;
+  xpTotal: number;
+  description: string;
+  kicker?: string;
+}) {
+  const formatter = new Intl.NumberFormat('es-AR');
+
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-emerald-500/10 to-indigo-500/10 p-5 shadow-[0_20px_60px_rgba(8,47,73,0.42)] backdrop-blur">
+      <div className="kpi-aurora pointer-events-none absolute inset-[-25%]" aria-hidden />
+      <div className="relative z-10 flex flex-col gap-4">
+        <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-100">
+          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200/40 bg-slate-950/40 px-3 py-1 text-[10px] shadow-[0_0_0_1px_rgba(16,185,129,0.35),0_10px_30px_rgba(16,185,129,0.2)]">
+            <span aria-hidden>✨</span>
+            KPI semanal
+          </span>
+          {kicker ? <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-[10px] text-emerald-50">{kicker}</span> : null}
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <KPIStat label="Tareas" value={formatter.format(completions)} suffix="completadas" />
+          <KPIStat label="XP" value={formatter.format(xpTotal)} suffix="esta semana" highlight />
+        </div>
+
+        <div className="h-px w-full bg-gradient-to-r from-emerald-400/30 via-white/30 to-sky-400/30" aria-hidden />
+
+        <p className="max-w-3xl text-base text-slate-50 sm:text-lg">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function KPIStat({
+  label,
+  value,
+  suffix,
+  highlight = false,
+}: {
+  label: string;
+  value: string;
+  suffix?: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 shadow-[0_20px_50px_rgba(12,74,110,0.35)] transition duration-500 ${
+        highlight ? 'ring-1 ring-emerald-300/40' : ''
+      }`}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-white/5 to-transparent opacity-80" aria-hidden />
+      <div className="relative flex items-center justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{label}</p>
+          <p className="text-4xl font-semibold leading-tight text-white sm:text-[44px]">
+            {value}
+            <span className="ml-2 text-base font-medium text-emerald-100">{suffix}</span>
+          </p>
+        </div>
+        <span className="rounded-full bg-white/10 px-2 py-1 text-lg" aria-hidden>
+          {highlight ? '⚡️' : '✅'}
+        </span>
+      </div>
+    </div>
   );
 }
 

@@ -14,6 +14,8 @@ export type WeeklyWrappedPayload = {
   summary: {
     pillarDominant: string | null;
     highlight: string | null;
+    completions: number;
+    xpTotal: number;
   };
   emotions: EmotionHighlight;
   levelUp: LevelUpHighlight;
