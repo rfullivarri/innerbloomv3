@@ -762,16 +762,22 @@ export async function getAchievements(userId: string): Promise<AchievementSummar
 }
 
 export async function getWeeklyWrappedLatest(userId: string): Promise<WeeklyWrappedRecord | null> {
+  console.info('[weekly-wrapped] fetching latest record', { userId });
   const response = await getAuthorizedJson<{ item: WeeklyWrappedRecord | null }>(
     `/users/${encodeURIComponent(userId)}/weekly-wrapped/latest`,
   );
+  logShape('[weekly-wrapped] latest response', response);
+  console.info('[weekly-wrapped] latest record resolved', { hasItem: Boolean(response.item) });
   return response.item ?? null;
 }
 
 export async function getWeeklyWrappedPrevious(userId: string): Promise<WeeklyWrappedRecord | null> {
+  console.info('[weekly-wrapped] fetching previous record', { userId });
   const response = await getAuthorizedJson<{ item: WeeklyWrappedRecord | null }>(
     `/users/${encodeURIComponent(userId)}/weekly-wrapped/previous`,
   );
+  logShape('[weekly-wrapped] previous response', response);
+  console.info('[weekly-wrapped] previous record resolved', { hasItem: Boolean(response.item) });
   return response.item ?? null;
 }
 

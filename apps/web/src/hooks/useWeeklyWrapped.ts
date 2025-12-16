@@ -13,10 +13,16 @@ export function useWeeklyWrapped(userId: string | null | undefined) {
       latest: WeeklyWrappedRecord | null;
       previous: WeeklyWrappedRecord | null;
     };
+    console.info('[weekly-wrapped] loading records for user', { userId });
     const [latest, previous] = await Promise.all([
       getWeeklyWrappedLatest(userId),
       getWeeklyWrappedPrevious(userId),
     ]);
+    console.info('[weekly-wrapped] records loaded', {
+      userId,
+      latestWeek: latest?.weekEnd,
+      previousWeek: previous?.weekEnd,
+    });
     return { latest, previous };
   }, [userId], { enabled: Boolean(userId) });
 
