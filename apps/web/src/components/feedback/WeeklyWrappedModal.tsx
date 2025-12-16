@@ -128,8 +128,8 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
         : daysMatch
           ? Number.parseInt(daysMatch[1] ?? '0', 10)
           : undefined;
-      const weeksActive = Number.isFinite(item.weeksActive) ? item.weeksActive : undefined;
-      const weeksSample = Number.isFinite(item.weeksSample) ? item.weeksSample : undefined;
+      const weeksActive = item.weeksActive;
+      const weeksSample = item.weeksSample;
       return {
         ...item,
         icon: getHabitIcon(item.pillar, idx),
@@ -531,15 +531,15 @@ function KPIStat({
   );
 }
 
-type HabitItem = {
+export type HabitItem = {
   title: string;
   body: string;
   badge?: string;
   icon?: string;
   pillar?: string | null;
   daysActive?: number;
-  weeksActive?: number;
-  weeksSample?: number;
+  weeksActive?: number | string;
+  weeksSample?: number | string;
 };
 
 type HabitsBlockProps = {
@@ -561,9 +561,16 @@ const HABIT_HEALTH_STYLES: Record<HabitHealthLevel, string> = {
   weak: 'bg-rose-300 text-rose-950',
 };
 
-function resolveHabitHealth({ daysActive, weeksActive, weeksSample }: HabitItem) {
-  const normalizedWeeksSample = Number.isFinite(weeksSample) ? Math.max(0, Math.round(weeksSample ?? 0)) : 0;
-  const normalizedWeeksActive = Number.isFinite(weeksActive) ? Math.max(0, Math.round(weeksActive ?? 0)) : 0;
+export function resolveHabitHealth({ daysActive, weeksActive, weeksSample }: HabitItem) {
+  const parsedWeeksSample = Number(weeksSample);
+  const parsedWeeksActive = Number(weeksActive);
+
+  const normalizedWeeksActive = Number.isFinite(parsedWeeksActive) ? Math.max(0, Math.round(parsedWeeksActive)) : 0;
+  const normalizedWeeksSample = Number.isFinite(parsedWeeksSample)
+    ? Math.max(0, Math.round(parsedWeeksSample))
+    : normalizedWeeksActive > 0
+      ? normalizedWeeksActive
+      : 0;
 
   const completionRate = (() => {
     if (normalizedWeeksSample > 0) {
@@ -574,7 +581,7 @@ function resolveHabitHealth({ daysActive, weeksActive, weeksSample }: HabitItem)
     return Math.round((normalizedDays / 7) * 100);
   })();
 
-  const sampleForHealth = normalizedWeeksSample || 1;
+  const sampleForHealth = Math.max(1, normalizedWeeksSample, normalizedWeeksActive);
 
   return getHabitHealthFromInsights(completionRate, sampleForHealth);
 }
