@@ -53,6 +53,15 @@ export type WeeklyWrappedPayload = {
     highlight: string | null;
     completions: number;
     xpTotal: number;
+    energyHighlight?: { metric: 'HP' | 'FOCUS' | 'MOOD'; value: number };
+    effortBalance?: {
+      easy: number;
+      medium: number;
+      hard: number;
+      total: number;
+      topTask?: { title: string; completions: number; difficulty: string } | null;
+      topHardTask?: { title: string; completions: number } | null;
+    };
   };
   emotions: EmotionHighlight;
   levelUp: LevelUpHighlight;
@@ -103,6 +112,12 @@ const EMOTION_KEY_BY_LABEL: Record<string, EmotionMessageKey> = {
 const EMOTION_KEY_BY_NORMALIZED_LABEL: Record<string, EmotionMessageKey> = Object.fromEntries(
   Object.entries(EMOTION_KEY_BY_LABEL).map(([label, key]) => [normalizeText(label), key]),
 );
+
+const ENERGY_METRIC_BY_PILLAR: Record<string, { label: 'HP' | 'FOCUS' | 'MOOD' }> = {
+  Body: { label: 'HP' },
+  Mind: { label: 'FOCUS' },
+  Soul: { label: 'MOOD' },
+};
 
 const EMOTION_COLORS: Record<EmotionMessageKey, string> = {
   calma: '#2ECC71',
@@ -355,6 +370,7 @@ export async function buildWeeklyWrappedFromData(
   const weeksSample = Math.max(1, Math.ceil((endDate.getTime() - longTermStartDate.getTime() + MS_IN_DAY) / (7 * MS_IN_DAY)));
 
   const { completions, habitCounts } = summarizeWeeklyActivity(weeklyLogs);
+  const effortBalance = computeEffortBalance(weeklyLogs);
   const longTermHabits = aggregateHabits(longTermLogs, weeksSample);
   const longTermHabitMap = new Map(longTermHabits.map((habit) => [habit.title, habit]));
 
@@ -374,7 +390,8 @@ export async function buildWeeklyWrappedFromData(
   const topHabitsWithInsights = await hydrateHabitsWithTaskInsights(topHabits);
   const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
-  const highlight = topHabitsWithInsights[0]?.title ?? null;
+  const highlight = effortBalance.topTask?.title ?? topHabitsWithInsights[0]?.title ?? null;
+  const energyHighlight = computeEnergyHighlightFromInsights(insights, pillarDominant);
   const emotionHighlight = buildEmotionHighlight(emotions);
   const weeklyEmotionMessage =
     emotionHighlight.weekly?.weeklyMessage ??
@@ -487,7 +504,7 @@ export async function buildWeeklyWrappedFromData(
     dataSource: 'real',
     variant,
     weekRange: { start: startDate.toISOString(), end: endDate.toISOString() },
-    summary: { pillarDominant, highlight, completions, xpTotal },
+    summary: { pillarDominant, highlight, completions, xpTotal, energyHighlight, effortBalance },
     emotions: emotionHighlight,
     levelUp,
     sections,
@@ -578,6 +595,73 @@ function getPillarIcon(pillar: string): string {
   return icons[pillar] ?? '';
 }
 
+function computeEnergyHighlightFromInsights(
+  insights: AdminInsights,
+  pillarDominant: string | null,
+): WeeklyWrappedPayload['summary']['energyHighlight'] {
+  const metric = pillarDominant && ENERGY_METRIC_BY_PILLAR[pillarDominant]
+    ? ENERGY_METRIC_BY_PILLAR[pillarDominant]
+    : ENERGY_METRIC_BY_PILLAR.Body;
+
+  const constancyValue = pillarDominant
+    ? insights.constancyWeekly[pillarDominant.toLowerCase() as 'body' | 'mind' | 'soul'] ?? 0
+    : Math.max(
+        insights.constancyWeekly.body ?? 0,
+        insights.constancyWeekly.mind ?? 0,
+        insights.constancyWeekly.soul ?? 0,
+      );
+
+  const value = Math.max(0, Math.min(100, Math.round(constancyValue)));
+
+  return { metric: metric.label, value } as WeeklyWrappedPayload['summary']['energyHighlight'];
+}
+
+function getDifficultyBucket(difficulty?: string | null): 'easy' | 'medium' | 'hard' {
+  const normalized = (difficulty ?? '').trim().toLowerCase();
+  if (normalized.includes('hard') || normalized === 'dificil' || normalized === 'difícil') {
+    return 'hard';
+  }
+  if (normalized.includes('easy') || normalized === 'facil' || normalized === 'fácil') {
+    return 'easy';
+  }
+  return 'medium';
+}
+
+function computeEffortBalance(logs: NormalizedLog[]): NonNullable<WeeklyWrappedPayload['summary']['effortBalance']> {
+  const counts = { easy: 0, medium: 0, hard: 0 } as const;
+  const taskTotals = new Map<string, { completions: number; difficulty: 'easy' | 'medium' | 'hard' }>();
+
+  for (const log of logs) {
+    if (log.state === 'red' || !log.dateKey) continue;
+    const bucket = getDifficultyBucket(log.difficulty);
+    const completions = log.quantity;
+    counts[bucket] = counts[bucket] + completions;
+
+    const key = log.taskName || log.taskId;
+    if (!key) continue;
+    const prev = taskTotals.get(key) ?? { completions: 0, difficulty: bucket };
+    taskTotals.set(key, { completions: prev.completions + completions, difficulty: bucket });
+  }
+
+  const total = counts.easy + counts.medium + counts.hard;
+  const topTask = Array.from(taskTotals.entries())
+    .map(([title, info]) => ({ title, ...info }))
+    .sort((a, b) => b.completions - a.completions)[0];
+  const topHardTask = Array.from(taskTotals.entries())
+    .map(([title, info]) => ({ title, ...info }))
+    .filter((entry) => entry.difficulty === 'hard')
+    .sort((a, b) => b.completions - a.completions)[0];
+
+  return {
+    easy: counts.easy,
+    medium: counts.medium,
+    hard: counts.hard,
+    total,
+    topTask: topTask ? { title: topTask.title, completions: topTask.completions, difficulty: topTask.difficulty } : null,
+    topHardTask: topHardTask ? { title: topHardTask.title, completions: topHardTask.completions } : null,
+  };
+}
+
 function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayload {
   const start = daysAgo(6);
   const end = new Date();
@@ -603,6 +687,15 @@ function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayloa
       highlight: 'Meditación al amanecer',
       completions: 3,
       xpTotal: 320,
+      energyHighlight: { metric: 'HP', value: 88 },
+      effortBalance: {
+        easy: 4,
+        medium: 3,
+        hard: 2,
+        total: 9,
+        topTask: { title: 'Respiración consciente', completions: 3, difficulty: 'medium' },
+        topHardTask: { title: 'Entrenamiento de fuerza', completions: 2 },
+      },
     },
     emotions: mockEmotions,
     levelUp: mockLevelUp,

@@ -270,6 +270,8 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               pillarDominant={pillarDominant}
               completions={completions}
               xpTotal={xpTotal}
+              energyHighlight={payload.summary.energyHighlight}
+              effortBalance={payload.summary.effortBalance}
               entered={entered}
               index={progressIndex}
               active={activeIndex === progressIndex}
@@ -725,6 +727,8 @@ type ProgressBlockProps = {
   pillarDominant: string | null;
   completions?: number;
   xpTotal?: number;
+  energyHighlight?: WeeklyWrappedPayload['summary']['energyHighlight'];
+  effortBalance?: WeeklyWrappedPayload['summary']['effortBalance'];
   entered: boolean;
   index: number;
   active?: boolean;
@@ -737,6 +741,8 @@ function ProgressBlock({
   pillarDominant,
   completions = 0,
   xpTotal = 0,
+  energyHighlight,
+  effortBalance,
   entered,
   index,
   active,
@@ -748,13 +754,36 @@ function ProgressBlock({
     'que suma a tu bienestar.',
   );
   const improvementStory = improvementBody.split('. ')[0];
-  const energySnapshot = computeEnergySnapshot(pillarDominant, completions, xpTotal);
+  const energySnapshot = computeEnergySnapshot(pillarDominant, completions, xpTotal, energyHighlight);
   const hasDelta = typeof energySnapshot.delta === 'number';
   const energyHeadline = hasDelta
     ? `${energySnapshot.metric.label} +${energySnapshot.delta}% vs semana anterior`
     : `Energía destacada: ${energySnapshot.metric.label} (${energySnapshot.current}%)`;
   const energyBarHeight = `${Math.max(12, Math.min(100, energySnapshot.current))}%`;
   const energyBarGradient = ENERGY_GRADIENT_BY_METRIC[energySnapshot.metric.label] ?? 'from-white/70 via-white/90 to-white';
+  const balanceTotal = effortBalance?.total ?? 0;
+  const easyPct = balanceTotal ? Math.round((100 * (effortBalance?.easy ?? 0)) / balanceTotal) : 0;
+  const mediumPct = balanceTotal ? Math.round((100 * (effortBalance?.medium ?? 0)) / balanceTotal) : 0;
+  const hardPct = Math.max(0, 100 - easyPct - mediumPct);
+  const balanceReading =
+    easyPct > 70
+      ? 'La semana priorizó estabilidad sobre intensidad'
+      : hardPct > 30
+        ? 'Semana de alta exigencia e intensidad'
+        : 'Buen equilibrio entre constancia e intensidad';
+  const hardInsight = effortBalance?.topHardTask
+    ? `La única tarea difícil que completaste fue: ${effortBalance.topHardTask.title}`
+    : 'No registraste tareas difíciles esta semana.';
+  const strategyMessage =
+    hardPct > 30
+      ? 'Seguís en modo desafiante: podés sostener el ritmo y sumar pausas de recuperación.'
+      : easyPct > 70
+        ? 'Patrón ideal para consolidar hábitos antes de subir la dificultad.'
+        : 'Tenés margen para subir un nivel la próxima semana manteniendo este balance.';
+  const keyTask = effortBalance?.topTask;
+  const advanceHeadline = keyTask
+    ? `${keyTask.title} fue la tarea más repetida (${keyTask.completions}x)`
+    : improvementStory;
 
   return (
     <SectionShell
@@ -773,7 +802,10 @@ function ProgressBlock({
       <div className="grid gap-4 md:grid-cols-[1.2fr,0.8fr]">
         <div className="space-y-3 rounded-3xl border border-white/10 bg-gradient-to-br from-emerald-500/15 via-slate-900/80 to-indigo-500/10 p-5 shadow-lg shadow-emerald-500/25">
           <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-50">Avance clave</p>
-          <p className="text-lg font-semibold text-slate-50">{improvementStory}</p>
+          <p className="text-lg font-semibold text-slate-50">{advanceHeadline}</p>
+          {keyTask ? (
+            <p className="text-sm text-emerald-50/80">Tu movimiento más repetido de la semana.</p>
+          ) : null}
         </div>
 
         <div className="space-y-3 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
@@ -789,9 +821,37 @@ function ProgressBlock({
             </div>
             <div className="flex flex-col text-sm text-emerald-50">
               <span className="font-semibold">{energySnapshot.metric.label}</span>
-              <span className="text-xs text-emerald-100">Pulso diario en alza</span>
+              <span className="text-xs text-emerald-100">Nivel habitual máximo</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="space-y-3 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/70 via-slate-900/60 to-emerald-500/10 p-5 shadow-lg shadow-emerald-500/15">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-100">Balance de esfuerzo</p>
+            <p className="text-lg font-semibold text-slate-50">Distribución semanal por dificultad</p>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-emerald-50/80">
+            <span className="rounded-full bg-emerald-500/20 px-2 py-1">Easy {easyPct}%</span>
+            <span className="rounded-full bg-cyan-500/20 px-2 py-1">Medium {mediumPct}%</span>
+            <span className="rounded-full bg-rose-500/20 px-2 py-1">Hard {hardPct}%</span>
+          </div>
+        </div>
+
+        <div className="h-3 w-full overflow-hidden rounded-full border border-white/10 bg-white/5">
+          <div className="flex h-full w-full">
+            <div className="h-full bg-gradient-to-r from-emerald-500/70 to-emerald-400/70" style={{ width: `${easyPct}%` }} />
+            <div className="h-full bg-gradient-to-r from-cyan-500/60 to-sky-400/70" style={{ width: `${mediumPct}%` }} />
+            <div className="h-full bg-gradient-to-r from-rose-500/70 to-orange-400/70" style={{ width: `${hardPct}%` }} />
+          </div>
+        </div>
+
+        <div className="grid gap-3 text-sm text-emerald-50 md:grid-cols-3">
+          <p className="rounded-2xl border border-white/10 bg-white/5 p-3 text-slate-100">{balanceReading}</p>
+          <p className="rounded-2xl border border-white/10 bg-white/5 p-3 text-slate-100">{hardInsight}</p>
+          <p className="rounded-2xl border border-white/10 bg-white/5 p-3 text-slate-100">{strategyMessage}</p>
         </div>
       </div>
     </SectionShell>
@@ -946,13 +1006,21 @@ function getPillarIcon(pillar?: string | null): string {
   return PILLAR_ICONS[pillar] ?? '';
 }
 
-function computeEnergySnapshot(pillarDominant: string | null, completions: number, xpTotal: number) {
-  const metric = pillarDominant && ENERGY_METRIC_BY_PILLAR[pillarDominant]
-    ? ENERGY_METRIC_BY_PILLAR[pillarDominant]
-    : ENERGY_METRIC_BY_PILLAR.Body;
+function computeEnergySnapshot(
+  pillarDominant: string | null,
+  completions: number,
+  xpTotal: number,
+  energyHighlight?: WeeklyWrappedPayload['summary']['energyHighlight'],
+) {
+  const metric = energyHighlight
+    ? Object.values(ENERGY_METRIC_BY_PILLAR).find((entry) => entry.label === energyHighlight.metric) ??
+      ENERGY_METRIC_BY_PILLAR.Body
+    : pillarDominant && ENERGY_METRIC_BY_PILLAR[pillarDominant]
+      ? ENERGY_METRIC_BY_PILLAR[pillarDominant]
+      : ENERGY_METRIC_BY_PILLAR.Body;
   const normalizedCompletionScore = Math.min(100, Math.round((completions / 14) * 100));
   const xpScore = Math.min(100, Math.round(xpTotal / 10));
-  const current = Math.max(12, normalizedCompletionScore || xpScore || 0);
+  const current = energyHighlight?.value ?? Math.max(12, normalizedCompletionScore || xpScore || 0);
 
   return {
     metric,
