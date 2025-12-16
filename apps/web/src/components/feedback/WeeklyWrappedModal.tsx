@@ -53,6 +53,12 @@ const ENERGY_METRIC_BY_PILLAR: Record<string, { label: 'HP' | 'FOCUS' | 'MOOD'; 
   Soul: { label: 'MOOD', color: '#e879f9' },
 };
 
+const ENERGY_GRADIENT_BY_METRIC: Record<'HP' | 'MOOD' | 'FOCUS', string> = {
+  HP: 'from-cyan-200 via-sky-300 to-blue-400',
+  MOOD: 'from-rose-200 via-pink-300 to-fuchsia-400',
+  FOCUS: 'from-indigo-200 via-violet-300 to-purple-400',
+};
+
 export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps) {
   const [entered, setEntered] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -735,19 +741,19 @@ function ProgressBlock({
   active,
   registerSectionRef,
 }: ProgressBlockProps) {
-  const pillarAura =
-    pillarDominant && PILLAR_GRADIENTS[pillarDominant]
-      ? PILLAR_GRADIENTS[pillarDominant]
-      : 'from-emerald-400/25 via-cyan-400/10 to-indigo-500/20';
-  const pillarTone = pillarDominant && PILLAR_TEXT_TONES[pillarDominant] ? PILLAR_TEXT_TONES[pillarDominant] : 'text-slate-50';
   const slideLabel = 'PROGRESO Y FOCO';
-  const improvementStory = (improvement?.body ?? 'Mini mejora registrada. Seguís afinando tu ritmo.').split('. ')[0];
-  const pillarLine = pillarDominant ? `${pillarDominant} mantuvo el pulso.` : 'Semana balanceada.';
+  const improvementBody = (improvement?.body ?? 'Mini mejora registrada. Seguís afinando tu ritmo.').replace(
+    'que suma momentum.',
+    'que suma a tu bienestar.',
+  );
+  const improvementStory = improvementBody.split('. ')[0];
   const energySnapshot = computeEnergySnapshot(pillarDominant, completions, xpTotal);
   const hasDelta = typeof energySnapshot.delta === 'number';
   const energyHeadline = hasDelta
     ? `${energySnapshot.metric.label} +${energySnapshot.delta}% vs semana anterior`
     : `Energía destacada: ${energySnapshot.metric.label} (${energySnapshot.current}%)`;
+  const energyBarHeight = `${Math.max(12, Math.min(100, energySnapshot.current))}%`;
+  const energyBarGradient = ENERGY_GRADIENT_BY_METRIC[energySnapshot.metric.label] ?? 'from-white/70 via-white/90 to-white';
 
   return (
     <SectionShell
@@ -767,13 +773,6 @@ function ProgressBlock({
         <div className="space-y-3 rounded-3xl border border-white/10 bg-gradient-to-br from-emerald-500/15 via-slate-900/80 to-indigo-500/10 p-5 shadow-lg shadow-emerald-500/25">
           <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-50">Avance clave</p>
           <p className="text-lg font-semibold text-slate-50">{improvementStory}</p>
-          <p className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-emerald-50">{pillarLine}</p>
-          <div className={`rounded-2xl border border-white/10 bg-gradient-to-br ${pillarAura} px-4 py-3 text-sm shadow-inner shadow-emerald-500/20`}>
-            <div className="flex items-center gap-2 text-base font-semibold">
-              <span className={pillarTone}>{pillar?.accent ?? pillarDominant ?? 'Body / Mind / Soul'}</span>
-            </div>
-            <p className="mt-1 text-slate-100">{pillar?.body ?? 'El foco de la semana te sostuvo. Seguimos apoyándonos ahí.'}</p>
-          </div>
         </div>
 
         <div className="space-y-3 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
@@ -782,15 +781,9 @@ function ProgressBlock({
             <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] text-emerald-50">Energía que más creció</span>
           </div>
           <p className="text-sm font-semibold text-slate-50">{energyHeadline}</p>
-          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
-            <div className="relative h-10 w-20 overflow-hidden rounded-xl border border-white/20 bg-slate-900/60">
-              <div
-                className="absolute inset-y-1 left-1 rounded-lg bg-gradient-to-r from-white/70 via-white/90 to-white"
-                style={{
-                  width: `${Math.max(12, Math.min(100, energySnapshot.current))}%`,
-                  backgroundColor: `${energySnapshot.metric.color}dd`,
-                }}
-              />
+          <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+            <div className="relative flex h-28 w-10 items-end overflow-hidden rounded-xl border border-white/20 bg-slate-900/60">
+              <div className={`w-full rounded-t-md bg-gradient-to-t ${energyBarGradient}`} style={{ height: energyBarHeight }} />
               <div className="absolute inset-0 animate-pulse bg-white/5" aria-hidden />
             </div>
             <div className="flex flex-col text-sm text-emerald-50">
