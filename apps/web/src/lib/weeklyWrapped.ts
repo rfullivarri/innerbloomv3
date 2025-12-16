@@ -628,7 +628,7 @@ function getDifficultyBucket(difficulty?: string | null): 'easy' | 'medium' | 'h
 }
 
 function computeEffortBalance(logs: NormalizedLog[]): NonNullable<WeeklyWrappedPayload['summary']['effortBalance']> {
-  const counts = { easy: 0, medium: 0, hard: 0 } as const;
+  const counts: Record<'easy' | 'medium' | 'hard', number> = { easy: 0, medium: 0, hard: 0 };
   const taskTotals = new Map<string, { completions: number; difficulty: 'easy' | 'medium' | 'hard' }>();
 
   for (const log of logs) {
