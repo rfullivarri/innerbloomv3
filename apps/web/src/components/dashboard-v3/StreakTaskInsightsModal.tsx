@@ -20,13 +20,12 @@ type TaskInsightsModalProps = {
   fallbackTask?: TaskSummary | null;
 };
 
-type HabitHealthLevel = 'early' | 'strong' | 'medium' | 'weak';
+type HabitHealthLevel = 'strong' | 'medium' | 'weak';
 
 export function getHabitHealth(weeklyHitRatePct: number, weeksSample: number): {
   level: HabitHealthLevel;
   label: string;
 } {
-  if (weeksSample < 4) return { level: 'early', label: 'Aún es pronto para medir' };
   if (weeklyHitRatePct >= 80) return { level: 'strong', label: 'Hábito fuerte' };
   if (weeklyHitRatePct >= 55) return { level: 'medium', label: 'Hábito en construcción' };
   return { level: 'weak', label: 'Hábito frágil' };
@@ -103,7 +102,6 @@ function WeeklyCompletionDonut({
   const habitHealth = getHabitHealth(completionPercent, totalWeeks);
 
   const healthStyles: Record<HabitHealthLevel, string> = {
-    early: 'bg-slate-200/70 text-slate-900',
     strong: 'bg-emerald-300 text-emerald-950',
     medium: 'bg-amber-300 text-amber-950',
     weak: 'bg-rose-300 text-rose-950',

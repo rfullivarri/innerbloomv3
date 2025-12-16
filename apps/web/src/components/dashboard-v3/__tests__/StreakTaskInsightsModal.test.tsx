@@ -38,8 +38,8 @@ vi.mock('../../../lib/api', async () => {
 });
 
 describe('getHabitHealth', () => {
-  test('retorna early cuando hay menos de 4 semanas de muestra', () => {
-    expect(getHabitHealth(100, 3)).toEqual({ level: 'early', label: 'Aún es pronto para medir' });
+  test('calcula la salud de hábito aun con pocas semanas de muestra', () => {
+    expect(getHabitHealth(100, 3)).toEqual({ level: 'strong', label: 'Hábito fuerte' });
   });
 
   test('clasifica correctamente hábitos débiles, en construcción y fuertes', () => {
