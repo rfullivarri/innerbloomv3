@@ -40,6 +40,7 @@ export type WeeklyWrappedSection = {
     daysActive?: number;
     weeksActive?: number;
     weeksSample?: number;
+    completionRate?: number | null;
   }[];
 };
 

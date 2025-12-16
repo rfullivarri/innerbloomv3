@@ -130,12 +130,17 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
           : undefined;
       const weeksActive = item.weeksActive;
       const weeksSample = item.weeksSample;
+      const completionRate =
+        typeof item.completionRate === 'number' || typeof item.completionRate === 'string'
+          ? item.completionRate
+          : undefined;
       return {
         ...item,
         icon: getHabitIcon(item.pillar, idx),
         daysActive,
         weeksActive,
         weeksSample,
+        completionRate,
       };
     })
     .slice(0, 5);
