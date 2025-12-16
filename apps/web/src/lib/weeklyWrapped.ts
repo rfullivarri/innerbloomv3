@@ -110,6 +110,41 @@ const EMOTION_KEY_BY_LABEL: Record<string, EmotionMessageKey> = {
   Cansancio: 'cansancio',
 };
 
+function normalizePillarCode(value: unknown): 'Body' | 'Mind' | 'Soul' | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value === 'number' || typeof value === 'bigint') {
+    const numeric = Number(value);
+    if (numeric === 1) return 'Body';
+    if (numeric === 2) return 'Mind';
+    if (numeric === 3) return 'Soul';
+  }
+
+  const text = value.toString().trim();
+  if (!text) {
+    return null;
+  }
+
+  const upper = text.toUpperCase();
+  if (upper === 'BODY' || upper === 'CUERPO') return 'Body';
+  if (upper === 'MIND' || upper === 'MENTE') return 'Mind';
+  if (upper === 'SOUL' || upper === 'ALMA') return 'Soul';
+
+  const numericText = Number(text);
+  if (Number.isFinite(numericText)) {
+    return normalizePillarCode(numericText);
+  }
+
+  const match = text.match(/(\d+)/);
+  if (match?.[1]) {
+    return normalizePillarCode(Number.parseInt(match[1], 10));
+  }
+
+  return null;
+}
+
 const EMOTION_KEY_BY_NORMALIZED_LABEL: Record<string, EmotionMessageKey> = Object.fromEntries(
   Object.entries(EMOTION_KEY_BY_LABEL).map(([label, key]) => [normalizeText(label), key]),
 );
@@ -588,12 +623,15 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number) {
       days: new Set<string>(),
       weeks: new Set<string>(),
       completions: 0,
-      pillar: log.pillar ?? null,
+      pillar: normalizePillarCode(log.pillar),
       badge: undefined,
     };
     current.days.add(log.dateKey);
     current.weeks.add(weekKey);
     current.completions += log.quantity;
+    if (!current.pillar) {
+      current.pillar = normalizePillarCode(log.pillar);
+    }
     weeksSeen.add(weekKey);
     if (!current.badge && current.days.size >= 5) {
       current.badge = 'racha activa';
@@ -636,7 +674,8 @@ function getPillarIcon(pillar: string): string {
     Mind: '🧠',
     Soul: '🌿',
   };
-  return icons[pillar] ?? '';
+  const normalized = normalizePillarCode(pillar);
+  return normalized ? icons[normalized] ?? '' : '';
 }
 
 function computeEnergyHighlightFromInsights(

@@ -9,6 +9,41 @@ const PILLAR_ICONS: Record<string, string> = {
   Soul: '🏵️',
 };
 
+function normalizePillarCode(value: unknown): keyof typeof PILLAR_ICONS | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value === 'number' || typeof value === 'bigint') {
+    const numeric = Number(value);
+    if (numeric === 1) return 'Body';
+    if (numeric === 2) return 'Mind';
+    if (numeric === 3) return 'Soul';
+  }
+
+  const text = value.toString().trim();
+  if (!text) {
+    return null;
+  }
+
+  const upper = text.toUpperCase();
+  if (upper === 'BODY' || upper === 'CUERPO') return 'Body';
+  if (upper === 'MIND' || upper === 'MENTE') return 'Mind';
+  if (upper === 'SOUL' || upper === 'ALMA') return 'Soul';
+
+  const numericText = Number(text);
+  if (Number.isFinite(numericText)) {
+    return normalizePillarCode(numericText);
+  }
+
+  const match = text.match(/(\d+)/);
+  if (match?.[1]) {
+    return normalizePillarCode(Number.parseInt(match[1], 10));
+  }
+
+  return null;
+}
+
 const HABIT_ICON_SETS: Record<string, string[]> = {
   Body: ['🏃‍♂️', '💪', '🥗', '🔥'],
   Mind: ['📚', '🎯', '✍️', '🧩'],
@@ -1020,8 +1055,9 @@ function getHabitIcon(pillar?: string | null, index = 0): string {
 }
 
 function getPillarIcon(pillar?: string | null): string {
-  if (!pillar) return '';
-  return PILLAR_ICONS[pillar] ?? '';
+  const normalized = normalizePillarCode(pillar);
+  if (!normalized) return '';
+  return PILLAR_ICONS[normalized] ?? '';
 }
 
 function computeEnergySnapshot(

@@ -116,6 +116,41 @@ const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
   },
 };
 
+function normalizePillarCode(value: unknown): 'Body' | 'Mind' | 'Soul' | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value === 'number' || typeof value === 'bigint') {
+    const numeric = Number(value);
+    if (numeric === 1) return 'Body';
+    if (numeric === 2) return 'Mind';
+    if (numeric === 3) return 'Soul';
+  }
+
+  const text = value.toString().trim();
+  if (text.length === 0) {
+    return null;
+  }
+
+  const upper = text.toUpperCase();
+  if (upper === 'BODY' || upper === 'CUERPO') return 'Body';
+  if (upper === 'MIND' || upper === 'MENTE') return 'Mind';
+  if (upper === 'SOUL' || upper === 'ALMA') return 'Soul';
+
+  const numericText = Number(text);
+  if (Number.isFinite(numericText)) {
+    return normalizePillarCode(numericText);
+  }
+
+  const match = text.match(/(\d+)/);
+  if (match?.[1]) {
+    return normalizePillarCode(Number.parseInt(match[1], 10));
+  }
+
+  return null;
+}
+
 const WEEKLY_WRAPPED_DEBUG_USERS = new Set(
   (process.env.WEEKLY_WRAPPED_DEBUG_USERS || '')
     .split(',')
@@ -596,12 +631,15 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number) {
       days: new Set<string>(),
       weeks: new Set<string>(),
       completions: 0,
-      pillar: (log as { pillar?: string }).pillar ?? null,
+      pillar: normalizePillarCode((log as { pillar?: string | number | null }).pillar),
       badge: undefined,
     };
     current.days.add(log.dateKey);
     current.weeks.add(weekKey);
     current.completions += Math.max(1, Number(log.quantity ?? 1));
+    if (!current.pillar) {
+      current.pillar = normalizePillarCode((log as { pillar?: string | number | null }).pillar);
+    }
     weeksSeen.add(weekKey);
     if (!current.badge && current.days.size >= 5) {
       current.badge = 'racha activa';
