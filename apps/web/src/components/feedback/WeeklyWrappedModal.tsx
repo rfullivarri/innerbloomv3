@@ -454,8 +454,13 @@ function WeeklyKPIHighlight({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <KPIStat label="Tareas" value={formatter.format(completions)} suffix="completadas" icon="🎯" />
-        <KPIStat label="XP" value={formatter.format(xpTotal)} suffix="esta semana" highlight icon="🎖️" />
+        <KPIStat
+          label="Tareas completadas"
+          value={formatter.format(completions)}
+          suffix="tareas"
+          icon="🎯"
+        />
+        <KPIStat label="Experiencia" value={formatter.format(xpTotal)} suffix="xp" highlight icon="🎖️" />
       </div>
     </div>
   );
@@ -496,20 +501,22 @@ function KPIStat({
 
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 shadow-[0_20px_50px_rgba(12,74,110,0.35)] transition duration-500 ${
-        highlight ? 'ring-1 ring-emerald-300/40' : ''
+      className={`group relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-emerald-500/10 to-indigo-500/10 p-4 shadow-[0_20px_60px_rgba(8,47,73,0.42)] backdrop-blur transition duration-500 ${
+        highlight ? 'ring-1 ring-emerald-300/50 shadow-emerald-500/25' : ''
       }`}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-white/5 to-transparent opacity-80" aria-hidden />
-      <div className="relative flex items-center gap-4">
-        <span className="rounded-full bg-white/10 px-2 py-1 text-lg" aria-hidden>
+      <div className="relative grid grid-cols-[72px_1fr] items-center gap-3 sm:grid-cols-[88px_1fr]">
+        <span
+          className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-3xl sm:h-20 sm:w-20"
+          aria-hidden
+        >
           {chipIcon}
         </span>
-        <div className="flex flex-1 flex-col items-end space-y-1 text-right">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{label}</p>
+        <div className="flex flex-1 flex-col gap-1 text-left">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-100">{label}</p>
           <p className="text-4xl font-semibold leading-tight text-white sm:text-[44px]">
             {value}
-            <span className="ml-2 text-base font-medium text-emerald-100">{suffix}</span>
+            {suffix ? <span className="ml-2 text-base font-medium lowercase text-emerald-50">{suffix}</span> : null}
           </p>
         </div>
       </div>
