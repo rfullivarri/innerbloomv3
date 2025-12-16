@@ -1692,6 +1692,7 @@ export type TaskInsightsResponse = {
   weeks: {
     weeklyGoal: number;
     completionRate: number;
+    weeksSample?: number | string | null;
     currentStreak: number;
     bestStreak: number;
     timeline: Array<{ weekStart: string; weekEnd: string; count: number; hit: boolean }>;

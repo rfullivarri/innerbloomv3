@@ -66,4 +66,36 @@ describe('TaskInsightsModal', () => {
     expect(await screen.findByText('Hábito fuerte')).toBeInTheDocument();
     expect(screen.getByText('83%')).toBeInTheDocument();
   });
+
+  test('usa weeksSample del backend aunque la timeline esté truncada', async () => {
+    const insightsWithSample: TaskInsightsResponse = {
+      ...mockInsights,
+      weeks: {
+        ...mockInsights.weeks,
+        weeksSample: 12,
+        timeline: mockInsights.weeks.timeline.slice(0, 2),
+      },
+    };
+
+    mockUseRequest.mockReturnValueOnce({
+      data: insightsWithSample,
+      error: null,
+      status: 'success',
+      reload: vi.fn(),
+    });
+
+    render(
+      <TaskInsightsModal
+        taskId="task-123"
+        weeklyGoal={3}
+        mode="Flow"
+        range="week"
+        onClose={() => {}}
+        fallbackTask={{ id: 'task-123', name: 'Nueva tarea', stat: 'Metric' }}
+      />,
+    );
+
+    expect(await screen.findByText('Hábito fuerte')).toBeInTheDocument();
+    expect(screen.getByText('83%')).toBeInTheDocument();
+  });
 });
