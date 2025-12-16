@@ -32,7 +32,7 @@ export type WeeklyWrappedPayload = {
       total: number;
       topTask?: { title: string; completions: number; difficulty: string } | null;
       topHardTask?: { title: string; completions: number } | null;
-    };
+    } | null;
   };
   emotions: EmotionHighlight;
   levelUp: LevelUpHighlight;
