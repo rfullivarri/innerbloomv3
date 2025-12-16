@@ -32,7 +32,15 @@ export type WeeklyWrappedSection = {
   title: string;
   body: string;
   accent?: string;
-  items?: { title: string; body: string; badge?: string; pillar?: string | null }[];
+  items?: {
+    title: string;
+    body: string;
+    badge?: string;
+    pillar?: string | null;
+    daysActive?: number;
+    weeksActive?: number;
+    weeksSample?: number;
+  }[];
 };
 
 export type WeeklyWrappedPayload = {
@@ -66,6 +74,7 @@ type NormalizedLog = AdminLogRow & {
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
 const MAX_LOG_PAGE_SIZE = 100;
+const MS_IN_DAY = 24 * 60 * 60 * 1000;
 
 const EMOTION_KEY_BY_LABEL: Record<string, EmotionMessageKey> = {
   Calma: 'calma',
@@ -176,7 +185,7 @@ export async function buildWeeklyWrappedPreviewPayload(
   const [insights, logs, emotions, levelSummary] = await Promise.all([
     fetchAdminInsights(options.userId),
     fetchLogsForRange(options.userId, {
-      from: toDateInput(daysAgo(6)),
+      from: toDateInput(daysAgo(83)),
       to: toDateInput(new Date()),
     }),
     getEmotions(options.userId, { days: 15 }),
@@ -252,6 +261,17 @@ export function normalizeLogs(logs: AdminLogRow[]): NormalizedLog[] {
     .filter((log) => Number.isFinite(log.parsedDate.getTime()));
 }
 
+function getWeekKey(date: Date): string {
+  const copy = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const day = copy.getUTCDay() || 7; // Convert Sunday (0) to 7
+  copy.setUTCDate(copy.getUTCDate() - day + 1); // Move to Monday
+
+  const yearStart = new Date(Date.UTC(copy.getUTCFullYear(), 0, 1));
+  const weekNumber = Math.ceil(((copy.getTime() - yearStart.getTime()) / MS_IN_DAY + 1) / 7);
+
+  return `${copy.getUTCFullYear()}-W${weekNumber}`;
+}
+
 export function summarizeWeeklyActivity(logs: NormalizedLog[]): {
   completions: number;
   habitCounts: ReturnType<typeof aggregateHabits>;
@@ -280,15 +300,34 @@ export function buildWeeklyWrappedFromData(
 
   const endDate = latestLog ?? new Date();
   const startDate = daysAgoFrom(endDate, 6);
+  const longTermStartDate = daysAgoFrom(endDate, 83);
   const periodLabel = `${formatDate(startDate)} – ${formatDate(endDate)}`;
 
-  const { completions, habitCounts } = summarizeWeeklyActivity(normalizedLogs);
-  const xpTotal = normalizedLogs
+  const weeklyLogs = normalizedLogs.filter(
+    (log) => log.parsedDate >= startDate && log.parsedDate <= endDate,
+  );
+  const longTermLogs = normalizedLogs.filter(
+    (log) => log.parsedDate >= longTermStartDate && log.parsedDate <= endDate,
+  );
+  const weeksSample = Math.max(1, Math.ceil((endDate.getTime() - longTermStartDate.getTime() + MS_IN_DAY) / (7 * MS_IN_DAY)));
+
+  const { completions, habitCounts } = summarizeWeeklyActivity(weeklyLogs);
+  const longTermHabits = aggregateHabits(longTermLogs, weeksSample);
+  const longTermHabitMap = new Map(longTermHabits.map((habit) => [habit.title, habit]));
+
+  const xpTotal = weeklyLogs
     .filter((log) => log.state !== 'red')
     .reduce((acc, log) => acc + Math.max(0, Number(log.xp ?? 0)), 0);
   const levelUp = detectLevelUp(levelSummary, xpTotal, options.forceLevelUpMock === true);
 
-  const topHabits = habitCounts.slice(0, 3);
+  const topHabits = habitCounts.slice(0, 3).map((habit) => {
+    const longTerm = longTermHabitMap.get(habit.title);
+    return {
+      ...habit,
+      weeksActive: longTerm?.weeksActive ?? habit.weeksActive ?? 0,
+      weeksSample: longTerm?.weeksSample ?? weeksSample,
+    };
+  });
   const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
   const highlight = topHabits[0]?.title ?? null;
@@ -345,6 +384,9 @@ export function buildWeeklyWrappedFromData(
                     : 'Ritmo sólido esta semana. Constancia pura.',
                 badge: habit.badge,
                 pillar: habit.pillar,
+                daysActive: habit.daysActive,
+                weeksActive: habit.weeksActive,
+                weeksSample: habit.weeksSample,
               }))
             : undefined,
       },
@@ -407,11 +449,20 @@ export function buildWeeklyWrappedFromData(
   };
 }
 
-function aggregateHabits(logs: NormalizedLog[]) {
+function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number) {
   const map = new Map<
     string,
-    { title: string; days: Set<string>; completions: number; pillar: string | null; badge: string | undefined }
+    {
+      title: string;
+      days: Set<string>;
+      weeks: Set<string>;
+      completions: number;
+      pillar: string | null;
+      badge: string | undefined;
+    }
   >();
+
+  const weeksSeen = new Set<string>();
 
   for (const log of logs) {
     if (!log.dateKey) {
@@ -422,25 +473,34 @@ function aggregateHabits(logs: NormalizedLog[]) {
     if (!key) {
       continue;
     }
+
+    const weekKey = getWeekKey(log.parsedDate);
     const current = map.get(key) ?? {
       title: log.taskName || 'Hábito sin nombre',
       days: new Set<string>(),
+      weeks: new Set<string>(),
       completions: 0,
       pillar: log.pillar ?? null,
       badge: undefined,
     };
     current.days.add(log.dateKey);
+    current.weeks.add(weekKey);
     current.completions += log.quantity;
+    weeksSeen.add(weekKey);
     if (!current.badge && current.days.size >= 5) {
       current.badge = 'racha activa';
     }
     map.set(key, current);
   }
 
+  const weeksSample = weeksSampleOverride ?? weeksSeen.size;
+
   return Array.from(map.values())
     .map((entry) => ({
       title: entry.title,
       daysActive: entry.days.size,
+      weeksActive: entry.weeks.size,
+      weeksSample,
       pillar: entry.pillar,
       badge: entry.badge,
       completions: entry.completions,
