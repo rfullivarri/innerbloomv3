@@ -154,23 +154,17 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
             active: false,
             dotOnly: true,
           },
-      topHabitTitle
+      topHabitTitle || pillarDominant
         ? {
             id: 'streak',
-            label: `${topHabitPillarIcon ? `🔥${topHabitPillarIcon}` : '🔥'}`,
+            label: `🔥${topHabitPillarIcon || getPillarIcon(pillarDominant) || '🫀'}`,
             active: true,
           }
-        : pillarDominant
-          ? {
-              id: 'streak-fallback',
-              label: `🔥${getPillarIcon(pillarDominant)}`,
-              active: true,
-            }
-          : {
-              id: 'streak-empty',
-              label: '🔥',
-              active: false,
-            },
+        : {
+            id: 'streak-empty',
+            label: '🔥🫀',
+            active: false,
+          },
     ],
     [payload.dataSource, payload.weekRange, topHabitPillarIcon, pillarDominant, topHabitTitle, weeklyEmotion],
   );
@@ -400,7 +394,7 @@ function SectionBlock({
               >
                 {badge.dotColor ? (
                   <span
-                    className={`rounded-full ${badge.dotOnly ? 'h-3.5 w-3.5' : 'h-2.5 w-2.5'}`}
+                    className={`rounded-full ${badge.dotOnly ? 'h-4 w-4' : 'h-2.5 w-2.5'}`}
                     style={{ backgroundColor: badge.dotColor }}
                     aria-hidden
                   />
@@ -447,7 +441,6 @@ function WeeklyKPIHighlight({
     <div className="space-y-4">
       <div className="rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-emerald-500/10 to-indigo-500/10 p-5 shadow-[0_20px_60px_rgba(8,47,73,0.42)] backdrop-blur">
         <div className="relative flex items-center gap-3 text-sm text-emerald-50">
-          {pillar ? <span aria-hidden>{getPillarIcon(pillar)}</span> : <span aria-hidden>✨</span>}
           <p className="text-base font-semibold leading-snug text-slate-50">{pillarNarrative}</p>
         </div>
       </div>
@@ -525,12 +518,10 @@ type HabitsBlockProps = {
 };
 
 function getStreakCopy(daysActive?: number) {
-  if (!daysActive || daysActive <= 0) return 'Constancia en construcción.';
-  if (daysActive >= 7) return 'Impecable.';
-  if (daysActive === 6) return 'Casi perfecta.';
-  if (daysActive === 5) return 'Buen ritmo.';
-  if (daysActive === 4) return 'Constancia en progreso.';
-  return 'Vamos por más pasos esta semana.';
+  if (!daysActive || daysActive <= 0) return 'Hábito frágil';
+  if (daysActive <= 2) return 'Hábito frágil';
+  if (daysActive <= 5) return 'Hábito en construcción';
+  return 'Hábito fuerte';
 }
 
 function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef }: HabitsBlockProps) {
@@ -566,13 +557,11 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
                 </div>
                 <div className="flex flex-wrap justify-end gap-2 text-[11px] uppercase tracking-[0.14em]">
                   <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-500/20 px-2 py-1 text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
-                    🔥 {item.daysActive ?? '–'}/7
+                    🔥{getPillarIcon(item.pillar) || '🫀'} {item.daysActive ?? '–'}/7
                   </span>
-                  {item.pillar ? (
-                    <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-lg text-slate-100">
-                      {getPillarIcon(item.pillar)}
-                    </span>
-                  ) : null}
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-lg text-slate-100">
+                    {getPillarIcon(item.pillar) || '🫀'}
+                  </span>
                 </div>
               </div>
               <p className="mt-3 text-sm text-slate-100">{getStreakCopy(item.daysActive)}</p>
@@ -673,7 +662,6 @@ function ProgressBlock({
       ? PILLAR_GRADIENTS[pillarDominant]
       : 'from-emerald-400/25 via-cyan-400/10 to-indigo-500/20';
   const pillarTone = pillarDominant && PILLAR_TEXT_TONES[pillarDominant] ? PILLAR_TEXT_TONES[pillarDominant] : 'text-slate-50';
-  const pillarIcon = getPillarIcon(pillarDominant);
   const slideLabel = 'PROGRESO Y FOCO';
   const improvementStory = (improvement?.body ?? 'Mini mejora registrada. Seguís afinando tu ritmo.').split('. ')[0];
   const pillarLine = pillarDominant ? `${pillarDominant} mantuvo el pulso.` : 'Semana balanceada.';
@@ -694,7 +682,7 @@ function ProgressBlock({
       <div className="space-y-3">
         <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
         <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">Pequeños avances</h3>
-        <p className="text-sm text-emerald-50">Tu semana avanzó con pasos cortos que sostienen el momentum.</p>
+        <p className="text-sm text-emerald-50">Tu semana avanzó con pasos cortos que sostienen tu energía.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-[1.2fr,0.8fr]">
@@ -704,8 +692,7 @@ function ProgressBlock({
           <p className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-emerald-50">{pillarLine}</p>
           <div className={`rounded-2xl border border-white/10 bg-gradient-to-br ${pillarAura} px-4 py-3 text-sm shadow-inner shadow-emerald-500/20`}>
             <div className="flex items-center gap-2 text-base font-semibold">
-              {pillarIcon ? <span aria-hidden>{pillarIcon}</span> : null}
-              <span className={pillarTone}>{pillar?.accent ?? pillarDominant ?? 'Mind / Body / Soul'}</span>
+              <span className={pillarTone}>{pillar?.accent ?? pillarDominant ?? 'Body / Mind / Soul'}</span>
             </div>
             <p className="mt-1 text-slate-100">{pillar?.body ?? 'El foco de la semana te sostuvo. Seguimos apoyándonos ahí.'}</p>
           </div>
