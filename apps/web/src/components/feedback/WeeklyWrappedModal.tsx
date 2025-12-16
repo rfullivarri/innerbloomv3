@@ -563,7 +563,6 @@ type HabitsBlockProps = {
 type HabitHealthLevel = ReturnType<typeof getHabitHealthFromInsights>['level'];
 
 const HABIT_HEALTH_STYLES: Record<HabitHealthLevel, string> = {
-  early: 'bg-slate-200/70 text-slate-900',
   strong: 'bg-emerald-300 text-emerald-950',
   medium: 'bg-amber-300 text-amber-950',
   weak: 'bg-rose-300 text-rose-950',
@@ -598,8 +597,7 @@ export function resolveHabitHealth({ daysActive, weeksActive, weeksSample, compl
     return Math.round((normalizedDays / 7) * 100);
   })();
 
-  const baseSample = Math.max(1, normalizedWeeksSample, normalizedWeeksActive);
-  const sampleForHealth = normalizedCompletionRate !== null && baseSample < 4 ? 4 : baseSample;
+  const sampleForHealth = Math.max(0, normalizedWeeksSample, normalizedWeeksActive);
 
   return getHabitHealthFromInsights(completionRateForHealth, sampleForHealth);
 }
