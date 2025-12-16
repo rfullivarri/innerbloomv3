@@ -620,7 +620,8 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
               </div>
               <div className="mt-3 flex items-center justify-between gap-3">
                 <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2 py-1 text-sm font-semibold uppercase tracking-[0.12em] text-slate-100">
-                  {getPillarIcon(item.pillar) || '🫀'} {item.pillar ?? '–'}
+                  {getPillarIcon(item.pillar) || '🫀'}
+                  <span className="sr-only">{item.pillar ?? '–'}</span>
                 </span>
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
