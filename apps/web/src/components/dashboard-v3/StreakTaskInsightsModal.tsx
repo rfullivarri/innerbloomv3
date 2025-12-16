@@ -22,7 +22,7 @@ type TaskInsightsModalProps = {
 
 type HabitHealthLevel = 'early' | 'strong' | 'medium' | 'weak';
 
-function getHabitHealth(weeklyHitRatePct: number, weeksSample: number): {
+export function getHabitHealth(weeklyHitRatePct: number, weeksSample: number): {
   level: HabitHealthLevel;
   label: string;
 } {
