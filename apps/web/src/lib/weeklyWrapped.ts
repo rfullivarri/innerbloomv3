@@ -447,7 +447,7 @@ export async function buildWeeklyWrappedFromData(
     .reduce((acc, log) => acc + Math.max(0, Number(log.xp ?? 0)), 0);
   const levelUp = detectLevelUp(levelSummary, xpTotal, options.forceLevelUpMock === true);
 
-  const topHabits = habitCounts.slice(0, 3).map((habit) => {
+  const topWeeklyHabits = habitCounts.slice(0, 3).map((habit) => {
     const longTerm = longTermHabitMap.get(habit.title);
     return {
       ...habit,
@@ -455,10 +455,32 @@ export async function buildWeeklyWrappedFromData(
       weeksSample: longTerm?.weeksSample ?? weeksSample,
     };
   });
-  const topHabitsWithInsights = await hydrateHabitsWithTaskInsights(topHabits);
+
+  const topStreakHabits = [...longTermHabits]
+    .sort((a, b) => b.weeksActive - a.weeksActive || b.daysActive - a.daysActive || b.completions - a.completions)
+    .slice(0, 3);
+
+  const constancyCandidatesMap = new Map<string, HabitAggregate>();
+  [...topStreakHabits, ...topWeeklyHabits].forEach((habit) => {
+    const key = habit.taskId ?? habit.title;
+    if (constancyCandidatesMap.has(key)) return;
+
+    const longTerm = longTermHabitMap.get(habit.title);
+    const normalizedWeeksActive = longTerm?.weeksActive ?? habit.weeksActive ?? 0;
+    const normalizedWeeksSample = longTerm?.weeksSample ?? habit.weeksSample ?? weeksSample;
+
+    constancyCandidatesMap.set(key, {
+      ...habit,
+      weeksActive: normalizedWeeksActive,
+      weeksSample: normalizedWeeksSample,
+    });
+  });
+
+  const constancyHabits = Array.from(constancyCandidatesMap.values()).slice(0, 3);
+  const constancyHabitsWithInsights = await hydrateHabitsWithTaskInsights(constancyHabits);
   const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
-  const highlight = effortBalance.topTask?.title ?? topHabitsWithInsights[0]?.title ?? null;
+  const highlight = effortBalance.topTask?.title ?? constancyHabitsWithInsights[0]?.title ?? null;
   const energyHighlight = computeEnergyHighlightFromInsights(insights, pillarDominant);
   const emotionHighlight = buildEmotionHighlight(emotions);
   const weeklyEmotionMessage =
@@ -511,12 +533,12 @@ export async function buildWeeklyWrappedFromData(
         key: 'habits',
         title: 'Ritmo que se sostiene',
         body:
-          topHabitsWithInsights.length > 0
+          constancyHabitsWithInsights.length > 0
             ? 'Estos hábitos aparecieron de forma consistente y mantuvieron tu semana en movimiento.'
             : 'Aún no registramos hábitos destacados esta semana, pero estás a un clic de retomarlos.',
         items:
-          topHabitsWithInsights.length > 0
-            ? topHabitsWithInsights.map((habit) => ({
+          constancyHabitsWithInsights.length > 0
+            ? constancyHabitsWithInsights.map((habit) => ({
                 title: habit.title,
                 body:
                   habit.daysActive > 0
