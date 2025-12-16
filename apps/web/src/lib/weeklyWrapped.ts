@@ -323,7 +323,13 @@ async function hydrateHabitsWithTaskInsights(habits: HabitAggregate[]): Promise<
         const insights = await getTaskInsights(habit.taskId);
         const timeline = insights.weeks.timeline ?? [];
         const weeksActiveFromInsights = timeline.filter((week) => week.hit).length;
-        const weeksSampleFromInsights = timeline.length;
+        const weeksSampleFromInsights = (() => {
+          const sample = Number(insights.weeks.weeksSample);
+          if (Number.isFinite(sample) && sample > 0) {
+            return Math.round(sample);
+          }
+          return timeline.length;
+        })();
 
         return {
           ...habit,
