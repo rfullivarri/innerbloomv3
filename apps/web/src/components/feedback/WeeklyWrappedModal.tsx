@@ -454,8 +454,8 @@ function WeeklyKPIHighlight({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <KPIStat label="Tareas" value={formatter.format(completions)} suffix="completadas" />
-        <KPIStat label="XP" value={formatter.format(xpTotal)} suffix="esta semana" highlight />
+        <KPIStat label="Tareas" value={formatter.format(completions)} suffix="completadas" icon="🎯" />
+        <KPIStat label="XP" value={formatter.format(xpTotal)} suffix="esta semana" highlight icon="🎖️" />
       </div>
     </div>
   );
@@ -484,12 +484,16 @@ function KPIStat({
   value,
   suffix,
   highlight = false,
+  icon,
 }: {
   label: string;
   value: string;
   suffix?: string;
   highlight?: boolean;
+  icon?: string;
 }) {
+  const chipIcon = icon ?? (highlight ? '⚡️' : '✅');
+
   return (
     <div
       className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 shadow-[0_20px_50px_rgba(12,74,110,0.35)] transition duration-500 ${
@@ -497,17 +501,17 @@ function KPIStat({
       }`}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-white/5 to-transparent opacity-80" aria-hidden />
-      <div className="relative flex items-center justify-between gap-4">
-        <div className="space-y-1">
+      <div className="relative flex items-center gap-4">
+        <span className="rounded-full bg-white/10 px-2 py-1 text-lg" aria-hidden>
+          {chipIcon}
+        </span>
+        <div className="flex flex-1 flex-col items-end space-y-1 text-right">
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{label}</p>
           <p className="text-4xl font-semibold leading-tight text-white sm:text-[44px]">
             {value}
             <span className="ml-2 text-base font-medium text-emerald-100">{suffix}</span>
           </p>
         </div>
-        <span className="rounded-full bg-white/10 px-2 py-1 text-lg" aria-hidden>
-          {highlight ? '⚡️' : '✅'}
-        </span>
       </div>
     </div>
   );
