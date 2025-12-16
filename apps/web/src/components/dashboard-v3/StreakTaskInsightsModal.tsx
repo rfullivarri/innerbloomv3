@@ -80,6 +80,7 @@ function WeeklyCompletionDonut({
   bestStreak,
   completionRate,
   difficultyLabel,
+  weeksSample,
 }: {
   timeline: TaskInsightsResponse['weeks']['timeline'];
   weeklyGoal: number;
@@ -87,9 +88,17 @@ function WeeklyCompletionDonut({
   bestStreak: number;
   completionRate: number;
   difficultyLabel?: string | null;
+  weeksSample?: number | null;
 }) {
-  const totalWeeks = timeline.length;
-  const completedWeeks = timeline.filter((week) => week.hit).length;
+  const parsedWeeksSample = Number(weeksSample);
+  const normalizedWeeksSample =
+    Number.isFinite(parsedWeeksSample) && parsedWeeksSample > 0
+      ? Math.round(parsedWeeksSample)
+      : timeline.length;
+  const totalWeeks = normalizedWeeksSample || timeline.length;
+  const completedWeeks = timeline.length
+    ? timeline.filter((week) => week.hit).length
+    : Math.round(((Number.isFinite(completionRate) ? completionRate : 0) / 100) * totalWeeks);
   const completionPercent = Number.isFinite(completionRate) ? Math.round(completionRate) : 0;
   const habitHealth = getHabitHealth(completionPercent, totalWeeks);
 
@@ -230,6 +239,14 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
   }, [mode, range, taskId, weeklyGoal]);
 
   const timeline = data?.weeks.timeline ?? [];
+  const weeksSample = useMemo(() => {
+    const sample = Number(data?.weeks?.weeksSample);
+    if (Number.isFinite(sample) && sample > 0) {
+      return Math.round(sample);
+    }
+
+    return timeline.length;
+  }, [data?.weeks?.weeksSample, timeline.length]);
   const stats = useMemo(() => {
     const completionRate = data?.weeks.completionRate ?? 0;
     const currentStreak = data?.weeks.currentStreak ?? 0;
@@ -312,6 +329,7 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
                   bestStreak={stats.bestStreak}
                   completionRate={stats.completionRate}
                   difficultyLabel={difficultyLabel}
+                  weeksSample={weeksSample}
                 />
               )}
             </div>
