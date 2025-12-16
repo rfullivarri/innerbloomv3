@@ -116,11 +116,19 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
   const habitsItems = (sectionsByKey.habits?.items ?? [])
     .map((item, idx) => {
       const daysMatch = item.body?.match(/(\d+)\/7/);
-      const daysActive = daysMatch ? Number.parseInt(daysMatch[1] ?? '0', 10) : undefined;
+      const daysActive = Number.isFinite(item.daysActive)
+        ? item.daysActive
+        : daysMatch
+          ? Number.parseInt(daysMatch[1] ?? '0', 10)
+          : undefined;
+      const weeksActive = Number.isFinite(item.weeksActive) ? item.weeksActive : undefined;
+      const weeksSample = Number.isFinite(item.weeksSample) ? item.weeksSample : undefined;
       return {
         ...item,
         icon: getHabitIcon(item.pillar, idx),
         daysActive,
+        weeksActive,
+        weeksSample,
       };
     })
     .slice(0, 5);
@@ -505,7 +513,16 @@ function KPIStat({
   );
 }
 
-type HabitItem = { title: string; body: string; badge?: string; icon?: string; pillar?: string | null; daysActive?: number };
+type HabitItem = {
+  title: string;
+  body: string;
+  badge?: string;
+  icon?: string;
+  pillar?: string | null;
+  daysActive?: number;
+  weeksActive?: number;
+  weeksSample?: number;
+};
 
 type HabitsBlockProps = {
   title: string;
@@ -526,7 +543,28 @@ const HABIT_HEALTH_STYLES: Record<HabitHealthLevel, string> = {
   weak: 'bg-rose-300 text-rose-950',
 };
 
-function getHabitHealthFromDaysActive(daysActive?: number): { level: HabitHealthLevel; label: string } {
+function getHabitHealth({
+  daysActive,
+  weeksActive,
+  weeksSample,
+}: {
+  daysActive?: number;
+  weeksActive?: number;
+  weeksSample?: number;
+}): { level: HabitHealthLevel; label: string } {
+  const hasWeekSample = Number.isFinite(weeksSample) && (weeksSample ?? 0) > 0;
+  if (hasWeekSample) {
+    const sample = Math.max(1, Math.round(weeksSample ?? 1));
+    if (sample < 4) return { level: 'early', label: 'Aún es pronto para medir' };
+
+    const clampedWeeks = Math.min(Math.max(0, Math.round(weeksActive ?? 0)), sample);
+    const weeklyHitRatePct = Math.round((clampedWeeks / sample) * 100);
+
+    if (weeklyHitRatePct >= 80) return { level: 'strong', label: 'Hábito fuerte' };
+    if (weeklyHitRatePct >= 55) return { level: 'medium', label: 'Hábito en construcción' };
+    return { level: 'weak', label: 'Hábito frágil' };
+  }
+
   if (!Number.isFinite(daysActive)) return { level: 'early', label: 'Aún es pronto para medir' };
 
   const clampedDays = Math.max(0, Math.min(7, Math.round(daysActive ?? 0)));
@@ -558,7 +596,11 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
       <div className="grid gap-4 sm:grid-cols-2">
         {items.length > 0 ? (
           items.map((item, idx) => {
-            const health = getHabitHealthFromDaysActive(item.daysActive);
+            const health = getHabitHealth({
+              daysActive: item.daysActive,
+              weeksActive: item.weeksActive,
+              weeksSample: item.weeksSample,
+            });
 
             return (
             <div
@@ -582,7 +624,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
               </div>
               <div className="mt-3 flex items-center gap-2">
                 <span
-                  className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
                     HABIT_HEALTH_STYLES[health.level]
                   }`}
                 >
