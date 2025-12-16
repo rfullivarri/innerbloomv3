@@ -517,11 +517,24 @@ type HabitsBlockProps = {
   registerSectionRef: MutableRefObject<(HTMLDivElement | null)[]>;
 };
 
-function getStreakCopy(daysActive?: number) {
-  if (!daysActive || daysActive <= 0) return 'Hábito frágil';
-  if (daysActive <= 2) return 'Hábito frágil';
-  if (daysActive <= 5) return 'Hábito en construcción';
-  return 'Hábito fuerte';
+type HabitHealthLevel = 'early' | 'strong' | 'medium' | 'weak';
+
+const HABIT_HEALTH_STYLES: Record<HabitHealthLevel, string> = {
+  early: 'bg-slate-200/70 text-slate-900',
+  strong: 'bg-emerald-300 text-emerald-950',
+  medium: 'bg-amber-300 text-amber-950',
+  weak: 'bg-rose-300 text-rose-950',
+};
+
+function getHabitHealthFromDaysActive(daysActive?: number): { level: HabitHealthLevel; label: string } {
+  if (!Number.isFinite(daysActive)) return { level: 'early', label: 'Aún es pronto para medir' };
+
+  const clampedDays = Math.max(0, Math.min(7, Math.round(daysActive ?? 0)));
+  const weeklyHitRatePct = Math.round((clampedDays / 7) * 100);
+
+  if (weeklyHitRatePct >= 80) return { level: 'strong', label: 'Hábito fuerte' };
+  if (weeklyHitRatePct >= 55) return { level: 'medium', label: 'Hábito en construcción' };
+  return { level: 'weak', label: 'Hábito frágil' };
 }
 
 function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef }: HabitsBlockProps) {
@@ -544,7 +557,10 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
 
       <div className="grid gap-4 sm:grid-cols-2">
         {items.length > 0 ? (
-          items.map((item, idx) => (
+          items.map((item, idx) => {
+            const health = getHabitHealthFromDaysActive(item.daysActive);
+
+            return (
             <div
               key={item.title}
               className="group rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-emerald-500/10 to-indigo-500/10 p-4 shadow-lg shadow-emerald-500/15 transition duration-700"
@@ -555,18 +571,27 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
                   {item.icon ? <span className="text-xl" aria-hidden>{item.icon}</span> : null}
                   <p className="text-sm font-semibold leading-snug">{item.title}</p>
                 </div>
-                <div className="flex flex-wrap justify-end gap-2 text-[11px] uppercase tracking-[0.14em]">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-500/20 px-2 py-1 text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
-                    🔥{getPillarIcon(item.pillar) || '🫀'} {item.daysActive ?? '–'}/7
+                <div className="flex flex-nowrap items-center justify-end gap-2 text-[11px] uppercase tracking-[0.14em]">
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-emerald-300/30 bg-emerald-500/20 px-2 py-1 text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
+                    🔥{item.daysActive ?? '–'}/7
                   </span>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-lg text-slate-100">
+                  <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2 py-1 text-lg text-slate-100">
                     {getPillarIcon(item.pillar) || '🫀'}
                   </span>
                 </div>
               </div>
-              <p className="mt-3 text-sm text-slate-100">{getStreakCopy(item.daysActive)}</p>
+              <div className="mt-3 flex items-center gap-2">
+                <span
+                  className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${
+                    HABIT_HEALTH_STYLES[health.level]
+                  }`}
+                >
+                  {health.label}
+                </span>
+              </div>
             </div>
-          ))
+            );
+          })
         ) : (
           <p className="rounded-2xl border border-dashed border-white/15 bg-slate-900/70 p-4 text-sm text-slate-300">
             Sin hábitos destacados aún, pero la pista está lista para vos.
