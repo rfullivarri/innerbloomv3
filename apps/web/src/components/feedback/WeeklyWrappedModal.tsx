@@ -564,22 +564,13 @@ function getHabitHealth({
   weeksSample?: number;
 }): { level: HabitHealthLevel; label: string } {
   const hasWeekSample = Number.isFinite(weeksSample) && (weeksSample ?? 0) > 0;
-  if (hasWeekSample) {
-    const sample = Math.max(1, Math.round(weeksSample ?? 1));
-    if (sample < 4) return { level: 'early', label: 'Aún es pronto para medir' };
+  if (!hasWeekSample) return { level: 'early', label: 'Aún es pronto para medir' };
 
-    const clampedWeeks = Math.min(Math.max(0, Math.round(weeksActive ?? 0)), sample);
-    const weeklyHitRatePct = Math.round((clampedWeeks / sample) * 100);
+  const sample = Math.max(1, Math.round(weeksSample ?? 1));
+  if (sample < 4) return { level: 'early', label: 'Aún es pronto para medir' };
 
-    if (weeklyHitRatePct >= 80) return { level: 'strong', label: 'Hábito fuerte' };
-    if (weeklyHitRatePct >= 55) return { level: 'medium', label: 'Hábito en construcción' };
-    return { level: 'weak', label: 'Hábito frágil' };
-  }
-
-  if (!Number.isFinite(daysActive)) return { level: 'early', label: 'Aún es pronto para medir' };
-
-  const clampedDays = Math.max(0, Math.min(7, Math.round(daysActive ?? 0)));
-  const weeklyHitRatePct = Math.round((clampedDays / 7) * 100);
+  const clampedWeeks = Math.min(Math.max(0, Math.round(weeksActive ?? 0)), sample);
+  const weeklyHitRatePct = Math.round((clampedWeeks / sample) * 100);
 
   if (weeklyHitRatePct >= 80) return { level: 'strong', label: 'Hábito fuerte' };
   if (weeklyHitRatePct >= 55) return { level: 'medium', label: 'Hábito en construcción' };
