@@ -24,6 +24,15 @@ export type WeeklyWrappedPayload = {
     highlight: string | null;
     completions: number;
     xpTotal: number;
+    energyHighlight?: { metric: 'HP' | 'FOCUS' | 'MOOD'; value: number };
+    effortBalance?: {
+      easy: number;
+      medium: number;
+      hard: number;
+      total: number;
+      topTask?: { title: string; completions: number; difficulty: string } | null;
+      topHardTask?: { title: string; completions: number } | null;
+    };
   };
   emotions: EmotionHighlight;
   levelUp: LevelUpHighlight;
