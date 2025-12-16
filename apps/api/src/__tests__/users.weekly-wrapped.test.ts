@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mockQuery, mockVerifyToken, mockGetRecentWrapped, mockMaybeGenerateWrapped } =
   vi.hoisted(() => ({
