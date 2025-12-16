@@ -1,11 +1,13 @@
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockQuery, mockVerifyToken, mockGetRecentWrapped } = vi.hoisted(() => ({
-  mockQuery: vi.fn(),
-  mockVerifyToken: vi.fn(),
-  mockGetRecentWrapped: vi.fn(),
-}));
+const { mockQuery, mockVerifyToken, mockGetRecentWrapped, mockMaybeGenerateWrapped } =
+  vi.hoisted(() => ({
+    mockQuery: vi.fn(),
+    mockVerifyToken: vi.fn(),
+    mockGetRecentWrapped: vi.fn(),
+    mockMaybeGenerateWrapped: vi.fn(),
+  }));
 
 vi.mock('../db.js', () => ({
   pool: { query: mockQuery },
@@ -23,6 +25,7 @@ vi.mock('../services/auth-service.js', () => ({
 
 vi.mock('../services/weeklyWrappedService.js', () => ({
   getRecentWeeklyWrapped: mockGetRecentWrapped,
+  maybeGenerateWeeklyWrappedForDate: mockMaybeGenerateWrapped,
 }));
 
 import app from '../app.js';
@@ -34,10 +37,7 @@ describe('GET /api/users/:id/weekly-wrapped/latest', () => {
     mockQuery.mockReset();
     mockVerifyToken.mockReset();
     mockGetRecentWrapped.mockReset();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
+    mockMaybeGenerateWrapped.mockReset();
   });
 
   it('returns 401 when authentication is missing', async () => {
@@ -107,6 +107,8 @@ describe('GET /api/users/:id/weekly-wrapped/latest', () => {
         },
       },
     });
+    const todayKey = new Date().toISOString().slice(0, 10);
+    expect(mockMaybeGenerateWrapped).toHaveBeenCalledWith(userId, todayKey);
     expect(mockGetRecentWrapped).toHaveBeenCalledWith(userId, 2);
   });
 });
@@ -116,6 +118,7 @@ describe('GET /api/users/:id/weekly-wrapped/previous', () => {
     mockQuery.mockReset();
     mockVerifyToken.mockReset();
     mockGetRecentWrapped.mockReset();
+    mockMaybeGenerateWrapped.mockReset();
   });
 
   it('returns the previous weekly wrapped entry when available', async () => {
@@ -174,6 +177,8 @@ describe('GET /api/users/:id/weekly-wrapped/previous', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.item?.id).toBe('wrap-previous');
+    const todayKey = new Date().toISOString().slice(0, 10);
+    expect(mockMaybeGenerateWrapped).toHaveBeenCalledWith(userId, todayKey);
     expect(mockGetRecentWrapped).toHaveBeenCalledWith(userId, 2);
   });
 });
