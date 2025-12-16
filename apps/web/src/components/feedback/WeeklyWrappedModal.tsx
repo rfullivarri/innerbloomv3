@@ -26,6 +26,16 @@ const PILLAR_TEXT_TONES: Record<string, string> = {
   Soul: 'text-fuchsia-50',
 };
 
+type SectionBadge = {
+  id: string;
+  label: string;
+  icon?: string;
+  dotColor?: string;
+  active?: boolean;
+  dotOnly?: boolean;
+  size?: 'default' | 'large';
+};
+
 type WeeklyWrappedModalProps = {
   payload: WeeklyWrappedPayload;
   onClose: () => void;
@@ -126,45 +136,46 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
   const emotionIndex = progressIndex + 1;
   const closingIndex = emotionIndex + 1;
 
-  const summaryChips = useMemo(
-    () => [
-      {
-        id: 'range',
-        label: formatRange(payload.weekRange),
-        active: true,
-        icon: '📅',
-      },
-      weeklyEmotion
-        ? {
-            id: 'emotion',
-            label: '',
-            dotColor: weeklyEmotion.color,
-            active: true,
-            dotOnly: true,
-          }
-        : {
-            id: 'emotion-empty',
-            label: '',
-            dotColor: '#94a3b8',
-            active: false,
-            dotOnly: true,
-          },
-      topHabitTitle || pillarDominant
-        ? {
-            id: 'streak',
-            label: `${topHabitPillarIcon || getPillarIcon(pillarDominant) || '🫀'}`,
-            icon: '🔥',
-            active: true,
-            size: 'large',
-          }
-        : {
-            id: 'streak-empty',
-            label: '🫀',
-            icon: '🔥',
-            active: false,
-            size: 'large',
-          },
-    ],
+  const summaryChips: SectionBadge[] = useMemo(
+    () =>
+      [
+        {
+          id: 'range',
+          label: formatRange(payload.weekRange),
+          active: true,
+          icon: '📅',
+        },
+        weeklyEmotion
+          ? {
+              id: 'emotion',
+              label: '',
+              dotColor: weeklyEmotion.color,
+              active: true,
+              dotOnly: true,
+            }
+          : {
+              id: 'emotion-empty',
+              label: '',
+              dotColor: '#94a3b8',
+              active: false,
+              dotOnly: true,
+            },
+        topHabitTitle || pillarDominant
+          ? {
+              id: 'streak',
+              label: `${topHabitPillarIcon || getPillarIcon(pillarDominant) || '🫀'}`,
+              icon: '🔥',
+              active: true,
+              size: 'large',
+            }
+          : {
+              id: 'streak-empty',
+              label: '🫀',
+              icon: '🔥',
+              active: false,
+              size: 'large',
+            },
+      ] satisfies SectionBadge[],
     [payload.weekRange, topHabitPillarIcon, pillarDominant, topHabitTitle, weeklyEmotion],
   );
 
@@ -325,15 +336,7 @@ function SectionShell({ children, index, entered, active = false, auraIndex = 0,
 type SectionBlockProps = {
   label: string;
   headline: string;
-  badges: {
-    id: string;
-    label: string;
-    icon?: string;
-    dotColor?: string;
-    active?: boolean;
-    dotOnly?: boolean;
-    size?: 'default' | 'large';
-  }[];
+  badges: SectionBadge[];
   description?: string;
   kicker?: string;
   highlightText?: string;
