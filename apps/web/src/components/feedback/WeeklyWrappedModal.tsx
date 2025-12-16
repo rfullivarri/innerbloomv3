@@ -1,4 +1,5 @@
 import { type MutableRefObject, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { getHabitHealth as getHabitHealthFromInsights } from '../dashboard-v3/StreakTaskInsightsModal';
 import type { WeeklyWrappedPayload, WeeklyWrappedSection } from '../../lib/weeklyWrapped';
 
 const ANIMATION_DELAY = 80;
@@ -551,7 +552,7 @@ type HabitsBlockProps = {
   registerSectionRef: MutableRefObject<(HTMLDivElement | null)[]>;
 };
 
-type HabitHealthLevel = 'early' | 'strong' | 'medium' | 'weak';
+type HabitHealthLevel = ReturnType<typeof getHabitHealthFromInsights>['level'];
 
 const HABIT_HEALTH_STYLES: Record<HabitHealthLevel, string> = {
   early: 'bg-slate-200/70 text-slate-900',
@@ -560,36 +561,22 @@ const HABIT_HEALTH_STYLES: Record<HabitHealthLevel, string> = {
   weak: 'bg-rose-300 text-rose-950',
 };
 
-function getHabitHealth({
-  daysActive,
-  weeksActive,
-  weeksSample,
-}: {
-  daysActive?: number;
-  weeksActive?: number;
-  weeksSample?: number;
-}): { level: HabitHealthLevel; label: string } {
-  const hasWeekSample = Number.isFinite(weeksSample) && (weeksSample ?? 0) > 0;
-  if (hasWeekSample) {
-    const sample = Math.max(1, Math.round(weeksSample ?? 1));
-    if (sample < 4) return { level: 'early', label: 'Aún es pronto para medir' };
+function resolveHabitHealth({ daysActive, weeksActive, weeksSample }: HabitItem) {
+  const normalizedWeeksSample = Number.isFinite(weeksSample) ? Math.max(0, Math.round(weeksSample ?? 0)) : 0;
+  const normalizedWeeksActive = Number.isFinite(weeksActive) ? Math.max(0, Math.round(weeksActive ?? 0)) : 0;
 
-    const clampedWeeks = Math.min(Math.max(0, Math.round(weeksActive ?? 0)), sample);
-    const weeklyHitRatePct = Math.round((clampedWeeks / sample) * 100);
+  const completionRate = (() => {
+    if (normalizedWeeksSample > 0) {
+      return Math.round((normalizedWeeksActive / Math.max(1, normalizedWeeksSample)) * 100);
+    }
 
-    if (weeklyHitRatePct >= 80) return { level: 'strong', label: 'Hábito fuerte' };
-    if (weeklyHitRatePct >= 55) return { level: 'medium', label: 'Hábito en construcción' };
-    return { level: 'weak', label: 'Hábito frágil' };
-  }
+    const normalizedDays = Number.isFinite(daysActive) ? Math.max(0, Math.min(7, Math.round(daysActive ?? 0))) : 0;
+    return Math.round((normalizedDays / 7) * 100);
+  })();
 
-  if (!Number.isFinite(daysActive)) return { level: 'early', label: 'Aún es pronto para medir' };
+  const sampleForHealth = normalizedWeeksSample || 1;
 
-  const clampedDays = Math.max(0, Math.min(7, Math.round(daysActive ?? 0)));
-  const weeklyHitRatePct = Math.round((clampedDays / 7) * 100);
-
-  if (weeklyHitRatePct >= 80) return { level: 'strong', label: 'Hábito fuerte' };
-  if (weeklyHitRatePct >= 55) return { level: 'medium', label: 'Hábito en construcción' };
-  return { level: 'weak', label: 'Hábito frágil' };
+  return getHabitHealthFromInsights(completionRate, sampleForHealth);
 }
 
 function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef }: HabitsBlockProps) {
@@ -613,11 +600,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
       <div className="grid gap-4 sm:grid-cols-2">
         {items.length > 0 ? (
           items.map((item, idx) => {
-            const health = getHabitHealth({
-              daysActive: item.daysActive,
-              weeksActive: item.weeksActive,
-              weeksSample: item.weeksSample,
-            });
+            const health = resolveHabitHealth(item);
 
             return (
             <div
