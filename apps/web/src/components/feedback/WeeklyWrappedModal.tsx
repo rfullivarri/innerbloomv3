@@ -540,6 +540,7 @@ export type HabitItem = {
   daysActive?: number;
   weeksActive?: number | string;
   weeksSample?: number | string;
+  completionRate?: number | string;
 };
 
 type HabitsBlockProps = {
@@ -561,7 +562,8 @@ const HABIT_HEALTH_STYLES: Record<HabitHealthLevel, string> = {
   weak: 'bg-rose-300 text-rose-950',
 };
 
-export function resolveHabitHealth({ daysActive, weeksActive, weeksSample }: HabitItem) {
+export function resolveHabitHealth({ daysActive, weeksActive, weeksSample, completionRate }: HabitItem) {
+  const parsedCompletionRate = Number(completionRate);
   const parsedWeeksSample = Number(weeksSample);
   const parsedWeeksActive = Number(weeksActive);
 
@@ -572,7 +574,15 @@ export function resolveHabitHealth({ daysActive, weeksActive, weeksSample }: Hab
       ? normalizedWeeksActive
       : 0;
 
-  const completionRate = (() => {
+  const normalizedCompletionRate = Number.isFinite(parsedCompletionRate)
+    ? Math.max(0, Math.min(100, Math.round(parsedCompletionRate)))
+    : null;
+
+  const completionRateForHealth = (() => {
+    if (normalizedCompletionRate !== null) {
+      return normalizedCompletionRate;
+    }
+
     if (normalizedWeeksSample > 0) {
       return Math.round((normalizedWeeksActive / Math.max(1, normalizedWeeksSample)) * 100);
     }
@@ -581,9 +591,10 @@ export function resolveHabitHealth({ daysActive, weeksActive, weeksSample }: Hab
     return Math.round((normalizedDays / 7) * 100);
   })();
 
-  const sampleForHealth = Math.max(1, normalizedWeeksSample, normalizedWeeksActive);
+  const baseSample = Math.max(1, normalizedWeeksSample, normalizedWeeksActive);
+  const sampleForHealth = normalizedCompletionRate !== null && baseSample < 4 ? 4 : baseSample;
 
-  return getHabitHealthFromInsights(completionRate, sampleForHealth);
+  return getHabitHealthFromInsights(completionRateForHealth, sampleForHealth);
 }
 
 function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef }: HabitsBlockProps) {

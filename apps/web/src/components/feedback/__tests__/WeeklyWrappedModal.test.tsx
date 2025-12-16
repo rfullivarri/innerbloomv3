@@ -30,4 +30,16 @@ describe('resolveHabitHealth', () => {
     expect(health.label).not.toBe('Aún es pronto para medir');
     expect(health.level).toBe('strong');
   });
+
+  test('prefiere la tasa de completionRate provista (popup) para calcular la salud', () => {
+    const health = resolveHabitHealth({
+      ...baseHabit,
+      completionRate: 83,
+      weeksActive: 8,
+      weeksSample: 10,
+      daysActive: 2,
+    });
+
+    expect(health.level).toBe('strong');
+  });
 });
