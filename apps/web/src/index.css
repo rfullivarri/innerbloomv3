@@ -1046,6 +1046,13 @@
   transition: transform var(--motion-duration-base) var(--motion-ease-enter);
 }
 
+.missions-heartbeat-indicator__dot--emoji {
+  width: auto;
+  height: auto;
+  font-size: 0.9rem;
+  filter: none;
+}
+
 .missions-heartbeat-indicator__icon {
   display: block;
   width: 100%;
@@ -1069,6 +1076,26 @@
 
 .missions-heartbeat-indicator--pulse .missions-heartbeat-indicator__dot {
   animation: missionsHeartbeatDot var(--motion-duration-slow) var(--motion-ease-emphasis);
+}
+
+.missions-pillar-chip {
+  letter-spacing: 0.08em;
+}
+
+.missions-pillar-chip--body {
+  color: rgba(248, 113, 113, 0.95);
+}
+
+.missions-pillar-chip--mind {
+  color: rgba(96, 165, 250, 0.95);
+}
+
+.missions-pillar-chip--soul {
+  color: rgba(236, 72, 153, 0.95);
+}
+
+.missions-pillar-chip--unknown {
+  color: rgba(148, 163, 184, 0.9);
 }
 
 .missions-active-card__footer {

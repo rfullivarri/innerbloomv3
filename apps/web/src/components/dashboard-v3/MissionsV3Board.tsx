@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useId,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -68,6 +67,18 @@ type MissionsWindow = Window &
 
 const SLOT_ORDER: Array<MissionsV2Slot['slot']> = ['main', 'hunt', 'skill'];
 const DEFAULT_MARKET_INDEX = SLOT_ORDER.length > 2 ? 1 : 0;
+
+const PILLAR_EMOJI: Record<string, string> = {
+  body: '🫀',
+  soul: '🏵️',
+  mind: '🧠',
+};
+
+const PILLAR_LABEL: Record<string, string> = {
+  body: 'Body',
+  soul: 'Soul',
+  mind: 'Mind',
+};
 
 const SLOT_DETAILS: Record<
   MissionsV2Slot['slot'],
@@ -805,37 +816,46 @@ function MissionPetalsMini({ slot, highlight }: { slot: MissionsV2Slot; highligh
   );
 }
 
-function MissionHeartbeatStatus({ pending, highlight }: { pending: boolean; highlight: boolean }) {
-  const rawGradientId = useId();
-  const gradientId = `missions-heartbeat-gradient-${rawGradientId.replace(/:/g, '')}`;
+function resolveMissionPillar(mission: MissionsV2Slot['mission']): string | null {
+  const metadata = mission?.metadata ?? {};
+  const rawPillar =
+    (metadata.pillar as string | undefined) ??
+    (metadata.pillar_code as string | undefined) ??
+    (metadata.pillarCode as string | undefined) ??
+    (metadata.pillarId as string | undefined) ??
+    (metadata.pillar_id as string | undefined) ??
+    (mission as unknown as { pillar?: string })?.pillar ??
+    (mission as unknown as { pillar_code?: string })?.pillar_code ??
+    null;
+
+  if (!rawPillar) {
+    return null;
+  }
+
+  const normalized = rawPillar.toLowerCase();
+  if (normalized === 'body' || normalized === 'soul' || normalized === 'mind') {
+    return normalized;
+  }
+
+  return null;
+}
+
+function MissionPillarBadge({ mission }: { mission: MissionsV2Slot['mission'] }) {
+  const pillar = resolveMissionPillar(mission);
+  const label = pillar ? `Pilar ${PILLAR_LABEL[pillar]}` : 'Pilar sin asignar';
+  const icon = pillar ? PILLAR_EMOJI[pillar] : '❔';
 
   return (
     <span
       className={classNames(
         'missions-heartbeat-indicator',
-        pending ? 'missions-heartbeat-indicator--pending' : 'missions-heartbeat-indicator--done',
-        highlight && 'missions-heartbeat-indicator--pulse',
+        pillar ? `missions-pillar-chip missions-pillar-chip--${pillar}` : 'missions-pillar-chip missions-pillar-chip--unknown',
       )}
     >
-      <span aria-hidden="true" className="missions-heartbeat-indicator__dot">
-        <svg viewBox="0 0 24 24" role="presentation" focusable="false" className="missions-heartbeat-indicator__icon">
-          <defs>
-            <linearGradient id={gradientId} x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="var(--missions-heartbeat-fill-start)" />
-              <stop offset="100%" stopColor="var(--missions-heartbeat-fill-end)" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M12 21.35 10.55 20.03C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54Z"
-            fill={`url(#${gradientId})`}
-            stroke="var(--missions-heartbeat-stroke)"
-            strokeWidth="1.35"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+      <span aria-hidden="true" className="missions-heartbeat-indicator__dot missions-heartbeat-indicator__dot--emoji">
+        {icon}
       </span>
-      {pending ? 'Heartbeat pendiente' : 'Heartbeat sellado'}
+      {label}
     </span>
   );
 }
@@ -871,7 +891,6 @@ type ActiveMissionCardProps = {
   secondaryActions: MissionsV2Action[];
   heartbeatActionId?: string;
   heartbeatHighlight: boolean;
-  heartbeatPending: boolean;
   prefersReducedMotion: boolean;
   busy: boolean;
   onHeartbeat: (slot: MissionsV2Slot) => void;
@@ -890,7 +909,6 @@ function ActiveMissionCard({
   secondaryActions,
   heartbeatActionId,
   heartbeatHighlight,
-  heartbeatPending,
   prefersReducedMotion,
   busy,
   onHeartbeat,
@@ -965,7 +983,7 @@ function ActiveMissionCard({
             <div className="missions-active-card__rail">
               <div className="missions-active-card__meta">
                 <MissionPetalsMini slot={slot} highlight={heartbeatHighlight} />
-                <MissionHeartbeatStatus pending={heartbeatPending} highlight={heartbeatHighlight} />
+                <MissionPillarBadge mission={slot.mission} />
               </div>
               {secondaryActions.length > 0 && (
                 <div className="missions-active-card__secondary-actions">
@@ -3397,7 +3415,6 @@ export function MissionsV3Board({
     const details = SLOT_DETAILS[slot.slot];
     const stateConfig = STATE_LABELS[slot.state];
     const requirementChips = buildRequirementChips(slot);
-    const heartbeatPending = !slot.heartbeat_today;
     const heroLine = buildHeroLine(slot, marketBySlot);
     const rewardCopy = getRewardCopy(slot);
     const heartbeatAction = slot.actions.find((action: MissionsV2Action) => action.type === 'heartbeat');
@@ -3527,7 +3544,6 @@ export function MissionsV3Board({
             secondaryActions={secondaryActions}
             heartbeatActionId={heartbeatActionId}
             heartbeatHighlight={Boolean(heartbeatHighlight)}
-            heartbeatPending={heartbeatPending}
             prefersReducedMotion={prefersReducedMotion}
             busy={busy}
             onHeartbeat={handleHeartbeat}
@@ -3797,7 +3813,6 @@ export function MissionsV3Board({
   const heroDetails = activeSlotCard ? SLOT_DETAILS[activeSlotCard.slot] : null;
   const heroState = activeSlotCard ? STATE_LABELS[activeSlotCard.state] : null;
   const heroPetalHighlight = activeSlotCard ? heartbeatFeedback?.slotId === activeSlotCard.id : false;
-  const heroHeartbeatPending = activeSlotCard ? !activeSlotCard.heartbeat_today : false;
   const heroBossStatusLabel = bossEnabled
     ? board.boss.status === 'locked'
       ? 'Desbloquealo llevando la Main al Acto 2'
@@ -3914,7 +3929,7 @@ export function MissionsV3Board({
                   {activeSlotCard ? (
                     <>
                       <MissionPetalsMini slot={activeSlotCard} highlight={heroPetalHighlight} />
-                      <MissionHeartbeatStatus pending={heroHeartbeatPending} highlight={heroPetalHighlight} />
+                      <MissionPillarBadge mission={activeSlotCard.mission} />
                     </>
                   ) : (
                     <p className="missions-hero__metric-placeholder">Protegé tus pétalos activando una misión.</p>
