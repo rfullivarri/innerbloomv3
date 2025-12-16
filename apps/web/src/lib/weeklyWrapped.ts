@@ -1,7 +1,7 @@
-import type { EmotionSnapshot, UserLevelResponse } from './api';
+import type { EmotionSnapshot, TaskInsightsResponse, UserLevelResponse } from './api';
 import type { AdminInsights, AdminLogRow } from './types';
 import { fetchAdminInsights, fetchAdminLogs } from './adminApi';
-import { getEmotions, getUserLevel } from './api';
+import { getEmotions, getTaskInsights, getUserLevel } from './api';
 import { logApiError } from './logger';
 
 type EmotionMessageKey =
@@ -70,6 +70,20 @@ type NormalizedLog = AdminLogRow & {
   dateKey: string | null;
   quantity: number;
   state: 'red' | 'yellow' | 'green';
+};
+
+type HabitAggregate = {
+  title: string;
+  taskId?: string | null;
+  daysActive: number;
+  weeksActive: number;
+  weeksSample: number;
+  completions: number;
+  pillar: string | null;
+  badge?: string;
+  completionRate?: number | null;
+  weeklyGoal?: number | null;
+  insightsTimeline?: TaskInsightsResponse['weeks']['timeline'];
 };
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
@@ -283,13 +297,42 @@ export function summarizeWeeklyActivity(logs: NormalizedLog[]): {
   return { completions, habitCounts };
 }
 
-export function buildWeeklyWrappedFromData(
+async function hydrateHabitsWithTaskInsights(habits: HabitAggregate[]): Promise<HabitAggregate[]> {
+  return Promise.all(
+    habits.map(async (habit) => {
+      if (!habit.taskId) {
+        return habit;
+      }
+
+      try {
+        const insights = await getTaskInsights(habit.taskId);
+        const timeline = insights.weeks.timeline ?? [];
+        const weeksActiveFromInsights = timeline.filter((week) => week.hit).length;
+        const weeksSampleFromInsights = timeline.length;
+
+        return {
+          ...habit,
+          weeksActive: weeksActiveFromInsights || habit.weeksActive,
+          weeksSample: weeksSampleFromInsights || habit.weeksSample,
+          completionRate: insights.weeks.completionRate,
+          weeklyGoal: insights.weeks.weeklyGoal,
+          insightsTimeline: timeline,
+        } satisfies HabitAggregate;
+      } catch (error) {
+        logApiError('[weekly-wrapped] failed to fetch task insights', { error, taskId: habit.taskId });
+        return habit;
+      }
+    }),
+  );
+}
+
+export async function buildWeeklyWrappedFromData(
   insights: AdminInsights,
   logs: AdminLogRow[],
   emotions: EmotionSnapshot[],
   levelSummary: LevelSummary | null,
   options: { forceLevelUpMock?: boolean } = {},
-): WeeklyWrappedPayload {
+): Promise<WeeklyWrappedPayload> {
   const normalizedLogs = normalizeLogs(logs);
   const latestLog = normalizedLogs.reduce<Date | null>((latest, log) => {
     if (!latest || log.parsedDate > latest) {
@@ -328,9 +371,10 @@ export function buildWeeklyWrappedFromData(
       weeksSample: longTerm?.weeksSample ?? weeksSample,
     };
   });
+  const topHabitsWithInsights = await hydrateHabitsWithTaskInsights(topHabits);
   const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
-  const highlight = topHabits[0]?.title ?? null;
+  const highlight = topHabitsWithInsights[0]?.title ?? null;
   const emotionHighlight = buildEmotionHighlight(emotions);
   const weeklyEmotionMessage =
     emotionHighlight.weekly?.weeklyMessage ??
@@ -371,12 +415,12 @@ export function buildWeeklyWrappedFromData(
         key: 'habits',
         title: 'Ritmo que se sostiene',
         body:
-          topHabits.length > 0
+          topHabitsWithInsights.length > 0
             ? 'Estos hábitos aparecieron de forma consistente y mantuvieron tu semana en movimiento.'
             : 'Aún no registramos hábitos destacados esta semana, pero estás a un clic de retomarlos.',
         items:
-          topHabits.length > 0
-            ? topHabits.map((habit) => ({
+          topHabitsWithInsights.length > 0
+            ? topHabitsWithInsights.map((habit) => ({
                 title: habit.title,
                 body:
                   habit.daysActive > 0
@@ -387,6 +431,7 @@ export function buildWeeklyWrappedFromData(
                 daysActive: habit.daysActive,
                 weeksActive: habit.weeksActive,
                 weeksSample: habit.weeksSample,
+                completionRate: habit.completionRate,
               }))
             : undefined,
       },
@@ -453,6 +498,7 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number) {
   const map = new Map<
     string,
     {
+      taskId?: string | null;
       title: string;
       days: Set<string>;
       weeks: Set<string>;
@@ -469,13 +515,14 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number) {
       continue;
     }
 
-    const key = log.taskName || log.taskId;
+    const key = log.taskId || log.taskName;
     if (!key) {
       continue;
     }
 
     const weekKey = getWeekKey(log.parsedDate);
     const current = map.get(key) ?? {
+      taskId: log.taskId ?? null,
       title: log.taskName || 'Hábito sin nombre',
       days: new Set<string>(),
       weeks: new Set<string>(),
@@ -498,6 +545,7 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number) {
   return Array.from(map.values())
     .map((entry) => ({
       title: entry.title,
+      taskId: entry.taskId ?? undefined,
       daysActive: entry.days.size,
       weeksActive: entry.weeks.size,
       weeksSample,
