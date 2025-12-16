@@ -67,6 +67,16 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
+    console.info('[weekly-wrapped] rendering modal with payload', {
+      dataSource: payload.dataSource,
+      variant: payload.variant,
+      weekRange: payload.weekRange,
+      summary: payload.summary,
+      sections: payload.sections.map((section) => section.key),
+    });
+  }, [payload]);
+
+  useEffect(() => {
     const raf = requestAnimationFrame(() => setEntered(true));
     return () => cancelAnimationFrame(raf);
   }, []);

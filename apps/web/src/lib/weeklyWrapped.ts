@@ -130,6 +130,16 @@ const EMOTION_COLORS: Record<EmotionMessageKey, string> = {
   cansancio: '#16A085',
 };
 
+function logWeeklyWrappedDebug(message: string, context?: Record<string, unknown>) {
+  if (typeof window === 'undefined' || (window as any).__DBG !== false) {
+    if (context) {
+      console.info(`[weekly-wrapped] ${message}`, context);
+    } else {
+      console.info(`[weekly-wrapped] ${message}`);
+    }
+  }
+}
+
 const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
   felicidad: {
     key: 'felicidad',
@@ -355,7 +365,23 @@ export async function buildWeeklyWrappedFromData(
   levelSummary: LevelSummary | null,
   options: { forceLevelUpMock?: boolean } = {},
 ): Promise<WeeklyWrappedPayload> {
+  logWeeklyWrappedDebug('building payload from data', {
+    logsCount: logs.length,
+    emotionsCount: emotions.length,
+    hasLevelSummary: Boolean(levelSummary),
+    forceLevelUpMock: options.forceLevelUpMock,
+  });
   const normalizedLogs = normalizeLogs(logs);
+  logWeeklyWrappedDebug('normalized logs ready', {
+    normalizedCount: normalizedLogs.length,
+    sample: normalizedLogs.slice(0, 3).map((log) => ({
+      task: log.taskName ?? log.taskId,
+      difficulty: log.difficulty,
+      state: log.state,
+      date: log.dateKey,
+      quantity: log.quantity,
+    })),
+  });
   const latestLog = normalizedLogs.reduce<Date | null>((latest, log) => {
     if (!latest || log.parsedDate > latest) {
       return log.parsedDate;
@@ -407,6 +433,17 @@ export async function buildWeeklyWrappedFromData(
     emotionHighlight.biweekly?.biweeklyContext ??
     'En cuanto registremos más emociones, vamos a mostrar la tendencia de las últimas dos semanas.';
   const emotionAccent = emotionHighlight.weekly?.label ?? emotionHighlight.biweekly?.label ?? 'Sin emoción dominante';
+
+  logWeeklyWrappedDebug('weekly wrapped summary computed', {
+    periodLabel,
+    completions,
+    xpTotal,
+    pillarDominant,
+    highlight,
+    variant,
+    energyHighlight,
+    effortBalance,
+  });
 
   const sections: WeeklyWrappedSection[] = (
     [
@@ -658,6 +695,16 @@ function computeEffortBalance(logs: NormalizedLog[]): NonNullable<WeeklyWrappedP
     .map(([title, info]) => ({ title, ...info }))
     .filter((entry) => entry.difficulty === 'hard')
     .sort((a, b) => b.completions - a.completions)[0];
+
+  logWeeklyWrappedDebug('effort balance computed', {
+    total,
+    counts,
+    sampleTasks: Array.from(taskTotals.entries())
+      .slice(0, 3)
+      .map(([title, info]) => ({ title, ...info })),
+    topTask,
+    topHardTask,
+  });
 
   return {
     easy: counts.easy,
