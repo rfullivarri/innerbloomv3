@@ -30,6 +30,7 @@ type NormalizedLog = AdminLogRow & {
 };
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+const MS_IN_DAY = 24 * 60 * 60 * 1000;
 const EMOTION_KEY_BY_LABEL: Record<string, EmotionMessageKey> = {
   Calma: 'calma',
   Felicidad: 'felicidad',
@@ -202,7 +203,14 @@ async function buildWeeklyWrappedPayload(
   userId: string,
   range: { start: string; end: string },
 ): Promise<WeeklyWrappedPayload> {
-  const [insights, logsResult, levelSummary] = await Promise.all([
+  const longTermStart = (() => {
+    const end = parseDate(range.end);
+    const start = new Date(end);
+    start.setUTCDate(end.getUTCDate() - 83);
+    return toDateKey(start);
+  })();
+
+  const [insights, logsResult, longTermLogsResult, levelSummary] = await Promise.all([
     getUserInsights(userId, {} as InsightQuery),
     getUserLogs(userId, {
       from: range.start,
@@ -211,11 +219,19 @@ async function buildWeeklyWrappedPayload(
       pageSize: 200,
       sort: 'date:asc',
     } as LogsQuery),
+    getUserLogs(userId, {
+      from: longTermStart,
+      to: range.end,
+      page: 1,
+      pageSize: 500,
+      sort: 'date:asc',
+    } as LogsQuery),
     loadUserLevelSummary(userId),
   ]);
   const emotions = buildEmotionSnapshots(insights.emotions?.last30 ?? [], range.end, 15);
 
   const normalizedLogs = normalizeLogs(logsResult.items ?? []);
+  const normalizedLongTermLogs = normalizeLogs(longTermLogsResult.items ?? []);
   const latestLog = normalizedLogs.reduce<Date | null>((latest, log) => {
     if (!latest || log.parsedDate > latest) {
       return log.parsedDate;
@@ -225,13 +241,23 @@ async function buildWeeklyWrappedPayload(
 
   const endDate = latestLog ?? new Date(`${range.end}T00:00:00Z`);
   const startDate = startOfDay(new Date(`${range.start}T00:00:00Z`));
+  const weeksSample = Math.max(1, Math.ceil((endDate.getTime() - parseDate(longTermStart).getTime() + MS_IN_DAY) / (7 * MS_IN_DAY)));
   const { completions, habitCounts } = summarizeWeeklyActivity(normalizedLogs);
+  const longTermHabits = aggregateHabits(normalizedLongTermLogs, weeksSample);
+  const longTermHabitMap = new Map(longTermHabits.map((habit) => [habit.title, habit]));
   const xpTotal = normalizedLogs
     .filter((log) => log.state !== 'red')
     .reduce((acc, log) => acc + Math.max(0, Number(log.xp ?? 0)), 0);
   const levelUp = detectLevelUp(levelSummary, xpTotal, false);
 
-  const topHabits = habitCounts.slice(0, 3);
+  const topHabits = habitCounts.slice(0, 3).map((habit) => {
+    const longTerm = longTermHabitMap.get(habit.title);
+    return {
+      ...habit,
+      weeksActive: longTerm?.weeksActive ?? habit.weeksActive ?? 0,
+      weeksSample: longTerm?.weeksSample ?? weeksSample,
+    };
+  });
   const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
   const highlight = topHabits[0]?.title ?? null;
@@ -286,6 +312,9 @@ async function buildWeeklyWrappedPayload(
                     : 'Ritmo sólido esta semana. Constancia pura.',
                 badge: habit.badge,
                 pillar: habit.pillar,
+                daysActive: habit.daysActive,
+                weeksActive: habit.weeksActive,
+                weeksSample: habit.weeksSample,
               }))
             : undefined,
       },
@@ -384,11 +413,31 @@ function summarizeWeeklyActivity(logs: NormalizedLog[]): {
   return { completions, habitCounts };
 }
 
-function aggregateHabits(logs: NormalizedLog[]) {
+function getWeekKey(date: Date): string {
+  const copy = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const day = copy.getUTCDay() || 7; // Convert Sunday (0) to 7
+  copy.setUTCDate(copy.getUTCDate() - day + 1); // Move to Monday
+
+  const yearStart = new Date(Date.UTC(copy.getUTCFullYear(), 0, 1));
+  const weekNumber = Math.ceil(((copy.getTime() - yearStart.getTime()) / MS_IN_DAY + 1) / 7);
+
+  return `${copy.getUTCFullYear()}-W${weekNumber}`;
+}
+
+function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number) {
   const map = new Map<
     string,
-    { title: string; days: Set<string>; completions: number; pillar: string | null; badge: string | undefined }
+    {
+      title: string;
+      days: Set<string>;
+      weeks: Set<string>;
+      completions: number;
+      pillar: string | null;
+      badge: string | undefined;
+    }
   >();
+
+  const weeksSeen = new Set<string>();
 
   for (const log of logs) {
     if (!log.dateKey) {
@@ -399,25 +448,36 @@ function aggregateHabits(logs: NormalizedLog[]) {
     if (!key) {
       continue;
     }
+    const weekKey = getWeekKey(log.parsedDate);
     const current = map.get(key) ?? {
       title: (log as { taskName?: string }).taskName || 'Hábito sin nombre',
       days: new Set<string>(),
+      weeks: new Set<string>(),
       completions: 0,
       pillar: (log as { pillar?: string }).pillar ?? null,
       badge: undefined,
     };
     current.days.add(log.dateKey);
+    current.weeks.add(weekKey);
     current.completions += Math.max(1, Number(log.quantity ?? 1));
+    weeksSeen.add(weekKey);
+    if (!current.badge && current.days.size >= 5) {
+      current.badge = 'racha activa';
+    }
     map.set(key, current);
   }
+
+  const weeksSample = weeksSampleOverride ?? weeksSeen.size;
 
   return Array.from(map.values())
     .map((entry) => ({
       title: entry.title,
       completions: entry.completions,
       daysActive: entry.days.size,
+      weeksActive: entry.weeks.size,
+      weeksSample,
       pillar: entry.pillar,
-      badge: entry.completions >= 3 ? 'Racha' : undefined,
+      badge: entry.badge,
     }))
     .sort((a, b) => b.daysActive - a.daysActive || b.completions - a.completions || a.title.localeCompare(b.title));
 }

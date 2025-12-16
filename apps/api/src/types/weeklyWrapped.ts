@@ -3,7 +3,15 @@ export type WeeklyWrappedSection = {
   title: string;
   body: string;
   accent?: string;
-  items?: { title: string; body: string; badge?: string; pillar?: string | null }[];
+  items?: {
+    title: string;
+    body: string;
+    badge?: string;
+    pillar?: string | null;
+    daysActive?: number;
+    weeksActive?: number;
+    weeksSample?: number;
+  }[];
 };
 
 export type WeeklyWrappedPayload = {
