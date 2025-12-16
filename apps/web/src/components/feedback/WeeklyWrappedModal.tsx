@@ -621,19 +621,18 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 text-slate-50">
-                  {item.icon ? <span className="text-xl" aria-hidden>{item.icon}</span> : null}
                   <p className="text-sm font-semibold leading-snug">{item.title}</p>
                 </div>
                 <div className="flex flex-nowrap items-center justify-end gap-2 text-[11px] uppercase tracking-[0.14em]">
                   <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-emerald-300/30 bg-emerald-500/20 px-2 py-1 text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
                     🔥{item.daysActive ?? '–'}/7
                   </span>
-                  <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2 py-1 text-lg text-slate-100">
-                    {getPillarIcon(item.pillar) || '🫀'}
-                  </span>
                 </div>
               </div>
-              <div className="mt-3 flex items-center gap-2">
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2 py-1 text-sm font-semibold uppercase tracking-[0.12em] text-slate-100">
+                  {getPillarIcon(item.pillar) || '🫀'} {item.pillar ?? '–'}
+                </span>
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
                     HABIT_HEALTH_STYLES[health.level]
