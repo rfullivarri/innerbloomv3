@@ -14,6 +14,7 @@ import { maybeGenerateWeeklyWrappedForDate } from './weeklyWrappedService.js';
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const LEVEL_UP_NOTIFICATION_KEY = 'inapp_level_up_popup';
 const STREAK_FIRE_NOTIFICATION_KEY = 'inapp_streak_fire_popup';
+const DEFAULT_STREAK_THRESHOLDS = [3, 5, 7];
 
 export type DailyQuestStatus = {
   date: string;
@@ -53,6 +54,8 @@ export type DailyQuestXpSummary = {
     weekly: number;
   };
 };
+
+type StreakTask = { id: string; name: string; streakDays: number };
 
 export type SubmitDailyQuestInput = {
   date?: string;
@@ -418,17 +421,31 @@ function isActiveInAppDefinition(row?: FeedbackDefinitionRow | null): row is Fee
   return Boolean(row && row.channel === 'in_app_popup' && row.status === 'active');
 }
 
-function resolveStreakThreshold(config: unknown): number {
-  const fallback = 3;
+function resolveStreakThresholds(config: unknown): number[] {
+  const base = new Set(DEFAULT_STREAK_THRESHOLDS);
   if (!config || typeof config !== 'object') {
-    return fallback;
+    return Array.from(base).sort((a, b) => a - b);
   }
-  const raw = (config as Record<string, unknown>).threshold;
-  const parsed = typeof raw === 'number' ? raw : Number(raw);
-  if (!Number.isFinite(parsed)) {
-    return fallback;
+
+  const record = config as Record<string, unknown>;
+  const rawThresholds = record.thresholds;
+  if (Array.isArray(rawThresholds)) {
+    for (const value of rawThresholds) {
+      const parsed = typeof value === 'number' ? value : Number(value);
+      if (Number.isFinite(parsed)) {
+        base.add(Math.max(1, Math.round(parsed)));
+      }
+    }
   }
-  return Math.max(1, Math.round(parsed));
+
+  const rawSingle = record.threshold;
+  const parsedSingle = typeof rawSingle === 'number' ? rawSingle : Number(rawSingle);
+  if (Number.isFinite(parsedSingle)) {
+    base.add(Math.max(1, Math.round(parsedSingle)));
+  }
+
+  const result = Array.from(base).sort((a, b) => a - b);
+  return result.length > 0 ? result : DEFAULT_STREAK_THRESHOLDS;
 }
 
 async function loadTaskEntriesForDate(
@@ -700,13 +717,14 @@ export async function submitDailyQuest(
     ? await loadUserLevelSummary(userId)
     : null;
 
-  let streakThreshold = 3;
+  let streakThresholds = DEFAULT_STREAK_THRESHOLDS;
   let loggedToday = new Set<string>();
   let previousTaskStreaks = new Map<string, number>();
 
   if (shouldTrackStreak) {
-    streakThreshold = resolveStreakThreshold(streakDefinitionRow?.config);
-    const lookbackDays = Math.max(streakThreshold + 5, 30);
+    streakThresholds = resolveStreakThresholds(streakDefinitionRow?.config);
+    const maxThreshold = Math.max(...streakThresholds);
+    const lookbackDays = Math.max(maxThreshold + 5, 30);
     [loggedToday, previousTaskStreaks] = await Promise.all([
       loadTaskEntriesForDate(userId, completedTasks, date),
       loadTaskStreakSnapshot(userId, completedTasks, date, lookbackDays),
@@ -837,24 +855,35 @@ export async function submitDailyQuest(
 
   if (shouldTrackStreak) {
     const tasksLoggedFirstTime = completedTasks.filter((taskId) => !loggedToday.has(taskId));
-    const triggeredTasks = tasksLoggedFirstTime
-      .map((taskId) => {
-        const previous = previousTaskStreaks.get(taskId) ?? 0;
-        return { taskId, previous, current: previous + 1 };
-      })
-      .filter((entry) => entry.previous < streakThreshold && entry.current >= streakThreshold)
-      .map((entry) => ({
-        id: entry.taskId,
-        name: taskLookup.get(entry.taskId)?.name ?? 'Tarea',
-        streakDays: entry.current,
-      }));
+    const triggeredTasksByThreshold = new Map<number, StreakTask[]>();
 
-    if (triggeredTasks.length > 0) {
+    for (const taskId of tasksLoggedFirstTime) {
+      const previous = previousTaskStreaks.get(taskId) ?? 0;
+      const current = previous + 1;
+
+      for (const threshold of streakThresholds) {
+        if (previous < threshold && current >= threshold) {
+          const entries = triggeredTasksByThreshold.get(threshold) ?? [];
+          entries.push({
+            id: taskId,
+            name: taskLookup.get(taskId)?.name ?? 'Tarea',
+            streakDays: current,
+          });
+          triggeredTasksByThreshold.set(threshold, entries);
+        }
+      }
+    }
+
+    for (const threshold of streakThresholds) {
+      const triggeredTasks = triggeredTasksByThreshold.get(threshold);
+      if (!triggeredTasks?.length) {
+        continue;
+      }
       feedbackEvents.push({
         type: 'streak_milestone',
         notificationKey: STREAK_FIRE_NOTIFICATION_KEY,
         payload: {
-          threshold: streakThreshold,
+          threshold,
           tasks: triggeredTasks,
         },
       });

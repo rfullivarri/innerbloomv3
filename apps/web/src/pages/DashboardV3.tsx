@@ -210,6 +210,7 @@ export default function DashboardV3Page() {
             emojiAnimation={feedbackNotifications.activePopup.emojiAnimation}
             cta={feedbackNotifications.activePopup.cta}
             tasks={feedbackNotifications.activePopup.tasks}
+            autoDismissMs={feedbackNotifications.activePopup.autoDismissMs}
             onClose={feedbackNotifications.dismissActivePopup}
           />
         ) : null}

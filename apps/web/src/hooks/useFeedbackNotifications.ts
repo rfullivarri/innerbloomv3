@@ -5,8 +5,6 @@ import type { NotificationPopupTask } from '../components/feedback/NotificationP
 import { formatLevelNotification, formatStreakNotification } from '../lib/notifications';
 import { emitFeedbackNotificationEvent } from '../lib/telemetry';
 
-const STREAK_MILESTONES = [3, 5, 7];
-
 type PopupDescriptor = {
   id: number;
   title: string;
@@ -15,6 +13,7 @@ type PopupDescriptor = {
   cta: { label: string; href: string | null } | null;
   tasks?: NotificationPopupTask[];
   emojiAnimation?: 'bounce' | 'pulse';
+  autoDismissMs?: number;
   telemetry?: { event: 'notification_level_up_shown' | 'notification_streak_shown'; payload: Record<string, unknown> };
 };
 
@@ -110,13 +109,7 @@ function buildPopups(
       if (event.type === 'level_up') {
         return buildLevelPopup(definition, event);
       }
-      if (event.type === 'streak_milestone') {
-        if (!STREAK_MILESTONES.includes(event.payload.threshold)) {
-          return null;
-        }
-        return buildStreakPopup(definition, event);
-      }
-      return null;
+      return event.type === 'streak_milestone' ? buildStreakPopup(definition, event) : null;
     })
     .filter((descriptor): descriptor is PopupDescriptor => Boolean(descriptor));
 }
@@ -127,7 +120,7 @@ function buildLevelPopup(
 ): PopupDescriptor {
   const formatted = formatLevelNotification(definition, event.payload);
   return {
-    ...createBaseDescriptor(definition, formatted),
+    ...createBaseDescriptor(definition, formatted, { autoDismissMs: 0 }),
     telemetry: {
       event: 'notification_level_up_shown',
       payload: {
@@ -148,7 +141,7 @@ function buildStreakPopup(
     tasks: event.payload.tasks,
   });
   return {
-    ...createBaseDescriptor(definition, formatted),
+    ...createBaseDescriptor(definition, formatted, { autoDismissMs: 0 }),
     telemetry: {
       event: 'notification_streak_shown',
       payload: {
@@ -163,6 +156,7 @@ function buildStreakPopup(
 function createBaseDescriptor(
   definition: InAppNotificationDefinition,
   formatted: ReturnType<typeof formatLevelNotification>,
+  options: { autoDismissMs?: number } = {},
 ): PopupDescriptor {
   return {
     id: Date.now() + Math.random(),
@@ -172,6 +166,7 @@ function createBaseDescriptor(
     emojiAnimation: formatted.emojiAnimation,
     cta: definition.cta ?? null,
     tasks: formatted.tasks,
+    autoDismissMs: options.autoDismissMs,
   };
 }
 
