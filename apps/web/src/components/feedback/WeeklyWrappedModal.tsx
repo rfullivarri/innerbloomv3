@@ -134,11 +134,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
         active: true,
         icon: '📅',
       },
-      {
-        id: 'mode',
-        label: 'DATOS REALES',
-        active: payload.dataSource === 'real',
-      },
       weeklyEmotion
         ? {
             id: 'emotion',
@@ -157,23 +152,21 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
       topHabitTitle || pillarDominant
         ? {
             id: 'streak',
-            label: `🔥${topHabitPillarIcon || getPillarIcon(pillarDominant) || '🫀'}`,
+            label: `${topHabitPillarIcon || getPillarIcon(pillarDominant) || '🫀'}`,
+            icon: '🔥',
             active: true,
+            size: 'large',
           }
         : {
             id: 'streak-empty',
-            label: '🔥🫀',
+            label: '🫀',
+            icon: '🔥',
             active: false,
+            size: 'large',
           },
     ],
-    [payload.dataSource, payload.weekRange, topHabitPillarIcon, pillarDominant, topHabitTitle, weeklyEmotion],
+    [payload.weekRange, topHabitPillarIcon, pillarDominant, topHabitTitle, weeklyEmotion],
   );
-
-  const heroLine = useMemo(() => {
-    const formattedCompletions = completions.toLocaleString('es-AR');
-    const formattedXp = xpTotal.toLocaleString('es-AR');
-    return `Esta semana completaste ${formattedCompletions} tareas y sumaste ${formattedXp} XP.`;
-  }, [completions, xpTotal]);
 
   return (
     <div className="fixed inset-0 z-50 flex bg-slate-950/95 backdrop-blur" role="dialog" aria-modal>
@@ -204,7 +197,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               label={sectionsByKey.intro?.title ?? 'Weekly Wrapped · Preview'}
               headline={sectionsByKey.intro?.body ?? 'Tu semana, en movimiento'}
               badges={summaryChips}
-              heroLine={heroLine}
               description={
                 hasAchievementStats
                   ? undefined
@@ -340,12 +332,12 @@ type SectionBlockProps = {
     dotColor?: string;
     active?: boolean;
     dotOnly?: boolean;
+    size?: 'default' | 'large';
   }[];
   description?: string;
   kicker?: string;
   highlightText?: string;
   stats?: { completions: number; xpTotal: number; pillar: string | null };
-  heroLine: string;
   entered: boolean;
   index: number;
   active?: boolean;
@@ -360,7 +352,6 @@ function SectionBlock({
   kicker,
   highlightText,
   stats,
-  heroLine,
   entered,
   index,
   active,
@@ -374,14 +365,13 @@ function SectionBlock({
       active={active}
       registerSectionRef={registerSectionRef}
     >
-      <div className="flex h-full flex-col gap-8">
+      <div className="flex h-full flex-col gap-6">
         <header className="space-y-4">
           <p className="text-[11px] uppercase tracking-[0.3em] text-emerald-100">{label}</p>
           <div className="space-y-3">
             <h2 className="text-4xl font-semibold leading-tight text-slate-50 drop-shadow-[0_0_28px_rgba(16,185,129,0.35)] sm:text-5xl">
               {headline}
             </h2>
-              <p className="text-lg text-emerald-50 sm:text-xl">{heroLine}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-emerald-50/90">
@@ -390,8 +380,9 @@ function SectionBlock({
                 key={badge.id}
                 className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-semibold shadow-[0_0_0_1px_rgba(16,185,129,0.2),0_10px_30px_rgba(16,185,129,0.18)] ${
                   badge.active ? 'border border-emerald-300/40 bg-emerald-500/25 text-emerald-50' : 'border border-white/10 bg-white/5 text-slate-200'
-                }`}
+                } ${badge.size === 'large' ? 'px-3.5 py-1.5 text-[11px]' : ''}`}
               >
+                {badge.icon ? <span aria-hidden>{badge.icon}</span> : null}
                 {badge.dotColor ? (
                   <span
                     className={`rounded-full ${badge.dotOnly ? 'h-4 w-4' : 'h-2.5 w-2.5'}`}
@@ -399,14 +390,13 @@ function SectionBlock({
                     aria-hidden
                   />
                 ) : null}
-                {badge.icon ? <span aria-hidden>{badge.icon}</span> : null}
                 {badge.label ? <span>{badge.label}</span> : null}
               </span>
             ))}
           </div>
         </header>
 
-          <div className="flex flex-1 flex-col justify-center gap-4 text-lg leading-relaxed text-slate-100">
+          <div className="flex flex-1 flex-col justify-start gap-4 pt-2 text-lg leading-relaxed text-slate-100">
             {stats ? (
               <WeeklyKPIHighlight completions={stats.completions} xpTotal={stats.xpTotal} pillar={stats.pillar} />
             ) : (
@@ -434,14 +424,21 @@ function WeeklyKPIHighlight({
   pillar: string | null;
 }) {
   const formatter = new Intl.NumberFormat('es-AR');
-  const pillarLabel = pillar ? formatPillarLabel(pillar) : 'modo mixto';
+  const pillarLabel = pillar ?? 'modo mixto';
+  const pillarIcon = pillar ? getPillarIcon(pillar) : '🫀';
   const pillarNarrative = `Tu energía se movió principalmente en ${pillarLabel}.`;
 
   return (
     <div className="space-y-4">
       <div className="rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-emerald-500/10 to-indigo-500/10 p-5 shadow-[0_20px_60px_rgba(8,47,73,0.42)] backdrop-blur">
-        <div className="relative flex items-center gap-3 text-sm text-emerald-50">
-          <p className="text-base font-semibold leading-snug text-slate-50">{pillarNarrative}</p>
+        <div className="relative grid grid-cols-[72px_1fr] items-center gap-4 text-sm text-emerald-50 sm:grid-cols-[88px_1fr]">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-3xl sm:h-20 sm:w-20">
+            <span aria-hidden>{pillarIcon}</span>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-100">Pilar dominante</p>
+            <p className="text-base font-semibold leading-snug text-slate-50 sm:text-lg">{pillarNarrative}</p>
+          </div>
         </div>
       </div>
 
@@ -872,11 +869,6 @@ function getHabitIcon(pillar?: string | null, index = 0): string {
 function getPillarIcon(pillar?: string | null): string {
   if (!pillar) return '';
   return PILLAR_ICONS[pillar] ?? '';
-}
-
-function formatPillarLabel(pillar: string): string {
-  const icon = getPillarIcon(pillar);
-  return icon ? `${icon} ${pillar}` : pillar;
 }
 
 function computeEnergySnapshot(pillarDominant: string | null, completions: number, xpTotal: number) {
