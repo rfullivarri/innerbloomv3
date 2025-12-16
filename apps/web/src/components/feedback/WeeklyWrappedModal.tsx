@@ -644,7 +644,12 @@ export function resolveHabitHealth({ daysActive, weeksActive, weeksSample, compl
 
   const sampleForHealth = Math.max(0, normalizedWeeksSample, normalizedWeeksActive);
 
-  return getHabitHealthFromInsights(completionRateForHealth, sampleForHealth);
+  return {
+    ...getHabitHealthFromInsights(completionRateForHealth, sampleForHealth),
+    completionRatePct: completionRateForHealth,
+    weeksActive: normalizedWeeksActive,
+    weeksSample: sampleForHealth,
+  };
 }
 
 function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef }: HabitsBlockProps) {
@@ -687,17 +692,27 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between gap-3">
-                <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2 py-1 text-sm font-semibold uppercase tracking-[0.12em] text-slate-100">
-                  {getPillarIcon(item.pillar) || '🫀'}
-                  <span className="sr-only">{item.pillar ?? '–'}</span>
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    HABIT_HEALTH_STYLES[health.level]
-                  }`}
-                >
-                  {health.label}
-                </span>
+                <div className="flex flex-col items-start gap-1 text-left text-sm text-emerald-50">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-100">
+                      {getPillarIcon(item.pillar) || '🫀'}
+                      <span className="sr-only">{item.pillar ?? '–'}</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-500/15 px-2 py-1 text-xs font-semibold text-emerald-50">
+                      {health.completionRatePct}%
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        HABIT_HEALTH_STYLES[health.level]
+                      }`}
+                    >
+                      {health.label}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-emerald-50/80">
+                    Cumplís tu meta en {health.weeksActive} de {health.weeksSample} semanas.
+                  </p>
+                </div>
               </div>
             </div>
             );
