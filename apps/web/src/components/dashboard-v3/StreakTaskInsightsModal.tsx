@@ -27,7 +27,7 @@ export function getHabitHealth(weeklyHitRatePct: number, weeksSample: number): {
   label: string;
 } {
   if (weeklyHitRatePct >= 80) return { level: 'strong', label: 'Hábito fuerte' };
-  if (weeklyHitRatePct >= 55) return { level: 'medium', label: 'Hábito en construcción' };
+  if (weeklyHitRatePct >= 50) return { level: 'medium', label: 'Hábito en construcción' };
   return { level: 'weak', label: 'Hábito frágil' };
 }
 
