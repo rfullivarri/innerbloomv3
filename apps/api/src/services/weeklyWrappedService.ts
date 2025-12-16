@@ -29,6 +29,8 @@ type NormalizedLog = AdminLogRow & {
   state: 'red' | 'yellow' | 'green';
 };
 
+export type WeeklyWrappedLog = NormalizedLog;
+
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
 const MS_IN_DAY = 24 * 60 * 60 * 1000;
 const EMOTION_KEY_BY_LABEL: Record<string, EmotionMessageKey> = {
@@ -113,6 +115,13 @@ const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
     biweeklyContext: 'Varias señales de freno estas dos semanas. Ajustá expectativas y buscá apoyo.',
   },
 };
+
+const WEEKLY_WRAPPED_DEBUG_USERS = new Set(
+  (process.env.WEEKLY_WRAPPED_DEBUG_USERS || '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean),
+);
 
 export function resolveWeekRange(referenceDate: string): { start: string; end: string } {
   const parsed = parseDate(referenceDate);
@@ -232,6 +241,7 @@ async function buildWeeklyWrappedPayload(
 
   const normalizedLogs = normalizeLogs(logsResult.items ?? []);
   const normalizedLongTermLogs = normalizeLogs(longTermLogsResult.items ?? []);
+  const effortBalance = computeEffortBalance(normalizedLogs);
   const latestLog = normalizedLogs.reduce<Date | null>((latest, log) => {
     if (!latest || log.parsedDate > latest) {
       return log.parsedDate;
@@ -243,6 +253,24 @@ async function buildWeeklyWrappedPayload(
   const startDate = startOfDay(new Date(`${range.start}T00:00:00Z`));
   const weeksSample = Math.max(1, Math.ceil((endDate.getTime() - parseDate(longTermStart).getTime() + MS_IN_DAY) / (7 * MS_IN_DAY)));
   const { completions, habitCounts } = summarizeWeeklyActivity(normalizedLogs);
+  logEffortBalanceDebug(
+    {
+      userId,
+      range,
+      effortBalance,
+      completions,
+      logs: normalizedLogs,
+    },
+    effortBalance.total === 0,
+  );
+  if (effortBalance.warnings.length > 0) {
+    console.warn('[weekly-wrapped] effort balance warnings', {
+      userId,
+      warnings: effortBalance.warnings,
+      range,
+      totals: { ...effortBalance, unknown: effortBalance.unknown },
+    });
+  }
   const longTermHabits = aggregateHabits(normalizedLongTermLogs, weeksSample);
   const longTermHabitMap = new Map(longTermHabits.map((habit) => [habit.title, habit]));
   const xpTotal = normalizedLogs
@@ -260,7 +288,7 @@ async function buildWeeklyWrappedPayload(
   });
   const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
-  const highlight = topHabits[0]?.title ?? null;
+  const highlight = effortBalance.topTask?.title ?? topHabits[0]?.title ?? null;
   const emotionHighlight = buildEmotionHighlight(emotions);
   const weeklyEmotionMessage =
     emotionHighlight.weekly?.weeklyMessage ??
@@ -370,11 +398,125 @@ async function buildWeeklyWrappedPayload(
     dataSource: 'real',
     variant,
     weekRange: { start: startDate.toISOString(), end: endDate.toISOString() },
-    summary: { pillarDominant, highlight, completions, xpTotal },
+    summary: { pillarDominant, highlight, completions, xpTotal, effortBalance: effortBalance.total ? effortBalance : null },
     emotions: emotionHighlight,
     levelUp,
     sections,
   };
+}
+
+export function computeEffortBalance(
+  logs: WeeklyWrappedLog[],
+): NonNullable<WeeklyWrappedPayload['summary']['effortBalance']> & { warnings: string[]; unknown: number } {
+  const counts: Record<'easy' | 'medium' | 'hard', number> = { easy: 0, medium: 0, hard: 0 };
+  const warnings: string[] = [];
+  const taskTotals = new Map<string, { completions: number; difficulty: 'easy' | 'medium' | 'hard' }>();
+  let unknown = 0;
+
+  for (const log of logs) {
+    if (log.state === 'red' || !log.dateKey) continue;
+
+    const bucket = getDifficultyBucket(log.difficulty);
+    const completions = Math.max(1, Number(log.quantity ?? 1));
+
+    if (bucket === 'unknown') {
+      unknown += completions;
+      continue;
+    }
+
+    counts[bucket] = counts[bucket] + completions;
+
+    const key = log.taskName || log.taskId;
+    if (!key) continue;
+    const prev = taskTotals.get(key) ?? { completions: 0, difficulty: bucket };
+    taskTotals.set(key, { completions: prev.completions + completions, difficulty: bucket });
+  }
+
+  const total = counts.easy + counts.medium + counts.hard;
+  const hardPct = total ? Math.round((counts.hard / total) * 100) : 0;
+  if (hardPct === 100 && total > 3) {
+    warnings.push('hard_bucket_full_share');
+  }
+
+  const topTask = Array.from(taskTotals.entries())
+    .map(([title, info]) => ({ title, ...info }))
+    .sort((a, b) => b.completions - a.completions)[0];
+  const topHardTask = Array.from(taskTotals.entries())
+    .map(([title, info]) => ({ title, ...info }))
+    .filter((entry) => entry.difficulty === 'hard')
+    .sort((a, b) => b.completions - a.completions)[0];
+
+  return {
+    easy: counts.easy,
+    medium: counts.medium,
+    hard: counts.hard,
+    total,
+    topTask: topTask ? { title: topTask.title, completions: topTask.completions, difficulty: topTask.difficulty } : null,
+    topHardTask: topHardTask ? { title: topHardTask.title, completions: topHardTask.completions } : null,
+    warnings,
+    unknown,
+  };
+}
+
+export function getDifficultyBucket(value: string | null | undefined): 'easy' | 'medium' | 'hard' | 'unknown' {
+  if (!value) return 'unknown';
+  const normalized = normalizeText(value);
+
+  if (['easy', 'facil', 'fácil', 'light', 'baja'].includes(normalized)) return 'easy';
+  if (['medium', 'media', 'medio', 'flow', 'normal'].includes(normalized)) return 'medium';
+  if (['hard', 'dificil', 'difícil', 'alta', 'intensa', 'strong'].includes(normalized)) return 'hard';
+  return 'unknown';
+}
+
+function shouldDebugWeeklyWrapped(userId: string, hasWarnings: boolean, hasUnknown: boolean): boolean {
+  return hasWarnings || hasUnknown || WEEKLY_WRAPPED_DEBUG_USERS.has(userId);
+}
+
+function logEffortBalanceDebug(
+  input: {
+    userId: string;
+    range: { start: string; end: string };
+    effortBalance: ReturnType<typeof computeEffortBalance>;
+    completions: number;
+    logs: WeeklyWrappedLog[];
+  },
+  force = false,
+): void {
+  if (
+    !force &&
+    !shouldDebugWeeklyWrapped(
+      input.userId,
+      input.effortBalance.warnings.length > 0,
+      input.effortBalance.unknown > 0,
+    )
+  ) {
+    return;
+  }
+
+  const sample = input.logs.slice(0, 5).map((log) => ({
+    date: log.dateKey,
+    task_id: log.taskId,
+    task_name: log.taskName,
+    difficulty_raw: log.difficulty,
+    difficulty_mapped: getDifficultyBucket(log.difficulty),
+    quantity: log.quantity,
+    source: log.source,
+  }));
+
+  console.info('[weekly-wrapped] effort balance debug', {
+    userId: input.userId,
+    range: { ...input.range, timezone: 'UTC' },
+    completions: input.completions,
+    totals: {
+      easy: input.effortBalance.easy,
+      medium: input.effortBalance.medium,
+      hard: input.effortBalance.hard,
+      unknown: input.effortBalance.unknown,
+      totalKnown: input.effortBalance.total,
+    },
+    warnings: input.effortBalance.warnings,
+    sample,
+  });
 }
 
 function normalizeLogs(logs: AdminLogRow[]): NormalizedLog[] {

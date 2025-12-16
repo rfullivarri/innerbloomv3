@@ -766,21 +766,26 @@ function ProgressBlock({
     : `Energía destacada: ${energySnapshot.metric.label} (${energySnapshot.current}%)`;
   const energyBarHeight = `${Math.max(12, Math.min(100, energySnapshot.current))}%`;
   const energyBarGradient = ENERGY_GRADIENT_BY_METRIC[energySnapshot.metric.label] ?? 'from-white/70 via-white/90 to-white';
-  const balanceTotal = effortBalance?.total ?? 0;
-  const easyPct = balanceTotal ? Math.round((100 * (effortBalance?.easy ?? 0)) / balanceTotal) : 0;
-  const mediumPct = balanceTotal ? Math.round((100 * (effortBalance?.medium ?? 0)) / balanceTotal) : 0;
-  const hardPct = Math.max(0, 100 - easyPct - mediumPct);
-  const balanceReading =
-    easyPct > 70
+  const hasEffortBalance = Boolean((effortBalance?.total ?? 0) > 0);
+  const balanceTotal = hasEffortBalance ? effortBalance?.total ?? 0 : 0;
+  const easyPct = hasEffortBalance && balanceTotal ? Math.round((100 * (effortBalance?.easy ?? 0)) / balanceTotal) : 0;
+  const mediumPct = hasEffortBalance && balanceTotal ? Math.round((100 * (effortBalance?.medium ?? 0)) / balanceTotal) : 0;
+  const hardPct = hasEffortBalance && balanceTotal ? Math.max(0, 100 - easyPct - mediumPct) : 0;
+  const balanceReading = !hasEffortBalance
+    ? 'Sin datos esta semana'
+    : easyPct > 70
       ? 'La semana priorizó estabilidad sobre intensidad'
       : hardPct > 30
         ? 'Semana de alta exigencia e intensidad'
         : 'Buen equilibrio entre constancia e intensidad';
-  const hardInsight = effortBalance?.topHardTask
-    ? `La única tarea difícil que completaste fue: ${effortBalance.topHardTask.title}`
-    : 'No registraste tareas difíciles esta semana.';
-  const strategyMessage =
-    hardPct > 30
+  const hardInsight = !hasEffortBalance
+    ? 'Necesitamos más completions esta semana para mostrar la dificultad real.'
+    : effortBalance?.topHardTask
+      ? `La tarea difícil más repetida fue: ${effortBalance.topHardTask.title}`
+      : 'No registraste tareas difíciles esta semana.';
+  const strategyMessage = !hasEffortBalance
+    ? 'Registrá completions para mapear el balance de esfuerzo con precisión.'
+    : hardPct > 30
       ? 'Seguís en modo desafiante: podés sostener el ritmo y sumar pausas de recuperación.'
       : easyPct > 70
         ? 'Patrón ideal para consolidar hábitos antes de subir la dificultad.'
