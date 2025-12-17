@@ -18,9 +18,20 @@ type TaskInsightsModalProps = {
   range: StreakPanelRange;
   onClose: () => void;
   fallbackTask?: TaskSummary | null;
+  referenceDate?: Date;
 };
 
 type HabitHealthLevel = 'strong' | 'medium' | 'weak';
+
+function isCurrentWeek(
+  week: { weekStart: string; weekEnd: string },
+  referenceDate: Date,
+): boolean {
+  const start = new Date(week.weekStart);
+  const end = new Date(week.weekEnd);
+
+  return start <= referenceDate && referenceDate <= end;
+}
 
 export function getHabitHealth(weeklyHitRatePct: number, weeksSample: number): {
   level: HabitHealthLevel;
@@ -80,6 +91,7 @@ function WeeklyCompletionDonut({
   completionRate,
   difficultyLabel,
   weeksSample,
+  referenceDate,
 }: {
   timeline: TaskInsightsResponse['weeks']['timeline'];
   weeklyGoal: number;
@@ -88,15 +100,23 @@ function WeeklyCompletionDonut({
   completionRate: number;
   difficultyLabel?: string | null;
   weeksSample?: number | null;
+  referenceDate?: Date;
 }) {
+  const today = useMemo(() => referenceDate ?? new Date(), [referenceDate]);
   const parsedWeeksSample = Number(weeksSample);
   const normalizedWeeksSample =
     Number.isFinite(parsedWeeksSample) && parsedWeeksSample > 0
       ? Math.round(parsedWeeksSample)
       : timeline.length;
-  const totalWeeks = normalizedWeeksSample || timeline.length;
-  const completedWeeks = timeline.length
-    ? timeline.filter((week) => week.hit).length
+  const timelineWithoutCurrentWeek = timeline.filter((week) => !isCurrentWeek(week, today));
+  const currentWeekIncluded = timeline.length !== timelineWithoutCurrentWeek.length;
+  const weeksSampleWithoutCurrent = Math.max(
+    0,
+    normalizedWeeksSample - (currentWeekIncluded ? 1 : 0),
+  );
+  const totalWeeks = Math.max(timelineWithoutCurrentWeek.length, weeksSampleWithoutCurrent);
+  const completedWeeks = timelineWithoutCurrentWeek.length
+    ? timelineWithoutCurrentWeek.filter((week) => week.hit).length
     : Math.round(((Number.isFinite(completionRate) ? completionRate : 0) / 100) * totalWeeks);
   const completionPercent = Number.isFinite(completionRate) ? Math.round(completionRate) : 0;
   const habitHealth = getHabitHealth(completionPercent, totalWeeks);
@@ -217,7 +237,15 @@ function MonthMiniChart({ days }: { days: Array<{ date: string; count: number }>
   );
 }
 
-export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fallbackTask }: TaskInsightsModalProps) {
+export function TaskInsightsModal({
+  taskId,
+  weeklyGoal,
+  mode,
+  range,
+  onClose,
+  fallbackTask,
+  referenceDate,
+}: TaskInsightsModalProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   useEscToClose(Boolean(taskId), onClose);
 
@@ -328,6 +356,7 @@ export function TaskInsightsModal({ taskId, weeklyGoal, mode, range, onClose, fa
                   completionRate={stats.completionRate}
                   difficultyLabel={difficultyLabel}
                   weeksSample={weeksSample}
+                  referenceDate={referenceDate}
                 />
               )}
             </div>

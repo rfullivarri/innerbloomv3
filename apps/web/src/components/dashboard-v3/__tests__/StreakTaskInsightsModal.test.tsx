@@ -67,6 +67,46 @@ describe('TaskInsightsModal', () => {
     expect(screen.getByText('83%')).toBeInTheDocument();
   });
 
+  test('excluye la semana en curso del rango de semanas usado para el chip', async () => {
+    const referenceDate = new Date('2024-02-06T12:00:00Z');
+
+    const insightsWithCurrentWeek: TaskInsightsResponse = {
+      ...mockInsights,
+      weeks: {
+        ...mockInsights.weeks,
+        completionRate: 60,
+        weeksSample: 6,
+        timeline: [
+          { weekStart: '2024-01-15', weekEnd: '2024-01-21', count: 3, hit: true },
+          { weekStart: '2024-01-22', weekEnd: '2024-01-28', count: 1, hit: false },
+          { weekStart: '2024-02-05', weekEnd: '2024-02-11', count: 2, hit: false },
+        ],
+      },
+    };
+
+    mockUseRequest.mockReturnValueOnce({
+      data: insightsWithCurrentWeek,
+      error: null,
+      status: 'success',
+      reload: vi.fn(),
+    });
+
+    render(
+      <TaskInsightsModal
+        taskId="task-123"
+        weeklyGoal={3}
+        mode="Flow"
+        range="week"
+        onClose={() => {}}
+        fallbackTask={{ id: 'task-123', name: 'Nueva tarea', stat: 'Metric' }}
+        referenceDate={referenceDate}
+      />,
+    );
+
+    expect(await screen.findByText('Hábito en construcción')).toBeInTheDocument();
+    expect(screen.getByText('Cumplís tu meta en 1 de 5 semanas.')).toBeInTheDocument();
+  });
+
   test('usa weeksSample del backend aunque la timeline esté truncada', async () => {
     const insightsWithSample: TaskInsightsResponse = {
       ...mockInsights,
