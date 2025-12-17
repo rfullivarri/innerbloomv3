@@ -617,13 +617,21 @@ export function resolveHabitHealth({ daysActive, weeksActive, weeksSample, compl
   const parsedCompletionRate = Number(completionRate);
   const parsedWeeksSample = Number(weeksSample);
   const parsedWeeksActive = Number(weeksActive);
+  const normalizedDays = Number.isFinite(daysActive) ? Math.max(0, Math.min(7, Math.round(daysActive ?? 0))) : 0;
 
-  const normalizedWeeksActive = Number.isFinite(parsedWeeksActive) ? Math.max(0, Math.round(parsedWeeksActive)) : 0;
+  const normalizedWeeksActive = Number.isFinite(parsedWeeksActive)
+    ? Math.max(0, Math.round(parsedWeeksActive))
+    : normalizedDays > 0
+      ? 1
+      : 0;
+
   const normalizedWeeksSample = Number.isFinite(parsedWeeksSample)
     ? Math.max(0, Math.round(parsedWeeksSample))
     : normalizedWeeksActive > 0
       ? normalizedWeeksActive
-      : 0;
+      : normalizedDays > 0
+        ? 1
+        : 0;
 
   const normalizedCompletionRate = Number.isFinite(parsedCompletionRate)
     ? Math.max(0, Math.min(100, Math.round(parsedCompletionRate)))
@@ -638,7 +646,6 @@ export function resolveHabitHealth({ daysActive, weeksActive, weeksSample, compl
       return Math.round((normalizedWeeksActive / Math.max(1, normalizedWeeksSample)) * 100);
     }
 
-    const normalizedDays = Number.isFinite(daysActive) ? Math.max(0, Math.min(7, Math.round(daysActive ?? 0))) : 0;
     return Math.round((normalizedDays / 7) * 100);
   })();
 

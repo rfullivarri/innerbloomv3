@@ -42,4 +42,16 @@ describe('resolveHabitHealth', () => {
 
     expect(health.level).toBe('strong');
   });
+
+  test('usa la actividad diaria como respaldo cuando no hay datos de semanas', () => {
+    const health = resolveHabitHealth({
+      ...baseHabit,
+      daysActive: 5,
+      weeksActive: undefined,
+      weeksSample: undefined,
+    });
+
+    expect(health.weeksActive).toBe(1);
+    expect(health.weeksSample).toBe(1);
+  });
 });
