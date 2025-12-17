@@ -35,6 +35,7 @@ export function computeWeeklyHabitHealth({
 } {
   const today = referenceDate ?? new Date();
   const parsedWeeksSample = Number(weeksSample);
+  const parsedCompletionRate = typeof completionRate === 'number' ? completionRate : null;
   const normalizedWeeksSample =
     Number.isFinite(parsedWeeksSample) && parsedWeeksSample > 0
       ? Math.round(parsedWeeksSample)
@@ -45,8 +46,8 @@ export function computeWeeklyHabitHealth({
   const totalWeeks = Math.max(timelineWithoutCurrentWeek.length, weeksSampleWithoutCurrent);
   const completedWeeks = timelineWithoutCurrentWeek.length
     ? timelineWithoutCurrentWeek.filter((week) => week.hit).length
-    : Math.round(((Number.isFinite(completionRate) ? completionRate : 0) / 100) * totalWeeks);
-  const completionPercent = Number.isFinite(completionRate) ? Math.round(completionRate) : 0;
+    : Math.round(((parsedCompletionRate ?? 0) / 100) * totalWeeks);
+  const completionPercent = parsedCompletionRate !== null ? Math.round(parsedCompletionRate) : 0;
   const habitHealth = getHabitHealth(completionPercent, totalWeeks);
 
   return {

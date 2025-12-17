@@ -16,7 +16,8 @@ function buildTimeline(hits: boolean[]): TimelineWeek[] {
 
     return {
       weekStart: weekStart.toISOString().slice(0, 10),
-      weekEnd: weekEnd.toISOString().slice(0, 10),
+    weekEnd: weekEnd.toISOString().slice(0, 10),
+      count: hit ? 1 : 0,
       hit,
     } satisfies TimelineWeek;
   });
