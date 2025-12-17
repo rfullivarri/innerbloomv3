@@ -116,6 +116,13 @@ const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
   },
 };
 
+const MODE_WEEKLY_GOAL: Record<string, number> = {
+  low: 1,
+  chill: 2,
+  flow: 3,
+  evolve: 4,
+};
+
 function normalizePillarCode(value: unknown): 'Body' | 'Mind' | 'Soul' | null {
   if (value === null || value === undefined) {
     return null;
@@ -274,6 +281,8 @@ async function buildWeeklyWrappedPayload(
   ]);
   const emotions = buildEmotionSnapshots(insights.emotions?.last30 ?? [], range.end, 15);
 
+  const weeklyGoal = resolveWeeklyGoal(insights.profile.gameMode);
+
   const normalizedLogs = normalizeLogs(logsResult.items ?? []);
   const normalizedLongTermLogs = normalizeLogs(longTermLogsResult.items ?? []);
   const effortBalance = computeEffortBalance(normalizedLogs);
@@ -287,7 +296,7 @@ async function buildWeeklyWrappedPayload(
   const endDate = latestLog ?? new Date(`${range.end}T00:00:00Z`);
   const startDate = startOfDay(new Date(`${range.start}T00:00:00Z`));
   const weeksSample = Math.max(1, Math.ceil((endDate.getTime() - parseDate(longTermStart).getTime() + MS_IN_DAY) / (7 * MS_IN_DAY)));
-  const { completions, habitCounts } = summarizeWeeklyActivity(normalizedLogs);
+  const { completions, habitCounts } = summarizeWeeklyActivity(normalizedLogs, weeklyGoal);
   logEffortBalanceDebug(
     {
       userId,
@@ -306,7 +315,7 @@ async function buildWeeklyWrappedPayload(
       totals: { ...effortBalance, unknown: effortBalance.unknown },
     });
   }
-  const longTermHabits = aggregateHabits(normalizedLongTermLogs, weeksSample);
+  const longTermHabits = aggregateHabits(normalizedLongTermLogs, weeksSample, weeklyGoal);
   const longTermHabitMap = new Map(longTermHabits.map((habit) => [habit.title, habit]));
   const xpTotal = normalizedLogs
     .filter((log) => log.state !== 'red')
@@ -579,13 +588,13 @@ function normalizeLogs(logs: AdminLogRow[]): NormalizedLog[] {
     .filter((log) => Number.isFinite(log.parsedDate.getTime()));
 }
 
-function summarizeWeeklyActivity(logs: NormalizedLog[]): {
+function summarizeWeeklyActivity(logs: NormalizedLog[], weeklyGoal?: number): {
   completions: number;
   habitCounts: ReturnType<typeof aggregateHabits>;
 } {
   const meaningfulLogs = logs.filter((log) => log.state !== 'red' && log.dateKey);
   const completions = meaningfulLogs.reduce((acc, log) => acc + log.quantity, 0);
-  const habitCounts = aggregateHabits(meaningfulLogs);
+  const habitCounts = aggregateHabits(meaningfulLogs, undefined, weeklyGoal);
 
   return { completions, habitCounts };
 }
@@ -601,13 +610,14 @@ function getWeekKey(date: Date): string {
   return `${copy.getUTCFullYear()}-W${weekNumber}`;
 }
 
-function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number) {
+function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, weeklyGoal?: number) {
   const map = new Map<
     string,
     {
       title: string;
       days: Set<string>;
       weeks: Set<string>;
+      weeklyCounts: Map<string, number>;
       completions: number;
       pillar: string | null;
       badge: string | undefined;
@@ -615,6 +625,7 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number) {
   >();
 
   const weeksSeen = new Set<string>();
+  const weeklyTarget = Number.isFinite(weeklyGoal) && weeklyGoal > 0 ? weeklyGoal : null;
 
   for (const log of logs) {
     if (!log.dateKey) {
@@ -630,13 +641,17 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number) {
       title: (log as { taskName?: string }).taskName || 'Hábito sin nombre',
       days: new Set<string>(),
       weeks: new Set<string>(),
+      weeklyCounts: new Map<string, number>(),
       completions: 0,
       pillar: normalizePillarCode((log as { pillar?: string | number | null }).pillar),
       badge: undefined,
     };
+    const quantity = Math.max(1, Number(log.quantity ?? 1));
+
     current.days.add(log.dateKey);
     current.weeks.add(weekKey);
-    current.completions += Math.max(1, Number(log.quantity ?? 1));
+    current.completions += quantity;
+    current.weeklyCounts.set(weekKey, (current.weeklyCounts.get(weekKey) ?? 0) + quantity);
     if (!current.pillar) {
       current.pillar = normalizePillarCode((log as { pillar?: string | number | null }).pillar);
     }
@@ -654,7 +669,10 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number) {
       title: entry.title,
       completions: entry.completions,
       daysActive: entry.days.size,
-      weeksActive: entry.weeks.size,
+      weeksActive:
+        weeklyTarget !== null
+          ? Array.from(entry.weeklyCounts.values()).filter((count) => count >= weeklyTarget).length
+          : entry.weeks.size,
       weeksSample,
       pillar: entry.pillar,
       badge: entry.badge,
@@ -721,6 +739,11 @@ function buildEmotionSnapshots(emotions: string[], endDate: string, days: number
   }
 
   return snapshots;
+}
+
+function resolveWeeklyGoal(gameMode: string | null | undefined): number {
+  const normalized = typeof gameMode === 'string' ? gameMode.trim().toLowerCase() : '';
+  return MODE_WEEKLY_GOAL[normalized] ?? MODE_WEEKLY_GOAL.flow;
 }
 
 function getPillarIcon(pillar?: string | null): string {
