@@ -61,6 +61,7 @@ describe('resolveHabitHealth', () => {
       {
         ...baseHabit,
         weeksSample: 4,
+        completionRate: 75,
         insightsTimeline: [
           { weekStart: '2024-05-13', weekEnd: '2024-05-19', count: 1, hit: true },
           { weekStart: '2024-05-20', weekEnd: '2024-05-26', count: 1, hit: true },
