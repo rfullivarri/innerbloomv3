@@ -54,4 +54,27 @@ describe('resolveHabitHealth', () => {
     expect(health.weeksActive).toBe(1);
     expect(health.weeksSample).toBe(1);
   });
+
+  test('replica la lógica del modal de insights excluyendo la semana actual', () => {
+    const today = new Date('2024-06-10T12:00:00Z');
+    const health = resolveHabitHealth(
+      {
+        ...baseHabit,
+        weeksSample: 4,
+        insightsTimeline: [
+          { weekStart: '2024-05-13', weekEnd: '2024-05-19', hit: true },
+          { weekStart: '2024-05-20', weekEnd: '2024-05-26', hit: true },
+          { weekStart: '2024-05-27', weekEnd: '2024-06-02', hit: false },
+          { weekStart: '2024-06-03', weekEnd: '2024-06-09', hit: true },
+          { weekStart: '2024-06-10', weekEnd: '2024-06-16', hit: false },
+        ],
+      },
+      today,
+    );
+
+    expect(health.completionRatePct).toBe(75);
+    expect(health.weeksSample).toBe(4);
+    expect(health.weeksActive).toBe(3);
+    expect(health.label).toBe('Hábito en construcción');
+  });
 });

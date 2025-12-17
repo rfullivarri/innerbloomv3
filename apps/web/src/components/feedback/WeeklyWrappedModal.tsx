@@ -622,6 +622,54 @@ const HABIT_HEALTH_STYLES: Record<HabitHealthLevel, string> = {
   weak: 'bg-rose-300 text-rose-950',
 };
 
+function isCurrentWeek(
+  week: { weekStart: string; weekEnd: string },
+  referenceDate: Date,
+): boolean {
+  const start = new Date(week.weekStart);
+  const end = new Date(week.weekEnd);
+
+  return start <= referenceDate && referenceDate <= end;
+}
+
+function computeCompletionFromInsights(
+  timeline: TaskInsightsResponse['weeks']['timeline'] | undefined,
+  weeksSample: HabitItem['weeksSample'],
+  referenceDate?: Date,
+):
+  | {
+      completionRatePct: number;
+      weeksActive: number;
+      weeksSample: number;
+    }
+  | null {
+  if (!timeline || timeline.length === 0) {
+    return null;
+  }
+
+  const today = referenceDate ?? new Date();
+  const parsedWeeksSample = Number(weeksSample);
+  const normalizedWeeksSample =
+    Number.isFinite(parsedWeeksSample) && parsedWeeksSample > 0
+      ? Math.round(parsedWeeksSample)
+      : timeline.length;
+  const timelineWithoutCurrentWeek = timeline.filter((week) => !isCurrentWeek(week, today));
+  const currentWeekIncluded = timeline.length !== timelineWithoutCurrentWeek.length;
+  const weeksSampleWithoutCurrent = Math.max(0, normalizedWeeksSample - (currentWeekIncluded ? 1 : 0));
+  const totalWeeks = Math.max(timelineWithoutCurrentWeek.length, weeksSampleWithoutCurrent);
+  const completedWeeks = timelineWithoutCurrentWeek.filter((week) => week.hit).length;
+
+  if (totalWeeks === 0) {
+    return null;
+  }
+
+  return {
+    completionRatePct: Math.round((completedWeeks / totalWeeks) * 100),
+    weeksActive: completedWeeks,
+    weeksSample: totalWeeks,
+  };
+}
+
 export function resolveHabitHealth(
   { daysActive, weeksActive, weeksSample, completionRate, insightsTimeline }: HabitItem,
   referenceDate?: Date,
@@ -649,34 +697,7 @@ export function resolveHabitHealth(
     ? Math.max(0, Math.min(100, Math.round(parsedCompletionRate)))
     : null;
 
-  const completionFromInsights = (() => {
-    if (!insightsTimeline || insightsTimeline.length === 0) return null;
-
-    const today = referenceDate ?? new Date();
-    const timelineWithoutCurrent = insightsTimeline.filter((week) => {
-      const start = new Date(week.weekStart);
-      const end = new Date(week.weekEnd);
-      return !(start <= today && today <= end);
-    });
-
-    const currentWeekIncluded = insightsTimeline.length !== timelineWithoutCurrent.length;
-    const sampleFromInsights = Number.isFinite(parsedWeeksSample) && parsedWeeksSample > 0
-      ? Math.round(parsedWeeksSample)
-      : insightsTimeline.length;
-    const weeksSampleWithoutCurrent = Math.max(0, sampleFromInsights - (currentWeekIncluded ? 1 : 0));
-    const totalWeeks = Math.max(timelineWithoutCurrent.length, weeksSampleWithoutCurrent);
-    const completedWeeks = timelineWithoutCurrent.filter((week) => week.hit).length;
-
-    if (totalWeeks === 0) {
-      return null;
-    }
-
-    return {
-      completionRatePct: Math.round((completedWeeks / totalWeeks) * 100),
-      weeksActive: completedWeeks,
-      weeksSample: totalWeeks,
-    };
-  })();
+  const completionFromInsights = computeCompletionFromInsights(insightsTimeline, weeksSample, referenceDate);
 
   if (completionFromInsights) {
     return {
@@ -759,7 +780,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
                         {health.completionRatePct}%
                       </span>
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${
                           HABIT_HEALTH_STYLES[health.level]
                         }`}
                       >
