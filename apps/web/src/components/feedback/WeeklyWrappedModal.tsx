@@ -759,7 +759,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
                         {health.completionRatePct}%
                       </span>
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${
                           HABIT_HEALTH_STYLES[health.level]
                         }`}
                       >
