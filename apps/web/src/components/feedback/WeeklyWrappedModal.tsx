@@ -1,4 +1,5 @@
 import { type MutableRefObject, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { type TaskInsightsResponse } from '../../lib/api';
 import { getHabitHealth as getHabitHealthFromInsights } from '../dashboard-v3/StreakTaskInsightsModal';
 import type { WeeklyWrappedPayload, WeeklyWrappedSection } from '../../lib/weeklyWrapped';
 
@@ -179,6 +180,8 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
         typeof item.completionRate === 'number' || typeof item.completionRate === 'string'
           ? item.completionRate
           : undefined;
+      const weeklyGoal =
+        typeof item.weeklyGoal === 'number' || typeof item.weeklyGoal === 'string' ? item.weeklyGoal : undefined;
       return {
         ...item,
         icon: getHabitIcon(item.pillar, idx),
@@ -186,6 +189,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
         weeksActive,
         weeksSample,
         completionRate,
+        weeklyGoal,
       };
     })
     .slice(0, 5);
@@ -200,6 +204,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
   const progressIndex = habitsStartIndex + 1;
   const emotionIndex = progressIndex + 1;
   const closingIndex = emotionIndex + 1;
+  const referenceDate = useMemo(() => new Date(payload.weekRange?.end ?? Date.now()), [payload.weekRange?.end]);
 
   const summaryChips: SectionBadge[] = useMemo(
     () =>
@@ -312,6 +317,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               startIndex={habitsStartIndex}
               activeIndex={activeIndex}
               registerSectionRef={sectionRefs}
+              referenceDate={referenceDate}
             />
 
             <ProgressBlock
@@ -593,6 +599,8 @@ export type HabitItem = {
   weeksActive?: number | string;
   weeksSample?: number | string;
   completionRate?: number | string;
+  weeklyGoal?: number | string | null;
+  insightsTimeline?: TaskInsightsResponse['weeks']['timeline'];
 };
 
 type HabitsBlockProps = {
@@ -603,6 +611,7 @@ type HabitsBlockProps = {
   startIndex: number;
   activeIndex: number;
   registerSectionRef: MutableRefObject<(HTMLDivElement | null)[]>;
+  referenceDate?: Date;
 };
 
 type HabitHealthLevel = ReturnType<typeof getHabitHealthFromInsights>['level'];
@@ -613,7 +622,10 @@ const HABIT_HEALTH_STYLES: Record<HabitHealthLevel, string> = {
   weak: 'bg-rose-300 text-rose-950',
 };
 
-export function resolveHabitHealth({ daysActive, weeksActive, weeksSample, completionRate }: HabitItem) {
+export function resolveHabitHealth(
+  { daysActive, weeksActive, weeksSample, completionRate, insightsTimeline }: HabitItem,
+  referenceDate?: Date,
+) {
   const parsedCompletionRate = Number(completionRate);
   const parsedWeeksSample = Number(weeksSample);
   const parsedWeeksActive = Number(weeksActive);
@@ -637,6 +649,44 @@ export function resolveHabitHealth({ daysActive, weeksActive, weeksSample, compl
     ? Math.max(0, Math.min(100, Math.round(parsedCompletionRate)))
     : null;
 
+  const completionFromInsights = (() => {
+    if (!insightsTimeline || insightsTimeline.length === 0) return null;
+
+    const today = referenceDate ?? new Date();
+    const timelineWithoutCurrent = insightsTimeline.filter((week) => {
+      const start = new Date(week.weekStart);
+      const end = new Date(week.weekEnd);
+      return !(start <= today && today <= end);
+    });
+
+    const currentWeekIncluded = insightsTimeline.length !== timelineWithoutCurrent.length;
+    const sampleFromInsights = Number.isFinite(parsedWeeksSample) && parsedWeeksSample > 0
+      ? Math.round(parsedWeeksSample)
+      : insightsTimeline.length;
+    const weeksSampleWithoutCurrent = Math.max(0, sampleFromInsights - (currentWeekIncluded ? 1 : 0));
+    const totalWeeks = Math.max(timelineWithoutCurrent.length, weeksSampleWithoutCurrent);
+    const completedWeeks = timelineWithoutCurrent.filter((week) => week.hit).length;
+
+    if (totalWeeks === 0) {
+      return null;
+    }
+
+    return {
+      completionRatePct: Math.round((completedWeeks / totalWeeks) * 100),
+      weeksActive: completedWeeks,
+      weeksSample: totalWeeks,
+    };
+  })();
+
+  if (completionFromInsights) {
+    return {
+      ...getHabitHealthFromInsights(completionFromInsights.completionRatePct, completionFromInsights.weeksSample),
+      completionRatePct: completionFromInsights.completionRatePct,
+      weeksActive: completionFromInsights.weeksActive,
+      weeksSample: completionFromInsights.weeksSample,
+    };
+  }
+
   const completionRateForHealth = (() => {
     if (normalizedCompletionRate !== null) {
       return normalizedCompletionRate;
@@ -659,7 +709,7 @@ export function resolveHabitHealth({ daysActive, weeksActive, weeksSample, compl
   };
 }
 
-function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef }: HabitsBlockProps) {
+function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef, referenceDate }: HabitsBlockProps) {
   const slideLabel = 'CONSTANCIA';
   const headline = 'Constancia';
   const subline = description || 'Tus hábitos más firmes sostuvieron el ritmo.';
@@ -680,48 +730,48 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
       <div className="grid gap-4 sm:grid-cols-2">
         {items.length > 0 ? (
           items.map((item, idx) => {
-            const health = resolveHabitHealth(item);
+            const health = resolveHabitHealth(item, referenceDate);
 
             return (
-            <div
-              key={item.title}
-              className="group rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-emerald-500/10 to-indigo-500/10 p-4 shadow-lg shadow-emerald-500/15 transition duration-700"
-              style={{ transitionDelay: `${ANIMATION_DELAY * (startIndex + idx)}ms` }}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3 text-slate-50">
-                  <p className="text-sm font-semibold leading-snug">{item.title}</p>
-                </div>
-                <div className="flex flex-nowrap items-center justify-end gap-2 text-[11px] uppercase tracking-[0.14em]">
-                  <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-emerald-300/30 bg-emerald-500/20 px-2 py-1 text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
-                    🔥{item.daysActive ?? '–'}/7
-                  </span>
-                </div>
-              </div>
-              <div className="mt-3 flex items-center justify-between gap-3">
-                <div className="flex flex-col items-start gap-1 text-left text-sm text-emerald-50">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-100">
-                      {getPillarIcon(item.pillar) || '🫀'}
-                      <span className="sr-only">{item.pillar ?? '–'}</span>
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-500/15 px-2 py-1 text-xs font-semibold text-emerald-50">
-                      {health.completionRatePct}%
-                    </span>
-                    <span
-                      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                        HABIT_HEALTH_STYLES[health.level]
-                      }`}
-                    >
-                      {health.label}
+              <div
+                key={item.title}
+                className="group rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-emerald-500/10 to-indigo-500/10 p-4 shadow-lg shadow-emerald-500/15 transition duration-700"
+                style={{ transitionDelay: `${ANIMATION_DELAY * (startIndex + idx)}ms` }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 text-slate-50">
+                    <p className="text-sm font-semibold leading-snug">{item.title}</p>
+                  </div>
+                  <div className="flex flex-nowrap items-center justify-end gap-2 text-[11px] uppercase tracking-[0.14em]">
+                    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-emerald-300/30 bg-emerald-500/20 px-2 py-1 text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
+                      🔥{item.daysActive ?? '–'}/7
                     </span>
                   </div>
-                  <p className="text-[11px] text-emerald-50/80">
-                    Cumplís tu meta en {health.weeksActive} de {health.weeksSample} semanas.
-                  </p>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <div className="flex flex-col items-start gap-1 text-left text-sm text-emerald-50">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-100">
+                        {getPillarIcon(item.pillar) || '🫀'}
+                        <span className="sr-only">{item.pillar ?? '–'}</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-500/15 px-2 py-1 text-xs font-semibold text-emerald-50">
+                        {health.completionRatePct}%
+                      </span>
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          HABIT_HEALTH_STYLES[health.level]
+                        }`}
+                      >
+                        {health.label}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-emerald-50/80">
+                      Cumplís tu meta en {health.weeksActive} de {health.weeksSample} semanas.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
             );
           })
         ) : (

@@ -11,6 +11,9 @@ export type WeeklyWrappedSection = {
     daysActive?: number;
     weeksActive?: number;
     weeksSample?: number;
+    completionRate?: number | null;
+    weeklyGoal?: number | null;
+    insightsTimeline?: { weekStart: string; weekEnd: string; hit: boolean; count: number }[];
   }[];
 };
 
