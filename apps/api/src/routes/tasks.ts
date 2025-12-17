@@ -39,7 +39,7 @@ const MODE_TIERS: Record<Mode, number> = {
   Evolve: 4,
 };
 
-const MAX_WEEKS = 12;
+const MS_IN_DAY = 24 * 60 * 60 * 1000;
 
 const insightsParamsSchema = z.object({
   taskId: uuidSchema,
@@ -80,6 +80,7 @@ type InsightsResponse = {
   weeks: {
     weeklyGoal: number;
     completionRate: number;
+    weeksSample: number;
     currentStreak: number;
     bestStreak: number;
     timeline: { weekStart: string; weekEnd: string; count: number; hit: boolean }[];
@@ -223,8 +224,15 @@ router.get(
     const currentWeekEndExclusive = addDays(currentWeekStart, 7);
     const monthStart = startOfMonth(today);
     const monthEndExclusive = addMonths(monthStart, 1);
-    const windowStart = addDays(currentWeekStart, -(MAX_WEEKS - 1) * 7);
-    const logsFrom = formatDate(windowStart < monthStart ? windowStart : monthStart);
+    const firstLogResult = await pool.query<{ first_date: string | null }>(
+      `SELECT MIN(date)::text AS first_date FROM daily_log WHERE task_id = $1 AND user_id = $2`,
+      [taskId, ownerId],
+    );
+
+    const firstLogDateRaw = firstLogResult.rows[0]?.first_date;
+    const firstLogDate = firstLogDateRaw ? parseDate(firstLogDateRaw) : null;
+    const timelineStart = firstLogDate ? startOfWeek(firstLogDate) : currentWeekStart;
+    const logsFrom = formatDate(timelineStart < monthStart ? timelineStart : monthStart);
     const logsTo = formatDate(addDays(currentWeekEndExclusive, -1));
 
     const logResult = await pool.query<InsightLogRow>(
@@ -253,21 +261,33 @@ router.get(
     }
 
     const timeline: InsightsResponse['weeks']['timeline'] = [];
-    for (let cursor = windowStart; cursor < currentWeekEndExclusive; cursor = addDays(cursor, 7)) {
-      const weekStart = cursor;
-      const weekEnd = addDays(weekStart, 7);
-      const count = sumCountsInRange(dayCounts, weekStart, weekEnd);
-      timeline.push({
-        weekStart: formatDate(weekStart),
-        weekEnd: formatDate(addDays(weekEnd, -1)),
-        count,
-        hit: count >= weeklyGoal,
-      });
+
+    if (firstLogDate) {
+      for (let cursor = timelineStart; cursor < currentWeekEndExclusive; cursor = addDays(cursor, 7)) {
+        const weekStart = cursor;
+        const weekEnd = addDays(weekStart, 7);
+        const count = sumCountsInRange(dayCounts, weekStart, weekEnd);
+        timeline.push({
+          weekStart: formatDate(weekStart),
+          weekEnd: formatDate(addDays(weekEnd, -1)),
+          count,
+          hit: count >= weeklyGoal,
+        });
+      }
     }
 
-    const totalWeeks = timeline.length || 1;
-    const completedWeeks = timeline.filter((week) => week.hit).length;
-    const completionRate = Math.round((completedWeeks / totalWeeks) * 100);
+    const weeksSample = firstLogDate
+      ? Math.max(
+          1,
+          Math.round((currentWeekStart.getTime() - timelineStart.getTime()) / (7 * MS_IN_DAY)) + 1,
+        )
+      : 0;
+
+    const timelineWithoutCurrentWeek = timeline.length > 0 ? timeline.slice(0, -1) : [];
+    const completedWeeks = timelineWithoutCurrentWeek.filter((week) => week.hit).length;
+    const baselineWeeks = Math.max(0, weeksSample - (timeline.length > 0 ? 1 : 0));
+    const totalWeeks = timelineWithoutCurrentWeek.length || baselineWeeks;
+    const completionRate = totalWeeks > 0 ? Math.round((completedWeeks / totalWeeks) * 100) : 0;
     const streaks = computeStreaks(timeline.map((entry) => entry.hit));
 
     const response: InsightsResponse = {
@@ -284,6 +304,7 @@ router.get(
       weeks: {
         weeklyGoal,
         completionRate: Number.isFinite(completionRate) ? completionRate : 0,
+        weeksSample,
         currentStreak: streaks.current,
         bestStreak: streaks.best,
         timeline,
