@@ -321,7 +321,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
             />
 
             <ProgressBlock
-              improvement={sectionsByKey.improvement}
               pillar={sectionsByKey.pillar}
               pillarDominant={pillarDominant}
               completions={completions}
@@ -850,7 +849,6 @@ function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef }: L
 }
 
 type ProgressBlockProps = {
-  improvement?: WeeklyWrappedSection;
   pillar?: WeeklyWrappedSection;
   pillarDominant: string | null;
   completions?: number;
@@ -864,7 +862,6 @@ type ProgressBlockProps = {
 };
 
 function ProgressBlock({
-  improvement,
   pillar,
   pillarDominant,
   completions = 0,
@@ -877,11 +874,6 @@ function ProgressBlock({
   registerSectionRef,
 }: ProgressBlockProps) {
   const slideLabel = 'PROGRESO Y FOCO';
-  const improvementBody = (improvement?.body ?? 'Mini mejora registrada. Seguís afinando tu ritmo.').replace(
-    'que suma momentum.',
-    'que suma a tu bienestar.',
-  );
-  const improvementStory = improvementBody.split('. ')[0];
   const energySnapshot = computeEnergySnapshot(pillarDominant, completions, xpTotal, energyHighlight);
   const hasDelta = typeof energySnapshot.delta === 'number';
   const energyHeadline = hasDelta
@@ -913,10 +905,6 @@ function ProgressBlock({
       : easyPct > 70
         ? 'Patrón ideal para consolidar hábitos antes de subir la dificultad.'
         : 'Tenés margen para subir un nivel la próxima semana manteniendo este balance.';
-  const keyTask = effortBalance?.topTask;
-  const advanceHeadline = keyTask
-    ? `${keyTask.title} fue la tarea más repetida (${keyTask.completions}x)`
-    : improvementStory;
 
   return (
     <SectionShell
@@ -932,30 +920,20 @@ function ProgressBlock({
         <p className="text-sm text-emerald-50">Tu semana avanzó con pasos cortos que sostienen tu energía.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[1.2fr,0.8fr]">
-        <div className="space-y-3 rounded-3xl border border-white/10 bg-gradient-to-br from-emerald-500/15 via-slate-900/80 to-indigo-500/10 p-5 shadow-lg shadow-emerald-500/25">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-50">Avance clave</p>
-          <p className="text-lg font-semibold text-slate-50">{advanceHeadline}</p>
-          {keyTask ? (
-            <p className="text-sm text-emerald-50/80">Tu movimiento más repetido de la semana.</p>
-          ) : null}
+      <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
+        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-emerald-100">
+          <span>Daily Energy</span>
+          <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] text-emerald-50">Energía que más creció</span>
         </div>
-
-        <div className="space-y-3 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
-          <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-emerald-100">
-            <span>Daily Energy</span>
-            <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] text-emerald-50">Energía que más creció</span>
+        <p className="text-sm font-semibold text-slate-50">{energyHeadline}</p>
+        <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+          <div className="relative flex h-28 w-10 items-end overflow-hidden rounded-xl border border-white/20 bg-slate-900/60">
+            <div className={`w-full rounded-t-md bg-gradient-to-t ${energyBarGradient}`} style={{ height: energyBarHeight }} />
+            <div className="absolute inset-0 animate-pulse bg-white/5" aria-hidden />
           </div>
-          <p className="text-sm font-semibold text-slate-50">{energyHeadline}</p>
-          <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
-            <div className="relative flex h-28 w-10 items-end overflow-hidden rounded-xl border border-white/20 bg-slate-900/60">
-              <div className={`w-full rounded-t-md bg-gradient-to-t ${energyBarGradient}`} style={{ height: energyBarHeight }} />
-              <div className="absolute inset-0 animate-pulse bg-white/5" aria-hidden />
-            </div>
-            <div className="flex flex-col text-sm text-emerald-50">
-              <span className="font-semibold">{energySnapshot.metric.label}</span>
-              <span className="text-xs text-emerald-100">Nivel habitual máximo</span>
-            </div>
+          <div className="flex flex-col text-sm text-emerald-50">
+            <span className="font-semibold">{energySnapshot.metric.label}</span>
+            <span className="text-xs text-emerald-100">Nivel habitual máximo</span>
           </div>
         </div>
       </div>
