@@ -2,6 +2,9 @@ import { createPortal } from 'react-dom';
 import { useEffect, useMemo, useRef } from 'react';
 import type { StreakPanelRange, StreakPanelTask } from '../../lib/api';
 import { getTaskInsights, type TaskInsightsResponse } from '../../lib/api';
+import { computeWeeklyHabitHealth, getHabitHealth } from '../../lib/habitHealth';
+
+export { getHabitHealth } from '../../lib/habitHealth';
 import { useRequest } from '../../hooks/useRequest';
 import type { GameMode } from '../../lib/gameMode';
 
@@ -22,25 +25,6 @@ type TaskInsightsModalProps = {
 };
 
 type HabitHealthLevel = 'strong' | 'medium' | 'weak';
-
-function isCurrentWeek(
-  week: { weekStart: string; weekEnd: string },
-  referenceDate: Date,
-): boolean {
-  const start = new Date(week.weekStart);
-  const end = new Date(week.weekEnd);
-
-  return start <= referenceDate && referenceDate <= end;
-}
-
-export function getHabitHealth(weeklyHitRatePct: number, weeksSample: number): {
-  level: HabitHealthLevel;
-  label: string;
-} {
-  if (weeklyHitRatePct >= 80) return { level: 'strong', label: 'Hábito fuerte' };
-  if (weeklyHitRatePct >= 50) return { level: 'medium', label: 'Hábito en construcción' };
-  return { level: 'weak', label: 'Hábito frágil' };
-}
 
 function DifficultyInsight({
   difficultyLabel,
@@ -104,22 +88,12 @@ function WeeklyCompletionDonut({
 }) {
   const today = useMemo(() => referenceDate ?? new Date(), [referenceDate]);
   const parsedWeeksSample = Number(weeksSample);
-  const normalizedWeeksSample =
-    Number.isFinite(parsedWeeksSample) && parsedWeeksSample > 0
-      ? Math.round(parsedWeeksSample)
-      : timeline.length;
-  const timelineWithoutCurrentWeek = timeline.filter((week) => !isCurrentWeek(week, today));
-  const currentWeekIncluded = timeline.length !== timelineWithoutCurrentWeek.length;
-  const weeksSampleWithoutCurrent = Math.max(
-    0,
-    normalizedWeeksSample - (currentWeekIncluded ? 1 : 0),
-  );
-  const totalWeeks = Math.max(timelineWithoutCurrentWeek.length, weeksSampleWithoutCurrent);
-  const completedWeeks = timelineWithoutCurrentWeek.length
-    ? timelineWithoutCurrentWeek.filter((week) => week.hit).length
-    : Math.round(((Number.isFinite(completionRate) ? completionRate : 0) / 100) * totalWeeks);
-  const completionPercent = Number.isFinite(completionRate) ? Math.round(completionRate) : 0;
-  const habitHealth = getHabitHealth(completionPercent, totalWeeks);
+  const { completionPercent, completedWeeks, totalWeeks, habitHealth } = computeWeeklyHabitHealth({
+    timeline,
+    completionRate,
+    weeksSample: parsedWeeksSample,
+    referenceDate: today,
+  });
 
   const healthStyles: Record<HabitHealthLevel, string> = {
     strong: 'bg-emerald-300 text-emerald-950',

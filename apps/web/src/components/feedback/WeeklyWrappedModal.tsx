@@ -1,6 +1,6 @@
 import { type MutableRefObject, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { type TaskInsightsResponse } from '../../lib/api';
-import { getHabitHealth as getHabitHealthFromInsights } from '../dashboard-v3/StreakTaskInsightsModal';
+import { computeWeeklyHabitHealth, getHabitHealth as getHabitHealthFromInsights } from '../../lib/habitHealth';
 import type { WeeklyWrappedPayload, WeeklyWrappedSection } from '../../lib/weeklyWrapped';
 
 const ANIMATION_DELAY = 80;
@@ -622,19 +622,10 @@ const HABIT_HEALTH_STYLES: Record<HabitHealthLevel, string> = {
   weak: 'bg-rose-300 text-rose-950',
 };
 
-function isCurrentWeek(
-  week: { weekStart: string; weekEnd: string },
-  referenceDate: Date,
-): boolean {
-  const start = new Date(week.weekStart);
-  const end = new Date(week.weekEnd);
-
-  return start <= referenceDate && referenceDate <= end;
-}
-
 function computeCompletionFromInsights(
   timeline: TaskInsightsResponse['weeks']['timeline'] | undefined,
   weeksSample: HabitItem['weeksSample'],
+  completionRate: HabitItem['completionRate'],
   referenceDate?: Date,
 ):
   | {
@@ -647,26 +638,17 @@ function computeCompletionFromInsights(
     return null;
   }
 
-  const today = referenceDate ?? new Date();
-  const parsedWeeksSample = Number(weeksSample);
-  const normalizedWeeksSample =
-    Number.isFinite(parsedWeeksSample) && parsedWeeksSample > 0
-      ? Math.round(parsedWeeksSample)
-      : timeline.length;
-  const timelineWithoutCurrentWeek = timeline.filter((week) => !isCurrentWeek(week, today));
-  const currentWeekIncluded = timeline.length !== timelineWithoutCurrentWeek.length;
-  const weeksSampleWithoutCurrent = Math.max(0, normalizedWeeksSample - (currentWeekIncluded ? 1 : 0));
-  const totalWeeks = Math.max(timelineWithoutCurrentWeek.length, weeksSampleWithoutCurrent);
-  const completedWeeks = timelineWithoutCurrentWeek.filter((week) => week.hit).length;
-
-  if (totalWeeks === 0) {
-    return null;
-  }
+  const completionSummary = computeWeeklyHabitHealth({
+    timeline,
+    weeksSample: Number(weeksSample),
+    completionRate: Number(completionRate),
+    referenceDate,
+  });
 
   return {
-    completionRatePct: Math.round((completedWeeks / totalWeeks) * 100),
-    weeksActive: completedWeeks,
-    weeksSample: totalWeeks,
+    completionRatePct: completionSummary.completionPercent,
+    weeksActive: completionSummary.completedWeeks,
+    weeksSample: completionSummary.totalWeeks,
   };
 }
 
@@ -697,7 +679,12 @@ export function resolveHabitHealth(
     ? Math.max(0, Math.min(100, Math.round(parsedCompletionRate)))
     : null;
 
-  const completionFromInsights = computeCompletionFromInsights(insightsTimeline, weeksSample, referenceDate);
+  const completionFromInsights = computeCompletionFromInsights(
+    insightsTimeline,
+    weeksSample,
+    completionRate,
+    referenceDate,
+  );
 
   if (completionFromInsights) {
     return {
