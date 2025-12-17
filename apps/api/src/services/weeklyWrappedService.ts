@@ -625,7 +625,8 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, we
   >();
 
   const weeksSeen = new Set<string>();
-  const weeklyTarget = Number.isFinite(weeklyGoal) && weeklyGoal > 0 ? weeklyGoal : null;
+  const weeklyTarget =
+    typeof weeklyGoal === 'number' && Number.isFinite(weeklyGoal) && weeklyGoal > 0 ? weeklyGoal : null;
 
   for (const log of logs) {
     if (!log.dateKey) {
