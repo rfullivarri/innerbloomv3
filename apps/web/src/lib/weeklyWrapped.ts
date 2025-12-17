@@ -443,6 +443,9 @@ export async function buildWeeklyWrappedFromData(
   const effortBalance = computeEffortBalance(weeklyLogs);
   const longTermHabits = aggregateHabits(longTermLogs, weeksSample);
   const longTermHabitMap = new Map(longTermHabits.map((habit) => [habit.title, habit]));
+  const weeklyHabitMap = new Map(
+    habitCounts.map((habit) => [habit.taskId ?? habit.title, habit]),
+  );
 
   const xpTotal = weeklyLogs
     .filter((log) => log.state !== 'red')
@@ -470,9 +473,13 @@ export async function buildWeeklyWrappedFromData(
     const longTerm = longTermHabitMap.get(habit.title);
     const normalizedWeeksActive = longTerm?.weeksActive ?? habit.weeksActive ?? 0;
     const normalizedWeeksSample = longTerm?.weeksSample ?? habit.weeksSample ?? weeksSample;
+    const weeklyEntry = weeklyHabitMap.get(key);
+    const weeklyCompletions = weeklyEntry?.completions ?? 0;
 
     constancyCandidatesMap.set(key, {
       ...habit,
+      daysActive: weeklyCompletions,
+      completions: weeklyEntry?.completions ?? habit.completions,
       weeksActive: normalizedWeeksActive,
       weeksSample: normalizedWeeksSample,
     });
