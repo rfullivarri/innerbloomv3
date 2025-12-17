@@ -41,6 +41,8 @@ export type WeeklyWrappedSection = {
     weeksActive?: number;
     weeksSample?: number;
     completionRate?: number | null;
+    weeklyGoal?: number | null;
+    insightsTimeline?: TaskInsightsResponse['weeks']['timeline'];
   }[];
 };
 
@@ -550,6 +552,8 @@ export async function buildWeeklyWrappedFromData(
                 weeksActive: habit.weeksActive,
                 weeksSample: habit.weeksSample,
                 completionRate: habit.completionRate,
+                weeklyGoal: habit.weeklyGoal,
+                insightsTimeline: habit.insightsTimeline,
               }))
             : undefined,
       },

@@ -328,6 +328,7 @@ async function buildWeeklyWrappedPayload(
       ...habit,
       weeksActive: longTerm?.weeksActive ?? habit.weeksActive ?? 0,
       weeksSample: longTerm?.weeksSample ?? weeksSample,
+      weeklyGoal,
     };
   });
   const pillarDominant = dominantPillar(insights) ?? null;
@@ -387,6 +388,11 @@ async function buildWeeklyWrappedPayload(
                 daysActive: habit.daysActive,
                 weeksActive: habit.weeksActive,
                 weeksSample: habit.weeksSample,
+                completionRate:
+                  habit.weeksSample > 0
+                    ? Math.round((Math.max(0, Math.min(habit.weeksActive, habit.weeksSample)) / habit.weeksSample) * 100)
+                    : null,
+                weeklyGoal,
               }))
             : undefined,
       },
@@ -677,6 +683,7 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, we
       weeksSample,
       pillar: entry.pillar,
       badge: entry.badge,
+      weeklyGoal: weeklyTarget,
     }))
     .sort((a, b) => b.daysActive - a.daysActive || b.completions - a.completions || a.title.localeCompare(b.title));
 }
