@@ -311,7 +311,104 @@ function GlobalNotificationsView() {
           {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
         </div>
 
-        <div className="max-h-[540px] overflow-auto overflow-x-auto">
+        <div className="block md:hidden">
+          <div className="space-y-3 px-4 pb-4">
+            {filteredDefinitions.map((definition) => (
+              <article
+                key={definition.id}
+                className="rounded-xl border border-slate-700/60 bg-slate-900/50 p-4 shadow-inner shadow-slate-950/30"
+              >
+                <header className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 space-y-1">
+                    <p className="text-sm font-semibold text-slate-50">{definition.label}</p>
+                    <p className="break-all text-[11px] text-slate-500">{definition.notificationKey}</p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="rounded-full bg-slate-800/80 px-3 py-1 capitalize text-slate-200">{definition.type}</span>
+                      <span
+                        className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase ${
+                          STATUS_BADGES[definition.status]
+                        }`}
+                      >
+                        {STATUS_LABELS[definition.status]}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewing(definition)}
+                      className="rounded-lg border border-slate-700/70 px-3 py-1 font-semibold text-slate-200 transition hover:border-sky-400/60 hover:text-sky-100"
+                    >
+                      Preview
+                    </button>
+                    <label className="inline-flex cursor-pointer items-center gap-2 text-[11px] text-slate-400">
+                      <span>{definition.status === 'active' ? 'Activo' : 'Pausado'}</span>
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={definition.status === 'active'}
+                        onChange={() => handleToggle(definition)}
+                        disabled={updatingId === definition.id}
+                      />
+                      <span
+                        className={`relative inline-flex h-5 w-10 items-center rounded-full bg-slate-700 transition ${
+                          definition.status === 'active' ? 'bg-emerald-500/60' : 'bg-slate-700'
+                        } ${updatingId === definition.id ? 'opacity-50' : ''}`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 rounded-full bg-white transition ${
+                            definition.status === 'active' ? 'translate-x-5' : 'translate-x-1'
+                          }`}
+                        />
+                      </span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setEditing(definition)}
+                      className="rounded-lg border border-slate-700/70 px-3 py-1 font-semibold text-slate-200 transition hover:border-sky-400/60 hover:text-sky-100"
+                    >
+                      Editar
+                    </button>
+                  </div>
+                </header>
+                <div className="mt-3 space-y-2 text-xs text-slate-300">
+                  <div className="flex flex-wrap gap-2">
+                    {definition.scope.map((scope) => (
+                      <span key={scope} className="rounded-full bg-slate-800/70 px-2 py-0.5 text-[11px] text-slate-300">
+                        {scope}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-slate-400">Trigger: {definition.trigger}</p>
+                  <p className="font-semibold text-slate-100">Canal: {definition.channel}</p>
+                  <p className="text-slate-400">
+                    CTA: {definition.cta ? `${definition.cta.label} → ${definition.cta.href ?? '—'}` : 'Sin CTA'}
+                  </p>
+                  <p className="text-slate-300">Frecuencia: {definition.frequency}</p>
+                  <p className="text-slate-300">Prioridad {definition.priority}</p>
+                  <div className="rounded-lg border border-slate-800/70 bg-slate-900/70 p-3 text-[11px] text-slate-200">
+                    <p>
+                      <span className="text-slate-500">Last fired:</span>{' '}
+                      {definition.metrics.lastFiredAt ? formatRelativeTimestamp(definition.metrics.lastFiredAt) : 'Nunca'}
+                    </p>
+                    <p>7d: {definition.metrics.fires7d} · 30d: {definition.metrics.fires30d}</p>
+                    <p>CTR 30d: {(definition.metrics.ctr30d * 100).toFixed(1)}%</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+            {filteredDefinitions.length === 0 && !loading ? (
+              <p className="px-1 py-6 text-center text-sm text-slate-400">
+                No hay notificaciones que coincidan con los filtros.
+              </p>
+            ) : null}
+            {loading ? (
+              <div className="flex items-center justify-center py-4 text-sm text-slate-400">Cargando…</div>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="hidden max-h-[540px] overflow-auto overflow-x-auto md:block">
           <table className="min-w-full border-collapse text-left text-sm">
             <thead className="sticky top-0 bg-slate-900/95 text-xs uppercase tracking-[0.2em] text-slate-400">
               <tr>
@@ -781,7 +878,78 @@ function UserNotificationsView() {
               {stateError ? (
                 <p className="px-4 py-3 text-xs text-rose-200">{stateError}</p>
               ) : null}
-              <div className="relative max-h-[420px] overflow-auto overflow-x-auto">
+              <div className="block md:hidden">
+                <div className="space-y-3 px-4 pb-4 pt-3">
+                  {notifications.map((notification) => {
+                    const isUpdating = updatingNotificationKey === notification.notificationKey;
+                    return (
+                      <article
+                        key={notification.notificationKey}
+                        className="rounded-xl border border-slate-700/70 bg-slate-900/50 p-4 shadow-inner shadow-slate-950/30"
+                      >
+                        <header className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 space-y-1">
+                            <p className="text-sm font-semibold text-slate-50">{notification.name}</p>
+                            <p className="break-all font-mono text-[11px] text-slate-500">{notification.notificationKey}</p>
+                            <p className="text-xs text-slate-400">{notification.type} · {notification.channel}</p>
+                          </div>
+                          <span className={notificationStateBadgeClass(notification.state)}>{notification.state}</span>
+                        </header>
+                        <dl className="mt-3 grid gap-2 text-[11px] text-slate-300">
+                          <div className="flex justify-between gap-3">
+                            <dt className="text-slate-500">mute_until</dt>
+                            <dd className="text-right">{formatOptionalDateTime(notification.muteUntil)}</dd>
+                          </div>
+                          <div className="flex justify-between gap-3">
+                            <dt className="text-slate-500">last_fired</dt>
+                            <dd className="text-right">{formatOptionalDateTime(notification.lastFiredForUserAt)}</dd>
+                          </div>
+                          <div className="flex justify-between gap-3">
+                            <dt className="text-slate-500">last_interaction</dt>
+                            <dd className="text-right">{formatInteractionLabel(notification.lastInteractionType)}</dd>
+                          </div>
+                        </dl>
+                        <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                          {notification.state === 'muted' ? (
+                            <button
+                              type="button"
+                              onClick={() => handleNotificationStateChange(notification.notificationKey, 'active')}
+                              disabled={isUpdating}
+                              className="rounded-lg border border-emerald-500/60 px-3 py-1 font-semibold text-emerald-100 transition hover:border-emerald-300 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Re-activar
+                            </button>
+                          ) : null}
+                          {notification.state === 'active' ? (
+                            <button
+                              type="button"
+                              onClick={() => handleNotificationStateChange(notification.notificationKey, 'muted')}
+                              disabled={isUpdating}
+                              className="rounded-lg border border-amber-500/60 px-3 py-1 font-semibold text-amber-100 transition hover:border-amber-300 hover:text-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Mutear
+                            </button>
+                          ) : null}
+                          {notification.state === 'suppressed_by_rule' ? (
+                            <span className="rounded-lg border border-slate-800/80 px-3 py-1 text-[11px] text-slate-400">
+                              Supeditado a reglas
+                            </span>
+                          ) : null}
+                        </div>
+                      </article>
+                    );
+                  })}
+                  {notifications.length === 0 && !stateLoading ? (
+                    <p className="px-1 py-4 text-center text-xs text-slate-400">
+                      No hay notificaciones personalizadas para este usuario.
+                    </p>
+                  ) : null}
+                  {stateLoading ? (
+                    <div className="flex items-center justify-center py-4 text-xs text-slate-400">Cargando…</div>
+                  ) : null}
+                </div>
+              </div>
+              <div className="relative hidden max-h-[420px] overflow-auto overflow-x-auto md:block">
                 <table className="min-w-[720px] border-collapse text-left text-sm text-slate-100 md:min-w-[900px]">
                   <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
                     <tr>
@@ -894,7 +1062,58 @@ function UserNotificationsView() {
               {historyError ? (
                 <p className="px-4 py-3 text-xs text-rose-200">{historyError}</p>
               ) : null}
-              <div className="relative max-h-[420px] overflow-auto overflow-x-auto">
+              <div className="block md:hidden">
+                <div className="space-y-3 px-4 pb-4 pt-3">
+                  {historyItems.map((entry) => (
+                    <article
+                      key={entry.id}
+                      className="rounded-xl border border-slate-700/70 bg-slate-900/50 p-4 shadow-inner shadow-slate-950/30"
+                    >
+                      <header className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 space-y-1">
+                          <p className="text-sm font-semibold text-slate-50">{entry.name}</p>
+                          <p className="break-all font-mono text-[11px] text-slate-500">{entry.notificationKey}</p>
+                          <p className="text-xs text-slate-400">{formatOptionalDateTime(entry.timestamp)}</p>
+                        </div>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-[11px] font-semibold ${
+                            entry.isCriticalMoment ? 'bg-rose-500/20 text-rose-100' : 'bg-slate-800/80 text-slate-200'
+                          }`}
+                        >
+                          {entry.isCriticalMoment ? 'Critical' : 'No critical'}
+                        </span>
+                      </header>
+                      <dl className="mt-3 grid gap-2 text-[11px] text-slate-300">
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-slate-500">Tipo / Canal</dt>
+                          <dd className="text-right">{entry.type} · {entry.channel}</dd>
+                        </div>
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-slate-500">Contexto</dt>
+                          <dd className="text-right">{entry.context ?? '—'}</dd>
+                        </div>
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-slate-500">Acción</dt>
+                          <dd className="text-right">{formatHistoryAction(entry.action)}</dd>
+                        </div>
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-slate-500">critical_tag</dt>
+                          <dd className="text-right">{entry.criticalTag ?? '—'}</dd>
+                        </div>
+                      </dl>
+                    </article>
+                  ))}
+                  {historyItems.length === 0 && !historyLoading ? (
+                    <p className="px-1 py-4 text-center text-xs text-slate-400">
+                      Aún no registramos eventos en el período seleccionado.
+                    </p>
+                  ) : null}
+                  {historyLoading ? (
+                    <div className="flex items-center justify-center py-4 text-xs text-slate-400">Cargando…</div>
+                  ) : null}
+                </div>
+              </div>
+              <div className="relative hidden max-h-[420px] overflow-auto overflow-x-auto md:block">
                 <table className="min-w-[720px] border-collapse text-left text-sm text-slate-100 md:min-w-[900px]">
                   <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
                     <tr>
