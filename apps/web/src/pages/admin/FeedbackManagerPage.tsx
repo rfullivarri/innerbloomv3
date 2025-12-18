@@ -655,7 +655,7 @@ function UserNotificationsView() {
           <div className="rounded-xl border border-slate-800/60 bg-slate-900/60 px-4 py-3 text-xs text-slate-300">
             {selectedUser ? (
               <>
-                <p className="font-semibold text-slate-100">{selectedUser.email ?? 'Sin email'}</p>
+                <p className="break-words font-semibold text-slate-100">{selectedUser.email ?? 'Sin email'}</p>
                 <p className="text-[11px] text-slate-500">user_id: {selectedUser.id}</p>
               </>
             ) : (
@@ -679,11 +679,11 @@ function UserNotificationsView() {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Vista por usuario</p>
                 <h2 className="mt-1 text-2xl font-semibold text-slate-50">{displayName}</h2>
-                <p className="text-sm text-slate-400">{email}</p>
+                <p className="break-words text-sm text-slate-400">{email}</p>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">user_id</p>
-                <p className="font-mono text-xs text-slate-200">{userProfile?.id ?? selectedUser.id}</p>
+                <p className="break-all font-mono text-xs text-slate-200">{userProfile?.id ?? selectedUser.id}</p>
               </div>
             </header>
             <dl className="mt-4 grid gap-4 text-sm text-slate-200 sm:grid-cols-3">
@@ -782,7 +782,7 @@ function UserNotificationsView() {
                 <p className="px-4 py-3 text-xs text-rose-200">{stateError}</p>
               ) : null}
               <div className="relative max-h-[420px] overflow-auto overflow-x-auto">
-                <table className="min-w-[960px] border-collapse text-left text-sm text-slate-100">
+                <table className="min-w-[720px] border-collapse text-left text-sm text-slate-100 md:min-w-[900px]">
                   <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
                     <tr>
                       <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">notification_key</th>
@@ -895,7 +895,7 @@ function UserNotificationsView() {
                 <p className="px-4 py-3 text-xs text-rose-200">{historyError}</p>
               ) : null}
               <div className="relative max-h-[420px] overflow-auto overflow-x-auto">
-                <table className="min-w-[960px] border-collapse text-left text-sm text-slate-100">
+                <table className="min-w-[720px] border-collapse text-left text-sm text-slate-100 md:min-w-[900px]">
                   <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur">
                     <tr>
                       <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">timestamp</th>
