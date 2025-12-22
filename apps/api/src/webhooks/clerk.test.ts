@@ -13,6 +13,7 @@ vi.mock('../db.js', () => ({
   pool: {
     query: mockPoolQuery,
   },
+  runWithDbContext: (_context: string, callback: () => unknown) => callback(),
 }));
 
 vi.mock('svix', () => ({

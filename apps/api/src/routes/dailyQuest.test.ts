@@ -13,6 +13,7 @@ vi.mock('../db.js', () => ({
   dbReady: Promise.resolve(),
   withClient: (callback: (client: { query: typeof mockClientQuery }) => Promise<unknown>) =>
     mockWithClient(callback),
+  runWithDbContext: (_context: string, callback: () => unknown) => callback(),
 }));
 
 vi.mock('../services/auth-service.js', () => ({

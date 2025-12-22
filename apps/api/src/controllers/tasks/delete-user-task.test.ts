@@ -12,6 +12,7 @@ vi.mock('../../db.js', () => ({
     query: mockQuery,
   },
   dbReady: Promise.resolve(),
+  runWithDbContext: (_context: string, callback: () => unknown) => callback(),
 }));
 
 vi.mock('../users/shared.js', () => ({
