@@ -14,7 +14,7 @@ export default function LoginPage() {
       secondaryActionLabel="Volver al inicio"
       secondaryActionHref="/"
     >
-      <div className="mx-auto w-full min-w-0 max-w-[calc(100%-2rem)] sm:max-w-[440px]">
+      <div className="mx-auto w-full max-w-full sm:max-w-[440px]">
         <SignIn
           appearance={createAuthAppearance({
             elements: {
