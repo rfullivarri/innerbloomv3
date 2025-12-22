@@ -89,7 +89,6 @@ export function EnergyCard({ userId }: EnergyCardProps) {
   return (
     <Card
       title="💠 Daily Energy"
-      subtitle="Promedio últimos 7 días"
       rightSlot={
         <InfoDotTarget id="dailyEnergy" placement="right" className="inline-flex items-center">
           <span className="sr-only">Más información sobre Daily Energy</span>
@@ -119,13 +118,8 @@ export function EnergyCard({ userId }: EnergyCardProps) {
 
       {status === 'success' && hasData && (
         <div className="space-y-5">
-          {normalized.hasHistory ? (
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">
-              Mayor crecimiento: {normalized.topGrowth?.pillar ?? '—'}{' '}
-              {normalized.topGrowth ? `(${formatDelta(normalized.topGrowth.deltaPct)})` : ''}
-            </p>
-          ) : (
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+          {!normalized.hasHistory && (
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
               Sin datos suficientes para comparar con la semana anterior.
             </p>
           )}
@@ -175,6 +169,14 @@ function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparis
   const width = clamped <= 4 ? 4 : clamped;
   const hasDelta = showComparison && typeof deltaPct === 'number';
   const deltaLabel = hasDelta ? formatDelta(deltaPct ?? null) : null;
+  const deltaColor =
+    typeof deltaPct === 'number'
+      ? deltaPct < 0
+        ? 'text-rose-300'
+        : deltaPct > 0
+          ? 'text-emerald-200'
+          : 'text-slate-200'
+      : 'text-slate-200';
 
   return (
     <div className="space-y-2 sm:grid sm:grid-cols-[88px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
@@ -202,11 +204,9 @@ function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparis
         </div>
       </div>
       {deltaLabel ? (
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-100">
-          {deltaLabel} vs. semana anterior
-        </p>
+        <p className={`text-[12px] font-medium leading-tight ${deltaColor}`}>{deltaLabel}</p>
       ) : showComparison ? (
-        <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400">Sin variación suficiente</p>
+        <p className="text-[11px] font-light text-slate-400">Sin variación suficiente</p>
       ) : null}
     </div>
   );
