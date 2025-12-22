@@ -179,19 +179,19 @@ function WeeklyWrappedCard({
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-slate-950/40 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.35)]">
-      <div className="flex flex-col gap-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{label}</p>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{label}</p>
+          <WeeklyChip icon="📅" label={weekRangeLabel} variant="accent" size="small" />
+        </div>
 
         <div className="flex flex-wrap gap-2">
-          <WeeklyChip icon="📅" label={weekRangeLabel} variant="accent" />
           <WeeklyChip
             icon={getEmotionEmoji(weeklyEmotion?.key)}
             label={weeklyEmotion?.label ?? 'Sin emoción dominante'}
             color={weeklyEmotion?.color}
           />
-          {pillarDominant ? (
-            <WeeklyChip icon={getPillarIcon(pillarDominant)} label={pillarDominant} variant="outline" />
-          ) : null}
+          {pillarDominant ? <WeeklyChip icon={getPillarIcon(pillarDominant)} variant="outline" /> : null}
         </div>
       </div>
       <button
@@ -210,11 +210,13 @@ function WeeklyChip({
   label,
   color,
   variant = 'neutral',
+  size = 'default',
 }: {
   icon?: string | null;
-  label: string;
+  label?: string;
   color?: string;
   variant?: 'neutral' | 'accent' | 'outline';
+  size?: 'default' | 'small';
 }) {
   const palette =
     variant === 'accent'
@@ -223,25 +225,20 @@ function WeeklyChip({
         ? 'border-white/25 bg-white/5 text-white'
         : 'border-white/15 bg-white/5 text-white/80';
 
-  const style = color
-    ? {
-        borderColor: `${color}80`,
-        backgroundColor: `${color}1a`,
-        color,
-      }
-    : undefined;
+  const sizeClasses = size === 'small' ? 'gap-1.5 px-2.5 py-1 text-[10px]' : 'gap-2 px-3 py-1 text-[11px]';
+  const iconClasses = size === 'small' ? 'text-sm leading-none' : 'text-base leading-none';
 
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${palette}`}
-      style={style}
+      className={`inline-flex items-center rounded-full border font-semibold uppercase tracking-[0.18em] ${palette} ${sizeClasses}`}
     >
       {icon ? (
-        <span aria-hidden className="text-base leading-none">
+        <span aria-hidden className={iconClasses}>
           {icon}
         </span>
       ) : null}
-      <span>{label}</span>
+      {color ? <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} /> : null}
+      {label ? <span className="leading-none">{label}</span> : null}
     </span>
   );
 }
