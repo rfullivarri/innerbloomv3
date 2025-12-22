@@ -10,6 +10,7 @@ const { mockQuery, mockVerifyToken, mockLinkDailyToHuntMission } = vi.hoisted(()
 vi.mock('../db.js', () => ({
   pool: { query: mockQuery },
   dbReady: Promise.resolve(),
+  runWithDbContext: (_context: string, callback: () => unknown) => callback(),
 }));
 
 vi.mock('../services/auth-service.js', () => ({
