@@ -898,13 +898,18 @@ function ProgressBlock({
     : effortBalance?.topHardTask
       ? `La tarea difícil más repetida fue: ${effortBalance.topHardTask.title}`
       : 'No registraste tareas difíciles esta semana.';
-  const strategyMessage = !hasEffortBalance
-    ? 'Registrá completions para mapear el balance de esfuerzo con precisión.'
-    : hardPct > 30
-      ? 'Seguís en modo desafiante: podés sostener el ritmo y sumar pausas de recuperación.'
-      : easyPct > 70
-        ? 'Patrón ideal para consolidar hábitos antes de subir la dificultad.'
-        : 'Tenés margen para subir un nivel la próxima semana manteniendo este balance.';
+  const effortInsights: { id: string; color: string; text: string }[] = [
+    {
+      id: 'balance',
+      color: '#34d399',
+      text: balanceReading,
+    },
+    {
+      id: 'hard-task',
+      color: '#38bdf8',
+      text: hardInsight,
+    },
+  ];
 
   return (
     <SectionShell
@@ -939,30 +944,69 @@ function ProgressBlock({
       </div>
 
       <div className="space-y-3 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/70 via-slate-900/60 to-emerald-500/10 p-5 shadow-lg shadow-emerald-500/15">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-100">Balance de esfuerzo</p>
-            <p className="text-lg font-semibold text-slate-50">Distribución semanal por dificultad</p>
+        <div className="space-y-3">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-100">Balance de esfuerzo</p>
+              <p className="text-lg font-semibold text-slate-50">Distribución semanal por dificultad</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-emerald-50/80">
-            <span className="rounded-full bg-emerald-500/20 px-2 py-1">Easy {easyPct}%</span>
-            <span className="rounded-full bg-cyan-500/20 px-2 py-1">Medium {mediumPct}%</span>
-            <span className="rounded-full bg-rose-500/20 px-2 py-1">Hard {hardPct}%</span>
-          </div>
-        </div>
 
-        <div className="h-3 w-full overflow-hidden rounded-full border border-white/10 bg-white/5">
-          <div className="flex h-full w-full">
-            <div className="h-full bg-gradient-to-r from-emerald-500/70 to-emerald-400/70" style={{ width: `${easyPct}%` }} />
-            <div className="h-full bg-gradient-to-r from-cyan-500/60 to-sky-400/70" style={{ width: `${mediumPct}%` }} />
-            <div className="h-full bg-gradient-to-r from-rose-500/70 to-orange-400/70" style={{ width: `${hardPct}%` }} />
-          </div>
-        </div>
+          <div className="space-y-2">
+            <div className="h-5 w-full overflow-hidden rounded-full border border-white/10 bg-white/5">
+              <div className="flex h-full w-full text-[11px] font-semibold text-white/90">
+                <div
+                  className="relative flex h-full items-center justify-center bg-gradient-to-r from-emerald-500/80 to-emerald-400/80"
+                  style={{ width: `${easyPct}%` }}
+                >
+                  {easyPct > 4 ? <span className="drop-shadow-[0_0_6px_rgba(15,118,110,0.5)]">{easyPct}%</span> : null}
+                </div>
+                <div
+                  className="relative flex h-full items-center justify-center bg-gradient-to-r from-cyan-500/70 to-sky-400/80"
+                  style={{ width: `${mediumPct}%` }}
+                >
+                  {mediumPct > 4 ? <span className="drop-shadow-[0_0_6px_rgba(14,165,233,0.5)]">{mediumPct}%</span> : null}
+                </div>
+                <div
+                  className="relative flex h-full items-center justify-center bg-gradient-to-r from-rose-500/80 to-orange-400/80"
+                  style={{ width: `${hardPct}%` }}
+                >
+                  {hardPct > 4 ? <span className="drop-shadow-[0_0_6px_rgba(190,24,93,0.45)]">{hardPct}%</span> : null}
+                </div>
+              </div>
+            </div>
 
-        <div className="grid gap-3 text-sm text-emerald-50 md:grid-cols-3">
-          <p className="rounded-2xl border border-white/10 bg-white/5 p-3 text-slate-100">{balanceReading}</p>
-          <p className="rounded-2xl border border-white/10 bg-white/5 p-3 text-slate-100">{hardInsight}</p>
-          <p className="rounded-2xl border border-white/10 bg-white/5 p-3 text-slate-100">{strategyMessage}</p>
+            <div className="flex flex-wrap items-center gap-3 text-[12px] text-emerald-50/80">
+              <span className="flex items-center gap-2 rounded-full bg-white/0 px-2 py-1">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" aria-hidden />
+                <span className="font-medium">Easy</span>
+              </span>
+              <span className="flex items-center gap-2 rounded-full bg-white/0 px-2 py-1">
+                <span className="h-2.5 w-2.5 rounded-full bg-cyan-400" aria-hidden />
+                <span className="font-medium">Medium</span>
+              </span>
+              <span className="flex items-center gap-2 rounded-full bg-white/0 px-2 py-1">
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-400" aria-hidden />
+                <span className="font-medium">Hard</span>
+              </span>
+            </div>
+          </div>
+
+          <ul className="space-y-2 text-sm text-emerald-50">
+            {effortInsights.map((insight) => (
+              <li
+                key={insight.id}
+                className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-slate-100 shadow-inner shadow-emerald-400/5"
+              >
+                <span
+                  className="mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                  style={{ backgroundColor: insight.color }}
+                  aria-hidden
+                />
+                <span className="leading-relaxed">{insight.text}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </SectionShell>
