@@ -901,15 +901,16 @@ function ProgressBlock({
     : effortBalance?.topHardTask
       ? `La tarea difícil más repetida fue: ${effortBalance.topHardTask.title}`
       : 'No registraste tareas difíciles esta semana.';
+  const insightDotColor = '#fbbf24';
   const effortInsights: { id: string; color: string; text: string }[] = [
     {
       id: 'balance',
-      color: '#34d399',
+      color: insightDotColor,
       text: balanceReading,
     },
     {
       id: 'hard-task',
-      color: '#38bdf8',
+      color: insightDotColor,
       text: hardInsight,
     },
   ];
@@ -930,10 +931,10 @@ function ProgressBlock({
       <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-emerald-100">
           <span>Daily Energy</span>
-          <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] text-emerald-50">Energía que más creció</span>
+          <span className="rounded-full bg-white/10 p-1.5 text-[10px] text-emerald-50">Energía que más creció</span>
         </div>
         <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
-          <div className="relative flex h-28 w-10 items-end overflow-hidden rounded-xl border border-white/20 bg-slate-900/60">
+          <div className="relative flex h-28 w-12 items-end overflow-hidden rounded-xl border border-white/20 bg-slate-900/60">
             <div className="absolute inset-x-0 top-1 text-center text-[11px] font-semibold text-emerald-50 drop-shadow-[0_0_8px_rgba(59,130,246,0.4)]">
               {energyCurrentLabel}
             </div>
@@ -943,7 +944,14 @@ function ProgressBlock({
           <div className="flex flex-col text-sm text-emerald-50">
             <div className="flex flex-wrap items-baseline gap-2">
               <span className="font-semibold">{energySnapshot.metric.label}</span>
-              <span className="text-xs text-emerald-100">{hasDelta ? `${formatDeltaValue(energySnapshot.delta)} vs semana anterior` : energyHeadline}</span>
+              {hasDelta ? (
+                <span className="text-xs font-semibold text-emerald-50">
+                  <span className="font-bold text-emerald-300">{formatDeltaValue(energySnapshot.delta)}</span>{' '}
+                  <span className="font-semibold">vs semana anterior</span>
+                </span>
+              ) : (
+                <span className="text-xs text-emerald-100">{energyHeadline}</span>
+              )}
             </div>
             <span className="text-xs text-emerald-50/90">{energyFocusStory}</span>
           </div>
@@ -955,7 +963,7 @@ function ProgressBlock({
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-100">Balance de esfuerzo</p>
-              <p className="text-lg font-semibold text-slate-50">Distribución semanal por dificultad</p>
+              <p className="text-lg font-semibold text-slate-50">Completaste {balanceTotal} tareas, repartidas por dificultad</p>
             </div>
           </div>
 
@@ -983,7 +991,7 @@ function ProgressBlock({
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 text-[12px] text-emerald-50/80">
+            <div className="flex flex-wrap items-center justify-center gap-3 text-[12px] text-emerald-50/80">
               <span className="flex items-center gap-2 rounded-full bg-white/0 px-2 py-1">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" aria-hidden />
                 <span className="font-medium">Easy</span>
