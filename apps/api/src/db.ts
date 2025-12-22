@@ -79,23 +79,6 @@ function resetPoolIdleTimer(poolToWatch: Pool): void {
 }
 
 function createPool(): Pool {
-  if (dbDebugEnabled) {
-    const [textOrConfig, values] = args as unknown as [string | QueryConfig, readonly unknown[] | undefined];
-    const text = getQueryText(textOrConfig as string | QueryConfig);
-    const resolvedValues =
-      Array.isArray(values) && values.length > 0
-        ? values
-        : (typeof textOrConfig === 'object' && Array.isArray((textOrConfig as QueryConfig).values)
-            ? (textOrConfig as QueryConfig).values
-            : undefined);
-    const previewText = text.replace(/\s+/g, ' ').trim();
-    console.info('[db-debug] query', {
-      context: getDbContext(),
-      text: previewText.length > 180 ? `${previewText.slice(0, 180)}…` : previewText,
-      values: resolvedValues,
-    });
-  }
-
   const createdPool = new Pool({
     connectionString: databaseUrl,
     connectionTimeoutMillis,
@@ -108,15 +91,23 @@ function createPool(): Pool {
   });
 
   const originalConnect = createdPool.connect.bind(createdPool);
+  type ConnectCallback = (err: Error | undefined, client: PoolClient | undefined, done: (release?: Error) => void) => void;
 
-  createdPool.connect = (async (...args: Parameters<typeof originalConnect>) => {
+  createdPool.connect = ((callback?: ConnectCallback) => {
     resetPoolIdleTimer(createdPool);
-    return originalConnect(...args);
+
+    if (callback) {
+      return originalConnect(callback);
+    }
+
+    return originalConnect();
   }) as typeof createdPool.connect;
 
-  const originalQuery = createdPool.query.bind(createdPool);
+  type QueryCallback = (err: Error, result: QueryResult<QueryResultRow>) => void;
+  type QueryArgs = [string | QueryConfig, (readonly unknown[] | QueryCallback)?, QueryCallback?];
+  const originalQuery: (...args: QueryArgs) => ReturnType<Pool['query']> = createdPool.query.bind(createdPool);
 
-  createdPool.query = (async (...args: Parameters<typeof originalQuery>) => {
+  createdPool.query = (async (...args: QueryArgs) => {
     resetPoolIdleTimer(createdPool);
 
     if (dbDebugEnabled) {
