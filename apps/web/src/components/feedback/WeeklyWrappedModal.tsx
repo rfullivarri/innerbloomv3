@@ -875,10 +875,12 @@ function ProgressBlock({
 }: ProgressBlockProps) {
   const slideLabel = 'PROGRESO Y FOCO';
   const energySnapshot = computeEnergySnapshot(pillarDominant, completions, xpTotal, energyHighlight);
-  const hasDelta = typeof energySnapshot.delta === 'number';
+  const hasDelta = energySnapshot.hasHistory && typeof energySnapshot.delta === 'number';
   const energyHeadline = hasDelta
-    ? `${energySnapshot.metric.label} +${energySnapshot.delta}% vs semana anterior`
-    : `Energía destacada: ${energySnapshot.metric.label} (${energySnapshot.current}%)`;
+    ? `${energySnapshot.metric.label} ${formatDeltaValue(energySnapshot.delta)} vs semana anterior`
+    : energySnapshot.hasHistory
+      ? `Energía destacada: ${energySnapshot.metric.label} (${energySnapshot.current}%)`
+      : 'Sin datos suficientes para comparar energía con la semana anterior.';
   const energyBarHeight = `${Math.max(12, Math.min(100, energySnapshot.current))}%`;
   const energyBarGradient = ENERGY_GRADIENT_BY_METRIC[energySnapshot.metric.label] ?? 'from-white/70 via-white/90 to-white';
   const hasEffortBalance = Boolean((effortBalance?.total ?? 0) > 0);
@@ -1162,6 +1164,13 @@ function getPillarIcon(pillar?: string | null): string {
   return PILLAR_ICONS[normalized] ?? '';
 }
 
+function formatDeltaValue(delta: number | null): string {
+  if (delta === null || Number.isNaN(delta)) return '';
+  const rounded = Math.round(delta * 10) / 10;
+  const sign = rounded > 0 ? '+' : '';
+  return `${sign}${rounded}%`;
+}
+
 function computeEnergySnapshot(
   pillarDominant: string | null,
   completions: number,
@@ -1177,10 +1186,15 @@ function computeEnergySnapshot(
   const normalizedCompletionScore = Math.min(100, Math.round((completions / 14) * 100));
   const xpScore = Math.min(100, Math.round(xpTotal / 10));
   const current = energyHighlight?.value ?? Math.max(12, normalizedCompletionScore || xpScore || 0);
+  const hasHistory = Boolean(energyHighlight?.hasHistory);
+  const delta = hasHistory && typeof energyHighlight?.deltaPct === 'number'
+    ? Math.round(energyHighlight.deltaPct * 10) / 10
+    : null;
 
   return {
     metric,
-    delta: null as number | null,
+    delta,
     current,
+    hasHistory,
   };
 }

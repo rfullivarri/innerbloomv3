@@ -1,7 +1,12 @@
-import type { EmotionSnapshot, TaskInsightsResponse, UserLevelResponse } from './api';
+import type {
+  DailyEnergySnapshot,
+  EmotionSnapshot,
+  TaskInsightsResponse,
+  UserLevelResponse,
+} from './api';
 import type { AdminInsights, AdminLogRow } from './types';
 import { fetchAdminInsights, fetchAdminLogs } from './adminApi';
-import { getEmotions, getTaskInsights, getUserLevel } from './api';
+import { getEmotions, getTaskInsights, getUserDailyEnergy, getUserLevel } from './api';
 import { logApiError } from './logger';
 
 type EmotionMessageKey =
@@ -56,7 +61,12 @@ export type WeeklyWrappedPayload = {
     highlight: string | null;
     completions: number;
     xpTotal: number;
-    energyHighlight?: { metric: 'HP' | 'FOCUS' | 'MOOD'; value: number };
+    energyHighlight?: {
+      metric: 'HP' | 'FOCUS' | 'MOOD';
+      value: number;
+      deltaPct?: number | null;
+      hasHistory?: boolean;
+    };
     effortBalance?: {
       easy: number;
       medium: number;
@@ -259,7 +269,7 @@ export async function buildWeeklyWrappedPreviewPayload(
     return buildMockWeeklyWrapped(options.forceLevelUpMock);
   }
 
-  const [insights, logs, emotions, levelSummary] = await Promise.all([
+  const [insights, logs, emotions, levelSummary, dailyEnergy] = await Promise.all([
     fetchAdminInsights(options.userId),
     fetchLogsForRange(options.userId, {
       from: toDateInput(daysAgo(83)),
@@ -267,11 +277,23 @@ export async function buildWeeklyWrappedPreviewPayload(
     }),
     getEmotions(options.userId, { days: 15 }),
     fetchLevelSummary(options.userId),
+    // Safe fetch; Weekly Wrapped can render without this data.
+    getUserDailyEnergy(options.userId).catch((error) => {
+      logApiError('[weekly-wrapped] failed to fetch daily energy', { error });
+      return null;
+    }),
   ]);
 
-  return buildWeeklyWrappedFromData(insights, logs, emotions, levelSummary, {
-    forceLevelUpMock: options.forceLevelUpMock ?? false,
-  });
+  return buildWeeklyWrappedFromData(
+    insights,
+    logs,
+    emotions,
+    levelSummary,
+    dailyEnergy?.trend ?? null,
+    {
+      forceLevelUpMock: options.forceLevelUpMock ?? false,
+    },
+  );
 }
 
 async function fetchLogsForRange(
@@ -400,6 +422,7 @@ export async function buildWeeklyWrappedFromData(
   logs: AdminLogRow[],
   emotions: EmotionSnapshot[],
   levelSummary: LevelSummary | null,
+  energyTrend: DailyEnergySnapshot['trend'] | null,
   options: { forceLevelUpMock?: boolean } = {},
 ): Promise<WeeklyWrappedPayload> {
   logWeeklyWrappedDebug('building payload from data', {
@@ -490,7 +513,7 @@ export async function buildWeeklyWrappedFromData(
   const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
   const highlight = effortBalance.topTask?.title ?? constancyHabitsWithInsights[0]?.title ?? null;
-  const energyHighlight = computeEnergyHighlightFromInsights(insights, pillarDominant);
+  const energyHighlight = computeEnergyHighlight(insights, pillarDominant, energyTrend);
   const emotionHighlight = buildEmotionHighlight(emotions);
   const weeklyEmotionMessage =
     emotionHighlight.weekly?.weeklyMessage ??
@@ -711,13 +734,37 @@ function getPillarIcon(pillar: string): string {
   return normalized ? icons[normalized] ?? '' : '';
 }
 
-function computeEnergyHighlightFromInsights(
+function computeEnergyHighlight(
   insights: AdminInsights,
   pillarDominant: string | null,
+  energyTrend: DailyEnergySnapshot['trend'] | null,
 ): WeeklyWrappedPayload['summary']['energyHighlight'] {
-  const metric = pillarDominant && ENERGY_METRIC_BY_PILLAR[pillarDominant]
-    ? ENERGY_METRIC_BY_PILLAR[pillarDominant]
-    : ENERGY_METRIC_BY_PILLAR.Body;
+  const metric =
+    pillarDominant && ENERGY_METRIC_BY_PILLAR[pillarDominant]
+      ? ENERGY_METRIC_BY_PILLAR[pillarDominant]
+      : ENERGY_METRIC_BY_PILLAR.Body;
+
+  const topGrowth = energyTrend?.hasHistory
+    ? (['Body', 'Mind', 'Soul'] as const)
+        .map((pillar) => ({
+          pillar,
+          delta: energyTrend.pillars[pillar].deltaPct,
+          metric: ENERGY_METRIC_BY_PILLAR[pillar].label,
+          current: energyTrend.pillars[pillar].current,
+        }))
+        .filter((entry) => typeof entry.delta === 'number')
+        .sort((a, b) => (b.delta ?? 0) - (a.delta ?? 0))[0]
+    : null;
+
+  if (topGrowth) {
+    const current = Math.max(0, Math.min(100, Math.round(topGrowth.current ?? 0)));
+    return {
+      metric: topGrowth.metric,
+      value: current,
+      deltaPct: Math.round((topGrowth.delta ?? 0) * 10) / 10,
+      hasHistory: true,
+    };
+  }
 
   const constancyValue = pillarDominant
     ? insights.constancyWeekly[pillarDominant.toLowerCase() as 'body' | 'mind' | 'soul'] ?? 0
@@ -729,7 +776,11 @@ function computeEnergyHighlightFromInsights(
 
   const value = Math.max(0, Math.min(100, Math.round(constancyValue)));
 
-  return { metric: metric.label, value } as WeeklyWrappedPayload['summary']['energyHighlight'];
+  return {
+    metric: metric.label,
+    value,
+    hasHistory: energyTrend?.hasHistory ?? false,
+  } as WeeklyWrappedPayload['summary']['energyHighlight'];
 }
 
 function getDifficultyBucket(difficulty?: string | null): 'easy' | 'medium' | 'hard' {

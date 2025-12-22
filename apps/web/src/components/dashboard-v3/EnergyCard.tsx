@@ -12,9 +12,21 @@ interface EnergyCardProps {
 type PillarKey = 'HP' | 'Mood' | 'Focus';
 
 type NormalizedEnergy = {
-  Body: { percent: number };
-  Soul: { percent: number };
-  Mind: { percent: number };
+  Body: { percent: number; deltaPct: number | null };
+  Soul: { percent: number; deltaPct: number | null };
+  Mind: { percent: number; deltaPct: number | null };
+};
+
+type NormalizedEnergyResult = {
+  energy: NormalizedEnergy;
+  hasHistory: boolean;
+  topGrowth: { pillar: PillarKey; deltaPct: number } | null;
+};
+
+const LABEL_BY_PILLAR: Record<keyof NormalizedEnergy, PillarKey> = {
+  Body: 'HP',
+  Soul: 'Mood',
+  Mind: 'Focus',
 };
 
 function toPercent(value: unknown): number {
@@ -25,20 +37,48 @@ function toPercent(value: unknown): number {
   return Math.round(Math.max(0, Math.min(numeric, 100)));
 }
 
-function normalize(snapshot: DailyEnergySnapshot | null): NormalizedEnergy {
+function normalize(snapshot: DailyEnergySnapshot | null): NormalizedEnergyResult {
+  const baseEnergy: NormalizedEnergy = {
+    Body: { percent: 0, deltaPct: null },
+    Soul: { percent: 0, deltaPct: null },
+    Mind: { percent: 0, deltaPct: null },
+  };
+
   if (!snapshot) {
-    return {
-      Body: { percent: 0 },
-      Soul: { percent: 0 },
-      Mind: { percent: 0 },
-    };
+    return { energy: baseEnergy, hasHistory: false, topGrowth: null };
   }
 
-  return {
-    Body: { percent: toPercent(snapshot.hp_pct) },
-    Soul: { percent: toPercent(snapshot.mood_pct) },
-    Mind: { percent: toPercent(snapshot.focus_pct) },
+  const hasHistory = Boolean(snapshot.trend?.hasHistory);
+  const deltas = {
+    Body: hasHistory ? snapshot.trend?.pillars.Body.deltaPct ?? null : null,
+    Soul: hasHistory ? snapshot.trend?.pillars.Soul.deltaPct ?? null : null,
+    Mind: hasHistory ? snapshot.trend?.pillars.Mind.deltaPct ?? null : null,
   };
+
+  const energy: NormalizedEnergy = {
+    Body: { percent: toPercent(snapshot.hp_pct), deltaPct: deltas.Body },
+    Soul: { percent: toPercent(snapshot.mood_pct), deltaPct: deltas.Soul },
+    Mind: { percent: toPercent(snapshot.focus_pct), deltaPct: deltas.Mind },
+  };
+
+  const topGrowth = hasHistory
+    ? (['Body', 'Soul', 'Mind'] as const)
+        .map((pillar) => ({
+          pillar: LABEL_BY_PILLAR[pillar],
+          deltaPct: energy[pillar].deltaPct,
+        }))
+        .filter((entry): entry is { pillar: PillarKey; deltaPct: number } => typeof entry.deltaPct === 'number')
+        .sort((a, b) => b.deltaPct - a.deltaPct)[0] ?? null
+    : null;
+
+  return { energy, hasHistory, topGrowth };
+}
+
+function formatDelta(delta: number | null): string {
+  if (delta === null || Number.isNaN(delta)) return '';
+  const rounded = Math.round(delta * 10) / 10;
+  const sign = rounded > 0 ? '+' : '';
+  return `${sign}${rounded}%`;
 }
 
 export function EnergyCard({ userId }: EnergyCardProps) {
@@ -79,9 +119,37 @@ export function EnergyCard({ userId }: EnergyCardProps) {
 
       {status === 'success' && hasData && (
         <div className="space-y-5">
-          <EnergyMeter label="HP" percent={normalized.Body.percent} />
-          <EnergyMeter label="Mood" percent={normalized.Soul.percent} />
-          <EnergyMeter label="Focus" percent={normalized.Mind.percent} />
+          {normalized.hasHistory ? (
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">
+              Mayor crecimiento: {normalized.topGrowth?.pillar ?? '—'}{' '}
+              {normalized.topGrowth ? `(${formatDelta(normalized.topGrowth.deltaPct)})` : ''}
+            </p>
+          ) : (
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Sin datos suficientes para comparar con la semana anterior.
+            </p>
+          )}
+          <EnergyMeter
+            label="HP"
+            percent={normalized.energy.Body.percent}
+            deltaPct={normalized.energy.Body.deltaPct}
+            highlight={normalized.topGrowth?.pillar === 'HP'}
+            showComparison={normalized.hasHistory}
+          />
+          <EnergyMeter
+            label="Mood"
+            percent={normalized.energy.Soul.percent}
+            deltaPct={normalized.energy.Soul.deltaPct}
+            highlight={normalized.topGrowth?.pillar === 'Mood'}
+            showComparison={normalized.hasHistory}
+          />
+          <EnergyMeter
+            label="Focus"
+            percent={normalized.energy.Mind.percent}
+            deltaPct={normalized.energy.Mind.deltaPct}
+            highlight={normalized.topGrowth?.pillar === 'Focus'}
+            showComparison={normalized.hasHistory}
+          />
         </div>
       )}
     </Card>
@@ -91,6 +159,9 @@ export function EnergyCard({ userId }: EnergyCardProps) {
 interface EnergyMeterProps {
   label: PillarKey;
   percent: number;
+  deltaPct?: number | null;
+  highlight?: boolean;
+  showComparison?: boolean;
 }
 
 const GRADIENTS: Record<PillarKey, string> = {
@@ -99,14 +170,22 @@ const GRADIENTS: Record<PillarKey, string> = {
   Focus: 'bg-gradient-to-r from-indigo-200 via-violet-300 to-purple-400',
 };
 
-function EnergyMeter({ label, percent }: EnergyMeterProps) {
+function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparison = false }: EnergyMeterProps) {
   const clamped = Math.max(0, Math.min(percent, 100));
   const width = clamped <= 4 ? 4 : clamped;
+  const hasDelta = showComparison && typeof deltaPct === 'number';
+  const deltaLabel = hasDelta ? formatDelta(deltaPct ?? null) : null;
 
   return (
     <div className="space-y-2 sm:grid sm:grid-cols-[88px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
       <div className="flex items-center justify-between sm:block">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300">{label}</span>
+        <span
+          className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${
+            highlight ? 'text-emerald-200' : 'text-slate-300'
+          }`}
+        >
+          {label}
+        </span>
         <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-slate-200 backdrop-blur sm:hidden">
           {clamped}%
         </span>
@@ -122,6 +201,13 @@ function EnergyMeter({ label, percent }: EnergyMeterProps) {
           </span>
         </div>
       </div>
+      {deltaLabel ? (
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-100">
+          {deltaLabel} vs. semana anterior
+        </p>
+      ) : showComparison ? (
+        <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400">Sin variación suficiente</p>
+      ) : null}
     </div>
   );
 }
