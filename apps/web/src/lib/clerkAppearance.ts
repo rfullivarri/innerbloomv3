@@ -1,5 +1,8 @@
 import type { Theme } from '@clerk/types';
 
+// 480px keeps the auth copy and Clerk card aligned on mobile while leaving generous horizontal padding.
+export const AUTH_LOGIN_MAX_WIDTH = 'max-w-[480px]';
+
 const baseLayout = {
   logoPlacement: 'none' as const,
   socialButtonsVariant: 'blockButton' as const,
@@ -22,9 +25,9 @@ const gradientButtonClass =
   'mt-3 inline-flex h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-[#8b5cf6] via-[#6366f1] to-[#0ea5e9] text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all duration-200 hover:from-[#8b5cf6] hover:to-[#0ea5e9]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:w-auto';
 
 const baseElements = {
-  rootBox: 'w-full min-w-0 max-w-[440px] mx-auto',
+  rootBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto`,
   card:
-    'mx-auto flex w-full min-w-0 flex-col gap-6 overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-4 shadow-[0_25px_80px_rgba(15,23,42,0.35)] backdrop-blur-2xl md:max-w-[420px] sm:rounded-[28px] sm:p-6 md:p-8',
+    `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-6 overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-4 shadow-[0_25px_80px_rgba(15,23,42,0.35)] backdrop-blur-2xl sm:rounded-[28px] sm:p-6 md:p-8`,
   header: 'hidden',
   socialButtons: 'hidden',
   divider: 'hidden',
