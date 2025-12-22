@@ -58,7 +58,7 @@ const originalQuery = pool.query.bind(pool);
 
 pool.query = (async (...args: Parameters<typeof originalQuery>) => {
   if (dbDebugEnabled) {
-    const [textOrConfig, values] = args;
+    const [textOrConfig, values] = args as unknown as [string | QueryConfig, readonly unknown[] | undefined];
     const text = getQueryText(textOrConfig as string | QueryConfig);
     const resolvedValues =
       Array.isArray(values) && values.length > 0
