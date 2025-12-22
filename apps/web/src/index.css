@@ -3987,7 +3987,7 @@
 }
 
 .weekly-wrapped-animated-bg {
-  position: relative;
+  position: fixed;
   isolation: isolate;
   background-color: var(--color-surface);
 }
