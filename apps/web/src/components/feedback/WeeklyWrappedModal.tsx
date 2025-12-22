@@ -249,8 +249,13 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
     [payload.weekRange, topHabitPillarIcon, pillarDominant, topHabitTitle, weeklyEmotion],
   );
 
+  // Fondo animado global aplicado al wrapper fijo que envuelve todas las slides del Weekly Wrapped (desktop y mobile usan este contenedor).
   return (
-    <div className="fixed inset-0 z-50 flex bg-slate-950/95 backdrop-blur" role="dialog" aria-modal>
+    <div
+      className="fixed inset-0 z-50 flex overflow-hidden bg-slate-950/95 backdrop-blur weekly-wrapped-animated-bg"
+      role="dialog"
+      aria-modal
+    >
       <div className="absolute inset-0" onClick={onClose} aria-hidden />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -1211,3 +1216,5 @@ function computeEnergySnapshot(
     hasHistory,
   };
 }
+
+// Nota de prueba: navegar next/prev entre slides y el fondo sigue animado siempre.
