@@ -804,12 +804,12 @@ function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef }: L
       active={active}
       registerSectionRef={registerSectionRef}
     >
-      <div className="relative overflow-hidden rounded-3xl border border-transparent bg-slate-950/70 p-[2px]">
+      <div className="relative flex flex-1 overflow-hidden rounded-3xl border border-transparent bg-slate-950/70 p-[2px]">
         <div className="absolute inset-0 animate-pulse bg-[conic-gradient(at_30%_40%,#a855f7,#22d3ee,#22c55e,#f59e0b,#f472b6,#22d3ee)] opacity-70 blur" />
-        <div className="relative rounded-[26px] border border-white/10 bg-gradient-to-br from-slate-950/80 via-emerald-950/50 to-indigo-950/60 p-6 shadow-[0_20px_60px_rgba(34,197,94,0.2)]">
+        <div className="relative flex h-full flex-col justify-between rounded-[26px] border border-white/10 bg-gradient-to-br from-slate-950/80 via-emerald-950/50 to-indigo-950/60 p-6 shadow-[0_20px_60px_rgba(34,197,94,0.2)] md:p-8">
           <div className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-emerald-400/20 blur-3xl" aria-hidden />
           <div className="absolute -left-10 -bottom-10 h-36 w-36 rounded-full bg-sky-400/15 blur-3xl" aria-hidden />
-          <div className="flex flex-col gap-4 text-slate-50 md:flex-row md:items-center md:justify-between">
+          <div className="flex h-full flex-col gap-5 text-slate-50 md:flex-row md:items-center md:justify-between md:gap-10">
             <div className="space-y-2">
               <p className="text-xs uppercase tracking-[0.22em] text-emerald-100">Slide especial · Level Up</p>
               <h3 className="text-3xl font-semibold drop-shadow-[0_0_30px_rgba(16,185,129,0.45)]">Subiste a Nivel {levelLabel}</h3>
@@ -827,7 +827,7 @@ function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef }: L
                 </span>
               </div>
             </div>
-            <div className="relative flex h-32 w-full max-w-xs items-center justify-center">
+            <div className="relative flex h-32 w-full max-w-xs items-center justify-center md:h-40">
               <div className="absolute h-28 w-28 animate-[ping_2.4s_ease-out_infinite] rounded-full bg-emerald-400/30" aria-hidden />
               <div className="absolute h-24 w-24 animate-[pulse_3s_ease-in-out_infinite] rounded-full bg-sky-400/20" aria-hidden />
               <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-400 text-center text-3xl font-bold leading-none text-slate-950 shadow-[0_0_40px_rgba(56,189,248,0.4)]">
