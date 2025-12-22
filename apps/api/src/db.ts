@@ -14,6 +14,18 @@ if (!databaseUrl) {
 
 const shouldUseSsl = databaseUrl.includes('sslmode=require');
 const skipDbReady = process.env.SKIP_DB_READY === 'true';
+const parsedConnectionTimeout = Number.parseInt(process.env.PG_CONNECTION_TIMEOUT_MS ?? '5000', 10);
+const connectionTimeoutMillis = Number.isNaN(parsedConnectionTimeout) ? 5000 : parsedConnectionTimeout;
+
+export const pool = new Pool({
+  connectionString: databaseUrl,
+  connectionTimeoutMillis,
+  ssl: shouldUseSsl
+    ? {
+        rejectUnauthorized: false,
+      }
+    : undefined,
+});
 
 const dbContext = new AsyncLocalStorage<string>();
 

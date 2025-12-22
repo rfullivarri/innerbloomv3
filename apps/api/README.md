@@ -5,6 +5,7 @@
 | Name | Required | Description |
 | --- | --- | --- |
 | `DATABASE_URL` | ✅ | PostgreSQL connection string used by the API and scripts. SSL is automatically enabled when `sslmode=require` is present. |
+| `PG_CONNECTION_TIMEOUT_MS` | ➖ | Milliseconds to wait when establishing new Postgres connections (defaults to `5000`). |
 | `ADMIN_USER_ID` | ➖ | Comma separated list of user identifiers (internal `user_id`, Clerk id or email) that should be treated as admins without touching the database. Useful for local bootstrapping. |
 | `CLERK_WEBHOOK_SECRET` | ✅ | Svix signing secret provided by Clerk for the `user.*` webhook. |
 | `CLERK_JWT_ISSUER` | ✅ | Base URL for Clerk-issued JWTs (e.g. `https://clerk.example.com`). Used to validate the `iss` claim. |
@@ -12,6 +13,7 @@
 | `CLERK_JWKS_URL` | ➖ | Optional override for the JWKS endpoint. Defaults to `<CLERK_JWT_ISSUER>/.well-known/jwks.json`. |
 | `CLERK_API_KEY` | ➖ | Clerk Backend API key. Required only for the backfill script. |
 | `PORT` | ➖ | Port for the Fastify server (defaults to `3000`). |
+| `DB_HEALTH_TIMEOUT_MS` | ➖ | Timeout in milliseconds for database probes executed by the health endpoints (defaults to `2000`). |
 | `CORS_ALLOWED_ORIGINS` | ➖ | Comma-separated list of additional origins allowed to call the API. |
 | `ALLOW_X_USER_ID_DEV` | ➖ | Enables the deprecated `X-User-Id` header for `/users/me` when running locally (defaults to `false`). The flag has no effect in production and will be removed on 2024-09-30. |
 | `EMAIL_PROVIDER_NAME` | ➖ | Selects the email provider. Use `resend` for production delivery or `console` (default) to log payloads locally. |
