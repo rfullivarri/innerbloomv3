@@ -22,6 +22,7 @@ describe('health routes', () => {
 
   beforeEach(() => {
     mockQuery.mockReset();
+    mockQuery.mockResolvedValue({ rows: [{ '?column?': 1 }] });
   });
 
   afterEach(() => {
@@ -33,6 +34,17 @@ describe('health routes', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ ok: true });
+    expect(mockQuery).toHaveBeenCalledWith('select 1');
+  });
+
+  it('reports database errors from the base health endpoint', async () => {
+    mockQuery.mockRejectedValueOnce(new Error('connection refused'));
+
+    const response = await request(app).get('/_health');
+
+    expect(response.status).toBe(503);
+    expect(response.body).toEqual({ code: 'database_unavailable', message: 'connection refused' });
+    expect(mockQuery).toHaveBeenCalledWith('select 1');
   });
 
   it('reports database status from the db health check', async () => {

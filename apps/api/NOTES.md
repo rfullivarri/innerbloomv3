@@ -4,3 +4,4 @@
 - Each feature router is expected to export paths that start at its domain root (for example, `users` exposes `/users/...`). The top-level Express app is responsible for attaching the `/api` prefix.
 - When adding new routes, rely on the development route logger (enabled whenever `NODE_ENV !== 'production'`) to verify the final method and path that were registered.
 - The `/api/_health` endpoint is the canonical health check for both local development and Railway deployments.
+- Health endpoints issue `SELECT 1` against Postgres and time out after `DB_HEALTH_TIMEOUT_MS` (defaults to 2000 ms) to avoid hanging the readiness probe when the database is unreachable.

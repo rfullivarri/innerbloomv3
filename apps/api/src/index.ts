@@ -12,6 +12,14 @@ const fastify = Fastify({
   logger: true,
 });
 
+dbReady
+  .then(() => {
+    fastify.log.info('Database connection established');
+  })
+  .catch((error: unknown) => {
+    fastify.log.warn({ err: error }, 'Initial database connection failed; continuing to accept requests');
+  });
+
 const configureServer = (async () => {
   await fastify.register(fastifyRawBody, {
     field: 'rawBody',
@@ -38,7 +46,6 @@ const host = '0.0.0.0';
 async function start(): Promise<void> {
   try {
     await configureServer;
-    await dbReady;
     await fastify.listen({ port, host });
     fastify.log.info(`API listening on http://${host}:${port}`);
   } catch (error) {
