@@ -59,3 +59,10 @@ You should see:
 ```
 
 If you run this on Railway (or any other deployment), use the deployed URL instead of `localhost`.
+
+## 5. Pool idle timeout (letting Neon suspend compute)
+
+The API now creates the PostgreSQL pool lazily and tears it down when it stays idle for a short period (default: 3 minutes). This keeps Neon free to suspend compute when there is no traffic.
+
+- Configure the timeout (in milliseconds) with `DB_POOL_IDLE_MS`. Values between 120000 (2 minutes) and 300000 (5 minutes) are recommended.
+- Production can use a shorter window (closer to 2–3 minutes) to release compute quickly, while local development can stretch closer to 5 minutes to avoid frequent reconnects.
