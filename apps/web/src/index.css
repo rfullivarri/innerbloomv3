@@ -3986,6 +3986,37 @@
   opacity: 0.35;
 }
 
+.weekly-wrapped-animated-bg {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--color-surface);
+}
+
+.weekly-wrapped-animated-bg::before {
+  content: '';
+  position: absolute;
+  inset: -12%;
+  background-image: linear-gradient(
+    135deg,
+    var(--color-accent-primary),
+    var(--color-accent-secondary),
+    var(--color-surface-muted),
+    var(--color-accent-primary)
+  );
+  background-size: 320% 320%;
+  background-position: 0% 50%;
+  animation: weekly-wrapped-gradient-flow 9s ease-in-out infinite;
+  opacity: 0.6;
+  filter: saturate(1.05);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.weekly-wrapped-animated-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
 @keyframes aurora-sweep {
   0% {
     transform: translate3d(-22%, -6%, 0) rotate(-4deg) scale(1.05);
@@ -3998,10 +4029,27 @@
   }
 }
 
+@keyframes weekly-wrapped-gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .kpi-aurora::before,
   .kpi-aurora::after {
     animation: none;
     opacity: 0.18;
+  }
+
+  .weekly-wrapped-animated-bg::before {
+    animation: none;
+    background-position: 50% 50%;
   }
 }
