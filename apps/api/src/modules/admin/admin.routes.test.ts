@@ -29,6 +29,7 @@ const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail } = vi.hoisted
 
 vi.mock('../../db.js', () => ({
   pool: { query: mockQuery },
+  runWithDbContext: (_context: string, callback: () => unknown) => callback(),
 }));
 
 vi.mock('../../middlewares/auth-middleware.js', () => ({

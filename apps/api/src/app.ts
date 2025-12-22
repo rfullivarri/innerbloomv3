@@ -11,6 +11,7 @@ import debugDbSnapshot from './routes/debug-db-snapshot.js';
 import debugAiTaskgen from './routes/debug/ai-taskgen.js';
 import { HttpError, isHttpError } from './lib/http-error.js';
 import clerkWebhookRouter from './webhooks/clerk.js';
+import { runWithDbContext } from './db.js';
 
 const defaultAllowedOrigins = [
   'https://web-dev-dfa2.up.railway.app',
@@ -46,6 +47,11 @@ const snapshotFilePath = path.resolve(
 app.use('/exports', express.static(path.resolve('exports')));
 
 const apiLoggingEnabled = process.env.API_LOGGING === 'true';
+
+app.use((req, _res, next) => {
+  // Tag every request so DB_DEBUG logs show which endpoint/job keeps the database awake.
+  runWithDbContext(`${req.method} ${req.originalUrl}`, () => next());
+});
 
 if (process.env.ENABLE_DB_SNAPSHOT === 'true') {
   app.use(debugDbSnapshot);
