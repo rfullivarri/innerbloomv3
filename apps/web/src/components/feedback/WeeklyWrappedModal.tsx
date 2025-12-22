@@ -925,7 +925,6 @@ function ProgressBlock({
       <div className="space-y-3">
         <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
         <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">Pequeños avances</h3>
-        <p className="text-sm text-emerald-50">Tu semana avanzó con pasos cortos que sostienen tu energía.</p>
       </div>
 
       <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
@@ -933,7 +932,6 @@ function ProgressBlock({
           <span>Daily Energy</span>
           <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] text-emerald-50">Energía que más creció</span>
         </div>
-        <p className="mt-1 text-xs text-emerald-50/80">{energyFocusStory}</p>
         <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
           <div className="relative flex h-28 w-10 items-end overflow-hidden rounded-xl border border-white/20 bg-slate-900/60">
             <div className="absolute inset-x-0 top-1 text-center text-[11px] font-semibold text-emerald-50 drop-shadow-[0_0_8px_rgba(59,130,246,0.4)]">
@@ -943,8 +941,11 @@ function ProgressBlock({
             <div className="absolute inset-0 animate-pulse bg-white/5" aria-hidden />
           </div>
           <div className="flex flex-col text-sm text-emerald-50">
-            <span className="font-semibold">{energySnapshot.metric.label}</span>
-            <span className="text-xs text-emerald-100">{energyHeadline}</span>
+            <div className="flex flex-wrap items-baseline gap-2">
+              <span className="font-semibold">{energySnapshot.metric.label}</span>
+              <span className="text-xs text-emerald-100">{hasDelta ? `${formatDeltaValue(energySnapshot.delta)} vs semana anterior` : energyHeadline}</span>
+            </div>
+            <span className="text-xs text-emerald-50/90">{energyFocusStory}</span>
           </div>
         </div>
       </div>
