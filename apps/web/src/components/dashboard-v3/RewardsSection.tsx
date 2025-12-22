@@ -154,15 +154,6 @@ function WeeklyWrappedShelf({ items, onOpen }: WeeklyWrappedShelfProps) {
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Weekly Wrapped</p>
           <p className="text-sm text-slate-200">Tus últimos resúmenes semanales</p>
         </div>
-        {onOpen && items[0] ? (
-          <button
-            type="button"
-            onClick={() => onOpen(items[0]?.record)}
-            className="inline-flex items-center justify-center rounded-full border border-emerald-300/50 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-50 transition hover:border-emerald-200/70 hover:bg-emerald-400/20 hover:text-slate-950"
-          >
-            Ver resumen
-          </button>
-        ) : null}
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {items.map((item) => (
@@ -182,18 +173,26 @@ function WeeklyWrappedCard({
   record: WeeklyWrappedRecord;
   onOpen?: (record?: WeeklyWrappedRecord | null) => void;
 }) {
-  const accent = record.payload.summary.pillarDominant ?? record.payload.summary.highlight ?? 'Weekly Wrapped';
+  const weeklyEmotion = record.payload.emotions.weekly ?? record.payload.emotions.biweekly;
+  const pillarDominant = record.payload.summary.pillarDominant;
+  const weekRangeLabel = formatWeekRange(record.payload).toUpperCase();
+
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-slate-950/40 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.35)]">
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{label}</p>
-          <p className="text-base font-semibold text-white">{accent}</p>
-          <p className="text-xs text-slate-400">{formatWeekRange(record.payload)}</p>
+      <div className="flex flex-col gap-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{label}</p>
+
+        <div className="flex flex-wrap gap-2">
+          <WeeklyChip icon="📅" label={weekRangeLabel} variant="accent" />
+          <WeeklyChip
+            icon={getEmotionEmoji(weeklyEmotion?.key)}
+            label={weeklyEmotion?.label ?? 'Sin emoción dominante'}
+            color={weeklyEmotion?.color}
+          />
+          {pillarDominant ? (
+            <WeeklyChip icon={getPillarIcon(pillarDominant)} label={pillarDominant} variant="outline" />
+          ) : null}
         </div>
-        <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-100">
-          {record.payload.variant === 'full' ? 'Completo' : 'Liviano'}
-        </span>
       </div>
       <button
         type="button"
@@ -204,6 +203,82 @@ function WeeklyWrappedCard({
       </button>
     </div>
   );
+}
+
+function WeeklyChip({
+  icon,
+  label,
+  color,
+  variant = 'neutral',
+}: {
+  icon?: string | null;
+  label: string;
+  color?: string;
+  variant?: 'neutral' | 'accent' | 'outline';
+}) {
+  const palette =
+    variant === 'accent'
+      ? 'border-emerald-300/60 bg-emerald-400/10 text-emerald-50'
+      : variant === 'outline'
+        ? 'border-white/25 bg-white/5 text-white'
+        : 'border-white/15 bg-white/5 text-white/80';
+
+  const style = color
+    ? {
+        borderColor: `${color}80`,
+        backgroundColor: `${color}1a`,
+        color,
+      }
+    : undefined;
+
+  return (
+    <span
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${palette}`}
+      style={style}
+    >
+      {icon ? (
+        <span aria-hidden className="text-base leading-none">
+          {icon}
+        </span>
+      ) : null}
+      <span>{label}</span>
+    </span>
+  );
+}
+
+function getEmotionEmoji(key?: string | null): string {
+  if (!key) return '✨';
+  const map: Record<string, string> = {
+    felicidad: '✨',
+    motivacion: '🔥',
+    calma: '🧘',
+    cansancio: '😴',
+    ansiedad: '😰',
+    tristeza: '😢',
+    frustracion: '😤',
+  };
+  return map[key.toLowerCase()] ?? '✨';
+}
+
+function getPillarIcon(pillar?: string | null): string {
+  const normalized = normalizePillar(pillar);
+  if (!normalized) return '';
+  const icons: Record<'Body' | 'Mind' | 'Soul', string> = {
+    Body: '🫀',
+    Mind: '🧠',
+    Soul: '🌿',
+  };
+  return icons[normalized] ?? '';
+}
+
+function normalizePillar(value?: string | null): 'Body' | 'Mind' | 'Soul' | null {
+  if (!value) return null;
+  const normalized = value.toString().trim().toLowerCase();
+  if (!normalized) return null;
+  if (normalized === 'body' || normalized === 'cuerpo' || normalized === '1') return 'Body';
+  if (normalized === 'mind' || normalized === 'mente' || normalized === '2') return 'Mind';
+  if (normalized === 'soul' || normalized === 'alma' || normalized === '3') return 'Soul';
+  return null;
 }
 
 function formatWeekRange(payload: WeeklyWrappedPayload): string {
