@@ -5,7 +5,7 @@ import Fastify from 'fastify';
 import fastifyExpress from '@fastify/express';
 import fastifyRawBody from 'fastify-raw-body';
 import app from './app.js';
-import { dbReady, pool } from './db.js';
+import { closePool, dbReady, getPoolIfInitialized } from './db.js';
 import { logRegisteredRoutes } from './lib/route-logger.js';
 
 const fastify = Fastify({
@@ -28,7 +28,9 @@ const configureServer = (async () => {
   await logRegisteredRoutes({ expressApp: app, fastify });
 
   fastify.addHook('onClose', async () => {
-    await pool.end();
+    if (getPoolIfInitialized()) {
+      await closePool();
+    }
   });
 })();
 
