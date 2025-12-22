@@ -91,7 +91,7 @@ function createPool(): Pool {
   });
 
   const originalConnect = createdPool.connect.bind(createdPool);
-  type ConnectCallback = (err: Error | undefined, client: PoolClient | undefined, done: (release?: any) => void) => void;
+  type ConnectCallback = (err: Error | undefined, client: PoolClient | undefined, done: (release?: Error) => void) => void;
 
   createdPool.connect = ((callback?: ConnectCallback) => {
     resetPoolIdleTimer(createdPool);
