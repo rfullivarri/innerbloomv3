@@ -104,7 +104,7 @@ describe('TaskInsightsModal', () => {
     );
 
     expect(await screen.findByText('Hábito en construcción')).toBeInTheDocument();
-    expect(screen.getByText('Cumplís tu meta en 1 de 5 semanas.')).toBeInTheDocument();
+    expect(screen.getByText('Meta complica 1 de 5 semanas.')).toBeInTheDocument();
   });
 
   test('usa weeksSample del backend aunque la timeline esté truncada', async () => {
