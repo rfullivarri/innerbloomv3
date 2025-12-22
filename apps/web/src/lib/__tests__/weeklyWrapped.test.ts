@@ -144,7 +144,7 @@ describe('weeklyWrapped data consistency', () => {
       },
     ];
 
-    const payload = await buildWeeklyWrappedFromData(adminInsights, logs, [], null);
+    const payload = await buildWeeklyWrappedFromData(adminInsights, logs, [], null, null);
 
     const habitsSection = payload.sections.find((section) => section.key === 'habits');
     const hydratedHabit = habitsSection?.items?.[0];

@@ -1533,6 +1533,23 @@ export async function getUserState(userId: string): Promise<UserState> {
   return response;
 }
 
+export type EnergyTrendPillar = {
+  current: number;
+  previous: number | null;
+  deltaPct: number | null;
+};
+
+export type EnergyTrend = {
+  currentDate: string;
+  previousDate: string;
+  hasHistory: boolean;
+  pillars: {
+    Body: EnergyTrendPillar;
+    Mind: EnergyTrendPillar;
+    Soul: EnergyTrendPillar;
+  };
+} | null;
+
 export type DailyEnergySnapshot = {
   user_id: string;
   hp_pct: number;
@@ -1541,6 +1558,7 @@ export type DailyEnergySnapshot = {
   hp_norm: number;
   mood_norm: number;
   focus_norm: number;
+  trend: EnergyTrend;
 };
 
 export async function getUserDailyEnergy(userId: string): Promise<DailyEnergySnapshot | null> {
