@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { getGradientButtonClass } from '../../lib/clerkAppearance';
+import { AUTH_LOGIN_MAX_WIDTH, getGradientButtonClass } from '../../lib/clerkAppearance';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -69,7 +69,7 @@ export function AuthLayout({
             </div>
           ) : null}
 
-          <div className="flex w-full max-w-[520px] min-w-0 items-center justify-center">
+          <div className={`flex w-full min-w-0 items-center justify-center ${AUTH_LOGIN_MAX_WIDTH}`}>
             {children}
           </div>
         </div>

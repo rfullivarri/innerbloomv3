@@ -14,20 +14,18 @@ export default function LoginPage() {
       secondaryActionLabel="Volver al inicio"
       secondaryActionHref="/"
     >
-      <div className="mx-auto w-full min-w-0 max-w-[520px]">
-        <SignIn
-          appearance={createAuthAppearance({
-            elements: {
-              footerActionText: 'text-white/50',
-              footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4'
-            }
-          })}
-          routing="path"
-          path="/login"
-          signUpUrl="/sign-up"
-          fallbackRedirectUrl={DASHBOARD_PATH}
-        />
-      </div>
+      <SignIn
+        appearance={createAuthAppearance({
+          elements: {
+            footerActionText: 'text-white/50',
+            footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4'
+          }
+        })}
+        routing="path"
+        path="/login"
+        signUpUrl="/sign-up"
+        fallbackRedirectUrl={DASHBOARD_PATH}
+      />
     </AuthLayout>
   );
 }
