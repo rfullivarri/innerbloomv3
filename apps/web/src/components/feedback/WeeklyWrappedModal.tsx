@@ -800,7 +800,6 @@ type LevelUpBlockProps = {
 function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef }: LevelUpBlockProps) {
   const levelLabel = levelUp.currentLevel ?? 'nuevo';
   const previousLabel = levelUp.previousLevel ?? Math.max(0, Number(levelLabel) - 1);
-  const xpLabel = `+${(levelUp.xpGained ?? 0).toLocaleString('es-AR')} XP esta semana`;
 
   return (
     <SectionShell
@@ -810,50 +809,34 @@ function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef }: L
       active={active}
       registerSectionRef={registerSectionRef}
     >
-      <div className="relative flex flex-1 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-slate-950/90 via-slate-900/80 to-emerald-950/70 shadow-[0_20px_60px_rgba(16,185,129,0.2)]">
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(34,197,94,0.14),transparent_35%),radial-gradient(circle_at_82%_12%,rgba(56,189,248,0.12),transparent_32%),radial-gradient(circle_at_30%_80%,rgba(99,102,241,0.08),transparent_30%)]"
-          aria-hidden
-        />
-        <div className="relative flex h-full flex-col gap-6 p-6 text-slate-50 sm:p-8">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-100">
-              <span className="h-px flex-1 bg-emerald-200/40 sm:flex-none sm:w-8" aria-hidden />
-              <span>Slide especial · Level Up</span>
-            </div>
-
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="space-y-3 sm:max-w-[70%]">
-                <h3 className="text-3xl font-semibold leading-tight drop-shadow-[0_0_25px_rgba(16,185,129,0.45)]">
-                  Subiste a Nivel {levelLabel}
-                </h3>
-                <p className="text-sm text-emerald-50/90">
-                  {levelUp.forced
-                    ? 'Mock activado para validar la celebración sin afectar métricas.'
-                    : 'Semana con salto real: cada misión empujó tu progreso.'}
-                </p>
-              </div>
-
-              <div className="flex justify-start sm:justify-end">
-                <div className="relative grid h-20 w-20 place-items-center rounded-full bg-slate-900/80 shadow-[0_15px_40px_rgba(16,185,129,0.25)] ring-1 ring-emerald-200/30">
-                  <div className="absolute inset-0 rounded-full border border-white/10 bg-gradient-to-br from-emerald-400/80 to-sky-400/80 opacity-70" aria-hidden />
-                  <div className="relative h-14 w-14 rounded-full bg-slate-950/90 text-center text-3xl font-bold leading-none text-emerald-50 shadow-inner shadow-emerald-400/20">
-                    {levelLabel}
-                  </div>
-                </div>
+      <div className="relative flex flex-1 overflow-hidden rounded-3xl border border-transparent bg-slate-950/70 p-[2px]">
+        <div className="absolute inset-0 animate-pulse bg-[conic-gradient(at_30%_40%,#a855f7,#22d3ee,#22c55e,#f59e0b,#f472b6,#22d3ee)] opacity-70 blur" />
+        <div className="relative flex h-full flex-col justify-between rounded-[26px] border border-white/10 bg-gradient-to-br from-slate-950/80 via-emerald-950/50 to-indigo-950/60 p-6 shadow-[0_20px_60px_rgba(34,197,94,0.2)] md:p-8">
+          <div className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-emerald-400/20 blur-3xl" aria-hidden />
+          <div className="absolute -left-10 -bottom-10 h-36 w-36 rounded-full bg-sky-400/15 blur-3xl" aria-hidden />
+          <div className="flex h-full flex-col gap-5 text-slate-50 md:flex-row md:items-center md:justify-between md:gap-10">
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-100">Slide especial · Level Up</p>
+              <h3 className="text-3xl font-semibold drop-shadow-[0_0_30px_rgba(16,185,129,0.45)]">Subiste a Nivel {levelLabel}</h3>
+              <p className="max-w-2xl text-sm text-emerald-50/90">
+                {levelUp.forced
+                  ? 'Mock activado para validar la celebración sin afectar métricas.'
+                  : 'Semana con salto real: cada misión empujó tu progreso.'}
+              </p>
+              <div className="flex flex-wrap gap-3 text-xs text-slate-200">
+                <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
+                  +{levelUp.xpGained.toLocaleString('es-AR')} XP esta semana
+                </span>
+                <span className="rounded-full border border-white/15 bg-emerald-500/20 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
+                  {previousLabel} → {levelLabel}
+                </span>
               </div>
             </div>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-50">Progreso</div>
-              <div className="text-sm font-semibold text-emerald-50">{xpLabel}</div>
-            </div>
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-50">Nivel</div>
-              <div className="text-sm font-semibold text-emerald-50">
-                {previousLabel} → {levelLabel}
+            <div className="relative flex h-32 w-full max-w-xs items-center justify-center md:h-40">
+              <div className="absolute h-28 w-28 animate-[ping_2.4s_ease-out_infinite] rounded-full bg-emerald-400/30" aria-hidden />
+              <div className="absolute h-24 w-24 animate-[pulse_3s_ease-in-out_infinite] rounded-full bg-sky-400/20" aria-hidden />
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-400 text-center text-3xl font-bold leading-none text-slate-950 shadow-[0_0_40px_rgba(56,189,248,0.4)]">
+                {levelLabel}
               </div>
             </div>
           </div>
