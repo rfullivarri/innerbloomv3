@@ -180,16 +180,19 @@ function WeeklyWrappedCard({
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-slate-950/40 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.35)]">
       <div className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{label}</p>
-          <WeeklyChip icon="📅" label={weekRangeLabel} variant="accent" size="small" />
+        <div className="flex items-center justify-between gap-3">
+          <p className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+            {label}
+          </p>
+          <div className="shrink-0">
+            <WeeklyChip icon="📅" label={weekRangeLabel} variant="accent" size="small" />
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
           <WeeklyChip
-            icon={getEmotionEmoji(weeklyEmotion?.key)}
-            label={weeklyEmotion?.label ?? 'Sin emoción dominante'}
             color={weeklyEmotion?.color}
+            srLabel={weeklyEmotion?.label ?? 'Sin emoción dominante'}
           />
           {pillarDominant ? <WeeklyChip icon={getPillarIcon(pillarDominant)} variant="outline" /> : null}
         </div>
@@ -211,12 +214,14 @@ function WeeklyChip({
   color,
   variant = 'neutral',
   size = 'default',
+  srLabel,
 }: {
   icon?: string | null;
   label?: string;
   color?: string;
   variant?: 'neutral' | 'accent' | 'outline';
   size?: 'default' | 'small';
+  srLabel?: string;
 }) {
   const palette =
     variant === 'accent'
@@ -225,8 +230,9 @@ function WeeklyChip({
         ? 'border-white/25 bg-white/5 text-white'
         : 'border-white/15 bg-white/5 text-white/80';
 
-  const sizeClasses = size === 'small' ? 'gap-1.5 px-2.5 py-1 text-[10px]' : 'gap-2 px-3 py-1 text-[11px]';
-  const iconClasses = size === 'small' ? 'text-sm leading-none' : 'text-base leading-none';
+  const sizeClasses =
+    size === 'small' ? 'gap-1 px-2 py-0.5 text-[8.5px]' : 'gap-2 px-3 py-1 text-[11px]';
+  const iconClasses = size === 'small' ? 'text-[12px] leading-none' : 'text-base leading-none';
 
   return (
     <span
@@ -239,6 +245,7 @@ function WeeklyChip({
       ) : null}
       {color ? <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} /> : null}
       {label ? <span className="leading-none">{label}</span> : null}
+      {srLabel ? <span className="sr-only">{srLabel}</span> : null}
     </span>
   );
 }
