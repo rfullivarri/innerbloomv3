@@ -153,7 +153,7 @@ function WeeklyCompletionDonut({
           <span className={cx('inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold', healthStyles[habitHealth.level])}>
             {habitHealth.label}
           </span>
-          <p className="text-xs text-slate-200">Cumplís tu meta en {completedWeeks} de {totalWeeks} semanas.</p>
+          <p className="text-xs text-slate-200">Meta complica {completedWeeks} de {totalWeeks} semanas.</p>
         </div>
 
         <div className="space-y-0.5 text-slate-100">
