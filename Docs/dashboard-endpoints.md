@@ -119,12 +119,14 @@ Este documento resume los endpoints HTTP disponibles en el backend del dashboard
 ## Salud y utilitarios
 
 ### `GET /_health`
-* **Uso:** chequeo rápido para confirmar que la API responde.
-* **Respuesta:** `{ ok: true }` cuando el servicio está operativo.
+* **Uso:** chequeo rápido que valida conectividad con Postgres (ejecuta `SELECT 1`).
+* **Timeout:** configurable vía `DB_HEALTH_TIMEOUT_MS` (default `2000` ms).
+* **Respuesta:** `{ ok: true }` cuando el servicio está operativo y la base responde. Devuelve `503` con código `database_unavailable` si el ping expira o falla.
 
 ### `GET /health/db`
 * **Uso:** monitoreo de conectividad con Postgres (ejecuta `SELECT 1`).
-* **Respuesta:** `{ ok: true }` si la consulta se ejecuta correctamente. Devuelve `500` con código `database_unavailable` cuando no puede acceder a la base.
+* **Timeout:** configurable vía `DB_HEALTH_TIMEOUT_MS` (default `2000` ms).
+* **Respuesta:** `{ ok: true }` si la consulta se ejecuta correctamente. Devuelve `500` con código `database_unavailable` cuando no puede acceder a la base o el ping expira.
 
 ## Catálogos para el editor de tareas
 

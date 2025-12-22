@@ -27,10 +27,13 @@ import app from '../app.js';
 
 describe('GET /api/_health', () => {
   it('returns a healthy response', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [{ '?column?': 1 }] });
+
     const response = await request(app).get('/api/_health');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ ok: true });
+    expect(mockQuery).toHaveBeenCalledWith('select 1');
   });
 });
 

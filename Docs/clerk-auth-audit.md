@@ -3,8 +3,8 @@
 ## 1. Inventario de endpoints
 | Método | Ruta | Handler principal | Protección actual | Identidad esperada | Evidencia |
 | --- | --- | --- | --- | --- | --- |
-| GET | /_health | inline (health) | Público (sin middleware) | N/A | `health.ts`【F:apps/api/src/routes/health.ts†L7-L26】 |
-| GET | /health/db | inline (health) | Público (sin middleware) | N/A | `health.ts`【F:apps/api/src/routes/health.ts†L15-L26】 |
+| GET | /_health | inline (health) | Público (sin middleware) | N/A | `health.ts`【F:apps/api/src/routes/health.ts†L35-L43】 |
+| GET | /health/db | inline (health) | Público (sin middleware) | N/A | `health.ts`【F:apps/api/src/routes/health.ts†L47-L56】 |
 | GET | /pillars | inline (pillars) | Público (sin middleware) | N/A | `pillars.ts`【F:apps/api/src/routes/pillars.ts†L7-L13】 |
 | GET | /tasks | inline (legacy) | Público; valida `userId` UUID en query | Clerk ID en query (UUID) | `legacy.ts`【F:apps/api/src/routes/legacy.ts†L22-L45】 |
 | GET | /task-logs | inline (legacy) | Público; valida `userId` UUID en query | Clerk ID en query (UUID) | `legacy.ts`【F:apps/api/src/routes/legacy.ts†L35-L45】 |
