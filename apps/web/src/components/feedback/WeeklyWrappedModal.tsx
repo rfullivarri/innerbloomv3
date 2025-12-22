@@ -1,7 +1,6 @@
 import { type MutableRefObject, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { type TaskInsightsResponse } from '../../lib/api';
 import { computeWeeklyHabitHealth, getHabitHealth as getHabitHealthFromInsights } from '../../lib/habitHealth';
-import '../../styles/weeklyWrappedAnimations.css';
 import type { WeeklyWrappedPayload, WeeklyWrappedSection } from '../../lib/weeklyWrapped';
 
 const ANIMATION_DELAY = 80;
@@ -79,26 +78,6 @@ type WeeklyWrappedModalProps = {
   onClose: () => void;
 };
 
-function usePrefersReducedMotion() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const handleChange = (event: MediaQueryListEvent | MediaQueryList) => {
-      setPrefersReducedMotion(event.matches);
-    };
-
-    handleChange(mediaQuery);
-    mediaQuery.addEventListener('change', handleChange);
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange);
-    };
-  }, []);
-
-  return prefersReducedMotion;
-}
-
 const GRADIENT_RING_CLASSES = [
   'from-emerald-400/40 via-cyan-400/10 to-indigo-500/40',
   'from-amber-400/40 via-rose-400/20 to-fuchsia-500/40',
@@ -120,8 +99,6 @@ const ENERGY_GRADIENT_BY_METRIC: Record<'HP' | 'MOOD' | 'FOCUS', string> = {
 export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps) {
   const [entered, setEntered] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
-  const prefersReducedMotion = usePrefersReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -138,20 +115,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
   useEffect(() => {
     const raf = requestAnimationFrame(() => setEntered(true));
     return () => cancelAnimationFrame(raf);
-  }, []);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const handleScroll = () => {
-      const scrollTop = containerRef.current?.scrollTop ?? 0;
-      setShowScrollIndicator(scrollTop < 12);
-    };
-
-    containerRef.current.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-
-    return () => containerRef.current?.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -327,8 +290,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
                 xpTotal,
                 pillar: pillarDominant,
               }}
-              showScrollIndicator={showScrollIndicator}
-              prefersReducedMotion={prefersReducedMotion}
               entered={entered}
               index={0}
               active={activeIndex === 0}
@@ -341,7 +302,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
                 index={1}
                 entered={entered}
                 active={activeIndex === 1}
-                prefersReducedMotion={prefersReducedMotion}
                 registerSectionRef={(el) => (sectionRefs.current[1] = el)}
               />
             ) : null}
@@ -358,7 +318,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               activeIndex={activeIndex}
               registerSectionRef={sectionRefs}
               referenceDate={referenceDate}
-              prefersReducedMotion={prefersReducedMotion}
             />
 
             <ProgressBlock
@@ -371,7 +330,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               entered={entered}
               index={progressIndex}
               active={activeIndex === progressIndex}
-              prefersReducedMotion={prefersReducedMotion}
               registerSectionRef={(el) => (sectionRefs.current[progressIndex] = el)}
             />
 
@@ -380,7 +338,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               entered={entered}
               index={emotionIndex}
               active={activeIndex === emotionIndex}
-              prefersReducedMotion={prefersReducedMotion}
               registerSectionRef={(el) => (sectionRefs.current[emotionIndex] = el)}
             />
 
@@ -391,7 +348,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               entered={entered}
               index={closingIndex}
               active={activeIndex === closingIndex}
-              prefersReducedMotion={prefersReducedMotion}
               registerSectionRef={(el) => (sectionRefs.current[closingIndex] = el)}
             />
           </div>
@@ -408,7 +364,6 @@ type SectionShellProps = {
   active?: boolean;
   auraIndex?: number;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
-  prefersReducedMotion?: boolean;
 };
 
 /**
@@ -417,15 +372,7 @@ type SectionShellProps = {
  * - Each SectionShell is full-bleed (100vw x 100dvh) with overflow hidden and an internal content scroller.
  * - Safe areas are handled in the content container to avoid clipping on devices with notches.
  */
-function SectionShell({
-  children,
-  index,
-  entered,
-  active = false,
-  auraIndex = 0,
-  registerSectionRef,
-  prefersReducedMotion,
-}: SectionShellProps) {
+function SectionShell({ children, index, entered, active = false, auraIndex = 0, registerSectionRef }: SectionShellProps) {
   const delay = `${ANIMATION_DELAY * index}ms`;
   const auraClasses = GRADIENT_RING_CLASSES[auraIndex % GRADIENT_RING_CLASSES.length];
   const safeAreaStyle = {
@@ -438,20 +385,16 @@ function SectionShell({
       className="relative flex h-[100dvh] min-h-[100dvh] w-[100vw] flex-none snap-start overflow-hidden"
       aria-live="polite"
       data-index={index}
-      data-reduced-motion={prefersReducedMotion ? 'true' : 'false'}
       ref={registerSectionRef}
     >
       <div className="absolute inset-0 bg-slate-950" aria-hidden />
       <div className={`pointer-events-none absolute inset-[-15%] bg-gradient-to-br opacity-80 blur-3xl ${auraClasses}`} aria-hidden />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_120%_at_30%_20%,rgba(16,185,129,0.14),transparent),radial-gradient(110%_110%_at_70%_80%,rgba(79,70,229,0.12),transparent)]" aria-hidden />
-      <div className="ww-animated-gradient pointer-events-none absolute inset-0" aria-hidden />
 
       <div
-        className={`ww-section relative z-10 mx-auto flex h-full w-full max-w-5xl flex-col px-5 sm:px-10 ${
-          active ? 'scale-[1.01]' : 'opacity-95'
-        }`}
-        data-entered={entered}
-        data-active={active}
+        className={`relative z-10 mx-auto flex h-full w-full max-w-5xl flex-col px-5 transition duration-700 sm:px-10 ${
+          entered ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+        } ${active ? 'scale-[1.01]' : 'opacity-95'}`}
         style={{ transitionDelay: delay, ...safeAreaStyle }}
       >
         <div className="relative flex h-full flex-col overflow-hidden">
@@ -473,8 +416,6 @@ type SectionBlockProps = {
   entered: boolean;
   index: number;
   active?: boolean;
-  prefersReducedMotion: boolean;
-  showScrollIndicator?: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
 };
 
@@ -489,8 +430,6 @@ function SectionBlock({
   entered,
   index,
   active,
-  prefersReducedMotion,
-  showScrollIndicator = false,
   registerSectionRef,
 }: SectionBlockProps) {
   return (
@@ -499,24 +438,18 @@ function SectionBlock({
       entered={entered}
       auraIndex={0}
       active={active}
-      prefersReducedMotion={prefersReducedMotion}
       registerSectionRef={registerSectionRef}
     >
       <div className="flex h-full flex-col gap-6">
         <header className="space-y-4">
-          <p className="ww-stagger text-[11px] uppercase tracking-[0.3em] text-emerald-100" style={{ ['--ww-delay' as string]: '60ms' }}>
-            {label}
-          </p>
+          <p className="text-[11px] uppercase tracking-[0.3em] text-emerald-100">{label}</p>
           <div className="space-y-3">
-            <h2
-              className="ww-stagger text-4xl font-semibold leading-tight text-slate-50 drop-shadow-[0_0_28px_rgba(16,185,129,0.35)] sm:text-5xl"
-              style={{ ['--ww-delay' as string]: '120ms' }}
-            >
+            <h2 className="text-4xl font-semibold leading-tight text-slate-50 drop-shadow-[0_0_28px_rgba(16,185,129,0.35)] sm:text-5xl">
               {headline}
             </h2>
           </div>
 
-          <div className="ww-stagger flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-emerald-50/90" style={{ ['--ww-delay' as string]: '160ms' }}>
+          <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-emerald-50/90">
             {badges.map((badge) => (
               <span
                 key={badge.id}
@@ -552,19 +485,7 @@ function SectionBlock({
           )}
         </div>
       </div>
-      <ScrollIndicator visible={Boolean(showScrollIndicator && active)} />
     </SectionShell>
-  );
-}
-
-function ScrollIndicator({ visible }: { visible: boolean }) {
-  return (
-    <div
-      className={`ww-scroll-indicator pointer-events-none ${visible ? 'opacity-100' : 'opacity-0'}`}
-      aria-hidden
-    >
-      <span className="ww-scroll-chevron" />
-    </div>
   );
 }
 
@@ -584,7 +505,7 @@ function WeeklyKPIHighlight({
 
   return (
     <div className="space-y-4">
-      <div className="ww-card rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-emerald-500/10 to-indigo-500/10 p-5 shadow-[0_20px_60px_rgba(8,47,73,0.42)] backdrop-blur">
+      <div className="rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-emerald-500/10 to-indigo-500/10 p-5 shadow-[0_20px_60px_rgba(8,47,73,0.42)] backdrop-blur">
         <div className="relative grid grid-cols-[72px_1fr] items-center gap-4 text-sm text-emerald-50 sm:grid-cols-[88px_1fr]">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-3xl sm:h-20 sm:w-20">
             <span aria-hidden>{pillarIcon}</span>
@@ -644,7 +565,7 @@ function KPIStat({
 
   return (
     <div
-      className={`ww-kpi group relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-emerald-500/10 to-indigo-500/10 p-4 shadow-[0_20px_60px_rgba(8,47,73,0.42)] backdrop-blur transition duration-500 ${
+      className={`group relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-emerald-500/10 to-indigo-500/10 p-4 shadow-[0_20px_60px_rgba(8,47,73,0.42)] backdrop-blur transition duration-500 ${
         highlight ? 'ring-1 ring-emerald-300/50 shadow-emerald-500/25' : ''
       }`}
     >
@@ -690,7 +611,6 @@ type HabitsBlockProps = {
   activeIndex: number;
   registerSectionRef: MutableRefObject<(HTMLDivElement | null)[]>;
   referenceDate?: Date;
-  prefersReducedMotion: boolean;
 };
 
 type HabitHealthLevel = ReturnType<typeof getHabitHealthFromInsights>['level'];
@@ -796,17 +716,7 @@ export function resolveHabitHealth(
   };
 }
 
-function HabitsBlock({
-  title,
-  description,
-  items,
-  entered,
-  startIndex,
-  activeIndex,
-  registerSectionRef,
-  referenceDate,
-  prefersReducedMotion,
-}: HabitsBlockProps) {
+function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef, referenceDate }: HabitsBlockProps) {
   const slideLabel = 'CONSTANCIA';
   const headline = 'Constancia';
   const subline = description || 'Tus hábitos más firmes sostuvieron el ritmo.';
@@ -816,7 +726,6 @@ function HabitsBlock({
       entered={entered}
       auraIndex={1}
       active={activeIndex === startIndex}
-      prefersReducedMotion={prefersReducedMotion}
       registerSectionRef={(el) => (registerSectionRef.current[startIndex] = el)}
     >
       <div className="space-y-2">
@@ -833,7 +742,7 @@ function HabitsBlock({
             return (
               <div
                 key={item.title}
-                className="ww-card group rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-emerald-500/10 to-indigo-500/10 p-4 shadow-lg shadow-emerald-500/15 transition duration-700"
+                className="group rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-emerald-500/10 to-indigo-500/10 p-4 shadow-lg shadow-emerald-500/15 transition duration-700"
                 style={{ transitionDelay: `${ANIMATION_DELAY * (startIndex + idx)}ms` }}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -880,11 +789,10 @@ type LevelUpBlockProps = {
   entered: boolean;
   index: number;
   active?: boolean;
-  prefersReducedMotion: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
 };
 
-function LevelUpBlock({ levelUp, entered, index, active, prefersReducedMotion, registerSectionRef }: LevelUpBlockProps) {
+function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef }: LevelUpBlockProps) {
   const levelLabel = levelUp.currentLevel ?? 'nuevo';
   const previousLabel = levelUp.previousLevel ?? Math.max(0, Number(levelLabel) - 1);
 
@@ -894,10 +802,9 @@ function LevelUpBlock({ levelUp, entered, index, active, prefersReducedMotion, r
       entered={entered}
       auraIndex={2}
       active={active}
-      prefersReducedMotion={prefersReducedMotion}
       registerSectionRef={registerSectionRef}
     >
-      <div className="ww-card relative flex flex-1 overflow-hidden rounded-3xl border border-transparent bg-slate-950/70 p-[2px]">
+      <div className="relative flex flex-1 overflow-hidden rounded-3xl border border-transparent bg-slate-950/70 p-[2px]">
         <div className="absolute inset-0 animate-pulse bg-[conic-gradient(at_30%_40%,#a855f7,#22d3ee,#22c55e,#f59e0b,#f472b6,#22d3ee)] opacity-70 blur" />
         <div className="relative flex h-full flex-col justify-between rounded-[26px] border border-white/10 bg-gradient-to-br from-slate-950/80 via-emerald-950/50 to-indigo-950/60 p-6 shadow-[0_20px_60px_rgba(34,197,94,0.2)] md:p-8">
           <div className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-emerald-400/20 blur-3xl" aria-hidden />
@@ -944,7 +851,6 @@ type ProgressBlockProps = {
   entered: boolean;
   index: number;
   active?: boolean;
-  prefersReducedMotion: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
 };
 
@@ -958,7 +864,6 @@ function ProgressBlock({
   entered,
   index,
   active,
-  prefersReducedMotion,
   registerSectionRef,
 }: ProgressBlockProps) {
   const slideLabel = 'PROGRESO Y FOCO';
@@ -1016,7 +921,6 @@ function ProgressBlock({
       entered={entered}
       auraIndex={2}
       active={active}
-      prefersReducedMotion={prefersReducedMotion}
       registerSectionRef={registerSectionRef}
     >
       <div className="space-y-3">
@@ -1024,7 +928,7 @@ function ProgressBlock({
         <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">Pequeños avances</h3>
       </div>
 
-      <div className="ww-card rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
+      <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-emerald-100">
           <span>Daily Energy</span>
           <span className="rounded-full bg-white/10 p-1.5 text-[10px] text-emerald-50">Energía que más creció</span>
@@ -1034,7 +938,7 @@ function ProgressBlock({
             <div className="absolute inset-x-0 top-1 text-center text-[11px] font-semibold text-emerald-50 drop-shadow-[0_0_8px_rgba(59,130,246,0.4)]">
               {energyCurrentLabel}
             </div>
-            <div className={`ww-progress-fill ww-bar-fill w-full rounded-t-md bg-gradient-to-t ${energyBarGradient}`} style={{ height: energyBarHeight }} />
+            <div className={`w-full rounded-t-md bg-gradient-to-t ${energyBarGradient}`} style={{ height: energyBarHeight }} />
             <div className="absolute inset-0 animate-pulse bg-white/5" aria-hidden />
           </div>
           <div className="flex flex-col text-sm text-emerald-50">
@@ -1054,7 +958,7 @@ function ProgressBlock({
         </div>
       </div>
 
-      <div className="ww-card space-y-3 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/70 via-slate-900/60 to-emerald-500/10 p-5 shadow-lg shadow-emerald-500/15">
+      <div className="space-y-3 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/70 via-slate-900/60 to-emerald-500/10 p-5 shadow-lg shadow-emerald-500/15">
         <div className="space-y-3">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -1067,19 +971,19 @@ function ProgressBlock({
             <div className="h-5 w-full overflow-hidden rounded-full border border-white/10 bg-white/5">
               <div className="flex h-full w-full text-[11px] font-semibold text-white/90">
                 <div
-                  className="ww-progress-fill ww-progress-glow relative flex h-full items-center justify-center bg-gradient-to-r from-emerald-500/80 to-emerald-400/80"
+                  className="relative flex h-full items-center justify-center bg-gradient-to-r from-emerald-500/80 to-emerald-400/80"
                   style={{ width: `${easyPct}%` }}
                 >
                   {easyPct > 4 ? <span className="drop-shadow-[0_0_6px_rgba(15,118,110,0.5)]">{easyPct}%</span> : null}
                 </div>
                 <div
-                  className="ww-progress-fill ww-progress-glow relative flex h-full items-center justify-center bg-gradient-to-r from-cyan-500/70 to-sky-400/80"
+                  className="relative flex h-full items-center justify-center bg-gradient-to-r from-cyan-500/70 to-sky-400/80"
                   style={{ width: `${mediumPct}%` }}
                 >
                   {mediumPct > 4 ? <span className="drop-shadow-[0_0_6px_rgba(14,165,233,0.5)]">{mediumPct}%</span> : null}
                 </div>
                 <div
-                  className="ww-progress-fill ww-progress-glow relative flex h-full items-center justify-center bg-gradient-to-r from-rose-500/80 to-orange-400/80"
+                  className="relative flex h-full items-center justify-center bg-gradient-to-r from-rose-500/80 to-orange-400/80"
                   style={{ width: `${hardPct}%` }}
                 >
                   {hardPct > 4 ? <span className="drop-shadow-[0_0_6px_rgba(190,24,93,0.45)]">{hardPct}%</span> : null}
@@ -1129,18 +1033,10 @@ type EmotionHighlightBlockProps = {
   entered: boolean;
   index: number;
   active?: boolean;
-  prefersReducedMotion: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
 };
 
-function EmotionHighlightBlock({
-  emotionHighlight,
-  entered,
-  index,
-  active,
-  prefersReducedMotion,
-  registerSectionRef,
-}: EmotionHighlightBlockProps) {
+function EmotionHighlightBlock({ emotionHighlight, entered, index, active, registerSectionRef }: EmotionHighlightBlockProps) {
   const weeklyEmotion = emotionHighlight.weekly;
   const biweeklyEmotion = emotionHighlight.biweekly ?? weeklyEmotion;
   const weeklyColor = weeklyEmotion?.color ?? '#fbbf24';
@@ -1159,7 +1055,6 @@ function EmotionHighlightBlock({
       entered={entered}
       auraIndex={1}
       active={active}
-      prefersReducedMotion={prefersReducedMotion}
       registerSectionRef={registerSectionRef}
     >
       <div className="space-y-3">
@@ -1169,7 +1064,7 @@ function EmotionHighlightBlock({
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="ww-card space-y-4 rounded-3xl border border-white/10 bg-gradient-to-br from-amber-200/15 via-amber-400/10 to-rose-400/15 p-5 shadow-lg shadow-amber-300/25">
+        <div className="space-y-4 rounded-3xl border border-white/10 bg-gradient-to-br from-amber-200/15 via-amber-400/10 to-rose-400/15 p-5 shadow-lg shadow-amber-300/25">
           <div className="flex items-center gap-3">
             <span
               className="flex h-16 w-16 items-center justify-center rounded-full text-2xl font-semibold"
@@ -1188,7 +1083,7 @@ function EmotionHighlightBlock({
           </div>
         </div>
 
-        <div className="ww-card space-y-4 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
+        <div className="space-y-4 rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
           <div className="flex items-center gap-3">
             <span
               className="flex h-16 w-16 items-center justify-center rounded-full text-2xl font-semibold"
@@ -1220,11 +1115,10 @@ type ClosingBlockProps = {
   entered: boolean;
   index: number;
   active?: boolean;
-  prefersReducedMotion: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
 };
 
-function ClosingBlock({ message, accent, onClose, entered, index, active, prefersReducedMotion, registerSectionRef }: ClosingBlockProps) {
+function ClosingBlock({ message, accent, onClose, entered, index, active, registerSectionRef }: ClosingBlockProps) {
   const slideLabel = 'CIERRE';
   return (
     <SectionShell
@@ -1232,7 +1126,6 @@ function ClosingBlock({ message, accent, onClose, entered, index, active, prefer
       entered={entered}
       auraIndex={0}
       active={active}
-      prefersReducedMotion={prefersReducedMotion}
       registerSectionRef={registerSectionRef}
     >
       <div className="flex h-full flex-col items-center justify-center gap-10 text-center text-slate-50">
