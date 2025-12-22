@@ -151,8 +151,7 @@ export function getPool(): Pool {
 export const poolProxy: Pool = new Proxy({} as Pool, {
   get(_target, propertyKey) {
     const currentPool = getPool();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const value = (currentPool as any)[propertyKey];
+    const value = currentPool[propertyKey as keyof Pool];
 
     if (typeof value === 'function') {
       return value.bind(currentPool);
@@ -216,8 +215,7 @@ export async function endPool(): Promise<void> {
 export const db: ReturnType<typeof drizzle> = new Proxy({} as ReturnType<typeof drizzle>, {
   get(_target, propertyKey) {
     const currentDb = getDb();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const value = (currentDb as any)[propertyKey];
+    const value = currentDb[propertyKey as keyof typeof currentDb];
 
     if (typeof value === 'function') {
       return value.bind(currentDb);
