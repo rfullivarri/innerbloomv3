@@ -2,18 +2,58 @@
 :root {
   --ww-duration-enter: 480ms;
   --ww-duration-card: 560ms;
-  --ww-duration-loop: 12s;
+  --ww-duration-loop: 9s;
   --ww-ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --ww-gradient-size: 320% 320%;
 }
 
 .ww-animated-gradient {
   background: radial-gradient(120% 120% at 30% 20%, rgba(45, 212, 191, 0.14), transparent),
     radial-gradient(110% 110% at 80% 40%, rgba(94, 234, 212, 0.12), transparent),
     linear-gradient(120deg, rgba(56, 189, 248, 0.15), rgba(16, 185, 129, 0.08), rgba(79, 70, 229, 0.12));
-  background-size: 160% 160%;
+  background-size: var(--ww-gradient-size);
   animation: ww-gradient-pan var(--ww-duration-loop) ease-in-out infinite;
   mix-blend-mode: screen;
   opacity: 0.55;
+}
+
+.weekly-wrapped-shell {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.weekly-wrapped-shell::before {
+  content: '';
+  position: absolute;
+  inset: -18%;
+  background:
+    radial-gradient(
+      140% 110% at 22% 18%,
+      color-mix(in srgb, var(--color-accent-primary) 26%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      120% 120% at 82% 26%,
+      color-mix(in srgb, var(--color-accent-secondary) 24%, transparent),
+      transparent
+    ),
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--color-accent-primary) 20%, transparent),
+      color-mix(in srgb, var(--color-accent-secondary) 18%, transparent),
+      color-mix(in srgb, var(--color-text) 12%, transparent)
+    );
+  background-size: var(--ww-gradient-size);
+  animation: ww-gradient-pan var(--ww-duration-loop) ease-in-out infinite;
+  opacity: 0.72;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.weekly-wrapped-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 .ww-section {
@@ -205,7 +245,8 @@
   .ww-kpi,
   .ww-progress-fill,
   .ww-bar-fill,
-  .ww-scroll-chevron {
+  .ww-scroll-chevron,
+  .weekly-wrapped-shell::before {
     animation: none !important;
     transition: none !important;
   }

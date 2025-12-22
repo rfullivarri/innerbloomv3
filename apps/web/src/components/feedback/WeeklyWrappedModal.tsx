@@ -287,7 +287,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex bg-slate-950/95 backdrop-blur" role="dialog" aria-modal>
+    <div className="weekly-wrapped-shell fixed inset-0 z-50 flex bg-slate-950/95 backdrop-blur" role="dialog" aria-modal>
       <div className="absolute inset-0" onClick={onClose} aria-hidden />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -397,6 +397,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
           </div>
         </div>
       </div>
+      {/* Global Weekly Wrapped wrapper above: all slides (mobile and desktop paths share this modal) inherit the animated gradient; navegar next/prev entre slides y el fondo sigue animado siempre. */}
     </div>
   );
 }
