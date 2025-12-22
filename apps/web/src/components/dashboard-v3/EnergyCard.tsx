@@ -182,8 +182,8 @@ function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparis
     <div className="space-y-2 sm:grid sm:grid-cols-[88px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
       <div className="flex items-center justify-between sm:block">
         <span
-          className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${
-            highlight ? 'text-emerald-200' : 'text-slate-300'
+          className={`text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300 ${
+            highlight ? 'drop-shadow-[0_0_6px_rgba(16,185,129,0.45)]' : ''
           }`}
         >
           {label}
