@@ -78,7 +78,20 @@ function resetPoolIdleTimer(poolToWatch: Pool): void {
 
 function createPool(): Pool {
   if (dbDebugEnabled) {
-    console.info('[db-debug] Creating Postgres pool lazily (will auto-close on idle)');
+    const [textOrConfig, values] = args as unknown as [string | QueryConfig, readonly unknown[] | undefined];
+    const text = getQueryText(textOrConfig as string | QueryConfig);
+    const resolvedValues =
+      Array.isArray(values) && values.length > 0
+        ? values
+        : (typeof textOrConfig === 'object' && Array.isArray((textOrConfig as QueryConfig).values)
+            ? (textOrConfig as QueryConfig).values
+            : undefined);
+    const previewText = text.replace(/\s+/g, ' ').trim();
+    console.info('[db-debug] query', {
+      context: getDbContext(),
+      text: previewText.length > 180 ? `${previewText.slice(0, 180)}…` : previewText,
+      values: resolvedValues,
+    });
   }
 
   const createdPool = new Pool({
