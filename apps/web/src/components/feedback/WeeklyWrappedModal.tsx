@@ -878,6 +878,14 @@ function ProgressBlock({
       : 'Sin datos suficientes para comparar energía con la semana anterior.';
   const energyBarHeight = `${Math.max(12, Math.min(100, energySnapshot.current))}%`;
   const energyBarGradient = ENERGY_GRADIENT_BY_METRIC[energySnapshot.metric.label] ?? 'from-white/70 via-white/90 to-white';
+  const energyCurrentLabel = `${Math.round(energySnapshot.current)}%`;
+  const energyFocusStory = `Esta semana tu energía se enfocó en ${
+    energySnapshot.metric.label === 'HP'
+      ? 'tu bienestar físico'
+      : energySnapshot.metric.label === 'FOCUS'
+        ? 'tu capacidad de enfoque'
+        : 'tu ánimo y bienestar emocional'
+  }; aquí verás cómo evolucionó.`;
   const hasEffortBalance = Boolean((effortBalance?.total ?? 0) > 0);
   const balanceTotal = hasEffortBalance ? effortBalance?.total ?? 0 : 0;
   const easyPct = hasEffortBalance && balanceTotal ? Math.round((100 * (effortBalance?.easy ?? 0)) / balanceTotal) : 0;
@@ -927,15 +935,18 @@ function ProgressBlock({
           <span>Daily Energy</span>
           <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] text-emerald-50">Energía que más creció</span>
         </div>
-        <p className="text-sm font-semibold text-slate-50">{energyHeadline}</p>
+        <p className="mt-1 text-xs text-emerald-50/80">{energyFocusStory}</p>
         <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
           <div className="relative flex h-28 w-10 items-end overflow-hidden rounded-xl border border-white/20 bg-slate-900/60">
+            <div className="absolute inset-x-0 top-1 text-center text-[11px] font-semibold text-emerald-50 drop-shadow-[0_0_8px_rgba(59,130,246,0.4)]">
+              {energyCurrentLabel}
+            </div>
             <div className={`w-full rounded-t-md bg-gradient-to-t ${energyBarGradient}`} style={{ height: energyBarHeight }} />
             <div className="absolute inset-0 animate-pulse bg-white/5" aria-hidden />
           </div>
           <div className="flex flex-col text-sm text-emerald-50">
             <span className="font-semibold">{energySnapshot.metric.label}</span>
-            <span className="text-xs text-emerald-100">Nivel habitual máximo</span>
+            <span className="text-xs text-emerald-100">{energyHeadline}</span>
           </div>
         </div>
       </div>
