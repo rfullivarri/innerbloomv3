@@ -4,7 +4,8 @@ import { ResendEmailProvider } from './resend-email-provider.js';
 
 let cachedProvider: EmailProvider | null = null;
 
-const DEFAULT_RESEND_FROM = 'Innerbloom <onboarding@resend.dev>';
+const DEFAULT_FROM_DISPLAY_NAME = 'Innerbloom Journey';
+const DEFAULT_RESEND_FROM = `${DEFAULT_FROM_DISPLAY_NAME} <onboarding@resend.dev>`;
 
 function resolveProviderName(): string {
   const raw = process.env.EMAIL_PROVIDER_NAME?.trim();
@@ -94,7 +95,11 @@ function resolveResendFrom(from: string | undefined): string {
     return DEFAULT_RESEND_FROM;
   }
 
-  return from;
+  return formatFromWithDisplayName(email);
+}
+
+function formatFromWithDisplayName(email: string): string {
+  return `${DEFAULT_FROM_DISPLAY_NAME} <${email}>`;
 }
 
 function extractEmailAddress(value: string): string | null {

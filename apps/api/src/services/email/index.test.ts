@@ -57,7 +57,7 @@ describe('createEmailProvider', () => {
 
     expect(provider).toBeDefined();
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('EMAIL_FROM is not set. Falling back to Innerbloom <onboarding@resend.dev>.'),
+      expect.stringContaining('EMAIL_FROM is not set. Falling back to Innerbloom Journey <onboarding@resend.dev>.'),
     );
     warnSpy.mockRestore();
   });
