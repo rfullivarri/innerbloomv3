@@ -747,31 +747,29 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2 text-slate-50">
-                    <p className="text-sm font-semibold leading-snug">{item.title}</p>
                     <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-white/10 px-2 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-100">
                       {getPillarIcon(item.pillar) || '🫀'}
                       <span className="sr-only">{item.pillar ?? '–'}</span>
                     </span>
+                    <p className="text-sm font-semibold leading-snug">{item.title}</p>
                   </div>
                   <div className="flex flex-col items-end gap-2 text-[11px] uppercase tracking-[0.14em]">
                     <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-emerald-300/30 bg-emerald-500/20 px-2 py-1 text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
                       🔥{item.daysActive ?? '–'}/7
                     </span>
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-tight ${
-                        HABIT_HEALTH_STYLES[health.level]
-                      }`}
-                    >
-                      {health.label}
-                    </span>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center justify-between gap-3">
-                  <div className="flex flex-col items-start gap-1 text-left text-sm text-emerald-50">
-                    <p className="text-[11px] text-emerald-50/80">
-                      Cumplís tu meta en {health.weeksActive} de {health.weeksSample} semanas.
-                    </p>
-                  </div>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-[11px] text-emerald-50/80">
+                    Cumplís tu meta en {health.weeksActive} de {health.weeksSample} semanas.
+                  </p>
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-tight ${
+                      HABIT_HEALTH_STYLES[health.level]
+                    }`}
+                  >
+                    {health.label}
+                  </span>
                 </div>
               </div>
             );
