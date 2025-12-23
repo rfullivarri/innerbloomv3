@@ -26,6 +26,7 @@ const gradientButtonClass =
 
 const baseElements = {
   rootBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto`,
+  cardBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto flex justify-center`,
   card:
     `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-4 overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-3 shadow-[0_25px_80px_rgba(15,23,42,0.35)] backdrop-blur-2xl sm:rounded-[28px] sm:p-4 md:p-5`,
   header: 'hidden',
