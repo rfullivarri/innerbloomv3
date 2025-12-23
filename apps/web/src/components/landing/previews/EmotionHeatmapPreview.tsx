@@ -32,7 +32,7 @@ export function EmotionHeatmapPreview() {
     if (prefersReducedMotion) return;
     const timer = window.setInterval(() => {
       setGlowIndex((current) => {
-        const next = [];
+        const next: number[] = [];
         while (next.length < 2) {
           const random = Math.floor(Math.random() * GRID_ROWS * GRID_COLS);
           if (!next.includes(random)) {
