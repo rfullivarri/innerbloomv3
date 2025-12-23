@@ -10,15 +10,13 @@ export default function SignUpPage() {
     <AuthLayout
       title="Crear tu cuenta"
       description="Sumate a Innerbloom para comenzar a medir y automatizar tus flujos. Creamos tu cuenta en segundos y te guiamos paso a paso."
-      primaryActionLabel="Crear cuenta"
-      onPrimaryActionClick={() => {
-        const input = signUpContainerRef.current?.querySelector<HTMLInputElement>('input');
-        input?.focus();
-      }}
       secondaryActionLabel="Volver al inicio"
       secondaryActionHref="/"
     >
-      <div ref={signUpContainerRef} className="mx-auto w-full min-w-0 max-w-[calc(100%-2rem)] sm:max-w-[440px]">
+      <div
+        ref={signUpContainerRef}
+        className="mx-auto w-full min-w-0 max-w-full px-1 sm:max-w-[480px] sm:px-0"
+      >
         <SignUp
           appearance={createAuthAppearance({
             layout: {
