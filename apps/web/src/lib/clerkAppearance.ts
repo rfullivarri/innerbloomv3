@@ -28,7 +28,7 @@ const baseElements = {
   rootBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto`,
   cardBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto flex justify-center`,
   card:
-    `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-4 overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-3 shadow-[0_25px_80px_rgba(15,23,42,0.35)] backdrop-blur-2xl sm:rounded-[28px] sm:p-4 md:p-5`,
+    `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-4 overflow-hidden rounded-[24px] border border-transparent bg-transparent p-3 shadow-none backdrop-blur-0 sm:rounded-[28px] sm:p-4 md:p-5`,
   header: 'hidden',
   socialButtons: 'hidden',
   divider: 'hidden',
@@ -41,7 +41,7 @@ const baseElements = {
   formButtonPrimary: `${gradientButtonClass} h-11 text-xs tracking-[0.16em] sm:h-12 sm:text-sm`,
 
   footer:
-    'mt-2 w-full max-w-none rounded-xl border border-white/10 bg-white/5 !px-2 !py-1 shadow-none',
+    'mt-2 w-full max-w-none rounded-xl border border-transparent bg-transparent !px-2 !py-1 shadow-none',
 
   // 1) CONTENEDOR 1 (cl-footerAction__signIn): reducir alto y aumentar ancho
   footerAction:
