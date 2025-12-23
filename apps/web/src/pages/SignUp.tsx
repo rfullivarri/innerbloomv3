@@ -23,7 +23,6 @@ export default function SignUpPage() {
               showOptionalFields: false
             },
             elements: {
-              footer: 'mt-6 flex flex-col items-center gap-1 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-center text-xs text-white/60 backdrop-blur-xl shadow-none',
               footerActionText: 'text-white/50',
               footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4',
               formFieldSuccessText: 'text-sm text-emerald-200'
