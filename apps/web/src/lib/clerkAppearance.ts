@@ -44,14 +44,14 @@ const baseElements = {
   'mt-2 w-full max-w-full rounded-xl border border-white/10 bg-white/5 px-2 py-1 text-center shadow-none',
   // Acción (Don’t have an account?  Sign up) en una sola línea
   footerAction:
-    'flex w-full items-center justify-between gap-2 text-[10px] leading-4 text-white/55',
+    'flex w-full items-center justify-between gap-2 text-[7px] leading-4 text-white/55',
   footerActionText:
     'min-w-0 whitespace-nowrap text-white/55',
   footerActionLink:
     'whitespace-nowrap font-semibold text-white/80 underline underline-offset-2 hover:text-white',
   // “Secured by clerk” chico y liviano
   footerPages:
-    'mt-0.5 flex w-full items-center justify-center gap-1 text-[9px] leading-3 text-white/40',
+    'mt-0.5 flex w-full items-center justify-center gap-1 text-[7px] leading-3 text-white/40',
   footerPageLink:
     'inline-flex items-center gap-1 text-white/40 hover:text-white/60',
   // Fallbacks por si tu variante usa estos keys
