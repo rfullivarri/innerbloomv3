@@ -40,14 +40,13 @@ export function AuthLayout({
               </Link>
             ) : null}
 
-            <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.4em] text-white/60 sm:text-sm">
-              <span className="h-2 w-2 rounded-full bg-[#7d3cff]" />
-              <span className="flex items-center gap-2">
+            <div className="flex items-center justify-center text-xs font-semibold uppercase tracking-[0.4em] text-white/60 sm:text-sm">
+              <span className="flex items-center gap-1">
                 <span>Innerbloom</span>
                 <img
                   src="/IB-COLOR-LOGO.png"
                   alt="Innerbloom logo"
-                  className="h-[3.9em] w-auto"
+                  className="h-[2em] w-auto"
                 />
               </span>
             </div>
