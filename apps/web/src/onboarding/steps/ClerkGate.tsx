@@ -15,6 +15,18 @@ const TAB_OPTIONS = [
 
 type TabId = (typeof TAB_OPTIONS)[number]['id'];
 
+const authFooterElements = {
+  footer: 'mt-2 w-full max-w-none rounded-xl border border-white/10 bg-white/5 !px-2 !py-1 shadow-none',
+  footerAction:
+    '!flex !w-full !max-w-none items-center justify-start gap-1 !px-2 !py-0 text-[10px] !leading-[12px] text-white/55',
+  footerActionText: '!whitespace-nowrap text-white/55',
+  footerActionLink:
+    '!whitespace-nowrap font-semibold text-white/80 underline underline-offset-2 hover:text-white',
+  footerPages:
+    '!mt-0.5 !flex !w-full !max-w-none items-center justify-center gap-1 !px-2 !py-0 text-[9px] !leading-[11px] text-white/40',
+  footerPageLink: 'inline-flex items-center gap-1 text-white/40 hover:text-white/60',
+} as const;
+
 const clerkAppearance = {
   elements: {
     rootBox: 'w-full',
@@ -28,8 +40,7 @@ const clerkAppearance = {
     formFieldInput:
       'rounded-xl border border-white/10 bg-white/10 text-white placeholder:text-white/50 focus:border-sky-400 focus:ring-2 focus:ring-sky-400',
     formFieldLabel: 'text-white/70 text-xs uppercase tracking-[0.2em]',
-    footerActionText: 'text-white/60 text-sm',
-    footerActionLink: 'text-sky-300 hover:text-sky-200 font-semibold',
+    ...authFooterElements,
     identityPreview: 'bg-white/10 border border-white/10 text-white/80 rounded-xl',
     formField: 'space-y-1',
     main: 'gap-4 flex flex-col',
