@@ -1,6 +1,7 @@
 import { SignIn, SignUp, useAuth, useUser } from '@clerk/clerk-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
+import { createAuthAppearance } from '../../lib/clerkAppearance';
 import { useOnboarding } from '../state';
 
 interface ClerkGateProps {
@@ -15,39 +16,16 @@ const TAB_OPTIONS = [
 
 type TabId = (typeof TAB_OPTIONS)[number]['id'];
 
-const authFooterElements = {
-  footer: 'mt-2 w-full max-w-none rounded-xl border border-white/10 bg-white/5 !px-2 !py-1 shadow-none',
-  footerAction:
-    '!flex !w-full !max-w-none items-center justify-start gap-1 !px-2 !py-0 text-[10px] !leading-[12px] text-white/55',
-  footerActionText: '!whitespace-nowrap text-white/55',
-  footerActionLink:
-    '!whitespace-nowrap font-semibold text-white/80 underline underline-offset-2 hover:text-white',
-  footerPages:
-    '!mt-0.5 !flex !w-full !max-w-none items-center justify-center gap-1 !px-2 !py-0 text-[9px] !leading-[11px] text-white/40',
-  footerPageLink: 'inline-flex items-center gap-1 text-white/40 hover:text-white/60',
-} as const;
-
-const clerkAppearance = {
-  elements: {
-    rootBox: 'w-full',
-    card: 'bg-transparent shadow-none border-0',
-    headerTitle: 'text-white text-2xl font-semibold',
-    headerSubtitle: 'text-white/70 text-sm',
-    socialButtonsBlockButton:
-      'bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-sm font-semibold py-2',
-    formButtonPrimary:
-      'rounded-full bg-gradient-to-r from-sky-400 via-violet-500 to-fuchsia-500 text-sm font-semibold py-2 mt-2 shadow-lg shadow-sky-500/20 hover:from-sky-300 hover:via-violet-400 hover:to-fuchsia-400',
-    formFieldInput:
-      'rounded-xl border border-white/10 bg-white/10 text-white placeholder:text-white/50 focus:border-sky-400 focus:ring-2 focus:ring-sky-400',
-    formFieldLabel: 'text-white/70 text-xs uppercase tracking-[0.2em]',
-    ...authFooterElements,
-    identityPreview: 'bg-white/10 border border-white/10 text-white/80 rounded-xl',
-    formField: 'space-y-1',
-    main: 'gap-4 flex flex-col',
-    dividerRow: 'text-white/40',
-    alert: 'bg-white/10 border-white/10 text-white/80 rounded-xl',
+const clerkAppearance = createAuthAppearance({
+  layout: {
+    showOptionalFields: true
   },
-} as const;
+  elements: {
+    footerActionText: 'text-white/50',
+    footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4',
+    formFieldSuccessText: 'text-sm text-emerald-200'
+  }
+});
 
 export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
   const { isLoaded, isSignedIn, getToken } = useAuth();
