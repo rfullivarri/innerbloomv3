@@ -69,7 +69,7 @@ export function AuthLayout({
             </div>
           ) : null}
 
-          <div className={`flex w-full min-w-0 items-center justify-center`>
+          <div className="flex w-full min-w-0 items-center justify-center">
             {children}
           </div>
         </div>
