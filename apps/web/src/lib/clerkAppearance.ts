@@ -1,7 +1,7 @@
 import type { Theme } from '@clerk/types';
 
-// 480px keeps the auth copy and Clerk card aligned on mobile while leaving generous horizontal padding.
-export const AUTH_LOGIN_MAX_WIDTH = 'max-w-[480px]';
+// Slightly narrower auth card to keep the login UI compact on small screens.
+export const AUTH_LOGIN_MAX_WIDTH = 'max-w-[288px]';
 
 const baseLayout = {
   logoPlacement: 'none' as const,
@@ -27,19 +27,19 @@ const gradientButtonClass =
 const baseElements = {
   rootBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto`,
   card:
-    `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-6 overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-4 shadow-[0_25px_80px_rgba(15,23,42,0.35)] backdrop-blur-2xl sm:rounded-[28px] sm:p-6 md:p-8`,
+    `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-4 overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-3 shadow-[0_25px_80px_rgba(15,23,42,0.35)] backdrop-blur-2xl sm:rounded-[28px] sm:p-4 md:p-5`,
   header: 'hidden',
   socialButtons: 'hidden',
   divider: 'hidden',
-  form: 'flex flex-col gap-4 text-left',
-  formField: 'flex flex-col gap-2',
-  formFieldLabel: 'text-xs font-medium text-white/75 sm:text-sm',
+  form: 'flex flex-col gap-3 text-left',
+  formField: 'flex flex-col gap-1.5',
+  formFieldLabel: 'text-[11px] font-medium text-white/75 sm:text-xs',
   formFieldInput:
-    'rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-[16px] leading-6 text-white placeholder:text-white/40 shadow-[0_6px_20px_rgba(99,102,241,0.15)] focus:border-white/40 focus:outline-none focus-visible:ring-0',
+    'rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 text-[15px] leading-6 text-white placeholder:text-white/40 shadow-[0_6px_20px_rgba(99,102,241,0.15)] focus:border-white/40 focus:outline-none focus-visible:ring-0',
   formFieldInputShowPasswordButton: 'text-sm text-white/60 hover:text-white',
-  formButtonPrimary: gradientButtonClass,
+  formButtonPrimary: `${gradientButtonClass} h-11 text-xs tracking-[0.16em] sm:h-12 sm:text-sm`,
   footer:
-    'mt-6 w-full max-w-full flex flex-col items-center gap-1 rounded-2xl border border-white/15 bg-white/10 px-3 py-3 text-center text-xs text-white/60 backdrop-blur-xl shadow-none sm:px-4',
+    'mt-4 w-full max-w-full flex flex-col items-center gap-1 rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 text-center text-xs text-white/60 backdrop-blur-xl shadow-none sm:px-4',
   footerTitle: 'text-white/70',
   footerSubtitle: 'text-white/50',
   footerActionText: 'text-white/50',
