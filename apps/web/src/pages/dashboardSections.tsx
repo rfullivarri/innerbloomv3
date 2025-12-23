@@ -179,8 +179,8 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
     dquest: {
       key: 'dquest',
       label: 'DQuest',
-      to: joinDashboardPath(basePath, 'dquest'),
-      end: true,
+      to: undefined,
+      end: false,
       pageTitle: 'Daily Quest',
       eyebrow: 'DQuest',
       contentTitle: 'Daily Quest',
@@ -238,6 +238,10 @@ export function getDashboardSectionConfig(
 }
 
 export function isSectionActive(section: DashboardSectionConfig, pathname: string) {
+  if (!section.to) {
+    return false;
+  }
+
   return matchPath({ path: section.to, end: section.end ?? false }, pathname) != null;
 }
 

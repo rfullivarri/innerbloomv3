@@ -61,11 +61,10 @@ export default function DashboardV3Page() {
   const { getToken } = useAuth();
   const { backendUserId, status, error, reload, clerkUserId, profile } = useBackendUser();
   const location = useLocation();
-  const sections = getDashboardSections(location.pathname);
-  const activeSection = getActiveSection(location.pathname, sections);
+  const baseSections = getDashboardSections(location.pathname);
+  const activeSection = getActiveSection(location.pathname, baseSections);
   const overviewSection = getDashboardSectionConfig('dashboard', location.pathname);
   const missionsSection = getDashboardSectionConfig('missions', location.pathname);
-  const dquestSection = getDashboardSectionConfig('dquest', location.pathname);
   const rewardsSection = getDashboardSectionConfig('rewards', location.pathname);
   const profileGameMode = deriveGameModeFromProfile(profile?.game_mode);
   const shouldFetchUserState = Boolean(backendUserId && !profileGameMode);
@@ -152,6 +151,12 @@ export default function DashboardV3Page() {
   const handleOpenReminderScheduler = useCallback(() => {
     reminderSchedulerDialogRef.current?.open();
   }, []);
+
+  const sections = baseSections.map((section) =>
+    section.key === 'dquest'
+      ? { ...section, to: undefined, onClick: backendUserId ? handleOpenDaily : undefined }
+      : section,
+  );
 
   useEffect(() => {
     if (!backendUserId || hasAutoOpenedDailyQuestRef.current) {
@@ -249,10 +254,6 @@ export default function DashboardV3Page() {
                   element={<MissionsView userId={backendUserId} section={missionsSection} />}
                 />
                 <Route
-                  path="dquest"
-                  element={<DailyQuestView section={dquestSection} onOpenDailyQuest={handleOpenDaily} />}
-                />
-                <Route
                   path="missions-v2"
                   element={<MissionsV2Route userId={backendUserId} gameMode={gameMode} />}
                 />
@@ -287,6 +288,7 @@ export default function DashboardV3Page() {
               key: section.key,
               label: section.key === 'editor' ? 'Editor' : section.label,
               to: section.to,
+              onClick: section.onClick,
               icon: <Icon className="h-[19px] w-[19px]" />,
               end: section.end,
             };
@@ -363,83 +365,6 @@ function MissionsView({ userId, section }: { userId: string; section: DashboardS
         pageTitle={section.pageTitle}
       />
       <MissionsSection userId={userId} />
-    </div>
-  );
-}
-
-function DailyQuestView({
-  section,
-  onOpenDailyQuest,
-}: {
-  section: DashboardSectionConfig;
-  onOpenDailyQuest: () => void;
-}) {
-  return (
-    <div className="space-y-6">
-      <SectionHeader
-        eyebrow={section.eyebrow}
-        title={section.contentTitle}
-        description={section.description}
-        pageTitle={section.pageTitle}
-      />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-12 lg:gap-6">
-        <LegacyCard
-          className="lg:col-span-7"
-          title="Activá tu DQuest"
-          subtitle="Ritual de foco en menos de 5 minutos"
-          action={
-            <button
-              type="button"
-              onClick={onOpenDailyQuest}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-[0_12px_28px_rgba(99,102,241,0.28)] transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-            >
-              Abrir Daily Quest
-            </button>
-          }
-        >
-          <div className="space-y-3 text-sm text-white/80">
-            <p>
-              Generamos una misión corta y accionable para que mantengas la racha. Abrila, confirma tu plan y marcala
-              cuando la completes.
-            </p>
-            <ul className="space-y-2">
-              {[
-                '1 foco principal con claridad de impacto.',
-                'Recordatorios opcionales para no olvidarla.',
-                'Registro rápido del resultado y energía invertida.',
-              ].map((tip) => (
-                <li key={tip} className="flex items-start gap-2 text-white/75">
-                  <span className="mt-1 inline-block h-2 w-2 rounded-full bg-gradient-to-br from-sky-300 via-indigo-300 to-fuchsia-300 shadow-[0_0_12px_rgba(99,102,241,0.45)]" aria-hidden />
-                  <span>{tip}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </LegacyCard>
-        <LegacyCard
-          className="lg:col-span-5"
-          title="Consejos rápidos"
-          subtitle="Mantén el hábito vivo"
-        >
-          <div className="space-y-3 text-sm text-white/75">
-            <p className="font-semibold text-white">DQuest es tu base diaria:</p>
-            <ul className="space-y-2">
-              <li className="flex items-start gap-2">
-                <span className="mt-1 h-2 w-2 rounded-full bg-white/70" aria-hidden />
-                <span>Define hora y lugar en el modal para reducir fricción.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-1 h-2 w-2 rounded-full bg-white/70" aria-hidden />
-                <span>Si cambia tu día, reabre el modal y replanifica en segundos.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-1 h-2 w-2 rounded-full bg-white/70" aria-hidden />
-                <span>Marca el cierre: sumarás XP extra y mantendrás la racha activa.</span>
-              </li>
-            </ul>
-          </div>
-        </LegacyCard>
-      </div>
     </div>
   );
 }
