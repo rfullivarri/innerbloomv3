@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import type { CSSProperties } from 'react';
 import type { GameMode, XP } from '../state';
 
 interface HUDProps {
@@ -11,26 +12,26 @@ interface HUDProps {
   onBrandClick?: () => void;
 }
 
-const MODE_BADGE_META: Record<GameMode, { label: string; className: string; dotClass: string }> = {
+const MODE_BADGE_META: Record<GameMode, { label: string; accent: string; dot: string }> = {
   LOW: {
     label: 'Low Mood',
-    className: 'border-amber-300/40 bg-amber-300/15 text-amber-50',
-    dotClass: 'bg-amber-200',
+    accent: 'rgba(251, 191, 36, 0.42)',
+    dot: 'rgba(251, 191, 36, 0.95)',
   },
   CHILL: {
     label: 'Chill Mood',
-    className: 'border-emerald-300/40 bg-emerald-300/15 text-emerald-50',
-    dotClass: 'bg-emerald-200',
+    accent: 'rgba(52, 211, 153, 0.38)',
+    dot: 'rgba(52, 211, 153, 0.92)',
   },
   FLOW: {
     label: 'Flow Mood',
-    className: 'border-sky-400/40 bg-sky-400/15 text-sky-50',
-    dotClass: 'bg-sky-200',
+    accent: 'rgba(59, 130, 246, 0.4)',
+    dot: 'rgba(125, 211, 252, 0.92)',
   },
   EVOLVE: {
     label: 'Evolve Mood',
-    className: 'border-fuchsia-400/40 bg-fuchsia-400/15 text-fuchsia-50',
-    dotClass: 'bg-fuchsia-200',
+    accent: 'rgba(217, 70, 239, 0.42)',
+    dot: 'rgba(217, 70, 239, 0.95)',
   },
 };
 
@@ -52,12 +53,14 @@ function ModeBadge({ mode }: { mode: GameMode | null }) {
   }
 
   const meta = MODE_BADGE_META[mode];
+  const style = { '--chip-accent': meta.accent } as CSSProperties;
 
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] shadow-[0_0_18px_rgba(15,23,42,0.35)] backdrop-blur ${meta.className}`}
+      className="onboarding-mode-chip inline-flex items-center gap-2 px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/85 shadow-[0_0_18px_rgba(8,12,24,0.5)] ring-1 ring-white/10"
+      style={style}
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${meta.dotClass}`} />
+      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: meta.dot }} />
       {meta.label}
     </span>
   );
