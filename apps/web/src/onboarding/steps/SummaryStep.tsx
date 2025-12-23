@@ -158,7 +158,7 @@ export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps)
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="w-full max-w-md rounded-3xl border border-white/10 bg-slate-900/90 p-6 text-center text-white shadow-[0_30px_80px_rgba(255,255,255,0.08)]"
+            className="w-full max-w-md rounded-3xl border border-white/10 bg-slate-900/90 p-6 text-center text-white shadow-2xl"
           >
             <h3 className="text-2xl font-semibold text-white">¡Tu plan está en marcha!</h3>
             <p className="mt-3 text-sm text-white/70">
@@ -176,7 +176,7 @@ export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps)
               <button
                 type="button"
                 onClick={handleGoToLogin}
-                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-sky-400 via-violet-500 to-fuchsia-500 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-white/30 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300"
+                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-sky-400 via-violet-500 to-fuchsia-500 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300"
               >
                 Ir a login
               </button>
