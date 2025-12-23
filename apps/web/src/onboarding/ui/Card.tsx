@@ -14,10 +14,10 @@ export const Card = forwardRef<HTMLButtonElement, CardProps>(function Card(
   ref,
 ) {
   const classes = [
-    'glass-card relative flex h-full flex-col gap-2 rounded-3xl px-5 py-6 text-left transition',
+    'glass-card onboarding-surface-inner relative flex h-full flex-col gap-2 rounded-3xl px-5 py-6 text-left transition',
     active
-      ? 'border-sky-400/60 shadow-lg shadow-sky-500/20 ring-2 ring-sky-400/50'
-      : 'border-white/5 hover:border-white/20 hover:shadow-lg/40',
+      ? 'onboarding-glass-border shadow-lg shadow-sky-500/20 ring-2 ring-sky-400/50'
+      : 'onboarding-glass-border-soft hover:border-white/40 hover:shadow-lg/40',
     className,
   ]
     .filter(Boolean)

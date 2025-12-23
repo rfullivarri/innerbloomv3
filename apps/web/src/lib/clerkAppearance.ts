@@ -12,7 +12,7 @@ const baseLayout = {
 const baseVariables = {
   colorPrimary: '#7c3aed',
   colorBackground: 'transparent',
-  colorInputBackground: 'rgba(15, 23, 42, 0.55)',
+  colorInputBackground: 'rgba(255, 255, 255, 0.14)',
   colorInputText: '#f8fafc',
   colorText: '#f8fafc',
   colorTextSecondary: 'rgba(226, 232, 240, 0.8)',

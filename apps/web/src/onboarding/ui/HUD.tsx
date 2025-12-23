@@ -90,7 +90,7 @@ export function HUD({ mode, stepIndex, totalSteps, xp, onRestart, onExit, onBran
   const handleBrand = onBrandClick ?? onExit;
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 border-b border-white/10 bg-slate-950/75 backdrop-blur">
+    <header className="fixed inset-x-0 top-0 z-40 border-b border-white/15 bg-white/10 backdrop-blur-2xl">
       <div className="mx-auto w-full max-w-4xl px-3 py-3 sm:px-4">
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-3">

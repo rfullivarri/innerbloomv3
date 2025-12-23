@@ -15,7 +15,7 @@ export function Snack({ message }: SnackProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="glow-chip rounded-full bg-slate-900/90 px-4 py-2 text-sm font-semibold text-white shadow-xl"
+            className="glow-chip rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-slate-900 shadow-xl backdrop-blur"
           >
             {message}
           </motion.div>
