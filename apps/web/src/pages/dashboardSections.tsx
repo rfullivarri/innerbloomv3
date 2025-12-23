@@ -3,7 +3,7 @@ import { type ReactElement, type SVGProps } from 'react';
 import type { NavbarSection } from '../components/layout/Navbar';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 
-export type DashboardSectionKey = 'dashboard' | 'missions' | 'rewards' | 'editor';
+export type DashboardSectionKey = 'dashboard' | 'missions' | 'dquest' | 'rewards' | 'editor';
 
 export interface DashboardSectionConfig extends NavbarSection {
   key: DashboardSectionKey;
@@ -72,6 +72,26 @@ function SparklesIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
       <path d="M9 4.5 10 7l1.5 1-1.5 1L9 12.5 8 9 6.5 8 8 7 9 4.5Z" />
       <path d="M15.5 11 16.5 13l1.5 1-1.5 1-1 2.5-1-2.5-1.5-1 1.5-1 1-2.5Z" />
       <path d="M12.5 5c.6 1 1.5 1.6 2.5 1.8" />
+    </svg>
+  );
+}
+
+function FlameIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M13.5 4.5c0 2.1 1.7 3.8 1.7 5.9 0 2.4-1.9 4.3-4.2 4.3s-4.2-1.9-4.2-4.3c0-.7.2-1.5.6-2.2" />
+      <path d="M11.2 3.6c0 1.4-1.2 2.3-1.7 3.5-.3.7-.4 1.4-.4 2.3 0 1.6 1.2 2.8 2.7 2.8s2.7-1.3 2.7-2.8c0-.6-.2-1.3-.5-1.8" />
+      <path d="M12 21c2.9 0 5.2-2.5 5.2-5.5 0-3.6-3.3-5.9-3.3-9.1 0-1.1.4-2.2 1.3-3.4" />
     </svg>
   );
 }
@@ -156,6 +176,17 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       description: 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.',
       icon: (props) => <RouteIcon {...props} />,
     },
+    dquest: {
+      key: 'dquest',
+      label: 'DQuest',
+      to: joinDashboardPath(basePath, 'dquest'),
+      end: true,
+      pageTitle: 'Daily Quest',
+      eyebrow: 'DQuest',
+      contentTitle: 'Daily Quest',
+      description: 'Tu ritual diario: enfócate en la misión clave del día y mantené la racha.',
+      icon: (props) => <FlameIcon {...props} />,
+    },
     rewards: {
       key: 'rewards',
       label: 'Rewards',
@@ -185,6 +216,7 @@ function createDashboardSections(currentPath?: string) {
   const sectionsByKey = buildDashboardSections(basePath);
   const sections: DashboardSectionConfig[] = [
     sectionsByKey.missions,
+    sectionsByKey.dquest,
     sectionsByKey.dashboard,
     sectionsByKey.rewards,
     sectionsByKey.editor,

@@ -461,7 +461,7 @@ export default function TaskEditorPage() {
               key: section.key,
               label: section.key === 'editor' ? 'Editor' : section.label,
               to: section.to,
-              icon: <Icon className="h-4 w-4" />,
+              icon: <Icon className="h-[19px] w-[19px]" />,
               end: section.end,
             };
           })}
