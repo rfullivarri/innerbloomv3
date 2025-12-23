@@ -1,7 +1,7 @@
 import type { Theme } from '@clerk/types';
 
-// Slightly narrower auth card to keep the login UI compact on small screens.
-export const AUTH_LOGIN_MAX_WIDTH = 'max-w-[450px]';
+// Allow the auth card to stretch edge-to-edge on small screens while keeping a comfortable max width on larger ones.
+export const AUTH_LOGIN_MAX_WIDTH = 'max-w-full sm:max-w-[480px]';
 
 const baseLayout = {
   logoPlacement: 'none' as const,
