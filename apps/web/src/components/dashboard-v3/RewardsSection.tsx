@@ -24,6 +24,25 @@ export function RewardsSection({
 
   const achievements = data?.achievements ?? [];
 
+  const { visibleAchievements, hasMockedAchievements } = useMemo(() => {
+    if (achievements.length === 0) {
+      return { visibleAchievements: [], hasMockedAchievements: false };
+    }
+
+    const mockIds = new Set(['ach_streak_7', 'ach_level_5']);
+    const mockNames = new Set(['7-Day Flame', 'Level 5']);
+
+    const isMocked = achievements.every((achievement) => {
+      const normalizedName = achievement.name?.trim() ?? '';
+      return mockIds.has(achievement.id) || (normalizedName && mockNames.has(normalizedName));
+    });
+
+    return {
+      visibleAchievements: isMocked ? [] : achievements,
+      hasMockedAchievements: isMocked,
+    };
+  }, [achievements]);
+
   const weeklyWrappedItems = useMemo(() => {
     const items: { label: string; record: WeeklyWrappedRecord }[] = [];
     if (weeklyWrappedCurrent) {
@@ -39,7 +58,7 @@ export function RewardsSection({
     let unlocked = 0;
     let inProgress = 0;
 
-    for (const achievement of achievements) {
+    for (const achievement of visibleAchievements) {
       const target = Math.max(0, achievement.progress.target ?? 0);
       const current = Math.max(0, achievement.progress.current ?? 0);
       const isUnlocked = target === 0 ? current > 0 : current >= target;
@@ -51,7 +70,7 @@ export function RewardsSection({
     }
 
     return { unlockedCount: unlocked, inProgressCount: inProgress };
-  }, [achievements]);
+  }, [visibleAchievements]);
 
   const showSkeleton = status === 'idle' || status === 'loading';
   const showError = status === 'error';
@@ -95,24 +114,28 @@ export function RewardsSection({
             items={weeklyWrappedItems}
             onOpen={onOpenWeeklyWrapped}
           />
-          <div className="grid gap-3 sm:grid-cols-2">
-            <RewardsSummaryCard label="Completados" value={unlockedCount} accent="emerald" />
-            <RewardsSummaryCard label="En progreso" value={inProgressCount} accent="sky" />
-          </div>
+          {!hasMockedAchievements && (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <RewardsSummaryCard label="Completados" value={unlockedCount} accent="emerald" />
+                <RewardsSummaryCard label="En progreso" value={inProgressCount} accent="sky" />
+              </div>
 
-          {achievements.length > 0 ? (
-            <ul className="space-y-4">
-              {achievements.map((achievement) => (
-                <RewardsAchievementItem key={achievement.id} achievement={achievement} />
-              ))}
-            </ul>
-          ) : (
-            <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-slate-300">
-              <p>Todavía no desbloqueaste recompensas.</p>
-              <p className="text-xs text-slate-400">
-                Completá misiones y mantené tus streaks activos para sumar XP y alcanzar nuevos hitos.
-              </p>
-            </div>
+              {visibleAchievements.length > 0 ? (
+                <ul className="space-y-4">
+                  {visibleAchievements.map((achievement) => (
+                    <RewardsAchievementItem key={achievement.id} achievement={achievement} />
+                  ))}
+                </ul>
+              ) : (
+                <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-slate-300">
+                  <p>Todavía no desbloqueaste recompensas.</p>
+                  <p className="text-xs text-slate-400">
+                    Completá misiones y mantené tus streaks activos para sumar XP y alcanzar nuevos hitos.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
