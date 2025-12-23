@@ -252,6 +252,10 @@ export default function DashboardV3Page() {
                   element={<MissionsV2Route userId={backendUserId} gameMode={gameMode} />}
                 />
                 <Route
+                  path="misiones"
+                  element={<MissionsV2Route userId={backendUserId} gameMode={gameMode} />}
+                />
+                <Route
                   path="missions-v3"
                   element={<MissionsV3Route userId={backendUserId} gameMode={gameMode} />}
                 />
@@ -618,4 +622,3 @@ function FallbackMetric({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
