@@ -41,7 +41,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
   }, [items, location.pathname]);
 
   const baseItemClasses =
-    'group relative flex w-full flex-col items-center gap-0.5 rounded-2xl px-2.5 py-1.5 text-[10px] font-semibold tracking-[0.12em] uppercase transition';
+    'group relative flex w-full flex-col items-center gap-0.5 rounded-2xl px-2 py-1.5 text-[10px] font-semibold tracking-[0.12em] uppercase transition';
 
   const renderParticles = activeKey
     ? [0, 1, 2].map((index) => (
@@ -74,7 +74,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
           </linearGradient>
         </defs>
       </svg>
-      <ul className="flex w-full max-w-xl items-center justify-between gap-1 rounded-[1.9rem] border border-white/16 bg-white/10 px-2 py-1.5 shadow-[0_14px_34px_rgba(8,15,35,0.55)] backdrop-blur-2xl backdrop-saturate-150">
+      <ul className="flex w-full max-w-xl items-center justify-between gap-0.5 rounded-[1.9rem] border border-white/16 bg-white/10 px-2 py-1.5 shadow-[0_14px_34px_rgba(8,15,35,0.55)] backdrop-blur-2xl backdrop-saturate-150">
         {items.map((item) => (
           <li key={item.key} className="relative flex flex-1 justify-center">
             <NavLink
@@ -85,7 +85,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                   baseItemClasses,
                   isActive
                     ? 'text-white'
-                    : 'text-white/70 hover:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/70'
+                    : 'text-white/65 hover:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/70'
                 )
               }
             >
@@ -101,10 +101,11 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                   )}
                   <span
                     className={combine(
-                      'relative z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/18 bg-white/12 text-sm shadow-[0_10px_22px_rgba(15,23,42,0.34)] transition-all duration-500 ease-out backdrop-blur-xl group-active:scale-95',
-                      item.key === 'dashboard' && 'h-10 w-10 text-base',
+                      'relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/14 bg-white/[0.08] text-xs shadow-[0_10px_22px_rgba(15,23,42,0.34)] transition-all duration-500 ease-out backdrop-blur-xl group-active:scale-95',
+                      item.key === 'dashboard' && 'h-9 w-9 text-sm',
                       isActive &&
-                        'scale-105 border-white/40 bg-gradient-to-br from-white/14 to-white/5 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_30px_rgba(59,130,246,0.32)]'
+                        'scale-105 border-white/40 bg-gradient-to-br from-white/14 to-white/5 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_16px_30px_rgba(59,130,246,0.32)]',
+                      !isActive && 'opacity-75'
                     )}
                   >
                     {isActive && (
@@ -118,17 +119,17 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                         'relative transition-all duration-400 ease-out',
                         isActive
                           ? 'text-white drop-shadow-[0_0_12px_rgba(99,102,241,0.55)]'
-                          : 'text-white/70 group-hover:text-white'
+                          : 'text-white/45 group-hover:text-white/80'
                       )}
                     >
                       {isValidElement<SVGProps<SVGSVGElement>>(item.icon)
                         ? cloneElement<SVGProps<SVGSVGElement>>(item.icon, {
                             className: combine(
-                              'h-[19px] w-[19px] stroke-[1.9] transition-all duration-300',
+                              'h-[16px] w-[16px] stroke-[1.85] transition-all duration-300',
                               item.icon.props.className,
                               isActive ? 'animate-[pulse_2.2s_ease-in-out_infinite]' : ''
                             ),
-                            stroke: isActive ? `url(#${gradientId})` : item.icon.props.stroke,
+                            stroke: isActive ? `url(#${gradientId})` : item.icon.props.stroke ?? 'currentColor',
                             'aria-hidden': true,
                           })
                         : null}
@@ -139,8 +140,8 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                   </span>
                   <span
                     className={combine(
-                      'mt-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60 transition-all duration-300',
-                      item.key === 'dashboard' && 'text-[10.5px]',
+                      'mt-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-white/55 transition-all duration-300',
+                      item.key === 'dashboard' && 'text-[10px]',
                       isActive &&
                         'text-transparent bg-clip-text bg-gradient-to-r from-sky-200 via-indigo-200 to-fuchsia-200 scale-105 drop-shadow-[0_0_8px_rgba(59,130,246,0.35)]'
                     )}
