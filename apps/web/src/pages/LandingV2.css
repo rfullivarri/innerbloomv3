@@ -144,6 +144,21 @@
   align-items: center;
 }
 
+.lv2-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+.lv2-dashboard-card {
+  height: 100%;
+}
+
+.card-span-2 {
+  grid-column: span 2;
+}
+
 .lv2-hero-copy h1 {
   font-family: var(--font-heading);
   font-weight: 900;
@@ -343,6 +358,65 @@
   border-radius: 999px;
   padding: 6px 10px;
   font-size: 12px;
+}
+
+.lv2-mission-list {
+  display: grid;
+  gap: 10px;
+}
+
+.lv2-mission-chip {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.lv2-mission-main {
+  display: grid;
+  gap: 6px;
+}
+
+.lv2-mission-title {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.lv2-mission-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lv2-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.lv2-pill.ghost {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.32);
+}
+
+.lv2-mission-reward {
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.22), rgba(56, 189, 248, 0.2));
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
 }
 
 .lv2-wrap-bar {
@@ -588,6 +662,14 @@
 
   .lv2-hero-visual {
     min-height: 360px;
+  }
+
+  .lv2-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-span-2 {
+    grid-column: span 1;
   }
 
   .lv2-hero-card {
