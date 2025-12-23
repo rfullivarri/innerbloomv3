@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
+import { FeatureShowcaseSection } from '../components/landing/FeatureShowcaseSection';
 import './Landing.css';
 
 const buttonBaseClasses =
@@ -91,15 +92,6 @@ const HOW_STEPS = [
     copy:
       'Seguís tu crecimiento acumulando experiencia (XP), moviendo tu constancia semanal, desafiándote a nuevas misiones y obteniendo recompensas.'
   }
-];
-
-const FEATURES = [
-  { title: '📝 Daily Quest', copy: 'Seguimiento de tareas por pilar y emoción diaria. 100% conectado a tu board.' },
-  { title: '⭐ XP & Nivel', copy: 'Progreso con datos reales. Barra de nivel y XP faltante al siguiente nivel.' },
-  { title: '📆 Constancia semanal', copy: 'Rachas por tarea: cuántas semanas seguidas mantienes la constancia de tus actividades.' },
-  { title: '🎯 Misiones & Rewards', copy: 'Misiones vinculadas a rachas. Bonos de XP al cumplir objetivos.' },
-  { title: '🗺️ Emotion Heatmap', copy: 'Mapa visual de tu estado emocional a lo largo del tiempo.' },
-  { title: '📱 App & Recordatorios', copy: 'Descarga nuestra app y recibe recordatorios para un mejor seguimiento.' }
 ];
 
 const TESTIMONIALS = [
@@ -355,24 +347,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="features section-pad reveal-on-scroll" id="features">
-          <div className="container">
-            <h2>Lo que desbloqueás</h2>
-            <p className="section-sub">Herramientas que te dan claridad y momentum.</p>
-            <div className="cards grid-3">
-              {FEATURES.map((feature, index) => (
-                <article
-                  className="card fade-item"
-                  key={feature.title}
-                  style={{ '--delay': `${index * 80}ms` } as CSSProperties}
-                >
-                  <h3>{feature.title}</h3>
-                  <p>{feature.copy}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+        <FeatureShowcaseSection />
 
         <section className="testimonials section-pad reveal-on-scroll" id="testimonials">
           <div className="container">
