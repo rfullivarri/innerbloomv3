@@ -40,7 +40,7 @@ export function ChoiceStep({
                 type="button"
                 onClick={() => onChange(choice)}
                 data-selected={active ? 'true' : undefined}
-                className={`inline-flex w-full items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-white/80 transition hover:border-white/25 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/60 data-[selected=true]:border-violet-400/70 data-[selected=true]:bg-violet-500/10 data-[selected=true]:text-white data-[selected=true]:shadow-inner data-[selected=true]:shadow-violet-500/20`}
+                className={`inline-flex w-full items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-white/80 transition hover:border-white/25 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/60 data-[selected=true]:border-violet-400/70 data-[selected=true]:bg-violet-500/10 data-[selected=true]:text-white data-[selected=true]:shadow-inner data-[selected=true]:shadow-white/25`}
               >
                 <SelectableCheck
                   selected={active}
