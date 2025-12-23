@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import './LandingV2.css';
+import '../styles/panel-rachas.overrides.css';
+import { Card } from '../components/ui/Card';
 
 type Language = 'en' | 'es';
 
@@ -14,7 +16,7 @@ type Highlight = {
   id: string;
   title: string;
   description: string;
-  visual: 'heatmap' | 'kpis' | 'wrap';
+  visual: 'xp' | 'energy' | 'emotion' | 'missions';
 };
 
 type Mode = {
@@ -60,87 +62,94 @@ const t = {
       { href: '#faq', label: 'FAQ' }
     ] satisfies NavItem[],
     hero: {
-      title: 'Turn habits into a dashboarded journey',
-      subtitle: 'Mobile-first heatmaps, streaks, and KPIs that adapt to your energy.',
-      cta: 'Start free',
-      secondary: 'See the product',
-      supporting: 'Your base is generated in under 3 minutes with AI.'
+      title: 'Turn experience into habits. Turn habits into your path.',
+      subtitle:
+        'Your habits are the map. Consistency is the level you reach. A gamified self-improvement journey balanced between Body, Mind and Soul.',
+      cta: 'Start my Journey',
+      secondary: 'See the dashboard',
+      supporting: 'In under 3 minutes we generate your AI base so you can play with real data.'
     },
     highlights: {
-      title: 'What you track in Innerbloom',
-      description: 'Visual, lightweight snapshots that keep you moving forward.',
+      title: 'See the real dashboard',
+      description: 'Same bars and heatmaps you use daily: Daily Quest, XP, streaks, missions and emotions.',
       items: [
         {
-          id: 'heatmap',
+          id: 'xp',
+          title: 'XP, level and streaks',
+          description: 'Progress bar with missing XP and active rewards.',
+          visual: 'xp'
+        },
+        {
+          id: 'energy',
+          title: 'Daily Energy',
+          description: 'Balance HP, Mood and Focus to sustain consistency.',
+          visual: 'energy'
+        },
+        {
+          id: 'emotion',
           title: 'Emotion heatmap',
-          description: 'Log mood in seconds and spot weekly trends.',
-          visual: 'heatmap'
+          description: 'Mood check-ins visualized exactly like in the app.',
+          visual: 'emotion'
         },
         {
-          id: 'kpis',
-          title: 'Streaks & KPIs',
-          description: 'Consistency, XP, and daily focus areas in one view.',
-          visual: 'kpis'
-        },
-        {
-          id: 'wrap',
-          title: 'Weekly wrap',
-          description: 'Auto-summary of wins, misses, and next steps.',
-          visual: 'wrap'
+          id: 'missions',
+          title: 'Missions & rewards',
+          description: 'Quests tied to streaks with XP bonuses and clear steps.',
+          visual: 'missions'
         }
       ] satisfies Highlight[]
     },
     modes: {
-      title: 'Match the app to your energy',
-      description: 'Four modes so you can move, even on low days.',
+      title: 'Modulate your game mode',
+      description: 'Swap modes to match your energy. The system adapts to keep you moving.',
       items: [
         {
           id: 'low',
           title: '🪫 Low',
-          benefit: 'Protect energy with tiny, winnable steps.',
-          bullets: ['1–2 minute tasks', 'Recovery-first', 'No guilt rest']
+          benefit: 'For low energy days: activate a minimum viable routine.',
+          bullets: ['1–2 minute tasks', 'Recovery-first', 'Zero-guilt rest']
         },
         {
           id: 'chill',
           title: '🍃 Chill',
-          benefit: 'Stay steady with balanced routines.',
+          benefit: 'Relaxed and stable: sustain well-being with soft routines.',
           bullets: ['Light planning', 'Evening reflection', 'Gentle streaks']
         },
         {
           id: 'flow',
           title: '🌊 Flow',
-          benefit: 'Ride momentum with focused blocks.',
+          benefit: 'Focused and in motion: ride momentum with aligned goals.',
           bullets: ['Goal-linked tasks', 'Focus timers', 'Progress tags']
         },
         {
           id: 'evolve',
           title: '🧬 Evolve',
-          benefit: 'Push limits with missions and rewards.',
+          benefit: 'Ambitious and determined: atomic habits, missions and rewards.',
           bullets: ['Atomic habits', 'XP ladders', 'Weekly challenges']
         }
       ] satisfies Mode[]
     },
     pillars: {
-      title: 'Built around Body, Mind, Soul',
-      description: 'Balance inputs so consistency actually sticks.',
+      title: 'Body, Mind, Soul',
+      description: 'Sustainable progress needs balance. When one drops, the other two support you.',
       items: [
         {
           id: 'body',
           title: 'Body',
           emoji: '🫀',
-          description: 'Sleep, nutrition, and movement drive daily energy.'
+          description: 'Sleep, nutrition and movement set your daily energy (HP).'
         },
         {
           id: 'mind',
           title: 'Mind',
           emoji: '🧠',
-          description: 'Focus and learning rituals keep momentum clean.'
+          description: 'Focus rituals keep attention, learning and creativity alive.'
         },
         {
           id: 'soul',
           title: 'Soul',
           emoji: '🏵️',
-          description: 'Emotions and purpose stabilize long-term habits.'
+          description: 'Emotions, relationships and purpose stabilize the system.'
         }
       ] satisfies Pillar[]
     },
@@ -157,118 +166,133 @@ const t = {
       title: 'FAQ',
       items: [
         {
-          q: 'Do I need discipline to start?',
-          a: 'No. Begin in Low mode and the app keeps tasks tiny until you have momentum.'
-        },
-        {
-          q: 'Where do I see my metrics?',
-          a: 'In your dashboard: heatmap, streaks, XP, and weekly wrap.'
+          q: 'Do I need a lot of discipline to start?',
+          a: 'No. Start in Low so we keep actions tiny while you regain momentum.'
         },
         {
           q: 'Can I switch modes?',
-          a: 'Yes, swap between Low, Chill, Flow, and Evolve anytime.'
+          a: 'Yes. Swap between Low, Chill, Flow and Evolve whenever you need.'
+        },
+        {
+          q: 'Where do I see my metrics?',
+          a: 'In the dashboard: XP, level, streaks and the emotion heatmap.'
+        },
+        {
+          q: 'What happens if I stop logging?',
+          a: 'You do not lose progress. Resume anytime and we adjust goals to your current energy.'
         }
       ] satisfies Faq[]
     },
     next: {
-      title: 'Ready to see your data?',
-      description: 'Start free, switch languages anytime.',
-      primary: 'Start free',
-      secondary: 'View sample dashboard'
+      title: 'Ready to play with your own data?',
+      description: 'We guide you step by step. Start free and change language anytime.',
+      primary: 'Start my Journey',
+      secondary: 'View the dashboard'
     },
     langLabel: 'Language'
   },
   es: {
     nav: [
       { href: '#hero', label: 'Overview' },
-      { href: '#highlights', label: 'Dashboards' },
+      { href: '#highlights', label: 'Producto' },
       { href: '#modes', label: 'Modos' },
       { href: '#pillars', label: 'Pilares' },
       { href: '#testimonials', label: 'Testimonios' },
       { href: '#faq', label: 'FAQ' }
     ] satisfies NavItem[],
     hero: {
-      title: 'Convierte tus hábitos en un dashboard claro',
-      subtitle: 'Heatmaps, rachas y KPIs mobile-first que se adaptan a tu energía.',
-      cta: 'Empezar gratis',
-      secondary: 'Ver el producto',
-      supporting: 'Generamos tu base en menos de 3 minutos con IA.'
+      title: 'Convierte la experiencia en hábitos. Convierte los hábitos en camino.',
+      subtitle:
+        'Tus hábitos son el mapa. Tu constancia, el nivel que alcanzas. Es tu self-improvement journey con equilibrio entre 🫀 Cuerpo, 🧠 Mente y 🏵️ Alma.',
+      cta: 'Comenzar mi Journey',
+      secondary: 'Ver el dashboard',
+      supporting: 'En menos de 3 minutos generamos tu base con IA y la conectamos al juego.'
     },
     highlights: {
-      title: 'Lo que ves en Innerbloom',
-      description: 'Snapshots visuales y ligeros para seguir avanzando.',
+      title: 'Muestra del producto real',
+      description: 'Las mismas barras y heatmaps del dashboard: Daily Quest, XP, rachas, misiones y emociones.',
       items: [
         {
-          id: 'heatmap',
-          title: 'Heatmap emocional',
-          description: 'Registra tu ánimo en segundos y ve tendencias semanales.',
-          visual: 'heatmap'
+          id: 'xp',
+          title: 'XP, nivel y rachas',
+          description: 'Barra de nivel con XP faltante y recompensas activas.',
+          visual: 'xp'
         },
         {
-          id: 'kpis',
-          title: 'Rachas y KPIs',
-          description: 'Constancia, XP y focos diarios en una sola vista.',
-          visual: 'kpis'
+          id: 'energy',
+          title: 'Daily Energy (HP/Mood/Focus)',
+          description: 'Equilibrio de pilares para sostener la constancia.',
+          visual: 'energy'
         },
         {
-          id: 'wrap',
-          title: 'Weekly wrap',
-          description: 'Resumen automático de logros, pendientes y próximos pasos.',
-          visual: 'wrap'
+          id: 'emotion',
+          title: 'Mapa emocional',
+          description: 'Heatmap exacto del dashboard para ver patrones reales.',
+          visual: 'emotion'
+        },
+        {
+          id: 'missions',
+          title: 'Misiones + Rewards',
+          description: 'Misiones ligadas a rachas con bonos de XP y próximos pasos.',
+          visual: 'missions'
         }
       ] satisfies Highlight[]
     },
     modes: {
-      title: 'Ajusta el modo a tu energía',
-      description: 'Cuatro modos para moverte incluso en días bajos.',
+      title: 'Modula tu modo de juego',
+      description: 'Cambia según tu momento. El sistema se adapta a tu energía.',
       items: [
         {
           id: 'low',
           title: '🪫 Low',
-          benefit: 'Protegé energía con pasos mínimos.',
+          benefit: 'Estado: sin energía, abrumado. Objetivo: activar tu mínimo vital con acciones pequeñas.',
           bullets: ['Tareas de 1–2 minutos', 'Recuperación primero', 'Descanso sin culpa']
         },
         {
           id: 'chill',
           title: '🍃 Chill',
-          benefit: 'Mantén estabilidad con rutinas balanceadas.',
+          benefit: 'Estado: relajado y estable. Objetivo: sostener bienestar con rutinas suaves y balanceadas.',
           bullets: ['Plan liviano', 'Reflexión nocturna', 'Rachas suaves']
         },
         {
           id: 'flow',
           title: '🌊 Flow',
-          benefit: 'Aprovechá el impulso con bloques enfocados.',
+          benefit: 'Estado: enfocado y en movimiento. Objetivo: aprovechar el impulso con un plan alineado a metas.',
           bullets: ['Tareas ligadas a metas', 'Timers de foco', 'Tags de progreso']
         },
         {
           id: 'evolve',
           title: '🧬 Evolve',
-          benefit: 'Subí la vara con misiones y recompensas.',
+          benefit: 'Estado: ambicioso y determinado. Objetivo: sistema retador con Hábitos Atómicos, misiones y recompensas.',
           bullets: ['Hábitos atómicos', 'Escalera de XP', 'Retos semanales']
         }
       ] satisfies Mode[]
     },
     pillars: {
       title: 'Cuerpo, Mente, Alma',
-      description: 'Equilibrá insumos para que la constancia se sostenga.',
+      description:
+        'El progreso sostenible necesita equilibrio. Cuerpo para la energía y la salud, Mente para el foco y el aprendizaje, y Alma para el bienestar emocional y el sentido.',
       items: [
         {
           id: 'body',
           title: 'Cuerpo',
           emoji: '🫀',
-          description: 'Sueño, nutrición y movimiento sostienen tu energía diaria.'
+          description:
+            'Tu cuerpo es el sustrato del hábito: sueño, nutrición y movimiento marcan tu disponibilidad de energía diaria (HP).'
         },
         {
           id: 'mind',
           title: 'Mente',
           emoji: '🧠',
-          description: 'Rituales de foco y aprendizaje mantienen el impulso.'
+          description:
+            'La mente filtra y prioriza. Sin foco, no hay consistencia. Diseñamos sesiones simples para sostener la atención, el aprendizaje y la creatividad.'
         },
         {
           id: 'soul',
           title: 'Alma',
           emoji: '🏵️',
-          description: 'Emociones y propósito estabilizan hábitos a largo plazo.'
+          description:
+            'Las emociones, los vínculos y el propósito estabilizan el sistema. Sin esto, los hábitos no atraviesan semanas ni meses.'
         }
       ] satisfies Pillar[]
     },
@@ -286,27 +310,294 @@ const t = {
       items: [
         {
           q: '¿Necesito disciplina para empezar?',
-          a: 'No. Arrancás en Low y la app mantiene tareas mínimas hasta generar impulso.'
-        },
-        {
-          q: '¿Dónde veo mis métricas?',
-          a: 'En tu dashboard: heatmap, rachas, XP y weekly wrap.'
+          a: 'No. Si estás con poca energía, empezás en Low para activar el mínimo vital. El sistema ajusta el ritmo.'
         },
         {
           q: '¿Puedo cambiar de modo?',
-          a: 'Sí, podés alternar entre Low, Chill, Flow y Evolve en cualquier momento.'
+          a: 'Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento.'
+        },
+        {
+          q: '¿Dónde veo mis métricas?',
+          a: 'En tu dashboard: XP, nivel, rachas y mapa emocional.'
+        },
+        {
+          q: '¿Qué pasa si dejo de registrar?',
+          a: 'No perdés progreso. Retomás cuando quieras y ajustamos objetivos según tu energía.'
         }
       ] satisfies Faq[]
     },
     next: {
-      title: 'Listo para ver tus datos?',
-      description: 'Empezá gratis y cambiá de idioma cuando quieras.',
-      primary: 'Empezar gratis',
-      secondary: 'Ver dashboard de muestra'
+      title: '¿Listo para ver tus datos reales?',
+      description: 'Te guiamos paso a paso. Empezá gratis y cambiá de idioma cuando quieras.',
+      primary: 'Comenzar mi Journey',
+      secondary: 'Ver el dashboard'
     },
     langLabel: 'Idioma'
   }
 } as const;
+
+type EmotionName = 'Calma' | 'Felicidad' | 'Motivación' | 'Tristeza' | 'Ansiedad' | 'Frustración' | 'Cansancio' | 'Sin registro';
+
+type EmotionPreviewColumn = {
+  key: string;
+  cells: EmotionName[];
+};
+
+const EMOTION_COLORS: Record<EmotionName, string> = {
+  Calma: '#2ECC71',
+  Felicidad: '#F1C40F',
+  Motivación: '#9B59B6',
+  Tristeza: '#3498DB',
+  Ansiedad: '#E74C3C',
+  Frustración: '#8D6E63',
+  Cansancio: '#16A085',
+  'Sin registro': '#555555'
+};
+
+const EMOTION_PREVIEW_COLUMNS: EmotionPreviewColumn[] = [
+  { key: 'w1', cells: ['Calma', 'Motivación', 'Felicidad', 'Motivación', 'Cansancio', 'Felicidad', 'Sin registro'] },
+  { key: 'w2', cells: ['Calma', 'Calma', 'Felicidad', 'Motivación', 'Calma', 'Cansancio', 'Sin registro'] },
+  { key: 'w3', cells: ['Motivación', 'Motivación', 'Felicidad', 'Calma', 'Calma', 'Tristeza', 'Frustración'] },
+  { key: 'w4', cells: ['Calma', 'Motivación', 'Felicidad', 'Motivación', 'Calma', 'Calma', 'Motivación'] },
+  { key: 'w5', cells: ['Motivación', 'Calma', 'Calma', 'Felicidad', 'Motivación', 'Calma', 'Calma'] },
+  { key: 'w6', cells: ['Calma', 'Motivación', 'Motivación', 'Felicidad', 'Motivación', 'Calma', 'Calma'] },
+  { key: 'w7', cells: ['Motivación', 'Calma', 'Calma', 'Felicidad', 'Motivación', 'Calma', 'Calma'] },
+  { key: 'w8', cells: ['Calma', 'Motivación', 'Felicidad', 'Motivación', 'Calma', 'Calma', 'Motivación'] }
+];
+
+const EMOTION_PREVIEW_SUMMARY = { emotion: 'Motivación' as const, count: 6 };
+
+const ENERGY_PREVIEW = [
+  { label: 'HP', percent: 76, delta: 8 },
+  { label: 'Mood', percent: 64, delta: 3 },
+  { label: 'Focus', percent: 88, delta: 6 }
+] as const;
+
+const MISSION_PREVIEW_ITEMS = [
+  { title: 'Daily Quest: Dormir 7h', tag: 'Body', reward: '+120 XP', status: { es: 'En progreso', en: 'In progress' } },
+  { title: 'Reflexión nocturna', tag: 'Soul', reward: '+80 XP', status: { es: 'Checklist', en: 'Checklist' } },
+  { title: 'Boss: Focus AM', tag: 'Mind', reward: '+160 XP', status: { es: '2/3 completado', en: '2/3 complete' } }
+] as const;
+
+function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boolean; language?: Language }) {
+  const progressPercent = 72;
+  const progressLabel = `${progressPercent}%`;
+  const levelLabel = '7';
+  const xpTotalLabel = '12,430';
+  const xpToNextMessage =
+    language === 'es' ? '✨ Te faltan 320 XP para el próximo nivel' : '✨ You need 320 XP for the next level';
+  const ariaValueText = language === 'es' ? `${progressLabel} completado` : `${progressLabel} complete`;
+
+  return (
+    <div className={compact ? 'space-y-3' : 'space-y-5'}>
+      <div className={`flex flex-wrap items-center justify-${compact ? 'between' : 'center'} gap-4 text-slate-200`}>
+        <div className={`${compact ? 'flex-1 min-w-[120px]' : ''}`}>
+          <div className="flex items-center gap-3">
+            <span className="text-[2.1em] leading-none">🏆</span>
+            <div className="flex flex-col">
+              <span className={`font-semibold text-slate-50 ${compact ? 'text-2xl' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Total XP</span>
+            </div>
+          </div>
+        </div>
+        <div className={`${compact ? 'flex-1 min-w-[120px]' : ''}`}>
+          <div className="flex items-center gap-3">
+            <span className="text-[2.1em] leading-none">🎯</span>
+            <div className="flex flex-col">
+              <span className={`font-semibold text-slate-50 ${compact ? 'text-2xl' : 'text-4xl sm:text-5xl'}`}>{levelLabel}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Nivel</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Progreso</p>
+        <div
+          className={`relative ${compact ? 'h-4' : 'h-6 sm:h-[30px]'} w-full overflow-hidden rounded-full border border-white/5 bg-slate-950/60 shadow-[inset_0_2px_8px_rgba(8,15,40,0.6)]`}
+          role="progressbar"
+          aria-label="Progreso hacia el próximo nivel"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progressPercent}
+          aria-valuetext={ariaValueText}
+        >
+          <div className="absolute inset-0" aria-hidden>
+            <div className="h-full bg-gradient-to-r from-indigo-400/20 via-fuchsia-400/25 to-amber-300/20" />
+          </div>
+          <div
+            className="relative h-full rounded-full bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300 transition-[width] duration-500 ease-out progress-fill--typing"
+            style={{ width: `${progressPercent}%` }}
+          />
+          <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-950 drop-shadow-[0_1px_2px_rgba(255,255,255,0.45)]">
+            {progressLabel}
+          </span>
+        </div>
+        {!compact && <p className="text-sm text-slate-300">{xpToNextMessage}</p>}
+      </div>
+    </div>
+  );
+}
+
+function EnergyMeterPreview({
+  label,
+  percent,
+  deltaPct,
+  highlight = false,
+  compact = false
+}: {
+  label: 'HP' | 'Mood' | 'Focus';
+  percent: number;
+  deltaPct?: number;
+  highlight?: boolean;
+  compact?: boolean;
+}) {
+  const clamped = Math.max(0, Math.min(percent, 100));
+  const width = clamped <= 4 ? 4 : clamped;
+  const hasDelta = typeof deltaPct === 'number';
+  const deltaLabel = hasDelta ? `${deltaPct >= 0 ? '+' : ''}${deltaPct}%` : null;
+  const deltaColor =
+    typeof deltaPct === 'number'
+      ? deltaPct < 0
+        ? 'text-rose-300'
+        : deltaPct > 0
+          ? 'text-emerald-200'
+          : 'text-slate-200'
+      : 'text-slate-200';
+  const gradient =
+    label === 'HP'
+      ? 'from-cyan-200 via-sky-300 to-blue-400'
+      : label === 'Mood'
+        ? 'from-rose-200 via-pink-300 to-fuchsia-400'
+        : 'from-indigo-200 via-violet-300 to-purple-400';
+
+  return (
+    <div className={`space-y-2 ${compact ? 'text-xs' : ''}`}>
+      <div className="flex items-center justify-between">
+        <span
+          className={`text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300 ${highlight ? 'drop-shadow-[0_0_6px_rgba(16,185,129,0.45)]' : ''}`}
+        >
+          {label}
+        </span>
+        <span className="rounded-full bg-slate-950/90 px-2 py-0.5 text-[11px] font-semibold text-slate-100 shadow-sm">
+          {clamped}%
+        </span>
+      </div>
+      <div className="relative h-4 w-full overflow-hidden rounded-full border border-white/5 bg-slate-900/40 shadow-[inset_0_1px_1px_rgba(15,23,42,0.45)] sm:h-5">
+        <div
+          className={`relative h-full rounded-full bg-gradient-to-r ${gradient} transition-[width] duration-500 ease-out progress-fill--typing`}
+          style={{ width: `${width}%`, minWidth: clamped === 0 ? '1.5rem' : undefined }}
+        />
+      </div>
+      {deltaLabel ? (
+        <p className={`text-[12px] font-medium leading-tight ${deltaColor}`}>{deltaLabel}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function DailyEnergyPreview({ compact = false, language = 'es' }: { compact?: boolean; language?: Language }) {
+  return (
+    <div className="space-y-4">
+      {!compact && (
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+          {language === 'es' ? 'Comparado con tu semana anterior' : 'Compared to your previous week'}
+        </p>
+      )}
+      <EnergyMeterPreview label="HP" percent={ENERGY_PREVIEW[0].percent} deltaPct={ENERGY_PREVIEW[0].delta} highlight compact={compact} />
+      <EnergyMeterPreview label="Mood" percent={ENERGY_PREVIEW[1].percent} deltaPct={ENERGY_PREVIEW[1].delta} compact={compact} />
+      <EnergyMeterPreview label="Focus" percent={ENERGY_PREVIEW[2].percent} deltaPct={ENERGY_PREVIEW[2].delta} compact={compact} />
+    </div>
+  );
+}
+
+function EmotionHeatmapPreview({ compact = false, language = 'es' }: { compact?: boolean; language?: Language }) {
+  const gridStyle = {
+    '--column-count': EMOTION_PREVIEW_COLUMNS.length,
+    '--cell': compact ? '10px' : '12px',
+    '--cell-gap': '5px'
+  } as CSSProperties;
+
+  return (
+    <div className="space-y-3" data-emotion-card="heatmap">
+      <div id="emotionChart">
+        <div className="emotion-chart-surface">
+          <div className="grid-box" style={gridStyle}>
+            <div className="emotion-grid--weekcols">
+              {EMOTION_PREVIEW_COLUMNS.map((column, columnIndex) => (
+                <div key={column.key} className="emotion-col" style={{ gridColumn: `${columnIndex + 1}` }}>
+                  {column.cells.map((cell, cellIndex) => (
+                    <div
+                      key={`${column.key}-${cellIndex}`}
+                      className="emotion-cell"
+                      style={{ backgroundColor: EMOTION_COLORS[cell] }}
+                      title={cell}
+                      aria-label={`${cell} • día ${cellIndex + 1}`}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      {!compact && (
+        <div className="summary-inner w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:p-4" data-emotion-card="summary">
+          <div className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full" style={{ backgroundColor: EMOTION_COLORS[EMOTION_PREVIEW_SUMMARY.emotion] }} />
+          <div className="summary-content">
+            <span className="summary-title text-slate-100">{EMOTION_PREVIEW_SUMMARY.emotion}</span>
+            <span className="summary-description text-sm text-slate-100 opacity-70">
+              {language === 'es'
+                ? `Emoción más frecuente en las últimas semanas (${EMOTION_PREVIEW_SUMMARY.count} ${
+                    EMOTION_PREVIEW_SUMMARY.count === 1 ? 'registro' : 'registros'
+                  })`
+                : `Most frequent emotion in recent weeks (${EMOTION_PREVIEW_SUMMARY.count} ${
+                    EMOTION_PREVIEW_SUMMARY.count === 1 ? 'log' : 'logs'
+                  })`}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MissionsPreview({ compact = false, language = 'es' }: { compact?: boolean; language?: Language }) {
+  return (
+    <div className="space-y-3">
+      {!compact && (
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+          {language === 'es' ? 'Misiones activas' : 'Active missions'}
+        </p>
+      )}
+      <div className="lv2-mission-list">
+        {MISSION_PREVIEW_ITEMS.map((mission) => (
+          <div key={mission.title} className="lv2-mission-chip">
+            <div className="lv2-mission-main">
+              <p className="lv2-mission-title">{mission.title}</p>
+              <div className="lv2-mission-tags">
+                <span className="lv2-pill">{mission.tag}</span>
+                <span className="lv2-pill ghost">{mission.status[language]}</span>
+              </div>
+            </div>
+            <div className="lv2-mission-reward">{mission.reward}</div>
+          </div>
+        ))}
+      </div>
+      {!compact && (
+        <p className="text-xs text-slate-300">
+          {language === 'es' ? 'Cada misión se conecta a tus rachas y XP real.' : 'Each mission ties into your streaks and real XP.'}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function HighlightVisual({ visual, language }: { visual: Highlight['visual']; language: Language }) {
+  if (visual === 'xp') return <DashboardXpVisual compact language={language} />;
+  if (visual === 'energy') return <DailyEnergyPreview compact language={language} />;
+  if (visual === 'emotion') return <EmotionHeatmapPreview compact language={language} />;
+  return <MissionsPreview compact language={language} />;
+}
 
 export default function LandingV2Page() {
   const { userId } = useAuth();
@@ -353,7 +644,7 @@ export default function LandingV2Page() {
         <section className="lv2-hero" id="hero">
           <div className="lv2-container lv2-hero-grid">
             <div className="lv2-hero-copy">
-              <p className="lv2-kicker">Mobile-first • Dashboards</p>
+              <p className="lv2-kicker">Habits • Gamification</p>
               <h1>{copy.hero.title}</h1>
               <p className="lv2-sub">{copy.hero.subtitle}</p>
               <div className="lv2-cta-row">
@@ -365,53 +656,41 @@ export default function LandingV2Page() {
                 </a>
               </div>
               <p className="lv2-support">{copy.hero.supporting}</p>
+              <p className="lv2-support">
+                {language === 'es'
+                  ? 'No es solo un dashboard: es una herramienta de mejora de hábitos gamificada.'
+                  : 'Not just a dashboard: a gamified habit-improvement system.'}
+              </p>
             </div>
-            <div className="lv2-hero-visual">
-              <div className="lv2-hero-card lv2-heatmap-card">
-                <div className="lv2-card-header">
-                  <span className="dot green" />
-                  <span className="dot amber" />
-                  <span className="dot purple" />
-                </div>
-                <div className="lv2-heatmap-grid">
-                  {Array.from({ length: 24 }).map((_, index) => (
-                    <span key={index} className={`cell cell-${(index % 5) + 1}`} />
-                  ))}
-                </div>
-                <div className="lv2-legend">
-                  <span>Calm</span>
-                  <span>Focus</span>
-                  <span>Peak</span>
-                </div>
-              </div>
-              <div className="lv2-hero-card lv2-kpi-card">
-                <div className="lv2-kpi-row">
-                  <div>
-                    <p className="label">Streak</p>
-                    <p className="value">18</p>
-                  </div>
-                  <div>
-                    <p className="label">XP</p>
-                    <p className="value">12,430</p>
-                  </div>
-                </div>
-                <div className="lv2-progress">
-                  <span style={{ width: '72%' }} />
-                </div>
-                <div className="lv2-tags">
-                  <span>Body</span>
-                  <span>Mind</span>
-                  <span>Soul</span>
-                </div>
-              </div>
-              <div className="lv2-hero-card lv2-wrap-card">
-                <p className="label">Weekly wrap</p>
-                <div className="lv2-wrap-bar">
-                  <span className="win" style={{ width: '64%' }} />
-                  <span className="miss" style={{ width: '24%' }} />
-                </div>
-                <p className="lv2-wrap-text">Top win: AM focus • Next: earlier sleep</p>
-              </div>
+            <div className="lv2-dashboard-grid">
+              <Card
+                className="lv2-dashboard-card card-span-2"
+                title={language === 'es' ? 'Progreso general' : 'Overall progress'}
+                subtitle={language === 'es' ? 'XP real, nivel y rachas activas' : 'Real XP, level and active streaks'}
+              >
+                <DashboardXpVisual language={language} />
+              </Card>
+              <Card
+                className="lv2-dashboard-card"
+                title="💠 Daily Energy"
+                subtitle={language === 'es' ? 'HP, Mood y Focus tal como lo ves en el dashboard' : 'HP, Mood & Focus exactly like the dashboard'}
+              >
+                <DailyEnergyPreview language={language} />
+              </Card>
+              <Card
+                className="lv2-dashboard-card"
+                title="🗺️ Emotion Heatmap"
+                subtitle={language === 'es' ? 'Check-ins y patrones semanales' : 'Check-ins and weekly patterns'}
+              >
+                <EmotionHeatmapPreview language={language} />
+              </Card>
+              <Card
+                className="lv2-dashboard-card"
+                title="🎯 Misiones + Rewards"
+                subtitle={language === 'es' ? 'Conectadas a tus rachas y XP real' : 'Connected to your streaks and real XP'}
+              >
+                <MissionsPreview language={language} />
+              </Card>
             </div>
           </div>
         </section>
@@ -430,45 +709,7 @@ export default function LandingV2Page() {
                     <p className="lv2-card-title">{item.title}</p>
                     <p className="lv2-card-sub">{item.description}</p>
                   </header>
-                  {item.visual === 'heatmap' ? (
-                    <div className="lv2-mini-heatmap">
-                      {Array.from({ length: 20 }).map((_, index) => (
-                        <span key={index} className={`cell cell-${(index % 5) + 1}`} />
-                      ))}
-                    </div>
-                  ) : null}
-                  {item.visual === 'kpis' ? (
-                    <div className="lv2-mini-kpis">
-                      <div className="tile">
-                        <p className="label">Streak</p>
-                        <p className="value">24</p>
-                      </div>
-                      <div className="tile">
-                        <p className="label">Focus</p>
-                        <p className="value">82%</p>
-                      </div>
-                      <div className="tile">
-                        <p className="label">XP</p>
-                        <p className="value">14k</p>
-                      </div>
-                    </div>
-                  ) : null}
-                  {item.visual === 'wrap' ? (
-                    <div className="lv2-mini-wrap">
-                      <div className="slide">
-                        <p className="label">Wins</p>
-                        <p className="value">4</p>
-                      </div>
-                      <div className="slide">
-                        <p className="label">Next</p>
-                        <p className="value">Sleep</p>
-                      </div>
-                      <div className="slide ghost">
-                        <p className="label">Share</p>
-                        <p className="value">PNG</p>
-                      </div>
-                    </div>
-                  ) : null}
+                  <HighlightVisual visual={item.visual} language={language} />
                 </article>
               ))}
             </div>
