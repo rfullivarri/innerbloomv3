@@ -5,6 +5,7 @@ import DashboardV3Page from './pages/DashboardV3';
 import TaskEditorPage from './pages/editor';
 import LoginPage from './pages/Login';
 import LandingPage from './pages/Landing';
+import LandingV2Page from './pages/LandingV2';
 import SignUpPage from './pages/SignUp';
 import DebugAiTaskgenPage from './pages/DebugAiTaskgen';
 import DevMissionsPage from './pages/DevMissionsPage';
@@ -128,6 +129,7 @@ export default function App() {
       <DevBanner />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/landing-v2" element={<LandingV2Page />} />
         <Route path="/intro-journey" element={<OnboardingIntroPage />} />
         <Route
           path="/login/*"
