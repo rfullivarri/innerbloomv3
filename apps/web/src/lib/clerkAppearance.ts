@@ -39,17 +39,41 @@ const baseElements = {
     'rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 text-[15px] leading-6 text-white placeholder:text-white/40 shadow-[0_6px_20px_rgba(99,102,241,0.15)] focus:border-white/40 focus:outline-none focus-visible:ring-0',
   formFieldInputShowPasswordButton: 'text-sm text-white/60 hover:text-white',
   formButtonPrimary: `${gradientButtonClass} h-11 text-xs tracking-[0.16em] sm:h-12 sm:text-sm`,
+
   footer:
-    'mt-3 w-full max-w-full rounded-2xl border border-white/10 bg-white/10 px-3 py-1.5 text-center text-[9px] leading-4 text-white/60 shadow-none',
-  footerTitle: 'inline text-white/70',
+  'mt-2 w-full max-w-full rounded-xl border border-white/10 bg-white/5 px-2 py-1 text-center shadow-none',
+  // Acción (Don’t have an account?  Sign up) en una sola línea
+  footerAction:
+    'flex w-full items-center justify-between gap-2 text-[10px] leading-4 text-white/55',
+  footerActionText:
+    'min-w-0 whitespace-nowrap text-white/55',
+  footerActionLink:
+    'whitespace-nowrap font-semibold text-white/80 underline underline-offset-2 hover:text-white',
+  // “Secured by clerk” chico y liviano
+  footerPages:
+    'mt-0.5 flex w-full items-center justify-center gap-1 text-[9px] leading-3 text-white/40',
+  footerPageLink:
+    'inline-flex items-center gap-1 text-white/40 hover:text-white/60',
+  // Fallbacks por si tu variante usa estos keys
+  footerTitle: 'hidden',
   footerSubtitle: 'hidden',
-  footerActionText: 'inline text-white/60',
-  footerActionLink: 'inline whitespace-nowrap font-semibold text-white/80 hover:text-white underline-offset-4',
   formResendCodeLink: 'text-sm text-white hover:text-white/80',
   identityPreview: 'rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl text-white/80',
   identityPreviewTitle: 'text-white',
   identityPreviewSubtitle: 'text-white/70',
-  identityPreviewEditButton: 'text-white hover:text-white/80'
+  identityPreviewEditButton: 'text-white hover:text-white/80',
+
+  
+  //footer:  'mt-3 w-full max-w-full rounded-2xl border border-white/10 bg-white/10 px-3 py-1.5 text-center text-[9px] leading-4 text-white/60 shadow-none',
+  //footerTitle: 'inline text-white/70',
+  //footerSubtitle: 'hidden',
+  //footerActionText: 'inline text-white/60',
+  //footerActionLink: 'inline whitespace-nowrap font-semibold text-white/80 hover:text-white underline-offset-4',
+  //formResendCodeLink: 'text-sm text-white hover:text-white/80',
+  //identityPreview: 'rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl text-white/80',
+  //identityPreviewTitle: 'text-white',
+  //identityPreviewSubtitle: 'text-white/70',
+  //identityPreviewEditButton: 'text-white hover:text-white/80''
 };
 
 type AppearanceOverrides = {
