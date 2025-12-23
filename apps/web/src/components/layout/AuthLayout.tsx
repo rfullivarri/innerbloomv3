@@ -42,7 +42,14 @@ export function AuthLayout({
 
             <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.4em] text-white/60 sm:text-sm">
               <span className="h-2 w-2 rounded-full bg-[#7d3cff]" />
-              Innerbloom
+              <span className="flex items-center gap-2">
+                <span>Innerbloom</span>
+                <img
+                  src="/IB-COLOR-LOGO.png"
+                  alt="Innerbloom logo"
+                  className="h-[1.3em] w-auto"
+                />
+              </span>
             </div>
 
             <div className="space-y-4 text-balance text-center">
