@@ -47,7 +47,7 @@ export function AuthLayout({
                 <img
                   src="/IB-COLOR-LOGO.png"
                   alt="Innerbloom logo"
-                  className="h-[1.3em] w-auto"
+                  className="h-[3.9em] w-auto"
                 />
               </span>
             </div>
