@@ -106,25 +106,25 @@ const t = {
         {
           id: 'low',
           title: '🪫 Low',
-          benefit: 'For low energy days: activate a minimum viable routine.',
+          benefit: 'Low energy day. Minimum viable routine.',
           bullets: ['1–2 minute tasks', 'Recovery-first', 'Zero-guilt rest']
         },
         {
           id: 'chill',
           title: '🍃 Chill',
-          benefit: 'Relaxed and stable: sustain well-being with soft routines.',
+          benefit: 'Stable energy. Soft routines to sustain well-being.',
           bullets: ['Light planning', 'Evening reflection', 'Gentle streaks']
         },
         {
           id: 'flow',
           title: '🌊 Flow',
-          benefit: 'Focused and in motion: ride momentum with aligned goals.',
+          benefit: 'Focused and in motion. Ride momentum with aligned goals.',
           bullets: ['Goal-linked tasks', 'Focus timers', 'Progress tags']
         },
         {
           id: 'evolve',
           title: '🧬 Evolve',
-          benefit: 'Ambitious and determined: atomic habits, missions and rewards.',
+          benefit: 'Ambitious and determined. Atomic habits, missions and rewards.',
           bullets: ['Atomic habits', 'XP ladders', 'Weekly challenges']
         }
       ] satisfies Mode[]
@@ -245,25 +245,25 @@ const t = {
         {
           id: 'low',
           title: '🪫 Low',
-          benefit: 'Estado: sin energía, abrumado. Objetivo: activar tu mínimo vital con acciones pequeñas.',
+          benefit: 'Energía baja, abrumado. Activá tu mínimo vital con acciones cortas.',
           bullets: ['Tareas de 1–2 minutos', 'Recuperación primero', 'Descanso sin culpa']
         },
         {
           id: 'chill',
           title: '🍃 Chill',
-          benefit: 'Estado: relajado y estable. Objetivo: sostener bienestar con rutinas suaves y balanceadas.',
+          benefit: 'Energía estable. Rutinas suaves y balanceadas para sostenerte.',
           bullets: ['Plan liviano', 'Reflexión nocturna', 'Rachas suaves']
         },
         {
           id: 'flow',
           title: '🌊 Flow',
-          benefit: 'Estado: enfocado y en movimiento. Objetivo: aprovechar el impulso con un plan alineado a metas.',
+          benefit: 'Enfocado y en movimiento. Aprovechá el impulso con metas alineadas.',
           bullets: ['Tareas ligadas a metas', 'Timers de foco', 'Tags de progreso']
         },
         {
           id: 'evolve',
           title: '🧬 Evolve',
-          benefit: 'Estado: ambicioso y determinado. Objetivo: sistema retador con Hábitos Atómicos, misiones y recompensas.',
+          benefit: 'Ambicioso y determinado. Sistema retador con Hábitos Atómicos, misiones y recompensas.',
           bullets: ['Hábitos atómicos', 'Escalera de XP', 'Retos semanales']
         }
       ] satisfies Mode[]
@@ -378,6 +378,29 @@ const MISSION_PREVIEW_ITEMS = [
   { title: 'Reflexión nocturna', tag: 'Soul', reward: '+80 XP', status: { es: 'Checklist', en: 'Checklist' } },
   { title: 'Boss: Focus AM', tag: 'Mind', reward: '+160 XP', status: { es: '2/3 completado', en: '2/3 complete' } }
 ] as const;
+
+function LanguageSwitch({ value, onChange }: { value: Language; onChange: (language: Language) => void }) {
+  const options: { code: Language; label: string }[] = [
+    { code: 'en', label: 'EN' },
+    { code: 'es', label: 'ES' }
+  ];
+
+  return (
+    <div className="lv2-lang-toggle" role="group" aria-label="Language selector">
+      {options.map((option) => (
+        <button
+          key={option.code}
+          type="button"
+          className={value === option.code ? 'active' : ''}
+          onClick={() => onChange(option.code)}
+          aria-pressed={value === option.code}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boolean; language?: Language }) {
   const progressPercent = 72;
@@ -604,6 +627,13 @@ export default function LandingV2Page() {
   const isSignedIn = Boolean(userId);
   const [language, setLanguage] = useState<Language>('en');
   const copy = t[language];
+  const heroMeta = useMemo(
+    () =>
+      language === 'es'
+        ? ['Setup <3 minutos', 'Dashboard real + XP', 'Modos Low / Chill / Flow / Evolve']
+        : ['Setup <3 minutes', 'Live XP dashboard', 'Modes: Low · Chill · Flow · Evolve'],
+    [language]
+  );
 
   const primaryCta = useMemo(
     () => (isSignedIn ? { label: 'Go to dashboard', to: '/dashboard' } : { label: copy.hero.cta, to: '/intro-journey' }),
@@ -614,10 +644,9 @@ export default function LandingV2Page() {
     <div className="landing-v2">
       <header className="lv2-nav">
         <Link className="lv2-brand" to="/landing-v2" aria-label="Innerbloom — Landing V2">
-          <span className="lv2-mark" aria-hidden="true">
-            ⧉
-          </span>
+          <img src="/IB-B2-cont-logo.png" alt="Innerbloom" className="lv2-logo" width={40} height={40} loading="lazy" />
           <span className="lv2-brand-text">Innerbloom</span>
+          <span className="lv2-brand-tagline">{language === 'es' ? 'Hábitos + IA' : 'Habits + AI'}</span>
         </Link>
         <nav className="lv2-links">
           {copy.nav.map((item) => (
@@ -627,13 +656,7 @@ export default function LandingV2Page() {
           ))}
         </nav>
         <div className="lv2-actions">
-          <label className="lv2-lang">
-            <span>{copy.langLabel}</span>
-            <select value={language} onChange={(e) => setLanguage(e.target.value as Language)}>
-              <option value="en">English</option>
-              <option value="es">Español</option>
-            </select>
-          </label>
+          <LanguageSwitch value={language} onChange={setLanguage} />
           <Link className={BUTTON_VARIANTS.primary} to={primaryCta.to}>
             {primaryCta.label}
           </Link>
@@ -647,6 +670,13 @@ export default function LandingV2Page() {
               <p className="lv2-kicker">Habits • Gamification</p>
               <h1>{copy.hero.title}</h1>
               <p className="lv2-sub">{copy.hero.subtitle}</p>
+              <div className="lv2-hero-meta" aria-hidden="true">
+                {heroMeta.map((item) => (
+                  <span key={item} className="lv2-meta-pill">
+                    {item}
+                  </span>
+                ))}
+              </div>
               <div className="lv2-cta-row">
                 <Link className={BUTTON_VARIANTS.primary} to={primaryCta.to}>
                   {primaryCta.label}
@@ -662,7 +692,7 @@ export default function LandingV2Page() {
                   : 'Not just a dashboard: a gamified habit-improvement system.'}
               </p>
             </div>
-            <div className="lv2-dashboard-grid">
+            <div className="lv2-dashboard-grid lv2-dashboard-grid--hero">
               <Card
                 className="lv2-dashboard-card card-span-2"
                 title={language === 'es' ? 'Progreso general' : 'Overall progress'}
@@ -725,7 +755,7 @@ export default function LandingV2Page() {
             </div>
             <div className="lv2-grid lv2-grid-2">
               {copy.modes.items.map((mode) => (
-                <article key={mode.id} className={`lv2-card mode-${mode.id}`}>
+                <article key={mode.id} className={`lv2-card lv2-mode-card mode-${mode.id}`}>
                   <div className="lv2-mode-title">{mode.title}</div>
                   <p className="lv2-card-sub">{mode.benefit}</p>
                   <ul className="lv2-bullets">
