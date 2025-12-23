@@ -55,7 +55,7 @@ function ModeBadge({ mode }: { mode: GameMode | null }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] shadow-[0_0_18px_rgba(255,255,255,0.2)] backdrop-blur ${meta.className}`}
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] shadow-[0_0_18px_rgba(15,23,42,0.35)] backdrop-blur ${meta.className}`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${meta.dotClass}`} />
       {meta.label}
