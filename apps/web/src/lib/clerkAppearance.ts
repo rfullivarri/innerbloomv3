@@ -1,7 +1,7 @@
 import type { Theme } from '@clerk/types';
 
 // Slightly narrower auth card to keep the login UI compact on small screens.
-export const AUTH_LOGIN_MAX_WIDTH = 'max-w-[488px]';
+export const AUTH_LOGIN_MAX_WIDTH = 'max-w-[450px]';
 
 const baseLayout = {
   logoPlacement: 'none' as const,
@@ -40,7 +40,7 @@ const baseElements = {
   formFieldInputShowPasswordButton: 'text-sm text-white/60 hover:text-white',
   formButtonPrimary: `${gradientButtonClass} h-11 text-xs tracking-[0.16em] sm:h-12 sm:text-sm`,
   footer:
-    'mt-4 w-full max-w-full flex flex-col items-center gap-1 rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 text-center text-[11px] text-white/60 backdrop-blur-xl shadow-none sm:px-4',
+    'mt-4 w-full max-w-full flex flex-col items-center gap-1 rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 text-center text-[9px] text-white/60 backdrop-blur-xl shadow-none sm:px-4',
   footerTitle: 'text-white/70',
   footerSubtitle: 'text-white/50',
   footerActionText: 'text-white/50',
