@@ -1099,12 +1099,6 @@ export function MissionsV3Board({
   const [heartbeatToastKey, setHeartbeatToastKey] = useState<number | null>(null);
   const [flippedMarketCards, setFlippedMarketCards] = useState<Record<string, boolean>>({});
   const [marketCoverAspect, setMarketCoverAspect] = useState<Record<string, string>>({});
-  const [hasAcknowledgedPreview, setHasAcknowledgedPreview] = useState<boolean>(() => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-    return window.sessionStorage.getItem('missionsV3PreviewAcknowledged') === 'true';
-  });
   const isMarketSwiperCardsEnabled = isLargeViewport && !hasCoarsePointer;
   const missionsWindow =
     typeof window === 'undefined' ? null : (window as unknown as MissionsWindow | null);
@@ -1217,22 +1211,6 @@ export function MissionsV3Board({
       marketSwiperRef.current = null;
     }
   }, [usingMarketSwiper]);
-
-  const handleAcknowledgePreview = useCallback(() => {
-    setHasAcknowledgedPreview(true);
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.setItem('missionsV3PreviewAcknowledged', 'true');
-    }
-  }, []);
-
-  const dashboardPath = useMemo(() => {
-    const normalized = location.pathname.replace(/\/?missions-v3\/?$/, '') || '..';
-    return normalized.endsWith('/') && normalized !== '/' ? normalized.slice(0, -1) : normalized;
-  }, [location.pathname]);
-
-  const handleReturnToDashboard = useCallback(() => {
-    navigate(dashboardPath);
-  }, [dashboardPath, navigate]);
 
   const marketBySlot = useMemo<MarketBySlot>(() => {
     const map: MarketBySlot = {};
@@ -3821,45 +3799,6 @@ export function MissionsV3Board({
           >
             Reintentar
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!hasAcknowledgedPreview) {
-    return (
-      <div className="missions-board" data-reduced-motion={prefersReducedMotion ? 'true' : 'false'}>
-        <div className="missions-board__background" aria-hidden="true" />
-        <PetalField disabled={prefersReducedMotion} />
-        <div className="missions-board__content">
-          <Card
-            variant="plain"
-            className="missions-card missions-preview"
-            bodyClassName="missions-preview__body"
-            title="Misiones v3 · Working in progress"
-            subtitle="Antes de dejar todo en BRUR, esta sección está en construcción."
-          >
-            <p className="missions-preview__copy">
-              Estamos afinando el loop de misiones. Podés entrar igual para explorar el market y los slots,
-              o volver al dashboard mientras seguimos iterando.
-            </p>
-            <div className="missions-preview__actions">
-              <button
-                type="button"
-                className="missions-preview__cta missions-preview__cta--primary"
-                onClick={handleAcknowledgePreview}
-              >
-                Explorar misiones
-              </button>
-              <button
-                type="button"
-                className="missions-preview__cta missions-preview__cta--ghost"
-                onClick={handleReturnToDashboard}
-              >
-                Volver al dashboard
-              </button>
-            </div>
-          </Card>
         </div>
       </div>
     );
