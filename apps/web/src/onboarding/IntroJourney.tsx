@@ -361,7 +361,7 @@ export function IntroJourney({ onFinish }: IntroJourneyProps) {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-16">
+    <div className="relative flex min-h-screen flex-col bg-gradient-to-b from-[#0b1125]/85 via-[#0d1530]/70 to-[#0b1125]/85 pb-16">
       <HUD
         mode={answers.mode}
         stepIndex={currentStepIndex}

@@ -15,6 +15,13 @@
     --motion-ease-emphasis: cubic-bezier(0.34, 1.56, 0.64, 1);
     --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 
+    --onboarding-glass-surface-base: rgba(255, 255, 255, 0.1);
+    --onboarding-glass-surface-inner: rgba(255, 255, 255, 0.06);
+    --onboarding-glass-surface-ghost: rgba(255, 255, 255, 0.03);
+    --onboarding-glass-border: rgba(255, 255, 255, 0.2);
+    --onboarding-glass-border-soft: rgba(255, 255, 255, 0.12);
+    --onboarding-glass-shadow: 0 26px 80px rgba(12, 18, 38, 0.24);
+
     --color-surface: #0f172a;
     --color-surface-muted: #111c33;
     --color-surface-elevated: #182640;
@@ -101,7 +108,41 @@
 
 @layer utilities {
   .glass-card {
-    @apply bg-surface-elevated/80 backdrop-blur-lg border border-white/5 shadow-glow;
+    @apply backdrop-blur-2xl;
+    background: var(--onboarding-glass-surface-inner);
+    border: 1px solid var(--onboarding-glass-border-soft);
+    box-shadow: var(--onboarding-glass-shadow);
+  }
+
+  .onboarding-surface-base {
+    background: var(--onboarding-glass-surface-base);
+    border: 1px solid var(--onboarding-glass-border);
+    box-shadow: var(--onboarding-glass-shadow);
+    backdrop-filter: blur(22px);
+  }
+
+  .onboarding-surface-inner {
+    background: var(--onboarding-glass-surface-inner);
+    border: 1px solid var(--onboarding-glass-border-soft);
+    backdrop-filter: blur(18px);
+  }
+
+  .onboarding-surface-ghost {
+    background: var(--onboarding-glass-surface-ghost);
+    border: 1px solid var(--onboarding-glass-border-soft);
+    backdrop-filter: blur(16px);
+  }
+
+  .onboarding-glass-border {
+    border-color: var(--onboarding-glass-border);
+  }
+
+  .onboarding-glass-border-soft {
+    border-color: var(--onboarding-glass-border-soft);
+  }
+
+  .onboarding-glass-shadow {
+    box-shadow: var(--onboarding-glass-shadow);
   }
 
   .glow-chip {

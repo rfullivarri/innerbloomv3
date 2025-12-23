@@ -56,7 +56,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
 
   if (!isLoaded) {
     return (
-      <div className="mx-auto max-w-3xl rounded-3xl border border-white/5 bg-slate-900/60 p-8 text-center text-white/70">
+      <div className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-white/10 p-8 text-center text-white/70 backdrop-blur-2xl">
         Cargando acceso seguro…
       </div>
     );
@@ -90,7 +90,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.24, ease: 'easeOut' }}
-      className="mx-auto w-full max-w-3xl rounded-3xl border border-white/5 bg-slate-900/70 p-5 shadow-2xl shadow-sky-500/10 sm:p-6"
+      className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-6"
     >
       <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
@@ -98,7 +98,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
           <h2 className="text-2xl font-semibold text-white">Creá tu cuenta Innerbloom</h2>
         </div>
       </div>
-      <div className="mt-4 flex gap-2 rounded-full bg-white/5 p-1">
+      <div className="mt-4 flex gap-2 rounded-full bg-white/10 p-1 backdrop-blur">
         {TAB_OPTIONS.map((option) => (
           <button
             key={option.id}
@@ -121,7 +121,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="rounded-2xl bg-slate-950/40 p-4 sm:p-6"
+              className="onboarding-surface-ghost rounded-2xl p-4 sm:p-6"
             >
               <SignUp
                 appearance={clerkAppearance}
@@ -137,7 +137,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="rounded-2xl bg-slate-950/40 p-4 sm:p-6"
+              className="onboarding-surface-ghost rounded-2xl p-4 sm:p-6"
             >
               <SignIn
                 appearance={clerkAppearance}

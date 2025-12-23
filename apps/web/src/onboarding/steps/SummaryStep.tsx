@@ -151,14 +151,14 @@ export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps)
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
       <Snack message={toastMessage} />
       {showConfirmation ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/10 px-4 py-6 backdrop-blur-lg">
           <motion.div
             role="dialog"
             aria-modal="true"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="w-full max-w-md rounded-3xl border border-white/10 bg-slate-900/90 p-6 text-center text-white shadow-2xl"
+            className="w-full max-w-md rounded-3xl border border-white/15 bg-white/10 p-6 text-center text-white shadow-2xl backdrop-blur-2xl"
           >
             <h3 className="text-2xl font-semibold text-white">¡Tu plan está en marcha!</h3>
             <p className="mt-3 text-sm text-white/70">
@@ -184,7 +184,7 @@ export function SummaryStep({ answers, xp, onBack, onFinish }: SummaryStepProps)
           </motion.div>
         </div>
       ) : null}
-      <div className="glass-card mx-auto max-w-5xl rounded-3xl border border-white/5 bg-slate-900/70 p-6 sm:p-8">
+      <div className="glass-card onboarding-surface-base mx-auto max-w-5xl rounded-3xl p-6 sm:p-8">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
           <p className="text-xs uppercase tracking-[0.35em] text-white/50">Summary</p>
           <h2 className="text-3xl font-semibold text-white">Tu recorrido</h2>
