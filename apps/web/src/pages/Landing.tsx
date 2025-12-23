@@ -199,8 +199,8 @@ export default function LandingPage() {
             src="/IB-B2-cont-logo.png"
             alt="Innerbloom"
             className="logo-mark"
-            width={45}
-            height={45}
+            width={50}
+            height={50}
           />
         </Link>
         <nav className="nav-links">
