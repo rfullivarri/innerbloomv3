@@ -196,7 +196,7 @@ export default function LandingPage() {
         <Link className="brand" to="/" aria-label="Innerbloom — inicio">
           <span className="brand-text">Innerbloom</span>
           <img
-            src="/IB-N-cont-logo.png"
+            src="/IB-B2-cont-logo.png"
             alt="Innerbloom"
             className="logo-mark"
             width={45}
