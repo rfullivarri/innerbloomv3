@@ -1,5 +1,5 @@
 import { matchPath } from 'react-router-dom';
-import type { ReactElement, SVGProps } from 'react';
+import { type ReactElement, type SVGProps } from 'react';
 import type { NavbarSection } from '../components/layout/Navbar';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 
@@ -14,7 +14,7 @@ export interface DashboardSectionConfig extends NavbarSection {
   icon: (props: SVGProps<SVGSVGElement>) => ReactElement;
 }
 
-function DashboardIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+function OrbIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -27,14 +27,15 @@ function DashboardIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
       aria-hidden="true"
       {...props}
     >
-      <path d="M4 13a8 8 0 0 1 16 0v4a1 1 0 0 1-1 1h-4.5" />
-      <path d="M12 7v5.5l3 2.5" />
-      <circle cx={12} cy={13} r={0.6} fill="currentColor" stroke="none" />
+      <circle cx={12} cy={12} r={6.5} />
+      <circle cx={12} cy={12} r={1.8} />
+      <path d="M7 7c1.4 1 3.1 1.5 5 1.5s3.6-.5 5-1.5" />
+      <path d="M17 17c-1.4-1-3.1-1.5-5-1.5S8.4 16 7 17" />
     </svg>
   );
 }
 
-function MissionsIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+function RouteIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -47,17 +48,15 @@ function MissionsIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
       aria-hidden="true"
       {...props}
     >
-      <circle cx={12} cy={12} r={5.5} />
-      <path d="M12 3v2.5" />
-      <path d="M12 18.5V21" />
-      <path d="M3 12h2.5" />
-      <path d="M18.5 12H21" />
-      <path d="M12 12l2.5-1.5" />
+      <path d="M6 19c0-2.5 1.8-4.5 4-4.5s4-2 4-4.5S16.8 5 19 5s3 1.3 3 3-1.3 3-3 3" />
+      <circle cx={6} cy={19} r={2} />
+      <circle cx={19} cy={8} r={2} />
+      <path d="M6 17.5S6 11 13 11" />
     </svg>
   );
 }
 
-function RewardsIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+function SparklesIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -70,15 +69,14 @@ function RewardsIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
       aria-hidden="true"
       {...props}
     >
-      <path d="M5 7h14" />
-      <path d="M6.5 7 8 4h8l1.5 3" />
-      <path d="M7 7v9a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3V7" />
-      <path d="M10 12h4" />
+      <path d="M9 4.5 10 7l1.5 1-1.5 1L9 12.5 8 9 6.5 8 8 7 9 4.5Z" />
+      <path d="M15.5 11 16.5 13l1.5 1-1.5 1-1 2.5-1-2.5-1.5-1 1.5-1 1-2.5Z" />
+      <path d="M12.5 5c.6 1 1.5 1.6 2.5 1.8" />
     </svg>
   );
 }
 
-function TaskEditorIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+function SproutIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -91,10 +89,10 @@ function TaskEditorIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
       aria-hidden="true"
       {...props}
     >
-      <path d="M4 5a2 2 0 0 1 2-2h6l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
-      <path d="M13 3v5h5" />
-      <path d="M9.5 14.5 8 19l4.5-1.5L16 12l-2-2z" />
-      <path d="M15 10l2 2" />
+      <path d="M12 21v-7.5" />
+      <path d="M12 13.5C12 10 15 7 18.5 7h2C20.5 10.5 17 13.5 12 13.5Z" />
+      <path d="M12 13.5C12 10 9 7 5.5 7h-2C3.5 10.5 7 13.5 12 13.5Z" />
+      <path d="M12 13.5 10 10" />
     </svg>
   );
 }
@@ -146,17 +144,17 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       end: true,
       pageTitle: 'Dashboard',
       contentTitle: 'Dashboard',
-      icon: DashboardIcon,
+      icon: (props) => <OrbIcon {...props} />,
     },
     missions: {
       key: 'missions',
       label: 'Misiones',
-      to: joinDashboardPath(basePath, 'missions-v2'),
+      to: joinDashboardPath(basePath, 'misiones'),
       pageTitle: 'Misiones',
       eyebrow: 'Misiones',
       contentTitle: 'Tus misiones activas',
       description: 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.',
-      icon: MissionsIcon,
+      icon: (props) => <RouteIcon {...props} />,
     },
     rewards: {
       key: 'rewards',
@@ -166,18 +164,18 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       eyebrow: 'Rewards',
       contentTitle: 'Logros y badges desbloqueados',
       description: 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.',
-      icon: RewardsIcon,
+      icon: (props) => <SparklesIcon {...props} />,
     },
     editor: {
       key: 'editor',
-      label: 'Task Editor',
+      label: 'Editor',
       to: '/editor',
       end: true,
-      pageTitle: 'Task Editor',
-      eyebrow: 'Task Editor',
+      pageTitle: 'Editor',
+      eyebrow: 'Editor',
       contentTitle: '',
       description: '',
-      icon: TaskEditorIcon,
+      icon: (props) => <SproutIcon {...props} />,
     },
   };
 }
@@ -186,8 +184,8 @@ function createDashboardSections(currentPath?: string) {
   const basePath = resolveDashboardBasePath(currentPath);
   const sectionsByKey = buildDashboardSections(basePath);
   const sections: DashboardSectionConfig[] = [
-    sectionsByKey.dashboard,
     sectionsByKey.missions,
+    sectionsByKey.dashboard,
     sectionsByKey.rewards,
     sectionsByKey.editor,
   ];
@@ -221,7 +219,7 @@ export function getActiveSection(
     return activeSection;
   }
 
-  const missionsBasePath = joinDashboardPath(DASHBOARD_BASE_PATH, 'missions');
+  const missionsBasePath = joinDashboardPath(DASHBOARD_BASE_PATH, 'misiones');
 
   if (pathname.startsWith(missionsBasePath)) {
     const missionsSection = getDashboardSectionConfig('missions', pathname);
