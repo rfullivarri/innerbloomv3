@@ -41,18 +41,19 @@ const baseElements = {
   formButtonPrimary: `${gradientButtonClass} h-11 text-xs tracking-[0.16em] sm:h-12 sm:text-sm`,
 
   footer:
-    'mt-2 w-full max-w-full rounded-xl border border-white/10 bg-white/5 px-2 py-0.5 shadow-none',
-  // Línea 1: todo a la izquierda, en una sola línea
-  footerAction:
-    'flex w-full items-center justify-start gap-1 text-[7px] leading-[10px] text-white/55',
-  footerActionText:
-    'whitespace-nowrap text-white/55',
-  footerActionLink:
-    'whitespace-nowrap font-semibold text-white/80 underline underline-offset-2 hover:text-white',
+    'mt-2 w-full max-w-none rounded-xl border border-white/10 bg-white/5 !px-2 !py-1 shadow-none',
 
-  // Línea 2: "Secured by clerk" centrado, casi sin separación vertical
+  // 1) CONTENEDOR 1 (cl-footerAction__signIn): reducir alto y aumentar ancho
+  footerAction:
+    '!flex !w-full !max-w-none items-center justify-start gap-1 !px-2 !py-0 text-[10px] !leading-[12px] text-white/55',
+  footerActionText:
+    '!whitespace-nowrap text-white/55',
+  footerActionLink:
+    '!whitespace-nowrap font-semibold text-white/80 underline underline-offset-2 hover:text-white',
+
+  // 2) CONTENEDOR 2 (“Secured by clerk”): reducir alto y aumentar ancho
   footerPages:
-    'mt-0 flex w-full items-center justify-center gap-1 text-[7px] leading-[9px] text-white/40',
+    '!mt-0.5 !flex !w-full !max-w-none items-center justify-center gap-1 !px-2 !py-0 text-[9px] !leading-[11px] text-white/40',
   footerPageLink:
     'inline-flex items-center gap-1 text-white/40 hover:text-white/60',
 
