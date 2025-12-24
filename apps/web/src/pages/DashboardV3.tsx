@@ -474,7 +474,7 @@ function MissionsV2View({
       <h1 className="sr-only">Misiones</h1>
       <MissionsV2Board userId={userId} gameMode={gameMode} />
       {showWip ? (
-        <div className="absolute inset-0 z-20 bg-slate-950/90 px-4 py-6 sm:px-8 sm:py-10">
+        <div className="fixed inset-0 z-20 bg-slate-950/90 px-4 py-6 sm:px-8 sm:py-10">
           <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center text-center">
             <p className="text-6xl">🚧</p>
             <p className="mt-4 text-2xl font-semibold text-white sm:text-3xl">work in progress</p>
@@ -492,7 +492,7 @@ function MissionsV2View({
               </button>
               <button
                 type="button"
-                className="inline-flex flex-1 items-center justify-center rounded-full bg-pink-400 px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-pink-300"
+                className="inline-flex flex-1 items-center justify-center rounded-full bg-accent-purple px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-purple/90"
                 onClick={() => navigate('/dashboard-v3')}
               >
                 let them cook
