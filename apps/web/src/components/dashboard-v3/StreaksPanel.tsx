@@ -229,6 +229,7 @@ interface StreaksPanelProps {
 type TaskHistory = {
   values: number[];
   labels?: string[];
+  totals?: number[];
 };
 
 type DisplayTask = {
@@ -329,6 +330,18 @@ function getStatusColor(done: number, goal: number): 'high' | 'mid' | 'low' {
   return 'low';
 }
 
+const MODE_WEEK_OFFSETS: Record<Mode, number> = {
+  Low: 2,
+  Chill: 2,
+  Flow: 1,
+  Evolve: 0,
+};
+
+function getQuarterHitThreshold(mode: Mode, totalWeeks: number): number {
+  const offset = MODE_WEEK_OFFSETS[mode] ?? 0;
+  return Math.max(0, totalWeeks - offset);
+}
+
 function getRangeMetrics(task: StreakPanelTask | undefined, range: StreakPanelRange) {
   if (!task) {
     return { count: 0, xp: 0, weeks: [] as number[] };
@@ -355,6 +368,10 @@ function buildHistory(task: StreakPanelTask | undefined, range: StreakPanelRange
 
   const source = range === 'month' ? task.metrics.month?.weeks ?? [] : task.metrics.qtr?.weeks ?? [];
   const values = source.map((value) => (Number.isFinite(value) ? Number(value) : 0));
+  const totals =
+    range === 'qtr'
+      ? task.metrics.qtr?.weekTotals?.map((value) => (Number.isFinite(value) ? Number(value) : 0))
+      : undefined;
 
   if (values.length === 0) {
     return { values: [] };
@@ -374,7 +391,7 @@ function buildHistory(task: StreakPanelTask | undefined, range: StreakPanelRange
     return raw.slice(0, 1).toUpperCase();
   });
 
-  return { values, labels };
+  return { values, labels, totals };
 }
 
 function buildDisplayTask(
@@ -405,8 +422,9 @@ function buildDisplayTask(
 function TaskItem({
   item,
   range,
+  mode,
   onSelect,
-}: { item: DisplayTask; range: StreakPanelRange; onSelect?: (task: DisplayTask) => void }) {
+}: { item: DisplayTask; range: StreakPanelRange; mode: Mode; onSelect?: (task: DisplayTask) => void }) {
   const status = getStatusColor(item.weeklyDone, item.weeklyGoal);
   const pct = computeProgressPercent(item.weeklyDone, item.weeklyGoal);
   const showHistory = item.history.values.length > 0;
@@ -522,7 +540,16 @@ function TaskItem({
                 const clamped = Math.max(0, Math.min(ratio, 1.6));
                 const height = 12 + clamped * 12;
                 const monthlyTarget = range === 'qtr' ? item.weeklyGoal - 0.001 : item.weeklyGoal;
-                const isHit = item.weeklyGoal > 0 && value >= monthlyTarget;
+                const completedWeeks = Math.max(0, Math.round(value));
+                const totalWeeksCandidate = Math.max(
+                  0,
+                  Math.round(item.history.totals?.[index] ?? 0),
+                );
+                const totalWeeks = totalWeeksCandidate > 0 ? totalWeeksCandidate : Math.max(completedWeeks, 4);
+                const quarterThreshold = getQuarterHitThreshold(mode, totalWeeks);
+                const isQuarterHit = completedWeeks >= quarterThreshold && totalWeeks > 0;
+                const isHit =
+                  range === 'qtr' ? isQuarterHit : item.weeklyGoal > 0 && value >= monthlyTarget;
                 return (
                   <div
                     key={index}
@@ -788,7 +815,13 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                 {topEntries.length > 0 ? (
                   <div className="grid grid-cols-1 gap-3">
                     {topEntries.map((entry) => (
-                      <TaskItem key={entry.id} item={entry} range={range} onSelect={handleSelectTask} />
+                      <TaskItem
+                        key={entry.id}
+                        item={entry}
+                        range={range}
+                        mode={normalizedMode}
+                        onSelect={handleSelectTask}
+                      />
                     ))}
                   </div>
                 ) : (
@@ -839,7 +872,13 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                 {displayTasks.length > 0 ? (
                   <div className="grid grid-cols-1 gap-3">
                     {displayTasks.map((task) => (
-                      <TaskItem key={task.id} item={task} range={range} onSelect={handleSelectTask} />
+                      <TaskItem
+                        key={task.id}
+                        item={task}
+                        range={range}
+                        mode={normalizedMode}
+                        onSelect={handleSelectTask}
+                      />
                     ))}
                   </div>
                 ) : (

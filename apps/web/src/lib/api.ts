@@ -1701,7 +1701,7 @@ export type StreakPanelTask = {
   metrics: {
     week: { count: number; xp: number };
     month: { count: number; xp: number; weeks: number[] };
-    qtr: { count: number; xp: number; weeks: number[] };
+    qtr: { count: number; xp: number; weeks: number[]; weekTotals?: number[] };
   };
 };
 
