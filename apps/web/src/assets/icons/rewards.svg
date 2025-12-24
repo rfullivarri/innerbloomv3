@@ -1,0 +1,37 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rewardsGradient" x1="6" y1="18" x2="18" y2="6" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C5CFF"/>
+      <stop offset="0.5" stop-color="#FF8DEB"/>
+      <stop offset="1" stop-color="#72E6FF"/>
+    </linearGradient>
+    <filter id="rewardsGlow" x="-2" y="-2" width="28" height="28" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="2.6" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.52 0 0 0 0 0.34 0 0 0 0 0.95 0 0 0 0.65 0" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="rewardParticles" x="0" y="0" width="24" height="24" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="1.2" result="pblur"/>
+      <feColorMatrix in="pblur" type="matrix" values="0 0 0 0 0.6 0 0 0 0 0.45 0 0 0 0 1 0 0 0 0.55 0" result="pcolor"/>
+      <feMerge>
+        <feMergeNode in="pcolor"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#rewardsGlow)" stroke="url(#rewardsGradient)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 6L13.4 9.6C13.6 10.1 14 10.4 14.6 10.6L18 12L14.6 13.4C14 13.6 13.6 13.9 13.4 14.4L12 18L10.6 14.4C10.4 13.9 10 13.6 9.4 13.4L6 12L9.4 10.6C10 10.4 10.4 10.1 10.6 9.6L12 6Z"/>
+    <path d="M12 8.4L12.9 10.7C13.1 11.3 13.6 11.8 14.2 12C13.6 12.2 13.1 12.7 12.9 13.3L12 15.6L11.1 13.3C10.9 12.7 10.4 12.2 9.8 12C10.4 11.8 10.9 11.3 11.1 10.7L12 8.4Z" opacity="0.9"/>
+  </g>
+  <g filter="url(#rewardParticles)" fill="#C8B6FF" fill-opacity="0.82">
+    <circle cx="6.6" cy="8.2" r="0.55"/>
+    <circle cx="17.4" cy="8" r="0.6"/>
+    <circle cx="7.8" cy="15.9" r="0.5"/>
+    <circle cx="16.7" cy="15.5" r="0.45"/>
+    <circle cx="12" cy="4.8" r="0.5"/>
+    <circle cx="12" cy="19.2" r="0.5"/>
+  </g>
+</svg>
