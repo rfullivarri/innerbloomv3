@@ -936,7 +936,6 @@ function ProgressBlock({
       <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-emerald-100">
           <span>Daily Energy</span>
-          <span className="rounded-full bg-white/10 p-1.5 text-[10px] text-emerald-50">Energía que más creció</span>
         </div>
         <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
           <div className="relative flex h-28 w-12 items-end overflow-hidden rounded-xl border border-white/20 bg-slate-900/60">
