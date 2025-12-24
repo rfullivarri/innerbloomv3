@@ -72,7 +72,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                               className: combine(
                                 item.icon.props.className,
                                 'stroke-[1.75] transition-all duration-300',
-                                item.key === 'dashboard' ? 'h-5 w-5' : 'h-4 w-4'
+                                item.key === 'dashboard' ? 'h-[26px] w-[26px]' : 'h-[21px] w-[21px]'
                               ),
                               stroke: item.icon.props.stroke ?? 'currentColor',
                               'aria-hidden': true,
