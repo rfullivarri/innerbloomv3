@@ -1,4 +1,5 @@
 import { matchPath } from 'react-router-dom';
+import { Route, Flame, CircleDot, Sparkles, Sprout } from 'lucide-react';
 import { type ReactElement, type SVGProps } from 'react';
 import type { NavbarSection } from '../components/layout/Navbar';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
@@ -12,109 +13,6 @@ export interface DashboardSectionConfig extends NavbarSection {
   contentTitle: string;
   description?: string;
   icon: (props: SVGProps<SVGSVGElement>) => ReactElement;
-}
-
-function OrbIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-      {...props}
-    >
-      <circle cx={12} cy={12} r={6.5} />
-      <circle cx={12} cy={12} r={1.8} />
-      <path d="M7 7c1.4 1 3.1 1.5 5 1.5s3.6-.5 5-1.5" />
-      <path d="M17 17c-1.4-1-3.1-1.5-5-1.5S8.4 16 7 17" />
-    </svg>
-  );
-}
-
-function RouteIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-      {...props}
-    >
-      <path d="M6 19c0-2.5 1.8-4.5 4-4.5s4-2 4-4.5S16.8 5 19 5s3 1.3 3 3-1.3 3-3 3" />
-      <circle cx={6} cy={19} r={2} />
-      <circle cx={19} cy={8} r={2} />
-      <path d="M6 17.5S6 11 13 11" />
-    </svg>
-  );
-}
-
-function SparklesIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-      {...props}
-    >
-      <path d="M9 4.5 10 7l1.5 1-1.5 1L9 12.5 8 9 6.5 8 8 7 9 4.5Z" />
-      <path d="M15.5 11 16.5 13l1.5 1-1.5 1-1 2.5-1-2.5-1.5-1 1.5-1 1-2.5Z" />
-      <path d="M12.5 5c.6 1 1.5 1.6 2.5 1.8" />
-    </svg>
-  );
-}
-
-function FlameIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-      {...props}
-    >
-      <path d="M13.5 4.5c0 2.1 1.7 3.8 1.7 5.9 0 2.4-1.9 4.3-4.2 4.3s-4.2-1.9-4.2-4.3c0-.7.2-1.5.6-2.2" />
-      <path d="M11.2 3.6c0 1.4-1.2 2.3-1.7 3.5-.3.7-.4 1.4-.4 2.3 0 1.6 1.2 2.8 2.7 2.8s2.7-1.3 2.7-2.8c0-.6-.2-1.3-.5-1.8" />
-      <path d="M12 21c2.9 0 5.2-2.5 5.2-5.5 0-3.6-3.3-5.9-3.3-9.1 0-1.1.4-2.2 1.3-3.4" />
-    </svg>
-  );
-}
-
-function SproutIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-      {...props}
-    >
-      <path d="M12 21v-7.5" />
-      <path d="M12 13.5C12 10 15 7 18.5 7h2C20.5 10.5 17 13.5 12 13.5Z" />
-      <path d="M12 13.5C12 10 9 7 5.5 7h-2C3.5 10.5 7 13.5 12 13.5Z" />
-      <path d="M12 13.5 10 10" />
-    </svg>
-  );
 }
 
 const rawDashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
@@ -164,7 +62,7 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       end: true,
       pageTitle: 'Dashboard',
       contentTitle: 'Dashboard',
-      icon: (props) => <OrbIcon {...props} />,
+      icon: (props) => <CircleDot {...props} />,
     },
     missions: {
       key: 'missions',
@@ -174,7 +72,7 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       eyebrow: 'Misiones',
       contentTitle: 'Tus misiones activas',
       description: 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.',
-      icon: (props) => <RouteIcon {...props} />,
+      icon: (props) => <Route {...props} />,
     },
     dquest: {
       key: 'dquest',
@@ -185,7 +83,7 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       eyebrow: 'DQuest',
       contentTitle: 'Daily Quest',
       description: 'Tu ritual diario: enfócate en la misión clave del día y mantené la racha.',
-      icon: (props) => <FlameIcon {...props} />,
+      icon: (props) => <Flame {...props} />,
     },
     rewards: {
       key: 'rewards',
@@ -195,7 +93,7 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       eyebrow: 'Rewards',
       contentTitle: 'Logros y badges desbloqueados',
       description: 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.',
-      icon: (props) => <SparklesIcon {...props} />,
+      icon: (props) => <Sparkles {...props} />,
     },
     editor: {
       key: 'editor',
@@ -206,7 +104,7 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       eyebrow: 'Editor',
       contentTitle: '',
       description: '',
-      icon: (props) => <SproutIcon {...props} />,
+      icon: (props) => <Sprout {...props} />,
     },
   };
 }
