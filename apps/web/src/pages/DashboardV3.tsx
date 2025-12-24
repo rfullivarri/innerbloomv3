@@ -289,6 +289,7 @@ export default function DashboardV3Page() {
               to: section.to,
               icon: <Icon className="h-4 w-4" />,
               end: section.end,
+              onClick: section.key === 'dquest' ? handleOpenDaily : undefined,
             };
           })}
         />

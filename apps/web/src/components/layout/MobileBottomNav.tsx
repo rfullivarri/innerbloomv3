@@ -7,6 +7,7 @@ export interface MobileBottomNavItem {
   to: string;
   icon: ReactElement<SVGProps<SVGSVGElement>>;
   end?: boolean;
+  onClick?: () => void;
 }
 
 interface MobileBottomNavProps {
@@ -37,6 +38,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
             <NavLink
               to={item.to}
               end={item.end}
+              onClick={() => item.onClick?.()}
               className={({ isActive }: { isActive: boolean }) =>
                 combine(
                   baseItemClasses,
