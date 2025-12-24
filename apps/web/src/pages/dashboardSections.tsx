@@ -1,5 +1,5 @@
 import { matchPath } from 'react-router-dom';
-import { Route, Flame, CircleDot, Sparkles, Sprout } from 'lucide-react';
+import { Route, Flame, CircleDot, Sparkles, Sprout } from '../components/icons';
 import { type ReactElement, type SVGProps } from 'react';
 import type { NavbarSection } from '../components/layout/Navbar';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
