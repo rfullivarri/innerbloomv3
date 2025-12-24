@@ -11,9 +11,9 @@
  * Derivaciones client-side: xp faltante y barra de nivel se calculan con una curva estimada; panel de rachas muestra métricas de XP mientras esperamos daily_log_raw.
  */
 
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { MobileBottomNav } from '../components/layout/MobileBottomNav';
 import { Alerts } from '../components/dashboard-v3/Alerts';
@@ -466,10 +466,41 @@ function MissionsV2View({
   userId: string;
   gameMode: GameMode | string | null;
 }) {
+  const [showWip, setShowWip] = useState(true);
+  const navigate = useNavigate();
+
   return (
-    <div className="space-y-6">
+    <div className="relative space-y-6">
       <h1 className="sr-only">Misiones</h1>
       <MissionsV2Board userId={userId} gameMode={gameMode} />
+      {showWip ? (
+        <div className="absolute inset-0 z-20 bg-slate-950/90 px-4 py-6 sm:px-8 sm:py-10">
+          <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center text-center">
+            <p className="text-6xl">🚧</p>
+            <p className="mt-4 text-2xl font-semibold text-white sm:text-3xl">work in progress</p>
+            <p className="mt-3 max-w-xl text-sm text-slate-300 sm:text-base">
+              Estamos afinando la experiencia de misiones en web. Mientras tanto, puedes volver al dashboard o seguir
+              explorando bajo tu propio riesgo.
+            </p>
+            <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                className="inline-flex flex-1 items-center justify-center rounded-full border border-slate-700 bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:border-slate-500 hover:bg-slate-800"
+                onClick={() => setShowWip(false)}
+              >
+                let see
+              </button>
+              <button
+                type="button"
+                className="inline-flex flex-1 items-center justify-center rounded-full bg-pink-400 px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-pink-300"
+                onClick={() => navigate('/dashboard-v3')}
+              >
+                let them cook
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

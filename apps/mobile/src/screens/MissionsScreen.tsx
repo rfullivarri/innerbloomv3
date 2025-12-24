@@ -1,13 +1,9 @@
-import { useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, RefreshControl, Pressable } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { ScrollView, View, Text, StyleSheet, RefreshControl } from 'react-native';
 import { useTokenProvider } from '../hooks/useTokenProvider';
 import { useApiQuery } from '../hooks/useApiQuery';
 import { fetchMissionsBoard } from '../api/client';
 
 export default function MissionsScreen() {
-  const [showWip, setShowWip] = useState(true);
-  const navigation = useNavigation();
   const { tokenProvider } = useTokenProvider();
   const { data, status, error, reload } = useApiQuery(
     () => fetchMissionsBoard(tokenProvider!),
@@ -22,7 +18,6 @@ export default function MissionsScreen() {
       <ScrollView
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={isLoading} onRefresh={reload} tintColor="#f472b6" />}
-        pointerEvents={showWip ? 'none' : 'auto'}
       >
         {!tokenProvider && <Text style={styles.info}>Esperando sesión...</Text>}
         {status === 'error' && tokenProvider && (
@@ -47,23 +42,6 @@ export default function MissionsScreen() {
           </View>
         )}
       </ScrollView>
-      {showWip && (
-        <View style={styles.wipOverlay}>
-          <Text style={styles.wipEmoji}>🚧</Text>
-          <Text style={styles.wipTitle}>work in progress</Text>
-          <View style={styles.wipActions}>
-            <Pressable style={[styles.wipButton, styles.wipButtonSecondary]} onPress={() => setShowWip(false)}>
-              <Text style={styles.wipButtonText}>let see</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.wipButton, styles.wipButtonPrimary]}
-              onPress={() => navigation.navigate('DashboardHome' as never)}
-            >
-              <Text style={styles.wipButtonTextPrimary}>let them cook</Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
     </View>
   );
 }
@@ -111,57 +89,5 @@ const styles = StyleSheet.create({
   slotMeta: {
     color: '#cbd5f5',
     fontSize: 13,
-  },
-  wipOverlay: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    backgroundColor: 'rgba(3, 7, 18, 0.92)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    zIndex: 20,
-  },
-  wipEmoji: {
-    fontSize: 72,
-  },
-  wipTitle: {
-    marginTop: 12,
-    color: '#f8fafc',
-    fontSize: 22,
-    fontWeight: '700',
-    textTransform: 'lowercase',
-  },
-  wipActions: {
-    marginTop: 32,
-    flexDirection: 'row',
-    gap: 16,
-    alignSelf: 'stretch',
-    justifyContent: 'space-between',
-  },
-  wipButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 999,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  wipButtonPrimary: {
-    backgroundColor: '#f472b6',
-    borderColor: '#f472b6',
-  },
-  wipButtonSecondary: {
-    backgroundColor: '#0b0d16',
-    borderColor: '#334155',
-  },
-  wipButtonText: {
-    color: '#f8fafc',
-    fontWeight: '600',
-  },
-  wipButtonTextPrimary: {
-    color: '#0f172a',
-    fontWeight: '700',
   },
 });
