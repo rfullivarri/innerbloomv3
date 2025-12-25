@@ -44,16 +44,6 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
               {resolvedTitle}
             </h1>
           </div>
-          {onDailyClick && (
-            <button
-              ref={dailyButtonRef}
-              type="button"
-              onClick={onDailyClick}
-              className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/80 backdrop-blur transition hover:border-white/30 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 md:px-3 md:text-xs"
-            >
-              Daily
-            </button>
-          )}
         </div>
         {hasSections ? (
           <nav
