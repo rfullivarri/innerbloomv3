@@ -296,7 +296,10 @@ const MODE_CHIP_STYLES: Record<Mode, { glowPrimary: string; glowSecondary: strin
 };
 
 const TAB_BUTTON_BASE =
-  'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 md:text-xs';
+  'flex-1 inline-flex items-center justify-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 md:text-xs';
+
+const TAB_GROUP_BASE =
+  'inline-flex w-full items-center justify-between gap-1 rounded-full border border-white/15 bg-white/5 p-1';
 
 function normalizeMode(mode?: string | null): Mode {
   return normalizeGameModeValue(mode) ?? 'Flow';
@@ -779,29 +782,31 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
         }
       >
         <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
-          {PILLAR_TABS.map((tab) => {
-            const isActive = pillar === tab.value;
-            return (
-              <button
-                key={tab.value}
-                type="button"
-                onClick={() => setPillar(tab.value)}
-                className={cx(
-                  TAB_BUTTON_BASE,
-                  'leading-none',
-                  isActive
-                    ? 'border-violet-300/80 bg-violet-500 text-white shadow-[0_4px_16px_rgba(139,92,246,0.45)]'
-                    : 'border-white/10 bg-white/10 text-slate-200 hover:border-white/20 hover:bg-white/15',
-                )}
-                aria-pressed={isActive}
-              >
-                <span aria-hidden>{tab.icon}</span>
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+          <div className="flex items-center justify-center">
+            <div className={cx(TAB_GROUP_BASE, 'max-w-[320px]')}>
+              {PILLAR_TABS.map((tab) => {
+                const isActive = pillar === tab.value;
+                return (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    onClick={() => setPillar(tab.value)}
+                    className={cx(
+                      TAB_BUTTON_BASE,
+                      'leading-none',
+                      isActive
+                        ? 'border-violet-300/80 bg-violet-500 text-white shadow-[0_4px_16px_rgba(139,92,246,0.45)]'
+                        : 'border-white/10 bg-white/10 text-slate-200 hover:border-white/20 hover:bg-white/15',
+                    )}
+                    aria-pressed={isActive}
+                  >
+                    <span aria-hidden>{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
         {isError && (
           <p className="text-sm text-rose-300">
@@ -823,21 +828,21 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                 <h4 className="text-base font-semibold leading-tight text-slate-100 md:text-lg">Top streaks</h4>
                 <span className="text-xs text-slate-400 md:text-sm">— días consecutivos sin cortar</span>
               </div>
-                {topEntries.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-3">
-                    {topEntries.map((entry) => (
-                      <TaskItem
-                        key={entry.id}
-                        item={entry}
-                        range={range}
-                        mode={normalizedMode}
-                        onSelect={handleSelectTask}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-400">Todavía no hay rachas destacadas.</p>
-                )}
+              {topEntries.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3">
+                  {topEntries.map((entry) => (
+                    <TaskItem
+                      key={entry.id}
+                      item={entry}
+                      range={range}
+                      mode={normalizedMode}
+                      onSelect={handleSelectTask}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400">Todavía no hay rachas destacadas.</p>
+              )}
             </section>
           )
         )}
@@ -847,7 +852,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
           placement="top"
           className="flex flex-wrap items-center justify-center gap-2"
         >
-          <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className={cx(TAB_GROUP_BASE, 'max-w-[220px]')}>
             {RANGE_TABS.map((tab) => {
               const isActive = range === tab.value;
               return (
@@ -880,26 +885,26 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
           hasContent && (
             <section className="space-y-3">
               <h4 className="text-base font-semibold leading-tight text-slate-100 md:text-lg">Todas las tareas</h4>
-                {displayTasks.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-3">
-                    {displayTasks.map((task) => (
-                      <TaskItem
-                        key={task.id}
-                        item={task}
-                        range={range}
-                        mode={normalizedMode}
-                        onSelect={handleSelectTask}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-400">
-                    No encontramos tareas activas para este pilar en las últimas semanas.
-                  </p>
-                )}
-              </section>
-            )
-          )}
+              {displayTasks.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3">
+                  {displayTasks.map((task) => (
+                    <TaskItem
+                      key={task.id}
+                      item={task}
+                      range={range}
+                      mode={normalizedMode}
+                      onSelect={handleSelectTask}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400">
+                  No encontramos tareas activas para este pilar en las últimas semanas.
+                </p>
+              )}
+            </section>
+          )
+        )}
         </div>
       </Card>
       <TaskInsightsModal
