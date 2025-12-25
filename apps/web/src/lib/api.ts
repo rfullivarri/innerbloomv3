@@ -1712,7 +1712,7 @@ export type StreakPanelResponse = {
 
 export type TaskInsightsResponse = {
   task: { id: string; name: string; stat: string | null; description: string | null };
-  month: { totalCount: number; days: Array<{ date: string; count: number }> };
+  month: { totalCount: number; totalXp?: number; days: Array<{ date: string; count: number }> };
   weeks: {
     weeklyGoal: number;
     completionRate: number;
