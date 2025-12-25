@@ -796,7 +796,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                       'leading-none',
                       isActive
                         ? 'border-violet-300/80 bg-violet-500 text-white shadow-[0_4px_16px_rgba(139,92,246,0.45)]'
-                        : 'border-white/10 bg-white/10 text-slate-200 hover:border-white/20 hover:bg-white/15',
+                        : 'border-transparent bg-transparent text-slate-200 hover:text-slate-100',
                     )}
                     aria-pressed={isActive}
                   >
@@ -864,7 +864,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
                     TAB_BUTTON_BASE,
                     isActive
                       ? 'border-white/60 bg-white text-slate-900 shadow-[0_4px_16px_rgba(226,232,240,0.35)]'
-                      : 'border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10',
+                      : 'border-transparent bg-transparent text-slate-200 hover:text-slate-100',
                   )}
                   aria-pressed={isActive}
                 >
