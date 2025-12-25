@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { StreakPanelRange, StreakPanelTask } from '../../lib/api';
 import { getTaskInsights, type TaskInsightsResponse } from '../../lib/api';
 import { computeWeeklyHabitHealth, getHabitHealth } from '../../lib/habitHealth';
@@ -31,6 +31,7 @@ type TaskInsightsModalProps = {
 };
 
 type HabitHealthLevel = 'strong' | 'medium' | 'weak';
+type ActivityScope = 'week' | 'month' | 'quarter';
 
 function DifficultyInsight({
   difficultyLabel,
@@ -71,6 +72,15 @@ function formatDateLabel(value: string): string {
   if (!value) return '';
   const day = Number.parseInt(value.slice(-2), 10);
   return Number.isFinite(day) ? String(day) : value;
+}
+
+function formatWeekdayLabel(date: Date): string {
+  return new Intl.DateTimeFormat('es-AR', { weekday: 'narrow' }).format(date).toUpperCase();
+}
+
+function parseIsoDate(date: string): Date {
+  const parsed = new Date(date);
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
 }
 
 function WeeklyCompletionDonut({
@@ -217,6 +227,133 @@ function MonthMiniChart({ days }: { days: Array<{ date: string; count: number }>
   );
 }
 
+function WeekMiniChart({
+  days,
+  referenceDate,
+}: {
+  days: Array<{ date: string; count: number }>;
+  referenceDate?: Date;
+}) {
+  const weekEnd = useMemo(() => referenceDate ?? new Date(), [referenceDate]);
+  const weekStart = useMemo(() => {
+    const start = new Date(weekEnd);
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - 6);
+    return start;
+  }, [weekEnd]);
+
+  const countsByDay = useMemo(() => {
+    return days.reduce<Map<string, number>>((map, day) => {
+      map.set(day.date, day.count);
+      return map;
+    }, new Map());
+  }, [days]);
+
+  const timeline = useMemo(() => {
+    return Array.from({ length: 7 }, (_, index) => {
+      const current = new Date(weekStart);
+      current.setDate(weekStart.getDate() + index);
+      const key = current.toISOString().slice(0, 10);
+      return {
+        label: formatWeekdayLabel(current),
+        count: countsByDay.get(key) ?? 0,
+      };
+    });
+  }, [countsByDay, weekStart]);
+
+  const maxCount = useMemo(() => timeline.reduce((max, day) => Math.max(max, day.count), 0) || 1, [timeline]);
+
+  if (!timeline.some((day) => day.count > 0)) {
+    return <p className="text-sm text-slate-400">Sin registros en esta semana.</p>;
+  }
+
+  return (
+    <div className="mt-3 space-y-1.5">
+      <div className="flex items-end justify-between gap-2 rounded-2xl bg-white/5 px-3 py-2">
+        {timeline.map((day) => {
+          const ratio = Math.min(1, Math.max(0, day.count / maxCount));
+          const height = 10 + ratio * 48;
+          return (
+            <div key={day.label} className="flex flex-1 flex-col items-center justify-end gap-1 text-[11px] text-slate-300">
+              <div className="flex w-full items-end justify-center rounded-full bg-white/5">
+                <div
+                  className={cx(
+                    'w-[14px] rounded-full bg-gradient-to-b from-violet-200 via-fuchsia-200 to-sky-200 transition-all',
+                    day.count === 0 && 'opacity-40',
+                  )}
+                  style={{ height }}
+                />
+              </div>
+              <span className="font-semibold">{day.label}</span>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-[11px] text-slate-400">Actividad diaria de la semana en curso.</p>
+    </div>
+  );
+}
+
+function QuarterMiniChart({
+  timeline,
+  referenceDate,
+}: {
+  timeline: TaskInsightsResponse['weeks']['timeline'];
+  referenceDate?: Date;
+}) {
+  const today = useMemo(() => referenceDate ?? new Date(), [referenceDate]);
+  const quarterStart = useMemo(() => {
+    const start = new Date(today);
+    start.setHours(0, 0, 0, 0);
+    start.setMonth(start.getMonth() - 3);
+    return start;
+  }, [today]);
+
+  const recentWeeks = useMemo(() => {
+    const filtered = timeline.filter((week) => parseIsoDate(week.weekEnd) >= quarterStart);
+    return filtered.slice(-13);
+  }, [quarterStart, timeline]);
+
+  const maxCount = useMemo(() => recentWeeks.reduce((max, week) => Math.max(max, week.count), 0) || 1, [recentWeeks]);
+
+  if (!recentWeeks.length) {
+    return <p className="text-sm text-slate-400">Sin registros en los últimos 3 meses.</p>;
+  }
+
+  return (
+    <div className="mt-3 space-y-1.5">
+      <div className="flex items-end gap-1 overflow-x-auto pb-1">
+        {recentWeeks.map((week, index) => {
+          const ratio = Math.min(1, Math.max(0, week.count / maxCount));
+          const height = 12 + ratio * 52;
+          const weekEnd = parseIsoDate(week.weekEnd);
+          const label = new Intl.DateTimeFormat('es-AR', { month: 'short', day: 'numeric' }).format(weekEnd);
+          return (
+            <div
+              key={`${week.weekStart}-${week.weekEnd}-${index}`}
+              className="flex flex-col items-center justify-end gap-1 text-[10px] text-slate-400"
+            >
+              <div className="flex w-6 items-end justify-center rounded-full bg-white/5">
+                <div
+                  className={cx(
+                    'w-[14px] rounded-full transition-all',
+                    week.hit
+                      ? 'bg-gradient-to-b from-emerald-200 via-emerald-300 to-emerald-400'
+                      : 'bg-white/30 backdrop-blur',
+                  )}
+                  style={{ height }}
+                />
+              </div>
+              <span>{label}</span>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-[11px] text-slate-400">Semanas de los últimos 3 meses (verde = objetivo cumplido).</p>
+    </div>
+  );
+}
+
 export function TaskInsightsModal({
   taskId,
   weeklyGoal,
@@ -237,6 +374,8 @@ export function TaskInsightsModal({
     [taskId, mode, range, weeklyGoal],
     { enabled: Boolean(taskId) },
   );
+
+  const [activityScope, setActivityScope] = useState<ActivityScope>('month');
 
   useEffect(() => {
     if (taskId) {
@@ -270,10 +409,6 @@ export function TaskInsightsModal({
     };
   }, [taskId]);
 
-  if (!taskId) {
-    return null;
-  }
-
   const activeTask = data?.task ?? fallbackTask;
   const monthDays = data?.month.days ?? [];
   const monthTotal = data?.month.totalCount ?? fallbackTask?.monthCount ?? 0;
@@ -281,6 +416,65 @@ export function TaskInsightsModal({
   const difficultyLabel =
     (activeTask as { difficultyLabel?: string | null })?.difficultyLabel ??
     (activeTask as { difficulty?: string | null })?.difficulty;
+
+  const xpPerCompletion = useMemo(() => {
+    if (monthTotal > 0 && monthXp > 0) {
+      return monthXp / monthTotal;
+    }
+    return 0;
+  }, [monthTotal, monthXp]);
+
+  const weekActivity = useMemo(() => {
+    const end = referenceDate ?? new Date();
+    end.setHours(0, 0, 0, 0);
+    const start = new Date(end);
+    start.setDate(start.getDate() - 6);
+
+    const countsByDay = monthDays.reduce<Map<string, number>>((map, day) => {
+      map.set(day.date, day.count);
+      return map;
+    }, new Map());
+
+    const timeline = Array.from({ length: 7 }, (_, index) => {
+      const current = new Date(start);
+      current.setDate(start.getDate() + index);
+      const key = current.toISOString().slice(0, 10);
+      return countsByDay.get(key) ?? 0;
+    });
+
+    return {
+      totalCount: timeline.reduce((sum, value) => sum + value, 0),
+    };
+  }, [monthDays, referenceDate]);
+
+  const quarterTimeline = useMemo(() => {
+    const today = referenceDate ?? new Date();
+    const start = new Date(today);
+    start.setHours(0, 0, 0, 0);
+    start.setMonth(start.getMonth() - 3);
+
+    const filtered = timeline.filter((week) => parseIsoDate(week.weekEnd) >= start);
+    return filtered.slice(-13);
+  }, [referenceDate, timeline]);
+
+  const activityTotals = useMemo(() => {
+    if (activityScope === 'week') {
+      const xp = xpPerCompletion * weekActivity.totalCount;
+      return { count: weekActivity.totalCount, xp: Math.round(xp) };
+    }
+
+    if (activityScope === 'quarter') {
+      const totalCount = quarterTimeline.reduce((sum, week) => sum + week.count, 0);
+      const xp = xpPerCompletion * totalCount;
+      return { count: totalCount, xp: Math.round(xp) };
+    }
+
+    return { count: monthTotal, xp: Math.round(monthXp) };
+  }, [activityScope, monthTotal, monthXp, quarterTimeline, weekActivity.totalCount, xpPerCompletion]);
+
+  if (!taskId) {
+    return null;
+  }
 
   return createPortal(
     <div
@@ -318,19 +512,57 @@ export function TaskInsightsModal({
         <div className="flex-1 overflow-y-auto px-4 pb-5 pt-2">
           <div className="mt-2 space-y-3">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-slate-100">Actividad del mes</p>
-                <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-100">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-0.5">
-                    ✓×{numberFormatter.format(monthTotal)}
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-2 py-0.5">
-                    +{numberFormatter.format(monthXp)} XP
-                  </span>
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-slate-100">Actividad</p>
+                    <div className="flex justify-center">
+                      <div className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1 text-[11px] font-semibold text-slate-100">
+                        {[
+                          { value: 'week', label: 'W' },
+                          { value: 'month', label: 'M' },
+                          { value: 'quarter', label: '3M' },
+                        ].map((option) => {
+                          const isActive = activityScope === option.value;
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => setActivityScope(option.value as ActivityScope)}
+                              className={cx(
+                                'rounded-full px-3 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+                                isActive
+                                  ? 'bg-white text-slate-900 shadow-inner shadow-white/30'
+                                  : 'text-slate-200 hover:bg-white/10',
+                              )}
+                              aria-pressed={isActive}
+                            >
+                              {option.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-100">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-0.5">
+                      ✓×{numberFormatter.format(activityTotals.count)}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-2 py-0.5">
+                      +{numberFormatter.format(activityTotals.xp)} XP
+                    </span>
+                  </div>
                 </div>
               </div>
               {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-white/10" aria-hidden />}
-              {status === 'success' && <MonthMiniChart days={monthDays} />}
+              {status === 'success' && activityScope === 'week' && (
+                <WeekMiniChart days={monthDays} referenceDate={referenceDate} />
+              )}
+              {status === 'success' && activityScope === 'month' && <MonthMiniChart days={monthDays} />}
+              {status === 'success' && activityScope === 'quarter' && (
+                <QuarterMiniChart timeline={timeline} referenceDate={referenceDate} />
+              )}
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
