@@ -517,7 +517,7 @@ export function TaskInsightsModal({
                   <div className="space-y-1">
                     <p className="text-sm font-semibold text-slate-100">Actividad</p>
                     <div className="flex justify-center">
-                      <div className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1 text-[11px] font-semibold text-slate-100">
+                      <div className="inline-flex w-full max-w-[240px] items-center justify-between gap-1 rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[11px] font-semibold text-slate-100">
                         {[
                           { value: 'week', label: 'W' },
                           { value: 'month', label: 'M' },
@@ -530,7 +530,7 @@ export function TaskInsightsModal({
                               type="button"
                               onClick={() => setActivityScope(option.value as ActivityScope)}
                               className={cx(
-                                'rounded-full px-3 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+                                'flex-1 rounded-full px-3 py-0.5 text-[11px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
                                 isActive
                                   ? 'bg-white text-slate-900 shadow-inner shadow-white/30'
                                   : 'text-slate-200 hover:bg-white/10',
