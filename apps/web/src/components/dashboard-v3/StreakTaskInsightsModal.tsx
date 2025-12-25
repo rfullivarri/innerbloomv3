@@ -191,7 +191,7 @@ function MonthMiniChart({ days }: { days: Array<{ date: string; count: number }>
   }
 
   return (
-    <div className="space-y-1.5">
+    <div className="mt-3 space-y-1.5">
       <div className="flex items-end gap-1 overflow-x-auto pb-1">
         {days.map((day) => {
           const ratio = Math.min(1, Math.max(0, day.count / maxCount));
