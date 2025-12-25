@@ -508,7 +508,7 @@ function TaskItem({
         )}
       >
         <div className="flex flex-col gap-1.5 md:min-w-[220px] md:flex-1">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 -mt-0.5">
             <span
               className={cx(
                 'h-2.5 w-2.5 shrink-0 rounded-full',
