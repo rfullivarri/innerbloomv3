@@ -466,8 +466,8 @@ function TaskItem({
       onClick={onSelect ? handleClick : undefined}
       onKeyDown={onSelect ? handleKeyDown : undefined}
     >
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0 space-y-0.5">
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="min-w-0 flex-1 space-y-0.5">
           <div className="truncate text-sm font-medium leading-tight text-slate-200 md:text-base" title={item.name}>
             {item.name}
           </div>
@@ -477,20 +477,26 @@ function TaskItem({
             </p>
           )}
         </div>
-        {showFireBadge && (
-          <GlowChip
-            glowPrimary="rgba(251, 191, 36, 0.65)"
-            glowSecondary="rgba(249, 115, 22, 0.45)"
-            innerClassName="gap-1 rounded-full border border-amber-400/60 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-100 shadow-[0_0_12px_rgba(251,191,36,0.25)]"
-          >
-            <span aria-hidden>🔥</span>
-            {showStreakMultiplier ? (
-              <>x{numberFormatter.format(streakDays)}</>
-            ) : (
-              <span className="sr-only">{`${numberFormatter.format(streakDays)} días consecutivos`}</span>
-            )}
-          </GlowChip>
-        )}
+        <div className="ml-auto flex items-center gap-2 self-start">
+          {showFireBadge && (
+            <GlowChip
+              glowPrimary="rgba(251, 191, 36, 0.65)"
+              glowSecondary="rgba(249, 115, 22, 0.45)"
+              innerClassName="gap-1 rounded-full border border-amber-400/60 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-100 shadow-[0_0_12px_rgba(251,191,36,0.25)]"
+            >
+              <span aria-hidden>🔥</span>
+              {showStreakMultiplier ? (
+                <>x{numberFormatter.format(streakDays)}</>
+              ) : (
+                <span className="sr-only">{`${numberFormatter.format(streakDays)} días consecutivos`}</span>
+              )}
+            </GlowChip>
+          )}
+          <span aria-hidden className="ml-1 text-lg text-slate-400">
+            ›
+          </span>
+          <span className="sr-only">Toca para ver más detalles del streak</span>
+        </div>
       </div>
 
       <div
