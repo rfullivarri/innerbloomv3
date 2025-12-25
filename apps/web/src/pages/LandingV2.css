@@ -186,7 +186,7 @@
 .lv2-dashboard-grid {
   display: grid;
   gap: 14px;
-  align-items: stretch;
+  align-items: start;
 }
 
 .lv2-dashboard-grid--hero {
@@ -195,7 +195,7 @@
 }
 
 .lv2-dashboard-card {
-  height: 100%;
+  height: auto;
 }
 
 .lv2-dashboard-card-body {
@@ -288,6 +288,7 @@
 .lv2-dashboard-column {
   display: grid;
   gap: 14px;
+  align-content: start;
 }
 
 .lv2-dashboard-grid--hero .lv2-dashboard-card {
