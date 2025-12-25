@@ -381,7 +381,8 @@ const MISSION_PREVIEW_ITEMS = [
 
 const STREAKS_PREVIEW_ITEMS = [
   { title: 'Ayuno hasta las 14hs', tag: 'Nutrición', progress: 3, total: 3, streak: 'x3' },
-  { title: '2L de agua', tag: 'Hidratación', progress: 3, total: 5, streak: 'x2' }
+  { title: '2L de agua', tag: 'Hidratación', progress: 3, total: 5, streak: 'x2' },
+  { title: 'Mover 20 min', tag: 'Movimiento', progress: 2, total: 4, streak: 'x4' }
 ] as const;
 
 const TASKS_PREVIEW_ITEMS = [
@@ -844,18 +845,24 @@ export default function LandingV2Page() {
               <div className="lv2-dashboard-column">
                 <Card
                   className="lv2-dashboard-card"
+                  bodyClassName="lv2-dashboard-card-body"
                   title={language === 'es' ? 'Progreso general' : 'Overall progress'}
                   subtitle={language === 'es' ? 'Resumen de tu aventura' : 'Adventure summary'}
                 >
-                  <DashboardXpVisual language={language} />
+                  <DashboardXpVisual compact language={language} />
                 </Card>
-                <Card className="lv2-dashboard-card lv2-avatar-card" title={language === 'es' ? 'Tu avatar' : 'Your avatar'}>
+                <Card
+                  className="lv2-dashboard-card lv2-avatar-card"
+                  bodyClassName="lv2-dashboard-card-body"
+                  title={language === 'es' ? 'Tu avatar' : 'Your avatar'}
+                >
                   <img src="/Chill-Mood.jpg" alt="Avatar Chill Mood" />
                 </Card>
               </div>
               <div className="lv2-dashboard-column">
                 <Card
                   className="lv2-dashboard-card"
+                  bodyClassName="lv2-dashboard-card-body"
                   title="Radar Chart"
                   subtitle={language === 'es' ? 'XP · total acumulado' : 'XP · total accumulated'}
                   rightSlot={<span className="lv2-card-chip">{language === 'es' ? 'Rasgos clave' : 'Key traits'}</span>}
@@ -864,6 +871,7 @@ export default function LandingV2Page() {
                 </Card>
                 <Card
                   className="lv2-dashboard-card"
+                  bodyClassName="lv2-dashboard-card-body"
                   title="💗 Emotion Chart"
                   subtitle={language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
                 >
@@ -873,12 +881,17 @@ export default function LandingV2Page() {
               <div className="lv2-dashboard-column">
                 <Card
                   className="lv2-dashboard-card"
+                  bodyClassName="lv2-dashboard-card-body"
                   title="🔥 Streaks"
                   rightSlot={<span className="lv2-card-chip">Flow · 3x/week</span>}
                 >
                   <StreaksPreview language={language} />
                 </Card>
-                <Card className="lv2-dashboard-card" title={language === 'es' ? 'Todas las tareas' : 'All tasks'}>
+                <Card
+                  className="lv2-dashboard-card"
+                  bodyClassName="lv2-dashboard-card-body"
+                  title={language === 'es' ? 'Todas las tareas' : 'All tasks'}
+                >
                   <TasksPreview language={language} />
                 </Card>
               </div>
