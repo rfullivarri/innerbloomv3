@@ -198,6 +198,93 @@
   height: 100%;
 }
 
+.lv2-dashboard-card-body {
+  gap: 12px;
+  padding: 14px;
+  font-size: 13px;
+}
+
+.lv2-dashboard-card-body header h3 {
+  font-size: 0.95rem;
+}
+
+.lv2-dashboard-card-body header .text-sm {
+  font-size: 0.75rem;
+}
+
+.lv2-dashboard-card-body .lv2-card-chip {
+  padding: 3px 8px;
+  font-size: 10px;
+}
+
+.lv2-dashboard-card-body .lv2-radar-chart {
+  padding: 2px 0;
+}
+
+.lv2-dashboard-card-body .lv2-radar-chart svg {
+  max-width: 180px;
+}
+
+.lv2-dashboard-card-body .lv2-emotion-column span {
+  width: 12px;
+  height: 12px;
+}
+
+.lv2-dashboard-card-body .lv2-streaks,
+.lv2-dashboard-card-body .lv2-tasks {
+  gap: 10px;
+}
+
+.lv2-dashboard-card-body .lv2-streaks-tabs span,
+.lv2-dashboard-card-body .lv2-tasks-tabs span {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
+.lv2-dashboard-card-body .lv2-streaks-label,
+.lv2-dashboard-card-body .lv2-tasks-label {
+  font-size: 12px;
+}
+
+.lv2-dashboard-card-body .lv2-streaks-list,
+.lv2-dashboard-card-body .lv2-tasks-list {
+  gap: 8px;
+}
+
+.lv2-dashboard-card-body .lv2-streak-item,
+.lv2-dashboard-card-body .lv2-task-item {
+  gap: 8px;
+  padding: 10px;
+}
+
+.lv2-dashboard-card-body .lv2-streak-title,
+.lv2-dashboard-card-body .lv2-task-title {
+  font-size: 13px;
+}
+
+.lv2-dashboard-card-body .lv2-streak-tag,
+.lv2-dashboard-card-body .lv2-task-tag {
+  font-size: 11px;
+}
+
+.lv2-dashboard-card-body .lv2-streak-badge {
+  padding: 3px 6px;
+  font-size: 10px;
+}
+
+.lv2-dashboard-card-body .lv2-streak-progress {
+  height: 6px;
+}
+
+.lv2-dashboard-card-body .lv2-task-progress {
+  min-width: 72px;
+  font-size: 11px;
+}
+
+.lv2-dashboard-card-body .lv2-task-progress span {
+  height: 5px;
+}
+
 .lv2-dashboard-column {
   display: grid;
   gap: 14px;
