@@ -79,7 +79,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
       className="ring-1 ring-indigo-400/20"
       title="Progreso general"
       rightSlot={
-        <div className="flex items-center justify-end gap-2 sm:gap-3">
+        <div className="flex items-start justify-end gap-2 sm:gap-3 -mt-1">
           {chipStyle ? <GameModeChip {...chipStyle} /> : null}
           <InfoDotTarget
             id="xpLevel"
