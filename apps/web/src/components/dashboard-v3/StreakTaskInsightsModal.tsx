@@ -12,7 +12,13 @@ function cx(...values: Array<string | false | null | undefined>): string {
   return values.filter(Boolean).join(' ');
 }
 
-type TaskSummary = Pick<StreakPanelTask, 'id' | 'name' | 'stat'> & { highlight?: boolean };
+type TaskSummary = Pick<StreakPanelTask, 'id' | 'name' | 'stat'> & {
+  highlight?: boolean;
+  monthCount?: number;
+  monthXp?: number;
+};
+
+const numberFormatter = new Intl.NumberFormat('es-AR');
 
 type TaskInsightsModalProps = {
   taskId: string | null;
@@ -270,7 +276,8 @@ export function TaskInsightsModal({
 
   const activeTask = data?.task ?? fallbackTask;
   const monthDays = data?.month.days ?? [];
-  const monthTotal = data?.month.totalCount ?? 0;
+  const monthTotal = data?.month.totalCount ?? fallbackTask?.monthCount ?? 0;
+  const monthXp = data?.month.totalXp ?? fallbackTask?.monthXp ?? 0;
   const difficultyLabel =
     (activeTask as { difficultyLabel?: string | null })?.difficultyLabel ??
     (activeTask as { difficulty?: string | null })?.difficulty;
@@ -310,6 +317,22 @@ export function TaskInsightsModal({
 
         <div className="flex-1 overflow-y-auto px-4 pb-5 pt-2">
           <div className="mt-2 space-y-3">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-slate-100">Actividad del mes</p>
+                <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-100">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-0.5">
+                    ✓×{numberFormatter.format(monthTotal)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-2 py-0.5">
+                    +{numberFormatter.format(monthXp)} XP
+                  </span>
+                </div>
+              </div>
+              {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-white/10" aria-hidden />}
+              {status === 'success' && <MonthMiniChart days={monthDays} />}
+            </div>
+
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-slate-100">Progreso semanal</p>
@@ -346,15 +369,6 @@ export function TaskInsightsModal({
                 <p className="mt-1 text-3xl font-semibold text-slate-50">{stats.bestStreak}</p>
                 <p className="text-xs text-slate-400">máxima racha lograda</p>
               </div>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-slate-100">Actividad del mes</p>
-                <span className="text-xs text-slate-400">Veces este mes: {monthTotal} · Objetivo: {weeklyGoal}x/sem</span>
-              </div>
-              {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-white/10" aria-hidden />}
-              {status === 'success' && <MonthMiniChart days={monthDays} />}
             </div>
           </div>
         </div>
