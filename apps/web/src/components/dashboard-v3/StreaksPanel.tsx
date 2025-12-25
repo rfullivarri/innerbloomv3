@@ -501,8 +501,10 @@ function TaskItem({
 
       <div
         className={cx(
-          'grid gap-2 md:flex md:flex-row md:items-start md:justify-between',
-          showHistory ? 'grid-cols-[minmax(0,1fr)_auto] md:gap-4' : 'grid-cols-1 md:items-center',
+          'grid gap-2 md:flex md:flex-row md:justify-between',
+          showHistory
+            ? 'grid-cols-[minmax(0,1fr)_auto] items-end md:items-end md:gap-4'
+            : 'grid-cols-1 md:items-center',
         )}
       >
         <div className="flex flex-col gap-1.5 md:min-w-[220px] md:flex-1">
