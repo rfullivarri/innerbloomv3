@@ -525,7 +525,7 @@ function TaskItem({
                 />
               </div>
             </div>
-            <span className="ml-2 shrink-0 text-xs tabular-nums text-slate-200 md:ml-3">
+            <span className="ml-1 shrink-0 text-xs tabular-nums text-slate-200 md:ml-1.5">
               {item.weeklyDone}/{item.weeklyGoal}
             </span>
           </div>
