@@ -180,22 +180,55 @@
   display: grid;
   grid-template-columns: 1.05fr 1fr;
   gap: 36px;
-  align-items: center;
+  align-items: start;
 }
 
 .lv2-dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   align-items: stretch;
 }
 
 .lv2-dashboard-grid--hero {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 6px;
 }
 
 .lv2-dashboard-card {
   height: 100%;
+}
+
+.lv2-dashboard-column {
+  display: grid;
+  gap: 14px;
+}
+
+.lv2-dashboard-grid--hero .lv2-dashboard-card {
+  animation: lv2-card-rise 0.7s ease both;
+}
+
+.lv2-dashboard-grid--hero .lv2-dashboard-column:nth-child(1) .lv2-dashboard-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.lv2-dashboard-grid--hero .lv2-dashboard-column:nth-child(1) .lv2-dashboard-card:nth-child(2) {
+  animation-delay: 0.22s;
+}
+
+.lv2-dashboard-grid--hero .lv2-dashboard-column:nth-child(2) .lv2-dashboard-card:nth-child(1) {
+  animation-delay: 0.34s;
+}
+
+.lv2-dashboard-grid--hero .lv2-dashboard-column:nth-child(2) .lv2-dashboard-card:nth-child(2) {
+  animation-delay: 0.46s;
+}
+
+.lv2-dashboard-grid--hero .lv2-dashboard-column:nth-child(3) .lv2-dashboard-card:nth-child(1) {
+  animation-delay: 0.58s;
+}
+
+.lv2-dashboard-grid--hero .lv2-dashboard-column:nth-child(3) .lv2-dashboard-card:nth-child(2) {
+  animation-delay: 0.7s;
 }
 
 .card-span-2 {
@@ -209,6 +242,14 @@
   line-height: 1.05;
   letter-spacing: -0.02em;
   margin: 6px 0 16px;
+}
+
+.lv2-title-grad {
+  background: linear-gradient(100deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .lv2-sub {
@@ -696,6 +737,310 @@
 .lv2-next {
   text-align: center;
   padding-bottom: clamp(64px, 8vw, 110px);
+}
+
+@keyframes lv2-card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lv2-avatar-card img {
+  width: 100%;
+  border-radius: 18px;
+  object-fit: cover;
+  aspect-ratio: 1 / 1;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lv2-card-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.lv2-radar-chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.lv2-radar-chart svg {
+  width: 100%;
+  max-width: 220px;
+}
+
+.lv2-radar-ring {
+  fill: none;
+  stroke: rgba(148, 163, 184, 0.2);
+  stroke-width: 1;
+}
+
+.lv2-radar-axis {
+  stroke: rgba(148, 163, 184, 0.25);
+  stroke-width: 1;
+}
+
+.lv2-radar-node {
+  fill: #c4b5fd;
+}
+
+.lv2-emotion-card {
+  display: grid;
+  gap: 10px;
+}
+
+.lv2-emotion-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lv2-emotion-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.lv2-emotion-pill::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--dot-color);
+}
+
+.lv2-emotion-grid {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 6px;
+}
+
+.lv2-emotion-column {
+  display: grid;
+  gap: 6px;
+}
+
+.lv2-emotion-column span {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  display: block;
+}
+
+.lv2-emotion-caption {
+  color: #94a3b8;
+  font-size: 12px;
+  margin: 0;
+}
+
+.lv2-streaks {
+  display: grid;
+  gap: 12px;
+}
+
+.lv2-streaks-tabs {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.lv2-streaks-tabs span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+}
+
+.lv2-streaks-tabs span.active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(56, 189, 248, 0.4));
+  border-color: transparent;
+}
+
+.lv2-streaks-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5f5;
+  margin: 0;
+}
+
+.lv2-streaks-list {
+  display: grid;
+  gap: 12px;
+}
+
+.lv2-streak-item {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lv2-streak-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.lv2-streak-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.lv2-streak-tag {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.lv2-streak-badge {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  color: #fde68a;
+}
+
+.lv2-streak-progress {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.lv2-streak-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #a78bfa, #60a5fa);
+}
+
+.lv2-streak-marks {
+  display: flex;
+  justify-content: space-between;
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.lv2-streak-marks .filled {
+  color: #7dd3fc;
+}
+
+.lv2-tasks {
+  display: grid;
+  gap: 12px;
+}
+
+.lv2-tasks-tabs {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.lv2-tasks-tabs span {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #cbd5f5;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.lv2-tasks-tabs span.active {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.lv2-tasks-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.lv2-tasks-list {
+  display: grid;
+  gap: 12px;
+}
+
+.lv2-task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lv2-task-title {
+  margin: 0 0 2px;
+  font-weight: 700;
+}
+
+.lv2-task-tag {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.lv2-task-progress {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  min-width: 80px;
+  font-size: 12px;
+  color: #cbd5f5;
+}
+
+.lv2-task-progress span {
+  display: block;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a78bfa, #f9a8d4);
+}
+
+.lv2-task-progress p {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lv2-dashboard-grid--hero .lv2-dashboard-card {
+    animation: none;
+  }
 }
 
 @keyframes auroraV2 {

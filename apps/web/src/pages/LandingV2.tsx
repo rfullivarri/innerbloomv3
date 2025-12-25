@@ -379,6 +379,16 @@ const MISSION_PREVIEW_ITEMS = [
   { title: 'Boss: Focus AM', tag: 'Mind', reward: '+160 XP', status: { es: '2/3 completado', en: '2/3 complete' } }
 ] as const;
 
+const STREAKS_PREVIEW_ITEMS = [
+  { title: 'Ayuno hasta las 14hs', tag: 'Nutrición', progress: 3, total: 3, streak: 'x3' },
+  { title: '2L de agua', tag: 'Hidratación', progress: 3, total: 5, streak: 'x2' }
+] as const;
+
+const TASKS_PREVIEW_ITEMS = [
+  { title: 'Dormir 8hs', tag: 'Sueño', progress: 2, total: 3 },
+  { title: 'Cena antes de las 22hs', tag: 'Nutrición', progress: 2, total: 3 }
+] as const;
+
 function LanguageSwitch({ value, onChange }: { value: Language; onChange: (language: Language) => void }) {
   const options: { code: Language; label: string }[] = [
     { code: 'en', label: 'EN' },
@@ -615,6 +625,138 @@ function MissionsPreview({ compact = false, language = 'es' }: { compact?: boole
   );
 }
 
+function RadarChartPreview() {
+  return (
+    <div className="lv2-radar-chart">
+      <svg viewBox="0 0 200 200" role="img" aria-label="Radar chart preview">
+        <defs>
+          <linearGradient id="lv2-radar-fill" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#7dd3fc" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#a78bfa" stopOpacity="0.45" />
+          </linearGradient>
+        </defs>
+        {[20, 40, 60, 80].map((radius) => (
+          <circle key={radius} cx="100" cy="100" r={radius} className="lv2-radar-ring" />
+        ))}
+        {Array.from({ length: 8 }).map((_, index) => {
+          const angle = (Math.PI * 2 * index) / 8 - Math.PI / 2;
+          return (
+            <line
+              key={index}
+              x1="100"
+              y1="100"
+              x2={100 + Math.cos(angle) * 80}
+              y2={100 + Math.sin(angle) * 80}
+              className="lv2-radar-axis"
+            />
+          );
+        })}
+        <polygon
+          points="100,36 134,64 158,100 138,136 100,150 70,132 46,100 70,66"
+          fill="url(#lv2-radar-fill)"
+          stroke="#93c5fd"
+          strokeWidth="2"
+        />
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((index) => {
+          const angle = (Math.PI * 2 * index) / 8 - Math.PI / 2;
+          return <circle key={index} cx={100 + Math.cos(angle) * 64} cy={100 + Math.sin(angle) * 64} r="4" className="lv2-radar-node" />;
+        })}
+      </svg>
+    </div>
+  );
+}
+
+function EmotionChartPreview({ language = 'es' }: { language?: Language }) {
+  return (
+    <div className="lv2-emotion-card">
+      <div className="lv2-emotion-legend">
+        {['Calma', 'Felicidad', 'Motivación', 'Tristeza'].map((emotion) => (
+          <span key={emotion} className="lv2-emotion-pill" style={{ ['--dot-color' as string]: EMOTION_COLORS[emotion as EmotionName] }}>
+            {emotion}
+          </span>
+        ))}
+      </div>
+      <div className="lv2-emotion-grid">
+        {EMOTION_PREVIEW_COLUMNS.slice(0, 6).map((column) => (
+          <div key={column.key} className="lv2-emotion-column">
+            {column.cells.slice(0, 5).map((cell, cellIndex) => (
+              <span key={`${column.key}-${cellIndex}`} style={{ backgroundColor: EMOTION_COLORS[cell] }} />
+            ))}
+          </div>
+        ))}
+      </div>
+      <p className="lv2-emotion-caption">
+        {language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
+      </p>
+    </div>
+  );
+}
+
+function StreaksPreview({ language = 'es' }: { language?: Language }) {
+  return (
+    <div className="lv2-streaks">
+      <div className="lv2-streaks-tabs">
+        <span className="active">🔥 Body</span>
+        <span>🧠 Mind</span>
+        <span>🏵️ Soul</span>
+      </div>
+      <p className="lv2-streaks-label">{language === 'es' ? 'Top streaks' : 'Top streaks'}</p>
+      <div className="lv2-streaks-list">
+        {STREAKS_PREVIEW_ITEMS.map((item) => (
+          <div key={item.title} className="lv2-streak-item">
+            <div className="lv2-streak-header">
+              <div>
+                <p className="lv2-streak-title">{item.title}</p>
+                <span className="lv2-streak-tag">{item.tag}</span>
+              </div>
+              <span className="lv2-streak-badge">🔥 {item.streak}</span>
+            </div>
+            <div className="lv2-streak-progress">
+              <span style={{ width: `${(item.progress / item.total) * 100}%` }} />
+            </div>
+            <div className="lv2-streak-marks">
+              {[1, 2, 3, 4, 5].map((mark) => (
+                <span key={mark} className={mark <= item.progress ? 'filled' : ''}>
+                  {mark}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TasksPreview({ language = 'es' }: { language?: Language }) {
+  return (
+    <div className="lv2-tasks">
+      <div className="lv2-tasks-tabs">
+        <span>SEM</span>
+        <span className="active">MES</span>
+        <span>3M</span>
+      </div>
+      <p className="lv2-tasks-label">{language === 'es' ? 'Todas las tareas' : 'All tasks'}</p>
+      <div className="lv2-tasks-list">
+        {TASKS_PREVIEW_ITEMS.map((task) => (
+          <div key={task.title} className="lv2-task-item">
+            <div>
+              <p className="lv2-task-title">{task.title}</p>
+              <span className="lv2-task-tag">{task.tag}</span>
+            </div>
+            <div className="lv2-task-progress">
+              <span style={{ width: `${(task.progress / task.total) * 100}%` }} />
+              <p>
+                {task.progress}/{task.total}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function HighlightVisual({ visual, language }: { visual: Highlight['visual']; language: Language }) {
   if (visual === 'xp') return <DashboardXpVisual compact language={language} />;
   if (visual === 'energy') return <DailyEnergyPreview compact language={language} />;
@@ -627,6 +769,10 @@ export default function LandingV2Page() {
   const isSignedIn = Boolean(userId);
   const [language, setLanguage] = useState<Language>('en');
   const copy = t[language];
+  const heroTitle =
+    language === 'es'
+      ? { lead: 'Convierte la experiencia en hábitos.', highlight: 'Convierte los hábitos en camino' }
+      : { lead: 'Turn experience into habits.', highlight: 'Turn habits into your path' };
   const heroMeta = useMemo(
     () =>
       language === 'es'
@@ -644,9 +790,8 @@ export default function LandingV2Page() {
     <div className="landing-v2">
       <header className="lv2-nav">
         <Link className="lv2-brand" to="/landing-v2" aria-label="Innerbloom — Landing V2">
-          <img src="/IB-B2-cont-logo.png" alt="Innerbloom" className="lv2-logo" width={40} height={40} loading="lazy" />
+          <img src="/IB-COLOR-LOGO.png" alt="Innerbloom" className="lv2-logo" width={40} height={40} loading="lazy" />
           <span className="lv2-brand-text">Innerbloom</span>
-          <span className="lv2-brand-tagline">{language === 'es' ? 'Hábitos + IA' : 'Habits + AI'}</span>
         </Link>
         <nav className="lv2-links">
           {copy.nav.map((item) => (
@@ -668,7 +813,10 @@ export default function LandingV2Page() {
           <div className="lv2-container lv2-hero-grid">
             <div className="lv2-hero-copy">
               <p className="lv2-kicker">Habits • Gamification</p>
-              <h1>{copy.hero.title}</h1>
+              <h1>
+                {heroTitle.lead}{' '}
+                <span className="lv2-title-grad">{heroTitle.highlight}</span>
+              </h1>
               <p className="lv2-sub">{copy.hero.subtitle}</p>
               <div className="lv2-hero-meta" aria-hidden="true">
                 {heroMeta.map((item) => (
@@ -692,35 +840,48 @@ export default function LandingV2Page() {
                   : 'Not just a dashboard: a gamified habit-improvement system.'}
               </p>
             </div>
-            <div className="lv2-dashboard-grid lv2-dashboard-grid--hero">
-              <Card
-                className="lv2-dashboard-card card-span-2"
-                title={language === 'es' ? 'Progreso general' : 'Overall progress'}
-                subtitle={language === 'es' ? 'XP real, nivel y rachas activas' : 'Real XP, level and active streaks'}
-              >
-                <DashboardXpVisual language={language} />
-              </Card>
-              <Card
-                className="lv2-dashboard-card"
-                title="💠 Daily Energy"
-                subtitle={language === 'es' ? 'HP, Mood y Focus tal como lo ves en el dashboard' : 'HP, Mood & Focus exactly like the dashboard'}
-              >
-                <DailyEnergyPreview language={language} />
-              </Card>
-              <Card
-                className="lv2-dashboard-card"
-                title="🗺️ Emotion Heatmap"
-                subtitle={language === 'es' ? 'Check-ins y patrones semanales' : 'Check-ins and weekly patterns'}
-              >
-                <EmotionHeatmapPreview language={language} />
-              </Card>
-              <Card
-                className="lv2-dashboard-card"
-                title="🎯 Misiones + Rewards"
-                subtitle={language === 'es' ? 'Conectadas a tus rachas y XP real' : 'Connected to your streaks and real XP'}
-              >
-                <MissionsPreview language={language} />
-              </Card>
+            <div className="lv2-dashboard-grid lv2-dashboard-grid--hero" aria-label="Demo del dashboard">
+              <div className="lv2-dashboard-column">
+                <Card
+                  className="lv2-dashboard-card"
+                  title={language === 'es' ? 'Progreso general' : 'Overall progress'}
+                  subtitle={language === 'es' ? 'Resumen de tu aventura' : 'Adventure summary'}
+                >
+                  <DashboardXpVisual language={language} />
+                </Card>
+                <Card className="lv2-dashboard-card lv2-avatar-card" title={language === 'es' ? 'Tu avatar' : 'Your avatar'}>
+                  <img src="/Chill-Mood.jpg" alt="Avatar Chill Mood" />
+                </Card>
+              </div>
+              <div className="lv2-dashboard-column">
+                <Card
+                  className="lv2-dashboard-card"
+                  title="Radar Chart"
+                  subtitle={language === 'es' ? 'XP · total acumulado' : 'XP · total accumulated'}
+                  rightSlot={<span className="lv2-card-chip">{language === 'es' ? 'Rasgos clave' : 'Key traits'}</span>}
+                >
+                  <RadarChartPreview />
+                </Card>
+                <Card
+                  className="lv2-dashboard-card"
+                  title="💗 Emotion Chart"
+                  subtitle={language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
+                >
+                  <EmotionChartPreview language={language} />
+                </Card>
+              </div>
+              <div className="lv2-dashboard-column">
+                <Card
+                  className="lv2-dashboard-card"
+                  title="🔥 Streaks"
+                  rightSlot={<span className="lv2-card-chip">Flow · 3x/week</span>}
+                >
+                  <StreaksPreview language={language} />
+                </Card>
+                <Card className="lv2-dashboard-card" title={language === 'es' ? 'Todas las tareas' : 'All tasks'}>
+                  <TasksPreview language={language} />
+                </Card>
+              </div>
             </div>
           </div>
         </section>
