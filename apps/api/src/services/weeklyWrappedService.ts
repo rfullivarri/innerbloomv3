@@ -188,12 +188,6 @@ function startOfDay(date: Date): Date {
   return clone;
 }
 
-function addDays(date: Date, amount: number): Date {
-  const clone = new Date(date.getTime());
-  clone.setUTCDate(clone.getUTCDate() + amount);
-  return clone;
-}
-
 function toDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
