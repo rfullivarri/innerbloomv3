@@ -322,7 +322,8 @@ async function buildWeeklyWrappedPayload(
     .reduce((acc, log) => acc + Math.max(0, Number(log.xp ?? 0)), 0);
   const levelUp = detectLevelUp(levelSummary, xpTotal, false);
 
-  const topHabits = habitCounts.slice(0, 3).map((habit) => {
+  const pillarDominant = dominantPillar(insights) ?? null;
+  const topHabits = selectTopHabits(habitCounts, pillarDominant).map((habit) => {
     const longTerm = longTermHabitMap.get(habit.title);
     return {
       ...habit,
@@ -331,7 +332,6 @@ async function buildWeeklyWrappedPayload(
       weeklyGoal,
     };
   });
-  const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
   const highlight = effortBalance.topTask?.title ?? topHabits[0]?.title ?? null;
   const emotionHighlight = buildEmotionHighlight(emotions);
@@ -616,6 +616,34 @@ function getWeekKey(date: Date): string {
   return `${copy.getUTCFullYear()}-W${weekNumber}`;
 }
 
+function computeStreakDays(days: Set<string>): number {
+  const sorted = Array.from(days).sort();
+  let maxStreak = 0;
+  let currentStreak = 0;
+  let previousDate: Date | null = null;
+
+  for (const dayKey of sorted) {
+    const date = parseDateKey(dayKey);
+    if (!date) {
+      continue;
+    }
+
+    if (previousDate && date.getTime() - previousDate.getTime() === MS_IN_DAY) {
+      currentStreak += 1;
+    } else {
+      currentStreak = 1;
+    }
+
+    if (currentStreak > maxStreak) {
+      maxStreak = currentStreak;
+    }
+
+    previousDate = date;
+  }
+
+  return maxStreak;
+}
+
 function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, weeklyGoal?: number) {
   const map = new Map<
     string,
@@ -676,6 +704,7 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, we
       title: entry.title,
       completions: entry.completions,
       daysActive: entry.days.size,
+      streakDays: computeStreakDays(entry.days),
       weeksActive:
         weeklyTarget !== null
           ? Array.from(entry.weeklyCounts.values()).filter((count) => count >= weeklyTarget).length
@@ -685,7 +714,75 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, we
       badge: entry.badge,
       weeklyGoal: weeklyTarget,
     }))
-    .sort((a, b) => b.daysActive - a.daysActive || b.completions - a.completions || a.title.localeCompare(b.title));
+    .sort(
+      (a, b) =>
+        b.daysActive - a.daysActive ||
+        b.streakDays - a.streakDays ||
+        b.completions - a.completions ||
+        a.title.localeCompare(b.title),
+    );
+}
+
+function selectTopHabits(
+  habits: ReturnType<typeof aggregateHabits>,
+  pillarDominant: string | null,
+  limit = 5,
+) {
+  if (habits.length <= limit) {
+    return habits;
+  }
+
+  const tieOnTop =
+    habits[0]?.daysActive === habits[limit - 1]?.daysActive &&
+    habits[0]?.streakDays === habits[limit - 1]?.streakDays;
+
+  if (!tieOnTop) {
+    return habits.slice(0, limit);
+  }
+
+  const selected: ReturnType<typeof aggregateHabits> = [];
+  const selectedKeys = new Set<string>();
+  const pillars = ['Body', 'Mind', 'Soul'] as const;
+
+  pillars.forEach((pillar) => {
+    const match = habits.find(
+      (habit) => normalizePillarCode(habit.pillar) === pillar && !selectedKeys.has(habit.title),
+    );
+    if (match) {
+      selected.push(match);
+      selectedKeys.add(match.title);
+    }
+  });
+
+  const dominant = normalizePillarCode(pillarDominant);
+  if (dominant) {
+    for (const habit of habits) {
+      if (selected.length >= limit) {
+        break;
+      }
+      if (normalizePillarCode(habit.pillar) !== dominant) {
+        continue;
+      }
+      if (selectedKeys.has(habit.title)) {
+        continue;
+      }
+      selected.push(habit);
+      selectedKeys.add(habit.title);
+    }
+  }
+
+  for (const habit of habits) {
+    if (selected.length >= limit) {
+      break;
+    }
+    if (selectedKeys.has(habit.title)) {
+      continue;
+    }
+    selected.push(habit);
+    selectedKeys.add(habit.title);
+  }
+
+  return selected.slice(0, limit);
 }
 
 function dominantPillar(insights: Awaited<ReturnType<typeof getUserInsights>>): string | undefined {
