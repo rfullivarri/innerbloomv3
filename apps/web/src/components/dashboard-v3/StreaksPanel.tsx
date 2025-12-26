@@ -504,13 +504,18 @@ function TaskItem({
 
       <div
         className={cx(
-          'grid gap-2 md:flex md:flex-row md:justify-between',
+          'grid gap-2',
           showHistory
-            ? 'grid-cols-[minmax(0,1fr)_auto] items-end md:items-end md:gap-4'
-            : 'grid-cols-1 md:items-center',
+            ? 'grid-cols-[minmax(0,1fr)_auto] grid-rows-[auto_auto] items-center gap-x-4'
+            : 'grid-cols-1 md:flex md:flex-row md:items-center md:justify-between',
         )}
       >
-        <div className="flex flex-col gap-1.5 md:min-w-[220px] md:flex-1">
+        <div
+          className={cx(
+            'flex flex-col gap-1.5 md:min-w-[220px] md:flex-1',
+            showHistory && 'row-start-1 self-center',
+          )}
+        >
           <div className="flex items-center gap-3 -mt-0.5">
             <span
               className={cx(
@@ -535,8 +540,8 @@ function TaskItem({
         </div>
 
         {showHistory && (
-          <div className="flex flex-col items-end gap-1 justify-self-end md:min-w-[72px] md:justify-self-auto">
-            <div className="flex items-end gap-1">
+          <>
+            <div className="flex items-end gap-1 justify-self-end md:min-w-[72px] md:justify-self-auto">
               {item.history.values.map((value, index) => {
                 const ratio = item.weeklyGoal > 0 ? value / item.weeklyGoal : 0;
                 const clamped = Math.max(0, Math.min(ratio, 1.6));
@@ -565,13 +570,13 @@ function TaskItem({
               })}
             </div>
             {item.history.labels && item.history.labels.length > 0 && (
-              <div className="flex items-center gap-1 text-[10px] uppercase tracking-[0.16em] text-slate-400">
+              <div className="flex items-center gap-1 justify-self-end text-[10px] uppercase tracking-[0.16em] text-slate-400 md:min-w-[72px]">
                 {item.history.labels.map((label, index) => (
                   <span key={index}>{label}</span>
                 ))}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </article>
