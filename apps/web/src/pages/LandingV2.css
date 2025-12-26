@@ -179,19 +179,19 @@
 .lv2-hero-grid {
   display: grid;
   grid-template-columns: 1.05fr 1fr;
-  gap: 36px;
+  gap: 24px;
   align-items: start;
 }
 
 .lv2-dashboard-grid {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   align-items: start;
 }
 
 .lv2-dashboard-grid--hero {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 6px;
+  margin-top: 0;
 }
 
 .lv2-dashboard-card {
@@ -207,9 +207,9 @@
 }
 
 .lv2-dashboard-card-body {
-  gap: 12px;
-  padding: 14px;
-  font-size: 13px;
+  gap: 10px;
+  padding: 12px;
+  font-size: 12px;
 }
 
 .lv2-xp-row {
@@ -232,24 +232,24 @@
 }
 
 .lv2-dashboard-card-body header h3 {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .lv2-dashboard-card-body header .text-sm {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
 }
 
 .lv2-dashboard-card-body .lv2-card-chip {
   padding: 3px 8px;
-  font-size: 10px;
+  font-size: 9px;
 }
 
 .lv2-dashboard-card-body .lv2-radar-chart {
-  padding: 2px 0;
+  padding: 0;
 }
 
 .lv2-dashboard-card-body .lv2-radar-chart svg {
-  max-width: 180px;
+  max-width: 170px;
 }
 
 .lv2-dashboard-card-body .lv2-emotion-column span {
@@ -270,7 +270,7 @@
 
 .lv2-dashboard-card-body .lv2-streaks-label,
 .lv2-dashboard-card-body .lv2-tasks-label {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .lv2-dashboard-card-body .lv2-streaks-list,
@@ -286,12 +286,12 @@
 
 .lv2-dashboard-card-body .lv2-streak-title,
 .lv2-dashboard-card-body .lv2-task-title {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .lv2-dashboard-card-body .lv2-streak-tag,
 .lv2-dashboard-card-body .lv2-task-tag {
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .lv2-dashboard-card-body .lv2-streak-badge {
@@ -314,8 +314,12 @@
 
 .lv2-dashboard-column {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   align-content: start;
+}
+
+.lv2-avatar-card .lv2-dashboard-card-body {
+  padding: 8px;
 }
 
 .lv2-dashboard-grid--hero .lv2-dashboard-card {
@@ -1021,7 +1025,8 @@
 }
 
 .lv2-dashboard-card--streaks .lv2-streaks-tabs {
-  gap: 8px;
+  gap: 6px;
+  flex-wrap: nowrap;
 }
 
 .lv2-dashboard-card--streaks .lv2-streaks-tabs span {
@@ -1032,6 +1037,7 @@
   background: rgba(15, 23, 42, 0.55);
   border: 1px solid rgba(148, 163, 184, 0.24);
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
 }
 
 .lv2-dashboard-card--streaks .lv2-streaks-tabs span.active {
