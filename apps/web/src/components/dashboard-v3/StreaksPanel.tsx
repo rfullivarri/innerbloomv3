@@ -540,8 +540,8 @@ function TaskItem({
         </div>
 
         {showHistory && (
-          <>
-            <div className="flex items-end gap-1 justify-self-end md:min-w-[72px] md:justify-self-auto">
+          <div className="flex flex-col items-start gap-1 justify-self-end md:min-w-[72px] md:justify-self-auto">
+            <div className="flex items-end gap-1">
               {item.history.values.map((value, index) => {
                 const ratio = item.weeklyGoal > 0 ? value / item.weeklyGoal : 0;
                 const clamped = Math.max(0, Math.min(ratio, 1.6));
@@ -570,7 +570,7 @@ function TaskItem({
               })}
             </div>
             {item.history.labels && item.history.labels.length > 0 && (
-              <div className="flex items-center gap-1 justify-self-end text-[10px] uppercase tracking-[0.16em] text-slate-400 md:min-w-[72px]">
+              <div className="flex items-center gap-1 text-[10px] uppercase tracking-[0.16em] text-slate-400">
                 {item.history.labels.map((label, index) => (
                   <span key={index} className="w-2 text-center">
                     {label}
@@ -578,7 +578,7 @@ function TaskItem({
                 ))}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </article>
