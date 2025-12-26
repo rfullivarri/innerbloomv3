@@ -36,8 +36,11 @@
   background:
     radial-gradient(1200px 780px at 14% 12%, rgba(139, 92, 246, 0.35), transparent 72%) no-repeat,
     radial-gradient(960px 680px at 84% 8%, rgba(56, 189, 248, 0.28), transparent 70%) no-repeat,
-    conic-gradient(from var(--gradient-angle, 120deg) at 50% 40%, rgba(139, 92, 246, 0.16), rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.75), rgba(56, 189, 248, 0.18), rgba(139, 92, 246, 0.22));
-  background-size: 1400px 900px, 1320px 900px, 220% 220%;
+    conic-gradient(from var(--gradient-angle, 120deg) at 50% 40%, rgba(139, 92, 246, 0.16), rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.75), rgba(56, 189, 248, 0.18), rgba(139, 92, 246, 0.22)),
+    linear-gradient(270deg, var(--bg-2) 0%, rgba(17, 28, 51, 0) 60%);
+  background-size: 1800px 1100px, 1700px 1100px, 260% 260%, 100% 100%;
+  background-position: center;
+  background-color: var(--bg);
   mix-blend-mode: screen;
   animation: auroraV2 32s ease-in-out infinite alternate;
 }
