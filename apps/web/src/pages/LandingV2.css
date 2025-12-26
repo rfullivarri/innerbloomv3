@@ -178,7 +178,7 @@
 
 .lv2-hero-grid {
   display: grid;
-  grid-template-columns: 1.05fr 1fr;
+  grid-template-columns: 1.05fr 1.2fr;
   gap: 24px;
   align-items: start;
 }
@@ -249,7 +249,7 @@
 }
 
 .lv2-dashboard-card-body .lv2-radar-chart svg {
-  max-width: 170px;
+  max-width: 210px;
 }
 
 .lv2-dashboard-card-body .lv2-emotion-column span {

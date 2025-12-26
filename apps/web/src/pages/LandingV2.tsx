@@ -859,7 +859,6 @@ export default function LandingV2Page() {
                   className="lv2-dashboard-card lv2-dashboard-card--square"
                   bodyClassName="lv2-dashboard-card-body"
                   title={language === 'es' ? 'Progreso general' : 'Overall progress'}
-                  subtitle={language === 'es' ? 'Resumen de tu aventura' : 'Adventure summary'}
                 >
                   <DashboardXpVisual compact language={language} />
                 </Card>
@@ -880,8 +879,6 @@ export default function LandingV2Page() {
                   className="lv2-dashboard-card lv2-dashboard-card--square"
                   bodyClassName="lv2-dashboard-card-body"
                   title="Radar Chart"
-                  subtitle={language === 'es' ? 'XP · total acumulado' : 'XP · total accumulated'}
-                  rightSlot={<span className="lv2-card-chip">{language === 'es' ? 'Rasgos clave' : 'Key traits'}</span>}
                 >
                   <RadarChartPreview />
                 </Card>
