@@ -296,7 +296,7 @@ async function buildWeeklyWrappedPayload(
   const endDate = latestLog ?? new Date(`${range.end}T00:00:00Z`);
   const startDate = startOfDay(new Date(`${range.start}T00:00:00Z`));
   const weeksSample = Math.max(1, Math.ceil((endDate.getTime() - parseDate(longTermStart).getTime() + MS_IN_DAY) / (7 * MS_IN_DAY)));
-  const { completions, habitCounts } = summarizeWeeklyActivity(normalizedLogs, weeklyGoal, endDate);
+  const { completions, habitCounts } = summarizeWeeklyActivity(normalizedLogs, weeklyGoal);
   logEffortBalanceDebug(
     {
       userId,
@@ -598,14 +598,13 @@ function normalizeLogs(logs: AdminLogRow[]): NormalizedLog[] {
 function summarizeWeeklyActivity(
   logs: NormalizedLog[],
   weeklyGoal: number | undefined,
-  referenceDate: Date,
 ): {
   completions: number;
   habitCounts: ReturnType<typeof aggregateHabits>;
 } {
   const meaningfulLogs = logs.filter((log) => log.state !== 'red' && log.dateKey);
   const completions = meaningfulLogs.reduce((acc, log) => acc + log.quantity, 0);
-  const habitCounts = aggregateHabits(meaningfulLogs, undefined, weeklyGoal, referenceDate);
+  const habitCounts = aggregateHabits(meaningfulLogs, undefined, weeklyGoal);
 
   return { completions, habitCounts };
 }
