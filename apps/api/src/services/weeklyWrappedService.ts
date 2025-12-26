@@ -317,13 +317,14 @@ async function buildWeeklyWrappedPayload(
   }
   const longTermHabits = aggregateHabits(normalizedLongTermLogs, weeksSample, weeklyGoal);
   const longTermHabitMap = new Map(longTermHabits.map((habit) => [habit.title, habit]));
+  const topHabitsCandidates = habitCounts.filter((habit) => habit.daysActive > 0);
   const xpTotal = normalizedLogs
     .filter((log) => log.state !== 'red')
     .reduce((acc, log) => acc + Math.max(0, Number(log.xp ?? 0)), 0);
   const levelUp = detectLevelUp(levelSummary, xpTotal, false);
 
   const pillarDominant = dominantPillar(insights) ?? null;
-  const topHabits = selectTopHabits(habitCounts, pillarDominant).map((habit) => {
+  const topHabits = selectTopHabits(topHabitsCandidates, pillarDominant).map((habit) => {
     const longTerm = longTermHabitMap.get(habit.title);
     return {
       ...habit,
