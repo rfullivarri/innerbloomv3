@@ -433,30 +433,30 @@ function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boo
     <div className={compact ? 'space-y-2' : 'space-y-5'}>
       <div className={`lv2-xp-row ${compact ? 'lv2-xp-row--compact' : ''}`}>
         <div className="lv2-xp-metric">
-          <span className={`leading-none ${compact ? 'text-[0.95em]' : 'text-[2.1em]'}`}>🏆</span>
+          <span className={`leading-none ${compact ? 'text-[1.24em]' : 'text-[2.1em]'}`}>🏆</span>
           <div className="flex flex-col">
-            <span className={`font-semibold text-slate-50 ${compact ? 'text-[0.55rem]' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
-            <span className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[5.5px]' : 'text-[11px]'}`}>
+            <span className={`font-semibold text-slate-50 ${compact ? 'text-[0.715rem]' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
+            <span className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[7.15px]' : 'text-[11px]'}`}>
               Total XP
             </span>
           </div>
         </div>
         <div className="lv2-xp-metric">
-          <span className={`leading-none ${compact ? 'text-[0.95em]' : 'text-[2.1em]'}`}>🎯</span>
+          <span className={`leading-none ${compact ? 'text-[1.24em]' : 'text-[2.1em]'}`}>🎯</span>
           <div className="flex flex-col">
-            <span className={`font-semibold text-slate-50 ${compact ? 'text-[0.55rem]' : 'text-4xl sm:text-5xl'}`}>{levelLabel}</span>
-            <span className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[5.5px]' : 'text-[11px]'}`}>
+            <span className={`font-semibold text-slate-50 ${compact ? 'text-[0.715rem]' : 'text-4xl sm:text-5xl'}`}>{levelLabel}</span>
+            <span className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[7.15px]' : 'text-[11px]'}`}>
               Nivel
             </span>
           </div>
         </div>
       </div>
       <div className="space-y-2">
-        <p className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[5.5px]' : 'text-[11px]'}`}>
+        <p className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[7.15px]' : 'text-[11px]'}`}>
           Progreso
         </p>
         <div
-          className={`relative ${compact ? 'h-4' : 'h-6 sm:h-[30px]'} w-full overflow-hidden rounded-full border border-white/5 bg-slate-950/60 shadow-[inset_0_2px_8px_rgba(8,15,40,0.6)]`}
+          className={`relative ${compact ? 'h-[20px]' : 'h-6 sm:h-[30px]'} w-full overflow-hidden rounded-full border border-white/5 bg-slate-950/60 shadow-[inset_0_2px_8px_rgba(8,15,40,0.6)]`}
           role="progressbar"
           aria-label="Progreso hacia el próximo nivel"
           aria-valuemin={0}
@@ -473,7 +473,7 @@ function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boo
           />
           <span
             className={`absolute inset-0 flex items-center justify-center font-semibold uppercase tracking-[0.18em] text-slate-950 drop-shadow-[0_1px_2px_rgba(255,255,255,0.45)] ${
-              compact ? 'text-[5.5px]' : 'text-[11px]'
+              compact ? 'text-[7.15px]' : 'text-[11px]'
             }`}
           >
             {progressLabel}

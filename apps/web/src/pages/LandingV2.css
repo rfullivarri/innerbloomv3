@@ -322,6 +322,10 @@
   align-content: start;
 }
 
+.lv2-dashboard-grid--hero .lv2-dashboard-column:nth-child(3) {
+  gap: 4px;
+}
+
 .lv2-avatar-card .lv2-dashboard-card-body {
   padding: 8px;
 }
