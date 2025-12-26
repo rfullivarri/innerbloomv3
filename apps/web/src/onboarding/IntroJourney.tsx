@@ -361,7 +361,12 @@ export function IntroJourney({ onFinish }: IntroJourneyProps) {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-gradient-to-b from-[#0b1125]/85 via-[#0d1530]/70 to-[#0b1125]/85 pb-16">
+    <div className="relative flex min-h-screen min-h-dvh flex-col overflow-hidden bg-[#040313] pb-16">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.18),transparent_55%),radial-gradient(circle_at_bottom_left,_rgba(14,165,233,0.15),transparent_60%),radial-gradient(circle_at_bottom_right,_rgba(217,70,239,0.1),transparent_65%)]" />
+        <div className="absolute -left-24 top-32 h-72 w-72 rounded-full bg-[#a855f7]/30 blur-[140px]" />
+        <div className="absolute -right-32 bottom-10 h-80 w-80 rounded-full bg-[#0ea5e9]/30 blur-[160px]" />
+      </div>
       <HUD
         mode={answers.mode}
         stepIndex={currentStepIndex}
@@ -370,7 +375,7 @@ export function IntroJourney({ onFinish }: IntroJourneyProps) {
         onRestart={handleRestart}
         onExit={handleExit}
       />
-      <main className="mx-auto w-full max-w-5xl flex-1 min-w-0 px-4 pb-16 pt-44 sm:px-6 sm:pt-48">
+      <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 min-w-0 px-4 pb-16 pt-44 sm:px-6 sm:pt-48">
         <div className="space-y-8" key={stepId}>
           {renderStep()}
         </div>
