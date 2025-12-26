@@ -875,7 +875,7 @@ export default function LandingV2Page() {
                 <Card
                   className="lv2-dashboard-card lv2-avatar-card"
                   bodyClassName="lv2-dashboard-card-body"
-                  title={language === 'es' ? 'Tu avatar' : 'Your avatar'}
+                  title={language === 'es' ? 'Tu avatar' : undefined}
                 >
                   <img
                     className="lv2-avatar-image"
