@@ -208,7 +208,7 @@
 
 .lv2-dashboard-card-body {
   gap: 10px;
-  padding: 12px 8px;
+  padding: 12px 4px;
   font-size: 12px;
 }
 
@@ -1205,7 +1205,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 12px;
+  padding: 12px 4px;
   border-radius: 14px;
   background: rgba(15, 23, 42, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.08);
