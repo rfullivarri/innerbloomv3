@@ -248,6 +248,10 @@
   padding: 0;
 }
 
+.lv2-dashboard-card--radar .lv2-dashboard-card-body {
+  gap: 5px;
+}
+
 .lv2-dashboard-card-body .lv2-radar-chart svg {
   max-width: 210px;
 }
@@ -1030,8 +1034,8 @@
 }
 
 .lv2-dashboard-card--streaks .lv2-streaks-tabs span {
-  padding: 4px 10px;
-  font-size: 7px;
+  padding: 3px 7px;
+  font-size: 5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   background: rgba(15, 23, 42, 0.55);
@@ -1048,6 +1052,14 @@
 
 .lv2-dashboard-card--streaks .lv2-streaks-label {
   font-size: 8px;
+}
+
+.lv2-dashboard-card--streaks .lv2-streaks {
+  gap: 2px;
+}
+
+.lv2-dashboard-card--streaks .lv2-streaks-list {
+  gap: 2px;
 }
 
 .lv2-dashboard-card--streaks .lv2-streak-title {
