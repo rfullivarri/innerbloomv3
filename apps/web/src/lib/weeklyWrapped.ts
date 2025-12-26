@@ -289,7 +289,7 @@ export async function buildWeeklyWrappedPreviewPayload(
     logs,
     emotions,
     levelSummary,
-    dailyEnergy?.trend ?? null,
+    dailyEnergy,
     {
       forceLevelUpMock: options.forceLevelUpMock ?? false,
     },
@@ -422,13 +422,14 @@ export async function buildWeeklyWrappedFromData(
   logs: AdminLogRow[],
   emotions: EmotionSnapshot[],
   levelSummary: LevelSummary | null,
-  energyTrend: DailyEnergySnapshot['trend'] | null,
+  dailyEnergy: DailyEnergySnapshot | null,
   options: { forceLevelUpMock?: boolean } = {},
 ): Promise<WeeklyWrappedPayload> {
   logWeeklyWrappedDebug('building payload from data', {
     logsCount: logs.length,
     emotionsCount: emotions.length,
     hasLevelSummary: Boolean(levelSummary),
+    hasDailyEnergy: Boolean(dailyEnergy),
     forceLevelUpMock: options.forceLevelUpMock,
   });
   const normalizedLogs = normalizeLogs(logs);
@@ -513,7 +514,7 @@ export async function buildWeeklyWrappedFromData(
   const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
   const highlight = effortBalance.topTask?.title ?? constancyHabitsWithInsights[0]?.title ?? null;
-  const energyHighlight = computeEnergyHighlight(insights, pillarDominant, energyTrend);
+  const energyHighlight = computeEnergyHighlight(insights, pillarDominant, dailyEnergy);
   const emotionHighlight = buildEmotionHighlight(emotions);
   const weeklyEmotionMessage =
     emotionHighlight.weekly?.weeklyMessage ??
@@ -737,12 +738,19 @@ function getPillarIcon(pillar: string): string {
 function computeEnergyHighlight(
   insights: AdminInsights,
   pillarDominant: string | null,
-  energyTrend: DailyEnergySnapshot['trend'] | null,
+  dailyEnergy: DailyEnergySnapshot | null,
 ): WeeklyWrappedPayload['summary']['energyHighlight'] {
+  const energyTrend = dailyEnergy?.trend ?? null;
   const metric =
     pillarDominant && ENERGY_METRIC_BY_PILLAR[pillarDominant]
       ? ENERGY_METRIC_BY_PILLAR[pillarDominant]
       : ENERGY_METRIC_BY_PILLAR.Body;
+
+  const snapshotValueByMetric: Record<'HP' | 'FOCUS' | 'MOOD', number | null> = {
+    HP: dailyEnergy?.hp_pct ?? null,
+    FOCUS: dailyEnergy?.focus_pct ?? null,
+    MOOD: dailyEnergy?.mood_pct ?? null,
+  };
 
   const topGrowth = energyTrend?.hasHistory
     ? (['Body', 'Mind', 'Soul'] as const)
@@ -757,7 +765,9 @@ function computeEnergyHighlight(
     : null;
 
   if (topGrowth) {
-    const current = Math.max(0, Math.min(100, Math.round(topGrowth.current ?? 0)));
+    const snapshotValue = snapshotValueByMetric[topGrowth.metric];
+    const rawValue = snapshotValue ?? topGrowth.current ?? 0;
+    const current = Math.max(0, Math.min(100, Math.round(rawValue)));
     return {
       metric: topGrowth.metric,
       value: current,
@@ -766,6 +776,7 @@ function computeEnergyHighlight(
     };
   }
 
+  const snapshotValue = snapshotValueByMetric[metric.label];
   const constancyValue = pillarDominant
     ? insights.constancyWeekly[pillarDominant.toLowerCase() as 'body' | 'mind' | 'soul'] ?? 0
     : Math.max(
@@ -774,7 +785,8 @@ function computeEnergyHighlight(
         insights.constancyWeekly.soul ?? 0,
       );
 
-  const value = Math.max(0, Math.min(100, Math.round(constancyValue)));
+  const rawValue = snapshotValue ?? constancyValue;
+  const value = Math.max(0, Math.min(100, Math.round(rawValue)));
 
   return {
     metric: metric.label,
