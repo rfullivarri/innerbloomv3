@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import './LandingV2.css';
@@ -390,6 +390,13 @@ const TASKS_PREVIEW_ITEMS = [
   { title: 'Cena antes de las 22hs', tag: 'Nutrición', progress: 2, total: 3 }
 ] as const;
 
+const AVATAR_MODES = [
+  { src: '/LowMood.jpg', label: 'Low' },
+  { src: '/Chill-Mood.jpg', label: 'Chill' },
+  { src: '/FlowMood.jpg', label: 'Flow' },
+  { src: '/Evolve-Mood.jpg', label: 'Evolve' }
+] as const;
+
 function LanguageSwitch({ value, onChange }: { value: Language; onChange: (language: Language) => void }) {
   const options: { code: Language; label: string }[] = [
     { code: 'en', label: 'EN' },
@@ -417,30 +424,26 @@ function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boo
   const progressPercent = 72;
   const progressLabel = `${progressPercent}%`;
   const levelLabel = '7';
-  const xpTotalLabel = '12,430';
+  const xpTotalLabel = compact ? '732' : '12,430';
   const xpToNextMessage =
     language === 'es' ? '✨ Te faltan 320 XP para el próximo nivel' : '✨ You need 320 XP for the next level';
   const ariaValueText = language === 'es' ? `${progressLabel} completado` : `${progressLabel} complete`;
 
   return (
     <div className={compact ? 'space-y-3' : 'space-y-5'}>
-      <div className={`flex flex-wrap items-center justify-${compact ? 'between' : 'center'} gap-4 text-slate-200`}>
-        <div className={`${compact ? 'flex-1 min-w-[120px]' : ''}`}>
-          <div className="flex items-center gap-3">
-            <span className="text-[2.1em] leading-none">🏆</span>
-            <div className="flex flex-col">
-              <span className={`font-semibold text-slate-50 ${compact ? 'text-2xl' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Total XP</span>
-            </div>
+      <div className={`lv2-xp-row ${compact ? 'lv2-xp-row--compact' : ''}`}>
+        <div className="lv2-xp-metric">
+          <span className="text-[2.1em] leading-none">🏆</span>
+          <div className="flex flex-col">
+            <span className={`font-semibold text-slate-50 ${compact ? 'text-xl' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Total XP</span>
           </div>
         </div>
-        <div className={`${compact ? 'flex-1 min-w-[120px]' : ''}`}>
-          <div className="flex items-center gap-3">
-            <span className="text-[2.1em] leading-none">🎯</span>
-            <div className="flex flex-col">
-              <span className={`font-semibold text-slate-50 ${compact ? 'text-2xl' : 'text-4xl sm:text-5xl'}`}>{levelLabel}</span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Nivel</span>
-            </div>
+        <div className="lv2-xp-metric">
+          <span className="text-[2.1em] leading-none">🎯</span>
+          <div className="flex flex-col">
+            <span className={`font-semibold text-slate-50 ${compact ? 'text-xl' : 'text-4xl sm:text-5xl'}`}>{levelLabel}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Nivel</span>
           </div>
         </div>
       </div>
@@ -786,6 +789,15 @@ export default function LandingV2Page() {
     () => (isSignedIn ? { label: 'Go to dashboard', to: '/dashboard' } : { label: copy.hero.cta, to: '/intro-journey' }),
     [copy.hero.cta, isSignedIn]
   );
+  const [avatarIndex, setAvatarIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setAvatarIndex((current) => (current + 1) % AVATAR_MODES.length);
+    }, 2600);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   return (
     <div className="landing-v2">
@@ -844,7 +856,7 @@ export default function LandingV2Page() {
             <div className="lv2-dashboard-grid lv2-dashboard-grid--hero" aria-label="Demo del dashboard">
               <div className="lv2-dashboard-column">
                 <Card
-                  className="lv2-dashboard-card"
+                  className="lv2-dashboard-card lv2-dashboard-card--square"
                   bodyClassName="lv2-dashboard-card-body"
                   title={language === 'es' ? 'Progreso general' : 'Overall progress'}
                   subtitle={language === 'es' ? 'Resumen de tu aventura' : 'Adventure summary'}
@@ -856,12 +868,16 @@ export default function LandingV2Page() {
                   bodyClassName="lv2-dashboard-card-body"
                   title={language === 'es' ? 'Tu avatar' : 'Your avatar'}
                 >
-                  <img src="/Chill-Mood.jpg" alt="Avatar Chill Mood" />
+                  <img
+                    className="lv2-avatar-image"
+                    src={AVATAR_MODES[avatarIndex].src}
+                    alt={`Avatar ${AVATAR_MODES[avatarIndex].label}`}
+                  />
                 </Card>
               </div>
               <div className="lv2-dashboard-column">
                 <Card
-                  className="lv2-dashboard-card"
+                  className="lv2-dashboard-card lv2-dashboard-card--square"
                   bodyClassName="lv2-dashboard-card-body"
                   title="Radar Chart"
                   subtitle={language === 'es' ? 'XP · total acumulado' : 'XP · total accumulated'}
@@ -870,7 +886,7 @@ export default function LandingV2Page() {
                   <RadarChartPreview />
                 </Card>
                 <Card
-                  className="lv2-dashboard-card"
+                  className="lv2-dashboard-card lv2-dashboard-card--emotion"
                   bodyClassName="lv2-dashboard-card-body"
                   title="💗 Emotion Chart"
                   subtitle={language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
@@ -880,7 +896,7 @@ export default function LandingV2Page() {
               </div>
               <div className="lv2-dashboard-column">
                 <Card
-                  className="lv2-dashboard-card"
+                  className="lv2-dashboard-card lv2-dashboard-card--streaks"
                   bodyClassName="lv2-dashboard-card-body"
                   title="🔥 Streaks"
                   rightSlot={<span className="lv2-card-chip">Flow · 3x/week</span>}
