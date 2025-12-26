@@ -430,19 +430,19 @@ function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boo
   const ariaValueText = language === 'es' ? `${progressLabel} completado` : `${progressLabel} complete`;
 
   return (
-    <div className={compact ? 'space-y-3' : 'space-y-5'}>
+    <div className={compact ? 'space-y-2' : 'space-y-5'}>
       <div className={`lv2-xp-row ${compact ? 'lv2-xp-row--compact' : ''}`}>
         <div className="lv2-xp-metric">
-          <span className="text-[2.1em] leading-none">🏆</span>
+          <span className={`leading-none ${compact ? 'text-[1.9em]' : 'text-[2.1em]'}`}>🏆</span>
           <div className="flex flex-col">
-            <span className={`font-semibold text-slate-50 ${compact ? 'text-xl' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
+            <span className={`font-semibold text-slate-50 ${compact ? 'text-lg' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
             <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Total XP</span>
           </div>
         </div>
         <div className="lv2-xp-metric">
-          <span className="text-[2.1em] leading-none">🎯</span>
+          <span className={`leading-none ${compact ? 'text-[1.9em]' : 'text-[2.1em]'}`}>🎯</span>
           <div className="flex flex-col">
-            <span className={`font-semibold text-slate-50 ${compact ? 'text-xl' : 'text-4xl sm:text-5xl'}`}>{levelLabel}</span>
+            <span className={`font-semibold text-slate-50 ${compact ? 'text-lg' : 'text-4xl sm:text-5xl'}`}>{levelLabel}</span>
             <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Nivel</span>
           </div>
         </div>
