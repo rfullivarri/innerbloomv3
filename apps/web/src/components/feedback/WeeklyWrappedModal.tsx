@@ -664,6 +664,7 @@ export function resolveHabitHealth(
   const parsedWeeksSample = Number(weeksSample);
   const parsedWeeksActive = Number(weeksActive);
   const normalizedDays = Number.isFinite(daysActive) ? Math.max(0, Math.min(7, Math.round(daysActive ?? 0))) : 0;
+  const weeklyDaysActive = normalizedDays;
 
   const normalizedWeeksActive = Number.isFinite(parsedWeeksActive)
     ? Math.max(0, Math.round(parsedWeeksActive))
@@ -696,6 +697,7 @@ export function resolveHabitHealth(
       completionRatePct: completionFromInsights.completionRatePct,
       weeksActive: completionFromInsights.weeksActive,
       weeksSample: completionFromInsights.weeksSample,
+      weeklyDaysActive,
     };
   }
 
@@ -718,6 +720,7 @@ export function resolveHabitHealth(
     completionRatePct: completionRateForHealth,
     weeksActive: normalizedWeeksActive,
     weeksSample: sampleForHealth,
+    weeklyDaysActive,
   };
 }
 
@@ -760,7 +763,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
                   </div>
                   <div className="flex flex-col items-end gap-2 text-[11px] uppercase tracking-[0.14em]">
                     <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-emerald-300/30 bg-emerald-500/20 px-2 py-1 text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
-                      🔥{item.daysActive ?? '–'}/7
+                      🔥{health.weeklyDaysActive}/7
                     </span>
                   </div>
                 </div>
