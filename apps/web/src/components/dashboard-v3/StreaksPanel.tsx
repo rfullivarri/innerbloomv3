@@ -572,7 +572,9 @@ function TaskItem({
             {item.history.labels && item.history.labels.length > 0 && (
               <div className="flex items-center gap-1 justify-self-end text-[10px] uppercase tracking-[0.16em] text-slate-400 md:min-w-[72px]">
                 {item.history.labels.map((label, index) => (
-                  <span key={index}>{label}</span>
+                  <span key={index} className="w-2 text-center">
+                    {label}
+                  </span>
                 ))}
               </div>
             )}
