@@ -208,7 +208,7 @@
 
 .lv2-dashboard-card-body {
   gap: 10px;
-  padding: 12px;
+  padding: 12px 8px;
   font-size: 12px;
 }
 
