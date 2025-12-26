@@ -433,22 +433,28 @@ function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boo
     <div className={compact ? 'space-y-2' : 'space-y-5'}>
       <div className={`lv2-xp-row ${compact ? 'lv2-xp-row--compact' : ''}`}>
         <div className="lv2-xp-metric">
-          <span className={`leading-none ${compact ? 'text-[1.9em]' : 'text-[2.1em]'}`}>🏆</span>
+          <span className={`leading-none ${compact ? 'text-[0.95em]' : 'text-[2.1em]'}`}>🏆</span>
           <div className="flex flex-col">
-            <span className={`font-semibold text-slate-50 ${compact ? 'text-lg' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Total XP</span>
+            <span className={`font-semibold text-slate-50 ${compact ? 'text-[0.55rem]' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
+            <span className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[5.5px]' : 'text-[11px]'}`}>
+              Total XP
+            </span>
           </div>
         </div>
         <div className="lv2-xp-metric">
-          <span className={`leading-none ${compact ? 'text-[1.9em]' : 'text-[2.1em]'}`}>🎯</span>
+          <span className={`leading-none ${compact ? 'text-[0.95em]' : 'text-[2.1em]'}`}>🎯</span>
           <div className="flex flex-col">
-            <span className={`font-semibold text-slate-50 ${compact ? 'text-lg' : 'text-4xl sm:text-5xl'}`}>{levelLabel}</span>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Nivel</span>
+            <span className={`font-semibold text-slate-50 ${compact ? 'text-[0.55rem]' : 'text-4xl sm:text-5xl'}`}>{levelLabel}</span>
+            <span className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[5.5px]' : 'text-[11px]'}`}>
+              Nivel
+            </span>
           </div>
         </div>
       </div>
       <div className="space-y-2">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Progreso</p>
+        <p className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[5.5px]' : 'text-[11px]'}`}>
+          Progreso
+        </p>
         <div
           className={`relative ${compact ? 'h-4' : 'h-6 sm:h-[30px]'} w-full overflow-hidden rounded-full border border-white/5 bg-slate-950/60 shadow-[inset_0_2px_8px_rgba(8,15,40,0.6)]`}
           role="progressbar"
@@ -465,7 +471,11 @@ function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boo
             className="relative h-full rounded-full bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300 transition-[width] duration-500 ease-out progress-fill--typing"
             style={{ width: `${progressPercent}%` }}
           />
-          <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-950 drop-shadow-[0_1px_2px_rgba(255,255,255,0.45)]">
+          <span
+            className={`absolute inset-0 flex items-center justify-center font-semibold uppercase tracking-[0.18em] text-slate-950 drop-shadow-[0_1px_2px_rgba(255,255,255,0.45)] ${
+              compact ? 'text-[5.5px]' : 'text-[11px]'
+            }`}
+          >
             {progressLabel}
           </span>
         </div>
@@ -876,7 +886,7 @@ export default function LandingV2Page() {
               </div>
               <div className="lv2-dashboard-column">
                 <Card
-                  className="lv2-dashboard-card lv2-dashboard-card--square"
+                  className="lv2-dashboard-card lv2-dashboard-card--square lv2-dashboard-card--radar"
                   bodyClassName="lv2-dashboard-card-body"
                   title="Radar Chart"
                 >
@@ -896,7 +906,6 @@ export default function LandingV2Page() {
                   className="lv2-dashboard-card lv2-dashboard-card--streaks"
                   bodyClassName="lv2-dashboard-card-body"
                   title="🔥 Streaks"
-                  rightSlot={<span className="lv2-card-chip">Flow · 3x/week</span>}
                 >
                   <StreaksPreview language={language} />
                 </Card>
