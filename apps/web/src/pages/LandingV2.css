@@ -198,10 +198,37 @@
   height: auto;
 }
 
+.lv2-dashboard-card--square {
+  aspect-ratio: 1 / 1;
+}
+
+.lv2-dashboard-card--square .lv2-dashboard-card-body {
+  height: 100%;
+}
+
 .lv2-dashboard-card-body {
   gap: 12px;
   padding: 14px;
   font-size: 13px;
+}
+
+.lv2-xp-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  color: #e2e8f0;
+}
+
+.lv2-xp-row--compact {
+  justify-content: space-between;
+}
+
+.lv2-xp-metric {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .lv2-dashboard-card-body header h3 {
@@ -838,12 +865,24 @@
   }
 }
 
-.lv2-avatar-card img {
+.lv2-avatar-image {
   width: 100%;
   border-radius: 18px;
   object-fit: cover;
   aspect-ratio: 1 / 1;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  animation: lv2-avatar-float 6s ease-in-out infinite;
+  transition: opacity 0.4s ease;
+}
+
+@keyframes lv2-avatar-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.02);
+  }
 }
 
 .lv2-card-chip {
@@ -920,6 +959,17 @@
   background: var(--dot-color);
 }
 
+.lv2-dashboard-card--emotion .lv2-emotion-pill {
+  gap: 4px;
+  padding: 2px 4px;
+  font-size: 7px;
+}
+
+.lv2-dashboard-card--emotion .lv2-emotion-pill::before {
+  width: 4px;
+  height: 4px;
+}
+
 .lv2-emotion-grid {
   display: grid;
   grid-auto-flow: column;
@@ -968,6 +1018,51 @@
 .lv2-streaks-tabs span.active {
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(56, 189, 248, 0.4));
   border-color: transparent;
+}
+
+.lv2-dashboard-card--streaks .lv2-streaks-tabs {
+  gap: 8px;
+}
+
+.lv2-dashboard-card--streaks .lv2-streaks-tabs span {
+  padding: 4px 10px;
+  font-size: 7px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.08);
+}
+
+.lv2-dashboard-card--streaks .lv2-streaks-tabs span.active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(56, 189, 248, 0.55));
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 16px rgba(56, 189, 248, 0.3);
+}
+
+.lv2-dashboard-card--streaks .lv2-streaks-label {
+  font-size: 8px;
+}
+
+.lv2-dashboard-card--streaks .lv2-streak-title {
+  font-size: 8px;
+}
+
+.lv2-dashboard-card--streaks .lv2-streak-tag {
+  font-size: 7px;
+}
+
+.lv2-dashboard-card--streaks .lv2-streak-badge {
+  padding: 3px 6px;
+  font-size: 7px;
+}
+
+.lv2-dashboard-card--streaks .lv2-streak-progress {
+  height: 5px;
+}
+
+.lv2-dashboard-card--streaks .lv2-streak-marks {
+  font-size: 6px;
 }
 
 .lv2-streaks-label {
