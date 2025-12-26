@@ -605,7 +605,7 @@ function summarizeWeeklyActivity(
 } {
   const meaningfulLogs = logs.filter((log) => log.state !== 'red' && log.dateKey);
   const completions = meaningfulLogs.reduce((acc, log) => acc + log.quantity, 0);
-  const habitCounts = aggregateHabits(meaningfulLogs, undefined, weeklyGoal, referenceDate);
+  const habitCounts = aggregateHabits(meaningfulLogs, undefined, weeklyGoal);
 
   return { completions, habitCounts };
 }
