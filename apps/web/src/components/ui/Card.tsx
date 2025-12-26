@@ -45,7 +45,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
     >
       <div
         className={combine(
-          'relative z-10 flex flex-col gap-4 p-4 text-slate-100 md:p-5 lg:p-6',
+          'relative z-10 flex flex-col gap-4 p-1.5 text-slate-100 md:p-2 lg:p-2.5',
           bodyClassName,
         )}
       >
