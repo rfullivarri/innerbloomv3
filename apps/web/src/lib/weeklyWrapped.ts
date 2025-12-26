@@ -466,50 +466,104 @@ export async function buildWeeklyWrappedFromData(
   const { completions, habitCounts } = summarizeWeeklyActivity(weeklyLogs);
   const effortBalance = computeEffortBalance(weeklyLogs);
   const longTermHabits = aggregateHabits(longTermLogs, weeksSample);
-  const longTermHabitMap = new Map(longTermHabits.map((habit) => [habit.title, habit]));
-  const weeklyHabitMap = new Map(
-    habitCounts.map((habit) => [habit.taskId ?? habit.title, habit]),
+  const longTermHabitMap = new Map(
+    longTermHabits.map((habit) => [habit.taskId ?? habit.title, habit]),
   );
+  const weeklyHabits = aggregateHabits(weeklyLogs);
 
   const xpTotal = weeklyLogs
     .filter((log) => log.state !== 'red')
     .reduce((acc, log) => acc + Math.max(0, Number(log.xp ?? 0)), 0);
   const levelUp = detectLevelUp(levelSummary, xpTotal, options.forceLevelUpMock === true);
 
-  const topWeeklyHabits = habitCounts.slice(0, 3).map((habit) => {
-    const longTerm = longTermHabitMap.get(habit.title);
-    return {
-      ...habit,
-      weeksActive: longTerm?.weeksActive ?? habit.weeksActive ?? 0,
-      weeksSample: longTerm?.weeksSample ?? weeksSample,
-    };
-  });
+  const topWeeklyHabits = [...weeklyHabits]
+    .sort(
+      (a, b) =>
+        b.completions - a.completions ||
+        b.daysActive - a.daysActive ||
+        a.title.localeCompare(b.title, 'es', { sensitivity: 'base' }),
+    )
+    .slice(0, 8);
 
   const topStreakHabits = [...longTermHabits]
-    .sort((a, b) => b.weeksActive - a.weeksActive || b.daysActive - a.daysActive || b.completions - a.completions)
-    .slice(0, 3);
+    .sort(
+      (a, b) =>
+        b.weeksActive - a.weeksActive ||
+        b.daysActive - a.daysActive ||
+        b.completions - a.completions ||
+        a.title.localeCompare(b.title, 'es', { sensitivity: 'base' }),
+    )
+    .slice(0, 8);
 
-  const constancyCandidatesMap = new Map<string, HabitAggregate>();
-  [...topStreakHabits, ...topWeeklyHabits].forEach((habit) => {
+  const constancyCandidatesMap = new Map<
+    string,
+    HabitAggregate & { longTermDaysActive: number }
+  >();
+
+  [...topWeeklyHabits, ...topStreakHabits].forEach((habit) => {
     const key = habit.taskId ?? habit.title;
     if (constancyCandidatesMap.has(key)) return;
 
-    const longTerm = longTermHabitMap.get(habit.title);
+    const longTerm = longTermHabitMap.get(key);
     const normalizedWeeksActive = longTerm?.weeksActive ?? habit.weeksActive ?? 0;
     const normalizedWeeksSample = longTerm?.weeksSample ?? habit.weeksSample ?? weeksSample;
-    const weeklyEntry = weeklyHabitMap.get(key);
-    const weeklyCompletions = weeklyEntry?.completions ?? 0;
+    const normalizedLongTermDays = longTerm?.daysActive ?? habit.daysActive ?? 0;
 
     constancyCandidatesMap.set(key, {
       ...habit,
-      daysActive: weeklyCompletions,
-      completions: weeklyEntry?.completions ?? habit.completions,
+      completions: habit.completions,
+      daysActive: habit.daysActive,
       weeksActive: normalizedWeeksActive,
       weeksSample: normalizedWeeksSample,
+      longTermDaysActive: normalizedLongTermDays,
     });
   });
 
-  const constancyHabits = Array.from(constancyCandidatesMap.values()).slice(0, 3);
+  const constancyCandidates = Array.from(constancyCandidatesMap.values()).sort(
+    (a, b) =>
+      b.completions - a.completions ||
+      b.weeksActive - a.weeksActive ||
+      b.longTermDaysActive - a.longTermDaysActive ||
+      a.title.localeCompare(b.title, 'es', { sensitivity: 'base' }),
+  );
+
+  const shouldBalanceByPillar =
+    constancyCandidates.length > 5 &&
+    constancyCandidates[0]?.completions === constancyCandidates[4]?.completions;
+
+  const constancyHabits = (() => {
+    if (!shouldBalanceByPillar) {
+      return constancyCandidates.slice(0, 5);
+    }
+
+    const selected: HabitAggregate[] = [];
+    const selectedKeys = new Set<string>();
+    const pillars = ['Body', 'Mind', 'Soul'] as const;
+
+    pillars.forEach((pillar) => {
+      const match = constancyCandidates.find(
+        (habit) => normalizePillarCode(habit.pillar) === pillar && !selectedKeys.has(habit.taskId ?? habit.title),
+      );
+      if (match) {
+        selected.push(match);
+        selectedKeys.add(match.taskId ?? match.title);
+      }
+    });
+
+    for (const habit of constancyCandidates) {
+      if (selected.length >= 5) {
+        break;
+      }
+      const key = habit.taskId ?? habit.title;
+      if (selectedKeys.has(key)) {
+        continue;
+      }
+      selected.push(habit);
+      selectedKeys.add(key);
+    }
+
+    return selected.slice(0, 5);
+  })();
   const constancyHabitsWithInsights = await hydrateHabitsWithTaskInsights(constancyHabits);
   const pillarDominant = dominantPillar(insights) ?? null;
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
