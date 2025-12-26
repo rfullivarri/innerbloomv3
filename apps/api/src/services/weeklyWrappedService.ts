@@ -188,6 +188,12 @@ function startOfDay(date: Date): Date {
   return clone;
 }
 
+function addDays(date: Date, amount: number): Date {
+  const clone = new Date(date.getTime());
+  clone.setUTCDate(clone.getUTCDate() + amount);
+  return clone;
+}
+
 function toDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
@@ -296,7 +302,7 @@ async function buildWeeklyWrappedPayload(
   const endDate = latestLog ?? new Date(`${range.end}T00:00:00Z`);
   const startDate = startOfDay(new Date(`${range.start}T00:00:00Z`));
   const weeksSample = Math.max(1, Math.ceil((endDate.getTime() - parseDate(longTermStart).getTime() + MS_IN_DAY) / (7 * MS_IN_DAY)));
-  const { completions, habitCounts } = summarizeWeeklyActivity(normalizedLogs, weeklyGoal);
+  const { completions, habitCounts } = summarizeWeeklyActivity(normalizedLogs, weeklyGoal, endDate);
   logEffortBalanceDebug(
     {
       userId,
@@ -388,6 +394,7 @@ async function buildWeeklyWrappedPayload(
                 daysActive: habit.daysActive,
                 weeksActive: habit.weeksActive,
                 weeksSample: habit.weeksSample,
+                streakDays: habit.streakDays,
                 completionRate:
                   habit.weeksSample > 0
                     ? Math.round((Math.max(0, Math.min(habit.weeksActive, habit.weeksSample)) / habit.weeksSample) * 100)
@@ -594,13 +601,17 @@ function normalizeLogs(logs: AdminLogRow[]): NormalizedLog[] {
     .filter((log) => Number.isFinite(log.parsedDate.getTime()));
 }
 
-function summarizeWeeklyActivity(logs: NormalizedLog[], weeklyGoal?: number): {
+function summarizeWeeklyActivity(
+  logs: NormalizedLog[],
+  weeklyGoal: number | undefined,
+  referenceDate: Date,
+): {
   completions: number;
   habitCounts: ReturnType<typeof aggregateHabits>;
 } {
   const meaningfulLogs = logs.filter((log) => log.state !== 'red' && log.dateKey);
   const completions = meaningfulLogs.reduce((acc, log) => acc + log.quantity, 0);
-  const habitCounts = aggregateHabits(meaningfulLogs, undefined, weeklyGoal);
+  const habitCounts = aggregateHabits(meaningfulLogs, undefined, weeklyGoal, referenceDate);
 
   return { completions, habitCounts };
 }
@@ -616,13 +627,37 @@ function getWeekKey(date: Date): string {
   return `${copy.getUTCFullYear()}-W${weekNumber}`;
 }
 
-function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, weeklyGoal?: number) {
+function computeStreakDays(dayCounts: Map<string, number>, referenceDate: Date, maxDays = 7): number {
+  let streak = 0;
+  let cursor = startOfDay(referenceDate);
+
+  for (let i = 0; i < maxDays; i += 1) {
+    const key = toDateKey(cursor);
+    const count = dayCounts.get(key) ?? 0;
+    if (count > 0) {
+      streak += 1;
+      cursor = addDays(cursor, -1);
+      continue;
+    }
+    break;
+  }
+
+  return streak;
+}
+
+function aggregateHabits(
+  logs: NormalizedLog[],
+  weeksSampleOverride?: number,
+  weeklyGoal?: number,
+  referenceDate?: Date,
+) {
   const map = new Map<
     string,
     {
       title: string;
       days: Set<string>;
       weeks: Set<string>;
+      dayCounts: Map<string, number>;
       weeklyCounts: Map<string, number>;
       completions: number;
       pillar: string | null;
@@ -648,6 +683,7 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, we
       title: (log as { taskName?: string }).taskName || 'Hábito sin nombre',
       days: new Set<string>(),
       weeks: new Set<string>(),
+      dayCounts: new Map<string, number>(),
       weeklyCounts: new Map<string, number>(),
       completions: 0,
       pillar: normalizePillarCode((log as { pillar?: string | number | null }).pillar),
@@ -657,6 +693,7 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, we
 
     current.days.add(log.dateKey);
     current.weeks.add(weekKey);
+    current.dayCounts.set(log.dateKey, (current.dayCounts.get(log.dateKey) ?? 0) + quantity);
     current.completions += quantity;
     current.weeklyCounts.set(weekKey, (current.weeklyCounts.get(weekKey) ?? 0) + quantity);
     if (!current.pillar) {
@@ -676,6 +713,7 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, we
       title: entry.title,
       completions: entry.completions,
       daysActive: entry.days.size,
+      streakDays: referenceDate ? computeStreakDays(entry.dayCounts, referenceDate) : 0,
       weeksActive:
         weeklyTarget !== null
           ? Array.from(entry.weeklyCounts.values()).filter((count) => count >= weeklyTarget).length
@@ -685,7 +723,13 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, we
       badge: entry.badge,
       weeklyGoal: weeklyTarget,
     }))
-    .sort((a, b) => b.daysActive - a.daysActive || b.completions - a.completions || a.title.localeCompare(b.title));
+    .sort(
+      (a, b) =>
+        b.daysActive - a.daysActive ||
+        b.streakDays - a.streakDays ||
+        b.completions - a.completions ||
+        a.title.localeCompare(b.title),
+    );
 }
 
 function dominantPillar(insights: Awaited<ReturnType<typeof getUserInsights>>): string | undefined {
