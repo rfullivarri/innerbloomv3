@@ -43,6 +43,7 @@ export type WeeklyWrappedSection = {
     badge?: string;
     pillar?: string | null;
     daysActive?: number;
+    weekCount?: number;
     weeksActive?: number;
     weeksSample?: number;
     completionRate?: number | null;

@@ -382,11 +382,12 @@ async function buildWeeklyWrappedPayload(
                 title: habit.title,
                 body:
                   habit.daysActive > 0
-                    ? `${habit.daysActive}/7 días. Sostuviste el compromiso.`
+                    ? `${habit.weekCount ?? habit.daysActive}/${habit.weeklyGoal ?? 7} días. Sostuviste el compromiso.`
                     : 'Ritmo sólido esta semana. Constancia pura.',
                 badge: habit.badge,
                 pillar: habit.pillar,
                 daysActive: habit.daysActive,
+                weekCount: habit.weekCount,
                 weeksActive: habit.weeksActive,
                 weeksSample: habit.weeksSample,
                 streakDays: habit.streakDays,
@@ -712,6 +713,7 @@ function aggregateHabits(logs: NormalizedLog[], weeksSampleOverride?: number, we
       title: entry.title,
       completions: entry.completions,
       daysActive: entry.days.size,
+      weekCount: Array.from(entry.weeklyCounts.values()).reduce((total, count) => total + count, 0),
       streakDays: computeStreakDays(entry.days),
       weeksActive:
         weeklyTarget !== null
