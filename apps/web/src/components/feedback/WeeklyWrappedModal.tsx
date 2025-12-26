@@ -168,7 +168,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
 
   const habitsItems = (sectionsByKey.habits?.items ?? [])
     .map((item, idx) => {
-      const daysMatch = item.body?.match(/(\d+)\/7/);
+      const daysMatch = item.body?.match(/(\d+)\s*\/\s*(\d+)/);
       const daysActive = Number.isFinite(item.daysActive)
         ? item.daysActive
         : daysMatch
@@ -181,11 +181,21 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
           ? item.completionRate
           : undefined;
       const weeklyGoal =
-        typeof item.weeklyGoal === 'number' || typeof item.weeklyGoal === 'string' ? item.weeklyGoal : undefined;
+        typeof item.weeklyGoal === 'number' || typeof item.weeklyGoal === 'string'
+          ? item.weeklyGoal
+          : daysMatch
+            ? Number.parseInt(daysMatch[2] ?? '0', 10)
+            : undefined;
+      const weekCount = Number.isFinite(item.weekCount)
+        ? item.weekCount
+        : daysMatch
+          ? Number.parseInt(daysMatch[1] ?? '0', 10)
+          : undefined;
       return {
         ...item,
         icon: getHabitIcon(item.pillar, idx),
         daysActive,
+        weekCount,
         weeksActive,
         weeksSample,
         completionRate,
@@ -600,6 +610,7 @@ export type HabitItem = {
   icon?: string;
   pillar?: string | null;
   daysActive?: number;
+  weekCount?: number;
   weeksActive?: number | string;
   weeksSample?: number | string;
   completionRate?: number | string;
@@ -746,6 +757,11 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
         {items.length > 0 ? (
           items.map((item, idx) => {
             const health = resolveHabitHealth(item, referenceDate);
+            const weeklyTargetRaw = Number(item.weeklyGoal);
+            const weeklyTarget =
+              Number.isFinite(weeklyTargetRaw) && weeklyTargetRaw > 0 ? Math.round(weeklyTargetRaw) : 7;
+            const weeklyCountRaw = Number(item.weekCount);
+            const weeklyCount = Number.isFinite(weeklyCountRaw) ? Math.max(0, Math.round(weeklyCountRaw)) : health.weeklyDaysActive;
 
             return (
               <div
@@ -763,7 +779,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
                   </div>
                   <div className="flex flex-col items-end gap-2 text-[11px] uppercase tracking-[0.14em]">
                     <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-emerald-300/30 bg-emerald-500/20 px-2 py-1 text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]">
-                      🔥{health.weeklyDaysActive}/7
+                      🔥{weeklyCount}/{weeklyTarget}
                     </span>
                   </div>
                 </div>

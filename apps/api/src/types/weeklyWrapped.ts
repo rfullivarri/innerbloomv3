@@ -9,6 +9,7 @@ export type WeeklyWrappedSection = {
     badge?: string;
     pillar?: string | null;
     daysActive?: number;
+    weekCount?: number;
     streakDays?: number;
     weeksActive?: number;
     weeksSample?: number;
