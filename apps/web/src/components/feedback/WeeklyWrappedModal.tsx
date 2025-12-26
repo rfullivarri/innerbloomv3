@@ -529,7 +529,7 @@ function WeeklyKPIHighlight({
           suffix="tareas"
           icon="🎯"
         />
-        <KPIStat label="Experiencia" value={formatter.format(xpTotal)} suffix="xp" highlight icon="🎖️" />
+        <KPIStat label="Experiencia" value={formatter.format(xpTotal)} suffix="xp" icon="🎖️" />
       </div>
     </div>
   );
