@@ -188,7 +188,6 @@ export function buildReminderEmail(
                 <img src="${REMINDER_LOGO_URL}" alt="Innerbloom" width="44" height="44" style="display:block;margin:0 auto 12px;border-radius:50%;border:1px solid rgba(148,163,184,0.5);background:#ffffff;" />
                 <p style="margin:0 0 14px;font-size:12px;letter-spacing:0.45em;text-transform:uppercase;color:#94a3b8;">
                   Innerbloom
-                  <img src="${REMINDER_LOGO_URL}" alt="Innerbloom logo" width="16" height="16" style="display:inline-block;margin-left:8px;vertical-align:middle;" />
                 </p>
                 <p style="margin:0 0 10px;font-size:15px;color:#cbd5f5;">Hola ${name} 👋</p>
                 <h1 style="margin:0 0 12px;font-size:24px;line-height:1.3;color:#f8fafc;">${normalizedHeadline}</h1>
