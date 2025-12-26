@@ -909,13 +909,6 @@ export default function LandingV2Page() {
                 >
                   <StreaksPreview language={language} />
                 </Card>
-                <Card
-                  className="lv2-dashboard-card"
-                  bodyClassName="lv2-dashboard-card-body"
-                  title={language === 'es' ? 'Todas las tareas' : 'All tasks'}
-                >
-                  <TasksPreview language={language} />
-                </Card>
               </div>
             </div>
           </div>
