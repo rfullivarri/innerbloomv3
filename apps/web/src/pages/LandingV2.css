@@ -953,6 +953,26 @@
   gap: 8px;
 }
 
+.lv2-emotion-legend--dashboard {
+  gap: 10px 14px;
+}
+
+.lv2-emotion-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.lv2-emotion-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
 .lv2-emotion-pill {
   display: inline-flex;
   align-items: center;
@@ -1001,6 +1021,27 @@
   height: 14px;
   border-radius: 4px;
   display: block;
+}
+
+.lv2-emotion-heatmap .emotion-chart-surface {
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(15, 33, 66, 0.65), rgba(16, 23, 45, 0.35));
+  padding: 6px;
+}
+
+.lv2-emotion-heatmap .grid-box {
+  column-gap: var(--cell-gap, 4px);
+  row-gap: 2px;
+}
+
+.lv2-emotion-heatmap .emotion-col {
+  gap: var(--cell-gap, 4px);
+}
+
+.lv2-emotion-heatmap .emotion-cell {
+  width: var(--cell, 8px);
+  height: var(--cell, 8px);
+  border-radius: 3px;
 }
 
 .lv2-emotion-caption {
