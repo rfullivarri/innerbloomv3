@@ -176,13 +176,15 @@ export function buildReminderEmail(
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
     <title>${subject}</title>
   </head>
-  <body style="margin:0;padding:0;background:#020617;font-family:'Inter','Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#f8fafc;">
-    <table role="presentation" width="100%" style="width:100%;padding:24px 12px;background:#020617;">
+  <body style="margin:0;padding:0;background:#020617;font-family:'Inter','Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#f8fafc;color-scheme:light;supported-color-schemes:light;background-color:#020617;">
+    <table role="presentation" width="100%" style="width:100%;padding:24px 12px;background:#020617;color-scheme:light;supported-color-schemes:light;background-color:#020617;">
       <tr>
         <td align="center">
-          <table role="presentation" width="100%" style="max-width:520px;width:100%;background:linear-gradient(160deg,#0f172a,#111c33);border-radius:24px;padding:32px 24px;border:1px solid rgba(99,102,241,0.35);box-shadow:0 26px 52px rgba(2,6,23,0.55);">
+          <table role="presentation" width="100%" style="max-width:520px;width:100%;background:linear-gradient(160deg,#0f172a,#111c33);border-radius:24px;padding:32px 24px;border:1px solid rgba(99,102,241,0.35);box-shadow:0 26px 52px rgba(2,6,23,0.55);color-scheme:light;supported-color-schemes:light;background-color:#020617;">
             <tr>
               <td align="center" style="text-align:center;">
                 <p style="margin:0 0 14px;font-size:12px;letter-spacing:0.45em;text-transform:uppercase;color:#94a3b8;">
