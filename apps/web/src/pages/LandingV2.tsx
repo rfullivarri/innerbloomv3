@@ -366,6 +366,7 @@ const EMOTION_PREVIEW_COLUMNS: EmotionPreviewColumn[] = [
 ];
 
 const EMOTION_PREVIEW_SUMMARY = { emotion: 'Motivación' as const, count: 6 };
+const EMOTION_PREVIEW_LEGEND: EmotionName[] = ['Calma', 'Felicidad', 'Motivación', 'Tristeza', 'Ansiedad', 'Frustración', 'Cansancio'];
 
 const ENERGY_PREVIEW = [
   { label: 'HP', percent: 76, delta: 8 },
@@ -681,23 +682,44 @@ function RadarChartPreview() {
 }
 
 function EmotionChartPreview({ language = 'es' }: { language?: Language }) {
+  const gridStyle = {
+    '--column-count': EMOTION_PREVIEW_COLUMNS.length,
+    '--cell': '8px',
+    '--cell-gap': '4px'
+  } as CSSProperties;
+
   return (
     <div className="lv2-emotion-card">
-      <div className="lv2-emotion-legend">
-        {['Calma', 'Felicidad', 'Motivación', 'Tristeza'].map((emotion) => (
-          <span key={emotion} className="lv2-emotion-pill" style={{ ['--dot-color' as string]: EMOTION_COLORS[emotion as EmotionName] }}>
-            {emotion}
+      <div className="lv2-emotion-legend lv2-emotion-legend--dashboard">
+        {EMOTION_PREVIEW_LEGEND.map((emotion) => (
+          <span key={emotion} className="lv2-emotion-legend-item">
+            <span className="lv2-emotion-legend-swatch" style={{ backgroundColor: EMOTION_COLORS[emotion] }} />
+            <span>{emotion}</span>
           </span>
         ))}
       </div>
-      <div className="lv2-emotion-grid">
-        {EMOTION_PREVIEW_COLUMNS.slice(0, 6).map((column) => (
-          <div key={column.key} className="lv2-emotion-column">
-            {column.cells.slice(0, 5).map((cell, cellIndex) => (
-              <span key={`${column.key}-${cellIndex}`} style={{ backgroundColor: EMOTION_COLORS[cell] }} />
-            ))}
+      <div className="lv2-emotion-heatmap" data-emotion-card="heatmap">
+        <div id="emotionChart">
+          <div className="emotion-chart-surface">
+            <div className="grid-box" style={gridStyle}>
+              <div className="emotion-grid--weekcols">
+                {EMOTION_PREVIEW_COLUMNS.map((column, columnIndex) => (
+                  <div key={column.key} className="emotion-col" style={{ gridColumn: `${columnIndex + 1}` }}>
+                    {column.cells.map((cell, cellIndex) => (
+                      <div
+                        key={`${column.key}-${cellIndex}`}
+                        className="emotion-cell"
+                        style={{ backgroundColor: EMOTION_COLORS[cell] }}
+                        title={cell}
+                        aria-label={`${cell} • día ${cellIndex + 1}`}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        ))}
+        </div>
       </div>
       <p className="lv2-emotion-caption">
         {language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
