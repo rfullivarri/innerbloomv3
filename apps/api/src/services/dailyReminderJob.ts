@@ -185,9 +185,9 @@ export function buildReminderEmail(
           <table role="presentation" width="100%" style="max-width:520px;width:100%;background:linear-gradient(160deg,#0f172a,#111c33);border-radius:24px;padding:32px 24px;border:1px solid rgba(99,102,241,0.35);box-shadow:0 26px 52px rgba(2,6,23,0.55);">
             <tr>
               <td align="center" style="text-align:center;">
-                <img src="${REMINDER_LOGO_URL}" alt="Innerbloom" width="44" height="44" style="display:block;margin:0 auto 12px;border-radius:50%;border:1px solid rgba(148,163,184,0.5);background:#ffffff;" />
                 <p style="margin:0 0 14px;font-size:12px;letter-spacing:0.45em;text-transform:uppercase;color:#94a3b8;">
                   Innerbloom
+                  <img src="${REMINDER_LOGO_URL}" alt="Innerbloom" width="18" height="18" style="display:inline-block;vertical-align:middle;margin-left:8px;border-radius:50%;border:1px solid rgba(148,163,184,0.5);background:#ffffff;" />
                 </p>
                 <p style="margin:0 0 10px;font-size:15px;color:#cbd5f5;">Hola ${name} 👋</p>
                 <h1 style="margin:0 0 12px;font-size:24px;line-height:1.3;color:#f8fafc;">${normalizedHeadline}</h1>
