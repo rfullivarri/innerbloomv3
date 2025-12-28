@@ -435,7 +435,7 @@ function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boo
         <div className="lv2-xp-metric">
           <span className={`leading-none ${compact ? 'text-[1.24em]' : 'text-[2.1em]'}`}>🏆</span>
           <div className="flex flex-col">
-            <span className={`font-semibold text-slate-50 ${compact ? 'text-[0.715rem]' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
+            <span className={`font-semibold text-slate-50 ${compact ? 'text-[0.86rem]' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
             <span className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[7.15px]' : 'text-[11px]'}`}>
               Total XP
             </span>
@@ -444,7 +444,7 @@ function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boo
         <div className="lv2-xp-metric">
           <span className={`leading-none ${compact ? 'text-[1.24em]' : 'text-[2.1em]'}`}>🎯</span>
           <div className="flex flex-col">
-            <span className={`font-semibold text-slate-50 ${compact ? 'text-[0.715rem]' : 'text-4xl sm:text-5xl'}`}>{levelLabel}</span>
+            <span className={`font-semibold text-slate-50 ${compact ? 'text-[0.86rem]' : 'text-4xl sm:text-5xl'}`}>{levelLabel}</span>
             <span className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[7.15px]' : 'text-[11px]'}`}>
               Nivel
             </span>
