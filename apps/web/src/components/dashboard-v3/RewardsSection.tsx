@@ -293,7 +293,7 @@ function getPillarIcon(pillar?: string | null): string {
   const icons: Record<'Body' | 'Mind' | 'Soul', string> = {
     Body: '🫀',
     Mind: '🧠',
-    Soul: '🌿',
+    Soul: '🏵️',
   };
   return icons[normalized] ?? '';
 }
