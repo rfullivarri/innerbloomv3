@@ -281,13 +281,13 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
           >
             <SectionBlock
               label={sectionsByKey.intro?.title ?? 'Weekly Wrapped · Preview'}
-              headline={sectionsByKey.intro?.body ?? 'Tu semana, en movimiento'}
+              headline={sectionsByKey.intro?.body ?? 'Tus últimos 7 días, en movimiento'}
               badges={summaryChips}
               description={
                 hasAchievementStats
                   ? undefined
                   : sectionsByKey.achievements?.body ??
-                    'Completaste 0 tareas y sumaste 0 XP esta semana.'
+                    'Completaste 0 tareas y sumaste 0 XP en los últimos 7 días.'
               }
               kicker={sectionsByKey.achievements?.accent}
               stats={{
@@ -313,7 +313,10 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
 
             <HabitsBlock
               title={sectionsByKey.habits?.title ?? 'Ritmo que se sostiene'}
-              description={sectionsByKey.habits?.body ?? 'Estos hábitos aparecieron de forma consistente y mantuvieron tu semana en movimiento.'}
+              description={
+                sectionsByKey.habits?.body ??
+                'Estos hábitos aparecieron de forma consistente y mantuvieron tus últimos 7 días en movimiento.'
+              }
               items={habitsItems.map((item, idx) => ({
                 ...item,
                 icon: item.icon || getHabitIcon(item.pillar, idx),
@@ -769,7 +772,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
                 </div>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                   <p className="text-[11px] text-emerald-50/80">
-                    Meta cumplida {health.weeksActive} de {health.weeksSample} semanas.
+                    Meta cumplida {health.weeksActive} de {health.weeksSample} ciclos de 7 días.
                   </p>
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-tight ${
@@ -824,11 +827,11 @@ function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef }: L
               <p className="max-w-2xl text-sm text-emerald-50/90">
                 {levelUp.forced
                   ? 'Mock activado para validar la celebración sin afectar métricas.'
-                  : 'Semana con salto real: cada misión empujó tu progreso.'}
+                  : 'Últimos 7 días con salto real: cada misión empujó tu progreso.'}
               </p>
               <div className="flex flex-wrap gap-3 text-xs text-slate-200">
                 <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
-                  +{levelUp.xpGained.toLocaleString('es-AR')} XP esta semana
+                  +{levelUp.xpGained.toLocaleString('es-AR')} XP en los últimos 7 días
                 </span>
                 <span className="rounded-full border border-white/15 bg-emerald-500/20 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
                   {previousLabel} → {levelLabel}
@@ -878,14 +881,14 @@ function ProgressBlock({
   const energySnapshot = computeEnergySnapshot(pillarDominant, completions, xpTotal, energyHighlight);
   const hasDelta = energySnapshot.hasHistory && typeof energySnapshot.delta === 'number';
   const energyHeadline = hasDelta
-    ? `${energySnapshot.metric.label} ${formatDeltaValue(energySnapshot.delta)} vs semana anterior`
+    ? `${energySnapshot.metric.label} ${formatDeltaValue(energySnapshot.delta)} vs 7 días anteriores`
     : energySnapshot.hasHistory
       ? `Energía destacada: ${energySnapshot.metric.label} (${energySnapshot.current}%)`
-      : 'Sin datos suficientes para comparar energía con la semana anterior.';
+      : 'Sin datos suficientes para comparar energía con los 7 días anteriores.';
   const energyBarHeight = `${Math.max(12, Math.min(100, energySnapshot.current))}%`;
   const energyBarGradient = ENERGY_GRADIENT_BY_METRIC[energySnapshot.metric.label] ?? 'from-white/70 via-white/90 to-white';
   const energyCurrentLabel = `${Math.round(energySnapshot.current)}%`;
-  const energyFocusStory = `Esta semana tu energía se enfocó en ${
+  const energyFocusStory = `En los últimos 7 días tu energía se enfocó en ${
     energySnapshot.metric.label === 'HP'
       ? 'tu bienestar físico'
       : energySnapshot.metric.label === 'FOCUS'
@@ -898,17 +901,17 @@ function ProgressBlock({
   const mediumPct = hasEffortBalance && balanceTotal ? Math.round((100 * (effortBalance?.medium ?? 0)) / balanceTotal) : 0;
   const hardPct = hasEffortBalance && balanceTotal ? Math.max(0, 100 - easyPct - mediumPct) : 0;
   const balanceReading = !hasEffortBalance
-    ? 'Sin datos esta semana'
+    ? 'Sin datos en los últimos 7 días'
     : easyPct > 70
-      ? 'La semana priorizó estabilidad sobre intensidad'
+      ? 'Los últimos 7 días priorizaron estabilidad sobre intensidad'
       : hardPct > 30
-        ? 'Semana de alta exigencia e intensidad'
+        ? 'Últimos 7 días de alta exigencia e intensidad'
         : 'Buen equilibrio entre constancia e intensidad';
   const hardInsight = !hasEffortBalance
-    ? 'Necesitamos más completions esta semana para mostrar la dificultad real.'
+    ? 'Necesitamos más completions en los últimos 7 días para mostrar la dificultad real.'
     : effortBalance?.topHardTask
       ? `La tarea difícil más repetida fue: ${effortBalance.topHardTask.title}`
-      : 'No registraste tareas difíciles esta semana.';
+      : 'No registraste tareas difíciles en los últimos 7 días.';
   const insightDotColor = '#fbbf24';
   const effortInsights: { id: string; color: string; text: string }[] = [
     {
@@ -954,7 +957,7 @@ function ProgressBlock({
               {hasDelta ? (
                 <span className="text-xs font-semibold text-emerald-50">
                   <span className="font-bold text-emerald-300">{formatDeltaValue(energySnapshot.delta)}</span>{' '}
-                  <span className="font-semibold">vs semana anterior</span>
+                  <span className="font-semibold">vs 7 días anteriores</span>
                 </span>
               ) : (
                 <span className="text-xs text-emerald-100">{energyHeadline}</span>
@@ -1050,7 +1053,7 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
   const biweeklyColor = biweeklyEmotion?.color ?? weeklyColor;
   const weeklyLabel = weeklyEmotion?.label ?? 'Sin emoción dominante';
   const weeklyMessage =
-    weeklyEmotion?.weeklyMessage ?? 'Registrá tus emociones para detectar cuál lideró la semana.';
+    weeklyEmotion?.weeklyMessage ?? 'Registrá tus emociones para detectar cuál lideró los últimos 7 días.';
   const biweeklyLabel = biweeklyEmotion?.label ?? 'Seguimos observando';
   const biweeklyContext =
     biweeklyEmotion?.biweeklyContext ?? 'Con más registros vamos a mostrar la tendencia de los últimos 15 días.';
@@ -1067,7 +1070,7 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
       <div className="space-y-3">
         <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
         <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(251,191,36,0.35)]">Emoción en foco</h3>
-        <p className="text-sm text-emerald-50">Movimiento emocional de la semana en un vistazo.</p>
+        <p className="text-sm text-emerald-50">Movimiento emocional de los últimos 7 días en un vistazo.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -1106,7 +1109,7 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
           </div>
           <div className="rounded-2xl border border-white/15 bg-white/5 p-3 text-sm text-slate-50 shadow-inner shadow-emerald-400/10">
             {biweeklyEmotion
-              ? `En las últimas dos semanas tu energía se inclinó hacia ${biweeklyLabel.toLowerCase()}. Aprovechá ese envión.`
+              ? `En los últimos 15 días tu energía se inclinó hacia ${biweeklyLabel.toLowerCase()}. Aprovechá ese envión.`
               : biweeklyContext}
           </div>
         </div>

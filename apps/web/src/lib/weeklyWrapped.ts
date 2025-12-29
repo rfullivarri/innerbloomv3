@@ -193,8 +193,8 @@ const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
     label: 'Felicidad',
     tone: 'positiva',
     color: EMOTION_COLORS.felicidad,
-    weeklyMessage: 'La alegría lideró tu semana. Anotá qué la impulsó y repetilo.',
-    biweeklyContext: 'En las últimas dos semanas tu energía se mantuvo luminosa. Aprovechá ese envión.',
+    weeklyMessage: 'La alegría lideró tus últimos 7 días. Anotá qué la impulsó y repetilo.',
+    biweeklyContext: 'En los últimos 15 días tu energía se mantuvo luminosa. Aprovechá ese envión.',
   },
   motivacion: {
     key: 'motivacion',
@@ -210,7 +210,7 @@ const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
     tone: 'neutral',
     color: EMOTION_COLORS.calma,
     weeklyMessage: 'Predominó la calma. Protegé los espacios que la generaron.',
-    biweeklyContext: 'Dos semanas con aire liviano. Podés sumar pequeños retos sin perder serenidad.',
+    biweeklyContext: '15 días con aire liviano. Podés sumar pequeños retos sin perder serenidad.',
   },
   cansancio: {
     key: 'cansancio',
@@ -242,7 +242,7 @@ const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
     tone: 'desafiante',
     color: EMOTION_COLORS.frustracion,
     weeklyMessage: 'La frustración dijo presente. Reconocé el avance mínimo y volvé a intentar.',
-    biweeklyContext: 'Varias señales de freno estas dos semanas. Ajustá expectativas y buscá apoyo.',
+    biweeklyContext: 'Varias señales de freno en los últimos 15 días. Ajustá expectativas y buscá apoyo.',
   },
 };
 
@@ -572,10 +572,10 @@ export async function buildWeeklyWrappedFromData(
   const emotionHighlight = buildEmotionHighlight(emotions);
   const weeklyEmotionMessage =
     emotionHighlight.weekly?.weeklyMessage ??
-    'Necesitamos más registros recientes en el Emotion Chart para destacar tu ánimo de la semana.';
+    'Necesitamos más registros recientes en el Emotion Chart para destacar tu ánimo de los últimos 7 días.';
   const biweeklyEmotionMessage =
     emotionHighlight.biweekly?.biweeklyContext ??
-    'En cuanto registremos más emociones, vamos a mostrar la tendencia de las últimas dos semanas.';
+    'En cuanto registremos más emociones, vamos a mostrar la tendencia de los últimos 15 días.';
   const emotionAccent = emotionHighlight.weekly?.label ?? emotionHighlight.biweekly?.label ?? 'Sin emoción dominante';
 
   logWeeklyWrappedDebug('weekly wrapped summary computed', {
@@ -594,35 +594,35 @@ export async function buildWeeklyWrappedFromData(
       {
         key: 'intro',
         title: 'Weekly Wrapped · Preview',
-        body: 'Tu semana, en movimiento.',
-        accent: `Semana ${periodLabel}`,
+        body: 'Tus últimos 7 días, en movimiento.',
+        accent: `Últimos 7 días · ${periodLabel}`,
       },
       levelUp.happened
         ? {
             key: 'level-up',
             title: 'Subida de nivel',
             body: `Llegaste al nivel ${levelUp.currentLevel ?? 'nuevo'}. ${
-              levelUp.forced ? 'Celebración mockeada para validar la experiencia.' : 'Impulso real para tu semana.'
+              levelUp.forced ? 'Celebración mockeada para validar la experiencia.' : 'Impulso real para tus últimos 7 días.'
             }`,
             accent: 'Level Up',
           }
         : null,
       {
         key: 'achievements',
-        title: 'Resumen semanal',
+        title: 'Resumen 7 días',
         body:
           completions > 0
-            ? `Completaste ${completions} tareas y sumaste ${xpTotal.toLocaleString('es-AR')} XP esta semana.`
-            : 'Semana tranquila: sin registros fuertes, pero el reset también suma.',
-        accent: completions > 0 ? 'Datos reales' : 'Semana liviana',
+            ? `Completaste ${completions} tareas y sumaste ${xpTotal.toLocaleString('es-AR')} XP en los últimos 7 días.`
+            : 'Últimos 7 días tranquilos: sin registros fuertes, pero el reset también suma.',
+        accent: completions > 0 ? 'Datos reales' : '7 días livianos',
       },
       {
         key: 'habits',
         title: 'Ritmo que se sostiene',
         body:
           constancyHabitsWithInsights.length > 0
-            ? 'Estos hábitos aparecieron de forma consistente y mantuvieron tu semana en movimiento.'
-            : 'Aún no registramos hábitos destacados esta semana, pero estás a un clic de retomarlos.',
+            ? 'Estos hábitos aparecieron de forma consistente y mantuvieron tus últimos 7 días en movimiento.'
+            : 'Aún no registramos hábitos destacados en los últimos 7 días, pero estás a un clic de retomarlos.',
         items:
           constancyHabitsWithInsights.length > 0
             ? constancyHabitsWithInsights.map((habit) => ({
@@ -630,7 +630,7 @@ export async function buildWeeklyWrappedFromData(
                 body:
                   habit.daysActive > 0
                     ? `${habit.daysActive}/7 días. Sostuviste el compromiso.`
-                    : 'Ritmo sólido esta semana. Constancia pura.',
+                    : 'Ritmo sólido en los últimos 7 días. Constancia pura.',
                 badge: habit.badge,
                 pillar: habit.pillar,
                 daysActive: habit.daysActive,
@@ -657,7 +657,7 @@ export async function buildWeeklyWrappedFromData(
         body:
           pillarDominant
             ? `${getPillarIcon(pillarDominant)} ${pillarDominant} lideró tu energía estos días. Seguí apoyándote en ese foco.`
-            : 'Sin un pilar dominante esta semana: espacio abierto para explorar Body, Mind o Soul.',
+            : 'Sin un pilar dominante en los últimos 7 días: espacio abierto para explorar Body, Mind o Soul.',
         accent: pillarDominant ?? 'Balanceado',
       },
       {
@@ -947,8 +947,8 @@ function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayloa
         {
           key: 'intro',
           title: 'Weekly Wrapped · Preview',
-          body: 'Tu semana, en movimiento.',
-          accent: `Semana ${formatDate(start)} – ${formatDate(end)}`,
+          body: 'Tus últimos 7 días, en movimiento.',
+          accent: `Últimos 7 días · ${formatDate(start)} – ${formatDate(end)}`,
         },
         mockLevelUp.happened
           ? {
@@ -960,14 +960,14 @@ function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayloa
           : null,
         {
           key: 'achievements',
-          title: 'Resumen semanal',
-          body: 'Completaste 3 tareas y sumaste 320 XP esta semana.',
+          title: 'Resumen 7 días',
+          body: 'Completaste 3 tareas y sumaste 320 XP en los últimos 7 días.',
           accent: 'Datos reales',
         },
         {
           key: 'habits',
           title: 'Ritmo que se sostiene',
-          body: 'Estos hábitos aparecieron de forma consistente y mantuvieron tu semana en movimiento.',
+          body: 'Estos hábitos aparecieron de forma consistente y mantuvieron tus últimos 7 días en movimiento.',
           items: [
             {
               title: 'Respiración consciente',
@@ -988,7 +988,7 @@ function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayloa
         {
           key: 'pillar',
           title: 'Pilar dominante',
-          body: '🧠 Mind dominó tu semana: más foco, menos ruido.',
+          body: '🧠 Mind dominó tus últimos 7 días: más foco, menos ruido.',
           accent: 'Mind',
         },
         {

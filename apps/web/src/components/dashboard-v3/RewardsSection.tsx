@@ -175,7 +175,7 @@ function WeeklyWrappedShelf({ items, onOpen }: WeeklyWrappedShelfProps) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Weekly Wrapped</p>
-          <p className="text-sm text-slate-200">Tus últimos resúmenes semanales</p>
+          <p className="text-sm text-slate-200">Tus últimos resúmenes de 7 días</p>
         </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
