@@ -205,6 +205,11 @@
   flex-wrap: nowrap;
 }
 
+.landing .nav-actions .nav-auth-button {
+  border-color: transparent;
+  box-shadow: none;
+}
+
 .landing .lang-toggle {
   position: relative;
   display: inline-flex;
