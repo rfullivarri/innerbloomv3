@@ -504,32 +504,6 @@
   color: #fff;
 }
 
-.landing .cta-floating {
-  /* Ajustá amplitud (px) en @keyframes ctaDrift y duración en animation. */
-  animation: ctaDrift 9s ease-in-out infinite;
-  will-change: transform, opacity, backdrop-filter;
-  transform-origin: center;
-  backdrop-filter: blur(12px);
-}
-
-@keyframes ctaDrift {
-  0% {
-    transform: translate3d(-8px, 0, 0) scale(1);
-    opacity: 1;
-    backdrop-filter: blur(12px);
-  }
-  50% {
-    transform: translate3d(8px, 0, 0) scale(1.01);
-    opacity: 0.98;
-    backdrop-filter: blur(13px);
-  }
-  100% {
-    transform: translate3d(-8px, 0, 0) scale(1);
-    opacity: 1;
-    backdrop-filter: blur(12px);
-  }
-}
-
 @keyframes meshFloat {
   0% {
     background-position: 12% 12%, 84% 16%, 16% 82%, 78% 76%;
@@ -578,8 +552,7 @@
 @media (prefers-reduced-motion: reduce) {
   .landing::before,
   .landing::after,
-  .landing .hero-media,
-  .landing .cta-floating {
+  .landing .hero-media {
     animation: none !important;
     transform: none !important;
   }
