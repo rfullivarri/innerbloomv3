@@ -1,4 +1,17 @@
-import { formatDateInTimezone } from '../controllers/users/user-state-service.js';
+import {
+  addDays,
+  computeDailyTargets,
+  computeHalfLife,
+  enumerateDates,
+  formatDateInTimezone,
+  getDailyXpSeriesByPillar,
+  getUserLogStats,
+  getUserProfile,
+  getXpBaseByPillar,
+  propagateEnergy,
+  type Pillar,
+  type PropagatedSeriesRow,
+} from '../controllers/users/user-state-service.js';
 import { pool } from '../db.js';
 import type { InsightQuery, LogsQuery } from '../modules/admin/admin.schemas.js';
 import { getUserInsights, getUserLogs } from '../modules/admin/admin.service.js';
@@ -32,6 +45,24 @@ type NormalizedLog = AdminLogRow & {
 
 export type WeeklyWrappedLog = NormalizedLog;
 
+type EnergyTrend = {
+  currentDate: string;
+  previousDate: string;
+  hasHistory: boolean;
+  pillars: Record<Pillar, { current: number; previous: number | null; deltaPct: number | null }>;
+};
+
+type DailyEnergySnapshot = {
+  user_id: string;
+  hp_pct: number;
+  mood_pct: number;
+  focus_pct: number;
+  hp_norm: number;
+  mood_norm: number;
+  focus_norm: number;
+  trend: EnergyTrend | null;
+};
+
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
 const MS_IN_DAY = 24 * 60 * 60 * 1000;
 const EMOTION_KEY_BY_LABEL: Record<string, EmotionMessageKey> = {
@@ -47,6 +78,12 @@ const EMOTION_KEY_BY_LABEL: Record<string, EmotionMessageKey> = {
 const EMOTION_KEY_BY_NORMALIZED_LABEL: Record<string, EmotionMessageKey> = Object.fromEntries(
   Object.entries(EMOTION_KEY_BY_LABEL).map(([label, key]) => [normalizeText(label), key]),
 );
+
+const ENERGY_METRIC_BY_PILLAR: Record<string, { label: 'HP' | 'FOCUS' | 'MOOD' }> = {
+  Body: { label: 'HP' },
+  Mind: { label: 'FOCUS' },
+  Soul: { label: 'MOOD' },
+};
 
 const EMOTION_COLORS: Record<EmotionMessageKey, string> = {
   calma: '#2ECC71',
@@ -266,7 +303,7 @@ async function buildWeeklyWrappedPayload(
     return toDateKey(start);
   })();
 
-  const [insights, logsResult, longTermLogsResult, levelSummary, emotionSnapshots] = await Promise.all([
+  const [insights, logsResult, longTermLogsResult, levelSummary, emotionSnapshots, dailyEnergy] = await Promise.all([
     getUserInsights(userId, {} as InsightQuery),
     getUserLogs(userId, {
       from: range.start,
@@ -284,6 +321,10 @@ async function buildWeeklyWrappedPayload(
     } as LogsQuery),
     loadUserLevelSummary(userId),
     loadEmotionSnapshots(userId, range.end, 15),
+    loadDailyEnergySnapshot(userId).catch((error) => {
+      console.warn('[weekly-wrapped] failed to load daily energy', { userId, error });
+      return null;
+    }),
   ]);
   const emotions = emotionSnapshots;
 
@@ -827,6 +868,66 @@ function dominantPillar(insights: Awaited<ReturnType<typeof getUserInsights>>): 
   return sorted[0]?.code;
 }
 
+function computeEnergyHighlight(
+  insights: Awaited<ReturnType<typeof getUserInsights>>,
+  pillarDominant: string | null,
+  dailyEnergy: DailyEnergySnapshot | null,
+): WeeklyWrappedPayload['summary']['energyHighlight'] {
+  const energyTrend = dailyEnergy?.trend ?? null;
+  const metric =
+    pillarDominant && ENERGY_METRIC_BY_PILLAR[pillarDominant]
+      ? ENERGY_METRIC_BY_PILLAR[pillarDominant]
+      : ENERGY_METRIC_BY_PILLAR.Body;
+
+  const snapshotValueByMetric: Record<'HP' | 'FOCUS' | 'MOOD', number | null> = {
+    HP: dailyEnergy?.hp_pct ?? null,
+    FOCUS: dailyEnergy?.focus_pct ?? null,
+    MOOD: dailyEnergy?.mood_pct ?? null,
+  };
+
+  const topGrowth = energyTrend?.hasHistory
+    ? (['Body', 'Mind', 'Soul'] as const)
+        .map((pillar) => ({
+          pillar,
+          delta: energyTrend.pillars[pillar].deltaPct,
+          metric: ENERGY_METRIC_BY_PILLAR[pillar].label,
+          current: energyTrend.pillars[pillar].current,
+        }))
+        .filter((entry) => typeof entry.delta === 'number')
+        .sort((a, b) => (b.delta ?? 0) - (a.delta ?? 0))[0]
+    : null;
+
+  if (topGrowth) {
+    const snapshotValue = snapshotValueByMetric[topGrowth.metric];
+    const rawValue = snapshotValue ?? topGrowth.current ?? 0;
+    const current = Math.max(0, Math.min(100, Math.round(rawValue)));
+    return {
+      metric: topGrowth.metric,
+      value: current,
+      deltaPct: Math.round((topGrowth.delta ?? 0) * 10) / 10,
+      hasHistory: true,
+    };
+  }
+
+  const snapshotValue = snapshotValueByMetric[metric.label];
+  const constancyValue = pillarDominant
+    ? insights.constancyWeekly[pillarDominant.toLowerCase() as 'body' | 'mind' | 'soul'] ?? 0
+    : Math.max(
+        insights.constancyWeekly.body ?? 0,
+        insights.constancyWeekly.mind ?? 0,
+        insights.constancyWeekly.soul ?? 0,
+      );
+
+  const rawValue = snapshotValue ?? constancyValue;
+  const value = Math.max(0, Math.min(100, Math.round(rawValue)));
+
+  return {
+    metric: metric.label,
+    value,
+    hasHistory: energyTrend?.hasHistory ?? false,
+  };
+}
+
 function buildEmotionHighlight(entries: EmotionSnapshot[]): EmotionHighlight {
   const map = new Map<string, EmotionMessageKey>();
 
@@ -903,6 +1004,135 @@ function normalizeEmotionKey(label: unknown): EmotionMessageKey | null {
 
   const normalized = normalizeText(label);
   return EMOTION_KEY_BY_NORMALIZED_LABEL[normalized] ?? null;
+}
+
+function round(value: number, decimals: number): number {
+  const factor = Math.pow(10, decimals);
+  return Math.round(value * factor) / factor;
+}
+
+function calculateDelta(current: number, previous: number | null): number | null {
+  if (previous === null || Math.abs(previous) < 0.0001) {
+    return null;
+  }
+
+  return round(((current - previous) / Math.abs(previous)) * 100, 1);
+}
+
+function buildTrendResponse(dates: string[], series: PropagatedSeriesRow[], uniqueDays: number): EnergyTrend {
+  const [currentDate, previousDate] = dates;
+  const byDate = new Map(series.map((row) => [row.date, row]));
+  const current = byDate.get(currentDate) ?? null;
+  const previous = byDate.get(previousDate) ?? null;
+  const hasHistory = uniqueDays >= 7 && Boolean(previous);
+
+  const buildPillar = (pillar: Pillar) => {
+    const currentValue = round(current?.[pillar] ?? 0, 1);
+    const previousValue = hasHistory ? round(previous?.[pillar] ?? 0, 1) : null;
+
+    return {
+      current: currentValue,
+      previous: previousValue,
+      deltaPct: hasHistory ? calculateDelta(currentValue, previousValue) : null,
+    };
+  };
+
+  return {
+    currentDate,
+    previousDate,
+    hasHistory,
+    pillars: {
+      Body: buildPillar('Body'),
+      Mind: buildPillar('Mind'),
+      Soul: buildPillar('Soul'),
+    },
+  };
+}
+
+async function computeEnergyTrend(userId: string): Promise<EnergyTrend | null> {
+  const profile = await getUserProfile(userId);
+  const today = formatDateInTimezone(new Date(), profile.timezone);
+  const previousDate = addDays(today, -7);
+
+  const logStats = await getUserLogStats(userId);
+  const xpBaseByPillar = await getXpBaseByPillar(userId);
+  const halfLifeByPillar = computeHalfLife(profile.modeCode);
+  const dailyTargets = computeDailyTargets(xpBaseByPillar, profile.weeklyTarget);
+  const graceApplied = logStats.uniqueDays < 7;
+  const graceUntilDate = logStats.firstDate ? addDays(logStats.firstDate, 6) : null;
+  const propagationStart = logStats.firstDate
+    ? logStats.firstDate < previousDate
+      ? logStats.firstDate
+      : previousDate
+    : previousDate;
+  const propagationDates = enumerateDates(propagationStart, today);
+
+  if (propagationDates.length === 0) {
+    return null;
+  }
+
+  const xpSeries =
+    propagationDates.length > 0 ? await getDailyXpSeriesByPillar(userId, propagationStart, today) : new Map();
+
+  const { series } = propagateEnergy({
+    dates: propagationDates,
+    xpByDate: xpSeries,
+    halfLifeByPillar,
+    dailyTargets,
+    forceFullGrace: graceApplied,
+    graceUntilDate,
+  });
+
+  const keyDates = [today, previousDate];
+
+  return buildTrendResponse(keyDates, series, logStats.uniqueDays);
+}
+
+const toNumber = (value: string | number | null | undefined): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+async function loadDailyEnergySnapshot(userId: string): Promise<DailyEnergySnapshot | null> {
+  const sql = `
+    SELECT user_id,
+           ROUND(hp_pct::numeric, 1)   AS hp_pct,
+           ROUND(mood_pct::numeric, 1) AS mood_pct,
+           ROUND(focus_pct::numeric, 1) AS focus_pct,
+           hp_norm,
+           mood_norm,
+           focus_norm
+      FROM v_user_daily_energy
+     WHERE user_id = $1
+  `;
+
+  const result = await pool.query<{
+    user_id: string;
+    hp_pct: string | number | null;
+    mood_pct: string | number | null;
+    focus_pct: string | number | null;
+    hp_norm: string | number | null;
+    mood_norm: string | number | null;
+    focus_norm: string | number | null;
+  }>(sql, [userId]);
+
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  const row = result.rows[0];
+  const trend = await computeEnergyTrend(userId);
+
+  return {
+    user_id: row.user_id,
+    hp_pct: toNumber(row.hp_pct),
+    mood_pct: toNumber(row.mood_pct),
+    focus_pct: toNumber(row.focus_pct),
+    hp_norm: toNumber(row.hp_norm),
+    mood_norm: toNumber(row.mood_norm),
+    focus_norm: toNumber(row.focus_norm),
+    trend,
+  };
 }
 
 async function loadEmotionSnapshots(userId: string, endDate: string, days: number): Promise<EmotionSnapshot[]> {
