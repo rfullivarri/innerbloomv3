@@ -299,7 +299,7 @@ async function buildWeeklyWrappedPayload(
     return latest;
   }, null);
 
-  const endDate = latestLog ?? new Date(`${range.end}T00:00:00Z`);
+  const endDate = new Date(range.end);
   const startDate = startOfDay(new Date(`${range.start}T00:00:00Z`));
   const weeksSample = Math.max(1, Math.ceil((endDate.getTime() - parseDate(longTermStart).getTime() + MS_IN_DAY) / (7 * MS_IN_DAY)));
   const { completions, habitCounts } = summarizeWeeklyActivity(normalizedLogs, weeklyGoal);
@@ -457,6 +457,7 @@ async function buildWeeklyWrappedPayload(
     dataSource: 'real',
     variant,
     weekRange: { start: startDate.toISOString(), end: endDate.toISOString() },
+    lastActivityAt: latestLog?.toISOString() ?? null,
     summary: {
       pillarDominant,
       highlight,
