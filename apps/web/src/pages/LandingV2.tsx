@@ -364,6 +364,14 @@ const EMOTION_PREVIEW_COLUMNS: EmotionPreviewColumn[] = [
   { key: 'w7', cells: ['Motivación', 'Calma', 'Calma', 'Felicidad', 'Motivación', 'Calma', 'Calma'] },
   { key: 'w8', cells: ['Calma', 'Motivación', 'Felicidad', 'Motivación', 'Calma', 'Calma', 'Motivación'] }
 ];
+const EMOTION_PREVIEW_TOTAL_COLUMNS = 18;
+const EMOTION_PREVIEW_PADDED_COLUMNS: EmotionPreviewColumn[] = [
+  ...EMOTION_PREVIEW_COLUMNS,
+  ...Array.from({ length: Math.max(0, EMOTION_PREVIEW_TOTAL_COLUMNS - EMOTION_PREVIEW_COLUMNS.length) }, (_, index) => ({
+    key: `empty-${index + 1}`,
+    cells: Array.from({ length: 7 }, () => 'Sin registro' as const)
+  }))
+];
 
 const EMOTION_PREVIEW_SUMMARY = { emotion: 'Motivación' as const, count: 6 };
 const EMOTION_PREVIEW_LEGEND: EmotionName[] = ['Calma', 'Felicidad', 'Motivación', 'Tristeza', 'Ansiedad', 'Frustración', 'Cansancio'];
@@ -560,7 +568,7 @@ function DailyEnergyPreview({ compact = false, language = 'es' }: { compact?: bo
 
 function EmotionHeatmapPreview({ compact = false, language = 'es' }: { compact?: boolean; language?: Language }) {
   const gridStyle = {
-    '--column-count': EMOTION_PREVIEW_COLUMNS.length,
+    '--column-count': EMOTION_PREVIEW_PADDED_COLUMNS.length,
     '--cell': compact ? '10px' : '12px',
     '--cell-gap': '5px'
   } as CSSProperties;
@@ -571,7 +579,7 @@ function EmotionHeatmapPreview({ compact = false, language = 'es' }: { compact?:
         <div className="emotion-chart-surface">
           <div className="grid-box" style={gridStyle}>
             <div className="emotion-grid--weekcols">
-              {EMOTION_PREVIEW_COLUMNS.map((column, columnIndex) => (
+              {EMOTION_PREVIEW_PADDED_COLUMNS.map((column, columnIndex) => (
                 <div key={column.key} className="emotion-col" style={{ gridColumn: `${columnIndex + 1}` }}>
                   {column.cells.map((cell, cellIndex) => (
                     <div
@@ -683,7 +691,7 @@ function RadarChartPreview() {
 
 function EmotionChartPreview({ language = 'es' }: { language?: Language }) {
   const gridStyle = {
-    '--column-count': EMOTION_PREVIEW_COLUMNS.length,
+    '--column-count': EMOTION_PREVIEW_PADDED_COLUMNS.length,
     '--cell': '8px',
     '--cell-gap': '4px'
   } as CSSProperties;
@@ -703,7 +711,7 @@ function EmotionChartPreview({ language = 'es' }: { language?: Language }) {
           <div className="emotion-chart-surface">
             <div className="grid-box" style={gridStyle}>
               <div className="emotion-grid--weekcols">
-                {EMOTION_PREVIEW_COLUMNS.map((column, columnIndex) => (
+                {EMOTION_PREVIEW_PADDED_COLUMNS.map((column, columnIndex) => (
                   <div key={column.key} className="emotion-col" style={{ gridColumn: `${columnIndex + 1}` }}>
                     {column.cells.map((cell, cellIndex) => (
                       <div
