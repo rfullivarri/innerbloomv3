@@ -28,7 +28,12 @@ export type WeeklyWrappedPayload = {
     highlight: string | null;
     completions: number;
     xpTotal: number;
-    energyHighlight?: { metric: 'HP' | 'FOCUS' | 'MOOD'; value: number };
+    energyHighlight?: {
+      metric: 'HP' | 'FOCUS' | 'MOOD';
+      value: number;
+      deltaPct?: number | null;
+      hasHistory?: boolean;
+    };
     effortBalance?: {
       easy: number;
       medium: number;
