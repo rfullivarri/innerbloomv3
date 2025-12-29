@@ -76,6 +76,91 @@
       linear-gradient(180deg, rgba(241, 245, 249, 0.94), #f8fafc 60%, #e2e8f0);
   }
 
+  .aurora-background {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .aurora-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .aurora-surface {
+    --aurora-blur: 140px;
+    --aurora-speed: 46s;
+    --aurora-intensity: 1;
+    --aurora-noise-opacity: 0.04;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+    background: radial-gradient(140% 120% at 50% 25%, color-mix(in srgb, var(--aurora-surface-alt) 58%, transparent) 0%, transparent 62%),
+      linear-gradient(180deg, color-mix(in srgb, var(--aurora-surface) 72%, transparent) 0%, color-mix(in srgb, var(--aurora-surface) 88%, transparent) 80%);
+  }
+
+  .aurora-gradient {
+    position: absolute;
+    inset: -18%;
+    filter: blur(var(--aurora-blur));
+    opacity: calc(0.9 * var(--aurora-intensity));
+    transform-origin: 50% 50%;
+    will-change: transform;
+    animation: aurora-shift var(--aurora-speed) ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+
+  .aurora-gradient--back {
+    background:
+      radial-gradient(circle at 18% 24%, var(--aurora-blob-a) 0%, transparent 48%),
+      radial-gradient(circle at 82% 16%, var(--aurora-blob-b) 0%, transparent 46%),
+      radial-gradient(circle at 44% 82%, var(--aurora-blob-c) 0%, transparent 56%);
+    animation-duration: calc(var(--aurora-speed) * 1.2);
+  }
+
+  .aurora-gradient--mid {
+    background:
+      radial-gradient(circle at 14% 65%, var(--aurora-blob-c) 0%, transparent 54%),
+      radial-gradient(circle at 86% 68%, var(--aurora-blob-d) 0%, transparent 52%),
+      radial-gradient(circle at 54% 26%, color-mix(in srgb, var(--aurora-blob-b) 60%, var(--aurora-surface-alt) 40%) 0%, transparent 60%);
+    animation-duration: calc(var(--aurora-speed) * 1.55);
+    animation-delay: -12s;
+    opacity: calc(0.72 * var(--aurora-intensity));
+  }
+
+  .aurora-gradient--front {
+    inset: -14%;
+    background:
+      radial-gradient(circle at 10% 42%, color-mix(in srgb, var(--aurora-blob-b) 75%, var(--aurora-blob-a) 25%) 0%, transparent 54%),
+      radial-gradient(circle at 90% 48%, color-mix(in srgb, var(--aurora-blob-a) 70%, var(--aurora-blob-d) 30%) 0%, transparent 52%),
+      radial-gradient(circle at 48% 8%, color-mix(in srgb, var(--aurora-blob-d) 80%, var(--aurora-surface) 20%) 0%, transparent 52%);
+    animation-duration: calc(var(--aurora-speed) * 1.9);
+    animation-delay: -18s;
+    opacity: calc(0.6 * var(--aurora-intensity));
+  }
+
+  .aurora-noise {
+    position: absolute;
+    inset: -2%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
+    mix-blend-mode: soft-light;
+    opacity: calc(var(--aurora-noise-opacity) * var(--aurora-intensity));
+    transform: translateZ(0);
+  }
+
+  @keyframes aurora-shift {
+    0% {
+      transform: translate3d(-6%, -4%, 0) scale(1.06) rotate(-1deg);
+    }
+    50% {
+      transform: translate3d(5%, 3%, 0) scale(1.12) rotate(1deg);
+    }
+    100% {
+      transform: translate3d(6%, -5%, 0) scale(1.08) rotate(-0.5deg);
+    }
+  }
+  
   *::selection {
     background-color: transparent;
     color: inherit;
@@ -98,6 +183,29 @@
     --motion-duration-slow: 0ms;
     --missions-market-flip-duration: 0ms;
   }
+
+  .aurora-gradient {
+    animation: none;
+    transform: none;
+  }
+}
+
+:root {
+  --aurora-surface: var(--color-surface, #0f172a);
+  --aurora-surface-alt: var(--color-surface-muted, #111c33);
+  --aurora-blob-a: color-mix(in srgb, var(--color-accent-secondary, #8b5cf6) 72%, var(--color-surface, #0f172a) 28%);
+  --aurora-blob-b: color-mix(in srgb, var(--color-accent-primary, #38bdf8) 70%, var(--color-surface, #0f172a) 30%);
+  --aurora-blob-c: color-mix(in srgb, var(--color-text-subtle, #94a3b8) 65%, var(--color-surface-alt, #111c33) 35%);
+  --aurora-blob-d: color-mix(in srgb, var(--color-text, #f8fafc) 45%, var(--color-surface, #0f172a) 55%);
+}
+
+:root[data-theme='light'] {
+  --aurora-surface: var(--color-surface, #f8fafc);
+  --aurora-surface-alt: var(--color-surface-muted, #e2e8f0);
+  --aurora-blob-a: color-mix(in srgb, var(--color-accent-secondary, #0ea5e9) 70%, var(--color-surface, #f8fafc) 30%);
+  --aurora-blob-b: color-mix(in srgb, var(--color-accent-primary, #2563eb) 68%, var(--color-surface, #f8fafc) 32%);
+  --aurora-blob-c: color-mix(in srgb, var(--color-text-subtle, #475569) 50%, var(--color-surface-alt, #e2e8f0) 50%);
+  --aurora-blob-d: color-mix(in srgb, var(--color-text, #0f172a) 38%, var(--color-surface, #f8fafc) 62%);
 }
 
 @property --glow-angle {

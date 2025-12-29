@@ -1,14 +1,14 @@
 .landing-v2 {
   --font-heading: 'Sora', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   --font-body: 'Manrope', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  --bg: #0f172a;
-  --bg-2: #111c33;
-  --card: #182640;
-  --ink: #f8fafc;
-  --muted: #94a3b8;
-  --accent: #8b5cf6;
-  --accent-2: #38bdf8;
-  --line: rgba(148, 163, 184, 0.18);
+  --bg: var(--color-surface);
+  --bg-2: var(--color-surface-muted);
+  --card: var(--color-surface-elevated);
+  --ink: var(--color-text);
+  --muted: var(--color-text-subtle);
+  --accent: var(--color-accent-secondary);
+  --accent-2: var(--color-accent-primary);
+  --line: color-mix(in srgb, var(--color-text-subtle) 18%, transparent);
   --low: #fb7185;
   --chill: #34d399;
   --flow: #38bdf8;
@@ -19,6 +19,10 @@
   background: var(--bg);
   font-family: var(--font-body);
   overflow-x: hidden;
+}
+
+:root[data-theme='light'] .landing-v2 {
+  --line: color-mix(in srgb, var(--color-text-subtle) 20%, transparent);
 }
 
 .landing-v2 > * {
@@ -155,6 +159,35 @@
   padding: clamp(52px, 7vw, 96px) 0 44px;
   position: relative;
   overflow: hidden;
+}
+
+.lv2-hero-aurora {
+  --aurora-blur: clamp(120px, 20vw, 240px);
+  --aurora-speed: 54s;
+  --aurora-intensity: 1;
+}
+
+.lv2-hero-aurora .aurora-surface {
+  inset: -8%;
+  background:
+    radial-gradient(120% 120% at 52% 16%, color-mix(in srgb, var(--aurora-surface) 85%, transparent) 0%, transparent 62%),
+    linear-gradient(180deg, color-mix(in srgb, var(--aurora-surface) 92%, transparent) 0%, color-mix(in srgb, var(--aurora-surface-alt) 88%, transparent) 80%);
+}
+
+.lv2-hero-aurora .aurora-surface::after {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(120% 120% at 50% 46%, rgba(0, 0, 0, 0.26), transparent 58%, rgba(0, 0, 0, 0.34) 92%);
+  mix-blend-mode: soft-light;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+:root[data-theme='light'] .lv2-hero-aurora .aurora-surface::after {
+  background: radial-gradient(120% 120% at 50% 50%, rgba(255, 255, 255, 0.46), transparent 60%, rgba(255, 255, 255, 0.2) 94%);
+  mix-blend-mode: screen;
+  opacity: 0.35;
 }
 
 .lv2-hero-grid {
