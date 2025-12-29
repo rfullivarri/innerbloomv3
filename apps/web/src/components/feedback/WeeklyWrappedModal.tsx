@@ -297,6 +297,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
                 completions,
                 xpTotal,
                 pillar: pillarDominant,
+                pillarStats: payload.summary.pillarDominantStats ?? null,
               }}
               entered={entered}
               index={0}
@@ -504,15 +505,23 @@ function WeeklyKPIHighlight({
   completions,
   xpTotal,
   pillar,
+  pillarStats,
 }: {
   completions: number;
   xpTotal: number;
   pillar: string | null;
+  pillarStats: { xp: number; completions: number } | null;
 }) {
   const formatter = new Intl.NumberFormat('es-AR');
   const pillarLabel = pillar ?? 'modo mixto';
   const pillarIcon = pillar ? getPillarIcon(pillar) : '🫀';
-  const pillarNarrative = `Tu energía se movió principalmente en ${pillarLabel}.`;
+  const pillarNarrative =
+    pillarLabel === 'modo mixto'
+      ? 'Tu energía se movió principalmente en modo mixto.'
+      : `Tu energía se movió principalmente en el pilar ${pillarLabel}.`;
+  const pillarStatsDetail = pillarStats
+    ? `Últimos 7 días: ${formatter.format(pillarStats.xp)} XP · ${formatter.format(pillarStats.completions)} tareas.`
+    : null;
 
   return (
     <div className="space-y-4">
@@ -524,6 +533,9 @@ function WeeklyKPIHighlight({
           <div className="space-y-1">
             <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-100">Pilar dominante</p>
             <p className="text-base font-semibold leading-snug text-slate-50 sm:text-lg">{pillarNarrative}</p>
+            {pillarStatsDetail ? (
+              <p className="text-sm text-emerald-50/90 sm:text-base">{pillarStatsDetail}</p>
+            ) : null}
           </div>
         </div>
       </div>

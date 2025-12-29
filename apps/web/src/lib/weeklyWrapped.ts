@@ -59,6 +59,10 @@ export type WeeklyWrappedPayload = {
   lastActivityAt?: string | null;
   summary: {
     pillarDominant: string | null;
+    pillarDominantStats?: {
+      xp: number;
+      completions: number;
+    } | null;
     highlight: string | null;
     completions: number;
     xpTotal: number;
@@ -567,6 +571,7 @@ export async function buildWeeklyWrappedFromData(
   })();
   const constancyHabitsWithInsights = await hydrateHabitsWithTaskInsights(constancyHabits);
   const pillarDominant = dominantPillar(insights) ?? null;
+  const pillarDominantStats = computePillarDominantStats(weeklyLogs, pillarDominant);
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
   const highlight = effortBalance.topTask?.title ?? constancyHabitsWithInsights[0]?.title ?? null;
   const energyHighlight = computeEnergyHighlight(insights, pillarDominant, dailyEnergy);
@@ -695,7 +700,15 @@ export async function buildWeeklyWrappedFromData(
     dataSource: 'real',
     variant,
     weekRange: { start: startDate.toISOString(), end: endDate.toISOString() },
-    summary: { pillarDominant, highlight, completions, xpTotal, energyHighlight, effortBalance },
+    summary: {
+      pillarDominant,
+      pillarDominantStats,
+      highlight,
+      completions,
+      xpTotal,
+      energyHighlight,
+      effortBalance,
+    },
     emotions: emotionHighlight,
     levelUp,
     sections,
@@ -778,6 +791,26 @@ function dominantPillar(insights: AdminInsights): string | undefined {
     return undefined;
   }
   return top.code;
+}
+
+function computePillarDominantStats(
+  logs: NormalizedLog[],
+  pillarDominant: string | null,
+): { xp: number; completions: number } | null {
+  const normalized = normalizePillarCode(pillarDominant);
+  if (!normalized) {
+    return null;
+  }
+
+  return logs
+    .filter((log) => log.state !== 'red' && normalizePillarCode(log.pillar) === normalized)
+    .reduce(
+      (acc, log) => ({
+        xp: acc.xp + Math.max(0, Number(log.xp ?? 0)),
+        completions: acc.completions + log.quantity,
+      }),
+      { xp: 0, completions: 0 },
+    );
 }
 
 function getPillarIcon(pillar: string): string {
@@ -928,6 +961,7 @@ function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayloa
     weekRange: { start: start.toISOString(), end: end.toISOString() },
     summary: {
       pillarDominant: 'Mind',
+      pillarDominantStats: { xp: 180, completions: 2 },
       highlight: 'Meditación al amanecer',
       completions: 3,
       xpTotal: 320,
