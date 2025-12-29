@@ -424,7 +424,7 @@ type SectionBlockProps = {
   description?: string;
   kicker?: string;
   highlightText?: string;
-  stats?: { completions: number; xpTotal: number; pillar: string | null };
+  stats?: { completions: number; xpTotal: number; pillar: string | null; pillarStats: { xp: number; completions: number } | null };
   entered: boolean;
   index: number;
   active?: boolean;
@@ -485,7 +485,12 @@ function SectionBlock({
 
           <div className="flex flex-1 flex-col justify-start gap-4 pt-2 text-lg leading-relaxed text-slate-100">
             {stats ? (
-              <WeeklyKPIHighlight completions={stats.completions} xpTotal={stats.xpTotal} pillar={stats.pillar} />
+              <WeeklyKPIHighlight
+                completions={stats.completions}
+                xpTotal={stats.xpTotal}
+                pillar={stats.pillar}
+                pillarStats={stats.pillarStats}
+              />
             ) : (
               <>
               {kicker ? <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">{kicker}</p> : null}
