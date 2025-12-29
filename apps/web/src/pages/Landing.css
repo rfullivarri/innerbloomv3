@@ -183,57 +183,6 @@
   opacity: 1;
 }
 
-.landing .journey-button {
-  position: relative;
-  isolation: isolate;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: rgba(15, 23, 42, 0.72);
-  color: #fff;
-  box-shadow:
-    0 14px 30px rgba(15, 23, 42, 0.35),
-    0 8px 22px rgba(139, 92, 246, 0.35),
-    0 0 0 1px rgba(139, 92, 246, 0.4);
-  overflow: hidden;
-}
-
-.landing .journey-button::before {
-  content: '';
-  position: absolute;
-  inset: -120%;
-  border-radius: inherit;
-  background: conic-gradient(
-    from 120deg,
-    rgba(139, 92, 246, 0.8),
-    rgba(56, 189, 248, 0.7),
-    rgba(52, 211, 153, 0.55),
-    rgba(139, 92, 246, 0.85)
-  );
-  opacity: 0.75;
-  animation: journeySpin 8s linear infinite;
-  z-index: -2;
-}
-
-.landing .journey-button::after {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  border-radius: inherit;
-  background: linear-gradient(140deg, rgba(139, 92, 246, 0.25), rgba(56, 189, 248, 0.12));
-  z-index: -1;
-}
-
-.landing .journey-button:hover {
-  box-shadow:
-    0 16px 36px rgba(15, 23, 42, 0.4),
-    0 12px 28px rgba(139, 92, 246, 0.5),
-    0 0 0 1px rgba(56, 189, 248, 0.55);
-  transform: translateY(-1px);
-}
-
-.landing .journey-button:active {
-  transform: translateY(0);
-}
-
 .landing .hero {
   position: relative;
 }
@@ -585,15 +534,6 @@
     background-position: 52% 14%, 46% 90%, 64% 44%, 36% 60%;
     opacity: 0.74;
     transform: scale(1.01);
-  }
-}
-
-@keyframes journeySpin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
   }
 }
 
