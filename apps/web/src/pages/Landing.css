@@ -43,7 +43,7 @@
   will-change: transform, background-position;
   mix-blend-mode: screen;
   /* Ajustá velocidad con la duración de meshFloat y blur con el filtro. */
-  animation: meshFloat 28s ease-in-out infinite;
+  animation: meshFloat 16s ease-in-out infinite;
 }
 
 .landing::after {
@@ -60,7 +60,7 @@
   background-repeat: no-repeat;
   opacity: 0.75;
   will-change: transform, opacity, background-position;
-  animation: meshDrift 34s ease-in-out infinite;
+  animation: meshDrift 22s ease-in-out infinite;
 }
 
 .landing > * {
@@ -548,33 +548,33 @@
 @keyframes meshFloat {
   0% {
     background-position: 12% 12%, 84% 16%, 16% 82%, 78% 76%;
-    transform: scale(1.02) translate3d(0, 0, 0);
+    transform: scale(1.04) translate3d(0, 0, 0);
   }
   45% {
-    background-position: 22% 22%, 76% 10%, 20% 70%, 70% 82%;
-    transform: scale(1.1) translate3d(0, -4.5%, 0);
+    background-position: 28% 26%, 70% 6%, 24% 66%, 66% 88%;
+    transform: scale(1.16) translate3d(0, -8%, 0);
   }
   100% {
-    background-position: 8% 16%, 90% 20%, 12% 78%, 82% 68%;
-    transform: scale(1.06) translate3d(0, 3.5%, 0);
+    background-position: 4% 22%, 94% 26%, 10% 86%, 88% 62%;
+    transform: scale(1.12) translate3d(0, 6%, 0);
   }
 }
 
 @keyframes meshDrift {
   0% {
     background-position: 50% 12%, 50% 92%, 68% 40%, 32% 56%;
-    opacity: 0.68;
-    transform: scale(1);
+    opacity: 0.65;
+    transform: scale(1.02);
   }
   50% {
-    background-position: 48% 18%, 54% 86%, 72% 46%, 26% 52%;
-    opacity: 0.88;
-    transform: scale(1.08);
+    background-position: 42% 24%, 60% 82%, 76% 52%, 22% 46%;
+    opacity: 0.92;
+    transform: scale(1.14);
   }
   100% {
-    background-position: 52% 14%, 46% 90%, 64% 44%, 36% 60%;
-    opacity: 0.78;
-    transform: scale(1.04);
+    background-position: 56% 18%, 40% 92%, 60% 48%, 40% 64%;
+    opacity: 0.8;
+    transform: scale(1.1);
   }
 }
 
