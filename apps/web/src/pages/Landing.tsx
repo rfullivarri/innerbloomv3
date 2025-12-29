@@ -293,7 +293,7 @@ export default function LandingPage() {
                 </article>
               ))}
             </div>
-            <p className="section-sub" style={{ marginTop: 24 }}>
+            <p className="section-sub highlight">
               Observate por primera vez en tercera persona y toma el control de tus acciones y hábitos.
             </p>
           </div>
