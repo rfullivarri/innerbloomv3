@@ -23,6 +23,7 @@ export type WeeklyWrappedPayload = {
   dataSource: 'real' | 'mock';
   variant: 'full' | 'light';
   weekRange: { start: string; end: string };
+  lastActivityAt?: string | null;
   summary: {
     pillarDominant: string | null;
     highlight: string | null;

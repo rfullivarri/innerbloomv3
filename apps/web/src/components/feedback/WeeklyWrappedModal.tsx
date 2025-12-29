@@ -204,7 +204,10 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
   const progressIndex = habitsStartIndex + 1;
   const emotionIndex = progressIndex + 1;
   const closingIndex = emotionIndex + 1;
-  const referenceDate = useMemo(() => new Date(payload.weekRange?.end ?? Date.now()), [payload.weekRange?.end]);
+  const referenceDate = useMemo(
+    () => new Date(payload.lastActivityAt ?? payload.weekRange?.end ?? Date.now()),
+    [payload.lastActivityAt, payload.weekRange?.end],
+  );
 
   const summaryChips: SectionBadge[] = useMemo(
     () =>
