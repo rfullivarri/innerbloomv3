@@ -64,8 +64,8 @@ const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
     label: 'Felicidad',
     tone: 'positiva',
     color: EMOTION_COLORS.felicidad,
-    weeklyMessage: 'La alegría lideró tu semana. Anotá qué la impulsó y repetilo.',
-    biweeklyContext: 'En las últimas dos semanas tu energía se mantuvo luminosa. Aprovechá ese envión.',
+    weeklyMessage: 'La alegría lideró tus últimos 7 días. Anotá qué la impulsó y repetilo.',
+    biweeklyContext: 'En los últimos 15 días tu energía se mantuvo luminosa. Aprovechá ese envión.',
   },
   motivacion: {
     key: 'motivacion',
@@ -81,7 +81,7 @@ const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
     tone: 'neutral',
     color: EMOTION_COLORS.calma,
     weeklyMessage: 'Predominó la calma. Protegé los espacios que la generaron.',
-    biweeklyContext: 'Dos semanas con aire liviano. Podés sumar pequeños retos sin perder serenidad.',
+    biweeklyContext: '15 días con aire liviano. Podés sumar pequeños retos sin perder serenidad.',
   },
   cansancio: {
     key: 'cansancio',
@@ -113,7 +113,7 @@ const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
     tone: 'desafiante',
     color: EMOTION_COLORS.frustracion,
     weeklyMessage: 'La frustración dijo presente. Reconocé el avance mínimo y volvé a intentar.',
-    biweeklyContext: 'Varias señales de freno estas dos semanas. Ajustá expectativas y buscá apoyo.',
+    biweeklyContext: 'Varias señales de freno en los últimos 15 días. Ajustá expectativas y buscá apoyo.',
   },
 };
 
@@ -168,11 +168,9 @@ const WEEKLY_WRAPPED_DEBUG_USERS = new Set(
 
 export function resolveWeekRange(referenceDate: string): { start: string; end: string } {
   const parsed = parseDate(referenceDate);
-  const sunday = startOfDay(parsed);
-  sunday.setUTCDate(sunday.getUTCDate() - sunday.getUTCDay());
-  const start = startOfDay(new Date(sunday));
-  start.setUTCDate(sunday.getUTCDate() - 6);
-  return { start: toDateKey(start), end: toDateKey(sunday) };
+  const end = startOfDay(parsed);
+  const start = daysAgoFrom(end, 6);
+  return { start: toDateKey(start), end: toDateKey(end) };
 }
 
 function parseDate(input: string): Date {
@@ -347,10 +345,10 @@ async function buildWeeklyWrappedPayload(
   const emotionHighlight = buildEmotionHighlight(emotions);
   const weeklyEmotionMessage =
     emotionHighlight.weekly?.weeklyMessage ??
-    'Necesitamos más registros recientes en el Emotion Chart para destacar tu ánimo de la semana.';
+    'Necesitamos más registros recientes en el Emotion Chart para destacar tu ánimo de los últimos 7 días.';
   const biweeklyEmotionMessage =
     emotionHighlight.biweekly?.biweeklyContext ??
-    'En cuanto registremos más emociones, vamos a mostrar la tendencia de las últimas dos semanas.';
+    'En cuanto registremos más emociones, vamos a mostrar la tendencia de los últimos 15 días.';
   const emotionAccent = emotionHighlight.weekly?.label ?? emotionHighlight.biweekly?.label ?? 'Sin emoción dominante';
 
   const sections: WeeklyWrappedSection[] = (
@@ -358,33 +356,33 @@ async function buildWeeklyWrappedPayload(
       {
         key: 'intro',
         title: 'Weekly Wrapped',
-        body: 'Tu semana, en movimiento.',
-        accent: `Semana ${formatDate(startDate)} – ${formatDate(endDate)}`,
+        body: 'Tus últimos 7 días, en movimiento.',
+        accent: `Últimos 7 días · ${formatDate(startDate)} – ${formatDate(endDate)}`,
       },
       levelUp.happened
         ? {
             key: 'level-up',
             title: 'Subida de nivel',
-            body: `Llegaste al nivel ${levelUp.currentLevel ?? 'nuevo'}. Impulso real para tu semana.`,
+            body: `Llegaste al nivel ${levelUp.currentLevel ?? 'nuevo'}. Impulso real para tus últimos 7 días.`,
             accent: 'Level Up',
           }
         : null,
       {
         key: 'achievements',
-        title: 'Resumen semanal',
+        title: 'Resumen 7 días',
         body:
           completions > 0
-            ? `Completaste ${completions} tareas y sumaste ${xpTotal.toLocaleString('es-AR')} XP esta semana.`
-            : 'Semana tranquila: sin registros fuertes, pero el reset también suma.',
-        accent: completions > 0 ? 'Datos reales' : 'Semana liviana',
+            ? `Completaste ${completions} tareas y sumaste ${xpTotal.toLocaleString('es-AR')} XP en los últimos 7 días.`
+            : 'Últimos 7 días tranquilos: sin registros fuertes, pero el reset también suma.',
+        accent: completions > 0 ? 'Datos reales' : '7 días livianos',
       },
       {
         key: 'habits',
         title: 'Ritmo que se sostiene',
         body:
           topHabits.length > 0
-            ? 'Estos hábitos aparecieron de forma consistente y mantuvieron tu semana en movimiento.'
-            : 'Aún no registramos hábitos destacados esta semana, pero estás a un clic de retomarlos.',
+            ? 'Estos hábitos aparecieron de forma consistente y mantuvieron tus últimos 7 días en movimiento.'
+            : 'Aún no registramos hábitos destacados en los últimos 7 días, pero estás a un clic de retomarlos.',
         items:
           topHabits.length > 0
             ? topHabits.map((habit) => ({
@@ -392,7 +390,7 @@ async function buildWeeklyWrappedPayload(
                 body:
                   habit.daysActive > 0
                     ? `${habit.daysActive}/7 días. Sostuviste el compromiso.`
-                    : 'Ritmo sólido esta semana. Constancia pura.',
+                    : 'Ritmo sólido en los últimos 7 días. Constancia pura.',
                 badge: habit.badge,
                 pillar: habit.pillar,
                 daysActive: habit.daysActive,
@@ -422,7 +420,7 @@ async function buildWeeklyWrappedPayload(
         body:
           pillarDominant
             ? `${getPillarIcon(pillarDominant)} ${pillarDominant} lideró tu energía estos días. Seguí apoyándote en ese foco.`
-            : 'Sin un pilar dominante esta semana: espacio abierto para explorar Body, Mind o Soul.',
+            : 'Sin un pilar dominante en los últimos 7 días: espacio abierto para explorar Body, Mind o Soul.',
         accent: pillarDominant ?? 'Balanceado',
       },
       {

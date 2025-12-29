@@ -803,7 +803,7 @@ function UserNotificationsView() {
             <header className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Preview · Weekly Wrapped</p>
-                <h3 className="text-xl font-semibold text-slate-50">Testear narrativa semanal</h3>
+                <h3 className="text-xl font-semibold text-slate-50">Testear narrativa 7 días</h3>
                 <p className="text-xs text-slate-400">
                   Usa el usuario activo y elegí si querés datos reales (últimos 7 días) o mock. No persiste métricas ni consumed.
                 </p>
@@ -811,7 +811,9 @@ function UserNotificationsView() {
               <div className="text-right text-xs text-slate-400">
                 <p>Fuente: {weeklyPreviewSource === 'real' ? 'Datos reales' : 'Mock'}</p>
                 {weeklyPreviewPayload ? (
-                  <p className="text-emerald-200">Último preview: {weeklyPreviewPayload.variant === 'light' ? 'Semana liviana' : 'Completa'}</p>
+                  <p className="text-emerald-200">
+                    Último preview: {weeklyPreviewPayload.variant === 'light' ? '7 días livianos' : 'Completa'}
+                  </p>
                 ) : null}
               </div>
             </header>
@@ -833,7 +835,7 @@ function UserNotificationsView() {
                     onChange={(event) => setWeeklyPreviewSource(event.target.value as 'real' | 'mock')}
                     className="mt-1 w-full rounded-lg border border-slate-700/60 bg-slate-900 px-3 py-2 text-sm text-slate-100"
                   >
-                    <option value="real">Real (última semana)</option>
+                    <option value="real">Real (últimos 7 días)</option>
                     <option value="mock">Mock</option>
                   </select>
                 </label>
