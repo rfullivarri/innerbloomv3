@@ -343,6 +343,7 @@ async function buildWeeklyWrappedPayload(
   });
   const variant: WeeklyWrappedPayload['variant'] = completions >= 3 ? 'full' : 'light';
   const highlight = effortBalance.topTask?.title ?? topHabits[0]?.title ?? null;
+  const energyHighlight = computeEnergyHighlight(insights, pillarDominant, dailyEnergy);
   const emotionHighlight = buildEmotionHighlight(emotions);
   const weeklyEmotionMessage =
     emotionHighlight.weekly?.weeklyMessage ??
@@ -458,7 +459,14 @@ async function buildWeeklyWrappedPayload(
     dataSource: 'real',
     variant,
     weekRange: { start: startDate.toISOString(), end: endDate.toISOString() },
-    summary: { pillarDominant, highlight, completions, xpTotal, effortBalance: effortBalance.total ? effortBalance : null },
+    summary: {
+      pillarDominant,
+      highlight,
+      completions,
+      xpTotal,
+      energyHighlight,
+      effortBalance: effortBalance.total ? effortBalance : null,
+    },
     emotions: emotionHighlight,
     levelUp,
     sections,
