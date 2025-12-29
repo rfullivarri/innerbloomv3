@@ -282,7 +282,7 @@ const buttonBaseClasses =
 
 const buttonVariants = {
   primary: `${buttonBaseClasses} bg-accent-purple text-white shadow-glow hover:bg-accent-purple/90`,
-  ghost: `${buttonBaseClasses} border border-white/20 bg-white/5 text-text-subtle hover:bg-white/10 hover:text-white`
+  ghost: `${buttonBaseClasses} border border-transparent bg-transparent text-text-subtle hover:bg-white/10 hover:text-white`
 };
 
 const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => buttonVariants[variant];
