@@ -1,9 +1,3 @@
-@property --gradient-angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 120deg;
-}
-
 .landing {
   --font-heading: 'Sora', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   --font-body: 'Manrope', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
@@ -38,21 +32,18 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(1200px 780px at 12% 8%, var(--glow-1), transparent 72%) no-repeat,
-    radial-gradient(960px 680px at 88% 6%, var(--glow-2), transparent 70%) no-repeat,
-    conic-gradient(from 120deg at 50% 40%, rgba(139, 92, 246, 0.16), rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.75), rgba(56, 189, 248, 0.18), rgba(139, 92, 246, 0.2));
-  background:
-    radial-gradient(1200px 780px at 12% 8%, color-mix(in srgb, var(--glow-1) 68%, transparent), transparent 72%) no-repeat,
-    radial-gradient(960px 680px at 88% 6%, color-mix(in srgb, var(--glow-2) 64%, transparent), transparent 70%) no-repeat,
-    conic-gradient(from var(--gradient-angle, 120deg) at 50% 40%, rgba(139, 92, 246, 0.16), rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.75), rgba(56, 189, 248, 0.18), rgba(139, 92, 246, 0.2));
-  background-position: 12% 8%, 88% 6%, center;
-  background-size: 1400px 900px, 1320px 900px, 220% 220%;
+    radial-gradient(55% 50% at 12% 12%, color-mix(in srgb, var(--accent) 62%, transparent), transparent 70%),
+    radial-gradient(48% 45% at 84% 16%, color-mix(in srgb, var(--accent-2) 58%, transparent), transparent 68%),
+    radial-gradient(44% 40% at 16% 82%, color-mix(in srgb, var(--glow-1) 60%, transparent), transparent 70%),
+    radial-gradient(58% 52% at 78% 76%, color-mix(in srgb, var(--glow-2) 62%, transparent), transparent 72%);
+  background-repeat: no-repeat;
   transform: translateZ(0);
-  filter: saturate(1.12) blur(0.4px);
-  will-change: transform, background-position, background-size;
+  filter: blur(56px) saturate(1.18);
+  opacity: 0.9;
+  will-change: transform, background-position;
   mix-blend-mode: screen;
-  animation: auroraDrift 26s ease-in-out infinite alternate,
-    auroraRotate 48s linear infinite;
+  /* Ajustá velocidad con la duración de meshFloat y blur con el filtro. */
+  animation: meshFloat 52s ease-in-out infinite;
 }
 
 .landing::after {
@@ -62,17 +53,14 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(820px 520px at 50% 18%, rgba(148, 163, 255, 0.22), transparent 65%) no-repeat,
-    radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.28) 0, transparent 65%),
-    radial-gradient(1.5px 1.5px at 70% 62%, rgba(148, 163, 255, 0.2) 0, transparent 70%),
-    radial-gradient(900px 640px at 62% 80%, rgba(139, 92, 246, 0.25), transparent 70%) no-repeat;
-  background-repeat: no-repeat, repeat, repeat, no-repeat;
-  background-size: 100% 100%, 420px 420px, 560px 560px, 1200px 820px;
-  mix-blend-mode: screen;
-  will-change: transform, opacity, background-position, background-size;
-  animation: auroraPulse 12s ease-in-out infinite alternate,
-    starDrift 36s linear infinite,
-    auroraWave 32s ease-in-out infinite;
+    radial-gradient(60% 55% at 50% 12%, rgba(15, 23, 42, 0.55), transparent 70%),
+    radial-gradient(80% 70% at 50% 92%, rgba(15, 23, 42, 0.7), transparent 75%),
+    radial-gradient(36% 32% at 68% 40%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 70%),
+    radial-gradient(32% 36% at 32% 56%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 68%);
+  background-repeat: no-repeat;
+  opacity: 0.75;
+  will-change: transform, opacity, background-position;
+  animation: meshDrift 64s ease-in-out infinite;
 }
 
 .landing > * {
@@ -516,77 +504,36 @@
   color: #fff;
 }
 
-@keyframes auroraDrift {
+@keyframes meshFloat {
   0% {
-    background-position: 12% 8%, 88% 6%, center;
-    background-size: 1200px 820px, 1280px 960px, 180% 180%;
+    background-position: 12% 12%, 84% 16%, 16% 82%, 78% 76%;
     transform: scale(1.02) translate3d(0, 0, 0);
   }
-  50% {
-    background-position: 18% 16%, 80% 12%, center;
-    background-size: 1340px 900px, 1320px 940px, 192% 192%;
-    transform: scale(1.05) translate3d(0, -1.5%, 0);
+  45% {
+    background-position: 22% 22%, 76% 10%, 20% 70%, 70% 82%;
+    transform: scale(1.06) translate3d(0, -1.8%, 0);
   }
   100% {
-    background-position: 8% 10%, 92% 4%, center;
-    background-size: 1180px 800px, 1360px 980px, 176% 176%;
-    transform: scale(1.01) translate3d(0, 1%, 0);
+    background-position: 8% 16%, 90% 20%, 12% 78%, 82% 68%;
+    transform: scale(1.03) translate3d(0, 1.2%, 0);
   }
 }
 
-@keyframes auroraRotate {
+@keyframes meshDrift {
   0% {
-    --gradient-angle: 60deg;
-  }
-  50% {
-    --gradient-angle: 320deg;
-  }
-  100% {
-    --gradient-angle: 420deg;
-  }
-}
-
-@keyframes starDrift {
-  0% {
-    background-position: center, 0 0, 38% 58%;
-  }
-  100% {
-    background-position: center, -420px 320px, 60% 32%;
-  }
-}
-
-@keyframes auroraWave {
-  0% {
-    background-position: 50% 18%, 0 0, 38% 58%, 62% 80%;
-    background-size: 100% 100%, 420px 420px, 560px 560px, 1200px 820px;
-    opacity: 0.6;
-  }
-  40% {
-    background-position: 48% 20%, -160px 180px, 52% 44%, 58% 74%;
-    background-size: 104% 104%, 430px 430px, 600px 600px, 1260px 880px;
-    opacity: 0.78;
-  }
-  70% {
-    background-position: 54% 16%, -220px -140px, 60% 36%, 66% 86%;
-    background-size: 102% 102%, 410px 410px, 540px 540px, 1180px 840px;
-    opacity: 0.72;
-  }
-  100% {
-    background-position: 50% 18%, 0 0, 38% 58%, 62% 80%;
-    background-size: 100% 100%, 420px 420px, 560px 560px, 1200px 820px;
-    opacity: 0.6;
-  }
-}
-
-@keyframes auroraPulse {
-  0%,
-  100% {
-    opacity: 0.55;
+    background-position: 50% 12%, 50% 92%, 68% 40%, 32% 56%;
+    opacity: 0.68;
     transform: scale(1);
   }
   50% {
-    opacity: 0.85;
-    transform: scale(1.05);
+    background-position: 48% 18%, 54% 86%, 72% 46%, 26% 52%;
+    opacity: 0.82;
+    transform: scale(1.04);
+  }
+  100% {
+    background-position: 52% 14%, 46% 90%, 64% 44%, 36% 60%;
+    opacity: 0.74;
+    transform: scale(1.01);
   }
 }
 
