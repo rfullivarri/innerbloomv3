@@ -467,10 +467,10 @@ export default function LandingPage() {
             </Link>
           ) : (
             <>
-              <Link className={buttonClasses('ghost')} to="/sign-up">
+              <Link className={`${buttonClasses('ghost')} nav-auth-button`} to="/sign-up">
                 {copy.auth.signup}
               </Link>
-              <Link className={buttonClasses()} to="/login">
+              <Link className={`${buttonClasses()} nav-auth-button`} to="/login">
                 {copy.auth.login}
               </Link>
             </>

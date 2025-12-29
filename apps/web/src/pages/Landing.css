@@ -753,6 +753,11 @@
     gap: 8px;
   }
 
+  .landing .nav-actions .nav-auth-button {
+    font-size: 0.625rem;
+    padding: 0.525rem 1.05rem;
+  }
+
   .landing .lang-button {
     font-size: 9px;
     padding: 4px 6px;
