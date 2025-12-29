@@ -177,6 +177,8 @@
 
 .lv2-hero {
   padding: clamp(52px, 7vw, 96px) 0 44px;
+  position: relative;
+  overflow: hidden;
 }
 
 .lv2-hero-grid {
@@ -184,6 +186,8 @@
   grid-template-columns: 1.05fr 1.2fr;
   gap: 24px;
   align-items: start;
+  position: relative;
+  z-index: 1;
 }
 
 .lv2-dashboard-grid {
