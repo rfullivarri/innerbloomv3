@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { FeatureShowcaseSection } from '../components/landing/FeatureShowcaseSection';
@@ -304,14 +304,62 @@ const buttonVariants = {
 const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => buttonVariants[variant];
 
 function LanguageDropdown({ value, onChange }: { value: Language; onChange: (language: Language) => void }) {
+  const options: { code: Language; label: string }[] = [
+    { code: 'en', label: 'EN' },
+    { code: 'es', label: 'ES' }
+  ];
+
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const currentOption = options.find((option) => option.code === value) ?? options[0];
+
+  function handleSelect(language: Language) {
+    onChange(language);
+    setIsOpen(false);
+  }
+
   return (
-    <label className="lang-select">
-      <span className="visually-hidden">Language selector</span>
-      <select value={value} onChange={(event) => onChange(event.target.value as Language)} aria-label="Language selector">
-        <option value="es">ES</option>
-        <option value="en">EN</option>
-      </select>
-    </label>
+    <div ref={dropdownRef} className="lang-toggle" role="group" aria-label="Language selector">
+      <button
+        type="button"
+        className="lang-button"
+        onClick={() => setIsOpen((open) => !open)}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <span className="lang-button-label">{currentOption.label}</span>
+        <span className="lang-caret" aria-hidden>
+          ▾
+        </span>
+      </button>
+
+      <div className="lang-menu" role="listbox" hidden={!isOpen}>
+        {options.map((option) => (
+          <button
+            key={option.code}
+            type="button"
+            role="option"
+            aria-selected={value === option.code}
+            className={value === option.code ? 'active' : ''}
+            onClick={() => handleSelect(option.code)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -411,7 +459,7 @@ export default function LandingPage() {
             </a>
           ))}
         </nav>
-        <nav className="flex flex-wrap items-center gap-2">
+        <div className="nav-actions">
           <LanguageDropdown value={language} onChange={setLanguage} />
           {isSignedIn ? (
             <Link className={buttonClasses()} to="/dashboard">
@@ -427,7 +475,7 @@ export default function LandingPage() {
               </Link>
             </>
           )}
-        </nav>
+        </div>
       </header>
 
       <main>

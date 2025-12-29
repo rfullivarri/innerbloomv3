@@ -130,10 +130,10 @@
   background: rgba(17, 28, 51, 0.78);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   padding: 12px 18px;
   position: sticky;
   top: 0;
@@ -165,8 +165,16 @@
 
 .landing .nav-links {
   display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  overflow-x: auto;
+  padding: 2px 0 4px;
+  scrollbar-width: none;
+  min-width: 0;
+}
+
+.landing .nav-links::-webkit-scrollbar {
+  display: none;
 }
 
 .landing .nav-links a {
@@ -175,47 +183,107 @@
   font-size: 14px;
   opacity: 0.9;
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.01em;
+  padding: 7px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
 
 .landing .nav-links a:hover {
   opacity: 1;
-}
-
-.landing .lang-select {
-  position: relative;
-}
-
-.landing .lang-select select {
-  appearance: none;
+  border-color: rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: #e5edff;
-  border-radius: 9999px;
-  padding: 6px 28px 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
+}
+
+.landing .nav-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+.landing .lang-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.landing .lang-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5f5;
+  font-weight: 800;
   letter-spacing: 0.06em;
-  outline: none;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
 }
 
-.landing .lang-select::after {
-  content: '▾';
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.6);
-  pointer-events: none;
-  font-size: 10px;
-}
-
-.landing .lang-select select:hover,
-.landing .lang-select select:focus-visible {
-  border-color: rgba(255, 255, 255, 0.35);
+.landing .lang-button:hover,
+.landing .lang-button:focus-visible {
+  color: #fff;
   background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.24);
+  outline: none;
+}
+
+.landing .lang-button-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.landing .lang-caret {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.landing .lang-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 112px;
+  padding: 6px;
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  display: grid;
+  gap: 2px;
+  z-index: 10;
+}
+
+.landing .lang-menu button {
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #cbd5f5;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.landing .lang-menu button:hover,
+.landing .lang-menu button:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  outline: none;
+}
+
+.landing .lang-menu button.active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(56, 189, 248, 0.32));
+  color: #fff;
 }
 
 .landing .hero {
@@ -657,10 +725,6 @@
   .landing .hero-media {
     margin: 0 auto;
   }
-
-  .landing .nav-links {
-    display: none;
-  }
 }
 
 @media (max-width: 768px) {
@@ -674,6 +738,27 @@
 }
 
 @media (max-width: 640px) {
+  .landing .nav {
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .landing .nav-links a {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  .landing .nav-actions {
+    gap: 8px;
+  }
+
+  .landing .lang-button {
+    font-size: 10px;
+    padding: 5px 8px;
+    gap: 4px;
+  }
+
   .landing .grid-3,
   .landing .grid-2 {
     grid-template-columns: 1fr;
