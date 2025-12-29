@@ -4,6 +4,295 @@ import { useAuth } from '@clerk/clerk-react';
 import { FeatureShowcaseSection } from '../components/landing/FeatureShowcaseSection';
 import './Landing.css';
 
+type Language = 'es' | 'en';
+type NavLink = { href: string; label: string };
+type Pillar = { emoji: string; title: string; copy: string };
+type Mode = { id: 'low' | 'chill' | 'flow' | 'evolve'; title: string; state: string; goal: string };
+type HowStep = { title: string; copy: string };
+type Testimonial = { quote: string; author: string };
+type Faq = { question: string; answer: string };
+type AuthCopy = {
+  dashboard: string;
+  signup: string;
+  login: string;
+  startJourney: string;
+};
+
+const content: Record<Language, {
+  navLinks: NavLink[];
+  hero: {
+    titleLead: string;
+    titleHighlight: string;
+    subtitle: string;
+    note: string;
+    alt: string;
+  };
+  pillars: { title: string; intro: string; highlight: string; items: Pillar[] };
+  modes: { title: string; intro: string; items: Mode[] };
+  how: { title: string; intro: string; steps: HowStep[] };
+  testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
+  faq: { title: string; items: Faq[] };
+  next: { title: string; intro: string };
+  auth: AuthCopy;
+  footer: { copyright: string; faq: string };
+}> = {
+  es: {
+    navLinks: [
+      { href: '#overview', label: 'Overview' },
+      { href: '#why', label: 'Nuestros Pilares' },
+      { href: '#modes', label: 'Modos' },
+      { href: '#how', label: 'Cómo funciona' },
+      { href: '#features', label: 'Features' },
+      { href: '#testimonials', label: 'Testimonios' },
+      { href: '#faq', label: 'FAQ' }
+    ],
+    hero: {
+      titleLead: 'Convierte la experiencia en hábitos.',
+      titleHighlight: 'Convierte los hábitos en camino',
+      subtitle:
+        'Tus hábitos son el mapa. Tu constancia, el nivel que alcanzas. Es tu self-improvement journey con equilibrio entre 🫀 Cuerpo, 🧠 Mente y 🏵️ Alma.',
+      note: 'En menos de 3 minutos generamos tu base personalizada con IA.',
+      alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
+    },
+    pillars: {
+      title: 'Nuestros pilares fundamentales',
+      intro:
+        'El progreso sostenible necesita equilibrio. 🫀 Cuerpo para la energía y la salud, 🧠 Mente para el foco y el aprendizaje, y 🏵️ Alma para el bienestar emocional y el sentido. Cuando uno cae, los otros dos lo sostienen. Cuando se alinean, tu progreso se acelera.',
+      highlight: 'Observate por primera vez en tercera persona y toma el control de tus acciones y hábitos.',
+      items: [
+        {
+          emoji: '🫀',
+          title: 'Cuerpo',
+          copy: 'Tu cuerpo es el sustrato del hábito: sueño, nutrición y movimiento marcan tu disponibilidad de energía diaria (HP).'
+        },
+        {
+          emoji: '🧠',
+          title: 'Mente',
+          copy: 'La mente filtra y prioriza. Sin foco, no hay consistencia. Diseñamos sesiones simples para sostener la atención, el aprendizaje y la creatividad.'
+        },
+        {
+          emoji: '🏵️',
+          title: 'Alma',
+          copy: 'Las emociones, los vínculos y el propósito estabilizan el sistema. Sin esto, los hábitos no atraviesan semanas ni meses.'
+        }
+      ]
+    },
+    modes: {
+      title: 'Modula tu modo de juego',
+      intro: 'Cambia según tu momento. El sistema se adapta a tu energía.',
+      items: [
+        {
+          id: 'low',
+          title: '🪫 LOW MOOD',
+          state: 'sin energía, abrumado.',
+          goal: 'activar tu mínimo vital con acciones pequeñas y sostenibles.'
+        },
+        {
+          id: 'chill',
+          title: '🍃 CHILL MOOD',
+          state: 'relajado y estable.',
+          goal: 'sostener bienestar con rutinas suaves y balanceadas.'
+        },
+        {
+          id: 'flow',
+          title: '🌊 FLOW MOOD',
+          state: 'enfocado y en movimiento.',
+          goal: 'aprovechar el impulso con un plan alineado a metas concretas.'
+        },
+        {
+          id: 'evolve',
+          title: '🧬 EVOLVE MOOD',
+          state: 'ambicioso y determinado.',
+          goal: 'sistema retador con Hábitos Atómicos, misiones y recompensas.'
+        }
+      ]
+    },
+    how: {
+      title: 'Cómo funciona',
+      intro: 'Un flujo claro, de la activación a la constancia.',
+      steps: [
+        {
+          title: 'Define tu camino',
+          copy: 'Responde una serie de preguntas, setea tu modo de juego; nosotros generaremos tu base (Body/Mind/Soul) con IA.'
+        },
+        { title: 'Activa tu base', copy: 'Recibís tu “pergamino digital” por mail y editás/confirmás tu base.' },
+        {
+          title: 'Daily Quest + Emociones',
+          copy: 'Con tu quest diaria vas a poder hacer una retrospectiva de tu día anterior; pensarás en qué emoción prevaleció más durante tu día.'
+        },
+        {
+          title: 'XP, Rachas y Recompensas',
+          copy: 'Seguís tu crecimiento acumulando experiencia (XP), moviendo tu constancia semanal, desafiándote a nuevas misiones y obteniendo recompensas.'
+        }
+      ]
+    },
+    testimonials: {
+      title: 'Testimonios',
+      intro: 'Lo que dicen quienes ya empezaron su Journey.',
+      items: [
+        { quote: '“Por primera vez sostuve hábitos 6 semanas. El mapa y las misiones me ordenaron.”', author: 'Lucía • Diseñadora' },
+        { quote: '“El heatmap emocional me cambió la mirada. Ajusto tareas por energía real.”', author: 'Diego • Dev' },
+        { quote: '“Empecé en Low y pasé a Flow con objetivos claros, sin culpa.”', author: 'Caro • Estudiante' }
+      ],
+      prev: 'Anterior',
+      next: 'Siguiente',
+      groupLabel: 'Seleccionar testimonio'
+    },
+    faq: {
+      title: 'Preguntas frecuentes',
+      items: [
+        {
+          question: '¿Necesito mucha disciplina para empezar?',
+          answer: 'No. Si estás con poca energía, empezás en Low para activar el mínimo vital. El sistema ajusta el ritmo.'
+        },
+        { question: '¿Puedo cambiar de modo de juego?', answer: 'Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento.' },
+        { question: '¿Dónde veo mis métricas?', answer: 'En tu archivo y en el Dashboard: XP, nivel, rachas y mapa emocional.' },
+        {
+          question: '¿Qué pasa si dejo de registrar?',
+          answer: 'No perdés progreso. Retomas cuando quieras y ajustamos objetivos a tu energía actual.'
+        }
+      ]
+    },
+    next: {
+      title: 'Listo para empezar',
+      intro: 'Te guiamos paso a paso. Empezá ahora.'
+    },
+    auth: {
+      dashboard: 'Ir al dashboard',
+      signup: 'Crear cuenta',
+      login: 'Iniciar sesión',
+      startJourney: 'Comenzar mi Journey'
+    },
+    footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
+  },
+  en: {
+    navLinks: [
+      { href: '#overview', label: 'Overview' },
+      { href: '#why', label: 'Our Pillars' },
+      { href: '#modes', label: 'Modes' },
+      { href: '#how', label: 'How it works' },
+      { href: '#features', label: 'Features' },
+      { href: '#testimonials', label: 'Testimonials' },
+      { href: '#faq', label: 'FAQ' }
+    ],
+    hero: {
+      titleLead: 'Turn experience into habits.',
+      titleHighlight: 'Turn habits into your path',
+      subtitle:
+        'Your habits are the map. Consistency is the level you reach. A self-improvement journey balanced between 🫀 Body, 🧠 Mind and 🏵️ Soul.',
+      note: 'In under 3 minutes we generate your personalized base with AI.',
+      alt: 'Kid looking at a violet energy sphere in the night sky — Gamification Journey'
+    },
+    pillars: {
+      title: 'Our core pillars',
+      intro:
+        'Sustainable progress needs balance. 🫀 Body for energy and health, 🧠 Mind for focus and learning, and 🏵️ Soul for emotional well-being and meaning. When one drops, the other two support it. When they align, your progress accelerates.',
+      highlight: 'See yourself in third person for the first time and take control of your actions and habits.',
+      items: [
+        {
+          emoji: '🫀',
+          title: 'Body',
+          copy: 'Your body is the substrate of the habit: sleep, nutrition and movement set your daily energy (HP).'
+        },
+        {
+          emoji: '🧠',
+          title: 'Mind',
+          copy: 'The mind filters and prioritizes. Without focus, there is no consistency. We design simple sessions to sustain attention, learning and creativity.'
+        },
+        {
+          emoji: '🏵️',
+          title: 'Soul',
+          copy: 'Emotions, relationships and purpose stabilize the system. Without them, habits don’t last weeks or months.'
+        }
+      ]
+    },
+    modes: {
+      title: 'Modulate your game mode',
+      intro: 'Switch based on your moment. The system adapts to your energy.',
+      items: [
+        {
+          id: 'low',
+          title: '🪫 LOW MOOD',
+          state: 'low energy, overwhelmed.',
+          goal: 'activate your vital minimum with small, sustainable actions.'
+        },
+        {
+          id: 'chill',
+          title: '🍃 CHILL MOOD',
+          state: 'relaxed and stable.',
+          goal: 'sustain well-being with smooth, balanced routines.'
+        },
+        {
+          id: 'flow',
+          title: '🌊 FLOW MOOD',
+          state: 'focused and moving.',
+          goal: 'leverage momentum with a plan aligned to concrete goals.'
+        },
+        {
+          id: 'evolve',
+          title: '🧬 EVOLVE MOOD',
+          state: 'ambitious and determined.',
+          goal: 'challenging system with Atomic Habits, missions and rewards.'
+        }
+      ]
+    },
+    how: {
+      title: 'How it works',
+      intro: 'A clear flow: from activation to consistency.',
+      steps: [
+        {
+          title: 'Define your path',
+          copy: 'Answer a few questions, set your game mode; we generate your Body/Mind/Soul base with AI.'
+        },
+        { title: 'Activate your base', copy: 'You receive your “digital scroll” by email and edit/confirm your base.' },
+        {
+          title: 'Daily Quest + Emotions',
+          copy: 'With your daily quest you can review yesterday and notice which emotion was most present.'
+        },
+        {
+          title: 'XP, Streaks and Rewards',
+          copy: 'Track growth by accumulating XP, moving your weekly consistency, challenging new missions and earning rewards.'
+        }
+      ]
+    },
+    testimonials: {
+      title: 'Testimonials',
+      intro: 'What people say after starting their Journey.',
+      items: [
+        { quote: '“First time keeping habits for 6 weeks. The map and missions kept me on track.”', author: 'Lucía • Designer' },
+        { quote: '“The emotion heatmap changed my view. I plan tasks around real energy.”', author: 'Diego • Dev' },
+        { quote: '“Started in Low and moved to Flow with clear goals, no guilt.”', author: 'Caro • Student' }
+      ],
+      prev: 'Previous',
+      next: 'Next',
+      groupLabel: 'Select testimonial'
+    },
+    faq: {
+      title: 'Frequently asked questions',
+      items: [
+        {
+          question: 'Do I need strong discipline to start?',
+          answer: 'No. If your energy is low, start in Low to activate the vital minimum. The system adjusts the pace.'
+        },
+        { question: 'Can I switch game modes?', answer: 'Yes. Swap between Low, Chill, Flow and Evolve whenever you need.' },
+        { question: 'Where do I see my metrics?', answer: 'In your file and dashboard: XP, level, streaks and emotion map.' },
+        { question: 'What happens if I stop logging?', answer: 'You do not lose progress. Resume anytime and we adjust goals to your current energy.' }
+      ]
+    },
+    next: {
+      title: 'Ready to start',
+      intro: 'We guide you step by step. Start now.'
+    },
+    auth: {
+      dashboard: 'Go to dashboard',
+      signup: 'Create account',
+      login: 'Log in',
+      startJourney: 'Start my Journey'
+    },
+    footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
+  }
+};
+
 const buttonBaseClasses =
   'inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-3 font-display text-sm font-semibold tracking-tight transition duration-150 ease-out active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
 
@@ -14,119 +303,27 @@ const buttonVariants = {
 
 const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => buttonVariants[variant];
 
-const NAV_LINKS = [
-  { href: '#overview', label: 'Overview' },
-  { href: '#why', label: 'Nuestros Pilares' },
-  { href: '#modes', label: 'Modos' },
-  { href: '#how', label: 'Cómo funciona' },
-  { href: '#features', label: 'Features' },
-  { href: '#testimonials', label: 'Testimonios' },
-  { href: '#faq', label: 'FAQ' }
-];
-
-const PILLARS = [
-  {
-    emoji: '🫀',
-    title: 'Cuerpo',
-    copy:
-      'Tu cuerpo es el sustrato del hábito: sueño, nutrición y movimiento marcan tu disponibilidad de energía diaria (HP).'
-  },
-  {
-    emoji: '🧠',
-    title: 'Mente',
-    copy:
-      'La mente filtra y prioriza. Sin foco, no hay consistencia. Diseñamos sesiones simples para sostener la atención, el aprendizaje y la creatividad.'
-  },
-  {
-    emoji: '🏵️',
-    title: 'Alma',
-    copy:
-      'Las emociones, los vínculos y el propósito estabilizan el sistema. Sin esto, los hábitos no atraviesan semanas ni meses.'
-  }
-];
-
-const MODES = [
-  {
-    id: 'low',
-    title: '🪫 LOW MOOD',
-    state: 'sin energía, abrumado.',
-    goal: 'activar tu mínimo vital con acciones pequeñas y sostenibles.'
-  },
-  {
-    id: 'chill',
-    title: '🍃 CHILL MOOD',
-    state: 'relajado y estable.',
-    goal: 'sostener bienestar con rutinas suaves y balanceadas.'
-  },
-  {
-    id: 'flow',
-    title: '🌊 FLOW MOOD',
-    state: 'enfocado y en movimiento.',
-    goal: 'aprovechar el impulso con un plan alineado a metas concretas.'
-  },
-  {
-    id: 'evolve',
-    title: '🧬 EVOLVE MOOD',
-    state: 'ambicioso y determinado.',
-    goal: 'sistema retador con Hábitos Atómicos, misiones y recompensas.'
-  }
-];
-
-const HOW_STEPS = [
-  {
-    title: 'Define tu camino',
-    copy:
-      'Responde una serie de preguntas, setea tu modo de juego; nosotros generaremos tu base (Body/Mind/Soul) con IA.'
-  },
-  {
-    title: 'Activa tu base',
-    copy: 'Recibís tu “pergamino digital” por mail y editás/confirmás tu base.'
-  },
-  {
-    title: 'Daily Quest + Emociones',
-    copy:
-      'Con tu quest diaria vas a poder hacer una retrospectiva de tu día anterior; pensarás en qué emoción prevaleció más durante tu día.'
-  },
-  {
-    title: 'XP, Rachas y Recompensas',
-    copy:
-      'Seguís tu crecimiento acumulando experiencia (XP), moviendo tu constancia semanal, desafiándote a nuevas misiones y obteniendo recompensas.'
-  }
-];
-
-const TESTIMONIALS = [
-  { quote: '“Por primera vez sostuve hábitos 6 semanas. El mapa y las misiones me ordenaron.”', author: 'Lucía • Diseñadora' },
-  { quote: '“El heatmap emocional me cambió la mirada. Ajusto tareas por energía real.”', author: 'Diego • Dev' },
-  { quote: '“Empecé en Low y pasé a Flow con objetivos claros, sin culpa.”', author: 'Caro • Estudiante' }
-];
-
-const FAQS = [
-  {
-    question: '¿Necesito mucha disciplina para empezar?',
-    answer:
-      'No. Si estás con poca energía, empezás en Low para activar el mínimo vital. El sistema ajusta el ritmo.'
-  },
-  {
-    question: '¿Puedo cambiar de modo de juego?',
-    answer: 'Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento.'
-  },
-  {
-    question: '¿Dónde veo mis métricas?',
-    answer: 'En tu archivo y en el Dashboard: XP, nivel, rachas y mapa emocional.'
-  },
-  {
-    question: '¿Qué pasa si dejo de registrar?',
-    answer: 'No perdés progreso. Retomás cuando quieras y ajustamos objetivos según tu energía.'
-  }
-];
+function LanguageDropdown({ value, onChange }: { value: Language; onChange: (language: Language) => void }) {
+  return (
+    <label className="lang-select">
+      <span className="visually-hidden">Language selector</span>
+      <select value={value} onChange={(event) => onChange(event.target.value as Language)} aria-label="Language selector">
+        <option value="es">ES</option>
+        <option value="en">EN</option>
+      </select>
+    </label>
+  );
+}
 
 export default function LandingPage() {
   const { userId } = useAuth();
   const isSignedIn = Boolean(userId);
+  const [language, setLanguage] = useState<Language>('es');
+  const copy = content[language];
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
 
-  const testimonialCount = TESTIMONIALS.length;
+  const testimonialCount = copy.testimonials.items.length;
 
   useEffect(() => {
     if (paused || testimonialCount <= 1) {
@@ -193,7 +390,11 @@ export default function LandingPage() {
   return (
     <div className="landing">
       <header className="nav">
-        <Link className="brand" to="/" aria-label="Innerbloom — inicio">
+        <Link
+          className="brand"
+          to="/"
+          aria-label={language === 'es' ? 'Innerbloom — inicio' : 'Innerbloom — home'}
+        >
           <span className="brand-text">Innerbloom</span>
           <img
             src="/IB-COLOR-LOGO.png"
@@ -204,24 +405,25 @@ export default function LandingPage() {
           />
         </Link>
         <nav className="nav-links">
-          {NAV_LINKS.map((link) => (
+          {copy.navLinks.map((link) => (
             <a key={link.href} href={link.href}>
               {link.label}
             </a>
           ))}
         </nav>
         <nav className="flex flex-wrap items-center gap-2">
+          <LanguageDropdown value={language} onChange={setLanguage} />
           {isSignedIn ? (
             <Link className={buttonClasses()} to="/dashboard">
-              Ir al dashboard
+              {copy.auth.dashboard}
             </Link>
           ) : (
             <>
               <Link className={buttonClasses('ghost')} to="/sign-up">
-                Crear cuenta
+                {copy.auth.signup}
               </Link>
               <Link className={buttonClasses()} to="/login">
-                Iniciar sesión
+                {copy.auth.login}
               </Link>
             </>
           )}
@@ -233,32 +435,31 @@ export default function LandingPage() {
           <div className="hero-grid">
             <div className="hero-copy">
               <h1>
-                Convierte la experiencia en hábitos.{' '}
-                <span className="grad">Convierte los hábitos en camino</span>
+                {copy.hero.titleLead}{' '}
+                <span className="grad">{copy.hero.titleHighlight}</span>
               </h1>
               <p className="sub">
-                Tus hábitos son el mapa. Tu constancia, el nivel que alcanzas. Es tu <strong>self-improvement journey</strong> con
-                equilibrio entre <strong>🫀 Cuerpo</strong>, <strong>🧠 Mente</strong> y <strong>🏵️ Alma</strong>.
+                {copy.hero.subtitle}
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3 hero-actions">
                 {isSignedIn ? (
                   <Link className={buttonClasses()} to="/dashboard">
-                    Ir al dashboard
+                    {copy.auth.dashboard}
                   </Link>
                 ) : (
                   <>
                     <Link className={`${buttonClasses()} journey-cta`} to="/intro-journey">
-                      Comenzar mi Journey
+                      {copy.auth.startJourney}
                     </Link>
                   </>
                 )}
               </div>
-              <p className="tiny">En menos de 3 minutos generamos tu base personalizada con IA.</p>
+              <p className="tiny">{copy.hero.note}</p>
             </div>
             <div className="hero-media">
               <img
                 src="https://i.ibb.co/Gv7WTT7h/Whats-App-Image-2025-08-31-at-03-52-15.jpg"
-                alt="Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey"
+                alt={copy.hero.alt}
                 className="hero-img"
                 width={1200}
                 height={1200}
@@ -270,14 +471,10 @@ export default function LandingPage() {
 
         <section className="why section-pad reveal-on-scroll" id="why">
           <div className="container narrow">
-            <h2>Nuestros pilares fundamentales</h2>
-            <p className="section-sub">
-              El progreso sostenible necesita equilibrio. <strong>🫀 Cuerpo</strong> para la energía y la salud,{' '}
-              <strong>🧠 Mente</strong> para el foco y el aprendizaje, y <strong>🏵️ Alma</strong> para el bienestar emocional y el sentido.
-              Cuando uno cae, los otros dos lo sostienen. Cuando se alinean, tu progreso se acelera.
-            </p>
+            <h2>{copy.pillars.title}</h2>
+            <p className="section-sub">{copy.pillars.intro}</p>
             <div className="cards grid-3">
-              {PILLARS.map((pillar, index) => (
+              {copy.pillars.items.map((pillar, index) => (
                 <article
                   className="card fade-item"
                   key={pillar.title}
@@ -290,18 +487,16 @@ export default function LandingPage() {
                 </article>
               ))}
             </div>
-            <p className="section-sub highlight">
-              Observate por primera vez en tercera persona y toma el control de tus acciones y hábitos.
-            </p>
+            <p className="section-sub highlight">{copy.pillars.highlight}</p>
           </div>
         </section>
 
         <section className="modes section-pad reveal-on-scroll" id="modes">
           <div className="container">
-            <h2>Modula tu modo de juego</h2>
-            <p className="section-sub">Cambia según tu momento. El sistema se adapta a tu energía.</p>
+            <h2>{copy.modes.title}</h2>
+            <p className="section-sub">{copy.modes.intro}</p>
             <div className="cards grid-2">
-              {MODES.map((mode, index) => (
+              {copy.modes.items.map((mode, index) => (
                 <article
                   className={`card mode ${mode.id} fade-item`}
                   key={mode.id}
@@ -311,10 +506,10 @@ export default function LandingPage() {
                     {mode.title} <span className="dot" aria-hidden="true" />
                   </div>
                   <p className="muted">
-                    <strong>Estado:</strong> {mode.state}
+                    <strong>{language === 'es' ? 'Estado:' : 'State:'}</strong> {mode.state}
                   </p>
                   <p>
-                    <strong>Objetivo:</strong> {mode.goal}
+                    <strong>{language === 'es' ? 'Objetivo:' : 'Goal:'}</strong> {mode.goal}
                   </p>
                 </article>
               ))}
@@ -324,10 +519,10 @@ export default function LandingPage() {
 
         <section className="how section-pad reveal-on-scroll" id="how">
           <div className="container narrow">
-            <h2>Cómo funciona</h2>
-            <p className="section-sub">Un flujo claro, de la activación a la constancia.</p>
+            <h2>{copy.how.title}</h2>
+            <p className="section-sub">{copy.how.intro}</p>
             <ol className="steps">
-              {HOW_STEPS.map((step, index) => (
+              {copy.how.steps.map((step, index) => (
                 <li
                   className="fade-item"
                   key={step.title}
@@ -344,12 +539,12 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <FeatureShowcaseSection />
+        <FeatureShowcaseSection language={language} />
 
         <section className="testimonials section-pad reveal-on-scroll" id="testimonials">
           <div className="container">
-            <h2>Testimonios</h2>
-            <p className="section-sub">Lo que dicen quienes ya empezaron su Journey.</p>
+            <h2>{copy.testimonials.title}</h2>
+            <p className="section-sub">{copy.testimonials.intro}</p>
             <div
               className="slider"
               id="testi-slider"
@@ -362,13 +557,17 @@ export default function LandingPage() {
               onBlur={() => setPaused(false)}
             >
               <div className="slider-track" style={{ transform: `translateX(-${activeSlide * 100}%)` }}>
-                {TESTIMONIALS.map((testimonial, index) => (
+                {copy.testimonials.items.map((testimonial, index) => (
                   <figure
                     className="testi"
                     key={testimonial.author}
                     role="group"
                     id={`slide-${index + 1}`}
-                    aria-label={`${index + 1} de ${testimonialCount}`}
+                    aria-label={
+                      language === 'es'
+                        ? `${index + 1} de ${testimonialCount}`
+                        : `${index + 1} of ${testimonialCount}`
+                    }
                   >
                     <blockquote>{testimonial.quote}</blockquote>
                     <figcaption>{testimonial.author}</figcaption>
@@ -378,7 +577,7 @@ export default function LandingPage() {
               <button
                 type="button"
                 className="slider-btn prev"
-                aria-label="Anterior"
+                aria-label={copy.testimonials.prev}
                 onClick={() => goToSlide(activeSlide - 1)}
               >
                 ‹
@@ -386,13 +585,13 @@ export default function LandingPage() {
               <button
                 type="button"
                 className="slider-btn next"
-                aria-label="Siguiente"
+                aria-label={copy.testimonials.next}
                 onClick={() => goToSlide(activeSlide + 1)}
               >
                 ›
               </button>
-              <div className="slider-dots" role="tablist" aria-label="Seleccionar testimonio">
-                {TESTIMONIALS.map((testimonial, index) => (
+              <div className="slider-dots" role="tablist" aria-label={copy.testimonials.groupLabel}>
+                {copy.testimonials.items.map((testimonial, index) => (
                   <button
                     key={testimonial.author}
                     className="dot"
@@ -411,8 +610,8 @@ export default function LandingPage() {
 
         <section className="faq section-pad reveal-on-scroll" id="faq">
           <div className="container narrow">
-            <h2>Preguntas frecuentes</h2>
-            {FAQS.map((faq) => (
+            <h2>{copy.faq.title}</h2>
+            {copy.faq.items.map((faq) => (
               <details key={faq.question}>
                 <summary>{faq.question}</summary>
                 <p>{faq.answer}</p>
@@ -423,17 +622,17 @@ export default function LandingPage() {
 
         <section className="next section-pad reveal-on-scroll">
           <div className="container narrow center">
-            <h2>Listo para empezar</h2>
-            <p className="section-sub">Te guiamos paso a paso. Empezá ahora.</p>
+            <h2>{copy.next.title}</h2>
+            <p className="section-sub">{copy.next.intro}</p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               {isSignedIn ? (
                 <Link className={buttonClasses()} to="/dashboard">
-                  Ir al dashboard
+                  {copy.auth.dashboard}
                 </Link>
               ) : (
                 <>
                   <Link className={`${buttonClasses()} journey-cta`} to="/intro-journey">
-                    Comenzar mi Journey
+                    {copy.auth.startJourney}
                   </Link>
                 </>
               )}
@@ -443,17 +642,17 @@ export default function LandingPage() {
       </main>
 
       <footer className="footer">
-        <span>©️ Gamification Journey</span>
+        <span>{copy.footer.copyright}</span>
         <nav className="footer-links">
           {isSignedIn ? (
             <Link to="/dashboard">Dashboard</Link>
           ) : (
             <>
-              <Link to="/login">Login</Link>
-              <Link to="/sign-up">Crear cuenta</Link>
+              <Link to="/login">{copy.auth.login}</Link>
+              <Link to="/sign-up">{copy.auth.signup}</Link>
             </>
           )}
-          <a href="#faq">FAQ</a>
+          <a href="#faq">{copy.footer.faq}</a>
         </nav>
       </footer>
     </div>
