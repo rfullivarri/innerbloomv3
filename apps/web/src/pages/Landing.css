@@ -223,6 +223,32 @@
   margin-top: 6px;
 }
 
+@property --conic-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.landing .journey-cta {
+  --conic-angle: 0deg;
+  --conic-border: 2px;
+  --conic-duration: 4s;
+  position: relative;
+  border: var(--conic-border) solid transparent;
+  background:
+    linear-gradient(var(--accent), var(--accent)) padding-box,
+    conic-gradient(
+        from var(--conic-angle),
+        var(--accent),
+        var(--accent-2),
+        var(--accent),
+        var(--accent-2),
+        var(--accent)
+      )
+      border-box;
+  animation: conic-spin var(--conic-duration) linear infinite;
+}
+
 .landing .hero-media {
   width: var(--hero-size);
   height: var(--hero-size);
@@ -558,10 +584,17 @@
   }
 }
 
+@keyframes conic-spin {
+  to {
+    --conic-angle: 360deg;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .landing::before,
   .landing::after,
-  .landing .hero-media {
+  .landing .hero-media,
+  .landing .journey-cta {
     animation: none !important;
     transform: none !important;
   }

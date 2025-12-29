@@ -247,7 +247,7 @@ export default function LandingPage() {
                   </Link>
                 ) : (
                   <>
-                    <Link className={buttonClasses()} to="/intro-journey">
+                    <Link className={`${buttonClasses()} journey-cta`} to="/intro-journey">
                       Comenzar mi Journey
                     </Link>
                     <Link className={buttonClasses('ghost')} to="/login">
@@ -435,7 +435,7 @@ export default function LandingPage() {
                 </Link>
               ) : (
                 <>
-                  <Link className={buttonClasses()} to="/intro-journey">
+                  <Link className={`${buttonClasses()} journey-cta`} to="/intro-journey">
                     Comenzar mi Journey
                   </Link>
                   <Link className={buttonClasses('ghost')} to="/login">
