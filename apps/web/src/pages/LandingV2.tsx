@@ -4,7 +4,7 @@ import { useAuth } from '@clerk/clerk-react';
 import './LandingV2.css';
 import '../styles/panel-rachas.overrides.css';
 import { Card } from '../components/ui/Card';
-import { MistBackground } from '../components/landing/MistBackground';
+import { AuroraBackground } from '../components/ui/AuroraBackground';
 
 type Language = 'en' | 'es';
 
@@ -899,80 +899,80 @@ export default function LandingV2Page() {
 
       <main>
         <section className="lv2-hero" id="hero">
-          <MistBackground />
-          <div className="lv2-container lv2-hero-grid">
-            <div className="lv2-hero-copy">
-              <p className="lv2-kicker">Habits • Gamification</p>
-              <h1>
-                {heroTitle.lead}{' '}
-                <span className="lv2-title-grad">{heroTitle.highlight}</span>
-              </h1>
-              <p className="lv2-sub">{copy.hero.subtitle}</p>
-              <div className="lv2-hero-meta" aria-hidden="true">
-                {heroMeta.map((item) => (
-                  <span key={item} className="lv2-meta-pill">
-                    {item}
-                  </span>
-                ))}
+          <AuroraBackground className="lv2-hero-aurora">
+            <div className="lv2-container lv2-hero-grid">
+              <div className="lv2-hero-copy">
+                <p className="lv2-kicker">Habits • Gamification</p>
+                <h1>
+                  {heroTitle.lead}{' '}
+                  <span className="lv2-title-grad">{heroTitle.highlight}</span>
+                </h1>
+                <p className="lv2-sub">{copy.hero.subtitle}</p>
+                <div className="lv2-hero-meta" aria-hidden="true">
+                  {heroMeta.map((item) => (
+                    <span key={item} className="lv2-meta-pill">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+                <div className="lv2-cta-row">
+                  <Link className={BUTTON_VARIANTS.primary} to={primaryCta.to}>
+                    {primaryCta.label}
+                  </Link>
+                  <a className={BUTTON_VARIANTS.ghost} href="#highlights">
+                    {copy.hero.secondary}
+                  </a>
+                </div>
+                <p className="lv2-support">{copy.hero.supporting}</p>
+                <p className="lv2-support">
+                  {language === 'es'
+                    ? 'No es solo un dashboard: es una herramienta de mejora de hábitos gamificada.'
+                    : 'Not just a dashboard: a gamified habit-improvement system.'}
+                </p>
               </div>
-              <div className="lv2-cta-row">
-                <Link className={BUTTON_VARIANTS.primary} to={primaryCta.to}>
-                  {primaryCta.label}
-                </Link>
-                <a className={BUTTON_VARIANTS.ghost} href="#highlights">
-                  {copy.hero.secondary}
-                </a>
-              </div>
-              <p className="lv2-support">{copy.hero.supporting}</p>
-              <p className="lv2-support">
-                {language === 'es'
-                  ? 'No es solo un dashboard: es una herramienta de mejora de hábitos gamificada.'
-                  : 'Not just a dashboard: a gamified habit-improvement system.'}
-              </p>
-            </div>
-            <div className="lv2-dashboard-grid lv2-dashboard-grid--hero" aria-label="Demo del dashboard">
-              <div className="lv2-dashboard-column">
-                <Card
-                  className="lv2-dashboard-card lv2-dashboard-card--square"
-                  bodyClassName="lv2-dashboard-card-body"
-                  title={language === 'es' ? 'Progreso general' : 'Overall progress'}
-                >
-                  <DashboardXpVisual compact language={language} />
-                </Card>
-                <Card
-                  className="lv2-dashboard-card lv2-avatar-card"
-                  bodyClassName="lv2-dashboard-card-body"
-                  title={language === 'es' ? 'Tu avatar' : undefined}
-                >
-                  <img
-                    className="lv2-avatar-image"
-                    src={AVATAR_MODES[avatarIndex].src}
-                    alt={`Avatar ${AVATAR_MODES[avatarIndex].label}`}
-                  />
-                </Card>
-              </div>
-              <div className="lv2-dashboard-column">
-                <Card
-                  className="lv2-dashboard-card lv2-dashboard-card--square lv2-dashboard-card--radar"
-                  bodyClassName="lv2-dashboard-card-body"
-                  title="Radar Chart"
-                >
-                  <RadarChartPreview />
-                </Card>
-                <Card
-                  className="lv2-dashboard-card lv2-dashboard-card--emotion"
-                  bodyClassName="lv2-dashboard-card-body"
-                  title="💗 Emotion Chart"
-                  subtitle={language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
-                >
-                  <EmotionChartPreview language={language} />
-                </Card>
-              </div>
-              <div className="lv2-dashboard-column">
-                <Card
-                  className="lv2-dashboard-card lv2-dashboard-card--streaks"
-                  bodyClassName="lv2-dashboard-card-body"
-                  title="🔥 Streaks"
+              <div className="lv2-dashboard-grid lv2-dashboard-grid--hero" aria-label="Demo del dashboard">
+                <div className="lv2-dashboard-column">
+                  <Card
+                    className="lv2-dashboard-card lv2-dashboard-card--square"
+                    bodyClassName="lv2-dashboard-card-body"
+                    title={language === 'es' ? 'Progreso general' : 'Overall progress'}
+                  >
+                    <DashboardXpVisual compact language={language} />
+                  </Card>
+                  <Card
+                    className="lv2-dashboard-card lv2-avatar-card"
+                    bodyClassName="lv2-dashboard-card-body"
+                    title={language === 'es' ? 'Tu avatar' : undefined}
+                  >
+                    <img
+                      className="lv2-avatar-image"
+                      src={AVATAR_MODES[avatarIndex].src}
+                      alt={`Avatar ${AVATAR_MODES[avatarIndex].label}`}
+                    />
+                  </Card>
+                </div>
+                <div className="lv2-dashboard-column">
+                  <Card
+                    className="lv2-dashboard-card lv2-dashboard-card--square lv2-dashboard-card--radar"
+                    bodyClassName="lv2-dashboard-card-body"
+                    title="Radar Chart"
+                  >
+                    <RadarChartPreview />
+                  </Card>
+                  <Card
+                    className="lv2-dashboard-card lv2-dashboard-card--emotion"
+                    bodyClassName="lv2-dashboard-card-body"
+                    title="💗 Emotion Chart"
+                    subtitle={language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
+                  >
+                    <EmotionChartPreview language={language} />
+                  </Card>
+                </div>
+                <div className="lv2-dashboard-column">
+                  <Card
+                    className="lv2-dashboard-card lv2-dashboard-card--streaks"
+                    bodyClassName="lv2-dashboard-card-body"
+                    title="🔥 Streaks"
                 >
                   <StreaksPreview language={language} />
                 </Card>
