@@ -239,11 +239,11 @@
     linear-gradient(var(--accent), var(--accent)) padding-box,
     conic-gradient(
         from var(--conic-angle),
-        var(--accent),
-        var(--accent-2),
-        var(--accent),
-        var(--accent-2),
-        var(--accent)
+        rgba(255, 255, 255, 0.95),
+        rgba(255, 255, 255, 0.45),
+        rgba(255, 255, 255, 0.85),
+        rgba(255, 255, 255, 0.35),
+        rgba(255, 255, 255, 0.95)
       )
       border-box;
   animation: conic-spin var(--conic-duration) linear infinite;
