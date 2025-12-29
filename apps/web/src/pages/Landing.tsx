@@ -37,15 +37,7 @@ const content: Record<Language, {
   footer: { copyright: string; faq: string };
 }> = {
   es: {
-    navLinks: [
-      { href: '#overview', label: 'Overview' },
-      { href: '#why', label: 'Nuestros Pilares' },
-      { href: '#modes', label: 'Modos' },
-      { href: '#how', label: 'Cómo funciona' },
-      { href: '#features', label: 'Features' },
-      { href: '#testimonials', label: 'Testimonios' },
-      { href: '#faq', label: 'FAQ' }
-    ],
+    navLinks: [],
     hero: {
       titleLead: 'Convierte la experiencia en hábitos.',
       titleHighlight: 'Convierte los hábitos en camino',
@@ -166,15 +158,7 @@ const content: Record<Language, {
     footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
   },
   en: {
-    navLinks: [
-      { href: '#overview', label: 'Overview' },
-      { href: '#why', label: 'Our Pillars' },
-      { href: '#modes', label: 'Modes' },
-      { href: '#how', label: 'How it works' },
-      { href: '#features', label: 'Features' },
-      { href: '#testimonials', label: 'Testimonials' },
-      { href: '#faq', label: 'FAQ' }
-    ],
+    navLinks: [],
     hero: {
       titleLead: 'Turn experience into habits.',
       titleHighlight: 'Turn habits into your path',
@@ -452,13 +436,15 @@ export default function LandingPage() {
             height={50}
           />
         </Link>
-        <nav className="nav-links">
-          {copy.navLinks.map((link) => (
-            <a key={link.href} href={link.href}>
-              {link.label}
-            </a>
-          ))}
-        </nav>
+        {copy.navLinks.length > 0 ? (
+          <nav className="nav-links">
+            {copy.navLinks.map((link) => (
+              <a key={link.href} href={link.href}>
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        ) : null}
         <div className="nav-actions">
           <LanguageDropdown value={language} onChange={setLanguage} />
           {isSignedIn ? (
