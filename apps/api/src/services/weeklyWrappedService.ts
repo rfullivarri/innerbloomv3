@@ -1,4 +1,5 @@
 import { formatDateInTimezone } from '../controllers/users/user-state-service.js';
+import { pool } from '../db.js';
 import type { InsightQuery, LogsQuery } from '../modules/admin/admin.schemas.js';
 import { getUserInsights, getUserLogs } from '../modules/admin/admin.service.js';
 import { HttpError } from '../lib/http-error.js';
@@ -19,7 +20,7 @@ import type {
 } from '../types/weeklyWrapped.js';
 import { loadUserLevelSummary, type UserLevelSummary } from './userLevelSummaryService.js';
 
-type EmotionSnapshot = { date: string; emotions: string[] };
+type EmotionSnapshot = { date: string; mood: string | null };
 
 type AdminLogRow = Awaited<ReturnType<typeof getUserLogs>>['items'][number];
 type NormalizedLog = AdminLogRow & {
@@ -192,6 +193,12 @@ function toDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+function daysAgoFrom(reference: Date, days: number): Date {
+  const copy = new Date(reference);
+  copy.setUTCDate(copy.getUTCDate() - days);
+  return copy;
+}
+
 export async function maybeGenerateWeeklyWrappedForDate(
   userId: string,
   referenceDate: string,
@@ -261,7 +268,7 @@ async function buildWeeklyWrappedPayload(
     return toDateKey(start);
   })();
 
-  const [insights, logsResult, longTermLogsResult, levelSummary] = await Promise.all([
+  const [insights, logsResult, longTermLogsResult, levelSummary, emotionSnapshots] = await Promise.all([
     getUserInsights(userId, {} as InsightQuery),
     getUserLogs(userId, {
       from: range.start,
@@ -278,8 +285,9 @@ async function buildWeeklyWrappedPayload(
       sort: 'date:asc',
     } as LogsQuery),
     loadUserLevelSummary(userId),
+    loadEmotionSnapshots(userId, range.end, 15),
   ]);
-  const emotions = buildEmotionSnapshots(insights.emotions?.last30 ?? [], range.end, 15);
+  const emotions = emotionSnapshots;
 
   const weeklyGoal = resolveWeeklyGoal(insights.profile.gameMode);
 
@@ -812,46 +820,110 @@ function dominantPillar(insights: Awaited<ReturnType<typeof getUserInsights>>): 
   return sorted[0]?.code;
 }
 
-function buildEmotionHighlight(emotions: EmotionSnapshot[]): EmotionHighlight {
-  const weekly = dominantEmotion(emotions.slice(0, 7));
-  const biweekly = dominantEmotion(emotions.slice(0, 15));
+function buildEmotionHighlight(entries: EmotionSnapshot[]): EmotionHighlight {
+  const map = new Map<string, EmotionMessageKey>();
 
-  return { weekly, biweekly };
-}
-
-function dominantEmotion(emotions: EmotionSnapshot[]): EmotionHighlightEntry | null {
-  const counts = new Map<EmotionMessageKey, number>();
-
-  for (const snapshot of emotions) {
-    for (const emotion of snapshot.emotions ?? []) {
-      const normalizedKey = EMOTION_KEY_BY_LABEL[emotion] ?? EMOTION_KEY_BY_NORMALIZED_LABEL[normalizeText(emotion)];
-      if (!normalizedKey) continue;
-      counts.set(normalizedKey, (counts.get(normalizedKey) ?? 0) + 1);
+  for (const entry of entries) {
+    const dateKey = normalizeDateKey(entry?.date);
+    const emotionKey = normalizeEmotionKey(entry?.mood);
+    if (dateKey && emotionKey) {
+      map.set(dateKey, emotionKey);
     }
   }
 
-  const sorted = Array.from(counts.entries())
-    .map(([key, value]) => ({ key, value, ref: EMOTION_REFLECTIONS[key] }))
-    .filter((entry) => entry.ref)
-    .sort((a, b) => b.value - a.value);
-
-  return sorted[0]?.ref ?? null;
-}
-
-function buildEmotionSnapshots(emotions: string[], endDate: string, days: number): EmotionSnapshot[] {
-  const to = parseDate(endDate);
-  const maxEntries = Math.max(0, days);
-  const snapshots: EmotionSnapshot[] = [];
-
-  for (let index = 0; index < emotions.length && snapshots.length < maxEntries; index += 1) {
-    const emotion = emotions[index];
-    if (!emotion) continue;
-    const date = new Date(to);
-    date.setUTCDate(to.getUTCDate() - index);
-    snapshots.push({ date: toDateKey(date), emotions: [emotion] });
+  if (map.size === 0) {
+    return { weekly: null, biweekly: null };
   }
 
-  return snapshots;
+  const latestKey = Array.from(map.keys()).sort().pop() ?? toDateKey(new Date());
+
+  return {
+    weekly: computeEmotionDominant(map, latestKey, 7),
+    biweekly: computeEmotionDominant(map, latestKey, 15),
+  };
+}
+
+function computeEmotionDominant(
+  map: Map<string, EmotionMessageKey>,
+  endKey: string,
+  windowDays: number,
+): EmotionHighlightEntry | null {
+  const endDate = parseDateKey(endKey) ?? new Date();
+  const startDate = daysAgoFrom(endDate, windowDays - 1);
+  const startKey = toDateKey(startDate);
+  const endRangeKey = toDateKey(endDate);
+
+  const filtered = Array.from(map.entries())
+    .filter(([key]) => key >= startKey && key <= endRangeKey)
+    .sort(([a], [b]) => (a < b ? -1 : 1));
+
+  if (filtered.length === 0) {
+    return null;
+  }
+
+  const counts = new Map<EmotionMessageKey, { count: number; lastKey: string }>();
+  for (const [key, emotion] of filtered) {
+    const prev = counts.get(emotion);
+    counts.set(emotion, { count: (prev?.count ?? 0) + 1, lastKey: key });
+  }
+
+  let winner: { key: EmotionMessageKey; count: number; lastKey: string } | null = null;
+  for (const [key, info] of counts.entries()) {
+    if (!winner || info.count > winner.count || (info.count === winner.count && info.lastKey > winner.lastKey)) {
+      winner = { key, count: info.count, lastKey: info.lastKey };
+    }
+  }
+
+  return winner ? buildEmotionEntry(winner.key) : null;
+}
+
+function buildEmotionEntry(key: EmotionMessageKey): EmotionHighlightEntry {
+  const message = EMOTION_REFLECTIONS[key];
+  return {
+    key,
+    label: message.label,
+    tone: message.tone,
+    color: EMOTION_COLORS[key] ?? '#0ea5e9',
+    weeklyMessage: message.weeklyMessage,
+    biweeklyContext: message.biweeklyContext,
+  };
+}
+
+function normalizeEmotionKey(label: unknown): EmotionMessageKey | null {
+  if (!label || typeof label !== 'string') {
+    return null;
+  }
+
+  const normalized = normalizeText(label);
+  return EMOTION_KEY_BY_NORMALIZED_LABEL[normalized] ?? null;
+}
+
+async function loadEmotionSnapshots(userId: string, endDate: string, days: number): Promise<EmotionSnapshot[]> {
+  const maxEntries = Math.max(1, Math.floor(days));
+  const to = parseDate(endDate);
+  const start = new Date(to);
+  start.setUTCDate(to.getUTCDate() - (maxEntries - 1));
+
+  const result = await pool.query<{ date: string; emotion: string | null }>(
+    `SELECT el.date,
+            COALESCE(ce.code, ce.name) AS emotion
+       FROM emotions_logs el
+  LEFT JOIN cat_emotion ce ON ce.emotion_id = el.emotion_id
+      WHERE el.user_id = $1
+        AND el.date BETWEEN $2 AND $3
+   ORDER BY el.date`,
+    [userId, toDateKey(start), toDateKey(to)],
+  );
+
+  return result.rows
+    .map((row) => {
+      const date = normalizeDateKey(row.date);
+      if (!date) {
+        return null;
+      }
+      return { date, mood: row.emotion ?? null };
+    })
+    .filter((row): row is EmotionSnapshot => row !== null);
 }
 
 function resolveWeeklyGoal(gameMode: string | null | undefined): number {
