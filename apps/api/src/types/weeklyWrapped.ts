@@ -26,6 +26,10 @@ export type WeeklyWrappedPayload = {
   lastActivityAt?: string | null;
   summary: {
     pillarDominant: string | null;
+    pillarDominantStats?: {
+      xp: number;
+      completions: number;
+    } | null;
     highlight: string | null;
     completions: number;
     xpTotal: number;

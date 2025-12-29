@@ -371,6 +371,7 @@ async function buildWeeklyWrappedPayload(
   const levelUp = detectLevelUp(levelSummary, xpTotal, false);
 
   const pillarDominant = dominantPillar(insights) ?? null;
+  const pillarDominantStats = computePillarDominantStats(normalizedLogs, pillarDominant);
   const topHabits = selectTopHabits(topHabitsCandidates, pillarDominant).map((habit) => {
     const longTerm = longTermHabitMap.get(habit.title);
     return {
@@ -501,6 +502,7 @@ async function buildWeeklyWrappedPayload(
     lastActivityAt: latestLog?.toISOString() ?? null,
     summary: {
       pillarDominant,
+      pillarDominantStats,
       highlight,
       completions,
       xpTotal,
@@ -866,6 +868,26 @@ function dominantPillar(insights: Awaited<ReturnType<typeof getUserInsights>>): 
   }
 
   return sorted[0]?.code;
+}
+
+function computePillarDominantStats(
+  logs: NormalizedLog[],
+  pillarDominant: string | null,
+): { xp: number; completions: number } | null {
+  const normalized = normalizePillarCode(pillarDominant);
+  if (!normalized) {
+    return null;
+  }
+
+  return logs
+    .filter((log) => log.state !== 'red' && normalizePillarCode(log.pillar) === normalized)
+    .reduce(
+      (acc, log) => ({
+        xp: acc.xp + Math.max(0, Number(log.xp ?? 0)),
+        completions: acc.completions + log.quantity,
+      }),
+      { xp: 0, completions: 0 },
+    );
 }
 
 function computeEnergyHighlight(
