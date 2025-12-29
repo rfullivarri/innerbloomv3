@@ -235,6 +235,8 @@
   --conic-duration: 4s;
   position: relative;
   border: var(--conic-border) solid transparent;
+  padding-inline: 2.4rem;
+  min-width: min(320px, 80%);
   background:
     linear-gradient(var(--accent), var(--accent)) padding-box,
     conic-gradient(
@@ -247,6 +249,10 @@
       )
       border-box;
   animation: conic-spin var(--conic-duration) linear infinite;
+}
+
+.landing .hero-actions .journey-cta {
+  flex: 0 1 auto;
 }
 
 .landing .hero-media {

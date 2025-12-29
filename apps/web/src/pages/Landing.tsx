@@ -5,7 +5,7 @@ import { FeatureShowcaseSection } from '../components/landing/FeatureShowcaseSec
 import './Landing.css';
 
 const buttonBaseClasses =
-  'inline-flex items-center justify-center whitespace-nowrap rounded-2xl px-5 py-3 font-display text-sm font-semibold tracking-tight transition duration-150 ease-out active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
+  'inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-3 font-display text-sm font-semibold tracking-tight transition duration-150 ease-out active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
 
 const buttonVariants = {
   primary: `${buttonBaseClasses} bg-accent-purple text-white shadow-glow hover:bg-accent-purple/90`,
@@ -240,7 +240,7 @@ export default function LandingPage() {
                 Tus hábitos son el mapa. Tu constancia, el nivel que alcanzas. Es tu <strong>self-improvement journey</strong> con
                 equilibrio entre <strong>🫀 Cuerpo</strong>, <strong>🧠 Mente</strong> y <strong>🏵️ Alma</strong>.
               </p>
-              <div className="mt-6 flex flex-wrap items-center gap-3">
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 hero-actions">
                 {isSignedIn ? (
                   <Link className={buttonClasses()} to="/dashboard">
                     Ir al dashboard
@@ -249,9 +249,6 @@ export default function LandingPage() {
                   <>
                     <Link className={`${buttonClasses()} journey-cta`} to="/intro-journey">
                       Comenzar mi Journey
-                    </Link>
-                    <Link className={buttonClasses('ghost')} to="/login">
-                      Iniciar sesión
                     </Link>
                   </>
                 )}
@@ -437,9 +434,6 @@ export default function LandingPage() {
                 <>
                   <Link className={`${buttonClasses()} journey-cta`} to="/intro-journey">
                     Comenzar mi Journey
-                  </Link>
-                  <Link className={buttonClasses('ghost')} to="/login">
-                    Iniciar sesión
                   </Link>
                 </>
               )}
