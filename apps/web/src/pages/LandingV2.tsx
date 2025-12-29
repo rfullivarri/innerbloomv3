@@ -973,12 +973,13 @@ export default function LandingV2Page() {
                     className="lv2-dashboard-card lv2-dashboard-card--streaks"
                     bodyClassName="lv2-dashboard-card-body"
                     title="🔥 Streaks"
-                >
-                  <StreaksPreview language={language} />
-                </Card>
+                  >
+                    <StreaksPreview language={language} />
+                  </Card>
+                </div>
               </div>
             </div>
-          </div>
+          </AuroraBackground>
         </section>
 
         <section className="lv2-section" id="highlights">
