@@ -1,0 +1,108 @@
+.lv2-hero {
+  --mist-speed: 36s;
+  --mist-opacity: 0.55;
+  --mist-blur: 48px;
+}
+
+.lv2-hero__mist {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.lv2-hero__mist-layer {
+  position: absolute;
+  inset: -18%;
+  opacity: var(--mist-opacity);
+  filter: blur(var(--mist-blur));
+  mix-blend-mode: screen;
+  will-change: transform;
+  animation: lv2-mist-drift var(--mist-speed) ease-in-out infinite;
+}
+
+.lv2-hero__mist-layer--base {
+  background:
+    radial-gradient(
+      circle at 18% 20%,
+      color-mix(in srgb, var(--accent) 45%, transparent) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      circle at 80% 18%,
+      color-mix(in srgb, var(--accent-2) 38%, transparent) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      circle at 50% 85%,
+      color-mix(in srgb, var(--card) 55%, transparent) 0%,
+      transparent 75%
+    );
+  animation-duration: calc(var(--mist-speed) * 1.2);
+}
+
+.lv2-hero__mist-layer--mid {
+  background:
+    radial-gradient(
+      circle at 20% 80%,
+      color-mix(in srgb, var(--accent-2) 42%, transparent) 0%,
+      transparent 68%
+    ),
+    radial-gradient(
+      circle at 78% 60%,
+      color-mix(in srgb, var(--accent) 35%, transparent) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      circle at 55% 25%,
+      color-mix(in srgb, var(--bg-2) 60%, transparent) 0%,
+      transparent 70%
+    );
+  opacity: calc(var(--mist-opacity) * 0.85);
+  filter: blur(calc(var(--mist-blur) * 0.9));
+  animation-duration: calc(var(--mist-speed) * 1.6);
+  animation-delay: -8s;
+}
+
+.lv2-hero__mist-layer--front {
+  background:
+    radial-gradient(
+      circle at 10% 45%,
+      color-mix(in srgb, var(--accent) 32%, transparent) 0%,
+      transparent 66%
+    ),
+    radial-gradient(
+      circle at 90% 50%,
+      color-mix(in srgb, var(--accent-2) 36%, transparent) 0%,
+      transparent 68%
+    ),
+    radial-gradient(
+      circle at 50% 10%,
+      color-mix(in srgb, var(--bg) 70%, transparent) 0%,
+      transparent 72%
+    );
+  opacity: calc(var(--mist-opacity) * 0.75);
+  filter: blur(calc(var(--mist-blur) * 0.8));
+  animation-duration: calc(var(--mist-speed) * 2);
+  animation-delay: -16s;
+}
+
+@keyframes lv2-mist-drift {
+  0% {
+    transform: translate3d(-4%, -2%, 0) scale(1.05);
+  }
+  50% {
+    transform: translate3d(3%, -3%, 0) scale(1.12);
+  }
+  100% {
+    transform: translate3d(5%, 4%, 0) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lv2-hero__mist-layer {
+    animation: none;
+    transform: none;
+  }
+}

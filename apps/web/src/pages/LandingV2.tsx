@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/clerk-react';
 import './LandingV2.css';
 import '../styles/panel-rachas.overrides.css';
 import { Card } from '../components/ui/Card';
+import { MistBackground } from '../components/landing/MistBackground';
 
 type Language = 'en' | 'es';
 
@@ -863,6 +864,7 @@ export default function LandingV2Page() {
 
       <main>
         <section className="lv2-hero" id="hero">
+          <MistBackground />
           <div className="lv2-container lv2-hero-grid">
             <div className="lv2-hero-copy">
               <p className="lv2-kicker">Habits • Gamification</p>
