@@ -175,35 +175,44 @@
     outline-offset: 2px;
   }
 
+  @property --conic-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+
   .glow-chip {
     position: relative;
     display: inline-flex;
-    --glow-angle: 0deg;
+    --conic-angle: 0deg;
+    --conic-border: 2px;
+    --conic-duration: 4s;
+    border-radius: 9999px;
   }
 
   .glow-chip::before {
     content: '';
     position: absolute;
-    inset: -8px;
-    border-radius: 9999px;
+    inset: 0;
+    border-radius: inherit;
+    padding: var(--conic-border);
     background: conic-gradient(
-      from var(--glow-angle),
-      transparent 0deg 285deg,
-      var(--glow-secondary) 310deg,
-      var(--glow-primary) 345deg,
+      from var(--conic-angle),
+      transparent 0deg 240deg,
+      var(--glow-secondary, rgba(148, 163, 184, 0.5)) 270deg,
+      var(--glow-primary, rgba(226, 232, 240, 0.8)) 320deg,
       transparent 360deg
     );
-    filter: blur(14px);
-    opacity: 0.95;
-    animation: glow-track 5s linear infinite;
+    animation: conic-spin var(--conic-duration) linear infinite;
     pointer-events: none;
-    transform-origin: center;
-    mask: radial-gradient(farthest-side, rgba(255, 255, 255, 0) calc(100% - 14px), rgba(255, 255, 255, 0.9) calc(100% - 6px));
-    -webkit-mask: radial-gradient(
-      farthest-side,
-      rgba(255, 255, 255, 0) calc(100% - 14px),
-      rgba(255, 255, 255, 0.9) calc(100% - 6px)
-    );
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
   }
 }
 
@@ -212,12 +221,12 @@
   z-index: 1;
 }
 
-@keyframes glow-track {
+@keyframes conic-spin {
   from {
-    --glow-angle: 0deg;
+    --conic-angle: 0deg;
   }
   to {
-    --glow-angle: 360deg;
+    --conic-angle: 360deg;
   }
 }
 

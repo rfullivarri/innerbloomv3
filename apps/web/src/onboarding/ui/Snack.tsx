@@ -17,7 +17,7 @@ export function Snack({ message }: SnackProps) {
             transition={{ duration: 0.16, ease: 'easeOut' }}
             className="glow-chip rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-slate-900 shadow-xl backdrop-blur"
           >
-            {message}
+            <span>{message}</span>
           </motion.div>
         ) : null}
       </AnimatePresence>
