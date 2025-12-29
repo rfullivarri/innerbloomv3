@@ -1,16 +1,31 @@
 import type { CSSProperties } from 'react';
 
-const QUESTS = [
-  { label: 'Bloque de foco', pillar: 'focus', status: 'done' as const },
-  { label: 'Movimiento 20m', pillar: 'health', status: 'pending' as const },
-  { label: 'Journal 5 minutos', pillar: 'mind', status: 'done' as const },
-  { label: 'Check-in emocional', pillar: 'soul', status: 'pending' as const }
-];
+type Language = 'es' | 'en';
+
+const QUESTS: Record<Language, { label: string; pillar: 'focus' | 'health' | 'mind' | 'soul'; status: 'done' | 'pending' }[]> = {
+  es: [
+    { label: 'Bloque de foco', pillar: 'focus', status: 'done' },
+    { label: 'Movimiento 20m', pillar: 'health', status: 'pending' },
+    { label: 'Journal 5 minutos', pillar: 'mind', status: 'done' },
+    { label: 'Check-in emocional', pillar: 'soul', status: 'pending' }
+  ],
+  en: [
+    { label: 'Focus block', pillar: 'focus', status: 'done' },
+    { label: 'Movement 20m', pillar: 'health', status: 'pending' },
+    { label: '5-minute journal', pillar: 'mind', status: 'done' },
+    { label: 'Emotion check-in', pillar: 'soul', status: 'pending' }
+  ]
+};
 
 const PROGRESS = 0.72;
 const CIRCUMFERENCE = 150.8;
 
-export function DailyQuestPreview() {
+export function DailyQuestPreview({ language = 'es' }: { language?: Language }) {
+  const statusLabel = language === 'es' ? { done: 'Hecha', pending: 'Pendiente' } : { done: 'Done', pending: 'Pending' };
+  const progressLabel = language === 'es' ? 'completado' : 'complete';
+  const ariaLabel =
+    language === 'es' ? 'Vista previa de tus quests diarias' : 'Preview of your daily quests';
+
   return (
     <div className="feature-mini-panel daily-quest-preview">
       <div className="quest-progress">
@@ -33,12 +48,12 @@ export function DailyQuestPreview() {
         </svg>
         <div className="quest-progress__label">
           <strong>{Math.round(PROGRESS * 100)}%</strong>
-          <span>completado</span>
+          <span>{progressLabel}</span>
         </div>
       </div>
 
-      <div className="quest-list" aria-label="Vista previa de tus quests diarias">
-        {QUESTS.map((quest) => (
+      <div className="quest-list" aria-label={ariaLabel}>
+        {QUESTS[language].map((quest) => (
           <div key={quest.label} className={`quest-item ${quest.status}`}>
             <div className="quest-name">
               <span className="status-dot" />
@@ -51,7 +66,7 @@ export function DailyQuestPreview() {
                 {quest.pillar === 'mind' && 'Mind'}
                 {quest.pillar === 'soul' && 'Soul'}
               </span>
-              <span className="quest-status">{quest.status === 'done' ? 'Hecha' : 'Pendiente'}</span>
+              <span className="quest-status">{statusLabel[quest.status]}</span>
             </div>
           </div>
         ))}
