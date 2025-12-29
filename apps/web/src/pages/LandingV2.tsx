@@ -891,7 +891,7 @@ export default function LandingV2Page() {
         </nav>
         <div className="lv2-actions">
           <LanguageSwitch value={language} onChange={setLanguage} />
-          <Link className={BUTTON_VARIANTS.primary} to={primaryCta.to}>
+          <Link className={`${BUTTON_VARIANTS.primary} lv2-nav-cta`} to={primaryCta.to}>
             {primaryCta.label}
           </Link>
         </div>
