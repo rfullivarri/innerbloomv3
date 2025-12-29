@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import './LandingV2.css';
@@ -413,19 +413,54 @@ function LanguageSwitch({ value, onChange }: { value: Language; onChange: (langu
     { code: 'es', label: 'ES' }
   ];
 
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const currentOption = options.find((option) => option.code === value) ?? options[0];
+
+  function handleSelect(language: Language) {
+    onChange(language);
+    setIsOpen(false);
+  }
+
   return (
-    <div className="lv2-lang-toggle" role="group" aria-label="Language selector">
-      {options.map((option) => (
-        <button
-          key={option.code}
-          type="button"
-          className={value === option.code ? 'active' : ''}
-          onClick={() => onChange(option.code)}
-          aria-pressed={value === option.code}
-        >
-          {option.label}
-        </button>
-      ))}
+    <div ref={dropdownRef} className="lv2-lang-toggle" role="group" aria-label="Language selector">
+      <button
+        type="button"
+        className="lv2-lang-button"
+        onClick={() => setIsOpen((open) => !open)}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <span className="lv2-lang-button-label">{currentOption.label}</span>
+        <span className="lv2-lang-caret" aria-hidden>▾</span>
+      </button>
+
+      <div className="lv2-lang-menu" role="listbox" hidden={!isOpen}>
+        {options.map((option) => (
+          <button
+            key={option.code}
+            type="button"
+            role="option"
+            aria-selected={value === option.code}
+            className={value === option.code ? 'active' : ''}
+            onClick={() => handleSelect(option.code)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
