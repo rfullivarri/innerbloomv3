@@ -9,6 +9,7 @@ const buttonBaseClasses =
 
 const buttonVariants = {
   primary: `${buttonBaseClasses} bg-accent-purple text-white shadow-glow hover:bg-accent-purple/90`,
+  journey: `${buttonBaseClasses} journey-button`,
   ghost: `${buttonBaseClasses} border border-white/20 bg-white/5 text-text-subtle hover:bg-white/10 hover:text-white`
 };
 
@@ -242,12 +243,12 @@ export default function LandingPage() {
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 {isSignedIn ? (
-                  <Link className={buttonClasses()} to="/dashboard">
-                    Ir al dashboard
-                  </Link>
-                ) : (
+                    <Link className={buttonClasses()} to="/dashboard">
+                      Ir al dashboard
+                    </Link>
+                  ) : (
                   <>
-                    <Link className={buttonClasses()} to="/intro-journey">
+                    <Link className={buttonClasses('journey')} to="/intro-journey">
                       Comenzar mi Journey
                     </Link>
                     <Link className={buttonClasses('ghost')} to="/login">
@@ -435,7 +436,7 @@ export default function LandingPage() {
                 </Link>
               ) : (
                 <>
-                  <Link className={buttonClasses()} to="/intro-journey">
+                  <Link className={buttonClasses('journey')} to="/intro-journey">
                     Comenzar mi Journey
                   </Link>
                   <Link className={buttonClasses('ghost')} to="/login">
