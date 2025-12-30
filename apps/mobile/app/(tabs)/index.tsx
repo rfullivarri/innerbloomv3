@@ -1,98 +1,260 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Linking,
+  Platform,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import type { WebViewNavigation } from 'react-native-webview';
+import { WebView } from 'react-native-webview';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+type ErrorState = {
+  message: string;
+  url?: string;
+} | null;
+
+const DEFAULT_BASE_URL = 'https://web-dev-dfa2.up.railway.app';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Hola Ramiro!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const baseUrl = process.env.EXPO_PUBLIC_WEB_BASE_URL ?? DEFAULT_BASE_URL;
+  const normalizedBaseUrl = useMemo(() => baseUrl?.replace(/\/$/, ''), [baseUrl]);
+  const dashboardUrl = normalizedBaseUrl ? `${normalizedBaseUrl}/dashboard` : undefined;
+  const [currentUri, setCurrentUri] = useState(dashboardUrl ?? normalizedBaseUrl ?? DEFAULT_BASE_URL);
+  const [canGoBack, setCanGoBack] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<ErrorState>(null);
+  const webViewRef = useRef<WebView>(null);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const onNavigationStateChange = useCallback((navState: WebViewNavigation) => {
+    setCanGoBack(navState.canGoBack);
+  }, []);
+
+  const handleShouldStartLoadWithRequest = useCallback(
+    (request: any) => {
+      const requestUrl = request?.url as string | undefined;
+
+      if (!requestUrl) return false;
+
+      if (requestUrl.startsWith('about:blank')) return true;
+
+      if (requestUrl.startsWith('mailto:') || requestUrl.startsWith('tel:')) {
+        Linking.openURL(requestUrl).catch(() => undefined);
+        return false;
+      }
+
+      try {
+        const requestOrigin = new URL(requestUrl).origin;
+        const baseOrigin = normalizedBaseUrl ? new URL(normalizedBaseUrl).origin : undefined;
+
+        const isSameOrigin = baseOrigin
+          ? requestOrigin === baseOrigin || requestUrl.startsWith(`${normalizedBaseUrl}/`)
+          : true;
+
+        if (!isSameOrigin) {
+          Linking.openURL(requestUrl).catch(() => undefined);
+          return false;
+        }
+      } catch (e) {
+        Linking.openURL(requestUrl).catch(() => undefined);
+        return false;
+      }
+
+      return true;
+    },
+    [normalizedBaseUrl],
+  );
+
+  const handleReload = useCallback(() => {
+    setError(null);
+    setIsLoading(true);
+    webViewRef.current?.reload();
+  }, []);
+
+  const handleBack = useCallback(() => {
+    if (canGoBack) {
+      webViewRef.current?.goBack();
+    }
+  }, [canGoBack]);
+
+  const handleLoadStart = useCallback(() => {
+    setIsLoading(true);
+  }, []);
+
+  const handleLoadEnd = useCallback(() => {
+    setIsLoading(false);
+  }, []);
+
+  const handleHttpError = useCallback(
+    (event: any) => {
+      const { statusCode, url } = event?.nativeEvent ?? {};
+
+      if (statusCode === 404 && dashboardUrl && url?.startsWith(dashboardUrl) && normalizedBaseUrl) {
+        setCurrentUri(normalizedBaseUrl);
+        return;
+      }
+
+      setError({
+        message: `Failed to load content (HTTP ${statusCode ?? 'error'})`,
+        url,
+      });
+      setIsLoading(false);
+    },
+    [dashboardUrl, normalizedBaseUrl],
+  );
+
+  const handleError = useCallback((event: any) => {
+    const failingUrl = event?.nativeEvent?.url as string | undefined;
+    setError({ message: 'An error occurred while loading the page.', url: failingUrl });
+    setIsLoading(false);
+  }, []);
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+      <View style={styles.header}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          disabled={!canGoBack}
+          onPress={handleBack}
+          style={[styles.headerButton, !canGoBack && styles.headerButtonDisabled]}
+        >
+          <Text style={[styles.headerButtonText, !canGoBack && styles.headerButtonTextDisabled]}>Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Innerbloom</Text>
+        <TouchableOpacity accessibilityRole="button" onPress={handleReload} style={styles.headerButton}>
+          <Text style={styles.headerButtonText}>Reload</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.webViewContainer}>
+        {error ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error.message}</Text>
+            {error.url ? <Text style={styles.errorSubtext}>{error.url}</Text> : null}
+            <TouchableOpacity accessibilityRole="button" onPress={handleReload} style={styles.retryButton}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <WebView
+            ref={webViewRef}
+            source={{ uri: currentUri }}
+            startInLoadingState
+            sharedCookiesEnabled
+            thirdPartyCookiesEnabled={Platform.OS === 'android'}
+            domStorageEnabled
+            javaScriptEnabled
+            allowsBackForwardNavigationGestures
+            onNavigationStateChange={onNavigationStateChange}
+            onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
+            renderLoading={() => (
+              <View style={styles.loader}>
+                <ActivityIndicator size="large" color="#0a84ff" />
+              </View>
+            )}
+            onLoadStart={handleLoadStart}
+            onLoadEnd={handleLoadEnd}
+            onHttpError={handleHttpError}
+            onError={handleError}
+          />
+        )}
+        {isLoading && !error ? (
+          <View style={styles.loaderOverlay} pointerEvents="none">
+            <ActivityIndicator size="large" color="#0a84ff" />
+          </View>
+        ) : null}
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fb',
+  },
+  header: {
+    height: 52,
+    paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
+    borderBottomColor: '#e0e4ea',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    backgroundColor: '#ffffff',
   },
-  stepContainer: {
-    gap: 8,
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#0a0a0a',
+  },
+  headerButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: '#eef2f7',
+  },
+  headerButtonText: {
+    color: '#0a84ff',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  headerButtonDisabled: {
+    backgroundColor: '#f3f3f3',
+  },
+  headerButtonTextDisabled: {
+    color: '#9aa0a6',
+  },
+  webViewContainer: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  loader: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+  },
+  loaderOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    backgroundColor: '#ffffff',
+  },
+  errorText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#b00020',
+    textAlign: 'center',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  errorSubtext: {
+    fontSize: 13,
+    color: '#5f6368',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    backgroundColor: '#0a84ff',
+    borderRadius: 10,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
