@@ -4,7 +4,7 @@ import { useAuth } from '@clerk/clerk-react';
 import './LandingV2.css';
 import '../styles/panel-rachas.overrides.css';
 import { Card } from '../components/ui/Card';
-import { AuroraBackground } from '../components/ui/AuroraBackground';
+import { FluidGradientBackground } from '../components/ui/FluidGradientBackground';
 
 type Language = 'en' | 'es';
 
@@ -899,7 +899,7 @@ export default function LandingV2Page() {
 
       <main>
         <section className="lv2-hero" id="hero">
-          <AuroraBackground className="lv2-hero-aurora">
+          <FluidGradientBackground className="lv2-hero-fluid">
             <div className="lv2-container lv2-hero-grid">
               <div className="lv2-hero-copy">
                 <p className="lv2-kicker">Habits • Gamification</p>
@@ -979,7 +979,7 @@ export default function LandingV2Page() {
                 </div>
               </div>
             </div>
-          </AuroraBackground>
+          </FluidGradientBackground>
         </section>
 
         <section className="lv2-section" id="highlights">
