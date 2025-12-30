@@ -221,10 +221,10 @@
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: none;
   background: rgba(255, 255, 255, 0.06);
   color: #cbd5f5;
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: 0.06em;
   font-size: 11px;
   cursor: pointer;
@@ -273,7 +273,7 @@
   border: none;
   background: transparent;
   color: #cbd5f5;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.04em;
   font-size: 11px;
   cursor: pointer;
