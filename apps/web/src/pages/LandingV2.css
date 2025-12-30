@@ -9,11 +9,11 @@
   --accent: var(--color-accent-secondary);
   --accent-2: var(--color-accent-primary);
   --line: color-mix(in srgb, var(--color-text-subtle) 18%, transparent);
-  --fluid-bg: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-muted) 12%);
-  --fluid-c1: color-mix(in srgb, var(--color-accent-secondary) 26%, var(--color-surface) 74%);
-  --fluid-c2: color-mix(in srgb, var(--color-accent-primary) 24%, var(--color-surface) 76%);
-  --fluid-c3: color-mix(in srgb, var(--color-text-subtle) 22%, var(--color-surface-muted) 78%);
-  --fluid-c4: color-mix(in srgb, var(--color-text) 14%, var(--color-surface) 86%);
+  --fluid-bg: #f1e8ff;
+  --fluid-c1: #f7b8d4;
+  --fluid-c2: #ffd3a4;
+  --fluid-c3: #cbbcf6;
+  --fluid-c4: #ffe9f2;
   --low: #fb7185;
   --chill: #34d399;
   --flow: #38bdf8;
@@ -28,11 +28,11 @@
 
 :root[data-theme='light'] .landing-v2 {
   --line: color-mix(in srgb, var(--color-text-subtle) 20%, transparent);
-  --fluid-bg: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-muted) 10%);
-  --fluid-c1: color-mix(in srgb, var(--color-accent-primary) 28%, var(--color-surface) 72%);
-  --fluid-c2: color-mix(in srgb, var(--color-accent-secondary) 26%, var(--color-surface-muted) 74%);
-  --fluid-c3: color-mix(in srgb, var(--color-text-muted) 22%, var(--color-surface) 78%);
-  --fluid-c4: color-mix(in srgb, var(--color-text) 18%, var(--color-surface) 82%);
+  --fluid-bg: #f8eefc;
+  --fluid-c1: #f58fb8;
+  --fluid-c2: #ffbf8f;
+  --fluid-c3: #b7a2f0;
+  --fluid-c4: #ffd9ec;
 }
 
 .landing-v2 > * {
