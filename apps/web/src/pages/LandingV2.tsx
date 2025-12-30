@@ -866,6 +866,7 @@ export default function LandingV2Page() {
     [copy.hero.cta, isSignedIn]
   );
   const [avatarIndex, setAvatarIndex] = useState(0);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -875,8 +876,16 @@ export default function LandingV2Page() {
     return () => window.clearInterval(intervalId);
   }, []);
 
+  useEffect(() => {
+    document.documentElement.style.setProperty('color-scheme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
+  };
+
   return (
-    <div className="landing-v2">
+    <div className="landing-v2" data-theme={theme}>
       <header className="lv2-nav">
         <Link className="lv2-brand" to="/landing-v2" aria-label="Innerbloom — Landing V2">
           <img src="/IB-COLOR-LOGO.png" alt="Innerbloom" className="lv2-logo" width={40} height={40} loading="lazy" />
@@ -890,6 +899,9 @@ export default function LandingV2Page() {
           ))}
         </nav>
         <div className="lv2-actions">
+          <button type="button" className="lv2-theme-toggle" onClick={toggleTheme}>
+            {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+          </button>
           <LanguageSwitch value={language} onChange={setLanguage} />
           <Link className={`${BUTTON_VARIANTS.primary} lv2-nav-cta`} to={primaryCta.to}>
             {primaryCta.label}
