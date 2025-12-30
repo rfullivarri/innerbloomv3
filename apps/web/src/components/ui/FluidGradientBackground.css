@@ -1,0 +1,129 @@
+.fluid-gradient {
+  position: relative;
+  isolation: isolate;
+}
+
+.fluid-gradient__content {
+  position: relative;
+  z-index: 1;
+}
+
+.fluid-gradient__surface {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--fluid-bg, var(--color-surface));
+}
+
+.fluid-gradient__surface::after {
+  content: '';
+  position: absolute;
+  inset: -12%;
+  background: radial-gradient(
+      120% 120% at 50% 40%,
+      color-mix(in srgb, var(--fluid-bg, transparent) 82%, transparent) 0%,
+      transparent 38%,
+      color-mix(in srgb, var(--fluid-bg, transparent) 70%, transparent) 72%
+    ),
+    radial-gradient(110% 90% at 50% 60%, color-mix(in srgb, var(--fluid-bg, transparent) 90%, transparent) 0%, transparent 48%);
+  mix-blend-mode: soft-light;
+  opacity: 0.75;
+}
+
+.fluid-gradient__blob {
+  position: absolute;
+  width: 68%;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  filter: blur(var(--fluid-blur, 140px));
+  opacity: 0.9;
+  transform-origin: center;
+  will-change: transform;
+  background: radial-gradient(circle, var(--fluid-c1, rgba(255, 255, 255, 0.22)) 0%, transparent 58%);
+  animation: fluid-drift-1 18s ease-in-out infinite alternate;
+}
+
+.fluid-gradient__blob--one {
+  top: -14%;
+  left: -6%;
+  background: radial-gradient(circle at 30% 30%, var(--fluid-c1, rgba(255, 255, 255, 0.2)) 0%, transparent 60%);
+  animation-duration: 22s;
+}
+
+.fluid-gradient__blob--two {
+  top: -10%;
+  right: -10%;
+  background: radial-gradient(circle at 70% 28%, var(--fluid-c2, rgba(255, 255, 255, 0.18)) 0%, transparent 58%);
+  animation: fluid-drift-2 19s ease-in-out infinite alternate;
+}
+
+.fluid-gradient__blob--three {
+  bottom: -18%;
+  left: -12%;
+  background: radial-gradient(circle at 28% 70%, var(--fluid-c3, rgba(255, 255, 255, 0.16)) 0%, transparent 62%);
+  animation: fluid-drift-3 16s ease-in-out infinite alternate;
+  opacity: 0.82;
+}
+
+.fluid-gradient__blob--four {
+  bottom: -22%;
+  right: -10%;
+  background: radial-gradient(circle at 72% 70%, var(--fluid-c4, rgba(255, 255, 255, 0.14)) 0%, transparent 60%);
+  animation: fluid-drift-4 21s ease-in-out infinite alternate;
+  opacity: 0.78;
+}
+
+@keyframes fluid-drift-1 {
+  0% {
+    transform: translate3d(-4%, 2%, 0) scale(1) rotate(-2deg);
+  }
+  50% {
+    transform: translate3d(6%, -2%, 0) scale(1.06) rotate(3deg);
+  }
+  100% {
+    transform: translate3d(4%, 6%, 0) scale(1.02) rotate(-1deg);
+  }
+}
+
+@keyframes fluid-drift-2 {
+  0% {
+    transform: translate3d(4%, -2%, 0) scale(1.04) rotate(2deg);
+  }
+  50% {
+    transform: translate3d(-3%, 3%, 0) scale(1.12) rotate(-1deg);
+  }
+  100% {
+    transform: translate3d(5%, 6%, 0) scale(1.06) rotate(2deg);
+  }
+}
+
+@keyframes fluid-drift-3 {
+  0% {
+    transform: translate3d(0%, 6%, 0) scale(1.02) rotate(1deg);
+  }
+  50% {
+    transform: translate3d(6%, -4%, 0) scale(1.08) rotate(-2deg);
+  }
+  100% {
+    transform: translate3d(-4%, 2%, 0) scale(1.04) rotate(0deg);
+  }
+}
+
+@keyframes fluid-drift-4 {
+  0% {
+    transform: translate3d(-6%, 8%, 0) scale(1.08) rotate(-3deg);
+  }
+  50% {
+    transform: translate3d(2%, -4%, 0) scale(1) rotate(2deg);
+  }
+  100% {
+    transform: translate3d(6%, 2%, 0) scale(1.06) rotate(-2deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fluid-gradient__blob {
+    animation-duration: 120s;
+  }
+}
