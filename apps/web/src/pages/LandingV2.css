@@ -1,19 +1,20 @@
+
 .landing-v2 {
   --font-heading: 'Sora', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   --font-body: 'Manrope', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  --bg: var(--color-surface);
-  --bg-2: var(--color-surface-muted);
-  --card: var(--color-surface-elevated);
+  --bg: #0b1220;
+  --bg-2: #0f1a2e;
+  --card: #111f35;
   --ink: var(--color-text);
-  --muted: var(--color-text-subtle);
+  --muted: color-mix(in srgb, var(--color-text-subtle) 85%, #cbd5f5 15%);
   --accent: var(--color-accent-secondary);
   --accent-2: var(--color-accent-primary);
-  --line: color-mix(in srgb, var(--color-text-subtle) 18%, transparent);
-  --fluid-bg: #f1e8ff;
-  --fluid-c1: #f7b8d4;
-  --fluid-c2: #ffd3a4;
-  --fluid-c3: #cbbcf6;
-  --fluid-c4: #ffe9f2;
+  --line: color-mix(in srgb, var(--color-accent-primary) 24%, transparent);
+  --fluid-bg: #0f172a;
+  --fluid-c1: #38bdf8;
+  --fluid-c2: #8b5cf6;
+  --fluid-c3: #22d3ee;
+  --fluid-c4: #a5b4fc;
   --low: #fb7185;
   --chill: #34d399;
   --flow: #38bdf8;
@@ -21,18 +22,21 @@
   position: relative;
   min-height: 100vh;
   color: var(--ink);
-  background: var(--bg);
+  background: radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.16), transparent 32%),
+    radial-gradient(circle at 82% 24%, rgba(139, 92, 246, 0.14), transparent 36%),
+    radial-gradient(circle at 30% 82%, rgba(14, 165, 233, 0.12), transparent 36%),
+    var(--bg);
   font-family: var(--font-body);
   overflow-x: hidden;
 }
 
 :root[data-theme='light'] .landing-v2 {
-  --line: color-mix(in srgb, var(--color-text-subtle) 20%, transparent);
-  --fluid-bg: #f8eefc;
-  --fluid-c1: #f58fb8;
-  --fluid-c2: #ffbf8f;
-  --fluid-c3: #b7a2f0;
-  --fluid-c4: #ffd9ec;
+  --line: color-mix(in srgb, var(--color-accent-primary) 22%, transparent);
+  --fluid-bg: #e6efff;
+  --fluid-c1: #38bdf8;
+  --fluid-c2: #2563eb;
+  --fluid-c3: #a855f7;
+  --fluid-c4: #c4d4ff;
 }
 
 .landing-v2 > * {
@@ -58,10 +62,10 @@
   align-items: center;
   gap: 10px;
   padding: 10px 16px;
-  background: rgba(17, 28, 51, 0.82);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.24);
+  background: linear-gradient(120deg, rgba(12, 20, 38, 0.9), rgba(18, 30, 56, 0.88));
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent-primary) 35%, transparent);
+  box-shadow: 0 14px 46px rgba(6, 28, 52, 0.45);
   z-index: 20;
 }
 
@@ -75,8 +79,8 @@
   font-family: var(--font-heading);
   padding: 6px 10px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.26), rgba(56, 189, 248, 0.18));
+  border: 1px solid color-mix(in srgb, var(--color-accent-secondary) 40%, transparent);
 }
 
 .lv2-logo {
@@ -113,7 +117,7 @@
 }
 
 .lv2-links a {
-  color: #d2dcff;
+  color: #d6e8ff;
   text-decoration: none;
   font-weight: 700;
   font-size: 13px;
@@ -125,8 +129,8 @@
 
 .lv2-links a:hover {
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.04);
+  border-color: color-mix(in srgb, var(--color-accent-primary) 40%, transparent);
+  background: color-mix(in srgb, var(--color-accent-primary) 16%, rgba(255, 255, 255, 0.06));
 }
 
 .lv2-actions {
@@ -148,7 +152,7 @@
   padding: 4px 6px;
   border: none;
   background: transparent;
-  color: #cbd5f5;
+  color: #d7e8ff;
   font-weight: 800;
   letter-spacing: 0.06em;
   font-size: 11px;
@@ -160,7 +164,7 @@
 .lv2-lang-button:hover,
 .lv2-lang-button:focus-visible {
   color: #fff;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--color-accent-secondary) 14%, transparent);
   outline: none;
 }
 
@@ -180,8 +184,8 @@
   left: 0;
   min-width: 112px;
   padding: 6px;
-  background: rgba(15, 23, 42, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(150deg, rgba(12, 19, 36, 0.96), rgba(19, 31, 54, 0.9));
+  border: 1px solid color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   display: grid;
@@ -209,13 +213,13 @@
 
 .lv2-lang-menu button:hover,
 .lv2-lang-menu button:focus-visible {
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--color-accent-primary) 14%, rgba(255, 255, 255, 0.06));
   color: #fff;
   outline: none;
 }
 
 .lv2-lang-menu button.active {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(56, 189, 248, 0.32));
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.55), rgba(56, 189, 248, 0.45));
   color: #fff;
 }
 
@@ -227,7 +231,7 @@
 
 .lv2-hero-fluid {
   border-radius: clamp(22px, 2vw, 34px);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 24px 70px rgba(6, 28, 52, 0.4);
 }
 
 .lv2-hero-fluid .fluid-gradient__surface {
@@ -488,8 +492,9 @@
   gap: 8px;
   padding: 8px 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--color-accent-primary) 12%, rgba(255, 255, 255, 0.02)),
+      color-mix(in srgb, var(--color-accent-secondary) 12%, rgba(255, 255, 255, 0.02)));
+  border: 1px solid color-mix(in srgb, var(--color-accent-primary) 24%, transparent);
   font-weight: 700;
   color: #e2e8f0;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -502,7 +507,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #cbd5f5;
+  color: color-mix(in srgb, var(--color-accent-primary) 70%, #dbeafe 30%);
   font-size: 0.78rem;
 }
 
@@ -541,8 +546,9 @@
   inset: auto;
   border-radius: 18px;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(24, 38, 64, 0.92), rgba(17, 28, 51, 0.8));
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 86%, rgba(56, 189, 248, 0.14)),
+      color-mix(in srgb, var(--bg-2) 92%, rgba(139, 92, 246, 0.12)));
+  box-shadow: 0 24px 80px rgba(6, 28, 52, 0.55);
   backdrop-filter: blur(10px);
 }
 
@@ -605,23 +611,23 @@
 .lv2-mini-heatmap .cell {
   aspect-ratio: 1 / 1;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--card) 60%, rgba(56, 189, 248, 0.12));
 }
 
 .cell-1 {
-  background: rgba(56, 189, 248, 0.35);
+  background: color-mix(in srgb, var(--color-accent-primary) 65%, rgba(12, 20, 38, 0.2));
 }
 .cell-2 {
-  background: rgba(56, 189, 248, 0.5);
+  background: color-mix(in srgb, var(--color-accent-primary) 75%, rgba(12, 20, 38, 0.16));
 }
 .cell-3 {
-  background: rgba(139, 92, 246, 0.5);
+  background: color-mix(in srgb, var(--color-accent-secondary) 72%, rgba(12, 20, 38, 0.14));
 }
 .cell-4 {
-  background: rgba(139, 92, 246, 0.68);
+  background: color-mix(in srgb, var(--color-accent-secondary) 82%, rgba(12, 20, 38, 0.12));
 }
 .cell-5 {
-  background: rgba(251, 113, 133, 0.62);
+  background: color-mix(in srgb, #fb7185 82%, rgba(12, 20, 38, 0.12));
 }
 
 .lv2-legend {
@@ -794,11 +800,12 @@
 }
 
 .lv2-card {
-  background: linear-gradient(180deg, rgba(24, 38, 64, 0.9), rgba(17, 28, 51, 0.78));
-  border: 1px solid var(--line);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 88%, rgba(56, 189, 248, 0.1)),
+      color-mix(in srgb, var(--bg-2) 90%, rgba(139, 92, 246, 0.12)));
+  border: 1px solid color-mix(in srgb, var(--line) 70%, rgba(255, 255, 255, 0.05));
   border-radius: 16px;
   padding: 18px;
-  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 16px 60px rgba(6, 28, 52, 0.42);
 }
 
 .lv2-mode-card {
@@ -818,8 +825,8 @@
 }
 
 .lv2-mode-card .lv2-bullets li {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--color-accent-primary) 12%, rgba(255, 255, 255, 0.04));
+  border: 1px solid color-mix(in srgb, var(--color-accent-primary) 22%, rgba(255, 255, 255, 0.08));
   font-weight: 700;
 }
 
@@ -835,7 +842,7 @@
 }
 
 .lv2-card-sub {
-  color: #dbe7ff;
+  color: color-mix(in srgb, var(--muted) 68%, #e2f3ff 32%);
   margin: 0;
 }
 
@@ -932,8 +939,9 @@
 }
 
 .lv2-faq details {
-  background: linear-gradient(180deg, rgba(24, 38, 64, 0.9), rgba(17, 28, 51, 0.8));
-  border: 1px solid var(--line);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 86%, rgba(56, 189, 248, 0.12)),
+      color-mix(in srgb, var(--bg-2) 90%, rgba(139, 92, 246, 0.1)));
+  border: 1px solid color-mix(in srgb, var(--color-accent-primary) 24%, transparent);
   border-radius: 16px;
   padding: 16px 18px;
   margin-bottom: 10px;
@@ -995,8 +1003,8 @@
   font-size: 11px;
   font-weight: 700;
   color: #e2e8f0;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(120deg, rgba(56, 189, 248, 0.16), rgba(139, 92, 246, 0.16));
+  border: 1px solid color-mix(in srgb, var(--color-accent-primary) 38%, transparent);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
