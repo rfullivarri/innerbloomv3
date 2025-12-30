@@ -5,8 +5,8 @@
   --bg: #0b1220;
   --bg-2: #0f1a2e;
   --card: #111f35;
-  --ink: var(--color-text);
-  --muted: color-mix(in srgb, var(--color-text-subtle) 85%, #cbd5f5 15%);
+  --ink: #eaf1ff;
+  --muted: color-mix(in srgb, #d6e5ff 72%, #9fb6e3 28%);
   --accent: var(--color-accent-secondary);
   --accent-2: var(--color-accent-primary);
   --line: color-mix(in srgb, var(--color-accent-primary) 24%, transparent);
@@ -22,16 +22,39 @@
   position: relative;
   min-height: 100vh;
   color: var(--ink);
+  background-color: var(--bg);
   background: radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.16), transparent 32%),
     radial-gradient(circle at 82% 24%, rgba(139, 92, 246, 0.14), transparent 36%),
     radial-gradient(circle at 30% 82%, rgba(14, 165, 233, 0.12), transparent 36%),
-    var(--bg);
+    radial-gradient(circle at 70% 82%, rgba(59, 130, 246, 0.08), transparent 40%), var(--bg);
   font-family: var(--font-body);
   overflow-x: hidden;
 }
 
-:root[data-theme='light'] .landing-v2 {
-  --line: color-mix(in srgb, var(--color-accent-primary) 22%, transparent);
+.landing-v2::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 16% 18%, color-mix(in srgb, var(--fluid-c1) 40%, transparent) 0%, transparent 40%),
+    radial-gradient(circle at 86% 22%, color-mix(in srgb, var(--fluid-c2) 36%, transparent) 0%, transparent 42%),
+    radial-gradient(circle at 28% 80%, color-mix(in srgb, var(--fluid-c3) 32%, transparent) 0%, transparent 46%),
+    radial-gradient(circle at 78% 74%, color-mix(in srgb, var(--fluid-c4) 36%, transparent) 0%, transparent 46%),
+    linear-gradient(140deg, color-mix(in srgb, var(--bg) 88%, transparent), color-mix(in srgb, var(--bg-2) 82%, transparent));
+  opacity: 0.8;
+  filter: saturate(1.05) blur(0px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.landing-v2[data-theme='light'] {
+  --bg: #e9f1ff;
+  --bg-2: #dbe7ff;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #2563eb;
+  --accent-2: #7c3aed;
+  --line: color-mix(in srgb, var(--accent) 22%, transparent);
   --fluid-bg: #e6efff;
   --fluid-c1: #38bdf8;
   --fluid-c2: #2563eb;
@@ -62,11 +85,18 @@
   align-items: center;
   gap: 10px;
   padding: 10px 16px;
-  background: linear-gradient(120deg, rgba(12, 20, 38, 0.9), rgba(18, 30, 56, 0.88));
+  background: linear-gradient(120deg, color-mix(in srgb, var(--bg) 86%, rgba(56, 189, 248, 0.08)),
+      color-mix(in srgb, var(--bg-2) 90%, rgba(139, 92, 246, 0.08)));
   backdrop-filter: blur(16px);
   border-bottom: 1px solid color-mix(in srgb, var(--color-accent-primary) 35%, transparent);
   box-shadow: 0 14px 46px rgba(6, 28, 52, 0.45);
   z-index: 20;
+}
+
+.landing-v2[data-theme='light'] .lv2-nav {
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.92), rgba(233, 240, 255, 0.92));
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.12);
 }
 
 .lv2-brand {
@@ -74,13 +104,20 @@
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 10px;
-  color: #fff;
+  color: var(--ink);
   text-decoration: none;
   font-family: var(--font-heading);
   padding: 6px 10px;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.26), rgba(56, 189, 248, 0.18));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-2) 28%, transparent),
+      color-mix(in srgb, var(--accent) 22%, transparent));
   border: 1px solid color-mix(in srgb, var(--color-accent-secondary) 40%, transparent);
+}
+
+.landing-v2[data-theme='light'] .lv2-brand {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, transparent),
+      color-mix(in srgb, var(--accent-2) 10%, transparent));
+  border-color: color-mix(in srgb, var(--accent) 24%, transparent);
 }
 
 .lv2-logo {
@@ -100,7 +137,7 @@
   margin-top: -4px;
   font-size: 12px;
   font-weight: 700;
-  color: rgba(226, 232, 240, 0.75);
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
 }
 
 .lv2-links {
@@ -117,7 +154,7 @@
 }
 
 .lv2-links a {
-  color: #d6e8ff;
+  color: color-mix(in srgb, var(--ink) 76%, #dce8ff 24%);
   text-decoration: none;
   font-weight: 700;
   font-size: 13px;
@@ -128,9 +165,18 @@
 }
 
 .lv2-links a:hover {
-  color: #fff;
+  color: var(--ink);
   border-color: color-mix(in srgb, var(--color-accent-primary) 40%, transparent);
   background: color-mix(in srgb, var(--color-accent-primary) 16%, rgba(255, 255, 255, 0.06));
+}
+
+.landing-v2[data-theme='light'] .lv2-links a {
+  color: color-mix(in srgb, var(--ink) 82%, #1f2a44 18%);
+}
+
+.landing-v2[data-theme='light'] .lv2-links a:hover {
+  background: color-mix(in srgb, var(--accent) 12%, rgba(255, 255, 255, 0.85));
+  border-color: color-mix(in srgb, var(--accent) 26%, transparent);
 }
 
 .lv2-actions {
@@ -145,6 +191,39 @@
   align-items: center;
 }
 
+.lv2-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-accent-primary) 28%, transparent);
+  background: color-mix(in srgb, var(--bg-2) 76%, rgba(255, 255, 255, 0.05));
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform 120ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.lv2-theme-toggle:hover,
+.lv2-theme-toggle:focus-visible {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--color-accent-secondary) 16%, rgba(255, 255, 255, 0.08));
+  border-color: color-mix(in srgb, var(--color-accent-secondary) 36%, transparent);
+  outline: none;
+}
+
+.landing-v2[data-theme='light'] .lv2-theme-toggle {
+  background: color-mix(in srgb, #ffffff 92%, var(--accent) 6%);
+  border-color: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.landing-v2[data-theme='light'] .lv2-theme-toggle:hover,
+.landing-v2[data-theme='light'] .lv2-theme-toggle:focus-visible {
+  background: color-mix(in srgb, #ffffff 96%, var(--accent) 10%);
+}
+
 .lv2-lang-button {
   display: inline-flex;
   align-items: center;
@@ -152,7 +231,7 @@
   padding: 4px 6px;
   border: none;
   background: transparent;
-  color: #d7e8ff;
+  color: color-mix(in srgb, var(--ink) 78%, #cbd5f5 22%);
   font-weight: 800;
   letter-spacing: 0.06em;
   font-size: 11px;
@@ -163,7 +242,7 @@
 
 .lv2-lang-button:hover,
 .lv2-lang-button:focus-visible {
-  color: #fff;
+  color: var(--ink);
   background: color-mix(in srgb, var(--color-accent-secondary) 14%, transparent);
   outline: none;
 }
@@ -214,13 +293,13 @@
 .lv2-lang-menu button:hover,
 .lv2-lang-menu button:focus-visible {
   background: color-mix(in srgb, var(--color-accent-primary) 14%, rgba(255, 255, 255, 0.06));
-  color: #fff;
+  color: var(--ink);
   outline: none;
 }
 
 .lv2-lang-menu button.active {
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.55), rgba(56, 189, 248, 0.45));
-  color: #fff;
+  color: var(--ink);
 }
 
 .lv2-hero {
@@ -741,7 +820,7 @@
   border-radius: 10px;
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.22), rgba(56, 189, 248, 0.2));
   font-weight: 800;
-  color: #fff;
+  color: var(--ink);
   white-space: nowrap;
 }
 
