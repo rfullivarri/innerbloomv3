@@ -8,3 +8,11 @@ coverage
 apps/mobile/ios/
 apps/mobile/android
 apps/mobile/**/*.ipa
+
+# Expo shared
+.expo-shared/
+
+# env files (dev)
+.env
+.env.*
+!.env.example
