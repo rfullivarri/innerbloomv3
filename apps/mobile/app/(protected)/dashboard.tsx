@@ -126,7 +126,7 @@ function createTabs(routes: DashboardRoutes): TabConfig[] {
     },
     {
       key: 'dquest',
-      label: 'DQuest',
+      label: 'Daily',
       path: routes.dquest,
       matchers: [routes.dquest.toLowerCase()],
       Icon: FlameIcon,
