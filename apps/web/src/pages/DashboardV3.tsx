@@ -55,6 +55,7 @@ import { NotificationPopup } from '../components/feedback/NotificationPopup';
 import { useFeedbackNotifications } from '../hooks/useFeedbackNotifications';
 import { useWeeklyWrapped } from '../hooks/useWeeklyWrapped';
 import { WeeklyWrappedModal } from '../components/feedback/WeeklyWrappedModal';
+import { useAppMode } from '../hooks/useAppMode';
 
 export default function DashboardV3Page() {
   const { user } = useUser();
@@ -79,6 +80,7 @@ export default function DashboardV3Page() {
   const normalizedGameMode = normalizeGameModeValue(rawGameMode);
   const gameMode = normalizedGameMode ?? (typeof rawGameMode === 'string' ? rawGameMode : null);
   const weeklyWrapped = useWeeklyWrapped(backendUserId);
+  const isAppMode = useAppMode();
 
   useEffect(() => {
     if (!clerkUserId || typeof window === 'undefined') {
@@ -279,20 +281,22 @@ export default function DashboardV3Page() {
             )}
           </div>
         </main>
-        <MobileBottomNav
-          items={sections.map((section) => {
-            const Icon = section.icon;
+        {!isAppMode && (
+          <MobileBottomNav
+            items={sections.map((section) => {
+              const Icon = section.icon;
 
-            return {
-              key: section.key,
-              label: section.key === 'editor' ? 'Editor' : section.label,
-              to: section.to,
-              icon: <Icon className="h-4 w-4" />,
-              end: section.end,
-              onClick: section.key === 'dquest' ? handleOpenDaily : undefined,
-            };
-          })}
-        />
+              return {
+                key: section.key,
+                label: section.key === 'editor' ? 'Editor' : section.label,
+                to: section.to,
+                icon: <Icon className="h-4 w-4" />,
+                end: section.end,
+                onClick: section.key === 'dquest' ? handleOpenDaily : undefined,
+              };
+            })}
+          />
+        )}
       </div>
     </DevErrorBoundary>
   );

@@ -18,6 +18,7 @@ import { useCreateTask, useDeleteTask, useUpdateTask, useUserTasks } from '../..
 import { useDifficulties, usePillars, useStats, useTraits } from '../../hooks/useCatalogs';
 import { type UserTask } from '../../lib/api';
 import { fetchCatalogStats, fetchCatalogTraits, type Pillar } from '../../lib/api/catalogs';
+import { useAppMode } from '../../hooks/useAppMode';
 import {
   getActiveSection,
   getDashboardSectionConfig,
@@ -43,6 +44,7 @@ export default function TaskEditorPage() {
     reload: reloadPillars,
   } = usePillars();
   const { data: difficulties } = useDifficulties();
+  const isAppMode = useAppMode();
 
   const [traitNamesById, setTraitNamesById] = useState<Record<string, string>>({});
   const [statNamesById, setStatNamesById] = useState<Record<string, string>>({});
@@ -453,19 +455,21 @@ export default function TaskEditorPage() {
             </Card>
           </div>
         </main>
-        <MobileBottomNav
-          items={sections.map((section) => {
-            const Icon = section.icon;
+        {!isAppMode && (
+          <MobileBottomNav
+            items={sections.map((section) => {
+              const Icon = section.icon;
 
-            return {
-              key: section.key,
-              label: section.key === 'editor' ? 'Editor' : section.label,
-              to: section.to,
-              icon: <Icon className="h-4 w-4" />,
-              end: section.end,
-            };
-          })}
-        />
+              return {
+                key: section.key,
+                label: section.key === 'editor' ? 'Editor' : section.label,
+                to: section.to,
+                icon: <Icon className="h-4 w-4" />,
+                end: section.end,
+              };
+            })}
+          />
+        )}
         <button
           type="button"
           onClick={handleCreateClick}
