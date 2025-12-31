@@ -1,20 +1,23 @@
 .landing {
   --font-heading: 'Sora', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   --font-body: 'Manrope', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  --bg: #0f172a;
-  --bg-2: #111c33;
-  --card: #182640;
-  --ink: #f8fafc;
-  --muted: #94a3b8;
-  --accent: #8b5cf6;
-  --accent-2: #38bdf8;
-  --line: rgba(148, 163, 184, 0.18);
+  --bg: #0b1220;
+  --bg-2: #0f1a2e;
+  --card: #111f35;
+  --ink: #eaf1ff;
+  --muted: color-mix(in srgb, #d6e5ff 72%, #9fb6e3 28%);
+  --accent: var(--color-accent-secondary);
+  --accent-2: var(--color-accent-primary);
+  --line: color-mix(in srgb, var(--color-accent-primary) 24%, transparent);
+  --fluid-bg: #0f172a;
+  --fluid-c1: #38bdf8;
+  --fluid-c2: #8b5cf6;
+  --fluid-c3: #22d3ee;
+  --fluid-c4: #a5b4fc;
   --low: #fb7185;
   --chill: #34d399;
   --flow: #38bdf8;
   --evolve: #8b5cf6;
-  --glow-1: rgba(139, 92, 246, 0.35);
-  --glow-2: rgba(56, 189, 248, 0.28);
   --hero-size: min(480px, 80vw);
   position: relative;
   min-height: 100vh;
@@ -22,45 +25,29 @@
   font-family: var(--font-body);
   color: var(--ink);
   background: var(--bg);
-  isolation: isolate;
 }
 
 .landing::before {
   content: '';
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background:
-    radial-gradient(55% 50% at 12% 12%, color-mix(in srgb, var(--accent) 62%, transparent), transparent 70%),
-    radial-gradient(48% 45% at 84% 16%, color-mix(in srgb, var(--accent-2) 58%, transparent), transparent 68%),
-    radial-gradient(44% 40% at 16% 82%, color-mix(in srgb, var(--glow-1) 60%, transparent), transparent 70%),
-    radial-gradient(58% 52% at 78% 76%, color-mix(in srgb, var(--glow-2) 62%, transparent), transparent 72%);
-  background-repeat: no-repeat;
-  transform: translateZ(0);
-  filter: blur(56px) saturate(1.18);
-  opacity: 0.9;
-  will-change: transform, background-position;
-  mix-blend-mode: screen;
-  /* Ajustá velocidad con la duración de meshFloat y blur con el filtro. */
-  animation: meshFloat 16s ease-in-out infinite;
+  background: radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.16), transparent 32%),
+    radial-gradient(circle at 82% 24%, rgba(139, 92, 246, 0.14), transparent 36%),
+    radial-gradient(circle at 30% 82%, rgba(14, 165, 233, 0.12), transparent 36%),
+    radial-gradient(circle at 70% 82%, rgba(59, 130, 246, 0.08), transparent 40%),
+    radial-gradient(circle at 16% 18%, color-mix(in srgb, var(--fluid-c1) 40%, transparent) 0%, transparent 40%),
+    radial-gradient(circle at 86% 22%, color-mix(in srgb, var(--fluid-c2) 36%, transparent) 0%, transparent 42%),
+    radial-gradient(circle at 28% 80%, color-mix(in srgb, var(--fluid-c3) 32%, transparent) 0%, transparent 46%),
+    radial-gradient(circle at 78% 74%, color-mix(in srgb, var(--fluid-c4) 36%, transparent) 0%, transparent 46%),
+    linear-gradient(140deg, color-mix(in srgb, var(--bg) 88%, transparent), color-mix(in srgb, var(--bg-2) 82%, transparent));
+  opacity: 0.8;
+  filter: saturate(1.05) blur(0px);
 }
 
 .landing::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(60% 55% at 50% 12%, rgba(15, 23, 42, 0.55), transparent 70%),
-    radial-gradient(80% 70% at 50% 92%, rgba(15, 23, 42, 0.7), transparent 75%),
-    radial-gradient(36% 32% at 68% 40%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 70%),
-    radial-gradient(32% 36% at 32% 56%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 68%);
-  background-repeat: no-repeat;
-  opacity: 0.75;
-  will-change: transform, opacity, background-position;
-  animation: meshDrift 22s ease-in-out infinite;
+  content: none;
 }
 
 .landing > * {
