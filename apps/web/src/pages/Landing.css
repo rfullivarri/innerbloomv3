@@ -220,23 +220,22 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 4px 6px;
   border: none;
-  background: rgba(255, 255, 255, 0.06);
-  color: #cbd5f5;
-  font-weight: 500;
+  background: transparent;
+  color: color-mix(in srgb, var(--ink) 78%, #cbd5f5 22%);
+  font-weight: 800;
   letter-spacing: 0.06em;
   font-size: 11px;
   cursor: pointer;
-  border-radius: 12px;
-  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+  border-radius: 8px;
+  transition: color 150ms ease, background-color 150ms ease;
 }
 
 .landing .lang-button:hover,
 .landing .lang-button:focus-visible {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.24);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent-2) 14%, transparent);
   outline: none;
 }
 
@@ -256,8 +255,8 @@
   left: 0;
   min-width: 112px;
   padding: 6px;
-  background: rgba(15, 23, 42, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(150deg, rgba(12, 19, 36, 0.96), rgba(19, 31, 54, 0.9));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   display: grid;
@@ -273,7 +272,7 @@
   border: none;
   background: transparent;
   color: #cbd5f5;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 0.04em;
   font-size: 11px;
   cursor: pointer;
@@ -281,14 +280,14 @@
 
 .landing .lang-menu button:hover,
 .landing .lang-menu button:focus-visible {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: color-mix(in srgb, var(--accent) 14%, rgba(255, 255, 255, 0.06));
+  color: var(--ink);
   outline: none;
 }
 
 .landing .lang-menu button.active {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(56, 189, 248, 0.32));
-  color: #fff;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.55), rgba(56, 189, 248, 0.45));
+  color: var(--ink);
 }
 
 .landing .hero {
@@ -764,17 +763,10 @@
   }
 
   .landing .lang-button {
-    font-size: 9px;
-    padding: 4px 6px;
-    gap: 4px;
-    border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.03);
+    font-size: 8px;
+    padding: 2px 4px;
+    gap: 3px;
     letter-spacing: 0.05em;
-  }
-
-  .landing .lang-button:focus-visible {
-    outline: 2px solid rgba(139, 92, 246, 0.6);
-    outline-offset: 2px;
   }
 
   .landing .lang-caret {
