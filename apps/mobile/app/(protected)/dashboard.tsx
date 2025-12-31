@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ComponentProps } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ComponentProps, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Linking,
-  Platform,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -18,7 +17,10 @@ import { WebView } from 'react-native-webview';
 // eslint-disable-next-line import/no-unresolved
 import Svg, { Circle, Path } from 'react-native-svg';
 
-import { DEFAULT_BASE_URL, buildAppUrl, normalizeBaseUrl } from '../utils/url';
+import { getDashboardRoutes, type DashboardRoutes } from '@/constants/routes';
+import { WebViewProvider, useWebViewController } from '@/hooks/webview-controller';
+
+import { DEFAULT_BASE_URL, buildAppUrl } from '../utils/url';
 
 const APP_FLAG_SCRIPT = 'window.__INNERBLOOM_NATIVE_APP__ = true; true;';
 
@@ -29,7 +31,7 @@ type TabConfig = {
   label: string;
   path: string;
   matchers: string[];
-  Icon: typeof SvgIcon;
+  Icon: typeof RouteIcon;
 };
 
 type ErrorState = {
@@ -37,129 +39,142 @@ type ErrorState = {
   url?: string;
 } | null;
 
-function getTabFromUrl(url?: string | null): TabKey {
-  if (!url) return 'dashboard';
+type IconProps = ComponentProps<typeof Svg> & { size?: number };
 
-  try {
-    const parsed = new URL(url);
-    const pathname = parsed.pathname.toLowerCase();
-
-    const matchingTab = TABS.find((tab) =>
-      tab.matchers.some((matcher) => pathname.startsWith(matcher)),
-    );
-
-    return matchingTab?.key ?? 'dashboard';
-  } catch (error) {
-    console.warn('Failed to parse url for tab detection', error);
-    return 'dashboard';
-  }
-}
-
-function SvgIcon(props: ComponentProps<typeof Svg>) {
-  return <Svg width={24} height={24} fill="none" stroke="currentColor" strokeWidth={1.75} {...props} />;
-}
-
-function RouteIcon(props: ComponentProps<typeof SvgIcon>) {
+function BaseIcon({
+  children,
+  size = 24,
+  strokeWidth = 1.75,
+  color,
+  ...props
+}: IconProps & { children: ReactNode }) {
   return (
-    <SvgIcon viewBox="0 0 24 24" {...props}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color ?? 'currentColor'}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      {children}
+    </Svg>
+  );
+}
+
+function RouteIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
       <Path d="M4 18c4 0 4-12 8-12s4 12 8 12" />
       <Circle cx="4" cy="18" r="2" />
       <Circle cx="20" cy="18" r="2" />
       <Circle cx="12" cy="6" r="2" />
-    </SvgIcon>
+    </BaseIcon>
   );
 }
 
-function FlameIcon(props: ComponentProps<typeof SvgIcon>) {
+function FlameIcon(props: IconProps) {
   return (
-    <SvgIcon viewBox="0 0 24 24" {...props}>
+    <BaseIcon {...props}>
       <Path d="M12 3c1 3-2 4-2 7a3 3 0 0 0 6 0c0-3-3-4-4-7Z" />
       <Path d="M8 14a4 4 0 1 0 8 0 6 6 0 0 0-2-4" />
-    </SvgIcon>
+    </BaseIcon>
   );
 }
 
-function CircleDotIcon(props: ComponentProps<typeof SvgIcon>) {
+function CircleDotIcon(props: IconProps) {
   return (
-    <SvgIcon viewBox="0 0 24 24" {...props}>
+    <BaseIcon {...props}>
       <Circle cx="12" cy="12" r="9" />
       <Circle cx="12" cy="12" r="2" />
-    </SvgIcon>
+    </BaseIcon>
   );
 }
 
-function SparklesIcon(props: ComponentProps<typeof SvgIcon>) {
+function SparklesIcon(props: IconProps) {
   return (
-    <SvgIcon viewBox="0 0 24 24" {...props}>
-      <Path d="M12 4l1.5 3.5L17 9l-3.5 1.5L12 14l-1.5-3.5L7 9l3.5-1.5Z" />
-      <Path d="M6 16l1 2 2 1-2 1-1 2-1-2-2-1 2-1Z" />
-      <Path d="M18 14l.75 1.5L20 16l-1.25.5L18 18l-.75-1.5L16 16l1.25-.5Z" />
-    </SvgIcon>
+    <BaseIcon {...props}>
+      <Path d="M12 4 13.5 7.5 17 9l-3.5 1.5L12 14l-1.5-3.5L7 9l3.5-1.5Z" />
+      <Path d="m6 16 1 2 2 1-2 1-1 2-1-2-2-1 2-1Z" />
+      <Path d="m18 14 .75 1.5L20 16l-1.25.5L18 18l-.75-1.5L16 16l1.25-.5Z" />
+    </BaseIcon>
   );
 }
 
-function SproutIcon(props: ComponentProps<typeof SvgIcon>) {
+function SproutIcon(props: IconProps) {
   return (
-    <SvgIcon viewBox="0 0 24 24" {...props}>
+    <BaseIcon {...props}>
       <Path d="M12 22v-6" />
       <Path d="M16 10c0 2-1.79 4-4 4s-4-2-4-4a4 4 0 0 1 4-4c2.21 0 4 2 4 4Z" />
       <Path d="M9 9C9 6 7 4 4 4c0 3 2 5 5 5Z" />
       <Path d="M15 9c0-3 2-5 5-5 0 3-2 5-5 5Z" />
-    </SvgIcon>
+    </BaseIcon>
   );
 }
 
-const TABS: TabConfig[] = [
-  {
-    key: 'missions',
-    label: 'Misiones',
-    path: '/missions',
-    matchers: ['/missions', '/misiones', '/dashboard/misiones', '/dashboard/missions', '/dashboard/missions-v2', '/dashboard/missions-v3'],
-    Icon: RouteIcon,
-  },
-  {
-    key: 'dquest',
-    label: 'DQuest',
-    path: '/dquest',
-    matchers: ['/dquest', '/dashboard/dquest'],
-    Icon: FlameIcon,
-  },
-  {
-    key: 'dashboard',
-    label: 'Dashboard',
-    path: '/dashboard',
-    matchers: ['/dashboard', '/dashboard-v3'],
-    Icon: CircleDotIcon,
-  },
-  {
-    key: 'rewards',
-    label: 'Rewards',
-    path: '/rewards',
-    matchers: ['/rewards', '/dashboard/rewards'],
-    Icon: SparklesIcon,
-  },
-  {
-    key: 'editor',
-    label: 'Editor',
-    path: '/editor',
-    matchers: ['/editor'],
-    Icon: SproutIcon,
-  },
-];
+function createTabs(routes: DashboardRoutes): TabConfig[] {
+  return [
+    {
+      key: 'missions',
+      label: 'Misiones',
+      path: routes.missions,
+      matchers: [routes.missions.toLowerCase()],
+      Icon: RouteIcon,
+    },
+    {
+      key: 'dquest',
+      label: 'DQuest',
+      path: routes.dquest,
+      matchers: [routes.dquest.toLowerCase()],
+      Icon: FlameIcon,
+    },
+    {
+      key: 'dashboard',
+      label: 'Dashboard',
+      path: routes.dashboard,
+      matchers: [routes.dashboard.toLowerCase()],
+      Icon: CircleDotIcon,
+    },
+    {
+      key: 'rewards',
+      label: 'Rewards',
+      path: routes.rewards,
+      matchers: [routes.rewards.toLowerCase()],
+      Icon: SparklesIcon,
+    },
+    {
+      key: 'editor',
+      label: 'Editor',
+      path: routes.editor,
+      matchers: [routes.editor.toLowerCase()],
+      Icon: SproutIcon,
+    },
+  ];
+}
 
-export default function HomeScreen() {
-  const baseUrl = useMemo(
-    () => normalizeBaseUrl(process.env.EXPO_PUBLIC_WEB_BASE_URL ?? null),
-    [],
+function getTabFromPath(pathname: string, tabs: TabConfig[]): TabKey {
+  const normalizedPath = pathname?.toLowerCase?.() ?? '';
+
+  const matchingTab = tabs.find((tab) =>
+    tab.matchers.some((matcher) => normalizedPath.startsWith(matcher)),
   );
-  const initialUrl = useMemo(() => buildAppUrl(baseUrl, '/dashboard'), [baseUrl]);
+
+  return matchingTab?.key ?? 'dashboard';
+}
+
+function DashboardContent({ routes }: { routes: DashboardRoutes }) {
+  const tabs = useMemo(() => createTabs(routes), [routes]);
+  const { baseUrl, webviewRef, navigate, currentPath, setCurrentPath, initialUrl } =
+    useWebViewController();
   const webViewSource = useMemo(() => ({ uri: initialUrl }), [initialUrl]);
-  const [activeTab, setActiveTab] = useState<TabKey>(() => getTabFromUrl(initialUrl));
+  const activeTab = useMemo(() => getTabFromPath(currentPath, tabs), [currentPath, tabs]);
   const [isNavVisible, setIsNavVisible] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ErrorState>(null);
-  const webViewRef = useRef<WebView>(null);
   const insets = useSafeAreaInsets();
 
   const allowedClerkDomains = useMemo(
@@ -199,40 +214,38 @@ export default function HomeScreen() {
 
         if (!isAllowedHost) return false;
 
-        return TABS.some((tab) =>
-          tab.matchers.some((matcher) => pathname.startsWith(matcher.toLowerCase())),
-        );
+        return tabs.some((tab) => tab.matchers.some((matcher) => pathname.startsWith(matcher)));
       } catch (error) {
         console.warn('Failed to evaluate navbar visibility for URL', error);
         return false;
       }
     },
-    [allowedHosts],
+    [allowedHosts, tabs],
   );
 
   const handleNavigationStateChange = useCallback(
     (navState: WebViewNavigation) => {
       setCanGoBack(navState.canGoBack);
-      const nextTab = getTabFromUrl(navState.url);
-      setActiveTab(nextTab);
       setIsNavVisible(shouldShowNavForUrl(navState.url));
+
+      try {
+        const parsed = new URL(navState.url);
+        setCurrentPath(parsed.pathname.toLowerCase());
+      } catch (error) {
+        console.warn('Failed to parse navigation state URL', error);
+        setCurrentPath(routes.dashboard);
+      }
     },
-    [shouldShowNavForUrl],
+    [routes.dashboard, setCurrentPath, shouldShowNavForUrl],
   );
 
   const navigateToTab = useCallback(
     (tab: TabConfig) => {
-      const targetUrl = buildAppUrl(baseUrl, tab.path || '/dashboard');
       setError(null);
-      setIsLoading(true);
-      setActiveTab(tab.key);
       setIsNavVisible(true);
-
-      webViewRef.current?.injectJavaScript(
-        `if (window.location.href !== ${JSON.stringify(targetUrl)}) { window.location.href = ${JSON.stringify(targetUrl)}; } true;`,
-      );
+      navigate(tab.path);
     },
-    [baseUrl],
+    [navigate],
   );
 
   const handleShouldStartLoadWithRequest = useCallback(
@@ -293,14 +306,14 @@ export default function HomeScreen() {
   const handleReload = useCallback(() => {
     setError(null);
     setIsLoading(true);
-    webViewRef.current?.reload();
-  }, []);
+    webviewRef.current?.reload();
+  }, [webviewRef]);
 
   const handleBack = useCallback(() => {
     if (canGoBack) {
-      webViewRef.current?.goBack();
+      webviewRef.current?.goBack();
     }
-  }, [canGoBack]);
+  }, [canGoBack, webviewRef]);
 
   const handleLoadStart = useCallback(() => {
     setIsLoading(true);
@@ -314,10 +327,10 @@ export default function HomeScreen() {
     (event: any) => {
       const { statusCode, url } = event?.nativeEvent ?? {};
 
-      if (statusCode === 404 && url?.includes('/dashboard') && baseUrl) {
+      if (statusCode === 404 && url?.includes(routes.dashboard) && baseUrl) {
         setError({ message: 'Redirecting to home after missing dashboard.', url });
-        webViewRef.current?.injectJavaScript(
-          `window.location.replace(${JSON.stringify(buildAppUrl(baseUrl, '/dashboard'))}); true;`,
+        webviewRef.current?.injectJavaScript(
+          `window.location.replace(${JSON.stringify(buildAppUrl(baseUrl, routes.dashboard))}); true;`,
         );
         setIsLoading(true);
         return;
@@ -329,7 +342,7 @@ export default function HomeScreen() {
       });
       setIsLoading(false);
     },
-    [baseUrl],
+    [baseUrl, routes.dashboard, webviewRef],
   );
 
   const handleError = useCallback((event: any) => {
@@ -373,14 +386,15 @@ export default function HomeScreen() {
           </View>
         ) : (
           <WebView
-            ref={webViewRef}
+            ref={webviewRef}
             source={webViewSource}
             startInLoadingState
             sharedCookiesEnabled
-            thirdPartyCookiesEnabled={Platform.OS === 'android'}
+            thirdPartyCookiesEnabled
             domStorageEnabled
             javaScriptEnabled
             incognito={false}
+            originWhitelist={["*"]}
             allowsBackForwardNavigationGestures
             onNavigationStateChange={handleNavigationStateChange}
             onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
@@ -405,12 +419,7 @@ export default function HomeScreen() {
       </View>
 
       {isNavVisible ? (
-        <NativeBottomNav
-          activeTab={activeTab}
-          onTabPress={navigateToTab}
-          tabs={TABS}
-          safeAreaBottom={navPadding}
-        />
+        <NativeBottomNav activeTab={activeTab} onTabPress={navigateToTab} tabs={tabs} safeAreaBottom={navPadding} />
       ) : null}
     </SafeAreaView>
   );
@@ -425,7 +434,7 @@ type NativeBottomNavProps = {
 
 function NativeBottomNav({ tabs, activeTab, onTabPress, safeAreaBottom }: NativeBottomNavProps) {
   return (
-    <View style={[styles.navContainer, { bottom: safeAreaBottom }]}>
+    <View style={[styles.navContainer, { bottom: safeAreaBottom }]}> 
       <BlurView intensity={40} tint="dark" style={styles.navBlur} experimentalBlurMethod="dimezisBlurView">
         {tabs.map((tab) => {
           const Icon = tab.Icon;
@@ -452,7 +461,9 @@ function NativeBottomNav({ tabs, activeTab, onTabPress, safeAreaBottom }: Native
                       ]}
                     >
                       <Icon
-                        stroke={isActive ? '#ffffff' : 'rgba(255,255,255,0.58)'}
+                        size={isDashboard ? 26 : 22}
+                        strokeWidth={2.25}
+                        color={isActive ? '#ffffff' : 'rgba(255,255,255,0.58)'}
                         style={[styles.icon, isDashboard && styles.dashboardIcon]}
                       />
                     </View>
@@ -475,6 +486,16 @@ function NativeBottomNav({ tabs, activeTab, onTabPress, safeAreaBottom }: Native
         })}
       </BlurView>
     </View>
+  );
+}
+
+export default function HomeScreen() {
+  const routes = useMemo(() => getDashboardRoutes(), []);
+
+  return (
+    <WebViewProvider initialPath={routes.dashboard}>
+      <DashboardContent routes={routes} />
+    </WebViewProvider>
   );
 }
 
@@ -521,39 +542,37 @@ const styles = StyleSheet.create({
   },
   webView: {
     flex: 1,
-    backgroundColor: 'transparent',
   },
-  loader: {
-    ...StyleSheet.absoluteFillObject,
+  errorContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 24,
+  },
+  errorText: {
+    color: '#f5f6fb',
+    fontSize: 16,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  errorSubtext: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#0d111b',
   },
   loaderOverlay: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(9, 13, 23, 0.45)',
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    backgroundColor: '#0d111b',
-  },
-  errorText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#ffb4c6',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  errorSubtext: {
-    fontSize: 13,
-    color: '#c7c9d6',
-    textAlign: 'center',
-    marginBottom: 16,
+    backgroundColor: 'rgba(7, 10, 16, 0.5)',
   },
   retryButton: {
     paddingVertical: 10,
