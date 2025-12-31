@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, type ComponentProps } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentProps } from 'react';
 import {
   ActivityIndicator,
   Linking,
@@ -10,10 +10,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+// eslint-disable-next-line import/no-unresolved
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { WebViewNavigation } from 'react-native-webview';
 import { WebView } from 'react-native-webview';
+// eslint-disable-next-line import/no-unresolved
 import Svg, { Circle, Path } from 'react-native-svg';
 
 const DEFAULT_BASE_URL = 'https://web-dev-dfa2.up.railway.app';
@@ -177,6 +179,7 @@ export default function HomeScreen() {
   const initialUrl = useMemo(() => buildAppUrl(baseUrl, '/dashboard'), [baseUrl]);
   const webViewSource = useMemo(() => ({ uri: initialUrl }), [initialUrl]);
   const [activeTab, setActiveTab] = useState<TabKey>(() => getTabFromUrl(initialUrl));
+  const [isNavVisible, setIsNavVisible] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ErrorState>(null);
@@ -188,13 +191,57 @@ export default function HomeScreen() {
     [],
   );
 
+  const allowedHosts = useMemo(() => {
+    const hosts = new Set<string>();
+    try {
+      hosts.add(new URL(baseUrl).hostname.toLowerCase());
+    } catch (error) {
+      console.warn('Invalid base URL when collecting hosts', error);
+    }
+
+    try {
+      hosts.add(new URL(DEFAULT_BASE_URL).hostname.toLowerCase());
+    } catch (error) {
+      console.warn('Invalid default URL when collecting hosts', error);
+    }
+
+    return Array.from(hosts);
+  }, [baseUrl]);
+
+  const shouldShowNavForUrl = useCallback(
+    (url?: string | null) => {
+      if (!url) return false;
+
+      try {
+        const parsed = new URL(url);
+        const hostname = parsed.hostname.toLowerCase();
+        const pathname = parsed.pathname.toLowerCase();
+
+        const isAllowedHost = allowedHosts.some(
+          (host) => hostname === host || hostname.endsWith(`.${host}`),
+        );
+
+        if (!isAllowedHost) return false;
+
+        return TABS.some((tab) =>
+          tab.matchers.some((matcher) => pathname.startsWith(matcher.toLowerCase())),
+        );
+      } catch (error) {
+        console.warn('Failed to evaluate navbar visibility for URL', error);
+        return false;
+      }
+    },
+    [allowedHosts],
+  );
+
   const handleNavigationStateChange = useCallback(
     (navState: WebViewNavigation) => {
       setCanGoBack(navState.canGoBack);
       const nextTab = getTabFromUrl(navState.url);
       setActiveTab(nextTab);
+      setIsNavVisible(shouldShowNavForUrl(navState.url));
     },
-    [],
+    [shouldShowNavForUrl],
   );
 
   const navigateToTab = useCallback(
@@ -203,6 +250,7 @@ export default function HomeScreen() {
       setError(null);
       setIsLoading(true);
       setActiveTab(tab.key);
+      setIsNavVisible(true);
 
       webViewRef.current?.injectJavaScript(
         `if (window.location.href !== ${JSON.stringify(targetUrl)}) { window.location.href = ${JSON.stringify(targetUrl)}; } true;`,
@@ -257,7 +305,8 @@ export default function HomeScreen() {
 
         Linking.openURL(requestUrl).catch(() => undefined);
         return false;
-      } catch (e) {
+      } catch (error) {
+        console.warn('Failed to handle navigation request', error);
         Linking.openURL(requestUrl).catch(() => undefined);
         return false;
       }
@@ -313,7 +362,11 @@ export default function HomeScreen() {
     setIsLoading(false);
   }, []);
 
-  const navPadding = Math.max(insets.bottom, 14);
+  useEffect(() => {
+    setIsNavVisible(shouldShowNavForUrl(initialUrl));
+  }, [initialUrl, shouldShowNavForUrl]);
+
+  const navPadding = Math.max(insets.bottom, 12);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -333,7 +386,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.webViewContainer, { paddingBottom: navPadding + 90 }]}>
+      <View style={[styles.webViewContainer, { paddingBottom: navPadding + 78 }]}>
         {error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error.message}</Text>
@@ -375,12 +428,14 @@ export default function HomeScreen() {
         ) : null}
       </View>
 
-      <NativeBottomNav
-        activeTab={activeTab}
-        onTabPress={navigateToTab}
-        tabs={TABS}
-        safeAreaBottom={navPadding}
-      />
+      {isNavVisible ? (
+        <NativeBottomNav
+          activeTab={activeTab}
+          onTabPress={navigateToTab}
+          tabs={TABS}
+          safeAreaBottom={navPadding}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -394,11 +449,12 @@ type NativeBottomNavProps = {
 
 function NativeBottomNav({ tabs, activeTab, onTabPress, safeAreaBottom }: NativeBottomNavProps) {
   return (
-    <View style={[styles.navContainer, { paddingBottom: safeAreaBottom }]}> 
-      <BlurView intensity={36} tint="dark" style={styles.navBlur} experimentalBlurMethod="dimezisBlurView">
+    <View style={[styles.navContainer, { paddingBottom: safeAreaBottom }]}>
+      <BlurView intensity={40} tint="dark" style={styles.navBlur} experimentalBlurMethod="dimezisBlurView">
         {tabs.map((tab) => {
           const Icon = tab.Icon;
           const isActive = activeTab === tab.key;
+          const isDashboard = tab.key === 'dashboard';
 
           return (
             <View key={tab.key} style={styles.navItemWrapper}>
@@ -410,24 +466,29 @@ function NativeBottomNav({ tabs, activeTab, onTabPress, safeAreaBottom }: Native
                 activeOpacity={0.85}
               >
                 <View style={styles.navContent}>
-                  <View
-                    style={[
-                      styles.iconWrapper,
-                      tab.key === 'dashboard' && styles.dashboardIconWrapper,
-                      isActive ? styles.iconWrapperActive : styles.iconWrapperInactive,
-                    ]}
-                  >
-                    <Icon
-                      stroke={isActive ? '#ffffff' : 'rgba(255,255,255,0.55)'}
-                      style={[styles.icon, tab.key === 'dashboard' && styles.dashboardIcon]}
-                    />
+                  <View style={styles.iconOuter}>
+                    {isActive ? <View style={[styles.iconHalo, isDashboard && styles.dashboardHalo]} /> : null}
+                    <View
+                      style={[
+                        styles.iconWrapper,
+                        isDashboard && styles.dashboardIconWrapper,
+                        isActive ? styles.iconWrapperActive : styles.iconWrapperInactive,
+                      ]}
+                    >
+                      <Icon
+                        stroke={isActive ? '#ffffff' : 'rgba(255,255,255,0.58)'}
+                        style={[styles.icon, isDashboard && styles.dashboardIcon]}
+                      />
+                    </View>
                   </View>
                   <Text
                     style={[
                       styles.tabLabel,
-                      tab.key === 'dashboard' && styles.dashboardLabel,
+                      isDashboard && styles.dashboardLabel,
                       isActive ? styles.tabLabelActive : styles.tabLabelInactive,
                     ]}
+                    numberOfLines={1}
+                    ellipsizeMode="clip"
                   >
                     {tab.label}
                   </Text>
@@ -534,21 +595,23 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: 18,
-    paddingTop: 8,
+    paddingHorizontal: 16,
+    paddingTop: 6,
   },
   navBlur: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: 28,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    shadowColor: '#0a1024',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.42,
-    shadowRadius: 18,
+    borderRadius: 32,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(44, 76, 140, 0.55)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.18)',
+    shadowColor: '#0c1635',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.28,
+    shadowRadius: 22,
     overflow: 'hidden',
   },
   navItemWrapper: {
@@ -561,46 +624,69 @@ const styles = StyleSheet.create({
   },
   navContent: {
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
+  },
+  iconOuter: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconHalo: {
+    position: 'absolute',
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    shadowColor: 'rgba(198,214,255,0.65)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 20,
+  },
+  dashboardHalo: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
   },
   iconWrapper: {
+    width: 38,
+    height: 38,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(10,16,35,0.25)',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 14,
+  },
+  dashboardIconWrapper: {
     width: 44,
     height: 44,
     borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: 'rgba(10,16,35,0.35)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 18,
-  },
-  dashboardIconWrapper: {
-    width: 52,
-    height: 52,
-    borderRadius: 24,
   },
   iconWrapperActive: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.16)',
   },
   iconWrapperInactive: {
     backgroundColor: 'rgba(255,255,255,0.08)',
   },
   icon: {
+    width: 22,
+    height: 22,
+  },
+  dashboardIcon: {
     width: 26,
     height: 26,
   },
-  dashboardIcon: {
-    width: 32,
-    height: 32,
-  },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '800',
-    letterSpacing: 1,
+    letterSpacing: 0.6,
     textTransform: 'uppercase',
+    textAlign: 'center',
+    includeFontPadding: false,
+    minWidth: 64,
   },
   dashboardLabel: {
-    fontSize: 11,
+    fontSize: 10,
   },
   tabLabelActive: {
     color: '#ffffff',
@@ -609,6 +695,6 @@ const styles = StyleSheet.create({
     textShadowRadius: 6,
   },
   tabLabelInactive: {
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(255,255,255,0.7)',
   },
 });
