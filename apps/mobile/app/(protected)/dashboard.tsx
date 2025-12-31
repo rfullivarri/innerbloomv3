@@ -18,7 +18,7 @@ import { WebView } from 'react-native-webview';
 // eslint-disable-next-line import/no-unresolved
 import Svg, { Circle, Path } from 'react-native-svg';
 
-const DEFAULT_BASE_URL = 'https://web-dev-dfa2.up.railway.app';
+import { DEFAULT_BASE_URL, buildAppUrl, normalizeBaseUrl } from '../utils/url';
 
 const APP_FLAG_SCRIPT = 'window.__INNERBLOOM_NATIVE_APP__ = true; true;';
 
@@ -36,30 +36,6 @@ type ErrorState = {
   message: string;
   url?: string;
 } | null;
-
-function normalizeBaseUrl(raw?: string | null) {
-  const trimmed = raw?.trim();
-
-  if (!trimmed) {
-    return DEFAULT_BASE_URL;
-  }
-
-  try {
-    const parsed = new URL(trimmed);
-    parsed.pathname = parsed.pathname.replace(/\/$/, '');
-    return parsed.toString();
-  } catch (error) {
-    console.warn('Invalid EXPO_PUBLIC_WEB_BASE_URL, falling back to default', error);
-    return DEFAULT_BASE_URL;
-  }
-}
-
-function buildAppUrl(base: string, path: string) {
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  const url = new URL(normalizedPath, base);
-  url.searchParams.set('app', '1');
-  return url.toString();
-}
 
 function getTabFromUrl(url?: string | null): TabKey {
   if (!url) return 'dashboard';
@@ -366,7 +342,7 @@ export default function HomeScreen() {
     setIsNavVisible(shouldShowNavForUrl(initialUrl));
   }, [initialUrl, shouldShowNavForUrl]);
 
-  const navPadding = Math.max(insets.bottom, 12);
+  const navPadding = insets.bottom + 12;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -386,7 +362,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.webViewContainer, { paddingBottom: navPadding + 78 }]}>
+      <View style={styles.webViewContainer}>
         {error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error.message}</Text>
@@ -449,7 +425,7 @@ type NativeBottomNavProps = {
 
 function NativeBottomNav({ tabs, activeTab, onTabPress, safeAreaBottom }: NativeBottomNavProps) {
   return (
-    <View style={[styles.navContainer, { paddingBottom: safeAreaBottom }]}>
+    <View style={[styles.navContainer, { bottom: safeAreaBottom }]}>
       <BlurView intensity={40} tint="dark" style={styles.navBlur} experimentalBlurMethod="dimezisBlurView">
         {tabs.map((tab) => {
           const Icon = tab.Icon;
@@ -595,8 +571,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    zIndex: 20,
+    elevation: 30,
     paddingHorizontal: 16,
     paddingTop: 6,
+    paddingBottom: 12,
   },
   navBlur: {
     flexDirection: 'row',

@@ -187,13 +187,15 @@ export default function DashboardV3Page() {
   return (
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
-        <Navbar
-          onDailyClick={backendUserId ? handleOpenDaily : undefined}
-          dailyButtonRef={dailyButtonRef}
-          title={activeSection.pageTitle}
-          sections={sections}
-          menuSlot={<DashboardMenu onOpenScheduler={handleOpenReminderScheduler} />}
-        />
+        {!isAppMode && (
+          <Navbar
+            onDailyClick={backendUserId ? handleOpenDaily : undefined}
+            dailyButtonRef={dailyButtonRef}
+            title={activeSection.pageTitle}
+            sections={sections}
+            menuSlot={<DashboardMenu onOpenScheduler={handleOpenReminderScheduler} />}
+          />
+        )}
         <DailyQuestModal
           ref={dailyQuestModalRef}
           enabled={Boolean(backendUserId)}
