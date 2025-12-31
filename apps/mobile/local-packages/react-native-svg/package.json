@@ -1,0 +1,8 @@
+{
+  "name": "react-native-svg",
+  "version": "15.4.0",
+  "main": "index.js",
+  "react-native": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts"
+}

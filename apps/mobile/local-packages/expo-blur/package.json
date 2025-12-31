@@ -1,0 +1,8 @@
+{
+  "name": "expo-blur",
+  "version": "13.0.0",
+  "main": "index.js",
+  "react-native": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts"
+}
