@@ -24,11 +24,22 @@ export default function HomeScreen() {
   const baseUrl = process.env.EXPO_PUBLIC_WEB_BASE_URL ?? DEFAULT_BASE_URL;
   const normalizedBaseUrl = useMemo(() => baseUrl?.replace(/\/$/, ''), [baseUrl]);
   const dashboardUrl = normalizedBaseUrl ? `${normalizedBaseUrl}/dashboard` : undefined;
-  const [currentUri, setCurrentUri] = useState(dashboardUrl ?? normalizedBaseUrl ?? DEFAULT_BASE_URL);
+  const initialUrl = useMemo(
+    () => dashboardUrl ?? normalizedBaseUrl ?? DEFAULT_BASE_URL,
+    [dashboardUrl, normalizedBaseUrl],
+  );
+  const currentUri = initialUrl;
   const [canGoBack, setCanGoBack] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ErrorState>(null);
   const webViewRef = useRef<WebView>(null);
+
+  const webViewSource = useMemo(() => ({ uri: currentUri }), [currentUri]);
+
+  const allowedClerkDomains = useMemo(
+    () => ['clerk.com', 'clerk.dev', 'clerkstage.dev', 'accounts.clerk.com', 'accounts.clerk.dev'],
+    [],
+  );
 
   const onNavigationStateChange = useCallback((navState: WebViewNavigation) => {
     setCanGoBack(navState.canGoBack);
@@ -37,6 +48,11 @@ export default function HomeScreen() {
   const handleShouldStartLoadWithRequest = useCallback(
     (request: any) => {
       const requestUrl = request?.url as string | undefined;
+      const navigationType = request?.navigationType as string | undefined;
+
+      if (navigationType === 'click' || navigationType === 'formsubmit') {
+        console.log(`[WebView] Navigation (${navigationType}): ${requestUrl}`);
+      }
 
       if (!requestUrl) return false;
 
@@ -47,26 +63,39 @@ export default function HomeScreen() {
         return false;
       }
 
+      if (navigationType && navigationType !== 'click' && navigationType !== 'formsubmit') {
+        return true;
+      }
+
       try {
-        const requestOrigin = new URL(requestUrl).origin;
-        const baseOrigin = normalizedBaseUrl ? new URL(normalizedBaseUrl).origin : undefined;
+        const requestUrlObject = new URL(requestUrl);
+        const hostname = requestUrlObject.hostname;
+        const protocol = requestUrlObject.protocol;
 
-        const isSameOrigin = baseOrigin
-          ? requestOrigin === baseOrigin || requestUrl.startsWith(`${normalizedBaseUrl}/`)
-          : true;
+        const allowedBaseHostname = normalizedBaseUrl ? new URL(normalizedBaseUrl).hostname : undefined;
+        const defaultHostname = new URL(DEFAULT_BASE_URL).hostname;
 
-        if (!isSameOrigin) {
-          Linking.openURL(requestUrl).catch(() => undefined);
-          return false;
+        const isHttpNavigation = protocol === 'https:' || protocol === 'http:';
+        const isClerkDomain = allowedClerkDomains.some(
+          (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+        );
+        const isAllowedHost =
+          (allowedBaseHostname && (hostname === allowedBaseHostname || hostname.endsWith(`.${allowedBaseHostname}`))) ||
+          hostname === defaultHostname ||
+          hostname.endsWith(`.${defaultHostname}`);
+
+        if (!isHttpNavigation || isClerkDomain || isAllowedHost) {
+          return true;
         }
+
+        Linking.openURL(requestUrl).catch(() => undefined);
+        return false;
       } catch (e) {
         Linking.openURL(requestUrl).catch(() => undefined);
         return false;
       }
-
-      return true;
     },
-    [normalizedBaseUrl],
+    [allowedClerkDomains, normalizedBaseUrl],
   );
 
   const handleReload = useCallback(() => {
@@ -89,23 +118,24 @@ export default function HomeScreen() {
     setIsLoading(false);
   }, []);
 
-  const handleHttpError = useCallback(
-    (event: any) => {
-      const { statusCode, url } = event?.nativeEvent ?? {};
+  const handleHttpError = useCallback((event: any) => {
+    const { statusCode, url } = event?.nativeEvent ?? {};
 
-      if (statusCode === 404 && dashboardUrl && url?.startsWith(dashboardUrl) && normalizedBaseUrl) {
-        setCurrentUri(normalizedBaseUrl);
-        return;
-      }
+    if (statusCode === 404 && dashboardUrl && url?.startsWith(dashboardUrl) && normalizedBaseUrl) {
+      setError({ message: 'Redirecting to home after missing dashboard.', url });
+      webViewRef.current?.injectJavaScript(
+        `window.location.replace('${normalizedBaseUrl}'); true;`,
+      );
+      setIsLoading(true);
+      return;
+    }
 
-      setError({
-        message: `Failed to load content (HTTP ${statusCode ?? 'error'})`,
-        url,
-      });
-      setIsLoading(false);
-    },
-    [dashboardUrl, normalizedBaseUrl],
-  );
+    setError({
+      message: `Failed to load content (HTTP ${statusCode ?? 'error'})`,
+      url,
+    });
+    setIsLoading(false);
+  }, [dashboardUrl, normalizedBaseUrl]);
 
   const handleError = useCallback((event: any) => {
     const failingUrl = event?.nativeEvent?.url as string | undefined;
@@ -143,12 +173,13 @@ export default function HomeScreen() {
         ) : (
           <WebView
             ref={webViewRef}
-            source={{ uri: currentUri }}
+            source={webViewSource}
             startInLoadingState
-            sharedCookiesEnabled
+            sharedCookiesEnabled={true}
             thirdPartyCookiesEnabled={Platform.OS === 'android'}
-            domStorageEnabled
-            javaScriptEnabled
+            domStorageEnabled={true}
+            javaScriptEnabled={true}
+            incognito={false}
             allowsBackForwardNavigationGestures
             onNavigationStateChange={onNavigationStateChange}
             onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
