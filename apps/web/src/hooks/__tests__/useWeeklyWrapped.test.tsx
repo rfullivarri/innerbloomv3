@@ -8,7 +8,9 @@ vi.mock('../../lib/api', () => {
   return { getWeeklyWrappedLatest, getWeeklyWrappedPrevious };
 });
 
-const { getWeeklyWrappedLatest, getWeeklyWrappedPrevious } = await import('../../lib/api');
+const api = await import('../../lib/api');
+const getWeeklyWrappedLatest = vi.mocked(api.getWeeklyWrappedLatest);
+const getWeeklyWrappedPrevious = vi.mocked(api.getWeeklyWrappedPrevious);
 const { useWeeklyWrapped } = await import('../useWeeklyWrapped');
 
 describe('useWeeklyWrapped', () => {
