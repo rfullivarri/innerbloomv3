@@ -3,8 +3,33 @@ import type { WeeklyWrappedRecord } from '../lib/api';
 import { getWeeklyWrappedLatest, getWeeklyWrappedPrevious } from '../lib/api';
 import { useRequest } from './useRequest';
 
-function buildSeenKey(weekEnd: string): string {
-  return `weekly-wrapped-seen:${weekEnd}`;
+function toUtcDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function parseDateKey(dateKey: string): Date {
+  const parsed = new Date(`${dateKey}T00:00:00Z`);
+  parsed.setUTCHours(0, 0, 0, 0);
+  return parsed;
+}
+
+function getStartOfWeekUtc(date: Date): Date {
+  const copy = new Date(date);
+  copy.setUTCHours(0, 0, 0, 0);
+  const dayOfWeek = copy.getUTCDay();
+  const daysSinceMonday = (dayOfWeek + 6) % 7;
+  copy.setUTCDate(copy.getUTCDate() - daysSinceMonday);
+  return copy;
+}
+
+function isSameUtcWeek(dateKey: string, reference: Date): boolean {
+  const referenceStart = getStartOfWeekUtc(reference);
+  const targetStart = getStartOfWeekUtc(parseDateKey(dateKey));
+  return referenceStart.getTime() === targetStart.getTime();
+}
+
+function buildSeenKey(weekStartKey: string): string {
+  return `weekly-wrapped-seen:${weekStartKey}`;
 }
 
 export function useWeeklyWrapped(userId: string | null | undefined) {
@@ -26,38 +51,49 @@ export function useWeeklyWrapped(userId: string | null | undefined) {
     return { latest, previous };
   }, [userId], { enabled: Boolean(userId) });
 
-  const latestWeekEnd = data?.latest?.weekEnd;
+  const latestWeekEnd = data?.latest?.weekEnd ?? null;
+  const latestWeekStart = useMemo(() => {
+    return latestWeekEnd ? toUtcDateKey(getStartOfWeekUtc(parseDateKey(latestWeekEnd))) : null;
+  }, [latestWeekEnd]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [activeRecord, setActiveRecord] = useState<WeeklyWrappedRecord | null>(null);
 
   useEffect(() => {
-    if (!latestWeekEnd || typeof window === 'undefined') {
+    if (!data?.latest || !latestWeekStart || typeof window === 'undefined') {
+      setModalOpen(false);
+      setActiveRecord(null);
       return;
     }
+
+    if (!isSameUtcWeek(data.latest.weekEnd, new Date())) {
+      setModalOpen(false);
+      setActiveRecord(null);
+      return;
+    }
+
     try {
-      const key = buildSeenKey(latestWeekEnd);
+      const key = buildSeenKey(latestWeekStart);
       const hasSeen = window.localStorage.getItem(key) === 'true';
-      if (!hasSeen && data?.latest) {
+      if (!hasSeen) {
         setActiveRecord(data.latest);
         setModalOpen(true);
+        window.localStorage.setItem(key, 'true');
       }
     } catch {
-      if (data?.latest) {
-        setActiveRecord(data.latest);
-        setModalOpen(true);
-      }
+      setActiveRecord(data.latest);
+      setModalOpen(true);
     }
-  }, [data?.latest, latestWeekEnd]);
+  }, [data?.latest, latestWeekStart]);
 
   const markSeen = useCallback(() => {
-    if (latestWeekEnd && typeof window !== 'undefined') {
+    if (latestWeekStart && typeof window !== 'undefined') {
       try {
-        window.localStorage.setItem(buildSeenKey(latestWeekEnd), 'true');
+        window.localStorage.setItem(buildSeenKey(latestWeekStart), 'true');
       } catch {
         // ignore storage errors
       }
     }
-  }, [latestWeekEnd]);
+  }, [latestWeekStart]);
 
   const closeModal = useCallback(() => {
     if (activeRecord?.weekEnd === latestWeekEnd) {
