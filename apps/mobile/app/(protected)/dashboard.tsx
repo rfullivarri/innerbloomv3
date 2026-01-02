@@ -126,7 +126,7 @@ function createTabs(routes: DashboardRoutes): TabConfig[] {
     },
     {
       key: 'dquest',
-      label: 'Daily',
+      label: 'DAILY',
       path: routes.dquest,
       matchers: [routes.dquest.toLowerCase()],
       Icon: FlameIcon,
@@ -225,6 +225,7 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
 
   const handleNavigationStateChange = useCallback(
     (navState: WebViewNavigation) => {
+      console.log('[WebView] navigation state url:', navState.url);
       setCanGoBack(navState.canGoBack);
       setIsNavVisible(shouldShowNavForUrl(navState.url));
 
