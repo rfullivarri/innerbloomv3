@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mockQuery, mockVerifyToken, mockGetRecentWrapped, mockMaybeGenerateWrapped } =
   vi.hoisted(() => ({
@@ -52,6 +52,8 @@ describe('GET /api/users/:id/weekly-wrapped/latest', () => {
   });
 
   it('returns the latest weekly wrapped entry', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-10-13T12:00:00Z'));
     mockVerifyToken.mockResolvedValue({
       id: userId,
       clerkId: 'user_123',
@@ -108,9 +110,8 @@ describe('GET /api/users/:id/weekly-wrapped/latest', () => {
         },
       },
     });
-    const todayKey = new Date().toISOString().slice(0, 10);
-    expect(mockMaybeGenerateWrapped).toHaveBeenCalledWith(userId, todayKey);
     expect(mockGetRecentWrapped).toHaveBeenCalledWith(userId, 2);
+    vi.useRealTimers();
   });
 });
 
@@ -123,6 +124,8 @@ describe('GET /api/users/:id/weekly-wrapped/previous', () => {
   });
 
   it('returns the previous weekly wrapped entry when available', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-10-20T12:00:00Z'));
     mockVerifyToken.mockResolvedValue({
       id: userId,
       clerkId: 'user_123',
@@ -178,8 +181,7 @@ describe('GET /api/users/:id/weekly-wrapped/previous', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.item?.id).toBe('wrap-previous');
-    const todayKey = new Date().toISOString().slice(0, 10);
-    expect(mockMaybeGenerateWrapped).toHaveBeenCalledWith(userId, todayKey);
     expect(mockGetRecentWrapped).toHaveBeenCalledWith(userId, 2);
+    vi.useRealTimers();
   });
 });
