@@ -73,6 +73,27 @@ export async function findWeeklyWrappedByWeek(
   return row ? mapRow(row) : null;
 }
 
+export async function findWeeklyWrappedByRange(
+  userId: string,
+  weekStart: string,
+  weekEnd: string,
+): Promise<ReturnType<typeof mapRow> | null> {
+  await ensureWeeklyWrappedReady();
+
+  const result = await pool.query<WeeklyWrappedRow>(
+    `SELECT *
+       FROM weekly_wrapped
+      WHERE user_id = $1
+        AND week_start = $2
+        AND week_end = $3
+      LIMIT 1`,
+    [userId, weekStart, weekEnd],
+  );
+
+  const row = result.rows[0];
+  return row ? mapRow(row) : null;
+}
+
 export async function insertWeeklyWrapped(input: {
   userId: string;
   weekStart: string;
