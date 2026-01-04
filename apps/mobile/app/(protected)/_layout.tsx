@@ -9,7 +9,11 @@ export default function ProtectedLayout() {
       screenOptions={{ headerShown: false }}
       tabBar={(props) => (Platform.OS !== 'web' ? <NativeTabBar {...props} /> : null)}
     >
+      <Tabs.Screen name="missions" />
+      <Tabs.Screen name="dquest" />
       <Tabs.Screen name="dashboard" />
+      <Tabs.Screen name="rewards" />
+      <Tabs.Screen name="editor" />
     </Tabs>
   );
 }
