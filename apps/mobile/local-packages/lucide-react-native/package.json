@@ -1,0 +1,8 @@
+{
+  "name": "lucide-react-native",
+  "version": "1.0.0",
+  "main": "index.js",
+  "react-native": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts"
+}

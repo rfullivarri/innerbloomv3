@@ -9,24 +9,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-// eslint-disable-next-line import/no-unresolved
-import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { WebViewNavigation } from 'react-native-webview';
 import { WebView } from 'react-native-webview';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { CircleDot, Flame, Route, Sparkles, Sprout } from 'lucide-react-native';
 
 import { getDashboardRoutes, type DashboardRoutes } from '@/constants/routes';
 import { WebViewProvider, useWebViewController } from '@/hooks/webview-controller';
-import {
-  CircleDotIcon,
-  FlameIcon,
-  NativeTabBar,
-  RouteIcon,
-  SparklesIcon,
-  SproutIcon,
-  type IconProps,
-} from '@/components/native-tab-bar';
+import { NativeTabBar, getNativeTabBarHeight } from '@/components/native-tab-bar';
 
 import { DEFAULT_BASE_URL, buildAppUrl } from '@/utils/url';
 
@@ -39,7 +30,7 @@ type TabConfig = {
   label: string;
   path: string;
   matchers: string[];
-  Icon: (props: IconProps) => JSX.Element;
+  Icon: (props: { size?: number; color?: string; strokeWidth?: number }) => JSX.Element;
 };
 
 type ErrorState = {
@@ -54,35 +45,35 @@ function createTabs(routes: DashboardRoutes): TabConfig[] {
       label: 'Misiones',
       path: routes.missions,
       matchers: [routes.missions.toLowerCase()],
-      Icon: RouteIcon,
+      Icon: Route,
     },
     {
       key: 'dquest',
       label: 'DAILY',
       path: routes.dquest,
       matchers: [routes.dquest.toLowerCase()],
-      Icon: FlameIcon,
+      Icon: Flame,
     },
     {
       key: 'dashboard',
       label: 'Dashboard',
       path: routes.dashboard,
       matchers: [routes.dashboard.toLowerCase()],
-      Icon: CircleDotIcon,
+      Icon: CircleDot,
     },
     {
       key: 'rewards',
       label: 'Rewards',
       path: routes.rewards,
       matchers: [routes.rewards.toLowerCase()],
-      Icon: SparklesIcon,
+      Icon: Sparkles,
     },
     {
       key: 'editor',
       label: 'Editor',
       path: routes.editor,
       matchers: [routes.editor.toLowerCase()],
-      Icon: SproutIcon,
+      Icon: Sprout,
     },
   ];
 }
@@ -108,28 +99,12 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ErrorState>(null);
   const insets = useSafeAreaInsets();
+  const bottomInset = insets.bottom;
 
   const allowedClerkDomains = useMemo(
     () => ['clerk.com', 'clerk.dev', 'clerkstage.dev', 'accounts.clerk.com', 'accounts.clerk.dev'],
     [],
   );
-
-  const allowedHosts = useMemo(() => {
-    const hosts = new Set<string>();
-    try {
-      hosts.add(new URL(baseUrl).hostname.toLowerCase());
-    } catch (error) {
-      console.warn('Invalid base URL when collecting hosts', error);
-    }
-
-    try {
-      hosts.add(new URL(DEFAULT_BASE_URL).hostname.toLowerCase());
-    } catch (error) {
-      console.warn('Invalid default URL when collecting hosts', error);
-    }
-
-    return Array.from(hosts);
-  }, [baseUrl]);
 
   const shouldShowNavForUrl = useCallback(
     (url?: string | null) => {
@@ -150,7 +125,7 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
         return false;
       }
     },
-    [allowedHosts, tabs],
+    [],
   );
 
   const handleNavigationStateChange = useCallback(
@@ -286,7 +261,7 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
     setIsNavVisible(shouldShowNavForUrl(initialUrl));
   }, [initialUrl, shouldShowNavForUrl]);
 
-  const navPadding = insets.bottom + 12;
+  const navPadding = getNativeTabBarHeight(bottomInset);
 
   const tabBarState: BottomTabBarProps['state'] = useMemo(
     () => ({
@@ -315,10 +290,10 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
                 color,
               }: {
                 size: number;
-                color: string;
+                color?: string;
                 focused: boolean;
               }) => (
-                <tab.Icon size={size} color={color} strokeWidth={2.25} />
+                <tab.Icon size={size} color={color ?? '#ffffff'} strokeWidth={2.25} />
               ),
             },
           },
@@ -343,11 +318,11 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
       state: tabBarState,
       navigation: tabBarNavigation,
       descriptors: tabBarDescriptors,
-      insets: { bottom: navPadding, top: 0, left: 0, right: 0 },
+      insets: { bottom: bottomInset, top: 0, left: 0, right: 0 },
       visible: isNavVisible,
-      safeAreaBottom: navPadding,
+      safeAreaBottom: bottomInset,
     }),
-    [tabBarDescriptors, tabBarNavigation, tabBarState, isNavVisible, navPadding],
+    [bottomInset, tabBarDescriptors, tabBarNavigation, tabBarState, isNavVisible],
   );
 
   return (
@@ -368,7 +343,7 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.webViewContainer}>
+      <View style={[styles.webViewContainer, { paddingBottom: navPadding }]}>
         {error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error.message}</Text>
