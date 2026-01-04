@@ -1,10 +1,15 @@
-import type { ComponentProps, ReactNode } from 'react';
+import { useEffect, type ComponentProps, type ReactNode } from 'react';
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-// eslint-disable-next-line import/no-unresolved
 import Svg, { Circle, Path } from 'react-native-svg';
 
 export type IconProps = ComponentProps<typeof Svg> & { size?: number };
+
+export const NATIVE_TAB_BAR_BASE_HEIGHT = 112;
+
+export function getNativeTabBarHeight(bottomInset: number) {
+  return NATIVE_TAB_BAR_BASE_HEIGHT + bottomInset;
+}
 
 type NativeTabBarProps = BottomTabBarProps & {
   visible?: boolean;
@@ -19,16 +24,25 @@ export function NativeTabBar({
   visible = true,
   safeAreaBottom,
 }: NativeTabBarProps) {
-  if (Platform.OS === 'web') return null;
+  const bottomInset = safeAreaBottom ?? insets?.bottom ?? 0;
+  const containerPaddingBottom = styles.navContainer.paddingBottom + bottomInset;
+  const devProps = __DEV__ ? { testID: 'native-tabbar' } : {};
 
-  const bottomSpacing = safeAreaBottom ?? insets?.bottom ?? 0;
+  useEffect(() => {
+    if (__DEV__ && Platform.OS !== 'web') {
+      console.log('[NativeTabBar] mounted');
+    }
+  }, []);
+
+  if (Platform.OS === 'web') return null;
 
   return (
     <View
+      {...devProps}
       style={[
         styles.navContainer,
         {
-          bottom: bottomSpacing,
+          paddingBottom: containerPaddingBottom,
           opacity: visible ? 1 : 0,
           pointerEvents: visible ? 'auto' : 'none',
         },
