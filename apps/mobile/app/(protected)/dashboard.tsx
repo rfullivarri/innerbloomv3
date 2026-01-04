@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ComponentProps, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
@@ -14,11 +14,19 @@ import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { WebViewNavigation } from 'react-native-webview';
 import { WebView } from 'react-native-webview';
-// eslint-disable-next-line import/no-unresolved
-import Svg, { Circle, Path } from 'react-native-svg';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { getDashboardRoutes, type DashboardRoutes } from '@/constants/routes';
 import { WebViewProvider, useWebViewController } from '@/hooks/webview-controller';
+import {
+  CircleDotIcon,
+  FlameIcon,
+  NativeTabBar,
+  RouteIcon,
+  SparklesIcon,
+  SproutIcon,
+  type IconProps,
+} from '@/components/native-tab-bar';
 
 import { DEFAULT_BASE_URL, buildAppUrl } from '@/utils/url';
 
@@ -31,89 +39,13 @@ type TabConfig = {
   label: string;
   path: string;
   matchers: string[];
-  Icon: typeof RouteIcon;
+  Icon: (props: IconProps) => JSX.Element;
 };
 
 type ErrorState = {
   message: string;
   url?: string;
 } | null;
-
-type IconProps = ComponentProps<typeof Svg> & { size?: number };
-
-function BaseIcon({
-  children,
-  size = 24,
-  strokeWidth = 1.75,
-  color,
-  ...props
-}: IconProps & { children: ReactNode }) {
-  return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color ?? 'currentColor'}
-      strokeWidth={strokeWidth}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      {children}
-    </Svg>
-  );
-}
-
-function RouteIcon(props: IconProps) {
-  return (
-    <BaseIcon {...props}>
-      <Path d="M4 18c4 0 4-12 8-12s4 12 8 12" />
-      <Circle cx="4" cy="18" r="2" />
-      <Circle cx="20" cy="18" r="2" />
-      <Circle cx="12" cy="6" r="2" />
-    </BaseIcon>
-  );
-}
-
-function FlameIcon(props: IconProps) {
-  return (
-    <BaseIcon {...props}>
-      <Path d="M12 3c1 3-2 4-2 7a3 3 0 0 0 6 0c0-3-3-4-4-7Z" />
-      <Path d="M8 14a4 4 0 1 0 8 0 6 6 0 0 0-2-4" />
-    </BaseIcon>
-  );
-}
-
-function CircleDotIcon(props: IconProps) {
-  return (
-    <BaseIcon {...props}>
-      <Circle cx="12" cy="12" r="9" />
-      <Circle cx="12" cy="12" r="2" />
-    </BaseIcon>
-  );
-}
-
-function SparklesIcon(props: IconProps) {
-  return (
-    <BaseIcon {...props}>
-      <Path d="M12 4 13.5 7.5 17 9l-3.5 1.5L12 14l-1.5-3.5L7 9l3.5-1.5Z" />
-      <Path d="m6 16 1 2 2 1-2 1-1 2-1-2-2-1 2-1Z" />
-      <Path d="m18 14 .75 1.5L20 16l-1.25.5L18 18l-.75-1.5L16 16l1.25-.5Z" />
-    </BaseIcon>
-  );
-}
-
-function SproutIcon(props: IconProps) {
-  return (
-    <BaseIcon {...props}>
-      <Path d="M12 22v-6" />
-      <Path d="M16 10c0 2-1.79 4-4 4s-4-2-4-4a4 4 0 0 1 4-4c2.21 0 4 2 4 4Z" />
-      <Path d="M9 9C9 6 7 4 4 4c0 3 2 5 5 5Z" />
-      <Path d="M15 9c0-3 2-5 5-5 0 3-2 5-5 5Z" />
-    </BaseIcon>
-  );
-}
 
 function createTabs(routes: DashboardRoutes): TabConfig[] {
   return [
@@ -356,6 +288,68 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
 
   const navPadding = insets.bottom + 12;
 
+  const tabBarState: BottomTabBarProps['state'] = useMemo(
+    () => ({
+      key: 'native-dashboard-nav',
+      index: Math.max(0, tabs.findIndex((tab) => tab.key === activeTab)),
+      routeNames: tabs.map((tab) => tab.key),
+      routes: tabs.map((tab) => ({ key: tab.key, name: tab.key })),
+      stale: false,
+      type: 'tab',
+      history: [],
+    }),
+    [activeTab, tabs],
+  );
+
+  const tabBarDescriptors: BottomTabBarProps['descriptors'] = useMemo(
+    () =>
+      Object.fromEntries(
+        tabs.map((tab) => [
+          tab.key,
+          {
+            key: tab.key,
+            options: {
+              tabBarLabel: tab.label,
+              tabBarIcon: ({
+                size = tab.key === 'dashboard' ? 26 : 22,
+                color,
+              }: {
+                size: number;
+                color: string;
+                focused: boolean;
+              }) => (
+                <tab.Icon size={size} color={color} strokeWidth={2.25} />
+              ),
+            },
+          },
+        ]),
+      ),
+    [tabs],
+  );
+
+  const tabBarNavigation: BottomTabBarProps['navigation'] = useMemo(
+    () =>
+      ({
+        navigate: (routeName: string) => {
+          const tab = tabs.find((item) => item.key === routeName);
+          if (tab) navigateToTab(tab);
+        },
+      }) as BottomTabBarProps['navigation'],
+    [navigateToTab, tabs],
+  );
+
+  const nativeTabBarProps: BottomTabBarProps & { visible: boolean; safeAreaBottom: number } = useMemo(
+    () => ({
+      state: tabBarState,
+      navigation: tabBarNavigation,
+      descriptors: tabBarDescriptors,
+      insets: { bottom: navPadding, top: 0, left: 0, right: 0 },
+      visible: isNavVisible,
+      safeAreaBottom: navPadding,
+    }),
+    [tabBarDescriptors, tabBarNavigation, tabBarState, isNavVisible, navPadding],
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -417,90 +411,8 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
         ) : null}
       </View>
 
-      <NativeBottomNav
-        activeTab={activeTab}
-        onTabPress={navigateToTab}
-        tabs={tabs}
-        safeAreaBottom={navPadding}
-        visible
-      />
+      <NativeTabBar {...nativeTabBarProps} />
     </SafeAreaView>
-  );
-}
-
-type NativeBottomNavProps = {
-  tabs: TabConfig[];
-  activeTab: TabKey;
-  onTabPress: (tab: TabConfig) => void;
-  safeAreaBottom: number;
-  visible?: boolean;
-};
-
-function NativeBottomNav({ tabs, activeTab, onTabPress, safeAreaBottom, visible = true }: NativeBottomNavProps) {
-  console.log('[NativeBottomNav] render', { tabs: tabs.length, activeTab, safeAreaBottom, visible });
-
-  return (
-    <View
-      style={[
-        styles.navContainer,
-        {
-          bottom: safeAreaBottom,
-          opacity: visible ? 1 : 0,
-          pointerEvents: visible ? 'auto' : 'none',
-        },
-      ]}
-    >
-      <View style={styles.navBlurFallback}>
-        {tabs.map((tab) => {
-          const Icon = tab.Icon;
-          const isActive = activeTab === tab.key;
-          const isDashboard = tab.key === 'dashboard';
-
-          return (
-            <View key={tab.key} style={styles.navItemWrapper}>
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityState={{ selected: isActive }}
-                onPress={() => onTabPress(tab)}
-                style={styles.navButton}
-                activeOpacity={0.85}
-              >
-                <View style={styles.navContent}>
-                  <View style={styles.iconOuter}>
-                    {isActive ? <View style={[styles.iconHalo, isDashboard && styles.dashboardHalo]} /> : null}
-                    <View
-                      style={[
-                        styles.iconWrapper,
-                        isDashboard && styles.dashboardIconWrapper,
-                        isActive ? styles.iconWrapperActive : styles.iconWrapperInactive,
-                      ]}
-                    >
-                      <Icon
-                        size={isDashboard ? 26 : 22}
-                        strokeWidth={2.25}
-                        color={isActive ? '#ffffff' : 'rgba(255,255,255,0.58)'}
-                        style={[styles.icon, isDashboard && styles.dashboardIcon]}
-                      />
-                    </View>
-                  </View>
-                  <Text
-                    style={[
-                      styles.tabLabel,
-                      isDashboard && styles.dashboardLabel,
-                      isActive ? styles.tabLabelActive : styles.tabLabelInactive,
-                    ]}
-                    numberOfLines={1}
-                    ellipsizeMode="clip"
-                  >
-                    {tab.label}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          );
-        })}
-      </View>
-    </View>
   );
 }
 
@@ -601,115 +513,5 @@ const styles = StyleSheet.create({
     color: '#0d111b',
     fontSize: 14,
     fontWeight: '700',
-  },
-  navContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 9999,
-    elevation: 9999,
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 24,
-  },
-  navBlurFallback: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 32,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    backgroundColor: 'rgba(18, 26, 44, 0.92)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.18)',
-    shadowColor: '#0c1635',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.28,
-    shadowRadius: 22,
-    overflow: 'hidden',
-  },
-  navItemWrapper: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navButton: {
-    width: '100%',
-  },
-  navContent: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  iconOuter: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconHalo: {
-    position: 'absolute',
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    shadowColor: 'rgba(198,214,255,0.65)',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 20,
-  },
-  dashboardHalo: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-  },
-  iconWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: 'rgba(10,16,35,0.25)',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 14,
-  },
-  dashboardIconWrapper: {
-    width: 44,
-    height: 44,
-    borderRadius: 18,
-  },
-  iconWrapperActive: {
-    backgroundColor: 'rgba(255,255,255,0.16)',
-  },
-  iconWrapperInactive: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  icon: {
-    width: 22,
-    height: 22,
-  },
-  dashboardIcon: {
-    width: 26,
-    height: 26,
-  },
-  tabLabel: {
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    textAlign: 'center',
-    includeFontPadding: false,
-    minWidth: 64,
-  },
-  dashboardLabel: {
-    fontSize: 10,
-  },
-  tabLabelActive: {
-    color: '#ffffff',
-    textShadowColor: 'rgba(255,255,255,0.22)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 6,
-  },
-  tabLabelInactive: {
-    color: 'rgba(255,255,255,0.7)',
   },
 });
