@@ -416,14 +416,19 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
   );
 }
 
-export default function HomeScreen() {
+export function DashboardWebViewScreen({ initialRoute = 'dashboard' }: { initialRoute?: TabKey }) {
   const routes = useMemo(() => getDashboardRoutes(), []);
+  const resolvedInitialPath = routes[initialRoute] ?? routes.dashboard;
 
   return (
-    <WebViewProvider initialPath={routes.dashboard}>
+    <WebViewProvider initialPath={resolvedInitialPath}>
       <DashboardContent routes={routes} />
     </WebViewProvider>
   );
+}
+
+export default function HomeScreen() {
+  return <DashboardWebViewScreen />;
 }
 
 const styles = StyleSheet.create({
