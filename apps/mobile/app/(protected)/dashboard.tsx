@@ -20,7 +20,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { getDashboardRoutes, type DashboardRoutes } from '@/constants/routes';
 import { WebViewProvider, useWebViewController } from '@/hooks/webview-controller';
 
-import { DEFAULT_BASE_URL, buildAppUrl } from '../utils/url';
+import { DEFAULT_BASE_URL, buildAppUrl } from '@/utils/url';
 
 const APP_FLAG_SCRIPT = 'window.__INNERBLOOM_NATIVE_APP__ = true; true;';
 
@@ -205,16 +205,14 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
 
       try {
         const parsed = new URL(url);
-        const hostname = parsed.hostname.toLowerCase();
         const pathname = parsed.pathname.toLowerCase();
 
-        const isAllowedHost = allowedHosts.some(
-          (host) => hostname === host || hostname.endsWith(`.${host}`),
-        );
+        const authPaths = ['/sign-in', '/login', '/sign-up', '/auth', '/sso-callback'];
+        if (authPaths.some((authPath) => pathname.startsWith(authPath))) {
+          return false;
+        }
 
-        if (!isAllowedHost) return false;
-
-        return tabs.some((tab) => tab.matchers.some((matcher) => pathname.startsWith(matcher)));
+        return true;
       } catch (error) {
         console.warn('Failed to evaluate navbar visibility for URL', error);
         return false;
@@ -419,9 +417,13 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
         ) : null}
       </View>
 
-      {isNavVisible ? (
-        <NativeBottomNav activeTab={activeTab} onTabPress={navigateToTab} tabs={tabs} safeAreaBottom={navPadding} />
-      ) : null}
+      <NativeBottomNav
+        activeTab={activeTab}
+        onTabPress={navigateToTab}
+        tabs={tabs}
+        safeAreaBottom={navPadding}
+        visible
+      />
     </SafeAreaView>
   );
 }
@@ -431,12 +433,24 @@ type NativeBottomNavProps = {
   activeTab: TabKey;
   onTabPress: (tab: TabConfig) => void;
   safeAreaBottom: number;
+  visible?: boolean;
 };
 
-function NativeBottomNav({ tabs, activeTab, onTabPress, safeAreaBottom }: NativeBottomNavProps) {
+function NativeBottomNav({ tabs, activeTab, onTabPress, safeAreaBottom, visible = true }: NativeBottomNavProps) {
+  console.log('[NativeBottomNav] render', { tabs: tabs.length, activeTab, safeAreaBottom, visible });
+
   return (
-    <View style={[styles.navContainer, { bottom: safeAreaBottom }]}> 
-      <BlurView intensity={40} tint="dark" style={styles.navBlur} experimentalBlurMethod="dimezisBlurView">
+    <View
+      style={[
+        styles.navContainer,
+        {
+          bottom: safeAreaBottom,
+          opacity: visible ? 1 : 0,
+          pointerEvents: visible ? 'auto' : 'none',
+        },
+      ]}
+    >
+      <View style={styles.navBlurFallback}>
         {tabs.map((tab) => {
           const Icon = tab.Icon;
           const isActive = activeTab === tab.key;
@@ -485,7 +499,7 @@ function NativeBottomNav({ tabs, activeTab, onTabPress, safeAreaBottom }: Native
             </View>
           );
         })}
-      </BlurView>
+      </View>
     </View>
   );
 }
@@ -540,9 +554,11 @@ const styles = StyleSheet.create({
   webViewContainer: {
     flex: 1,
     backgroundColor: '#0d111b',
+    zIndex: 0,
   },
   webView: {
     flex: 1,
+    zIndex: 0,
   },
   errorContainer: {
     flex: 1,
@@ -591,20 +607,20 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 20,
-    elevation: 30,
-    paddingHorizontal: 16,
-    paddingTop: 6,
-    paddingBottom: 12,
+    zIndex: 9999,
+    elevation: 9999,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 24,
   },
-  navBlur: {
+  navBlurFallback: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderRadius: 32,
     paddingVertical: 8,
     paddingHorizontal: 10,
-    backgroundColor: 'rgba(44, 76, 140, 0.55)',
+    backgroundColor: 'rgba(18, 26, 44, 0.92)',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(255,255,255,0.18)',
     shadowColor: '#0c1635',

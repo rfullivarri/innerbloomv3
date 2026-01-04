@@ -3,7 +3,7 @@ import type { ReactNode, RefObject } from 'react';
 import { WebView } from 'react-native-webview';
 
 import { getDashboardRoutes } from '../constants/routes';
-import { buildAppUrl, normalizeBaseUrl } from '../app/utils/url';
+import { buildAppUrl, normalizeBaseUrl } from '@/utils/url';
 
 type WebViewControllerValue = {
   baseUrl: string;

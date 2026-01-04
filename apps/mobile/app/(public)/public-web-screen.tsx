@@ -3,7 +3,7 @@ import { ActivityIndicator, Linking, Platform, SafeAreaView, StatusBar, StyleShe
 import type { WebViewNavigation } from 'react-native-webview';
 import { WebView } from 'react-native-webview';
 
-import { DEFAULT_BASE_URL, buildAppUrl, normalizeBaseUrl } from '../utils/url';
+import { DEFAULT_BASE_URL, buildAppUrl, normalizeBaseUrl } from '@/utils/url';
 
 const APP_FLAG_SCRIPT = 'window.__INNERBLOOM_NATIVE_APP__ = true; true;';
 
@@ -175,6 +175,8 @@ export function PublicWebScreen({ path, title }: PublicWebScreenProps) {
     </SafeAreaView>
   );
 }
+
+export default PublicWebScreen;
 
 const styles = StyleSheet.create({
   container: {
