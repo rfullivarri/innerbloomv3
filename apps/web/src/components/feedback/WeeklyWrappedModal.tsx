@@ -792,7 +792,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
                 </div>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                   <p className="text-[11px] text-emerald-50/80">
-                    Meta cumplida {health.weeksActive} de {health.weeksSample} ciclos de 7 días.
+                    Meta cumplida {health.weeksActive} de {health.weeksSample} semanas.
                   </p>
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-tight ${

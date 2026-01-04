@@ -17,7 +17,7 @@ import type { InsightQuery, LogsQuery } from '../modules/admin/admin.schemas.js'
 import { getUserInsights, getUserLogs } from '../modules/admin/admin.service.js';
 import { HttpError } from '../lib/http-error.js';
 import {
-  findWeeklyWrappedByWeek,
+  findWeeklyWrappedByRange,
   insertWeeklyWrapped,
   listActiveUsersWithLogs,
   listRecentWeeklyWrapped,
@@ -210,6 +210,29 @@ export function resolveWeekRange(referenceDate: string): { start: string; end: s
   return { start: toDateKey(start), end: toDateKey(end) };
 }
 
+export async function shouldGenerateWeeklyWrappedForSubmission(
+  userId: string,
+  referenceDate: string,
+): Promise<boolean> {
+  const { start, end } = resolveWeekRange(referenceDate);
+  const existing = await findWeeklyWrappedByRange(userId, start, end);
+  if (existing) {
+    return false;
+  }
+
+  const result = await pool.query<{ count: string }>(
+    `SELECT COUNT(*) AS count
+       FROM emotions_logs
+      WHERE user_id = $1
+        AND date BETWEEN $2 AND $3
+        AND date < $4`,
+    [userId, start, end, referenceDate],
+  );
+
+  const count = Number.parseInt(result.rows[0]?.count ?? '0', 10);
+  return count === 0;
+}
+
 function parseDate(input: string): Date {
   const parsed = new Date(`${input}T00:00:00Z`);
   if (Number.isNaN(parsed.getTime())) {
@@ -239,7 +262,7 @@ export async function maybeGenerateWeeklyWrappedForDate(
   referenceDate: string,
 ): Promise<WeeklyWrappedEntry | null> {
   const { start, end } = resolveWeekRange(referenceDate);
-  const existing = await findWeeklyWrappedByWeek(userId, end);
+  const existing = await findWeeklyWrappedByRange(userId, start, end);
   if (existing) {
     return existing as WeeklyWrappedEntry;
   }
@@ -274,7 +297,7 @@ export async function runWeeklyWrappedJob(now: Date): Promise<{
 
   for (const userId of candidates) {
     try {
-      const existing = await findWeeklyWrappedByWeek(userId, end);
+      const existing = await findWeeklyWrappedByRange(userId, start, end);
       if (existing) {
         skipped += 1;
         continue;
