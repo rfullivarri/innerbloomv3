@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
@@ -12,12 +12,13 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { WebViewNavigation } from 'react-native-webview';
 import { WebView } from 'react-native-webview';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useFocusEffect } from '@react-navigation/native';
+// eslint-disable-next-line import/no-unresolved
 import { CircleDot, Flame, Route, Sparkles, Sprout } from 'lucide-react-native';
 
 import { getDashboardRoutes, type DashboardRoutes } from '@/constants/routes';
 import { WebViewProvider, useWebViewController } from '@/hooks/webview-controller';
-import { NativeTabBar, getNativeTabBarHeight } from '@/components/native-tab-bar';
+import { getNativeTabBarHeight } from '@/components/native-tab-bar';
 
 import { DEFAULT_BASE_URL, buildAppUrl } from '@/utils/url';
 
@@ -94,7 +95,6 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
     useWebViewController();
   const webViewSource = useMemo(() => ({ uri: initialUrl }), [initialUrl]);
   const activeTab = useMemo(() => getTabFromPath(currentPath, tabs), [currentPath, tabs]);
-  const [isNavVisible, setIsNavVisible] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ErrorState>(null);
@@ -106,34 +106,10 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
     [],
   );
 
-  const shouldShowNavForUrl = useCallback(
-    (url?: string | null) => {
-      if (!url) return false;
-
-      try {
-        const parsed = new URL(url);
-        const pathname = parsed.pathname.toLowerCase();
-
-        const authPaths = ['/sign-in', '/login', '/sign-up', '/auth', '/sso-callback'];
-        if (authPaths.some((authPath) => pathname.startsWith(authPath))) {
-          return false;
-        }
-
-        return true;
-      } catch (error) {
-        console.warn('Failed to evaluate navbar visibility for URL', error);
-        return false;
-      }
-    },
-    [],
-  );
-
   const handleNavigationStateChange = useCallback(
     (navState: WebViewNavigation) => {
       console.log('[WebView] navigation state url:', navState.url);
       setCanGoBack(navState.canGoBack);
-      setIsNavVisible(shouldShowNavForUrl(navState.url));
-
       try {
         const parsed = new URL(navState.url);
         setCurrentPath(parsed.pathname.toLowerCase());
@@ -142,13 +118,12 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
         setCurrentPath(routes.dashboard);
       }
     },
-    [routes.dashboard, setCurrentPath, shouldShowNavForUrl],
+    [routes.dashboard, setCurrentPath],
   );
 
   const navigateToTab = useCallback(
     (tab: TabConfig) => {
       setError(null);
-      setIsNavVisible(true);
       navigate(tab.path);
     },
     [navigate],
@@ -257,72 +232,13 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    setIsNavVisible(shouldShowNavForUrl(initialUrl));
-  }, [initialUrl, shouldShowNavForUrl]);
-
   const navPadding = getNativeTabBarHeight(bottomInset);
 
-  const tabBarState: BottomTabBarProps['state'] = useMemo(
-    () => ({
-      key: 'native-dashboard-nav',
-      index: Math.max(0, tabs.findIndex((tab) => tab.key === activeTab)),
-      routeNames: tabs.map((tab) => tab.key),
-      routes: tabs.map((tab) => ({ key: tab.key, name: tab.key })),
-      stale: false,
-      type: 'tab',
-      history: [],
-    }),
-    [activeTab, tabs],
-  );
-
-  const tabBarDescriptors: BottomTabBarProps['descriptors'] = useMemo(
-    () =>
-      Object.fromEntries(
-        tabs.map((tab) => [
-          tab.key,
-          {
-            key: tab.key,
-            options: {
-              tabBarLabel: tab.label,
-              tabBarIcon: ({
-                size = tab.key === 'dashboard' ? 26 : 22,
-                color,
-              }: {
-                size: number;
-                color?: string;
-                focused: boolean;
-              }) => (
-                <tab.Icon size={size} color={color ?? '#ffffff'} strokeWidth={2.25} />
-              ),
-            },
-          },
-        ]),
-      ),
-    [tabs],
-  );
-
-  const tabBarNavigation: BottomTabBarProps['navigation'] = useMemo(
-    () =>
-      ({
-        navigate: (routeName: string) => {
-          const tab = tabs.find((item) => item.key === routeName);
-          if (tab) navigateToTab(tab);
-        },
-      }) as BottomTabBarProps['navigation'],
-    [navigateToTab, tabs],
-  );
-
-  const nativeTabBarProps: BottomTabBarProps & { visible: boolean; safeAreaBottom: number } = useMemo(
-    () => ({
-      state: tabBarState,
-      navigation: tabBarNavigation,
-      descriptors: tabBarDescriptors,
-      insets: { bottom: bottomInset, top: 0, left: 0, right: 0 },
-      visible: isNavVisible,
-      safeAreaBottom: bottomInset,
-    }),
-    [bottomInset, tabBarDescriptors, tabBarNavigation, tabBarState, isNavVisible],
+  useFocusEffect(
+    useCallback(() => {
+      const active = tabs.find((tab) => tab.key === activeTab) ?? tabs[0];
+      navigateToTab(active);
+    }, [activeTab, navigateToTab, tabs]),
   );
 
   return (
@@ -385,8 +301,6 @@ function DashboardContent({ routes }: { routes: DashboardRoutes }) {
           </View>
         ) : null}
       </View>
-
-      <NativeTabBar {...nativeTabBarProps} />
     </SafeAreaView>
   );
 }
