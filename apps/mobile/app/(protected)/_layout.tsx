@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// eslint-disable-next-line import/no-unresolved
 import { CircleDot, Flame, Route, Sparkles, Sprout } from 'lucide-react-native';
 
 import { NativeTabBar, getNativeTabBarHeight } from '@/components/native-tab-bar';
@@ -30,7 +31,7 @@ export default function ProtectedLayout() {
       <Tabs.Screen
         name="dquest"
         options={{
-          tabBarLabel: 'Daily',
+          tabBarLabel: 'DQuest',
           tabBarIcon: ({ color = '#fff', size = 22 }) => (
             <Flame size={size} color={color} strokeWidth={2.25} />
           ),
