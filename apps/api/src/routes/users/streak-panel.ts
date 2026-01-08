@@ -220,7 +220,17 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
   }
 
   const { id } = parseWithValidation(paramsSchema, req.params);
-  const { pillar, range, mode: rawMode, query } = parseWithValidation(querySchema, req.query);
+  const fallbackUrl = new URL(req.originalUrl ?? req.url ?? '', 'http://localhost');
+  const fallbackParams = fallbackUrl.searchParams;
+  const rawQuery = (req.query ?? {}) as Record<string, unknown>;
+  const normalizedQuery = {
+    ...rawQuery,
+    pillar: rawQuery.pillar ?? fallbackParams.get('pillar') ?? undefined,
+    range: rawQuery.range ?? fallbackParams.get('range') ?? undefined,
+    mode: rawQuery.mode ?? fallbackParams.get('mode') ?? undefined,
+    query: rawQuery.query ?? fallbackParams.get('query') ?? undefined,
+  };
+  const { pillar, range, mode: rawMode, query } = parseWithValidation(querySchema, normalizedQuery);
 
   await ensureUserExists(id);
 
