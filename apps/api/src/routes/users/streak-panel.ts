@@ -408,6 +408,12 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
       range,
       mode,
       query: queryFilter,
+      request: {
+        query: req.query,
+        originalUrl: req.originalUrl,
+        url: req.url,
+        contentType: req.headers['content-type'],
+      },
       tasks: tasks.length,
       topStreaks: topStreaks.length,
     });
@@ -418,4 +424,3 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
     tasks,
   });
 };
-
