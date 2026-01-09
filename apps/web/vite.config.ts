@@ -26,7 +26,13 @@ export default defineConfig({
   preview: {
     host: '0.0.0.0',
     port: 5173,
-    allowedHosts: ['.railway.app']
+    allowedHosts: [
+      'innerbloomjourney.org',
+      'www.innerbloomjourney.org',
+      'dev.innerbloomjourney.org',
+      '.up.railway.app',
+      'localhost'
+    ]
   },
   build: {
     sourcemap: true,

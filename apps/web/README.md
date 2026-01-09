@@ -13,6 +13,9 @@ npm run dev
 ```
 The dev server runs on <http://localhost:5173> by default.
 
+## Allowed preview hosts
+Vite preview only accepts requests from `innerbloomjourney.org`, `www.innerbloomjourney.org`, `dev.innerbloomjourney.org`, `localhost`, and `*.up.railway.app` to avoid the blocked-host warning. This keeps the preview server reachable on the production and Railway domains while still rejecting unknown hosts.
+
 ## Environment
 Set the API origin before starting the dev server or building:
 
