@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } f
 import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { FeatureShowcaseSection } from '../components/landing/FeatureShowcaseSection';
+import { usePageMeta } from '../lib/seo';
 import './Landing.css';
 
 type Language = 'es' | 'en';
@@ -354,8 +355,16 @@ export default function LandingPage() {
   const copy = content[language];
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
+  const shareImage = '/FlowMood.jpg';
 
   const testimonialCount = copy.testimonials.items.length;
+
+  usePageMeta({
+    title: language === 'es' ? 'Innerbloom | Gamification Journey' : 'Innerbloom | Gamification Journey',
+    description: copy.hero.subtitle,
+    image: shareImage,
+    url: '/'
+  });
 
   useEffect(() => {
     if (paused || testimonialCount <= 1) {

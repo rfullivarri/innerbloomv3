@@ -2,8 +2,16 @@ import { SignIn } from '@clerk/clerk-react';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { DASHBOARD_PATH } from '../config/auth';
 import { createAuthAppearance } from '../lib/clerkAppearance';
+import { usePageMeta } from '../lib/seo';
 
 export default function LoginPage() {
+  usePageMeta({
+    title: 'Innerbloom | Iniciar sesión',
+    description: 'Ingresá a Innerbloom y continuá tu Journey con hábitos y misiones personalizadas.',
+    image: '/FlowMood.jpg',
+    url: '/login'
+  });
+
   return (
     <AuthLayout
       title={
