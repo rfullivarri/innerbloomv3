@@ -1,10 +1,12 @@
 [service.api]
+build.command = "npm --workspace apps/api run build"
 command = "npm --workspace apps/api run start"
 
   [service.api.env]
   PORT = "8080"
 
 [service.web]
+build.command = "npm --workspace apps/web run build"
 command = "npm --workspace apps/web run start"
 
   [service.web.env]
