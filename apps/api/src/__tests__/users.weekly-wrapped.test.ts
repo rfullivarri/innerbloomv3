@@ -113,6 +113,40 @@ describe('GET /api/users/:id/weekly-wrapped/latest', () => {
     expect(mockGetRecentWrapped).toHaveBeenCalledWith(userId, 2);
     vi.useRealTimers();
   });
+
+  it('returns the most recent entry when the current week is missing', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-10-20T12:00:00Z'));
+    mockVerifyToken.mockResolvedValue({
+      id: userId,
+      clerkId: 'user_123',
+      email: 'test@example.com',
+      isNew: false,
+    });
+
+    mockQuery.mockResolvedValue({ rows: [{ user_id: userId }] });
+    mockGetRecentWrapped.mockResolvedValue([
+      {
+        id: 'wrap-1',
+        userId,
+        weekStart: '2024-10-07',
+        weekEnd: '2024-10-13',
+        createdAt: '2024-10-14T10:00:00.000Z',
+        updatedAt: '2024-10-14T10:00:00.000Z',
+        summary: null,
+        payload: { mode: 'final' },
+      },
+    ]);
+
+    const response = await request(app)
+      .get(`/api/users/${userId}/weekly-wrapped/latest`)
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.item?.id).toBe('wrap-1');
+    expect(mockGetRecentWrapped).toHaveBeenCalledWith(userId, 2);
+    vi.useRealTimers();
+  });
 });
 
 describe('GET /api/users/:id/weekly-wrapped/previous', () => {
@@ -172,6 +206,40 @@ describe('GET /api/users/:id/weekly-wrapped/previous', () => {
           levelUp: { happened: false, currentLevel: 1, previousLevel: 1, xpGained: 0, forced: false },
           sections: [],
         },
+      },
+    ]);
+
+    const response = await request(app)
+      .get(`/api/users/${userId}/weekly-wrapped/previous`)
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.item?.id).toBe('wrap-previous');
+    expect(mockGetRecentWrapped).toHaveBeenCalledWith(userId, 2);
+    vi.useRealTimers();
+  });
+
+  it('returns the most recent entry when the current week is missing', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-10-20T12:00:00Z'));
+    mockVerifyToken.mockResolvedValue({
+      id: userId,
+      clerkId: 'user_123',
+      email: 'test@example.com',
+      isNew: false,
+    });
+
+    mockQuery.mockResolvedValue({ rows: [{ user_id: userId }] });
+    mockGetRecentWrapped.mockResolvedValue([
+      {
+        id: 'wrap-previous',
+        userId,
+        weekStart: '2024-10-07',
+        weekEnd: '2024-10-13',
+        createdAt: '2024-10-14T10:00:00.000Z',
+        updatedAt: '2024-10-14T10:00:00.000Z',
+        summary: null,
+        payload: { mode: 'final' },
       },
     ]);
 

@@ -12,6 +12,27 @@ interface RewardsSectionProps {
   onOpenWeeklyWrapped?: (record?: WeeklyWrappedRecord | null) => void;
 }
 
+function parseDateKey(dateKey: string): Date {
+  const parsed = new Date(`${dateKey}T00:00:00Z`);
+  parsed.setUTCHours(0, 0, 0, 0);
+  return parsed;
+}
+
+function getStartOfWeekUtc(date: Date): Date {
+  const copy = new Date(date);
+  copy.setUTCHours(0, 0, 0, 0);
+  const dayOfWeek = copy.getUTCDay();
+  const daysSinceMonday = (dayOfWeek + 6) % 7;
+  copy.setUTCDate(copy.getUTCDate() - daysSinceMonday);
+  return copy;
+}
+
+function isSameUtcWeek(dateKey: string, reference: Date): boolean {
+  const referenceStart = getStartOfWeekUtc(reference);
+  const targetStart = getStartOfWeekUtc(parseDateKey(dateKey));
+  return referenceStart.getTime() === targetStart.getTime();
+}
+
 export function RewardsSection({
   userId,
   weeklyWrappedCurrent,
@@ -46,9 +67,13 @@ export function RewardsSection({
   const weeklyWrappedItems = useMemo(() => {
     const items: { label: string; record: WeeklyWrappedRecord }[] = [];
     if (weeklyWrappedCurrent) {
-      items.push({ label: 'Semana en curso', record: weeklyWrappedCurrent });
+      const isCurrentWeek = isSameUtcWeek(weeklyWrappedCurrent.weekEnd, new Date());
+      items.push({
+        label: isCurrentWeek ? 'Semana en curso' : 'Semana más reciente',
+        record: weeklyWrappedCurrent,
+      });
     }
-    if (weeklyWrappedPrevious) {
+    if (weeklyWrappedPrevious && weeklyWrappedPrevious.id !== weeklyWrappedCurrent?.id) {
       items.push({ label: 'Semana anterior', record: weeklyWrappedPrevious });
     }
     return items;

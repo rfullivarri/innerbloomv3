@@ -28,7 +28,8 @@ export const getUserWeeklyWrappedLatest: AsyncHandler = async (req, res) => {
   const items = await getRecentWeeklyWrapped(id, 2);
   const { start, end } = resolveCurrentWeekRange(new Date());
   const current = items.find((entry) => entry.weekEnd >= start && entry.weekEnd <= end);
-  res.json({ item: current ?? null });
+  const latest = current ?? items[0] ?? null;
+  res.json({ item: latest ?? null });
 };
 
 export const getUserWeeklyWrappedPrevious: AsyncHandler = async (req, res) => {
@@ -37,6 +38,8 @@ export const getUserWeeklyWrappedPrevious: AsyncHandler = async (req, res) => {
   const items = await getRecentWeeklyWrapped(id, 2);
   const { start, end } = resolveCurrentWeekRange(new Date());
   const current = items.find((entry) => entry.weekEnd >= start && entry.weekEnd <= end);
-  const previous = current ? items.find((entry) => entry.id !== current.id) ?? null : null;
+  const previous = current
+    ? items.find((entry) => entry.id !== current.id) ?? null
+    : items[1] ?? items[0] ?? null;
   res.json({ item: previous ?? null });
 };
