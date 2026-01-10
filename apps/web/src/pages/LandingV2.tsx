@@ -682,7 +682,7 @@ function MissionsPreview({ compact = false, language = 'es' }: { compact?: boole
 function RadarChartPreview() {
   return (
     <div className="lv2-radar-chart">
-      <svg viewBox="0 0 200 200" role="img" aria-label="Radar chart preview">
+      <svg viewBox="-10 -10 220 220" role="img" aria-label="Radar chart preview">
         <defs>
           <linearGradient id="lv2-radar-fill" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#7dd3fc" stopOpacity="0.5" />
@@ -723,8 +723,8 @@ function RadarChartPreview() {
 function EmotionChartPreview({ language = 'es' }: { language?: Language }) {
   const gridStyle = {
     '--column-count': EMOTION_PREVIEW_PADDED_COLUMNS.length,
-    '--cell': '8px',
-    '--cell-gap': '4px'
+    '--cell': '10px',
+    '--cell-gap': '5px'
   } as CSSProperties;
 
   return (
