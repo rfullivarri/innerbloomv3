@@ -10,6 +10,7 @@ type MetaInput = {
   twitterImageAlt?: string;
   url?: string;
   type?: 'website' | 'article';
+  siteName?: string;
 };
 
 const ensureAbsoluteUrl = (value: string) => {
@@ -67,7 +68,8 @@ export const usePageMeta = ({
   twitterImage,
   twitterImageAlt,
   url,
-  type = 'website'
+  type = 'website',
+  siteName = 'Innerbloom'
 }: MetaInput) => {
   useEffect(() => {
     const resolvedUrl = ensureAbsoluteUrl(url ?? window.location.pathname);
@@ -87,6 +89,7 @@ export const usePageMeta = ({
     }
     upsertMetaTag('og:url', resolvedUrl, 'property');
     upsertMetaTag('og:type', type, 'property');
+    upsertMetaTag('og:site_name', siteName, 'property');
     upsertMetaTag('twitter:card', 'summary_large_image', 'name');
     upsertMetaTag('twitter:title', title, 'name');
     upsertMetaTag('twitter:description', description, 'name');
