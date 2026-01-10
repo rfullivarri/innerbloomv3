@@ -912,8 +912,8 @@ export default function LandingV2Page() {
       <main>
         <section className="lv2-hero" id="hero">
           <FluidGradientBackground className="lv2-hero-fluid">
-            <div className="lv2-container lv2-hero-grid">
-              <div className="lv2-hero-copy">
+            <div className="lv2-hero-content">
+              <div className="lv2-container lv2-hero-copy">
                 <p className="lv2-kicker">Habits • Gamification</p>
                 <h1>
                   {heroTitle.lead}{' '}
@@ -927,7 +927,7 @@ export default function LandingV2Page() {
                     </span>
                   ))}
                 </div>
-                <div className="lv2-cta-row">
+                <div className="lv2-cta-row center">
                   <Link className={BUTTON_VARIANTS.primary} to={primaryCta.to}>
                     {primaryCta.label}
                   </Link>
@@ -942,52 +942,54 @@ export default function LandingV2Page() {
                     : 'Not just a dashboard: a gamified habit-improvement system.'}
                 </p>
               </div>
-              <div className="lv2-dashboard-grid lv2-dashboard-grid--hero" aria-label="Demo del dashboard">
-                <div className="lv2-dashboard-column">
-                  <Card
-                    className="lv2-dashboard-card lv2-dashboard-card--square"
-                    bodyClassName="lv2-dashboard-card-body"
-                    title={language === 'es' ? 'Progreso general' : 'Overall progress'}
-                  >
-                    <DashboardXpVisual compact language={language} />
-                  </Card>
-                  <Card
-                    className="lv2-dashboard-card lv2-avatar-card"
-                    bodyClassName="lv2-dashboard-card-body"
-                    title={language === 'es' ? 'Tu avatar' : undefined}
-                  >
-                    <img
-                      className="lv2-avatar-image"
-                      src={AVATAR_MODES[avatarIndex].src}
-                      alt={`Avatar ${AVATAR_MODES[avatarIndex].label}`}
-                    />
-                  </Card>
-                </div>
-                <div className="lv2-dashboard-column">
-                  <Card
-                    className="lv2-dashboard-card lv2-dashboard-card--square lv2-dashboard-card--radar"
-                    bodyClassName="lv2-dashboard-card-body"
-                    title="Radar Chart"
-                  >
-                    <RadarChartPreview />
-                  </Card>
-                  <Card
-                    className="lv2-dashboard-card lv2-dashboard-card--emotion"
-                    bodyClassName="lv2-dashboard-card-body"
-                    title="💗 Emotion Chart"
-                    subtitle={language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
-                  >
-                    <EmotionChartPreview language={language} />
-                  </Card>
-                </div>
-                <div className="lv2-dashboard-column">
-                  <Card
-                    className="lv2-dashboard-card lv2-dashboard-card--streaks"
-                    bodyClassName="lv2-dashboard-card-body"
-                    title="🔥 Streaks"
-                  >
-                    <StreaksPreview language={language} />
-                  </Card>
+              <div className="lv2-hero-dashboard">
+                <div className="lv2-dashboard-grid lv2-dashboard-grid--hero" aria-label="Demo del dashboard">
+                  <div className="lv2-dashboard-column">
+                    <Card
+                      className="lv2-dashboard-card lv2-dashboard-card--square"
+                      bodyClassName="lv2-dashboard-card-body"
+                      title={language === 'es' ? 'Progreso general' : 'Overall progress'}
+                    >
+                      <DashboardXpVisual compact language={language} />
+                    </Card>
+                    <Card
+                      className="lv2-dashboard-card lv2-avatar-card"
+                      bodyClassName="lv2-dashboard-card-body"
+                      title={language === 'es' ? 'Tu avatar' : undefined}
+                    >
+                      <img
+                        className="lv2-avatar-image"
+                        src={AVATAR_MODES[avatarIndex].src}
+                        alt={`Avatar ${AVATAR_MODES[avatarIndex].label}`}
+                      />
+                    </Card>
+                  </div>
+                  <div className="lv2-dashboard-column">
+                    <Card
+                      className="lv2-dashboard-card lv2-dashboard-card--square lv2-dashboard-card--radar"
+                      bodyClassName="lv2-dashboard-card-body"
+                      title="Radar Chart"
+                    >
+                      <RadarChartPreview />
+                    </Card>
+                    <Card
+                      className="lv2-dashboard-card lv2-dashboard-card--emotion"
+                      bodyClassName="lv2-dashboard-card-body"
+                      title="💗 Emotion Chart"
+                      subtitle={language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
+                    >
+                      <EmotionChartPreview language={language} />
+                    </Card>
+                  </div>
+                  <div className="lv2-dashboard-column">
+                    <Card
+                      className="lv2-dashboard-card lv2-dashboard-card--streaks"
+                      bodyClassName="lv2-dashboard-card-body"
+                      title="🔥 Streaks"
+                    >
+                      <StreaksPreview language={language} />
+                    </Card>
+                  </div>
                 </div>
               </div>
             </div>
