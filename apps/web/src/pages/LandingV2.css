@@ -471,7 +471,7 @@
 }
 
 .lv2-dashboard-card-body .lv2-radar-chart svg {
-  max-width: 240px;
+  max-width: 250px;
 }
 
 .lv2-dashboard-card-body .lv2-emotion-column span {
@@ -1186,7 +1186,8 @@
 
 .lv2-radar-chart svg {
   width: 100%;
-  max-width: 220px;
+  max-width: 250px;
+  overflow: visible;
 }
 
 .lv2-radar-ring {
@@ -1320,6 +1321,8 @@
   display: inline-flex;
   gap: 6px;
   flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
 }
 
 .lv2-streaks-tabs span {
@@ -1489,6 +1492,8 @@
   display: inline-flex;
   gap: 6px;
   align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .lv2-tasks-tabs span {
