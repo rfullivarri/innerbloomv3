@@ -373,24 +373,51 @@
   padding: 0 18px;
 }
 
+.lv2-dashboard-shell {
+  margin: 0 auto;
+  width: min(1200px, 100%);
+  border-radius: 28px;
+  padding: clamp(16px, 2.2vw, 24px);
+  background: linear-gradient(140deg, rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.25));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 24px 50px rgba(8, 15, 30, 0.45);
+  backdrop-filter: blur(26px);
+}
+
+.landing-v2[data-theme='light'] .lv2-dashboard-shell {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.72), rgba(226, 232, 240, 0.6));
+  border-color: rgba(148, 163, 184, 0.3);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+}
+
 .lv2-dashboard-grid {
   display: grid;
-  gap: 10px;
+  gap: 16px;
   align-items: start;
 }
 
 .lv2-dashboard-grid--hero {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0 auto;
-  width: min(1400px, 100%);
+  width: 100%;
 }
 
 .lv2-dashboard-card {
   height: auto;
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: linear-gradient(160deg, rgba(20, 30, 54, 0.96), rgba(15, 23, 42, 0.75));
+  box-shadow: 0 18px 36px rgba(8, 15, 30, 0.45);
+}
+
+.landing-v2[data-theme='light'] .lv2-dashboard-card {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(226, 232, 240, 0.85));
+  border-color: rgba(148, 163, 184, 0.35);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
 }
 
 .lv2-dashboard-card--square {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
 }
 
 .lv2-dashboard-card--square .lv2-dashboard-card-body {
@@ -398,9 +425,9 @@
 }
 
 .lv2-dashboard-card-body {
-  gap: 10px;
-  padding: 4px 4px;
-  font-size: 12px;
+  gap: 12px;
+  padding: 16px;
+  font-size: 13px;
 }
 
 .lv2-xp-row {
@@ -423,33 +450,33 @@
 }
 
 .lv2-dashboard-card-body header h3 {
-  font-size: 0.9rem;
+  font-size: 1.05rem;
 }
 
 .lv2-dashboard-card-body header .text-sm {
-  font-size: 0.7rem;
+  font-size: 0.82rem;
 }
 
 .lv2-dashboard-card-body .lv2-card-chip {
-  padding: 3px 8px;
-  font-size: 9px;
+  padding: 6px 12px;
+  font-size: 10px;
 }
 
 .lv2-dashboard-card-body .lv2-radar-chart {
-  padding: 0;
+  padding: 6px 0;
 }
 
 .lv2-dashboard-card--radar .lv2-dashboard-card-body {
-  gap: 5px;
+  gap: 12px;
 }
 
 .lv2-dashboard-card-body .lv2-radar-chart svg {
-  max-width: 210px;
+  max-width: 240px;
 }
 
 .lv2-dashboard-card-body .lv2-emotion-column span {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 }
 
 .lv2-dashboard-card-body .lv2-streaks,
@@ -459,13 +486,13 @@
 
 .lv2-dashboard-card-body .lv2-streaks-tabs span,
 .lv2-dashboard-card-body .lv2-tasks-tabs span {
-  padding: 4px 8px;
+  padding: 6px 12px;
   font-size: 10px;
 }
 
 .lv2-dashboard-card-body .lv2-streaks-label,
 .lv2-dashboard-card-body .lv2-tasks-label {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .lv2-dashboard-card-body .lv2-streaks-list,
@@ -475,22 +502,22 @@
 
 .lv2-dashboard-card-body .lv2-streak-item,
 .lv2-dashboard-card-body .lv2-task-item {
-  gap: 8px;
-  padding: 10px;
+  gap: 10px;
+  padding: 12px 14px;
 }
 
 .lv2-dashboard-card-body .lv2-streak-title,
 .lv2-dashboard-card-body .lv2-task-title {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .lv2-dashboard-card-body .lv2-streak-tag,
 .lv2-dashboard-card-body .lv2-task-tag {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .lv2-dashboard-card-body .lv2-streak-badge {
-  padding: 3px 6px;
+  padding: 4px 8px;
   font-size: 10px;
 }
 
@@ -499,26 +526,26 @@
 }
 
 .lv2-dashboard-card-body .lv2-task-progress {
-  min-width: 72px;
-  font-size: 11px;
+  min-width: 86px;
+  font-size: 12px;
 }
 
 .lv2-dashboard-card-body .lv2-task-progress span {
-  height: 5px;
+  height: 6px;
 }
 
 .lv2-dashboard-column {
   display: grid;
-  gap: 10px;
+  gap: 16px;
   align-content: start;
 }
 
 .lv2-dashboard-grid--hero .lv2-dashboard-column:nth-child(3) {
-  gap: 4px;
+  gap: 16px;
 }
 
 .lv2-avatar-card .lv2-dashboard-card-body {
-  padding: 4px;
+  padding: 10px;
 }
 
 .lv2-dashboard-grid--hero .lv2-dashboard-card {
@@ -1085,7 +1112,7 @@
 
 .lv2-avatar-image {
   width: 100%;
-  border-radius: 18px;
+  border-radius: 20px;
   object-fit: cover;
   aspect-ratio: 1 / 1;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1103,6 +1130,12 @@
   }
 }
 
+.lv2-dashboard-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .lv2-card-chip {
   display: inline-flex;
   align-items: center;
@@ -1116,6 +1149,32 @@
   border: 1px solid color-mix(in srgb, var(--color-accent-primary) 38%, transparent);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+.lv2-card-chip--muted {
+  background: rgba(148, 163, 184, 0.18);
+  border-color: rgba(148, 163, 184, 0.4);
+  color: #e2e8f0;
+}
+
+.lv2-card-chip--outline {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(125, 211, 252, 0.5);
+  color: #dbeafe;
+}
+
+.lv2-info-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #dbeafe;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.4);
 }
 
 .lv2-radar-chart {
@@ -1247,15 +1306,14 @@
   border-radius: 3px;
 }
 
-.lv2-emotion-caption {
-  color: #94a3b8;
-  font-size: 12px;
-  margin: 0;
-}
-
 .lv2-streaks {
   display: grid;
   gap: 12px;
+}
+
+.lv2-streaks-top {
+  display: grid;
+  gap: 6px;
 }
 
 .lv2-streaks-tabs {
@@ -1280,14 +1338,14 @@
 }
 
 .lv2-dashboard-card--streaks .lv2-streaks-tabs {
-  gap: 6px;
+  gap: 10px;
   flex-wrap: nowrap;
 }
 
 .lv2-dashboard-card--streaks .lv2-streaks-tabs span {
-  padding: 3px 7px;
-  font-size: 5px;
-  letter-spacing: 0.14em;
+  padding: 6px 14px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   background: rgba(15, 23, 42, 0.55);
   border: 1px solid rgba(148, 163, 184, 0.24);
@@ -1302,36 +1360,36 @@
 }
 
 .lv2-dashboard-card--streaks .lv2-streaks-label {
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .lv2-dashboard-card--streaks .lv2-streaks {
-  gap: 2px;
+  gap: 12px;
 }
 
 .lv2-dashboard-card--streaks .lv2-streaks-list {
-  gap: 2px;
+  gap: 10px;
 }
 
 .lv2-dashboard-card--streaks .lv2-streak-title {
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .lv2-dashboard-card--streaks .lv2-streak-tag {
-  font-size: 7px;
+  font-size: 11px;
 }
 
 .lv2-dashboard-card--streaks .lv2-streak-badge {
-  padding: 3px 6px;
-  font-size: 7px;
+  padding: 4px 8px;
+  font-size: 10px;
 }
 
 .lv2-dashboard-card--streaks .lv2-streak-progress {
-  height: 5px;
+  height: 6px;
 }
 
 .lv2-dashboard-card--streaks .lv2-streak-marks {
-  font-size: 6px;
+  font-size: 10px;
 }
 
 .lv2-streaks-label {
@@ -1339,6 +1397,19 @@
   font-weight: 600;
   color: #cbd5f5;
   margin: 0;
+}
+
+.lv2-streaks-label-sub {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.lv2-streaks-empty {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 13px;
 }
 
 .lv2-streaks-list {
@@ -1496,6 +1567,10 @@
 }
 
 @media (max-width: 960px) {
+  .lv2-dashboard-shell {
+    display: none;
+  }
+
   .lv2-dashboard-grid--hero {
     display: none;
   }

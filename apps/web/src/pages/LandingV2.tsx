@@ -389,15 +389,10 @@ const MISSION_PREVIEW_ITEMS = [
   { title: 'Boss: Focus AM', tag: 'Mind', reward: '+160 XP', status: { es: '2/3 completado', en: '2/3 complete' } }
 ] as const;
 
-const STREAKS_PREVIEW_ITEMS = [
-  { title: 'Ayuno hasta las 14hs', tag: 'Nutrición', progress: 3, total: 3, streak: 'x3' },
-  { title: '2L de agua', tag: 'Hidratación', progress: 3, total: 5, streak: 'x2' },
-  { title: 'Mover 20 min', tag: 'Movimiento', progress: 2, total: 4, streak: 'x4' }
-] as const;
-
 const TASKS_PREVIEW_ITEMS = [
   { title: 'Dormir 8hs', tag: 'Sueño', progress: 2, total: 3 },
-  { title: 'Cena antes de las 22hs', tag: 'Nutrición', progress: 2, total: 3 }
+  { title: 'Cena antes de las 22hs', tag: 'Nutrición', progress: 2, total: 3 },
+  { title: '10.000 pasos / Correr', tag: 'Movilidad', progress: 1, total: 3 }
 ] as const;
 
 const AVATAR_MODES = [
@@ -466,12 +461,12 @@ function LanguageSwitch({ value, onChange }: { value: Language; onChange: (langu
 }
 
 function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boolean; language?: Language }) {
-  const progressPercent = 72;
+  const progressPercent = 57;
   const progressLabel = `${progressPercent}%`;
-  const levelLabel = '7';
-  const xpTotalLabel = compact ? '732' : '12,430';
+  const levelLabel = '16';
+  const xpTotalLabel = '3.177';
   const xpToNextMessage =
-    language === 'es' ? '✨ Te faltan 320 XP para el próximo nivel' : '✨ You need 320 XP for the next level';
+    language === 'es' ? '✨ Te faltan 101 XP para el próximo nivel' : '✨ You need 101 XP for the next level';
   const ariaValueText = language === 'es' ? `${progressLabel} completado` : `${progressLabel} complete`;
 
   return (
@@ -765,9 +760,6 @@ function EmotionChartPreview({ language = 'es' }: { language?: Language }) {
           </div>
         </div>
       </div>
-      <p className="lv2-emotion-caption">
-        {language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
-      </p>
     </div>
   );
 }
@@ -780,30 +772,18 @@ function StreaksPreview({ language = 'es' }: { language?: Language }) {
         <span>🧠 Mind</span>
         <span>🏵️ Soul</span>
       </div>
-      <p className="lv2-streaks-label">{language === 'es' ? 'Top streaks' : 'Top streaks'}</p>
-      <div className="lv2-streaks-list">
-        {STREAKS_PREVIEW_ITEMS.map((item) => (
-          <div key={item.title} className="lv2-streak-item">
-            <div className="lv2-streak-header">
-              <div>
-                <p className="lv2-streak-title">{item.title}</p>
-                <span className="lv2-streak-tag">{item.tag}</span>
-              </div>
-              <span className="lv2-streak-badge">🔥 {item.streak}</span>
-            </div>
-            <div className="lv2-streak-progress">
-              <span style={{ width: `${(item.progress / item.total) * 100}%` }} />
-            </div>
-            <div className="lv2-streak-marks">
-              {[1, 2, 3, 4, 5].map((mark) => (
-                <span key={mark} className={mark <= item.progress ? 'filled' : ''}>
-                  {mark}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="lv2-streaks-top">
+        <p className="lv2-streaks-label">
+          {language === 'es' ? 'Top streaks' : 'Top streaks'}
+          <span className="lv2-streaks-label-sub">
+            {language === 'es' ? '— días consecutivos sin cortar' : '— consecutive days without breaks'}
+          </span>
+        </p>
+        <p className="lv2-streaks-empty">
+          {language === 'es' ? 'Todavía no hay rachas destacadas.' : 'No highlighted streaks yet.'}
+        </p>
       </div>
+      <TasksPreview language={language} />
     </div>
   );
 }
@@ -943,52 +923,82 @@ export default function LandingV2Page() {
                 </p>
               </div>
               <div className="lv2-hero-dashboard">
-                <div className="lv2-dashboard-grid lv2-dashboard-grid--hero" aria-label="Demo del dashboard">
-                  <div className="lv2-dashboard-column">
-                    <Card
-                      className="lv2-dashboard-card lv2-dashboard-card--square"
-                      bodyClassName="lv2-dashboard-card-body"
-                      title={language === 'es' ? 'Progreso general' : 'Overall progress'}
-                    >
-                      <DashboardXpVisual compact language={language} />
-                    </Card>
-                    <Card
-                      className="lv2-dashboard-card lv2-avatar-card"
-                      bodyClassName="lv2-dashboard-card-body"
-                      title={language === 'es' ? 'Tu avatar' : undefined}
-                    >
-                      <img
-                        className="lv2-avatar-image"
-                        src={AVATAR_MODES[avatarIndex].src}
-                        alt={`Avatar ${AVATAR_MODES[avatarIndex].label}`}
-                      />
-                    </Card>
-                  </div>
-                  <div className="lv2-dashboard-column">
-                    <Card
-                      className="lv2-dashboard-card lv2-dashboard-card--square lv2-dashboard-card--radar"
-                      bodyClassName="lv2-dashboard-card-body"
-                      title="Radar Chart"
-                    >
-                      <RadarChartPreview />
-                    </Card>
-                    <Card
-                      className="lv2-dashboard-card lv2-dashboard-card--emotion"
-                      bodyClassName="lv2-dashboard-card-body"
-                      title="💗 Emotion Chart"
-                      subtitle={language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
-                    >
-                      <EmotionChartPreview language={language} />
-                    </Card>
-                  </div>
-                  <div className="lv2-dashboard-column">
-                    <Card
-                      className="lv2-dashboard-card lv2-dashboard-card--streaks"
-                      bodyClassName="lv2-dashboard-card-body"
-                      title="🔥 Streaks"
-                    >
-                      <StreaksPreview language={language} />
-                    </Card>
+                <div className="lv2-dashboard-shell">
+                  <div className="lv2-dashboard-grid lv2-dashboard-grid--hero" aria-label="Demo del dashboard">
+                    <div className="lv2-dashboard-column">
+                      <Card
+                        className="lv2-dashboard-card lv2-dashboard-card--square"
+                        bodyClassName="lv2-dashboard-card-body"
+                        title={language === 'es' ? 'Progreso general' : 'Overall progress'}
+                        subtitle={language === 'es' ? 'Resumen de tu aventura' : 'Adventure summary'}
+                        rightSlot={
+                          <div className="lv2-dashboard-meta">
+                            <span className="lv2-card-chip">FLOW</span>
+                            <span className="lv2-info-dot" aria-hidden>
+                              i
+                            </span>
+                          </div>
+                        }
+                      >
+                        <DashboardXpVisual language={language} />
+                      </Card>
+                      <Card
+                        className="lv2-dashboard-card lv2-avatar-card"
+                        bodyClassName="lv2-dashboard-card-body"
+                        title={language === 'es' ? 'Tu avatar' : undefined}
+                      >
+                        <img
+                          className="lv2-avatar-image"
+                          src={AVATAR_MODES[avatarIndex].src}
+                          alt={`Avatar ${AVATAR_MODES[avatarIndex].label}`}
+                        />
+                      </Card>
+                    </div>
+                    <div className="lv2-dashboard-column">
+                      <Card
+                        className="lv2-dashboard-card lv2-dashboard-card--square lv2-dashboard-card--radar"
+                        bodyClassName="lv2-dashboard-card-body"
+                        title="Radar Chart"
+                        subtitle={language === 'es' ? 'XP · total acumulado' : 'XP · total accumulated'}
+                        rightSlot={
+                          <div className="lv2-dashboard-meta">
+                            <span className="lv2-card-chip lv2-card-chip--muted">
+                              {language === 'es' ? 'Rasgos clave' : 'Key traits'}
+                            </span>
+                            <span className="lv2-info-dot" aria-hidden>
+                              i
+                            </span>
+                          </div>
+                        }
+                      >
+                        <RadarChartPreview />
+                      </Card>
+                      <Card
+                        className="lv2-dashboard-card lv2-dashboard-card--emotion"
+                        bodyClassName="lv2-dashboard-card-body"
+                        title="💗 Emotion Chart"
+                        subtitle={language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
+                      >
+                        <EmotionChartPreview language={language} />
+                      </Card>
+                    </div>
+                    <div className="lv2-dashboard-column">
+                      <Card
+                        className="lv2-dashboard-card lv2-dashboard-card--streaks"
+                        bodyClassName="lv2-dashboard-card-body"
+                        title="🔥 Streaks"
+                        rightSlot={
+                          <div className="lv2-dashboard-meta">
+                            <span className="lv2-card-chip lv2-card-chip--outline">FLOW · 3×/WEEK</span>
+                            <span className="lv2-info-dot" aria-hidden>
+                              i
+                            </span>
+                          </div>
+                        }
+                      >
+                        <StreaksPreview language={language} />
+                      </Card>
+                    </div>
                   </div>
                 </div>
               </div>
