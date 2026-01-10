@@ -296,10 +296,10 @@ const MODE_CHIP_STYLES: Record<Mode, { glowPrimary: string; glowSecondary: strin
 };
 
 const TAB_BUTTON_BASE =
-  'inline-flex items-center justify-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 md:text-xs';
+  'flex-1 inline-flex items-center justify-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 md:text-xs';
 
 const TAB_GROUP_BASE =
-  'inline-flex items-center justify-center gap-1 rounded-full border border-white/15 bg-white/5 p-1';
+  'inline-flex w-full items-center justify-between gap-1 rounded-full border border-white/15 bg-white/5 p-1';
 
 function normalizeMode(mode?: string | null): Mode {
   return normalizeGameModeValue(mode) ?? 'Flow';
