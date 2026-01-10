@@ -36,6 +36,12 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
+    rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        login: fileURLToPath(new URL('./login/index.html', import.meta.url)),
+      },
+    },
   },
   test: {
     globals: true,
