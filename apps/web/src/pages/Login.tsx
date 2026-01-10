@@ -7,8 +7,12 @@ import { usePageMeta } from '../lib/seo';
 export default function LoginPage() {
   usePageMeta({
     title: 'Innerbloom | Iniciar sesión',
-    description: 'Ingresá a Innerbloom y continuá tu Journey con hábitos y misiones personalizadas.',
+    description: 'Ingresá para seguir tu journey de hábitos con misiones, recompensas y enfoque en bienestar.',
     image: '/FlowMood.jpg',
+    images: ['/FlowMood.jpg', '/IB-COLOR-LOGO.png'],
+    imageAlt: 'Visual de Flow Mood y flor del logo de Innerbloom.',
+    twitterImage: '/IB-COLOR-LOGO.png',
+    twitterImageAlt: 'Flor del logo de Innerbloom.',
     url: '/login'
   });
 

@@ -356,13 +356,26 @@ export default function LandingPage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
   const shareImage = '/FlowMood.jpg';
+  const shareImages = [shareImage, '/IB-COLOR-LOGO.png'];
 
   const testimonialCount = copy.testimonials.items.length;
 
   usePageMeta({
-    title: language === 'es' ? 'Innerbloom | Gamification Journey' : 'Innerbloom | Gamification Journey',
-    description: copy.hero.subtitle,
+    title: language === 'es'
+      ? 'Innerbloom | Gamificación de hábitos y bienestar'
+      : 'Innerbloom | Habits, wellbeing, and gamification',
+    description: language === 'es'
+      ? 'Tu journey de hábitos con misiones, recompensas y enfoque en cuerpo, mente y alma.'
+      : 'Your habit journey with missions, rewards, and balance across body, mind, and soul.',
     image: shareImage,
+    images: shareImages,
+    imageAlt: language === 'es'
+      ? 'Visual de Flow Mood y flor del logo de Innerbloom.'
+      : 'Flow Mood visual with the Innerbloom flower logo.',
+    twitterImage: '/IB-COLOR-LOGO.png',
+    twitterImageAlt: language === 'es'
+      ? 'Flor del logo de Innerbloom.'
+      : 'Innerbloom flower logo.',
     url: '/'
   });
 
