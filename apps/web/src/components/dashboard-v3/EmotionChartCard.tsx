@@ -11,10 +11,10 @@ interface EmotionChartCardProps {
   userId: string;
 }
 
-const GAP = 4;
-const MEDIUM_GAP = 3;
+const GAP = 6;
+const MEDIUM_GAP = 4;
 const SMALL_GAP = 2;
-const MIN_CELL_SIZE = 9;
+const MIN_CELL_SIZE = 8;
 const CELL_SCALE = 1;
 const NUM_WEEKS = 26;
 const DAYS_IN_WEEK = 7;
