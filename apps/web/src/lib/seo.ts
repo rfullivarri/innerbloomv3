@@ -6,6 +6,10 @@ type MetaInput = {
   image: string;
   images?: string[];
   imageAlt?: string;
+  ogImageSecureUrl?: string;
+  ogImageType?: string;
+  ogImageWidth?: string;
+  ogImageHeight?: string;
   twitterImage?: string;
   twitterImageAlt?: string;
   url?: string;
@@ -67,6 +71,10 @@ export const usePageMeta = ({
   imageAlt,
   twitterImage,
   twitterImageAlt,
+  ogImageSecureUrl,
+  ogImageType,
+  ogImageWidth,
+  ogImageHeight,
   url,
   type = 'website',
   siteName = 'Innerbloom'
@@ -87,6 +95,18 @@ export const usePageMeta = ({
     if (imageAlt) {
       insertMetaTag('og:image:alt', imageAlt, 'property');
     }
+    if (ogImageSecureUrl) {
+      upsertMetaTag('og:image:secure_url', ensureAbsoluteUrl(ogImageSecureUrl), 'property');
+    }
+    if (ogImageType) {
+      upsertMetaTag('og:image:type', ogImageType, 'property');
+    }
+    if (ogImageWidth) {
+      upsertMetaTag('og:image:width', ogImageWidth, 'property');
+    }
+    if (ogImageHeight) {
+      upsertMetaTag('og:image:height', ogImageHeight, 'property');
+    }
     upsertMetaTag('og:url', resolvedUrl, 'property');
     upsertMetaTag('og:type', type, 'property');
     upsertMetaTag('og:site_name', siteName, 'property');
@@ -98,5 +118,19 @@ export const usePageMeta = ({
       upsertMetaTag('twitter:image:alt', twitterImageAlt, 'name');
     }
     upsertCanonical(resolvedUrl);
-  }, [description, image, imageAlt, images, title, twitterImage, twitterImageAlt, type, url]);
+  }, [
+    description,
+    image,
+    imageAlt,
+    images,
+    ogImageHeight,
+    ogImageSecureUrl,
+    ogImageType,
+    ogImageWidth,
+    title,
+    twitterImage,
+    twitterImageAlt,
+    type,
+    url
+  ]);
 };

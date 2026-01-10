@@ -8,7 +8,13 @@ export default function LoginPage() {
   usePageMeta({
     title: 'Innerbloom',
     description: 'Obsérvate por primera vez en tercera persona y toma el control de tus acciones y hábitos.',
-    image: 'https://innerbloomjourney.org/nene.png',
+    image: 'https://innerbloomjourney.org/og/neneOGP.png',
+    imageAlt: 'Innerbloom',
+    ogImageSecureUrl: 'https://innerbloomjourney.org/og/neneOGP.png',
+    ogImageType: 'image/png',
+    ogImageWidth: '1200',
+    ogImageHeight: '630',
+    twitterImage: 'https://innerbloomjourney.org/og/neneOGP.png',
     url: 'https://innerbloomjourney.org/login'
   });
 
