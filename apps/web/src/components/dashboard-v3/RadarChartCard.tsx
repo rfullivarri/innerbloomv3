@@ -277,7 +277,7 @@ interface RadarProps {
 
 function Radar({ dataset }: RadarProps) {
   const radius = 130;
-  const outerPadding = 96;
+  const outerPadding = 110;
   const center = radius + outerPadding;
   const { axes, maxValue } = dataset;
   const count = axes.length;
@@ -328,7 +328,7 @@ function Radar({ dataset }: RadarProps) {
   return (
     <svg
       viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
-      className="h-auto w-full max-w-[420px]"
+      className="h-auto w-full max-w-[440px]"
       role="img"
       aria-label="Radar de XP por rasgo"
     >
