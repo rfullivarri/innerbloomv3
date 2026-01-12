@@ -216,21 +216,7 @@ export async function shouldGenerateWeeklyWrappedForSubmission(
 ): Promise<boolean> {
   const { start, end } = resolveWeekRange(referenceDate);
   const existing = await findWeeklyWrappedByRange(userId, start, end);
-  if (existing) {
-    return false;
-  }
-
-  const result = await pool.query<{ count: string }>(
-    `SELECT COUNT(*) AS count
-       FROM emotions_logs
-      WHERE user_id = $1
-        AND date BETWEEN $2 AND $3
-        AND date < $4`,
-    [userId, start, end, referenceDate],
-  );
-
-  const count = Number.parseInt(result.rows[0]?.count ?? '0', 10);
-  return count === 0;
+  return !existing;
 }
 
 function parseDate(input: string): Date {
