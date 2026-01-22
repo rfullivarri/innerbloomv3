@@ -759,26 +759,10 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       setSelectedEmotion(null);
       setSelectedTasks([]);
       setNotes('');
-      const missionsBonus = response.missions_v2;
       const celebrationExtras: {
         detail?: string;
         action?: ToastAction;
       } = {};
-      if (missionsBonus?.bonus_ready) {
-        const missionTasks = missionsBonus.tasks ?? [];
-        if (missionTasks.length > 0) {
-          const summary = missionTasks
-            .map((task) => `${task.mission_name}: ${task.task_name}`)
-            .join(' · ');
-          celebrationExtras.detail = `Tareas de Misión: ${summary}`;
-        } else {
-          celebrationExtras.detail = 'Bonus listo para reclamar.';
-        }
-        celebrationExtras.action = {
-          label: 'Ir a Misiones v2',
-          href: missionsBonus.redirect_url || '/dashboard-v3/missions-v2',
-        };
-      }
       const celebrationId = Date.now();
       const celebrationMessage =
         CELEBRATION_MESSAGES[Math.floor(Math.random() * CELEBRATION_MESSAGES.length)];
