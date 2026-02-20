@@ -12,7 +12,7 @@
  */
 
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useAuth } from '@clerk/clerk-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { MobileBottomNav } from '../components/layout/MobileBottomNav';
@@ -58,7 +58,6 @@ import { WeeklyWrappedModal } from '../components/feedback/WeeklyWrappedModal';
 import { useAppMode } from '../hooks/useAppMode';
 
 export default function DashboardV3Page() {
-  const { user } = useUser();
   const { getToken } = useAuth();
   const { backendUserId, status, error, reload, clerkUserId, profile } = useBackendUser();
   const location = useLocation();
@@ -137,7 +136,6 @@ export default function DashboardV3Page() {
   const isLoadingProfile = status === 'idle' || status === 'loading';
   const failedToLoadProfile = status === 'error' || !backendUserId;
 
-  const avatarUrl = profile?.image_url || user?.imageUrl;
   const dailyButtonRef = useRef<HTMLButtonElement | null>(null);
   const dailyQuestModalRef = useRef<DailyQuestModalHandle | null>(null);
   const reminderSchedulerDialogRef = useRef<ReminderSchedulerDialogHandle | null>(null);
@@ -240,7 +238,6 @@ export default function DashboardV3Page() {
                   element={
                     <DashboardOverview
                       userId={backendUserId}
-                      avatarUrl={avatarUrl}
                       gameMode={gameMode}
                       weeklyTarget={profile?.weekly_target ?? null}
                       section={overviewSection}
@@ -306,7 +303,6 @@ export default function DashboardV3Page() {
 
 interface DashboardOverviewProps {
   userId: string;
-  avatarUrl?: string | null;
   gameMode: GameMode | string | null;
   weeklyTarget: number | null;
   section: DashboardSectionConfig;
@@ -315,7 +311,6 @@ interface DashboardOverviewProps {
 
 function DashboardOverview({
   userId,
-  avatarUrl,
   gameMode,
   weeklyTarget,
   section,
@@ -340,7 +335,7 @@ function DashboardOverview({
 
         <div className="order-2 space-y-4 md:space-y-5 lg:order-2 lg:col-span-4">
           <MetricHeader userId={userId} gameMode={gameMode} />
-          <ProfileCard imageUrl={avatarUrl} />
+          <ProfileCard gameMode={gameMode} />
           <EnergyCard userId={userId} gameMode={gameMode} />
           <DailyCultivationSection userId={userId} />
         </div>
