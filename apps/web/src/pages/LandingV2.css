@@ -1023,6 +1023,14 @@
   background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2), rgba(15, 23, 42, 0.9));
 }
 
+.lv2-modes-selector-shell .lv2-mode-card.is-active .lv2-mode-media {
+  height: clamp(220px, 50vh, 420px);
+  min-height: 0;
+  width: auto;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
 .lv2-mode-video {
   width: 100%;
   height: 100%;
