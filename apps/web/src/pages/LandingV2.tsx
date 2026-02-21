@@ -27,19 +27,11 @@ type Mode = {
   bullets: string[];
 };
 
-type ModeVisualState = {
-  emotion: string;
-  cue: string;
-};
-
 type ModeVisual = {
   avatarVideo: string;
   avatarImage: string;
   avatarAlt: string;
   avatarLabel: string;
-  emotionJourneyTitle: string;
-  emotionJourneyDescription: string;
-  states: ModeVisualState[];
 };
 
 type Pillar = {
@@ -424,53 +416,25 @@ const MODE_VISUALS: Record<Language, Record<Mode['id'], ModeVisual>> = {
       avatarVideo: '/avatars/low-basic.mp4',
       avatarImage: '/LowMood.jpg',
       avatarAlt: 'Low mode avatar with a resting facial expression.',
-      avatarLabel: 'Your avatar mirrors your energy',
-      emotionJourneyTitle: 'Emotion response loop',
-      emotionJourneyDescription: 'When you complete tiny tasks, your avatar goes from tired to relieved.',
-      states: [
-        { emotion: '😶‍🌫️ Overwhelmed', cue: 'No check-ins yet' },
-        { emotion: '🙂 Relieved', cue: '2 micro tasks done' },
-        { emotion: '😌 Restored', cue: 'Recovery streak active' }
-      ]
+      avatarLabel: 'Your avatar mirrors your energy'
     },
     chill: {
       avatarVideo: '/avatars/chill-basic.mp4',
       avatarImage: '/Chill-Mood.jpg',
       avatarAlt: 'Chill mode avatar with a calm expression.',
-      avatarLabel: 'Your avatar mirrors your energy',
-      emotionJourneyTitle: 'Emotion response loop',
-      emotionJourneyDescription: 'Small routines keep your avatar calm and steady across the day.',
-      states: [
-        { emotion: '🌤️ Stable', cue: 'Soft plan created' },
-        { emotion: '😊 Grounded', cue: 'Evening reflection logged' },
-        { emotion: '🍃 Balanced', cue: 'Gentle streak maintained' }
-      ]
+      avatarLabel: 'Your avatar mirrors your energy'
     },
     flow: {
       avatarVideo: '/avatars/flow-basic.mp4',
       avatarImage: '/FlowMood.jpg',
       avatarAlt: 'Flow mode avatar in action with a focused expression.',
-      avatarLabel: 'Your avatar mirrors your energy',
-      emotionJourneyTitle: 'Emotion response loop',
-      emotionJourneyDescription: 'Aligned tasks and focus blocks make your avatar look sharper and energized.',
-      states: [
-        { emotion: '🎯 Focused', cue: 'Goal-linked task started' },
-        { emotion: '⚡ In motion', cue: 'Focus timer completed' },
-        { emotion: '🏄 Momentum', cue: 'Progress tags chained' }
-      ]
+      avatarLabel: 'Your avatar mirrors your energy'
     },
     evolve: {
       avatarVideo: '/avatars/evolve-basic.mp4',
       avatarImage: '/Evolve-Mood.jpg',
       avatarAlt: 'Evolve mode avatar with a determined expression.',
-      avatarLabel: 'Your avatar mirrors your energy',
-      emotionJourneyTitle: 'Emotion response loop',
-      emotionJourneyDescription: 'As you clear missions, your avatar levels up from determined to unstoppable.',
-      states: [
-        { emotion: '🧠 Determined', cue: 'Atomic habit tracked' },
-        { emotion: '🚀 Boosted', cue: 'XP ladder climbed' },
-        { emotion: '👑 Unstoppable', cue: 'Weekly challenge complete' }
-      ]
+      avatarLabel: 'Your avatar mirrors your energy'
     }
   },
   es: {
@@ -478,53 +442,25 @@ const MODE_VISUALS: Record<Language, Record<Mode['id'], ModeVisual>> = {
       avatarVideo: '/avatars/low-basic.mp4',
       avatarImage: '/LowMood.jpg',
       avatarAlt: 'Avatar del modo Low con expresión de descanso.',
-      avatarLabel: 'Tu avatar refleja cómo estás hoy',
-      emotionJourneyTitle: 'Evolución emocional del avatar',
-      emotionJourneyDescription: 'Cuando cumplís tareas mínimas, tu avatar pasa de agotado a aliviado.',
-      states: [
-        { emotion: '😶‍🌫️ Abrumado', cue: 'Sin check-ins todavía' },
-        { emotion: '🙂 Aliviado', cue: '2 micro tareas completas' },
-        { emotion: '😌 Recuperado', cue: 'Racha de recuperación activa' }
-      ]
+      avatarLabel: 'Tu avatar refleja cómo estás hoy'
     },
     chill: {
       avatarVideo: '/avatars/chill-basic.mp4',
       avatarImage: '/Chill-Mood.jpg',
       avatarAlt: 'Avatar del modo Chill con expresión de calma.',
-      avatarLabel: 'Tu avatar refleja cómo estás hoy',
-      emotionJourneyTitle: 'Evolución emocional del avatar',
-      emotionJourneyDescription: 'Las rutinas suaves mantienen a tu avatar en calma durante el día.',
-      states: [
-        { emotion: '🌤️ Estable', cue: 'Plan liviano definido' },
-        { emotion: '😊 En equilibrio', cue: 'Reflexión nocturna registrada' },
-        { emotion: '🍃 Sereno', cue: 'Racha suave sostenida' }
-      ]
+      avatarLabel: 'Tu avatar refleja cómo estás hoy'
     },
     flow: {
       avatarVideo: '/avatars/flow-basic.mp4',
       avatarImage: '/FlowMood.jpg',
       avatarAlt: 'Avatar del modo Flow en movimiento y enfocado.',
-      avatarLabel: 'Tu avatar refleja cómo estás hoy',
-      emotionJourneyTitle: 'Evolución emocional del avatar',
-      emotionJourneyDescription: 'Las tareas alineadas y bloques de foco lo vuelven más activo y energizado.',
-      states: [
-        { emotion: '🎯 Enfocado', cue: 'Arrancaste una tarea ligada a meta' },
-        { emotion: '⚡ En acción', cue: 'Completaste un timer de foco' },
-        { emotion: '🏄 Con impulso', cue: 'Encadenaste tags de progreso' }
-      ]
+      avatarLabel: 'Tu avatar refleja cómo estás hoy'
     },
     evolve: {
       avatarVideo: '/avatars/evolve-basic.mp4',
       avatarImage: '/Evolve-Mood.jpg',
       avatarAlt: 'Avatar del modo Evolve con expresión determinada.',
-      avatarLabel: 'Tu avatar refleja cómo estás hoy',
-      emotionJourneyTitle: 'Evolución emocional del avatar',
-      emotionJourneyDescription: 'A medida que completás misiones, evoluciona de decidido a imparable.',
-      states: [
-        { emotion: '🧠 Determinado', cue: 'Hábito atómico registrado' },
-        { emotion: '🚀 Potenciado', cue: 'Subiste en la escalera de XP' },
-        { emotion: '👑 Imparable', cue: 'Reto semanal completado' }
-      ]
+      avatarLabel: 'Tu avatar refleja cómo estás hoy'
     }
   }
 };
@@ -1185,19 +1121,6 @@ export default function LandingV2Page() {
                       />
                       <div className="lv2-mode-media-overlay" aria-hidden="true" />
                       <span className="lv2-mode-media-badge">{visual.avatarLabel}</span>
-                    </div>
-
-                    <div className="lv2-mode-emotion-block">
-                      <p className="lv2-mode-emotion-title">{visual.emotionJourneyTitle}</p>
-                      <p className="lv2-mode-emotion-sub">{visual.emotionJourneyDescription}</p>
-                      <div className="lv2-mode-state-grid">
-                        {visual.states.map((state) => (
-                          <div key={`${mode.id}-${state.emotion}`} className="lv2-mode-state-pill">
-                            <strong>{state.emotion}</strong>
-                            <span>{state.cue}</span>
-                          </div>
-                        ))}
-                      </div>
                     </div>
 
                     <ul className="lv2-bullets">
