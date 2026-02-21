@@ -948,7 +948,7 @@
   padding: 16px;
   border-left-width: 4px;
   display: grid;
-  gap: 10px;
+  gap: 12px;
   overflow: hidden;
 }
 
@@ -962,9 +962,10 @@
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--line) 58%, rgba(255, 255, 255, 0.22));
-  width: min(100%, 170px);
-  aspect-ratio: 3 / 4;
-  margin-inline: auto;
+  width: 100%;
+  min-height: 280px;
+  aspect-ratio: 5 / 4;
+  margin-inline: 0;
   background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2), rgba(15, 23, 42, 0.9));
 }
 
@@ -1006,54 +1007,6 @@
   font-size: 0.98rem;
 }
 
-.lv2-mode-emotion-block {
-  border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--line) 72%, rgba(255, 255, 255, 0.1));
-  background: linear-gradient(150deg, rgba(15, 23, 42, 0.72), rgba(30, 41, 59, 0.45));
-  padding: 12px;
-  display: grid;
-  gap: 8px;
-}
-
-.lv2-mode-emotion-title {
-  margin: 0;
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 800;
-  color: color-mix(in srgb, var(--text) 70%, rgba(255, 255, 255, 0.32));
-}
-
-.lv2-mode-emotion-sub {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #d7e9ff;
-}
-
-.lv2-mode-state-grid {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.lv2-mode-state-pill {
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--line) 74%, rgba(255, 255, 255, 0.1));
-  background: rgba(15, 23, 42, 0.45);
-  padding: 8px;
-  display: grid;
-  gap: 4px;
-}
-
-.lv2-mode-state-pill strong {
-  font-size: 0.82rem;
-  line-height: 1.2;
-}
-
-.lv2-mode-state-pill span {
-  font-size: 0.74rem;
-  color: color-mix(in srgb, var(--text) 62%, rgba(255, 255, 255, 0.2));
-}
 
 .lv2-mode-card .lv2-bullets {
   gap: 8px;
