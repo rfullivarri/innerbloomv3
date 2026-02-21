@@ -1000,10 +1000,12 @@
   padding: 16px;
   border-left-width: 4px;
   display: grid;
+  grid-template-rows: auto 1fr;
   gap: 14px;
-  width: min(100%, min(52vw, 620px));
-  max-height: min(86vh, 860px);
-  overflow: visible;
+  width: min(100%, min(52vw, 620px), calc(70vh * 9 / 16));
+  aspect-ratio: 9 / 16;
+  max-height: 70vh;
+  overflow: hidden;
   cursor: pointer;
   transition: transform 220ms ease, box-shadow 220ms ease, opacity 220ms ease;
 }
@@ -1025,20 +1027,22 @@
 
 .lv2-mode-media {
   margin: 0;
-  width: min(100%, clamp(250px, 32vw, 460px));
+  width: 100%;
   max-width: 100%;
-  aspect-ratio: 4 / 5;
-  max-height: min(56vh, 560px);
+  min-height: 0;
+  max-height: 100%;
   margin-inline: auto;
   display: grid;
+  grid-template-rows: 1fr auto;
   gap: 10px;
 }
 
 .lv2-mode-video {
   width: 100%;
-  height: 100%;
-  min-height: clamp(240px, 42vh, 500px);
-  max-height: min(50vh, 500px);
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 9 / 16;
+  max-height: 100%;
   border-radius: 12px;
   object-fit: cover;
   object-position: center top;
@@ -1785,7 +1789,7 @@
   }
 
   .lv2-mode-card {
-    width: min(100%, min(60vw, 560px));
+    width: min(100%, min(60vw, 560px), calc(70vh * 9 / 16));
   }
 }
 
@@ -1853,18 +1857,17 @@
   }
 
   .lv2-mode-card {
-    width: min(100%, 430px);
-    max-height: none;
+    width: min(100%, 430px, calc(70svh * 9 / 16));
+    max-height: 70svh;
   }
 
   .lv2-mode-media {
-    width: min(100%, 360px);
-    max-height: min(54vh, 520px);
+    width: 100%;
+    max-height: 100%;
   }
 
   .lv2-mode-video {
-    min-height: clamp(220px, 40vh, 420px);
-    max-height: min(48vh, 440px);
+    max-height: 100%;
   }
 }
 
