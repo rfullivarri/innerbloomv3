@@ -953,11 +953,13 @@
 
 .lv2-modes-selector-shell {
   display: grid;
-  grid-template-columns: minmax(120px, 170px) minmax(320px, min(52vw, 620px)) minmax(120px, 170px);
+  grid-template-columns: auto auto auto;
   align-items: center;
-  justify-content: center;
+  justify-items: center;
   gap: clamp(16px, 2.2vw, 30px);
-  margin-top: 12px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 12px auto 0;
   overflow: visible;
 }
 
@@ -1785,7 +1787,7 @@
 
 @media (max-width: 1200px) {
   .lv2-modes-selector-shell {
-    grid-template-columns: minmax(90px, 140px) minmax(300px, min(60vw, 560px)) minmax(90px, 140px);
+    grid-template-columns: auto auto auto;
   }
 
   .lv2-mode-card {
