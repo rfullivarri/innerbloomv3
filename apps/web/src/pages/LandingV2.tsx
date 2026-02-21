@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import './LandingV2.css';
@@ -25,6 +25,7 @@ type Mode = {
   title: string;
   benefit: string;
   bullets: string[];
+  cta: string;
 };
 
 type ModeVisual = {
@@ -115,25 +116,29 @@ const t = {
           id: 'low',
           title: '🪫 Low',
           benefit: 'Low energy day. Minimum viable routine.',
-          bullets: ['1–2 minute tasks', 'Recovery-first', 'Zero-guilt rest']
+          bullets: ['1–2 minute tasks', 'Recovery-first', 'Zero-guilt rest'],
+          cta: 'Try Low mode'
         },
         {
           id: 'chill',
           title: '🍃 Chill',
           benefit: 'Stable energy. Soft routines to sustain well-being.',
-          bullets: ['Light planning', 'Evening reflection', 'Gentle streaks']
+          bullets: ['Light planning', 'Evening reflection', 'Gentle streaks'],
+          cta: 'Try Chill mode'
         },
         {
           id: 'flow',
           title: '🌊 Flow',
           benefit: 'Focused and in motion. Ride momentum with aligned goals.',
-          bullets: ['Goal-linked tasks', 'Focus timers', 'Progress tags']
+          bullets: ['Goal-linked tasks', 'Focus timers', 'Progress tags'],
+          cta: 'Try Flow mode'
         },
         {
           id: 'evolve',
           title: '🧬 Evolve',
           benefit: 'Ambitious and determined. Atomic habits, missions and rewards.',
-          bullets: ['Atomic habits', 'XP ladders', 'Weekly challenges']
+          bullets: ['Atomic habits', 'XP ladders', 'Weekly challenges'],
+          cta: 'Try Evolve mode'
         }
       ] satisfies Mode[]
     },
@@ -254,25 +259,29 @@ const t = {
           id: 'low',
           title: '🪫 Low',
           benefit: 'Energía baja, abrumado. Activá tu mínimo vital con acciones cortas.',
-          bullets: ['Tareas de 1–2 minutos', 'Recuperación primero', 'Descanso sin culpa']
+          bullets: ['Tareas de 1–2 minutos', 'Recuperación primero', 'Descanso sin culpa'],
+          cta: 'Activar modo Low'
         },
         {
           id: 'chill',
           title: '🍃 Chill',
           benefit: 'Energía estable. Rutinas suaves y balanceadas para sostenerte.',
-          bullets: ['Plan liviano', 'Reflexión nocturna', 'Rachas suaves']
+          bullets: ['Plan liviano', 'Reflexión nocturna', 'Rachas suaves'],
+          cta: 'Activar modo Chill'
         },
         {
           id: 'flow',
           title: '🌊 Flow',
           benefit: 'Enfocado y en movimiento. Aprovechá el impulso con metas alineadas.',
-          bullets: ['Tareas ligadas a metas', 'Timers de foco', 'Tags de progreso']
+          bullets: ['Tareas ligadas a metas', 'Timers de foco', 'Tags de progreso'],
+          cta: 'Activar modo Flow'
         },
         {
           id: 'evolve',
           title: '🧬 Evolve',
           benefit: 'Ambicioso y determinado. Sistema retador con Hábitos Atómicos, misiones y recompensas.',
-          bullets: ['Hábitos atómicos', 'Escalera de XP', 'Retos semanales']
+          bullets: ['Hábitos atómicos', 'Escalera de XP', 'Retos semanales'],
+          cta: 'Activar modo Evolve'
         }
       ] satisfies Mode[]
     },
@@ -910,6 +919,9 @@ export default function LandingV2Page() {
   );
   const [avatarIndex, setAvatarIndex] = useState(0);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [activeModeIndex, setActiveModeIndex] = useState(0);
+  const modesTrackId = useId();
+  const modesTrackRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -923,8 +935,67 @@ export default function LandingV2Page() {
     document.documentElement.style.setProperty('color-scheme', theme);
   }, [theme]);
 
+  useEffect(() => {
+    const track = modesTrackRef.current;
+    if (!track) return;
+
+    const cards = Array.from(track.querySelectorAll<HTMLElement>('.lv2-mode-slide'));
+    if (!cards.length) return;
+
+    const updateActiveMode = () => {
+      const closestIndex = cards.reduce(
+        (closest, card, index) => {
+          const distance = Math.abs(card.offsetLeft - track.scrollLeft);
+          return distance < closest.distance ? { index, distance } : closest;
+        },
+        { index: 0, distance: Number.POSITIVE_INFINITY }
+      ).index;
+
+      setActiveModeIndex((current) => (current === closestIndex ? current : closestIndex));
+    };
+
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        updateActiveMode();
+      });
+    };
+
+    updateActiveMode();
+    track.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      track.removeEventListener('scroll', onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [language]);
+
+  useEffect(() => {
+    setActiveModeIndex(0);
+    const track = modesTrackRef.current;
+    if (!track) return;
+    track.scrollTo({ left: 0, behavior: 'auto' });
+  }, [language]);
+
   const toggleTheme = () => {
     setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
+  };
+
+  const modeCount = copy.modes.items.length;
+  const isFirstMode = activeModeIndex === 0;
+  const isLastMode = activeModeIndex === modeCount - 1;
+
+  const scrollToMode = (index: number) => {
+    const track = modesTrackRef.current;
+    if (!track) return;
+
+    const cards = track.querySelectorAll<HTMLElement>('.lv2-mode-slide');
+    const target = cards[index];
+    if (!target) return;
+
+    target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
   };
 
   return (
@@ -1090,47 +1161,96 @@ export default function LandingV2Page() {
           </div>
         </section>
 
-        <section className="lv2-section" id="modes">
-          <div className="lv2-container">
+        <section className="lv2-section lv2-modes-carousel-section" id="modes">
+          <div className="lv2-container" id="game-modes-carousel">
             <div className="lv2-section-head">
               <p className="lv2-kicker">Adaptive</p>
               <h2>{copy.modes.title}</h2>
               <p className="lv2-sub">{copy.modes.description}</p>
             </div>
-            <div className="lv2-grid lv2-modes-grid" role="list" aria-label={language === 'es' ? 'Modos de juego' : 'Game modes'}>
-              {copy.modes.items.map((mode) => {
-                const visual = MODE_VISUALS[language][mode.id];
 
-                return (
-                  <article key={mode.id} className={`lv2-card lv2-mode-card mode-${mode.id}`} role="listitem">
-                    <header className="lv2-mode-header">
-                      <div className="lv2-mode-title">{mode.title}</div>
-                      <p className="lv2-card-sub">{mode.benefit}</p>
-                    </header>
+            <div className="lv2-modes-carousel-shell">
+              <button
+                type="button"
+                className="lv2-modes-arrow"
+                aria-label={language === 'es' ? 'Modo anterior' : 'Previous mode'}
+                aria-controls={modesTrackId}
+                onClick={() => scrollToMode(Math.max(0, activeModeIndex - 1))}
+                disabled={isFirstMode}
+              >
+                ‹
+              </button>
 
-                    <div className="lv2-mode-media">
-                      <video
-                        className="lv2-mode-video"
-                        src={visual.avatarVideo}
-                        poster={visual.avatarImage}
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        aria-label={visual.avatarAlt}
-                      />
-                      <div className="lv2-mode-media-overlay" aria-hidden="true" />
-                      <span className="lv2-mode-media-badge">{visual.avatarLabel}</span>
-                    </div>
+              <div
+                id={modesTrackId}
+                ref={modesTrackRef}
+                className="lv2-modes-track"
+                role="list"
+                aria-label={language === 'es' ? 'Carrusel de modos de juego' : 'Game mode carousel'}
+              >
+                {copy.modes.items.map((mode) => {
+                  const visual = MODE_VISUALS[language][mode.id];
 
-                    <ul className="lv2-bullets">
-                      {mode.bullets.map((bullet) => (
-                        <li key={bullet}>{bullet}</li>
-                      ))}
-                    </ul>
-                  </article>
-                );
-              })}
+                  return (
+                    <article key={mode.id} className={`lv2-card lv2-mode-card lv2-mode-slide mode-${mode.id}`} role="listitem">
+                      <header className="lv2-mode-header">
+                        <div className="lv2-mode-title">{mode.title}</div>
+                        <p className="lv2-card-sub">{mode.benefit}</p>
+                      </header>
+
+                      <div className="lv2-mode-media">
+                        <video
+                          className="lv2-mode-video"
+                          src={visual.avatarVideo}
+                          poster={visual.avatarImage}
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                          aria-label={visual.avatarAlt}
+                        />
+                        <div className="lv2-mode-media-overlay" aria-hidden="true" />
+                        <span className="lv2-mode-media-badge">{visual.avatarLabel}</span>
+                      </div>
+
+                      <ul className="lv2-bullets">
+                        {mode.bullets.map((bullet) => (
+                          <li key={bullet}>{bullet}</li>
+                        ))}
+                      </ul>
+
+                      <button type="button" className="lv2-mode-cta">
+                        {mode.cta}
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                className="lv2-modes-arrow"
+                aria-label={language === 'es' ? 'Siguiente modo' : 'Next mode'}
+                aria-controls={modesTrackId}
+                onClick={() => scrollToMode(Math.min(modeCount - 1, activeModeIndex + 1))}
+                disabled={isLastMode}
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="lv2-modes-dots" role="tablist" aria-label={language === 'es' ? 'Posición del carrusel' : 'Carousel position'}>
+              {copy.modes.items.map((mode, index) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={index === activeModeIndex}
+                  aria-label={`${mode.title} (${index + 1}/${modeCount})`}
+                  className={`lv2-modes-dot ${index === activeModeIndex ? 'is-active' : ''}`}
+                  onClick={() => scrollToMode(index)}
+                />
+              ))}
             </div>
           </div>
         </section>
