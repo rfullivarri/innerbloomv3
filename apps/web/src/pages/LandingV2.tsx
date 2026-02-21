@@ -1167,6 +1167,11 @@ export default function LandingV2Page() {
 
                 return (
                   <article key={mode.id} className={`lv2-card lv2-mode-card mode-${mode.id}`}>
+                    <header className="lv2-mode-header">
+                      <div className="lv2-mode-title">{mode.title}</div>
+                      <p className="lv2-card-sub">{mode.benefit}</p>
+                    </header>
+
                     <div className="lv2-mode-media">
                       <video
                         className="lv2-mode-video"
@@ -1181,9 +1186,6 @@ export default function LandingV2Page() {
                       <div className="lv2-mode-media-overlay" aria-hidden="true" />
                       <span className="lv2-mode-media-badge">{visual.avatarLabel}</span>
                     </div>
-
-                    <div className="lv2-mode-title">{mode.title}</div>
-                    <p className="lv2-card-sub">{mode.benefit}</p>
 
                     <div className="lv2-mode-emotion-block">
                       <p className="lv2-mode-emotion-title">{visual.emotionJourneyTitle}</p>
