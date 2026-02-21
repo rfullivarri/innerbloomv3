@@ -952,19 +952,25 @@
   overflow: hidden;
 }
 
+.lv2-mode-header {
+  display: grid;
+  gap: 4px;
+}
+
 .lv2-mode-media {
   position: relative;
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--line) 58%, rgba(255, 255, 255, 0.22));
-  min-height: 160px;
+  width: min(100%, 170px);
+  aspect-ratio: 3 / 4;
+  margin-inline: auto;
   background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2), rgba(15, 23, 42, 0.9));
 }
 
 .lv2-mode-video {
   width: 100%;
   height: 100%;
-  min-height: 160px;
   object-fit: cover;
   display: block;
   filter: saturate(1.08) contrast(1.05);
