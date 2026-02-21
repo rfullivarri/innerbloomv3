@@ -944,50 +944,65 @@
   box-shadow: 0 16px 60px rgba(6, 28, 52, 0.42);
 }
 
-/* Modo carrusel: ocupa ancho completo con scroll-snap para swipe fluido en mobile. */
+/* Selector de modos: deck desktop con card central y miniaturas laterales. */
 .lv2-modes-carousel-section {
   min-height: 100vh;
   display: flex;
   align-items: center;
 }
 
-.lv2-modes-carousel-shell {
+.lv2-modes-selector-shell {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(120px, 180px) minmax(320px, 620px) minmax(120px, 180px);
   align-items: center;
-  gap: 16px;
+  justify-content: center;
+  gap: clamp(14px, 2vw, 28px);
+  margin-top: 12px;
 }
 
-.lv2-modes-track {
-  display: flex;
-  gap: 18px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  padding: 10px 6px 14px;
+.lv2-mode-mini {
+  border: 1px solid color-mix(in srgb, var(--line) 76%, rgba(255, 255, 255, 0.14));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--card) 72%, rgba(15, 23, 42, 0.4));
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  color: #e3f2ff;
+  opacity: 0.9;
+  transition: transform 180ms ease, opacity 180ms ease, border-color 180ms ease;
 }
 
-.lv2-modes-track::-webkit-scrollbar {
-  display: none;
+.lv2-mode-mini:hover {
+  opacity: 1;
+  transform: translateY(-4px) scale(1.02);
+  border-color: color-mix(in srgb, var(--color-accent-primary) 60%, rgba(255, 255, 255, 0.2));
 }
 
-/* Cada card se comporta como slide con snap. */
+.lv2-mode-mini img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.lv2-mode-mini span {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* Card principal resaltada en desktop. */
 .lv2-mode-card {
   padding: 16px;
   border-left-width: 4px;
   display: grid;
   gap: 12px;
   overflow: hidden;
-  flex: 0 0 calc((100% - 54px) / 4);
-  min-width: 260px;
-  scroll-snap-align: start;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition: transform 220ms ease, box-shadow 220ms ease, opacity 220ms ease;
 }
 
-.lv2-mode-card:hover {
-  transform: translateY(-4px) scale(1.015);
+.lv2-mode-card.is-active {
+  transform: scale(1.03);
   box-shadow: 0 22px 70px rgba(6, 28, 52, 0.52);
 }
 
@@ -1070,20 +1085,30 @@
   background: color-mix(in srgb, var(--card) 55%, rgba(59, 130, 246, 0.34));
 }
 
-.lv2-modes-arrow {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--line) 70%, rgba(255, 255, 255, 0.24));
-  background: color-mix(in srgb, var(--card) 78%, rgba(15, 23, 42, 0.35));
-  color: #e5edff;
-  font-size: 2rem;
-  line-height: 1;
+.lv2-modes-thumbs {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
-.lv2-modes-arrow:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+.lv2-mode-thumb {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 74%, rgba(255, 255, 255, 0.2));
+  background: color-mix(in srgb, var(--card) 72%, rgba(15, 23, 42, 0.45));
+  color: #cfe2ff;
+  padding: 8px 14px;
+  font-weight: 700;
+}
+
+.lv2-mode-thumb.is-active {
+  border-color: color-mix(in srgb, var(--color-accent-primary) 65%, rgba(255, 255, 255, 0.22));
+  color: #fff;
+}
+
+.lv2-modes-mobile-track {
+  display: none;
 }
 
 .lv2-modes-dots {
@@ -1779,8 +1804,8 @@
 }
 
 @media (max-width: 1200px) {
-  .lv2-mode-card {
-    flex-basis: calc((100% - 18px) / 2);
+  .lv2-modes-selector-shell {
+    grid-template-columns: minmax(100px, 150px) minmax(320px, 1fr) minmax(100px, 150px);
   }
 }
 
@@ -1818,18 +1843,30 @@
     grid-template-columns: 1fr;
   }
 
-  .lv2-modes-carousel-shell {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .lv2-modes-arrow {
+  .lv2-modes-selector-shell,
+  .lv2-modes-thumbs {
     display: none;
   }
 
-  .lv2-mode-card {
-    flex-basis: 82%;
-    min-width: 82%;
+  .lv2-modes-mobile-track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 2px 12px;
+  }
+
+  .lv2-modes-mobile-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lv2-mode-mobile-slide {
+    flex: 0 0 88%;
+    min-width: 88%;
+    scroll-snap-align: center;
   }
 }
 

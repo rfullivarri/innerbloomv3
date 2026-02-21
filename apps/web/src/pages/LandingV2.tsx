@@ -939,7 +939,7 @@ export default function LandingV2Page() {
     const track = modesTrackRef.current;
     if (!track) return;
 
-    const cards = Array.from(track.querySelectorAll<HTMLElement>('.lv2-mode-slide'));
+    const cards = Array.from(track.querySelectorAll<HTMLElement>('.lv2-mode-mobile-slide'));
     if (!cards.length) return;
 
     const updateActiveMode = () => {
@@ -963,9 +963,7 @@ export default function LandingV2Page() {
       });
     };
 
-    updateActiveMode();
     track.addEventListener('scroll', onScroll, { passive: true });
-
     return () => {
       track.removeEventListener('scroll', onScroll);
       if (frame) window.cancelAnimationFrame(frame);
@@ -984,19 +982,27 @@ export default function LandingV2Page() {
   };
 
   const modeCount = copy.modes.items.length;
-  const isFirstMode = activeModeIndex === 0;
-  const isLastMode = activeModeIndex === modeCount - 1;
 
-  const scrollToMode = (index: number) => {
+  const selectMode = (index: number, options?: { syncMobile?: boolean }) => {
+    setActiveModeIndex(index);
+
+    if (!options?.syncMobile) return;
+
     const track = modesTrackRef.current;
     if (!track) return;
 
-    const cards = track.querySelectorAll<HTMLElement>('.lv2-mode-slide');
+    const cards = track.querySelectorAll<HTMLElement>('.lv2-mode-mobile-slide');
     const target = cards[index];
     if (!target) return;
 
-    target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    target.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   };
+
+  const getWrappedMode = (index: number) => (index + modeCount) % modeCount;
+  const prevModeIndex = getWrappedMode(activeModeIndex - 1);
+  const nextModeIndex = getWrappedMode(activeModeIndex + 1);
+  const activeMode = copy.modes.items[activeModeIndex];
+  const activeVisual = MODE_VISUALS[language][activeMode.id];
 
   return (
     <div className="landing-v2" data-theme={theme}>
@@ -1162,84 +1168,127 @@ export default function LandingV2Page() {
         </section>
 
         <section className="lv2-section lv2-modes-carousel-section" id="modes">
-          <div className="lv2-container" id="game-modes-carousel">
+          <div className="lv2-container" id="game-modes-selector">
             <div className="lv2-section-head">
               <p className="lv2-kicker">Adaptive</p>
               <h2>{copy.modes.title}</h2>
               <p className="lv2-sub">{copy.modes.description}</p>
             </div>
 
-            <div className="lv2-modes-carousel-shell">
+            <div className="lv2-modes-selector-shell" aria-live="polite">
               <button
                 type="button"
-                className="lv2-modes-arrow"
-                aria-label={language === 'es' ? 'Modo anterior' : 'Previous mode'}
-                aria-controls={modesTrackId}
-                onClick={() => scrollToMode(Math.max(0, activeModeIndex - 1))}
-                disabled={isFirstMode}
+                className="lv2-mode-mini mode-mini-left"
+                onClick={() => selectMode(prevModeIndex, { syncMobile: true })}
               >
-                ‹
+                <img src={MODE_VISUALS[language][copy.modes.items[prevModeIndex].id].avatarImage} alt="" aria-hidden />
+                <span>{copy.modes.items[prevModeIndex].title}</span>
               </button>
 
-              <div
-                id={modesTrackId}
-                ref={modesTrackRef}
-                className="lv2-modes-track"
-                role="list"
-                aria-label={language === 'es' ? 'Carrusel de modos de juego' : 'Game mode carousel'}
-              >
-                {copy.modes.items.map((mode) => {
-                  const visual = MODE_VISUALS[language][mode.id];
+              <article className={`lv2-card lv2-mode-card is-active mode-${activeMode.id}`}>
+                <header className="lv2-mode-header">
+                  <div className="lv2-mode-title">{activeMode.title}</div>
+                  <p className="lv2-card-sub">{activeMode.benefit}</p>
+                </header>
 
-                  return (
-                    <article key={mode.id} className={`lv2-card lv2-mode-card lv2-mode-slide mode-${mode.id}`} role="listitem">
-                      <header className="lv2-mode-header">
-                        <div className="lv2-mode-title">{mode.title}</div>
-                        <p className="lv2-card-sub">{mode.benefit}</p>
-                      </header>
+                <div className="lv2-mode-media">
+                  <video
+                    className="lv2-mode-video"
+                    src={activeVisual.avatarVideo}
+                    poster={activeVisual.avatarImage}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    aria-label={activeVisual.avatarAlt}
+                  />
+                  <div className="lv2-mode-media-overlay" aria-hidden="true" />
+                  <span className="lv2-mode-media-badge">{activeVisual.avatarLabel}</span>
+                </div>
 
-                      <div className="lv2-mode-media">
-                        <video
-                          className="lv2-mode-video"
-                          src={visual.avatarVideo}
-                          poster={visual.avatarImage}
-                          autoPlay
-                          muted
-                          loop
-                          playsInline
-                          aria-label={visual.avatarAlt}
-                        />
-                        <div className="lv2-mode-media-overlay" aria-hidden="true" />
-                        <span className="lv2-mode-media-badge">{visual.avatarLabel}</span>
-                      </div>
+                <ul className="lv2-bullets">
+                  {activeMode.bullets.map((bullet) => (
+                    <li key={bullet}>{bullet}</li>
+                  ))}
+                </ul>
 
-                      <ul className="lv2-bullets">
-                        {mode.bullets.map((bullet) => (
-                          <li key={bullet}>{bullet}</li>
-                        ))}
-                      </ul>
-
-                      <button type="button" className="lv2-mode-cta">
-                        {mode.cta}
-                      </button>
-                    </article>
-                  );
-                })}
-              </div>
+                <button type="button" className="lv2-mode-cta">
+                  {language === 'es' ? 'Seleccionar modo' : 'Select mode'}
+                </button>
+              </article>
 
               <button
                 type="button"
-                className="lv2-modes-arrow"
-                aria-label={language === 'es' ? 'Siguiente modo' : 'Next mode'}
-                aria-controls={modesTrackId}
-                onClick={() => scrollToMode(Math.min(modeCount - 1, activeModeIndex + 1))}
-                disabled={isLastMode}
+                className="lv2-mode-mini mode-mini-right"
+                onClick={() => selectMode(nextModeIndex, { syncMobile: true })}
               >
-                ›
+                <img src={MODE_VISUALS[language][copy.modes.items[nextModeIndex].id].avatarImage} alt="" aria-hidden />
+                <span>{copy.modes.items[nextModeIndex].title}</span>
               </button>
             </div>
 
-            <div className="lv2-modes-dots" role="tablist" aria-label={language === 'es' ? 'Posición del carrusel' : 'Carousel position'}>
+            <div
+              id={modesTrackId}
+              ref={modesTrackRef}
+              className="lv2-modes-mobile-track"
+              role="list"
+              aria-label={language === 'es' ? 'Selector mobile de modos de juego' : 'Mobile game mode selector'}
+            >
+              {copy.modes.items.map((mode, index) => {
+                const visual = MODE_VISUALS[language][mode.id];
+
+                return (
+                  <article key={mode.id} className={`lv2-card lv2-mode-card lv2-mode-mobile-slide mode-${mode.id}`} role="listitem">
+                    <header className="lv2-mode-header">
+                      <div className="lv2-mode-title">{mode.title}</div>
+                      <p className="lv2-card-sub">{mode.benefit}</p>
+                    </header>
+
+                    <div className="lv2-mode-media">
+                      <video
+                        className="lv2-mode-video"
+                        src={visual.avatarVideo}
+                        poster={visual.avatarImage}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        aria-label={visual.avatarAlt}
+                      />
+                      <div className="lv2-mode-media-overlay" aria-hidden="true" />
+                      <span className="lv2-mode-media-badge">{visual.avatarLabel}</span>
+                    </div>
+
+                    <ul className="lv2-bullets">
+                      {mode.bullets.map((bullet) => (
+                        <li key={bullet}>{bullet}</li>
+                      ))}
+                    </ul>
+
+                    <button type="button" className="lv2-mode-cta" onClick={() => selectMode(index)}>
+                      {language === 'es' ? 'Seleccionar modo' : 'Select mode'}
+                    </button>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="lv2-modes-thumbs" role="tablist" aria-label={language === 'es' ? 'Elegir modo' : 'Choose mode'}>
+              {copy.modes.items.map((mode, index) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={index === activeModeIndex}
+                  className={`lv2-mode-thumb ${index === activeModeIndex ? 'is-active' : ''}`}
+                  onClick={() => selectMode(index, { syncMobile: true })}
+                >
+                  {mode.title}
+                </button>
+              ))}
+            </div>
+
+            <div className="lv2-modes-dots" role="tablist" aria-label={language === 'es' ? 'Modo activo' : 'Active mode'}>
               {copy.modes.items.map((mode, index) => (
                 <button
                   key={mode.id}
@@ -1248,7 +1297,7 @@ export default function LandingV2Page() {
                   aria-selected={index === activeModeIndex}
                   aria-label={`${mode.title} (${index + 1}/${modeCount})`}
                   className={`lv2-modes-dot ${index === activeModeIndex ? 'is-active' : ''}`}
-                  onClick={() => scrollToMode(index)}
+                  onClick={() => selectMode(index, { syncMobile: true })}
                 />
               ))}
             </div>
