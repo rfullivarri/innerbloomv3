@@ -1097,12 +1097,12 @@ export default function LandingV2Page() {
               <h2>{copy.modes.title}</h2>
               <p className="lv2-sub">{copy.modes.description}</p>
             </div>
-            <div className="lv2-grid lv2-grid-2">
+            <div className="lv2-grid lv2-modes-grid" role="list" aria-label={language === 'es' ? 'Modos de juego' : 'Game modes'}>
               {copy.modes.items.map((mode) => {
                 const visual = MODE_VISUALS[language][mode.id];
 
                 return (
-                  <article key={mode.id} className={`lv2-card lv2-mode-card mode-${mode.id}`}>
+                  <article key={mode.id} className={`lv2-card lv2-mode-card mode-${mode.id}`} role="listitem">
                     <header className="lv2-mode-header">
                       <div className="lv2-mode-title">{mode.title}</div>
                       <p className="lv2-card-sub">{mode.benefit}</p>
