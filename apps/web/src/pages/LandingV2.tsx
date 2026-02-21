@@ -115,28 +115,28 @@ const t = {
         {
           id: 'low',
           title: '🪫 Low',
-          benefit: 'Low energy day. Minimum viable routine.',
+          benefit: 'Designed to protect momentum on low-energy days by lowering friction and preserving self-trust.',
           bullets: ['1–2 minute tasks', 'Recovery-first', 'Zero-guilt rest'],
           cta: 'Try Low mode'
         },
         {
           id: 'chill',
           title: '🍃 Chill',
-          benefit: 'Stable energy. Soft routines to sustain well-being.',
+          benefit: 'Built to stabilize consistency with gentle structure, so progress feels sustainable instead of demanding.',
           bullets: ['Light planning', 'Evening reflection', 'Gentle streaks'],
           cta: 'Try Chill mode'
         },
         {
           id: 'flow',
           title: '🌊 Flow',
-          benefit: 'Focused and in motion. Ride momentum with aligned goals.',
+          benefit: 'Optimized for focused windows to channel momentum into meaningful progress before attention fades.',
           bullets: ['Goal-linked tasks', 'Focus timers', 'Progress tags'],
           cta: 'Try Flow mode'
         },
         {
           id: 'evolve',
           title: '🧬 Evolve',
-          benefit: 'Ambitious and determined. Atomic habits, missions and rewards.',
+          benefit: 'Created for high-drive phases to convert ambition into repeatable systems that scale your identity.',
           bullets: ['Atomic habits', 'XP ladders', 'Weekly challenges'],
           cta: 'Try Evolve mode'
         }
@@ -258,28 +258,28 @@ const t = {
         {
           id: 'low',
           title: '🪫 Low',
-          benefit: 'Energía baja, abrumado. Activá tu mínimo vital con acciones cortas.',
+          benefit: 'Diseñado para sostener el progreso en días de baja energía, reduciendo fricción y culpa.',
           bullets: ['Tareas de 1–2 minutos', 'Recuperación primero', 'Descanso sin culpa'],
           cta: 'Activar modo Low'
         },
         {
           id: 'chill',
           title: '🍃 Chill',
-          benefit: 'Energía estable. Rutinas suaves y balanceadas para sostenerte.',
+          benefit: 'Pensado para mantener constancia con una estructura suave que protege tu bienestar.',
           bullets: ['Plan liviano', 'Reflexión nocturna', 'Rachas suaves'],
           cta: 'Activar modo Chill'
         },
         {
           id: 'flow',
           title: '🌊 Flow',
-          benefit: 'Enfocado y en movimiento. Aprovechá el impulso con metas alineadas.',
+          benefit: 'Optimizado para ventanas de foco, canalizando impulso en avances concretos y medibles.',
           bullets: ['Tareas ligadas a metas', 'Timers de foco', 'Tags de progreso'],
           cta: 'Activar modo Flow'
         },
         {
           id: 'evolve',
           title: '🧬 Evolve',
-          benefit: 'Ambicioso y determinado. Sistema retador con Hábitos Atómicos, misiones y recompensas.',
+          benefit: 'Creado para etapas de alta ambición, transformando intensidad en sistemas sostenibles.',
           bullets: ['Hábitos atómicos', 'Escalera de XP', 'Retos semanales'],
           cta: 'Activar modo Evolve'
         }
@@ -425,25 +425,25 @@ const MODE_VISUALS: Record<Language, Record<Mode['id'], ModeVisual>> = {
       avatarVideo: '/avatars/low-basic.mp4',
       avatarImage: '/LowMood.jpg',
       avatarAlt: 'Low mode avatar with a resting facial expression.',
-      avatarLabel: 'Your avatar mirrors your energy'
+      avatarLabel: 'Aligned with your state'
     },
     chill: {
       avatarVideo: '/avatars/chill-basic.mp4',
       avatarImage: '/Chill-Mood.jpg',
       avatarAlt: 'Chill mode avatar with a calm expression.',
-      avatarLabel: 'Your avatar mirrors your energy'
+      avatarLabel: 'Aligned with your state'
     },
     flow: {
       avatarVideo: '/avatars/flow-basic.mp4',
       avatarImage: '/FlowMood.jpg',
       avatarAlt: 'Flow mode avatar in action with a focused expression.',
-      avatarLabel: 'Your avatar mirrors your energy'
+      avatarLabel: 'Aligned with your state'
     },
     evolve: {
       avatarVideo: '/avatars/evolve-basic.mp4',
       avatarImage: '/Evolve-Mood.jpg',
       avatarAlt: 'Evolve mode avatar with a determined expression.',
-      avatarLabel: 'Your avatar mirrors your energy'
+      avatarLabel: 'Aligned with your state'
     }
   },
   es: {
@@ -451,25 +451,25 @@ const MODE_VISUALS: Record<Language, Record<Mode['id'], ModeVisual>> = {
       avatarVideo: '/avatars/low-basic.mp4',
       avatarImage: '/LowMood.jpg',
       avatarAlt: 'Avatar del modo Low con expresión de descanso.',
-      avatarLabel: 'Tu avatar refleja cómo estás hoy'
+      avatarLabel: 'Alineado a tu energía'
     },
     chill: {
       avatarVideo: '/avatars/chill-basic.mp4',
       avatarImage: '/Chill-Mood.jpg',
       avatarAlt: 'Avatar del modo Chill con expresión de calma.',
-      avatarLabel: 'Tu avatar refleja cómo estás hoy'
+      avatarLabel: 'Alineado a tu energía'
     },
     flow: {
       avatarVideo: '/avatars/flow-basic.mp4',
       avatarImage: '/FlowMood.jpg',
       avatarAlt: 'Avatar del modo Flow en movimiento y enfocado.',
-      avatarLabel: 'Tu avatar refleja cómo estás hoy'
+      avatarLabel: 'Alineado a tu energía'
     },
     evolve: {
       avatarVideo: '/avatars/evolve-basic.mp4',
       avatarImage: '/Evolve-Mood.jpg',
       avatarAlt: 'Avatar del modo Evolve con expresión determinada.',
-      avatarLabel: 'Tu avatar refleja cómo estás hoy'
+      avatarLabel: 'Alineado a tu energía'
     }
   }
 };
@@ -1185,13 +1185,24 @@ export default function LandingV2Page() {
                 <span>{copy.modes.items[prevModeIndex].title}</span>
               </button>
 
-              <article className={`lv2-card lv2-mode-card is-active mode-${activeMode.id}`}>
+              <article
+                className={`lv2-card lv2-mode-card is-active mode-${activeMode.id}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => selectMode(activeModeIndex, { syncMobile: true })}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    selectMode(activeModeIndex, { syncMobile: true });
+                  }
+                }}
+              >
                 <header className="lv2-mode-header">
                   <div className="lv2-mode-title">{activeMode.title}</div>
                   <p className="lv2-card-sub">{activeMode.benefit}</p>
                 </header>
 
-                <div className="lv2-mode-media">
+                <figure className="lv2-mode-media">
                   <video
                     className="lv2-mode-video"
                     src={activeVisual.avatarVideo}
@@ -1202,19 +1213,8 @@ export default function LandingV2Page() {
                     playsInline
                     aria-label={activeVisual.avatarAlt}
                   />
-                  <div className="lv2-mode-media-overlay" aria-hidden="true" />
-                  <span className="lv2-mode-media-badge">{activeVisual.avatarLabel}</span>
-                </div>
-
-                <ul className="lv2-bullets">
-                  {activeMode.bullets.map((bullet) => (
-                    <li key={bullet}>{bullet}</li>
-                  ))}
-                </ul>
-
-                <button type="button" className="lv2-mode-cta">
-                  {language === 'es' ? 'Seleccionar modo' : 'Select mode'}
-                </button>
+                  <figcaption className="lv2-mode-media-caption">{activeVisual.avatarLabel}</figcaption>
+                </figure>
               </article>
 
               <button
@@ -1238,13 +1238,26 @@ export default function LandingV2Page() {
                 const visual = MODE_VISUALS[language][mode.id];
 
                 return (
-                  <article key={mode.id} className={`lv2-card lv2-mode-card lv2-mode-mobile-slide mode-${mode.id}`} role="listitem">
+                  <article
+                    key={mode.id}
+                    className={`lv2-card lv2-mode-card lv2-mode-mobile-slide mode-${mode.id}`}
+                    role="button"
+                    tabIndex={0}
+                    aria-current={index === activeModeIndex}
+                    onClick={() => selectMode(index)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        selectMode(index);
+                      }
+                    }}
+                  >
                     <header className="lv2-mode-header">
                       <div className="lv2-mode-title">{mode.title}</div>
                       <p className="lv2-card-sub">{mode.benefit}</p>
                     </header>
 
-                    <div className="lv2-mode-media">
+                    <figure className="lv2-mode-media">
                       <video
                         className="lv2-mode-video"
                         src={visual.avatarVideo}
@@ -1255,19 +1268,8 @@ export default function LandingV2Page() {
                         playsInline
                         aria-label={visual.avatarAlt}
                       />
-                      <div className="lv2-mode-media-overlay" aria-hidden="true" />
-                      <span className="lv2-mode-media-badge">{visual.avatarLabel}</span>
-                    </div>
-
-                    <ul className="lv2-bullets">
-                      {mode.bullets.map((bullet) => (
-                        <li key={bullet}>{bullet}</li>
-                      ))}
-                    </ul>
-
-                    <button type="button" className="lv2-mode-cta" onClick={() => selectMode(index)}>
-                      {language === 'es' ? 'Seleccionar modo' : 'Select mode'}
-                    </button>
+                      <figcaption className="lv2-mode-media-caption">{visual.avatarLabel}</figcaption>
+                    </figure>
                   </article>
                 );
               })}
