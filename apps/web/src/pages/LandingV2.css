@@ -935,11 +935,6 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.lv2-modes-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-}
-
 .lv2-card {
   background: linear-gradient(180deg, color-mix(in srgb, var(--card) 88%, rgba(56, 189, 248, 0.1)),
       color-mix(in srgb, var(--bg-2) 90%, rgba(139, 92, 246, 0.12)));
@@ -949,12 +944,51 @@
   box-shadow: 0 16px 60px rgba(6, 28, 52, 0.42);
 }
 
+/* Modo carrusel: ocupa ancho completo con scroll-snap para swipe fluido en mobile. */
+.lv2-modes-carousel-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.lv2-modes-carousel-shell {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+}
+
+.lv2-modes-track {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 6px 14px;
+}
+
+.lv2-modes-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* Cada card se comporta como slide con snap. */
 .lv2-mode-card {
   padding: 16px;
   border-left-width: 4px;
   display: grid;
   gap: 12px;
   overflow: hidden;
+  flex: 0 0 calc((100% - 54px) / 4);
+  min-width: 260px;
+  scroll-snap-align: start;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.lv2-mode-card:hover {
+  transform: translateY(-4px) scale(1.015);
+  box-shadow: 0 22px 70px rgba(6, 28, 52, 0.52);
 }
 
 .lv2-mode-header {
@@ -1012,7 +1046,6 @@
   font-size: 0.98rem;
 }
 
-
 .lv2-mode-card .lv2-bullets {
   gap: 8px;
 }
@@ -1021,6 +1054,57 @@
   background: color-mix(in srgb, var(--color-accent-primary) 12%, rgba(255, 255, 255, 0.04));
   border: 1px solid color-mix(in srgb, var(--color-accent-primary) 22%, rgba(255, 255, 255, 0.08));
   font-weight: 700;
+}
+
+.lv2-mode-cta {
+  margin-top: auto;
+  border: 1px solid color-mix(in srgb, var(--line) 72%, rgba(255, 255, 255, 0.25));
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--card) 72%, rgba(20, 184, 166, 0.2));
+  color: #f5f9ff;
+  font-weight: 700;
+}
+
+.lv2-mode-cta:hover {
+  background: color-mix(in srgb, var(--card) 55%, rgba(59, 130, 246, 0.34));
+}
+
+.lv2-modes-arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, rgba(255, 255, 255, 0.24));
+  background: color-mix(in srgb, var(--card) 78%, rgba(15, 23, 42, 0.35));
+  color: #e5edff;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.lv2-modes-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.lv2-modes-dots {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.lv2-modes-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(148, 163, 184, 0.35);
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.lv2-modes-dot.is-active {
+  background: #7dd3fc;
+  transform: scale(1.2);
 }
 
 .lv2-card-head {
@@ -1695,8 +1779,8 @@
 }
 
 @media (max-width: 1200px) {
-  .lv2-modes-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .lv2-mode-card {
+    flex-basis: calc((100% - 18px) / 2);
   }
 }
 
@@ -1734,13 +1818,18 @@
     grid-template-columns: 1fr;
   }
 
-  .lv2-modes-grid {
+  .lv2-modes-carousel-shell {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 8px;
   }
 
-  .lv2-mode-state-grid {
-    grid-template-columns: 1fr;
+  .lv2-modes-arrow {
+    display: none;
+  }
+
+  .lv2-mode-card {
+    flex-basis: 82%;
+    min-width: 82%;
   }
 }
 
