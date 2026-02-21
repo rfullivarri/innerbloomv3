@@ -43,7 +43,7 @@ const content: Record<Language, {
       titleLead: 'Convierte la experiencia en hábitos.',
       titleHighlight: 'Convierte los hábitos en camino',
       subtitle:
-        'Tus hábitos son el mapa. Tu constancia, el nivel que alcanzas. Es tu self-improvement journey con equilibrio entre 🫀 Cuerpo, 🧠 Mente y 🏵️ Alma.',
+        'Tus hábitos son el mapa. Tu constancia, el nivel que alcanzas. Es tu self-improvement journey con equilibrio entre Cuerpo, Mente y Alma.',
       note: 'En menos de 3 minutos generamos tu base personalizada con IA.',
       alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
     },
@@ -164,7 +164,7 @@ const content: Record<Language, {
       titleLead: 'Turn experience into habits.',
       titleHighlight: 'Turn habits into your path',
       subtitle:
-        'Your habits are the map. Consistency is the level you reach. A self-improvement journey balanced between 🫀 Body, 🧠 Mind and 🏵️ Soul.',
+        'Your habits are the map. Consistency is the level you reach. A self-improvement journey balanced between Body, Mind and Soul.',
       note: 'In under 3 minutes we generate your personalized base with AI.',
       alt: 'Kid looking at a violet energy sphere in the night sky — Gamification Journey'
     },
