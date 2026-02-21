@@ -1016,10 +1016,9 @@
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--line) 58%, rgba(255, 255, 255, 0.22));
-  width: 100%;
-  min-height: 300px;
+  width: 50%;
   aspect-ratio: 9 / 16;
-  margin-inline: 0;
+  margin-inline: auto;
   background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2), rgba(15, 23, 42, 0.9));
 }
 
