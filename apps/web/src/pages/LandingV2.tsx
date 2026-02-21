@@ -921,7 +921,12 @@ export default function LandingV2Page() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [activeModeIndex, setActiveModeIndex] = useState(0);
   const modesTrackId = useId();
+  const gameModesSectionRef = useRef<HTMLDivElement | null>(null);
   const modesTrackRef = useRef<HTMLDivElement | null>(null);
+  const autoplayIntervalRef = useRef<number | null>(null);
+  const autoplayResumeTimeoutRef = useRef<number | null>(null);
+  const isModesHoveredRef = useRef(false);
+  const isModesInteractionPausedRef = useRef(false);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -983,11 +988,21 @@ export default function LandingV2Page() {
 
   const modeCount = copy.modes.items.length;
 
-  const selectMode = (index: number, options?: { syncMobile?: boolean }) => {
-    setActiveModeIndex(index);
+  const clearModesAutoplayInterval = () => {
+    if (autoplayIntervalRef.current) {
+      window.clearInterval(autoplayIntervalRef.current);
+      autoplayIntervalRef.current = null;
+    }
+  };
 
-    if (!options?.syncMobile) return;
+  const clearModesAutoplayResumeTimeout = () => {
+    if (autoplayResumeTimeoutRef.current) {
+      window.clearTimeout(autoplayResumeTimeoutRef.current);
+      autoplayResumeTimeoutRef.current = null;
+    }
+  };
 
+  const scrollMobileModeIntoView = (index: number) => {
     const track = modesTrackRef.current;
     if (!track) return;
 
@@ -998,11 +1013,96 @@ export default function LandingV2Page() {
     target.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   };
 
+  const pauseModesAutoplayForInteraction = () => {
+    isModesInteractionPausedRef.current = true;
+    clearModesAutoplayInterval();
+    clearModesAutoplayResumeTimeout();
+
+    // Reanuda autoplay tras inactividad del usuario.
+    autoplayResumeTimeoutRef.current = window.setTimeout(() => {
+      isModesInteractionPausedRef.current = false;
+    }, 6000);
+  };
+
+  const selectMode = (index: number, options?: { syncMobile?: boolean; source?: 'manual' | 'autoplay' }) => {
+    if (options?.source !== 'autoplay') {
+      pauseModesAutoplayForInteraction();
+    }
+
+    setActiveModeIndex(index);
+
+    if (!options?.syncMobile) return;
+
+    scrollMobileModeIntoView(index);
+  };
+
   const getWrappedMode = (index: number) => (index + modeCount) % modeCount;
   const prevModeIndex = getWrappedMode(activeModeIndex - 1);
   const nextModeIndex = getWrappedMode(activeModeIndex + 1);
   const activeMode = copy.modes.items[activeModeIndex];
   const activeVisual = MODE_VISUALS[language][activeMode.id];
+
+  useEffect(() => {
+    const section = gameModesSectionRef.current;
+    if (!section || modeCount < 2) return;
+
+    const hasHover = window.matchMedia('(hover: hover)').matches;
+
+    const canAutoplay = () => !isModesHoveredRef.current && !isModesInteractionPausedRef.current;
+
+    const startModesAutoplay = () => {
+      if (!canAutoplay() || autoplayIntervalRef.current) return;
+
+      autoplayIntervalRef.current = window.setInterval(() => {
+        setActiveModeIndex((current) => {
+          const next = (current + 1) % modeCount;
+          scrollMobileModeIntoView(next);
+          return next;
+        });
+      }, 4500);
+    };
+
+    const stopModesAutoplay = () => {
+      clearModesAutoplayInterval();
+    };
+
+    const onSectionEnter = () => {
+      if (!hasHover) return;
+      isModesHoveredRef.current = true;
+      stopModesAutoplay();
+    };
+
+    const onSectionLeave = () => {
+      if (!hasHover) return;
+      isModesHoveredRef.current = false;
+      startModesAutoplay();
+    };
+
+    const onManualInteraction = () => {
+      pauseModesAutoplayForInteraction();
+    };
+
+    section.addEventListener('mouseenter', onSectionEnter);
+    section.addEventListener('mouseleave', onSectionLeave);
+    section.addEventListener('pointerdown', onManualInteraction, { passive: true });
+    section.addEventListener('keydown', onManualInteraction);
+
+    startModesAutoplay();
+
+    const resumeWatcher = window.setInterval(() => {
+      if (canAutoplay()) startModesAutoplay();
+    }, 500);
+
+    return () => {
+      section.removeEventListener('mouseenter', onSectionEnter);
+      section.removeEventListener('mouseleave', onSectionLeave);
+      section.removeEventListener('pointerdown', onManualInteraction);
+      section.removeEventListener('keydown', onManualInteraction);
+      window.clearInterval(resumeWatcher);
+      clearModesAutoplayInterval();
+      clearModesAutoplayResumeTimeout();
+    };
+  }, [modeCount]);
 
   return (
     <div className="landing-v2" data-theme={theme}>
@@ -1168,7 +1268,7 @@ export default function LandingV2Page() {
         </section>
 
         <section className="lv2-section lv2-modes-carousel-section" id="modes">
-          <div className="lv2-container" id="game-modes-section">
+          <div className="lv2-container" id="game-modes-section" ref={gameModesSectionRef}>
             <div className="lv2-section-head">
               <p className="lv2-kicker">Adaptive</p>
               <h2>{copy.modes.title}</h2>
