@@ -1168,7 +1168,7 @@ export default function LandingV2Page() {
         </section>
 
         <section className="lv2-section lv2-modes-carousel-section" id="modes">
-          <div className="lv2-container" id="game-modes-selector">
+          <div className="lv2-container" id="game-modes-section">
             <div className="lv2-section-head">
               <p className="lv2-kicker">Adaptive</p>
               <h2>{copy.modes.title}</h2>
