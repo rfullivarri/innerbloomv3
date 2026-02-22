@@ -5,53 +5,60 @@
     "product": "Innerbloom Journey",
     "category": "Self-improvement gamificado"
   },
+  "source_of_truth": {
+    "sourceModule": "apps/web/src/content/officialLandingContent.ts",
+    "sections": [
+      "tagline",
+      "hero",
+      "value_proposition",
+      "pillars",
+      "modes",
+      "how_it_works",
+      "faq",
+      "ctas"
+    ]
+  },
   "copy": {
     "tagline": "Convierte la experiencia en hábitos. Convierte los hábitos en camino.",
     "short": "Innerbloom transforma hábitos diarios en progreso visible con equilibrio entre Body, Mind y Soul.",
-    "long": "Innerbloom es una experiencia web de self-improvement gamificada. La persona define su camino inicial, activa una base personalizada asistida por IA y sostiene su proceso con un loop diario de quest, emociones y métricas de progreso (XP, rachas, nivel, consistencia y misiones)."
-  },
-  "problem_solution": {
-    "problem": "Abandono temprano de hábitos por falta de sistema, baja adaptación al nivel de energía y poca visibilidad del progreso.",
-    "solution": "Journey estructurado con game modes adaptativos (Low/Chill/Flow/Evolve), pilares Body/Mind/Soul y seguimiento diario accionable."
+    "long": "Innerbloom es una experiencia web de self-improvement gamificada. La persona define su camino inicial, activa una base personalizada asistida por IA y sostiene su proceso con un loop diario de quest, emociones y métricas de progreso (XP, rachas, nivel, consistencia y misiones).",
+    "hero": {
+      "titleLead": "Convierte la experiencia en hábitos.",
+      "titleHighlight": "Convierte los hábitos en camino",
+      "subtitle": "Tus hábitos son el mapa. Tu constancia, el nivel que alcanzas. Es tu self-improvement journey con equilibrio entre Cuerpo, Mente y Alma.",
+      "note": "En menos de 3 minutos generamos tu base personalizada con IA.",
+      "alt": "Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey"
+    },
+    "value_proposition": "Observate por primera vez en tercera persona y toma el control de tus acciones y hábitos."
   },
   "features": [
-    "Base personalizada Body/Mind/Soul (generación inicial con IA)",
-    "Modos de energía: Low Mood, Chill Mood, Flow Mood, Evolve Mood",
-    "Daily Quest + retrospectiva emocional",
-    "Métricas: XP, nivel, rachas, consistencia semanal",
-    "Misiones y recompensas"
+    "🪫 LOW MOOD: activar tu mínimo vital con acciones pequeñas y sostenibles.",
+    "🍃 CHILL MOOD: sostener bienestar con rutinas suaves y balanceadas.",
+    "🌊 FLOW MOOD: aprovechar el impulso con un plan alineado a metas concretas.",
+    "🧬 EVOLVE MOOD: sistema retador con Hábitos Atómicos, misiones y recompensas."
   ],
   "onboarding_steps": [
-    "Responder preguntas iniciales para definir camino",
-    "Recibir y activar base personalizada",
-    "Ejecutar quest diaria y registrar emoción predominante",
-    "Escalar consistencia mediante XP, rachas, misiones y recompensas"
-  ],
-  "differentiators": [
-    "Enfoque integrado Body/Mind/Soul",
-    "Adaptación del ritmo al estado energético real",
-    "Mecánicas de juego orientadas a constancia sostenible"
+    "Define tu camino: Responde una serie de preguntas, setea tu modo de juego; nosotros generaremos tu base (Body/Mind/Soul) con IA.",
+    "Activa tu base: Recibís tu “pergamino digital” por mail y editás/confirmás tu base.",
+    "Daily Quest + Emociones: Con tu quest diaria vas a poder hacer una retrospectiva de tu día anterior; pensarás en qué emoción prevaleció más durante tu día.",
+    "XP, Rachas y Recompensas: Seguís tu crecimiento acumulando experiencia (XP), moviendo tu constancia semanal, desafiándote a nuevas misiones y obteniendo recompensas."
   ],
   "faq": [
     {
-      "question": "¿Qué hace Innerbloom?",
-      "answer": "Ayuda a convertir hábitos en progreso sostenido con una estructura gamificada y seguimiento diario."
+      "question": "¿Necesito mucha disciplina para empezar?",
+      "answer": "No. Si estás con poca energía, empezás en Low para activar el mínimo vital. El sistema ajusta el ritmo."
     },
     {
-      "question": "¿Para quién es?",
-      "answer": "Para personas que quieren construir bienestar y consistencia en hábitos personales."
+      "question": "¿Puedo cambiar de modo de juego?",
+      "answer": "Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento."
     },
     {
-      "question": "¿Qué no hace?",
-      "answer": "No reemplaza tratamiento médico, psicológico ni psiquiátrico."
+      "question": "¿Dónde veo mis métricas?",
+      "answer": "En tu archivo y en el Dashboard: XP, nivel, rachas y mapa emocional."
     },
     {
-      "question": "¿Qué datos necesita?",
-      "answer": "Respuestas de onboarding, actividad diaria y señales de progreso. TBD: matriz técnica campo-por-campo."
-    },
-    {
-      "question": "¿Cómo aborda privacidad?",
-      "answer": "Usa autenticación y backend propio. TBD: enlazar política pública oficial de privacidad cuando esté disponible."
+      "question": "¿Qué pasa si dejo de registrar?",
+      "answer": "No perdés progreso. Retomas cuando quieras y ajustamos objetivos a tu energía actual."
     }
   ],
   "links": {
@@ -63,14 +70,13 @@
     "llms": "https://innerbloomjourney.org/llms.txt"
   },
   "versioning": {
-    "updated_at": "2026-02-22T00:00:00Z",
-    "source_commit": "601f452",
-    "source": "apps/web/src/pages/Landing.tsx + apps/web/src/pages/Landing.css + apps/web/src/index.css"
+    "version": "53aa718",
+    "lastUpdated": "2026-02-22T10:45:59.812Z"
   },
   "design_tokens": {
     "palette": {
       "bg": "#0B1220",
-      "bg_alt": "#0F1A2E",
+      "bgAlt": "#0F1A2E",
       "surface": "#111F35",
       "text": "#EAF1FF",
       "muted": "#9FB6E3",
@@ -86,21 +92,21 @@
       }
     },
     "typography": {
-      "heading_family": "Sora, Segoe UI, system-ui, sans-serif",
-      "body_family": "Manrope, Segoe UI, system-ui, sans-serif",
+      "headingFamily": "Sora, Segoe UI, system-ui, sans-serif",
+      "bodyFamily": "Manrope, Segoe UI, system-ui, sans-serif",
+      "headingLetterSpacing": "-0.015em",
       "weights": [
         400,
         500,
         600,
         700,
         800
-      ],
-      "heading_letter_spacing": "-0.015em"
+      ]
     },
     "spacing": {
       "base": "8px",
-      "section_vertical": "64px",
-      "container_max": "1080px"
+      "sectionVertical": "64px",
+      "containerMax": "1080px"
     },
     "radius": {
       "sm": "10px",
@@ -110,7 +116,7 @@
     },
     "shadows": {
       "card": "0 18px 40px rgba(0,0,0,0.35)",
-      "onboarding_glass": "0 26px 80px rgba(12, 18, 38, 0.24)"
+      "onboardingGlass": "0 26px 80px rgba(12, 18, 38, 0.24)"
     },
     "gradients": [
       {
@@ -125,7 +131,7 @@
         ]
       }
     ],
-    "css_variables_mapped": [
+    "cssVariablesMapped": [
       "--color-surface",
       "--color-surface-muted",
       "--color-surface-elevated",
