@@ -10,6 +10,11 @@ type SubscriptionRow = {
   grace_ends_at: string | null;
 };
 
+type DatabaseError = {
+  code?: string;
+  message?: string;
+};
+
 const LATEST_SUBSCRIPTION_SQL = `
   SELECT status, grace_ends_at
     FROM user_subscriptions
@@ -54,6 +59,18 @@ function isSubscriptionActive(status: string | null | undefined, graceEndsAt: st
   return false;
 }
 
+function isMissingSubscriptionTableError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const databaseError = error as DatabaseError;
+  return (
+    databaseError.code === '42P01'
+    || databaseError.message?.toLowerCase().includes('user_subscriptions') === true
+  );
+}
+
 export async function requireActiveSubscription(
   req: Request,
   _res: Response,
@@ -82,6 +99,12 @@ export async function requireActiveSubscription(
   } catch (error) {
     if (error instanceof HttpError) {
       next(error);
+      return;
+    }
+
+    if (isMissingSubscriptionTableError(error)) {
+      console.warn('[billing] user_subscriptions table is not available yet; skipping subscription validation');
+      next();
       return;
     }
 
