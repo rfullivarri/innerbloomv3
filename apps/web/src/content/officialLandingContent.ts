@@ -26,6 +26,13 @@ export type LandingCopy = {
   modes: { title: string; intro: string; items: Mode[] };
   how: { title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
   testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
+  pricing: {
+    title: string;
+    intro: string;
+    taxNote: string;
+    actionLabel: string;
+    plans: Array<{ id: 'FREE' | 'MONTH' | 'SIX_MONTHS' | 'YEAR'; name: string; price: string; detail: string }>;
+  };
   faq: { title: string; items: Faq[] };
   next: { title: string; intro: string };
   auth: AuthCopy;
@@ -146,6 +153,18 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       prev: 'Anterior',
       next: 'Siguiente',
       groupLabel: 'Seleccionar testimonio'
+    },
+    pricing: {
+      title: 'Planes y pricing',
+      intro: 'Elige el plan que mejor acompaña tu ritmo actual.',
+      taxNote: 'Precios finales para cliente (impuestos incluidos).',
+      actionLabel: 'Empezar con este plan',
+      plans: [
+        { id: 'FREE', name: 'FREE', price: '2 meses gratis', detail: 'Ideal para explorar Innerbloom sin compromiso inicial.' },
+        { id: 'MONTH', name: 'MONTH', price: '4,99 EUR/mes', detail: 'Suscripción mensual para avanzar con flexibilidad.' },
+        { id: 'SIX_MONTHS', name: 'SIX_MONTHS', price: '23 EUR', detail: 'Plan semestral para mantener consistencia y ahorrar.' },
+        { id: 'YEAR', name: 'YEAR', price: '32 EUR', detail: 'Plan anual para comprometerte con tu Journey completo.' }
+      ]
     },
     faq: {
       title: 'Preguntas frecuentes',
@@ -287,6 +306,18 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       prev: 'Previous',
       next: 'Next',
       groupLabel: 'Select testimonial'
+    },
+    pricing: {
+      title: 'Plans & pricing',
+      intro: 'Choose the plan that best fits your current pace.',
+      taxNote: 'Final customer prices (taxes included).',
+      actionLabel: 'Start with this plan',
+      plans: [
+        { id: 'FREE', name: 'FREE', price: '2 months free', detail: 'Best to explore Innerbloom with zero upfront commitment.' },
+        { id: 'MONTH', name: 'MONTH', price: '4.99 EUR/month', detail: 'Monthly subscription to progress with full flexibility.' },
+        { id: 'SIX_MONTHS', name: 'SIX_MONTHS', price: '23 EUR', detail: '6-month plan for stronger consistency and savings.' },
+        { id: 'YEAR', name: 'YEAR', price: '32 EUR', detail: 'Annual plan to commit to your full Journey.' }
+      ]
     },
     faq: {
       title: 'Frequently asked questions',
