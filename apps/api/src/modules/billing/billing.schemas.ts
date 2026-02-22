@@ -35,6 +35,18 @@ export const reactivateBodySchema = z
   })
   .default({});
 
+export const checkoutSessionBodySchema = z.object({
+  plan: billingPlanSchema.refine((value) => value !== 'FREE', {
+    message: 'FREE cannot be subscribed explicitly',
+  }),
+  successUrl: z.string().trim().url().optional(),
+  cancelUrl: z.string().trim().url().optional(),
+});
+
+export const portalSessionBodySchema = z.object({
+  returnUrl: z.string().trim().url().optional(),
+});
+
 export type BillingPlan = z.infer<typeof billingPlanSchema>;
 export type BillingStatus = z.infer<typeof billingStatusSchema>;
 export type BillingPlanCatalog = z.infer<typeof billingPlanCatalogSchema>;
@@ -42,3 +54,5 @@ export type SubscribeBody = z.infer<typeof subscribeBodySchema>;
 export type ChangePlanBody = z.infer<typeof changePlanBodySchema>;
 export type CancelBody = z.infer<typeof cancelBodySchema>;
 export type ReactivateBody = z.infer<typeof reactivateBodySchema>;
+export type CheckoutSessionBody = z.infer<typeof checkoutSessionBodySchema>;
+export type PortalSessionBody = z.infer<typeof portalSessionBodySchema>;

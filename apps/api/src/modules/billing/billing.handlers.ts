@@ -4,12 +4,16 @@ import { HttpError } from '../../lib/http-error.js';
 import {
   cancelBodySchema,
   changePlanBodySchema,
+  checkoutSessionBodySchema,
+  portalSessionBodySchema,
   reactivateBodySchema,
   subscribeBodySchema,
 } from './billing.schemas.js';
 import {
   cancelUserSubscription,
   changeUserPlan,
+  createBillingCheckoutSession,
+  createBillingPortalSession,
   getUserBillingSubscription,
   listBillingPlans,
   reactivateUserSubscription,
@@ -31,6 +35,21 @@ export const getBillingPlans = asyncHandler(async (_req: Request, res: Response)
 export const getBillingSubscription = asyncHandler(async (req: Request, res: Response) => {
   const userId = requireUserId(req);
   res.json(getUserBillingSubscription(userId));
+});
+
+
+export const postBillingCheckoutSession = asyncHandler(async (req: Request, res: Response) => {
+  const userId = requireUserId(req);
+  const body = checkoutSessionBodySchema.parse(req.body);
+  const result = await createBillingCheckoutSession(userId, body);
+  res.status(201).json(result);
+});
+
+export const postBillingPortalSession = asyncHandler(async (req: Request, res: Response) => {
+  const userId = requireUserId(req);
+  const body = portalSessionBodySchema.parse(req.body ?? {});
+  const result = await createBillingPortalSession(userId, body);
+  res.status(201).json(result);
 });
 
 export const postBillingSubscribe = asyncHandler(async (req: Request, res: Response) => {

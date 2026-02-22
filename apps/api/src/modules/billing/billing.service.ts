@@ -10,9 +10,12 @@ import type {
   BillingStatus,
   CancelBody,
   ChangePlanBody,
+  CheckoutSessionBody,
+  PortalSessionBody,
   ReactivateBody,
   SubscribeBody,
 } from './billing.schemas.js';
+import { getBillingProvider } from './provider/index.js';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const GRACE_DAYS = 7;
@@ -171,3 +174,40 @@ export function reactivateUserSubscription(userId: string, input: ReactivateBody
 }
 
 export { clearBillingSubscriptionsForTest };
+
+
+export async function createBillingCheckoutSession(userId: string, input: CheckoutSessionBody) {
+  const provider = getBillingProvider();
+  return provider.createCheckoutSession({
+    userId,
+    plan: input.plan,
+    successUrl: input.successUrl,
+    cancelUrl: input.cancelUrl,
+  });
+}
+
+export async function createBillingPortalSession(userId: string, input: PortalSessionBody) {
+  const provider = getBillingProvider();
+  return provider.createPortalSession({
+    userId,
+    returnUrl: input.returnUrl,
+  });
+}
+
+export async function handleBillingWebhookEvent(signature: string | undefined, payload: unknown) {
+  const provider = getBillingProvider();
+  return provider.handleWebhookEvent({ signature, payload });
+}
+
+export async function syncBillingSubscription(
+  userId: string,
+  externalCustomerId?: string,
+  externalSubscriptionId?: string
+) {
+  const provider = getBillingProvider();
+  return provider.syncSubscription({
+    userId,
+    externalCustomerId,
+    externalSubscriptionId,
+  });
+}

@@ -25,6 +25,10 @@
 | `OPENAI_API_KEY` | ➖ | Required for AI TaskGen to call OpenAI. When missing the runner records `OPENAI_MISCONFIGURED` and skips task creation. |
 | `OPENAI_MODEL` | ➖ | Optional override for the OpenAI Responses API model used by TaskGen (defaults to `gpt-4.1-mini`). |
 | `TASKGEN_OPENAI_TIMEOUT` | ➖ | Timeout in milliseconds for the OpenAI request (defaults to `45000`). |
+| `BILLING_PROVIDER` | ➖ | Billing backend selector. Supported values: `mock` (default) or `stripe` (reserved, currently returns `501` until Stripe integration is enabled). |
+| `STRIPE_SECRET_KEY` | ➖ | Stripe secret API key placeholder for future provider activation (`sk_test_...`). |
+| `STRIPE_WEBHOOK_SECRET` | ➖ | Stripe webhook signing secret placeholder (`whsec_...`) for `POST /api/webhooks/stripe`. |
+| `STRIPE_PUBLISHABLE_KEY` | ➖ | Optional publishable key placeholder for client checkout handoff (`pk_test_...`). |
 
 ## Database migrations
 
@@ -398,3 +402,14 @@ curl -i \
 # HTTP/1.1 403 Forbidden
 # {"code":"forbidden","message":"You do not have access to this resource"}
 ```
+
+
+## Billing provider abstraction
+
+The billing module now resolves a provider through `BILLING_PROVIDER`:
+
+- `mock` (default): enables controlled mock responses for:
+  - `POST /api/billing/checkout-session`
+  - `POST /api/billing/portal-session`
+  - `POST /api/webhooks/stripe`
+- `stripe`: reserved for real Stripe integration; these endpoints currently return `501 billing_provider_not_ready` until the provider is activated.
