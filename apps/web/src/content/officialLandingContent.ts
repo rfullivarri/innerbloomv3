@@ -3,7 +3,7 @@ export type Language = 'es' | 'en';
 type NavLink = { href: string; label: string };
 type Pillar = { emoji: string; title: string; copy: string };
 type Mode = { id: 'low' | 'chill' | 'flow' | 'evolve'; title: string; state: string; goal: string };
-type HowStep = { title: string; copy: string };
+type HowStep = { title: string; action: string; outcome: string; copy: string };
 type Testimonial = { quote: string; author: string };
 type Faq = { question: string; answer: string };
 type AuthCopy = {
@@ -24,7 +24,7 @@ export type LandingCopy = {
   };
   pillars: { title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { title: string; intro: string; items: Mode[] };
-  how: { title: string; intro: string; steps: HowStep[] };
+  how: { title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
   testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
   faq: { title: string; items: Faq[] };
   next: { title: string; intro: string };
@@ -98,24 +98,40 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     how: {
-      title: 'Cómo funciona',
-      intro: 'Un flujo claro para empezar y sostener tu Journey.',
+      title: 'Cómo funciona Innerbloom',
+      intro: 'Un sistema guiado para pasar de ‘quiero estar mejor’ a hábitos reales en tu día a día.',
+      actionLabel: 'Acción',
+      outcomeLabel: 'Resultado',
       steps: [
         {
-          title: 'Inicia con claridad',
-          copy: 'Respondes preguntas y la IA sugiere primeras tareas; tú editas todo desde el inicio.'
+          title: 'Comienzas con un diagnóstico breve',
+          action: 'Respondes unas preguntas sobre energía, prioridades y momento actual (2–3 min).',
+          outcome: 'Un punto de partida claro + tu primer plan personalizado.',
+          copy: 'Respondes unas preguntas sobre energía, prioridades y momento actual (2–3 min). Un punto de partida claro + tu primer plan personalizado.'
         },
         {
-          title: 'Base por pilares',
-          copy: 'Organizas tareas diarias en Cuerpo, Mente y Alma para sostener equilibrio real cada día.'
+          title: 'Recibes un plan en 3 pilares',
+          action: 'Revisas tareas sugeridas en Cuerpo, Mente y Alma.',
+          outcome: 'Una rutina equilibrada, concreta y fácil de sostener.',
+          copy: 'Revisas tareas sugeridas en Cuerpo, Mente y Alma. Una rutina equilibrada, concreta y fácil de sostener.'
         },
         {
-          title: 'Elige modo y avatar',
-          copy: 'Seleccionas tu modo actual y usas su avatar correspondiente para acompañar tu proceso diario.'
+          title: 'Lo adaptas a tu realidad',
+          action: 'Editas, cambias o descartas tareas; eliges modo y avatar según cómo estés hoy.',
+          outcome: 'Un plan realmente tuyo (la IA propone, tú decides).',
+          copy: 'Editas, cambias o descartas tareas; eliges modo y avatar según cómo estés hoy. Un plan realmente tuyo (la IA propone, tú decides).'
         },
         {
-          title: 'Registra tu emoción',
-          copy: 'Cada día registras cómo te sientes y tu avatar lo refleja en tu experiencia.'
+          title: 'Lo aplicas en pocos minutos al día',
+          action: 'Completas microacciones diarias (3–5 min) con enfoque simple y realista.',
+          outcome: 'Constancia sin saturarte y progreso visible semana a semana.',
+          copy: 'Completas microacciones diarias (3–5 min) con enfoque simple y realista. Constancia sin saturarte y progreso visible semana a semana.'
+        },
+        {
+          title: 'Registras cómo te sientes y recalibras',
+          action: 'Registras tu emoción y estado diario en segundos.',
+          outcome: 'Recomendaciones ajustadas a tu momento + continuidad del proceso.',
+          copy: 'Registras tu emoción y estado diario en segundos. Recomendaciones ajustadas a tu momento + continuidad del proceso.'
         }
       ]
     },
@@ -223,24 +239,40 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     how: {
-      title: 'How it works',
-      intro: 'A clear flow to start and sustain your Journey.',
+      title: 'How Innerbloom works',
+      intro: 'A guided system to turn ‘I want to feel better’ into real habits in your day-to-day.',
+      actionLabel: 'Action',
+      outcomeLabel: 'Outcome',
       steps: [
         {
-          title: 'Start with clarity',
-          copy: 'You answer questions and AI suggests first tasks; everything stays editable from day one.'
+          title: 'Start with a brief check-in',
+          action: 'Answer a few questions about your energy, priorities, and current phase (2–3 min).',
+          outcome: 'A clear starting point + your first personalized plan.',
+          copy: 'Answer a few questions about your energy, priorities, and current phase (2–3 min). A clear starting point + your first personalized plan.'
         },
         {
-          title: 'Pillars shape your base',
-          copy: 'You organize daily tasks across Body, Mind, and Soul to sustain practical balance every day.'
+          title: 'Get a 3-pillar plan',
+          action: 'Review suggested tasks across Body, Mind, and Soul.',
+          outcome: 'A balanced routine that’s concrete and easy to sustain.',
+          copy: 'Review suggested tasks across Body, Mind, and Soul. A balanced routine that’s concrete and easy to sustain.'
         },
         {
-          title: 'Choose mode and avatar',
-          copy: 'You select your current mode and use its avatar to support your daily process.'
+          title: 'Make it yours',
+          action: 'Edit, swap, or drop tasks; choose a mode and avatar based on how you feel today.',
+          outcome: 'A plan that’s truly yours (AI suggests, you decide).',
+          copy: 'Edit, swap, or drop tasks; choose a mode and avatar based on how you feel today. A plan that’s truly yours (AI suggests, you decide).'
         },
         {
-          title: 'Log daily emotion',
-          copy: 'Each day you log how you feel, and your avatar reflects it in your experience.'
+          title: 'Apply it in minutes',
+          action: 'Complete small daily actions (3–5 min) with a simple, realistic focus.',
+          outcome: 'Consistency without overload and visible progress week by week.',
+          copy: 'Complete small daily actions (3–5 min) with a simple, realistic focus. Consistency without overload and visible progress week by week.'
+        },
+        {
+          title: 'Log & recalibrate',
+          action: 'Log your emotion and daily state in seconds.',
+          outcome: 'Guidance that adapts to your moment + continuity over time.',
+          copy: 'Log your emotion and daily state in seconds. Guidance that adapts to your moment + continuity over time.'
         }
       ]
     },
