@@ -13,6 +13,7 @@ import AdminRoute from './routes/admin';
 import { DevBanner } from './components/layout/DevBanner';
 import { DEV_USER_SWITCH_ACTIVE, setApiAuthTokenProvider } from './lib/api';
 import OnboardingIntroPage from './pages/OnboardingIntro';
+import PricingPage from './pages/Pricing';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
@@ -162,6 +163,14 @@ export default function App() {
             element={<DashboardAliasRedirect from={alias} to={trimmedDashboardPath} />}
           />
         ))}
+        <Route
+          path="/pricing"
+          element={
+            <RequireUser>
+              <PricingPage />
+            </RequireUser>
+          }
+        />
         <Route
           path="/editor"
           element={
