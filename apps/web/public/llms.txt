@@ -1,0 +1,6 @@
+# Innerbloom official AI/LLM discovery
+# Canonical public AI docs
+- https://innerbloomjourney.org/ai
+- https://innerbloomjourney.org/ai.json
+- https://innerbloomjourney.org/
+- https://innerbloomjourney.org/sitemap.xml
