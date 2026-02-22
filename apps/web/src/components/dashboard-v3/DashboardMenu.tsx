@@ -1,6 +1,7 @@
 import { useAuth, useClerk, useUser } from '@clerk/clerk-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   forwardRef,
   type MouseEvent,
@@ -42,6 +43,7 @@ const DashboardMenuTrigger = forwardRef<HTMLButtonElement, { onClick: () => void
 );
 
 export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
+  const navigate = useNavigate();
   const { user } = useUser();
   const { openUserProfile } = useClerk();
   const { signOut } = useAuth();
@@ -102,6 +104,16 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
     handleClose();
     await signOut({ redirectUrl: '/' });
   }, [signOut, handleClose]);
+
+  const handleGoToSubscription = useCallback(() => {
+    handleClose();
+    navigate('/subscription');
+  }, [handleClose, navigate]);
+
+  const handleGoToPricing = useCallback(() => {
+    handleClose();
+    navigate('/pricing');
+  }, [handleClose, navigate]);
 
   const handleOverlayClick = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
@@ -218,6 +230,28 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                     >
                       Abrir recordatorio diario
                     </button>
+                  </section>
+                  <section className="rounded-3xl border border-sky-400/20 bg-sky-400/5 p-4">
+                    <p className="text-[0.65rem] uppercase tracking-[0.3em] text-sky-200">Planes</p>
+                    <p className="mt-1 text-sm text-sky-50/80">
+                      Revisá tu suscripción actual y compará opciones disponibles.
+                    </p>
+                    <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                      <button
+                        type="button"
+                        onClick={handleGoToSubscription}
+                        className="rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 transition hover:border-white/40 hover:bg-white/20"
+                      >
+                        Suscripción
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleGoToPricing}
+                        className="rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 transition hover:border-white/40 hover:bg-white/20"
+                      >
+                        Pricing
+                      </button>
+                    </div>
                   </section>
                 </div>
                 <button
