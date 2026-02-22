@@ -141,6 +141,21 @@ describe.each(privateRoutes)('GET /api/users/:id%s', ({ path, key }) => {
     mockQuery.mockReset();
     mockVerifyToken.mockReset();
 
+    mockQuery.mockImplementation(async (queryText: string) => {
+      if (queryText.includes('FROM user_subscriptions')) {
+        return {
+          rows: [
+            {
+              status: 'active',
+              grace_ends_at: null,
+            },
+          ],
+        };
+      }
+
+      return { rows: [] };
+    });
+
     for (const handler of handlerSpies.values()) {
       handler.mockClear();
     }
@@ -164,6 +179,38 @@ describe.each(privateRoutes)('GET /api/users/:id%s', ({ path, key }) => {
     const handler = handlerSpies.get(key);
     expect(handler).toBeDefined();
     expect(handler!).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 402 when subscription is inactive', async () => {
+    mockVerifyToken.mockResolvedValue({
+      id: userId,
+      clerkId: 'user_123',
+      email: 'user@example.com',
+      isNew: false,
+    });
+
+    mockQuery.mockImplementationOnce(async () => ({
+      rows: [
+        {
+          status: 'canceled',
+          grace_ends_at: null,
+        },
+      ],
+    }));
+
+    const response = await request(app)
+      .get(`/api/users/${userId}${path}`)
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(402);
+    expect(response.body).toEqual({
+      code: 'subscription_inactive',
+      message: 'Active subscription required',
+    });
+
+    const handler = handlerSpies.get(key);
+    expect(handler).toBeDefined();
+    expect(handler!).not.toHaveBeenCalled();
   });
 
   it('returns 403 when the token belongs to a different user', async () => {

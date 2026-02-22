@@ -19,6 +19,7 @@ import { deleteUserTask } from '../controllers/tasks/delete-user-task.js';
 import { asyncHandler } from '../lib/async-handler.js';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
 import { ownUserGuard } from '../middlewares/own-user-guard.js';
+import { requireActiveSubscription } from '../middlewares/require-active-subscription.js';
 
 import { getUserStreakPanel } from './users/streak-panel.js';
 import { getUserDailyEnergy } from './users/daily-energy.js';
@@ -52,7 +53,7 @@ userScopedRoutes.get('/weekly-wrapped/previous', asyncHandler(getUserWeeklyWrapp
 userScopedRoutes.use('/missions/v2', missionsV2Router);
 
 router.get('/users/me', authMiddleware, asyncHandler(getCurrentUser));
-router.use('/users/:id', authMiddleware, ownUserGuard, userScopedRoutes);
+router.use('/users/:id', authMiddleware, ownUserGuard, requireActiveSubscription, userScopedRoutes);
 
 export default router;
 export type { GetUserSummaryTodayResponse } from './users/summary-today.js';

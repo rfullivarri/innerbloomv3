@@ -5,6 +5,7 @@ import { asyncHandler } from '../lib/async-handler.js';
 import { HttpError, isHttpError } from '../lib/http-error.js';
 import { parseWithValidation } from '../lib/validation.js';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
+import { requireActiveSubscription } from '../middlewares/require-active-subscription.js';
 import {
   getDailyQuestDefinition,
   getDailyQuestStatus,
@@ -54,6 +55,7 @@ const submitBodySchema = z.object({
 router.get(
   '/daily-quest/status',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -72,6 +74,7 @@ router.get(
 router.get(
   '/daily-quest/definition',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -90,6 +93,7 @@ router.get(
 router.post(
   '/daily-quest/submit',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
