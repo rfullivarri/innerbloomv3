@@ -5,6 +5,8 @@ import {
   getBillingSubscription,
   postBillingCancel,
   postBillingChangePlan,
+  postBillingCheckoutSession,
+  postBillingPortalSession,
   postBillingReactivate,
   postBillingSubscribe,
 } from './billing.handlers.js';
@@ -17,5 +19,7 @@ router.post('/billing/subscribe', authMiddleware, postBillingSubscribe);
 router.post('/billing/change-plan', authMiddleware, postBillingChangePlan);
 router.post('/billing/cancel', authMiddleware, postBillingCancel);
 router.post('/billing/reactivate', authMiddleware, postBillingReactivate);
+router.post('/billing/checkout-session', authMiddleware, postBillingCheckoutSession);
+router.post('/billing/portal-session', authMiddleware, postBillingPortalSession);
 
 export default router;

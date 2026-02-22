@@ -11,6 +11,7 @@ import debugDbSnapshot from './routes/debug-db-snapshot.js';
 import debugAiTaskgen from './routes/debug/ai-taskgen.js';
 import { HttpError, isHttpError } from './lib/http-error.js';
 import clerkWebhookRouter from './webhooks/clerk.js';
+import stripeWebhookRouter from './webhooks/stripe.js';
 import { runWithDbContext } from './db.js';
 
 const defaultAllowedOrigins = [
@@ -75,6 +76,7 @@ if (apiLoggingEnabled) {
   console.info('[boot] mounting Clerk webhook router before JSON parser');
 }
 app.use('/api', clerkWebhookRouter);
+app.use('/api', stripeWebhookRouter);
 if (apiLoggingEnabled) {
   console.info('[boot] registering express.json() after Clerk webhook router');
 }
