@@ -77,4 +77,16 @@ describe('requireActiveSubscription', () => {
       expect(error.code).toBe('subscription_inactive');
     }
   });
+
+  it('allows requests when subscription tables are not migrated yet', async () => {
+    mockQuery.mockRejectedValue({ code: '42P01', message: 'relation "user_subscriptions" does not exist' });
+
+    const req = mockReq({ user: { id: '11111111-2222-3333-4444-555555555555' } }) as Request;
+    const res = mockRes() as Response;
+    const next = mockNext();
+
+    await requireActiveSubscription(req, res, next);
+
+    expect(next).toHaveBeenCalledWith();
+  });
 });
