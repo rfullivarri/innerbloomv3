@@ -27,7 +27,8 @@ function buildApp() {
   app.use(express.json());
   app.use('/api', billingRoutes);
 
-  app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((error: unknown, _req: Request, res: Response, next: NextFunction) => {
+    void next;
     if (error instanceof z.ZodError) {
       return res.status(400).json({ code: 'invalid_request' });
     }
