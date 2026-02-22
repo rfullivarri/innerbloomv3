@@ -80,8 +80,8 @@ const buttonVariants = {
 const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => buttonVariants[variant];
 
 const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
-  es: 'Ejemplos:',
-  en: 'Examples:'
+  es: 'Tareas sugeridas:',
+  en: 'Suggested tasks:'
 };
 
 function splitPillarCopy(copy: string, language: Language) {
@@ -338,8 +338,9 @@ export default function LandingPage() {
 
         <section className="why section-pad reveal-on-scroll" id="why">
           <div className="container narrow">
-            <h2>{copy.pillars.title}</h2>
-            <p className="section-sub">{copy.pillars.intro}</p>
+            <h2 className="pillars-title">{copy.pillars.title}</h2>
+            <p className="section-sub pillars-intro">{copy.pillars.intro}</p>
+            <div className="pillars-constellation" aria-hidden />
             <div className="cards grid-3">
               {copy.pillars.items.map((pillar, index) => {
                 const { definition, examples } = splitPillarCopy(pillar.copy, language);
@@ -349,8 +350,9 @@ export default function LandingPage() {
                     key={pillar.title}
                     style={{ '--delay': `${index * 90}ms` } as CSSProperties}
                   >
-                    <h3>
-                      {pillar.emoji} {pillar.title}
+                    <h3 className="pillar-heading">
+                      <span className="pillar-emoji" aria-hidden>{pillar.emoji}</span>
+                      <span>{pillar.title}</span>
                     </h3>
                     <p className="pillar-definition">{definition}</p>
                     {examples.length > 0 ? (
