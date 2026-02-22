@@ -386,17 +386,19 @@
 }
 
 .landing .section-sub.highlight {
-  margin: 24px auto 0;
-  padding: 10px 18px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(120deg, rgba(24, 38, 64, 0.65), rgba(22, 33, 58, 0.35));
-  box-shadow: 0 12px 30px rgba(10, 16, 34, 0.35);
+  margin: 28px auto 0;
+  max-width: min(100%, 920px);
+  padding: 14px 28px;
+  border-radius: 20px;
+  border: 1px solid rgba(191, 219, 254, 0.25);
+  color: rgba(240, 248, 255, 0.95);
+  background: linear-gradient(120deg, rgba(24, 38, 64, 0.8), rgba(22, 33, 58, 0.52));
+  box-shadow: 0 16px 34px rgba(10, 16, 34, 0.42);
 }
 
 .landing .cards {
   display: grid;
-  gap: 16px;
+  gap: clamp(20px, 2.2vw, 30px);
 }
 
 .landing .grid-3 {
@@ -425,6 +427,49 @@
 .landing .card p {
   margin: 0;
   color: #dbe7ff;
+}
+
+.landing .pillar-card {
+  padding: 22px;
+}
+
+.landing .pillar-definition {
+  max-width: 28ch;
+  font-size: clamp(1.08rem, 0.4vw + 1rem, 1.32rem);
+  line-height: 1.45;
+  color: rgba(228, 238, 255, 0.96);
+}
+
+.landing .pillar-examples {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.landing .pillar-examples-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(190, 210, 240, 0.72);
+}
+
+.landing .pillar-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.landing .pillar-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(191, 219, 254, 0.28);
+  background: rgba(19, 30, 52, 0.78);
+  color: rgba(225, 239, 255, 0.92);
+  font-size: 0.86rem;
+  line-height: 1.2;
 }
 
 .landing .card-emoji {

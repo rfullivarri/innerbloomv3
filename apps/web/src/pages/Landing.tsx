@@ -79,6 +79,19 @@ const buttonVariants = {
 
 const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => buttonVariants[variant];
 
+const PILLAR_EXAMPLES_LABEL = 'Ejemplos:';
+
+function splitPillarCopy(copy: string) {
+  const [definitionPart, examplesPart] = copy.split(PILLAR_EXAMPLES_LABEL);
+  const definition = definitionPart?.trim() ?? copy;
+  const examples = (examplesPart ?? '')
+    .split('•')
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return { definition, examples };
+}
+
 function LanguageDropdown({ value, onChange }: { value: Language; onChange: (language: Language) => void }) {
   const options: { code: Language; label: string }[] = [
     { code: 'en', label: 'EN' },
@@ -324,20 +337,34 @@ export default function LandingPage() {
             <h2>{copy.pillars.title}</h2>
             <p className="section-sub">{copy.pillars.intro}</p>
             <div className="cards grid-3">
-              {copy.pillars.items.map((pillar, index) => (
-                <article
-                  className="card fade-item"
-                  key={pillar.title}
-                  style={{ '--delay': `${index * 90}ms` } as CSSProperties}
-                >
-                  <h3>
-                    {pillar.emoji} {pillar.title}
-                  </h3>
-                  <p>{pillar.copy}</p>
-                </article>
-              ))}
+              {copy.pillars.items.map((pillar, index) => {
+                const { definition, examples } = splitPillarCopy(pillar.copy);
+                return (
+                  <article
+                    className="card pillar-card fade-item"
+                    key={pillar.title}
+                    style={{ '--delay': `${index * 90}ms` } as CSSProperties}
+                  >
+                    <h3>
+                      {pillar.emoji} {pillar.title}
+                    </h3>
+                    <p className="pillar-definition">{definition}</p>
+                    {examples.length > 0 ? (
+                      <div className="pillar-examples" aria-label="Ejemplos">
+                        <span className="pillar-examples-label">{PILLAR_EXAMPLES_LABEL}</span>
+                        <div className="pillar-chips" role="list">
+                          {examples.map((example) => (
+                            <span key={example} className="pillar-chip" role="listitem">
+                              {example}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })}
             </div>
-            <p className="section-sub">{copy.pillars.highlightLeadIn}</p>
             <p className="section-sub highlight">{copy.pillars.highlight}</p>
           </div>
         </section>
