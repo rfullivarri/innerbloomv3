@@ -22,7 +22,7 @@ export type LandingCopy = {
     note: string;
     alt: string;
   };
-  pillars: { title: string; intro: string; highlight: string; items: Pillar[] };
+  pillars: { title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { title: string; intro: string; items: Mode[] };
   how: { title: string; intro: string; steps: HowStep[] };
   testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
@@ -46,23 +46,24 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     pillars: {
       title: 'Nuestros pilares fundamentales',
       intro:
-        'El progreso sostenible necesita equilibrio. 🫀 Cuerpo para tu energía diaria, 🧠 Mente para foco y claridad, y 🏵️ Alma para bienestar emocional y sentido. Cuando un pilar baja, los otros lo sostienen.',
+        'Tres pilares para avanzar en equilibrio: energía física, claridad mental y estabilidad emocional.',
+      highlightLeadIn: 'Mírate con perspectiva y elegí tu próximo paso.',
       highlight: 'Obsérvate por primera vez en tercera persona y toma el control de tus acciones y hábitos.',
       items: [
         {
           emoji: '🫀',
           title: 'Cuerpo',
-          copy: 'Tu cuerpo es la base de tus hábitos: descanso, nutrición y movimiento sostienen tu energía para cumplir tus tareas diarias.'
+          copy: 'Recupera energía diaria con hábitos físicos simples y sostenibles. Ejemplos: • Caminar 20 minutos • Dormir 7 horas'
         },
         {
           emoji: '🧠',
           title: 'Mente',
-          copy: 'La mente ordena lo importante. Con foco y calma, te resulta más simple decidir, sostener acciones y avanzar en lo que importa.'
+          copy: 'Entrena atención y enfoque para decidir mejor y sostener lo importante. Ejemplos: • Leer 10 páginas • Planificar 3 prioridades'
         },
         {
           emoji: '🏵️',
           title: 'Alma',
-          copy: 'El alma integra emociones, vínculos y propósito. Ese equilibrio interno te ayuda a sostener hábitos con más presencia y menos fricción.'
+          copy: 'Conecta con tus emociones y propósito para actuar con más calma. Ejemplos: • Respirar 5 minutos • Escribir 3 gratitudes'
         }
       ]
     },
@@ -167,23 +168,24 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     pillars: {
       title: 'Our core pillars',
       intro:
-        'Sustainable progress needs balance. 🫀 Body for daily energy, 🧠 Mind for focus and clarity, and 🏵️ Soul for emotional well-being and meaning. When one pillar drops, the other two support it.',
+        'Three pillars to grow in balance: physical energy, mental clarity, emotional steadiness.',
+      highlightLeadIn: 'Pause, zoom out, and choose your next move.',
       highlight: 'See yourself in third person for the first time and take control of your actions and habits.',
       items: [
         {
           emoji: '🫀',
           title: 'Body',
-          copy: 'Your body is the base of your habits: rest, nutrition and movement sustain your energy for daily tasks.'
+          copy: 'Build steady daily energy through simple, sustainable physical habits. Examples: • Walk 20 minutes • Sleep 7 hours'
         },
         {
           emoji: '🧠',
           title: 'Mind',
-          copy: 'Your mind organizes what matters. With focus and calm, it is easier to decide, stay consistent and move forward.'
+          copy: 'Train focus and attention to decide better and stay consistent. Examples: • Read 10 pages • Plan 3 priorities'
         },
         {
           emoji: '🏵️',
           title: 'Soul',
-          copy: 'Soul integrates emotions, relationships and purpose. That inner balance helps your habits stay present with less friction.'
+          copy: 'Reconnect with emotions and purpose to act with more calm. Examples: • Breathe 5 minutes • Write 3 gratitudes'
         }
       ]
     },
