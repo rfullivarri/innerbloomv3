@@ -337,6 +337,7 @@ export default function LandingPage() {
                 </article>
               ))}
             </div>
+            <p className="section-sub">{copy.pillars.highlightLeadIn}</p>
             <p className="section-sub highlight">{copy.pillars.highlight}</p>
           </div>
         </section>
