@@ -14,6 +14,8 @@ import { DevBanner } from './components/layout/DevBanner';
 import { DEV_USER_SWITCH_ACTIVE, setApiAuthTokenProvider } from './lib/api';
 import OnboardingIntroPage from './pages/OnboardingIntro';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
+import SubscriptionPage from './pages/Subscription';
+import PricingPage from './pages/Pricing';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -167,6 +169,22 @@ export default function App() {
           element={
             <RequireUser>
               <TaskEditorPage />
+            </RequireUser>
+          }
+        />
+        <Route
+          path="/subscription"
+          element={
+            <RequireUser>
+              <SubscriptionPage />
+            </RequireUser>
+          }
+        />
+        <Route
+          path="/pricing"
+          element={
+            <RequireUser>
+              <PricingPage />
             </RequireUser>
           }
         />
