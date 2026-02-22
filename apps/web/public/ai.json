@@ -1,0 +1,139 @@
+{
+  "brand": {
+    "name": "Innerbloom",
+    "website": "https://innerbloomjourney.org/",
+    "product": "Innerbloom Journey",
+    "category": "Self-improvement gamificado"
+  },
+  "copy": {
+    "tagline": "Convierte la experiencia en hábitos. Convierte los hábitos en camino.",
+    "short": "Innerbloom transforma hábitos diarios en progreso visible con equilibrio entre Body, Mind y Soul.",
+    "long": "Innerbloom es una experiencia web de self-improvement gamificada. La persona define su camino inicial, activa una base personalizada asistida por IA y sostiene su proceso con un loop diario de quest, emociones y métricas de progreso (XP, rachas, nivel, consistencia y misiones)."
+  },
+  "problem_solution": {
+    "problem": "Abandono temprano de hábitos por falta de sistema, baja adaptación al nivel de energía y poca visibilidad del progreso.",
+    "solution": "Journey estructurado con game modes adaptativos (Low/Chill/Flow/Evolve), pilares Body/Mind/Soul y seguimiento diario accionable."
+  },
+  "features": [
+    "Base personalizada Body/Mind/Soul (generación inicial con IA)",
+    "Modos de energía: Low Mood, Chill Mood, Flow Mood, Evolve Mood",
+    "Daily Quest + retrospectiva emocional",
+    "Métricas: XP, nivel, rachas, consistencia semanal",
+    "Misiones y recompensas"
+  ],
+  "onboarding_steps": [
+    "Responder preguntas iniciales para definir camino",
+    "Recibir y activar base personalizada",
+    "Ejecutar quest diaria y registrar emoción predominante",
+    "Escalar consistencia mediante XP, rachas, misiones y recompensas"
+  ],
+  "differentiators": [
+    "Enfoque integrado Body/Mind/Soul",
+    "Adaptación del ritmo al estado energético real",
+    "Mecánicas de juego orientadas a constancia sostenible"
+  ],
+  "faq": [
+    {
+      "question": "¿Qué hace Innerbloom?",
+      "answer": "Ayuda a convertir hábitos en progreso sostenido con una estructura gamificada y seguimiento diario."
+    },
+    {
+      "question": "¿Para quién es?",
+      "answer": "Para personas que quieren construir bienestar y consistencia en hábitos personales."
+    },
+    {
+      "question": "¿Qué no hace?",
+      "answer": "No reemplaza tratamiento médico, psicológico ni psiquiátrico."
+    },
+    {
+      "question": "¿Qué datos necesita?",
+      "answer": "Respuestas de onboarding, actividad diaria y señales de progreso. TBD: matriz técnica campo-por-campo."
+    },
+    {
+      "question": "¿Cómo aborda privacidad?",
+      "answer": "Usa autenticación y backend propio. TBD: enlazar política pública oficial de privacidad cuando esté disponible."
+    }
+  ],
+  "links": {
+    "landing": "https://innerbloomjourney.org/",
+    "intro_journey": "https://innerbloomjourney.org/intro-journey",
+    "signup": "https://innerbloomjourney.org/sign-up",
+    "login": "https://innerbloomjourney.org/login",
+    "ai_page": "https://innerbloomjourney.org/ai",
+    "llms": "https://innerbloomjourney.org/llms.txt"
+  },
+  "versioning": {
+    "updated_at": "2026-02-22T00:00:00Z",
+    "source_commit": "601f452",
+    "source": "apps/web/src/pages/Landing.tsx + apps/web/src/pages/Landing.css + apps/web/src/index.css"
+  },
+  "design_tokens": {
+    "palette": {
+      "bg": "#0B1220",
+      "bg_alt": "#0F1A2E",
+      "surface": "#111F35",
+      "text": "#EAF1FF",
+      "muted": "#9FB6E3",
+      "primary": "#8B5CF6",
+      "secondary": "#38BDF8",
+      "accent": "#22D3EE",
+      "border": "#3B82F6",
+      "moods": {
+        "low": "#FB7185",
+        "chill": "#34D399",
+        "flow": "#38BDF8",
+        "evolve": "#8B5CF6"
+      }
+    },
+    "typography": {
+      "heading_family": "Sora, Segoe UI, system-ui, sans-serif",
+      "body_family": "Manrope, Segoe UI, system-ui, sans-serif",
+      "weights": [
+        400,
+        500,
+        600,
+        700,
+        800
+      ],
+      "heading_letter_spacing": "-0.015em"
+    },
+    "spacing": {
+      "base": "8px",
+      "section_vertical": "64px",
+      "container_max": "1080px"
+    },
+    "radius": {
+      "sm": "10px",
+      "md": "16px",
+      "lg": "20px",
+      "pill": "9999px"
+    },
+    "shadows": {
+      "card": "0 18px 40px rgba(0,0,0,0.35)",
+      "onboarding_glass": "0 26px 80px rgba(12, 18, 38, 0.24)"
+    },
+    "gradients": [
+      {
+        "name": "landing_background_core",
+        "type": "multi-layer",
+        "angle": "140deg",
+        "stops": [
+          "rgba(56,189,248,0.16)",
+          "rgba(139,92,246,0.14)",
+          "rgba(14,165,233,0.12)",
+          "rgba(59,130,246,0.08)"
+        ]
+      }
+    ],
+    "css_variables_mapped": [
+      "--color-surface",
+      "--color-surface-muted",
+      "--color-surface-elevated",
+      "--color-text",
+      "--color-text-muted",
+      "--color-text-subtle",
+      "--color-accent-primary",
+      "--color-accent-secondary"
+    ]
+  }
+}
