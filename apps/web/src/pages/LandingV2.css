@@ -954,9 +954,9 @@
 
 /* Selector de modos: deck desktop con card central y miniaturas laterales. */
 .lv2-modes-carousel-section {
-  min-height: auto;
+  min-height: 100svh;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .lv2-modes-selector-shell {
@@ -1012,9 +1012,9 @@
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 14px;
-  width: min(100%, min(48vw, 560px), calc(58vh * 4 / 5));
-  aspect-ratio: 4 / 5;
-  max-height: 58vh;
+  width: min(100%, min(52vw, 620px), calc(70vh * 9 / 16));
+  aspect-ratio: 9 / 16;
+  max-height: 70vh;
   overflow: hidden;
   cursor: pointer;
   transition: transform 220ms ease, box-shadow 220ms ease, opacity 220ms ease;
@@ -1051,7 +1051,7 @@
   width: 100%;
   height: auto;
   min-height: 0;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 9 / 16;
   max-height: 100%;
   border-radius: 12px;
   object-fit: cover;
@@ -1799,8 +1799,7 @@
   }
 
   .lv2-mode-card {
-    width: min(100%, min(60vw, 520px), calc(56vh * 4 / 5));
-    max-height: 56vh;
+    width: min(100%, min(60vw, 560px), calc(70vh * 9 / 16));
   }
 }
 
@@ -1863,10 +1862,10 @@
 
   .lv2-mode-mobile-slide {
     /* En mobile la card ocupa casi todo el ancho útil sin provocar overflow horizontal. */
-    flex: 0 0 min(92vw, 360px);
-    min-width: min(92vw, 360px);
-    width: min(92vw, 360px);
-    max-height: min(68svh, 620px);
+    flex: 0 0 min(94vw, 430px);
+    min-width: min(94vw, 430px);
+    width: min(94vw, 430px);
+    max-height: min(84svh, 860px);
     scroll-snap-align: center;
   }
 
@@ -1878,8 +1877,8 @@
   }
 
   .lv2-mode-card {
-    width: min(100%, 360px, calc(66svh * 4 / 5));
-    max-height: 66svh;
+    width: min(100%, 430px, calc(70svh * 9 / 16));
+    max-height: 70svh;
   }
 
   .lv2-mode-media {
