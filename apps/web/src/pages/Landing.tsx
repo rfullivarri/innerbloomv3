@@ -165,6 +165,7 @@ export default function LandingPage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
   const [activeModeIndex, setActiveModeIndex] = useState(0);
+  const [activeHowStep, setActiveHowStep] = useState(0);
 
   const testimonialCount = copy.testimonials.items.length;
   const modeCount = copy.modes.items.length;
@@ -451,20 +452,39 @@ export default function LandingPage() {
           <div className="container narrow">
             <h2>{copy.how.title}</h2>
             <p className="section-sub">{copy.how.intro}</p>
-            <ol className="steps">
-              {copy.how.steps.map((step, index) => (
-                <li
-                  className="fade-item"
-                  key={step.title}
-                  style={{ '--delay': `${index * 80}ms` } as CSSProperties}
-                >
-                  <span className="step-badge">{index + 1}</span>
-                  <div>
-                    <h3>{step.title}</h3>
-                    <p>{step.copy}</p>
-                  </div>
-                </li>
-              ))}
+            <ol className="how-timeline">
+              {copy.how.steps.map((step, index) => {
+                const isActive = activeHowStep === index;
+
+                return (
+                  <li
+                    className="fade-item timeline-step"
+                    key={step.title}
+                    style={{ '--delay': `${index * 80}ms` } as CSSProperties}
+                  >
+                    <div className="timeline-rail" aria-hidden>
+                      <span className={`timeline-node ${isActive ? 'is-active' : ''}`}>{index + 1}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={`timeline-card ${isActive ? 'is-active' : ''}`}
+                      aria-current={isActive ? 'step' : undefined}
+                      onClick={() => setActiveHowStep(index)}
+                      onFocus={() => setActiveHowStep(index)}
+                    >
+                      <h3>{step.title}</h3>
+                      <div className="timeline-micro">
+                        <p className="timeline-label">{copy.how.actionLabel}</p>
+                        <p className="timeline-copy">{step.action}</p>
+                      </div>
+                      <div className="timeline-micro">
+                        <p className="timeline-label">{copy.how.outcomeLabel}</p>
+                        <p className="timeline-copy">{step.outcome}</p>
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
             </ol>
           </div>
         </section>
