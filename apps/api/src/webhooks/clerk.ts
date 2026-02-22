@@ -8,9 +8,15 @@ import {
   type WebhookRequiredHeaders,
 } from 'svix';
 import { pool } from '../db.js';
+import { createRateLimitMiddleware } from '../middlewares/rate-limit.js';
 
 const router = express.Router();
 const rawJson = express.raw({ type: 'application/json' });
+const webhookRateLimit = createRateLimitMiddleware({
+  keyPrefix: 'clerk-webhook',
+  windowMs: 60_000,
+  maxRequests: 120,
+});
 
 const UPSERT_USER_SQL = `
 INSERT INTO users (clerk_user_id, email, first_name, last_name, image_url, timezone, channel_scheduler, deleted_at)
@@ -114,7 +120,7 @@ const buildFullName = (first?: string | null, last?: string | null): string | nu
   return parts.length ? parts.join(' ') : null;
 };
 
-router.post('/webhooks/clerk', rawJson, async (req: Request, res: Response): Promise<Response> => {
+router.post('/webhooks/clerk', webhookRateLimit, rawJson, async (req: Request, res: Response): Promise<Response> => {
   const secret = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!secret) {
