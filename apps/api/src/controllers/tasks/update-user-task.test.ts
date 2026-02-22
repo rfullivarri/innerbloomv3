@@ -27,6 +27,9 @@ vi.mock('../../services/auth-service.js', () => ({
   createAuthService: vi.fn(),
   resetAuthServiceCache: vi.fn(),
 }));
+vi.mock('../../middlewares/require-active-subscription.js', () => ({
+  requireActiveSubscription: (_req: unknown, _res: unknown, next: (error?: unknown) => void) => next(),
+}));
 
 import app from '../../app.js';
 
