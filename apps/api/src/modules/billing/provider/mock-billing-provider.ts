@@ -31,6 +31,7 @@ export class MockBillingProvider implements BillingProvider {
   }
 
   async handleWebhookEvent(_input: HandleWebhookEventInput) {
+    void _input;
     return {
       provider: 'mock' as const,
       received: true,
@@ -39,6 +40,7 @@ export class MockBillingProvider implements BillingProvider {
   }
 
   async syncSubscription(_input: SyncSubscriptionInput) {
+    void _input;
     return {
       provider: 'mock' as const,
       synced: true,
