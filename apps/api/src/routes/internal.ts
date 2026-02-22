@@ -2,11 +2,19 @@ import { Router } from 'express';
 import { asyncHandler } from '../lib/async-handler.js';
 import { runDailyReminderJob } from '../services/dailyReminderJob.js';
 import { runWeeklyWrappedJob } from '../services/weeklyWrappedService.js';
+import { createRateLimitMiddleware } from '../middlewares/rate-limit.js';
 
 const router = Router();
 
+const cronRateLimit = createRateLimitMiddleware({
+  keyPrefix: 'internal-cron',
+  windowMs: 60_000,
+  maxRequests: 10,
+});
+
 router.post(
   '/internal/cron/daily-reminders',
+  cronRateLimit,
   asyncHandler(async (req, res) => {
     const expectedSecret = process.env.CRON_SECRET?.trim();
 
@@ -30,6 +38,7 @@ router.post(
 
 router.post(
   '/internal/cron/weekly-wrapped',
+  cronRateLimit,
   asyncHandler(async (req, res) => {
     const expectedSecret = process.env.CRON_SECRET?.trim();
 

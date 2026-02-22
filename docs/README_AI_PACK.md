@@ -40,3 +40,36 @@ Fuente: `apps/web/src/content/aiBuild.ts`.
 - `curl -i http://localhost:4173/ai.json`
 - `curl -i http://localhost:4173/llms.txt`
 - `curl -s http://localhost:4173/sitemap.xml`
+
+## Política legal/clean (sin cloaking)
+- `/ai` y `/ai.json` son canales públicos oficiales y se sirven como archivos estáticos accesibles sin JavaScript y sin autenticación.
+- No hay lógica por `User-Agent` para cambiar el contenido de `/` (home) ni del AI Pack.
+- El contenido del AI Pack deriva de la misma fuente oficial que la landing (`officialLandingContent.ts`), por lo que no se está mostrando un mensaje distinto para bots.
+
+## Hardening implementado
+- `robots.txt` ahora permite explícitamente: `/ai`, `/ai.json`, `/llms.txt`.
+- Se configuraron headers de cache y descubrimiento para AI Pack vía `serve.json`:
+  - `Cache-Control` para `/ai`, `/ai.json`, `/llms.txt`.
+  - `Content-Type: application/json; charset=utf-8` para `/ai.json`.
+  - `X-Robots-Tag: all` para `/ai` y `/ai.json`.
+- Se agregaron rate limits razonables en endpoints sensibles de API:
+  - `/webhooks/clerk`: 120 req/min por IP.
+  - `/internal/cron/*`: 10 req/min por IP.
+
+## Recomendaciones WAF/CDN (infra)
+Estas reglas deben aplicarse en CDN/WAF (Cloudflare/Railway edge o equivalente):
+1. **Bypass/allowlist AI Pack**: no aplicar challenge JS ni bloqueo por reputación a `GET /ai`, `GET /ai.json`, `GET /llms.txt`.
+2. **Rate limits por zona**:
+   - Público HTML/estáticos: umbrales altos (ej. 120-300 req/min/IP).
+   - Endpoints sensibles (`/api`, `/webhooks`, `/internal`): umbrales bajos + burst control.
+3. **Sin UA-based content switching**: prohibir reglas que reescriban `/` según `User-Agent`.
+4. **SEO-safe bot handling**: permitir bots legítimos en AI Pack y mantener 200 estable para esos endpoints.
+
+## Checklist de verificación
+- [ ] `GET /robots.txt` incluye `Allow: /ai`, `Allow: /ai.json`, `Allow: /llms.txt`.
+- [ ] `GET /ai` responde `200` y es legible sin ejecutar JS.
+- [ ] `GET /ai.json` responde `200` con `Content-Type: application/json`.
+- [ ] `GET /ai` y `GET /ai.json` incluyen `Cache-Control`.
+- [ ] `GET /` no cambia contenido por `User-Agent` (comparar dos UAs distintos).
+- [ ] Endpoint sensible devuelve `429` al superar límite (prueba controlada).
+- [ ] `sitemap.xml` y `llms.txt` apuntan al AI Pack público.

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /ai
+Allow: /ai/
+Allow: /ai.json
+Allow: /llms.txt
+Disallow: /_debug/
+Disallow: /api/
+
+Sitemap: https://innerbloomjourney.org/sitemap.xml
