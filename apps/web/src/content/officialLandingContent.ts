@@ -102,17 +102,20 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       intro: 'Un flujo claro para empezar y sostener tu Journey.',
       steps: [
         {
-          title: 'Define tu camino',
-          copy: 'Respondé algunas preguntas, elegí tu modo de juego y recibí sugerencias iniciales para tu base Body/Mind/Soul. Todo es editable.'
-        },
-        { title: 'Activa tu base', copy: 'Recibís tu “pergamino digital” por mail y editás/confirmás tu base.' },
-        {
-          title: 'Tareas diarias + emociones',
-          copy: 'Cada día registrás tu emoción y completás tus tareas diarias. Tu avatar refleja cómo te sentís: cuidás a tu avatar cuidándote.'
+          title: 'Inicia con claridad',
+          copy: 'Respondes preguntas y la IA sugiere primeras tareas; tú editas todo desde el inicio.'
         },
         {
-          title: 'Ajusta y continúa',
-          copy: 'Tu sistema evoluciona con vos: editás tu base, ajustás tus tareas y mantenés el rumbo según tu momento real.'
+          title: 'Base por pilares',
+          copy: 'Organizas tareas diarias en Cuerpo, Mente y Alma para sostener equilibrio real cada día.'
+        },
+        {
+          title: 'Elige modo y avatar',
+          copy: 'Seleccionas tu modo actual y usas su avatar correspondiente para acompañar tu proceso diario.'
+        },
+        {
+          title: 'Registra tu emoción',
+          copy: 'Cada día registras cómo te sientes y tu avatar lo refleja en tu experiencia.'
         }
       ]
     },
@@ -224,17 +227,20 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       intro: 'A clear flow to start and sustain your Journey.',
       steps: [
         {
-          title: 'Define your path',
-          copy: 'Answer a few questions, choose your game mode, and receive initial suggestions for your Body/Mind/Soul base. Everything is editable.'
-        },
-        { title: 'Activate your base', copy: 'You receive your “digital scroll” by email and edit/confirm your base.' },
-        {
-          title: 'Daily tasks + emotions',
-          copy: 'Each day you log your emotion and complete your daily tasks. Your avatar reflects your state: you care for your avatar by caring for yourself.'
+          title: 'Start with clarity',
+          copy: 'You answer questions and AI suggests first tasks; everything stays editable from day one.'
         },
         {
-          title: 'Adjust and continue',
-          copy: 'Your system evolves with you: edit your base, adjust your tasks, and keep moving with your real-life rhythm.'
+          title: 'Pillars shape your base',
+          copy: 'You organize daily tasks across Body, Mind, and Soul to sustain practical balance every day.'
+        },
+        {
+          title: 'Choose mode and avatar',
+          copy: 'You select your current mode and use its avatar to support your daily process.'
+        },
+        {
+          title: 'Log daily emotion',
+          copy: 'Each day you log how you feel, and your avatar reflects it in your experience.'
         }
       ]
     },
