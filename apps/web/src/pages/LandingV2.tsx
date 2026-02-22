@@ -353,6 +353,10 @@ const t = {
   }
 } as const;
 
+const MODES_AUTOPLAY_BASE_DELAY_MS = 4500;
+const MODES_AUTOPLAY_DESKTOP_DELAY_MS = MODES_AUTOPLAY_BASE_DELAY_MS * 2;
+const MODES_AUTOPLAY_MOBILE_DELAY_MS = 10000;
+
 type EmotionName = 'Calma' | 'Felicidad' | 'Motivación' | 'Tristeza' | 'Ansiedad' | 'Frustración' | 'Cansancio' | 'Sin registro';
 
 type EmotionPreviewColumn = {
@@ -1047,6 +1051,10 @@ export default function LandingV2Page() {
     if (!section || modeCount < 2) return;
 
     const hasHover = window.matchMedia('(hover: hover)').matches;
+    const mobileViewportQuery = window.matchMedia('(max-width: 768px)');
+
+    const getModesAutoplayDelay = () =>
+      mobileViewportQuery.matches ? MODES_AUTOPLAY_MOBILE_DELAY_MS : MODES_AUTOPLAY_DESKTOP_DELAY_MS;
 
     const canAutoplay = () => !isModesHoveredRef.current && !isModesInteractionPausedRef.current;
 
@@ -1059,7 +1067,7 @@ export default function LandingV2Page() {
           scrollMobileModeIntoView(next);
           return next;
         });
-      }, 4500);
+      }, getModesAutoplayDelay());
     };
 
     const stopModesAutoplay = () => {
@@ -1086,6 +1094,7 @@ export default function LandingV2Page() {
     section.addEventListener('mouseleave', onSectionLeave);
     section.addEventListener('pointerdown', onManualInteraction, { passive: true });
     section.addEventListener('keydown', onManualInteraction);
+    mobileViewportQuery.addEventListener('change', stopModesAutoplay);
 
     startModesAutoplay();
 
@@ -1098,6 +1107,7 @@ export default function LandingV2Page() {
       section.removeEventListener('mouseleave', onSectionLeave);
       section.removeEventListener('pointerdown', onManualInteraction);
       section.removeEventListener('keydown', onManualInteraction);
+      mobileViewportQuery.removeEventListener('change', stopModesAutoplay);
       window.clearInterval(resumeWatcher);
       clearModesAutoplayInterval();
       clearModesAutoplayResumeTimeout();
@@ -1269,7 +1279,7 @@ export default function LandingV2Page() {
 
         <section className="lv2-section lv2-modes-carousel-section" id="modes">
           <div className="lv2-container" id="game-modes-section" ref={gameModesSectionRef}>
-            <div className="lv2-section-head">
+            <div className="lv2-section-head lv2-modes-head">
               <p className="lv2-kicker">Adaptive</p>
               <h2>{copy.modes.title}</h2>
               <p className="lv2-sub">{copy.modes.description}</p>
