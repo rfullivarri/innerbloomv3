@@ -79,10 +79,14 @@ const buttonVariants = {
 
 const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => buttonVariants[variant];
 
-const PILLAR_EXAMPLES_LABEL = 'Ejemplos:';
+const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
+  es: 'Ejemplos:',
+  en: 'Examples:'
+};
 
-function splitPillarCopy(copy: string) {
-  const [definitionPart, examplesPart] = copy.split(PILLAR_EXAMPLES_LABEL);
+function splitPillarCopy(copy: string, language: Language) {
+  const examplesLabel = PILLAR_EXAMPLES_LABEL[language];
+  const [definitionPart, examplesPart] = copy.split(examplesLabel);
   const definition = definitionPart?.trim() ?? copy;
   const examples = (examplesPart ?? '')
     .split('•')
@@ -338,7 +342,7 @@ export default function LandingPage() {
             <p className="section-sub">{copy.pillars.intro}</p>
             <div className="cards grid-3">
               {copy.pillars.items.map((pillar, index) => {
-                const { definition, examples } = splitPillarCopy(pillar.copy);
+                const { definition, examples } = splitPillarCopy(pillar.copy, language);
                 return (
                   <article
                     className="card pillar-card fade-item"
@@ -350,8 +354,8 @@ export default function LandingPage() {
                     </h3>
                     <p className="pillar-definition">{definition}</p>
                     {examples.length > 0 ? (
-                      <div className="pillar-examples" aria-label="Ejemplos">
-                        <span className="pillar-examples-label">{PILLAR_EXAMPLES_LABEL}</span>
+                      <div className="pillar-examples" aria-label={PILLAR_EXAMPLES_LABEL[language]}>
+                        <span className="pillar-examples-label">{PILLAR_EXAMPLES_LABEL[language]}</span>
                         <div className="pillar-chips" role="list">
                           {examples.map((example) => (
                             <span key={example} className="pillar-chip" role="listitem">
