@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { FeatureShowcaseSection } from '../components/landing/FeatureShowcaseSection';
 import { OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
@@ -158,6 +158,7 @@ function LanguageDropdown({ value, onChange }: { value: Language; onChange: (lan
 
 export default function LandingPage() {
   const { userId } = useAuth();
+  const navigate = useNavigate();
   const isSignedIn = Boolean(userId);
   const [language, setLanguage] = useState<Language>('es');
   const copy = OFFICIAL_LANDING_CONTENT[language];
@@ -251,6 +252,15 @@ export default function LandingPage() {
 
   const selectMode = (index: number) => {
     setActiveModeIndex((index + modeCount) % modeCount);
+  };
+
+  const handlePricingCta = () => {
+    if (isSignedIn) {
+      navigate('/pricing');
+      return;
+    }
+
+    navigate('/sign-up');
   };
 
   return (
@@ -554,6 +564,36 @@ export default function LandingPage() {
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="pricing section-pad reveal-on-scroll" id="pricing">
+          <div className="container">
+            <h2>{copy.pricing.title}</h2>
+            <p className="section-sub">{copy.pricing.intro}</p>
+            <p className="pricing-tax-note">{copy.pricing.taxNote}</p>
+            <div className="pricing-grid">
+              {copy.pricing.plans.map((plan, index) => (
+                <article
+                  className="card pricing-card fade-item"
+                  key={plan.id}
+                  style={{ '--delay': `${index * 90}ms` } as CSSProperties}
+                >
+                  <p className="pricing-plan-name">{plan.name}</p>
+                  <p className="pricing-plan-price">{plan.price}</p>
+                  <p className="pricing-plan-detail">{plan.detail}</p>
+                  {isSignedIn ? (
+                    <button type="button" className={buttonClasses()} onClick={handlePricingCta}>
+                      {copy.pricing.actionLabel}
+                    </button>
+                  ) : (
+                    <Link className={buttonClasses()} to="/sign-up">
+                      {copy.pricing.actionLabel}
+                    </Link>
+                  )}
+                </article>
+              ))}
             </div>
           </div>
         </section>
