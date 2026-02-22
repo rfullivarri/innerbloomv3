@@ -10,6 +10,10 @@ vi.mock('../services/dailyReminderJob.js', () => ({
   runDailyReminderJob: (...args: unknown[]) => mockRunJob(...args),
 }));
 
+vi.mock('../services/subscriptionNotificationsJob.js', () => ({
+  runSubscriptionNotificationsJob: (...args: unknown[]) => mockRunJob(...args),
+}));
+
 describe('internal cron routes', () => {
   let app: express.Express;
   const originalSecret = process.env.CRON_SECRET;

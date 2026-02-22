@@ -16,6 +16,7 @@ import {
   reminderSendBodySchema,
   feedbackDefinitionUpdateSchema,
   feedbackUserNotificationUpdateSchema,
+  subscriptionNotificationsTriggerBodySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -36,6 +37,7 @@ import {
   getFeedbackUserState,
   getFeedbackUserHistory,
   updateFeedbackUserNotificationState,
+  triggerSubscriptionNotificationsJob,
 } from './admin.service.js';
 import {
   getTaskgenEventsByCorrelation,
@@ -145,6 +147,14 @@ export const postAdminSendReminder = asyncHandler(async (req: Request, res: Resp
 export const postAdminSendTasksReady = asyncHandler(async (req: Request, res: Response) => {
   const { userId } = userIdParamSchema.parse(req.params);
   const result = await sendTasksReadyPreview(userId);
+  res.json(result);
+});
+
+
+export const postAdminRunSubscriptionNotifications = asyncHandler(async (req: Request, res: Response) => {
+  const body = subscriptionNotificationsTriggerBodySchema.parse(req.body ?? {});
+  const runAt = body.runAt ? new Date(body.runAt) : new Date();
+  const result = await triggerSubscriptionNotificationsJob(runAt);
   res.json(result);
 });
 

@@ -8,6 +8,7 @@ import { findReminderContextForUser } from '../../repositories/user-daily-remind
 import { buildReminderEmail, loadReminderTemplate, resolveRecipient } from '../../services/dailyReminderJob.js';
 import { getEmailProvider } from '../../services/email/index.js';
 import { sendTasksReadyEmailPreview } from '../../services/tasksReadyEmailService.js';
+import { runSubscriptionNotificationsJob } from '../../services/subscriptionNotificationsJob.js';
 import {
   listFeedbackDefinitionRows,
   updateFeedbackDefinitionRow,
@@ -1507,6 +1508,14 @@ export async function sendDailyReminderPreview(
   await provider.sendEmail({ ...message, to: recipient });
 
   return { ok: true, reminder_id: reminder.user_daily_reminder_id, recipient, sent_at: now.toISOString() };
+}
+
+
+export async function triggerSubscriptionNotificationsJob(
+  runAt: Date = new Date(),
+): Promise<{ ok: true; attempted: number; sent: number; skipped: number; deduplicated: number; errors: { userSubscriptionId: string; reason: string }[] }> {
+  const result = await runSubscriptionNotificationsJob(runAt);
+  return { ok: true, ...result };
 }
 
 export async function retryTaskgenJob(jobId: string): Promise<{ ok: true }> {

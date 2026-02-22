@@ -123,6 +123,11 @@ export const reminderSendBodySchema = z.object({
   channel: z.literal('email').optional().default('email'),
 });
 
+
+export const subscriptionNotificationsTriggerBodySchema = z.object({
+  runAt: z.string().datetime().optional(),
+});
+
 const feedbackStatusSchema = z.enum(['active', 'paused', 'draft', 'deprecated']);
 
 const feedbackCtaSchema = z
@@ -184,5 +189,6 @@ export type TaskgenForceRunBody = z.infer<typeof taskgenForceRunBodySchema>;
 export type TaskgenTraceQuery = z.infer<typeof taskgenTraceQuerySchema>;
 export type TaskgenTraceGlobalQuery = z.infer<typeof taskgenTraceGlobalQuerySchema>;
 export type ReminderSendBody = z.infer<typeof reminderSendBodySchema>;
+export type SubscriptionNotificationsTriggerBody = z.infer<typeof subscriptionNotificationsTriggerBodySchema>;
 export type FeedbackDefinitionUpdateInput = z.infer<typeof feedbackDefinitionUpdateSchema>;
 export type FeedbackUserNotificationUpdateInput = z.infer<typeof feedbackUserNotificationUpdateSchema>;
