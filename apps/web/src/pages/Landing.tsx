@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import { FeatureShowcaseSection } from '../components/landing/FeatureShowcaseSection';
 import { OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
 import { usePageMeta } from '../lib/seo';
@@ -498,8 +497,6 @@ export default function LandingPage() {
             </ol>
           </div>
         </section>
-
-        <FeatureShowcaseSection language={language} />
 
         <section className="testimonials section-pad reveal-on-scroll" id="testimonials">
           <div className="container">
