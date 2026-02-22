@@ -19,6 +19,7 @@ import {
   retryTaskgenJobHandler,
   postAdminSendReminder,
   postAdminSendTasksReady,
+  postAdminRunSubscriptionNotifications,
   getAdminFeedbackDefinitions,
   patchAdminFeedbackDefinition,
   getAdminFeedbackUserHistory,
@@ -44,6 +45,7 @@ adminRouter.patch('/users/:userId/tasks/:taskId', patchAdminUserTask);
 adminRouter.get('/users/:userId/logs.csv', exportAdminUserLogsCsv);
 adminRouter.post('/users/:userId/daily-reminder/send', postAdminSendReminder);
 adminRouter.post('/users/:userId/tasks-ready/send', postAdminSendTasksReady);
+adminRouter.post('/subscription-notifications/run', postAdminRunSubscriptionNotifications);
 adminRouter.get('/taskgen/trace', getTaskgenTraceForUser);
 adminRouter.get('/taskgen/trace/by-correlation/:id', getTaskgenTraceByCorrelation);
 adminRouter.get('/taskgen/trace/global', getTaskgenTraceGlobal);

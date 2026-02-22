@@ -5,7 +5,7 @@ import { clearTaskgenEvents, recordTaskgenEvent } from '../../services/taskgenTr
 
 type QueryRow = { is_admin: boolean | null };
 
-const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail } = vi.hoisted(() => ({
+const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail, mockRunSubscriptionJob } = vi.hoisted(() => ({
   mockQuery: vi.fn<(sql: string, params?: unknown[]) => Promise<{ rows: QueryRow[] }>>(),
   authMiddlewareMock: (req: Request, _res: Response, next: NextFunction) => {
     (req as Request & {
@@ -25,6 +25,7 @@ const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail } = vi.hoisted
   },
   mockTrigger: vi.fn(() => 'corr-force'),
   mockSendEmail: vi.fn(() => Promise.resolve()),
+  mockRunSubscriptionJob: vi.fn(async () => ({ attempted: 2, sent: 2, skipped: 0, deduplicated: 0, errors: [] })),
 }));
 
 vi.mock('../../db.js', () => ({
@@ -46,6 +47,10 @@ vi.mock('../../services/email/index.js', () => ({
   }),
 }));
 
+vi.mock('../../services/subscriptionNotificationsJob.js', () => ({
+  runSubscriptionNotificationsJob: (...args: unknown[]) => mockRunSubscriptionJob(...args),
+}));
+
 import app from '../../app.js';
 
 describe('Admin routes', () => {
@@ -53,6 +58,7 @@ describe('Admin routes', () => {
     mockQuery.mockClear();
     mockTrigger.mockClear();
     mockSendEmail.mockClear();
+    mockRunSubscriptionJob.mockClear();
     mockTrigger.mockReturnValue('corr-force');
     clearTaskgenEvents();
     mockQuery.mockImplementation(async (sql: string) => {
@@ -468,6 +474,18 @@ describe('Admin routes', () => {
       recipient: 'admin@example.com',
     });
     expect(mockSendEmail).toHaveBeenCalledWith(expect.objectContaining({ to: 'admin@example.com' }));
+  });
+
+
+  it('runs subscription notifications job from admin endpoint', async () => {
+    const response = await request(app)
+      .post('/api/admin/subscription-notifications/run')
+      .set('Authorization', 'Bearer token')
+      .send({ runAt: '2026-03-01T10:00:00Z' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ ok: true, attempted: 2, sent: 2, skipped: 0, deduplicated: 0, errors: [] });
+    expect(mockRunSubscriptionJob).toHaveBeenCalledTimes(1);
   });
 
   it('returns feedback definitions with real metrics', async () => {
