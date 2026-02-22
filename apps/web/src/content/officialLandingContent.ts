@@ -53,17 +53,17 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
         {
           emoji: '🫀',
           title: 'Cuerpo',
-          copy: 'Recupera energía diaria con hábitos físicos simples y sostenibles. Ejemplos: • Caminar 20 minutos • Dormir 7 horas'
+          copy: 'Recupera energía diaria con hábitos físicos simples y sostenibles. Tareas sugeridas: • Caminar 20 minutos • Dormir 7 horas'
         },
         {
           emoji: '🧠',
           title: 'Mente',
-          copy: 'Entrena atención y enfoque para decidir mejor y sostener lo importante. Ejemplos: • Leer 10 páginas • Planificar 3 prioridades'
+          copy: 'Entrena atención y enfoque para decidir mejor y sostener lo importante. Tareas sugeridas: • Leer 10 páginas • Planificar 3 prioridades'
         },
         {
           emoji: '🏵️',
           title: 'Alma',
-          copy: 'Conecta con tus emociones y propósito para actuar con más calma. Ejemplos: • Respirar 5 minutos • Escribir 3 gratitudes'
+          copy: 'Conecta con tus emociones y propósito para actuar con más calma. Tareas sugeridas: • Respirar 5 minutos • Escribir 3 gratitudes'
         }
       ]
     },
@@ -173,22 +173,22 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       intro:
         'Three pillars to grow in balance: physical energy, mental clarity, emotional steadiness.',
       highlightLeadIn: 'Pause, zoom out, and choose your next move.',
-      highlight: 'See yourself in third person for the first time and take control of your actions and habits.',
+      highlight: 'Observe yourself in third person for the first time and take control of your actions and habits.',
       items: [
         {
           emoji: '🫀',
           title: 'Body',
-          copy: 'Build steady daily energy through simple, sustainable physical habits. Examples: • Walk 20 minutes • Sleep 7 hours'
+          copy: 'Build steady daily energy through simple, sustainable physical habits. Suggested tasks: • Walk 20 minutes • Sleep 7 hours'
         },
         {
           emoji: '🧠',
           title: 'Mind',
-          copy: 'Train focus and attention to decide better and stay consistent. Examples: • Read 10 pages • Plan 3 priorities'
+          copy: 'Train focus and attention to decide better and stay consistent. Suggested tasks: • Read 10 pages • Plan 3 priorities'
         },
         {
           emoji: '🏵️',
           title: 'Soul',
-          copy: 'Reconnect with emotions and purpose to act with more calm. Examples: • Breathe 5 minutes • Write 3 gratitudes'
+          copy: 'Reconnect with emotions and purpose to act with more calm. Suggested tasks: • Breathe 5 minutes • Write 3 gratitudes'
         }
       ]
     },
