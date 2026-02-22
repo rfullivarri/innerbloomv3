@@ -7,6 +7,68 @@ import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLand
 import { usePageMeta } from '../lib/seo';
 import './Landing.css';
 
+type ModeVisual = {
+  avatarVideo: string;
+  avatarImage: string;
+  avatarAlt: string;
+  avatarLabel: string;
+};
+
+const MODE_VISUALS: Record<Language, Record<'low' | 'chill' | 'flow' | 'evolve', ModeVisual>> = {
+  en: {
+    low: {
+      avatarVideo: '/avatars/low-basic.mp4',
+      avatarImage: '/LowMood.jpg',
+      avatarAlt: 'Low mode avatar with a resting facial expression.',
+      avatarLabel: 'Aligned with your energy'
+    },
+    chill: {
+      avatarVideo: '/avatars/chill-basic.mp4',
+      avatarImage: '/Chill-Mood.jpg',
+      avatarAlt: 'Chill mode avatar with a calm expression.',
+      avatarLabel: 'Aligned with your energy'
+    },
+    flow: {
+      avatarVideo: '/avatars/flow-basic.mp4',
+      avatarImage: '/FlowMood.jpg',
+      avatarAlt: 'Flow mode avatar in action with a focused expression.',
+      avatarLabel: 'Aligned with your energy'
+    },
+    evolve: {
+      avatarVideo: '/avatars/evolve-basic.mp4',
+      avatarImage: '/Evolve-Mood.jpg',
+      avatarAlt: 'Evolve mode avatar with a determined expression.',
+      avatarLabel: 'Aligned with your energy'
+    }
+  },
+  es: {
+    low: {
+      avatarVideo: '/avatars/low-basic.mp4',
+      avatarImage: '/LowMood.jpg',
+      avatarAlt: 'Avatar del modo Low con expresión de descanso.',
+      avatarLabel: 'Alineado a tu energía'
+    },
+    chill: {
+      avatarVideo: '/avatars/chill-basic.mp4',
+      avatarImage: '/Chill-Mood.jpg',
+      avatarAlt: 'Avatar del modo Chill con expresión de calma.',
+      avatarLabel: 'Alineado a tu energía'
+    },
+    flow: {
+      avatarVideo: '/avatars/flow-basic.mp4',
+      avatarImage: '/FlowMood.jpg',
+      avatarAlt: 'Avatar del modo Flow en movimiento y enfocado.',
+      avatarLabel: 'Alineado a tu energía'
+    },
+    evolve: {
+      avatarVideo: '/avatars/evolve-basic.mp4',
+      avatarImage: '/Evolve-Mood.jpg',
+      avatarAlt: 'Avatar del modo Evolve con expresión determinada.',
+      avatarLabel: 'Alineado a tu energía'
+    }
+  }
+};
+
 const buttonBaseClasses =
   'inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-3 font-display text-sm font-semibold tracking-tight transition duration-150 ease-out active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
 
@@ -85,8 +147,14 @@ export default function LandingPage() {
   const landingStyle = OFFICIAL_LANDING_CSS_VARIABLES as CSSProperties;
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [activeModeIndex, setActiveModeIndex] = useState(0);
 
   const testimonialCount = copy.testimonials.items.length;
+  const modeCount = copy.modes.items.length;
+  const activeMode = copy.modes.items[activeModeIndex] ?? copy.modes.items[0];
+  const prevModeIndex = (activeModeIndex - 1 + modeCount) % modeCount;
+  const nextModeIndex = (activeModeIndex + 1) % modeCount;
+  const activeVisual = MODE_VISUALS[language][activeMode.id];
 
   usePageMeta({
     title: 'Innerbloom',
@@ -161,6 +229,10 @@ export default function LandingPage() {
       event.preventDefault();
       goToSlide(activeSlide + 1);
     }
+  };
+
+  const selectMode = (index: number) => {
+    setActiveModeIndex((index + modeCount) % modeCount);
   };
 
   return (
@@ -273,23 +345,69 @@ export default function LandingPage() {
           <div className="container">
             <h2>{copy.modes.title}</h2>
             <p className="section-sub">{copy.modes.intro}</p>
-            <div className="cards grid-2">
-              {copy.modes.items.map((mode, index) => (
-                <article
-                  className={`card mode ${mode.id} fade-item`}
-                  key={mode.id}
-                  style={{ '--delay': `${index * 90}ms` } as CSSProperties}
-                >
-                  <div className="mode-title">
-                    {mode.title} <span className="dot" aria-hidden="true" />
-                  </div>
+            <div className="modes-carousel" aria-live="polite">
+              <button type="button" className="mode-mini mode-mini-left" onClick={() => selectMode(prevModeIndex)}>
+                <img src={MODE_VISUALS[language][copy.modes.items[prevModeIndex].id].avatarImage} alt="" aria-hidden />
+                <span>{copy.modes.items[prevModeIndex].title}</span>
+              </button>
+
+              <article className={`card mode mode-main mode-${activeMode.id} fade-item`}>
+                <header className="mode-header">
+                  <div className="mode-title">{activeMode.title}</div>
                   <p className="muted">
-                    <strong>{language === 'es' ? 'Estado:' : 'State:'}</strong> {mode.state}
+                    <strong>{language === 'es' ? 'Estado:' : 'State:'}</strong> {activeMode.state}
                   </p>
                   <p>
-                    <strong>{language === 'es' ? 'Objetivo:' : 'Goal:'}</strong> {mode.goal}
+                    <strong>{language === 'es' ? 'Objetivo:' : 'Goal:'}</strong> {activeMode.goal}
                   </p>
-                </article>
+                </header>
+                <figure className="mode-media">
+                  <video
+                    className="mode-video"
+                    src={activeVisual.avatarVideo}
+                    poster={activeVisual.avatarImage}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    aria-label={activeVisual.avatarAlt}
+                  />
+                  <figcaption className="mode-media-caption">{activeVisual.avatarLabel}</figcaption>
+                </figure>
+              </article>
+
+              <button type="button" className="mode-mini mode-mini-right" onClick={() => selectMode(nextModeIndex)}>
+                <img src={MODE_VISUALS[language][copy.modes.items[nextModeIndex].id].avatarImage} alt="" aria-hidden />
+                <span>{copy.modes.items[nextModeIndex].title}</span>
+              </button>
+            </div>
+
+            <div className="mode-thumbs" role="tablist" aria-label={language === 'es' ? 'Elegir modo' : 'Choose mode'}>
+              {copy.modes.items.map((mode, index) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={index === activeModeIndex}
+                  className={`mode-thumb ${index === activeModeIndex ? 'is-active' : ''}`}
+                  onClick={() => selectMode(index)}
+                >
+                  {mode.title}
+                </button>
+              ))}
+            </div>
+
+            <div className="modes-dots" role="tablist" aria-label={language === 'es' ? 'Modo activo' : 'Active mode'}>
+              {copy.modes.items.map((mode, index) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={index === activeModeIndex}
+                  aria-label={`${mode.title} (${index + 1}/${modeCount})`}
+                  className={`modes-dot ${index === activeModeIndex ? 'is-active' : ''}`}
+                  onClick={() => selectMode(index)}
+                />
               ))}
             </div>
           </div>
