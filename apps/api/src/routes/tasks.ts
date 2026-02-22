@@ -5,6 +5,7 @@ import { HttpError } from '../lib/http-error.js';
 import { pool } from '../db.js';
 import { parseWithValidation, uuidSchema } from '../lib/validation.js';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
+import { requireActiveSubscription } from '../middlewares/require-active-subscription.js';
 
 const router = Router();
 
@@ -186,6 +187,7 @@ function computeStreaks(hits: boolean[]): { current: number; best: number } {
 router.get(
   '/tasks/:taskId/insights',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const { taskId } = parseWithValidation(insightsParamsSchema, req.params);
     const { mode: rawMode, weeklyGoal: weeklyGoalParam } = parseWithValidation(insightsQuerySchema, req.query);

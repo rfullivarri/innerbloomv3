@@ -5,6 +5,7 @@ import { asyncHandler } from '../lib/async-handler.js';
 import { HttpError } from '../lib/http-error.js';
 import { parseWithValidation } from '../lib/validation.js';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
+import { requireActiveSubscription } from '../middlewares/require-active-subscription.js';
 import {
   getMissionBoard,
   claimMissionReward,
@@ -80,6 +81,7 @@ function normalizeError(error: unknown, message: string, status = 400): never {
 router.get(
   '/missions/board',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -100,6 +102,7 @@ router.get(
 router.get(
   '/missions/market',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -118,6 +121,7 @@ router.get(
 router.post(
   '/missions/select',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -139,6 +143,7 @@ router.post(
 router.post(
   '/missions/reroll',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -160,6 +165,7 @@ router.post(
 router.post(
   '/missions/link-daily',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -185,6 +191,7 @@ router.post(
 router.post(
   '/boss/phase2',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -209,6 +216,7 @@ router.post(
 router.post(
   '/missions/heartbeat',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -240,6 +248,7 @@ router.post(
 router.post(
   '/missions/:id/claim',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -287,6 +296,7 @@ router.post(
 router.post(
   '/missions/activate',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -306,6 +316,7 @@ router.post(
 router.post(
   '/missions/abandon',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -325,6 +336,7 @@ router.post(
 router.post(
   '/missions/auto/weekly',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
@@ -340,6 +352,7 @@ router.post(
 router.post(
   '/missions/auto/boss',
   authMiddleware,
+  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     const user = req.user;
 
