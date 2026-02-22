@@ -73,10 +73,10 @@ const t = {
     hero: {
       title: 'Turn experience into habits. Turn habits into your path.',
       subtitle:
-        'Your habits are the map. Consistency is the level you reach. A gamified self-improvement journey balanced between Body, Mind and Soul.',
+        'Your habits chart the path; your consistency shapes how far you go. A personal growth journey balanced across Body, Mind, and Soul.',
       cta: 'Start my Journey',
       secondary: 'See the dashboard',
-      supporting: 'In under 3 minutes we generate your AI base so you can play with real data.'
+      supporting: 'In under 3 minutes, we create your personalized starting point with guidance tailored to you.'
     },
     highlights: {
       title: 'See the real dashboard',
@@ -216,10 +216,10 @@ const t = {
     hero: {
       title: 'Convierte la experiencia en hábitos. Convierte los hábitos en camino.',
       subtitle:
-        'Tus hábitos son el mapa. Tu constancia, el nivel que alcanzas. Es tu self-improvement journey con equilibrio entre 🫀 Cuerpo, 🧠 Mente y 🏵️ Alma.',
+        'Tus hábitos marcan la ruta; tu constancia define hasta dónde llegas. Un viaje de crecimiento personal en equilibrio entre 🫀 Cuerpo, 🧠 Mente y 🏵️ Alma.',
       cta: 'Comenzar mi Journey',
       secondary: 'Ver el dashboard',
-      supporting: 'En menos de 3 minutos generamos tu base con IA y la conectamos al juego.'
+      supporting: 'En menos de 3 minutos creamos tu punto de partida personalizado, con una orientación inicial hecha para ti.'
     },
     highlights: {
       title: 'Muestra del producto real',
