@@ -2,11 +2,23 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import { configDefaults } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+import { generateAiArtifacts } from './src/content/aiBuild';
 
 const useMockClerk = process.env.MOCK_CLERK === 'true';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'generate-ai-artifacts',
+      buildStart() {
+        generateAiArtifacts();
+      },
+      configureServer() {
+        generateAiArtifacts();
+      }
+    }
+  ],
   resolve: {
     alias: {
       config: fileURLToPath(new URL('./src/config', import.meta.url)),
