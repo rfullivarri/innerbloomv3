@@ -149,7 +149,8 @@ export function changeUserPlan(userId: string, input: ChangePlanBody) {
   return buildSubscriptionResponse(record);
 }
 
-export function cancelUserSubscription(userId: string, _input: CancelBody) {
+export function cancelUserSubscription(userId: string, input: CancelBody) {
+  void input;
   const now = new Date().toISOString();
   const record = saveBillingSubscription(userId, {
     status: 'CANCELED',
