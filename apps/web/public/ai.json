@@ -1,77 +1,201 @@
 {
+  "schema_version": "ai_dossier_v2",
   "brand": {
     "name": "Innerbloom",
-    "website": "https://innerbloomjourney.org/",
+    "website": "https://innerbloom.org",
     "product": "Innerbloom Journey",
     "category": "Self-improvement gamificado"
   },
   "source_of_truth": {
     "sourceModule": "apps/web/src/content/officialLandingContent.ts",
     "sections": [
-      "tagline",
       "hero",
-      "value_proposition",
       "pillars",
       "modes",
-      "how_it_works",
+      "how",
       "faq",
-      "ctas"
+      "testimonials",
+      "auth"
+    ],
+    "policy": "Este AI Dossier se mantiene fiel a la landing oficial. No inventa features ni claims no presentes en la landing."
+  },
+  "positioning": {
+    "one_liner": "Innerbloom convierte hábitos diarios en un journey gamificado de progreso visible con equilibrio entre Cuerpo, Mente y Alma.",
+    "one_paragraph": "Innerbloom Journey es una experiencia de self-improvement donde cada persona define su camino inicial, recibe una base personalizada con IA en menos de 3 minutos y sostiene el avance con un loop diario: retrospectiva emocional, quest diaria y métricas de progreso (XP, nivel, rachas, consistencia, misiones y recompensas). El producto se adapta a la energía real del momento para facilitar constancia sin culpa.",
+    "five_bullets": [
+      "IA para activar rápido una base personalizada Body/Mind/Soul.",
+      "4 modos (Low, Chill, Flow, Evolve) para ajustar el sistema a tu energía actual.",
+      "Loop diario de Daily Quest + emociones para transformar reflexión en acción.",
+      "Dashboard con métricas de progreso visibles: XP, nivel, rachas y mapa emocional.",
+      "Enfoque de equilibrio integral para sostener hábitos semanas y meses, no solo días."
     ]
   },
-  "copy": {
-    "tagline": "Convierte la experiencia en hábitos. Convierte los hábitos en camino.",
-    "short": "Innerbloom transforma hábitos diarios en progreso visible con equilibrio entre Body, Mind y Soul.",
-    "long": "Innerbloom es una experiencia web de self-improvement gamificada. La persona define su camino inicial, activa una base personalizada asistida por IA y sostiene su proceso con un loop diario de quest, emociones y métricas de progreso (XP, rachas, nivel, consistencia y misiones).",
-    "hero": {
-      "titleLead": "Convierte la experiencia en hábitos.",
-      "titleHighlight": "Convierte los hábitos en camino",
-      "subtitle": "Tus hábitos son el mapa. Tu constancia, el nivel que alcanzas. Es tu self-improvement journey con equilibrio entre Cuerpo, Mente y Alma.",
-      "note": "En menos de 3 minutos generamos tu base personalizada con IA.",
-      "alt": "Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey"
-    },
-    "value_proposition": "Observate por primera vez en tercera persona y toma el control de tus acciones y hábitos."
+  "icp": {
+    "for_who": [
+      "Personas que quieren mejorar hábitos con estructura clara y feedback diario.",
+      "Usuarios que alternan energía/estado y necesitan adaptar intensidad sin abandonar.",
+      "Perfiles que valoran ver progreso en métricas gamificadas (XP, nivel, rachas).",
+      "Quienes buscan un enfoque integral Body/Mind/Soul, no solo productividad."
+    ],
+    "not_for_who": [
+      "Personas que buscan resultados instantáneos sin práctica diaria.",
+      "Usuarios que no quieren registrar retrospectivas o seguimiento de hábitos.",
+      "Equipos/empresas que necesitan funciones B2B, colaboración o paneles multiusuario (no se describen en la landing oficial)."
+    ]
+  },
+  "jobs_to_be_done": [
+    "Cuando me siento sin energía o abrumado, quiero un punto de partida simple para activar mi mínimo vital.",
+    "Cuando tengo impulso, quiero un sistema que me ayude a sostener consistencia y convertirla en progreso acumulado.",
+    "Cuando no entiendo mis altibajos, quiero observar emociones y hábitos juntos para decidir mejor mi siguiente día.",
+    "Cuando pierdo ritmo, quiero retomar sin perder progreso y reajustar objetivos a mi energía actual."
+  ],
+  "measurable_benefits": {
+    "available": true,
+    "items": [
+      "Tiempo de activación inicial: base personalizada con IA en menos de 3 minutos.",
+      "Métricas visibles de avance: XP, nivel, rachas, consistencia semanal y mapa emocional."
+    ],
+    "note": "No se publican porcentajes de mejora ni benchmarks clínicos en la landing oficial."
   },
   "features": [
-    "🪫 LOW MOOD: activar tu mínimo vital con acciones pequeñas y sostenibles.",
-    "🍃 CHILL MOOD: sostener bienestar con rutinas suaves y balanceadas.",
-    "🌊 FLOW MOOD: aprovechar el impulso con un plan alineado a metas concretas.",
-    "🧬 EVOLVE MOOD: sistema retador con Hábitos Atómicos, misiones y recompensas."
-  ],
-  "onboarding_steps": [
-    "Define tu camino: Responde una serie de preguntas, setea tu modo de juego; nosotros generaremos tu base (Body/Mind/Soul) con IA.",
-    "Activa tu base: Recibís tu “pergamino digital” por mail y editás/confirmás tu base.",
-    "Daily Quest + Emociones: Con tu quest diaria vas a poder hacer una retrospectiva de tu día anterior; pensarás en qué emoción prevaleció más durante tu día.",
-    "XP, Rachas y Recompensas: Seguís tu crecimiento acumulando experiencia (XP), moviendo tu constancia semanal, desafiándote a nuevas misiones y obteniendo recompensas."
-  ],
-  "faq": [
     {
-      "question": "¿Necesito mucha disciplina para empezar?",
+      "feature": "Base personalizada con IA (Body/Mind/Soul)",
+      "what_it_does": "Genera una base inicial personalizada después de responder preguntas y elegir modo.",
+      "why_it_matters": "Reduce fricción de arranque y transforma intención difusa en plan accionable."
+    },
+    {
+      "feature": "🪫 LOW MOOD",
+      "what_it_does": "Modo pensado para cuando estás sin energía, abrumado.",
+      "why_it_matters": "activar tu mínimo vital con acciones pequeñas y sostenibles."
+    },
+    {
+      "feature": "🍃 CHILL MOOD",
+      "what_it_does": "Modo pensado para cuando estás relajado y estable.",
+      "why_it_matters": "sostener bienestar con rutinas suaves y balanceadas."
+    },
+    {
+      "feature": "🌊 FLOW MOOD",
+      "what_it_does": "Modo pensado para cuando estás enfocado y en movimiento.",
+      "why_it_matters": "aprovechar el impulso con un plan alineado a metas concretas."
+    },
+    {
+      "feature": "🧬 EVOLVE MOOD",
+      "what_it_does": "Modo pensado para cuando estás ambicioso y determinado.",
+      "why_it_matters": "sistema retador con Hábitos Atómicos, misiones y recompensas."
+    },
+    {
+      "feature": "Daily Quest + registro emocional",
+      "what_it_does": "Guía una retrospectiva diaria para identificar la emoción predominante y cerrar el día con conciencia.",
+      "why_it_matters": "Conecta hábitos con estado interno para decisiones más sostenibles."
+    },
+    {
+      "feature": "Dashboard gamificado de progreso",
+      "what_it_does": "Muestra XP, nivel, rachas, consistencia y progreso en misiones/recompensas.",
+      "why_it_matters": "Hace visible el avance y fortalece motivación por evidencia, no por impulso momentáneo."
+    },
+    {
+      "feature": "Retomar sin perder progreso",
+      "what_it_does": "Permite volver luego de pausas y ajustar objetivos al estado actual.",
+      "why_it_matters": "Sostiene continuidad realista y evita el ciclo de culpa + abandono."
+    }
+  ],
+  "onboarding_narrative": [
+    {
+      "step": 1,
+      "title": "Define tu camino",
+      "experience": "Responde una serie de preguntas, setea tu modo de juego; nosotros generaremos tu base (Body/Mind/Soul) con IA.",
+      "outcome": "Entrás con dirección y un modo alineado a tu energía."
+    },
+    {
+      "step": 2,
+      "title": "Activa tu base",
+      "experience": "Recibís tu “pergamino digital” por mail y editás/confirmás tu base.",
+      "outcome": "Salís con una base concreta para comenzar hoy."
+    },
+    {
+      "step": 3,
+      "title": "Daily Quest + Emociones",
+      "experience": "Con tu quest diaria vas a poder hacer una retrospectiva de tu día anterior; pensarás en qué emoción prevaleció más durante tu día.",
+      "outcome": "Convertís tu día en aprendizaje práctico y señal accionable."
+    },
+    {
+      "step": 4,
+      "title": "XP, Rachas y Recompensas",
+      "experience": "Seguís tu crecimiento acumulando experiencia (XP), moviendo tu constancia semanal, desafiándote a nuevas misiones y obteniendo recompensas.",
+      "outcome": "Visualizás progreso acumulado y próximos desafíos."
+    }
+  ],
+  "objections_faq": [
+    {
+      "objection": "¿Necesito mucha disciplina para empezar?",
       "answer": "No. Si estás con poca energía, empezás en Low para activar el mínimo vital. El sistema ajusta el ritmo."
     },
     {
-      "question": "¿Puedo cambiar de modo de juego?",
+      "objection": "¿Puedo cambiar de modo de juego?",
       "answer": "Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento."
     },
     {
-      "question": "¿Dónde veo mis métricas?",
+      "objection": "¿Dónde veo mis métricas?",
       "answer": "En tu archivo y en el Dashboard: XP, nivel, rachas y mapa emocional."
     },
     {
-      "question": "¿Qué pasa si dejo de registrar?",
+      "objection": "¿Qué pasa si dejo de registrar?",
       "answer": "No perdés progreso. Retomas cuando quieras y ajustamos objetivos a tu energía actual."
     }
   ],
+  "design_dossier": {
+    "unique_look": [
+      "Estética nocturna/espacial con gradientes fríos y acentos violeta-cyan que comunican introspección + progreso.",
+      "Lenguaje visual de juego (moods, XP, misiones) aplicado a self-improvement, con tono emocional y no punitivo.",
+      "Combinación tipográfica Sora (titulares) + Manrope (cuerpo) para balance entre personalidad y legibilidad."
+    ],
+    "do_not_change": [
+      "No romper la narrativa de equilibrio Body/Mind/Soul: es el núcleo estratégico del producto.",
+      "No eliminar ni diluir los 4 moods (Low, Chill, Flow, Evolve): explican la adaptación por energía.",
+      "No sustituir la base oscura ni los acentos brand (primary/secondary): son parte central del reconocimiento visual.",
+      "No mover el foco de constancia progresiva hacia promesas de resultados instantáneos."
+    ],
+    "spacing_and_contrast": [
+      "Mantener jerarquía de secciones amplias (sectionVertical 64px) para lectura respirable en storytelling largo.",
+      "Usar superficies elevadas y bordes con contraste suficiente para distinguir cards sobre fondo oscuro.",
+      "Conservar texto principal claro sobre fondo #0B1220 y reservar muted para soporte, no para contenido crítico."
+    ],
+    "component_library": {
+      "applies": true,
+      "guidance": [
+        "Tratar los tokens oficiales como API visual estable (palette, typography, spacing, radius, shadows).",
+        "Priorizar variables CSS ya mapeadas para color/tipografía antes de agregar nuevas constantes.",
+        "Usar semántica de componentes consistente: cards, secciones narrativas, listas de pasos, bloques FAQ."
+      ]
+    },
+    "suggested_improvements": [
+      "Agregar un bloque comparativo por mood (cuándo usar cada uno) para reducir duda de entrada.",
+      "Incluir microcopy contextual en onboarding que anticipe “retomar sin culpa” antes del primer corte de racha.",
+      "Incorporar casos de uso técnicos (ej. estudiante/dev/creativo) reutilizando testimonios ya existentes."
+    ]
+  },
+  "provenance_note": {
+    "derived_from_official_landing": [
+      "Propuesta de valor general, pilares Body/Mind/Soul, modos, flujo de onboarding y FAQs.",
+      "Métricas visibles mencionadas: XP, nivel, rachas, consistencia, mapa emocional, misiones y recompensas.",
+      "Claim temporal explícito: base personalizada con IA en menos de 3 minutos."
+    ],
+    "recommendations": [
+      "Estructura AI-first para LLM (ICP, JTBD, what/why de features, design guardrails).",
+      "Suggested improvements de UX/copy señaladas explícitamente como recomendaciones opcionales."
+    ]
+  },
   "links": {
-    "landing": "https://innerbloomjourney.org/",
-    "intro_journey": "https://innerbloomjourney.org/intro-journey",
-    "signup": "https://innerbloomjourney.org/sign-up",
-    "login": "https://innerbloomjourney.org/login",
-    "ai_page": "https://innerbloomjourney.org/ai",
-    "llms": "https://innerbloomjourney.org/llms.txt"
+    "landing": "https://innerbloom.org",
+    "intro_journey": "https://innerbloom.org/intro-journey",
+    "signup": "https://innerbloom.org/sign-up",
+    "login": "https://innerbloom.org/login",
+    "ai_page": "https://innerbloom.org/ai",
+    "llms": "https://innerbloom.org/llms.txt"
   },
   "versioning": {
-    "version": "53aa718",
-    "lastUpdated": "2026-02-22T10:45:59.812Z"
+    "version": "0144b1c",
+    "lastUpdated": "2026-02-22T11:16:37.114Z"
   },
   "design_tokens": {
     "palette": {
