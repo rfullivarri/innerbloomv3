@@ -39,42 +39,42 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Convierte la experiencia en hábitos.',
       titleHighlight: 'Convierte los hábitos en camino',
       subtitle:
-        'Tus hábitos son el mapa. Tu constancia, el nivel que alcanzas. Es tu self-improvement journey con equilibrio entre Cuerpo, Mente y Alma.',
-      note: 'En menos de 3 minutos generamos tu base personalizada con IA.',
+        'Tus hábitos son el mapa. Tu constancia marca el ritmo. Es tu Journey de crecimiento con equilibrio entre Cuerpo, Mente y Alma.',
+      note: 'En menos de 3 minutos recibís una orientación inicial para crear tu base personalizada.',
       alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
     },
     pillars: {
       title: 'Nuestros pilares fundamentales',
       intro:
-        'El progreso sostenible necesita equilibrio. 🫀 Cuerpo para la energía y la salud, 🧠 Mente para el foco y el aprendizaje, y 🏵️ Alma para el bienestar emocional y el sentido. Cuando uno cae, los otros dos lo sostienen. Cuando se alinean, tu progreso se acelera.',
-      highlight: 'Observate por primera vez en tercera persona y toma el control de tus acciones y hábitos.',
+        'El progreso sostenible necesita equilibrio. 🫀 Cuerpo para tu energía diaria, 🧠 Mente para foco y claridad, y 🏵️ Alma para bienestar emocional y sentido. Cuando un pilar baja, los otros lo sostienen.',
+      highlight: 'Obsérvate por primera vez en tercera persona y toma el control de tus acciones y hábitos.',
       items: [
         {
           emoji: '🫀',
           title: 'Cuerpo',
-          copy: 'Tu cuerpo es el sustrato del hábito: sueño, nutrición y movimiento marcan tu disponibilidad de energía diaria (HP).'
+          copy: 'Tu cuerpo es la base de tus hábitos: descanso, nutrición y movimiento sostienen tu energía para cumplir tus tareas diarias.'
         },
         {
           emoji: '🧠',
           title: 'Mente',
-          copy: 'La mente filtra y prioriza. Sin foco, no hay consistencia. Diseñamos sesiones simples para sostener la atención, el aprendizaje y la creatividad.'
+          copy: 'La mente ordena lo importante. Con foco y calma, te resulta más simple decidir, sostener acciones y avanzar en lo que importa.'
         },
         {
           emoji: '🏵️',
           title: 'Alma',
-          copy: 'Las emociones, los vínculos y el propósito estabilizan el sistema. Sin esto, los hábitos no atraviesan semanas ni meses.'
+          copy: 'El alma integra emociones, vínculos y propósito. Ese equilibrio interno te ayuda a sostener hábitos con más presencia y menos fricción.'
         }
       ]
     },
     modes: {
       title: 'Modula tu modo de juego',
-      intro: 'Cambia según tu momento. El sistema se adapta a tu energía.',
+      intro: 'Elegí tu modo según cómo te sentís hoy. Cada modo tiene un avatar que refleja tu estado emocional.',
       items: [
         {
           id: 'low',
           title: '🪫 LOW MOOD',
           state: 'sin energía, abrumado.',
-          goal: 'activar tu mínimo vital con acciones pequeñas y sostenibles.'
+          goal: 'activar tu mínimo vital con tareas pequeñas y sostenibles.'
         },
         {
           id: 'chill',
@@ -92,26 +92,26 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
           id: 'evolve',
           title: '🧬 EVOLVE MOOD',
           state: 'ambicioso y determinado.',
-          goal: 'sistema retador con Hábitos Atómicos, misiones y recompensas.'
+          goal: 'sostener un ritmo desafiante con estructura y tareas diarias claras.'
         }
       ]
     },
     how: {
       title: 'Cómo funciona',
-      intro: 'Un flujo claro, de la activación a la constancia.',
+      intro: 'Un flujo claro para empezar y sostener tu Journey.',
       steps: [
         {
           title: 'Define tu camino',
-          copy: 'Responde una serie de preguntas, setea tu modo de juego; nosotros generaremos tu base (Body/Mind/Soul) con IA.'
+          copy: 'Respondé algunas preguntas, elegí tu modo de juego y recibí sugerencias iniciales para tu base Body/Mind/Soul. Todo es editable.'
         },
         { title: 'Activa tu base', copy: 'Recibís tu “pergamino digital” por mail y editás/confirmás tu base.' },
         {
-          title: 'Daily Quest + Emociones',
-          copy: 'Con tu quest diaria vas a poder hacer una retrospectiva de tu día anterior; pensarás en qué emoción prevaleció más durante tu día.'
+          title: 'Tareas diarias + emociones',
+          copy: 'Cada día registrás tu emoción y completás tus tareas diarias. Tu avatar refleja cómo te sentís: cuidás a tu avatar cuidándote.'
         },
         {
-          title: 'XP, Rachas y Recompensas',
-          copy: 'Seguís tu crecimiento acumulando experiencia (XP), moviendo tu constancia semanal, desafiándote a nuevas misiones y obteniendo recompensas.'
+          title: 'Ajusta y continúa',
+          copy: 'Tu sistema evoluciona con vos: editás tu base, ajustás tus tareas y mantenés el rumbo según tu momento real.'
         }
       ]
     },
@@ -119,8 +119,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       title: 'Testimonios',
       intro: 'Lo que dicen quienes ya empezaron su Journey.',
       items: [
-        { quote: '“Por primera vez sostuve hábitos 6 semanas. El mapa y las misiones me ordenaron.”', author: 'Lucía • Diseñadora' },
-        { quote: '“El heatmap emocional me cambió la mirada. Ajusto tareas por energía real.”', author: 'Diego • Dev' },
+        { quote: '“Por primera vez sostuve hábitos varias semanas. Tener tareas diarias claras me ordenó.”', author: 'Lucía • Diseñadora' },
+        { quote: '“Registrar mi emoción diaria cambió mi mirada. Ahora ajusto tareas según mi energía real.”', author: 'Diego • Dev' },
         { quote: '“Empecé en Low y pasé a Flow con objetivos claros, sin culpa.”', author: 'Caro • Estudiante' }
       ],
       prev: 'Anterior',
@@ -135,7 +135,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
           answer: 'No. Si estás con poca energía, empezás en Low para activar el mínimo vital. El sistema ajusta el ritmo.'
         },
         { question: '¿Puedo cambiar de modo de juego?', answer: 'Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento.' },
-        { question: '¿Dónde veo mis métricas?', answer: 'En tu archivo y en el Dashboard: XP, nivel, rachas y mapa emocional.' },
+        { question: '¿Dónde veo mi progreso?', answer: 'En tu archivo y en el Dashboard, con foco en tus tareas, tus registros emocionales y tu equilibrio general.' },
         {
           question: '¿Qué pasa si dejo de registrar?',
           answer: 'No perdés progreso. Retomas cuando quieras y ajustamos objetivos a tu energía actual.'
@@ -160,36 +160,36 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Turn experience into habits.',
       titleHighlight: 'Turn habits into your path',
       subtitle:
-        'Your habits are the map. Consistency is the level you reach. A self-improvement journey balanced between Body, Mind and Soul.',
-      note: 'In under 3 minutes we generate your personalized base with AI.',
+        'Your habits are the map. Consistency sets your pace. A growth Journey balanced across Body, Mind and Soul.',
+      note: 'In under 3 minutes you get initial guidance to build your personalized base.',
       alt: 'Kid looking at a violet energy sphere in the night sky — Gamification Journey'
     },
     pillars: {
       title: 'Our core pillars',
       intro:
-        'Sustainable progress needs balance. 🫀 Body for energy and health, 🧠 Mind for focus and learning, and 🏵️ Soul for emotional well-being and meaning. When one drops, the other two support it. When they align, your progress accelerates.',
+        'Sustainable progress needs balance. 🫀 Body for daily energy, 🧠 Mind for focus and clarity, and 🏵️ Soul for emotional well-being and meaning. When one pillar drops, the other two support it.',
       highlight: 'See yourself in third person for the first time and take control of your actions and habits.',
       items: [
         {
           emoji: '🫀',
           title: 'Body',
-          copy: 'Your body is the substrate of the habit: sleep, nutrition and movement set your daily energy (HP).'
+          copy: 'Your body is the base of your habits: rest, nutrition and movement sustain your energy for daily tasks.'
         },
         {
           emoji: '🧠',
           title: 'Mind',
-          copy: 'The mind filters and prioritizes. Without focus, there is no consistency. We design simple sessions to sustain attention, learning and creativity.'
+          copy: 'Your mind organizes what matters. With focus and calm, it is easier to decide, stay consistent and move forward.'
         },
         {
           emoji: '🏵️',
           title: 'Soul',
-          copy: 'Emotions, relationships and purpose stabilize the system. Without them, habits don’t last weeks or months.'
+          copy: 'Soul integrates emotions, relationships and purpose. That inner balance helps your habits stay present with less friction.'
         }
       ]
     },
     modes: {
       title: 'Modulate your game mode',
-      intro: 'Switch based on your moment. The system adapts to your energy.',
+      intro: 'Choose your mode based on how you feel today. Each mode has an avatar that mirrors your emotional state.',
       items: [
         {
           id: 'low',
@@ -213,26 +213,26 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
           id: 'evolve',
           title: '🧬 EVOLVE MOOD',
           state: 'ambitious and determined.',
-          goal: 'challenging system with Atomic Habits, missions and rewards.'
+          goal: 'maintain a challenging rhythm with structure and clear daily tasks.'
         }
       ]
     },
     how: {
       title: 'How it works',
-      intro: 'A clear flow: from activation to consistency.',
+      intro: 'A clear flow to start and sustain your Journey.',
       steps: [
         {
           title: 'Define your path',
-          copy: 'Answer a few questions, set your game mode; we generate your Body/Mind/Soul base with AI.'
+          copy: 'Answer a few questions, choose your game mode, and receive initial suggestions for your Body/Mind/Soul base. Everything is editable.'
         },
         { title: 'Activate your base', copy: 'You receive your “digital scroll” by email and edit/confirm your base.' },
         {
-          title: 'Daily Quest + Emotions',
-          copy: 'With your daily quest you can review yesterday and notice which emotion was most present.'
+          title: 'Daily tasks + emotions',
+          copy: 'Each day you log your emotion and complete your daily tasks. Your avatar reflects your state: you care for your avatar by caring for yourself.'
         },
         {
-          title: 'XP, Streaks and Rewards',
-          copy: 'Track growth by accumulating XP, moving your weekly consistency, challenging new missions and earning rewards.'
+          title: 'Adjust and continue',
+          copy: 'Your system evolves with you: edit your base, adjust your tasks, and keep moving with your real-life rhythm.'
         }
       ]
     },
@@ -240,8 +240,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       title: 'Testimonials',
       intro: 'What people say after starting their Journey.',
       items: [
-        { quote: '“First time keeping habits for 6 weeks. The map and missions kept me on track.”', author: 'Lucía • Designer' },
-        { quote: '“The emotion heatmap changed my view. I plan tasks around real energy.”', author: 'Diego • Dev' },
+        { quote: '“First time I kept habits for weeks. Clear daily tasks helped me stay on track.”', author: 'Lucía • Designer' },
+        { quote: '“Logging my daily emotion changed how I plan. Now I adjust tasks to real energy.”', author: 'Diego • Dev' },
         { quote: '“Started in Low and moved to Flow with clear goals, no guilt.”', author: 'Caro • Student' }
       ],
       prev: 'Previous',
@@ -256,7 +256,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
           answer: 'No. If your energy is low, start in Low to activate the vital minimum. The system adjusts the pace.'
         },
         { question: 'Can I switch game modes?', answer: 'Yes. Swap between Low, Chill, Flow and Evolve whenever you need.' },
-        { question: 'Where do I see my metrics?', answer: 'In your file and dashboard: XP, level, streaks and emotion map.' },
+        { question: 'Where do I see my progress?', answer: 'In your file and dashboard, focused on your tasks, emotion logs, and overall balance.' },
         { question: 'What happens if I stop logging?', answer: 'You do not lose progress. Resume anytime and we adjust goals to your current energy.' }
       ]
     },
