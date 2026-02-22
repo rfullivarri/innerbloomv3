@@ -916,6 +916,14 @@
   margin-bottom: 28px;
 }
 
+.lv2-modes-head {
+  padding-inline: clamp(8px, 2vw, 16px);
+}
+
+.lv2-modes-head h2 {
+  overflow-wrap: anywhere;
+}
+
 .lv2-section h2 {
   font-family: var(--font-heading);
   font-size: clamp(2rem, 1.2vw + 1.6rem, 2.6rem);
@@ -1842,7 +1850,10 @@
     scroll-behavior: smooth;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    padding: 8px 2px 12px;
+    padding: 8px 4px 12px;
+    width: 100%;
+    max-width: 100%;
+    justify-content: flex-start;
   }
 
   .lv2-modes-mobile-track::-webkit-scrollbar {
@@ -1851,11 +1862,18 @@
 
   .lv2-mode-mobile-slide {
     /* En mobile la card ocupa casi todo el ancho útil sin provocar overflow horizontal. */
-    flex: 0 0 min(90vw, 430px);
-    min-width: min(90vw, 430px);
-    width: min(90vw, 430px);
+    flex: 0 0 min(94vw, 430px);
+    min-width: min(94vw, 430px);
+    width: min(94vw, 430px);
     max-height: min(84svh, 860px);
     scroll-snap-align: center;
+  }
+
+  .lv2-modes-dots {
+    margin-top: 12px;
+    width: 100%;
+    justify-content: center;
+    padding-inline: 8px;
   }
 
   .lv2-mode-card {
@@ -1910,5 +1928,16 @@
   .lv2-meta-pill {
     width: 100%;
     justify-content: center;
+  }
+
+  .lv2-modes-head {
+    padding-inline: clamp(12px, 5vw, 20px);
+  }
+
+  .lv2-modes-head h2 {
+    font-size: clamp(1.85rem, 7.6vw, 2.35rem);
+    line-height: 1.1;
+    margin-inline: auto;
+    max-width: 12ch;
   }
 }
