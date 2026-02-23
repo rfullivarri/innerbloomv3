@@ -68,7 +68,7 @@ export default function SubscriptionPage() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-6 text-white backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6 text-white backdrop-blur-md">
         Cargando suscripción...
       </div>
     );
@@ -76,21 +76,21 @@ export default function SubscriptionPage() {
 
   if (isLocked) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-6 text-white backdrop-blur-sm">
-        <div className="w-full max-w-xl rounded-3xl border border-white/10 bg-slate-900/95 p-6 text-center shadow-2xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6 text-white backdrop-blur-md">
+        <div className="w-full max-w-xl rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-indigo-950/70 p-6 text-center shadow-[0_30px_120px_rgba(15,23,42,0.55)] backdrop-blur-xl">
           <h1 className="text-3xl font-semibold">Tu suscripción está inactiva</h1>
-          <p className="mx-auto mt-3 max-w-xl text-white/70">Activá un plan para volver a acceder a las funciones premium.</p>
+          <p className="mx-auto mt-3 max-w-xl text-text-muted">Activá un plan para volver a acceder a las funciones premium.</p>
           <div className="mt-6 flex justify-center gap-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="rounded-xl border border-white/20 px-5 py-3 font-semibold text-white/90 transition hover:bg-white/10"
+              className="rounded-2xl border border-white/20 bg-white/10 px-5 py-3 font-semibold text-white/90 transition hover:border-white/40 hover:bg-white/20"
             >
               Cerrar
             </button>
             <Link
               to="/pricing"
-              className="rounded-xl bg-emerald-400 px-6 py-3 font-semibold text-emerald-950 transition hover:bg-emerald-300"
+              className="rounded-2xl border border-emerald-300/30 bg-emerald-400/90 px-6 py-3 font-semibold text-emerald-950 shadow-[0_12px_30px_rgba(16,185,129,0.3)] transition hover:bg-emerald-300"
             >
               Ver pricing
             </Link>
@@ -101,44 +101,44 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-6 text-white backdrop-blur-sm">
-      <div className="w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0b1b44]/95 p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6 text-white backdrop-blur-md">
+      <div className="w-full max-w-3xl rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-indigo-950/70 p-6 shadow-[0_30px_120px_rgba(15,23,42,0.55)] backdrop-blur-xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-3xl font-semibold">Suscripción</h1>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded-lg border border-white/20 px-3 py-1.5 text-sm font-semibold text-white/90 transition hover:bg-white/10"
+            className="rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 transition hover:border-white/40 hover:bg-white/20"
           >
             Cerrar
           </button>
         </div>
 
-        <div className="mt-6 space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6">
+        <div className="mt-6 space-y-4 rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur">
           <p className="flex items-center gap-2">
-            <span className="text-white/70">Plan actual:</span>
+            <span className="text-text-muted">Plan actual:</span>
             <strong>{subscription?.plan ?? 'No definido'}</strong>
-            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-200">
+            <span className="rounded-full border border-emerald-300/40 bg-emerald-400/15 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-200">
               {subscription?.plan ?? 'Sin plan'}
             </span>
           </p>
           <p>
-            <span className="text-white/70">Estado:</span> <strong>{subscription?.status ?? 'No definido'}</strong>
+            <span className="text-text-muted">Estado:</span> <strong>{subscription?.status ?? 'No definido'}</strong>
           </p>
-          <p className="text-white/90">{nextDateLabel}</p>
+          <p className="text-white/85">{nextDateLabel}</p>
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
             to="/pricing"
-            className="rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-emerald-950 transition hover:bg-emerald-300"
+            className="rounded-2xl border border-emerald-300/30 bg-emerald-400/90 px-5 py-3 font-semibold text-emerald-950 shadow-[0_12px_30px_rgba(16,185,129,0.3)] transition hover:bg-emerald-300"
           >
             Cambiar plan
           </Link>
           <button
             type="button"
             onClick={handleCancel}
-            className="rounded-xl border border-red-300/30 bg-red-500/10 px-5 py-3 font-semibold text-red-100 transition hover:bg-red-500/20"
+            className="rounded-2xl border border-rose-300/35 bg-rose-500/10 px-5 py-3 font-semibold text-rose-100 transition hover:border-rose-300/55 hover:bg-rose-500/20"
           >
             Cancelar suscripción
           </button>
