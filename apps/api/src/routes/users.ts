@@ -5,6 +5,7 @@ import { getUserJourney } from '../controllers/logs/get-user-journey.js';
 import { createUserTask } from '../controllers/tasks/create-user-task.js';
 import { getUserTasks } from '../controllers/tasks/get-user-tasks.js';
 import { getCurrentUser } from '../controllers/users/get-user-me.js';
+import { getUserSubscription } from '../controllers/users/get-user-subscription.js';
 import { getUserAchievements } from '../controllers/users/get-user-achievements.js';
 import { getUserLevel } from '../controllers/users/get-user-level.js';
 import { getUserState } from '../controllers/users/get-user-state.js';
@@ -53,6 +54,7 @@ userScopedRoutes.get('/weekly-wrapped/previous', asyncHandler(getUserWeeklyWrapp
 userScopedRoutes.use('/missions/v2', missionsV2Router);
 
 router.get('/users/me', authMiddleware, asyncHandler(getCurrentUser));
+router.get('/users/me/subscription', authMiddleware, asyncHandler(getUserSubscription));
 router.use('/users/:id', authMiddleware, ownUserGuard, requireActiveSubscription, userScopedRoutes);
 
 export default router;

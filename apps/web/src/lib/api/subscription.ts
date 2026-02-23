@@ -50,15 +50,24 @@ function mapBillingToSubscription(payload: BillingSubscriptionPayload): Subscrip
 
 export async function getSubscriptionWithFallback() {
   try {
-    const response = await apiAuthorizedFetch('/billing/subscription');
+    const response = await apiAuthorizedFetch('/users/me/subscription');
     if (!response.ok) {
-      return getMockSubscription();
+      const billingResponse = await apiAuthorizedFetch('/billing/subscription');
+      if (!billingResponse.ok) {
+        return getMockSubscription();
+      }
+
+      const billingPayload = (await billingResponse.json()) as BillingSubscriptionPayload;
+      return {
+        ok: true as const,
+        data: mapBillingToSubscription(billingPayload),
+      };
     }
 
-    const payload = (await response.json()) as BillingSubscriptionPayload;
+    const payload = (await response.json()) as SubscriptionData;
     return {
       ok: true as const,
-      data: mapBillingToSubscription(payload),
+      data: payload,
     };
   } catch {
     return getMockSubscription();
