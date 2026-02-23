@@ -213,3 +213,13 @@ export function emitFeedbackNotificationEvent(
     ...sanitizedPayload,
   });
 }
+
+export type OnboardingEventName = 'onboarding_completed';
+
+export function emitOnboardingEvent(event: OnboardingEventName, payload: Record<string, unknown> = {}) {
+  logApiDebug('[analytics] onboarding event', {
+    event,
+    timestamp: new Date().toISOString(),
+    ...payload,
+  });
+}
