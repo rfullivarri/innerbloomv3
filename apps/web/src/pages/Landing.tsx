@@ -166,10 +166,6 @@ export default function LandingPage() {
   const [paused, setPaused] = useState(false);
   const [activeModeIndex, setActiveModeIndex] = useState(0);
   const [activeHowStep, setActiveHowStep] = useState(0);
-  const [hasHydratedHow, setHasHydratedHow] = useState(false);
-  const howStepRefs = useRef<Array<HTMLLIElement | null>>([]);
-  const activeHowStepRef = useRef(0);
-  const howDebounceTimerRef = useRef<number | null>(null);
 
   const testimonialCount = copy.testimonials.items.length;
   const modeCount = copy.modes.items.length;
@@ -190,74 +186,6 @@ export default function LandingPage() {
     twitterImage: 'https://innerbloomjourney.org/og/neneOGP.png',
     url: 'https://innerbloomjourney.org/'
   });
-
-  useEffect(() => {
-    setHasHydratedHow(true);
-  }, []);
-
-  useEffect(() => {
-    activeHowStepRef.current = activeHowStep;
-  }, [activeHowStep]);
-
-  useEffect(() => {
-    if (!hasHydratedHow) {
-      return;
-    }
-
-    const stepElements = howStepRefs.current.filter(Boolean) as HTMLLIElement[];
-    if (!stepElements.length) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const intersecting = entries
-          .filter((entry) => entry.isIntersecting)
-          .map((entry) => {
-            const index = Number((entry.target as HTMLElement).dataset.stepIndex ?? -1);
-            const rect = entry.target.getBoundingClientRect();
-            const viewportCenter = window.innerHeight * 0.5;
-            const cardCenter = rect.top + rect.height * 0.5;
-            return { index, distance: Math.abs(cardCenter - viewportCenter) };
-          })
-          .filter((item) => item.index >= 0)
-          .sort((a, b) => a.distance - b.distance);
-
-        const nextIndex = intersecting[0]?.index;
-        if (typeof nextIndex !== 'number' || nextIndex === activeHowStepRef.current) {
-          return;
-        }
-
-        if (howDebounceTimerRef.current) {
-          window.clearTimeout(howDebounceTimerRef.current);
-        }
-
-        howDebounceTimerRef.current = window.setTimeout(() => {
-          setActiveHowStep(nextIndex);
-          howDebounceTimerRef.current = null;
-        }, 90);
-      },
-      {
-        root: null,
-        rootMargin: '-45% 0px -45% 0px',
-        threshold: [0, 0.25, 0.5, 0.75]
-      }
-    );
-
-    stepElements.forEach((element) => observer.observe(element));
-
-    return () => {
-      observer.disconnect();
-      if (howDebounceTimerRef.current) {
-        window.clearTimeout(howDebounceTimerRef.current);
-        howDebounceTimerRef.current = null;
-      }
-    };
-  }, [hasHydratedHow, language]);
-
-  useEffect(() => {
-    setActiveHowStep(0);
-  }, [language]);
 
   useEffect(() => {
     if (paused || testimonialCount <= 1) {
@@ -536,17 +464,11 @@ export default function LandingPage() {
             <ol className="how-timeline">
               {copy.how.steps.map((step, index) => {
                 const isActive = activeHowStep === index;
-                const isExpanded = !hasHydratedHow || isActive;
-                const panelId = `how-step-panel-${language}-${index}`;
 
                 return (
                   <li
                     className="fade-item timeline-step"
                     key={step.title}
-                    ref={(element) => {
-                      howStepRefs.current[index] = element;
-                    }}
-                    data-step-index={index}
                     style={{ '--delay': `${index * 80}ms` } as CSSProperties}
                   >
                     <div className="timeline-rail" aria-hidden>
@@ -554,28 +476,19 @@ export default function LandingPage() {
                     </div>
                     <button
                       type="button"
-                      className={`timeline-card ${isExpanded ? 'is-expanded' : 'is-collapsed'} ${isActive ? 'is-active' : ''}`}
-                      aria-expanded={isExpanded}
-                      aria-controls={panelId}
+                      className={`timeline-card ${isActive ? 'is-active' : ''}`}
                       aria-current={isActive ? 'step' : undefined}
-                      onClick={() => setActiveHowStep((current) => (current === index ? -1 : index))}
+                      onClick={() => setActiveHowStep(index)}
                       onFocus={() => setActiveHowStep(index)}
                     >
                       <h3>{step.title}</h3>
-                      <p className="timeline-summary">{step.outcome}</p>
-                      <div
-                        className={`timeline-details ${isExpanded ? 'is-expanded' : ''}`}
-                        id={panelId}
-                        aria-hidden={!isExpanded}
-                      >
-                        <div className="timeline-micro">
-                          <p className="timeline-label">{copy.how.actionLabel}</p>
-                          <p className="timeline-copy">{step.action}</p>
-                        </div>
-                        <div className="timeline-micro">
-                          <p className="timeline-label">{copy.how.outcomeLabel}</p>
-                          <p className="timeline-copy">{step.outcome}</p>
-                        </div>
+                      <div className="timeline-micro">
+                        <p className="timeline-label">{copy.how.actionLabel}</p>
+                        <p className="timeline-copy">{step.action}</p>
+                      </div>
+                      <div className="timeline-micro">
+                        <p className="timeline-label">{copy.how.outcomeLabel}</p>
+                        <p className="timeline-copy">{step.outcome}</p>
                       </div>
                     </button>
                   </li>
