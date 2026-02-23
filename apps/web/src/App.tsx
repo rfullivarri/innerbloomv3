@@ -16,7 +16,6 @@ import OnboardingIntroPage from './pages/OnboardingIntro';
 import PricingPage from './pages/Pricing';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
 import SubscriptionPage from './pages/Subscription';
-import PricingPage from './pages/Pricing';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
