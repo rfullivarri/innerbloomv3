@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 
 export type TimelineStep = {
   title: string;
@@ -25,6 +25,11 @@ type PremiumTimelineProps = {
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 type Point = { x: number; y: number };
+type TimelineGeometry = {
+  yStart: number;
+  yEnd: number;
+  stepAnchors: number[];
+};
 
 const catmullRomToBezierPath = (points: Point[]) => {
   if (points.length === 0) {
@@ -71,11 +76,13 @@ export default function PremiumTimeline({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
   const cardRefs = useRef<Array<HTMLElement | null>>([]);
+  const markerRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const [pathData, setPathData] = useState('');
   const [pathLength, setPathLength] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [geometry, setGeometry] = useState<TimelineGeometry>({ yStart: 0, yEnd: 1, stepAnchors: [] });
   const [visibleCards, setVisibleCards] = useState<boolean[]>(() => steps.map(() => false));
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -163,7 +170,7 @@ export default function PremiumTimeline({
 
     const recomputePath = () => {
       const rootRect = container.getBoundingClientRect();
-      const points = cardRefs.current
+      const anchorPoints = markerRefs.current
         .map((node) => {
           if (!node) {
             return null;
@@ -180,20 +187,23 @@ export default function PremiumTimeline({
       const height = container.scrollHeight;
       setContainerHeight(height);
 
-      if (points.length === 0) {
+      if (anchorPoints.length === 0) {
         setPathData(`M ${resolvedAxisX} 0 L ${resolvedAxisX} ${Math.max(height, 1)}`);
+        setGeometry({ yStart: 0, yEnd: Math.max(height, 1), stepAnchors: [] });
         return;
       }
 
-      if (points.length === 1) {
-        const startY = points[0].y - tailTopPx;
-        const endY = points[0].y + tailBottomPx;
-        setPathData(`M ${points[0].x} ${startY} L ${points[0].x} ${endY}`);
+      if (anchorPoints.length === 1) {
+        const startY = anchorPoints[0].y - tailTopPx;
+        const endY = anchorPoints[0].y + tailBottomPx;
+        setPathData(`M ${anchorPoints[0].x} ${startY} L ${anchorPoints[0].x} ${endY}`);
+        setGeometry({ yStart: startY, yEnd: endY, stepAnchors: [anchorPoints[0].y] });
         return;
       }
 
-      const yStart = points[0].y - tailTopPx;
-      const yEnd = points[points.length - 1].y + tailBottomPx;
+      const stepAnchors = anchorPoints.map((point) => point.y);
+      const yStart = stepAnchors[0] - tailTopPx;
+      const yEnd = stepAnchors[stepAnchors.length - 1] + tailBottomPx;
       const isMobile = window.matchMedia('(max-width: 639px)').matches;
       const amplitude = isMobile ? amplitudeMobile : amplitudeDesktop;
       const period = isMobile ? periodMobile : periodDesktop;
@@ -217,6 +227,7 @@ export default function PremiumTimeline({
       }
 
       setPathData(catmullRomToBezierPath(sampledPoints));
+      setGeometry({ yStart, yEnd, stepAnchors });
     };
 
     recomputePath();
@@ -270,10 +281,10 @@ export default function PremiumTimeline({
 
     const updateProgress = () => {
       const rect = node.getBoundingClientRect();
-      const viewportHeight = window.innerHeight || 1;
-      const start = viewportHeight;
-      const end = -rect.height;
-      const rawProgress = (start - rect.top) / (start - end);
+      const scanY = (window.innerHeight || 1) * 0.45;
+      const localY = scanY - rect.top;
+      const range = Math.max(geometry.yEnd - geometry.yStart, 1);
+      const rawProgress = (localY - geometry.yStart) / range;
       setProgress(clamp(rawProgress, 0, 1));
     };
 
@@ -299,7 +310,7 @@ export default function PremiumTimeline({
         window.cancelAnimationFrame(rafId);
       }
     };
-  }, [reducedMotion]);
+  }, [geometry.yEnd, geometry.yStart, reducedMotion]);
 
   const dashOffset = useMemo(() => {
     if (!pathLength || reducedMotion) {
@@ -311,6 +322,9 @@ export default function PremiumTimeline({
 
   const cardMaxWidth = typeof cardWidth === 'number' ? `${cardWidth}px` : cardWidth;
   const fallbackAxisX = axisX ?? lineOffsetX;
+  const drawY = geometry.yStart + progress * (geometry.yEnd - geometry.yStart);
+  const activationThreshold = 8;
+  const highlightWindow = 24;
 
   return (
     <section
@@ -322,6 +336,12 @@ export default function PremiumTimeline({
         .filter(Boolean)
         .join(' ')}
       aria-label="Timeline premium"
+      style={
+        {
+          '--ib-accent': '#73d0ff',
+          '--ib-accent-2': '#b58dff',
+        } as CSSProperties
+      }
     >
       <div ref={containerRef} className="relative">
         <svg className="pointer-events-none absolute inset-0 z-0 h-full w-full overflow-visible" aria-hidden="true">
@@ -359,11 +379,27 @@ export default function PremiumTimeline({
         <ol className="relative z-10 space-y-5 sm:space-y-7" role="list">
           {steps.map((step, index) => {
             const visible = reducedMotion || visibleCards[index];
+            const anchorY = geometry.stepAnchors[index] ?? Number.POSITIVE_INFINITY;
+            const isActive = reducedMotion || drawY >= anchorY - activationThreshold;
+            const isCurrent = !reducedMotion && Math.abs(drawY - anchorY) <= highlightWindow;
             return (
               <li key={`${step.title}-${index}`} className="grid grid-cols-[72px_minmax(0,1fr)] items-start gap-4 sm:gap-6">
                 <div className="relative flex h-full w-[72px] items-start justify-center pt-2">
                   <div
-                    className="relative z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-slate-900/80 text-sm font-semibold text-white shadow-[0_0_0_4px_rgba(255,255,255,0.06)]"
+                    ref={(node) => {
+                      markerRefs.current[index] = node;
+                    }}
+                    className={[
+                      'relative z-20 flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-all duration-200',
+                      isActive
+                        ? 'border border-[var(--ib-accent)]/80 bg-slate-900/90 text-white ring-2 ring-[var(--ib-accent)]/80 shadow-[0_0_0_6px_rgba(115,208,255,0.16),0_0_26px_rgba(115,208,255,0.38)]'
+                        : 'border border-white/35 bg-slate-900/80 text-white shadow-[0_0_0_4px_rgba(255,255,255,0.06)]',
+                      isCurrent
+                        ? 'ring-[var(--ib-accent-2)]/80 shadow-[0_0_0_8px_rgba(181,141,255,0.24),0_0_32px_rgba(115,208,255,0.45)]'
+                        : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
                     aria-hidden="true"
                   >
                     {index + 1}
