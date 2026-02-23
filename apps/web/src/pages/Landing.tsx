@@ -165,7 +165,8 @@ export default function LandingPage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
   const [activeModeIndex, setActiveModeIndex] = useState(0);
-  const [activeHowStep, setActiveHowStep] = useState(0);
+  const [activeHowStep, setActiveHowStep] = useState<number | null>(null);
+  const howStepRefs = useRef<Array<HTMLLIElement | null>>([]);
 
   const testimonialCount = copy.testimonials.items.length;
   const modeCount = copy.modes.items.length;
@@ -233,6 +234,51 @@ export default function LandingPage() {
 
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    const stepElements = howStepRefs.current.filter((step): step is HTMLLIElement => step !== null);
+
+    if (!stepElements.length) {
+      return;
+    }
+
+    const ratioByIndex = new Map<number, number>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const index = Number((entry.target as HTMLElement).dataset.stepIndex);
+          if (Number.isNaN(index)) {
+            return;
+          }
+
+          ratioByIndex.set(index, entry.isIntersecting ? entry.intersectionRatio : 0);
+        });
+
+        let nextIndex: number | null = null;
+        let maxRatio = 0;
+
+        ratioByIndex.forEach((ratio, index) => {
+          if (ratio > maxRatio) {
+            maxRatio = ratio;
+            nextIndex = index;
+          }
+        });
+
+        if (nextIndex !== null && nextIndex !== activeHowStep && maxRatio >= 0.6) {
+          setActiveHowStep(nextIndex);
+        }
+      },
+      {
+        threshold: [0.6, 0.75, 0.9],
+        rootMargin: '-20% 0px -20% 0px'
+      }
+    );
+
+    stepElements.forEach((step) => observer.observe(step));
+
+    return () => observer.disconnect();
+  }, [activeHowStep]);
 
   const goToSlide = (index: number) => {
     setActiveSlide((index + testimonialCount) % testimonialCount);
@@ -464,11 +510,16 @@ export default function LandingPage() {
             <ol className="how-timeline">
               {copy.how.steps.map((step, index) => {
                 const isActive = activeHowStep === index;
+                const panelId = `how-step-panel-${language}-${index}`;
 
                 return (
                   <li
                     className="fade-item timeline-step"
                     key={step.title}
+                    data-step-index={index}
+                    ref={(element) => {
+                      howStepRefs.current[index] = element;
+                    }}
                     style={{ '--delay': `${index * 80}ms` } as CSSProperties}
                   >
                     <div className="timeline-rail" aria-hidden>
@@ -477,18 +528,23 @@ export default function LandingPage() {
                     <button
                       type="button"
                       className={`timeline-card ${isActive ? 'is-active' : ''}`}
+                      aria-expanded={isActive}
+                      aria-controls={panelId}
                       aria-current={isActive ? 'step' : undefined}
                       onClick={() => setActiveHowStep(index)}
                       onFocus={() => setActiveHowStep(index)}
                     >
                       <h3>{step.title}</h3>
-                      <div className="timeline-micro">
-                        <p className="timeline-label">{copy.how.actionLabel}</p>
-                        <p className="timeline-copy">{step.action}</p>
-                      </div>
-                      <div className="timeline-micro">
-                        <p className="timeline-label">{copy.how.outcomeLabel}</p>
-                        <p className="timeline-copy">{step.outcome}</p>
+                      <p className="timeline-outcome-preview">{step.outcome}</p>
+                      <div id={panelId} className={`timeline-panel ${isActive ? 'is-expanded' : ''}`}>
+                        <div className="timeline-micro">
+                          <p className="timeline-label">{copy.how.actionLabel}</p>
+                          <p className="timeline-copy">{step.action}</p>
+                        </div>
+                        <div className="timeline-micro">
+                          <p className="timeline-label">{copy.how.outcomeLabel}</p>
+                          <p className="timeline-copy">{step.outcome}</p>
+                        </div>
                       </div>
                     </button>
                   </li>
