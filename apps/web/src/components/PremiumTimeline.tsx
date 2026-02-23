@@ -5,6 +5,7 @@ export type TimelineStep = {
   title: string;
   description: string;
   badge?: string;
+  chips?: string[];
 };
 
 type PremiumTimelineProps = {
@@ -429,6 +430,18 @@ export default function PremiumTimeline({
                   ) : null}
                   <h3 className="text-xl font-semibold leading-tight text-white sm:text-2xl">{step.title}</h3>
                   <p className="mt-3 text-base leading-relaxed text-slate-200/90 sm:text-lg">{step.description}</p>
+                  {step.chips?.length ? (
+                    <ul className="mt-4 flex flex-wrap gap-2" aria-label="Step tags">
+                      {step.chips.map((chip) => (
+                        <li
+                          key={`${step.title}-${chip}`}
+                          className="inline-flex rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-white/80"
+                        >
+                          {chip}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </motion.article>
               </li>
             );
