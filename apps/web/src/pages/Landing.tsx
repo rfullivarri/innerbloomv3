@@ -192,7 +192,6 @@ export default function LandingPage() {
   };
   const modeFrequency = frequencyByMode[language][activeMode.id];
   const modeStateLabel = language === 'es' ? 'Estado' : 'State';
-  const modeRepresentsLabel = language === 'es' ? 'Mood que representa' : 'Mood represented';
   const modeObjectiveLabel = language === 'es' ? 'Objetivo' : 'Objective';
 
   usePageMeta({
@@ -579,10 +578,6 @@ export default function LandingPage() {
                     <p className="mode-meta-item">
                       <span className="mode-meta-label">{modeStateLabel}</span>
                       <span className="mode-meta-copy">{activeMode.state}</span>
-                    </p>
-                    <p className="mode-meta-item">
-                      <span className="mode-meta-label">{modeRepresentsLabel}</span>
-                      <span className="mode-meta-copy">{activeVisual.avatarLabel}</span>
                     </p>
                     <span className="mode-frequency-chip">{modeFrequency}</span>
                   </div>
