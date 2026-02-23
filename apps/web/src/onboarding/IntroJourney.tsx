@@ -15,7 +15,9 @@ import { HUD } from './ui/HUD';
 import { Snack } from './ui/Snack';
 
 interface IntroJourneyProps {
-  onFinish?: (payload: ReturnType<typeof buildPayload>) => void;
+  onFinish?: (payload: ReturnType<typeof buildPayload>) => Promise<void> | void;
+  isSubmitting?: boolean;
+  submitError?: string | null;
 }
 
 const OPEN_TEXT_FIELDS: Partial<Record<StepId, 'bodyOpen' | 'soulOpen' | 'mindOpen'>> = {
@@ -27,7 +29,7 @@ const OPEN_TEXT_FIELDS: Partial<Record<StepId, 'bodyOpen' | 'soulOpen' | 'mindOp
   'foundations-mind': 'mindOpen',
 };
 
-export function IntroJourney({ onFinish }: IntroJourneyProps) {
+export function IntroJourney({ onFinish, isSubmitting = false, submitError = null }: IntroJourneyProps) {
   const {
     state,
     setMode,
@@ -107,10 +109,9 @@ export function IntroJourney({ onFinish }: IntroJourneyProps) {
     goNext();
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     const payload = buildPayload(answers, xp);
-    console.log('[onboarding] payload', payload);
-    onFinish?.(payload);
+    await onFinish?.(payload);
   };
 
   const handleRestart = () => {
@@ -354,7 +355,16 @@ export function IntroJourney({ onFinish }: IntroJourneyProps) {
           />
         );
       case 'summary':
-        return <SummaryStep answers={answers} xp={xp} onBack={goPrevious} onFinish={handleFinish} />;
+        return (
+          <SummaryStep
+            answers={answers}
+            xp={xp}
+            onBack={goPrevious}
+            onFinish={handleFinish}
+            isSubmitting={isSubmitting}
+            submitError={submitError}
+          />
+        );
       default:
         return null;
     }
