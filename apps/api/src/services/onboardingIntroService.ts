@@ -89,6 +89,36 @@ WHERE NOT EXISTS (
   WHERE user_id = $1 AND pillar_id = $2 AND source = 'onboarding'
 );
 `;
+const UPSERT_FREE_TRIAL_SUBSCRIPTION_SQL = `
+WITH active_subscription AS (
+  SELECT 1
+  FROM user_subscriptions
+  WHERE user_id = $1
+    AND status IN ('trialing', 'active', 'past_due')
+    AND COALESCE(current_period_ends_at, trial_ends_at, grace_ends_at) >= now()
+  LIMIT 1
+)
+INSERT INTO user_subscriptions (
+  user_id,
+  plan_code,
+  status,
+  trial_starts_at,
+  trial_ends_at,
+  current_period_starts_at,
+  current_period_ends_at,
+  cancel_at_period_end
+)
+SELECT
+  $1,
+  'FREE',
+  'trialing',
+  now(),
+  now() + interval '2 months',
+  now(),
+  now() + interval '2 months',
+  false
+WHERE NOT EXISTS (SELECT 1 FROM active_subscription);
+`;
 const SELECT_LATEST_SESSION_SQL = `
   SELECT
     onboarding_session_id,
@@ -225,6 +255,8 @@ export async function submitOnboardingIntro(
       // Update the user's mode imagery after all onboarding data has been persisted.
       await client.query(UPDATE_USER_GAME_MODE_SQL, [userId, gameModeId, imageUrl]);
 
+      await upsertFreeTrialSubscription(client, userId);
+
       await client.query('COMMIT');
 
       const normalizedMode = payload.mode.toLowerCase() as NormalizedMode;
@@ -241,6 +273,10 @@ export async function submitOnboardingIntro(
       throw error;
     }
   });
+}
+
+async function upsertFreeTrialSubscription(client: PoolClient, userId: string): Promise<void> {
+  await client.query(UPSERT_FREE_TRIAL_SUBSCRIPTION_SQL, [userId]);
 }
 
 export async function getLatestOnboardingSession(
