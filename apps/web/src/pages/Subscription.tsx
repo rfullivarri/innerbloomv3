@@ -76,7 +76,7 @@ export default function SubscriptionPage() {
 
   if (isLocked) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6 text-white backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-6 text-white backdrop-blur-md">
         <div className="w-full max-w-xl rounded-3xl border border-white/15 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-indigo-950/70 p-6 text-center shadow-[0_30px_120px_rgba(15,23,42,0.55)] backdrop-blur-xl">
           <h1 className="text-3xl font-semibold">Tu suscripción está inactiva</h1>
           <p className="mx-auto mt-3 max-w-xl text-text-muted">Activá un plan para volver a acceder a las funciones premium.</p>
