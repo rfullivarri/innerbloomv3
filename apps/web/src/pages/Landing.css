@@ -974,41 +974,41 @@
   display: grid;
   align-content: start;
   gap: 0;
-  border-radius: 24px;
+  border-radius: 36px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: linear-gradient(155deg, rgba(28, 46, 81, 0.94), rgba(15, 27, 62, 0.97));
   box-shadow: 0 20px 60px rgba(3, 10, 35, 0.38);
-  padding: 12.1px;
+  padding: 18.15px;
 }
 
 .landing .pricing-plan-name {
-  font-size: 0.54rem;
+  font-size: 0.81rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.8);
 }
 
 .landing .pricing-plan-price {
-  margin-top: 0.44rem;
-  font-size: 1.1rem;
+  margin-top: 0.66rem;
+  font-size: 1.65rem;
   font-weight: 600;
   line-height: 1.15;
   color: #fff;
 }
 
 .landing .pricing-plan-detail {
-  margin-top: 0.55rem;
-  min-height: 46px;
+  margin-top: 0.825rem;
+  min-height: 69px;
   color: rgba(255, 255, 255, 0.75);
-  font-size: 0.55rem;
+  font-size: 0.825rem;
   line-height: 1.45;
 }
 
 .landing .pricing-plan-action {
-  margin-top: 0.88rem;
+  margin-top: 1.32rem;
   width: 100%;
-  padding: 0.55rem 0.83rem;
-  font-size: 0.68rem;
+  padding: 0.825rem 1.245rem;
+  font-size: 1.02rem;
 }
 
 .landing .faq details {
