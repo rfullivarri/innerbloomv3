@@ -537,7 +537,7 @@
 .landing .modes-carousel {
   display: grid;
   grid-template-columns: minmax(88px, 112px) minmax(320px, calc((var(--mode-count, 4) * 112px) + ((var(--mode-count, 4) - 1) * 10px)));
-  align-items: start;
+  align-items: stretch;
   justify-content: center;
   gap: clamp(14px, 2vw, 26px);
   margin: 8px auto 0;
@@ -550,7 +550,7 @@
   flex-direction: column;
   gap: 14px;
   width: min(100%, calc((var(--mode-count, 4) * 112px) + ((var(--mode-count, 4) - 1) * 10px)));
-  max-height: 72vh;
+  min-height: 100%;
   margin-inline: auto;
   overflow: hidden;
 }
@@ -591,14 +591,17 @@
 
 .landing .mode-media {
   margin: 0;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  flex: 1;
+  min-height: 0;
 }
 
 .landing .mode-video {
   width: 100%;
-  aspect-ratio: 4 / 5;
-  max-height: min(48vh, 420px);
+  flex: 1;
+  min-height: 260px;
   border-radius: 12px;
   object-fit: cover;
 }
