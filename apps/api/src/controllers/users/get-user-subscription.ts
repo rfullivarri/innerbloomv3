@@ -7,6 +7,8 @@ type SubscriptionRow = {
   status: string;
   trial_ends_at: string | null;
   current_period_ends_at: string | null;
+  current_period_starts_at: string | null;
+  updated_at: string;
 };
 
 type DatabaseError = {
@@ -48,10 +50,17 @@ export async function getUserSubscription(req: Request, res: Response) {
 
   try {
     const result = await pool.query<SubscriptionRow>(
-      `SELECT plan_code, status, trial_ends_at, current_period_ends_at
+      `SELECT plan_code, status, trial_ends_at, current_period_starts_at, current_period_ends_at, updated_at
          FROM user_subscriptions
         WHERE user_id = $1
-        ORDER BY updated_at DESC
+        ORDER BY
+          CASE
+            WHEN status IN ('trialing', 'active', 'past_due')
+              AND COALESCE(current_period_ends_at, trial_ends_at, current_period_starts_at) >= now()
+            THEN 0
+            ELSE 1
+          END,
+          updated_at DESC
         LIMIT 1`,
       [userId],
     );
@@ -60,7 +69,7 @@ export async function getUserSubscription(req: Request, res: Response) {
     if (!subscription) {
       res.json({
         plan: 'FREE',
-        status: 'active',
+        status: 'inactive',
         trialEndsAt: null,
         nextRenewalAt: null,
       });
@@ -77,7 +86,7 @@ export async function getUserSubscription(req: Request, res: Response) {
     if (isMissingSubscriptionTableError(error)) {
       res.json({
         plan: 'FREE',
-        status: 'active',
+        status: 'inactive',
         trialEndsAt: null,
         nextRenewalAt: null,
       });
@@ -87,4 +96,3 @@ export async function getUserSubscription(req: Request, res: Response) {
     throw new HttpError(500, 'internal_error', 'Unable to fetch subscription', { cause: error });
   }
 }
-
