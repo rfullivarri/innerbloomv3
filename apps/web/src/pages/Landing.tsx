@@ -178,16 +178,16 @@ export default function LandingPage() {
   const activeVisual = MODE_VISUALS[language][activeMode.id];
   const frequencyByMode: Record<Language, Record<typeof activeMode.id, string>> = {
     es: {
-      low: '2×/semana',
-      chill: '3×/semana',
-      flow: '4×/semana',
-      evolve: '5×/semana'
+      low: '1×/semana',
+      chill: '2×/semana',
+      flow: '3×/semana',
+      evolve: '4×/semana'
     },
     en: {
-      low: '2×/week',
-      chill: '3×/week',
-      flow: '4×/week',
-      evolve: '5×/week'
+      low: '1×/week',
+      chill: '2×/week',
+      flow: '3×/week',
+      evolve: '4×/week'
     }
   };
   const modeFrequency = frequencyByMode[language][activeMode.id];
