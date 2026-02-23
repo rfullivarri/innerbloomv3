@@ -970,30 +970,45 @@
 }
 
 .landing .pricing-card {
+  position: relative;
   display: grid;
   align-content: start;
-  gap: 12px;
+  gap: 0;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(155deg, rgba(28, 46, 81, 0.94), rgba(15, 27, 62, 0.97));
+  box-shadow: 0 20px 60px rgba(3, 10, 35, 0.38);
+  padding: 12.1px;
 }
 
 .landing .pricing-plan-name {
-  font-size: 0.82rem;
-  letter-spacing: 0.14em;
+  font-size: 0.54rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(194, 214, 245, 0.82);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .landing .pricing-plan-price {
-  font-size: 1.5rem;
-  font-weight: 800;
-  line-height: 1.2;
-  color: #f6f9ff;
+  margin-top: 0.44rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: #fff;
 }
 
 .landing .pricing-plan-detail {
-  color: rgba(216, 230, 255, 0.9);
-  font-size: 0.92rem;
+  margin-top: 0.55rem;
+  min-height: 46px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.55rem;
   line-height: 1.45;
-  min-height: 3.1em;
+}
+
+.landing .pricing-plan-action {
+  margin-top: 0.88rem;
+  width: 100%;
+  padding: 0.55rem 0.83rem;
+  font-size: 0.68rem;
 }
 
 .landing .faq details {
