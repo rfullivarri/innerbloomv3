@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { pool } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 
-const ENABLED_STATUSES = new Set(['trialing', 'active']);
+const ENABLED_STATUSES = new Set(['trialing', 'active', 'superuser']);
 const EXPLICIT_BLOCKED_STATUSES = new Set(['canceled', 'expired']);
 
 type SubscriptionRow = {
