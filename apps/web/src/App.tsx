@@ -16,6 +16,7 @@ import OnboardingIntroPage from './pages/OnboardingIntro';
 import PricingPage from './pages/Pricing';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
 import SubscriptionPage from './pages/Subscription';
+import PremiumTimelineDemoPage from './pages/PremiumTimelineDemo';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -132,6 +133,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/landing-v2" element={<LandingV2Page />} />
+        <Route path="/premium-timeline" element={<PremiumTimelineDemoPage />} />
         <Route path="/intro-journey" element={<OnboardingIntroPage />} />
         <Route
           path="/login/*"
