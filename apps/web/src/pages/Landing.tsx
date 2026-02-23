@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type TouchEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
@@ -165,15 +165,32 @@ export default function LandingPage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
   const [activeModeIndex, setActiveModeIndex] = useState(0);
+  const [isModesInView, setIsModesInView] = useState(false);
+  const [hasModeInteracted, setHasModeInteracted] = useState(false);
   const [activeHowStep, setActiveHowStep] = useState<number | null>(null);
   const howStepRefs = useRef<Array<HTMLLIElement | null>>([]);
+  const modesSectionRef = useRef<HTMLElement | null>(null);
+  const modeThumbTouchStartXRef = useRef<number | null>(null);
 
   const testimonialCount = copy.testimonials.items.length;
   const modeCount = copy.modes.items.length;
   const activeMode = copy.modes.items[activeModeIndex] ?? copy.modes.items[0];
-  const prevModeIndex = (activeModeIndex - 1 + modeCount) % modeCount;
-  const nextModeIndex = (activeModeIndex + 1) % modeCount;
   const activeVisual = MODE_VISUALS[language][activeMode.id];
+  const frequencyByMode: Record<Language, Record<typeof activeMode.id, string>> = {
+    es: {
+      low: '2×/semana',
+      chill: '3×/semana',
+      flow: '4×/semana',
+      evolve: '5×/semana'
+    },
+    en: {
+      low: '2×/week',
+      chill: '3×/week',
+      flow: '4×/week',
+      evolve: '5×/week'
+    }
+  };
+  const modeFrequency = frequencyByMode[language][activeMode.id];
 
   usePageMeta({
     title: 'Innerbloom',
@@ -234,6 +251,39 @@ export default function LandingPage() {
 
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    const sectionElement = modesSectionRef.current;
+
+    if (!sectionElement) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsModesInView(entry.isIntersecting);
+      },
+      { threshold: 0.35 }
+    );
+
+    observer.observe(sectionElement);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion || hasModeInteracted || !isModesInView || modeCount <= 1) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setActiveModeIndex((current) => (current + 1) % modeCount);
+    }, 2500);
+
+    return () => window.clearInterval(timer);
+  }, [hasModeInteracted, isModesInView, modeCount]);
 
   useEffect(() => {
     const stepElements = howStepRefs.current.filter((step): step is HTMLLIElement => step !== null);
@@ -297,6 +347,58 @@ export default function LandingPage() {
 
   const selectMode = (index: number) => {
     setActiveModeIndex((index + modeCount) % modeCount);
+  };
+
+  const stopModesAutoplay = () => {
+    setHasModeInteracted(true);
+  };
+
+  const handleModeSelect = (index: number) => {
+    stopModesAutoplay();
+    selectMode(index);
+  };
+
+  const handleModeThumbKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const { key } = event;
+
+    if (key === 'Enter' || key === ' ' || key === 'Spacebar') {
+      event.preventDefault();
+      handleModeSelect(index);
+      return;
+    }
+
+    if (key === 'ArrowUp' || key === 'ArrowLeft') {
+      event.preventDefault();
+      stopModesAutoplay();
+      selectMode(index - 1);
+      return;
+    }
+
+    if (key === 'ArrowDown' || key === 'ArrowRight') {
+      event.preventDefault();
+      stopModesAutoplay();
+      selectMode(index + 1);
+    }
+  };
+
+  const handleModeThumbTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    modeThumbTouchStartXRef.current = event.changedTouches[0]?.clientX ?? null;
+  };
+
+  const handleModeThumbTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    const startX = modeThumbTouchStartXRef.current;
+    const endX = event.changedTouches[0]?.clientX;
+
+    if (startX === null || endX === undefined) {
+      modeThumbTouchStartXRef.current = null;
+      return;
+    }
+
+    if (Math.abs(endX - startX) > 18) {
+      stopModesAutoplay();
+    }
+
+    modeThumbTouchStartXRef.current = null;
   };
 
   const handlePricingCta = () => {
@@ -431,25 +533,42 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="modes section-pad reveal-on-scroll" id="modes">
+        <section ref={modesSectionRef} className="modes section-pad reveal-on-scroll" id="modes">
           <div className="container">
             <h2>{copy.modes.title}</h2>
             <p className="section-sub">{copy.modes.intro}</p>
             <div className="modes-carousel" aria-live="polite">
-              <button type="button" className="mode-mini mode-mini-left" onClick={() => selectMode(prevModeIndex)}>
-                <img src={MODE_VISUALS[language][copy.modes.items[prevModeIndex].id].avatarImage} alt="" aria-hidden />
-                <span>{copy.modes.items[prevModeIndex].title}</span>
-              </button>
+              <div
+                className="mode-thumbs"
+                role="listbox"
+                aria-label={language === 'es' ? 'Elegir modo' : 'Choose mode'}
+                onTouchStart={handleModeThumbTouchStart}
+                onTouchEnd={handleModeThumbTouchEnd}
+              >
+                {copy.modes.items.map((mode, index) => {
+                  const visual = MODE_VISUALS[language][mode.id];
+                  const isActive = index === activeModeIndex;
+                  return (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      role="option"
+                      aria-label={mode.title}
+                      aria-selected={isActive}
+                      className={`mode-thumb ${isActive ? 'is-active' : ''}`}
+                      onClick={() => handleModeSelect(index)}
+                      onKeyDown={(event) => handleModeThumbKeyDown(event, index)}
+                    >
+                      <img src={visual.avatarImage} alt="" aria-hidden />
+                    </button>
+                  );
+                })}
+              </div>
 
               <article className={`card mode mode-main mode-${activeMode.id} fade-item`}>
                 <header className="mode-header">
                   <div className="mode-title">{activeMode.title}</div>
-                  <p className="muted">
-                    <strong>{language === 'es' ? 'Estado:' : 'State:'}</strong> {activeMode.state}
-                  </p>
-                  <p>
-                    <strong>{language === 'es' ? 'Objetivo:' : 'Goal:'}</strong> {activeMode.goal}
-                  </p>
+                  <span className="mode-frequency-chip">{modeFrequency}</span>
                 </header>
                 <figure className="mode-media">
                   <video
@@ -464,41 +583,11 @@ export default function LandingPage() {
                   />
                   <figcaption className="mode-media-caption">{activeVisual.avatarLabel}</figcaption>
                 </figure>
+                <div className="mode-goal-block">
+                  <p className="mode-goal-label">{language === 'es' ? 'Objetivo' : 'Objective'}</p>
+                  <p className="mode-goal-copy">{activeMode.goal}</p>
+                </div>
               </article>
-
-              <button type="button" className="mode-mini mode-mini-right" onClick={() => selectMode(nextModeIndex)}>
-                <img src={MODE_VISUALS[language][copy.modes.items[nextModeIndex].id].avatarImage} alt="" aria-hidden />
-                <span>{copy.modes.items[nextModeIndex].title}</span>
-              </button>
-            </div>
-
-            <div className="mode-thumbs" role="tablist" aria-label={language === 'es' ? 'Elegir modo' : 'Choose mode'}>
-              {copy.modes.items.map((mode, index) => (
-                <button
-                  key={mode.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={index === activeModeIndex}
-                  className={`mode-thumb ${index === activeModeIndex ? 'is-active' : ''}`}
-                  onClick={() => selectMode(index)}
-                >
-                  {mode.title}
-                </button>
-              ))}
-            </div>
-
-            <div className="modes-dots" role="tablist" aria-label={language === 'es' ? 'Modo activo' : 'Active mode'}>
-              {copy.modes.items.map((mode, index) => (
-                <button
-                  key={mode.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={index === activeModeIndex}
-                  aria-label={`${mode.title} (${index + 1}/${modeCount})`}
-                  className={`modes-dot ${index === activeModeIndex ? 'is-active' : ''}`}
-                  onClick={() => selectMode(index)}
-                />
-              ))}
             </div>
           </div>
         </section>
