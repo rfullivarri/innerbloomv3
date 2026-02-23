@@ -14,9 +14,45 @@ type PremiumTimelineProps = {
   lineOffsetX?: number;
   cardWidth?: number | string;
   compact?: boolean;
+  amplitudeDesktop?: number;
+  amplitudeMobile?: number;
+  periodDesktop?: number;
+  periodMobile?: number;
+  tailTopPx?: number;
+  tailBottomPx?: number;
 };
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+type Point = { x: number; y: number };
+
+const catmullRomToBezierPath = (points: Point[]) => {
+  if (points.length === 0) {
+    return '';
+  }
+
+  if (points.length === 1) {
+    return `M ${points[0].x} ${points[0].y}`;
+  }
+
+  let d = `M ${points[0].x} ${points[0].y}`;
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const p0 = points[Math.max(index - 1, 0)];
+    const p1 = points[index];
+    const p2 = points[index + 1];
+    const p3 = points[Math.min(index + 2, points.length - 1)];
+
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+    d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+  }
+
+  return d;
+};
 
 export default function PremiumTimeline({
   steps,
@@ -25,6 +61,12 @@ export default function PremiumTimeline({
   lineOffsetX = 56,
   cardWidth = 860,
   compact = false,
+  amplitudeDesktop = 18,
+  amplitudeMobile = 12,
+  periodDesktop = 250,
+  periodMobile = 230,
+  tailTopPx = 80,
+  tailBottomPx = 120,
 }: PremiumTimelineProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
@@ -144,28 +186,37 @@ export default function PremiumTimeline({
       }
 
       if (points.length === 1) {
-        const startY = Math.max(points[0].y - 40, 0);
-        const endY = Math.min(height, points[0].y + 40);
+        const startY = points[0].y - tailTopPx;
+        const endY = points[0].y + tailBottomPx;
         setPathData(`M ${points[0].x} ${startY} L ${points[0].x} ${endY}`);
         return;
       }
 
-      const wave = compact ? 12 : 18;
-      let d = `M ${points[0].x} ${Math.max(points[0].y - 40, 0)}`;
+      const yStart = points[0].y - tailTopPx;
+      const yEnd = points[points.length - 1].y + tailBottomPx;
+      const isMobile = window.matchMedia('(max-width: 639px)').matches;
+      const amplitude = isMobile ? amplitudeMobile : amplitudeDesktop;
+      const period = isMobile ? periodMobile : periodDesktop;
+      const sampleStep = compact ? 12 : 10;
+      const phase = 0;
+      const omega = (2 * Math.PI) / period;
+      const sampledPoints: Point[] = [];
 
-      for (let index = 0; index < points.length - 1; index += 1) {
-        const current = points[index];
-        const next = points[index + 1];
-        const direction = index % 2 === 0 ? 1 : -1;
-        const dy = next.y - current.y;
-
-        d += ` C ${current.x + direction * wave} ${current.y + dy * 0.34}, ${next.x - direction * wave} ${
-          current.y + dy * 0.66
-        }, ${next.x} ${next.y}`;
+      for (let y = yStart; y <= yEnd; y += sampleStep) {
+        sampledPoints.push({
+          x: resolvedAxisX + amplitude * Math.sin(omega * (y - yStart) + phase),
+          y,
+        });
       }
 
-      d += ` L ${points[points.length - 1].x} ${Math.min(height, points[points.length - 1].y + 40)}`;
-      setPathData(d);
+      if (sampledPoints[sampledPoints.length - 1]?.y !== yEnd) {
+        sampledPoints.push({
+          x: resolvedAxisX + amplitude * Math.sin(omega * (yEnd - yStart) + phase),
+          y: yEnd,
+        });
+      }
+
+      setPathData(catmullRomToBezierPath(sampledPoints));
     };
 
     recomputePath();
@@ -180,7 +231,18 @@ export default function PremiumTimeline({
       resizeObserver.disconnect();
       window.removeEventListener('resize', recomputePath);
     };
-  }, [axisX, compact, lineOffsetX, steps]);
+  }, [
+    amplitudeDesktop,
+    amplitudeMobile,
+    axisX,
+    compact,
+    lineOffsetX,
+    periodDesktop,
+    periodMobile,
+    steps,
+    tailBottomPx,
+    tailTopPx,
+  ]);
 
   useLayoutEffect(() => {
     if (!pathRef.current || !pathData) {
@@ -209,7 +271,9 @@ export default function PremiumTimeline({
     const updateProgress = () => {
       const rect = node.getBoundingClientRect();
       const viewportHeight = window.innerHeight || 1;
-      const rawProgress = (viewportHeight - rect.top) / (rect.height + viewportHeight);
+      const start = viewportHeight;
+      const end = -rect.height;
+      const rawProgress = (start - rect.top) / (start - end);
       setProgress(clamp(rawProgress, 0, 1));
     };
 
@@ -266,6 +330,15 @@ export default function PremiumTimeline({
               <feDropShadow dx="0" dy="0" stdDeviation="2.6" floodColor="rgba(255,255,255,0.34)" />
             </filter>
           </defs>
+          <path
+            d={pathData || `M ${fallbackAxisX} 0 L ${fallbackAxisX} ${Math.max(containerHeight, 1)}`}
+            fill="none"
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth={6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ filter: 'blur(6px)' }}
+          />
           <path
             ref={pathRef}
             d={pathData || `M ${fallbackAxisX} 0 L ${fallbackAxisX} ${Math.max(containerHeight, 1)}`}
