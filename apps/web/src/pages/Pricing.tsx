@@ -7,11 +7,11 @@ import { changePlan, type PlanCode, type SubscriptionData } from '../lib/api/sub
 const PLANS = OFFICIAL_LANDING_CONTENT.es.pricing.plans;
 
 const PLAN_BUTTON_LABELS: Record<PlanCode, string> = {
-  FREE: 'Seleccionar free trial',
-  MONTH: 'Seleccionar mensual',
-  SIX_MONTHS: 'Seleccionar semestral',
-  YEAR: 'Seleccionar anual',
-  SUPERUSER: 'Seleccionar plan',
+  FREE: 'Seleccionar',
+  MONTH: 'Seleccionar',
+  SIX_MONTHS: 'Seleccionar',
+  YEAR: 'Seleccionar',
+  SUPERUSER: 'Seleccionar',
 };
 
 export default function PricingPage() {
@@ -77,6 +77,16 @@ export default function PricingPage() {
           </p>
         ) : null}
 
+        {selectedPlan === 'SUPERUSER' ? (
+          <section className="mx-auto mt-8 max-w-3xl rounded-3xl border border-fuchsia-300/60 bg-gradient-to-r from-violet-600/35 via-purple-600/25 to-fuchsia-500/30 p-6 shadow-[0_18px_55px_rgba(139,92,246,0.45)]">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-fuchsia-100/90">Plan activo</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white md:text-3xl">Superusuario</h2>
+            <p className="mt-3 text-base text-fuchsia-100/90">
+              Tenés un plan Superusuario activo. Tu cuenta mantiene acceso privilegiado y no requiere cambiar de plan desde este panel.
+            </p>
+          </section>
+        ) : null}
+
         <section className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {PLANS.map((plan) => {
             const isSelected = selectedPlan === plan.id;
@@ -123,7 +133,7 @@ export default function PricingPage() {
 
         <div className="mt-8 flex justify-center">
           <Link
-            to="/"
+            to="/dashboard-v3"
             className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-text transition hover:bg-white/5"
           >
             Volver / Back
