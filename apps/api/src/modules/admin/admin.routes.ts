@@ -20,6 +20,8 @@ import {
   postAdminSendReminder,
   postAdminSendTasksReady,
   postAdminRunSubscriptionNotifications,
+  getAdminUserSubscription,
+  putAdminUserSubscription,
   getAdminFeedbackDefinitions,
   patchAdminFeedbackDefinition,
   getAdminFeedbackUserHistory,
@@ -45,6 +47,8 @@ adminRouter.patch('/users/:userId/tasks/:taskId', patchAdminUserTask);
 adminRouter.get('/users/:userId/logs.csv', exportAdminUserLogsCsv);
 adminRouter.post('/users/:userId/daily-reminder/send', postAdminSendReminder);
 adminRouter.post('/users/:userId/tasks-ready/send', postAdminSendTasksReady);
+adminRouter.get('/users/:userId/subscription', getAdminUserSubscription);
+adminRouter.put('/users/:userId/subscription', putAdminUserSubscription);
 adminRouter.post('/subscription-notifications/run', postAdminRunSubscriptionNotifications);
 adminRouter.get('/taskgen/trace', getTaskgenTraceForUser);
 adminRouter.get('/taskgen/trace/by-correlation/:id', getTaskgenTraceByCorrelation);

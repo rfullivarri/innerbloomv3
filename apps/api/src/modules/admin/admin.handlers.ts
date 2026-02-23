@@ -17,6 +17,7 @@ import {
   feedbackDefinitionUpdateSchema,
   feedbackUserNotificationUpdateSchema,
   subscriptionNotificationsTriggerBodySchema,
+  adminSubscriptionUpdateBodySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -38,6 +39,8 @@ import {
   getFeedbackUserHistory,
   updateFeedbackUserNotificationState,
   triggerSubscriptionNotificationsJob,
+  getUserSubscriptionForAdmin,
+  updateUserSubscriptionFromAdmin,
 } from './admin.service.js';
 import {
   getTaskgenEventsByCorrelation,
@@ -150,6 +153,23 @@ export const postAdminSendTasksReady = asyncHandler(async (req: Request, res: Re
   res.json(result);
 });
 
+
+
+export const getAdminUserSubscription = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const result = await getUserSubscriptionForAdmin(userId);
+  res.json(result);
+});
+
+export const putAdminUserSubscription = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const body = adminSubscriptionUpdateBodySchema.parse(req.body ?? {});
+  const result = await updateUserSubscriptionFromAdmin(userId, {
+    planCode: body.planCode,
+    status: body.status,
+  });
+  res.json(result);
+});
 
 export const postAdminRunSubscriptionNotifications = asyncHandler(async (req: Request, res: Response) => {
   const body = subscriptionNotificationsTriggerBodySchema.parse(req.body ?? {});

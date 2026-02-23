@@ -123,6 +123,18 @@ export const reminderSendBodySchema = z.object({
   channel: z.literal('email').optional().default('email'),
 });
 
+const subscriptionStatusSchema = z.enum(['trialing', 'active', 'past_due', 'canceled', 'expired']);
+
+export const adminSubscriptionUpdateBodySchema = z.object({
+  planCode: z
+    .string()
+    .trim()
+    .min(1)
+    .max(50)
+    .transform((value) => value.toUpperCase()),
+  status: subscriptionStatusSchema.optional().default('active'),
+});
+
 
 export const subscriptionNotificationsTriggerBodySchema = z.object({
   runAt: z.string().datetime().optional(),
@@ -189,6 +201,7 @@ export type TaskgenForceRunBody = z.infer<typeof taskgenForceRunBodySchema>;
 export type TaskgenTraceQuery = z.infer<typeof taskgenTraceQuerySchema>;
 export type TaskgenTraceGlobalQuery = z.infer<typeof taskgenTraceGlobalQuerySchema>;
 export type ReminderSendBody = z.infer<typeof reminderSendBodySchema>;
+export type AdminSubscriptionUpdateBody = z.infer<typeof adminSubscriptionUpdateBodySchema>;
 export type SubscriptionNotificationsTriggerBody = z.infer<typeof subscriptionNotificationsTriggerBodySchema>;
 export type FeedbackDefinitionUpdateInput = z.infer<typeof feedbackDefinitionUpdateSchema>;
 export type FeedbackUserNotificationUpdateInput = z.infer<typeof feedbackUserNotificationUpdateSchema>;
