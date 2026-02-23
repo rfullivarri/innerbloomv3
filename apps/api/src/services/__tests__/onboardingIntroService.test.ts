@@ -267,6 +267,13 @@ function createSubmitExpectations(options: {
       },
     },
     {
+      match: (sql) => sql.includes('INSERT INTO user_subscriptions'),
+      handle: (_sql, params) => {
+        expect(params).toEqual([userId]);
+        return { rowCount: 1 };
+      },
+    },
+    {
       match: (sql) => sql === 'COMMIT',
       handle: () => ({}),
     },
