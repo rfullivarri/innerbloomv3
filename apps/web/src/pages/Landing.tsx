@@ -738,11 +738,11 @@ export default function LandingPage() {
                   <p className="pricing-plan-price">{plan.price}</p>
                   <p className="pricing-plan-detail">{plan.detail}</p>
                   {isSignedIn ? (
-                    <button type="button" className={buttonClasses()} onClick={handlePricingCta}>
+                    <button type="button" className={`${buttonClasses()} pricing-plan-action`} onClick={handlePricingCta}>
                       {copy.pricing.actionLabel}
                     </button>
                   ) : (
-                    <Link className={buttonClasses()} to="/sign-up">
+                    <Link className={`${buttonClasses()} pricing-plan-action`} to="/sign-up">
                       {copy.pricing.actionLabel}
                     </Link>
                   )}
