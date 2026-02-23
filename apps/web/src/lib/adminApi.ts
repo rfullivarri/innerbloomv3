@@ -5,6 +5,8 @@ import type {
   AdminTaskRow,
   AdminTaskSummaryRow,
   AdminUser,
+  AdminUserSubscriptionResponse,
+  SubscriptionStatus,
   TaskgenTraceEvent,
 } from './types';
 
@@ -137,6 +139,41 @@ export async function exportAdminLogsCsv(userId: string, params: LogFilters = {}
   return response.text();
 }
 
+
+
+export async function fetchAdminUserSubscription(userId: string) {
+  return apiAuthorizedGet<AdminUserSubscriptionResponse>(`/admin/users/${encodeURIComponent(userId)}/subscription`);
+}
+
+export async function updateAdminUserSubscription(
+  userId: string,
+  payload: { planCode: string; status?: SubscriptionStatus },
+) {
+  const url = buildApiUrl(`/admin/users/${encodeURIComponent(userId)}/subscription`);
+  const response = await apiAuthorizedFetch(url, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      planCode: payload.planCode,
+      status: payload.status ?? 'active',
+    }),
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response.json() as Promise<{ ok: boolean }>;
+}
 export async function verifyAdminAccess() {
   return apiAuthorizedGet<{ ok: boolean }>('/admin/me');
 }

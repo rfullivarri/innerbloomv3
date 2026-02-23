@@ -1,12 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { AdminInsights, AdminLogRow, AdminTaskSummaryRow, AdminUser } from '../../lib/types';
+import type {
+  AdminInsights,
+  AdminLogRow,
+  AdminTaskSummaryRow,
+  AdminUser,
+  AdminUserSubscriptionResponse,
+  SubscriptionStatus,
+} from '../../lib/types';
 import {
   exportAdminLogsCsv,
   fetchAdminInsights,
   fetchAdminLogs,
   fetchAdminTaskStats,
+  fetchAdminUserSubscription,
   sendAdminDailyReminder,
   sendAdminTasksReadyEmail,
+  updateAdminUserSubscription,
 } from '../../lib/adminApi';
 import { AdminDataTable } from './AdminDataTable';
 import { FiltersBar, type AdminFilters } from './FiltersBar';
@@ -21,6 +30,14 @@ const DEFAULT_FILTERS: AdminFilters = {
   q: '',
   page: 1,
   pageSize: 10,
+};
+
+const SUBSCRIPTION_STATUS_LABELS: Record<SubscriptionStatus, string> = {
+  trialing: 'Trial',
+  active: 'Activa',
+  past_due: 'Past due',
+  canceled: 'Cancelada',
+  expired: 'Expirada',
 };
 
 type LogsState = {
@@ -50,6 +67,11 @@ export function AdminLayout() {
   const [sendingTasksReady, setSendingTasksReady] = useState(false);
   const [tasksReadySuccess, setTasksReadySuccess] = useState<string | null>(null);
   const [tasksReadyError, setTasksReadyError] = useState<string | null>(null);
+  const [subscriptionData, setSubscriptionData] = useState<AdminUserSubscriptionResponse | null>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(false);
+  const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
+  const [updatingSubscription, setUpdatingSubscription] = useState(false);
+  const [subscriptionActionMessage, setSubscriptionActionMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedUser) {
@@ -182,7 +204,73 @@ export function AdminLayout() {
     setReminderError(null);
     setTasksReadySuccess(null);
     setTasksReadyError(null);
+    setSubscriptionData(null);
+    setSubscriptionError(null);
+    setSubscriptionActionMessage(null);
   }, []);
+
+
+  useEffect(() => {
+    if (!selectedUser) {
+      setSubscriptionData(null);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingSubscription(true);
+    setSubscriptionError(null);
+
+    fetchAdminUserSubscription(selectedUser.id)
+      .then((data) => {
+        if (!cancelled) {
+          setSubscriptionData(data);
+        }
+      })
+      .catch((error: unknown) => {
+        console.error('[admin] failed to fetch subscription', error);
+        if (!cancelled) {
+          setSubscriptionError('No se pudo cargar la suscripción del usuario.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingSubscription(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedUser]);
+
+  const handleUpdateSubscription = useCallback(
+    async (payload: { planCode: string; status?: SubscriptionStatus; successMessage: string }) => {
+      if (!selectedUser) {
+        return;
+      }
+
+      setUpdatingSubscription(true);
+      setSubscriptionError(null);
+      setSubscriptionActionMessage(null);
+
+      try {
+        await updateAdminUserSubscription(selectedUser.id, {
+          planCode: payload.planCode,
+          status: payload.status,
+        });
+
+        const refreshed = await fetchAdminUserSubscription(selectedUser.id);
+        setSubscriptionData(refreshed);
+        setSubscriptionActionMessage(payload.successMessage);
+      } catch (error) {
+        console.error('[admin] failed to update subscription', error);
+        setSubscriptionError('No se pudo actualizar la suscripción del usuario.');
+      } finally {
+        setUpdatingSubscription(false);
+      }
+    },
+    [selectedUser],
+  );
 
   const handleSendReminder = useCallback(async () => {
     if (!selectedUser) {
@@ -313,6 +401,71 @@ export function AdminLayout() {
         <UserPicker onSelect={handleSelectUser} selectedUserId={selectedUser?.id ?? null} />
         {selectedUser ? (
           <div className="flex flex-col gap-3">
+            <div className="rounded-xl border border-fuchsia-500/50 bg-fuchsia-500/10 p-4 text-sm text-fuchsia-100">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-200">Suscripción</p>
+                  {loadingSubscription ? <p>Cargando suscripción…</p> : null}
+                  {!loadingSubscription && subscriptionData?.subscription ? (
+                    <>
+                      <p>
+                        Plan actual: <strong>{subscriptionData.subscription.planCode}</strong>
+                        {subscriptionData.subscription.isSuperuser ? ' · SUPERUSER' : ''}
+                      </p>
+                      <p>
+                        Estado: <strong>{SUBSCRIPTION_STATUS_LABELS[subscriptionData.subscription.status]}</strong>
+                        {subscriptionData.subscription.isBillingExempt ? ' · Sin billing' : ''}
+                      </p>
+                    </>
+                  ) : null}
+                  {!loadingSubscription && !subscriptionData?.subscription ? (
+                    <p>Sin suscripción registrada todavía.</p>
+                  ) : null}
+                  {subscriptionActionMessage ? (
+                    <p className="text-xs font-semibold text-emerald-300">{subscriptionActionMessage}</p>
+                  ) : null}
+                  {subscriptionError ? <p className="text-xs font-semibold text-rose-300">{subscriptionError}</p> : null}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void handleUpdateSubscription({
+                        planCode: 'SUPERUSER',
+                        status: 'active',
+                        successMessage: 'Usuario actualizado a SUPERUSER con uso ilimitado y sin billing.',
+                      })
+                    }
+                    disabled={updatingSubscription || loadingSubscription}
+                    className="rounded-lg border border-fuchsia-300/70 bg-fuchsia-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {updatingSubscription ? 'Actualizando…' : 'Hacer superusuario'}
+                  </button>
+
+                  {subscriptionData?.availablePlans
+                    .filter((plan) => plan.active && plan.planCode !== 'SUPERUSER')
+                    .map((plan) => (
+                      <button
+                        key={plan.planCode}
+                        type="button"
+                        onClick={() =>
+                          void handleUpdateSubscription({
+                            planCode: plan.planCode,
+                            status: 'active',
+                            successMessage: `Suscripción actualizada manualmente a ${plan.planCode}.`,
+                          })
+                        }
+                        disabled={updatingSubscription || loadingSubscription}
+                        className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:border-sky-400/60 hover:text-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        Set {plan.planCode}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            </div>
+
             <div className="flex flex-col gap-3 rounded-xl border border-slate-800/70 bg-slate-900/60 p-4 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Recordatorio puntual</p>

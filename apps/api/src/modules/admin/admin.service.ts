@@ -35,6 +35,35 @@ type AdminUserListItem = {
   createdAt: string;
 };
 
+type AdminSubscriptionSummary = {
+  userSubscriptionId: string;
+  planCode: string;
+  status: 'trialing' | 'active' | 'past_due' | 'canceled' | 'expired';
+  trialEndsAt: string | null;
+  currentPeriodEndsAt: string | null;
+  graceEndsAt: string | null;
+  cancelAtPeriodEnd: boolean;
+  isSuperuser: boolean;
+  isBillingExempt: boolean;
+  updatedAt: string;
+};
+
+type AdminSubscriptionPlan = {
+  planCode: string;
+  name: string;
+  active: boolean;
+};
+
+type AdminUserSubscriptionPayload = {
+  user: {
+    id: string;
+    email: string | null;
+    name: string | null;
+  };
+  subscription: AdminSubscriptionSummary | null;
+  availablePlans: AdminSubscriptionPlan[];
+};
+
 type AdminInsights = {
   profile: {
     id: string;
@@ -161,6 +190,24 @@ type UserProfileRow = {
   created_at: string | Date;
   last_seen_at?: string | Date | null;
   level?: string | number | null;
+};
+
+
+type UserSubscriptionRow = {
+  user_subscription_id: string;
+  plan_code: string;
+  status: string;
+  trial_ends_at: string | Date | null;
+  current_period_ends_at: string | Date | null;
+  grace_ends_at: string | Date | null;
+  cancel_at_period_end: boolean;
+  updated_at: string | Date;
+};
+
+type SubscriptionPlanRow = {
+  plan_code: string;
+  name: string;
+  active: boolean;
 };
 
 type DailyXpRow = {
@@ -636,6 +683,176 @@ export async function listUsers(query: ListUsersQuery): Promise<PaginatedResult<
     page,
     pageSize,
     total,
+  };
+}
+
+
+function normalizeSubscriptionStatus(status: string | null | undefined): AdminSubscriptionSummary['status'] {
+  const normalized = (status ?? '').trim().toLowerCase();
+  if (normalized === 'trialing' || normalized === 'active' || normalized === 'past_due' || normalized === 'canceled' || normalized === 'expired') {
+    return normalized;
+  }
+  return 'active';
+}
+
+function toIsoOrNull(value: string | Date | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString();
+}
+
+export async function getUserSubscriptionForAdmin(userId: string): Promise<AdminUserSubscriptionPayload> {
+  const [profileResult, subscriptionResult, plansResult] = await Promise.all([
+    pool.query<Pick<UserProfileRow, 'user_id' | 'email_primary' | 'full_name'>>(
+      `SELECT u.user_id, u.email_primary, u.full_name
+         FROM users u
+        WHERE u.user_id = $1
+          AND u.deleted_at IS NULL
+        LIMIT 1`,
+      [userId],
+    ),
+    pool.query<UserSubscriptionRow>(
+      `SELECT user_subscription_id,
+              plan_code,
+              status,
+              trial_ends_at,
+              current_period_ends_at,
+              grace_ends_at,
+              cancel_at_period_end,
+              updated_at
+         FROM user_subscriptions
+        WHERE user_id = $1
+        ORDER BY updated_at DESC
+        LIMIT 1`,
+      [userId],
+    ),
+    pool.query<SubscriptionPlanRow>(
+      `SELECT plan_code, name, active
+         FROM subscription_plans
+        ORDER BY active DESC, plan_code ASC`,
+    ),
+  ]);
+
+  const profile = profileResult.rows[0];
+  if (!profile) {
+    throw new HttpError(404, 'user_not_found', 'User not found');
+  }
+
+  const sub = subscriptionResult.rows[0] ?? null;
+  return {
+    user: {
+      id: profile.user_id,
+      email: profile.email_primary ?? null,
+      name: profile.full_name ?? null,
+    },
+    subscription: sub
+      ? {
+          userSubscriptionId: sub.user_subscription_id,
+          planCode: sub.plan_code,
+          status: normalizeSubscriptionStatus(sub.status),
+          trialEndsAt: toIsoOrNull(sub.trial_ends_at),
+          currentPeriodEndsAt: toIsoOrNull(sub.current_period_ends_at),
+          graceEndsAt: toIsoOrNull(sub.grace_ends_at),
+          cancelAtPeriodEnd: Boolean(sub.cancel_at_period_end),
+          isSuperuser: sub.plan_code === 'SUPERUSER',
+          isBillingExempt: sub.plan_code === 'SUPERUSER',
+          updatedAt: formatDate(sub.updated_at),
+        }
+      : null,
+    availablePlans: plansResult.rows.map((row) => ({
+      planCode: row.plan_code,
+      name: row.name,
+      active: Boolean(row.active),
+    })),
+  };
+}
+
+export async function updateUserSubscriptionFromAdmin(
+  userId: string,
+  payload: { planCode: string; status: 'trialing' | 'active' | 'past_due' | 'canceled' | 'expired' },
+): Promise<{ ok: boolean; subscription: AdminSubscriptionSummary }> {
+  const profileExistsResult = await pool.query<{ user_id: string }>(
+    `SELECT user_id FROM users WHERE user_id = $1 AND deleted_at IS NULL LIMIT 1`,
+    [userId],
+  );
+
+  if (!profileExistsResult.rows[0]) {
+    throw new HttpError(404, 'user_not_found', 'User not found');
+  }
+
+  const planResult = await pool.query<SubscriptionPlanRow>(
+    `SELECT plan_code, name, active
+       FROM subscription_plans
+      WHERE plan_code = $1
+      LIMIT 1`,
+    [payload.planCode],
+  );
+
+  if (!planResult.rows[0]) {
+    throw new HttpError(400, 'invalid_subscription_plan', 'Plan code is not valid');
+  }
+
+  const updatedResult = await pool.query<UserSubscriptionRow>(
+    `INSERT INTO user_subscriptions (
+       user_id,
+       plan_code,
+       status,
+       trial_starts_at,
+       trial_ends_at,
+       current_period_starts_at,
+       current_period_ends_at,
+       grace_ends_at,
+       cancel_at_period_end,
+       canceled_at,
+       updated_at
+     )
+     VALUES (
+       $1,
+       $2,
+       $3,
+       CASE WHEN $3 = 'trialing' THEN now() ELSE NULL END,
+       CASE WHEN $3 = 'trialing' THEN now() + interval '30 days' ELSE NULL END,
+       CASE WHEN $2 = 'SUPERUSER' OR $3 IN ('canceled', 'expired') THEN NULL ELSE now() END,
+       CASE WHEN $2 = 'SUPERUSER' OR $3 IN ('canceled', 'expired') THEN NULL ELSE now() + interval '30 days' END,
+       CASE WHEN $3 = 'past_due' THEN now() + interval '7 days' ELSE NULL END,
+       false,
+       CASE WHEN $3 IN ('canceled', 'expired') THEN now() ELSE NULL END,
+       now()
+     )
+     RETURNING user_subscription_id,
+               plan_code,
+               status,
+               trial_ends_at,
+               current_period_ends_at,
+               grace_ends_at,
+               cancel_at_period_end,
+               updated_at`,
+    [userId, payload.planCode, payload.status],
+  );
+
+  const sub = updatedResult.rows[0];
+
+  return {
+    ok: true,
+    subscription: {
+      userSubscriptionId: sub.user_subscription_id,
+      planCode: sub.plan_code,
+      status: normalizeSubscriptionStatus(sub.status),
+      trialEndsAt: toIsoOrNull(sub.trial_ends_at),
+      currentPeriodEndsAt: toIsoOrNull(sub.current_period_ends_at),
+      graceEndsAt: toIsoOrNull(sub.grace_ends_at),
+      cancelAtPeriodEnd: Boolean(sub.cancel_at_period_end),
+      isSuperuser: sub.plan_code === 'SUPERUSER',
+      isBillingExempt: sub.plan_code === 'SUPERUSER',
+      updatedAt: formatDate(sub.updated_at),
+    },
   };
 }
 

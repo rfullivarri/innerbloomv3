@@ -164,3 +164,35 @@ export type FeedbackDefinition = {
     ctr30d: number;
   };
 };
+
+
+export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'expired';
+
+export type AdminSubscriptionPlan = {
+  planCode: string;
+  name: string;
+  active: boolean;
+};
+
+export type AdminUserSubscription = {
+  userSubscriptionId: string;
+  planCode: string;
+  status: SubscriptionStatus;
+  trialEndsAt: string | null;
+  currentPeriodEndsAt: string | null;
+  graceEndsAt: string | null;
+  cancelAtPeriodEnd: boolean;
+  isSuperuser: boolean;
+  isBillingExempt: boolean;
+  updatedAt: string;
+};
+
+export type AdminUserSubscriptionResponse = {
+  user: {
+    id: string;
+    email: string | null;
+    name: string | null;
+  };
+  subscription: AdminUserSubscription | null;
+  availablePlans: AdminSubscriptionPlan[];
+};

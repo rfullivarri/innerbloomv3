@@ -165,6 +165,72 @@ describe('Admin routes', () => {
         return { rows: [] } as never;
       }
 
+
+
+      if (sql.includes('SELECT user_id FROM users WHERE user_id = $1 AND deleted_at IS NULL LIMIT 1')) {
+        return { rows: [{ user_id: '00000000-0000-4000-8000-000000000001' }] } as never;
+      }
+
+      if (sql.includes('SELECT u.user_id, u.email_primary, u.full_name') && sql.includes('WHERE u.user_id = $1')) {
+        return {
+          rows: [
+            {
+              user_id: '00000000-0000-4000-8000-000000000001',
+              email_primary: 'admin@example.com',
+              full_name: 'Admin User',
+            },
+          ],
+        } as never;
+      }
+
+      if (sql.includes('FROM user_subscriptions') && sql.includes('ORDER BY updated_at DESC')) {
+        return {
+          rows: [
+            {
+              user_subscription_id: 'sub-1',
+              plan_code: 'MONTH',
+              status: 'active',
+              trial_ends_at: null,
+              current_period_ends_at: new Date().toISOString(),
+              grace_ends_at: null,
+              cancel_at_period_end: false,
+              updated_at: new Date().toISOString(),
+            },
+          ],
+        } as never;
+      }
+
+      if (sql.includes('FROM subscription_plans') && sql.includes('ORDER BY active DESC')) {
+        return {
+          rows: [
+            { plan_code: 'FREE', name: 'Free', active: true },
+            { plan_code: 'MONTH', name: 'Monthly', active: true },
+            { plan_code: 'SUPERUSER', name: 'Superuser', active: true },
+          ],
+        } as never;
+      }
+
+      if (sql.includes('FROM subscription_plans') && sql.includes('WHERE plan_code = $1')) {
+        return { rows: [{ plan_code: 'SUPERUSER', name: 'Superuser', active: true }] } as never;
+      }
+
+      if (sql.includes('INSERT INTO user_subscriptions')) {
+        return {
+          rows: [
+            {
+              user_subscription_id: 'sub-2',
+              plan_code: 'SUPERUSER',
+              status: 'active',
+              trial_ends_at: null,
+              current_period_ends_at: null,
+              grace_ends_at: null,
+              cancel_at_period_end: false,
+              updated_at: new Date().toISOString(),
+            },
+          ],
+        } as never;
+      }
+
       if (sql.includes('FROM users u') && sql.includes('LEFT JOIN cat_game_mode gm')) {
         return {
           rows: [
@@ -486,6 +552,38 @@ describe('Admin routes', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ ok: true, attempted: 2, sent: 2, skipped: 0, deduplicated: 0, errors: [] });
     expect(mockRunSubscriptionJob).toHaveBeenCalledTimes(1);
+  });
+
+
+  it('returns selected user subscription from admin endpoint', async () => {
+    const response = await request(app)
+      .get('/api/admin/users/00000000-0000-4000-8000-000000000001/subscription')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.user.email).toBe('admin@example.com');
+    expect(response.body.subscription).toMatchObject({
+      planCode: 'MONTH',
+      status: 'active',
+      isSuperuser: false,
+    });
+    expect(response.body.availablePlans.length).toBeGreaterThan(0);
+  });
+
+  it('updates selected user subscription from admin endpoint', async () => {
+    const response = await request(app)
+      .put('/api/admin/users/00000000-0000-4000-8000-000000000001/subscription')
+      .set('Authorization', 'Bearer token')
+      .send({ planCode: 'SUPERUSER', status: 'active' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+    expect(response.body.subscription).toMatchObject({
+      planCode: 'SUPERUSER',
+      status: 'active',
+      isSuperuser: true,
+      isBillingExempt: true,
+    });
   });
 
   it('returns feedback definitions with real metrics', async () => {
