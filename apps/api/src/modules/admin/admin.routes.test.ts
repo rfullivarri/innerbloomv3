@@ -92,6 +92,10 @@ describe('Admin routes', () => {
         return { rows: [{ is_admin: true }] };
       }
 
+      if (sql.includes('SELECT 1 FROM users WHERE user_id = $1 LIMIT 1')) {
+        return { rowCount: 1, rows: [{ '?column?': 1 }] } as never;
+      }
+
       if (sql.includes('UPDATE feedback_definitions')) {
         return {
           rows: [
@@ -476,6 +480,32 @@ describe('Admin routes', () => {
     expect(mockSendEmail).toHaveBeenCalledWith(expect.objectContaining({ to: 'admin@example.com' }));
   });
 
+
+  it('allows admin to assign and remove superuser access', async () => {
+    const enableResponse = await request(app)
+      .patch('/api/admin/users/00000000-0000-4000-8000-000000000001/superuser')
+      .set('Authorization', 'Bearer token')
+      .send({ enabled: true });
+
+    expect(enableResponse.status).toBe(200);
+    expect(enableResponse.body).toEqual({
+      ok: true,
+      userId: '00000000-0000-4000-8000-000000000001',
+      subscription: { planCode: 'SUPERUSER', status: 'superuser' },
+    });
+
+    const disableResponse = await request(app)
+      .patch('/api/admin/users/00000000-0000-4000-8000-000000000001/superuser')
+      .set('Authorization', 'Bearer token')
+      .send({ enabled: false });
+
+    expect(disableResponse.status).toBe(200);
+    expect(disableResponse.body).toEqual({
+      ok: true,
+      userId: '00000000-0000-4000-8000-000000000001',
+      subscription: { planCode: 'FREE', status: 'active' },
+    });
+  });
 
   it('runs subscription notifications job from admin endpoint', async () => {
     const response = await request(app)

@@ -64,8 +64,7 @@ VALUES
   ('FREE', 'Free', 0, 'EUR', 'month', 1, 60, true),
   ('MONTH', 'Monthly', 499, 'EUR', 'month', 1, 0, true),
   ('SIX_MONTHS', 'Six Months', 2300, 'EUR', 'month', 6, 0, true),
-  ('YEAR', 'Yearly', 3200, 'EUR', 'month', 12, 0, true),
-  ('SUPERUSER', 'Superuser', 0, 'EUR', 'month', 1, 0, true)
+  ('YEAR', 'Yearly', 3200, 'EUR', 'month', 12, 0, true)
 ON CONFLICT (plan_code) DO UPDATE SET
   name = EXCLUDED.name,
   price_cents = EXCLUDED.price_cents,

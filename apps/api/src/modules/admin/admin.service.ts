@@ -33,6 +33,8 @@ type AdminUserListItem = {
   name: string | null;
   gameMode: string | null;
   createdAt: string;
+  subscriptionPlan: string | null;
+  subscriptionStatus: string | null;
 };
 
 type AdminInsights = {
@@ -159,6 +161,8 @@ type UserProfileRow = {
   full_name: string | null;
   game_mode_code: string | null;
   created_at: string | Date;
+  latest_plan_code?: string | null;
+  latest_subscription_status?: string | null;
   last_seen_at?: string | Date | null;
   level?: string | number | null;
 };
@@ -613,10 +617,19 @@ export async function listUsers(query: ListUsersQuery): Promise<PaginatedResult<
             u.email_primary,
             u.full_name,
             gm_id.code AS game_mode_code,
-            u.created_at
+            u.created_at,
+            us_latest.plan_code AS latest_plan_code,
+            us_latest.status AS latest_subscription_status
        FROM users u
   LEFT JOIN cat_game_mode gm_id
          ON gm_id.game_mode_id = u.game_mode_id
+  LEFT JOIN LATERAL (
+         SELECT us.plan_code, us.status
+           FROM user_subscriptions us
+          WHERE us.user_id = u.user_id
+          ORDER BY us.updated_at DESC
+          LIMIT 1
+       ) us_latest ON TRUE
       ${whereClause}
    ORDER BY u.created_at DESC
       LIMIT $${limitIndex} OFFSET $${offsetIndex}`,
@@ -629,6 +642,8 @@ export async function listUsers(query: ListUsersQuery): Promise<PaginatedResult<
     name: row.full_name ?? null,
     gameMode: row.game_mode_code ?? null,
     createdAt: formatDate(row.created_at),
+    subscriptionPlan: row.latest_plan_code ?? null,
+    subscriptionStatus: row.latest_subscription_status ?? null,
   }));
 
   return {
@@ -1510,6 +1525,68 @@ export async function sendDailyReminderPreview(
   return { ok: true, reminder_id: reminder.user_daily_reminder_id, recipient, sent_at: now.toISOString() };
 }
 
+
+
+export async function setUserSuperuserAccess(
+  userId: string,
+  enabled: boolean,
+): Promise<{ ok: true; userId: string; subscription: { planCode: string; status: string } }> {
+  const userResult = await pool.query('SELECT 1 FROM users WHERE user_id = $1 LIMIT 1', [userId]);
+
+  if ((userResult.rowCount ?? userResult.rows.length) === 0) {
+    throw new HttpError(404, 'not_found', 'User not found');
+  }
+
+  const planCode = enabled ? 'SUPERUSER' : 'FREE';
+  const status = enabled ? 'superuser' : 'active';
+
+  await pool.query(
+    `INSERT INTO subscription_plans (
+        plan_code,
+        name,
+        price_cents,
+        currency,
+        interval_unit,
+        interval_count,
+        trial_days,
+        active
+      )
+      VALUES ('SUPERUSER', 'Superuser', 0, 'EUR', 'month', 1, 0, true)
+      ON CONFLICT (plan_code) DO UPDATE SET
+        name = EXCLUDED.name,
+        price_cents = EXCLUDED.price_cents,
+        currency = EXCLUDED.currency,
+        interval_unit = EXCLUDED.interval_unit,
+        interval_count = EXCLUDED.interval_count,
+        trial_days = EXCLUDED.trial_days,
+        active = EXCLUDED.active`,
+  );
+
+  await pool.query(
+    `INSERT INTO user_subscriptions (
+        user_id,
+        plan_code,
+        status,
+        trial_starts_at,
+        trial_ends_at,
+        current_period_starts_at,
+        current_period_ends_at,
+        grace_ends_at,
+        cancel_at_period_end,
+        canceled_at,
+        created_at,
+        updated_at
+      )
+      VALUES ($1, $2, $3, NULL, NULL, NULL, NULL, NULL, false, NULL, now(), now())`,
+    [userId, planCode, status],
+  );
+
+  return {
+    ok: true,
+    userId,
+    subscription: { planCode, status },
+  };
+}
 
 export async function triggerSubscriptionNotificationsJob(
   runAt: Date = new Date(),
