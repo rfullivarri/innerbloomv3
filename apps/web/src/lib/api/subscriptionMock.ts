@@ -1,4 +1,4 @@
-export type PlanCode = 'FREE' | 'MONTH' | 'SIX_MONTHS' | 'YEAR';
+export type PlanCode = 'FREE' | 'MONTH' | 'SIX_MONTHS' | 'YEAR' | 'SUPERUSER';
 
 export type SubscriptionStatus = 'trialing' | 'active' | 'inactive';
 
