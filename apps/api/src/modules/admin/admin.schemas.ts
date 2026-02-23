@@ -128,6 +128,10 @@ export const subscriptionNotificationsTriggerBodySchema = z.object({
   runAt: z.string().datetime().optional(),
 });
 
+export const superuserAccessBodySchema = z.object({
+  enabled: z.boolean(),
+});
+
 const feedbackStatusSchema = z.enum(['active', 'paused', 'draft', 'deprecated']);
 
 const feedbackCtaSchema = z
@@ -190,5 +194,6 @@ export type TaskgenTraceQuery = z.infer<typeof taskgenTraceQuerySchema>;
 export type TaskgenTraceGlobalQuery = z.infer<typeof taskgenTraceGlobalQuerySchema>;
 export type ReminderSendBody = z.infer<typeof reminderSendBodySchema>;
 export type SubscriptionNotificationsTriggerBody = z.infer<typeof subscriptionNotificationsTriggerBodySchema>;
+export type SuperuserAccessBody = z.infer<typeof superuserAccessBodySchema>;
 export type FeedbackDefinitionUpdateInput = z.infer<typeof feedbackDefinitionUpdateSchema>;
 export type FeedbackUserNotificationUpdateInput = z.infer<typeof feedbackUserNotificationUpdateSchema>;

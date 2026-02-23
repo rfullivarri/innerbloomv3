@@ -40,6 +40,8 @@ const baseUser: CurrentUserRow = {
   created_at: '2024-01-01T00:00:00.000Z',
   updated_at: '2024-01-02T00:00:00.000Z',
   deleted_at: null,
+  subscription_plan: null,
+  subscription_status: null,
 };
 
 const originalDevFlag = process.env.ALLOW_X_USER_ID_DEV;

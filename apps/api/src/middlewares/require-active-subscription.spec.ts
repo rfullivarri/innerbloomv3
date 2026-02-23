@@ -78,6 +78,19 @@ describe('requireActiveSubscription', () => {
     }
   });
 
+
+  it('allows superuser subscriptions', async () => {
+    mockQuery.mockResolvedValue({ rows: [{ status: 'superuser', grace_ends_at: null }] });
+
+    const req = mockReq({ user: { id: '11111111-2222-3333-4444-555555555555' } }) as Request;
+    const res = mockRes() as Response;
+    const next = mockNext();
+
+    await requireActiveSubscription(req, res, next);
+
+    expect(next).toHaveBeenCalledWith();
+  });
+
   it('allows requests when subscription tables are not migrated yet', async () => {
     mockQuery.mockRejectedValue({ code: '42P01', message: 'relation "user_subscriptions" does not exist' });
 

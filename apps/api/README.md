@@ -68,6 +68,21 @@ When `OPENAI_API_KEY` is not configured the runner emits `OPENAI_MISCONFIGURED` 
 
 Reasoning-family models (GPT-5, `o`-series) automatically strip unsupported sampling parameters before reaching OpenAI. The trace log for `OPENAI_REQUEST` includes `paramFilter=on` whenever the sanitization runs, helping correlate payload adjustments with downstream responses.
 
+
+## Superusuario (admin)
+
+El estado de superusuario **no** es un plan público de checkout. Se asigna por endpoint admin:
+
+```bash
+PATCH /api/admin/users/:userId/superuser
+{ "enabled": true }
+```
+
+- `enabled: true` crea una nueva fila en `user_subscriptions` con `plan_code='SUPERUSER'` y `status='superuser'`.
+- `enabled: false` crea una nueva fila con `plan_code='FREE'` y `status='active'`.
+
+La respuesta de `GET /api/users/me` incluye `subscription_plan` y `subscription_status` para mostrar el estado en el menú del dashboard.
+
 ## Development server
 
 Start the API locally:

@@ -17,6 +17,7 @@ import {
   feedbackDefinitionUpdateSchema,
   feedbackUserNotificationUpdateSchema,
   subscriptionNotificationsTriggerBodySchema,
+  superuserAccessBodySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -38,6 +39,7 @@ import {
   getFeedbackUserHistory,
   updateFeedbackUserNotificationState,
   triggerSubscriptionNotificationsJob,
+  setUserSuperuserAccess,
 } from './admin.service.js';
 import {
   getTaskgenEventsByCorrelation,
@@ -150,6 +152,14 @@ export const postAdminSendTasksReady = asyncHandler(async (req: Request, res: Re
   res.json(result);
 });
 
+
+
+export const patchAdminUserSuperuserAccess = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const body = superuserAccessBodySchema.parse(req.body ?? {});
+  const result = await setUserSuperuserAccess(userId, body.enabled);
+  res.json(result);
+});
 
 export const postAdminRunSubscriptionNotifications = asyncHandler(async (req: Request, res: Response) => {
   const body = subscriptionNotificationsTriggerBodySchema.parse(req.body ?? {});

@@ -13,10 +13,19 @@ export const SELECT_USER_SQL = `SELECT u.user_id,
        NULL::text AS locale,
        u.created_at,
        u.updated_at,
-       u.deleted_at
+       u.deleted_at,
+       us_latest.plan_code AS subscription_plan,
+       us_latest.status AS subscription_status
   FROM users u
   LEFT JOIN cat_game_mode gm
          ON gm.game_mode_id = u.game_mode_id
+  LEFT JOIN LATERAL (
+         SELECT us.plan_code, us.status
+           FROM user_subscriptions us
+          WHERE us.user_id = u.user_id
+          ORDER BY us.updated_at DESC
+          LIMIT 1
+       ) us_latest ON TRUE
  WHERE u.user_id = $1
  LIMIT 1`;
 
@@ -33,6 +42,8 @@ export type CurrentUserRow = {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  subscription_plan: string | null;
+  subscription_status: string | null;
 };
 
 async function selectUser(userId: string): Promise<CurrentUserRow | null> {
