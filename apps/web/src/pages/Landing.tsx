@@ -191,6 +191,9 @@ export default function LandingPage() {
     }
   };
   const modeFrequency = frequencyByMode[language][activeMode.id];
+  const modeStateLabel = language === 'es' ? 'Estado' : 'State';
+  const modeRepresentsLabel = language === 'es' ? 'Mood que representa' : 'Mood represented';
+  const modeObjectiveLabel = language === 'es' ? 'Objetivo' : 'Objective';
 
   usePageMeta({
     title: 'Innerbloom',
@@ -537,7 +540,11 @@ export default function LandingPage() {
           <div className="container">
             <h2>{copy.modes.title}</h2>
             <p className="section-sub">{copy.modes.intro}</p>
-            <div className="modes-carousel" aria-live="polite">
+            <div
+              className="modes-carousel"
+              aria-live="polite"
+              style={{ '--mode-count': copy.modes.items.length } as CSSProperties}
+            >
               <div
                 className="mode-thumbs"
                 role="listbox"
@@ -568,7 +575,17 @@ export default function LandingPage() {
               <article className={`card mode mode-main mode-${activeMode.id} fade-item`}>
                 <header className="mode-header">
                   <div className="mode-title">{activeMode.title}</div>
-                  <span className="mode-frequency-chip">{modeFrequency}</span>
+                  <div className="mode-meta">
+                    <p className="mode-meta-item">
+                      <span className="mode-meta-label">{modeStateLabel}</span>
+                      <span className="mode-meta-copy">{activeMode.state}</span>
+                    </p>
+                    <p className="mode-meta-item">
+                      <span className="mode-meta-label">{modeRepresentsLabel}</span>
+                      <span className="mode-meta-copy">{activeVisual.avatarLabel}</span>
+                    </p>
+                    <span className="mode-frequency-chip">{modeFrequency}</span>
+                  </div>
                 </header>
                 <figure className="mode-media">
                   <video
@@ -584,7 +601,7 @@ export default function LandingPage() {
                   <figcaption className="mode-media-caption">{activeVisual.avatarLabel}</figcaption>
                 </figure>
                 <div className="mode-goal-block">
-                  <p className="mode-goal-label">{language === 'es' ? 'Objetivo' : 'Objective'}</p>
+                  <p className="mode-goal-label">{modeObjectiveLabel}</p>
                   <p className="mode-goal-copy">{activeMode.goal}</p>
                 </div>
               </article>
