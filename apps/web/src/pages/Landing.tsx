@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/clerk-react';
 import { OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
 import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
+import GradientSwitcher from '../components/GradientSwitcher';
 import { usePageMeta } from '../lib/seo';
 import './Landing.css';
 
@@ -250,6 +251,8 @@ export default function LandingPage() {
   const [language, setLanguage] = useState<Language>('es');
   const copy = OFFICIAL_LANDING_CONTENT[language];
   const landingStyle = OFFICIAL_LANDING_CSS_VARIABLES as CSSProperties;
+  const env = import.meta.env as Record<string, string | boolean | undefined>;
+  const showGradientSwitcher = env.DEV || env.NEXT_PUBLIC_SHOW_GRADIENT_SWITCHER === 'true' || env.VITE_SHOW_GRADIENT_SWITCHER === 'true';
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
   const [activeModeIndex, setActiveModeIndex] = useState(0);
@@ -801,6 +804,8 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
+
+      {showGradientSwitcher ? <GradientSwitcher /> : null}
 
       <footer className="footer">
         <span>{copy.footer.copyright}</span>
