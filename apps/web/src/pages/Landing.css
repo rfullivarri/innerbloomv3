@@ -975,10 +975,26 @@
   align-content: start;
   gap: 0;
   border-radius: 36px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(155deg, rgba(28, 46, 81, 0.94), rgba(15, 27, 62, 0.97));
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(24, 38, 64, 0.88), rgba(17, 28, 51, 0.7));
+  backdrop-filter: blur(8px);
   box-shadow: 0 20px 60px rgba(3, 10, 35, 0.38);
   padding: 18.15px;
+}
+
+.landing .pricing-best-deal-chip {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 0.3rem 0.62rem;
+  border-radius: 999px;
+  border: 1px solid rgba(125, 211, 252, 0.5);
+  background: rgba(125, 211, 252, 0.18);
+  color: #dff4ff;
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .landing .pricing-plan-name {
