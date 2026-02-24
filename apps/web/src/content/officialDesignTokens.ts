@@ -43,6 +43,36 @@ export const OFFICIAL_DESIGN_TOKENS = {
       type: 'multi-layer',
       angle: '140deg',
       stops: ['rgba(56,189,248,0.16)', 'rgba(139,92,246,0.14)', 'rgba(14,165,233,0.12)', 'rgba(59,130,246,0.08)']
+    },
+    {
+      name: 'purple_paradise',
+      type: 'linear',
+      angle: '135deg',
+      stops: ['#1d2b64', '#f8cdda']
+    },
+    {
+      name: 'color_1',
+      type: 'linear',
+      angle: '135deg',
+      stops: ['#ff512f', '#dd2476']
+    },
+    {
+      name: 'color_2',
+      type: 'linear',
+      angle: '135deg',
+      stops: ['#348f50', '#56b4d3']
+    },
+    {
+      name: 'purple_love',
+      type: 'linear',
+      angle: '135deg',
+      stops: ['#cc2b5e', '#753a88']
+    },
+    {
+      name: 'afternoon',
+      type: 'linear',
+      angle: '135deg',
+      stops: ['#000c40', '#607d8b']
     }
   ],
   cssVariablesMapped: [
