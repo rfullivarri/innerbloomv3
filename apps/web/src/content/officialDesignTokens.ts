@@ -97,6 +97,12 @@ export const OFFICIAL_DESIGN_TOKENS = {
       type: 'linear',
       angle: '135deg',
       stops: ['#000c40', '#607d8b']
+    },
+    {
+      name: 'purple_afternoon',
+      type: 'linear',
+      angle: '135deg',
+      stops: ['#000c40', '#f8cdda']
     }
   ],
   cssVariablesMapped: [

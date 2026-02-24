@@ -25,6 +25,7 @@ const GRADIENT_LABELS: Record<string, { es: string; en: string }> = {
   color_2: { es: 'Color 2', en: 'Color 2' },
   purple_love: { es: 'Purple Love', en: 'Purple Love' },
   afternoon: { es: 'Afternoon', en: 'Afternoon' },
+  purple_afternoon: { es: 'Purple Afternoon', en: 'Purple Afternoon' },
 };
 
 const LANDING_GRADIENTS: LandingGradientOption[] = OFFICIAL_DESIGN_TOKENS.gradients
