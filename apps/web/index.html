@@ -30,6 +30,34 @@
     />
     <meta name="twitter:image" content="https://innerbloomjourney.org/og/neneOGP%20(1).png" />
     <title>Innerbloom</title>
+    <script>
+      (function () {
+        var key = 'ib:gradient';
+        var defaults = { angle: '135deg', a: '#525252', b: '#3D72B4' };
+        var map = {
+          curiosity: { a: '#525252', b: '#3D72B4' },
+          endless: { a: '#43CEA2', b: '#185A9D' },
+          amethyst: { a: '#9D50BB', b: '#6E48AA' },
+          dirty: { a: '#B993D6', b: '#8CA6DB' }
+        };
+
+        try {
+          var saved = window.localStorage.getItem(key);
+          var parsed = saved ? JSON.parse(saved) : null;
+          var gradient = parsed && map[parsed.id] ? map[parsed.id] : defaults;
+          var angle = parsed && typeof parsed.angle === 'string' ? parsed.angle : defaults.angle;
+          var root = document.documentElement;
+          root.style.setProperty('--bg-angle', angle);
+          root.style.setProperty('--bg-a', gradient.a);
+          root.style.setProperty('--bg-b', gradient.b);
+        } catch (_error) {
+          var fallbackRoot = document.documentElement;
+          fallbackRoot.style.setProperty('--bg-angle', defaults.angle);
+          fallbackRoot.style.setProperty('--bg-a', defaults.a);
+          fallbackRoot.style.setProperty('--bg-b', defaults.b);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
