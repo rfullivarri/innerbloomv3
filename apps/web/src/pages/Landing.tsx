@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
+import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
 import { usePageMeta } from '../lib/seo';
 import './Landing.css';
 
@@ -81,6 +82,93 @@ const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => butt
 const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
   es: 'Tareas sugeridas:',
   en: 'Suggested tasks:'
+};
+
+const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: string; steps: TimelineStep[] }> = {
+  es: {
+    title: 'Cómo funciona Innerbloom',
+    closingLine: 'Innerbloom combina gestión de hábitos con registro emocional para construir constancia con un plan realista.',
+    steps: [
+      {
+        title: 'Comienzas tu camino ✨',
+        badge: 'ONBOARDING PERSONALIZADO',
+        bullets: [
+          'Elegís tu modo de juego y respondés unas preguntas sobre energía, prioridades y tu momento actual (2–3 min).',
+          'Innerbloom entiende lo que estás buscando y arma un punto de partida claro para empezar con foco (sin presión).',
+        ],
+        chips: ['onboarding · energía diaria'],
+      },
+      {
+        title: 'Tu primer plan equilibrado ⚖️',
+        badge: 'PLAN EQUILIBRADO',
+        bullets: [
+          'Recibís un plan ordenado en Cuerpo, Mente y Alma, con microacciones realistas.',
+          'Te queda una rutina simple y sostenible para avanzar incluso en días de baja energía.',
+        ],
+        chips: ['micro hábitos · rutina diaria'],
+      },
+      {
+        title: 'Hazlo a tu medida 🧩',
+        badge: 'FLEXIBLE',
+        bullets: [
+          'Editás, cambiás o descartás tareas; ajustás modo y avatar según cómo estés hoy.',
+          'La IA propone y vos decidís: el plan se adapta a tu vida (no al revés).',
+        ],
+        chips: ['hábitos flexibles · personalización'],
+      },
+      {
+        title: 'Retrospectiva diaria + progreso visible 📅📈',
+        badge: 'PROGRESO SEMANAL',
+        bullets: [
+          'Completás microacciones y registrás tu emoción/estado en minutos (simple y realista).',
+          'Ves progreso semana a semana y recibís sugerencias para sostener constancia sin saturarte.',
+        ],
+        chips: ['seguimiento de hábitos · mood tracking'],
+      },
+    ],
+  },
+  en: {
+    title: 'How Innerbloom works',
+    closingLine: 'Innerbloom combines habit tracking with mood tracking to build consistency through a realistic plan.',
+    steps: [
+      {
+        title: 'You start your journey ✨',
+        badge: 'PERSONALIZED ONBOARDING',
+        bullets: [
+          'You choose your play mode and answer a few questions about energy, priorities, and your current moment (2–3 min).',
+          'Innerbloom understands what you are looking for and builds a clear starting point so you can begin with focus (without pressure).',
+        ],
+        chips: ['onboarding · daily energy'],
+      },
+      {
+        title: 'Your first balanced plan ⚖️',
+        badge: 'BALANCED PLAN',
+        bullets: [
+          'You receive a plan organized across Body, Mind, and Soul, with realistic micro-habits.',
+          'You get a simple, sustainable routine to keep moving forward even on low-energy days.',
+        ],
+        chips: ['micro-habits · daily routine'],
+      },
+      {
+        title: 'Make it your own 🧩',
+        badge: 'FLEXIBLE',
+        bullets: [
+          'You edit, swap, or remove tasks; you adjust your mode and avatar based on how you feel today.',
+          'AI suggests and you decide: the plan adapts to your life (not the other way around).',
+        ],
+        chips: ['flexible habits · personalization'],
+      },
+      {
+        title: 'Daily reflection + visible progress 📅📈',
+        badge: 'WEEKLY PROGRESS',
+        bullets: [
+          'You complete micro-habits and log your emotion/state in minutes (simple and realistic).',
+          'You see weekly progress and get suggestions to sustain consistency without overload.',
+        ],
+        chips: ['habit tracking · mood tracking'],
+      },
+    ],
+  },
 };
 
 function splitPillarCopy(copy: string, language: Language) {
@@ -167,8 +255,6 @@ export default function LandingPage() {
   const [activeModeIndex, setActiveModeIndex] = useState(0);
   const [isModesInView, setIsModesInView] = useState(false);
   const [hasModeInteracted, setHasModeInteracted] = useState(false);
-  const [activeHowStep, setActiveHowStep] = useState<number | null>(null);
-  const howStepRefs = useRef<Array<HTMLLIElement | null>>([]);
   const modesSectionRef = useRef<HTMLElement | null>(null);
   const modeThumbTouchStartXRef = useRef<number | null>(null);
 
@@ -286,51 +372,6 @@ export default function LandingPage() {
 
     return () => window.clearInterval(timer);
   }, [hasModeInteracted, isModesInView, modeCount]);
-
-  useEffect(() => {
-    const stepElements = howStepRefs.current.filter((step): step is HTMLLIElement => step !== null);
-
-    if (!stepElements.length) {
-      return;
-    }
-
-    const ratioByIndex = new Map<number, number>();
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const index = Number((entry.target as HTMLElement).dataset.stepIndex);
-          if (Number.isNaN(index)) {
-            return;
-          }
-
-          ratioByIndex.set(index, entry.isIntersecting ? entry.intersectionRatio : 0);
-        });
-
-        let nextIndex: number | null = null;
-        let maxRatio = 0;
-
-        ratioByIndex.forEach((ratio, index) => {
-          if (ratio > maxRatio) {
-            maxRatio = ratio;
-            nextIndex = index;
-          }
-        });
-
-        if (nextIndex !== null && nextIndex !== activeHowStep && maxRatio >= 0.6) {
-          setActiveHowStep(nextIndex);
-        }
-      },
-      {
-        threshold: [0.6, 0.75, 0.9],
-        rootMargin: '-20% 0px -20% 0px'
-      }
-    );
-
-    stepElements.forEach((step) => observer.observe(step));
-
-    return () => observer.disconnect();
-  }, [activeHowStep]);
 
   const goToSlide = (index: number) => {
     setActiveSlide((index + testimonialCount) % testimonialCount);
@@ -606,52 +647,12 @@ export default function LandingPage() {
 
         <section className="how section-pad reveal-on-scroll" id="how">
           <div className="container narrow">
-            <h2>{copy.how.title}</h2>
-            <p className="section-sub">{copy.how.intro}</p>
-            <ol className="how-timeline">
-              {copy.how.steps.map((step, index) => {
-                const isActive = activeHowStep === index;
-                const panelId = `how-step-panel-${language}-${index}`;
-
-                return (
-                  <li
-                    className="fade-item timeline-step"
-                    key={step.title}
-                    data-step-index={index}
-                    ref={(element) => {
-                      howStepRefs.current[index] = element;
-                    }}
-                    style={{ '--delay': `${index * 80}ms` } as CSSProperties}
-                  >
-                    <div className="timeline-rail" aria-hidden>
-                      <span className={`timeline-node ${isActive ? 'is-active' : ''}`}>{index + 1}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className={`timeline-card ${isActive ? 'is-active' : ''}`}
-                      aria-expanded={isActive}
-                      aria-controls={panelId}
-                      aria-current={isActive ? 'step' : undefined}
-                      onClick={() => setActiveHowStep(index)}
-                      onFocus={() => setActiveHowStep(index)}
-                    >
-                      <h3>{step.title}</h3>
-                      <p className="timeline-outcome-preview">{step.outcome}</p>
-                      <div id={panelId} className={`timeline-panel ${isActive ? 'is-expanded' : ''}`}>
-                        <div className="timeline-micro">
-                          <p className="timeline-label">{copy.how.actionLabel}</p>
-                          <p className="timeline-copy">{step.action}</p>
-                        </div>
-                        <div className="timeline-micro">
-                          <p className="timeline-label">{copy.how.outcomeLabel}</p>
-                          <p className="timeline-copy">{step.outcome}</p>
-                        </div>
-                      </div>
-                    </button>
-                  </li>
-                );
-              })}
-            </ol>
+            <h2>{PREMIUM_TIMELINE_COPY[language].title}</h2>
+            <PremiumTimeline
+              steps={PREMIUM_TIMELINE_COPY[language].steps}
+              closingLine={PREMIUM_TIMELINE_COPY[language].closingLine}
+              className="mt-2"
+            />
           </div>
         </section>
 
