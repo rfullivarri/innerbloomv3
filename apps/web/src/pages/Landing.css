@@ -977,9 +977,10 @@
 
 .landing .pricing-card {
   position: relative;
-  display: grid;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
   gap: 0;
+  min-height: 390px;
   border-radius: 36px;
   border: 1px solid var(--card-blur-border);
   background: var(--card-blur-bg);
@@ -1027,7 +1028,7 @@
 }
 
 .landing .pricing-plan-action {
-  margin-top: 1.32rem;
+  margin-top: auto;
   width: 100%;
   padding: 0.825rem 1.245rem;
   font-size: 1.02rem;
