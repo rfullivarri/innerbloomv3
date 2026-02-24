@@ -5,6 +5,7 @@ import './LandingV2.css';
 import '../styles/panel-rachas.overrides.css';
 import { Card } from '../components/ui/Card';
 import { FluidGradientBackground } from '../components/ui/FluidGradientBackground';
+import { AdaptiveText } from '../components/landing/AdaptiveText';
 
 type Language = 'en' | 'es';
 
@@ -1260,8 +1261,8 @@ export default function LandingV2Page() {
           <div className="lv2-container">
             <div className="lv2-section-head">
               <p className="lv2-kicker">Product</p>
-              <h2>{copy.highlights.title}</h2>
-              <p className="lv2-sub">{copy.highlights.description}</p>
+              <AdaptiveText as="h2">{copy.highlights.title}</AdaptiveText>
+              <AdaptiveText as="p" className="lv2-sub">{copy.highlights.description}</AdaptiveText>
             </div>
             <div className="lv2-grid lv2-grid-3">
               {copy.highlights.items.map((item) => (
@@ -1281,8 +1282,8 @@ export default function LandingV2Page() {
           <div className="lv2-container" id="game-modes-section" ref={gameModesSectionRef}>
             <div className="lv2-section-head lv2-modes-head">
               <p className="lv2-kicker">Adaptive</p>
-              <h2>{copy.modes.title}</h2>
-              <p className="lv2-sub">{copy.modes.description}</p>
+              <AdaptiveText as="h2">{copy.modes.title}</AdaptiveText>
+              <AdaptiveText as="p" className="lv2-sub">{copy.modes.description}</AdaptiveText>
             </div>
 
             <div className="lv2-modes-selector-shell" aria-live="polite">
@@ -1420,8 +1421,8 @@ export default function LandingV2Page() {
           <div className="lv2-container">
             <div className="lv2-section-head">
               <p className="lv2-kicker">Balance</p>
-              <h2>{copy.pillars.title}</h2>
-              <p className="lv2-sub">{copy.pillars.description}</p>
+              <AdaptiveText as="h2">{copy.pillars.title}</AdaptiveText>
+              <AdaptiveText as="p" className="lv2-sub">{copy.pillars.description}</AdaptiveText>
             </div>
             <div className="lv2-grid lv2-grid-3">
               {copy.pillars.items.map((pillar) => (
@@ -1441,8 +1442,8 @@ export default function LandingV2Page() {
           <div className="lv2-container">
             <div className="lv2-section-head">
               <p className="lv2-kicker">Social proof</p>
-              <h2>{copy.testimonials.title}</h2>
-              <p className="lv2-sub">{copy.testimonials.description}</p>
+              <AdaptiveText as="h2">{copy.testimonials.title}</AdaptiveText>
+              <AdaptiveText as="p" className="lv2-sub">{copy.testimonials.description}</AdaptiveText>
             </div>
             <div className="lv2-grid lv2-grid-2">
               {copy.testimonials.items.map((testimonial) => (
@@ -1459,7 +1460,7 @@ export default function LandingV2Page() {
           <div className="lv2-container lv2-container-narrow">
             <div className="lv2-section-head">
               <p className="lv2-kicker">Clarity</p>
-              <h2>{copy.faq.title}</h2>
+              <AdaptiveText as="h2">{copy.faq.title}</AdaptiveText>
             </div>
             <div className="lv2-faq">
               {copy.faq.items.map((item) => (
@@ -1474,8 +1475,8 @@ export default function LandingV2Page() {
 
         <section className="lv2-section lv2-next">
           <div className="lv2-container lv2-container-narrow">
-            <h2>{copy.next.title}</h2>
-            <p className="lv2-sub">{copy.next.description}</p>
+            <AdaptiveText as="h2">{copy.next.title}</AdaptiveText>
+            <AdaptiveText as="p" className="lv2-sub">{copy.next.description}</AdaptiveText>
             <div className="lv2-cta-row center">
               <Link className={BUTTON_VARIANTS.primary} to={primaryCta.to}>
                 {copy.next.primary}
