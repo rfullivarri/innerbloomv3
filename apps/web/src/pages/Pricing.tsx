@@ -97,7 +97,7 @@ export default function PricingPage() {
               <article
                 key={plan.id}
                 className={[
-                  'group relative rounded-3xl border border-white/10 bg-[linear-gradient(155deg,rgba(28,46,81,0.94),rgba(15,27,62,0.97))] p-7 shadow-[0_20px_60px_rgba(3,10,35,0.38)] transition-all duration-300',
+                  'group relative flex min-h-[30rem] flex-col rounded-3xl border border-white/10 bg-[linear-gradient(155deg,rgba(28,46,81,0.94),rgba(15,27,62,0.97))] p-7 shadow-[0_20px_60px_rgba(3,10,35,0.38)] transition-all duration-300',
                   isSelected
                     ? 'ring-2 ring-accent-purple/70 shadow-[0_0_0_1px_rgba(167,139,250,0.4),0_25px_65px_rgba(109,40,217,0.35)]'
                     : 'opacity-70 saturate-75 hover:scale-[1.02] hover:opacity-100 hover:saturate-100 hover:ring-1 hover:ring-white/35',
@@ -111,14 +111,14 @@ export default function PricingPage() {
 
                 <p className="text-3xl tracking-[0.2em] text-white/80">{plan.name}</p>
                 <p className="mt-4 text-5xl font-semibold leading-tight text-white">{plan.price}</p>
-                <p className="mt-5 min-h-[84px] text-2xl leading-relaxed text-white/75">{plan.detail}</p>
+                <p className="mt-5 min-h-[126px] text-2xl leading-relaxed text-white/75">{plan.detail}</p>
 
                 <button
                   type="button"
                   disabled={isDisabled || isSelected}
                   onClick={() => void handleSelectPlan(plan.id)}
                   className={[
-                    'mt-8 w-full rounded-full px-6 py-4 text-xl font-semibold transition',
+                    'mt-auto w-full rounded-full px-6 py-4 text-xl font-semibold transition',
                     isSelected
                       ? 'cursor-default border border-white/25 bg-white/10 text-white/85'
                       : 'bg-accent-purple text-white shadow-glow hover:bg-accent-purple/90 disabled:cursor-not-allowed disabled:opacity-70',
