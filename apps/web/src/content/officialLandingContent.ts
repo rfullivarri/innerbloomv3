@@ -46,7 +46,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Convierte la experiencia en hábitos.',
       titleHighlight: 'Convierte los hábitos en camino',
       subtitle:
-        'Tus hábitos son el mapa. Tu constancia marca el ritmo. Es tu Journey de crecimiento con equilibrio entre Cuerpo, Mente y Alma.',
+        'Gestión de hábitos + registro emocional, gamificado. Un habit tracker con mood tracking para crear constancia con micro hábitos sostenibles.',
       note: 'En menos de 3 minutos recibís una orientación inicial para crear tu base personalizada.',
       alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
     },
@@ -199,7 +199,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Turn experience into habits.',
       titleHighlight: 'Turn habits into your path',
       subtitle:
-        'Your habits are the map. Consistency sets your pace. A growth Journey balanced across Body, Mind and Soul.',
+        'Habit tracking + mood tracking, gamified. Build consistency with sustainable micro-habits.',
       note: 'In under 3 minutes you get initial guidance to build your personalized base.',
       alt: 'Kid looking at a violet energy sphere in the night sky — Gamification Journey'
     },
