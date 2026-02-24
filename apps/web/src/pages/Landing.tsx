@@ -1,28 +1,46 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type TouchEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import { OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
+import { OFFICIAL_DESIGN_TOKENS, OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
 import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
 import { usePageMeta } from '../lib/seo';
 import './Landing.css';
 
-type LandingGradientId = 'curiosity' | 'endless' | 'amethyst' | 'dirty';
-
 type LandingGradientOption = {
-  id: LandingGradientId;
+  id: string;
   label: { es: string; en: string };
   angle: string;
   a: string;
   b: string;
 };
 
-const LANDING_GRADIENTS: LandingGradientOption[] = [
-  { id: 'curiosity', label: { es: 'Curiosity Blue', en: 'Curiosity Blue' }, angle: '135deg', a: '#525252', b: '#3D72B4' },
-  { id: 'endless', label: { es: 'Endless River', en: 'Endless River' }, angle: '135deg', a: '#43CEA2', b: '#185A9D' },
-  { id: 'amethyst', label: { es: 'Amethyst', en: 'Amethyst' }, angle: '135deg', a: '#9D50BB', b: '#6E48AA' },
-  { id: 'dirty', label: { es: 'Dirty Fog', en: 'Dirty Fog' }, angle: '135deg', a: '#B993D6', b: '#8CA6DB' },
-];
+const GRADIENT_LABELS: Record<string, { es: string; en: string }> = {
+  curiosity_blue: { es: 'Curiosity Blue', en: 'Curiosity Blue' },
+  endless_river: { es: 'Endless River', en: 'Endless River' },
+  amethyst: { es: 'Amethyst', en: 'Amethyst' },
+  dirty_fog: { es: 'Dirty Fog', en: 'Dirty Fog' },
+  purple_paradise: { es: 'Purple Paradise', en: 'Purple Paradise' },
+  color_1: { es: 'Color 1', en: 'Color 1' },
+  color_2: { es: 'Color 2', en: 'Color 2' },
+  purple_love: { es: 'Purple Love', en: 'Purple Love' },
+  afternoon: { es: 'Afternoon', en: 'Afternoon' },
+};
+
+const LANDING_GRADIENTS: LandingGradientOption[] = OFFICIAL_DESIGN_TOKENS.gradients
+  .filter((gradient) => gradient.type === 'linear' && gradient.stops.length >= 2)
+  .map((gradient) => {
+    const label = GRADIENT_LABELS[gradient.name]
+      ?? { es: gradient.name.replace(/_/g, ' '), en: gradient.name.replace(/_/g, ' ') };
+
+    return {
+      id: gradient.name,
+      label,
+      angle: gradient.angle,
+      a: gradient.stops[0],
+      b: gradient.stops[1],
+    };
+  });
 
 const LANDING_GRADIENT_STORAGE_KEY = 'ib:official-landing-gradient';
 
@@ -267,11 +285,11 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const isSignedIn = Boolean(userId);
   const [language, setLanguage] = useState<Language>('es');
-  const [gradientId, setGradientId] = useState<LandingGradientId>(() => {
-    if (typeof window === 'undefined') return 'curiosity';
+  const [gradientId, setGradientId] = useState<string>(() => {
+    if (typeof window === 'undefined') return LANDING_GRADIENTS[0]?.id ?? '';
     const storedGradientId = window.localStorage.getItem(LANDING_GRADIENT_STORAGE_KEY);
     const storedGradient = LANDING_GRADIENTS.find((option) => option.id === storedGradientId);
-    return storedGradient?.id ?? 'curiosity';
+    return storedGradient?.id ?? LANDING_GRADIENTS[0]?.id ?? '';
   });
   const copy = OFFICIAL_LANDING_CONTENT[language];
   const selectedGradient = LANDING_GRADIENTS.find((option) => option.id === gradientId) ?? LANDING_GRADIENTS[0];
@@ -534,7 +552,7 @@ export default function LandingPage() {
             <select
               className="gradient-select"
               value={gradientId}
-              onChange={(event) => setGradientId(event.target.value as LandingGradientId)}
+              onChange={(event) => setGradientId(event.target.value)}
               aria-label={language === 'es' ? 'Selector de fondo' : 'Background selector'}
             >
               {LANDING_GRADIENTS.map((option) => (
