@@ -171,13 +171,36 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       items: [
         {
           question: '¿Necesito mucha disciplina para empezar?',
-          answer: 'No. Si estás con poca energía, empezás en Low para activar el mínimo vital. El sistema ajusta el ritmo.'
+          answer: 'No. Si estás con poca energía, empezás en Low con micro hábitos para activar el mínimo vital. La gestión de hábitos se adapta a tu ritmo.'
         },
-        { question: '¿Puedo cambiar de modo de juego?', answer: 'Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento.' },
-        { question: '¿Dónde veo mi progreso?', answer: 'En tu archivo y en el Dashboard, con foco en tus tareas, tus registros emocionales y tu equilibrio general.' },
+        { question: '¿Puedo cambiar de modo de juego?', answer: 'Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento y tu energía diaria.' },
+        {
+          question: '¿Dónde veo mi progreso?',
+          answer: 'En tu archivo y en el Dashboard: ves tus tareas, tu seguimiento de hábitos, tu registro emocional (mood tracking) y tu equilibrio general.'
+        },
         {
           question: '¿Qué pasa si dejo de registrar?',
-          answer: 'No perdés progreso. Retomas cuando quieras y ajustamos objetivos a tu energía actual.'
+          answer: 'No perdés progreso. Retomás cuando quieras y ajustamos el plan a tu energía actual para recuperar constancia.'
+        },
+        {
+          question: '¿Innerbloom es un habit tracker o un planificador diario?',
+          answer:
+            'Ambas cosas. Funciona como habit tracker (seguimiento de hábitos) y como planificador diario liviano: convertís tu energía del día en acciones simples y sostenibles.'
+        },
+        {
+          question: '¿Cómo funciona el registro emocional (mood tracking)?',
+          answer:
+            'Registrás tu emoción/estado en segundos. Ese registro emocional diario ayuda a que las sugerencias y el ritmo del plan se mantengan alineados con cómo estás.'
+        },
+        {
+          question: '¿Qué son los micro hábitos y por qué ayudan?',
+          answer:
+            'Son acciones pequeñas y realistas (2–10 min) que reducen fricción y aumentan constancia. Son ideales para construir hábitos sostenibles sin saturarte.'
+        },
+        {
+          question: '¿Innerbloom es una app de productividad o de bienestar?',
+          answer:
+            'Está enfocada en bienestar emocional y hábitos sostenibles, pero naturalmente mejora tu productividad al darte foco, estructura y seguimiento diario.'
         }
       ]
     },
@@ -324,11 +347,38 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       items: [
         {
           question: 'Do I need strong discipline to start?',
-          answer: 'No. If your energy is low, start in Low to activate the vital minimum. The system adjusts the pace.'
+          answer: 'No. If your energy is low, start in Low with micro-habits to build momentum. Habit tracking adapts to your pace.'
         },
-        { question: 'Can I switch game modes?', answer: 'Yes. Swap between Low, Chill, Flow and Evolve whenever you need.' },
-        { question: 'Where do I see my progress?', answer: 'In your file and dashboard, focused on your tasks, emotion logs, and overall balance.' },
-        { question: 'What happens if I stop logging?', answer: 'You do not lose progress. Resume anytime and we adjust goals to your current energy.' }
+        {
+          question: 'Can I switch game modes?',
+          answer: 'Yes. Switch between Low, Chill, Flow, and Evolve depending on your season and daily energy.'
+        },
+        {
+          question: 'Where can I see my progress?',
+          answer: 'In your archive and Dashboard: tasks, habit tracking, mood tracking, and your overall balance.'
+        },
+        {
+          question: 'What if I stop tracking for a while?',
+          answer: 'You don’t lose progress. Come back anytime and the plan adjusts to your current energy so you can rebuild consistency.'
+        },
+        {
+          question: 'Is Innerbloom a habit tracker or a daily planner?',
+          answer:
+            'Both. It works as a habit tracker and a lightweight daily planner—turning daily energy into simple, sustainable actions.'
+        },
+        {
+          question: 'How does mood tracking work?',
+          answer: 'Log your mood/state in seconds. Daily mood logging helps recommendations stay aligned with how you feel.'
+        },
+        {
+          question: 'What are micro-habits and why do they work?',
+          answer: 'Small, realistic actions (2–10 min) that reduce friction and build consistency—without burnout.'
+        },
+        {
+          question: 'Is Innerbloom a productivity app or a wellbeing app?',
+          answer:
+            'It’s built for emotional wellbeing and sustainable habits, while naturally improving focus and daily consistency.'
+        }
       ]
     },
     next: {

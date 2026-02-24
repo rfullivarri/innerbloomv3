@@ -1023,11 +1023,13 @@
   cursor: pointer;
   font-weight: 700;
   font-family: var(--font-heading);
+  overflow-wrap: anywhere;
 }
 
 .landing .faq p {
   color: #d8def5;
   margin-bottom: 0;
+  overflow-wrap: anywhere;
 }
 
 .landing .footer {
