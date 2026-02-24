@@ -3,46 +3,56 @@ import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimelin
 
 type Language = 'es' | 'en';
 
-const TIMELINE_COPY: Record<Language, { eyebrow: string; title: string; subtitle: string; steps: TimelineStep[] }> = {
+type TimelineCopy = {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  closingLine: string;
+  steps: TimelineStep[];
+};
+
+const TIMELINE_COPY: Record<Language, TimelineCopy> = {
   es: {
     eyebrow: 'Premium Scroll Timeline',
     title: 'Cómo funciona Innerbloom',
     subtitle: 'Un sistema guiado para pasar de “quiero estar mejor” a hábitos reales en tu día a día.',
+    closingLine: 'Innerbloom combina gestión de hábitos con registro emocional para construir constancia con un plan realista.',
     steps: [
       {
-        title: 'Comienzas con un diagnóstico breve',
-        description:
-          'Qué haces: respondes unas preguntas sobre energía, prioridades y momento actual (2–3 min). Qué obtienes: un punto de partida claro + tu primer plan personalizado.',
-        badge: '2–3 min',
-        chips: ['Check-in inicial', 'Energía y prioridades', 'Plan personalizado'],
+        title: 'Comienzas tu camino ✨',
+        badge: 'ONBOARDING PERSONALIZADO',
+        bullets: [
+          'Elegís tu modo de juego y respondés unas preguntas sobre energía, prioridades y tu momento actual (2–3 min).',
+          'Innerbloom entiende lo que estás buscando y arma un punto de partida claro para empezar con foco (sin presión).',
+        ],
+        chips: ['onboarding · energía diaria'],
       },
       {
-        title: 'Recibes un plan en 3 pilares',
-        description:
-          'Qué haces: revisas tareas sugeridas en Cuerpo, Mente y Alma. Qué obtienes: una rutina equilibrada, concreta y fácil de sostener.',
-        badge: '3 pilares',
-        chips: ['Cuerpo · Mente · Alma', 'Rutina equilibrada', 'Acciones concretas'],
+        title: 'Tu primer plan equilibrado ⚖️',
+        badge: 'PLAN EQUILIBRADO',
+        bullets: [
+          'Recibís un plan ordenado en Cuerpo, Mente y Alma, con microacciones realistas.',
+          'Te queda una rutina simple y sostenible para avanzar incluso en días de baja energía.',
+        ],
+        chips: ['micro hábitos · rutina diaria'],
       },
       {
-        title: 'Lo adaptas a tu realidad',
-        description:
-          'Qué haces: editas, cambias o descartas tareas; eliges modo y avatar según cómo estés hoy. Qué obtienes: un plan realmente tuyo (la IA propone, tú decides).',
-        badge: 'Flexible',
-        chips: ['Editar tareas', 'Modo y avatar', 'Tú decides'],
+        title: 'Hazlo a tu medida 🧩',
+        badge: 'FLEXIBLE',
+        bullets: [
+          'Editás, cambiás o descartás tareas; ajustás modo y avatar según cómo estés hoy.',
+          'La IA propone y vos decidís: el plan se adapta a tu vida (no al revés).',
+        ],
+        chips: ['hábitos flexibles · personalización'],
       },
       {
-        title: 'Lo aplicas en pocos minutos al día',
-        description:
-          'Qué haces: completas microacciones diarias (3–5 min) con enfoque simple y realista. Qué obtienes: constancia sin saturarte y progreso visible semana a semana.',
-        badge: '3–5 min/día',
-        chips: ['Microacciones', 'Constancia', 'Progreso semanal'],
-      },
-      {
-        title: 'Registras cómo te sientes y recalibras',
-        description:
-          'Qué haces: registras tu emoción y estado diario en segundos. Qué obtienes: recomendaciones ajustadas a tu momento + continuidad del proceso.',
-        badge: 'Recalibración',
-        chips: ['Registro emocional', 'Ajuste inteligente', 'Continuidad'],
+        title: 'Retrospectiva diaria + progreso visible 📅📈',
+        badge: 'PROGRESO SEMANAL',
+        bullets: [
+          'Completás microacciones y registrás tu emoción/estado en minutos (simple y realista).',
+          'Ves progreso semana a semana y recibís sugerencias para sostener constancia sin saturarte.',
+        ],
+        chips: ['seguimiento de hábitos · mood tracking'],
       },
     ],
   },
@@ -50,41 +60,43 @@ const TIMELINE_COPY: Record<Language, { eyebrow: string; title: string; subtitle
     eyebrow: 'Premium Scroll Timeline',
     title: 'How Innerbloom works',
     subtitle: 'A guided system to turn “I want to feel better” into real habits in your day-to-day.',
+    closingLine: 'Innerbloom combines habit tracking with mood tracking to build consistency through a realistic plan.',
     steps: [
       {
-        title: 'You begin with a brief check-in',
-        description:
-          'What you do: answer a few questions about energy, priorities, and your current moment (2–3 min). What you get: a clear starting point + your first personalized plan.',
-        badge: '2–3 min',
-        chips: ['Initial check-in', 'Energy & priorities', 'Personalized plan'],
+        title: 'You start your journey ✨',
+        badge: 'PERSONALIZED ONBOARDING',
+        bullets: [
+          'You choose your play mode and answer a few questions about energy, priorities, and your current moment (2–3 min).',
+          'Innerbloom understands what you are looking for and builds a clear starting point so you can begin with focus (without pressure).',
+        ],
+        chips: ['onboarding · daily energy'],
       },
       {
-        title: 'You receive a 3-pillar plan',
-        description:
-          'What you do: review suggested tasks across Body, Mind, and Soul. What you get: a balanced routine that is concrete and easy to sustain.',
-        badge: '3 pillars',
-        chips: ['Body · Mind · Soul', 'Balanced routine', 'Concrete actions'],
+        title: 'Your first balanced plan ⚖️',
+        badge: 'BALANCED PLAN',
+        bullets: [
+          'You receive a plan organized across Body, Mind, and Soul, with realistic micro-habits.',
+          'You get a simple, sustainable routine to keep moving forward even on low-energy days.',
+        ],
+        chips: ['micro-habits · daily routine'],
       },
       {
-        title: 'You adapt it to your reality',
-        description:
-          'What you do: edit, swap, or discard tasks; choose a mode and avatar based on how you feel today. What you get: a plan that is truly yours (AI suggests, you decide).',
-        badge: 'Flexible',
-        chips: ['Edit tasks', 'Mode & avatar', 'You decide'],
+        title: 'Make it your own 🧩',
+        badge: 'FLEXIBLE',
+        bullets: [
+          'You edit, swap, or remove tasks; you adjust your mode and avatar based on how you feel today.',
+          'AI suggests and you decide: the plan adapts to your life (not the other way around).',
+        ],
+        chips: ['flexible habits · personalization'],
       },
       {
-        title: 'You apply it in just minutes a day',
-        description:
-          'What you do: complete daily micro-actions (3–5 min) with a simple, realistic focus. What you get: consistency without overload and visible week-by-week progress.',
-        badge: '3–5 min/day',
-        chips: ['Micro-actions', 'Consistency', 'Weekly progress'],
-      },
-      {
-        title: 'You track how you feel and recalibrate',
-        description:
-          'What you do: log your emotion and daily state in seconds. What you get: recommendations adapted to your current moment + continuity in the process.',
-        badge: 'Recalibration',
-        chips: ['Emotion tracking', 'Adaptive guidance', 'Continuity'],
+        title: 'Daily reflection + visible progress 📅📈',
+        badge: 'WEEKLY PROGRESS',
+        bullets: [
+          'You complete micro-habits and log your emotion/state in minutes (simple and realistic).',
+          'You see weekly progress and get suggestions to sustain consistency without overload.',
+        ],
+        chips: ['habit tracking · mood tracking'],
       },
     ],
   },
@@ -124,7 +136,7 @@ export default function PremiumTimelineDemoPage() {
         <p className="mx-auto mt-4 max-w-3xl text-base text-slate-200/85 sm:text-xl">{copy.subtitle}</p>
       </div>
 
-      <PremiumTimeline steps={copy.steps} className="mt-10" />
+      <PremiumTimeline steps={copy.steps} closingLine={copy.closingLine} className="mt-10" />
     </main>
   );
 }

@@ -3,13 +3,14 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperti
 
 export type TimelineStep = {
   title: string;
-  description: string;
+  bullets: string[];
   badge?: string;
   chips?: string[];
 };
 
 type PremiumTimelineProps = {
   steps: TimelineStep[];
+  closingLine: string;
   className?: string;
   axisX?: number;
   lineOffsetX?: number;
@@ -62,6 +63,7 @@ const catmullRomToBezierPath = (points: Point[]) => {
 
 export default function PremiumTimeline({
   steps,
+  closingLine,
   className,
   axisX,
   lineOffsetX = 56,
@@ -78,6 +80,8 @@ export default function PremiumTimeline({
   const pathRef = useRef<SVGPathElement | null>(null);
   const cardRefs = useRef<Array<HTMLElement | null>>([]);
   const markerRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const closingLineRef = useRef<HTMLParagraphElement | null>(null);
+  const lastStepRef = useRef<HTMLElement | null>(null);
 
   const [pathData, setPathData] = useState('');
   const [pathLength, setPathLength] = useState(0);
@@ -86,6 +90,8 @@ export default function PremiumTimeline({
   const [geometry, setGeometry] = useState<TimelineGeometry>({ yStart: 0, yEnd: 1, stepAnchors: [] });
   const [visibleCards, setVisibleCards] = useState<boolean[]>(() => steps.map(() => false));
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [endPoint, setEndPoint] = useState<Point>({ x: 0, y: 0 });
+  const [completionInView, setCompletionInView] = useState(false);
 
   useEffect(() => {
     setVisibleCards((prev) => {
@@ -204,7 +210,9 @@ export default function PremiumTimeline({
 
       const stepAnchors = anchorPoints.map((point) => point.y);
       const yStart = stepAnchors[0] - tailTopPx;
-      const yEnd = stepAnchors[stepAnchors.length - 1] + tailBottomPx;
+      const closingRect = closingLineRef.current?.getBoundingClientRect();
+      const closingY = closingRect ? closingRect.top - rootRect.top + closingRect.height / 2 : null;
+      const yEnd = closingY ? Math.max(stepAnchors[stepAnchors.length - 1] + tailBottomPx, closingY) : stepAnchors[stepAnchors.length - 1] + tailBottomPx;
       const isMobile = window.matchMedia('(max-width: 639px)').matches;
       const amplitude = isMobile ? amplitudeMobile : amplitudeDesktop;
       const period = isMobile ? periodMobile : periodDesktop;
@@ -261,8 +269,59 @@ export default function PremiumTimeline({
       return;
     }
 
-    setPathLength(pathRef.current.getTotalLength());
+    const nextPathLength = pathRef.current.getTotalLength();
+    setPathLength(nextPathLength);
+
+    const point = pathRef.current.getPointAtLength(nextPathLength);
+    setEndPoint({ x: point.x, y: point.y });
   }, [pathData]);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setCompletionInView(false);
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const closingNode = closingLineRef.current;
+    const finalNode = lastStepRef.current;
+
+    if (!closingNode || !finalNode) {
+      return;
+    }
+
+    let finalFullyVisible = false;
+    let closingVisible = false;
+
+    const sync = () => {
+      setCompletionInView(finalFullyVisible && closingVisible);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.target === finalNode) {
+            finalFullyVisible = entry.isIntersecting && entry.intersectionRatio >= 0.9;
+          }
+
+          if (entry.target === closingNode) {
+            closingVisible = entry.isIntersecting && entry.intersectionRatio >= 0.35;
+          }
+        });
+
+        sync();
+      },
+      { threshold: [0, 0.35, 0.9, 1] },
+    );
+
+    observer.observe(finalNode);
+    observer.observe(closingNode);
+
+    return () => observer.disconnect();
+  }, [reducedMotion, steps.length]);
 
   useEffect(() => {
     if (reducedMotion) {
@@ -375,6 +434,19 @@ export default function PremiumTimeline({
               transition: reducedMotion ? 'none' : 'stroke-dashoffset 0.16s linear',
             }}
           />
+          <circle
+            cx={endPoint.x}
+            cy={endPoint.y}
+            r={5}
+            fill="rgba(115,208,255,0.95)"
+            style={{
+              opacity: completionInView || reducedMotion ? 0.95 : 0.45,
+              transition: 'opacity 320ms ease, transform 320ms ease, box-shadow 320ms ease',
+              transformOrigin: `${endPoint.x}px ${endPoint.y}px`,
+              transform: completionInView && !reducedMotion ? 'scale(1.08)' : 'scale(1)',
+            }}
+            className={completionInView && !reducedMotion ? 'animate-[pulse_1.9s_ease-in-out_infinite]' : ''}
+          />
         </svg>
 
         <ol className="relative z-10 space-y-5 sm:space-y-7" role="list">
@@ -410,6 +482,9 @@ export default function PremiumTimeline({
                 <motion.article
                   ref={(node) => {
                     cardRefs.current[index] = node;
+                    if (index === steps.length - 1) {
+                      lastStepRef.current = node;
+                    }
                   }}
                   initial={false}
                   animate={
@@ -429,7 +504,13 @@ export default function PremiumTimeline({
                     </span>
                   ) : null}
                   <h3 className="text-xl font-semibold leading-tight text-white sm:text-2xl">{step.title}</h3>
-                  <p className="mt-3 text-base leading-relaxed text-slate-200/90 sm:text-lg">{step.description}</p>
+                  <ul className="mt-3 space-y-2 text-base leading-relaxed text-slate-200/90 sm:text-lg">
+                    {step.bullets.map((bullet) => (
+                      <li key={`${step.title}-${bullet}`} className="list-none">
+                        • {bullet}
+                      </li>
+                    ))}
+                  </ul>
                   {step.chips?.length ? (
                     <ul className="mt-4 flex flex-wrap gap-2" aria-label="Step tags">
                       {step.chips.map((chip) => (
@@ -447,6 +528,18 @@ export default function PremiumTimeline({
             );
           })}
         </ol>
+
+        <p
+          ref={closingLineRef}
+          className={[
+            'relative z-10 ml-[88px] mt-6 max-w-[860px] text-left text-base leading-relaxed text-slate-100/90 transition-all duration-300 sm:ml-[96px] sm:text-lg',
+            completionInView && !reducedMotion ? 'text-white drop-shadow-[0_0_14px_rgba(115,208,255,0.34)]' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {closingLine}
+        </p>
       </div>
     </section>
   );
