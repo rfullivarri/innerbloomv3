@@ -411,6 +411,20 @@ export default function LandingPage() {
 
     navigate('/sign-up');
   };
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    inLanguage: language,
+    mainEntity: copy.faq.items.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer
+      }
+    }))
+  };
+
 
   return (
     <div className="landing" style={landingStyle}>
@@ -458,6 +472,7 @@ export default function LandingPage() {
       </header>
 
       <main>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
         <section className="hero reveal-on-scroll" id="overview">
           <div className="hero-grid">
             <div className="hero-copy">
