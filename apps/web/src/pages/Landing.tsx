@@ -750,6 +750,7 @@ export default function LandingPage() {
                   key={plan.id}
                   style={{ '--delay': `${index * 90}ms` } as CSSProperties}
                 >
+                  {plan.id === 'YEAR' ? <span className="pricing-best-deal-chip">best deal</span> : null}
                   <p className="pricing-plan-name">{plan.name}</p>
                   <p className="pricing-plan-price">{plan.price}</p>
                   <p className="pricing-plan-detail">{plan.detail}</p>
