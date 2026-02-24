@@ -4,9 +4,27 @@ import { useAuth } from '@clerk/clerk-react';
 import { OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
 import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
-import GradientSwitcher from '../components/GradientSwitcher';
 import { usePageMeta } from '../lib/seo';
 import './Landing.css';
+
+type LandingGradientId = 'curiosity' | 'endless' | 'amethyst' | 'dirty';
+
+type LandingGradientOption = {
+  id: LandingGradientId;
+  label: { es: string; en: string };
+  angle: string;
+  a: string;
+  b: string;
+};
+
+const LANDING_GRADIENTS: LandingGradientOption[] = [
+  { id: 'curiosity', label: { es: 'Curiosity Blue', en: 'Curiosity Blue' }, angle: '135deg', a: '#525252', b: '#3D72B4' },
+  { id: 'endless', label: { es: 'Endless River', en: 'Endless River' }, angle: '135deg', a: '#43CEA2', b: '#185A9D' },
+  { id: 'amethyst', label: { es: 'Amethyst', en: 'Amethyst' }, angle: '135deg', a: '#9D50BB', b: '#6E48AA' },
+  { id: 'dirty', label: { es: 'Dirty Fog', en: 'Dirty Fog' }, angle: '135deg', a: '#B993D6', b: '#8CA6DB' },
+];
+
+const LANDING_GRADIENT_STORAGE_KEY = 'ib:official-landing-gradient';
 
 type ModeVisual = {
   avatarVideo: string;
@@ -249,10 +267,20 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const isSignedIn = Boolean(userId);
   const [language, setLanguage] = useState<Language>('es');
+  const [gradientId, setGradientId] = useState<LandingGradientId>(() => {
+    if (typeof window === 'undefined') return 'curiosity';
+    const storedGradientId = window.localStorage.getItem(LANDING_GRADIENT_STORAGE_KEY);
+    const storedGradient = LANDING_GRADIENTS.find((option) => option.id === storedGradientId);
+    return storedGradient?.id ?? 'curiosity';
+  });
   const copy = OFFICIAL_LANDING_CONTENT[language];
-  const landingStyle = OFFICIAL_LANDING_CSS_VARIABLES as CSSProperties;
-  const env = import.meta.env as Record<string, string | boolean | undefined>;
-  const showGradientSwitcher = env.DEV || env.NEXT_PUBLIC_SHOW_GRADIENT_SWITCHER === 'true' || env.VITE_SHOW_GRADIENT_SWITCHER === 'true';
+  const selectedGradient = LANDING_GRADIENTS.find((option) => option.id === gradientId) ?? LANDING_GRADIENTS[0];
+  const landingStyle = {
+    ...(OFFICIAL_LANDING_CSS_VARIABLES as CSSProperties),
+    '--bg-angle': selectedGradient.angle,
+    '--bg-a': selectedGradient.a,
+    '--bg-b': selectedGradient.b,
+  } as CSSProperties;
   const [activeSlide, setActiveSlide] = useState(0);
   const [paused, setPaused] = useState(false);
   const [activeModeIndex, setActiveModeIndex] = useState(0);
@@ -282,6 +310,10 @@ export default function LandingPage() {
   const modeFrequency = frequencyByMode[language][activeMode.id];
   const modeStateLabel = language === 'es' ? 'Estado' : 'State';
   const modeObjectiveLabel = language === 'es' ? 'Objetivo' : 'Objective';
+
+  useEffect(() => {
+    window.localStorage.setItem(LANDING_GRADIENT_STORAGE_KEY, gradientId);
+  }, [gradientId]);
 
   usePageMeta({
     title: 'Innerbloom',
@@ -497,6 +529,21 @@ export default function LandingPage() {
           </nav>
         ) : null}
         <div className="nav-actions">
+          <label className="gradient-select-wrapper">
+            <span className="visually-hidden">{language === 'es' ? 'Seleccionar fondo' : 'Select background'}</span>
+            <select
+              className="gradient-select"
+              value={gradientId}
+              onChange={(event) => setGradientId(event.target.value as LandingGradientId)}
+              aria-label={language === 'es' ? 'Selector de fondo' : 'Background selector'}
+            >
+              {LANDING_GRADIENTS.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label[language]}
+                </option>
+              ))}
+            </select>
+          </label>
           <LanguageDropdown value={language} onChange={setLanguage} />
           {isSignedIn ? (
             <Link className={buttonClasses()} to="/dashboard">
@@ -804,8 +851,6 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-
-      {showGradientSwitcher ? <GradientSwitcher /> : null}
 
       <footer className="footer">
         <span>{copy.footer.copyright}</span>

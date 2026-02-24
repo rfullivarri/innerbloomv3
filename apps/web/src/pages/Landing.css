@@ -27,7 +27,7 @@
   overflow-x: hidden;
   font-family: var(--font-body);
   color: var(--ink);
-  background: var(--bg);
+  background: linear-gradient(var(--bg-angle, 135deg), var(--bg-a, #525252), var(--bg-b, #3d72b4));
 }
 
 .landing::before {
@@ -198,6 +198,30 @@
 .landing .nav-actions .nav-auth-button {
   border-color: transparent;
   box-shadow: none;
+}
+
+.landing .gradient-select-wrapper {
+  display: inline-flex;
+  align-items: center;
+}
+
+.landing .gradient-select {
+  border: 1px solid rgba(186, 212, 255, 0.36);
+  border-radius: 12px;
+  background: rgba(11, 18, 32, 0.82);
+  color: #eaf1ff;
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 7px 10px;
+  min-width: 130px;
+  cursor: pointer;
+}
+
+.landing .gradient-select:focus-visible {
+  outline: 2px solid rgba(125, 211, 252, 0.7);
+  outline-offset: 2px;
 }
 
 .landing .lang-toggle {
@@ -1206,6 +1230,12 @@
     padding: 0.525rem 1.05rem;
   }
 
+  .landing .gradient-select {
+    min-width: 102px;
+    font-size: 0.6rem;
+    padding: 5px 8px;
+  }
+
   .landing .lang-button {
     font-size: 8px;
     padding: 2px 4px;
@@ -1273,97 +1303,4 @@
 }
 .landing .lang-menu[hidden] {
   display: none;
-}
-
-:root {
-  --bg-angle: 135deg;
-  --bg-a: #525252;
-  --bg-b: #3d72b4;
-}
-
-.landing {
-  background: linear-gradient(var(--bg-angle), var(--bg-a), var(--bg-b));
-}
-
-.gradient-switcher {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 70;
-}
-
-.gradient-switcher-toggle,
-.gradient-switcher-next {
-  border: 1px solid rgba(186, 212, 255, 0.35);
-  color: #eaf1ff;
-  background: rgba(11, 18, 32, 0.86);
-  backdrop-filter: blur(10px);
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-.gradient-switcher-panel {
-  position: absolute;
-  right: 0;
-  bottom: 48px;
-  width: min(320px, calc(100vw - 24px));
-  border-radius: 14px;
-  border: 1px solid rgba(186, 212, 255, 0.3);
-  background: rgba(12, 19, 35, 0.92);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.35);
-  padding: 12px;
-}
-
-.gradient-switcher-options {
-  border: 0;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 8px;
-}
-
-.gradient-switcher-title {
-  margin-bottom: 8px;
-  font-size: 0.8rem;
-  color: rgba(214, 229, 255, 0.9);
-}
-
-.gradient-switcher-option {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 8px;
-}
-
-.gradient-switcher-option input {
-  accent-color: #8ca6db;
-}
-
-.gradient-switcher-label {
-  font-size: 0.85rem;
-}
-
-.gradient-switcher-preview {
-  width: 80px;
-  height: 40px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-}
-
-.gradient-switcher-next {
-  margin-top: 10px;
-}
-
-@media (max-width: 640px) {
-  .gradient-switcher {
-    right: 10px;
-    bottom: 10px;
-  }
-
-  .gradient-switcher-panel {
-    bottom: 44px;
-  }
 }
