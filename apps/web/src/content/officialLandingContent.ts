@@ -53,7 +53,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     pillars: {
       title: 'Nuestros pilares fundamentales',
       intro:
-        'Tres pilares para avanzar en equilibrio: energía física, claridad mental y estabilidad emocional.',
+        'Tus hábitos son el mapa. Tu constancia marca el ritmo. Es tu Journey de crecimiento con equilibrio entre Cuerpo, Mente y Alma—registrando tu emoción diaria para ajustar el camino.',
       highlightLeadIn: 'Mírate con perspectiva y elegí tu próximo paso.',
       highlight: 'Obsérvate por primera vez en tercera persona y toma el control de tus acciones y hábitos.',
       items: [
@@ -206,7 +206,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     pillars: {
       title: 'Our core pillars',
       intro:
-        'Three pillars to grow in balance: physical energy, mental clarity, emotional steadiness.',
+        'Your habits are the map. Consistency sets the rhythm. It’s your growth journey—balanced across Body, Mind, and Soul—logging your daily mood to stay aligned.',
       highlightLeadIn: 'Pause, zoom out, and choose your next move.',
       highlight: 'Observe yourself in third person for the first time and take control of your actions and habits.',
       items: [
