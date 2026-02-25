@@ -38,7 +38,9 @@ const baseElements = {
   formFieldInput:
     'rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 text-[15px] leading-6 text-white placeholder:text-white/40 shadow-[0_6px_20px_rgba(99,102,241,0.15)] focus:border-white/40 focus:outline-none focus-visible:ring-0',
   formFieldInputShowPasswordButton: 'text-sm text-white/60 hover:text-white',
-  formButtonPrimary: `${gradientButtonClass} w-full text-sm`,
+  formButtonPrimary:
+    `${gradientButtonClass} w-full rounded-full font-display text-sm font-semibold ` +
+    '!appearance-none !border-0 !bg-none !bg-accent-purple !shadow-none !ring-0 !outline-none',
 
   footer:
     'mt-2 w-full max-w-none rounded-xl border border-transparent bg-transparent !px-2 !py-1 shadow-none',
