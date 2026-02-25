@@ -22,7 +22,7 @@ const baseVariables = {
 };
 
 const gradientButtonClass =
-  'mt-3 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#7c3aed] text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all duration-200 hover:bg-[#6d28d9] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 sm:w-auto';
+  'mt-3 inline-flex h-12 w-full items-center justify-center rounded-full bg-accent-purple px-6 py-3 font-display text-sm font-semibold tracking-tight text-white shadow-none transition duration-150 ease-out hover:bg-accent-purple/90 active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
 
 const baseElements = {
   rootBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto`,
@@ -38,7 +38,7 @@ const baseElements = {
   formFieldInput:
     'rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 text-[15px] leading-6 text-white placeholder:text-white/40 shadow-[0_6px_20px_rgba(99,102,241,0.15)] focus:border-white/40 focus:outline-none focus-visible:ring-0',
   formFieldInputShowPasswordButton: 'text-sm text-white/60 hover:text-white',
-  formButtonPrimary: `${gradientButtonClass} h-11 text-xs tracking-[0.16em] sm:h-12 sm:text-sm`,
+  formButtonPrimary: `${gradientButtonClass} w-full text-sm`,
 
   footer:
     'mt-2 w-full max-w-none rounded-xl border border-transparent bg-transparent !px-2 !py-1 shadow-none',
