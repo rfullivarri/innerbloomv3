@@ -371,7 +371,7 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
   };
 
   return (
-    <div className="relative flex min-h-screen min-h-dvh flex-col overflow-hidden bg-[linear-gradient(135deg,_#000c40,_#f8cdda)] pb-16">
+    <div className="relative flex min-h-screen min-h-dvh flex-col overflow-hidden bg-[#000c40] pb-16">
       <HUD
         mode={answers.mode}
         stepIndex={currentStepIndex}
