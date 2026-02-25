@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import './PremiumTimeline.css';
 
 export type TimelineStep = {
   title: string;
@@ -81,7 +82,6 @@ export default function PremiumTimeline({
   const cardRefs = useRef<Array<HTMLElement | null>>([]);
   const markerRefs = useRef<Array<HTMLDivElement | null>>([]);
   const closingLineRef = useRef<HTMLDivElement | null>(null);
-  const lastStepRef = useRef<HTMLElement | null>(null);
 
   const [pathData, setPathData] = useState('');
   const [pathLength, setPathLength] = useState(0);
@@ -91,8 +91,7 @@ export default function PremiumTimeline({
   const [visibleCards, setVisibleCards] = useState<boolean[]>(() => steps.map(() => false));
   const [reducedMotion, setReducedMotion] = useState(false);
   const [endPoint, setEndPoint] = useState<Point>({ x: 0, y: 0 });
-  const [completionInView, setCompletionInView] = useState(false);
-  const [closingActivated, setClosingActivated] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     setVisibleCards((prev) => {
@@ -238,17 +237,22 @@ export default function PremiumTimeline({
         });
       }
 
-      if (closingRect && closingY) {
-        const closingX = Math.max(resolvedAxisX + 28, closingRect.left - rootRect.left + 28);
-        sampledPoints.push(
-          { x: resolvedAxisX + 18, y: closingY - 10 },
-          { x: resolvedAxisX + 28, y: closingY + 6 },
-          { x: closingX, y: closingY },
-        );
+      let nextPathData = catmullRomToBezierPath(sampledPoints);
+      let effectiveYEnd = sampledPoints[sampledPoints.length - 1]?.y ?? yEndBase;
+
+      if (closingRect && closingY && sampledPoints.length > 1) {
+        const finalGapPx = 8;
+        const landingX = Math.max(resolvedAxisX + 44, closingRect.left - rootRect.left - finalGapPx);
+        const waveEnd = sampledPoints[sampledPoints.length - 1];
+        const midX = landingX - 22;
+        const midY = closingY - 5;
+
+        nextPathData += ` C ${waveEnd.x + 22} ${waveEnd.y + 8}, ${landingX - 46} ${closingY - 18}, ${midX} ${midY}`;
+        nextPathData += ` S ${landingX - 10} ${closingY}, ${landingX} ${closingY}`;
+        effectiveYEnd = closingY;
       }
 
-      setPathData(catmullRomToBezierPath(sampledPoints));
-      const effectiveYEnd = sampledPoints[sampledPoints.length - 1]?.y ?? yEndBase;
+      setPathData(nextPathData);
       setGeometry({ yStart, yEnd: effectiveYEnd, stepAnchors });
     };
 
@@ -290,62 +294,14 @@ export default function PremiumTimeline({
   }, [pathData]);
 
   useEffect(() => {
-    if (reducedMotion) {
-      setCompletionInView(false);
+    if (isComplete) {
       return;
     }
 
-    if (typeof window === 'undefined') {
-      return;
+    if (reducedMotion || progress >= 0.99) {
+      setIsComplete(true);
     }
-
-    const closingNode = closingLineRef.current;
-    const finalNode = lastStepRef.current;
-
-    if (!closingNode || !finalNode) {
-      return;
-    }
-
-    let finalFullyVisible = false;
-    let closingVisible = false;
-
-    const sync = () => {
-      setCompletionInView(finalFullyVisible && closingVisible);
-    };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.target === finalNode) {
-            finalFullyVisible = entry.isIntersecting && entry.intersectionRatio >= 0.9;
-          }
-
-          if (entry.target === closingNode) {
-            closingVisible = entry.isIntersecting && entry.intersectionRatio >= 0.35;
-          }
-        });
-
-        sync();
-      },
-      { threshold: [0, 0.35, 0.9, 1] },
-    );
-
-    observer.observe(finalNode);
-    observer.observe(closingNode);
-
-    return () => observer.disconnect();
-  }, [reducedMotion, steps.length]);
-
-  useEffect(() => {
-    if (reducedMotion) {
-      setClosingActivated(true);
-      return;
-    }
-
-    if (progress >= 0.995) {
-      setClosingActivated((prev) => (prev ? prev : true));
-    }
-  }, [progress, reducedMotion]);
+  }, [isComplete, progress, reducedMotion]);
 
   useEffect(() => {
     if (reducedMotion) {
@@ -464,12 +420,12 @@ export default function PremiumTimeline({
             r={5}
             fill="rgba(115,208,255,0.95)"
             style={{
-              opacity: completionInView || reducedMotion ? 0.95 : 0.45,
+              opacity: isComplete || reducedMotion ? 0.95 : 0.45,
               transition: 'opacity 320ms ease, transform 320ms ease, box-shadow 320ms ease',
               transformOrigin: `${endPoint.x}px ${endPoint.y}px`,
-              transform: completionInView && !reducedMotion ? 'scale(1.08)' : 'scale(1)',
+              transform: isComplete && !reducedMotion ? 'scale(1.08)' : 'scale(1)',
             }}
-            className={completionInView && !reducedMotion ? 'animate-[pulse_1.9s_ease-in-out_infinite]' : ''}
+            className={isComplete && !reducedMotion ? 'animate-[pulse_1.9s_ease-in-out_infinite]' : ''}
           />
         </svg>
 
@@ -506,9 +462,6 @@ export default function PremiumTimeline({
                 <motion.article
                   ref={(node) => {
                     cardRefs.current[index] = node;
-                    if (index === steps.length - 1) {
-                      lastStepRef.current = node;
-                    }
                   }}
                   initial={false}
                   animate={
@@ -555,9 +508,10 @@ export default function PremiumTimeline({
 
         <motion.div
           ref={closingLineRef}
+          data-completed={isComplete ? 'true' : 'false'}
           initial={false}
           animate={
-            reducedMotion || !closingActivated
+            reducedMotion || !isComplete
               ? {
                 opacity: 1,
                 scale: 1,
@@ -567,18 +521,18 @@ export default function PremiumTimeline({
               : {
                 opacity: [0.94, 1],
                 scale: [1, 1.03, 1],
-                borderColor: ['rgba(255,255,255,0.2)', 'rgba(170, 228, 255, 0.72)', 'rgba(255,255,255,0.38)'],
+                borderColor: ['rgba(255,255,255,0.2)', 'rgba(170, 228, 255, 0.72)', 'rgba(176, 232, 255, 0.9)'],
                 boxShadow: [
                   '0 18px 38px rgba(15, 10, 26, 0.24)',
-                  '0 0 0 1px rgba(184, 236, 255, 0.42), 0 0 36px rgba(126, 211, 255, 0.36), inset 0 0 44px rgba(173, 137, 255, 0.16)',
-                  '0 22px 44px rgba(15, 10, 26, 0.26)',
+                  '0 0 0 1px rgba(184, 236, 255, 0.52), 0 0 42px rgba(126, 211, 255, 0.5), inset 0 0 56px rgba(173, 137, 255, 0.2)',
+                  '0 0 0 1px rgba(184, 236, 255, 0.46), 0 0 34px rgba(126, 211, 255, 0.42), inset 0 0 46px rgba(173, 137, 255, 0.16)',
                 ],
               }
           }
-          transition={reducedMotion ? { duration: 0 } : { duration: 0.78, ease: 'easeOut', times: [0, 0.62, 1] }}
+          transition={reducedMotion ? { duration: 0 } : { duration: 0.7, ease: 'easeOut', times: [0, 0.62, 1] }}
           className={[
-            'relative z-10 ml-[88px] mt-6 max-w-[860px] rounded-[28px] border bg-white/[0.08] px-5 py-4 text-left text-base leading-relaxed text-slate-100/90 backdrop-blur-[10px] sm:ml-[96px] sm:px-7 sm:py-5 sm:text-lg',
-            completionInView && !reducedMotion ? 'text-white' : '',
+            'timeline-closing-card relative z-10 ml-[88px] mt-6 max-w-[860px] rounded-[28px] border bg-white/[0.08] px-5 py-4 text-left text-base leading-relaxed text-slate-100/90 backdrop-blur-[10px] sm:ml-[96px] sm:px-7 sm:py-5 sm:text-lg',
+            isComplete && !reducedMotion ? 'completed text-white' : '',
           ].filter(Boolean).join(' ')}
           style={{
             backgroundImage: 'radial-gradient(circle at 18% 48%, rgba(152,214,255,0.14), transparent 55%)',
