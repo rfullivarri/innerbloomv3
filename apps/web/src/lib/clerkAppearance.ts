@@ -21,8 +21,7 @@ const baseVariables = {
   fontFamily: '"Manrope", "Inter", system-ui, sans-serif'
 };
 
-const gradientButtonClass =
-  'mt-3 inline-flex h-12 w-full items-center justify-center rounded-full bg-accent-purple px-6 py-3 font-display text-sm font-semibold tracking-tight text-white shadow-none transition duration-150 ease-out hover:bg-accent-purple/90 active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
+const gradientButtonClass = 'ib-primary-button mt-3 h-12 w-full';
 
 const baseElements = {
   rootBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto`,
@@ -40,7 +39,7 @@ const baseElements = {
   formFieldInputShowPasswordButton: 'text-sm text-white/60 hover:text-white',
   formButtonPrimary:
     `${gradientButtonClass} w-full rounded-full font-display text-sm font-semibold ` +
-    '!appearance-none !border-0 !bg-none !bg-accent-purple !shadow-none !ring-0 !outline-none',
+    '!appearance-none !ring-0',
 
   footer:
     'mt-2 w-full max-w-none rounded-xl border border-transparent bg-transparent !px-2 !py-1 shadow-none',
