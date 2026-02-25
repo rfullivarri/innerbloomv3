@@ -17,6 +17,8 @@ import PricingPage from './pages/Pricing';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
 import SubscriptionPage from './pages/Subscription';
 import PremiumTimelineDemoPage from './pages/PremiumTimelineDemo';
+import BillingSuccessPage from './pages/BillingSuccess';
+import BillingCancelPage from './pages/BillingCancel';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -190,6 +192,24 @@ export default function App() {
             </RequireUser>
           }
         />
+        <Route
+          path="/settings/billing"
+          element={
+            <RequireUser>
+              <SubscriptionPage />
+            </RequireUser>
+          }
+        />
+        <Route
+          path="/premium"
+          element={
+            <RequireUser>
+              <SubscriptionPage />
+            </RequireUser>
+          }
+        />
+        <Route path="/billing/success" element={<BillingSuccessPage />} />
+        <Route path="/billing/cancel" element={<BillingCancelPage />} />
         <Route
           path="/pricing"
           element={
