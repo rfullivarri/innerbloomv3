@@ -244,6 +244,22 @@
 }
 
 @layer utilities {
+  .ib-primary-button {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-full border border-transparent bg-accent-purple px-6 py-3 font-display text-sm font-semibold tracking-tight text-white shadow-glow transition duration-150 ease-out;
+  }
+
+  .ib-primary-button:hover {
+    @apply bg-accent-purple/90;
+  }
+
+  .ib-primary-button:active {
+    @apply translate-y-[1px];
+  }
+
+  .ib-primary-button:focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-white;
+  }
+
   .glass-card {
     @apply backdrop-blur-2xl;
     background: var(--onboarding-glass-surface-inner);

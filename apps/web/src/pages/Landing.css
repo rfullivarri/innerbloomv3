@@ -180,11 +180,6 @@
   flex-wrap: nowrap;
 }
 
-.landing .nav-actions .nav-auth-button {
-  border-color: transparent;
-  box-shadow: none;
-}
-
 .landing .gradient-select-wrapper {
   display: inline-flex;
   align-items: center;
