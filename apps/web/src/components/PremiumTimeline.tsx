@@ -80,7 +80,7 @@ export default function PremiumTimeline({
   const pathRef = useRef<SVGPathElement | null>(null);
   const cardRefs = useRef<Array<HTMLElement | null>>([]);
   const markerRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const closingLineRef = useRef<HTMLParagraphElement | null>(null);
+  const closingLineRef = useRef<HTMLDivElement | null>(null);
   const lastStepRef = useRef<HTMLElement | null>(null);
 
   const [pathData, setPathData] = useState('');
@@ -92,6 +92,7 @@ export default function PremiumTimeline({
   const [reducedMotion, setReducedMotion] = useState(false);
   const [endPoint, setEndPoint] = useState<Point>({ x: 0, y: 0 });
   const [completionInView, setCompletionInView] = useState(false);
+  const [closingActivated, setClosingActivated] = useState(false);
 
   useEffect(() => {
     setVisibleCards((prev) => {
@@ -212,7 +213,9 @@ export default function PremiumTimeline({
       const yStart = stepAnchors[0] - tailTopPx;
       const closingRect = closingLineRef.current?.getBoundingClientRect();
       const closingY = closingRect ? closingRect.top - rootRect.top + closingRect.height / 2 : null;
-      const yEnd = closingY ? Math.max(stepAnchors[stepAnchors.length - 1] + tailBottomPx, closingY) : stepAnchors[stepAnchors.length - 1] + tailBottomPx;
+      const yEndBase = closingY
+        ? Math.max(stepAnchors[stepAnchors.length - 1] + tailBottomPx, closingY - 34)
+        : stepAnchors[stepAnchors.length - 1] + tailBottomPx;
       const isMobile = window.matchMedia('(max-width: 639px)').matches;
       const amplitude = isMobile ? amplitudeMobile : amplitudeDesktop;
       const period = isMobile ? periodMobile : periodDesktop;
@@ -221,22 +224,32 @@ export default function PremiumTimeline({
       const omega = (2 * Math.PI) / period;
       const sampledPoints: Point[] = [];
 
-      for (let y = yStart; y <= yEnd; y += sampleStep) {
+      for (let y = yStart; y <= yEndBase; y += sampleStep) {
         sampledPoints.push({
           x: resolvedAxisX + amplitude * Math.sin(omega * (y - yStart) + phase),
           y,
         });
       }
 
-      if (sampledPoints[sampledPoints.length - 1]?.y !== yEnd) {
+      if (sampledPoints[sampledPoints.length - 1]?.y !== yEndBase) {
         sampledPoints.push({
-          x: resolvedAxisX + amplitude * Math.sin(omega * (yEnd - yStart) + phase),
-          y: yEnd,
+          x: resolvedAxisX + amplitude * Math.sin(omega * (yEndBase - yStart) + phase),
+          y: yEndBase,
         });
       }
 
+      if (closingRect && closingY) {
+        const closingX = Math.max(resolvedAxisX + 28, closingRect.left - rootRect.left + 28);
+        sampledPoints.push(
+          { x: resolvedAxisX + 18, y: closingY - 10 },
+          { x: resolvedAxisX + 28, y: closingY + 6 },
+          { x: closingX, y: closingY },
+        );
+      }
+
       setPathData(catmullRomToBezierPath(sampledPoints));
-      setGeometry({ yStart, yEnd, stepAnchors });
+      const effectiveYEnd = sampledPoints[sampledPoints.length - 1]?.y ?? yEndBase;
+      setGeometry({ yStart, yEnd: effectiveYEnd, stepAnchors });
     };
 
     recomputePath();
@@ -322,6 +335,17 @@ export default function PremiumTimeline({
 
     return () => observer.disconnect();
   }, [reducedMotion, steps.length]);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setClosingActivated(true);
+      return;
+    }
+
+    if (progress >= 0.995) {
+      setClosingActivated((prev) => (prev ? prev : true));
+    }
+  }, [progress, reducedMotion]);
 
   useEffect(() => {
     if (reducedMotion) {
@@ -529,17 +553,39 @@ export default function PremiumTimeline({
           })}
         </ol>
 
-        <p
+        <motion.div
           ref={closingLineRef}
+          initial={false}
+          animate={
+            reducedMotion || !closingActivated
+              ? {
+                opacity: 1,
+                scale: 1,
+                borderColor: 'rgba(255,255,255,0.2)',
+                boxShadow: '0 18px 38px rgba(15, 10, 26, 0.24)',
+              }
+              : {
+                opacity: [0.94, 1],
+                scale: [1, 1.03, 1],
+                borderColor: ['rgba(255,255,255,0.2)', 'rgba(170, 228, 255, 0.72)', 'rgba(255,255,255,0.38)'],
+                boxShadow: [
+                  '0 18px 38px rgba(15, 10, 26, 0.24)',
+                  '0 0 0 1px rgba(184, 236, 255, 0.42), 0 0 36px rgba(126, 211, 255, 0.36), inset 0 0 44px rgba(173, 137, 255, 0.16)',
+                  '0 22px 44px rgba(15, 10, 26, 0.26)',
+                ],
+              }
+          }
+          transition={reducedMotion ? { duration: 0 } : { duration: 0.78, ease: 'easeOut', times: [0, 0.62, 1] }}
           className={[
-            'relative z-10 ml-[88px] mt-6 max-w-[860px] text-left text-base leading-relaxed text-slate-100/90 transition-all duration-300 sm:ml-[96px] sm:text-lg',
-            completionInView && !reducedMotion ? 'text-white drop-shadow-[0_0_14px_rgba(115,208,255,0.34)]' : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
+            'relative z-10 ml-[88px] mt-6 max-w-[860px] rounded-[28px] border bg-white/[0.08] px-5 py-4 text-left text-base leading-relaxed text-slate-100/90 backdrop-blur-[10px] sm:ml-[96px] sm:px-7 sm:py-5 sm:text-lg',
+            completionInView && !reducedMotion ? 'text-white' : '',
+          ].filter(Boolean).join(' ')}
+          style={{
+            backgroundImage: 'radial-gradient(circle at 18% 48%, rgba(152,214,255,0.14), transparent 55%)',
+          }}
         >
           {closingLine}
-        </p>
+        </motion.div>
       </div>
     </section>
   );
