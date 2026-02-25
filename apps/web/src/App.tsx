@@ -74,12 +74,7 @@ function RequireUser({ children }: { children: ReactElement }) {
   const devBypass = DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV;
 
   if (devBypass) {
-    return (
-      <>
-        <ApiAuthBridge />
-        {children}
-      </>
-    );
+    return children;
   }
 
   if (!isLoaded) {
@@ -90,12 +85,7 @@ function RequireUser({ children }: { children: ReactElement }) {
     return <Navigate to="/login" replace />;
   }
 
-  return (
-    <>
-      <ApiAuthBridge />
-      {children}
-    </>
-  );
+  return children;
 }
 
 function RedirectIfSignedIn({
@@ -131,6 +121,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-transparent">
+      <ApiAuthBridge />
       <DevBanner />
       <Routes>
         <Route path="/" element={<LandingPage />} />
