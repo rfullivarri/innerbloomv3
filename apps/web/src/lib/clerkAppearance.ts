@@ -42,11 +42,11 @@ const baseElements = {
     '!appearance-none !ring-0',
 
   footer:
-    'mt-2 w-full max-w-none rounded-xl border border-transparent bg-transparent !px-2 !py-1 shadow-none',
+    'mt-2 w-full max-w-none rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(148,163,184,0.24),rgba(99,102,241,0.22))] !px-2 !py-1 shadow-[0_18px_40px_rgba(15,23,42,0.28)] backdrop-blur-md',
 
   // 1) CONTENEDOR 1 (cl-footerAction__signIn): reducir alto y aumentar ancho
   footerAction:
-    '!flex !w-full !max-w-none items-center justify-start gap-1 !px-2 !py-0 text-[10px] !leading-[12px] text-white/55',
+    '!flex !w-full !max-w-none items-center justify-start gap-1 rounded-xl border border-white/10 bg-white/5 !px-3 !py-1 text-[10px] !leading-[12px] text-white/60 backdrop-blur-sm',
   footerActionText:
     '!whitespace-nowrap text-white/55',
   footerActionLink:
@@ -54,7 +54,7 @@ const baseElements = {
 
   // 2) CONTENEDOR 2 (“Secured by clerk”): reducir alto y aumentar ancho
   footerPages:
-    '!mt-0.5 !flex !w-full !max-w-none items-center justify-center gap-1 !px-2 !py-0 text-[9px] !leading-[11px] text-white/40',
+    '!mt-1 !flex !w-full !max-w-none items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/5 !px-3 !py-1 text-[9px] !leading-[11px] text-white/45 backdrop-blur-sm',
   footerPageLink:
     'inline-flex items-center gap-1 text-white/40 hover:text-white/60',
 
