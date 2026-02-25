@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/clerk-react';
 import { OFFICIAL_DESIGN_TOKENS, OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
 import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
+import { AdaptiveText } from '../components/landing/AdaptiveText';
 import { usePageMeta } from '../lib/seo';
 import './Landing.css';
 
@@ -623,8 +624,8 @@ export default function LandingPage() {
 
         <section className="why section-pad reveal-on-scroll" id="why">
           <div className="container narrow">
-            <h2 className="pillars-title">{copy.pillars.title}</h2>
-            <p className="section-sub pillars-intro">{copy.pillars.intro}</p>
+            <AdaptiveText as="h2" className="pillars-title">{copy.pillars.title}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub pillars-intro">{copy.pillars.intro}</AdaptiveText>
             <div className="pillars-constellation" aria-hidden />
             <div className="cards grid-3">
               {copy.pillars.items.map((pillar, index) => {
@@ -656,14 +657,14 @@ export default function LandingPage() {
                 );
               })}
             </div>
-            <p className="section-sub highlight">{copy.pillars.highlight}</p>
+            <AdaptiveText as="p" className="section-sub highlight">{copy.pillars.highlight}</AdaptiveText>
           </div>
         </section>
 
         <section ref={modesSectionRef} className="modes section-pad reveal-on-scroll" id="modes">
           <div className="container">
-            <h2>{copy.modes.title}</h2>
-            <p className="section-sub">{copy.modes.intro}</p>
+            <AdaptiveText as="h2">{copy.modes.title}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub">{copy.modes.intro}</AdaptiveText>
             <div
               className="modes-carousel"
               aria-live="polite"
@@ -731,7 +732,7 @@ export default function LandingPage() {
 
         <section className="how section-pad reveal-on-scroll" id="how">
           <div className="container narrow">
-            <h2>{PREMIUM_TIMELINE_COPY[language].title}</h2>
+            <AdaptiveText as="h2">{PREMIUM_TIMELINE_COPY[language].title}</AdaptiveText>
             <PremiumTimeline
               steps={PREMIUM_TIMELINE_COPY[language].steps}
               closingLine={PREMIUM_TIMELINE_COPY[language].closingLine}
@@ -742,8 +743,8 @@ export default function LandingPage() {
 
         <section className="testimonials section-pad reveal-on-scroll" id="testimonials">
           <div className="container">
-            <h2>{copy.testimonials.title}</h2>
-            <p className="section-sub">{copy.testimonials.intro}</p>
+            <AdaptiveText as="h2">{copy.testimonials.title}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub">{copy.testimonials.intro}</AdaptiveText>
             <div
               className="slider"
               id="testi-slider"
@@ -809,8 +810,8 @@ export default function LandingPage() {
 
         <section className="pricing section-pad reveal-on-scroll" id="pricing">
           <div className="container">
-            <h2>{copy.pricing.title}</h2>
-            <p className="section-sub">{copy.pricing.intro}</p>
+            <AdaptiveText as="h2">{copy.pricing.title}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub">{copy.pricing.intro}</AdaptiveText>
             <p className="pricing-tax-note">{copy.pricing.taxNote}</p>
             <div className="pricing-grid">
               {copy.pricing.plans.map((plan, index) => (
@@ -840,7 +841,7 @@ export default function LandingPage() {
 
         <section className="faq section-pad reveal-on-scroll" id="faq">
           <div className="container narrow">
-            <h2>{copy.faq.title}</h2>
+            <AdaptiveText as="h2">{copy.faq.title}</AdaptiveText>
             {copy.faq.items.map((faq) => (
               <details key={faq.question}>
                 <summary>{faq.question}</summary>
@@ -852,8 +853,8 @@ export default function LandingPage() {
 
         <section className="next section-pad reveal-on-scroll">
           <div className="container narrow center">
-            <h2>{copy.next.title}</h2>
-            <p className="section-sub">{copy.next.intro}</p>
+            <AdaptiveText as="h2">{copy.next.title}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub">{copy.next.intro}</AdaptiveText>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               {isSignedIn ? (
                 <Link className={buttonClasses()} to="/dashboard">
