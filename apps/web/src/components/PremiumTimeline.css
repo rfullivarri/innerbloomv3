@@ -1,0 +1,13 @@
+.timeline-closing-card {
+  transition: border-color 320ms ease, box-shadow 320ms ease, color 320ms ease, background-color 320ms ease;
+}
+
+.timeline-closing-card.completed,
+.timeline-closing-card[data-completed='true'] {
+  border-color: rgba(176, 232, 255, 0.88);
+  box-shadow:
+    0 0 0 1px rgba(184, 236, 255, 0.44),
+    0 0 34px rgba(126, 211, 255, 0.42),
+    inset 0 0 46px rgba(173, 137, 255, 0.16);
+  background-color: rgba(255, 255, 255, 0.13);
+}
