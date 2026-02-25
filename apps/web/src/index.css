@@ -79,7 +79,7 @@
 
   .auth-rotating-gradient {
     isolation: isolate;
-    background: #161b49;
+    background: #000c40;
   }
 
   .auth-rotating-gradient::before {
@@ -87,7 +87,7 @@
     position: absolute;
     inset: -65%;
     z-index: -1;
-    background: conic-gradient(from 0deg at 50% 50%, #000c40 0deg, #4e4c7a 140deg, #f8cdda 280deg, #000c40 360deg);
+    background: conic-gradient(from 0deg at 50% 50%, #000c40 0deg, #607d8b 180deg, #000c40 360deg);
     animation: auth-gradient-spin 32s linear infinite;
     transform-origin: 50% 50%;
     will-change: transform;
