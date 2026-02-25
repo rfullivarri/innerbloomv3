@@ -243,13 +243,17 @@ export default function PremiumTimeline({
       if (closingRect && closingY && sampledPoints.length > 1) {
         const finalGapPx = 8;
         const landingX = Math.max(resolvedAxisX + 44, closingRect.left - rootRect.left - finalGapPx);
+        const landingY = closingY;
         const waveEnd = sampledPoints[sampledPoints.length - 1];
-        const midX = landingX - 22;
-        const midY = closingY - 5;
+        const horizontalPull = Math.max(58, Math.abs(landingX - waveEnd.x) + 28);
+        const verticalDrop = clamp(Math.abs(landingY - waveEnd.y) + 68, 70, 170);
+        const control1X = waveEnd.x - horizontalPull;
+        const control1Y = waveEnd.y + verticalDrop;
+        const control2X = landingX - Math.max(44, horizontalPull * 0.62);
+        const control2Y = landingY + Math.max(18, verticalDrop * 0.18);
 
-        nextPathData += ` C ${waveEnd.x + 22} ${waveEnd.y + 8}, ${landingX - 46} ${closingY - 18}, ${midX} ${midY}`;
-        nextPathData += ` S ${landingX - 10} ${closingY}, ${landingX} ${closingY}`;
-        effectiveYEnd = closingY;
+        nextPathData += ` C ${control1X} ${control1Y}, ${control2X} ${control2Y}, ${landingX} ${landingY}`;
+        effectiveYEnd = landingY;
       }
 
       setPathData(nextPathData);
@@ -531,7 +535,7 @@ export default function PremiumTimeline({
           }
           transition={reducedMotion ? { duration: 0 } : { duration: 0.7, ease: 'easeOut', times: [0, 0.62, 1] }}
           className={[
-            'timeline-closing-card relative z-10 ml-[88px] mt-6 max-w-[860px] rounded-[28px] border bg-white/[0.08] px-5 py-4 text-left text-base leading-relaxed text-slate-100/90 backdrop-blur-[10px] sm:ml-[96px] sm:px-7 sm:py-5 sm:text-lg',
+            'timeline-closing-card relative z-10 ml-[88px] mt-12 max-w-[860px] rounded-[28px] border bg-white/[0.08] px-5 py-4 text-left text-base leading-relaxed text-slate-100/90 backdrop-blur-[10px] sm:ml-[96px] sm:mt-14 sm:px-7 sm:py-5 sm:text-lg',
             isComplete && !reducedMotion ? 'completed text-white' : '',
           ].filter(Boolean).join(' ')}
           style={{
