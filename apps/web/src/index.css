@@ -88,7 +88,7 @@
     inset: -65%;
     z-index: -1;
     background: conic-gradient(from 0deg at 50% 50%, #000c40 0deg, #4e4c7a 140deg, #f8cdda 280deg, #000c40 360deg);
-    animation: auth-gradient-spin 17s linear infinite;
+    animation: auth-gradient-spin 23s linear infinite;
     transform-origin: 50% 50%;
     will-change: transform;
   }
