@@ -5,6 +5,7 @@ import { type JourneyPayload } from '../onboarding/payload';
 import { OnboardingProvider } from '../onboarding/state';
 import { ApiError, apiAuthorizedFetch, buildApiUrl } from '../lib/api';
 import { emitOnboardingEvent } from '../lib/telemetry';
+import { buildWebAbsoluteUrl } from '../lib/siteUrl';
 
 type BillingPlan = 'MONTH' | 'SIX_MONTHS' | 'YEAR';
 
@@ -89,8 +90,8 @@ export default function OnboardingIntroPage() {
             },
             body: JSON.stringify({
               plan: selectedPlan,
-              successUrl: `${window.location.origin}/subscription?checkout=success`,
-              cancelUrl: `${window.location.origin}/pricing?checkout=cancelled`,
+              successUrl: buildWebAbsoluteUrl('/billing/success'),
+              cancelUrl: buildWebAbsoluteUrl('/billing/cancel'),
             }),
           });
 
