@@ -984,14 +984,18 @@
   position: absolute;
   top: 14px;
   right: 14px;
-  padding: 0.3rem 0.62rem;
+  padding: 0.36rem 0.74rem;
   border-radius: 999px;
-  border: 1px solid rgba(125, 211, 252, 0.5);
-  background: rgba(125, 211, 252, 0.18);
-  color: #dff4ff;
-  font-size: 0.67rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  border: 1px solid color-mix(in srgb, var(--accent) 72%, #ffffff 28%);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 84%, #ffffff 16%), var(--accent-2));
+  color: #fbf7ff;
+  box-shadow:
+    0 10px 24px color-mix(in srgb, var(--accent-2) 56%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
