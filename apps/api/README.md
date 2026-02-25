@@ -25,10 +25,16 @@
 | `OPENAI_API_KEY` | ➖ | Required for AI TaskGen to call OpenAI. When missing the runner records `OPENAI_MISCONFIGURED` and skips task creation. |
 | `OPENAI_MODEL` | ➖ | Optional override for the OpenAI Responses API model used by TaskGen (defaults to `gpt-4.1-mini`). |
 | `TASKGEN_OPENAI_TIMEOUT` | ➖ | Timeout in milliseconds for the OpenAI request (defaults to `45000`). |
-| `BILLING_PROVIDER` | ➖ | Billing backend selector. Supported values: `mock` (default) or `stripe` (reserved, currently returns `501` until Stripe integration is enabled). |
-| `STRIPE_SECRET_KEY` | ➖ | Stripe secret API key placeholder for future provider activation (`sk_test_...`). |
-| `STRIPE_WEBHOOK_SECRET` | ➖ | Stripe webhook signing secret placeholder (`whsec_...`) for `POST /api/webhooks/stripe`. |
+| `BILLING_PROVIDER` | ➖ | Billing backend selector. Supported values: `mock` (default) or `stripe` (production Stripe integration). |
+| `STRIPE_SECRET_KEY` | ➖ | Stripe secret API key (`sk_test_...` / `sk_live_...`). Required when `BILLING_PROVIDER=stripe`. |
+| `STRIPE_WEBHOOK_SECRET` | ➖ | Stripe webhook signing secret (`whsec_...`) used to validate `POST /api/webhooks/stripe`. |
 | `STRIPE_PUBLISHABLE_KEY` | ➖ | Optional publishable key placeholder for client checkout handoff (`pk_test_...`). |
+| `STRIPE_PRICE_ID_MONTH` | ➖ | Stripe Price ID for `MONTH` plan. |
+| `STRIPE_PRICE_ID_SIX_MONTHS` | ➖ | Stripe Price ID for `SIX_MONTHS` plan. |
+| `STRIPE_PRICE_ID_YEAR` | ➖ | Stripe Price ID for `YEAR` plan. |
+| `STRIPE_CHECKOUT_SUCCESS_URL` | ➖ | Default success redirect URL for Checkout Sessions. |
+| `STRIPE_CHECKOUT_CANCEL_URL` | ➖ | Default cancel redirect URL for Checkout Sessions. |
+| `STRIPE_PORTAL_RETURN_URL` | ➖ | Default return URL for Stripe customer portal sessions. |
 
 ## Database migrations
 
@@ -412,4 +418,4 @@ The billing module now resolves a provider through `BILLING_PROVIDER`:
   - `POST /api/billing/checkout-session`
   - `POST /api/billing/portal-session`
   - `POST /api/webhooks/stripe`
-- `stripe`: reserved for real Stripe integration; these endpoints currently return `501 billing_provider_not_ready` until the provider is activated.
+- `stripe`: enables real Stripe Checkout, Billing Portal and webhook processing (signature validation + idempotency by `event.id`).

@@ -27,8 +27,9 @@ describe('stripe webhook route', () => {
     expect(response.body.received).toBe(true);
   });
 
-  it('returns 501 when stripe provider is configured but not enabled', async () => {
+  it('validates stripe signature when stripe provider is enabled', async () => {
     process.env.BILLING_PROVIDER = 'stripe';
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
     const app = buildApp();
 
     const response = await request(app)
@@ -36,7 +37,7 @@ describe('stripe webhook route', () => {
       .set('content-type', 'application/json')
       .send(JSON.stringify({ type: 'invoice.paid' }));
 
-    expect(response.status).toBe(501);
-    expect(response.body.code).toBe('billing_provider_not_ready');
+    expect(response.status).toBe(400);
+    expect(response.body.code).toBe('invalid_signature');
   });
 });

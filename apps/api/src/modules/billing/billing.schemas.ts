@@ -6,8 +6,8 @@ export const billingStatusSchema = z.enum(['ACTIVE', 'PAST_DUE', 'CANCELED']);
 export const billingPlanCatalogSchema = z.object({
   plan: billingPlanSchema,
   amountCents: z.number().int().nonnegative(),
-  currency: z.literal('USD'),
-  intervalMonths: z.number().int().positive(),
+  currency: z.literal('EUR'),
+  intervalMonths: z.number().int().nonnegative(),
   displayName: z.string().min(1),
   features: z.array(z.string().min(1)),
 });

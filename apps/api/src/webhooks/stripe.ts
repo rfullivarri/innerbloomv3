@@ -8,7 +8,7 @@ const rawJson = express.raw({ type: 'application/json' });
 
 router.post('/webhooks/stripe', rawJson, async (req: Request, res: Response) => {
   const signature = req.header('stripe-signature');
-  const body = toPayload(req.body);
+  const body = toRawPayload(req.body);
 
   try {
     const result = await handleBillingWebhookEvent(signature, body);
@@ -28,18 +28,9 @@ router.post('/webhooks/stripe', rawJson, async (req: Request, res: Response) => 
   }
 });
 
-function toPayload(body: unknown): unknown {
+function toRawPayload(body: unknown): string | Buffer | unknown {
   if (Buffer.isBuffer(body)) {
-    const text = body.toString('utf-8').trim();
-    if (!text) {
-      return {};
-    }
-
-    try {
-      return JSON.parse(text);
-    } catch {
-      return text;
-    }
+    return body.toString('utf-8');
   }
 
   return body;

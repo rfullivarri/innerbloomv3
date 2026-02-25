@@ -103,17 +103,18 @@ describe('billing.routes', () => {
     expect(portal.body.portalUrl).toContain('mock-billing.local');
   });
 
-  it('returns 501 in checkout/portal endpoints when stripe provider is selected but not active yet', async () => {
+  it('returns misconfiguration error when stripe provider lacks required env vars', async () => {
     process.env.BILLING_PROVIDER = 'stripe';
     const app = buildApp();
 
     const checkout = await request(app)
       .post('/api/billing/checkout-session')
       .send({ plan: 'MONTH' });
-    expect(checkout.status).toBe(501);
+    expect(checkout.status).toBe(503);
+    expect(checkout.body.code).toBe('billing_misconfigured');
 
     const portal = await request(app).post('/api/billing/portal-session').send({});
-    expect(portal.status).toBe(501);
+    expect(portal.status).toBe(400);
   });
 
   it('validates subscription payload', async () => {
