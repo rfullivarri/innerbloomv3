@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import type { BillingProvider } from './billing-provider.js';
 import { MockBillingProvider } from './mock-billing-provider.js';
 import { getBillingProvider } from './index.js';
-import { HttpError } from '../../../lib/http-error.js';
 
 function assertBillingProviderContract(provider: BillingProvider) {
   expect(provider).toHaveProperty('createCheckoutSession');
@@ -42,10 +41,11 @@ describe('billing provider contract', () => {
     expect(provider).toBeInstanceOf(MockBillingProvider);
   });
 
-  it('fails with 501 for stripe provider until implementation is enabled', () => {
+  it('resolves stripe provider when configured', () => {
     process.env.BILLING_PROVIDER = 'stripe';
 
-    expect(() => getBillingProvider()).toThrowError(HttpError);
-    expect(() => getBillingProvider()).toThrowError(/not enabled yet/i);
+    const provider = getBillingProvider();
+    assertBillingProviderContract(provider);
+    expect(provider.constructor.name).toContain('StripeBillingProvider');
   });
 });
