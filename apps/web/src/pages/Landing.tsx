@@ -626,7 +626,6 @@ export default function LandingPage() {
           <div className="container narrow">
             <AdaptiveText as="h2" className="pillars-title">{copy.pillars.title}</AdaptiveText>
             <AdaptiveText as="p" className="section-sub pillars-intro">{copy.pillars.intro}</AdaptiveText>
-            <div className="pillars-constellation" aria-hidden />
             <div className="cards grid-3">
               {copy.pillars.items.map((pillar, index) => {
                 const { definition, examples } = splitPillarCopy(pillar.copy, language);

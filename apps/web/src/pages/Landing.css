@@ -422,19 +422,6 @@
   color: rgba(215, 231, 255, 0.88);
 }
 
-.landing .pillars-constellation {
-  position: absolute;
-  inset: 116px 4% 88px;
-  pointer-events: none;
-  z-index: 0;
-  border-radius: 28px;
-  background:
-    radial-gradient(110% 90% at 8% 50%, rgba(125, 211, 252, 0.09), transparent 72%),
-    radial-gradient(110% 90% at 92% 50%, rgba(167, 139, 250, 0.08), transparent 74%),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.08), rgba(148, 163, 184, 0.03) 30%, rgba(148, 163, 184, 0.08));
-  filter: blur(0.5px);
-}
-
 .landing .grid-3 {
   grid-template-columns: repeat(3, 1fr);
 }
