@@ -76,6 +76,31 @@
       linear-gradient(180deg, rgba(241, 245, 249, 0.94), #f8fafc 60%, #e2e8f0);
   }
 
+
+  .auth-rotating-gradient {
+    isolation: isolate;
+    background: #161b49;
+  }
+
+  .auth-rotating-gradient::before {
+    content: '';
+    position: absolute;
+    inset: -65%;
+    z-index: -1;
+    background: conic-gradient(from 0deg at 50% 50%, #000c40 0deg, #4e4c7a 140deg, #f8cdda 280deg, #000c40 360deg);
+    animation: auth-gradient-spin 10s linear infinite;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+
+  @keyframes auth-gradient-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
   .aurora-background {
     position: relative;
     isolation: isolate;
@@ -187,6 +212,10 @@
   .aurora-gradient {
     animation: none;
     transform: none;
+  }
+
+  .auth-rotating-gradient::before {
+    animation: none;
   }
 }
 
