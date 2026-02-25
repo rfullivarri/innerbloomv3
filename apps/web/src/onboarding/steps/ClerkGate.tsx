@@ -121,7 +121,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="onboarding-surface-ghost rounded-2xl p-4 sm:p-6"
+              className="onboarding-surface-ghost rounded-2xl px-2 py-4 sm:px-4 sm:py-6"
             >
               <SignUp
                 appearance={clerkAppearance}
@@ -137,7 +137,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="onboarding-surface-ghost rounded-2xl p-4 sm:p-6"
+              className="onboarding-surface-ghost rounded-2xl px-2 py-4 sm:px-4 sm:py-6"
             >
               <SignIn
                 appearance={clerkAppearance}
