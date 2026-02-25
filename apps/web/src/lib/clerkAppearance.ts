@@ -22,7 +22,7 @@ const baseVariables = {
 };
 
 const gradientButtonClass =
-  'mt-3 inline-flex h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-[#000c40] to-[#607d8b] text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all duration-200 hover:from-[#000c40] hover:to-[#526c79] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:w-auto';
+  'mt-3 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#7c3aed] text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all duration-200 hover:bg-[#6d28d9] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 sm:w-auto';
 
 const baseElements = {
   rootBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto`,
