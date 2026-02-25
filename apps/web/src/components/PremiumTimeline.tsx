@@ -237,24 +237,8 @@ export default function PremiumTimeline({
         });
       }
 
-      let nextPathData = catmullRomToBezierPath(sampledPoints);
-      let effectiveYEnd = sampledPoints[sampledPoints.length - 1]?.y ?? yEndBase;
-
-      if (closingRect && closingY && sampledPoints.length > 1) {
-        const finalGapPx = 8;
-        const landingX = Math.max(resolvedAxisX + 44, closingRect.left - rootRect.left - finalGapPx);
-        const landingY = closingY;
-        const waveEnd = sampledPoints[sampledPoints.length - 1];
-        const horizontalPull = Math.max(58, Math.abs(landingX - waveEnd.x) + 28);
-        const verticalDrop = clamp(Math.abs(landingY - waveEnd.y) + 68, 70, 170);
-        const control1X = waveEnd.x - horizontalPull;
-        const control1Y = waveEnd.y + verticalDrop;
-        const control2X = landingX - Math.max(44, horizontalPull * 0.62);
-        const control2Y = landingY + Math.max(18, verticalDrop * 0.18);
-
-        nextPathData += ` C ${control1X} ${control1Y}, ${control2X} ${control2Y}, ${landingX} ${landingY}`;
-        effectiveYEnd = landingY;
-      }
+      const nextPathData = catmullRomToBezierPath(sampledPoints);
+      const effectiveYEnd = sampledPoints[sampledPoints.length - 1]?.y ?? yEndBase;
 
       setPathData(nextPathData);
       setGeometry({ yStart, yEnd: effectiveYEnd, stepAnchors });
@@ -480,7 +464,7 @@ export default function PremiumTimeline({
                   style={{ maxWidth: cardMaxWidth }}
                 >
                   {step.badge ? (
-                    <span className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white/85">
+                    <span className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-[9px] py-[3px] text-[9px] font-medium tracking-[0.18em] text-white/85">
                       {step.badge}
                     </span>
                   ) : null}
@@ -497,7 +481,7 @@ export default function PremiumTimeline({
                       {step.chips.map((chip) => (
                         <li
                           key={`${step.title}-${chip}`}
-                          className="inline-flex rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-white/80"
+                          className="inline-flex rounded-full border border-white/20 bg-white/10 px-2 py-[3px] text-[8px] font-medium uppercase tracking-[0.06em] text-white/80"
                         >
                           {chip}
                         </li>
