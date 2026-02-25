@@ -1074,7 +1074,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  color: var(--muted);
+  color: #21142f;
 }
 
 .landing .footer-links {
@@ -1088,7 +1088,7 @@
 }
 
 .landing .footer-links a:hover {
-  color: #fff;
+  color: #120a1c;
 }
 
 @keyframes meshFloat {
