@@ -22,7 +22,7 @@ export function AuthLayout({
   secondaryActionHref
 }: AuthLayoutProps) {
   return (
-    <div className="relative flex min-h-screen min-h-dvh flex-col items-center justify-center overflow-x-hidden overflow-y-auto bg-[linear-gradient(135deg,_#000c40,_#f8cdda)] px-4 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] pt-10 text-white sm:px-6 sm:pb-[calc(env(safe-area-inset-bottom)+3rem)] sm:pt-12 lg:overflow-hidden lg:px-12 lg:pb-[calc(env(safe-area-inset-bottom)+3.5rem)] lg:pt-14">
+    <div className="auth-rotating-gradient relative flex min-h-screen min-h-dvh flex-col items-center justify-center overflow-x-hidden overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] pt-10 text-white sm:px-6 sm:pb-[calc(env(safe-area-inset-bottom)+3rem)] sm:pt-12 lg:overflow-hidden lg:px-12 lg:pb-[calc(env(safe-area-inset-bottom)+3.5rem)] lg:pt-14">
       <div className="relative z-10 mx-auto w-full min-w-0 max-w-[calc(100%-1.5rem)] overflow-hidden rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_30px_120px_rgba(15,23,42,0.45)] backdrop-blur-3xl sm:max-w-[calc(100%-2rem)] sm:rounded-[32px] sm:p-7 md:p-10 lg:max-w-4xl">
         <div className="flex min-w-0 flex-col items-center gap-9 sm:gap-10 lg:gap-12">
           <div className="flex w-full max-w-3xl flex-col items-center gap-6 text-center sm:gap-7">
