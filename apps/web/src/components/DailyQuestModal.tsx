@@ -39,6 +39,7 @@ type ToastState = {
 
 type DailyQuestModalProps = {
   enabled?: boolean;
+  canAutoOpen?: boolean;
   returnFocusRef?: RefObject<HTMLElement | null>;
   onComplete?: (response: SubmitDailyQuestResponse) => void;
 };
@@ -302,8 +303,12 @@ function CheckIcon({ active }: { active: boolean }) {
 }
 
 export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModalProps>(
-  function DailyQuestModal({ enabled = false, returnFocusRef, onComplete }: DailyQuestModalProps, ref) {
+  function DailyQuestModal(
+    { enabled = false, canAutoOpen = true, returnFocusRef, onComplete }: DailyQuestModalProps,
+    ref,
+  ) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isManualOpen, setIsManualOpen] = useState(false);
   const [snoozed, setSnoozed] = useState(false);
   const [hasCompletedToday, setHasCompletedToday] = useState(false);
   const [selectedEmotion, setSelectedEmotion] = useState<number | null>(null);
@@ -359,11 +364,17 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
   useEffect(() => {
     if (!enabled || !status) {
+      setIsManualOpen(false);
       setIsOpen(false);
       return;
     }
 
     if (pendingSubmission) {
+      setIsOpen(false);
+      return;
+    }
+
+    if (!canAutoOpen && !isManualOpen) {
       setIsOpen(false);
       return;
     }
@@ -379,7 +390,16 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
     }
 
     setIsOpen(true);
-  }, [enabled, status, hasCompletedToday, snoozed, pendingSubmission, successCelebration]);
+  }, [
+    canAutoOpen,
+    enabled,
+    status,
+    hasCompletedToday,
+    isManualOpen,
+    snoozed,
+    pendingSubmission,
+    successCelebration,
+  ]);
 
   useEffect(() => {
     if (!definition) {
@@ -555,6 +575,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       setSuccessCelebration(null);
       setSrAnnouncement('');
       shouldRestoreFocusRef.current = options?.restoreFocus !== false;
+      setIsManualOpen(false);
       setIsOpen(false);
     },
     [resetCelebrationHold],
@@ -577,6 +598,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       return;
     }
     setSnoozed(false);
+    setIsManualOpen(true);
     shouldRestoreFocusRef.current = false;
     setIsOpen(true);
   }, [enabled]);
