@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
-import { type CSSProperties, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import type { Answers, GameMode, XP } from '../state';
 import { MODE_CARD_CONTENT } from './GameModeStep';
 import { NavButtons } from '../ui/NavButtons';
+import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../../components/common/GameModeChip';
 
 interface SummaryStepProps {
   answers: Answers;
@@ -64,46 +65,13 @@ function TextRow({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
-const MODE_BADGE_META: Record<GameMode, { label: string; accent: string; dot: string }> = {
-  LOW: {
-    label: 'Low Mood',
-    accent: 'rgba(248, 113, 113, 0.45)',
-    dot: 'rgba(248, 113, 113, 0.96)',
-  },
-  CHILL: {
-    label: 'Chill Mood',
-    accent: 'rgba(74, 222, 128, 0.4)',
-    dot: 'rgba(74, 222, 128, 0.95)',
-  },
-  FLOW: {
-    label: 'Flow Mood',
-    accent: 'rgba(56, 189, 248, 0.42)',
-    dot: 'rgba(56, 189, 248, 0.95)',
-  },
-  EVOLVE: {
-    label: 'Evolve Mood',
-    accent: 'rgba(167, 139, 250, 0.44)',
-    dot: 'rgba(167, 139, 250, 0.96)',
-  },
-};
-
 function ModeChip({ mode }: { mode: GameMode | null }) {
   if (!mode) {
     return <span className="text-white/70">—</span>;
   }
 
-  const meta = MODE_BADGE_META[mode];
-  const style = { '--chip-accent': meta.accent } as CSSProperties;
-
-  return (
-    <span
-      className="onboarding-mode-chip inline-flex items-center gap-2 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-white/85 shadow-[0_0_18px_rgba(8,12,24,0.5)] ring-1 ring-white/10"
-      style={style}
-    >
-      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: meta.dot }} />
-      {meta.label}
-    </span>
-  );
+  const chipStyle = buildGameModeChip(mode);
+  return <SharedGameModeChip {...chipStyle} />;
 }
 
 function getModeState(mode: GameMode | null): string {
