@@ -74,6 +74,30 @@ describe('DailyQuestModal', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
+  it('does not auto-open when canAutoOpen is false', async () => {
+    mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
+    mockGetDefinition.mockResolvedValue(baseDefinition);
+
+    render(<DailyQuestModal enabled canAutoOpen={false} />);
+
+    await waitFor(() => {
+      expect(mockGetStatus).toHaveBeenCalled();
+    });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('auto-opens when canAutoOpen is true and quest is not submitted', async () => {
+    mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
+    mockGetDefinition.mockResolvedValue(baseDefinition);
+
+    render(<DailyQuestModal enabled canAutoOpen />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+  });
+
   it('allows selecting only one emotion at a time', async () => {
     mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
     mockGetDefinition.mockResolvedValue(baseDefinition);
