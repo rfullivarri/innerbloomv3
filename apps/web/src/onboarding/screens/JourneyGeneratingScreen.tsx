@@ -15,7 +15,6 @@ export function JourneyGeneratingScreen({ gameMode, onGoToDashboard }: JourneyGe
       'Diseñando micro-hábitos alineados a tu energía',
       'Equilibrando Cuerpo, Mente y Alma',
       `Activando tu Game Mode: ${gameMode}`,
-      'Activando tu plan Free — 2 meses incluidos',
     ],
     [gameMode],
   );
@@ -25,7 +24,7 @@ export function JourneyGeneratingScreen({ gameMode, onGoToDashboard }: JourneyGe
     setVisibleBullets(1);
     const timer = window.setInterval(() => {
       setVisibleBullets((current) => {
-        if (current >= bullets.length) {
+        if (current >= bullets.length + 1) {
           window.clearInterval(timer);
           return current;
         }
@@ -60,41 +59,64 @@ export function JourneyGeneratingScreen({ gameMode, onGoToDashboard }: JourneyGe
 
       <section className="relative z-10 w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0a133d]/85 p-6 shadow-[0_0_45px_rgba(79,70,229,0.22)] backdrop-blur-xl sm:p-10">
         <h1 className="text-balance text-3xl font-semibold text-white sm:text-4xl">
-          Estamos creando tu Journey personalizado
+          Estamos calibrando tu fórmula personal
         </h1>
+        <p className="mt-3 text-sm text-slate-300 sm:text-base">
+          Mezclando tus hábitos, energía y objetivos para diseñar tu Journey ideal.
+        </p>
 
         <ul className="mt-8 space-y-3">
           {bullets.map((bullet, index) => {
             const isVisible = index < visibleBullets;
-            const isLast = index === bullets.length - 1;
 
             return (
               <li
                 key={bullet}
                 className={`flex items-start gap-3 text-sm text-slate-100/90 transition-all duration-500 sm:text-base ${
                   isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
-                } ${isLast ? 'text-white drop-shadow-[0_0_10px_rgba(165,180,252,0.5)]' : ''}`}
+                }`}
               >
                 <span className="mt-2 h-2.5 w-2.5 rounded-full bg-sky-300" aria-hidden />
                 <span>{bullet}</span>
               </li>
             );
           })}
+
+          <li
+            className={`flex items-start gap-3 text-sm text-white transition-all duration-500 sm:text-base ${
+              visibleBullets >= bullets.length + 1 ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+            } drop-shadow-[0_0_10px_rgba(165,180,252,0.5)]`}
+          >
+            <span className="mt-2 h-2.5 w-2.5 rounded-full bg-sky-300" aria-hidden />
+            <span>
+              Activando tu plan{' '}
+              <span className="inline-flex rounded-full border border-emerald-300/35 bg-emerald-400/20 px-2 py-0.5 text-xs font-semibold text-emerald-100 align-middle">
+                FREE
+              </span>{' '}
+              – 2 meses incluidos
+            </span>
+          </li>
         </ul>
+
+        <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-white/10" aria-hidden>
+          <div className="journey-generating-screen__progress h-full w-1/3 rounded-full bg-gradient-to-r from-violet-300/70 via-indigo-300/80 to-violet-300/70" />
+        </div>
 
         <p className="mt-8 text-sm text-slate-300 sm:text-base">
           Esto puede tardar unos minutos.
           <br />
-          Puedes entrar al dashboard mientras finalizamos tu plan.
+          Puedes explorar tu Dashboard mientras terminamos de ajustar tu fórmula.
         </p>
 
-        <button
-          type="button"
-          className="mt-8 inline-flex items-center justify-center rounded-full border border-indigo-200/50 bg-indigo-200/15 px-6 py-3 text-sm font-semibold text-white transition hover:border-indigo-100/80 hover:bg-indigo-200/25"
-          onClick={onGoToDashboard}
-        >
-          Ir a mi Dashboard
-        </button>
+        <div className="mt-8 flex justify-center">
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-full border border-violet-300/45 bg-violet-500 px-7 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(76,29,149,0.3)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_14px_28px_rgba(76,29,149,0.4)]"
+            onClick={onGoToDashboard}
+          >
+            Entrar al Dashboard
+          </button>
+        </div>
       </section>
 
       <style>{`
@@ -104,9 +126,24 @@ export function JourneyGeneratingScreen({ gameMode, onGoToDashboard }: JourneyGe
           filter: drop-shadow(0 0 14px rgba(129, 140, 248, 0.6));
         }
 
+        .journey-generating-screen__progress {
+          animation: journey-progress 2.4s ease-in-out infinite;
+          transform-origin: left;
+        }
+
         @keyframes journey-line-draw {
           to {
             stroke-dashoffset: -72;
+          }
+        }
+
+        @keyframes journey-progress {
+          0% {
+            transform: translateX(-115%);
+          }
+
+          100% {
+            transform: translateX(325%);
           }
         }
       `}</style>
