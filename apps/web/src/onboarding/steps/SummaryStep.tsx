@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { type ReactNode } from 'react';
-import type { Answers, XP } from '../state';
+import { type CSSProperties, type ReactNode } from 'react';
+import type { Answers, GameMode, XP } from '../state';
+import { MODE_CARD_CONTENT } from './GameModeStep';
 import { NavButtons } from '../ui/NavButtons';
 
 interface SummaryStepProps {
@@ -55,11 +56,121 @@ function PillList({ label, values }: { label: string; values: readonly string[] 
   );
 }
 
-function TextRow({ label, value }: { label: string; value: string }) {
+function TextRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <p>
       <span className="font-semibold text-white">{label}:</span> {value || '—'}
     </p>
+  );
+}
+
+const MODE_BADGE_META: Record<GameMode, { label: string; accent: string; dot: string }> = {
+  LOW: {
+    label: 'Low Mood',
+    accent: 'rgba(248, 113, 113, 0.45)',
+    dot: 'rgba(248, 113, 113, 0.96)',
+  },
+  CHILL: {
+    label: 'Chill Mood',
+    accent: 'rgba(74, 222, 128, 0.4)',
+    dot: 'rgba(74, 222, 128, 0.95)',
+  },
+  FLOW: {
+    label: 'Flow Mood',
+    accent: 'rgba(56, 189, 248, 0.42)',
+    dot: 'rgba(56, 189, 248, 0.95)',
+  },
+  EVOLVE: {
+    label: 'Evolve Mood',
+    accent: 'rgba(167, 139, 250, 0.44)',
+    dot: 'rgba(167, 139, 250, 0.96)',
+  },
+};
+
+function ModeChip({ mode }: { mode: GameMode | null }) {
+  if (!mode) {
+    return <span className="text-white/70">—</span>;
+  }
+
+  const meta = MODE_BADGE_META[mode];
+  const style = { '--chip-accent': meta.accent } as CSSProperties;
+
+  return (
+    <span
+      className="onboarding-mode-chip inline-flex items-center gap-2 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-white/85 shadow-[0_0_18px_rgba(8,12,24,0.5)] ring-1 ring-white/10"
+      style={style}
+    >
+      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: meta.dot }} />
+      {meta.label}
+    </span>
+  );
+}
+
+function getModeState(mode: GameMode | null): string {
+  if (!mode) {
+    return '—';
+  }
+
+  return MODE_CARD_CONTENT[mode].state;
+}
+
+function extractTrait(value: string): string {
+  const matches = value.match(/\(([^()]+)\)\s*$/);
+  if (!matches?.[1]) {
+    return value.trim();
+  }
+
+  return matches[1].trim();
+}
+
+function PillarTraits({ label, traits }: { label: string; traits: readonly string[] }) {
+  return (
+    <div className="space-y-1.5">
+      <p className="text-sm font-semibold text-white">{label}</p>
+      {traits.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-white/85">
+          {traits.map((trait, index) => (
+            <span key={`${label}-${trait}`}>
+              {trait}
+              {index < traits.length - 1 ? ' · ' : ''}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-white/50">—</p>
+      )}
+    </div>
+  );
+}
+
+function ChillMotivations({ values }: { values: readonly string[] }) {
+  if (!values.length) {
+    return <p className="text-sm text-white/50">—</p>;
+  }
+
+  const visible = values.slice(0, 3);
+  const hidden = values.slice(3);
+
+  return (
+    <div>
+      <ul className="list-disc space-y-1 pl-5 text-sm text-white/85 marker:text-white/70">
+        {visible.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+      {hidden.length ? (
+        <details className="mt-2">
+          <summary className="cursor-pointer select-none text-xs font-semibold uppercase tracking-wide text-sky-200 transition hover:text-sky-100">
+            Ver {hidden.length} más
+          </summary>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-white/75 marker:text-white/60">
+            {hidden.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </div>
   );
 }
 
@@ -74,6 +185,10 @@ export function SummaryStep({
   const { mode } = answers;
   const isDisabled = isSubmitting;
 
+  const bodyTraits = answers.foundations.body.map(extractTrait);
+  const soulTraits = answers.foundations.soul.map(extractTrait);
+  const mindTraits = answers.foundations.mind.map(extractTrait);
+
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
       <div className="glass-card onboarding-surface-base mx-auto max-w-5xl rounded-3xl p-6 sm:p-8">
@@ -86,7 +201,8 @@ export function SummaryStep({
           <div className="space-y-5">
             <SummarySection title="Datos base">
               <TextRow label="Email" value={answers.email} />
-              <TextRow label="Game Mode" value={mode ?? '—'} />
+              <TextRow label="Game Mode" value={<ModeChip mode={mode} />} />
+              <TextRow label="Estado" value={getModeState(mode)} />
             </SummarySection>
             {mode === 'LOW' ? (
               <SummarySection title="LOW" subtitle="Tu plan para recuperar energía">
@@ -103,7 +219,12 @@ export function SummaryStep({
             {mode === 'CHILL' ? (
               <SummarySection title="CHILL" subtitle="Equilibrio con intención clara">
                 <TextRow label="Objetivo" value={answers.chill.oneThing} />
-                <PillList label="Motivaciones" values={answers.chill.motiv} />
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-white/50">Motivaciones</p>
+                  <div className="mt-2">
+                    <ChillMotivations values={answers.chill.motiv} />
+                  </div>
+                </div>
               </SummarySection>
             ) : null}
             {mode === 'FLOW' ? (
@@ -120,10 +241,10 @@ export function SummaryStep({
               </SummarySection>
             ) : null}
             {mode && mode !== 'LOW' ? (
-              <SummarySection title="Foundations" subtitle="Tus anclas para sostener el avance">
-                <PillList label="Body" values={answers.foundations.body} />
-                <PillList label="Soul" values={answers.foundations.soul} />
-                <PillList label="Mind" values={answers.foundations.mind} />
+              <SummarySection title="Foundations" subtitle="Configuración equilibrada en Cuerpo, Mente y Alma">
+                <PillarTraits label="Body 🫀" traits={bodyTraits} />
+                <PillarTraits label="Soul 🏵️" traits={soulTraits} />
+                <PillarTraits label="Mind 🧠" traits={mindTraits} />
               </SummarySection>
             ) : null}
           </div>

@@ -20,7 +20,7 @@ type ModeCardContent = {
   avatarAlt: string;
 };
 
-const MODE_CARD_CONTENT: Record<GameMode, ModeCardContent> = {
+export const MODE_CARD_CONTENT: Record<GameMode, ModeCardContent> = {
   FLOW: {
     title: 'FLOW MOOD',
     frequency: '3x/semana',
