@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import type { GameMode } from '../state';
+import { getBannerObjectPosition } from '../utils/bannerObjectPosition';
 import { NavButtons } from '../ui/NavButtons';
 
 interface GameModeStepProps {
@@ -26,7 +27,7 @@ const MODE_CARD_CONTENT: Record<GameMode, ModeCardContent> = {
     state: 'En foco. En movimiento.',
     objective: 'Canalizar energía en metas concretas.',
     accentColor: '#49C2F2',
-    avatarSrc: '/FlowMood.jpg',
+    avatarSrc: '/flowGMO.png',
     avatarAlt: 'Avatar del modo Flow en movimiento y enfocado.',
   },
   LOW: {
@@ -35,7 +36,7 @@ const MODE_CARD_CONTENT: Record<GameMode, ModeCardContent> = {
     state: 'Baja energía. Saturado.',
     objective: 'Activar lo mínimo vital con pasos pequeños.',
     accentColor: '#FF6B6B',
-    avatarSrc: '/LowMood.jpg',
+    avatarSrc: '/lowGMO.png',
     avatarAlt: 'Avatar del modo Low con expresión de descanso.',
   },
   CHILL: {
@@ -44,7 +45,7 @@ const MODE_CARD_CONTENT: Record<GameMode, ModeCardContent> = {
     state: 'Estable. Sin presión.',
     objective: 'Sostener hábitos simples con constancia.',
     accentColor: '#6EDC8C',
-    avatarSrc: '/Chill-Mood.jpg',
+    avatarSrc: '/chillGMO.png',
     avatarAlt: 'Avatar del modo Chill con expresión de calma.',
   },
   EVOLVE: {
@@ -53,7 +54,7 @@ const MODE_CARD_CONTENT: Record<GameMode, ModeCardContent> = {
     state: 'Ambicioso. Determinado.',
     objective: 'Sostener ritmo alto con estructura clara.',
     accentColor: '#9B6CFF',
-    avatarSrc: '/Evolve-Mood.jpg',
+    avatarSrc: '/evolveGMO.png',
     avatarAlt: 'Avatar del modo Evolve con expresión determinada.',
   },
 };
@@ -73,6 +74,7 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
           {MODE_ORDER.map((mode) => {
             const content = MODE_CARD_CONTENT[mode];
             const isActive = selected === mode;
+            const bannerObjectPosition = getBannerObjectPosition(mode);
 
             return (
               <motion.button
@@ -111,7 +113,8 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
                     <img
                       src={content.avatarSrc}
                       alt={content.avatarAlt}
-                      className="h-24 w-full object-cover sm:h-28"
+                      className="h-[110px] w-full object-cover sm:h-[124px]"
+                      style={{ objectPosition: bannerObjectPosition }}
                       loading="lazy"
                     />
                   </span>
