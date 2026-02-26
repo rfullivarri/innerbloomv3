@@ -1,12 +1,13 @@
 import { StrictMode } from 'react';
 import { ClerkProvider } from '@clerk/clerk-react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, useLocation } from 'react-router-dom';
 import App from './App';
 import './index.css';
 import { DEV_USER_SWITCH_ACTIVE } from './lib/api';
 import { isApiLoggingEnabled, setApiLoggingEnabled } from './lib/logger';
 import { resolveAuthLanguage } from './lib/authLanguage';
+import { getClerkLocalization } from './lib/clerkLocalization';
 
 declare global {
   interface Window {
@@ -38,15 +39,28 @@ if (!publishableKey) {
   throw new Error('VITE_CLERK_PUBLISHABLE_KEY is not set');
 }
 
-const authLanguage = typeof window !== 'undefined' ? resolveAuthLanguage(window.location.search) : 'es';
-const clerkLocalization = authLanguage === 'en' ? undefined : ({ locale: 'es-ES' } as any);
+function LocalizedClerkProvider({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  const authLanguage = resolveAuthLanguage(location.search);
+  const clerkLocalization = getClerkLocalization(authLanguage);
+
+  return (
+    <ClerkProvider
+      key={authLanguage}
+      publishableKey={publishableKey}
+      localization={clerkLocalization}
+    >
+      {children}
+    </ClerkProvider>
+  );
+}
 
 createRoot(rootElement).render(
   <StrictMode>
-    <ClerkProvider publishableKey={publishableKey} localization={clerkLocalization}>
-      <BrowserRouter>
+    <BrowserRouter>
+      <LocalizedClerkProvider>
         <App />
-      </BrowserRouter>
-    </ClerkProvider>
+      </LocalizedClerkProvider>
+    </BrowserRouter>
   </StrictMode>,
 );
