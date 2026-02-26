@@ -82,21 +82,31 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
                 type="button"
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onSelect(mode)}
+                data-selected={isActive ? 'true' : 'false'}
                 className={[
-                  'glass-card onboarding-surface-inner onboarding-glass-border-soft relative flex h-full overflow-hidden rounded-3xl border px-5 py-[1.35rem] text-left transition',
+                  'glass-card onboarding-surface-inner onboarding-glass-border-soft relative flex h-full overflow-hidden rounded-3xl border px-5 py-[1.35rem] text-left transition-all duration-250 ease-out',
                   isActive
-                    ? 'border-white/65 bg-white/[0.09] ring-2 ring-sky-300/80 shadow-[0_0_0_1px_rgba(255,255,255,0.25),0_0_24px_rgba(56,189,248,0.34),0_0_38px_rgba(139,92,246,0.22)]'
+                    ? 'border-white/80 bg-white/[0.11] ring-2 ring-sky-300/85 shadow-[0_0_0_1px_rgba(255,255,255,0.28),0_0_28px_rgba(34,211,238,0.38),0_0_52px_rgba(139,92,246,0.34)] -translate-y-0.5 scale-[1.01]'
                     : 'hover:border-white/30 hover:bg-white/[0.07] focus-visible:border-white/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70',
                 ]
                   .filter(Boolean)
                   .join(' ')}
               >
                 <span
-                  className="absolute inset-y-0 left-0 w-[6px] rounded-l-3xl"
+                  className={[
+                    'pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_25%_15%,rgba(34,211,238,0.22)_0%,rgba(59,130,246,0.12)_35%,rgba(139,92,246,0.22)_70%,transparent_100%)] transition-all duration-250 ease-out',
+                    isActive ? 'opacity-100' : 'opacity-0',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  aria-hidden
+                />
+                <span
+                  className="absolute inset-y-0 left-0 z-10 w-[6px] rounded-l-3xl"
                   aria-hidden
                   style={{ backgroundColor: content.accentColor }}
                 />
-                <span className="ml-4 flex h-full w-full flex-col gap-3">
+                <span className="relative z-10 ml-4 flex h-full w-full flex-col gap-3">
                   <span className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
                     <span className="text-xs font-semibold tracking-[0.12em] text-white/95 sm:text-sm">{content.title}</span>
                     <span className="shrink-0 rounded-full border border-white/20 bg-white/10 px-2 py-1 text-[0.62rem] font-medium uppercase tracking-[0.08em] text-white/80 sm:px-2.5 sm:text-[0.68rem]">
