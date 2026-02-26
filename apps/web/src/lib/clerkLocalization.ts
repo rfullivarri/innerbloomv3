@@ -17,6 +17,8 @@ const clerkLocalizationByLanguage: Record<AuthLanguage, LocalizationResource> = 
     formFieldInputPlaceholder__emailAddress: 'Ingresá tu correo electrónico',
     formFieldInputPlaceholder__password: 'Ingresá tu contraseña',
     formButtonPrimary: 'Continuar',
+    form_password_pwned:
+      'Esta contraseña aparece en filtraciones públicas y no puede usarse. Probá con otra contraseña.',
     signUp: {
       start: {
         actionText: '¿Ya tenés una cuenta?',
