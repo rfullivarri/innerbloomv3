@@ -26,7 +26,7 @@ export default function SignUpPage() {
     >
       <div
         ref={signUpContainerRef}
-        className="mx-auto w-full min-w-0 max-w-full px-1 sm:max-w-[480px] sm:px-0"
+        className="mx-auto w-full min-w-0 max-w-full px-1 sm:px-0"
       >
         <SignUp
           appearance={appearance}

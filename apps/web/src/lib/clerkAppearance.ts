@@ -1,7 +1,7 @@
 import type { Theme } from '@clerk/types';
 
-// Allow the auth card to stretch edge-to-edge on small screens while keeping a comfortable max width on larger ones.
-export const AUTH_LOGIN_MAX_WIDTH = 'max-w-full sm:max-w-[520px] md:max-w-[560px]';
+// Keep auth widgets fluid across breakpoints so desktop side margins match the tighter mobile framing.
+export const AUTH_LOGIN_MAX_WIDTH = 'max-w-full';
 
 const baseLayout = {
   logoPlacement: 'none' as const,
