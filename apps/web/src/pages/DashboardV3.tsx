@@ -32,7 +32,7 @@ import {
 import { useBackendUser } from '../hooks/useBackendUser';
 import { useRequest } from '../hooks/useRequest';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
-import { getUserState } from '../lib/api';
+import { getJourneyGenerationStatus, getUserState } from '../lib/api';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
 import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
@@ -56,7 +56,7 @@ import { useFeedbackNotifications } from '../hooks/useFeedbackNotifications';
 import { useWeeklyWrapped } from '../hooks/useWeeklyWrapped';
 import { WeeklyWrappedModal } from '../components/feedback/WeeklyWrappedModal';
 import { useAppMode } from '../hooks/useAppMode';
-import { isJourneyGenerationPending } from '../lib/journeyGeneration';
+import { isJourneyGenerationPending, syncJourneyGenerationFromServer } from '../lib/journeyGeneration';
 
 export default function DashboardV3Page() {
   const { getToken } = useAuth();
@@ -95,6 +95,40 @@ export default function DashboardV3Page() {
     syncState();
     window.addEventListener('journey-generation-change', syncState);
     return () => window.removeEventListener('journey-generation-change', syncState);
+  }, [clerkUserId]);
+
+  useEffect(() => {
+    if (!clerkUserId) {
+      return;
+    }
+
+    let isMounted = true;
+
+    const syncFromBackend = async () => {
+      try {
+        const payload = await getJourneyGenerationStatus();
+        if (!isMounted) {
+          return;
+        }
+
+        syncJourneyGenerationFromServer({
+          clerkUserId,
+          state: payload.state,
+        });
+      } catch (error) {
+        console.warn('Failed to sync journey generation state', error);
+      }
+    };
+
+    void syncFromBackend();
+    const timer = window.setInterval(() => {
+      void syncFromBackend();
+    }, 7000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(timer);
+    };
   }, [clerkUserId]);
 
   useEffect(() => {
@@ -349,7 +383,7 @@ function DashboardOverview({
       />
       <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="order-1 space-y-4 lg:col-span-12">
-          <Alerts userId={userId} onScheduleClick={handleScheduleClick} />
+          <Alerts userId={userId} isJourneyGenerating={isJourneyGenerating} onScheduleClick={handleScheduleClick} />
         </div>
 
         <div className="order-2 space-y-4 md:space-y-5 lg:order-2 lg:col-span-4">

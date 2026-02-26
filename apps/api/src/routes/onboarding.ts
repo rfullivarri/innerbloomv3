@@ -10,6 +10,7 @@ import {
   submitOnboardingIntro,
 } from '../services/onboardingIntroService.js';
 import { triggerTaskGenerationForUser } from '../services/taskgenTriggerService.js';
+import { getJourneyGenerationState } from '../services/journeyGenerationStateService.js';
 
 const router = Router();
 
@@ -36,6 +37,34 @@ router.post(
       session_id: result.sessionId,
       awarded: result.awarded,
       taskgen_correlation_id: result.taskgenCorrelationId ?? null,
+    });
+  }),
+);
+
+
+router.get(
+  '/onboarding/generation-status',
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    if (!user) {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    }
+
+    const state = await getJourneyGenerationState(user.id);
+
+    res.json({
+      ok: true,
+      state: state
+        ? {
+            status: state.status,
+            correlation_id: state.correlationId,
+            updated_at: state.updatedAt,
+            completed_at: state.completedAt,
+            failure_reason: state.failureReason,
+          }
+        : null,
     });
   }),
 );

@@ -3,6 +3,7 @@ import { withClient } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 import type { OnboardingIntroPayload } from '../schemas/onboarding.js';
 import { triggerTaskGenerationForUser } from './taskgenTriggerService.js';
+import { upsertJourneyGenerationStateWithClient } from './journeyGenerationStateService.js';
 
 const ONBOARDING_MODE_IMAGE_PATHS: Record<OnboardingIntroPayload['mode'], string> = {
   LOW: '/LowMood.jpg',
@@ -256,6 +257,7 @@ export async function submitOnboardingIntro(
       await client.query(UPDATE_USER_GAME_MODE_SQL, [userId, gameModeId, imageUrl]);
 
       await upsertFreeTrialSubscription(client, userId);
+      await upsertJourneyGenerationStateWithClient(client, userId, 'pending');
 
       await client.query('COMMIT');
 

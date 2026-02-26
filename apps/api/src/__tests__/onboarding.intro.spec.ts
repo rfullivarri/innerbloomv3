@@ -6,11 +6,13 @@ const {
   mockGetLatestOnboardingSession,
   mockVerifyToken,
   mockTriggerTaskGenerationForUser,
+  mockGetJourneyGenerationState,
 } = vi.hoisted(() => ({
   mockSubmitOnboardingIntro: vi.fn(),
   mockGetLatestOnboardingSession: vi.fn(),
   mockVerifyToken: vi.fn(),
   mockTriggerTaskGenerationForUser: vi.fn(),
+  mockGetJourneyGenerationState: vi.fn(),
 }));
 
 vi.mock('../services/onboardingIntroService.js', () => ({
@@ -20,6 +22,10 @@ vi.mock('../services/onboardingIntroService.js', () => ({
 
 vi.mock('../services/taskgenTriggerService.js', () => ({
   triggerTaskGenerationForUser: mockTriggerTaskGenerationForUser,
+}));
+
+vi.mock('../services/journeyGenerationStateService.js', () => ({
+  getJourneyGenerationState: mockGetJourneyGenerationState,
 }));
 
 vi.mock('../services/auth-service.js', () => ({
@@ -111,6 +117,7 @@ describe('POST /api/onboarding/intro', () => {
     mockGetLatestOnboardingSession.mockReset();
     mockVerifyToken.mockReset();
     mockTriggerTaskGenerationForUser.mockReset();
+    mockGetJourneyGenerationState.mockReset();
     mockTriggerTaskGenerationForUser.mockReturnValue('corr-mock');
     process.env.NODE_ENV = 'test';
   });
@@ -349,5 +356,56 @@ describe('GET /api/debug/onboarding/last', () => {
       message: 'Debug endpoint is disabled in production',
     });
     expect(mockGetLatestOnboardingSession).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('GET /api/onboarding/generation-status', () => {
+  beforeEach(() => {
+    mockVerifyToken.mockResolvedValue({
+      id: 'uuid-user',
+      clerkId: 'user_123',
+      email: 'user@example.com',
+      isNew: false,
+    });
+  });
+
+  it('returns null state when no generation record exists', async () => {
+    mockGetJourneyGenerationState.mockResolvedValue(null);
+
+    const response = await request(app)
+      .get('/api/onboarding/generation-status')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ ok: true, state: null });
+    expect(mockGetJourneyGenerationState).toHaveBeenCalledWith('uuid-user');
+  });
+
+  it('returns normalized generation state payload', async () => {
+    mockGetJourneyGenerationState.mockResolvedValue({
+      userId: 'uuid-user',
+      status: 'running',
+      correlationId: '7d2a75cc-2c20-4ed3-917a-f518cd1cd0c8',
+      updatedAt: '2026-02-26T10:00:00.000Z',
+      completedAt: null,
+      failureReason: null,
+    });
+
+    const response = await request(app)
+      .get('/api/onboarding/generation-status')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      ok: true,
+      state: {
+        status: 'running',
+        correlation_id: '7d2a75cc-2c20-4ed3-917a-f518cd1cd0c8',
+        updated_at: '2026-02-26T10:00:00.000Z',
+        completed_at: null,
+        failure_reason: null,
+      },
+    });
   });
 });

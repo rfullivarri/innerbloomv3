@@ -58,6 +58,10 @@ describe('triggerTaskGenerationForUser', () => {
         return { rowCount: 1 };
       }
 
+      if (sql.includes('INSERT INTO user_journey_generation_state')) {
+        return { rowCount: 1 };
+      }
+
       throw new Error(`Unexpected query: ${sql}`);
     });
 

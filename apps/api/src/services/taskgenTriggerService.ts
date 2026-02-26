@@ -13,6 +13,7 @@ import {
   type TaskgenEventName,
 } from './taskgenTraceService.js';
 import { notifyTasksReadyEmail } from './tasksReadyEmailService.js';
+import { upsertJourneyGenerationState } from './journeyGenerationStateService.js';
 
 type TriggerInput = {
   userId: string;
@@ -341,6 +342,8 @@ async function runTaskGeneration(args: {
   origin: string;
   metadata?: Record<string, unknown>;
 }) {
+  await upsertJourneyGenerationState(args.userId, 'running', { correlationId: args.correlationId });
+
   emitEvent({
     level: 'info',
     event: 'RUNNER_STARTED',
@@ -372,6 +375,15 @@ async function runTaskGeneration(args: {
     });
   }
 
+  if (result.status === 'ok') {
+    await upsertJourneyGenerationState(args.userId, 'completed', { correlationId: args.correlationId });
+  } else {
+    await upsertJourneyGenerationState(args.userId, 'failed', {
+      correlationId: args.correlationId,
+      failureReason: result.error ?? 'task_generation_failed',
+    });
+  }
+
   emitEvent({
     level: result.status === 'ok' ? 'info' : result.error ? 'error' : 'warn',
     event: 'RUNNER_ENDED',
@@ -395,6 +407,9 @@ export function triggerTaskGenerationForUser(input: TriggerInput): string {
   const normalizedMode = normalizeMode(input.mode);
   const origin = input.origin ?? 'system';
 
+  void upsertJourneyGenerationState(input.userId, 'pending', { correlationId })
+    .catch(() => undefined);
+
   emitEvent({
     level: 'info',
     event: 'TRIGGER_RECEIVED',
@@ -417,6 +432,10 @@ export function triggerTaskGenerationForUser(input: TriggerInput): string {
       metadata: input.metadata,
     }).catch((error: unknown) => {
       const message = getErrorMessage(error);
+      void upsertJourneyGenerationState(input.userId, 'failed', {
+        correlationId,
+        failureReason: message,
+      }).catch(() => undefined);
       emitEvent({
         level: 'error',
         event: 'RUNNER_EXCEPTION',

@@ -6,6 +6,7 @@ import { clearJourneyGenerationPending, isJourneyGenerationPending } from '../..
 
 interface AlertsProps {
   userId: string;
+  isJourneyGenerating?: boolean;
   onScheduleClick?: () => void;
 }
 
@@ -20,7 +21,7 @@ function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean
   return journey.first_programmed === false;
 }
 
-export function Alerts({ userId, onScheduleClick }: AlertsProps) {
+export function Alerts({ userId, isJourneyGenerating = false, onScheduleClick }: AlertsProps) {
   const { data: tasks, status: tasksStatus } = useRequest(() => getUserTasks(userId), [userId]);
   const hasTasks = useMemo(() => (tasks?.length ?? 0) > 0, [tasks]);
   const showJourneyPreparing = useMemo(() => {

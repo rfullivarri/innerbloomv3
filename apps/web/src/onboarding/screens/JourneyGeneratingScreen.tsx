@@ -37,7 +37,7 @@ export function JourneyGeneratingScreen({ gameMode, onGoToDashboard }: JourneyGe
   }, [bullets.length]);
 
   return (
-    <div className="relative flex min-h-screen min-h-dvh items-center justify-center overflow-hidden bg-[#050b2c] px-6 py-10 text-white">
+    <div className="relative flex min-h-screen min-h-dvh items-center justify-center overflow-hidden bg-[#000c40] px-6 py-10 text-white">
       <div className="pointer-events-none absolute inset-0 opacity-60">
         <svg viewBox="0 0 1200 720" className="h-full w-full" role="presentation" aria-hidden>
           <defs>
