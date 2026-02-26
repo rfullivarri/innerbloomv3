@@ -842,7 +842,7 @@ export default function LandingPage() {
             </div>
             <div className="pricing-primary-cta-wrap">
               <button type="button" className={buttonClasses()} onClick={handlePricingCta}>
-                Empezar gratis 2 meses
+                Start 2 months free
               </button>
             </div>
           </div>
