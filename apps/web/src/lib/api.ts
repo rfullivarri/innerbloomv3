@@ -1792,6 +1792,22 @@ export async function getCurrentUserProfile(): Promise<CurrentUserProfile> {
   return response.user;
 }
 
+
+export type CurrentUserSubscriptionResponse = {
+  plan: string;
+  status: string;
+  subscription_status?: 'free_trial' | 'active' | 'paused' | string;
+  subscription_end_date?: string | null;
+  trialEndsAt: string | null;
+  nextRenewalAt: string | null;
+};
+
+export async function getCurrentUserSubscription(): Promise<CurrentUserSubscriptionResponse> {
+  const response = await getAuthorizedJson<CurrentUserSubscriptionResponse>('/users/me/subscription');
+  logShape('current-user-subscription', response);
+  return response;
+}
+
 export type UserLevelResponse = {
   user_id: string;
   current_level: number;
@@ -1835,8 +1851,26 @@ export type JourneyGenerationStateResponse = {
 };
 
 
-export async function getJourneyGenerationStatus(): Promise<{ ok: boolean; state: JourneyGenerationStateResponse | null }> {
-  return getAuthorizedJson<{ ok: boolean; state: JourneyGenerationStateResponse | null }>('/onboarding/generation-status');
+export async function getJourneyGenerationStatus(): Promise<{ ok: boolean; state: JourneyGenerationStateResponse | null; journey_ready_modal_seen_at?: string | null }> {
+  return getAuthorizedJson<{ ok: boolean; state: JourneyGenerationStateResponse | null; journey_ready_modal_seen_at?: string | null }>('/onboarding/generation-status');
+}
+
+export async function markJourneyReadyModalSeen(generationKey: string): Promise<{ ok: boolean; seen_at: string }> {
+  const response = await apiAuthorizedFetch('/onboarding/journey-ready-modal/seen', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ generation_key: generationKey }),
+  });
+
+  if (!response.ok) {
+    const body = await safeJson(response);
+    throw new ApiError(response.status, body, '/onboarding/journey-ready-modal/seen');
+  }
+
+  return (await response.json()) as { ok: boolean; seen_at: string };
 }
 
 export async function getUserJourney(userId: string): Promise<UserJourneySummary> {

@@ -7,12 +7,16 @@ const {
   mockVerifyToken,
   mockTriggerTaskGenerationForUser,
   mockGetJourneyGenerationState,
+  mockGetJourneyReadyModalSeenAt,
+  mockMarkJourneyReadyModalSeen,
 } = vi.hoisted(() => ({
   mockSubmitOnboardingIntro: vi.fn(),
   mockGetLatestOnboardingSession: vi.fn(),
   mockVerifyToken: vi.fn(),
   mockTriggerTaskGenerationForUser: vi.fn(),
   mockGetJourneyGenerationState: vi.fn(),
+  mockGetJourneyReadyModalSeenAt: vi.fn(),
+  mockMarkJourneyReadyModalSeen: vi.fn(),
 }));
 
 vi.mock('../services/onboardingIntroService.js', () => ({
@@ -26,6 +30,11 @@ vi.mock('../services/taskgenTriggerService.js', () => ({
 
 vi.mock('../services/journeyGenerationStateService.js', () => ({
   getJourneyGenerationState: mockGetJourneyGenerationState,
+}));
+
+vi.mock('../services/journeyReadyModalService.js', () => ({
+  getJourneyReadyModalSeenAt: mockGetJourneyReadyModalSeenAt,
+  markJourneyReadyModalSeen: mockMarkJourneyReadyModalSeen,
 }));
 
 vi.mock('../services/auth-service.js', () => ({
@@ -118,6 +127,8 @@ describe('POST /api/onboarding/intro', () => {
     mockVerifyToken.mockReset();
     mockTriggerTaskGenerationForUser.mockReset();
     mockGetJourneyGenerationState.mockReset();
+    mockGetJourneyReadyModalSeenAt.mockReset();
+    mockMarkJourneyReadyModalSeen.mockReset();
     mockTriggerTaskGenerationForUser.mockReturnValue('corr-mock');
     process.env.NODE_ENV = 'test';
   });
@@ -360,6 +371,33 @@ describe('GET /api/debug/onboarding/last', () => {
 });
 
 
+
+
+describe('POST /api/onboarding/journey-ready-modal/seen', () => {
+  beforeEach(() => {
+    mockVerifyToken.mockReset();
+    mockMarkJourneyReadyModalSeen.mockReset();
+  });
+
+  it('marks the modal as seen for the provided generation key', async () => {
+    mockVerifyToken.mockResolvedValue({
+      id: 'uuid-user',
+      clerkId: 'user_123',
+      email: 'user@example.com',
+      isNew: false,
+    });
+    mockMarkJourneyReadyModalSeen.mockResolvedValue('2026-02-26T10:00:00.000Z');
+
+    const response = await request(app)
+      .post('/api/onboarding/journey-ready-modal/seen')
+      .set('Authorization', 'Bearer token')
+      .send({ generation_key: 'corr-123' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ ok: true, seen_at: '2026-02-26T10:00:00.000Z' });
+    expect(mockMarkJourneyReadyModalSeen).toHaveBeenCalledWith('uuid-user', 'corr-123');
+  });
+});
 describe('GET /api/onboarding/generation-status', () => {
   beforeEach(() => {
     mockVerifyToken.mockResolvedValue({
@@ -372,13 +410,15 @@ describe('GET /api/onboarding/generation-status', () => {
 
   it('returns null state when no generation record exists', async () => {
     mockGetJourneyGenerationState.mockResolvedValue(null);
+    mockGetJourneyReadyModalSeenAt.mockResolvedValue(null);
+
 
     const response = await request(app)
       .get('/api/onboarding/generation-status')
       .set('Authorization', 'Bearer token');
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ ok: true, state: null });
+    expect(response.body).toEqual({ ok: true, state: null, journey_ready_modal_seen_at: null });
     expect(mockGetJourneyGenerationState).toHaveBeenCalledWith('uuid-user');
   });
 
@@ -391,6 +431,7 @@ describe('GET /api/onboarding/generation-status', () => {
       completedAt: null,
       failureReason: null,
     });
+    mockGetJourneyReadyModalSeenAt.mockResolvedValue('2026-02-26T11:00:00.000Z');
 
     const response = await request(app)
       .get('/api/onboarding/generation-status')
@@ -406,6 +447,7 @@ describe('GET /api/onboarding/generation-status', () => {
         completed_at: null,
         failure_reason: null,
       },
+      journey_ready_modal_seen_at: '2026-02-26T11:00:00.000Z',
     });
   });
 });

@@ -11,6 +11,7 @@ import {
 } from '../services/onboardingIntroService.js';
 import { triggerTaskGenerationForUser } from '../services/taskgenTriggerService.js';
 import { getJourneyGenerationState } from '../services/journeyGenerationStateService.js';
+import { getJourneyReadyModalSeenAt, markJourneyReadyModalSeen } from '../services/journeyReadyModalService.js';
 
 const router = Router();
 
@@ -53,6 +54,10 @@ router.get(
     }
 
     const state = await getJourneyGenerationState(user.id);
+    const generationKey = state ? state.correlationId ?? state.updatedAt : null;
+    const journeyReadyModalSeenAt = generationKey
+      ? await getJourneyReadyModalSeenAt(user.id, generationKey)
+      : null;
 
     res.json({
       ok: true,
@@ -65,7 +70,31 @@ router.get(
             failure_reason: state.failureReason,
           }
         : null,
+      journey_ready_modal_seen_at: journeyReadyModalSeenAt,
     });
+  }),
+);
+
+router.post(
+  '/onboarding/journey-ready-modal/seen',
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    if (!user) {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    }
+
+    const rawGenerationKey = typeof req.body?.generation_key === 'string' ? req.body.generation_key : '';
+    const generationKey = rawGenerationKey.trim();
+
+    if (!generationKey) {
+      throw new HttpError(400, 'invalid_generation_key', 'generation_key is required');
+    }
+
+    const seenAt = await markJourneyReadyModalSeen(user.id, generationKey);
+
+    res.json({ ok: true, seen_at: seenAt });
   }),
 );
 

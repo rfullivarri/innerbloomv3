@@ -28,20 +28,6 @@ function isMissingSubscriptionTableError(error: unknown): boolean {
   );
 }
 
-function mapStatus(status: string | null | undefined): 'trialing' | 'active' | 'inactive' {
-  const normalized = status?.trim().toLowerCase();
-
-  if (normalized === 'trialing' || normalized === 'past_due') {
-    return 'trialing';
-  }
-
-  if (normalized === 'active') {
-    return 'active';
-  }
-
-  return 'inactive';
-}
-
 export async function getUserSubscription(req: Request, res: Response) {
   const userId = req.user?.id;
   if (!userId) {
@@ -53,14 +39,7 @@ export async function getUserSubscription(req: Request, res: Response) {
       `SELECT plan_code, status, trial_ends_at, current_period_starts_at, current_period_ends_at, updated_at
          FROM user_subscriptions
         WHERE user_id = $1
-        ORDER BY
-          CASE
-            WHEN status IN ('trialing', 'active', 'past_due')
-              AND COALESCE(current_period_ends_at, trial_ends_at, current_period_starts_at) >= now()
-            THEN 0
-            ELSE 1
-          END,
-          updated_at DESC
+        ORDER BY updated_at DESC
         LIMIT 1`,
       [userId],
     );
@@ -70,25 +49,39 @@ export async function getUserSubscription(req: Request, res: Response) {
       res.json({
         plan: 'FREE',
         status: 'inactive',
+        subscription_status: 'free_trial',
         trialEndsAt: null,
         nextRenewalAt: null,
+        subscription_end_date: null,
       });
       return;
     }
 
+    const rawStatus = subscription.status?.trim().toLowerCase() ?? 'inactive';
+    const subscriptionStatus = rawStatus === 'paused'
+      ? 'paused'
+      : rawStatus === 'active'
+        ? 'active'
+        : 'free_trial';
+    const endDate = subscription.current_period_ends_at ?? subscription.trial_ends_at;
+
     res.json({
       plan: subscription.plan_code,
-      status: mapStatus(subscription.status),
+      status: rawStatus,
+      subscription_status: subscriptionStatus,
       trialEndsAt: subscription.trial_ends_at,
       nextRenewalAt: subscription.current_period_ends_at,
+      subscription_end_date: endDate,
     });
   } catch (error) {
     if (isMissingSubscriptionTableError(error)) {
       res.json({
         plan: 'FREE',
         status: 'inactive',
+        subscription_status: 'free_trial',
         trialEndsAt: null,
         nextRenewalAt: null,
+        subscription_end_date: null,
       });
       return;
     }
