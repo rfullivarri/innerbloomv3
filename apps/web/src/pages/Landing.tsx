@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { OFFICIAL_DESIGN_TOKENS, OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
+import { buildLocalizedAuthPath } from '../lib/authLanguage';
 import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
 import { usePageMeta } from '../lib/seo';
@@ -538,7 +539,7 @@ export default function LandingPage() {
       <header className="nav">
         <Link
           className="brand"
-          to="/"
+          to={buildLocalizedAuthPath('/', language)}
           aria-label={language === 'es' ? 'Innerbloom — inicio' : 'Innerbloom — home'}
         >
           <span className="brand-text">Innerbloom</span>
@@ -584,10 +585,10 @@ export default function LandingPage() {
             </Link>
           ) : (
             <>
-              <Link className={`${buttonClasses('ghost')} nav-auth-button`} to="/sign-up">
+              <Link className={`${buttonClasses('ghost')} nav-auth-button`} to={buildLocalizedAuthPath('/sign-up', language)}>
                 {copy.auth.signup}
               </Link>
-              <Link className={`${buttonClasses()} nav-auth-button`} to="/login">
+              <Link className={`${buttonClasses()} nav-auth-button`} to={buildLocalizedAuthPath('/login', language)}>
                 {copy.auth.login}
               </Link>
             </>
@@ -888,8 +889,8 @@ export default function LandingPage() {
             <Link to="/dashboard">Dashboard</Link>
           ) : (
             <>
-              <Link to="/login">{copy.auth.login}</Link>
-              <Link to="/sign-up">{copy.auth.signup}</Link>
+              <Link to={buildLocalizedAuthPath('/login', language)}>{copy.auth.login}</Link>
+              <Link to={buildLocalizedAuthPath('/sign-up', language)}>{copy.auth.signup}</Link>
             </>
           )}
           <a href="#faq">{copy.footer.faq}</a>
