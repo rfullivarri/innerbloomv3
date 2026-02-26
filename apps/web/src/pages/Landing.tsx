@@ -45,6 +45,8 @@ const LANDING_GRADIENTS: LandingGradientOption[] = OFFICIAL_DESIGN_TOKENS.gradie
   });
 
 const LANDING_GRADIENT_STORAGE_KEY = 'ib:official-landing-gradient';
+const OFFICIAL_DEFAULT_GRADIENT_ID = 'purple_afternoon';
+const SHOW_GRADIENT_SELECTOR = false;
 
 type ModeVisual = {
   avatarVideo: string;
@@ -288,10 +290,19 @@ export default function LandingPage() {
   const isSignedIn = Boolean(userId);
   const [language, setLanguage] = useState<Language>('es');
   const [gradientId, setGradientId] = useState<string>(() => {
-    if (typeof window === 'undefined') return LANDING_GRADIENTS[0]?.id ?? '';
+    const fallbackGradientId = LANDING_GRADIENTS[0]?.id ?? '';
+    const officialGradient = LANDING_GRADIENTS.find((option) => option.id === OFFICIAL_DEFAULT_GRADIENT_ID);
+    const officialGradientId = officialGradient?.id ?? fallbackGradientId;
+
+    if (typeof window === 'undefined') return officialGradientId;
+
+    if (!SHOW_GRADIENT_SELECTOR) {
+      return officialGradientId;
+    }
+
     const storedGradientId = window.localStorage.getItem(LANDING_GRADIENT_STORAGE_KEY);
     const storedGradient = LANDING_GRADIENTS.find((option) => option.id === storedGradientId);
-    return storedGradient?.id ?? LANDING_GRADIENTS[0]?.id ?? '';
+    return storedGradient?.id ?? officialGradientId;
   });
   const copy = OFFICIAL_LANDING_CONTENT[language];
   const selectedGradient = LANDING_GRADIENTS.find((option) => option.id === gradientId) ?? LANDING_GRADIENTS[0];
@@ -549,21 +560,23 @@ export default function LandingPage() {
           </nav>
         ) : null}
         <div className="nav-actions">
-          <label className="gradient-select-wrapper">
-            <span className="visually-hidden">{language === 'es' ? 'Seleccionar fondo' : 'Select background'}</span>
-            <select
-              className="gradient-select"
-              value={gradientId}
-              onChange={(event) => setGradientId(event.target.value)}
-              aria-label={language === 'es' ? 'Selector de fondo' : 'Background selector'}
-            >
-              {LANDING_GRADIENTS.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label[language]}
-                </option>
-              ))}
-            </select>
-          </label>
+          {SHOW_GRADIENT_SELECTOR ? (
+            <label className="gradient-select-wrapper">
+              <span className="visually-hidden">{language === 'es' ? 'Seleccionar fondo' : 'Select background'}</span>
+              <select
+                className="gradient-select"
+                value={gradientId}
+                onChange={(event) => setGradientId(event.target.value)}
+                aria-label={language === 'es' ? 'Selector de fondo' : 'Background selector'}
+              >
+                {LANDING_GRADIENTS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label[language]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
           <LanguageDropdown value={language} onChange={setLanguage} />
           {isSignedIn ? (
             <Link className={buttonClasses()} to="/dashboard">
