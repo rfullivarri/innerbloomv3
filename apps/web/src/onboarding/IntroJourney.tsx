@@ -46,6 +46,7 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
   const { route, currentStepIndex, answers, xp, awardedChecklists, awardedOpen } = state;
   const stepId = route[currentStepIndex] ?? 'clerk-gate';
   const totalSteps = route.length;
+  const isClerkGateStep = stepId === 'clerk-gate';
   const [snack, setSnack] = useState<string | null>(null);
   const { isLoaded: authLoaded, isSignedIn } = useAuth();
   const navigate = useNavigate();
@@ -380,7 +381,11 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
         onRestart={handleRestart}
         onExit={handleExit}
       />
-      <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 min-w-0 px-4 pb-16 pt-44 sm:px-6 sm:pt-48">
+      <main
+        className={`relative z-10 mx-auto w-full max-w-5xl flex-1 min-w-0 pb-16 pt-44 sm:px-6 sm:pt-48 ${
+          isClerkGateStep ? 'px-2.5' : 'px-4'
+        }`}
+      >
         <div className="space-y-8" key={stepId}>
           {renderStep()}
         </div>
