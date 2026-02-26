@@ -224,6 +224,7 @@ interface StreaksPanelProps {
   userId: string;
   gameMode?: string | null;
   weeklyTarget?: number | null;
+  forceLoadingTasks?: boolean;
 }
 
 type TaskHistory = {
@@ -585,7 +586,7 @@ function TaskItem({
   );
 }
 
-export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelProps) {
+export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks = false }: StreaksPanelProps) {
   const [pillar, setPillar] = useState<Pillar>('Body');
   const [range, setRange] = useState<StreakPanelRange>('month');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -766,6 +767,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
   const isLoading = status === 'idle' || status === 'loading';
   const isError = status === 'error';
   const hasContent = !isLoading && !isError;
+  const showTasksSkeleton = isLoading || forceLoadingTasks;
 
   const modeLabel = `${normalizedMode.toUpperCase()} · ${tier}×/WEEK`;
   const modeChip = MODE_CHIP_STYLES[normalizedMode];
@@ -882,7 +884,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget }: StreaksPanelPro
           </div>
         </InfoDotTarget>
 
-        {isLoading ? (
+        {showTasksSkeleton ? (
           <div className="grid grid-cols-1 gap-3">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={`task-skeleton-${index}`} className="h-24 animate-pulse rounded-xl border border-white/10 bg-white/5" />

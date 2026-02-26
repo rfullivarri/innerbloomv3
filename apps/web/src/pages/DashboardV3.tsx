@@ -56,6 +56,7 @@ import { useFeedbackNotifications } from '../hooks/useFeedbackNotifications';
 import { useWeeklyWrapped } from '../hooks/useWeeklyWrapped';
 import { WeeklyWrappedModal } from '../components/feedback/WeeklyWrappedModal';
 import { useAppMode } from '../hooks/useAppMode';
+import { isJourneyGenerationPending } from '../lib/journeyGeneration';
 
 export default function DashboardV3Page() {
   const { getToken } = useAuth();
@@ -80,6 +81,21 @@ export default function DashboardV3Page() {
   const gameMode = normalizedGameMode ?? (typeof rawGameMode === 'string' ? rawGameMode : null);
   const weeklyWrapped = useWeeklyWrapped(backendUserId);
   const isAppMode = useAppMode();
+  const [isJourneyGenerating, setIsJourneyGenerating] = useState(false);
+
+  useEffect(() => {
+    if (!clerkUserId || typeof window === 'undefined') {
+      return;
+    }
+
+    const syncState = () => {
+      setIsJourneyGenerating(isJourneyGenerationPending(clerkUserId));
+    };
+
+    syncState();
+    window.addEventListener('journey-generation-change', syncState);
+    return () => window.removeEventListener('journey-generation-change', syncState);
+  }, [clerkUserId]);
 
   useEffect(() => {
     if (!clerkUserId || typeof window === 'undefined') {
@@ -240,6 +256,7 @@ export default function DashboardV3Page() {
                       userId={backendUserId}
                       gameMode={gameMode}
                       weeklyTarget={profile?.weekly_target ?? null}
+                      isJourneyGenerating={isJourneyGenerating}
                       section={overviewSection}
                       onOpenReminderScheduler={handleOpenReminderScheduler}
                     />
@@ -305,6 +322,7 @@ interface DashboardOverviewProps {
   userId: string;
   gameMode: GameMode | string | null;
   weeklyTarget: number | null;
+  isJourneyGenerating: boolean;
   section: DashboardSectionConfig;
   onOpenReminderScheduler: () => void;
 }
@@ -313,6 +331,7 @@ function DashboardOverview({
   userId,
   gameMode,
   weeklyTarget,
+  isJourneyGenerating,
   section,
   onOpenReminderScheduler,
 }: DashboardOverviewProps) {
@@ -347,7 +366,12 @@ function DashboardOverview({
 
         <div className="order-4 space-y-4 md:space-y-5 lg:order-4 lg:col-span-4">
           {FEATURE_STREAKS_PANEL_V1 && <LegacyStreaksPanel userId={userId} />}
-          <StreaksPanel userId={userId} gameMode={gameMode} weeklyTarget={weeklyTarget} />
+          <StreaksPanel
+            userId={userId}
+            gameMode={gameMode}
+            weeklyTarget={weeklyTarget}
+            forceLoadingTasks={isJourneyGenerating}
+          />
         </div>
       </div>
 
