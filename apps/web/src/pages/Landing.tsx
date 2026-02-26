@@ -824,6 +824,7 @@ export default function LandingPage() {
           <div className="container">
             <AdaptiveText as="h2">{copy.pricing.title}</AdaptiveText>
             <AdaptiveText as="p" className="section-sub">{copy.pricing.intro}</AdaptiveText>
+            <p className="pricing-trial-highlight">{copy.pricing.trialHighlight}</p>
             <p className="pricing-tax-note">{copy.pricing.taxNote}</p>
             <div className="pricing-grid">
               {copy.pricing.plans.map((plan, index) => (

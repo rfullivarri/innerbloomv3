@@ -29,6 +29,7 @@ export type LandingCopy = {
   pricing: {
     title: string;
     intro: string;
+    trialHighlight: string;
     taxNote: string;
     actionLabel: string;
     plans: Array<{ id: 'FREE' | 'MONTH' | 'SIX_MONTHS' | 'YEAR'; name: string; price: string; detail: string }>;
@@ -157,13 +158,14 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     pricing: {
       title: 'Planes y pricing',
       intro: 'Elige el plan que mejor acompaña tu ritmo actual.',
+      trialHighlight: 'Todos los planes comienzan con 2 meses gratis.',
       taxNote: 'Precios finales para cliente (impuestos incluidos).',
       actionLabel: 'Empezar con este plan',
       plans: [
         { id: 'FREE', name: 'FREE', price: '2 meses gratis', detail: 'Ideal para explorar Innerbloom sin compromiso inicial.' },
-        { id: 'MONTH', name: 'MONTH', price: '4,99 EUR/mes', detail: 'Suscripción mensual para avanzar con flexibilidad.' },
-        { id: 'SIX_MONTHS', name: 'SIX_MONTHS', price: '23 EUR', detail: 'Plan semestral para mantener consistencia y ahorrar.' },
-        { id: 'YEAR', name: 'YEAR', price: '32 EUR', detail: 'Plan anual para comprometerte con tu Journey completo.' }
+        { id: 'MONTH', name: 'MONTH', price: '4,99 EUR/mes', detail: 'Luego de los 2 meses gratis, continúa con suscripción mensual flexible.' },
+        { id: 'SIX_MONTHS', name: 'SIX_MONTHS', price: '23 EUR', detail: 'Luego de los 2 meses gratis, sigue con plan semestral para ahorrar.' },
+        { id: 'YEAR', name: 'YEAR', price: '32 EUR', detail: 'Luego de los 2 meses gratis, continúa con plan anual de mayor ahorro.' }
       ]
     },
     faq: {
@@ -333,6 +335,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     pricing: {
       title: 'Plans & pricing',
       intro: 'Choose the plan that best fits your current pace.',
+      trialHighlight: 'All plans start with a 2-month free trial.',
       taxNote: 'Final customer prices (taxes included).',
       actionLabel: 'Start with this plan',
       plans: [
