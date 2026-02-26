@@ -15,23 +15,23 @@ interface HUDProps {
 const MODE_BADGE_META: Record<GameMode, { label: string; accent: string; dot: string }> = {
   LOW: {
     label: 'Low Mood',
-    accent: 'rgba(251, 191, 36, 0.42)',
-    dot: 'rgba(251, 191, 36, 0.95)',
+    accent: 'rgba(248, 113, 113, 0.45)',
+    dot: 'rgba(248, 113, 113, 0.96)',
   },
   CHILL: {
     label: 'Chill Mood',
-    accent: 'rgba(52, 211, 153, 0.38)',
-    dot: 'rgba(52, 211, 153, 0.92)',
+    accent: 'rgba(74, 222, 128, 0.4)',
+    dot: 'rgba(74, 222, 128, 0.95)',
   },
   FLOW: {
     label: 'Flow Mood',
-    accent: 'rgba(59, 130, 246, 0.4)',
-    dot: 'rgba(125, 211, 252, 0.92)',
+    accent: 'rgba(56, 189, 248, 0.42)',
+    dot: 'rgba(56, 189, 248, 0.95)',
   },
   EVOLVE: {
     label: 'Evolve Mood',
-    accent: 'rgba(217, 70, 239, 0.42)',
-    dot: 'rgba(217, 70, 239, 0.95)',
+    accent: 'rgba(167, 139, 250, 0.44)',
+    dot: 'rgba(167, 139, 250, 0.96)',
   },
 };
 

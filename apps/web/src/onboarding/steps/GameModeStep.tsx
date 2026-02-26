@@ -85,8 +85,8 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
                 className={[
                   'glass-card onboarding-surface-inner onboarding-glass-border-soft relative flex h-full overflow-hidden rounded-3xl border px-5 py-[1.35rem] text-left transition',
                   isActive
-                    ? 'border-white/45 ring-1 ring-white/30'
-                    : 'hover:border-white/30 hover:bg-white/[0.07] focus-visible:border-white/45 focus-visible:outline-none',
+                    ? 'border-white/65 bg-white/[0.09] ring-2 ring-sky-300/80 shadow-[0_0_0_1px_rgba(255,255,255,0.25),0_0_24px_rgba(56,189,248,0.34),0_0_38px_rgba(139,92,246,0.22)]'
+                    : 'hover:border-white/30 hover:bg-white/[0.07] focus-visible:border-white/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70',
                 ]
                   .filter(Boolean)
                   .join(' ')}

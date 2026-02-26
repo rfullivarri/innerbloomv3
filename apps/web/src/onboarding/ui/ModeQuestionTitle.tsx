@@ -1,10 +1,10 @@
 const MODE_TITLE_REGEX = /^(LOW|CHILL|FLOW|EVOLVE)\s*·\s*(.+)$/i;
 
 const MODE_DOT_CLASSNAME: Record<string, string> = {
-  LOW: 'bg-sky-300 shadow-[0_0_16px_rgba(125,211,252,0.7)]',
-  CHILL: 'bg-fuchsia-300 shadow-[0_0_16px_rgba(240,171,252,0.75)]',
-  FLOW: 'bg-emerald-300 shadow-[0_0_16px_rgba(110,231,183,0.75)]',
-  EVOLVE: 'bg-violet-300 shadow-[0_0_16px_rgba(196,181,253,0.75)]',
+  LOW: 'bg-red-400 shadow-[0_0_16px_rgba(248,113,113,0.78)]',
+  CHILL: 'bg-emerald-400 shadow-[0_0_16px_rgba(74,222,128,0.75)]',
+  FLOW: 'bg-sky-400 shadow-[0_0_16px_rgba(56,189,248,0.75)]',
+  EVOLVE: 'bg-violet-400 shadow-[0_0_16px_rgba(167,139,250,0.78)]',
 };
 
 type ModeQuestionTitleProps = {
@@ -48,4 +48,3 @@ export function ModeQuestionTitle({ title, className = 'text-2xl font-semibold t
     </h2>
   );
 }
-
