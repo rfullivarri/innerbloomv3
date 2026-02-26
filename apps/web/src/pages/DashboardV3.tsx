@@ -53,6 +53,7 @@ import {
 } from '../components/dashboard-v3/ReminderSchedulerDialog';
 import { NotificationPopup } from '../components/feedback/NotificationPopup';
 import { useFeedbackNotifications } from '../hooks/useFeedbackNotifications';
+import { useDailyQuestReadiness } from '../hooks/useDailyQuestReadiness';
 import { useWeeklyWrapped } from '../hooks/useWeeklyWrapped';
 import { WeeklyWrappedModal } from '../components/feedback/WeeklyWrappedModal';
 import { useAppMode } from '../hooks/useAppMode';
@@ -194,17 +195,28 @@ export default function DashboardV3Page() {
     userId: backendUserId,
     enabled: Boolean(backendUserId),
   });
+  const dailyQuestReadiness = useDailyQuestReadiness(backendUserId ?? '', {
+    enabled: Boolean(backendUserId),
+    isJourneyGenerating,
+  });
 
   const handleOpenDaily = useCallback(() => {
+    if (!dailyQuestReadiness.canShowDailyQuestPopup) {
+      return;
+    }
     dailyQuestModalRef.current?.open();
-  }, []);
+  }, [dailyQuestReadiness.canShowDailyQuestPopup]);
 
   const handleOpenReminderScheduler = useCallback(() => {
     reminderSchedulerDialogRef.current?.open();
   }, []);
 
   useEffect(() => {
-    if (!backendUserId || hasAutoOpenedDailyQuestRef.current) {
+    if (
+      !backendUserId ||
+      hasAutoOpenedDailyQuestRef.current ||
+      !dailyQuestReadiness.canShowDailyQuestPopup
+    ) {
       return;
     }
 
@@ -230,14 +242,14 @@ export default function DashboardV3Page() {
 
     hasAutoOpenedDailyQuestRef.current = true;
     dailyQuestModalRef.current?.open();
-  }, [backendUserId, location.hash, location.search]);
+  }, [backendUserId, dailyQuestReadiness.canShowDailyQuestPopup, location.hash, location.search]);
 
   return (
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
         {!isAppMode && (
           <Navbar
-            onDailyClick={backendUserId ? handleOpenDaily : undefined}
+            onDailyClick={backendUserId && dailyQuestReadiness.canShowDailyQuestPopup ? handleOpenDaily : undefined}
             dailyButtonRef={dailyButtonRef}
             title={activeSection.pageTitle}
             sections={sections}
@@ -247,6 +259,7 @@ export default function DashboardV3Page() {
         <DailyQuestModal
           ref={dailyQuestModalRef}
           enabled={Boolean(backendUserId)}
+          canAutoOpen={dailyQuestReadiness.canShowDailyQuestPopup}
           returnFocusRef={dailyButtonRef}
           onComplete={feedbackNotifications.handleDailyQuestResult}
         />
@@ -291,6 +304,7 @@ export default function DashboardV3Page() {
                       gameMode={gameMode}
                       weeklyTarget={profile?.weekly_target ?? null}
                       isJourneyGenerating={isJourneyGenerating}
+                      showOnboardingGuidance={dailyQuestReadiness.showOnboardingGuidance}
                       section={overviewSection}
                       onOpenReminderScheduler={handleOpenReminderScheduler}
                     />
@@ -357,6 +371,7 @@ interface DashboardOverviewProps {
   gameMode: GameMode | string | null;
   weeklyTarget: number | null;
   isJourneyGenerating: boolean;
+  showOnboardingGuidance: boolean;
   section: DashboardSectionConfig;
   onOpenReminderScheduler: () => void;
 }
@@ -366,6 +381,7 @@ function DashboardOverview({
   gameMode,
   weeklyTarget,
   isJourneyGenerating,
+  showOnboardingGuidance,
   section,
   onOpenReminderScheduler,
 }: DashboardOverviewProps) {
@@ -383,7 +399,12 @@ function DashboardOverview({
       />
       <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="order-1 space-y-4 lg:col-span-12">
-          <Alerts userId={userId} isJourneyGenerating={isJourneyGenerating} onScheduleClick={handleScheduleClick} />
+          <Alerts
+            userId={userId}
+            isJourneyGenerating={isJourneyGenerating}
+            showOnboardingGuidance={showOnboardingGuidance}
+            onScheduleClick={handleScheduleClick}
+          />
         </div>
 
         <div className="order-2 space-y-4 md:space-y-5 lg:order-2 lg:col-span-4">
