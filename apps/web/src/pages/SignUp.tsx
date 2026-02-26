@@ -20,7 +20,6 @@ export default function SignUpPage() {
   return (
     <AuthLayout
       title="Crear tu cuenta"
-      description="Sumate a Innerbloom para comenzar a medir y automatizar tus flujos. Creamos tu cuenta en segundos y te guiamos paso a paso."
       secondaryActionLabel="Volver al inicio"
       secondaryActionHref="/"
     >
