@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { STEP_XP, FORM_LABELS, CHECKLIST_LIMITS, OPEN_TEXT_XP } from './constants';
@@ -72,6 +72,10 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
     const timer = setTimeout(() => setSnack(null), 1300);
     return () => clearTimeout(timer);
   }, [snack]);
+
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [stepId]);
 
   const handleChecklistConfirm = (target: StepId) => {
     const hadChecklist = awardedChecklists[target];
@@ -310,9 +314,10 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-body':
         return (
           <ChecklistStep
-            title="Foundations · Body"
+            title="BODY · 🫀"
             subtitle="Tu base física sostiene todo. Elegí hasta 5 anclas."
             xpAmount={13}
+            badgeLabel="Foundations"
             items={FORM_LABELS.fBody}
             selected={answers.foundations.body}
             onToggle={(value) => toggleChecklist('foundations-body', value)}
@@ -326,9 +331,10 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-soul':
         return (
           <ChecklistStep
-            title="Foundations · Soul"
+            title="SOUL · 🏵️"
             subtitle="Sin centro no hay llegada. Elegí hasta 5 prácticas."
             xpAmount={13}
+            badgeLabel="Foundations"
             items={FORM_LABELS.fSoul}
             selected={answers.foundations.soul}
             onToggle={(value) => toggleChecklist('foundations-soul', value)}
@@ -342,9 +348,10 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-mind':
         return (
           <ChecklistStep
-            title="Foundations · Mind"
+            title="MIND · 🧠"
             subtitle="No es hacer más: es hacer mejor. Elegí hasta 5 focos."
             xpAmount={13}
+            badgeLabel="Foundations"
             items={FORM_LABELS.fMind}
             selected={answers.foundations.mind}
             onToggle={(value) => toggleChecklist('foundations-mind', value)}
