@@ -1031,6 +1031,12 @@
   font-size: 1.02rem;
 }
 
+.landing .pricing-primary-cta-wrap {
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+}
+
 .landing .faq details {
   background: var(--card-blur-bg);
   border: 1px solid var(--card-blur-border);

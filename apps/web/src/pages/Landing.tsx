@@ -512,11 +512,11 @@ export default function LandingPage() {
 
   const handlePricingCta = () => {
     if (isSignedIn) {
-      navigate('/pricing');
+      navigate('/dashboard');
       return;
     }
 
-    navigate('/sign-up');
+    navigate('/intro-journey');
   };
   const faqJsonLd = {
     '@context': 'https://schema.org',
@@ -836,17 +836,13 @@ export default function LandingPage() {
                   <p className="pricing-plan-name">{plan.name}</p>
                   <p className="pricing-plan-price">{plan.price}</p>
                   <p className="pricing-plan-detail">{plan.detail}</p>
-                  {isSignedIn ? (
-                    <button type="button" className={`${buttonClasses()} pricing-plan-action`} onClick={handlePricingCta}>
-                      {copy.pricing.actionLabel}
-                    </button>
-                  ) : (
-                    <Link className={`${buttonClasses()} pricing-plan-action`} to="/sign-up">
-                      {copy.pricing.actionLabel}
-                    </Link>
-                  )}
                 </article>
               ))}
+            </div>
+            <div className="pricing-primary-cta-wrap">
+              <button type="button" className={buttonClasses()} onClick={handlePricingCta}>
+                Empezar gratis 2 meses
+              </button>
             </div>
           </div>
         </section>
