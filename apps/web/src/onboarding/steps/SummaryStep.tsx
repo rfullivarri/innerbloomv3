@@ -147,7 +147,7 @@ export function SummaryStep({
         <NavButtons
           onBack={onBack}
           onConfirm={onFinish}
-          confirmLabel="Generar plan"
+          confirmLabel="Comienza tu Journey"
           loading={isSubmitting}
           disabled={isDisabled}
           showBack

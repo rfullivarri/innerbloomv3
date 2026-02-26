@@ -1824,6 +1824,20 @@ export type UserJourneySummary = {
   quantity_daily_logs: number;
   first_programmed: boolean;
 };
+export type JourneyGenerationStatus = 'pending' | 'running' | 'completed' | 'failed';
+
+export type JourneyGenerationStateResponse = {
+  status: JourneyGenerationStatus;
+  correlation_id: string | null;
+  updated_at: string;
+  completed_at: string | null;
+  failure_reason: string | null;
+};
+
+
+export async function getJourneyGenerationStatus(): Promise<{ ok: boolean; state: JourneyGenerationStateResponse | null }> {
+  return getAuthorizedJson<{ ok: boolean; state: JourneyGenerationStateResponse | null }>('/onboarding/generation-status');
+}
 
 export async function getUserJourney(userId: string): Promise<UserJourneySummary> {
   const response = await getAuthorizedJson<UserJourneySummary>(`/users/${encodeURIComponent(userId)}/journey`);

@@ -1,10 +1,12 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserJourney, getUserTasks, type UserJourneySummary } from '../../lib/api';
+import { clearJourneyGenerationPending } from '../../lib/journeyGeneration';
 
 interface AlertsProps {
   userId: string;
+  isJourneyGenerating?: boolean;
   onScheduleClick?: () => void;
 }
 
@@ -19,9 +21,16 @@ function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean
   return journey.first_programmed === false;
 }
 
-export function Alerts({ userId, onScheduleClick }: AlertsProps) {
+export function Alerts({ userId, isJourneyGenerating = false, onScheduleClick }: AlertsProps) {
   const { data: tasks, status: tasksStatus } = useRequest(() => getUserTasks(userId), [userId]);
   const hasTasks = useMemo(() => (tasks?.length ?? 0) > 0, [tasks]);
+  const showJourneyPreparing = isJourneyGenerating && !hasTasks;
+
+  useEffect(() => {
+    if (hasTasks) {
+      clearJourneyGenerationPending();
+    }
+  }, [hasTasks]);
 
   const shouldLoadJourney = tasksStatus === 'success' ? hasTasks : tasksStatus === 'error';
 
@@ -42,7 +51,7 @@ export function Alerts({ userId, onScheduleClick }: AlertsProps) {
     );
   }
 
-  if (tasksStatus === 'success' && !hasTasks) {
+  if (tasksStatus === 'success' && !hasTasks && !showJourneyPreparing) {
     return (
       <div className="rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 text-sm text-sky-100">
         <div className="flex items-start gap-3">
@@ -64,6 +73,19 @@ export function Alerts({ userId, onScheduleClick }: AlertsProps) {
 
   return (
     <div className="space-y-4">
+      {showJourneyPreparing && (
+        <div className="rounded-2xl border border-fuchsia-400/30 bg-fuchsia-500/10 p-4 text-sm text-fuchsia-100">
+          <div className="flex items-start gap-3">
+            <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-fuchsia-300" aria-hidden />
+            <div className="space-y-1">
+              <p className="font-semibold text-white">Tu Journey se está preparando</p>
+              <p className="text-fuchsia-100/80">Estamos generando tus primeras misiones personalizadas.</p>
+              <p className="text-fuchsia-100/80">Esto puede tardar unos minutos.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showScheduler && (
         <div className="rounded-2xl border border-indigo-400/30 bg-indigo-500/10 p-4 text-sm text-indigo-100">
           <div className="flex items-start gap-3">

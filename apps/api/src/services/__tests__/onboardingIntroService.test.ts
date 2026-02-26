@@ -274,6 +274,13 @@ function createSubmitExpectations(options: {
       },
     },
     {
+      match: (sql) => sql.includes('INSERT INTO user_journey_generation_state'),
+      handle: (_sql, params) => {
+        expect(params).toEqual([userId, 'pending', null, null]);
+        return { rowCount: 1 };
+      },
+    },
+    {
       match: (sql) => sql === 'COMMIT',
       handle: () => ({}),
     },
