@@ -6,6 +6,7 @@ import App from './App';
 import './index.css';
 import { DEV_USER_SWITCH_ACTIVE } from './lib/api';
 import { isApiLoggingEnabled, setApiLoggingEnabled } from './lib/logger';
+import { resolveAuthLanguage } from './lib/authLanguage';
 
 declare global {
   interface Window {
@@ -37,9 +38,12 @@ if (!publishableKey) {
   throw new Error('VITE_CLERK_PUBLISHABLE_KEY is not set');
 }
 
+const authLanguage = typeof window !== 'undefined' ? resolveAuthLanguage(window.location.search) : 'es';
+const clerkLocalization = authLanguage === 'en' ? undefined : ({ locale: 'es-ES' } as any);
+
 createRoot(rootElement).render(
   <StrictMode>
-    <ClerkProvider publishableKey={publishableKey}>
+    <ClerkProvider publishableKey={publishableKey} localization={clerkLocalization}>
       <BrowserRouter>
         <App />
       </BrowserRouter>

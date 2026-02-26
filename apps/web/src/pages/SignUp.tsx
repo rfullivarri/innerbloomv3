@@ -1,10 +1,14 @@
 import { SignUp } from '@clerk/clerk-react';
 import { useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AuthLayout } from '../components/layout/AuthLayout';
+import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { createAuthAppearance } from '../lib/clerkAppearance';
 
 export default function SignUpPage() {
   const signUpContainerRef = useRef<HTMLDivElement | null>(null);
+  const location = useLocation();
+  const language = resolveAuthLanguage(location.search);
 
   const appearance = createAuthAppearance({
     layout: {
@@ -19,9 +23,9 @@ export default function SignUpPage() {
 
   return (
     <AuthLayout
-      title="Crear tu cuenta"
-      secondaryActionLabel="Volver al inicio"
-      secondaryActionHref="/"
+      title={language === 'en' ? 'Create your account' : 'Crear tu cuenta'}
+      secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
+      secondaryActionHref={`/?lang=${language}`}
     >
       <div
         ref={signUpContainerRef}
@@ -31,7 +35,7 @@ export default function SignUpPage() {
           appearance={appearance}
           routing="path"
           path="/sign-up"
-          signInUrl="/login"
+          signInUrl={buildLocalizedAuthPath('/login', language)}
           // post-signup must continue onboarding
           fallbackRedirectUrl="/intro-journey"
         />

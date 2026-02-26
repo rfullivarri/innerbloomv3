@@ -1,13 +1,21 @@
 import { SignIn } from '@clerk/clerk-react';
+import { useLocation } from 'react-router-dom';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { DASHBOARD_PATH } from '../config/auth';
+import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { createAuthAppearance } from '../lib/clerkAppearance';
 import { usePageMeta } from '../lib/seo';
 
 export default function LoginPage() {
+  const location = useLocation();
+  const language = resolveAuthLanguage(location.search);
+
   usePageMeta({
     title: 'Innerbloom',
-    description: 'Obsérvate por primera vez en tercera persona y toma el control de tus acciones y hábitos.',
+    description:
+      language === 'en'
+        ? 'Observe yourself in third person for the first time and take control of your actions and habits.'
+        : 'Obsérvate por primera vez en tercera persona y toma el control de tus acciones y hábitos.',
     image: 'https://innerbloomjourney.org/og/neneOGP.png',
     imageAlt: 'Innerbloom',
     ogImageSecureUrl: 'https://innerbloomjourney.org/og/neneOGP.png',
@@ -22,11 +30,11 @@ export default function LoginPage() {
     <AuthLayout
       title={
         <div className="flex flex-col items-center gap-2 text-center text-3xl font-semibold uppercase tracking-[0.24em] text-white sm:text-4xl sm:tracking-[0.28em] md:text-5xl">
-          dashboard
+          {language === 'en' ? 'Sign in' : 'Iniciar sesión'}
         </div>
       }
-      secondaryActionLabel="Volver al inicio"
-      secondaryActionHref="/"
+      secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
+      secondaryActionHref={`/?lang=${language}`}
     >
       <SignIn
         appearance={createAuthAppearance({
@@ -37,7 +45,7 @@ export default function LoginPage() {
         })}
         routing="path"
         path="/login"
-        signUpUrl="/sign-up"
+        signUpUrl={buildLocalizedAuthPath('/sign-up', language)}
         fallbackRedirectUrl={DASHBOARD_PATH}
       />
     </AuthLayout>
