@@ -453,7 +453,9 @@
 .landing .pillar-card {
   position: relative;
   z-index: 1;
-  padding: 26px 24px;
+  min-height: 390px;
+  border-radius: 36px;
+  padding: 18.15px;
 }
 
 .landing .pillar-heading {
