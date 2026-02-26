@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type TouchEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { OFFICIAL_DESIGN_TOKENS, OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
-import { buildLocalizedAuthPath } from '../lib/authLanguage';
+import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
 import { usePageMeta } from '../lib/seo';
@@ -287,9 +287,12 @@ function LanguageDropdown({ value, onChange }: { value: Language; onChange: (lan
 
 export default function LandingPage() {
   const { userId } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
   const isSignedIn = Boolean(userId);
-  const [language, setLanguage] = useState<Language>('es');
+  const [language, setLanguage] = useState<Language>(() =>
+    typeof window !== 'undefined' ? resolveAuthLanguage(window.location.search) : 'es'
+  );
   const [gradientId, setGradientId] = useState<string>(() => {
     const fallbackGradientId = LANDING_GRADIENTS[0]?.id ?? '';
     const officialGradient = LANDING_GRADIENTS.find((option) => option.id === OFFICIAL_DEFAULT_GRADIENT_ID);
@@ -346,6 +349,10 @@ export default function LandingPage() {
   useEffect(() => {
     window.localStorage.setItem(LANDING_GRADIENT_STORAGE_KEY, gradientId);
   }, [gradientId]);
+
+  useEffect(() => {
+    setLanguage(resolveAuthLanguage(location.search));
+  }, [location.search]);
 
   usePageMeta({
     title: 'Innerbloom',
