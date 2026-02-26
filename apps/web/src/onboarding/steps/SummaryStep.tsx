@@ -71,7 +71,11 @@ function ModeChip({ mode }: { mode: GameMode | null }) {
   }
 
   const chipStyle = buildGameModeChip(mode);
-  return <SharedGameModeChip {...chipStyle} />;
+  return (
+    <span className="inline-flex origin-left scale-75">
+      <SharedGameModeChip {...chipStyle} />
+    </span>
+  );
 }
 
 function getModeState(mode: GameMode | null): string {
