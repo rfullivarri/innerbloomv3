@@ -28,11 +28,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout
-      title={
-        <div className="flex flex-col items-center gap-2 text-center text-3xl font-semibold uppercase tracking-[0.24em] text-white sm:text-4xl sm:tracking-[0.28em] md:text-5xl">
-          {language === 'en' ? 'Sign in' : 'Iniciar sesión'}
-        </div>
-      }
+      title={language === 'en' ? 'Sign in' : 'Iniciar sesión'}
       secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
       secondaryActionHref={`/?lang=${language}`}
     >
