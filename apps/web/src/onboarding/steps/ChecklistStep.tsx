@@ -7,6 +7,7 @@ interface ChecklistStepProps {
   title: string;
   subtitle: string;
   xpAmount: number;
+  badgeLabel?: string;
   items: readonly string[];
   selected: readonly string[];
   onToggle: (value: string) => void;
@@ -22,6 +23,7 @@ export function ChecklistStep({
   title,
   subtitle,
   xpAmount,
+  badgeLabel = 'Checklist',
   items,
   selected,
   onToggle,
@@ -39,7 +41,7 @@ export function ChecklistStep({
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
       <div className="glass-card onboarding-surface-base mx-auto max-w-3xl rounded-3xl p-6">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-white/50">Checklist · +{xpAmount} XP</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-white/50">{badgeLabel} · +{xpAmount} XP</p>
           <ModeQuestionTitle title={title} />
           <p className="text-sm text-white/70">{subtitle}</p>
           {typeof limit === 'number' ? (
@@ -54,7 +56,7 @@ export function ChecklistStep({
         {showOpen ? (
           <div className="mt-6">
             <label className="block text-sm font-medium text-white/80">
-              {openLabel ?? '¿Querés anclar algo más?'}
+              {openLabel ?? '¿Quieres comentar o sumar algo más?'}
             </label>
             <textarea
               value={openValue ?? ''}
