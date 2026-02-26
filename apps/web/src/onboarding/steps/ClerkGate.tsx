@@ -90,7 +90,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.24, ease: 'easeOut' }}
-      className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-6"
+      className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl px-3 py-5 sm:p-6"
     >
       <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
@@ -121,7 +121,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="onboarding-surface-ghost rounded-2xl px-2 py-4 sm:px-4 sm:py-6"
+              className="onboarding-surface-ghost rounded-2xl px-0 py-4 sm:px-4 sm:py-6"
             >
               <SignUp
                 appearance={clerkAppearance}
@@ -138,7 +138,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="onboarding-surface-ghost rounded-2xl px-2 py-4 sm:px-4 sm:py-6"
+              className="onboarding-surface-ghost rounded-2xl px-0 py-4 sm:px-4 sm:py-6"
             >
               <SignIn
                 appearance={clerkAppearance}
