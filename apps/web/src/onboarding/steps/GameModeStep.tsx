@@ -82,12 +82,14 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
                 type="button"
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onSelect(mode)}
+                aria-pressed={isActive}
+                aria-label={`${content.title}${isActive ? ' seleccionado' : ''}`}
                 data-selected={isActive ? 'true' : 'false'}
                 className={[
-                  'glass-card onboarding-surface-inner onboarding-glass-border-soft relative flex h-full overflow-hidden rounded-3xl border px-5 py-[1.35rem] text-left transition-all duration-250 ease-out',
+                  'glass-card onboarding-surface-inner onboarding-glass-border-soft relative flex h-full overflow-hidden rounded-3xl border px-5 py-[1.35rem] text-left transition-all duration-250 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80',
                   isActive
-                    ? 'border-white/80 bg-white/[0.11] ring-2 ring-sky-300/85 shadow-[0_0_0_1px_rgba(255,255,255,0.28),0_0_28px_rgba(34,211,238,0.38),0_0_52px_rgba(139,92,246,0.34)] -translate-y-0.5 scale-[1.01]'
-                    : 'hover:border-white/30 hover:bg-white/[0.07] focus-visible:border-white/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70',
+                    ? 'border-white/80 bg-white/[0.11] ring-2 ring-sky-300/85 shadow-[0_0_0_1px_rgba(255,255,255,0.28),0_0_28px_rgba(34,211,238,0.38),0_0_52px_rgba(139,92,246,0.34)] -translate-y-0.5 scale-[1.01] focus-visible:ring-4 focus-visible:ring-cyan-200/95'
+                    : 'hover:border-white/30 hover:bg-white/[0.07] focus-visible:border-white/45 focus-visible:ring-sky-300/70',
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -108,7 +110,15 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
                 />
                 <span className="relative z-10 ml-4 flex h-full w-full flex-col gap-3">
                   <span className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
-                    <span className="text-xs font-semibold tracking-[0.12em] text-white/95 sm:text-sm">{content.title}</span>
+                    <span className="flex items-center gap-2">
+                      <span className="text-xs font-semibold tracking-[0.12em] text-white/95 sm:text-sm">{content.title}</span>
+                      {isActive ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/80 bg-emerald-300/95 px-2 py-0.5 text-[0.58rem] font-semibold uppercase tracking-[0.08em] text-slate-950 shadow-[0_0_14px_rgba(110,231,183,0.42)] sm:text-[0.62rem]">
+                          <span aria-hidden>✓</span>
+                          Seleccionado
+                        </span>
+                      ) : null}
+                    </span>
                     <span className="shrink-0 rounded-full border border-white/20 bg-white/10 px-2 py-1 text-[0.62rem] font-medium uppercase tracking-[0.08em] text-white/80 sm:px-2.5 sm:text-[0.68rem]">
                       {content.frequency}
                     </span>
