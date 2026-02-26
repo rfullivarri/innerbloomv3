@@ -1,18 +1,12 @@
-import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useRequest } from '../../hooks/useRequest';
-import { getUserJourney, getUserTasks, type UserJourneySummary } from '../../lib/api';
-import { clearJourneyGenerationPending, isJourneyGenerationPending } from '../../lib/journeyGeneration';
+import { useDailyQuestReadiness } from '../../hooks/useDailyQuestReadiness';
+import type { UserJourneySummary } from '../../lib/api';
 
 interface AlertsProps {
   userId: string;
   isJourneyGenerating?: boolean;
+  showOnboardingGuidance?: boolean;
   onScheduleClick?: () => void;
-}
-
-function shouldShowBbddWarning(journey: UserJourneySummary | null): boolean {
-  if (!journey) return false;
-  return (journey.quantity_daily_logs ?? 0) === 0;
 }
 
 function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean {
@@ -21,36 +15,21 @@ function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean
   return journey.first_programmed === false;
 }
 
-export function Alerts({ userId, isJourneyGenerating = false, onScheduleClick }: AlertsProps) {
-  const { data: tasks, status: tasksStatus } = useRequest(() => getUserTasks(userId), [userId]);
-  const hasTasks = useMemo(() => (tasks?.length ?? 0) > 0, [tasks]);
-  const showJourneyPreparing = useMemo(() => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-
-    const clerkUserId = window.localStorage.getItem('clerk_uid');
-    return !hasTasks && isJourneyGenerationPending(clerkUserId);
-  }, [hasTasks]);
-
-  useEffect(() => {
-    if (hasTasks) {
-      clearJourneyGenerationPending();
-    }
-  }, [hasTasks]);
-
-  const shouldLoadJourney = tasksStatus === 'success' ? hasTasks : tasksStatus === 'error';
-
+export function Alerts({ userId, isJourneyGenerating = false, showOnboardingGuidance, onScheduleClick }: AlertsProps) {
   const {
-    data,
-    status: journeyStatus,
-  } = useRequest(() => getUserJourney(userId), [userId], { enabled: shouldLoadJourney });
+    hasTasks,
+    baseConfirmed,
+    showJourneyPreparing,
+    tasksStatus,
+    journeyStatus,
+    journey,
+  } = useDailyQuestReadiness(userId, { isJourneyGenerating });
 
-  const showBbdd = useMemo(() => shouldShowBbddWarning(data), [data]);
-  const showScheduler = useMemo(() => shouldShowSchedulerWarning(data), [data]);
+  const showScheduler = shouldShowSchedulerWarning(journey);
+  const showBbdd = hasTasks && !baseConfirmed;
   const canSchedule = typeof onScheduleClick === 'function';
 
-  if (tasksStatus === 'loading' || (shouldLoadJourney && journeyStatus === 'loading')) {
+  if (tasksStatus === 'loading' || (hasTasks && journeyStatus === 'loading')) {
     return (
       <div className="space-y-3">
         <div className="animate-pulse rounded-2xl border border-white/5 bg-white/5/40 p-4" />
@@ -58,7 +37,9 @@ export function Alerts({ userId, isJourneyGenerating = false, onScheduleClick }:
     );
   }
 
-  if (tasksStatus === 'success' && !hasTasks && !showJourneyPreparing) {
+  const shouldShowOnboardingGuidance = showOnboardingGuidance ?? (!hasTasks || !baseConfirmed);
+
+  if (tasksStatus === 'success' && shouldShowOnboardingGuidance && !hasTasks && !showJourneyPreparing) {
     return (
       <div className="rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 text-sm text-sky-100">
         <div className="flex items-start gap-3">
