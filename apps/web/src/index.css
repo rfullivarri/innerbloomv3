@@ -328,6 +328,16 @@
     outline-offset: 2px;
   }
 
+  .onboarding-force-white,
+  .onboarding-force-white :is(h1, h2, h3, h4, h5, h6, p, span, label, legend, li, dt, dd, small, strong, em, a, button) {
+    color: #ffffff;
+  }
+
+  .onboarding-force-white :is(input, textarea)::placeholder {
+    color: #ffffff;
+    opacity: 1;
+  }
+
   @property --conic-angle {
     syntax: '<angle>';
     inherits: false;
