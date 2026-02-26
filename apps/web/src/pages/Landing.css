@@ -955,6 +955,15 @@
   border-color: transparent;
 }
 
+
+.landing .pricing-trial-highlight {
+  margin: 8px 0 8px;
+  text-align: center;
+  color: rgba(244, 248, 255, 0.95);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 .landing .pricing-tax-note {
   margin: -4px 0 20px;
   text-align: center;
