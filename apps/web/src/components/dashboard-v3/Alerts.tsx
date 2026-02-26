@@ -7,6 +7,7 @@ interface AlertsProps {
   isJourneyGenerating?: boolean;
   showOnboardingGuidance?: boolean;
   onScheduleClick?: () => void;
+  suppressJourneyPreparing?: boolean;
 }
 
 function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean {
@@ -15,7 +16,13 @@ function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean
   return journey.first_programmed === false;
 }
 
-export function Alerts({ userId, isJourneyGenerating = false, showOnboardingGuidance, onScheduleClick }: AlertsProps) {
+export function Alerts({
+  userId,
+  isJourneyGenerating = false,
+  showOnboardingGuidance,
+  onScheduleClick,
+  suppressJourneyPreparing = false,
+}: AlertsProps) {
   const {
     hasTasks,
     baseConfirmed,
@@ -61,7 +68,7 @@ export function Alerts({ userId, isJourneyGenerating = false, showOnboardingGuid
 
   return (
     <div className="space-y-4">
-      {showJourneyPreparing && (
+      {showJourneyPreparing && !suppressJourneyPreparing && (
         <div className="rounded-2xl border border-fuchsia-400/30 bg-fuchsia-500/10 p-4 text-sm text-fuchsia-100">
           <div className="flex items-start gap-3">
             <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-fuchsia-300" aria-hidden />

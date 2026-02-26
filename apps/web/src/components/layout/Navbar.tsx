@@ -15,13 +15,14 @@ type NavbarProps = {
   title?: string;
   sections?: NavbarSection[];
   menuSlot?: ReactNode;
+  planSlot?: ReactNode;
 };
 
 function combine(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
 
-export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot }: NavbarProps) {
+export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot, planSlot }: NavbarProps) {
   const { userId } = useAuth();
   const { user } = useUser();
 
@@ -76,8 +77,13 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
         ) : (
           <div className="hidden flex-1 md:flex" aria-hidden="true" />
         )}
-        <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
+        <div className="ml-auto flex items-center gap-2 sm:gap-3 md:hidden">
+          {planSlot}
           {menuSlot}
+        </div>
+        <div className="hidden flex-1 items-center justify-end gap-2 sm:gap-3 md:flex">
+          {menuSlot}
+          {planSlot}
           {displayName && (
             <span className="hidden rounded-full bg-white/10 px-3 py-1 text-xs text-text-muted md:inline-flex">
               {displayName}

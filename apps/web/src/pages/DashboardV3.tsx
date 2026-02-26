@@ -32,7 +32,13 @@ import {
 import { useBackendUser } from '../hooks/useBackendUser';
 import { useRequest } from '../hooks/useRequest';
 import { DevErrorBoundary } from '../components/DevErrorBoundary';
-import { getJourneyGenerationStatus, getUserState } from '../lib/api';
+import {
+  getCurrentUserSubscription,
+  getJourneyGenerationStatus,
+  getUserState,
+  getUserTasks,
+  markJourneyReadyModalSeen,
+} from '../lib/api';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
 import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
@@ -47,6 +53,8 @@ import {
 } from './dashboardSections';
 import { FEATURE_MISSIONS_V2 } from '../lib/featureFlags';
 import { DashboardMenu } from '../components/dashboard-v3/DashboardMenu';
+import { PlanChip } from '../components/dashboard-v3/PlanChip';
+import { JourneyReadyModal } from '../components/dashboard-v3/JourneyReadyModal';
 import {
   ReminderSchedulerDialog,
   type ReminderSchedulerDialogHandle,
@@ -61,6 +69,7 @@ import { isJourneyGenerationPending, syncJourneyGenerationFromServer } from '../
 
 export default function DashboardV3Page() {
   const { getToken } = useAuth();
+  const navigate = useNavigate();
   const { backendUserId, status, error, reload, clerkUserId, profile } = useBackendUser();
   const location = useLocation();
   const sections = getDashboardSections(location.pathname);
@@ -199,6 +208,18 @@ export default function DashboardV3Page() {
     enabled: Boolean(backendUserId),
     isJourneyGenerating,
   });
+  const { data: subscription } = useRequest(
+    () => getCurrentUserSubscription(),
+    [backendUserId],
+    { enabled: Boolean(backendUserId) },
+  );
+  const { data: generatedTasks } = useRequest(
+    () => getUserTasks(backendUserId!),
+    [backendUserId, isJourneyGenerating],
+    { enabled: Boolean(backendUserId) },
+  );
+  const [journeyReadyOpen, setJourneyReadyOpen] = useState(false);
+  const generationKeyRef = useRef<string | null>(null);
 
   const handleOpenDaily = useCallback(() => {
     if (!dailyQuestReadiness.canShowDailyQuestPopup) {
@@ -244,6 +265,55 @@ export default function DashboardV3Page() {
     dailyQuestModalRef.current?.open();
   }, [backendUserId, dailyQuestReadiness.canShowDailyQuestPopup, location.hash, location.search]);
 
+  useEffect(() => {
+    if (!backendUserId || !generatedTasks || generatedTasks.length === 0) {
+      return;
+    }
+
+    const check = async () => {
+      try {
+        const payload = await getJourneyGenerationStatus();
+        const state = payload.state;
+        if (!state) {
+          return;
+        }
+
+        const generationKey = state.correlation_id ?? state.updated_at;
+        generationKeyRef.current = generationKey;
+        const seenInBackend = Boolean(payload.journey_ready_modal_seen_at);
+        const seenInSession = window.sessionStorage.getItem(`jr_seen_session_${generationKey}`) === '1';
+        const isReady = state.status === 'completed';
+
+        if (isReady && !seenInBackend && !seenInSession && generatedTasks.length > 0) {
+          setJourneyReadyOpen(true);
+          window.sessionStorage.setItem(`jr_seen_session_${generationKey}`, '1');
+        }
+      } catch (error) {
+        console.warn('Failed to resolve journey ready modal status', error);
+      }
+    };
+
+    void check();
+  }, [backendUserId, generatedTasks]);
+
+  const persistJourneyReadySeen = useCallback(async () => {
+    const generationKey = generationKeyRef.current;
+    if (!generationKey) {
+      return;
+    }
+
+    try {
+      await markJourneyReadyModalSeen(generationKey);
+    } catch (error) {
+      console.warn('Failed to persist journey ready modal seen state', error);
+    }
+  }, []);
+
+  const handleCloseJourneyReady = useCallback(() => {
+    setJourneyReadyOpen(false);
+    void persistJourneyReadySeen();
+  }, [persistJourneyReadySeen]);
+
   return (
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
@@ -254,6 +324,7 @@ export default function DashboardV3Page() {
             title={activeSection.pageTitle}
             sections={sections}
             menuSlot={<DashboardMenu onOpenScheduler={handleOpenReminderScheduler} />}
+            planSlot={<PlanChip subscription={subscription ?? null} />}
           />
         )}
         <DailyQuestModal
@@ -283,6 +354,19 @@ export default function DashboardV3Page() {
         {weeklyWrapped.isModalOpen && weeklyWrapped.activeRecord ? (
           <WeeklyWrappedModal payload={weeklyWrapped.activeRecord.payload} onClose={weeklyWrapped.closeModal} />
         ) : null}
+        <JourneyReadyModal
+          open={journeyReadyOpen}
+          tasks={generatedTasks ?? []}
+          onClose={handleCloseJourneyReady}
+          onEditor={() => {
+            handleCloseJourneyReady();
+            navigate('/editor');
+          }}
+          onQuest={() => {
+            handleCloseJourneyReady();
+            handleOpenDaily();
+          }}
+        />
         <main className="flex-1 pb-24 md:pb-0">
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             {isLoadingProfile && <ProfileSkeleton />}
@@ -307,6 +391,7 @@ export default function DashboardV3Page() {
                       showOnboardingGuidance={dailyQuestReadiness.showOnboardingGuidance}
                       section={overviewSection}
                       onOpenReminderScheduler={handleOpenReminderScheduler}
+                      journeyReadyOpen={journeyReadyOpen}
                     />
                   }
                 />
@@ -374,6 +459,7 @@ interface DashboardOverviewProps {
   showOnboardingGuidance: boolean;
   section: DashboardSectionConfig;
   onOpenReminderScheduler: () => void;
+  journeyReadyOpen?: boolean;
 }
 
 function DashboardOverview({
@@ -384,6 +470,7 @@ function DashboardOverview({
   showOnboardingGuidance,
   section,
   onOpenReminderScheduler,
+  journeyReadyOpen = false,
 }: DashboardOverviewProps) {
   const handleScheduleClick = useCallback(() => {
     onOpenReminderScheduler();
@@ -404,6 +491,7 @@ function DashboardOverview({
             isJourneyGenerating={isJourneyGenerating}
             showOnboardingGuidance={showOnboardingGuidance}
             onScheduleClick={handleScheduleClick}
+            suppressJourneyPreparing={journeyReadyOpen}
           />
         </div>
 
