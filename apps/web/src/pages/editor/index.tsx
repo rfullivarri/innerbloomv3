@@ -380,6 +380,14 @@ export default function TaskEditorPage() {
     setEditGroupKey(null);
   }, []);
 
+  const handleEditSuccess = useCallback(
+    (message: string) => {
+      setPageToast({ type: 'success', text: message });
+      handleCloseEdit();
+    },
+    [handleCloseEdit],
+  );
+
   const handleNavigatePanelTask = useCallback(
     (taskId: string) => {
       if (editVariant !== 'panel') {
@@ -490,6 +498,7 @@ export default function TaskEditorPage() {
         <EditTaskModal
           open={taskToEdit != null}
           onClose={handleCloseEdit}
+          onTaskUpdated={handleEditSuccess}
           userId={backendUserId ?? null}
           task={taskToEdit}
           pillars={pillars}
@@ -1825,6 +1834,7 @@ function CreateTaskModal({
 interface EditTaskModalProps {
   open: boolean;
   onClose: () => void;
+  onTaskUpdated?: (message: string) => void;
   userId: string | null;
   task: UserTask | null;
   pillars: Pillar[];
@@ -1836,6 +1846,7 @@ interface EditTaskModalProps {
 function EditTaskModal({
   open,
   onClose,
+  onTaskUpdated,
   userId,
   task,
   pillars,
@@ -1974,6 +1985,13 @@ function EditTaskModal({
         difficultyId: difficultyId || null,
         isActive,
       });
+
+      if (onTaskUpdated) {
+        onTaskUpdated('Tarea actualizada correctamente.');
+        handleClose();
+        return;
+      }
+
       setToast({ type: 'success', text: 'Tarea actualizada correctamente.' });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo actualizar la tarea.';
