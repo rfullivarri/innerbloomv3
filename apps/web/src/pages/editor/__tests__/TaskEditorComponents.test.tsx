@@ -247,6 +247,53 @@ describe('Task editor components', () => {
     expect(await screen.findByText('Tarea creada correctamente.')).toBeInTheDocument();
   });
 
+
+  it('calls parent success handler and closes after saving an edited task', async () => {
+    const user = userEvent.setup();
+    const pillars: Pillar[] = [{ id: 'pillar-1', code: 'body', name: 'Cuerpo', description: null }];
+
+    const task: UserTask = {
+      id: 'task-4',
+      title: 'Tarea original',
+      pillarId: 'pillar-1',
+      traitId: 'trait-1',
+      statId: 'stat-1',
+      difficultyId: 'easy',
+      isActive: true,
+      xp: null,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+      completedAt: null,
+      archivedAt: null,
+    };
+
+    const onClose = vi.fn();
+    const onTaskUpdated = vi.fn();
+    updateTaskMock.mockResolvedValueOnce({ ...task, title: 'Tarea guardada' });
+
+    render(
+      <EditTaskModal
+        open
+        onClose={onClose}
+        onTaskUpdated={onTaskUpdated}
+        userId="user-123"
+        task={task}
+        pillars={pillars}
+      />,
+    );
+
+    await user.clear(screen.getByLabelText('Título de la tarea'));
+    await user.type(screen.getByLabelText('Título de la tarea'), 'Tarea guardada');
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+
+    await waitFor(() => {
+      expect(onTaskUpdated).toHaveBeenCalledWith('Tarea actualizada correctamente.');
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    expect(screen.queryByText('Tarea actualizada correctamente.')).not.toBeInTheDocument();
+  });
+
   it('validates and submits the edit task modal', async () => {
     const user = userEvent.setup();
     const pillars: Pillar[] = [
