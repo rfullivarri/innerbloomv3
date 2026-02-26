@@ -4,7 +4,8 @@ import { OFFICIAL_LANDING_CONTENT } from '../content/officialLandingContent';
 import { getSubscriptionWithFallback } from '../lib/api/subscription';
 import { changePlan, type PlanCode, type SubscriptionData } from '../lib/api/subscriptionMock';
 
-const PLANS = OFFICIAL_LANDING_CONTENT.es.pricing.plans;
+const PRICING_COPY = OFFICIAL_LANDING_CONTENT.es.pricing;
+const PLANS = PRICING_COPY.plans;
 
 const PLAN_BUTTON_LABELS: Record<PlanCode, string> = {
   FREE: 'Seleccionar',
@@ -67,9 +68,10 @@ export default function PricingPage() {
       <div className="mx-auto w-full max-w-7xl">
         <h1 className="text-center text-4xl font-semibold md:text-6xl">Planes y pricing</h1>
         <p className="mx-auto mt-4 max-w-3xl text-center text-lg text-text-muted md:text-2xl">
-          Elegí tu plan desde el dashboard. El plan activo se resalta para que identifiques tu suscripción actual.
+          Elegí tu plan desde el dashboard. Todos los planes comienzan con 2 meses gratis y luego se aplica el importe del plan elegido.
         </p>
-        <p className="mt-6 text-center text-base text-text-muted">Precios finales para cliente (impuestos incluidos).</p>
+        <p className="mt-5 text-center text-base font-semibold text-white/90">{PRICING_COPY.trialHighlight}</p>
+        <p className="mt-2 text-center text-base text-text-muted">{PRICING_COPY.taxNote}</p>
 
         {feedbackMessage ? (
           <p className="mx-auto mt-6 max-w-xl rounded-xl border border-accent-purple/40 bg-accent-purple/15 px-4 py-3 text-center text-sm text-white">
@@ -110,8 +112,8 @@ export default function PricingPage() {
                 ) : null}
 
                 <p className="text-3xl tracking-[0.2em] text-white/80">{plan.name}</p>
-                <p className="mt-4 text-5xl font-semibold leading-tight text-white">{plan.price}</p>
-                <p className="mt-5 min-h-[126px] text-2xl leading-relaxed text-white/75">{plan.detail}</p>
+                <p className="mt-4 min-h-[126px] text-2xl leading-relaxed text-white/75">{plan.detail}</p>
+                <p className="mt-5 text-5xl font-semibold leading-tight text-white">{plan.price}</p>
 
                 <button
                   type="button"

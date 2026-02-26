@@ -45,6 +45,8 @@ const LANDING_GRADIENTS: LandingGradientOption[] = OFFICIAL_DESIGN_TOKENS.gradie
   });
 
 const LANDING_GRADIENT_STORAGE_KEY = 'ib:official-landing-gradient';
+const OFFICIAL_DEFAULT_GRADIENT_ID = 'purple_afternoon';
+const SHOW_GRADIENT_SELECTOR = false;
 
 type ModeVisual = {
   avatarVideo: string;
@@ -288,10 +290,19 @@ export default function LandingPage() {
   const isSignedIn = Boolean(userId);
   const [language, setLanguage] = useState<Language>('es');
   const [gradientId, setGradientId] = useState<string>(() => {
-    if (typeof window === 'undefined') return LANDING_GRADIENTS[0]?.id ?? '';
+    const fallbackGradientId = LANDING_GRADIENTS[0]?.id ?? '';
+    const officialGradient = LANDING_GRADIENTS.find((option) => option.id === OFFICIAL_DEFAULT_GRADIENT_ID);
+    const officialGradientId = officialGradient?.id ?? fallbackGradientId;
+
+    if (typeof window === 'undefined') return officialGradientId;
+
+    if (!SHOW_GRADIENT_SELECTOR) {
+      return officialGradientId;
+    }
+
     const storedGradientId = window.localStorage.getItem(LANDING_GRADIENT_STORAGE_KEY);
     const storedGradient = LANDING_GRADIENTS.find((option) => option.id === storedGradientId);
-    return storedGradient?.id ?? LANDING_GRADIENTS[0]?.id ?? '';
+    return storedGradient?.id ?? officialGradientId;
   });
   const copy = OFFICIAL_LANDING_CONTENT[language];
   const selectedGradient = LANDING_GRADIENTS.find((option) => option.id === gradientId) ?? LANDING_GRADIENTS[0];
@@ -501,11 +512,11 @@ export default function LandingPage() {
 
   const handlePricingCta = () => {
     if (isSignedIn) {
-      navigate('/pricing');
+      navigate('/dashboard');
       return;
     }
 
-    navigate('/sign-up');
+    navigate('/intro-journey');
   };
   const faqJsonLd = {
     '@context': 'https://schema.org',
@@ -549,21 +560,23 @@ export default function LandingPage() {
           </nav>
         ) : null}
         <div className="nav-actions">
-          <label className="gradient-select-wrapper">
-            <span className="visually-hidden">{language === 'es' ? 'Seleccionar fondo' : 'Select background'}</span>
-            <select
-              className="gradient-select"
-              value={gradientId}
-              onChange={(event) => setGradientId(event.target.value)}
-              aria-label={language === 'es' ? 'Selector de fondo' : 'Background selector'}
-            >
-              {LANDING_GRADIENTS.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label[language]}
-                </option>
-              ))}
-            </select>
-          </label>
+          {SHOW_GRADIENT_SELECTOR ? (
+            <label className="gradient-select-wrapper">
+              <span className="visually-hidden">{language === 'es' ? 'Seleccionar fondo' : 'Select background'}</span>
+              <select
+                className="gradient-select"
+                value={gradientId}
+                onChange={(event) => setGradientId(event.target.value)}
+                aria-label={language === 'es' ? 'Selector de fondo' : 'Background selector'}
+              >
+                {LANDING_GRADIENTS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label[language]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
           <LanguageDropdown value={language} onChange={setLanguage} />
           {isSignedIn ? (
             <Link className={buttonClasses()} to="/dashboard">
@@ -811,6 +824,7 @@ export default function LandingPage() {
           <div className="container">
             <AdaptiveText as="h2">{copy.pricing.title}</AdaptiveText>
             <AdaptiveText as="p" className="section-sub">{copy.pricing.intro}</AdaptiveText>
+            <p className="pricing-trial-highlight">{copy.pricing.trialHighlight}</p>
             <p className="pricing-tax-note">{copy.pricing.taxNote}</p>
             <div className="pricing-grid">
               {copy.pricing.plans.map((plan, index) => (
@@ -823,17 +837,13 @@ export default function LandingPage() {
                   <p className="pricing-plan-name">{plan.name}</p>
                   <p className="pricing-plan-price">{plan.price}</p>
                   <p className="pricing-plan-detail">{plan.detail}</p>
-                  {isSignedIn ? (
-                    <button type="button" className={`${buttonClasses()} pricing-plan-action`} onClick={handlePricingCta}>
-                      {copy.pricing.actionLabel}
-                    </button>
-                  ) : (
-                    <Link className={`${buttonClasses()} pricing-plan-action`} to="/sign-up">
-                      {copy.pricing.actionLabel}
-                    </Link>
-                  )}
                 </article>
               ))}
+            </div>
+            <div className="pricing-primary-cta-wrap">
+              <button type="button" className={buttonClasses()} onClick={handlePricingCta}>
+                Empezar gratis 2 meses
+              </button>
             </div>
           </div>
         </section>

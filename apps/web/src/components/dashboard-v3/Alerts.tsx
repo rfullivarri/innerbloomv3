@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserJourney, getUserTasks, type UserJourneySummary } from '../../lib/api';
-import { clearJourneyGenerationPending } from '../../lib/journeyGeneration';
+import { clearJourneyGenerationPending, isJourneyGenerationPending } from '../../lib/journeyGeneration';
 
 interface AlertsProps {
   userId: string;
@@ -24,7 +24,14 @@ function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean
 export function Alerts({ userId, isJourneyGenerating = false, onScheduleClick }: AlertsProps) {
   const { data: tasks, status: tasksStatus } = useRequest(() => getUserTasks(userId), [userId]);
   const hasTasks = useMemo(() => (tasks?.length ?? 0) > 0, [tasks]);
-  const showJourneyPreparing = isJourneyGenerating && !hasTasks;
+  const showJourneyPreparing = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    const clerkUserId = window.localStorage.getItem('clerk_uid');
+    return !hasTasks && isJourneyGenerationPending(clerkUserId);
+  }, [hasTasks]);
 
   useEffect(() => {
     if (hasTasks) {
