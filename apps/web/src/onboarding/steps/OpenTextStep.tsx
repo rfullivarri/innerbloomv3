@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { NavButtons } from '../ui/NavButtons';
+import { ModeQuestionTitle } from '../ui/ModeQuestionTitle';
 
 interface OpenTextStepProps {
   title: string;
@@ -32,7 +33,7 @@ export function OpenTextStep({
       <div className="glass-card onboarding-surface-base mx-auto max-w-3xl rounded-3xl p-6">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
           <p className="text-xs uppercase tracking-[0.3em] text-white/50">Pregunta clave · +{xpAmount} XP</p>
-          <h2 className="text-2xl font-semibold text-white">{title}</h2>
+          <ModeQuestionTitle title={title} />
           <p className="text-sm text-white/70">{subtitle}</p>
         </header>
         <div className="mt-6">
