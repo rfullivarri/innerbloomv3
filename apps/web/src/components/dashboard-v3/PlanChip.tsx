@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { CurrentUserSubscriptionResponse } from '../../lib/api';
 
@@ -52,6 +53,21 @@ export function PlanChip({ subscription }: { subscription: CurrentUserSubscripti
 
   const dateLabel = display.endDate ? new Date(display.endDate).toLocaleDateString('es-ES') : '—';
 
+  const planModal = open ? (
+    <div className="fixed inset-0 z-[110] bg-black/50" onClick={() => setOpen(false)}>
+      <div
+        className="absolute inset-x-0 bottom-0 rounded-t-3xl border border-white/20 bg-surface p-4 md:inset-auto md:right-4 md:top-16 md:w-80 md:rounded-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="text-xs text-text-muted">Plan actual: {display.planName}</p>
+        <p className="mt-1 text-sm text-white">Vence el: {dateLabel}</p>
+        <Link to="/pricing" onClick={() => setOpen(false)} className="mt-3 inline-flex rounded-full border border-white/30 px-3 py-1 text-xs text-white">
+          Ver planes
+        </Link>
+      </div>
+    </div>
+  ) : null;
+
   return (
     <>
       <button
@@ -63,17 +79,7 @@ export function PlanChip({ subscription }: { subscription: CurrentUserSubscripti
         <span className="md:hidden">{display.mobile}</span>
       </button>
 
-      {open ? (
-        <div className="fixed inset-0 z-[70] bg-black/50" onClick={() => setOpen(false)}>
-          <div className="absolute inset-x-0 bottom-0 rounded-t-3xl border border-white/20 bg-surface p-4 md:inset-auto md:right-4 md:top-16 md:w-80 md:rounded-2xl" onClick={(e) => e.stopPropagation()}>
-            <p className="text-xs text-text-muted">Plan actual: {display.planName}</p>
-            <p className="mt-1 text-sm text-white">Vence el: {dateLabel}</p>
-            <Link to="/pricing" onClick={() => setOpen(false)} className="mt-3 inline-flex rounded-full border border-white/30 px-3 py-1 text-xs text-white">
-              Ver planes
-            </Link>
-          </div>
-        </div>
-      ) : null}
+      {typeof document !== 'undefined' ? createPortal(planModal, document.body) : null}
     </>
   );
 }
