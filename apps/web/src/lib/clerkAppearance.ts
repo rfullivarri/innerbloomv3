@@ -36,6 +36,8 @@ const baseElements = {
   formFieldLabel: 'text-[11px] font-medium text-white/75 sm:text-xs',
   formFieldInput:
     'rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 text-[15px] leading-6 text-white placeholder:text-white/40 shadow-[0_6px_20px_rgba(99,102,241,0.15)] focus:border-white/40 focus:outline-none focus-visible:ring-0',
+  otpCodeFieldInput:
+    'h-14 w-14 rounded-full border-2 border-white/55 bg-white/95 text-xl font-semibold text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.3)] focus:border-white focus:shadow-[0_0_0_3px_rgba(255,255,255,0.25)]',
   formFieldInputShowPasswordButton: 'text-sm text-white/60 hover:text-white',
   formButtonPrimary:
     `${gradientButtonClass} w-full rounded-full font-display text-sm font-semibold ` +
