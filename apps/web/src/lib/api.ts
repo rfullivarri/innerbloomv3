@@ -1839,6 +1839,8 @@ export type UserJourneySummary = {
   days_of_journey: number;
   quantity_daily_logs: number;
   first_programmed: boolean;
+  first_tasks_confirmed: boolean;
+  completed_first_daily_quest: boolean;
 };
 export type JourneyGenerationStatus = 'pending' | 'running' | 'completed' | 'failed';
 

@@ -7,13 +7,11 @@ export function JourneyReadyModal({
   tasks,
   onClose,
   onEditor,
-  onQuest,
 }: {
   open: boolean;
   tasks: UserTask[];
   onClose: () => void;
   onEditor: () => void;
-  onQuest: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const preview = useMemo(() => tasks.slice(0, 5), [tasks]);
@@ -24,13 +22,11 @@ export function JourneyReadyModal({
       <div
         role="dialog"
         aria-modal="true"
-        className="absolute inset-x-0 bottom-0 rounded-t-3xl border border-white/20 bg-surface p-4 md:inset-auto md:left-1/2 md:top-1/2 md:w-[560px] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-3xl"
+        className="absolute inset-x-0 bottom-0 max-h-[90dvh] overflow-y-auto rounded-t-3xl border border-white/20 bg-surface p-4 md:inset-auto md:left-1/2 md:top-1/2 md:max-h-[80vh] md:w-[560px] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-3xl"
         onClick={(event) => event.stopPropagation()}
       >
         <h2 className="font-display text-2xl font-semibold text-white">Tu Journey está listo</h2>
-        <p className="mt-2 text-sm text-white/80">
-          Tus primeras tareas ya están creadas. Ahora te recomendamos 2 pasos para empezar bien.
-        </p>
+        <p className="mt-2 text-sm text-white/80">Tus primeras tareas ya están creadas. Revisalas y ajustalas a tu rutina.</p>
 
         <div className="mt-4 rounded-2xl border border-white/15 bg-white/5 p-3">
           <button type="button" onClick={() => setExpanded((value) => !value)} className="text-sm font-semibold text-white">
@@ -47,20 +43,27 @@ export function JourneyReadyModal({
           ) : null}
         </div>
 
-        <div className="mt-4 space-y-3 text-sm">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-            <p className="font-semibold text-white">Edita tus tareas</p>
-            <p className="text-white/75">Ajusta duración y dificultad para que encajen con tu rutina.</p>
-            <button type="button" onClick={onEditor} className="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-black">Editar tareas</button>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-            <p className="font-semibold text-white">Haz tu primer Daily Quest</p>
-            <p className="text-white/75">Completa tu primer check-in para activar tu ritmo y tus rachas.</p>
-            <button type="button" onClick={onQuest} className="mt-2 rounded-full border border-white/30 px-3 py-1 text-xs font-semibold text-white">Ir a Daily Quest</button>
-          </div>
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-3 text-sm">
+          <p className="font-semibold text-white">Primer paso recomendado</p>
+          <p className="text-white/75">Editá tu base para asegurarte de que las tareas encajen con tu energía real.</p>
         </div>
 
-        <button type="button" onClick={onClose} className="mt-4 text-xs text-white/60">Ir al Dashboard</button>
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="order-2 text-xs text-white/60 sm:order-1 sm:px-3 sm:py-2"
+          >
+            Ir al Dashboard
+          </button>
+          <button
+            type="button"
+            onClick={onEditor}
+            className="order-1 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-black sm:order-2"
+          >
+            Editar base / Editar tareas
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -362,10 +362,6 @@ export default function DashboardV3Page() {
             handleCloseJourneyReady();
             navigate('/editor');
           }}
-          onQuest={() => {
-            handleCloseJourneyReady();
-            handleOpenDaily();
-          }}
         />
         <main className="flex-1 pb-24 md:pb-0">
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">

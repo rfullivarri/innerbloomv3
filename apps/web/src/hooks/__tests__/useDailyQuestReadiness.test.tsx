@@ -29,7 +29,8 @@ describe('useDailyQuestReadiness', () => {
     await waitFor(() => expect(result.current.tasksStatus).toBe('success'));
 
     expect(result.current.hasTasks).toBe(false);
-    expect(result.current.baseConfirmed).toBe(false);
+    expect(result.current.firstTasksConfirmed).toBe(false);
+    expect(result.current.completedFirstDailyQuest).toBe(false);
     expect(result.current.canShowDailyQuestPopup).toBe(false);
     expect(result.current.showOnboardingGuidance).toBe(true);
     expect(mockGetUserJourney).not.toHaveBeenCalled();
@@ -44,6 +45,8 @@ describe('useDailyQuestReadiness', () => {
       days_of_journey: 0,
       quantity_daily_logs: 0,
       first_programmed: false,
+      first_tasks_confirmed: false,
+      completed_first_daily_quest: false,
     });
 
     const { result } = renderHook(() => useDailyQuestReadiness('user-1'));
@@ -51,7 +54,8 @@ describe('useDailyQuestReadiness', () => {
     await waitFor(() => expect(result.current.journeyStatus).toBe('success'));
 
     expect(result.current.hasTasks).toBe(true);
-    expect(result.current.baseConfirmed).toBe(false);
+    expect(result.current.firstTasksConfirmed).toBe(false);
+    expect(result.current.completedFirstDailyQuest).toBe(false);
     expect(result.current.canShowDailyQuestPopup).toBe(false);
     expect(result.current.showOnboardingGuidance).toBe(true);
   });
@@ -65,6 +69,8 @@ describe('useDailyQuestReadiness', () => {
       days_of_journey: 12,
       quantity_daily_logs: 4,
       first_programmed: true,
+      first_tasks_confirmed: true,
+      completed_first_daily_quest: true,
     });
 
     const { result } = renderHook(() => useDailyQuestReadiness('user-1'));
@@ -72,7 +78,8 @@ describe('useDailyQuestReadiness', () => {
     await waitFor(() => expect(result.current.journeyStatus).toBe('success'));
 
     expect(result.current.hasTasks).toBe(true);
-    expect(result.current.baseConfirmed).toBe(true);
+    expect(result.current.firstTasksConfirmed).toBe(true);
+    expect(result.current.completedFirstDailyQuest).toBe(true);
     expect(result.current.canShowDailyQuestPopup).toBe(true);
     expect(result.current.showOnboardingGuidance).toBe(false);
   });

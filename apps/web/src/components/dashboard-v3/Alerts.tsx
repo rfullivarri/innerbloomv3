@@ -12,7 +12,7 @@ interface AlertsProps {
 
 function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean {
   if (!journey) return false;
-  // The blue banner must only depend on whether the user ever programmed the scheduler.
+  // Scheduler banner only appears at the final onboarding stage.
   return journey.first_programmed === false;
 }
 
@@ -25,15 +25,19 @@ export function Alerts({
 }: AlertsProps) {
   const {
     hasTasks,
-    baseConfirmed,
+    firstTasksConfirmed,
+    completedFirstDailyQuest,
     showJourneyPreparing,
     tasksStatus,
     journeyStatus,
     journey,
   } = useDailyQuestReadiness(userId, { isJourneyGenerating });
 
-  const showScheduler = shouldShowSchedulerWarning(journey);
-  const showBbdd = hasTasks && !baseConfirmed;
+  const showScheduler =
+    hasTasks &&
+    firstTasksConfirmed &&
+    completedFirstDailyQuest &&
+    shouldShowSchedulerWarning(journey);
   const canSchedule = typeof onScheduleClick === 'function';
 
   if (tasksStatus === 'loading' || (hasTasks && journeyStatus === 'loading')) {
@@ -44,7 +48,7 @@ export function Alerts({
     );
   }
 
-  const shouldShowOnboardingGuidance = showOnboardingGuidance ?? (!hasTasks || !baseConfirmed);
+  const shouldShowOnboardingGuidance = showOnboardingGuidance ?? (!hasTasks || !firstTasksConfirmed);
 
   if (tasksStatus === 'success' && shouldShowOnboardingGuidance && !hasTasks && !showJourneyPreparing) {
     return (
@@ -71,7 +75,10 @@ export function Alerts({
       {showJourneyPreparing && !suppressJourneyPreparing && (
         <div className="rounded-2xl border border-fuchsia-400/30 bg-fuchsia-500/10 p-4 text-sm text-fuchsia-100">
           <div className="flex items-start gap-3">
-            <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-fuchsia-300" aria-hidden />
+            <span
+              className="mt-0.5 inline-flex h-4 w-4 flex-none animate-spin rounded-full border-2 border-fuchsia-200/30 border-t-fuchsia-200"
+              aria-hidden
+            />
             <div className="space-y-1">
               <p className="font-semibold text-white">Tu Journey se está preparando</p>
               <p className="text-fuchsia-100/80">Estamos generando tus primeras misiones personalizadas.</p>
@@ -81,7 +88,41 @@ export function Alerts({
         </div>
       )}
 
-      {showScheduler && (
+      {!showJourneyPreparing && hasTasks && !firstTasksConfirmed && (
+        <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+          <div className="flex items-start gap-3">
+            <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-amber-300" aria-hidden />
+            <div className="space-y-1">
+              <p className="font-semibold text-white">Confirmá tu base</p>
+              <p className="text-amber-100/80">
+                Editá al menos una tarea para confirmar tu base y desbloquear el siguiente paso.
+              </p>
+            </div>
+            <Link
+              to="/editor"
+              className="ml-auto inline-flex rounded-full border border-amber-200/50 bg-amber-200/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur"
+            >
+              Editar tareas
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {!showJourneyPreparing && hasTasks && firstTasksConfirmed && !completedFirstDailyQuest && (
+        <div className="rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 text-sm text-sky-100">
+          <div className="flex items-start gap-3">
+            <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-sky-300" aria-hidden />
+            <div className="space-y-1">
+              <p className="font-semibold text-white">Realizá tu primer Daily Quest</p>
+              <p className="text-sky-100/80">
+                Completá tu primer check-in diario para activar tu progreso y tus rachas.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!showJourneyPreparing && showScheduler && (
         <div className="rounded-2xl border border-indigo-400/30 bg-indigo-500/10 p-4 text-sm text-indigo-100">
           <div className="flex items-start gap-3">
             <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-indigo-300" aria-hidden />
@@ -103,29 +144,6 @@ export function Alerts({
           </div>
           <p className="mt-2 text-xs text-indigo-100/70">
             Configurá tu recordatorio desde el scheduler que está más abajo en el dashboard.
-          </p>
-        </div>
-      )}
-
-      {showBbdd && (
-        <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-          <div className="flex items-start gap-3">
-            <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-amber-300" aria-hidden />
-            <div className="space-y-1">
-              <p className="font-semibold text-white">Confirmá tu base</p>
-              <p className="text-amber-100/80">
-                Abrí el menú y revisá tu base para que podamos generar tu próxima Daily Quest.
-              </p>
-            </div>
-            <Link
-              to="/editor"
-              className="ml-auto inline-flex rounded-full border border-amber-200/50 bg-amber-200/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur"
-            >
-              Editar base
-            </Link>
-          </div>
-          <p className="mt-2 text-xs text-amber-100/70">
-            Este aviso desaparece cuando tu registro diario queda confirmado en la nueva app.
           </p>
         </div>
       )}
