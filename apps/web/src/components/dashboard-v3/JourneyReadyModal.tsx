@@ -18,13 +18,18 @@ export function JourneyReadyModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[80] bg-black/55 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
-        className="absolute inset-x-0 bottom-0 max-h-[90dvh] overflow-y-auto rounded-t-3xl border border-white/20 bg-surface p-4 md:inset-auto md:left-1/2 md:top-1/2 md:max-h-[80vh] md:w-[560px] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-3xl"
+        className="w-full max-w-[560px] max-h-[90dvh] overflow-y-auto rounded-3xl border border-white/20 bg-surface p-4 md:max-h-[80vh]"
         onClick={(event) => event.stopPropagation()}
       >
+        <div className="mb-5 flex items-center justify-center gap-2 text-center text-xs font-semibold uppercase tracking-[0.32em] text-white/65 sm:text-sm">
+          <span>Innerbloom</span>
+          <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.45em] w-auto" />
+        </div>
+
         <h2 className="font-display text-2xl font-semibold text-white">Tu Journey está listo</h2>
         <p className="mt-2 text-sm text-white/80">Tus primeras tareas ya están creadas. Revisalas y ajustalas a tu rutina.</p>
 
@@ -59,7 +64,7 @@ export function JourneyReadyModal({
           <button
             type="button"
             onClick={onEditor}
-            className="order-1 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-black sm:order-2"
+            className="order-1 inline-flex items-center justify-center rounded-full border border-violet-300/45 bg-violet-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(76,29,149,0.3)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_14px_28px_rgba(76,29,149,0.4)] sm:order-2"
           >
             Editar base / Editar tareas
           </button>
