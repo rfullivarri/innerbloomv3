@@ -37,6 +37,49 @@ Para derivar el estado se usan estos flags lógicos:
 
 > Nota: este documento asume que `has_tasks` representa disponibilidad real para mostrar Journey.
 
+## Mapeo de señales (DB + LocalStorage)
+
+Para alinear backend y frontend, estas son las señales fuente y su equivalencia funcional:
+
+| Señal lógica usada por el derivador | Backend (fuente persistente) | Frontend instantáneo (LocalStorage) | Regla de reconciliación |
+|---|---|---|---|
+| `base_edited` | `first_tasks_confirmed` | `ib.baseEdited:<userId>` | UI usa LocalStorage primero. Luego confirma con backend; si difiere, backend gana. |
+| `first_daily_quest_done` | `quantity_daily_logs > 0` | `ib.firstDailyQuestDone:<userId>` | UI optimista local; backend corrige en hydrate/re-fetch. |
+| `scheduler_configured` | `first_programmed` | `ib.firstProgrammed:<userId>` | Misma política: instantáneo local + reconciliación con backend. |
+| `taskgen_status` | Estado TaskGen (`pending\|running\|completed\|failed`) desde endpoint de generación | N/A | Siempre backend (no persistir local como fuente de verdad). |
+| `welcome_modal_seen` | `journey_ready_modal_seen_at` (vía endpoint de marcado) | `ib.journeyReadySeen:<userId>:<generationKey>` | Local habilita cierre inmediato; backend confirma visto. Backend prevalece en conflicto. |
+
+### Regla de sincronización obligatoria
+
+1. **Reacción inmediata en UI**: cualquier acción de usuario impacta primero el flag local para feedback instantáneo.
+2. **Confirmación asíncrona**: se llama al backend correspondiente.
+3. **Resolución de conflicto**: al llegar respuesta o en refetch, **backend sobrescribe** estado local si hay discrepancia.
+4. **Login/refresh**:
+   - Hidratar todos los flags derivados desde backend.
+   - Limpiar flags obsoletos de `ib.journeyReadySeen:<userId>:<generationKey>` cuando cambie `generationKey`.
+
+## Tabla de verdad (normalizada)
+
+La siguiente tabla resume la derivación con variables ya normalizadas (`T/F`), donde:
+
+- `TG` = taskgen en curso (`taskgen_status in {pending,running}`)
+- `HT` = `has_tasks`
+- `WM` = `welcome_modal_seen`
+- `BE` = `base_edited`
+- `DQ` = `first_daily_quest_done`
+- `SC` = `scheduler_configured`
+
+| Prioridad | TG | HT | WM | BE | DQ | SC | `dashboard_alert_state` |
+|---:|:---:|:---:|:---:|:---:|:---:|:---:|---|
+| 1 | T | F | * | * | * | * | `journey_generating` |
+| 2 | * | T | F | * | * | * | `journey_ready_unseen` |
+| 3 | * | T | T | F | * | * | `needs_base_edit` |
+| 4 | * | * | * | T | F | * | `needs_first_daily_quest` |
+| 5 | * | * | * | * | T | F | `needs_scheduler_setup` |
+| 6 | * | * | * | * | * | T | `all_set` |
+
+`*` = no relevante para esa fila porque una regla de mayor prioridad ya fija el estado.
+
 ## Prioridad de render (de mayor a menor)
 
 La evaluación debe hacerse en este orden y retornar el **primer match**:
