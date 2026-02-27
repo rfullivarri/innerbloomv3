@@ -11,10 +11,10 @@ import {
 } from '../repositories/feedback-definitions.repository.js';
 
 const DEFAULT_CTA_URL =
-  process.env.DAILY_REMINDER_CTA_URL?.trim() || 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open';
+  process.env.DAILY_REMINDER_CTA_URL?.trim() || 'https://innerbloomjourney.org/dashboard-v3?daily-quest=open';
 const REMINDER_NOTIFICATION_KEY = DEFAULT_FEEDBACK_DEFINITION.notificationKey;
 const REMINDER_LOGO_URL =
-  process.env.EMAIL_LOGO_URL?.trim() || 'https://web-dev-dfa2.up.railway.app/IB-COLOR-LOGO.png';
+  process.env.EMAIL_LOGO_URL?.trim() || 'https://innerbloomjourney.org/IB-COLOR-LOGO.png';
 
 type ReminderTemplate = {
   copy: string;

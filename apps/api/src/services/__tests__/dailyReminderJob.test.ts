@@ -31,7 +31,7 @@ vi.mock('../../repositories/feedback-definitions.repository.js', () => ({
     priority: 50,
     copy: 'Hola {{user_name}}, tu Daily Quest de {{friendly_date}} ya está lista. Sumá XP registrando tu emoción del día y marcando tus hábitos completados.',
     ctaLabel: 'Abrir Daily Quest',
-    ctaHref: 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
+    ctaHref: 'https://innerbloomjourney.org/dashboard-v3?daily-quest=open',
     previewVariables: {},
   },
   findFeedbackDefinitionByNotificationKey: (...args: unknown[]) => mockFindFeedbackDefinition(...args),

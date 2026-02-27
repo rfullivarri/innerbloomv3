@@ -23,7 +23,7 @@ const LOG_PREFIX = '[tasks-ready-email]';
 const DEFAULT_CTA_URL =
   process.env.TASKS_READY_CTA_URL?.trim() ||
   process.env.DAILY_REMINDER_CTA_URL?.trim() ||
-  'https://web-dev-dfa2.up.railway.app/login';
+  'https://innerbloomjourney.org/login';
 
 function sanitizeRecipient(value?: string | null): string | null {
   const trimmed = value?.trim();
@@ -63,13 +63,13 @@ function buildEmailMessage(params: { to: string } & {
     <table role="presentation" width="100%" style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;border:1px solid #e2e8f0;">
       <tr>
         <td>
-          <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.24em;font-weight:700;text-transform:uppercase;color:#94a3b8;text-align:center;">Innerbloom</p>
+          <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.24em;font-weight:700;text-transform:uppercase;color:#94a3b8;text-align:center;">Innerbloom 🌸</p>
           <p style="margin:0 0 16px;font-size:16px;text-align:center;">Hola ${name},</p>
           <h1 style="margin:0 0 12px;font-size:28px;line-height:1.3;text-align:center;">Tu journey está a punto de comenzar</h1>
           <p style="margin:0 0 16px;font-size:16px;line-height:1.6;text-align:center;">Ya generamos tu set inicial de tareas usando IA, diseñado según tus objetivos y tu momento actual.</p>
           <p style="margin:0 0 24px;font-size:16px;line-height:1.6;text-align:center;">Todo está listo. Este es el primer paso de tu camino en Innerbloom.</p>
           <div style="text-align:center;">
-            <a href="${ctaUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#111827;color:#ffffff;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:700;">Iniciar mi Journey</a>
+            <a href="${ctaUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#8b5cf6;color:#ffffff;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:700;">Iniciar mi Journey</a>
           </div>
           <p style="margin:24px 0 0;font-size:14px;color:#94a3b8;text-align:center;">Si el botón no funciona, copiá y pegá este enlace en tu navegador:<br /><a href="${ctaUrl}" style="color:#6366f1;">${ctaUrl}</a></p>
         </td>
