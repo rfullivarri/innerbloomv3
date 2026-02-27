@@ -28,8 +28,8 @@ const GAME_MODE_STYLES: Record<GameMode, GameModeChipStyle> = {
   },
   Low: {
     label: 'LOW',
-    backgroundClass: 'bg-gradient-to-r from-amber-300/25 via-orange-400/30 to-yellow-300/25 text-amber-50',
-    glowClass: 'bg-amber-400/35',
+    backgroundClass: 'bg-gradient-to-r from-rose-500/30 via-red-500/35 to-orange-500/30 text-rose-50',
+    glowClass: 'bg-rose-500/40',
     animate: true,
   },
 };
