@@ -412,7 +412,9 @@ export default function TaskEditorPage() {
             <Card>
               <div className="flex flex-col gap-5">
                 {pageToast && (
-                  <ToastBanner tone={pageToast.type} message={pageToast.text} className="px-3" />
+                  <div className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+4.5rem)] z-40 md:static md:inset-auto md:top-auto">
+                    <ToastBanner tone={pageToast.type} message={pageToast.text} className="px-3" />
+                  </div>
                 )}
                 <TaskFilters
                   searchTerm={searchTerm}
