@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { CurrentUserSubscriptionResponse } from '../../lib/api';
@@ -23,6 +23,8 @@ function diffMonthsLabel(targetIso: string | null): string {
 
 export function PlanChip({ subscription }: { subscription: CurrentUserSubscriptionResponse | null }) {
   const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   const display = useMemo(() => {
     const status = subscription?.status ?? 'inactive';
@@ -53,10 +55,41 @@ export function PlanChip({ subscription }: { subscription: CurrentUserSubscripti
 
   const dateLabel = display.endDate ? new Date(display.endDate).toLocaleDateString('es-ES') : '—';
 
+  useEffect(() => {
+    if (!open) return;
+
+    const updatePosition = () => {
+      const rect = buttonRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const panelWidth = 288;
+      const viewportPadding = 16;
+      const left = Math.min(
+        Math.max(viewportPadding, rect.right - panelWidth),
+        window.innerWidth - panelWidth - viewportPadding,
+      );
+
+      setPosition({
+        top: rect.bottom + 8,
+        left,
+      });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [open]);
+
   const planModal = open ? (
-    <div className="fixed inset-0 z-[110] bg-black/50" onClick={() => setOpen(false)}>
+    <div className="fixed inset-0 z-[110]" onClick={() => setOpen(false)}>
       <div
-        className="absolute inset-x-0 bottom-0 rounded-t-3xl border border-white/20 bg-surface p-4 md:inset-auto md:right-4 md:top-16 md:w-80 md:rounded-2xl"
+        className="absolute w-72 rounded-2xl border border-white/20 bg-surface p-4"
+        style={{ top: position.top, left: position.left }}
         onClick={(e) => e.stopPropagation()}
       >
         <p className="text-xs text-text-muted">Plan actual: {display.planName}</p>
@@ -71,6 +104,7 @@ export function PlanChip({ subscription }: { subscription: CurrentUserSubscripti
   return (
     <>
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen(true)}
         className="inline-flex items-center rounded-full border border-cyan-300/40 bg-cyan-300/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100"
