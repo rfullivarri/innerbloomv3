@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { DailyReminderSettings } from './DailyReminderSettings';
 import { getDailyReminderSettings, updateDailyReminderSettings } from '../../lib/api';
 
@@ -13,11 +13,23 @@ describe('DailyReminderSettings', () => {
   const mockedGet = vi.mocked(getDailyReminderSettings);
   const mockedUpdate = vi.mocked(updateDailyReminderSettings);
 
+  const originalSupportedValuesOf = (Intl as any).supportedValuesOf;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    (Intl as any).supportedValuesOf = vi.fn(() => [
+      'UTC',
+      'America/Bogota',
+      'America/Argentina/Buenos_Aires',
+      'America/Mexico_City',
+    ]);
   });
 
-  it('loads the reminder settings and allows updating them', async () => {
+  afterEach(() => {
+    (Intl as any).supportedValuesOf = originalSupportedValuesOf;
+  });
+
+  it('allows searching timezones by location and submits IANA timezone value', async () => {
     const user = userEvent.setup();
     mockedGet.mockResolvedValue({
       local_time: '08:30',
@@ -26,20 +38,24 @@ describe('DailyReminderSettings', () => {
     });
     mockedUpdate.mockResolvedValue({
       local_time: '10:00',
-      timezone: 'UTC',
+      timezone: 'America/Argentina/Buenos_Aires',
       status: 'paused',
     });
 
     render(<DailyReminderSettings />);
 
-    const switchControl = await screen.findByRole('switch', { name: /recordatorio diario/i });
+    const switchControl = await screen.findByRole('switch', { name: /daily quest/i });
     await waitFor(() => expect(switchControl).toHaveAttribute('aria-checked', 'true'));
 
     const timeSelect = screen.getByLabelText(/hora local/i);
     await user.selectOptions(timeSelect, '10:00');
     await user.click(switchControl);
-    const timezoneSelect = screen.getByLabelText(/zona horaria/i);
-    await user.selectOptions(timezoneSelect, 'UTC');
+
+    const timezoneSearch = screen.getByRole('textbox', { name: /buscar zona horaria/i });
+    await user.type(timezoneSearch, 'argentina');
+
+    const timezoneSelect = screen.getByRole('combobox', { name: /zona horaria/i });
+    await user.selectOptions(timezoneSelect, 'America/Argentina/Buenos_Aires');
 
     const submitButton = screen.getByRole('button', { name: /guardar cambios/i });
     expect(submitButton).not.toBeDisabled();
@@ -48,7 +64,7 @@ describe('DailyReminderSettings', () => {
     expect(mockedUpdate).toHaveBeenCalledWith({
       status: 'paused',
       local_time: '10:00',
-      timezone: 'UTC',
+      timezone: 'America/Argentina/Buenos_Aires',
     });
 
     await screen.findByText(/guardamos tus recordatorios/i);
@@ -68,7 +84,7 @@ describe('DailyReminderSettings', () => {
     const retryButton = screen.getByRole('button', { name: /reintentar/i });
     await user.click(retryButton);
 
-    await screen.findByRole('switch', { name: /recordatorio diario/i });
+    await screen.findByRole('switch', { name: /daily quest/i });
     expect(mockedGet).toHaveBeenCalledTimes(2);
   });
 });
