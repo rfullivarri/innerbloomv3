@@ -110,7 +110,7 @@ describe('PATCH /api/users/:id/tasks/:taskId', () => {
     });
 
     expect(mockEnsureUserExists).toHaveBeenCalledWith(userId);
-    expect(mockQuery).toHaveBeenCalledTimes(4);
+    expect(mockQuery).toHaveBeenCalledTimes(5);
     expect(mockQuery).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining('information_schema.columns'),
@@ -133,6 +133,11 @@ describe('PATCH /api/users/:id/tasks/:taskId', () => {
       4,
       expect.stringContaining('UPDATE tasks'),
       ['Read more books', 4, 30, false, taskId, userId],
+    );
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      5,
+      expect.stringContaining('UPDATE users'),
+      [userId],
     );
   });
 
