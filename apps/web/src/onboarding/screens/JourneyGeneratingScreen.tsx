@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { getJourneyGenerationStatus } from '../../lib/api';
 
 interface JourneyGeneratingScreenProps {
   gameMode: string;
@@ -19,6 +20,35 @@ export function JourneyGeneratingScreen({ gameMode, onGoToDashboard }: JourneyGe
     [gameMode],
   );
   const [visibleBullets, setVisibleBullets] = useState(1);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const syncGenerationState = async () => {
+      try {
+        const response = await getJourneyGenerationStatus();
+        if (!isMounted) {
+          return;
+        }
+
+        if (response.state?.status === 'completed') {
+          onGoToDashboard();
+        }
+      } catch (error) {
+        console.warn('Failed to sync journey generation state on onboarding screen', error);
+      }
+    };
+
+    void syncGenerationState();
+    const timer = window.setInterval(() => {
+      void syncGenerationState();
+    }, 4000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(timer);
+    };
+  }, [onGoToDashboard]);
 
   useEffect(() => {
     setVisibleBullets(1);

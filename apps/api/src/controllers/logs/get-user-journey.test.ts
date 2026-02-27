@@ -40,6 +40,8 @@ describe('getUserJourney', () => {
           days_of_journey: '14',
           quantity_daily_logs: '10',
           first_programmed: true,
+          first_tasks_confirmed: false,
+          completed_first_daily_quest: true,
         },
       ],
     });
@@ -61,6 +63,8 @@ describe('getUserJourney', () => {
       days_of_journey: 14,
       quantity_daily_logs: 10,
       first_programmed: true,
+      first_tasks_confirmed: false,
+      completed_first_daily_quest: true,
     });
     expect(next).not.toHaveBeenCalled();
   });
@@ -74,6 +78,8 @@ describe('getUserJourney', () => {
           days_of_journey: null,
           quantity_daily_logs: null,
           first_programmed: false,
+          first_tasks_confirmed: false,
+          completed_first_daily_quest: false,
         },
       ],
     });
@@ -90,6 +96,8 @@ describe('getUserJourney', () => {
       days_of_journey: 0,
       quantity_daily_logs: 0,
       first_programmed: false,
+      first_tasks_confirmed: false,
+      completed_first_daily_quest: false,
     });
   });
 });

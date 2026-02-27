@@ -124,7 +124,7 @@ describe('POST /api/users/:id/tasks', () => {
     });
 
     expect(mockEnsureUserExists).toHaveBeenCalledWith(userId);
-    expect(mockQuery).toHaveBeenCalledTimes(4);
+    expect(mockQuery).toHaveBeenCalledTimes(5);
     expect(mockQuery).toHaveBeenNthCalledWith(
       1,
       'SELECT tasks_group_id FROM users WHERE user_id = $1 LIMIT 1',
@@ -158,6 +158,11 @@ describe('POST /api/users/:id/tasks', () => {
         15,
         true,
       ],
+    );
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      5,
+      expect.stringContaining('UPDATE users'),
+      [userId],
     );
   });
 
@@ -212,7 +217,7 @@ describe('POST /api/users/:id/tasks', () => {
       });
 
     expect(response.status).toBe(201);
-    expect(mockQuery).toHaveBeenCalledTimes(3);
+    expect(mockQuery).toHaveBeenCalledTimes(4);
 
     const insertCall = mockQuery.mock.calls[2];
     expect(insertCall?.[0]).toContain('INSERT INTO tasks');
@@ -284,7 +289,7 @@ describe('POST /api/users/:id/tasks', () => {
       });
 
     expect(response.status).toBe(201);
-    expect(mockQuery).toHaveBeenCalledTimes(3);
+    expect(mockQuery).toHaveBeenCalledTimes(4);
     expect(mockQuery).toHaveBeenNthCalledWith(
       2,
       expect.stringContaining('information_schema.columns'),

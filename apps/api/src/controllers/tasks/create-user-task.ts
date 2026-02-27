@@ -205,6 +205,15 @@ export const createUserTask: AsyncHandler = async (req, res) => {
     ? createdTask.stat_id ?? resolvedStatId
     : resolvedStatId;
 
+  await pool.query(
+    `UPDATE users
+        SET first_tasks_confirmed = TRUE,
+            updated_at = NOW()
+      WHERE user_id = $1
+        AND first_tasks_confirmed = FALSE`,
+    [id],
+  );
+
   res.status(201).json({
     task: {
       ...createdTask,

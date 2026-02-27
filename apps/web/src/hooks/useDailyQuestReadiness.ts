@@ -10,7 +10,8 @@ type UseDailyQuestReadinessOptions = {
 
 export type DailyQuestReadiness = {
   hasTasks: boolean;
-  baseConfirmed: boolean;
+  firstTasksConfirmed: boolean;
+  completedFirstDailyQuest: boolean;
   canShowDailyQuestPopup: boolean;
   showOnboardingGuidance: boolean;
   showJourneyPreparing: boolean;
@@ -54,13 +55,15 @@ export function useDailyQuestReadiness(
     status: journeyStatus,
   } = useRequest(() => getUserJourney(userId), [userId], { enabled: shouldLoadJourney });
 
-  const baseConfirmed = (journey?.quantity_daily_logs ?? 0) > 0;
-  const canShowDailyQuestPopup = hasTasks && baseConfirmed;
-  const showOnboardingGuidance = !hasTasks || !baseConfirmed;
+  const firstTasksConfirmed = Boolean(journey?.first_tasks_confirmed);
+  const completedFirstDailyQuest = Boolean(journey?.completed_first_daily_quest);
+  const canShowDailyQuestPopup = hasTasks && firstTasksConfirmed;
+  const showOnboardingGuidance = !hasTasks || !firstTasksConfirmed;
 
   return {
     hasTasks,
-    baseConfirmed,
+    firstTasksConfirmed,
+    completedFirstDailyQuest,
     canShowDailyQuestPopup,
     showOnboardingGuidance,
     showJourneyPreparing,
@@ -69,4 +72,3 @@ export function useDailyQuestReadiness(
     journey,
   };
 }
-

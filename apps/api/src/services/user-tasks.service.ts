@@ -226,6 +226,15 @@ export async function updateUserTaskRow(
     throw new HttpError(500, 'internal_error', 'Failed to update task');
   }
 
+  await pool.query(
+    `UPDATE users
+        SET first_tasks_confirmed = TRUE,
+            updated_at = NOW()
+      WHERE user_id = $1
+        AND first_tasks_confirmed = FALSE`,
+    [userId],
+  );
+
   return {
     ...updatedTask,
     stat_id: hasStatColumn ? updatedTask.stat_id ?? null : null,
