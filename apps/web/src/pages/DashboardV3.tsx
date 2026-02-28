@@ -66,6 +66,7 @@ import { useWeeklyWrapped } from '../hooks/useWeeklyWrapped';
 import { WeeklyWrappedModal } from '../components/feedback/WeeklyWrappedModal';
 import { useAppMode } from '../hooks/useAppMode';
 import { isJourneyGenerationPending, syncJourneyGenerationFromServer } from '../lib/journeyGeneration';
+import { StandaloneSplash } from '../components/pwa/StandaloneSplash';
 
 export default function DashboardV3Page() {
   const { getToken } = useAuth();
@@ -326,6 +327,7 @@ export default function DashboardV3Page() {
 
   return (
     <DevErrorBoundary>
+      <StandaloneSplash />
       <div className="flex min-h-screen flex-col">
         {!isAppMode && (
           <Navbar
