@@ -13,6 +13,7 @@ export type NotificationPopupProps = {
   message: string;
   emoji: string;
   onClose: () => void;
+  onCtaClick?: () => void;
   cta?: { label: string; href: string | null } | null;
   tasks?: NotificationPopupTask[];
   emojiAnimation?: 'bounce' | 'pulse';
@@ -33,6 +34,7 @@ export function NotificationPopup({
   message,
   emoji,
   onClose,
+  onCtaClick,
   cta,
   tasks,
   emojiAnimation = 'bounce',
@@ -101,6 +103,7 @@ export function NotificationPopup({
           {cta?.label ? (
             <a
               href={cta.href ?? '#'}
+              onClick={onCtaClick}
               className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:opacity-95"
             >
               {cta.label}

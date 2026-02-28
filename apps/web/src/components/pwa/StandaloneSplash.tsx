@@ -5,20 +5,59 @@ import { OFFICIAL_LANDING_CSS_VARIABLES } from '../../content/officialDesignToke
 
 const MIN_DURATION_MS = Math.round(450 * 1.3);
 const MAX_DURATION_MS = Math.round(1200 * 1.3);
+const SPLASH_SESSION_KEY = 'innerbloom.pwaSplashShown';
 
 interface StandaloneSplashProps {
   onDone?: () => void;
 }
 
+function isReloadNavigation(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const navigationEntry = window.performance
+    .getEntriesByType?.('navigation')[0] as PerformanceNavigationTiming | undefined;
+
+  if (navigationEntry?.type) {
+    return navigationEntry.type === 'reload';
+  }
+
+  const legacyNavigation = (window.performance as Performance & { navigation?: { type?: number } }).navigation;
+  return legacyNavigation?.type === 1;
+}
+
+function shouldRenderSplash(standalone: boolean): boolean {
+  if (!standalone || typeof window === 'undefined') {
+    return false;
+  }
+
+  if (isReloadNavigation()) {
+    return false;
+  }
+
+  try {
+    if (window.sessionStorage.getItem(SPLASH_SESSION_KEY) === '1') {
+      return false;
+    }
+    window.sessionStorage.setItem(SPLASH_SESSION_KEY, '1');
+  } catch {
+    // If storage is unavailable, we still show the splash on first load.
+  }
+
+  return true;
+}
+
 export function StandaloneSplash({ onDone }: StandaloneSplashProps) {
   const prefersReducedMotion = useReducedMotion();
   const standalone = useMemo(() => isStandaloneMode(), []);
-  const [visible, setVisible] = useState(true);
-  const [mounted, setMounted] = useState(true);
+  const canShowSplash = useMemo(() => shouldRenderSplash(standalone), [standalone]);
+  const [visible, setVisible] = useState(canShowSplash);
+  const [mounted, setMounted] = useState(canShowSplash);
   const [readyToHide, setReadyToHide] = useState(false);
 
   useEffect(() => {
-    if (!standalone) {
+    if (!canShowSplash) {
       return;
     }
 
@@ -29,10 +68,10 @@ export function StandaloneSplash({ onDone }: StandaloneSplashProps) {
     return () => {
       window.clearTimeout(minTimer);
     };
-  }, [standalone]);
+  }, [canShowSplash]);
 
   useEffect(() => {
-    if (!standalone || !readyToHide) {
+    if (!canShowSplash || !readyToHide) {
       return;
     }
 
@@ -55,9 +94,9 @@ export function StandaloneSplash({ onDone }: StandaloneSplashProps) {
       window.removeEventListener('load', onLoad);
       window.clearTimeout(maxTimer);
     };
-  }, [readyToHide, standalone]);
+  }, [canShowSplash, readyToHide]);
 
-  if (!standalone || !mounted) {
+  if (!canShowSplash || !mounted) {
     return null;
   }
 
