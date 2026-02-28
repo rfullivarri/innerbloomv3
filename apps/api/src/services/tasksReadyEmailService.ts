@@ -24,8 +24,6 @@ const DEFAULT_CTA_URL =
   process.env.TASKS_READY_CTA_URL?.trim() ||
   process.env.DAILY_REMINDER_CTA_URL?.trim() ||
   'https://innerbloomjourney.org/login';
-const EMAIL_LOGO_URL =
-  process.env.EMAIL_LOGO_URL?.trim() || 'https://innerbloomjourney.org/IB-COLOR-LOGO.png';
 
 function sanitizeRecipient(value?: string | null): string | null {
   const trimmed = value?.trim();
@@ -59,19 +57,15 @@ function buildEmailMessage(params: { to: string } & {
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${subject}</title>
   </head>
-  <body style="font-family:'Inter','Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#0f172a;padding:24px;">
+  <body style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#0f172a;padding:24px;">
     <table role="presentation" width="100%" style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;border:1px solid #e2e8f0;">
       <tr>
         <td>
-          <p style="margin:0 0 14px;font-size:12px;letter-spacing:0.45em;font-weight:700;text-transform:uppercase;color:#94a3b8;text-align:center;">
-            INNERBLOOM
-            <img src="${EMAIL_LOGO_URL}" alt="Innerbloom" width="18" height="18" style="display:inline-block;vertical-align:middle;margin-left:2px;border-radius:50%;border:none;background:transparent;" />
-          </p>
-          <p style="margin:0 0 16px;font-size:16px;text-align:center;font-weight:500;">Hola ${name},</p>
-          <h1 style="margin:0 0 12px;font-size:28px;line-height:1.2;text-align:center;font-weight:800;color:#0b132b;">Tu journey está a punto de comenzar</h1>
+          <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.24em;font-weight:700;text-transform:uppercase;color:#94a3b8;text-align:center;">Innerbloom 🌸</p>
+          <p style="margin:0 0 16px;font-size:16px;text-align:center;">Hola ${name},</p>
+          <h1 style="margin:0 0 12px;font-size:28px;line-height:1.3;text-align:center;">Tu journey está a punto de comenzar</h1>
           <p style="margin:0 0 16px;font-size:16px;line-height:1.6;text-align:center;">Ya generamos tu set inicial de tareas usando IA, diseñado según tus objetivos y tu momento actual.</p>
           <p style="margin:0 0 24px;font-size:16px;line-height:1.6;text-align:center;">Todo está listo. Este es el primer paso de tu camino en Innerbloom.</p>
           <div style="text-align:center;">
@@ -172,3 +166,4 @@ export async function notifyTasksReadyEmail(params: TasksReadyEmailParams): Prom
     throw error;
   }
 }
+
