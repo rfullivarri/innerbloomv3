@@ -149,7 +149,7 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'low-body':
         return (
           <ChecklistStep
-            title="LOW · Reinicia tu Body"
+            title="LOW · Reinicia tu cuerpo"
             subtitle="Elegí hasta 5 acciones simples que te harían bien ahora."
             xpAmount={13}
             items={FORM_LABELS.lowBody}
@@ -166,7 +166,7 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'low-soul':
         return (
           <ChecklistStep
-            title="LOW · Reconectá tu Soul"
+            title="LOW · Reconectá tu alma"
             subtitle="Elegí hasta 5 cosas simples que te conectan con vos."
             xpAmount={13}
             items={FORM_LABELS.lowSoul}
@@ -183,7 +183,7 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'low-mind':
         return (
           <ChecklistStep
-            title="LOW · Calmá tu Mind"
+            title="LOW · Calmá tu mente"
             subtitle="Elegí hasta 5 acciones mentales que te ayuden hoy."
             xpAmount={13}
             items={FORM_LABELS.lowMind}
@@ -314,10 +314,10 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-body':
         return (
           <ChecklistStep
-            title="BODY · 🫀"
+            title="CUERPO · 🫀"
             subtitle="Tu base física sostiene todo. Elegí hasta 5 anclas."
             xpAmount={13}
-            badgeLabel="Foundations"
+            badgeLabel="Pilares"
             items={FORM_LABELS.fBody}
             selected={answers.foundations.body}
             onToggle={(value) => toggleChecklist('foundations-body', value)}
@@ -331,10 +331,10 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-soul':
         return (
           <ChecklistStep
-            title="SOUL · 🏵️"
+            title="ALMA · 🏵️"
             subtitle="Sin centro no hay llegada. Elegí hasta 5 prácticas."
             xpAmount={13}
-            badgeLabel="Foundations"
+            badgeLabel="Pilares"
             items={FORM_LABELS.fSoul}
             selected={answers.foundations.soul}
             onToggle={(value) => toggleChecklist('foundations-soul', value)}
@@ -348,10 +348,10 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-mind':
         return (
           <ChecklistStep
-            title="MIND · 🧠"
+            title="MENTE · 🧠"
             subtitle="No es hacer más: es hacer mejor. Elegí hasta 5 focos."
             xpAmount={13}
-            badgeLabel="Foundations"
+            badgeLabel="Pilares"
             items={FORM_LABELS.fMind}
             selected={answers.foundations.mind}
             onToggle={(value) => toggleChecklist('foundations-mind', value)}

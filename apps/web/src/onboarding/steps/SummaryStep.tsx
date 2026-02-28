@@ -165,7 +165,7 @@ export function SummaryStep({
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
       <div className="glass-card onboarding-surface-base mx-auto max-w-5xl rounded-3xl p-6 sm:p-8">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
-          <p className="text-xs uppercase tracking-[0.35em] text-white/50">Summary</p>
+          <p className="text-xs uppercase tracking-[0.35em] text-white/50">Resumen</p>
           <h2 className="text-3xl font-semibold text-white">Tu recorrido</h2>
           <p className="text-sm text-white/70">Revisá tu plan antes de enviarlo. Podés volver atrás para ajustar.</p>
         </header>
@@ -173,14 +173,14 @@ export function SummaryStep({
           <div className="space-y-5">
             <SummarySection title="Datos base">
               <TextRow label="Email" value={answers.email} />
-              <TextRow label="Game Mode" value={<ModeChip mode={mode} />} />
+              <TextRow label="Modo de juego" value={<ModeChip mode={mode} />} />
               <TextRow label="Estado" value={getModeState(mode)} />
             </SummarySection>
             {mode === 'LOW' ? (
               <SummarySection title="LOW" subtitle="Tu plan para recuperar energía">
-                <PillList label="Body" values={answers.low.body} />
-                <PillList label="Soul" values={answers.low.soul} />
-                <PillList label="Mind" values={answers.low.mind} />
+                <PillList label="Cuerpo" values={answers.low.body} />
+                <PillList label="Alma" values={answers.low.soul} />
+                <PillList label="Mente" values={answers.low.mind} />
                 {answers.low.note ? (
                   <p className="rounded-2xl border border-white/10 bg-white/5 p-3 text-sm text-white/80">
                     <span className="font-semibold text-white">Nota personal:</span> {answers.low.note}
@@ -213,10 +213,10 @@ export function SummaryStep({
               </SummarySection>
             ) : null}
             {mode && mode !== 'LOW' ? (
-              <SummarySection title="Foundations" subtitle="Configuración equilibrada en Cuerpo, Mente y Alma">
-                <PillarTraits label="Body 🫀" traits={bodyTraits} />
-                <PillarTraits label="Soul 🏵️" traits={soulTraits} />
-                <PillarTraits label="Mind 🧠" traits={mindTraits} />
+              <SummarySection title="Pilares" subtitle="Configuración equilibrada en Cuerpo, Mente y Alma">
+                <PillarTraits label="Cuerpo 🫀" traits={bodyTraits} />
+                <PillarTraits label="Alma 🏵️" traits={soulTraits} />
+                <PillarTraits label="Mente 🧠" traits={mindTraits} />
               </SummarySection>
             ) : null}
           </div>
@@ -224,13 +224,13 @@ export function SummaryStep({
             <SummarySection title="XP" subtitle="Cómo se reparte tu progreso">
               <div className="space-y-2 text-sm text-white">
                 <p>
-                  <span className="font-semibold text-white">Body:</span> {Math.round(xp.Body)} XP
+                  <span className="font-semibold text-white">Cuerpo:</span> {Math.round(xp.Body)} XP
                 </p>
                 <p>
-                  <span className="font-semibold text-white">Mind:</span> {Math.round(xp.Mind)} XP
+                  <span className="font-semibold text-white">Mente:</span> {Math.round(xp.Mind)} XP
                 </p>
                 <p>
-                  <span className="font-semibold text-white">Soul:</span> {Math.round(xp.Soul)} XP
+                  <span className="font-semibold text-white">Alma:</span> {Math.round(xp.Soul)} XP
                 </p>
                 <p className="mt-3 text-base font-semibold text-white">Total: {Math.round(xp.total)} XP</p>
               </div>
