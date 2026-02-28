@@ -236,12 +236,15 @@ export default function DashboardV3Page() {
   const handleDailyQuestComplete = useCallback(
     (response: Parameters<typeof feedbackNotifications.handleDailyQuestResult>[0]) => {
       feedbackNotifications.handleDailyQuestResult(response);
-      if (typeof window !== 'undefined') {
-        window.location.reload();
-      }
     },
     [feedbackNotifications],
   );
+
+  const handleFeedbackPopupCta = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
+  }, []);
 
   useEffect(() => {
     if (
@@ -360,6 +363,7 @@ export default function DashboardV3Page() {
             cta={feedbackNotifications.activePopup.cta}
             tasks={feedbackNotifications.activePopup.tasks}
             autoDismissMs={feedbackNotifications.activePopup.autoDismissMs}
+            onCtaClick={handleFeedbackPopupCta}
             onClose={feedbackNotifications.dismissActivePopup}
           />
         ) : null}
