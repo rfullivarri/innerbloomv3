@@ -225,6 +225,43 @@ describe('runDailyReminderJob', () => {
     expect(payload?.text).toContain('Reabrir Innerbloom: https://example.com/custom');
   });
 
+
+  it('normalizes legacy PRE daily quest URLs to the PRO domain', async () => {
+    const now = new Date('2024-06-10T15:00:00Z');
+    mockFindFeedbackDefinition.mockResolvedValueOnce({
+      copy: 'Hola {{user_name}}, este es tu recordatorio de {{friendly_date}}.',
+      cta_label: 'Abrir Daily Quest',
+      cta_href: 'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
+    } as never);
+    mockFindPendingReminders.mockResolvedValueOnce([
+      {
+        user_daily_reminder_id: 'legacy-pre',
+        user_id: 'u-pre',
+        channel: 'email',
+        status: 'active',
+        timezone: 'UTC',
+        local_time: '08:00:00',
+        last_sent_at: null,
+        created_at: now,
+        updated_at: now,
+        email_primary: 'legacy@example.com',
+        email: null,
+        first_name: 'Legacy',
+        full_name: 'Legacy User',
+        effective_timezone: 'UTC',
+      },
+    ]);
+
+    const { runDailyReminderJob } = await import('../dailyReminderJob.js');
+
+    await runDailyReminderJob(now);
+
+    const payload = mockSendEmail.mock.calls[0]?.[0];
+    expect(payload?.html).toContain('https://innerbloomjourney.org/dashboard-v3?daily-quest=open');
+    expect(payload?.html).not.toContain('https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open');
+    expect(payload?.text).toContain('Abrir Daily Quest: https://innerbloomjourney.org/dashboard-v3?daily-quest=open');
+  });
+
   it('only updates last_sent_at for reminders that were actually delivered', async () => {
     const now = new Date('2024-02-01T09:00:00Z');
     mockFindPendingReminders.mockResolvedValueOnce([

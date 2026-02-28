@@ -12,6 +12,8 @@ import {
 
 const DEFAULT_CTA_URL =
   process.env.DAILY_REMINDER_CTA_URL?.trim() || 'https://innerbloomjourney.org/dashboard-v3?daily-quest=open';
+const DAILY_QUEST_PRO_BASE_URL = 'https://innerbloomjourney.org';
+const LEGACY_PRE_HOSTS = new Set(['web-dev-dfa2.up.railway.app']);
 const REMINDER_NOTIFICATION_KEY = DEFAULT_FEEDBACK_DEFINITION.notificationKey;
 const REMINDER_LOGO_URL =
   process.env.EMAIL_LOGO_URL?.trim() || 'https://innerbloomjourney.org/IB-COLOR-LOGO.png';
@@ -102,6 +104,24 @@ function normalizeHeadline(value: string): string {
   return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
 }
 
+function normalizeDailyQuestCtaUrl(rawUrl: string): string {
+  const url = rawUrl.trim();
+  if (!url) {
+    return DEFAULT_CTA_URL;
+  }
+
+  try {
+    const parsed = new URL(url);
+    if (LEGACY_PRE_HOSTS.has(parsed.host)) {
+      return `${DAILY_QUEST_PRO_BASE_URL}${parsed.pathname}${parsed.search}${parsed.hash}`;
+    }
+  } catch {
+    return url;
+  }
+
+  return url;
+}
+
 export async function loadReminderTemplate(): Promise<ReminderTemplate> {
   const definition = await findFeedbackDefinitionByNotificationKey(REMINDER_NOTIFICATION_KEY);
   if (!definition) {
@@ -138,7 +158,7 @@ export function buildReminderEmail(
   template: ReminderTemplate = FALLBACK_TEMPLATE,
 ): EmailMessage {
   const name = resolveDisplayName(row);
-  const ctaUrl = template.ctaHref?.trim() || DEFAULT_CTA_URL;
+  const ctaUrl = normalizeDailyQuestCtaUrl(template.ctaHref?.trim() || DEFAULT_CTA_URL);
   const ctaLabel = template.ctaLabel?.trim() || 'Abrir Daily Quest';
   const friendlyDate = formatLocalDate(now, row.effective_timezone);
   let sendTime: string;
