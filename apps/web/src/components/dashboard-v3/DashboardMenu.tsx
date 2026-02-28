@@ -243,7 +243,7 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                 role="dialog"
                 aria-modal="true"
                 aria-label="Menú principal"
-                className="absolute inset-x-0 bottom-0 flex max-h-[92vh] flex-col rounded-t-3xl border border-white/15 bg-surface/95 p-5 text-white shadow-2xl transition md:inset-auto md:right-6 md:top-6 md:max-h-[85vh] md:w-[420px] md:rounded-3xl"
+                className="absolute left-1/2 top-1/2 flex max-h-[92vh] w-[calc(100%-0.75rem)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-3xl border border-white/15 bg-surface/95 p-5 text-white shadow-2xl transition md:inset-auto md:right-6 md:top-6 md:w-[420px] md:translate-x-0 md:translate-y-0"
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 40 }}
@@ -329,15 +329,26 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                         <button
                           type="button"
                           onClick={handleGoToSubscription}
-                          className="flex h-11 w-full items-center rounded-lg px-3 text-left text-sm text-white/85 transition hover:bg-white/10"
+                          className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-white/85 transition hover:bg-white/10"
                         >
+                          <MenuIcon className="h-4 w-4 text-white/65">
+                            <path d="M12 3a4 4 0 0 0-4 4v2" />
+                            <path d="M8 12v-1a4 4 0 1 1 8 0v1" />
+                            <rect x="5" y="12" width="14" height="9" rx="2" />
+                          </MenuIcon>
                           Suscripción
                         </button>
                         <button
                           type="button"
                           onClick={handleGoToPricing}
-                          className="flex h-11 w-full items-center rounded-lg px-3 text-left text-sm text-white/85 transition hover:bg-white/10"
+                          className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-white/85 transition hover:bg-white/10"
                         >
+                          <MenuIcon className="h-4 w-4 text-white/65">
+                            <path d="M6 19V9" />
+                            <path d="M12 19V5" />
+                            <path d="M18 19v-7" />
+                            <path d="M4 19h16" />
+                          </MenuIcon>
                           Pricing
                         </button>
                       </div>
