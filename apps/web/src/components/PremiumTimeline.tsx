@@ -77,6 +77,9 @@ export default function PremiumTimeline({
   tailTopPx = 80,
   tailBottomPx = 120,
 }: PremiumTimelineProps) {
+  const mobileBreakpointPx = 768;
+  const mobileAxisX = 24;
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
   const cardRefs = useRef<Array<HTMLElement | null>>([]);
@@ -173,9 +176,9 @@ export default function PremiumTimeline({
       return;
     }
 
-    const resolvedAxisX = axisX ?? lineOffsetX;
-
     const recomputePath = () => {
+      const isMobileViewport = window.matchMedia(`(max-width: ${mobileBreakpointPx}px)`).matches;
+      const resolvedAxisX = axisX ?? (isMobileViewport ? mobileAxisX : lineOffsetX);
       const rootRect = container.getBoundingClientRect();
       const anchorPoints = markerRefs.current
         .map((node) => {
@@ -215,7 +218,7 @@ export default function PremiumTimeline({
       const yEndBase = closingY
         ? Math.max(stepAnchors[stepAnchors.length - 1] + tailBottomPx, closingY - 34)
         : stepAnchors[stepAnchors.length - 1] + tailBottomPx;
-      const isMobile = window.matchMedia('(max-width: 639px)').matches;
+      const isMobile = window.matchMedia(`(max-width: ${mobileBreakpointPx}px)`).matches;
       const amplitude = isMobile ? amplitudeMobile : amplitudeDesktop;
       const period = isMobile ? periodMobile : periodDesktop;
       const sampleStep = compact ? 12 : 10;
@@ -349,7 +352,7 @@ export default function PremiumTimeline({
   }, [pathLength, progress, reducedMotion]);
 
   const cardMaxWidth = typeof cardWidth === 'number' ? `${cardWidth}px` : cardWidth;
-  const fallbackAxisX = axisX ?? lineOffsetX;
+  const fallbackAxisX = axisX ?? mobileAxisX;
   const drawY = geometry.yStart + progress * (geometry.yEnd - geometry.yStart);
   const activationThreshold = 8;
   const highlightWindow = 24;
@@ -357,8 +360,8 @@ export default function PremiumTimeline({
   return (
     <section
       className={[
-        'relative mx-auto w-full max-w-6xl px-4 py-10 text-white sm:px-6',
-        compact ? 'py-6' : 'py-10 sm:py-14',
+        'relative mx-auto w-full max-w-6xl px-4 py-10 text-white md:px-6',
+        compact ? 'py-6' : 'py-10 md:py-14',
         className,
       ]
         .filter(Boolean)
@@ -417,21 +420,21 @@ export default function PremiumTimeline({
           />
         </svg>
 
-        <ol className="relative z-10 space-y-5 sm:space-y-7" role="list">
+        <ol className="relative z-10 space-y-[1.1rem] md:space-y-7" role="list">
           {steps.map((step, index) => {
             const visible = reducedMotion || visibleCards[index];
             const anchorY = geometry.stepAnchors[index] ?? Number.POSITIVE_INFINITY;
             const isActive = reducedMotion || drawY >= anchorY - activationThreshold;
             const isCurrent = !reducedMotion && Math.abs(drawY - anchorY) <= highlightWindow;
             return (
-              <li key={`${step.title}-${index}`} className="grid grid-cols-[72px_minmax(0,1fr)] items-start gap-4 sm:gap-6">
-                <div className="relative flex h-full w-[72px] items-start justify-center pt-2">
+              <li key={`${step.title}-${index}`} className="relative block md:grid md:grid-cols-[72px_minmax(0,1fr)] md:items-start md:gap-6">
+                <div className="absolute left-2 top-2 z-20 flex h-full w-8 items-start justify-center md:relative md:left-0 md:top-0 md:w-[72px] md:pt-2">
                   <div
                     ref={(node) => {
                       markerRefs.current[index] = node;
                     }}
                     className={[
-                      'relative z-20 flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-all duration-200',
+                      'relative z-20 flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold transition-all duration-200 md:h-10 md:w-10 md:text-sm',
                       isActive
                         ? 'border border-[var(--ib-accent)]/80 bg-slate-900/90 text-white ring-2 ring-[var(--ib-accent)]/80 shadow-[0_0_0_6px_rgba(115,208,255,0.16),0_0_26px_rgba(115,208,255,0.38)]'
                         : 'border border-white/35 bg-slate-900/80 text-white shadow-[0_0_0_4px_rgba(255,255,255,0.06)]',
@@ -460,7 +463,7 @@ export default function PremiumTimeline({
                   transition={
                     reducedMotion ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: index * 0.04 }
                   }
-                  className="relative z-10 w-full rounded-3xl border border-white/15 bg-white/[0.06] p-5 shadow-[0_18px_45px_rgba(0,0,0,0.28)] backdrop-blur-[10px] sm:p-7"
+                  className="relative z-10 ml-7 w-[calc(100%-1.75rem)] rounded-3xl border border-white/15 bg-white/[0.06] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] backdrop-blur-[10px] md:ml-0 md:w-full md:p-7"
                   style={{ maxWidth: cardMaxWidth }}
                 >
                   {step.badge ? (
@@ -468,8 +471,8 @@ export default function PremiumTimeline({
                       {step.badge}
                     </span>
                   ) : null}
-                  <h3 className="text-xl font-semibold leading-tight text-white sm:text-2xl">{step.title}</h3>
-                  <ul className="mt-3 space-y-2 text-base leading-relaxed text-slate-200/90 sm:text-lg">
+                  <h3 className="text-xl font-semibold leading-tight text-white md:text-2xl">{step.title}</h3>
+                  <ul className="mt-3 space-y-2 text-base leading-relaxed text-slate-200/90 md:text-lg">
                     {step.bullets.map((bullet) => (
                       <li key={`${step.title}-${bullet}`} className="list-none">
                         • {bullet}
@@ -519,7 +522,7 @@ export default function PremiumTimeline({
           }
           transition={reducedMotion ? { duration: 0 } : { duration: 0.7, ease: 'easeOut', times: [0, 0.62, 1] }}
           className={[
-            'timeline-closing-card relative z-10 ml-[88px] mt-12 max-w-[860px] rounded-[28px] border bg-white/[0.08] px-5 py-4 text-left text-base leading-relaxed text-slate-100/90 backdrop-blur-[10px] sm:ml-[96px] sm:mt-14 sm:px-7 sm:py-5 sm:text-lg',
+            'timeline-closing-card relative z-10 ml-7 mt-10 w-[calc(100%-1.75rem)] max-w-[860px] rounded-[28px] border bg-white/[0.08] px-4 py-4 text-left text-base leading-relaxed text-slate-100/90 backdrop-blur-[10px] md:ml-[96px] md:mt-14 md:w-auto md:px-7 md:py-5 md:text-lg',
             isComplete && !reducedMotion ? 'completed text-white' : '',
           ].filter(Boolean).join(' ')}
           style={{
