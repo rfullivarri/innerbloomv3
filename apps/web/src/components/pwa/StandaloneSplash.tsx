@@ -3,8 +3,8 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { isStandaloneMode } from '../../lib/pwa';
 import { OFFICIAL_LANDING_CSS_VARIABLES } from '../../content/officialDesignTokens';
 
-const MIN_DURATION_MS = 450;
-const MAX_DURATION_MS = 1200;
+const MIN_DURATION_MS = Math.round(450 * 1.3);
+const MAX_DURATION_MS = Math.round(1200 * 1.3);
 
 interface StandaloneSplashProps {
   onDone?: () => void;
@@ -86,7 +86,16 @@ export function StandaloneSplash({ onDone }: StandaloneSplashProps) {
           exit={{ opacity: 0 }}
           transition={{ duration: exitDuration, ease: 'easeInOut' }}
         >
-          <div className="flex items-center gap-3 px-6">
+          <div className="flex items-center gap-4 px-6">
+            <motion.span
+              className="text-[1.8rem] font-semibold uppercase tracking-[0.35em] text-white sm:text-[2.15rem]"
+              style={{ fontFamily: OFFICIAL_LANDING_CSS_VARIABLES['--font-heading'] }}
+              initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+              animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              transition={{ duration: textDuration, delay: textDelay, ease: 'easeOut' }}
+            >
+              INNERBLOOM
+            </motion.span>
             <motion.img
               src="/IB-COLOR-LOGO.png"
               alt=""
@@ -95,15 +104,6 @@ export function StandaloneSplash({ onDone }: StandaloneSplashProps) {
               animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: flowerDuration, ease: 'easeOut' }}
             />
-            <motion.span
-              className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
-              style={{ fontFamily: OFFICIAL_LANDING_CSS_VARIABLES['--font-heading'] }}
-              initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
-              animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-              transition={{ duration: textDuration, delay: textDelay, ease: 'easeOut' }}
-            >
-              Innerbloom
-            </motion.span>
           </div>
         </motion.div>
       ) : null}
