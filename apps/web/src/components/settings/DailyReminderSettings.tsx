@@ -6,6 +6,7 @@ import {
   getDailyReminderSettings,
   updateDailyReminderSettings,
 } from '../../lib/api';
+import { TimezoneOption, filterTimezoneOptions, getTimezoneCatalog, resolveDefaultTimezone } from '../../lib/timezones';
 import { Skeleton } from '../common/Skeleton';
 import { ToastBanner } from '../common/ToastBanner';
 
@@ -15,20 +16,6 @@ const LOAD_STALE_MESSAGE = 'No pudimos refrescar tus recordatorios. Mostramos tu
 const SAVE_ERROR_MESSAGE = 'No pudimos guardar tus recordatorios. Intentá nuevamente.';
 const SAVE_SUCCESS_MESSAGE = 'Guardamos tus recordatorios.';
 const REMINDER_DESCRIPTION = 'Te enviamos un correo para recordarte tu Daily Quest y mantener tu consistencia.';
-const FALLBACK_TIMEZONES = [
-  'UTC',
-  'America/Los_Angeles',
-  'America/New_York',
-  'America/Mexico_City',
-  'America/Bogota',
-  'America/Argentina/Buenos_Aires',
-  'Europe/Madrid',
-  'Europe/London',
-  'Europe/Berlin',
-  'Asia/Tokyo',
-  'Asia/Singapore',
-];
-
 const TIME_OPTIONS = buildTimeOptions();
 
 type ReminderFormState = {
@@ -48,38 +35,6 @@ function buildTimeOptions(): string[] {
     }
   }
   return options;
-}
-
-function resolveDefaultTimezone(): string {
-  if (typeof Intl !== 'undefined' && typeof Intl.DateTimeFormat === 'function') {
-    try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (typeof tz === 'string' && tz.trim()) {
-        return tz;
-      }
-    } catch {
-      // ignore
-    }
-  }
-  return 'UTC';
-}
-
-function getTimezoneCatalog(): string[] {
-  if (typeof Intl !== 'undefined' && typeof (Intl as any).supportedValuesOf === 'function') {
-    try {
-      const values = (Intl as any).supportedValuesOf('timeZone');
-      if (Array.isArray(values) && values.length > 0) {
-        const normalized = [...values];
-        if (!normalized.includes('UTC')) {
-          normalized.push('UTC');
-        }
-        return normalized as string[];
-      }
-    } catch {
-      // ignore
-    }
-  }
-  return FALLBACK_TIMEZONES;
 }
 
 function normalizeLocalTime(value?: string | null): string {
@@ -125,11 +80,9 @@ export function DailyReminderSettings() {
   const [initialState, setInitialState] = useState<ReminderFormState | null>(null);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle');
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [timezoneSearch, setTimezoneSearch] = useState('');
   const { data, status, error, reload } = useRequest(getDailyReminderSettings, []);
-  const [timezoneCatalog] = useState(() => {
-    const zones = Array.from(new Set(getTimezoneCatalog()));
-    return zones.sort((a, b) => a.localeCompare(b));
-  });
+  const [timezoneCatalog] = useState<TimezoneOption[]>(() => getTimezoneCatalog());
 
   useEffect(() => {
     if (status !== 'success') {
@@ -151,12 +104,8 @@ export function DailyReminderSettings() {
   }, [submitStatus]);
 
   const timezoneOptions = useMemo(() => {
-    if (!formState.timezone || timezoneCatalog.includes(formState.timezone)) {
-      return timezoneCatalog;
-    }
-    const augmented = [...timezoneCatalog, formState.timezone];
-    return augmented.sort((a, b) => a.localeCompare(b));
-  }, [formState.timezone, timezoneCatalog]);
+    return filterTimezoneOptions(timezoneCatalog, timezoneSearch, formState.timezone);
+  }, [formState.timezone, timezoneCatalog, timezoneSearch]);
 
   const isInitialLoading = (status === 'idle' || status === 'loading') && !data && !error;
   const hasBlockingError = status === 'error' && !data;
@@ -290,6 +239,15 @@ export function DailyReminderSettings() {
 
         <label className="space-y-2 text-sm" htmlFor={timezoneFieldId}>
           <span className="block text-xs uppercase tracking-[0.3em] text-text-subtle">Zona horaria</span>
+          <input
+            type="text"
+            value={timezoneSearch}
+            onChange={(event) => setTimezoneSearch(event.target.value)}
+            aria-label="Buscar zona horaria"
+            placeholder="Buscar por ciudad o país"
+            disabled={isSaving}
+            className="w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
+          />
           <select
             id={timezoneFieldId}
             value={formState.timezone}
@@ -298,8 +256,8 @@ export function DailyReminderSettings() {
             className="w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
           >
             {timezoneOptions.map((zone) => (
-              <option key={zone} value={zone}>
-                {zone}
+              <option key={zone.value} value={zone.value}>
+                {zone.label}
               </option>
             ))}
           </select>
