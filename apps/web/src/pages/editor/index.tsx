@@ -412,8 +412,12 @@ export default function TaskEditorPage() {
             <Card>
               <div className="flex flex-col gap-5">
                 {pageToast && (
-                  <div className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+4.5rem)] z-40 md:static md:inset-auto md:top-auto">
-                    <ToastBanner tone={pageToast.type} message={pageToast.text} className="px-3" />
+                  <div className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+6.75rem)] z-40 md:inset-x-auto md:bottom-28 md:right-8 md:w-[24rem]">
+                    <ToastBanner
+                      tone={pageToast.type}
+                      message={pageToast.text}
+                      className="border-emerald-300/70 bg-emerald-500 text-white shadow-[0_14px_36px_rgba(16,185,129,0.45)]"
+                    />
                   </div>
                 )}
                 <TaskFilters
@@ -483,7 +487,7 @@ export default function TaskEditorPage() {
         <button
           type="button"
           onClick={handleCreateClick}
-          className="fixed bottom-24 right-4 z-30 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(79,70,229,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 md:bottom-10 md:right-8"
+          className="fixed bottom-24 right-4 z-30 inline-flex items-center gap-2 rounded-full bg-violet-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(139,92,246,0.45)] transition hover:bg-violet-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 md:bottom-10 md:right-8"
         >
           <span aria-hidden className="text-lg leading-none">＋</span>
           Nueva tarea
