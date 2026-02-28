@@ -25,6 +25,8 @@ const DEFAULT_CTA_URL =
   process.env.DAILY_REMINDER_CTA_URL?.trim() ||
   'https://innerbloomjourney.org/login';
 
+const BRAND_LOGO_URL = 'https://innerbloomjourney.org/IB-COLOR-LOGO.png';
+
 function sanitizeRecipient(value?: string | null): string | null {
   const trimmed = value?.trim();
   return trimmed && trimmed.includes('@') ? trimmed : null;
@@ -63,7 +65,14 @@ function buildEmailMessage(params: { to: string } & {
     <table role="presentation" width="100%" style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;border:1px solid #e2e8f0;">
       <tr>
         <td>
-          <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.24em;font-weight:700;text-transform:uppercase;color:#94a3b8;text-align:center;">Innerbloom 🌸</p>
+          <table role="presentation" width="100%" style="margin:0 0 16px;">
+            <tr>
+              <td style="text-align:center;">
+                <span style="font-family:'Manrope','Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;color:#94a3b8;vertical-align:middle;display:inline-block;">Innerbloom</span>
+                <img src="${BRAND_LOGO_URL}" alt="Innerbloom logo" width="26" height="26" style="width:26px;height:26px;vertical-align:middle;display:inline-block;margin-left:10px;border:0;" />
+              </td>
+            </tr>
+          </table>
           <p style="margin:0 0 16px;font-size:16px;text-align:center;">Hola ${name},</p>
           <h1 style="margin:0 0 12px;font-size:28px;line-height:1.3;text-align:center;">Tu journey está a punto de comenzar</h1>
           <p style="margin:0 0 16px;font-size:16px;line-height:1.6;text-align:center;">Ya generamos tu set inicial de tareas usando IA, diseñado según tus objetivos y tu momento actual.</p>
@@ -166,4 +175,3 @@ export async function notifyTasksReadyEmail(params: TasksReadyEmailParams): Prom
     throw error;
   }
 }
-
