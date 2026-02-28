@@ -229,6 +229,7 @@ export async function updateUserTaskRow(
   await pool.query(
     `UPDATE users
         SET first_tasks_confirmed = TRUE,
+            first_tasks_confirmed_at = COALESCE(first_tasks_confirmed_at, NOW()),
             updated_at = NOW()
       WHERE user_id = $1
         AND first_tasks_confirmed = FALSE`,

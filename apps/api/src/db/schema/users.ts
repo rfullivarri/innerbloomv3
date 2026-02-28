@@ -23,6 +23,7 @@ export const users = pgTable(
     lastSentLocalDateScheduler: date('last_sent_local_date_scheduler'),
     firstProgrammed: boolean('first_programmed').notNull().default(false),
     firstTasksConfirmed: boolean('first_tasks_confirmed').notNull().default(false),
+    firstTasksConfirmedAt: timestamp('first_tasks_confirmed_at', { withTimezone: true }),
     email: text('email'),
     firstName: text('first_name'),
     lastName: text('last_name'),
