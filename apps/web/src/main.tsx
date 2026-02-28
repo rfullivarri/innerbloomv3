@@ -8,7 +8,6 @@ import { DEV_USER_SWITCH_ACTIVE } from './lib/api';
 import { isApiLoggingEnabled, setApiLoggingEnabled } from './lib/logger';
 import { resolveAuthLanguage } from './lib/authLanguage';
 import { getClerkLocalization } from './lib/clerkLocalization';
-import { registerSW } from 'virtual:pwa-register';
 
 declare global {
   interface Window {
@@ -18,8 +17,6 @@ declare global {
 }
 
 setApiLoggingEnabled(true);
-
-registerSW({ immediate: true });
 
 if (typeof window !== 'undefined') {
   (window as any).__DBG ??= true;
