@@ -16,7 +16,6 @@ const LOAD_ERROR_MESSAGE = 'No pudimos cargar tus recordatorios.';
 const LOAD_STALE_MESSAGE = 'No pudimos refrescar tus recordatorios. Mostramos tu último estado guardado.';
 const SAVE_ERROR_MESSAGE = 'No pudimos guardar tus recordatorios. Intentá nuevamente.';
 const SAVE_SUCCESS_MESSAGE = 'Guardamos tus recordatorios.';
-const REMINDER_DESCRIPTION = 'Te enviamos un correo para recordarte tu Daily Quest y mantener tu consistencia.';
 const TIME_OPTIONS = buildTimeOptions();
 
 type ReminderFormState = {
@@ -181,33 +180,32 @@ export function DailyReminderSettings() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 text-base text-text">
-      <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-5">
-        <div>
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+        <div className="flex items-center justify-between gap-4">
           <p className="text-sm font-semibold text-white">{toggleLabel}</p>
-          <p className="text-xs text-text-subtle">{REMINDER_DESCRIPTION}</p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={formState.enabled}
-          aria-label={toggleLabel}
-          onClick={handleToggle}
-          disabled={isSaving}
-          className={combine(
-            'relative inline-flex h-7 w-14 items-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
-            formState.enabled
-              ? 'border-emerald-300/60 bg-emerald-400/30'
-              : 'border-white/15 bg-white/5',
-            (isSaving || isInitialLoading) && 'cursor-not-allowed opacity-60',
-          )}
-        >
-          <span
+          <button
+            type="button"
+            role="switch"
+            aria-checked={formState.enabled}
+            aria-label={toggleLabel}
+            onClick={handleToggle}
+            disabled={isSaving}
             className={combine(
-              'inline-block h-5 w-5 rounded-full bg-white shadow transition',
-              formState.enabled ? 'translate-x-7 bg-emerald-100' : 'translate-x-2',
+              'relative inline-flex h-7 w-14 shrink-0 items-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
+              formState.enabled
+                ? 'border-emerald-300/60 bg-emerald-400/30'
+                : 'border-white/15 bg-white/5',
+              (isSaving || isInitialLoading) && 'cursor-not-allowed opacity-60',
             )}
-          />
-        </button>
+          >
+            <span
+              className={combine(
+                'inline-block h-5 w-5 rounded-full bg-white shadow transition',
+                formState.enabled ? 'translate-x-7 bg-emerald-100' : 'translate-x-2',
+              )}
+            />
+          </button>
+        </div>
       </div>
 
       {submitStatus === 'error' && submitError ? (
