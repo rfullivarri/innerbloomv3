@@ -314,7 +314,7 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-body':
         return (
           <ChecklistStep
-            title="CUERPO · 🫀"
+            title="Cuerpo · 🫀"
             subtitle="Tu base física sostiene todo. Elegí hasta 5 anclas."
             xpAmount={13}
             badgeLabel="Pilares"
@@ -331,7 +331,7 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-soul':
         return (
           <ChecklistStep
-            title="ALMA · 🏵️"
+            title="Alma · 🏵️"
             subtitle="Sin centro no hay llegada. Elegí hasta 5 prácticas."
             xpAmount={13}
             badgeLabel="Pilares"
@@ -348,7 +348,7 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-mind':
         return (
           <ChecklistStep
-            title="MENTE · 🧠"
+            title="Mente · 🧠"
             subtitle="No es hacer más: es hacer mejor. Elegí hasta 5 focos."
             xpAmount={13}
             badgeLabel="Pilares"
