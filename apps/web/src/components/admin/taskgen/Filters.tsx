@@ -27,7 +27,7 @@ export function Filters({ filters, onChange, onReset, loading = false, showUserI
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Status</span>
             <select
-              className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm ios-touch-input text-slate-100 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
               value={filters.status}
               disabled={loading}
               onChange={(event) =>
@@ -48,7 +48,7 @@ export function Filters({ filters, onChange, onReset, loading = false, showUserI
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Modo</span>
             <select
-              className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm ios-touch-input text-slate-100 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
               value={filters.mode}
               disabled={loading}
               onChange={(event) =>
@@ -73,7 +73,7 @@ export function Filters({ filters, onChange, onReset, loading = false, showUserI
               </span>
               <input
                 type="text"
-                className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm ios-touch-input text-slate-100 placeholder:text-slate-500 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
                 value={filters.user}
                 disabled={loading}
                 onChange={(event) =>
@@ -92,7 +92,7 @@ export function Filters({ filters, onChange, onReset, loading = false, showUserI
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Desde</span>
             <input
               type="date"
-              className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm ios-touch-input text-slate-100 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
               value={filters.from ?? ''}
               disabled={loading}
               onChange={(event) =>
@@ -108,7 +108,7 @@ export function Filters({ filters, onChange, onReset, loading = false, showUserI
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Hasta</span>
             <input
               type="date"
-              className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm ios-touch-input text-slate-100 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
               value={filters.to ?? ''}
               disabled={loading}
               onChange={(event) =>
@@ -123,7 +123,7 @@ export function Filters({ filters, onChange, onReset, loading = false, showUserI
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Límite</span>
             <select
-              className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              className="rounded-lg border border-slate-700/60 bg-slate-950 px-3 py-2 text-sm ios-touch-input text-slate-100 focus:border-sky-400/70 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
               value={filters.limit}
               disabled={loading}
               onChange={(event) =>

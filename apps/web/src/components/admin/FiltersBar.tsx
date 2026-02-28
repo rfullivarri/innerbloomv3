@@ -35,7 +35,7 @@ export function FiltersBar({
             type="date"
             value={filters.from ?? ''}
             onChange={(event) => onChange({ ...filters, from: event.target.value || undefined, page: 1 })}
-            className="rounded-lg border border-slate-700/60 bg-slate-800 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="rounded-lg border border-slate-700/60 bg-slate-800 px-3 py-2 text-sm ios-touch-input text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
           />
         </label>
         <label className="flex flex-col text-xs text-slate-300">
@@ -44,7 +44,7 @@ export function FiltersBar({
             type="date"
             value={filters.to ?? ''}
             onChange={(event) => onChange({ ...filters, to: event.target.value || undefined, page: 1 })}
-            className="rounded-lg border border-slate-700/60 bg-slate-800 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="rounded-lg border border-slate-700/60 bg-slate-800 px-3 py-2 text-sm ios-touch-input text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
           />
         </label>
         <label className="flex flex-col text-xs text-slate-300">
@@ -54,7 +54,7 @@ export function FiltersBar({
             value={filters.q}
             onChange={(event) => onChange({ ...filters, q: event.target.value, page: 1 })}
             placeholder="Task, nota, pilar…"
-            className="rounded-lg border border-slate-700/60 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className="rounded-lg border border-slate-700/60 bg-slate-800 px-3 py-2 text-sm ios-touch-input text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
           />
         </label>
         {showPageSize ? (
@@ -63,7 +63,7 @@ export function FiltersBar({
             <select
               value={filters.pageSize}
               onChange={(event) => onChange({ ...filters, pageSize: Number(event.target.value) || 10, page: 1 })}
-              className="rounded-lg border border-slate-700/60 bg-slate-800 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              className="rounded-lg border border-slate-700/60 bg-slate-800 px-3 py-2 text-sm ios-touch-input text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               {[10, 20, 50].map((size) => (
                 <option key={size} value={size}>

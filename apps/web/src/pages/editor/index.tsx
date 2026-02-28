@@ -581,7 +581,7 @@ function TaskFilters({
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Buscar por título"
-              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-base text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 md:text-sm"
+              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </div>
         </label>
@@ -592,7 +592,7 @@ function TaskFilters({
           <select
             value={selectedPillar}
             onChange={(event) => onPillarChange(event.target.value)}
-            className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-base text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 md:text-sm"
+            className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {pillars.map((pillar) => (
               <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-slate-100">
@@ -630,7 +630,7 @@ function TaskFilters({
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Buscar por título"
-              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2 text-base text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 md:text-sm"
+              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm ios-touch-input text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </label>
           <div className="space-y-2">
@@ -683,7 +683,7 @@ function TaskFilters({
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Buscar por título"
-              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-base text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 md:text-sm"
+              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </div>
         </label>
@@ -694,7 +694,7 @@ function TaskFilters({
           <select
             value={selectedPillar}
             onChange={(event) => onPillarChange(event.target.value)}
-            className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-base text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 md:text-sm"
+            className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {pillars.map((pillar) => (
               <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-slate-100">
@@ -1635,7 +1635,7 @@ function CreateTaskModal({
                       setSelectedPillarId(event.target.value);
                       clearError('pillar');
                     }}
-                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-base text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed md:text-sm"
+                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={isLoadingPillars || pillarsError != null}
                   >
                     <option value="" className="bg-slate-900 text-slate-100">
@@ -1679,7 +1679,7 @@ function CreateTaskModal({
                       setSelectedTraitId(event.target.value);
                       clearError('trait');
                     }}
-                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-base text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed md:text-sm"
+                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={!selectedPillarId || isLoadingTraits}
                   >
                     <option value="" className="bg-slate-900 text-slate-100">
@@ -1720,7 +1720,7 @@ function CreateTaskModal({
                   <select
                     value={selectedStatId}
                     onChange={(event) => setSelectedStatId(event.target.value)}
-                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-base text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed md:text-sm"
+                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={!selectedTraitId || isLoadingStats}
                   >
                     <option value="" className="bg-slate-900 text-slate-100">
@@ -1766,7 +1766,7 @@ function CreateTaskModal({
                       clearError('title');
                     }}
                     placeholder="Ej. Entrenar 30 minutos"
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 md:text-sm"
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm ios-touch-input text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
                   />
                 </label>
                 {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
@@ -1778,7 +1778,7 @@ function CreateTaskModal({
                   <select
                     value={difficultyId}
                     onChange={(event) => setDifficultyId(event.target.value)}
-                    className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed md:text-sm"
+                    className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={isLoadingDifficulties}
                   >
                     <option value="" className="bg-slate-900 text-slate-100">
@@ -2065,7 +2065,7 @@ function EditTaskModal({
                 clearError('title');
               }}
               placeholder="Ej. Entrenar 30 minutos"
-              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 md:text-sm"
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm ios-touch-input text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </label>
           {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
@@ -2077,7 +2077,7 @@ function EditTaskModal({
             <select
               value={difficultyId}
               onChange={(event) => setDifficultyId(event.target.value)}
-              className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed md:text-sm"
+              className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
               disabled={isLoadingDifficulties}
             >
               <option value="" className="bg-slate-900 text-slate-100">
