@@ -55,6 +55,7 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
   const toastTimeoutRef = useRef<number | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
+  const [isSpanishSystem, setIsSpanishSystem] = useState(true);
 
   const {
     isMobile,
@@ -70,6 +71,10 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
   useEffect(() => {
     setPortalNode(document.body);
     setIsMounted(true);
+
+    const browserLanguages = navigator.languages?.length ? navigator.languages : [navigator.language];
+    const prefersSpanish = browserLanguages.some((lang) => lang?.toLowerCase().startsWith('es'));
+    setIsSpanishSystem(prefersSpanish);
   }, []);
 
   useEffect(() => {
@@ -172,6 +177,26 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
     }
     return '';
   }, [user]);
+
+  const quickAccessLabels = useMemo(
+    () =>
+      isSpanishSystem
+        ? {
+            title: 'Añadir acceso rápido',
+            stepShare: 'Compartir',
+            stepAddToHome: 'Añadir a pantalla de inicio',
+            stepAdd: 'Añadir',
+            gotIt: 'Entendido',
+          }
+        : {
+            title: 'Add quick access',
+            stepShare: 'Share',
+            stepAddToHome: 'Add to Home Screen',
+            stepAdd: 'Add',
+            gotIt: 'Got it',
+          },
+    [isSpanishSystem],
+  );
 
   if (!isMounted || !portalNode) {
     return <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} />;
@@ -319,11 +344,30 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                     aria-label="Cómo añadir acceso rápido en iOS"
                     className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/20 bg-[#000c40] p-4 shadow-2xl"
                   >
-                    <p className="text-sm font-semibold text-white">Añadir acceso rápido</p>
+                    <p className="text-sm font-semibold text-white">{quickAccessLabels.title}</p>
                     <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-white/85">
-                      <li>Toca Compartir ⎋</li>
-                      <li>Añadir a pantalla de inicio ✚</li>
-                      <li>Añadir</li>
+                      <li className="flex flex-wrap items-center gap-2">
+                        <span>{isSpanishSystem ? 'Toca' : 'Tap'}</span>
+                        <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-xs font-medium text-white">
+                          <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="7" y="7" width="10" height="14" rx="2" />
+                            <path d="M12 3v10" />
+                            <path d="m9 6 3-3 3 3" />
+                          </svg>
+                          {quickAccessLabels.stepShare}
+                        </span>
+                      </li>
+                      <li className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-xs font-medium text-white">
+                          <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="4" y="4" width="16" height="16" rx="3" />
+                            <path d="M12 8v8" />
+                            <path d="M8 12h8" />
+                          </svg>
+                          {quickAccessLabels.stepAddToHome}
+                        </span>
+                      </li>
+                      <li>{quickAccessLabels.stepAdd}</li>
                     </ol>
                     {/* iOS Safari y navegadores iOS no permiten abrir Share Sheet ni instalar de forma programática. */}
                     <button
@@ -331,7 +375,7 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                       onClick={closeIosInstructions}
                       className="mt-3 w-full rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-sm text-white"
                     >
-                      Entendido
+                      {quickAccessLabels.gotIt}
                     </button>
                   </div>
                 ) : null}
