@@ -232,7 +232,7 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
         <AnimatePresence>
           {isOpen ? (
             <motion.div
-              className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-md"
+              className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-1.5 backdrop-blur-md md:items-start md:justify-end md:p-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -243,7 +243,7 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                 role="dialog"
                 aria-modal="true"
                 aria-label="Menú principal"
-                className="absolute left-1/2 top-1/2 flex max-h-[92vh] w-[calc(100%-0.75rem)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-3xl border border-white/15 bg-surface/95 p-5 text-white shadow-2xl transition md:inset-auto md:right-6 md:top-6 md:w-[420px] md:translate-x-0 md:translate-y-0"
+                className="flex max-h-[92vh] w-full max-w-[420px] flex-col rounded-3xl border border-white/15 bg-surface/95 p-5 text-white shadow-2xl transition"
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 40 }}
