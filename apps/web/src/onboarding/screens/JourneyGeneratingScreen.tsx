@@ -15,7 +15,7 @@ export function JourneyGeneratingScreen({ gameMode, onGoToDashboard }: JourneyGe
       'Ajustando frecuencias sostenibles',
       'Diseñando micro-hábitos alineados a tu energía',
       'Equilibrando Cuerpo, Mente y Alma',
-      `Activando tu Game Mode: ${gameMode}`,
+      `Activando tu modo de juego: ${gameMode}`,
     ],
     [gameMode],
   );

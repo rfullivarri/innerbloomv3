@@ -94,7 +94,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
     >
       <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
-          <p className="text-xs uppercase tracking-wide text-white/50">Step 0 · Acceso</p>
+          <p className="text-xs uppercase tracking-wide text-white/50">Paso 0 · Acceso</p>
           <h2 className="text-2xl font-semibold text-white">Creá tu cuenta Innerbloom</h2>
         </div>
       </div>

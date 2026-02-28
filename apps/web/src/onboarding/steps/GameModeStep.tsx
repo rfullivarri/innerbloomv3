@@ -66,7 +66,7 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
       <div className="glass-card onboarding-surface-base mx-auto max-w-4xl rounded-3xl p-4 sm:p-6">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-white/50">Step 1 · Elegí tu modo</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-white/50">Paso 1 · Elegí tu modo</p>
           <h2 className="text-3xl font-semibold text-white">¿Cómo querés jugar hoy?</h2>
           <p className="text-sm text-white/70">Elegí el modo que mejor representa tu estado actual.</p>
         </header>
