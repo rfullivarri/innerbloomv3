@@ -2137,7 +2137,7 @@ function EditTaskModal({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(79,70,229,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(207,139,243,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? 'Guardando…' : 'Guardar cambios'}
         </button>
