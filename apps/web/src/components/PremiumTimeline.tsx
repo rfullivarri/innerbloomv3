@@ -463,7 +463,7 @@ export default function PremiumTimeline({
                   transition={
                     reducedMotion ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: index * 0.04 }
                   }
-                  className="relative z-10 ml-7 w-[calc(100%-1.75rem)] rounded-3xl border border-white/15 bg-white/[0.06] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] backdrop-blur-[10px] md:ml-0 md:w-full md:p-7"
+                  className="relative z-10 ml-12 w-[calc(100%-3rem)] rounded-3xl border border-white/15 bg-white/[0.06] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] backdrop-blur-[10px] md:ml-0 md:w-full md:p-7"
                   style={{ maxWidth: cardMaxWidth }}
                 >
                   {step.badge ? (
@@ -522,7 +522,7 @@ export default function PremiumTimeline({
           }
           transition={reducedMotion ? { duration: 0 } : { duration: 0.7, ease: 'easeOut', times: [0, 0.62, 1] }}
           className={[
-            'timeline-closing-card relative z-10 ml-7 mt-10 w-[calc(100%-1.75rem)] max-w-[860px] rounded-[28px] border bg-white/[0.08] px-4 py-4 text-left text-base leading-relaxed text-slate-100/90 backdrop-blur-[10px] md:ml-[96px] md:mt-14 md:w-auto md:px-7 md:py-5 md:text-lg',
+            'timeline-closing-card relative z-10 ml-12 mt-10 w-[calc(100%-3rem)] max-w-[860px] rounded-[28px] border bg-white/[0.08] px-4 py-4 text-left text-base leading-relaxed text-slate-100/90 backdrop-blur-[10px] md:ml-[96px] md:mt-14 md:w-auto md:px-7 md:py-5 md:text-lg',
             isComplete && !reducedMotion ? 'completed text-white' : '',
           ].filter(Boolean).join(' ')}
           style={{
