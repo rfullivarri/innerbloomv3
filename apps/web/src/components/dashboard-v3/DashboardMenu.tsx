@@ -7,6 +7,7 @@ import { useQuickAccessInstall } from '../../hooks/useQuickAccessInstall';
 import {
   forwardRef,
   type MouseEvent,
+  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -16,6 +17,23 @@ import {
 
 interface DashboardMenuProps {
   onOpenScheduler?: () => void;
+}
+
+function MenuIcon({ children, className = 'h-5 w-5 text-white/75' }: { children: ReactNode; className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {children}
+    </svg>
+  );
 }
 
 const DashboardMenuTrigger = forwardRef<HTMLButtonElement, { onClick: () => void }>(
@@ -56,6 +74,7 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
   const [isSpanishSystem, setIsSpanishSystem] = useState(true);
+  const [isPlansOpen, setIsPlansOpen] = useState(false);
 
   const {
     isMobile,
@@ -124,10 +143,14 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
+    setIsPlansOpen(false);
     requestAnimationFrame(() => {
       triggerRef.current?.focus({ preventScroll: true });
     });
   }, []);
+
+  const menuRowClassName =
+    'flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-white/90 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40';
 
   const handleOpenProfile = useCallback(() => {
     if (typeof openUserProfile === 'function') {
@@ -250,81 +273,97 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                   </button>
                 </div>
                 <div className="flex-1 space-y-4 overflow-y-auto pr-1">
-                  <section className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-[0.65rem] uppercase tracking-[0.3em] text-text-muted">Perfil</p>
-                    <div className="mt-3 flex items-center gap-3">
+                  <section className="rounded-2xl border border-white/10 bg-white/5 px-2 py-1">
+                    <button type="button" onClick={handleOpenProfile} className={`${menuRowClassName} h-14`}>
                       {user?.imageUrl ? (
                         <img
                           src={user.imageUrl}
                           alt="Avatar"
-                          className="h-12 w-12 rounded-2xl border border-white/20 object-cover"
+                          className="h-9 w-9 rounded-xl border border-white/20 object-cover"
                         />
                       ) : (
-                        <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-sm font-semibold uppercase text-white/80">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-xs font-semibold uppercase text-white/80">
                           {initials || 'UX'}
                         </span>
                       )}
-                      <div className="min-w-0">
-                        <p className="text-base font-semibold text-white">{user?.fullName || user?.username || 'Tu perfil'}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-white">{user?.fullName || user?.username || 'Tu perfil'}</p>
                         {user?.primaryEmailAddress?.emailAddress ? (
-                          <p className="truncate text-sm text-text-muted">{user.primaryEmailAddress.emailAddress}</p>
+                          <p className="truncate text-xs text-text-muted">{user.primaryEmailAddress.emailAddress}</p>
                         ) : null}
                       </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleOpenProfile}
-                      className="mt-4 w-full rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 transition hover:border-white/40 hover:bg-white/15"
-                    >
-                      Gestionar perfil
+                      <MenuIcon className="h-4 w-4 text-white/70">
+                        <path d="M20 21a8 8 0 0 0-16 0" />
+                        <circle cx="12" cy="8" r="4" />
+                      </MenuIcon>
                     </button>
                   </section>
-                  <section className="rounded-3xl border border-emerald-400/20 bg-emerald-400/5 p-4">
-                    <p className="text-[0.65rem] uppercase tracking-[0.3em] text-emerald-200">Scheduler</p>
-                    <p className="mt-1 text-sm text-emerald-50/80">
-                      Activá, pausá o cambiá la hora del recordatorio diario.
-                    </p>
+
+                  <section className="rounded-2xl border border-white/10 bg-white/5 px-2 py-1">
+                    <button type="button" onClick={handleOpenScheduler} className={menuRowClassName}>
+                      <MenuIcon>
+                        <path d="M6 9a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                        <path d="M10 20a2 2 0 0 0 4 0" />
+                      </MenuIcon>
+                      <span className="flex-1">Recordatorio</span>
+                    </button>
+                    <div className="mx-3 h-px bg-white/10" />
                     <button
                       type="button"
-                      onClick={handleOpenScheduler}
-                      className="mt-4 w-full rounded-2xl bg-emerald-400/90 px-4 py-3 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300"
+                      onClick={() => setIsPlansOpen((current) => !current)}
+                      className={menuRowClassName}
+                      aria-expanded={isPlansOpen}
+                      aria-controls="menu-planes"
                     >
-                      Abrir recordatorio diario
+                      <MenuIcon>
+                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                        <path d="M3 10h18" />
+                      </MenuIcon>
+                      <span className="flex-1">Planes</span>
+                      <MenuIcon className={`h-4 w-4 text-white/60 transition ${isPlansOpen ? 'rotate-180' : ''}`}>
+                        <path d="m6 9 6 6 6-6" />
+                      </MenuIcon>
                     </button>
+                    {isPlansOpen ? (
+                      <div id="menu-planes" className="-mt-1 mb-1 space-y-1 px-3 pb-2 pl-11">
+                        <button
+                          type="button"
+                          onClick={handleGoToSubscription}
+                          className="flex h-11 w-full items-center rounded-lg px-3 text-left text-sm text-white/85 transition hover:bg-white/10"
+                        >
+                          Suscripción
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleGoToPricing}
+                          className="flex h-11 w-full items-center rounded-lg px-3 text-left text-sm text-white/85 transition hover:bg-white/10"
+                        >
+                          Pricing
+                        </button>
+                      </div>
+                    ) : null}
                   </section>
-                  <section className="rounded-3xl border border-sky-400/20 bg-sky-400/5 p-4">
-                    <p className="text-[0.65rem] uppercase tracking-[0.3em] text-sky-200">Planes</p>
-                    <p className="mt-1 text-sm text-sky-50/80">
-                      Revisá tu suscripción actual y compará opciones disponibles.
-                    </p>
-                    <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                      <button
-                        type="button"
-                        onClick={handleGoToSubscription}
-                        className="rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 transition hover:border-white/40 hover:bg-white/20"
-                      >
-                        Suscripción
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleGoToPricing}
-                        className="rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 transition hover:border-white/40 hover:bg-white/20"
-                      >
-                        Pricing
-                      </button>
-                    </div>
-                  </section>
+
                   {isMobile ? (
-                    <section className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                      <p className="text-[0.65rem] uppercase tracking-[0.3em] text-text-muted">Acceso rápido</p>
+                    <section className="rounded-2xl border border-accent-purple/35 bg-accent-purple/15 p-4">
+                      <div className="mb-3 flex items-center gap-2 text-accent-purple">
+                        <MenuIcon className="h-4 w-4 text-violet-200">
+                          <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
+                        </MenuIcon>
+                        <p className="text-[0.65rem] uppercase tracking-[0.3em] text-violet-200">Acceso rápido</p>
+                      </div>
                       <button
                         type="button"
                         onClick={handleQuickAccessClick}
                         disabled={isStandalone}
-                        className="mt-3 flex w-full items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-left text-sm font-semibold text-white/90 transition hover:border-white/40 hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-80"
+                        className="flex h-12 w-full items-center justify-between rounded-xl border border-violet-300/35 bg-violet-300/10 px-4 text-left text-sm font-semibold text-violet-50 transition hover:border-violet-200/45 hover:bg-violet-300/20 disabled:cursor-not-allowed disabled:opacity-80"
                       >
                         <span>{isStandalone ? 'Acceso rápido activo' : 'Añadir acceso rápido'}</span>
-                        {isStandalone ? <span aria-hidden="true">✓</span> : null}
+                        {isStandalone ? (
+                          <MenuIcon className="h-4 w-4 text-violet-50">
+                            <path d="m5 12 4 4 10-10" />
+                          </MenuIcon>
+                        ) : null}
                       </button>
                       {toast ? <ToastBanner tone={toast.tone} message={toast.message} className="mt-3" /> : null}
                     </section>
@@ -333,9 +372,14 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="mt-4 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-white/30 hover:bg-white/10"
+                  className="mt-4 flex h-12 w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white/80 transition hover:border-white/30 hover:bg-white/10"
                 >
-                  Cerrar sesión
+                  <MenuIcon className="h-5 w-5 text-white/80">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <path d="M16 17l5-5-5-5" />
+                    <path d="M21 12H9" />
+                  </MenuIcon>
+                  <span>Cerrar sesión</span>
                 </button>
                 {iosInstructionsOpen && isIOS ? (
                   <div
