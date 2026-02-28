@@ -130,7 +130,7 @@ export function TimezoneCombobox({
           setActiveIndex(0);
         }}
         onKeyDown={handleKeyDown}
-        className="w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
+        className="w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-sm ios-touch-input text-white outline-none transition focus:border-white/40"
       />
 
       {isOpen ? (

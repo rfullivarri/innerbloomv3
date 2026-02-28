@@ -219,6 +219,14 @@
   }
 }
 
+@layer utilities {
+  @media (max-width: 767px) {
+    .ios-touch-input {
+      font-size: 16px;
+    }
+  }
+}
+
 :root {
   --aurora-surface: var(--color-surface, #0f172a);
   --aurora-surface-alt: var(--color-surface-muted, #111c33);
