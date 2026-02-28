@@ -45,11 +45,7 @@ const PILLAR_META: Record<PillarKey, { icon: string }> = {
 
 function ModeBadge({ mode }: { mode: GameMode | null }) {
   if (!mode) {
-    return (
-      <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/60">
-        Elegí tu Game Mode
-      </span>
-    );
+    return null;
   }
 
   const meta = MODE_BADGE_META[mode];
@@ -109,7 +105,7 @@ export function HUD({ mode, stepIndex, totalSteps, xp, onRestart, onExit, onBran
               <div />
             )}
             <div className="flex items-center gap-2 sm:gap-3">
-              <ModeBadge mode={mode} />
+              {mode ? <ModeBadge mode={mode} /> : null}
               {onRestart ? (
                 <button
                   type="button"
