@@ -2,6 +2,8 @@ import { useAuth, useClerk, useUser } from '@clerk/clerk-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import { ToastBanner } from '../common/ToastBanner';
+import { useQuickAccessInstall } from '../../hooks/useQuickAccessInstall';
 import {
   forwardRef,
   type MouseEvent,
@@ -50,8 +52,20 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const toastTimeoutRef = useRef<number | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
+
+  const {
+    isMobile,
+    isIOS,
+    isStandalone,
+    toast,
+    setToast,
+    onQuickAccessClick,
+    iosInstructionsOpen,
+    closeIosInstructions,
+  } = useQuickAccessInstall();
 
   useEffect(() => {
     setPortalNode(document.body);
@@ -76,6 +90,28 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!toast) {
+      return;
+    }
+    if (toastTimeoutRef.current) {
+      window.clearTimeout(toastTimeoutRef.current);
+    }
+    toastTimeoutRef.current = window.setTimeout(() => {
+      setToast(null);
+      toastTimeoutRef.current = null;
+    }, 2500);
+    return () => {
+      if (toastTimeoutRef.current) {
+        window.clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, [toast, setToast]);
+
+  const handleQuickAccessClick = useCallback(async () => {
+    await onQuickAccessClick();
+  }, [onQuickAccessClick]);
 
   const handleTriggerClick = useCallback(() => {
     setIsOpen(true);
@@ -253,6 +289,21 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                       </button>
                     </div>
                   </section>
+                  {isMobile ? (
+                    <section className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                      <p className="text-[0.65rem] uppercase tracking-[0.3em] text-text-muted">Acceso rápido</p>
+                      <button
+                        type="button"
+                        onClick={handleQuickAccessClick}
+                        disabled={isStandalone}
+                        className="mt-3 flex w-full items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-left text-sm font-semibold text-white/90 transition hover:border-white/40 hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-80"
+                      >
+                        <span>{isStandalone ? 'Acceso rápido activo' : 'Añadir acceso rápido'}</span>
+                        {isStandalone ? <span aria-hidden="true">✓</span> : null}
+                      </button>
+                      {toast ? <ToastBanner tone={toast.tone} message={toast.message} className="mt-3" /> : null}
+                    </section>
+                  ) : null}
                 </div>
                 <button
                   type="button"
@@ -261,6 +312,29 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                 >
                   Cerrar sesión
                 </button>
+                {iosInstructionsOpen && isIOS ? (
+                  <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Cómo añadir acceso rápido en iOS"
+                    className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/20 bg-[#000c40] p-4 shadow-2xl"
+                  >
+                    <p className="text-sm font-semibold text-white">Añadir acceso rápido</p>
+                    <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-white/85">
+                      <li>Toca Compartir ⎋</li>
+                      <li>Añadir a pantalla de inicio ✚</li>
+                      <li>Añadir</li>
+                    </ol>
+                    {/* iOS Safari y navegadores iOS no permiten abrir Share Sheet ni instalar de forma programática. */}
+                    <button
+                      type="button"
+                      onClick={closeIosInstructions}
+                      className="mt-3 w-full rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-sm text-white"
+                    >
+                      Entendido
+                    </button>
+                  </div>
+                ) : null}
               </motion.div>
             </motion.div>
           ) : null}
