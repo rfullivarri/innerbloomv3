@@ -3,9 +3,8 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { isStandaloneMode } from '../../lib/pwa';
 import { OFFICIAL_LANDING_CSS_VARIABLES } from '../../content/officialDesignTokens';
 
-const SPLASH_VISIBILITY_MULTIPLIER = 1.3;
-const MIN_DURATION_MS = Math.round(450 * SPLASH_VISIBILITY_MULTIPLIER);
-const MAX_DURATION_MS = Math.round(1200 * SPLASH_VISIBILITY_MULTIPLIER);
+const MIN_DURATION_MS = 450;
+const MAX_DURATION_MS = 1200;
 
 interface StandaloneSplashProps {
   onDone?: () => void;
@@ -97,13 +96,13 @@ export function StandaloneSplash({ onDone }: StandaloneSplashProps) {
               transition={{ duration: flowerDuration, ease: 'easeOut' }}
             />
             <motion.span
-              className="text-2xl font-semibold uppercase tracking-[0.34em] text-white sm:text-3xl"
-              style={{ fontFamily: OFFICIAL_LANDING_CSS_VARIABLES['--font-body'] }}
+              className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
+              style={{ fontFamily: OFFICIAL_LANDING_CSS_VARIABLES['--font-heading'] }}
               initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
               animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ duration: textDuration, delay: textDelay, ease: 'easeOut' }}
             >
-              INNERBLOOM
+              Innerbloom
             </motion.span>
           </div>
         </motion.div>
