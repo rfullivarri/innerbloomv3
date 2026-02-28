@@ -232,6 +232,16 @@ export default function DashboardV3Page() {
     reminderSchedulerDialogRef.current?.open();
   }, []);
 
+  const handleDailyQuestComplete = useCallback(
+    (response: Parameters<typeof feedbackNotifications.handleDailyQuestResult>[0]) => {
+      feedbackNotifications.handleDailyQuestResult(response);
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+      }
+    },
+    [feedbackNotifications],
+  );
+
   useEffect(() => {
     if (
       !backendUserId ||
@@ -332,7 +342,7 @@ export default function DashboardV3Page() {
           enabled={Boolean(backendUserId)}
           canAutoOpen={dailyQuestReadiness.canShowDailyQuestPopup}
           returnFocusRef={dailyButtonRef}
-          onComplete={feedbackNotifications.handleDailyQuestResult}
+          onComplete={handleDailyQuestComplete}
         />
         <ReminderSchedulerDialog
           ref={reminderSchedulerDialogRef}
