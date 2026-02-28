@@ -6,9 +6,10 @@ import {
   getDailyReminderSettings,
   updateDailyReminderSettings,
 } from '../../lib/api';
-import { TimezoneOption, filterTimezoneOptions, getTimezoneCatalog, resolveDefaultTimezone } from '../../lib/timezones';
+import { TimezoneOption, getTimezoneCatalog, resolveDefaultTimezone } from '../../lib/timezones';
 import { Skeleton } from '../common/Skeleton';
 import { ToastBanner } from '../common/ToastBanner';
+import { TimezoneCombobox } from '../common/TimezoneCombobox';
 
 const DEFAULT_TIME = '09:00';
 const LOAD_ERROR_MESSAGE = 'No pudimos cargar tus recordatorios.';
@@ -80,7 +81,6 @@ export function DailyReminderSettings() {
   const [initialState, setInitialState] = useState<ReminderFormState | null>(null);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle');
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [timezoneSearch, setTimezoneSearch] = useState('');
   const { data, status, error, reload } = useRequest(getDailyReminderSettings, []);
   const [timezoneCatalog] = useState<TimezoneOption[]>(() => getTimezoneCatalog());
 
@@ -102,10 +102,6 @@ export function DailyReminderSettings() {
     }, 3200);
     return () => window.clearTimeout(timeoutId);
   }, [submitStatus]);
-
-  const timezoneOptions = useMemo(() => {
-    return filterTimezoneOptions(timezoneCatalog, timezoneSearch, formState.timezone);
-  }, [formState.timezone, timezoneCatalog, timezoneSearch]);
 
   const isInitialLoading = (status === 'idle' || status === 'loading') && !data && !error;
   const hasBlockingError = status === 'error' && !data;
@@ -239,28 +235,13 @@ export function DailyReminderSettings() {
 
         <label className="space-y-2 text-sm" htmlFor={timezoneFieldId}>
           <span className="block text-xs uppercase tracking-[0.3em] text-text-subtle">Zona horaria</span>
-          <input
-            type="text"
-            value={timezoneSearch}
-            onChange={(event) => setTimezoneSearch(event.target.value)}
-            aria-label="Buscar zona horaria"
-            placeholder="Buscar por ciudad o país"
-            disabled={isSaving}
-            className="w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
-          />
-          <select
+          <TimezoneCombobox
             id={timezoneFieldId}
             value={formState.timezone}
-            onChange={(event) => setFormState((previous) => ({ ...previous, timezone: event.target.value }))}
+            options={timezoneCatalog}
             disabled={isSaving}
-            className="w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
-          >
-            {timezoneOptions.map((zone) => (
-              <option key={zone.value} value={zone.value}>
-                {zone.label}
-              </option>
-            ))}
-          </select>
+            onChange={(timezone) => setFormState((previous) => ({ ...previous, timezone }))}
+          />
         </label>
       </div>
 

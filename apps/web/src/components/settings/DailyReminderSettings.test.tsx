@@ -51,11 +51,12 @@ describe('DailyReminderSettings', () => {
     await user.selectOptions(timeSelect, '10:00');
     await user.click(switchControl);
 
-    const timezoneSearch = screen.getByRole('textbox', { name: /buscar zona horaria/i });
-    await user.type(timezoneSearch, 'argentina');
+    const timezoneCombobox = screen.getByRole('combobox', { name: /zona horaria/i });
+    await user.click(timezoneCombobox);
+    await user.type(timezoneCombobox, 'argentina');
 
-    const timezoneSelect = screen.getByRole('combobox', { name: /zona horaria/i });
-    await user.selectOptions(timezoneSelect, 'America/Argentina/Buenos_Aires');
+    const timezoneOption = await screen.findByRole('option', { name: /buenos aires/i });
+    await user.click(timezoneOption);
 
     const submitButton = screen.getByRole('button', { name: /guardar cambios/i });
     expect(submitButton).not.toBeDisabled();
