@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Checklist } from '../ui/Checklist';
 import { NavButtons } from '../ui/NavButtons';
 import { ModeQuestionTitle } from '../ui/ModeQuestionTitle';
+import { XpBonusChip } from '../ui/XpBonusChip';
 
 interface ChecklistStepProps {
   title: string;
@@ -17,6 +18,7 @@ interface ChecklistStepProps {
   openValue?: string;
   onOpenChange?: (value: string) => void;
   openLabel?: string;
+  openBonusXp?: number;
 }
 
 export function ChecklistStep({
@@ -33,9 +35,11 @@ export function ChecklistStep({
   openValue,
   onOpenChange,
   openLabel,
+  openBonusXp = 8,
 }: ChecklistStepProps) {
   const ready = selected.length >= 1;
   const showOpen = typeof onOpenChange === 'function';
+  const isOpenActive = (openValue ?? '').trim().length > 0;
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
@@ -55,8 +59,9 @@ export function ChecklistStep({
         </div>
         {showOpen ? (
           <div className="mt-6">
-            <label className="block text-sm font-medium text-white/80">
-              {openLabel ?? '¿Quieres comentar o sumar algo más?'}
+            <label className="flex items-center justify-between gap-3 text-sm font-medium text-white/80">
+              <span>{openLabel ?? '¿Quieres comentar o sumar algo más?'}</span>
+              <XpBonusChip bonus={openBonusXp} active={isOpenActive} />
             </label>
             <textarea
               value={openValue ?? ''}
