@@ -45,8 +45,13 @@ const PILLAR_META: Record<PillarKey, { icon: string }> = {
 
 function ModeBadge({ mode }: { mode: GameMode | null }) {
   if (!mode) {
+    const style = { '--chip-accent': 'rgba(148, 163, 184, 0.35)' } as CSSProperties;
+
     return (
-      <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/60">
+      <span
+        className="onboarding-mode-chip inline-flex shrink-0 items-center whitespace-nowrap px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/70"
+        style={style}
+      >
         Elegí tu Game Mode
       </span>
     );
@@ -57,7 +62,7 @@ function ModeBadge({ mode }: { mode: GameMode | null }) {
 
   return (
     <span
-      className="onboarding-mode-chip inline-flex items-center gap-2 px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/85 shadow-[0_0_18px_rgba(8,12,24,0.5)] ring-1 ring-white/10"
+      className="onboarding-mode-chip inline-flex shrink-0 items-center gap-2 whitespace-nowrap px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/85 shadow-[0_0_18px_rgba(8,12,24,0.5)] ring-1 ring-white/10"
       style={style}
     >
       <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: meta.dot }} />
