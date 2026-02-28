@@ -10,6 +10,7 @@ import {
 } from '../repositories/feedback-definitions.repository.js';
 import { loadUserLevelSummary } from './userLevelSummaryService.js';
 import {
+  isWeeklyWrappedEligibleForSubmission,
   maybeGenerateWeeklyWrappedForDate,
   shouldGenerateWeeklyWrappedForSubmission,
 } from './weeklyWrappedService.js';
@@ -894,13 +895,17 @@ export async function submitDailyQuest(
   }
 
   try {
-    const shouldGenerateWeeklyWrapped = await shouldGenerateWeeklyWrappedForSubmission(
-      userId,
-      date,
-    );
+    const isWeeklyWrappedEligible = await isWeeklyWrappedEligibleForSubmission(userId, date);
 
-    if (shouldGenerateWeeklyWrapped) {
-      await maybeGenerateWeeklyWrappedForDate(userId, date);
+    if (isWeeklyWrappedEligible) {
+      const shouldGenerateWeeklyWrapped = await shouldGenerateWeeklyWrappedForSubmission(
+        userId,
+        date,
+      );
+
+      if (shouldGenerateWeeklyWrapped) {
+        await maybeGenerateWeeklyWrappedForDate(userId, date);
+      }
     }
   } catch (error) {
     log?.('warn', 'Failed to build weekly wrapped after daily quest submit', {

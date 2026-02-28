@@ -219,6 +219,46 @@ export async function shouldGenerateWeeklyWrappedForSubmission(
   return !existing;
 }
 
+type WeeklyWrappedEligibilityRow = {
+  first_tasks_confirmed: boolean;
+  first_tasks_confirmed_at: Date | string | null;
+};
+
+export async function isWeeklyWrappedEligibleForSubmission(
+  userId: string,
+  referenceDate: string,
+): Promise<boolean> {
+  const referenceDay = startOfDay(parseDate(referenceDate));
+
+  const result = await pool.query<WeeklyWrappedEligibilityRow>(
+    `SELECT first_tasks_confirmed,
+            first_tasks_confirmed_at
+       FROM users
+      WHERE user_id = $1
+      LIMIT 1`,
+    [userId],
+  );
+
+  if (result.rowCount === 0) {
+    throw new HttpError(404, 'user_not_found', 'User not found');
+  }
+
+  const eligibility = result.rows[0];
+
+  if (!eligibility.first_tasks_confirmed || !eligibility.first_tasks_confirmed_at) {
+    return false;
+  }
+
+  const firstTasksConfirmedAt = new Date(eligibility.first_tasks_confirmed_at);
+  if (Number.isNaN(firstTasksConfirmedAt.getTime())) {
+    return false;
+  }
+
+  const firstTasksConfirmedDay = startOfDay(firstTasksConfirmedAt);
+  const elapsedMs = referenceDay.getTime() - firstTasksConfirmedDay.getTime();
+  return elapsedMs >= 7 * MS_IN_DAY;
+}
+
 function parseDate(input: string): Date {
   const parsed = new Date(`${input}T00:00:00Z`);
   if (Number.isNaN(parsed.getTime())) {
