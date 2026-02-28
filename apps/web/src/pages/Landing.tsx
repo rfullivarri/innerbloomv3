@@ -518,14 +518,6 @@ export default function LandingPage() {
     modeThumbTouchStartXRef.current = null;
   };
 
-  const handlePricingCta = () => {
-    if (isSignedIn) {
-      navigate('/dashboard');
-      return;
-    }
-
-    navigate('/intro-journey');
-  };
   const faqJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -843,15 +835,10 @@ export default function LandingPage() {
                 >
                   {plan.id === 'YEAR' ? <span className="pricing-best-deal-chip">best deal</span> : null}
                   <p className="pricing-plan-name">{plan.name}</p>
-                  <p className="pricing-plan-price">{plan.price}</p>
                   <p className="pricing-plan-detail">{plan.detail}</p>
+                  <p className="pricing-plan-price">{plan.price}</p>
                 </article>
               ))}
-            </div>
-            <div className="pricing-primary-cta-wrap">
-              <button type="button" className={buttonClasses()} onClick={handlePricingCta}>
-                {copy.pricing.actionLabel}
-              </button>
             </div>
           </div>
         </section>
