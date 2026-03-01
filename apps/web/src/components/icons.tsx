@@ -60,3 +60,21 @@ export function Sprout(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+
+export function ArrowRight(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...baseIconProps} {...props}>
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  );
+}
+
+export function ArrowUp(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...baseIconProps} {...props}>
+      <path d="M12 19V5" />
+      <path d="m5 12 7-7 7 7" />
+    </svg>
+  );
+}

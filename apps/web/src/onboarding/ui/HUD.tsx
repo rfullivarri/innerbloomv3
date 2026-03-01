@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import type { CSSProperties } from 'react';
 import type { OnboardingLanguage } from '../constants';
 import type { GameMode, XP } from '../state';
+import { GpProgressBar } from './GpProgressBar';
 
 interface HUDProps {
   language?: OnboardingLanguage;
@@ -137,19 +138,7 @@ export function HUD({ language = 'es', mode, stepIndex, totalSteps, xp, highligh
               ) : null}
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-white/10">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${safeProgress}%` }}
-                transition={{ duration: 0.24, ease: 'easeOut' }}
-                className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-sky-400 to-violet-500 progress-fill--typing"
-              />
-            </div>
-            <div className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-white/80">
-              {Math.round(xp.total)} GP
-            </div>
-          </div>
+          <GpProgressBar progress={safeProgress} totalGp={Math.round(xp.total)} />
           <div className="flex items-center gap-2">
             {(Object.keys(PILLAR_META) as PillarKey[]).map((pillar) => (
               <MiniPillarBar key={pillar} icon={PILLAR_META[pillar].icon} value={xp[pillar]} />
