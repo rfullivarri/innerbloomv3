@@ -38,7 +38,7 @@ export function MissionsSection({ userId }: MissionsSectionProps) {
               <p className="text-xs text-slate-400">Rasgo: {task.traitId ?? '—'}</p>
               <p className="text-xs text-slate-400">Stat: {task.statId ?? '—'}</p>
               {task.xp != null && (
-                <p className="text-xs text-slate-400">XP base: {task.xp}</p>
+                <p className="text-xs text-slate-400">GP base: {task.xp}</p>
               )}
               <p className="text-xs text-slate-400">Constancia requerida: próximamente</p>
               <button

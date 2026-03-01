@@ -3,6 +3,7 @@ import { Card } from '../ui/Card';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserLevel, getUserTotalXp } from '../../lib/api';
+import { formatGp } from '../../lib/points';
 import { GameModeChip, buildGameModeChip } from '../common/GameModeChip';
 
 interface MetricHeaderProps {
@@ -58,7 +59,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
   const xpToNextMessage = showContent
     ? data.xpToNext === null
       ? '✨ Alcanzaste el nivel máximo disponible en esta etapa.'
-      : `✨ Te faltan ${formatInteger(data.xpToNext)} XP para el próximo nivel`
+      : `✨ Te faltan ${formatGp(formatInteger(data.xpToNext))} para el próximo nivel`
     : '';
   const levelLabel = showContent ? formatInteger(data.currentLevel) : '—';
   const totalXpLabel = showContent ? formatInteger(data.xpTotal) : '—';
@@ -106,7 +107,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
 
       {showError && (
         <div className="flex flex-col gap-3 text-sm text-rose-200">
-          <p>No pudimos conectar con el servicio de XP. Probá actualizar más tarde.</p>
+          <p>No pudimos conectar con el servicio de GP. Probá actualizar más tarde.</p>
           <p className="text-xs text-rose-200/70">Los datos de progreso se recalculan automáticamente cada pocas horas.</p>
         </div>
       )}
@@ -120,7 +121,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
                 <div className="flex flex-col items-center text-center">
                   <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{totalXpLabel}</span>
                   <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                    Total XP
+                    Total GP
                   </span>
                 </div>
               </div>

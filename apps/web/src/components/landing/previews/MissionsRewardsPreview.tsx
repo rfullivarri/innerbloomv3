@@ -8,7 +8,7 @@ export function MissionsRewardsPreview({ language = 'es' }: { language?: Languag
   const activeLabel = language === 'es' ? 'Misión activa' : 'Active mission';
   const missionTitle = language === 'es' ? 'Reforzar hábito matinal' : 'Strengthen morning habit';
   const streakBonus = language === 'es' ? '🔥 Racha +2' : '🔥 Streak +2';
-  const xpBonus = language === 'es' ? '🎁 120 XP Bonus' : '🎁 120 XP Bonus';
+  const xpBonus = language === 'es' ? '🎁 120 GP Bonus' : '🎁 120 GP Bonus';
   const progressLabel = language === 'es' ? 'Progreso de misión' : 'Mission progress';
 
   return (

@@ -230,7 +230,7 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
   return (
     <Card
       title="🧿 Radar Chart"
-      subtitle="XP · total acumulado"
+      subtitle="GP · total acumulado"
       rightSlot={
         <InfoDotTarget id="radar" placement="right" className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
@@ -259,7 +259,7 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
               ) : (
                 <div className="flex h-[260px] w-full max-w-[420px] items-center justify-center text-center text-sm text-slate-200/80">
                   <p className="px-6 leading-relaxed">
-                    Todavía no registraste XP por rasgo. Completá misiones para ver cómo evoluciona tu radar.
+                    Todavía no registraste GP por rasgo. Completá misiones para ver cómo evoluciona tu radar.
                   </p>
                 </div>
               )}
@@ -330,7 +330,7 @@ function Radar({ dataset }: RadarProps) {
       viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
       className="h-auto w-full max-w-[420px]"
       role="img"
-      aria-label="Radar de XP por rasgo"
+      aria-label="Radar de GP por rasgo"
     >
       <defs>
         <radialGradient id="radarGlow" cx="50%" cy="50%" r="50%">

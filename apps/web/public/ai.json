@@ -21,12 +21,12 @@
   },
   "positioning": {
     "one_liner": "Innerbloom convierte hábitos diarios en un journey gamificado de progreso visible con equilibrio entre Cuerpo, Mente y Alma.",
-    "one_paragraph": "Innerbloom Journey es una experiencia de self-improvement donde cada persona define su camino inicial, recibe una base personalizada con IA en menos de 3 minutos y sostiene el avance con un loop diario: retrospectiva emocional, quest diaria y métricas de progreso (XP, nivel, rachas, consistencia, misiones y recompensas). El producto se adapta a la energía real del momento para facilitar constancia sin culpa.",
+    "one_paragraph": "Innerbloom Journey es una experiencia de self-improvement donde cada persona define su camino inicial, recibe una base personalizada con IA en menos de 3 minutos y sostiene el avance con un loop diario: retrospectiva emocional, quest diaria y métricas de progreso (GP, nivel, rachas, consistencia, misiones y recompensas). El producto se adapta a la energía real del momento para facilitar constancia sin culpa.",
     "five_bullets": [
       "IA para activar rápido una base personalizada Body/Mind/Soul.",
       "4 modos (Low, Chill, Flow, Evolve) para ajustar el sistema a tu energía actual.",
       "Loop diario de Daily Quest + emociones para transformar reflexión en acción.",
-      "Dashboard con métricas de progreso visibles: XP, nivel, rachas y mapa emocional.",
+      "Dashboard con métricas de progreso visibles: GP, nivel, rachas y mapa emocional.",
       "Enfoque de equilibrio integral para sostener hábitos semanas y meses, no solo días."
     ]
   },
@@ -34,7 +34,7 @@
     "for_who": [
       "Personas que quieren mejorar hábitos con estructura clara y feedback diario.",
       "Usuarios que alternan energía/estado y necesitan adaptar intensidad sin abandonar.",
-      "Perfiles que valoran ver progreso en métricas gamificadas (XP, nivel, rachas).",
+      "Perfiles que valoran ver progreso en métricas gamificadas (GP, nivel, rachas).",
       "Quienes buscan un enfoque integral Body/Mind/Soul, no solo productividad."
     ],
     "not_for_who": [
@@ -53,7 +53,7 @@
     "available": true,
     "items": [
       "Tiempo de activación inicial: base personalizada con IA en menos de 3 minutos.",
-      "Métricas visibles de avance: XP, nivel, rachas, consistencia semanal y mapa emocional."
+      "Métricas visibles de avance: GP, nivel, rachas, consistencia semanal y mapa emocional."
     ],
     "note": "No se publican porcentajes de mejora ni benchmarks clínicos en la landing oficial."
   },
@@ -66,7 +66,7 @@
     {
       "feature": "🪫 LOW MOOD",
       "what_it_does": "Modo pensado para cuando estás sin energía, abrumado.",
-      "why_it_matters": "activar tu mínimo vital con acciones pequeñas y sostenibles."
+      "why_it_matters": "activar tu mínimo vital con tareas pequeñas y sostenibles."
     },
     {
       "feature": "🍃 CHILL MOOD",
@@ -81,7 +81,7 @@
     {
       "feature": "🧬 EVOLVE MOOD",
       "what_it_does": "Modo pensado para cuando estás ambicioso y determinado.",
-      "why_it_matters": "sistema retador con Hábitos Atómicos, misiones y recompensas."
+      "why_it_matters": "sostener un ritmo desafiante con estructura y tareas diarias claras."
     },
     {
       "feature": "Daily Quest + registro emocional",
@@ -90,7 +90,7 @@
     },
     {
       "feature": "Dashboard gamificado de progreso",
-      "what_it_does": "Muestra XP, nivel, rachas, consistencia y progreso en misiones/recompensas.",
+      "what_it_does": "Muestra GP, nivel, rachas, consistencia y progreso en misiones/recompensas.",
       "why_it_matters": "Hace visible el avance y fortalece motivación por evidencia, no por impulso momentáneo."
     },
     {
@@ -102,51 +102,73 @@
   "onboarding_narrative": [
     {
       "step": 1,
-      "title": "Define tu camino",
-      "experience": "Responde una serie de preguntas, setea tu modo de juego; nosotros generaremos tu base (Body/Mind/Soul) con IA.",
+      "title": "Comienzas con un diagnóstico breve",
+      "experience": "Respondes unas preguntas sobre energía, prioridades y momento actual (2–3 min). Un punto de partida claro + tu primer plan personalizado.",
       "outcome": "Entrás con dirección y un modo alineado a tu energía."
     },
     {
       "step": 2,
-      "title": "Activa tu base",
-      "experience": "Recibís tu “pergamino digital” por mail y editás/confirmás tu base.",
+      "title": "Recibes un plan en 3 pilares",
+      "experience": "Revisas tareas sugeridas en Cuerpo, Mente y Alma. Una rutina equilibrada, concreta y fácil de sostener.",
       "outcome": "Salís con una base concreta para comenzar hoy."
     },
     {
       "step": 3,
-      "title": "Daily Quest + Emociones",
-      "experience": "Con tu quest diaria vas a poder hacer una retrospectiva de tu día anterior; pensarás en qué emoción prevaleció más durante tu día.",
+      "title": "Lo adaptas a tu realidad",
+      "experience": "Editas, cambias o descartas tareas; eliges modo y avatar según cómo estés hoy. Un plan realmente tuyo (la IA propone, tú decides).",
       "outcome": "Convertís tu día en aprendizaje práctico y señal accionable."
     },
     {
       "step": 4,
-      "title": "XP, Rachas y Recompensas",
-      "experience": "Seguís tu crecimiento acumulando experiencia (XP), moviendo tu constancia semanal, desafiándote a nuevas misiones y obteniendo recompensas.",
+      "title": "Lo aplicas en pocos minutos al día",
+      "experience": "Completas microacciones diarias (3–5 min) con enfoque simple y realista. Constancia sin saturarte y progreso visible semana a semana.",
+      "outcome": "Visualizás progreso acumulado y próximos desafíos."
+    },
+    {
+      "step": 5,
+      "title": "Registras cómo te sientes y recalibras",
+      "experience": "Registras tu emoción y estado diario en segundos. Recomendaciones ajustadas a tu momento + continuidad del proceso.",
       "outcome": "Visualizás progreso acumulado y próximos desafíos."
     }
   ],
   "objections_faq": [
     {
       "objection": "¿Necesito mucha disciplina para empezar?",
-      "answer": "No. Si estás con poca energía, empezás en Low para activar el mínimo vital. El sistema ajusta el ritmo."
+      "answer": "No. Si estás con poca energía, empezás en Low con micro hábitos para activar el mínimo vital. La gestión de hábitos se adapta a tu ritmo."
     },
     {
       "objection": "¿Puedo cambiar de modo de juego?",
-      "answer": "Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento."
+      "answer": "Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento y tu energía diaria."
     },
     {
-      "objection": "¿Dónde veo mis métricas?",
-      "answer": "En tu archivo y en el Dashboard: XP, nivel, rachas y mapa emocional."
+      "objection": "¿Dónde veo mi progreso?",
+      "answer": "En tu archivo y en el Dashboard: ves tus tareas, tu seguimiento de hábitos, tu registro emocional (mood tracking) y tu equilibrio general."
     },
     {
       "objection": "¿Qué pasa si dejo de registrar?",
-      "answer": "No perdés progreso. Retomas cuando quieras y ajustamos objetivos a tu energía actual."
+      "answer": "No perdés progreso. Retomás cuando quieras y ajustamos el plan a tu energía actual para recuperar constancia."
+    },
+    {
+      "objection": "¿Innerbloom es un habit tracker o un planificador diario?",
+      "answer": "Ambas cosas. Funciona como habit tracker (seguimiento de hábitos) y como planificador diario liviano: convertís tu energía del día en acciones simples y sostenibles."
+    },
+    {
+      "objection": "¿Cómo funciona el registro emocional (mood tracking)?",
+      "answer": "Registrás tu emoción/estado en segundos. Ese registro emocional diario ayuda a que las sugerencias y el ritmo del plan se mantengan alineados con cómo estás."
+    },
+    {
+      "objection": "¿Qué son los micro hábitos y por qué ayudan?",
+      "answer": "Son acciones pequeñas y realistas (2–10 min) que reducen fricción y aumentan constancia. Son ideales para construir hábitos sostenibles sin saturarte."
+    },
+    {
+      "objection": "¿Innerbloom es una app de productividad o de bienestar?",
+      "answer": "Está enfocada en bienestar emocional y hábitos sostenibles, pero naturalmente mejora tu productividad al darte foco, estructura y seguimiento diario."
     }
   ],
   "design_dossier": {
     "unique_look": [
       "Estética nocturna/espacial con gradientes fríos y acentos violeta-cyan que comunican introspección + progreso.",
-      "Lenguaje visual de juego (moods, XP, misiones) aplicado a self-improvement, con tono emocional y no punitivo.",
+      "Lenguaje visual de juego (moods, GP, misiones) aplicado a self-improvement, con tono emocional y no punitivo.",
       "Combinación tipográfica Sora (titulares) + Manrope (cuerpo) para balance entre personalidad y legibilidad."
     ],
     "do_not_change": [
@@ -177,7 +199,7 @@
   "provenance_note": {
     "derived_from_official_landing": [
       "Propuesta de valor general, pilares Body/Mind/Soul, modos, flujo de onboarding y FAQs.",
-      "Métricas visibles mencionadas: XP, nivel, rachas, consistencia, mapa emocional, misiones y recompensas.",
+      "Métricas visibles mencionadas: GP, nivel, rachas, consistencia, mapa emocional, misiones y recompensas.",
       "Claim temporal explícito: base personalizada con IA en menos de 3 minutos."
     ],
     "recommendations": [
@@ -194,8 +216,8 @@
     "llms": "https://innerbloom.org/llms.txt"
   },
   "versioning": {
-    "version": "0144b1c",
-    "lastUpdated": "2026-02-22T11:16:37.114Z"
+    "version": "0cdde29",
+    "lastUpdated": "2026-03-01T17:37:40.378Z"
   },
   "design_tokens": {
     "palette": {
@@ -252,6 +274,96 @@
           "rgba(139,92,246,0.14)",
           "rgba(14,165,233,0.12)",
           "rgba(59,130,246,0.08)"
+        ]
+      },
+      {
+        "name": "curiosity_blue",
+        "type": "linear",
+        "angle": "135deg",
+        "stops": [
+          "#525252",
+          "#3d72b4"
+        ]
+      },
+      {
+        "name": "endless_river",
+        "type": "linear",
+        "angle": "135deg",
+        "stops": [
+          "#43cea2",
+          "#185a9d"
+        ]
+      },
+      {
+        "name": "amethyst",
+        "type": "linear",
+        "angle": "135deg",
+        "stops": [
+          "#9d50bb",
+          "#6e48aa"
+        ]
+      },
+      {
+        "name": "dirty_fog",
+        "type": "linear",
+        "angle": "135deg",
+        "stops": [
+          "#b993d6",
+          "#8ca6db"
+        ]
+      },
+      {
+        "name": "purple_paradise",
+        "type": "linear",
+        "angle": "135deg",
+        "stops": [
+          "#1d2b64",
+          "#f8cdda"
+        ]
+      },
+      {
+        "name": "color_1",
+        "type": "linear",
+        "angle": "135deg",
+        "stops": [
+          "#ff512f",
+          "#dd2476"
+        ]
+      },
+      {
+        "name": "color_2",
+        "type": "linear",
+        "angle": "135deg",
+        "stops": [
+          "#348f50",
+          "#56b4d3"
+        ]
+      },
+      {
+        "name": "purple_love",
+        "type": "linear",
+        "angle": "135deg",
+        "stops": [
+          "#cc2b5e",
+          "#753a88"
+        ]
+      },
+      {
+        "name": "afternoon",
+        "type": "linear",
+        "angle": "135deg",
+        "stops": [
+          "#000c40",
+          "#607d8b"
+        ]
+      },
+      {
+        "name": "purple_afternoon",
+        "type": "linear",
+        "angle": "135deg",
+        "stops": [
+          "#000c40",
+          "#f8cdda"
         ]
       }
     ],

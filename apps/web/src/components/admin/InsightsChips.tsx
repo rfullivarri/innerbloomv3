@@ -36,12 +36,12 @@ export function InsightsChips({ insights, loading }: InsightsProps) {
         <p className="text-xs uppercase tracking-[0.2em] text-sky-200">Nivel</p>
         <p className="mt-2 text-3xl font-bold text-sky-50">{level.level}</p>
         <p className="mt-1 text-xs text-sky-100/80">
-          {level.xpCurrent} XP · {level.xpToNext} para el siguiente nivel
+          {level.xpCurrent} GP · {level.xpToNext} para el siguiente nivel
         </p>
       </div>
 
       <div className="rounded-xl border border-slate-800/70 bg-gradient-to-br from-emerald-500/15 to-teal-500/10 p-4 shadow-sm">
-        <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">XP</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">GP</p>
         <p className="mt-2 text-lg font-semibold text-emerald-50">Total {xp.total}</p>
         <p className="mt-1 text-xs text-emerald-100/80">30d: {xp.last30d} · 90d: {xp.last90d}</p>
         <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-emerald-100/80">

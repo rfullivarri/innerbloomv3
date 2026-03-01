@@ -424,7 +424,7 @@ function getRewardCopy(slot: MissionsV2Slot): string {
   }
   const currency = reward.currency ?? 0;
   const items = reward.items?.length ? ` · ${reward.items.join(' + ')}` : '';
-  return `${reward.xp} XP · ${currency} Monedas${items}`;
+  return `${reward.xp} GP · ${currency} Monedas${items}`;
 }
 
 function missionToMarketProposal(slot: MissionsV2Slot): RealMarketProposal | null {
@@ -463,7 +463,7 @@ function formatProposalReward(proposal: RealMarketProposal): string {
   const { reward } = proposal;
   const currency = reward.currency ?? 0;
   const items = reward.items.length > 0 ? ` · ${reward.items.join(' + ')}` : '';
-  return `${reward.xp} XP · ${currency} Monedas${items}`;
+  return `${reward.xp} GP · ${currency} Monedas${items}`;
 }
 
 function humanizeMetadataValue(value: string): string {
@@ -533,7 +533,7 @@ function makeMockProposals(slot: MissionsV2Slot['slot']): MockMissionProposal[] 
     id: `${slot}-${index}`,
     title: MOCK_MISSION_TITLES[index % MOCK_MISSION_TITLES.length]!,
     summary: 'Brief one-sentence mission summary.',
-    reward: `${(index + 1) * 50} XP • ${8 + index} Coins`,
+    reward: `${(index + 1) * 50} GP • ${8 + index} Coins`,
     difficulty: ['easy', 'medium', 'high'][index % 3]!,
     objective: 'Complete the core objective for this mock mission.',
     objectives: ['Primer entregable', 'Segundo entregable'],
@@ -690,11 +690,11 @@ function ClaimModal({
             </div>
             {!prefersReducedMotion && <span className="missions-claim-confetti" aria-hidden="true" />}
             <p className="text-sm text-slate-200">
-              Tesoro protegido: XP, amuletos y monedas listos para tu vitrina.
+              Tesoro protegido: GP, amuletos y monedas listos para tu vitrina.
             </p>
             <ul className="missions-claim-loot">
               <li className="missions-claim-loot__item">
-                <span className="font-semibold">XP</span>
+                <span className="font-semibold">GP</span>
                 <span>{state.rewards.xp}</span>
               </li>
               <li className="missions-claim-loot__item">
@@ -3971,7 +3971,7 @@ export function MissionsV3Board({
             <SummaryBadge
               icon="💎"
               label="Botín asignado"
-              value={`${slotMetrics.xp.toLocaleString()} XP · ${slotMetrics.currency.toLocaleString()} monedas`}
+              value={`${slotMetrics.xp.toLocaleString()} GP · ${slotMetrics.currency.toLocaleString()} monedas`}
               hint="Incluye las tres rutas activas."
             />
           </div>

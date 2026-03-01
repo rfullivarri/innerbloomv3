@@ -618,7 +618,7 @@ export async function buildWeeklyWrappedFromData(
         title: 'Resumen 7 días',
         body:
           completions > 0
-            ? `Completaste ${completions} tareas y sumaste ${xpTotal.toLocaleString('es-AR')} XP en los últimos 7 días.`
+            ? `Completaste ${completions} tareas y sumaste ${xpTotal.toLocaleString('es-AR')} GP en los últimos 7 días.`
             : 'Últimos 7 días tranquilos: sin registros fuertes, pero el reset también suma.',
         accent: completions > 0 ? 'Datos reales' : '7 días livianos',
       },
@@ -996,7 +996,7 @@ function buildMockWeeklyWrapped(forceLevelUpMock?: boolean): WeeklyWrappedPayloa
         {
           key: 'achievements',
           title: 'Resumen 7 días',
-          body: 'Completaste 3 tareas y sumaste 320 XP en los últimos 7 días.',
+          body: 'Completaste 3 tareas y sumaste 320 GP en los últimos 7 días.',
           accent: 'Datos reales',
         },
         {

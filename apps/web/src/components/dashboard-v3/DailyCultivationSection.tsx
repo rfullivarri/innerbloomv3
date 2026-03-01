@@ -111,7 +111,7 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
   return (
     <Card
       title="🪴 Daily Cultivation"
-      subtitle="Tendencia mensual de XP"
+      subtitle="Tendencia mensual de GP"
       rightSlot={
         <InfoDotTarget id="dailyCultivation" placement="left" className="ml-auto inline-flex items-center gap-2">
           {buckets.length > 0 ? (
@@ -138,11 +138,11 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
       )}
 
       {status === 'error' && (
-        <p className="text-sm text-rose-300">No pudimos cargar tus XP diarios.</p>
+        <p className="text-sm text-rose-300">No pudimos cargar tus GP diarios.</p>
       )}
 
       {status === 'success' && (!activeBucket || activeBucket.days.length === 0) && (
-        <p className="text-sm text-slate-400">Todavía no registraste XP este mes.</p>
+        <p className="text-sm text-slate-400">Todavía no registraste GP este mes.</p>
       )}
 
       {status === 'success' && activeBucket && activeBucket.days.length > 0 && (
@@ -152,10 +152,10 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
             <span>
-              Total XP del mes: <span className="font-semibold text-slate-100">{formatNumber(monthlySummary.total)}</span>
+              Total GP del mes: <span className="font-semibold text-slate-100">{formatNumber(monthlySummary.total)}</span>
             </span>
             <span>
-              Promedio diario: <span className="font-semibold text-slate-100">{formatNumber(monthlySummary.average)}</span> XP
+              Promedio diario: <span className="font-semibold text-slate-100">{formatNumber(monthlySummary.average)}</span> GP
             </span>
           </div>
         </div>
@@ -308,7 +308,7 @@ function LineChart({ days }: LineChartProps) {
             stroke="#1F2937"
             strokeWidth={1.5}
           >
-            <title>{`${getIsoDateLabel(point.day)}: ${point.day.xp_day} XP`}</title>
+            <title>{`${getIsoDateLabel(point.day)}: ${point.day.xp_day} GP`}</title>
           </circle>
         ))}
       </svg>

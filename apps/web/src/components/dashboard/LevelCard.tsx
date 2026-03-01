@@ -3,6 +3,7 @@ import { ProgressBar } from '../common/ProgressBar';
 import { Skeleton } from '../common/Skeleton';
 import { useRequest } from '../../hooks/useRequest';
 import { getProgress, type ProgressSummary } from '../../lib/api';
+import { formatGp } from '../../lib/points';
 
 interface LevelCardProps {
   userId: string;
@@ -29,7 +30,7 @@ export function LevelCard({ userId }: LevelCardProps) {
   return (
     <Card
       title="Level Progress"
-      subtitle="Earn XP by completing your quests"
+      subtitle="Earn GP by completing your quests"
       action={
         <button
           type="button"
@@ -51,7 +52,7 @@ export function LevelCard({ userId }: LevelCardProps) {
 
       {status === 'error' && (
         <div className="space-y-3 text-sm text-rose-300">
-          <p>We couldn’t load your XP right now.</p>
+          <p>We couldn’t load your GP right now.</p>
           <button
             type="button"
             onClick={reload}
@@ -66,12 +67,12 @@ export function LevelCard({ userId }: LevelCardProps) {
       {status === 'success' && data && (
         <div className="space-y-4">
           <div>
-            <p className="text-xs uppercase tracking-wide text-text-subtle">Total XP</p>
+            <p className="text-xs uppercase tracking-wide text-text-subtle">Total GP</p>
             <p className="text-3xl font-semibold text-white">{data.totalXp.toLocaleString()}</p>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm text-text-muted">
             <span className="rounded-full bg-white/5 px-3 py-1 text-sm text-white">Level {data.level}</span>
-            <span className="text-text-subtle">{remaining} XP to next level</span>
+            <span className="text-text-subtle">{formatGp(remaining)} to next level</span>
             {data.nextLevelLabel && <span className="text-text-muted">Next: {data.nextLevelLabel}</span>}
           </div>
           <ProgressBar value={percent} label="Progress to next level" />

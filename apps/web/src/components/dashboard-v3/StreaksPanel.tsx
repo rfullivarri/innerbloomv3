@@ -160,12 +160,12 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
       {status === 'success' && data && (
         <div className="flex flex-col gap-4">
           <p className="text-xs text-slate-400">
-            La API actual aún no expone <code className="rounded bg-white/10 px-1 py-px text-[10px]">daily_log_raw</code>. Listamos tus tareas activas y calculamos el XP semanal total como referencia.
+            La API actual aún no expone <code className="rounded bg-white/10 px-1 py-px text-[10px]">daily_log_raw</code>. Listamos tus tareas activas y calculamos el GP semanal total como referencia.
           </p>
 
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">XP total últimos 7 días</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-100">{weeklyXp.toLocaleString('es-AR')} XP</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">GP total últimos 7 días</p>
+            <p className="mt-2 text-2xl font-semibold text-slate-100">{weeklyXp.toLocaleString('es-AR')} GP</p>
             <p className="mt-1 text-xs text-slate-400">Filtro: {pillarFilter} · Alcance: {scopeFilter === 'week' ? 'Semana' : scopeFilter === 'month' ? 'Mes' : '3 meses'}</p>
           </div>
 
@@ -178,7 +178,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
                     <p className="text-xs text-slate-400">Pilar: {task.pillarId ?? '—'}</p>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-slate-300">
-                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-100">+{task.xp ?? 0} XP</span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-100">+{task.xp ?? 0} GP</span>
                     <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">✓×—</span>
                   </div>
                 </div>

@@ -79,7 +79,7 @@ function MiniPillarBar({ icon, value }: { icon: string; value: number }) {
             className="h-full rounded-full bg-gradient-to-r from-sky-400 via-violet-400 to-fuchsia-400"
           />
         </div>
-        <span className="shrink-0 font-semibold text-white/80">{Math.round(value)} XP</span>
+        <span className="shrink-0 font-semibold text-white/80">{Math.round(value)} GP</span>
       </div>
     </div>
   );
@@ -140,7 +140,7 @@ export function HUD({ language = 'es', mode, stepIndex, totalSteps, xp, onRestar
               />
             </div>
             <div className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-white/80">
-              {Math.round(xp.total)} XP
+              {Math.round(xp.total)} GP
             </div>
           </div>
           <div className="flex items-center gap-2">

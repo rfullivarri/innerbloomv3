@@ -156,7 +156,7 @@ export function RewardsSection({
                 <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-slate-300">
                   <p>Todavía no desbloqueaste recompensas.</p>
                   <p className="text-xs text-slate-400">
-                    Completá misiones y mantené tus streaks activos para sumar XP y alcanzar nuevos hitos.
+                    Completá misiones y mantené tus streaks activos para sumar GP y alcanzar nuevos hitos.
                   </p>
                 </div>
               )}

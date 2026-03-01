@@ -16,17 +16,17 @@ export const infoTips: Record<InfoKey, InfoTip> = {
   xpLevel: {
     title: '¿Qué ves acá?',
     bullets: [
-      '🏆 **XP** = experiencia total acumulada.',
-      '🎯 **Level** sube al alcanzar el umbral de XP.',
+      '🏆 **GP** = experiencia total acumulada.',
+      '🎯 **Level** sube al alcanzar el umbral de GP.',
       '📊 La barra muestra el **progreso al próximo nivel**.',
-      '💡 Cada hábito suma XP: pequeños pasos, gran avance.',
+      '💡 Cada hábito suma GP: pequeños pasos, gran avance.',
     ],
   },
   radar: {
     title: '¿Qué es el Radar Chart?',
     bullets: [
       '📊 Muestra tus **rasgos principales** en Body/Mind/Soul.',
-      '🧭 Cada punto refleja XP acumulada en ese rasgo.',
+      '🧭 Cada punto refleja GP acumulada en ese rasgo.',
       '💡 Útil para ver **balance** y detectar desequilibrios.',
     ],
   },
@@ -51,7 +51,7 @@ export const infoTips: Record<InfoKey, InfoTip> = {
   dailyCultivation: {
     title: '¿Qué es Daily Cultivation?',
     bullets: [
-      '📈 Muestra los **XP** que ganaste cada día del mes.',
+      '📈 Muestra los **GP** que ganaste cada día del mes.',
       '📊 El progreso **no siempre es lineal** (y está bien).',
       '💡 Mirá tendencias y celebrá la constancia.',
     ],
@@ -60,7 +60,7 @@ export const infoTips: Record<InfoKey, InfoTip> = {
     title: '¿Cómo leer “Rachas”?',
     bullets: [
       '🟣 Barra lila: progreso de la **semana actual** vs objetivo (**N×/sem** según el game mode).',
-      '✅ **✓×N** y **+XP**: totales en el **scope** seleccionado (Sem, Mes, 3M).',
+      '✅ **✓×N** y **+GP**: totales en el **scope** seleccionado (Sem, Mes, 3M).',
       '🔥 **Racha diaria**: días consecutivos sin cortar.',
       '🟩 Mini barras verdes (Top-3): semanas del **mes actual** vs objetivo.',
       '🟩 Barras verdes por tarea: Mes → 4–5 columnas (semanas). Verde si esa semana alcanzó el objetivo; 3M → 3 columnas (meses). Verde “llena” si todas las semanas cumplieron.',

@@ -290,7 +290,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
                 hasAchievementStats
                   ? undefined
                   : sectionsByKey.achievements?.body ??
-                    'Completaste 0 tareas y sumaste 0 XP en los últimos 7 días.'
+                    'Completaste 0 tareas y sumaste 0 GP en los últimos 7 días.'
               }
               kicker={sectionsByKey.achievements?.accent}
               stats={{
@@ -525,7 +525,7 @@ function WeeklyKPIHighlight({
       ? 'Tu energía se movió principalmente en modo mixto.'
       : `Tu energía se movió principalmente en el pilar ${pillarLabel}.`;
   const pillarStatsDetail = pillarStats
-    ? `Últimos 7 días: ${formatter.format(pillarStats.xp)} XP · ${formatter.format(pillarStats.completions)} tareas.`
+    ? `Últimos 7 días: ${formatter.format(pillarStats.xp)} GP · ${formatter.format(pillarStats.completions)} tareas.`
     : null;
 
   return (
@@ -563,7 +563,7 @@ function extractSummaryMetrics(
 ): { completions: number; xpTotal: number } | null {
   if (!text) return null;
 
-  const match = text.match(/Completaste\s+([\d\.]+)\s+tareas.*?sumaste\s+([\d\.]+)\s*XP/i);
+  const match = text.match(/Completaste\s+([\d\.]+)\s+tareas.*?sumaste\s+([\d\.]+)\s*GP/i);
   if (!match) return null;
 
   const completions = Number.parseInt(match[1]?.replace(/\./g, '') ?? '', 10);
@@ -851,7 +851,7 @@ function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef }: L
               </p>
               <div className="flex flex-wrap gap-3 text-xs text-slate-200">
                 <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
-                  +{levelUp.xpGained.toLocaleString('es-AR')} XP en los últimos 7 días
+                  +{levelUp.xpGained.toLocaleString('es-AR')} GP en los últimos 7 días
                 </span>
                 <span className="rounded-full border border-white/15 bg-emerald-500/20 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
                   {previousLabel} → {levelLabel}
