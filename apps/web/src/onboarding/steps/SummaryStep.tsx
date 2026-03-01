@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { type ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import type { OnboardingLanguage } from '../constants';
 import type { Answers, GameMode, XP } from '../state';
 import { MODE_CARD_CONTENT } from './GameModeStep';
@@ -21,8 +21,8 @@ function SummarySection({
   subtitle,
   children,
 }: {
-  title: string;
-  subtitle?: string;
+  title: ReactNode;
+  subtitle?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -65,6 +65,20 @@ function TextRow({ label, value }: { label: string; value: ReactNode }) {
       <span className="font-semibold text-white">{label}:</span> {value || '—'}
     </p>
   );
+}
+
+function GpLabel() {
+  return <span className="font-semibold text-white">GP</span>;
+}
+
+function renderWithGp(text: string): ReactNode {
+  const parts = text.split('GP');
+  return parts.map((part, index) => (
+    <Fragment key={`${part}-${index}`}>
+      {part}
+      {index < parts.length - 1 ? <GpLabel /> : null}
+    </Fragment>
+  ));
 }
 
 function ModeChip({ mode }: { mode: GameMode | null }) {
@@ -182,8 +196,12 @@ export function SummaryStep({
         attitude: 'Mindset',
         pillars: 'Pillars',
         pillarsSubtitle: 'Balanced setup across Body, Mind, and Soul',
-        xpTitle: 'GP',
-        xpSubtitle: 'How your progress is distributed',
+        xpEyebrow: 'GP (Growth Points)',
+        xpTitle: 'How your GP balanced out',
+        xpSubtitlePrefix: 'GP reflects your',
+        xpSubtitleEmphasis: 'daily consistency',
+        xpSubtitleSuffix: "Here's the balance across your pillars.",
+        xpMicroNote: 'Every answer earns GP. Every habit does too.',
         total: 'Total',
         start: 'Start your Journey',
       }
@@ -211,8 +229,12 @@ export function SummaryStep({
         attitude: 'Actitud',
         pillars: 'Pilares',
         pillarsSubtitle: 'Configuración equilibrada en Cuerpo, Mente y Alma',
-        xpTitle: 'GP',
-        xpSubtitle: 'Cómo se reparte tu progreso',
+        xpEyebrow: 'GP (Growth Points / Puntos de Crecimiento)',
+        xpTitle: 'Así se equilibraron tus GP',
+        xpSubtitlePrefix: 'Tus GP reflejan tu',
+        xpSubtitleEmphasis: 'constancia diaria',
+        xpSubtitleSuffix: 'Acá ves el equilibrio entre tus pilares.',
+        xpMicroNote: 'Cada respuesta suma GP. Cada hábito también.',
         total: 'Total',
         start: 'Comienza tu Journey',
       };
@@ -283,18 +305,26 @@ export function SummaryStep({
             ) : null}
           </div>
           <aside className="space-y-5">
-            <SummarySection title={copy.xpTitle} subtitle={copy.xpSubtitle}>
+            <SummarySection title={renderWithGp(copy.xpEyebrow)}>
               <div className="space-y-2 text-sm text-white">
-                <p>
-                  <span className="font-semibold text-white">{copy.body}:</span> {Math.round(xp.Body)} GP
+                <h3 className="text-base font-semibold text-white">{renderWithGp(copy.xpTitle)}</h3>
+                <p className="text-sm text-white/70">
+                  <span>{renderWithGp(copy.xpSubtitlePrefix)} </span>
+                  <span className="font-semibold text-white">{copy.xpSubtitleEmphasis}</span>
+                  <span>. </span>
+                  <span>{renderWithGp(copy.xpSubtitleSuffix)}</span>
                 </p>
                 <p>
-                  <span className="font-semibold text-white">{copy.mind}:</span> {Math.round(xp.Mind)} GP
+                  <span className="font-semibold text-white">{copy.body}:</span> {Math.round(xp.Body)} <GpLabel />
                 </p>
                 <p>
-                  <span className="font-semibold text-white">{copy.soul}:</span> {Math.round(xp.Soul)} GP
+                  <span className="font-semibold text-white">{copy.mind}:</span> {Math.round(xp.Mind)} <GpLabel />
                 </p>
-                <p className="mt-3 text-base font-semibold text-white">{copy.total}: {Math.round(xp.total)} GP</p>
+                <p>
+                  <span className="font-semibold text-white">{copy.soul}:</span> {Math.round(xp.Soul)} <GpLabel />
+                </p>
+                <p className="mt-3 text-base font-semibold text-white">{copy.total}: {Math.round(xp.total)} <GpLabel /></p>
+                <p className="text-xs text-white/60">{renderWithGp(copy.xpMicroNote)}</p>
               </div>
             </SummarySection>
           </aside>
