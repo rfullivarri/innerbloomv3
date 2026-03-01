@@ -287,8 +287,8 @@ describe('Task editor components', () => {
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
 
     await waitFor(() => {
-      expect(onTaskUpdated).toHaveBeenCalledWith('Tarea actualizada correctamente.');
-      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onTaskUpdated).toHaveBeenCalledTimes(1);
+      expect(onClose).not.toHaveBeenCalled();
     });
 
     expect(screen.queryByText('Tarea actualizada correctamente.')).not.toBeInTheDocument();
