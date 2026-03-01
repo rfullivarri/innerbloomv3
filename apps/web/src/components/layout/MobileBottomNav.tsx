@@ -8,6 +8,7 @@ export interface MobileBottomNavItem {
   icon: ReactElement<SVGProps<SVGSVGElement>>;
   end?: boolean;
   onClick?: () => void;
+  showPulseDot?: boolean;
 }
 
 interface MobileBottomNavProps {
@@ -82,6 +83,13 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                           : null}
                       </span>
                     </span>
+                    {item.showPulseDot ? (
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute -right-0.5 top-0 z-20 h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.85)]"
+                        style={{ animation: 'ibOnboardingPulse 1.6s ease-in-out infinite' }}
+                      />
+                    ) : null}
                   </div>
                   <span
                     className={combine(

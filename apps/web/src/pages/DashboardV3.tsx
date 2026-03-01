@@ -67,6 +67,7 @@ import { WeeklyWrappedModal } from '../components/feedback/WeeklyWrappedModal';
 import { useAppMode } from '../hooks/useAppMode';
 import { isJourneyGenerationPending, syncJourneyGenerationFromServer } from '../lib/journeyGeneration';
 import { StandaloneSplash } from '../components/pwa/StandaloneSplash';
+import { useOnboardingEditorNudge } from '../hooks/useOnboardingEditorNudge';
 
 export default function DashboardV3Page() {
   const { getToken } = useAuth();
@@ -222,12 +223,35 @@ export default function DashboardV3Page() {
   const [journeyReadyOpen, setJourneyReadyOpen] = useState(false);
   const generationKeyRef = useRef<string | null>(null);
 
+  const onboardingEditorNudge = useOnboardingEditorNudge({
+    completedFirstDailyQuest: dailyQuestReadiness.completedFirstDailyQuest,
+  });
+  const {
+    firstEditDone,
+    hasReturnedToDashboardAfterEdit,
+    shouldShowDashboardDot,
+    markReturnedToDashboard,
+  } = onboardingEditorNudge;
+
+  useEffect(() => {
+    if (!firstEditDone || hasReturnedToDashboardAfterEdit) {
+      return;
+    }
+
+    markReturnedToDashboard();
+  }, [firstEditDone, hasReturnedToDashboardAfterEdit, markReturnedToDashboard]);
+
   const handleOpenDaily = useCallback(() => {
     if (!dailyQuestReadiness.canShowDailyQuestPopup) {
       return;
     }
+
+    if (shouldShowDashboardDot) {
+      markReturnedToDashboard();
+    }
+
     dailyQuestModalRef.current?.open();
-  }, [dailyQuestReadiness.canShowDailyQuestPopup]);
+  }, [dailyQuestReadiness.canShowDailyQuestPopup, markReturnedToDashboard, shouldShowDashboardDot]);
 
   const handleOpenReminderScheduler = useCallback(() => {
     reminderSchedulerDialogRef.current?.open();
@@ -337,7 +361,10 @@ export default function DashboardV3Page() {
             onDailyClick={backendUserId && dailyQuestReadiness.canShowDailyQuestPopup ? handleOpenDaily : undefined}
             dailyButtonRef={dailyButtonRef}
             title={activeSection.pageTitle}
-            sections={sections}
+            sections={sections.map((section) => ({
+              ...section,
+              showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
+            }))}
             menuSlot={<DashboardMenu onOpenScheduler={handleOpenReminderScheduler} />}
             planSlot={<PlanChip subscription={subscription ?? null} />}
           />
@@ -454,6 +481,7 @@ export default function DashboardV3Page() {
                 icon: <Icon className="h-4 w-4" />,
                 end: section.end,
                 onClick: section.key === 'dquest' ? handleOpenDaily : undefined,
+                showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
               };
             })}
           />

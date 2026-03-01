@@ -7,6 +7,7 @@ export interface NavbarSection {
   label: string;
   to: string;
   end?: boolean;
+  showPulseDot?: boolean;
 }
 
 type NavbarProps = {
@@ -63,7 +64,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
                 }}
                 className={({ isActive }: { isActive: boolean }) =>
                   combine(
-                    'inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+                    'relative inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
                     isActive
                       ? 'border-white/40 bg-white/20 text-white shadow-[0_8px_24px_rgba(148,163,184,0.35)]'
                       : 'border-white/10 bg-white/5 text-text hover:border-white/20 hover:bg-white/10',
@@ -71,6 +72,13 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
                 }
               >
                 {section.label}
+                {section.showPulseDot ? (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute -right-0.5 top-0 h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.85)]"
+                    style={{ animation: 'ibOnboardingPulse 1.6s ease-in-out infinite' }}
+                  />
+                ) : null}
               </NavLink>
             ))}
           </nav>

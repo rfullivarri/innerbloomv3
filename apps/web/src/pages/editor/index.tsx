@@ -7,7 +7,7 @@ import {
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { DevErrorBoundary } from '../../components/DevErrorBoundary';
 import { Navbar } from '../../components/layout/Navbar';
 import { MobileBottomNav } from '../../components/layout/MobileBottomNav';
@@ -19,6 +19,8 @@ import { useDifficulties, usePillars, useStats, useTraits } from '../../hooks/us
 import { type UserTask } from '../../lib/api';
 import { fetchCatalogStats, fetchCatalogTraits, type Pillar } from '../../lib/api/catalogs';
 import { useAppMode } from '../../hooks/useAppMode';
+import { useDailyQuestReadiness } from '../../hooks/useDailyQuestReadiness';
+import { useOnboardingEditorNudge } from '../../hooks/useOnboardingEditorNudge';
 import {
   getActiveSection,
   getDashboardSectionConfig,
@@ -59,6 +61,15 @@ export default function TaskEditorPage() {
   const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(null);
   const [pageToast, setPageToast] = useState<ToastMessage | null>(null);
   const [duplicatingTaskId, setDuplicatingTaskId] = useState<string | null>(null);
+
+  const editorTopRef = useRef<HTMLDivElement | null>(null);
+  const dailyQuestReadiness = useDailyQuestReadiness(backendUserId ?? '', {
+    enabled: Boolean(backendUserId),
+  });
+  const onboardingEditorNudge = useOnboardingEditorNudge({
+    completedFirstDailyQuest: dailyQuestReadiness.completedFirstDailyQuest,
+  });
+  const { shouldShowInlineNotice, shouldShowDashboardDot, markFirstEditDone } = onboardingEditorNudge;
 
   const { deleteTask, status: deleteStatus } = useDeleteTask();
   const { createTask: duplicateTask } = useCreateTask();
@@ -380,13 +391,45 @@ export default function TaskEditorPage() {
     setEditGroupKey(null);
   }, []);
 
-  const handleEditSuccess = useCallback(
-    (message: string) => {
-      setPageToast({ type: 'success', text: message });
-      handleCloseEdit();
-    },
-    [handleCloseEdit],
-  );
+  const scrollToEditorTop = useCallback(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const anchor = editorTopRef.current;
+    if (!anchor) {
+      return;
+    }
+
+    const headerOffset = 92;
+    const target = anchor.getBoundingClientRect().top + window.scrollY - headerOffset;
+    window.scrollTo({ top: Math.max(target, 0), behavior: 'smooth' });
+  }, []);
+
+  const handleEditSuccess = useCallback(() => {
+    const isFirstOnboardingEdit =
+      !dailyQuestReadiness.firstTasksConfirmed &&
+      !dailyQuestReadiness.completedFirstDailyQuest &&
+      markFirstEditDone();
+
+    setPageToast({
+      type: 'success',
+      text: isFirstOnboardingEdit
+        ? 'Cambios guardados. Ya podés hacer tu primer Daily Quest.'
+        : 'Cambios guardados.',
+    });
+
+    handleCloseEdit();
+    window.setTimeout(() => {
+      scrollToEditorTop();
+    }, 20);
+  }, [
+    dailyQuestReadiness.completedFirstDailyQuest,
+    dailyQuestReadiness.firstTasksConfirmed,
+    handleCloseEdit,
+    markFirstEditDone,
+    scrollToEditorTop,
+  ]);
 
   const handleNavigatePanelTask = useCallback(
     (taskId: string) => {
@@ -405,14 +448,21 @@ export default function TaskEditorPage() {
   return (
     <DevErrorBoundary>
       <div className="flex min-h-screen flex-col">
-        <Navbar title={activeSection.pageTitle} sections={sections} />
+        <Navbar
+          title={activeSection.pageTitle}
+          sections={sections.map((section) => ({
+            ...section,
+            showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
+          }))}
+        />
         <main className="flex-1 pb-24 md:pb-0">
+          <div ref={editorTopRef} className="scroll-mt-24" />
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             <SectionHeader section={taskEditorSection} />
             <Card>
               <div className="flex flex-col gap-5">
                 {pageToast && (
-                  <div className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+6.75rem)] z-40 md:inset-x-auto md:bottom-28 md:right-8 md:w-[24rem]">
+                  <div className="fixed inset-x-3 top-[calc(env(safe-area-inset-top,0px)+4.5rem)] z-[70] md:inset-x-auto md:right-8 md:top-24 md:w-[24rem]">
                     <ToastBanner
                       tone={pageToast.type}
                       message={pageToast.text}
@@ -420,6 +470,17 @@ export default function TaskEditorPage() {
                     />
                   </div>
                 )}
+                {shouldShowInlineNotice && (
+                  <div className="overflow-hidden rounded-md border-l-[3px] border-violet-400 bg-violet-400/10 px-2.5 py-1.5 text-[11px] leading-4 text-slate-300">
+                    <Link
+                      to={getDashboardSectionConfig('dashboard', location.pathname).to}
+                      className="block overflow-hidden text-ellipsis whitespace-nowrap text-violet-200 hover:text-violet-100"
+                    >
+                      Listo. Volvé al Dashboard para tu primer Daily Quest →
+                    </Link>
+                  </div>
+                )}
+
                 <TaskFilters
                   searchTerm={searchTerm}
                   onSearchChange={setSearchTerm}
@@ -480,6 +541,7 @@ export default function TaskEditorPage() {
                 to: section.to,
                 icon: <Icon className="h-4 w-4" />,
                 end: section.end,
+                showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
               };
             })}
           />
@@ -1840,7 +1902,7 @@ function CreateTaskModal({
 interface EditTaskModalProps {
   open: boolean;
   onClose: () => void;
-  onTaskUpdated?: (message: string) => void;
+  onTaskUpdated?: () => void;
   userId: string | null;
   task: UserTask | null;
   pillars: Pillar[];
@@ -1984,8 +2046,7 @@ function EditTaskModal({
       });
 
       if (onTaskUpdated) {
-        onTaskUpdated('Tarea actualizada correctamente.');
-        handleClose();
+        onTaskUpdated();
         return;
       }
 
