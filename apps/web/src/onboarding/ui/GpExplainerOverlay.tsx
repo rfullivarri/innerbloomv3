@@ -10,7 +10,11 @@ interface GpExplainerOverlayProps {
 
 type ExplainerItem = {
   id: string;
-  text: string;
+  segments: Array<{
+    text: string;
+    emphasis?: 'semibold';
+    noWrap?: boolean;
+  }>;
   icon: 'dot' | 'arrow-right' | 'arrow-up';
 };
 
@@ -24,20 +28,69 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
             title: 'How Growth Points work',
             chip: '+ GP',
             items: [
-              { id: 'earn', text: 'Every answer and action earns Growth Points.', icon: 'dot' },
-              { id: 'consistency', text: 'Growth Points reflect your consistency.', icon: 'arrow-right' },
-              { id: 'level', text: 'More Growth Points → higher level.', icon: 'arrow-up' },
+              {
+                id: 'earn',
+                icon: 'dot',
+                segments: [
+                  { text: 'Every answer and action earns ' },
+                  { text: 'Growth Points', emphasis: 'semibold' },
+                  { text: '.' },
+                ],
+              },
+              {
+                id: 'consistency',
+                icon: 'arrow-right',
+                segments: [
+                  { text: 'Growth Points', emphasis: 'semibold' },
+                  { text: ' reflect your consistency.' },
+                ],
+              },
+              {
+                id: 'level',
+                icon: 'arrow-up',
+                segments: [
+                  { text: 'More ' },
+                  { text: 'Growth Points', emphasis: 'semibold' },
+                  { text: ' = higher level.' },
+                ],
+              },
             ] as ExplainerItem[],
             cta: 'Got it',
             closeLabel: 'Close Growth Points explainer',
           }
         : {
-            title: 'Cómo funcionan los Growth Points',
+            title: 'Cómo funcionan los GP',
             chip: '+ GP',
             items: [
-              { id: 'earn', text: 'Cada respuesta y acción suma Growth Points.', icon: 'dot' },
-              { id: 'consistency', text: 'Los Growth Points reflejan tu constancia.', icon: 'arrow-right' },
-              { id: 'level', text: 'Más Growth Points → mayor nivel.', icon: 'arrow-up' },
+              {
+                id: 'earn',
+                icon: 'dot',
+                segments: [
+                  { text: 'Cada respuesta y acción suma ' },
+                  { text: 'GP', emphasis: 'semibold' },
+                  { text: ' (Growth Points / Puntos de Crecimiento).' },
+                ],
+              },
+              {
+                id: 'consistency',
+                icon: 'arrow-right',
+                segments: [
+                  { text: 'Los ' },
+                  { text: 'GP', emphasis: 'semibold' },
+                  { text: ' reflejan tu ' },
+                  { text: 'constancia diaria', emphasis: 'semibold', noWrap: true },
+                  { text: '.' },
+                ],
+              },
+              {
+                id: 'level',
+                icon: 'arrow-up',
+                segments: [
+                  { text: 'Más ' },
+                  { text: 'GP', emphasis: 'semibold' },
+                  { text: ' = mayor nivel.' },
+                ],
+              },
             ] as ExplainerItem[],
             cta: 'Entendido',
             closeLabel: 'Cerrar explicación de Growth Points',
@@ -146,7 +199,21 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
                   ) : (
                     <ArrowUp className={iconClassName} />
                   )}
-                  <span>{item.text}</span>
+                  <span>
+                    {item.segments.map((segment) => (
+                      <span
+                        key={`${item.id}-${segment.text}`}
+                        className={[
+                          segment.emphasis === 'semibold' ? 'font-semibold text-white' : '',
+                          segment.noWrap ? 'whitespace-nowrap' : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                      >
+                        {segment.text}
+                      </span>
+                    ))}
+                  </span>
                 </li>
               );
             })}
