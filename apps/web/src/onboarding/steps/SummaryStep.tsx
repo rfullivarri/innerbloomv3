@@ -182,7 +182,7 @@ export function SummaryStep({
         attitude: 'Mindset',
         pillars: 'Pillars',
         pillarsSubtitle: 'Balanced setup across Body, Mind, and Soul',
-        xpTitle: 'XP',
+        xpTitle: 'GP',
         xpSubtitle: 'How your progress is distributed',
         total: 'Total',
         start: 'Start your Journey',
@@ -211,7 +211,7 @@ export function SummaryStep({
         attitude: 'Actitud',
         pillars: 'Pilares',
         pillarsSubtitle: 'Configuración equilibrada en Cuerpo, Mente y Alma',
-        xpTitle: 'XP',
+        xpTitle: 'GP',
         xpSubtitle: 'Cómo se reparte tu progreso',
         total: 'Total',
         start: 'Comienza tu Journey',
@@ -286,15 +286,15 @@ export function SummaryStep({
             <SummarySection title={copy.xpTitle} subtitle={copy.xpSubtitle}>
               <div className="space-y-2 text-sm text-white">
                 <p>
-                  <span className="font-semibold text-white">{copy.body}:</span> {Math.round(xp.Body)} XP
+                  <span className="font-semibold text-white">{copy.body}:</span> {Math.round(xp.Body)} GP
                 </p>
                 <p>
-                  <span className="font-semibold text-white">{copy.mind}:</span> {Math.round(xp.Mind)} XP
+                  <span className="font-semibold text-white">{copy.mind}:</span> {Math.round(xp.Mind)} GP
                 </p>
                 <p>
-                  <span className="font-semibold text-white">{copy.soul}:</span> {Math.round(xp.Soul)} XP
+                  <span className="font-semibold text-white">{copy.soul}:</span> {Math.round(xp.Soul)} GP
                 </p>
-                <p className="mt-3 text-base font-semibold text-white">{copy.total}: {Math.round(xp.total)} XP</p>
+                <p className="mt-3 text-base font-semibold text-white">{copy.total}: {Math.round(xp.total)} GP</p>
               </div>
             </SummarySection>
           </aside>

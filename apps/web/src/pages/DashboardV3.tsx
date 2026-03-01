@@ -1,14 +1,14 @@
 /**
  * Endpoints utilizados en esta vista:
- * - GET /users/:id/xp/total → XP total para la tarjeta principal.
- * - GET /users/:id/level → Nivel actual; el XP restante se estima client-side con una curva cuadrática.
+ * - GET /users/:id/xp/total → GP total para la tarjeta principal.
+ * - GET /users/:id/level → Nivel actual; el GP restante se estima client-side con una curva cuadrática.
  * - GET /users/:id/state → Game mode y barras de Daily Energy.
- * - GET /users/:id/xp/daily → Serie diaria de XP (Daily Cultivation + XP semanal del panel de rachas).
- * - GET /users/:id/xp/by-trait → Radar Chart (XP real por rasgo/pilar principal).
+ * - GET /users/:id/xp/daily → Serie diaria de GP (Daily Cultivation + GP semanal del panel de rachas).
+ * - GET /users/:id/xp/by-trait → Radar Chart (GP real por rasgo/pilar principal).
  * - GET /users/:id/emotions → Línea temporal de emociones (mapa emotion_id → etiqueta legible).
  * - GET /users/:id/tasks → Tareas activas reutilizadas para panel de rachas y misiones.
  * - GET /users/:id/journey → Avisos iniciales (confirmación de base / scheduler).
- * Derivaciones client-side: xp faltante y barra de nivel se calculan con una curva estimada; panel de rachas muestra métricas de XP mientras esperamos daily_log_raw.
+ * Derivaciones client-side: xp faltante y barra de nivel se calculan con una curva estimada; panel de rachas muestra métricas de GP mientras esperamos daily_log_raw.
  */
 
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
@@ -615,7 +615,7 @@ function DailyQuestView({
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-1 h-2 w-2 rounded-full bg-white/70" aria-hidden />
-                <span>Marca el cierre: sumarás XP extra y mantendrás la racha activa.</span>
+                <span>Marca el cierre: sumarás GP extra y mantendrás la racha activa.</span>
               </li>
             </ul>
           </div>
@@ -844,20 +844,20 @@ function DashboardFallback() {
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Vista previa sin conexión</p>
         <h2 className="mt-3 font-display text-2xl font-semibold text-white">Estamos preparando tu Dashboard</h2>
         <p className="mt-2 text-sm text-slate-300">
-          Conservá esta ventana abierta: los datos de XP, emociones y misiones aparecerán automáticamente cuando recuperemos la conexión con el servidor.
+          Conservá esta ventana abierta: los datos de GP, emociones y misiones aparecerán automáticamente cuando recuperemos la conexión con el servidor.
         </p>
       </section>
 
       <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
           <LegacyCard
-            title="XP diario"
+            title="GP diario"
             subtitle="Se actualizará al reconectar"
             className="min-h-[180px]"
           >
             <div className="space-y-3 text-sm text-slate-200">
               <FallbackMetric label="Quests completadas" value="0 / —" />
-              <FallbackMetric label="XP hoy" value="—" />
+              <FallbackMetric label="GP hoy" value="—" />
               <p className="text-xs text-slate-400">Tu progreso diario aparece acá cuando la API responde.</p>
             </div>
           </LegacyCard>
@@ -885,7 +885,7 @@ function DashboardFallback() {
           <LegacyCard title="Rachas" subtitle="Seguimiento semanal" className="min-h-[180px]">
             <div className="space-y-3 text-xs text-slate-300">
               <FallbackMetric label="Daily Quest" value="En espera" />
-              <FallbackMetric label="Weekly XP" value="Sin datos" />
+              <FallbackMetric label="Weekly GP" value="Sin datos" />
               <p className="text-xs text-slate-400">Apenas detectemos actividad, tus rachas se renderizan acá.</p>
             </div>
           </LegacyCard>

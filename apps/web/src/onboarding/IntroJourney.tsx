@@ -64,7 +64,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
 
   const showSnack = (amount?: number) => {
     if (!amount || amount <= 0) return;
-    setSnack(`+${amount} XP`);
+    setSnack(`+${amount} GP`);
   };
 
   const copy = language === 'en'
@@ -79,7 +79,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
         lowMindSubtitle: 'Choose up to 5 mental actions that can help you today.',
         lowMindOpen: 'What idea do you want to reinforce?',
         lowNoteTitle: 'LOW · Add your personal note',
-        lowNoteSubtitle: 'Writing it unlocks +21 XP and helps close your plan.',
+        lowNoteSubtitle: 'Writing it unlocks +21 GP and helps close your plan.',
         chillOpenTitle: 'CHILL · What matters most right now?',
         chillOpenSubtitle: 'Define a clear intention to track your habits.',
         chillOpenPlaceholder: 'I want to focus on…',
@@ -116,7 +116,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
         lowMindSubtitle: 'Elegí hasta 5 acciones mentales que te ayuden hoy.',
         lowMindOpen: '¿Qué idea querés reforzar?',
         lowNoteTitle: 'LOW · Anotá tu nota personal',
-        lowNoteSubtitle: 'Escribirlo desbloquea +21 XP y ayuda a cerrar el plan.',
+        lowNoteSubtitle: 'Escribirlo desbloquea +21 GP y ayuda a cerrar el plan.',
         chillOpenTitle: 'CHILL · ¿Qué es lo más importante ahora?',
         chillOpenSubtitle: 'Definí una intención clara para trackear tus hábitos.',
         chillOpenPlaceholder: 'Quiero enfocarme en…',

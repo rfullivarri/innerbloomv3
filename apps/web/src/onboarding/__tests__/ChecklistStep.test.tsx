@@ -14,19 +14,19 @@ const baseProps = {
 };
 
 describe('ChecklistStep optional open bonus chip', () => {
-  it('shows +8 XP when optional textarea is empty or whitespace', () => {
+  it('shows +8 GP when optional textarea is empty or whitespace', () => {
     const { rerender } = render(<ChecklistStep {...baseProps} openValue="" />);
 
-    expect(screen.getByText('+8 XP')).toBeInTheDocument();
+    expect(screen.getByText('+8 GP')).toBeInTheDocument();
 
     rerender(<ChecklistStep {...baseProps} openValue="   " />);
 
-    expect(screen.getByText('+8 XP')).toBeInTheDocument();
+    expect(screen.getByText('+8 GP')).toBeInTheDocument();
   });
 
-  it('shows +8 XP ✓ when optional textarea has content', () => {
+  it('shows +8 GP ✓ when optional textarea has content', () => {
     render(<ChecklistStep {...baseProps} openValue="algo escrito" />);
 
-    expect(screen.getByText('+8 XP ✓')).toBeInTheDocument();
+    expect(screen.getByText('+8 GP ✓')).toBeInTheDocument();
   });
 });

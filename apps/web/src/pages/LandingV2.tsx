@@ -82,12 +82,12 @@ const t = {
     },
     highlights: {
       title: 'See the real dashboard',
-      description: 'Same bars and heatmaps you use daily: Daily Quest, XP, streaks, missions and emotions.',
+      description: 'Same bars and heatmaps you use daily: Daily Quest, GP, streaks, missions and emotions.',
       items: [
         {
           id: 'xp',
-          title: 'XP, level and streaks',
-          description: 'Progress bar with missing XP and active rewards.',
+          title: 'GP, level and streaks',
+          description: 'Progress bar with missing GP and active rewards.',
           visual: 'xp'
         },
         {
@@ -105,7 +105,7 @@ const t = {
         {
           id: 'missions',
           title: 'Missions & rewards',
-          description: 'Quests tied to streaks with XP bonuses and clear steps.',
+          description: 'Quests tied to streaks with GP bonuses and clear steps.',
           visual: 'missions'
         }
       ] satisfies Highlight[]
@@ -139,7 +139,7 @@ const t = {
           id: 'evolve',
           title: '🧬 Evolve',
           benefit: 'Created for high-drive phases to convert ambition into repeatable systems that scale your identity.',
-          bullets: ['Atomic habits', 'XP ladders', 'Weekly challenges'],
+          bullets: ['Atomic habits', 'GP ladders', 'Weekly challenges'],
           cta: 'Try Evolve mode'
         }
       ] satisfies Mode[]
@@ -190,7 +190,7 @@ const t = {
         },
         {
           q: 'Where do I see my metrics?',
-          a: 'In the dashboard: XP, level, streaks and the emotion heatmap.'
+          a: 'In the dashboard: GP, level, streaks and the emotion heatmap.'
         },
         {
           q: 'What happens if I stop logging?',
@@ -225,12 +225,12 @@ const t = {
     },
     highlights: {
       title: 'Muestra del producto real',
-      description: 'Las mismas barras y heatmaps del dashboard: Daily Quest, XP, rachas, misiones y emociones.',
+      description: 'Las mismas barras y heatmaps del dashboard: Daily Quest, GP, rachas, misiones y emociones.',
       items: [
         {
           id: 'xp',
-          title: 'XP, nivel y rachas',
-          description: 'Barra de nivel con XP faltante y recompensas activas.',
+          title: 'GP, nivel y rachas',
+          description: 'Barra de nivel con GP faltante y recompensas activas.',
           visual: 'xp'
         },
         {
@@ -248,7 +248,7 @@ const t = {
         {
           id: 'missions',
           title: 'Misiones + Rewards',
-          description: 'Misiones ligadas a rachas con bonos de XP y próximos pasos.',
+          description: 'Misiones ligadas a rachas con bonos de GP y próximos pasos.',
           visual: 'missions'
         }
       ] satisfies Highlight[]
@@ -282,7 +282,7 @@ const t = {
           id: 'evolve',
           title: '🧬 Evolve',
           benefit: 'Creado para etapas de alta ambición, transformando intensidad en sistemas sostenibles.',
-          bullets: ['Hábitos atómicos', 'Escalera de XP', 'Retos semanales'],
+          bullets: ['Hábitos atómicos', 'Escalera de GP', 'Retos semanales'],
           cta: 'Activar modo Evolve'
         }
       ] satisfies Mode[]
@@ -337,7 +337,7 @@ const t = {
         },
         {
           q: '¿Dónde veo mis métricas?',
-          a: 'En tu dashboard: XP, nivel, rachas y mapa emocional.'
+          a: 'En tu dashboard: GP, nivel, rachas y mapa emocional.'
         },
         {
           q: '¿Qué pasa si dejo de registrar?',
@@ -406,9 +406,9 @@ const ENERGY_PREVIEW = [
 ] as const;
 
 const MISSION_PREVIEW_ITEMS = [
-  { title: 'Daily Quest: Dormir 7h', tag: 'Body', reward: '+120 XP', status: { es: 'En progreso', en: 'In progress' } },
-  { title: 'Reflexión nocturna', tag: 'Soul', reward: '+80 XP', status: { es: 'Checklist', en: 'Checklist' } },
-  { title: 'Boss: Focus AM', tag: 'Mind', reward: '+160 XP', status: { es: '2/3 completado', en: '2/3 complete' } }
+  { title: 'Daily Quest: Dormir 7h', tag: 'Body', reward: '+120 GP', status: { es: 'En progreso', en: 'In progress' } },
+  { title: 'Reflexión nocturna', tag: 'Soul', reward: '+80 GP', status: { es: 'Checklist', en: 'Checklist' } },
+  { title: 'Boss: Focus AM', tag: 'Mind', reward: '+160 GP', status: { es: '2/3 completado', en: '2/3 complete' } }
 ] as const;
 
 const TASKS_PREVIEW_ITEMS = [
@@ -544,7 +544,7 @@ function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boo
   const levelLabel = '16';
   const xpTotalLabel = '3.177';
   const xpToNextMessage =
-    language === 'es' ? '✨ Te faltan 101 XP para el próximo nivel' : '✨ You need 101 XP for the next level';
+    language === 'es' ? '✨ Te faltan 101 GP para el próximo nivel' : '✨ You need 101 GP for the next level';
   const ariaValueText = language === 'es' ? `${progressLabel} completado` : `${progressLabel} complete`;
 
   return (
@@ -555,7 +555,7 @@ function DashboardXpVisual({ compact = false, language = 'es' }: { compact?: boo
           <div className="flex flex-col">
             <span className={`font-semibold text-slate-50 ${compact ? 'text-[0.86rem]' : 'text-4xl sm:text-5xl'}`}>{xpTotalLabel}</span>
             <span className={`font-semibold uppercase tracking-[0.18em] text-slate-400 ${compact ? 'text-[7.15px]' : 'text-[11px]'}`}>
-              Total XP
+              Total GP
             </span>
           </div>
         </div>
@@ -750,7 +750,7 @@ function MissionsPreview({ compact = false, language = 'es' }: { compact?: boole
       </div>
       {!compact && (
         <p className="text-xs text-slate-300">
-          {language === 'es' ? 'Cada misión se conecta a tus rachas y XP real.' : 'Each mission ties into your streaks and real XP.'}
+          {language === 'es' ? 'Cada misión se conecta a tus rachas y GP real.' : 'Each mission ties into your streaks and real GP.'}
         </p>
       )}
     </div>
@@ -914,8 +914,8 @@ export default function LandingV2Page() {
   const heroMeta = useMemo(
     () =>
       language === 'es'
-        ? ['Setup <3 minutos', 'Dashboard real + XP', 'Modos Low / Chill / Flow / Evolve']
-        : ['Setup <3 minutes', 'Live XP dashboard', 'Modes: Low · Chill · Flow · Evolve'],
+        ? ['Setup <3 minutos', 'Dashboard real + GP', 'Modos Low / Chill / Flow / Evolve']
+        : ['Setup <3 minutes', 'Live GP dashboard', 'Modes: Low · Chill · Flow · Evolve'],
     [language]
   );
 
@@ -1211,7 +1211,7 @@ export default function LandingV2Page() {
                         className="lv2-dashboard-card lv2-dashboard-card--square lv2-dashboard-card--radar"
                         bodyClassName="lv2-dashboard-card-body"
                         title="Radar Chart"
-                        subtitle={language === 'es' ? 'XP · total acumulado' : 'XP · total accumulated'}
+                        subtitle={language === 'es' ? 'GP · total acumulado' : 'GP · total accumulated'}
                         rightSlot={
                           <div className="lv2-dashboard-meta">
                             <span className="lv2-card-chip lv2-card-chip--muted">

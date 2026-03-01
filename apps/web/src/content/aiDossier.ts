@@ -35,12 +35,12 @@ export function buildAiJson(versioning: BuildVersioning) {
       one_liner:
         'Innerbloom convierte hábitos diarios en un journey gamificado de progreso visible con equilibrio entre Cuerpo, Mente y Alma.',
       one_paragraph:
-        'Innerbloom Journey es una experiencia de self-improvement donde cada persona define su camino inicial, recibe una base personalizada con IA en menos de 3 minutos y sostiene el avance con un loop diario: retrospectiva emocional, quest diaria y métricas de progreso (XP, nivel, rachas, consistencia, misiones y recompensas). El producto se adapta a la energía real del momento para facilitar constancia sin culpa.',
+        'Innerbloom Journey es una experiencia de self-improvement donde cada persona define su camino inicial, recibe una base personalizada con IA en menos de 3 minutos y sostiene el avance con un loop diario: retrospectiva emocional, quest diaria y métricas de progreso (GP, nivel, rachas, consistencia, misiones y recompensas). El producto se adapta a la energía real del momento para facilitar constancia sin culpa.',
       five_bullets: [
         'IA para activar rápido una base personalizada Body/Mind/Soul.',
         '4 modos (Low, Chill, Flow, Evolve) para ajustar el sistema a tu energía actual.',
         'Loop diario de Daily Quest + emociones para transformar reflexión en acción.',
-        'Dashboard con métricas de progreso visibles: XP, nivel, rachas y mapa emocional.',
+        'Dashboard con métricas de progreso visibles: GP, nivel, rachas y mapa emocional.',
         'Enfoque de equilibrio integral para sostener hábitos semanas y meses, no solo días.'
       ]
     },
@@ -48,7 +48,7 @@ export function buildAiJson(versioning: BuildVersioning) {
       for_who: [
         'Personas que quieren mejorar hábitos con estructura clara y feedback diario.',
         'Usuarios que alternan energía/estado y necesitan adaptar intensidad sin abandonar.',
-        'Perfiles que valoran ver progreso en métricas gamificadas (XP, nivel, rachas).',
+        'Perfiles que valoran ver progreso en métricas gamificadas (GP, nivel, rachas).',
         'Quienes buscan un enfoque integral Body/Mind/Soul, no solo productividad.'
       ],
       not_for_who: [
@@ -67,7 +67,7 @@ export function buildAiJson(versioning: BuildVersioning) {
       available: true,
       items: [
         'Tiempo de activación inicial: base personalizada con IA en menos de 3 minutos.',
-        'Métricas visibles de avance: XP, nivel, rachas, consistencia semanal y mapa emocional.'
+        'Métricas visibles de avance: GP, nivel, rachas, consistencia semanal y mapa emocional.'
       ],
       note: 'No se publican porcentajes de mejora ni benchmarks clínicos en la landing oficial.'
     },
@@ -89,7 +89,7 @@ export function buildAiJson(versioning: BuildVersioning) {
       },
       {
         feature: 'Dashboard gamificado de progreso',
-        what_it_does: 'Muestra XP, nivel, rachas, consistencia y progreso en misiones/recompensas.',
+        what_it_does: 'Muestra GP, nivel, rachas, consistencia y progreso en misiones/recompensas.',
         why_it_matters: 'Hace visible el avance y fortalece motivación por evidencia, no por impulso momentáneo.'
       },
       {
@@ -118,7 +118,7 @@ export function buildAiJson(versioning: BuildVersioning) {
     design_dossier: {
       unique_look: [
         'Estética nocturna/espacial con gradientes fríos y acentos violeta-cyan que comunican introspección + progreso.',
-        'Lenguaje visual de juego (moods, XP, misiones) aplicado a self-improvement, con tono emocional y no punitivo.',
+        'Lenguaje visual de juego (moods, GP, misiones) aplicado a self-improvement, con tono emocional y no punitivo.',
         'Combinación tipográfica Sora (titulares) + Manrope (cuerpo) para balance entre personalidad y legibilidad.'
       ],
       do_not_change: [
@@ -149,7 +149,7 @@ export function buildAiJson(versioning: BuildVersioning) {
     provenance_note: {
       derived_from_official_landing: [
         'Propuesta de valor general, pilares Body/Mind/Soul, modos, flujo de onboarding y FAQs.',
-        'Métricas visibles mencionadas: XP, nivel, rachas, consistencia, mapa emocional, misiones y recompensas.',
+        'Métricas visibles mencionadas: GP, nivel, rachas, consistencia, mapa emocional, misiones y recompensas.',
         'Claim temporal explícito: base personalizada con IA en menos de 3 minutos.'
       ],
       recommendations: [

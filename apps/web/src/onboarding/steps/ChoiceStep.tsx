@@ -32,7 +32,7 @@ export function ChoiceStep({
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
       <div className="glass-card onboarding-surface-base mx-auto max-w-3xl rounded-3xl p-6">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/50">{badge} · +{xpAmount} XP</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-white/50">{badge} · +{xpAmount} GP</p>
           <ModeQuestionTitle title={title} />
           <p className="text-sm text-white/70">{subtitle}</p>
         </header>

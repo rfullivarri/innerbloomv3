@@ -20,7 +20,7 @@ const columns: { key: keyof AdminLogRow | 'index'; label: string }[] = [
   { key: 'stat', label: 'Stat' },
   { key: 'taskName', label: 'Task' },
   { key: 'difficulty', label: 'Dificultad' },
-  { key: 'xp', label: 'XP' },
+  { key: 'xp', label: 'GP' },
   { key: 'state', label: 'Estado' },
   { key: 'timesInRange', label: 'Veces' },
   { key: 'source', label: 'Origen' },

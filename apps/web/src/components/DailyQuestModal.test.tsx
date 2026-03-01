@@ -118,7 +118,7 @@ describe('DailyQuestModal', () => {
     expect(emotionButtons[1]).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('updates the XP counter when tasks are toggled', async () => {
+  it('updates the GP counter when tasks are toggled', async () => {
     mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
     mockGetDefinition.mockResolvedValue(baseDefinition);
 
@@ -180,7 +180,7 @@ describe('DailyQuestModal', () => {
     await screen.findByRole('button', { name: /mantené presionado/i }, { timeout: 4000 });
 
     expect(screen.getByText('Mantené presionado 2 segundos para cerrar')).toBeInTheDocument();
-    expect(screen.getByText('+10 XP')).toBeInTheDocument();
+    expect(screen.getByText('+10 GP')).toBeInTheDocument();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     await act(async () => {

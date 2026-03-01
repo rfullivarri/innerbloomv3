@@ -7,9 +7,9 @@ const XP_PROGRESS = 0.64;
 export function XpLevelPreview({ language = 'es' }: { language?: Language }) {
   const levelLabel = language === 'es' ? 'Nivel 7' : 'Level 7';
   const progressLabel = language === 'es' ? 'Progreso de nivel' : 'Level progress';
-  const weeklyXp = language === 'es' ? '+45 XP esta semana' : '+45 XP this week';
-  const goalLabel = language === 'es' ? 'Objetivo 500 XP' : 'Goal 500 XP';
-  const ariaLabel = language === 'es' ? 'Barra de XP' : 'XP bar';
+  const weeklyXp = language === 'es' ? '+45 GP esta semana' : '+45 GP this week';
+  const goalLabel = language === 'es' ? 'Objetivo 500 GP' : 'Goal 500 GP';
+  const ariaLabel = language === 'es' ? 'Barra de GP' : 'GP bar';
 
   return (
     <div className="feature-mini-panel xp-preview">
@@ -26,7 +26,7 @@ export function XpLevelPreview({ language = 'es' }: { language?: Language }) {
       </div>
 
       <div className="xp-meta">
-        <span>320 XP</span>
+        <span>320 GP</span>
         <span>{goalLabel}</span>
       </div>
     </div>

@@ -1052,7 +1052,7 @@ function TaskCard({
           <dd className="truncate text-right">{difficultyName ?? task.difficultyId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-slate-300">XP base</dt>
+          <dt className="font-medium text-slate-300">GP base</dt>
           <dd className="truncate text-right">{task.xp != null ? task.xp : '—'}</dd>
         </div>
       </dl>

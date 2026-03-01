@@ -550,7 +550,7 @@ export function TaskInsightsModal({
                       {numberFormatter.format(activityTotals.count)}d
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-2 py-0.5">
-                      +{numberFormatter.format(activityTotals.xp)} XP
+                      +{numberFormatter.format(activityTotals.xp)} GP
                     </span>
                   </div>
                 </div>

@@ -18,7 +18,7 @@ export function AdminTaskSummaryTable({ rows, loading }: AdminTaskSummaryTablePr
               <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Pilar</th>
               <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Rasgo</th>
               <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Dificultad</th>
-              <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Total XP</th>
+              <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Total GP</th>
               <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Veces</th>
               <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Días activos</th>
               <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Primera vez</th>
@@ -75,7 +75,7 @@ export function AdminTaskSummaryTable({ rows, loading }: AdminTaskSummaryTablePr
       </div>
       <footer className="flex items-center justify-between border-t border-slate-800/60 bg-slate-900/80 px-4 py-3 text-xs text-slate-300">
         <span>{rows.length} tareas únicas</span>
-        <span>Ordenado por XP total descendente</span>
+        <span>Ordenado por GP total descendente</span>
       </footer>
     </div>
   );

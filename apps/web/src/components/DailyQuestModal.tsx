@@ -72,7 +72,7 @@ const CELEBRATION_PANEL_DURATION_MS = 1800;
 const DEFAULT_HOLD_TO_CLOSE_DURATION_MS = 2000;
 
 const CELEBRATION_MESSAGES = [
-  'Registro guardado. ¡Arrancaste con todo! 💥 Seguimos sumando XP hoy.',
+  'Registro guardado. ¡Arrancaste con todo! 💥 Seguimos sumando GP hoy.',
   'Listo el diario de ayer. ¡Hoy más fuerte! 💪✨',
   '¡Bien! Emoción registrada y tareas checkeadas. 🚀 A por el día.',
 ] as const;
@@ -892,7 +892,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                         </h2>
                         <p className="text-[11px] text-white/65 md:text-xs">
                           Registrá cómo te sentiste ayer, elegí la emoción que predominó y marcá las tareas logradas.
-                          ¡Seguí sumando XP y rachas!
+                          ¡Seguí sumando GP y rachas!
                         </p>
                       </div>
                       <button
@@ -1029,7 +1029,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                                     className="pointer-events-none absolute right-3 top-3 rounded-lg px-2 py-1 text-[11px] font-semibold text-amber-200 shadow-[0_12px_40px_rgba(251,191,36,0.25)] ring-1 ring-amber-400/40"
                                                     style={{ backgroundColor: 'rgba(251, 191, 36, 0.18)' }}
                                                   >
-                                                    HARD · +{task.xp} XP
+                                                    HARD · +{task.xp} GP
                                                   </motion.div>
                                                 ))}
                                               </AnimatePresence>
@@ -1090,7 +1090,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                               <div className="space-y-1">
                                                 <p className="font-medium text-white">{task.name}</p>
                                                 <p className="text-xs text-white/60">
-                                                  {task.difficulty ? `Dificultad ${task.difficulty}` : 'Dificultad desconocida'} · {task.xp} XP
+                                                  {task.difficulty ? `Dificultad ${task.difficulty}` : 'Dificultad desconocida'} · {task.xp} GP
                                                 </p>
                                               </div>
                                             </div>
@@ -1135,7 +1135,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                       <div className="relative text-white">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">Experiencia ganada</p>
                         <p className="mt-1 text-2xl font-bold md:text-3xl">
-                          XP:{' '}
+                          GP:{' '}
                           <span
                             data-testid="xp-counter"
                             className="text-amber-200 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]"
@@ -1153,7 +1153,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                               exit={{ opacity: 0, y: -18, scale: 0.85 }}
                               transition={{ duration: 0.36, ease: 'easeOut' }}
                             >
-                              +{xpBubble.delta} XP
+                              +{xpBubble.delta} GP
                             </motion.span>
                           )}
                         </AnimatePresence>
@@ -1229,7 +1229,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                         >
                           <span className="text-base md:text-lg">{successCelebration.message}</span>
                           <span className="rounded-full bg-emerald-500/25 px-3 py-1 text-[11px] font-semibold text-emerald-100 ring-1 ring-emerald-400/40">
-                            +{successCelebration.xpDelta} XP
+                            +{successCelebration.xpDelta} GP
                           </span>
                           {successCelebration.detail && (
                             <p className="text-sm font-normal text-white/90">

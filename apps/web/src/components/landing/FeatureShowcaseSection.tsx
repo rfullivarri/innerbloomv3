@@ -34,8 +34,8 @@ const FEATURE_CONTENT: Record<Language, { title: string; subtitle: string; items
       },
       {
         id: 'xp',
-        title: '⭐ XP & Nivel',
-        description: 'Progreso con datos reales. Barra de nivel y XP faltante al siguiente nivel.'
+        title: '⭐ GP & Nivel',
+        description: 'Progreso con datos reales. Barra de nivel y GP faltante al siguiente nivel.'
       },
       {
         id: 'consistency',
@@ -45,7 +45,7 @@ const FEATURE_CONTENT: Record<Language, { title: string; subtitle: string; items
       {
         id: 'missions',
         title: '🎯 Misiones & Rewards',
-        description: 'Misiones vinculadas a rachas. Bonos de XP al cumplir objetivos.'
+        description: 'Misiones vinculadas a rachas. Bonos de GP al cumplir objetivos.'
       },
       {
         id: 'heatmap',
@@ -70,8 +70,8 @@ const FEATURE_CONTENT: Record<Language, { title: string; subtitle: string; items
       },
       {
         id: 'xp',
-        title: '⭐ XP & Level',
-        description: 'Progress with real data. Level bar and XP missing to the next level.'
+        title: '⭐ GP & Level',
+        description: 'Progress with real data. Level bar and GP missing to the next level.'
       },
       {
         id: 'consistency',
@@ -81,7 +81,7 @@ const FEATURE_CONTENT: Record<Language, { title: string; subtitle: string; items
       {
         id: 'missions',
         title: '🎯 Missions & Rewards',
-        description: 'Missions tied to streaks. XP bonuses when you hit your goals.'
+        description: 'Missions tied to streaks. GP bonuses when you hit your goals.'
       },
       {
         id: 'heatmap',

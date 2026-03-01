@@ -23,7 +23,7 @@ exports[`InfoDot > matches the xpLevel snapshot 1`] = `
     <li>
       🏆 
       <strong>
-        XP
+        GP
       </strong>
        = experiencia total acumulada.
     </li>
@@ -32,7 +32,7 @@ exports[`InfoDot > matches the xpLevel snapshot 1`] = `
       <strong>
         Level
       </strong>
-       sube al alcanzar el umbral de XP.
+       sube al alcanzar el umbral de GP.
     </li>
     <li>
       📊 La barra muestra el 
@@ -42,7 +42,7 @@ exports[`InfoDot > matches the xpLevel snapshot 1`] = `
       .
     </li>
     <li>
-      💡 Cada hábito suma XP: pequeños pasos, gran avance.
+      💡 Cada hábito suma GP: pequeños pasos, gran avance.
     </li>
   </ul>
 </div>
