@@ -2044,12 +2044,12 @@ function EditTaskModal({
       </section>
 
       <section className="space-y-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300/90">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-violet-300/90">
           Campos editables
         </p>
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">Título de la tarea</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-200">Título de la tarea</span>
             <input
               type="text"
               value={title}
@@ -2058,7 +2058,7 @@ function EditTaskModal({
                 clearError('title');
               }}
               placeholder="Ej. Entrenar 30 minutos"
-              className="w-full rounded-2xl border border-cyan-300/50 bg-cyan-400/10 px-4 py-3 text-sm ios-touch-input text-slate-100 placeholder:text-cyan-100/50 shadow-[0_0_0_1px_rgba(34,211,238,0.25)] transition focus:border-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-200/50"
+              className="w-full rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-slate-100 placeholder:text-violet-100/50 shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50"
             />
           </label>
           {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
@@ -2066,11 +2066,11 @@ function EditTaskModal({
 
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">Dificultad</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-200">Dificultad</span>
             <select
               value={difficultyId}
               onChange={(event) => setDifficultyId(event.target.value)}
-              className="w-full appearance-none rounded-2xl border border-cyan-300/50 bg-cyan-400/10 px-4 py-3 text-sm ios-touch-input text-slate-100 shadow-[0_0_0_1px_rgba(34,211,238,0.25)] transition focus:border-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-200/50 disabled:cursor-not-allowed"
+              className="w-full appearance-none rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-slate-100 shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50 disabled:cursor-not-allowed"
               disabled={isLoadingDifficulties}
             >
               <option value="" className="bg-slate-900 text-slate-100">
@@ -2101,7 +2101,7 @@ function EditTaskModal({
         </div>
 
         <div className="space-y-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">Estado</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-200">Estado</span>
           <label className="flex items-center gap-3">
             <input
               type="checkbox"
