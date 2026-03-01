@@ -2,19 +2,27 @@ import { SignIn, SignUp, useAuth, useUser } from '@clerk/clerk-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { createAuthAppearance } from '../../lib/clerkAppearance';
+import type { OnboardingLanguage } from '../constants';
 import { useOnboarding } from '../state';
 
 interface ClerkGateProps {
+  language?: OnboardingLanguage;
   onContinue: () => void;
   autoAdvance?: boolean;
 }
 
-const TAB_OPTIONS = [
-  { id: 'sign-up', label: 'Crear cuenta' },
-  { id: 'sign-in', label: 'Ya tengo cuenta' },
-] as const;
+const TAB_OPTIONS = {
+  es: [
+    { id: 'sign-up', label: 'Crear cuenta' },
+    { id: 'sign-in', label: 'Ya tengo cuenta' },
+  ],
+  en: [
+    { id: 'sign-up', label: 'Create account' },
+    { id: 'sign-in', label: 'I already have an account' },
+  ],
+} as const;
 
-type TabId = (typeof TAB_OPTIONS)[number]['id'];
+type TabId = (typeof TAB_OPTIONS)['es'][number]['id'];
 
 const clerkAppearance = createAuthAppearance({
   layout: {
@@ -27,12 +35,30 @@ const clerkAppearance = createAuthAppearance({
   }
 });
 
-export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
+export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: ClerkGateProps) {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { user } = useUser();
   const { syncClerkSession } = useOnboarding();
   const [tab, setTab] = useState<TabId>('sign-up');
   const [hasAutoAdvanced, setHasAutoAdvanced] = useState(false);
+  const tabOptions = TAB_OPTIONS[language];
+  const copy = language === 'en'
+    ? {
+        loading: 'Loading secure access…',
+        readyTitle: 'You are ready to play!',
+        readyBody: 'Use the button to start your personalized journey.',
+        start: 'Start',
+        step: 'Step 0 · Access',
+        create: 'Create your Innerbloom account',
+      }
+    : {
+        loading: 'Cargando acceso seguro…',
+        readyTitle: '¡Estás listo para jugar!',
+        readyBody: 'Usa el botón para comenzar tu recorrido personalizado.',
+        start: 'Comenzar',
+        step: 'Paso 0 · Acceso',
+        create: 'Creá tu cuenta Innerbloom',
+      };
 
   const currentUrl = useMemo(() => (typeof window !== 'undefined' ? window.location.href : '/intro-journey'), []);
   const userEmail = user?.primaryEmailAddress?.emailAddress ?? '';
@@ -57,7 +83,7 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
   if (!isLoaded) {
     return (
       <div className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-white/10 p-8 text-center text-white/70 backdrop-blur-2xl">
-        Cargando acceso seguro…
+        {copy.loading}
       </div>
     );
   }
@@ -70,16 +96,14 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
         transition={{ duration: 0.2, ease: 'easeOut' }}
         className="mx-auto max-w-xl rounded-3xl border border-emerald-400/40 bg-emerald-500/10 p-8 text-center text-white"
       >
-        <h2 className="text-2xl font-semibold">¡Estás listo para jugar!</h2>
-        <p className="mt-2 text-sm text-white/80">
-          Usa el botón para comenzar tu recorrido personalizado.
-        </p>
+        <h2 className="text-2xl font-semibold">{copy.readyTitle}</h2>
+        <p className="mt-2 text-sm text-white/80">{copy.readyBody}</p>
         <button
           type="button"
           onClick={onContinue}
           className="mt-6 inline-flex items-center justify-center rounded-full bg-white px-6 py-2 text-sm font-semibold text-emerald-700 shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
-          Comenzar
+          {copy.start}
         </button>
       </motion.div>
     );
@@ -94,12 +118,12 @@ export function ClerkGate({ onContinue, autoAdvance = false }: ClerkGateProps) {
     >
       <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
-          <p className="text-xs uppercase tracking-wide text-white/50">Paso 0 · Acceso</p>
-          <h2 className="text-2xl font-semibold text-white">Creá tu cuenta Innerbloom</h2>
+          <p className="text-xs uppercase tracking-wide text-white/50">{copy.step}</p>
+          <h2 className="text-2xl font-semibold text-white">{copy.create}</h2>
         </div>
       </div>
       <div className="mt-4 flex gap-2 rounded-full bg-white/10 p-1 backdrop-blur">
-        {TAB_OPTIONS.map((option) => (
+        {tabOptions.map((option) => (
           <button
             key={option.id}
             type="button"

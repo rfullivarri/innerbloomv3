@@ -7,6 +7,7 @@ import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage
 import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
 import { usePageMeta } from '../lib/seo';
+import { buildOnboardingPath } from '../onboarding/i18n';
 import './Landing.css';
 
 type LandingGradientOption = {
@@ -614,7 +615,7 @@ export default function LandingPage() {
                   </Link>
                 ) : (
                   <>
-                    <Link className={`${buttonClasses()} journey-cta`} to="/intro-journey">
+                    <Link className={`${buttonClasses()} journey-cta`} to={buildOnboardingPath(language)}>
                       {copy.auth.startJourney}
                     </Link>
                   </>
@@ -866,7 +867,7 @@ export default function LandingPage() {
                 </Link>
               ) : (
                 <>
-                  <Link className={`${buttonClasses()} journey-cta`} to="/intro-journey">
+                  <Link className={`${buttonClasses()} journey-cta`} to={buildOnboardingPath(language)}>
                     {copy.auth.startJourney}
                   </Link>
                 </>

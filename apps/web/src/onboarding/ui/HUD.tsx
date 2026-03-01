@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 import type { CSSProperties } from 'react';
+import type { OnboardingLanguage } from '../constants';
 import type { GameMode, XP } from '../state';
 
 interface HUDProps {
+  language?: OnboardingLanguage;
   mode: GameMode | null;
   stepIndex: number;
   totalSteps: number;
@@ -83,7 +85,7 @@ function MiniPillarBar({ icon, value }: { icon: string; value: number }) {
   );
 }
 
-export function HUD({ mode, stepIndex, totalSteps, xp, onRestart, onExit, onBrandClick }: HUDProps) {
+export function HUD({ language = 'es', mode, stepIndex, totalSteps, xp, onRestart, onExit, onBrandClick }: HUDProps) {
   const progress = totalSteps > 1 ? Math.round((stepIndex / (totalSteps - 1)) * 100) : 0;
   const safeProgress = Math.min(100, Math.max(0, progress));
   const handleBrand = onBrandClick ?? onExit;
@@ -111,7 +113,7 @@ export function HUD({ mode, stepIndex, totalSteps, xp, onRestart, onExit, onBran
                   type="button"
                   onClick={onRestart}
                   className="hidden h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-white/70 transition hover:border-white/40 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 sm:inline-flex"
-                  aria-label="Reiniciar onboarding"
+                  aria-label={language === 'en' ? 'Restart onboarding' : 'Reiniciar onboarding'}
                 >
                   ↺
                 </button>
@@ -121,7 +123,7 @@ export function HUD({ mode, stepIndex, totalSteps, xp, onRestart, onExit, onBran
                   type="button"
                   onClick={onExit}
                   className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-white/70 transition hover:border-white/40 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
-                  aria-label="Volver a la landing"
+                  aria-label={language === 'en' ? 'Back to landing' : 'Volver a la landing'}
                 >
                   ✕
                 </button>

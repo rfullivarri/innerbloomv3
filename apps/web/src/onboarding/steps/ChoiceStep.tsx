@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
+import type { OnboardingLanguage } from '../constants';
 import { NavButtons } from '../ui/NavButtons';
 import { ModeQuestionTitle } from '../ui/ModeQuestionTitle';
 import { SelectableCheck } from '../ui/SelectableCheck';
 
 interface ChoiceStepProps {
+  language?: OnboardingLanguage;
   title: string;
   subtitle: string;
   choices: readonly string[];
@@ -15,6 +17,7 @@ interface ChoiceStepProps {
 }
 
 export function ChoiceStep({
+  language = 'es',
   title,
   subtitle,
   choices,
@@ -24,11 +27,12 @@ export function ChoiceStep({
   onBack,
   xpAmount,
 }: ChoiceStepProps) {
+  const badge = language === 'en' ? 'Mindset' : 'Actitud';
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
       <div className="glass-card onboarding-surface-base mx-auto max-w-3xl rounded-3xl p-6">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/50">Actitud · +{xpAmount} XP</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-white/50">{badge} · +{xpAmount} XP</p>
           <ModeQuestionTitle title={title} />
           <p className="text-sm text-white/70">{subtitle}</p>
         </header>
@@ -52,7 +56,7 @@ export function ChoiceStep({
             );
           })}
         </div>
-        <NavButtons onBack={onBack} onConfirm={onConfirm} disabled={!value} />
+        <NavButtons language={language} onBack={onBack} onConfirm={onConfirm} disabled={!value} />
       </div>
     </motion.div>
   );

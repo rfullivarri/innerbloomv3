@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
+import type { OnboardingLanguage } from '../constants';
 
 interface NavButtonsProps {
+  language?: OnboardingLanguage;
   onBack?: () => void;
   onConfirm: () => void;
   confirmLabel?: string;
@@ -12,15 +14,21 @@ interface NavButtonsProps {
 }
 
 export function NavButtons({
+  language = 'es',
   onBack,
   onConfirm,
-  confirmLabel = 'Continuar',
-  backLabel = 'Volver',
+  confirmLabel,
+  backLabel,
   disabled = false,
   loading = false,
   showBack = true,
 }: NavButtonsProps) {
-  const confirmText = useMemo(() => (loading ? 'Guardando…' : confirmLabel), [confirmLabel, loading]);
+  const resolvedConfirmLabel = confirmLabel ?? (language === 'en' ? 'Continue' : 'Continuar');
+  const resolvedBackLabel = backLabel ?? (language === 'en' ? 'Back' : 'Volver');
+  const confirmText = useMemo(
+    () => (loading ? (language === 'en' ? 'Saving…' : 'Guardando…') : resolvedConfirmLabel),
+    [language, loading, resolvedConfirmLabel],
+  );
 
   return (
     <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -30,7 +38,7 @@ export function NavButtons({
           onClick={onBack}
           className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2 text-sm font-medium text-white/80 transition hover:border-white/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
         >
-          ← {backLabel}
+          ← {resolvedBackLabel}
         </button>
       ) : (
         <span />
