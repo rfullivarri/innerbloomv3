@@ -1,10 +1,18 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { ArrowRight, ArrowUp, CircleDot } from '../../components/icons';
+import { GpProgressBar } from './GpProgressBar';
 import type { OnboardingLanguage } from '../constants';
 
 interface GpExplainerOverlayProps {
   language?: OnboardingLanguage;
   onClose: () => void;
 }
+
+type ExplainerItem = {
+  id: string;
+  text: string;
+  icon: 'dot' | 'arrow-right' | 'arrow-up';
+};
 
 export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOverlayProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -14,21 +22,23 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
       language === 'en'
         ? {
             title: 'How Growth Points work',
-            body: [
-              'Every answer and action earns Growth Points.',
-              'Growth Points reflect your consistency.',
-              'More Growth Points → higher level.',
-            ],
+            chip: '+ GP',
+            items: [
+              { id: 'earn', text: 'Every answer and action earns Growth Points.', icon: 'dot' },
+              { id: 'consistency', text: 'Growth Points reflect your consistency.', icon: 'arrow-right' },
+              { id: 'level', text: 'More Growth Points → higher level.', icon: 'arrow-up' },
+            ] as ExplainerItem[],
             cta: 'Got it',
             closeLabel: 'Close Growth Points explainer',
           }
         : {
             title: 'Cómo funcionan los Growth Points',
-            body: [
-              'Cada respuesta y acción suma Growth Points (puntos de crecimiento).',
-              'Los Growth Points reflejan tu constancia.',
-              'Más Growth Points → mayor nivel.',
-            ],
+            chip: '+ GP',
+            items: [
+              { id: 'earn', text: 'Cada respuesta y acción suma Growth Points.', icon: 'dot' },
+              { id: 'consistency', text: 'Los Growth Points reflejan tu constancia.', icon: 'arrow-right' },
+              { id: 'level', text: 'Más Growth Points → mayor nivel.', icon: 'arrow-up' },
+            ] as ExplainerItem[],
             cta: 'Entendido',
             closeLabel: 'Cerrar explicación de Growth Points',
           },
@@ -110,17 +120,42 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
             ✕
           </button>
 
-          <h2 className="pr-8 text-sm font-semibold tracking-wide text-white">{copy.title}</h2>
-          <ul className="mt-2 space-y-1 text-xs leading-relaxed text-white/80">
-            {copy.body.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
+          <div className="pr-8">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold tracking-wide text-white">{copy.title}</h2>
+              <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white/75">
+                {copy.chip}
+              </span>
+            </div>
+
+            <div className="mt-3">
+              <GpProgressBar progress={40} totalGp={0} />
+            </div>
+          </div>
+
+          <ul className="mt-3 space-y-2 text-xs leading-relaxed text-white/80">
+            {copy.items.map((item) => {
+              const iconClassName = 'h-3.5 w-3.5 shrink-0 text-violet-200';
+
+              return (
+                <li key={item.id} className="flex items-start gap-2">
+                  {item.icon === 'dot' ? (
+                    <CircleDot className={iconClassName} />
+                  ) : item.icon === 'arrow-right' ? (
+                    <ArrowRight className={iconClassName} />
+                  ) : (
+                    <ArrowUp className={iconClassName} />
+                  )}
+                  <span>{item.text}</span>
+                </li>
+              );
+            })}
           </ul>
 
           <button
             type="button"
             onClick={onClose}
-            className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-violet-300/45 bg-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(76,29,149,0.3)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_14px_28px_rgba(76,29,149,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
+            className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-violet-300/45 bg-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(76,29,149,0.3)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_14px_28px_rgba(76,29,149,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
           >
             {copy.cta}
           </button>
