@@ -13,24 +13,24 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
     () =>
       language === 'en'
         ? {
-            title: 'How GP works',
+            title: 'How Growth Points work',
             body: [
-              'Every answer and action earns GP (Growth Points).',
-              'GP reflects your consistency.',
-              'More GP → higher Level.',
+              'Every answer and action earns Growth Points.',
+              'Growth Points reflect your consistency.',
+              'More Growth Points → higher level.',
             ],
             cta: 'Got it',
-            closeLabel: 'Close GP explainer',
+            closeLabel: 'Close Growth Points explainer',
           }
         : {
-            title: 'Cómo funcionan los GP',
+            title: 'Cómo funcionan los Growth Points',
             body: [
-              'Cada respuesta y acción suma GP (Puntos de Crecimiento).',
-              'Los GP reflejan tu constancia.',
-              'Más GP → mayor nivel.',
+              'Cada respuesta y acción suma Growth Points (puntos de crecimiento).',
+              'Los Growth Points reflejan tu constancia.',
+              'Más Growth Points → mayor nivel.',
             ],
             cta: 'Entendido',
-            closeLabel: 'Cerrar explicación de GP',
+            closeLabel: 'Cerrar explicación de Growth Points',
           },
     [language],
   );
@@ -90,7 +90,7 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[70]" aria-hidden={false}>
-      <div className="pointer-events-auto absolute inset-0 bg-slate-950/45 backdrop-blur-[3px]" onClick={onClose} />
+      <div className="pointer-events-auto absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={onClose} />
 
       <div className="pointer-events-auto absolute inset-x-0 top-[7.15rem] px-3 sm:top-[7.8rem] sm:px-4">
         <div
@@ -99,7 +99,7 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
           aria-modal="true"
           aria-label={copy.title}
           tabIndex={-1}
-          className="relative mx-auto w-full max-w-sm rounded-2xl border border-white/20 bg-slate-950/88 p-4 text-white shadow-[0_18px_40px_rgba(3,8,22,0.55)]"
+          className="relative mx-auto w-full max-w-sm rounded-3xl border border-white/20 bg-surface p-4 text-white shadow-[0_18px_40px_rgba(3,8,22,0.55)]"
         >
           <button
             type="button"
@@ -120,7 +120,7 @@ export function GpExplainerOverlay({ language = 'es', onClose }: GpExplainerOver
           <button
             type="button"
             onClick={onClose}
-            className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-sky-400 to-violet-500 px-3 py-2 text-sm font-semibold text-slate-950 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+            className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-violet-300/45 bg-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(76,29,149,0.3)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_14px_28px_rgba(76,29,149,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
           >
             {copy.cta}
           </button>
