@@ -80,12 +80,12 @@ function ModeChip({ mode }: { mode: GameMode | null }) {
   );
 }
 
-function getModeState(mode: GameMode | null): string {
+function getModeState(mode: GameMode | null, language: OnboardingLanguage): string {
   if (!mode) {
     return '—';
   }
 
-  return MODE_CARD_CONTENT[mode].state;
+  return MODE_CARD_CONTENT[mode].state[language];
 }
 
 function extractTrait(value: string): string {
@@ -236,7 +236,7 @@ export function SummaryStep({
             <SummarySection title={copy.baseData}>
               <TextRow label={copy.email} value={answers.email} />
               <TextRow label={copy.gameMode} value={<ModeChip mode={mode} />} />
-              <TextRow label={copy.state} value={getModeState(mode)} />
+              <TextRow label={copy.state} value={getModeState(mode, language)} />
             </SummarySection>
             {mode === 'LOW' ? (
               <SummarySection title="LOW" subtitle={copy.lowSubtitle}>

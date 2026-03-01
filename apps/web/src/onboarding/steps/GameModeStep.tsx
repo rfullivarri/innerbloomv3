@@ -14,50 +14,62 @@ interface GameModeStepProps {
 
 type ModeCardContent = {
   title: string;
-  frequency: string;
-  state: string;
-  objective: string;
+  frequency: Record<OnboardingLanguage, string>;
+  state: Record<OnboardingLanguage, string>;
+  objective: Record<OnboardingLanguage, string>;
   accentColor: string;
   avatarSrc: string;
-  avatarAlt: string;
+  avatarAlt: Record<OnboardingLanguage, string>;
 };
 
 export const MODE_CARD_CONTENT: Record<GameMode, ModeCardContent> = {
   FLOW: {
     title: 'FLOW MOOD',
-    frequency: '3x/semana',
-    state: 'En foco. En movimiento.',
-    objective: 'Canalizar energía en metas concretas.',
+    frequency: { es: '3x/semana', en: '3x/week' },
+    state: { es: 'En foco. En movimiento.', en: 'Focused. In motion.' },
+    objective: { es: 'Canalizar energía en metas concretas.', en: 'Channel your energy into concrete goals.' },
     accentColor: '#49C2F2',
     avatarSrc: '/flowGMO.png',
-    avatarAlt: 'Avatar del modo Flow en movimiento y enfocado.',
+    avatarAlt: {
+      es: 'Avatar del modo Flow en movimiento y enfocado.',
+      en: 'Flow mode avatar in motion and focused.',
+    },
   },
   LOW: {
     title: 'LOW MOOD',
-    frequency: '1x/semana',
-    state: 'Baja energía. Saturado.',
-    objective: 'Activar lo mínimo vital con pasos pequeños.',
+    frequency: { es: '1x/semana', en: '1x/week' },
+    state: { es: 'Baja energía. Saturado.', en: 'Low energy. Overwhelmed.' },
+    objective: { es: 'Activar lo mínimo vital con pasos pequeños.', en: 'Activate the essentials with small steps.' },
     accentColor: '#FF6B6B',
     avatarSrc: '/lowGMO.png',
-    avatarAlt: 'Avatar del modo Low con expresión de descanso.',
+    avatarAlt: {
+      es: 'Avatar del modo Low con expresión de descanso.',
+      en: 'Low mode avatar with a resting expression.',
+    },
   },
   CHILL: {
     title: 'CHILL MOOD',
-    frequency: '2x/semana',
-    state: 'Estable. Sin presión.',
-    objective: 'Sostener hábitos simples con constancia.',
+    frequency: { es: '2x/semana', en: '2x/week' },
+    state: { es: 'Estable. Sin presión.', en: 'Stable. No pressure.' },
+    objective: { es: 'Sostener hábitos simples con constancia.', en: 'Sustain simple habits consistently.' },
     accentColor: '#6EDC8C',
     avatarSrc: '/chillGMO.png',
-    avatarAlt: 'Avatar del modo Chill con expresión de calma.',
+    avatarAlt: {
+      es: 'Avatar del modo Chill con expresión de calma.',
+      en: 'Chill mode avatar with a calm expression.',
+    },
   },
   EVOLVE: {
     title: 'EVOLVE MOOD',
-    frequency: '4x/semana',
-    state: 'Ambicioso. Determinado.',
-    objective: 'Sostener ritmo alto con estructura clara.',
+    frequency: { es: '4x/semana', en: '4x/week' },
+    state: { es: 'Ambicioso. Determinado.', en: 'Ambitious. Determined.' },
+    objective: { es: 'Sostener ritmo alto con estructura clara.', en: 'Keep a high pace with clear structure.' },
     accentColor: '#9B6CFF',
     avatarSrc: '/evolveGMO.png',
-    avatarAlt: 'Avatar del modo Evolve con expresión determinada.',
+    avatarAlt: {
+      es: 'Avatar del modo Evolve con expresión determinada.',
+      en: 'Evolve mode avatar with a determined expression.',
+    },
   },
 };
 
@@ -145,19 +157,19 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
                       ) : null}
                     </span>
                     <span className="shrink-0 rounded-full border border-white/20 bg-white/10 px-2 py-1 text-[0.62rem] font-medium uppercase tracking-[0.08em] text-white/80 sm:px-2.5 sm:text-[0.68rem]">
-                      {content.frequency}
+                      {content.frequency[language]}
                     </span>
                   </span>
 
                   <span>
                     <span className="block text-[0.62rem] font-medium uppercase tracking-[0.12em] text-white/45 sm:text-[0.68rem]">{copy.state}</span>
-                    <span className="mt-1 block text-[0.79rem] leading-[1.35] text-white/75 sm:text-[0.83rem]">{content.state}</span>
+                    <span className="mt-1 block text-[0.79rem] leading-[1.35] text-white/75 sm:text-[0.83rem]">{content.state[language]}</span>
                   </span>
 
                   <span className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
                     <img
                       src={content.avatarSrc}
-                      alt={content.avatarAlt}
+                      alt={content.avatarAlt[language]}
                       className="h-[110px] w-full object-cover sm:h-[124px]"
                       style={{ objectPosition: bannerObjectPosition }}
                       loading="lazy"
@@ -168,7 +180,7 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
 
                   <span>
                     <span className="block text-[0.62rem] font-medium uppercase tracking-[0.12em] text-white/45 sm:text-[0.68rem]">{copy.objective}</span>
-                    <span className="mt-1 block text-[0.79rem] leading-[1.35] text-white/75 sm:text-[0.83rem]">{content.objective}</span>
+                    <span className="mt-1 block text-[0.79rem] leading-[1.35] text-white/75 sm:text-[0.83rem]">{content.objective[language]}</span>
                   </span>
                 </span>
               </motion.button>
