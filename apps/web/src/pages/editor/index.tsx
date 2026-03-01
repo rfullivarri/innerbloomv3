@@ -471,12 +471,12 @@ export default function TaskEditorPage() {
                   </div>
                 )}
                 {shouldShowInlineNotice && (
-                  <div className="overflow-hidden rounded-md border-l-[3px] border-violet-400 bg-violet-400/10 px-2.5 py-1.5 text-[11px] leading-4 text-slate-300">
+                  <div className="overflow-hidden rounded-md bg-[linear-gradient(90deg,#7C3AED_0%,#8B5CF6_100%)] px-2.5 py-1.5 text-[11px] leading-4 text-white shadow-[0_8px_18px_rgba(124,58,237,0.35)]">
                     <Link
                       to={getDashboardSectionConfig('dashboard', location.pathname).to}
-                      className="block overflow-hidden text-ellipsis whitespace-nowrap text-violet-200 hover:text-violet-100"
+                      className="block overflow-hidden text-ellipsis whitespace-nowrap text-white hover:text-white/95"
                     >
-                      Listo. Volvé al Dashboard para tu primer Daily Quest →
+                      Listo. Volvé al Dashboard para tu primer Daily Quest <span className="font-semibold">→</span>
                     </Link>
                   </div>
                 )}
