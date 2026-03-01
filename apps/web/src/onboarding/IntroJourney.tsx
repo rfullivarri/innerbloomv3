@@ -11,6 +11,7 @@ import { ChoiceStep } from './steps/ChoiceStep';
 import { GameModeStep } from './steps/GameModeStep';
 import { OpenTextStep } from './steps/OpenTextStep';
 import { SummaryStep } from './steps/SummaryStep';
+import { GpExplainerOverlay } from './ui/GpExplainerOverlay';
 import { HUD } from './ui/HUD';
 import { Snack } from './ui/Snack';
 
@@ -54,6 +55,9 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   const navigate = useNavigate();
   const hasRecordedSession = useRef(false);
   const [shouldAutoAdvance, setShouldAutoAdvance] = useState(false);
+  const [isGpExplainerOpen, setIsGpExplainerOpen] = useState(false);
+  const [hasDismissedGpExplainer, setHasDismissedGpExplainer] = useState(false);
+  const firstQuestionStep = route[2] ?? null;
 
   useEffect(() => {
     if (!hasRecordedSession.current && authLoaded) {
@@ -155,6 +159,26 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [stepId]);
 
+  useEffect(() => {
+    if (!firstQuestionStep || stepId !== firstQuestionStep || hasDismissedGpExplainer) {
+      return;
+    }
+    setIsGpExplainerOpen(true);
+  }, [firstQuestionStep, hasDismissedGpExplainer, stepId]);
+
+  useEffect(() => {
+    if (!isGpExplainerOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isGpExplainerOpen]);
+
   const handleChecklistConfirm = (target: StepId) => {
     const hadChecklist = awardedChecklists[target];
     awardChecklist(target);
@@ -206,6 +230,11 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   const handleExit = () => {
     handleRestart();
     navigate('/');
+  };
+
+  const handleCloseGpExplainer = () => {
+    setIsGpExplainerOpen(false);
+    setHasDismissedGpExplainer(true);
   };
 
   const renderStep = () => {
@@ -482,16 +511,18 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
         xp={xp}
         onRestart={handleRestart}
         onExit={handleExit}
+        highlighted={isGpExplainerOpen}
       />
       <main
-        className={`relative z-10 mx-auto w-full max-w-5xl flex-1 min-w-0 pb-16 pt-44 sm:px-6 sm:pt-48 ${
+        className={`relative z-10 mx-auto w-full max-w-5xl flex-1 min-w-0 pb-16 pt-44 transition duration-200 sm:px-6 sm:pt-48 ${
           isClerkGateStep ? 'px-2.5' : 'px-4'
-        }`}
+        } ${isGpExplainerOpen ? 'blur-[2px]' : ''}`}
       >
         <div className="space-y-8" key={stepId}>
           {renderStep()}
         </div>
       </main>
+      {isGpExplainerOpen ? <GpExplainerOverlay language={language} onClose={handleCloseGpExplainer} /> : null}
       <Snack message={snack} />
     </div>
   );
