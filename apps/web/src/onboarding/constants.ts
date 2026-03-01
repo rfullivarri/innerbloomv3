@@ -1,6 +1,8 @@
 import type { GameMode, Pillar, StepId } from './state';
 
-export const FORM_LABELS = {
+export type OnboardingLanguage = 'es' | 'en';
+
+const FORM_LABELS_ES = {
   lowBody: [
     'Dormir mejor 😴',
     'Alimentarte mejor 🥗',
@@ -95,7 +97,111 @@ export const FORM_LABELS = {
   ],
 } as const;
 
-export type ChecklistKey = keyof typeof FORM_LABELS;
+const FORM_LABELS_EN: Record<keyof typeof FORM_LABELS_ES, readonly string[]> = {
+  lowBody: [
+    'Sleep better 😴',
+    'Eat better 🥗',
+    'Move a little more 🏃',
+    'Drink more water 💧',
+    'Rest without guilt 🧘',
+  ],
+  lowSoul: [
+    'Take a few deep breaths 🌬️',
+    'Listen to music you like 🎶',
+    'Spend time in nature 🍃',
+    'Write down what you feel 📝',
+    'Do something without needing to be productive 🌈',
+  ],
+  lowMind: [
+    'Read something short 📖',
+    'Write down your thoughts 📓',
+    'Watch a calming show 📺',
+    'Take a no-screen break 🚫📱',
+    'Reframe a negative thought 🧩',
+  ],
+  chillMotiv: [
+    '🌱 Grow as a person / personal development',
+    '🎯 Achieve concrete goals I set for myself',
+    '🤝 Feel more connected with others',
+    '🧘‍♂️ Live with more calm and less stress',
+    '🏆 Challenge myself and break my limits',
+    '🛠️ Create or build something (projects, art, startups)',
+    '✨ Feel happier and more fulfilled in daily life',
+    '🗺️ Have more experiences and adventures',
+    '💖 Take care of my health and long-term wellbeing',
+  ],
+  flowObstacles: [
+    'Lack of time',
+    'Low energy or motivation',
+    'Fear of failure',
+    'Not sure where to start',
+    'Lack of support',
+    'Procrastination',
+    'I do not have habits yet',
+    'Impostor syndrome',
+  ],
+  evolveCommit: [
+    'My daily habits',
+    'My nutrition',
+    'My rest routines',
+    'My free time',
+    'My social relationships',
+    'My beliefs and mental blocks',
+    'My physical spaces',
+  ],
+  evolveAtt: [
+    'I am highly motivated and want change now',
+    'I want to go step by step but with focus',
+    'Consistency is hard for me, but I want to try',
+  ],
+  fBody: [
+    '🏃‍♂️ Regular physical activity (Energy)',
+    '🥗 Healthy eating (Nutrition)',
+    '😴 Better sleep and recovery (Sleep)',
+    '🛀 Relaxation and recovery breaks (Recovery)',
+    '💧 Drink more water / better hydration (Hydration)',
+    '🧼 Daily hygiene and self-care (Hygiene)',
+    '🌅 Feel more energy and vitality in the morning (Vitality)',
+    '💺 Improve posture and ergonomics (Posture)',
+    '🧘‍♂️ Improve flexibility and mobility (Mobility)',
+    '🚫 Reduce alcohol, tobacco, or caffeine consumption (Moderation)',
+  ],
+  fSoul: [
+    '🤝 Strengthen personal relationships and bonds (Connection)',
+    '🌌 Practice spirituality or inner fullness (Spirituality)',
+    '🎯 Define your purpose and direction in life (Purpose)',
+    '⚖️ Live more aligned with your values (Values)',
+    '💗 Help others or contribute to a cause (Altruism)',
+    '🔍 Know yourself more deeply (Insight)',
+    '🙏 Practice gratitude and a positive attitude (Gratitude)',
+    '🌳 Connect more with nature (Nature)',
+    '🎉 Play, laugh, and enjoy without guilt (Joy)',
+    '🪞 Improve self-esteem and self-talk (Self-esteem)',
+  ],
+  fMind: [
+    '🎯 Improve focus and daily productivity (Focus)',
+    '📚 Learn new things or study better (Learning)',
+    '🎨 Develop creativity and new ideas (Creativity)',
+    '😵‍💫 Better manage stress and anxiety (Management)',
+    '🧠 Regulate your emotions and reactions (Self-control)',
+    '💪 Be more resilient when facing challenges (Resilience)',
+    '🗂️ Keep your tasks and mental space organized (Order)',
+    '🚀 Grow professionally or advance your career (Projection)',
+    '💰 Improve your financial habits (Finances)',
+    '🧩 Train memory and mental agility (Agility)',
+  ],
+};
+
+export const FORM_LABELS = {
+  es: FORM_LABELS_ES,
+  en: FORM_LABELS_EN,
+} as const;
+
+export function getFormLabels(language: OnboardingLanguage) {
+  return FORM_LABELS[language];
+}
+
+export type ChecklistKey = keyof typeof FORM_LABELS_ES;
 
 export const MODE_LABELS: Record<GameMode, string> = {
   LOW: 'Low Mood 🪫 - Quiero un cambio, pero no tengo la energia',

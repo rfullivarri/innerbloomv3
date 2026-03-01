@@ -6,6 +6,7 @@ import '../styles/panel-rachas.overrides.css';
 import { Card } from '../components/ui/Card';
 import { FluidGradientBackground } from '../components/ui/FluidGradientBackground';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
+import { buildOnboardingPath } from '../onboarding/i18n';
 
 type Language = 'en' | 'es';
 
@@ -919,8 +920,8 @@ export default function LandingV2Page() {
   );
 
   const primaryCta = useMemo(
-    () => (isSignedIn ? { label: 'Go to dashboard', to: '/dashboard' } : { label: copy.hero.cta, to: '/intro-journey' }),
-    [copy.hero.cta, isSignedIn]
+    () => (isSignedIn ? { label: 'Go to dashboard', to: '/dashboard' } : { label: copy.hero.cta, to: buildOnboardingPath(language) }),
+    [copy.hero.cta, isSignedIn, language]
   );
   const [avatarIndex, setAvatarIndex] = useState(0);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');

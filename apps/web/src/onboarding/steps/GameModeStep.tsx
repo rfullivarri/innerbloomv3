@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
 import type { GameMode } from '../state';
+import type { OnboardingLanguage } from '../constants';
 import { getBannerObjectPosition } from '../utils/bannerObjectPosition';
 import { NavButtons } from '../ui/NavButtons';
 
 interface GameModeStepProps {
+  language?: OnboardingLanguage;
   selected: GameMode | null;
   onSelect: (mode: GameMode) => void;
   onConfirm: () => void;
@@ -61,14 +63,37 @@ export const MODE_CARD_CONTENT: Record<GameMode, ModeCardContent> = {
 
 const MODE_ORDER: GameMode[] = ['LOW', 'CHILL', 'FLOW', 'EVOLVE'];
 
-export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameModeStepProps) {
+export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, onBack }: GameModeStepProps) {
+  const copy = language === 'en'
+    ? {
+        step: 'Step 1 · Choose your mode',
+        title: 'How do you want to play today?',
+        subtitle: 'Choose the mode that best represents your current state.',
+        selected: 'Selected',
+        state: 'State',
+        objective: 'Objective',
+        enterMode: 'Enter mode',
+        selectMode: 'Select a mode',
+        selectedSuffix: ' selected',
+      }
+    : {
+        step: 'Paso 1 · Elegí tu modo',
+        title: '¿Cómo querés jugar hoy?',
+        subtitle: 'Elegí el modo que mejor representa tu estado actual.',
+        selected: 'Seleccionado',
+        state: 'Estado',
+        objective: 'Objetivo',
+        enterMode: 'Entrar al modo',
+        selectMode: 'Seleccioná un modo',
+        selectedSuffix: ' seleccionado',
+      };
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
       <div className="glass-card onboarding-surface-base mx-auto max-w-4xl rounded-3xl p-4 sm:p-6">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-white/50">Paso 1 · Elegí tu modo</p>
-          <h2 className="text-3xl font-semibold text-white">¿Cómo querés jugar hoy?</h2>
-          <p className="text-sm text-white/70">Elegí el modo que mejor representa tu estado actual.</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-white/50">{copy.step}</p>
+          <h2 className="text-3xl font-semibold text-white">{copy.title}</h2>
+          <p className="text-sm text-white/70">{copy.subtitle}</p>
         </header>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {MODE_ORDER.map((mode) => {
@@ -83,7 +108,7 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onSelect(mode)}
                 aria-pressed={isActive}
-                aria-label={`${content.title}${isActive ? ' seleccionado' : ''}`}
+                aria-label={`${content.title}${isActive ? copy.selectedSuffix : ''}`}
                 data-selected={isActive ? 'true' : 'false'}
                 className={[
                   'glass-card onboarding-surface-inner onboarding-glass-border-soft relative flex h-full overflow-hidden rounded-3xl border px-5 py-[1.35rem] text-left transition-all duration-250 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80',
@@ -115,7 +140,7 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
                       {isActive ? (
                         <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/80 bg-emerald-300/95 px-2 py-0.5 text-[0.58rem] font-semibold uppercase tracking-[0.08em] text-slate-950 shadow-[0_0_14px_rgba(110,231,183,0.42)] sm:text-[0.62rem]">
                           <span aria-hidden>✓</span>
-                          Seleccionado
+                          {copy.selected}
                         </span>
                       ) : null}
                     </span>
@@ -125,7 +150,7 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
                   </span>
 
                   <span>
-                    <span className="block text-[0.62rem] font-medium uppercase tracking-[0.12em] text-white/45 sm:text-[0.68rem]">Estado</span>
+                    <span className="block text-[0.62rem] font-medium uppercase tracking-[0.12em] text-white/45 sm:text-[0.68rem]">{copy.state}</span>
                     <span className="mt-1 block text-[0.79rem] leading-[1.35] text-white/75 sm:text-[0.83rem]">{content.state}</span>
                   </span>
 
@@ -142,7 +167,7 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
                   <span className="h-px w-full bg-white/10" aria-hidden />
 
                   <span>
-                    <span className="block text-[0.62rem] font-medium uppercase tracking-[0.12em] text-white/45 sm:text-[0.68rem]">Objetivo</span>
+                    <span className="block text-[0.62rem] font-medium uppercase tracking-[0.12em] text-white/45 sm:text-[0.68rem]">{copy.objective}</span>
                     <span className="mt-1 block text-[0.79rem] leading-[1.35] text-white/75 sm:text-[0.83rem]">{content.objective}</span>
                   </span>
                 </span>
@@ -151,10 +176,11 @@ export function GameModeStep({ selected, onSelect, onConfirm, onBack }: GameMode
           })}
         </div>
         <NavButtons
+          language={language}
           showBack={Boolean(onBack)}
           onBack={onBack}
           onConfirm={onConfirm}
-          confirmLabel={selected ? 'Entrar al modo' : 'Seleccioná un modo'}
+          confirmLabel={selected ? copy.enterMode : copy.selectMode}
           disabled={!selected}
         />
       </div>

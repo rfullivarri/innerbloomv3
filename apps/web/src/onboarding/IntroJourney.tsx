@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import { STEP_XP, FORM_LABELS, CHECKLIST_LIMITS, OPEN_TEXT_XP } from './constants';
+import { STEP_XP, CHECKLIST_LIMITS, OPEN_TEXT_XP, getFormLabels, type OnboardingLanguage } from './constants';
 import { buildPayload } from './payload';
 import { useOnboarding } from './state';
 import type { GameMode, StepId } from './state';
@@ -15,6 +15,7 @@ import { HUD } from './ui/HUD';
 import { Snack } from './ui/Snack';
 
 interface IntroJourneyProps {
+  language?: OnboardingLanguage;
   onFinish?: (payload: ReturnType<typeof buildPayload>) => Promise<void> | void;
   isSubmitting?: boolean;
   submitError?: string | null;
@@ -29,7 +30,7 @@ const OPEN_TEXT_FIELDS: Partial<Record<StepId, 'bodyOpen' | 'soulOpen' | 'mindOp
   'foundations-mind': 'mindOpen',
 };
 
-export function IntroJourney({ onFinish, isSubmitting = false, submitError = null }: IntroJourneyProps) {
+export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, submitError = null }: IntroJourneyProps) {
   const {
     state,
     setMode,
@@ -44,6 +45,7 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
     reset,
   } = useOnboarding();
   const { route, currentStepIndex, answers, xp, awardedChecklists, awardedOpen } = state;
+  const labels = getFormLabels(language);
   const stepId = route[currentStepIndex] ?? 'clerk-gate';
   const totalSteps = route.length;
   const isClerkGateStep = stepId === 'clerk-gate';
@@ -64,6 +66,82 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
     if (!amount || amount <= 0) return;
     setSnack(`+${amount} XP`);
   };
+
+  const copy = language === 'en'
+    ? {
+        lowBodyTitle: 'LOW · Reset your body',
+        lowBodySubtitle: 'Choose up to 5 simple actions that would help you right now.',
+        lowBodyOpen: 'What physical anchor would you add?',
+        lowSoulTitle: 'LOW · Reconnect with your soul',
+        lowSoulSubtitle: 'Choose up to 5 simple things that reconnect you with yourself.',
+        lowSoulOpen: 'What detail would help you feel fulfilled?',
+        lowMindTitle: 'LOW · Calm your mind',
+        lowMindSubtitle: 'Choose up to 5 mental actions that can help you today.',
+        lowMindOpen: 'What idea do you want to reinforce?',
+        lowNoteTitle: 'LOW · Add your personal note',
+        lowNoteSubtitle: 'Writing it unlocks +21 XP and helps close your plan.',
+        chillOpenTitle: 'CHILL · What matters most right now?',
+        chillOpenSubtitle: 'Define a clear intention to track your habits.',
+        chillOpenPlaceholder: 'I want to focus on…',
+        chillMotivTitle: 'CHILL · What motivates you most?',
+        chillMotivSubtitle: 'Choose what helps you keep momentum.',
+        flowGoalTitle: 'FLOW · What is your goal?',
+        flowGoalSubtitle: 'Name it so your adventure starts with focus.',
+        flowGoalPlaceholder: 'I want to achieve…',
+        flowImpedTitle: 'FLOW · What has been holding you back?',
+        flowImpedSubtitle: 'Choose what you want to unblock to enter flow.',
+        evolveGoalTitle: 'EVOLVE · What do you want to transform?',
+        evolveGoalSubtitle: 'Put your challenge into words to level up.',
+        evolveGoalPlaceholder: 'I am going to evolve in…',
+        evolveTradeTitle: 'EVOLVE · What are you willing to adjust?',
+        evolveTradeSubtitle: 'Select the trade-offs you accept to grow.',
+        evolveAttTitle: 'EVOLVE · How are you approaching this mission?',
+        evolveAttSubtitle: 'Choose the mindset that best represents you now.',
+        foundationsBodyTitle: 'Body · 🫀',
+        foundationsBodySubtitle: 'Your physical base supports everything. Choose up to 5 anchors.',
+        foundationsSoulTitle: 'Soul · 🏵️',
+        foundationsSoulSubtitle: 'Without center, there is no arrival. Choose up to 5 practices.',
+        foundationsMindTitle: 'Mind · 🧠',
+        foundationsMindSubtitle: 'It is not doing more, it is doing better. Choose up to 5 focus points.',
+        pillarsBadge: 'Pillars',
+      }
+    : {
+        lowBodyTitle: 'LOW · Reinicia tu cuerpo',
+        lowBodySubtitle: 'Elegí hasta 5 acciones simples que te harían bien ahora.',
+        lowBodyOpen: '¿Qué ancla física sumarías?',
+        lowSoulTitle: 'LOW · Reconectá tu alma',
+        lowSoulSubtitle: 'Elegí hasta 5 cosas simples que te conectan con vos.',
+        lowSoulOpen: '¿Qué detalle te haría sentir pleno?',
+        lowMindTitle: 'LOW · Calmá tu mente',
+        lowMindSubtitle: 'Elegí hasta 5 acciones mentales que te ayuden hoy.',
+        lowMindOpen: '¿Qué idea querés reforzar?',
+        lowNoteTitle: 'LOW · Anotá tu nota personal',
+        lowNoteSubtitle: 'Escribirlo desbloquea +21 XP y ayuda a cerrar el plan.',
+        chillOpenTitle: 'CHILL · ¿Qué es lo más importante ahora?',
+        chillOpenSubtitle: 'Definí una intención clara para trackear tus hábitos.',
+        chillOpenPlaceholder: 'Quiero enfocarme en…',
+        chillMotivTitle: 'CHILL · ¿Qué te impulsa más?',
+        chillMotivSubtitle: 'Elegí lo que te motiva mantener el ritmo.',
+        flowGoalTitle: 'FLOW · ¿Cuál es tu objetivo?',
+        flowGoalSubtitle: 'Nombralo para que la aventura empiece con foco.',
+        flowGoalPlaceholder: 'Quiero lograr…',
+        flowImpedTitle: 'FLOW · ¿Qué te viene frenando?',
+        flowImpedSubtitle: 'Elegí lo que querés destrabar para entrar en flujo.',
+        evolveGoalTitle: 'EVOLVE · ¿Qué querés transformar?',
+        evolveGoalSubtitle: 'Poné en palabras tu desafío para subir de nivel.',
+        evolveGoalPlaceholder: 'Voy a evolucionar en…',
+        evolveTradeTitle: 'EVOLVE · ¿Qué estás dispuesto a ajustar?',
+        evolveTradeSubtitle: 'Marcá los trade-offs que aceptás para crecer.',
+        evolveAttTitle: 'EVOLVE · ¿Cómo encarás esta misión?',
+        evolveAttSubtitle: 'Elegí la actitud que mejor te representa ahora.',
+        foundationsBodyTitle: 'Cuerpo · 🫀',
+        foundationsBodySubtitle: 'Tu base física sostiene todo. Elegí hasta 5 anclas.',
+        foundationsSoulTitle: 'Alma · 🏵️',
+        foundationsSoulSubtitle: 'Sin centro no hay llegada. Elegí hasta 5 prácticas.',
+        foundationsMindTitle: 'Mente · 🧠',
+        foundationsMindSubtitle: 'No es hacer más: es hacer mejor. Elegí hasta 5 focos.',
+        pillarsBadge: 'Pilares',
+      };
 
   useEffect(() => {
     if (!snack) {
@@ -133,10 +211,11 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
   const renderStep = () => {
     switch (stepId) {
       case 'clerk-gate':
-        return <ClerkGate onContinue={goNext} autoAdvance={shouldAutoAdvance} />;
+        return <ClerkGate language={language} onContinue={goNext} autoAdvance={shouldAutoAdvance} />;
       case 'mode-select':
         return (
           <GameModeStep
+            language={language}
             selected={answers.mode}
             onSelect={(mode: GameMode) => setMode(mode)}
             onConfirm={() => {
@@ -149,10 +228,11 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'low-body':
         return (
           <ChecklistStep
-            title="LOW · Reinicia tu cuerpo"
-            subtitle="Elegí hasta 5 acciones simples que te harían bien ahora."
+            language={language}
+            title={copy.lowBodyTitle}
+            subtitle={copy.lowBodySubtitle}
             xpAmount={13}
-            items={FORM_LABELS.lowBody}
+            items={labels.lowBody}
             selected={answers.low.body}
             onToggle={(value) => toggleChecklist('low-body', value)}
             onConfirm={() => handleChecklistConfirm('low-body')}
@@ -160,16 +240,17 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
             limit={CHECKLIST_LIMITS['low-body']}
             openValue={answers.foundations.bodyOpen}
             onOpenChange={(value) => setTextValue('foundations.bodyOpen', value)}
-            openLabel="¿Qué ancla física sumarías?"
+            openLabel={copy.lowBodyOpen}
           />
         );
       case 'low-soul':
         return (
           <ChecklistStep
-            title="LOW · Reconectá tu alma"
-            subtitle="Elegí hasta 5 cosas simples que te conectan con vos."
+            language={language}
+            title={copy.lowSoulTitle}
+            subtitle={copy.lowSoulSubtitle}
             xpAmount={13}
-            items={FORM_LABELS.lowSoul}
+            items={labels.lowSoul}
             selected={answers.low.soul}
             onToggle={(value) => toggleChecklist('low-soul', value)}
             onConfirm={() => handleChecklistConfirm('low-soul')}
@@ -177,16 +258,17 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
             limit={CHECKLIST_LIMITS['low-soul']}
             openValue={answers.foundations.soulOpen}
             onOpenChange={(value) => setTextValue('foundations.soulOpen', value)}
-            openLabel="¿Qué detalle te haría sentir pleno?"
+            openLabel={copy.lowSoulOpen}
           />
         );
       case 'low-mind':
         return (
           <ChecklistStep
-            title="LOW · Calmá tu mente"
-            subtitle="Elegí hasta 5 acciones mentales que te ayuden hoy."
+            language={language}
+            title={copy.lowMindTitle}
+            subtitle={copy.lowMindSubtitle}
             xpAmount={13}
-            items={FORM_LABELS.lowMind}
+            items={labels.lowMind}
             selected={answers.low.mind}
             onToggle={(value) => toggleChecklist('low-mind', value)}
             onConfirm={() => handleChecklistConfirm('low-mind')}
@@ -194,14 +276,15 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
             limit={CHECKLIST_LIMITS['low-mind']}
             openValue={answers.foundations.mindOpen}
             onOpenChange={(value) => setTextValue('foundations.mindOpen', value)}
-            openLabel="¿Qué idea querés reforzar?"
+            openLabel={copy.lowMindOpen}
           />
         );
       case 'low-note':
         return (
           <OpenTextStep
-            title="LOW · Anotá tu nota personal"
-            subtitle="Escribirlo desbloquea +21 XP y ayuda a cerrar el plan."
+            language={language}
+            title={copy.lowNoteTitle}
+            subtitle={copy.lowNoteSubtitle}
             value={answers.low.note}
             onChange={(value) => setTextValue('low.note', value)}
             onConfirm={() => handleOpenConfirm('low-note', answers.low.note)}
@@ -212,24 +295,26 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'chill-open':
         return (
           <OpenTextStep
-            title="CHILL · ¿Qué es lo más importante ahora?"
-            subtitle="Definí una intención clara para trackear tus hábitos."
+            language={language}
+            title={copy.chillOpenTitle}
+            subtitle={copy.chillOpenSubtitle}
             value={answers.chill.oneThing}
             onChange={(value) => setTextValue('chill.oneThing', value)}
             onConfirm={() => handleOpenConfirm('chill-open', answers.chill.oneThing)}
             onBack={goPrevious}
             xpAmount={21}
             multiline={false}
-            placeholder="Quiero enfocarme en…"
+            placeholder={copy.chillOpenPlaceholder}
           />
         );
       case 'chill-motiv':
         return (
           <ChecklistStep
-            title="CHILL · ¿Qué te impulsa más?"
-            subtitle="Elegí lo que te motiva mantener el ritmo."
+            language={language}
+            title={copy.chillMotivTitle}
+            subtitle={copy.chillMotivSubtitle}
             xpAmount={13}
-            items={FORM_LABELS.chillMotiv}
+            items={labels.chillMotiv}
             selected={answers.chill.motiv}
             onToggle={(value) => toggleChecklist('chill-motiv', value)}
             onConfirm={() => handleChecklistConfirm('chill-motiv')}
@@ -239,24 +324,26 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'flow-goal':
         return (
           <OpenTextStep
-            title="FLOW · ¿Cuál es tu objetivo?"
-            subtitle="Nombralo para que la aventura empiece con foco."
+            language={language}
+            title={copy.flowGoalTitle}
+            subtitle={copy.flowGoalSubtitle}
             value={answers.flow.goal}
             onChange={(value) => setTextValue('flow.goal', value)}
             onConfirm={() => handleOpenConfirm('flow-goal', answers.flow.goal)}
             onBack={goPrevious}
             xpAmount={21}
             multiline={false}
-            placeholder="Quiero lograr…"
+            placeholder={copy.flowGoalPlaceholder}
           />
         );
       case 'flow-imped':
         return (
           <ChecklistStep
-            title="FLOW · ¿Qué te viene frenando?"
-            subtitle="Elegí lo que querés destrabar para entrar en flujo."
+            language={language}
+            title={copy.flowImpedTitle}
+            subtitle={copy.flowImpedSubtitle}
             xpAmount={13}
-            items={FORM_LABELS.flowObstacles}
+            items={labels.flowObstacles}
             selected={answers.flow.imped}
             onToggle={(value) => toggleChecklist('flow-imped', value)}
             onConfirm={() => handleChecklistConfirm('flow-imped')}
@@ -266,24 +353,26 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'evolve-goal':
         return (
           <OpenTextStep
-            title="EVOLVE · ¿Qué querés transformar?"
-            subtitle="Poné en palabras tu desafío para subir de nivel."
+            language={language}
+            title={copy.evolveGoalTitle}
+            subtitle={copy.evolveGoalSubtitle}
             value={answers.evolve.goal}
             onChange={(value) => setTextValue('evolve.goal', value)}
             onConfirm={() => handleOpenConfirm('evolve-goal', answers.evolve.goal)}
             onBack={goPrevious}
             xpAmount={21}
             multiline={false}
-            placeholder="Voy a evolucionar en…"
+            placeholder={copy.evolveGoalPlaceholder}
           />
         );
       case 'evolve-trade':
         return (
           <ChecklistStep
-            title="EVOLVE · ¿Qué estás dispuesto a ajustar?"
-            subtitle="Marcá los trade-offs que aceptás para crecer."
+            language={language}
+            title={copy.evolveTradeTitle}
+            subtitle={copy.evolveTradeSubtitle}
             xpAmount={13}
-            items={FORM_LABELS.evolveCommit}
+            items={labels.evolveCommit}
             selected={answers.evolve.trade}
             onToggle={(value) => toggleChecklist('evolve-trade', value)}
             onConfirm={() => handleChecklistConfirm('evolve-trade')}
@@ -293,9 +382,10 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'evolve-att':
         return (
           <ChoiceStep
-            title="EVOLVE · ¿Cómo encarás esta misión?"
-            subtitle="Elegí la actitud que mejor te representa ahora."
-            choices={FORM_LABELS.evolveAtt}
+            language={language}
+            title={copy.evolveAttTitle}
+            subtitle={copy.evolveAttSubtitle}
+            choices={labels.evolveAtt}
             value={answers.evolve.att}
             onChange={(value) => setEvolveAtt(value)}
             onConfirm={() => {
@@ -314,11 +404,12 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-body':
         return (
           <ChecklistStep
-            title="Cuerpo · 🫀"
-            subtitle="Tu base física sostiene todo. Elegí hasta 5 anclas."
+            language={language}
+            title={copy.foundationsBodyTitle}
+            subtitle={copy.foundationsBodySubtitle}
             xpAmount={13}
-            badgeLabel="Pilares"
-            items={FORM_LABELS.fBody}
+            badgeLabel={copy.pillarsBadge}
+            items={labels.fBody}
             selected={answers.foundations.body}
             onToggle={(value) => toggleChecklist('foundations-body', value)}
             onConfirm={() => handleChecklistConfirm('foundations-body')}
@@ -331,11 +422,12 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-soul':
         return (
           <ChecklistStep
-            title="Alma · 🏵️"
-            subtitle="Sin centro no hay llegada. Elegí hasta 5 prácticas."
+            language={language}
+            title={copy.foundationsSoulTitle}
+            subtitle={copy.foundationsSoulSubtitle}
             xpAmount={13}
-            badgeLabel="Pilares"
-            items={FORM_LABELS.fSoul}
+            badgeLabel={copy.pillarsBadge}
+            items={labels.fSoul}
             selected={answers.foundations.soul}
             onToggle={(value) => toggleChecklist('foundations-soul', value)}
             onConfirm={() => handleChecklistConfirm('foundations-soul')}
@@ -348,11 +440,12 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'foundations-mind':
         return (
           <ChecklistStep
-            title="Mente · 🧠"
-            subtitle="No es hacer más: es hacer mejor. Elegí hasta 5 focos."
+            language={language}
+            title={copy.foundationsMindTitle}
+            subtitle={copy.foundationsMindSubtitle}
             xpAmount={13}
-            badgeLabel="Pilares"
-            items={FORM_LABELS.fMind}
+            badgeLabel={copy.pillarsBadge}
+            items={labels.fMind}
             selected={answers.foundations.mind}
             onToggle={(value) => toggleChecklist('foundations-mind', value)}
             onConfirm={() => handleChecklistConfirm('foundations-mind')}
@@ -365,6 +458,7 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
       case 'summary':
         return (
           <SummaryStep
+            language={language}
             answers={answers}
             xp={xp}
             onBack={goPrevious}
@@ -381,6 +475,7 @@ export function IntroJourney({ onFinish, isSubmitting = false, submitError = nul
   return (
     <div className="onboarding-force-white relative flex min-h-screen min-h-dvh flex-col overflow-hidden bg-[#000c40] pb-16">
       <HUD
+        language={language}
         mode={answers.mode}
         stepIndex={currentStepIndex}
         totalSteps={totalSteps}

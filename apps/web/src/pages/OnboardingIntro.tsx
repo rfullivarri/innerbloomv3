@@ -7,6 +7,7 @@ import { OnboardingProvider } from '../onboarding/state';
 import { ApiError, apiAuthorizedFetch, buildApiUrl } from '../lib/api';
 import { setJourneyGenerationPending } from '../lib/journeyGeneration';
 import { emitOnboardingEvent } from '../lib/telemetry';
+import { resolveOnboardingLanguage } from '../onboarding/i18n';
 
 async function parseErrorMessage(response: Response) {
   const payload = await response.json().catch(() => ({}));
@@ -22,6 +23,7 @@ async function parseErrorMessage(response: Response) {
 
 export default function OnboardingIntroPage() {
   const navigate = useNavigate();
+  const language = typeof window !== 'undefined' ? resolveOnboardingLanguage(window.location.search) : 'es';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [generationMode, setGenerationMode] = useState<string | null>(null);
@@ -64,12 +66,14 @@ export default function OnboardingIntroPage() {
         setGenerationMode(payload.mode);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Error inesperado';
-        setSubmitError(`No pudimos guardar tu onboarding. ${message}. Reintentá en unos segundos.`);
+        const prefix = language === 'en' ? 'We could not save your onboarding.' : 'No pudimos guardar tu onboarding.';
+        const suffix = language === 'en' ? 'Try again in a few seconds.' : 'Reintentá en unos segundos.';
+        setSubmitError(`${prefix} ${message}. ${suffix}`);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [isSubmitting],
+    [isSubmitting, language],
   );
 
   if (generationMode) {
@@ -78,7 +82,7 @@ export default function OnboardingIntroPage() {
 
   return (
     <OnboardingProvider>
-      <IntroJourney onFinish={handleFinish} isSubmitting={isSubmitting} submitError={submitError} />
+      <IntroJourney language={language} onFinish={handleFinish} isSubmitting={isSubmitting} submitError={submitError} />
     </OnboardingProvider>
   );
 }
