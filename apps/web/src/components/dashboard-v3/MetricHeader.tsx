@@ -84,7 +84,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
           {chipStyle ? <GameModeChip {...chipStyle} /> : null}
           <InfoDotTarget
             id="xpLevel"
-            placement="right"
+            placement="left"
             className="inline-flex items-center"
           >
             <span className="sr-only">Más información sobre tu progreso general</span>
@@ -169,4 +169,3 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
     </Card>
   );
 }
-
