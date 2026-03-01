@@ -1882,9 +1882,7 @@ function EditTaskModal({
     useDifficulties();
 
   const currentPillarId = open && task?.pillarId ? task.pillarId : null;
-  const currentTraitId = open && task?.traitId ? task.traitId : null;
   const { data: traits } = useTraits(currentPillarId);
-  const { data: stats } = useStats(currentTraitId);
 
   const sortedDifficulties = useMemo(() => {
     return [...difficulties].sort((a, b) => a.name.localeCompare(b.name, 'es'));
@@ -1903,13 +1901,6 @@ function EditTaskModal({
     }
     return traits.find((trait) => trait.id === task.traitId)?.name ?? task.traitId;
   }, [traits, task?.traitId]);
-
-  const statName = useMemo(() => {
-    if (!task?.statId) {
-      return '—';
-    }
-    return stats.find((stat) => stat.id === task.statId)?.name ?? task.statId;
-  }, [stats, task?.statId]);
 
   const isSubmitting = updateStatus === 'loading';
 
@@ -2037,26 +2028,28 @@ function EditTaskModal({
         <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Editar tarea</p>
         <h2 className="text-xl font-semibold text-white">Actualiza los detalles de tu tarea</h2>
         <p className="text-sm text-slate-300">
-          Ajusta el título, dificultad y estado. Los campos de pilar, rasgo y stat permanecen bloqueados.
+          Ajusta el título, dificultad y estado. Los campos de pilar y rasgo permanecen bloqueados.
         </p>
       </header>
 
       <section className="space-y-4">
         <div className="space-y-2">
           <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Contexto</span>
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2">
             <ReadOnlyField label="Pilar" value={pillarName} />
             <ReadOnlyField label="Rasgo" value={traitName} />
-            <ReadOnlyField label="Stat" value={statName} />
           </div>
           <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Estos campos no se pueden editar.</p>
         </div>
       </section>
 
       <section className="space-y-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300/90">
+          Campos editables
+        </p>
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Título de la tarea</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">Título de la tarea</span>
             <input
               type="text"
               value={title}
@@ -2065,7 +2058,7 @@ function EditTaskModal({
                 clearError('title');
               }}
               placeholder="Ej. Entrenar 30 minutos"
-              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm ios-touch-input text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="w-full rounded-2xl border border-cyan-300/50 bg-cyan-400/10 px-4 py-3 text-sm ios-touch-input text-slate-100 placeholder:text-cyan-100/50 shadow-[0_0_0_1px_rgba(34,211,238,0.25)] transition focus:border-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-200/50"
             />
           </label>
           {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
@@ -2073,11 +2066,11 @@ function EditTaskModal({
 
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Dificultad</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">Dificultad</span>
             <select
               value={difficultyId}
               onChange={(event) => setDifficultyId(event.target.value)}
-              className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+              className="w-full appearance-none rounded-2xl border border-cyan-300/50 bg-cyan-400/10 px-4 py-3 text-sm ios-touch-input text-slate-100 shadow-[0_0_0_1px_rgba(34,211,238,0.25)] transition focus:border-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-200/50 disabled:cursor-not-allowed"
               disabled={isLoadingDifficulties}
             >
               <option value="" className="bg-slate-900 text-slate-100">
@@ -2108,7 +2101,7 @@ function EditTaskModal({
         </div>
 
         <div className="space-y-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Estado</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">Estado</span>
           <label className="flex items-center gap-3">
             <input
               type="checkbox"
@@ -2221,8 +2214,8 @@ function EditTaskModal({
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-1">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{label}</span>
-      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">{value}</div>
+      <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">{label}</span>
+      <div className="rounded-2xl border border-slate-600/60 bg-slate-800/70 px-4 py-3 text-sm text-slate-300">{value}</div>
     </div>
   );
 }
