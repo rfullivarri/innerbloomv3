@@ -9,6 +9,7 @@ interface HUDProps {
   stepIndex: number;
   totalSteps: number;
   xp: XP;
+  highlighted?: boolean;
   onRestart?: () => void;
   onExit?: () => void;
   onBrandClick?: () => void;
@@ -85,13 +86,19 @@ function MiniPillarBar({ icon, value }: { icon: string; value: number }) {
   );
 }
 
-export function HUD({ language = 'es', mode, stepIndex, totalSteps, xp, onRestart, onExit, onBrandClick }: HUDProps) {
+export function HUD({ language = 'es', mode, stepIndex, totalSteps, xp, highlighted = false, onRestart, onExit, onBrandClick }: HUDProps) {
   const progress = totalSteps > 1 ? Math.round((stepIndex / (totalSteps - 1)) * 100) : 0;
   const safeProgress = Math.min(100, Math.max(0, progress));
   const handleBrand = onBrandClick ?? onExit;
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 border-b border-white/15 bg-white/10 backdrop-blur-2xl">
+    <header
+      className={`fixed inset-x-0 top-0 z-40 border-b bg-white/10 backdrop-blur-2xl transition duration-200 ${
+        highlighted
+          ? 'border-sky-200/40 shadow-[0_14px_38px_rgba(8,57,104,0.35)] ring-1 ring-sky-200/30'
+          : 'border-white/15'
+      }`}
+    >
       <div className="mx-auto w-full max-w-4xl px-3 py-3 sm:px-4">
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-3">
