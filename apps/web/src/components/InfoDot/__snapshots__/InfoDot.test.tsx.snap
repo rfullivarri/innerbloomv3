@@ -2,18 +2,18 @@
 
 exports[`InfoDot > matches the xpLevel snapshot 1`] = `
 <div
-  aria-labelledby=":r3:-title"
+  aria-labelledby="«r3»-title"
   aria-modal="false"
   class="info-dot__popover"
   data-placement="bottom"
-  id=":r3:-dialog"
+  id="«r3»-dialog"
   role="dialog"
   style="top: 18px; left: 12px; --arrow-x: -11px;"
   tabindex="-1"
 >
   <h4
     class="info-dot__title"
-    id=":r3:-title"
+    id="«r3»-title"
   >
     ¿Qué ves acá?
   </h4>
@@ -25,24 +25,32 @@ exports[`InfoDot > matches the xpLevel snapshot 1`] = `
       <strong>
         GP
       </strong>
-       = experiencia total acumulada.
+       = crecimiento acumulado por tu 
+      <strong>
+        constancia diaria
+      </strong>
+      .
     </li>
     <li>
       🎯 
       <strong>
         Level
       </strong>
-       sube al alcanzar el umbral de GP.
-    </li>
-    <li>
-      📊 La barra muestra el 
+       sube cuando alcanzás el siguiente umbral de 
       <strong>
-        progreso al próximo nivel
+        GP
       </strong>
       .
     </li>
     <li>
-      💡 Cada hábito suma GP: pequeños pasos, gran avance.
+      📊 La barra muestra cuánto te falta para el próximo nivel.
+    </li>
+    <li>
+      💡 Cada hábito suma 
+      <strong>
+        GP
+      </strong>
+      . La constancia construye tu progreso.
     </li>
   </ul>
 </div>

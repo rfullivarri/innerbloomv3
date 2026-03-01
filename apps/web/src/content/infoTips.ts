@@ -16,10 +16,10 @@ export const infoTips: Record<InfoKey, InfoTip> = {
   xpLevel: {
     title: '¿Qué ves acá?',
     bullets: [
-      '🏆 **GP** = experiencia total acumulada.',
-      '🎯 **Level** sube al alcanzar el umbral de GP.',
-      '📊 La barra muestra el **progreso al próximo nivel**.',
-      '💡 Cada hábito suma GP: pequeños pasos, gran avance.',
+      '🏆 **GP** = crecimiento acumulado por tu **constancia diaria**.',
+      '🎯 **Level** sube cuando alcanzás el siguiente umbral de **GP**.',
+      '📊 La barra muestra cuánto te falta para el próximo nivel.',
+      '💡 Cada hábito suma **GP**. La constancia construye tu progreso.',
     ],
   },
   radar: {
