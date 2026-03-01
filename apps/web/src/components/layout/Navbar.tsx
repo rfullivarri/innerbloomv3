@@ -75,8 +75,11 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
                 {section.showPulseDot ? (
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute -right-0.5 top-0 h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.85)]"
-                    style={{ animation: 'ibOnboardingPulse 1.6s ease-in-out infinite' }}
+                    className="pointer-events-none absolute -right-1 top-0.5 h-2.5 w-2.5 rounded-full bg-violet-500"
+                    style={{
+                      boxShadow: '0 0 6px rgba(255,255,255,0.6), 0 0 10px rgba(139,92,246,0.8)',
+                      animation: 'ibOnboardingPulse 1.4s ease-in-out infinite',
+                    }}
                   />
                 ) : null}
               </NavLink>
