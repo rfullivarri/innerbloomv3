@@ -25,7 +25,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
   }
 
   const baseItemClasses =
-    'group relative flex w-full flex-col items-center gap-0.5 rounded-2xl px-1.5 py-1 text-[9px] font-semibold leading-tight tracking-[0.08em] uppercase transition';
+    'group relative flex w-full flex-col items-center gap-0.5 rounded-2xl px-1.5 py-1 text-[9px] font-semibold leading-tight tracking-[0.08em] transition';
 
   return (
     <nav
@@ -96,7 +96,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                   </div>
                   <span
                     className={combine(
-                      'font-semibold uppercase leading-tight text-white transition-all duration-300',
+                      'font-semibold leading-tight text-white transition-all duration-300',
                       item.key === 'dashboard' ? 'text-[10px] tracking-[0.09em]' : 'text-[9px] tracking-[0.08em]',
                       isActive
                         ? 'drop-shadow-[0_0_6px_rgba(255,255,255,0.22)]'
