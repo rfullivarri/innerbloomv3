@@ -25,7 +25,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
   }
 
   const baseItemClasses =
-    'group relative flex w-full flex-col items-center gap-0.5 rounded-2xl px-2 py-1.5 text-[4.5px] font-semibold leading-tight tracking-[0.08em] uppercase transition';
+    'group relative flex w-full flex-col items-center gap-0.5 rounded-2xl px-1.5 py-1 text-[9px] font-semibold leading-tight tracking-[0.08em] uppercase transition';
 
   return (
     <nav
@@ -51,7 +51,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
               }
             >
               {({ isActive }: { isActive: boolean }) => (
-                <div className="relative flex flex-col items-center gap-1">
+                <div className="relative flex flex-col items-center gap-0.5">
                   <div className="relative flex items-center justify-center">
                     <span
                       className={combine(
@@ -75,7 +75,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                               className: combine(
                                 item.icon.props.className,
                                 'stroke-[1.75] transition-all duration-300',
-                                item.key === 'dashboard' ? 'h-[26px] w-[26px]' : 'h-[21px] w-[21px]'
+                                item.key === 'dashboard' ? 'h-[28px] w-[28px]' : 'h-[24px] w-[24px]'
                               ),
                               stroke: item.icon.props.stroke ?? 'currentColor',
                               'aria-hidden': true,
@@ -96,8 +96,8 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                   </div>
                   <span
                     className={combine(
-                      'text-[4.5px] font-semibold uppercase leading-tight tracking-[0.1em] text-white/60 transition-all duration-300',
-                      item.key === 'dashboard' && 'text-[4.75px]',
+                      'font-semibold uppercase leading-tight text-white/60 transition-all duration-300',
+                      item.key === 'dashboard' ? 'text-[10px] tracking-[0.09em]' : 'text-[9px] tracking-[0.08em]',
                       isActive && 'text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.22)]'
                     )}
                   >
