@@ -46,7 +46,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/65 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/70',
                   isActive
                     ? 'text-white'
-                    : 'text-white/60 hover:text-white/85'
+                    : 'text-white hover:text-white'
                 )
               }
             >
@@ -59,7 +59,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                         item.key === 'dashboard' && 'h-8 w-8',
                         isActive
                           ? 'bg-white/15 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.28)]'
-                          : 'bg-white/8 text-white/55'
+                          : 'bg-white/10 text-white/80'
                       )}
                     >
                       <span
@@ -67,7 +67,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                           'relative flex h-full w-full items-center justify-center transition-all duration-400 ease-out',
                           isActive
                             ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]'
-                            : 'text-white/60 group-hover:text-white/85'
+                            : 'text-white/80 group-hover:text-white'
                         )}
                       >
                         {isValidElement<SVGProps<SVGSVGElement>>(item.icon)
@@ -96,9 +96,11 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                   </div>
                   <span
                     className={combine(
-                      'font-semibold uppercase leading-tight text-white/60 transition-all duration-300',
+                      'font-semibold uppercase leading-tight text-white transition-all duration-300',
                       item.key === 'dashboard' ? 'text-[10px] tracking-[0.09em]' : 'text-[9px] tracking-[0.08em]',
-                      isActive && 'text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.22)]'
+                      isActive
+                        ? 'drop-shadow-[0_0_6px_rgba(255,255,255,0.22)]'
+                        : 'drop-shadow-[0_0_2px_rgba(255,255,255,0.14)]'
                     )}
                   >
                     {item.label}
