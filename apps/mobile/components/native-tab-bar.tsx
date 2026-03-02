@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.6,
-    textTransform: 'uppercase',
+    textTransform: 'none',
     textAlign: 'center',
     includeFontPadding: false,
     minWidth: 64,
