@@ -11,7 +11,7 @@ export const DEFAULT_FEEDBACK_DEFINITIONS = [
     frequency: 'daily',
     status: 'active',
     priority: 50,
-    copy: 'Hola {{user_name}}, tu Daily Quest de {{friendly_date}} ya está lista. Sumá XP registrando tu emoción del día y marcando tus hábitos completados.',
+    copy: 'Hola {{user_name}}, tu Daily Quest de {{friendly_date}} ya está lista. Sumá GP registrando tu emoción del día y marcando tus hábitos completados.',
     ctaLabel: 'Abrir Daily Quest',
     ctaHref: 'https://innerbloomjourney.org/dashboard-v3?daily-quest=open',
     previewVariables: {

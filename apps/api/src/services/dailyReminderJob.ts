@@ -185,11 +185,11 @@ export function buildReminderEmail(
   const sanitizedCopy = stripDuplicateGreeting(rawCopy, name);
   const { headline, body } = splitHeadlineAndBody(sanitizedCopy);
   const finalHeadline = headline || `Tu Daily Quest de ${friendlyDate} ya está lista.`;
-  const finalBody = body || 'Sumá XP registrando tu emoción del día y marcando los hábitos completados. Cada check cuenta. 💫';
+  const finalBody = body || 'Sumá GP registrando tu emoción del día y marcando los hábitos completados. Cada check cuenta. 💫';
   const normalizedHeadline = normalizeHeadline(finalHeadline);
   const bodyHtml =
     buildHtmlParagraphs(finalBody) ||
-    '<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#e2e8f0;">Sumá XP registrando tu emoción del día y marcando los hábitos completados. Cada check cuenta. 💫</p>';
+    '<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#e2e8f0;">Sumá GP registrando tu emoción del día y marcando los hábitos completados. Cada check cuenta. 💫</p>';
   const subject = `${name}, ${normalizedHeadline.replace(/\s+/g, ' ').trim()} ✨`;
   const html = `<!doctype html>
 <html lang="es">
@@ -228,7 +228,7 @@ export function buildReminderEmail(
   const textCopy = [normalizedHeadline, finalBody].filter(Boolean).join(' ');
   const text = [
     `Hola ${name} 👋`,
-    textCopy || 'Tu Daily Quest ya está lista. Sumá XP registrando tu emoción del día y marcando tus hábitos completados.',
+    textCopy || 'Tu Daily Quest ya está lista. Sumá GP registrando tu emoción del día y marcando tus hábitos completados.',
     `${ctaLabel}: ${ctaUrl}`,
     `Recordatorio enviado ${friendlyDate} · ${sendTime}`,
   ].join('\n\n');

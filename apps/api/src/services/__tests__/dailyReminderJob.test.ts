@@ -29,7 +29,7 @@ vi.mock('../../repositories/feedback-definitions.repository.js', () => ({
     frequency: 'daily',
     status: 'active',
     priority: 50,
-    copy: 'Hola {{user_name}}, tu Daily Quest de {{friendly_date}} ya está lista. Sumá XP registrando tu emoción del día y marcando tus hábitos completados.',
+    copy: 'Hola {{user_name}}, tu Daily Quest de {{friendly_date}} ya está lista. Sumá GP registrando tu emoción del día y marcando tus hábitos completados.',
     ctaLabel: 'Abrir Daily Quest',
     ctaHref: 'https://innerbloomjourney.org/dashboard-v3?daily-quest=open',
     previewVariables: {},
@@ -185,7 +185,7 @@ describe('runDailyReminderJob', () => {
     }).format(now);
 
     expect(payload?.html).toContain(`Tu Daily Quest de ${friendlyDate} ya está lista.`);
-    expect(payload?.html).toContain('Sumá XP registrando tu emoción del día');
+    expect(payload?.html).toContain('Sumá GP registrando tu emoción del día');
   });
 
   it('uses the admin-defined template copy and CTA when available', async () => {

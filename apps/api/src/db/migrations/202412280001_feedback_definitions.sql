@@ -46,7 +46,7 @@ VALUES (
   'daily',
   'active',
   50,
-  'Hola {{user_name}}, tu Daily Quest de {{friendly_date}} ya está lista. Sumá XP registrando tu emoción del día y marcando tus hábitos completados.',
+  'Hola {{user_name}}, tu Daily Quest de {{friendly_date}} ya está lista. Sumá GP registrando tu emoción del día y marcando tus hábitos completados.',
   'Abrir Daily Quest',
   'https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open',
   '{"user_name":"Majo","friendly_date":"lunes","cta_url":"https://web-dev-dfa2.up.railway.app/dashboard-v3?daily-quest=open"}'
