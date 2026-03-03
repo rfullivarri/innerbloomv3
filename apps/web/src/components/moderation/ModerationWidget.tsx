@@ -23,23 +23,26 @@ function nextStatus(status: ModerationStatus): ModerationStatus {
 }
 
 function chipStateClass(status: ModerationStatus): string {
+  const baseClass =
+    "border-white/10 bg-[radial-gradient(ellipse_at_top,_rgba(35,43,76,0.35),_rgba(17,24,39,0.55))] shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md";
+
   if (status === "on_track") {
-    return "border-emerald-300/45 bg-[radial-gradient(ellipse_at_top,_rgba(16,185,129,0.2),_rgba(17,24,39,0.5))] shadow-[0_10px_28px_rgba(16,185,129,0.16)] backdrop-blur-md";
+    return `${baseClass} before:absolute before:inset-0 before:rounded-[inherit] before:bg-emerald-300/[0.08] before:opacity-100 before:content-['']`;
   }
 
   if (status === "off_track") {
-    return "border-amber-200/30 bg-[radial-gradient(ellipse_at_top,_rgba(251,191,36,0.18),_rgba(17,24,39,0.48))] shadow-[0_10px_26px_rgba(251,191,36,0.12)] backdrop-blur-md";
+    return `${baseClass} before:absolute before:inset-0 before:rounded-[inherit] before:bg-amber-200/[0.06] before:opacity-100 before:content-['']`;
   }
 
-  return "border-white/15 bg-[radial-gradient(ellipse_at_top,_rgba(71,85,105,0.3),_rgba(17,24,39,0.42))] backdrop-blur-md";
+  return baseClass;
 }
 
 function statusPillClass(status: ModerationStatus): string {
   if (status === "on_track") {
-    return "border border-emerald-300/35 bg-emerald-300/10 text-emerald-100";
+    return "border border-emerald-200/30 bg-emerald-300/12 text-emerald-50";
   }
 
-  return "border border-amber-200/35 bg-amber-100/10 text-amber-100/90";
+  return "border border-amber-200/25 bg-amber-100/10 text-amber-50/90";
 }
 
 const STATUS_BADGE_HOLD_MS = 1020;
@@ -103,13 +106,13 @@ function Chip({
     <button
       type="button"
       onClick={() => onCycle(tracker.type, nextStatus(tracker.statusToday))}
-      className={`relative w-full overflow-hidden rounded-[1.9rem] border px-3 pb-6 pt-2.5 text-left transition-all duration-200 hover:bg-white/10 sm:px-3.5 sm:pb-6 sm:pt-3 ${chipStateClass(tracker.statusToday)}`}
+      className={`relative w-full overflow-hidden rounded-[1.9rem] border px-3 pb-6 pt-2.5 text-left transition-all duration-200 hover:border-white/20 hover:bg-white/[0.07] sm:px-3.5 sm:pb-6 sm:pt-3 ${chipStateClass(tracker.statusToday)}`}
       title={meta.hint}
       {...longPressBind}
     >
       {statusFlash ? (
         <span
-          className={`pointer-events-none absolute left-1/2 top-1.5 z-20 flex -translate-x-1/2 items-center justify-center rounded-full border px-1.5 py-px text-[0.46rem] font-semibold uppercase tracking-[0.12em] backdrop-blur-sm transition-[transform,opacity] duration-300 ease-out sm:top-2 ${statusPillClass(statusFlash)} ${
+          className={`pointer-events-none absolute left-1/2 top-1.5 z-20 flex -translate-x-1/2 items-center justify-center rounded-full border px-1.5 py-px text-[0.46rem] font-semibold tracking-[0.08em] backdrop-blur-sm transition-[transform,opacity] duration-300 ease-out sm:top-2 ${statusPillClass(statusFlash)} ${
             statusFlashPhase === "from"
               ? "translate-y-[6px] opacity-0"
               : statusFlashPhase === "exit"
@@ -130,7 +133,7 @@ function Chip({
             />
           </div>
         </div>
-        <span className="shrink-0 leading-none text-amber-100">
+        <span className="shrink-0 leading-none text-amber-100/95">
           <span className="text-[2.45rem] font-semibold sm:text-[2.7rem]">
             {tracker.current_streak_days}
           </span>
@@ -140,7 +143,7 @@ function Chip({
         </span>
       </div>
       <p
-        className="pointer-events-none absolute bottom-2 left-1/2 z-10 w-full -translate-x-1/2 truncate px-2 text-center text-[0.64rem] font-medium uppercase tracking-[0.12em] text-white/70"
+        className="pointer-events-none absolute bottom-2 left-1/2 z-10 w-full -translate-x-1/2 truncate px-2 text-center text-[0.72rem] font-medium tracking-[0.02em] text-white/72"
         title={meta.hint}
       >
         {meta.label}
