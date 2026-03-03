@@ -86,12 +86,8 @@ import {
 import { StandaloneSplash } from "../components/pwa/StandaloneSplash";
 import { useOnboardingEditorNudge } from "../hooks/useOnboardingEditorNudge";
 import { useModerationWidget } from "../hooks/useModerationWidget";
-import type {
-  ModerationTrackerConfig,
-  ModerationTrackerType,
-} from "../lib/api";
+import type { ModerationTrackerType } from "../lib/api";
 import { ModerationWidget as ModerationStatusWidget } from "../components/moderation/ModerationWidget";
-import { ModerationWidget as ModerationConfigWidget } from "../components/dashboard-v3/ModerationWidget";
 import { ModerationEditSheet } from "../components/dashboard-v3/ModerationEditSheet";
 import { ModerationOnboardingSuggestion } from "../components/dashboard-v3/ModerationOnboardingSuggestion";
 
@@ -711,8 +707,6 @@ export default function DashboardV3Page() {
                       section={overviewSection}
                       onOpenReminderScheduler={handleOpenReminderScheduler}
                       journeyReadyOpen={journeyReadyOpen}
-                      moderationConfigs={moderation.configs}
-                      moderationEnabledTypes={moderation.enabledTypes}
                       onOpenModerationEdit={() => setIsModerationEditOpen(true)}
                     />
                   }
@@ -732,9 +726,6 @@ export default function DashboardV3Page() {
                     <DailyQuestView
                       section={dquestSection}
                       onOpenDailyQuest={handleOpenDaily}
-                      moderationConfigs={moderation.configs}
-                      moderationEnabledTypes={moderation.enabledTypes}
-                      onOpenModerationEdit={() => setIsModerationEditOpen(true)}
                     />
                   }
                 />
@@ -839,11 +830,6 @@ interface DashboardOverviewProps {
   section: DashboardSectionConfig;
   onOpenReminderScheduler: () => void;
   journeyReadyOpen?: boolean;
-  moderationConfigs: Record<
-    ModerationTrackerType,
-    ModerationTrackerConfig
-  > | null;
-  moderationEnabledTypes: ModerationTrackerType[];
   onOpenModerationEdit: () => void;
 }
 
@@ -856,8 +842,6 @@ function DashboardOverview({
   section,
   onOpenReminderScheduler,
   journeyReadyOpen = false,
-  moderationConfigs,
-  moderationEnabledTypes,
   onOpenModerationEdit,
 }: DashboardOverviewProps) {
   const handleScheduleClick = useCallback(() => {
@@ -915,14 +899,6 @@ function DashboardOverview({
           <ProfileCard gameMode={gameMode} />
           <EnergyCard userId={userId} gameMode={gameMode} />
           <DailyCultivationSection userId={userId} />
-          {moderationConfigs && moderationEnabledTypes.length > 0 ? (
-            <div className="hidden lg:block">
-              <ModerationConfigWidget
-                configs={moderationConfigs}
-                onEdit={onOpenModerationEdit}
-              />
-            </div>
-          ) : null}
         </div>
 
         <div className="order-3 space-y-4 md:space-y-5 lg:order-3 lg:col-span-4">
@@ -974,18 +950,9 @@ function MissionsView({
 function DailyQuestView({
   section,
   onOpenDailyQuest,
-  moderationConfigs,
-  moderationEnabledTypes,
-  onOpenModerationEdit,
 }: {
   section: DashboardSectionConfig;
   onOpenDailyQuest: () => void;
-  moderationConfigs: Record<
-    ModerationTrackerType,
-    ModerationTrackerConfig
-  > | null;
-  moderationEnabledTypes: ModerationTrackerType[];
-  onOpenModerationEdit: () => void;
 }) {
   return (
     <div className="space-y-6">
@@ -1073,15 +1040,6 @@ function DailyQuestView({
             </ul>
           </div>
         </LegacyCard>
-        {moderationConfigs && moderationEnabledTypes.length > 0 ? (
-          <div className="md:col-span-2 lg:col-span-12">
-            <ModerationConfigWidget
-              title="Moderación"
-              configs={moderationConfigs}
-              onEdit={onOpenModerationEdit}
-            />
-          </div>
-        ) : null}
       </div>
     </div>
   );
