@@ -73,6 +73,10 @@ import { isJourneyGenerationPending, syncJourneyGenerationFromServer } from '../
 import { StandaloneSplash } from '../components/pwa/StandaloneSplash';
 import { ModerationWidget } from '../components/moderation/ModerationWidget';
 import { useOnboardingEditorNudge } from '../hooks/useOnboardingEditorNudge';
+import { useModerationWidget } from '../hooks/useModerationWidget';
+import type { ModerationTrackerConfig, ModerationTrackerType } from '../lib/api';
+import { ModerationWidget } from '../components/dashboard-v3/ModerationWidget';
+import { ModerationEditSheet } from '../components/dashboard-v3/ModerationEditSheet';
 
 export default function DashboardV3Page() {
   const { getToken } = useAuth();
@@ -99,6 +103,8 @@ export default function DashboardV3Page() {
   const weeklyWrapped = useWeeklyWrapped(backendUserId);
   const isAppMode = useAppMode();
   const [isJourneyGenerating, setIsJourneyGenerating] = useState(false);
+  const moderation = useModerationWidget();
+  const [isModerationEditOpen, setIsModerationEditOpen] = useState(false);
 
   useEffect(() => {
     if (!clerkUserId || typeof window === 'undefined') {
@@ -370,7 +376,16 @@ export default function DashboardV3Page() {
               ...section,
               showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
             }))}
-            menuSlot={<DashboardMenu onOpenScheduler={handleOpenReminderScheduler} />}
+            menuSlot={<DashboardMenu onOpenScheduler={handleOpenReminderScheduler} moderation={{
+              configs: moderation.configs,
+              enabledTypes: moderation.enabledTypes,
+              isGeneralEnabled: moderation.isGeneralEnabled,
+              setGeneralEnabled: moderation.setGeneralEnabled,
+              updateTrackerEnabled: async (type, enabled) => {
+                await moderation.updateTracker(type, { isEnabled: enabled });
+              },
+              onOpenEdit: () => setIsModerationEditOpen(true),
+            }} />}
             planSlot={<PlanChip subscription={subscription ?? null} />}
           />
         )}
@@ -436,6 +451,9 @@ export default function DashboardV3Page() {
                       section={overviewSection}
                       onOpenReminderScheduler={handleOpenReminderScheduler}
                       journeyReadyOpen={journeyReadyOpen}
+                      moderationConfigs={moderation.configs}
+                      moderationEnabledTypes={moderation.enabledTypes}
+                      onOpenModerationEdit={() => setIsModerationEditOpen(true)}
                     />
                   }
                 />
@@ -445,7 +463,7 @@ export default function DashboardV3Page() {
                 />
                 <Route
                   path="dquest"
-                  element={<DailyQuestView section={dquestSection} onOpenDailyQuest={handleOpenDaily} />}
+                  element={<DailyQuestView section={dquestSection} onOpenDailyQuest={handleOpenDaily} moderationConfigs={moderation.configs} moderationEnabledTypes={moderation.enabledTypes} onOpenModerationEdit={() => setIsModerationEditOpen(true)} />}
                 />
                 <Route
                   path="missions-v2"
@@ -474,6 +492,19 @@ export default function DashboardV3Page() {
             )}
           </div>
         </main>
+
+        <ModerationEditSheet
+          isOpen={isModerationEditOpen}
+          enabledTypes={moderation.enabledTypes}
+          configs={moderation.configs ?? { alcohol: { type: 'alcohol', isEnabled: false, isPaused: false, notLoggedToleranceDays: 2 }, tobacco: { type: 'tobacco', isEnabled: false, isPaused: false, notLoggedToleranceDays: 2 }, sugar: { type: 'sugar', isEnabled: false, isPaused: false, notLoggedToleranceDays: 2 } }}
+          onClose={() => setIsModerationEditOpen(false)}
+          onTogglePause={async (type, value) => {
+            await moderation.updateTracker(type, { isPaused: value });
+          }}
+          onToleranceChange={async (type, value) => {
+            await moderation.updateTracker(type, { notLoggedToleranceDays: value });
+          }}
+        />
         {!isAppMode && (
           <MobileBottomNav
             items={sections.map((section) => {
@@ -505,6 +536,9 @@ interface DashboardOverviewProps {
   section: DashboardSectionConfig;
   onOpenReminderScheduler: () => void;
   journeyReadyOpen?: boolean;
+  moderationConfigs: Record<ModerationTrackerType, ModerationTrackerConfig> | null;
+  moderationEnabledTypes: ModerationTrackerType[];
+  onOpenModerationEdit: () => void;
 }
 
 function DashboardOverview({
@@ -516,6 +550,9 @@ function DashboardOverview({
   section,
   onOpenReminderScheduler,
   journeyReadyOpen = false,
+  moderationConfigs,
+  moderationEnabledTypes,
+  onOpenModerationEdit,
 }: DashboardOverviewProps) {
   const handleScheduleClick = useCallback(() => {
     onOpenReminderScheduler();
@@ -568,6 +605,9 @@ function DashboardOverview({
           <ProfileCard gameMode={gameMode} />
           <EnergyCard userId={userId} gameMode={gameMode} />
           <DailyCultivationSection userId={userId} />
+          {moderationConfigs && moderationEnabledTypes.length > 0 ? (
+            <ModerationWidget configs={moderationConfigs} onEdit={onOpenModerationEdit} />
+          ) : null}
         </div>
 
         <div className="order-3 space-y-4 md:space-y-5 lg:order-3 lg:col-span-4">
@@ -613,9 +653,15 @@ function MissionsView({ userId, section }: { userId: string; section: DashboardS
 function DailyQuestView({
   section,
   onOpenDailyQuest,
+  moderationConfigs,
+  moderationEnabledTypes,
+  onOpenModerationEdit,
 }: {
   section: DashboardSectionConfig;
   onOpenDailyQuest: () => void;
+  moderationConfigs: Record<ModerationTrackerType, ModerationTrackerConfig> | null;
+  moderationEnabledTypes: ModerationTrackerType[];
+  onOpenModerationEdit: () => void;
 }) {
   return (
     <div className="space-y-6">
@@ -682,6 +728,11 @@ function DailyQuestView({
             </ul>
           </div>
         </LegacyCard>
+        {moderationConfigs && moderationEnabledTypes.length > 0 ? (
+          <div className="md:col-span-2 lg:col-span-12">
+            <ModerationWidget title="Moderación (Daily Quest)" configs={moderationConfigs} onEdit={onOpenModerationEdit} />
+          </div>
+        ) : null}
       </div>
     </div>
   );

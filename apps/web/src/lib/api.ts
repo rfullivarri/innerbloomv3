@@ -557,6 +557,59 @@ export async function apiAuthorizedFetch(path: string, init: RequestInit = {}): 
   return fetch(url, authedInit);
 }
 
+export type ModerationTrackerType = 'alcohol' | 'tobacco' | 'sugar';
+
+export type ModerationTrackerConfig = {
+  type: ModerationTrackerType;
+  isEnabled: boolean;
+  isPaused: boolean;
+  notLoggedToleranceDays: number;
+};
+
+type ModerationTrackerConfigPatch = Partial<
+  Pick<ModerationTrackerConfig, 'isEnabled' | 'isPaused' | 'notLoggedToleranceDays'>
+>;
+
+function normalizeModerationTrackerConfig(
+  type: ModerationTrackerType,
+  payload: unknown,
+): ModerationTrackerConfig {
+  const source = (payload ?? {}) as Record<string, unknown>;
+  return {
+    type,
+    isEnabled: source.isEnabled === true,
+    isPaused: source.isPaused === true,
+    notLoggedToleranceDays: Math.max(0, Number(source.notLoggedToleranceDays ?? 2) || 2),
+  };
+}
+
+export async function getModerationTrackerConfig(type: ModerationTrackerType): Promise<ModerationTrackerConfig> {
+  const payload = await apiAuthorizedGet<unknown>(`/moderation/${type}/config`);
+  return normalizeModerationTrackerConfig(type, payload);
+}
+
+export async function updateModerationTrackerConfig(
+  type: ModerationTrackerType,
+  patch: ModerationTrackerConfigPatch,
+): Promise<ModerationTrackerConfig> {
+  const response = await apiAuthorizedFetch(`/moderation/${type}/config`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(patch),
+  });
+
+  if (!response.ok) {
+    const body = await safeJson(response);
+    throw new ApiError(response.status, body, `/api/moderation/${type}/config`);
+  }
+
+  const payload = (await safeJson(response)) ?? patch;
+  return normalizeModerationTrackerConfig(type, payload);
+}
+
 export type ProgressSummary = {
   userId: string;
   totalXp: number;
