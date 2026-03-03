@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { ToastBanner } from '../common/ToastBanner';
 import { useQuickAccessInstall } from '../../hooks/useQuickAccessInstall';
+import { useLongPress } from '../../hooks/useLongPress';
+import type { ModerationTrackerConfig, ModerationTrackerType } from '../../lib/api';
 import {
   forwardRef,
   type MouseEvent,
@@ -17,6 +19,14 @@ import {
 
 interface DashboardMenuProps {
   onOpenScheduler?: () => void;
+  moderation: {
+    configs: Record<ModerationTrackerType, ModerationTrackerConfig> | null;
+    enabledTypes: ModerationTrackerType[];
+    isGeneralEnabled: boolean;
+    setGeneralEnabled: (nextEnabled: boolean) => Promise<void>;
+    updateTrackerEnabled: (type: ModerationTrackerType, enabled: boolean) => Promise<void>;
+    onOpenEdit: () => void;
+  };
 }
 
 function MenuIcon({ children, className = 'h-5 w-5 text-white/75' }: { children: ReactNode; className?: string }) {
@@ -62,7 +72,7 @@ const DashboardMenuTrigger = forwardRef<HTMLButtonElement, { onClick: () => void
   },
 );
 
-export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
+export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProps) {
   const navigate = useNavigate();
   const { user } = useUser();
   const { openUserProfile } = useClerk();
@@ -221,6 +231,18 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
     [isSpanishSystem],
   );
 
+
+  const trackerLabels: Record<ModerationTrackerType, string> = {
+    alcohol: 'Alcohol',
+    tobacco: 'Tabaco',
+    sugar: 'Azúcar',
+  };
+
+  const moderationLongPressBind = useLongPress({
+    delayMs: 2200,
+    onLongPress: moderation.onOpenEdit,
+  });
+
   if (!isMounted || !portalNode) {
     return <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} />;
   }
@@ -351,6 +373,70 @@ export function DashboardMenu({ onOpenScheduler }: DashboardMenuProps) {
                           </MenuIcon>
                           Pricing
                         </button>
+                      </div>
+                    ) : null}
+                  </section>
+
+
+                  <section className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <div>
+                        <p className="text-[0.62rem] uppercase tracking-[0.28em] text-text-muted">Widgets</p>
+                        <p className="text-sm font-semibold text-white">Gestión de widgets</p>
+                      </div>
+                      <label className="flex items-center gap-2 text-xs text-white/80">
+                        <span>Moderación</span>
+                        <input
+                          type="checkbox"
+                          checked={moderation.isGeneralEnabled}
+                          onChange={(event) => {
+                            void moderation.setGeneralEnabled(event.target.checked);
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <p className="mb-2 text-xs text-white/65">Widgets activos</p>
+                    {moderation.enabledTypes.length > 0 ? (
+                      <button
+                        type="button"
+                        className="flex w-full items-start justify-between rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-left"
+                        onClick={moderation.onOpenEdit}
+                        {...moderationLongPressBind}
+                      >
+                        <span>
+                          <span className="block text-sm font-medium text-white">Moderación</span>
+                          <span className="block text-xs text-text-muted">Trackers: {moderation.enabledTypes.map((type) => trackerLabels[type]).join(', ')}</span>
+                        </span>
+                        <span className="text-xs text-white/70">Activo</span>
+                      </button>
+                    ) : (
+                      <p className="rounded-xl border border-dashed border-white/15 px-3 py-2 text-xs text-white/60">Sin widgets activos.</p>
+                    )}
+                    <p className="mt-3 text-xs text-white/65">Widgets disponibles</p>
+                    {moderation.enabledTypes.length === 0 ? (
+                      <div className="mt-1 rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                        <p className="text-sm text-white">Moderación</p>
+                        <p className="text-xs text-text-muted">Seguimiento de alcohol, tabaco y azúcar.</p>
+                      </div>
+                    ) : null}
+                    <div className="mt-3 space-y-1 text-[11px] text-white/60">
+                      <p>Tip: mantené presionado un widget para editarlo.</p>
+                      <p>Tip: press and hold a widget to edit.</p>
+                    </div>
+                    {moderation.isGeneralEnabled ? (
+                      <div className="mt-2 space-y-1 rounded-xl border border-white/10 bg-black/20 p-2">
+                        {(['alcohol', 'tobacco', 'sugar'] as ModerationTrackerType[]).map((type) => (
+                          <label key={type} className="flex items-center justify-between text-xs text-white/85">
+                            <span>{trackerLabels[type]}{type === 'sugar' ? ' (azúcar añadido)' : ''}</span>
+                            <input
+                              type="checkbox"
+                              checked={Boolean(moderation.configs?.[type]?.isEnabled)}
+                              onChange={(event) => {
+                                void moderation.updateTrackerEnabled(type, event.target.checked);
+                              }}
+                            />
+                          </label>
+                        ))}
                       </div>
                     ) : null}
                   </section>
