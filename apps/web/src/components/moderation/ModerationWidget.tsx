@@ -87,20 +87,20 @@ function Chip({
     <button
       type="button"
       onClick={() => onCycle(tracker.type, nextStatus(tracker.statusToday))}
-      className={`relative w-full overflow-hidden rounded-[1.9rem] border px-3 py-2.5 text-left transition-all duration-200 hover:bg-white/10 sm:px-3.5 sm:py-3 ${chipStateClass(tracker.statusToday)}`}
+      className={`relative w-full overflow-hidden rounded-[1.9rem] border px-3 pb-6 pt-2.5 text-left transition-all duration-200 hover:bg-white/10 sm:px-3.5 sm:pb-6 sm:pt-3 ${chipStateClass(tracker.statusToday)}`}
       title={meta.hint}
       {...longPressBind}
     >
       {statusFlash ? (
         <span
-          className={`pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-[1.9rem] border text-[0.72rem] font-semibold uppercase tracking-[0.16em] backdrop-blur-sm transition-all duration-300 ${statusPillClass(statusFlash)}`}
+          className={`pointer-events-none absolute left-1/2 top-2 z-20 flex -translate-x-1/2 items-center justify-center rounded-full border px-2 py-0.5 text-[0.54rem] font-semibold uppercase tracking-[0.14em] backdrop-blur-sm transition-all duration-300 sm:top-2.5 ${statusPillClass(statusFlash)}`}
           aria-live="polite"
         >
           <span
-            className={`mr-2 h-2 w-2 rounded-full ${statusFlash === "on_track" ? "bg-emerald-300" : "bg-amber-200/90"}`}
+            className={`mr-1.5 h-1.5 w-1.5 rounded-full ${statusFlash === "on_track" ? "bg-emerald-300" : "bg-amber-200/90"}`}
             aria-hidden
           />
-          {statusFlash === "on_track" ? "Cumplido" : "Interrumpido"}
+          {statusFlash === "on_track" ? "Cumplido" : "Incumplido"}
         </span>
       ) : null}
       <div className="relative z-10 flex items-center justify-between gap-3">
@@ -110,12 +110,6 @@ function Chip({
               type={tracker.type}
               className="h-8 w-8 shrink-0 text-white/90"
             />
-            <p
-              className="truncate text-[0.72rem] font-medium uppercase tracking-[0.12em] text-white/70"
-              title={meta.hint}
-            >
-              {meta.label}
-            </p>
           </div>
         </div>
         <span className="shrink-0 leading-none text-amber-100">
@@ -127,6 +121,12 @@ function Chip({
           </span>
         </span>
       </div>
+      <p
+        className="pointer-events-none absolute bottom-2 left-1/2 z-10 w-full -translate-x-1/2 truncate px-2 text-center text-[0.64rem] font-medium uppercase tracking-[0.12em] text-white/70"
+        title={meta.hint}
+      >
+        {meta.label}
+      </p>
     </button>
   );
 }
