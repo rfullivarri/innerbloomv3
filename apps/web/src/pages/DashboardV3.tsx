@@ -41,7 +41,8 @@ import {
   markJourneyReadyModalSeen,
   updateModerationStatus,
   type ModerationStatus,
-  type ModerationTrackerType,
+  type CurrentUserProfile,
+  type UserJourneySummary,
 } from '../lib/api';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
@@ -71,12 +72,66 @@ import { WeeklyWrappedModal } from '../components/feedback/WeeklyWrappedModal';
 import { useAppMode } from '../hooks/useAppMode';
 import { isJourneyGenerationPending, syncJourneyGenerationFromServer } from '../lib/journeyGeneration';
 import { StandaloneSplash } from '../components/pwa/StandaloneSplash';
-import { ModerationWidget } from '../components/moderation/ModerationWidget';
 import { useOnboardingEditorNudge } from '../hooks/useOnboardingEditorNudge';
 import { useModerationWidget } from '../hooks/useModerationWidget';
 import type { ModerationTrackerConfig, ModerationTrackerType } from '../lib/api';
-import { ModerationWidget } from '../components/dashboard-v3/ModerationWidget';
+import { ModerationWidget as ModerationStatusWidget } from '../components/moderation/ModerationWidget';
+import { ModerationWidget as ModerationConfigWidget } from '../components/dashboard-v3/ModerationWidget';
 import { ModerationEditSheet } from '../components/dashboard-v3/ModerationEditSheet';
+import { ModerationOnboardingSuggestion } from '../components/dashboard-v3/ModerationOnboardingSuggestion';
+
+const MODERATION_SUGGESTION_RESOLVED_KEY = 'ib.onboarding.moderationSuggestionResolved';
+
+function hasModerationBodyFocus(profile: CurrentUserProfile | null | undefined, journey: UserJourneySummary | null): boolean {
+  const candidates: unknown[] = [];
+  const profileRecord = profile as Record<string, unknown> | null | undefined;
+  const journeyRecord = journey as Record<string, unknown> | null;
+
+  if (profileRecord) {
+    candidates.push(profileRecord.bodyFocus, profileRecord.body_focus, profileRecord.onboardingBodyFocus, profileRecord.onboarding_body_focus);
+    const onboarding = profileRecord.onboarding as Record<string, unknown> | undefined;
+    if (onboarding) {
+      candidates.push(onboarding.bodyFocus, onboarding.body_focus);
+    }
+  }
+
+  if (journeyRecord) {
+    candidates.push(journeyRecord.bodyFocus, journeyRecord.body_focus, journeyRecord.onboardingBodyFocus, journeyRecord.onboarding_body_focus);
+    const onboarding = journeyRecord.onboarding as Record<string, unknown> | undefined;
+    if (onboarding) {
+      candidates.push(onboarding.bodyFocus, onboarding.body_focus);
+    }
+  }
+
+  return candidates.some((value) => {
+    if (typeof value !== 'string') {
+      return false;
+    }
+    const normalized = value.trim().toLowerCase();
+    return normalized === 'moderation' || normalized === 'moderación' || normalized === 'moderacion';
+  });
+}
+
+function readModerationSuggestionResolvedFlag(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.localStorage.getItem(MODERATION_SUGGESTION_RESOLVED_KEY) === '1';
+}
+
+function writeModerationSuggestionResolvedFlag(value: boolean) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  if (value) {
+    window.localStorage.setItem(MODERATION_SUGGESTION_RESOLVED_KEY, '1');
+    return;
+  }
+
+  window.localStorage.removeItem(MODERATION_SUGGESTION_RESOLVED_KEY);
+}
 
 export default function DashboardV3Page() {
   const { getToken } = useAuth();
@@ -105,6 +160,16 @@ export default function DashboardV3Page() {
   const [isJourneyGenerating, setIsJourneyGenerating] = useState(false);
   const moderation = useModerationWidget();
   const [isModerationEditOpen, setIsModerationEditOpen] = useState(false);
+  const [moderationSuggestionResolved, setModerationSuggestionResolved] = useState(() =>
+    readModerationSuggestionResolvedFlag(),
+  );
+  const [isModerationSuggestionOpen, setIsModerationSuggestionOpen] = useState(false);
+  const [selectedModerationSuggestions, setSelectedModerationSuggestions] = useState<ModerationTrackerType[]>([
+    'alcohol',
+    'tobacco',
+    'sugar',
+  ]);
+  const [isSubmittingModerationSuggestion, setIsSubmittingModerationSuggestion] = useState(false);
 
   useEffect(() => {
     if (!clerkUserId || typeof window === 'undefined') {
@@ -244,13 +309,94 @@ export default function DashboardV3Page() {
     markReturnedToDashboard,
   } = onboardingEditorNudge;
 
+  const onboardingLanguage = profile?.locale?.toLowerCase().startsWith('en') ? 'en' : 'es';
+
   useEffect(() => {
-    if (!firstEditDone || hasReturnedToDashboardAfterEdit) {
+    const shouldShowModerationSuggestion =
+      firstEditDone &&
+      !hasReturnedToDashboardAfterEdit &&
+      dailyQuestReadiness.firstTasksConfirmed &&
+      !dailyQuestReadiness.completedFirstDailyQuest &&
+      hasModerationBodyFocus(profile, dailyQuestReadiness.journey) &&
+      !moderationSuggestionResolved &&
+      !moderation.isLoading;
+
+    if (shouldShowModerationSuggestion) {
+      if (moderation.enabledTypes.length > 0) {
+        writeModerationSuggestionResolvedFlag(true);
+        setModerationSuggestionResolved(true);
+        markReturnedToDashboard();
+        return;
+      }
+
+      setIsModerationSuggestionOpen(true);
+      return;
+    }
+
+    if (!firstEditDone || hasReturnedToDashboardAfterEdit || isModerationSuggestionOpen) {
       return;
     }
 
     markReturnedToDashboard();
-  }, [firstEditDone, hasReturnedToDashboardAfterEdit, markReturnedToDashboard]);
+  }, [
+    dailyQuestReadiness.completedFirstDailyQuest,
+    dailyQuestReadiness.firstTasksConfirmed,
+    dailyQuestReadiness.journey,
+    firstEditDone,
+    hasReturnedToDashboardAfterEdit,
+    isModerationSuggestionOpen,
+    markReturnedToDashboard,
+    moderation.enabledTypes.length,
+    moderation.isLoading,
+    moderationSuggestionResolved,
+    profile,
+  ]);
+
+  const resolveModerationSuggestion = useCallback(() => {
+    writeModerationSuggestionResolvedFlag(true);
+    setModerationSuggestionResolved(true);
+    setIsModerationSuggestionOpen(false);
+    markReturnedToDashboard();
+  }, [markReturnedToDashboard]);
+
+  const handleToggleModerationSuggestion = useCallback((type: ModerationTrackerType) => {
+    setSelectedModerationSuggestions((current) => {
+      if (current.includes(type)) {
+        return current.filter((item) => item !== type);
+      }
+
+      if (current.length >= 3) {
+        return current;
+      }
+
+      return [...current, type];
+    });
+  }, []);
+
+  const handleActivateModerationSuggestion = useCallback(async () => {
+    if (selectedModerationSuggestions.length === 0) {
+      return;
+    }
+
+    setIsSubmittingModerationSuggestion(true);
+    try {
+      await Promise.all(
+        selectedModerationSuggestions.map(async (type) => {
+          const currentConfig = moderation.configs?.[type];
+          await moderation.updateTracker(type, {
+            isEnabled: true,
+            isPaused: false,
+            ...(currentConfig?.notLoggedToleranceDays == null ? { notLoggedToleranceDays: 2 } : {}),
+          });
+        }),
+      );
+      resolveModerationSuggestion();
+    } catch (error) {
+      console.error('Failed to activate moderation onboarding suggestion', error);
+    } finally {
+      setIsSubmittingModerationSuggestion(false);
+    }
+  }, [moderation, resolveModerationSuggestion, selectedModerationSuggestions]);
 
   const handleOpenDaily = useCallback(() => {
     if (!dailyQuestReadiness.canShowDailyQuestPopup) {
@@ -505,6 +651,17 @@ export default function DashboardV3Page() {
             await moderation.updateTracker(type, { notLoggedToleranceDays: value });
           }}
         />
+        <ModerationOnboardingSuggestion
+          open={isModerationSuggestionOpen}
+          language={onboardingLanguage}
+          selected={selectedModerationSuggestions}
+          onToggle={handleToggleModerationSuggestion}
+          onActivate={() => {
+            void handleActivateModerationSuggestion();
+          }}
+          onSkip={resolveModerationSuggestion}
+          isSubmitting={isSubmittingModerationSuggestion}
+        />
         {!isAppMode && (
           <MobileBottomNav
             items={sections.map((section) => {
@@ -606,12 +763,12 @@ function DashboardOverview({
           <EnergyCard userId={userId} gameMode={gameMode} />
           <DailyCultivationSection userId={userId} />
           {moderationConfigs && moderationEnabledTypes.length > 0 ? (
-            <ModerationWidget configs={moderationConfigs} onEdit={onOpenModerationEdit} />
+            <ModerationConfigWidget configs={moderationConfigs} onEdit={onOpenModerationEdit} />
           ) : null}
         </div>
 
         <div className="order-3 space-y-4 md:space-y-5 lg:order-3 lg:col-span-4">
-          <ModerationWidget
+          <ModerationStatusWidget
             title="Moderación"
             data={moderationState ?? null}
             loading={moderationRequest.status === 'loading'}
@@ -730,7 +887,7 @@ function DailyQuestView({
         </LegacyCard>
         {moderationConfigs && moderationEnabledTypes.length > 0 ? (
           <div className="md:col-span-2 lg:col-span-12">
-            <ModerationWidget title="Moderación (Daily Quest)" configs={moderationConfigs} onEdit={onOpenModerationEdit} />
+            <ModerationConfigWidget title="Moderación (Daily Quest)" configs={moderationConfigs} onEdit={onOpenModerationEdit} />
           </div>
         ) : null}
       </div>
