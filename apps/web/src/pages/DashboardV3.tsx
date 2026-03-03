@@ -927,10 +927,10 @@ function DashboardOverview({
 
         <div className="order-3 space-y-4 md:space-y-5 lg:order-3 lg:col-span-4">
           <ModerationStatusWidget
-            title="Moderación"
             data={moderationState ?? null}
             loading={moderationRequest.status === "loading"}
             onCycle={handleCycleModeration}
+            onEdit={onOpenModerationEdit}
           />
           <RadarChartCard userId={userId} />
           <EmotionChartCard userId={userId} />
