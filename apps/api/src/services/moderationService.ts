@@ -64,13 +64,9 @@ async function ensureTrackers(userId: string): Promise<void> {
 
 async function hasDailyQuestSubmission(userId: string, dayKey: string): Promise<boolean> {
   const result = await pool.query<DailyQuestSubmissionRow>(
-    `SELECT EXISTS(
-      SELECT 1
-        FROM (
-          SELECT 1 FROM daily_log WHERE user_id = $1 AND date = $2 LIMIT 1
-          UNION ALL
-          SELECT 1 FROM emotions_logs WHERE user_id = $1 AND date = $2 LIMIT 1
-        ) submissions
+    `SELECT (
+      EXISTS(SELECT 1 FROM daily_log WHERE user_id = $1 AND date = $2)
+      OR EXISTS(SELECT 1 FROM emotions_logs WHERE user_id = $1 AND date = $2)
     ) AS submitted`,
     [userId, dayKey],
   );
