@@ -22,14 +22,22 @@ function nextStatus(status: ModerationStatus): ModerationStatus {
 
 function chipStateClass(status: ModerationStatus): string {
   if (status === "on_track") {
-    return "border-emerald-300/50 bg-emerald-400/10 shadow-[0_0_0_1px_rgba(52,211,153,0.28)]";
+    return "border-emerald-300/45 bg-emerald-400/[0.08] shadow-[0_8px_22px_rgba(16,185,129,0.12)]";
   }
 
   if (status === "off_track") {
-    return "border-amber-200/30 bg-amber-100/5";
+    return "border-amber-200/30 bg-amber-100/[0.06] shadow-[0_8px_20px_rgba(251,191,36,0.08)]";
   }
 
-  return "border-white/15 bg-white/5";
+  return "border-white/15 bg-white/[0.045]";
+}
+
+function statusPillClass(status: ModerationStatus): string {
+  if (status === "on_track") {
+    return "border border-emerald-300/35 bg-emerald-300/10 text-emerald-100";
+  }
+
+  return "border border-amber-200/35 bg-amber-100/10 text-amber-100/90";
 }
 
 function Chip({
@@ -45,41 +53,41 @@ function Chip({
     <button
       type="button"
       onClick={() => onCycle(tracker.type, nextStatus(tracker.statusToday))}
-      className={`w-full rounded-[1.7rem] border p-3 text-left transition hover:bg-white/10 sm:p-4 ${chipStateClass(tracker.statusToday)}`}
+      className={`w-full rounded-[1.9rem] border px-3 py-2.5 text-left transition-all duration-200 hover:bg-white/10 sm:px-3.5 sm:py-3 ${chipStateClass(tracker.statusToday)}`}
       title={meta.hint}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2 text-white/90">
-          <ModerationTrackerIcon
-            type={tracker.type}
-            className="h-4 w-4 sm:h-5 sm:w-5"
-          />
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          <div className="flex min-w-0 items-center gap-2 text-white/85">
+            <ModerationTrackerIcon
+              type={tracker.type}
+              className="h-8 w-8 shrink-0 text-white/90"
+            />
+            <p
+              className="truncate text-[0.72rem] font-medium uppercase tracking-[0.12em] text-white/70"
+              title={meta.hint}
+            >
+              {meta.label}
+            </p>
+            {tracker.statusToday !== "not_logged" ? (
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] transition-all duration-200 ${statusPillClass(tracker.statusToday)}`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${tracker.statusToday === "on_track" ? "bg-emerald-300" : "bg-amber-200/90"}`}
+                  aria-hidden
+                />
+                {tracker.statusToday === "on_track"
+                  ? "Cumplido"
+                  : "Interrumpido"}
+              </span>
+            ) : null}
+          </div>
         </div>
-        <span className="text-xl font-bold leading-none text-amber-200 sm:text-2xl">
+        <span className="shrink-0 text-3xl font-semibold leading-none text-amber-100 sm:text-[2.1rem]">
           {tracker.current_streak_days}d
         </span>
       </div>
-      <p className="mt-2 truncate text-[11px] font-medium text-white/70 sm:text-xs">
-        {meta.label}
-      </p>
-      {tracker.statusToday === "on_track" ? (
-        <div className="mt-1 inline-flex items-center gap-1 text-[11px] text-emerald-200/90">
-          <span
-            className="h-1.5 w-1.5 rounded-full bg-emerald-300"
-            aria-hidden
-          />
-          <span>Cumplido</span>
-        </div>
-      ) : null}
-      {tracker.statusToday === "off_track" ? (
-        <div className="mt-1 inline-flex items-center gap-1 text-[11px] text-amber-100/80">
-          <span
-            className="h-1.5 w-1.5 rounded-full bg-amber-200/80"
-            aria-hidden
-          />
-          <span>Interrumpido</span>
-        </div>
-      ) : null}
     </button>
   );
 }
@@ -99,13 +107,13 @@ export function ModerationWidget({
   const activeCount = Math.max(1, Math.min(3, enabled.length || 1));
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-slate-900/60 p-4">
-      <h3 className="text-sm font-semibold text-white/85">{title}</h3>
+    <section>
+      <h3 className="mb-2 text-sm font-semibold text-white/85">{title}</h3>
       <div
-        className={`mt-3 grid gap-2 sm:gap-3 ${activeCount === 1 ? "grid-cols-1" : ""} ${activeCount === 2 ? "grid-cols-2" : ""} ${activeCount === 3 ? "grid-cols-3 max-[360px]:grid-cols-2" : ""}`}
+        className={`grid gap-2.5 sm:gap-3 ${activeCount === 1 ? "grid-cols-1" : ""} ${activeCount === 2 ? "grid-cols-2" : ""} ${activeCount === 3 ? "grid-cols-3 max-[360px]:grid-cols-2" : ""}`}
       >
         {loading && (
-          <div className="h-20 animate-pulse rounded-[1.4rem] bg-white/10" />
+          <div className="h-20 animate-pulse rounded-[1.8rem] border border-white/10 bg-white/10" />
         )}
         {!loading &&
           enabled.map((tracker) => (
