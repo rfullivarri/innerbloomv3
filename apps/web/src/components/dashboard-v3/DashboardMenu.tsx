@@ -85,7 +85,7 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
   const [isSpanishSystem, setIsSpanishSystem] = useState(true);
   const [isPlansOpen, setIsPlansOpen] = useState(false);
-  const [isModerationOpen, setIsModerationOpen] = useState(false);
+  const [isModerationOpen, setIsModerationOpen] = useState(true);
   const [activePanel, setActivePanel] = useState<MenuPanel>('main');
   const [trackerOverrides, setTrackerOverrides] = useState<Partial<Record<ModerationTrackerType, boolean>>>({});
 
@@ -157,7 +157,7 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
   const handleClose = useCallback(() => {
     setIsOpen(false);
     setIsPlansOpen(false);
-    setIsModerationOpen(false);
+    setIsModerationOpen(true);
     setActivePanel('main');
     requestAnimationFrame(() => {
       triggerRef.current?.focus({ preventScroll: true });
@@ -510,7 +510,7 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
                                 className="rounded-md border border-white/15 px-2 py-1 text-xs text-white/80 transition hover:bg-white/10"
                                 aria-label="Editar configuración de Moderación"
                               >
-                                ⋯
+                                Editar
                               </button>
                             </div>
 
@@ -566,7 +566,7 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
                           </div>
                         </div>
 
-                        <p className="text-[11px] text-white/60">Tip: mantené presionado un widget para editarlo.</p>
+                        <p className="text-[11px] text-white/60">Podés activar/desactivar trackers y tocar “Editar” para abrir la configuración completa.</p>
                       </div>
                     ) : null}
                   </section>
