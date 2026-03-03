@@ -165,7 +165,28 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
   }, []);
 
   useEffect(() => {
-    setTrackerOverrides({});
+    if (!moderation.configs) {
+      return;
+    }
+
+    setTrackerOverrides((current) => {
+      let didChange = false;
+      const next: Partial<Record<ModerationTrackerType, boolean>> = { ...current };
+
+      (Object.keys(current) as ModerationTrackerType[]).forEach((type) => {
+        const localOverride = current[type];
+        if (typeof localOverride !== 'boolean') {
+          return;
+        }
+
+        if (moderation.configs?.[type]?.isEnabled === localOverride) {
+          delete next[type];
+          didChange = true;
+        }
+      });
+
+      return didChange ? next : current;
+    });
   }, [moderation.configs]);
 
   const menuRowClassName =
