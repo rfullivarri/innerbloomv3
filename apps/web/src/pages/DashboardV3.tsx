@@ -11,27 +11,33 @@
  * Derivaciones client-side: xp faltante y barra de nivel se calculan con una curva estimada; panel de rachas muestra métricas de GP mientras esperamos daily_log_raw.
  */
 
-import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Navbar } from '../components/layout/Navbar';
-import { MobileBottomNav } from '../components/layout/MobileBottomNav';
-import { Alerts } from '../components/dashboard-v3/Alerts';
-import { EnergyCard } from '../components/dashboard-v3/EnergyCard';
-import { DailyCultivationSection } from '../components/dashboard-v3/DailyCultivationSection';
-import { MissionsSection } from '../components/dashboard-v3/MissionsSection';
-import { ProfileCard } from '../components/dashboard-v3/ProfileCard';
-import { MetricHeader } from '../components/dashboard-v3/MetricHeader';
-import { RadarChartCard } from '../components/dashboard-v3/RadarChartCard';
-import { EmotionChartCard } from '../components/dashboard-v3/EmotionChartCard';
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Navbar } from "../components/layout/Navbar";
+import { MobileBottomNav } from "../components/layout/MobileBottomNav";
+import { Alerts } from "../components/dashboard-v3/Alerts";
+import { EnergyCard } from "../components/dashboard-v3/EnergyCard";
+import { DailyCultivationSection } from "../components/dashboard-v3/DailyCultivationSection";
+import { MissionsSection } from "../components/dashboard-v3/MissionsSection";
+import { ProfileCard } from "../components/dashboard-v3/ProfileCard";
+import { MetricHeader } from "../components/dashboard-v3/MetricHeader";
+import { RadarChartCard } from "../components/dashboard-v3/RadarChartCard";
+import { EmotionChartCard } from "../components/dashboard-v3/EmotionChartCard";
 import {
   FEATURE_STREAKS_PANEL_V1,
   LegacyStreaksPanel,
   StreaksPanel,
-} from '../components/dashboard-v3/StreaksPanel';
-import { useBackendUser } from '../hooks/useBackendUser';
-import { useRequest } from '../hooks/useRequest';
-import { DevErrorBoundary } from '../components/DevErrorBoundary';
+} from "../components/dashboard-v3/StreaksPanel";
+import { useBackendUser } from "../hooks/useBackendUser";
+import { useRequest } from "../hooks/useRequest";
+import { DevErrorBoundary } from "../components/DevErrorBoundary";
 import {
   getCurrentUserSubscription,
   getJourneyGenerationStatus,
@@ -43,90 +49,123 @@ import {
   type ModerationStatus,
   type CurrentUserProfile,
   type UserJourneySummary,
-} from '../lib/api';
-import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
-import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
-import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
-import { MissionsV2Board } from '../components/dashboard-v3/MissionsV2Board';
-import { MissionsV3Board } from '../components/dashboard-v3/MissionsV3Board';
-import { Card as LegacyCard } from '../components/common/Card';
+} from "../lib/api";
+import {
+  DailyQuestModal,
+  type DailyQuestModalHandle,
+} from "../components/DailyQuestModal";
+import { normalizeGameModeValue, type GameMode } from "../lib/gameMode";
+import { RewardsSection } from "../components/dashboard-v3/RewardsSection";
+import { MissionsV2Board } from "../components/dashboard-v3/MissionsV2Board";
+import { MissionsV3Board } from "../components/dashboard-v3/MissionsV3Board";
+import { Card as LegacyCard } from "../components/common/Card";
 import {
   getActiveSection,
   getDashboardSectionConfig,
   getDashboardSections,
   type DashboardSectionConfig,
-} from './dashboardSections';
-import { FEATURE_MISSIONS_V2 } from '../lib/featureFlags';
-import { DashboardMenu } from '../components/dashboard-v3/DashboardMenu';
-import { PlanChip } from '../components/dashboard-v3/PlanChip';
-import { JourneyReadyModal } from '../components/dashboard-v3/JourneyReadyModal';
+} from "./dashboardSections";
+import { FEATURE_MISSIONS_V2 } from "../lib/featureFlags";
+import { DashboardMenu } from "../components/dashboard-v3/DashboardMenu";
+import { PlanChip } from "../components/dashboard-v3/PlanChip";
+import { JourneyReadyModal } from "../components/dashboard-v3/JourneyReadyModal";
 import {
   ReminderSchedulerDialog,
   type ReminderSchedulerDialogHandle,
-} from '../components/dashboard-v3/ReminderSchedulerDialog';
-import { NotificationPopup } from '../components/feedback/NotificationPopup';
-import { useFeedbackNotifications } from '../hooks/useFeedbackNotifications';
-import { useDailyQuestReadiness } from '../hooks/useDailyQuestReadiness';
-import { useWeeklyWrapped } from '../hooks/useWeeklyWrapped';
-import { WeeklyWrappedModal } from '../components/feedback/WeeklyWrappedModal';
-import { useAppMode } from '../hooks/useAppMode';
-import { isJourneyGenerationPending, syncJourneyGenerationFromServer } from '../lib/journeyGeneration';
-import { StandaloneSplash } from '../components/pwa/StandaloneSplash';
-import { useOnboardingEditorNudge } from '../hooks/useOnboardingEditorNudge';
-import { useModerationWidget } from '../hooks/useModerationWidget';
-import type { ModerationTrackerConfig, ModerationTrackerType } from '../lib/api';
-import { ModerationWidget as ModerationStatusWidget } from '../components/moderation/ModerationWidget';
-import { ModerationWidget as ModerationConfigWidget } from '../components/dashboard-v3/ModerationWidget';
-import { ModerationEditSheet } from '../components/dashboard-v3/ModerationEditSheet';
-import { ModerationOnboardingSuggestion } from '../components/dashboard-v3/ModerationOnboardingSuggestion';
+} from "../components/dashboard-v3/ReminderSchedulerDialog";
+import { NotificationPopup } from "../components/feedback/NotificationPopup";
+import { useFeedbackNotifications } from "../hooks/useFeedbackNotifications";
+import { useDailyQuestReadiness } from "../hooks/useDailyQuestReadiness";
+import { useWeeklyWrapped } from "../hooks/useWeeklyWrapped";
+import { WeeklyWrappedModal } from "../components/feedback/WeeklyWrappedModal";
+import { useAppMode } from "../hooks/useAppMode";
+import {
+  isJourneyGenerationPending,
+  syncJourneyGenerationFromServer,
+} from "../lib/journeyGeneration";
+import { StandaloneSplash } from "../components/pwa/StandaloneSplash";
+import { useOnboardingEditorNudge } from "../hooks/useOnboardingEditorNudge";
+import { useModerationWidget } from "../hooks/useModerationWidget";
+import type {
+  ModerationTrackerConfig,
+  ModerationTrackerType,
+} from "../lib/api";
+import { ModerationWidget as ModerationStatusWidget } from "../components/moderation/ModerationWidget";
+import { ModerationWidget as ModerationConfigWidget } from "../components/dashboard-v3/ModerationWidget";
+import { ModerationEditSheet } from "../components/dashboard-v3/ModerationEditSheet";
+import { ModerationOnboardingSuggestion } from "../components/dashboard-v3/ModerationOnboardingSuggestion";
 
-const MODERATION_SUGGESTION_RESOLVED_KEY = 'ib.onboarding.moderationSuggestionResolved';
+const MODERATION_SUGGESTION_RESOLVED_KEY =
+  "ib.onboarding.moderationSuggestionResolved";
 
-function hasModerationBodyFocus(profile: CurrentUserProfile | null | undefined, journey: UserJourneySummary | null): boolean {
+function hasModerationBodyFocus(
+  profile: CurrentUserProfile | null | undefined,
+  journey: UserJourneySummary | null,
+): boolean {
   const candidates: unknown[] = [];
   const profileRecord = profile as Record<string, unknown> | null | undefined;
   const journeyRecord = journey as Record<string, unknown> | null;
 
   if (profileRecord) {
-    candidates.push(profileRecord.bodyFocus, profileRecord.body_focus, profileRecord.onboardingBodyFocus, profileRecord.onboarding_body_focus);
-    const onboarding = profileRecord.onboarding as Record<string, unknown> | undefined;
+    candidates.push(
+      profileRecord.bodyFocus,
+      profileRecord.body_focus,
+      profileRecord.onboardingBodyFocus,
+      profileRecord.onboarding_body_focus,
+    );
+    const onboarding = profileRecord.onboarding as
+      | Record<string, unknown>
+      | undefined;
     if (onboarding) {
       candidates.push(onboarding.bodyFocus, onboarding.body_focus);
     }
   }
 
   if (journeyRecord) {
-    candidates.push(journeyRecord.bodyFocus, journeyRecord.body_focus, journeyRecord.onboardingBodyFocus, journeyRecord.onboarding_body_focus);
-    const onboarding = journeyRecord.onboarding as Record<string, unknown> | undefined;
+    candidates.push(
+      journeyRecord.bodyFocus,
+      journeyRecord.body_focus,
+      journeyRecord.onboardingBodyFocus,
+      journeyRecord.onboarding_body_focus,
+    );
+    const onboarding = journeyRecord.onboarding as
+      | Record<string, unknown>
+      | undefined;
     if (onboarding) {
       candidates.push(onboarding.bodyFocus, onboarding.body_focus);
     }
   }
 
   return candidates.some((value) => {
-    if (typeof value !== 'string') {
+    if (typeof value !== "string") {
       return false;
     }
     const normalized = value.trim().toLowerCase();
-    return normalized === 'moderation' || normalized === 'moderación' || normalized === 'moderacion';
+    return (
+      normalized === "moderation" ||
+      normalized === "moderación" ||
+      normalized === "moderacion"
+    );
   });
 }
 
 function readModerationSuggestionResolvedFlag(): boolean {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return false;
   }
 
-  return window.localStorage.getItem(MODERATION_SUGGESTION_RESOLVED_KEY) === '1';
+  return (
+    window.localStorage.getItem(MODERATION_SUGGESTION_RESOLVED_KEY) === "1"
+  );
 }
 
 function writeModerationSuggestionResolvedFlag(value: boolean) {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return;
   }
 
   if (value) {
-    window.localStorage.setItem(MODERATION_SUGGESTION_RESOLVED_KEY, '1');
+    window.localStorage.setItem(MODERATION_SUGGESTION_RESOLVED_KEY, "1");
     return;
   }
 
@@ -136,14 +175,24 @@ function writeModerationSuggestionResolvedFlag(value: boolean) {
 export default function DashboardV3Page() {
   const { getToken } = useAuth();
   const navigate = useNavigate();
-  const { backendUserId, status, error, reload, clerkUserId, profile } = useBackendUser();
+  const { backendUserId, status, error, reload, clerkUserId, profile } =
+    useBackendUser();
   const location = useLocation();
   const sections = getDashboardSections(location.pathname);
   const activeSection = getActiveSection(location.pathname, sections);
-  const overviewSection = getDashboardSectionConfig('dashboard', location.pathname);
-  const missionsSection = getDashboardSectionConfig('missions', location.pathname);
-  const dquestSection = getDashboardSectionConfig('dquest', location.pathname);
-  const rewardsSection = getDashboardSectionConfig('rewards', location.pathname);
+  const overviewSection = getDashboardSectionConfig(
+    "dashboard",
+    location.pathname,
+  );
+  const missionsSection = getDashboardSectionConfig(
+    "missions",
+    location.pathname,
+  );
+  const dquestSection = getDashboardSectionConfig("dquest", location.pathname);
+  const rewardsSection = getDashboardSectionConfig(
+    "rewards",
+    location.pathname,
+  );
   const profileGameMode = deriveGameModeFromProfile(profile?.game_mode);
   const shouldFetchUserState = Boolean(backendUserId && !profileGameMode);
   const { data: userState } = useRequest(
@@ -152,27 +201,30 @@ export default function DashboardV3Page() {
     { enabled: shouldFetchUserState },
   );
 
-  const rawGameMode = userState?.mode_name ?? userState?.mode ?? profileGameMode ?? null;
+  const rawGameMode =
+    userState?.mode_name ?? userState?.mode ?? profileGameMode ?? null;
   const normalizedGameMode = normalizeGameModeValue(rawGameMode);
-  const gameMode = normalizedGameMode ?? (typeof rawGameMode === 'string' ? rawGameMode : null);
+  const gameMode =
+    normalizedGameMode ??
+    (typeof rawGameMode === "string" ? rawGameMode : null);
   const weeklyWrapped = useWeeklyWrapped(backendUserId);
   const isAppMode = useAppMode();
   const [isJourneyGenerating, setIsJourneyGenerating] = useState(false);
   const moderation = useModerationWidget();
   const [isModerationEditOpen, setIsModerationEditOpen] = useState(false);
-  const [moderationSuggestionResolved, setModerationSuggestionResolved] = useState(() =>
-    readModerationSuggestionResolvedFlag(),
-  );
-  const [isModerationSuggestionOpen, setIsModerationSuggestionOpen] = useState(false);
-  const [selectedModerationSuggestions, setSelectedModerationSuggestions] = useState<ModerationTrackerType[]>([
-    'alcohol',
-    'tobacco',
-    'sugar',
-  ]);
-  const [isSubmittingModerationSuggestion, setIsSubmittingModerationSuggestion] = useState(false);
+  const [moderationSuggestionResolved, setModerationSuggestionResolved] =
+    useState(() => readModerationSuggestionResolvedFlag());
+  const [isModerationSuggestionOpen, setIsModerationSuggestionOpen] =
+    useState(false);
+  const [selectedModerationSuggestions, setSelectedModerationSuggestions] =
+    useState<ModerationTrackerType[]>(["alcohol", "tobacco", "sugar"]);
+  const [
+    isSubmittingModerationSuggestion,
+    setIsSubmittingModerationSuggestion,
+  ] = useState(false);
 
   useEffect(() => {
-    if (!clerkUserId || typeof window === 'undefined') {
+    if (!clerkUserId || typeof window === "undefined") {
       return;
     }
 
@@ -181,8 +233,9 @@ export default function DashboardV3Page() {
     };
 
     syncState();
-    window.addEventListener('journey-generation-change', syncState);
-    return () => window.removeEventListener('journey-generation-change', syncState);
+    window.addEventListener("journey-generation-change", syncState);
+    return () =>
+      window.removeEventListener("journey-generation-change", syncState);
   }, [clerkUserId]);
 
   useEffect(() => {
@@ -204,7 +257,7 @@ export default function DashboardV3Page() {
           state: payload.state,
         });
       } catch (error) {
-        console.warn('Failed to sync journey generation state', error);
+        console.warn("Failed to sync journey generation state", error);
       }
     };
 
@@ -220,46 +273,51 @@ export default function DashboardV3Page() {
   }, [clerkUserId]);
 
   useEffect(() => {
-    if (!clerkUserId || typeof window === 'undefined') {
+    if (!clerkUserId || typeof window === "undefined") {
       return;
     }
 
     let hasTimezoneBeenSet = false;
 
     try {
-      hasTimezoneBeenSet = window.localStorage.getItem('tzSet') === 'true';
+      hasTimezoneBeenSet = window.localStorage.getItem("tzSet") === "true";
     } catch (error) {
-      console.warn('Failed to access timezone flag in localStorage', error);
+      console.warn("Failed to access timezone flag in localStorage", error);
     }
 
     if (hasTimezoneBeenSet) {
       return;
     }
 
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
     const updateTimezone = async () => {
       try {
         const token = await getToken();
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
 
         if (token) {
           headers.Authorization = `Bearer ${token}`;
         }
 
-        await fetch('/api/me/timezone', {
-          method: 'PUT',
+        await fetch("/api/me/timezone", {
+          method: "PUT",
           headers,
           body: JSON.stringify({ timezone }),
-          credentials: 'include',
+          credentials: "include",
         });
       } catch (error) {
-        console.warn('Failed to update user timezone', error);
+        console.warn("Failed to update user timezone", error);
       } finally {
         try {
-          window.localStorage.setItem('tzSet', 'true');
+          window.localStorage.setItem("tzSet", "true");
         } catch (storageError) {
-          console.warn('Failed to persist timezone flag in localStorage', storageError);
+          console.warn(
+            "Failed to persist timezone flag in localStorage",
+            storageError,
+          );
         }
       }
     };
@@ -271,18 +329,19 @@ export default function DashboardV3Page() {
     return null;
   }
 
-  const isLoadingProfile = status === 'idle' || status === 'loading';
-  const failedToLoadProfile = status === 'error' || !backendUserId;
+  const isLoadingProfile = status === "idle" || status === "loading";
+  const failedToLoadProfile = status === "error" || !backendUserId;
 
   const dailyButtonRef = useRef<HTMLButtonElement | null>(null);
   const dailyQuestModalRef = useRef<DailyQuestModalHandle | null>(null);
-  const reminderSchedulerDialogRef = useRef<ReminderSchedulerDialogHandle | null>(null);
+  const reminderSchedulerDialogRef =
+    useRef<ReminderSchedulerDialogHandle | null>(null);
   const hasAutoOpenedDailyQuestRef = useRef(false);
   const feedbackNotifications = useFeedbackNotifications({
     userId: backendUserId,
     enabled: Boolean(backendUserId),
   });
-  const dailyQuestReadiness = useDailyQuestReadiness(backendUserId ?? '', {
+  const dailyQuestReadiness = useDailyQuestReadiness(backendUserId ?? "", {
     enabled: Boolean(backendUserId),
     isJourneyGenerating,
   });
@@ -309,7 +368,9 @@ export default function DashboardV3Page() {
     markReturnedToDashboard,
   } = onboardingEditorNudge;
 
-  const onboardingLanguage = profile?.locale?.toLowerCase().startsWith('en') ? 'en' : 'es';
+  const onboardingLanguage = profile?.locale?.toLowerCase().startsWith("en")
+    ? "en"
+    : "es";
 
   useEffect(() => {
     const shouldShowModerationSuggestion =
@@ -333,7 +394,11 @@ export default function DashboardV3Page() {
       return;
     }
 
-    if (!firstEditDone || hasReturnedToDashboardAfterEdit || isModerationSuggestionOpen) {
+    if (
+      !firstEditDone ||
+      hasReturnedToDashboardAfterEdit ||
+      isModerationSuggestionOpen
+    ) {
       return;
     }
 
@@ -359,19 +424,22 @@ export default function DashboardV3Page() {
     markReturnedToDashboard();
   }, [markReturnedToDashboard]);
 
-  const handleToggleModerationSuggestion = useCallback((type: ModerationTrackerType) => {
-    setSelectedModerationSuggestions((current) => {
-      if (current.includes(type)) {
-        return current.filter((item) => item !== type);
-      }
+  const handleToggleModerationSuggestion = useCallback(
+    (type: ModerationTrackerType) => {
+      setSelectedModerationSuggestions((current) => {
+        if (current.includes(type)) {
+          return current.filter((item) => item !== type);
+        }
 
-      if (current.length >= 3) {
-        return current;
-      }
+        if (current.length >= 3) {
+          return current;
+        }
 
-      return [...current, type];
-    });
-  }, []);
+        return [...current, type];
+      });
+    },
+    [],
+  );
 
   const handleActivateModerationSuggestion = useCallback(async () => {
     if (selectedModerationSuggestions.length === 0) {
@@ -386,13 +454,18 @@ export default function DashboardV3Page() {
           await moderation.updateTracker(type, {
             isEnabled: true,
             isPaused: false,
-            ...(currentConfig?.notLoggedToleranceDays == null ? { notLoggedToleranceDays: 2 } : {}),
+            ...(currentConfig?.notLoggedToleranceDays == null
+              ? { notLoggedToleranceDays: 2 }
+              : {}),
           });
         }),
       );
       resolveModerationSuggestion();
     } catch (error) {
-      console.error('Failed to activate moderation onboarding suggestion', error);
+      console.error(
+        "Failed to activate moderation onboarding suggestion",
+        error,
+      );
     } finally {
       setIsSubmittingModerationSuggestion(false);
     }
@@ -408,21 +481,29 @@ export default function DashboardV3Page() {
     }
 
     dailyQuestModalRef.current?.open();
-  }, [dailyQuestReadiness.canShowDailyQuestPopup, markReturnedToDashboard, shouldShowDashboardDot]);
+  }, [
+    dailyQuestReadiness.canShowDailyQuestPopup,
+    markReturnedToDashboard,
+    shouldShowDashboardDot,
+  ]);
 
   const handleOpenReminderScheduler = useCallback(() => {
     reminderSchedulerDialogRef.current?.open();
   }, []);
 
   const handleDailyQuestComplete = useCallback(
-    (response: Parameters<typeof feedbackNotifications.handleDailyQuestResult>[0]) => {
+    (
+      response: Parameters<
+        typeof feedbackNotifications.handleDailyQuestResult
+      >[0],
+    ) => {
       feedbackNotifications.handleDailyQuestResult(response);
     },
     [feedbackNotifications],
   );
 
   const handleFeedbackPopupCta = useCallback(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       window.location.reload();
     }
   }, []);
@@ -437,20 +518,23 @@ export default function DashboardV3Page() {
     }
 
     const searchParams = new URLSearchParams(location.search);
-    const queryParamName = searchParams.has('daily-quest')
-      ? 'daily-quest'
-      : searchParams.has('dailyQuest')
-        ? 'dailyQuest'
+    const queryParamName = searchParams.has("daily-quest")
+      ? "daily-quest"
+      : searchParams.has("dailyQuest")
+        ? "dailyQuest"
         : null;
     const rawValue = queryParamName ? searchParams.get(queryParamName) : null;
     const normalizedValue = rawValue?.trim().toLowerCase();
-    const allowedValues = new Set(['1', 'true', 'open', 'yes']);
-    const hasEmptyValue = queryParamName != null && (!rawValue || rawValue.trim() === '');
+    const allowedValues = new Set(["1", "true", "open", "yes"]);
+    const hasEmptyValue =
+      queryParamName != null && (!rawValue || rawValue.trim() === "");
     const shouldOpenFromQuery = Boolean(
-      queryParamName && (hasEmptyValue || (normalizedValue && allowedValues.has(normalizedValue))),
+      queryParamName &&
+      (hasEmptyValue ||
+        (normalizedValue && allowedValues.has(normalizedValue))),
     );
-    const normalizedHash = location.hash?.toLowerCase() ?? '';
-    const shouldOpenFromHash = normalizedHash === '#daily-quest';
+    const normalizedHash = location.hash?.toLowerCase() ?? "";
+    const shouldOpenFromHash = normalizedHash === "#daily-quest";
 
     if (!shouldOpenFromQuery && !shouldOpenFromHash) {
       return;
@@ -458,7 +542,12 @@ export default function DashboardV3Page() {
 
     hasAutoOpenedDailyQuestRef.current = true;
     dailyQuestModalRef.current?.open();
-  }, [backendUserId, dailyQuestReadiness.canShowDailyQuestPopup, location.hash, location.search]);
+  }, [
+    backendUserId,
+    dailyQuestReadiness.canShowDailyQuestPopup,
+    location.hash,
+    location.search,
+  ]);
 
   useEffect(() => {
     if (!backendUserId || !generatedTasks || generatedTasks.length === 0) {
@@ -476,15 +565,25 @@ export default function DashboardV3Page() {
         const generationKey = state.correlation_id ?? state.updated_at;
         generationKeyRef.current = generationKey;
         const seenInBackend = Boolean(payload.journey_ready_modal_seen_at);
-        const seenInSession = window.sessionStorage.getItem(`jr_seen_session_${generationKey}`) === '1';
-        const isReady = state.status === 'completed';
+        const seenInSession =
+          window.sessionStorage.getItem(`jr_seen_session_${generationKey}`) ===
+          "1";
+        const isReady = state.status === "completed";
 
-        if (isReady && !seenInBackend && !seenInSession && generatedTasks.length > 0) {
+        if (
+          isReady &&
+          !seenInBackend &&
+          !seenInSession &&
+          generatedTasks.length > 0
+        ) {
           setJourneyReadyOpen(true);
-          window.sessionStorage.setItem(`jr_seen_session_${generationKey}`, '1');
+          window.sessionStorage.setItem(
+            `jr_seen_session_${generationKey}`,
+            "1",
+          );
         }
       } catch (error) {
-        console.warn('Failed to resolve journey ready modal status', error);
+        console.warn("Failed to resolve journey ready modal status", error);
       }
     };
 
@@ -500,7 +599,7 @@ export default function DashboardV3Page() {
     try {
       await markJourneyReadyModalSeen(generationKey);
     } catch (error) {
-      console.warn('Failed to persist journey ready modal seen state', error);
+      console.warn("Failed to persist journey ready modal seen state", error);
     }
   }, []);
 
@@ -515,21 +614,33 @@ export default function DashboardV3Page() {
       <div className="flex min-h-screen flex-col">
         {!isAppMode && (
           <Navbar
-            onDailyClick={backendUserId && dailyQuestReadiness.canShowDailyQuestPopup ? handleOpenDaily : undefined}
+            onDailyClick={
+              backendUserId && dailyQuestReadiness.canShowDailyQuestPopup
+                ? handleOpenDaily
+                : undefined
+            }
             dailyButtonRef={dailyButtonRef}
             title={activeSection.pageTitle}
             sections={sections.map((section) => ({
               ...section,
-              showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
+              showPulseDot:
+                section.key === "dashboard" && shouldShowDashboardDot,
             }))}
-            menuSlot={<DashboardMenu onOpenScheduler={handleOpenReminderScheduler} moderation={{
-              configs: moderation.configs,
-              enabledTypes: moderation.enabledTypes,
-              updateTrackerEnabled: async (type, enabled) => {
-                await moderation.updateTracker(type, { isEnabled: enabled });
-              },
-              onOpenEdit: () => setIsModerationEditOpen(true),
-            }} />}
+            menuSlot={
+              <DashboardMenu
+                onOpenScheduler={handleOpenReminderScheduler}
+                moderation={{
+                  configs: moderation.configs,
+                  enabledTypes: moderation.enabledTypes,
+                  updateTrackerEnabled: async (type, enabled) => {
+                    await moderation.updateTracker(type, {
+                      isEnabled: enabled,
+                    });
+                  },
+                  onOpenEdit: () => setIsModerationEditOpen(true),
+                }}
+              />
+            }
             planSlot={<PlanChip subscription={subscription ?? null} />}
           />
         )}
@@ -559,7 +670,10 @@ export default function DashboardV3Page() {
           />
         ) : null}
         {weeklyWrapped.isModalOpen && weeklyWrapped.activeRecord ? (
-          <WeeklyWrappedModal payload={weeklyWrapped.activeRecord.payload} onClose={weeklyWrapped.closeModal} />
+          <WeeklyWrappedModal
+            payload={weeklyWrapped.activeRecord.payload}
+            onClose={weeklyWrapped.closeModal}
+          />
         ) : null}
         <JourneyReadyModal
           open={journeyReadyOpen}
@@ -567,7 +681,7 @@ export default function DashboardV3Page() {
           onClose={handleCloseJourneyReady}
           onEditor={() => {
             handleCloseJourneyReady();
-            navigate('/editor');
+            navigate("/editor");
           }}
         />
         <main className="flex-1 pb-24 md:pb-0">
@@ -591,7 +705,9 @@ export default function DashboardV3Page() {
                       gameMode={gameMode}
                       weeklyTarget={profile?.weekly_target ?? null}
                       isJourneyGenerating={isJourneyGenerating}
-                      showOnboardingGuidance={dailyQuestReadiness.showOnboardingGuidance}
+                      showOnboardingGuidance={
+                        dailyQuestReadiness.showOnboardingGuidance
+                      }
                       section={overviewSection}
                       onOpenReminderScheduler={handleOpenReminderScheduler}
                       journeyReadyOpen={journeyReadyOpen}
@@ -603,23 +719,51 @@ export default function DashboardV3Page() {
                 />
                 <Route
                   path="missions"
-                  element={<MissionsView userId={backendUserId} section={missionsSection} />}
+                  element={
+                    <MissionsView
+                      userId={backendUserId}
+                      section={missionsSection}
+                    />
+                  }
                 />
                 <Route
                   path="dquest"
-                  element={<DailyQuestView section={dquestSection} onOpenDailyQuest={handleOpenDaily} moderationConfigs={moderation.configs} moderationEnabledTypes={moderation.enabledTypes} onOpenModerationEdit={() => setIsModerationEditOpen(true)} />}
+                  element={
+                    <DailyQuestView
+                      section={dquestSection}
+                      onOpenDailyQuest={handleOpenDaily}
+                      moderationConfigs={moderation.configs}
+                      moderationEnabledTypes={moderation.enabledTypes}
+                      onOpenModerationEdit={() => setIsModerationEditOpen(true)}
+                    />
+                  }
                 />
                 <Route
                   path="missions-v2"
-                  element={<MissionsV2Route userId={backendUserId} gameMode={gameMode} />}
+                  element={
+                    <MissionsV2Route
+                      userId={backendUserId}
+                      gameMode={gameMode}
+                    />
+                  }
                 />
                 <Route
                   path="misiones"
-                  element={<MissionsV2Route userId={backendUserId} gameMode={gameMode} />}
+                  element={
+                    <MissionsV2Route
+                      userId={backendUserId}
+                      gameMode={gameMode}
+                    />
+                  }
                 />
                 <Route
                   path="missions-v3"
-                  element={<MissionsV3Route userId={backendUserId} gameMode={gameMode} />}
+                  element={
+                    <MissionsV3Route
+                      userId={backendUserId}
+                      gameMode={gameMode}
+                    />
+                  }
                 />
                 <Route
                   path="rewards"
@@ -647,7 +791,9 @@ export default function DashboardV3Page() {
             await moderation.updateTracker(type, { isPaused: value });
           }}
           onToleranceChange={async (type, value) => {
-            await moderation.updateTracker(type, { notLoggedToleranceDays: value });
+            await moderation.updateTracker(type, {
+              notLoggedToleranceDays: value,
+            });
           }}
         />
         <ModerationOnboardingSuggestion
@@ -668,12 +814,13 @@ export default function DashboardV3Page() {
 
               return {
                 key: section.key,
-                label: section.key === 'editor' ? 'Editor' : section.label,
+                label: section.key === "editor" ? "Editor" : section.label,
                 to: section.to,
                 icon: <Icon className="h-4 w-4" />,
                 end: section.end,
-                onClick: section.key === 'dquest' ? handleOpenDaily : undefined,
-                showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
+                onClick: section.key === "dquest" ? handleOpenDaily : undefined,
+                showPulseDot:
+                  section.key === "dashboard" && shouldShowDashboardDot,
               };
             })}
           />
@@ -692,7 +839,10 @@ interface DashboardOverviewProps {
   section: DashboardSectionConfig;
   onOpenReminderScheduler: () => void;
   journeyReadyOpen?: boolean;
-  moderationConfigs: Record<ModerationTrackerType, ModerationTrackerConfig> | null;
+  moderationConfigs: Record<
+    ModerationTrackerType,
+    ModerationTrackerConfig
+  > | null;
   moderationEnabledTypes: ModerationTrackerType[];
   onOpenModerationEdit: () => void;
 }
@@ -714,8 +864,12 @@ function DashboardOverview({
     onOpenReminderScheduler();
   }, [onOpenReminderScheduler]);
 
-  const moderationRequest = useRequest(() => getModerationState(), [userId], { enabled: Boolean(userId) });
-  const [moderationState, setModerationState] = useState(moderationRequest.data);
+  const moderationRequest = useRequest(() => getModerationState(), [userId], {
+    enabled: Boolean(userId),
+  });
+  const [moderationState, setModerationState] = useState(
+    moderationRequest.data,
+  );
 
   useEffect(() => {
     setModerationState(moderationRequest.data);
@@ -731,7 +885,7 @@ function DashboardOverview({
         const updated = await updateModerationStatus(type, { dayKey, status });
         setModerationState(updated);
       } catch (error) {
-        console.error('Failed to update moderation from dashboard', error);
+        console.error("Failed to update moderation from dashboard", error);
       }
     },
     [moderationState?.dayKey],
@@ -763,7 +917,10 @@ function DashboardOverview({
           <DailyCultivationSection userId={userId} />
           {moderationConfigs && moderationEnabledTypes.length > 0 ? (
             <div className="hidden lg:block">
-              <ModerationConfigWidget configs={moderationConfigs} onEdit={onOpenModerationEdit} />
+              <ModerationConfigWidget
+                configs={moderationConfigs}
+                onEdit={onOpenModerationEdit}
+              />
             </div>
           ) : null}
         </div>
@@ -772,14 +929,17 @@ function DashboardOverview({
           <ModerationStatusWidget
             title="Moderación"
             data={moderationState ?? null}
-            loading={moderationRequest.status === 'loading'}
+            loading={moderationRequest.status === "loading"}
             onCycle={handleCycleModeration}
           />
           <RadarChartCard userId={userId} />
           <EmotionChartCard userId={userId} />
           {moderationConfigs && moderationEnabledTypes.length > 0 ? (
             <div className="lg:hidden">
-              <ModerationConfigWidget configs={moderationConfigs} onEdit={onOpenModerationEdit} />
+              <ModerationConfigWidget
+                configs={moderationConfigs}
+                onEdit={onOpenModerationEdit}
+              />
             </div>
           ) : null}
         </div>
@@ -794,12 +954,17 @@ function DashboardOverview({
           />
         </div>
       </div>
-
     </div>
   );
 }
 
-function MissionsView({ userId, section }: { userId: string; section: DashboardSectionConfig }) {
+function MissionsView({
+  userId,
+  section,
+}: {
+  userId: string;
+  section: DashboardSectionConfig;
+}) {
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -822,7 +987,10 @@ function DailyQuestView({
 }: {
   section: DashboardSectionConfig;
   onOpenDailyQuest: () => void;
-  moderationConfigs: Record<ModerationTrackerType, ModerationTrackerConfig> | null;
+  moderationConfigs: Record<
+    ModerationTrackerType,
+    ModerationTrackerConfig
+  > | null;
   moderationEnabledTypes: ModerationTrackerType[];
   onOpenModerationEdit: () => void;
 }) {
@@ -851,17 +1019,20 @@ function DailyQuestView({
         >
           <div className="space-y-3 text-sm text-white/80">
             <p>
-              Generamos una misión corta y accionable para que mantengas la racha. Abrila, confirma tu plan y marcala
-              cuando la completes.
+              Generamos una misión corta y accionable para que mantengas la
+              racha. Abrila, confirma tu plan y marcala cuando la completes.
             </p>
             <ul className="space-y-2">
               {[
-                '1 foco principal con claridad de impacto.',
-                'Recordatorios opcionales para no olvidarla.',
-                'Registro rápido del resultado y energía invertida.',
+                "1 foco principal con claridad de impacto.",
+                "Recordatorios opcionales para no olvidarla.",
+                "Registro rápido del resultado y energía invertida.",
               ].map((tip) => (
                 <li key={tip} className="flex items-start gap-2 text-white/75">
-                  <span className="mt-1 inline-block h-2 w-2 rounded-full bg-gradient-to-br from-sky-300 via-indigo-300 to-fuchsia-300 shadow-[0_0_12px_rgba(99,102,241,0.45)]" aria-hidden />
+                  <span
+                    className="mt-1 inline-block h-2 w-2 rounded-full bg-gradient-to-br from-sky-300 via-indigo-300 to-fuchsia-300 shadow-[0_0_12px_rgba(99,102,241,0.45)]"
+                    aria-hidden
+                  />
                   <span>{tip}</span>
                 </li>
               ))}
@@ -874,26 +1045,48 @@ function DailyQuestView({
           subtitle="Mantén el hábito vivo"
         >
           <div className="space-y-3 text-sm text-white/75">
-            <p className="font-semibold text-white">DQuest es tu base diaria:</p>
+            <p className="font-semibold text-white">
+              DQuest es tu base diaria:
+            </p>
             <ul className="space-y-2">
               <li className="flex items-start gap-2">
-                <span className="mt-1 h-2 w-2 rounded-full bg-white/70" aria-hidden />
-                <span>Define hora y lugar en el modal para reducir fricción.</span>
+                <span
+                  className="mt-1 h-2 w-2 rounded-full bg-white/70"
+                  aria-hidden
+                />
+                <span>
+                  Define hora y lugar en el modal para reducir fricción.
+                </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="mt-1 h-2 w-2 rounded-full bg-white/70" aria-hidden />
-                <span>Si cambia tu día, reabre el modal y replanifica en segundos.</span>
+                <span
+                  className="mt-1 h-2 w-2 rounded-full bg-white/70"
+                  aria-hidden
+                />
+                <span>
+                  Si cambia tu día, reabre el modal y replanifica en segundos.
+                </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="mt-1 h-2 w-2 rounded-full bg-white/70" aria-hidden />
-                <span>Marca el cierre: sumarás GP extra y mantendrás la racha activa.</span>
+                <span
+                  className="mt-1 h-2 w-2 rounded-full bg-white/70"
+                  aria-hidden
+                />
+                <span>
+                  Marca el cierre: sumarás GP extra y mantendrás la racha
+                  activa.
+                </span>
               </li>
             </ul>
           </div>
         </LegacyCard>
         {moderationConfigs && moderationEnabledTypes.length > 0 ? (
           <div className="md:col-span-2 lg:col-span-12">
-            <ModerationConfigWidget title="Moderación (Daily Quest)" configs={moderationConfigs} onEdit={onOpenModerationEdit} />
+            <ModerationConfigWidget
+              title="Moderación"
+              configs={moderationConfigs}
+              onEdit={onOpenModerationEdit}
+            />
           </div>
         ) : null}
       </div>
@@ -933,10 +1126,13 @@ function MissionsV2View({
         <div className="fixed inset-0 z-20 bg-slate-950/90 px-4 py-6 sm:px-8 sm:py-10">
           <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center text-center">
             <p className="text-6xl">🚧</p>
-            <p className="mt-4 text-2xl font-semibold text-white sm:text-3xl">work in progress</p>
+            <p className="mt-4 text-2xl font-semibold text-white sm:text-3xl">
+              work in progress
+            </p>
             <p className="mt-3 max-w-xl text-sm text-slate-300 sm:text-base">
-              Estamos afinando la experiencia de misiones en web. Mientras tanto, puedes volver al dashboard o seguir
-              explorando bajo tu propio riesgo.
+              Estamos afinando la experiencia de misiones en web. Mientras
+              tanto, puedes volver al dashboard o seguir explorando bajo tu
+              propio riesgo.
             </p>
             <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
               <button
@@ -949,7 +1145,7 @@ function MissionsV2View({
               <button
                 type="button"
                 className="inline-flex flex-1 items-center justify-center rounded-full bg-accent-purple px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-purple/90"
-                onClick={() => navigate('/dashboard-v3')}
+                onClick={() => navigate("/dashboard-v3")}
               >
                 let them cook
               </button>
@@ -1024,15 +1220,20 @@ interface SectionHeaderProps {
   pageTitle: string;
 }
 
-function SectionHeader({ eyebrow, title, description, pageTitle }: SectionHeaderProps) {
+function SectionHeader({
+  eyebrow,
+  title,
+  description,
+  pageTitle,
+}: SectionHeaderProps) {
   const normalizedTitle = title.trim();
   const normalizedPageTitle = pageTitle.trim();
   const shouldShowTitle =
     normalizedTitle.length > 0 &&
     normalizedTitle.toLowerCase() !== normalizedPageTitle.toLowerCase();
-  const normalizedEyebrow = eyebrow?.trim() ?? '';
+  const normalizedEyebrow = eyebrow?.trim() ?? "";
   const shouldShowEyebrow = normalizedEyebrow.length > 0;
-  const normalizedDescription = description?.trim() ?? '';
+  const normalizedDescription = description?.trim() ?? "";
   const shouldShowDescription = normalizedDescription.length > 0;
 
   return (
@@ -1044,7 +1245,9 @@ function SectionHeader({ eyebrow, title, description, pageTitle }: SectionHeader
         </p>
       )}
       {shouldShowTitle && (
-        <h2 className="font-display text-2xl font-semibold text-white sm:text-3xl">{title}</h2>
+        <h2 className="font-display text-2xl font-semibold text-white sm:text-3xl">
+          {title}
+        </h2>
       )}
       {shouldShowDescription && (
         <p className="text-sm text-slate-400">{normalizedDescription}</p>
@@ -1095,12 +1298,17 @@ function ProfileErrorState({ onRetry, error }: ProfileErrorStateProps) {
     <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-100 shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md md:p-6">
       <div className="space-y-3">
         <div>
-          <h2 className="text-lg font-semibold text-white">No pudimos conectar con tu perfil</h2>
+          <h2 className="text-lg font-semibold text-white">
+            No pudimos conectar con tu perfil
+          </h2>
           <p className="mt-1 text-sm text-rose-100/80">
-            Verificá tu conexión e intentá cargar nuevamente la información de tu Daily Quest.
+            Verificá tu conexión e intentá cargar nuevamente la información de
+            tu Daily Quest.
           </p>
         </div>
-        {error?.message && <p className="text-xs text-rose-100/70">{error.message}</p>}
+        {error?.message && (
+          <p className="text-xs text-rose-100/70">{error.message}</p>
+        )}
         <button
           type="button"
           onClick={onRetry}
@@ -1117,10 +1325,16 @@ function DashboardFallback() {
   return (
     <div className="mt-8 space-y-6">
       <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-slate-200 shadow-glow">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Vista previa sin conexión</p>
-        <h2 className="mt-3 font-display text-2xl font-semibold text-white">Estamos preparando tu Dashboard</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+          Vista previa sin conexión
+        </p>
+        <h2 className="mt-3 font-display text-2xl font-semibold text-white">
+          Estamos preparando tu Dashboard
+        </h2>
         <p className="mt-2 text-sm text-slate-300">
-          Conservá esta ventana abierta: los datos de GP, emociones y misiones aparecerán automáticamente cuando recuperemos la conexión con el servidor.
+          Conservá esta ventana abierta: los datos de GP, emociones y misiones
+          aparecerán automáticamente cuando recuperemos la conexión con el
+          servidor.
         </p>
       </section>
 
@@ -1134,11 +1348,17 @@ function DashboardFallback() {
             <div className="space-y-3 text-sm text-slate-200">
               <FallbackMetric label="Quests completadas" value="0 / —" />
               <FallbackMetric label="GP hoy" value="—" />
-              <p className="text-xs text-slate-400">Tu progreso diario aparece acá cuando la API responde.</p>
+              <p className="text-xs text-slate-400">
+                Tu progreso diario aparece acá cuando la API responde.
+              </p>
             </div>
           </LegacyCard>
 
-          <LegacyCard title="Perfil" subtitle="Foto y game mode" className="min-h-[180px]">
+          <LegacyCard
+            title="Perfil"
+            subtitle="Foto y game mode"
+            className="min-h-[180px]"
+          >
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-full border border-white/10 bg-white/10" />
               <div className="space-y-2 text-xs text-slate-300">
@@ -1146,34 +1366,60 @@ function DashboardFallback() {
                 <div className="h-3 w-16 rounded bg-white/10" />
               </div>
             </div>
-            <p className="mt-4 text-xs text-slate-400">Mostramos tus datos personales en cuanto podamos sincronizar tu perfil.</p>
+            <p className="mt-4 text-xs text-slate-400">
+              Mostramos tus datos personales en cuanto podamos sincronizar tu
+              perfil.
+            </p>
           </LegacyCard>
         </div>
 
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <LegacyCard title="Emociones" subtitle="Últimos 7 días" className="min-h-[180px]">
+          <LegacyCard
+            title="Emociones"
+            subtitle="Últimos 7 días"
+            className="min-h-[180px]"
+          >
             <div className="h-24 rounded-2xl border border-white/10 bg-gradient-to-r from-slate-800/60 via-slate-900/40 to-slate-800/60" />
-            <p className="text-xs text-slate-400">El mapa emocional vuelve automáticamente una vez que la API responda.</p>
+            <p className="text-xs text-slate-400">
+              El mapa emocional vuelve automáticamente una vez que la API
+              responda.
+            </p>
           </LegacyCard>
         </div>
 
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <LegacyCard title="Rachas" subtitle="Seguimiento semanal" className="min-h-[180px]">
+          <LegacyCard
+            title="Rachas"
+            subtitle="Seguimiento semanal"
+            className="min-h-[180px]"
+          >
             <div className="space-y-3 text-xs text-slate-300">
               <FallbackMetric label="Daily Quest" value="En espera" />
               <FallbackMetric label="Weekly GP" value="Sin datos" />
-              <p className="text-xs text-slate-400">Apenas detectemos actividad, tus rachas se renderizan acá.</p>
+              <p className="text-xs text-slate-400">
+                Apenas detectemos actividad, tus rachas se renderizan acá.
+              </p>
             </div>
           </LegacyCard>
 
-          <LegacyCard title="Rewards" subtitle="Logros desbloqueados" className="min-h-[180px]">
+          <LegacyCard
+            title="Rewards"
+            subtitle="Logros desbloqueados"
+            className="min-h-[180px]"
+          >
             <div className="space-y-2 text-xs text-slate-200">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Siguiente badge</p>
-                <p className="mt-2 text-sm text-white">Disponible al reconectar</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Siguiente badge
+                </p>
+                <p className="mt-2 text-sm text-white">
+                  Disponible al reconectar
+                </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Último logro</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Último logro
+                </p>
                 <p className="mt-2 text-sm text-white">Sincronizando…</p>
               </div>
             </div>
@@ -1187,7 +1433,9 @@ function DashboardFallback() {
 function FallbackMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-      <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-400">{label}</span>
+      <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-400">
+        {label}
+      </span>
       <span className="text-sm font-semibold text-white">{value}</span>
     </div>
   );
