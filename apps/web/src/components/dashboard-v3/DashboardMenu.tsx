@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ToastBanner } from '../common/ToastBanner';
 import { useQuickAccessInstall } from '../../hooks/useQuickAccessInstall';
 import { useLongPress } from '../../hooks/useLongPress';
-import type { ModerationTrackerConfig, ModerationTrackerType } from '../../lib/api';
+import { ApiError, type ModerationTrackerConfig, type ModerationTrackerType } from '../../lib/api';
 import {
   forwardRef,
   type MouseEvent,
@@ -71,6 +71,44 @@ const DashboardMenuTrigger = forwardRef<HTMLButtonElement, { onClick: () => void
     );
   },
 );
+
+function buildModerationSaveErrorMessage(error: unknown): string {
+  const fallback = 'No se pudo guardar Moderación. Revisa tu conexión e inténtalo otra vez.';
+
+  if (error instanceof ApiError) {
+    const apiMessage =
+      typeof error.body?.message === 'string' && error.body.message.trim().length > 0
+        ? error.body.message.trim()
+        : null;
+    const apiCode =
+      typeof error.body?.code === 'string' && error.body.code.trim().length > 0
+        ? error.body.code.trim()
+        : null;
+    const requestId = typeof error.requestId === 'string' && error.requestId.trim().length > 0
+      ? error.requestId.trim()
+      : null;
+
+    const detailParts = [
+      `HTTP ${error.status}`,
+      apiCode ? `code: ${apiCode}` : null,
+      requestId ? `requestId: ${requestId}` : null,
+    ].filter(Boolean);
+
+    if (apiMessage) {
+      return `${fallback} ${apiMessage}${detailParts.length ? ` (${detailParts.join(' · ')})` : ''}`;
+    }
+
+    if (detailParts.length) {
+      return `${fallback} ${detailParts.join(' · ')}.`;
+    }
+  }
+
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return `${fallback} ${error.message.trim()}`;
+  }
+
+  return fallback;
+}
 
 export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProps) {
   const navigate = useNavigate();
@@ -298,7 +336,7 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
         .catch((error) => {
           console.error('[moderation-menu] failed to persist tracker toggle', { type, nextValue, error });
           setTrackerOverrides((current) => ({ ...current, [type]: !nextValue }));
-          setToast({ tone: 'error', message: 'No se pudo guardar Moderación. Revisa tu conexión e inténtalo otra vez.' });
+          setToast({ tone: 'error', message: buildModerationSaveErrorMessage(error) });
         });
     },
     [isTrackerEnabled, moderation],
