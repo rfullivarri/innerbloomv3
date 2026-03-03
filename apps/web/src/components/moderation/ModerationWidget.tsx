@@ -106,7 +106,7 @@ function Chip({
     <button
       type="button"
       onClick={() => onCycle(tracker.type, nextStatus(tracker.statusToday))}
-      className={`relative w-full overflow-hidden rounded-[1.9rem] border px-3 pb-6 pt-2.5 text-left transition-all duration-200 hover:border-white/20 hover:bg-white/[0.07] sm:px-3.5 sm:pb-6 sm:pt-3 ${chipStateClass(tracker.statusToday)}`}
+      className={`relative w-full overflow-hidden rounded-[1.9rem] border px-3 pb-6 pt-[0.3125rem] text-left transition-all duration-200 hover:border-white/20 hover:bg-white/[0.07] sm:px-3.5 sm:pb-6 sm:pt-1.5 ${chipStateClass(tracker.statusToday)}`}
       title={meta.hint}
       {...longPressBind}
     >
