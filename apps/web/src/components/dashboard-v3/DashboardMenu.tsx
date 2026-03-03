@@ -17,6 +17,8 @@ import {
   useState,
 } from 'react';
 
+type MenuPanel = 'main' | 'widgets';
+
 interface DashboardMenuProps {
   onOpenScheduler?: () => void;
   moderation: {
@@ -83,8 +85,9 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
   const [isSpanishSystem, setIsSpanishSystem] = useState(true);
   const [isPlansOpen, setIsPlansOpen] = useState(false);
-  const [isWidgetsOpen, setIsWidgetsOpen] = useState(false);
   const [isModerationOpen, setIsModerationOpen] = useState(false);
+  const [activePanel, setActivePanel] = useState<MenuPanel>('main');
+  const [trackerOverrides, setTrackerOverrides] = useState<Partial<Record<ModerationTrackerType, boolean>>>({});
 
   const {
     isMobile,
@@ -154,12 +157,16 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
   const handleClose = useCallback(() => {
     setIsOpen(false);
     setIsPlansOpen(false);
-    setIsWidgetsOpen(false);
     setIsModerationOpen(false);
+    setActivePanel('main');
     requestAnimationFrame(() => {
       triggerRef.current?.focus({ preventScroll: true });
     });
   }, []);
+
+  useEffect(() => {
+    setTrackerOverrides({});
+  }, [moderation.configs]);
 
   const menuRowClassName =
     'flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-white/90 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40';
@@ -244,6 +251,35 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
     delayMs: 2200,
     onLongPress: moderation.onOpenEdit,
   });
+
+  const isTrackerEnabled = useCallback(
+    (type: ModerationTrackerType) => {
+      const localOverride = trackerOverrides[type];
+      if (typeof localOverride === 'boolean') {
+        return localOverride;
+      }
+      return Boolean(moderation.configs?.[type]?.isEnabled);
+    },
+    [moderation.configs, trackerOverrides],
+  );
+
+  const enabledTrackers = useMemo(
+    () => (['alcohol', 'tobacco', 'sugar'] as ModerationTrackerType[]).filter((type) => isTrackerEnabled(type)),
+    [isTrackerEnabled],
+  );
+
+  const handleTrackerToggle = useCallback(
+    (type: ModerationTrackerType) => {
+      const nextValue = !isTrackerEnabled(type);
+      setTrackerOverrides((current) => ({ ...current, [type]: nextValue }));
+      void moderation
+        .updateTrackerEnabled(type, nextValue)
+        .catch(() => {
+          setTrackerOverrides((current) => ({ ...current, [type]: !nextValue }));
+        });
+    },
+    [isTrackerEnabled, moderation],
+  );
 
   if (!isMounted || !portalNode) {
     return <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} />;
@@ -378,13 +414,7 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
                       </div>
                     ) : null}
                     <div className="mx-3 h-px bg-white/10" />
-                    <button
-                      type="button"
-                      onClick={() => setIsWidgetsOpen((current) => !current)}
-                      className={menuRowClassName}
-                      aria-expanded={isWidgetsOpen}
-                      aria-controls="menu-widgets"
-                    >
+                    <button type="button" onClick={() => setActivePanel('widgets')} className={menuRowClassName}>
                       <MenuIcon>
                         <rect x="4" y="4" width="7" height="7" rx="1.5" />
                         <rect x="13" y="4" width="7" height="7" rx="1.5" />
@@ -392,15 +422,29 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
                         <rect x="13" y="13" width="7" height="7" rx="1.5" />
                       </MenuIcon>
                       <span className="flex-1">Widgets</span>
-                      <MenuIcon className={`h-4 w-4 text-white/60 transition ${isWidgetsOpen ? 'rotate-180' : ''}`}>
-                        <path d="m6 9 6 6 6-6" />
+                      <MenuIcon className="h-4 w-4 text-white/60">
+                        <path d="m9 6 6 6-6 6" />
                       </MenuIcon>
                     </button>
-                    {isWidgetsOpen ? (
-                      <div id="menu-widgets" className="-mt-1 mb-1 space-y-3 px-3 pb-2 pl-11">
+                    {activePanel === 'widgets' ? (
+                      <div id="menu-widgets" className="-mt-1 mb-1 space-y-3 px-3 pb-2 pl-3">
+                        <div className="flex items-center gap-2 pb-1">
+                          <button
+                            type="button"
+                            onClick={() => setActivePanel('main')}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 transition hover:bg-white/10"
+                            aria-label="Volver al menú"
+                          >
+                            <MenuIcon className="h-4 w-4 text-white/75">
+                              <path d="m15 6-6 6 6 6" />
+                            </MenuIcon>
+                          </button>
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">Widgets</p>
+                        </div>
+
                         <div>
                           <p className="mb-1 text-xs text-white/65">Widgets activos</p>
-                          {moderation.enabledTypes.length > 0 ? (
+                          {enabledTrackers.length > 0 ? (
                             <button
                               type="button"
                               className="flex w-full items-start justify-between rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-left"
@@ -409,7 +453,7 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
                             >
                               <span>
                                 <span className="block text-sm font-medium text-white">Moderación</span>
-                                <span className="block text-xs text-text-muted">Trackers: {moderation.enabledTypes.map((type) => trackerLabels[type]).join(', ')}</span>
+                                <span className="block text-xs text-text-muted">Trackers: {enabledTrackers.map((type) => trackerLabels[type]).join(', ')}</span>
                               </span>
                               <span className="text-xs text-white/70">Activo</span>
                             </button>
@@ -430,7 +474,7 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
                               >
                                 <span className="min-w-0 flex-1">
                                   <span className="block text-sm text-white">Moderación</span>
-                                  <span className="block text-xs text-text-muted">Alcohol, tabaco y azúcar (añadido)</span>
+                                  <span className="block text-xs text-text-muted">Alcohol, tabaco y azúcar</span>
                                 </span>
                                 <MenuIcon className={`mt-0.5 h-4 w-4 shrink-0 text-white/60 transition ${isModerationOpen ? 'rotate-180' : ''}`}>
                                   <path d="m6 9 6 6 6-6" />
@@ -453,18 +497,16 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
                               <div className="space-y-2 border-t border-white/10 px-3 py-3">
                                 <div className="flex flex-wrap gap-2">
                                   {(['alcohol', 'tobacco', 'sugar'] as ModerationTrackerType[]).map((type) => {
-                                    const isSelected = Boolean(moderation.configs?.[type]?.isEnabled);
+                                    const isSelected = isTrackerEnabled(type);
                                     return (
                                       <button
                                         key={type}
                                         type="button"
                                         title={type === 'sugar' ? 'Azúcar añadido' : undefined}
-                                        onClick={() => {
-                                          void moderation.updateTrackerEnabled(type, !isSelected);
-                                        }}
+                                        onClick={() => handleTrackerToggle(type)}
                                         className={`inline-flex min-h-9 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition ${
                                           isSelected
-                                            ? 'border-violet-300/70 bg-violet-400/25 text-violet-100'
+                                            ? 'border-emerald-300 bg-emerald-400/30 text-emerald-50 shadow-[0_0_0_1px_rgba(52,211,153,0.35)]'
                                             : 'border-white/20 bg-white/5 text-white/80 hover:bg-white/10'
                                         }`}
                                       >
@@ -491,6 +533,7 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
                                             </>
                                           ) : null}
                                         </MenuIcon>
+                                        {isSelected ? <span className="text-[11px] font-bold text-emerald-100">✓</span> : null}
                                         <span>{trackerLabels[type]}</span>
                                       </button>
                                     );
