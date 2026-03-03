@@ -22,8 +22,6 @@ interface DashboardMenuProps {
   moderation: {
     configs: Record<ModerationTrackerType, ModerationTrackerConfig> | null;
     enabledTypes: ModerationTrackerType[];
-    isGeneralEnabled: boolean;
-    setGeneralEnabled: (nextEnabled: boolean) => Promise<void>;
     updateTrackerEnabled: (type: ModerationTrackerType, enabled: boolean) => Promise<void>;
     onOpenEdit: () => void;
   };
@@ -85,6 +83,8 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
   const [isSpanishSystem, setIsSpanishSystem] = useState(true);
   const [isPlansOpen, setIsPlansOpen] = useState(false);
+  const [isWidgetsOpen, setIsWidgetsOpen] = useState(false);
+  const [isModerationOpen, setIsModerationOpen] = useState(false);
 
   const {
     isMobile,
@@ -154,6 +154,8 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
   const handleClose = useCallback(() => {
     setIsOpen(false);
     setIsPlansOpen(false);
+    setIsWidgetsOpen(false);
+    setIsModerationOpen(false);
     requestAnimationFrame(() => {
       triggerRef.current?.focus({ preventScroll: true });
     });
@@ -375,68 +377,132 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
                         </button>
                       </div>
                     ) : null}
-                  </section>
+                    <div className="mx-3 h-px bg-white/10" />
+                    <button
+                      type="button"
+                      onClick={() => setIsWidgetsOpen((current) => !current)}
+                      className={menuRowClassName}
+                      aria-expanded={isWidgetsOpen}
+                      aria-controls="menu-widgets"
+                    >
+                      <MenuIcon>
+                        <rect x="4" y="4" width="7" height="7" rx="1.5" />
+                        <rect x="13" y="4" width="7" height="7" rx="1.5" />
+                        <rect x="4" y="13" width="7" height="7" rx="1.5" />
+                        <rect x="13" y="13" width="7" height="7" rx="1.5" />
+                      </MenuIcon>
+                      <span className="flex-1">Widgets</span>
+                      <MenuIcon className={`h-4 w-4 text-white/60 transition ${isWidgetsOpen ? 'rotate-180' : ''}`}>
+                        <path d="m6 9 6 6 6-6" />
+                      </MenuIcon>
+                    </button>
+                    {isWidgetsOpen ? (
+                      <div id="menu-widgets" className="-mt-1 mb-1 space-y-3 px-3 pb-2 pl-11">
+                        <div>
+                          <p className="mb-1 text-xs text-white/65">Widgets activos</p>
+                          {moderation.enabledTypes.length > 0 ? (
+                            <button
+                              type="button"
+                              className="flex w-full items-start justify-between rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-left"
+                              onClick={moderation.onOpenEdit}
+                              {...moderationLongPressBind}
+                            >
+                              <span>
+                                <span className="block text-sm font-medium text-white">Moderación</span>
+                                <span className="block text-xs text-text-muted">Trackers: {moderation.enabledTypes.map((type) => trackerLabels[type]).join(', ')}</span>
+                              </span>
+                              <span className="text-xs text-white/70">Activo</span>
+                            </button>
+                          ) : (
+                            <p className="rounded-xl border border-dashed border-white/15 px-3 py-2 text-xs text-white/60">Sin widgets activos.</p>
+                          )}
+                        </div>
 
+                        <div>
+                          <p className="mb-1 text-xs text-white/65">Widgets disponibles</p>
+                          <div className="rounded-xl border border-white/10 bg-black/20">
+                            <div className="flex items-start gap-2 px-3 py-2">
+                              <button
+                                type="button"
+                                onClick={() => setIsModerationOpen((current) => !current)}
+                                className="flex min-w-0 flex-1 items-start gap-2 text-left"
+                                aria-expanded={isModerationOpen}
+                              >
+                                <span className="min-w-0 flex-1">
+                                  <span className="block text-sm text-white">Moderación</span>
+                                  <span className="block text-xs text-text-muted">Alcohol, tabaco y azúcar (añadido)</span>
+                                </span>
+                                <MenuIcon className={`mt-0.5 h-4 w-4 shrink-0 text-white/60 transition ${isModerationOpen ? 'rotate-180' : ''}`}>
+                                  <path d="m6 9 6 6 6-6" />
+                                </MenuIcon>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  moderation.onOpenEdit();
+                                }}
+                                className="rounded-md border border-white/15 px-2 py-1 text-xs text-white/80 transition hover:bg-white/10"
+                                aria-label="Editar configuración de Moderación"
+                              >
+                                ⋯
+                              </button>
+                            </div>
 
-                  <section className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <div className="mb-2 flex items-center justify-between">
-                      <div>
-                        <p className="text-[0.62rem] uppercase tracking-[0.28em] text-text-muted">Widgets</p>
-                        <p className="text-sm font-semibold text-white">Gestión de widgets</p>
-                      </div>
-                      <label className="flex items-center gap-2 text-xs text-white/80">
-                        <span>Moderación</span>
-                        <input
-                          type="checkbox"
-                          checked={moderation.isGeneralEnabled}
-                          onChange={(event) => {
-                            void moderation.setGeneralEnabled(event.target.checked);
-                          }}
-                        />
-                      </label>
-                    </div>
-                    <p className="mb-2 text-xs text-white/65">Widgets activos</p>
-                    {moderation.enabledTypes.length > 0 ? (
-                      <button
-                        type="button"
-                        className="flex w-full items-start justify-between rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-left"
-                        onClick={moderation.onOpenEdit}
-                        {...moderationLongPressBind}
-                      >
-                        <span>
-                          <span className="block text-sm font-medium text-white">Moderación</span>
-                          <span className="block text-xs text-text-muted">Trackers: {moderation.enabledTypes.map((type) => trackerLabels[type]).join(', ')}</span>
-                        </span>
-                        <span className="text-xs text-white/70">Activo</span>
-                      </button>
-                    ) : (
-                      <p className="rounded-xl border border-dashed border-white/15 px-3 py-2 text-xs text-white/60">Sin widgets activos.</p>
-                    )}
-                    <p className="mt-3 text-xs text-white/65">Widgets disponibles</p>
-                    {moderation.enabledTypes.length === 0 ? (
-                      <div className="mt-1 rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-                        <p className="text-sm text-white">Moderación</p>
-                        <p className="text-xs text-text-muted">Seguimiento de alcohol, tabaco y azúcar.</p>
-                      </div>
-                    ) : null}
-                    <div className="mt-3 space-y-1 text-[11px] text-white/60">
-                      <p>Tip: mantené presionado un widget para editarlo.</p>
-                      <p>Tip: press and hold a widget to edit.</p>
-                    </div>
-                    {moderation.isGeneralEnabled ? (
-                      <div className="mt-2 space-y-1 rounded-xl border border-white/10 bg-black/20 p-2">
-                        {(['alcohol', 'tobacco', 'sugar'] as ModerationTrackerType[]).map((type) => (
-                          <label key={type} className="flex items-center justify-between text-xs text-white/85">
-                            <span>{trackerLabels[type]}{type === 'sugar' ? ' (azúcar añadido)' : ''}</span>
-                            <input
-                              type="checkbox"
-                              checked={Boolean(moderation.configs?.[type]?.isEnabled)}
-                              onChange={(event) => {
-                                void moderation.updateTrackerEnabled(type, event.target.checked);
-                              }}
-                            />
-                          </label>
-                        ))}
+                            {isModerationOpen ? (
+                              <div className="space-y-2 border-t border-white/10 px-3 py-3">
+                                <div className="flex flex-wrap gap-2">
+                                  {(['alcohol', 'tobacco', 'sugar'] as ModerationTrackerType[]).map((type) => {
+                                    const isSelected = Boolean(moderation.configs?.[type]?.isEnabled);
+                                    return (
+                                      <button
+                                        key={type}
+                                        type="button"
+                                        title={type === 'sugar' ? 'Azúcar añadido' : undefined}
+                                        onClick={() => {
+                                          void moderation.updateTrackerEnabled(type, !isSelected);
+                                        }}
+                                        className={`inline-flex min-h-9 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition ${
+                                          isSelected
+                                            ? 'border-violet-300/70 bg-violet-400/25 text-violet-100'
+                                            : 'border-white/20 bg-white/5 text-white/80 hover:bg-white/10'
+                                        }`}
+                                      >
+                                        <MenuIcon className="h-3.5 w-3.5 text-white/90">
+                                          {type === 'alcohol' ? (
+                                            <>
+                                              <path d="M9 3h6" />
+                                              <path d="M12 3v7" />
+                                              <rect x="9" y="10" width="6" height="10" rx="2" />
+                                            </>
+                                          ) : null}
+                                          {type === 'tobacco' ? (
+                                            <>
+                                              <rect x="4" y="11" width="12" height="3" rx="1" />
+                                              <path d="M17 11h3" />
+                                              <path d="M19 8c1 .8 1 2 0 2.8" />
+                                            </>
+                                          ) : null}
+                                          {type === 'sugar' ? (
+                                            <>
+                                              <path d="m12 4 6 3.5v7L12 18l-6-3.5v-7L12 4Z" />
+                                              <path d="m6 7.5 6 3.5 6-3.5" />
+                                              <path d="M12 11v7" />
+                                            </>
+                                          ) : null}
+                                        </MenuIcon>
+                                        <span>{trackerLabels[type]}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                                <p className="text-[11px] text-white/55">Azúcar: seguimiento de azúcar añadido.</p>
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+
+                        <p className="text-[11px] text-white/60">Tip: mantené presionado un widget para editarlo.</p>
                       </div>
                     ) : null}
                   </section>
