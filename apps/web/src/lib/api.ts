@@ -1935,6 +1935,25 @@ export async function updateDailyReminderSettings(
   return response;
 }
 
+
+export type ModerationTrackerType = 'alcohol' | 'tobacco' | 'sugar';
+export type ModerationStatus = 'on_track' | 'off_track' | 'not_logged';
+
+export type ModerationTracker = {
+  type: ModerationTrackerType;
+  is_enabled: boolean;
+  is_paused: boolean;
+  not_logged_tolerance_days: number;
+  current_streak_days: number;
+  statusToday: ModerationStatus;
+};
+
+export type ModerationStateResponse = {
+  dayKey: string;
+  dailyQuestCompleted: boolean;
+  trackers: ModerationTracker[];
+};
+
 export type DailyQuestStatusResponse = {
   date: string;
   submitted: boolean;
@@ -2052,6 +2071,39 @@ export async function submitDailyQuest(payload: SubmitDailyQuestPayload): Promis
   return response;
 }
 
+
+
+export async function getModerationState(): Promise<ModerationStateResponse> {
+  const response = await getAuthorizedJson<ModerationStateResponse>('/moderation');
+  logShape('moderation-state', response);
+  return response;
+}
+
+export async function updateModerationStatus(
+  type: ModerationTrackerType,
+  payload: { dayKey: string; status: ModerationStatus },
+): Promise<ModerationStateResponse> {
+  const token = await resolveAuthToken();
+  const url = buildUrl(`/moderation/${type}/status`);
+  const headers = new Headers({ Accept: 'application/json', 'Content-Type': 'application/json' });
+  const init = applyAuthorization({ method: 'PUT', headers, body: JSON.stringify(payload) }, token);
+  const response = await apiRequest<ModerationStateResponse>(url, init);
+  logShape('moderation-status-update', response);
+  return response;
+}
+
+export async function updateModerationConfig(
+  type: ModerationTrackerType,
+  payload: { isEnabled?: boolean; isPaused?: boolean; notLoggedToleranceDays?: number },
+): Promise<ModerationStateResponse> {
+  const token = await resolveAuthToken();
+  const url = buildUrl(`/moderation/${type}/config`);
+  const headers = new Headers({ Accept: 'application/json', 'Content-Type': 'application/json' });
+  const init = applyAuthorization({ method: 'PUT', headers, body: JSON.stringify(payload) }, token);
+  const response = await apiRequest<ModerationStateResponse>(url, init);
+  logShape('moderation-config-update', response);
+  return response;
+}
 
 async function missionsV2AuthorizedPost<T>(path: string, body?: Record<string, unknown>): Promise<T> {
   const token = await resolveAuthToken();

@@ -16,11 +16,17 @@ import type { RefObject } from 'react';
 import {
   getDailyQuestDefinition,
   getDailyQuestStatus,
+  getModerationState,
   submitDailyQuest,
+  updateModerationStatus,
+  type ModerationStateResponse,
+  type ModerationStatus,
+  type ModerationTrackerType,
   type SubmitDailyQuestResponse,
 } from '../lib/api';
 import { useHoldToClose } from '../hooks/useHoldToClose';
 import { useRequest } from '../hooks/useRequest';
+import { ModerationWidget } from './moderation/ModerationWidget';
 
 type ToastTone = 'success' | 'error';
 
@@ -317,6 +323,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
   const [toast, setToast] = useState<ToastState | null>(null);
   const [pendingSubmission, setPendingSubmission] = useState<PendingSubmission | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [moderationState, setModerationState] = useState<ModerationStateResponse | null>(null);
   const [hardCelebrations, setHardCelebrations] = useState<HardCelebration[]>([]);
   const [successCelebration, setSuccessCelebration] = useState<CelebrationOverlayState | null>(null);
   const [srAnnouncement, setSrAnnouncement] = useState('');
@@ -353,6 +360,29 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
     () => getDailyQuestDefinition({ date: currentDate }),
     [currentDate, enabled],
     { enabled: Boolean(enabled && currentDate) },
+  );
+
+  const moderationRequest = useRequest(() => getModerationState(), [isOpen], { enabled: isOpen });
+
+  useEffect(() => {
+    setModerationState(moderationRequest.data);
+  }, [moderationRequest.data]);
+
+  const handleCycleModeration = useCallback(
+    async (type: ModerationTrackerType, status: ModerationStatus) => {
+      const dayKey = definition?.date ?? moderationState?.dayKey;
+      if (!dayKey) {
+        return;
+      }
+
+      try {
+        const updated = await updateModerationStatus(type, { dayKey, status });
+        setModerationState(updated);
+      } catch (error) {
+        console.error('Failed to update moderation status', error);
+      }
+    },
+    [definition?.date, moderationState?.dayKey],
   );
 
   useEffect(() => {
@@ -955,6 +985,12 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                               })}
                             </div>
                           </section>
+
+                          <ModerationWidget
+                            data={moderationState}
+                            loading={moderationRequest.status === 'loading'}
+                            onCycle={handleCycleModeration}
+                          />
 
                           <section className="flex flex-col gap-4">
                             <h3 className="text-sm font-semibold uppercase tracking-wide text-white/80">Checklist del día</h3>
