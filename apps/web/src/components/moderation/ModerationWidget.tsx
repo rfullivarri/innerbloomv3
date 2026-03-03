@@ -112,7 +112,7 @@ function Chip({
     >
       {statusFlash ? (
         <span
-          className={`pointer-events-none absolute left-1/2 top-1.5 z-20 flex -translate-x-1/2 items-center justify-center rounded-full border px-1.5 py-px text-[0.46rem] font-semibold tracking-[0.08em] backdrop-blur-sm transition-[transform,opacity] duration-300 ease-out sm:top-2 ${statusPillClass(statusFlash)} ${
+          className={`pointer-events-none absolute left-1/2 top-0 z-20 flex -translate-x-1/2 items-center justify-center rounded-full border px-1.5 py-px text-[0.46rem] font-semibold tracking-[0.08em] backdrop-blur-sm transition-[transform,opacity] duration-300 ease-out ${statusPillClass(statusFlash)} ${
             statusFlashPhase === "from"
               ? "translate-y-[6px] opacity-0"
               : statusFlashPhase === "exit"
