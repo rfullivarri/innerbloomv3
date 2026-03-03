@@ -4,7 +4,6 @@ import { asyncHandler } from '../lib/async-handler.js';
 import { HttpError } from '../lib/http-error.js';
 import { parseWithValidation } from '../lib/validation.js';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
-import { requireActiveSubscription } from '../middlewares/require-active-subscription.js';
 import {
   getModerationState,
   TRACKER_TYPES,
@@ -50,7 +49,6 @@ const configBodySchema = z
 router.get(
   '/moderation',
   authMiddleware,
-  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     if (!req.user) {
       throw new HttpError(401, 'unauthorized', 'Authentication required');
@@ -65,7 +63,6 @@ router.get(
 router.put(
   '/moderation/:type/status',
   authMiddleware,
-  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     if (!req.user) {
       throw new HttpError(401, 'unauthorized', 'Authentication required');
@@ -81,7 +78,6 @@ router.put(
 router.put(
   '/moderation/:type/config',
   authMiddleware,
-  requireActiveSubscription,
   asyncHandler(async (req, res) => {
     if (!req.user) {
       throw new HttpError(401, 'unauthorized', 'Authentication required');
