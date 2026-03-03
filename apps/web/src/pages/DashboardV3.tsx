@@ -35,9 +35,13 @@ import { DevErrorBoundary } from '../components/DevErrorBoundary';
 import {
   getCurrentUserSubscription,
   getJourneyGenerationStatus,
+  getModerationState,
   getUserState,
   getUserTasks,
   markJourneyReadyModalSeen,
+  updateModerationStatus,
+  type ModerationStatus,
+  type ModerationTrackerType,
 } from '../lib/api';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { normalizeGameModeValue, type GameMode } from '../lib/gameMode';
@@ -67,6 +71,7 @@ import { WeeklyWrappedModal } from '../components/feedback/WeeklyWrappedModal';
 import { useAppMode } from '../hooks/useAppMode';
 import { isJourneyGenerationPending, syncJourneyGenerationFromServer } from '../lib/journeyGeneration';
 import { StandaloneSplash } from '../components/pwa/StandaloneSplash';
+import { ModerationWidget } from '../components/moderation/ModerationWidget';
 import { useOnboardingEditorNudge } from '../hooks/useOnboardingEditorNudge';
 
 export default function DashboardV3Page() {
@@ -516,6 +521,29 @@ function DashboardOverview({
     onOpenReminderScheduler();
   }, [onOpenReminderScheduler]);
 
+  const moderationRequest = useRequest(() => getModerationState(), [userId], { enabled: Boolean(userId) });
+  const [moderationState, setModerationState] = useState(moderationRequest.data);
+
+  useEffect(() => {
+    setModerationState(moderationRequest.data);
+  }, [moderationRequest.data]);
+
+  const handleCycleModeration = useCallback(
+    async (type: ModerationTrackerType, status: ModerationStatus) => {
+      const dayKey = moderationState?.dayKey;
+      if (!dayKey) {
+        return;
+      }
+      try {
+        const updated = await updateModerationStatus(type, { dayKey, status });
+        setModerationState(updated);
+      } catch (error) {
+        console.error('Failed to update moderation from dashboard', error);
+      }
+    },
+    [moderationState?.dayKey],
+  );
+
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -543,6 +571,12 @@ function DashboardOverview({
         </div>
 
         <div className="order-3 space-y-4 md:space-y-5 lg:order-3 lg:col-span-4">
+          <ModerationWidget
+            title="Moderación"
+            data={moderationState ?? null}
+            loading={moderationRequest.status === 'loading'}
+            onCycle={handleCycleModeration}
+          />
           <RadarChartCard userId={userId} />
           <EmotionChartCard userId={userId} />
         </div>
