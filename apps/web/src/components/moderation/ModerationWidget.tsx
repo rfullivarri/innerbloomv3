@@ -42,7 +42,8 @@ function statusPillClass(status: ModerationStatus): string {
   return "border border-amber-200/35 bg-amber-100/10 text-amber-100/90";
 }
 
-const STATUS_MESSAGE_VISIBLE_MS = 2600;
+const STATUS_BADGE_HOLD_MS = 1020;
+const STATUS_BADGE_EXIT_MS = 320;
 
 function Chip({
   tracker,
@@ -56,6 +57,7 @@ function Chip({
   const meta = moderationTrackerMeta[tracker.type];
   const previousStatusRef = useRef<ModerationStatus>(tracker.statusToday);
   const [statusFlash, setStatusFlash] = useState<ModerationStatus | null>(null);
+  const [statusFlashPhase, setStatusFlashPhase] = useState<"from" | "visible" | "exit">("from");
   const longPressBind = useLongPress({
     onLongPress: () => onEdit?.(),
     delayMs: 850,
@@ -71,13 +73,27 @@ function Chip({
       }
 
       setStatusFlash(tracker.statusToday);
-      const timeout = window.setTimeout(() => {
+      setStatusFlashPhase("from");
+
+      const enterTimeout = window.setTimeout(() => {
+        setStatusFlashPhase("visible");
+      }, 16);
+
+      const exitTimeout = window.setTimeout(() => {
+        setStatusFlashPhase("exit");
+      }, STATUS_BADGE_HOLD_MS);
+
+      const removeTimeout = window.setTimeout(() => {
         setStatusFlash((current) =>
           current === tracker.statusToday ? null : current,
         );
-      }, STATUS_MESSAGE_VISIBLE_MS);
+      }, STATUS_BADGE_HOLD_MS + STATUS_BADGE_EXIT_MS);
 
-      return () => window.clearTimeout(timeout);
+      return () => {
+        window.clearTimeout(enterTimeout);
+        window.clearTimeout(exitTimeout);
+        window.clearTimeout(removeTimeout);
+      };
     }
 
     return undefined;
@@ -93,14 +109,16 @@ function Chip({
     >
       {statusFlash ? (
         <span
-          className={`pointer-events-none absolute left-1/2 top-2 z-20 flex -translate-x-1/2 items-center justify-center rounded-full border px-2 py-0.5 text-[0.54rem] font-semibold uppercase tracking-[0.14em] backdrop-blur-sm transition-all duration-300 sm:top-2.5 ${statusPillClass(statusFlash)}`}
+          className={`pointer-events-none absolute left-1/2 top-1.5 z-20 flex -translate-x-1/2 items-center justify-center rounded-full border px-1.5 py-px text-[0.46rem] font-semibold uppercase tracking-[0.12em] backdrop-blur-sm transition-[transform,opacity] duration-300 ease-out sm:top-2 ${statusPillClass(statusFlash)} ${
+            statusFlashPhase === "from"
+              ? "translate-y-[6px] opacity-0"
+              : statusFlashPhase === "exit"
+                ? "-translate-y-[14px] opacity-0"
+                : "translate-y-0 opacity-100"
+          }`}
           aria-live="polite"
         >
-          <span
-            className={`mr-1.5 h-1.5 w-1.5 rounded-full ${statusFlash === "on_track" ? "bg-emerald-300" : "bg-amber-200/90"}`}
-            aria-hidden
-          />
-          {statusFlash === "on_track" ? "Cumplido" : "Incumplido"}
+          {statusFlash === "on_track" ? "Cumplido" : "Interrumpido"}
         </span>
       ) : null}
       <div className="relative z-10 flex items-center justify-between gap-3">
