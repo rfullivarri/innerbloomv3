@@ -639,8 +639,9 @@ export default function DashboardV3Page() {
 
         <ModerationEditSheet
           isOpen={isModerationEditOpen}
+          isLoading={moderation.isLoading}
           enabledTypes={moderation.enabledTypes}
-          configs={moderation.configs ?? { alcohol: { type: 'alcohol', isEnabled: false, isPaused: false, notLoggedToleranceDays: 2 }, tobacco: { type: 'tobacco', isEnabled: false, isPaused: false, notLoggedToleranceDays: 2 }, sugar: { type: 'sugar', isEnabled: false, isPaused: false, notLoggedToleranceDays: 2 } }}
+          configs={moderation.configs}
           onClose={() => setIsModerationEditOpen(false)}
           onTogglePause={async (type, value) => {
             await moderation.updateTracker(type, { isPaused: value });
