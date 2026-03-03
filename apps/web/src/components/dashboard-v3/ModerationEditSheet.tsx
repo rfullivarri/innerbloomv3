@@ -1,10 +1,13 @@
-import { moderationTrackerOrder } from '../../hooks/useModerationWidget';
-import type { ModerationTrackerConfig, ModerationTrackerType } from '../../lib/api';
+import { moderationTrackerOrder } from "../../hooks/useModerationWidget";
+import type {
+  ModerationTrackerConfig,
+  ModerationTrackerType,
+} from "../../lib/api";
 
 const trackerLabels: Record<ModerationTrackerType, string> = {
-  alcohol: 'Alcohol',
-  tobacco: 'Tabaco',
-  sugar: 'Azúcar',
+  alcohol: "Alcohol",
+  tobacco: "Tabaco",
+  sugar: "Azúcar",
 };
 
 interface ModerationEditSheetProps {
@@ -14,7 +17,10 @@ interface ModerationEditSheetProps {
   configs: Record<ModerationTrackerType, ModerationTrackerConfig> | null;
   onClose: () => void;
   onTogglePause: (type: ModerationTrackerType, value: boolean) => Promise<void>;
-  onToleranceChange: (type: ModerationTrackerType, value: number) => Promise<void>;
+  onToleranceChange: (
+    type: ModerationTrackerType,
+    value: number,
+  ) => Promise<void>;
 }
 
 export function ModerationEditSheet({
@@ -30,10 +36,14 @@ export function ModerationEditSheet({
     return null;
   }
 
-  const visibleTypes = enabledTypes.length > 0 ? enabledTypes : moderationTrackerOrder;
+  const visibleTypes =
+    enabledTypes.length > 0 ? enabledTypes : moderationTrackerOrder;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/50 p-3 backdrop-blur-sm" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[80] flex items-end justify-center bg-black/50 p-3 backdrop-blur-sm"
+      onClick={onClose}
+    >
       <div
         role="dialog"
         aria-modal="true"
@@ -43,7 +53,11 @@ export function ModerationEditSheet({
       >
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-base font-semibold">Edit Moderación</h3>
-          <button type="button" onClick={onClose} className="rounded-full border border-white/25 px-3 py-1 text-xs text-white/80">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-white/25 px-3 py-1 text-xs text-white/80"
+          >
             Cerrar
           </button>
         </div>
@@ -53,9 +67,12 @@ export function ModerationEditSheet({
             Cargando configuración…
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {visibleTypes.map((type) => (
-              <div key={type} className="rounded-2xl border border-white/10 bg-white/5 p-3">
+              <div
+                key={type}
+                className="rounded-3xl border border-white/10 bg-white/5 p-4"
+              >
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-semibold">{trackerLabels[type]}</p>
                   {!configs[type].isEnabled ? (
@@ -64,20 +81,34 @@ export function ModerationEditSheet({
                     </span>
                   ) : null}
                 </div>
-                <label className="mt-2 flex items-center justify-between text-sm text-white/85">
+                <label className="mt-3 flex items-center justify-between text-sm text-white/85">
                   <span>Vacaciones</span>
-                  <input
-                    type="checkbox"
-                    checked={configs[type].isPaused}
-                    onChange={(event) => {
-                      void onTogglePause(type, event.target.checked);
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={configs[type].isPaused}
+                    onClick={() => {
+                      void onTogglePause(type, !configs[type].isPaused);
                     }}
-                  />
+                    className={`relative inline-flex h-7 w-12 items-center rounded-full border transition ${
+                      configs[type].isPaused
+                        ? "border-emerald-300/60 bg-emerald-400/40"
+                        : "border-white/25 bg-white/20"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 rounded-full bg-white shadow transition ${
+                        configs[type].isPaused
+                          ? "translate-x-6"
+                          : "translate-x-1"
+                      }`}
+                    />
+                  </button>
                 </label>
                 <label className="mt-3 block text-sm text-white/85">
                   Tolerancia sin marcar: {configs[type].notLoggedToleranceDays}
                   <input
-                    className="mt-2 w-full"
+                    className="mt-2 w-full accent-emerald-400"
                     type="range"
                     min={0}
                     max={7}
