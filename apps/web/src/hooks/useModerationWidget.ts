@@ -55,26 +55,18 @@ export function useModerationWidget() {
 
   const updateTracker = useCallback(async (type: ModerationTrackerType, patch: Partial<ModerationTrackerConfig>) => {
     const updatedState = await updateModerationConfig(type, patch);
-    const updated = updatedState.trackers.find((tracker) => tracker.type === type);
-    if (!updated) {
-      return;
-    }
-
-    setConfigs((current) => {
-      if (!current) {
-        return current;
-      }
-      return {
-        ...current,
-        [type]: {
-          ...current[type],
-          type,
-          isEnabled: updated.is_enabled,
-          isPaused: updated.is_paused,
-          notLoggedToleranceDays: updated.not_logged_tolerance_days,
+    const next = Object.fromEntries(
+      updatedState.trackers.map((tracker) => [
+        tracker.type,
+        {
+          type: tracker.type,
+          isEnabled: tracker.is_enabled,
+          isPaused: tracker.is_paused,
+          notLoggedToleranceDays: tracker.not_logged_tolerance_days,
         },
-      };
-    });
+      ]),
+    ) as Record<ModerationTrackerType, ModerationTrackerConfig>;
+    setConfigs(next);
   }, []);
 
   return {
