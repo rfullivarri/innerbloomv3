@@ -151,7 +151,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
         })}
       </div>
 
-      {status === 'loading' && <div className="h-56 w-full animate-pulse rounded-2xl bg-white/10" />}
+      {status === 'loading' && <div className="h-56 w-full animate-pulse rounded-ib-md bg-white/10" />}
 
       {status === 'error' && (
         <p className="text-sm text-rose-300">No pudimos cargar tus tareas activas.</p>
@@ -163,7 +163,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
             La API actual aún no expone <code className="rounded bg-white/10 px-1 py-px text-[10px]">daily_log_raw</code>. Listamos tus tareas activas y calculamos el GP semanal total como referencia.
           </p>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="rounded-ib-md border border-white/10 bg-white/5 p-4">
             <p className="text-xs uppercase tracking-[0.18em] text-slate-400">GP total últimos 7 días</p>
             <p className="mt-2 text-2xl font-semibold text-slate-100">{weeklyXp.toLocaleString('es-AR')} GP</p>
             <p className="mt-1 text-xs text-slate-400">Filtro: {pillarFilter} · Alcance: {scopeFilter === 'week' ? 'Semana' : scopeFilter === 'month' ? 'Mes' : '3 meses'}</p>
@@ -171,7 +171,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
 
           <div className="space-y-3">
             {filteredTasks.slice(0, 8).map((task) => (
-              <article key={task.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <article key={task.id} className="rounded-ib-md border border-white/10 bg-white/5 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-semibold text-slate-100">{task.title}</p>
@@ -461,7 +461,7 @@ function TaskItem({
   return (
     <article
       className={cx(
-        'flex flex-col gap-1.5 rounded-xl border border-white/10 bg-white/5 p-2.5 text-slate-200 shadow-[0_6px_20px_rgba(15,23,42,0.3)] transition hover:border-violet-300/50 hover:bg-white/10 md:gap-2 md:p-3',
+        'flex flex-col gap-1.5 rounded-ib-md border border-white/10 bg-white/5 p-2.5 text-slate-200 shadow-[0_6px_20px_rgba(15,23,42,0.3)] transition hover:border-violet-300/50 hover:bg-white/10 md:gap-2 md:p-3',
         item.highlight && 'border-violet-400/60 bg-violet-400/10 shadow-[0_8px_26px_rgba(99,102,241,0.3)]',
       )}
       aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${streakDays} consecutive days`}
@@ -827,7 +827,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
         {isLoading ? (
           <div className="grid grid-cols-1 gap-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={`top-skeleton-${index}`} className="h-24 animate-pulse rounded-xl border border-white/10 bg-white/5" />
+              <div key={`top-skeleton-${index}`} className="h-24 animate-pulse rounded-ib-md border border-white/10 bg-white/5" />
             ))}
           </div>
         ) : (
@@ -887,7 +887,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
         {showTasksSkeleton ? (
           <div className="grid grid-cols-1 gap-3">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={`task-skeleton-${index}`} className="h-24 animate-pulse rounded-xl border border-white/10 bg-white/5" />
+              <div key={`task-skeleton-${index}`} className="h-24 animate-pulse rounded-ib-md border border-white/10 bg-white/5" />
             ))}
           </div>
         ) : (

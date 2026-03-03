@@ -239,7 +239,7 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
         </InfoDotTarget>
       }
     >
-      {status === 'loading' && <div className="h-[260px] w-full animate-pulse rounded-2xl bg-white/10" />}
+      {status === 'loading' && <div className="h-[260px] w-full animate-pulse rounded-ib-md bg-white/10" />}
 
       {status === 'error' && (
         <p className="text-sm text-rose-300">No pudimos construir el radar. Probá más tarde.</p>
@@ -247,7 +247,7 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
 
       {status === 'success' && (
         <div className="flex flex-col items-center gap-6">
-          <div className="relative w-full max-w-[520px] overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-2xl sm:p-6">
+          <div className="relative w-full max-w-[520px] overflow-hidden rounded-ib-lg border border-white/10 bg-white/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-2xl sm:p-6">
             <div className="pointer-events-none absolute inset-0" aria-hidden>
               <div className="absolute -left-16 bottom-6 h-64 w-64 rounded-full bg-[#a878ff]/25 blur-[90px]" />
               <div className="absolute -right-24 -top-12 h-72 w-72 rounded-full bg-[#37aaff]/25 blur-[110px]" />

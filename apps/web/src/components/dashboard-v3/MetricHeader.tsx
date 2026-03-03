@@ -99,7 +99,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
           <div className="h-4 w-full animate-pulse rounded-full bg-white/10" />
           <div className="grid gap-3 md:grid-cols-2">
             {Array.from({ length: 2 }).map((_, index) => (
-              <div key={index} className="h-20 animate-pulse rounded-2xl bg-white/5" />
+              <div key={index} className="h-20 animate-pulse rounded-ib-md bg-white/5" />
             ))}
           </div>
         </div>

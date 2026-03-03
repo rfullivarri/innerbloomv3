@@ -118,7 +118,7 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
             <label className="flex items-center gap-1.5 whitespace-nowrap text-[11px] uppercase tracking-[0.12em] text-slate-300">
               <span className="text-[11px]">Mes</span>
               <select
-                className="w-28 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-100 focus:border-white/20 focus:outline-none sm:w-32"
+                className="w-28 rounded-ib-sm border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-100 focus:border-white/20 focus:outline-none sm:w-32"
                 value={selectedMonth ?? ''}
                 onChange={(event) => setSelectedMonth(event.target.value)}
               >
@@ -134,7 +134,7 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
       }
     >
       {status === 'loading' && (
-        <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />
+        <div className="h-48 w-full animate-pulse rounded-ib-md bg-white/10" />
       )}
 
       {status === 'error' && (
@@ -147,7 +147,7 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
 
       {status === 'success' && activeBucket && activeBucket.days.length > 0 && (
         <div className="space-y-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="rounded-ib-md border border-white/10 bg-white/5 p-4">
             <LineChart days={activeBucket.days} />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">

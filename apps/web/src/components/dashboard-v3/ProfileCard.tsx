@@ -22,7 +22,7 @@ export function ProfileCard({ gameMode }: ProfileCardProps) {
         <video
           src={videoSrc}
           aria-label={`Avatar animado modo ${normalizedGameMode ?? 'Flow'}`}
-          className="h-full w-full rounded-2xl object-cover shadow-lg"
+          className="h-full w-full rounded-ib-md object-cover shadow-lg"
           autoPlay
           loop
           muted
