@@ -525,8 +525,6 @@ export default function DashboardV3Page() {
             menuSlot={<DashboardMenu onOpenScheduler={handleOpenReminderScheduler} moderation={{
               configs: moderation.configs,
               enabledTypes: moderation.enabledTypes,
-              isGeneralEnabled: moderation.isGeneralEnabled,
-              setGeneralEnabled: moderation.setGeneralEnabled,
               updateTrackerEnabled: async (type, enabled) => {
                 await moderation.updateTracker(type, { isEnabled: enabled });
               },
