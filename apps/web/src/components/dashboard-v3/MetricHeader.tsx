@@ -65,14 +65,14 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
   const totalXpLabel = showContent ? formatInteger(data.xpTotal) : '—';
   const chipStyle = useMemo(() => buildGameModeChip(gameMode), [gameMode]);
 
-  const headline = useMemo(() => {
+  const subtitle = useMemo(() => {
     if (showError) {
       return 'No pudimos cargar tu progreso.';
     }
     if (showSkeleton) {
       return 'Actualizando progreso…';
     }
-    return 'Resumen de tu aventura';
+    return undefined;
   }, [showError, showSkeleton]);
 
   return (
@@ -91,7 +91,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
           </InfoDotTarget>
         </div>
       }
-      subtitle={headline}
+      subtitle={subtitle}
     >
       {showSkeleton && (
         <div className="flex flex-col gap-4">
@@ -138,7 +138,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
           </div>
 
           <div className="space-y-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Progreso</p>
+            <p className="text-[11px] font-semibold tracking-[0.18em] text-slate-400">Progreso</p>
             <div
               className="relative h-6 w-full overflow-hidden rounded-full border border-white/5 bg-slate-950/60 shadow-[inset_0_2px_8px_rgba(8,15,40,0.6)] sm:h-[30px]"
               role="progressbar"
