@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   ModerationStateResponse,
   ModerationStatus,
   ModerationTracker,
   ModerationTrackerType,
 } from "../../lib/api";
+import { useLongPress } from "../../hooks/useLongPress";
 import { moderationTrackerMeta, ModerationTrackerIcon } from "./trackerMeta";
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
   onCycle: (type: ModerationTrackerType, next: ModerationStatus) => void;
   loading?: boolean;
   title?: string;
+  onEdit?: () => void;
 };
 
 function nextStatus(status: ModerationStatus): ModerationStatus {
@@ -22,14 +24,14 @@ function nextStatus(status: ModerationStatus): ModerationStatus {
 
 function chipStateClass(status: ModerationStatus): string {
   if (status === "on_track") {
-    return "border-emerald-300/45 bg-emerald-400/[0.08] shadow-[0_8px_22px_rgba(16,185,129,0.12)]";
+    return "border-emerald-300/45 bg-[radial-gradient(ellipse_at_top,_rgba(16,185,129,0.2),_rgba(17,24,39,0.5))] shadow-[0_10px_28px_rgba(16,185,129,0.16)] backdrop-blur-md";
   }
 
   if (status === "off_track") {
-    return "border-amber-200/30 bg-amber-100/[0.06] shadow-[0_8px_20px_rgba(251,191,36,0.08)]";
+    return "border-amber-200/30 bg-[radial-gradient(ellipse_at_top,_rgba(251,191,36,0.18),_rgba(17,24,39,0.48))] shadow-[0_10px_26px_rgba(251,191,36,0.12)] backdrop-blur-md";
   }
 
-  return "border-white/15 bg-white/[0.045]";
+  return "border-white/15 bg-[radial-gradient(ellipse_at_top,_rgba(71,85,105,0.3),_rgba(17,24,39,0.42))] backdrop-blur-md";
 }
 
 function statusPillClass(status: ModerationStatus): string {
@@ -40,24 +42,69 @@ function statusPillClass(status: ModerationStatus): string {
   return "border border-amber-200/35 bg-amber-100/10 text-amber-100/90";
 }
 
+const STATUS_MESSAGE_VISIBLE_MS = 2600;
+
 function Chip({
   tracker,
   onCycle,
+  onEdit,
 }: {
   tracker: ModerationTracker;
   onCycle: Props["onCycle"];
+  onEdit?: Props["onEdit"];
 }) {
   const meta = moderationTrackerMeta[tracker.type];
+  const previousStatusRef = useRef<ModerationStatus>(tracker.statusToday);
+  const [statusFlash, setStatusFlash] = useState<ModerationStatus | null>(null);
+  const longPressBind = useLongPress({
+    onLongPress: () => onEdit?.(),
+    delayMs: 850,
+  });
+
+  useEffect(() => {
+    const previous = previousStatusRef.current;
+    if (tracker.statusToday !== previous) {
+      previousStatusRef.current = tracker.statusToday;
+      if (tracker.statusToday === "not_logged") {
+        setStatusFlash(null);
+        return;
+      }
+
+      setStatusFlash(tracker.statusToday);
+      const timeout = window.setTimeout(() => {
+        setStatusFlash((current) =>
+          current === tracker.statusToday ? null : current,
+        );
+      }, STATUS_MESSAGE_VISIBLE_MS);
+
+      return () => window.clearTimeout(timeout);
+    }
+
+    return undefined;
+  }, [tracker.statusToday]);
 
   return (
     <button
       type="button"
       onClick={() => onCycle(tracker.type, nextStatus(tracker.statusToday))}
-      className={`w-full rounded-[1.9rem] border px-3 py-2.5 text-left transition-all duration-200 hover:bg-white/10 sm:px-3.5 sm:py-3 ${chipStateClass(tracker.statusToday)}`}
+      className={`relative w-full overflow-hidden rounded-[1.9rem] border px-3 py-2.5 text-left transition-all duration-200 hover:bg-white/10 sm:px-3.5 sm:py-3 ${chipStateClass(tracker.statusToday)}`}
       title={meta.hint}
+      {...longPressBind}
     >
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0 space-y-1">
+      {statusFlash ? (
+        <span
+          className={`pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-[1.9rem] border text-[0.72rem] font-semibold uppercase tracking-[0.16em] backdrop-blur-sm transition-all duration-300 ${statusPillClass(statusFlash)}`}
+          aria-live="polite"
+        >
+          <span
+            className={`mr-2 h-2 w-2 rounded-full ${statusFlash === "on_track" ? "bg-emerald-300" : "bg-amber-200/90"}`}
+            aria-hidden
+          />
+          {statusFlash === "on_track" ? "Cumplido" : "Interrumpido"}
+        </span>
+      ) : null}
+      <div className="relative z-10 flex items-center justify-between gap-3">
+        <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2 text-white/85">
             <ModerationTrackerIcon
               type={tracker.type}
@@ -69,23 +116,15 @@ function Chip({
             >
               {meta.label}
             </p>
-            {tracker.statusToday !== "not_logged" ? (
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] transition-all duration-200 ${statusPillClass(tracker.statusToday)}`}
-              >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${tracker.statusToday === "on_track" ? "bg-emerald-300" : "bg-amber-200/90"}`}
-                  aria-hidden
-                />
-                {tracker.statusToday === "on_track"
-                  ? "Cumplido"
-                  : "Interrumpido"}
-              </span>
-            ) : null}
           </div>
         </div>
-        <span className="shrink-0 text-3xl font-semibold leading-none text-amber-100 sm:text-[2.1rem]">
-          {tracker.current_streak_days}d
+        <span className="shrink-0 leading-none text-amber-100">
+          <span className="text-[2.45rem] font-semibold sm:text-[2.7rem]">
+            {tracker.current_streak_days}
+          </span>
+          <span className="ml-0.5 align-top text-[1.05rem] font-semibold text-amber-100/90 sm:text-[1.2rem]">
+            d
+          </span>
         </span>
       </div>
     </button>
@@ -96,7 +135,8 @@ export function ModerationWidget({
   data,
   onCycle,
   loading = false,
-  title = "Moderación",
+  title,
+  onEdit,
 }: Props) {
   const enabled = useMemo(
     () => (data?.trackers ?? []).filter((tracker) => tracker.is_enabled),
@@ -108,7 +148,7 @@ export function ModerationWidget({
 
   return (
     <section>
-      <h3 className="mb-2 text-sm font-semibold text-white/85">{title}</h3>
+      {title ? <h3 className="mb-2 text-sm font-semibold text-white/85">{title}</h3> : null}
       <div
         className={`grid gap-2.5 sm:gap-3 ${activeCount === 1 ? "grid-cols-1" : ""} ${activeCount === 2 ? "grid-cols-2" : ""} ${activeCount === 3 ? "grid-cols-3 max-[360px]:grid-cols-2" : ""}`}
       >
@@ -117,7 +157,12 @@ export function ModerationWidget({
         )}
         {!loading &&
           enabled.map((tracker) => (
-            <Chip key={tracker.type} tracker={tracker} onCycle={onCycle} />
+            <Chip
+              key={tracker.type}
+              tracker={tracker}
+              onCycle={onCycle}
+              onEdit={onEdit}
+            />
           ))}
       </div>
     </section>
