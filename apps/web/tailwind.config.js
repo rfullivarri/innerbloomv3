@@ -33,7 +33,10 @@ const config = {
         modal: '9999'
       },
       borderRadius: {
-        xl: '1.25rem'
+        xl: '1.25rem',
+        'ib-lg': '24px',
+        'ib-md': '20px',
+        'ib-sm': '14px'
       }
     }
   },

@@ -871,7 +871,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       subtitle="Últimos 6 meses"
       rightSlot={<InfoDotTarget id="emotion" placement="right" className="flex items-center" />}
     >
-      {showSkeleton && <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />}
+      {showSkeleton && <div className="h-48 w-full animate-pulse rounded-ib-md bg-white/10" />}
 
       {showError && <p className="text-sm text-rose-300">Todavía no pudimos cargar tus emociones.</p>}
 
@@ -894,7 +894,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
           {rangeLabel && <p className="text-xs text-slate-400">Período analizado: {rangeLabel}</p>}
 
           <div
-            className="rounded-2xl border border-white/10 bg-white/5 p-0"
+            className="rounded-ib-md border border-white/10 bg-white/5 p-0"
             data-emotion-card="heatmap"
             ref={heatmapRef}
           >
@@ -950,7 +950,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
           </div>
           <div ref={summaryRef} data-emotion-card="summary">
             {highlight ? (
-              <div className="summary-inner w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-left sm:p-4">
+              <div className="summary-inner w-full rounded-ib-md border border-white/10 bg-white/5 p-3 text-left sm:p-4">
                 <div
                   className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
                   style={{ backgroundColor: highlight.color }}
@@ -964,7 +964,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
                 </div>
               </div>
             ) : (
-              <div className="summary-inner rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-slate-400 sm:p-4">
+              <div className="summary-inner rounded-ib-md border border-white/10 bg-white/5 p-3 text-xs text-slate-400 sm:p-4">
                 <div className="summary-content">
                   <span className="summary-description">
                     Aún no hay suficiente información reciente para destacar una emoción.

@@ -36,7 +36,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
       role="region"
       aria-labelledby={labelledBy}
       className={combine(
-        'relative overflow-hidden rounded-2xl border border-white/10',
+        'relative overflow-hidden rounded-ib-lg border border-white/10',
         variant === 'default' &&
           'bg-[radial-gradient(ellipse_at_top,_rgba(35,43,76,0.35),_rgba(17,24,39,0.55))] backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.35)]',
         className,
