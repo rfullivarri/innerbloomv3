@@ -761,7 +761,9 @@ function DashboardOverview({
           <EnergyCard userId={userId} gameMode={gameMode} />
           <DailyCultivationSection userId={userId} />
           {moderationConfigs && moderationEnabledTypes.length > 0 ? (
-            <ModerationConfigWidget configs={moderationConfigs} onEdit={onOpenModerationEdit} />
+            <div className="hidden lg:block">
+              <ModerationConfigWidget configs={moderationConfigs} onEdit={onOpenModerationEdit} />
+            </div>
           ) : null}
         </div>
 
@@ -774,6 +776,11 @@ function DashboardOverview({
           />
           <RadarChartCard userId={userId} />
           <EmotionChartCard userId={userId} />
+          {moderationConfigs && moderationEnabledTypes.length > 0 ? (
+            <div className="lg:hidden">
+              <ModerationConfigWidget configs={moderationConfigs} onEdit={onOpenModerationEdit} />
+            </div>
+          ) : null}
         </div>
 
         <div className="order-4 space-y-4 md:space-y-5 lg:order-4 lg:col-span-4">
