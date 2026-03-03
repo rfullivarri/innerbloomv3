@@ -295,8 +295,10 @@ export function DashboardMenu({ onOpenScheduler, moderation }: DashboardMenuProp
       setTrackerOverrides((current) => ({ ...current, [type]: nextValue }));
       void moderation
         .updateTrackerEnabled(type, nextValue)
-        .catch(() => {
+        .catch((error) => {
+          console.error('[moderation-menu] failed to persist tracker toggle', { type, nextValue, error });
           setTrackerOverrides((current) => ({ ...current, [type]: !nextValue }));
+          setToast({ tone: 'error', message: 'No se pudo guardar Moderación. Revisa tu conexión e inténtalo otra vez.' });
         });
     },
     [isTrackerEnabled, moderation],

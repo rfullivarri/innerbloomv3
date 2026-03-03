@@ -22,6 +22,23 @@ const statusBodySchema = z.object({
   status: z.enum(['on_track', 'off_track', 'not_logged']),
 });
 
+
+const moderationDebugEnabled =
+  process.env.NODE_ENV !== 'production' || String(process.env.DEBUG_MODERATION ?? 'false').toLowerCase() === 'true';
+
+function logModerationRoute(message: string, payload?: unknown) {
+  if (!moderationDebugEnabled) {
+    return;
+  }
+
+  if (payload === undefined) {
+    console.info(`[moderation-route] ${message}`);
+    return;
+  }
+
+  console.info(`[moderation-route] ${message}`, payload);
+}
+
 const configBodySchema = z
   .object({
     isEnabled: z.boolean().optional(),
@@ -40,6 +57,7 @@ router.get(
     }
 
     const response = await getModerationState(req.user.id);
+    logModerationRoute('GET /api/moderation success', { userId: req.user.id, trackers: response.trackers });
     res.json(response);
   }),
 );
@@ -71,7 +89,9 @@ router.put(
 
     const { type } = parseWithValidation(z.object({ type: trackerTypeSchema }), req.params);
     const body = parseWithValidation(configBodySchema, req.body);
+    logModerationRoute(`PUT /api/moderation/${type}/config request`, { userId: req.user.id, body });
     const response = await updateModerationConfig(req.user.id, type, body);
+    logModerationRoute(`PUT /api/moderation/${type}/config success`, { userId: req.user.id, trackers: response.trackers });
     res.json(response);
   }),
 );
