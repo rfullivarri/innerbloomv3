@@ -14,6 +14,7 @@ import missionsRoutes from './missions.js';
 import internalRoutes from './internal.js';
 import feedbackRoutes from './feedback.js';
 import billingRoutes from '../modules/billing/billing.routes.js';
+import moderationRoutes from './moderation.js';
 
 const router = Router();
 
@@ -32,5 +33,6 @@ router.use(onboardingRoutes);
 router.use(internalRoutes);
 router.use(feedbackRoutes);
 router.use(billingRoutes);
+router.use(moderationRoutes);
 
 export default router;
