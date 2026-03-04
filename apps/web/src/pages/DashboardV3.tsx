@@ -1197,7 +1197,7 @@ function SectionHeader({
         </p>
       )}
       {shouldShowTitle && (
-        <h2 className="font-display text-2xl font-semibold text-white sm:text-3xl">
+        <h2 className="font-display text-2xl font-semibold text-[color:var(--color-text-strong)] sm:text-3xl">
           {title}
         </h2>
       )}
@@ -1250,7 +1250,7 @@ function ProfileErrorState({ onRetry, error }: ProfileErrorStateProps) {
     <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-100 shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md md:p-6">
       <div className="space-y-3">
         <div>
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-[color:var(--color-text-strong)]">
             No pudimos conectar con tu perfil
           </h2>
           <p className="mt-1 text-sm text-rose-100/80">
@@ -1280,7 +1280,7 @@ function DashboardFallback() {
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">
           Vista previa sin conexión
         </p>
-        <h2 className="mt-3 font-display text-2xl font-semibold text-white">
+        <h2 className="mt-3 font-display text-2xl font-semibold text-[color:var(--color-text-strong)]">
           Estamos preparando tu Dashboard
         </h2>
         <p className="mt-2 text-sm text-[color:var(--color-slate-300)]">
