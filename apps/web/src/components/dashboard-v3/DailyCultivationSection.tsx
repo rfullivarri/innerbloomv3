@@ -337,7 +337,7 @@ function LineChart({ days }: LineChartProps) {
 
       {labels.length > 0 && (
         <div
-          className="grid gap-1.5 pb-3 text-text-muted"
+          className="grid gap-1.5 pb-3 text-slate-900 dark:text-text-muted"
           style={{
             gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))`,
             marginTop: `${layout.axisMarginTop}px`,

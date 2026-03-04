@@ -344,7 +344,7 @@ function Radar({ dataset }: RadarProps) {
             return `${x},${y}`;
           })
           .join(' ');
-        return <polygon key={level} points={points} fill="none" stroke="var(--color-border-subtle)" strokeWidth={1} />;
+        return <polygon key={level} points={points} fill="none" className="stroke-[color-mix(in_srgb,var(--color-text-muted)_62%,transparent)] dark:stroke-[var(--color-border-subtle)]" strokeWidth={1.35} />;
       })}
 
       {axes.map((axis, index) => {
@@ -364,8 +364,8 @@ function Radar({ dataset }: RadarProps) {
               y1={center}
               x2={lineEnd.x}
               y2={lineEnd.y}
-              stroke="color-mix(in srgb, var(--color-text-subtle) 40%, transparent)"
-              strokeWidth={1}
+              className="stroke-[color-mix(in_srgb,var(--color-text-subtle)_72%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-text-subtle)_40%,transparent)]"
+              strokeWidth={1.6}
             />
             <text
               x={labelPoint.x}
@@ -398,7 +398,7 @@ function Radar({ dataset }: RadarProps) {
         );
       })}
 
-      <polygon points={polygonPoints} fill="url(#radarFill)" stroke="rgba(129,140,248,0.5)" strokeWidth={2} />
+      <polygon points={polygonPoints} fill="url(#radarFill)" className="stroke-[rgba(99,102,241,0.82)] dark:stroke-[rgba(129,140,248,0.5)]" strokeWidth={2.4} />
       <circle cx={center} cy={center} r={6} fill="rgba(224,231,255,0.95)" />
     </svg>
   );
