@@ -7,6 +7,7 @@ import type {
 } from "../../lib/api";
 import { useLongPress } from "../../hooks/useLongPress";
 import { moderationTrackerMeta, ModerationTrackerIcon } from "./trackerMeta";
+import { DashboardTitle } from "../dashboard-v3/DashboardTypography";
 
 type Props = {
   data: ModerationStateResponse | null;
@@ -166,16 +167,15 @@ export function ModerationWidget({
   if (!loading && enabled.length === 0) return null;
 
   const activeCount = Math.max(1, Math.min(3, enabled.length || 1));
-  const headerAlign = activeCount === 3 ? "text-center" : "text-left";
   const resolvedTitle = title?.trim() || "Moderación";
 
   return (
-    <section>
-      <h3
-        className={`mb-1.5 font-display text-[0.78rem] font-semibold tracking-[0.08em] text-white/90 ${headerAlign}`}
-      >
-        {resolvedTitle}
-      </h3>
+    <section className="space-y-2.5">
+      <header className="flex min-h-[1.625rem] items-center pl-1.5 pt-1.5 md:pl-0 md:pt-0">
+        <DashboardTitle level="h1" as="h3">
+          {resolvedTitle}
+        </DashboardTitle>
+      </header>
       <div
         className={`grid gap-2.5 sm:gap-3 ${activeCount === 1 ? "grid-cols-1" : ""} ${activeCount === 2 ? "grid-cols-2" : ""} ${activeCount === 3 ? "grid-cols-3 max-[360px]:grid-cols-2" : ""}`}
       >
