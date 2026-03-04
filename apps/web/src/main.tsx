@@ -8,6 +8,8 @@ import { DEV_USER_SWITCH_ACTIVE } from './lib/api';
 import { isApiLoggingEnabled, setApiLoggingEnabled } from './lib/logger';
 import { resolveAuthLanguage } from './lib/authLanguage';
 import { getClerkLocalization } from './lib/clerkLocalization';
+import { ThemePreferenceProvider } from './theme/ThemePreferenceProvider';
+import { applyStoredThemePreference } from './theme/themePreference';
 
 declare global {
   interface Window {
@@ -25,6 +27,9 @@ if (typeof window !== 'undefined') {
   window.isInnerbloomApiLoggingEnabled = isApiLoggingEnabled;
   console.info('[API] Use window.setInnerbloomApiLogging(false) to disable API logs.');
 }
+
+
+applyStoredThemePreference();
 
 const rootElement = document.getElementById('root');
 
@@ -59,7 +64,9 @@ createRoot(rootElement).render(
   <StrictMode>
     <BrowserRouter>
       <LocalizedClerkProvider>
-        <App />
+        <ThemePreferenceProvider>
+          <App />
+        </ThemePreferenceProvider>
       </LocalizedClerkProvider>
     </BrowserRouter>
   </StrictMode>,

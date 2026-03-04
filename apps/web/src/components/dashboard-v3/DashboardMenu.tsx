@@ -6,6 +6,7 @@ import { ToastBanner } from "../common/ToastBanner";
 import { ModerationWidget as ModerationPreviewWidget } from "./ModerationWidget";
 import { ModerationTrackerIcon } from "../moderation/trackerMeta";
 import { useQuickAccessInstall } from "../../hooks/useQuickAccessInstall";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 import { useLongPress } from "../../hooks/useLongPress";
 import {
   ApiError,
@@ -441,6 +442,8 @@ export function DashboardMenu({
                   </button>
                 </div>
                 <div className="flex-1 space-y-4 overflow-y-auto pr-1">
+                  <ThemeSwitcher />
+
                   <section className="rounded-2xl border border-white/10 bg-white/5 px-2 py-1">
                     <button
                       type="button"
