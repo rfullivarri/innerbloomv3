@@ -33,7 +33,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
       aria-label="Navegación principal en vista móvil"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.56rem)' }}
     >
-      <ul className="flex w-full max-w-xl items-center justify-between gap-1 rounded-[1.75rem] bg-white/12 px-2 py-1 shadow-[0_12px_26px_rgba(8,15,35,0.52)] backdrop-blur-2xl backdrop-saturate-150">
+      <ul className="flex w-full max-w-xl items-center justify-between gap-1 rounded-[1.75rem] border border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] px-2 py-1 shadow-[var(--shadow-elev-2)] backdrop-blur-2xl backdrop-saturate-150">
         {items.map((item) => (
           <li key={item.key} className="relative flex flex-1 justify-center">
             <NavLink
@@ -43,10 +43,10 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
               className={({ isActive }: { isActive: boolean }) =>
                 combine(
                   baseItemClasses,
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/65 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/70',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-overlay-4)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-muted)]',
                   isActive
-                    ? 'text-white'
-                    : 'text-white hover:text-white'
+                    ? 'text-[color:var(--color-text)]'
+                    : 'text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]'
                 )
               }
             >
@@ -55,19 +55,19 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                   <div className="relative flex items-center justify-center">
                     <span
                       className={combine(
-                        'relative z-10 flex h-7 w-7 items-center justify-center rounded-2xl text-[10px] shadow-[0_8px_18px_rgba(10,16,35,0.35)] transition-all duration-400 ease-out backdrop-blur-xl group-active:scale-95',
+                        'relative z-10 flex h-7 w-7 items-center justify-center rounded-2xl text-[10px] shadow-[var(--shadow-elev-1)] transition-all duration-400 ease-out backdrop-blur-xl group-active:scale-95',
                         item.key === 'dashboard' && 'h-8 w-8',
                         isActive
-                          ? 'bg-white/15 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.28)]'
-                          : 'bg-white/10 text-white/80'
+                          ? 'bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)]'
+                          : 'bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]'
                       )}
                     >
                       <span
                         className={combine(
                           'relative flex h-full w-full items-center justify-center transition-all duration-400 ease-out',
                           isActive
-                            ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]'
-                            : 'text-white/80 group-hover:text-white'
+                            ? 'text-[color:var(--color-accent-primary)]'
+                            : 'text-[color:var(--color-text-muted)] group-hover:text-[color:var(--color-text)]'
                         )}
                       >
                         {isValidElement<SVGProps<SVGSVGElement>>(item.icon)
@@ -96,11 +96,11 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                   </div>
                   <span
                     className={combine(
-                      'font-semibold leading-tight text-white transition-all duration-300',
+                      'font-semibold leading-tight text-[color:var(--color-text-muted)] transition-all duration-300',
                       item.key === 'dashboard' ? 'text-[10px] tracking-[0.09em]' : 'text-[9px] tracking-[0.08em]',
                       isActive
-                        ? 'drop-shadow-[0_0_6px_rgba(255,255,255,0.22)]'
-                        : 'drop-shadow-[0_0_2px_rgba(255,255,255,0.14)]'
+                        ? 'text-[color:var(--color-text)]'
+                        : 'group-hover:text-[color:var(--color-text)]'
                     )}
                   >
                     {item.label}

@@ -116,12 +116,12 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
       {showContent && (
         <div className="flex flex-col gap-6">
           <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-center gap-6 text-slate-200">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-[color:var(--color-text-muted)]">
               <div className="flex items-center gap-3">
                 <span className="text-[2.5em] leading-none">🏆</span>
                 <div className="flex flex-col items-center text-center">
-                  <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{totalXpLabel}</span>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <span className="text-4xl font-semibold text-[color:var(--color-text)] sm:text-5xl">{totalXpLabel}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-subtle)]">
                     Total GP
                   </span>
                 </div>
@@ -129,8 +129,8 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
               <div className="flex items-center gap-3">
                 <span className="text-[2.5em] leading-none">🎯</span>
                 <div className="flex flex-col items-center text-center">
-                  <span className="text-4xl font-semibold text-slate-50 sm:text-5xl">{levelLabel}</span>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <span className="text-4xl font-semibold text-[color:var(--color-text)] sm:text-5xl">{levelLabel}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-subtle)]">
                     Nivel
                   </span>
                 </div>
@@ -139,9 +139,9 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
           </div>
 
           <div className="space-y-3">
-            <DashboardMeta className="tracking-[0.02em] text-slate-300/78">Progreso</DashboardMeta>
+            <DashboardMeta className="tracking-[0.02em] text-[color:var(--color-text-muted)]">Progreso</DashboardMeta>
             <div
-              className="relative h-6 w-full overflow-hidden rounded-full border border-white/5 bg-slate-950/60 shadow-[inset_0_2px_8px_rgba(8,15,40,0.6)] sm:h-[30px]"
+              className="relative h-6 w-full overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] shadow-[inset_0_2px_8px_rgba(15,23,42,0.12)] sm:h-[30px]"
               role="progressbar"
               aria-label="Progreso hacia el próximo nivel"
               aria-valuemin={0}
@@ -163,7 +163,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
                 {progressLabel}
               </span>
             </div>
-            {xpToNextMessage && <DashboardMeta className="text-slate-300/78">{xpToNextMessage}</DashboardMeta>}
+            {xpToNextMessage && <DashboardMeta className="text-[color:var(--color-text-muted)]">{xpToNextMessage}</DashboardMeta>}
           </div>
         </div>
       )}

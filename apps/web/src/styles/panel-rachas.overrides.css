@@ -45,7 +45,7 @@
 #emotionChart .emotion-chart-surface {
   width: 100%;
   border-radius: 16px;
-  background: linear-gradient(145deg, rgba(15, 33, 66, 0.65), rgba(16, 23, 45, 0.35));
+  background: var(--glass-bg);
   padding: clamp(3px, 4.5vw, 3px) clamp(3px, 6vw, 3px);
   overflow: hidden;
   min-height: inherit;
@@ -64,7 +64,7 @@
   grid-template-columns: repeat(var(--column-count, 1), minmax(0, var(--cell)));
   column-gap: var(--cell-gap, 6px);
   row-gap: clamp(1.2px, 0.28vw, 2.4px);
-  color: rgba(226, 232, 255, 0.45);
+  color: var(--color-text-subtle);
 }
 
 #emotionChart .grid-box .month-row {
@@ -97,7 +97,7 @@
   width: var(--cell);
   height: var(--cell);
   border-radius: 4px;
-  background-color: #555555;
+  background-color: color-mix(in srgb, var(--color-text-subtle) 46%, transparent);
 }
 
 .emotion-highlight-indicator {
@@ -110,7 +110,7 @@
   position: absolute;
   inset: -6px;
   border-radius: 9999px;
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  border: 2px solid color-mix(in srgb, var(--color-text-subtle) 35%, transparent);
   opacity: 0;
   transform: scale(0.8);
   animation: emotionHighlightRing 3s ease-in-out infinite;

@@ -301,7 +301,7 @@ const TAB_BUTTON_BASE =
   'flex-1 inline-flex items-center justify-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 md:text-xs';
 
 const TAB_GROUP_BASE =
-  'inline-flex w-full items-center justify-between gap-1 rounded-full border border-white/15 bg-[color:var(--color-overlay-1)] p-1';
+  'inline-flex w-full items-center justify-between gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-1 shadow-[var(--shadow-elev-1)]';
 
 function normalizeMode(mode?: string | null): Mode {
   return normalizeGameModeValue(mode) ?? 'Flow';
@@ -805,8 +805,8 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                       TAB_BUTTON_BASE,
                       'leading-none',
                       isActive
-                        ? 'border-white/60 bg-white text-slate-900 shadow-[0_4px_16px_rgba(226,232,240,0.35)]'
-                        : 'border-transparent bg-transparent text-[color:var(--color-slate-300)] hover:text-[color:var(--color-slate-100)]',
+                        ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)]'
+                        : 'border-transparent bg-transparent text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]',
                     )}
                     aria-pressed={isActive}
                   >
@@ -835,7 +835,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
           hasContent && (
             <section className="space-y-3">
               <div className="flex flex-wrap items-baseline gap-2">
-                <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-slate-100)]/88">
+                <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-text)]">
                   Top streaks
                 </DashboardTitle>
                 <DashboardMeta as="span">— días consecutivos sin cortar</DashboardMeta>
@@ -875,8 +875,8 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                   className={cx(
                     TAB_BUTTON_BASE,
                     isActive
-                      ? 'border-white/60 bg-white text-slate-900 shadow-[0_4px_16px_rgba(226,232,240,0.35)]'
-                      : 'border-transparent bg-transparent text-[color:var(--color-slate-200)] hover:text-[color:var(--color-slate-100)]',
+                      ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)]'
+                      : 'border-transparent bg-transparent text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]',
                   )}
                   aria-pressed={isActive}
                 >
@@ -896,7 +896,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
         ) : (
           hasContent && (
             <section className="space-y-3">
-              <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-slate-100)]/88">
+              <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-text)]">
                 Todas las tareas
               </DashboardTitle>
               {displayTasks.length > 0 ? (
