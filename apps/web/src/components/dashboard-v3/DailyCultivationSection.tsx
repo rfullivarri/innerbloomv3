@@ -350,7 +350,7 @@ function LineChart({ days }: LineChartProps) {
               style={{ height: `${layout.axisRowHeight}px` }}
             >
               <span
-                className={shouldShowLabel(index) ? 'inline-block leading-tight' : 'invisible'}
+                className={shouldShowLabel(index) ? 'inline-block leading-tight text-slate-600 dark:text-text-muted' : 'invisible'}
                 style={{
                   fontSize: `${layout.axisLabelFontSize}px`,
                   letterSpacing: '0.08em',
