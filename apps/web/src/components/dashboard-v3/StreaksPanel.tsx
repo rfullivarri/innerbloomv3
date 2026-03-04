@@ -839,7 +839,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                 <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-text)]">
                   Top streaks
                 </DashboardTitle>
-                <DashboardMeta as="span" className="text-slate-950">— días consecutivos sin cortar</DashboardMeta>
+                <DashboardMeta as="span" className="text-[color:var(--color-text)]">— días consecutivos sin cortar</DashboardMeta>
               </div>
               {topEntries.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3">

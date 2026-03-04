@@ -139,7 +139,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
           </div>
 
           <div className="space-y-3">
-            <DashboardMeta className="tracking-[0.02em] text-slate-950">Progreso</DashboardMeta>
+            <DashboardMeta className="tracking-[0.02em] text-[color:var(--color-text)]">Progreso</DashboardMeta>
             <div
               className="relative h-6 w-full overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] shadow-[inset_0_2px_8px_rgba(15,23,42,0.12)] sm:h-[30px]"
               role="progressbar"
@@ -159,11 +159,11 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
                 className="relative h-full rounded-full bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300 transition-[width] duration-500 ease-out progress-fill--typing"
                 style={{ width: `${progressPercent.toFixed(1)}%` }}
               />
-              <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-950 drop-shadow-[0_1px_2px_rgba(255,255,255,0.45)]">
+              <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text)] drop-shadow-[0_1px_2px_rgba(255,255,255,0.45)]">
                 {progressLabel}
               </span>
             </div>
-            {xpToNextMessage && <DashboardMeta className="text-slate-950">{xpToNextMessage}</DashboardMeta>}
+            {xpToNextMessage && <DashboardMeta className="text-[color:var(--color-text)]">{xpToNextMessage}</DashboardMeta>}
           </div>
         </div>
       )}
