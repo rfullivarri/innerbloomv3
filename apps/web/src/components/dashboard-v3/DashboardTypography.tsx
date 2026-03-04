@@ -57,7 +57,7 @@ export function DashboardMeta<T extends ElementType = 'p'>({
   return (
     <Component
       className={cx(
-        'font-sans text-[0.72rem] font-medium leading-snug tracking-[0.01em] text-slate-950 md:text-xs',
+        'font-sans text-[0.72rem] font-medium leading-snug tracking-[0.01em] text-[color:var(--color-text)] md:text-xs',
         className,
       )}
       {...props}
