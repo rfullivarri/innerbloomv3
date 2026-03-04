@@ -42,7 +42,7 @@ interface DashboardMenuProps {
 
 function MenuIcon({
   children,
-  className = "h-5 w-5 text-white/75",
+  className = "h-5 w-5 text-[color:var(--color-text-dim)]",
 }: {
   children: ReactNode;
   className?: string;
@@ -72,7 +72,7 @@ const DashboardMenuTrigger = forwardRef<
       ref={ref}
       type="button"
       onClick={onClick}
-      className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 p-2 text-white/80 transition hover:border-white/40 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+      className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2 text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40"
       aria-label="Abrir menú"
     >
       <svg

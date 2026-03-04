@@ -107,7 +107,7 @@ export function PlanChip({ subscription }: { subscription: CurrentUserSubscripti
         ref={buttonRef}
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center rounded-full border border-cyan-300/40 bg-cyan-300/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100"
+        className="inline-flex items-center rounded-full border border-[color:var(--color-accent-primary)]/35 bg-[color:var(--color-accent-primary)]/12 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-accent-primary)]"
       >
         <span className="hidden md:inline">{display.desktop}</span>
         <span className="md:hidden">{display.mobile}</span>

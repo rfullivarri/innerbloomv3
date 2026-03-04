@@ -41,7 +41,9 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
       <div className="flex w-full flex-wrap items-center justify-between gap-2 px-3 py-3 sm:px-4 md:flex-nowrap md:px-8 md:py-4">
         <div className="flex flex-1 min-w-0 flex-wrap items-center justify-start gap-x-2 gap-y-1 text-left sm:gap-x-3 md:flex-row">
           <div className="min-w-0">
-            <p className="text-[0.6rem] uppercase tracking-[0.35em] text-text-muted md:text-xs">Innerbloom</p>
+            <p className="text-[0.62rem] uppercase tracking-[0.3em] text-[color:var(--color-text-subtle)] md:text-xs">
+              Innerbloom
+            </p>
             <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl lg:text-2xl">
               {resolvedTitle}
             </h1>
@@ -96,7 +98,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
           {menuSlot}
           {planSlot}
           {displayName && (
-            <span className="hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs text-text-muted md:inline-flex">
+            <span className="hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs text-[color:var(--color-text-dim)] md:inline-flex">
               {displayName}
             </span>
           )}
