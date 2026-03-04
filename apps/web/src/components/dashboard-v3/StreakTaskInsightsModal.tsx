@@ -532,7 +532,7 @@ export function TaskInsightsModal({
                               className={cx(
                                 'flex-1 rounded-full px-3 py-0.5 text-[11px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface)]',
                                 isActive
-                                  ? 'bg-white text-[color:var(--color-surface)] shadow-inner shadow-white/30'
+                                  ? 'bg-white text-slate-900 shadow-inner shadow-white/30'
                                   : 'text-[color:var(--color-slate-200)] hover:bg-[color:var(--color-overlay-2)]',
                               )}
                               aria-pressed={isActive}
