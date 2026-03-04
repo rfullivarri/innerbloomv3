@@ -126,14 +126,14 @@ function Chip({
       ) : null}
       <div className="relative z-10 flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex min-w-0 items-center gap-2 text-white/85">
+          <div className="mt-2 flex min-w-0 items-center gap-2 text-white/85">
             <ModerationTrackerIcon
               type={tracker.type}
               className="h-8 w-8 shrink-0 text-white/90"
             />
           </div>
         </div>
-        <span className="shrink-0 leading-none text-amber-100/95">
+        <span className="mt-2 shrink-0 leading-none text-amber-100/95">
           <span className="text-[2.45rem] font-semibold sm:text-[2.7rem]">
             {tracker.current_streak_days}
           </span>
