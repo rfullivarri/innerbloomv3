@@ -628,6 +628,7 @@ export default function DashboardV3Page() {
                 moderation={{
                   configs: moderation.configs,
                   enabledTypes: moderation.enabledTypes,
+                  isRefreshingWidgets: moderation.isRefreshingWidgets,
                   updateTrackerEnabled: async (type, enabled) => {
                     await moderation.updateTracker(type, {
                       isEnabled: enabled,

@@ -41,6 +41,7 @@ function mapStateToConfigs(state: Awaited<ReturnType<typeof getModerationState>>
 export function useModerationWidget() {
   const [configs, setConfigs] = useState<Record<ModerationTrackerType, ModerationTrackerConfig> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshingWidgets, setIsRefreshingWidgets] = useState(false);
   const mutationIdRef = useRef(0);
 
   const setConfigsWithLog = useCallback(
@@ -104,6 +105,35 @@ export function useModerationWidget() {
     };
   }, [setConfigsWithLog]);
 
+  const refreshWidgets = useCallback(async () => {
+    const refreshStartMutationId = mutationIdRef.current;
+    setIsRefreshingWidgets(true);
+    try {
+      logModerationDebug('GET /api/moderation refresh start', { refreshStartMutationId });
+      const state = await getModerationState();
+      logModerationDebug('GET /api/moderation refresh success', { refreshStartMutationId, state });
+
+      setConfigsWithLog(
+        (current) => {
+          if (mutationIdRef.current !== refreshStartMutationId && current) {
+            logModerationDebug('Ignoring stale moderation refresh response', {
+              refreshStartMutationId,
+              currentMutationId: mutationIdRef.current,
+            });
+            return current;
+          }
+          return mapStateToConfigs(state);
+        },
+        'widgets_refresh',
+      );
+    } catch (error) {
+      logModerationDebug('GET /api/moderation refresh failed', error);
+      throw error;
+    } finally {
+      setIsRefreshingWidgets(false);
+    }
+  }, [setConfigsWithLog]);
+
   const enabledTypes = useMemo(
     () => moderationTrackerOrder.filter((type) => Boolean(configs?.[type]?.isEnabled)),
     [configs],
@@ -151,6 +181,8 @@ export function useModerationWidget() {
         },
         `server_reconcile:${type}`,
       );
+
+      await refreshWidgets();
     } catch (error) {
       logModerationDebug(`PUT /api/moderation/${type}/config failed`, { error, mutationId });
       if (!previousConfig) {
@@ -171,12 +203,14 @@ export function useModerationWidget() {
       );
       throw error;
     }
-  }, [setConfigsWithLog]);
+  }, [refreshWidgets, setConfigsWithLog]);
 
   return {
     configs,
     isLoading,
+    isRefreshingWidgets,
     enabledTypes,
+    refreshWidgets,
     updateTracker,
   };
 }

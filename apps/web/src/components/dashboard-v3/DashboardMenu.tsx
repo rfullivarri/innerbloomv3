@@ -30,6 +30,7 @@ interface DashboardMenuProps {
   moderation: {
     configs: Record<ModerationTrackerType, ModerationTrackerConfig> | null;
     enabledTypes: ModerationTrackerType[];
+    isRefreshingWidgets: boolean;
     updateTrackerEnabled: (
       type: ModerationTrackerType,
       enabled: boolean,
@@ -361,6 +362,9 @@ export function DashboardMenu({
 
   const handleTrackerToggle = useCallback(
     (type: ModerationTrackerType) => {
+      if (moderation.isRefreshingWidgets) {
+        return;
+      }
       const nextValue = !isTrackerEnabled(type);
       setTrackerOverrides((current) => ({ ...current, [type]: nextValue }));
       void moderation.updateTrackerEnabled(type, nextValue).catch((error) => {
@@ -572,7 +576,7 @@ export function DashboardMenu({
                           </p>
                         </div>
 
-                        <div>
+                        <div className="relative">
                           <p className="mb-1 text-xs text-white/65">
                             Widgets activos
                           </p>
@@ -596,9 +600,12 @@ export function DashboardMenu({
                               Sin widgets activos.
                             </p>
                           )}
+                          {moderation.isRefreshingWidgets ? (
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-white/10 bg-black/25" />
+                          ) : null}
                         </div>
 
-                        <div>
+                        <div className="relative">
                           <p className="mb-1 text-xs text-white/65">
                             Widgets disponibles
                           </p>
@@ -667,11 +674,12 @@ export function DashboardMenu({
                                         onClick={() =>
                                           handleTrackerToggle(type)
                                         }
+                                        disabled={moderation.isRefreshingWidgets}
                                         className={`inline-flex min-h-9 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition ${
                                           isSelected
                                             ? "border-emerald-300 bg-emerald-400/30 text-emerald-50 shadow-[0_0_0_1px_rgba(52,211,153,0.35)]"
                                             : "border-white/20 bg-white/5 text-white/80 hover:bg-white/10"
-                                        }`}
+                                        } disabled:cursor-wait disabled:opacity-80`}
                                       >
                                         <ModerationTrackerIcon
                                           type={type}
@@ -693,6 +701,9 @@ export function DashboardMenu({
                               </div>
                             ) : null}
                           </div>
+                          {moderation.isRefreshingWidgets ? (
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-white/10 bg-black/25" />
+                          ) : null}
                         </div>
 
                         <p className="text-[11px] text-white/60">
