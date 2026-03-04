@@ -7,6 +7,9 @@
   --card: #0e1a16;
   --ink: #e6fff4;
   --muted: color-mix(in srgb, #c6f7df 64%, #6fae95 36%);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-on-surface: #cbd5f5;
   --color-accent-primary: #22c55e;
   --color-accent-secondary: #14b8a6;
   --accent: #22c55e;
@@ -61,6 +64,9 @@
   --card: #ffffff;
   --ink: #0f172a;
   --muted: #475569;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-on-surface: #334155;
   --color-accent-primary: #22c55e;
   --color-accent-secondary: #14b8a6;
   --accent: #16a34a;
@@ -436,7 +442,7 @@
   justify-content: center;
   align-items: center;
   gap: 16px;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .lv2-xp-row--compact {
@@ -451,10 +457,12 @@
 
 .lv2-dashboard-card-body header h3 {
   font-size: 1.05rem;
+  color: var(--text-primary);
 }
 
 .lv2-dashboard-card-body header .text-sm {
   font-size: 0.82rem;
+  color: var(--text-secondary);
 }
 
 .lv2-dashboard-card-body .lv2-card-chip {
@@ -1554,7 +1562,7 @@
 .lv2-streaks-label {
   font-size: 13px;
   font-weight: 600;
-  color: #cbd5f5;
+  color: var(--text-on-surface);
   margin: 0;
 }
 
@@ -1562,12 +1570,12 @@
   margin-left: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .lv2-streaks-empty {
   margin: 0;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
@@ -1595,11 +1603,12 @@
 .lv2-streak-title {
   margin: 0;
   font-weight: 700;
+  color: var(--text-primary);
 }
 
 .lv2-streak-tag {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .lv2-streak-badge {
@@ -1631,7 +1640,7 @@
 .lv2-streak-marks {
   display: flex;
   justify-content: space-between;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 10px;
 }
 
@@ -1657,7 +1666,7 @@
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
-  color: #cbd5f5;
+  color: var(--text-on-surface);
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.04);
 }
@@ -1671,7 +1680,7 @@
   margin: 0;
   font-size: 13px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .lv2-tasks-list {
@@ -1693,11 +1702,12 @@
 .lv2-task-title {
   margin: 0 0 2px;
   font-weight: 700;
+  color: var(--text-primary);
 }
 
 .lv2-task-tag {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .lv2-task-progress {
@@ -1706,7 +1716,7 @@
   justify-items: end;
   min-width: 80px;
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-on-surface);
 }
 
 .lv2-task-progress span {

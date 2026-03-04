@@ -14,7 +14,7 @@ type DashboardTitleProps<T extends ElementType> = {
 } & Omit<ComponentPropsWithoutRef<T>, 'as' | 'children' | 'className'>;
 
 const DASHBOARD_TITLE_BASE =
-  'font-sans font-medium tracking-[0.28em] text-text';
+  'font-sans font-medium tracking-[0.28em] text-[color:var(--color-text-strong)]';
 
 const DASHBOARD_TITLE_LEVEL_STYLES: Record<DashboardTitleLevel, string> = {
   h1: 'text-[0.7425rem] uppercase md:text-[0.8025rem]',
