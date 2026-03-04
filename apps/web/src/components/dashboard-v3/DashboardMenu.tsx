@@ -260,7 +260,7 @@ export function DashboardMenu({
   }, [moderation.configs]);
 
   const menuRowClassName =
-    "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-white/90 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40";
+    "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40";
 
   const handleOpenProfile = useCallback(() => {
     if (typeof openUserProfile === "function") {
@@ -408,7 +408,7 @@ export function DashboardMenu({
                 role="dialog"
                 aria-modal="true"
                 aria-label="Menú principal"
-                className="flex max-h-[92vh] w-full max-w-[420px] flex-col rounded-3xl border border-white/15 bg-surface/95 p-5 text-white shadow-2xl transition"
+                className="flex max-h-[92vh] w-full max-w-[420px] flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-5 text-[color:var(--color-text)] shadow-2xl transition"
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 40 }}
@@ -425,7 +425,7 @@ export function DashboardMenu({
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="rounded-full border border-white/20 bg-white/10 p-2 text-sm text-white/80 transition hover:border-white/40 hover:bg-white/20"
+                    className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-2 text-sm text-[color:var(--color-text-dim)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]"
                     aria-label="Cerrar menú"
                   >
                     <svg
@@ -444,7 +444,7 @@ export function DashboardMenu({
                 <div className="flex-1 space-y-4 overflow-y-auto pr-1">
                   <ThemeSwitcher />
 
-                  <section className="rounded-2xl border border-white/10 bg-white/5 px-2 py-1">
+                  <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1">
                     <button
                       type="button"
                       onClick={handleOpenProfile}
@@ -454,15 +454,15 @@ export function DashboardMenu({
                         <img
                           src={user.imageUrl}
                           alt="Avatar"
-                          className="h-9 w-9 rounded-xl border border-white/20 object-cover"
+                          className="h-9 w-9 rounded-xl border border-[color:var(--color-border-soft)] object-cover"
                         />
                       ) : (
-                        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-xs font-semibold uppercase text-white/80">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-xs font-semibold uppercase text-[color:var(--color-text-dim)]">
                           {initials || "UX"}
                         </span>
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-white">
+                        <p className="truncate text-sm font-semibold text-[color:var(--color-text)]">
                           {user?.fullName || user?.username || "Tu perfil"}
                         </p>
                         {user?.primaryEmailAddress?.emailAddress ? (
@@ -471,14 +471,14 @@ export function DashboardMenu({
                           </p>
                         ) : null}
                       </div>
-                      <MenuIcon className="h-4 w-4 text-white/70">
+                      <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
                         <path d="M20 21a8 8 0 0 0-16 0" />
                         <circle cx="12" cy="8" r="4" />
                       </MenuIcon>
                     </button>
                   </section>
 
-                  <section className="rounded-2xl border border-white/10 bg-white/5 px-2 py-1">
+                  <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1">
                     <button
                       type="button"
                       onClick={handleOpenScheduler}
@@ -490,7 +490,7 @@ export function DashboardMenu({
                       </MenuIcon>
                       <span className="flex-1">Recordatorio</span>
                     </button>
-                    <div className="mx-3 h-px bg-white/10" />
+                    <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]" />
                     <button
                       type="button"
                       onClick={() => setIsPlansOpen((current) => !current)}
@@ -504,7 +504,7 @@ export function DashboardMenu({
                       </MenuIcon>
                       <span className="flex-1">Planes</span>
                       <MenuIcon
-                        className={`h-4 w-4 text-white/60 transition ${isPlansOpen ? "rotate-180" : ""}`}
+                        className={`h-4 w-4 text-[color:var(--color-text-faint)] transition ${isPlansOpen ? "rotate-180" : ""}`}
                       >
                         <path d="m6 9 6 6 6-6" />
                       </MenuIcon>
@@ -517,9 +517,9 @@ export function DashboardMenu({
                         <button
                           type="button"
                           onClick={handleGoToSubscription}
-                          className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-white/85 transition hover:bg-white/10"
+                          className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
                         >
-                          <MenuIcon className="h-4 w-4 text-white/65">
+                          <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
                             <path d="M12 3a4 4 0 0 0-4 4v2" />
                             <path d="M8 12v-1a4 4 0 1 1 8 0v1" />
                             <rect x="5" y="12" width="14" height="9" rx="2" />
@@ -529,9 +529,9 @@ export function DashboardMenu({
                         <button
                           type="button"
                           onClick={handleGoToPricing}
-                          className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-white/85 transition hover:bg-white/10"
+                          className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
                         >
-                          <MenuIcon className="h-4 w-4 text-white/65">
+                          <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
                             <path d="M6 19V9" />
                             <path d="M12 19V5" />
                             <path d="M18 19v-7" />
@@ -541,7 +541,7 @@ export function DashboardMenu({
                         </button>
                       </div>
                     ) : null}
-                    <div className="mx-3 h-px bg-white/10" />
+                    <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]" />
                     <button
                       type="button"
                       onClick={() => setActivePanel("widgets")}
@@ -554,7 +554,7 @@ export function DashboardMenu({
                         <rect x="13" y="13" width="7" height="7" rx="1.5" />
                       </MenuIcon>
                       <span className="flex-1">Widgets</span>
-                      <MenuIcon className="h-4 w-4 text-white/60">
+                      <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
                         <path d="m9 6 6 6-6 6" />
                       </MenuIcon>
                     </button>
@@ -567,20 +567,20 @@ export function DashboardMenu({
                           <button
                             type="button"
                             onClick={() => setActivePanel("main")}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 transition hover:bg-white/10"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
                             aria-label="Volver al menú"
                           >
-                            <MenuIcon className="h-4 w-4 text-white/75">
+                            <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)]">
                               <path d="m15 6-6 6 6 6" />
                             </MenuIcon>
                           </button>
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--color-text-faint)]">
                             Widgets
                           </p>
                         </div>
 
                         <div className="relative">
-                          <p className="mb-1 text-xs text-white/65">
+                          <p className="mb-1 text-xs text-[color:var(--color-text-faint)]">
                             Widgets activos
                           </p>
                           {enabledTrackers.length > 0 && moderation.configs ? (
@@ -599,20 +599,20 @@ export function DashboardMenu({
                               />
                             </button>
                           ) : (
-                            <p className="rounded-xl border border-dashed border-white/15 px-3 py-2 text-xs text-white/60">
+                            <p className="rounded-xl border border-dashed border-[color:var(--color-border-soft)] px-3 py-2 text-xs text-[color:var(--color-text-faint)]">
                               Sin widgets activos.
                             </p>
                           )}
                           {moderation.isRefreshingWidgets ? (
-                            <div className="pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-white/10 bg-black/25" />
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-950-80)]" />
                           ) : null}
                         </div>
 
                         <div className="relative">
-                          <p className="mb-1 text-xs text-white/65">
+                          <p className="mb-1 text-xs text-[color:var(--color-text-faint)]">
                             Widgets disponibles
                           </p>
-                          <div className="rounded-xl border border-white/10 bg-black/20">
+                          <div className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]">
                             <div className="flex items-start gap-2 px-3 py-2">
                               <button
                                 type="button"
@@ -698,18 +698,18 @@ export function DashboardMenu({
                                     );
                                   })}
                                 </div>
-                                <p className="text-[11px] text-white/55">
+                                <p className="text-[11px] text-[color:var(--color-text-faint)]">
                                   Azúcar: seguimiento de azúcar añadido.
                                 </p>
                               </div>
                             ) : null}
                           </div>
                           {moderation.isRefreshingWidgets ? (
-                            <div className="pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-white/10 bg-black/25" />
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-950-80)]" />
                           ) : null}
                         </div>
 
-                        <p className="text-[11px] text-white/60">
+                        <p className="text-[11px] text-[color:var(--color-text-faint)]">
                           Tip: mantené presionado un widget para editarlo.
                         </p>
                       </div>
@@ -756,9 +756,9 @@ export function DashboardMenu({
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="mt-4 flex h-12 w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white/80 transition hover:border-white/30 hover:bg-white/10"
+                  className="mt-4 flex h-12 w-full items-center gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 text-sm font-semibold text-[color:var(--color-text-dim)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]"
                 >
-                  <MenuIcon className="h-5 w-5 text-white/80">
+                  <MenuIcon className="h-5 w-5 text-[color:var(--color-text-dim)]">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                     <path d="M16 17l5-5-5-5" />
                     <path d="M21 12H9" />

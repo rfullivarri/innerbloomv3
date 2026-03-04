@@ -45,11 +45,11 @@ function DifficultyInsight({
   const isEasy = normalized.includes('fácil') || normalized.includes('facil') || normalized.includes('easy');
 
   if (isHard && habitHealthLevel === 'strong') {
-    return <p className="text-xs text-slate-200">Se comporta como un hábito estable. Podría considerarse menos difícil.</p>;
+    return <p className="text-xs text-[color:var(--color-slate-200)]">Se comporta como un hábito estable. Podría considerarse menos difícil.</p>;
   }
 
   if (isEasy && habitHealthLevel === 'weak') {
-    return <p className="text-xs text-slate-200">Está marcada como fácil, pero te cuesta sostenerla.</p>;
+    return <p className="text-xs text-[color:var(--color-slate-200)]">Está marcada como fácil, pero te cuesta sostenerla.</p>;
   }
 
   return null;
@@ -118,7 +118,7 @@ function WeeklyCompletionDonut({
   };
 
   if (!timeline.length) {
-    return <p className="text-sm text-slate-400">Aún no registramos semanas para esta tarea.</p>;
+    return <p className="text-sm text-[color:var(--color-slate-400)]">Aún no registramos semanas para esta tarea.</p>;
   }
 
   const radius = 50;
@@ -140,7 +140,7 @@ function WeeklyCompletionDonut({
           cy="60"
           r={radius}
           strokeWidth={strokeWidth}
-          className="fill-none stroke-white/10"
+          className="fill-none stroke-[color:var(--color-border-subtle)]"
         />
         <circle
           cx="60"
@@ -158,21 +158,21 @@ function WeeklyCompletionDonut({
           y="60"
           textAnchor="middle"
           dominantBaseline="middle"
-          className="fill-slate-50 text-[20px] font-semibold"
+          className="fill-[color:var(--color-text)] text-[20px] font-semibold"
         >
           {progress}%
         </text>
       </svg>
 
-      <div className="flex-1 space-y-2 text-center text-xs text-slate-300 sm:text-left">
+      <div className="flex-1 space-y-2 text-center text-xs text-[color:var(--color-slate-300)] sm:text-left">
         <div className="space-y-1">
           <span className={cx('inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold', healthStyles[habitHealth.level])}>
             {habitHealth.label}
           </span>
-          <p className="text-xs text-slate-200">Meta cumplida {completedWeeks} de {totalWeeks} semanas.</p>
+          <p className="text-xs text-[color:var(--color-slate-200)]">Meta cumplida {completedWeeks} de {totalWeeks} semanas.</p>
         </div>
 
-        <div className="space-y-0.5 text-slate-100">
+        <div className="space-y-0.5 text-[color:var(--color-slate-100)]">
           {currentStreak === bestStreak && bestStreak > 0 && (
             <p className="text-xs text-emerald-100">Estás empatando tu récord.</p>
           )}
@@ -182,9 +182,9 @@ function WeeklyCompletionDonut({
         </div>
 
         {difficultyLabel && (
-          <div className="rounded-xl border border-white/10 bg-white/5 p-2 text-left text-slate-100">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Dificultad actual</p>
-            <p className="text-sm font-semibold text-slate-50">{difficultyLabel}</p>
+          <div className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2 text-left text-[color:var(--color-slate-100)]">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Dificultad actual</p>
+            <p className="text-sm font-semibold text-[color:var(--color-text)]">{difficultyLabel}</p>
             <DifficultyInsight difficultyLabel={difficultyLabel} habitHealthLevel={habitHealth.level} />
           </div>
         )}
@@ -197,7 +197,7 @@ function MonthMiniChart({ days }: { days: Array<{ date: string; count: number }>
   const maxCount = useMemo(() => days.reduce((max, day) => Math.max(max, day.count), 0) || 1, [days]);
 
   if (!days.length) {
-    return <p className="text-sm text-slate-400">Sin registros en este mes.</p>;
+    return <p className="text-sm text-[color:var(--color-slate-400)]">Sin registros en este mes.</p>;
   }
 
   return (
@@ -207,8 +207,8 @@ function MonthMiniChart({ days }: { days: Array<{ date: string; count: number }>
           const ratio = Math.min(1, Math.max(0, day.count / maxCount));
           const height = 12 + ratio * 48;
           return (
-            <div key={day.date} className="flex flex-col items-center justify-end gap-1 text-[10px] text-slate-400">
-              <div className="flex w-4 items-end justify-center rounded-full bg-white/5">
+            <div key={day.date} className="flex flex-col items-center justify-end gap-1 text-[10px] text-[color:var(--color-slate-400)]">
+              <div className="flex w-4 items-end justify-center rounded-full bg-[color:var(--color-overlay-1)]">
                 <div
                   className={cx(
                     'w-[10px] rounded-full bg-gradient-to-b from-violet-200 via-fuchsia-200 to-sky-200 transition-all',
@@ -222,7 +222,7 @@ function MonthMiniChart({ days }: { days: Array<{ date: string; count: number }>
           );
         })}
       </div>
-      <p className="text-[11px] text-slate-400">Actividad diaria del mes (scroll horizontal para ver todos los días).</p>
+      <p className="text-[11px] text-[color:var(--color-slate-400)]">Actividad diaria del mes (scroll horizontal para ver todos los días).</p>
     </div>
   );
 }
@@ -264,18 +264,18 @@ function WeekMiniChart({
   const maxCount = useMemo(() => timeline.reduce((max, day) => Math.max(max, day.count), 0) || 1, [timeline]);
 
   if (!timeline.some((day) => day.count > 0)) {
-    return <p className="text-sm text-slate-400">Sin registros en esta semana.</p>;
+    return <p className="text-sm text-[color:var(--color-slate-400)]">Sin registros en esta semana.</p>;
   }
 
   return (
     <div className="mt-3 space-y-1.5">
-      <div className="flex items-end justify-between gap-2 rounded-2xl bg-white/5 px-3 py-2">
+      <div className="flex items-end justify-between gap-2 rounded-2xl bg-[color:var(--color-overlay-1)] px-3 py-2">
         {timeline.map((day) => {
           const ratio = Math.min(1, Math.max(0, day.count / maxCount));
           const height = 10 + ratio * 48;
           return (
-            <div key={day.label} className="flex flex-1 flex-col items-center justify-end gap-1 text-[11px] text-slate-300">
-              <div className="flex w-full items-end justify-center rounded-full bg-white/5">
+            <div key={day.label} className="flex flex-1 flex-col items-center justify-end gap-1 text-[11px] text-[color:var(--color-slate-300)]">
+              <div className="flex w-full items-end justify-center rounded-full bg-[color:var(--color-overlay-1)]">
                 <div
                   className={cx(
                     'w-[14px] rounded-full bg-gradient-to-b from-violet-200 via-fuchsia-200 to-sky-200 transition-all',
@@ -289,7 +289,7 @@ function WeekMiniChart({
           );
         })}
       </div>
-      <p className="text-[11px] text-slate-400">Actividad diaria de la semana en curso.</p>
+      <p className="text-[11px] text-[color:var(--color-slate-400)]">Actividad diaria de la semana en curso.</p>
     </div>
   );
 }
@@ -317,7 +317,7 @@ function QuarterMiniChart({
   const maxCount = useMemo(() => recentWeeks.reduce((max, week) => Math.max(max, week.count), 0) || 1, [recentWeeks]);
 
   if (!recentWeeks.length) {
-    return <p className="text-sm text-slate-400">Sin registros en los últimos 3 meses.</p>;
+    return <p className="text-sm text-[color:var(--color-slate-400)]">Sin registros en los últimos 3 meses.</p>;
   }
 
   return (
@@ -331,9 +331,9 @@ function QuarterMiniChart({
           return (
             <div
               key={`${week.weekStart}-${week.weekEnd}-${index}`}
-              className="flex flex-col items-center justify-end gap-1 text-[10px] text-slate-400"
+              className="flex flex-col items-center justify-end gap-1 text-[10px] text-[color:var(--color-slate-400)]"
             >
-              <div className="flex w-6 items-end justify-center rounded-full bg-white/5">
+              <div className="flex w-6 items-end justify-center rounded-full bg-[color:var(--color-overlay-1)]">
                 <div
                   className={cx(
                     'w-[14px] rounded-full transition-all',
@@ -349,7 +349,7 @@ function QuarterMiniChart({
           );
         })}
       </div>
-      <p className="text-[11px] text-slate-400">Semanas de los últimos 3 meses (verde = objetivo cumplido).</p>
+      <p className="text-[11px] text-[color:var(--color-slate-400)]">Semanas de los últimos 3 meses (verde = objetivo cumplido).</p>
     </div>
   );
 }
@@ -479,30 +479,30 @@ export function TaskInsightsModal({
   return createPortal(
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[120] flex items-end justify-center bg-slate-950/70 px-3 py-4 backdrop-blur-sm md:items-center"
+      className="fixed inset-0 z-[120] flex items-end justify-center bg-black/50 px-3 py-4 backdrop-blur-sm md:items-center"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="flex w-full max-h-[92vh] max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-white/10 bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 shadow-2xl ring-1 ring-white/5 md:rounded-2xl"
+        className="flex w-full max-h-[92vh] max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-[color:var(--color-border-subtle)] bg-gradient-to-b from-[color:var(--color-surface)] via-[color:var(--color-surface)] to-[color:var(--color-surface-muted)] shadow-2xl ring-1 ring-white/5 md:rounded-2xl"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal
         aria-label="Detalle de tarea"
       >
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-2 border-b border-white/5 bg-slate-900/90 p-4 backdrop-blur supports-[backdrop-filter]:bg-slate-900/75">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-2 border-b border-white/5 bg-[color:var(--color-surface)]/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--color-surface)]/85">
           <div className="space-y-1">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Detalle de tarea</p>
-            <h3 className="text-lg font-semibold leading-tight text-slate-50 md:text-xl">{activeTask?.name ?? 'Tarea'}</h3>
-            {activeTask?.stat && <p className="text-sm text-slate-400">{activeTask.stat}</p>}
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Detalle de tarea</p>
+            <h3 className="text-lg font-semibold leading-tight text-[color:var(--color-text)] md:text-xl">{activeTask?.name ?? 'Tarea'}</h3>
+            {activeTask?.stat && <p className="text-sm text-[color:var(--color-slate-400)]">{activeTask.stat}</p>}
             {activeTask && 'description' in activeTask && activeTask.description && (
-              <p className="text-sm text-slate-300">{activeTask.description}</p>
+              <p className="text-sm text-[color:var(--color-slate-300)]">{activeTask.description}</p>
             )}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-sm text-slate-200 transition hover:border-white/25 hover:bg-white/10"
+            className="shrink-0 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-sm text-[color:var(--color-slate-200)] transition hover:border-white/25 hover:bg-[color:var(--color-overlay-2)]"
             aria-label="Cerrar detalle"
           >
             ✕
@@ -511,13 +511,13 @@ export function TaskInsightsModal({
 
         <div className="flex-1 overflow-y-auto px-4 pb-5 pt-2">
           <div className="mt-2 space-y-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+            <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3">
               <div className="space-y-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold text-slate-100">Actividad</p>
+                    <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">Actividad</p>
                     <div className="flex justify-center">
-                      <div className="inline-flex w-full max-w-[240px] items-center justify-between gap-1 rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[11px] font-semibold text-slate-100">
+                      <div className="inline-flex w-full max-w-[240px] items-center justify-between gap-1 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-2 py-0.5 text-[11px] font-semibold text-[color:var(--color-slate-100)]">
                         {[
                           { value: 'week', label: 'W' },
                           { value: 'month', label: 'M' },
@@ -530,10 +530,10 @@ export function TaskInsightsModal({
                               type="button"
                               onClick={() => setActivityScope(option.value as ActivityScope)}
                               className={cx(
-                                'flex-1 rounded-full px-3 py-0.5 text-[11px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+                                'flex-1 rounded-full px-3 py-0.5 text-[11px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface)]',
                                 isActive
-                                  ? 'bg-white text-slate-900 shadow-inner shadow-white/30'
-                                  : 'text-slate-200 hover:bg-white/10',
+                                  ? 'bg-white text-[color:var(--color-surface)] shadow-inner shadow-white/30'
+                                  : 'text-[color:var(--color-slate-200)] hover:bg-[color:var(--color-overlay-2)]',
                               )}
                               aria-pressed={isActive}
                             >
@@ -545,8 +545,8 @@ export function TaskInsightsModal({
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-100">
-                    <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-0.5">
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-[color:var(--color-slate-100)]">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-0.5">
                       {numberFormatter.format(activityTotals.count)}d
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-2 py-0.5">
@@ -555,7 +555,7 @@ export function TaskInsightsModal({
                   </div>
                 </div>
               </div>
-              {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-white/10" aria-hidden />}
+              {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-[color:var(--color-overlay-2)]" aria-hidden />}
               {status === 'success' && activityScope === 'week' && (
                 <WeekMiniChart days={monthDays} referenceDate={referenceDate} />
               )}
@@ -565,13 +565,13 @@ export function TaskInsightsModal({
               )}
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
+            <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-slate-100">Progreso semanal</p>
-                <span className="text-xs text-slate-400">Objetivo: {weeklyGoal}x/sem</span>
+                <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">Progreso semanal</p>
+                <span className="text-xs text-[color:var(--color-slate-400)]">Objetivo: {weeklyGoal}x/sem</span>
               </div>
               {status === 'loading' && (
-                <div className="mt-3 h-36 animate-pulse rounded-xl bg-white/10" aria-hidden />
+                <div className="mt-3 h-36 animate-pulse rounded-xl bg-[color:var(--color-overlay-2)]" aria-hidden />
               )}
               {status === 'error' && (
                 <p className="mt-2 text-sm text-rose-300">No pudimos cargar la serie semanal: {error?.message}</p>
@@ -591,15 +591,15 @@ export function TaskInsightsModal({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Racha actual</p>
-                <p className="mt-1 text-3xl font-semibold text-slate-50">🔥 {stats.currentStreak}</p>
-                <p className="text-xs text-slate-400">semanas seguidas</p>
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Racha actual</p>
+                <p className="mt-1 text-3xl font-semibold text-[color:var(--color-text)]">🔥 {stats.currentStreak}</p>
+                <p className="text-xs text-[color:var(--color-slate-400)]">semanas seguidas</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-inner">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Mejor racha</p>
-                <p className="mt-1 text-3xl font-semibold text-slate-50">{stats.bestStreak}</p>
-                <p className="text-xs text-slate-400">máxima racha lograda</p>
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Mejor racha</p>
+                <p className="mt-1 text-3xl font-semibold text-[color:var(--color-text)]">{stats.bestStreak}</p>
+                <p className="text-xs text-[color:var(--color-slate-400)]">máxima racha lograda</p>
               </div>
             </div>
           </div>
