@@ -339,7 +339,7 @@
   padding-inline: 2.4rem;
   min-width: min(320px, 80%);
   background:
-    linear-gradient(var(--accent), var(--accent)) padding-box,
+    linear-gradient(#8b5cf6, #8b5cf6) padding-box,
     conic-gradient(
         from var(--conic-angle),
         rgba(255, 255, 255, 0.95),
