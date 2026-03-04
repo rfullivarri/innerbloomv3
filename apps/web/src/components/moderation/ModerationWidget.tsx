@@ -39,10 +39,10 @@ function chipStateClass(status: ModerationStatus): string {
 
 function statusPillClass(status: ModerationStatus): string {
   if (status === "on_track") {
-    return "border border-emerald-200/30 bg-emerald-300/12 text-emerald-50";
+    return "border border-emerald-100/45 bg-emerald-200/95 text-emerald-950 shadow-[0_4px_14px_rgba(16,185,129,0.35)]";
   }
 
-  return "border border-amber-200/25 bg-amber-100/10 text-amber-50/90";
+  return "border border-amber-100/45 bg-amber-100/95 text-amber-950 shadow-[0_4px_14px_rgba(217,119,6,0.24)]";
 }
 
 const STATUS_BADGE_HOLD_MS = 1020;
@@ -112,7 +112,7 @@ function Chip({
     >
       {statusFlash ? (
         <span
-          className={`pointer-events-none absolute left-1/2 top-0 z-20 flex -translate-x-1/2 items-center justify-center rounded-full border px-1.5 py-px text-[0.46rem] font-semibold tracking-[0.08em] backdrop-blur-sm transition-[transform,opacity] duration-300 ease-out ${statusPillClass(statusFlash)} ${
+          className={`pointer-events-none absolute left-1/2 top-1 z-20 flex -translate-x-1/2 items-center justify-center rounded-full border px-1.5 py-px text-[0.46rem] font-semibold tracking-[0.08em] transition-[transform,opacity] duration-300 ease-out ${statusPillClass(statusFlash)} ${
             statusFlashPhase === "from"
               ? "translate-y-[6px] opacity-0"
               : statusFlashPhase === "exit"
@@ -166,10 +166,16 @@ export function ModerationWidget({
   if (!loading && enabled.length === 0) return null;
 
   const activeCount = Math.max(1, Math.min(3, enabled.length || 1));
+  const headerAlign = activeCount === 3 ? "text-center" : "text-left";
+  const resolvedTitle = title?.trim() || "Moderación";
 
   return (
     <section>
-      {title ? <h3 className="mb-2 text-sm font-semibold text-white/85">{title}</h3> : null}
+      <h3
+        className={`mb-1.5 font-display text-[0.78rem] font-semibold tracking-[0.08em] text-white/90 ${headerAlign}`}
+      >
+        {resolvedTitle}
+      </h3>
       <div
         className={`grid gap-2.5 sm:gap-3 ${activeCount === 1 ? "grid-cols-1" : ""} ${activeCount === 2 ? "grid-cols-2" : ""} ${activeCount === 3 ? "grid-cols-3 max-[360px]:grid-cols-2" : ""}`}
       >
