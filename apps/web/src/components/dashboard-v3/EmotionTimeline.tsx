@@ -536,15 +536,15 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
   };
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#111d3a]/80 via-[#0b1429]/70 to-[#071022]/80 p-8 text-base text-text backdrop-blur md:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-4 text-white">
+    <section className="rounded-3xl border border-[color:var(--color-border-subtle)] bg-[image:var(--color-card-gradient)] p-8 text-base text-text shadow-[var(--color-card-shadow)] backdrop-blur md:p-10">
+      <header className="flex flex-wrap items-start justify-between gap-4 text-text">
         <div className="space-y-1.5">
           <h3 className="text-2xl font-semibold">💗 Emotion Chart</h3>
           <p className="text-sm text-text-muted">6 meses desde tu primer registro</p>
         </div>
       </header>
 
-      {status === 'loading' && <div className="mt-6 h-48 w-full animate-pulse rounded-2xl bg-white/10" />}
+      {status === 'loading' && <div className="mt-6 h-48 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />}
 
       {status === 'error' && <p className="mt-6 text-sm text-rose-300">Todavía no pudimos cargar tus emociones.</p>}
 
@@ -554,8 +554,8 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
             {LEGEND_ITEMS.map((name) => (
               <span
                 key={name}
-                className={`flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[13px] ${
-                  name === 'Sin registro' ? 'text-white/60' : 'text-white/80'
+                className={`flex items-center gap-2 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-3 py-1 text-[13px] ${
+                  name === 'Sin registro' ? 'text-text-subtle' : 'text-text-muted'
                 }`}
               >
                 <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: EMOTION_COLORS[name] }} />
@@ -605,10 +605,10 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
           {grid.highlight && (
             <div
               id="emotion-destacada"
-              className="emotion-highlight flex items-center gap-6 rounded-3xl border border-white/10 bg-gradient-to-r from-white/12 via-white/5 to-transparent p-6 text-white shadow-[0_20px_60px_rgba(8,20,40,0.45)]"
+              className="emotion-highlight flex items-center gap-6 rounded-3xl border border-[color:var(--color-border-subtle)] bg-[image:var(--color-card-highlight-gradient)] p-6 text-text shadow-[var(--color-card-shadow)]"
             >
               <div
-                className="emotion-highlight-dot flex h-20 w-20 items-center justify-center rounded-3xl border border-white/20 text-2xl font-semibold text-white"
+                className="emotion-highlight-dot flex h-20 w-20 items-center justify-center rounded-3xl border border-[color:var(--color-border-subtle)] text-2xl font-semibold text-text"
                 style={
                   {
                     backgroundColor: grid.highlight.color,
@@ -616,7 +616,7 @@ export function EmotionTimeline({ userId }: EmotionTimelineProps) {
                   } as HighlightDotStyle
                 }
               >
-                <span className="relative z-10 font-bold drop-shadow-[0_0_6px_rgba(0,0,0,0.35)]">{grid.highlight.count}</span>
+                <span className="relative z-10 font-bold drop-shadow-[0_0_4px_rgba(255,255,255,0.45)]">{grid.highlight.count}</span>
               </div>
               <div>
                 <p className="text-lg font-semibold">{grid.highlight.emotion}</p>

@@ -53,16 +53,16 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
       role="region"
       aria-labelledby={labelledBy}
       className={combine(
-        'relative overflow-hidden rounded-ib-lg border border-white/10',
+        'relative overflow-hidden rounded-ib-lg border border-[color:var(--color-border-subtle)]',
         variant === 'default' &&
-          'bg-[radial-gradient(ellipse_at_top,_rgba(35,43,76,0.35),_rgba(17,24,39,0.55))] backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.35)]',
+          'bg-[image:var(--color-card-gradient)] backdrop-blur-md shadow-[var(--color-card-shadow)]',
         className,
       )}
       {...sectionProps}
     >
       <div
         className={combine(
-          'relative z-10 flex flex-col gap-4 p-1.5 text-slate-100 md:p-2 lg:p-2.5',
+          'relative z-10 flex flex-col gap-4 p-1.5 text-text md:p-2 lg:p-2.5',
           bodyClassName,
         )}
       >
@@ -84,7 +84,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
             {rightSlot}
           </header>
         )}
-        <div className="flex flex-col gap-4 text-sm leading-relaxed text-slate-200/90">{children}</div>
+        <div className="flex flex-col gap-4 text-sm leading-relaxed text-text-muted">{children}</div>
       </div>
     </section>
   );

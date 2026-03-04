@@ -25,6 +25,7 @@
     --color-surface: #0f172a;
     --color-surface-muted: #111c33;
     --color-surface-elevated: #182640;
+    --color-surface-highlight: #1e2d4a;
     --color-text: #f8fafc;
     --color-text-muted: #cbd5f5;
     --color-text-subtle: #94a3b8;
@@ -47,6 +48,10 @@
     --color-slate-400: #94a3b8;
     --color-slate-900-95: rgba(15, 23, 42, 0.95);
     --color-slate-950-80: rgba(2, 6, 23, 0.8);
+    --color-card-gradient: radial-gradient(ellipse at top, rgba(35, 43, 76, 0.35), rgba(17, 24, 39, 0.55));
+    --color-card-highlight-gradient: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.2), rgba(15, 23, 42, 0.82));
+    --color-card-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    --color-glass-surface: linear-gradient(180deg, rgba(30, 41, 59, 0.78), rgba(15, 23, 42, 0.64));
 
   }
 
@@ -55,6 +60,7 @@
     --color-surface: #0f172a;
     --color-surface-muted: #111c33;
     --color-surface-elevated: #182640;
+    --color-surface-highlight: #1e2d4a;
     --color-text: #f8fafc;
     --color-text-muted: #cbd5f5;
     --color-text-subtle: #94a3b8;
@@ -77,19 +83,51 @@
     --color-slate-400: #94a3b8;
     --color-slate-900-95: rgba(15, 23, 42, 0.95);
     --color-slate-950-80: rgba(2, 6, 23, 0.8);
+    --color-card-gradient: radial-gradient(ellipse at top, rgba(35, 43, 76, 0.35), rgba(17, 24, 39, 0.55));
+    --color-card-highlight-gradient: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.2), rgba(15, 23, 42, 0.82));
+    --color-card-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    --color-glass-surface: linear-gradient(180deg, rgba(30, 41, 59, 0.78), rgba(15, 23, 42, 0.64));
 
   }
 
   :root[data-theme='light'] {
     color-scheme: light;
-    --color-surface: #f8fafc;
-    --color-surface-muted: #e2e8f0;
+    --color-surface: #ffffff;
+    --color-surface-muted: #f5f7fb;
     --color-surface-elevated: #ffffff;
+    --color-surface-highlight: #f8faff;
     --color-text: #0f172a;
     --color-text-muted: #334155;
-    --color-text-subtle: #475569;
-    --color-accent-primary: #2563eb;
-    --color-accent-secondary: #0ea5e9;
+    --color-text-subtle: #64748b;
+    --color-accent-primary: #6366f1;
+    --color-accent-secondary: #d946ef;
+    --color-overlay-1: rgba(248, 250, 255, 0.92);
+    --color-overlay-2: rgba(241, 245, 255, 0.84);
+    --color-overlay-3: rgba(226, 232, 240, 0.7);
+    --color-overlay-4: rgba(148, 163, 184, 0.22);
+    --color-overlay-5: rgba(148, 163, 184, 0.3);
+    --color-border-subtle: #e2e8f0;
+    --color-border-soft: #eef2f7;
+    --color-border-strong: #cbd5e1;
+    --color-text-strong: #020617;
+    --color-text-dim: rgba(15, 23, 42, 0.78);
+    --color-text-faint: rgba(51, 65, 85, 0.68);
+    --color-slate-100: #0f172a;
+    --color-slate-200: #1e293b;
+    --color-slate-300: #334155;
+    --color-slate-400: #64748b;
+    --color-slate-900-95: rgba(255, 255, 255, 0.95);
+    --color-slate-950-80: rgba(248, 250, 255, 0.8);
+    --color-card-gradient: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.12), rgba(255, 255, 255, 0.95));
+    --color-card-highlight-gradient: radial-gradient(ellipse at top, rgba(217, 70, 239, 0.14), rgba(255, 255, 255, 0.95));
+    --color-card-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    --color-glass-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+    --onboarding-glass-surface-base: rgba(255, 255, 255, 0.92);
+    --onboarding-glass-surface-inner: rgba(255, 255, 255, 0.85);
+    --onboarding-glass-surface-ghost: rgba(248, 250, 255, 0.76);
+    --onboarding-glass-border: rgba(148, 163, 184, 0.24);
+    --onboarding-glass-border-soft: rgba(148, 163, 184, 0.2);
+    --onboarding-glass-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
   }
 
   body {
@@ -107,9 +145,9 @@
 
   :root[data-theme='light'] body {
     background-image:
-      radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 55%),
-      radial-gradient(circle at 20% 80%, rgba(14, 165, 233, 0.12), transparent 60%),
-      linear-gradient(180deg, rgba(241, 245, 249, 0.94), #f8fafc 60%, #e2e8f0);
+      radial-gradient(circle at top left, rgba(99, 102, 241, 0.1), transparent 55%),
+      radial-gradient(circle at 20% 80%, rgba(217, 70, 239, 0.1), transparent 60%),
+      linear-gradient(180deg, #ffffff 0%, #f8faff 58%, #f5f7fb 100%);
   }
 
 
@@ -273,12 +311,12 @@
 }
 
 :root[data-theme='light'] {
-  --aurora-surface: var(--color-surface, #f8fafc);
-  --aurora-surface-alt: var(--color-surface-muted, #e2e8f0);
-  --aurora-blob-a: color-mix(in srgb, var(--color-accent-secondary, #0ea5e9) 70%, var(--color-surface, #f8fafc) 30%);
-  --aurora-blob-b: color-mix(in srgb, var(--color-accent-primary, #2563eb) 68%, var(--color-surface, #f8fafc) 32%);
-  --aurora-blob-c: color-mix(in srgb, var(--color-text-subtle, #475569) 50%, var(--color-surface-alt, #e2e8f0) 50%);
-  --aurora-blob-d: color-mix(in srgb, var(--color-text, #0f172a) 38%, var(--color-surface, #f8fafc) 62%);
+  --aurora-surface: var(--color-surface, #ffffff);
+  --aurora-surface-alt: var(--color-surface-muted, #f5f7fb);
+  --aurora-blob-a: color-mix(in srgb, var(--color-accent-secondary, #d946ef) 70%, var(--color-surface, #ffffff) 30%);
+  --aurora-blob-b: color-mix(in srgb, var(--color-accent-primary, #6366f1) 68%, var(--color-surface, #ffffff) 32%);
+  --aurora-blob-c: color-mix(in srgb, var(--color-text-subtle, #64748b) 50%, var(--color-surface-alt, #f5f7fb) 50%);
+  --aurora-blob-d: color-mix(in srgb, var(--color-text, #0f172a) 38%, var(--color-surface, #ffffff) 62%);
 }
 
 @property --glow-angle {
@@ -306,9 +344,9 @@
 
   .glass-card {
     @apply backdrop-blur-2xl;
-    background: var(--onboarding-glass-surface-inner);
-    border: 1px solid var(--onboarding-glass-border-soft);
-    box-shadow: var(--onboarding-glass-shadow);
+    background: var(--color-glass-surface);
+    border: 1px solid var(--color-border-subtle);
+    box-shadow: var(--color-card-shadow);
   }
 
   .onboarding-surface-base {

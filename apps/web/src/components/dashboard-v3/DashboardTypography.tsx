@@ -14,7 +14,7 @@ type DashboardTitleProps<T extends ElementType> = {
 } & Omit<ComponentPropsWithoutRef<T>, 'as' | 'children' | 'className'>;
 
 const DASHBOARD_TITLE_BASE =
-  'font-sans font-medium tracking-[0.28em] text-slate-100/86';
+  'font-sans font-medium tracking-[0.28em] text-text';
 
 const DASHBOARD_TITLE_LEVEL_STYLES: Record<DashboardTitleLevel, string> = {
   h1: 'text-[0.7425rem] uppercase md:text-[0.8025rem]',
@@ -57,7 +57,7 @@ export function DashboardMeta<T extends ElementType = 'p'>({
   return (
     <Component
       className={cx(
-        'font-sans text-[0.72rem] font-medium leading-snug tracking-[0.01em] text-slate-300/78 md:text-xs',
+        'font-sans text-[0.72rem] font-medium leading-snug tracking-[0.01em] text-text-muted md:text-xs',
         className,
       )}
       {...props}
