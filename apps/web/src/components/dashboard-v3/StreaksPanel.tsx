@@ -485,9 +485,10 @@ function TaskItem({
         <div className="ml-auto flex items-center gap-2 self-start">
           {showFireBadge && (
             <GlowChip
+              className="ib-streak-fire-chip"
               glowPrimary="rgba(251, 191, 36, 0.65)"
               glowSecondary="rgba(249, 115, 22, 0.45)"
-              innerClassName="gap-1 rounded-full border border-amber-400/60 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-100 shadow-[0_0_12px_rgba(251,191,36,0.25)]"
+              innerClassName="ib-streak-fire-chip__inner gap-1 rounded-full border border-amber-400/60 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-100 shadow-[0_0_12px_rgba(251,191,36,0.25)]"
             >
               <span aria-hidden>🔥</span>
               {showStreakMultiplier ? (
@@ -805,7 +806,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                       TAB_BUTTON_BASE,
                       'leading-none',
                       isActive
-                        ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)]'
+                        ? 'ib-streak-pill-tab-active border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)]'
                         : 'border-transparent bg-transparent text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]',
                     )}
                     aria-pressed={isActive}
