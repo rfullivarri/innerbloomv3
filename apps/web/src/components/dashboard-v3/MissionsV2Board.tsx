@@ -638,7 +638,7 @@ function ClaimModal({
               <span className="missions-claim-chest__base" />
             </div>
             {!prefersReducedMotion && <span className="missions-claim-confetti" aria-hidden="true" />}
-            <p className="text-sm text-slate-200">
+            <p className="text-sm text-[color:var(--color-slate-200)]">
               Tesoro protegido: GP, amuletos y monedas listos para tu vitrina.
             </p>
             <ul className="missions-claim-loot">
@@ -652,7 +652,7 @@ function ClaimModal({
               </li>
               <li className="missions-claim-loot__item missions-claim-loot__item--stacked">
                 <span className="font-semibold">Loot</span>
-                <p className="mt-1 text-xs text-slate-300">
+                <p className="mt-1 text-xs text-[color:var(--color-slate-300)]">
                   {state.rewards.items.length > 0
                     ? state.rewards.items.join(' · ')
                     : 'Aura en preparación — pronto desbloqueamos tu trofeo.'}
@@ -664,14 +664,14 @@ function ClaimModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-slate-100 transition hover:border-white/40 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300 sm:w-auto"
+              className="w-full rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-100)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-4)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300 sm:w-auto"
             >
               Ver en trofeos
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/20 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300 sm:w-auto"
+              className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300 sm:w-auto"
             >
               Cerrar
             </button>
@@ -3434,8 +3434,8 @@ export function MissionsV2Board({
         {!mission && (
           <div className="missions-slot-empty">
             <div className="missions-slot-empty__content">
-              <p className="text-sm font-semibold text-slate-100">Slot vacío. Elegí tu reto.</p>
-              <p className="text-xs text-slate-300">
+              <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">Slot vacío. Elegí tu reto.</p>
+              <p className="text-xs text-[color:var(--color-slate-300)]">
                 Explorá el market para activar esta misión y proteger los pétalos.
               </p>
               <button type="button" className="missions-slot-empty__cta" onClick={scrollToMarket}>

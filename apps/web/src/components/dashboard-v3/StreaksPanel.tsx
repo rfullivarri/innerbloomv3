@@ -104,8 +104,8 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
       title="Panel de Rachas"
       subtitle="Vista read-only"
       rightSlot={
-        <span className="inline-flex items-center gap-2 text-xs text-slate-400">
-          <span className="hidden rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-300 md:inline-flex">
+        <span className="inline-flex items-center gap-2 text-xs text-[color:var(--color-slate-400)]">
+          <span className="hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-slate-300)] md:inline-flex">
             Beta
           </span>
           <span aria-hidden>⚡</span>
@@ -123,7 +123,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
               className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60 ${
                 isActive
                   ? 'border-indigo-300/60 bg-indigo-300/15 text-indigo-100'
-                  : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10'
+                  : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-slate-300)] hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--color-overlay-2)]'
               }`}
             >
               {filter.label}
@@ -143,7 +143,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
               className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60 ${
                 isActive
                   ? 'border-amber-300/60 bg-amber-300/15 text-amber-100'
-                  : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10'
+                  : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-slate-300)] hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--color-overlay-2)]'
               }`}
             >
               {filter.label}
@@ -152,7 +152,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
         })}
       </div>
 
-      {status === 'loading' && <div className="h-56 w-full animate-pulse rounded-ib-md bg-white/10" />}
+      {status === 'loading' && <div className="h-56 w-full animate-pulse rounded-ib-md bg-[color:var(--color-overlay-2)]" />}
 
       {status === 'error' && (
         <p className="text-sm text-rose-300">No pudimos cargar tus tareas activas.</p>
@@ -160,34 +160,34 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
 
       {status === 'success' && data && (
         <div className="flex flex-col gap-4">
-          <p className="text-xs text-slate-400">
-            La API actual aún no expone <code className="rounded bg-white/10 px-1 py-px text-[10px]">daily_log_raw</code>. Listamos tus tareas activas y calculamos el GP semanal total como referencia.
+          <p className="text-xs text-[color:var(--color-slate-400)]">
+            La API actual aún no expone <code className="rounded bg-[color:var(--color-overlay-2)] px-1 py-px text-[10px]">daily_log_raw</code>. Listamos tus tareas activas y calculamos el GP semanal total como referencia.
           </p>
 
-          <div className="rounded-ib-md border border-white/10 bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">GP total últimos 7 días</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-100">{weeklyXp.toLocaleString('es-AR')} GP</p>
-            <p className="mt-1 text-xs text-slate-400">Filtro: {pillarFilter} · Alcance: {scopeFilter === 'week' ? 'Semana' : scopeFilter === 'month' ? 'Mes' : '3 meses'}</p>
+          <div className="rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">GP total últimos 7 días</p>
+            <p className="mt-2 text-2xl font-semibold text-[color:var(--color-slate-100)]">{weeklyXp.toLocaleString('es-AR')} GP</p>
+            <p className="mt-1 text-xs text-[color:var(--color-slate-400)]">Filtro: {pillarFilter} · Alcance: {scopeFilter === 'week' ? 'Semana' : scopeFilter === 'month' ? 'Mes' : '3 meses'}</p>
           </div>
 
           <div className="space-y-3">
             {filteredTasks.slice(0, 8).map((task) => (
-              <article key={task.id} className="rounded-ib-md border border-white/10 bg-white/5 p-4">
+              <article key={task.id} className="rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-slate-100">{task.title}</p>
-                    <p className="text-xs text-slate-400">Pilar: {task.pillarId ?? '—'}</p>
+                    <p className="font-semibold text-[color:var(--color-slate-100)]">{task.title}</p>
+                    <p className="text-xs text-[color:var(--color-slate-400)]">Pilar: {task.pillarId ?? '—'}</p>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-300">
-                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-100">+{task.xp ?? 0} GP</span>
-                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">✓×—</span>
+                  <div className="flex items-center gap-2 text-xs text-[color:var(--color-slate-300)]">
+                    <span className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1 text-[color:var(--color-slate-100)]">+{task.xp ?? 0} GP</span>
+                    <span className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1">✓×—</span>
                   </div>
                 </div>
               </article>
             ))}
 
             {filteredTasks.length === 0 && (
-              <p className="text-sm text-slate-400">Sin tareas activas para mostrar con el filtro seleccionado.</p>
+              <p className="text-sm text-[color:var(--color-slate-400)]">Sin tareas activas para mostrar con el filtro seleccionado.</p>
             )}
           </div>
         </div>
@@ -301,7 +301,7 @@ const TAB_BUTTON_BASE =
   'flex-1 inline-flex items-center justify-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 md:text-xs';
 
 const TAB_GROUP_BASE =
-  'inline-flex w-full items-center justify-between gap-1 rounded-full border border-white/15 bg-white/5 p-1';
+  'inline-flex w-full items-center justify-between gap-1 rounded-full border border-white/15 bg-[color:var(--color-overlay-1)] p-1';
 
 function normalizeMode(mode?: string | null): Mode {
   return normalizeGameModeValue(mode) ?? 'Flow';
@@ -462,7 +462,7 @@ function TaskItem({
   return (
     <article
       className={cx(
-        'flex flex-col gap-1.5 rounded-ib-md border border-white/10 bg-white/5 p-2.5 text-slate-200 shadow-[0_6px_20px_rgba(15,23,42,0.3)] transition hover:border-violet-300/50 hover:bg-white/10 md:gap-2 md:p-3',
+        'flex flex-col gap-1.5 rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2.5 text-[color:var(--color-slate-200)] shadow-[0_6px_20px_rgba(15,23,42,0.3)] transition hover:border-violet-300/50 hover:bg-[color:var(--color-overlay-2)] md:gap-2 md:p-3',
         item.highlight && 'border-violet-400/60 bg-violet-400/10 shadow-[0_8px_26px_rgba(99,102,241,0.3)]',
       )}
       aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${streakDays} consecutive days`}
@@ -473,11 +473,11 @@ function TaskItem({
     >
       <div className="flex flex-wrap items-start gap-2">
         <div className="min-w-0 flex-1 space-y-0.5">
-          <div className="truncate text-sm font-medium leading-tight text-slate-200 md:text-base" title={item.name}>
+          <div className="truncate text-sm font-medium leading-tight text-[color:var(--color-slate-200)] md:text-base" title={item.name}>
             {item.name}
           </div>
           {item.stat && (
-            <p className="truncate text-xs text-slate-400" title={item.stat}>
+            <p className="truncate text-xs text-[color:var(--color-slate-400)]" title={item.stat}>
               {item.stat}
             </p>
           )}
@@ -497,7 +497,7 @@ function TaskItem({
               )}
             </GlowChip>
           )}
-          <span aria-hidden className="ml-1 text-lg text-slate-400">
+          <span aria-hidden className="ml-1 text-lg text-[color:var(--color-slate-400)]">
             ›
           </span>
           <span className="sr-only">Toca para ver más detalles del streak</span>
@@ -535,7 +535,7 @@ function TaskItem({
                 />
               </div>
             </div>
-            <span className="ml-1 shrink-0 text-xs tabular-nums text-slate-200 md:ml-1.5">
+            <span className="ml-1 shrink-0 text-xs tabular-nums text-[color:var(--color-slate-200)] md:ml-1.5">
               {item.weeklyDone}/{item.weeklyGoal}
             </span>
           </div>
@@ -572,7 +572,7 @@ function TaskItem({
               })}
             </div>
             {item.history.labels && item.history.labels.length > 0 && (
-              <div className="flex items-center gap-1 text-[10px] uppercase tracking-[0.16em] text-slate-400">
+              <div className="flex items-center gap-1 text-[10px] uppercase tracking-[0.16em] text-[color:var(--color-slate-400)]">
                 {item.history.labels.map((label, index) => (
                   <span key={index} className="w-2 text-center">
                     {label}
@@ -777,7 +777,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
     <>
       <Card
         title="Streaks"
-        bodyClassName="gap-5 p-3 text-slate-100 md:p-4"
+        bodyClassName="gap-5 p-3 text-[color:var(--color-slate-100)] md:p-4"
         className="text-sm leading-relaxed"
         rightSlot={
           <InfoDotTarget id="streaksGuide" placement="left" className="flex items-center gap-2">
@@ -806,7 +806,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                       'leading-none',
                       isActive
                         ? 'border-white/60 bg-white text-slate-900 shadow-[0_4px_16px_rgba(226,232,240,0.35)]'
-                        : 'border-transparent bg-transparent text-slate-300 hover:text-slate-100',
+                        : 'border-transparent bg-transparent text-[color:var(--color-slate-300)] hover:text-[color:var(--color-slate-100)]',
                     )}
                     aria-pressed={isActive}
                   >
@@ -828,14 +828,14 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
         {isLoading ? (
           <div className="grid grid-cols-1 gap-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={`top-skeleton-${index}`} className="h-24 animate-pulse rounded-ib-md border border-white/10 bg-white/5" />
+              <div key={`top-skeleton-${index}`} className="h-24 animate-pulse rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
             ))}
           </div>
         ) : (
           hasContent && (
             <section className="space-y-3">
               <div className="flex flex-wrap items-baseline gap-2">
-                <DashboardTitle level="h2" as="h4" className="text-slate-100/88">
+                <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-slate-100)]/88">
                   Top streaks
                 </DashboardTitle>
                 <DashboardMeta as="span">— días consecutivos sin cortar</DashboardMeta>
@@ -853,7 +853,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-400">Todavía no hay rachas destacadas.</p>
+                <p className="text-sm text-[color:var(--color-slate-400)]">Todavía no hay rachas destacadas.</p>
               )}
             </section>
           )
@@ -876,7 +876,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                     TAB_BUTTON_BASE,
                     isActive
                       ? 'border-white/60 bg-white text-slate-900 shadow-[0_4px_16px_rgba(226,232,240,0.35)]'
-                      : 'border-transparent bg-transparent text-slate-200 hover:text-slate-100',
+                      : 'border-transparent bg-transparent text-[color:var(--color-slate-200)] hover:text-[color:var(--color-slate-100)]',
                   )}
                   aria-pressed={isActive}
                 >
@@ -890,13 +890,13 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
         {showTasksSkeleton ? (
           <div className="grid grid-cols-1 gap-3">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={`task-skeleton-${index}`} className="h-24 animate-pulse rounded-ib-md border border-white/10 bg-white/5" />
+              <div key={`task-skeleton-${index}`} className="h-24 animate-pulse rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
             ))}
           </div>
         ) : (
           hasContent && (
             <section className="space-y-3">
-              <DashboardTitle level="h2" as="h4" className="text-slate-100/88">
+              <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-slate-100)]/88">
                 Todas las tareas
               </DashboardTitle>
               {displayTasks.length > 0 ? (
@@ -912,7 +912,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-[color:var(--color-slate-400)]">
                   No encontramos tareas activas para este pilar en las últimas semanas.
                 </p>
               )}

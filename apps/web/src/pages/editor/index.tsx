@@ -604,7 +604,7 @@ function SectionHeader({ section }: { section: DashboardSectionConfig }) {
           {normalizedTitle}
         </h1>
       )}
-      {shouldShowDescription && <p className="text-sm text-slate-400">{normalizedDescription}</p>}
+      {shouldShowDescription && <p className="text-sm text-[color:var(--color-slate-400)]">{normalizedDescription}</p>}
     </header>
   );
 }
@@ -634,7 +634,7 @@ function TaskFilters({
     return (
       <div className="flex flex-col gap-3 md:flex-row md:items-end">
         <label className="flex w-full flex-col gap-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
             Búsqueda
           </span>
           <div className="relative flex items-center">
@@ -643,21 +643,21 @@ function TaskFilters({
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Buscar por título"
-              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </div>
         </label>
         <label className="flex w-full flex-col gap-2 md:max-w-xs">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
             Pilar
           </span>
           <select
             value={selectedPillar}
             onChange={(event) => onPillarChange(event.target.value)}
-            className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {pillars.map((pillar) => (
-              <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-slate-100">
+              <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-[color:var(--color-slate-100)]">
                 {pillar.label}
               </option>
             ))}
@@ -684,7 +684,7 @@ function TaskFilters({
       <div className="md:hidden">
         <div className="sticky -mx-6 -mt-6 px-6 pt-6 pb-3 top-[4.5rem] z-30 space-y-3 rounded-t-2xl bg-surface/95 backdrop-blur">
           <label className="flex flex-col gap-1">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">
               Buscar tareas
             </span>
             <input
@@ -692,7 +692,7 @@ function TaskFilters({
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Buscar por título"
-              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm ios-touch-input text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </label>
           <div className="space-y-2">
@@ -710,7 +710,7 @@ function TaskFilters({
                     className={`inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60 ${
                       isActive
                         ? 'border-indigo-400/70 bg-indigo-400/15 text-indigo-100'
-                        : 'border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10'
+                        : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-slate-200)] hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--color-overlay-2)]'
                     }`}
                     aria-pressed={isActive}
                   >
@@ -736,7 +736,7 @@ function TaskFilters({
       </div>
       <div className="hidden flex-col gap-3 md:flex md:flex-row md:items-end">
         <label className="flex w-full flex-col gap-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
             Búsqueda
           </span>
           <div className="relative flex items-center">
@@ -745,21 +745,21 @@ function TaskFilters({
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Buscar por título"
-              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </div>
         </label>
         <label className="flex w-full flex-col gap-2 md:max-w-xs">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
             Pilar
           </span>
           <select
             value={selectedPillar}
             onChange={(event) => onPillarChange(event.target.value)}
-            className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {pillars.map((pillar) => (
-              <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-slate-100">
+              <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-[color:var(--color-slate-100)]">
                 {pillar.label}
               </option>
             ))}
@@ -935,7 +935,7 @@ function TaskListMobile({
 
   // TODO: incorporar gestos de swipe cuando exista infraestructura compartida en el proyecto.
   return (
-    <ul className="divide-y divide-white/5 overflow-visible rounded-2xl border border-white/10 bg-white/5">
+    <ul className="divide-y divide-white/5 overflow-visible rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]">
       {tasks.map((task) => {
         const { label: difficultyLabel, tone } = resolveDifficulty(task);
         const isMenuOpen = openMenuTaskId === task.id;
@@ -946,13 +946,13 @@ function TaskListMobile({
             <button
               type="button"
               onClick={() => onEditTask(task)}
-              className="flex w-full flex-col gap-2 px-4 py-2.5 text-left transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+              className="flex w-full flex-col gap-2 px-4 py-2.5 text-left transition hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
             >
               <div className="flex items-start justify-between gap-3">
                 <p className="line-clamp-1 pr-8 text-sm font-semibold text-white">{task.title}</p>
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-300">
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-2 py-0.5 font-semibold uppercase tracking-[0.18em] text-slate-100">
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-[color:var(--color-slate-300)]">
+                <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-2 py-0.5 font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-100)]">
                   <span className={`h-1.5 w-1.5 rounded-full ${tone}`} aria-hidden />
                   <span>{difficultyLabel}</span>
                 </span>
@@ -974,13 +974,13 @@ function TaskListMobile({
                   event.stopPropagation();
                   setOpenMenuTaskId((current) => (current === task.id ? null : task.id));
                 }}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-base text-slate-200 transition hover:border-white/30 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-base text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
               >
                 <span aria-hidden>⋯</span>
                 <span className="sr-only">Más acciones</span>
               </button>
               {isMenuOpen && (
-                <div className="absolute right-0 top-10 z-40 w-44 rounded-xl border border-white/10 bg-slate-900/95 p-1 shadow-[0_10px_30px_rgba(15,23,42,0.6)]">
+                <div className="absolute right-0 top-10 z-40 w-44 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] p-1 shadow-[0_10px_30px_rgba(15,23,42,0.6)]">
                   <button
                     type="button"
                     onClick={(event) => {
@@ -988,7 +988,7 @@ function TaskListMobile({
                       setOpenMenuTaskId(null);
                       onEditTask(task);
                     }}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-100 transition hover:bg-white/10"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-[color:var(--color-slate-100)] transition hover:bg-[color:var(--color-overlay-2)]"
                   >
                     Editar
                   </button>
@@ -1005,7 +1005,7 @@ function TaskListMobile({
                     className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
                       !onDuplicateTask
                         ? 'cursor-not-allowed text-slate-500'
-                        : 'text-slate-100 hover:bg-white/10'
+                        : 'text-[color:var(--color-slate-100)] hover:bg-[color:var(--color-overlay-2)]'
                     } ${isDuplicating ? 'opacity-70' : ''}`.trim()}
                   >
                     {isDuplicating ? 'Duplicando…' : 'Duplicar'}
@@ -1022,7 +1022,7 @@ function TaskListMobile({
                     }}
                     className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
                       onImproveTask
-                        ? 'text-slate-100 hover:bg-white/10'
+                        ? 'text-[color:var(--color-slate-100)] hover:bg-[color:var(--color-overlay-2)]'
                         : 'cursor-not-allowed text-slate-500'
                     }`}
                   >
@@ -1067,15 +1067,15 @@ function TaskCard({
   onDelete: () => void;
 }) {
   return (
-    <article className="group relative flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_8px_24px_rgba(15,23,42,0.35)] transition hover:border-white/20">
+    <article className="group relative flex flex-col gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[0_8px_24px_rgba(15,23,42,0.35)] transition hover:border-[color:var(--color-border-soft)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <h3 className="font-semibold text-slate-100">{task.title}</h3>
+        <h3 className="font-semibold text-[color:var(--color-slate-100)]">{task.title}</h3>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
           <span
             className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
               task.isActive
                 ? 'bg-emerald-500/15 text-emerald-300'
-                : 'bg-slate-500/20 text-slate-300'
+                : 'bg-slate-500/20 text-[color:var(--color-slate-300)]'
             }`}
           >
             {task.isActive ? 'Activa' : 'Inactiva'}
@@ -1083,7 +1083,7 @@ function TaskCard({
           <button
             type="button"
             onClick={onEdit}
-            className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 hover:text-white"
+            className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
           >
             Editar
           </button>
@@ -1096,25 +1096,25 @@ function TaskCard({
           </button>
         </div>
       </div>
-      <dl className="grid gap-1 text-xs text-slate-400">
+      <dl className="grid gap-1 text-xs text-[color:var(--color-slate-400)]">
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-slate-300">Pilar</dt>
-          <dd className="truncate text-right text-slate-200">{pillarName ?? task.pillarId ?? '—'}</dd>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">Pilar</dt>
+          <dd className="truncate text-right text-[color:var(--color-slate-200)]">{pillarName ?? task.pillarId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-slate-300">Rasgo</dt>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">Rasgo</dt>
           <dd className="truncate text-right">{traitName ?? task.traitId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-slate-300">Stat</dt>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">Stat</dt>
           <dd className="truncate text-right">{statName ?? task.statId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-slate-300">Dificultad</dt>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">Dificultad</dt>
           <dd className="truncate text-right">{difficultyName ?? task.difficultyId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-slate-300">GP base</dt>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">GP base</dt>
           <dd className="truncate text-right">{task.xp != null ? task.xp : '—'}</dd>
         </div>
       </dl>
@@ -1202,7 +1202,7 @@ function TaskBoard({
         return (
           <section
             key={group.key}
-            className="flex min-h-[260px] flex-col rounded-2xl border border-white/10 bg-white/5 p-4"
+            className="flex min-h-[260px] flex-col rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4"
           >
             <header className="flex items-center justify-between border-b border-white/5 pb-3">
               <div className="space-y-1">
@@ -1219,7 +1219,7 @@ function TaskBoard({
             </header>
             <div className="mt-3 flex-1 space-y-2">
               {group.tasks.length === 0 ? (
-                <p className="rounded-xl border border-white/5 bg-white/5 px-3 py-6 text-center text-xs text-slate-500">
+                <p className="rounded-xl border border-white/5 bg-[color:var(--color-overlay-1)] px-3 py-6 text-center text-xs text-slate-500">
                   Sin tareas en este pilar.
                 </p>
               ) : (
@@ -1284,7 +1284,7 @@ function TaskBoardItem({
   };
 
   const containerClasses = [
-    'group relative cursor-pointer rounded-xl border border-white/10 bg-slate-900/60 p-3 transition hover:border-white/25 hover:bg-slate-900/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
+    'group relative cursor-pointer rounded-xl border border-[color:var(--color-border-subtle)] bg-slate-900/60 p-3 transition hover:border-white/25 hover:bg-slate-900/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
     isActiveTask ? `border-white/30 bg-slate-900/80 ring-2 ${ringClass}` : '',
   ]
     .filter(Boolean)
@@ -1301,16 +1301,16 @@ function TaskBoardItem({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-slate-100">{task.title}</p>
-          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+          <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">{task.title}</p>
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
             <span
               className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${
-                task.isActive ? 'bg-emerald-500/10 text-emerald-200' : 'bg-slate-700/20 text-slate-300'
+                task.isActive ? 'bg-emerald-500/10 text-emerald-200' : 'bg-slate-700/20 text-[color:var(--color-slate-300)]'
               }`}
             >
               {task.isActive ? 'Activa' : 'Inactiva'}
             </span>
-            <span className="flex items-center gap-1 text-slate-400">
+            <span className="flex items-center gap-1 text-[color:var(--color-slate-400)]">
               <span className={`text-base leading-none ${bulletClass}`}>•</span>
               {difficultyName ?? 'Sin dificultad'}
             </span>
@@ -1390,14 +1390,14 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
         <div
           role="dialog"
           aria-modal="true"
-          className="space-y-5 rounded-2xl border border-white/10 bg-slate-900/95 p-6 text-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
+          className="space-y-5 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] p-6 text-[color:var(--color-slate-100)] shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
           onClick={(event) => event.stopPropagation()}
         >
           <header className="space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Confirmar eliminación</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Confirmar eliminación</p>
             <h2 className="text-xl font-semibold text-white">Eliminar tarea</h2>
           </header>
-          <p className="text-sm text-slate-300">
+          <p className="text-sm text-[color:var(--color-slate-300)]">
             ¿Seguro que quieres eliminar {displayTitle}? Esta acción quitará la tarea de tu lista inmediatamente.
           </p>
           {errorMessage && (
@@ -1414,7 +1414,7 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
                 }
               }}
               disabled={isDeleting}
-              className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
               Cancelar
             </button>
@@ -1437,7 +1437,7 @@ function TaskListSkeleton() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="h-40 animate-pulse rounded-2xl border border-white/5 bg-white/5" />
+        <div key={index} className="h-40 animate-pulse rounded-2xl border border-white/5 bg-[color:var(--color-overlay-1)]" />
       ))}
     </div>
   );
@@ -1445,7 +1445,7 @@ function TaskListSkeleton() {
 
 function TaskListEmpty({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-white/10 bg-white/5/40 px-6 py-12 text-center text-sm text-slate-300">
+    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/40 px-6 py-12 text-center text-sm text-[color:var(--color-slate-300)]">
       <span className="text-2xl" aria-hidden>
         🌱
       </span>
@@ -1462,7 +1462,7 @@ function TaskListError({ message, onRetry }: { message: string; onRetry: () => v
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:border-white/40"
+        className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:border-[color:var(--color-border-strong)]"
       >
         Reintentar
       </button>
@@ -1674,14 +1674,14 @@ function CreateTaskModal({
       <div className="relative z-10 w-full max-w-2xl p-4">
         <form
           onSubmit={handleSubmit}
-          className="max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-slate-900/95 p-6 text-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
+          className="max-h-[90vh] overflow-y-auto rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] p-6 text-[color:var(--color-slate-100)] shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
           onClick={(event) => event.stopPropagation()}
         >
           <div className="space-y-6">
             <header className="space-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Nueva tarea</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Nueva tarea</p>
               <h2 className="text-xl font-semibold text-white">Crear tarea personalizada</h2>
-              <p className="text-sm text-slate-300">
+              <p className="text-sm text-[color:var(--color-slate-300)]">
                 Define el pilar, rasgo y stat para desbloquear campos específicos de tu misión.
               </p>
             </header>
@@ -1690,21 +1690,21 @@ function CreateTaskModal({
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 1 · Pilar</p>
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Selecciona un pilar</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Selecciona un pilar</span>
                   <select
                     value={selectedPillarId}
                     onChange={(event) => {
                       setSelectedPillarId(event.target.value);
                       clearError('pillar');
                     }}
-                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={isLoadingPillars || pillarsError != null}
                   >
-                    <option value="" className="bg-slate-900 text-slate-100">
+                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
                       Selecciona un pilar…
                     </option>
                     {sortedPillars.map((pillar) => (
-                      <option key={pillar.id} value={pillar.id} className="bg-slate-900 text-slate-100">
+                      <option key={pillar.id} value={pillar.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
                         {pillar.name}
                       </option>
                     ))}
@@ -1727,28 +1727,28 @@ function CreateTaskModal({
                 )}
                 {errors.pillar && <p className="text-xs text-rose-300">{errors.pillar}</p>}
                 {!isLoadingPillars && !pillarsError && sortedPillars.length === 0 && (
-                  <p className="text-xs text-slate-400">No encontramos pilares disponibles por ahora.</p>
+                  <p className="text-xs text-[color:var(--color-slate-400)]">No encontramos pilares disponibles por ahora.</p>
                 )}
               </div>
 
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 2 · Rasgo</p>
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Selecciona un rasgo</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Selecciona un rasgo</span>
                   <select
                     value={selectedTraitId}
                     onChange={(event) => {
                       setSelectedTraitId(event.target.value);
                       clearError('trait');
                     }}
-                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={!selectedPillarId || isLoadingTraits}
                   >
-                    <option value="" className="bg-slate-900 text-slate-100">
+                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
                       {selectedPillarId ? 'Selecciona un rasgo…' : 'Selecciona primero un pilar'}
                     </option>
                     {filteredTraits.map((trait) => (
-                      <option key={trait.id} value={trait.id} className="bg-slate-900 text-slate-100">
+                      <option key={trait.id} value={trait.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
                         {trait.name}
                       </option>
                     ))}
@@ -1771,25 +1771,25 @@ function CreateTaskModal({
                 )}
                 {errors.trait && <p className="text-xs text-rose-300">{errors.trait}</p>}
                 {selectedPillarId && !isLoadingTraits && filteredTraits.length === 0 && !traitsError && (
-                  <p className="text-xs text-slate-400">Este pilar aún no tiene rasgos disponibles.</p>
+                  <p className="text-xs text-[color:var(--color-slate-400)]">Este pilar aún no tiene rasgos disponibles.</p>
                 )}
               </div>
 
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 3 · Stat</p>
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Selecciona un stat (opcional)</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Selecciona un stat (opcional)</span>
                   <select
                     value={selectedStatId}
                     onChange={(event) => setSelectedStatId(event.target.value)}
-                    className="w-full appearance-none rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={!selectedTraitId || isLoadingStats}
                   >
-                    <option value="" className="bg-slate-900 text-slate-100">
+                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
                       {selectedTraitId ? 'Selecciona un stat…' : 'Selecciona primero un rasgo'}
                     </option>
                     {filteredStats.map((stat) => (
-                      <option key={stat.id} value={stat.id} className="bg-slate-900 text-slate-100">
+                      <option key={stat.id} value={stat.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
                         {stat.name}
                       </option>
                     ))}
@@ -1811,7 +1811,7 @@ function CreateTaskModal({
                   </div>
                 )}
                 {selectedTraitId && !isLoadingStats && filteredStats.length === 0 && !statsError && (
-                  <p className="text-xs text-slate-400">Este rasgo aún no tiene stats asociados.</p>
+                  <p className="text-xs text-[color:var(--color-slate-400)]">Este rasgo aún no tiene stats asociados.</p>
                 )}
               </div>
             </section>
@@ -1819,7 +1819,7 @@ function CreateTaskModal({
             <section className="space-y-4">
               <div className="space-y-2">
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Título de la tarea</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Título de la tarea</span>
                   <input
                     type="text"
                     value={title}
@@ -1828,7 +1828,7 @@ function CreateTaskModal({
                       clearError('title');
                     }}
                     placeholder="Ej. Entrenar 30 minutos"
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm ios-touch-input text-slate-100 placeholder:text-slate-400 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
                   />
                 </label>
                 {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
@@ -1836,18 +1836,18 @@ function CreateTaskModal({
 
               <div className="space-y-2">
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Dificultad</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Dificultad</span>
                   <select
                     value={difficultyId}
                     onChange={(event) => setDifficultyId(event.target.value)}
-                    className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm ios-touch-input text-slate-100 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
+                    className="w-full appearance-none rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={isLoadingDifficulties}
                   >
-                    <option value="" className="bg-slate-900 text-slate-100">
+                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
                       Selecciona una dificultad…
                     </option>
                     {sortedDifficulties.map((difficulty) => (
-                      <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-slate-100">
+                      <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
                         {difficulty.name}
                       </option>
                     ))}
@@ -1880,7 +1880,7 @@ function CreateTaskModal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:text-white"
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-white"
               >
                 Cancelar
               </button>
@@ -2086,9 +2086,9 @@ function EditTaskModal({
   const formBody = (
     <div className="space-y-6">
       <header className="space-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Editar tarea</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Editar tarea</p>
         <h2 className="text-xl font-semibold text-white">Actualiza los detalles de tu tarea</h2>
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-[color:var(--color-slate-300)]">
           Ajusta el título, dificultad y estado. Los campos de pilar y rasgo permanecen bloqueados.
         </p>
       </header>
@@ -2119,7 +2119,7 @@ function EditTaskModal({
                 clearError('title');
               }}
               placeholder="Ej. Entrenar 30 minutos"
-              className="w-full rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-slate-100 placeholder:text-violet-100/50 shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50"
+              className="w-full rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-violet-100/50 shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50"
             />
           </label>
           {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
@@ -2131,14 +2131,14 @@ function EditTaskModal({
             <select
               value={difficultyId}
               onChange={(event) => setDifficultyId(event.target.value)}
-              className="w-full appearance-none rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-slate-100 shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50 disabled:cursor-not-allowed"
+              className="w-full appearance-none rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50 disabled:cursor-not-allowed"
               disabled={isLoadingDifficulties}
             >
-              <option value="" className="bg-slate-900 text-slate-100">
+              <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
                 Sin dificultad asignada
               </option>
               {sortedDifficulties.map((difficulty) => (
-                <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-slate-100">
+                <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
                   {difficulty.name}
                 </option>
               ))}
@@ -2168,9 +2168,9 @@ function EditTaskModal({
               type="checkbox"
               checked={isActive}
               onChange={(event) => setIsActive(event.target.checked)}
-              className="h-4 w-4 rounded border-white/30 bg-white/10 text-indigo-500 focus:ring-indigo-400"
+              className="h-4 w-4 rounded border-white/30 bg-[color:var(--color-overlay-2)] text-indigo-500 focus:ring-indigo-400"
             />
-            <span className="text-sm text-slate-200">{isActive ? 'Activa' : 'Inactiva'}</span>
+            <span className="text-sm text-[color:var(--color-slate-200)]">{isActive ? 'Activa' : 'Inactiva'}</span>
           </label>
         </div>
       </section>
@@ -2184,7 +2184,7 @@ function EditTaskModal({
         <button
           type="button"
           onClick={handleClose}
-          className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:text-white"
+          className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-white"
         >
           Cancelar
         </button>
@@ -2208,38 +2208,38 @@ function EditTaskModal({
           onClick={handleClose}
           className="flex-1 bg-slate-950/60 backdrop-blur-sm"
         />
-        <aside className="flex h-full w-full max-w-xl flex-col border-l border-white/10 bg-slate-950/95 text-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.65)]">
+        <aside className="flex h-full w-full max-w-xl flex-col border-l border-[color:var(--color-border-subtle)] bg-slate-950/95 text-[color:var(--color-slate-100)] shadow-[0_18px_40px_rgba(15,23,42,0.65)]">
           <form onSubmit={handleSubmit} className="flex h-full flex-col overflow-hidden">
-            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-6 py-4">
+            <div className="flex items-center justify-between gap-3 border-b border-[color:var(--color-border-subtle)] px-6 py-4">
               {showNavigation ? (
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => handleNavigate(previousTask)}
                     disabled={!previousTask}
-                    className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Anterior
                   </button>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-400)]">
                     {navigationLabel}
                   </span>
                   <button
                     type="button"
                     onClick={() => handleNavigate(nextTask)}
                     disabled={!nextTask}
-                    className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Siguiente
                   </button>
                 </div>
               ) : (
-                <p className="text-sm font-semibold text-slate-200">Editar tarea</p>
+                <p className="text-sm font-semibold text-[color:var(--color-slate-200)]">Editar tarea</p>
               )}
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 hover:text-white"
+                className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
               >
                 Cerrar
               </button>
@@ -2262,7 +2262,7 @@ function EditTaskModal({
       <div className="relative z-10 w-full max-w-2xl p-4">
         <form
           onSubmit={handleSubmit}
-          className="max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-slate-900/95 p-6 text-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
+          className="max-h-[90vh] overflow-y-auto rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] p-6 text-[color:var(--color-slate-100)] shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
           onClick={(event) => event.stopPropagation()}
         >
           {formBody}
@@ -2275,8 +2275,8 @@ function EditTaskModal({
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-1">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">{label}</span>
-      <div className="rounded-2xl border border-slate-600/60 bg-slate-800/70 px-4 py-3 text-sm text-slate-300">{value}</div>
+      <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">{label}</span>
+      <div className="rounded-2xl border border-slate-600/60 bg-slate-800/70 px-4 py-3 text-sm text-[color:var(--color-slate-300)]">{value}</div>
     </div>
   );
 }
