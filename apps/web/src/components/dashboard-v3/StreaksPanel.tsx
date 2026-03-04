@@ -100,7 +100,7 @@ export function LegacyStreaksPanel({ userId }: LegacyStreaksPanelProps) {
 
   return (
     <Card
-      title="🔥 Panel de Rachas"
+      title="Panel de Rachas"
       subtitle="Vista read-only"
       rightSlot={
         <span className="inline-flex items-center gap-2 text-xs text-slate-400">
@@ -775,7 +775,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
   return (
     <>
       <Card
-        title="🔥 Streaks"
+        title="Streaks"
         bodyClassName="gap-5 p-3 text-slate-100 md:p-4"
         className="text-sm leading-relaxed"
         rightSlot={
@@ -804,8 +804,8 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                       TAB_BUTTON_BASE,
                       'leading-none',
                       isActive
-                        ? 'border-violet-300/80 bg-violet-500 text-white shadow-[0_4px_16px_rgba(139,92,246,0.45)]'
-                        : 'border-transparent bg-transparent text-slate-200 hover:text-slate-100',
+                        ? 'border-white/60 bg-white text-slate-900 shadow-[0_4px_16px_rgba(226,232,240,0.35)]'
+                        : 'border-transparent bg-transparent text-slate-300 hover:text-slate-100',
                     )}
                     aria-pressed={isActive}
                   >
