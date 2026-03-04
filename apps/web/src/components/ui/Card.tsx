@@ -79,7 +79,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
                 </DashboardTitle>
               )}
               {subtitle &&
-                (isPrimitiveText(subtitle) ? <DashboardMeta>{subtitle}</DashboardMeta> : subtitle)}
+                (isPrimitiveText(subtitle) ? <DashboardMeta className="text-slate-950">{subtitle}</DashboardMeta> : subtitle)}
             </div>
             {rightSlot}
           </header>

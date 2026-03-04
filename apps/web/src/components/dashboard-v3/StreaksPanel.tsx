@@ -572,7 +572,7 @@ function TaskItem({
               })}
             </div>
             {item.history.labels && item.history.labels.length > 0 && (
-              <div className="flex items-center gap-1 text-[10px] uppercase tracking-[0.16em] text-[color:var(--color-slate-400)]">
+              <div className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700">
                 {item.history.labels.map((label, index) => (
                   <span key={index} className="w-2 text-center">
                     {label}
@@ -838,7 +838,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                 <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-text)]">
                   Top streaks
                 </DashboardTitle>
-                <DashboardMeta as="span">— días consecutivos sin cortar</DashboardMeta>
+                <DashboardMeta as="span" className="text-slate-950">— días consecutivos sin cortar</DashboardMeta>
               </div>
               {topEntries.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3">
