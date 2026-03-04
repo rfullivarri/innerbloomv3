@@ -239,7 +239,7 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
         </InfoDotTarget>
       }
     >
-      {status === 'loading' && <div className="h-[260px] w-full animate-pulse rounded-ib-md bg-white/10" />}
+      {status === 'loading' && <div className="h-[260px] w-full animate-pulse rounded-ib-md bg-[color:var(--color-overlay-2)]" />}
 
       {status === 'error' && (
         <p className="text-sm text-rose-300">No pudimos construir el radar. Probá más tarde.</p>

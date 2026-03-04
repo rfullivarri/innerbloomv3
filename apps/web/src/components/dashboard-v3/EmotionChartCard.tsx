@@ -871,7 +871,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       subtitle="Últimos 6 meses"
       rightSlot={<InfoDotTarget id="emotion" placement="right" className="flex items-center" />}
     >
-      {showSkeleton && <div className="h-48 w-full animate-pulse rounded-ib-md bg-white/10" />}
+      {showSkeleton && <div className="h-48 w-full animate-pulse rounded-ib-md bg-[color:var(--color-overlay-2)]" />}
 
       {showError && <p className="text-sm text-rose-300">Todavía no pudimos cargar tus emociones.</p>}
 

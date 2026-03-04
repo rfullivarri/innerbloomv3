@@ -904,7 +904,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   animate="visible"
                   exit="hidden"
                   transition={{ duration: 0.24, ease: 'easeOut' }}
-                  className="pointer-events-auto relative mx-auto flex h-[100dvh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-[color:var(--color-slate-900-95)] text-white shadow-2xl backdrop-blur md:max-w-2xl"
+                  className="pointer-events-auto relative mx-auto flex h-[100dvh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-[color:var(--color-slate-900-95)] text-white shadow-2xl backdrop-blur md:max-w-2xl" data-light-scope="daily-quest"
                   layout={false}
                   onClick={(event: MouseEvent<HTMLDivElement>) => {
                     event.stopPropagation();
@@ -917,10 +917,10 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1.5">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/70">Daily Quest</p>
-                        <h2 id="daily-quest-title" className="text-lg font-semibold text-white md:text-xl">
+                        <h2 id="daily-quest-title" className="text-lg font-semibold text-[color:var(--color-text)] md:text-xl">
                           ☀️ Retrospectiva
                         </h2>
-                        <p className="text-[11px] text-white/65 md:text-xs">
+                        <p className="text-[11px] text-[color:var(--color-text-muted)] md:text-xs">
                           Registrá cómo te sentiste ayer, elegí la emoción que predominó y marcá las tareas logradas.
                           ¡Seguí sumando GP y rachas!
                         </p>
@@ -993,7 +993,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           />
 
                           <section className="flex flex-col gap-4">
-                            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/80">Checklist del día</h3>
+                            <h3 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-muted)]">Checklist del día</h3>
                             <div className="flex flex-col">
                               {definition.pillars.map((pillar, index) => {
                                 const fallbackTheme = resolvePillarTheme(pillar.pillar_code);
@@ -1124,7 +1124,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                                 <CheckIcon active={isSelected} />
                                               </motion.span>
                                               <div className="space-y-1">
-                                                <p className="font-medium text-white">{task.name}</p>
+                                                <p className="font-medium text-[color:var(--color-text)]">{task.name}</p>
                                                 <p className="text-xs text-[color:var(--color-text-faint)]">
                                                   {task.difficulty ? `Dificultad ${task.difficulty}` : 'Dificultad desconocida'} · {task.xp} GP
                                                 </p>
@@ -1155,7 +1155,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                               value={notes}
                               onChange={(event) => setNotes(event.target.value)}
                               placeholder="¿Algo que quieras destacar de tu día?"
-                              className="min-h-[96px] resize-y rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3 text-sm text-white placeholder:text-white/40 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                              className="min-h-[96px] resize-y rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3 text-sm text-[color:var(--color-text)] placeholder:text-[color:var(--color-text-subtle)] focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
                             />
                           </section>
                         </>
@@ -1165,7 +1165,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
                   <motion.footer
                     layout={false}
-                    className="sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t border-[color:var(--color-border-subtle)] bg-slate-900/90 px-4 py-2 backdrop-blur md:py-3"
+                    className="sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 backdrop-blur md:py-3"
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <div className="relative text-white">

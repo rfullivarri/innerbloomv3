@@ -273,7 +273,7 @@ function WeeklyChip({
 }) {
   const palette =
     variant === 'accent'
-      ? 'border-emerald-300/60 bg-emerald-400/10 text-emerald-50'
+      ? 'ib-reward-chip-accent border-emerald-300/60 bg-emerald-400/10 text-emerald-50'
       : variant === 'outline'
         ? 'border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] text-[color:var(--color-text)]'
         : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]';
@@ -359,7 +359,7 @@ function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {
         <div className="flex items-center gap-4">
           <span
             className={`flex h-12 w-12 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] text-xl shadow-[0_0_12px_rgba(148,163,184,0.25)] ${
-              isUnlocked ? 'border-emerald-300/40 bg-emerald-400/15 text-emerald-100' : 'text-[color:var(--color-slate-200)]'
+              isUnlocked ? 'ib-reward-unlocked border-emerald-300/40 bg-emerald-400/15 text-emerald-100' : 'text-[color:var(--color-slate-200)]'
             }`}
           >
             {achievement.icon ? (
@@ -383,7 +383,7 @@ function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {
         <span
           className={`inline-flex items-center justify-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
             isUnlocked
-              ? 'border-emerald-300/40 bg-emerald-400/15 text-emerald-100'
+              ? 'ib-reward-unlocked border-emerald-300/40 bg-emerald-400/15 text-emerald-100'
               : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]'
           }`}
         >
@@ -428,8 +428,8 @@ interface RewardsSummaryCardProps {
 function RewardsSummaryCard({ label, value, accent }: RewardsSummaryCardProps) {
   const accentClasses =
     accent === 'emerald'
-      ? 'border-emerald-300/50 bg-emerald-400/10 text-emerald-100'
-      : 'border-sky-400/40 bg-sky-400/10 text-sky-100';
+      ? 'ib-reward-summary-emerald border-emerald-300/50 bg-emerald-400/10 text-emerald-100'
+      : 'ib-reward-summary-sky border-sky-400/40 bg-sky-400/10 text-sky-100';
 
   return (
     <div
