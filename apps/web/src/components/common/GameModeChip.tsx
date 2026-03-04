@@ -10,25 +10,25 @@ interface GameModeChipStyle {
 const GAME_MODE_STYLES: Record<GameMode, GameModeChipStyle> = {
   Flow: {
     label: 'FLOW',
-    backgroundClass: 'bg-gradient-to-r from-sky-500/25 via-indigo-500/30 to-purple-500/25 text-slate-100',
+    backgroundClass: 'bg-gradient-to-r from-sky-500/25 via-indigo-500/30 to-purple-500/25 text-[color:var(--color-text)]',
     glowClass: 'bg-sky-400/40',
     animate: true,
   },
   Chill: {
     label: 'CHILL',
-    backgroundClass: 'bg-gradient-to-r from-emerald-400/25 via-teal-400/30 to-cyan-400/25 text-emerald-50',
+    backgroundClass: 'bg-gradient-to-r from-emerald-400/25 via-teal-400/30 to-cyan-400/25 text-[color:var(--color-text)]',
     glowClass: 'bg-emerald-400/40',
     animate: true,
   },
   Evolve: {
     label: 'EVOLVE',
-    backgroundClass: 'bg-gradient-to-r from-fuchsia-400/25 via-rose-400/30 to-amber-300/25 text-rose-50',
+    backgroundClass: 'bg-gradient-to-r from-fuchsia-400/25 via-rose-400/30 to-amber-300/25 text-[color:var(--color-text)]',
     glowClass: 'bg-fuchsia-400/40',
     animate: true,
   },
   Low: {
     label: 'LOW',
-    backgroundClass: 'bg-gradient-to-r from-rose-500/30 via-red-500/35 to-orange-500/30 text-rose-50',
+    backgroundClass: 'bg-gradient-to-r from-rose-500/30 via-red-500/35 to-orange-500/30 text-[color:var(--color-text)]',
     glowClass: 'bg-rose-500/40',
     animate: true,
   },
@@ -36,7 +36,7 @@ const GAME_MODE_STYLES: Record<GameMode, GameModeChipStyle> = {
 
 const DEFAULT_CHIP_STYLE: GameModeChipStyle = {
   label: 'Modo sin definir',
-  backgroundClass: 'bg-white/10 text-slate-200',
+  backgroundClass: 'bg-white/10 text-[color:var(--color-text)]',
   glowClass: 'bg-slate-400/20',
   animate: false,
 };
