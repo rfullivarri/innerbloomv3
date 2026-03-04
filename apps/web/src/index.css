@@ -4455,3 +4455,58 @@
     opacity: 0.85;
   }
 }
+
+@layer components {
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] {
+    --color-slate-900-95: rgba(255, 255, 255, 0.96);
+    --color-slate-950-80: rgba(241, 245, 255, 0.82);
+  }
+
+  :root[data-theme='light'] [data-light-scope='editor'] {
+    --color-slate-900-95: rgba(255, 255, 255, 0.97);
+    --color-slate-950-80: rgba(241, 245, 255, 0.78);
+  }
+
+  :root[data-theme='light'] [data-light-scope='editor'] input,
+  :root[data-theme='light'] [data-light-scope='editor'] select,
+  :root[data-theme='light'] [data-light-scope='editor'] textarea {
+    color: var(--color-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='editor'] option {
+    background: #ffffff;
+    color: var(--color-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='editor'] [class*='focus:ring-white'] {
+    --tw-ring-color: color-mix(in srgb, var(--color-accent-primary) 42%, transparent) !important;
+  }
+
+  :root[data-theme='light'] [data-light-scope='daily-quest'] {
+    color: var(--color-text);
+    box-shadow: 0 24px 52px rgba(15, 23, 42, 0.12);
+  }
+
+  :root[data-theme='light'] [data-light-scope='daily-quest'] [class*='text-white'] {
+    color: var(--color-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='daily-quest'] [class*='border-white/'] {
+    border-color: var(--color-border-subtle);
+  }
+
+  :root[data-theme='light'] [data-light-scope='daily-quest'] [class*='bg-slate-950/'],
+  :root[data-theme='light'] [data-light-scope='daily-quest'] [class*='bg-slate-900/'] {
+    background-color: var(--color-overlay-1);
+  }
+
+  :root[data-theme='light'] .ib-reward-chip-accent,
+  :root[data-theme='light'] .ib-reward-unlocked,
+  :root[data-theme='light'] .ib-reward-summary-emerald {
+    color: #166534;
+  }
+
+  :root[data-theme='light'] .ib-reward-summary-sky {
+    color: #1e40af;
+  }
+}

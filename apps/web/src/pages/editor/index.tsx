@@ -455,7 +455,7 @@ export default function TaskEditorPage() {
             showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
           }))}
         />
-        <main className="flex-1 pb-24 md:pb-0">
+        <main className="flex-1 pb-24 md:pb-0" data-light-scope="editor">
           <div ref={editorTopRef} className="scroll-mt-24" />
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             <SectionHeader section={taskEditorSection} />
@@ -600,7 +600,7 @@ function SectionHeader({ section }: { section: DashboardSectionConfig }) {
   return (
     <header className="mb-6 space-y-2 md:mb-8">
       {shouldShowTitle && (
-        <h1 className="font-display text-2xl font-semibold text-white sm:text-3xl">
+        <h1 className="font-display text-2xl font-semibold text-[color:var(--color-text)] sm:text-3xl">
           {normalizedTitle}
         </h1>
       )}

@@ -681,7 +681,7 @@ export default function DashboardV3Page() {
             navigate("/editor");
           }}
         />
-        <main className="flex-1 pb-24 md:pb-0">
+        <main className="flex-1 pb-24 md:pb-0" data-light-scope="dashboard-v3">
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             {isLoadingProfile && <ProfileSkeleton />}
 
@@ -978,7 +978,7 @@ function DailyQuestView({
             </button>
           }
         >
-          <div className="space-y-3 text-sm text-white/80">
+          <div className="space-y-3 text-sm text-[color:var(--color-text-muted)]">
             <p>
               Generamos una misión corta y accionable para que mantengas la
               racha. Abrila, confirma tu plan y marcala cuando la completes.
@@ -989,7 +989,7 @@ function DailyQuestView({
                 "Recordatorios opcionales para no olvidarla.",
                 "Registro rápido del resultado y energía invertida.",
               ].map((tip) => (
-                <li key={tip} className="flex items-start gap-2 text-white/75">
+                <li key={tip} className="flex items-start gap-2 text-[color:var(--color-text-muted)]">
                   <span
                     className="mt-1 inline-block h-2 w-2 rounded-full bg-gradient-to-br from-sky-300 via-indigo-300 to-fuchsia-300 shadow-[0_0_12px_rgba(99,102,241,0.45)]"
                     aria-hidden
@@ -1005,14 +1005,14 @@ function DailyQuestView({
           title="Consejos rápidos"
           subtitle="Mantén el hábito vivo"
         >
-          <div className="space-y-3 text-sm text-white/75">
-            <p className="font-semibold text-white">
+          <div className="space-y-3 text-sm text-[color:var(--color-text-muted)]">
+            <p className="font-semibold text-[color:var(--color-text)]">
               DQuest es tu base diaria:
             </p>
             <ul className="space-y-2">
               <li className="flex items-start gap-2">
                 <span
-                  className="mt-1 h-2 w-2 rounded-full bg-white/70"
+                  className="mt-1 h-2 w-2 rounded-full bg-[color:var(--color-text-subtle)]"
                   aria-hidden
                 />
                 <span>
@@ -1021,7 +1021,7 @@ function DailyQuestView({
               </li>
               <li className="flex items-start gap-2">
                 <span
-                  className="mt-1 h-2 w-2 rounded-full bg-white/70"
+                  className="mt-1 h-2 w-2 rounded-full bg-[color:var(--color-text-subtle)]"
                   aria-hidden
                 />
                 <span>
@@ -1030,7 +1030,7 @@ function DailyQuestView({
               </li>
               <li className="flex items-start gap-2">
                 <span
-                  className="mt-1 h-2 w-2 rounded-full bg-white/70"
+                  className="mt-1 h-2 w-2 rounded-full bg-[color:var(--color-text-subtle)]"
                   aria-hidden
                 />
                 <span>
