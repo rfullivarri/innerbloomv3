@@ -1081,7 +1081,7 @@ function MissionsV2View({
             <p className="mt-4 text-2xl font-semibold text-white sm:text-3xl">
               work in progress
             </p>
-            <p className="mt-3 max-w-xl text-sm text-slate-300 sm:text-base">
+            <p className="mt-3 max-w-xl text-sm text-[color:var(--color-slate-300)] sm:text-base">
               Estamos afinando la experiencia de misiones en web. Mientras
               tanto, puedes volver al dashboard o seguir explorando bajo tu
               propio riesgo.
@@ -1202,7 +1202,7 @@ function SectionHeader({
         </h2>
       )}
       {shouldShowDescription && (
-        <p className="text-sm text-slate-400">{normalizedDescription}</p>
+        <p className="text-sm text-[color:var(--color-slate-400)]">{normalizedDescription}</p>
       )}
     </header>
   );
@@ -1215,25 +1215,25 @@ function deriveGameModeFromProfile(mode?: string | null): GameMode | null {
 function ProfileSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="h-6 w-48 animate-pulse rounded bg-white/10" />
+      <div className="h-6 w-48 animate-pulse rounded bg-[color:var(--color-overlay-2)]" />
       <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="lg:col-span-12">
-          <div className="h-32 w-full animate-pulse rounded-2xl bg-white/10" />
+          <div className="h-32 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
         </div>
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <div className="h-36 w-full animate-pulse rounded-2xl bg-white/10" />
-          <div className="h-64 w-full animate-pulse rounded-2xl bg-white/10" />
-          <div className="h-56 w-full animate-pulse rounded-2xl bg-white/10" />
-          <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />
+          <div className="h-36 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
+          <div className="h-64 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
+          <div className="h-56 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
+          <div className="h-48 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
         </div>
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <div className="h-64 w-full animate-pulse rounded-2xl bg-white/10" />
-          <div className="h-64 w-full animate-pulse rounded-2xl bg-white/10" />
+          <div className="h-64 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
+          <div className="h-64 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
         </div>
         <div className="space-y-4 md:space-y-5 lg:col-span-4">
-          <div className="h-72 w-full animate-pulse rounded-2xl bg-white/10" />
-          <div className="h-72 w-full animate-pulse rounded-2xl bg-white/10" />
-          <div className="h-48 w-full animate-pulse rounded-2xl bg-white/10" />
+          <div className="h-72 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
+          <div className="h-72 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
+          <div className="h-48 w-full animate-pulse rounded-2xl bg-[color:var(--color-overlay-2)]" />
         </div>
       </div>
     </div>
@@ -1276,14 +1276,14 @@ function ProfileErrorState({ onRetry, error }: ProfileErrorStateProps) {
 function DashboardFallback() {
   return (
     <div className="mt-8 space-y-6">
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-slate-200 shadow-glow">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+      <section className="rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-6 text-[color:var(--color-slate-200)] shadow-glow">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">
           Vista previa sin conexión
         </p>
         <h2 className="mt-3 font-display text-2xl font-semibold text-white">
           Estamos preparando tu Dashboard
         </h2>
-        <p className="mt-2 text-sm text-slate-300">
+        <p className="mt-2 text-sm text-[color:var(--color-slate-300)]">
           Conservá esta ventana abierta: los datos de GP, emociones y misiones
           aparecerán automáticamente cuando recuperemos la conexión con el
           servidor.
@@ -1297,10 +1297,10 @@ function DashboardFallback() {
             subtitle="Se actualizará al reconectar"
             className="min-h-[180px]"
           >
-            <div className="space-y-3 text-sm text-slate-200">
+            <div className="space-y-3 text-sm text-[color:var(--color-slate-200)]">
               <FallbackMetric label="Quests completadas" value="0 / —" />
               <FallbackMetric label="GP hoy" value="—" />
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[color:var(--color-slate-400)]">
                 Tu progreso diario aparece acá cuando la API responde.
               </p>
             </div>
@@ -1312,13 +1312,13 @@ function DashboardFallback() {
             className="min-h-[180px]"
           >
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full border border-white/10 bg-white/10" />
-              <div className="space-y-2 text-xs text-slate-300">
-                <div className="h-3 w-24 rounded bg-white/10" />
-                <div className="h-3 w-16 rounded bg-white/10" />
+              <div className="h-12 w-12 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)]" />
+              <div className="space-y-2 text-xs text-[color:var(--color-slate-300)]">
+                <div className="h-3 w-24 rounded bg-[color:var(--color-overlay-2)]" />
+                <div className="h-3 w-16 rounded bg-[color:var(--color-overlay-2)]" />
               </div>
             </div>
-            <p className="mt-4 text-xs text-slate-400">
+            <p className="mt-4 text-xs text-[color:var(--color-slate-400)]">
               Mostramos tus datos personales en cuanto podamos sincronizar tu
               perfil.
             </p>
@@ -1331,8 +1331,8 @@ function DashboardFallback() {
             subtitle="Últimos 7 días"
             className="min-h-[180px]"
           >
-            <div className="h-24 rounded-2xl border border-white/10 bg-gradient-to-r from-slate-800/60 via-slate-900/40 to-slate-800/60" />
-            <p className="text-xs text-slate-400">
+            <div className="h-24 rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-r from-slate-800/60 via-slate-900/40 to-slate-800/60" />
+            <p className="text-xs text-[color:var(--color-slate-400)]">
               El mapa emocional vuelve automáticamente una vez que la API
               responda.
             </p>
@@ -1345,10 +1345,10 @@ function DashboardFallback() {
             subtitle="Seguimiento semanal"
             className="min-h-[180px]"
           >
-            <div className="space-y-3 text-xs text-slate-300">
+            <div className="space-y-3 text-xs text-[color:var(--color-slate-300)]">
               <FallbackMetric label="Daily Quest" value="En espera" />
               <FallbackMetric label="Weekly GP" value="Sin datos" />
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[color:var(--color-slate-400)]">
                 Apenas detectemos actividad, tus rachas se renderizan acá.
               </p>
             </div>
@@ -1359,17 +1359,17 @@ function DashboardFallback() {
             subtitle="Logros desbloqueados"
             className="min-h-[180px]"
           >
-            <div className="space-y-2 text-xs text-slate-200">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            <div className="space-y-2 text-xs text-[color:var(--color-slate-200)]">
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
                   Siguiente badge
                 </p>
                 <p className="mt-2 text-sm text-white">
                   Disponible al reconectar
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
                   Último logro
                 </p>
                 <p className="mt-2 text-sm text-white">Sincronizando…</p>
@@ -1384,8 +1384,8 @@ function DashboardFallback() {
 
 function FallbackMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-      <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-400">
+    <div className="flex items-center justify-between rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-2">
+      <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-[color:var(--color-slate-400)]">
         {label}
       </span>
       <span className="text-sm font-semibold text-white">{value}</span>

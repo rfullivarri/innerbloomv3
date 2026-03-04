@@ -155,7 +155,7 @@ type EmotionTheme = {
 const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   calm: {
     chipInactive:
-      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
     chipActive:
       'bg-gradient-to-r from-sky-400/90 via-sky-500/80 to-indigo-400/80 text-white ring-1 ring-sky-300/60',
     chipShadow: 'shadow-[0_12px_32px_rgba(56,189,248,0.45)]',
@@ -166,7 +166,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   happy: {
     chipInactive:
-      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
     chipActive:
       'bg-gradient-to-r from-amber-300/90 via-orange-400/80 to-rose-400/80 text-white ring-1 ring-amber-200/60',
     chipShadow: 'shadow-[0_12px_32px_rgba(251,191,36,0.45)]',
@@ -177,7 +177,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   motivation: {
     chipInactive:
-      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
     chipActive:
       'bg-gradient-to-r from-violet-400/90 via-fuchsia-500/80 to-purple-500/80 text-white ring-1 ring-violet-300/60',
     chipShadow: 'shadow-[0_12px_32px_rgba(139,92,246,0.45)]',
@@ -188,7 +188,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   sad: {
     chipInactive:
-      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
     chipActive:
       'bg-gradient-to-r from-indigo-400/90 via-blue-500/80 to-slate-500/80 text-white ring-1 ring-indigo-300/60',
     chipShadow: 'shadow-[0_12px_32px_rgba(99,102,241,0.45)]',
@@ -199,7 +199,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   anxiety: {
     chipInactive:
-      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
     chipActive:
       'bg-gradient-to-r from-rose-400/90 via-pink-500/80 to-red-400/80 text-white ring-1 ring-rose-300/60',
     chipShadow: 'shadow-[0_12px_32px_rgba(244,63,94,0.45)]',
@@ -210,7 +210,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   frustration: {
     chipInactive:
-      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
     chipActive:
       'bg-gradient-to-r from-orange-400/90 via-amber-400/80 to-red-400/80 text-white ring-1 ring-orange-300/60',
     chipShadow: 'shadow-[0_12px_32px_rgba(249,115,22,0.45)]',
@@ -221,7 +221,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   },
   tired: {
     chipInactive:
-      'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
     chipActive:
       'bg-gradient-to-r from-violet-400/90 via-purple-500/80 to-slate-500/80 text-white ring-1 ring-violet-300/60',
     chipShadow: 'shadow-[0_12px_32px_rgba(139,92,246,0.45)]',
@@ -234,7 +234,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
 
 const DEFAULT_EMOTION_THEME: EmotionTheme = {
   chipInactive:
-    'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',
+    'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
   chipActive:
     'bg-gradient-to-r from-indigo-400/90 via-fuchsia-500/80 to-amber-300/80 text-white ring-1 ring-indigo-300/60',
   chipShadow: 'shadow-[0_12px_32px_rgba(99,102,241,0.45)]',
@@ -877,7 +877,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
           <AnimatePresence presenceAffectsLayout={false}>
             {isOpen && (
               <motion.div
-                className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/80 p-2 md:p-4"
+                className="fixed inset-0 z-[9999] flex items-center justify-center bg-[color:var(--color-slate-950-80)] p-2 md:p-4"
                 variants={overlayVariants}
                 initial="hidden"
                 animate="visible"
@@ -904,7 +904,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   animate="visible"
                   exit="hidden"
                   transition={{ duration: 0.24, ease: 'easeOut' }}
-                  className="pointer-events-auto relative mx-auto flex h-[100dvh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-slate-900/95 text-white shadow-2xl backdrop-blur md:max-w-2xl"
+                  className="pointer-events-auto relative mx-auto flex h-[100dvh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-[color:var(--color-slate-900-95)] text-white shadow-2xl backdrop-blur md:max-w-2xl"
                   layout={false}
                   onClick={(event: MouseEvent<HTMLDivElement>) => {
                     event.stopPropagation();
@@ -912,7 +912,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                 >
                   <motion.header
                     layout={false}
-                    className="sticky top-[env(safe-area-inset-top)] z-10 flex flex-col justify-center border-b border-white/10 bg-slate-900/95 px-4 py-3 backdrop-blur md:py-4"
+                    className="sticky top-[env(safe-area-inset-top)] z-10 flex flex-col justify-center border-b border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] px-4 py-3 backdrop-blur md:py-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1.5">
@@ -928,7 +928,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                       <button
                         ref={closeButtonRef}
                         type="button"
-                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm text-white/80 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-sm text-white/80 transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                         onClick={handleSnooze}
                         aria-label="Cerrar Daily Quest"
                       >
@@ -943,17 +943,17 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   >
                     <div className="flex flex-col gap-6 pb-6">
                       {showSkeleton && (
-                        <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/60">
-                          <div className="h-3 w-24 animate-pulse rounded-full bg-white/10" />
-                          <div className="h-3 w-3/4 animate-pulse rounded-full bg-white/10" />
-                          <div className="h-3 w-5/6 animate-pulse rounded-full bg-white/10" />
+                        <div className="flex flex-col gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-faint)]">
+                          <div className="h-3 w-24 animate-pulse rounded-full bg-[color:var(--color-overlay-2)]" />
+                          <div className="h-3 w-3/4 animate-pulse rounded-full bg-[color:var(--color-overlay-2)]" />
+                          <div className="h-3 w-5/6 animate-pulse rounded-full bg-[color:var(--color-overlay-2)]" />
                         </div>
                       )}
 
                       {canShowContent && definition && (
                         <>
                           <section className="flex flex-col gap-2">
-                            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">
+                            <h3 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-dim)]">
                               ¿Qué sentimiento prevaleció más el día de ayer?
                             </h3>
                             <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Emociones disponibles">
@@ -1029,7 +1029,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                             key={task.task_id}
                                             whileTap={{ scale: 0.98 }}
                                             className={classNames(
-                                              'group relative flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/5 p-4 text-left transition duration-200 hover:bg-white/[0.07] focus-within:ring-2 focus-within:ring-white/60',
+                                              'group relative flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-[color:var(--color-overlay-1)] p-4 text-left transition duration-200 hover:bg-white/[0.07] focus-within:ring-2 focus-within:ring-white/60',
                                               isSelected && 'bg-white/[0.12] backdrop-blur-sm',
                                             )}
                                           >
@@ -1115,7 +1115,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                                   'flex h-5 w-5 items-center justify-center rounded-full border text-[10px] transition-colors duration-200',
                                                   isSelected
                                                     ? classNames(theme.checkBackground, theme.checkBorder, theme.checkText)
-                                                    : 'border-white/20 text-white/40',
+                                                    : 'border-[color:var(--color-border-soft)] text-white/40',
                                                 )}
                                                 initial={false}
                                                 animate={{ scale: isSelected ? 1 : 0.92 }}
@@ -1125,7 +1125,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                               </motion.span>
                                               <div className="space-y-1">
                                                 <p className="font-medium text-white">{task.name}</p>
-                                                <p className="text-xs text-white/60">
+                                                <p className="text-xs text-[color:var(--color-text-faint)]">
                                                   {task.difficulty ? `Dificultad ${task.difficulty}` : 'Dificultad desconocida'} · {task.xp} GP
                                                 </p>
                                               </div>
@@ -1147,7 +1147,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           </section>
 
                           <section className="flex flex-col gap-2">
-                            <label htmlFor="daily-quest-notes" className="text-sm font-semibold uppercase tracking-wide text-white/70">
+                            <label htmlFor="daily-quest-notes" className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-dim)]">
                               Notas opcionales
                             </label>
                             <textarea
@@ -1155,7 +1155,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                               value={notes}
                               onChange={(event) => setNotes(event.target.value)}
                               placeholder="¿Algo que quieras destacar de tu día?"
-                              className="min-h-[96px] resize-y rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white placeholder:text-white/40 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                              className="min-h-[96px] resize-y rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3 text-sm text-white placeholder:text-white/40 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
                             />
                           </section>
                         </>
@@ -1165,11 +1165,11 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
                   <motion.footer
                     layout={false}
-                    className="sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t border-white/10 bg-slate-900/90 px-4 py-2 backdrop-blur md:py-3"
+                    className="sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t border-[color:var(--color-border-subtle)] bg-slate-900/90 px-4 py-2 backdrop-blur md:py-3"
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <div className="relative text-white">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">Experiencia ganada</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-faint)]">Experiencia ganada</p>
                         <p className="mt-1 text-2xl font-bold md:text-3xl">
                           GP:{' '}
                           <span
@@ -1198,7 +1198,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                         <button
                           type="button"
                           onClick={handleSnooze}
-                          className="h-10 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white/70 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:h-11 md:px-6"
+                          className="h-10 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:h-11 md:px-6"
                         >
                           Más tarde
                         </button>
@@ -1261,7 +1261,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.96 }}
                           transition={{ duration: 0.28, ease: 'easeOut' }}
-                          className="relative z-10 mx-4 flex max-w-sm flex-col items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-6 py-5 text-center text-sm font-semibold text-white shadow-[0_24px_80px_rgba(56,189,248,0.35)]"
+                          className="relative z-10 mx-4 flex max-w-sm flex-col items-center gap-3 rounded-2xl border border-white/15 bg-[color:var(--color-overlay-2)] px-6 py-5 text-center text-sm font-semibold text-white shadow-[0_24px_80px_rgba(56,189,248,0.35)]"
                         >
                           <span className="text-base md:text-lg">{successCelebration.message}</span>
                           <span className="rounded-full bg-emerald-500/25 px-3 py-1 text-[11px] font-semibold text-emerald-100 ring-1 ring-emerald-400/40">
@@ -1275,19 +1275,19 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           {successCelebration.action && (
                             <a
                               href={successCelebration.action.href}
-                              className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-white shadow-sm transition hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-3)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-white shadow-sm transition hover:bg-[color:var(--color-overlay-5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                             >
                               {successCelebration.action.label}
                             </a>
                           )}
                           {isCelebrationHoldReady && (
                             <div className="mt-1 flex w-full flex-col items-center gap-2 text-[12px] text-white/80" id="daily-quest-celebration-hold-instructions">
-                              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/70">
+                              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[color:var(--color-text-dim)]">
                                 Mantené presionado 2 segundos para cerrar
                               </span>
                               <motion.button
                                 type="button"
-                                className="relative flex w-full max-w-xs items-center justify-center overflow-hidden rounded-full border border-white/25 bg-white/10 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.3em] text-white shadow-[0_18px_38px_rgba(16,185,129,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                                className="relative flex w-full max-w-xs items-center justify-center overflow-hidden rounded-full border border-white/25 bg-[color:var(--color-overlay-2)] px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.3em] text-white shadow-[0_18px_38px_rgba(16,185,129,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                                 onPointerDown={(event: PointerEvent<HTMLButtonElement>) => {
                                   event.preventDefault();
                                   startCelebrationHold({
@@ -1318,7 +1318,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                 transition={{ duration: 0.18, ease: 'easeOut' }}
                               >
                                 <motion.span
-                                  className="absolute inset-0 rounded-full bg-white/20"
+                                  className="absolute inset-0 rounded-full bg-[color:var(--color-overlay-4)]"
                                   initial={false}
                                   animate={{
                                     opacity: celebrationHoldProgress > 0 ? 0.65 : 0,
@@ -1328,7 +1328,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                 />
                                 <span className="relative z-10">Mantené presionado</span>
                               </motion.button>
-                              <div className="h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-white/15">
+                              <div className="h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-[color:var(--color-overlay-3)]">
                                 <motion.div
                                   className="h-full rounded-full bg-white/90"
                                   initial={{ width: '0%' }}
@@ -1374,7 +1374,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
               {toast.action && (
                 <a
                   href={toast.action.href}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-white shadow-sm transition hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-3)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-white shadow-sm transition hover:bg-[color:var(--color-overlay-5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                 >
                   {toast.action.label}
                 </a>
