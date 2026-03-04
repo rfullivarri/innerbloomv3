@@ -4509,4 +4509,27 @@
   :root[data-theme='light'] .ib-reward-summary-sky {
     color: #1e40af;
   }
+
+  :root[data-theme='light'] .ib-streak-pill-tab-active {
+    border-color: color-mix(in srgb, #8b5cf6 38%, #d8b4fe 62%);
+    background: color-mix(in srgb, #f3e8ff 74%, #ffffff 26%);
+    color: #7c3aed;
+    box-shadow:
+      0 8px 18px rgba(124, 58, 237, 0.15),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.85);
+  }
+
+  :root[data-theme='light'] .ib-streak-fire-chip {
+    --glow-primary: rgba(192, 132, 252, 0.78);
+    --glow-secondary: rgba(139, 92, 246, 0.46);
+  }
+
+  :root[data-theme='light'] .ib-streak-fire-chip .ib-streak-fire-chip__inner {
+    border-color: color-mix(in srgb, #8b5cf6 44%, #e9d5ff 56%);
+    background: linear-gradient(120deg, rgba(243, 232, 255, 0.94) 0%, rgba(233, 213, 255, 0.9) 100%);
+    color: #7c3aed;
+    box-shadow:
+      0 10px 20px rgba(139, 92, 246, 0.18),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.82);
+  }
 }
