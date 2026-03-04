@@ -102,8 +102,8 @@
 
   :root[data-theme='light'] {
     color-scheme: light;
-    --color-surface: #ffffff;
-    --color-surface-muted: #f5f7fb;
+    --color-surface: #f8fafc;
+    --color-surface-muted: #f1f5f9;
     --color-surface-elevated: #ffffff;
     --color-surface-highlight: #f8faff;
     --color-text: #0f172a;
@@ -128,14 +128,14 @@
     --color-slate-400: #64748b;
     --color-slate-900-95: rgba(255, 255, 255, 0.95);
     --color-slate-950-80: rgba(248, 250, 255, 0.8);
-    --color-card-gradient: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.12), rgba(255, 255, 255, 0.95));
-    --color-card-highlight-gradient: radial-gradient(ellipse at top, rgba(217, 70, 239, 0.14), rgba(255, 255, 255, 0.95));
-    --color-card-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-    --color-glass-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+    --color-card-gradient: linear-gradient(180deg, #ffffff, #ffffff);
+    --color-card-highlight-gradient: linear-gradient(180deg, #ffffff, #f8faff);
+    --color-card-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    --color-glass-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.94));
     --color-glow-soft: rgba(248, 250, 255, 0.9);
-    --shadow-elev-1: 0 8px 24px rgba(15, 23, 42, 0.1);
-    --shadow-elev-2: 0 18px 40px rgba(99, 102, 241, 0.12);
-    --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 255, 0.88));
+    --shadow-elev-1: 0 8px 20px rgba(15, 23, 42, 0.08);
+    --shadow-elev-2: 0 16px 40px rgba(15, 23, 42, 0.1);
+    --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 255, 0.94));
     --glass-border: rgba(148, 163, 184, 0.28);
     --onboarding-glass-surface-base: rgba(255, 255, 255, 0.92);
     --onboarding-glass-surface-inner: rgba(255, 255, 255, 0.85);
@@ -159,10 +159,7 @@
   }
 
   :root[data-theme='light'] body {
-    background-image:
-      radial-gradient(circle at top left, rgba(99, 102, 241, 0.1), transparent 55%),
-      radial-gradient(circle at 20% 80%, rgba(217, 70, 239, 0.1), transparent 60%),
-      linear-gradient(180deg, #ffffff 0%, #f8faff 58%, #f5f7fb 100%);
+    background-image: linear-gradient(180deg, #f8fafc 0%, #f8fafc 100%);
   }
 
 
@@ -4531,5 +4528,100 @@
     box-shadow:
       0 10px 20px rgba(139, 92, 246, 0.18),
       inset 0 0 0 1px rgba(255, 255, 255, 0.82);
+  }
+}
+
+@layer utilities {
+  :root[data-theme='light'] .info-dot__button {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #334155;
+    box-shadow: var(--shadow-elev-1);
+  }
+
+  :root[data-theme='light'] .info-dot__button:hover {
+    background: #ede9fe;
+    color: #5b21b6;
+  }
+
+  :root[data-theme='light'] .info-dot__popover {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: #dbe3f0;
+    color: #334155;
+    box-shadow: var(--shadow-elev-2);
+    backdrop-filter: blur(10px);
+  }
+
+  :root[data-theme='light'] .info-dot__title {
+    color: var(--color-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] h2,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] h3,
+  :root[data-theme='light'] [data-light-scope='editor'] h1,
+  :root[data-theme='light'] [data-light-scope='editor'] h2,
+  :root[data-theme='light'] [data-light-scope='editor'] h3 {
+    color: var(--color-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .text-white,
+  :root[data-theme='light'] [data-light-scope='editor'] .text-white,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .text-slate-100,
+  :root[data-theme='light'] [data-light-scope='editor'] .text-slate-100 {
+    color: var(--color-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .text-slate-200,
+  :root[data-theme='light'] [data-light-scope='editor'] .text-slate-200,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .text-slate-300,
+  :root[data-theme='light'] [data-light-scope='editor'] .text-slate-300 {
+    color: var(--color-text-muted);
+  }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .text-slate-400,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .text-slate-500,
+  :root[data-theme='light'] [data-light-scope='editor'] .text-slate-400,
+  :root[data-theme='light'] [data-light-scope='editor'] .text-slate-500 {
+    color: var(--color-text-subtle);
+  }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .bg-white\/5,
+  :root[data-theme='light'] [data-light-scope='editor'] .bg-white\/5,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .bg-white\/10,
+  :root[data-theme='light'] [data-light-scope='editor'] .bg-white\/10,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .bg-black\/20,
+  :root[data-theme='light'] [data-light-scope='editor'] .bg-black\/20,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .bg-black\/25,
+  :root[data-theme='light'] [data-light-scope='editor'] .bg-black\/25,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .bg-slate-900\/60,
+  :root[data-theme='light'] [data-light-scope='editor'] .bg-slate-900\/60,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .bg-slate-900\/80,
+  :root[data-theme='light'] [data-light-scope='editor'] .bg-slate-900\/80 {
+    background: var(--color-overlay-1);
+  }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .border-white\/10,
+  :root[data-theme='light'] [data-light-scope='editor'] .border-white\/10,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .border-white\/15,
+  :root[data-theme='light'] [data-light-scope='editor'] .border-white\/15,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .border-white\/20,
+  :root[data-theme='light'] [data-light-scope='editor'] .border-white\/20,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .border-white\/30,
+  :root[data-theme='light'] [data-light-scope='editor'] .border-white\/30,
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .border-white\/5,
+  :root[data-theme='light'] [data-light-scope='editor'] .border-white\/5 {
+    border-color: var(--color-border-subtle);
+  }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] [aria-label='Radar de GP por rasgo'] circle:first-of-type {
+    opacity: 0;
+  }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] [aria-label='Radar de GP por rasgo'] line {
+    stroke: color-mix(in srgb, var(--color-text-subtle) 78%, transparent);
+  }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] [aria-label='Radar de GP por rasgo'] text {
+    fill: var(--color-text-muted);
   }
 }
