@@ -806,7 +806,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                       TAB_BUTTON_BASE,
                       'leading-none',
                       isActive
-                        ? 'ib-streak-pill-tab-active border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)]'
+                        ? 'ib-streak-pill-tab-active border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)] dark:border-white/90 dark:bg-white dark:text-black'
                         : 'border-transparent bg-transparent text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]',
                     )}
                     aria-pressed={isActive}
@@ -876,7 +876,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                   className={cx(
                     TAB_BUTTON_BASE,
                     isActive
-                      ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)]'
+                      ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)] dark:border-white/90 dark:bg-white dark:text-black'
                       : 'border-transparent bg-transparent text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]',
                   )}
                   aria-pressed={isActive}
