@@ -351,7 +351,6 @@ function Radar({ dataset }: RadarProps) {
         const lineEnd = basePointFor(radius, index);
         const labelPoint = basePointFor(radius + 30, index);
         const normalized = maxValue > 0 ? Math.min(Math.max(axis.xp / maxValue, 0), 1) : 0;
-        const valuePoint = pointFor(axis.xp, index);
         const valueDistance = normalized * radius;
         const xpLabelOffset = normalized > 0 ? 24 : 36;
         const xpLabelPoint = basePointFor(Math.min(radius + 48, valueDistance + xpLabelOffset), index);
@@ -393,7 +392,6 @@ function Radar({ dataset }: RadarProps) {
             >
               {xpLabel}
             </text>
-            <circle cx={valuePoint.x} cy={valuePoint.y} r={4 + normalized * 4} fill="rgba(125,211,252,0.65)" />
           </g>
         );
       })}
