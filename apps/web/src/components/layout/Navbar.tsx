@@ -37,12 +37,12 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
   const hasSections = Boolean(sections && sections.length > 0);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/5 bg-surface/60 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] shadow-[var(--shadow-elev-1)] backdrop-blur-xl">
       <div className="flex w-full flex-wrap items-center justify-between gap-2 px-3 py-3 sm:px-4 md:flex-nowrap md:px-8 md:py-4">
         <div className="flex flex-1 min-w-0 flex-wrap items-center justify-start gap-x-2 gap-y-1 text-left sm:gap-x-3 md:flex-row">
           <div className="min-w-0">
             <p className="text-[0.6rem] uppercase tracking-[0.35em] text-text-muted md:text-xs">Innerbloom</p>
-            <h1 className="font-display text-[1.05rem] font-semibold text-white md:text-xl lg:text-2xl">
+            <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl lg:text-2xl">
               {resolvedTitle}
             </h1>
           </div>
@@ -64,10 +64,10 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
                 }}
                 className={({ isActive }: { isActive: boolean }) =>
                   combine(
-                    'relative inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1.5 text-[9px] font-semibold tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+                    'relative inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1.5 text-[9px] font-semibold tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-overlay-4)]',
                     isActive
-                      ? 'border-white/40 bg-white/20 text-white shadow-[0_8px_24px_rgba(148,163,184,0.35)]'
-                      : 'border-white/10 bg-white/5 text-text hover:border-white/20 hover:bg-white/10',
+                      ? 'border-[color:var(--glass-border)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)]'
+                      : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)] hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]',
                   )
                 }
               >
@@ -96,7 +96,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
           {menuSlot}
           {planSlot}
           {displayName && (
-            <span className="hidden rounded-full bg-white/10 px-3 py-1 text-xs text-text-muted md:inline-flex">
+            <span className="hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs text-text-muted md:inline-flex">
               {displayName}
             </span>
           )}

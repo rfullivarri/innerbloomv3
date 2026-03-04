@@ -875,33 +875,33 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
 
       {showError && <p className="text-sm text-rose-300">Todavía no pudimos cargar tus emociones.</p>}
 
-      {showEmpty && <p className="text-sm text-slate-400">Registrá tu primera emoción para ver el mapa de calor.</p>}
+      {showEmpty && <p className="text-sm text-[color:var(--color-text-subtle)]">Registrá tu primera emoción para ver el mapa de calor.</p>}
 
       {(!showSkeleton && !showError && !showEmpty) || hasRecordedEmotion ? (
         <div className="flex flex-col gap-5">
-          <div className="flex flex-wrap gap-4 text-xs text-slate-400">
+          <div className="flex flex-wrap gap-4 text-xs text-[color:var(--color-text-subtle)]">
             {LEGEND.map((item) => (
               <div key={item.name} className="flex items-center gap-2">
                 <span
-                  className="h-4 w-4 rounded-md border border-white/10"
+                  className="h-4 w-4 rounded-md border border-[color:var(--color-border-subtle)]"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="font-medium text-slate-100">{item.name}</span>
+                <span className="font-medium text-[color:var(--color-text)]">{item.name}</span>
               </div>
             ))}
           </div>
 
-          {rangeLabel && <p className="text-xs text-slate-400">Período analizado: {rangeLabel}</p>}
+          {rangeLabel && <p className="text-xs text-[color:var(--color-text-subtle)]">Período analizado: {rangeLabel}</p>}
 
           <div
-            className="rounded-ib-md border border-white/10 bg-white/5 p-0"
+            className="rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[image:var(--glass-bg)] p-0 shadow-[var(--shadow-elev-1)]"
             data-emotion-card="heatmap"
             ref={heatmapRef}
           >
             <div id="emotionChart">
               <div className="emotion-chart-surface">
                 <div ref={gridBoxRef} className="grid-box" style={gridStyle}>
-                  <div className="month-row text-[10px] uppercase tracking-wide text-slate-500">
+                  <div className="month-row text-[10px] uppercase tracking-wide text-[color:var(--color-text-subtle)]">
                     {monthSegments.map((segment) => (
                       <span
                         key={segment.key}
@@ -950,21 +950,21 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
           </div>
           <div ref={summaryRef} data-emotion-card="summary">
             {highlight ? (
-              <div className="summary-inner w-full rounded-ib-md border border-white/10 bg-white/5 p-3 text-left sm:p-4">
+              <div className="summary-inner w-full rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left sm:p-4">
                 <div
                   className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
                   style={{ backgroundColor: highlight.color }}
                 />
                 <div className="summary-content">
-                  <span className="summary-title text-slate-100">{highlight.emotion}</span>
-                  <span className="summary-description text-sm text-slate-100 opacity-70">
+                  <span className="summary-title text-[color:var(--color-text)]">{highlight.emotion}</span>
+                  <span className="summary-description text-sm text-[color:var(--color-text)] opacity-70">
                     Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
                     {highlight.count === 1 ? 'registro' : 'registros'})
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="summary-inner rounded-ib-md border border-white/10 bg-white/5 p-3 text-xs text-slate-400 sm:p-4">
+              <div className="summary-inner rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-xs text-[color:var(--color-text-subtle)] sm:p-4">
                 <div className="summary-content">
                   <span className="summary-description">
                     Aún no hay suficiente información reciente para destacar una emoción.

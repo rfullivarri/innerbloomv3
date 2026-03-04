@@ -25,7 +25,7 @@ function nextStatus(status: ModerationStatus): ModerationStatus {
 
 function chipStateClass(status: ModerationStatus): string {
   const baseClass =
-    "border-white/10 bg-[radial-gradient(ellipse_at_top,_rgba(35,43,76,0.35),_rgba(17,24,39,0.55))] shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md";
+    "border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] shadow-[var(--shadow-elev-1)] backdrop-blur-md";
 
   if (status === "on_track") {
     return `${baseClass} before:absolute before:inset-0 before:rounded-[inherit] before:bg-emerald-300/[0.08] before:opacity-100 before:content-['']`;
@@ -107,7 +107,7 @@ function Chip({
     <button
       type="button"
       onClick={() => onCycle(tracker.type, nextStatus(tracker.statusToday))}
-      className={`relative w-full overflow-hidden rounded-ib-lg border px-3 pb-6 pt-[0.3125rem] text-left transition-all duration-200 hover:border-white/20 hover:bg-white/[0.07] sm:px-3.5 sm:pb-6 sm:pt-1.5 ${chipStateClass(tracker.statusToday)}`}
+      className={`relative w-full overflow-hidden rounded-ib-lg border px-3 pb-6 pt-[0.3125rem] text-left transition-all duration-200 hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] sm:px-3.5 sm:pb-6 sm:pt-1.5 ${chipStateClass(tracker.statusToday)}`}
       title={meta.hint}
       {...longPressBind}
     >
@@ -127,24 +127,24 @@ function Chip({
       ) : null}
       <div className="relative z-10 flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="mt-2 flex min-w-0 items-center gap-2 text-white/85">
+          <div className="mt-2 flex min-w-0 items-center gap-2 text-[color:var(--color-text-muted)]">
             <ModerationTrackerIcon
               type={tracker.type}
-              className="h-8 w-8 shrink-0 text-white/90"
+              className="h-8 w-8 shrink-0 text-[color:var(--color-text-muted)]"
             />
           </div>
         </div>
-        <span className="mt-2 shrink-0 leading-none text-amber-100/95">
+        <span className="mt-2 shrink-0 leading-none text-[color:var(--color-text)]">
           <span className="text-[2.45rem] font-semibold sm:text-[2.7rem]">
             {tracker.current_streak_days}
           </span>
-          <span className="ml-0.5 align-top text-[1.05rem] font-semibold text-amber-100/90 sm:text-[1.2rem]">
+          <span className="ml-0.5 align-top text-[1.05rem] font-semibold text-[color:var(--color-text-subtle)] sm:text-[1.2rem]">
             d
           </span>
         </span>
       </div>
       <p
-        className="pointer-events-none absolute bottom-2 left-1/2 z-10 w-full -translate-x-1/2 truncate px-2 text-center text-[0.72rem] font-medium tracking-[0.02em] text-white/72"
+        className="pointer-events-none absolute bottom-2 left-1/2 z-10 w-full -translate-x-1/2 truncate px-2 text-center text-[0.72rem] font-medium tracking-[0.02em] text-[color:var(--color-text-muted)]"
         title={meta.hint}
       >
         {meta.label}
@@ -180,7 +180,7 @@ export function ModerationWidget({
         className={`grid gap-2.5 sm:gap-3 ${activeCount === 1 ? "grid-cols-1" : ""} ${activeCount === 2 ? "grid-cols-2" : ""} ${activeCount === 3 ? "grid-cols-3 max-[360px]:grid-cols-2" : ""}`}
       >
         {loading && (
-          <div className="h-20 animate-pulse rounded-ib-lg border border-white/10 bg-white/10" />
+          <div className="h-20 animate-pulse rounded-ib-lg border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
         )}
         {!loading &&
           enabled.map((tracker) => (

@@ -110,7 +110,7 @@ export function RewardsSection({
           type="button"
           onClick={reload}
           disabled={status === 'loading'}
-          className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white disabled:opacity-60"
+          className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)] disabled:opacity-60"
         >
           Actualizar
         </button>
@@ -196,7 +196,7 @@ function WeeklyWrappedShelf({ items, onOpen }: WeeklyWrappedShelfProps) {
   }
 
   return (
-    <div className="space-y-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[0_1px_12px_rgba(15,23,42,0.45)]">
+    <div className="space-y-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[var(--shadow-elev-1)]">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-dim)]">Weekly Wrapped</p>
@@ -226,7 +226,7 @@ function WeeklyWrappedCard({
   const weekRangeLabel = formatWeekRange(record.payload).toUpperCase();
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-[color:var(--color-border-subtle)] bg-slate-950/40 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.35)]">
+    <div className="flex flex-col gap-3 rounded-xl border border-[color:var(--color-border-subtle)] bg-[image:var(--glass-bg)] p-4 shadow-[var(--shadow-elev-1)]">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
           <p className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-400)]">
@@ -248,7 +248,7 @@ function WeeklyWrappedCard({
       <button
         type="button"
         onClick={() => onOpen?.(record)}
-        className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-soft)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:-translate-y-0.5 hover:border-emerald-300/50 hover:bg-emerald-400/10 hover:text-emerald-50"
+        className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-soft)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text)] transition hover:-translate-y-0.5 hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]"
       >
         Ver detalles
       </button>
@@ -275,8 +275,8 @@ function WeeklyChip({
     variant === 'accent'
       ? 'border-emerald-300/60 bg-emerald-400/10 text-emerald-50'
       : variant === 'outline'
-        ? 'border-white/25 bg-[color:var(--color-overlay-1)] text-white'
-        : 'border-white/15 bg-[color:var(--color-overlay-1)] text-white/80';
+        ? 'border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] text-[color:var(--color-text)]'
+        : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]';
 
   const sizeClasses =
     size === 'small' ? 'gap-1 px-2 py-0.5 text-[8.5px]' : 'gap-2 px-3 py-1 text-[11px]';
@@ -354,7 +354,7 @@ function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {
     : `${Math.round(current)} / ${target} completado`;
 
   return (
-    <li className="space-y-4 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[0_1px_12px_rgba(15,23,42,0.45)] md:p-5">
+    <li className="space-y-4 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[var(--shadow-elev-1)] md:p-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
           <span
@@ -376,7 +376,7 @@ function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {
             )}
           </span>
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-white">{achievement.name}</p>
+            <p className="text-sm font-semibold text-[color:var(--color-text)]">{achievement.name}</p>
             <p className="text-xs text-[color:var(--color-slate-400)]">{detailLabel}</p>
           </div>
         </div>
@@ -384,7 +384,7 @@ function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {
           className={`inline-flex items-center justify-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
             isUnlocked
               ? 'border-emerald-300/40 bg-emerald-400/15 text-emerald-100'
-              : 'border-slate-500/40 bg-slate-800/60 text-[color:var(--color-slate-300)]'
+              : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]'
           }`}
         >
           {statusLabel}
@@ -433,10 +433,10 @@ function RewardsSummaryCard({ label, value, accent }: RewardsSummaryCardProps) {
 
   return (
     <div
-      className={`flex flex-col gap-2 rounded-2xl border ${accentClasses} p-4 shadow-[0_0_20px_rgba(8,47,73,0.35)] backdrop-blur`}
+      className={`flex flex-col gap-2 rounded-2xl border ${accentClasses} p-4 shadow-[var(--shadow-elev-1)] backdrop-blur`}
     >
       <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-dim)]">{label}</span>
-      <span className="text-2xl font-semibold text-white">{value}</span>
+      <span className="text-2xl font-semibold text-[color:var(--color-text)]">{value}</span>
     </div>
   );
 }

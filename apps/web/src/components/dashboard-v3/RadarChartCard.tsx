@@ -233,7 +233,7 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
       subtitle="GP · total acumulado"
       rightSlot={
         <InfoDotTarget id="radar" placement="right" className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
+          <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1 text-xs text-[color:var(--color-text-muted)]">
             Rasgos clave
           </span>
         </InfoDotTarget>
@@ -252,7 +252,7 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
               {hasAxes ? (
                 <Radar dataset={dataset} />
               ) : (
-                <div className="flex h-[260px] w-full max-w-[420px] items-center justify-center text-center text-sm text-slate-200/80">
+                <div className="flex h-[260px] w-full max-w-[420px] items-center justify-center text-center text-sm text-[color:var(--color-text-muted)]">
                   <p className="px-6 leading-relaxed">
                     Todavía no registraste GP por rasgo. Completá misiones para ver cómo evoluciona tu radar.
                   </p>
@@ -311,13 +311,9 @@ function Radar({ dataset }: RadarProps) {
   const labelStyle: CSSProperties = {
     fontFamily: '"Manrope", "Inter", system-ui, sans-serif',
     fontSize: 'clamp(11px, 3.2vw, 14px)',
-    fontWeight: 500,
+    fontWeight: 600,
     letterSpacing: '0.01em',
-    paintOrder: 'stroke fill',
-    stroke: 'rgba(15,23,42,0.7)',
-    strokeWidth: 2,
-    strokeLinecap: 'round',
-    strokeLinejoin: 'round',
+    lineHeight: 1.2,
   };
 
   return (
@@ -348,7 +344,7 @@ function Radar({ dataset }: RadarProps) {
             return `${x},${y}`;
           })
           .join(' ');
-        return <polygon key={level} points={points} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={1} />;
+        return <polygon key={level} points={points} fill="none" stroke="var(--color-border-subtle)" strokeWidth={1} />;
       })}
 
       {axes.map((axis, index) => {
@@ -368,13 +364,13 @@ function Radar({ dataset }: RadarProps) {
               y1={center}
               x2={lineEnd.x}
               y2={lineEnd.y}
-              stroke="rgba(255,255,255,0.15)"
+              stroke="color-mix(in srgb, var(--color-text-subtle) 40%, transparent)"
               strokeWidth={1}
             />
             <text
               x={labelPoint.x}
               y={labelPoint.y}
-              fill="rgba(226,232,240,0.9)"
+              fill="var(--color-text-subtle)"
               textAnchor="middle"
               dominantBaseline="middle"
               style={labelStyle}
@@ -384,7 +380,7 @@ function Radar({ dataset }: RadarProps) {
             <text
               x={xpLabelPoint.x}
               y={xpLabelPoint.y}
-              fill="rgba(226,232,240,0.95)"
+              fill="var(--color-text-muted)"
               textAnchor="middle"
               dominantBaseline="middle"
               style={{
@@ -392,11 +388,7 @@ function Radar({ dataset }: RadarProps) {
                 fontSize: 'clamp(12px, 3.4vw, 16px)',
                 fontWeight: 600,
                 letterSpacing: '0.01em',
-                paintOrder: 'stroke fill',
-                stroke: 'rgba(15,23,42,0.65)',
-                strokeWidth: 2,
-                strokeLinecap: 'round',
-                strokeLinejoin: 'round',
+                lineHeight: 1.2,
               }}
             >
               {xpLabel}

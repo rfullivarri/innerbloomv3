@@ -115,10 +115,10 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
       rightSlot={
         <InfoDotTarget id="dailyCultivation" placement="left" className="ml-auto inline-flex items-center gap-2">
           {buckets.length > 0 ? (
-            <label className="flex items-center gap-1.5 whitespace-nowrap text-[11px] uppercase tracking-[0.12em] text-slate-300">
+            <label className="flex items-center gap-1.5 whitespace-nowrap text-[11px] uppercase tracking-[0.12em] text-[color:var(--color-text-muted)]">
               <span className="text-[11px]">Mes</span>
               <select
-                className="w-28 rounded-ib-sm border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-100 focus:border-white/20 focus:outline-none sm:w-32"
+                className="w-28 rounded-ib-sm border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1 text-xs text-[color:var(--color-text)] focus:border-white/20 focus:outline-none sm:w-32"
                 value={selectedMonth ?? ''}
                 onChange={(event) => setSelectedMonth(event.target.value)}
               >
@@ -142,20 +142,20 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
       )}
 
       {status === 'success' && (!activeBucket || activeBucket.days.length === 0) && (
-        <p className="text-sm text-slate-400">Todavía no registraste GP este mes.</p>
+        <p className="text-sm text-[color:var(--color-text-subtle)]">Todavía no registraste GP este mes.</p>
       )}
 
       {status === 'success' && activeBucket && activeBucket.days.length > 0 && (
         <div className="space-y-4">
-          <div className="rounded-ib-md border border-white/10 bg-white/5 p-4">
+          <div className="rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[var(--shadow-elev-1)]">
             <LineChart days={activeBucket.days} />
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[color:var(--color-text-subtle)]">
             <span>
-              Total GP del mes: <span className="font-semibold text-slate-100">{formatNumber(monthlySummary.total)}</span>
+              Total GP del mes: <span className="font-semibold text-[color:var(--color-text)]">{formatNumber(monthlySummary.total)}</span>
             </span>
             <span>
-              Promedio diario: <span className="font-semibold text-slate-100">{formatNumber(monthlySummary.average)}</span> GP
+              Promedio diario: <span className="font-semibold text-[color:var(--color-text)]">{formatNumber(monthlySummary.average)}</span> GP
             </span>
           </div>
         </div>
