@@ -9,9 +9,9 @@ export function ProgressBar({ value, label }: ProgressBarProps) {
   return (
     <div className="space-y-2">
       {label && <p className="text-xs uppercase tracking-wide text-text-subtle">{label}</p>}
-      <div className="h-3 w-full overflow-hidden rounded-full bg-white/10">
+      <div className="h-3 w-full overflow-hidden rounded-full bg-[color:var(--color-overlay-2)]">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-accent-purple via-accent-blue to-accent-amber transition-all"
+          className="h-full rounded-full bg-[linear-gradient(90deg,#6366F1,#D946EF,#F59E0B)] transition-all"
           style={{ width: `${safeValue}%` }}
         />
       </div>

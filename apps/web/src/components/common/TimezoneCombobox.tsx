@@ -130,14 +130,14 @@ export function TimezoneCombobox({
           setActiveIndex(0);
         }}
         onKeyDown={handleKeyDown}
-        className="w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-sm ios-touch-input text-white outline-none transition focus:border-white/40"
+        className="w-full rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-surface-elevated)] px-4 py-3 text-sm ios-touch-input text-text outline-none transition focus:border-[color:var(--color-border-strong)]"
       />
 
       {isOpen ? (
         <ul
           id={listboxId}
           role="listbox"
-          className="absolute z-20 mt-2 max-h-60 w-full overflow-y-auto rounded-2xl border border-white/10 bg-surface/95 p-1 shadow-lg backdrop-blur"
+          className="absolute z-20 mt-2 max-h-60 w-full overflow-y-auto rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-surface-elevated)]/95 p-1 shadow-[var(--color-card-shadow)] backdrop-blur"
         >
           {filteredOptions.length === 0 ? (
             <li className="px-3 py-2 text-sm text-text-subtle">No encontramos resultados.</li>
@@ -152,7 +152,7 @@ export function TimezoneCombobox({
                   role="option"
                   aria-selected={isSelected}
                   className={`cursor-pointer rounded-xl px-3 py-2 text-sm transition ${
-                    isActive ? 'bg-white/15 text-white' : 'text-text hover:bg-white/10'
+                    isActive ? 'bg-[color:var(--color-overlay-2)] text-text' : 'text-text hover:bg-[color:var(--color-overlay-1)]'
                   } ${isSelected ? 'font-semibold' : ''}`}
                   onMouseDown={(event) => event.preventDefault()}
                   onMouseEnter={() => setActiveIndex(index)}
