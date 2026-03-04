@@ -192,7 +192,7 @@ function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparis
           {clamped}%
         </span>
       </div>
-      <div className="relative h-5 w-full overflow-hidden rounded-full border border-white/5 bg-slate-900/40 shadow-[inset_0_1px_1px_rgba(15,23,42,0.45)]">
+      <div className="relative h-5 w-full overflow-hidden rounded-full border border-transparent bg-slate-200/70 shadow-none dark:border-white/5 dark:bg-slate-900/40 dark:shadow-[inset_0_1px_1px_rgba(15,23,42,0.45)]">
         <div
           className={`${GRADIENTS[label]} h-full rounded-full transition-[width] duration-500 ease-out progress-fill--typing`}
           style={{ width: `${width}%`, minWidth: clamped === 0 ? '1.5rem' : undefined }}
