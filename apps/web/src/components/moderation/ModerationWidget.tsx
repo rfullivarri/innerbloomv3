@@ -170,7 +170,7 @@ export function ModerationWidget({
   const resolvedTitle = title?.trim() || "Moderación";
 
   return (
-    <section className="space-y-2.5">
+    <section className="space-y-2.5 pt-1.5 md:pt-2 lg:pt-2.5">
       <header className="flex min-h-[1.625rem] items-center pl-1.5 pt-1.5 md:pl-0 md:pt-0">
         <DashboardTitle level="h1" as="h3">
           {resolvedTitle}
