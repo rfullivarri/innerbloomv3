@@ -275,25 +275,25 @@ const MODE_CHIP_STYLES: Record<Mode, { glowPrimary: string; glowSecondary: strin
     glowPrimary: 'rgba(248, 113, 113, 0.65)',
     glowSecondary: 'rgba(239, 68, 68, 0.35)',
     innerClassName:
-      'gap-2 rounded-full border border-rose-400/65 bg-rose-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]',
+      'gap-2 rounded-full border border-rose-400/65 bg-rose-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:border-rose-400/60 dark:bg-rose-500/15 dark:text-[color:var(--color-text)] dark:shadow-[0_0_12px_rgba(244,63,94,0.25)]',
   },
   Chill: {
     glowPrimary: 'rgba(74, 222, 128, 0.6)',
     glowSecondary: 'rgba(34, 197, 94, 0.3)',
     innerClassName:
-      'gap-2 rounded-full border border-emerald-400/70 bg-emerald-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]',
+      'gap-2 rounded-full border border-emerald-400/70 bg-emerald-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:border-emerald-400/60 dark:bg-emerald-500/15 dark:text-[color:var(--color-text)] dark:shadow-[0_0_12px_rgba(34,197,94,0.2)]',
   },
   Flow: {
     glowPrimary: 'rgba(96, 165, 250, 0.6)',
     glowSecondary: 'rgba(59, 130, 246, 0.35)',
     innerClassName:
-      'gap-2 rounded-full border border-sky-400/70 bg-sky-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]',
+      'gap-2 rounded-full border border-sky-400/70 bg-sky-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:border-sky-400/60 dark:bg-sky-500/15 dark:text-[color:var(--color-text)] dark:shadow-[0_0_12px_rgba(59,130,246,0.25)]',
   },
   Evolve: {
     glowPrimary: 'rgba(167, 139, 250, 0.65)',
     glowSecondary: 'rgba(139, 92, 246, 0.35)',
     innerClassName:
-      'gap-2 rounded-full border border-violet-400/70 bg-violet-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]',
+      'gap-2 rounded-full border border-violet-400/70 bg-violet-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:border-violet-400/60 dark:bg-violet-500/15 dark:text-[color:var(--color-text)] dark:shadow-[0_0_12px_rgba(139,92,246,0.25)]',
   },
 };
 
