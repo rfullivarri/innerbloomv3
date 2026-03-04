@@ -16,6 +16,7 @@ import { asArray, dateStr } from '../../lib/safe';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 import { TaskInsightsModal } from './StreakTaskInsightsModal';
+import { DashboardMeta, DashboardTitle } from './DashboardTypography';
 
 export const FEATURE_STREAKS_PANEL_V1 = false;
 
@@ -834,8 +835,10 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
           hasContent && (
             <section className="space-y-3">
               <div className="flex flex-wrap items-baseline gap-2">
-                <h4 className="text-base font-semibold leading-tight text-slate-100 md:text-lg">Top streaks</h4>
-                <span className="text-xs text-slate-400 md:text-sm">— días consecutivos sin cortar</span>
+                <DashboardTitle level="h2" as="h4" className="text-slate-100/88">
+                  Top streaks
+                </DashboardTitle>
+                <DashboardMeta as="span">— días consecutivos sin cortar</DashboardMeta>
               </div>
               {topEntries.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3">
@@ -893,7 +896,9 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
         ) : (
           hasContent && (
             <section className="space-y-3">
-              <h4 className="text-base font-semibold leading-tight text-slate-100 md:text-lg">Todas las tareas</h4>
+              <DashboardTitle level="h2" as="h4" className="text-slate-100/88">
+                Todas las tareas
+              </DashboardTitle>
               {displayTasks.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3">
                   {displayTasks.map((task) => (

@@ -5,6 +5,7 @@ import { useRequest } from '../../hooks/useRequest';
 import { getUserLevel, getUserTotalXp } from '../../lib/api';
 import { formatGp } from '../../lib/points';
 import { GameModeChip, buildGameModeChip } from '../common/GameModeChip';
+import { DashboardMeta } from './DashboardTypography';
 
 interface MetricHeaderProps {
   userId: string;
@@ -138,7 +139,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
           </div>
 
           <div className="space-y-3">
-            <p className="text-[11px] font-semibold tracking-[0.18em] text-slate-400">Progreso</p>
+            <DashboardMeta className="tracking-[0.02em] text-slate-300/78">Progreso</DashboardMeta>
             <div
               className="relative h-6 w-full overflow-hidden rounded-full border border-white/5 bg-slate-950/60 shadow-[inset_0_2px_8px_rgba(8,15,40,0.6)] sm:h-[30px]"
               role="progressbar"
@@ -162,7 +163,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
                 {progressLabel}
               </span>
             </div>
-            {xpToNextMessage && <p className="text-sm text-slate-300">{xpToNextMessage}</p>}
+            {xpToNextMessage && <DashboardMeta className="text-slate-300/78">{xpToNextMessage}</DashboardMeta>}
           </div>
         </div>
       )}

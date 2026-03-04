@@ -1,5 +1,6 @@
 import { forwardRef, useId } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
+import { DashboardMeta, DashboardTitle } from '../dashboard-v3/DashboardTypography';
 
 function normalizeDashboardTitle(title: ReactNode): ReactNode {
   if (typeof title !== 'string') {
@@ -10,6 +11,10 @@ function normalizeDashboardTitle(title: ReactNode): ReactNode {
     .replace(/^[^\p{L}\p{N}]+/u, '')
     .trim()
     .toLocaleUpperCase('es-AR');
+}
+
+function isPrimitiveText(value: ReactNode): value is string | number {
+  return typeof value === 'string' || typeof value === 'number';
 }
 
 interface CardProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
@@ -65,14 +70,16 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
           <header className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
               {title && (
-                <h3
+                <DashboardTitle
+                  level="h1"
+                  as="h3"
                   id={labelledBy}
-                  className="font-sans text-[0.62rem] font-medium uppercase tracking-[0.35em] text-text-muted"
                 >
                   {normalizedTitle}
-                </h3>
+                </DashboardTitle>
               )}
-              {subtitle && <div className="text-sm text-slate-400">{subtitle}</div>}
+              {subtitle &&
+                (isPrimitiveText(subtitle) ? <DashboardMeta>{subtitle}</DashboardMeta> : subtitle)}
             </div>
             {rightSlot}
           </header>
