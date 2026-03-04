@@ -172,17 +172,17 @@ function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparis
   const deltaColor =
     typeof deltaPct === 'number'
       ? deltaPct < 0
-        ? 'text-rose-300'
+        ? 'text-red-600'
         : deltaPct > 0
-          ? 'text-emerald-200'
-          : 'text-slate-200'
-      : 'text-slate-200';
+          ? 'text-emerald-600'
+          : 'text-slate-700'
+      : 'text-slate-700';
 
   return (
     <div className="space-y-2 sm:grid sm:grid-cols-[88px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
       <div className="flex items-center justify-between sm:block">
         <span
-          className={`text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300 ${
+          className={`text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-950 ${
             highlight ? 'drop-shadow-[0_0_6px_rgba(16,185,129,0.45)]' : ''
           }`}
         >
@@ -204,9 +204,9 @@ function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparis
         </div>
       </div>
       {deltaLabel ? (
-        <p className={`text-[12px] font-medium leading-tight ${deltaColor}`}>{deltaLabel}</p>
+        <p className={`text-[13px] font-bold leading-tight tracking-tight ${deltaColor}`}>{deltaLabel}</p>
       ) : showComparison ? (
-        <p className="text-[11px] font-light text-slate-400">Sin variación suficiente</p>
+        <p className="text-[11px] font-medium text-slate-600">Sin variación suficiente</p>
       ) : null}
     </div>
   );
