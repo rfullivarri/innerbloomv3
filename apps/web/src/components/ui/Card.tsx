@@ -1,6 +1,17 @@
 import { forwardRef, useId } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 
+function normalizeDashboardTitle(title: ReactNode): ReactNode {
+  if (typeof title !== 'string') {
+    return title;
+  }
+
+  return title
+    .replace(/^[^\p{L}\p{N}]+/u, '')
+    .trim()
+    .toLocaleUpperCase('es-AR');
+}
+
 interface CardProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
   title?: ReactNode;
   subtitle?: ReactNode;
@@ -29,6 +40,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
 ) {
   const headingId = useId();
   const labelledBy = title ? `${headingId}-title` : undefined;
+  const normalizedTitle = normalizeDashboardTitle(title);
 
   return (
     <section
@@ -53,8 +65,11 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
           <header className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
               {title && (
-                <h3 id={labelledBy} className="text-base font-semibold tracking-wide text-slate-200">
-                  {title}
+                <h3
+                  id={labelledBy}
+                  className="font-sans text-[0.62rem] font-medium uppercase tracking-[0.35em] text-text-muted"
+                >
+                  {normalizedTitle}
                 </h3>
               )}
               {subtitle && <div className="text-sm text-slate-400">{subtitle}</div>}
