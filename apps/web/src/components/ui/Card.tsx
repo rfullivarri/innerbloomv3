@@ -67,7 +67,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
         )}
       >
         {(title || subtitle || rightSlot) && (
-          <header className="flex flex-wrap items-center justify-between gap-3">
+          <header className="flex flex-wrap items-center justify-between gap-3 pl-1.5 pt-1.5 md:pl-0 md:pt-0">
             <div className="space-y-1">
               {title && (
                 <DashboardTitle

@@ -17,7 +17,7 @@ const DASHBOARD_TITLE_BASE =
   'font-sans font-medium tracking-[0.28em] text-slate-100/86';
 
 const DASHBOARD_TITLE_LEVEL_STYLES: Record<DashboardTitleLevel, string> = {
-  h1: 'text-[0.68rem] uppercase md:text-[0.74rem]',
+  h1: 'text-[0.7425rem] uppercase md:text-[0.8025rem]',
   h2: 'text-[0.94rem] leading-tight tracking-[0.02em] md:text-[1rem]',
 };
 
