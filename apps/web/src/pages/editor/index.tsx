@@ -2120,7 +2120,7 @@ function EditTaskModal({
                 clearError('title');
               }}
               placeholder="Ej. Entrenar 30 minutos"
-              className="edit-task-modal__editable-control w-full rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-violet-100/50 shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50"
+              className="edit-task-modal__editable-control w-full rounded-2xl border px-4 py-3 text-sm ios-touch-input transition focus:outline-none"
             />
           </label>
           {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
@@ -2132,7 +2132,7 @@ function EditTaskModal({
             <select
               value={difficultyId}
               onChange={(event) => setDifficultyId(event.target.value)}
-              className="edit-task-modal__editable-control w-full appearance-none rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50 disabled:cursor-not-allowed"
+              className="edit-task-modal__editable-control w-full appearance-none rounded-2xl border px-4 py-3 text-sm ios-touch-input transition focus:outline-none disabled:cursor-not-allowed"
               disabled={isLoadingDifficulties}
             >
               <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
@@ -2169,9 +2169,9 @@ function EditTaskModal({
               type="checkbox"
               checked={isActive}
               onChange={(event) => setIsActive(event.target.checked)}
-              className="h-4 w-4 rounded border-white/30 bg-[color:var(--color-overlay-2)] text-indigo-500 focus:ring-indigo-400"
+              className="edit-task-modal__status-checkbox h-4 w-4 rounded"
             />
-            <span className="text-sm text-[color:var(--color-slate-200)]">{isActive ? 'Activa' : 'Inactiva'}</span>
+            <span className="edit-task-modal__status-label text-sm">{isActive ? 'Activa' : 'Inactiva'}</span>
           </label>
         </div>
       </section>
@@ -2185,14 +2185,14 @@ function EditTaskModal({
         <button
           type="button"
           onClick={handleClose}
-          className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-white"
+          className="edit-task-modal__button-secondary inline-flex items-center justify-center rounded-full border px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(207,139,243,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
+          className="edit-task-modal__button-primary inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? 'Guardando…' : 'Guardar cambios'}
         </button>
@@ -2263,7 +2263,7 @@ function EditTaskModal({
       <div className="relative z-10 w-full max-w-2xl p-4">
         <form
           onSubmit={handleSubmit}
-          className="max-h-[90vh] overflow-y-auto rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] p-6 text-[color:var(--color-slate-100)] shadow-[0_18px_40px_rgba(15,23,42,0.65)]"
+          className="edit-task-modal__dialog max-h-[90vh] overflow-y-auto rounded-2xl border p-6"
           onClick={(event) => event.stopPropagation()}
         >
           {formBody}
