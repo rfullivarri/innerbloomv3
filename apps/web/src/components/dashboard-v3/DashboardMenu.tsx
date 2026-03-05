@@ -798,15 +798,15 @@ export function DashboardMenu({
                     role="dialog"
                     aria-modal="true"
                     aria-label="Cómo añadir acceso rápido en iOS"
-                    className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/20 bg-[#000c40] p-4 shadow-2xl"
+                    className="absolute inset-x-4 bottom-4 rounded-2xl border border-[color:var(--color-ios-quick-access-modal-border)] bg-[color:var(--color-ios-quick-access-modal-surface)] p-4 shadow-[var(--shadow-elev-2)]"
                   >
-                    <p className="text-sm font-semibold text-white">
+                    <p className="text-sm font-semibold text-[color:var(--color-ios-quick-access-modal-text)]">
                       {quickAccessLabels.title}
                     </p>
-                    <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-white/85">
+                    <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-[color:var(--color-ios-quick-access-modal-text-muted)]">
                       <li className="flex flex-wrap items-center gap-2">
                         <span>{quickAccessLabels.tap}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-xs font-medium text-white">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
                           <svg
                             aria-hidden="true"
                             className="h-3.5 w-3.5"
@@ -825,7 +825,7 @@ export function DashboardMenu({
                       </li>
                       <li className="flex flex-wrap items-center gap-2">
                         <span>{quickAccessLabels.tap}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-xs font-medium text-white">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
                           <svg
                             aria-hidden="true"
                             className="h-3.5 w-3.5"
@@ -845,7 +845,7 @@ export function DashboardMenu({
                       </li>
                       <li className="flex flex-wrap items-center gap-2">
                         <span>{quickAccessLabels.scrollUp}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-xs font-medium text-white">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
                           <svg
                             aria-hidden="true"
                             className="h-3.5 w-3.5"
@@ -862,7 +862,7 @@ export function DashboardMenu({
                         </span>
                       </li>
                       <li className="flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-xs font-medium text-white">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
                           <svg
                             aria-hidden="true"
                             className="h-3.5 w-3.5"
@@ -886,7 +886,7 @@ export function DashboardMenu({
                     <button
                       type="button"
                       onClick={closeIosInstructions}
-                      className="mt-3 w-full rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-sm text-white"
+                      className="mt-3 w-full rounded-xl border border-[color:var(--color-ios-quick-access-modal-button-border)] bg-[color:var(--color-ios-quick-access-modal-button-bg)] px-3 py-2 text-sm text-[color:var(--color-ios-quick-access-modal-button-text)] transition hover:bg-[color:var(--color-ios-quick-access-modal-button-hover-bg)]"
                     >
                       {quickAccessLabels.gotIt}
                     </button>
