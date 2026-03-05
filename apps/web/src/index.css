@@ -4599,6 +4599,18 @@
     background-color: var(--color-overlay-1);
   }
 
+  :root[data-theme='light'] [data-light-scope='daily-quest'] .ib-daily-quest-gp-value {
+    color: #ea580c;
+    text-shadow: 0 0 14px rgba(234, 88, 12, 0.35);
+  }
+
+  :root[data-theme='light'] [data-light-scope='daily-quest'] .ib-daily-quest-gp-toast-chip {
+    border: 1px solid #f97316;
+    background: #f97316;
+    color: #fff7ed;
+    box-shadow: 0 10px 24px rgba(249, 115, 22, 0.38);
+  }
+
   :root[data-theme='light'] .ib-chip-solid {
     border: 1px solid #d8b4fe;
     background: #e9d5ff;
