@@ -120,16 +120,16 @@ export function RewardsSection({
       {showSkeleton && <RewardsSkeleton />}
 
       {showError && (
-        <div className="space-y-3 text-sm text-rose-200">
+        <div className="space-y-3 text-sm text-[color:var(--text-secondary)]">
           <p>No pudimos cargar tus recompensas.</p>
           <button
             type="button"
             onClick={reload}
-            className="inline-flex items-center gap-2 rounded-full border border-rose-300/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-rose-100 transition hover:border-rose-200/70 hover:text-rose-50"
+            className="inline-flex items-center gap-2 rounded-full border border-[color:var(--border-default)]/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--text-primary)] transition hover:border-[color:var(--border-default)]/70 hover:text-[color:var(--text-primary)]"
           >
             Reintentar
           </button>
-          {error?.message && <p className="text-xs text-rose-200/70">{error.message}</p>}
+          {error?.message && <p className="text-xs text-[color:var(--text-secondary)]/70">{error.message}</p>}
         </div>
       )}
 
@@ -273,7 +273,7 @@ function WeeklyChip({
 }) {
   const palette =
     variant === 'accent'
-      ? 'ib-reward-chip-accent border-emerald-300/60 bg-emerald-400/10 text-emerald-50'
+      ? 'ib-reward-chip-accent border-[color:var(--border-default)]/60 bg-[color:var(--accent-primary)]/10 text-[color:var(--text-primary)]'
       : variant === 'outline'
         ? 'border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] text-[color:var(--color-text)]'
         : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]';
@@ -359,7 +359,7 @@ function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {
         <div className="flex items-center gap-4">
           <span
             className={`flex h-12 w-12 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] text-xl shadow-[0_0_12px_rgba(148,163,184,0.25)] ${
-              isUnlocked ? 'ib-reward-unlocked border-emerald-300/40 bg-emerald-400/15 text-emerald-100' : 'text-[color:var(--color-slate-200)]'
+              isUnlocked ? 'ib-reward-unlocked border-[color:var(--border-default)]/40 bg-[color:var(--accent-primary)]/15 text-[color:var(--text-primary)]' : 'text-[color:var(--color-slate-200)]'
             }`}
           >
             {achievement.icon ? (
@@ -383,7 +383,7 @@ function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {
         <span
           className={`inline-flex items-center justify-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
             isUnlocked
-              ? 'ib-reward-unlocked border-emerald-300/40 bg-emerald-400/15 text-emerald-100'
+              ? 'ib-reward-unlocked border-[color:var(--border-default)]/40 bg-[color:var(--accent-primary)]/15 text-[color:var(--text-primary)]'
               : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]'
           }`}
         >
@@ -428,8 +428,8 @@ interface RewardsSummaryCardProps {
 function RewardsSummaryCard({ label, value, accent }: RewardsSummaryCardProps) {
   const accentClasses =
     accent === 'emerald'
-      ? 'ib-reward-summary-emerald border-emerald-300/50 bg-emerald-400/10 text-emerald-100'
-      : 'ib-reward-summary-sky border-sky-400/40 bg-sky-400/10 text-sky-100';
+      ? 'ib-reward-summary-emerald border-[color:var(--border-default)]/50 bg-[color:var(--accent-primary)]/10 text-[color:var(--text-primary)]'
+      : 'ib-reward-summary-sky border-[color:var(--border-default)]/40 bg-[color:var(--accent-secondary)]/10 text-[color:var(--text-primary)]';
 
   return (
     <div
