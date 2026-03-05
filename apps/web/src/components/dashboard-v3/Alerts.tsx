@@ -61,7 +61,7 @@ export function Alerts({
           </div>
           <Link
             to="/intro-journey"
-            className="ml-auto inline-flex rounded-full border border-sky-200/50 bg-sky-200/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur"
+            className="ib-chip-solid ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold"
           >
             Hacer onboarding
           </Link>
@@ -100,7 +100,7 @@ export function Alerts({
             </div>
             <Link
               to="/editor"
-              className="ml-auto inline-flex rounded-full border border-amber-200/50 bg-amber-200/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur"
+              className="ib-chip-solid ib-chip-solid--warning ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold"
             >
               Editar tareas
             </Link>
@@ -136,7 +136,7 @@ export function Alerts({
               <button
                 type="button"
                 onClick={onScheduleClick}
-                className="ml-auto inline-flex rounded-full border border-indigo-200/50 bg-indigo-200/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur transition hover:border-indigo-200/80 hover:bg-indigo-200/20"
+                className="ib-chip-solid ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold transition"
               >
                 Programar Daily Quest
               </button>

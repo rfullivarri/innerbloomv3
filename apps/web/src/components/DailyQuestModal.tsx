@@ -1062,8 +1062,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                                       damping: 22,
                                                       duration: 0.6,
                                                     }}
-                                                    className="pointer-events-none absolute right-3 top-3 rounded-lg px-2 py-1 text-[11px] font-semibold text-amber-200 shadow-[0_12px_40px_rgba(251,191,36,0.25)] ring-1 ring-amber-400/40"
-                                                    style={{ backgroundColor: 'rgba(251, 191, 36, 0.18)' }}
+                                                    className="ib-chip-solid ib-chip-solid--warning pointer-events-none absolute right-3 top-3 rounded-lg px-2 py-1 text-[11px] font-semibold"
                                                   >
                                                     HARD · +{task.xp} GP
                                                   </motion.div>
@@ -1264,7 +1263,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           className="relative z-10 mx-4 flex max-w-sm flex-col items-center gap-3 rounded-2xl border border-white/15 bg-[color:var(--color-overlay-2)] px-6 py-5 text-center text-sm font-semibold text-white shadow-[0_24px_80px_rgba(56,189,248,0.35)]"
                         >
                           <span className="text-base md:text-lg">{successCelebration.message}</span>
-                          <span className="rounded-full bg-emerald-500/25 px-3 py-1 text-[11px] font-semibold text-emerald-100 ring-1 ring-emerald-400/40">
+                          <span className="ib-chip-solid ib-chip-solid--success rounded-full px-3 py-1 text-[11px] font-semibold">
                             +{successCelebration.xpDelta} GP
                           </span>
                           {successCelebration.detail && (

@@ -4507,6 +4507,24 @@
     background-color: var(--color-overlay-1);
   }
 
+  :root[data-theme='light'] .ib-chip-solid {
+    border: 1px solid #d8b4fe;
+    background: #e9d5ff;
+    color: #7c3aed;
+  }
+
+  :root[data-theme='light'] .ib-chip-solid--warning {
+    border-color: #fdba74;
+    background: #ffedd5;
+    color: #c2410c;
+  }
+
+  :root[data-theme='light'] .ib-chip-solid--success {
+    border-color: #86efac;
+    background: #dcfce7;
+    color: #166534;
+  }
+
   :root[data-theme='light'] .ib-reward-chip-accent,
   :root[data-theme='light'] .ib-reward-unlocked,
   :root[data-theme='light'] .ib-reward-summary-emerald {
