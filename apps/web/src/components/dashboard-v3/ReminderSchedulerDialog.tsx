@@ -105,7 +105,7 @@ export const ReminderSchedulerDialog = forwardRef<
     <AnimatePresence>
       {isOpen ? (
         <motion.div
-          className="fixed inset-0 z-[70] bg-black/60 backdrop-blur flex items-end justify-center p-4 md:items-center"
+          className="reminder-scheduler-dialog__overlay fixed inset-0 z-[70] flex items-end justify-center bg-black/60 p-4 backdrop-blur md:items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -115,18 +115,19 @@ export const ReminderSchedulerDialog = forwardRef<
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="flex w-full max-h-[80vh] flex-col rounded-3xl border border-white/10 bg-surface/95 p-5 shadow-2xl md:max-h-[85vh] md:max-w-[560px]"
+            data-light-scope="reminder-scheduler"
+            className="reminder-scheduler-dialog__panel flex max-h-[80vh] w-full flex-col rounded-3xl border border-white/10 bg-surface/95 p-5 shadow-2xl md:max-h-[85vh] md:max-w-[560px]"
             initial={{ opacity: 0, y: 64 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 64 }}
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <p className="text-[0.65rem] uppercase tracking-[0.32em] text-text-muted">Scheduler diario</p>
-                <h2 id={titleId} className="font-display text-2xl font-semibold text-white">
+                <p className="reminder-scheduler-dialog__eyebrow text-[0.65rem] uppercase tracking-[0.32em] text-text-muted">Scheduler diario</p>
+                <h2 id={titleId} className="reminder-scheduler-dialog__title font-display text-2xl font-semibold text-white">
                   Recordatorios inteligentes
                 </h2>
-                <p className="mt-1 text-sm text-text-muted">
+                <p className="reminder-scheduler-dialog__description mt-1 text-sm text-text-muted">
                   Configurá tu recordatorio por correo o pausa cuando lo necesites.
                 </p>
               </div>
@@ -134,7 +135,7 @@ export const ReminderSchedulerDialog = forwardRef<
                 ref={closeButtonRef}
                 type="button"
                 onClick={close}
-                className="rounded-full border border-white/20 bg-white/10 p-2 text-white/80 transition hover:border-white/40 hover:bg-white/20"
+                className="reminder-scheduler-dialog__close-button rounded-full border border-white/20 bg-white/10 p-2 text-white/80 transition hover:border-white/40 hover:bg-white/20"
                 aria-label="Cerrar recordatorio diario"
               >
                 <svg

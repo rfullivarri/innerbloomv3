@@ -4844,6 +4844,136 @@
     color: #cbd5e1;
   }
 
+
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] {
+    --scheduler-surface: var(--editor-modal-surface, #ffffff);
+    --scheduler-border: var(--editor-modal-secondary-border, #dbe3ee);
+    --scheduler-text: var(--editor-modal-text, #0f172a);
+    --scheduler-text-muted: var(--editor-modal-text-muted, #475569);
+    --scheduler-eyebrow: var(--editor-modal-label-muted, #64748b);
+    --scheduler-input-bg: var(--editor-modal-input-bg, #ffffff);
+    --scheduler-input-border: var(--editor-modal-input-border, #cfd9e6);
+    --scheduler-input-focus-border: var(--editor-modal-input-focus-border, #8b5cf6);
+    --scheduler-input-focus-ring: var(--editor-modal-input-focus-ring, rgba(139, 92, 246, 0.2));
+    --scheduler-toggle-bg: var(--editor-modal-locked-bg, #f8fafc);
+    --scheduler-toggle-border: var(--editor-modal-locked-border, #dbe3ee);
+    --scheduler-cta-bg: var(--editor-modal-secondary-hover-bg, #f3f5fa);
+    --scheduler-cta-border: var(--editor-modal-secondary-border, #dbe3ee);
+    --scheduler-cta-text: var(--editor-modal-secondary-text, #334155);
+  }
+
+  :root[data-theme='light'] .reminder-scheduler-dialog__overlay {
+    background: rgba(15, 23, 42, 0.2);
+    backdrop-filter: blur(8px);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'].reminder-scheduler-dialog__panel,
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-dialog__panel {
+    border-color: var(--scheduler-border);
+    background: var(--scheduler-surface);
+    box-shadow: var(--editor-modal-shadow, 0 24px 52px rgba(15, 23, 42, 0.12));
+    color: var(--scheduler-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-dialog__eyebrow {
+    color: var(--scheduler-eyebrow);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-dialog__title {
+    color: var(--scheduler-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-dialog__description {
+    color: var(--scheduler-text-muted);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-dialog__close-button {
+    border-color: var(--scheduler-border);
+    background: var(--scheduler-cta-bg);
+    color: var(--scheduler-cta-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-dialog__close-button:hover {
+    border-color: var(--editor-modal-secondary-hover-border, #c5d0df);
+    background: #eef2f7;
+    color: var(--scheduler-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__toggle-card {
+    border-color: var(--scheduler-toggle-border);
+    background: var(--scheduler-toggle-bg);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__toggle-label,
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__footer-note,
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__field-label {
+    color: var(--scheduler-text-muted);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__switch-track {
+    border-color: var(--scheduler-input-border);
+    background: #e2e8f0;
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__switch-track--enabled {
+    border-color: #6ee7b7;
+    background: #a7f3d0;
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__switch-thumb {
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__switch-thumb--enabled {
+    background: #ecfdf5;
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__control {
+    border-color: var(--scheduler-input-border);
+    background: var(--scheduler-input-bg);
+    color: var(--scheduler-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__control:focus {
+    border-color: var(--scheduler-input-focus-border);
+    box-shadow: 0 0 0 3px var(--scheduler-input-focus-ring);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__footer {
+    border-top-color: var(--scheduler-border);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__save-button--enabled {
+    border-color: var(--scheduler-cta-border);
+    background: var(--scheduler-cta-bg);
+    color: var(--scheduler-cta-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__save-button--enabled:hover {
+    border-color: var(--editor-modal-secondary-hover-border, #c5d0df);
+    background: #eef2f7;
+    color: var(--scheduler-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__save-button--disabled {
+    border-color: var(--scheduler-border);
+    background: color-mix(in srgb, var(--scheduler-surface) 70%, #eef2f7 30%);
+    color: var(--scheduler-eyebrow);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__retry-button {
+    border-color: var(--scheduler-cta-border);
+    background: var(--scheduler-cta-bg);
+    color: var(--scheduler-cta-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__retry-button:hover {
+    border-color: var(--editor-modal-secondary-hover-border, #c5d0df);
+    background: #eef2f7;
+    color: var(--scheduler-text);
+  }
   :root[data-theme='light'] [data-light-scope='daily-quest'] {
     color: var(--color-text);
     box-shadow: 0 24px 52px rgba(15, 23, 42, 0.12);
