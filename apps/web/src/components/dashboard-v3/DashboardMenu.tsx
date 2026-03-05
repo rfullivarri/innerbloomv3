@@ -574,13 +574,13 @@ export function DashboardMenu({
                               <path d="m15 6-6 6 6 6" />
                             </MenuIcon>
                           </button>
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-700 dark:text-[color:var(--color-text-faint)]">
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-700 dark:text-white">
                             Widgets
                           </p>
                         </div>
 
                         <div className="relative">
-                          <p className="mb-1 text-xs text-slate-600 dark:text-[color:var(--color-text-faint)]">
+                          <p className="mb-1 text-xs text-slate-600 dark:text-white">
                             Widgets activos
                           </p>
                           {enabledTrackers.length > 0 && moderation.configs ? (
@@ -599,7 +599,7 @@ export function DashboardMenu({
                               />
                             </button>
                           ) : (
-                            <p className="rounded-xl border border-dashed border-[color:var(--color-border-soft)] px-3 py-2 text-xs text-slate-600 dark:text-[color:var(--color-text-faint)]">
+                            <p className="rounded-xl border border-dashed border-[color:var(--color-border-soft)] px-3 py-2 text-xs text-slate-600 dark:text-white">
                               Sin widgets activos.
                             </p>
                           )}
@@ -609,7 +609,7 @@ export function DashboardMenu({
                         </div>
 
                         <div className="relative">
-                          <p className="mb-1 text-xs text-slate-600 dark:text-[color:var(--color-text-faint)]">
+                          <p className="mb-1 text-xs text-slate-600 dark:text-white">
                             Widgets disponibles
                           </p>
                           <div className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]">
@@ -626,7 +626,7 @@ export function DashboardMenu({
                                   <span className="block text-sm text-slate-900 dark:text-white">
                                     Moderación
                                   </span>
-                                  <span className="block text-xs text-slate-600 dark:text-text-muted">
+                                  <span className="block text-xs text-slate-600 dark:text-white">
                                     Alcohol, tabaco y azúcar
                                   </span>
                                   {enabledTrackers.length > 0 ? (
@@ -636,7 +636,7 @@ export function DashboardMenu({
                                   ) : null}
                                 </span>
                                 <MenuIcon
-                                  className={`mt-0.5 h-4 w-4 shrink-0 text-slate-500 transition dark:text-white/60 ${isModerationOpen ? "rotate-180" : ""}`}
+                                  className={`mt-0.5 h-4 w-4 shrink-0 text-slate-500 transition dark:text-white ${isModerationOpen ? "rotate-180" : ""}`}
                                 >
                                   <path d="m6 9 6 6 6-6" />
                                 </MenuIcon>
@@ -647,7 +647,7 @@ export function DashboardMenu({
                                   event.stopPropagation();
                                   moderation.onOpenEdit();
                                 }}
-                                className="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-white/15 dark:text-white/80 dark:hover:bg-white/10"
+                                className="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-white/55 dark:text-white dark:hover:bg-white/10"
                                 aria-label="Editar configuración de Moderación"
                               >
                                 Editar
@@ -677,23 +677,25 @@ export function DashboardMenu({
                                         onClick={() =>
                                           handleTrackerToggle(type)
                                         }
-                                        disabled={moderation.isRefreshingWidgets}
+                                        disabled={
+                                          moderation.isRefreshingWidgets
+                                        }
                                         className={`inline-flex min-h-9 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition ${
                                           isSelected
-                                            ? "border-emerald-400 bg-emerald-100 text-emerald-900 shadow-[0_0_0_1px_rgba(52,211,153,0.2)] dark:border-emerald-300 dark:bg-emerald-400/30 dark:text-emerald-50 dark:shadow-[0_0_0_1px_rgba(52,211,153,0.35)]"
-                                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/20 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10"
+                                            ? "border-emerald-400 bg-emerald-100 text-emerald-900 shadow-[0_0_0_1px_rgba(52,211,153,0.2)] dark:border-emerald-300 dark:bg-emerald-400/10 dark:text-white dark:shadow-[0_0_0_1px_rgba(52,211,153,0.5)]"
+                                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/55 dark:bg-transparent dark:text-white dark:hover:bg-white/10"
                                         } disabled:cursor-wait disabled:opacity-80`}
                                       >
                                         <ModerationTrackerIcon
                                           type={type}
                                           className={`h-3.5 w-3.5 ${
                                             isSelected
-                                              ? "text-emerald-700 dark:text-white/90"
-                                              : "text-slate-500 dark:text-white/90"
+                                              ? "text-emerald-700 dark:text-white"
+                                              : "text-slate-500 dark:text-white"
                                           }`}
                                         />
                                         {isSelected ? (
-                                          <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-100">
+                                          <span className="text-[11px] font-bold text-emerald-700 dark:text-white">
                                             ✓
                                           </span>
                                         ) : null}
@@ -702,7 +704,7 @@ export function DashboardMenu({
                                     );
                                   })}
                                 </div>
-                                <p className="text-[11px] text-slate-600 dark:text-[color:var(--color-text-faint)]">
+                                <p className="text-[11px] text-slate-600 dark:text-white">
                                   Azúcar: seguimiento de azúcar añadido.
                                 </p>
                               </div>
@@ -713,7 +715,7 @@ export function DashboardMenu({
                           ) : null}
                         </div>
 
-                        <p className="text-[11px] text-slate-600 dark:text-[color:var(--color-text-faint)]">
+                        <p className="text-[11px] text-slate-600 dark:text-white">
                           Tip: mantené presionado un widget para editarlo.
                         </p>
                       </div>
