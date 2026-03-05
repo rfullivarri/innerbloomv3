@@ -66,6 +66,18 @@
     --color-widget-chip-active-text: #ecfdf5;
     --color-widget-chip-active-icon: #d1fae5;
     --color-widget-chip-active-outline: rgba(52, 211, 153, 0.5);
+    --color-quickaccess-bg: rgba(49, 46, 129, 0.2);
+    --color-quickaccess-border: rgba(129, 140, 248, 0.35);
+    --color-quickaccess-text: rgba(224, 231, 255, 0.92);
+    --color-quickaccess-label: rgba(196, 181, 253, 0.86);
+    --color-quickaccess-cta-bg: rgba(99, 102, 241, 0.2);
+    --color-quickaccess-cta-border: rgba(165, 180, 252, 0.5);
+    --color-quickaccess-cta-text: rgba(238, 242, 255, 0.95);
+    --color-quickaccess-cta-hover-bg: rgba(99, 102, 241, 0.3);
+    --color-quickaccess-cta-hover-border: rgba(199, 210, 254, 0.72);
+    --color-quickaccess-cta-disabled-bg: rgba(99, 102, 241, 0.14);
+    --color-quickaccess-cta-disabled-border: rgba(165, 180, 252, 0.3);
+    --color-quickaccess-cta-disabled-text: rgba(224, 231, 255, 0.62);
     --color-card-gradient: radial-gradient(ellipse at top, rgba(35, 43, 76, 0.35), rgba(17, 24, 39, 0.55));
     --color-card-highlight-gradient: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.2), rgba(15, 23, 42, 0.82));
     --color-card-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
@@ -76,6 +88,17 @@
     --glass-bg: linear-gradient(180deg, rgba(30, 41, 59, 0.78), rgba(15, 23, 42, 0.64));
     --glass-border: rgba(255, 255, 255, 0.18);
 
+    --color-ios-quick-access-modal-surface: #000c40;
+    --color-ios-quick-access-modal-border: rgba(255, 255, 255, 0.2);
+    --color-ios-quick-access-modal-text: var(--color-text-strong);
+    --color-ios-quick-access-modal-text-muted: rgba(255, 255, 255, 0.85);
+    --color-ios-quick-access-modal-chip-border: rgba(255, 255, 255, 0.25);
+    --color-ios-quick-access-modal-chip-bg: rgba(255, 255, 255, 0.1);
+    --color-ios-quick-access-modal-chip-text: var(--color-text-strong);
+    --color-ios-quick-access-modal-button-border: rgba(255, 255, 255, 0.25);
+    --color-ios-quick-access-modal-button-bg: rgba(255, 255, 255, 0.1);
+    --color-ios-quick-access-modal-button-hover-bg: rgba(255, 255, 255, 0.15);
+    --color-ios-quick-access-modal-button-text: var(--color-text-strong);
   }
 
   :root[data-theme='dark'] {
@@ -124,6 +147,18 @@
     --color-widget-chip-active-text: #ecfdf5;
     --color-widget-chip-active-icon: #d1fae5;
     --color-widget-chip-active-outline: rgba(52, 211, 153, 0.5);
+    --color-quickaccess-bg: rgba(49, 46, 129, 0.2);
+    --color-quickaccess-border: rgba(129, 140, 248, 0.35);
+    --color-quickaccess-text: rgba(224, 231, 255, 0.92);
+    --color-quickaccess-label: rgba(196, 181, 253, 0.86);
+    --color-quickaccess-cta-bg: rgba(99, 102, 241, 0.2);
+    --color-quickaccess-cta-border: rgba(165, 180, 252, 0.5);
+    --color-quickaccess-cta-text: rgba(238, 242, 255, 0.95);
+    --color-quickaccess-cta-hover-bg: rgba(99, 102, 241, 0.3);
+    --color-quickaccess-cta-hover-border: rgba(199, 210, 254, 0.72);
+    --color-quickaccess-cta-disabled-bg: rgba(99, 102, 241, 0.14);
+    --color-quickaccess-cta-disabled-border: rgba(165, 180, 252, 0.3);
+    --color-quickaccess-cta-disabled-text: rgba(224, 231, 255, 0.62);
     --color-card-gradient: radial-gradient(ellipse at top, rgba(35, 43, 76, 0.35), rgba(17, 24, 39, 0.55));
     --color-card-highlight-gradient: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.2), rgba(15, 23, 42, 0.82));
     --color-card-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
@@ -182,6 +217,18 @@
     --color-widget-chip-active-text: #064e3b;
     --color-widget-chip-active-icon: #047857;
     --color-widget-chip-active-outline: rgba(16, 185, 129, 0.28);
+    --color-quickaccess-bg: rgba(238, 242, 255, 0.78);
+    --color-quickaccess-border: rgba(196, 181, 253, 0.65);
+    --color-quickaccess-text: #4338ca;
+    --color-quickaccess-label: rgba(109, 40, 217, 0.85);
+    --color-quickaccess-cta-bg: rgba(224, 231, 255, 0.86);
+    --color-quickaccess-cta-border: rgba(167, 139, 250, 0.58);
+    --color-quickaccess-cta-text: #4338ca;
+    --color-quickaccess-cta-hover-bg: rgba(221, 214, 254, 0.96);
+    --color-quickaccess-cta-hover-border: rgba(139, 92, 246, 0.7);
+    --color-quickaccess-cta-disabled-bg: rgba(237, 233, 254, 0.85);
+    --color-quickaccess-cta-disabled-border: rgba(196, 181, 253, 0.55);
+    --color-quickaccess-cta-disabled-text: rgba(67, 56, 202, 0.58);
     --color-card-gradient: linear-gradient(180deg, #ffffff, #ffffff);
     --color-card-highlight-gradient: linear-gradient(180deg, #ffffff, #f8faff);
     --color-card-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
@@ -198,28 +245,17 @@
     --onboarding-glass-border: rgba(148, 163, 184, 0.24);
     --onboarding-glass-border-soft: rgba(148, 163, 184, 0.2);
     --onboarding-glass-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-    --editor-modal-surface: #f8fafc;
-    --editor-modal-text: #0f172a;
-    --editor-modal-text-muted: #334155;
-    --editor-modal-label-muted: #64748b;
-    --editor-modal-locked-bg: #f8fafc;
-    --editor-modal-locked-border: #cfd8e6;
-    --editor-modal-locked-text: #64748b;
-    --editor-modal-editable-label: #818cf8;
-    --editor-modal-input-bg: #ede9fe;
-    --editor-modal-input-border: #c4b5fd;
-    --editor-modal-input-placeholder: #6366f1;
-    --editor-modal-input-focus-border: #a78bfa;
-    --editor-modal-input-focus-ring: rgba(167, 139, 250, 0.28);
-    --editor-modal-status-checkbox-accent: #3b82f6;
-    --editor-modal-primary-gradient: linear-gradient(90deg, #a770ef 0%, #cf8bf3 52%, #fdb99b 100%);
-    --editor-modal-primary-text: #f8fafc;
-    --editor-modal-primary-shadow: 0 12px 28px rgba(207, 139, 243, 0.34);
-    --editor-modal-secondary-border: #dbe3ee;
-    --editor-modal-secondary-text: #1e293b;
-    --editor-modal-secondary-hover-border: #cbd5e1;
-    --editor-modal-secondary-hover-bg: #eef2f7;
-    --editor-modal-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+    --color-ios-quick-access-modal-surface: var(--color-surface-elevated);
+    --color-ios-quick-access-modal-border: var(--color-border-strong);
+    --color-ios-quick-access-modal-text: var(--color-text-strong);
+    --color-ios-quick-access-modal-text-muted: var(--color-text-dim);
+    --color-ios-quick-access-modal-chip-border: var(--color-border-soft);
+    --color-ios-quick-access-modal-chip-bg: var(--color-overlay-2);
+    --color-ios-quick-access-modal-chip-text: var(--color-text);
+    --color-ios-quick-access-modal-button-border: var(--color-border-soft);
+    --color-ios-quick-access-modal-button-bg: var(--color-overlay-1);
+    --color-ios-quick-access-modal-button-hover-bg: var(--color-overlay-2);
+    --color-ios-quick-access-modal-button-text: var(--color-text);
   }
 
   body {
