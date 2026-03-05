@@ -2084,7 +2084,7 @@ function EditTaskModal({
       : '—';
 
   const formBody = (
-    <div className="space-y-6">
+    <div className="edit-task-modal space-y-6">
       <header className="space-y-1">
         <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Editar tarea</p>
         <h2 className="text-xl font-semibold text-white">Actualiza los detalles de tu tarea</h2>
@@ -2095,12 +2095,16 @@ function EditTaskModal({
 
       <section className="space-y-4">
         <div className="space-y-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Contexto</span>
+          <span className="edit-task-modal__locked-section-label text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Contexto
+          </span>
           <div className="grid gap-3 md:grid-cols-2">
             <ReadOnlyField label="Pilar" value={pillarName} />
             <ReadOnlyField label="Rasgo" value={traitName} />
           </div>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Estos campos no se pueden editar.</p>
+          <p className="edit-task-modal__locked-section-label text-[11px] uppercase tracking-[0.2em] text-slate-500">
+            Estos campos no se pueden editar.
+          </p>
         </div>
       </section>
 
@@ -2119,7 +2123,7 @@ function EditTaskModal({
                 clearError('title');
               }}
               placeholder="Ej. Entrenar 30 minutos"
-              className="w-full rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-violet-100/50 shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50"
+              className="edit-task-modal__editable-control w-full rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-violet-100/50 shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50"
             />
           </label>
           {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
@@ -2131,7 +2135,7 @@ function EditTaskModal({
             <select
               value={difficultyId}
               onChange={(event) => setDifficultyId(event.target.value)}
-              className="w-full appearance-none rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50 disabled:cursor-not-allowed"
+              className="edit-task-modal__editable-control w-full appearance-none rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50 disabled:cursor-not-allowed"
               disabled={isLoadingDifficulties}
             >
               <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
@@ -2274,10 +2278,33 @@ function EditTaskModal({
 
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="space-y-1">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">{label}</span>
-      <div className="rounded-2xl border border-slate-600/60 bg-slate-800/70 px-4 py-3 text-sm text-[color:var(--color-slate-300)]">{value}</div>
+    <div className="edit-task-modal__locked-field space-y-1">
+      <span className="edit-task-modal__locked-field-label text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">
+        {label}
+        <LockBadgeIcon className="edit-task-modal__lock-icon h-3.5 w-3.5 shrink-0" />
+      </span>
+      <div className="edit-task-modal__locked-field-value rounded-2xl border border-slate-600/60 bg-slate-800/70 px-4 py-3 text-sm text-[color:var(--color-slate-300)]">
+        {value}
+      </div>
     </div>
+  );
+}
+
+function LockBadgeIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="11" width="16" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 1 1 8 0v3" />
+    </svg>
   );
 }
 
