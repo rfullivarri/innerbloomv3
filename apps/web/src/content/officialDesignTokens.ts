@@ -35,7 +35,8 @@ export const OFFICIAL_DESIGN_TOKENS = {
   },
   shadows: {
     card: '0 18px 40px rgba(0,0,0,0.35)',
-    onboardingGlass: '0 26px 80px rgba(12, 18, 38, 0.24)'
+    onboardingGlass: '0 26px 80px rgba(12, 18, 38, 0.24)',
+    IB_SURFACE_CARD_LIGHT: '0 6px 20px rgba(15, 23, 42, 0.3)'
   },
   gradients: [
     {

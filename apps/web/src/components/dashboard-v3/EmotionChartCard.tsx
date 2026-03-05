@@ -894,7 +894,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
           {rangeLabel && <p className="text-xs text-[color:var(--color-text-subtle)]">Período analizado: {rangeLabel}</p>}
 
           <div
-            className="rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[image:var(--glass-bg)] p-0 shadow-[var(--shadow-elev-1)]"
+            className="rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[image:var(--glass-bg)] p-0 shadow-[var(--IB_SURFACE_CARD_LIGHT)] dark:shadow-[var(--shadow-elev-1)]"
             data-emotion-card="heatmap"
             ref={heatmapRef}
           >
@@ -950,7 +950,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
           </div>
           <div ref={summaryRef} data-emotion-card="summary">
             {highlight ? (
-              <div className="summary-inner w-full rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left sm:p-4">
+              <div className="summary-inner w-full rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left shadow-[var(--IB_SURFACE_CARD_LIGHT)] dark:shadow-[var(--shadow-elev-1)] sm:p-4">
                 <div
                   className="emotion-highlight-indicator h-10 w-10 shrink-0 rounded-full"
                   style={{ backgroundColor: highlight.color }}
@@ -964,7 +964,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
                 </div>
               </div>
             ) : (
-              <div className="summary-inner rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-xs text-[color:var(--color-text-subtle)] sm:p-4">
+              <div className="summary-inner rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-xs text-[color:var(--color-text-subtle)] shadow-[var(--IB_SURFACE_CARD_LIGHT)] dark:shadow-[var(--shadow-elev-1)] sm:p-4">
                 <div className="summary-content">
                   <span className="summary-description">
                     Aún no hay suficiente información reciente para destacar una emoción.
