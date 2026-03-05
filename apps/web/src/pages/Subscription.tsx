@@ -75,6 +75,12 @@ export default function SubscriptionPage() {
   const secondaryButtonClassName =
     'rounded-2xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-4 py-2 text-sm font-semibold text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]';
 
+  const primaryActionClassName =
+    'rounded-full border border-violet-400/45 bg-violet-500 px-7 py-3 font-semibold text-white shadow-[0_14px_35px_rgba(124,58,237,0.3)] transition hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_18px_40px_rgba(124,58,237,0.35)]';
+
+  const destructiveActionClassName =
+    'rounded-full border border-rose-400/65 bg-rose-500/12 px-7 py-3 font-semibold text-rose-700 transition hover:border-rose-500/70 hover:bg-rose-500/18 dark:border-rose-300/45 dark:bg-rose-500/18 dark:text-rose-100';
+
   if (isLoading) {
     return (
       <div className={overlayClassName}>
@@ -125,29 +131,29 @@ export default function SubscriptionPage() {
 
         <div className="mt-6 space-y-4 rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-6">
           <p className="flex items-center gap-2">
-            <span className="text-text-muted">Plan actual:</span>
+            <span className="text-[color:var(--color-text-dim)]">Plan actual:</span>
             <strong>{subscription?.plan ?? 'No definido'}</strong>
-            <span className="rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-200">
+            <span className="rounded-full border border-emerald-500/55 bg-emerald-500/18 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-200">
               {subscription?.plan ?? 'Sin plan'}
             </span>
           </p>
           <p>
-            <span className="text-text-muted">Estado:</span> <strong>{subscription?.status ?? 'No definido'}</strong>
+            <span className="text-[color:var(--color-text-dim)]">Estado:</span> <strong>{subscription?.status ?? 'No definido'}</strong>
           </p>
-          <p className="text-[color:var(--color-text-subtle)]">{nextDateLabel}</p>
+          <p className="text-[color:var(--color-text-muted)]">{nextDateLabel}</p>
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
             to="/pricing"
-            className="rounded-2xl border border-emerald-400/50 bg-emerald-400 px-5 py-3 font-semibold text-emerald-950 shadow-[0_12px_30px_rgba(16,185,129,0.24)] transition hover:bg-emerald-300"
+            className={primaryActionClassName}
           >
             Cambiar plan
           </Link>
           <button
             type="button"
             onClick={handleCancel}
-            className="rounded-2xl border border-rose-400/45 bg-rose-500/10 px-5 py-3 font-semibold text-rose-700 transition hover:border-rose-500/55 hover:bg-rose-500/15 dark:text-rose-100"
+            className={destructiveActionClassName}
           >
             Cancelar suscripción
           </button>
