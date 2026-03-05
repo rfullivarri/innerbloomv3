@@ -585,20 +585,20 @@ export function DashboardMenu({
                           <button
                             type="button"
                             onClick={() => setActivePanel("main")}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] dark:text-white"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-widget-menu-heading)] transition hover:bg-[color:var(--color-overlay-2)]"
                             aria-label="Volver al menú"
                           >
-                            <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)] dark:text-white">
+                            <MenuIcon className="h-4 w-4 text-[color:var(--color-widget-menu-heading)]">
                               <path d="m15 6-6 6 6 6" />
                             </MenuIcon>
                           </button>
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-700 dark:text-white">
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--color-widget-menu-heading)]">
                             Widgets
                           </p>
                         </div>
 
                         <div className="relative">
-                          <p className="mb-1 text-xs text-slate-600 dark:text-white">
+                          <p className="mb-1 text-xs text-[color:var(--color-widget-menu-label)]">
                             Widgets activos
                           </p>
                           {enabledTrackers.length > 0 && moderation.configs ? (
@@ -617,7 +617,7 @@ export function DashboardMenu({
                               />
                             </button>
                           ) : (
-                            <p className="rounded-xl border border-dashed border-[color:var(--color-border-soft)] px-3 py-2 text-xs text-slate-600 dark:text-white">
+                            <p className="rounded-xl border border-dashed border-[color:var(--color-border-soft)] px-3 py-2 text-xs text-[color:var(--color-widget-menu-label)]">
                               Sin widgets activos.
                             </p>
                           )}
@@ -629,7 +629,7 @@ export function DashboardMenu({
                         </div>
 
                         <div className="relative">
-                          <p className="mb-1 text-xs text-slate-600 dark:text-white">
+                          <p className="mb-1 text-xs text-[color:var(--color-widget-menu-label)]">
                             Widgets disponibles
                           </p>
                           <div className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]">
@@ -643,20 +643,20 @@ export function DashboardMenu({
                                 aria-expanded={isModerationOpen}
                               >
                                 <span className="min-w-0 flex-1">
-                                  <span className="block text-sm text-slate-900 dark:text-white">
+                                  <span className="block text-sm text-[color:var(--color-widget-menu-item-title)]">
                                     Moderación
                                   </span>
-                                  <span className="block text-xs text-slate-600 dark:text-white">
+                                  <span className="block text-xs text-[color:var(--color-widget-menu-label)]">
                                     Alcohol, tabaco y azúcar
                                   </span>
                                   {enabledTrackers.length > 0 ? (
-                                    <span className="mt-1 inline-block rounded-full border border-emerald-300 bg-emerald-100 px-2 py-0.5 text-[10px] text-emerald-800 dark:border-emerald-300/40 dark:bg-emerald-400/20 dark:text-emerald-100">
+                                    <span className="mt-1 inline-block rounded-full border border-[color:var(--color-widget-chip-active-border)] bg-[color:var(--color-widget-chip-active-bg)] px-2 py-0.5 text-[10px] text-[color:var(--color-widget-chip-active-text)]">
                                       Configurado
                                     </span>
                                   ) : null}
                                 </span>
                                 <MenuIcon
-                                  className={`mt-0.5 h-4 w-4 shrink-0 text-slate-500 transition dark:text-white ${isModerationOpen ? "rotate-180" : ""}`}
+                                  className={`mt-0.5 h-4 w-4 shrink-0 text-[color:var(--color-widget-menu-icon)] transition ${isModerationOpen ? "rotate-180" : ""}`}
                                 >
                                   <path d="m6 9 6 6 6-6" />
                                 </MenuIcon>
@@ -667,7 +667,7 @@ export function DashboardMenu({
                                   event.stopPropagation();
                                   moderation.onOpenEdit();
                                 }}
-                                className="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-white/55 dark:text-white dark:hover:bg-white/10"
+                                className="rounded-md border border-[color:var(--color-widget-edit-border)] bg-[color:var(--color-widget-edit-bg)] px-2 py-1 text-xs text-[color:var(--color-widget-edit-text)] transition hover:bg-[color:var(--color-widget-edit-hover-bg)]"
                                 aria-label="Editar configuración de Moderación"
                               >
                                 Editar
@@ -675,7 +675,7 @@ export function DashboardMenu({
                             </div>
 
                             {isModerationOpen ? (
-                              <div className="space-y-2 border-t border-[color:var(--color-border-subtle)] px-3 py-3 dark:border-white/10">
+                              <div className="space-y-2 border-t border-[color:var(--color-border-subtle)] px-3 py-3">
                                 <div className="flex flex-wrap gap-2">
                                   {(
                                     [
@@ -702,20 +702,20 @@ export function DashboardMenu({
                                         }
                                         className={`inline-flex min-h-9 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition ${
                                           isSelected
-                                            ? "border-emerald-400 bg-emerald-100 text-emerald-900 shadow-[0_0_0_1px_rgba(52,211,153,0.2)] dark:border-emerald-300 dark:bg-emerald-400/10 dark:text-white dark:shadow-[0_0_0_1px_rgba(52,211,153,0.5)]"
-                                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/55 dark:bg-transparent dark:text-white dark:hover:bg-white/10"
+                                            ? "border-[color:var(--color-widget-chip-active-border)] bg-[color:var(--color-widget-chip-active-bg)] text-[color:var(--color-widget-chip-active-text)] shadow-[0_0_0_1px_var(--color-widget-chip-active-outline)]"
+                                            : "border-[color:var(--color-widget-chip-border)] bg-[color:var(--color-widget-chip-bg)] text-[color:var(--color-widget-chip-text)] hover:bg-[color:var(--color-widget-chip-hover-bg)]"
                                         } disabled:cursor-wait disabled:opacity-80`}
                                       >
                                         <ModerationTrackerIcon
                                           type={type}
                                           className={`h-3.5 w-3.5 ${
                                             isSelected
-                                              ? "text-emerald-700 dark:text-white"
-                                              : "text-slate-500 dark:text-white"
+                                              ? "text-[color:var(--color-widget-chip-active-icon)]"
+                                              : "text-[color:var(--color-widget-chip-icon)]"
                                           }`}
                                         />
                                         {isSelected ? (
-                                          <span className="text-[11px] font-bold text-emerald-700 dark:text-white">
+                                          <span className="text-[11px] font-bold text-[color:var(--color-widget-chip-active-icon)]">
                                             ✓
                                           </span>
                                         ) : null}
@@ -724,7 +724,7 @@ export function DashboardMenu({
                                     );
                                   })}
                                 </div>
-                                <p className="text-[11px] text-slate-600 dark:text-white">
+                                <p className="text-[11px] text-[color:var(--color-widget-menu-label)]">
                                   Azúcar: seguimiento de azúcar añadido.
                                 </p>
                               </div>
@@ -737,7 +737,7 @@ export function DashboardMenu({
                           ) : null}
                         </div>
 
-                        <p className="text-[11px] text-slate-600 dark:text-white">
+                        <p className="text-[11px] text-[color:var(--color-widget-menu-label)]">
                           Tip: mantené presionado un widget para editarlo.
                         </p>
                       </div>

@@ -104,6 +104,19 @@ Use border intensity to communicate state:
 
 Never invert this hierarchy (e.g. do not use subtle text for primary content).
 
+### Widget menu semantic tokens
+
+For Dashboard-v3 widget configuration surfaces ("Widgets", "Widgets disponibles", chips, and "Editar" actions), use semantic tokens only.
+
+- `--color-widget-menu-heading`: section title text.
+- `--color-widget-menu-label`: secondary labels and helper copy.
+- `--color-widget-menu-item-title`: primary item names inside list rows.
+- `--color-widget-menu-icon`: chevrons and passive iconography.
+- `--color-widget-edit-*`: border/background/text/hover tokens for compact secondary edit actions.
+- `--color-widget-chip-*`: default and selected chip surfaces, borders, icons, text, and selected outline.
+
+Do not hardcode `slate-*`, `white`, or `emerald-*` utility colors in this area; map visual states through these DS tokens to preserve contrast parity in Light and Dark modes.
+
 ---
 
 ## 4) Component Categories
