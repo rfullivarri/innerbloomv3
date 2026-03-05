@@ -8,11 +8,13 @@ import { ModerationTrackerIcon } from "../moderation/trackerMeta";
 import { useQuickAccessInstall } from "../../hooks/useQuickAccessInstall";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { useLongPress } from "../../hooks/useLongPress";
+import { useThemePreference } from "../../theme/ThemePreferenceProvider";
 import {
   ApiError,
   type ModerationTrackerConfig,
   type ModerationTrackerType,
 } from "../../lib/api";
+import type { ResolvedTheme } from "../../theme/themePreference";
 import {
   forwardRef,
   type MouseEvent,
@@ -38,6 +40,12 @@ interface DashboardMenuProps {
     ) => Promise<void>;
     onOpenEdit: () => void;
   };
+}
+
+export function getWidgetsRefreshingOverlayClass(theme: ResolvedTheme): string {
+  return theme === "light"
+    ? "bg-[color:var(--color-overlay-3)]"
+    : "bg-[color:var(--color-slate-950-80)]";
 }
 
 function MenuIcon({
@@ -135,6 +143,7 @@ export function DashboardMenu({
   onOpenScheduler,
   moderation,
 }: DashboardMenuProps) {
+  const { theme } = useThemePreference();
   const navigate = useNavigate();
   const { user } = useUser();
   const { openUserProfile } = useClerk();
@@ -363,6 +372,11 @@ export function DashboardMenu({
         (type) => isTrackerEnabled(type),
       ),
     [isTrackerEnabled],
+  );
+
+  const widgetsRefreshingOverlayClassName = useMemo(
+    () => getWidgetsRefreshingOverlayClass(theme),
+    [theme],
   );
 
   const handleTrackerToggle = useCallback(
@@ -608,7 +622,9 @@ export function DashboardMenu({
                             </p>
                           )}
                           {moderation.isRefreshingWidgets ? (
-                            <div className="pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-950-80)]" />
+                            <div
+                              className={`pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-[color:var(--color-border-subtle)] ${widgetsRefreshingOverlayClassName}`}
+                            />
                           ) : null}
                         </div>
 
@@ -715,7 +731,9 @@ export function DashboardMenu({
                             ) : null}
                           </div>
                           {moderation.isRefreshingWidgets ? (
-                            <div className="pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-950-80)]" />
+                            <div
+                              className={`pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-[color:var(--color-border-subtle)] ${widgetsRefreshingOverlayClassName}`}
+                            />
                           ) : null}
                         </div>
 
