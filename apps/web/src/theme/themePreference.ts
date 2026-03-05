@@ -6,13 +6,13 @@ const DARK_SCHEME_MEDIA_QUERY = '(prefers-color-scheme: dark)';
 
 export function readStoredThemePreference(): ThemePreference {
   if (typeof window === 'undefined') {
-    return 'auto';
+    return 'dark';
   }
 
   const storedPreference = window.localStorage.getItem(THEME_PREFERENCE_STORAGE_KEY);
   return storedPreference === 'light' || storedPreference === 'dark' || storedPreference === 'auto'
     ? storedPreference
-    : 'auto';
+    : 'dark';
 }
 
 export function resolveThemeFromPreference(preference: ThemePreference): ResolvedTheme {
