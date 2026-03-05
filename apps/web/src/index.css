@@ -4474,6 +4474,52 @@
     --color-slate-950-80: rgba(241, 245, 255, 0.78);
   }
 
+  :root[data-theme='dark'] [data-light-scope='editor'] .editor-filters-mobile-panel {
+    background: color-mix(in srgb, var(--color-surface) 95%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  :root[data-theme='light'] [data-light-scope='editor'] .editor-filters-mobile-panel {
+    background: var(--color-surface-elevated);
+    border-bottom: 1px solid var(--color-border-subtle);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+    backdrop-filter: none;
+  }
+
+  :root[data-theme='dark'] [data-light-scope='editor'] .editor-pillar-chip {
+    border-color: var(--color-border-subtle);
+    background: var(--color-overlay-1);
+    color: var(--color-slate-200);
+  }
+
+  :root[data-theme='dark'] [data-light-scope='editor'] .editor-pillar-chip:hover {
+    border-color: var(--color-border-soft);
+    background: var(--color-overlay-2);
+  }
+
+  :root[data-theme='dark'] [data-light-scope='editor'] .editor-pillar-chip[data-active='true'] {
+    border-color: rgb(129 140 248 / 0.7);
+    background: rgb(129 140 248 / 0.15);
+    color: rgb(224 231 255);
+  }
+
+  :root[data-theme='light'] [data-light-scope='editor'] .editor-pillar-chip {
+    border-color: var(--color-border-subtle);
+    background: #ffffff;
+    color: var(--color-text);
+  }
+
+  :root[data-theme='light'] [data-light-scope='editor'] .editor-pillar-chip:hover {
+    border-color: color-mix(in srgb, var(--color-accent-primary) 24%, var(--color-border-subtle));
+    background: color-mix(in srgb, #ffffff 72%, #eef2ff 28%);
+  }
+
+  :root[data-theme='light'] [data-light-scope='editor'] .editor-pillar-chip[data-active='true'] {
+    border-color: color-mix(in srgb, #8b5cf6 58%, #c4b5fd 42%);
+    background: color-mix(in srgb, #ede9fe 78%, #ffffff 22%);
+    color: #6d28d9;
+  }
+
   :root[data-theme='light'] [data-light-scope='editor'] input,
   :root[data-theme='light'] [data-light-scope='editor'] select,
   :root[data-theme='light'] [data-light-scope='editor'] textarea {

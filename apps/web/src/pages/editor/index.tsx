@@ -682,7 +682,7 @@ function TaskFilters({
   return (
     <div className="flex flex-col gap-4">
       <div className="md:hidden">
-        <div className="sticky -mx-6 -mt-6 px-6 pt-6 pb-3 top-[4.5rem] z-30 space-y-3 rounded-t-2xl bg-surface/95 backdrop-blur">
+        <div className="editor-filters-mobile-panel sticky -mx-6 -mt-6 top-[4.5rem] z-30 space-y-3 rounded-t-2xl px-6 pt-6 pb-3 bg-[color:var(--color-slate-900-95)]">
           <label className="flex flex-col gap-1">
             <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">
               Buscar tareas
@@ -707,11 +707,8 @@ function TaskFilters({
                     key={pillar.value || 'all'}
                     type="button"
                     onClick={() => onPillarChange(pillar.value)}
-                    className={`inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60 ${
-                      isActive
-                        ? 'border-indigo-400/70 bg-indigo-400/15 text-indigo-100'
-                        : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-slate-200)] hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--color-overlay-2)]'
-                    }`}
+                    className="editor-pillar-chip inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+                    data-active={isActive}
                     aria-pressed={isActive}
                   >
                     {pillar.label}
