@@ -4550,11 +4550,37 @@
     gap: 0.375rem;
   }
 
+  .edit-task-modal__title {
+    color: var(--color-text);
+  }
+
+  .edit-task-modal__description {
+    color: var(--color-text-muted);
+  }
+
+  .edit-task-modal__editable-section-label,
+  .edit-task-modal__editable-field-label {
+    color: color-mix(in srgb, var(--color-accent-primary) 74%, #ffffff 26%);
+  }
+
   :root[data-theme='light'] [data-light-scope='editor'] .edit-task-modal__locked-field-value {
     background-color: #f1f5f9;
-    border-color: #e2e8f0;
-    color: #94a3b8;
+    border-color: #cbd5e1;
+    color: #334155;
     cursor: not-allowed;
+  }
+
+  :root[data-theme='light'] [data-light-scope='editor'] .edit-task-modal__title {
+    color: #0f172a;
+  }
+
+  :root[data-theme='light'] [data-light-scope='editor'] .edit-task-modal__description {
+    color: #334155;
+  }
+
+  :root[data-theme='light'] [data-light-scope='editor'] .edit-task-modal__editable-section-label,
+  :root[data-theme='light'] [data-light-scope='editor'] .edit-task-modal__editable-field-label {
+    color: #6d28d9;
   }
 
   :root[data-theme='light'] [data-light-scope='editor'] .edit-task-modal__editable-control {
@@ -4579,6 +4605,25 @@
 
   :root[data-theme='dark'] [data-light-scope='editor'] .edit-task-modal__lock-icon {
     color: var(--color-text-subtle);
+  }
+
+  :root[data-theme='dark'] [data-light-scope='editor'] .edit-task-modal__title {
+    color: var(--color-text);
+  }
+
+  :root[data-theme='dark'] [data-light-scope='editor'] .edit-task-modal__description {
+    color: var(--color-text-muted);
+  }
+
+  :root[data-theme='dark'] [data-light-scope='editor'] .edit-task-modal__editable-section-label,
+  :root[data-theme='dark'] [data-light-scope='editor'] .edit-task-modal__editable-field-label {
+    color: #c4b5fd;
+  }
+
+  :root[data-theme='dark'] [data-light-scope='editor'] .edit-task-modal__locked-field-value {
+    background-color: rgba(51, 65, 85, 0.78);
+    border-color: rgba(100, 116, 139, 0.9);
+    color: #e2e8f0;
   }
 
   :root[data-theme='light'] [data-light-scope='daily-quest'] {

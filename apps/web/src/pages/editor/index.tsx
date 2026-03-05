@@ -2084,8 +2084,8 @@ function EditTaskModal({
     <div className="edit-task-modal space-y-6">
       <header className="space-y-1">
         <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Editar tarea</p>
-        <h2 className="text-xl font-semibold text-white">Actualiza los detalles de tu tarea</h2>
-        <p className="text-sm text-[color:var(--color-slate-300)]">
+        <h2 className="edit-task-modal__title text-xl font-semibold">Actualiza los detalles de tu tarea</h2>
+        <p className="edit-task-modal__description text-sm">
           Ajusta el título, dificultad y estado. Los campos de pilar y rasgo permanecen bloqueados.
         </p>
       </header>
@@ -2106,12 +2106,12 @@ function EditTaskModal({
       </section>
 
       <section className="space-y-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-violet-300/90">
+        <p className="edit-task-modal__editable-section-label text-[11px] font-semibold uppercase tracking-[0.2em]">
           Campos editables
         </p>
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-200">Título de la tarea</span>
+            <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">Título de la tarea</span>
             <input
               type="text"
               value={title}
@@ -2128,7 +2128,7 @@ function EditTaskModal({
 
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-200">Dificultad</span>
+            <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">Dificultad</span>
             <select
               value={difficultyId}
               onChange={(event) => setDifficultyId(event.target.value)}
@@ -2163,7 +2163,7 @@ function EditTaskModal({
         </div>
 
         <div className="space-y-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-200">Estado</span>
+          <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">Estado</span>
           <label className="flex items-center gap-3">
             <input
               type="checkbox"
