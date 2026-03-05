@@ -427,6 +427,16 @@
     color: #ffffff;
   }
 
+  .onboarding-force-white {
+    /* Keep IntroJourney in dark mode even when app theme is light. */
+    --onboarding-glass-surface-base: rgba(255, 255, 255, 0.1);
+    --onboarding-glass-surface-inner: rgba(255, 255, 255, 0.06);
+    --onboarding-glass-surface-ghost: rgba(255, 255, 255, 0.03);
+    --onboarding-glass-border: rgba(255, 255, 255, 0.2);
+    --onboarding-glass-border-soft: rgba(255, 255, 255, 0.12);
+    --onboarding-glass-shadow: 0 26px 80px rgba(12, 18, 38, 0.24);
+  }
+
   .onboarding-force-white :is(input, textarea)::placeholder {
     color: #ffffff;
     opacity: 1;
