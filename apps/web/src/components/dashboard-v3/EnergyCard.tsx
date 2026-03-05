@@ -169,6 +169,7 @@ function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparis
   const width = clamped <= 4 ? 4 : clamped;
   const hasDelta = showComparison && typeof deltaPct === 'number';
   const deltaLabel = hasDelta ? formatDelta(deltaPct ?? null) : null;
+  const headerLabel = deltaLabel ?? (showComparison ? 'Sin variación suficiente' : null);
   const deltaColor =
     typeof deltaPct === 'number'
       ? deltaPct < 0
@@ -179,20 +180,22 @@ function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparis
       : 'text-slate-700 dark:text-slate-200';
 
   return (
-    <div className="space-y-2 sm:grid sm:grid-cols-[88px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
-      <div className="flex items-center justify-between sm:block">
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
         <span
-          className={`text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-950 dark:text-slate-300 ${
+          className={`text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-950 dark:text-white ${
             highlight ? 'drop-shadow-[0_0_6px_rgba(16,185,129,0.45)]' : ''
           }`}
         >
           {label}
         </span>
-        <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-slate-200 backdrop-blur sm:hidden">
-          {clamped}%
-        </span>
+        {headerLabel ? (
+          <span className={`text-[13px] font-bold leading-tight tracking-tight dark:text-[12px] dark:font-medium ${deltaColor}`}>
+            {headerLabel}
+          </span>
+        ) : null}
       </div>
-      <div className="relative h-5 w-full overflow-hidden rounded-full border border-slate-200 bg-slate-200/90 shadow-none dark:border-white/5 dark:bg-slate-900/40 dark:shadow-[inset_0_1px_1px_rgba(15,23,42,0.45)]">
+      <div className="relative h-5 w-full overflow-hidden rounded-full bg-slate-200/90 shadow-none dark:bg-slate-900/40 dark:shadow-none">
         <div
           className={`${GRADIENTS[label]} h-full rounded-full transition-[width] duration-500 ease-out progress-fill--typing`}
           style={{ width: `${width}%`, minWidth: clamped === 0 ? '1.5rem' : undefined }}
@@ -203,11 +206,6 @@ function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparis
           </span>
         </div>
       </div>
-      {deltaLabel ? (
-        <p className={`text-[13px] font-bold leading-tight tracking-tight dark:text-[12px] dark:font-medium ${deltaColor}`}>{deltaLabel}</p>
-      ) : showComparison ? (
-        <p className="text-[11px] font-medium text-slate-600 dark:font-light dark:text-slate-400">Sin variación suficiente</p>
-      ) : null}
     </div>
   );
 }
