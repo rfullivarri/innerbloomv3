@@ -4550,6 +4550,19 @@
     gap: 0.375rem;
   }
 
+  .edit-task-modal__locked-field-value {
+    border: 1px solid #dbe3ee;
+    background-color: #f8fafc;
+    color: #64748b;
+    cursor: not-allowed;
+  }
+
+  :root[data-theme='dark'] .edit-task-modal__locked-field-value {
+    background-color: rgba(71, 85, 105, 0.45);
+    border-color: rgba(148, 163, 184, 0.5);
+    color: #cbd5e1;
+  }
+
   .edit-task-modal__title {
     color: var(--color-text);
   }
@@ -4564,10 +4577,9 @@
   }
 
   :root[data-theme='light'] [data-light-scope='editor'] .edit-task-modal__locked-field-value {
-    background-color: #f1f5f9;
-    border-color: #cbd5e1;
-    color: #334155;
-    cursor: not-allowed;
+    background-color: #f8fafc;
+    border-color: #dbe3ee;
+    color: #64748b;
   }
 
   :root[data-theme='light'] [data-light-scope='editor'] .edit-task-modal__title {
@@ -4621,9 +4633,9 @@
   }
 
   :root[data-theme='dark'] [data-light-scope='editor'] .edit-task-modal__locked-field-value {
-    background-color: rgba(51, 65, 85, 0.78);
-    border-color: rgba(100, 116, 139, 0.9);
-    color: #e2e8f0;
+    background-color: rgba(71, 85, 105, 0.45);
+    border-color: rgba(148, 163, 184, 0.5);
+    color: #cbd5e1;
   }
 
   :root[data-theme='light'] [data-light-scope='daily-quest'] {
