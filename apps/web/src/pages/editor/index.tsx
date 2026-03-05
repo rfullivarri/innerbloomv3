@@ -2280,7 +2280,7 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
         {label}
         <LockBadgeIcon className="edit-task-modal__lock-icon h-3.5 w-3.5 shrink-0" />
       </span>
-      <div className="edit-task-modal__locked-field-value rounded-2xl border border-slate-600/60 bg-slate-800/70 px-4 py-3 text-sm text-[color:var(--color-slate-300)]">
+      <div className="edit-task-modal__locked-field-value rounded-2xl px-4 py-3 text-sm">
         {value}
       </div>
     </div>
