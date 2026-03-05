@@ -466,15 +466,15 @@ export default function TaskEditorPage() {
                     <ToastBanner
                       tone={pageToast.type}
                       message={pageToast.text}
-                      className="border-emerald-300/70 bg-emerald-500 text-white shadow-[0_14px_36px_rgba(16,185,129,0.45)]"
+                      className="border-[color:var(--border-default)]/70 bg-[color:var(--accent-primary)] text-[color:var(--button-primary-text)] shadow-[0_14px_36px_rgba(16,185,129,0.45)]"
                     />
                   </div>
                 )}
                 {shouldShowInlineNotice && (
-                  <div className="overflow-hidden rounded-md bg-[linear-gradient(90deg,#7C3AED_0%,#8B5CF6_100%)] px-2.5 py-1.5 text-[11px] leading-4 text-white shadow-[0_8px_18px_rgba(124,58,237,0.35)]">
+                  <div className="overflow-hidden rounded-md bg-[color:var(--button-primary-bg)] px-2.5 py-1.5 text-[11px] leading-4 text-[color:var(--button-primary-text)] shadow-[0_8px_18px_rgba(124,58,237,0.35)]">
                     <Link
                       to={getDashboardSectionConfig('dashboard', location.pathname).to}
-                      className="block overflow-hidden text-ellipsis whitespace-nowrap text-white hover:text-white/95"
+                      className="block overflow-hidden text-ellipsis whitespace-nowrap text-[color:var(--button-primary-text)] hover:text-[color:var(--button-primary-text)]/95"
                     >
                       Listo. Volvé al Dashboard para tu primer Daily Quest <span className="font-semibold">→</span>
                     </Link>
@@ -549,7 +549,7 @@ export default function TaskEditorPage() {
         <button
           type="button"
           onClick={handleCreateClick}
-          className="fixed bottom-24 right-4 z-30 inline-flex items-center gap-2 rounded-full bg-violet-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(139,92,246,0.45)] transition hover:bg-violet-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 md:bottom-10 md:right-8"
+          className="fixed bottom-24 right-4 z-30 inline-flex items-center gap-2 rounded-full bg-[color:var(--accent-secondary)] px-5 py-3 text-sm font-semibold text-[color:var(--button-primary-text)] shadow-[0_12px_32px_rgba(139,92,246,0.45)] transition hover:bg-[color:var(--accent-secondary)]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-secondary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--surface-app)] md:bottom-10 md:right-8"
         >
           <span aria-hidden className="text-lg leading-none">＋</span>
           Nueva tarea
@@ -657,19 +657,19 @@ function TaskFilters({
             className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {pillars.map((pillar) => (
-              <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+              <option key={pillar.value || 'all'} value={pillar.value} className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                 {pillar.label}
               </option>
             ))}
           </select>
           {isLoadingPillars && (
-            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando pilares…</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)]">Cargando pilares…</span>
           )}
           {pillarsError && !isLoadingPillars && (
             <button
               type="button"
               onClick={onRetryPillars}
-              className="self-start text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300"
+              className="self-start text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--text-muted)]"
             >
               Reintentar cargar pilares
             </button>
@@ -696,7 +696,7 @@ function TaskFilters({
             />
           </label>
           <div className="space-y-2">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[color:var(--text-muted)]">
               Pilares
             </span>
             <div className="flex gap-2 overflow-x-auto pb-1 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
@@ -719,13 +719,13 @@ function TaskFilters({
           </div>
         </div>
         {isLoadingPillars && (
-          <p className="px-1 text-[10px] uppercase tracking-[0.28em] text-slate-500">Cargando pilares…</p>
+          <p className="px-1 text-[10px] uppercase tracking-[0.28em] text-[color:var(--text-muted)]">Cargando pilares…</p>
         )}
         {pillarsError && !isLoadingPillars && (
           <button
             type="button"
             onClick={onRetryPillars}
-            className="px-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-300"
+            className="px-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[color:var(--text-muted)]"
           >
             Reintentar cargar pilares
           </button>
@@ -756,19 +756,19 @@ function TaskFilters({
             className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {pillars.map((pillar) => (
-              <option key={pillar.value || 'all'} value={pillar.value} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+              <option key={pillar.value || 'all'} value={pillar.value} className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                 {pillar.label}
               </option>
             ))}
           </select>
           {isLoadingPillars && (
-            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando pilares…</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)]">Cargando pilares…</span>
           )}
           {pillarsError && !isLoadingPillars && (
             <button
               type="button"
               onClick={onRetryPillars}
-              className="self-start text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300"
+              className="self-start text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--text-muted)]"
             >
               Reintentar cargar pilares
             </button>
@@ -946,7 +946,7 @@ function TaskListMobile({
               className="flex w-full flex-col gap-2 px-4 py-2.5 text-left transition hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
             >
               <div className="flex items-start justify-between gap-3">
-                <p className="line-clamp-1 pr-8 text-sm font-semibold text-white">{task.title}</p>
+                <p className="line-clamp-1 pr-8 text-sm font-semibold text-[color:var(--button-primary-text)]">{task.title}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-[11px] text-[color:var(--color-slate-300)]">
                 <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-2 py-0.5 font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-100)]">
@@ -971,7 +971,7 @@ function TaskListMobile({
                   event.stopPropagation();
                   setOpenMenuTaskId((current) => (current === task.id ? null : task.id));
                 }}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-base text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-base text-[color:var(--color-slate-200)] transition hover:border-[color:var(--border-default)]/30 hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
               >
                 <span aria-hidden>⋯</span>
                 <span className="sr-only">Más acciones</span>
@@ -1001,7 +1001,7 @@ function TaskListMobile({
                     }}
                     className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
                       !onDuplicateTask
-                        ? 'cursor-not-allowed text-slate-500'
+                        ? 'cursor-not-allowed text-[color:var(--text-muted)]'
                         : 'text-[color:var(--color-slate-100)] hover:bg-[color:var(--color-overlay-2)]'
                     } ${isDuplicating ? 'opacity-70' : ''}`.trim()}
                   >
@@ -1020,7 +1020,7 @@ function TaskListMobile({
                     className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
                       onImproveTask
                         ? 'text-[color:var(--color-slate-100)] hover:bg-[color:var(--color-overlay-2)]'
-                        : 'cursor-not-allowed text-slate-500'
+                        : 'cursor-not-allowed text-[color:var(--text-muted)]'
                     }`}
                   >
                     Mejorar con IA
@@ -1032,7 +1032,7 @@ function TaskListMobile({
                       setOpenMenuTaskId(null);
                       onDeleteTask(task);
                     }}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-rose-200 transition hover:bg-rose-500/10"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-[color:var(--text-secondary)] transition hover:bg-[color:var(--accent-secondary)]/10"
                   >
                     Eliminar
                   </button>
@@ -1071,7 +1071,7 @@ function TaskCard({
           <span
             className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
               task.isActive
-                ? 'bg-emerald-500/15 text-emerald-300'
+                ? 'bg-[color:var(--accent-primary)]/15 text-emerald-300'
                 : 'bg-slate-500/20 text-[color:var(--color-slate-300)]'
             }`}
           >
@@ -1080,14 +1080,14 @@ function TaskCard({
           <button
             type="button"
             onClick={onEdit}
-            className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
+            className="rounded-full border border-[color:var(--border-default)]/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--border-default)]/30 hover:text-[color:var(--button-primary-text)]"
           >
             Editar
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="rounded-full border border-rose-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-200 transition hover:border-rose-400 hover:text-rose-100"
+            className="rounded-full border border-rose-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--text-secondary)] transition hover:border-rose-400 hover:text-[color:var(--text-primary)]"
           >
             Eliminar
           </button>
@@ -1115,7 +1115,7 @@ function TaskCard({
           <dd className="truncate text-right">{task.xp != null ? task.xp : '—'}</dd>
         </div>
       </dl>
-      <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+      <p className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)]">
         Actualizada: {formatDateLabel(task.updatedAt)}
       </p>
     </article>
@@ -1142,21 +1142,21 @@ const PILLAR_STYLE_MAP: Record<string, { headerText: string; badgeBg: string; ba
  = {
   BODY: {
     headerText: 'text-emerald-300',
-    badgeBg: 'bg-emerald-500/15 border border-emerald-400/40',
-    badgeText: 'text-emerald-100',
+    badgeBg: 'bg-[color:var(--accent-primary)]/15 border border-emerald-400/40',
+    badgeText: 'text-[color:var(--text-primary)]',
     bullet: 'text-emerald-300',
     ring: 'ring-emerald-400/40',
   },
   MIND: {
     headerText: 'text-sky-300',
-    badgeBg: 'bg-sky-500/15 border border-sky-400/40',
-    badgeText: 'text-sky-100',
+    badgeBg: 'bg-sky-500/15 border border-[color:var(--border-default)]/40',
+    badgeText: 'text-[color:var(--text-primary)]',
     bullet: 'text-sky-300',
     ring: 'ring-sky-400/40',
   },
   SOUL: {
     headerText: 'text-violet-300',
-    badgeBg: 'bg-violet-500/15 border border-violet-400/40',
+    badgeBg: 'bg-[color:var(--accent-secondary)]/15 border border-violet-400/40',
     badgeText: 'text-violet-100',
     bullet: 'text-violet-300',
     ring: 'ring-violet-400/40',
@@ -1201,12 +1201,12 @@ function TaskBoard({
             key={group.key}
             className="flex min-h-[260px] flex-col rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4"
           >
-            <header className="flex items-center justify-between border-b border-white/5 pb-3">
+            <header className="flex items-center justify-between border-b border-[color:var(--border-subtle)] pb-3">
               <div className="space-y-1">
                 <p className={`text-xs font-semibold uppercase tracking-[0.24em] ${style.headerText}`}>
                   {group.name}
                 </p>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{displayCode}</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)]">{displayCode}</p>
               </div>
               <span
                 className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${style.badgeBg} ${style.badgeText}`}
@@ -1216,7 +1216,7 @@ function TaskBoard({
             </header>
             <div className="mt-3 flex-1 space-y-2">
               {group.tasks.length === 0 ? (
-                <p className="rounded-xl border border-white/5 bg-[color:var(--color-overlay-1)] px-3 py-6 text-center text-xs text-slate-500">
+                <p className="rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-6 text-center text-xs text-[color:var(--text-muted)]">
                   Sin tareas en este pilar.
                 </p>
               ) : (
@@ -1281,8 +1281,8 @@ function TaskBoardItem({
   };
 
   const containerClasses = [
-    'group relative cursor-pointer rounded-xl border border-[color:var(--color-border-subtle)] bg-slate-900/60 p-3 transition hover:border-white/25 hover:bg-slate-900/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
-    isActiveTask ? `border-white/30 bg-slate-900/80 ring-2 ${ringClass}` : '',
+    'group relative cursor-pointer rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--surface-app)]/60 p-3 transition hover:border-[color:var(--border-default)]/25 hover:bg-[color:var(--surface-app)]/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
+    isActiveTask ? `border-[color:var(--border-default)]/30 bg-[color:var(--surface-app)]/80 ring-2 ${ringClass}` : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -1302,7 +1302,7 @@ function TaskBoardItem({
           <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
             <span
               className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${
-                task.isActive ? 'bg-emerald-500/10 text-emerald-200' : 'bg-slate-700/20 text-[color:var(--color-slate-300)]'
+                task.isActive ? 'bg-[color:var(--accent-primary)]/10 text-emerald-200' : 'bg-slate-700/20 text-[color:var(--color-slate-300)]'
               }`}
             >
               {task.isActive ? 'Activa' : 'Inactiva'}
@@ -1311,7 +1311,7 @@ function TaskBoardItem({
               <span className={`text-base leading-none ${bulletClass}`}>•</span>
               {difficultyName ?? 'Sin dificultad'}
             </span>
-            <span className="text-slate-500">{pillarName}</span>
+            <span className="text-[color:var(--text-muted)]">{pillarName}</span>
           </div>
         </div>
         <button
@@ -1320,7 +1320,7 @@ function TaskBoardItem({
             event.stopPropagation();
             onDeleteTask(task);
           }}
-          className="rounded-full border border-rose-500/40 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200 transition hover:border-rose-400 hover:text-rose-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/50"
+          className="rounded-full border border-[color:var(--border-default)]/50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--text-secondary)] transition hover:border-rose-400 hover:text-[color:var(--text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/50"
         >
           Eliminar
         </button>
@@ -1372,7 +1372,7 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
   const displayTitle = normalizedTitle.length > 0 ? `“${normalizedTitle}”` : 'esta tarea';
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-[color:var(--surface-app)]/70 backdrop-blur-sm md:items-center">
       <button
         type="button"
         aria-label="Cerrar"
@@ -1392,13 +1392,13 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
         >
           <header className="space-y-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Confirmar eliminación</p>
-            <h2 className="text-xl font-semibold text-white">Eliminar tarea</h2>
+            <h2 className="text-xl font-semibold text-[color:var(--button-primary-text)]">Eliminar tarea</h2>
           </header>
           <p className="text-sm text-[color:var(--color-slate-300)]">
             ¿Seguro que quieres eliminar {displayTitle}? Esta acción quitará la tarea de tu lista inmediatamente.
           </p>
           {errorMessage && (
-            <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
+            <div className="rounded-xl border border-[color:var(--border-default)]/50 bg-[color:var(--accent-secondary)]/10 px-3 py-2 text-sm text-[color:var(--text-primary)]">
               {errorMessage}
             </div>
           )}
@@ -1411,7 +1411,7 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
                 }
               }}
               disabled={isDeleting}
-              className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-[color:var(--button-primary-text)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               Cancelar
             </button>
@@ -1419,7 +1419,7 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
               type="button"
               onClick={handleConfirmClick}
               disabled={isDeleting}
-              className="inline-flex items-center justify-center rounded-full bg-rose-600/90 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(225,29,72,0.3)] transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-full bg-rose-600/90 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--button-primary-text)] shadow-[0_10px_30px_rgba(225,29,72,0.3)] transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isDeleting ? 'Eliminando…' : 'Eliminar'}
             </button>
@@ -1434,7 +1434,7 @@ function TaskListSkeleton() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="h-40 animate-pulse rounded-2xl border border-white/5 bg-[color:var(--color-overlay-1)]" />
+        <div key={index} className="h-40 animate-pulse rounded-2xl border border-[color:var(--border-subtle)] bg-[color:var(--color-overlay-1)]" />
       ))}
     </div>
   );
@@ -1453,13 +1453,13 @@ function TaskListEmpty({ message }: { message: string }) {
 
 function TaskListError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-6 py-8 text-center text-sm text-rose-100">
+    <div className="flex flex-col items-center gap-4 rounded-2xl border border-rose-500/30 bg-[color:var(--accent-secondary)]/10 px-6 py-8 text-center text-sm text-[color:var(--text-primary)]">
       <p className="font-semibold">No pudimos cargar tus tareas.</p>
-      <p className="max-w-sm text-rose-200/80">{message}</p>
+      <p className="max-w-sm text-[color:var(--text-secondary)]/80">{message}</p>
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:border-[color:var(--color-border-strong)]"
+        className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--button-primary-text)] transition hover:border-[color:var(--color-border-strong)]"
       >
         Reintentar
       </button>
@@ -1661,7 +1661,7 @@ function CreateTaskModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-[color:var(--surface-app)]/70 backdrop-blur-sm md:items-center">
       <button
         type="button"
         aria-label="Cerrar"
@@ -1677,7 +1677,7 @@ function CreateTaskModal({
           <div className="space-y-6">
             <header className="space-y-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Nueva tarea</p>
-              <h2 className="text-xl font-semibold text-white">Crear tarea personalizada</h2>
+              <h2 className="text-xl font-semibold text-[color:var(--button-primary-text)]">Crear tarea personalizada</h2>
               <p className="text-sm text-[color:var(--color-slate-300)]">
                 Define el pilar, rasgo y stat para desbloquear campos específicos de tu misión.
               </p>
@@ -1685,7 +1685,7 @@ function CreateTaskModal({
 
             <section className="space-y-4">
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 1 · Pilar</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--text-muted)]">Paso 1 · Pilar</p>
                 <label className="flex flex-col gap-2">
                   <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Selecciona un pilar</span>
                   <select
@@ -1697,39 +1697,39 @@ function CreateTaskModal({
                     className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={isLoadingPillars || pillarsError != null}
                   >
-                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                    <option value="" className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                       Selecciona un pilar…
                     </option>
                     {sortedPillars.map((pillar) => (
-                      <option key={pillar.id} value={pillar.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                      <option key={pillar.id} value={pillar.id} className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                         {pillar.name}
                       </option>
                     ))}
                   </select>
                 </label>
                 {isLoadingPillars && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando pilares…</p>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)]">Cargando pilares…</p>
                 )}
                 {pillarsError && (
-                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                  <div className="space-y-1 rounded-xl border border-[color:var(--border-default)]/50 bg-[color:var(--accent-secondary)]/10 px-3 py-2 text-xs text-[color:var(--text-primary)]">
                     <p>No se pudieron cargar los pilares.</p>
                     <button
                       type="button"
                       onClick={onRetryPillars}
-                      className="font-semibold text-rose-200 underline decoration-dotted"
+                      className="font-semibold text-[color:var(--text-secondary)] underline decoration-dotted"
                     >
                       Reintentar
                     </button>
                   </div>
                 )}
-                {errors.pillar && <p className="text-xs text-rose-300">{errors.pillar}</p>}
+                {errors.pillar && <p className="text-xs text-[color:var(--text-muted)]">{errors.pillar}</p>}
                 {!isLoadingPillars && !pillarsError && sortedPillars.length === 0 && (
                   <p className="text-xs text-[color:var(--color-slate-400)]">No encontramos pilares disponibles por ahora.</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 2 · Rasgo</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--text-muted)]">Paso 2 · Rasgo</p>
                 <label className="flex flex-col gap-2">
                   <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Selecciona un rasgo</span>
                   <select
@@ -1741,39 +1741,39 @@ function CreateTaskModal({
                     className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={!selectedPillarId || isLoadingTraits}
                   >
-                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                    <option value="" className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                       {selectedPillarId ? 'Selecciona un rasgo…' : 'Selecciona primero un pilar'}
                     </option>
                     {filteredTraits.map((trait) => (
-                      <option key={trait.id} value={trait.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                      <option key={trait.id} value={trait.id} className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                         {trait.name}
                       </option>
                     ))}
                   </select>
                 </label>
                 {isLoadingTraits && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando rasgos…</p>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)]">Cargando rasgos…</p>
                 )}
                 {traitsError && (
-                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                  <div className="space-y-1 rounded-xl border border-[color:var(--border-default)]/50 bg-[color:var(--accent-secondary)]/10 px-3 py-2 text-xs text-[color:var(--text-primary)]">
                     <p>No se pudieron cargar los rasgos.</p>
                     <button
                       type="button"
                       onClick={reloadTraits}
-                      className="font-semibold text-rose-200 underline decoration-dotted"
+                      className="font-semibold text-[color:var(--text-secondary)] underline decoration-dotted"
                     >
                       Reintentar
                     </button>
                   </div>
                 )}
-                {errors.trait && <p className="text-xs text-rose-300">{errors.trait}</p>}
+                {errors.trait && <p className="text-xs text-[color:var(--text-muted)]">{errors.trait}</p>}
                 {selectedPillarId && !isLoadingTraits && filteredTraits.length === 0 && !traitsError && (
                   <p className="text-xs text-[color:var(--color-slate-400)]">Este pilar aún no tiene rasgos disponibles.</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 3 · Stat</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--text-muted)]">Paso 3 · Stat</p>
                 <label className="flex flex-col gap-2">
                   <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Selecciona un stat (opcional)</span>
                   <select
@@ -1782,26 +1782,26 @@ function CreateTaskModal({
                     className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={!selectedTraitId || isLoadingStats}
                   >
-                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                    <option value="" className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                       {selectedTraitId ? 'Selecciona un stat…' : 'Selecciona primero un rasgo'}
                     </option>
                     {filteredStats.map((stat) => (
-                      <option key={stat.id} value={stat.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                      <option key={stat.id} value={stat.id} className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                         {stat.name}
                       </option>
                     ))}
                   </select>
                 </label>
                 {isLoadingStats && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando stats…</p>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)]">Cargando stats…</p>
                 )}
                 {statsError && (
-                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                  <div className="space-y-1 rounded-xl border border-[color:var(--border-default)]/50 bg-[color:var(--accent-secondary)]/10 px-3 py-2 text-xs text-[color:var(--text-primary)]">
                     <p>No se pudieron cargar los stats.</p>
                     <button
                       type="button"
                       onClick={reloadStats}
-                      className="font-semibold text-rose-200 underline decoration-dotted"
+                      className="font-semibold text-[color:var(--text-secondary)] underline decoration-dotted"
                     >
                       Reintentar
                     </button>
@@ -1828,7 +1828,7 @@ function CreateTaskModal({
                     className="w-full rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
                   />
                 </label>
-                {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
+                {errors.title && <p className="text-xs text-[color:var(--text-muted)]">{errors.title}</p>}
               </div>
 
               <div className="space-y-2">
@@ -1840,26 +1840,26 @@ function CreateTaskModal({
                     className="w-full appearance-none rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
                     disabled={isLoadingDifficulties}
                   >
-                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                    <option value="" className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                       Selecciona una dificultad…
                     </option>
                     {sortedDifficulties.map((difficulty) => (
-                      <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                      <option key={difficulty.id} value={difficulty.id} className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                         {difficulty.name}
                       </option>
                     ))}
                   </select>
                 </label>
                 {isLoadingDifficulties && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando dificultades…</p>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)]">Cargando dificultades…</p>
                 )}
                 {difficultiesError && (
-                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                  <div className="space-y-1 rounded-xl border border-[color:var(--border-default)]/50 bg-[color:var(--accent-secondary)]/10 px-3 py-2 text-xs text-[color:var(--text-primary)]">
                     <p>No se pudieron cargar las dificultades.</p>
                     <button
                       type="button"
                       onClick={reloadDifficulties}
-                      className="font-semibold text-rose-200 underline decoration-dotted"
+                      className="font-semibold text-[color:var(--text-secondary)] underline decoration-dotted"
                     >
                       Reintentar
                     </button>
@@ -1869,7 +1869,7 @@ function CreateTaskModal({
 
             </section>
 
-            {errors.user && <p className="text-xs text-rose-300">{errors.user}</p>}
+            {errors.user && <p className="text-xs text-[color:var(--text-muted)]">{errors.user}</p>}
 
             {toast && <ToastBanner tone={toast.type} message={toast.text} className="px-3" />}
 
@@ -1877,14 +1877,14 @@ function CreateTaskModal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-white"
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-[color:var(--button-primary-text)]"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isSubmitDisabled}
-                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(79,70,229,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-full bg-[color:var(--button-primary-bg)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--button-primary-text)] shadow-[0_10px_30px_rgba(79,70,229,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? 'Creando…' : 'Crear tarea'}
               </button>
@@ -2092,14 +2092,14 @@ function EditTaskModal({
 
       <section className="space-y-4">
         <div className="space-y-2">
-          <span className="edit-task-modal__locked-section-label text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+          <span className="edit-task-modal__locked-section-label text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--text-muted)]">
             Contexto
           </span>
           <div className="grid gap-3 md:grid-cols-2">
             <ReadOnlyField label="Pilar" value={pillarName} />
             <ReadOnlyField label="Rasgo" value={traitName} />
           </div>
-          <p className="edit-task-modal__locked-section-label text-[11px] uppercase tracking-[0.2em] text-slate-500">
+          <p className="edit-task-modal__locked-section-label text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)]">
             Estos campos no se pueden editar.
           </p>
         </div>
@@ -2120,10 +2120,10 @@ function EditTaskModal({
                 clearError('title');
               }}
               placeholder="Ej. Entrenar 30 minutos"
-              className="edit-task-modal__editable-control w-full rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-violet-100/50 shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50"
+              className="edit-task-modal__editable-control w-full rounded-2xl border border-[color:var(--border-default)]/50 bg-[color:var(--accent-secondary)]/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--text-muted)] shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-[color:var(--border-default)] focus:outline-none focus:ring-2 focus:ring-[color:var(--focus-ring)]"
             />
           </label>
-          {errors.title && <p className="text-xs text-rose-300">{errors.title}</p>}
+          {errors.title && <p className="text-xs text-[color:var(--text-muted)]">{errors.title}</p>}
         </div>
 
         <div className="space-y-2">
@@ -2132,29 +2132,29 @@ function EditTaskModal({
             <select
               value={difficultyId}
               onChange={(event) => setDifficultyId(event.target.value)}
-              className="edit-task-modal__editable-control w-full appearance-none rounded-2xl border border-violet-300/50 bg-violet-400/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-violet-200 focus:outline-none focus:ring-2 focus:ring-violet-200/50 disabled:cursor-not-allowed"
+              className="edit-task-modal__editable-control w-full appearance-none rounded-2xl border border-[color:var(--border-default)]/50 bg-[color:var(--accent-secondary)]/10 px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] shadow-[0_0_0_1px_rgba(167,139,250,0.25)] transition focus:border-[color:var(--border-default)] focus:outline-none focus:ring-2 focus:ring-[color:var(--focus-ring)] disabled:cursor-not-allowed"
               disabled={isLoadingDifficulties}
             >
-              <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
+              <option value="" className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                 Sin dificultad asignada
               </option>
               {sortedDifficulties.map((difficulty) => (
-                <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
+                <option key={difficulty.id} value={difficulty.id} className="bg-[color:var(--surface-app)] text-[color:var(--color-slate-100)]">
                   {difficulty.name}
                 </option>
               ))}
             </select>
           </label>
           {isLoadingDifficulties && (
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando dificultades…</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)]">Cargando dificultades…</p>
           )}
           {difficultiesError && (
-            <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+            <div className="space-y-1 rounded-xl border border-[color:var(--border-default)]/50 bg-[color:var(--accent-secondary)]/10 px-3 py-2 text-xs text-[color:var(--text-primary)]">
               <p>No se pudieron cargar las dificultades.</p>
               <button
                 type="button"
                 onClick={reloadDifficulties}
-                className="font-semibold text-rose-200 underline decoration-dotted"
+                className="font-semibold text-[color:var(--text-secondary)] underline decoration-dotted"
               >
                 Reintentar
               </button>
@@ -2169,15 +2169,15 @@ function EditTaskModal({
               type="checkbox"
               checked={isActive}
               onChange={(event) => setIsActive(event.target.checked)}
-              className="h-4 w-4 rounded border-white/30 bg-[color:var(--color-overlay-2)] text-indigo-500 focus:ring-indigo-400"
+              className="h-4 w-4 rounded border-[color:var(--border-default)]/30 bg-[color:var(--color-overlay-2)] text-[color:var(--accent-primary)] focus:ring-[color:var(--focus-ring)]"
             />
             <span className="text-sm text-[color:var(--color-slate-200)]">{isActive ? 'Activa' : 'Inactiva'}</span>
           </label>
         </div>
       </section>
 
-      {errors.user && <p className="text-xs text-rose-300">{errors.user}</p>}
-      {errors.task && <p className="text-xs text-rose-300">{errors.task}</p>}
+      {errors.user && <p className="text-xs text-[color:var(--text-muted)]">{errors.user}</p>}
+      {errors.task && <p className="text-xs text-[color:var(--text-muted)]">{errors.task}</p>}
 
       {toast && <ToastBanner tone={toast.type} message={toast.text} className="px-3" />}
 
@@ -2185,14 +2185,14 @@ function EditTaskModal({
         <button
           type="button"
           onClick={handleClose}
-          className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-white"
+          className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-[color:var(--button-primary-text)]"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(207,139,243,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-full bg-[color:var(--button-primary-bg)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--button-primary-text)] shadow-[0_10px_30px_rgba(207,139,243,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? 'Guardando…' : 'Guardar cambios'}
         </button>
@@ -2207,9 +2207,9 @@ function EditTaskModal({
           type="button"
           aria-label="Cerrar"
           onClick={handleClose}
-          className="flex-1 bg-slate-950/60 backdrop-blur-sm"
+          className="flex-1 bg-[color:var(--surface-app)]/60 backdrop-blur-sm"
         />
-        <aside className="flex h-full w-full max-w-xl flex-col border-l border-[color:var(--color-border-subtle)] bg-slate-950/95 text-[color:var(--color-slate-100)] shadow-[0_18px_40px_rgba(15,23,42,0.65)]">
+        <aside className="flex h-full w-full max-w-xl flex-col border-l border-[color:var(--color-border-subtle)] bg-[color:var(--surface-app)]/95 text-[color:var(--color-slate-100)] shadow-[0_18px_40px_rgba(15,23,42,0.65)]">
           <form onSubmit={handleSubmit} className="flex h-full flex-col overflow-hidden">
             <div className="flex items-center justify-between gap-3 border-b border-[color:var(--color-border-subtle)] px-6 py-4">
               {showNavigation ? (
@@ -2218,7 +2218,7 @@ function EditTaskModal({
                     type="button"
                     onClick={() => handleNavigate(previousTask)}
                     disabled={!previousTask}
-                    className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-full border border-[color:var(--border-default)]/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--border-default)]/30 hover:text-[color:var(--button-primary-text)] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Anterior
                   </button>
@@ -2229,7 +2229,7 @@ function EditTaskModal({
                     type="button"
                     onClick={() => handleNavigate(nextTask)}
                     disabled={!nextTask}
-                    className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-full border border-[color:var(--border-default)]/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--border-default)]/30 hover:text-[color:var(--button-primary-text)] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Siguiente
                   </button>
@@ -2240,7 +2240,7 @@ function EditTaskModal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
+                className="rounded-full border border-[color:var(--border-default)]/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--border-default)]/30 hover:text-[color:var(--button-primary-text)]"
               >
                 Cerrar
               </button>
@@ -2253,7 +2253,7 @@ function EditTaskModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-[color:var(--surface-app)]/70 backdrop-blur-sm md:items-center">
       <button
         type="button"
         aria-label="Cerrar"
@@ -2280,7 +2280,7 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
         {label}
         <LockBadgeIcon className="edit-task-modal__lock-icon h-3.5 w-3.5 shrink-0" />
       </span>
-      <div className="edit-task-modal__locked-field-value rounded-2xl border border-slate-600/60 bg-slate-800/70 px-4 py-3 text-sm text-[color:var(--color-slate-300)]">
+      <div className="edit-task-modal__locked-field-value rounded-2xl border border-[color:var(--border-default)]/60 bg-[color:var(--surface-section)]/70 px-4 py-3 text-sm text-[color:var(--color-slate-300)]">
         {value}
       </div>
     </div>
