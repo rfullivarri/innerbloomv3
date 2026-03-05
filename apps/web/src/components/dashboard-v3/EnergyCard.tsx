@@ -3,6 +3,7 @@ import { useRequest } from '../../hooks/useRequest';
 import { getUserDailyEnergy, type DailyEnergySnapshot } from '../../lib/api';
 import { Card } from '../ui/Card';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
+import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 
 interface EnergyCardProps {
   userId: string;
@@ -165,11 +166,13 @@ const GRADIENTS: Record<PillarKey, string> = {
 };
 
 function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparison = false }: EnergyMeterProps) {
+  const { theme } = useThemePreference();
   const clamped = Math.max(0, Math.min(percent, 100));
   const width = clamped <= 4 ? 4 : clamped;
   const hasDelta = showComparison && typeof deltaPct === 'number';
   const deltaLabel = hasDelta ? formatDelta(deltaPct ?? null) : null;
   const headerLabel = deltaLabel ?? (showComparison ? 'Sin variación suficiente' : null);
+  const labelColor = theme === 'dark' ? 'text-white' : 'text-slate-950';
   const deltaColor =
     typeof deltaPct === 'number'
       ? deltaPct < 0
@@ -183,7 +186,7 @@ function EnergyMeter({ label, percent, deltaPct, highlight = false, showComparis
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-3">
         <span
-          className={`text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-950 dark:text-white ${
+          className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${labelColor} ${
             highlight ? 'drop-shadow-[0_0_6px_rgba(16,185,129,0.45)]' : ''
           }`}
         >
