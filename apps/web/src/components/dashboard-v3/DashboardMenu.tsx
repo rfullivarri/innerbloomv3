@@ -462,7 +462,7 @@ export function DashboardMenu({
                 <div className="flex-1 space-y-4 overflow-y-auto pr-1">
                   <ThemeSwitcher />
 
-                  <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1">
+                  <section className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1">
                     <button
                       type="button"
                       onClick={handleOpenProfile}
@@ -496,7 +496,7 @@ export function DashboardMenu({
                     </button>
                   </section>
 
-                  <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1">
+                  <section className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1">
                     <button
                       type="button"
                       onClick={handleOpenScheduler}
@@ -745,7 +745,7 @@ export function DashboardMenu({
                   </section>
 
                   {isMobile ? (
-                    <section className="rounded-2xl border border-[color:var(--color-quickaccess-border)] bg-[color:var(--color-quickaccess-bg)] p-4">
+                    <section className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-quickaccess-border)] bg-[color:var(--color-quickaccess-bg)] p-4">
                       <div className="mb-3 flex items-center gap-2 text-[color:var(--color-quickaccess-text)]">
                         <MenuIcon className="h-4 w-4 text-[color:var(--color-quickaccess-text)]">
                           <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
