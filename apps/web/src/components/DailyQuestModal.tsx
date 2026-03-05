@@ -83,7 +83,13 @@ const CELEBRATION_MESSAGES = [
   '¡Bien! Emoción registrada y tareas checkeadas. 🚀 A por el día.',
 ] as const;
 
-const CONFETTI_COLORS = ['#38bdf8', '#a855f7', '#fbbf24', '#34d399', '#f97316'];
+const CONFETTI_COLORS = [
+  'var(--accent-primary)',
+  'var(--accent-secondary)',
+  'var(--text-muted)',
+  'var(--text-secondary)',
+  'var(--text-primary)',
+];
 
 type ParticleConfig = {
   id: number;
@@ -152,97 +158,29 @@ type EmotionTheme = {
   taskGlow: string;
 };
 
-const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
-  calm: {
-    chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-sky-400/90 via-sky-500/80 to-indigo-400/80 text-white ring-1 ring-sky-300/60',
-    chipShadow: 'shadow-[0_12px_32px_rgba(56,189,248,0.45)]',
-    checkBackground: 'bg-sky-500/20',
-    checkBorder: 'border-sky-300/60',
-    checkText: 'text-sky-100',
-    taskGlow: 'ring-2 ring-sky-400/55 shadow-[0_0_28px_rgba(56,189,248,0.32)]',
-  },
-  happy: {
-    chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-amber-300/90 via-orange-400/80 to-rose-400/80 text-white ring-1 ring-amber-200/60',
-    chipShadow: 'shadow-[0_12px_32px_rgba(251,191,36,0.45)]',
-    checkBackground: 'bg-amber-500/20',
-    checkBorder: 'border-amber-300/60',
-    checkText: 'text-amber-100',
-    taskGlow: 'ring-2 ring-amber-400/55 shadow-[0_0_28px_rgba(251,191,36,0.36)]',
-  },
-  motivation: {
-    chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-violet-400/90 via-fuchsia-500/80 to-purple-500/80 text-white ring-1 ring-violet-300/60',
-    chipShadow: 'shadow-[0_12px_32px_rgba(139,92,246,0.45)]',
-    checkBackground: 'bg-violet-500/20',
-    checkBorder: 'border-violet-300/60',
-    checkText: 'text-violet-100',
-    taskGlow: 'ring-2 ring-violet-400/55 shadow-[0_0_28px_rgba(139,92,246,0.34)]',
-  },
-  sad: {
-    chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-indigo-400/90 via-blue-500/80 to-slate-500/80 text-white ring-1 ring-indigo-300/60',
-    chipShadow: 'shadow-[0_12px_32px_rgba(99,102,241,0.45)]',
-    checkBackground: 'bg-indigo-500/20',
-    checkBorder: 'border-indigo-300/60',
-    checkText: 'text-indigo-100',
-    taskGlow: 'ring-2 ring-indigo-400/55 shadow-[0_0_28px_rgba(99,102,241,0.34)]',
-  },
-  anxiety: {
-    chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-rose-400/90 via-pink-500/80 to-red-400/80 text-white ring-1 ring-rose-300/60',
-    chipShadow: 'shadow-[0_12px_32px_rgba(244,63,94,0.45)]',
-    checkBackground: 'bg-rose-500/20',
-    checkBorder: 'border-rose-300/60',
-    checkText: 'text-rose-100',
-    taskGlow: 'ring-2 ring-rose-400/55 shadow-[0_0_28px_rgba(244,63,94,0.36)]',
-  },
-  frustration: {
-    chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-orange-400/90 via-amber-400/80 to-red-400/80 text-white ring-1 ring-orange-300/60',
-    chipShadow: 'shadow-[0_12px_32px_rgba(249,115,22,0.45)]',
-    checkBackground: 'bg-orange-500/20',
-    checkBorder: 'border-orange-300/60',
-    checkText: 'text-orange-100',
-    taskGlow: 'ring-2 ring-orange-400/55 shadow-[0_0_28px_rgba(249,115,22,0.36)]',
-  },
-  tired: {
-    chipInactive:
-      'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-violet-400/90 via-purple-500/80 to-slate-500/80 text-white ring-1 ring-violet-300/60',
-    chipShadow: 'shadow-[0_12px_32px_rgba(139,92,246,0.45)]',
-    checkBackground: 'bg-violet-500/20',
-    checkBorder: 'border-violet-300/60',
-    checkText: 'text-violet-100',
-    taskGlow: 'ring-2 ring-violet-400/55 shadow-[0_0_28px_rgba(139,92,246,0.34)]',
-  },
+const TOKEN_EMOTION_THEME: EmotionTheme = {
+  chipInactive:
+    'border border-[color:var(--border-subtle)] bg-[color:var(--surface-elevated)] text-[color:var(--text-muted)] hover:bg-[color:var(--surface-card)]',
+  chipActive:
+    'bg-[color:var(--accent-primary)] text-[color:var(--button-primary-text)] ring-1 ring-[color:var(--border-default)]',
+  chipShadow: 'shadow-[var(--shadow-sm)]',
+  checkBackground: 'bg-[color:var(--accent-primary)]/20',
+  checkBorder: 'border-[color:var(--border-default)]',
+  checkText: 'text-[color:var(--text-primary)]',
+  taskGlow: 'ring-2 ring-[color:var(--accent-primary)]/45 shadow-[var(--shadow-sm)]',
 };
 
-const DEFAULT_EMOTION_THEME: EmotionTheme = {
-  chipInactive:
-    'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-  chipActive:
-    'bg-gradient-to-r from-indigo-400/90 via-fuchsia-500/80 to-amber-300/80 text-white ring-1 ring-indigo-300/60',
-  chipShadow: 'shadow-[0_12px_32px_rgba(99,102,241,0.45)]',
-  checkBackground: 'bg-primary/20',
-  checkBorder: 'border-primary/60',
-  checkText: 'text-white',
-  taskGlow: 'ring-2 ring-primary/55 shadow-[0_0_28px_rgba(129,140,248,0.34)]',
+const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
+  calm: TOKEN_EMOTION_THEME,
+  happy: TOKEN_EMOTION_THEME,
+  motivation: TOKEN_EMOTION_THEME,
+  sad: TOKEN_EMOTION_THEME,
+  anxiety: TOKEN_EMOTION_THEME,
+  frustration: TOKEN_EMOTION_THEME,
+  tired: TOKEN_EMOTION_THEME,
 };
+
+const DEFAULT_EMOTION_THEME: EmotionTheme = TOKEN_EMOTION_THEME;
 
 type PillarTheme = {
   taskGlow: string;
@@ -251,33 +189,20 @@ type PillarTheme = {
   checkText: string;
 };
 
-const PILLAR_THEME_MAP: Record<string, PillarTheme> = {
-  BODY: {
-    taskGlow: 'ring-2 ring-emerald-400/50 shadow-[0_0_28px_rgba(16,185,129,0.32)]',
-    checkBackground: 'bg-emerald-500/15',
-    checkBorder: 'border-emerald-300/50',
-    checkText: 'text-emerald-100',
-  },
-  MIND: {
-    taskGlow: 'ring-2 ring-sky-400/50 shadow-[0_0_28px_rgba(56,189,248,0.3)]',
-    checkBackground: 'bg-sky-500/15',
-    checkBorder: 'border-sky-300/50',
-    checkText: 'text-sky-100',
-  },
-  SOUL: {
-    taskGlow: 'ring-2 ring-violet-400/50 shadow-[0_0_28px_rgba(139,92,246,0.3)]',
-    checkBackground: 'bg-violet-500/15',
-    checkBorder: 'border-violet-300/50',
-    checkText: 'text-violet-100',
-  },
+const TOKEN_PILLAR_THEME: PillarTheme = {
+  taskGlow: 'ring-2 ring-[color:var(--accent-secondary)]/45 shadow-[var(--shadow-sm)]',
+  checkBackground: 'bg-[color:var(--accent-secondary)]/15',
+  checkBorder: 'border-[color:var(--border-default)]',
+  checkText: 'text-[color:var(--text-primary)]',
 };
 
-const DEFAULT_PILLAR_THEME: PillarTheme = {
-  taskGlow: 'ring-2 ring-indigo-400/50 shadow-[0_0_28px_rgba(99,102,241,0.3)]',
-  checkBackground: 'bg-indigo-500/15',
-  checkBorder: 'border-indigo-300/50',
-  checkText: 'text-indigo-100',
+const PILLAR_THEME_MAP: Record<string, PillarTheme> = {
+  BODY: TOKEN_PILLAR_THEME,
+  MIND: TOKEN_PILLAR_THEME,
+  SOUL: TOKEN_PILLAR_THEME,
 };
+
+const DEFAULT_PILLAR_THEME: PillarTheme = TOKEN_PILLAR_THEME;
 
 function resolveEmotionTheme(code?: string, name?: string): EmotionTheme {
   const key = (code ?? name ?? '').toLowerCase();
@@ -904,7 +829,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   animate="visible"
                   exit="hidden"
                   transition={{ duration: 0.24, ease: 'easeOut' }}
-                  className="pointer-events-auto relative mx-auto flex h-[100dvh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-[color:var(--color-slate-900-95)] text-white shadow-2xl backdrop-blur md:max-w-2xl" data-light-scope="daily-quest"
+                  className="pointer-events-auto relative mx-auto flex h-[100dvh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-[color:var(--color-slate-900-95)] text-[color:var(--button-primary-text)] shadow-2xl backdrop-blur md:max-w-2xl" data-light-scope="daily-quest"
                   layout={false}
                   onClick={(event: MouseEvent<HTMLDivElement>) => {
                     event.stopPropagation();
@@ -928,7 +853,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                       <button
                         ref={closeButtonRef}
                         type="button"
-                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-sm text-white/80 transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-sm text-[color:var(--button-primary-text)]/80 transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]"
                         onClick={handleSnooze}
                         aria-label="Cerrar Daily Quest"
                       >
@@ -970,7 +895,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                     whileTap={{ scale: 0.94 }}
                                     onClick={() => setSelectedEmotion(option.emotion_id)}
                                     className={classNames(
-                                      'relative overflow-visible rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+                                      'relative overflow-visible rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]',
                                       isActive
                                         ? classNames(theme.chipActive, theme.chipShadow)
                                         : theme.chipInactive,
@@ -1002,7 +927,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                   <section key={pillar.pillar_code} className="flex flex-col">
                                     <h4
                                       className={classNames(
-                                        'text-base font-semibold tracking-wide uppercase text-white/90 md:text-lg',
+                                        'text-base font-semibold tracking-wide uppercase text-[color:var(--button-primary-text)]/90 md:text-lg',
                                         headingMarginClass,
                                       )}
                                     >
@@ -1014,7 +939,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                         ? '🏵️ Alma (SOUL)'
                                         : pillar.pillar_code}
                                     </h4>
-                                    <span className="mt-2 h-1.5 w-16 rounded-full bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300" />
+                                    <span className="mt-2 h-1.5 w-16 rounded-full bg-[color:var(--accent-primary)]" />
                                     <div className="mt-3 flex flex-col gap-2">
                                       {pillar.tasks.map((task) => {
                                         const isSelected = selectedTasks.includes(task.task_id);
@@ -1029,8 +954,8 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                             key={task.task_id}
                                             whileTap={{ scale: 0.98 }}
                                             className={classNames(
-                                              'group relative flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/5 bg-[color:var(--color-overlay-1)] p-4 text-left transition duration-200 hover:bg-white/[0.07] focus-within:ring-2 focus-within:ring-white/60',
-                                              isSelected && 'bg-white/[0.12] backdrop-blur-sm',
+                                              'group relative flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[color:var(--border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-left transition duration-200 hover:bg-[color:var(--surface-card)]/10 focus-within:ring-2 focus-within:ring-[color:var(--focus-ring)]',
+                                              isSelected && 'bg-[color:var(--surface-card)]/15 backdrop-blur-sm',
                                             )}
                                           >
                                             <AnimatePresence presenceAffectsLayout={false}>
@@ -1114,7 +1039,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                                   'flex h-5 w-5 items-center justify-center rounded-full border text-[10px] transition-colors duration-200',
                                                   isSelected
                                                     ? classNames(theme.checkBackground, theme.checkBorder, theme.checkText)
-                                                    : 'border-[color:var(--color-border-soft)] text-white/40',
+                                                    : 'border-[color:var(--color-border-soft)] text-[color:var(--button-primary-text)]/40',
                                                 )}
                                                 initial={false}
                                                 animate={{ scale: isSelected ? 1 : 0.92 }}
@@ -1167,13 +1092,13 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                     className="sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 backdrop-blur md:py-3"
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                      <div className="relative text-white">
+                      <div className="relative text-[color:var(--button-primary-text)]">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-faint)]">Experiencia ganada</p>
                         <p className="mt-1 text-2xl font-bold md:text-3xl">
                           GP:{' '}
                           <span
                             data-testid="xp-counter"
-                            className="ib-daily-quest-gp-value text-amber-200 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]"
+                            className="ib-daily-quest-gp-value text-[color:var(--text-primary)] drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]"
                           >
                             {xpSelected}
                           </span>
@@ -1182,7 +1107,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           {xpBubble && (
                             <motion.span
                               key={xpBubble.id}
-                              className="ib-daily-quest-gp-toast-chip pointer-events-none absolute -top-2 right-0 rounded-full bg-amber-500/30 px-2 py-1 text-[11px] font-semibold text-amber-100 shadow-[0_8px_22px_rgba(251,191,36,0.35)]"
+                              className="ib-daily-quest-gp-toast-chip pointer-events-none absolute -top-2 right-0 rounded-full bg-[color:var(--accent-primary)]/30 px-2 py-1 text-[11px] font-semibold text-[color:var(--text-primary)] shadow-[0_8px_22px_rgba(251,191,36,0.35)]"
                               initial={{ opacity: 0, y: 10, scale: 0.8 }}
                               animate={{ opacity: 1, y: -6, scale: 1 }}
                               exit={{ opacity: 0, y: -18, scale: 0.85 }}
@@ -1197,7 +1122,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                         <button
                           type="button"
                           onClick={handleSnooze}
-                          className="h-10 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:h-11 md:px-6"
+                          className="h-10 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)] md:h-11 md:px-6"
                         >
                           Más tarde
                         </button>
@@ -1208,8 +1133,8 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           aria-describedby={showEmotionHelper ? helperTextId : undefined}
                           aria-label="Registrar Daily Quest"
                           className={classNames(
-                            'inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-400 via-fuchsia-500 to-amber-300 text-sm font-semibold text-white shadow-[0_12px_40px_rgba(99,102,241,0.35)] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-60 md:h-11 md:px-6',
-                            !isConfirmDisabled && 'hover:from-indigo-300 hover:via-fuchsia-500 hover:to-amber-200',
+                            'inline-flex h-10 items-center justify-center rounded-xl bg-[color:var(--button-primary-bg)] text-sm font-semibold text-[color:var(--button-primary-text)] shadow-[0_12px_40px_rgba(99,102,241,0.35)] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-60 md:h-11 md:px-6',
+                            !isConfirmDisabled && 'hover:bg-[color:var(--button-primary-bg-hover)]',
                             isSubmitting && 'cursor-wait',
                           )}
                         >
@@ -1218,7 +1143,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                       </div>
                     </div>
                     {showEmotionHelper && (
-                      <p id={helperTextId} className="text-[11px] text-rose-200/80 md:text-right">
+                      <p id={helperTextId} className="text-[11px] text-[color:var(--text-secondary)]/80 md:text-right">
                         Seleccioná una emoción para confirmar.
                       </p>
                     )}
@@ -1231,7 +1156,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.24, ease: 'easeOut' }}
-                        className="absolute inset-0 z-40 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm"
+                        className="absolute inset-0 z-40 flex items-center justify-center bg-[color:var(--surface-app)]/70 backdrop-blur-sm"
                       >
                         <div className="pointer-events-none absolute inset-0 overflow-hidden">
                           {successCelebration.confetti.map((piece) => (
@@ -1260,33 +1185,33 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.96 }}
                           transition={{ duration: 0.28, ease: 'easeOut' }}
-                          className="relative z-10 mx-4 flex max-w-sm flex-col items-center gap-3 rounded-2xl border border-white/15 bg-[color:var(--color-overlay-2)] px-6 py-5 text-center text-sm font-semibold text-white shadow-[0_24px_80px_rgba(56,189,248,0.35)]"
+                          className="relative z-10 mx-4 flex max-w-sm flex-col items-center gap-3 rounded-2xl border border-[color:var(--border-default)]/15 bg-[color:var(--color-overlay-2)] px-6 py-5 text-center text-sm font-semibold text-[color:var(--button-primary-text)] shadow-[0_24px_80px_rgba(56,189,248,0.35)]"
                         >
                           <span className="text-base md:text-lg">{successCelebration.message}</span>
                           <span className="ib-chip-solid ib-chip-solid--success rounded-full px-3 py-1 text-[11px] font-semibold">
                             +{successCelebration.xpDelta} GP
                           </span>
                           {successCelebration.detail && (
-                            <p className="text-sm font-normal text-white/90">
+                            <p className="text-sm font-normal text-[color:var(--button-primary-text)]/90">
                               {successCelebration.detail}
                             </p>
                           )}
                           {successCelebration.action && (
                             <a
                               href={successCelebration.action.href}
-                              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-3)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-white shadow-sm transition hover:bg-[color:var(--color-overlay-5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-3)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-[color:var(--button-primary-text)] shadow-sm transition hover:bg-[color:var(--color-overlay-5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]"
                             >
                               {successCelebration.action.label}
                             </a>
                           )}
                           {isCelebrationHoldReady && (
-                            <div className="mt-1 flex w-full flex-col items-center gap-2 text-[12px] text-white/80" id="daily-quest-celebration-hold-instructions">
+                            <div className="mt-1 flex w-full flex-col items-center gap-2 text-[12px] text-[color:var(--button-primary-text)]/80" id="daily-quest-celebration-hold-instructions">
                               <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[color:var(--color-text-dim)]">
                                 Mantené presionado 2 segundos para cerrar
                               </span>
                               <motion.button
                                 type="button"
-                                className="relative flex w-full max-w-xs items-center justify-center overflow-hidden rounded-full border border-white/25 bg-[color:var(--color-overlay-2)] px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.3em] text-white shadow-[0_18px_38px_rgba(16,185,129,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                                className="relative flex w-full max-w-xs items-center justify-center overflow-hidden rounded-full border border-[color:var(--border-default)]/25 bg-[color:var(--color-overlay-2)] px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.3em] text-[color:var(--button-primary-text)] shadow-[0_18px_38px_rgba(16,185,129,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]"
                                 onPointerDown={(event: PointerEvent<HTMLButtonElement>) => {
                                   event.preventDefault();
                                   startCelebrationHold({
@@ -1329,7 +1254,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                               </motion.button>
                               <div className="h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-[color:var(--color-overlay-3)]">
                                 <motion.div
-                                  className="h-full rounded-full bg-white/90"
+                                  className="h-full rounded-full bg-[color:var(--surface-card)]/90"
                                   initial={{ width: '0%' }}
                                   animate={{ width: `${Math.min(Math.max(celebrationHoldProgress, 0), 1) * 100}%` }}
                                   transition={{ duration: 0.1, ease: 'linear' }}
@@ -1359,8 +1284,8 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
               'fixed inset-x-0 z-50 mx-auto w-fit max-w-[92vw] rounded-2xl border px-5 py-4 text-sm shadow-2xl backdrop-blur',
               'top-[calc(env(safe-area-inset-top,0)+1rem)] md:top-6',
               toast.tone === 'success'
-                ? 'border-emerald-400/30 bg-emerald-500/20 text-emerald-50'
-                : 'border-rose-400/30 bg-rose-500/20 text-rose-50',
+                ? 'border-[color:var(--border-default)]/40 bg-[color:var(--accent-primary)]/20 text-[color:var(--text-primary)]'
+                : 'border-[color:var(--border-default)]/40 bg-[color:var(--accent-secondary)]/20 text-[color:var(--text-primary)]',
             )}
             role="status"
             aria-live="polite"
@@ -1368,12 +1293,12 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
             <div className="flex flex-col items-center gap-3 text-center">
               <p className="text-base font-semibold leading-snug md:text-lg">{toast.message}</p>
               {toast.detail && (
-                <p className="text-sm text-white/85 md:text-base">{toast.detail}</p>
+                <p className="text-sm text-[color:var(--button-primary-text)]/85 md:text-base">{toast.detail}</p>
               )}
               {toast.action && (
                 <a
                   href={toast.action.href}
-                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-3)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-white shadow-sm transition hover:bg-[color:var(--color-overlay-5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-3)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-[color:var(--button-primary-text)] shadow-sm transition hover:bg-[color:var(--color-overlay-5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]"
                 >
                   {toast.action.label}
                 </a>
