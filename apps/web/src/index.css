@@ -4945,6 +4945,12 @@
     color: var(--scheduler-text);
   }
 
+  :root[data-theme='light'] [data-light-scope='reminder-scheduler'] input[role='combobox'] {
+    color: var(--scheduler-text);
+    -webkit-text-fill-color: var(--scheduler-text);
+    opacity: 1;
+  }
+
   :root[data-theme='light'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__control:focus {
     border-color: var(--scheduler-input-focus-border);
     box-shadow: 0 0 0 3px var(--scheduler-input-focus-ring);
