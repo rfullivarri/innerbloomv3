@@ -169,7 +169,7 @@ export function DailyReminderSettings() {
           <button
             type="button"
             onClick={reload}
-            className="inline-flex items-center rounded-full border border-white/20 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:border-white/40 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="reminder-scheduler-form__retry-button inline-flex items-center rounded-full border border-white/20 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:border-white/40 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             Reintentar
           </button>
@@ -179,10 +179,14 @@ export function DailyReminderSettings() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 text-base text-text">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+    <form
+      onSubmit={handleSubmit}
+      className="reminder-scheduler-form space-y-6 text-base text-text"
+      data-light-scope="reminder-scheduler"
+    >
+      <div className="reminder-scheduler-form__toggle-card rounded-2xl border border-white/10 bg-white/5 p-5">
         <div className="flex items-center justify-between gap-4">
-          <p className="text-sm font-semibold text-white">{toggleLabel}</p>
+          <p className="reminder-scheduler-form__toggle-label text-sm font-semibold text-white">{toggleLabel}</p>
           <button
             type="button"
             role="switch"
@@ -191,17 +195,19 @@ export function DailyReminderSettings() {
             onClick={handleToggle}
             disabled={isSaving}
             className={combine(
-              'relative inline-flex h-7 w-14 shrink-0 items-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
+              'reminder-scheduler-form__switch-track relative inline-flex h-7 w-14 shrink-0 items-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
               formState.enabled
-                ? 'border-emerald-300/60 bg-emerald-400/30'
-                : 'border-white/15 bg-white/5',
+                ? 'reminder-scheduler-form__switch-track--enabled border-emerald-300/60 bg-emerald-400/30'
+                : 'reminder-scheduler-form__switch-track--disabled border-white/15 bg-white/5',
               (isSaving || isInitialLoading) && 'cursor-not-allowed opacity-60',
             )}
           >
             <span
               className={combine(
-                'inline-block h-5 w-5 rounded-full bg-white shadow transition',
-                formState.enabled ? 'translate-x-7 bg-emerald-100' : 'translate-x-2',
+                'reminder-scheduler-form__switch-thumb inline-block h-5 w-5 rounded-full bg-white shadow transition',
+                formState.enabled
+                  ? 'reminder-scheduler-form__switch-thumb--enabled translate-x-7 bg-emerald-100'
+                  : 'reminder-scheduler-form__switch-thumb--disabled translate-x-2',
               )}
             />
           </button>
@@ -215,13 +221,13 @@ export function DailyReminderSettings() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2 text-sm" htmlFor={timeFieldId}>
-          <span className="block text-xs uppercase tracking-[0.3em] text-text-subtle">Hora local</span>
+          <span className="reminder-scheduler-form__field-label block text-xs uppercase tracking-[0.3em] text-text-subtle">Hora local</span>
           <select
             id={timeFieldId}
             value={formState.localTime}
             onChange={(event) => setFormState((previous) => ({ ...previous, localTime: event.target.value }))}
             disabled={isSaving}
-            className="w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
+            className="reminder-scheduler-form__control w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
           >
             {TIME_OPTIONS.map((time) => (
               <option key={time} value={time}>
@@ -232,7 +238,7 @@ export function DailyReminderSettings() {
         </label>
 
         <label className="space-y-2 text-sm" htmlFor={timezoneFieldId}>
-          <span className="block text-xs uppercase tracking-[0.3em] text-text-subtle">Zona horaria</span>
+          <span className="reminder-scheduler-form__field-label block text-xs uppercase tracking-[0.3em] text-text-subtle">Zona horaria</span>
           <TimezoneCombobox
             id={timezoneFieldId}
             value={formState.timezone}
@@ -247,16 +253,16 @@ export function DailyReminderSettings() {
         <ToastBanner tone="error" message={LOAD_STALE_MESSAGE} />
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/5 pt-4 text-sm text-text-subtle">
-        <p>Los cambios se aplican solo cuando presionás guardar.</p>
+      <div className="reminder-scheduler-form__footer flex flex-wrap items-center justify-between gap-4 border-t border-white/5 pt-4 text-sm text-text-subtle">
+        <p className="reminder-scheduler-form__footer-note">Los cambios se aplican solo cuando presionás guardar.</p>
         <button
           type="submit"
           disabled={!canSubmit}
           className={combine(
-            'inline-flex items-center rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
+            'reminder-scheduler-form__save-button inline-flex items-center rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
             canSubmit
-              ? 'border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20'
-              : 'cursor-not-allowed border-white/10 bg-white/5 text-text-subtle',
+              ? 'reminder-scheduler-form__save-button--enabled border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20'
+              : 'reminder-scheduler-form__save-button--disabled cursor-not-allowed border-white/10 bg-white/5 text-text-subtle',
           )}
         >
           {isSaving ? 'Guardando…' : 'Guardar cambios'}
