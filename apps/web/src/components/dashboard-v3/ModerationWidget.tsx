@@ -31,18 +31,18 @@ export function ModerationWidget({
 
   return (
     <section
-      className={`rounded-3xl border border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] text-[color:var(--color-text)] shadow-[var(--shadow-elev-1)] ${compact ? "p-3" : "p-4"}`}
+      className={`rounded-3xl border border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] text-[color:var(--color-text)] shadow-[var(--shadow-elev-1)] dark:text-white ${compact ? "p-3" : "p-4"}`}
       {...longPressBind}
       aria-label="Widget de moderación"
     >
       {showHeader ? (
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <p className="text-[0.65rem] uppercase tracking-[0.26em] text-text-muted">
+            <p className="text-[0.65rem] uppercase tracking-[0.26em] text-text-muted dark:text-white">
               Widget
             </p>
             <h3 className="text-base font-semibold">{title}</h3>
-            <p className="text-xs text-text-muted">
+            <p className="text-xs text-text-muted dark:text-white">
               Tip: mantené presionado un widget para editarlo.
             </p>
           </div>
@@ -61,7 +61,7 @@ export function ModerationWidget({
                 type={type}
                 className="h-4 w-4 text-[color:var(--color-text-muted)] dark:text-white"
               />
-              <span className="text-sm font-semibold text-amber-200">
+              <span className="text-sm font-semibold text-amber-200 dark:text-white">
                 {configs[type].notLoggedToleranceDays}d
               </span>
             </div>
