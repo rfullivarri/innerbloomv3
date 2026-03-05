@@ -1173,7 +1173,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           GP:{' '}
                           <span
                             data-testid="xp-counter"
-                            className="ib-daily-quest-gp-value text-amber-200 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]"
+                            className="ib-daily-quest-gp-value text-accent-purple drop-shadow-[0_0_12px_rgba(139,92,246,0.45)]"
                           >
                             {xpSelected}
                           </span>
