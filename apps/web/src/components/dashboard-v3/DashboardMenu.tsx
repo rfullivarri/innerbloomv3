@@ -803,7 +803,6 @@ export function DashboardMenu({
                             <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
                             <circle cx="18" cy="12" r="1.5" fill="currentColor" stroke="none" />
                           </svg>
-                          •••
                         </span>
                       </li>
                       <li className="flex flex-wrap items-center gap-2">
@@ -842,7 +841,6 @@ export function DashboardMenu({
                             <path d="M12 19V5" />
                             <path d="m7 10 5-5 5 5" />
                           </svg>
-                          ↑
                         </span>
                       </li>
                       <li className="flex flex-wrap items-center gap-2">
