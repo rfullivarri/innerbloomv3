@@ -571,10 +571,10 @@ export function DashboardMenu({
                           <button
                             type="button"
                             onClick={() => setActivePanel("main")}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] dark:text-white"
                             aria-label="Volver al menú"
                           >
-                            <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)]">
+                            <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)] dark:text-white">
                               <path d="m15 6-6 6 6 6" />
                             </MenuIcon>
                           </button>
