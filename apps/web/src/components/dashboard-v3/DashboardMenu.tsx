@@ -315,14 +315,18 @@ export function DashboardMenu({
     () =>
       isSpanishSystem
         ? {
-            title: "Añadir acceso rápido",
+            title: "Para añadir acceso rápido",
+            tap: "Toca",
+            scrollUp: "Scrollear para arriba",
             stepShare: "Compartir",
             stepAddToHome: "Añadir a pantalla de inicio",
             stepAdd: "Añadir",
             gotIt: "Entendido",
           }
         : {
-            title: "Add quick access",
+            title: "To add quick access",
+            tap: "Tap",
+            scrollUp: "Scroll up",
             stepShare: "Share",
             stepAddToHome: "Add to Home Screen",
             stepAdd: "Add",
@@ -781,7 +785,27 @@ export function DashboardMenu({
                     </p>
                     <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-white/85">
                       <li className="flex flex-wrap items-center gap-2">
-                        <span>{isSpanishSystem ? "Toca" : "Tap"}</span>
+                        <span>{quickAccessLabels.tap}</span>
+                        <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-xs font-medium text-white">
+                          <svg
+                            aria-hidden="true"
+                            className="h-3.5 w-3.5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <circle cx="6" cy="12" r="1.5" fill="currentColor" stroke="none" />
+                            <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+                            <circle cx="18" cy="12" r="1.5" fill="currentColor" stroke="none" />
+                          </svg>
+                          •••
+                        </span>
+                      </li>
+                      <li className="flex flex-wrap items-center gap-2">
+                        <span>{quickAccessLabels.tap}</span>
                         <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-xs font-medium text-white">
                           <svg
                             aria-hidden="true"
@@ -798,6 +822,25 @@ export function DashboardMenu({
                             <path d="m9 6 3-3 3 3" />
                           </svg>
                           {quickAccessLabels.stepShare}
+                        </span>
+                      </li>
+                      <li className="flex flex-wrap items-center gap-2">
+                        <span>{quickAccessLabels.scrollUp}</span>
+                        <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-xs font-medium text-white">
+                          <svg
+                            aria-hidden="true"
+                            className="h-3.5 w-3.5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M12 19V5" />
+                            <path d="m7 10 5-5 5 5" />
+                          </svg>
+                          ↑
                         </span>
                       </li>
                       <li className="flex flex-wrap items-center gap-2">
