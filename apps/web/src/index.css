@@ -4516,6 +4516,15 @@
       inset 0 0 0 1px rgba(255, 255, 255, 0.85);
   }
 
+  :root[data-theme='dark'] .ib-streak-pill-tab-active {
+    border-color: rgba(255, 255, 255, 0.88);
+    background: #ffffff;
+    color: #020617;
+    box-shadow:
+      0 8px 18px rgba(15, 23, 42, 0.35),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+  }
+
   :root[data-theme='light'] .ib-streak-fire-chip {
     --glow-primary: rgba(192, 132, 252, 0.78);
     --glow-secondary: rgba(139, 92, 246, 0.46);
