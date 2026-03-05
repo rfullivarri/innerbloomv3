@@ -727,12 +727,12 @@ export function DashboardMenu({
                   </section>
 
                   {isMobile ? (
-                    <section className="rounded-2xl border border-violet-200/85 bg-violet-50/70 p-4 dark:border-violet-300/20 dark:bg-violet-400/6">
-                      <div className="mb-3 flex items-center gap-2 text-violet-700 dark:text-violet-200/90">
-                        <MenuIcon className="h-4 w-4 text-violet-700 dark:text-violet-200/90">
+                    <section className="rounded-2xl border border-violet-200/85 bg-violet-50/70 p-4 dark:border-violet-300/28 dark:bg-violet-500/14">
+                      <div className="mb-3 flex items-center gap-2 text-violet-700 dark:text-violet-200/80">
+                        <MenuIcon className="h-4 w-4 text-violet-700 dark:text-violet-200/80">
                           <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
                         </MenuIcon>
-                        <p className="text-[0.65rem] uppercase tracking-[0.3em] text-violet-500 dark:text-violet-300/85">
+                        <p className="text-[0.65rem] uppercase tracking-[0.3em] text-violet-500 dark:text-violet-300/75">
                           Acceso rápido
                         </p>
                       </div>
@@ -740,7 +740,7 @@ export function DashboardMenu({
                         type="button"
                         onClick={handleQuickAccessClick}
                         disabled={isStandalone}
-                        className="flex h-12 w-full items-center justify-between rounded-xl border border-violet-300/70 bg-violet-100/45 px-4 text-left text-sm font-semibold text-violet-700 transition hover:border-violet-300 hover:bg-violet-100/65 disabled:cursor-not-allowed disabled:opacity-80 dark:border-violet-300/25 dark:bg-violet-300/8 dark:text-violet-200/95 dark:hover:border-violet-200/35 dark:hover:bg-violet-300/14"
+                        className="flex h-12 w-full items-center justify-between rounded-xl border border-violet-300/70 bg-violet-100/45 px-4 text-left text-sm font-semibold text-violet-700 transition hover:border-violet-300 hover:bg-violet-100/65 disabled:cursor-not-allowed disabled:opacity-80 dark:border-violet-300/35 dark:bg-violet-400/16 dark:text-violet-200/88 dark:hover:border-violet-200/45 dark:hover:bg-violet-400/22"
                       >
                         <span>
                           {isStandalone
@@ -748,7 +748,7 @@ export function DashboardMenu({
                             : "Añadir acceso rápido"}
                         </span>
                         {isStandalone ? (
-                          <MenuIcon className="h-4 w-4 text-violet-700 dark:text-violet-200/95">
+                          <MenuIcon className="h-4 w-4 text-violet-700 dark:text-violet-200/88">
                             <path d="m5 12 4 4 10-10" />
                           </MenuIcon>
                         ) : null}
