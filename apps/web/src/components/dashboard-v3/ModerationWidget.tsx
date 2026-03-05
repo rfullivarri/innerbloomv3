@@ -31,18 +31,18 @@ export function ModerationWidget({
 
   return (
     <section
-      className={`rounded-3xl border border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] text-[color:var(--color-text)] shadow-[var(--shadow-elev-1)] dark:text-white ${compact ? "p-3" : "p-4"}`}
+      className={`rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-widget-menu-item-title)] shadow-[var(--shadow-elev-1)] ${compact ? "p-3" : "p-4"}`}
       {...longPressBind}
       aria-label="Widget de moderación"
     >
       {showHeader ? (
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <p className="text-[0.65rem] uppercase tracking-[0.26em] text-text-muted dark:text-white">
+            <p className="text-[0.65rem] uppercase tracking-[0.26em] text-[color:var(--color-widget-menu-label)]">
               Widget
             </p>
             <h3 className="text-base font-semibold">{title}</h3>
-            <p className="text-xs text-text-muted dark:text-white">
+            <p className="text-xs text-[color:var(--color-widget-menu-label)]">
               Tip: mantené presionado un widget para editarlo.
             </p>
           </div>
@@ -54,24 +54,24 @@ export function ModerationWidget({
         {enabled.map((type) => (
           <div
             key={type}
-            className="rounded-[1.35rem] border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-2 shadow-[var(--shadow-elev-1)]"
+            className="rounded-[1.35rem] border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-3 py-2 shadow-[var(--shadow-elev-1)]"
           >
             <div className="flex items-start justify-between gap-2">
               <ModerationTrackerIcon
                 type={type}
-                className="h-4 w-4 text-[color:var(--color-text-muted)] dark:text-white"
+                className="h-4 w-4 text-[color:var(--color-widget-menu-icon)]"
               />
-              <span className="text-sm font-semibold text-amber-200 dark:text-white">
+              <span className="text-sm font-semibold text-[color:var(--color-widget-menu-item-title)]">
                 {configs[type].notLoggedToleranceDays}d
               </span>
             </div>
             <p
-              className="mt-1 text-[11px] text-[color:var(--color-text-muted)] dark:text-white"
+              className="mt-1 text-[11px] text-[color:var(--color-widget-menu-label)]"
               title={moderationTrackerMeta[type].hint}
             >
               {moderationTrackerMeta[type].label}
             </p>
-            <p className="text-[10px] text-text-muted dark:text-white">
+            <p className="text-[10px] text-[color:var(--color-widget-menu-label)]">
               {configs[type].isPaused ? "Vacaciones" : "Activo"}
             </p>
           </div>
