@@ -59,19 +59,19 @@ export function ModerationWidget({
             <div className="flex items-start justify-between gap-2">
               <ModerationTrackerIcon
                 type={type}
-                className="h-4 w-4 text-[color:var(--color-text-muted)]"
+                className="h-4 w-4 text-[color:var(--color-text-muted)] dark:text-white"
               />
               <span className="text-sm font-semibold text-amber-200">
                 {configs[type].notLoggedToleranceDays}d
               </span>
             </div>
             <p
-              className="mt-1 text-[11px] text-[color:var(--color-text-muted)]"
+              className="mt-1 text-[11px] text-[color:var(--color-text-muted)] dark:text-white"
               title={moderationTrackerMeta[type].hint}
             >
               {moderationTrackerMeta[type].label}
             </p>
-            <p className="text-[10px] text-text-muted">
+            <p className="text-[10px] text-text-muted dark:text-white">
               {configs[type].isPaused ? "Vacaciones" : "Activo"}
             </p>
           </div>
