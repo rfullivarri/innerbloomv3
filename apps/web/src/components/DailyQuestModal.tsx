@@ -1173,7 +1173,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           GP:{' '}
                           <span
                             data-testid="xp-counter"
-                            className="text-amber-200 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]"
+                            className="ib-daily-quest-gp-value text-amber-200 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]"
                           >
                             {xpSelected}
                           </span>
@@ -1182,7 +1182,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           {xpBubble && (
                             <motion.span
                               key={xpBubble.id}
-                              className="pointer-events-none absolute -top-2 right-0 rounded-full bg-amber-500/30 px-2 py-1 text-[11px] font-semibold text-amber-100 shadow-[0_8px_22px_rgba(251,191,36,0.35)]"
+                              className="ib-daily-quest-gp-toast-chip pointer-events-none absolute -top-2 right-0 rounded-full bg-amber-500/30 px-2 py-1 text-[11px] font-semibold text-amber-100 shadow-[0_8px_22px_rgba(251,191,36,0.35)]"
                               initial={{ opacity: 0, y: 10, scale: 0.8 }}
                               animate={{ opacity: 1, y: -6, scale: 1 }}
                               exit={{ opacity: 0, y: -18, scale: 0.85 }}
