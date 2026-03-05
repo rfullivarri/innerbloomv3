@@ -276,6 +276,15 @@
   }
 
 
+
+  .ib-card-contour-shadow {
+    box-shadow: var(--IB_SURFACE_CARD_LIGHT);
+  }
+
+  :root[data-theme='dark'] .ib-card-contour-shadow {
+    box-shadow: var(--shadow-elev-1);
+  }
+
   .auth-rotating-gradient {
     isolation: isolate;
     background: #000c40;
