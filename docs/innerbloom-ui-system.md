@@ -24,6 +24,7 @@ The app uses global theme tokens and Dashboard-v3 scoped behavior (`data-light-s
 - Use bright neutral surfaces (`--color-surface`, `--color-surface-elevated`) and low-noise overlays.
 - Prefer subtle borders (`--color-border-subtle`) over heavy outlines.
 - Use short, soft shadows (`--shadow-elev-1`, `--color-card-shadow`) to separate layers.
+- For dashboard card parity (task cards + emotion surfaces), use `--IB_SURFACE_CARD_LIGHT` (`0 6px 20px rgba(15, 23, 42, 0.3)`) in Light Mode only.
 - Keep text contrast hierarchy clear:
   - Primary text: `--color-text`
   - Secondary text: `--color-text-muted`

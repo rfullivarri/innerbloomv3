@@ -189,6 +189,7 @@
     --color-glow-soft: rgba(248, 250, 255, 0.9);
     --shadow-elev-1: 0 8px 20px rgba(15, 23, 42, 0.08);
     --shadow-elev-2: 0 16px 40px rgba(15, 23, 42, 0.1);
+    --IB_SURFACE_CARD_LIGHT: 0 6px 20px rgba(15, 23, 42, 0.3);
     --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 255, 0.94));
     --glass-border: rgba(148, 163, 184, 0.28);
     --onboarding-glass-surface-base: rgba(255, 255, 255, 0.92);
