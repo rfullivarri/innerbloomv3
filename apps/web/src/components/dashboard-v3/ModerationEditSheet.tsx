@@ -48,7 +48,7 @@ export function ModerationEditSheet({
         role="dialog"
         aria-modal="true"
         aria-label="Edit Moderación"
-        className="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-white/20 bg-surface/95 p-4 text-white shadow-2xl"
+        className="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)]/95 p-4 text-[color:var(--color-text)] shadow-[var(--shadow-elev-2)]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
@@ -56,14 +56,14 @@ export function ModerationEditSheet({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-white/25 px-3 py-1 text-xs text-white/80"
+            className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs text-[color:var(--color-text-dim)] transition-colors hover:bg-[color:var(--color-overlay-2)]"
           >
             Cerrar
           </button>
         </div>
 
         {isLoading || !configs ? (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/80">
+          <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-dim)]">
             Cargando configuración…
           </div>
         ) : (
@@ -71,17 +71,17 @@ export function ModerationEditSheet({
             {visibleTypes.map((type) => (
               <div
                 key={type}
-                className="rounded-3xl border border-white/10 bg-white/5 p-4"
+                className="rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold">{trackerLabels[type]}</p>
+                  <p className="text-sm font-semibold text-[color:var(--color-text)]">{trackerLabels[type]}</p>
                   {!configs[type].isEnabled ? (
-                    <span className="rounded-full border border-white/20 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white/70">
+                    <span className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[color:var(--color-text-faint)]">
                       Desactivado
                     </span>
                   ) : null}
                 </div>
-                <label className="mt-3 flex items-center justify-between text-sm text-white/85">
+                <label className="mt-3 flex items-center justify-between text-sm text-[color:var(--color-text-dim)]">
                   <span>Vacaciones</span>
                   <button
                     type="button"
@@ -90,14 +90,14 @@ export function ModerationEditSheet({
                     onClick={() => {
                       void onTogglePause(type, !configs[type].isPaused);
                     }}
-                    className={`relative inline-flex h-7 w-12 items-center rounded-full border transition ${
+                    className={`relative inline-flex h-7 w-12 items-center rounded-full border transition-colors ${
                       configs[type].isPaused
-                        ? "border-emerald-300/60 bg-emerald-400/40"
-                        : "border-white/25 bg-white/20"
+                        ? "border-emerald-500/45 bg-emerald-500/30"
+                        : "border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)]"
                     }`}
                   >
                     <span
-                      className={`inline-block h-5 w-5 rounded-full bg-white shadow transition ${
+                      className={`inline-block h-5 w-5 rounded-full bg-[color:var(--color-surface-elevated)] shadow-[var(--shadow-elev-1)] transition ${
                         configs[type].isPaused
                           ? "translate-x-6"
                           : "translate-x-1"
@@ -105,10 +105,10 @@ export function ModerationEditSheet({
                     />
                   </button>
                 </label>
-                <label className="mt-3 block text-sm text-white/85">
+                <label className="mt-3 block text-sm text-[color:var(--color-text-dim)]">
                   Tolerancia sin marcar: {configs[type].notLoggedToleranceDays}
                   <input
-                    className="mt-2 w-full accent-emerald-400"
+                    className="mt-2 w-full accent-emerald-500"
                     type="range"
                     min={0}
                     max={7}
