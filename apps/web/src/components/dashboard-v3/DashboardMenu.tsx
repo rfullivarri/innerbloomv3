@@ -326,22 +326,22 @@ export function DashboardMenu({
     () =>
       isSpanishSystem
         ? {
-            title: "Para añadir acceso rápido",
-            tap: "Toca",
+            title: "Guía para añadir acceso rápido",
+            subtitle: "Sigue los siguientes pasos:",
+            tap: "Tocar",
             scrollUp: "Scrollear para arriba",
-            stepShare: "Compartir",
-            stepAddToHome: "Añadir a pantalla de inicio",
-            stepAdd: "Añadir",
-            gotIt: "Entendido",
+            select: "Seleccionar",
+            stepAdd: "Añadir.",
+            gotIt: "Entedido",
           }
         : {
-            title: "To add quick access",
+            title: "Quick access setup guide",
+            subtitle: "Follow these steps:",
             tap: "Tap",
             scrollUp: "Scroll up",
-            stepShare: "Share",
-            stepAddToHome: "Add to Home Screen",
-            stepAdd: "Add",
-            gotIt: "Got it",
+            select: "Select",
+            stepAdd: "Add.",
+            gotIt: "Understood",
           },
     [isSpanishSystem],
   );
@@ -806,12 +806,15 @@ export function DashboardMenu({
                     role="dialog"
                     aria-modal="true"
                     aria-label="Cómo añadir acceso rápido en iOS"
-                    className="absolute inset-x-4 bottom-4 rounded-2xl border border-[color:var(--color-ios-quick-access-modal-border)] bg-[color:var(--color-ios-quick-access-modal-surface)] p-4 shadow-[var(--shadow-elev-2)]"
+                    className="absolute inset-x-4 bottom-4 rounded-3xl border border-[color:var(--color-ios-quick-access-modal-border)] bg-[color:var(--color-ios-quick-access-modal-surface)] p-5 shadow-[var(--shadow-elev-2)]"
                   >
                     <p className="text-sm font-semibold text-[color:var(--color-ios-quick-access-modal-text)]">
                       {quickAccessLabels.title}
                     </p>
-                    <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-[color:var(--color-ios-quick-access-modal-text-muted)]">
+                    <p className="mt-1 text-xs text-[color:var(--color-ios-quick-access-modal-text-muted)]">
+                      {quickAccessLabels.subtitle}
+                    </p>
+                    <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-[color:var(--color-ios-quick-access-modal-text-muted)]">
                       <li className="flex flex-wrap items-center gap-2">
                         <span>{quickAccessLabels.tap}</span>
                         <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
@@ -848,7 +851,6 @@ export function DashboardMenu({
                             <path d="M12 3v10" />
                             <path d="m9 6 3-3 3 3" />
                           </svg>
-                          {quickAccessLabels.stepShare}
                         </span>
                       </li>
                       <li className="flex flex-wrap items-center gap-2">
@@ -870,6 +872,7 @@ export function DashboardMenu({
                         </span>
                       </li>
                       <li className="flex flex-wrap items-center gap-2">
+                        <span>{quickAccessLabels.select}</span>
                         <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
                           <svg
                             aria-hidden="true"
@@ -885,7 +888,6 @@ export function DashboardMenu({
                             <path d="M12 8v8" />
                             <path d="M8 12h8" />
                           </svg>
-                          {quickAccessLabels.stepAddToHome}
                         </span>
                       </li>
                       <li>{quickAccessLabels.stepAdd}</li>
@@ -894,7 +896,7 @@ export function DashboardMenu({
                     <button
                       type="button"
                       onClick={closeIosInstructions}
-                      className="mt-3 w-full rounded-xl border border-[color:var(--color-ios-quick-access-modal-button-border)] bg-[color:var(--color-ios-quick-access-modal-button-bg)] px-3 py-2 text-sm text-[color:var(--color-ios-quick-access-modal-button-text)] transition hover:bg-[color:var(--color-ios-quick-access-modal-button-hover-bg)]"
+                      className="mt-4 w-full rounded-full border border-[color:var(--color-ios-quick-access-modal-button-border)] bg-[color:var(--color-ios-quick-access-modal-button-bg)] px-3 py-2 text-sm text-[color:var(--color-ios-quick-access-modal-button-text)] transition hover:bg-[color:var(--color-ios-quick-access-modal-button-hover-bg)]"
                     >
                       {quickAccessLabels.gotIt}
                     </button>
