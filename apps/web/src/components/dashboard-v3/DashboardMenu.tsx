@@ -272,13 +272,6 @@ export function DashboardMenu({
     "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40";
   const menuCardClassName =
     "ib-card-contour-shadow relative z-10 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)]";
-  const isLightMode = theme === "light";
-  const menuScrollContainerClassName = isLightMode
-    ? "flex-1 overflow-y-auto overflow-x-visible"
-    : "flex-1 overflow-y-auto";
-  const menuContentClassName = isLightMode
-    ? "relative z-[2] overflow-visible space-y-4 px-1 pb-1"
-    : "space-y-4 px-1 pb-1";
 
   const handleOpenProfile = useCallback(() => {
     if (typeof openUserProfile === "function") {
@@ -468,9 +461,8 @@ export function DashboardMenu({
                     </svg>
                   </button>
                 </div>
-                <div className="flex-1 overflow-visible">
-                  <div className={menuScrollContainerClassName}>
-                    <div className={menuContentClassName}>
+                <div className="flex-1 overflow-y-auto">
+                  <div className="space-y-4 px-1 pb-1">
                     <ThemeSwitcher />
 
                     <section className={`${menuCardClassName} px-2 py-1`}>
@@ -507,41 +499,21 @@ export function DashboardMenu({
                       </button>
                     </section>
 
-                    <section
-                      className={isLightMode ? `${menuCardClassName} px-2 py-1` : "space-y-2"}
+                    <section className="space-y-2">
+                      <div className={`${menuCardClassName} px-2 py-1`}>
+                    <button
+                      type="button"
+                      onClick={handleOpenScheduler}
+                      className={menuRowClassName}
                     >
-                      {isLightMode ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={handleOpenScheduler}
-                            className={menuRowClassName}
-                          >
-                            <MenuIcon>
-                              <path d="M6 9a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-                              <path d="M10 20a2 2 0 0 0 4 0" />
-                            </MenuIcon>
-                            <span className="flex-1">Recordatorio</span>
-                          </button>
-                          <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]" />
-                        </>
-                      ) : (
-                        <div className={`${menuCardClassName} px-2 py-1`}>
-                          <button
-                            type="button"
-                            onClick={handleOpenScheduler}
-                            className={menuRowClassName}
-                          >
-                            <MenuIcon>
-                              <path d="M6 9a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-                              <path d="M10 20a2 2 0 0 0 4 0" />
-                            </MenuIcon>
-                            <span className="flex-1">Recordatorio</span>
-                          </button>
-                        </div>
-                      )}
-
-                      <div className={isLightMode ? "" : `${menuCardClassName} px-2 py-1`}>
+                      <MenuIcon>
+                        <path d="M6 9a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                        <path d="M10 20a2 2 0 0 0 4 0" />
+                      </MenuIcon>
+                      <span className="flex-1">Recordatorio</span>
+                    </button>
+                      </div>
+                      <div className={`${menuCardClassName} px-2 py-1`}>
                       <button
                         type="button"
                         onClick={() => setIsPlansOpen((current) => !current)}
@@ -593,12 +565,7 @@ export function DashboardMenu({
                       </div>
                     ) : null}
                       </div>
-
-                      {isLightMode ? (
-                        <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]" />
-                      ) : null}
-
-                      <div className={isLightMode ? "" : `${menuCardClassName} px-2 py-1`}>
+                      <div className={`${menuCardClassName} px-2 py-1`}>
                       <button
                         type="button"
                         onClick={() => setActivePanel("widgets")}
@@ -820,7 +787,6 @@ export function DashboardMenu({
                       ) : null}
                     </section>
                   ) : null}
-                    </div>
                   </div>
                 </div>
                 <button
