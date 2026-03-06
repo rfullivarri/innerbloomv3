@@ -153,7 +153,7 @@ export function RewardsSection({
                   ))}
                 </ul>
               ) : (
-                <div className="space-y-2 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-5 text-sm text-[color:var(--color-slate-300)]">
+                <div className="ib-card-contour-shadow space-y-2 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-5 text-sm text-[color:var(--color-slate-300)]">
                   <p>Todavía no desbloqueaste recompensas.</p>
                   <p className="text-xs text-[color:var(--color-slate-400)]">
                     Completá misiones y mantené tus streaks activos para sumar GP y alcanzar nuevos hitos.
@@ -173,12 +173,12 @@ function RewardsSkeleton() {
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         {[0, 1].map((key) => (
-          <div key={key} className="h-24 animate-pulse rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
+          <div key={key} className="ib-card-contour-shadow h-24 animate-pulse rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
         ))}
       </div>
       <div className="space-y-3">
         {[0, 1, 2].map((key) => (
-          <div key={key} className="h-20 animate-pulse rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
+          <div key={key} className="ib-card-contour-shadow h-20 animate-pulse rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
         ))}
       </div>
     </div>
@@ -196,7 +196,7 @@ function WeeklyWrappedShelf({ items, onOpen }: WeeklyWrappedShelfProps) {
   }
 
   return (
-    <div className="space-y-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[var(--shadow-elev-1)]">
+    <div className="ib-card-contour-shadow space-y-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-dim)]">Weekly Wrapped</p>
@@ -226,7 +226,7 @@ function WeeklyWrappedCard({
   const weekRangeLabel = formatWeekRange(record.payload).toUpperCase();
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-[color:var(--color-border-subtle)] bg-[image:var(--glass-bg)] p-4 shadow-[var(--shadow-elev-1)]">
+    <div className="ib-card-contour-shadow flex flex-col gap-3 rounded-xl border border-[color:var(--color-border-subtle)] bg-[image:var(--glass-bg)] p-4">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
           <p className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-400)]">
@@ -354,7 +354,7 @@ function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {
     : `${Math.round(current)} / ${target} completado`;
 
   return (
-    <li className="space-y-4 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[var(--shadow-elev-1)] md:p-5">
+    <li className="ib-card-contour-shadow space-y-4 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 md:p-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
           <span
@@ -433,7 +433,7 @@ function RewardsSummaryCard({ label, value, accent }: RewardsSummaryCardProps) {
 
   return (
     <div
-      className={`flex flex-col gap-2 rounded-2xl border ${accentClasses} p-4 shadow-[var(--shadow-elev-1)] backdrop-blur`}
+      className={`ib-card-contour-shadow flex flex-col gap-2 rounded-2xl border ${accentClasses} p-4 backdrop-blur`}
     >
       <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-dim)]">{label}</span>
       <span className="text-2xl font-semibold text-[color:var(--color-text)]">{value}</span>
