@@ -44,6 +44,14 @@ export const Route = createIcon(
   'Route',
 );
 
+export const CircleDot = createIcon(
+  [
+    ['circle', { cx: '12', cy: '12', r: '10' }],
+    ['circle', { cx: '12', cy: '12', r: '1' }],
+  ],
+  'CircleDot',
+);
+
 export const RefreshCcwDot = createIcon(
   [
     ['path', { d: 'M3 2v6h6' }],
