@@ -270,6 +270,8 @@ export function DashboardMenu({
 
   const menuRowClassName =
     "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40";
+  const menuCardClassName =
+    "ib-card-contour-shadow rounded-2xl bg-[color:var(--color-overlay-1)]";
 
   const handleOpenProfile = useCallback(() => {
     if (typeof openUserProfile === "function") {
@@ -459,15 +461,16 @@ export function DashboardMenu({
                     </svg>
                   </button>
                 </div>
-                <div className="flex-1 space-y-4 overflow-y-auto pr-1">
-                  <ThemeSwitcher />
+                <div className="flex-1 overflow-y-auto">
+                  <div className="space-y-4 px-1 pb-1">
+                    <ThemeSwitcher />
 
-                  <section className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1">
-                    <button
-                      type="button"
-                      onClick={handleOpenProfile}
-                      className={`${menuRowClassName} h-14`}
-                    >
+                    <section className={`${menuCardClassName} px-2 py-1`}>
+                      <button
+                        type="button"
+                        onClick={handleOpenProfile}
+                        className={`${menuRowClassName} h-14`}
+                      >
                       {user?.imageUrl ? (
                         <img
                           src={user.imageUrl}
@@ -493,10 +496,11 @@ export function DashboardMenu({
                         <path d="M20 21a8 8 0 0 0-16 0" />
                         <circle cx="12" cy="8" r="4" />
                       </MenuIcon>
-                    </button>
-                  </section>
+                      </button>
+                    </section>
 
-                  <section className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1">
+                    <section className="space-y-2">
+                      <div className={`${menuCardClassName} px-2 py-1`}>
                     <button
                       type="button"
                       onClick={handleOpenScheduler}
@@ -508,25 +512,26 @@ export function DashboardMenu({
                       </MenuIcon>
                       <span className="flex-1">Recordatorio</span>
                     </button>
-                    <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]" />
-                    <button
-                      type="button"
-                      onClick={() => setIsPlansOpen((current) => !current)}
-                      className={menuRowClassName}
-                      aria-expanded={isPlansOpen}
-                      aria-controls="menu-planes"
-                    >
-                      <MenuIcon>
-                        <rect x="3" y="5" width="18" height="14" rx="2" />
-                        <path d="M3 10h18" />
-                      </MenuIcon>
-                      <span className="flex-1">Planes</span>
-                      <MenuIcon
-                        className={`h-4 w-4 text-[color:var(--color-text-faint)] transition ${isPlansOpen ? "rotate-180" : ""}`}
+                      </div>
+                      <div className={`${menuCardClassName} px-2 py-1`}>
+                      <button
+                        type="button"
+                        onClick={() => setIsPlansOpen((current) => !current)}
+                        className={menuRowClassName}
+                        aria-expanded={isPlansOpen}
+                        aria-controls="menu-planes"
                       >
-                        <path d="m6 9 6 6 6-6" />
-                      </MenuIcon>
-                    </button>
+                        <MenuIcon>
+                          <rect x="3" y="5" width="18" height="14" rx="2" />
+                          <path d="M3 10h18" />
+                        </MenuIcon>
+                        <span className="flex-1">Planes</span>
+                        <MenuIcon
+                          className={`h-4 w-4 text-[color:var(--color-text-faint)] transition ${isPlansOpen ? "rotate-180" : ""}`}
+                        >
+                          <path d="m6 9 6 6 6-6" />
+                        </MenuIcon>
+                      </button>
                     {isPlansOpen ? (
                       <div
                         id="menu-planes"
@@ -559,23 +564,24 @@ export function DashboardMenu({
                         </button>
                       </div>
                     ) : null}
-                    <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]" />
-                    <button
-                      type="button"
-                      onClick={() => setActivePanel("widgets")}
-                      className={menuRowClassName}
-                    >
-                      <MenuIcon>
-                        <rect x="4" y="4" width="7" height="7" rx="1.5" />
-                        <rect x="13" y="4" width="7" height="7" rx="1.5" />
-                        <rect x="4" y="13" width="7" height="7" rx="1.5" />
-                        <rect x="13" y="13" width="7" height="7" rx="1.5" />
-                      </MenuIcon>
-                      <span className="flex-1">Widgets</span>
-                      <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
-                        <path d="m9 6 6 6-6 6" />
-                      </MenuIcon>
-                    </button>
+                      </div>
+                      <div className={`${menuCardClassName} px-2 py-1`}>
+                      <button
+                        type="button"
+                        onClick={() => setActivePanel("widgets")}
+                        className={menuRowClassName}
+                      >
+                        <MenuIcon>
+                          <rect x="4" y="4" width="7" height="7" rx="1.5" />
+                          <rect x="13" y="4" width="7" height="7" rx="1.5" />
+                          <rect x="4" y="13" width="7" height="7" rx="1.5" />
+                          <rect x="13" y="13" width="7" height="7" rx="1.5" />
+                        </MenuIcon>
+                        <span className="flex-1">Widgets</span>
+                        <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
+                          <path d="m9 6 6 6-6 6" />
+                        </MenuIcon>
+                      </button>
                     {activePanel === "widgets" ? (
                       <div
                         id="menu-widgets"
@@ -742,10 +748,11 @@ export function DashboardMenu({
                         </p>
                       </div>
                     ) : null}
-                  </section>
+                      </div>
+                    </section>
 
                   {isMobile ? (
-                    <section className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-quickaccess-border)] bg-[color:var(--color-quickaccess-bg)] p-4">
+                    <section className="ib-card-contour-shadow rounded-2xl bg-[color:var(--color-quickaccess-bg)] p-4">
                       <div className="mb-3 flex items-center gap-2 text-[color:var(--color-quickaccess-text)]">
                         <MenuIcon className="h-4 w-4 text-[color:var(--color-quickaccess-text)]">
                           <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
@@ -780,11 +787,12 @@ export function DashboardMenu({
                       ) : null}
                     </section>
                   ) : null}
+                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="mt-4 flex h-12 w-full items-center gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 text-sm font-semibold text-[color:var(--color-text-dim)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]"
+                  className="ib-card-contour-shadow mt-4 flex h-12 w-full items-center gap-3 rounded-2xl bg-[color:var(--color-overlay-1)] px-4 text-sm font-semibold text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
                 >
                   <MenuIcon className="h-5 w-5 text-[color:var(--color-text-dim)]">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
