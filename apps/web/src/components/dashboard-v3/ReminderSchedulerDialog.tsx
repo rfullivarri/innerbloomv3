@@ -123,10 +123,15 @@ export const ReminderSchedulerDialog = forwardRef<
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <p className="reminder-scheduler-dialog__eyebrow text-[0.65rem] uppercase tracking-[0.32em] text-text-muted">Scheduler diario</p>
-                <h2 id={titleId} className="reminder-scheduler-dialog__title font-display text-2xl font-semibold text-white">
-                  Recordatorios inteligentes
+                <h2
+                  id={titleId}
+                  className="reminder-scheduler-dialog__eyebrow font-display text-[1.05rem] font-semibold uppercase tracking-[0.22em] text-text"
+                >
+                  Scheduler diario
                 </h2>
+                <p className="reminder-scheduler-dialog__title mt-1 font-display text-2xl font-semibold text-text">
+                  Recordatorios inteligentes
+                </p>
                 <p className="reminder-scheduler-dialog__description mt-1 text-sm text-text-muted">
                   Configurá tu recordatorio por correo o pausa cuando lo necesites.
                 </p>

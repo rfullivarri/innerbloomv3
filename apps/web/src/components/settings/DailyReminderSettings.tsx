@@ -261,11 +261,11 @@ export function DailyReminderSettings() {
           className={combine(
             'reminder-scheduler-form__save-button inline-flex items-center rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
             canSubmit
-              ? 'reminder-scheduler-form__save-button--enabled border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20'
+              ? 'reminder-scheduler-form__save-button--enabled border-fuchsia-200/70 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-300 text-white shadow-[0_12px_36px_rgba(217,70,239,0.34)] hover:from-fuchsia-400 hover:via-pink-500 hover:to-amber-200'
               : 'reminder-scheduler-form__save-button--disabled cursor-not-allowed border-white/10 bg-white/5 text-text-subtle',
           )}
         >
-          {isSaving ? 'Guardando…' : 'Guardar cambios'}
+          {isSaving ? 'Guardando…' : 'Guardar'}
         </button>
       </div>
     </form>
