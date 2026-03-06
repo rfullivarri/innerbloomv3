@@ -79,7 +79,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                               ),
                               strokeWidth: 2,
                               stroke: 'currentColor',
-                              fill: isActive ? 'currentColor' : 'none',
+                              fill: 'none',
                               opacity: isActive ? 1 : 0.85,
                               'aria-hidden': true,
                             })
