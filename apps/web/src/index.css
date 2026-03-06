@@ -88,16 +88,16 @@
     --glass-bg: linear-gradient(180deg, rgba(30, 41, 59, 0.78), rgba(15, 23, 42, 0.64));
     --glass-border: rgba(255, 255, 255, 0.18);
 
-    --color-ios-quick-access-modal-surface: #000c40;
-    --color-ios-quick-access-modal-border: rgba(255, 255, 255, 0.2);
+    --color-ios-quick-access-modal-surface: var(--color-surface-elevated);
+    --color-ios-quick-access-modal-border: var(--color-border-soft);
     --color-ios-quick-access-modal-text: var(--color-text-strong);
-    --color-ios-quick-access-modal-text-muted: rgba(255, 255, 255, 0.85);
-    --color-ios-quick-access-modal-chip-border: rgba(255, 255, 255, 0.25);
-    --color-ios-quick-access-modal-chip-bg: rgba(255, 255, 255, 0.1);
+    --color-ios-quick-access-modal-text-muted: var(--color-text-muted);
+    --color-ios-quick-access-modal-chip-border: var(--color-border-soft);
+    --color-ios-quick-access-modal-chip-bg: var(--color-overlay-2);
     --color-ios-quick-access-modal-chip-text: var(--color-text-strong);
-    --color-ios-quick-access-modal-button-border: rgba(255, 255, 255, 0.25);
-    --color-ios-quick-access-modal-button-bg: rgba(255, 255, 255, 0.1);
-    --color-ios-quick-access-modal-button-hover-bg: rgba(255, 255, 255, 0.15);
+    --color-ios-quick-access-modal-button-border: var(--color-border-soft);
+    --color-ios-quick-access-modal-button-bg: var(--color-overlay-2);
+    --color-ios-quick-access-modal-button-hover-bg: var(--color-overlay-3);
     --color-ios-quick-access-modal-button-text: var(--color-text-strong);
   }
 
@@ -246,14 +246,14 @@
     --onboarding-glass-border-soft: rgba(148, 163, 184, 0.2);
     --onboarding-glass-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
     --color-ios-quick-access-modal-surface: var(--color-surface-elevated);
-    --color-ios-quick-access-modal-border: var(--color-border-strong);
+    --color-ios-quick-access-modal-border: var(--color-border-soft);
     --color-ios-quick-access-modal-text: var(--color-text-strong);
     --color-ios-quick-access-modal-text-muted: var(--color-text-dim);
     --color-ios-quick-access-modal-chip-border: var(--color-border-soft);
     --color-ios-quick-access-modal-chip-bg: var(--color-overlay-2);
     --color-ios-quick-access-modal-chip-text: var(--color-text);
     --color-ios-quick-access-modal-button-border: var(--color-border-soft);
-    --color-ios-quick-access-modal-button-bg: var(--color-overlay-1);
+    --color-ios-quick-access-modal-button-bg: var(--color-overlay-2);
     --color-ios-quick-access-modal-button-hover-bg: var(--color-overlay-2);
     --color-ios-quick-access-modal-button-text: var(--color-text);
   }
