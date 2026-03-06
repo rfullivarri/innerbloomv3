@@ -58,6 +58,17 @@ const CircleDot = createIcon(
   'CircleDotIcon',
 );
 
+const FingerprintPattern = createIcon(
+  () => [
+    React.createElement(Path, { key: 'fp1', d: 'M12 4a8 8 0 0 1 8 8' }),
+    React.createElement(Path, { key: 'fp2', d: 'M6 12a6 6 0 0 1 12 0' }),
+    React.createElement(Path, { key: 'fp3', d: 'M8 16a4 4 0 0 1 8 0' }),
+    React.createElement(Path, { key: 'fp4', d: 'M10 20a2 2 0 0 1 4 0' }),
+    React.createElement(Circle, { key: 'fp5', cx: '12', cy: '12', r: '1' }),
+  ],
+  'FingerprintPatternIcon',
+);
+
 const Sparkles = createIcon(
   () => [
     React.createElement(Path, { key: 's1', d: 'M12 4 13.5 7.5 17 9l-3.5 1.5L12 14l-1.5-3.5L7 9l3.5-1.5Z' }),
@@ -77,10 +88,23 @@ const Sprout = createIcon(
   'SproutIcon',
 );
 
+const WandSparkles = createIcon(
+  () => [
+    React.createElement(Path, { key: 'ws1', d: 'm21 3-5 5' }),
+    React.createElement(Path, { key: 'ws2', d: 'M15 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1Z' }),
+    React.createElement(Path, { key: 'ws3', d: 'M18 12l1 2 2 1-2 1-1 2-1-2-2-1 2-1Z' }),
+    React.createElement(Path, { key: 'ws4', d: 'm3 21 9-9' }),
+    React.createElement(Path, { key: 'ws5', d: 'm8 21 2-2' }),
+  ],
+  'WandSparklesIcon',
+);
+
 module.exports = {
   Route,
   Flame,
   CircleDot,
+  FingerprintPattern,
   Sparkles,
   Sprout,
+  WandSparkles,
 };
