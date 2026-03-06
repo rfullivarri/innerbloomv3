@@ -22,6 +22,7 @@ export default defineConfig({
   resolve: {
     alias: {
       config: fileURLToPath(new URL('./src/config', import.meta.url)),
+      'lucide-react': fileURLToPath(new URL('./src/lib/lucide-react.tsx', import.meta.url)),
       ...(useMockClerk
         ? {
             '@clerk/clerk-react': fileURLToPath(
