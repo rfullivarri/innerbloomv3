@@ -51,12 +51,14 @@ export function ModerationEditSheet({
         className="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)]/95 p-4 text-[color:var(--color-text)] shadow-[var(--shadow-elev-2)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-base font-semibold">Edit Moderación</h3>
+        <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-surface-elevated)]/90 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm">
+          <h3 className="text-base font-semibold text-[color:var(--color-text-strong)] [text-shadow:0_1px_1px_rgba(2,6,23,0.22)]">
+            Edit Moderación
+          </h3>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs text-[color:var(--color-text-dim)] transition-colors hover:bg-[color:var(--color-overlay-2)]"
+            className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-medium text-[color:var(--color-text-dim)] transition-colors hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-border-strong)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)]"
           >
             Cerrar
           </button>
