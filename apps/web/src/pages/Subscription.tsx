@@ -118,14 +118,15 @@ export default function SubscriptionPage() {
   return (
     <div className={overlayClassName}>
       <div className={panelClassName}>
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           <h1 className="text-3xl font-semibold uppercase tracking-[0.14em]">Suscripción</h1>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className={secondaryButtonClassName}
+            aria-label="Cerrar"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-xl font-semibold leading-none text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]"
           >
-            Cerrar
+            ×
           </button>
         </div>
 
