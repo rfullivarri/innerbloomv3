@@ -74,10 +74,13 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                           ? cloneElement<SVGProps<SVGSVGElement>>(item.icon, {
                               className: combine(
                                 item.icon.props.className,
-                                'stroke-[1.75] transition-all duration-300',
+                                'transition-all duration-300',
                                 item.key === 'dashboard' ? 'h-[28px] w-[28px]' : 'h-[24px] w-[24px]'
                               ),
-                              stroke: item.icon.props.stroke ?? 'currentColor',
+                              strokeWidth: 2,
+                              stroke: 'currentColor',
+                              fill: isActive ? 'currentColor' : 'none',
+                              opacity: isActive ? 1 : 0.85,
                               'aria-hidden': true,
                             })
                           : null}

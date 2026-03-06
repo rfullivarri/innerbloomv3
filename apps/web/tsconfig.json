@@ -19,6 +19,7 @@
         "../../packages/missions-v2-contracts/src/*.ts",
         "../../packages/missions-v2-contracts/src/*.d.ts"
       ],
+      "lucide-react": ["src/lib/lucide-react.tsx"],
       "config/*": ["src/config/*"]
     }
   },

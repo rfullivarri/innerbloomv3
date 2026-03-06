@@ -1,5 +1,5 @@
 import { matchPath } from 'react-router-dom';
-import { Route, Flame, CircleDot, Sparkles, Sprout } from '../components/icons';
+import { Route, RefreshCcwDot, FingerprintPattern, Sparkles, WandSparkles } from 'lucide-react';
 import { type ReactElement, type SVGProps } from 'react';
 import type { NavbarSection } from '../components/layout/Navbar';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
@@ -62,7 +62,7 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       end: true,
       pageTitle: 'Dashboard',
       contentTitle: 'Dashboard',
-      icon: (props) => <CircleDot {...props} />,
+      icon: (props) => <FingerprintPattern {...props} />,
     },
     missions: {
       key: 'missions',
@@ -83,7 +83,7 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       eyebrow: 'DQuest',
       contentTitle: 'Daily Quest',
       description: 'Tu ritual diario: enfócate en la misión clave del día y mantené la racha.',
-      icon: (props) => <Flame {...props} />,
+      icon: (props) => <RefreshCcwDot {...props} />,
     },
     rewards: {
       key: 'rewards',
@@ -104,7 +104,7 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       eyebrow: 'Editor',
       contentTitle: '',
       description: '',
-      icon: (props) => <Sprout {...props} />,
+      icon: (props) => <WandSparkles {...props} />,
     },
   };
 }
