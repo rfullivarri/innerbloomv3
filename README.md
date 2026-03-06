@@ -109,3 +109,9 @@ Las pruebas unitarias de `apps/api` se ejecutan sin configuración adicional. La
 ### Reportes de cobertura
 
 Vitest genera un resumen de cobertura directamente en los logs del job (`Run tests with coverage`). Además, el workflow publica la carpeta `apps/api/coverage` como artefacto llamado **api-coverage** para que puedas descargar el reporte completo (incluyendo `lcov-report/index.html`) desde la pestaña **Artifacts** del run en GitHub Actions.
+
+## Inventario de microservicios y endpoints
+
+Para consultar la lista actualizada de microservicios, sus endpoints y una descripción funcional breve de cada uno, revisa:
+
+- `docs/microservices-endpoints.md`
