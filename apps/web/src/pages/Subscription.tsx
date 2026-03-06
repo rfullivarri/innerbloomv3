@@ -79,7 +79,7 @@ export default function SubscriptionPage() {
     'rounded-full border border-violet-400/45 bg-violet-500 px-7 py-3 font-semibold text-white shadow-[0_14px_35px_rgba(124,58,237,0.3)] transition hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_18px_40px_rgba(124,58,237,0.35)]';
 
   const destructiveActionClassName =
-    'rounded-full border border-rose-500/70 bg-rose-500 px-7 py-3 font-semibold text-white shadow-[0_14px_35px_rgba(244,63,94,0.28)] transition hover:-translate-y-0.5 hover:bg-rose-400 hover:shadow-[0_18px_40px_rgba(244,63,94,0.34)] dark:border-rose-300/45 dark:bg-rose-500 dark:text-rose-50';
+    'rounded-full border border-rose-200 bg-rose-100/90 px-7 py-3 font-semibold text-rose-700 shadow-[0_8px_22px_rgba(244,63,94,0.12)] transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-200/85 hover:text-rose-800 hover:shadow-[0_14px_30px_rgba(244,63,94,0.18)] dark:border-rose-300/45 dark:bg-rose-500 dark:text-rose-50 dark:shadow-[0_14px_35px_rgba(244,63,94,0.28)] dark:hover:bg-rose-400 dark:hover:shadow-[0_18px_40px_rgba(244,63,94,0.34)]';
 
   if (isLoading) {
     return (
@@ -119,7 +119,7 @@ export default function SubscriptionPage() {
     <div className={overlayClassName}>
       <div className={panelClassName}>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="font-display text-3xl font-semibold">Suscripción</h1>
+          <h1 className="text-3xl font-semibold uppercase tracking-[0.14em]">Suscripción</h1>
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -132,7 +132,6 @@ export default function SubscriptionPage() {
         <div className="mt-6 space-y-4 rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-6 shadow-[0_20px_46px_color-mix(in_srgb,var(--color-text)_9%,transparent),0_8px_20px_color-mix(in_srgb,var(--color-accent-primary)_10%,transparent),inset_0_1px_0_color-mix(in_srgb,white_72%,transparent)] dark:shadow-none">
           <p className="flex items-center gap-2">
             <span className="text-[color:var(--color-text-dim)]">Plan actual:</span>
-            <strong>{subscription?.plan ?? 'No definido'}</strong>
             <span className="rounded-full border border-emerald-400/60 bg-emerald-400 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-950 shadow-[0_8px_22px_rgba(16,185,129,0.24)] dark:border-emerald-300/45 dark:bg-emerald-400 dark:text-emerald-950">
               {subscription?.plan ?? 'Sin plan'}
             </span>
