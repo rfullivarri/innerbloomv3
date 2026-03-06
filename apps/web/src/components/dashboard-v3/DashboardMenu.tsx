@@ -271,7 +271,7 @@ export function DashboardMenu({
   const menuRowClassName =
     "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40";
   const menuCardClassName =
-    "rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)]";
+    "ib-card-contour-shadow relative z-10 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)]";
 
   const handleOpenProfile = useCallback(() => {
     if (typeof openUserProfile === "function") {
