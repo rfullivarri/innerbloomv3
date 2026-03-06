@@ -466,7 +466,7 @@ function TaskItem({
   return (
     <article
       className={cx(
-        'flex flex-col gap-1.5 rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2.5 text-[color:var(--color-slate-200)] shadow-[var(--IB_SURFACE_CARD_LIGHT)] dark:shadow-[0_6px_20px_rgba(15,23,42,0.3)] transition hover:border-violet-300/50 hover:bg-[color:var(--color-overlay-2)] md:gap-2 md:p-3',
+        'ib-card-contour-shadow flex flex-col gap-1.5 rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2.5 text-[color:var(--color-slate-200)] transition hover:border-violet-300/50 hover:bg-[color:var(--color-overlay-2)] md:gap-2 md:p-3',
         item.highlight && 'border-violet-400/60 bg-violet-400/10 shadow-[0_8px_26px_rgba(99,102,241,0.3)]',
       )}
       aria-label={`Streak ${item.name}, ${item.weeklyDone} of ${item.weeklyGoal} this week, ${streakDays} consecutive days`}
