@@ -73,6 +73,8 @@ export function ModerationEditSheet({
             {visibleTypes.map((type) => {
               const isPaused = configs[type].isPaused;
               const isSwitchDisabled = !configs[type].isEnabled;
+              const toleranceDays = configs[type].notLoggedToleranceDays;
+              const toleranceProgress = (toleranceDays / 7) * 100;
 
               return (
                 <div
@@ -118,18 +120,26 @@ export function ModerationEditSheet({
                     </button>
                   </label>
                   <label className="mt-3 block text-sm text-[color:var(--color-text-dim)]">
-                    Tolerancia sin marcar: {configs[type].notLoggedToleranceDays}
-                    <input
-                      className="mt-2 w-full accent-emerald-500"
-                      type="range"
-                      min={0}
-                      max={7}
-                      step={1}
-                      value={configs[type].notLoggedToleranceDays}
-                      onChange={(event) => {
-                        void onToleranceChange(type, Number(event.target.value));
-                      }}
-                    />
+                    Tolerancia sin marcar: {toleranceDays}
+                    <div className="relative mt-2 h-8">
+                      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 h-2 -translate-y-1/2 rounded-full bg-[color:var(--color-surface-muted)]" data-testid="tolerance-rail" />
+                      <div
+                        className="pointer-events-none absolute left-0 top-1/2 z-10 h-2 -translate-y-1/2 rounded-full bg-[color:var(--color-semantic-success-500)]"
+                        data-testid="tolerance-fill"
+                        style={{ width: `${toleranceProgress}%` }}
+                      />
+                      <input
+                        className="absolute inset-0 z-20 h-full w-full appearance-none bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-overlay-1)] [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-[color:var(--color-border-strong)] [&::-moz-range-thumb]:bg-[color:var(--color-surface-elevated)] [&::-moz-range-thumb]:shadow-[var(--shadow-elev-1)] [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-transparent [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:z-20 [&::-webkit-slider-thumb]:mt-[-4px] [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-[color:var(--color-border-strong)] [&::-webkit-slider-thumb]:bg-[color:var(--color-surface-elevated)] [&::-webkit-slider-thumb]:shadow-[var(--shadow-elev-1)]"
+                        type="range"
+                        min={0}
+                        max={7}
+                        step={1}
+                        value={toleranceDays}
+                        onChange={(event) => {
+                          void onToleranceChange(type, Number(event.target.value));
+                        }}
+                      />
+                    </div>
                   </label>
                 </div>
               );
