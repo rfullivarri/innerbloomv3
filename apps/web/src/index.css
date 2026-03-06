@@ -88,7 +88,7 @@
     --glass-bg: linear-gradient(180deg, rgba(30, 41, 59, 0.78), rgba(15, 23, 42, 0.64));
     --glass-border: rgba(255, 255, 255, 0.18);
 
-    --color-ios-quick-access-modal-surface: var(--color-surface-elevated);
+    --color-ios-quick-access-modal-surface: #182640;
     --color-ios-quick-access-modal-border: var(--color-border-soft);
     --color-ios-quick-access-modal-text: var(--color-text-strong);
     --color-ios-quick-access-modal-text-muted: var(--color-text-muted);
@@ -245,7 +245,7 @@
     --onboarding-glass-border: rgba(148, 163, 184, 0.24);
     --onboarding-glass-border-soft: rgba(148, 163, 184, 0.2);
     --onboarding-glass-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-    --color-ios-quick-access-modal-surface: var(--color-surface-elevated);
+    --color-ios-quick-access-modal-surface: #ffffff;
     --color-ios-quick-access-modal-border: var(--color-border-soft);
     --color-ios-quick-access-modal-text: var(--color-text-strong);
     --color-ios-quick-access-modal-text-muted: var(--color-text-dim);
