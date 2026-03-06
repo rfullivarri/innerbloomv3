@@ -51,12 +51,12 @@ export function ModerationEditSheet({
         className="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)]/95 p-4 text-[color:var(--color-text)] shadow-[var(--shadow-elev-2)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between gap-3 px-1 py-1">
           <h3 className="text-base font-semibold">Edit Moderación</h3>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs text-[color:var(--color-text-dim)] transition-colors hover:bg-[color:var(--color-overlay-2)]"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-2)] px-3 py-2 text-xs font-medium text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-overlay-3)]"
           >
             Cerrar
           </button>
