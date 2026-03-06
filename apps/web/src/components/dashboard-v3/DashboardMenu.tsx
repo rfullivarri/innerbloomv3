@@ -271,7 +271,7 @@ export function DashboardMenu({
   const menuRowClassName =
     "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40";
   const menuCardClassName =
-    "ib-card-contour-shadow rounded-2xl bg-[color:var(--color-overlay-1)]";
+    "rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)]";
 
   const handleOpenProfile = useCallback(() => {
     if (typeof openUserProfile === "function") {
@@ -752,7 +752,7 @@ export function DashboardMenu({
                     </section>
 
                   {isMobile ? (
-                    <section className="ib-card-contour-shadow rounded-2xl bg-[color:var(--color-quickaccess-bg)] p-4">
+                    <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-quickaccess-bg)] p-4">
                       <div className="mb-3 flex items-center gap-2 text-[color:var(--color-quickaccess-text)]">
                         <MenuIcon className="h-4 w-4 text-[color:var(--color-quickaccess-text)]">
                           <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
@@ -792,7 +792,7 @@ export function DashboardMenu({
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="ib-card-contour-shadow mt-4 flex h-12 w-full items-center gap-3 rounded-2xl bg-[color:var(--color-overlay-1)] px-4 text-sm font-semibold text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
+                  className="mt-4 flex h-12 w-full items-center gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-4 text-sm font-semibold text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-3)]"
                 >
                   <MenuIcon className="h-5 w-5 text-[color:var(--color-text-dim)]">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
