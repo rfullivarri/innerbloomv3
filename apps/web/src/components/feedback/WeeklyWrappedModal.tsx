@@ -255,7 +255,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
   // Fondo animado global aplicado al wrapper fijo que envuelve todas las slides del Weekly Wrapped (desktop y mobile usan este contenedor).
   return (
     <div
-      className="fixed inset-0 z-50 flex overflow-hidden bg-slate-950/95 backdrop-blur weekly-wrapped-animated-bg"
+      className="ib-weekly-wrapped-modal fixed inset-0 z-50 flex overflow-hidden bg-slate-950/95 backdrop-blur weekly-wrapped-animated-bg"
       role="dialog"
       aria-modal
     >
@@ -271,7 +271,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-5 top-5 z-20 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-50 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-400/30 hover:text-slate-950"
+          className="ib-weekly-wrapped-close absolute right-5 top-5 z-20 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-50 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-400/30 hover:text-slate-950"
           style={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}
         >
           Cerrar
