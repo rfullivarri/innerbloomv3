@@ -12,7 +12,9 @@ type LucideIcon = (props: IconProps) => JSX.Element;
 export const Route: LucideIcon;
 export const Flame: LucideIcon;
 export const CircleDot: LucideIcon;
+export const FingerprintPattern: LucideIcon;
 export const Sparkles: LucideIcon;
 export const Sprout: LucideIcon;
+export const WandSparkles: LucideIcon;
 
 export type { IconProps, LucideIcon };
