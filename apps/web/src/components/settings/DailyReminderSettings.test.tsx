@@ -58,7 +58,7 @@ describe('DailyReminderSettings', () => {
     const timezoneOption = await screen.findByRole('option', { name: /buenos aires/i });
     await user.click(timezoneOption);
 
-    const submitButton = screen.getByRole('button', { name: /guardar cambios/i });
+    const submitButton = screen.getByRole('button', { name: /guardar/i });
     expect(submitButton).not.toBeDisabled();
     await user.click(submitButton);
 
