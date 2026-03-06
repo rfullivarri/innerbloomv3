@@ -4,6 +4,7 @@ import {
   type ReactElement,
   type SVGProps,
 } from "react";
+import { CircleDot } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 export interface MobileBottomNavItem {
@@ -86,27 +87,29 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                                 : "text-[color:var(--color-text-muted)] group-hover:text-[color:var(--color-text)]",
                           )}
                         >
-                          {isValidElement<SVGProps<SVGSVGElement>>(item.icon)
+                          {isDashboard ? (
+                            <CircleDot
+                              size={22}
+                              strokeWidth={2}
+                              className={combine(
+                                "transition-all duration-300",
+                                isActive
+                                  ? "text-primary fill-current opacity-100"
+                                  : "text-muted-foreground",
+                              )}
+                              aria-hidden
+                            />
+                          ) : isValidElement<SVGProps<SVGSVGElement>>(item.icon)
                             ? cloneElement<SVGProps<SVGSVGElement>>(item.icon, {
                                 className: combine(
                                   item.icon.props.className,
                                   "transition-all duration-300",
-                                  isDashboard
-                                    ? isActive
-                                      ? "h-[29px] w-[29px]"
-                                      : "h-[27px] w-[27px]"
-                                    : "h-[24px] w-[24px]",
+                                  "h-[24px] w-[24px]",
                                 ),
-                                strokeWidth: isDashboard && isActive ? 2.4 : 2,
+                                strokeWidth: 2,
                                 stroke: "currentColor",
                                 fill: "none",
-                                opacity: isDashboard
-                                  ? isActive
-                                    ? 1
-                                    : 0.68
-                                  : isActive
-                                    ? 1
-                                    : 0.85,
+                                opacity: isActive ? 1 : 0.85,
                                 "aria-hidden": true,
                               })
                             : null}
