@@ -4,7 +4,6 @@ import {
   type ReactElement,
   type SVGProps,
 } from "react";
-import { CircleDot } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 export interface MobileBottomNavItem {
@@ -70,10 +69,10 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                           isDashboard ? "h-8 w-8 rounded-full" : null,
                           isDashboard
                             ? isActive
-                              ? "bg-[color:color-mix(in_srgb,var(--color-accent-primary)_78%,var(--color-accent-secondary)_22%)] text-[color:var(--color-text)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-primary)_30%,transparent),0_10px_24px_color-mix(in_srgb,var(--color-accent-primary)_48%,transparent),0_0_20px_color-mix(in_srgb,var(--color-accent-secondary)_42%,transparent)]"
+                              ? "bg-white text-[color:var(--color-surface)] shadow-[0_0_0_1px_rgba(255,255,255,0.95),0_14px_28px_rgba(255,255,255,0.38)]"
                               : "bg-transparent text-[color:color-mix(in_srgb,var(--color-text-muted)_86%,transparent)] shadow-none"
                             : isActive
-                              ? "bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)]"
+                              ? "bg-[color:rgba(255,255,255,0.92)] text-[color:var(--color-surface)]"
                               : "bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]",
                         )}
                       >
@@ -83,23 +82,11 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                             isDashboard && !isActive
                               ? "text-[color:color-mix(in_srgb,var(--color-text-muted)_86%,transparent)]"
                               : isActive
-                                ? "text-[color:var(--color-accent-primary)]"
+                                ? "text-[color:var(--color-surface)]"
                                 : "text-[color:var(--color-text-muted)] group-hover:text-[color:var(--color-text)]",
                           )}
                         >
-                          {isDashboard ? (
-                            <CircleDot
-                              size={22}
-                              strokeWidth={2}
-                              className={combine(
-                                "transition-all duration-300",
-                                isActive
-                                  ? "text-primary fill-current opacity-100"
-                                  : "text-muted-foreground",
-                              )}
-                              aria-hidden
-                            />
-                          ) : isValidElement<SVGProps<SVGSVGElement>>(item.icon)
+                          {isValidElement<SVGProps<SVGSVGElement>>(item.icon)
                             ? cloneElement<SVGProps<SVGSVGElement>>(item.icon, {
                                 className: combine(
                                   item.icon.props.className,
