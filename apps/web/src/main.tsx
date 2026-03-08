@@ -10,6 +10,7 @@ import { resolveAuthLanguage } from './lib/authLanguage';
 import { getClerkLocalization } from './lib/clerkLocalization';
 import { ThemePreferenceProvider } from './theme/ThemePreferenceProvider';
 import { applyStoredThemePreference } from './theme/themePreference';
+import { PostLoginLanguageProvider } from './i18n/postLoginLanguage';
 
 declare global {
   interface Window {
@@ -64,9 +65,11 @@ createRoot(rootElement).render(
   <StrictMode>
     <BrowserRouter>
       <LocalizedClerkProvider>
-        <ThemePreferenceProvider>
-          <App />
-        </ThemePreferenceProvider>
+        <PostLoginLanguageProvider>
+          <ThemePreferenceProvider>
+            <App />
+          </ThemePreferenceProvider>
+        </PostLoginLanguageProvider>
       </LocalizedClerkProvider>
     </BrowserRouter>
   </StrictMode>,

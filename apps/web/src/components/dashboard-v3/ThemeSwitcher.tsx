@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 import type { ThemePreference } from '../../theme/themePreference';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 const OPTIONS: Array<{ value: ThemePreference; label: string; icon?: ReactNode }> = [
   {
@@ -27,12 +28,32 @@ const OPTIONS: Array<{ value: ThemePreference; label: string; icon?: ReactNode }
 
 export function ThemeSwitcher() {
   const { preference, setPreference } = useThemePreference();
+  const { language } = usePostLoginLanguage();
+  const isSpanish = language === 'es';
+
+  const localizedOptions = OPTIONS.map((option) => ({
+    ...option,
+    label:
+      option.value === 'light'
+        ? isSpanish
+          ? 'Claro'
+          : 'Light'
+        : option.value === 'dark'
+          ? isSpanish
+            ? 'Oscuro'
+            : 'Dark'
+          : isSpanish
+            ? 'Auto'
+            : 'Auto',
+  }));
 
   return (
     <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3">
-      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)]">Apariencia</p>
+      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)]">
+        {isSpanish ? 'Apariencia' : 'Appearance'}
+      </p>
       <div className="mt-2 inline-flex w-full rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)]/40 p-1">
-        {OPTIONS.map((option) => {
+        {localizedOptions.map((option) => {
           const isActive = preference === option.value;
 
           return (

@@ -3,19 +3,20 @@ import { Link } from 'react-router-dom';
 import { OFFICIAL_LANDING_CONTENT } from '../content/officialLandingContent';
 import { getSubscriptionWithFallback } from '../lib/api/subscription';
 import { changePlan, type PlanCode, type SubscriptionData } from '../lib/api/subscriptionMock';
-
-const PRICING_COPY = OFFICIAL_LANDING_CONTENT.es.pricing;
-const PLANS = PRICING_COPY.plans;
-
-const PLAN_BUTTON_LABELS: Record<PlanCode, string> = {
-  FREE: 'Seleccionar',
-  MONTH: 'Seleccionar',
-  SIX_MONTHS: 'Seleccionar',
-  YEAR: 'Seleccionar',
-  SUPERUSER: 'Seleccionar',
-};
+import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 
 export default function PricingPage() {
+  const { language } = usePostLoginLanguage();
+  const isSpanish = language === 'es';
+  const PRICING_COPY = OFFICIAL_LANDING_CONTENT[language].pricing;
+  const PLANS = PRICING_COPY.plans;
+  const PLAN_BUTTON_LABELS: Record<PlanCode, string> = {
+    FREE: isSpanish ? 'Seleccionar' : 'Select',
+    MONTH: isSpanish ? 'Seleccionar' : 'Select',
+    SIX_MONTHS: isSpanish ? 'Seleccionar' : 'Select',
+    YEAR: isSpanish ? 'Seleccionar' : 'Select',
+    SUPERUSER: isSpanish ? 'Seleccionar' : 'Select',
+  };
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [pendingPlan, setPendingPlan] = useState<PlanCode | null>(null);
@@ -53,22 +54,24 @@ export default function PricingPage() {
       const response = await changePlan(planId);
       if (response.ok) {
         setSubscription(response.data);
-        setFeedbackMessage(`Plan actualizado a ${planId.replace('_', ' ')}.`);
+        setFeedbackMessage(isSpanish ? `Plan actualizado a ${planId.replace('_', ' ')}.` : `Plan updated to ${planId.replace('_', ' ')}.`);
       } else {
-        setFeedbackMessage('No se pudo actualizar el plan. Intentá nuevamente.');
+        setFeedbackMessage(isSpanish ? 'No se pudo actualizar el plan. Intentá nuevamente.' : 'Could not update plan. Try again.');
       }
 
       setPendingPlan(null);
     },
-    [pendingPlan, selectedPlan]
+    [isSpanish, pendingPlan, selectedPlan]
   );
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_20%_20%,rgba(76,145,196,0.5),rgba(7,26,68,0.96)_45%,rgba(3,10,35,1))] px-6 py-16 text-text">
       <div className="mx-auto w-full max-w-7xl">
-        <h1 className="text-center text-4xl font-semibold md:text-6xl">Planes y pricing</h1>
+        <h1 className="text-center text-4xl font-semibold md:text-6xl">{isSpanish ? 'Planes y pricing' : 'Plans & pricing'}</h1>
         <p className="mx-auto mt-4 max-w-3xl text-center text-lg text-text-muted md:text-2xl">
-          Elegí tu plan desde el dashboard. Todos los planes comienzan con 2 meses gratis y luego se aplica el importe del plan elegido.
+          {isSpanish
+            ? 'Elegí tu plan desde el dashboard. Todos los planes comienzan con 2 meses gratis y luego se aplica el importe del plan elegido.'
+            : 'Pick your plan from the dashboard. Every plan starts with a 2-month free trial and then applies the selected plan price.'}
         </p>
         <p className="mt-5 text-center text-base font-semibold text-white/90">{PRICING_COPY.trialHighlight}</p>
         <p className="mt-2 text-center text-base text-text-muted">{PRICING_COPY.taxNote}</p>
@@ -107,7 +110,7 @@ export default function PricingPage() {
               >
                 {isSelected ? (
                   <span className="absolute right-4 top-4 rounded-full border border-emerald-300/45 bg-emerald-400/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-100">
-                    Seleccionado
+                    {isSpanish ? 'Seleccionado' : 'Selected'}
                   </span>
                 ) : null}
 

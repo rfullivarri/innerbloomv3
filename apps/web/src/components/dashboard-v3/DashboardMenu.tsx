@@ -7,6 +7,7 @@ import { ModerationWidget as ModerationPreviewWidget } from "./ModerationWidget"
 import { ModerationTrackerIcon } from "../moderation/trackerMeta";
 import { useQuickAccessInstall } from "../../hooks/useQuickAccessInstall";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
 import { useLongPress } from "../../hooks/useLongPress";
 import { useThemePreference } from "../../theme/ThemePreferenceProvider";
 import {
@@ -73,15 +74,15 @@ function MenuIcon({
 
 const DashboardMenuTrigger = forwardRef<
   HTMLButtonElement,
-  { onClick: () => void }
->(function DashboardMenuTrigger({ onClick }, ref) {
+  { onClick: () => void; ariaLabel: string }
+>(function DashboardMenuTrigger({ onClick, ariaLabel }, ref) {
   return (
     <button
       ref={ref}
       type="button"
       onClick={onClick}
       className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2 text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40"
-      aria-label="Abrir menú"
+      aria-label={ariaLabel}
     >
       <svg
         aria-hidden="true"
@@ -144,6 +145,8 @@ export function DashboardMenu({
   moderation,
 }: DashboardMenuProps) {
   const { theme } = useThemePreference();
+  const { language, setManualLanguage } = usePostLoginLanguage();
+  const isSpanishSystem = language === "es";
   const navigate = useNavigate();
   const { user } = useUser();
   const { openUserProfile } = useClerk();
@@ -154,7 +157,6 @@ export function DashboardMenu({
   const toastTimeoutRef = useRef<number | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
-  const [isSpanishSystem, setIsSpanishSystem] = useState(true);
   const [isPlansOpen, setIsPlansOpen] = useState(false);
   const [isModerationOpen, setIsModerationOpen] = useState(true);
   const [activePanel, setActivePanel] = useState<MenuPanel>("main");
@@ -176,14 +178,6 @@ export function DashboardMenu({
   useEffect(() => {
     setPortalNode(document.body);
     setIsMounted(true);
-
-    const browserLanguages = navigator.languages?.length
-      ? navigator.languages
-      : [navigator.language];
-    const prefersSpanish = browserLanguages.some((lang) =>
-      lang?.toLowerCase().startsWith("es"),
-    );
-    setIsSpanishSystem(prefersSpanish);
   }, []);
 
   useEffect(() => {
@@ -346,6 +340,20 @@ export function DashboardMenu({
     [isSpanishSystem],
   );
 
+  const languageLabels = isSpanishSystem
+    ? {
+        title: "Idioma",
+        spanish: "Español",
+        english: "English",
+        selected: "Seleccionado",
+      }
+    : {
+        title: "Language",
+        spanish: "Español",
+        english: "English",
+        selected: "Selected",
+      };
+
   const trackerLabels: Record<ModerationTrackerType, string> = {
     alcohol: "Alcohol",
     tobacco: "Tabaco",
@@ -406,13 +414,13 @@ export function DashboardMenu({
 
   if (!isMounted || !portalNode) {
     return (
-      <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} />
+      <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} ariaLabel={isSpanishSystem ? "Abrir menú" : "Open menu"} />
     );
   }
 
   return (
     <>
-      <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} />
+      <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} ariaLabel={isSpanishSystem ? "Abrir menú" : "Open menu"} />
       {createPortal(
         <AnimatePresence>
           {isOpen ? (
@@ -427,7 +435,7 @@ export function DashboardMenu({
                 ref={panelRef}
                 role="dialog"
                 aria-modal="true"
-                aria-label="Menú principal"
+                aria-label={isSpanishSystem ? "Menú principal" : "Main menu"}
                 className="flex max-h-[92vh] w-full max-w-[420px] flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-5 text-[color:var(--color-text)] shadow-2xl transition"
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -436,17 +444,17 @@ export function DashboardMenu({
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-[0.6rem] uppercase tracking-[0.35em] text-slate-900/80 dark:text-text-muted">
-                      Menú
+                      {isSpanishSystem ? "Menú" : "Menu"}
                     </p>
                     <h2 className="font-display text-xl font-semibold">
-                      Tu espacio personal
+                      {isSpanishSystem ? "Tu espacio personal" : "Your personal space"}
                     </h2>
                   </div>
                   <button
                     type="button"
                     onClick={handleClose}
                     className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-2 text-sm text-[color:var(--color-text-dim)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]"
-                    aria-label="Cerrar menú"
+                    aria-label={isSpanishSystem ? "Cerrar menú" : "Close menu"}
                   >
                     <svg
                       aria-hidden="true"
@@ -674,9 +682,9 @@ export function DashboardMenu({
                                   moderation.onOpenEdit();
                                 }}
                                 className="rounded-md border border-[color:var(--color-widget-edit-border)] bg-[color:var(--color-widget-edit-bg)] px-2 py-1 text-xs text-[color:var(--color-widget-edit-text)] transition hover:bg-[color:var(--color-widget-edit-hover-bg)]"
-                                aria-label="Editar configuración de Moderación"
+                                aria-label={isSpanishSystem ? "Editar configuración de Moderación" : "Edit Moderation settings"}
                               >
-                                Editar
+                                {isSpanishSystem ? "Editar" : "Edit"}
                               </button>
                             </div>
 
@@ -731,7 +739,7 @@ export function DashboardMenu({
                                   })}
                                 </div>
                                 <p className="text-[11px] text-[color:var(--color-widget-menu-label)]">
-                                  Azúcar: seguimiento de azúcar añadido.
+                                  {isSpanishSystem ? "Azúcar: seguimiento de azúcar añadido." : "Sugar: added sugar tracking."}
                                 </p>
                               </div>
                             ) : null}
@@ -744,10 +752,38 @@ export function DashboardMenu({
                         </div>
 
                         <p className="text-[11px] text-[color:var(--color-widget-menu-label)]">
-                          Tip: mantené presionado un widget para editarlo.
+                          {isSpanishSystem ? "Tip: mantené presionado un widget para editarlo." : "Tip: long-press a widget to edit it."}
                         </p>
                       </div>
                     ) : null}
+                      </div>
+                    </section>
+
+
+                    <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3">
+                      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)]">{languageLabels.title}</p>
+                      <div className="mt-2 inline-flex w-full rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)]/40 p-1">
+                        {([
+                          { value: "es", label: languageLabels.spanish },
+                          { value: "en", label: languageLabels.english },
+                        ] as const).map((option) => {
+                          const isActive = language === option.value;
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => setManualLanguage(option.value)}
+                              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
+                                isActive
+                                  ? "border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-2)] text-[color:var(--color-text-strong)]"
+                                  : "border border-transparent text-[color:var(--color-text-faint)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]"
+                              }`}
+                              aria-pressed={isActive}
+                            >
+                              {option.label}
+                            </button>
+                          );
+                        })}
                       </div>
                     </section>
 
