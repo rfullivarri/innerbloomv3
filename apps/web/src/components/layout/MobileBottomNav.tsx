@@ -4,6 +4,7 @@ import {
   type ReactElement,
   type SVGProps,
 } from "react";
+import { FingerprintPattern } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 export interface MobileBottomNavItem {
@@ -69,7 +70,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                           isDashboard ? "h-8 w-8 rounded-full" : null,
                           isDashboard
                             ? isActive
-                              ? "bg-white text-[color:var(--color-surface)] shadow-[0_0_0_1px_rgba(255,255,255,0.95),0_14px_28px_rgba(255,255,255,0.38)]"
+                              ? "bg-[color:color-mix(in_srgb,var(--color-accent-secondary)_18%,var(--color-surface)_82%)] text-[color:color-mix(in_srgb,var(--color-accent-primary)_72%,var(--color-text)_28%)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-secondary)_36%,transparent),0_12px_24px_color-mix(in_srgb,var(--color-accent-secondary)_20%,transparent)] dark:bg-[color:color-mix(in_srgb,var(--color-accent-secondary)_28%,var(--color-surface)_72%)] dark:text-[color:color-mix(in_srgb,#ffffff_86%,var(--color-accent-secondary)_14%)] dark:shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-secondary)_42%,transparent),0_12px_26px_color-mix(in_srgb,var(--color-accent-secondary)_34%,transparent)]"
                               : "bg-transparent text-[color:color-mix(in_srgb,var(--color-text-muted)_86%,transparent)] shadow-none"
                             : isActive
                               ? "bg-[color:rgba(255,255,255,0.92)] text-[color:var(--color-surface)]"
@@ -79,27 +80,44 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                         <span
                           className={combine(
                             "relative flex h-full w-full items-center justify-center transition-all duration-400 ease-out",
-                            isDashboard && !isActive
-                              ? "text-[color:color-mix(in_srgb,var(--color-text-muted)_86%,transparent)]"
+                            isDashboard
+                              ? isActive
+                                ? "text-[color:color-mix(in_srgb,var(--color-accent-primary)_72%,var(--color-text)_28%)] dark:text-[color:color-mix(in_srgb,#ffffff_86%,var(--color-accent-secondary)_14%)]"
+                                : "text-[color:color-mix(in_srgb,var(--color-text-muted)_92%,transparent)] dark:text-[color:color-mix(in_srgb,var(--color-text-muted)_86%,transparent)]"
                               : isActive
                                 ? "text-[color:var(--color-surface)]"
                                 : "text-[color:var(--color-text-muted)] group-hover:text-[color:var(--color-text)]",
                           )}
                         >
-                          {isValidElement<SVGProps<SVGSVGElement>>(item.icon)
-                            ? cloneElement<SVGProps<SVGSVGElement>>(item.icon, {
-                                className: combine(
-                                  item.icon.props.className,
-                                  "transition-all duration-300",
-                                  "h-[24px] w-[24px]",
-                                ),
-                                strokeWidth: 2,
-                                stroke: "currentColor",
-                                fill: "none",
-                                opacity: isActive ? 1 : 0.85,
-                                "aria-hidden": true,
-                              })
-                            : null}
+                          {isDashboard ? (
+                            <FingerprintPattern
+                              className={combine(
+                                "transition-all duration-300",
+                                "h-[26px] w-[26px]",
+                                isActive ? "scale-[1.05]" : null,
+                              )}
+                              strokeWidth={2.5}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              stroke="currentColor"
+                              fill="none"
+                              opacity={isActive ? 1 : 0.88}
+                              aria-hidden
+                            />
+                          ) : isValidElement<SVGProps<SVGSVGElement>>(item.icon) ? (
+                            cloneElement<SVGProps<SVGSVGElement>>(item.icon, {
+                              className: combine(
+                                item.icon.props.className,
+                                "transition-all duration-300",
+                                "h-[24px] w-[24px]",
+                              ),
+                              strokeWidth: 2,
+                              stroke: "currentColor",
+                              fill: "none",
+                              opacity: isActive ? 1 : 0.85,
+                              "aria-hidden": true,
+                            })
+                          ) : null}
                         </span>
                       </span>
                       {item.showPulseDot ? (
