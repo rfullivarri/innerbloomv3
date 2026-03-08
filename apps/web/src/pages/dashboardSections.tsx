@@ -60,11 +60,11 @@ function buildDashboardSections(basePath: string, language: PostLoginLanguage = 
   return {
     dashboard: {
       key: 'dashboard',
-      label: isSpanish ? 'Inicio' : 'Dashboard',
+      label: isSpanish ? 'Dashboard' : 'Dashboard',
       to: joinDashboardPath(basePath),
       end: true,
-      pageTitle: isSpanish ? 'Inicio' : 'Dashboard',
-      contentTitle: isSpanish ? 'Resumen' : 'Dashboard overview',
+      pageTitle: isSpanish ? 'Dashboard' : 'Dashboard',
+      contentTitle: isSpanish ? 'Dashboard' : 'Dashboard',
       icon: (props) => <FingerprintPattern {...props} />,
     },
     missions: {
@@ -82,9 +82,9 @@ function buildDashboardSections(basePath: string, language: PostLoginLanguage = 
       label: 'DQuest',
       to: joinDashboardPath(basePath, 'dquest'),
       end: true,
-      pageTitle: isSpanish ? 'Misión diaria' : 'Daily Quest',
+      pageTitle: isSpanish ? 'Daily Quest' : 'Daily Quest',
       eyebrow: 'DQuest',
-      contentTitle: isSpanish ? 'Misión diaria' : 'Daily Quest',
+      contentTitle: isSpanish ? 'Daily Quest' : 'Daily Quest',
       description: isSpanish
         ? 'Tu ritual diario: enfócate en la misión clave del día y mantené la racha.'
         : "Your daily ritual: focus on today's key quest and keep your streak alive.",
@@ -92,10 +92,10 @@ function buildDashboardSections(basePath: string, language: PostLoginLanguage = 
     },
     rewards: {
       key: 'rewards',
-      label: isSpanish ? 'Recompensas' : 'Rewards',
+      label: isSpanish ? 'Rewards' : 'Rewards',
       to: joinDashboardPath(basePath, 'rewards'),
-      pageTitle: isSpanish ? 'Recompensas' : 'Rewards',
-      eyebrow: isSpanish ? 'Recompensas' : 'Rewards',
+      pageTitle: isSpanish ? 'Rewards' : 'Rewards',
+      eyebrow: isSpanish ? 'Rewards' : 'Rewards',
       contentTitle: isSpanish ? 'Logros y badges desbloqueados' : 'Unlocked achievements and badges',
       description: isSpanish
         ? 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.'
@@ -107,8 +107,8 @@ function buildDashboardSections(basePath: string, language: PostLoginLanguage = 
       label: isSpanish ? 'Editor' : 'Editor',
       to: '/editor',
       end: true,
-      pageTitle: isSpanish ? 'Editor de tareas' : 'Task editor',
-      eyebrow: isSpanish ? 'Editor' : 'Editor',
+      pageTitle: 'Editor',
+      eyebrow: 'Editor',
       contentTitle: '',
       description: '',
       icon: (props) => <WandSparkles {...props} />,

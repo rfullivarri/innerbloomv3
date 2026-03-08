@@ -35,7 +35,6 @@ export default function TaskEditorPage() {
   const location = useLocation();
   const { language } = usePostLoginLanguage();
   const sections = getDashboardSections(location.pathname, language);
-  const isSpanish = language === 'es';
   const activeSection = getActiveSection(location.pathname, sections, language);
   const taskEditorSection = getDashboardSectionConfig('editor', location.pathname, language);
   const { backendUserId, status: backendStatus, error: backendError, reload: reloadProfile } =
@@ -187,7 +186,7 @@ export default function TaskEditorPage() {
 
   const pillarOptions = useMemo(() => {
     return [
-      { value: '', label: isSpanish ? 'Todos los pilares' : 'All pillars' },
+      { value: '', label: 'Todos los pilares' },
       ...pillars.map((pillar) => ({ value: pillar.id, label: pillar.name })),
     ];
   }, [pillars]);
@@ -453,7 +452,6 @@ export default function TaskEditorPage() {
       <div className="flex min-h-screen flex-col">
         <Navbar
           title={activeSection.pageTitle}
-          navAriaLabel={isSpanish ? 'Navegación principal en vista desktop' : 'Main navigation desktop'}
           sections={sections.map((section) => ({
             ...section,
             showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
@@ -536,7 +534,6 @@ export default function TaskEditorPage() {
         </main>
         {!isAppMode && (
           <MobileBottomNav
-            navAriaLabel={isSpanish ? 'Navegación principal en vista móvil' : 'Main navigation mobile'}
             items={sections.map((section) => {
               const Icon = section.icon;
 
