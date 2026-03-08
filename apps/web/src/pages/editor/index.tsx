@@ -21,6 +21,7 @@ import { fetchCatalogStats, fetchCatalogTraits, type Pillar } from '../../lib/ap
 import { useAppMode } from '../../hooks/useAppMode';
 import { useDailyQuestReadiness } from '../../hooks/useDailyQuestReadiness';
 import { useOnboardingEditorNudge } from '../../hooks/useOnboardingEditorNudge';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import {
   getActiveSection,
   getDashboardSectionConfig,
@@ -32,9 +33,10 @@ export const FEATURE_TASK_EDITOR_MOBILE_LIST_V1 = true;
 
 export default function TaskEditorPage() {
   const location = useLocation();
-  const sections = getDashboardSections(location.pathname);
-  const activeSection = getActiveSection(location.pathname, sections);
-  const taskEditorSection = getDashboardSectionConfig('editor', location.pathname);
+  const { language } = usePostLoginLanguage();
+  const sections = getDashboardSections(location.pathname, language);
+  const activeSection = getActiveSection(location.pathname, sections, language);
+  const taskEditorSection = getDashboardSectionConfig('editor', location.pathname, language);
   const { backendUserId, status: backendStatus, error: backendError, reload: reloadProfile } =
     useBackendUser();
   const { tasks, status: tasksStatus, error: tasksError, reload: reloadTasks } =
@@ -473,7 +475,7 @@ export default function TaskEditorPage() {
                 {shouldShowInlineNotice && (
                   <div className="overflow-hidden rounded-md bg-[linear-gradient(90deg,#7C3AED_0%,#8B5CF6_100%)] px-2.5 py-1.5 text-[11px] leading-4 text-white shadow-[0_8px_18px_rgba(124,58,237,0.35)]">
                     <Link
-                      to={getDashboardSectionConfig('dashboard', location.pathname).to}
+                      to={getDashboardSectionConfig('dashboard', location.pathname, language).to}
                       className="block overflow-hidden text-ellipsis whitespace-nowrap text-white hover:text-white/95"
                     >
                       Listo. Volvé al Dashboard para tu primer Daily Quest <span className="font-semibold">→</span>

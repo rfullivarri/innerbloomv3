@@ -6,6 +6,8 @@ import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 
 export type DashboardSectionKey = 'dashboard' | 'missions' | 'dquest' | 'rewards' | 'editor';
 
+import type { PostLoginLanguage } from '../i18n/postLoginLanguage';
+
 export interface DashboardSectionConfig extends NavbarSection {
   key: DashboardSectionKey;
   pageTitle: string;
@@ -53,25 +55,26 @@ function joinDashboardPath(basePath: string, segment?: string): string {
   return `${basePath}${normalizedSegment}`;
 }
 
-function buildDashboardSections(basePath: string): Record<DashboardSectionKey, DashboardSectionConfig> {
+function buildDashboardSections(basePath: string, language: PostLoginLanguage = 'en'): Record<DashboardSectionKey, DashboardSectionConfig> {
+  const isSpanish = language === 'es';
   return {
     dashboard: {
       key: 'dashboard',
-      label: 'Dashboard',
+      label: isSpanish ? 'Dashboard' : 'Dashboard',
       to: joinDashboardPath(basePath),
       end: true,
-      pageTitle: 'Dashboard',
-      contentTitle: 'Dashboard',
+      pageTitle: isSpanish ? 'Dashboard' : 'Dashboard',
+      contentTitle: isSpanish ? 'Dashboard' : 'Dashboard',
       icon: (props) => <FingerprintPattern {...props} />,
     },
     missions: {
       key: 'missions',
-      label: 'Misiones',
+      label: isSpanish ? 'Misiones' : 'Missions',
       to: joinDashboardPath(basePath, 'misiones'),
-      pageTitle: 'Misiones',
-      eyebrow: 'Misiones',
-      contentTitle: 'Tus misiones activas',
-      description: 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.',
+      pageTitle: isSpanish ? 'Misiones' : 'Missions',
+      eyebrow: isSpanish ? 'Misiones' : 'Missions',
+      contentTitle: isSpanish ? 'Tus misiones activas' : 'Your active missions',
+      description: isSpanish ? 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.' : 'Quickly access daily missions, weekly goals, and special events.',
       icon: (props) => <Route {...props} />,
     },
     dquest: {
@@ -79,25 +82,29 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
       label: 'DQuest',
       to: joinDashboardPath(basePath, 'dquest'),
       end: true,
-      pageTitle: 'Daily Quest',
+      pageTitle: isSpanish ? 'Daily Quest' : 'Daily Quest',
       eyebrow: 'DQuest',
-      contentTitle: 'Daily Quest',
-      description: 'Tu ritual diario: enfócate en la misión clave del día y mantené la racha.',
+      contentTitle: isSpanish ? 'Daily Quest' : 'Daily Quest',
+      description: isSpanish
+        ? 'Tu ritual diario: enfócate en la misión clave del día y mantené la racha.'
+        : "Your daily ritual: focus on today's key quest and keep your streak alive.",
       icon: (props) => <RefreshCcwDot {...props} />,
     },
     rewards: {
       key: 'rewards',
-      label: 'Rewards',
+      label: isSpanish ? 'Rewards' : 'Rewards',
       to: joinDashboardPath(basePath, 'rewards'),
-      pageTitle: 'Rewards',
-      eyebrow: 'Rewards',
-      contentTitle: 'Logros y badges desbloqueados',
-      description: 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.',
+      pageTitle: isSpanish ? 'Rewards' : 'Rewards',
+      eyebrow: isSpanish ? 'Rewards' : 'Rewards',
+      contentTitle: isSpanish ? 'Logros y badges desbloqueados' : 'Unlocked achievements and badges',
+      description: isSpanish
+        ? 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.'
+        : "Review your milestones and what's left for your next reward.",
       icon: (props) => <Sparkles {...props} />,
     },
     editor: {
       key: 'editor',
-      label: 'Editor',
+      label: isSpanish ? 'Editor' : 'Editor',
       to: '/editor',
       end: true,
       pageTitle: 'Editor',
@@ -109,9 +116,9 @@ function buildDashboardSections(basePath: string): Record<DashboardSectionKey, D
   };
 }
 
-function createDashboardSections(currentPath?: string) {
+function createDashboardSections(currentPath?: string, language: PostLoginLanguage = 'en') {
   const basePath = resolveDashboardBasePath(currentPath);
-  const sectionsByKey = buildDashboardSections(basePath);
+  const sectionsByKey = buildDashboardSections(basePath, language);
   const sections: DashboardSectionConfig[] = [
     sectionsByKey.missions,
     sectionsByKey.dquest,
@@ -123,15 +130,16 @@ function createDashboardSections(currentPath?: string) {
   return { sections, sectionsByKey };
 }
 
-export function getDashboardSections(currentPath?: string): DashboardSectionConfig[] {
-  return createDashboardSections(currentPath).sections;
+export function getDashboardSections(currentPath?: string, language: PostLoginLanguage = 'en'): DashboardSectionConfig[] {
+  return createDashboardSections(currentPath, language).sections;
 }
 
 export function getDashboardSectionConfig(
   key: DashboardSectionKey,
   currentPath?: string,
+  language: PostLoginLanguage = 'en',
 ): DashboardSectionConfig {
-  const { sectionsByKey } = createDashboardSections(currentPath);
+  const { sectionsByKey } = createDashboardSections(currentPath, language);
   return sectionsByKey[key];
 }
 
@@ -142,7 +150,9 @@ export function isSectionActive(section: DashboardSectionConfig, pathname: strin
 export function getActiveSection(
   pathname: string,
   sections: DashboardSectionConfig[] = getDashboardSections(pathname),
+  language: PostLoginLanguage = 'en',
 ): DashboardSectionConfig {
+  const isSpanish = language === 'es';
   const activeSection = sections.find((section) => isSectionActive(section, pathname));
 
   if (activeSection) {
@@ -152,13 +162,13 @@ export function getActiveSection(
   const missionsBasePath = joinDashboardPath(DASHBOARD_BASE_PATH, 'misiones');
 
   if (pathname.startsWith(missionsBasePath)) {
-    const missionsSection = getDashboardSectionConfig('missions', pathname);
+    const missionsSection = getDashboardSectionConfig('missions', pathname, language);
 
     return {
       ...missionsSection,
-      pageTitle: 'Misiones',
+      pageTitle: isSpanish ? 'Misiones' : 'Missions',
     };
   }
 
-  return getDashboardSectionConfig('dashboard', pathname);
+  return getDashboardSectionConfig('dashboard', pathname, language);
 }

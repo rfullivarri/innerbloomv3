@@ -113,6 +113,7 @@ Cuando la tarea diga algo como “cambiar todo después del login”, revisar es
 | Modal | Dashboard Misiones | `components/dashboard-v3/MissionsV3Board.tsx` (ClaimModal) | Activo | 2026-03-06 |
 | Popover | Dashboard | `components/dashboard-v3/PlanChip.tsx` | Activo | 2026-03-06 |
 | Overlay | Dashboard | `components/dashboard-v3/DashboardMenu.tsx` | Activo | 2026-03-06 |
+| Infra | Post-login global | `apps/web/src/i18n/postLoginLanguage.tsx` | Activo | 2026-03-08 |
 | Modal | Dashboard Menu iOS | `components/dashboard-v3/DashboardMenu.tsx` (quick access) | Activo | 2026-03-06 |
 | Modal | Editor | `pages/editor/index.tsx` (CreateTaskModal) | Activo | 2026-03-06 |
 | Modal | Editor | `pages/editor/index.tsx` (EditTaskModal) | Activo | 2026-03-06 |
@@ -131,6 +132,8 @@ Cada vez que se toque UI post-login:
 4. Si hay copy visible al usuario, marcar si impacta ES/EN.
 5. En el resumen del PR, incluir una línea: **"Updated post-login map"**.
 
+Último cambio global registrado: rollout base i18n ES/EN post-login (detección + selector manual en menú).
+
 ---
 
 ## 6) Nota de uso rápido
@@ -143,4 +146,3 @@ Si el pedido es amplio (“cambiá todo post-login”), usar este orden de ejecu
 4. `pages/Pricing.tsx` + `pages/Subscription.tsx`
 5. Componentes de overlays en dashboard/editor/admin
 6. QA por ruta + modales críticos
-

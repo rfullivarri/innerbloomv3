@@ -20,6 +20,7 @@ import {
 } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 import { Navbar } from "../components/layout/Navbar";
 import { MobileBottomNav } from "../components/layout/MobileBottomNav";
 import { Alerts } from "../components/dashboard-v3/Alerts";
@@ -174,20 +175,24 @@ export default function DashboardV3Page() {
   const { backendUserId, status, error, reload, clerkUserId, profile } =
     useBackendUser();
   const location = useLocation();
-  const sections = getDashboardSections(location.pathname);
-  const activeSection = getActiveSection(location.pathname, sections);
+  const { language } = usePostLoginLanguage();
+  const sections = getDashboardSections(location.pathname, language);
+  const activeSection = getActiveSection(location.pathname, sections, language);
   const overviewSection = getDashboardSectionConfig(
     "dashboard",
     location.pathname,
+    language,
   );
   const missionsSection = getDashboardSectionConfig(
     "missions",
     location.pathname,
+    language,
   );
-  const dquestSection = getDashboardSectionConfig("dquest", location.pathname);
+  const dquestSection = getDashboardSectionConfig("dquest", location.pathname, language);
   const rewardsSection = getDashboardSectionConfig(
     "rewards",
     location.pathname,
+    language,
   );
   const profileGameMode = deriveGameModeFromProfile(profile?.game_mode);
   const shouldFetchUserState = Boolean(backendUserId && !profileGameMode);
