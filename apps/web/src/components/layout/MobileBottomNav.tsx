@@ -19,14 +19,13 @@ export interface MobileBottomNavItem {
 
 interface MobileBottomNavProps {
   items: MobileBottomNavItem[];
-  navAriaLabel?: string;
 }
 
 function combine(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-export function MobileBottomNav({ items, navAriaLabel }: MobileBottomNavProps) {
+export function MobileBottomNav({ items }: MobileBottomNavProps) {
   if (!items || items.length === 0) {
     return null;
   }
@@ -37,7 +36,7 @@ export function MobileBottomNav({ items, navAriaLabel }: MobileBottomNavProps) {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-transparent px-3 pb-1.5 md:hidden"
-      aria-label={navAriaLabel ?? "Main navigation mobile"}
+      aria-label="Navegación principal en vista móvil"
       style={{
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.56rem)",
       }}

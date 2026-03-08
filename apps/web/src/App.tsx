@@ -19,7 +19,6 @@ import SubscriptionPage from './pages/Subscription';
 import PremiumTimelineDemoPage from './pages/PremiumTimelineDemo';
 import BillingSuccessPage from './pages/BillingSuccess';
 import BillingCancelPage from './pages/BillingCancel';
-import { usePostLoginLanguage } from './i18n/postLoginLanguage';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -72,7 +71,6 @@ function ApiAuthBridge() {
 
 function RequireUser({ children }: { children: ReactElement }) {
   const { isLoaded, userId } = useAuth();
-  const { language } = usePostLoginLanguage();
   const devBypass = DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV;
 
   if (devBypass) {
@@ -80,7 +78,7 @@ function RequireUser({ children }: { children: ReactElement }) {
   }
 
   if (!isLoaded) {
-    return <div className="flex min-h-screen items-center justify-center text-text">{language === 'es' ? 'Cargando…' : 'Loading…'}</div>;
+    return <div className="flex min-h-screen items-center justify-center text-text">Cargando…</div>;
   }
 
   if (!userId) {
@@ -98,10 +96,9 @@ function RedirectIfSignedIn({
   redirectPath: string;
 }) {
   const { isLoaded, userId } = useAuth();
-  const { language } = usePostLoginLanguage();
 
   if (!isLoaded) {
-    return <div className="flex min-h-screen items-center justify-center text-text">{language === 'es' ? 'Cargando…' : 'Loading…'}</div>;
+    return <div className="flex min-h-screen items-center justify-center text-text">Cargando…</div>;
   }
 
   if (userId) {
