@@ -22,6 +22,21 @@ export default function PricingPage() {
   const [pendingPlan, setPendingPlan] = useState<PlanCode | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
+  const copy = {
+    title: isSpanish ? 'Planes y pricing' : 'Plans & pricing',
+    subtitle: isSpanish
+      ? 'Elegí tu plan desde el dashboard. Todos los planes comienzan con 2 meses gratis y luego se aplica el importe del plan elegido.'
+      : 'Pick your plan from the dashboard. Every plan starts with a 2-month free trial and then applies the selected plan price.',
+    activePlan: isSpanish ? 'Plan activo' : 'Active plan',
+    superuser: isSpanish ? 'Superusuario' : 'Superuser',
+    superuserDescription: isSpanish
+      ? 'Tenés un plan Superusuario activo. Tu cuenta mantiene acceso privilegiado y no requiere cambiar de plan desde este panel.'
+      : 'You currently have an active Superuser plan. Your account keeps privileged access and does not require plan changes from this panel.',
+    updating: isSpanish ? 'Actualizando...' : 'Updating...',
+    selected: isSpanish ? 'Seleccionado' : 'Selected',
+    back: isSpanish ? 'Volver' : 'Back',
+  };
+
   const loadSubscription = useCallback(async () => {
     setIsLoading(true);
     const response = await getSubscriptionWithFallback();
@@ -67,11 +82,9 @@ export default function PricingPage() {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_20%_20%,rgba(76,145,196,0.5),rgba(7,26,68,0.96)_45%,rgba(3,10,35,1))] px-6 py-16 text-text">
       <div className="mx-auto w-full max-w-7xl">
-        <h1 className="text-center text-4xl font-semibold md:text-6xl">{isSpanish ? 'Planes y pricing' : 'Plans & pricing'}</h1>
+        <h1 className="text-center text-4xl font-semibold md:text-6xl">{copy.title}</h1>
         <p className="mx-auto mt-4 max-w-3xl text-center text-lg text-text-muted md:text-2xl">
-          {isSpanish
-            ? 'Elegí tu plan desde el dashboard. Todos los planes comienzan con 2 meses gratis y luego se aplica el importe del plan elegido.'
-            : 'Pick your plan from the dashboard. Every plan starts with a 2-month free trial and then applies the selected plan price.'}
+          {copy.subtitle}
         </p>
         <p className="mt-5 text-center text-base font-semibold text-white/90">{PRICING_COPY.trialHighlight}</p>
         <p className="mt-2 text-center text-base text-text-muted">{PRICING_COPY.taxNote}</p>
@@ -84,10 +97,10 @@ export default function PricingPage() {
 
         {selectedPlan === 'SUPERUSER' ? (
           <section className="mx-auto mt-8 max-w-3xl rounded-3xl border border-fuchsia-300/60 bg-gradient-to-r from-violet-600/35 via-purple-600/25 to-fuchsia-500/30 p-6 shadow-[0_18px_55px_rgba(139,92,246,0.45)]">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-fuchsia-100/90">Plan activo</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white md:text-3xl">Superusuario</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-fuchsia-100/90">{copy.activePlan}</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white md:text-3xl">{copy.superuser}</h2>
             <p className="mt-3 text-base text-fuchsia-100/90">
-              Tenés un plan Superusuario activo. Tu cuenta mantiene acceso privilegiado y no requiere cambiar de plan desde este panel.
+              {copy.superuserDescription}
             </p>
           </section>
         ) : null}
@@ -110,7 +123,7 @@ export default function PricingPage() {
               >
                 {isSelected ? (
                   <span className="absolute right-4 top-4 rounded-full border border-emerald-300/45 bg-emerald-400/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-100">
-                    {isSpanish ? 'Seleccionado' : 'Selected'}
+                    {copy.selected}
                   </span>
                 ) : null}
 
@@ -129,7 +142,7 @@ export default function PricingPage() {
                       : 'bg-accent-purple text-white shadow-glow hover:bg-accent-purple/90 disabled:cursor-not-allowed disabled:opacity-70',
                   ].join(' ')}
                 >
-                  {isPending ? 'Actualizando...' : isSelected ? 'Seleccionado' : PLAN_BUTTON_LABELS[plan.id]}
+                  {isPending ? copy.updating : isSelected ? copy.selected : PLAN_BUTTON_LABELS[plan.id]}
                 </button>
               </article>
             );
@@ -141,7 +154,7 @@ export default function PricingPage() {
             to="/dashboard-v3"
             className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-text transition hover:bg-white/5"
           >
-            Volver / Back
+            {copy.back}
           </Link>
         </div>
       </div>

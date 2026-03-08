@@ -1,18 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  cancelSubscriptionWithFallback,
-  getSubscriptionWithFallback,
-} from '../lib/api/subscription';
-import {
-  type SubscriptionData,
-} from '../lib/api/subscriptionMock';
+import { cancelSubscriptionWithFallback, getSubscriptionWithFallback } from '../lib/api/subscription';
+import { type SubscriptionData } from '../lib/api/subscriptionMock';
+import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, language: 'es' | 'en'): string {
   if (!value) {
-    return 'No disponible';
+    return language === 'es' ? 'No disponible' : 'Not available';
   }
-  return new Date(value).toLocaleDateString('es-AR', {
+  return new Date(value).toLocaleDateString(language === 'es' ? 'es-AR' : 'en-US', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -20,6 +16,28 @@ function formatDate(value: string | null): string {
 }
 
 export default function SubscriptionPage() {
+  const { language } = usePostLoginLanguage();
+  const isSpanish = language === 'es';
+  const copy = {
+    loading: isSpanish ? 'Cargando suscripción...' : 'Loading subscription...',
+    lockedTitle: isSpanish ? 'Tu suscripción está inactiva' : 'Your subscription is inactive',
+    lockedDescription: isSpanish
+      ? 'Activá un plan para volver a acceder a las funciones premium.'
+      : 'Activate a plan to regain access to premium features.',
+    close: isSpanish ? 'Cerrar' : 'Close',
+    viewPricing: isSpanish ? 'Ver pricing' : 'View pricing',
+    title: isSpanish ? 'Suscripción' : 'Subscription',
+    closeAria: isSpanish ? 'Cerrar' : 'Close',
+    currentPlan: isSpanish ? 'Plan actual:' : 'Current plan:',
+    noPlan: isSpanish ? 'Sin plan' : 'No plan',
+    status: isSpanish ? 'Estado:' : 'Status:',
+    undefinedStatus: isSpanish ? 'No definido' : 'Undefined',
+    trialEnds: isSpanish ? 'Fin de trial:' : 'Trial ends:',
+    nextRenewal: isSpanish ? 'Próxima renovación:' : 'Next renewal:',
+    changePlan: isSpanish ? 'Cambiar plan' : 'Change plan',
+    cancelSubscription: isSpanish ? 'Cancelar suscripción' : 'Cancel subscription',
+  };
+
   const navigate = useNavigate();
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,15 +66,15 @@ export default function SubscriptionPage() {
 
   const nextDateLabel = useMemo(() => {
     if (!subscription) {
-      return 'No disponible';
+      return isSpanish ? 'No disponible' : 'Not available';
     }
 
     if (subscription.status === 'trialing') {
-      return `Fin de trial: ${formatDate(subscription.trialEndsAt)}`;
+      return `${copy.trialEnds} ${formatDate(subscription.trialEndsAt, language)}`;
     }
 
-    return `Próxima renovación: ${formatDate(subscription.nextRenewalAt)}`;
-  }, [subscription]);
+    return `${copy.nextRenewal} ${formatDate(subscription.nextRenewalAt, language)}`;
+  }, [copy.nextRenewal, copy.trialEnds, isSpanish, language, subscription]);
 
   const handleCancel = useCallback(async () => {
     const response = await cancelSubscriptionWithFallback();
@@ -82,32 +100,28 @@ export default function SubscriptionPage() {
     'rounded-full border border-rose-200 bg-rose-100/90 px-7 py-3 font-semibold text-rose-700 shadow-[0_8px_22px_rgba(244,63,94,0.12)] transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-200/85 hover:text-rose-800 hover:shadow-[0_14px_30px_rgba(244,63,94,0.18)] dark:border-rose-300/45 dark:bg-rose-500 dark:text-rose-50 dark:shadow-[0_14px_35px_rgba(244,63,94,0.28)] dark:hover:bg-rose-400 dark:hover:shadow-[0_18px_40px_rgba(244,63,94,0.34)]';
 
   if (isLoading) {
-    return (
-      <div className={overlayClassName}>
-        Cargando suscripción...
-      </div>
-    );
+    return <div className={overlayClassName}>{copy.loading}</div>;
   }
 
   if (isLocked) {
     return (
       <div className={overlayClassName}>
         <div className="w-full max-w-xl rounded-[2rem] border border-[color:var(--color-border-soft)] bg-[linear-gradient(145deg,color-mix(in_srgb,var(--color-surface-elevated)_94%,transparent),color-mix(in_srgb,var(--color-overlay-2)_66%,transparent))] p-6 text-center shadow-[var(--shadow-elev-2)]">
-          <h1 className="text-3xl font-semibold">Tu suscripción está inactiva</h1>
-          <p className="mx-auto mt-3 max-w-xl text-text-muted">Activá un plan para volver a acceder a las funciones premium.</p>
+          <h1 className="text-3xl font-semibold">{copy.lockedTitle}</h1>
+          <p className="mx-auto mt-3 max-w-xl text-text-muted">{copy.lockedDescription}</p>
           <div className="mt-6 flex justify-center gap-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
               className={`${secondaryButtonClassName} px-5 py-3 text-base`}
             >
-              Cerrar
+              {copy.close}
             </button>
             <Link
               to="/pricing"
               className="rounded-2xl border border-emerald-400/50 bg-emerald-400 px-6 py-3 font-semibold text-emerald-950 shadow-[0_12px_30px_rgba(16,185,129,0.24)] transition hover:bg-emerald-300"
             >
-              Ver pricing
+              {copy.viewPricing}
             </Link>
           </div>
         </div>
@@ -119,11 +133,11 @@ export default function SubscriptionPage() {
     <div className={overlayClassName}>
       <div className={panelClassName}>
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-3xl font-semibold uppercase tracking-[0.14em]">Suscripción</h1>
+          <h1 className="text-3xl font-semibold uppercase tracking-[0.14em]">{copy.title}</h1>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            aria-label="Cerrar"
+            aria-label={copy.closeAria}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-xl font-semibold leading-none text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]"
           >
             ×
@@ -132,30 +146,24 @@ export default function SubscriptionPage() {
 
         <div className="mt-6 space-y-4 rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-6 shadow-[0_20px_46px_color-mix(in_srgb,var(--color-text)_9%,transparent),0_8px_20px_color-mix(in_srgb,var(--color-accent-primary)_10%,transparent),inset_0_1px_0_color-mix(in_srgb,white_72%,transparent)] dark:shadow-none">
           <p className="flex items-center gap-2">
-            <span className="text-[color:var(--color-text-dim)]">Plan actual:</span>
+            <span className="text-[color:var(--color-text-dim)]">{copy.currentPlan}</span>
             <span className="rounded-full border border-emerald-400/60 bg-emerald-400 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-950 shadow-[0_8px_22px_rgba(16,185,129,0.24)] dark:border-emerald-300/45 dark:bg-emerald-400 dark:text-emerald-950">
-              {subscription?.plan ?? 'Sin plan'}
+              {subscription?.plan ?? copy.noPlan}
             </span>
           </p>
           <p>
-            <span className="text-[color:var(--color-text-dim)]">Estado:</span> <strong>{subscription?.status ?? 'No definido'}</strong>
+            <span className="text-[color:var(--color-text-dim)]">{copy.status}</span>{' '}
+            <strong>{subscription?.status ?? copy.undefinedStatus}</strong>
           </p>
           <p className="text-[color:var(--color-text-muted)]">{nextDateLabel}</p>
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link
-            to="/pricing"
-            className={primaryActionClassName}
-          >
-            Cambiar plan
+          <Link to="/pricing" className={primaryActionClassName}>
+            {copy.changePlan}
           </Link>
-          <button
-            type="button"
-            onClick={handleCancel}
-            className={destructiveActionClassName}
-          >
-            Cancelar suscripción
+          <button type="button" onClick={handleCancel} className={destructiveActionClassName}>
+            {copy.cancelSubscription}
           </button>
         </div>
       </div>

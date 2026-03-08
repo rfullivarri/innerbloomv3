@@ -17,13 +17,14 @@ type NavbarProps = {
   sections?: NavbarSection[];
   menuSlot?: ReactNode;
   planSlot?: ReactNode;
+  navAriaLabel?: string;
 };
 
 function combine(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
 
-export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot, planSlot }: NavbarProps) {
+export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot, planSlot, navAriaLabel }: NavbarProps) {
   const { userId } = useAuth();
   const { user } = useUser();
 
@@ -51,7 +52,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
         </div>
         {hasSections ? (
           <nav
-            aria-label="Navegación principal en vista desktop"
+            aria-label={navAriaLabel ?? "Main navigation desktop"}
             className="hidden flex-1 justify-center gap-1.5 md:flex lg:gap-2"
           >
             {sections?.map((section) => (

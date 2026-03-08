@@ -644,6 +644,7 @@ export default function DashboardV3Page() {
               />
             }
             planSlot={<PlanChip subscription={subscription ?? null} />}
+            navAriaLabel={language === 'es' ? 'Navegación principal en vista desktop' : 'Main navigation desktop'}
           />
         )}
         <DailyQuestModal
@@ -806,6 +807,7 @@ export default function DashboardV3Page() {
         />
         {!isAppMode && (
           <MobileBottomNav
+            navAriaLabel={language === 'es' ? 'Navegación principal en vista móvil' : 'Main navigation mobile'}
             items={sections.map((section) => {
               const Icon = section.icon;
 
