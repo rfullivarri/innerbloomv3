@@ -14,7 +14,7 @@ import type { WebViewNavigation } from 'react-native-webview';
 import { WebView } from 'react-native-webview';
 import { useFocusEffect } from '@react-navigation/native';
 // eslint-disable-next-line import/no-unresolved
-import { CircleDot, Flame, Route, Sparkles, Sprout } from 'lucide-react-native';
+import { Disc, Flame, Route, Sparkles, Sprout } from 'lucide-react-native';
 
 import { getDashboardRoutes, type DashboardRoutes } from '@/constants/routes';
 import { WebViewProvider, useWebViewController } from '@/hooks/webview-controller';
@@ -60,7 +60,7 @@ function createTabs(routes: DashboardRoutes): TabConfig[] {
       label: 'Dashboard',
       path: routes.dashboard,
       matchers: [routes.dashboard.toLowerCase()],
-      Icon: CircleDot,
+      Icon: Disc,
     },
     {
       key: 'rewards',
