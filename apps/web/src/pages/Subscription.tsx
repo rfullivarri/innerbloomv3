@@ -9,15 +9,16 @@ import {
 } from '../lib/api/subscriptionMock';
 import { usePostLoginLanguage, type PostLoginLanguage } from '../i18n/postLoginLanguage';
 
-function formatDate(value: string | null, language: PostLoginLanguage): string {
+function resolveLocale(language: PostLoginLanguage): string {
+  return language === 'es' ? 'es-AR' : 'en-US';
+}
+
+function formatDate(value: string | null, formatter: Intl.DateTimeFormat, fallbackLabel: string): string {
   if (!value) {
-    return language === 'es' ? 'No disponible' : 'Not available';
+    return fallbackLabel;
   }
-  return new Date(value).toLocaleDateString(language === 'es' ? 'es-AR' : 'en-US', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
+
+  return formatter.format(new Date(value));
 }
 
 export default function SubscriptionPage() {
@@ -26,8 +27,23 @@ export default function SubscriptionPage() {
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  const formatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(resolveLocale(language), {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      }),
+    [language],
+  );
+
+  const tx = useCallback((key: string) => t(`subscription.${key}`), [t]);
 
   const loadSubscription = useCallback(async () => {
+    setErrorMessage(null);
     setIsLoading(true);
     const response = await getSubscriptionWithFallback();
     if (!response.ok && response.error.code === 'subscription_inactive') {
@@ -36,13 +52,17 @@ export default function SubscriptionPage() {
       return;
     }
 
-    if (response.ok) {
-      setSubscription(response.data);
-      setIsLocked(response.data.status === 'inactive');
+    if (!response.ok) {
+      setErrorMessage(tx('error.load'));
+      setIsLoading(false);
+      return;
     }
 
+    setSubscription(response.data);
+    setIsLocked(response.data.status === 'inactive');
+
     setIsLoading(false);
-  }, []);
+  }, [tx]);
 
   useEffect(() => {
     void loadSubscription();
@@ -50,23 +70,29 @@ export default function SubscriptionPage() {
 
   const nextDateLabel = useMemo(() => {
     if (!subscription) {
-      return t('subscription.value.notAvailable');
+      return tx('value.notAvailable');
     }
 
     if (subscription.status === 'trialing') {
-      return `${t('subscription.value.trialEnds')}: ${formatDate(subscription.trialEndsAt, language)}`;
+      return `${tx('value.trialEnds')}: ${formatDate(subscription.trialEndsAt, formatter, tx('value.notAvailable'))}`;
     }
 
-    return `${t('subscription.value.nextRenewal')}: ${formatDate(subscription.nextRenewalAt, language)}`;
-  }, [language, subscription, t]);
+    return `${tx('renewalDate')}: ${formatDate(subscription.nextRenewalAt, formatter, tx('value.notAvailable'))}`;
+  }, [formatter, subscription, tx]);
 
   const handleCancel = useCallback(async () => {
+    setActionMessage(null);
+    setErrorMessage(null);
     const response = await cancelSubscriptionWithFallback();
     if (response.ok) {
       setSubscription(response.data);
       setIsLocked(true);
+      setActionMessage(tx('success.cancel'));
+      return;
     }
-  }, []);
+
+    setErrorMessage(tx('error.cancel'));
+  }, [tx]);
 
   const overlayClassName =
     'fixed inset-0 z-50 flex items-center justify-center bg-[radial-gradient(circle_at_top,_color-mix(in_srgb,var(--color-accent-primary)_18%,transparent),_transparent_55%),radial-gradient(circle_at_bottom_right,_color-mix(in_srgb,var(--color-accent-secondary)_14%,transparent),_transparent_50%),color-mix(in_srgb,var(--color-surface)_76%,transparent)] px-6 text-[color:var(--color-text)] backdrop-blur-md';
@@ -86,7 +112,7 @@ export default function SubscriptionPage() {
   if (isLoading) {
     return (
       <div className={overlayClassName}>
-        {t('subscription.loading')}
+        {tx('loading')}
       </div>
     );
   }
@@ -95,21 +121,23 @@ export default function SubscriptionPage() {
     return (
       <div className={overlayClassName}>
         <div className="w-full max-w-xl rounded-[2rem] border border-[color:var(--color-border-soft)] bg-[linear-gradient(145deg,color-mix(in_srgb,var(--color-surface-elevated)_94%,transparent),color-mix(in_srgb,var(--color-overlay-2)_66%,transparent))] p-6 text-center shadow-[var(--shadow-elev-2)]">
-          <h1 className="text-3xl font-semibold">{t('subscription.locked.title')}</h1>
-          <p className="mx-auto mt-3 max-w-xl text-text-muted">{t('subscription.locked.description')}</p>
+          <h1 className="text-3xl font-semibold">{tx('inactive.title')}</h1>
+          <p className="mx-auto mt-3 max-w-xl text-text-muted">{tx('inactive.body')}</p>
+          {actionMessage ? <p className="mt-4 text-sm font-medium text-emerald-600">{actionMessage}</p> : null}
+          {errorMessage ? <p className="mt-4 text-sm font-medium text-rose-600">{errorMessage}</p> : null}
           <div className="mt-6 flex justify-center gap-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
               className={`${secondaryButtonClassName} px-5 py-3 text-base`}
             >
-              {t('subscription.action.close')}
+              {tx('actions.close')}
             </button>
             <Link
               to="/pricing"
               className="rounded-2xl border border-emerald-400/50 bg-emerald-400 px-6 py-3 font-semibold text-emerald-950 shadow-[0_12px_30px_rgba(16,185,129,0.24)] transition hover:bg-emerald-300"
             >
-              {t('subscription.action.viewPricing')}
+              {tx('actions.viewPricing')}
             </Link>
           </div>
         </div>
@@ -125,7 +153,7 @@ export default function SubscriptionPage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            aria-label={t('subscription.action.close')}
+            aria-label={tx('actions.close')}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-xl font-semibold leading-none text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]"
           >
             ×
@@ -134,15 +162,17 @@ export default function SubscriptionPage() {
 
         <div className="mt-6 space-y-4 rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-6 shadow-[0_20px_46px_color-mix(in_srgb,var(--color-text)_9%,transparent),0_8px_20px_color-mix(in_srgb,var(--color-accent-primary)_10%,transparent),inset_0_1px_0_color-mix(in_srgb,white_72%,transparent)] dark:shadow-none">
           <p className="flex items-center gap-2">
-            <span className="text-[color:var(--color-text-dim)]">{t('subscription.label.currentPlan')}:</span>
+            <span className="text-[color:var(--color-text-dim)]">{tx('label.currentPlan')}:</span>
             <span className="rounded-full border border-emerald-400/60 bg-emerald-400 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-950 shadow-[0_8px_22px_rgba(16,185,129,0.24)] dark:border-emerald-300/45 dark:bg-emerald-400 dark:text-emerald-950">
-              {subscription?.plan ?? t('subscription.value.noPlan')}
+              {subscription?.plan ?? tx('value.noPlan')}
             </span>
           </p>
           <p>
-            <span className="text-[color:var(--color-text-dim)]">{t('subscription.label.status')}:</span> <strong>{subscription?.status ?? t('subscription.value.undefined')}</strong>
+            <span className="text-[color:var(--color-text-dim)]">{tx('label.status')}:</span> <strong>{subscription?.status ?? tx('value.undefined')}</strong>
           </p>
           <p className="text-[color:var(--color-text-muted)]">{nextDateLabel}</p>
+          {actionMessage ? <p className="text-sm font-medium text-emerald-600">{actionMessage}</p> : null}
+          {errorMessage ? <p className="text-sm font-medium text-rose-600">{errorMessage}</p> : null}
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
@@ -150,14 +180,14 @@ export default function SubscriptionPage() {
             to="/pricing"
             className={primaryActionClassName}
           >
-            {t('subscription.action.changePlan')}
+            {tx('actions.changePlan')}
           </Link>
           <button
             type="button"
             onClick={handleCancel}
             className={destructiveActionClassName}
           >
-            {t('subscription.action.cancel')}
+            {tx('actions.cancel')}
           </button>
         </div>
       </div>
