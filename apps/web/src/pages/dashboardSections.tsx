@@ -7,6 +7,7 @@ import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 export type DashboardSectionKey = 'dashboard' | 'missions' | 'dquest' | 'rewards' | 'editor';
 
 import type { PostLoginLanguage } from '../i18n/postLoginLanguage';
+import { resolvePostLoginTranslation } from '../i18n/post-login';
 
 export interface DashboardSectionConfig extends NavbarSection {
   key: DashboardSectionKey;
@@ -56,25 +57,25 @@ function joinDashboardPath(basePath: string, segment?: string): string {
 }
 
 function buildDashboardSections(basePath: string, language: PostLoginLanguage = 'en'): Record<DashboardSectionKey, DashboardSectionConfig> {
-  const isSpanish = language === 'es';
+  const t = (key: string) => resolvePostLoginTranslation(language, key);
   return {
     dashboard: {
       key: 'dashboard',
-      label: isSpanish ? 'Dashboard' : 'Dashboard',
+      label: t('dashboard.nav.home'),
       to: joinDashboardPath(basePath),
       end: true,
-      pageTitle: isSpanish ? 'Dashboard' : 'Dashboard',
-      contentTitle: isSpanish ? 'Dashboard' : 'Dashboard',
+      pageTitle: t('dashboard.nav.home'),
+      contentTitle: t('dashboard.nav.home'),
       icon: (props) => <FingerprintPattern {...props} />,
     },
     missions: {
       key: 'missions',
-      label: isSpanish ? 'Misiones' : 'Missions',
+      label: t('dashboard.section.missions.title'),
       to: joinDashboardPath(basePath, 'misiones'),
-      pageTitle: isSpanish ? 'Misiones' : 'Missions',
-      eyebrow: isSpanish ? 'Misiones' : 'Missions',
-      contentTitle: isSpanish ? 'Tus misiones activas' : 'Your active missions',
-      description: isSpanish ? 'Accedé rápidamente a misiones diarias, semanales y eventos especiales.' : 'Quickly access daily missions, weekly goals, and special events.',
+      pageTitle: resolvePostLoginTranslation(language, 'dashboard.section.missions.title'),
+      eyebrow: t('dashboard.section.missions.title'),
+      contentTitle: t('dashboard.section.missions.subtitle'),
+      description: t('dashboard.section.missions.description'),
       icon: (props) => <Route {...props} />,
     },
     dquest: {
@@ -82,29 +83,25 @@ function buildDashboardSections(basePath: string, language: PostLoginLanguage = 
       label: 'DQuest',
       to: joinDashboardPath(basePath, 'dquest'),
       end: true,
-      pageTitle: isSpanish ? 'Daily Quest' : 'Daily Quest',
+      pageTitle: t('missions.dailyQuest.title'),
       eyebrow: 'DQuest',
-      contentTitle: isSpanish ? 'Daily Quest' : 'Daily Quest',
-      description: isSpanish
-        ? 'Tu ritual diario: enfócate en la misión clave del día y mantené la racha.'
-        : "Your daily ritual: focus on today's key quest and keep your streak alive.",
+      contentTitle: t('missions.dailyQuest.title'),
+      description: t('missions.dailyQuest.description'),
       icon: (props) => <RefreshCcwDot {...props} />,
     },
     rewards: {
       key: 'rewards',
-      label: isSpanish ? 'Rewards' : 'Rewards',
+      label: 'Rewards',
       to: joinDashboardPath(basePath, 'rewards'),
-      pageTitle: isSpanish ? 'Rewards' : 'Rewards',
-      eyebrow: isSpanish ? 'Rewards' : 'Rewards',
-      contentTitle: isSpanish ? 'Logros y badges desbloqueados' : 'Unlocked achievements and badges',
-      description: isSpanish
-        ? 'Revisá los hitos alcanzados y lo que falta para tu próxima recompensa.'
-        : "Review your milestones and what's left for your next reward.",
+      pageTitle: 'Rewards',
+      eyebrow: 'Rewards',
+      contentTitle: t('dashboard.section.rewards.subtitle'),
+      description: t('dashboard.section.rewards.description'),
       icon: (props) => <Sparkles {...props} />,
     },
     editor: {
       key: 'editor',
-      label: isSpanish ? 'Editor' : 'Editor',
+      label: 'Editor',
       to: '/editor',
       end: true,
       pageTitle: 'Editor',
@@ -152,7 +149,6 @@ export function getActiveSection(
   sections: DashboardSectionConfig[] = getDashboardSections(pathname),
   language: PostLoginLanguage = 'en',
 ): DashboardSectionConfig {
-  const isSpanish = language === 'es';
   const activeSection = sections.find((section) => isSectionActive(section, pathname));
 
   if (activeSection) {
@@ -166,7 +162,7 @@ export function getActiveSection(
 
     return {
       ...missionsSection,
-      pageTitle: isSpanish ? 'Misiones' : 'Missions',
+      pageTitle: resolvePostLoginTranslation(language, 'dashboard.section.missions.title'),
     };
   }
 

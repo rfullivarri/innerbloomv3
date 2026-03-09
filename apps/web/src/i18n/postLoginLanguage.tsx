@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { resolvePostLoginTranslation } from './post-login';
 
 export type PostLoginLanguage = 'es' | 'en';
 
@@ -45,6 +46,7 @@ function resolveInitialLanguage(): PostLoginLanguage {
 
 interface PostLoginLanguageContextValue {
   language: PostLoginLanguage;
+  t: (key: string, params?: Record<string, string | number>) => string;
   setManualLanguage: (language: PostLoginLanguage) => void;
   hasManualPreference: boolean;
 }
@@ -58,6 +60,7 @@ export function PostLoginLanguageProvider({ children }: { children: ReactNode })
   const value = useMemo<PostLoginLanguageContextValue>(
     () => ({
       language,
+      t: (key, params) => resolvePostLoginTranslation(language, key, params),
       hasManualPreference,
       setManualLanguage: (nextLanguage) => {
         if (typeof window !== 'undefined') {
