@@ -6,6 +6,7 @@ import { getEmotions, type EmotionSnapshot } from '../../lib/api';
 import { asArray } from '../../lib/safe';
 import '../../styles/panel-rachas.overrides.css';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 interface EmotionChartCardProps {
   userId: string;
@@ -22,23 +23,6 @@ const LOOKBACK_FOR_HIGHLIGHT = 15;
 const TOTAL_DAYS = NUM_WEEKS * DAYS_IN_WEEK;
 const MAX_FILLED_RATIO = 0.75;
 const MAX_FILLED_DAYS = Math.floor(TOTAL_DAYS * MAX_FILLED_RATIO);
-
-const MONTH_ABBREVIATIONS = [
-  'ENE',
-  'FEB',
-  'MAR',
-  'ABR',
-  'MAY',
-  'JUN',
-  'JUL',
-  'AGO',
-  'SEPT',
-  'OCT',
-  'NOV',
-  'DIC',
-] as const;
-
-const FALLBACK_MONTH_FORMATTER = new Intl.DateTimeFormat('es-ES', { month: 'short' });
 
 const EMOTION_NAMES = [
   'Calma',
@@ -114,6 +98,33 @@ const LEGEND: Array<{ name: EmotionName; color: string }> = EMOTION_NAMES.map((n
   name,
   color: EMOTION_COLORS[name],
 }));
+
+const EMOTION_LABELS: Record<'es' | 'en', Record<EmotionValue, string>> = {
+  es: {
+    Calma: 'Calma',
+    Felicidad: 'Felicidad',
+    Motivación: 'Motivación',
+    Tristeza: 'Tristeza',
+    Ansiedad: 'Ansiedad',
+    Frustración: 'Frustración',
+    Cansancio: 'Cansancio',
+    'Sin registro': 'Sin registro',
+  },
+  en: {
+    Calma: 'Calm',
+    Felicidad: 'Happiness',
+    Motivación: 'Motivation',
+    Tristeza: 'Sadness',
+    Ansiedad: 'Anxiety',
+    Frustración: 'Frustration',
+    Cansancio: 'Fatigue',
+    'Sin registro': 'No record',
+  },
+};
+
+function getEmotionLabel(emotion: EmotionValue, language: 'es' | 'en'): string {
+  return EMOTION_LABELS[language][emotion] ?? emotion;
+}
 
 function removeDiacritics(input: string): string {
   return input.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -393,6 +404,7 @@ function buildColumns(
   startMonday: Date,
   endMonday: Date,
   rows: number,
+  language: 'es' | 'en',
 ): { columns: EmotionColumn[]; monthSegments: MonthSegment[] } {
   const columns: EmotionColumn[] = [];
   let currentMonday = new Date(startMonday);
@@ -462,11 +474,10 @@ function buildColumns(
         if (currentKey && span > 0) {
           const [yearPart, monthPart] = currentKey.split('-');
           const monthIndex = Number(monthPart);
-          const label =
-            MONTH_ABBREVIATIONS[monthIndex] ??
-            FALLBACK_MONTH_FORMATTER.format(new Date(Number(yearPart), monthIndex, 1))
-              .toUpperCase()
-              .replace('.', '');
+          const label = new Intl.DateTimeFormat(language === 'es' ? 'es-ES' : 'en-US', { month: 'short' })
+            .format(new Date(Number(yearPart), monthIndex, 1))
+            .toUpperCase()
+            .replace('.', '');
 
           monthSegments.push({
             key: `${currentKey}-${segmentStart}`,
@@ -524,11 +535,6 @@ function computeHighlight(
   if (!winner) return null;
 
   return { emotion: winner.emotion, color: EMOTION_COLORS[winner.emotion], count: winner.count };
-}
-
-function formatPeriodLabel(range: { from: Date; to: Date }): string {
-  const formatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
-  return `${formatter.format(range.from)} – ${formatter.format(range.to)}`;
 }
 
 function buildRange() {
@@ -620,6 +626,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 }
 
 export function EmotionChartCard({ userId }: EmotionChartCardProps) {
+  const { language, t } = usePostLoginLanguage();
   const range = useMemo(buildRange, []);
   const { data, status } = useRequest(
     () => getEmotions(userId, range),
@@ -673,6 +680,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       timelineStart,
       timelineEnd,
       DAYS_IN_WEEK,
+      language,
     );
     const highlightResult = computeHighlight(map, keys, LOOKBACK_FOR_HIGHLIGHT);
     const rangeDates = {
@@ -688,7 +696,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
       period: rangeDates,
       hasRecordedEmotion: anyRecorded,
     };
-  }, [normalizedEntries]);
+  }, [language, normalizedEntries]);
 
   const cardRef = useRef<HTMLElement | null>(null);
   const heatmapRef = useRef<HTMLDivElement | null>(null);
@@ -744,11 +752,14 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
   }, [columnCount]);
 
   const tooltipFormatter = useMemo(
-    () => new Intl.DateTimeFormat('es-ES', { weekday: 'short', month: 'short', day: 'numeric' }),
-    [],
+    () => new Intl.DateTimeFormat(language === 'es' ? 'es-ES' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+    [language],
   );
 
-  const rangeLabel = useMemo(() => formatPeriodLabel(period), [period]);
+  const rangeLabel = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'short' });
+    return `${formatter.format(period.from)} – ${formatter.format(period.to)}`;
+  }, [language, period]);
 
   const showSkeleton = status === 'loading' && overrideEntries === null;
   const showError = status === 'error' && overrideEntries === null;
@@ -868,30 +879,30 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
     <Card
       ref={cardRef}
       title="💗 Emotion Chart"
-      subtitle="Últimos 6 meses"
+      subtitle={t('dashboard.emotionChart.lastSixMonths')}
       rightSlot={<InfoDotTarget id="emotion" placement="right" className="flex items-center" />}
     >
       {showSkeleton && <div className="h-48 w-full animate-pulse rounded-ib-md bg-[color:var(--color-overlay-2)]" />}
 
-      {showError && <p className="text-sm text-rose-300">Todavía no pudimos cargar tus emociones.</p>}
+      {showError && <p className="text-sm text-rose-300">{t('dashboard.emotionChart.loadError')}</p>}
 
-      {showEmpty && <p className="text-sm text-[color:var(--color-text-subtle)]">Registrá tu primera emoción para ver el mapa de calor.</p>}
+      {showEmpty && <p className="text-sm text-[color:var(--color-text-subtle)]">{t('dashboard.emotionChart.empty')}</p>}
 
       {(!showSkeleton && !showError && !showEmpty) || hasRecordedEmotion ? (
         <div className="flex flex-col gap-5">
           <div className="flex flex-wrap gap-4 text-xs text-[color:var(--color-text-subtle)]">
             {LEGEND.map((item) => (
-              <div key={item.name} className="flex items-center gap-2">
+              <div key={getEmotionLabel(item.name, language)} className="flex items-center gap-2">
                 <span
                   className="h-4 w-4 rounded-md border border-[color:var(--color-border-subtle)]"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="font-medium text-[color:var(--color-text)]">{item.name}</span>
+                <span className="font-medium text-[color:var(--color-text)]">{getEmotionLabel(item.name, language)}</span>
               </div>
             ))}
           </div>
 
-          {rangeLabel && <p className="text-xs text-[color:var(--color-text-subtle)]">Período analizado: {rangeLabel}</p>}
+          {rangeLabel && <p className="text-xs text-[color:var(--color-text-subtle)]">{t('dashboard.emotionChart.period')}: {rangeLabel}</p>}
 
           <div
             className="ib-card-contour-shadow rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[image:var(--glass-bg)] p-0"
@@ -920,7 +931,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
                         style={{ gridColumn: `${columnIndex + 1}` }}
                       >
                         {column.cells.map((cell) => {
-                          const tooltipEmotion = cell.rawEmotion ?? cell.emotion;
+                          const tooltipEmotion = getEmotionLabel(cell.emotion, language);
                           const tooltipDateRaw = cell.rawDate;
                           const tooltipDate =
                             tooltipDateRaw && tooltipDateRaw !== '[object Object]'
@@ -956,10 +967,13 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
                   style={{ backgroundColor: highlight.color }}
                 />
                 <div className="summary-content">
-                  <span className="summary-title text-[color:var(--color-text)]">{highlight.emotion}</span>
+                  <span className="summary-title text-[color:var(--color-text)]">{getEmotionLabel(highlight.emotion, language)}</span>
                   <span className="summary-description text-sm text-[color:var(--color-text)] opacity-70">
-                    Emoción más frecuente en los últimos {LOOKBACK_FOR_HIGHLIGHT} días ({highlight.count}{' '}
-                    {highlight.count === 1 ? 'registro' : 'registros'})
+                    {t('dashboard.emotionChart.mostFrequent', {
+                      days: LOOKBACK_FOR_HIGHLIGHT,
+                      count: highlight.count,
+                      registerLabel: highlight.count === 1 ? t('dashboard.emotionChart.record.single') : t('dashboard.emotionChart.record.plural'),
+                    })}
                   </span>
                 </div>
               </div>
@@ -967,7 +981,7 @@ export function EmotionChartCard({ userId }: EmotionChartCardProps) {
               <div className="summary-inner ib-card-contour-shadow rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-xs text-[color:var(--color-text-subtle)] sm:p-4">
                 <div className="summary-content">
                   <span className="summary-description">
-                    Aún no hay suficiente información reciente para destacar una emoción.
+                    {t('dashboard.emotionChart.insufficientData')}
                   </span>
                 </div>
               </div>
