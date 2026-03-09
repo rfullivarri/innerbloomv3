@@ -29,16 +29,16 @@
   gap: 0.5rem;
 }
 
-.info-dot-target > .info-dot__mount {
+.info-dot-target > .info-dot {
   display: inline-flex;
   align-items: center;
 }
 
-.info-dot-target[data-info-placement='left'] > .info-dot__mount {
+.info-dot-target > .info-dot:first-child {
   margin-right: 0.5rem;
 }
 
-.info-dot-target:not([data-info-placement='left']) > .info-dot__mount {
+.info-dot-target > .info-dot:last-child {
   margin-left: 0.5rem;
 }
 
