@@ -369,9 +369,6 @@ export default function DashboardV3Page() {
     markReturnedToDashboard,
   } = onboardingEditorNudge;
 
-  const onboardingLanguage = profile?.locale?.toLowerCase().startsWith("en")
-    ? "en"
-    : "es";
 
   useEffect(() => {
     const shouldShowModerationSuggestion =
@@ -795,7 +792,7 @@ export default function DashboardV3Page() {
         />
         <ModerationOnboardingSuggestion
           open={isModerationSuggestionOpen}
-          language={onboardingLanguage}
+          language={language}
           selected={selectedModerationSuggestions}
           onToggle={handleToggleModerationSuggestion}
           onActivate={() => {

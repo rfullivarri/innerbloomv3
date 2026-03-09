@@ -22,7 +22,8 @@
 
 ## Resolución de idioma
 - Prioridad 1: preferencia manual persistida en `localStorage` (`innerbloom.postlogin.language`).
-- Prioridad 2: detección de dispositivo/navegador.
+- Prioridad 2: idioma inicial de onboarding/perfil (`innerbloom.onboarding.language` o persistencia automática de onboarding en `innerbloom.postlogin.language`).
+- Prioridad 3: detección de dispositivo/navegador.
 - Detección: cualquier locale que empiece por `es` => ES, todo lo demás => EN.
 
 ## Punto único
