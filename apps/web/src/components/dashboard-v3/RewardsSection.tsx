@@ -41,7 +41,7 @@ export function RewardsSection({
   weeklyWrappedPrevious,
   onOpenWeeklyWrapped,
 }: RewardsSectionProps) {
-  const { language } = usePostLoginLanguage();
+  const { language, t } = usePostLoginLanguage();
   const { data, status, error, reload } = useRequest(() => getAchievements(userId), [userId], {
     enabled: Boolean(userId),
   });
@@ -72,15 +72,15 @@ export function RewardsSection({
     if (weeklyWrappedCurrent) {
       const isCurrentWeek = isSameUtcWeek(weeklyWrappedCurrent.weekEnd, new Date());
       items.push({
-        label: isCurrentWeek ? 'Semana en curso' : 'Semana más reciente',
+        label: isCurrentWeek ? t('dashboard.rewards.currentWeek') : t('dashboard.rewards.latestWeek'),
         record: weeklyWrappedCurrent,
       });
     }
     if (weeklyWrappedPrevious && weeklyWrappedPrevious.id !== weeklyWrappedCurrent?.id) {
-      items.push({ label: 'Semana anterior', record: weeklyWrappedPrevious });
+      items.push({ label: t('dashboard.rewards.previousWeek'), record: weeklyWrappedPrevious });
     }
     return items;
-  }, [weeklyWrappedCurrent, weeklyWrappedPrevious]);
+  }, [t, weeklyWrappedCurrent, weeklyWrappedPrevious]);
 
   const { unlockedCount, inProgressCount } = useMemo(() => {
     let unlocked = 0;
@@ -107,7 +107,7 @@ export function RewardsSection({
   return (
     <Card
       title="🎁 Rewards"
-      subtitle="Seguimiento de logros, badges y recompensas desbloqueadas"
+      subtitle={t('dashboard.rewards.subtitle')}
       rightSlot={
         <button
           type="button"
@@ -115,7 +115,7 @@ export function RewardsSection({
           disabled={status === 'loading'}
           className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)] disabled:opacity-60"
         >
-          Actualizar
+          {t('dashboard.rewards.update')}
         </button>
       }
       bodyClassName="gap-5"
@@ -124,13 +124,13 @@ export function RewardsSection({
 
       {showError && (
         <div className="space-y-3 text-sm text-rose-200">
-          <p>No pudimos cargar tus recompensas.</p>
+          <p>{t('dashboard.rewards.loadError')}</p>
           <button
             type="button"
             onClick={reload}
             className="inline-flex items-center gap-2 rounded-full border border-rose-300/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-rose-100 transition hover:border-rose-200/70 hover:text-rose-50"
           >
-            Reintentar
+            {t('dashboard.rewards.retry')}
           </button>
           {error?.message && <p className="text-xs text-rose-200/70">{error.message}</p>}
         </div>
@@ -146,21 +146,21 @@ export function RewardsSection({
           {!hasMockedAchievements && (
             <>
               <div className="grid gap-3 sm:grid-cols-2">
-                <RewardsSummaryCard label="Completados" value={unlockedCount} accent="emerald" />
-                <RewardsSummaryCard label="En progreso" value={inProgressCount} accent="sky" />
+                <RewardsSummaryCard label={t('dashboard.rewards.completed')} value={unlockedCount} accent="emerald" />
+                <RewardsSummaryCard label={t('dashboard.rewards.inProgress')} value={inProgressCount} accent="sky" />
               </div>
 
               {visibleAchievements.length > 0 ? (
                 <ul className="space-y-4">
                   {visibleAchievements.map((achievement) => (
-                    <RewardsAchievementItem key={achievement.id} achievement={achievement} />
+                    <RewardsAchievementItem key={achievement.id} achievement={achievement} language={language} t={t} />
                   ))}
                 </ul>
               ) : (
                 <div className="ib-card-contour-shadow space-y-2 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-5 text-sm text-[color:var(--color-slate-300)]">
-                  <p>Todavía no desbloqueaste recompensas.</p>
+                  <p>{t('dashboard.rewards.emptyTitle')}</p>
                   <p className="text-xs text-[color:var(--color-slate-400)]">
-                    Completá misiones y mantené tus streaks activos para sumar GP y alcanzar nuevos hitos.
+                    {t('dashboard.rewards.emptyDescription')}
                   </p>
                 </div>
               )}
@@ -205,7 +205,7 @@ function WeeklyWrappedShelf({ items, onOpen, language }: WeeklyWrappedShelfProps
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-dim)]">Weekly Wrapped</p>
-          <p className="text-sm text-[color:var(--color-slate-200)]">Tus últimos resúmenes de 7 días</p>
+          <p className="text-sm text-[color:var(--color-slate-200)]">{language === 'es' ? 'Tus últimos resúmenes de 7 días' : 'Your latest 7-day summaries'}</p>
         </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -258,7 +258,7 @@ function WeeklyWrappedCard({
         onClick={() => onOpen?.(record)}
         className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-soft)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text)] transition hover:-translate-y-0.5 hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]"
       >
-        Ver detalles
+        {language === 'es' ? 'Ver detalles' : 'View details'}
       </button>
     </div>
   );
@@ -348,19 +348,19 @@ function formatWeekRange(payload: WeeklyWrappedPayload, language: 'es' | 'en'): 
   return `${start.toLocaleDateString(locale, { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString(locale, { month: 'short', day: 'numeric' })}`;
 }
 
-function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {
+function RewardsAchievementItem({ achievement, language, t }: { achievement: Achievement; language: 'es' | 'en'; t: (key: string, params?: Record<string, string | number>) => string }) {
   const { progress } = achievement;
   const target = Math.max(0, progress.target ?? 0);
   const current = Math.max(0, progress.current ?? 0);
   const pct = Math.min(100, Math.max(0, progress.pct ?? 0));
   const isUnlocked = target === 0 ? current > 0 : current >= target;
-  const statusLabel = isUnlocked ? 'Desbloqueado' : 'En progreso';
-  const unlockedDate = formatAchievementDate(achievement.earnedAt ?? achievement.unlockedAt ?? null);
+  const statusLabel = isUnlocked ? t('dashboard.rewards.unlocked') : t('dashboard.rewards.inProgress');
+  const unlockedDate = formatAchievementDate(achievement.earnedAt ?? achievement.unlockedAt ?? null, language);
   const detailLabel = isUnlocked
     ? unlockedDate
-      ? `Alcanzado el ${unlockedDate}`
-      : 'Nuevo logro desbloqueado'
-    : `${Math.round(current)} / ${target} completado`;
+      ? t('dashboard.rewards.reachedOn', { date: unlockedDate })
+      : t('dashboard.rewards.newUnlocked')
+    : t('dashboard.rewards.progressCompleted', { current: Math.round(current), target });
 
   return (
     <li className="ib-card-contour-shadow space-y-4 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 md:p-5">
@@ -409,13 +409,7 @@ function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {
   );
 }
 
-const DATE_FORMATTER = new Intl.DateTimeFormat('es-AR', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
-
-function formatAchievementDate(value: string | null): string | null {
+function formatAchievementDate(value: string | null, language: 'es' | 'en'): string | null {
   if (!value) {
     return null;
   }
@@ -425,7 +419,8 @@ function formatAchievementDate(value: string | null): string | null {
     return null;
   }
 
-  return DATE_FORMATTER.format(parsed);
+  const formatter = new Intl.DateTimeFormat(language === 'es' ? 'es-AR' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  return formatter.format(parsed);
 }
 
 interface RewardsSummaryCardProps {
