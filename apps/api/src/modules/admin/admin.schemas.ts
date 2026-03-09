@@ -119,6 +119,13 @@ export const taskgenTraceGlobalQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).default(50),
 });
 
+
+export const taskDifficultyCalibrationRunBodySchema = z.object({
+  userId: z.string().uuid({ message: 'Invalid user id' }).optional(),
+  window_days: z.coerce.number().int().min(1).max(3650).default(90),
+  mode: z.enum(['baseline']).default('baseline'),
+});
+
 export const reminderSendBodySchema = z.object({
   channel: z.literal('email').optional().default('email'),
 });
@@ -200,6 +207,7 @@ export type TaskgenJobsQuery = z.infer<typeof taskgenJobsQuerySchema>;
 export type TaskgenForceRunBody = z.infer<typeof taskgenForceRunBodySchema>;
 export type TaskgenTraceQuery = z.infer<typeof taskgenTraceQuerySchema>;
 export type TaskgenTraceGlobalQuery = z.infer<typeof taskgenTraceGlobalQuerySchema>;
+export type TaskDifficultyCalibrationRunBody = z.infer<typeof taskDifficultyCalibrationRunBodySchema>;
 export type ReminderSendBody = z.infer<typeof reminderSendBodySchema>;
 export type AdminSubscriptionUpdateBody = z.infer<typeof adminSubscriptionUpdateBodySchema>;
 export type SubscriptionNotificationsTriggerBody = z.infer<typeof subscriptionNotificationsTriggerBodySchema>;

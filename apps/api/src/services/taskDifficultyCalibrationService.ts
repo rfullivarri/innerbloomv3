@@ -14,6 +14,7 @@ type TaskCandidateRow = {
 type GameModeHistoryRow = { game_mode_id: number; weekly_target: number | string | null };
 type CompletionRow = { completed: number | string | null };
 type LastCalibrationRow = { period_end: string };
+type LastAdminRunRow = { task_difficulty_recalibration_id: string };
 
 type CalibrationAction = 'up' | 'keep' | 'down';
 
@@ -108,28 +109,66 @@ export type TaskDifficultyCalibrationRun = {
   evaluated: number;
   adjusted: number;
   skipped: number;
+  ignored: number;
+  actionBreakdown: { up: number; keep: number; down: number };
   errors: { taskId: string; reason: string }[];
 };
 
-export async function runMonthlyTaskDifficultyCalibration(now: Date = new Date()): Promise<TaskDifficultyCalibrationRun> {
-  const result: TaskDifficultyCalibrationRun = { evaluated: 0, adjusted: 0, skipped: 0, errors: [] };
+type CalibrationRunSource = 'cron' | 'admin_run';
+
+type RunCalibrationOptions = {
+  now?: Date;
+  userId?: string;
+  windowDays?: number;
+  source?: CalibrationRunSource;
+  mode?: 'baseline';
+  dedupeByDay?: boolean;
+};
+
+async function runTaskDifficultyCalibrationEngine(options: RunCalibrationOptions = {}): Promise<TaskDifficultyCalibrationRun> {
+  const now = options.now ?? new Date();
+  const source = options.source ?? 'cron';
+  const dedupeByDay = options.dedupeByDay ?? false;
+  const windowDays = options.windowDays ?? 90;
+
+  const result: TaskDifficultyCalibrationRun = {
+    evaluated: 0,
+    adjusted: 0,
+    skipped: 0,
+    ignored: 0,
+    actionBreakdown: { up: 0, keep: 0, down: 0 },
+    errors: [],
+  };
 
   const difficultiesResult = await pool.query<DifficultyRow>(
     'SELECT difficulty_id, xp_base FROM cat_difficulty ORDER BY xp_base ASC NULLS LAST, difficulty_id ASC',
   );
   const orderedDifficultyIds = difficultiesResult.rows.map((row) => row.difficulty_id);
 
+  const userFilterSql = options.userId ? 'AND t.user_id = $1::uuid' : '';
   const tasksResult = await pool.query<TaskCandidateRow>(
     `SELECT t.task_id, t.user_id, t.difficulty_id, t.created_at::text AS created_at, t.active, u.game_mode_id
        FROM tasks t
        JOIN users u ON u.user_id = t.user_id
-      WHERE t.active = TRUE`,
+      WHERE t.active = TRUE ${userFilterSql}`,
+    options.userId ? [options.userId] : [],
   );
 
   for (const task of tasksResult.rows) {
     try {
-      if (task.difficulty_id == null || !isTaskEligibleForCalibration({ now, createdAt: task.created_at, active: task.active })) {
-        result.skipped += 1;
+      const adminEligibility = (() => {
+        if (source !== 'admin_run') {
+          return isTaskEligibleForCalibration({ now, createdAt: task.created_at, active: task.active });
+        }
+        if (!task.active) {
+          return false;
+        }
+        const ageDays = Math.floor((now.getTime() - parseDateOnly(task.created_at).getTime()) / MS_IN_DAY);
+        return ageDays > 30;
+      })();
+
+      if (task.difficulty_id == null || !adminEligibility) {
+        result.ignored += 1;
         continue;
       }
 
@@ -142,15 +181,37 @@ export async function runMonthlyTaskDifficultyCalibration(now: Date = new Date()
         [task.task_id],
       );
 
-      const period = buildAnalysisPeriod({
-        now,
-        createdAt: task.created_at,
-        lastPeriodEnd: lastResult.rows[0]?.period_end ?? null,
-      });
+      const period = source === 'admin_run'
+        ? {
+            start: formatDate(addDays(new Date(now.toISOString().slice(0, 10)), -Math.max(1, windowDays) + 1)),
+            end: formatDate(new Date(now.toISOString().slice(0, 10))),
+          }
+        : buildAnalysisPeriod({
+            now,
+            createdAt: task.created_at,
+            lastPeriodEnd: lastResult.rows[0]?.period_end ?? null,
+          });
 
       if (!period) {
         result.skipped += 1;
         continue;
+      }
+
+      if (source === 'admin_run' && dedupeByDay) {
+        const duplicateResult = await pool.query<LastAdminRunRow>(
+          `SELECT task_difficulty_recalibration_id
+             FROM task_difficulty_recalibrations
+            WHERE task_id = $1
+              AND source = 'admin_run'
+              AND analyzed_at::date = $2::date
+            LIMIT 1`,
+          [task.task_id, formatDate(now)],
+        );
+
+        if (duplicateResult.rows[0]) {
+          result.skipped += 1;
+          continue;
+        }
       }
 
       result.evaluated += 1;
@@ -160,10 +221,9 @@ export async function runMonthlyTaskDifficultyCalibration(now: Date = new Date()
            FROM user_game_mode_history h
       LEFT JOIN cat_game_mode gm ON gm.game_mode_id = h.game_mode_id
           WHERE h.user_id = $1
-            AND h.effective_at::date <= $2::date
           ORDER BY h.effective_at DESC
           LIMIT 1`,
-        [task.user_id, period.end],
+        [task.user_id],
       );
 
       const selectedMode = gameModeResult.rows[0];
@@ -198,6 +258,7 @@ export async function runMonthlyTaskDifficultyCalibration(now: Date = new Date()
       const completionRate = expectedTarget > 0 ? completions / expectedTarget : 0;
 
       const decision = decideDifficultyChange(completionRate, task.difficulty_id, orderedDifficultyIds);
+      result.actionBreakdown[decision.finalAction] += 1;
 
       if (decision.newDifficultyId !== task.difficulty_id) {
         await pool.query(
@@ -224,8 +285,9 @@ export async function runMonthlyTaskDifficultyCalibration(now: Date = new Date()
           previous_difficulty_id,
           new_difficulty_id,
           action,
+          source,
           analyzed_at
-        ) VALUES ($1, $2, $3::date, $4::date, $5, $6, $7, $8, $9, $10, $11, NOW())`,
+        ) VALUES ($1, $2, $3::date, $4::date, $5, $6, $7, $8, $9, $10, $11, $12, NOW())`,
         [
           task.task_id,
           task.user_id,
@@ -238,6 +300,7 @@ export async function runMonthlyTaskDifficultyCalibration(now: Date = new Date()
           task.difficulty_id,
           decision.newDifficultyId,
           decision.finalAction,
+          source,
         ],
       );
     } catch (error) {
@@ -249,12 +312,34 @@ export async function runMonthlyTaskDifficultyCalibration(now: Date = new Date()
     evaluated: result.evaluated,
     adjusted: result.adjusted,
     skipped: result.skipped,
+    ignored: result.ignored,
+    source,
     errors: result.errors.length,
   });
 
   return result;
 }
 
+export async function runMonthlyTaskDifficultyCalibration(now: Date = new Date()): Promise<TaskDifficultyCalibrationRun> {
+  return runTaskDifficultyCalibrationEngine({ now, source: 'cron' });
+}
+
 export async function runTaskDifficultyCalibrationBackfill(now: Date = new Date()): Promise<TaskDifficultyCalibrationRun> {
-  return runMonthlyTaskDifficultyCalibration(now);
+  return runTaskDifficultyCalibrationEngine({ now, source: 'admin_run', windowDays: 90, dedupeByDay: true, mode: 'baseline' });
+}
+
+export async function runAdminTaskDifficultyCalibration(options: {
+  userId?: string;
+  windowDays?: number;
+  mode?: 'baseline';
+  now?: Date;
+}): Promise<TaskDifficultyCalibrationRun> {
+  return runTaskDifficultyCalibrationEngine({
+    now: options.now ?? new Date(),
+    userId: options.userId,
+    windowDays: options.windowDays ?? 90,
+    mode: options.mode ?? 'baseline',
+    source: 'admin_run',
+    dedupeByDay: true,
+  });
 }

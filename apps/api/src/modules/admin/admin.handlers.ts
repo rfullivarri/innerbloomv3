@@ -18,6 +18,7 @@ import {
   feedbackUserNotificationUpdateSchema,
   subscriptionNotificationsTriggerBodySchema,
   adminSubscriptionUpdateBodySchema,
+  taskDifficultyCalibrationRunBodySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -48,6 +49,7 @@ import {
   getTaskgenEventsGlobal,
 } from '../../services/taskgenTraceService.js';
 import { triggerTaskGenerationForUser } from '../../services/taskgenTriggerService.js';
+import { runAdminTaskDifficultyCalibration } from '../../services/taskDifficultyCalibrationService.js';
 
 const taskgenForceRunRequestSchema = z
   .object({
@@ -266,4 +268,24 @@ export const patchAdminFeedbackUserState = asyncHandler(async (req: Request, res
   const body = feedbackUserNotificationUpdateSchema.parse(req.body);
   const result = await updateFeedbackUserNotificationState(userId, body);
   res.json(result);
+});
+
+
+export const postAdminRunTaskDifficultyCalibration = asyncHandler(async (req: Request, res: Response) => {
+  const body = taskDifficultyCalibrationRunBodySchema.parse(req.body ?? {});
+  const result = await runAdminTaskDifficultyCalibration({
+    userId: body.userId,
+    windowDays: body.window_days,
+    mode: body.mode,
+  });
+
+  res.json({
+    ok: true,
+    source: 'admin_run',
+    scope: body.userId ? 'single_user' : 'all_users',
+    userId: body.userId ?? null,
+    window_days: body.window_days,
+    mode: body.mode,
+    ...result,
+  });
 });

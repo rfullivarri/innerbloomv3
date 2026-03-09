@@ -27,6 +27,7 @@ import {
   getAdminFeedbackUserHistory,
   getAdminFeedbackUserState,
   patchAdminFeedbackUserState,
+  postAdminRunTaskDifficultyCalibration,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
 
@@ -54,6 +55,7 @@ adminRouter.get('/taskgen/trace', getTaskgenTraceForUser);
 adminRouter.get('/taskgen/trace/by-correlation/:id', getTaskgenTraceByCorrelation);
 adminRouter.get('/taskgen/trace/global', getTaskgenTraceGlobal);
 adminRouter.post('/taskgen/force-run', postTaskgenForceRun);
+adminRouter.post('/task-difficulty-calibration/run', postAdminRunTaskDifficultyCalibration);
 adminRouter.get('/feedback/definitions', getAdminFeedbackDefinitions);
 adminRouter.patch('/feedback/definitions/:id', patchAdminFeedbackDefinition);
 adminRouter.get('/feedback/users/:userId/state', getAdminFeedbackUserState);

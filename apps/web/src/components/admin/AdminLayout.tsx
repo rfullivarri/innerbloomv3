@@ -16,6 +16,8 @@ import {
   sendAdminDailyReminder,
   sendAdminTasksReadyEmail,
   updateAdminUserSubscription,
+  runAdminTaskDifficultyCalibration,
+  type AdminTaskDifficultyCalibrationRunResponse,
 } from '../../lib/adminApi';
 import { AdminDataTable } from './AdminDataTable';
 import { FiltersBar, type AdminFilters } from './FiltersBar';
@@ -72,6 +74,12 @@ export function AdminLayout() {
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   const [updatingSubscription, setUpdatingSubscription] = useState(false);
   const [subscriptionActionMessage, setSubscriptionActionMessage] = useState<string | null>(null);
+  const [calibrationWindowDays, setCalibrationWindowDays] = useState(90);
+  const [calibrationMode] = useState<'baseline'>('baseline');
+  const [calibrationRunAllUsers, setCalibrationRunAllUsers] = useState(false);
+  const [runningCalibration, setRunningCalibration] = useState(false);
+  const [calibrationResult, setCalibrationResult] = useState<AdminTaskDifficultyCalibrationRunResponse | null>(null);
+  const [calibrationError, setCalibrationError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedUser) {
@@ -207,6 +215,9 @@ export function AdminLayout() {
     setSubscriptionData(null);
     setSubscriptionError(null);
     setSubscriptionActionMessage(null);
+    setCalibrationResult(null);
+    setCalibrationError(null);
+    setCalibrationRunAllUsers(false);
   }, []);
 
 
@@ -315,6 +326,31 @@ export function AdminLayout() {
       setSendingTasksReady(false);
     }
   }, [selectedUser]);
+
+
+  const handleRunTaskDifficultyCalibration = useCallback(async () => {
+    if (!selectedUser && !calibrationRunAllUsers) {
+      return;
+    }
+
+    setRunningCalibration(true);
+    setCalibrationError(null);
+
+    try {
+      const response = await runAdminTaskDifficultyCalibration({
+        userId: calibrationRunAllUsers ? undefined : selectedUser?.id,
+        windowDays: calibrationWindowDays,
+        mode: calibrationMode,
+      });
+      setCalibrationResult(response);
+    } catch (error) {
+      console.error('[admin] failed to run task difficulty calibration', error);
+      setCalibrationResult(null);
+      setCalibrationError('No se pudo ejecutar la calibración de dificultad.');
+    } finally {
+      setRunningCalibration(false);
+    }
+  }, [calibrationMode, calibrationRunAllUsers, calibrationWindowDays, selectedUser]);
 
   const handleExport = useCallback(async () => {
     if (!selectedUser) return;
@@ -517,6 +553,69 @@ export function AdminLayout() {
                 }`}
               >
                 {sendingTasksReady ? 'Enviando…' : 'Probar correo AI'}
+              </button>
+            </div>
+
+
+            <div className="flex flex-col gap-3 rounded-xl border border-emerald-700/40 bg-emerald-900/10 p-4 text-sm text-emerald-100">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">Task Difficulty Calibration</p>
+                <p className="text-sm text-emerald-100/90">Ejecuta el motor mensual de calibración en modo manual (BACKFILL / ADMIN_RUN).</p>
+              </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
+                  Window days
+                  <input
+                    type="number"
+                    min={1}
+                    max={3650}
+                    value={calibrationWindowDays}
+                    onChange={(event) => setCalibrationWindowDays(Math.max(1, Number(event.target.value || 90)))}
+                    className="rounded-md border border-emerald-700/50 bg-slate-900/70 px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-100"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
+                  Mode
+                  <select
+                    value={calibrationMode}
+                    disabled
+                    className="rounded-md border border-emerald-700/50 bg-slate-900/70 px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-100"
+                  >
+                    <option value="baseline">Baseline 1 período</option>
+                  </select>
+                </label>
+                <label className="flex items-center gap-2 text-sm text-emerald-100">
+                  <input
+                    type="checkbox"
+                    checked={calibrationRunAllUsers}
+                    onChange={(event) => setCalibrationRunAllUsers(event.target.checked)}
+                  />
+                  Correr para todos los usuarios
+                </label>
+              </div>
+              {!calibrationRunAllUsers && selectedUser ? (
+                <p className="text-xs text-emerald-200">Scope actual: userId {selectedUser.id}</p>
+              ) : null}
+              {calibrationError ? <p className="text-xs font-semibold text-rose-300">{calibrationError}</p> : null}
+              {calibrationResult ? (
+                <div className="rounded-md border border-emerald-700/50 bg-slate-900/50 p-3 text-xs text-emerald-100">
+                  <p>Evaluadas: <strong>{calibrationResult.evaluated}</strong> · Ajustadas: <strong>{calibrationResult.adjusted}</strong></p>
+                  <p>Ignoradas: <strong>{calibrationResult.ignored}</strong> · Skipped: <strong>{calibrationResult.skipped}</strong></p>
+                  <p>Acciones → up: <strong>{calibrationResult.actionBreakdown.up}</strong>, keep: <strong>{calibrationResult.actionBreakdown.keep}</strong>, down: <strong>{calibrationResult.actionBreakdown.down}</strong></p>
+                  <p>Errores: <strong>{calibrationResult.errors.length}</strong></p>
+                </div>
+              ) : null}
+              <button
+                type="button"
+                onClick={handleRunTaskDifficultyCalibration}
+                disabled={runningCalibration || (!selectedUser && !calibrationRunAllUsers)}
+                className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                  runningCalibration
+                    ? 'cursor-not-allowed border border-slate-700/60 bg-slate-800 text-slate-400'
+                    : 'border border-emerald-700/60 bg-emerald-900/30 text-emerald-100 hover:border-emerald-400/60 hover:text-emerald-50'
+                }`}
+              >
+                {runningCalibration ? 'Running…' : 'Run Difficulty Calibration'}
               </button>
             </div>
           </div>
