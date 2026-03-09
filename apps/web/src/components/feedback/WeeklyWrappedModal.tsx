@@ -2,6 +2,7 @@ import { type MutableRefObject, type ReactNode, useEffect, useMemo, useRef, useS
 import { type TaskInsightsResponse } from '../../lib/api';
 import { computeWeeklyHabitHealth, getHabitHealth as getHabitHealthFromInsights } from '../../lib/habitHealth';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+import { resolveEmotionCopy } from '../../config/emotionMessages';
 import type { WeeklyWrappedPayload, WeeklyWrappedSection } from '../../lib/weeklyWrapped';
 
 const ANIMATION_DELAY = 80;
@@ -306,7 +307,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               active={activeIndex === 0}
               registerSectionRef={(el) => (sectionRefs.current[0] = el)}
               t={t}
-              language={language}
             />
 
             {showLevelUp ? (
@@ -317,7 +317,6 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
                 active={activeIndex === 1}
                 registerSectionRef={(el) => (sectionRefs.current[1] = el)}
                 t={t}
-                language={language}
               />
             ) : null}
 
@@ -360,6 +359,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               active={activeIndex === emotionIndex}
               registerSectionRef={(el) => (sectionRefs.current[emotionIndex] = el)}
               t={t}
+              language={language}
             />
 
             <ClosingBlock
@@ -440,7 +440,6 @@ type SectionBlockProps = {
   active?: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
-  language: 'es' | 'en';
 };
 
 function SectionBlock({
@@ -455,8 +454,7 @@ function SectionBlock({
   index,
   active,
   registerSectionRef,
-  t,
-  language,
+  t
 }: SectionBlockProps) {
   return (
     <SectionShell
@@ -505,7 +503,6 @@ function SectionBlock({
                 pillar={stats.pillar}
                 pillarStats={stats.pillarStats}
                 t={t}
-                language={language}
               />
             ) : (
               <>
@@ -528,16 +525,14 @@ function WeeklyKPIHighlight({
   pillar,
   pillarStats,
   t,
-  language,
 }: {
   completions: number;
   xpTotal: number;
   pillar: string | null;
   pillarStats: { xp: number; completions: number } | null;
   t: (key: string, params?: Record<string, string | number>) => string;
-  language: 'es' | 'en';
 }) {
-  const formatter = new Intl.NumberFormat(language === 'es' ? 'es-AR' : 'en-US');
+  const formatter = new Intl.NumberFormat('es-AR');
   const pillarLabel = pillar ?? t('feedback.weeklyWrapped.metrics.mixedMode');
   const pillarIcon = pillar ? getPillarIcon(pillar) : '🫀';
   const pillarNarrative =
@@ -851,10 +846,9 @@ type LevelUpBlockProps = {
   active?: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
-  language: 'es' | 'en';
 };
 
-function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef, t, language }: LevelUpBlockProps) {
+function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef, t }: LevelUpBlockProps) {
   const levelLabel = levelUp.currentLevel ?? t('feedback.weeklyWrapped.levelUp.newLabel');
   const previousLabel = levelUp.previousLevel ?? Math.max(0, Number(levelLabel) - 1);
 
@@ -882,7 +876,7 @@ function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef, t, 
               </p>
               <div className="flex flex-wrap gap-3 text-xs text-slate-200">
                 <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
-                  +{levelUp.xpGained.toLocaleString(language === 'es' ? 'es-AR' : 'en-US')} {t('feedback.weeklyWrapped.levelUp.xpChip')}
+                  +{levelUp.xpGained.toLocaleString('es-AR')} {t('feedback.weeklyWrapped.levelUp.xpChip')}
                 </span>
                 <span className="rounded-full border border-white/15 bg-emerald-500/20 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
                   {previousLabel} → {levelLabel}
@@ -1105,19 +1099,22 @@ type EmotionHighlightBlockProps = {
   active?: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
+  language: 'es' | 'en';
 };
 
-function EmotionHighlightBlock({ emotionHighlight, entered, index, active, registerSectionRef, t }: EmotionHighlightBlockProps) {
+function EmotionHighlightBlock({ emotionHighlight, entered, index, active, registerSectionRef, t, language }: EmotionHighlightBlockProps) {
   const weeklyEmotion = emotionHighlight.weekly;
   const biweeklyEmotion = emotionHighlight.biweekly ?? weeklyEmotion;
   const weeklyColor = weeklyEmotion?.color ?? '#fbbf24';
   const biweeklyColor = biweeklyEmotion?.color ?? weeklyColor;
-  const weeklyLabel = weeklyEmotion?.label ?? t('feedback.weeklyWrapped.emotion.noDominant');
-  const weeklyMessage =
-    weeklyEmotion?.weeklyMessage ?? t('feedback.weeklyWrapped.emotion.weeklyMessageFallback');
-  const biweeklyLabel = biweeklyEmotion?.label ?? t('feedback.weeklyWrapped.emotion.biweeklyFallback');
-  const biweeklyContext =
-    biweeklyEmotion?.biweeklyContext ?? t('feedback.weeklyWrapped.emotion.biweeklyContextFallback');
+  const weeklyCopy = resolveEmotionCopy(language, weeklyEmotion?.key ?? null);
+  const biweeklyCopy = resolveEmotionCopy(language, biweeklyEmotion?.key ?? null);
+  const weeklyLabel = weeklyEmotion ? weeklyCopy.label : t('feedback.weeklyWrapped.emotion.noDominant');
+  const weeklyMessage = weeklyEmotion ? weeklyCopy.weekly_message : t('feedback.weeklyWrapped.emotion.weeklyMessageFallback');
+  const biweeklyLabel = biweeklyEmotion ? biweeklyCopy.label : t('feedback.weeklyWrapped.emotion.biweeklyFallback');
+  const biweeklyContext = biweeklyEmotion
+    ? biweeklyCopy.biweekly_context
+    : t('feedback.weeklyWrapped.emotion.biweeklyContextFallback');
   const slideLabel = t('feedback.weeklyWrapped.emotion.slideLabel');
 
   return (

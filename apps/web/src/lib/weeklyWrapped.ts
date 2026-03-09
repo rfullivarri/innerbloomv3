@@ -8,15 +8,7 @@ import type { AdminInsights, AdminLogRow } from './types';
 import { fetchAdminInsights, fetchAdminLogs } from './adminApi';
 import { getEmotions, getTaskInsights, getUserDailyEnergy, getUserLevel } from './api';
 import { logApiError } from './logger';
-
-type EmotionMessageKey =
-  | 'felicidad'
-  | 'motivacion'
-  | 'calma'
-  | 'cansancio'
-  | 'ansiedad'
-  | 'tristeza'
-  | 'frustracion';
+import { resolveEmotionCopy, type EmotionMessageKey } from '../config/emotionMessages';
 
 type EmotionHighlightEntry = {
   key: EmotionMessageKey;
@@ -191,65 +183,6 @@ function logWeeklyWrappedDebug(message: string, context?: Record<string, unknown
     }
   }
 }
-
-const EMOTION_REFLECTIONS: Record<EmotionMessageKey, EmotionHighlightEntry> = {
-  felicidad: {
-    key: 'felicidad',
-    label: 'Felicidad',
-    tone: 'positiva',
-    color: EMOTION_COLORS.felicidad,
-    weeklyMessage: 'La alegría lideró tus últimos 7 días. Anotá qué la impulsó y repetilo.',
-    biweeklyContext: 'En los últimos 15 días tu energía se mantuvo luminosa. Aprovechá ese envión.',
-  },
-  motivacion: {
-    key: 'motivacion',
-    label: 'Motivación',
-    tone: 'positiva',
-    color: EMOTION_COLORS.motivacion,
-    weeklyMessage: 'La motivación estuvo al frente. ¿Qué objetivo te movió? Sostenelo.',
-    biweeklyContext: '15 días orientados a avanzar. Elegí la próxima misión y seguí subiendo.',
-  },
-  calma: {
-    key: 'calma',
-    label: 'Calma',
-    tone: 'neutral',
-    color: EMOTION_COLORS.calma,
-    weeklyMessage: 'Predominó la calma. Protegé los espacios que la generaron.',
-    biweeklyContext: '15 días con aire liviano. Podés sumar pequeños retos sin perder serenidad.',
-  },
-  cansancio: {
-    key: 'cansancio',
-    label: 'Cansancio',
-    tone: 'neutral',
-    color: EMOTION_COLORS.cansancio,
-    weeklyMessage: 'El cansancio marcó el ritmo. Respetá el descanso y elegí micro acciones.',
-    biweeklyContext: 'Quincena exigente. Bajá la vara y priorizá recuperación.',
-  },
-  ansiedad: {
-    key: 'ansiedad',
-    label: 'Ansiedad',
-    tone: 'desafiante',
-    color: EMOTION_COLORS.ansiedad,
-    weeklyMessage: 'La ansiedad tomó espacio. Anclate con respiraciones cortas y tareas simples.',
-    biweeklyContext: 'En 15 días se repitió la tensión. Sumá pausas activas para soltarla.',
-  },
-  tristeza: {
-    key: 'tristeza',
-    label: 'Tristeza',
-    tone: 'desafiante',
-    color: EMOTION_COLORS.tristeza,
-    weeklyMessage: 'Apareció tristeza. Elegí una acción amable y compartila con alguien de confianza.',
-    biweeklyContext: 'La tendencia quincenal fue baja. Apoyate en Mind/Soul y en pequeños gestos.',
-  },
-  frustracion: {
-    key: 'frustracion',
-    label: 'Frustración',
-    tone: 'desafiante',
-    color: EMOTION_COLORS.frustracion,
-    weeklyMessage: 'La frustración dijo presente. Reconocé el avance mínimo y volvé a intentar.',
-    biweeklyContext: 'Varias señales de freno en los últimos 15 días. Ajustá expectativas y buscá apoyo.',
-  },
-};
 
 type LevelUpHighlight = {
   happened: boolean;
@@ -1111,14 +1044,14 @@ function computeEmotionDominant(
 }
 
 function buildEmotionEntry(key: EmotionMessageKey): EmotionHighlightEntry {
-  const message = EMOTION_REFLECTIONS[key];
+  const message = resolveEmotionCopy('es', key);
   return {
     key,
     label: message.label,
     tone: message.tone,
     color: EMOTION_COLORS[key] ?? '#0ea5e9',
-    weeklyMessage: message.weeklyMessage,
-    biweeklyContext: message.biweeklyContext,
+    weeklyMessage: message.weekly_message,
+    biweeklyContext: message.biweekly_context,
   };
 }
 

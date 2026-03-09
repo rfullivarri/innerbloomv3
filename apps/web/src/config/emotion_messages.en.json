@@ -1,0 +1,44 @@
+{
+  "felicidad": {
+    "label": "Joy",
+    "tone": "positive",
+    "weekly_message": "Joy was very present this week. Letting yourself enjoy it is also part of your growth.",
+    "biweekly_context": "This emotional state has appeared often lately. Noticing what supports it can help you sustain it."
+  },
+  "motivacion": {
+    "label": "Motivation",
+    "tone": "positive",
+    "weekly_message": "Motivation was your driving force this week. Use that momentum with clear, realistic next steps.",
+    "biweekly_context": "This drive has remained steady. Moving forward with focus, without overpushing, can turn it into consistency."
+  },
+  "calma": {
+    "label": "Calm",
+    "tone": "neutral",
+    "weekly_message": "Calm defined your week. A steady pace is also meaningful progress.",
+    "biweekly_context": "This state has stayed present over time. Protecting your pauses can help maintain that balance."
+  },
+  "cansancio": {
+    "label": "Fatigue",
+    "tone": "neutral",
+    "weekly_message": "Fatigue showed up this week. Listening to it with kindness is also self-care.",
+    "biweekly_context": "This state has repeated over recent weeks. Adjusting your pace and prioritizing rest may help."
+  },
+  "ansiedad": {
+    "label": "Anxiety",
+    "tone": "challenging",
+    "weekly_message": "Anxiety was present this week. Returning to simple actions and conscious breathing can help regulate it.",
+    "biweekly_context": "This state repeated on several days. Consistent micro-pauses can help you feel more grounded."
+  },
+  "tristeza": {
+    "label": "Sadness",
+    "tone": "challenging",
+    "weekly_message": "Sadness was present. Naming it without judgment is already an act of care.",
+    "biweekly_context": "This mood appeared at different moments. Slow, supported steps are still progress."
+  },
+  "frustracion": {
+    "label": "Frustration",
+    "tone": "challenging",
+    "weekly_message": "Frustration made itself felt. Adjusting expectations without quitting is also progress.",
+    "biweekly_context": "This state appeared when pressure was higher. Celebrating small wins can help rebuild momentum."
+  }
+}
