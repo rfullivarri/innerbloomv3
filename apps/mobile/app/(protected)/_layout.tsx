@@ -1,8 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-// eslint-disable-next-line import/no-unresolved
-import { Disc, Flame, Route, Sparkles, WandSparkles } from 'lucide-react-native';
+import { Flame, Route, Sparkles, Target, WandSparkles } from 'lucide-react-native';
 
 import { NativeTabBar, getNativeTabBarHeight } from '@/components/native-tab-bar';
 
@@ -42,7 +41,7 @@ export default function ProtectedLayout() {
         options={{
           tabBarLabel: 'Dashboard',
           tabBarIcon: ({ color = '#fff', size = 26 }) => (
-            <Disc size={size} color={color} strokeWidth={2.25} />
+            <Target size={size} color={color} strokeWidth={2.25} />
           ),
         }}
       />
