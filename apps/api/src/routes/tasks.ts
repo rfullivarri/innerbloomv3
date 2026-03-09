@@ -86,6 +86,29 @@ type InsightsResponse = {
     bestStreak: number;
     timeline: { weekStart: string; weekEnd: string; count: number; hit: boolean }[];
   };
+  recalibration: {
+    latest: {
+      action: 'up' | 'keep' | 'down';
+      periodLabel: string;
+      periodStart: string;
+      periodEnd: string;
+      expectedTarget: number;
+      completions: number;
+      completionRate: number;
+      recalibratedAt: string;
+    } | null;
+    history: {
+      action: 'up' | 'keep' | 'down';
+      periodLabel: string;
+      periodStart: string;
+      periodEnd: string;
+      expectedTarget: number;
+      completions: number;
+      completionRate: number;
+      recalibratedAt: string;
+    }[];
+    eligible: boolean;
+  };
 };
 
 
@@ -201,6 +224,23 @@ function computeStreaks(hits: boolean[]): { current: number; best: number } {
   }
 
   return { current, best };
+}
+
+function mapRecalibrationRecord(row: TaskRecalibrationRow): InsightsResponse['recalibration']['history'][number] {
+  const expectedTarget = Number(row.expected_target ?? 0);
+  const completionRate = Number(row.completion_rate ?? 0);
+  const completions = Number(row.completions_done ?? 0);
+
+  return {
+    action: row.action,
+    periodLabel: `${row.period_start} → ${row.period_end}`,
+    periodStart: row.period_start,
+    periodEnd: row.period_end,
+    expectedTarget: Number.isFinite(expectedTarget) ? expectedTarget : 0,
+    completions: Number.isFinite(completions) ? completions : 0,
+    completionRate: Number.isFinite(completionRate) ? completionRate : 0,
+    recalibratedAt: row.analyzed_at,
+  };
 }
 
 router.get(
@@ -330,6 +370,37 @@ router.get(
         bestStreak: streaks.best,
         timeline,
       },
+      recalibration: {
+        latest: null,
+        history: [],
+        eligible: false,
+      },
+    };
+
+    const recalibrationResult = await pool.query<TaskRecalibrationRow>(
+      `SELECT task_difficulty_recalibration_id,
+              period_start::text,
+              period_end::text,
+              game_mode_id,
+              expected_target,
+              completions_done,
+              completion_rate,
+              previous_difficulty_id,
+              new_difficulty_id,
+              action,
+              analyzed_at::text
+         FROM task_difficulty_recalibrations
+        WHERE task_id = $1
+        ORDER BY analyzed_at DESC
+        LIMIT 3`,
+      [taskId],
+    );
+
+    const recalibrationHistory = recalibrationResult.rows.map(mapRecalibrationRecord);
+    response.recalibration = {
+      latest: recalibrationHistory[0] ?? null,
+      history: recalibrationHistory,
+      eligible: recalibrationHistory.length > 0,
     };
 
     if (process.env.DEBUG_STREAKS_PANEL === 'true') {
