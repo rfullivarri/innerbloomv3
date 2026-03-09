@@ -4,7 +4,6 @@ import {
   type ReactElement,
   type SVGProps,
 } from "react";
-import { FingerprintPattern } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 export interface MobileBottomNavItem {
@@ -60,6 +59,22 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
             >
               {({ isActive }: { isActive: boolean }) => {
                 const isDashboard = item.key === "dashboard";
+                const resolvedIcon = isValidElement<SVGProps<SVGSVGElement>>(item.icon)
+                  ? cloneElement<SVGProps<SVGSVGElement>>(item.icon, {
+                      className: combine(
+                        item.icon.props.className,
+                        "transition-all duration-300",
+                        isDashboard ? "h-[26px] w-[26px]" : "h-[24px] w-[24px]",
+                      ),
+                      strokeWidth: isDashboard ? 2.5 : 2,
+                      strokeLinecap: isDashboard ? "round" : item.icon.props.strokeLinecap,
+                      strokeLinejoin: isDashboard ? "round" : item.icon.props.strokeLinejoin,
+                      stroke: "currentColor",
+                      fill: "none",
+                      opacity: isActive ? 1 : isDashboard ? 0.88 : 0.85,
+                      "aria-hidden": true,
+                    })
+                  : null;
 
                 return (
                   <div className="relative flex flex-col items-center gap-0.5">
@@ -89,35 +104,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
                                 : "text-[color:var(--color-text-muted)] group-hover:text-[color:var(--color-text)]",
                           )}
                         >
-                          {isDashboard ? (
-                            <FingerprintPattern
-                              className={combine(
-                                "transition-all duration-300",
-                                "h-[26px] w-[26px]",
-                                isActive ? "scale-[1.05]" : null,
-                              )}
-                              strokeWidth={2.5}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              stroke="currentColor"
-                              fill="none"
-                              opacity={isActive ? 1 : 0.88}
-                              aria-hidden
-                            />
-                          ) : isValidElement<SVGProps<SVGSVGElement>>(item.icon) ? (
-                            cloneElement<SVGProps<SVGSVGElement>>(item.icon, {
-                              className: combine(
-                                item.icon.props.className,
-                                "transition-all duration-300",
-                                "h-[24px] w-[24px]",
-                              ),
-                              strokeWidth: 2,
-                              stroke: "currentColor",
-                              fill: "none",
-                              opacity: isActive ? 1 : 0.85,
-                              "aria-hidden": true,
-                            })
-                          ) : null}
+                          {resolvedIcon}
                         </span>
                       </span>
                       {item.showPulseDot ? (
