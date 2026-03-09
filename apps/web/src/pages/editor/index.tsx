@@ -34,6 +34,7 @@ export const FEATURE_TASK_EDITOR_MOBILE_LIST_V1 = true;
 export default function TaskEditorPage() {
   const location = useLocation();
   const { language, t } = usePostLoginLanguage();
+  const activeLocale = language === 'es' ? 'es' : 'en';
   const sections = getDashboardSections(location.pathname, language);
   const activeSection = getActiveSection(location.pathname, sections, language);
   const taskEditorSection = getDashboardSectionConfig('editor', location.pathname, language);
@@ -186,10 +187,10 @@ export default function TaskEditorPage() {
 
   const pillarOptions = useMemo(() => {
     return [
-      { value: '', label: 'Todos los pilares' },
+      { value: '', label: t('editor.filters.pillars.all') },
       ...pillars.map((pillar) => ({ value: pillar.id, label: pillar.name })),
     ];
-  }, [pillars]);
+  }, [pillars, t]);
 
   const pillarNamesById = useMemo(() => {
     const map = new Map<string, string>();
@@ -257,7 +258,7 @@ export default function TaskEditorPage() {
 
     entries.sort((a, b) => {
       if (a.pillarName === b.pillarName) {
-        return a.task.title.localeCompare(b.task.title, 'es', { sensitivity: 'base' });
+        return a.task.title.localeCompare(b.task.title, activeLocale, { sensitivity: 'base' });
       }
 
       if (!a.pillarName) {
@@ -268,11 +269,11 @@ export default function TaskEditorPage() {
         return -1;
       }
 
-      return a.pillarName.localeCompare(b.pillarName, 'es', { sensitivity: 'base' });
+      return a.pillarName.localeCompare(b.pillarName, activeLocale, { sensitivity: 'base' });
     });
 
     return entries.map((entry) => entry.task);
-  }, [filteredTasks, pillarNamesById]);
+  }, [activeLocale, filteredTasks, pillarNamesById]);
 
   const hasActiveFilters = normalizedSearch.length > 0 || selectedPillar.length > 0;
   const isDeletingTask = deleteStatus === 'loading';
@@ -300,12 +301,12 @@ export default function TaskEditorPage() {
 
   const handleConfirmDelete = useCallback(async () => {
     if (!taskToDelete) {
-      setDeleteErrorMessage('No se encontró la tarea que deseas eliminar.');
+      setDeleteErrorMessage(t('editor.validation.taskNotFound'));
       return;
     }
 
     if (!backendUserId) {
-      setDeleteErrorMessage('No se pudo identificar tu usuario. Intenta más tarde.');
+      setDeleteErrorMessage(t('editor.validation.userNotFound'));
       return;
     }
 
@@ -315,11 +316,11 @@ export default function TaskEditorPage() {
       await deleteTask(backendUserId, taskToDelete.id);
       setTaskToDelete(null);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo eliminar la tarea.';
+      const message = error instanceof Error ? error.message : t('editor.toast.delete.error');
       setDeleteErrorMessage(message);
       setPageToast({ type: 'error', text: message });
     }
-  }, [backendUserId, deleteTask, taskToDelete]);
+  }, [backendUserId, deleteTask, t, taskToDelete]);
 
   useEffect(() => {
     if (!pageToast) {
@@ -335,7 +336,7 @@ export default function TaskEditorPage() {
       if (!backendUserId) {
         setPageToast({
           type: 'error',
-          text: 'No se pudo identificar tu usuario. Intenta más tarde.',
+          text: t('editor.validation.userNotFound'),
         });
         return;
       }
@@ -344,7 +345,7 @@ export default function TaskEditorPage() {
 
       try {
         const normalizedTitle = task.title?.trim() ?? '';
-        const title = normalizedTitle.length > 0 ? `${normalizedTitle} (copia)` : 'Tarea duplicada';
+        const title = normalizedTitle.length > 0 ? `${normalizedTitle} ${t('editor.duplicate.copySuffix')}` : t('editor.duplicate.fallbackTitle');
         await duplicateTask(backendUserId, {
           title,
           pillarId: task.pillarId ?? null,
@@ -353,15 +354,15 @@ export default function TaskEditorPage() {
           difficultyId: task.difficultyId ?? null,
           isActive: task.isActive ?? true,
         });
-        setPageToast({ type: 'success', text: 'Tarea duplicada correctamente.' });
+        setPageToast({ type: 'success', text: t('editor.toast.duplicate.success') });
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'No se pudo duplicar la tarea.';
+        const message = error instanceof Error ? error.message : t('editor.toast.duplicate.error');
         setPageToast({ type: 'error', text: message });
       } finally {
         setDuplicatingTaskId(null);
       }
     },
-    [backendUserId, duplicateTask],
+    [backendUserId, duplicateTask, t],
   );
 
   const handleImproveTask = useCallback(
@@ -373,10 +374,10 @@ export default function TaskEditorPage() {
       // TODO: conectar con el flujo de mejora por IA cuando esté disponible en el editor.
       setPageToast({
         type: 'info',
-        text: 'Pronto podrás mejorar tareas con IA desde aquí.',
+        text: t('editor.toast.improve.comingSoon'),
       });
     },
-    [],
+    [t],
   );
 
   const navigationTasks = useMemo(() => {
@@ -417,8 +418,8 @@ export default function TaskEditorPage() {
     setPageToast({
       type: 'success',
       text: isFirstOnboardingEdit
-        ? 'Cambios guardados. Ya podés hacer tu primer Daily Quest.'
-        : 'Cambios guardados.',
+        ? t('editor.toast.edit.firstQuestReady')
+        : t('editor.toast.edit.saved'),
     });
 
     handleCloseEdit();
@@ -431,6 +432,7 @@ export default function TaskEditorPage() {
     handleCloseEdit,
     markFirstEditDone,
     scrollToEditorTop,
+    t,
   ]);
 
   const handleNavigatePanelTask = useCallback(
@@ -478,7 +480,7 @@ export default function TaskEditorPage() {
                       to={getDashboardSectionConfig('dashboard', location.pathname, language).to}
                       className="block overflow-hidden text-ellipsis whitespace-nowrap text-white hover:text-white/95"
                     >
-                      Listo. Volvé al Dashboard para tu primer Daily Quest <span className="font-semibold">→</span>
+                      {t('editor.onboarding.nudge')} <span className="font-semibold">→</span>
                     </Link>
                   </div>
                 )}
@@ -501,15 +503,15 @@ export default function TaskEditorPage() {
                 )}
 
                 {isTaskListEmpty && (
-                  <TaskListEmpty message="Todavía no tienes tareas. Usa el botón para comenzar cuando esté listo." />
+                  <TaskListEmpty message={t('editor.empty.noTasks')} />
                 )}
 
                 {isFilteredEmpty && (
                   <TaskListEmpty
                     message={
                       hasActiveFilters
-                        ? 'No encontramos tareas con los filtros actuales. Ajusta la búsqueda para ver más resultados.'
-                        : 'No encontramos tareas para mostrar.'
+                        ? t('editor.empty.noMatches')
+                        : t('editor.empty.noVisibleTasks')
                     }
                   />
                 )}
@@ -539,7 +541,7 @@ export default function TaskEditorPage() {
 
               return {
                 key: section.key,
-                label: section.key === 'editor' ? 'Editor' : section.label,
+                label: section.key === 'editor' ? t('editor.navigation.label') : section.label,
                 to: section.to,
                 icon: <Icon className="h-4 w-4" />,
                 end: section.end,
@@ -554,7 +556,7 @@ export default function TaskEditorPage() {
           className="fixed bottom-24 right-4 z-30 inline-flex items-center gap-2 rounded-full bg-violet-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(139,92,246,0.45)] transition hover:bg-violet-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 md:bottom-10 md:right-8"
         >
           <span aria-hidden className="text-lg leading-none">＋</span>
-          Nueva tarea
+          {t('editor.button.newTask')}
         </button>
         <CreateTaskModal
           open={showCreateModal}
@@ -632,26 +634,27 @@ function TaskFilters({
   pillarsError,
   onRetryPillars,
 }: TaskFiltersProps) {
+  const { t } = usePostLoginLanguage();
   if (!FEATURE_TASK_EDITOR_MOBILE_LIST_V1) {
     return (
       <div className="flex flex-col gap-3 md:flex-row md:items-end">
         <label className="flex w-full flex-col gap-2">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
-            Búsqueda
+            {t('editor.filters.search.label')}
           </span>
           <div className="relative flex items-center">
             <input
               type="search"
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Buscar por título"
+              placeholder={t('editor.filters.search.placeholder')}
               className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </div>
         </label>
         <label className="flex w-full flex-col gap-2 md:max-w-xs">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
-            Pilar
+            {t('editor.filters.pillar.label')}
           </span>
           <select
             value={selectedPillar}
@@ -665,7 +668,7 @@ function TaskFilters({
             ))}
           </select>
           {isLoadingPillars && (
-            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando pilares…</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.filters.pillar.loading')}</span>
           )}
           {pillarsError && !isLoadingPillars && (
             <button
@@ -673,7 +676,7 @@ function TaskFilters({
               onClick={onRetryPillars}
               className="self-start text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300"
             >
-              Reintentar cargar pilares
+              {t('editor.filters.pillar.retry')}
             </button>
           )}
         </label>
@@ -687,19 +690,19 @@ function TaskFilters({
         <div className="editor-filters-mobile-panel sticky -mx-6 -mt-6 top-[4.5rem] z-30 space-y-3 rounded-t-2xl px-6 pt-6 pb-3 bg-[color:var(--color-slate-900-95)]">
           <label className="flex flex-col gap-1">
             <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">
-              Buscar tareas
+              {t('editor.filters.search.mobileLabel')}
             </span>
             <input
               type="search"
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Buscar por título"
+              placeholder={t('editor.filters.search.placeholder')}
               className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </label>
           <div className="space-y-2">
             <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-              Pilares
+              {t('editor.filters.pillar.mobileLabel')}
             </span>
             <div className="flex gap-2 overflow-x-auto pb-1 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
               {pillars.map((pillar) => {
@@ -721,7 +724,7 @@ function TaskFilters({
           </div>
         </div>
         {isLoadingPillars && (
-          <p className="px-1 text-[10px] uppercase tracking-[0.28em] text-slate-500">Cargando pilares…</p>
+          <p className="px-1 text-[10px] uppercase tracking-[0.28em] text-slate-500">{t('editor.filters.pillar.loading')}</p>
         )}
         {pillarsError && !isLoadingPillars && (
           <button
@@ -729,28 +732,28 @@ function TaskFilters({
             onClick={onRetryPillars}
             className="px-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-300"
           >
-            Reintentar cargar pilares
+            {t('editor.filters.pillar.retry')}
           </button>
         )}
       </div>
       <div className="hidden flex-col gap-3 md:flex md:flex-row md:items-end">
         <label className="flex w-full flex-col gap-2">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
-            Búsqueda
+            {t('editor.filters.search.label')}
           </span>
           <div className="relative flex items-center">
             <input
               type="search"
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Buscar por título"
+              placeholder={t('editor.filters.search.placeholder')}
               className="w-full rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </div>
         </label>
         <label className="flex w-full flex-col gap-2 md:max-w-xs">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">
-            Pilar
+            {t('editor.filters.pillar.label')}
           </span>
           <select
             value={selectedPillar}
@@ -764,7 +767,7 @@ function TaskFilters({
             ))}
           </select>
           {isLoadingPillars && (
-            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando pilares…</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.filters.pillar.loading')}</span>
           )}
           {pillarsError && !isLoadingPillars && (
             <button
@@ -772,7 +775,7 @@ function TaskFilters({
               onClick={onRetryPillars}
               className="self-start text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300"
             >
-              Reintentar cargar pilares
+              {t('editor.filters.pillar.retry')}
             </button>
           )}
         </label>
@@ -917,7 +920,7 @@ function TaskListMobile({
   const resolveDifficulty = useCallback(
     (task: UserTask) => {
       const difficultyId = task.difficultyId ?? '';
-      const name = difficultyId ? difficultyNamesById.get(difficultyId) ?? difficultyId : 'Sin dificultad';
+      const name = difficultyId ? difficultyNamesById.get(difficultyId) ?? difficultyId : t('editor.field.noDifficulty');
       const reference = (difficultyId || name).toLowerCase();
       let tone = 'bg-slate-400';
       if (reference.includes('easy') || reference.includes('baja') || reference.includes('low')) {
@@ -928,7 +931,7 @@ function TaskListMobile({
         tone = 'bg-rose-400';
       }
 
-      return { label: name || 'Sin dificultad', tone };
+      return { label: name || t('editor.field.noDifficulty'), tone };
     },
     [difficultyNamesById],
   );
@@ -977,7 +980,7 @@ function TaskListMobile({
                 className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-base text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
               >
                 <span aria-hidden>⋯</span>
-                <span className="sr-only">Más acciones</span>
+                <span className="sr-only">{t('editor.task.actions.more')}</span>
               </button>
               {isMenuOpen && (
                 <div className="absolute right-0 top-10 z-40 w-44 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] p-1 shadow-[0_10px_30px_rgba(15,23,42,0.6)]">
@@ -990,7 +993,7 @@ function TaskListMobile({
                     }}
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-[color:var(--color-slate-100)] transition hover:bg-[color:var(--color-overlay-2)]"
                   >
-                    Editar
+                    {t('editor.button.edit')}
                   </button>
                   <button
                     type="button"
@@ -1008,7 +1011,7 @@ function TaskListMobile({
                         : 'text-[color:var(--color-slate-100)] hover:bg-[color:var(--color-overlay-2)]'
                     } ${isDuplicating ? 'opacity-70' : ''}`.trim()}
                   >
-                    {isDuplicating ? 'Duplicando…' : 'Duplicar'}
+                    {isDuplicating ? t('editor.button.duplicating') : t('editor.button.duplicate')}
                   </button>
                   <button
                     type="button"
@@ -1026,7 +1029,7 @@ function TaskListMobile({
                         : 'cursor-not-allowed text-slate-500'
                     }`}
                   >
-                    Mejorar con IA
+                    {t('editor.button.improveAi')}
                   </button>
                   <button
                     type="button"
@@ -1064,7 +1067,7 @@ function TaskCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const { t } = usePostLoginLanguage();
+  const { language, t } = usePostLoginLanguage();
 
   return (
     <article className="group relative flex flex-col gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[0_8px_24px_rgba(15,23,42,0.35)] transition hover:border-[color:var(--color-border-soft)]">
@@ -1085,7 +1088,7 @@ function TaskCard({
             onClick={onEdit}
             className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
           >
-            Editar
+            {t('editor.button.edit')}
           </button>
           <button
             type="button"
@@ -1096,28 +1099,28 @@ function TaskCard({
       </div>
       <dl className="grid gap-1 text-xs text-[color:var(--color-slate-400)]">
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-[color:var(--color-slate-300)]">Pilar</dt>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">{t('editor.field.pillar')}</dt>
           <dd className="truncate text-right text-[color:var(--color-slate-200)]">{pillarName ?? task.pillarId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-[color:var(--color-slate-300)]">Rasgo</dt>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">{t('editor.field.trait')}</dt>
           <dd className="truncate text-right">{traitName ?? task.traitId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-[color:var(--color-slate-300)]">Stat</dt>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">{t('editor.field.stat')}</dt>
           <dd className="truncate text-right">{statName ?? task.statId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-[color:var(--color-slate-300)]">Dificultad</dt>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">{t('editor.field.difficulty')}</dt>
           <dd className="truncate text-right">{difficultyName ?? task.difficultyId ?? '—'}</dd>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <dt className="font-medium text-[color:var(--color-slate-300)]">GP base</dt>
+          <dt className="font-medium text-[color:var(--color-slate-300)]">{t('editor.field.baseGp')}</dt>
           <dd className="truncate text-right">{task.xp != null ? task.xp : '—'}</dd>
         </div>
       </dl>
       <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
-        Actualizada: {formatDateLabel(task.updatedAt)}
+        {t('editor.field.updatedAt')}: {formatDateLabel(task.updatedAt, language)}
       </p>
     </article>
   );
@@ -1187,6 +1190,8 @@ function TaskBoard({
   onSelectTask,
   onDeleteTask,
 }: TaskBoardProps) {
+  const { t } = usePostLoginLanguage();
+
   if (groups.length === 0) {
     return <div className="hidden lg:block" />;
   }
@@ -1195,7 +1200,7 @@ function TaskBoard({
     <div className="hidden gap-4 lg:grid lg:grid-cols-3">
       {groups.map((group) => {
         const style = resolvePillarStyle(group.code);
-        const displayCode = group.code === 'UNKNOWN' ? 'Sin pilar' : group.code;
+        const displayCode = group.code === 'UNKNOWN' ? t('editor.field.noPillar') : group.code;
 
         return (
           <section
@@ -1218,7 +1223,7 @@ function TaskBoard({
             <div className="mt-3 flex-1 space-y-2">
               {group.tasks.length === 0 ? (
                 <p className="rounded-xl border border-white/5 bg-[color:var(--color-overlay-1)] px-3 py-6 text-center text-xs text-slate-500">
-                  Sin tareas en este pilar.
+                  {t('editor.board.emptyPillar')}
                 </p>
               ) : (
                 group.tasks.map((task: UserTask) => (
@@ -1228,7 +1233,7 @@ function TaskBoard({
                     groupKey={group.key}
                     pillarName=
                       {group.key === '__unknown__'
-                        ? pillarNamesById.get(task.pillarId ?? '') ?? 'Sin pilar'
+                        ? pillarNamesById.get(task.pillarId ?? '') ?? t('editor.field.noPillar')
                         : group.name}
                     difficultyName={task.difficultyId ? difficultyNamesById.get(task.difficultyId) ?? null : null}
                     isActiveTask={activeTaskId === task.id}
@@ -1312,7 +1317,7 @@ function TaskBoardItem({
             </span>
             <span className="flex items-center gap-1 text-[color:var(--color-slate-400)]">
               <span className={`text-base leading-none ${bulletClass}`}>•</span>
-              {difficultyName ?? 'Sin dificultad'}
+              {difficultyName ?? t('editor.field.noDifficulty')}
             </span>
             <span className="text-slate-500">{pillarName}</span>
           </div>
@@ -1371,13 +1376,13 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
   };
 
   const normalizedTitle = task?.title?.trim() ?? '';
-  const displayTitle = normalizedTitle.length > 0 ? `“${normalizedTitle}”` : 'esta tarea';
+  const displayTitle = normalizedTitle.length > 0 ? `“${normalizedTitle}”` : t('editor.modal.delete.thisTask');
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
       <button
         type="button"
-        aria-label="Cerrar"
+        aria-label={t('editor.button.close')}
         onClick={() => {
           if (!isDeleting) {
             onClose();
@@ -1393,11 +1398,11 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
           onClick={(event) => event.stopPropagation()}
         >
           <header className="space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Confirmar eliminación</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">{t('editor.modal.delete.heading')}</p>
             <h2 className="text-xl font-semibold text-white">{t('editor.modal.delete.title')}</h2>
           </header>
           <p className="text-sm text-[color:var(--color-slate-300)]">
-            ¿Seguro que quieres eliminar {displayTitle}? Esta acción quitará la tarea de tu lista inmediatamente.
+            {t('editor.modal.delete.message', { title: displayTitle })}
           </p>
           {errorMessage && (
             <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
@@ -1415,7 +1420,7 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
               disabled={isDeleting}
               className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Cancelar
+              {t('editor.button.cancel')}
             </button>
             <button
               type="button"
@@ -1454,22 +1459,24 @@ function TaskListEmpty({ message }: { message: string }) {
 }
 
 function TaskListError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const { t } = usePostLoginLanguage();
+
   return (
     <div className="flex flex-col items-center gap-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-6 py-8 text-center text-sm text-rose-100">
-      <p className="font-semibold">No pudimos cargar tus tareas.</p>
+      <p className="font-semibold">{t('editor.error.loadTasks.title')}</p>
       <p className="max-w-sm text-rose-200/80">{message}</p>
       <button
         type="button"
         onClick={onRetry}
         className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:border-[color:var(--color-border-strong)]"
       >
-        Reintentar
+        {t('editor.button.retry')}
       </button>
     </div>
   );
 }
 
-function formatDateLabel(value: string | null): string {
+function formatDateLabel(value: string | null, locale: 'es' | 'en' = 'es'): string {
   if (!value) {
     return '—';
   }
@@ -1479,7 +1486,7 @@ function formatDateLabel(value: string | null): string {
     return '—';
   }
 
-  return parsed.toLocaleDateString();
+  return parsed.toLocaleDateString(locale);
 }
 
 type ToastMessage = { type: 'success' | 'error' | 'info'; text: string };
@@ -1503,6 +1510,8 @@ function CreateTaskModal({
   pillarsError,
   onRetryPillars,
 }: CreateTaskModalProps) {
+  const { language, t } = usePostLoginLanguage();
+  const activeLocale = language === 'es' ? 'es' : 'en';
   const [selectedPillarId, setSelectedPillarId] = useState('');
   const [selectedTraitId, setSelectedTraitId] = useState('');
   const [selectedStatId, setSelectedStatId] = useState('');
@@ -1597,8 +1606,8 @@ function CreateTaskModal({
   }, [selectedTraitId, clearError]);
 
   const sortedPillars = useMemo(() => {
-    return [...pillars].sort((a, b) => a.name.localeCompare(b.name, 'es'));
-  }, [pillars]);
+    return [...pillars].sort((a, b) => a.name.localeCompare(b.name, activeLocale, { sensitivity: 'base' }));
+  }, [activeLocale, pillars]);
 
   const filteredTraits = useMemo(() => {
     return traits.filter((trait) => trait.pillarId === selectedPillarId);
@@ -1609,8 +1618,8 @@ function CreateTaskModal({
   }, [stats, selectedTraitId]);
 
   const sortedDifficulties = useMemo(() => {
-    return [...difficulties].sort((a, b) => a.name.localeCompare(b.name, 'es'));
-  }, [difficulties]);
+    return [...difficulties].sort((a, b) => a.name.localeCompare(b.name, activeLocale, { sensitivity: 'base' }));
+  }, [activeLocale, difficulties]);
 
   const isSubmitting = createStatus === 'loading';
   const isSubmitDisabled =
@@ -1621,16 +1630,16 @@ function CreateTaskModal({
 
     const validationErrors: Record<string, string> = {};
     if (!selectedPillarId) {
-      validationErrors.pillar = 'Selecciona un pilar para continuar.';
+      validationErrors.pillar = t('editor.validation.selectPillar');
     }
     if (!selectedTraitId) {
-      validationErrors.trait = 'Selecciona un rasgo para continuar.';
+      validationErrors.trait = t('editor.validation.selectTrait');
     }
     if (title.trim().length === 0) {
-      validationErrors.title = 'El título es obligatorio.';
+      validationErrors.title = t('editor.validation.titleRequired');
     }
     if (!userId) {
-      validationErrors.user = 'No se pudo identificar tu usuario. Intenta más tarde.';
+      validationErrors.user = t('editor.validation.userNotFound');
     }
 
     setErrors(validationErrors);
@@ -1647,13 +1656,13 @@ function CreateTaskModal({
         statId: selectedStatId || null,
         difficultyId: difficultyId || null,
       });
-      setToast({ type: 'success', text: 'Tarea creada correctamente.' });
+      setToast({ type: 'success', text: t('editor.toast.create.success') });
       setTitle('');
       setDifficultyId('');
       setSelectedStatId('');
       setErrors({});
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo crear la tarea.';
+      const message = error instanceof Error ? error.message : t('editor.toast.create.error');
       setToast({ type: 'error', text: message });
     }
   };
@@ -1666,7 +1675,7 @@ function CreateTaskModal({
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
       <button
         type="button"
-        aria-label="Cerrar"
+        aria-label={t('editor.button.close')}
         onClick={handleClose}
         className="absolute inset-0 h-full w-full"
       />
@@ -1678,18 +1687,18 @@ function CreateTaskModal({
         >
           <div className="space-y-6">
             <header className="space-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Nueva tarea</p>
-              <h2 className="text-xl font-semibold text-white">Crear tarea personalizada</h2>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">{t('editor.modal.create.badge')}</p>
+              <h2 className="text-xl font-semibold text-white">{t('editor.modal.create.title')}</h2>
               <p className="text-sm text-[color:var(--color-slate-300)]">
-                Define el pilar, rasgo y stat para desbloquear campos específicos de tu misión.
+                {t('editor.modal.create.description')}
               </p>
             </header>
 
             <section className="space-y-4">
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 1 · Pilar</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{t('editor.modal.create.step1')}</p>
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Selecciona un pilar</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('editor.modal.create.selectPillarLabel')}</span>
                   <select
                     value={selectedPillarId}
                     onChange={(event) => {
@@ -1700,7 +1709,7 @@ function CreateTaskModal({
                     disabled={isLoadingPillars || pillarsError != null}
                   >
                     <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                      Selecciona un pilar…
+                      {t('editor.modal.create.selectPillarPlaceholder')}
                     </option>
                     {sortedPillars.map((pillar) => (
                       <option key={pillar.id} value={pillar.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
@@ -1710,17 +1719,17 @@ function CreateTaskModal({
                   </select>
                 </label>
                 {isLoadingPillars && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando pilares…</p>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.pillars')}</p>
                 )}
                 {pillarsError && (
                   <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-                    <p>No se pudieron cargar los pilares.</p>
+                    <p>{t('editor.error.pillars.load')}</p>
                     <button
                       type="button"
                       onClick={onRetryPillars}
                       className="font-semibold text-rose-200 underline decoration-dotted"
                     >
-                      Reintentar
+                      {t('editor.button.retry')}
                     </button>
                   </div>
                 )}
@@ -1731,9 +1740,9 @@ function CreateTaskModal({
               </div>
 
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 2 · Rasgo</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{t('editor.modal.create.step2')}</p>
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Selecciona un rasgo</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('editor.modal.create.selectTraitLabel')}</span>
                   <select
                     value={selectedTraitId}
                     onChange={(event) => {
@@ -1744,7 +1753,7 @@ function CreateTaskModal({
                     disabled={!selectedPillarId || isLoadingTraits}
                   >
                     <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                      {selectedPillarId ? 'Selecciona un rasgo…' : 'Selecciona primero un pilar'}
+                      {selectedPillarId ? t('editor.modal.create.selectTraitPlaceholder') : t('editor.modal.create.selectPillarFirst')}
                     </option>
                     {filteredTraits.map((trait) => (
                       <option key={trait.id} value={trait.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
@@ -1754,30 +1763,30 @@ function CreateTaskModal({
                   </select>
                 </label>
                 {isLoadingTraits && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando rasgos…</p>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.traits')}</p>
                 )}
                 {traitsError && (
                   <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-                    <p>No se pudieron cargar los rasgos.</p>
+                    <p>{t('editor.error.traits.load')}</p>
                     <button
                       type="button"
                       onClick={reloadTraits}
                       className="font-semibold text-rose-200 underline decoration-dotted"
                     >
-                      Reintentar
+                      {t('editor.button.retry')}
                     </button>
                   </div>
                 )}
                 {errors.trait && <p className="text-xs text-rose-300">{errors.trait}</p>}
                 {selectedPillarId && !isLoadingTraits && filteredTraits.length === 0 && !traitsError && (
-                  <p className="text-xs text-[color:var(--color-slate-400)]">Este pilar aún no tiene rasgos disponibles.</p>
+                  <p className="text-xs text-[color:var(--color-slate-400)]">{t('editor.empty.noTraits')}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Paso 3 · Stat</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{t('editor.modal.create.step3')}</p>
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Selecciona un stat (opcional)</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('editor.modal.create.selectStatLabel')}</span>
                   <select
                     value={selectedStatId}
                     onChange={(event) => setSelectedStatId(event.target.value)}
@@ -1785,7 +1794,7 @@ function CreateTaskModal({
                     disabled={!selectedTraitId || isLoadingStats}
                   >
                     <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                      {selectedTraitId ? 'Selecciona un stat…' : 'Selecciona primero un rasgo'}
+                      {selectedTraitId ? t('editor.modal.create.selectStatPlaceholder') : t('editor.modal.create.selectTraitFirst')}
                     </option>
                     {filteredStats.map((stat) => (
                       <option key={stat.id} value={stat.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
@@ -1795,22 +1804,22 @@ function CreateTaskModal({
                   </select>
                 </label>
                 {isLoadingStats && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando stats…</p>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.stats')}</p>
                 )}
                 {statsError && (
                   <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-                    <p>No se pudieron cargar los stats.</p>
+                    <p>{t('editor.error.stats.load')}</p>
                     <button
                       type="button"
                       onClick={reloadStats}
                       className="font-semibold text-rose-200 underline decoration-dotted"
                     >
-                      Reintentar
+                      {t('editor.button.retry')}
                     </button>
                   </div>
                 )}
                 {selectedTraitId && !isLoadingStats && filteredStats.length === 0 && !statsError && (
-                  <p className="text-xs text-[color:var(--color-slate-400)]">Este rasgo aún no tiene stats asociados.</p>
+                  <p className="text-xs text-[color:var(--color-slate-400)]">{t('editor.empty.noStats')}</p>
                 )}
               </div>
             </section>
@@ -1818,7 +1827,7 @@ function CreateTaskModal({
             <section className="space-y-4">
               <div className="space-y-2">
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Título de la tarea</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('editor.modal.create.taskTitleLabel')}</span>
                   <input
                     type="text"
                     value={title}
@@ -1826,7 +1835,7 @@ function CreateTaskModal({
                       setTitle(event.target.value);
                       clearError('title');
                     }}
-                    placeholder="Ej. Entrenar 30 minutos"
+                    placeholder={t('editor.modal.taskTitle.placeholder')}
                     className="w-full rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-3 text-sm ios-touch-input text-[color:var(--color-slate-100)] placeholder:text-[color:var(--color-slate-400)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20"
                   />
                 </label>
@@ -1835,7 +1844,7 @@ function CreateTaskModal({
 
               <div className="space-y-2">
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Dificultad</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('editor.field.difficulty')}</span>
                   <select
                     value={difficultyId}
                     onChange={(event) => setDifficultyId(event.target.value)}
@@ -1843,7 +1852,7 @@ function CreateTaskModal({
                     disabled={isLoadingDifficulties}
                   >
                     <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                      Selecciona una dificultad…
+                      {t('editor.modal.create.selectDifficultyPlaceholder')}
                     </option>
                     {sortedDifficulties.map((difficulty) => (
                       <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
@@ -1853,17 +1862,17 @@ function CreateTaskModal({
                   </select>
                 </label>
                 {isLoadingDifficulties && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando dificultades…</p>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.difficulties')}</p>
                 )}
                 {difficultiesError && (
                   <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-                    <p>No se pudieron cargar las dificultades.</p>
+                    <p>{t('editor.error.difficulties.load')}</p>
                     <button
                       type="button"
                       onClick={reloadDifficulties}
                       className="font-semibold text-rose-200 underline decoration-dotted"
                     >
-                      Reintentar
+                      {t('editor.button.retry')}
                     </button>
                   </div>
                 )}
@@ -1881,14 +1890,14 @@ function CreateTaskModal({
                 onClick={handleClose}
                 className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-white"
               >
-                Cancelar
+                {t('editor.button.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitDisabled}
                 className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(79,70,229,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSubmitting ? 'Creando…' : 'Crear tarea'}
+                {isSubmitting ? t('editor.button.creating') : t('editor.button.createTask')}
               </button>
             </div>
           </div>
@@ -1921,6 +1930,8 @@ function EditTaskModal({
   navigationTasks = [],
   onNavigateTask,
 }: EditTaskModalProps) {
+  const { language, t } = usePostLoginLanguage();
+  const activeLocale = language === 'es' ? 'es' : 'en';
   const [title, setTitle] = useState('');
   const [difficultyId, setDifficultyId] = useState('');
   const [isActive, setIsActive] = useState(true);
@@ -1946,19 +1957,19 @@ function EditTaskModal({
   const { data: traits } = useTraits(currentPillarId);
 
   const sortedDifficulties = useMemo(() => {
-    return [...difficulties].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    return [...difficulties].sort((a, b) => a.name.localeCompare(b.name, activeLocale, { sensitivity: 'base' }));
   }, [difficulties]);
 
   const pillarName = useMemo(() => {
     if (!task?.pillarId) {
-      return '—';
+      return t('editor.symbol.empty');
     }
     return pillars.find((pillar) => pillar.id === task.pillarId)?.name ?? task.pillarId;
   }, [pillars, task?.pillarId]);
 
   const traitName = useMemo(() => {
     if (!task?.traitId) {
-      return '—';
+      return t('editor.symbol.empty');
     }
     return traits.find((trait) => trait.id === task.traitId)?.name ?? task.traitId;
   }, [traits, task?.traitId]);
@@ -2020,15 +2031,15 @@ function EditTaskModal({
     const validationErrors: Record<string, string> = {};
 
     if (!title.trim()) {
-      validationErrors.title = 'El título es obligatorio.';
+      validationErrors.title = t('editor.validation.titleRequired');
     }
 
     if (!userId) {
-      validationErrors.user = 'No se pudo identificar tu usuario. Intenta más tarde.';
+      validationErrors.user = t('editor.validation.userNotFound');
     }
 
     if (!task) {
-      validationErrors.task = 'No se encontró la tarea que deseas editar.';
+      validationErrors.task = t('editor.validation.taskNotFoundEdit');
     }
 
     setErrors(validationErrors);
@@ -2049,9 +2060,9 @@ function EditTaskModal({
         return;
       }
 
-      setToast({ type: 'success', text: 'Tarea actualizada correctamente.' });
+      setToast({ type: 'success', text: t('editor.toast.update.success') });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo actualizar la tarea.';
+      const message = error instanceof Error ? error.message : t('editor.toast.update.error');
       setToast({ type: 'error', text: message });
     }
   };
@@ -2085,10 +2096,10 @@ function EditTaskModal({
   const formBody = (
     <div className="edit-task-modal space-y-6">
       <header className="space-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Editar tarea</p>
-        <h2 className="edit-task-modal__title text-xl font-semibold">Actualiza los detalles de tu tarea</h2>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">{t('editor.modal.edit.badge')}</p>
+        <h2 className="edit-task-modal__title text-xl font-semibold">{t('editor.modal.edit.title')}</h2>
         <p className="edit-task-modal__description text-sm">
-          Ajusta el título, dificultad y estado. Los campos de pilar y rasgo permanecen bloqueados.
+          {t('editor.modal.edit.description')}
         </p>
       </header>
 
@@ -2098,11 +2109,11 @@ function EditTaskModal({
             Contexto
           </span>
           <div className="grid gap-3 md:grid-cols-2">
-            <ReadOnlyField label="Pilar" value={pillarName} />
-            <ReadOnlyField label="Rasgo" value={traitName} />
+            <ReadOnlyField label={t('editor.field.pillar')} value={pillarName} />
+            <ReadOnlyField label={t('editor.field.trait')} value={traitName} />
           </div>
           <p className="edit-task-modal__locked-section-label text-[11px] uppercase tracking-[0.2em] text-slate-500">
-            Estos campos no se pueden editar.
+            {t('editor.modal.edit.lockedHint')}
           </p>
         </div>
       </section>
@@ -2113,7 +2124,7 @@ function EditTaskModal({
         </p>
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
-            <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">Título de la tarea</span>
+            <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">{t('editor.modal.create.taskTitleLabel')}</span>
             <input
               type="text"
               value={title}
@@ -2121,7 +2132,7 @@ function EditTaskModal({
                 setTitle(event.target.value);
                 clearError('title');
               }}
-              placeholder="Ej. Entrenar 30 minutos"
+              placeholder={t('editor.modal.taskTitle.placeholder')}
               className="edit-task-modal__editable-control w-full rounded-2xl border px-4 py-3 text-sm ios-touch-input transition focus:outline-none"
             />
           </label>
@@ -2130,7 +2141,7 @@ function EditTaskModal({
 
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
-            <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">Dificultad</span>
+            <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">{t('editor.field.difficulty')}</span>
             <select
               value={difficultyId}
               onChange={(event) => setDifficultyId(event.target.value)}
@@ -2138,7 +2149,7 @@ function EditTaskModal({
               disabled={isLoadingDifficulties}
             >
               <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                Sin dificultad asignada
+                {t('editor.modal.edit.noDifficultyAssigned')}
               </option>
               {sortedDifficulties.map((difficulty) => (
                 <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
@@ -2148,24 +2159,24 @@ function EditTaskModal({
             </select>
           </label>
           {isLoadingDifficulties && (
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Cargando dificultades…</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.difficulties')}</p>
           )}
           {difficultiesError && (
             <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-              <p>No se pudieron cargar las dificultades.</p>
+              <p>{t('editor.error.difficulties.load')}</p>
               <button
                 type="button"
                 onClick={reloadDifficulties}
                 className="font-semibold text-rose-200 underline decoration-dotted"
               >
-                Reintentar
+                {t('editor.button.retry')}
               </button>
             </div>
           )}
         </div>
 
         <div className="space-y-2">
-          <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">Estado</span>
+          <span className="edit-task-modal__editable-field-label text-xs font-semibold uppercase tracking-[0.18em]">{t('editor.field.status')}</span>
           <label className="flex items-center gap-3">
             <input
               type="checkbox"
@@ -2173,7 +2184,7 @@ function EditTaskModal({
               onChange={(event) => setIsActive(event.target.checked)}
               className="edit-task-modal__status-checkbox h-4 w-4 rounded"
             />
-            <span className="edit-task-modal__status-label text-sm">{isActive ? 'Activa' : 'Inactiva'}</span>
+            <span className="edit-task-modal__status-label text-sm">{isActive ? t('editor.task.status.active') : t('editor.task.status.inactive')}</span>
           </label>
         </div>
       </section>
@@ -2189,14 +2200,14 @@ function EditTaskModal({
           onClick={handleClose}
           className="edit-task-modal__button-secondary inline-flex items-center justify-center rounded-full border px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition"
         >
-          Cancelar
+          {t('editor.button.cancel')}
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
           className="edit-task-modal__button-primary inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Guardando…' : 'Guardar cambios'}
+          {isSubmitting ? t('editor.button.saving') : t('editor.button.saveChanges')}
         </button>
       </div>
     </div>
@@ -2207,7 +2218,7 @@ function EditTaskModal({
       <div className="fixed inset-0 z-[60] flex">
         <button
           type="button"
-          aria-label="Cerrar"
+          aria-label={t('editor.button.close')}
           onClick={handleClose}
           className="flex-1 bg-slate-950/60 backdrop-blur-sm"
         />
@@ -2222,7 +2233,7 @@ function EditTaskModal({
                     disabled={!previousTask}
                     className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Anterior
+                    {t('editor.button.previous')}
                   </button>
                   <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-400)]">
                     {navigationLabel}
@@ -2233,18 +2244,18 @@ function EditTaskModal({
                     disabled={!nextTask}
                     className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Siguiente
+                    {t('editor.button.next')}
                   </button>
                 </div>
               ) : (
-                <p className="text-sm font-semibold text-[color:var(--color-slate-200)]">Editar tarea</p>
+                <p className="text-sm font-semibold text-[color:var(--color-slate-200)]">{t('editor.modal.edit.panelTitle')}</p>
               )}
               <button
                 type="button"
                 onClick={handleClose}
                 className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-slate-200)] transition hover:border-white/30 hover:text-white"
               >
-                Cerrar
+                {t('editor.button.close')}
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-6">{formBody}</div>
@@ -2258,7 +2269,7 @@ function EditTaskModal({
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/70 backdrop-blur-sm md:items-center">
       <button
         type="button"
-        aria-label="Cerrar"
+        aria-label={t('editor.button.close')}
         onClick={handleClose}
         className="absolute inset-0 h-full w-full"
       />
