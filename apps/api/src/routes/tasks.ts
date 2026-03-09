@@ -97,7 +97,7 @@ type InsightsResponse = {
       completionRate: number;
       recalibratedAt: string;
     } | null;
-    history: Array<{
+    history: {
       action: 'up' | 'keep' | 'down';
       periodLabel: string;
       periodStart: string;
@@ -106,7 +106,7 @@ type InsightsResponse = {
       completions: number;
       completionRate: number;
       recalibratedAt: string;
-    }>;
+    }[];
     eligible: boolean;
   };
 };
