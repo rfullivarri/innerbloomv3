@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { StreakPanelRange, StreakPanelTask } from '../../lib/api';
 import { getTaskInsights, type TaskInsightsResponse } from '../../lib/api';
 import { computeWeeklyHabitHealth, getHabitHealth } from '../../lib/habitHealth';
@@ -33,6 +33,112 @@ type TaskInsightsModalProps = {
 
 type HabitHealthLevel = 'strong' | 'medium' | 'weak';
 type ActivityScope = 'week' | 'month' | 'quarter';
+type RecalibrationAction = 'up' | 'keep' | 'down' | 'none';
+
+type RecalibrationRecord = {
+  action?: string | null;
+  periodLabel?: string | null;
+  periodStart?: string | null;
+  periodEnd?: string | null;
+  expectedTarget?: number | null;
+  completions?: number | null;
+  completionRate?: number | null;
+  recalibratedAt?: string | null;
+};
+
+function normalizeRecalibrationAction(value: string | null | undefined): RecalibrationAction {
+  const normalized = (value ?? '').trim().toLowerCase();
+  if (normalized === 'up' || normalized === 'keep' || normalized === 'down') {
+    return normalized;
+  }
+  return 'none';
+}
+
+function formatCompactDate(value: string | null | undefined): string {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return new Intl.DateTimeFormat('es-AR', { month: 'short', day: 'numeric' }).format(parsed);
+}
+
+function formatPeriodLabel(record: RecalibrationRecord): string {
+  if (record.periodLabel?.trim()) return record.periodLabel.trim();
+  const start = formatCompactDate(record.periodStart);
+  const end = formatCompactDate(record.periodEnd);
+  if (start && end) return `${start} – ${end}`;
+  return start || end || 'Período reciente';
+}
+
+function RecalibrationTrendIndicator({
+  latest,
+  eligible,
+  tooltipLabel,
+  onToggleTooltip,
+  onOpenTooltip,
+  tooltipOpen,
+  onCloseTooltip,
+  tooltipId,
+}: {
+  latest: RecalibrationRecord | null;
+  eligible: boolean;
+  tooltipLabel: string;
+  onToggleTooltip: () => void;
+  onOpenTooltip: () => void;
+  tooltipOpen: boolean;
+  onCloseTooltip: () => void;
+  tooltipId: string;
+}) {
+  const action = normalizeRecalibrationAction(latest?.action);
+
+  const config: Record<Exclude<RecalibrationAction, 'none'>, { icon: string; tone: string }> = {
+    down: { icon: '↗', tone: 'text-emerald-300 border-emerald-300/40 bg-emerald-300/10' },
+    keep: { icon: '→', tone: 'text-amber-200 border-amber-300/40 bg-amber-300/10' },
+    up: { icon: '↘', tone: 'text-rose-300 border-rose-300/40 bg-rose-300/10' },
+  };
+
+  const fallback = !latest || action === 'none' || !eligible;
+
+  useEffect(() => {
+    if (!tooltipOpen) return;
+    const listener = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest('[data-recalibration-tooltip]')) {
+        onCloseTooltip();
+      }
+    };
+    document.addEventListener('mousedown', listener);
+    return () => document.removeEventListener('mousedown', listener);
+  }, [onCloseTooltip, tooltipOpen]);
+
+  return (
+    <div className="relative" data-recalibration-tooltip>
+      <button
+        type="button"
+        onClick={onToggleTooltip}
+        onMouseEnter={onOpenTooltip}
+        onMouseLeave={onCloseTooltip}
+        className={cx(
+          'inline-flex h-8 w-8 items-center justify-center rounded-full border text-base font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50',
+          fallback ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] text-[color:var(--color-slate-300)]' : config[action].tone,
+        )}
+        aria-label={tooltipLabel}
+        aria-describedby={tooltipOpen ? tooltipId : undefined}
+      >
+        {fallback ? '•' : config[action].icon}
+      </button>
+      {tooltipOpen && (
+        <div
+          id={tooltipId}
+          role="tooltip"
+          className="absolute right-0 top-10 z-20 w-64 rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] p-2 text-xs text-[color:var(--color-slate-200)] shadow-xl"
+        >
+          {tooltipLabel}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 function DifficultyInsight({
   difficultyLabel,
@@ -420,6 +526,12 @@ export function TaskInsightsModal({
   const difficultyLabel =
     (activeTask as { difficultyLabel?: string | null })?.difficultyLabel ??
     (activeTask as { difficulty?: string | null })?.difficulty;
+  const recalibration = data?.recalibration ?? null;
+  const recalibrationHistory = (recalibration?.history ?? []).slice(0, 3);
+  const recalibrationLatest = recalibration?.latest ?? recalibrationHistory[0] ?? null;
+  const isRecalibrationEligible = recalibration?.eligible ?? Boolean(recalibrationLatest || recalibrationHistory.length);
+  const [isRecalibrationTooltipOpen, setIsRecalibrationTooltipOpen] = useState(false);
+  const recalibrationTooltipId = useId();
 
   const xpPerCompletion = useMemo(() => {
     if (monthTotal > 0 && monthXp > 0) {
@@ -498,7 +610,23 @@ export function TaskInsightsModal({
           <div className="space-y-1">
             <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.title')}</p>
             <h3 className="text-lg font-semibold leading-tight text-[color:var(--color-text)] md:text-xl">{activeTask?.name ?? t('dashboard.streakTaskInsights.taskFallback')}</h3>
-            {activeTask?.stat && <p className="text-sm text-[color:var(--color-slate-400)]">{activeTask.stat}</p>}
+            <div className="flex items-center gap-2">
+              {activeTask?.stat && <p className="text-sm text-[color:var(--color-slate-400)]">{activeTask.stat}</p>}
+              <RecalibrationTrendIndicator
+                latest={recalibrationLatest}
+                eligible={isRecalibrationEligible}
+                tooltipLabel={
+                  isRecalibrationEligible && recalibrationLatest
+                    ? 'La flecha muestra el ajuste del último período vs el objetivo: ↗ bajó dificultad, → se mantuvo, ↘ subió dificultad.'
+                    : 'Aún no hay recalibraciones. Se activan cuando hay historial suficiente del período anterior.'
+                }
+                tooltipOpen={isRecalibrationTooltipOpen}
+                onToggleTooltip={() => setIsRecalibrationTooltipOpen((prev) => !prev)}
+                onOpenTooltip={() => setIsRecalibrationTooltipOpen(true)}
+                onCloseTooltip={() => setIsRecalibrationTooltipOpen(false)}
+                tooltipId={recalibrationTooltipId}
+              />
+            </div>
             {activeTask && 'description' in activeTask && activeTask.description && (
               <p className="text-sm text-[color:var(--color-slate-300)]">{activeTask.description}</p>
             )}
@@ -592,6 +720,46 @@ export function TaskInsightsModal({
                   referenceDate={referenceDate}
                   progressAriaLabel={t('dashboard.streakTaskInsights.weeklyProgressAria')}
                 />
+              )}
+            </div>
+
+
+            <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">Ajustes de dificultad</p>
+                {recalibrationLatest?.recalibratedAt && (
+                  <span className="text-[11px] text-[color:var(--color-slate-400)]">Último: {formatCompactDate(recalibrationLatest.recalibratedAt)}</span>
+                )}
+              </div>
+              {status === 'loading' && <div className="mt-2 h-16 animate-pulse rounded-xl bg-[color:var(--color-overlay-2)]" aria-hidden />}
+              {status === 'success' && recalibrationHistory.length > 0 && (
+                <ul className="mt-2 space-y-1.5">
+                  {recalibrationHistory.map((record, index) => {
+                    const action = normalizeRecalibrationAction(record.action);
+                    const actionTone =
+                      action === 'down'
+                        ? 'text-emerald-200 border-emerald-300/35 bg-emerald-300/10'
+                        : action === 'up'
+                          ? 'text-rose-200 border-rose-300/35 bg-rose-300/10'
+                          : 'text-amber-100 border-amber-300/35 bg-amber-300/10';
+                    const actionLabel = action === 'down' ? '↗ Lower diff' : action === 'up' ? '↘ Higher diff' : '→ Keep';
+                    const expected = Number(record.expectedTarget ?? 0);
+                    const completions = Number(record.completions ?? 0);
+
+                    return (
+                      <li key={`${record.periodStart ?? 'period'}-${index}`} className="flex items-center justify-between gap-2 rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-1.5">
+                        <div>
+                          <p className="text-xs font-semibold text-[color:var(--color-slate-100)]">{formatPeriodLabel(record)}</p>
+                          <p className="text-[11px] text-[color:var(--color-slate-400)]">{completions}/{expected > 0 ? expected : '—'}</p>
+                        </div>
+                        <span className={cx('inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold', actionTone)}>{actionLabel}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              {status === 'success' && recalibrationHistory.length === 0 && (
+                <p className="mt-2 text-xs text-[color:var(--color-slate-400)]">Aún no hay recalibraciones.</p>
               )}
             </div>
 
