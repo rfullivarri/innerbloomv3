@@ -130,7 +130,7 @@ function RecalibrationTrendIndicator({
         <div
           id={tooltipId}
           role="tooltip"
-          className="absolute right-0 top-10 z-20 w-64 rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] p-2 text-xs text-[color:var(--color-slate-200)] shadow-xl"
+          className="absolute left-0 top-10 z-20 w-64 max-w-[calc(100vw-3rem)] rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] p-2 text-xs text-[color:var(--color-slate-200)] shadow-xl"
         >
           {tooltipLabel}
         </div>
@@ -742,7 +742,7 @@ export function TaskInsightsModal({
                         : action === 'up'
                           ? 'text-rose-200 border-rose-300/35 bg-rose-300/10'
                           : 'text-amber-100 border-amber-300/35 bg-amber-300/10';
-                    const actionLabel = action === 'down' ? '↗ Lower diff' : action === 'up' ? '↘ Higher diff' : '→ Keep';
+                    const actionLabel = action === 'down' ? '↗ Bajó dificultad' : action === 'up' ? '↘ Subió dificultad' : '→ Se mantuvo';
                     const expected = Number(record.expectedTarget ?? 0);
                     const completions = Number(record.completions ?? 0);
 
