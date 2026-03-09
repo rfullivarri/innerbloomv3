@@ -145,8 +145,7 @@ export function DashboardMenu({
   moderation,
 }: DashboardMenuProps) {
   const { theme } = useThemePreference();
-  const { language, setManualLanguage } = usePostLoginLanguage();
-  const isSpanishSystem = language === "es";
+  const { language, setManualLanguage, t } = usePostLoginLanguage();
   const navigate = useNavigate();
   const { user } = useUser();
   const { openUserProfile } = useClerk();
@@ -316,43 +315,6 @@ export function DashboardMenu({
     return "";
   }, [user]);
 
-  const quickAccessLabels = useMemo(
-    () =>
-      isSpanishSystem
-        ? {
-            title: "Guía para añadir acceso rápido",
-            subtitle: "Sigue los siguientes pasos:",
-            tap: "Tocar",
-            scrollUp: "Scrollear para arriba",
-            select: "Seleccionar",
-            stepAdd: "Añadir.",
-            gotIt: "Entedido",
-          }
-        : {
-            title: "Quick access setup guide",
-            subtitle: "Follow these steps:",
-            tap: "Tap",
-            scrollUp: "Scroll up",
-            select: "Select",
-            stepAdd: "Add.",
-            gotIt: "Understood",
-          },
-    [isSpanishSystem],
-  );
-
-  const languageLabels = isSpanishSystem
-    ? {
-        title: "Idioma",
-        spanish: "Español",
-        english: "English",
-        selected: "Seleccionado",
-      }
-    : {
-        title: "Language",
-        spanish: "Español",
-        english: "English",
-        selected: "Selected",
-      };
 
   const trackerLabels: Record<ModerationTrackerType, string> = {
     alcohol: "Alcohol",
@@ -414,13 +376,13 @@ export function DashboardMenu({
 
   if (!isMounted || !portalNode) {
     return (
-      <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} ariaLabel={isSpanishSystem ? "Abrir menú" : "Open menu"} />
+      <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} ariaLabel={t('dashboard.nav.openMenu')} />
     );
   }
 
   return (
     <>
-      <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} ariaLabel={isSpanishSystem ? "Abrir menú" : "Open menu"} />
+      <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} ariaLabel={t('dashboard.nav.openMenu')} />
       {createPortal(
         <AnimatePresence>
           {isOpen ? (
@@ -435,7 +397,7 @@ export function DashboardMenu({
                 ref={panelRef}
                 role="dialog"
                 aria-modal="true"
-                aria-label={isSpanishSystem ? "Menú principal" : "Main menu"}
+                aria-label={t('dashboard.nav.mainMenu')}
                 className="flex max-h-[92vh] w-full max-w-[420px] flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-5 text-[color:var(--color-text)] shadow-2xl transition"
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -444,17 +406,17 @@ export function DashboardMenu({
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-[0.6rem] uppercase tracking-[0.35em] text-slate-900/80 dark:text-text-muted">
-                      {isSpanishSystem ? "Menú" : "Menu"}
+                      {t('dashboard.nav.menu')}
                     </p>
                     <h2 className="font-display text-xl font-semibold">
-                      {isSpanishSystem ? "Tu espacio personal" : "Your personal space"}
+                      {t('dashboard.nav.personalSpace')}
                     </h2>
                   </div>
                   <button
                     type="button"
                     onClick={handleClose}
                     className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-2 text-sm text-[color:var(--color-text-dim)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]"
-                    aria-label={isSpanishSystem ? "Cerrar menú" : "Close menu"}
+                    aria-label={t('dashboard.nav.closeMenu')}
                   >
                     <svg
                       aria-hidden="true"
@@ -682,9 +644,9 @@ export function DashboardMenu({
                                   moderation.onOpenEdit();
                                 }}
                                 className="rounded-md border border-[color:var(--color-widget-edit-border)] bg-[color:var(--color-widget-edit-bg)] px-2 py-1 text-xs text-[color:var(--color-widget-edit-text)] transition hover:bg-[color:var(--color-widget-edit-hover-bg)]"
-                                aria-label={isSpanishSystem ? "Editar configuración de Moderación" : "Edit Moderation settings"}
+                                aria-label={t('a11y.action.editModeration')}
                               >
-                                {isSpanishSystem ? "Editar" : "Edit"}
+                                {t('dashboard.action.edit')}
                               </button>
                             </div>
 
@@ -739,7 +701,7 @@ export function DashboardMenu({
                                   })}
                                 </div>
                                 <p className="text-[11px] text-[color:var(--color-widget-menu-label)]">
-                                  {isSpanishSystem ? "Azúcar: seguimiento de azúcar añadido." : "Sugar: added sugar tracking."}
+                                  {t('dashboard.moderation.sugarHint')}
                                 </p>
                               </div>
                             ) : null}
@@ -752,7 +714,7 @@ export function DashboardMenu({
                         </div>
 
                         <p className="text-[11px] text-[color:var(--color-widget-menu-label)]">
-                          {isSpanishSystem ? "Tip: mantené presionado un widget para editarlo." : "Tip: long-press a widget to edit it."}
+                          {t('dashboard.moderation.tipLongPress')}
                         </p>
                       </div>
                     ) : null}
@@ -761,11 +723,11 @@ export function DashboardMenu({
 
 
                     <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3">
-                      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)]">{languageLabels.title}</p>
+                      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)]">{t('dashboard.language.title')}</p>
                       <div className="mt-2 inline-flex w-full rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)]/40 p-1">
                         {([
-                          { value: "es", label: languageLabels.spanish },
-                          { value: "en", label: languageLabels.english },
+                          { value: "es", label: t('dashboard.language.spanish') },
+                          { value: "en", label: t('dashboard.language.english') },
                         ] as const).map((option) => {
                           const isActive = language === option.value;
                           return (
@@ -845,14 +807,14 @@ export function DashboardMenu({
                     className="absolute inset-x-4 bottom-4 rounded-3xl border border-[color:var(--color-ios-quick-access-modal-border)] bg-[color:var(--color-ios-quick-access-modal-surface)] p-5 shadow-[var(--shadow-elev-2)]"
                   >
                     <p className="text-sm font-semibold text-[color:var(--color-ios-quick-access-modal-text)]">
-                      {quickAccessLabels.title}
+                      {t('dashboard.quickAccess.title')}
                     </p>
                     <p className="mt-1 text-xs text-[color:var(--color-ios-quick-access-modal-text-muted)]">
-                      {quickAccessLabels.subtitle}
+                      {t('dashboard.quickAccess.subtitle')}
                     </p>
                     <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-[color:var(--color-ios-quick-access-modal-text-muted)]">
                       <li className="flex flex-wrap items-center gap-2">
-                        <span>{quickAccessLabels.tap}</span>
+                        <span>{t('dashboard.quickAccess.tap')}</span>
                         <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
                           <svg
                             aria-hidden="true"
@@ -871,7 +833,7 @@ export function DashboardMenu({
                         </span>
                       </li>
                       <li className="flex flex-wrap items-center gap-2">
-                        <span>{quickAccessLabels.tap}</span>
+                        <span>{t('dashboard.quickAccess.tap')}</span>
                         <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
                           <svg
                             aria-hidden="true"
@@ -890,7 +852,7 @@ export function DashboardMenu({
                         </span>
                       </li>
                       <li className="flex flex-wrap items-center gap-2">
-                        <span>{quickAccessLabels.scrollUp}</span>
+                        <span>{t('dashboard.quickAccess.scrollUp')}</span>
                         <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
                           <svg
                             aria-hidden="true"
@@ -908,7 +870,7 @@ export function DashboardMenu({
                         </span>
                       </li>
                       <li className="flex flex-wrap items-center gap-2">
-                        <span>{quickAccessLabels.select}</span>
+                        <span>{t('dashboard.quickAccess.select')}</span>
                         <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
                           <svg
                             aria-hidden="true"
@@ -926,7 +888,7 @@ export function DashboardMenu({
                           </svg>
                         </span>
                       </li>
-                      <li>{quickAccessLabels.stepAdd}</li>
+                      <li>{t('dashboard.quickAccess.stepAdd')}</li>
                     </ol>
                     {/* iOS Safari y navegadores iOS no permiten abrir Share Sheet ni instalar de forma programática. */}
                     <button
@@ -934,7 +896,7 @@ export function DashboardMenu({
                       onClick={closeIosInstructions}
                       className="mt-4 w-full rounded-full border border-[color:var(--color-ios-quick-access-modal-button-border)] bg-[color:var(--color-ios-quick-access-modal-button-bg)] px-3 py-2 text-sm text-[color:var(--color-ios-quick-access-modal-button-text)] transition hover:bg-[color:var(--color-ios-quick-access-modal-button-hover-bg)]"
                     >
-                      {quickAccessLabels.gotIt}
+                      {t('dashboard.quickAccess.gotIt')}
                     </button>
                   </div>
                 ) : null}

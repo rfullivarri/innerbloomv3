@@ -33,7 +33,7 @@ export const FEATURE_TASK_EDITOR_MOBILE_LIST_V1 = true;
 
 export default function TaskEditorPage() {
   const location = useLocation();
-  const { language } = usePostLoginLanguage();
+  const { language, t } = usePostLoginLanguage();
   const sections = getDashboardSections(location.pathname, language);
   const activeSection = getActiveSection(location.pathname, sections, language);
   const taskEditorSection = getDashboardSectionConfig('editor', location.pathname, language);
@@ -874,6 +874,7 @@ function TaskListMobile({
   onImproveTask?: (task: UserTask) => void;
   duplicatingTaskId: string | null;
 }) {
+  const { t } = usePostLoginLanguage();
   const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null);
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -1035,9 +1036,7 @@ function TaskListMobile({
                       onDeleteTask(task);
                     }}
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-rose-200 transition hover:bg-rose-500/10"
-                  >
-                    Eliminar
-                  </button>
+                  >{t('editor.modal.delete.confirm')}</button>
                 </div>
               )}
             </div>
@@ -1065,6 +1064,8 @@ function TaskCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const { t } = usePostLoginLanguage();
+
   return (
     <article className="group relative flex flex-col gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 shadow-[0_8px_24px_rgba(15,23,42,0.35)] transition hover:border-[color:var(--color-border-soft)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -1077,7 +1078,7 @@ function TaskCard({
                 : 'bg-slate-500/20 text-[color:var(--color-slate-300)]'
             }`}
           >
-            {task.isActive ? 'Activa' : 'Inactiva'}
+            {task.isActive ? t('editor.task.status.active') : t('editor.task.status.inactive')}
           </span>
           <button
             type="button"
@@ -1090,9 +1091,7 @@ function TaskCard({
             type="button"
             onClick={onDelete}
             className="rounded-full border border-rose-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-200 transition hover:border-rose-400 hover:text-rose-100"
-          >
-            Eliminar
-          </button>
+          >{t('editor.modal.delete.confirm')}</button>
         </div>
       </div>
       <dl className="grid gap-1 text-xs text-[color:var(--color-slate-400)]">
@@ -1271,6 +1270,8 @@ function TaskBoardItem({
   bulletClass,
   ringClass,
 }: TaskBoardItemProps) {
+  const { t } = usePostLoginLanguage();
+
   const handleClick = () => {
     onSelectTask(task, groupKey);
   };
@@ -1307,7 +1308,7 @@ function TaskBoardItem({
                 task.isActive ? 'bg-emerald-500/10 text-emerald-200' : 'bg-slate-700/20 text-[color:var(--color-slate-300)]'
               }`}
             >
-              {task.isActive ? 'Activa' : 'Inactiva'}
+              {task.isActive ? t('editor.task.status.active') : t('editor.task.status.inactive')}
             </span>
             <span className="flex items-center gap-1 text-[color:var(--color-slate-400)]">
               <span className={`text-base leading-none ${bulletClass}`}>•</span>
@@ -1323,9 +1324,7 @@ function TaskBoardItem({
             onDeleteTask(task);
           }}
           className="rounded-full border border-rose-500/40 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200 transition hover:border-rose-400 hover:text-rose-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/50"
-        >
-          Eliminar
-        </button>
+        >{t('editor.modal.delete.confirm')}</button>
       </div>
     </div>
   );
@@ -1341,6 +1340,7 @@ interface DeleteTaskModalProps {
 }
 
 function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConfirm }: DeleteTaskModalProps) {
+  const { t } = usePostLoginLanguage();
   useEffect(() => {
     if (!open) {
       return;
@@ -1394,7 +1394,7 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
         >
           <header className="space-y-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--color-slate-400)]">Confirmar eliminación</p>
-            <h2 className="text-xl font-semibold text-white">Eliminar tarea</h2>
+            <h2 className="text-xl font-semibold text-white">{t('editor.modal.delete.title')}</h2>
           </header>
           <p className="text-sm text-[color:var(--color-slate-300)]">
             ¿Seguro que quieres eliminar {displayTitle}? Esta acción quitará la tarea de tu lista inmediatamente.
@@ -1423,7 +1423,7 @@ function DeleteTaskModal({ open, onClose, task, isDeleting, errorMessage, onConf
               disabled={isDeleting}
               className="inline-flex items-center justify-center rounded-full bg-rose-600/90 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(225,29,72,0.3)] transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isDeleting ? 'Eliminando…' : 'Eliminar'}
+              {isDeleting ? t('editor.modal.delete.loading') : t('editor.modal.delete.confirm')}
             </button>
           </div>
         </div>

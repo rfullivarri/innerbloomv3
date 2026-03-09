@@ -7,12 +7,13 @@ import {
 import {
   type SubscriptionData,
 } from '../lib/api/subscriptionMock';
+import { usePostLoginLanguage, type PostLoginLanguage } from '../i18n/postLoginLanguage';
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, language: PostLoginLanguage): string {
   if (!value) {
-    return 'No disponible';
+    return language === 'es' ? 'No disponible' : 'Not available';
   }
-  return new Date(value).toLocaleDateString('es-AR', {
+  return new Date(value).toLocaleDateString(language === 'es' ? 'es-AR' : 'en-US', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -21,6 +22,7 @@ function formatDate(value: string | null): string {
 
 export default function SubscriptionPage() {
   const navigate = useNavigate();
+  const { language, t } = usePostLoginLanguage();
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
@@ -48,15 +50,15 @@ export default function SubscriptionPage() {
 
   const nextDateLabel = useMemo(() => {
     if (!subscription) {
-      return 'No disponible';
+      return t('subscription.value.notAvailable');
     }
 
     if (subscription.status === 'trialing') {
-      return `Fin de trial: ${formatDate(subscription.trialEndsAt)}`;
+      return `${t('subscription.value.trialEnds')}: ${formatDate(subscription.trialEndsAt, language)}`;
     }
 
-    return `Próxima renovación: ${formatDate(subscription.nextRenewalAt)}`;
-  }, [subscription]);
+    return `${t('subscription.value.nextRenewal')}: ${formatDate(subscription.nextRenewalAt, language)}`;
+  }, [language, subscription, t]);
 
   const handleCancel = useCallback(async () => {
     const response = await cancelSubscriptionWithFallback();
@@ -84,7 +86,7 @@ export default function SubscriptionPage() {
   if (isLoading) {
     return (
       <div className={overlayClassName}>
-        Cargando suscripción...
+        {t('subscription.loading')}
       </div>
     );
   }
@@ -93,21 +95,21 @@ export default function SubscriptionPage() {
     return (
       <div className={overlayClassName}>
         <div className="w-full max-w-xl rounded-[2rem] border border-[color:var(--color-border-soft)] bg-[linear-gradient(145deg,color-mix(in_srgb,var(--color-surface-elevated)_94%,transparent),color-mix(in_srgb,var(--color-overlay-2)_66%,transparent))] p-6 text-center shadow-[var(--shadow-elev-2)]">
-          <h1 className="text-3xl font-semibold">Tu suscripción está inactiva</h1>
-          <p className="mx-auto mt-3 max-w-xl text-text-muted">Activá un plan para volver a acceder a las funciones premium.</p>
+          <h1 className="text-3xl font-semibold">{t('subscription.locked.title')}</h1>
+          <p className="mx-auto mt-3 max-w-xl text-text-muted">{t('subscription.locked.description')}</p>
           <div className="mt-6 flex justify-center gap-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
               className={`${secondaryButtonClassName} px-5 py-3 text-base`}
             >
-              Cerrar
+              {t('subscription.action.close')}
             </button>
             <Link
               to="/pricing"
               className="rounded-2xl border border-emerald-400/50 bg-emerald-400 px-6 py-3 font-semibold text-emerald-950 shadow-[0_12px_30px_rgba(16,185,129,0.24)] transition hover:bg-emerald-300"
             >
-              Ver pricing
+              {t('subscription.action.viewPricing')}
             </Link>
           </div>
         </div>
@@ -119,11 +121,11 @@ export default function SubscriptionPage() {
     <div className={overlayClassName}>
       <div className={panelClassName}>
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-3xl font-semibold uppercase tracking-[0.14em]">Suscripción</h1>
+          <h1 className="text-3xl font-semibold uppercase tracking-[0.14em]">{t('subscription.page.title')}</h1>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            aria-label="Cerrar"
+            aria-label={t('subscription.action.close')}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-xl font-semibold leading-none text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]"
           >
             ×
@@ -132,13 +134,13 @@ export default function SubscriptionPage() {
 
         <div className="mt-6 space-y-4 rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-6 shadow-[0_20px_46px_color-mix(in_srgb,var(--color-text)_9%,transparent),0_8px_20px_color-mix(in_srgb,var(--color-accent-primary)_10%,transparent),inset_0_1px_0_color-mix(in_srgb,white_72%,transparent)] dark:shadow-none">
           <p className="flex items-center gap-2">
-            <span className="text-[color:var(--color-text-dim)]">Plan actual:</span>
+            <span className="text-[color:var(--color-text-dim)]">{t('subscription.label.currentPlan')}:</span>
             <span className="rounded-full border border-emerald-400/60 bg-emerald-400 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-950 shadow-[0_8px_22px_rgba(16,185,129,0.24)] dark:border-emerald-300/45 dark:bg-emerald-400 dark:text-emerald-950">
-              {subscription?.plan ?? 'Sin plan'}
+              {subscription?.plan ?? t('subscription.value.noPlan')}
             </span>
           </p>
           <p>
-            <span className="text-[color:var(--color-text-dim)]">Estado:</span> <strong>{subscription?.status ?? 'No definido'}</strong>
+            <span className="text-[color:var(--color-text-dim)]">{t('subscription.label.status')}:</span> <strong>{subscription?.status ?? t('subscription.value.undefined')}</strong>
           </p>
           <p className="text-[color:var(--color-text-muted)]">{nextDateLabel}</p>
         </div>
@@ -148,14 +150,14 @@ export default function SubscriptionPage() {
             to="/pricing"
             className={primaryActionClassName}
           >
-            Cambiar plan
+            {t('subscription.action.changePlan')}
           </Link>
           <button
             type="button"
             onClick={handleCancel}
             className={destructiveActionClassName}
           >
-            Cancelar suscripción
+            {t('subscription.action.cancel')}
           </button>
         </div>
       </div>
