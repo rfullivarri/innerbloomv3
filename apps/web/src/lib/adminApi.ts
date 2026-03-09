@@ -279,3 +279,51 @@ export async function sendAdminTasksReadyEmail(userId: string) {
 
   return response.json() as Promise<TasksReadySendResponse>;
 }
+
+
+export type AdminTaskDifficultyCalibrationRunResponse = {
+  ok: boolean;
+  source: 'admin_run';
+  scope: 'single_user' | 'all_users';
+  userId: string | null;
+  window_days: number;
+  mode: 'baseline';
+  evaluated: number;
+  adjusted: number;
+  skipped: number;
+  ignored: number;
+  actionBreakdown: { up: number; keep: number; down: number };
+  errors: { taskId: string; reason: string }[];
+};
+
+export async function runAdminTaskDifficultyCalibration(payload: {
+  userId?: string;
+  windowDays?: number;
+  mode?: 'baseline';
+}) {
+  const url = buildApiUrl('/admin/task-difficulty-calibration/run');
+  const response = await apiAuthorizedFetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      userId: payload.userId,
+      window_days: payload.windowDays ?? 90,
+      mode: payload.mode ?? 'baseline',
+    }),
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response.json() as Promise<AdminTaskDifficultyCalibrationRunResponse>;
+}
