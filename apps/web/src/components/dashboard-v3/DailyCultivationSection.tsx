@@ -4,6 +4,7 @@ import { getUserDailyXp, type DailyXpPoint } from '../../lib/api';
 import { asArray, dateStr } from '../../lib/safe';
 import { Card } from '../ui/Card';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 interface DailyCultivationSectionProps {
   userId: string;
@@ -17,18 +18,12 @@ type MonthBucket = {
   days: NormalizedDailyXpPoint[];
 };
 
-const XP_NUMBER_FORMATTER = new Intl.NumberFormat('es-AR');
-const DAY_MONTH_FORMATTER = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short' });
-
-function formatNumber(value: number): string {
-  return XP_NUMBER_FORMATTER.format(Math.round(value));
-}
-
-function formatDateLabel(value: string): string {
+function formatDateLabel(value: string, language: 'es' | 'en'): string {
   if (!value) return '';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
-  return DAY_MONTH_FORMATTER.format(parsed);
+  const formatter = new Intl.DateTimeFormat(language === 'es' ? 'es-AR' : 'en-US', { day: '2-digit', month: 'short' });
+  return formatter.format(parsed);
 }
 
 function createRange(daysBack: number) {
@@ -38,7 +33,7 @@ function createRange(daysBack: number) {
   return { from: dateStr(from), to: dateStr(to) };
 }
 
-function groupByMonth(series: NormalizedDailyXpPoint[]): MonthBucket[] {
+function groupByMonth(series: NormalizedDailyXpPoint[], language: 'es' | 'en'): MonthBucket[] {
   const map = new Map<string, NormalizedDailyXpPoint[]>();
 
   for (const point of series) {
@@ -55,7 +50,7 @@ function groupByMonth(series: NormalizedDailyXpPoint[]): MonthBucket[] {
     .sort(([a], [b]) => (a > b ? -1 : 1))
     .map(([key, days]) => {
       const [year, month] = key.split('-');
-      const formatter = new Intl.DateTimeFormat('es-AR', { month: 'short', year: 'numeric' });
+      const formatter = new Intl.DateTimeFormat(language === 'es' ? 'es-AR' : 'en-US', { month: 'short', year: 'numeric' });
       const parsedYear = Number(year);
       const parsedMonth = Number(month) - 1;
       const label = Number.isFinite(parsedYear) && Number.isFinite(parsedMonth)
@@ -66,6 +61,7 @@ function groupByMonth(series: NormalizedDailyXpPoint[]): MonthBucket[] {
 }
 
 export function DailyCultivationSection({ userId }: DailyCultivationSectionProps) {
+  const { language, t } = usePostLoginLanguage();
   const range = useMemo(() => createRange(120), []);
   const { data, status } = useRequest(() => getUserDailyXp(userId, range), [userId, range.from, range.to]);
   const series = useMemo<NormalizedDailyXpPoint[]>(() => {
@@ -84,7 +80,8 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
       .filter((row) => !!row.day);
   }, [data]);
 
-  const buckets = useMemo(() => groupByMonth(series), [series]);
+  const buckets = useMemo(() => groupByMonth(series, language), [language, series]);
+  const numberFormatter = useMemo(() => new Intl.NumberFormat(language === 'es' ? 'es-AR' : 'en-US'), [language]);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
   useEffect(() => {
@@ -111,12 +108,12 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
   return (
     <Card
       title="🪴 Daily Cultivation"
-      subtitle="Tendencia mensual de GP"
+      subtitle={t('dashboard.dailyCultivation.subtitle')}
       rightSlot={
         <InfoDotTarget id="dailyCultivation" placement="left" className="ml-auto inline-flex items-center gap-2">
           {buckets.length > 0 ? (
             <label className="flex items-center gap-1.5 whitespace-nowrap text-[11px] uppercase tracking-[0.12em] text-[color:var(--color-text-muted)]">
-              <span className="text-[11px]">Mes</span>
+              <span className="text-[11px]">{t('dashboard.dailyCultivation.month')}</span>
               <select
                 className="w-28 rounded-ib-sm border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-1 text-xs text-[color:var(--color-text)] focus:border-white/20 focus:outline-none sm:w-32"
                 value={selectedMonth ?? ''}
@@ -138,24 +135,24 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
       )}
 
       {status === 'error' && (
-        <p className="text-sm text-rose-300">No pudimos cargar tus GP diarios.</p>
+        <p className="text-sm text-rose-300">{t('dashboard.dailyCultivation.error')}</p>
       )}
 
       {status === 'success' && (!activeBucket || activeBucket.days.length === 0) && (
-        <p className="text-sm text-[color:var(--color-text-subtle)]">Todavía no registraste GP este mes.</p>
+        <p className="text-sm text-[color:var(--color-text-subtle)]">{t('dashboard.dailyCultivation.empty')}</p>
       )}
 
       {status === 'success' && activeBucket && activeBucket.days.length > 0 && (
         <div className="space-y-4">
           <div className="ib-card-contour-shadow rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4">
-            <LineChart days={activeBucket.days} />
+            <LineChart days={activeBucket.days} language={language} />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[color:var(--color-text-subtle)]">
             <span>
-              Total GP del mes: <span className="font-semibold text-[color:var(--color-text)]">{formatNumber(monthlySummary.total)}</span>
+              {t('dashboard.dailyCultivation.total')}: <span className="font-semibold text-[color:var(--color-text)]">{numberFormatter.format(Math.round(monthlySummary.total))}</span>
             </span>
             <span>
-              Promedio diario: <span className="font-semibold text-[color:var(--color-text)]">{formatNumber(monthlySummary.average)}</span> GP
+              {t('dashboard.dailyCultivation.average')}: <span className="font-semibold text-[color:var(--color-text)]">{numberFormatter.format(Math.round(monthlySummary.average))}</span> GP
             </span>
           </div>
         </div>
@@ -166,6 +163,7 @@ export function DailyCultivationSection({ userId }: DailyCultivationSectionProps
 
 interface LineChartProps {
   days: DailyXpPoint[];
+  language: 'es' | 'en';
 }
 
 function getIsoDateLabel(point: DailyXpPoint): string {
@@ -177,7 +175,7 @@ function getIsoDateLabel(point: DailyXpPoint): string {
   return dateStr(raw) ?? '';
 }
 
-function LineChart({ days }: LineChartProps) {
+function LineChart({ days, language }: LineChartProps) {
   const sorted = [...days].sort((a, b) => (a.date > b.date ? 1 : -1));
   const maxValue = Math.max(...sorted.map((day) => day.xp_day), 1);
 
@@ -258,7 +256,7 @@ function LineChart({ days }: LineChartProps) {
     // NOTE: The layout hook adapts tick density and label font size to match the responsive spec.
   }, [labels.length]);
 
-  const formattedLabels = labels.map((label) => formatDateLabel(label));
+  const formattedLabels = labels.map((label) => formatDateLabel(label, language));
   const shouldShowLabel = (index: number) => {
     if (layout.tickStep <= 1) return true;
     if (index === labels.length - 1) return true;
@@ -328,7 +326,7 @@ function LineChart({ days }: LineChartProps) {
                 className="rounded bg-slate-900/80 px-2 py-0.5 font-medium leading-tight shadow-sm shadow-black/40"
                 style={{ fontSize: `${layout.dataLabelFontSize}px` }}
               >
-                {formatNumber(point.day.xp_day)}
+                {new Intl.NumberFormat(language === 'es' ? 'es-AR' : 'en-US').format(Math.round(point.day.xp_day))}
               </span>
             </div>
           ))}
