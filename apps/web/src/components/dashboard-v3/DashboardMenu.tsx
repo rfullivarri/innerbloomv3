@@ -99,9 +99,7 @@ const DashboardMenuTrigger = forwardRef<
   );
 });
 
-function buildModerationSaveErrorMessage(error: unknown): string {
-  const fallback =
-    "No se pudo guardar Moderación. Revisa tu conexión e inténtalo otra vez.";
+function buildModerationSaveErrorMessage(error: unknown, fallback: string): string {
 
   if (error instanceof ApiError) {
     const apiMessage =
@@ -367,7 +365,7 @@ export function DashboardMenu({
         setTrackerOverrides((current) => ({ ...current, [type]: !nextValue }));
         setToast({
           tone: "error",
-          message: buildModerationSaveErrorMessage(error),
+          message: buildModerationSaveErrorMessage(error, t('dashboard.menu.moderationSaveError')),
         });
       });
     },
@@ -444,7 +442,7 @@ export function DashboardMenu({
                       {user?.imageUrl ? (
                         <img
                           src={user.imageUrl}
-                          alt="Avatar"
+                          alt={t('dashboard.menu.avatarAlt')}
                           className="h-9 w-9 rounded-xl border border-[color:var(--color-border-soft)] object-cover"
                         />
                       ) : (
@@ -454,7 +452,7 @@ export function DashboardMenu({
                       )}
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-[color:var(--color-text)]">
-                          {user?.fullName || user?.username || "Tu perfil"}
+                          {user?.fullName || user?.username || t('dashboard.menu.profileFallback')}
                         </p>
                         {user?.primaryEmailAddress?.emailAddress ? (
                           <p className="truncate text-xs text-text-muted">
@@ -480,7 +478,7 @@ export function DashboardMenu({
                         <path d="M6 9a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
                         <path d="M10 20a2 2 0 0 0 4 0" />
                       </MenuIcon>
-                      <span className="flex-1">Recordatorio</span>
+                      <span className="flex-1">{t('dashboard.menu.reminder')}</span>
                     </button>
                       </div>
                       <div className={`${menuCardClassName} px-2 py-1`}>
@@ -495,7 +493,7 @@ export function DashboardMenu({
                           <rect x="3" y="5" width="18" height="14" rx="2" />
                           <path d="M3 10h18" />
                         </MenuIcon>
-                        <span className="flex-1">Planes</span>
+                        <span className="flex-1">{t('dashboard.menu.plans')}</span>
                         <MenuIcon
                           className={`h-4 w-4 text-[color:var(--color-text-faint)] transition ${isPlansOpen ? "rotate-180" : ""}`}
                         >
@@ -517,7 +515,7 @@ export function DashboardMenu({
                             <path d="M8 12v-1a4 4 0 1 1 8 0v1" />
                             <rect x="5" y="12" width="14" height="9" rx="2" />
                           </MenuIcon>
-                          Suscripción
+                          {t('dashboard.menu.subscription')}
                         </button>
                         <button
                           type="button"
@@ -547,7 +545,7 @@ export function DashboardMenu({
                           <rect x="4" y="13" width="7" height="7" rx="1.5" />
                           <rect x="13" y="13" width="7" height="7" rx="1.5" />
                         </MenuIcon>
-                        <span className="flex-1">Widgets</span>
+                        <span className="flex-1">{t('dashboard.menu.widgets')}</span>
                         <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
                           <path d="m9 6 6 6-6 6" />
                         </MenuIcon>
@@ -562,7 +560,7 @@ export function DashboardMenu({
                             type="button"
                             onClick={() => setActivePanel("main")}
                             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-widget-menu-heading)] transition hover:bg-[color:var(--color-overlay-2)]"
-                            aria-label="Volver al menú"
+                            aria-label={t('dashboard.menu.backToMenu')}
                           >
                             <MenuIcon className="h-4 w-4 text-[color:var(--color-widget-menu-heading)]">
                               <path d="m15 6-6 6 6 6" />
@@ -585,7 +583,7 @@ export function DashboardMenu({
                               {...moderationLongPressBind}
                             >
                               <ModerationPreviewWidget
-                                title="Moderación"
+                                title={t('dashboard.menu.moderation')}
                                 configs={moderation.configs}
                                 onEdit={moderation.onOpenEdit}
                                 compact
@@ -620,10 +618,10 @@ export function DashboardMenu({
                               >
                                 <span className="min-w-0 flex-1">
                                   <span className="block text-sm text-[color:var(--color-widget-menu-item-title)]">
-                                    Moderación
+                                    {t('dashboard.menu.moderation')}
                                   </span>
                                   <span className="block text-xs text-[color:var(--color-widget-menu-label)]">
-                                    Alcohol, tabaco y azúcar
+                                    {t('dashboard.menu.moderationSubtitle')}
                                   </span>
                                   {enabledTrackers.length > 0 ? (
                                     <span className="mt-1 inline-block rounded-full border border-[color:var(--color-widget-chip-active-border)] bg-[color:var(--color-widget-chip-active-bg)] px-2 py-0.5 text-[10px] text-[color:var(--color-widget-chip-active-text)]">
@@ -667,7 +665,7 @@ export function DashboardMenu({
                                         type="button"
                                         title={
                                           type === "sugar"
-                                            ? "Azúcar añadido"
+                                            ? t('dashboard.menu.sugarAdded')
                                             : undefined
                                         }
                                         onClick={() =>
@@ -756,7 +754,7 @@ export function DashboardMenu({
                           <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
                         </MenuIcon>
                         <p className="text-[0.65rem] uppercase tracking-[0.3em] text-[color:var(--color-quickaccess-label)]">
-                          Acceso rápido
+                          {t('dashboard.menu.quickAccess')}
                         </p>
                       </div>
                       <button
@@ -767,8 +765,8 @@ export function DashboardMenu({
                       >
                         <span>
                           {isStandalone
-                            ? "Acceso rápido activo"
-                            : "Añadir acceso rápido"}
+                            ? t('dashboard.menu.quickAccessActive')
+                            : t('dashboard.menu.quickAccessAdd')}
                         </span>
                         {isStandalone ? (
                           <MenuIcon className="h-4 w-4 text-[color:var(--color-quickaccess-cta-text)]">
@@ -797,13 +795,13 @@ export function DashboardMenu({
                     <path d="M16 17l5-5-5-5" />
                     <path d="M21 12H9" />
                   </MenuIcon>
-                  <span>Cerrar sesión</span>
+                  <span>{t('dashboard.menu.signOut')}</span>
                 </button>
                 {iosInstructionsOpen && isIOS ? (
                   <div
                     role="dialog"
                     aria-modal="true"
-                    aria-label="Cómo añadir acceso rápido en iOS"
+                    aria-label={t('dashboard.quickAccess.iosDialogAria')}
                     className="absolute inset-x-4 bottom-4 rounded-3xl border border-[color:var(--color-ios-quick-access-modal-border)] bg-[color:var(--color-ios-quick-access-modal-surface)] p-5 shadow-[var(--shadow-elev-2)]"
                   >
                     <p className="text-sm font-semibold text-[color:var(--color-ios-quick-access-modal-text)]">

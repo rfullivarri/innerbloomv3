@@ -7,6 +7,7 @@ import { computeWeeklyHabitHealth, getHabitHealth } from '../../lib/habitHealth'
 export { getHabitHealth } from '../../lib/habitHealth';
 import { useRequest } from '../../hooks/useRequest';
 import type { GameMode } from '../../lib/gameMode';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 function cx(...values: Array<string | false | null | undefined>): string {
   return values.filter(Boolean).join(' ');
@@ -92,6 +93,7 @@ function WeeklyCompletionDonut({
   difficultyLabel,
   weeksSample,
   referenceDate,
+  progressAriaLabel,
 }: {
   timeline: TaskInsightsResponse['weeks']['timeline'];
   weeklyGoal: number;
@@ -101,6 +103,7 @@ function WeeklyCompletionDonut({
   difficultyLabel?: string | null;
   weeksSample?: number | null;
   referenceDate?: Date;
+  progressAriaLabel: string;
 }) {
   const today = useMemo(() => referenceDate ?? new Date(), [referenceDate]);
   const parsedWeeksSample = Number(weeksSample);
@@ -133,7 +136,7 @@ function WeeklyCompletionDonut({
         className="h-36 w-36 drop-shadow-[0_0_25px_rgba(52,211,153,0.2)]"
         viewBox="0 0 120 120"
         role="img"
-        aria-label={`Progreso semanal: ${progress}%`}
+        aria-label={progressAriaLabel.replace("{{progress}}", String(progress))}
       >
         <circle
           cx="60"
@@ -363,6 +366,7 @@ export function TaskInsightsModal({
   fallbackTask,
   referenceDate,
 }: TaskInsightsModalProps) {
+  const { t } = usePostLoginLanguage();
   const containerRef = useRef<HTMLDivElement | null>(null);
   useEscToClose(Boolean(taskId), onClose);
 
@@ -488,12 +492,12 @@ export function TaskInsightsModal({
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal
-        aria-label="Detalle de tarea"
+        aria-label={t('dashboard.streakTaskInsights.dialogAria')}
       >
         <div className="sticky top-0 z-10 flex items-start justify-between gap-2 border-b border-white/5 bg-[color:var(--color-surface)]/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--color-surface)]/85">
           <div className="space-y-1">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Detalle de tarea</p>
-            <h3 className="text-lg font-semibold leading-tight text-[color:var(--color-text)] md:text-xl">{activeTask?.name ?? 'Tarea'}</h3>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.title')}</p>
+            <h3 className="text-lg font-semibold leading-tight text-[color:var(--color-text)] md:text-xl">{activeTask?.name ?? t('dashboard.streakTaskInsights.taskFallback')}</h3>
             {activeTask?.stat && <p className="text-sm text-[color:var(--color-slate-400)]">{activeTask.stat}</p>}
             {activeTask && 'description' in activeTask && activeTask.description && (
               <p className="text-sm text-[color:var(--color-slate-300)]">{activeTask.description}</p>
@@ -503,7 +507,7 @@ export function TaskInsightsModal({
             type="button"
             onClick={onClose}
             className="shrink-0 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-sm text-[color:var(--color-slate-200)] transition hover:border-white/25 hover:bg-[color:var(--color-overlay-2)]"
-            aria-label="Cerrar detalle"
+            aria-label={t('dashboard.streakTaskInsights.closeAria')}
           >
             ✕
           </button>
@@ -515,7 +519,7 @@ export function TaskInsightsModal({
               <div className="space-y-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">Actividad</p>
+                    <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">{t('dashboard.streakTaskInsights.activity')}</p>
                     <div className="flex justify-center">
                       <div className="inline-flex w-full max-w-[240px] items-center justify-between gap-1 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-2 py-0.5 text-[11px] font-semibold text-[color:var(--color-slate-100)]">
                         {[
@@ -567,8 +571,8 @@ export function TaskInsightsModal({
 
             <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">Progreso semanal</p>
-                <span className="text-xs text-[color:var(--color-slate-400)]">Objetivo: {weeklyGoal}x/sem</span>
+                <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">{t('dashboard.streakTaskInsights.weeklyProgress')}</p>
+                <span className="text-xs text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.goal', { goal: weeklyGoal })}</span>
               </div>
               {status === 'loading' && (
                 <div className="mt-3 h-36 animate-pulse rounded-xl bg-[color:var(--color-overlay-2)]" aria-hidden />
@@ -586,18 +590,19 @@ export function TaskInsightsModal({
                   difficultyLabel={difficultyLabel}
                   weeksSample={weeksSample}
                   referenceDate={referenceDate}
+                  progressAriaLabel={t('dashboard.streakTaskInsights.weeklyProgressAria')}
                 />
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Racha actual</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.currentStreak')}</p>
                 <p className="mt-1 text-3xl font-semibold text-[color:var(--color-text)]">🔥 {stats.currentStreak}</p>
                 <p className="text-xs text-[color:var(--color-slate-400)]">semanas seguidas</p>
               </div>
               <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Mejor racha</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.bestStreak')}</p>
                 <p className="mt-1 text-3xl font-semibold text-[color:var(--color-text)]">{stats.bestStreak}</p>
                 <p className="text-xs text-[color:var(--color-slate-400)]">máxima racha lograda</p>
               </div>
