@@ -88,6 +88,25 @@ type InsightsResponse = {
   };
 };
 
+
+type TaskRecalibrationRow = {
+  task_difficulty_recalibration_id: string;
+  period_start: string;
+  period_end: string;
+  game_mode_id: number;
+  expected_target: number | string;
+  completions_done: number;
+  completion_rate: number | string;
+  previous_difficulty_id: number;
+  new_difficulty_id: number;
+  action: 'up' | 'keep' | 'down';
+  analyzed_at: string;
+};
+
+const recalibrationsQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(24).default(3),
+});
+
 function normalizeMode(value: string | null | undefined): Mode {
   if (!value) return 'Flow';
   const normalized = value.trim().toLowerCase();
@@ -325,6 +344,86 @@ router.get(
     }
 
     res.json(response);
+  }),
+);
+
+
+router.get(
+  '/tasks/:taskId/recalibrations/latest',
+  authMiddleware,
+  requireActiveSubscription,
+  asyncHandler(async (req, res) => {
+    const { taskId } = parseWithValidation(insightsParamsSchema, req.params);
+
+    const taskOwnerResult = await pool.query<{ user_id: string }>(
+      'SELECT user_id FROM tasks WHERE task_id = $1 LIMIT 1',
+      [taskId],
+    );
+
+    if (!taskOwnerResult.rows[0] || taskOwnerResult.rows[0].user_id !== req.user?.id) {
+      throw new HttpError(404, 'not_found', 'Task not found');
+    }
+
+    const latestResult = await pool.query<TaskRecalibrationRow>(
+      `SELECT task_difficulty_recalibration_id,
+              period_start::text,
+              period_end::text,
+              game_mode_id,
+              expected_target,
+              completions_done,
+              completion_rate,
+              previous_difficulty_id,
+              new_difficulty_id,
+              action,
+              analyzed_at::text
+         FROM task_difficulty_recalibrations
+        WHERE task_id = $1
+        ORDER BY analyzed_at DESC
+        LIMIT 1`,
+      [taskId],
+    );
+
+    res.json({ recalibration: latestResult.rows[0] ?? null });
+  }),
+);
+
+router.get(
+  '/tasks/:taskId/recalibrations',
+  authMiddleware,
+  requireActiveSubscription,
+  asyncHandler(async (req, res) => {
+    const { taskId } = parseWithValidation(insightsParamsSchema, req.params);
+    const { limit } = parseWithValidation(recalibrationsQuerySchema, req.query);
+
+    const taskOwnerResult = await pool.query<{ user_id: string }>(
+      'SELECT user_id FROM tasks WHERE task_id = $1 LIMIT 1',
+      [taskId],
+    );
+
+    if (!taskOwnerResult.rows[0] || taskOwnerResult.rows[0].user_id !== req.user?.id) {
+      throw new HttpError(404, 'not_found', 'Task not found');
+    }
+
+    const listResult = await pool.query<TaskRecalibrationRow>(
+      `SELECT task_difficulty_recalibration_id,
+              period_start::text,
+              period_end::text,
+              game_mode_id,
+              expected_target,
+              completions_done,
+              completion_rate,
+              previous_difficulty_id,
+              new_difficulty_id,
+              action,
+              analyzed_at::text
+         FROM task_difficulty_recalibrations
+        WHERE task_id = $1
+        ORDER BY analyzed_at DESC
+        LIMIT $2`,
+      [taskId, limit],
+    );
+
+    res.json({ recalibrations: listResult.rows });
   }),
 );
 

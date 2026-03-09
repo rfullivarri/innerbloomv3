@@ -15,7 +15,8 @@
     "backfill:users": "tsx apps/api/scripts/clerk-backfill.ts",
     "admin:grant": "tsx scripts/grant-admin.ts",
     "admin:revoke": "tsx scripts/grant-admin.ts --revoke",
-    "routes:print": "tsx scripts/routes-print.ts"
+    "routes:print": "tsx scripts/routes-print.ts",
+    "backfill:task-difficulty": "tsx scripts/task-difficulty-backfill.ts"
   },
   "dependencies": {
     "@fastify/express": "^4.0.2",
