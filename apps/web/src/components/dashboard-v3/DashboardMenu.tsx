@@ -567,13 +567,13 @@ export function DashboardMenu({
                             </MenuIcon>
                           </button>
                           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--color-widget-menu-heading)]">
-                            Widgets
+                            {t('dashboard.menu.widgets')}
                           </p>
                         </div>
 
                         <div className="relative">
                           <p className="mb-1 text-xs text-[color:var(--color-widget-menu-label)]">
-                            Widgets activos
+                            {t('dashboard.menu.activeWidgets')}
                           </p>
                           {enabledTrackers.length > 0 && moderation.configs ? (
                             <button
@@ -592,7 +592,7 @@ export function DashboardMenu({
                             </button>
                           ) : (
                             <p className="rounded-xl border border-dashed border-[color:var(--color-border-soft)] px-3 py-2 text-xs text-[color:var(--color-widget-menu-label)]">
-                              Sin widgets activos.
+                              {t('dashboard.menu.noActiveWidgets')}
                             </p>
                           )}
                           {moderation.isRefreshingWidgets ? (
@@ -604,7 +604,7 @@ export function DashboardMenu({
 
                         <div className="relative">
                           <p className="mb-1 text-xs text-[color:var(--color-widget-menu-label)]">
-                            Widgets disponibles
+                            {t('dashboard.menu.availableWidgets')}
                           </p>
                           <div className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]">
                             <div className="flex items-start gap-2 px-3 py-2">
@@ -625,7 +625,7 @@ export function DashboardMenu({
                                   </span>
                                   {enabledTrackers.length > 0 ? (
                                     <span className="mt-1 inline-block rounded-full border border-[color:var(--color-widget-chip-active-border)] bg-[color:var(--color-widget-chip-active-bg)] px-2 py-0.5 text-[10px] text-[color:var(--color-widget-chip-active-text)]">
-                                      Configurado
+                                      {t('dashboard.menu.configured')}
                                     </span>
                                   ) : null}
                                 </span>

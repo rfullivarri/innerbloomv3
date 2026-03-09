@@ -3,10 +3,8 @@ import type {
   ModerationTrackerType,
 } from "../../lib/api";
 import { useLongPress } from "../../hooks/useLongPress";
-import {
-  moderationTrackerMeta,
-  ModerationTrackerIcon,
-} from "../moderation/trackerMeta";
+import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
+import { ModerationTrackerIcon } from "../moderation/trackerMeta";
 
 interface ModerationWidgetProps {
   title?: string;
@@ -17,7 +15,7 @@ interface ModerationWidgetProps {
 }
 
 export function ModerationWidget({
-  title = "Moderación",
+  title,
   configs,
   onEdit,
   compact = false,
@@ -26,24 +24,36 @@ export function ModerationWidget({
   const enabled = (Object.keys(configs) as ModerationTrackerType[]).filter(
     (type) => configs[type].isEnabled,
   );
+  const { t } = usePostLoginLanguage();
+  const resolvedTitle = title ?? t('dashboard.menu.moderation');
   const longPressBind = useLongPress({ onLongPress: onEdit, delayMs: 2200 });
   const activeCount = Math.max(1, Math.min(3, enabled.length || 1));
+
+  const trackerLabelByType: Record<ModerationTrackerType, string> = {
+    alcohol: "Alcohol",
+    tobacco: t('dashboard.moderation.tobacco'),
+    sugar: t('dashboard.moderation.sugar'),
+  };
+
+  const trackerHintByType: Partial<Record<ModerationTrackerType, string>> = {
+    sugar: t('dashboard.menu.sugarAdded'),
+  };
 
   return (
     <section
       className={`rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-widget-menu-item-title)] shadow-[var(--shadow-elev-1)] ${compact ? "p-3" : "p-4"}`}
       {...longPressBind}
-      aria-label="Widget de moderación"
+      aria-label={t('dashboard.menu.moderation')}
     >
       {showHeader ? (
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <p className="text-[0.65rem] uppercase tracking-[0.26em] text-[color:var(--color-widget-menu-label)]">
-              Widget
+              {t('dashboard.menu.widgets')}
             </p>
-            <h3 className="text-base font-semibold">{title}</h3>
+            <h3 className="text-base font-semibold">{resolvedTitle}</h3>
             <p className="text-xs text-[color:var(--color-widget-menu-label)]">
-              Tip: mantené presionado un widget para editarlo.
+              {t('dashboard.moderation.tipLongPress')}
             </p>
           </div>
         </div>
@@ -67,12 +77,12 @@ export function ModerationWidget({
             </div>
             <p
               className="mt-1 text-[11px] text-[color:var(--color-widget-menu-label)]"
-              title={moderationTrackerMeta[type].hint}
+              title={trackerHintByType[type]}
             >
-              {moderationTrackerMeta[type].label}
+              {trackerLabelByType[type]}
             </p>
             <p className="text-[10px] text-[color:var(--color-widget-menu-label)]">
-              {configs[type].isPaused ? "Vacaciones" : "Activo"}
+              {configs[type].isPaused ? t('dashboard.moderation.vacation') : t('dashboard.moderation.active')}
             </p>
           </div>
         ))}

@@ -36,6 +36,7 @@ export const dashboardTranslations = {
   'dashboard.action.edit': { es: 'Editar', en: 'Edit' },
   'dashboard.moderation.sugarHint': { es: 'Azúcar: seguimiento de azúcar añadido.', en: 'Sugar: added sugar tracking.' },
   'dashboard.moderation.tipLongPress': { es: 'Tip: mantené presionado un widget para editarlo.', en: 'Tip: long-press a widget to edit it.' },
+  'dashboard.moderation.active': { es: 'Activo', en: 'Active' },
 
   'dashboard.menu.avatarAlt': { es: 'Avatar', en: 'Avatar' },
   'dashboard.menu.profileFallback': { es: 'Tu perfil', en: 'Your profile' },
@@ -47,6 +48,10 @@ export const dashboardTranslations = {
   'dashboard.menu.plans': { es: 'Planes', en: 'Plans' },
   'dashboard.menu.subscription': { es: 'Suscripción', en: 'Subscription' },
   'dashboard.menu.widgets': { es: 'Widgets', en: 'Widgets' },
+  'dashboard.menu.activeWidgets': { es: 'Widgets activos', en: 'Active widgets' },
+  'dashboard.menu.noActiveWidgets': { es: 'Sin widgets activos.', en: 'No active widgets.' },
+  'dashboard.menu.availableWidgets': { es: 'Widgets disponibles', en: 'Available widgets' },
+  'dashboard.menu.configured': { es: 'Configurado', en: 'Configured' },
   'dashboard.menu.backToMenu': { es: 'Volver al menú', en: 'Back to menu' },
   'dashboard.menu.moderation': { es: 'Moderación', en: 'Moderation' },
   'dashboard.menu.moderationSubtitle': { es: 'Alcohol, tabaco y azúcar', en: 'Alcohol, tobacco and sugar' },
