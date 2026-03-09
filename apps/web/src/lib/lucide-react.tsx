@@ -52,6 +52,16 @@ export const CircleDot = createIcon(
   'CircleDot',
 );
 
+
+export const Target = createIcon(
+  [
+    ['circle', { cx: '12', cy: '12', r: '10' }],
+    ['circle', { cx: '12', cy: '12', r: '6' }],
+    ['circle', { cx: '12', cy: '12', r: '2' }],
+  ],
+  'Target',
+);
+
 export const RefreshCcwDot = createIcon(
   [
     ['path', { d: 'M3 2v6h6' }],

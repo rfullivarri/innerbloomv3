@@ -1,5 +1,5 @@
 import { matchPath } from 'react-router-dom';
-import { Route, RefreshCcwDot, FingerprintPattern, Sparkles, WandSparkles } from 'lucide-react';
+import { Route, RefreshCcwDot, Target, Sparkles, WandSparkles } from 'lucide-react';
 import { type ReactElement, type SVGProps } from 'react';
 import type { NavbarSection } from '../components/layout/Navbar';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
@@ -66,7 +66,7 @@ function buildDashboardSections(basePath: string, language: PostLoginLanguage = 
       end: true,
       pageTitle: t('dashboard.nav.home'),
       contentTitle: t('dashboard.nav.home'),
-      icon: (props) => <FingerprintPattern {...props} />,
+      icon: (props) => <Target {...props} />,
     },
     missions: {
       key: 'missions',
