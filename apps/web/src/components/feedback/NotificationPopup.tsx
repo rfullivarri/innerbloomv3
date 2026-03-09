@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 export type NotificationPopupTask = {
   id: string;
@@ -42,6 +43,7 @@ export function NotificationPopup({
   dataTestId,
   inline = false,
 }: NotificationPopupProps) {
+  const { t } = usePostLoginLanguage();
   useEffect(() => {
     const hasTasks = Boolean(tasks && tasks.length > 0);
     if (!open || autoDismissMs <= 0 || inline || hasTasks) {
@@ -71,14 +73,14 @@ export function NotificationPopup({
         </motion.span>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="ib-feedback-popup-kicker text-xs font-semibold uppercase tracking-[0.3em] text-sky-300/70">Feedback</p>
+            <p className="ib-feedback-popup-kicker text-xs font-semibold uppercase tracking-[0.3em] text-sky-300/70">{t('feedback.popup.kicker')}</p>
             <p className="ib-feedback-popup-title text-lg font-semibold text-white">{title}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="ib-feedback-popup-close rounded-full border border-white/20 p-1 text-xs text-white/70 transition hover:border-sky-300/50 hover:text-white"
-            aria-label="Cerrar notificación"
+            aria-label={t('feedback.popup.closeAria')}
           >
             ✕
           </button>
@@ -114,7 +116,7 @@ export function NotificationPopup({
             onClick={onClose}
             className="ib-feedback-popup-dismiss inline-flex w-full items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-sky-300/60 hover:bg-white/10"
           >
-            Cerrar
+            {t('feedback.popup.close')}
           </button>
         </div>
       </div>

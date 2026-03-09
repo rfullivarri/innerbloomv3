@@ -12,6 +12,7 @@ import {
 import { createPortal } from 'react-dom';
 import type { RefObject } from 'react';
 import { DailyReminderSettings } from '../settings/DailyReminderSettings';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 export type ReminderSchedulerDialogHandle = {
   open: () => void;
@@ -27,6 +28,7 @@ export const ReminderSchedulerDialog = forwardRef<
   ReminderSchedulerDialogHandle,
   ReminderSchedulerDialogProps
 >(function ReminderSchedulerDialog({ enabled = true, returnFocusRef }, ref) {
+  const { t } = usePostLoginLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [portalNode, setPortalNode] = useState<Element | null>(null);
@@ -127,13 +129,13 @@ export const ReminderSchedulerDialog = forwardRef<
                   id={titleId}
                   className="reminder-scheduler-dialog__eyebrow font-display text-[1.05rem] font-semibold uppercase tracking-[0.22em] text-text"
                 >
-                  Scheduler diario
+                  {t('dashboard.reminderScheduler.eyebrow')}
                 </h2>
                 <p className="reminder-scheduler-dialog__title mt-1 font-display text-2xl font-semibold text-text">
-                  Recordatorios inteligentes
+                  {t('dashboard.reminderScheduler.title')}
                 </p>
                 <p className="reminder-scheduler-dialog__description mt-1 text-sm text-text-muted">
-                  Configurá tu recordatorio por correo o pausa cuando lo necesites.
+                  {t('dashboard.reminderScheduler.description')}
                 </p>
               </div>
               <button
@@ -141,7 +143,7 @@ export const ReminderSchedulerDialog = forwardRef<
                 type="button"
                 onClick={close}
                 className="reminder-scheduler-dialog__close-button rounded-full border border-white/20 bg-white/10 p-2 text-white/80 transition hover:border-white/40 hover:bg-white/20"
-                aria-label="Cerrar recordatorio diario"
+                aria-label={t('dashboard.reminderScheduler.closeAria')}
               >
                 <svg
                   aria-hidden="true"
