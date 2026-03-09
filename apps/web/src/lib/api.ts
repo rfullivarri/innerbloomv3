@@ -1774,6 +1774,29 @@ export type TaskInsightsResponse = {
     bestStreak: number;
     timeline: Array<{ weekStart: string; weekEnd: string; count: number; hit: boolean }>;
   };
+  recalibration?: {
+    latest?: {
+      action?: string | null;
+      periodLabel?: string | null;
+      periodStart?: string | null;
+      periodEnd?: string | null;
+      expectedTarget?: number | null;
+      completions?: number | null;
+      completionRate?: number | null;
+      recalibratedAt?: string | null;
+    } | null;
+    history?: Array<{
+      action?: string | null;
+      periodLabel?: string | null;
+      periodStart?: string | null;
+      periodEnd?: string | null;
+      expectedTarget?: number | null;
+      completions?: number | null;
+      completionRate?: number | null;
+      recalibratedAt?: string | null;
+    }>;
+    eligible?: boolean | null;
+  } | null;
 };
 
 export async function getUserStreakPanel(
