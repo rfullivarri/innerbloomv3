@@ -3,6 +3,7 @@ import type {
   ModerationTrackerConfig,
   ModerationTrackerType,
 } from "../../lib/api";
+import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
 
 const trackerLabels: Record<ModerationTrackerType, string> = {
   alcohol: "Alcohol",
@@ -32,6 +33,7 @@ export function ModerationEditSheet({
   onTogglePause,
   onToleranceChange,
 }: ModerationEditSheetProps) {
+  const { t } = usePostLoginLanguage();
   if (!isOpen) {
     return null;
   }
@@ -47,26 +49,26 @@ export function ModerationEditSheet({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Edit Moderación"
+        aria-label={t('dashboard.moderation.editSheetAria')}
         className="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-[color:var(--color-border-soft)] bg-[linear-gradient(160deg,color-mix(in_srgb,var(--color-surface)_94%,transparent),color-mix(in_srgb,var(--color-overlay-2)_72%,transparent))] p-4 text-[color:var(--color-text)] shadow-[var(--shadow-elev-2)]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] px-3 py-2 shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_14%,transparent)]">
           <h3 className="text-base font-semibold text-[color:var(--color-text-strong)]">
-            Edit Moderación
+            {t('dashboard.moderation.editSheetTitle')}
           </h3>
           <button
             type="button"
             onClick={onClose}
             className="rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text-strong)] transition-colors hover:bg-[color:var(--color-overlay-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)]"
           >
-            Cerrar
+            {t('dashboard.moderation.close')}
           </button>
         </div>
 
         {isLoading || !configs ? (
           <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-dim)]">
-            Cargando configuración…
+            {t('dashboard.moderation.loadingConfig')}
           </div>
         ) : (
           <div className="space-y-3.5">
@@ -85,12 +87,12 @@ export function ModerationEditSheet({
                     <p className="text-sm font-semibold text-[color:var(--color-text)]">{trackerLabels[type]}</p>
                     {isSwitchDisabled ? (
                       <span className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[color:var(--color-text-faint)]">
-                        Desactivado
+                        {t('dashboard.moderation.disabled')}
                       </span>
                     ) : null}
                   </div>
                   <label className="mt-3 flex items-center justify-between text-sm text-[color:var(--color-text)]">
-                    <span>Vacaciones</span>
+                    <span>{t('dashboard.moderation.vacation')}</span>
                     <button
                       type="button"
                       role="switch"
@@ -120,7 +122,7 @@ export function ModerationEditSheet({
                     </button>
                   </label>
                   <label className="mt-3 block text-sm text-[color:var(--color-text)]">
-                    Tolerancia sin marcar: {toleranceDays}
+                    {t('dashboard.moderation.toleranceLabel', { days: toleranceDays })}
                     <div className="relative mt-2 h-8">
                       <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 h-2 -translate-y-1/2 rounded-full bg-[color:var(--color-overlay-4)]" data-testid="tolerance-rail" />
                       <div
