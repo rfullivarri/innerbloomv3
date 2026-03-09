@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('config/emotion_messages.json', () => ({ default: {} }));
+vi.mock('../../config/emotion_messages.es.json', () => ({ default: {} }));
+vi.mock('../../config/emotion_messages.en.json', () => ({ default: {} }));
 vi.mock('../api', () => ({
   getTaskInsights: vi.fn(),
 }));

@@ -4,6 +4,8 @@ import { ProgressBar } from '../common/ProgressBar';
 import { useRequest } from '../../hooks/useRequest';
 import { getAchievements, type Achievement, type WeeklyWrappedRecord } from '../../lib/api';
 import type { WeeklyWrappedPayload } from '../../lib/weeklyWrapped';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+import { resolveEmotionCopy } from '../../config/emotionMessages';
 
 interface RewardsSectionProps {
   userId: string;
@@ -39,6 +41,7 @@ export function RewardsSection({
   weeklyWrappedPrevious,
   onOpenWeeklyWrapped,
 }: RewardsSectionProps) {
+  const { language } = usePostLoginLanguage();
   const { data, status, error, reload } = useRequest(() => getAchievements(userId), [userId], {
     enabled: Boolean(userId),
   });
@@ -138,6 +141,7 @@ export function RewardsSection({
           <WeeklyWrappedShelf
             items={weeklyWrappedItems}
             onOpen={onOpenWeeklyWrapped}
+            language={language}
           />
           {!hasMockedAchievements && (
             <>
@@ -188,9 +192,10 @@ function RewardsSkeleton() {
 type WeeklyWrappedShelfProps = {
   items: { label: string; record: WeeklyWrappedRecord }[];
   onOpen?: (record?: WeeklyWrappedRecord | null) => void;
+  language: 'es' | 'en';
 };
 
-function WeeklyWrappedShelf({ items, onOpen }: WeeklyWrappedShelfProps) {
+function WeeklyWrappedShelf({ items, onOpen, language }: WeeklyWrappedShelfProps) {
   if (items.length === 0) {
     return null;
   }
@@ -205,7 +210,7 @@ function WeeklyWrappedShelf({ items, onOpen }: WeeklyWrappedShelfProps) {
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {items.map((item) => (
-          <WeeklyWrappedCard key={item.record.id} label={item.label} record={item.record} onOpen={onOpen} />
+          <WeeklyWrappedCard key={item.record.id} label={item.label} record={item.record} onOpen={onOpen} language={language} />
         ))}
       </div>
     </div>
@@ -216,14 +221,17 @@ function WeeklyWrappedCard({
   label,
   record,
   onOpen,
+  language,
 }: {
   label: string;
   record: WeeklyWrappedRecord;
   onOpen?: (record?: WeeklyWrappedRecord | null) => void;
+  language: 'es' | 'en';
 }) {
   const weeklyEmotion = record.payload.emotions.weekly ?? record.payload.emotions.biweekly;
   const pillarDominant = record.payload.summary.pillarDominant;
-  const weekRangeLabel = formatWeekRange(record.payload).toUpperCase();
+  const weekRangeLabel = formatWeekRange(record.payload, language).toUpperCase();
+  const weeklyEmotionLabel = weeklyEmotion ? resolveEmotionCopy(language, weeklyEmotion.key).label : null;
 
   return (
     <div className="ib-card-contour-shadow flex flex-col gap-3 rounded-xl border border-[color:var(--color-border-subtle)] bg-[image:var(--glass-bg)] p-4">
@@ -240,7 +248,7 @@ function WeeklyWrappedCard({
         <div className="flex flex-wrap gap-2">
           <WeeklyChip
             color={weeklyEmotion?.color}
-            srLabel={weeklyEmotion?.label ?? 'Sin emoción dominante'}
+            srLabel={weeklyEmotionLabel ?? (language === 'es' ? 'Sin emoción dominante' : 'No dominant emotion')}
           />
           {pillarDominant ? <WeeklyChip icon={getPillarIcon(pillarDominant)} variant="outline" /> : null}
         </div>
@@ -333,10 +341,11 @@ function normalizePillar(value?: string | null): 'Body' | 'Mind' | 'Soul' | null
   return null;
 }
 
-function formatWeekRange(payload: WeeklyWrappedPayload): string {
+function formatWeekRange(payload: WeeklyWrappedPayload, language: 'es' | 'en'): string {
   const start = new Date(payload.weekRange.start);
   const end = new Date(payload.weekRange.end);
-  return `${start.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`;
+  const locale = language === 'es' ? 'es-AR' : 'en-US';
+  return `${start.toLocaleDateString(locale, { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString(locale, { month: 'short', day: 'numeric' })}`;
 }
 
 function RewardsAchievementItem({ achievement }: { achievement: Achievement }) {

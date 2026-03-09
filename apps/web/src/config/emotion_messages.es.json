@@ -1,0 +1,44 @@
+{
+  "felicidad": {
+    "label": "Felicidad",
+    "tone": "positivo",
+    "weekly_message": "La felicidad estuvo muy presente esta semana. Darte permiso para disfrutar también es parte de tu proceso.",
+    "biweekly_context": "En los últimos días este estado apareció con frecuencia. Identificar qué lo nutre puede ayudarte a sostenerlo."
+  },
+  "motivacion": {
+    "label": "Motivación",
+    "tone": "positivo",
+    "weekly_message": "La motivación fue tu motor esta semana. Aprovechá este impulso con pasos concretos y realistas.",
+    "biweekly_context": "Este envión se viene sosteniendo. Avanzar con foco, sin exigirte de más, puede convertirlo en constancia."
+  },
+  "calma": {
+    "label": "Calma",
+    "tone": "neutro",
+    "weekly_message": "La calma marcó tu semana. Un ritmo estable también es una forma valiosa de avanzar.",
+    "biweekly_context": "Este estado se sostuvo en el tiempo. Cuidar tus pausas puede ayudarte a mantener ese equilibrio."
+  },
+  "cansancio": {
+    "label": "Cansancio",
+    "tone": "neutro",
+    "weekly_message": "El cansancio estuvo presente. Escucharlo con amabilidad también es autocuidado.",
+    "biweekly_context": "En las últimas semanas este estado se repitió. Ajustar el ritmo y priorizar descanso puede hacer diferencia."
+  },
+  "ansiedad": {
+    "label": "Ansiedad",
+    "tone": "desafiante",
+    "weekly_message": "La ansiedad apareció esta semana. Volver a lo simple y respirar consciente puede ayudarte a regularla.",
+    "biweekly_context": "Este estado se repitió en varios días. Sostener microacciones de calma puede darte más sensación de control."
+  },
+  "tristeza": {
+    "label": "Tristeza",
+    "tone": "desafiante",
+    "weekly_message": "La tristeza estuvo presente. Reconocerla sin juzgarte también es una forma de cuidado.",
+    "biweekly_context": "Este ánimo apareció en distintos momentos. Avanzar de a poco, con apoyo, sigue siendo avanzar."
+  },
+  "frustracion": {
+    "label": "Frustración",
+    "tone": "desafiante",
+    "weekly_message": "La frustración se hizo notar. Ajustar expectativas sin abandonar también es progreso.",
+    "biweekly_context": "Este estado apareció cuando hubo más presión. Celebrar avances pequeños puede ayudarte a recuperar impulso."
+  }
+}
