@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+import { PostLoginLanguageProvider } from '../../i18n/postLoginLanguage';
 import { NotificationPopup } from './NotificationPopup';
 
 describe('NotificationPopup', () => {
@@ -10,15 +11,17 @@ describe('NotificationPopup', () => {
     const onCtaClick = vi.fn();
 
     render(
-      <NotificationPopup
-        open
-        title="Título"
-        message="Mensaje"
-        emoji="🚀"
-        cta={{ label: 'Abrir', href: null }}
-        onClose={onClose}
-        onCtaClick={onCtaClick}
-      />,
+      <PostLoginLanguageProvider>
+        <NotificationPopup
+          open
+          title="Título"
+          message="Mensaje"
+          emoji="🚀"
+          cta={{ label: 'Abrir', href: null }}
+          onClose={onClose}
+          onCtaClick={onCtaClick}
+        />
+      </PostLoginLanguageProvider>,
     );
 
     await user.click(screen.getByRole('link', { name: /abrir/i }));

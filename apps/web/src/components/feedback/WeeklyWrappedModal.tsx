@@ -1,6 +1,7 @@
 import { type MutableRefObject, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { type TaskInsightsResponse } from '../../lib/api';
 import { computeWeeklyHabitHealth, getHabitHealth as getHabitHealthFromInsights } from '../../lib/habitHealth';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import type { WeeklyWrappedPayload, WeeklyWrappedSection } from '../../lib/weeklyWrapped';
 
 const ANIMATION_DELAY = 80;
@@ -97,6 +98,7 @@ const ENERGY_GRADIENT_BY_METRIC: Record<'HP' | 'MOOD' | 'FOCUS', string> = {
 };
 
 export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps) {
+  const { language, t } = usePostLoginLanguage();
   const [entered, setEntered] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -214,7 +216,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
       [
         {
           id: 'range',
-          label: formatRange(payload.weekRange),
+          label: formatRange(payload.weekRange, language),
           active: true,
           icon: '📅',
         },
@@ -274,7 +276,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
           className="ib-weekly-wrapped-close absolute right-5 top-5 z-20 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-50 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-400/30 hover:text-slate-950"
           style={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}
         >
-          Cerrar
+          {t('feedback.common.close')}
         </button>
 
         <div className="relative h-full w-full overflow-hidden">
@@ -283,14 +285,14 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
             ref={containerRef}
           >
             <SectionBlock
-              label={sectionsByKey.intro?.title ?? 'Weekly Wrapped · Preview'}
-              headline={sectionsByKey.intro?.body ?? 'Tus últimos 7 días, en movimiento'}
+              label={sectionsByKey.intro?.title ?? t('feedback.weeklyWrapped.intro.label')}
+              headline={sectionsByKey.intro?.body ?? t('feedback.weeklyWrapped.intro.headline')}
               badges={summaryChips}
               description={
                 hasAchievementStats
                   ? undefined
                   : sectionsByKey.achievements?.body ??
-                    'Completaste 0 tareas y sumaste 0 GP en los últimos 7 días.'
+                    t('feedback.weeklyWrapped.intro.fallbackAchievements')
               }
               kicker={sectionsByKey.achievements?.accent}
               stats={{
@@ -303,6 +305,8 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               index={0}
               active={activeIndex === 0}
               registerSectionRef={(el) => (sectionRefs.current[0] = el)}
+              t={t}
+              language={language}
             />
 
             {showLevelUp ? (
@@ -312,14 +316,16 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
                 entered={entered}
                 active={activeIndex === 1}
                 registerSectionRef={(el) => (sectionRefs.current[1] = el)}
+                t={t}
+                language={language}
               />
             ) : null}
 
             <HabitsBlock
-              title={sectionsByKey.habits?.title ?? 'Ritmo que se sostiene'}
+              title={sectionsByKey.habits?.title ?? t('feedback.weeklyWrapped.habits.title')}
               description={
                 sectionsByKey.habits?.body ??
-                'Estos hábitos aparecieron de forma consistente y mantuvieron tus últimos 7 días en movimiento.'
+                t('feedback.weeklyWrapped.habits.description')
               }
               items={habitsItems.map((item, idx) => ({
                 ...item,
@@ -330,6 +336,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               activeIndex={activeIndex}
               registerSectionRef={sectionRefs}
               referenceDate={referenceDate}
+              t={t}
             />
 
             <ProgressBlock
@@ -343,6 +350,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               index={progressIndex}
               active={activeIndex === progressIndex}
               registerSectionRef={(el) => (sectionRefs.current[progressIndex] = el)}
+              t={t}
             />
 
             <EmotionHighlightBlock
@@ -351,16 +359,18 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
               index={emotionIndex}
               active={activeIndex === emotionIndex}
               registerSectionRef={(el) => (sectionRefs.current[emotionIndex] = el)}
+              t={t}
             />
 
             <ClosingBlock
-              message={sectionsByKey.closing?.body ?? 'Seguimos sumando: mañana vuelve el Daily Quest.'}
-              accent={sectionsByKey.closing?.accent ?? 'Mañana hay más'}
+              message={sectionsByKey.closing?.body ?? t('feedback.weeklyWrapped.closing.message')}
+              accent={sectionsByKey.closing?.accent ?? t('feedback.weeklyWrapped.closing.accent')}
               onClose={onClose}
               entered={entered}
               index={closingIndex}
               active={activeIndex === closingIndex}
               registerSectionRef={(el) => (sectionRefs.current[closingIndex] = el)}
+              t={t}
             />
           </div>
         </div>
@@ -429,6 +439,8 @@ type SectionBlockProps = {
   index: number;
   active?: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
+  language: 'es' | 'en';
 };
 
 function SectionBlock({
@@ -443,6 +455,8 @@ function SectionBlock({
   index,
   active,
   registerSectionRef,
+  t,
+  language,
 }: SectionBlockProps) {
   return (
     <SectionShell
@@ -490,6 +504,8 @@ function SectionBlock({
                 xpTotal={stats.xpTotal}
                 pillar={stats.pillar}
                 pillarStats={stats.pillarStats}
+                t={t}
+                language={language}
               />
             ) : (
               <>
@@ -511,21 +527,28 @@ function WeeklyKPIHighlight({
   xpTotal,
   pillar,
   pillarStats,
+  t,
+  language,
 }: {
   completions: number;
   xpTotal: number;
   pillar: string | null;
   pillarStats: { xp: number; completions: number } | null;
+  t: (key: string, params?: Record<string, string | number>) => string;
+  language: 'es' | 'en';
 }) {
-  const formatter = new Intl.NumberFormat('es-AR');
-  const pillarLabel = pillar ?? 'modo mixto';
+  const formatter = new Intl.NumberFormat(language === 'es' ? 'es-AR' : 'en-US');
+  const pillarLabel = pillar ?? t('feedback.weeklyWrapped.metrics.mixedMode');
   const pillarIcon = pillar ? getPillarIcon(pillar) : '🫀';
   const pillarNarrative =
-    pillarLabel === 'modo mixto'
-      ? 'Tu energía se movió principalmente en modo mixto.'
-      : `Tu energía se movió principalmente en el pilar ${pillarLabel}.`;
+    pillarLabel === t('feedback.weeklyWrapped.metrics.mixedMode')
+      ? t('feedback.weeklyWrapped.metrics.pillarNarrativeMixed')
+      : t('feedback.weeklyWrapped.metrics.pillarNarrative', { pillar: pillarLabel });
   const pillarStatsDetail = pillarStats
-    ? `Últimos 7 días: ${formatter.format(pillarStats.xp)} GP · ${formatter.format(pillarStats.completions)} tareas.`
+    ? t('feedback.weeklyWrapped.metrics.pillarStatsDetail', {
+        xp: formatter.format(pillarStats.xp),
+        completions: formatter.format(pillarStats.completions),
+      })
     : null;
 
   return (
@@ -536,7 +559,7 @@ function WeeklyKPIHighlight({
             <span aria-hidden>{pillarIcon}</span>
           </div>
           <div className="space-y-1">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-100">Pilar dominante</p>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-100">{t('feedback.weeklyWrapped.metrics.dominantPillar')}</p>
             <p className="text-base font-semibold leading-snug text-slate-50 sm:text-lg">{pillarNarrative}</p>
             {pillarStatsDetail ? (
               <p className="text-sm text-emerald-50/90 sm:text-base">{pillarStatsDetail}</p>
@@ -547,12 +570,17 @@ function WeeklyKPIHighlight({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <KPIStat
-          label="Tareas completadas"
+          label={t('feedback.weeklyWrapped.metrics.completedTasks')}
           value={formatter.format(completions)}
-          suffix="tareas"
+          suffix={t('feedback.weeklyWrapped.metrics.tasksSuffix')}
           icon="🎯"
         />
-        <KPIStat label="Experiencia" value={formatter.format(xpTotal)} suffix="xp" icon="🎖️" />
+        <KPIStat
+          label={t('feedback.weeklyWrapped.metrics.experience')}
+          value={formatter.format(xpTotal)}
+          suffix={t('feedback.weeklyWrapped.metrics.experienceSuffix')}
+          icon="🎖️"
+        />
       </div>
     </div>
   );
@@ -639,6 +667,7 @@ type HabitsBlockProps = {
   activeIndex: number;
   registerSectionRef: MutableRefObject<(HTMLDivElement | null)[]>;
   referenceDate?: Date;
+  t: (key: string, params?: Record<string, string | number>) => string;
 };
 
 type HabitHealthLevel = ReturnType<typeof getHabitHealthFromInsights>['level'];
@@ -747,10 +776,10 @@ export function resolveHabitHealth(
   };
 }
 
-function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef, referenceDate }: HabitsBlockProps) {
-  const slideLabel = 'CONSTANCIA';
-  const headline = 'Constancia';
-  const subline = description || 'Tus hábitos más firmes sostuvieron el ritmo.';
+function HabitsBlock({ title, description, items, entered, startIndex, activeIndex, registerSectionRef, referenceDate, t }: HabitsBlockProps) {
+  const slideLabel = t('feedback.weeklyWrapped.habits.slideLabel');
+  const headline = t('feedback.weeklyWrapped.habits.headline');
+  const subline = description || t('feedback.weeklyWrapped.habits.subline');
   return (
     <SectionShell
       index={startIndex}
@@ -792,7 +821,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
                 </div>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                   <p className="text-[11px] text-emerald-50/80">
-                    Meta cumplida {health.weeksActive} de {health.weeksSample} semanas.
+                    {t('feedback.weeklyWrapped.habits.goalMet', { weeksActive: health.weeksActive, weeksSample: health.weeksSample })}
                   </p>
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-tight ${
@@ -807,7 +836,7 @@ function HabitsBlock({ title, description, items, entered, startIndex, activeInd
           })
         ) : (
           <p className="rounded-2xl border border-dashed border-white/15 bg-slate-900/70 p-4 text-sm text-slate-300">
-            Sin hábitos destacados aún, pero la pista está lista para vos.
+            {t('feedback.weeklyWrapped.habits.empty')}
           </p>
         )}
       </div>
@@ -821,10 +850,12 @@ type LevelUpBlockProps = {
   index: number;
   active?: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
+  language: 'es' | 'en';
 };
 
-function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef }: LevelUpBlockProps) {
-  const levelLabel = levelUp.currentLevel ?? 'nuevo';
+function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef, t, language }: LevelUpBlockProps) {
+  const levelLabel = levelUp.currentLevel ?? t('feedback.weeklyWrapped.levelUp.newLabel');
   const previousLabel = levelUp.previousLevel ?? Math.max(0, Number(levelLabel) - 1);
 
   return (
@@ -842,16 +873,16 @@ function LevelUpBlock({ levelUp, entered, index, active, registerSectionRef }: L
           <div className="absolute -left-10 -bottom-10 h-36 w-36 rounded-full bg-sky-400/15 blur-3xl" aria-hidden />
           <div className="flex h-full flex-col gap-5 text-slate-50 md:flex-row md:items-center md:justify-between md:gap-10">
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.22em] text-emerald-100">Slide especial · Level Up</p>
-              <h3 className="text-3xl font-semibold drop-shadow-[0_0_30px_rgba(16,185,129,0.45)]">Subiste a Nivel {levelLabel}</h3>
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-100">{t('feedback.weeklyWrapped.levelUp.slideLabel')}</p>
+              <h3 className="text-3xl font-semibold drop-shadow-[0_0_30px_rgba(16,185,129,0.45)]">{t('feedback.weeklyWrapped.levelUp.headline', { level: levelLabel })}</h3>
               <p className="max-w-2xl text-sm text-emerald-50/90">
                 {levelUp.forced
-                  ? 'Mock activado para validar la celebración sin afectar métricas.'
-                  : 'Últimos 7 días con salto real: cada misión empujó tu progreso.'}
+                  ? t('feedback.weeklyWrapped.levelUp.mockCopy')
+                  : t('feedback.weeklyWrapped.levelUp.realCopy')}
               </p>
               <div className="flex flex-wrap gap-3 text-xs text-slate-200">
                 <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
-                  +{levelUp.xpGained.toLocaleString('es-AR')} GP en los últimos 7 días
+                  +{levelUp.xpGained.toLocaleString(language === 'es' ? 'es-AR' : 'en-US')} {t('feedback.weeklyWrapped.levelUp.xpChip')}
                 </span>
                 <span className="rounded-full border border-white/15 bg-emerald-500/20 px-3 py-1 font-semibold uppercase tracking-[0.18em] text-emerald-50">
                   {previousLabel} → {levelLabel}
@@ -883,6 +914,7 @@ type ProgressBlockProps = {
   index: number;
   active?: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
 };
 
 function ProgressBlock({
@@ -896,42 +928,50 @@ function ProgressBlock({
   index,
   active,
   registerSectionRef,
+  t,
 }: ProgressBlockProps) {
-  const slideLabel = 'PROGRESO Y FOCO';
+  const slideLabel = t('feedback.weeklyWrapped.progress.slideLabel');
   const energySnapshot = computeEnergySnapshot(pillarDominant, completions, xpTotal, energyHighlight);
   const hasDelta = energySnapshot.hasHistory && typeof energySnapshot.delta === 'number';
   const energyHeadline = hasDelta
-    ? `${energySnapshot.metric.label} ${formatDeltaValue(energySnapshot.delta)} vs 7 días anteriores`
+    ? t('feedback.weeklyWrapped.progress.deltaHeadline', {
+        metric: energySnapshot.metric.label,
+        delta: formatDeltaValue(energySnapshot.delta),
+      })
     : energySnapshot.hasHistory
-      ? `Energía destacada: ${energySnapshot.metric.label} (${energySnapshot.current}%)`
-      : 'Sin datos suficientes para comparar energía con los 7 días anteriores.';
+      ? t('feedback.weeklyWrapped.progress.energyHighlight', {
+          metric: energySnapshot.metric.label,
+          current: energySnapshot.current,
+        })
+      : t('feedback.weeklyWrapped.progress.energyNoData');
   const energyBarHeight = `${Math.max(12, Math.min(100, energySnapshot.current))}%`;
   const energyBarGradient = ENERGY_GRADIENT_BY_METRIC[energySnapshot.metric.label] ?? 'from-white/70 via-white/90 to-white';
   const energyCurrentLabel = `${Math.round(energySnapshot.current)}%`;
-  const energyFocusStory = `En los últimos 7 días tu energía se enfocó en ${
-    energySnapshot.metric.label === 'HP'
-      ? 'tu bienestar físico'
-      : energySnapshot.metric.label === 'FOCUS'
-        ? 'tu capacidad de enfoque'
-        : 'tu ánimo y bienestar emocional'
-  }; aquí verás cómo evolucionó.`;
+  const energyFocusStory = t('feedback.weeklyWrapped.progress.energyFocus.story', {
+    area:
+      energySnapshot.metric.label === 'HP'
+        ? t('feedback.weeklyWrapped.progress.energyFocus.hp')
+        : energySnapshot.metric.label === 'FOCUS'
+          ? t('feedback.weeklyWrapped.progress.energyFocus.focus')
+          : t('feedback.weeklyWrapped.progress.energyFocus.mood'),
+  });
   const hasEffortBalance = Boolean((effortBalance?.total ?? 0) > 0);
   const balanceTotal = hasEffortBalance ? effortBalance?.total ?? 0 : 0;
   const easyPct = hasEffortBalance && balanceTotal ? Math.round((100 * (effortBalance?.easy ?? 0)) / balanceTotal) : 0;
   const mediumPct = hasEffortBalance && balanceTotal ? Math.round((100 * (effortBalance?.medium ?? 0)) / balanceTotal) : 0;
   const hardPct = hasEffortBalance && balanceTotal ? Math.max(0, 100 - easyPct - mediumPct) : 0;
   const balanceReading = !hasEffortBalance
-    ? 'Sin datos en los últimos 7 días'
+    ? t('feedback.weeklyWrapped.progress.balanceNoData')
     : easyPct > 70
-      ? 'Los últimos 7 días priorizaron estabilidad sobre intensidad'
+      ? t('feedback.weeklyWrapped.progress.balanceStability')
       : hardPct > 30
-        ? 'Últimos 7 días de alta exigencia e intensidad'
-        : 'Buen equilibrio entre constancia e intensidad';
+        ? t('feedback.weeklyWrapped.progress.balanceIntensity')
+        : t('feedback.weeklyWrapped.progress.balanceBalanced');
   const hardInsight = !hasEffortBalance
-    ? 'Necesitamos más completions en los últimos 7 días para mostrar la dificultad real.'
+    ? t('feedback.weeklyWrapped.progress.hardInsightNoData')
     : effortBalance?.topHardTask
-      ? `La tarea difícil más repetida fue: ${effortBalance.topHardTask.title}`
-      : 'No registraste tareas difíciles en los últimos 7 días.';
+      ? t('feedback.weeklyWrapped.progress.hardInsightTopTask', { task: effortBalance.topHardTask.title })
+      : t('feedback.weeklyWrapped.progress.hardInsightEmpty');
   const insightDotColor = '#fbbf24';
   const effortInsights: { id: string; color: string; text: string }[] = [
     {
@@ -956,12 +996,12 @@ function ProgressBlock({
     >
       <div className="space-y-3">
         <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
-        <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">Pequeños avances</h3>
+        <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(56,189,248,0.3)]">{t('feedback.weeklyWrapped.progress.headline')}</h3>
       </div>
 
       <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-emerald-500/15 p-5 shadow-lg shadow-emerald-400/20">
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-emerald-100">
-          <span>Daily Energy</span>
+          <span>{t('feedback.weeklyWrapped.progress.dailyEnergy')}</span>
         </div>
         <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
           <div className="relative flex h-28 w-12 items-end overflow-hidden rounded-xl border border-white/20 bg-slate-900/60">
@@ -977,7 +1017,7 @@ function ProgressBlock({
               {hasDelta ? (
                 <span className="text-xs font-semibold text-emerald-50">
                   <span className="font-bold text-emerald-300">{formatDeltaValue(energySnapshot.delta)}</span>{' '}
-                  <span className="font-semibold">vs 7 días anteriores</span>
+                  <span className="font-semibold">{t('feedback.weeklyWrapped.progress.vsPrevious7Days')}</span>
                 </span>
               ) : (
                 <span className="text-xs text-emerald-100">{energyHeadline}</span>
@@ -992,8 +1032,8 @@ function ProgressBlock({
         <div className="space-y-3">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-100">Balance de esfuerzo</p>
-              <p className="text-lg font-semibold text-slate-50">Completaste {balanceTotal} tareas, repartidas por dificultad</p>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-100">{t('feedback.weeklyWrapped.progress.balanceTitle')}</p>
+              <p className="text-lg font-semibold text-slate-50">{t('feedback.weeklyWrapped.progress.balanceSummary', { total: balanceTotal })}</p>
             </div>
           </div>
 
@@ -1024,15 +1064,15 @@ function ProgressBlock({
             <div className="flex flex-wrap items-center justify-center gap-3 text-[12px] text-emerald-50/80">
               <span className="flex items-center gap-2 rounded-full bg-white/0 px-2 py-1">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" aria-hidden />
-                <span className="font-medium">Easy</span>
+                <span className="font-medium">{t('feedback.weeklyWrapped.progress.easy')}</span>
               </span>
               <span className="flex items-center gap-2 rounded-full bg-white/0 px-2 py-1">
                 <span className="h-2.5 w-2.5 rounded-full bg-cyan-400" aria-hidden />
-                <span className="font-medium">Medium</span>
+                <span className="font-medium">{t('feedback.weeklyWrapped.progress.medium')}</span>
               </span>
               <span className="flex items-center gap-2 rounded-full bg-white/0 px-2 py-1">
                 <span className="h-2.5 w-2.5 rounded-full bg-rose-400" aria-hidden />
-                <span className="font-medium">Hard</span>
+                <span className="font-medium">{t('feedback.weeklyWrapped.progress.hard')}</span>
               </span>
             </div>
           </div>
@@ -1064,20 +1104,21 @@ type EmotionHighlightBlockProps = {
   index: number;
   active?: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
 };
 
-function EmotionHighlightBlock({ emotionHighlight, entered, index, active, registerSectionRef }: EmotionHighlightBlockProps) {
+function EmotionHighlightBlock({ emotionHighlight, entered, index, active, registerSectionRef, t }: EmotionHighlightBlockProps) {
   const weeklyEmotion = emotionHighlight.weekly;
   const biweeklyEmotion = emotionHighlight.biweekly ?? weeklyEmotion;
   const weeklyColor = weeklyEmotion?.color ?? '#fbbf24';
   const biweeklyColor = biweeklyEmotion?.color ?? weeklyColor;
-  const weeklyLabel = weeklyEmotion?.label ?? 'Sin emoción dominante';
+  const weeklyLabel = weeklyEmotion?.label ?? t('feedback.weeklyWrapped.emotion.noDominant');
   const weeklyMessage =
-    weeklyEmotion?.weeklyMessage ?? 'Registrá tus emociones para detectar cuál lideró los últimos 7 días.';
-  const biweeklyLabel = biweeklyEmotion?.label ?? 'Seguimos observando';
+    weeklyEmotion?.weeklyMessage ?? t('feedback.weeklyWrapped.emotion.weeklyMessageFallback');
+  const biweeklyLabel = biweeklyEmotion?.label ?? t('feedback.weeklyWrapped.emotion.biweeklyFallback');
   const biweeklyContext =
-    biweeklyEmotion?.biweeklyContext ?? 'Con más registros vamos a mostrar la tendencia de los últimos 15 días.';
-  const slideLabel = 'EMOCIÓN EN FOCO';
+    biweeklyEmotion?.biweeklyContext ?? t('feedback.weeklyWrapped.emotion.biweeklyContextFallback');
+  const slideLabel = t('feedback.weeklyWrapped.emotion.slideLabel');
 
   return (
     <SectionShell
@@ -1089,8 +1130,8 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
     >
       <div className="space-y-3">
         <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">{slideLabel}</p>
-        <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(251,191,36,0.35)]">Emoción en foco</h3>
-        <p className="text-sm text-emerald-50">Movimiento emocional de los últimos 7 días en un vistazo.</p>
+        <h3 className="text-2xl font-semibold text-slate-50 drop-shadow-[0_0_18px_rgba(251,191,36,0.35)]">{t('feedback.weeklyWrapped.emotion.headline')}</h3>
+        <p className="text-sm text-emerald-50">{t('feedback.weeklyWrapped.emotion.description')}</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -1104,7 +1145,7 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
               ●
             </span>
             <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-amber-50">Emoción dominante (7 días)</p>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-amber-50">{t('feedback.weeklyWrapped.emotion.dominant7Days')}</p>
               <p className="text-2xl font-semibold text-slate-900 drop-shadow-[0_0_18px_rgba(251,191,36,0.35)]">{weeklyLabel}</p>
             </div>
           </div>
@@ -1123,13 +1164,13 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
               ●
             </span>
             <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-100">Tendencia emocional (15 días)</p>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-100">{t('feedback.weeklyWrapped.emotion.trend15Days')}</p>
               <p className="text-2xl font-semibold text-slate-50">{biweeklyLabel}</p>
             </div>
           </div>
           <div className="rounded-2xl border border-white/15 bg-white/5 p-3 text-sm text-slate-50 shadow-inner shadow-emerald-400/10">
             {biweeklyEmotion
-              ? `En los últimos 15 días tu energía se inclinó hacia ${biweeklyLabel.toLowerCase()}. Aprovechá ese envión.`
+              ? t('feedback.weeklyWrapped.emotion.biweeklyTrend', { label: biweeklyLabel.toLowerCase() })
               : biweeklyContext}
           </div>
         </div>
@@ -1146,10 +1187,11 @@ type ClosingBlockProps = {
   index: number;
   active?: boolean;
   registerSectionRef?: (el: HTMLDivElement | null) => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
 };
 
-function ClosingBlock({ message, accent, onClose, entered, index, active, registerSectionRef }: ClosingBlockProps) {
-  const slideLabel = 'CIERRE';
+function ClosingBlock({ message, accent, onClose, entered, index, active, registerSectionRef, t }: ClosingBlockProps) {
+  const slideLabel = t('feedback.weeklyWrapped.closing.slideLabel');
   return (
     <SectionShell
       index={index}
@@ -1171,14 +1213,14 @@ function ClosingBlock({ message, accent, onClose, entered, index, active, regist
             onClick={onClose}
             className="w-full min-w-[220px] rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 px-6 py-3 text-base font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 sm:w-auto"
           >
-            Ir al Daily Quest
+            {t('feedback.weeklyWrapped.closing.goToDailyQuest')}
           </button>
           <button
             type="button"
             onClick={onClose}
             className="w-full min-w-[220px] rounded-full border border-white/25 bg-white/10 px-6 py-3 text-base font-semibold text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300/50 hover:bg-emerald-400/20 hover:text-slate-950 sm:w-auto"
           >
-            Cerrar
+            {t('feedback.common.close')}
           </button>
         </div>
       </div>
@@ -1186,10 +1228,10 @@ function ClosingBlock({ message, accent, onClose, entered, index, active, regist
   );
 }
 
-function formatRange(range: WeeklyWrappedPayload['weekRange']): string {
+function formatRange(range: WeeklyWrappedPayload['weekRange'], language: 'es' | 'en'): string {
   const start = new Date(range.start);
   const end = new Date(range.end);
-  return `${start.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`;
+  return `${start.toLocaleDateString(language === 'es' ? 'es-AR' : 'en-US', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString(language === 'es' ? 'es-AR' : 'en-US', { month: 'short', day: 'numeric' })}`;
 }
 
 function getHabitIcon(pillar?: string | null, index = 0): string {

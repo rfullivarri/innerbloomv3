@@ -80,7 +80,7 @@ export function NotificationPopup({
             type="button"
             onClick={onClose}
             className="ib-feedback-popup-close rounded-full border border-white/20 p-1 text-xs text-white/70 transition hover:border-sky-300/50 hover:text-white"
-            aria-label={t('feedback.popup.closeAria')}
+            aria-label={t('feedback.popup.closeNotificationAria')}
           >
             ✕
           </button>
@@ -116,7 +116,7 @@ export function NotificationPopup({
             onClick={onClose}
             className="ib-feedback-popup-dismiss inline-flex w-full items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-sky-300/60 hover:bg-white/10"
           >
-            {t('feedback.popup.close')}
+            {t('feedback.common.close')}
           </button>
         </div>
       </div>
