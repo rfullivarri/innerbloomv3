@@ -8,6 +8,7 @@ import { ApiError, apiAuthorizedFetch, buildApiUrl } from '../lib/api';
 import { setJourneyGenerationPending } from '../lib/journeyGeneration';
 import { emitOnboardingEvent } from '../lib/telemetry';
 import { resolveOnboardingLanguage } from '../onboarding/i18n';
+import { POSTLOGIN_LANGUAGE_STORAGE_KEY } from '../i18n/postLoginLanguage';
 
 async function parseErrorMessage(response: Response) {
   const payload = await response.json().catch(() => ({}));
@@ -58,6 +59,11 @@ export default function OnboardingIntroPage() {
           plan: 'FREE',
           xpTotal: payload.xp.total,
         });
+
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(POSTLOGIN_LANGUAGE_STORAGE_KEY, language);
+          window.localStorage.setItem('innerbloom.postlogin.language.source', 'locale');
+        }
 
         setJourneyGenerationPending({
           clerkUserId: payload.meta.user_id,
