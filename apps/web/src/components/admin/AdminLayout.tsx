@@ -19,6 +19,7 @@ import {
   runAdminTaskDifficultyCalibration,
   type AdminTaskDifficultyCalibrationRunResponse,
 } from '../../lib/adminApi';
+import { ApiError } from '../../lib/api';
 import { AdminDataTable } from './AdminDataTable';
 import { FiltersBar, type AdminFilters } from './FiltersBar';
 import { InsightsChips } from './InsightsChips';
@@ -80,6 +81,7 @@ export function AdminLayout() {
   const [runningCalibration, setRunningCalibration] = useState(false);
   const [calibrationResult, setCalibrationResult] = useState<AdminTaskDifficultyCalibrationRunResponse | null>(null);
   const [calibrationError, setCalibrationError] = useState<string | null>(null);
+  const calibrationErrorsPreview = calibrationResult?.errors.slice(0, 5) ?? [];
 
   useEffect(() => {
     if (!selectedUser) {
@@ -346,7 +348,17 @@ export function AdminLayout() {
     } catch (error) {
       console.error('[admin] failed to run task difficulty calibration', error);
       setCalibrationResult(null);
-      setCalibrationError('No se pudo ejecutar la calibración de dificultad.');
+      if (error instanceof ApiError) {
+        const detail =
+          typeof error.body?.message === 'string'
+            ? error.body.message
+            : typeof error.body?.error === 'string'
+              ? error.body.error
+              : null;
+        setCalibrationError(detail ? `No se pudo ejecutar la calibración de dificultad: ${detail}` : `No se pudo ejecutar la calibración de dificultad (HTTP ${error.status}).`);
+      } else {
+        setCalibrationError('No se pudo ejecutar la calibración de dificultad.');
+      }
     } finally {
       setRunningCalibration(false);
     }
@@ -603,6 +615,23 @@ export function AdminLayout() {
                   <p>Ignoradas: <strong>{calibrationResult.ignored}</strong> · Skipped: <strong>{calibrationResult.skipped}</strong></p>
                   <p>Acciones → up: <strong>{calibrationResult.actionBreakdown.up}</strong>, keep: <strong>{calibrationResult.actionBreakdown.keep}</strong>, down: <strong>{calibrationResult.actionBreakdown.down}</strong></p>
                   <p>Errores: <strong>{calibrationResult.errors.length}</strong></p>
+                  {calibrationResult.errors.length > 0 ? (
+                    <div className="mt-2 space-y-1 rounded border border-rose-500/30 bg-rose-500/10 p-2 text-rose-100">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-rose-200">Detalle de errores (máx. 5)</p>
+                      <ul className="space-y-1 text-[11px]">
+                        {calibrationErrorsPreview.map((item) => (
+                          <li key={`${item.taskId}-${item.reason}`} className="break-words">
+                            <strong className="text-rose-200">{item.taskId}</strong>: {item.reason}
+                          </li>
+                        ))}
+                      </ul>
+                      {calibrationResult.errors.length > calibrationErrorsPreview.length ? (
+                        <p className="text-[11px] text-rose-200/90">
+                          Mostrando {calibrationErrorsPreview.length} de {calibrationResult.errors.length} errores.
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
               <button
