@@ -5,11 +5,6 @@ import type {
 } from "../../lib/api";
 import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
 
-const trackerLabels: Record<ModerationTrackerType, string> = {
-  alcohol: "Alcohol",
-  tobacco: "Tabaco",
-  sugar: "Azúcar",
-};
 
 interface ModerationEditSheetProps {
   isOpen: boolean;
@@ -84,7 +79,9 @@ export function ModerationEditSheet({
                   className="rounded-3xl border border-[color:var(--color-border-soft)] bg-[linear-gradient(160deg,color-mix(in_srgb,var(--color-surface-elevated)_94%,transparent),color-mix(in_srgb,var(--color-overlay-2)_52%,transparent))] p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-[color:var(--color-text)]">{trackerLabels[type]}</p>
+                    <p className="text-sm font-semibold text-[color:var(--color-text)]">
+                      {type === 'alcohol' ? 'Alcohol' : type === 'tobacco' ? t('dashboard.moderation.tobacco') : t('dashboard.moderation.sugar')}
+                    </p>
                     {isSwitchDisabled ? (
                       <span className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[color:var(--color-text-faint)]">
                         {t('dashboard.moderation.disabled')}

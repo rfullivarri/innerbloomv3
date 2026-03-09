@@ -17,6 +17,7 @@ import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 import { TaskInsightsModal } from './StreakTaskInsightsModal';
 import { DashboardMeta, DashboardTitle } from './DashboardTypography';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 export const FEATURE_STREAKS_PANEL_V1 = false;
 
@@ -220,6 +221,30 @@ const RANGE_TABS: Array<{ value: StreakPanelRange; label: string }> = [
 ];
 
 const PANEL_ENABLED = String(import.meta.env.VITE_SHOW_STREAKS_PANEL ?? 'true').toLowerCase() !== 'false';
+
+
+function localizeTaskStat(stat: string | undefined, language: 'es' | 'en'): string | undefined {
+  if (!stat || language === 'es') {
+    return stat;
+  }
+
+  const normalized = stat.trim().toLowerCase();
+  const map: Record<string, string> = {
+    'higiene': 'Hygiene',
+    'nutricion': 'Nutrition',
+    'nutrición': 'Nutrition',
+    'movilidad': 'Mobility',
+    'sueno': 'Sleep',
+    'sueño': 'Sleep',
+    'hidratacion': 'Hydration',
+    'hidratación': 'Hydration',
+    'tabaco': 'Tobacco',
+    'azucar': 'Sugar',
+    'azúcar': 'Sugar',
+  };
+
+  return map[normalized] ?? stat;
+}
 
 interface StreaksPanelProps {
   userId: string;
@@ -433,7 +458,14 @@ function TaskItem({
   range,
   mode,
   onSelect,
-}: { item: DisplayTask; range: StreakPanelRange; mode: Mode; onSelect?: (task: DisplayTask) => void }) {
+  daysConsecutiveText,
+}: {
+  item: DisplayTask;
+  range: StreakPanelRange;
+  mode: Mode;
+  onSelect?: (task: DisplayTask) => void;
+  daysConsecutiveText: (days: string) => string;
+}) {
   const status = getStatusColor(item.weeklyDone, item.weeklyGoal);
   const pct = computeProgressPercent(item.weeklyDone, item.weeklyGoal);
   const showHistory = item.history.values.length > 0;
@@ -498,7 +530,7 @@ function TaskItem({
               {showStreakMultiplier ? (
                 <>x{numberFormatter.format(streakDays)}</>
               ) : (
-                <span className="sr-only">{`${numberFormatter.format(streakDays)} días consecutivos`}</span>
+                <span className="sr-only">{daysConsecutiveText(numberFormatter.format(streakDays))}</span>
               )}
             </GlowChip>
           )}
@@ -593,6 +625,7 @@ function TaskItem({
 }
 
 export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks = false }: StreaksPanelProps) {
+  const { t, language } = usePostLoginLanguage();
   const [pillar, setPillar] = useState<Pillar>('Body');
   const [range, setRange] = useState<StreakPanelRange>('month');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -776,6 +809,16 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
   const showTasksSkeleton = isLoading || forceLoadingTasks;
 
   const modeLabel = `${normalizedMode.toUpperCase()} · ${tier}×/WEEK`;
+  const rangeTabs = RANGE_TABS.map((tab) => ({
+    ...tab,
+    label:
+      tab.value === 'week'
+        ? t('dashboard.streaks.week')
+        : tab.value === 'month'
+          ? t('dashboard.streaks.month')
+          : tab.label,
+  }));
+  const daysConsecutiveText = (days: string) => t('dashboard.streaks.daysConsecutiveSr', { days });
   const modeChip = MODE_CHIP_STYLES[normalizedMode];
 
   return (
@@ -844,22 +887,23 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                 <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-text)]">
                   Top streaks
                 </DashboardTitle>
-                <DashboardMeta as="span" className="text-[color:var(--color-text)]">— días consecutivos sin cortar</DashboardMeta>
+                <DashboardMeta as="span" className="text-[color:var(--color-text)]">{t('dashboard.streaks.consecutiveDays')}</DashboardMeta>
               </div>
               {topEntries.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3">
                   {topEntries.map((entry) => (
                     <TaskItem
                       key={entry.id}
-                      item={entry}
+                      item={{ ...entry, stat: localizeTaskStat(entry.stat, language) }}
                       range={range}
                       mode={normalizedMode}
                       onSelect={handleSelectTask}
+                      daysConsecutiveText={daysConsecutiveText}
                     />
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-[color:var(--color-slate-400)]">Todavía no hay rachas destacadas.</p>
+                <p className="text-sm text-[color:var(--color-slate-400)]">{t('dashboard.streaks.noneHighlighted')}</p>
               )}
             </section>
           )
@@ -871,7 +915,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
           className="flex flex-wrap items-center justify-center gap-2"
         >
           <div className={cx(TAB_GROUP_BASE, 'max-w-[220px]')}>
-            {RANGE_TABS.map((tab) => {
+            {rangeTabs.map((tab) => {
               const isActive = range === tab.value;
               return (
                 <button
@@ -904,23 +948,24 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
           hasContent && (
             <section className="space-y-3">
               <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-text)]">
-                Todas las tareas
+                {t('dashboard.streaks.allTasks')}
               </DashboardTitle>
               {displayTasks.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3">
                   {displayTasks.map((task) => (
                     <TaskItem
                       key={task.id}
-                      item={task}
+                      item={{ ...task, stat: localizeTaskStat(task.stat, language) }}
                       range={range}
                       mode={normalizedMode}
                       onSelect={handleSelectTask}
+                      daysConsecutiveText={daysConsecutiveText}
                     />
                   ))}
                 </div>
               ) : (
                 <p className="text-sm text-[color:var(--color-slate-400)]">
-                  No encontramos tareas activas para este pilar en las últimas semanas.
+                  {t('dashboard.streaks.noneForFilter')}
                 </p>
               )}
             </section>

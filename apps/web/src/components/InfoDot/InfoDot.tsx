@@ -1,7 +1,8 @@
 import { Fragment, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { infoTips, type InfoKey } from '../../content/infoTips';
+import { getInfoTips, type InfoKey } from '../../content/infoTips';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import './InfoDot.css';
 
 export type InfoDotPlacement = 'top' | 'right' | 'bottom' | 'left';
@@ -73,7 +74,8 @@ function getFocusableElements(root: HTMLElement): HTMLElement[] {
 }
 
 export function InfoDot({ id, placement = 'top', className }: InfoDotProps) {
-  const tip = infoTips[id];
+  const { language } = usePostLoginLanguage();
+  const tip = getInfoTips(language)[id];
   if (!tip) {
     throw new Error(`InfoDot: no tip found for id "${id}"`);
   }
