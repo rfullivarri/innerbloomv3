@@ -5,16 +5,93 @@ import { getSubscriptionWithFallback } from '../lib/api/subscription';
 import { changePlan, type PlanCode, type SubscriptionData } from '../lib/api/subscriptionMock';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 
+const PLAN_DISPLAY_NAMES: Record<'es' | 'en', Record<PlanCode, string>> = {
+  es: {
+    FREE: 'FREE',
+    MONTH: 'MONTH',
+    SIX_MONTHS: 'SIX_MONTHS',
+    YEAR: 'YEAR',
+    SUPERUSER: 'SUPERUSER',
+  },
+  en: {
+    FREE: 'FREE',
+    MONTH: 'MONTH',
+    SIX_MONTHS: 'SIX_MONTHS',
+    YEAR: 'YEAR',
+    SUPERUSER: 'SUPERUSER',
+  },
+};
+
+const PRICING_UI_COPY: Record<
+  'es' | 'en',
+  {
+    buttons: {
+      selectPlan: string;
+      selectedPlan: string;
+      updatingPlan: string;
+      backToDashboard: string;
+    };
+    feedback: {
+      updateSuccess: string;
+      updateError: string;
+    };
+    banners: {
+      activePlanLabel: string;
+      superuserTitle: string;
+      superuserMessage: string;
+    };
+  }
+> = {
+  es: {
+    buttons: {
+      selectPlan: 'Seleccionar',
+      selectedPlan: 'Seleccionado',
+      updatingPlan: 'Actualizando...',
+      backToDashboard: 'Volver',
+    },
+    feedback: {
+      updateSuccess: 'Plan actualizado a {{planName}}.',
+      updateError: 'No se pudo actualizar el plan. Intentá nuevamente.',
+    },
+    banners: {
+      activePlanLabel: 'Plan activo',
+      superuserTitle: 'SUPERUSER',
+      superuserMessage:
+        'Tenés un plan SUPERUSER activo. Tu cuenta mantiene acceso privilegiado y no requiere cambiar de plan desde este panel.',
+    },
+  },
+  en: {
+    buttons: {
+      selectPlan: 'Select',
+      selectedPlan: 'Selected',
+      updatingPlan: 'Updating...',
+      backToDashboard: 'Back',
+    },
+    feedback: {
+      updateSuccess: 'Plan updated to {{planName}}.',
+      updateError: 'Could not update the plan. Please try again.',
+    },
+    banners: {
+      activePlanLabel: 'Active plan',
+      superuserTitle: 'SUPERUSER',
+      superuserMessage:
+        'You have an active SUPERUSER plan. Your account keeps privileged access and does not require changing plans from this panel.',
+    },
+  },
+};
+
 export default function PricingPage() {
   const { language, t } = usePostLoginLanguage();
   const PRICING_COPY = OFFICIAL_LANDING_CONTENT[language].pricing;
   const PLANS = PRICING_COPY.plans;
+  const PAGE_COPY = PRICING_UI_COPY[language];
+  const planDisplayNames = PLAN_DISPLAY_NAMES[language];
   const PLAN_BUTTON_LABELS: Record<PlanCode, string> = {
-    FREE: t('pricing.plan.select'),
-    MONTH: t('pricing.plan.select'),
-    SIX_MONTHS: t('pricing.plan.select'),
-    YEAR: t('pricing.plan.select'),
-    SUPERUSER: t('pricing.plan.select'),
+    FREE: PAGE_COPY.buttons.selectPlan,
+    MONTH: PAGE_COPY.buttons.selectPlan,
+    SIX_MONTHS: PAGE_COPY.buttons.selectPlan,
+    YEAR: PAGE_COPY.buttons.selectPlan,
+    SUPERUSER: PAGE_COPY.buttons.selectPlan,
   };
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,14 +130,16 @@ export default function PricingPage() {
       const response = await changePlan(planId);
       if (response.ok) {
         setSubscription(response.data);
-        setFeedbackMessage(t('pricing.feedback.updateSuccess', { planId: planId.replace('_', ' ') }));
+        setFeedbackMessage(
+          PAGE_COPY.feedback.updateSuccess.replace('{{planName}}', planDisplayNames[planId])
+        );
       } else {
-        setFeedbackMessage(t('pricing.feedback.updateError'));
+        setFeedbackMessage(PAGE_COPY.feedback.updateError);
       }
 
       setPendingPlan(null);
     },
-    [pendingPlan, selectedPlan, t]
+    [pendingPlan, selectedPlan, PAGE_COPY.feedback.updateError, PAGE_COPY.feedback.updateSuccess, planDisplayNames]
   );
 
   return (
@@ -81,10 +160,10 @@ export default function PricingPage() {
 
         {selectedPlan === 'SUPERUSER' ? (
           <section className="mx-auto mt-8 max-w-3xl rounded-3xl border border-fuchsia-300/60 bg-gradient-to-r from-violet-600/35 via-purple-600/25 to-fuchsia-500/30 p-6 shadow-[0_18px_55px_rgba(139,92,246,0.45)]">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-fuchsia-100/90">Plan activo</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white md:text-3xl">Superusuario</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-fuchsia-100/90">{PAGE_COPY.banners.activePlanLabel}</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white md:text-3xl">{PAGE_COPY.banners.superuserTitle}</h2>
             <p className="mt-3 text-base text-fuchsia-100/90">
-              Tenés un plan Superusuario activo. Tu cuenta mantiene acceso privilegiado y no requiere cambiar de plan desde este panel.
+              {PAGE_COPY.banners.superuserMessage}
             </p>
           </section>
         ) : null}
@@ -107,11 +186,11 @@ export default function PricingPage() {
               >
                 {isSelected ? (
                   <span className="absolute right-4 top-4 rounded-full border border-emerald-300/45 bg-emerald-400/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-100">
-                    {t('pricing.plan.selected')}
+                    {PAGE_COPY.buttons.selectedPlan}
                   </span>
                 ) : null}
 
-                <p className="text-3xl tracking-[0.2em] text-white/80">{plan.name}</p>
+                <p className="text-3xl tracking-[0.2em] text-white/80">{planDisplayNames[plan.id]}</p>
                 <p className="mt-4 min-h-[126px] text-2xl leading-relaxed text-white/75">{plan.detail}</p>
                 <p className="mt-5 text-5xl font-semibold leading-tight text-white">{plan.price}</p>
 
@@ -126,7 +205,11 @@ export default function PricingPage() {
                       : 'bg-accent-purple text-white shadow-glow hover:bg-accent-purple/90 disabled:cursor-not-allowed disabled:opacity-70',
                   ].join(' ')}
                 >
-                  {isPending ? 'Actualizando...' : isSelected ? 'Seleccionado' : PLAN_BUTTON_LABELS[plan.id]}
+                  {isPending
+                    ? PAGE_COPY.buttons.updatingPlan
+                    : isSelected
+                      ? PAGE_COPY.buttons.selectedPlan
+                      : PLAN_BUTTON_LABELS[plan.id]}
                 </button>
               </article>
             );
@@ -138,7 +221,7 @@ export default function PricingPage() {
             to="/dashboard-v3"
             className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-text transition hover:bg-white/5"
           >
-            Volver / Back
+            {PAGE_COPY.buttons.backToDashboard}
           </Link>
         </div>
       </div>
