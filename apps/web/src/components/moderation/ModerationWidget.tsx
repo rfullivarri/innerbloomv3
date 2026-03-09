@@ -8,6 +8,7 @@ import type {
 import { useLongPress } from "../../hooks/useLongPress";
 import { moderationTrackerMeta, ModerationTrackerIcon } from "./trackerMeta";
 import { DashboardTitle } from "../dashboard-v3/DashboardTypography";
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 type Props = {
   data: ModerationStateResponse | null;
@@ -53,12 +54,16 @@ function Chip({
   tracker,
   onCycle,
   onEdit,
+  language,
 }: {
   tracker: ModerationTracker;
   onCycle: Props["onCycle"];
   onEdit?: Props["onEdit"];
+  language: 'es' | 'en';
 }) {
   const meta = moderationTrackerMeta[tracker.type];
+  const label = tracker.type === 'alcohol' ? 'Alcohol' : tracker.type === 'tobacco' ? (language === 'en' ? 'Tobacco' : 'Tabaco') : (language === 'en' ? 'Sugar' : 'Azúcar');
+  const hint = tracker.type === 'sugar' ? (language === 'en' ? 'added sugar' : 'azúcar añadido') : meta.hint;
   const previousStatusRef = useRef<ModerationStatus>(tracker.statusToday);
   const [statusFlash, setStatusFlash] = useState<ModerationStatus | null>(null);
   const [statusFlashPhase, setStatusFlashPhase] = useState<"from" | "visible" | "exit">("from");
@@ -108,7 +113,7 @@ function Chip({
       type="button"
       onClick={() => onCycle(tracker.type, nextStatus(tracker.statusToday))}
       className={`relative w-full overflow-hidden rounded-ib-lg border px-3 pb-6 pt-[0.3125rem] text-left transition-all duration-200 hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] sm:px-3.5 sm:pb-6 sm:pt-1.5 ${chipStateClass(tracker.statusToday)}`}
-      title={meta.hint}
+      title={hint}
       {...longPressBind}
     >
       {statusFlash ? (
@@ -122,7 +127,7 @@ function Chip({
           }`}
           aria-live="polite"
         >
-          {statusFlash === "on_track" ? "Cumplido" : "Interrumpido"}
+          {statusFlash === "on_track" ? (language === "en" ? "Completed" : "Cumplido") : (language === "en" ? "Interrupted" : "Interrumpido")}
         </span>
       ) : null}
       <div className="relative z-10 flex items-center justify-between gap-3">
@@ -145,9 +150,9 @@ function Chip({
       </div>
       <p
         className="pointer-events-none absolute bottom-2 left-1/2 z-10 w-full -translate-x-1/2 truncate px-2 text-center text-[0.72rem] font-medium tracking-[0.02em] text-[color:var(--color-text-muted)]"
-        title={meta.hint}
+        title={hint}
       >
-        {meta.label}
+        {label}
       </p>
     </button>
   );
@@ -160,6 +165,7 @@ export function ModerationWidget({
   title,
   onEdit,
 }: Props) {
+  const { language } = usePostLoginLanguage();
   const enabled = useMemo(
     () => (data?.trackers ?? []).filter((tracker) => tracker.is_enabled),
     [data],
@@ -167,7 +173,7 @@ export function ModerationWidget({
   if (!loading && enabled.length === 0) return null;
 
   const activeCount = Math.max(1, Math.min(3, enabled.length || 1));
-  const resolvedTitle = title?.trim() || "Moderación";
+  const resolvedTitle = title?.trim() || (language === 'en' ? 'Moderation' : 'Moderación');
 
   return (
     <section className="space-y-2.5 pt-1.5 md:pt-2 lg:pt-2.5">
@@ -189,6 +195,7 @@ export function ModerationWidget({
               tracker={tracker}
               onCycle={onCycle}
               onEdit={onEdit}
+              language={language}
             />
           ))}
       </div>

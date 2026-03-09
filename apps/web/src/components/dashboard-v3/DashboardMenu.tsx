@@ -314,11 +314,11 @@ export function DashboardMenu({
   }, [user]);
 
 
-  const trackerLabels: Record<ModerationTrackerType, string> = {
+  const trackerLabels: Record<ModerationTrackerType, string> = useMemo(() => ({
     alcohol: "Alcohol",
-    tobacco: "Tabaco",
-    sugar: "Azúcar",
-  };
+    tobacco: t('dashboard.moderation.tobacco'),
+    sugar: t('dashboard.moderation.sugar'),
+  }), [t]);
 
   const moderationLongPressBind = useLongPress({
     delayMs: 2200,

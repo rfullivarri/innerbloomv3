@@ -3,6 +3,7 @@ import { Card } from '../ui/Card';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserXpByTrait, type TraitXpEntry } from '../../lib/api';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 interface RadarChartCardProps {
   userId: string;
@@ -223,6 +224,7 @@ function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
 }
 
 export function RadarChartCard({ userId }: RadarChartCardProps) {
+  const { t } = usePostLoginLanguage();
   const { data, status } = useRequest(() => getUserXpByTrait(userId), [userId]);
   const dataset = useMemo(() => computeRadarDataset(data?.traits ?? []), [data?.traits]);
   const hasAxes = dataset.axes.length > 0;
@@ -230,11 +232,11 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
   return (
     <Card
       title="🧿 Radar Chart"
-      subtitle="GP · total acumulado"
+      subtitle={t('dashboard.radar.subtitle')}
       rightSlot={
         <InfoDotTarget id="radar" placement="right" className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1 text-xs text-[color:var(--color-text-muted)]">
-            Rasgos clave
+            {t('dashboard.radar.keyTraits')}
           </span>
         </InfoDotTarget>
       }
@@ -242,7 +244,7 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
       {status === 'loading' && <div className="h-[260px] w-full animate-pulse rounded-ib-md bg-[color:var(--color-overlay-2)]" />}
 
       {status === 'error' && (
-        <p className="text-sm text-rose-300">No pudimos construir el radar. Probá más tarde.</p>
+        <p className="text-sm text-rose-300">{t('dashboard.radar.loadError')}</p>
       )}
 
       {status === 'success' && (
@@ -254,7 +256,7 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
               ) : (
                 <div className="flex h-[260px] w-full max-w-[420px] items-center justify-center text-center text-sm text-[color:var(--color-text-muted)]">
                   <p className="px-6 leading-relaxed">
-                    Todavía no registraste GP por rasgo. Completá misiones para ver cómo evoluciona tu radar.
+                    {t('dashboard.radar.empty')}
                   </p>
                 </div>
               )}

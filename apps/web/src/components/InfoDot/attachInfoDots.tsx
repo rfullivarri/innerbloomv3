@@ -1,6 +1,6 @@
 import { createRoot, type Root } from 'react-dom/client';
 import { InfoDot, type InfoDotPlacement } from './InfoDot';
-import { infoTips, type InfoKey } from '../../content/infoTips';
+import { INFO_KEYS, type InfoKey } from '../../content/infoTips';
 import './InfoDot.css';
 
 type DotEntry = {
@@ -15,7 +15,7 @@ function isPlacement(value: unknown): value is InfoDotPlacement {
 }
 
 function isInfoKey(value: string | null | undefined): value is InfoKey {
-  return Boolean(value && value in infoTips);
+  return Boolean(value && INFO_KEYS.includes(value as InfoKey));
 }
 
 function collectHosts(target?: ParentNode): HTMLElement[] {

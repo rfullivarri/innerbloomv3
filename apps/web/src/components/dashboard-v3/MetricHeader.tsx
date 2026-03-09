@@ -6,6 +6,7 @@ import { getUserLevel, getUserTotalXp } from '../../lib/api';
 import { formatGp } from '../../lib/points';
 import { GameModeChip, buildGameModeChip } from '../common/GameModeChip';
 import { DashboardMeta } from './DashboardTypography';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 interface MetricHeaderProps {
   userId: string;
@@ -26,6 +27,8 @@ function formatInteger(value: number) {
 }
 
 export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
+  const { t } = usePostLoginLanguage();
+
   const { data, status } = useRequest<XpProgressData>(async () => {
     const [total, level] = await Promise.all([
       getUserTotalXp(userId),
@@ -59,8 +62,8 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
   const progressLabel = `${progressPercent.toFixed(0)}%`;
   const xpToNextMessage = showContent
     ? data.xpToNext === null
-      ? '✨ Alcanzaste el nivel máximo disponible en esta etapa.'
-      : `✨ Te faltan ${formatGp(formatInteger(data.xpToNext))} para el próximo nivel`
+      ? t('dashboard.metricHeader.maxLevel')
+      : t('dashboard.metricHeader.toNextLevel', { gp: formatGp(formatInteger(data.xpToNext)) })
     : '';
   const levelLabel = showContent ? formatInteger(data.currentLevel) : '—';
   const totalXpLabel = showContent ? formatInteger(data.xpTotal) : '—';
@@ -68,18 +71,18 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
 
   const subtitle = useMemo(() => {
     if (showError) {
-      return 'No pudimos cargar tu progreso.';
+      return t('dashboard.metricHeader.loadError');
     }
     if (showSkeleton) {
-      return 'Actualizando progreso…';
+      return t('dashboard.metricHeader.loading');
     }
     return undefined;
-  }, [showError, showSkeleton]);
+  }, [showError, showSkeleton, t]);
 
   return (
     <Card
       className="ring-1 ring-indigo-400/20"
-      title="Progreso general"
+      title={t('dashboard.metricHeader.title')}
       rightSlot={
         <div className="flex items-start justify-end gap-2 sm:gap-3 -mt-1">
           {chipStyle ? <GameModeChip {...chipStyle} /> : null}
@@ -88,7 +91,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
             placement="left"
             className="inline-flex items-center"
           >
-            <span className="sr-only">Más información sobre tu progreso general</span>
+            <span className="sr-only">{t('dashboard.metricHeader.infoAria')}</span>
           </InfoDotTarget>
         </div>
       }
@@ -108,8 +111,8 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
 
       {showError && (
         <div className="flex flex-col gap-3 text-sm text-rose-200">
-          <p>No pudimos conectar con el servicio de GP. Probá actualizar más tarde.</p>
-          <p className="text-xs text-rose-200/70">Los datos de progreso se recalculan automáticamente cada pocas horas.</p>
+          <p>{t('dashboard.metricHeader.serviceError')}</p>
+          <p className="text-xs text-rose-200/70">{t('dashboard.metricHeader.serviceErrorHint')}</p>
         </div>
       )}
 
@@ -131,7 +134,7 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
                 <div className="flex flex-col items-center text-center">
                   <span className="text-4xl font-semibold text-[color:var(--color-text)] sm:text-5xl">{levelLabel}</span>
                   <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-subtle)]">
-                    Nivel
+                    {t('dashboard.metricHeader.level')}
                   </span>
                 </div>
               </div>
@@ -139,15 +142,15 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
           </div>
 
           <div className="space-y-3">
-            <DashboardMeta className="tracking-[0.02em] text-[color:var(--color-text)]">Progreso</DashboardMeta>
+            <DashboardMeta className="tracking-[0.02em] text-[color:var(--color-text)]">{t('dashboard.metricHeader.progress')}</DashboardMeta>
             <div
               className="relative h-6 w-full overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] shadow-[inset_0_2px_8px_rgba(15,23,42,0.12)] sm:h-[30px]"
               role="progressbar"
-              aria-label="Progreso hacia el próximo nivel"
+              aria-label={t('dashboard.metricHeader.progressAria')}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={Number(progressPercent.toFixed(1))}
-              aria-valuetext={`${progressLabel} completado`}
+              aria-valuetext={t('dashboard.metricHeader.progressCompleted', { percent: progressLabel })}
             >
               <div
                 className="absolute inset-0"
