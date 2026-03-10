@@ -44,19 +44,23 @@ const localizedInfoTips: Record<InfoKey, LocalizedInfoTip> = {
   },
   radar: {
     es: {
-      title: '¿Qué es el Radar Chart?',
+      title: '¿Qué es el Equilibrio?',
       bullets: [
-        '📊 Muestra tus **rasgos principales** en Body/Mind/Soul.',
-        '🧭 Cada punto refleja GP acumulada en ese rasgo.',
-        '💡 Útil para ver **balance** y detectar desequilibrios.',
+        '📊 Muestra cómo se distribuye tu crecimiento entre Body, Mind y Soul.',
+        '🎯 La forma del radar refleja los GP acumulados de tus rasgos.',
+        '🧭 Los porcentajes indican cuánto aporta cada pilar a tu desarrollo total.',
+        '💡 Úsalo para ver si tu progreso está equilibrado o si predomina algún pilar.',
+        'Toca un pilar para explorar sus rasgos.',
       ],
     },
     en: {
-      title: 'What is the Radar Chart?',
+      title: 'What is Balance?',
       bullets: [
-        '📊 It shows your **main traits** across Body/Mind/Soul.',
-        '🧭 Each point reflects accumulated GP for that trait.',
-        '💡 Useful to see **balance** and spot imbalances.',
+        '📊 Shows how your growth is distributed across Body, Mind, and Soul.',
+        '🎯 The radar shape reflects accumulated GP from your traits.',
+        '🧭 The percentages show how much each pillar contributes to your overall development.',
+        '💡 Use it to see whether your growth is balanced or dominated by one pillar.',
+        'Tap a pillar to explore its traits.',
       ],
     },
   },
