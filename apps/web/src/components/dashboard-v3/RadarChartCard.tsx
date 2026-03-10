@@ -1,4 +1,4 @@
-import { useId, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Card } from '../ui/Card';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { useRequest } from '../../hooks/useRequest';
@@ -291,13 +291,26 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
     soulDominant: t('dashboard.radar.status.soulDominant'),
   };
 
+  const statusChipToneByKey: Record<BalanceStatus, string> = {
+    balanced:
+      'border-[color:color-mix(in_srgb,var(--color-border-subtle)_75%,#93c5fd_25%)] bg-[color:color-mix(in_srgb,var(--color-bg-elevated)_74%,#bfdbfe_26%)] text-[color:var(--color-text-strong)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-border-subtle)_82%,transparent)] dark:border-[color:color-mix(in_srgb,var(--color-border-subtle)_68%,#bfdbfe_32%)] dark:bg-[color:color-mix(in_srgb,var(--color-overlay-2)_74%,#7dd3fc_26%)] dark:text-[color:color-mix(in_srgb,var(--color-text-strong)_84%,white_16%)] dark:shadow-[0_0_22px_color-mix(in_srgb,#7dd3fc_26%,transparent)]',
+    bodyDominant:
+      'border-[color:color-mix(in_srgb,var(--color-border-subtle)_62%,#38bdf8_38%)] bg-[color:color-mix(in_srgb,var(--color-bg-elevated)_62%,#bae6fd_38%)] text-[color:color-mix(in_srgb,var(--color-text-strong)_78%,#0c4a6e_22%)] shadow-[0_0_0_1px_color-mix(in_srgb,#7dd3fc_18%,transparent)] dark:border-[color:color-mix(in_srgb,var(--color-border-subtle)_56%,#67e8f9_44%)] dark:bg-[color:color-mix(in_srgb,var(--color-overlay-2)_64%,#22d3ee_36%)] dark:text-white dark:shadow-[0_0_20px_color-mix(in_srgb,#22d3ee_32%,transparent)]',
+    mindDominant:
+      'border-[color:color-mix(in_srgb,var(--color-border-subtle)_58%,#a78bfa_42%)] bg-[color:color-mix(in_srgb,var(--color-bg-elevated)_60%,#ddd6fe_40%)] text-[color:color-mix(in_srgb,var(--color-text-strong)_78%,#4c1d95_22%)] shadow-[0_0_0_1px_color-mix(in_srgb,#a78bfa_16%,transparent)] dark:border-[color:color-mix(in_srgb,var(--color-border-subtle)_54%,#c4b5fd_46%)] dark:bg-[color:color-mix(in_srgb,var(--color-overlay-2)_66%,#8b5cf6_34%)] dark:text-white dark:shadow-[0_0_20px_color-mix(in_srgb,#8b5cf6_30%,transparent)]',
+    soulDominant:
+      'border-[color:color-mix(in_srgb,var(--color-border-subtle)_56%,#facc15_44%)] bg-[color:color-mix(in_srgb,var(--color-bg-elevated)_58%,#fef3c7_42%)] text-[color:color-mix(in_srgb,var(--color-text-strong)_78%,#78350f_22%)] shadow-[0_0_0_1px_color-mix(in_srgb,#fcd34d_16%,transparent)] dark:border-[color:color-mix(in_srgb,var(--color-border-subtle)_52%,#fbbf24_48%)] dark:bg-[color:color-mix(in_srgb,var(--color-overlay-2)_66%,#f59e0b_34%)] dark:text-[color:color-mix(in_srgb,white_86%,#fef3c7_14%)] dark:shadow-[0_0_20px_color-mix(in_srgb,#f59e0b_30%,transparent)]',
+  };
+
   return (
     <Card
       title={t('dashboard.radar.title')}
       subtitle={t('dashboard.radar.subtitle')}
       rightSlot={
         <InfoDotTarget id="radar" placement="right" className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1 text-xs font-semibold text-[color:var(--color-text-muted)]">
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold tracking-[0.01em] transition-colors ${statusChipToneByKey[balanceStatus]}`}
+          >
             {balanceStatusLabelByKey[balanceStatus]}
           </span>
         </InfoDotTarget>
@@ -355,7 +368,10 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
   const traitLabelRadius = ringRadius + 24;
   const ringThickness = 4.8;
   const uniqueId = useId().replace(/:/g, '_');
+  const svgRef = useRef<SVGSVGElement | null>(null);
   const [openPillars, setOpenPillars] = useState<Array<(typeof PILLAR_ORDER)[number]>>([]);
+  const [hoveredPillar, setHoveredPillar] = useState<(typeof PILLAR_ORDER)[number] | null>(null);
+  const [pressedPillar, setPressedPillar] = useState<(typeof PILLAR_ORDER)[number] | null>(null);
 
   if (count === 0) {
     return null;
@@ -395,6 +411,7 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
     Soul: '#F6D365',
   };
   const hasOpenPillars = openPillars.length > 0;
+  const hasHoverOrPress = hoveredPillar !== null || pressedPillar !== null;
 
   const pillarRanges = PILLAR_ORDER
     .map((pillar) => {
@@ -460,6 +477,26 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
     );
   };
 
+  useEffect(() => {
+    const handlePointerDownOutside = (event: PointerEvent) => {
+      if (!svgRef.current) return;
+
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+
+      if (!svgRef.current.contains(target)) {
+        setOpenPillars([]);
+        setHoveredPillar(null);
+        setPressedPillar(null);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDownOutside);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDownOutside);
+    };
+  }, []);
+
   const labelStyle: CSSProperties = {
     fontFamily: '"Manrope", "Inter", system-ui, sans-serif',
     fontSize: 'clamp(11px, 3.2vw, 14px)',
@@ -470,6 +507,7 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
 
   return (
     <svg
+      ref={svgRef}
       viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
       className="h-auto w-full max-w-[420px] overflow-visible"
       role="img"
@@ -491,6 +529,18 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
           >
             <stop offset="0%" stopColor={range.color} stopOpacity={0.1} />
             <stop offset="100%" stopColor={range.color} stopOpacity={0.04} />
+          </radialGradient>
+        ))}
+        {pillarRanges.map((range) => (
+          <radialGradient
+            key={`${range.pillar}-hover-gradient`}
+            id={`${uniqueId}-${range.pillar.toLowerCase()}-hover-gradient`}
+            cx="50%"
+            cy="50%"
+            r="92%"
+          >
+            <stop offset="0%" stopColor={range.color} stopOpacity={0.24} />
+            <stop offset="100%" stopColor={range.color} stopOpacity={0.02} />
           </radialGradient>
         ))}
         {pillarRanges.map((range) => {
@@ -532,6 +582,20 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
         />
       ))}
 
+      {pillarRanges.map((range) => {
+        const isCandidate = hoveredPillar === range.pillar || pressedPillar === range.pillar;
+        return (
+          <path
+            key={`${range.pillar}-hover-overlay`}
+            d={sectorPath(radius, range.startAngle, range.endAngle)}
+            fill={`url(#${uniqueId}-${range.pillar.toLowerCase()}-hover-gradient)`}
+            opacity={isCandidate ? 0.95 : 0}
+            style={{ transition: 'opacity 150ms ease' }}
+            pointerEvents="none"
+          />
+        );
+      })}
+
       {gridLevels.map((level) => {
         const points = axes
           .map((_, index) => {
@@ -539,7 +603,7 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
             return `${x},${y}`;
           })
           .join(' ');
-        return <polygon key={level} points={points} fill="none" className="stroke-[color-mix(in_srgb,var(--color-text-strong)_12%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-border-subtle)_78%,white_8%)]" strokeWidth={1.2} />;
+        return <polygon key={level} points={points} fill="none" className="stroke-[color-mix(in_srgb,var(--color-text-strong)_8%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-border-subtle)_78%,white_8%)]" strokeWidth={1.1} />;
       })}
 
       {axes.map((axis, index) => {
@@ -567,7 +631,7 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
               y1={center}
               x2={lineEnd.x}
               y2={lineEnd.y}
-              className="stroke-[color-mix(in_srgb,var(--color-text-strong)_20%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-text-subtle)_52%,transparent)]"
+              className="stroke-[color-mix(in_srgb,var(--color-text-strong)_12%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-text-subtle)_52%,transparent)]"
               strokeWidth={1.45}
               opacity={hasOpenPillars && !isOpen ? 0.35 : 1}
               style={{ transition: 'opacity 160ms ease' }}
@@ -575,7 +639,7 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
             <text
               x={xpLabelPoint.x}
               y={xpLabelPoint.y}
-              fill="var(--color-text-subtle)"
+              fill={isOpen ? 'color-mix(in_srgb,var(--color-text-strong)_90%,white_10%)' : 'var(--color-text-subtle)'}
               textAnchor="middle"
               dominantBaseline="middle"
               style={{
@@ -586,6 +650,7 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
                 lineHeight: 1.2,
               }}
               opacity={hasOpenPillars && !isOpen ? 0.45 : 1}
+              filter={isOpen ? 'drop-shadow(0 0 6px rgba(255,255,255,0.25))' : undefined}
             >
               {xpLabel}
             </text>
@@ -599,36 +664,54 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
         strokeWidth={2.5}
       />
 
-      {pillarRanges.map((range) => (
-        <path
-          key={`${range.pillar}-ring`}
-          d={arcPath(ringRadius, range.startAngle, range.endAngle)}
-          fill="none"
-          stroke={hasOpenPillars && !openPillars.includes(range.pillar) ? 'var(--color-text-muted)' : range.color}
-          strokeOpacity={hasOpenPillars ? (openPillars.includes(range.pillar) ? 1 : 0.33) : 0.8}
-          strokeWidth={openPillars.includes(range.pillar) ? ringThickness + 0.5 : ringThickness}
-          strokeLinecap="round"
-          onClick={() => togglePillar(range.pillar)}
-          className="cursor-pointer"
-          style={{
-            transition: 'stroke-opacity 180ms ease, filter 180ms ease, stroke-width 180ms ease',
-            filter:
-              openPillars.includes(range.pillar)
-                ? `drop-shadow(0 0 6px ${range.color}cc) drop-shadow(0 0 12px ${range.color}99)`
-                : hasOpenPillars
-                  ? 'saturate(0.2)'
-                  : `drop-shadow(0 0 4px ${range.color}77)`,
-          }}
-        />
-      ))}
+      {pillarRanges.map((range) => {
+        const isOpen = openPillars.includes(range.pillar);
+        const isCandidate = hoveredPillar === range.pillar || pressedPillar === range.pillar;
+
+        return (
+          <g key={`${range.pillar}-interaction`}>
+            <path
+              d={sectorPath(radius + 18, range.startAngle, range.endAngle)}
+              fill="transparent"
+              className="cursor-pointer"
+              onPointerEnter={() => setHoveredPillar(range.pillar)}
+              onPointerLeave={() => {
+                setHoveredPillar((current) => (current === range.pillar ? null : current));
+                setPressedPillar((current) => (current === range.pillar ? null : current));
+              }}
+              onPointerDown={() => setPressedPillar(range.pillar)}
+              onPointerUp={() => setPressedPillar((current) => (current === range.pillar ? null : current))}
+              onClick={() => togglePillar(range.pillar)}
+            />
+            <path
+              d={arcPath(ringRadius, range.startAngle, range.endAngle)}
+              fill="none"
+              stroke={hasOpenPillars && !isOpen ? 'var(--color-text-muted)' : range.color}
+              strokeOpacity={hasOpenPillars ? (isOpen ? 1 : 0.33) : 0.86}
+              strokeWidth={isOpen || isCandidate ? ringThickness + 0.7 : ringThickness}
+              strokeLinecap="round"
+              pointerEvents="none"
+              style={{
+                transition: 'stroke-opacity 180ms ease, filter 180ms ease, stroke-width 180ms ease',
+                filter: isOpen
+                  ? `drop-shadow(0 0 8px ${range.color}cc) drop-shadow(0 0 16px ${range.color}99)`
+                  : isCandidate
+                    ? `drop-shadow(0 0 8px ${range.color}88)`
+                    : hasOpenPillars
+                      ? 'saturate(0.2)'
+                      : `drop-shadow(0 0 4px ${range.color}66)`,
+              }}
+            />
+          </g>
+        );
+      })}
 
       {pillarRanges.map((range) => (
         <text
           key={`${range.pillar}-label`}
-          fill={hasOpenPillars && !openPillars.includes(range.pillar) ? 'var(--color-text-muted)' : range.color}
-          fillOpacity={hasOpenPillars ? (openPillars.includes(range.pillar) ? 0.99 : 0.48) : 0.84}
-          onClick={() => togglePillar(range.pillar)}
-          className="cursor-pointer"
+          fill={hasOpenPillars && !openPillars.includes(range.pillar) ? 'var(--color-text-muted)' : '#eef2ff'}
+          fillOpacity={hasOpenPillars ? (openPillars.includes(range.pillar) ? 0.99 : 0.56) : 0.96}
+          className="pointer-events-none"
           style={{
             fontFamily: OFFICIAL_LANDING_CSS_VARIABLES['--font-heading'],
             fontSize: 'clamp(12px, 3.4vw, 16px)',
@@ -636,7 +719,11 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
             fontWeight: 600,
             textTransform: 'uppercase',
             transition: 'fill-opacity 180ms ease, filter 180ms ease',
-            filter: openPillars.includes(range.pillar) ? `drop-shadow(0 0 7px ${range.color}99)` : undefined,
+            filter: openPillars.includes(range.pillar)
+              ? `drop-shadow(0 0 9px rgba(255,255,255,0.46)) drop-shadow(0 0 12px ${range.color}66)`
+              : hasHoverOrPress && (hoveredPillar === range.pillar || pressedPillar === range.pillar)
+                ? `drop-shadow(0 0 7px rgba(255,255,255,0.3))`
+                : 'drop-shadow(0 0 4px rgba(255,255,255,0.16))',
           }}
         >
           <textPath
