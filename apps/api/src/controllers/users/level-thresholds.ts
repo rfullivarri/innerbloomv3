@@ -1,6 +1,7 @@
 import type { LevelThreshold } from './types.js';
 
 const MAX_LEVEL = 50;
+export const CANONICAL_LEVEL_BASE_XP = 100;
 
 function toSafeNumber(value: unknown): number {
   const numeric = Number(value ?? 0);
@@ -34,6 +35,10 @@ export function computeThresholdsFromBaseXp(xpBaseSum: unknown): LevelThreshold[
   }
 
   return thresholds;
+}
+
+export function computeCanonicalLevelThresholds(): LevelThreshold[] {
+  return computeThresholdsFromBaseXp(CANONICAL_LEVEL_BASE_XP);
 }
 
 export type ThresholdRow = { xp_base_sum: string | number | null };

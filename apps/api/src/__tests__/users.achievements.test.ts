@@ -25,7 +25,7 @@ vi.mock('../middlewares/require-active-subscription.js', () => ({
 }));
 
 import app from '../app.js';
-import { computeThresholdsFromBaseXp } from '../controllers/users/level-thresholds.js';
+import { computeCanonicalLevelThresholds } from '../controllers/users/level-thresholds.js';
 import { buildLevelSummary } from '../controllers/users/level-summary.js';
 
 const userId = '11111111-2222-3333-4444-555555555555';
@@ -180,7 +180,7 @@ describe('GET /api/users/:id/achievements', () => {
     expect(mockVerifyToken).toHaveBeenCalledTimes(1);
   });
 
-  it('derives level thresholds from tasks when the view is empty', async () => {
+  it('uses canonical level thresholds when the view is empty', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-03-08T12:00:00.000Z'));
 
@@ -195,10 +195,9 @@ describe('GET /api/users/:id/achievements', () => {
       .mockResolvedValueOnce({ rows: [{ user_id: userId }] })
       .mockResolvedValueOnce({ rows: [{ date: '2024-03-08', xp_day: '120' }] })
       .mockResolvedValueOnce({ rows: [{ total_xp: '147' }] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [{ xp_base_sum: '42' }] });
+      .mockResolvedValueOnce({ rows: [] });
 
-    const fallbackThresholds = computeThresholdsFromBaseXp('42');
+    const fallbackThresholds = computeCanonicalLevelThresholds();
     const levelSummary = buildLevelSummary(147, fallbackThresholds);
 
     const expectedAchievements = [
@@ -230,11 +229,6 @@ describe('GET /api/users/:id/achievements', () => {
       achievements: expectedAchievements,
     });
 
-    expect(mockQuery).toHaveBeenCalledTimes(5);
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      5,
-      `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum\n       FROM tasks\n       WHERE user_id = $1`,
-      [userId],
-    );
+    expect(mockQuery).toHaveBeenCalledTimes(4);
   });
 });

@@ -1,11 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { computeThresholdsFromBaseXp, extractThresholdsFromRows } from './level-thresholds.js';
+import { CANONICAL_LEVEL_BASE_XP, computeCanonicalLevelThresholds, computeThresholdsFromBaseXp, extractThresholdsFromRows } from './level-thresholds.js';
 
 describe('computeThresholdsFromBaseXp', () => {
   it('returns an empty array when base XP is zero or negative', () => {
     expect(computeThresholdsFromBaseXp(0)).toEqual([]);
     expect(computeThresholdsFromBaseXp(-10)).toEqual([]);
     expect(computeThresholdsFromBaseXp(null)).toEqual([]);
+  });
+
+
+  it('builds deterministic canonical thresholds', () => {
+    const thresholds = computeCanonicalLevelThresholds();
+
+    expect(thresholds[0]).toEqual({ level: 0, xpRequired: Math.round(CANONICAL_LEVEL_BASE_XP * 0.4 * 7) });
+    expect(thresholds[1]).toEqual({ level: 1, xpRequired: Math.round(CANONICAL_LEVEL_BASE_XP * Math.pow(1, 1.3)) });
+    expect(thresholds[18]).toEqual({ level: 18, xpRequired: Math.round(CANONICAL_LEVEL_BASE_XP * Math.pow(18, 1.3)) });
   });
 
   it('mirrors the database formula for level requirements', () => {

@@ -4,7 +4,7 @@ import type { AsyncHandler } from '../../lib/async-handler.js';
 import { uuidSchema } from '../../lib/validation.js';
 import { ensureUserExists } from './shared.js';
 import { buildLevelSummary } from './level-summary.js';
-import { computeThresholdsFromBaseXp } from './level-thresholds.js';
+import { computeCanonicalLevelThresholds } from './level-thresholds.js';
 import type { LevelThreshold } from './types.js';
 
 type DailyXpRow = {
@@ -21,9 +21,6 @@ type LevelRow = {
   xp_required: string | number | null;
 };
 
-type XpBaseRow = {
-  xp_base_sum: string | number | null;
-};
 
 type NormalizedDailyXp = {
   date: string;
@@ -176,18 +173,7 @@ export const getUserAchievements: AsyncHandler = async (req, res) => {
   let thresholds = normalizeLevelThresholds(levelThresholdsResult.rows);
 
   if (thresholds.length === 0) {
-    const fallbackResult = await pool.query<XpBaseRow>(
-      `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum
-       FROM tasks
-       WHERE user_id = $1`,
-      [id],
-    );
-
-    const fallbackThresholds = computeThresholdsFromBaseXp(fallbackResult.rows[0]?.xp_base_sum);
-
-    if (fallbackThresholds.length > 0) {
-      thresholds = fallbackThresholds;
-    }
+    thresholds = computeCanonicalLevelThresholds();
   }
   const levelSummary = buildLevelSummary(totalXp, thresholds);
   const currentLevel = levelSummary.currentLevel;

@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getUserLevel } from './get-user-level.js';
-import { computeThresholdsFromBaseXp } from './level-thresholds.js';
+import { computeCanonicalLevelThresholds } from './level-thresholds.js';
 
 const { mockQuery, mockEnsureUserExists, mockBuildLevelSummary } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
@@ -136,14 +136,13 @@ describe('getUserLevel', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('derives thresholds from tasks when the view returns no rows', async () => {
+  it('uses canonical thresholds when the view returns no rows', async () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
     mockQuery
       .mockResolvedValueOnce({ rows: [{ xp_total: '147' }] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [{ xp_base_sum: '42' }] });
+      .mockResolvedValueOnce({ rows: [] });
 
-    const fallbackThresholds = computeThresholdsFromBaseXp('42');
+    const fallbackThresholds = computeCanonicalLevelThresholds();
 
     mockBuildLevelSummary.mockReturnValue({
       currentLevel: 1,
@@ -161,12 +160,7 @@ describe('getUserLevel', () => {
 
     await getUserLevel(req, res, next);
 
-    expect(mockQuery).toHaveBeenCalledTimes(3);
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      3,
-      `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum\n       FROM tasks\n       WHERE user_id = $1`,
-      ['f4a2e6fb-5a09-4b9a-8a2f-f80f4129170b'],
-    );
+    expect(mockQuery).toHaveBeenCalledTimes(2);
     expect(mockBuildLevelSummary).toHaveBeenCalledWith(147, fallbackThresholds);
     expect(res.json).toHaveBeenCalledWith({
       user_id: 'f4a2e6fb-5a09-4b9a-8a2f-f80f4129170b',
@@ -180,7 +174,7 @@ describe('getUserLevel', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('derives thresholds from tasks when the view only yields incomplete data', async () => {
+  it('uses canonical thresholds when the view only yields incomplete data', async () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
     mockQuery
       .mockResolvedValueOnce({ rows: [{ xp_total: '147' }] })
@@ -189,10 +183,9 @@ describe('getUserLevel', () => {
           { level: '0', xp_required: null },
           { level: '1', xp_required: null },
         ],
-      })
-      .mockResolvedValueOnce({ rows: [{ xp_base_sum: '42' }] });
+      });
 
-    const fallbackThresholds = computeThresholdsFromBaseXp('42');
+    const fallbackThresholds = computeCanonicalLevelThresholds();
 
     mockBuildLevelSummary.mockReturnValue({
       currentLevel: 1,
@@ -210,12 +203,7 @@ describe('getUserLevel', () => {
 
     await getUserLevel(req, res, next);
 
-    expect(mockQuery).toHaveBeenCalledTimes(3);
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      3,
-      `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum\n       FROM tasks\n       WHERE user_id = $1`,
-      ['22bfdc9a-7fb1-4d58-af59-5f41f7b4622a'],
-    );
+    expect(mockQuery).toHaveBeenCalledTimes(2);
     expect(mockBuildLevelSummary).toHaveBeenCalledWith(147, fallbackThresholds);
     expect(res.json).toHaveBeenCalledWith({
       user_id: '22bfdc9a-7fb1-4d58-af59-5f41f7b4622a',

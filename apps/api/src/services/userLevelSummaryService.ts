@@ -1,6 +1,6 @@
 import { pool } from '../db.js';
 import { buildLevelSummary } from '../controllers/users/level-summary.js';
-import { computeThresholdsFromBaseXp } from '../controllers/users/level-thresholds.js';
+import { computeCanonicalLevelThresholds } from '../controllers/users/level-thresholds.js';
 import type { LevelThreshold } from '../controllers/users/types.js';
 
 export type UserLevelSummary = {
@@ -49,18 +49,7 @@ export async function loadUserLevelSummary(userId: string): Promise<UserLevelSum
   const hasProgression = thresholds.some((threshold) => threshold.level > 0);
 
   if (thresholds.length === 0 || !hasProgression) {
-    const fallbackResult = await pool.query<{ xp_base_sum: string | number | null }>(
-      `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum
-       FROM tasks
-       WHERE user_id = $1`,
-      [userId],
-    );
-
-    const fallbackThresholds = computeThresholdsFromBaseXp(fallbackResult.rows[0]?.xp_base_sum);
-
-    if (fallbackThresholds.length > 0) {
-      thresholds = fallbackThresholds;
-    }
+    thresholds = computeCanonicalLevelThresholds();
   }
 
   const summary = buildLevelSummary(xpTotal, thresholds);
