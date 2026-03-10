@@ -1,4 +1,4 @@
-import { useId, useMemo, type CSSProperties } from 'react';
+import { useId, useMemo, useState, type CSSProperties } from 'react';
 import { Card } from '../ui/Card';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { useRequest } from '../../hooks/useRequest';
@@ -283,14 +283,15 @@ interface RadarProps {
 
 function Radar({ dataset, pillarLabels }: RadarProps) {
   const radius = 130;
-  const outerPadding = 104;
+  const outerPadding = 126;
   const center = radius + outerPadding;
   const { axes, maxValue } = dataset;
   const count = axes.length;
-  const ringRadius = radius + 20;
-  const labelRadius = ringRadius + 14;
+  const ringRadius = radius + 38;
+  const labelRadius = ringRadius + 20;
   const ringThickness = 3.6;
   const uniqueId = useId().replace(/:/g, '_');
+  const [activePillar, setActivePillar] = useState<(typeof PILLAR_ORDER)[number] | null>(null);
 
   if (count === 0) {
     return null;
@@ -452,6 +453,8 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
           key={`${range.pillar}-sector`}
           d={sectorPath(radius, range.startAngle, range.endAngle)}
           fill={`url(#${uniqueId}-${range.pillar.toLowerCase()}-sector-gradient)`}
+          opacity={activePillar && activePillar !== range.pillar ? 0.55 : 1}
+          style={{ transition: 'opacity 160ms ease' }}
         />
       ))}
 
@@ -467,15 +470,47 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
 
       {axes.map((axis, index) => {
         const lineEnd = basePointFor(radius, index);
-        const labelPoint = basePointFor(radius + 30, index);
+        const angle = angleFor(index);
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        const labelPoint = basePointFor(radius + 28, index);
         const normalized = maxValue > 0 ? Math.min(Math.max(axis.xp / maxValue, 0), 1) : 0;
         const valueDistance = normalized * radius;
         const xpLabelOffset = normalized > 0 ? 24 : 36;
         const xpLabelPoint = basePointFor(Math.min(radius + 48, valueDistance + xpLabelOffset), index);
         const xpLabel = XP_NUMBER_FORMATTER.format(Math.round(axis.xp ?? 0));
+        const axisPillar = normalizePillar(axis.pillar) as (typeof PILLAR_ORDER)[number] | null;
+        const isActive = axisPillar && activePillar === axisPillar;
+        const hasActive = activePillar !== null;
+
+        const axisLabelAnchor: 'start' | 'middle' | 'end' =
+          cos > 0.34 ? 'start' : cos < -0.34 ? 'end' : 'middle';
+        const axisLabelDx = cos > 0.34 ? 5 : cos < -0.34 ? -5 : 0;
+        const axisLabelDy = sin > 0.56 ? 4 : sin < -0.56 ? -4 : 0;
+
+        const setAxisPillarFocus = () => {
+          if (axisPillar) {
+            setActivePillar(axisPillar);
+          }
+        };
 
         return (
-          <g key={axis.key}>
+          <g
+            key={axis.key}
+            onMouseEnter={setAxisPillarFocus}
+            onFocus={setAxisPillarFocus}
+            onMouseLeave={() => setActivePillar(null)}
+            onBlur={() => setActivePillar(null)}
+            onClick={() => setActivePillar(activePillar === axisPillar ? null : axisPillar)}
+          >
+            <line
+              x1={center}
+              y1={center}
+              x2={lineEnd.x}
+              y2={lineEnd.y}
+              stroke="transparent"
+              strokeWidth={14}
+            />
             <line
               x1={center}
               y1={center}
@@ -483,14 +518,19 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
               y2={lineEnd.y}
               className="stroke-[color-mix(in_srgb,var(--color-text-subtle)_72%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-text-subtle)_40%,transparent)]"
               strokeWidth={1.6}
+              opacity={hasActive && !isActive ? 0.45 : 1}
+              style={{ transition: 'opacity 160ms ease' }}
             />
             <text
               x={labelPoint.x}
               y={labelPoint.y}
               fill="var(--color-text-subtle)"
-              textAnchor="middle"
+              textAnchor={axisLabelAnchor}
               dominantBaseline="middle"
+              dx={axisLabelDx}
+              dy={axisLabelDy}
               style={labelStyle}
+              opacity={hasActive && !isActive ? 0.52 : 1}
             >
               {axis.label}
             </text>
@@ -507,6 +547,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
                 letterSpacing: '0.01em',
                 lineHeight: 1.2,
               }}
+              opacity={hasActive && !isActive ? 0.52 : 1}
             >
               {xpLabel}
             </text>
@@ -522,9 +563,18 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
           d={arcPath(ringRadius, range.startAngle, range.endAngle)}
           fill="none"
           stroke={range.color}
-          strokeOpacity={0.6}
+          strokeOpacity={
+            activePillar ? (activePillar === range.pillar ? 0.88 : 0.34) : 0.66
+          }
           strokeWidth={ringThickness}
           strokeLinecap="round"
+          style={{
+            transition: 'stroke-opacity 180ms ease, filter 180ms ease',
+            filter:
+              activePillar === range.pillar
+                ? `drop-shadow(0 0 8px ${range.color}) drop-shadow(0 0 16px ${range.color}66)`
+                : `drop-shadow(0 0 4px ${range.color}88)`,
+          }}
         />
       ))}
 
@@ -532,13 +582,14 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
         <text
           key={`${range.pillar}-label`}
           fill={range.color}
-          fillOpacity={0.62}
+          fillOpacity={activePillar ? (activePillar === range.pillar ? 0.84 : 0.44) : 0.68}
           style={{
             fontFamily: OFFICIAL_LANDING_CSS_VARIABLES['--font-heading'],
-            fontSize: 'clamp(10px, 2.5vw, 12px)',
+            fontSize: 'clamp(11px, 2.7vw, 13px)',
             letterSpacing: '0.24em',
             fontWeight: 600,
             textTransform: 'uppercase',
+            transition: 'fill-opacity 180ms ease',
           }}
         >
           <textPath
