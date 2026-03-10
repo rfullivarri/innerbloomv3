@@ -94,13 +94,13 @@ const localizedInfoTips: Record<InfoKey, LocalizedInfoTip> = {
     en: {
       title: 'Daily Energy',
       bullets: [
-        '⚡ Es la energía que generás al hacer actividades en cada pilar.',
+        '⚡ It is the energy you generate by doing activities in each pillar.',
         '❤️ HP → Body',
         '🌼 Mood → Soul',
         '🧠 Focus → Mind',
-        '📈 Las actividades cargan tu energía.',
-        '💧 Con el tiempo la energía se drena si no la renovás.',
-        '💡 Mantenerla alta facilita sostener hábitos y constancia.',
+        '📈 Activities charge your energy.',
+        '💧 Over time, energy drains if you do not renew it.',
+        '💡 Keeping it high makes it easier to sustain habits and consistency.',
       ],
     },
   },
