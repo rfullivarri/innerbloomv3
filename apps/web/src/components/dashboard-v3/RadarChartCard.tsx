@@ -623,16 +623,8 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
               y1={center}
               x2={lineEnd.x}
               y2={lineEnd.y}
-              stroke="transparent"
-              strokeWidth={14}
-            />
-            <line
-              x1={center}
-              y1={center}
-              x2={lineEnd.x}
-              y2={lineEnd.y}
-              className="stroke-[color-mix(in_srgb,var(--color-text-strong)_12%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-text-subtle)_52%,transparent)]"
-              strokeWidth={1.45}
+              className="stroke-[color-mix(in_srgb,var(--color-text-strong)_8%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-border-subtle)_78%,white_8%)]"
+              strokeWidth={1.1}
               opacity={hasOpenPillars && !isOpen ? 0.35 : 1}
               style={{ transition: 'opacity 160ms ease' }}
             />
