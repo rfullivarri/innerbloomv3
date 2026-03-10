@@ -283,14 +283,14 @@ interface RadarProps {
 
 function Radar({ dataset, pillarLabels }: RadarProps) {
   const radius = 130;
-  const outerPadding = 106;
+  const outerPadding = 82;
   const center = radius + outerPadding;
   const { axes, maxValue } = dataset;
   const count = axes.length;
-  const ringRadius = radius + 24;
+  const ringRadius = radius + 8;
   const pillarLabelRadius = ringRadius + 8;
-  const traitLabelRadius = ringRadius + 14;
-  const ringThickness = 4.4;
+  const traitLabelRadius = ringRadius + 24;
+  const ringThickness = 4.8;
   const uniqueId = useId().replace(/:/g, '_');
   const [activePillar, setActivePillar] = useState<(typeof PILLAR_ORDER)[number] | null>(null);
 
@@ -447,7 +447,13 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
         })}
       </defs>
 
-      <circle cx={center} cy={center} r={radius + 24} fill="url(#radarGlow)" opacity={0.12} />
+      <circle
+        cx={center}
+        cy={center}
+        r={radius + 16}
+        fill="url(#radarGlow)"
+        className="opacity-[0.08] dark:opacity-[0.14]"
+      />
 
       {pillarRanges.map((range) => (
         <path
@@ -466,7 +472,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
             return `${x},${y}`;
           })
           .join(' ');
-        return <polygon key={level} points={points} fill="none" className="stroke-[color-mix(in_srgb,var(--color-text-muted)_62%,transparent)] dark:stroke-[var(--color-border-subtle)]" strokeWidth={1.35} />;
+        return <polygon key={level} points={points} fill="none" className="stroke-[color-mix(in_srgb,var(--color-text-strong)_28%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-border-subtle)_82%,white_8%)]" strokeWidth={1.4} />;
       })}
 
       {axes.map((axis, index) => {
@@ -517,7 +523,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
               y1={center}
               x2={lineEnd.x}
               y2={lineEnd.y}
-              className="stroke-[color-mix(in_srgb,var(--color-text-subtle)_72%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-text-subtle)_40%,transparent)]"
+              className="stroke-[color-mix(in_srgb,var(--color-text-strong)_34%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-text-subtle)_52%,transparent)]"
               strokeWidth={1.6}
               opacity={hasActive && !isActive ? 0.45 : 1}
               style={{ transition: 'opacity 160ms ease' }}
@@ -525,7 +531,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
             <text
               x={labelPoint.x}
               y={labelPoint.y}
-              fill="var(--color-text-subtle)"
+              fill="var(--color-text-strong)"
               textAnchor={axisLabelAnchor}
               dominantBaseline="middle"
               dx={axisLabelDx}
@@ -538,7 +544,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
             <text
               x={xpLabelPoint.x}
               y={xpLabelPoint.y}
-              fill="var(--color-text-muted)"
+              fill="var(--color-text-subtle)"
               textAnchor="middle"
               dominantBaseline="middle"
               style={{
@@ -556,25 +562,25 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
         );
       })}
 
-      <polygon points={polygonPoints} fill="url(#radarFill)" className="stroke-[rgba(99,102,241,0.82)] dark:stroke-[rgba(129,140,248,0.5)]" strokeWidth={2.4} />
+      <polygon points={polygonPoints} fill="url(#radarFill)" className="stroke-[rgba(99,102,241,0.9)] dark:stroke-[rgba(129,140,248,0.62)]" strokeWidth={2.5} />
 
       {pillarRanges.map((range) => (
         <path
           key={`${range.pillar}-ring`}
           d={arcPath(ringRadius, range.startAngle, range.endAngle)}
           fill="none"
-          stroke={range.color}
-          strokeOpacity={activePillar ? (activePillar === range.pillar ? 0.98 : 0.22) : 0.74}
-          strokeWidth={ringThickness}
+          stroke={activePillar && activePillar !== range.pillar ? 'var(--color-text-muted)' : range.color}
+          strokeOpacity={activePillar ? (activePillar === range.pillar ? 1 : 0.35) : 0.8}
+          strokeWidth={activePillar === range.pillar ? ringThickness + 0.5 : ringThickness}
           strokeLinecap="round"
           style={{
-            transition: 'stroke-opacity 180ms ease, filter 180ms ease',
+            transition: 'stroke-opacity 180ms ease, filter 180ms ease, stroke-width 180ms ease',
             filter:
               activePillar === range.pillar
-                ? `drop-shadow(0 0 10px ${range.color}) drop-shadow(0 0 20px ${range.color}88)`
+                ? `drop-shadow(0 0 6px ${range.color}cc) drop-shadow(0 0 12px ${range.color}99)`
                 : activePillar
-                  ? 'saturate(0.42)'
-                  : `drop-shadow(0 0 4px ${range.color}88)`,
+                  ? 'saturate(0.2)'
+                  : `drop-shadow(0 0 4px ${range.color}77)`,
           }}
         />
       ))}
@@ -582,16 +588,16 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
       {pillarRanges.map((range) => (
         <text
           key={`${range.pillar}-label`}
-          fill={range.color}
-          fillOpacity={activePillar ? (activePillar === range.pillar ? 0.96 : 0.28) : 0.72}
+          fill={activePillar && activePillar !== range.pillar ? 'var(--color-text-muted)' : range.color}
+          fillOpacity={activePillar ? (activePillar === range.pillar ? 0.99 : 0.55) : 0.84}
           style={{
             fontFamily: OFFICIAL_LANDING_CSS_VARIABLES['--font-heading'],
-            fontSize: 'clamp(12px, 3vw, 14px)',
+            fontSize: 'clamp(14px, 3.6vw, 17px)',
             letterSpacing: '0.24em',
             fontWeight: 600,
             textTransform: 'uppercase',
             transition: 'fill-opacity 180ms ease, filter 180ms ease',
-            filter: activePillar === range.pillar ? `drop-shadow(0 0 8px ${range.color}99)` : undefined,
+            filter: activePillar === range.pillar ? `drop-shadow(0 0 7px ${range.color}99)` : undefined,
           }}
         >
           <textPath
