@@ -431,13 +431,14 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
           const midAngle = (range.startAngle + range.endAngle) / 2;
           const reverseForBottomHalf = Math.sin(midAngle) > 0;
           const textPathId = `${uniqueId}-${range.pillar.toLowerCase()}-label-path`;
+          const labelRadius = range.pillar === 'Mind' ? pillarLabelRadius + 5 : pillarLabelRadius;
 
           return (
             <path
               key={textPathId}
               id={textPathId}
               d={arcPath(
-                pillarLabelRadius,
+                labelRadius,
                 reverseForBottomHalf ? range.endAngle : range.startAngle,
                 reverseForBottomHalf ? range.startAngle : range.endAngle,
               )}
@@ -472,7 +473,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
             return `${x},${y}`;
           })
           .join(' ');
-        return <polygon key={level} points={points} fill="none" className="stroke-[color-mix(in_srgb,var(--color-text-strong)_28%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-border-subtle)_82%,white_8%)]" strokeWidth={1.4} />;
+        return <polygon key={level} points={points} fill="none" className="stroke-[color-mix(in_srgb,var(--color-text-strong)_18%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-border-subtle)_82%,white_8%)]" strokeWidth={1.3} />;
       })}
 
       {axes.map((axis, index) => {
@@ -489,11 +490,6 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
         const axisPillar = normalizePillar(axis.pillar) as (typeof PILLAR_ORDER)[number] | null;
         const isActive = axisPillar && activePillar === axisPillar;
         const hasActive = activePillar !== null;
-
-        const axisLabelAnchor: 'start' | 'middle' | 'end' =
-          cos > 0.34 ? 'start' : cos < -0.34 ? 'end' : 'middle';
-        const axisLabelDx = cos > 0.34 ? 5 : cos < -0.34 ? -5 : 0;
-        const axisLabelDy = sin > 0.56 ? 4 : sin < -0.56 ? -4 : 0;
 
         const setAxisPillarFocus = () => {
           if (axisPillar) {
@@ -523,24 +519,11 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
               y1={center}
               x2={lineEnd.x}
               y2={lineEnd.y}
-              className="stroke-[color-mix(in_srgb,var(--color-text-strong)_34%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-text-subtle)_52%,transparent)]"
-              strokeWidth={1.6}
+              className="stroke-[color-mix(in_srgb,var(--color-text-strong)_20%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-text-subtle)_52%,transparent)]"
+              strokeWidth={1.45}
               opacity={hasActive && !isActive ? 0.45 : 1}
               style={{ transition: 'opacity 160ms ease' }}
             />
-            <text
-              x={labelPoint.x}
-              y={labelPoint.y}
-              fill="var(--color-text-strong)"
-              textAnchor={axisLabelAnchor}
-              dominantBaseline="middle"
-              dx={axisLabelDx}
-              dy={axisLabelDy}
-              style={labelStyle}
-              opacity={hasActive && !isActive ? 0.52 : 1}
-            >
-              {axis.label}
-            </text>
             <text
               x={xpLabelPoint.x}
               y={xpLabelPoint.y}
@@ -609,6 +592,45 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
           </textPath>
         </text>
       ))}
+
+      {axes.map((axis, index) => {
+        const angle = angleFor(index);
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        const labelPoint = basePointFor(traitLabelRadius, index);
+        const axisPillar = normalizePillar(axis.pillar) as (typeof PILLAR_ORDER)[number] | null;
+        const isActive = axisPillar && activePillar === axisPillar;
+        const hasActive = activePillar !== null;
+
+        const axisLabelAnchor: 'start' | 'middle' | 'end' =
+          cos > 0.34 ? 'start' : cos < -0.34 ? 'end' : 'middle';
+        const axisLabelDx = cos > 0.34 ? 4 : cos < -0.34 ? -4 : 0;
+        const axisLabelDy = sin > 0.56 ? 4 : sin < -0.56 ? -4 : 0;
+
+        return (
+          <text
+            key={`${axis.key}-label`}
+            x={labelPoint.x}
+            y={labelPoint.y}
+            fill="var(--color-text-strong)"
+            textAnchor={axisLabelAnchor}
+            dominantBaseline="middle"
+            dx={axisLabelDx}
+            dy={axisLabelDy}
+            style={{
+              ...labelStyle,
+              paintOrder: 'stroke',
+              stroke: 'var(--color-bg-elevated)',
+              strokeWidth: 2.4,
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round',
+            }}
+            opacity={hasActive && !isActive ? 0.52 : 1}
+          >
+            {axis.label}
+          </text>
+        );
+      })}
 
       <circle cx={center} cy={center} r={6} fill="rgba(224,231,255,0.95)" />
     </svg>
