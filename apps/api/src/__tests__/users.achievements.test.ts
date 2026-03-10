@@ -25,7 +25,7 @@ vi.mock('../middlewares/require-active-subscription.js', () => ({
 }));
 
 import app from '../app.js';
-import { computeThresholdsFromBaseXp } from '../controllers/users/level-thresholds.js';
+import { computeCanonicalLevelThresholds } from '../controllers/users/level-thresholds.js';
 import { buildLevelSummary } from '../controllers/users/level-summary.js';
 
 const userId = '11111111-2222-3333-4444-555555555555';
@@ -77,18 +77,7 @@ describe('GET /api/users/:id/achievements', () => {
           { date: '2024-03-08', xp_day: '120' },
         ],
       })
-      .mockResolvedValueOnce({ rows: [{ total_xp: '680' }] })
-      .mockResolvedValueOnce({
-        rows: [
-          { level: 0, xp_required: 0 },
-          { level: 1, xp_required: 50 },
-          { level: 2, xp_required: 150 },
-          { level: 3, xp_required: 250 },
-          { level: 4, xp_required: 350 },
-          { level: 5, xp_required: 500 },
-          { level: 6, xp_required: 650 },
-        ],
-      });
+      .mockResolvedValueOnce({ rows: [{ total_xp: '680' }] });
 
     const response = await request(app)
       .get(`/api/users/${userId}/achievements`)
@@ -108,12 +97,12 @@ describe('GET /api/users/:id/achievements', () => {
           id: 'ach_level_5',
           name: 'Level 5',
           earned_at: null,
-          progress: { current: 6, target: 5, pct: 100 },
+          progress: { current: 4, target: 5, pct: 80 },
         },
       ],
     });
 
-    expect(mockQuery).toHaveBeenCalledTimes(4);
+    expect(mockQuery).toHaveBeenCalledTimes(3);
     expect(mockQuery).toHaveBeenNthCalledWith(
       1,
       'SELECT user_id FROM users WHERE user_id = $1 LIMIT 1',
@@ -127,11 +116,6 @@ describe('GET /api/users/:id/achievements', () => {
     expect(mockQuery).toHaveBeenNthCalledWith(
       3,
       `SELECT COALESCE(total_xp, 0) AS total_xp\n       FROM v_user_total_xp\n       WHERE user_id = $1`,
-      [userId],
-    );
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      4,
-      `SELECT level, xp_required\n       FROM v_user_level\n       WHERE user_id = $1\n       ORDER BY level ASC`,
       [userId],
     );
   });
@@ -180,7 +164,7 @@ describe('GET /api/users/:id/achievements', () => {
     expect(mockVerifyToken).toHaveBeenCalledTimes(1);
   });
 
-  it('derives level thresholds from tasks when the view is empty', async () => {
+  it('uses canonical level thresholds to compute level progress', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-03-08T12:00:00.000Z'));
 
@@ -194,11 +178,9 @@ describe('GET /api/users/:id/achievements', () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [{ user_id: userId }] })
       .mockResolvedValueOnce({ rows: [{ date: '2024-03-08', xp_day: '120' }] })
-      .mockResolvedValueOnce({ rows: [{ total_xp: '147' }] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [{ xp_base_sum: '42' }] });
+      .mockResolvedValueOnce({ rows: [{ total_xp: '147' }] });
 
-    const fallbackThresholds = computeThresholdsFromBaseXp('42');
+    const fallbackThresholds = computeCanonicalLevelThresholds();
     const levelSummary = buildLevelSummary(147, fallbackThresholds);
 
     const expectedAchievements = [
@@ -230,11 +212,6 @@ describe('GET /api/users/:id/achievements', () => {
       achievements: expectedAchievements,
     });
 
-    expect(mockQuery).toHaveBeenCalledTimes(5);
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      5,
-      `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum\n       FROM tasks\n       WHERE user_id = $1`,
-      [userId],
-    );
+    expect(mockQuery).toHaveBeenCalledTimes(3);
   });
 });

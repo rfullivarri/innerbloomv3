@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getUserLevel } from './get-user-level.js';
-import { computeThresholdsFromBaseXp } from './level-thresholds.js';
+import { computeCanonicalLevelThresholds } from './level-thresholds.js';
 
 const { mockQuery, mockEnsureUserExists, mockBuildLevelSummary } = vi.hoisted(() => ({
   mockQuery: vi.fn(),
@@ -40,15 +40,7 @@ describe('getUserLevel', () => {
 
   it('returns the computed level summary for the requested user', async () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
-    mockQuery
-      .mockResolvedValueOnce({ rows: [{ xp_total: '150' }] })
-      .mockResolvedValueOnce({
-        rows: [
-          { level: '0', xp_required: '0' },
-          { level: '1', xp_required: '100' },
-          { level: '2', xp_required: '250' },
-        ],
-      });
+    mockQuery.mockResolvedValueOnce({ rows: [{ xp_total: '150' }] });
     mockBuildLevelSummary.mockReturnValue({
       currentLevel: 2,
       xpRequiredCurrent: 100,
@@ -66,22 +58,16 @@ describe('getUserLevel', () => {
     await getUserLevel(req, res, next);
 
     expect(mockEnsureUserExists).toHaveBeenCalledWith('2abfdf50-ecf0-4f94-8cb7-2b3429792433');
-    expect(mockQuery).toHaveBeenCalledTimes(2);
+    expect(mockQuery).toHaveBeenCalledTimes(1);
     expect(mockQuery).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining('FROM v_user_total_xp'),
       ['2abfdf50-ecf0-4f94-8cb7-2b3429792433'],
     );
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      2,
-      expect.stringContaining('FROM v_user_level'),
-      ['2abfdf50-ecf0-4f94-8cb7-2b3429792433'],
-    );
-    expect(mockBuildLevelSummary).toHaveBeenCalledWith(150, [
-      { level: 0, xpRequired: 0 },
-      { level: 1, xpRequired: 100 },
-      { level: 2, xpRequired: 250 },
-    ]);
+    expect(mockBuildLevelSummary).toHaveBeenCalledWith(150, expect.any(Array));
+    const firstThresholds = mockBuildLevelSummary.mock.calls[0]?.[1] as { level: number; xpRequired: number }[];
+    expect(firstThresholds[0]).toEqual({ level: 0, xpRequired: 0 });
+    expect(firstThresholds[1]).toEqual({ level: 1, xpRequired: 100 });
     expect(res.json).toHaveBeenCalledWith({
       user_id: '2abfdf50-ecf0-4f94-8cb7-2b3429792433',
       current_level: 2,
@@ -96,14 +82,7 @@ describe('getUserLevel', () => {
 
   it('normalizes invalid XP totals and thresholds before building the summary', async () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
-    mockQuery
-      .mockResolvedValueOnce({ rows: [{ xp_total: '-12' }] })
-      .mockResolvedValueOnce({
-        rows: [
-          { level: '3', xp_required: '450' },
-          { level: null, xp_required: null },
-        ],
-      });
+    mockQuery.mockResolvedValueOnce({ rows: [{ xp_total: '-12' }] });
 
     mockBuildLevelSummary.mockReturnValue({
       currentLevel: 0,
@@ -121,9 +100,10 @@ describe('getUserLevel', () => {
 
     await getUserLevel(req, res, next);
 
-    expect(mockBuildLevelSummary).toHaveBeenCalledWith(0, [
-      { level: 3, xpRequired: 450 },
-    ]);
+    expect(mockBuildLevelSummary).toHaveBeenCalledWith(0, expect.any(Array));
+    const normalizedThresholds = mockBuildLevelSummary.mock.calls[0]?.[1] as { level: number; xpRequired: number }[];
+    expect(normalizedThresholds[0]).toEqual({ level: 0, xpRequired: 0 });
+    expect(normalizedThresholds[1]).toEqual({ level: 1, xpRequired: 100 });
     expect(res.json).toHaveBeenCalledWith({
       user_id: 'b77fcdaa-8d96-4a68-ac07-f21a8193c116',
       current_level: 0,
@@ -136,14 +116,13 @@ describe('getUserLevel', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('derives thresholds from tasks when the view returns no rows', async () => {
+  it('uses canonical thresholds when the view returns no rows', async () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
     mockQuery
       .mockResolvedValueOnce({ rows: [{ xp_total: '147' }] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [{ xp_base_sum: '42' }] });
+      .mockResolvedValueOnce({ rows: [] });
 
-    const fallbackThresholds = computeThresholdsFromBaseXp('42');
+    const fallbackThresholds = computeCanonicalLevelThresholds();
 
     mockBuildLevelSummary.mockReturnValue({
       currentLevel: 1,
@@ -161,12 +140,7 @@ describe('getUserLevel', () => {
 
     await getUserLevel(req, res, next);
 
-    expect(mockQuery).toHaveBeenCalledTimes(3);
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      3,
-      `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum\n       FROM tasks\n       WHERE user_id = $1`,
-      ['f4a2e6fb-5a09-4b9a-8a2f-f80f4129170b'],
-    );
+    expect(mockQuery).toHaveBeenCalledTimes(1);
     expect(mockBuildLevelSummary).toHaveBeenCalledWith(147, fallbackThresholds);
     expect(res.json).toHaveBeenCalledWith({
       user_id: 'f4a2e6fb-5a09-4b9a-8a2f-f80f4129170b',
@@ -180,7 +154,7 @@ describe('getUserLevel', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('derives thresholds from tasks when the view only yields incomplete data', async () => {
+  it('uses canonical thresholds when the view only yields incomplete data', async () => {
     mockEnsureUserExists.mockResolvedValueOnce(undefined);
     mockQuery
       .mockResolvedValueOnce({ rows: [{ xp_total: '147' }] })
@@ -189,10 +163,9 @@ describe('getUserLevel', () => {
           { level: '0', xp_required: null },
           { level: '1', xp_required: null },
         ],
-      })
-      .mockResolvedValueOnce({ rows: [{ xp_base_sum: '42' }] });
+      });
 
-    const fallbackThresholds = computeThresholdsFromBaseXp('42');
+    const fallbackThresholds = computeCanonicalLevelThresholds();
 
     mockBuildLevelSummary.mockReturnValue({
       currentLevel: 1,
@@ -210,12 +183,7 @@ describe('getUserLevel', () => {
 
     await getUserLevel(req, res, next);
 
-    expect(mockQuery).toHaveBeenCalledTimes(3);
-    expect(mockQuery).toHaveBeenNthCalledWith(
-      3,
-      `SELECT COALESCE(SUM(CASE WHEN active THEN xp_base ELSE 0 END), 0) AS xp_base_sum\n       FROM tasks\n       WHERE user_id = $1`,
-      ['22bfdc9a-7fb1-4d58-af59-5f41f7b4622a'],
-    );
+    expect(mockQuery).toHaveBeenCalledTimes(1);
     expect(mockBuildLevelSummary).toHaveBeenCalledWith(147, fallbackThresholds);
     expect(res.json).toHaveBeenCalledWith({
       user_id: '22bfdc9a-7fb1-4d58-af59-5f41f7b4622a',

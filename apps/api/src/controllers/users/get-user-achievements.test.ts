@@ -61,17 +61,7 @@ describe('getUserAchievements', () => {
       .mockResolvedValueOnce({
         rows: [{ total_xp: '1800' }],
       })
-      .mockResolvedValueOnce({
-        rows: [
-          { level: '0', xp_required: '0' },
-          { level: '1', xp_required: '100' },
-          { level: '2', xp_required: '300' },
-          { level: '3', xp_required: '600' },
-          { level: '4', xp_required: '1000' },
-          { level: '5', xp_required: '1500' },
-          { level: '6', xp_required: '2100' },
-        ],
-      });
+      ;
 
     const req = { params: { id: 'dedb5d95-244c-47b7-922c-c256d8930723' } } as unknown as Request;
     const res = createMockResponse();
@@ -80,7 +70,7 @@ describe('getUserAchievements', () => {
     await getUserAchievements(req, res, next);
 
     expect(mockEnsureUserExists).toHaveBeenCalledWith('dedb5d95-244c-47b7-922c-c256d8930723');
-    expect(mockQuery).toHaveBeenCalledTimes(3);
+    expect(mockQuery).toHaveBeenCalledTimes(2);
     expect(mockQuery).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining('FROM v_user_daily_xp'),
@@ -104,7 +94,7 @@ describe('getUserAchievements', () => {
           name: 'Level 5',
           earned_at: null,
           progress: {
-            current: 5,
+            current: 9,
             target: 5,
             pct: 100,
           },
