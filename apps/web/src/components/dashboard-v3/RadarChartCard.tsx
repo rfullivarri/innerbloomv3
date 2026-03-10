@@ -652,7 +652,7 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
 
       <polygon
         points={polygonPoints}
-        className="fill-[rgba(99,102,241,0.22)] stroke-[rgba(99,102,241,0.82)] dark:fill-[rgba(248,250,252,0.18)] dark:stroke-[rgba(248,250,252,0.82)]"
+        className="radar-data-area fill-[rgba(99,102,241,0.22)] stroke-[rgba(99,102,241,0.82)] dark:fill-[rgba(248,250,252,0.18)] dark:stroke-[rgba(248,250,252,0.82)]"
         strokeWidth={2.5}
       />
 
