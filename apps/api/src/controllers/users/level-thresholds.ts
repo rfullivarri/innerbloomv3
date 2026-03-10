@@ -38,7 +38,14 @@ export function computeThresholdsFromBaseXp(xpBaseSum: unknown): LevelThreshold[
 }
 
 export function computeCanonicalLevelThresholds(): LevelThreshold[] {
-  return computeThresholdsFromBaseXp(CANONICAL_LEVEL_BASE_XP);
+  const thresholds: LevelThreshold[] = [{ level: 0, xpRequired: 0 }];
+
+  for (let level = 1; level <= MAX_LEVEL; level += 1) {
+    const xpRequired = Math.round(CANONICAL_LEVEL_BASE_XP * Math.pow(level, 1.3));
+    thresholds.push({ level, xpRequired: Math.max(0, xpRequired) });
+  }
+
+  return thresholds;
 }
 
 export type ThresholdRow = { xp_base_sum: string | number | null };

@@ -1,6 +1,6 @@
 import { pool } from '../../db.js';
 import { buildLevelSummary } from '../../controllers/users/level-summary.js';
-import type { LevelThreshold } from '../../controllers/users/types.js';
+import { computeCanonicalLevelThresholds } from '../../controllers/users/level-thresholds.js';
 import { HttpError } from '../../lib/http-error.js';
 import { triggerTaskGenerationForUser } from '../../services/taskgenTriggerService.js';
 import { updateUserTaskRow } from '../../services/user-tasks.service.js';
@@ -213,11 +213,6 @@ type SubscriptionPlanRow = {
 type DailyXpRow = {
   date: string | Date;
   xp_day: string | number | null;
-};
-
-type LevelRow = {
-  level: string | number | null;
-  xp_required: string | number | null;
 };
 
 type TotalXpRow = {
@@ -1107,18 +1102,7 @@ export async function getUserInsights(userId: string, _query: InsightQuery): Pro
 
   const totalXp = Math.max(0, toNumber(totalXpResult.rows[0]?.total_xp ?? 0));
 
-  const thresholdsResult = await pool.query<LevelRow>(
-    `SELECT level, xp_required
-       FROM v_user_level
-      WHERE user_id = $1
-      ORDER BY level ASC`,
-    [userId],
-  );
-
-  const thresholds: LevelThreshold[] = thresholdsResult.rows.map((row) => ({
-    level: Number(row.level ?? 0),
-    xpRequired: Number(row.xp_required ?? 0),
-  }));
+  const thresholds = computeCanonicalLevelThresholds();
   const levelSummary = buildLevelSummary(totalXp, thresholds);
 
   const dailyXpResult = await pool.query<DailyXpRow>(

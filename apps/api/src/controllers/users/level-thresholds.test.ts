@@ -12,7 +12,7 @@ describe('computeThresholdsFromBaseXp', () => {
   it('builds deterministic canonical thresholds', () => {
     const thresholds = computeCanonicalLevelThresholds();
 
-    expect(thresholds[0]).toEqual({ level: 0, xpRequired: Math.round(CANONICAL_LEVEL_BASE_XP * 0.4 * 7) });
+    expect(thresholds[0]).toEqual({ level: 0, xpRequired: 0 });
     expect(thresholds[1]).toEqual({ level: 1, xpRequired: Math.round(CANONICAL_LEVEL_BASE_XP * Math.pow(1, 1.3)) });
     expect(thresholds[18]).toEqual({ level: 18, xpRequired: Math.round(CANONICAL_LEVEL_BASE_XP * Math.pow(18, 1.3)) });
   });
