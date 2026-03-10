@@ -283,13 +283,14 @@ interface RadarProps {
 
 function Radar({ dataset, pillarLabels }: RadarProps) {
   const radius = 130;
-  const outerPadding = 126;
+  const outerPadding = 106;
   const center = radius + outerPadding;
   const { axes, maxValue } = dataset;
   const count = axes.length;
-  const ringRadius = radius + 38;
-  const labelRadius = ringRadius + 20;
-  const ringThickness = 3.6;
+  const ringRadius = radius + 24;
+  const pillarLabelRadius = ringRadius + 8;
+  const traitLabelRadius = ringRadius + 14;
+  const ringThickness = 4.4;
   const uniqueId = useId().replace(/:/g, '_');
   const [activePillar, setActivePillar] = useState<(typeof PILLAR_ORDER)[number] | null>(null);
 
@@ -436,7 +437,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
               key={textPathId}
               id={textPathId}
               d={arcPath(
-                labelRadius,
+                pillarLabelRadius,
                 reverseForBottomHalf ? range.endAngle : range.startAngle,
                 reverseForBottomHalf ? range.startAngle : range.endAngle,
               )}
@@ -473,7 +474,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
         const angle = angleFor(index);
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
-        const labelPoint = basePointFor(radius + 28, index);
+        const labelPoint = basePointFor(traitLabelRadius, index);
         const normalized = maxValue > 0 ? Math.min(Math.max(axis.xp / maxValue, 0), 1) : 0;
         const valueDistance = normalized * radius;
         const xpLabelOffset = normalized > 0 ? 24 : 36;
@@ -563,17 +564,17 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
           d={arcPath(ringRadius, range.startAngle, range.endAngle)}
           fill="none"
           stroke={range.color}
-          strokeOpacity={
-            activePillar ? (activePillar === range.pillar ? 0.88 : 0.34) : 0.66
-          }
+          strokeOpacity={activePillar ? (activePillar === range.pillar ? 0.98 : 0.22) : 0.74}
           strokeWidth={ringThickness}
           strokeLinecap="round"
           style={{
             transition: 'stroke-opacity 180ms ease, filter 180ms ease',
             filter:
               activePillar === range.pillar
-                ? `drop-shadow(0 0 8px ${range.color}) drop-shadow(0 0 16px ${range.color}66)`
-                : `drop-shadow(0 0 4px ${range.color}88)`,
+                ? `drop-shadow(0 0 10px ${range.color}) drop-shadow(0 0 20px ${range.color}88)`
+                : activePillar
+                  ? 'saturate(0.42)'
+                  : `drop-shadow(0 0 4px ${range.color}88)`,
           }}
         />
       ))}
@@ -582,14 +583,15 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
         <text
           key={`${range.pillar}-label`}
           fill={range.color}
-          fillOpacity={activePillar ? (activePillar === range.pillar ? 0.84 : 0.44) : 0.68}
+          fillOpacity={activePillar ? (activePillar === range.pillar ? 0.96 : 0.28) : 0.72}
           style={{
             fontFamily: OFFICIAL_LANDING_CSS_VARIABLES['--font-heading'],
-            fontSize: 'clamp(11px, 2.7vw, 13px)',
+            fontSize: 'clamp(12px, 3vw, 14px)',
             letterSpacing: '0.24em',
             fontWeight: 600,
             textTransform: 'uppercase',
-            transition: 'fill-opacity 180ms ease',
+            transition: 'fill-opacity 180ms ease, filter 180ms ease',
+            filter: activePillar === range.pillar ? `drop-shadow(0 0 8px ${range.color}99)` : undefined,
           }}
         >
           <textPath
