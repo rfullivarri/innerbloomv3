@@ -5266,6 +5266,11 @@
   :root[data-theme='light'] [data-light-scope='dashboard-v3'] [aria-label='Radar de GP por rasgo'] text {
     fill: var(--color-text-muted);
   }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] [aria-label='Radar de GP por rasgo'] .radar-data-area {
+    fill: rgba(79, 70, 229, 0.34);
+    stroke: rgba(79, 70, 229, 0.92);
+  }
 }
 
 @layer components {
