@@ -1,9 +1,10 @@
-import { useMemo, type CSSProperties } from 'react';
+import { useId, useMemo, type CSSProperties } from 'react';
 import { Card } from '../ui/Card';
 import { InfoDotTarget } from '../InfoDot/InfoDotTarget';
 import { useRequest } from '../../hooks/useRequest';
 import { getUserXpByTrait, type TraitXpEntry } from '../../lib/api';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+import { OFFICIAL_LANDING_CSS_VARIABLES } from '../../content/officialDesignTokens';
 
 interface RadarChartCardProps {
   userId: string;
@@ -252,7 +253,14 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
           <div className="w-full max-w-[520px] p-4 sm:p-6">
             <div className="flex w-full justify-center px-1 sm:px-2">
               {hasAxes ? (
-                <Radar dataset={dataset} />
+                <Radar
+                  dataset={dataset}
+                  pillarLabels={{
+                    Body: t('dashboard.radar.pillars.body'),
+                    Mind: t('dashboard.radar.pillars.mind'),
+                    Soul: t('dashboard.radar.pillars.soul'),
+                  }}
+                />
               ) : (
                 <div className="flex h-[260px] w-full max-w-[420px] items-center justify-center text-center text-sm text-[color:var(--color-text-muted)]">
                   <p className="px-6 leading-relaxed">
@@ -270,20 +278,26 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
 
 interface RadarProps {
   dataset: RadarDataset;
+  pillarLabels: Record<(typeof PILLAR_ORDER)[number], string>;
 }
 
-function Radar({ dataset }: RadarProps) {
+function Radar({ dataset, pillarLabels }: RadarProps) {
   const radius = 130;
-  const outerPadding = 96;
+  const outerPadding = 104;
   const center = radius + outerPadding;
   const { axes, maxValue } = dataset;
   const count = axes.length;
+  const ringRadius = radius + 20;
+  const labelRadius = ringRadius + 14;
+  const ringThickness = 3.6;
+  const uniqueId = useId().replace(/:/g, '_');
 
   if (count === 0) {
     return null;
   }
 
   const angleFor = (index: number) => -Math.PI / 2 + (index * (2 * Math.PI)) / count;
+  const angleStep = (2 * Math.PI) / count;
 
   const pointFor = (value: number, index: number, distance = radius) => {
     const normalized = maxValue > 0 ? Math.min(Math.max(value / maxValue, 0), 1) : 0;
@@ -310,6 +324,70 @@ function Radar({ dataset }: RadarProps) {
 
   const gridLevels = [0.25, 0.5, 0.75, 1];
   const viewBoxSize = center * 2;
+  const PILLAR_COLORS: Record<(typeof PILLAR_ORDER)[number], string> = {
+    Body: '#5DD4FF',
+    Mind: '#A78BFA',
+    Soul: '#F6D365',
+  };
+
+  const pillarRanges = PILLAR_ORDER
+    .map((pillar) => {
+      let startIndex = -1;
+      let endIndex = -1;
+
+      for (let index = 0; index < axes.length; index += 1) {
+        if (normalizePillar(axes[index].pillar) !== pillar) {
+          continue;
+        }
+
+        if (startIndex === -1) {
+          startIndex = index;
+        }
+
+        endIndex = index;
+      }
+
+      if (startIndex === -1 || endIndex === -1) {
+        return null;
+      }
+
+      return {
+        pillar,
+        color: PILLAR_COLORS[pillar],
+        startAngle: angleFor(startIndex) - angleStep / 2,
+        endAngle: angleFor(endIndex) + angleStep / 2,
+      };
+    })
+    .filter(Boolean) as Array<{
+    pillar: (typeof PILLAR_ORDER)[number];
+    color: string;
+    startAngle: number;
+    endAngle: number;
+  }>;
+
+  const pointAtAngle = (distance: number, angle: number) => ({
+    x: center + distance * Math.cos(angle),
+    y: center + distance * Math.sin(angle),
+  });
+
+  const arcPath = (distance: number, startAngle: number, endAngle: number) => {
+    const start = pointAtAngle(distance, startAngle);
+    const end = pointAtAngle(distance, endAngle);
+    const delta = endAngle - startAngle;
+    const largeArc = Math.abs(delta) > Math.PI ? 1 : 0;
+    const sweep = delta >= 0 ? 1 : 0;
+
+    return `M ${start.x} ${start.y} A ${distance} ${distance} 0 ${largeArc} ${sweep} ${end.x} ${end.y}`;
+  };
+
+  const sectorPath = (distance: number, startAngle: number, endAngle: number) => {
+    const start = pointAtAngle(distance, startAngle);
+    const end = pointAtAngle(distance, endAngle);
+    const delta = endAngle - startAngle;
+    const largeArc = Math.abs(delta) > Math.PI ? 1 : 0;
+
+    return `M ${center} ${center} L ${start.x} ${start.y} A ${distance} ${distance} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
+  };
   const labelStyle: CSSProperties = {
     fontFamily: '"Manrope", "Inter", system-ui, sans-serif',
     fontSize: 'clamp(11px, 3.2vw, 14px)',
@@ -335,9 +413,47 @@ function Radar({ dataset }: RadarProps) {
           <stop offset="0%" stopColor="rgba(139,92,246,0.55)" />
           <stop offset="100%" stopColor="rgba(79,70,229,0.2)" />
         </linearGradient>
+        {pillarRanges.map((range) => (
+          <radialGradient
+            key={`${range.pillar}-sector-gradient`}
+            id={`${uniqueId}-${range.pillar.toLowerCase()}-sector-gradient`}
+            cx="50%"
+            cy="50%"
+            r="80%"
+          >
+            <stop offset="0%" stopColor={range.color} stopOpacity={0.1} />
+            <stop offset="100%" stopColor={range.color} stopOpacity={0.04} />
+          </radialGradient>
+        ))}
+        {pillarRanges.map((range) => {
+          const midAngle = (range.startAngle + range.endAngle) / 2;
+          const reverseForBottomHalf = Math.sin(midAngle) > 0;
+          const textPathId = `${uniqueId}-${range.pillar.toLowerCase()}-label-path`;
+
+          return (
+            <path
+              key={textPathId}
+              id={textPathId}
+              d={arcPath(
+                labelRadius,
+                reverseForBottomHalf ? range.endAngle : range.startAngle,
+                reverseForBottomHalf ? range.startAngle : range.endAngle,
+              )}
+              fill="none"
+            />
+          );
+        })}
       </defs>
 
       <circle cx={center} cy={center} r={radius + 24} fill="url(#radarGlow)" opacity={0.12} />
+
+      {pillarRanges.map((range) => (
+        <path
+          key={`${range.pillar}-sector`}
+          d={sectorPath(radius, range.startAngle, range.endAngle)}
+          fill={`url(#${uniqueId}-${range.pillar.toLowerCase()}-sector-gradient)`}
+        />
+      ))}
 
       {gridLevels.map((level) => {
         const points = axes
@@ -399,6 +515,42 @@ function Radar({ dataset }: RadarProps) {
       })}
 
       <polygon points={polygonPoints} fill="url(#radarFill)" className="stroke-[rgba(99,102,241,0.82)] dark:stroke-[rgba(129,140,248,0.5)]" strokeWidth={2.4} />
+
+      {pillarRanges.map((range) => (
+        <path
+          key={`${range.pillar}-ring`}
+          d={arcPath(ringRadius, range.startAngle, range.endAngle)}
+          fill="none"
+          stroke={range.color}
+          strokeOpacity={0.6}
+          strokeWidth={ringThickness}
+          strokeLinecap="round"
+        />
+      ))}
+
+      {pillarRanges.map((range) => (
+        <text
+          key={`${range.pillar}-label`}
+          fill={range.color}
+          fillOpacity={0.62}
+          style={{
+            fontFamily: OFFICIAL_LANDING_CSS_VARIABLES['--font-heading'],
+            fontSize: 'clamp(10px, 2.5vw, 12px)',
+            letterSpacing: '0.24em',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+          }}
+        >
+          <textPath
+            href={`#${uniqueId}-${range.pillar.toLowerCase()}-label-path`}
+            startOffset="50%"
+            textAnchor="middle"
+          >
+            {pillarLabels[range.pillar].toUpperCase()}
+          </textPath>
+        </text>
+      ))}
+
       <circle cx={center} cy={center} r={6} fill="rgba(224,231,255,0.95)" />
     </svg>
   );
