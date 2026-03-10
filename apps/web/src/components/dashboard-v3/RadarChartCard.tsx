@@ -631,7 +631,7 @@ function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
             <text
               x={xpLabelPoint.x}
               y={xpLabelPoint.y}
-              fill={isOpen ? 'color-mix(in_srgb,var(--color-text-strong)_90%,white_10%)' : 'var(--color-text-subtle)'}
+              fill={isOpen ? '#ffffff' : 'var(--color-text-subtle)'}
               textAnchor="middle"
               dominantBaseline="middle"
               style={{
