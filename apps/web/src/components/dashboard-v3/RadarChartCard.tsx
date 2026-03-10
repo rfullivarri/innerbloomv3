@@ -81,6 +81,14 @@ type RadarDataset = {
   maxValue: number;
 };
 
+type PillarMetrics = {
+  values: Record<(typeof PILLAR_ORDER)[number], number>;
+  percentages: Record<(typeof PILLAR_ORDER)[number], number>;
+  total: number;
+};
+
+type BalanceStatus = 'balanced' | 'bodyDominant' | 'mindDominant' | 'soulDominant';
+
 function sanitizeTraitValue(value: string | null | undefined): string | null {
   if (!value) {
     return null;
@@ -224,20 +232,73 @@ function computeRadarDataset(entries: TraitXpEntry[] = []): RadarDataset {
   return { axes, maxValue };
 }
 
+function computePillarMetrics(axes: RadarAxis[]): PillarMetrics {
+  const values: Record<(typeof PILLAR_ORDER)[number], number> = {
+    Body: 0,
+    Mind: 0,
+    Soul: 0,
+  };
+
+  axes.forEach((axis) => {
+    const pillar = normalizePillar(axis.pillar) as (typeof PILLAR_ORDER)[number] | null;
+    if (!pillar) {
+      return;
+    }
+
+    values[pillar] += Math.max(0, Number(axis.xp ?? 0));
+  });
+
+  const total = values.Body + values.Mind + values.Soul;
+  const percentages: Record<(typeof PILLAR_ORDER)[number], number> = {
+    Body: total > 0 ? Math.round((values.Body / total) * 100) : 0,
+    Mind: total > 0 ? Math.round((values.Mind / total) * 100) : 0,
+    Soul: total > 0 ? Math.round((values.Soul / total) * 100) : 0,
+  };
+
+  return { values, percentages, total };
+}
+
+function computeBalanceStatus(metrics: PillarMetrics): BalanceStatus {
+  const points = PILLAR_ORDER.map((pillar) => metrics.percentages[pillar]);
+  const max = Math.max(...points);
+  const min = Math.min(...points);
+
+  if (max - min <= 15) {
+    return 'balanced';
+  }
+
+  const dominantPillar = PILLAR_ORDER.reduce((current, pillar) =>
+    metrics.percentages[pillar] > metrics.percentages[current] ? pillar : current,
+  );
+
+  if (dominantPillar === 'Body') return 'bodyDominant';
+  if (dominantPillar === 'Mind') return 'mindDominant';
+  return 'soulDominant';
+}
+
 export function RadarChartCard({ userId }: RadarChartCardProps) {
   const { t } = usePostLoginLanguage();
   const { data, status } = useRequest(() => getUserXpByTrait(userId), [userId]);
   const dataset = useMemo(() => computeRadarDataset(data?.traits ?? []), [data?.traits]);
+  const pillarMetrics = useMemo(() => computePillarMetrics(dataset.axes), [dataset.axes]);
+  const balanceStatus = useMemo(() => computeBalanceStatus(pillarMetrics), [pillarMetrics]);
   const hasAxes = dataset.axes.length > 0;
+
+  const balanceStatusLabelByKey: Record<BalanceStatus, string> = {
+    balanced: t('dashboard.radar.status.balanced'),
+    bodyDominant: t('dashboard.radar.status.bodyDominant'),
+    mindDominant: t('dashboard.radar.status.mindDominant'),
+    soulDominant: t('dashboard.radar.status.soulDominant'),
+  };
 
   return (
     <Card
-      title="🧿 Radar Chart"
+      title={t('dashboard.radar.title')}
       subtitle={t('dashboard.radar.subtitle')}
       rightSlot={
         <InfoDotTarget id="radar" placement="right" className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1 text-xs text-[color:var(--color-text-muted)]">
-            {t('dashboard.radar.keyTraits')}
+          <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1 text-xs font-semibold text-[color:var(--color-text-muted)]">
+            {balanceStatusLabelByKey[balanceStatus]}
           </span>
         </InfoDotTarget>
       }
@@ -255,6 +316,7 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
               {hasAxes ? (
                 <Radar
                   dataset={dataset}
+                  pillarPercentages={pillarMetrics.percentages}
                   pillarLabels={{
                     Body: t('dashboard.radar.pillars.body'),
                     Mind: t('dashboard.radar.pillars.mind'),
@@ -278,10 +340,11 @@ export function RadarChartCard({ userId }: RadarChartCardProps) {
 
 interface RadarProps {
   dataset: RadarDataset;
+  pillarPercentages: Record<(typeof PILLAR_ORDER)[number], number>;
   pillarLabels: Record<(typeof PILLAR_ORDER)[number], string>;
 }
 
-function Radar({ dataset, pillarLabels }: RadarProps) {
+function Radar({ dataset, pillarPercentages, pillarLabels }: RadarProps) {
   const radius = 130;
   const outerPadding = 82;
   const center = radius + outerPadding;
@@ -292,7 +355,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
   const traitLabelRadius = ringRadius + 24;
   const ringThickness = 4.8;
   const uniqueId = useId().replace(/:/g, '_');
-  const [activePillar, setActivePillar] = useState<(typeof PILLAR_ORDER)[number] | null>(null);
+  const [openPillars, setOpenPillars] = useState<Array<(typeof PILLAR_ORDER)[number]>>([]);
 
   if (count === 0) {
     return null;
@@ -331,6 +394,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
     Mind: '#A78BFA',
     Soul: '#F6D365',
   };
+  const hasOpenPillars = openPillars.length > 0;
 
   const pillarRanges = PILLAR_ORDER
     .map((pillar) => {
@@ -390,6 +454,12 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
 
     return `M ${center} ${center} L ${start.x} ${start.y} A ${distance} ${distance} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
   };
+  const togglePillar = (pillar: (typeof PILLAR_ORDER)[number]) => {
+    setOpenPillars((current) =>
+      current.includes(pillar) ? current.filter((item) => item !== pillar) : [...current, pillar],
+    );
+  };
+
   const labelStyle: CSSProperties = {
     fontFamily: '"Manrope", "Inter", system-ui, sans-serif',
     fontSize: 'clamp(11px, 3.2vw, 14px)',
@@ -401,7 +471,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
   return (
     <svg
       viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
-      className="h-auto w-full max-w-[420px]"
+      className="h-auto w-full max-w-[420px] overflow-visible"
       role="img"
       aria-label="Radar de GP por rasgo"
     >
@@ -411,10 +481,6 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
           <stop offset="70%" stopColor="rgba(59,130,246,0.4)" />
           <stop offset="100%" stopColor="rgba(59,130,246,0.15)" />
         </radialGradient>
-        <linearGradient id="radarFill" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="rgba(139,92,246,0.55)" />
-          <stop offset="100%" stopColor="rgba(79,70,229,0.2)" />
-        </linearGradient>
         {pillarRanges.map((range) => (
           <radialGradient
             key={`${range.pillar}-sector-gradient`}
@@ -461,7 +527,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
           key={`${range.pillar}-sector`}
           d={sectorPath(radius, range.startAngle, range.endAngle)}
           fill={`url(#${uniqueId}-${range.pillar.toLowerCase()}-sector-gradient)`}
-          opacity={activePillar && activePillar !== range.pillar ? 0.55 : 1}
+          opacity={hasOpenPillars && !openPillars.includes(range.pillar) ? 0.42 : 1}
           style={{ transition: 'opacity 160ms ease' }}
         />
       ))}
@@ -473,39 +539,21 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
             return `${x},${y}`;
           })
           .join(' ');
-        return <polygon key={level} points={points} fill="none" className="stroke-[color-mix(in_srgb,var(--color-text-strong)_18%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-border-subtle)_82%,white_8%)]" strokeWidth={1.3} />;
+        return <polygon key={level} points={points} fill="none" className="stroke-[color-mix(in_srgb,var(--color-text-strong)_12%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-border-subtle)_78%,white_8%)]" strokeWidth={1.2} />;
       })}
 
       {axes.map((axis, index) => {
         const lineEnd = basePointFor(radius, index);
-        const angle = angleFor(index);
-        const cos = Math.cos(angle);
-        const sin = Math.sin(angle);
-        const labelPoint = basePointFor(traitLabelRadius, index);
         const normalized = maxValue > 0 ? Math.min(Math.max(axis.xp / maxValue, 0), 1) : 0;
         const valueDistance = normalized * radius;
         const xpLabelOffset = normalized > 0 ? 24 : 36;
         const xpLabelPoint = basePointFor(Math.min(radius + 48, valueDistance + xpLabelOffset), index);
         const xpLabel = XP_NUMBER_FORMATTER.format(Math.round(axis.xp ?? 0));
         const axisPillar = normalizePillar(axis.pillar) as (typeof PILLAR_ORDER)[number] | null;
-        const isActive = axisPillar && activePillar === axisPillar;
-        const hasActive = activePillar !== null;
-
-        const setAxisPillarFocus = () => {
-          if (axisPillar) {
-            setActivePillar(axisPillar);
-          }
-        };
+        const isOpen = axisPillar ? openPillars.includes(axisPillar) : false;
 
         return (
-          <g
-            key={axis.key}
-            onMouseEnter={setAxisPillarFocus}
-            onFocus={setAxisPillarFocus}
-            onMouseLeave={() => setActivePillar(null)}
-            onBlur={() => setActivePillar(null)}
-            onClick={() => setActivePillar(activePillar === axisPillar ? null : axisPillar)}
-          >
+          <g key={axis.key}>
             <line
               x1={center}
               y1={center}
@@ -521,7 +569,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
               y2={lineEnd.y}
               className="stroke-[color-mix(in_srgb,var(--color-text-strong)_20%,transparent)] dark:stroke-[color-mix(in_srgb,var(--color-text-subtle)_52%,transparent)]"
               strokeWidth={1.45}
-              opacity={hasActive && !isActive ? 0.45 : 1}
+              opacity={hasOpenPillars && !isOpen ? 0.35 : 1}
               style={{ transition: 'opacity 160ms ease' }}
             />
             <text
@@ -537,7 +585,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
                 letterSpacing: '0.01em',
                 lineHeight: 1.2,
               }}
-              opacity={hasActive && !isActive ? 0.52 : 1}
+              opacity={hasOpenPillars && !isOpen ? 0.45 : 1}
             >
               {xpLabel}
             </text>
@@ -545,23 +593,29 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
         );
       })}
 
-      <polygon points={polygonPoints} fill="url(#radarFill)" className="stroke-[rgba(99,102,241,0.9)] dark:stroke-[rgba(129,140,248,0.62)]" strokeWidth={2.5} />
+      <polygon
+        points={polygonPoints}
+        className="fill-[rgba(99,102,241,0.22)] stroke-[rgba(99,102,241,0.82)] dark:fill-[rgba(248,250,252,0.18)] dark:stroke-[rgba(248,250,252,0.82)]"
+        strokeWidth={2.5}
+      />
 
       {pillarRanges.map((range) => (
         <path
           key={`${range.pillar}-ring`}
           d={arcPath(ringRadius, range.startAngle, range.endAngle)}
           fill="none"
-          stroke={activePillar && activePillar !== range.pillar ? 'var(--color-text-muted)' : range.color}
-          strokeOpacity={activePillar ? (activePillar === range.pillar ? 1 : 0.35) : 0.8}
-          strokeWidth={activePillar === range.pillar ? ringThickness + 0.5 : ringThickness}
+          stroke={hasOpenPillars && !openPillars.includes(range.pillar) ? 'var(--color-text-muted)' : range.color}
+          strokeOpacity={hasOpenPillars ? (openPillars.includes(range.pillar) ? 1 : 0.33) : 0.8}
+          strokeWidth={openPillars.includes(range.pillar) ? ringThickness + 0.5 : ringThickness}
           strokeLinecap="round"
+          onClick={() => togglePillar(range.pillar)}
+          className="cursor-pointer"
           style={{
             transition: 'stroke-opacity 180ms ease, filter 180ms ease, stroke-width 180ms ease',
             filter:
-              activePillar === range.pillar
+              openPillars.includes(range.pillar)
                 ? `drop-shadow(0 0 6px ${range.color}cc) drop-shadow(0 0 12px ${range.color}99)`
-                : activePillar
+                : hasOpenPillars
                   ? 'saturate(0.2)'
                   : `drop-shadow(0 0 4px ${range.color}77)`,
           }}
@@ -571,16 +625,18 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
       {pillarRanges.map((range) => (
         <text
           key={`${range.pillar}-label`}
-          fill={activePillar && activePillar !== range.pillar ? 'var(--color-text-muted)' : range.color}
-          fillOpacity={activePillar ? (activePillar === range.pillar ? 0.99 : 0.55) : 0.84}
+          fill={hasOpenPillars && !openPillars.includes(range.pillar) ? 'var(--color-text-muted)' : range.color}
+          fillOpacity={hasOpenPillars ? (openPillars.includes(range.pillar) ? 0.99 : 0.48) : 0.84}
+          onClick={() => togglePillar(range.pillar)}
+          className="cursor-pointer"
           style={{
             fontFamily: OFFICIAL_LANDING_CSS_VARIABLES['--font-heading'],
-            fontSize: 'clamp(14px, 3.6vw, 17px)',
+            fontSize: 'clamp(12px, 3.4vw, 16px)',
             letterSpacing: '0.24em',
             fontWeight: 600,
             textTransform: 'uppercase',
             transition: 'fill-opacity 180ms ease, filter 180ms ease',
-            filter: activePillar === range.pillar ? `drop-shadow(0 0 7px ${range.color}99)` : undefined,
+            filter: openPillars.includes(range.pillar) ? `drop-shadow(0 0 7px ${range.color}99)` : undefined,
           }}
         >
           <textPath
@@ -588,7 +644,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
             startOffset="50%"
             textAnchor="middle"
           >
-            {pillarLabels[range.pillar].toUpperCase()}
+            {`${pillarLabels[range.pillar]} ${pillarPercentages[range.pillar]}%`.toUpperCase()}
           </textPath>
         </text>
       ))}
@@ -599,8 +655,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
         const sin = Math.sin(angle);
         const labelPoint = basePointFor(traitLabelRadius, index);
         const axisPillar = normalizePillar(axis.pillar) as (typeof PILLAR_ORDER)[number] | null;
-        const isActive = axisPillar && activePillar === axisPillar;
-        const hasActive = activePillar !== null;
+        const isVisible = axisPillar ? openPillars.includes(axisPillar) : false;
 
         const axisLabelAnchor: 'start' | 'middle' | 'end' =
           cos > 0.34 ? 'start' : cos < -0.34 ? 'end' : 'middle';
@@ -625,7 +680,7 @@ function Radar({ dataset, pillarLabels }: RadarProps) {
               strokeLinecap: 'round',
               strokeLinejoin: 'round',
             }}
-            opacity={hasActive && !isActive ? 0.52 : 1}
+            opacity={isVisible ? 1 : 0}
           >
             {axis.label}
           </text>
