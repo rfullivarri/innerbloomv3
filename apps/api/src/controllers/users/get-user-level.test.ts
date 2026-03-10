@@ -65,7 +65,7 @@ describe('getUserLevel', () => {
       ['2abfdf50-ecf0-4f94-8cb7-2b3429792433'],
     );
     expect(mockBuildLevelSummary).toHaveBeenCalledWith(150, expect.any(Array));
-    const firstThresholds = mockBuildLevelSummary.mock.calls[0]?.[1] as Array<{ level: number; xpRequired: number }>;
+    const firstThresholds = mockBuildLevelSummary.mock.calls[0]?.[1] as { level: number; xpRequired: number }[];
     expect(firstThresholds[0]).toEqual({ level: 0, xpRequired: 0 });
     expect(firstThresholds[1]).toEqual({ level: 1, xpRequired: 100 });
     expect(res.json).toHaveBeenCalledWith({
@@ -101,7 +101,7 @@ describe('getUserLevel', () => {
     await getUserLevel(req, res, next);
 
     expect(mockBuildLevelSummary).toHaveBeenCalledWith(0, expect.any(Array));
-    const normalizedThresholds = mockBuildLevelSummary.mock.calls[0]?.[1] as Array<{ level: number; xpRequired: number }>;
+    const normalizedThresholds = mockBuildLevelSummary.mock.calls[0]?.[1] as { level: number; xpRequired: number }[];
     expect(normalizedThresholds[0]).toEqual({ level: 0, xpRequired: 0 });
     expect(normalizedThresholds[1]).toEqual({ level: 1, xpRequired: 100 });
     expect(res.json).toHaveBeenCalledWith({
