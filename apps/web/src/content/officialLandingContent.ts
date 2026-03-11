@@ -47,7 +47,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Construye hábitos',
       titleHighlight: 'que crecen contigo.',
       subtitle:
-        'Un sistema realista para hábitos, equilibrio y crecimiento.',
+        'Un sistema realista para hábitos, emociones y crecimiento.',
       note: 'En menos de 3 minutos obtienes un punto de partida personalizado según tu energía, tus prioridades y tu ritmo actual.',
       alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
     },
@@ -125,9 +125,9 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
         },
         {
           title: 'Crece con progreso diario 📅📈',
-          action: 'Completa micro-hábitos, registra cómo te sientes y gana impulso día a día.',
+          action: 'Completa micro-hábitos, registra cómo te sientes y convierte tu emoción diaria en progreso visible.',
           outcome: 'Descubre qué te ayuda a mantener la constancia.',
-          copy: 'Completa micro-hábitos, registra cómo te sientes y gana impulso día a día. Descubre qué te ayuda a mantener la constancia.'
+          copy: 'Completa micro-hábitos, registra cómo te sientes y convierte tu emoción diaria en progreso visible. Descubre qué te ayuda a mantener la constancia.'
         },
         {
           title: 'Crece con un sistema que se adapta 🌱',
@@ -239,7 +239,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Build habits',
       titleHighlight: 'that grow with you.',
       subtitle:
-        'A realistic system for habits, balance, and growth.',
+        'A realistic system for habits, emotions, and growth.',
       note: 'In under 3 minutes, you get a personalized starting point built around your energy, priorities, and current rhythm.',
       alt: 'Kid looking at a violet energy sphere in the night sky — Gamification Journey'
     },
@@ -317,9 +317,9 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
         },
         {
           title: 'Grow with daily progress 📅📈',
-          action: 'Complete small habits, track how you feel, and build momentum day by day.',
+          action: 'Complete small habits, log how you feel, and turn daily emotion into visible progress.',
           outcome: 'See what helps you stay consistent.',
-          copy: 'Complete small habits, track how you feel, and build momentum day by day. See what helps you stay consistent.'
+          copy: 'Complete small habits, log how you feel, and turn daily emotion into visible progress. See what helps you stay consistent.'
         },
         {
           title: 'Grow with a system that adapts 🌱',
