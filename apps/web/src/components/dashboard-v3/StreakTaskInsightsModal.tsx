@@ -92,7 +92,7 @@ function RecalibrationTrendIndicator({
 
   const config: Record<Exclude<RecalibrationAction, 'none'>, { icon: string; tone: string }> = {
     down: { icon: '↗', tone: 'text-emerald-300 border-emerald-300/40 bg-emerald-300/10' },
-    keep: { icon: '→', tone: 'text-amber-200 border-amber-300/40 bg-amber-300/10' },
+    keep: { icon: '→', tone: 'text-amber-950 border-amber-500/70 bg-amber-400' },
     up: { icon: '↘', tone: 'text-rose-300 border-rose-300/40 bg-rose-300/10' },
   };
 
@@ -223,7 +223,7 @@ function WeeklyCompletionDonut({
   const healthStyles: Record<HabitHealthLevel, string> = {
     strong: 'bg-emerald-300 text-emerald-950',
     medium: 'bg-amber-300 text-amber-950',
-    weak: 'bg-rose-300 text-rose-950',
+    weak: 'bg-rose-400 text-rose-950',
   };
 
   if (!timeline.length) {
@@ -741,7 +741,7 @@ export function TaskInsightsModal({
                         ? 'text-emerald-200 border-emerald-300/35 bg-emerald-300/10'
                         : action === 'up'
                           ? 'text-rose-200 border-rose-300/35 bg-rose-300/10'
-                          : 'text-amber-100 border-amber-300/35 bg-amber-300/10';
+                          : 'text-amber-950 border-amber-500/70 bg-amber-400';
                     const actionLabel = action === 'down' ? '↗ Bajó dificultad' : action === 'up' ? '↘ Subió dificultad' : '→ Se mantuvo';
                     const expected = Number(record.expectedTarget ?? 0);
                     const completions = Number(record.completions ?? 0);
