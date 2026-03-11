@@ -41,6 +41,7 @@ import { useRequest } from "../hooks/useRequest";
 import { DevErrorBoundary } from "../components/DevErrorBoundary";
 import {
   getCurrentUserSubscription,
+  getGameModeUpgradeSuggestion,
   getJourneyGenerationStatus,
   getModerationState,
   getUserState,
@@ -91,6 +92,7 @@ import type { ModerationTrackerType } from "../lib/api";
 import { ModerationWidget as ModerationStatusWidget } from "../components/moderation/ModerationWidget";
 import { ModerationEditSheet } from "../components/dashboard-v3/ModerationEditSheet";
 import { ModerationOnboardingSuggestion } from "../components/dashboard-v3/ModerationOnboardingSuggestion";
+import { ModeUpgradeSuggestionCTA } from "../components/dashboard-v3/ModeUpgradeSuggestionCTA";
 
 const MODERATION_SUGGESTION_RESOLVED_KEY =
   "ib.onboarding.moderationSuggestionResolved";
@@ -711,6 +713,7 @@ export default function DashboardV3Page() {
                       onOpenReminderScheduler={handleOpenReminderScheduler}
                       journeyReadyOpen={journeyReadyOpen}
                       onOpenModerationEdit={() => setIsModerationEditOpen(true)}
+                      onProfileRefresh={reload}
                     />
                   }
                 />
@@ -834,6 +837,7 @@ interface DashboardOverviewProps {
   onOpenReminderScheduler: () => void;
   journeyReadyOpen?: boolean;
   onOpenModerationEdit: () => void;
+  onProfileRefresh: () => void;
 }
 
 function DashboardOverview({
@@ -846,6 +850,7 @@ function DashboardOverview({
   onOpenReminderScheduler,
   journeyReadyOpen = false,
   onOpenModerationEdit,
+  onProfileRefresh,
 }: DashboardOverviewProps) {
   const handleScheduleClick = useCallback(() => {
     onOpenReminderScheduler();
@@ -857,10 +862,22 @@ function DashboardOverview({
   const [moderationState, setModerationState] = useState(
     moderationRequest.data,
   );
+  const modeUpgradeSuggestionRequest = useRequest(
+    () => getGameModeUpgradeSuggestion(),
+    [userId],
+    { enabled: Boolean(userId) },
+  );
+  const [modeUpgradeSuggestion, setModeUpgradeSuggestion] = useState(
+    modeUpgradeSuggestionRequest.data,
+  );
 
   useEffect(() => {
     setModerationState(moderationRequest.data);
   }, [moderationRequest.data]);
+
+  useEffect(() => {
+    setModeUpgradeSuggestion(modeUpgradeSuggestionRequest.data);
+  }, [modeUpgradeSuggestionRequest.data]);
 
   const handleCycleModeration = useCallback(
     async (type: ModerationTrackerType, status: ModerationStatus) => {
@@ -888,6 +905,12 @@ function DashboardOverview({
       />
       <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="order-1 space-y-4 lg:col-span-12">
+          <ModeUpgradeSuggestionCTA
+            suggestion={modeUpgradeSuggestion}
+            isLoading={modeUpgradeSuggestionRequest.status === "loading"}
+            onSuggestionChange={setModeUpgradeSuggestion}
+            onUpgradeAccepted={onProfileRefresh}
+          />
           <Alerts
             userId={userId}
             isJourneyGenerating={isJourneyGenerating}

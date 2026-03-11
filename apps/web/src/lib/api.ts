@@ -1951,6 +1951,59 @@ export async function markJourneyReadyModalSeen(generationKey: string): Promise<
   return (await response.json()) as { ok: boolean; seen_at: string };
 }
 
+export type GameModeUpgradeSuggestion = {
+  current_mode: string | null;
+  suggested_mode: string | null;
+  period_key: string | null;
+  eligible_for_upgrade: boolean;
+  tasks_total_evaluated: number;
+  tasks_meeting_goal: number;
+  task_pass_rate: number;
+  accepted_at: string | null;
+  dismissed_at: string | null;
+};
+
+type GameModeUpgradeSuggestionMutationResponse = {
+  ok: boolean;
+  suggestion: GameModeUpgradeSuggestion;
+};
+
+export async function getGameModeUpgradeSuggestion(): Promise<GameModeUpgradeSuggestion> {
+  return getAuthorizedJson<GameModeUpgradeSuggestion>('/game-mode/upgrade-suggestion');
+}
+
+export async function acceptGameModeUpgradeSuggestion(): Promise<GameModeUpgradeSuggestionMutationResponse> {
+  const response = await apiAuthorizedFetch('/game-mode/upgrade-suggestion/accept', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const body = await safeJson(response);
+    throw new ApiError(response.status, body, '/game-mode/upgrade-suggestion/accept');
+  }
+
+  return (await response.json()) as GameModeUpgradeSuggestionMutationResponse;
+}
+
+export async function dismissGameModeUpgradeSuggestion(): Promise<GameModeUpgradeSuggestionMutationResponse> {
+  const response = await apiAuthorizedFetch('/game-mode/upgrade-suggestion/dismiss', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const body = await safeJson(response);
+    throw new ApiError(response.status, body, '/game-mode/upgrade-suggestion/dismiss');
+  }
+
+  return (await response.json()) as GameModeUpgradeSuggestionMutationResponse;
+}
+
 export async function getUserJourney(userId: string): Promise<UserJourneySummary> {
   const response = await getAuthorizedJson<UserJourneySummary>(`/users/${encodeURIComponent(userId)}/journey`);
   logShape('user-journey', response);
