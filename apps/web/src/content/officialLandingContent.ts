@@ -24,7 +24,7 @@ export type LandingCopy = {
   };
   pillars: { title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { title: string; intro: string; items: Mode[] };
-  how: { title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
+  how: { kicker: string; title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
   testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
   pricing: {
     title: string;
@@ -47,7 +47,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Construye hábitos',
       titleHighlight: 'que crecen contigo.',
       subtitle:
-        'Un sistema realista para hábitos, emociones y crecimiento.',
+        'Un sistema de hábitos gamificado que se adapta a tu energía, refleja tus emociones y recompensa tu progreso.',
       note: 'En menos de 3 minutos obtienes un punto de partida personalizado según tu energía, tus prioridades y tu ritmo actual.',
       alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
     },
@@ -106,8 +106,9 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     how: {
+      kicker: 'THE INNERBLOOM JOURNEY',
       title: 'Start, Grow & Bloom',
-      intro: 'Un sistema guiado para transformar tu energía y tus emociones en crecimiento real.',
+      intro: 'Del primer paso a hábitos que perduran.',
       actionLabel: 'Acción',
       outcomeLabel: 'Resultado',
       steps: [
@@ -239,7 +240,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Build habits',
       titleHighlight: 'that grow with you.',
       subtitle:
-        'A realistic system for habits, emotions, and growth.',
+        'A gamified habit system that adapts to your energy, reflects your emotions, and rewards your progress.',
       note: 'In under 3 minutes, you get a personalized starting point built around your energy, priorities, and current rhythm.',
       alt: 'Kid looking at a violet energy sphere in the night sky — Gamification Journey'
     },
@@ -298,8 +299,9 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     how: {
+      kicker: 'THE INNERBLOOM JOURNEY',
       title: 'Start, Grow & Bloom',
-      intro: 'A guided system to turn your energy and emotions into real growth.',
+      intro: 'From first step to lasting habits.',
       actionLabel: 'Action',
       outcomeLabel: 'Outcome',
       steps: [
