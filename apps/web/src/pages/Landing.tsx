@@ -130,14 +130,14 @@ const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
 const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: string; steps: TimelineStep[] }> = {
   es: {
     title: 'Start, Grow & Bloom',
-    closingLine: 'Innerbloom convierte tu energía, tus emociones, tus hábitos y tu progreso en un sistema adaptativo de crecimiento.',
+    closingLine: 'Innerbloom convierte tu energía y tus emociones en un sistema adaptativo de crecimiento.',
     steps: [
       {
-        title: 'Empieza con un comienzo claro ✨',
+        title: 'Empieza con claridad ✨',
         badge: 'PERSONALIZED ONBOARDING',
         bullets: [
-          'Eliges tu game mode y respondes unas pocas preguntas sobre tu energía, tus prioridades y tu momento actual.',
-          'Innerbloom usa eso para construir un punto de partida personalizado que realmente puedas sostener desde el día uno.',
+          'Elige tu game mode y responde unas pocas preguntas sobre tu energía, tus prioridades y tu momento actual.',
+          'Innerbloom usa eso para darte un punto de partida que realmente puedas sostener.',
         ],
         chips: ['ONBOARDING · DAILY ENERGY'],
       },
@@ -145,26 +145,17 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         title: 'Empieza con tu primer plan equilibrado ⚖️',
         badge: 'BALANCED PLAN',
         bullets: [
-          'Recibes un plan realista organizado en Body, Mind y Soul, con micro-hábitos simples adaptados a tu ritmo actual.',
-          'El objetivo no es la intensidad. El objetivo es una constancia que puedas sostener.',
+          'Recibe un plan realista en Body, Mind y Soul, con micro-hábitos simples adaptados a tu ritmo.',
+          'El objetivo no es la intensidad. Es una constancia que puedas sostener.',
         ],
         chips: ['MICRO-HABITS · DAILY ROUTINE'],
       },
       {
-        title: 'Crece de una forma que encaja con la vida real 🧩',
-        badge: 'FLEXIBLE',
-        bullets: [
-          'Puedes editar, cambiar o eliminar tareas, y ajustar tu modo según cómo te sientes.',
-          'Innerbloom te da estructura sin encerrarte en un sistema rígido.',
-        ],
-        chips: ['FLEXIBLE HABITS · PERSONALIZATION'],
-      },
-      {
-        title: 'Crece con reflexión diaria y progreso visible 📅📈',
+        title: 'Crece con progreso diario 📅📈',
         badge: 'VISIBLE PROGRESS',
         bullets: [
-          'Completas micro-hábitos, registras tu estado emocional y generas impulso a través de pequeñas acciones diarias.',
-          'Ves tu progreso con el tiempo y entiendes mejor qué te ayuda a mantener la constancia.',
+          'Completa micro-hábitos, registra cómo te sientes y gana impulso día a día.',
+          'Descubre qué te ayuda a mantener la constancia.',
         ],
         chips: ['HABIT TRACKING · EMOTION TRACKING'],
       },
@@ -172,26 +163,17 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         title: 'Crece con un sistema que se adapta 🌱',
         badge: 'ADAPTIVE SYSTEM',
         bullets: [
-          'A medida que cambia tu constancia, Innerbloom puede recalibrar tus hábitos para que el desafío siga siendo realista y productivo.',
-          'Growth Calibration ayuda a que tu plan evolucione en lugar de volverse demasiado fácil o demasiado abrumador.',
+          'A medida que cambia tu constancia, Innerbloom ajusta el desafío para que tu plan siga siendo realista.',
+          'Growth Calibration y Next Mode te ayudan a avanzar en el momento adecuado.',
         ],
-        chips: ['GROWTH CALIBRATION · ADAPTIVE DIFFICULTY'],
-      },
-      {
-        title: 'Avanza en el momento adecuado ⬆️',
-        badge: 'NEXT STEP',
-        bullets: [
-          'Cuando tu ritmo actual se vuelve estable, Innerbloom puede sugerirte un modo superior que acompañe tu crecimiento.',
-          'En lugar de empujarte demasiado pronto, el sistema te ayuda a avanzar cuando realmente estás listo.',
-        ],
-        chips: ['NEXT MODE · PROGRESSIVE CHALLENGE'],
+        chips: ['GROWTH CALIBRATION · NEXT MODE'],
       },
       {
         title: 'Florece en hábitos que perduran 🌸',
         badge: 'LASTING HABITS',
         bullets: [
           'Cuando un hábito se vuelve estable con el tiempo, Innerbloom puede reconocerlo como parte de tu base.',
-          'Habit Bloomed marca el momento en que la constancia empieza a convertirse en algo duradero.',
+          'Habit Bloomed marca el momento en que la constancia se convierte en cambio duradero.',
         ],
         chips: ['HABIT BLOOMED · STABLE ROUTINE'],
       },
@@ -199,14 +181,14 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
   },
   en: {
     title: 'Start, Grow & Bloom',
-    closingLine: 'Innerbloom turns your energy, emotions, habits, and progress into one adaptive growth system.',
+    closingLine: 'Innerbloom turns your energy and emotions into an adaptive system for growth.',
     steps: [
       {
-        title: 'Start with a clear beginning ✨',
+        title: 'Start with clarity ✨',
         badge: 'PERSONALIZED ONBOARDING',
         bullets: [
-          'You choose your game mode and answer a few questions about your energy, priorities, and current moment.',
-          'Innerbloom uses that to build a personalized starting point you can actually sustain from day one.',
+          'Choose your game mode and answer a few quick questions about your energy, priorities, and current moment.',
+          'Innerbloom uses that to create a starting point you can actually sustain.',
         ],
         chips: ['ONBOARDING · DAILY ENERGY'],
       },
@@ -214,26 +196,17 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         title: 'Start with your first balanced plan ⚖️',
         badge: 'BALANCED PLAN',
         bullets: [
-          'You receive a realistic plan organized across Body, Mind, and Soul, with simple micro-habits matched to your current pace.',
-          'The goal is not intensity. The goal is consistency you can sustain.',
+          'Get a realistic plan across Body, Mind, and Soul, built around simple micro-habits that match your pace.',
+          'The goal is not intensity. It is consistency you can keep.',
         ],
         chips: ['MICRO-HABITS · DAILY ROUTINE'],
       },
       {
-        title: 'Grow in a way that fits real life 🧩',
-        badge: 'FLEXIBLE',
-        bullets: [
-          'You can edit, swap, or remove tasks, and adjust your mode based on how you feel.',
-          'Innerbloom gives you structure without locking you into a rigid system.',
-        ],
-        chips: ['FLEXIBLE HABITS · PERSONALIZATION'],
-      },
-      {
-        title: 'Grow through daily reflection and visible progress 📅📈',
+        title: 'Grow with daily progress 📅📈',
         badge: 'VISIBLE PROGRESS',
         bullets: [
-          'You complete micro-habits, track your emotional state, and build momentum through small daily actions.',
-          'You see your progress over time and get a clearer view of what helps you stay consistent.',
+          'Complete small habits, track how you feel, and build momentum day by day.',
+          'See what helps you stay consistent.',
         ],
         chips: ['HABIT TRACKING · EMOTION TRACKING'],
       },
@@ -241,26 +214,17 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         title: 'Grow with a system that adapts 🌱',
         badge: 'ADAPTIVE SYSTEM',
         bullets: [
-          'As your consistency changes, Innerbloom can recalibrate your habits so the challenge stays realistic and productive.',
-          'Growth Calibration helps your plan evolve instead of becoming too easy or too overwhelming.',
+          'As your consistency changes, Innerbloom adjusts the challenge to keep your plan realistic.',
+          'Growth Calibration and Next Mode help you move forward at the right time.',
         ],
-        chips: ['GROWTH CALIBRATION · ADAPTIVE DIFFICULTY'],
-      },
-      {
-        title: 'Grow forward at the right time ⬆️',
-        badge: 'NEXT STEP',
-        bullets: [
-          'When your current rhythm becomes stable, Innerbloom can suggest a higher mode that matches your growth.',
-          'Instead of pushing too early, the system helps you move forward when you are actually ready.',
-        ],
-        chips: ['NEXT MODE · PROGRESSIVE CHALLENGE'],
+        chips: ['GROWTH CALIBRATION · NEXT MODE'],
       },
       {
         title: 'Bloom into habits that last 🌸',
         badge: 'LASTING HABITS',
         bullets: [
           'When a habit becomes stable over time, Innerbloom can recognize it as part of your foundation.',
-          'Habit Bloomed marks the moment when consistency starts turning into something lasting.',
+          'Habit Bloomed marks the moment consistency becomes lasting change.',
         ],
         chips: ['HABIT BLOOMED · STABLE ROUTINE'],
       },
