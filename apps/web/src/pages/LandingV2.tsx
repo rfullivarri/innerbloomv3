@@ -73,7 +73,7 @@ const t = {
       { href: '#faq', label: 'FAQ' }
     ] satisfies NavItem[],
     hero: {
-      title: 'Turn experience into habits. Turn habits into your path.',
+      title: 'Build habits with a system that adapts to your energy',
       subtitle:
         'Your habits chart the path; your consistency shapes how far you go. A personal growth journey balanced across Body, Mind, and Soul.',
       cta: 'Start my Journey',
@@ -216,7 +216,7 @@ const t = {
       { href: '#faq', label: 'FAQ' }
     ] satisfies NavItem[],
     hero: {
-      title: 'Convierte la experiencia en hábitos. Convierte los hábitos en camino.',
+      title: 'Construye hábitos con un sistema que se adapta a tu energía',
       subtitle:
         'Tus hábitos marcan la ruta; tu constancia define hasta dónde llegas. Un viaje de crecimiento personal en equilibrio entre 🫀 Cuerpo, 🧠 Mente y 🏵️ Alma.',
       cta: 'Comenzar mi Journey',
