@@ -154,7 +154,7 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         title: 'Crece con progreso diario 📅📈',
         badge: 'VISIBLE PROGRESS',
         bullets: [
-          'Completa micro-hábitos, registra cómo te sientes y gana impulso día a día.',
+          'Completa micro-hábitos, registra cómo te sientes y convierte tu emoción diaria en progreso visible.',
           'Descubre qué te ayuda a mantener la constancia.',
         ],
         chips: ['HABIT TRACKING · EMOTION TRACKING'],
@@ -205,7 +205,7 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         title: 'Grow with daily progress 📅📈',
         badge: 'VISIBLE PROGRESS',
         bullets: [
-          'Complete small habits, track how you feel, and build momentum day by day.',
+          'Complete small habits, log how you feel, and turn daily emotion into visible progress.',
           'See what helps you stay consistent.',
         ],
         chips: ['HABIT TRACKING · EMOTION TRACKING'],
