@@ -5,7 +5,7 @@ import { clearTaskgenEvents, recordTaskgenEvent } from '../../services/taskgenTr
 
 type QueryRow = { is_admin: boolean | null };
 
-const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail, mockRunSubscriptionJob } = vi.hoisted(() => ({
+const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail, mockRunSubscriptionJob, mockRunModeUpgradeAggregation } = vi.hoisted(() => ({
   mockQuery: vi.fn<(sql: string, params?: unknown[]) => Promise<{ rows: QueryRow[] }>>(),
   authMiddlewareMock: (req: Request, _res: Response, next: NextFunction) => {
     (req as Request & {
@@ -26,6 +26,14 @@ const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail, mockRunSubscr
   mockTrigger: vi.fn(() => 'corr-force'),
   mockSendEmail: vi.fn(() => Promise.resolve()),
   mockRunSubscriptionJob: vi.fn(async () => ({ attempted: 2, sent: 2, skipped: 0, deduplicated: 0, errors: [] })),
+  mockRunModeUpgradeAggregation: vi.fn(async () => ({
+    periodKey: '2026-02',
+    periodStart: '2026-02-01',
+    nextPeriodStart: '2026-03-01',
+    scope: 'all_users',
+    processed: 3,
+    persisted: 3,
+  })),
 }));
 
 vi.mock('../../db.js', () => ({
@@ -51,6 +59,10 @@ vi.mock('../../services/subscriptionNotificationsJob.js', () => ({
   runSubscriptionNotificationsJob: (...args: unknown[]) => mockRunSubscriptionJob(...args),
 }));
 
+vi.mock('../../services/modeUpgradeMonthlyAggregationService.js', () => ({
+  runUserMonthlyModeUpgradeAggregation: (...args: unknown[]) => mockRunModeUpgradeAggregation(...args),
+}));
+
 import app from '../../app.js';
 
 describe('Admin routes', () => {
@@ -59,6 +71,7 @@ describe('Admin routes', () => {
     mockTrigger.mockClear();
     mockSendEmail.mockClear();
     mockRunSubscriptionJob.mockClear();
+    mockRunModeUpgradeAggregation.mockClear();
     mockTrigger.mockReturnValue('corr-force');
     clearTaskgenEvents();
     mockQuery.mockImplementation(async (sql: string) => {
@@ -635,5 +648,38 @@ describe('Admin routes', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.item.label).toBe('Email recordatorio diario (updated)');
+  });
+
+  it('runs mode upgrade monthly aggregation for a custom period', async () => {
+    mockRunModeUpgradeAggregation.mockResolvedValueOnce({
+      periodKey: '2026-01',
+      periodStart: '2026-01-01',
+      nextPeriodStart: '2026-02-01',
+      scope: 'single_user',
+      processed: 1,
+      persisted: 1,
+    });
+
+    const response = await request(app)
+      .post('/api/admin/mode-upgrade-aggregation/run')
+      .set('Authorization', 'Bearer token')
+      .send({ userId: '00000000-0000-4000-8000-000000000001', period_key: '2026-01' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      ok: true,
+      source: 'monthly_mode_upgrade_aggregation',
+      userId: '00000000-0000-4000-8000-000000000001',
+      period_key: '2026-01',
+      period_start: '2026-01-01',
+      next_period_start: '2026-02-01',
+      scope: 'single_user',
+      processed: 1,
+      persisted: 1,
+    });
+    expect(mockRunModeUpgradeAggregation).toHaveBeenCalledWith({
+      userId: '00000000-0000-4000-8000-000000000001',
+      periodKey: '2026-01',
+    });
   });
 });

@@ -19,6 +19,7 @@ import {
   subscriptionNotificationsTriggerBodySchema,
   adminSubscriptionUpdateBodySchema,
   taskDifficultyCalibrationRunBodySchema,
+  modeUpgradeAggregationRunBodySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -50,6 +51,7 @@ import {
 } from '../../services/taskgenTraceService.js';
 import { triggerTaskGenerationForUser } from '../../services/taskgenTriggerService.js';
 import { runAdminTaskDifficultyCalibration } from '../../services/taskDifficultyCalibrationService.js';
+import { runUserMonthlyModeUpgradeAggregation } from '../../services/modeUpgradeMonthlyAggregationService.js';
 
 const taskgenForceRunRequestSchema = z
   .object({
@@ -270,6 +272,27 @@ export const patchAdminFeedbackUserState = asyncHandler(async (req: Request, res
   res.json(result);
 });
 
+
+
+export const postAdminRunModeUpgradeAggregation = asyncHandler(async (req: Request, res: Response) => {
+  const body = modeUpgradeAggregationRunBodySchema.parse(req.body ?? {});
+  const result = await runUserMonthlyModeUpgradeAggregation({
+    userId: body.userId,
+    periodKey: body.period_key,
+  });
+
+  res.json({
+    ok: true,
+    source: 'monthly_mode_upgrade_aggregation',
+    userId: body.userId ?? null,
+    period_key: result.periodKey,
+    period_start: result.periodStart,
+    next_period_start: result.nextPeriodStart,
+    scope: result.scope,
+    processed: result.processed,
+    persisted: result.persisted,
+  });
+});
 
 export const postAdminRunTaskDifficultyCalibration = asyncHandler(async (req: Request, res: Response) => {
   const body = taskDifficultyCalibrationRunBodySchema.parse(req.body ?? {});
