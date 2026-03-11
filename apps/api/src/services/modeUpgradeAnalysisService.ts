@@ -244,7 +244,6 @@ export async function getRollingModeUpgradeAnalysis(userId: string, now: Date = 
 
   const tasks: ModeUpgradeAnalysisTask[] = [];
   let tasksWithNoModeBaseline = 0;
-  let tasksWithExpectedZero = 0;
 
   for (const task of tasksResult.rows) {
     const taskCreatedDate = parseDate(task.created_at);
@@ -269,8 +268,6 @@ export async function getRollingModeUpgradeAnalysis(userId: string, now: Date = 
     if (expectedCount <= 0) {
       if (segments.length === 0) {
         tasksWithNoModeBaseline += 1;
-      } else {
-        tasksWithExpectedZero += 1;
       }
       continue;
     }
