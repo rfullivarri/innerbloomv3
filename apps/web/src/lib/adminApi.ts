@@ -4,6 +4,7 @@ import type {
   AdminLogRow,
   AdminTaskRow,
   AdminTaskSummaryRow,
+  AdminModeUpgradeAnalysis,
   AdminUser,
   AdminUserSubscriptionResponse,
   SubscriptionStatus,
@@ -174,6 +175,44 @@ export async function updateAdminUserSubscription(
 
   return response.json() as Promise<{ ok: boolean }>;
 }
+
+export async function fetchAdminModeUpgradeAnalysis(userId: string) {
+  return apiAuthorizedGet<AdminModeUpgradeAnalysis>(`/admin/user/${encodeURIComponent(userId)}/mode-upgrade-analysis`);
+}
+
+export async function runAdminMonthlyReview(userId: string) {
+  const url = buildApiUrl(`/admin/user/${encodeURIComponent(userId)}/run-monthly-review`);
+  const response = await apiAuthorizedFetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response.json() as Promise<{
+    ok: boolean;
+    source: string;
+    userId: string;
+    period_key: string;
+    period_start: string;
+    next_period_start: string;
+    scope: 'single_user' | 'all_users';
+    processed: number;
+    persisted: number;
+  }>;
+}
+
 export async function verifyAdminAccess() {
   return apiAuthorizedGet<{ ok: boolean }>('/admin/me');
 }

@@ -42,6 +42,7 @@ import {
   updateFeedbackUserNotificationState,
   triggerSubscriptionNotificationsJob,
   getUserSubscriptionForAdmin,
+  getUserModeUpgradeAnalysis,
   updateUserSubscriptionFromAdmin,
 } from './admin.service.js';
 import {
@@ -285,6 +286,29 @@ export const postAdminRunModeUpgradeAggregation = asyncHandler(async (req: Reque
     ok: true,
     source: 'monthly_mode_upgrade_aggregation',
     userId: body.userId ?? null,
+    period_key: result.periodKey,
+    period_start: result.periodStart,
+    next_period_start: result.nextPeriodStart,
+    scope: result.scope,
+    processed: result.processed,
+    persisted: result.persisted,
+  });
+});
+
+export const getAdminUserModeUpgradeAnalysis = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const result = await getUserModeUpgradeAnalysis(userId);
+  res.json(result);
+});
+
+export const postAdminRunMonthlyReview = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const result = await runUserMonthlyModeUpgradeAggregation({ userId });
+
+  res.json({
+    ok: true,
+    source: 'admin_manual_monthly_review',
+    userId,
     period_key: result.periodKey,
     period_start: result.periodStart,
     next_period_start: result.nextPeriodStart,

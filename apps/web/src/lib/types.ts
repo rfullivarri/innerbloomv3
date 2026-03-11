@@ -196,3 +196,23 @@ export type AdminUserSubscriptionResponse = {
   subscription: AdminUserSubscription | null;
   availablePlans: AdminSubscriptionPlan[];
 };
+
+export type AdminModeUpgradeTask = {
+  task_id: string;
+  task_name: string;
+  completion_rate: number;
+  meets_goal: boolean;
+};
+
+export type AdminModeUpgradeAnalysis = {
+  current_mode: string | null;
+  next_mode: string | null;
+  evaluation_period_days: number;
+  tasks_evaluated: number;
+  tasks_meeting_goal: number;
+  task_pass_rate: number;
+  threshold: number;
+  missing_tasks: number;
+  eligible: boolean;
+  tasks: AdminModeUpgradeTask[];
+};
