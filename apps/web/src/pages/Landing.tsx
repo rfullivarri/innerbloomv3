@@ -763,7 +763,11 @@ export default function LandingPage() {
 
         <section className="how section-pad reveal-on-scroll" id="how">
           <div className="container narrow">
-            <AdaptiveText as="h2">{PREMIUM_TIMELINE_COPY[language].title}</AdaptiveText>
+            <div className="how-heading">
+              <p className="how-kicker">{copy.how.kicker}</p>
+              <AdaptiveText as="h2">{copy.how.title}</AdaptiveText>
+              <AdaptiveText as="p" className="section-sub how-intro">{copy.how.intro}</AdaptiveText>
+            </div>
             <PremiumTimeline
               steps={PREMIUM_TIMELINE_COPY[language].steps}
               closingLine={PREMIUM_TIMELINE_COPY[language].closingLine}
