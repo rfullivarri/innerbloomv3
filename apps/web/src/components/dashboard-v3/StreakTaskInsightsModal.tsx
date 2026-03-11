@@ -91,9 +91,9 @@ function RecalibrationTrendIndicator({
   const action = normalizeRecalibrationAction(latest?.action);
 
   const config: Record<Exclude<RecalibrationAction, 'none'>, { icon: string; tone: string }> = {
-    down: { icon: '↗', tone: 'text-emerald-300 border-emerald-300/40 bg-emerald-300/10' },
-    keep: { icon: '→', tone: 'text-amber-950 border-amber-500/70 bg-amber-400' },
-    up: { icon: '↘', tone: 'text-rose-300 border-rose-300/40 bg-rose-300/10' },
+    down: { icon: '↗', tone: 'text-emerald-900 border-emerald-400/50 bg-emerald-300/10' },
+    keep: { icon: '→', tone: 'text-amber-900 border-amber-400/50 bg-amber-300' },
+    up: { icon: '↘', tone: 'text-rose-900 border-rose-400/50 bg-rose-300/10' },
   };
 
   const fallback = !latest || action === 'none' || !eligible;
@@ -223,7 +223,7 @@ function WeeklyCompletionDonut({
   const healthStyles: Record<HabitHealthLevel, string> = {
     strong: 'bg-emerald-300 text-emerald-950',
     medium: 'bg-amber-300 text-amber-950',
-    weak: 'bg-rose-400 text-rose-950',
+    weak: 'bg-rose-300 text-rose-950',
   };
 
   if (!timeline.length) {
