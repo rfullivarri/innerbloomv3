@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   AdminInsights,
   AdminLogRow,
+  AdminModeUpgradeAnalysis,
   AdminTaskSummaryRow,
   AdminUser,
   AdminUserSubscriptionResponse,
@@ -13,6 +14,8 @@ import {
   fetchAdminLogs,
   fetchAdminTaskStats,
   fetchAdminUserSubscription,
+  fetchAdminModeUpgradeAnalysis,
+  runAdminMonthlyReview,
   sendAdminDailyReminder,
   sendAdminTasksReadyEmail,
   updateAdminUserSubscription,
@@ -75,6 +78,12 @@ export function AdminLayout() {
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   const [updatingSubscription, setUpdatingSubscription] = useState(false);
   const [subscriptionActionMessage, setSubscriptionActionMessage] = useState<string | null>(null);
+  const [modeUpgradeAnalysis, setModeUpgradeAnalysis] = useState<AdminModeUpgradeAnalysis | null>(null);
+  const [loadingModeUpgradeAnalysis, setLoadingModeUpgradeAnalysis] = useState(false);
+  const [modeUpgradeAnalysisError, setModeUpgradeAnalysisError] = useState<string | null>(null);
+  const [runningMonthlyReview, setRunningMonthlyReview] = useState(false);
+  const [monthlyReviewMessage, setMonthlyReviewMessage] = useState<string | null>(null);
+  const [monthlyReviewError, setMonthlyReviewError] = useState<string | null>(null);
   const [calibrationWindowDays, setCalibrationWindowDays] = useState(90);
   const [calibrationMode] = useState<'baseline'>('baseline');
   const [calibrationRunAllUsers, setCalibrationRunAllUsers] = useState(false);
@@ -217,6 +226,10 @@ export function AdminLayout() {
     setSubscriptionData(null);
     setSubscriptionError(null);
     setSubscriptionActionMessage(null);
+    setModeUpgradeAnalysis(null);
+    setModeUpgradeAnalysisError(null);
+    setMonthlyReviewMessage(null);
+    setMonthlyReviewError(null);
     setCalibrationResult(null);
     setCalibrationError(null);
     setCalibrationRunAllUsers(false);
@@ -248,6 +261,40 @@ export function AdminLayout() {
       .finally(() => {
         if (!cancelled) {
           setLoadingSubscription(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedUser]);
+
+  useEffect(() => {
+    if (!selectedUser) {
+      setModeUpgradeAnalysis(null);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingModeUpgradeAnalysis(true);
+    setModeUpgradeAnalysisError(null);
+
+    fetchAdminModeUpgradeAnalysis(selectedUser.id)
+      .then((data) => {
+        if (!cancelled) {
+          setModeUpgradeAnalysis(data);
+        }
+      })
+      .catch((error: unknown) => {
+        console.error('[admin] failed to fetch mode upgrade analysis', error);
+        if (!cancelled) {
+          setModeUpgradeAnalysis(null);
+          setModeUpgradeAnalysisError('No se pudo cargar el análisis de mode upgrade.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingModeUpgradeAnalysis(false);
         }
       });
 
@@ -329,6 +376,38 @@ export function AdminLayout() {
     }
   }, [selectedUser]);
 
+
+  const handleRunMonthlyReview = useCallback(async () => {
+    if (!selectedUser) {
+      return;
+    }
+
+    setRunningMonthlyReview(true);
+    setMonthlyReviewError(null);
+    setMonthlyReviewMessage(null);
+
+    try {
+      const response = await runAdminMonthlyReview(selectedUser.id);
+      setMonthlyReviewMessage(`Monthly analysis ejecutado (${response.period_key}).`);
+      const refreshed = await fetchAdminModeUpgradeAnalysis(selectedUser.id);
+      setModeUpgradeAnalysis(refreshed);
+    } catch (error) {
+      console.error('[admin] failed to run monthly review', error);
+      if (error instanceof ApiError) {
+        const detail =
+          typeof error.body?.message === 'string'
+            ? error.body.message
+            : typeof error.body?.error === 'string'
+              ? error.body.error
+              : null;
+        setMonthlyReviewError(detail ? `No se pudo ejecutar monthly review: ${detail}` : `No se pudo ejecutar monthly review (HTTP ${error.status}).`);
+      } else {
+        setMonthlyReviewError('No se pudo ejecutar monthly review.');
+      }
+    } finally {
+      setRunningMonthlyReview(false);
+    }
+  }, [selectedUser]);
 
   const handleRunTaskDifficultyCalibration = useCallback(async () => {
     if (!selectedUser && !calibrationRunAllUsers) {
@@ -646,6 +725,68 @@ export function AdminLayout() {
               >
                 {runningCalibration ? 'Running…' : 'Run Difficulty Calibration'}
               </button>
+            </div>
+
+            <div className="flex flex-col gap-4 rounded-xl border border-cyan-700/40 bg-cyan-900/10 p-4 text-sm text-cyan-100">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">MODE UPGRADE ANALYSIS</p>
+                  <p className="text-sm text-cyan-100/90">Inspección read-only del review mensual y elegibilidad de upgrade.</p>
+                  {monthlyReviewMessage ? <p className="text-xs font-semibold text-emerald-300">{monthlyReviewMessage}</p> : null}
+                  {monthlyReviewError ? <p className="text-xs font-semibold text-rose-300">{monthlyReviewError}</p> : null}
+                  {modeUpgradeAnalysisError ? <p className="text-xs font-semibold text-rose-300">{modeUpgradeAnalysisError}</p> : null}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRunMonthlyReview}
+                  disabled={runningMonthlyReview || !selectedUser}
+                  className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                    runningMonthlyReview
+                      ? 'cursor-not-allowed border border-slate-700/60 bg-slate-800 text-slate-400'
+                      : 'border border-cyan-700/60 bg-cyan-900/30 text-cyan-100 hover:border-cyan-400/60 hover:text-cyan-50'
+                  }`}
+                >
+                  {runningMonthlyReview ? 'Running…' : 'Run Monthly Analysis'}
+                </button>
+              </div>
+
+              {loadingModeUpgradeAnalysis ? <p className="text-xs text-cyan-200">Cargando análisis…</p> : null}
+
+              {modeUpgradeAnalysis ? (
+                <>
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Current Mode</p><p className="font-semibold">{modeUpgradeAnalysis.current_mode ?? '—'}</p></div>
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Next Mode</p><p className="font-semibold">{modeUpgradeAnalysis.next_mode ?? '—'}</p></div>
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Tasks evaluated</p><p className="font-semibold">{modeUpgradeAnalysis.tasks_evaluated}</p></div>
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Tasks meeting goal</p><p className="font-semibold">{modeUpgradeAnalysis.tasks_meeting_goal} / {modeUpgradeAnalysis.tasks_evaluated}</p></div>
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Pass rate</p><p className="font-semibold">{modeUpgradeAnalysis.task_pass_rate}%</p></div>
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Upgrade threshold</p><p className="font-semibold">{modeUpgradeAnalysis.threshold}%</p></div>
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Missing tasks</p><p className="font-semibold">{modeUpgradeAnalysis.missing_tasks}</p></div>
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Eligible</p><p className="font-semibold">{modeUpgradeAnalysis.eligible ? 'YES' : 'NO'}</p></div>
+                  </div>
+
+                  <div className="overflow-hidden rounded-lg border border-cyan-700/40">
+                    <table className="min-w-full divide-y divide-cyan-700/40 text-left text-xs">
+                      <thead className="bg-slate-900/80 text-cyan-200">
+                        <tr>
+                          <th className="px-3 py-2 font-semibold uppercase tracking-[0.14em]">Task</th>
+                          <th className="px-3 py-2 font-semibold uppercase tracking-[0.14em]">Completion %</th>
+                          <th className="px-3 py-2 font-semibold uppercase tracking-[0.14em]">Meets Goal</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-cyan-700/30 bg-slate-950/40 text-cyan-50">
+                        {modeUpgradeAnalysis.tasks.map((task) => (
+                          <tr key={task.task_id}>
+                            <td className="px-3 py-2">{task.task_name}</td>
+                            <td className="px-3 py-2">{task.completion_rate}%</td>
+                            <td className="px-3 py-2">{task.meets_goal ? '✅' : '❌'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              ) : null}
             </div>
           </div>
         ) : null}

@@ -6,6 +6,7 @@ import {
   getAdminUserInsights,
   getAdminUserLogs,
   getAdminUserTaskStats,
+  getAdminUserModeUpgradeAnalysis,
   getAdminUserTasks,
   getAdminUsers,
   getTaskgenJobLogsHandler,
@@ -29,6 +30,7 @@ import {
   patchAdminFeedbackUserState,
   postAdminRunTaskDifficultyCalibration,
   postAdminRunModeUpgradeAggregation,
+  postAdminRunMonthlyReview,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
 
@@ -44,6 +46,7 @@ adminRouter.get('/users/:userId/insights', getAdminUserInsights);
 adminRouter.get('/users/:userId/logs', getAdminUserLogs);
 adminRouter.get('/users/:userId/tasks', getAdminUserTasks);
 adminRouter.get('/users/:userId/task-stats', getAdminUserTaskStats);
+adminRouter.get('/user/:userId/mode-upgrade-analysis', getAdminUserModeUpgradeAnalysis);
 adminRouter.get('/users/:userId/taskgen/latest', getTaskgenUserOverviewHandler);
 adminRouter.patch('/users/:userId/tasks/:taskId', patchAdminUserTask);
 adminRouter.get('/users/:userId/logs.csv', exportAdminUserLogsCsv);
@@ -58,6 +61,7 @@ adminRouter.get('/taskgen/trace/global', getTaskgenTraceGlobal);
 adminRouter.post('/taskgen/force-run', postTaskgenForceRun);
 adminRouter.post('/task-difficulty-calibration/run', postAdminRunTaskDifficultyCalibration);
 adminRouter.post('/mode-upgrade-aggregation/run', postAdminRunModeUpgradeAggregation);
+adminRouter.post('/user/:userId/run-monthly-review', postAdminRunMonthlyReview);
 adminRouter.get('/feedback/definitions', getAdminFeedbackDefinitions);
 adminRouter.patch('/feedback/definitions/:id', patchAdminFeedbackDefinition);
 adminRouter.get('/feedback/users/:userId/state', getAdminFeedbackUserState);

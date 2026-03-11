@@ -9,6 +9,7 @@ import { buildReminderEmail, loadReminderTemplate, resolveRecipient } from '../.
 import { getEmailProvider } from '../../services/email/index.js';
 import { sendTasksReadyEmailPreview } from '../../services/tasksReadyEmailService.js';
 import { runSubscriptionNotificationsJob } from '../../services/subscriptionNotificationsJob.js';
+import { getGameModeUpgradeSuggestion, resolveNextGameModeCode } from '../../services/gameModeUpgradeSuggestionService.js';
 import {
   listFeedbackDefinitionRows,
   updateFeedbackDefinitionRow,
@@ -277,6 +278,34 @@ type FeedbackUserHistory = {
 type EmotionRow = {
   date: string | Date;
   emotion: string | null;
+};
+
+type ModeUpgradeTaskRow = {
+  task_id: string;
+  task_name: string;
+  completion_rate: number | string;
+};
+
+type MonthlyWrappedSummaryRow = {
+  missing_tasks_to_upgrade: number | string | null;
+};
+
+export type AdminModeUpgradeAnalysis = {
+  current_mode: string | null;
+  next_mode: string | null;
+  evaluation_period_days: number;
+  tasks_evaluated: number;
+  tasks_meeting_goal: number;
+  task_pass_rate: number;
+  threshold: number;
+  missing_tasks: number;
+  eligible: boolean;
+  tasks: {
+    task_id: string;
+    task_name: string;
+    completion_rate: number;
+    meets_goal: boolean;
+  }[];
 };
 
 type TaskgenJobRow = {
@@ -1392,6 +1421,79 @@ export async function getUserTaskStats(userId: string, query: TaskStatsQuery): P
   });
 }
 
+export async function getUserModeUpgradeAnalysis(userId: string): Promise<AdminModeUpgradeAnalysis> {
+  const suggestion = await getGameModeUpgradeSuggestion(userId);
+  const threshold = 80;
+
+  let missingTasks = 0;
+  if (suggestion.period_key) {
+    const summaryResult = await pool.query<MonthlyWrappedSummaryRow>(
+      `SELECT (summary->>'missing_tasks_to_upgrade')::int AS missing_tasks_to_upgrade
+         FROM monthly_wrapped
+        WHERE user_id = $1::uuid
+          AND period_key = $2
+        LIMIT 1`,
+      [userId, suggestion.period_key],
+    );
+    missingTasks = Math.max(0, toNumber(summaryResult.rows[0]?.missing_tasks_to_upgrade ?? 0));
+  }
+
+  const periodStart = suggestion.period_key ? `${suggestion.period_key}-01` : null;
+  const nextPeriodStart =
+    suggestion.period_key && /^\d{4}-\d{2}$/.test(suggestion.period_key)
+      ? (() => {
+          const [yearText, monthText] = suggestion.period_key.split('-');
+          const base = new Date(Date.UTC(Number(yearText), Number(monthText) - 1, 1));
+          const next = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth() + 1, 1));
+          return next.toISOString().slice(0, 10);
+        })()
+      : null;
+
+  const tasksResult = suggestion.period_key && periodStart && nextPeriodStart
+    ? await pool.query<ModeUpgradeTaskRow>(
+        `SELECT r.task_id,
+                COALESCE(t.task, 'Unnamed task') AS task_name,
+                r.completion_rate
+           FROM task_difficulty_recalibrations r
+      LEFT JOIN tasks t ON t.task_id = r.task_id
+          WHERE r.user_id = $1::uuid
+            AND r.source = 'cron'
+            AND r.game_mode_id = (
+              SELECT game_mode_id FROM users WHERE user_id = $1::uuid LIMIT 1
+            )
+            AND r.period_end >= $2::date
+            AND r.period_end < $3::date
+          ORDER BY t.task ASC, r.task_id ASC`,
+        [userId, periodStart, nextPeriodStart],
+      )
+    : { rows: [] };
+
+  const tasks = tasksResult.rows.map((row) => {
+    const completionRate = toNumber(row.completion_rate) * 100;
+    return {
+      task_id: row.task_id,
+      task_name: row.task_name,
+      completion_rate: Math.round(completionRate),
+      meets_goal: completionRate >= threshold,
+    };
+  });
+
+  const nextMode = suggestion.suggested_mode ?? resolveNextGameModeCode(suggestion.current_mode);
+
+  return {
+    current_mode: suggestion.current_mode,
+    next_mode: nextMode,
+    evaluation_period_days: 30,
+    tasks_evaluated: suggestion.tasks_total_evaluated,
+    tasks_meeting_goal: suggestion.tasks_meeting_goal,
+    task_pass_rate: Math.round(suggestion.task_pass_rate * 100),
+    threshold,
+    missing_tasks: missingTasks,
+    eligible: suggestion.eligible_for_upgrade,
+    tasks,
+  };
+}
+
 export async function getUserTasks(
   userId: string,
   query: TasksQuery,
@@ -2226,4 +2328,3 @@ export async function updateFeedbackUserNotificationState(
 
   return { ok: true };
 }
-

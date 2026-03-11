@@ -244,6 +244,19 @@ describe('Admin routes', () => {
         } as never;
       }
 
+      if (sql.includes('SELECT u.user_id,') && sql.includes('gm.code AS current_mode') && sql.includes('WHERE u.user_id = $1::uuid')) {
+        return {
+          rows: [
+            {
+              user_id: '00000000-0000-4000-8000-000000000001',
+              game_mode_id: 3,
+              current_mode: 'FLOW',
+            },
+          ],
+        } as never;
+      }
+
+
       if (sql.includes('FROM users u') && sql.includes('LEFT JOIN cat_game_mode gm')) {
         return {
           rows: [
@@ -411,6 +424,41 @@ describe('Admin routes', () => {
 
       if (sql.includes('COUNT(*) AS count') && sql.includes('FROM daily_log')) {
         return { rows: [{ count: '1' }] };
+      }
+
+      if (sql.includes('FROM user_monthly_mode_upgrade_stats') && sql.includes('ORDER BY period_key DESC')) {
+        return {
+          rows: [
+            {
+              period_key: '2026-02',
+              tasks_total_evaluated: 18,
+              tasks_meeting_goal: 13,
+              task_pass_rate: 0.72,
+              eligible_for_upgrade: false,
+            },
+          ],
+        } as never;
+      }
+
+      if (sql.includes('INSERT INTO user_game_mode_upgrade_suggestions')) {
+        return { rows: [{ accepted_at: null, dismissed_at: null }] } as never;
+      }
+
+      if (sql.includes('SELECT game_mode_id, code') && sql.includes('FROM cat_game_mode')) {
+        return { rows: [{ game_mode_id: 4, code: 'EVOLVE' }] } as never;
+      }
+
+      if (sql.includes('SELECT r.task_id') && sql.includes('FROM task_difficulty_recalibrations r')) {
+        return {
+          rows: [
+            { task_id: 'task-1', task_name: 'Dormir 8h', completion_rate: 0.92 },
+            { task_id: 'task-2', task_name: 'Minoxidil', completion_rate: 0.45 },
+          ],
+        } as never;
+      }
+
+      if (sql.includes("SELECT (summary->>'missing_tasks_to_upgrade')::int AS missing_tasks_to_upgrade")) {
+        return { rows: [{ missing_tasks_to_upgrade: 2 }] } as never;
       }
 
       if (sql.includes('FROM daily_log dl') && sql.includes('week_key')) {
@@ -648,6 +696,52 @@ describe('Admin routes', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.item.label).toBe('Email recordatorio diario (updated)');
+  });
+
+
+  it('returns mode upgrade analysis for an admin user', async () => {
+    const response = await request(app)
+      .get('/api/admin/user/00000000-0000-4000-8000-000000000001/mode-upgrade-analysis')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      current_mode: 'FLOW',
+      next_mode: 'EVOLVE',
+      tasks_evaluated: 18,
+      tasks_meeting_goal: 13,
+      task_pass_rate: 72,
+      threshold: 80,
+      missing_tasks: 2,
+      eligible: false,
+    });
+    expect(response.body.tasks).toHaveLength(2);
+  });
+
+  it('runs monthly review for a user from admin endpoint', async () => {
+    mockRunModeUpgradeAggregation.mockResolvedValueOnce({
+      periodKey: '2026-02',
+      periodStart: '2026-02-01',
+      nextPeriodStart: '2026-03-01',
+      scope: 'single_user',
+      processed: 1,
+      persisted: 1,
+    });
+
+    const response = await request(app)
+      .post('/api/admin/user/00000000-0000-4000-8000-000000000001/run-monthly-review')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      ok: true,
+      source: 'admin_manual_monthly_review',
+      userId: '00000000-0000-4000-8000-000000000001',
+      period_key: '2026-02',
+      scope: 'single_user',
+      processed: 1,
+      persisted: 1,
+    });
   });
 
   it('runs mode upgrade monthly aggregation for a custom period', async () => {
