@@ -286,7 +286,7 @@ export type AdminModeUpgradeAnalysis = {
   analysis_start: string;
   analysis_end: string;
   analysis_basis: 'rolling_30_days';
-  debug_reason: string | null;
+  reason_if_empty: 'no_active_tasks' | 'no_mode_baseline' | 'all_expected_zero' | null;
   eligible_for_upgrade: boolean;
   current_mode: string | null;
   next_mode: string | null;

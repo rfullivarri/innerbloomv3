@@ -97,10 +97,100 @@ describe('modeUpgradeAnalysisService', () => {
     const result = await getRollingModeUpgradeAnalysis('u1', new Date('2025-01-31T12:00:00.000Z'));
 
     expect(result.has_analysis).toBe(false);
-    expect(result.debug_reason).toBe('no_evaluable_tasks');
+    expect(result.reason_if_empty).toBe('no_active_tasks');
     expect(result.tasks_total_evaluated).toBe(0);
     expect(result.missing_tasks).toBeNull();
     expect(result.cta_enabled).toBe(false);
     expect(result.next_mode).toBeNull();
+  });
+
+  it('returns no_mode_baseline when tasks exist but there is no user mode/history baseline', async () => {
+    queueExpectations([
+      {
+        match: (sql) => sql.includes('FROM users u') && sql.includes('current_weekly_target'),
+        handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: null, current_mode: null, current_weekly_target: null }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM tasks t') && sql.includes('t.active = TRUE'),
+        handle: () => ({ rows: [{ task_id: 'task-1', task_name: 'Task 1', created_at: '2024-12-01T00:00:00.000Z' }] }),
+      },
+      {
+        match: (sql) => sql.includes('GROUP BY dl.task_id'),
+        handle: () => ({ rows: [] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM user_game_mode_history h') && sql.includes('gm.weekly_target'),
+        handle: () => ({ rows: [] }),
+      },
+    ]);
+
+    const result = await getRollingModeUpgradeAnalysis('u1', new Date('2025-01-31T12:00:00.000Z'));
+
+    expect(result.has_analysis).toBe(false);
+    expect(result.reason_if_empty).toBe('no_mode_baseline');
+    expect(result.tasks).toEqual([]);
+    expect(result.missing_tasks).toBeNull();
+    expect(result.cta_enabled).toBe(false);
+  });
+
+  it('returns all_expected_zero when baseline exists but weekly target resolves to zero', async () => {
+    queueExpectations([
+      {
+        match: (sql) => sql.includes('FROM users u') && sql.includes('current_weekly_target'),
+        handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 1, current_mode: 'LOW', current_weekly_target: 0 }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM tasks t') && sql.includes('t.active = TRUE'),
+        handle: () => ({ rows: [{ task_id: 'task-1', task_name: 'Task 1', created_at: '2024-12-01T00:00:00.000Z' }] }),
+      },
+      {
+        match: (sql) => sql.includes('GROUP BY dl.task_id'),
+        handle: () => ({ rows: [{ task_id: 'task-1', actual_count: 3 }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM user_game_mode_history h') && sql.includes('gm.weekly_target'),
+        handle: () => ({ rows: [] }),
+      },
+    ]);
+
+    const result = await getRollingModeUpgradeAnalysis('u1', new Date('2025-01-31T12:00:00.000Z'));
+
+    expect(result.has_analysis).toBe(false);
+    expect(result.reason_if_empty).toBe('all_expected_zero');
+    expect(result.tasks_total_evaluated).toBe(0);
+    expect(result.missing_tasks).toBeNull();
+  });
+
+  it('keeps tasks[] consistent with aggregate and includes zero-completion tasks', async () => {
+    queueExpectations([
+      {
+        match: (sql) => sql.includes('FROM users u') && sql.includes('current_weekly_target'),
+        handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 2, current_mode: 'CHILL', current_weekly_target: 4 }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM tasks t') && sql.includes('t.active = TRUE'),
+        handle: () => ({
+          rows: [
+            { task_id: 'task-1', task_name: 'Task 1', created_at: '2024-12-01T00:00:00.000Z' },
+            { task_id: 'task-2', task_name: 'Task 2', created_at: '2024-12-01T00:00:00.000Z' },
+          ],
+        }),
+      },
+      {
+        match: (sql) => sql.includes('GROUP BY dl.task_id'),
+        handle: () => ({ rows: [{ task_id: 'task-1', actual_count: 18 }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM user_game_mode_history h') && sql.includes('gm.weekly_target'),
+        handle: () => ({ rows: [{ game_mode_id: 2, effective_at: '2024-12-15T00:00:00.000Z', mode_code: 'CHILL', weekly_target: 4 }] }),
+      },
+    ]);
+
+    const result = await getRollingModeUpgradeAnalysis('u1', new Date('2025-01-31T12:00:00.000Z'));
+
+    expect(result.tasks).toHaveLength(2);
+    expect(result.tasks.find((task) => task.task_id === 'task-2')?.actual_count).toBe(0);
+    expect(result.tasks_total_evaluated).toBe(result.tasks.length);
+    expect(result.tasks_meeting_goal).toBe(result.tasks.filter((task) => task.meets_goal).length);
   });
 });
