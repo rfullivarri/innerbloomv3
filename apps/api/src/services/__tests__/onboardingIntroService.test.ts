@@ -116,7 +116,7 @@ function createSubmitExpectations(options: {
   expectedXp?: ExpectedXp;
 }) {
   const userId = 'user-1';
-  const gameModeId = 'mode-1';
+  const gameModeId = 1;
   const sessionId = 'session-1';
   const pillars = {
     BODY: 'pillar-body',
@@ -212,10 +212,10 @@ function createSubmitExpectations(options: {
       },
     },
     {
-      match: (sql) => sql.includes('SELECT game_mode_id, code FROM cat_game_mode'),
+      match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
       handle: (_sql, params) => {
         expect(params).toEqual([payload.mode]);
-        return { rows: [{ game_mode_id: gameModeId, code: payload.mode.toLowerCase() }] };
+        return { rows: [{ game_mode_id: gameModeId, code: payload.mode }] };
       },
     },
     {
@@ -237,7 +237,7 @@ function createSubmitExpectations(options: {
         expect(params).toEqual([
           userId,
           payload.client_id,
-          gameModeId,
+          String(gameModeId),
           expectedXp.total,
           expectedXp.body,
           expectedXp.mind,
@@ -258,12 +258,13 @@ function createSubmitExpectations(options: {
     ...foundationExpectations,
     ...xpBonusExpectations,
     {
-      match: (sql) =>
-        sql ===
-        'UPDATE users SET game_mode_id = $2, image_url = $3, avatar_url = $3 WHERE user_id = $1',
+      match: (sql) => {
+        const normalized = sql.toLowerCase();
+        return normalized.includes('set game_mode_id = $2') && normalized.includes('avatar_url = $3');
+      },
       handle: (_sql, params) => {
-        expect(params).toEqual([userId, gameModeId, expectedImageUrl]);
-        return { rowCount: 1 };
+        expect(params).toEqual([userId, gameModeId, expectedImageUrl, null]);
+        return { rows: [{ user_id: userId, game_mode_id: gameModeId, image_url: expectedImageUrl, avatar_url: expectedImageUrl }] };
       },
     },
     {

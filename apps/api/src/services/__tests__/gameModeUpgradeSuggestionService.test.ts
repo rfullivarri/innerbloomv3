@@ -195,7 +195,10 @@ describe('gameModeUpgradeSuggestionService', () => {
       },
       {
         match: (sql) => sql.includes('UPDATE users'),
-        handle: () => ({ rowCount: 1 }),
+        handle: (_sql, params) => {
+          expect(params).toEqual(['u1', 12, '/Chill-Mood.jpg', 11]);
+          return { rows: [{ user_id: 'u1', game_mode_id: 12, image_url: '/Chill-Mood.jpg', avatar_url: '/Chill-Mood.jpg' }] };
+        },
       },
       {
         match: (sql) => sql.includes('UPDATE user_game_mode_upgrade_suggestions'),

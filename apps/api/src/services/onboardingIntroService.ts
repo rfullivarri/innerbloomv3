@@ -4,35 +4,17 @@ import { HttpError } from '../lib/http-error.js';
 import type { OnboardingIntroPayload } from '../schemas/onboarding.js';
 import { triggerTaskGenerationForUser } from './taskgenTriggerService.js';
 import { upsertJourneyGenerationStateWithClient } from './journeyGenerationStateService.js';
-
-const ONBOARDING_MODE_IMAGE_PATHS: Record<OnboardingIntroPayload['mode'], string> = {
-  LOW: '/LowMood.jpg',
-  CHILL: '/Chill-Mood.jpg',
-  FLOW: '/FlowMood.jpg',
-  EVOLVE: '/Evolve-Mood.jpg',
-} as const;
+import {
+  changeUserGameMode,
+  resolveGameModeByCode,
+  resolveGameModeImageUrl,
+} from './userGameModeChangeService.js';
 
 export function resolveModeImageUrl(mode: OnboardingIntroPayload['mode']): string | null {
-  const path = ONBOARDING_MODE_IMAGE_PATHS[mode];
-
-  if (!path) {
-    return null;
-  }
-
-  const baseUrl = process.env.WEB_PUBLIC_BASE_URL;
-
-  if (!baseUrl) {
-    return path;
-  }
-
-  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-
-  return `${normalizedBaseUrl}${path}`;
+  return resolveGameModeImageUrl(mode);
 }
 
 const SELECT_USER_SQL = 'SELECT user_id FROM users WHERE clerk_user_id = $1 LIMIT 1';
-const SELECT_GAME_MODE_SQL =
-  'SELECT game_mode_id, code FROM cat_game_mode WHERE code = $1 LIMIT 1';
 const SELECT_PILLARS_SQL =
   "SELECT pillar_id, code FROM cat_pillar WHERE code = ANY($1::text[])";
 const UPSERT_SESSION_SQL = `
@@ -79,8 +61,6 @@ INSERT INTO onboarding_foundations
 SELECT $1,$2,$3,$4
 WHERE NOT EXISTS (SELECT 1 FROM upd);
 `;
-const UPDATE_USER_GAME_MODE_SQL =
-  'UPDATE users SET game_mode_id = $2, image_url = $3, avatar_url = $3 WHERE user_id = $1';
 const INSERT_XP_BONUS_SQL = `
 INSERT INTO xp_bonus
   (user_id, pillar_id, source, amount, meta)
@@ -150,7 +130,6 @@ const SELECT_SESSION_FOUNDATIONS_SQL = `
 const REQUIRED_PILLARS = ['BODY', 'MIND', 'SOUL'] as const;
 
 type UserRow = { user_id: string };
-type GameModeRow = { game_mode_id: string; code: string | null };
 type PillarRow = { pillar_id: string; code: string };
 type SessionRow = {
   onboarding_session_id: string;
@@ -221,15 +200,8 @@ export async function submitOnboardingIntro(
 
     try {
       const userId = await resolveUserId(client, clerkUserId);
-      const { id: gameModeId } = await resolveGameMode(
-        client,
-        payload.mode,
-      );
-      const imageUrl = resolveModeImageUrl(payload.mode);
-
-      if (!imageUrl) {
-        throw new HttpError(500, 'missing_mode_image', 'Missing mood image for onboarding mode');
-      }
+      const gameMode = await resolveGameMode(client, payload.mode);
+      const gameModeId = String(gameMode.id);
       const pillarMap = await resolvePillarMap(client);
       const normalizedXp = normalizeXp(payload.xp);
 
@@ -254,7 +226,11 @@ export async function submitOnboardingIntro(
       );
 
       // Update the user's mode imagery after all onboarding data has been persisted.
-      await client.query(UPDATE_USER_GAME_MODE_SQL, [userId, gameModeId, imageUrl]);
+      await changeUserGameMode(client, {
+        userId,
+        nextGameModeId: Number(gameMode.id),
+        nextModeCode: gameMode.code,
+      });
 
       await upsertFreeTrialSubscription(client, userId);
       await upsertJourneyGenerationStateWithClient(client, userId, 'pending');
@@ -327,16 +303,11 @@ async function resolveUserId(client: PoolClient, clerkUserId: string): Promise<s
   return row.user_id;
 }
 
-async function resolveGameMode(client: PoolClient, code: string): Promise<{ id: string }> {
-  const result = await client.query<GameModeRow>(SELECT_GAME_MODE_SQL, [code]);
-  const row = result.rows[0];
-
-  if (!row) {
-    throw new HttpError(409, 'invalid_game_mode', 'Invalid onboarding mode');
-  }
-
+async function resolveGameMode(client: PoolClient, code: string): Promise<{ id: string; code: string }> {
+  const row = await resolveGameModeByCode(client, code);
   return {
-    id: row.game_mode_id,
+    id: String(row.game_mode_id),
+    code: row.code,
   };
 }
 
