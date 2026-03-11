@@ -300,12 +300,12 @@ export type AdminModeUpgradeAnalysis = {
   threshold: number;
   missing_tasks: number;
   eligible: boolean;
-  tasks: Array<{
+  tasks: {
     task_id: string;
     task_name: string;
     completion_rate: number;
     meets_goal: boolean;
-  }>;
+  }[];
 };
 
 type TaskgenJobRow = {
