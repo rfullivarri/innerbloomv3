@@ -15,6 +15,7 @@ import internalRoutes from './internal.js';
 import feedbackRoutes from './feedback.js';
 import billingRoutes from '../modules/billing/billing.routes.js';
 import moderationRoutes from './moderation.js';
+import gameModeRoutes from './game-mode.js';
 
 const router = Router();
 
@@ -34,5 +35,6 @@ router.use(internalRoutes);
 router.use(feedbackRoutes);
 router.use(billingRoutes);
 router.use(moderationRoutes);
+router.use(gameModeRoutes);
 
 export default router;
