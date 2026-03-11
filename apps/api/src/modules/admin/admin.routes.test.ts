@@ -5,7 +5,7 @@ import { clearTaskgenEvents, recordTaskgenEvent } from '../../services/taskgenTr
 
 type QueryRow = { is_admin: boolean | null };
 
-const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail, mockRunSubscriptionJob, mockRunModeUpgradeAggregation } = vi.hoisted(() => ({
+const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail, mockRunSubscriptionJob, mockRunModeUpgradeAggregation, mockRunMonthlyCalibrationForUser } = vi.hoisted(() => ({
   mockQuery: vi.fn<(sql: string, params?: unknown[]) => Promise<{ rows: QueryRow[] }>>(),
   authMiddlewareMock: (req: Request, _res: Response, next: NextFunction) => {
     (req as Request & {
@@ -33,6 +33,14 @@ const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail, mockRunSubscr
     scope: 'all_users',
     processed: 3,
     persisted: 3,
+  })),
+  mockRunMonthlyCalibrationForUser: vi.fn(async () => ({
+    evaluated: 3,
+    adjusted: 1,
+    skipped: 0,
+    ignored: 0,
+    actionBreakdown: { up: 1, keep: 1, down: 1 },
+    errors: [],
   })),
 }));
 
@@ -63,6 +71,18 @@ vi.mock('../../services/modeUpgradeMonthlyAggregationService.js', () => ({
   runUserMonthlyModeUpgradeAggregation: (...args: unknown[]) => mockRunModeUpgradeAggregation(...args),
 }));
 
+vi.mock('../../services/taskDifficultyCalibrationService.js', () => ({
+  runAdminTaskDifficultyCalibration: vi.fn(async () => ({
+    evaluated: 0,
+    adjusted: 0,
+    skipped: 0,
+    ignored: 0,
+    actionBreakdown: { up: 0, keep: 0, down: 0 },
+    errors: [],
+  })),
+  runMonthlyTaskDifficultyCalibrationForUser: (...args: unknown[]) => mockRunMonthlyCalibrationForUser(...args),
+}));
+
 import app from '../../app.js';
 
 describe('Admin routes', () => {
@@ -72,6 +92,7 @@ describe('Admin routes', () => {
     mockSendEmail.mockClear();
     mockRunSubscriptionJob.mockClear();
     mockRunModeUpgradeAggregation.mockClear();
+    mockRunMonthlyCalibrationForUser.mockClear();
     mockTrigger.mockReturnValue('corr-force');
     clearTaskgenEvents();
     mockQuery.mockImplementation(async (sql: string) => {
@@ -741,6 +762,14 @@ describe('Admin routes', () => {
       scope: 'single_user',
       processed: 1,
       persisted: 1,
+    });
+    expect(mockRunMonthlyCalibrationForUser).toHaveBeenCalledWith({
+      userId: '00000000-0000-4000-8000-000000000001',
+      now: expect.any(Date),
+    });
+    expect(mockRunModeUpgradeAggregation).toHaveBeenCalledWith({
+      userId: '00000000-0000-4000-8000-000000000001',
+      now: expect.any(Date),
     });
   });
 
