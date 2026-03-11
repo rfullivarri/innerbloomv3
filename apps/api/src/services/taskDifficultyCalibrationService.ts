@@ -324,6 +324,17 @@ export async function runMonthlyTaskDifficultyCalibration(now: Date = new Date()
   return runTaskDifficultyCalibrationEngine({ now, source: 'cron' });
 }
 
+export async function runMonthlyTaskDifficultyCalibrationForUser(options: {
+  userId: string;
+  now?: Date;
+}): Promise<TaskDifficultyCalibrationRun> {
+  return runTaskDifficultyCalibrationEngine({
+    now: options.now ?? new Date(),
+    userId: options.userId,
+    source: 'cron',
+  });
+}
+
 export async function runTaskDifficultyCalibrationBackfill(now: Date = new Date()): Promise<TaskDifficultyCalibrationRun> {
   return runTaskDifficultyCalibrationEngine({ now, source: 'admin_run', windowDays: 90, dedupeByDay: true, mode: 'baseline' });
 }

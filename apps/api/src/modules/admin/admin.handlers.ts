@@ -51,7 +51,10 @@ import {
   getTaskgenEventsGlobal,
 } from '../../services/taskgenTraceService.js';
 import { triggerTaskGenerationForUser } from '../../services/taskgenTriggerService.js';
-import { runAdminTaskDifficultyCalibration } from '../../services/taskDifficultyCalibrationService.js';
+import {
+  runAdminTaskDifficultyCalibration,
+  runMonthlyTaskDifficultyCalibrationForUser,
+} from '../../services/taskDifficultyCalibrationService.js';
 import { runUserMonthlyModeUpgradeAggregation } from '../../services/modeUpgradeMonthlyAggregationService.js';
 
 const taskgenForceRunRequestSchema = z
@@ -303,7 +306,10 @@ export const getAdminUserModeUpgradeAnalysis = asyncHandler(async (req: Request,
 
 export const postAdminRunMonthlyReview = asyncHandler(async (req: Request, res: Response) => {
   const { userId } = userIdParamSchema.parse(req.params);
-  const result = await runUserMonthlyModeUpgradeAggregation({ userId });
+
+  const now = new Date();
+  await runMonthlyTaskDifficultyCalibrationForUser({ userId, now });
+  const result = await runUserMonthlyModeUpgradeAggregation({ userId, now });
 
   res.json({
     ok: true,
