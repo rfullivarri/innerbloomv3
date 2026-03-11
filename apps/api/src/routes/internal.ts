@@ -8,6 +8,7 @@ import {
   runTaskDifficultyCalibrationBackfill,
 } from '../services/taskDifficultyCalibrationService.js';
 import { createRateLimitMiddleware } from '../middlewares/rate-limit.js';
+import { runUserMonthlyModeUpgradeAggregation } from '../services/modeUpgradeMonthlyAggregationService.js';
 
 const router = Router();
 
@@ -107,11 +108,14 @@ router.post(
     }
 
     const shouldBackfill = req.query.backfill === '1';
+    const now = new Date();
     const result = shouldBackfill
-      ? await runTaskDifficultyCalibrationBackfill(new Date())
-      : await runMonthlyTaskDifficultyCalibration(new Date());
+      ? await runTaskDifficultyCalibrationBackfill(now)
+      : await runMonthlyTaskDifficultyCalibration(now);
 
-    res.json({ ok: true, backfill: shouldBackfill, ...result });
+    const modeUpgradeAggregation = shouldBackfill ? null : await runUserMonthlyModeUpgradeAggregation({ now });
+
+    res.json({ ok: true, backfill: shouldBackfill, ...result, mode_upgrade_aggregation: modeUpgradeAggregation });
   }),
 );
 
