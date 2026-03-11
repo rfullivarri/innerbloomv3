@@ -40,7 +40,10 @@ export function applyResolvedTheme(theme: ResolvedTheme) {
     return;
   }
 
-  document.documentElement.setAttribute('data-theme', theme);
+  const root = document.documentElement;
+  root.setAttribute('data-theme', theme);
+  root.classList.toggle('dark', theme === 'dark');
+  root.classList.toggle('light', theme === 'light');
 }
 
 export function applyThemePreference(preference: ThemePreference): ResolvedTheme {
