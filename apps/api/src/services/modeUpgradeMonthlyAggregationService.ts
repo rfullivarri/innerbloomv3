@@ -1,4 +1,5 @@
 import { pool } from '../db.js';
+import { buildAndPersistMonthlyWrapped } from './monthlyWrappedService.js';
 
 type AggregationOptions = {
   userId?: string;
@@ -15,6 +16,7 @@ type AggregateBaseRow = {
 
 type GameModeRow = {
   game_mode_id: number;
+  code: string;
   weekly_target: number | string | null;
 };
 
@@ -131,8 +133,9 @@ export async function runUserMonthlyModeUpgradeAggregation(options: AggregationO
     );
 
     if (baseResult.rows.length > 0) {
-      const gameModesResult = await pool.query<GameModeRow>('SELECT game_mode_id, weekly_target FROM cat_game_mode');
+      const gameModesResult = await pool.query<GameModeRow>('SELECT game_mode_id, code, weekly_target FROM cat_game_mode');
       const nextModeMap = buildNextModeMap(gameModesResult.rows);
+      const modeById = new Map(gameModesResult.rows.map((row) => [row.game_mode_id, row]));
 
       for (const row of baseResult.rows) {
         const tasksTotalEvaluated = Number(row.tasks_total_evaluated);
@@ -140,6 +143,8 @@ export async function runUserMonthlyModeUpgradeAggregation(options: AggregationO
         const taskPassRate = computePassRate(tasksTotalEvaluated, tasksMeetingGoal);
         const eligibleForUpgrade = taskPassRate >= 0.8;
         const nextGameModeId = nextModeMap.get(row.game_mode_id) ?? null;
+        const currentMode = modeById.get(row.game_mode_id);
+        const suggestedMode = nextGameModeId ? modeById.get(nextGameModeId) : null;
 
         await pool.query(
           `INSERT INTO user_monthly_mode_upgrade_stats (
@@ -164,6 +169,20 @@ export async function runUserMonthlyModeUpgradeAggregation(options: AggregationO
             nextGameModeId,
           ],
         );
+
+        await buildAndPersistMonthlyWrapped({
+          userId: row.user_id,
+          periodKey,
+          periodStart,
+          nextPeriodStart,
+          currentMode: currentMode?.code ?? null,
+          modeWeeklyTarget: Number(currentMode?.weekly_target ?? 0),
+          tasksTotalEvaluated,
+          tasksMeetingGoal,
+          taskPassRate,
+          eligibleForUpgrade,
+          suggestedNextMode: eligibleForUpgrade ? (suggestedMode?.code ?? null) : null,
+        });
       }
     }
 

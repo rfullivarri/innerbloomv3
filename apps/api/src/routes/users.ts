@@ -16,6 +16,7 @@ import {
   getUserWeeklyWrappedPrevious,
 } from '../controllers/users/weekly-wrapped.js';
 import { updateUserTask } from '../controllers/tasks/update-user-task.js';
+import { getUserRewardsHistory } from '../controllers/users/rewards-history.js';
 import { deleteUserTask } from '../controllers/tasks/delete-user-task.js';
 import { asyncHandler } from '../lib/async-handler.js';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
@@ -51,6 +52,7 @@ userScopedRoutes.get('/state/timeseries', asyncHandler(getUserStateTimeseries));
 userScopedRoutes.get('/summary/today', asyncHandler(getUserSummaryToday));
 userScopedRoutes.get('/weekly-wrapped/latest', asyncHandler(getUserWeeklyWrappedLatest));
 userScopedRoutes.get('/weekly-wrapped/previous', asyncHandler(getUserWeeklyWrappedPrevious));
+userScopedRoutes.get('/rewards/history', asyncHandler(getUserRewardsHistory));
 userScopedRoutes.use('/missions/v2', missionsV2Router);
 
 router.get('/users/me', authMiddleware, asyncHandler(getCurrentUser));
