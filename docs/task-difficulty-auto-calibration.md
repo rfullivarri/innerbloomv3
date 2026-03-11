@@ -73,3 +73,28 @@ Ambas opciones reutilizan exactamente el mismo motor de recalibración.
 - `GET /tasks/:taskId/recalibrations?limit=3`
 
 Ambos endpoints requieren auth y suscripción activa, y solo devuelven datos del dueño de la task.
+
+## Coexistencia con agregación mensual para Mode Upgrade suggestion
+
+Se agregó una capa separada de reporting: `user_monthly_mode_upgrade_stats`.
+
+- Endpoint admin/dev: `POST /admin/mode-upgrade-aggregation/run`
+- Body:
+
+```json
+{
+  "userId": "uuid-opcional",
+  "period_key": "YYYY-MM-opcional"
+}
+```
+
+Reglas de esta agregación (solo lectura/reporting):
+
+- Usa `task_difficulty_recalibrations` únicamente con `source = cron` para evitar mezclar corridas `admin_run` con reporting mensual.
+- Evalúa el período de calendario (por default, mes anterior UTC).
+- `task_met_goal = completion_rate >= 0.80` por task evaluada.
+- `task_pass_rate = tasks_meeting_goal / tasks_total_evaluated`.
+- `eligible_for_upgrade = task_pass_rate >= 0.80`.
+- No cambia dificultad de tasks y no actualiza `users.game_mode_id`; solo persiste elegibilidad para sugerencias futuras.
+
+Esto mantiene intacto el flujo existente de auto-recalibración de dificultad.
