@@ -64,6 +64,24 @@ export async function resolveGameModeByCode(client: QueryClient, modeCode: strin
   return row;
 }
 
+export async function resolveGameModeById(client: QueryClient, gameModeId: number): Promise<GameModeRow> {
+  const result = await client.query<GameModeRow>(
+    `SELECT game_mode_id, code
+       FROM cat_game_mode
+      WHERE game_mode_id = $1
+      LIMIT 1`,
+    [gameModeId],
+  );
+
+  const row = result.rows[0];
+
+  if (!row) {
+    throw new HttpError(409, 'invalid_game_mode', 'Invalid game mode');
+  }
+
+  return row;
+}
+
 export async function changeUserGameMode(client: QueryClient, input: {
   userId: string;
   nextGameModeId: number;
@@ -107,4 +125,3 @@ export async function changeUserGameMode(client: QueryClient, input: {
 
   throw new HttpError(409, 'game_mode_change_conflict', 'User game mode changed before update');
 }
-

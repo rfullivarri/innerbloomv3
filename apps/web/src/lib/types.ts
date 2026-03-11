@@ -200,19 +200,27 @@ export type AdminUserSubscriptionResponse = {
 export type AdminModeUpgradeTask = {
   task_id: string;
   task_name: string;
+  actual_count: number;
+  expected_count: number;
   completion_rate: number;
   meets_goal: boolean;
 };
 
 export type AdminModeUpgradeAnalysis = {
+  has_analysis: boolean;
+  analysis_window_days: number;
+  analysis_start: string;
+  analysis_end: string;
+  analysis_basis: 'rolling_30_days';
+  reason_if_empty: 'no_active_tasks' | 'no_mode_baseline' | 'all_expected_zero' | null;
+  eligible_for_upgrade: boolean;
   current_mode: string | null;
   next_mode: string | null;
-  evaluation_period_days: number;
-  tasks_evaluated: number;
+  tasks_total_evaluated: number;
   tasks_meeting_goal: number;
   task_pass_rate: number;
   threshold: number;
-  missing_tasks: number;
-  eligible: boolean;
+  missing_tasks: number | null;
+  cta_enabled: boolean;
   tasks: AdminModeUpgradeTask[];
 };

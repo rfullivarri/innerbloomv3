@@ -5,7 +5,18 @@ import { clearTaskgenEvents, recordTaskgenEvent } from '../../services/taskgenTr
 
 type QueryRow = { is_admin: boolean | null };
 
-const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail, mockRunSubscriptionJob, mockRunModeUpgradeAggregation, mockRunMonthlyCalibrationForUser } = vi.hoisted(() => ({
+const {
+  mockQuery,
+  authMiddlewareMock,
+  mockTrigger,
+  mockSendEmail,
+  mockRunSubscriptionJob,
+  mockRunModeUpgradeAggregation,
+  mockRunMonthlyCalibrationForUser,
+  mockResolveModeByCode,
+  mockResolveModeById,
+  mockChangeUserGameMode,
+} = vi.hoisted(() => ({
   mockQuery: vi.fn<(sql: string, params?: unknown[]) => Promise<{ rows: QueryRow[] }>>(),
   authMiddlewareMock: (req: Request, _res: Response, next: NextFunction) => {
     (req as Request & {
@@ -42,6 +53,20 @@ const { mockQuery, authMiddlewareMock, mockTrigger, mockSendEmail, mockRunSubscr
     actionBreakdown: { up: 1, keep: 1, down: 1 },
     errors: [],
   })),
+  mockResolveModeByCode: vi.fn(async (_client: unknown, modeCode: string) => ({
+    game_mode_id: modeCode === 'LOW' ? 1 : modeCode === 'CHILL' ? 2 : modeCode === 'FLOW' ? 3 : 4,
+    code: modeCode,
+  })),
+  mockResolveModeById: vi.fn(async (_client: unknown, modeId: number) => ({
+    game_mode_id: modeId,
+    code: modeId === 1 ? 'LOW' : modeId === 2 ? 'CHILL' : modeId === 3 ? 'FLOW' : 'EVOLVE',
+  })),
+  mockChangeUserGameMode: vi.fn(async () => ({
+    user_id: '00000000-0000-4000-8000-000000000001',
+    game_mode_id: 4,
+    image_url: '/Evolve-Mood.jpg',
+    avatar_url: '/Evolve-Mood.jpg',
+  })),
 }));
 
 vi.mock('../../db.js', () => ({
@@ -71,6 +96,12 @@ vi.mock('../../services/modeUpgradeMonthlyAggregationService.js', () => ({
   runUserMonthlyModeUpgradeAggregation: (...args: unknown[]) => mockRunModeUpgradeAggregation(...args),
 }));
 
+vi.mock('../../services/userGameModeChangeService.js', () => ({
+  resolveGameModeByCode: (...args: unknown[]) => mockResolveModeByCode(...args),
+  resolveGameModeById: (...args: unknown[]) => mockResolveModeById(...args),
+  changeUserGameMode: (...args: unknown[]) => mockChangeUserGameMode(...args),
+}));
+
 vi.mock('../../services/taskDifficultyCalibrationService.js', () => ({
   runAdminTaskDifficultyCalibration: vi.fn(async () => ({
     evaluated: 0,
@@ -93,6 +124,9 @@ describe('Admin routes', () => {
     mockRunSubscriptionJob.mockClear();
     mockRunModeUpgradeAggregation.mockClear();
     mockRunMonthlyCalibrationForUser.mockClear();
+    mockResolveModeByCode.mockClear();
+    mockResolveModeById.mockClear();
+    mockChangeUserGameMode.mockClear();
     mockTrigger.mockReturnValue('corr-force');
     clearTaskgenEvents();
     mockQuery.mockImplementation(async (sql: string) => {
@@ -748,6 +782,38 @@ describe('Admin routes', () => {
       task_id: 'task-1',
       actual_count: 22,
       meets_goal: true,
+    });
+  });
+
+  it('manually changes user mode by targetModeKey', async () => {
+    const response = await request(app)
+      .post('/api/admin/user/00000000-0000-4000-8000-000000000001/game-mode')
+      .set('Authorization', 'Bearer token')
+      .send({ targetModeKey: 'EVOLVE', reason: 'admin_test' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      ok: true,
+      userId: '00000000-0000-4000-8000-000000000001',
+      game_mode_code: 'EVOLVE',
+      reason: 'admin_test',
+    });
+    expect(mockResolveModeByCode).toHaveBeenCalled();
+    expect(mockChangeUserGameMode).toHaveBeenCalled();
+  });
+
+  it('runs rolling mode upgrade analysis from admin endpoint', async () => {
+    const response = await request(app)
+      .post('/api/admin/user/00000000-0000-4000-8000-000000000001/mode-upgrade-analysis/run')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      ok: true,
+      source: 'admin_manual_rolling_mode_upgrade_analysis',
+      current_mode: 'FLOW',
+      next_mode: 'EVOLVE',
+      tasks_total_evaluated: 2,
     });
   });
 
