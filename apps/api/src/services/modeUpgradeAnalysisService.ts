@@ -62,7 +62,7 @@ export type RollingModeUpgradeAnalysis = {
   analysis_start: string;
   analysis_end: string;
   analysis_basis: 'rolling_30_days';
-  debug_reason: string | null;
+  reason_if_empty: 'no_active_tasks' | 'no_mode_baseline' | 'all_expected_zero' | null;
   eligible_for_upgrade: boolean;
   current_mode: string | null;
   next_mode: string | null;
@@ -243,6 +243,7 @@ export async function getRollingModeUpgradeAnalysis(userId: string, now: Date = 
   const completionByTask = new Map(completionResult.rows.map((row) => [row.task_id, Number(row.actual_count ?? 0)]));
 
   const tasks: ModeUpgradeAnalysisTask[] = [];
+  let tasksWithNoModeBaseline = 0;
 
   for (const task of tasksResult.rows) {
     const taskCreatedDate = parseDate(task.created_at);
@@ -265,6 +266,9 @@ export async function getRollingModeUpgradeAnalysis(userId: string, now: Date = 
     const expectedCount = Number(expectedCountRaw.toFixed(4));
 
     if (expectedCount <= 0) {
+      if (segments.length === 0) {
+        tasksWithNoModeBaseline += 1;
+      }
       continue;
     }
 
@@ -297,6 +301,13 @@ export async function getRollingModeUpgradeAnalysis(userId: string, now: Date = 
   const requiredTasks = tasksTotalEvaluated > 0 ? Math.ceil(tasksTotalEvaluated * GOAL_THRESHOLD) : null;
   const missingTasks = requiredTasks == null ? null : Math.max(0, requiredTasks - tasksMeetingGoal);
   const hasAnalysis = tasksTotalEvaluated > 0;
+  const reasonIfEmpty = hasAnalysis
+    ? null
+    : tasksResult.rows.length === 0
+      ? 'no_active_tasks'
+      : tasksWithNoModeBaseline > 0
+        ? 'no_mode_baseline'
+        : 'all_expected_zero';
 
   return {
     has_analysis: hasAnalysis,
@@ -304,7 +315,7 @@ export async function getRollingModeUpgradeAnalysis(userId: string, now: Date = 
     analysis_start: analysisStart,
     analysis_end: analysisEnd,
     analysis_basis: 'rolling_30_days',
-    debug_reason: hasAnalysis ? null : 'no_evaluable_tasks',
+    reason_if_empty: reasonIfEmpty,
     eligible_for_upgrade: eligibleForUpgrade,
     current_mode: user.current_mode,
     next_mode: nextMode,

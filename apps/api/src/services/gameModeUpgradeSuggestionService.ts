@@ -1,5 +1,6 @@
 import { pool } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
+import { getRollingModeUpgradeAnalysis } from './modeUpgradeAnalysisService.js';
 
 const NEXT_MODE_BY_CODE: Record<string, string | null> = {
   LOW: 'CHILL',
@@ -14,13 +15,6 @@ type UserModeRow = {
   current_mode: string | null;
 };
 
-type MonthlyAggregateRow = {
-  period_key: string;
-  tasks_total_evaluated: number | string;
-  tasks_meeting_goal: number | string;
-  task_pass_rate: number | string;
-  eligible_for_upgrade: boolean;
-};
 
 type GameModeRow = {
   game_mode_id: number;
@@ -78,27 +72,6 @@ async function getUserCurrentMode(client: typeof pool, userId: string): Promise<
   return row;
 }
 
-async function getLatestAggregateForCurrentMode(
-  client: typeof pool,
-  userId: string,
-  gameModeId: number,
-): Promise<MonthlyAggregateRow | null> {
-  const result = await client.query<MonthlyAggregateRow>(
-    `SELECT period_key,
-            tasks_total_evaluated,
-            tasks_meeting_goal,
-            task_pass_rate,
-            eligible_for_upgrade
-       FROM user_monthly_mode_upgrade_stats
-      WHERE user_id = $1::uuid
-        AND game_mode_id = $2
-      ORDER BY period_key DESC
-      LIMIT 1`,
-    [userId, gameModeId],
-  );
-
-  return result.rows[0] ?? null;
-}
 
 async function getGameModeByCode(client: typeof pool, code: string): Promise<GameModeRow | null> {
   const result = await client.query<GameModeRow>(
@@ -162,13 +135,14 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
     };
   }
 
-  const aggregate = await getLatestAggregateForCurrentMode(pool, userId, user.game_mode_id);
+  const analysis = await getRollingModeUpgradeAnalysis(userId);
+  const periodKey = `rolling_${analysis.analysis_end}`;
 
-  if (!aggregate) {
+  if (!analysis.has_analysis) {
     return {
       current_mode: user.current_mode,
       suggested_mode: null,
-      period_key: null,
+      period_key: periodKey,
       eligible_for_upgrade: false,
       tasks_total_evaluated: 0,
       tasks_meeting_goal: 0,
@@ -179,13 +153,13 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
   }
 
   const nextModeCode = resolveNextGameModeCode(user.current_mode);
-  const eligibleForUpgrade = Boolean(aggregate.eligible_for_upgrade);
+  const eligibleForUpgrade = Boolean(analysis.eligible_for_upgrade);
   const nextMode = nextModeCode ? await getGameModeByCode(pool, nextModeCode) : null;
   const canSuggest = eligibleForUpgrade && Boolean(nextMode);
 
   const suggestionState = await upsertSuggestionState(pool, {
     userId,
-    periodKey: aggregate.period_key,
+    periodKey,
     currentGameModeId: user.game_mode_id,
     suggestedGameModeId: canSuggest ? (nextMode?.game_mode_id ?? null) : null,
     eligibleForUpgrade,
@@ -194,11 +168,11 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
   return {
     current_mode: user.current_mode,
     suggested_mode: canSuggest ? (nextMode?.code ?? null) : null,
-    period_key: aggregate.period_key,
+    period_key: periodKey,
     eligible_for_upgrade: eligibleForUpgrade,
-    tasks_total_evaluated: Number(aggregate.tasks_total_evaluated),
-    tasks_meeting_goal: Number(aggregate.tasks_meeting_goal),
-    task_pass_rate: Number(aggregate.task_pass_rate),
+    tasks_total_evaluated: analysis.tasks_total_evaluated,
+    tasks_meeting_goal: analysis.tasks_meeting_goal,
+    task_pass_rate: analysis.task_pass_rate,
     accepted_at: suggestionState.accepted_at,
     dismissed_at: suggestionState.dismissed_at,
   };
