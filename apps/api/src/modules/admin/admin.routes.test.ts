@@ -272,6 +272,7 @@ describe('Admin routes', () => {
               user_id: '00000000-0000-4000-8000-000000000001',
               game_mode_id: 3,
               current_mode: 'FLOW',
+              current_weekly_target: 5,
             },
           ],
         } as never;
@@ -447,39 +448,41 @@ describe('Admin routes', () => {
         return { rows: [{ count: '1' }] };
       }
 
-      if (sql.includes('FROM user_monthly_mode_upgrade_stats') && sql.includes('ORDER BY period_key DESC')) {
+      if (sql.includes('FROM tasks t') && sql.includes('t.active = TRUE')) {
+        return {
+          rows: [
+            { task_id: 'task-1', task_name: 'Dormir 8h', created_at: '2025-01-01T00:00:00.000Z' },
+            { task_id: 'task-2', task_name: 'Minoxidil', created_at: '2025-01-01T00:00:00.000Z' },
+          ],
+        } as never;
+      }
+
+      if (sql.includes('COALESCE(SUM(dl.quantity), 0)::int AS actual_count') && sql.includes('GROUP BY dl.task_id')) {
+        return {
+          rows: [
+            { task_id: 'task-1', actual_count: 22 },
+            { task_id: 'task-2', actual_count: 8 },
+          ],
+        } as never;
+      }
+
+      if (sql.includes('FROM user_game_mode_history h') && sql.includes('gm.weekly_target')) {
         return {
           rows: [
             {
-              period_key: '2026-02',
-              tasks_total_evaluated: 18,
-              tasks_meeting_goal: 13,
-              task_pass_rate: 0.72,
-              eligible_for_upgrade: false,
+              game_mode_id: 2,
+              effective_at: '2026-02-10T00:00:00.000Z',
+              mode_code: 'CHILL',
+              weekly_target: 4,
+            },
+            {
+              game_mode_id: 3,
+              effective_at: '2026-02-20T00:00:00.000Z',
+              mode_code: 'FLOW',
+              weekly_target: 7,
             },
           ],
         } as never;
-      }
-
-      if (sql.includes('INSERT INTO user_game_mode_upgrade_suggestions')) {
-        return { rows: [{ accepted_at: null, dismissed_at: null }] } as never;
-      }
-
-      if (sql.includes('SELECT game_mode_id, code') && sql.includes('FROM cat_game_mode')) {
-        return { rows: [{ game_mode_id: 4, code: 'EVOLVE' }] } as never;
-      }
-
-      if (sql.includes('SELECT r.task_id') && sql.includes('FROM task_difficulty_recalibrations r')) {
-        return {
-          rows: [
-            { task_id: 'task-1', task_name: 'Dormir 8h', completion_rate: 0.92 },
-            { task_id: 'task-2', task_name: 'Minoxidil', completion_rate: 0.45 },
-          ],
-        } as never;
-      }
-
-      if (sql.includes("SELECT (summary->>'missing_tasks_to_upgrade')::int AS missing_tasks_to_upgrade")) {
-        return { rows: [{ missing_tasks_to_upgrade: 2 }] } as never;
       }
 
       if (sql.includes('FROM daily_log dl') && sql.includes('week_key')) {
@@ -727,16 +730,25 @@ describe('Admin routes', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({
+      has_analysis: true,
+      analysis_window_days: 30,
+      analysis_basis: 'rolling_30_days',
       current_mode: 'FLOW',
       next_mode: 'EVOLVE',
-      tasks_evaluated: 18,
-      tasks_meeting_goal: 13,
-      task_pass_rate: 72,
-      threshold: 80,
-      missing_tasks: 2,
-      eligible: false,
+      tasks_total_evaluated: 2,
+      tasks_meeting_goal: 1,
+      threshold: 0.8,
+      missing_tasks: 1,
+      eligible_for_upgrade: false,
+      cta_enabled: false,
     });
+    expect(response.body.task_pass_rate).toBeCloseTo(0.5, 4);
     expect(response.body.tasks).toHaveLength(2);
+    expect(response.body.tasks[0]).toMatchObject({
+      task_id: 'task-1',
+      actual_count: 22,
+      meets_goal: true,
+    });
   });
 
   it('runs monthly review for a user from admin endpoint', async () => {
