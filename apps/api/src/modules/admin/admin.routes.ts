@@ -31,6 +31,8 @@ import {
   postAdminRunTaskDifficultyCalibration,
   postAdminRunModeUpgradeAggregation,
   postAdminRunMonthlyReview,
+  postAdminUserManualGameModeChange,
+  postAdminRunModeUpgradeAnalysis,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
 
@@ -62,6 +64,8 @@ adminRouter.post('/taskgen/force-run', postTaskgenForceRun);
 adminRouter.post('/task-difficulty-calibration/run', postAdminRunTaskDifficultyCalibration);
 adminRouter.post('/mode-upgrade-aggregation/run', postAdminRunModeUpgradeAggregation);
 adminRouter.post('/user/:userId/run-monthly-review', postAdminRunMonthlyReview);
+adminRouter.post('/user/:userId/mode-upgrade-analysis/run', postAdminRunModeUpgradeAnalysis);
+adminRouter.post('/user/:userId/game-mode', postAdminUserManualGameModeChange);
 adminRouter.get('/feedback/definitions', getAdminFeedbackDefinitions);
 adminRouter.patch('/feedback/definitions/:id', patchAdminFeedbackDefinition);
 adminRouter.get('/feedback/users/:userId/state', getAdminFeedbackUserState);

@@ -15,7 +15,9 @@ import {
   fetchAdminTaskStats,
   fetchAdminUserSubscription,
   fetchAdminModeUpgradeAnalysis,
+  runAdminModeUpgradeAnalysis,
   runAdminMonthlyReview,
+  changeAdminUserGameMode,
   sendAdminDailyReminder,
   sendAdminTasksReadyEmail,
   updateAdminUserSubscription,
@@ -84,6 +86,12 @@ export function AdminLayout() {
   const [runningMonthlyReview, setRunningMonthlyReview] = useState(false);
   const [monthlyReviewMessage, setMonthlyReviewMessage] = useState<string | null>(null);
   const [monthlyReviewError, setMonthlyReviewError] = useState<string | null>(null);
+  const [runningRollingAnalysis, setRunningRollingAnalysis] = useState(false);
+  const [manualModeTarget, setManualModeTarget] = useState<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'>('LOW');
+  const [manualModeReason, setManualModeReason] = useState('admin_override_manual_mode_change');
+  const [changingMode, setChangingMode] = useState(false);
+  const [manualModeMessage, setManualModeMessage] = useState<string | null>(null);
+  const [manualModeError, setManualModeError] = useState<string | null>(null);
   const [calibrationWindowDays, setCalibrationWindowDays] = useState(90);
   const [calibrationMode] = useState<'baseline'>('baseline');
   const [calibrationRunAllUsers, setCalibrationRunAllUsers] = useState(false);
@@ -230,6 +238,8 @@ export function AdminLayout() {
     setModeUpgradeAnalysisError(null);
     setMonthlyReviewMessage(null);
     setMonthlyReviewError(null);
+    setManualModeMessage(null);
+    setManualModeError(null);
     setCalibrationResult(null);
     setCalibrationError(null);
     setCalibrationRunAllUsers(false);
@@ -384,6 +394,8 @@ export function AdminLayout() {
 
     setRunningMonthlyReview(true);
     setMonthlyReviewError(null);
+    setManualModeMessage(null);
+    setManualModeError(null);
     setMonthlyReviewMessage(null);
 
     try {
@@ -408,6 +420,70 @@ export function AdminLayout() {
       setRunningMonthlyReview(false);
     }
   }, [selectedUser]);
+
+  const handleRunRollingModeAnalysis = useCallback(async () => {
+    if (!selectedUser) {
+      return;
+    }
+
+    try {
+      setRunningRollingAnalysis(true);
+      setModeUpgradeAnalysisError(null);
+      const response = await runAdminModeUpgradeAnalysis(selectedUser.id);
+      setModeUpgradeAnalysis(response);
+    } catch (error) {
+      console.error('[admin] failed to run rolling mode analysis', error);
+      if (error instanceof ApiError) {
+        const detail = typeof error.body === 'object' && error.body && 'message' in error.body
+          ? String((error.body as { message?: string }).message)
+          : null;
+        setModeUpgradeAnalysisError(detail ? `No se pudo correr rolling analysis: ${detail}` : `No se pudo correr rolling analysis (HTTP ${error.status}).`);
+      } else {
+        setModeUpgradeAnalysisError('No se pudo correr rolling analysis.');
+      }
+    } finally {
+      setRunningRollingAnalysis(false);
+    }
+  }, [selectedUser]);
+
+  const handleManualModeChange = useCallback(async () => {
+    if (!selectedUser) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Confirmar cambio manual de modo a ${manualModeTarget} para ${selectedUser.email ?? selectedUser.id}?`);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setChangingMode(true);
+      setManualModeError(null);
+      const result = await changeAdminUserGameMode(selectedUser.id, {
+        targetModeKey: manualModeTarget,
+        reason: manualModeReason.trim() || 'admin_override_manual_mode_change',
+      });
+      setManualModeMessage(`Modo actualizado a ${result.game_mode_code}.`);
+      const [refreshedInsights, refreshedAnalysis] = await Promise.all([
+        fetchAdminInsights(selectedUser.id, { from: filters.from, to: filters.to }),
+        fetchAdminModeUpgradeAnalysis(selectedUser.id),
+      ]);
+      setInsights(refreshedInsights);
+      setModeUpgradeAnalysis(refreshedAnalysis);
+    } catch (error) {
+      console.error('[admin] failed to change game mode', error);
+      if (error instanceof ApiError) {
+        const detail = typeof error.body === 'object' && error.body && 'message' in error.body
+          ? String((error.body as { message?: string }).message)
+          : null;
+        setManualModeError(detail ? `No se pudo cambiar el game mode: ${detail}` : `No se pudo cambiar el game mode (HTTP ${error.status}).`);
+      } else {
+        setManualModeError('No se pudo cambiar el game mode.');
+      }
+    } finally {
+      setChangingMode(false);
+    }
+  }, [filters.from, filters.to, manualModeReason, manualModeTarget, selectedUser]);
 
   const handleRunTaskDifficultyCalibration = useCallback(async () => {
     if (!selectedUser && !calibrationRunAllUsers) {
@@ -735,6 +811,8 @@ export function AdminLayout() {
                   {monthlyReviewMessage ? <p className="text-xs font-semibold text-emerald-300">{monthlyReviewMessage}</p> : null}
                   {monthlyReviewError ? <p className="text-xs font-semibold text-rose-300">{monthlyReviewError}</p> : null}
                   {modeUpgradeAnalysisError ? <p className="text-xs font-semibold text-rose-300">{modeUpgradeAnalysisError}</p> : null}
+                  {manualModeMessage ? <p className="text-xs font-semibold text-emerald-300">{manualModeMessage}</p> : null}
+                  {manualModeError ? <p className="text-xs font-semibold text-rose-300">{manualModeError}</p> : null}
                 </div>
                 <button
                   type="button"
@@ -748,6 +826,53 @@ export function AdminLayout() {
                 >
                   {runningMonthlyReview ? 'Running…' : 'Run Monthly Analysis'}
                 </button>
+                <button
+                  type="button"
+                  onClick={handleRunRollingModeAnalysis}
+                  disabled={runningRollingAnalysis || !selectedUser}
+                  className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                    runningRollingAnalysis || !selectedUser
+                      ? 'cursor-not-allowed border border-cyan-900/50 bg-slate-900/60 text-cyan-200/60'
+                      : 'border border-cyan-700/60 bg-cyan-500/10 text-cyan-100 hover:border-cyan-500/80 hover:text-cyan-50'
+                  }`}
+                >
+                  {runningRollingAnalysis ? 'Running…' : 'Recompute Rolling 30d Analysis'}
+                </button>
+              </div>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,220px)_1fr_auto] md:items-end">
+                <label className="flex flex-col gap-1 text-xs uppercase tracking-[0.14em] text-cyan-300">
+                  Manual Game Mode
+                  <select
+                    value={manualModeTarget}
+                    onChange={(event) => setManualModeTarget(event.target.value as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE')}
+                    className="rounded-md border border-cyan-700/50 bg-slate-900/70 px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-100"
+                  >
+                    <option value="LOW">LOW</option>
+                    <option value="CHILL">CHILL</option>
+                    <option value="FLOW">FLOW</option>
+                    <option value="EVOLVE">EVOLVE</option>
+                  </select>
+                </label>
+                <label className="flex flex-col gap-1 text-xs uppercase tracking-[0.14em] text-cyan-300">
+                  Reason
+                  <input
+                    value={manualModeReason}
+                    onChange={(event) => setManualModeReason(event.target.value)}
+                    className="rounded-md border border-cyan-700/50 bg-slate-900/70 px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-100"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={handleManualModeChange}
+                  disabled={changingMode || !selectedUser}
+                  className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                    changingMode || !selectedUser
+                      ? 'cursor-not-allowed border border-amber-900/50 bg-slate-900/60 text-amber-200/60'
+                      : 'border border-amber-700/60 bg-amber-500/10 text-amber-100 hover:border-amber-500/80 hover:text-amber-50'
+                  }`}
+                >
+                  {changingMode ? 'Changing…' : 'Apply Manual Mode Change'}
+                </button>
               </div>
 
               {loadingModeUpgradeAnalysis ? <p className="text-xs text-cyan-200">Cargando análisis…</p> : null}
@@ -756,13 +881,13 @@ export function AdminLayout() {
                 <>
                   <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
                     <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Current Mode</p><p className="font-semibold">{modeUpgradeAnalysis.current_mode ?? '—'}</p></div>
-                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Next Mode</p><p className="font-semibold">{modeUpgradeAnalysis.next_mode ?? '—'}</p></div>
-                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Tasks evaluated</p><p className="font-semibold">{modeUpgradeAnalysis.tasks_evaluated}</p></div>
-                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Tasks meeting goal</p><p className="font-semibold">{modeUpgradeAnalysis.tasks_meeting_goal} / {modeUpgradeAnalysis.tasks_evaluated}</p></div>
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Next Mode</p><p className="font-semibold">{modeUpgradeAnalysis.next_mode ?? '—'}</p></div><div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Window</p><p className="font-semibold">{modeUpgradeAnalysis.analysis_start} → {modeUpgradeAnalysis.analysis_end}</p></div><div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Reason if empty</p><p className="font-semibold">{modeUpgradeAnalysis.reason_if_empty ?? '—'}</p></div>
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Tasks evaluated</p><p className="font-semibold">{modeUpgradeAnalysis.tasks_total_evaluated}</p></div>
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Tasks meeting goal</p><p className="font-semibold">{modeUpgradeAnalysis.tasks_meeting_goal} / {modeUpgradeAnalysis.tasks_total_evaluated}</p></div>
                     <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Pass rate</p><p className="font-semibold">{modeUpgradeAnalysis.task_pass_rate}%</p></div>
                     <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Upgrade threshold</p><p className="font-semibold">{modeUpgradeAnalysis.threshold}%</p></div>
                     <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Missing tasks</p><p className="font-semibold">{modeUpgradeAnalysis.missing_tasks}</p></div>
-                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Eligible</p><p className="font-semibold">{modeUpgradeAnalysis.eligible ? 'YES' : 'NO'}</p></div>
+                    <div className="rounded-md border border-cyan-700/50 bg-slate-900/50 p-3"><p className="text-[11px] uppercase text-cyan-300">Eligible</p><p className="font-semibold">{modeUpgradeAnalysis.eligible_for_upgrade ? 'YES' : 'NO'}</p></div>
                   </div>
 
                   <div className="overflow-hidden rounded-lg border border-cyan-700/40">
@@ -770,7 +895,7 @@ export function AdminLayout() {
                       <thead className="bg-slate-900/80 text-cyan-200">
                         <tr>
                           <th className="px-3 py-2 font-semibold uppercase tracking-[0.14em]">Task</th>
-                          <th className="px-3 py-2 font-semibold uppercase tracking-[0.14em]">Completion %</th>
+                          <th className="px-3 py-2 font-semibold uppercase tracking-[0.14em]">Actual / Expected</th><th className="px-3 py-2 font-semibold uppercase tracking-[0.14em]">Completion %</th>
                           <th className="px-3 py-2 font-semibold uppercase tracking-[0.14em]">Meets Goal</th>
                         </tr>
                       </thead>
@@ -778,7 +903,7 @@ export function AdminLayout() {
                         {modeUpgradeAnalysis.tasks.map((task) => (
                           <tr key={task.task_id}>
                             <td className="px-3 py-2">{task.task_name}</td>
-                            <td className="px-3 py-2">{task.completion_rate}%</td>
+                            <td className="px-3 py-2">{task.actual_count} / {task.expected_count}</td><td className="px-3 py-2">{task.completion_rate}%</td>
                             <td className="px-3 py-2">{task.meets_goal ? '✅' : '❌'}</td>
                           </tr>
                         ))}

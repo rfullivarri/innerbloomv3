@@ -213,6 +213,65 @@ export async function runAdminMonthlyReview(userId: string) {
   }>;
 }
 
+
+export async function runAdminModeUpgradeAnalysis(userId: string) {
+  const url = buildApiUrl(`/admin/user/${encodeURIComponent(userId)}/mode-upgrade-analysis/run`);
+  const response = await apiAuthorizedFetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response.json() as Promise<AdminModeUpgradeAnalysis & { ok: boolean; source: string }>;
+}
+
+export async function changeAdminUserGameMode(
+  userId: string,
+  payload: { targetModeId?: number; targetModeKey?: 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'; reason: string },
+) {
+  const url = buildApiUrl(`/admin/user/${encodeURIComponent(userId)}/game-mode`);
+  const response = await apiAuthorizedFetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response.json() as Promise<{
+    ok: boolean;
+    userId: string;
+    game_mode_id: number;
+    game_mode_code: string;
+    image_url: string | null;
+    avatar_url: string | null;
+    reason: string;
+  }>;
+}
+
 export async function verifyAdminAccess() {
   return apiAuthorizedGet<{ ok: boolean }>('/admin/me');
 }
