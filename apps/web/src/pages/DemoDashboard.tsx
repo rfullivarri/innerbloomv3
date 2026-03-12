@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAuth } from '@clerk/clerk-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
 import { DashboardOverview } from './DashboardV3';
 import { getDashboardSectionConfig } from './dashboardSections';
@@ -9,8 +10,9 @@ import { emitDemoEvent } from '../lib/telemetry';
 import { setDashboardDemoModeEnabled } from '../lib/demoMode';
 import { GuidedDemoOverlay } from '../components/demo/GuidedDemoOverlay';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
-import { DEMO_GUIDED_STEPS } from '../config/demoGuidedTour';
+import { buildGuidedSteps } from '../config/demoGuidedTour';
 import { resolveDemoEntryContext } from '../lib/demoEntry';
+import { DASHBOARD_PATH } from '../config/auth';
 
 const DEMO_USER_ID = 'demo-public-user';
 
@@ -24,11 +26,32 @@ const DAILY_QUEST_STEP_IDS = new Set([
 export default function DemoDashboardPage() {
   const { language, setManualLanguage } = usePostLoginLanguage();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { userId } = useAuth();
   const demoContext = resolveDemoEntryContext(location.search);
   const { theme, setPreference } = useThemePreference();
   const [showGuidedTour, setShowGuidedTour] = useState(true);
   const hasLoggedGuidedStart = useRef(false);
   const dailyQuestModalRef = useRef<DailyQuestModalHandle | null>(null);
+
+  const guidedSteps = useMemo(() => buildGuidedSteps(demoContext.fromOnboarding), [demoContext.fromOnboarding]);
+
+  const dashboardPath = useMemo(() => {
+    const raw = DASHBOARD_PATH || '/dashboard-v3';
+    const normalized = raw.startsWith('/') ? raw : `/${raw}`;
+    return normalized.replace(/\/+$/, '') || '/dashboard-v3';
+  }, []);
+
+  const handleDemoExit = useCallback(() => {
+    emitDemoEvent('demo_exited', { from: '/demo', source: demoContext.source, mode: demoContext.mode });
+
+    if (demoContext.fromOnboarding && userId) {
+      navigate(dashboardPath);
+      return;
+    }
+
+    navigate('/');
+  }, [dashboardPath, demoContext.fromOnboarding, demoContext.mode, demoContext.source, navigate, userId]);
 
   useEffect(() => {
     if (language !== demoContext.language) {
@@ -41,14 +64,14 @@ export default function DemoDashboardPage() {
     emitDemoEvent('demo_opened', { language, theme, source: demoContext.source, mode: demoContext.mode });
 
     if (!hasLoggedGuidedStart.current) {
-      emitDemoEvent('demo_guided_started', { language, totalSteps: DEMO_GUIDED_STEPS.length, source: demoContext.source, mode: demoContext.mode });
+      emitDemoEvent('demo_guided_started', { language, totalSteps: guidedSteps.length, source: demoContext.source, mode: demoContext.mode });
       hasLoggedGuidedStart.current = true;
     }
 
     return () => {
       setDashboardDemoModeEnabled(false);
     };
-  }, [demoContext.mode, demoContext.source, language, theme]);
+  }, [demoContext.mode, demoContext.source, guidedSteps.length, language, theme]);
 
   const handleStepChange = useCallback((stepId: string) => {
     if (DAILY_QUEST_STEP_IDS.has(stepId)) {
@@ -60,9 +83,16 @@ export default function DemoDashboardPage() {
   }, []);
 
   const handleGuidedCompleted = useCallback(() => {
-    emitDemoEvent('demo_guided_completed', { totalSteps: DEMO_GUIDED_STEPS.length });
+    emitDemoEvent('demo_guided_completed', { totalSteps: guidedSteps.length, source: demoContext.source, mode: demoContext.mode });
+
+    if (demoContext.fromOnboarding && userId) {
+      dailyQuestModalRef.current?.close();
+      navigate(dashboardPath);
+      return;
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  }, [dashboardPath, demoContext.fromOnboarding, demoContext.mode, demoContext.source, guidedSteps.length, navigate, userId]);
 
   const overviewSection = getDashboardSectionConfig('dashboard', '/dashboard', language);
 
@@ -107,8 +137,11 @@ export default function DemoDashboardPage() {
               Daily Quest
             </button>
             <Link
-              to="/"
-              onClick={() => emitDemoEvent('demo_exited', { from: '/demo' })}
+              to={demoContext.fromOnboarding ? dashboardPath : '/'}
+              onClick={(event) => {
+                event.preventDefault();
+                handleDemoExit();
+              }}
               className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1.5 text-xs font-semibold text-[color:var(--color-text)]"
             >
               {language === 'es' ? 'Salir demo' : 'Exit demo'}
@@ -120,7 +153,13 @@ export default function DemoDashboardPage() {
       {showGuidedTour ? (
         <GuidedDemoOverlay
           language={language}
+          steps={guidedSteps}
+          finalActionLabel={demoContext.fromOnboarding ? { es: 'Ir al dashboard', en: 'Go to dashboard' } : undefined}
           onFinish={() => {
+            if (demoContext.fromOnboarding) {
+              handleDemoExit();
+              return;
+            }
             setShowGuidedTour(false);
             dailyQuestModalRef.current?.close();
           }}

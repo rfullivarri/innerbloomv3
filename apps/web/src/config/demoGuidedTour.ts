@@ -166,3 +166,25 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     },
   },
 ];
+
+export const ONBOARDING_DEMO_END_STEP: GuidedStep = {
+  id: 'tour-end-onboarding',
+  targetSelector: null,
+  tooltipPlacement: 'auto',
+  title: {
+    es: 'Tu demo guiada terminó',
+    en: 'Your guided demo is complete',
+  },
+  body: {
+    es: '¡Buen comienzo! Tus primeras tareas ya están listas (o casi listas). Ahora entra a tu dashboard para iniciar tu Journey y avanzar con tu primer Daily Quest.',
+    en: 'Great start! Your first tasks are ready (or almost ready). Now jump into your dashboard to begin your Journey and move forward with your first Daily Quest.',
+  },
+};
+
+export function buildGuidedSteps(fromOnboarding: boolean): GuidedStep[] {
+  if (!fromOnboarding) {
+    return DEMO_GUIDED_STEPS;
+  }
+
+  return [...DEMO_GUIDED_STEPS.slice(0, -1), ONBOARDING_DEMO_END_STEP];
+}

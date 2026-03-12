@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { DEMO_GUIDED_STEPS, type DemoLanguage } from '../../config/demoGuidedTour';
+import { DEMO_GUIDED_STEPS, type DemoLanguage, type GuidedStep } from '../../config/demoGuidedTour';
 
 type Props = {
   language: DemoLanguage;
+  steps?: GuidedStep[];
+  finalActionLabel?: Record<DemoLanguage, string>;
   onFinish: () => void;
   onSkip: (stepId: string, stepIndex: number) => void;
   onStepViewed: (stepId: string, stepIndex: number) => void;
@@ -51,11 +53,20 @@ function intersects(a: Rect, b: Rect) {
   return a.left < b.left + b.width && a.left + a.width > b.left && a.top < b.top + b.height && a.top + a.height > b.top;
 }
 
-export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, onStepChange, onCompleted }: Props) {
+export function GuidedDemoOverlay({
+  language,
+  steps = DEMO_GUIDED_STEPS,
+  finalActionLabel,
+  onFinish,
+  onSkip,
+  onStepViewed,
+  onStepChange,
+  onCompleted,
+}: Props) {
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
-  const step = DEMO_GUIDED_STEPS[stepIndex];
+  const step = steps[stepIndex];
   const isDailyQuestStep = DAILY_QUEST_STEP_IDS.has(step.id);
 
   useEffect(() => {
@@ -231,7 +242,7 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
     };
   }, [step.tooltipPlacement, targetRect, viewport.height, viewport.width]);
 
-  const isLast = stepIndex === DEMO_GUIDED_STEPS.length - 1;
+  const isLast = stepIndex === steps.length - 1;
 
   return (
     <div className={`pointer-events-none fixed inset-0 ${isDailyQuestStep ? 'z-[10020]' : 'z-[120]'}`}>
@@ -271,7 +282,7 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
         style={tooltipStyle}
       >
         <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.16em] text-slate-300">
-          <span>{stepIndex + 1}/{DEMO_GUIDED_STEPS.length}</span>
+          <span>{stepIndex + 1}/{steps.length}</span>
           <button type="button" className="rounded-md px-2 py-1 hover:bg-white/10" onClick={onFinish}>
             {language === 'es' ? 'Cerrar' : 'Close'}
           </button>
@@ -291,7 +302,7 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
           {!isLast ? (
             <button
               type="button"
-              onClick={() => setStepIndex((current) => Math.min(DEMO_GUIDED_STEPS.length - 1, current + 1))}
+              onClick={() => setStepIndex((current) => Math.min(steps.length - 1, current + 1))}
               className="rounded-lg bg-cyan-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-950"
             >
               {language === 'es' ? 'Siguiente' : 'Next'}
@@ -306,7 +317,7 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
                 }}
                 className="rounded-lg bg-cyan-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-950"
               >
-                {language === 'es' ? 'Finalizar' : 'Finish'}
+                {finalActionLabel?.[language] ?? (language === 'es' ? 'Finalizar' : 'Finish')}
               </button>
             </>
           )}
