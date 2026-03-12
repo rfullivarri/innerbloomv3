@@ -96,8 +96,8 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
       en: 'Daily Quest',
     },
     body: {
-      es: 'Desde aquí accedes a tu retrospección diaria: registras emoción predominante, marcas tareas logradas, ganas GP, sostienes rachas y confirmas el día para cerrarlo conscientemente.',
-      en: 'From here you access your daily reflection: log your main emotion, mark completed tasks, earn GP, sustain streaks, and confirm your day with intention.',
+      es: 'Desde aquí accedes a tu retrospección diaria. Toca el chip “Daily Quest” para registrar tu emoción predominante, marcar tareas logradas, ganar GP y cerrar el día con intención.',
+      en: 'This is the entry to your daily reflection. Tap the “Daily Quest” chip to log your main emotion, mark completed tasks, earn GP, and close the day with intention.',
     },
   },
   {

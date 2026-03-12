@@ -15,6 +15,17 @@ const PADDING = 10;
 const VIEWPORT_PADDING = 12;
 const TOOLTIP_HEIGHT_DESKTOP = 252;
 const TOOLTIP_HEIGHT_MOBILE = 238;
+const MOBILE_FOCUS_DEFAULT_OFFSET = 10;
+
+const MOBILE_STEP_FOCUS_OFFSET: Record<string, number> = {
+  'overall-progress': 8,
+  'streaks-top': 4,
+  'streaks-bottom': 4,
+  balance: 6,
+  'emotion-chart': 6,
+  'daily-energy': 18,
+  'daily-quest': 8,
+};
 
 type Placement = 'top' | 'right' | 'bottom' | 'left';
 
@@ -49,20 +60,52 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
         setTargetRect(null);
         return;
       }
-      target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
       const rect = target.getBoundingClientRect();
+      const maxRectWidth = Math.max(0, viewport.width - VIEWPORT_PADDING * 2);
+      const width = Math.min(rect.width + PADDING * 2, maxRectWidth);
+      const left = clamp(rect.left - PADDING, VIEWPORT_PADDING, viewport.width - width - VIEWPORT_PADDING);
       setTargetRect({
         top: Math.max(8, rect.top - PADDING),
-        left: Math.max(8, rect.left - PADDING),
-        width: rect.width + PADDING * 2,
+        left,
+        width,
         height: rect.height + PADDING * 2,
       });
     };
 
+    const alignForStep = () => {
+      const selector = step.targetSelector;
+      if (!selector) return;
+
+      const target = document.querySelector(selector) as HTMLElement | null;
+      if (!target) return;
+
+      const isMobile = window.innerWidth < 768;
+      if (!isMobile) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        return;
+      }
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+
+      window.setTimeout(() => {
+        const focusOffset = MOBILE_STEP_FOCUS_OFFSET[step.id] ?? MOBILE_FOCUS_DEFAULT_OFFSET;
+        const headerHeight = document.querySelector('header')?.getBoundingClientRect().height ?? 0;
+        const desiredTop = headerHeight + focusOffset;
+        const rect = target.getBoundingClientRect();
+        const delta = rect.top - desiredTop;
+
+        if (Math.abs(delta) > 4) {
+          window.scrollBy({ top: delta, behavior: 'smooth' });
+        }
+      }, 120);
+    };
+
+    alignForStep();
     updateRect();
-    const timeout = window.setTimeout(updateRect, 180);
+    const timeout = window.setTimeout(updateRect, 260);
     const handleResize = () => {
       setViewport({ width: window.innerWidth, height: window.innerHeight });
+      alignForStep();
       updateRect();
     };
     window.addEventListener('resize', handleResize);
@@ -153,13 +196,13 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
     <div className="pointer-events-none fixed inset-0 z-[120]">
       {targetRect ? (
         <>
-          <div className="absolute left-0 right-0 top-0 bg-slate-950/72 backdrop-blur-[3px]" style={{ height: targetRect.top }} />
+          <div className="absolute left-0 right-0 top-0 bg-slate-950/82 backdrop-blur-[4px]" style={{ height: targetRect.top }} />
           <div
-            className="absolute left-0 bg-slate-950/72 backdrop-blur-[3px]"
+            className="absolute left-0 bg-slate-950/82 backdrop-blur-[4px]"
             style={{ top: targetRect.top, width: targetRect.left, height: targetRect.height }}
           />
           <div
-            className="absolute right-0 bg-slate-950/72 backdrop-blur-[3px]"
+            className="absolute right-0 bg-slate-950/82 backdrop-blur-[4px]"
             style={{
               top: targetRect.top,
               width: Math.max(0, viewport.width - (targetRect.left + targetRect.width)),
@@ -167,12 +210,12 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
             }}
           />
           <div
-            className="absolute bottom-0 left-0 right-0 bg-slate-950/72 backdrop-blur-[3px]"
+            className="absolute bottom-0 left-0 right-0 bg-slate-950/82 backdrop-blur-[4px]"
             style={{ top: targetRect.top + targetRect.height }}
           />
         </>
       ) : (
-        <div className="absolute inset-0 bg-slate-950/72 backdrop-blur-[3px]" />
+        <div className="absolute inset-0 bg-slate-950/82 backdrop-blur-[4px]" />
       )}
 
       {targetRect ? (
