@@ -840,7 +840,7 @@ interface DashboardOverviewProps {
   onProfileRefresh: () => void;
 }
 
-function DashboardOverview({
+export function DashboardOverview({
   userId,
   gameMode,
   weeklyTarget,
