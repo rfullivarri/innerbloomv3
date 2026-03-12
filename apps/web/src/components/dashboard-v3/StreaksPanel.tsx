@@ -841,7 +841,8 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
         }
       >
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-center">
+          <div data-demo-anchor="streaks-top" className="space-y-4">
+            <div className="flex items-center justify-center">
             <div className={cx(TAB_GROUP_BASE, 'max-w-[320px]')}>
               {PILLAR_TABS.map((tab) => {
                 const isActive = pillar === tab.value;
@@ -867,110 +868,113 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
             </div>
           </div>
 
-        {isError && (
-          <p className="text-sm text-rose-300">
-            No pudimos cargar tus rachas activas
-            {error?.message ? `: ${error.message}` : '.'}
-          </p>
-        )}
+          {isError && (
+            <p className="text-sm text-rose-300">
+              No pudimos cargar tus rachas activas
+              {error?.message ? `: ${error.message}` : '.'}
+            </p>
+          )}
 
-        {isLoading ? (
-          <div className="grid grid-cols-1 gap-3">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div key={`top-skeleton-${index}`} className="h-24 animate-pulse rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
-            ))}
+          {isLoading ? (
+            <div className="grid grid-cols-1 gap-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={`top-skeleton-${index}`} className="h-24 animate-pulse rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
+              ))}
+            </div>
+          ) : (
+            hasContent && (
+              <section className="space-y-3">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-text)]">
+                    Top streaks
+                  </DashboardTitle>
+                  <DashboardMeta as="span" className="text-[color:var(--color-text)]">{t('dashboard.streaks.consecutiveDays')}</DashboardMeta>
+                </div>
+                {topEntries.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-3">
+                    {topEntries.map((entry) => (
+                      <TaskItem
+                        key={entry.id}
+                        item={{ ...entry, stat: localizeTaskStat(entry.stat, language) }}
+                        range={range}
+                        mode={normalizedMode}
+                        onSelect={handleSelectTask}
+                        daysConsecutiveText={daysConsecutiveText}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-[color:var(--color-slate-400)]">{t('dashboard.streaks.noneHighlighted')}</p>
+                )}
+              </section>
+            )
+          )}
           </div>
-        ) : (
-          hasContent && (
-            <section className="space-y-3">
-              <div className="flex flex-wrap items-baseline gap-2">
-                <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-text)]">
-                  Top streaks
-                </DashboardTitle>
-                <DashboardMeta as="span" className="text-[color:var(--color-text)]">{t('dashboard.streaks.consecutiveDays')}</DashboardMeta>
+
+          <div data-demo-anchor="streaks-bottom" className="space-y-4">
+            <InfoDotTarget
+              id="scopesGuide"
+              placement="top"
+              className="flex flex-wrap items-center justify-center gap-2"
+            >
+              <div className={cx(TAB_GROUP_BASE, 'max-w-[220px]')}>
+                {rangeTabs.map((tab) => {
+                  const isActive = range === tab.value;
+                  return (
+                    <button
+                      key={tab.value}
+                      type="button"
+                      onClick={() => setRange(tab.value)}
+                      className={cx(
+                        TAB_BUTTON_BASE,
+                        'leading-none',
+                        isActive
+                          ? 'ib-streak-pill-tab-active border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)] dark:border-white/90 dark:bg-white dark:text-black'
+                          : 'border-transparent bg-transparent text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]',
+                      )}
+                      aria-pressed={isActive}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
               </div>
-              {topEntries.length > 0 ? (
-                <div className="grid grid-cols-1 gap-3">
-                  {topEntries.map((entry) => (
-                    <TaskItem
-                      key={entry.id}
-                      item={{ ...entry, stat: localizeTaskStat(entry.stat, language) }}
-                      range={range}
-                      mode={normalizedMode}
-                      onSelect={handleSelectTask}
-                      daysConsecutiveText={daysConsecutiveText}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-[color:var(--color-slate-400)]">{t('dashboard.streaks.noneHighlighted')}</p>
-              )}
-            </section>
-          )
-        )}
+            </InfoDotTarget>
 
-        <InfoDotTarget
-          id="scopesGuide"
-          placement="top"
-          className="flex flex-wrap items-center justify-center gap-2"
-        >
-          <div className={cx(TAB_GROUP_BASE, 'max-w-[220px]')}>
-            {rangeTabs.map((tab) => {
-              const isActive = range === tab.value;
-              return (
-                <button
-                  key={tab.value}
-                  type="button"
-                  onClick={() => setRange(tab.value)}
-                  className={cx(
-                    TAB_BUTTON_BASE,
-                    'leading-none',
-                    isActive
-                      ? 'ib-streak-pill-tab-active border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)] dark:border-white/90 dark:bg-white dark:text-black'
-                      : 'border-transparent bg-transparent text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]',
+            {showTasksSkeleton ? (
+              <div className="grid grid-cols-1 gap-3">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div key={`task-skeleton-${index}`} className="h-24 animate-pulse rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
+                ))}
+              </div>
+            ) : (
+              hasContent && (
+                <section className="space-y-3">
+                  <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-text)]">
+                    {t('dashboard.streaks.allTasks')}
+                  </DashboardTitle>
+                  {displayTasks.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-3">
+                      {displayTasks.map((task) => (
+                        <TaskItem
+                          key={task.id}
+                          item={{ ...task, stat: localizeTaskStat(task.stat, language) }}
+                          range={range}
+                          mode={normalizedMode}
+                          onSelect={handleSelectTask}
+                          daysConsecutiveText={daysConsecutiveText}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-[color:var(--color-slate-400)]">
+                      {t('dashboard.streaks.noneForFilter')}
+                    </p>
                   )}
-                  aria-pressed={isActive}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
+                </section>
+              )
+            )}
           </div>
-        </InfoDotTarget>
-
-        {showTasksSkeleton ? (
-          <div className="grid grid-cols-1 gap-3">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div key={`task-skeleton-${index}`} className="h-24 animate-pulse rounded-ib-md border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]" />
-            ))}
-          </div>
-        ) : (
-          hasContent && (
-            <section className="space-y-3">
-              <DashboardTitle level="h2" as="h4" className="text-[color:var(--color-text)]">
-                {t('dashboard.streaks.allTasks')}
-              </DashboardTitle>
-              {displayTasks.length > 0 ? (
-                <div className="grid grid-cols-1 gap-3">
-                  {displayTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      item={{ ...task, stat: localizeTaskStat(task.stat, language) }}
-                      range={range}
-                      mode={normalizedMode}
-                      onSelect={handleSelectTask}
-                      daysConsecutiveText={daysConsecutiveText}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-[color:var(--color-slate-400)]">
-                  {t('dashboard.streaks.noneForFilter')}
-                </p>
-              )}
-            </section>
-          )
-        )}
         </div>
       </Card>
       <TaskInsightsModal
