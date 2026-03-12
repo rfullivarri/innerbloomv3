@@ -786,14 +786,12 @@ export default function LandingPage() {
 
         <section className="demo section-pad reveal-on-scroll" id="demo">
           <div className="container narrow">
-            <div className="demo-card">
-              <AdaptiveText as="h2">{copy.demo.title}</AdaptiveText>
-              <AdaptiveText as="p" className="section-sub demo-sub">{copy.demo.text}</AdaptiveText>
-              <div className="demo-actions">
-                <Link className={buttonClasses('ghost')} to="/demo">
-                  {copy.demo.cta}
-                </Link>
-              </div>
+            <AdaptiveText as="h2">{copy.demo.title}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub demo-sub">{copy.demo.text}</AdaptiveText>
+            <div className="demo-actions">
+              <Link className={buttonClasses('ghost')} to="/demo">
+                {copy.demo.cta}
+              </Link>
             </div>
           </div>
         </section>
