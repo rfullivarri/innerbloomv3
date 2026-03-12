@@ -32,6 +32,13 @@ const MOBILE_STEP_FOCUS_OFFSET: Record<string, number> = {
   'daily-quest-footer': 10,
 };
 
+const DAILY_QUEST_STEP_IDS = new Set([
+  'daily-quest-intro',
+  'daily-quest-moderation',
+  'daily-quest-tasks',
+  'daily-quest-footer',
+]);
+
 type Placement = 'top' | 'right' | 'bottom' | 'left';
 
 function clamp(value: number, min: number, max: number) {
@@ -47,8 +54,13 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
   const step = DEMO_GUIDED_STEPS[stepIndex];
+  const isDailyQuestStep = DAILY_QUEST_STEP_IDS.has(step.id);
 
   useEffect(() => {
+    if (isDailyQuestStep) {
+      setTargetRect(null);
+    }
+
     if (!step?.targetSelector) {
       setTargetRect(null);
       return;
@@ -120,7 +132,7 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', updateRect, true);
     };
-  }, [step?.targetSelector]);
+  }, [isDailyQuestStep, step?.targetSelector]);
 
   useEffect(() => {
     if (!step) return;
@@ -199,7 +211,7 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
   const isLast = stepIndex === DEMO_GUIDED_STEPS.length - 1;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[120]">
+    <div className={`pointer-events-none fixed inset-0 ${isDailyQuestStep ? 'z-[10020]' : 'z-[120]'}`}>
       {targetRect ? (
         <>
           <div className="absolute left-0 right-0 top-0 bg-slate-950/82 backdrop-blur-[4px]" style={{ height: targetRect.top }} />
