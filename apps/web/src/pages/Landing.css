@@ -356,6 +356,50 @@
   flex: 0 1 auto;
 }
 
+.landing .hero-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing .hero-demo-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  min-height: 42px;
+  padding: 0.58rem 1.02rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent-2) 48%, rgba(186, 212, 255, 0.45));
+  background: color-mix(in srgb, var(--accent-2) 9%, rgba(255, 255, 255, 0.03));
+  color: color-mix(in srgb, var(--ink) 94%, #fff 6%);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 0.83rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 26px rgba(8, 18, 44, 0.28);
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 180ms ease;
+}
+
+.landing .hero-demo-cta:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--accent-2) 14%, rgba(255, 255, 255, 0.04));
+  border-color: color-mix(in srgb, var(--accent-2) 58%, rgba(186, 212, 255, 0.52));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-2) 24%, transparent), 0 12px 28px rgba(10, 20, 48, 0.34);
+}
+
+.landing .hero-demo-cta:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-2) 78%, #fff 22%);
+  outline-offset: 2px;
+}
+
+.landing .hero-demo-cta-icon {
+  font-size: 0.64rem;
+  opacity: 0.92;
+}
+
 .landing .hero-media {
   width: var(--hero-size);
   height: var(--hero-size);
@@ -1259,6 +1303,14 @@
     margin: 0 auto;
   }
 
+
+  .landing .hero-demo-cta {
+    min-height: 40px;
+    padding: 0.54rem 0.95rem;
+    font-size: 0.8rem;
+    border-radius: 13px;
+  }
+
   .landing .demo-bridge {
     width: min(100%, 860px);
     grid-template-columns: minmax(96px, auto) minmax(0, 1fr) auto;
@@ -1390,6 +1442,11 @@
 
   .landing .brand-text {
     display: none;
+  }
+
+
+  .landing .hero-demo-cta {
+    max-width: min(88vw, 280px);
   }
 
   .landing .slider {

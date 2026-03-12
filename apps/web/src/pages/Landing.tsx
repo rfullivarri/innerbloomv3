@@ -646,6 +646,12 @@ export default function LandingPage() {
                     <Link className={`${buttonClasses()} journey-cta`} to={buildOnboardingPath(language)}>
                       {copy.auth.startJourney}
                     </Link>
+                    <Link className="hero-demo-cta" to={`/demo?lang=${language}`}>
+                      <span className="hero-demo-cta-icon" aria-hidden>
+                        ▶
+                      </span>
+                      <span>{copy.auth.guidedDemo}</span>
+                    </Link>
                   </>
                 )}
               </div>
