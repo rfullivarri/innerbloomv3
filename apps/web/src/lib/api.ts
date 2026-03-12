@@ -2154,6 +2154,35 @@ export async function dismissGameModeUpgradeSuggestion(): Promise<GameModeUpgrad
   return (await response.json()) as GameModeUpgradeSuggestionMutationResponse;
 }
 
+type GameModeChangeResponse = {
+  ok: boolean;
+  user: {
+    user_id: string;
+    game_mode_id: number;
+    image_url: string | null;
+    avatar_url: string | null;
+  };
+};
+
+export async function changeCurrentUserGameMode(mode: 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'): Promise<GameModeChangeResponse> {
+  const response = await apiAuthorizedFetch('/game-mode/change', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ mode }),
+  });
+
+  if (!response.ok) {
+    const body = await safeJson(response);
+    throw new ApiError(response.status, body, '/game-mode/change');
+  }
+
+  return (await response.json()) as GameModeChangeResponse;
+}
+
+
 export async function getUserJourney(userId: string): Promise<UserJourneySummary> {
   if (isDashboardDemoModeEnabled()) {
     return { first_date_log: '2025-10-01', days_of_journey: 150, quantity_daily_logs: 84, first_programmed: true, first_tasks_confirmed: true, completed_first_daily_quest: true };

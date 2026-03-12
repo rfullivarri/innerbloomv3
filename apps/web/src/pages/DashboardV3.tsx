@@ -628,6 +628,8 @@ export default function DashboardV3Page() {
             }))}
             menuSlot={
               <DashboardMenu
+                currentGameMode={gameMode}
+                onGameModeChanged={reload}
                 onOpenScheduler={handleOpenReminderScheduler}
                 moderation={{
                   configs: moderation.configs,
