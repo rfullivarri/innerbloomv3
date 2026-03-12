@@ -790,7 +790,7 @@ export default function LandingPage() {
               <AdaptiveText as="h2">{copy.demo.title}</AdaptiveText>
               <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
               <div className="demo-actions">
-                <Link className={buttonClasses('ghost')} to="/demo">
+                <Link className={buttonClasses()} to="/demo">
                   {copy.demo.cta}
                 </Link>
               </div>
