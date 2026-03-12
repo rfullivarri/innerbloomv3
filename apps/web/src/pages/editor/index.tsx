@@ -411,7 +411,6 @@ export default function TaskEditorPage() {
 
   const handleEditSuccess = useCallback(() => {
     const isFirstOnboardingEdit =
-      !dailyQuestReadiness.firstTasksConfirmed &&
       !dailyQuestReadiness.completedFirstDailyQuest &&
       markFirstEditDone();
 
@@ -428,7 +427,6 @@ export default function TaskEditorPage() {
     }, 20);
   }, [
     dailyQuestReadiness.completedFirstDailyQuest,
-    dailyQuestReadiness.firstTasksConfirmed,
     handleCloseEdit,
     markFirstEditDone,
     scrollToEditorTop,
