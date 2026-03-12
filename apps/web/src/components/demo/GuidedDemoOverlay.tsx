@@ -17,6 +17,8 @@ const VIEWPORT_PADDING = 12;
 const TOOLTIP_HEIGHT_DESKTOP = 252;
 const TOOLTIP_HEIGHT_MOBILE = 238;
 const MOBILE_FOCUS_DEFAULT_OFFSET = 10;
+const DAILY_QUEST_INTRO_STEP_ID = 'daily-quest-intro';
+const DAILY_QUEST_FOOTER_STEP_ID = 'daily-quest-footer';
 
 const MOBILE_STEP_FOCUS_OFFSET: Record<string, number> = {
   'overall-progress': 8,
@@ -77,7 +79,23 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
         setTargetRect(null);
         return;
       }
-      const rect = target.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const emotionBlock = step.id === DAILY_QUEST_INTRO_STEP_ID
+        ? (document.querySelector('[data-demo-anchor="daily-quest-emotion-block"]') as HTMLElement | null)
+        : null;
+      const emotionRect = emotionBlock?.getBoundingClientRect();
+
+      const rect = emotionRect
+        ? {
+          top: Math.min(targetRect.top, emotionRect.top),
+          left: Math.min(targetRect.left, emotionRect.left),
+          right: Math.max(targetRect.right, emotionRect.right),
+          bottom: Math.max(targetRect.bottom, emotionRect.bottom),
+          width: Math.max(targetRect.right, emotionRect.right) - Math.min(targetRect.left, emotionRect.left),
+          height: Math.max(targetRect.bottom, emotionRect.bottom) - Math.min(targetRect.top, emotionRect.top),
+        }
+        : targetRect;
+
       const maxRectWidth = Math.max(0, viewport.width - VIEWPORT_PADDING * 2);
       const width = Math.min(rect.width + PADDING * 2, maxRectWidth);
       const left = clamp(rect.left - PADDING, VIEWPORT_PADDING, viewport.width - width - VIEWPORT_PADDING);
@@ -153,7 +171,10 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
     }
 
     if (isMobile) {
-      const mobileTop = clamp(viewport.height - TOOLTIP_HEIGHT_MOBILE - VIEWPORT_PADDING, VIEWPORT_PADDING, viewport.height - TOOLTIP_HEIGHT_MOBILE - VIEWPORT_PADDING);
+      const defaultMobileTop = viewport.height - TOOLTIP_HEIGHT_MOBILE - VIEWPORT_PADDING;
+      const mobileTop = step.id === DAILY_QUEST_FOOTER_STEP_ID
+        ? clamp(Math.max(VIEWPORT_PADDING + 24, targetRect.top - TOOLTIP_HEIGHT_MOBILE - 24), VIEWPORT_PADDING, defaultMobileTop)
+        : clamp(defaultMobileTop, VIEWPORT_PADDING, defaultMobileTop);
       return {
         left: VIEWPORT_PADDING,
         top: mobileTop,
@@ -163,9 +184,11 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
 
     const gap = 18;
     const candidates: Placement[] = ['right', 'left', 'bottom', 'top'];
-    const preferredOrder = step.tooltipPlacement && step.tooltipPlacement !== 'auto'
-      ? [step.tooltipPlacement as Placement, ...candidates.filter((placement) => placement !== step.tooltipPlacement)]
-      : candidates;
+    const preferredOrder = step.id === DAILY_QUEST_FOOTER_STEP_ID
+      ? (['top', ...candidates.filter((placement) => placement !== 'top')] as Placement[])
+      : step.tooltipPlacement && step.tooltipPlacement !== 'auto'
+        ? [step.tooltipPlacement as Placement, ...candidates.filter((placement) => placement !== step.tooltipPlacement)]
+        : candidates;
 
     const centerLeft = targetRect.left + targetRect.width / 2 - width / 2;
     const centerTop = targetRect.top + targetRect.height / 2 - TOOLTIP_HEIGHT_DESKTOP / 2;
