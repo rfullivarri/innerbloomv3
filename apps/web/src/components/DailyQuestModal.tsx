@@ -987,13 +987,12 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                             </div>
                           </section>
 
-                          <section data-demo-anchor="daily-quest-moderation">
-                            <ModerationWidget
-                              data={moderationState}
-                              loading={moderationRequest.status === 'loading'}
-                              onCycle={handleCycleModeration}
-                            />
-                          </section>
+                          <ModerationWidget
+                            data={moderationState}
+                            loading={moderationRequest.status === 'loading'}
+                            onCycle={handleCycleModeration}
+                            demoAnchor="daily-quest-moderation"
+                          />
 
                           <section className="flex flex-col gap-4" data-demo-anchor="daily-quest-tasks">
                             <h3 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-muted)]">Checklist del día</h3>

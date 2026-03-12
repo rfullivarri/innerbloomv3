@@ -16,6 +16,7 @@ type Rect = { top: number; left: number; width: number; height: number };
 
 const PADDING = 10;
 const VIEWPORT_PADDING = 12;
+const MOBILE_TOOLTIP_BOTTOM_GAP = 6;
 const TOOLTIP_HEIGHT_DESKTOP = 252;
 const TOOLTIP_HEIGHT_MOBILE = 238;
 const TOOLTIP_HEIGHT_MOBILE_COMPACT = 210;
@@ -25,7 +26,7 @@ const DAILY_QUEST_INTRO_STEP_ID = 'daily-quest-intro';
 const DAILY_QUEST_FOOTER_STEP_ID = 'daily-quest-footer';
 
 const MOBILE_DASHBOARD_STEP_FOCUS_OFFSET: Record<string, number> = {
-  'overall-progress': 8,
+  'overall-progress': 12,
   'streaks-top': 4,
   'streaks-bottom': 4,
   balance: 6,
@@ -36,9 +37,14 @@ const MOBILE_DASHBOARD_STEP_FOCUS_OFFSET: Record<string, number> = {
 
 const MOBILE_DAILY_QUEST_STEP_FOCUS_OFFSET: Record<string, number> = {
   'daily-quest-intro': 6,
-  'daily-quest-moderation': 6,
+  'daily-quest-moderation': 10,
   'daily-quest-tasks': 6,
   'daily-quest-footer': 10,
+};
+
+const STEP_FRAME_PADDING: Record<string, number> = {
+  'overall-progress': 12,
+  'daily-quest-moderation': 12,
 };
 
 const DAILY_QUEST_STEP_IDS = new Set([
@@ -138,15 +144,16 @@ export function GuidedDemoOverlay({
         }
         : targetRect;
 
+      const framePadding = STEP_FRAME_PADDING[step.id] ?? PADDING;
       const maxRectWidth = Math.max(0, viewport.width - VIEWPORT_PADDING * 2);
-      const width = Math.min(rect.width + PADDING * 2, maxRectWidth);
-      const left = clamp(rect.left - PADDING, VIEWPORT_PADDING, viewport.width - width - VIEWPORT_PADDING);
+      const width = Math.min(rect.width + framePadding * 2, maxRectWidth);
+      const left = clamp(rect.left - framePadding, VIEWPORT_PADDING, viewport.width - width - VIEWPORT_PADDING);
       const topInset = window.visualViewport?.offsetTop ?? 0;
       setTargetRect({
-        top: Math.max(VIEWPORT_PADDING, rect.top - PADDING - topInset),
+        top: Math.max(VIEWPORT_PADDING, rect.top - framePadding - topInset),
         left,
         width,
-        height: rect.height + PADDING * 2,
+        height: rect.height + framePadding * 2,
       });
     };
 
@@ -255,7 +262,7 @@ export function GuidedDemoOverlay({
     }
 
     if (isMobile) {
-      const defaultMobileTop = viewport.height - mobileTooltipHeight - VIEWPORT_PADDING;
+      const defaultMobileTop = viewport.height - mobileTooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP;
       const mobileTop = step.id === DAILY_QUEST_FOOTER_STEP_ID
         ? clamp(Math.max(VIEWPORT_PADDING + 24, targetRect.top - mobileTooltipHeight - 24), VIEWPORT_PADDING, defaultMobileTop)
         : clamp(defaultMobileTop, VIEWPORT_PADDING, defaultMobileTop);
@@ -321,13 +328,13 @@ export function GuidedDemoOverlay({
     <div className={`pointer-events-none fixed inset-0 ${isDailyQuestStep ? 'z-[10020]' : 'z-[120]'}`}>
       {targetRect ? (
         <>
-          <div className="absolute left-0 right-0 top-0 bg-slate-950/82 backdrop-blur-[4px]" style={{ height: targetRect.top }} />
+          <div className="absolute left-0 right-0 top-0 bg-slate-950/86 backdrop-blur-[6px]" style={{ height: targetRect.top }} />
           <div
-            className="absolute left-0 bg-slate-950/82 backdrop-blur-[4px]"
+            className="absolute left-0 bg-slate-950/86 backdrop-blur-[6px]"
             style={{ top: targetRect.top, width: targetRect.left, height: targetRect.height }}
           />
           <div
-            className="absolute right-0 bg-slate-950/82 backdrop-blur-[4px]"
+            className="absolute right-0 bg-slate-950/86 backdrop-blur-[6px]"
             style={{
               top: targetRect.top,
               width: Math.max(0, viewport.width - (targetRect.left + targetRect.width)),
@@ -335,12 +342,12 @@ export function GuidedDemoOverlay({
             }}
           />
           <div
-            className="absolute bottom-0 left-0 right-0 bg-slate-950/82 backdrop-blur-[4px]"
+            className="absolute bottom-0 left-0 right-0 bg-slate-950/86 backdrop-blur-[6px]"
             style={{ top: targetRect.top + targetRect.height }}
           />
         </>
       ) : (
-        <div className="absolute inset-0 bg-slate-950/82 backdrop-blur-[4px]" />
+        <div className="absolute inset-0 bg-slate-950/86 backdrop-blur-[6px]" />
       )}
 
       {targetRect ? (
