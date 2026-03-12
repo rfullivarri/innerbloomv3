@@ -368,8 +368,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.42rem;
-  min-height: 42px;
-  padding: 0.58rem 1.02rem;
+  min-height: 30px;
+  padding: 0.4rem 1.02rem;
   border-radius: 14px;
   border: 1px solid color-mix(in srgb, var(--accent-2) 48%, rgba(186, 212, 255, 0.45));
   background: color-mix(in srgb, var(--accent-2) 9%, rgba(255, 255, 255, 0.03));
@@ -1305,8 +1305,8 @@
 
 
   .landing .hero-demo-cta {
-    min-height: 40px;
-    padding: 0.54rem 0.95rem;
+    min-height: 28px;
+    padding: 0.38rem 0.95rem;
     font-size: 0.8rem;
     border-radius: 13px;
   }
