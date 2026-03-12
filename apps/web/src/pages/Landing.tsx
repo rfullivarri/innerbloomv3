@@ -796,7 +796,7 @@ export default function LandingPage() {
         <section className="feature-showcase section-pad reveal-on-scroll" id="demo">
           <div className="container narrow">
             <div className="demo-bridge">
-              <AdaptiveText as="h2">{copy.demo.title}</AdaptiveText>
+              <AdaptiveText as="h2" className="demo-title">{copy.demo.title}</AdaptiveText>
               <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
               <div className="demo-actions">
                 <Link className={buttonClasses()} to={`/demo?lang=${language}`}>
