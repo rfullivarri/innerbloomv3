@@ -11,9 +11,11 @@ import { useLongPress } from "../../hooks/useLongPress";
 import { useThemePreference } from "../../theme/ThemePreferenceProvider";
 import {
   ApiError,
+  changeCurrentUserGameMode,
   type ModerationTrackerConfig,
   type ModerationTrackerType,
 } from "../../lib/api";
+import { normalizeGameModeValue, type GameMode } from "../../lib/gameMode";
 import type { ResolvedTheme } from "../../theme/themePreference";
 import {
   forwardRef,
@@ -29,6 +31,8 @@ import {
 type MenuPanel = "main" | "widgets";
 
 interface DashboardMenuProps {
+  currentGameMode: GameMode | string | null;
+  onGameModeChanged: () => Promise<void> | void;
   onOpenScheduler?: () => void;
   moderation: {
     configs: Record<ModerationTrackerType, ModerationTrackerConfig> | null;
@@ -40,6 +44,24 @@ interface DashboardMenuProps {
     ) => Promise<void>;
     onOpenEdit: () => void;
   };
+}
+
+
+
+export function isDemandingModeJump(currentMode: GameMode | null, selectedMode: GameMode | null): boolean {
+  if (!currentMode || !selectedMode) {
+    return false;
+  }
+
+  const modeOrder: GameMode[] = ['Low', 'Chill', 'Flow', 'Evolve'];
+  const currentIndex = modeOrder.indexOf(currentMode);
+  const selectedIndex = modeOrder.indexOf(selectedMode);
+
+  if (currentIndex < 0 || selectedIndex < 0) {
+    return false;
+  }
+
+  return Math.abs(selectedIndex - currentIndex) > 1;
 }
 
 export function getWidgetsRefreshingOverlayClass(theme: ResolvedTheme): string {
@@ -138,6 +160,8 @@ function buildModerationSaveErrorMessage(error: unknown, fallback: string): stri
 }
 
 export function DashboardMenu({
+  currentGameMode,
+  onGameModeChanged,
   onOpenScheduler,
   moderation,
 }: DashboardMenuProps) {
@@ -156,6 +180,10 @@ export function DashboardMenu({
   const [isPlansOpen, setIsPlansOpen] = useState(false);
   const [isModerationOpen, setIsModerationOpen] = useState(true);
   const [activePanel, setActivePanel] = useState<MenuPanel>("main");
+  const [isGameModeOpen, setIsGameModeOpen] = useState(false);
+  const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
+  const [isSavingMode, setIsSavingMode] = useState(false);
+  const [gameModeError, setGameModeError] = useState<string | null>(null);
   const [trackerOverrides, setTrackerOverrides] = useState<
     Partial<Record<ModerationTrackerType, boolean>>
   >({});
@@ -258,6 +286,14 @@ export function DashboardMenu({
     });
   }, [moderation.configs]);
 
+  const modeOptions: GameMode[] = ["Low", "Chill", "Flow", "Evolve"];
+  const normalizedCurrentMode = useMemo(() => normalizeGameModeValue(currentGameMode), [currentGameMode]);
+  const selectedOrCurrentMode = selectedMode ?? normalizedCurrentMode;
+  const modeJumpIsDemanding = useMemo(
+    () => isDemandingModeJump(normalizedCurrentMode, selectedOrCurrentMode),
+    [normalizedCurrentMode, selectedOrCurrentMode],
+  );
+
   const menuRowClassName =
     "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40";
   const menuCardClassName =
@@ -274,6 +310,48 @@ export function DashboardMenu({
     handleClose();
     onOpenScheduler?.();
   }, [handleClose, onOpenScheduler]);
+
+  const handleOpenGameMode = useCallback(() => {
+    setSelectedMode(normalizedCurrentMode);
+    setGameModeError(null);
+    setIsGameModeOpen(true);
+  }, [normalizedCurrentMode]);
+
+  const handleCloseGameMode = useCallback(() => {
+    if (isSavingMode) {
+      return;
+    }
+    setIsGameModeOpen(false);
+    setSelectedMode(null);
+    setGameModeError(null);
+  }, [isSavingMode]);
+
+  const handleConfirmGameMode = useCallback(async () => {
+    if (!selectedOrCurrentMode || isSavingMode) {
+      return;
+    }
+
+    const normalized = selectedOrCurrentMode.toUpperCase() as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
+    setIsSavingMode(true);
+    setGameModeError(null);
+
+    try {
+      await changeCurrentUserGameMode(normalized);
+      await onGameModeChanged();
+      setIsGameModeOpen(false);
+      setSelectedMode(null);
+      setToast({
+        tone: 'success',
+        message: t('dashboard.menu.gameModeUpdated'),
+      });
+      handleClose();
+    } catch (error) {
+      console.error('[dashboard-menu] failed to change game mode', error);
+      setGameModeError(buildModerationSaveErrorMessage(error, t('dashboard.menu.gameModeSaveError')));
+    } finally {
+      setIsSavingMode(false);
+    }
+  }, [handleClose, isSavingMode, onGameModeChanged, selectedOrCurrentMode, setToast, t]);
 
   const handleSignOut = useCallback(async () => {
     handleClose();
@@ -559,6 +637,20 @@ export function DashboardMenu({
                       </MenuIcon>
                       <span className="flex-1">{t('dashboard.menu.reminder')}</span>
                     </button>
+                    <button
+                      type="button"
+                      onClick={handleOpenGameMode}
+                      className={menuRowClassName}
+                    >
+                      <MenuIcon>
+                        <circle cx="12" cy="12" r="8" />
+                        <path d="m12 7 3 3-3 3-3-3 3-3Z" />
+                      </MenuIcon>
+                      <span className="flex-1">{t('dashboard.menu.gameMode')}</span>
+                      <span className="text-xs text-[color:var(--color-text-faint)]">
+                        {normalizedCurrentMode ?? 'Flow'}
+                      </span>
+                    </button>
                       </div>
                       <div className={`${menuCardClassName} px-2 py-1`}>
                       <button
@@ -836,6 +928,77 @@ export function DashboardMenu({
                   ) : null}
                   </div>
                 </div>
+
+                {isGameModeOpen ? (
+                  <div className="absolute inset-0 z-20 flex items-end bg-black/40 p-2 md:items-center">
+                    <div className="w-full rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl">
+                      <div className="mb-3 flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-text-faint)]">{t('dashboard.menu.gameMode')}</p>
+                          <h3 className="text-base font-semibold text-[color:var(--color-text)]">{t('dashboard.menu.chooseGameMode')}</h3>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCloseGameMode}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)]"
+                          aria-label={t('dashboard.nav.closeMenu')}
+                        >
+                          <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)]">
+                            <path d="M6 6l12 12M18 6 6 18" />
+                          </MenuIcon>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        {modeOptions.map((mode) => {
+                          const isSelected = (selectedOrCurrentMode ?? 'Flow') === mode;
+                          return (
+                            <button
+                              key={mode}
+                              type="button"
+                              onClick={() => setSelectedMode(mode)}
+                              className={`rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] text-[color:var(--color-text)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]'}`}
+                            >
+                              <p className="text-sm font-semibold">{mode}</p>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {modeJumpIsDemanding ? (
+                        <p className="mt-3 rounded-xl border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+                          {t('dashboard.menu.gameModeDemandingWarning')}
+                        </p>
+                      ) : null}
+
+                      {gameModeError ? (
+                        <p className="mt-3 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+                          {gameModeError}
+                        </p>
+                      ) : null}
+
+                      <div className="mt-4 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCloseGameMode}
+                          className="flex-1 rounded-xl border border-[color:var(--color-border-subtle)] px-3 py-2 text-sm text-[color:var(--color-text-dim)]"
+                          disabled={isSavingMode}
+                        >
+                          {t('dashboard.menu.cancel')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleConfirmGameMode()}
+                          className="flex-1 rounded-xl border border-[color:var(--color-accent-primary)] bg-[color:var(--color-accent-primary)]/20 px-3 py-2 text-sm font-semibold text-[color:var(--color-text)] disabled:opacity-60"
+                          disabled={isSavingMode || !selectedOrCurrentMode}
+                        >
+                          {isSavingMode ? t('dashboard.menu.gameModeSaving') : t('dashboard.menu.gameModeConfirm')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
                 <button
                   type="button"
                   onClick={handleSignOut}
