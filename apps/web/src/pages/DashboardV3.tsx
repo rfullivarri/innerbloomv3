@@ -921,32 +921,46 @@ export function DashboardOverview({
         </div>
 
         <div className="order-2 space-y-4 md:space-y-5 lg:order-2 lg:col-span-4">
-          <MetricHeader userId={userId} gameMode={gameMode} />
+          <div data-demo-anchor="overall-progress">
+            <MetricHeader userId={userId} gameMode={gameMode} />
+          </div>
           <ProfileCard gameMode={gameMode} />
-          <EnergyCard userId={userId} gameMode={gameMode} />
-          <DailyCultivationSection userId={userId} />
+          <div data-demo-anchor="daily-energy">
+            <EnergyCard userId={userId} gameMode={gameMode} />
+          </div>
+          <div data-demo-anchor="daily-cultivation">
+            <DailyCultivationSection userId={userId} />
+          </div>
         </div>
 
         <div className="order-3 space-y-4 md:space-y-5 lg:order-3 lg:col-span-4">
-          <ModerationStatusWidget
-            data={moderationState ?? null}
-            loading={moderationRequest.status === "loading"}
-            onCycle={handleCycleModeration}
-            onEdit={onOpenModerationEdit}
-          />
-          <RadarChartCard userId={userId} />
-          <EmotionChartCard userId={userId} />
+          <div data-demo-anchor="moderation">
+            <ModerationStatusWidget
+              data={moderationState ?? null}
+              loading={moderationRequest.status === "loading"}
+              onCycle={handleCycleModeration}
+              onEdit={onOpenModerationEdit}
+            />
+          </div>
+          <div data-demo-anchor="balance">
+            <RadarChartCard userId={userId} />
+          </div>
+          <div data-demo-anchor="emotion-chart">
+            <EmotionChartCard userId={userId} />
+          </div>
 
         </div>
 
         <div className="order-4 space-y-4 md:space-y-5 lg:order-4 lg:col-span-4">
           {FEATURE_STREAKS_PANEL_V1 && <LegacyStreaksPanel userId={userId} />}
-          <StreaksPanel
-            userId={userId}
-            gameMode={gameMode}
-            weeklyTarget={weeklyTarget}
-            forceLoadingTasks={isJourneyGenerating}
-          />
+          <div data-demo-anchor="streaks">
+            <StreaksPanel
+              userId={userId}
+              gameMode={gameMode}
+              weeklyTarget={weeklyTarget}
+              forceLoadingTasks={isJourneyGenerating}
+            />
+          </div>
         </div>
       </div>
     </div>
