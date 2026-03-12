@@ -367,7 +367,6 @@ export default function LandingPage() {
   const modeFrequency = frequencyByMode[language][activeMode.id];
   const modeStateLabel = language === 'es' ? 'Estado' : 'State';
   const modeObjectiveLabel = language === 'es' ? 'Objetivo' : 'Objective';
-  const demoCtaLabel = language === 'es' ? 'Ver demo' : 'Start demo';
 
   useEffect(() => {
     window.localStorage.setItem(LANDING_GRADIENT_STORAGE_KEY, gradientId);
@@ -620,9 +619,6 @@ export default function LandingPage() {
               <Link className={`${buttonClasses()} nav-auth-button`} to={buildLocalizedAuthPath('/login', language)}>
                 {copy.auth.login}
               </Link>
-              <Link className={`${buttonClasses('ghost')} nav-auth-button`} to={`/demo?lang=${language}`}>
-                {demoCtaLabel}
-              </Link>
             </>
           )}
         </div>
@@ -649,9 +645,6 @@ export default function LandingPage() {
                   <>
                     <Link className={`${buttonClasses()} journey-cta`} to={buildOnboardingPath(language)}>
                       {copy.auth.startJourney}
-                    </Link>
-                    <Link className={`${buttonClasses('ghost')} journey-cta`} to={`/demo?lang=${language}`}>
-                      {demoCtaLabel}
                     </Link>
                   </>
                 )}
