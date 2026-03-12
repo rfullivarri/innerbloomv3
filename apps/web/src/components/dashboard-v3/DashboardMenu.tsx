@@ -7,6 +7,7 @@ import { ModerationWidget as ModerationPreviewWidget } from "./ModerationWidget"
 import { ModerationTrackerIcon } from "../moderation/trackerMeta";
 import { useQuickAccessInstall } from "../../hooks/useQuickAccessInstall";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { SegmentedPillControl } from "./SegmentedPillControl";
 import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
 import { useLongPress } from "../../hooks/useLongPress";
 import { useThemePreference } from "../../theme/ThemePreferenceProvider";
@@ -722,29 +723,15 @@ export function DashboardMenu({
 
                     <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3">
                       <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)]">{t('dashboard.language.title')}</p>
-                      <div className="mt-2 inline-flex w-full rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)]/40 p-1">
-                        {([
+                      <SegmentedPillControl
+                        ariaLabel={t('dashboard.language.title')}
+                        options={[
                           { value: "es", label: t('dashboard.language.spanish') },
                           { value: "en", label: t('dashboard.language.english') },
-                        ] as const).map((option) => {
-                          const isActive = language === option.value;
-                          return (
-                            <button
-                              key={option.value}
-                              type="button"
-                              onClick={() => setManualLanguage(option.value)}
-                              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
-                                isActive
-                                  ? "border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-2)] text-[color:var(--color-text-strong)]"
-                                  : "border border-transparent text-[color:var(--color-text-faint)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]"
-                              }`}
-                              aria-pressed={isActive}
-                            >
-                              {option.label}
-                            </button>
-                          );
-                        })}
-                      </div>
+                        ] as const}
+                        value={language}
+                        onChange={setManualLanguage}
+                      />
                     </section>
 
                   {isMobile ? (
