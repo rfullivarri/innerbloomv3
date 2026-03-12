@@ -21,7 +21,7 @@ export const GAME_MODE_META: Record<GameMode, GameModeMeta> = {
     state: { es: 'En foco. En movimiento.', en: 'Focused. In motion.' },
     objective: { es: 'Canalizar energía en metas concretas.', en: 'Channel your energy into concrete goals.' },
     accentColor: '#49C2F2',
-    avatarSrc: '/flowGMO.png',
+    avatarSrc: '/flowVertical.jpg',
     avatarAlt: {
       es: 'Avatar del modo Flow en movimiento y enfocado.',
       en: 'Flow mode avatar in motion and focused.',
@@ -33,7 +33,7 @@ export const GAME_MODE_META: Record<GameMode, GameModeMeta> = {
     state: { es: 'Baja energía. Saturado.', en: 'Low energy. Overwhelmed.' },
     objective: { es: 'Activar lo mínimo vital con pasos pequeños.', en: 'Activate the essentials with small steps.' },
     accentColor: '#FF6B6B',
-    avatarSrc: '/lowGMO.png',
+    avatarSrc: '/lowVertical.jpg',
     avatarAlt: {
       es: 'Avatar del modo Low con expresión de descanso.',
       en: 'Low mode avatar with a resting expression.',
@@ -45,7 +45,7 @@ export const GAME_MODE_META: Record<GameMode, GameModeMeta> = {
     state: { es: 'Estable. Sin presión.', en: 'Stable. No pressure.' },
     objective: { es: 'Sostener hábitos simples con constancia.', en: 'Sustain simple habits consistently.' },
     accentColor: '#6EDC8C',
-    avatarSrc: '/chillGMO.png',
+    avatarSrc: '/chillVertical.jpg',
     avatarAlt: {
       es: 'Avatar del modo Chill con expresión de calma.',
       en: 'Chill mode avatar with a calm expression.',
@@ -57,7 +57,7 @@ export const GAME_MODE_META: Record<GameMode, GameModeMeta> = {
     state: { es: 'Ambicioso. Determinado.', en: 'Ambitious. Determined.' },
     objective: { es: 'Sostener ritmo alto con estructura clara.', en: 'Keep a high pace with clear structure.' },
     accentColor: '#9B6CFF',
-    avatarSrc: '/evolveGMO.png',
+    avatarSrc: '/evolveVertical.jpg',
     avatarAlt: {
       es: 'Avatar del modo Evolve con expresión determinada.',
       en: 'Evolve mode avatar with a determined expression.',

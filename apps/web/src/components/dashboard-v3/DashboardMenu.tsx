@@ -74,15 +74,6 @@ function toMetaModeKey(mode: GameMode): keyof typeof GAME_MODE_META {
   return "Evolve";
 }
 
-function getModeBannerObjectPosition(mode: GameMode): string {
-  const positions: Record<GameMode, string> = {
-    Low: '65% 45%',
-    Chill: '60% 45%',
-    Flow: '70% 45%',
-    Evolve: '65% 50%',
-  };
-  return positions[mode];
-}
 export function getWidgetsRefreshingOverlayClass(theme: ResolvedTheme): string {
   return theme === "light"
     ? "bg-[color:var(--color-overlay-3)]"
@@ -1004,8 +995,7 @@ export function DashboardMenu({
                                 <img
                                   src={content.avatarSrc}
                                   alt={content.avatarAlt[language]}
-                                  className="h-20 w-full rounded-xl border border-white/10 object-cover"
-                                  style={{ objectPosition: getModeBannerObjectPosition(mode) }}
+                                  className="h-28 w-full rounded-xl border border-white/10 object-contain bg-black/10"
                                   loading="lazy"
                                 />
                                 <p className="line-clamp-2 text-[11px] text-[color:var(--color-text-dim)]">{content.objective[language]}</p>
