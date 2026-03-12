@@ -636,6 +636,9 @@ export default function LandingPage() {
                     <Link className={`${buttonClasses()} journey-cta`} to={buildOnboardingPath(language)}>
                       {copy.auth.startJourney}
                     </Link>
+                    <Link className={buttonClasses('ghost')} to="/demo">
+                      {language === 'es' ? 'Ver demo' : 'Start demo'}
+                    </Link>
                   </>
                 )}
               </div>
@@ -891,6 +894,9 @@ export default function LandingPage() {
                 <>
                   <Link className={`${buttonClasses()} journey-cta`} to={buildOnboardingPath(language)}>
                     {copy.auth.startJourney}
+                  </Link>
+                  <Link className={buttonClasses('ghost')} to="/demo">
+                    {language === 'es' ? 'Ver demo' : 'Start demo'}
                   </Link>
                 </>
               )}

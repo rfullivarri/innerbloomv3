@@ -223,3 +223,20 @@ export function emitOnboardingEvent(event: OnboardingEventName, payload: Record<
     ...payload,
   });
 }
+
+export type DemoEventName =
+  | 'demo_opened'
+  | 'demo_guided_started'
+  | 'demo_step_viewed'
+  | 'demo_guided_skipped'
+  | 'demo_guided_completed'
+  | 'demo_exited'
+  | 'demo_cta_clicked';
+
+export function emitDemoEvent(event: DemoEventName, payload: Record<string, unknown> = {}) {
+  logApiDebug('[analytics] demo event', {
+    event,
+    timestamp: new Date().toISOString(),
+    ...payload,
+  });
+}
