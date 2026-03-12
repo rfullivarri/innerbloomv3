@@ -46,12 +46,15 @@ export const dashboardTranslations = {
   },
   'dashboard.menu.reminder': { es: 'Recordatorio', en: 'Reminder' },
   'dashboard.menu.gameMode': { es: 'Game Mode', en: 'Game Mode' },
+  'dashboard.menu.changeGameMode': { es: 'Cambiar Game Mode', en: 'Change Game Mode' },
   'dashboard.menu.chooseGameMode': { es: 'Elegí tu Game Mode', en: 'Choose your game mode' },
   'dashboard.menu.gameModeDemandingWarning': {
     es: 'This will make your task tracking significantly more demanding.',
     en: 'This will make your task tracking significantly more demanding.',
   },
-  'dashboard.menu.gameModeConfirm': { es: 'Aplicar modo', en: 'Apply mode' },
+  'dashboard.menu.confirmChange': { es: 'Confirmar cambio', en: 'Confirm change' },
+  'dashboard.menu.currentGameMode': { es: 'Modo actual', en: 'Current mode' },
+  'dashboard.menu.gameModeConfirmPrompt': { es: '¿Confirmas cambiar tu Game Mode a {{mode}}?', en: 'Do you want to change your Game Mode to {{mode}}?' },
   'dashboard.menu.gameModeSaving': { es: 'Guardando…', en: 'Saving…' },
   'dashboard.menu.gameModeUpdated': { es: 'Game Mode actualizado.', en: 'Game mode updated.' },
   'dashboard.menu.gameModeSaveError': {

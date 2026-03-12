@@ -3,6 +3,7 @@ import type { GameMode } from '../state';
 import type { OnboardingLanguage } from '../constants';
 import { getBannerObjectPosition } from '../utils/bannerObjectPosition';
 import { NavButtons } from '../ui/NavButtons';
+import { GAME_MODE_META } from '../../lib/gameModeMeta';
 
 interface GameModeStepProps {
   language?: OnboardingLanguage;
@@ -12,65 +13,11 @@ interface GameModeStepProps {
   onBack?: () => void;
 }
 
-type ModeCardContent = {
-  title: string;
-  frequency: Record<OnboardingLanguage, string>;
-  state: Record<OnboardingLanguage, string>;
-  objective: Record<OnboardingLanguage, string>;
-  accentColor: string;
-  avatarSrc: string;
-  avatarAlt: Record<OnboardingLanguage, string>;
-};
-
-export const MODE_CARD_CONTENT: Record<GameMode, ModeCardContent> = {
-  FLOW: {
-    title: 'FLOW MOOD',
-    frequency: { es: '3x/semana', en: '3x/week' },
-    state: { es: 'En foco. En movimiento.', en: 'Focused. In motion.' },
-    objective: { es: 'Canalizar energía en metas concretas.', en: 'Channel your energy into concrete goals.' },
-    accentColor: '#49C2F2',
-    avatarSrc: '/flowGMO.png',
-    avatarAlt: {
-      es: 'Avatar del modo Flow en movimiento y enfocado.',
-      en: 'Flow mode avatar in motion and focused.',
-    },
-  },
-  LOW: {
-    title: 'LOW MOOD',
-    frequency: { es: '1x/semana', en: '1x/week' },
-    state: { es: 'Baja energía. Saturado.', en: 'Low energy. Overwhelmed.' },
-    objective: { es: 'Activar lo mínimo vital con pasos pequeños.', en: 'Activate the essentials with small steps.' },
-    accentColor: '#FF6B6B',
-    avatarSrc: '/lowGMO.png',
-    avatarAlt: {
-      es: 'Avatar del modo Low con expresión de descanso.',
-      en: 'Low mode avatar with a resting expression.',
-    },
-  },
-  CHILL: {
-    title: 'CHILL MOOD',
-    frequency: { es: '2x/semana', en: '2x/week' },
-    state: { es: 'Estable. Sin presión.', en: 'Stable. No pressure.' },
-    objective: { es: 'Sostener hábitos simples con constancia.', en: 'Sustain simple habits consistently.' },
-    accentColor: '#6EDC8C',
-    avatarSrc: '/chillGMO.png',
-    avatarAlt: {
-      es: 'Avatar del modo Chill con expresión de calma.',
-      en: 'Chill mode avatar with a calm expression.',
-    },
-  },
-  EVOLVE: {
-    title: 'EVOLVE MOOD',
-    frequency: { es: '4x/semana', en: '4x/week' },
-    state: { es: 'Ambicioso. Determinado.', en: 'Ambitious. Determined.' },
-    objective: { es: 'Sostener ritmo alto con estructura clara.', en: 'Keep a high pace with clear structure.' },
-    accentColor: '#9B6CFF',
-    avatarSrc: '/evolveGMO.png',
-    avatarAlt: {
-      es: 'Avatar del modo Evolve con expresión determinada.',
-      en: 'Evolve mode avatar with a determined expression.',
-    },
-  },
+export const MODE_CARD_CONTENT = {
+  FLOW: GAME_MODE_META.Flow,
+  LOW: GAME_MODE_META.Low,
+  CHILL: GAME_MODE_META.Chill,
+  EVOLVE: GAME_MODE_META.Evolve,
 };
 
 const MODE_ORDER: GameMode[] = ['LOW', 'CHILL', 'FLOW', 'EVOLVE'];
