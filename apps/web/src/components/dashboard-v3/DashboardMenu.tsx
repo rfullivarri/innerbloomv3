@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { ToastBanner } from "../common/ToastBanner";
+import { GameModeChip, buildGameModeChip } from "../common/GameModeChip";
 import { ModerationWidget as ModerationPreviewWidget } from "./ModerationWidget";
 import { ModerationTrackerIcon } from "../moderation/trackerMeta";
 import { useQuickAccessInstall } from "../../hooks/useQuickAccessInstall";
@@ -16,6 +17,7 @@ import {
   type ModerationTrackerType,
 } from "../../lib/api";
 import { normalizeGameModeValue, type GameMode } from "../../lib/gameMode";
+import { GAME_MODE_META, GAME_MODE_ORDER } from "../../lib/gameModeMeta";
 import type { ResolvedTheme } from "../../theme/themePreference";
 import {
   forwardRef,
@@ -64,6 +66,23 @@ export function isDemandingModeJump(currentMode: GameMode | null, selectedMode: 
   return Math.abs(selectedIndex - currentIndex) > 1;
 }
 
+
+function toMetaModeKey(mode: GameMode): keyof typeof GAME_MODE_META {
+  if (mode === "Low") return "Low";
+  if (mode === "Chill") return "Chill";
+  if (mode === "Flow") return "Flow";
+  return "Evolve";
+}
+
+function getModeBannerObjectPosition(mode: GameMode): string {
+  const positions: Record<GameMode, string> = {
+    Low: '65% 45%',
+    Chill: '60% 45%',
+    Flow: '70% 45%',
+    Evolve: '65% 50%',
+  };
+  return positions[mode];
+}
 export function getWidgetsRefreshingOverlayClass(theme: ResolvedTheme): string {
   return theme === "light"
     ? "bg-[color:var(--color-overlay-3)]"
@@ -184,6 +203,7 @@ export function DashboardMenu({
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
   const [isSavingMode, setIsSavingMode] = useState(false);
   const [gameModeError, setGameModeError] = useState<string | null>(null);
+  const [pendingConfirmMode, setPendingConfirmMode] = useState<GameMode | null>(null);
   const [trackerOverrides, setTrackerOverrides] = useState<
     Partial<Record<ModerationTrackerType, boolean>>
   >({});
@@ -254,6 +274,8 @@ export function DashboardMenu({
     setIsPlansOpen(false);
     setIsModerationOpen(true);
     setActivePanel("main");
+    setPendingConfirmMode(null);
+    setIsGameModeOpen(false);
     requestAnimationFrame(() => {
       triggerRef.current?.focus({ preventScroll: true });
     });
@@ -286,7 +308,6 @@ export function DashboardMenu({
     });
   }, [moderation.configs]);
 
-  const modeOptions: GameMode[] = ["Low", "Chill", "Flow", "Evolve"];
   const normalizedCurrentMode = useMemo(() => normalizeGameModeValue(currentGameMode), [currentGameMode]);
   const selectedOrCurrentMode = selectedMode ?? normalizedCurrentMode;
   const modeJumpIsDemanding = useMemo(
@@ -314,6 +335,7 @@ export function DashboardMenu({
   const handleOpenGameMode = useCallback(() => {
     setSelectedMode(normalizedCurrentMode);
     setGameModeError(null);
+    setPendingConfirmMode(null);
     setIsGameModeOpen(true);
   }, [normalizedCurrentMode]);
 
@@ -323,15 +345,16 @@ export function DashboardMenu({
     }
     setIsGameModeOpen(false);
     setSelectedMode(null);
+    setPendingConfirmMode(null);
     setGameModeError(null);
   }, [isSavingMode]);
 
   const handleConfirmGameMode = useCallback(async () => {
-    if (!selectedOrCurrentMode || isSavingMode) {
+    if (!pendingConfirmMode || isSavingMode) {
       return;
     }
 
-    const normalized = selectedOrCurrentMode.toUpperCase() as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
+    const normalized = pendingConfirmMode.toUpperCase() as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
     setIsSavingMode(true);
     setGameModeError(null);
 
@@ -351,8 +374,20 @@ export function DashboardMenu({
     } finally {
       setIsSavingMode(false);
     }
-  }, [handleClose, isSavingMode, onGameModeChanged, selectedOrCurrentMode, setToast, t]);
+  }, [handleClose, isSavingMode, onGameModeChanged, pendingConfirmMode, setToast, t]);
 
+
+  const handleSelectGameMode = useCallback((mode: GameMode) => {
+    setSelectedMode(mode);
+    setPendingConfirmMode(mode);
+  }, []);
+
+  const handleCloseGameModeConfirm = useCallback(() => {
+    if (isSavingMode) {
+      return;
+    }
+    setPendingConfirmMode(null);
+  }, [isSavingMode]);
   const handleSignOut = useCallback(async () => {
     handleClose();
     await signOut({ redirectUrl: "/" });
@@ -624,8 +659,21 @@ export function DashboardMenu({
                       </button>
                     </section>
 
-                    <section className="space-y-2">
+                    <section>
                       <div className={`${menuCardClassName} px-2 py-1`}>
+                    <button
+                      type="button"
+                      onClick={handleOpenGameMode}
+                      className={menuRowClassName}
+                    >
+                      <MenuIcon>
+                        <circle cx="12" cy="12" r="8" />
+                        <path d="m12 7 3 3-3 3-3-3 3-3Z" />
+                      </MenuIcon>
+                      <span className="flex-1">{t('dashboard.menu.changeGameMode')}</span>
+                      <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow')} />
+                    </button>
+                    <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
                     <button
                       type="button"
                       onClick={handleOpenScheduler}
@@ -637,22 +685,7 @@ export function DashboardMenu({
                       </MenuIcon>
                       <span className="flex-1">{t('dashboard.menu.reminder')}</span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleOpenGameMode}
-                      className={menuRowClassName}
-                    >
-                      <MenuIcon>
-                        <circle cx="12" cy="12" r="8" />
-                        <path d="m12 7 3 3-3 3-3-3 3-3Z" />
-                      </MenuIcon>
-                      <span className="flex-1">{t('dashboard.menu.gameMode')}</span>
-                      <span className="text-xs text-[color:var(--color-text-faint)]">
-                        {normalizedCurrentMode ?? 'Flow'}
-                      </span>
-                    </button>
-                      </div>
-                      <div className={`${menuCardClassName} px-2 py-1`}>
+                      <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
                       <button
                         type="button"
                         onClick={() => setIsPlansOpen((current) => !current)}
@@ -703,8 +736,7 @@ export function DashboardMenu({
                         </button>
                       </div>
                     ) : null}
-                      </div>
-                      <div className={`${menuCardClassName} px-2 py-1`}>
+                      <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
                       <button
                         type="button"
                         onClick={() => setActivePanel("widgets")}
@@ -949,17 +981,40 @@ export function DashboardMenu({
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        {modeOptions.map((mode) => {
+                      <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+                        {GAME_MODE_ORDER.map((mode) => {
                           const isSelected = (selectedOrCurrentMode ?? 'Flow') === mode;
+                          const isCurrent = (normalizedCurrentMode ?? 'Flow') === mode;
+                          const content = GAME_MODE_META[toMetaModeKey(mode)];
                           return (
                             <button
                               key={mode}
                               type="button"
-                              onClick={() => setSelectedMode(mode)}
-                              className={`rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] text-[color:var(--color-text)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]'}`}
+                              onClick={() => handleSelectGameMode(mode)}
+                              className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(125,211,252,0.65),0_0_20px_rgba(56,189,248,0.2)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
                             >
-                              <p className="text-sm font-semibold">{mode}</p>
+                              <span className="absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: content.accentColor }} aria-hidden />
+                              <div className="ml-2 space-y-2">
+                                <div className="flex items-center justify-between gap-2">
+                                  <p className="text-sm font-semibold text-[color:var(--color-text)]">{mode}</p>
+                                  <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text-dim)]">
+                                    {content.frequency[language]}
+                                  </span>
+                                </div>
+                                <img
+                                  src={content.avatarSrc}
+                                  alt={content.avatarAlt[language]}
+                                  className="h-20 w-full rounded-xl border border-white/10 object-cover"
+                                  style={{ objectPosition: getModeBannerObjectPosition(mode) }}
+                                  loading="lazy"
+                                />
+                                <p className="line-clamp-2 text-[11px] text-[color:var(--color-text-dim)]">{content.objective[language]}</p>
+                                {isCurrent ? (
+                                  <span className="inline-flex rounded-full border border-emerald-300/40 bg-emerald-400/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+                                    {t('dashboard.menu.currentGameMode')}
+                                  </span>
+                                ) : null}
+                              </div>
                             </button>
                           );
                         })}
@@ -977,27 +1032,35 @@ export function DashboardMenu({
                         </p>
                       ) : null}
 
-                      <div className="mt-4 flex gap-2">
-                        <button
-                          type="button"
-                          onClick={handleCloseGameMode}
-                          className="flex-1 rounded-xl border border-[color:var(--color-border-subtle)] px-3 py-2 text-sm text-[color:var(--color-text-dim)]"
-                          disabled={isSavingMode}
-                        >
-                          {t('dashboard.menu.cancel')}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void handleConfirmGameMode()}
-                          className="flex-1 rounded-xl border border-[color:var(--color-accent-primary)] bg-[color:var(--color-accent-primary)]/20 px-3 py-2 text-sm font-semibold text-[color:var(--color-text)] disabled:opacity-60"
-                          disabled={isSavingMode || !selectedOrCurrentMode}
-                        >
-                          {isSavingMode ? t('dashboard.menu.gameModeSaving') : t('dashboard.menu.gameModeConfirm')}
-                        </button>
-                      </div>
+                      {pendingConfirmMode ? (
+                        <div className="mt-4 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] p-3">
+                          <p className="text-sm text-[color:var(--color-text)]">
+                            {t('dashboard.menu.gameModeConfirmPrompt', { mode: pendingConfirmMode })}
+                          </p>
+                          <div className="mt-3 flex gap-2">
+                            <button
+                              type="button"
+                              onClick={handleCloseGameModeConfirm}
+                              className="flex-1 rounded-xl border border-[color:var(--color-border-subtle)] px-3 py-2 text-sm text-[color:var(--color-text-dim)]"
+                              disabled={isSavingMode}
+                            >
+                              {t('dashboard.menu.cancel')}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void handleConfirmGameMode()}
+                              className="flex-1 rounded-xl border border-[color:var(--color-accent-primary)] bg-[color:var(--color-accent-primary)]/20 px-3 py-2 text-sm font-semibold text-[color:var(--color-text)] disabled:opacity-60"
+                              disabled={isSavingMode}
+                            >
+                              {isSavingMode ? t('dashboard.menu.gameModeSaving') : t('dashboard.menu.confirmChange')}
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 ) : null}
+
 
                 <button
                   type="button"
