@@ -115,7 +115,7 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'daily-quest-moderation',
-    targetSelector: '[data-demo-anchor="daily-quest-moderation"]',
+    targetSelector: '[data-demo-anchor="daily-quest-moderation-content"]',
     tooltipPlacement: 'top',
     title: {
       es: 'Daily Quest · moderación',

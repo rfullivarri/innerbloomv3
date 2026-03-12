@@ -17,6 +17,7 @@ type Rect = { top: number; left: number; width: number; height: number };
 const PADDING = 10;
 const VIEWPORT_PADDING = 12;
 const MOBILE_TOOLTIP_BOTTOM_GAP = 6;
+const MOBILE_TOOLTIP_BOTTOM_GAP_LOWER = 2;
 const TOOLTIP_HEIGHT_DESKTOP = 252;
 const TOOLTIP_HEIGHT_MOBILE = 238;
 const TOOLTIP_HEIGHT_MOBILE_COMPACT = 210;
@@ -263,9 +264,10 @@ export function GuidedDemoOverlay({
 
     if (isMobile) {
       const defaultMobileTop = viewport.height - mobileTooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP;
+      const lowerMobileTop = viewport.height - mobileTooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP_LOWER;
       const mobileTop = step.id === DAILY_QUEST_FOOTER_STEP_ID
         ? clamp(Math.max(VIEWPORT_PADDING + 24, targetRect.top - mobileTooltipHeight - 24), VIEWPORT_PADDING, defaultMobileTop)
-        : clamp(defaultMobileTop, VIEWPORT_PADDING, defaultMobileTop);
+        : clamp(lowerMobileTop, VIEWPORT_PADDING, lowerMobileTop);
       return {
         left: VIEWPORT_PADDING,
         top: mobileTop,

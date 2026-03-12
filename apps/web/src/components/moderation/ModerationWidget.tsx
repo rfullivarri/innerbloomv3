@@ -185,6 +185,7 @@ export function ModerationWidget({
         </DashboardTitle>
       </header>
       <div
+        data-demo-anchor={demoAnchor ? `${demoAnchor}-content` : undefined}
         className={`grid gap-2.5 sm:gap-3 ${activeCount === 1 ? "grid-cols-1" : ""} ${activeCount === 2 ? "grid-cols-2" : ""} ${activeCount === 3 ? "grid-cols-3 max-[360px]:grid-cols-2" : ""}`}
       >
         {loading && (
