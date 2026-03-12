@@ -18,11 +18,12 @@ const PADDING = 10;
 const VIEWPORT_PADDING = 12;
 const TOOLTIP_HEIGHT_DESKTOP = 252;
 const TOOLTIP_HEIGHT_MOBILE = 238;
-const MOBILE_FOCUS_DEFAULT_OFFSET = 10;
+const MOBILE_DASHBOARD_FOCUS_DEFAULT_OFFSET = 8;
+const MOBILE_MODAL_FOCUS_DEFAULT_OFFSET = 6;
 const DAILY_QUEST_INTRO_STEP_ID = 'daily-quest-intro';
 const DAILY_QUEST_FOOTER_STEP_ID = 'daily-quest-footer';
 
-const MOBILE_STEP_FOCUS_OFFSET: Record<string, number> = {
+const MOBILE_DASHBOARD_STEP_FOCUS_OFFSET: Record<string, number> = {
   'overall-progress': 8,
   'streaks-top': 4,
   'streaks-bottom': 4,
@@ -30,6 +31,9 @@ const MOBILE_STEP_FOCUS_OFFSET: Record<string, number> = {
   'emotion-chart': 6,
   'daily-energy': 18,
   'info-dot': 18,
+};
+
+const MOBILE_DAILY_QUEST_STEP_FOCUS_OFFSET: Record<string, number> = {
   'daily-quest-intro': 6,
   'daily-quest-moderation': 6,
   'daily-quest-tasks': 6,
@@ -44,6 +48,7 @@ const DAILY_QUEST_STEP_IDS = new Set([
 ]);
 
 type Placement = 'top' | 'right' | 'bottom' | 'left';
+type WalkthroughMode = 'dashboard' | 'daily-quest-modal';
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(value, max));
@@ -51,6 +56,29 @@ function clamp(value: number, min: number, max: number) {
 
 function intersects(a: Rect, b: Rect) {
   return a.left < b.left + b.width && a.left + a.width > b.left && a.top < b.top + b.height && a.top + a.height > b.top;
+}
+
+function getWalkthroughMode(stepId: string): WalkthroughMode {
+  return DAILY_QUEST_STEP_IDS.has(stepId) ? 'daily-quest-modal' : 'dashboard';
+}
+
+function getScrollableAncestor(element: HTMLElement | null): HTMLElement | null {
+  let current = element?.parentElement ?? null;
+  while (current) {
+    const style = window.getComputedStyle(current);
+    const overflowY = style.overflowY;
+    const isScrollable = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay')
+      && current.scrollHeight > current.clientHeight;
+    if (isScrollable) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+  return null;
+}
+
+function raf(): Promise<void> {
+  return new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
 }
 
 export function GuidedDemoOverlay({
@@ -67,7 +95,8 @@ export function GuidedDemoOverlay({
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
   const step = steps[stepIndex];
-  const isDailyQuestStep = DAILY_QUEST_STEP_IDS.has(step.id);
+  const walkthroughMode = getWalkthroughMode(step.id);
+  const isDailyQuestStep = walkthroughMode === 'daily-quest-modal';
 
   useEffect(() => {
     if (isDailyQuestStep) {
@@ -110,15 +139,54 @@ export function GuidedDemoOverlay({
       const maxRectWidth = Math.max(0, viewport.width - VIEWPORT_PADDING * 2);
       const width = Math.min(rect.width + PADDING * 2, maxRectWidth);
       const left = clamp(rect.left - PADDING, VIEWPORT_PADDING, viewport.width - width - VIEWPORT_PADDING);
+      const topInset = window.visualViewport?.offsetTop ?? 0;
       setTargetRect({
-        top: Math.max(8, rect.top - PADDING),
+        top: Math.max(VIEWPORT_PADDING, rect.top - PADDING - topInset),
         left,
         width,
         height: rect.height + PADDING * 2,
       });
     };
 
-    const alignForStep = () => {
+    const alignDashboardStepMobile = async (target: HTMLElement) => {
+      const headerHeight = document.querySelector('header')?.getBoundingClientRect().height ?? 0;
+      const topInset = window.visualViewport?.offsetTop ?? 0;
+      const focusOffset = MOBILE_DASHBOARD_STEP_FOCUS_OFFSET[step.id] ?? MOBILE_DASHBOARD_FOCUS_DEFAULT_OFFSET;
+      const desiredTop = Math.max(VIEWPORT_PADDING, headerHeight + topInset + focusOffset);
+      const firstRect = target.getBoundingClientRect();
+      const initialDelta = firstRect.top - desiredTop;
+      if (Math.abs(initialDelta) > 2) {
+        window.scrollBy({ top: initialDelta, behavior: 'auto' });
+      }
+
+      await raf();
+      await raf();
+
+      const finalRect = target.getBoundingClientRect();
+      const settleDelta = finalRect.top - desiredTop;
+      if (Math.abs(settleDelta) > 2) {
+        window.scrollBy({ top: settleDelta, behavior: 'auto' });
+        await raf();
+      }
+    };
+
+    const alignDailyQuestStep = async (target: HTMLElement) => {
+      const scroller = getScrollableAncestor(target);
+      if (!scroller) {
+        return;
+      }
+      const focusOffset = MOBILE_DAILY_QUEST_STEP_FOCUS_OFFSET[step.id] ?? MOBILE_MODAL_FOCUS_DEFAULT_OFFSET;
+      const scrollerRect = scroller.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const desiredTop = scrollerRect.top + focusOffset;
+      const delta = targetRect.top - desiredTop;
+      if (Math.abs(delta) > 2) {
+        scroller.scrollBy({ top: delta, behavior: 'auto' });
+        await raf();
+      }
+    };
+
+    const alignForStep = async () => {
       const selector = step.targetSelector;
       if (!selector) return;
 
@@ -126,33 +194,35 @@ export function GuidedDemoOverlay({
       if (!target) return;
 
       const isMobile = window.innerWidth < 768;
+      if (walkthroughMode === 'daily-quest-modal') {
+        if (isMobile) {
+          await alignDailyQuestStep(target);
+        } else {
+          target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        }
+        return;
+      }
+
       if (!isMobile) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
         return;
       }
 
-      target.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-
-      window.setTimeout(() => {
-        const focusOffset = MOBILE_STEP_FOCUS_OFFSET[step.id] ?? MOBILE_FOCUS_DEFAULT_OFFSET;
-        const headerHeight = document.querySelector('header')?.getBoundingClientRect().height ?? 0;
-        const desiredTop = headerHeight + focusOffset;
-        const rect = target.getBoundingClientRect();
-        const delta = rect.top - desiredTop;
-
-        if (Math.abs(delta) > 4) {
-          window.scrollBy({ top: delta, behavior: 'smooth' });
-        }
-      }, 120);
+      await alignDashboardStepMobile(target);
     };
 
-    alignForStep();
-    updateRect();
-    const timeout = window.setTimeout(updateRect, 260);
+    void alignForStep().then(() => {
+      updateRect();
+    });
+
+    const timeout = window.setTimeout(() => {
+      updateRect();
+    }, 280);
     const handleResize = () => {
       setViewport({ width: window.innerWidth, height: window.innerHeight });
-      alignForStep();
-      updateRect();
+      void alignForStep().then(() => {
+        updateRect();
+      });
     };
     window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', updateRect, true);
@@ -161,7 +231,7 @@ export function GuidedDemoOverlay({
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', updateRect, true);
     };
-  }, [isDailyQuestStep, step?.targetSelector]);
+  }, [isDailyQuestStep, step?.id, step?.targetSelector, walkthroughMode, viewport.width]);
 
   useEffect(() => {
     if (!step) return;
