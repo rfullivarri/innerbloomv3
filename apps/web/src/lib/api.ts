@@ -1,5 +1,6 @@
 import { apiLog, logApiDebug, logApiError } from './logger';
 import type { WeeklyWrappedPayload } from './weeklyWrapped';
+import { isDashboardDemoModeEnabled } from './demoMode';
 import type {
   MissionsV2AbandonPayload,
   MissionsV2ActivatePayload,
@@ -1178,7 +1179,36 @@ function normalizeUserTaskSingle(source: unknown): UserTask | null {
   return null;
 }
 
+const DEMO_TODAY = '2026-03-01';
+let demoModerationState: ModerationStateResponse = {
+  dayKey: DEMO_TODAY,
+  dailyQuestCompleted: false,
+  trackers: [
+    { type: 'alcohol', is_enabled: true, is_paused: false, not_logged_tolerance_days: 2, current_streak_days: 0, statusToday: 'not_logged' },
+    { type: 'tobacco', is_enabled: true, is_paused: false, not_logged_tolerance_days: 2, current_streak_days: 4, statusToday: 'on_track' },
+    { type: 'sugar', is_enabled: true, is_paused: false, not_logged_tolerance_days: 2, current_streak_days: 2, statusToday: 'off_track' },
+  ],
+};
+
+const DEMO_USER_TASKS: UserTask[] = [
+  { id: 'task-minoxidil', title: 'Minoxidil noche', pillarId: 'Body', traitId: null, statId: 'Recuperación', difficultyId: '2', isActive: true, xp: 40, createdAt: null, updatedAt: null, completedAt: null, archivedAt: null },
+  { id: 'task-correr', title: '10.000 pasos / Correr', pillarId: 'Body', traitId: null, statId: 'Movilidad', difficultyId: '2', isActive: true, xp: 55, createdAt: null, updatedAt: null, completedAt: null, archivedAt: null },
+  { id: 'task-no-dulces', title: 'No dulces', pillarId: 'Body', traitId: null, statId: 'Nutrición', difficultyId: '2', isActive: true, xp: 45, createdAt: null, updatedAt: null, completedAt: null, archivedAt: null },
+  { id: 'task-gym', title: 'gym', pillarId: 'Body', traitId: null, statId: 'Energía', difficultyId: '2', isActive: true, xp: 50, createdAt: null, updatedAt: null, completedAt: null, archivedAt: null },
+  { id: 'task-pantallas', title: '20` Sin pantallas antes de dormir', pillarId: 'Mind', traitId: null, statId: 'Recuperación', difficultyId: '2', isActive: true, xp: 35, createdAt: null, updatedAt: null, completedAt: null, archivedAt: null },
+  { id: 'task-ayuno', title: 'Ayuno hasta las 14hs', pillarId: 'Body', traitId: null, statId: 'Nutrición', difficultyId: '2', isActive: true, xp: 45, createdAt: null, updatedAt: null, completedAt: null, archivedAt: null },
+  { id: 'task-cena', title: 'Cena antes de las 22hs', pillarId: 'Body', traitId: null, statId: 'Nutrición', difficultyId: '2', isActive: true, xp: 45, createdAt: null, updatedAt: null, completedAt: null, archivedAt: null },
+];
+
+function cloneDemo<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
 export async function getUserTasks(userId: string): Promise<UserTask[]> {
+  if (isDashboardDemoModeEnabled()) {
+    return cloneDemo(DEMO_USER_TASKS);
+  }
+
   const response = await getAuthorizedJson<UserTasksResponse | RawUserTask[] | null>(
     `/users/${encodeURIComponent(userId)}/tasks`,
   );
@@ -1501,6 +1531,20 @@ function normalizeEmotionDate(raw: unknown): string | null {
 }
 
 export async function getEmotions(userId: string, params: EmotionQuery = {}): Promise<EmotionSnapshot[]> {
+  if (isDashboardDemoModeEnabled()) {
+    return [
+      { date: '2025-10-03', mood: 'Calma' }, { date: '2025-10-08', mood: 'Motivación' },
+      { date: '2025-10-14', mood: 'Felicidad' }, { date: '2025-10-20', mood: 'Tristeza' },
+      { date: '2025-10-24', mood: 'Motivación' }, { date: '2025-11-02', mood: 'Calma' },
+      { date: '2025-11-11', mood: 'Frustración' }, { date: '2025-11-20', mood: 'Ansiedad' },
+      { date: '2025-12-02', mood: 'Cansancio' }, { date: '2025-12-10', mood: 'Felicidad' },
+      { date: '2025-12-19', mood: 'Motivación' }, { date: '2026-01-03', mood: 'Calma' },
+      { date: '2026-01-09', mood: 'Cansancio' }, { date: '2026-01-17', mood: 'Motivación' },
+      { date: '2026-01-25', mood: 'Felicidad' }, { date: '2026-02-05', mood: 'Calma' },
+      { date: '2026-02-14', mood: 'Motivación' }, { date: '2026-02-23', mood: 'Ansiedad' },
+      { date: '2026-03-01', mood: 'Motivación' },
+    ];
+  }
   const response = await getAuthorizedJson<
     EmotionLogResponse | EmotionLogEntry[] | { emotions?: unknown; days?: unknown }
   >(`/users/${encodeURIComponent(userId)}/emotions`, buildEmotionQuery(params));
@@ -1581,6 +1625,20 @@ export type UserState = {
 };
 
 export async function getUserState(userId: string): Promise<UserState> {
+  if (isDashboardDemoModeEnabled()) {
+    return {
+      date: DEMO_TODAY,
+      mode: 'flow',
+      mode_name: 'flow',
+      weekly_target: 3,
+      grace: { applied: false, unique_days: 0 },
+      pillars: {
+        Body: { hp: 86, xp_today: 78, xp_obj_day: 100 },
+        Mind: { focus: 42, xp_today: 64, xp_obj_day: 100 },
+        Soul: { mood: 55, xp_today: 71, xp_obj_day: 100 },
+      },
+    };
+  }
   const response = await getAuthorizedJson<UserState>(`/users/${encodeURIComponent(userId)}/state`);
   logShape('user-state', response);
   return response;
@@ -1615,6 +1673,21 @@ export type DailyEnergySnapshot = {
 };
 
 export async function getUserDailyEnergy(userId: string): Promise<DailyEnergySnapshot | null> {
+  if (isDashboardDemoModeEnabled()) {
+    return {
+      user_id: userId,
+      hp_pct: 86, mood_pct: 55, focus_pct: 42,
+      hp_norm: 0.86, mood_norm: 0.55, focus_norm: 0.42,
+      trend: {
+        currentDate: DEMO_TODAY, previousDate: '2026-02-29', hasHistory: true,
+        pillars: {
+          Body: { current: 86, previous: 72, deltaPct: 18.8 },
+          Mind: { current: 42, previous: 39, deltaPct: 6.4 },
+          Soul: { current: 55, previous: 48, deltaPct: 15.5 },
+        },
+      },
+    };
+  }
   try {
     const response = await getAuthorizedJson<DailyEnergySnapshot>(
       `/users/${encodeURIComponent(userId)}/daily-energy`,
@@ -1662,6 +1735,15 @@ export async function getUserDailyXp(
   userId: string,
   params: { from?: string; to?: string } = {},
 ): Promise<DailyXpResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    const series = [
+      { date: '2026-03-01', xp_day: 29 },{ date: '2026-03-02', xp_day: 31 },{ date: '2026-03-03', xp_day: 24 },
+      { date: '2026-03-04', xp_day: 26 },{ date: '2026-03-05', xp_day: 35 },{ date: '2026-03-06', xp_day: 28 },
+      { date: '2026-03-07', xp_day: 21 },{ date: '2026-03-08', xp_day: 23 },{ date: '2026-03-09', xp_day: 26 },
+      { date: '2026-03-10', xp_day: 24 },{ date: '2026-03-11', xp_day: 17 },
+    ];
+    return { from: params.from ?? series[0].date, to: params.to ?? series[series.length - 1].date, series };
+  }
   const response = await getAuthorizedJson<DailyXpResponse>(
     `/users/${encodeURIComponent(userId)}/xp/daily`,
     params,
@@ -1686,6 +1768,22 @@ export async function getUserXpByTrait(
   userId: string,
   params: { from?: string; to?: string } = {},
 ): Promise<UserXpByTraitResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    return { traits: [
+      { trait: 'sleep', name: 'Recuperación', xp: 517, pillar: 'Body', sortOrder: 1 },
+      { trait: 'movement', name: 'Movilidad', xp: 437, pillar: 'Body', sortOrder: 2 },
+      { trait: 'nutrition', name: 'Nutrición', xp: 375, pillar: 'Body', sortOrder: 3 },
+      { trait: 'focus', name: 'Concentración', xp: 312, pillar: 'Mind', sortOrder: 4 },
+      { trait: 'learning', name: 'Aprendizaje', xp: 397, pillar: 'Mind', sortOrder: 5 },
+      { trait: 'meditation', name: 'Respiración', xp: 430, pillar: 'Soul', sortOrder: 6 },
+      { trait: 'purpose', name: 'Propósito', xp: 223, pillar: 'Soul', sortOrder: 7 },
+      { trait: 'connection', name: 'Vínculos', xp: 245, pillar: 'Soul', sortOrder: 8 },
+      { trait: 'reflection', name: 'Reflexión', xp: 246, pillar: 'Mind', sortOrder: 9 },
+      { trait: 'play', name: 'Juego', xp: 208, pillar: 'Soul', sortOrder: 10 },
+      { trait: 'planning', name: 'Planificación', xp: 147, pillar: 'Mind', sortOrder: 11 },
+      { trait: 'discipline', name: 'Disciplina', xp: 428, pillar: 'Body', sortOrder: 12 },
+    ] };
+  }
   const response = await getAuthorizedJson<unknown>(`/users/${encodeURIComponent(userId)}/xp/by-trait`, params);
   logShape('user-xp-by-trait', response);
 
@@ -1803,6 +1901,23 @@ export async function getUserStreakPanel(
   userId: string,
   params: { pillar: StreakPanelPillar; range: StreakPanelRange; mode?: string; query?: string },
 ): Promise<StreakPanelResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    const tasks: StreakPanelTask[] = [
+      { id: 'task-minoxidil', name: 'Minoxidil noche', stat: 'Recuperación', weekDone: 3, streakDays: 20, metrics: { week: { count: 3, xp: 120 }, month: { count: 24, xp: 960, weeks: [5, 6, 6, 7] }, qtr: { count: 61, xp: 2440, weeks: [5, 6, 6, 7, 5, 4], weekTotals: [5, 6, 6, 7, 5, 4] } } },
+      { id: 'task-correr', name: '10.000 pasos / Correr', stat: 'Movilidad', weekDone: 2, streakDays: 4, metrics: { week: { count: 2, xp: 110 }, month: { count: 11, xp: 560, weeks: [2, 4, 3, 2] }, qtr: { count: 31, xp: 1540, weeks: [2, 4, 3, 2, 5, 3], weekTotals: [2, 4, 3, 2, 5, 3] } } },
+      { id: 'task-no-dulces', name: 'No dulces', stat: 'Nutrición', weekDone: 0, streakDays: 0, metrics: { week: { count: 0, xp: 0 }, month: { count: 3, xp: 130, weeks: [0, 1, 1, 1] }, qtr: { count: 9, xp: 390, weeks: [0, 1, 1, 1, 2, 4], weekTotals: [0, 1, 1, 1, 2, 4] } } },
+      { id: 'task-gym', name: 'gym', stat: 'Energía', weekDone: 0, streakDays: 0, metrics: { week: { count: 0, xp: 0 }, month: { count: 5, xp: 250, weeks: [1, 2, 1, 1] }, qtr: { count: 14, xp: 700, weeks: [1, 2, 1, 1, 4, 5], weekTotals: [1, 2, 1, 1, 4, 5] } } },
+      { id: 'task-pantallas', name: '20` Sin pantallas antes de dormir', stat: 'Recuperación', weekDone: 0, streakDays: 0, metrics: { week: { count: 0, xp: 0 }, month: { count: 6, xp: 210, weeks: [1, 1, 2, 2] }, qtr: { count: 12, xp: 420, weeks: [1, 1, 2, 2, 3, 3], weekTotals: [1, 1, 2, 2, 3, 3] } } },
+      { id: 'task-ayuno', name: 'Ayuno hasta las 14hs', stat: 'Nutrición', weekDone: 2, streakDays: 2, metrics: { week: { count: 2, xp: 90 }, month: { count: 9, xp: 405, weeks: [2, 2, 3, 2] }, qtr: { count: 26, xp: 1170, weeks: [2, 2, 3, 2, 7, 10], weekTotals: [2, 2, 3, 2, 7, 10] } } },
+      { id: 'task-cena', name: 'Cena antes de las 22hs', stat: 'Nutrición', weekDone: 2, streakDays: 2, metrics: { week: { count: 2, xp: 90 }, month: { count: 8, xp: 360, weeks: [2, 2, 2, 2] }, qtr: { count: 22, xp: 990, weeks: [2, 2, 2, 2, 7, 7], weekTotals: [2, 2, 2, 2, 7, 7] } } },
+    ];
+    const topStreaks = tasks
+      .filter((entry) => (params.pillar === 'Body' ? true : params.pillar === 'Mind' ? entry.id === 'task-pantallas' : entry.id === 'task-minoxidil'))
+      .sort((a, b) => b.streakDays - a.streakDays)
+      .slice(0, 3)
+      .map((entry) => ({ id: entry.id, name: entry.name, stat: entry.stat, weekDone: entry.weekDone, streakDays: entry.streakDays }));
+    return { topStreaks, tasks };
+  }
   const normalized: Record<string, string | undefined> = {
     pillar: params.pillar,
     range: params.range,
@@ -1823,6 +1938,29 @@ export async function getTaskInsights(
   taskId: string,
   params?: { mode?: string | null; weeklyGoal?: number | null; range?: StreakPanelRange },
 ): Promise<TaskInsightsResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    const task = DEMO_USER_TASKS.find((entry) => entry.id === taskId);
+    return {
+      task: { id: taskId, name: task?.title ?? 'Task demo', stat: task?.statId ?? null, description: 'Detalle de hábito en modo demo.' },
+      month: { totalCount: 9, totalXp: 405, days: [
+        { date: '2026-02-03', count: 1 }, { date: '2026-02-05', count: 1 }, { date: '2026-02-08', count: 2 },
+        { date: '2026-02-13', count: 1 }, { date: '2026-02-16', count: 1 }, { date: '2026-02-20', count: 1 },
+        { date: '2026-02-24', count: 1 }, { date: '2026-02-28', count: 1 },
+      ] },
+      weeks: {
+        weeklyGoal: params?.weeklyGoal ?? 3, completionRate: 0.67, weeksSample: 6, currentStreak: 2, bestStreak: 20,
+        timeline: [
+          { weekStart: '2026-01-19', weekEnd: '2026-01-25', count: 2, hit: false },
+          { weekStart: '2026-01-26', weekEnd: '2026-02-01', count: 3, hit: true },
+          { weekStart: '2026-02-02', weekEnd: '2026-02-08', count: 2, hit: false },
+          { weekStart: '2026-02-09', weekEnd: '2026-02-15', count: 3, hit: true },
+          { weekStart: '2026-02-16', weekEnd: '2026-02-22', count: 1, hit: false },
+          { weekStart: '2026-02-23', weekEnd: '2026-03-01', count: 3, hit: true },
+        ],
+      },
+      recalibration: { eligible: true },
+    };
+  }
   const normalized: Record<string, string | undefined> = {
     mode: params?.mode ?? undefined,
     weeklyGoal:
@@ -1879,6 +2017,9 @@ export type CurrentUserSubscriptionResponse = {
 };
 
 export async function getCurrentUserSubscription(): Promise<CurrentUserSubscriptionResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    return { plan: 'free', status: 'active', subscription_status: 'active', trialEndsAt: null, nextRenewalAt: null };
+  }
   const response = await getAuthorizedJson<CurrentUserSubscriptionResponse>('/users/me/subscription');
   logShape('current-user-subscription', response);
   return response;
@@ -1895,6 +2036,9 @@ export type UserLevelResponse = {
 };
 
 export async function getUserLevel(userId: string): Promise<UserLevelResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    return { user_id: userId, current_level: 18, xp_total: 4308, xp_required_current: 4020, xp_required_next: 4596, xp_to_next: 288, progress_percent: 8 };
+  }
   const response = await getAuthorizedJson<UserLevelResponse>(`/users/${encodeURIComponent(userId)}/level`);
   logShape('user-level', response);
   return response;
@@ -1905,6 +2049,9 @@ export type UserTotalXpResponse = {
 };
 
 export async function getUserTotalXp(userId: string): Promise<UserTotalXpResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    return { total_xp: 4308 };
+  }
   const response = await getAuthorizedJson<UserTotalXpResponse>(`/users/${encodeURIComponent(userId)}/xp/total`);
   logShape('user-total-xp', response);
   return response;
@@ -1969,6 +2116,9 @@ type GameModeUpgradeSuggestionMutationResponse = {
 };
 
 export async function getGameModeUpgradeSuggestion(): Promise<GameModeUpgradeSuggestion> {
+  if (isDashboardDemoModeEnabled()) {
+    return { current_mode: 'flow', suggested_mode: 'evolve', period_key: null, eligible_for_upgrade: false, tasks_total_evaluated: 0, tasks_meeting_goal: 0, task_pass_rate: 0, accepted_at: null, dismissed_at: null };
+  }
   return getAuthorizedJson<GameModeUpgradeSuggestion>('/game-mode/upgrade-suggestion');
 }
 
@@ -2005,6 +2155,9 @@ export async function dismissGameModeUpgradeSuggestion(): Promise<GameModeUpgrad
 }
 
 export async function getUserJourney(userId: string): Promise<UserJourneySummary> {
+  if (isDashboardDemoModeEnabled()) {
+    return { first_date_log: '2025-10-01', days_of_journey: 150, quantity_daily_logs: 84, first_programmed: true, first_tasks_confirmed: true, completed_first_daily_quest: true };
+  }
   const response = await getAuthorizedJson<UserJourneySummary>(`/users/${encodeURIComponent(userId)}/journey`);
   logShape('user-journey', response);
   return response;
@@ -2203,6 +2356,9 @@ export async function submitDailyQuest(payload: SubmitDailyQuestPayload): Promis
 
 
 export async function getModerationState(): Promise<ModerationStateResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    return cloneDemo(demoModerationState);
+  }
   const response = await getAuthorizedJson<ModerationStateResponse>('/moderation');
   logShape('moderation-state', response);
   return response;
@@ -2212,6 +2368,16 @@ export async function updateModerationStatus(
   type: ModerationTrackerType,
   payload: { dayKey: string; status: ModerationStatus },
 ): Promise<ModerationStateResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    demoModerationState = {
+      ...demoModerationState,
+      dayKey: payload.dayKey || demoModerationState.dayKey,
+      trackers: demoModerationState.trackers.map((tracker) =>
+        tracker.type === type ? { ...tracker, statusToday: payload.status } : tracker,
+      ),
+    };
+    return cloneDemo(demoModerationState);
+  }
   const token = await resolveAuthToken();
   const url = buildUrl(`/moderation/${type}/status`);
   const headers = new Headers({ Accept: 'application/json', 'Content-Type': 'application/json' });
