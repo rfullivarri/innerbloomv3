@@ -912,6 +912,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                 >
                   <motion.header
                     layout={false}
+                    data-demo-anchor="daily-quest-intro"
                     className="sticky top-[env(safe-area-inset-top)] z-10 flex flex-col justify-center border-b border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] px-4 py-3 backdrop-blur md:py-4"
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -986,13 +987,15 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                             </div>
                           </section>
 
-                          <ModerationWidget
-                            data={moderationState}
-                            loading={moderationRequest.status === 'loading'}
-                            onCycle={handleCycleModeration}
-                          />
+                          <section data-demo-anchor="daily-quest-moderation">
+                            <ModerationWidget
+                              data={moderationState}
+                              loading={moderationRequest.status === 'loading'}
+                              onCycle={handleCycleModeration}
+                            />
+                          </section>
 
-                          <section className="flex flex-col gap-4">
+                          <section className="flex flex-col gap-4" data-demo-anchor="daily-quest-tasks">
                             <h3 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-muted)]">Checklist del día</h3>
                             <div className="flex flex-col">
                               {definition.pillars.map((pillar, index) => {
@@ -1164,6 +1167,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
                   <motion.footer
                     layout={false}
+                    data-demo-anchor="daily-quest-footer"
                     className="sticky bottom-[env(safe-area-inset-bottom)] z-10 border-t border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2 backdrop-blur md:py-3"
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

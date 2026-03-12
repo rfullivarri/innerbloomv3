@@ -91,7 +91,12 @@ export function EnergyCard({ userId }: EnergyCardProps) {
     <Card
       title="💠 Daily Energy"
       rightSlot={
-        <InfoDotTarget id="dailyEnergy" placement="right" className="inline-flex items-center">
+        <InfoDotTarget
+          id="dailyEnergy"
+          placement="right"
+          className="inline-flex items-center"
+          data-demo-anchor="info-dot"
+        >
           <span className="sr-only">Más información sobre Daily Energy</span>
         </InfoDotTarget>
       }

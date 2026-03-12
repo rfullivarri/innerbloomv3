@@ -2265,6 +2265,49 @@ export type DailyQuestDefinitionResponse = DailyQuestStatusResponse & {
   }>;
 };
 
+const DEMO_DAILY_QUEST_STATUS: DailyQuestStatusResponse = {
+  date: DEMO_TODAY,
+  submitted: false,
+  submitted_at: null,
+};
+
+const DEMO_DAILY_QUEST_DEFINITION: DailyQuestDefinitionResponse = {
+  ...DEMO_DAILY_QUEST_STATUS,
+  emotionOptions: [
+    { emotion_id: 1, code: 'calm', name: 'Calma' },
+    { emotion_id: 2, code: 'happy', name: 'Felicidad' },
+    { emotion_id: 3, code: 'motivation', name: 'Motivación' },
+    { emotion_id: 4, code: 'sad', name: 'Tristeza' },
+    { emotion_id: 5, code: 'anxiety', name: 'Ansiedad' },
+    { emotion_id: 6, code: 'frustration', name: 'Frustración' },
+    { emotion_id: 7, code: 'tired', name: 'Cansancio' },
+  ],
+  pillars: [
+    {
+      pillar_code: 'BODY',
+      tasks: [
+        { task_id: 'dq-body-1', name: 'Dormir 8hs', trait_id: null, difficulty: 'Medium', difficulty_id: 2, xp: 3 },
+        { task_id: 'dq-body-2', name: 'Hacer ejercicios de estiramiento y movilidad', trait_id: null, difficulty: 'Easy', difficulty_id: 1, xp: 1 },
+        { task_id: 'dq-body-3', name: '10.000 pasos / Correr', trait_id: null, difficulty: 'Hard', difficulty_id: 3, xp: 7 },
+        { task_id: 'dq-body-4', name: '20` Sin pantallas antes de dormir', trait_id: null, difficulty: 'Medium', difficulty_id: 2, xp: 3 },
+        { task_id: 'dq-body-5', name: '2L de agua', trait_id: null, difficulty: 'Easy', difficulty_id: 1, xp: 1 },
+      ],
+    },
+    {
+      pillar_code: 'MIND',
+      tasks: [
+        { task_id: 'dq-mind-1', name: '15 min de lectura enfocada', trait_id: null, difficulty: 'Medium', difficulty_id: 2, xp: 3 },
+      ],
+    },
+    {
+      pillar_code: 'SOUL',
+      tasks: [
+        { task_id: 'dq-soul-1', name: '10 min de respiración consciente', trait_id: null, difficulty: 'Easy', difficulty_id: 1, xp: 1 },
+      ],
+    },
+  ],
+};
+
 export type SubmitDailyQuestResponse = {
   ok: true;
   saved: {
@@ -2311,6 +2354,13 @@ export type SubmitDailyQuestPayload = {
 };
 
 export async function getDailyQuestStatus(params: { date?: string } = {}): Promise<DailyQuestStatusResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    return cloneDemo({
+      ...DEMO_DAILY_QUEST_STATUS,
+      ...(params.date ? { date: params.date } : {}),
+    });
+  }
+
   const response = await getAuthorizedJson<DailyQuestStatusResponse>('/daily-quest/status', params);
   logShape('daily-quest-status', response);
   return response;
@@ -2319,12 +2369,45 @@ export async function getDailyQuestStatus(params: { date?: string } = {}): Promi
 export async function getDailyQuestDefinition(
   params: { date?: string } = {},
 ): Promise<DailyQuestDefinitionResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    return cloneDemo({
+      ...DEMO_DAILY_QUEST_DEFINITION,
+      ...(params.date ? { date: params.date } : {}),
+    });
+  }
+
   const response = await getAuthorizedJson<DailyQuestDefinitionResponse>('/daily-quest/definition', params);
   logShape('daily-quest-definition', response);
   return response;
 }
 
 export async function submitDailyQuest(payload: SubmitDailyQuestPayload): Promise<SubmitDailyQuestResponse> {
+  if (isDashboardDemoModeEnabled()) {
+    return cloneDemo({
+      ok: true,
+      saved: {
+        emotion: {
+          emotion_id: payload.emotion_id,
+          date: payload.date ?? DEMO_TODAY,
+          notes: payload.notes ?? null,
+        },
+        tasks: {
+          date: payload.date ?? DEMO_TODAY,
+          completed: payload.tasks_done,
+        },
+      },
+      xp_delta: Math.max(0, payload.tasks_done.length * 2),
+      xp_total_today: 124 + Math.max(0, payload.tasks_done.length * 2),
+      streaks: { daily: 11, weekly: 3 },
+      missions_v2: {
+        bonus_ready: false,
+        redirect_url: '/dashboard-v3/missions-v3',
+        tasks: [],
+      },
+      feedback_events: [],
+    });
+  }
+
   const token = await resolveAuthToken();
   const url = buildUrl('/daily-quest/submit');
   const headers = new Headers({
