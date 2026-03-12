@@ -16,6 +16,7 @@ type Props = {
   loading?: boolean;
   title?: string;
   onEdit?: () => void;
+  demoAnchor?: string;
 };
 
 function nextStatus(status: ModerationStatus): ModerationStatus {
@@ -164,6 +165,7 @@ export function ModerationWidget({
   loading = false,
   title,
   onEdit,
+  demoAnchor,
 }: Props) {
   const { language } = usePostLoginLanguage();
   const enabled = useMemo(
@@ -176,7 +178,7 @@ export function ModerationWidget({
   const resolvedTitle = title?.trim() || (language === 'en' ? 'Moderation' : 'Moderación');
 
   return (
-    <section className="space-y-2.5 pt-1.5 md:pt-2 lg:pt-2.5">
+    <section className="space-y-2.5 pt-1.5 md:pt-2 lg:pt-2.5" data-demo-anchor={demoAnchor}>
       <header className="flex min-h-[1.625rem] items-center pl-1.5 pt-1.5 md:pl-0 md:pt-0">
         <DashboardTitle level="h1" as="h3">
           {resolvedTitle}
