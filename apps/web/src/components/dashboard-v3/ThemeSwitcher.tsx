@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useThemePreference } from '../../theme/ThemePreferenceProvider';
 import type { ThemePreference } from '../../theme/themePreference';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+import { SegmentedPillControl } from './SegmentedPillControl';
 
 const OPTIONS: Array<{ value: ThemePreference; label: string; icon?: ReactNode }> = [
   {
@@ -45,30 +46,12 @@ export function ThemeSwitcher() {
       <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)]">
         {t('dashboard.theme.appearance')}
       </p>
-      <div className="mt-2 inline-flex w-full rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)]/40 p-1">
-        {localizedOptions.map((option) => {
-          const isActive = preference === option.value;
-
-          return (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setPreference(option.value)}
-              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
-                isActive
-                  ? 'border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-2)] text-[color:var(--color-text-strong)] shadow-[0_0_0_1px_var(--color-border-subtle)_inset]'
-                  : 'border border-transparent text-[color:var(--color-text-faint)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]'
-              }`}
-              aria-pressed={isActive}
-            >
-              <span className="inline-flex items-center justify-center gap-1.5">
-                {option.icon}
-                {option.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <SegmentedPillControl
+        ariaLabel={t('dashboard.theme.appearance')}
+        options={localizedOptions}
+        value={preference}
+        onChange={setPreference}
+      />
     </section>
   );
 }
