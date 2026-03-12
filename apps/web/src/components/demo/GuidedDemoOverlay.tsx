@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { DEMO_GUIDED_STEPS, type DemoLanguage } from '../../config/demoGuidedTour';
 
 type Props = {
@@ -8,16 +7,16 @@ type Props = {
   onSkip: (stepId: string, stepIndex: number) => void;
   onStepViewed: (stepId: string, stepIndex: number) => void;
   onCompleted: () => void;
-  onCtaClick: () => void;
 };
 
 type Rect = { top: number; left: number; width: number; height: number };
 
 const PADDING = 10;
 
-export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, onCompleted, onCtaClick }: Props) {
+export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, onCompleted }: Props) {
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
+  const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
   const step = DEMO_GUIDED_STEPS[stepIndex];
 
   useEffect(() => {
@@ -49,11 +48,15 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
 
     updateRect();
     const timeout = window.setTimeout(updateRect, 180);
-    window.addEventListener('resize', updateRect);
+    const handleResize = () => {
+      setViewport({ width: window.innerWidth, height: window.innerHeight });
+      updateRect();
+    };
+    window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', updateRect, true);
     return () => {
       window.clearTimeout(timeout);
-      window.removeEventListener('resize', updateRect);
+      window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', updateRect, true);
     };
   }, [step?.targetSelector]);
@@ -64,7 +67,8 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
   }, [onStepViewed, step, stepIndex]);
 
   const tooltipStyle = useMemo(() => {
-    const width = Math.min(window.innerWidth - 24, 360);
+    const width = Math.min(viewport.width - 24, 360);
+    const isMobile = viewport.width < 768;
     if (!targetRect) {
       return {
         top: '50%',
@@ -75,6 +79,14 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
     }
 
     const viewportPadding = 12;
+    if (isMobile) {
+      return {
+        left: 12,
+        top: Math.max(12, viewport.height - 232),
+        width: Math.max(260, width),
+      };
+    }
+
     const topChoice = targetRect.top - 18;
     const bottomChoice = targetRect.top + targetRect.height + 18;
     const leftChoice = targetRect.left - width - 18;
@@ -89,15 +101,15 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
     }
     if (place === 'left' && leftChoice > viewportPadding) {
       left = leftChoice;
-    } else if (place === 'right' && rightChoice + width < window.innerWidth - viewportPadding) {
+    } else if (place === 'right' && rightChoice + width < viewport.width - viewportPadding) {
       left = rightChoice;
     }
 
-    left = Math.max(viewportPadding, Math.min(left, window.innerWidth - width - viewportPadding));
-    top = Math.max(viewportPadding, Math.min(top, window.innerHeight - 220));
+    left = Math.max(viewportPadding, Math.min(left, viewport.width - width - viewportPadding));
+    top = Math.max(viewportPadding, Math.min(top, viewport.height - 220));
 
     return { top, left, width };
-  }, [step.tooltipPlacement, targetRect]);
+  }, [step.tooltipPlacement, targetRect, viewport.height, viewport.width]);
 
   const isLast = stepIndex === DEMO_GUIDED_STEPS.length - 1;
 
@@ -153,13 +165,6 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
               >
                 {language === 'es' ? 'Finalizar' : 'Finish'}
               </button>
-              <Link
-                to="/sign-up"
-                onClick={onCtaClick}
-                className="rounded-lg border border-cyan-200/70 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-cyan-100"
-              >
-                {step.ctaLabel?.[language] ?? 'Start my journey'}
-              </Link>
             </>
           )}
           {!isLast ? (
