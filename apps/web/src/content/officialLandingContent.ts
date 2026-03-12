@@ -198,7 +198,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     demo: {
       title: 'Demo',
-      text: '¿Quieres verlo en acción? Recorre la demo interactiva para entender el flujo completo antes de empezar tu journey.',
+      text: 'Explora Innerbloom con nuestra demo guiada.',
       cta: 'Explorar demo'
     },
     testimonials: {
@@ -445,8 +445,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     demo: {
       title: 'Demo',
-      text: 'Want to see it in action? Explore the interactive demo to understand the full flow before starting your journey.',
-      cta: 'Explore demo'
+      text: 'Explore Innerbloom through our guided demo.',
+      cta: 'Start Demo'
     },
     testimonials: {
       title: 'Testimonials',
