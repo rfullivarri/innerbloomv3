@@ -4,6 +4,7 @@ type NavLink = { href: string; label: string };
 type Pillar = { emoji: string; title: string; copy: string };
 type Mode = { id: 'low' | 'chill' | 'flow' | 'evolve'; title: string; state: string; goal: string };
 type HowStep = { title: string; action: string; outcome: string; copy: string };
+type FeatureShowcaseItem = { title: string; description: string; previewLabel: string; previewValue: string; previewMeta: string };
 type Testimonial = { quote: string; author: string };
 type Faq = { question: string; answer: string };
 type AuthCopy = {
@@ -25,6 +26,7 @@ export type LandingCopy = {
   pillars: { title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { title: string; intro: string; items: Mode[] };
   how: { kicker: string; title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
+  featureShowcase: { kicker: string; title: string; intro: string; items: FeatureShowcaseItem[] };
   demo: { title: string; text: string; cta: string };
   testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
   pricing: {
@@ -145,10 +147,59 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
         }
       ]
     },
+    featureShowcase: {
+      kicker: 'PRODUCT SHOWCASE',
+      title: 'Vista rápida de lo que desbloqueas al sostener tu ritmo',
+      intro: 'Estas previews muestran cómo Innerbloom transforma tu energía diaria en acciones medibles y progreso visible.',
+      items: [
+        {
+          title: 'Daily Quest',
+          description: 'Plan del día con micro-hábitos priorizados por energía para avanzar sin fricción.',
+          previewLabel: 'Completado hoy',
+          previewValue: '72%',
+          previewMeta: '4 de 6 tareas cerradas'
+        },
+        {
+          title: 'XP & Nivel',
+          description: 'Seguimiento de experiencia semanal para mantener dirección y momentum sostenible.',
+          previewLabel: 'XP semanal',
+          previewValue: '+640 XP',
+          previewMeta: 'Objetivo: nivel 6'
+        },
+        {
+          title: 'Constancia semanal',
+          description: 'Lectura clara de tu racha y tu estabilidad para ajustar el desafío en el momento correcto.',
+          previewLabel: 'Racha activa',
+          previewValue: '8 semanas',
+          previewMeta: 'Tendencia: +18%'
+        },
+        {
+          title: 'Misiones & Rewards',
+          description: 'Misiones guiadas con bonus para reforzar hábitos que ya están tomando forma.',
+          previewLabel: 'Misión activa',
+          previewValue: '40%',
+          previewMeta: 'Siguiente reward: Focus Pack'
+        },
+        {
+          title: 'Emotion Heatmap',
+          description: 'Mapa emocional para detectar patrones y decidir acciones alineadas con cómo te sientes.',
+          previewLabel: 'Check-ins',
+          previewValue: '26',
+          previewMeta: 'Calma dominante esta semana'
+        },
+        {
+          title: 'App & Recordatorios',
+          description: 'Recordatorios contextuales para sostener tus hábitos sin saturar tu día.',
+          previewLabel: 'Recordatorios útiles',
+          previewValue: '3/día',
+          previewMeta: 'Ajustados a tu horario'
+        }
+      ]
+    },
     demo: {
       title: 'Demo',
-      text: 'Si quieres ver las funcionalidades con más detalle, entra en la demo interactiva.',
-      cta: 'Ver demo'
+      text: '¿Quieres verlo en acción? Recorre la demo interactiva para entender el flujo completo antes de empezar tu journey.',
+      cta: 'Explorar demo'
     },
     testimonials: {
       title: 'Testimonials',
@@ -343,10 +394,59 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
         }
       ]
     },
+    featureShowcase: {
+      kicker: 'PRODUCT SHOWCASE',
+      title: 'A quick preview of what unlocks when you stay consistent',
+      intro: 'These previews show how Innerbloom turns your daily energy into measurable actions and visible progress.',
+      items: [
+        {
+          title: 'Daily Quest',
+          description: 'A daily plan with energy-aware micro-habits so you can move forward with less friction.',
+          previewLabel: 'Completed today',
+          previewValue: '72%',
+          previewMeta: '4 of 6 tasks done'
+        },
+        {
+          title: 'XP & Level',
+          description: 'Weekly XP tracking that keeps your direction and momentum sustainable.',
+          previewLabel: 'Weekly XP',
+          previewValue: '+640 XP',
+          previewMeta: 'Goal: level 6'
+        },
+        {
+          title: 'Weekly consistency',
+          description: 'A clear view of streak and stability so challenge can adapt at the right moment.',
+          previewLabel: 'Active streak',
+          previewValue: '8 weeks',
+          previewMeta: 'Trend: +18%'
+        },
+        {
+          title: 'Missions & Rewards',
+          description: 'Guided missions and bonuses that reinforce habits already taking root.',
+          previewLabel: 'Active mission',
+          previewValue: '40%',
+          previewMeta: 'Next reward: Focus Pack'
+        },
+        {
+          title: 'Emotion Heatmap',
+          description: 'An emotional map to detect patterns and choose actions aligned with how you feel.',
+          previewLabel: 'Check-ins',
+          previewValue: '26',
+          previewMeta: 'Calm was dominant this week'
+        },
+        {
+          title: 'App & Reminders',
+          description: 'Context-aware reminders that support consistency without overloading your day.',
+          previewLabel: 'Useful reminders',
+          previewValue: '3/day',
+          previewMeta: 'Matched to your schedule'
+        }
+      ]
+    },
     demo: {
       title: 'Demo',
-      text: 'If you want to explore the features in more detail, enter the interactive demo.',
-      cta: 'Start demo'
+      text: 'Want to see it in action? Explore the interactive demo to understand the full flow before starting your journey.',
+      cta: 'Explore demo'
     },
     testimonials: {
       title: 'Testimonials',

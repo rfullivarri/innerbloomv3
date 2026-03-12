@@ -784,14 +784,36 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="demo section-pad reveal-on-scroll" id="demo">
-          <div className="container narrow">
-            <AdaptiveText as="h2">{copy.demo.title}</AdaptiveText>
-            <AdaptiveText as="p" className="section-sub demo-sub">{copy.demo.text}</AdaptiveText>
-            <div className="demo-actions">
-              <Link className={buttonClasses('ghost')} to="/demo">
-                {copy.demo.cta}
-              </Link>
+        <section className="feature-showcase section-pad reveal-on-scroll" id="feature-showcase">
+          <div className="container">
+            <div className="showcase-heading">
+              <p className="showcase-kicker">{copy.featureShowcase.kicker}</p>
+              <AdaptiveText as="h2">{copy.featureShowcase.title}</AdaptiveText>
+              <AdaptiveText as="p" className="section-sub">{copy.featureShowcase.intro}</AdaptiveText>
+            </div>
+
+            <div className="showcase-grid">
+              {copy.featureShowcase.items.map((item, index) => (
+                <article className="card showcase-card fade-item" key={item.title} style={{ '--delay': `${index * 70}ms` } as CSSProperties}>
+                  <h3>{item.title}</h3>
+                  <p className="showcase-description">{item.description}</p>
+                  <div className="showcase-preview" aria-hidden>
+                    <p className="showcase-preview-label">{item.previewLabel}</p>
+                    <p className="showcase-preview-value">{item.previewValue}</p>
+                    <p className="showcase-preview-meta">{item.previewMeta}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className="demo-bridge" id="demo">
+              <AdaptiveText as="h3">{copy.demo.title}</AdaptiveText>
+              <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
+              <div className="demo-actions">
+                <Link className={buttonClasses('ghost')} to="/demo">
+                  {copy.demo.cta}
+                </Link>
+              </div>
             </div>
           </div>
         </section>
