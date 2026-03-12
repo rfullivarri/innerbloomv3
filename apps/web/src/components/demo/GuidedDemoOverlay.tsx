@@ -5,13 +5,17 @@ import { DEMO_GUIDED_STEPS, type DemoLanguage } from '../../config/demoGuidedTou
 type Props = {
   language: DemoLanguage;
   onFinish: () => void;
+  onSkip: (stepId: string, stepIndex: number) => void;
+  onStepViewed: (stepId: string, stepIndex: number) => void;
+  onCompleted: () => void;
+  onCtaClick: () => void;
 };
 
 type Rect = { top: number; left: number; width: number; height: number };
 
 const PADDING = 10;
 
-export function GuidedDemoOverlay({ language, onFinish }: Props) {
+export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, onCompleted, onCtaClick }: Props) {
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const step = DEMO_GUIDED_STEPS[stepIndex];
@@ -54,6 +58,11 @@ export function GuidedDemoOverlay({ language, onFinish }: Props) {
     };
   }, [step?.targetSelector]);
 
+  useEffect(() => {
+    if (!step) return;
+    onStepViewed(step.id, stepIndex);
+  }, [onStepViewed, step, stepIndex]);
+
   const tooltipStyle = useMemo(() => {
     const width = Math.min(window.innerWidth - 24, 360);
     if (!targetRect) {
@@ -94,7 +103,7 @@ export function GuidedDemoOverlay({ language, onFinish }: Props) {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[120]">
-      <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px]" />
+      <div className="absolute inset-0 bg-slate-950/72 backdrop-blur-[3px]" />
       {targetRect ? (
         <div
           className="absolute rounded-2xl border border-cyan-200/80 shadow-[0_0_0_9999px_rgba(2,6,23,0.72),0_0_0_2px_rgba(34,211,238,0.55),0_20px_45px_rgba(0,0,0,0.45)] transition-all"
@@ -136,12 +145,19 @@ export function GuidedDemoOverlay({ language, onFinish }: Props) {
             <>
               <button
                 type="button"
-                onClick={onFinish}
+                onClick={() => {
+                  onCompleted();
+                  onFinish();
+                }}
                 className="rounded-lg bg-cyan-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-950"
               >
                 {language === 'es' ? 'Finalizar' : 'Finish'}
               </button>
-              <Link to="/sign-up" className="rounded-lg border border-cyan-200/70 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-cyan-100">
+              <Link
+                to="/sign-up"
+                onClick={onCtaClick}
+                className="rounded-lg border border-cyan-200/70 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-cyan-100"
+              >
                 {step.ctaLabel?.[language] ?? 'Start my journey'}
               </Link>
             </>
@@ -149,7 +165,10 @@ export function GuidedDemoOverlay({ language, onFinish }: Props) {
           {!isLast ? (
             <button
               type="button"
-              onClick={onFinish}
+              onClick={() => {
+                onSkip(step.id, stepIndex);
+                onFinish();
+              }}
               className="ml-auto rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-300 hover:bg-white/10"
             >
               {language === 'es' ? 'Saltar' : 'Skip'}
