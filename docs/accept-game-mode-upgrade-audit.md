@@ -271,3 +271,24 @@ Within one DB transaction (`BEGIN ... COMMIT`), onboarding:
    - Is `/users/me` reload enough, or should we also force-refresh streak/energy cards instantly?
 4. **Calibration historical precision follow-up**:
    - Existing service selects latest history row overall; confirm whether this should be corrected in separate scope.
+
+---
+
+## 13) Final implementation notes
+
+Implemented in this change:
+
+- Added a shared service at `apps/api/src/services/userGameModeChangeService.ts` with:
+  - `resolveGameModeByCode(...)`
+  - `resolveGameModeImageUrl(...)`
+  - `changeUserGameMode(...)`
+- The shared writer now updates `users.game_mode_id`, `users.image_url`, and `users.avatar_url` in one statement and intentionally relies on the existing DB trigger to persist `user_game_mode_history`.
+- `submitOnboardingIntro(...)` now uses the shared service for game mode mutation (instead of direct `UPDATE users ...`), preserving onboarding behavior while centralizing mode mutation logic.
+- `acceptGameModeUpgradeSuggestion(...)` now uses the same shared service, including optimistic concurrency via `expectedCurrentGameModeId`, while still enforcing eligibility/staleness validations and writing `accepted_at`.
+- Accept-upgrade route now returns a refreshed suggestion payload (`suggestion`) plus `accepted_suggestion` for immediate frontend state refresh after mode change.
+
+Guardrails preserved:
+
+- XP/GP/Level are not mutated in the shared mode-change path.
+- Task difficulty is not changed by this flow.
+- Historical periods remain intact because history continues to be appended through the existing trigger on `users.game_mode_id` updates.

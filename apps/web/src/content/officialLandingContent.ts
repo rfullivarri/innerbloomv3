@@ -25,6 +25,7 @@ export type LandingCopy = {
   pillars: { title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { title: string; intro: string; items: Mode[] };
   how: { kicker: string; title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
+  demo: { title: string; text: string; cta: string };
   testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
   pricing: {
     title: string;
@@ -44,8 +45,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   es: {
     navLinks: [],
     hero: {
-      titleLead: 'Construye hábitos',
-      titleHighlight: 'que crecen contigo.',
+      titleLead: 'Construye hábitos con un sistema',
+      titleHighlight: 'que se adapta a tu energía',
       subtitle:
         'Un sistema de hábitos gamificado que se adapta a tu energía, refleja tus emociones y recompensa tu progreso.',
       note: 'En menos de 3 minutos obtienes un punto de partida personalizado según tu energía, tus prioridades y tu ritmo actual.',
@@ -144,6 +145,11 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
         }
       ]
     },
+    demo: {
+      title: 'Demo',
+      text: 'Si quieres ver las funcionalidades con más detalle, entra en la demo interactiva.',
+      cta: 'Ver demo'
+    },
     testimonials: {
       title: 'Testimonials',
       intro: 'Lo que dice la gente después de empezar su journey.',
@@ -237,8 +243,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   en: {
     navLinks: [],
     hero: {
-      titleLead: 'Build habits',
-      titleHighlight: 'that grow with you.',
+      titleLead: 'Build habits with a system',
+      titleHighlight: 'that adapts to your energy',
       subtitle:
         'A gamified habit system that adapts to your energy, reflects your emotions, and rewards your progress.',
       note: 'In under 3 minutes, you get a personalized starting point built around your energy, priorities, and current rhythm.',
@@ -336,6 +342,11 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
           copy: 'When a habit becomes stable over time, Innerbloom can recognize it as part of your foundation. Habit Bloomed marks the moment consistency becomes lasting change.'
         }
       ]
+    },
+    demo: {
+      title: 'Demo',
+      text: 'If you want to explore the features in more detail, enter the interactive demo.',
+      cta: 'Start demo'
     },
     testimonials: {
       title: 'Testimonials',
