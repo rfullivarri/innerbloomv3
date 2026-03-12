@@ -1,6 +1,6 @@
 export type AuthLanguage = 'es' | 'en';
 
-const AUTH_LANGUAGE_STORAGE_KEY = 'innerbloom.auth.language';
+export const AUTH_LANGUAGE_STORAGE_KEY = 'innerbloom.auth.language';
 
 function isSupportedLanguage(language: string | null): language is AuthLanguage {
   return language === 'es' || language === 'en';

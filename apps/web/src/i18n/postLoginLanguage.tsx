@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 import { resolvePostLoginTranslation } from './post-login';
+import { AUTH_LANGUAGE_STORAGE_KEY } from '../lib/authLanguage';
 
 export type PostLoginLanguage = 'es' | 'en';
 
@@ -60,8 +61,16 @@ function readOnboardingLanguage(): PostLoginLanguage | null {
   return normalizeLanguage(window.localStorage.getItem(ONBOARDING_LANGUAGE_STORAGE_KEY));
 }
 
+function readAuthLanguage(): PostLoginLanguage | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return normalizeLanguage(window.localStorage.getItem(AUTH_LANGUAGE_STORAGE_KEY));
+}
+
 function resolveInitialLanguage(): PostLoginLanguage {
-  return readStoredLanguage() ?? readOnboardingLanguage() ?? detectDeviceLanguage();
+  return readStoredLanguage() ?? readAuthLanguage() ?? readOnboardingLanguage() ?? detectDeviceLanguage();
 }
 
 interface PostLoginLanguageContextValue {

@@ -5,6 +5,7 @@ import {
   POSTLOGIN_LANGUAGE_STORAGE_KEY,
   usePostLoginLanguage,
 } from './postLoginLanguage';
+import { AUTH_LANGUAGE_STORAGE_KEY } from '../lib/authLanguage';
 
 const ONBOARDING_LANGUAGE_STORAGE_KEY = 'innerbloom.onboarding.language';
 const POSTLOGIN_LANGUAGE_SOURCE_STORAGE_KEY = 'innerbloom.postlogin.language.source';
@@ -44,6 +45,18 @@ describe('post-login language flow', () => {
 
   it('boots dashboard in ES when onboarding selected ES', () => {
     window.localStorage.setItem(ONBOARDING_LANGUAGE_STORAGE_KEY, 'es');
+
+    render(
+      <PostLoginLanguageProvider>
+        <Probe />
+      </PostLoginLanguageProvider>,
+    );
+
+    expect(screen.getByTestId('language').textContent).toBe('es');
+  });
+
+  it('inherits landing language when auth locale is already active', () => {
+    window.localStorage.setItem(AUTH_LANGUAGE_STORAGE_KEY, 'es');
 
     render(
       <PostLoginLanguageProvider>

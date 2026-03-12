@@ -8,6 +8,7 @@ import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimelin
 import { AdaptiveText } from '../components/landing/AdaptiveText';
 import { usePageMeta } from '../lib/seo';
 import { buildOnboardingPath } from '../onboarding/i18n';
+import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 import './Landing.css';
 
 type LandingGradientOption = {
@@ -306,6 +307,7 @@ function LanguageDropdown({ value, onChange }: { value: Language; onChange: (lan
 
 export default function LandingPage() {
   const { userId } = useAuth();
+  const { setManualLanguage, syncLocaleLanguage } = usePostLoginLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const isSignedIn = Boolean(userId);
@@ -372,8 +374,15 @@ export default function LandingPage() {
   }, [gradientId]);
 
   useEffect(() => {
-    setLanguage(resolveAuthLanguage(location.search));
-  }, [location.search]);
+    const resolvedLanguage = resolveAuthLanguage(location.search);
+    setLanguage(resolvedLanguage);
+    syncLocaleLanguage(resolvedLanguage);
+  }, [location.search, syncLocaleLanguage]);
+
+  const handleLanguageChange = (nextLanguage: Language) => {
+    setLanguage(nextLanguage);
+    setManualLanguage(nextLanguage);
+  };
 
   usePageMeta({
     title: 'Innerbloom',
@@ -598,7 +607,7 @@ export default function LandingPage() {
               </select>
             </label>
           ) : null}
-          <LanguageDropdown value={language} onChange={setLanguage} />
+          <LanguageDropdown value={language} onChange={handleLanguageChange} />
           {isSignedIn ? (
             <Link className={buttonClasses()} to="/dashboard">
               {copy.auth.dashboard}
@@ -611,7 +620,7 @@ export default function LandingPage() {
               <Link className={`${buttonClasses()} nav-auth-button`} to={buildLocalizedAuthPath('/login', language)}>
                 {copy.auth.login}
               </Link>
-              <Link className={`${buttonClasses('ghost')} nav-auth-button`} to="/demo">
+              <Link className={`${buttonClasses('ghost')} nav-auth-button`} to={`/demo?lang=${language}`}>
                 {demoCtaLabel}
               </Link>
             </>
@@ -641,7 +650,7 @@ export default function LandingPage() {
                     <Link className={`${buttonClasses()} journey-cta`} to={buildOnboardingPath(language)}>
                       {copy.auth.startJourney}
                     </Link>
-                    <Link className={`${buttonClasses('ghost')} journey-cta`} to="/demo">
+                    <Link className={`${buttonClasses('ghost')} journey-cta`} to={`/demo?lang=${language}`}>
                       {demoCtaLabel}
                     </Link>
                   </>
@@ -790,7 +799,7 @@ export default function LandingPage() {
               <AdaptiveText as="h2">{copy.demo.title}</AdaptiveText>
               <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
               <div className="demo-actions">
-                <Link className={buttonClasses()} to="/demo">
+                <Link className={buttonClasses()} to={`/demo?lang=${language}`}>
                   {copy.demo.cta}
                 </Link>
               </div>
