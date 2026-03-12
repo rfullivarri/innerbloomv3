@@ -111,7 +111,7 @@ const t = {
       ] satisfies Highlight[]
     },
     modes: {
-      title: 'Modulate your game mode',
+      title: 'Choose the mode that fits your energy today',
       description: 'Swap modes to match your energy. The system adapts to keep you moving.',
       items: [
         {
@@ -254,7 +254,7 @@ const t = {
       ] satisfies Highlight[]
     },
     modes: {
-      title: 'Modula tu modo de juego',
+      title: 'Elige el modo que mejor se adapta a tu energía hoy',
       description: 'Cambia según tu momento. El sistema se adapta a tu energía.',
       items: [
         {
