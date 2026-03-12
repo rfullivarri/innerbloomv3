@@ -1,4 +1,5 @@
 import express from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -13,7 +14,7 @@ const {
 }));
 
 vi.mock('../middlewares/auth-middleware.js', () => ({
-  authMiddleware: (req: any, _res: any, next: () => void) => {
+  authMiddleware: (req: Request, _res: Response, next: NextFunction) => {
     req.user = { id: '00000000-0000-4000-8000-000000000001' };
     next();
   },
