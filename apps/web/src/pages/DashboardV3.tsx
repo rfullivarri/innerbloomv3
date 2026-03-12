@@ -93,6 +93,10 @@ import { ModerationWidget as ModerationStatusWidget } from "../components/modera
 import { ModerationEditSheet } from "../components/dashboard-v3/ModerationEditSheet";
 import { ModerationOnboardingSuggestion } from "../components/dashboard-v3/ModerationOnboardingSuggestion";
 import { ModeUpgradeSuggestionCTA } from "../components/dashboard-v3/ModeUpgradeSuggestionCTA";
+import {
+  readModerationOnboardingIntentFlag,
+  writeModerationOnboardingIntentFlag,
+} from "../lib/moderationOnboarding";
 
 const MODERATION_SUGGESTION_RESOLVED_KEY =
   "ib.onboarding.moderationSuggestionResolved";
@@ -219,6 +223,8 @@ export default function DashboardV3Page() {
     useState(() => readModerationSuggestionResolvedFlag());
   const [isModerationSuggestionOpen, setIsModerationSuggestionOpen] =
     useState(false);
+  const [hasModerationOnboardingIntent, setHasModerationOnboardingIntent] =
+    useState(() => readModerationOnboardingIntentFlag());
   const [selectedModerationSuggestions, setSelectedModerationSuggestions] =
     useState<ModerationTrackerType[]>(["alcohol", "tobacco", "sugar"]);
   const [
@@ -373,20 +379,35 @@ export default function DashboardV3Page() {
 
 
   useEffect(() => {
+    if (!hasModerationOnboardingIntent) {
+      const fallbackFromProfile = hasModerationBodyFocus(
+        profile,
+        dailyQuestReadiness.journey,
+      );
+      if (fallbackFromProfile) {
+        setHasModerationOnboardingIntent(true);
+      }
+    }
+  }, [
+    dailyQuestReadiness.journey,
+    hasModerationOnboardingIntent,
+    profile,
+  ]);
+
+  useEffect(() => {
     const shouldShowModerationSuggestion =
-      firstEditDone &&
-      !hasReturnedToDashboardAfterEdit &&
       dailyQuestReadiness.firstTasksConfirmed &&
       !dailyQuestReadiness.completedFirstDailyQuest &&
-      hasModerationBodyFocus(profile, dailyQuestReadiness.journey) &&
+      hasModerationOnboardingIntent &&
       !moderationSuggestionResolved &&
       !moderation.isLoading;
 
     if (shouldShowModerationSuggestion) {
       if (moderation.enabledTypes.length > 0) {
         writeModerationSuggestionResolvedFlag(true);
+        writeModerationOnboardingIntentFlag(false);
+        setHasModerationOnboardingIntent(false);
         setModerationSuggestionResolved(true);
-        markReturnedToDashboard();
         return;
       }
 
@@ -394,35 +415,26 @@ export default function DashboardV3Page() {
       return;
     }
 
-    if (
-      !firstEditDone ||
-      hasReturnedToDashboardAfterEdit ||
-      isModerationSuggestionOpen
-    ) {
+    if (isModerationSuggestionOpen) {
       return;
     }
-
-    markReturnedToDashboard();
   }, [
     dailyQuestReadiness.completedFirstDailyQuest,
     dailyQuestReadiness.firstTasksConfirmed,
-    dailyQuestReadiness.journey,
-    firstEditDone,
-    hasReturnedToDashboardAfterEdit,
+    hasModerationOnboardingIntent,
     isModerationSuggestionOpen,
-    markReturnedToDashboard,
     moderation.enabledTypes.length,
     moderation.isLoading,
     moderationSuggestionResolved,
-    profile,
   ]);
 
   const resolveModerationSuggestion = useCallback(() => {
     writeModerationSuggestionResolvedFlag(true);
+    writeModerationOnboardingIntentFlag(false);
+    setHasModerationOnboardingIntent(false);
     setModerationSuggestionResolved(true);
     setIsModerationSuggestionOpen(false);
-    markReturnedToDashboard();
-  }, [markReturnedToDashboard]);
+  }, []);
 
   const handleToggleModerationSuggestion = useCallback(
     (type: ModerationTrackerType) => {

@@ -10,6 +10,10 @@ import { emitOnboardingEvent } from '../lib/telemetry';
 import { resolveOnboardingLanguage } from '../onboarding/i18n';
 import { POSTLOGIN_LANGUAGE_STORAGE_KEY } from '../i18n/postLoginLanguage';
 import { buildDemoUrl } from '../lib/demoEntry';
+import {
+  hasModerationSelection,
+  writeModerationOnboardingIntentFlag,
+} from '../lib/moderationOnboarding';
 
 async function parseErrorMessage(response: Response) {
   const payload = await response.json().catch(() => ({}));
@@ -64,6 +68,9 @@ export default function OnboardingIntroPage() {
         if (typeof window !== 'undefined') {
           window.localStorage.setItem(POSTLOGIN_LANGUAGE_STORAGE_KEY, language);
           window.localStorage.setItem('innerbloom.postlogin.language.source', 'locale');
+          writeModerationOnboardingIntentFlag(
+            hasModerationSelection(payload.data.foundations.body),
+          );
         }
 
         setJourneyGenerationPending({
