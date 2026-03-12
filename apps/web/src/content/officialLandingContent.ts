@@ -25,6 +25,7 @@ export type LandingCopy = {
   pillars: { title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { title: string; intro: string; items: Mode[] };
   how: { kicker: string; title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
+  demo: { title: string; text: string; cta: string };
   testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
   pricing: {
     title: string;
@@ -143,6 +144,11 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
           copy: 'Cuando un hábito se vuelve estable con el tiempo, Innerbloom puede reconocerlo como parte de tu base. Habit Bloomed marca el momento en que la constancia se convierte en cambio duradero.'
         }
       ]
+    },
+    demo: {
+      title: 'Demo',
+      text: 'Si quieres ver las funcionalidades con más detalle, entra en la demo interactiva.',
+      cta: 'Ver demo'
     },
     testimonials: {
       title: 'Testimonials',
@@ -336,6 +342,11 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
           copy: 'When a habit becomes stable over time, Innerbloom can recognize it as part of your foundation. Habit Bloomed marks the moment consistency becomes lasting change.'
         }
       ]
+    },
+    demo: {
+      title: 'Demo',
+      text: 'If you want to explore the features in more detail, enter the interactive demo.',
+      cta: 'Start demo'
     },
     testimonials: {
       title: 'Testimonials',

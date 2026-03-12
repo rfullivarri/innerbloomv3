@@ -328,6 +328,7 @@ export default function LandingPage() {
     return storedGradient?.id ?? officialGradientId;
   });
   const copy = OFFICIAL_LANDING_CONTENT[language];
+  const visibleNavLinks = copy.navLinks.filter((link) => !/^\/demo$/i.test(link.href) && !/^#?demo$/i.test(link.href));
   const selectedGradient = LANDING_GRADIENTS.find((option) => option.id === gradientId) ?? LANDING_GRADIENTS[0];
   const landingStyle = {
     ...(OFFICIAL_LANDING_CSS_VARIABLES as CSSProperties),
@@ -570,9 +571,9 @@ export default function LandingPage() {
             height={50}
           />
         </Link>
-        {copy.navLinks.length > 0 ? (
+        {visibleNavLinks.length > 0 ? (
           <nav className="nav-links">
-            {copy.navLinks.map((link) => (
+            {visibleNavLinks.map((link) => (
               <a key={link.href} href={link.href}>
                 {link.label}
               </a>
@@ -780,6 +781,20 @@ export default function LandingPage() {
               closingLine={PREMIUM_TIMELINE_COPY[language].closingLine}
               className="mt-2"
             />
+          </div>
+        </section>
+
+        <section className="demo section-pad reveal-on-scroll" id="demo">
+          <div className="container narrow">
+            <div className="demo-card">
+              <AdaptiveText as="h2">{copy.demo.title}</AdaptiveText>
+              <AdaptiveText as="p" className="section-sub demo-sub">{copy.demo.text}</AdaptiveText>
+              <div className="demo-actions">
+                <Link className={buttonClasses('ghost')} to="/demo">
+                  {copy.demo.cta}
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
 
