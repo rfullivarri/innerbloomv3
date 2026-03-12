@@ -1,33 +1,17 @@
-import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
-import { ToastBanner } from "../common/ToastBanner";
-import { ModerationWidget as ModerationPreviewWidget } from "./ModerationWidget";
-import { ModerationTrackerIcon } from "../moderation/trackerMeta";
-import { useQuickAccessInstall } from "../../hooks/useQuickAccessInstall";
-import { ThemeSwitcher } from "./ThemeSwitcher";
 import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
-import { useLongPress } from "../../hooks/useLongPress";
 import { useThemePreference } from "../../theme/ThemePreferenceProvider";
-import {
-  ApiError,
-  type ModerationTrackerConfig,
-  type ModerationTrackerType,
-} from "../../lib/api";
 import type { ResolvedTheme } from "../../theme/themePreference";
+import type { ModerationTrackerConfig, ModerationTrackerType } from "../../lib/api";
 import {
   forwardRef,
   type MouseEvent,
-  type ReactNode,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
-
-type MenuPanel = "main" | "widgets";
 
 interface DashboardMenuProps {
   onOpenScheduler?: () => void;
@@ -35,10 +19,7 @@ interface DashboardMenuProps {
     configs: Record<ModerationTrackerType, ModerationTrackerConfig> | null;
     enabledTypes: ModerationTrackerType[];
     isRefreshingWidgets: boolean;
-    updateTrackerEnabled: (
-      type: ModerationTrackerType,
-      enabled: boolean,
-    ) => Promise<void>;
+    updateTrackerEnabled: (type: ModerationTrackerType, enabled: boolean) => Promise<void>;
     onOpenEdit: () => void;
   };
 }
@@ -47,29 +28,6 @@ export function getWidgetsRefreshingOverlayClass(theme: ResolvedTheme): string {
   return theme === "light"
     ? "bg-[color:var(--color-overlay-3)]"
     : "bg-[color:var(--color-slate-950-80)]";
-}
-
-function MenuIcon({
-  children,
-  className = "h-5 w-5 text-[color:var(--color-text-dim)]",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {children}
-    </svg>
-  );
 }
 
 const DashboardMenuTrigger = forwardRef<
@@ -99,82 +57,29 @@ const DashboardMenuTrigger = forwardRef<
   );
 });
 
-function buildModerationSaveErrorMessage(error: unknown, fallback: string): string {
-
-  if (error instanceof ApiError) {
-    const apiMessage =
-      typeof error.body?.message === "string" &&
-      error.body.message.trim().length > 0
-        ? error.body.message.trim()
-        : null;
-    const apiCode =
-      typeof error.body?.code === "string" && error.body.code.trim().length > 0
-        ? error.body.code.trim()
-        : null;
-    const requestId =
-      typeof error.requestId === "string" && error.requestId.trim().length > 0
-        ? error.requestId.trim()
-        : null;
-
-    const detailParts = [
-      `HTTP ${error.status}`,
-      apiCode ? `code: ${apiCode}` : null,
-      requestId ? `requestId: ${requestId}` : null,
-    ].filter(Boolean);
-
-    if (apiMessage) {
-      return `${fallback} ${apiMessage}${detailParts.length ? ` (${detailParts.join(" · ")})` : ""}`;
-    }
-
-    if (detailParts.length) {
-      return `${fallback} ${detailParts.join(" · ")}.`;
-    }
-  }
-
-  if (error instanceof Error && error.message.trim().length > 0) {
-    return `${fallback} ${error.message.trim()}`;
-  }
-
-  return fallback;
-}
-
-export function DashboardMenu({
-  onOpenScheduler,
-  moderation,
-}: DashboardMenuProps) {
-  const { theme } = useThemePreference();
+export function DashboardMenu({ moderation: _moderation }: DashboardMenuProps) {
+  const { theme, setPreference } = useThemePreference();
   const { language, setManualLanguage, t } = usePostLoginLanguage();
-  const navigate = useNavigate();
-  const { user } = useUser();
-  const { openUserProfile } = useClerk();
-  const { signOut } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const toastTimeoutRef = useRef<number | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
-  const [isPlansOpen, setIsPlansOpen] = useState(false);
-  const [isModerationOpen, setIsModerationOpen] = useState(true);
-  const [activePanel, setActivePanel] = useState<MenuPanel>("main");
-  const [trackerOverrides, setTrackerOverrides] = useState<
-    Partial<Record<ModerationTrackerType, boolean>>
-  >({});
-
-  const {
-    isMobile,
-    isIOS,
-    isStandalone,
-    toast,
-    setToast,
-    onQuickAccessClick,
-    iosInstructionsOpen,
-    closeIosInstructions,
-  } = useQuickAccessInstall();
 
   useEffect(() => {
     setPortalNode(document.body);
     setIsMounted(true);
+  }, []);
+
+  const handleTriggerClick = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    requestAnimationFrame(() => {
+      triggerRef.current?.focus({ preventScroll: true });
+    });
   }, []);
 
   useEffect(() => {
@@ -186,7 +91,7 @@ export function DashboardMenu({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        setIsOpen(false);
+        handleClose();
       }
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -194,102 +99,7 @@ export function DashboardMenu({
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!toast) {
-      return;
-    }
-    if (toastTimeoutRef.current) {
-      window.clearTimeout(toastTimeoutRef.current);
-    }
-    toastTimeoutRef.current = window.setTimeout(() => {
-      setToast(null);
-      toastTimeoutRef.current = null;
-    }, 2500);
-    return () => {
-      if (toastTimeoutRef.current) {
-        window.clearTimeout(toastTimeoutRef.current);
-      }
-    };
-  }, [toast, setToast]);
-
-  const handleQuickAccessClick = useCallback(async () => {
-    await onQuickAccessClick();
-  }, [onQuickAccessClick]);
-
-  const handleTriggerClick = useCallback(() => {
-    setIsOpen(true);
-  }, []);
-
-  const handleClose = useCallback(() => {
-    setIsOpen(false);
-    setIsPlansOpen(false);
-    setIsModerationOpen(true);
-    setActivePanel("main");
-    requestAnimationFrame(() => {
-      triggerRef.current?.focus({ preventScroll: true });
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!moderation.configs) {
-      return;
-    }
-
-    setTrackerOverrides((current) => {
-      let didChange = false;
-      const next: Partial<Record<ModerationTrackerType, boolean>> = {
-        ...current,
-      };
-
-      (Object.keys(current) as ModerationTrackerType[]).forEach((type) => {
-        const localOverride = current[type];
-        if (typeof localOverride !== "boolean") {
-          return;
-        }
-
-        if (moderation.configs?.[type]?.isEnabled === localOverride) {
-          delete next[type];
-          didChange = true;
-        }
-      });
-
-      return didChange ? next : current;
-    });
-  }, [moderation.configs]);
-
-  const menuRowClassName =
-    "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40";
-  const menuCardClassName =
-    "ib-card-contour-shadow relative z-10 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)]";
-
-  const handleOpenProfile = useCallback(() => {
-    if (typeof openUserProfile === "function") {
-      openUserProfile();
-    }
-    handleClose();
-  }, [openUserProfile, handleClose]);
-
-  const handleOpenScheduler = useCallback(() => {
-    handleClose();
-    onOpenScheduler?.();
-  }, [handleClose, onOpenScheduler]);
-
-  const handleSignOut = useCallback(async () => {
-    handleClose();
-    await signOut({ redirectUrl: "/" });
-  }, [signOut, handleClose]);
-
-  const handleGoToSubscription = useCallback(() => {
-    handleClose();
-    navigate("/subscription");
-  }, [handleClose, navigate]);
-
-  const handleGoToPricing = useCallback(() => {
-    handleClose();
-    navigate("/pricing");
-  }, [handleClose, navigate]);
+  }, [handleClose, isOpen]);
 
   const handleOverlayClick = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
@@ -300,87 +110,23 @@ export function DashboardMenu({
     [handleClose],
   );
 
-  const initials = useMemo(() => {
-    if (!user) {
-      return "";
-    }
-    if (user.firstName || user.lastName) {
-      return `${user.firstName?.charAt(0) ?? ""}${user.lastName?.charAt(0) ?? ""}`.toUpperCase();
-    }
-    if (user.primaryEmailAddress?.emailAddress) {
-      return user.primaryEmailAddress.emailAddress.slice(0, 2).toUpperCase();
-    }
-    return "";
-  }, [user]);
-
-
-  const trackerLabels: Record<ModerationTrackerType, string> = useMemo(() => ({
-    alcohol: "Alcohol",
-    tobacco: t('dashboard.moderation.tobacco'),
-    sugar: t('dashboard.moderation.sugar'),
-  }), [t]);
-
-  const moderationLongPressBind = useLongPress({
-    delayMs: 2200,
-    onLongPress: moderation.onOpenEdit,
-  });
-
-  const isTrackerEnabled = useCallback(
-    (type: ModerationTrackerType) => {
-      const localOverride = trackerOverrides[type];
-      if (typeof localOverride === "boolean") {
-        return localOverride;
-      }
-      return Boolean(moderation.configs?.[type]?.isEnabled);
-    },
-    [moderation.configs, trackerOverrides],
-  );
-
-  const enabledTrackers = useMemo(
-    () =>
-      (["alcohol", "tobacco", "sugar"] as ModerationTrackerType[]).filter(
-        (type) => isTrackerEnabled(type),
-      ),
-    [isTrackerEnabled],
-  );
-
-  const widgetsRefreshingOverlayClassName = useMemo(
-    () => getWidgetsRefreshingOverlayClass(theme),
-    [theme],
-  );
-
-  const handleTrackerToggle = useCallback(
-    (type: ModerationTrackerType) => {
-      if (moderation.isRefreshingWidgets) {
-        return;
-      }
-      const nextValue = !isTrackerEnabled(type);
-      setTrackerOverrides((current) => ({ ...current, [type]: nextValue }));
-      void moderation.updateTrackerEnabled(type, nextValue).catch((error) => {
-        console.error("[moderation-menu] failed to persist tracker toggle", {
-          type,
-          nextValue,
-          error,
-        });
-        setTrackerOverrides((current) => ({ ...current, [type]: !nextValue }));
-        setToast({
-          tone: "error",
-          message: buildModerationSaveErrorMessage(error, t('dashboard.menu.moderationSaveError')),
-        });
-      });
-    },
-    [isTrackerEnabled, moderation],
-  );
-
   if (!isMounted || !portalNode) {
     return (
-      <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} ariaLabel={t('dashboard.nav.openMenu')} />
+      <DashboardMenuTrigger
+        ref={triggerRef}
+        onClick={handleTriggerClick}
+        ariaLabel={t("dashboard.nav.openMenu")}
+      />
     );
   }
 
   return (
     <>
-      <DashboardMenuTrigger ref={triggerRef} onClick={handleTriggerClick} ariaLabel={t('dashboard.nav.openMenu')} />
+      <DashboardMenuTrigger
+        ref={triggerRef}
+        onClick={handleTriggerClick}
+        ariaLabel={t("dashboard.nav.openMenu")}
+      />
       {createPortal(
         <AnimatePresence>
           {isOpen ? (
@@ -395,8 +141,8 @@ export function DashboardMenu({
                 ref={panelRef}
                 role="dialog"
                 aria-modal="true"
-                aria-label={t('dashboard.nav.mainMenu')}
-                className="flex max-h-[92vh] w-full max-w-[420px] flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-5 text-[color:var(--color-text)] shadow-2xl transition"
+                aria-label={t("dashboard.nav.mainMenu")}
+                className="flex max-h-[92vh] w-full max-w-[420px] flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-5 text-[color:var(--color-text)] shadow-2xl"
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 40 }}
@@ -404,17 +150,17 @@ export function DashboardMenu({
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-[0.6rem] uppercase tracking-[0.35em] text-slate-900/80 dark:text-text-muted">
-                      {t('dashboard.nav.menu')}
+                      {t("dashboard.nav.menu")}
                     </p>
                     <h2 className="font-display text-xl font-semibold">
-                      {t('dashboard.nav.personalSpace')}
+                      {t("dashboard.nav.personalSpace")}
                     </h2>
                   </div>
                   <button
                     type="button"
                     onClick={handleClose}
                     className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-2 text-sm text-[color:var(--color-text-dim)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)]"
-                    aria-label={t('dashboard.nav.closeMenu')}
+                    aria-label={t("dashboard.nav.closeMenu")}
                   >
                     <svg
                       aria-hidden="true"
@@ -429,475 +175,47 @@ export function DashboardMenu({
                     </svg>
                   </button>
                 </div>
-                <div className="flex-1 overflow-y-auto">
-                  <div className="space-y-4 px-1 pb-1">
-                    <ThemeSwitcher />
 
-                    <section className={`${menuCardClassName} px-2 py-1`}>
-                      <button
-                        type="button"
-                        onClick={handleOpenProfile}
-                        className={`${menuRowClassName} h-14`}
-                      >
-                      {user?.imageUrl ? (
-                        <img
-                          src={user.imageUrl}
-                          alt={t('dashboard.menu.avatarAlt')}
-                          className="h-9 w-9 rounded-xl border border-[color:var(--color-border-soft)] object-cover"
-                        />
-                      ) : (
-                        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-xs font-semibold uppercase text-[color:var(--color-text-dim)]">
-                          {initials || "UX"}
-                        </span>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-[color:var(--color-text)]">
-                          {user?.fullName || user?.username || t('dashboard.menu.profileFallback')}
-                        </p>
-                        {user?.primaryEmailAddress?.emailAddress ? (
-                          <p className="truncate text-xs text-text-muted">
-                            {user.primaryEmailAddress.emailAddress}
-                          </p>
-                        ) : null}
-                      </div>
-                      <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
-                        <path d="M20 21a8 8 0 0 0-16 0" />
-                        <circle cx="12" cy="8" r="4" />
-                      </MenuIcon>
-                      </button>
-                    </section>
-
-                    <section className="space-y-2">
-                      <div className={`${menuCardClassName} px-2 py-1`}>
+                <div className="flex-1 overflow-y-auto px-1 pb-1">
+                  <div className="flex items-center gap-2">
+                    <div className="inline-flex flex-1 items-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-1">
+                      {([
+                        { value: "es", label: "ES" },
+                        { value: "en", label: "EN" },
+                      ] as const).map((option) => {
+                        const isActive = language === option.value;
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setManualLanguage(option.value)}
+                            className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] transition ${
+                              isActive
+                                ? "bg-[color:var(--color-overlay-4)] text-[color:var(--color-text)]"
+                                : "text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]"
+                            }`}
+                            aria-pressed={isActive}
+                            aria-label={
+                              option.value === "es"
+                                ? t("dashboard.language.spanish")
+                                : t("dashboard.language.english")
+                            }
+                          >
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                     <button
                       type="button"
-                      onClick={handleOpenScheduler}
-                      className={menuRowClassName}
+                      onClick={() => setPreference(theme === "dark" ? "light" : "dark")}
+                      className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-lg"
+                      aria-label={theme === "dark" ? t("dashboard.theme.light") : t("dashboard.theme.dark")}
                     >
-                      <MenuIcon>
-                        <path d="M6 9a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-                        <path d="M10 20a2 2 0 0 0 4 0" />
-                      </MenuIcon>
-                      <span className="flex-1">{t('dashboard.menu.reminder')}</span>
+                      {theme === "dark" ? "☀️" : "🌙"}
                     </button>
-                      </div>
-                      <div className={`${menuCardClassName} px-2 py-1`}>
-                      <button
-                        type="button"
-                        onClick={() => setIsPlansOpen((current) => !current)}
-                        className={menuRowClassName}
-                        aria-expanded={isPlansOpen}
-                        aria-controls="menu-planes"
-                      >
-                        <MenuIcon>
-                          <rect x="3" y="5" width="18" height="14" rx="2" />
-                          <path d="M3 10h18" />
-                        </MenuIcon>
-                        <span className="flex-1">{t('dashboard.menu.plans')}</span>
-                        <MenuIcon
-                          className={`h-4 w-4 text-[color:var(--color-text-faint)] transition ${isPlansOpen ? "rotate-180" : ""}`}
-                        >
-                          <path d="m6 9 6 6 6-6" />
-                        </MenuIcon>
-                      </button>
-                    {isPlansOpen ? (
-                      <div
-                        id="menu-planes"
-                        className="-mt-1 mb-1 space-y-1 px-3 pb-2 pl-11"
-                      >
-                        <button
-                          type="button"
-                          onClick={handleGoToSubscription}
-                          className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
-                        >
-                          <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
-                            <path d="M12 3a4 4 0 0 0-4 4v2" />
-                            <path d="M8 12v-1a4 4 0 1 1 8 0v1" />
-                            <rect x="5" y="12" width="14" height="9" rx="2" />
-                          </MenuIcon>
-                          {t('dashboard.menu.subscription')}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleGoToPricing}
-                          className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
-                        >
-                          <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
-                            <path d="M6 19V9" />
-                            <path d="M12 19V5" />
-                            <path d="M18 19v-7" />
-                            <path d="M4 19h16" />
-                          </MenuIcon>
-                          Pricing
-                        </button>
-                      </div>
-                    ) : null}
-                      </div>
-                      <div className={`${menuCardClassName} px-2 py-1`}>
-                      <button
-                        type="button"
-                        onClick={() => setActivePanel("widgets")}
-                        className={menuRowClassName}
-                      >
-                        <MenuIcon>
-                          <rect x="4" y="4" width="7" height="7" rx="1.5" />
-                          <rect x="13" y="4" width="7" height="7" rx="1.5" />
-                          <rect x="4" y="13" width="7" height="7" rx="1.5" />
-                          <rect x="13" y="13" width="7" height="7" rx="1.5" />
-                        </MenuIcon>
-                        <span className="flex-1">{t('dashboard.menu.widgets')}</span>
-                        <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
-                          <path d="m9 6 6 6-6 6" />
-                        </MenuIcon>
-                      </button>
-                    {activePanel === "widgets" ? (
-                      <div
-                        id="menu-widgets"
-                        className="-mt-1 mb-1 space-y-3 px-3 pb-2 pl-3"
-                      >
-                        <div className="flex items-center gap-2 pb-1">
-                          <button
-                            type="button"
-                            onClick={() => setActivePanel("main")}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-widget-menu-heading)] transition hover:bg-[color:var(--color-overlay-2)]"
-                            aria-label={t('dashboard.menu.backToMenu')}
-                          >
-                            <MenuIcon className="h-4 w-4 text-[color:var(--color-widget-menu-heading)]">
-                              <path d="m15 6-6 6 6 6" />
-                            </MenuIcon>
-                          </button>
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--color-widget-menu-heading)]">
-                            {t('dashboard.menu.widgets')}
-                          </p>
-                        </div>
-
-                        <div className="relative">
-                          <p className="mb-1 text-xs text-[color:var(--color-widget-menu-label)]">
-                            {t('dashboard.menu.activeWidgets')}
-                          </p>
-                          {enabledTrackers.length > 0 && moderation.configs ? (
-                            <button
-                              type="button"
-                              className="w-full text-left"
-                              onClick={moderation.onOpenEdit}
-                              {...moderationLongPressBind}
-                            >
-                              <ModerationPreviewWidget
-                                title={t('dashboard.menu.moderation')}
-                                configs={moderation.configs}
-                                onEdit={moderation.onOpenEdit}
-                                compact
-                                showHeader={false}
-                              />
-                            </button>
-                          ) : (
-                            <p className="rounded-xl border border-dashed border-[color:var(--color-border-soft)] px-3 py-2 text-xs text-[color:var(--color-widget-menu-label)]">
-                              {t('dashboard.menu.noActiveWidgets')}
-                            </p>
-                          )}
-                          {moderation.isRefreshingWidgets ? (
-                            <div
-                              className={`pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-[color:var(--color-border-subtle)] ${widgetsRefreshingOverlayClassName}`}
-                            />
-                          ) : null}
-                        </div>
-
-                        <div className="relative">
-                          <p className="mb-1 text-xs text-[color:var(--color-widget-menu-label)]">
-                            {t('dashboard.menu.availableWidgets')}
-                          </p>
-                          <div className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]">
-                            <div className="flex items-start gap-2 px-3 py-2">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setIsModerationOpen((current) => !current)
-                                }
-                                className="flex min-w-0 flex-1 items-start gap-2 text-left"
-                                aria-expanded={isModerationOpen}
-                              >
-                                <span className="min-w-0 flex-1">
-                                  <span className="block text-sm text-[color:var(--color-widget-menu-item-title)]">
-                                    {t('dashboard.menu.moderation')}
-                                  </span>
-                                  <span className="block text-xs text-[color:var(--color-widget-menu-label)]">
-                                    {t('dashboard.menu.moderationSubtitle')}
-                                  </span>
-                                  {enabledTrackers.length > 0 ? (
-                                    <span className="mt-1 inline-block rounded-full border border-[color:var(--color-widget-chip-active-border)] bg-[color:var(--color-widget-chip-active-bg)] px-2 py-0.5 text-[10px] text-[color:var(--color-widget-chip-active-text)]">
-                                      {t('dashboard.menu.configured')}
-                                    </span>
-                                  ) : null}
-                                </span>
-                                <MenuIcon
-                                  className={`mt-0.5 h-4 w-4 shrink-0 text-[color:var(--color-widget-menu-icon)] transition ${isModerationOpen ? "rotate-180" : ""}`}
-                                >
-                                  <path d="m6 9 6 6 6-6" />
-                                </MenuIcon>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  moderation.onOpenEdit();
-                                }}
-                                className="rounded-md border border-[color:var(--color-widget-edit-border)] bg-[color:var(--color-widget-edit-bg)] px-2 py-1 text-xs text-[color:var(--color-widget-edit-text)] transition hover:bg-[color:var(--color-widget-edit-hover-bg)]"
-                                aria-label={t('a11y.action.editModeration')}
-                              >
-                                {t('dashboard.action.edit')}
-                              </button>
-                            </div>
-
-                            {isModerationOpen ? (
-                              <div className="space-y-2 border-t border-[color:var(--color-border-subtle)] px-3 py-3">
-                                <div className="flex flex-wrap gap-2">
-                                  {(
-                                    [
-                                      "alcohol",
-                                      "tobacco",
-                                      "sugar",
-                                    ] as ModerationTrackerType[]
-                                  ).map((type) => {
-                                    const isSelected = isTrackerEnabled(type);
-                                    return (
-                                      <button
-                                        key={type}
-                                        type="button"
-                                        title={
-                                          type === "sugar"
-                                            ? t('dashboard.menu.sugarAdded')
-                                            : undefined
-                                        }
-                                        onClick={() =>
-                                          handleTrackerToggle(type)
-                                        }
-                                        disabled={
-                                          moderation.isRefreshingWidgets
-                                        }
-                                        className={`inline-flex min-h-9 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition ${
-                                          isSelected
-                                            ? "border-[color:var(--color-widget-chip-active-border)] bg-[color:var(--color-widget-chip-active-bg)] text-[color:var(--color-widget-chip-active-text)] shadow-[0_0_0_1px_var(--color-widget-chip-active-outline)]"
-                                            : "border-[color:var(--color-widget-chip-border)] bg-[color:var(--color-widget-chip-bg)] text-[color:var(--color-widget-chip-text)] hover:bg-[color:var(--color-widget-chip-hover-bg)]"
-                                        } disabled:cursor-wait disabled:opacity-80`}
-                                      >
-                                        <ModerationTrackerIcon
-                                          type={type}
-                                          className={`h-3.5 w-3.5 ${
-                                            isSelected
-                                              ? "text-[color:var(--color-widget-chip-active-icon)]"
-                                              : "text-[color:var(--color-widget-chip-icon)]"
-                                          }`}
-                                        />
-                                        {isSelected ? (
-                                          <span className="text-[11px] font-bold text-[color:var(--color-widget-chip-active-icon)]">
-                                            ✓
-                                          </span>
-                                        ) : null}
-                                        <span>{trackerLabels[type]}</span>
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                                <p className="text-[11px] text-[color:var(--color-widget-menu-label)]">
-                                  {t('dashboard.moderation.sugarHint')}
-                                </p>
-                              </div>
-                            ) : null}
-                          </div>
-                          {moderation.isRefreshingWidgets ? (
-                            <div
-                              className={`pointer-events-none absolute inset-x-0 bottom-0 top-5 animate-pulse rounded-xl border border-[color:var(--color-border-subtle)] ${widgetsRefreshingOverlayClassName}`}
-                            />
-                          ) : null}
-                        </div>
-
-                        <p className="text-[11px] text-[color:var(--color-widget-menu-label)]">
-                          {t('dashboard.moderation.tipLongPress')}
-                        </p>
-                      </div>
-                    ) : null}
-                      </div>
-                    </section>
-
-
-                    <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3">
-                      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)]">{t('dashboard.language.title')}</p>
-                      <div className="mt-2 inline-flex w-full rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)]/40 p-1">
-                        {([
-                          { value: "es", label: t('dashboard.language.spanish') },
-                          { value: "en", label: t('dashboard.language.english') },
-                        ] as const).map((option) => {
-                          const isActive = language === option.value;
-                          return (
-                            <button
-                              key={option.value}
-                              type="button"
-                              onClick={() => setManualLanguage(option.value)}
-                              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
-                                isActive
-                                  ? "border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-2)] text-[color:var(--color-text-strong)]"
-                                  : "border border-transparent text-[color:var(--color-text-faint)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]"
-                              }`}
-                              aria-pressed={isActive}
-                            >
-                              {option.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </section>
-
-                  {isMobile ? (
-                    <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-quickaccess-bg)] p-4">
-                      <div className="mb-3 flex items-center gap-2 text-[color:var(--color-quickaccess-text)]">
-                        <MenuIcon className="h-4 w-4 text-[color:var(--color-quickaccess-text)]">
-                          <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
-                        </MenuIcon>
-                        <p className="text-[0.65rem] uppercase tracking-[0.3em] text-[color:var(--color-quickaccess-label)]">
-                          {t('dashboard.menu.quickAccess')}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleQuickAccessClick}
-                        disabled={isStandalone}
-                        className="flex h-12 w-full items-center justify-between rounded-xl border border-[color:var(--color-quickaccess-cta-border)] bg-[color:var(--color-quickaccess-cta-bg)] px-4 text-left text-sm font-semibold text-[color:var(--color-quickaccess-cta-text)] transition hover:border-[color:var(--color-quickaccess-cta-hover-border)] hover:bg-[color:var(--color-quickaccess-cta-hover-bg)] disabled:cursor-not-allowed disabled:border-[color:var(--color-quickaccess-cta-disabled-border)] disabled:bg-[color:var(--color-quickaccess-cta-disabled-bg)] disabled:text-[color:var(--color-quickaccess-cta-disabled-text)]"
-                      >
-                        <span>
-                          {isStandalone
-                            ? t('dashboard.menu.quickAccessActive')
-                            : t('dashboard.menu.quickAccessAdd')}
-                        </span>
-                        {isStandalone ? (
-                          <MenuIcon className="h-4 w-4 text-[color:var(--color-quickaccess-cta-text)]">
-                            <path d="m5 12 4 4 10-10" />
-                          </MenuIcon>
-                        ) : null}
-                      </button>
-                      {toast ? (
-                        <ToastBanner
-                          tone={toast.tone}
-                          message={toast.message}
-                          className="mt-3"
-                        />
-                      ) : null}
-                    </section>
-                  ) : null}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  className="mt-4 flex h-12 w-full items-center gap-3 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-4 text-sm font-semibold text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-3)]"
-                >
-                  <MenuIcon className="h-5 w-5 text-[color:var(--color-text-dim)]">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <path d="M16 17l5-5-5-5" />
-                    <path d="M21 12H9" />
-                  </MenuIcon>
-                  <span>{t('dashboard.menu.signOut')}</span>
-                </button>
-                {iosInstructionsOpen && isIOS ? (
-                  <div
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label={t('dashboard.quickAccess.iosDialogAria')}
-                    className="absolute inset-x-4 bottom-4 rounded-3xl border border-[color:var(--color-ios-quick-access-modal-border)] bg-[color:var(--color-ios-quick-access-modal-surface)] p-5 shadow-[var(--shadow-elev-2)]"
-                  >
-                    <p className="text-sm font-semibold text-[color:var(--color-ios-quick-access-modal-text)]">
-                      {t('dashboard.quickAccess.title')}
-                    </p>
-                    <p className="mt-1 text-xs text-[color:var(--color-ios-quick-access-modal-text-muted)]">
-                      {t('dashboard.quickAccess.subtitle')}
-                    </p>
-                    <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-[color:var(--color-ios-quick-access-modal-text-muted)]">
-                      <li className="flex flex-wrap items-center gap-2">
-                        <span>{t('dashboard.quickAccess.tap')}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
-                          <svg
-                            aria-hidden="true"
-                            className="h-3.5 w-3.5"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <circle cx="6" cy="12" r="1.5" fill="currentColor" stroke="none" />
-                            <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
-                            <circle cx="18" cy="12" r="1.5" fill="currentColor" stroke="none" />
-                          </svg>
-                        </span>
-                      </li>
-                      <li className="flex flex-wrap items-center gap-2">
-                        <span>{t('dashboard.quickAccess.tap')}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
-                          <svg
-                            aria-hidden="true"
-                            className="h-3.5 w-3.5"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <rect x="7" y="7" width="10" height="14" rx="2" />
-                            <path d="M12 3v10" />
-                            <path d="m9 6 3-3 3 3" />
-                          </svg>
-                        </span>
-                      </li>
-                      <li className="flex flex-wrap items-center gap-2">
-                        <span>{t('dashboard.quickAccess.scrollUp')}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
-                          <svg
-                            aria-hidden="true"
-                            className="h-3.5 w-3.5"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M12 19V5" />
-                            <path d="m7 10 5-5 5 5" />
-                          </svg>
-                        </span>
-                      </li>
-                      <li className="flex flex-wrap items-center gap-2">
-                        <span>{t('dashboard.quickAccess.select')}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-ios-quick-access-modal-chip-border)] bg-[color:var(--color-ios-quick-access-modal-chip-bg)] px-2 py-0.5 text-xs font-medium text-[color:var(--color-ios-quick-access-modal-chip-text)]">
-                          <svg
-                            aria-hidden="true"
-                            className="h-3.5 w-3.5"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <rect x="4" y="4" width="16" height="16" rx="3" />
-                            <path d="M12 8v8" />
-                            <path d="M8 12h8" />
-                          </svg>
-                        </span>
-                      </li>
-                      <li>{t('dashboard.quickAccess.stepAdd')}</li>
-                    </ol>
-                    {/* iOS Safari y navegadores iOS no permiten abrir Share Sheet ni instalar de forma programática. */}
-                    <button
-                      type="button"
-                      onClick={closeIosInstructions}
-                      className="mt-4 w-full rounded-full border border-[color:var(--color-ios-quick-access-modal-button-border)] bg-[color:var(--color-ios-quick-access-modal-button-bg)] px-3 py-2 text-sm text-[color:var(--color-ios-quick-access-modal-button-text)] transition hover:bg-[color:var(--color-ios-quick-access-modal-button-hover-bg)]"
-                    >
-                      {t('dashboard.quickAccess.gotIt')}
-                    </button>
-                  </div>
-                ) : null}
               </motion.div>
             </motion.div>
           ) : null}
