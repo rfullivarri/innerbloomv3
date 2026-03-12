@@ -88,16 +88,68 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     },
   },
   {
-    id: 'daily-quest',
-    targetSelector: '[data-demo-anchor="daily-quest"]',
-    tooltipPlacement: 'bottom',
+    id: 'info-dot',
+    targetSelector: '[data-demo-anchor="info-dot"]',
+    tooltipPlacement: 'left',
     title: {
-      es: 'Daily Quest',
-      en: 'Daily Quest',
+      es: 'Info Dots',
+      en: 'Info Dots',
     },
     body: {
-      es: 'Desde aquí accedes a tu retrospección diaria. Toca el chip “Daily Quest” para registrar tu emoción predominante, marcar tareas logradas, ganar GP y cerrar el día con intención.',
-      en: 'This is the entry to your daily reflection. Tap the “Daily Quest” chip to log your main emotion, mark completed tasks, earn GP, and close the day with intention.',
+      es: 'Cada sección importante tiene un info dot como este. Ahí puedes revisar qué significa cada bloque y cómo leer cada card. Si tienes dudas, vuelve a consultar ese botón.',
+      en: 'Each key section has an info dot like this one. Use it to understand what each block means and how to read each card. If you have doubts, return to this button anytime.',
+    },
+  },
+  {
+    id: 'daily-quest-intro',
+    targetSelector: '[data-demo-anchor="daily-quest-intro"]',
+    tooltipPlacement: 'bottom',
+    title: {
+      es: 'Daily Quest · retrospectiva y emoción',
+      en: 'Daily Quest · retrospective and emotion',
+    },
+    body: {
+      es: 'Daily Quest es una retrospectiva de ayer: no cargas lo que harás hoy, registras lo que lograste. El primer paso obligatorio es elegir la emoción predominante (Innerbloom trabaja con 7 emociones base).',
+      en: 'Daily Quest is a retrospective for yesterday: you are not planning today, you are logging what you achieved. The required first step is selecting your dominant emotion (Innerbloom uses 7 core emotions).',
+    },
+  },
+  {
+    id: 'daily-quest-moderation',
+    targetSelector: '[data-demo-anchor="daily-quest-moderation"]',
+    tooltipPlacement: 'top',
+    title: {
+      es: 'Daily Quest · moderación',
+      en: 'Daily Quest · moderation',
+    },
+    body: {
+      es: 'Si tienes widgets de moderación activos (como alcohol, tabaco o azúcar), aquí registras si cumpliste o no. Esta sección refleja tus objetivos diarios de moderación.',
+      en: 'If you have moderation widgets active (such as alcohol, tobacco, or sugar), you log compliance here. This section reflects your daily moderation goals.',
+    },
+  },
+  {
+    id: 'daily-quest-tasks',
+    targetSelector: '[data-demo-anchor="daily-quest-tasks"]',
+    tooltipPlacement: 'top',
+    title: {
+      es: 'Daily Quest · tareas por pilar',
+      en: 'Daily Quest · tasks by pillar',
+    },
+    body: {
+      es: 'Las tareas se organizan por pilares (Body / Mind / Soul). Aquí marcas qué completaste ayer, y eso conecta con tu progreso, energía, constancia y evolución en el sistema.',
+      en: 'Tasks are organized by pillars (Body / Mind / Soul). Here you mark what you completed yesterday, connecting directly to your progress, energy, consistency, and system evolution.',
+    },
+  },
+  {
+    id: 'daily-quest-footer',
+    targetSelector: '[data-demo-anchor="daily-quest-footer"]',
+    tooltipPlacement: 'top',
+    title: {
+      es: 'Daily Quest · cierre',
+      en: 'Daily Quest · close-out',
+    },
+    body: {
+      es: 'En el footer ves el resumen final: GP ganados en la retrospectiva y botón Confirmar para cerrar la Daily Quest del día.',
+      en: 'In the footer you see the final summary: GP gained from the retrospective and the Confirm button to close that day’s Daily Quest.',
     },
   },
   {

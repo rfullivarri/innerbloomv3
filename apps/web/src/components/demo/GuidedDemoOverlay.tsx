@@ -6,6 +6,7 @@ type Props = {
   onFinish: () => void;
   onSkip: (stepId: string, stepIndex: number) => void;
   onStepViewed: (stepId: string, stepIndex: number) => void;
+  onStepChange?: (stepId: string, stepIndex: number) => void;
   onCompleted: () => void;
 };
 
@@ -24,7 +25,11 @@ const MOBILE_STEP_FOCUS_OFFSET: Record<string, number> = {
   balance: 6,
   'emotion-chart': 6,
   'daily-energy': 18,
-  'daily-quest': 8,
+  'info-dot': 18,
+  'daily-quest-intro': 6,
+  'daily-quest-moderation': 6,
+  'daily-quest-tasks': 6,
+  'daily-quest-footer': 10,
 };
 
 type Placement = 'top' | 'right' | 'bottom' | 'left';
@@ -37,7 +42,7 @@ function intersects(a: Rect, b: Rect) {
   return a.left < b.left + b.width && a.left + a.width > b.left && a.top < b.top + b.height && a.top + a.height > b.top;
 }
 
-export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, onCompleted }: Props) {
+export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, onStepChange, onCompleted }: Props) {
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -120,7 +125,8 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
   useEffect(() => {
     if (!step) return;
     onStepViewed(step.id, stepIndex);
-  }, [onStepViewed, step, stepIndex]);
+    onStepChange?.(step.id, stepIndex);
+  }, [onStepChange, onStepViewed, step, stepIndex]);
 
   const tooltipStyle = useMemo(() => {
     const width = Math.min(viewport.width - 24, 360);
