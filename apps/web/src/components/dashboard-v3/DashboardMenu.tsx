@@ -6,8 +6,6 @@ import { ToastBanner } from "../common/ToastBanner";
 import { ModerationWidget as ModerationPreviewWidget } from "./ModerationWidget";
 import { ModerationTrackerIcon } from "../moderation/trackerMeta";
 import { useQuickAccessInstall } from "../../hooks/useQuickAccessInstall";
-import { ThemeSwitcher } from "./ThemeSwitcher";
-import { SegmentedPillControl } from "./SegmentedPillControl";
 import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
 import { useLongPress } from "../../hooks/useLongPress";
 import { useThemePreference } from "../../theme/ThemePreferenceProvider";
@@ -143,7 +141,7 @@ export function DashboardMenu({
   onOpenScheduler,
   moderation,
 }: DashboardMenuProps) {
-  const { theme } = useThemePreference();
+  const { preference, setPreference, theme } = useThemePreference();
   const { language, setManualLanguage, t } = usePostLoginLanguage();
   const navigate = useNavigate();
   const { user } = useUser();
@@ -350,6 +348,23 @@ export function DashboardMenu({
     [theme],
   );
 
+  const handleThemeCycle = useCallback(() => {
+    const nextPreference =
+      preference === "auto"
+        ? "light"
+        : preference === "light"
+          ? "dark"
+          : "auto";
+    setPreference(nextPreference);
+  }, [preference, setPreference]);
+
+  const themeToggleLabel =
+    preference === "auto"
+      ? `${t('dashboard.theme.auto')} (${theme === "dark" ? t('dashboard.theme.dark') : t('dashboard.theme.light')})`
+      : theme === "dark"
+        ? t('dashboard.theme.dark')
+        : t('dashboard.theme.light');
+
   const handleTrackerToggle = useCallback(
     (type: ModerationTrackerType) => {
       if (moderation.isRefreshingWidgets) {
@@ -432,7 +447,70 @@ export function DashboardMenu({
                 </div>
                 <div className="flex-1 overflow-y-auto">
                   <div className="space-y-4 px-1 pb-1">
-                    <ThemeSwitcher />
+                    <section className="flex items-center justify-between gap-2 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2">
+                      <div
+                        role="radiogroup"
+                        aria-label={t('dashboard.language.title')}
+                        className="inline-flex items-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-15)] p-1"
+                      >
+                        {([
+                          { value: "es", label: "ES" },
+                          { value: "en", label: "EN" },
+                        ] as const).map((option) => {
+                          const isActive = language === option.value;
+
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              role="radio"
+                              aria-checked={isActive}
+                              aria-label={option.label}
+                              onClick={() => setManualLanguage(option.value)}
+                              className={`min-w-[3rem] rounded-full px-3 py-1.5 text-xs font-semibold tracking-[0.18em] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40 ${
+                                isActive
+                                  ? "border border-white/35 bg-[color:var(--color-surface)] text-[color:var(--color-text-strong)]"
+                                  : "border border-transparent text-[color:var(--color-text-faint)] hover:text-[color:var(--color-text)]"
+                              }`}
+                            >
+                              {option.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleThemeCycle}
+                        aria-label={`${t('dashboard.theme.appearance')}: ${themeToggleLabel}`}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-15)] text-[color:var(--color-text-dim)] transition hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40"
+                      >
+                        {theme === "dark" ? (
+                          <svg
+                            aria-hidden="true"
+                            className="h-4 w-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                          >
+                            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8Z" />
+                          </svg>
+                        ) : (
+                          <svg
+                            aria-hidden="true"
+                            className="h-4 w-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                          >
+                            <circle cx="12" cy="12" r="4" />
+                            <path d="M12 2v2.2M12 19.8V22M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2 12h2.2M19.8 12H22M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56" />
+                          </svg>
+                        )}
+                      </button>
+                    </section>
 
                     <section className={`${menuCardClassName} px-2 py-1`}>
                       <button
@@ -718,20 +796,6 @@ export function DashboardMenu({
                       </div>
                     ) : null}
                       </div>
-                    </section>
-
-
-                    <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3">
-                      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-text-muted)]">{t('dashboard.language.title')}</p>
-                      <SegmentedPillControl
-                        ariaLabel={t('dashboard.language.title')}
-                        options={[
-                          { value: "es", label: t('dashboard.language.spanish') },
-                          { value: "en", label: t('dashboard.language.english') },
-                        ] as const}
-                        value={language}
-                        onChange={setManualLanguage}
-                      />
                     </section>
 
                   {isMobile ? (
