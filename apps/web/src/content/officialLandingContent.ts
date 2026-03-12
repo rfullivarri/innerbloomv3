@@ -12,6 +12,7 @@ type AuthCopy = {
   signup: string;
   login: string;
   startJourney: string;
+  guidedDemo: string;
 };
 
 export type LandingCopy = {
@@ -287,7 +288,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       dashboard: 'Ir al dashboard',
       signup: 'Crear cuenta',
       login: 'Iniciar sesión',
-      startJourney: 'Empieza mi Journey'
+      startJourney: 'Empieza mi Journey',
+      guidedDemo: 'Ver demo guiada'
     },
     footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
   },
@@ -535,7 +537,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       dashboard: 'Go to dashboard',
       signup: 'Create account',
       login: 'Log in',
-      startJourney: 'Start my Journey'
+      startJourney: 'Start my Journey',
+      guidedDemo: 'Watch guided demo'
     },
     footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
   }
