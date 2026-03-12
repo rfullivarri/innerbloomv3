@@ -881,106 +881,32 @@
 }
 
 .landing .feature-showcase .container {
-  display: grid;
-  gap: 24px;
-}
-
-.landing .showcase-heading {
-  margin: 0 auto;
-  text-align: center;
-  display: grid;
-  gap: 8px;
-  max-width: 72ch;
-}
-
-.landing .showcase-kicker {
-  margin: 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(186, 201, 229, 0.88);
-}
-
-.landing .showcase-grid {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.landing .showcase-card {
-  display: grid;
-  gap: 12px;
-  padding: 18px;
-}
-
-.landing .showcase-card h3 {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.landing .showcase-description {
-  margin: 0;
-  color: #d9e4ff;
-  font-size: 0.94rem;
-  line-height: 1.45;
-}
-
-.landing .showcase-preview {
-  border: 1px solid rgba(186, 212, 255, 0.22);
-  border-radius: 12px;
-  background: rgba(13, 23, 43, 0.55);
-  padding: 10px 12px;
-  display: grid;
-  gap: 3px;
-}
-
-.landing .showcase-preview-label {
-  margin: 0;
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: #a9bbdf;
-}
-
-.landing .showcase-preview-value {
-  margin: 0;
-  font-family: var(--font-heading);
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #f3f7ff;
-}
-
-.landing .showcase-preview-meta {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #c0d2f5;
+  display: flex;
+  justify-content: center;
 }
 
 .landing .demo-bridge {
-  margin: 2px auto 0;
-  border: 1px solid rgba(186, 212, 255, 0.24);
-  border-radius: 16px;
-  background: rgba(10, 18, 34, 0.45);
-  padding: 20px 18px;
-  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(28px, 4vw, 52px) 0;
+  max-width: 640px;
   text-align: center;
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 
-.landing .demo-bridge h3 {
+.landing .demo-bridge h2 {
   margin: 0;
-  font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
 }
 
 .landing .demo-sub {
   margin: 0 auto;
-  max-width: 56ch;
+  max-width: 48ch;
+  color: #dbe6ff;
 }
 
 .landing .demo-actions {
-  margin-top: 2px;
+  margin-top: 8px;
   display: flex;
   justify-content: center;
 }
@@ -1300,10 +1226,6 @@
 }
 
 @media (max-width: 768px) {
-
-  .landing .showcase-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .landing .grid-3 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1323,13 +1245,8 @@
 }
 
 @media (max-width: 640px) {
-
-  .landing .showcase-grid {
-    grid-template-columns: 1fr;
-  }
-
   .landing .demo-bridge {
-    padding: 18px 14px;
+    padding: 24px 0;
   }
   .landing .nav {
     grid-template-columns: auto 1fr auto;
