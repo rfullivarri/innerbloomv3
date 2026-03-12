@@ -50,6 +50,11 @@ export default function DemoDashboardPage() {
     dailyQuestModalRef.current?.close();
   }, []);
 
+  const handleGuidedCompleted = useCallback(() => {
+    emitDemoEvent('demo_guided_completed', { totalSteps: DEMO_GUIDED_STEPS.length });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const overviewSection = getDashboardSectionConfig('dashboard', '/dashboard', language);
 
   return (
@@ -113,7 +118,7 @@ export default function DemoDashboardPage() {
           onSkip={(stepId, stepIndex) => emitDemoEvent('demo_guided_skipped', { stepId, stepIndex })}
           onStepViewed={(stepId, stepIndex) => emitDemoEvent('demo_step_viewed', { stepId, stepIndex })}
           onStepChange={handleStepChange}
-          onCompleted={() => emitDemoEvent('demo_guided_completed', { totalSteps: DEMO_GUIDED_STEPS.length })}
+          onCompleted={handleGuidedCompleted}
         />
       ) : null}
 

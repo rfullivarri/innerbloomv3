@@ -953,7 +953,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
                       {canShowContent && definition && (
                         <>
-                          <section className="flex flex-col gap-2">
+                          <section className="flex flex-col gap-2" data-demo-anchor="daily-quest-emotion-block">
                             <h3 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-dim)]">
                               ¿Qué sentimiento prevaleció más el día de ayer?
                             </h3>
