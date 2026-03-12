@@ -12,6 +12,19 @@ type Props = {
 type Rect = { top: number; left: number; width: number; height: number };
 
 const PADDING = 10;
+const VIEWPORT_PADDING = 12;
+const TOOLTIP_HEIGHT_DESKTOP = 252;
+const TOOLTIP_HEIGHT_MOBILE = 238;
+
+type Placement = 'top' | 'right' | 'bottom' | 'left';
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(value, max));
+}
+
+function intersects(a: Rect, b: Rect) {
+  return a.left < b.left + b.width && a.left + a.width > b.left && a.top < b.top + b.height && a.top + a.height > b.top;
+}
 
 export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, onCompleted }: Props) {
   const [stepIndex, setStepIndex] = useState(0);
@@ -78,47 +91,93 @@ export function GuidedDemoOverlay({ language, onFinish, onSkip, onStepViewed, on
       };
     }
 
-    const viewportPadding = 12;
     if (isMobile) {
+      const mobileTop = clamp(viewport.height - TOOLTIP_HEIGHT_MOBILE - VIEWPORT_PADDING, VIEWPORT_PADDING, viewport.height - TOOLTIP_HEIGHT_MOBILE - VIEWPORT_PADDING);
       return {
-        left: 12,
-        top: Math.max(12, viewport.height - 232),
+        left: VIEWPORT_PADDING,
+        top: mobileTop,
         width: Math.max(260, width),
       };
     }
 
-    const topChoice = targetRect.top - 18;
-    const bottomChoice = targetRect.top + targetRect.height + 18;
-    const leftChoice = targetRect.left - width - 18;
-    const rightChoice = targetRect.left + targetRect.width + 18;
+    const gap = 18;
+    const candidates: Placement[] = ['right', 'left', 'bottom', 'top'];
+    const preferredOrder = step.tooltipPlacement && step.tooltipPlacement !== 'auto'
+      ? [step.tooltipPlacement as Placement, ...candidates.filter((placement) => placement !== step.tooltipPlacement)]
+      : candidates;
 
-    const place = step.tooltipPlacement ?? 'auto';
-    let top = bottomChoice;
-    let left = targetRect.left;
+    const centerLeft = targetRect.left + targetRect.width / 2 - width / 2;
+    const centerTop = targetRect.top + targetRect.height / 2 - TOOLTIP_HEIGHT_DESKTOP / 2;
+    const byPlacement: Record<Placement, { top: number; left: number }> = {
+      top: { top: targetRect.top - TOOLTIP_HEIGHT_DESKTOP - gap, left: centerLeft },
+      bottom: { top: targetRect.top + targetRect.height + gap, left: centerLeft },
+      left: { top: centerTop, left: targetRect.left - width - gap },
+      right: { top: centerTop, left: targetRect.left + targetRect.width + gap },
+    };
 
-    if (place === 'top' || (place === 'auto' && topChoice > 180)) {
-      top = topChoice;
+    const targetSafeRect: Rect = {
+      top: targetRect.top - 6,
+      left: targetRect.left - 6,
+      width: targetRect.width + 12,
+      height: targetRect.height + 12,
+    };
+
+    let best: { top: number; left: number; score: number } | null = null;
+    for (const placement of preferredOrder) {
+      const raw = byPlacement[placement];
+      const left = clamp(raw.left, VIEWPORT_PADDING, viewport.width - width - VIEWPORT_PADDING);
+      const top = clamp(raw.top, VIEWPORT_PADDING, viewport.height - TOOLTIP_HEIGHT_DESKTOP - VIEWPORT_PADDING);
+      const tooltipRect: Rect = { top, left, width, height: TOOLTIP_HEIGHT_DESKTOP };
+      const overlap = intersects(tooltipRect, targetSafeRect);
+
+      const freeHorizontal = placement === 'left' ? targetRect.left : viewport.width - (targetRect.left + targetRect.width);
+      const freeVertical = placement === 'top' ? targetRect.top : viewport.height - (targetRect.top + targetRect.height);
+      const primarySpace = placement === 'left' || placement === 'right' ? freeHorizontal : freeVertical;
+      const score = (overlap ? -2000 : 500) + primarySpace;
+
+      if (!best || score > best.score) {
+        best = { top, left, score };
+      }
     }
-    if (place === 'left' && leftChoice > viewportPadding) {
-      left = leftChoice;
-    } else if (place === 'right' && rightChoice + width < viewport.width - viewportPadding) {
-      left = rightChoice;
-    }
 
-    left = Math.max(viewportPadding, Math.min(left, viewport.width - width - viewportPadding));
-    top = Math.max(viewportPadding, Math.min(top, viewport.height - 220));
-
-    return { top, left, width };
+    return {
+      top: best?.top ?? VIEWPORT_PADDING,
+      left: best?.left ?? VIEWPORT_PADDING,
+      width,
+    };
   }, [step.tooltipPlacement, targetRect, viewport.height, viewport.width]);
 
   const isLast = stepIndex === DEMO_GUIDED_STEPS.length - 1;
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[120]">
-      <div className="absolute inset-0 bg-slate-950/72 backdrop-blur-[3px]" />
+      {targetRect ? (
+        <>
+          <div className="absolute left-0 right-0 top-0 bg-slate-950/72 backdrop-blur-[3px]" style={{ height: targetRect.top }} />
+          <div
+            className="absolute left-0 bg-slate-950/72 backdrop-blur-[3px]"
+            style={{ top: targetRect.top, width: targetRect.left, height: targetRect.height }}
+          />
+          <div
+            className="absolute right-0 bg-slate-950/72 backdrop-blur-[3px]"
+            style={{
+              top: targetRect.top,
+              width: Math.max(0, viewport.width - (targetRect.left + targetRect.width)),
+              height: targetRect.height,
+            }}
+          />
+          <div
+            className="absolute bottom-0 left-0 right-0 bg-slate-950/72 backdrop-blur-[3px]"
+            style={{ top: targetRect.top + targetRect.height }}
+          />
+        </>
+      ) : (
+        <div className="absolute inset-0 bg-slate-950/72 backdrop-blur-[3px]" />
+      )}
+
       {targetRect ? (
         <div
-          className="absolute rounded-2xl border border-cyan-200/80 shadow-[0_0_0_9999px_rgba(2,6,23,0.72),0_0_0_2px_rgba(34,211,238,0.55),0_20px_45px_rgba(0,0,0,0.45)] transition-all"
+          className="absolute rounded-2xl border border-cyan-200/90 bg-white/[0.025] shadow-[0_0_0_2px_rgba(34,211,238,0.55),0_0_34px_rgba(34,211,238,0.22),0_20px_45px_rgba(0,0,0,0.45)] transition-all"
           style={{ top: targetRect.top, left: targetRect.left, width: targetRect.width, height: targetRect.height }}
         />
       ) : null}

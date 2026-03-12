@@ -23,16 +23,29 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     },
   },
   {
-    id: 'streaks',
-    targetSelector: '[data-demo-anchor="streaks"]',
+    id: 'streaks-top',
+    targetSelector: '[data-demo-anchor="streaks-top"]',
     tooltipPlacement: 'left',
     title: {
-      es: 'Streaks',
-      en: 'Streaks',
+      es: 'Streaks · parte superior',
+      en: 'Streaks · top section',
     },
     body: {
-      es: 'Explora tabs por pilar (Body/Mind/Soul), scopes (Week/Month/3M), Top Streaks y All Tasks. Cada tarea muestra progreso y mini actividad: puedes abrir su detalle para profundizar.',
-      en: 'Explore pillar tabs (Body/Mind/Soul), scopes (Week/Month/3M), Top Streaks, and All Tasks. Each task has progress and mini activity bars, and you can open its detail for deeper context.',
+      es: 'Aquí navegas por pilares (Body/Mind/Soul) y ves Top Streaks. Esta parte resume tus rachas más fuertes y te ayuda a comparar en qué dimensión vienes más consistente.',
+      en: 'Here you switch across pillars (Body/Mind/Soul) and review Top Streaks. This section summarizes your strongest streaks and helps compare where your consistency is strongest.',
+    },
+  },
+  {
+    id: 'streaks-bottom',
+    targetSelector: '[data-demo-anchor="streaks-bottom"]',
+    tooltipPlacement: 'left',
+    title: {
+      es: 'Streaks · parte inferior',
+      en: 'Streaks · bottom section',
+    },
+    body: {
+      es: 'En esta zona ajustas el scope (Week/Month/3M), revisas All Tasks y su progreso detallado con mini actividad por tarea. Es la vista granular para seguimiento fino.',
+      en: 'In this area you switch scope (Week/Month/3M), inspect All Tasks, and track per-task progress with mini activity bars. This is the granular tracking view.',
     },
   },
   {
