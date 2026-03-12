@@ -447,7 +447,7 @@ export function DashboardMenu({
                 </div>
                 <div className="flex-1 overflow-y-auto">
                   <div className="space-y-4 px-1 pb-1">
-                    <section className="flex items-center justify-between gap-2 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2">
+                    <section className="flex items-center justify-between gap-3">
                       <div
                         role="radiogroup"
                         aria-label={t('dashboard.language.title')}
