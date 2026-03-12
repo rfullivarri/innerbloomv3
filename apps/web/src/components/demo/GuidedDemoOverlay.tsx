@@ -18,6 +18,7 @@ const PADDING = 10;
 const VIEWPORT_PADDING = 12;
 const TOOLTIP_HEIGHT_DESKTOP = 252;
 const TOOLTIP_HEIGHT_MOBILE = 238;
+const TOOLTIP_HEIGHT_MOBILE_COMPACT = 210;
 const MOBILE_DASHBOARD_FOCUS_DEFAULT_OFFSET = 8;
 const MOBILE_MODAL_FOCUS_DEFAULT_OFFSET = 6;
 const DAILY_QUEST_INTRO_STEP_ID = 'daily-quest-intro';
@@ -97,6 +98,7 @@ export function GuidedDemoOverlay({
   const step = steps[stepIndex];
   const walkthroughMode = getWalkthroughMode(step.id);
   const isDailyQuestStep = walkthroughMode === 'daily-quest-modal';
+  const isCompactMobile = viewport.width <= 390 || viewport.height <= 740;
 
   useEffect(() => {
     if (isDailyQuestStep) {
@@ -242,6 +244,7 @@ export function GuidedDemoOverlay({
   const tooltipStyle = useMemo(() => {
     const width = Math.min(viewport.width - 24, 360);
     const isMobile = viewport.width < 768;
+    const mobileTooltipHeight = isCompactMobile ? TOOLTIP_HEIGHT_MOBILE_COMPACT : TOOLTIP_HEIGHT_MOBILE;
     if (!targetRect) {
       return {
         top: '50%',
@@ -252,14 +255,14 @@ export function GuidedDemoOverlay({
     }
 
     if (isMobile) {
-      const defaultMobileTop = viewport.height - TOOLTIP_HEIGHT_MOBILE - VIEWPORT_PADDING;
+      const defaultMobileTop = viewport.height - mobileTooltipHeight - VIEWPORT_PADDING;
       const mobileTop = step.id === DAILY_QUEST_FOOTER_STEP_ID
-        ? clamp(Math.max(VIEWPORT_PADDING + 24, targetRect.top - TOOLTIP_HEIGHT_MOBILE - 24), VIEWPORT_PADDING, defaultMobileTop)
+        ? clamp(Math.max(VIEWPORT_PADDING + 24, targetRect.top - mobileTooltipHeight - 24), VIEWPORT_PADDING, defaultMobileTop)
         : clamp(defaultMobileTop, VIEWPORT_PADDING, defaultMobileTop);
       return {
         left: VIEWPORT_PADDING,
         top: mobileTop,
-        width: Math.max(260, width),
+        width: Math.max(isCompactMobile ? 248 : 260, width),
       };
     }
 
@@ -310,7 +313,7 @@ export function GuidedDemoOverlay({
       left: best?.left ?? VIEWPORT_PADDING,
       width,
     };
-  }, [step.tooltipPlacement, targetRect, viewport.height, viewport.width]);
+  }, [isCompactMobile, step.id, step.tooltipPlacement, targetRect, viewport.height, viewport.width]);
 
   const isLast = stepIndex === steps.length - 1;
 
@@ -348,24 +351,50 @@ export function GuidedDemoOverlay({
       ) : null}
 
       <aside
-        className="pointer-events-auto absolute rounded-2xl border border-white/15 bg-slate-900/95 p-4 text-slate-100 shadow-2xl"
+        className={`pointer-events-auto absolute rounded-2xl border border-white/15 bg-slate-900/95 text-slate-100 shadow-2xl ${isCompactMobile ? 'p-3' : 'p-4'}`}
         style={tooltipStyle}
       >
-        <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.16em] text-slate-300">
-          <span>{stepIndex + 1}/{steps.length}</span>
-          <button type="button" className="rounded-md px-2 py-1 hover:bg-white/10" onClick={onFinish}>
-            {language === 'es' ? 'Cerrar' : 'Close'}
-          </button>
-        </div>
-        <h3 className="text-lg font-semibold">{step.title[language]}</h3>
-        <p className="mt-2 text-sm leading-relaxed text-slate-200">{step.body[language]}</p>
+        {isCompactMobile ? (
+          <div className="mb-1.5 flex items-start justify-between gap-2">
+            <h3 className="text-sm font-semibold leading-tight">
+              <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-300">
+                {stepIndex + 1}/{steps.length} ·
+              </span>
+              {step.title[language]}
+            </h3>
+            <button
+              type="button"
+              className="rounded-md p-1.5 text-base leading-none text-slate-300 hover:bg-white/10 hover:text-slate-100"
+              onClick={onFinish}
+              aria-label={language === 'es' ? 'Cerrar recorrido' : 'Close walkthrough'}
+            >
+              ×
+            </button>
+          </div>
+        ) : (
+          <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.16em] text-slate-300">
+            <span>{stepIndex + 1}/{steps.length}</span>
+            <button
+              type="button"
+              className="rounded-md p-1.5 text-base leading-none text-slate-300 hover:bg-white/10 hover:text-slate-100"
+              onClick={onFinish}
+              aria-label={language === 'es' ? 'Cerrar recorrido' : 'Close walkthrough'}
+            >
+              ×
+            </button>
+          </div>
+        )}
+        {!isCompactMobile ? <h3 className="text-lg font-semibold">{step.title[language]}</h3> : null}
+        <p className={`${isCompactMobile ? 'mt-1.5 text-[13px] leading-snug' : 'mt-2 text-sm leading-relaxed'} text-slate-200`}>
+          {step.body[language]}
+        </p>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className={`flex flex-wrap items-center ${isCompactMobile ? 'mt-3 gap-1.5' : 'mt-4 gap-2'}`}>
           <button
             type="button"
             onClick={() => setStepIndex((current) => Math.max(0, current - 1))}
             disabled={stepIndex === 0}
-            className="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] disabled:opacity-40"
+            className={`rounded-lg border border-white/20 font-semibold uppercase tracking-[0.12em] disabled:opacity-40 ${isCompactMobile ? 'px-2.5 py-1.5 text-[11px]' : 'px-3 py-2 text-xs'}`}
           >
             {language === 'es' ? 'Anterior' : 'Back'}
           </button>
@@ -373,7 +402,7 @@ export function GuidedDemoOverlay({
             <button
               type="button"
               onClick={() => setStepIndex((current) => Math.min(steps.length - 1, current + 1))}
-              className="rounded-lg bg-cyan-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-950"
+              className={`rounded-lg bg-cyan-300 font-semibold uppercase tracking-[0.12em] text-slate-950 ${isCompactMobile ? 'px-2.5 py-1.5 text-[11px]' : 'px-3 py-2 text-xs'}`}
             >
               {language === 'es' ? 'Siguiente' : 'Next'}
             </button>
@@ -385,7 +414,7 @@ export function GuidedDemoOverlay({
                   onCompleted();
                   onFinish();
                 }}
-                className="rounded-lg bg-cyan-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-950"
+                className={`rounded-lg bg-cyan-300 font-semibold uppercase tracking-[0.12em] text-slate-950 ${isCompactMobile ? 'px-2.5 py-1.5 text-[11px]' : 'px-3 py-2 text-xs'}`}
               >
                 {finalActionLabel?.[language] ?? (language === 'es' ? 'Finalizar' : 'Finish')}
               </button>
@@ -398,7 +427,7 @@ export function GuidedDemoOverlay({
                 onSkip(step.id, stepIndex);
                 onFinish();
               }}
-              className="ml-auto rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-300 hover:bg-white/10"
+              className={`ml-auto rounded-lg font-semibold uppercase tracking-[0.12em] text-slate-300 hover:bg-white/10 ${isCompactMobile ? 'px-2 py-1.5 text-[11px]' : 'px-3 py-2 text-xs'}`}
             >
               {language === 'es' ? 'Saltar' : 'Skip'}
             </button>
