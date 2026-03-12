@@ -39,8 +39,9 @@ router.post(
     }
 
     const suggestion = await acceptGameModeUpgradeSuggestion(user.id);
+    const refreshedSuggestion = await getGameModeUpgradeSuggestion(user.id);
 
-    res.json({ ok: true, suggestion });
+    res.json({ ok: true, suggestion: refreshedSuggestion, accepted_suggestion: suggestion });
   }),
 );
 

@@ -1,6 +1,7 @@
 import { pool } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 import { getRollingModeUpgradeAnalysis } from './modeUpgradeAnalysisService.js';
+import { changeUserGameMode, resolveGameModeByCode } from './userGameModeChangeService.js';
 
 const NEXT_MODE_BY_CODE: Record<string, string | null> = {
   LOW: 'CHILL',
@@ -15,11 +16,6 @@ type UserModeRow = {
   current_mode: string | null;
 };
 
-
-type GameModeRow = {
-  game_mode_id: number;
-  code: string;
-};
 
 type SuggestionRow = {
   period_key: string;
@@ -72,18 +68,6 @@ async function getUserCurrentMode(client: typeof pool, userId: string): Promise<
   return row;
 }
 
-
-async function getGameModeByCode(client: typeof pool, code: string): Promise<GameModeRow | null> {
-  const result = await client.query<GameModeRow>(
-    `SELECT game_mode_id, code
-       FROM cat_game_mode
-      WHERE code = $1
-      LIMIT 1`,
-    [code],
-  );
-
-  return result.rows[0] ?? null;
-}
 
 async function upsertSuggestionState(client: typeof pool, params: {
   userId: string;
@@ -154,7 +138,7 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
 
   const nextModeCode = resolveNextGameModeCode(user.current_mode);
   const eligibleForUpgrade = Boolean(analysis.eligible_for_upgrade);
-  const nextMode = nextModeCode ? await getGameModeByCode(pool, nextModeCode) : null;
+  const nextMode = nextModeCode ? await resolveGameModeByCode(pool, nextModeCode) : null;
   const canSuggest = eligibleForUpgrade && Boolean(nextMode);
 
   const suggestionState = await upsertSuggestionState(pool, {
@@ -232,24 +216,22 @@ export async function acceptGameModeUpgradeSuggestion(userId: string): Promise<G
       return suggestion;
     }
 
-    const nextMode = await getGameModeByCode(pool, suggestion.suggested_mode);
-    const currentMode = await getGameModeByCode(pool, suggestion.current_mode);
+    const nextMode = await resolveGameModeByCode(pool, suggestion.suggested_mode);
+    const currentMode = await resolveGameModeByCode(pool, suggestion.current_mode);
 
-    if (!nextMode || !currentMode) {
-      throw new HttpError(409, 'invalid_game_mode', 'Invalid game mode mapping');
-    }
+    try {
+      await changeUserGameMode(pool, {
+        userId,
+        nextGameModeId: nextMode.game_mode_id,
+        nextModeCode: nextMode.code,
+        expectedCurrentGameModeId: currentMode.game_mode_id,
+      });
+    } catch (error) {
+      if (error instanceof HttpError && error.code === 'game_mode_change_conflict') {
+        throw new HttpError(409, 'upgrade_suggestion_stale', 'User game mode changed before accepting suggestion');
+      }
 
-    const updateUserResult = await pool.query(
-      `UPDATE users
-          SET game_mode_id = $2,
-              updated_at = NOW()
-        WHERE user_id = $1::uuid
-          AND game_mode_id = $3`,
-      [userId, nextMode.game_mode_id, currentMode.game_mode_id],
-    );
-
-    if (updateUserResult.rowCount === 0) {
-      throw new HttpError(409, 'upgrade_suggestion_stale', 'User game mode changed before accepting suggestion');
+      throw error;
     }
 
     const markAcceptedResult = await pool.query<{ accepted_at: string }>(
@@ -284,11 +266,7 @@ export async function dismissGameModeUpgradeSuggestion(userId: string): Promise<
     return suggestion;
   }
 
-  const currentMode = await getGameModeByCode(pool, suggestion.current_mode);
-
-  if (!currentMode) {
-    return suggestion;
-  }
+  const currentMode = await resolveGameModeByCode(pool, suggestion.current_mode);
 
   const result = await pool.query<{ dismissed_at: string }>(
     `UPDATE user_game_mode_upgrade_suggestions

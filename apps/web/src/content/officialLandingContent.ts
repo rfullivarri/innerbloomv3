@@ -45,8 +45,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   es: {
     navLinks: [],
     hero: {
-      titleLead: 'Construye hábitos',
-      titleHighlight: 'que crecen contigo.',
+      titleLead: 'Construye hábitos con un sistema',
+      titleHighlight: 'que se adapta a tu energía',
       subtitle:
         'Un sistema de hábitos gamificado que se adapta a tu energía, refleja tus emociones y recompensa tu progreso.',
       note: 'En menos de 3 minutos obtienes un punto de partida personalizado según tu energía, tus prioridades y tu ritmo actual.',
@@ -243,8 +243,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   en: {
     navLinks: [],
     hero: {
-      titleLead: 'Build habits',
-      titleHighlight: 'that grow with you.',
+      titleLead: 'Build habits with a system',
+      titleHighlight: 'that adapts to your energy',
       subtitle:
         'A gamified habit system that adapts to your energy, reflects your emotions, and rewards your progress.',
       note: 'In under 3 minutes, you get a personalized starting point built around your energy, priorities, and current rhythm.',

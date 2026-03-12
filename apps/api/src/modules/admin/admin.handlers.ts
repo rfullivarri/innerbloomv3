@@ -20,6 +20,7 @@ import {
   adminSubscriptionUpdateBodySchema,
   taskDifficultyCalibrationRunBodySchema,
   modeUpgradeAggregationRunBodySchema,
+  adminManualGameModeChangeBodySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -44,6 +45,7 @@ import {
   getUserSubscriptionForAdmin,
   getUserModeUpgradeAnalysis,
   updateUserSubscriptionFromAdmin,
+  adminChangeUserGameMode,
 } from './admin.service.js';
 import {
   getTaskgenEventsByCorrelation,
@@ -302,6 +304,25 @@ export const getAdminUserModeUpgradeAnalysis = asyncHandler(async (req: Request,
   const { userId } = userIdParamSchema.parse(req.params);
   const result = await getUserModeUpgradeAnalysis(userId);
   res.json(result);
+});
+
+export const postAdminUserManualGameModeChange = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const body = adminManualGameModeChangeBodySchema.parse(req.body ?? {});
+  const result = await adminChangeUserGameMode({
+    userId,
+    targetModeId: body.targetModeId,
+    targetModeKey: body.targetModeKey,
+    reason: body.reason,
+  });
+
+  res.json(result);
+});
+
+export const postAdminRunModeUpgradeAnalysis = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const result = await getUserModeUpgradeAnalysis(userId);
+  res.json({ ok: true, source: 'admin_manual_rolling_mode_upgrade_analysis', ...result });
 });
 
 export const postAdminRunMonthlyReview = asyncHandler(async (req: Request, res: Response) => {

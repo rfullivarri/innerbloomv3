@@ -120,6 +120,27 @@ export const taskgenTraceGlobalQuerySchema = z.object({
 });
 
 
+
+export const adminManualGameModeChangeBodySchema = z.object({
+  targetModeId: z.coerce.number().int().positive().optional(),
+  targetModeKey: z
+    .string()
+    .trim()
+    .min(1)
+    .max(50)
+    .transform((value) => value.toUpperCase())
+    .optional(),
+  reason: z.string().trim().min(1).max(500).default('admin_override_manual_mode_change'),
+}).superRefine((value, ctx) => {
+  if (!value.targetModeId && !value.targetModeKey) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'targetModeId or targetModeKey is required',
+      path: ['targetModeId'],
+    });
+  }
+});
+
 export const taskDifficultyCalibrationRunBodySchema = z.object({
   userId: z.string().uuid({ message: 'Invalid user id' }).optional(),
   window_days: z.coerce.number().int().min(1).max(3650).default(90),
@@ -216,6 +237,7 @@ export type TaskgenJobsQuery = z.infer<typeof taskgenJobsQuerySchema>;
 export type TaskgenForceRunBody = z.infer<typeof taskgenForceRunBodySchema>;
 export type TaskgenTraceQuery = z.infer<typeof taskgenTraceQuerySchema>;
 export type TaskgenTraceGlobalQuery = z.infer<typeof taskgenTraceGlobalQuerySchema>;
+export type AdminManualGameModeChangeBody = z.infer<typeof adminManualGameModeChangeBodySchema>;
 export type TaskDifficultyCalibrationRunBody = z.infer<typeof taskDifficultyCalibrationRunBodySchema>;
 export type ModeUpgradeAggregationRunBody = z.infer<typeof modeUpgradeAggregationRunBodySchema>;
 export type ReminderSendBody = z.infer<typeof reminderSendBodySchema>;

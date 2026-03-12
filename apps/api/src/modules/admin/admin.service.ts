@@ -10,6 +10,7 @@ import { getEmailProvider } from '../../services/email/index.js';
 import { sendTasksReadyEmailPreview } from '../../services/tasksReadyEmailService.js';
 import { runSubscriptionNotificationsJob } from '../../services/subscriptionNotificationsJob.js';
 import { getRollingModeUpgradeAnalysis } from '../../services/modeUpgradeAnalysisService.js';
+import { changeUserGameMode, resolveGameModeByCode, resolveGameModeById } from '../../services/userGameModeChangeService.js';
 import {
   listFeedbackDefinitionRows,
   updateFeedbackDefinitionRow,
@@ -1429,6 +1430,50 @@ export async function getUserTaskStats(userId: string, query: TaskStatsQuery): P
 
 export async function getUserModeUpgradeAnalysis(userId: string): Promise<AdminModeUpgradeAnalysis> {
   return getRollingModeUpgradeAnalysis(userId);
+}
+
+export async function adminChangeUserGameMode(input: {
+  userId: string;
+  targetModeId?: number;
+  targetModeKey?: string;
+  reason: string;
+}): Promise<{
+  ok: boolean;
+  userId: string;
+  game_mode_id: number;
+  game_mode_code: string;
+  image_url: string | null;
+  avatar_url: string | null;
+  reason: string;
+}> {
+  await pool.query('BEGIN');
+
+  try {
+    const targetMode = input.targetModeId
+      ? await resolveGameModeById(pool, input.targetModeId)
+      : await resolveGameModeByCode(pool, input.targetModeKey ?? '');
+
+    const updated = await changeUserGameMode(pool, {
+      userId: input.userId,
+      nextGameModeId: targetMode.game_mode_id,
+      nextModeCode: targetMode.code,
+    });
+
+    await pool.query('COMMIT');
+
+    return {
+      ok: true,
+      userId: updated.user_id,
+      game_mode_id: updated.game_mode_id,
+      game_mode_code: targetMode.code,
+      image_url: updated.image_url,
+      avatar_url: updated.avatar_url,
+      reason: input.reason,
+    };
+  } catch (error) {
+    await pool.query('ROLLBACK');
+    throw error;
+  }
 }
 
 
