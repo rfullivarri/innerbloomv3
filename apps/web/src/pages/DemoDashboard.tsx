@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
 import { DashboardOverview } from './DashboardV3';
 import { getDashboardSectionConfig } from './dashboardSections';
@@ -10,6 +10,7 @@ import { setDashboardDemoModeEnabled } from '../lib/demoMode';
 import { GuidedDemoOverlay } from '../components/demo/GuidedDemoOverlay';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { DEMO_GUIDED_STEPS } from '../config/demoGuidedTour';
+import { resolveDemoEntryContext } from '../lib/demoEntry';
 
 const DEMO_USER_ID = 'demo-public-user';
 
@@ -22,24 +23,32 @@ const DAILY_QUEST_STEP_IDS = new Set([
 
 export default function DemoDashboardPage() {
   const { language, setManualLanguage } = usePostLoginLanguage();
+  const location = useLocation();
+  const demoContext = resolveDemoEntryContext(location.search);
   const { theme, setPreference } = useThemePreference();
   const [showGuidedTour, setShowGuidedTour] = useState(true);
   const hasLoggedGuidedStart = useRef(false);
   const dailyQuestModalRef = useRef<DailyQuestModalHandle | null>(null);
 
   useEffect(() => {
+    if (language !== demoContext.language) {
+      setManualLanguage(demoContext.language);
+    }
+  }, [demoContext.language, language, setManualLanguage]);
+
+  useEffect(() => {
     setDashboardDemoModeEnabled(true);
-    emitDemoEvent('demo_opened', { language, theme });
+    emitDemoEvent('demo_opened', { language, theme, source: demoContext.source, mode: demoContext.mode });
 
     if (!hasLoggedGuidedStart.current) {
-      emitDemoEvent('demo_guided_started', { language, totalSteps: DEMO_GUIDED_STEPS.length });
+      emitDemoEvent('demo_guided_started', { language, totalSteps: DEMO_GUIDED_STEPS.length, source: demoContext.source, mode: demoContext.mode });
       hasLoggedGuidedStart.current = true;
     }
 
     return () => {
       setDashboardDemoModeEnabled(false);
     };
-  }, [language, theme]);
+  }, [demoContext.mode, demoContext.source, language, theme]);
 
   const handleStepChange = useCallback((stepId: string) => {
     if (DAILY_QUEST_STEP_IDS.has(stepId)) {
@@ -128,7 +137,11 @@ export default function DemoDashboardPage() {
         canAutoOpen={false}
       />
 
-      <main className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
+      <main
+        className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8"
+        data-demo-source={demoContext.source}
+        data-demo-mode={demoContext.mode}
+      >
         <DashboardOverview
           userId={DEMO_USER_ID}
           gameMode="flow"

@@ -9,6 +9,7 @@ import { setJourneyGenerationPending } from '../lib/journeyGeneration';
 import { emitOnboardingEvent } from '../lib/telemetry';
 import { resolveOnboardingLanguage } from '../onboarding/i18n';
 import { POSTLOGIN_LANGUAGE_STORAGE_KEY } from '../i18n/postLoginLanguage';
+import { buildDemoUrl } from '../lib/demoEntry';
 
 async function parseErrorMessage(response: Response) {
   const payload = await response.json().catch(() => ({}));
@@ -83,7 +84,14 @@ export default function OnboardingIntroPage() {
   );
 
   if (generationMode) {
-    return <JourneyGeneratingScreen gameMode={generationMode} onGoToDashboard={() => navigate('/dashboard-v3')} />;
+    return (
+      <JourneyGeneratingScreen
+        gameMode={generationMode}
+        language={language}
+        onGoToDashboard={() => navigate('/dashboard-v3')}
+        onOpenGuidedDemo={() => navigate(buildDemoUrl({ language, source: 'onboarding', mode: 'onboarding' }))}
+      />
+    );
   }
 
   return (

@@ -3,22 +3,49 @@ import { getJourneyGenerationStatus } from '../../lib/api';
 
 interface JourneyGeneratingScreenProps {
   gameMode: string;
+  language: 'es' | 'en';
   onGoToDashboard: () => void;
+  onOpenGuidedDemo: () => void;
 }
 
 const BULLET_REVEAL_MS = 1300;
 
-export function JourneyGeneratingScreen({ gameMode, onGoToDashboard }: JourneyGeneratingScreenProps) {
-  const bullets = useMemo(
-    () => [
-      'Analizando tus hábitos y prioridades',
-      'Ajustando frecuencias sostenibles',
-      'Diseñando micro-hábitos alineados a tu energía',
-      'Equilibrando Cuerpo, Mente y Alma',
-      `Activando tu modo de juego: ${gameMode}`,
-    ],
-    [gameMode],
-  );
+export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, onOpenGuidedDemo }: JourneyGeneratingScreenProps) {
+  const copy = language === 'en'
+    ? {
+        title: 'We are calibrating your personal formula',
+        subtitle: 'Blending your habits, energy, and goals to design your ideal Journey.',
+        bullets: [
+          'Analyzing your habits and priorities',
+          'Adjusting sustainable rhythms',
+          'Designing micro-habits aligned with your energy',
+          'Balancing Body, Mind & Soul',
+        ],
+        modeLabel: 'Activating your game mode',
+        planLabel: 'Activating your plan',
+        minutesHint: 'This can take a few minutes.',
+        bridgeHint: 'You can explore the guided demo while we finish preparing your tasks.',
+        cta: 'View guided demo',
+        includedMonths: '2 months included',
+      }
+    : {
+        title: 'Estamos calibrando tu fórmula personal',
+        subtitle: 'Mezclando tus hábitos, energía y objetivos para diseñar tu Journey ideal.',
+        bullets: [
+          'Analizando tus hábitos y prioridades',
+          'Ajustando frecuencias sostenibles',
+          'Diseñando micro-hábitos alineados a tu energía',
+          'Equilibrando Cuerpo, Mente y Alma',
+        ],
+        modeLabel: 'Activando tu modo de juego',
+        planLabel: 'Activando tu plan',
+        minutesHint: 'Esto puede tardar unos minutos.',
+        bridgeHint: 'Puedes explorar la demo guiada mientras terminamos de preparar tus tareas.',
+        cta: 'Ver demo guiada',
+        includedMonths: '2 meses incluidos',
+      };
+
+  const bullets = useMemo(() => [...copy.bullets, `${copy.modeLabel}: ${gameMode}`], [gameMode, language]);
   const [visibleBullets, setVisibleBullets] = useState(1);
 
   useEffect(() => {
@@ -95,11 +122,9 @@ export function JourneyGeneratingScreen({ gameMode, onGoToDashboard }: JourneyGe
           <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.9em] w-auto" />
         </div>
 
-        <h1 className="text-balance text-3xl font-semibold text-white sm:text-4xl">
-          Estamos calibrando tu fórmula personal
-        </h1>
+        <h1 className="text-balance text-3xl font-semibold text-white sm:text-4xl">{copy.title}</h1>
         <p className="mt-3 text-sm text-slate-300 sm:text-base">
-          Mezclando tus hábitos, energía y objetivos para diseñar tu Journey ideal.
+          {copy.subtitle}
         </p>
 
         <ul className="mt-8 space-y-3">
@@ -126,11 +151,11 @@ export function JourneyGeneratingScreen({ gameMode, onGoToDashboard }: JourneyGe
           >
             <span className="mt-2 h-2.5 w-2.5 rounded-full bg-sky-300" aria-hidden />
             <span>
-              Activando tu plan{' '}
+              {copy.planLabel}{' '}
               <span className="inline-flex rounded-full border border-emerald-300/35 bg-emerald-400/20 px-2 py-0.5 text-xs font-semibold text-emerald-100 align-middle">
                 FREE
               </span>{' '}
-              – 2 meses incluidos
+              – {copy.includedMonths}
             </span>
           </li>
         </ul>
@@ -140,18 +165,18 @@ export function JourneyGeneratingScreen({ gameMode, onGoToDashboard }: JourneyGe
         </div>
 
         <p className="mt-8 text-sm text-slate-300 sm:text-base">
-          Esto puede tardar unos minutos.
+          {copy.minutesHint}
           <br />
-          Puedes explorar tu Dashboard mientras terminamos de ajustar tu fórmula.
+          {copy.bridgeHint}
         </p>
 
         <div className="mt-8 flex justify-center">
           <button
             type="button"
             className="inline-flex items-center justify-center rounded-full border border-violet-300/45 bg-violet-500 px-7 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(76,29,149,0.3)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_14px_28px_rgba(76,29,149,0.4)]"
-            onClick={onGoToDashboard}
+            onClick={onOpenGuidedDemo}
           >
-            Entrar al Dashboard
+            {copy.cta}
           </button>
         </div>
       </section>
