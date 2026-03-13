@@ -199,32 +199,39 @@ export async function markOnboardingProgressStep(
   step: OnboardingProgressStep,
   options: { onboardingSessionId?: string | null; source?: Record<string, unknown> } = {},
 ): Promise<OnboardingProgress> {
-  return withClient(async (client) => {
-    await client.query(ENSURE_BASE_ROW_SQL, [userId]);
-    const column = STEP_COLUMN_MAP[step];
+  return withClient((client) => markOnboardingProgressStepWithClient(client, userId, step, options));
+}
 
-    await client.query(
-      `UPDATE user_onboarding_progress
-          SET ${column} = COALESCE(${column}, now()),
-              onboarding_session_id = COALESCE(onboarding_session_id, $2),
-              onboarding_completed_at = CASE
-                WHEN $3::boolean THEN COALESCE(onboarding_completed_at, now())
-                ELSE onboarding_completed_at
-              END,
-              state = CASE
-                WHEN onboarding_completed_at IS NOT NULL OR $3::boolean THEN 'completed'
-                ELSE 'in_progress'
-              END,
-              source = source || $4::jsonb,
-              updated_at = now()
-        WHERE user_id = $1`,
-      [userId, options.onboardingSessionId ?? null, step === 'onboarding_completed', JSON.stringify(options.source ?? {})],
-    );
+export async function markOnboardingProgressStepWithClient(
+  client: PoolClient,
+  userId: string,
+  step: OnboardingProgressStep,
+  options: { onboardingSessionId?: string | null; source?: Record<string, unknown> } = {},
+): Promise<OnboardingProgress> {
+  await client.query(ENSURE_BASE_ROW_SQL, [userId]);
+  const column = STEP_COLUMN_MAP[step];
 
-    const progress = await readProgressWithClient(client, userId);
-    if (!progress) throw new Error('Failed to read onboarding progress after step update');
-    return progress;
-  });
+  await client.query(
+    `UPDATE user_onboarding_progress
+        SET ${column} = COALESCE(${column}, now()),
+            onboarding_session_id = COALESCE(onboarding_session_id, $2),
+            onboarding_completed_at = CASE
+              WHEN $3::boolean THEN COALESCE(onboarding_completed_at, now())
+              ELSE onboarding_completed_at
+            END,
+            state = CASE
+              WHEN onboarding_completed_at IS NOT NULL OR $3::boolean THEN 'completed'
+              ELSE 'in_progress'
+            END,
+            source = source || $4::jsonb,
+            updated_at = now()
+      WHERE user_id = $1`,
+    [userId, options.onboardingSessionId ?? null, step === 'onboarding_completed', JSON.stringify(options.source ?? {})],
+  );
+
+  const progress = await readProgressWithClient(client, userId);
+  if (!progress) throw new Error('Failed to read onboarding progress after step update');
+  return progress;
 }
 
 export async function reconcileOnboardingProgressFromClient(
