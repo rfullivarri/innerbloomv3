@@ -5,14 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { ToastBanner } from "../common/ToastBanner";
 import { GameModeChip, buildGameModeChip } from "../common/GameModeChip";
 import { ModerationWidget as ModerationPreviewWidget } from "./ModerationWidget";
+import { UpgradeRecommendationModal } from "./UpgradeRecommendationModal";
 import { ModerationTrackerIcon } from "../moderation/trackerMeta";
 import { useQuickAccessInstall } from "../../hooks/useQuickAccessInstall";
 import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
 import { useLongPress } from "../../hooks/useLongPress";
+import { useRequest } from "../../hooks/useRequest";
 import { useThemePreference } from "../../theme/ThemePreferenceProvider";
 import {
+  acceptGameModeUpgradeSuggestion,
   ApiError,
   changeCurrentUserGameMode,
+  getGameModeUpgradeSuggestion,
   type ModerationTrackerConfig,
   type ModerationTrackerType,
 } from "../../lib/api";
@@ -202,6 +206,12 @@ export function DashboardMenu({
   const [isGameModeOpen, setIsGameModeOpen] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
   const [isSavingMode, setIsSavingMode] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [isUpgradeSubmitting, setIsUpgradeSubmitting] = useState(false);
+
+  const modeUpgradeSuggestionRequest = useRequest(() => getGameModeUpgradeSuggestion(), [], {
+    enabled: true,
+  });
   const [gameModeError, setGameModeError] = useState<string | null>(null);
   const [pendingConfirmMode, setPendingConfirmMode] = useState<GameMode | null>(null);
   const [trackerOverrides, setTrackerOverrides] = useState<
@@ -309,6 +319,13 @@ export function DashboardMenu({
   }, [moderation.configs]);
 
   const normalizedCurrentMode = useMemo(() => normalizeGameModeValue(currentGameMode), [currentGameMode]);
+  const modeUpgradeSuggestion = modeUpgradeSuggestionRequest.data ?? null;
+  const hasActiveUpgradeCta = Boolean(
+    modeUpgradeSuggestion?.eligible_for_upgrade &&
+      modeUpgradeSuggestion?.cta_enabled &&
+      modeUpgradeSuggestion?.suggested_mode &&
+      !modeUpgradeSuggestion?.accepted_at,
+  );
   const selectedOrCurrentMode = selectedMode ?? normalizedCurrentMode;
   const modeJumpIsDemanding = useMemo(
     () => isDemandingModeJump(normalizedCurrentMode, selectedOrCurrentMode),
@@ -333,11 +350,16 @@ export function DashboardMenu({
   }, [handleClose, onOpenScheduler]);
 
   const handleOpenGameMode = useCallback(() => {
+    if (hasActiveUpgradeCta) {
+      setIsUpgradeModalOpen(true);
+      return;
+    }
+
     setSelectedMode(normalizedCurrentMode);
     setGameModeError(null);
     setPendingConfirmMode(null);
     setIsGameModeOpen(true);
-  }, [normalizedCurrentMode]);
+  }, [hasActiveUpgradeCta, normalizedCurrentMode]);
 
   const handleCloseGameMode = useCallback(() => {
     if (isSavingMode) {
@@ -388,6 +410,24 @@ export function DashboardMenu({
     }
     setPendingConfirmMode(null);
   }, [isSavingMode]);
+  const handleAcceptUpgrade = useCallback(async () => {
+    if (isUpgradeSubmitting) {
+      return;
+    }
+
+    setIsUpgradeSubmitting(true);
+    try {
+      await acceptGameModeUpgradeSuggestion();
+      await onGameModeChanged();
+      await modeUpgradeSuggestionRequest.reload();
+    } catch (error) {
+      console.error('[dashboard-menu] failed to accept game mode upgrade', error);
+      throw error;
+    } finally {
+      setIsUpgradeSubmitting(false);
+    }
+  }, [isUpgradeSubmitting, modeUpgradeSuggestionRequest, onGameModeChanged]);
+
   const handleSignOut = useCallback(async () => {
     handleClose();
     await signOut({ redirectUrl: "/" });
@@ -664,13 +704,16 @@ export function DashboardMenu({
                     <button
                       type="button"
                       onClick={handleOpenGameMode}
-                      className={menuRowClassName}
+                      className={`${menuRowClassName} ${hasActiveUpgradeCta ? "border border-black/20 bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] text-black shadow-[0_12px_26px_rgba(167,112,239,0.28)]" : ""}`}
                     >
                       <MenuIcon>
                         <circle cx="12" cy="12" r="8" />
                         <path d="m12 7 3 3-3 3-3-3 3-3Z" />
                       </MenuIcon>
-                      <span className="flex-1">{t('dashboard.menu.changeGameMode')}</span>
+                      <div className="flex flex-1 items-center gap-2">
+                        <span>{hasActiveUpgradeCta ? 'Upgrade disponible' : t('dashboard.menu.changeGameMode')}</span>
+                        {hasActiveUpgradeCta ? <span className="rounded-full border border-black/20 bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] px-2 py-0.5 text-[10px] font-bold uppercase text-black shadow-[0_8px_20px_rgba(167,112,239,0.35)]">7d</span> : null}
+                      </div>
                       <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow')} />
                     </button>
                     <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
@@ -1182,6 +1225,21 @@ export function DashboardMenu({
                     </button>
                   </div>
                 ) : null}
+                <UpgradeRecommendationModal
+                  open={isUpgradeModalOpen && hasActiveUpgradeCta}
+                  currentMode={modeUpgradeSuggestion?.current_mode ?? null}
+                  nextMode={modeUpgradeSuggestion?.suggested_mode ?? null}
+                  isSubmitting={isUpgradeSubmitting}
+                  onConfirm={handleAcceptUpgrade}
+                  onClose={() => setIsUpgradeModalOpen(false)}
+                  onOpenAllModes={() => {
+                    setIsUpgradeModalOpen(false);
+                    setSelectedMode(normalizedCurrentMode);
+                    setGameModeError(null);
+                    setPendingConfirmMode(null);
+                    setIsGameModeOpen(true);
+                  }}
+                />
               </motion.div>
             </motion.div>
           ) : null}

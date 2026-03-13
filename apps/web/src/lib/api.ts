@@ -2108,6 +2108,8 @@ export type GameModeUpgradeSuggestion = {
   task_pass_rate: number;
   accepted_at: string | null;
   dismissed_at: string | null;
+  cta_enabled: boolean;
+  cta_active_until: string | null;
 };
 
 type GameModeUpgradeSuggestionMutationResponse = {
@@ -2117,7 +2119,7 @@ type GameModeUpgradeSuggestionMutationResponse = {
 
 export async function getGameModeUpgradeSuggestion(): Promise<GameModeUpgradeSuggestion> {
   if (isDashboardDemoModeEnabled()) {
-    return { current_mode: 'flow', suggested_mode: 'evolve', period_key: null, eligible_for_upgrade: false, tasks_total_evaluated: 0, tasks_meeting_goal: 0, task_pass_rate: 0, accepted_at: null, dismissed_at: null };
+    return { current_mode: 'flow', suggested_mode: 'evolve', period_key: null, eligible_for_upgrade: false, tasks_total_evaluated: 0, tasks_meeting_goal: 0, task_pass_rate: 0, accepted_at: null, dismissed_at: null, cta_enabled: false, cta_active_until: null };
   }
   return getAuthorizedJson<GameModeUpgradeSuggestion>('/game-mode/upgrade-suggestion');
 }
