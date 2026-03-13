@@ -1,15 +1,18 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { DailyReminderSettings } from './DailyReminderSettings';
-import { getDailyReminderSettings, updateDailyReminderSettings } from '../../lib/api';
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { DailyReminderSettings } from "./DailyReminderSettings";
+import {
+  getDailyReminderSettings,
+  updateDailyReminderSettings,
+} from "../../lib/api";
 
-vi.mock('../../lib/api', () => ({
+vi.mock("../../lib/api", () => ({
   getDailyReminderSettings: vi.fn(),
   updateDailyReminderSettings: vi.fn(),
 }));
 
-describe('DailyReminderSettings', () => {
+describe("DailyReminderSettings", () => {
   const mockedGet = vi.mocked(getDailyReminderSettings);
   const mockedUpdate = vi.mocked(updateDailyReminderSettings);
 
@@ -18,74 +21,158 @@ describe('DailyReminderSettings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (Intl as any).supportedValuesOf = vi.fn(() => [
-      'UTC',
-      'America/Bogota',
-      'America/Argentina/Buenos_Aires',
-      'America/Mexico_City',
+      "UTC",
+      "America/Bogota",
+      "America/Argentina/Buenos_Aires",
+      "America/Mexico_City",
     ]);
   });
 
   afterEach(() => {
     (Intl as any).supportedValuesOf = originalSupportedValuesOf;
+    vi.useRealTimers();
   });
 
-  it('allows searching timezones by location and submits IANA timezone value', async () => {
+  it("allows searching timezones by location and submits IANA timezone value", async () => {
     const user = userEvent.setup();
     mockedGet.mockResolvedValue({
-      local_time: '08:30',
-      timezone: 'America/Bogota',
-      status: 'active',
+      local_time: "08:30",
+      timezone: "America/Bogota",
+      status: "active",
     });
     mockedUpdate.mockResolvedValue({
-      local_time: '10:00',
-      timezone: 'America/Argentina/Buenos_Aires',
-      status: 'paused',
+      local_time: "10:00",
+      timezone: "America/Argentina/Buenos_Aires",
+      status: "paused",
     });
 
     render(<DailyReminderSettings />);
 
-    const switchControl = await screen.findByRole('switch', { name: /daily quest/i });
-    await waitFor(() => expect(switchControl).toHaveAttribute('aria-checked', 'true'));
+    const switchControl = await screen.findByRole("switch", {
+      name: /daily quest/i,
+    });
+    await waitFor(() =>
+      expect(switchControl).toHaveAttribute("aria-checked", "true"),
+    );
 
     const timeSelect = screen.getByLabelText(/hora local/i);
-    await user.selectOptions(timeSelect, '10:00');
+    await user.selectOptions(timeSelect, "10:00");
     await user.click(switchControl);
 
-    const timezoneCombobox = screen.getByRole('combobox', { name: /zona horaria/i });
+    const timezoneCombobox = screen.getByRole("combobox", {
+      name: /zona horaria/i,
+    });
     await user.click(timezoneCombobox);
-    await user.type(timezoneCombobox, 'argentina');
+    await user.type(timezoneCombobox, "argentina");
 
-    const timezoneOption = await screen.findByRole('option', { name: /buenos aires/i });
+    const timezoneOption = await screen.findByRole("option", {
+      name: /buenos aires/i,
+    });
     await user.click(timezoneOption);
 
-    const submitButton = screen.getByRole('button', { name: /guardar/i });
+    const submitButton = screen.getByRole("button", { name: /guardar/i });
     expect(submitButton).not.toBeDisabled();
     await user.click(submitButton);
 
     expect(mockedUpdate).toHaveBeenCalledWith({
-      status: 'paused',
-      local_time: '10:00',
-      timezone: 'America/Argentina/Buenos_Aires',
+      status: "paused",
+      local_time: "10:00",
+      timezone: "America/Argentina/Buenos_Aires",
     });
 
     await screen.findByText(/guardamos tus recordatorios/i);
   });
 
-  it('shows the load error state and retries when requested', async () => {
+  it("calls onSaveSuccess after the success toast delay", async () => {
+    const onSaveSuccess = vi.fn();
+    const user = userEvent.setup();
+    mockedGet.mockResolvedValue({
+      local_time: "08:30",
+      timezone: "America/Bogota",
+      status: "active",
+    });
+    mockedUpdate.mockResolvedValue({
+      local_time: "10:00",
+      timezone: "America/Argentina/Buenos_Aires",
+      status: "paused",
+    });
+
+    render(<DailyReminderSettings onSaveSuccess={onSaveSuccess} />);
+
+    const switchControl = await screen.findByRole("switch", {
+      name: /daily quest/i,
+    });
+    const timeSelect = screen.getByLabelText(/hora local/i);
+    await user.selectOptions(timeSelect, "10:00");
+    await user.click(switchControl);
+
+    const submitButton = screen.getByRole("button", { name: /guardar/i });
+    await user.click(submitButton);
+
+    await screen.findByText(/guardamos tus recordatorios/i);
+    expect(onSaveSuccess).not.toHaveBeenCalled();
+
+    await waitFor(() => expect(onSaveSuccess).toHaveBeenCalledTimes(1), {
+      timeout: 2500,
+    });
+  });
+
+  it("clears delayed onSaveSuccess when unmounted", async () => {
+    const onSaveSuccess = vi.fn();
+    const user = userEvent.setup();
+    mockedGet.mockResolvedValue({
+      local_time: "08:30",
+      timezone: "America/Bogota",
+      status: "active",
+    });
+    mockedUpdate.mockResolvedValue({
+      local_time: "10:00",
+      timezone: "America/Argentina/Buenos_Aires",
+      status: "paused",
+    });
+
+    const { unmount } = render(
+      <DailyReminderSettings onSaveSuccess={onSaveSuccess} />,
+    );
+
+    const switchControl = await screen.findByRole("switch", {
+      name: /daily quest/i,
+    });
+    const timeSelect = screen.getByLabelText(/hora local/i);
+    await user.selectOptions(timeSelect, "10:00");
+    await user.click(switchControl);
+
+    const submitButton = screen.getByRole("button", { name: /guardar/i });
+    await user.click(submitButton);
+    await screen.findByText(/guardamos tus recordatorios/i);
+
+    unmount();
+
+    await new Promise((resolve) => setTimeout(resolve, 1700));
+    expect(onSaveSuccess).not.toHaveBeenCalled();
+  });
+
+  it("shows the load error state and retries when requested", async () => {
     const user = userEvent.setup();
     mockedGet
-      .mockRejectedValueOnce(new Error('boom'))
-      .mockResolvedValueOnce({ local_time: '09:00', timezone: 'UTC', status: 'paused' });
+      .mockRejectedValueOnce(new Error("boom"))
+      .mockResolvedValueOnce({
+        local_time: "09:00",
+        timezone: "UTC",
+        status: "paused",
+      });
 
     render(<DailyReminderSettings />);
 
-    const errorMessage = await screen.findByText(/no pudimos cargar tus recordatorios/i);
+    const errorMessage = await screen.findByText(
+      /no pudimos cargar tus recordatorios/i,
+    );
     expect(errorMessage).toBeInTheDocument();
 
-    const retryButton = screen.getByRole('button', { name: /reintentar/i });
+    const retryButton = screen.getByRole("button", { name: /reintentar/i });
     await user.click(retryButton);
 
-    await screen.findByRole('switch', { name: /daily quest/i });
+    await screen.findByRole("switch", { name: /daily quest/i });
     expect(mockedGet).toHaveBeenCalledTimes(2);
   });
 });
