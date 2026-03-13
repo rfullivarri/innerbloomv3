@@ -381,7 +381,7 @@ export function GuidedDemoOverlay({
     ? 'min-h-8 px-3 py-1.5 text-[11px]'
     : 'min-h-9 px-4 py-2 text-xs';
   const secondaryButtonClass = `inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 disabled:opacity-40 ${walkthroughButtonSizeClass}`;
-  const primaryButtonClass = `ib-primary-button min-h-0 px-4 py-2 font-semibold uppercase tracking-[0.16em] focus-visible:ring-offset-slate-900 ${walkthroughButtonSizeClass}`;
+  const primaryButtonClass = `ib-primary-button !min-h-0 !px-4 !py-2 !font-semibold !text-xs !uppercase !tracking-[0.16em] focus-visible:ring-offset-slate-900 ${walkthroughButtonSizeClass}`;
   const tertiaryButtonClass = `ml-auto inline-flex items-center justify-center rounded-full border border-transparent font-semibold uppercase tracking-[0.14em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-subtle)] hover:bg-[color:var(--color-overlay-1)] hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${walkthroughButtonSizeClass}`;
 
   return (
