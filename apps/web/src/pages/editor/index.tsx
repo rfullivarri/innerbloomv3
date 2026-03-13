@@ -22,6 +22,7 @@ import { useAppMode } from '../../hooks/useAppMode';
 import { useDailyQuestReadiness } from '../../hooks/useDailyQuestReadiness';
 import { useOnboardingEditorNudge } from '../../hooks/useOnboardingEditorNudge';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+import { localizeDifficultyLabel, localizePillarLabel, localizeTraitLabel } from './labelLocalization';
 import {
   getActiveSection,
   getDashboardSectionConfig,
@@ -51,7 +52,7 @@ export default function TaskEditorPage() {
   const { data: difficulties } = useDifficulties();
   const isAppMode = useAppMode();
 
-  const [traitNamesById, setTraitNamesById] = useState<Record<string, string>>({});
+  const [traitCatalogById, setTraitCatalogById] = useState<Record<string, { name: string; code: string }>>({});
   const [statNamesById, setStatNamesById] = useState<Record<string, string>>({});
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,7 +96,7 @@ export default function TaskEditorPage() {
     for (const task of tasks) {
       const pillarId = task.pillarId?.trim();
       const traitId = task.traitId?.trim();
-      if (!pillarId || !traitId || traitNamesById[traitId]) {
+      if (!pillarId || !traitId || traitCatalogById[traitId]) {
         continue;
       }
 
@@ -112,13 +113,13 @@ export default function TaskEditorPage() {
     let isCancelled = false;
 
     const loadTraits = async () => {
-      const updates: Record<string, string> = {};
+      const updates: Record<string, { name: string; code: string }> = {};
 
       for (const [pillarId] of missingTraitsByPillar) {
         try {
           const traits = await fetchCatalogTraits(pillarId);
           for (const trait of traits) {
-            updates[trait.id] = trait.name;
+            updates[trait.id] = { name: trait.name, code: trait.code };
           }
         } catch (error) {
           console.error('Failed to load traits for pillar', pillarId, error);
@@ -126,7 +127,7 @@ export default function TaskEditorPage() {
       }
 
       if (!isCancelled && Object.keys(updates).length > 0) {
-        setTraitNamesById((previous) => ({ ...previous, ...updates }));
+        setTraitCatalogById((previous) => ({ ...previous, ...updates }));
       }
     };
 
@@ -135,7 +136,7 @@ export default function TaskEditorPage() {
     return () => {
       isCancelled = true;
     };
-  }, [tasks, traitNamesById]);
+  }, [tasks, traitCatalogById]);
 
   useEffect(() => {
     const missingStatsByTrait = new Map<string, Set<string>>();
@@ -188,27 +189,39 @@ export default function TaskEditorPage() {
   const pillarOptions = useMemo(() => {
     return [
       { value: '', label: t('editor.filters.pillars.all') },
-      ...pillars.map((pillar) => ({ value: pillar.id, label: pillar.name })),
+      ...pillars.map((pillar) => ({
+        value: pillar.id,
+        label: localizePillarLabel(pillar.name, language),
+      })),
     ];
-  }, [pillars, t]);
+  }, [language, pillars, t]);
 
   const pillarNamesById = useMemo(() => {
     const map = new Map<string, string>();
     for (const pillar of pillars) {
-      map.set(pillar.id, pillar.name);
+      map.set(pillar.id, localizePillarLabel(pillar.name, language));
     }
     return map;
-  }, [pillars]);
+  }, [language, pillars]);
 
-  const traitNamesMap = useMemo(() => new Map(Object.entries(traitNamesById)), [traitNamesById]);
+  const traitNamesMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const [traitId, trait] of Object.entries(traitCatalogById)) {
+      map.set(
+        traitId,
+        localizeTraitLabel({ name: trait.name, code: trait.code, fallback: traitId }, language),
+      );
+    }
+    return map;
+  }, [language, traitCatalogById]);
   const statNamesMap = useMemo(() => new Map(Object.entries(statNamesById)), [statNamesById]);
   const difficultyNamesById = useMemo(() => {
     const map = new Map<string, string>();
     for (const difficulty of difficulties) {
-      map.set(difficulty.id, difficulty.name);
+      map.set(difficulty.id, localizeDifficultyLabel(difficulty.name, language));
     }
     return map;
-  }, [difficulties]);
+  }, [difficulties, language]);
 
   const pillarGrouping = useMemo(() => {
     const canonicalOrder = new Map<string, number>();
@@ -1718,7 +1731,7 @@ function CreateTaskModal({
                     </option>
                     {sortedPillars.map((pillar) => (
                       <option key={pillar.id} value={pillar.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                        {pillar.name}
+                        {localizePillarLabel(pillar.name, language)}
                       </option>
                     ))}
                   </select>
@@ -1762,7 +1775,7 @@ function CreateTaskModal({
                     </option>
                     {filteredTraits.map((trait) => (
                       <option key={trait.id} value={trait.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                        {trait.name}
+                        {localizeTraitLabel({ name: trait.name, code: trait.code, fallback: trait.id }, language)}
                       </option>
                     ))}
                   </select>
@@ -1861,7 +1874,7 @@ function CreateTaskModal({
                     </option>
                     {sortedDifficulties.map((difficulty) => (
                       <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                        {difficulty.name}
+                        {localizeDifficultyLabel(difficulty.name, language)}
                       </option>
                     ))}
                   </select>
@@ -1963,21 +1976,26 @@ function EditTaskModal({
 
   const sortedDifficulties = useMemo(() => {
     return [...difficulties].sort((a, b) => a.name.localeCompare(b.name, activeLocale, { sensitivity: 'base' }));
-  }, [difficulties]);
+  }, [activeLocale, difficulties]);
 
   const pillarName = useMemo(() => {
     if (!task?.pillarId) {
       return t('editor.symbol.empty');
     }
-    return pillars.find((pillar) => pillar.id === task.pillarId)?.name ?? task.pillarId;
-  }, [pillars, task?.pillarId]);
+    const sourceLabel = pillars.find((pillar) => pillar.id === task.pillarId)?.name ?? task.pillarId;
+    return localizePillarLabel(sourceLabel, language);
+  }, [language, pillars, task?.pillarId, t]);
 
   const traitName = useMemo(() => {
     if (!task?.traitId) {
       return t('editor.symbol.empty');
     }
-    return traits.find((trait) => trait.id === task.traitId)?.name ?? task.traitId;
-  }, [traits, task?.traitId]);
+    const trait = traits.find((entry) => entry.id === task.traitId);
+    return localizeTraitLabel(
+      { name: trait?.name, code: trait?.code, fallback: task.traitId },
+      language,
+    );
+  }, [language, t, task?.traitId, traits]);
 
   const isSubmitting = updateStatus === 'loading';
 
@@ -2111,7 +2129,7 @@ function EditTaskModal({
       <section className="space-y-4">
         <div className="space-y-2">
           <span className="edit-task-modal__locked-section-label text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            Contexto
+            {t('editor.modal.edit.context')}
           </span>
           <div className="grid gap-3 md:grid-cols-2">
             <ReadOnlyField label={t('editor.field.pillar')} value={pillarName} />
@@ -2125,7 +2143,7 @@ function EditTaskModal({
 
       <section className="space-y-4">
         <p className="edit-task-modal__editable-section-label text-[11px] font-semibold uppercase tracking-[0.2em]">
-          Campos editables
+          {t('editor.modal.edit.editableFields')}
         </p>
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
@@ -2158,7 +2176,7 @@ function EditTaskModal({
               </option>
               {sortedDifficulties.map((difficulty) => (
                 <option key={difficulty.id} value={difficulty.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                  {difficulty.name}
+                  {localizeDifficultyLabel(difficulty.name, language)}
                 </option>
               ))}
             </select>
