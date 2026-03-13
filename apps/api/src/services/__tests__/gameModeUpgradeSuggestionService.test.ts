@@ -209,6 +209,43 @@ describe('gameModeUpgradeSuggestionService', () => {
     expect(mockRollingAnalysis).not.toHaveBeenCalled();
   });
 
+  it('resets accepted_at and dismissed_at when debug forced CTA is reapplied', async () => {
+    queueExpectations([
+      {
+        match: (sql) => sql.includes('FROM users u'),
+        handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 11, current_mode: 'LOW' }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'),
+        handle: () => ({ rows: [{ user_id: 'u1', enabled: true, forced_current_mode: 'CHILL', forced_next_mode: 'FLOW', expires_at: null, created_at: '2026-03-13T00:00:00.000Z', updated_at: '2026-03-13T00:00:00.000Z' }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
+        handle: (_sql, params) => {
+          expect(params).toEqual(['FLOW']);
+          return { rows: [{ game_mode_id: 13, code: 'FLOW' }] };
+        },
+      },
+      {
+        match: (sql) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'),
+        handle: (sql, params) => {
+          expect(params?.[1]).toBe('debug_forced');
+          expect(sql).toContain("WHEN EXCLUDED.period_key = 'debug_forced' THEN NULL");
+          return { rows: [{ accepted_at: null, dismissed_at: null, created_at: null }] };
+        },
+      },
+    ]);
+
+    const result = await getGameModeUpgradeSuggestion('u1');
+
+    expect(result.debug_forced_cta).toBe(true);
+    expect(result.period_key).toBe('debug_forced');
+    expect(result.accepted_at).toBeNull();
+    expect(result.dismissed_at).toBeNull();
+    expect(result.cta_enabled).toBe(true);
+  });
+
+
   it('falls back to rolling eligibility when debug override is absent', async () => {
     mockRollingAnalysis.mockResolvedValueOnce({
       has_analysis: true,

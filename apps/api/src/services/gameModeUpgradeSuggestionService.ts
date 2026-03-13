@@ -120,6 +120,14 @@ async function upsertSuggestionState(client: typeof pool, params: {
     DO UPDATE SET
       suggested_game_mode_id = EXCLUDED.suggested_game_mode_id,
       eligible_for_upgrade = EXCLUDED.eligible_for_upgrade,
+      accepted_at = CASE
+        WHEN EXCLUDED.period_key = 'debug_forced' THEN NULL
+        ELSE user_game_mode_upgrade_suggestions.accepted_at
+      END,
+      dismissed_at = CASE
+        WHEN EXCLUDED.period_key = 'debug_forced' THEN NULL
+        ELSE user_game_mode_upgrade_suggestions.dismissed_at
+      END,
       updated_at = NOW()
     RETURNING accepted_at, dismissed_at, created_at`,
     [
