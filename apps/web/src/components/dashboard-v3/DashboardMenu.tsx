@@ -962,9 +962,12 @@ export function DashboardMenu({
                 </div>
 
                 {isGameModeOpen ? (
-                  <div className="absolute inset-0 z-20 flex items-end bg-black/40 p-2 md:items-center">
-                    <div className="w-full rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl">
-                      <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="absolute inset-0 z-20 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center">
+                    <div
+                      className="flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
+                      style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)' }}
+                    >
+                      <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
                         <div>
                           <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-text-faint)]">{t('dashboard.menu.gameMode')}</p>
                           <h3 className="text-base font-semibold text-[color:var(--color-text)]">{t('dashboard.menu.chooseGameMode')}</h3>
@@ -981,82 +984,86 @@ export function DashboardMenu({
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
-                        {GAME_MODE_ORDER.map((mode) => {
-                          const isSelected = (selectedOrCurrentMode ?? 'Flow') === mode;
-                          const isCurrent = (normalizedCurrentMode ?? 'Flow') === mode;
-                          const content = GAME_MODE_META[toMetaModeKey(mode)];
-                          return (
-                            <button
-                              key={mode}
-                              type="button"
-                              onClick={() => handleSelectGameMode(mode)}
-                              className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(125,211,252,0.65),0_0_20px_rgba(56,189,248,0.2)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
-                            >
-                              <span className="absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: content.accentColor }} aria-hidden />
-                              <div className="ml-2 space-y-2">
-                                <div className="flex items-center justify-between gap-2">
-                                  <p className="text-sm font-semibold text-[color:var(--color-text)]">{mode}</p>
-                                  <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text-dim)]">
-                                    {content.frequency[language]}
-                                  </span>
-                                </div>
-                                <img
-                                  src={content.avatarSrc}
-                                  alt={content.avatarAlt[language]}
-                                  className="h-20 w-full rounded-xl border border-white/10 object-cover"
-                                  style={{ objectPosition: getModeBannerObjectPosition(mode) }}
-                                  loading="lazy"
-                                />
-                                <p className="line-clamp-2 text-[11px] text-[color:var(--color-text-dim)]">{content.objective[language]}</p>
-                                {isCurrent ? (
-                                  <span className="inline-flex rounded-full border border-emerald-300/40 bg-emerald-400/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
-                                    {t('dashboard.menu.currentGameMode')}
-                                  </span>
-                                ) : null}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {modeJumpIsDemanding ? (
-                        <p className="mt-3 rounded-xl border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
-                          {t('dashboard.menu.gameModeDemandingWarning')}
-                        </p>
-                      ) : null}
-
-                      {gameModeError ? (
-                        <p className="mt-3 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
-                          {gameModeError}
-                        </p>
-                      ) : null}
-
-                      {pendingConfirmMode ? (
-                        <div className="mt-4 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] p-3">
-                          <p className="text-sm text-[color:var(--color-text)]">
-                            {t('dashboard.menu.gameModeConfirmPrompt', { mode: pendingConfirmMode })}
-                          </p>
-                          <div className="mt-3 flex gap-2">
-                            <button
-                              type="button"
-                              onClick={handleCloseGameModeConfirm}
-                              className="flex-1 rounded-xl border border-[color:var(--color-border-subtle)] px-3 py-2 text-sm text-[color:var(--color-text-dim)]"
-                              disabled={isSavingMode}
-                            >
-                              {t('dashboard.menu.cancel')}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => void handleConfirmGameMode()}
-                              className="flex-1 rounded-xl border border-[color:var(--color-accent-primary)] bg-[color:var(--color-accent-primary)]/20 px-3 py-2 text-sm font-semibold text-[color:var(--color-text)] disabled:opacity-60"
-                              disabled={isSavingMode}
-                            >
-                              {isSavingMode ? t('dashboard.menu.gameModeSaving') : t('dashboard.menu.confirmChange')}
-                            </button>
+                      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 [-webkit-overflow-scrolling:touch]">
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+                            {GAME_MODE_ORDER.map((mode) => {
+                              const isSelected = (selectedOrCurrentMode ?? 'Flow') === mode;
+                              const isCurrent = (normalizedCurrentMode ?? 'Flow') === mode;
+                              const content = GAME_MODE_META[toMetaModeKey(mode)];
+                              return (
+                                <button
+                                  key={mode}
+                                  type="button"
+                                  onClick={() => handleSelectGameMode(mode)}
+                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(125,211,252,0.65),0_0_20px_rgba(56,189,248,0.2)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
+                                >
+                                  <span className="absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: content.accentColor }} aria-hidden />
+                                  <div className="ml-2 space-y-2">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <p className="text-sm font-semibold text-[color:var(--color-text)]">{mode}</p>
+                                      <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text-dim)]">
+                                        {content.frequency[language]}
+                                      </span>
+                                    </div>
+                                    <img
+                                      src={content.avatarSrc}
+                                      alt={content.avatarAlt[language]}
+                                      className="h-20 w-full rounded-xl border border-white/10 object-cover"
+                                      style={{ objectPosition: getModeBannerObjectPosition(mode) }}
+                                      loading="lazy"
+                                    />
+                                    <p className="line-clamp-2 text-[11px] text-[color:var(--color-text-dim)]">{content.objective[language]}</p>
+                                    {isCurrent ? (
+                                      <span className="inline-flex rounded-full border border-emerald-300/40 bg-emerald-400/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+                                        {t('dashboard.menu.currentGameMode')}
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                </button>
+                              );
+                            })}
                           </div>
+
+                          {modeJumpIsDemanding ? (
+                            <p className="rounded-xl border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+                              {t('dashboard.menu.gameModeDemandingWarning')}
+                            </p>
+                          ) : null}
+
+                          {gameModeError ? (
+                            <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+                              {gameModeError}
+                            </p>
+                          ) : null}
+
+                          {pendingConfirmMode ? (
+                            <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] p-3">
+                              <p className="text-sm text-[color:var(--color-text)]">
+                                {t('dashboard.menu.gameModeConfirmPrompt', { mode: pendingConfirmMode })}
+                              </p>
+                              <div className="mt-3 flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={handleCloseGameModeConfirm}
+                                  className="flex-1 rounded-xl border border-[color:var(--color-border-subtle)] px-3 py-2 text-sm text-[color:var(--color-text-dim)]"
+                                  disabled={isSavingMode}
+                                >
+                                  {t('dashboard.menu.cancel')}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => void handleConfirmGameMode()}
+                                  className="flex-1 rounded-xl border border-[color:var(--color-accent-primary)] bg-[color:var(--color-accent-primary)]/20 px-3 py-2 text-sm font-semibold text-[color:var(--color-text)] disabled:opacity-60"
+                                  disabled={isSavingMode}
+                                >
+                                  {isSavingMode ? t('dashboard.menu.gameModeSaving') : t('dashboard.menu.confirmChange')}
+                                </button>
+                              </div>
+                            </div>
+                          ) : null}
                         </div>
-                      ) : null}
+                      </div>
                     </div>
                   </div>
                 ) : null}
