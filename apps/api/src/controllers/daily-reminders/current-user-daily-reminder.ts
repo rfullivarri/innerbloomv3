@@ -10,6 +10,7 @@ import {
   updateUserDailyReminder,
   type UserDailyReminderRow,
 } from '../../repositories/user-daily-reminders.repository.js';
+import { markOnboardingProgressStep } from '../../services/onboardingProgressService.js';
 
 const DEFAULT_LOCAL_TIME = '09:00:00';
 const DEFAULT_TIMEZONE = 'UTC';
@@ -100,6 +101,12 @@ export const updateCurrentUserDailyReminderSettings: AsyncHandler = async (req, 
 
   if (!reminder) {
     throw new HttpError(500, 'reminder_persist_failed', 'Failed to persist reminder settings');
+  }
+
+  if (body.status === 'active') {
+    await markOnboardingProgressStep(authUser.id, 'daily_quest_scheduled', {
+      source: { trigger: 'daily_reminder_update' },
+    });
   }
 
   const legacyState: LegacySchedulerStateRow = {

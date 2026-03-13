@@ -12,8 +12,29 @@ import {
 import { triggerTaskGenerationForUser } from '../services/taskgenTriggerService.js';
 import { getJourneyGenerationState } from '../services/journeyGenerationStateService.js';
 import { getJourneyReadyModalSeenAt, markJourneyReadyModalSeen } from '../services/journeyReadyModalService.js';
+import {
+  getOnboardingProgress,
+  markOnboardingProgressStep,
+  reconcileOnboardingProgressFromClient,
+  type OnboardingProgressStep,
+} from '../services/onboardingProgressService.js';
 
 const router = Router();
+
+const validSteps = new Set<OnboardingProgressStep>([
+  'onboarding_started',
+  'game_mode_selected',
+  'moderation_selected',
+  'tasks_generated',
+  'first_task_edited',
+  'returned_to_dashboard_after_first_edit',
+  'moderation_modal_shown',
+  'moderation_modal_resolved',
+  'first_daily_quest_prompted',
+  'first_daily_quest_completed',
+  'daily_quest_scheduled',
+  'onboarding_completed',
+]);
 
 router.post(
   '/onboarding/intro',
@@ -42,6 +63,65 @@ router.post(
   }),
 );
 
+
+router.get(
+  '/onboarding/progress',
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+    if (!user) {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    }
+
+    const progress = await getOnboardingProgress(user.id);
+    res.json({ ok: true, progress });
+  }),
+);
+
+router.post(
+  '/onboarding/progress/mark',
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+    if (!user) {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    }
+
+    const step = typeof req.body?.step === 'string' ? (req.body.step.trim() as OnboardingProgressStep) : null;
+    if (!step || !validSteps.has(step)) {
+      throw new HttpError(400, 'invalid_step', 'step is required and must be valid');
+    }
+
+    const progress = await markOnboardingProgressStep(user.id, step, {
+      onboardingSessionId: typeof req.body?.onboarding_session_id === 'string' ? req.body.onboarding_session_id : null,
+      source: req.body?.source && typeof req.body.source === 'object' ? req.body.source : undefined,
+    });
+
+    res.json({ ok: true, progress });
+  }),
+);
+
+router.post(
+  '/onboarding/progress/reconcile-client',
+  authMiddleware,
+  asyncHandler(async (req, res) => {
+    const user = req.user;
+    if (!user) {
+      throw new HttpError(401, 'unauthorized', 'Authentication required');
+    }
+
+    const flags = req.body?.flags && typeof req.body.flags === 'object' ? req.body.flags : {};
+    const sanitized: Partial<Record<OnboardingProgressStep, boolean>> = {};
+    for (const [key, value] of Object.entries(flags)) {
+      if (validSteps.has(key as OnboardingProgressStep) && typeof value === 'boolean') {
+        sanitized[key as OnboardingProgressStep] = value;
+      }
+    }
+
+    const progress = await reconcileOnboardingProgressFromClient(user.id, sanitized);
+    res.json({ ok: true, progress });
+  }),
+);
 
 router.get(
   '/onboarding/generation-status',

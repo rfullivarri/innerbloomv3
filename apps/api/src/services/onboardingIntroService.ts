@@ -4,6 +4,7 @@ import { HttpError } from '../lib/http-error.js';
 import type { OnboardingIntroPayload } from '../schemas/onboarding.js';
 import { triggerTaskGenerationForUser } from './taskgenTriggerService.js';
 import { upsertJourneyGenerationStateWithClient } from './journeyGenerationStateService.js';
+import { markOnboardingProgressStep } from './onboardingProgressService.js';
 import {
   changeUserGameMode,
   resolveGameModeByCode,
@@ -234,6 +235,14 @@ export async function submitOnboardingIntro(
 
       await upsertFreeTrialSubscription(client, userId);
       await upsertJourneyGenerationStateWithClient(client, userId, 'pending');
+      await markOnboardingProgressStep(userId, 'onboarding_started', {
+        onboardingSessionId: sessionId,
+        source: { trigger: 'onboarding_intro_submit' },
+      });
+      await markOnboardingProgressStep(userId, 'game_mode_selected', {
+        onboardingSessionId: sessionId,
+        source: { trigger: 'onboarding_intro_submit' },
+      });
 
       await client.query('COMMIT');
 

@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { useRequest, type AsyncStatus } from './useRequest';
 import { getUserJourney, getUserTasks, type UserJourneySummary } from '../lib/api';
 import { clearJourneyGenerationPending, isJourneyGenerationPending } from '../lib/journeyGeneration';
+import { useOnboardingProgress } from './useOnboardingProgress';
 
 type UseDailyQuestReadinessOptions = {
   enabled?: boolean;
@@ -28,6 +29,7 @@ export function useDailyQuestReadiness(
   options: UseDailyQuestReadinessOptions = {},
 ): DailyQuestReadiness {
   const { enabled = true, isJourneyGenerating = false } = options;
+  const onboardingProgress = useOnboardingProgress();
   const { data: tasks, status: tasksStatus, reload: reloadTasks } = useRequest(() => getUserTasks(userId), [userId], {
     enabled,
   });
@@ -61,8 +63,8 @@ export function useDailyQuestReadiness(
     reload: reloadJourney,
   } = useRequest(() => getUserJourney(userId), [userId], { enabled: shouldLoadJourney });
 
-  const firstTasksConfirmed = Boolean(journey?.first_tasks_confirmed);
-  const completedFirstDailyQuest = Boolean(journey?.completed_first_daily_quest);
+  const firstTasksConfirmed = Boolean(journey?.first_tasks_confirmed || onboardingProgress.progress?.first_task_edited_at);
+  const completedFirstDailyQuest = Boolean(journey?.completed_first_daily_quest || onboardingProgress.progress?.first_daily_quest_completed_at);
   const canOpenDailyQuest = hasTasks && firstTasksConfirmed;
   const canShowDailyQuestPopup = canOpenDailyQuest;
   const canAutoOpenDailyQuestPopup = canOpenDailyQuest && completedFirstDailyQuest;

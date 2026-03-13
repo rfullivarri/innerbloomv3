@@ -72,7 +72,7 @@ export default function TaskEditorPage() {
   const onboardingEditorNudge = useOnboardingEditorNudge({
     completedFirstDailyQuest: dailyQuestReadiness.completedFirstDailyQuest,
   });
-  const { shouldShowInlineNotice, shouldShowDashboardDot, markFirstEditDone } = onboardingEditorNudge;
+  const { firstEditDone, shouldShowInlineNotice, shouldShowDashboardDot, markFirstEditDone } = onboardingEditorNudge;
 
   const { deleteTask, status: deleteStatus } = useDeleteTask();
   const { createTask: duplicateTask } = useCreateTask();
@@ -411,8 +411,11 @@ export default function TaskEditorPage() {
 
   const handleEditSuccess = useCallback(() => {
     const isFirstOnboardingEdit =
-      !dailyQuestReadiness.completedFirstDailyQuest &&
-      markFirstEditDone();
+      !dailyQuestReadiness.completedFirstDailyQuest && !firstEditDone;
+
+    if (isFirstOnboardingEdit) {
+      void markFirstEditDone();
+    }
 
     if (!isFirstOnboardingEdit) {
       setPageToast({
@@ -428,6 +431,7 @@ export default function TaskEditorPage() {
   }, [
     dailyQuestReadiness.completedFirstDailyQuest,
     handleCloseEdit,
+    firstEditDone,
     markFirstEditDone,
     scrollToEditorTop,
     t,

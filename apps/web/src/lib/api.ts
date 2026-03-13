@@ -2057,6 +2057,86 @@ export async function getUserTotalXp(userId: string): Promise<UserTotalXpRespons
   return response;
 }
 
+
+export type OnboardingProgressStep =
+  | 'onboarding_started'
+  | 'game_mode_selected'
+  | 'moderation_selected'
+  | 'tasks_generated'
+  | 'first_task_edited'
+  | 'returned_to_dashboard_after_first_edit'
+  | 'moderation_modal_shown'
+  | 'moderation_modal_resolved'
+  | 'first_daily_quest_prompted'
+  | 'first_daily_quest_completed'
+  | 'daily_quest_scheduled'
+  | 'onboarding_completed';
+
+export type OnboardingProgress = {
+  user_id: string;
+  onboarding_session_id: string | null;
+  version: number;
+  state: 'in_progress' | 'completed';
+  onboarding_started_at: string | null;
+  game_mode_selected_at: string | null;
+  moderation_selected_at: string | null;
+  tasks_generated_at: string | null;
+  first_task_edited_at: string | null;
+  returned_to_dashboard_after_first_edit_at: string | null;
+  moderation_modal_shown_at: string | null;
+  moderation_modal_resolved_at: string | null;
+  first_daily_quest_prompted_at: string | null;
+  first_daily_quest_completed_at: string | null;
+  daily_quest_scheduled_at: string | null;
+  onboarding_completed_at: string | null;
+  source: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function getOnboardingProgress(): Promise<{ ok: boolean; progress: OnboardingProgress }> {
+  return getAuthorizedJson<{ ok: boolean; progress: OnboardingProgress }>('/onboarding/progress');
+}
+
+export async function markOnboardingProgress(
+  step: OnboardingProgressStep,
+  source?: Record<string, unknown>,
+): Promise<{ ok: boolean; progress: OnboardingProgress }> {
+  const response = await apiAuthorizedFetch('/onboarding/progress/mark', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ step, source }),
+  });
+
+  if (!response.ok) {
+    const body = await safeJson(response);
+    throw new ApiError(response.status, body, '/onboarding/progress/mark');
+  }
+
+  return (await response.json()) as { ok: boolean; progress: OnboardingProgress };
+}
+
+export async function reconcileOnboardingProgressClient(flags: Partial<Record<OnboardingProgressStep, boolean>>): Promise<{ ok: boolean; progress: OnboardingProgress }> {
+  const response = await apiAuthorizedFetch('/onboarding/progress/reconcile-client', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ flags }),
+  });
+
+  if (!response.ok) {
+    const body = await safeJson(response);
+    throw new ApiError(response.status, body, '/onboarding/progress/reconcile-client');
+  }
+
+  return (await response.json()) as { ok: boolean; progress: OnboardingProgress };
+}
+
 export type UserJourneySummary = {
   first_date_log: string | null;
   days_of_journey: number;
