@@ -23,8 +23,10 @@ const TOOLTIP_HEIGHT_MOBILE = 238;
 const TOOLTIP_HEIGHT_MOBILE_COMPACT = 210;
 const MOBILE_DASHBOARD_FOCUS_DEFAULT_OFFSET = 8;
 const MOBILE_MODAL_FOCUS_DEFAULT_OFFSET = 6;
+const DAILY_QUEST_MODAL_EXTRA_HEADER_GAP = 8;
 const DAILY_QUEST_INTRO_STEP_ID = 'daily-quest-intro';
 const DAILY_QUEST_FOOTER_STEP_ID = 'daily-quest-footer';
+const DAILY_QUEST_MODERATION_STEP_ID = 'daily-quest-moderation';
 
 const MOBILE_DASHBOARD_STEP_FOCUS_OFFSET: Record<string, number> = {
   'overall-progress': 12,
@@ -87,6 +89,30 @@ function getScrollableAncestor(element: HTMLElement | null): HTMLElement | null 
 
 function raf(): Promise<void> {
   return new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
+}
+
+async function waitForLayoutSettle(frames = 2): Promise<void> {
+  for (let index = 0; index < frames; index += 1) {
+    await raf();
+  }
+}
+
+function getDashboardScrollContainer(): HTMLElement {
+  return (document.scrollingElement as HTMLElement | null) ?? document.documentElement;
+}
+
+function getDailyQuestScrollContainer(): HTMLElement | null {
+  return document.querySelector('[data-daily-quest-scroll-container="true"]') as HTMLElement | null;
+}
+
+function getDailyQuestStickyHeaderHeight(): number {
+  const header = document.querySelector('[data-daily-quest-sticky-header="true"]') as HTMLElement | null;
+  if (!header) {
+    return 0;
+  }
+
+  const safeAreaTop = Number.parseFloat(window.getComputedStyle(header).top || '0') || 0;
+  return header.getBoundingClientRect().height + safeAreaTop;
 }
 
 export function GuidedDemoOverlay({
@@ -163,36 +189,52 @@ export function GuidedDemoOverlay({
       const topInset = window.visualViewport?.offsetTop ?? 0;
       const focusOffset = MOBILE_DASHBOARD_STEP_FOCUS_OFFSET[step.id] ?? MOBILE_DASHBOARD_FOCUS_DEFAULT_OFFSET;
       const desiredTop = Math.max(VIEWPORT_PADDING, headerHeight + topInset + focusOffset);
+      const dashboardScroller = getDashboardScrollContainer();
+
       const firstRect = target.getBoundingClientRect();
       const initialDelta = firstRect.top - desiredTop;
       if (Math.abs(initialDelta) > 2) {
-        window.scrollBy({ top: initialDelta, behavior: 'auto' });
+        dashboardScroller.scrollTo({ top: dashboardScroller.scrollTop + initialDelta, behavior: 'auto' });
       }
 
-      await raf();
-      await raf();
+      await waitForLayoutSettle(3);
 
       const finalRect = target.getBoundingClientRect();
       const settleDelta = finalRect.top - desiredTop;
       if (Math.abs(settleDelta) > 2) {
-        window.scrollBy({ top: settleDelta, behavior: 'auto' });
-        await raf();
+        dashboardScroller.scrollTo({ top: dashboardScroller.scrollTop + settleDelta, behavior: 'auto' });
+        await waitForLayoutSettle(2);
       }
     };
 
     const alignDailyQuestStep = async (target: HTMLElement) => {
-      const scroller = getScrollableAncestor(target);
+      const scroller = getDailyQuestScrollContainer() ?? getScrollableAncestor(target);
       if (!scroller) {
         return;
       }
+
       const focusOffset = MOBILE_DAILY_QUEST_STEP_FOCUS_OFFSET[step.id] ?? MOBILE_MODAL_FOCUS_DEFAULT_OFFSET;
       const scrollerRect = scroller.getBoundingClientRect();
       const targetRect = target.getBoundingClientRect();
-      const desiredTop = scrollerRect.top + focusOffset;
+      const stickyHeaderHeight = getDailyQuestStickyHeaderHeight();
+      const moderationExtraGap = step.id === DAILY_QUEST_MODERATION_STEP_ID ? 18 : 0;
+      const desiredTop = scrollerRect.top + stickyHeaderHeight + DAILY_QUEST_MODAL_EXTRA_HEADER_GAP + focusOffset + moderationExtraGap;
       const delta = targetRect.top - desiredTop;
+
       if (Math.abs(delta) > 2) {
-        scroller.scrollBy({ top: delta, behavior: 'auto' });
-        await raf();
+        scroller.scrollTo({ top: scroller.scrollTop + delta, behavior: 'auto' });
+        await waitForLayoutSettle(3);
+      } else {
+        await waitForLayoutSettle(2);
+      }
+
+      if (step.id === DAILY_QUEST_MODERATION_STEP_ID) {
+        const moderationRect = target.getBoundingClientRect();
+        const moderationDelta = moderationRect.top - desiredTop;
+        if (Math.abs(moderationDelta) > 1) {
+          scroller.scrollTo({ top: scroller.scrollTop + moderationDelta, behavior: 'auto' });
+          await waitForLayoutSettle(2);
+        }
       }
     };
 
@@ -205,16 +247,18 @@ export function GuidedDemoOverlay({
 
       const isMobile = window.innerWidth < 768;
       if (walkthroughMode === 'daily-quest-modal') {
-        if (isMobile) {
-          await alignDailyQuestStep(target);
-        } else {
-          target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-        }
+        await alignDailyQuestStep(target);
         return;
       }
 
+      if (step.id === 'overall-progress') {
+        getDashboardScrollContainer().scrollTo({ top: 0, behavior: 'auto' });
+        await waitForLayoutSettle(2);
+      }
+
       if (!isMobile) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        target.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
+        await waitForLayoutSettle(2);
         return;
       }
 
@@ -222,16 +266,24 @@ export function GuidedDemoOverlay({
     };
 
     void alignForStep().then(() => {
-      updateRect();
+      void waitForLayoutSettle(2).then(() => {
+        updateRect();
+      });
     });
 
     const timeout = window.setTimeout(() => {
-      updateRect();
-    }, 280);
+      void alignForStep().then(() => {
+        void waitForLayoutSettle(1).then(() => {
+          updateRect();
+        });
+      });
+    }, 220);
     const handleResize = () => {
       setViewport({ width: window.innerWidth, height: window.innerHeight });
       void alignForStep().then(() => {
-        updateRect();
+        void waitForLayoutSettle(2).then(() => {
+          updateRect();
+        });
       });
     };
     window.addEventListener('resize', handleResize);
