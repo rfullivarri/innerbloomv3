@@ -218,6 +218,24 @@ export default function DashboardV3Page() {
   const weeklyWrapped = useWeeklyWrapped(backendUserId);
   const isAppMode = useAppMode();
   const [isJourneyGenerating, setIsJourneyGenerating] = useState(false);
+
+  useEffect(() => {
+    if (!location.state || typeof location.state !== "object") {
+      return;
+    }
+
+    const navigationState = location.state as {
+      scrollToTopOnEnter?: boolean;
+      source?: string;
+    };
+
+    if (!navigationState.scrollToTopOnEnter || navigationState.source !== "demo") {
+      return;
+    }
+
+    window.scrollTo({ top: 0, behavior: "auto" });
+    navigate(location.pathname + location.search, { replace: true, state: null });
+  }, [location.pathname, location.search, location.state, navigate]);
   const moderation = useModerationWidget();
   const [isModerationEditOpen, setIsModerationEditOpen] = useState(false);
   const [moderationSuggestionResolved, setModerationSuggestionResolved] =

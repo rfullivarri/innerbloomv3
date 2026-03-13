@@ -477,7 +477,7 @@ export default function TaskEditorPage() {
                   </div>
                 )}
                 {shouldShowInlineNotice && (
-                  <div className="rounded-2xl border border-[color:color-mix(in_srgb,var(--color-accent-secondary)_55%,white)] bg-[linear-gradient(110deg,color-mix(in_srgb,var(--color-accent-secondary)_36%,#1e1b4b)_0%,color-mix(in_srgb,var(--color-accent-secondary)_58%,#2e1065)_100%)] px-3 py-2.5 text-white shadow-[0_14px_30px_color-mix(in_srgb,var(--color-accent-secondary)_36%,transparent)] md:px-4">
+                  <div className="mb-2 rounded-2xl border border-[color:color-mix(in_srgb,var(--color-accent-secondary)_55%,white)] bg-[linear-gradient(110deg,color-mix(in_srgb,var(--color-accent-secondary)_36%,#1e1b4b)_0%,color-mix(in_srgb,var(--color-accent-secondary)_58%,#2e1065)_100%)] px-3 py-2.5 text-white shadow-[0_14px_30px_color-mix(in_srgb,var(--color-accent-secondary)_36%,transparent)] md:mb-3 md:px-4">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-xs leading-snug text-white/95 md:text-sm">{t('editor.onboarding.banner.message')}</p>
                       <Link
