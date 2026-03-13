@@ -26,7 +26,7 @@ vi.mock('../../db.js', () => ({
 }));
 
 vi.mock('../../services/onboardingProgressService.js', () => ({
-  markOnboardingProgressStep: vi.fn().mockResolvedValue(undefined),
+  markOnboardingProgressStepWithClient: vi.fn().mockResolvedValue(undefined),
 }));
 
 type Expectation = {
