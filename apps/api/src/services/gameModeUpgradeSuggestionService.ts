@@ -26,6 +26,8 @@ type SuggestionRow = {
   suggested_mode: string | null;
 };
 
+const CTA_ACTIVE_WINDOW_DAYS = 7;
+
 export type GameModeUpgradeSuggestion = {
   current_mode: string | null;
   suggested_mode: string | null;
@@ -36,7 +38,35 @@ export type GameModeUpgradeSuggestion = {
   task_pass_rate: number;
   accepted_at: string | null;
   dismissed_at: string | null;
+  cta_enabled: boolean;
+  cta_active_until: string | null;
 };
+
+function computeCtaWindow(createdAt: string | null): string | null {
+  if (!createdAt) {
+    return null;
+  }
+
+  const createdAtMs = Date.parse(createdAt);
+  if (Number.isNaN(createdAtMs)) {
+    return null;
+  }
+
+  return new Date(createdAtMs + CTA_ACTIVE_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
+}
+
+function isCtaEnabled(params: {
+  eligibleForUpgrade: boolean;
+  suggestedMode: string | null;
+  acceptedAt: string | null;
+  ctaActiveUntil: string | null;
+}): boolean {
+  if (!params.eligibleForUpgrade || !params.suggestedMode || params.acceptedAt || !params.ctaActiveUntil) {
+    return false;
+  }
+
+  return Date.parse(params.ctaActiveUntil) > Date.now();
+}
 
 export function resolveNextGameModeCode(currentModeCode: string | null | undefined): string | null {
   if (!currentModeCode) {
@@ -75,8 +105,8 @@ async function upsertSuggestionState(client: typeof pool, params: {
   currentGameModeId: number;
   suggestedGameModeId: number | null;
   eligibleForUpgrade: boolean;
-}): Promise<{ accepted_at: string | null; dismissed_at: string | null }> {
-  const result = await client.query<{ accepted_at: string | null; dismissed_at: string | null }>(
+}): Promise<{ accepted_at: string | null; dismissed_at: string | null; created_at: string | null }> {
+  const result = await client.query<{ accepted_at: string | null; dismissed_at: string | null; created_at: string | null }>(
     `INSERT INTO user_game_mode_upgrade_suggestions (
       user_id,
       period_key,
@@ -89,7 +119,7 @@ async function upsertSuggestionState(client: typeof pool, params: {
       suggested_game_mode_id = EXCLUDED.suggested_game_mode_id,
       eligible_for_upgrade = EXCLUDED.eligible_for_upgrade,
       updated_at = NOW()
-    RETURNING accepted_at, dismissed_at`,
+    RETURNING accepted_at, dismissed_at, created_at`,
     [
       params.userId,
       params.periodKey,
@@ -99,7 +129,7 @@ async function upsertSuggestionState(client: typeof pool, params: {
     ],
   );
 
-  return result.rows[0] ?? { accepted_at: null, dismissed_at: null };
+  return result.rows[0] ?? { accepted_at: null, dismissed_at: null, created_at: null };
 }
 
 export async function getGameModeUpgradeSuggestion(userId: string): Promise<GameModeUpgradeSuggestion> {
@@ -116,6 +146,8 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
       task_pass_rate: 0,
       accepted_at: null,
       dismissed_at: null,
+      cta_enabled: false,
+      cta_active_until: null,
     };
   }
 
@@ -133,6 +165,8 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
       task_pass_rate: 0,
       accepted_at: null,
       dismissed_at: null,
+      cta_enabled: false,
+      cta_active_until: null,
     };
   }
 
@@ -149,6 +183,14 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
     eligibleForUpgrade,
   });
 
+  const ctaActiveUntil = computeCtaWindow(suggestionState.created_at);
+  const ctaEnabled = isCtaEnabled({
+    eligibleForUpgrade,
+    suggestedMode: canSuggest ? (nextMode?.code ?? null) : null,
+    acceptedAt: suggestionState.accepted_at,
+    ctaActiveUntil,
+  });
+
   return {
     current_mode: user.current_mode,
     suggested_mode: canSuggest ? (nextMode?.code ?? null) : null,
@@ -159,6 +201,8 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
     task_pass_rate: analysis.task_pass_rate,
     accepted_at: suggestionState.accepted_at,
     dismissed_at: suggestionState.dismissed_at,
+    cta_enabled: ctaEnabled,
+    cta_active_until: ctaActiveUntil,
   };
 }
 
@@ -199,10 +243,6 @@ export async function acceptGameModeUpgradeSuggestion(userId: string): Promise<G
 
     if (!suggestion.eligible_for_upgrade || !suggestion.suggested_mode) {
       throw new HttpError(409, 'upgrade_suggestion_not_eligible', 'Upgrade suggestion is not eligible');
-    }
-
-    if (suggestion.dismissed_at) {
-      throw new HttpError(409, 'upgrade_suggestion_dismissed', 'Upgrade suggestion was dismissed for this period');
     }
 
     const latestSuggestion = await getLatestSuggestionForCurrentMode(pool, userId);
