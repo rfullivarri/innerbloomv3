@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
 import { normalizeGameModeValue } from '../../lib/gameMode';
+import { buildGameModeChip, GameModeChip } from '../common/GameModeChip';
 
 interface UpgradeRecommendationModalProps {
   open: boolean;
@@ -13,6 +14,9 @@ interface UpgradeRecommendationModalProps {
   onClose: () => void;
   onOpenAllModes: () => void;
 }
+
+const DRAG_COMPLETE_THRESHOLD = 0.9;
+const DRAG_HANDLE_SIZE = 56;
 
 function formatMode(mode: string | null): string {
   if (!mode) return 'MODO';
@@ -38,16 +42,20 @@ export function UpgradeRecommendationModal({
   const [dragProgress, setDragProgress] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [activePointerId, setActivePointerId] = useState<number | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
+  const handleRef = useRef<HTMLButtonElement | null>(null);
 
   const currentMeta = useMemo(() => resolveModeMeta(currentMode), [currentMode]);
   const nextMeta = useMemo(() => resolveModeMeta(nextMode), [nextMode]);
+  const nextModeChip = useMemo(() => buildGameModeChip(nextMode), [nextMode]);
 
   useEffect(() => {
     if (!open) {
       setDragProgress(0);
       setIsSuccess(false);
       setIsDragging(false);
+      setActivePointerId(null);
     }
   }, [open]);
 
@@ -56,16 +64,38 @@ export function UpgradeRecommendationModal({
     setIsSuccess(true);
   };
 
-  const updateDragFromClientX = async (clientX: number) => {
-    if (isSubmitting || isSuccess || !railRef.current) return;
+  const resolveProgressFromClientX = (clientX: number) => {
+    if (!railRef.current) {
+      return 0;
+    }
     const rect = railRef.current.getBoundingClientRect();
-    const raw = ((clientX - rect.left) / rect.width) * 100;
-    const nextValue = Math.max(0, Math.min(100, raw));
+    const maxTravel = Math.max(rect.width - DRAG_HANDLE_SIZE, 1);
+    const relativeX = clientX - rect.left - DRAG_HANDLE_SIZE / 2;
+    const boundedX = Math.max(0, Math.min(maxTravel, relativeX));
+    return boundedX / maxTravel;
+  };
+
+  const handlePointerMove = async (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging || isSubmitting || isSuccess) return;
+    if (activePointerId !== null && event.pointerId !== activePointerId) return;
+
+    const nextValue = resolveProgressFromClientX(event.clientX);
     setDragProgress(nextValue);
 
-    if (nextValue >= 92) {
-      setDragProgress(100);
+    if (nextValue >= DRAG_COMPLETE_THRESHOLD) {
+      setDragProgress(1);
+      setIsDragging(false);
+      setActivePointerId(null);
+      if (handleRef.current && event.pointerId !== undefined && handleRef.current.hasPointerCapture(event.pointerId)) {
+        handleRef.current.releasePointerCapture(event.pointerId);
+      }
       await handleConfirm();
+    }
+  };
+
+  const resetIfIncomplete = () => {
+    if (!isSuccess && dragProgress < DRAG_COMPLETE_THRESHOLD) {
+      setDragProgress(0);
     }
   };
 
@@ -81,9 +111,15 @@ export function UpgradeRecommendationModal({
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] text-black shadow-[0_12px_30px_rgba(167,112,239,0.5)]">
               <Sparkles className="h-7 w-7" />
             </div>
+            {nextMode ? (
+              <div className="flex justify-center">
+                <GameModeChip {...nextModeChip} />
+              </div>
+            ) : null}
             <p className="text-lg font-semibold">
               {t('dashboard.upgradeCta.success', { nextMode: formatMode(nextMode) })}
             </p>
+            <p className="text-sm text-[color:var(--color-text-muted)]">{t('dashboard.upgradeCta.successSubtitle')}</p>
             <button
               type="button"
               onClick={onClose}
@@ -108,21 +144,25 @@ export function UpgradeRecommendationModal({
                 ref={railRef}
                 className="relative h-24 rounded-xl border border-black/15 bg-white/20 px-2"
                 onPointerMove={(event) => {
-                  if (!isDragging) return;
-                  void updateDragFromClientX(event.clientX);
+                  void handlePointerMove(event);
                 }}
-                onPointerUp={() => {
+                onPointerUp={(event) => {
+                  if (activePointerId !== null && event.pointerId !== activePointerId) return;
                   setIsDragging(false);
-                  if (!isSuccess && dragProgress < 92) {
-                    setDragProgress(0);
-                  }
+                  setActivePointerId(null);
+                  resetIfIncomplete();
+                }}
+                onPointerCancel={(event) => {
+                  if (activePointerId !== null && event.pointerId !== activePointerId) return;
+                  setIsDragging(false);
+                  setActivePointerId(null);
+                  resetIfIncomplete();
                 }}
                 onPointerLeave={() => {
                   if (!isDragging || isSuccess) return;
                   setIsDragging(false);
-                  if (dragProgress < 92) {
-                    setDragProgress(0);
-                  }
+                  setActivePointerId(null);
+                  resetIfIncomplete();
                 }}
               >
                 <div className="pointer-events-none absolute inset-y-0 left-[4.5rem] right-[4.5rem] flex items-center justify-center">
@@ -134,7 +174,8 @@ export function UpgradeRecommendationModal({
                     <img
                       src={nextMeta.avatarSrc}
                       alt={nextMeta.avatarAlt[language]}
-                      className="h-14 w-14 rounded-xl border border-black/10 object-cover shadow-[0_10px_22px_rgba(15,23,42,0.28)]"
+                      draggable={false}
+                      className="h-14 w-14 rounded-xl border border-black/10 object-cover shadow-[0_10px_22px_rgba(15,23,42,0.28)] select-none"
                     />
                     <p className="text-[11px] font-semibold uppercase tracking-[0.08em]">{formatMode(nextMode)}</p>
                   </div>
@@ -142,31 +183,37 @@ export function UpgradeRecommendationModal({
 
                 {currentMeta ? (
                   <button
+                    ref={handleRef}
                     type="button"
                     disabled={isSubmitting}
-                    className="absolute top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1 rounded-xl p-0.5 transition enabled:cursor-grab active:cursor-grabbing"
-                    style={{ left: `calc(${dragProgress}% * 0.68)` }}
+                    draggable={false}
+                    className="absolute top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1 rounded-xl p-0.5 touch-none transition enabled:cursor-grab active:cursor-grabbing"
+                    style={{ left: `calc(${dragProgress * 100}% - ${(dragProgress * DRAG_HANDLE_SIZE).toFixed(2)}px)` }}
+                    onDragStart={(event) => {
+                      event.preventDefault();
+                    }}
                     onPointerDown={(event) => {
+                      if (isSubmitting || isSuccess) return;
                       setIsDragging(true);
+                      setActivePointerId(event.pointerId);
                       event.currentTarget.setPointerCapture(event.pointerId);
                     }}
-                    onPointerMove={(event) => {
-                      if (!isDragging) return;
-                      void updateDragFromClientX(event.clientX);
-                    }}
                     onPointerUp={(event) => {
-                      event.currentTarget.releasePointerCapture(event.pointerId);
-                      setIsDragging(false);
-                      if (!isSuccess && dragProgress < 92) {
-                        setDragProgress(0);
+                      if (activePointerId !== null && event.pointerId !== activePointerId) return;
+                      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                        event.currentTarget.releasePointerCapture(event.pointerId);
                       }
+                      setIsDragging(false);
+                      setActivePointerId(null);
+                      resetIfIncomplete();
                     }}
                     aria-label={t('dashboard.upgradeCta.dragHint')}
                   >
                     <img
                       src={currentMeta.avatarSrc}
                       alt={currentMeta.avatarAlt[language]}
-                      className="h-14 w-14 rounded-xl border border-black/10 object-cover shadow-[0_10px_22px_rgba(15,23,42,0.28)]"
+                      draggable={false}
+                      className="h-14 w-14 rounded-xl border border-black/10 object-cover shadow-[0_10px_22px_rgba(15,23,42,0.28)] select-none"
                     />
                     <p className="text-[11px] font-semibold uppercase tracking-[0.08em]">{formatMode(currentMode)}</p>
                   </button>

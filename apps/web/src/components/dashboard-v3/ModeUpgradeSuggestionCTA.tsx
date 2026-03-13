@@ -95,7 +95,7 @@ export function ModeUpgradeSuggestionCTA({
             </span>
           </div>
 
-          <div className="mt-2 flex items-center gap-3 sm:mt-2.5">
+          <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 sm:mt-2.5">
             <div className="min-w-0 flex-1">
               <p className="text-base font-bold leading-tight sm:text-lg">{t('dashboard.upgradeCta.bannerTitle')}</p>
               <p className="mt-1 hidden text-sm text-black/85 sm:block">
@@ -108,7 +108,7 @@ export function ModeUpgradeSuggestionCTA({
             <button
               type="button"
               onClick={() => setIsOpen(true)}
-              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/55 bg-white/88 px-4 py-2 text-sm font-semibold text-black shadow-[0_8px_24px_rgba(15,23,42,0.2)] backdrop-blur-sm transition hover:bg-white"
+              className="inline-flex h-10 shrink-0 items-center gap-2 self-center rounded-full border border-white/55 bg-white/88 px-4 text-sm font-semibold text-black shadow-[0_8px_24px_rgba(15,23,42,0.2)] backdrop-blur-sm transition hover:bg-white"
             >
               {t('dashboard.upgradeCta.bannerAction')}
             </button>
