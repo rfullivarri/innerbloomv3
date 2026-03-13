@@ -913,6 +913,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   <motion.header
                     layout={false}
                     data-demo-anchor="daily-quest-intro"
+                    data-daily-quest-sticky-header="true"
                     className="sticky top-[env(safe-area-inset-top)] z-10 flex flex-col justify-center border-b border-[color:var(--color-border-subtle)] bg-[color:var(--color-slate-900-95)] px-4 py-3 backdrop-blur md:py-4"
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -940,6 +941,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
                   <div
                     className="flex-1 overflow-y-auto -webkit-overflow-scrolling-touch px-4 pb-28 pt-4"
+                    data-daily-quest-scroll-container="true"
                     aria-live="polite"
                   >
                     <div className="flex flex-col gap-6 pb-6">
