@@ -126,9 +126,9 @@ export function Alerts({
               <button
                 type="button"
                 onClick={onOpenFirstDailyQuest}
-                className="ib-chip-solid ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold transition"
+                className="ml-auto inline-flex rounded-full border border-white/60 bg-white/5 px-3 py-1 text-xs font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] transition hover:bg-white/10"
               >
-                Realizar Daily Quest
+                Daily Quest
               </button>
             ) : null}
           </div>
@@ -140,18 +140,18 @@ export function Alerts({
           <div className="flex items-start gap-3">
             <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-indigo-300" aria-hidden />
             <div className="space-y-1">
-              <p className="font-semibold text-white">Tu Daily Quest está listo</p>
+              <p className="font-semibold text-white">Último paso! Programa tu Daily Quest</p>
               <p className="text-indigo-100/80">
-                Programá tu recordatorio para recibirlo automáticamente cada día.
+                Programá tu recordatorio para recibirlo automáticamente cada día
               </p>
             </div>
             {canSchedule && (
               <button
                 type="button"
                 onClick={onScheduleClick}
-                className="ib-chip-solid ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold transition"
+                className="ml-auto inline-flex rounded-full border border-white/60 bg-white/5 px-3 py-1 text-xs font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] transition hover:bg-white/10"
               >
-                Programar Daily Quest
+                Programar
               </button>
             )}
           </div>

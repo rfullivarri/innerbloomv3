@@ -46,7 +46,7 @@ export default function DemoDashboardPage() {
     emitDemoEvent('demo_exited', { from: '/demo', source: demoContext.source, mode: demoContext.mode });
 
     if (demoContext.fromOnboarding && userId) {
-      navigate(dashboardPath);
+      navigate(dashboardPath, { state: { scrollToTopOnEnter: true, source: 'demo' } });
       return;
     }
 
@@ -87,7 +87,7 @@ export default function DemoDashboardPage() {
 
     if (demoContext.fromOnboarding && userId) {
       dailyQuestModalRef.current?.close();
-      navigate(dashboardPath);
+      navigate(dashboardPath, { state: { scrollToTopOnEnter: true, source: 'demo' } });
       return;
     }
 
