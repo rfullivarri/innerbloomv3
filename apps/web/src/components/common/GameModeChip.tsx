@@ -16,8 +16,8 @@ const GAME_MODE_STYLES: Record<GameMode, GameModeChipStyle> = {
   },
   Chill: {
     label: 'CHILL',
-    backgroundClass: 'bg-gradient-to-r from-emerald-400/25 via-teal-400/30 to-cyan-400/25 text-[color:var(--color-text)]',
-    glowClass: 'bg-emerald-400/40',
+    backgroundClass: 'bg-gradient-to-r from-emerald-400/25 via-teal-400/30 to-cyan-400/25 text-[color:var(--color-text)] dark:from-emerald-500/60 dark:via-teal-500/65 dark:to-cyan-500/55 dark:text-emerald-50',
+    glowClass: 'bg-emerald-400/40 dark:bg-emerald-400/60',
     animate: true,
   },
   Evolve: {
