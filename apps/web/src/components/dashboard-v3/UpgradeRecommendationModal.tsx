@@ -1,5 +1,6 @@
 import { Sparkles } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
 import { normalizeGameModeValue } from '../../lib/gameMode';
 
@@ -14,7 +15,7 @@ interface UpgradeRecommendationModalProps {
 }
 
 function formatMode(mode: string | null): string {
-  if (!mode) return 'Modo actual';
+  if (!mode) return 'MODO';
   return mode.trim().toUpperCase();
 }
 
@@ -33,16 +34,20 @@ export function UpgradeRecommendationModal({
   onClose,
   onOpenAllModes,
 }: UpgradeRecommendationModalProps) {
-  const [slideValue, setSlideValue] = useState(0);
+  const { t, language } = usePostLoginLanguage();
+  const [dragProgress, setDragProgress] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const railRef = useRef<HTMLDivElement | null>(null);
 
   const currentMeta = useMemo(() => resolveModeMeta(currentMode), [currentMode]);
   const nextMeta = useMemo(() => resolveModeMeta(nextMode), [nextMode]);
 
   useEffect(() => {
     if (!open) {
-      setSlideValue(0);
+      setDragProgress(0);
       setIsSuccess(false);
+      setIsDragging(false);
     }
   }, [open]);
 
@@ -51,11 +56,15 @@ export function UpgradeRecommendationModal({
     setIsSuccess(true);
   };
 
-  const handleSlideChange = async (value: number) => {
-    if (isSubmitting || isSuccess) return;
-    setSlideValue(value);
-    if (value >= 96) {
-      setSlideValue(100);
+  const updateDragFromClientX = async (clientX: number) => {
+    if (isSubmitting || isSuccess || !railRef.current) return;
+    const rect = railRef.current.getBoundingClientRect();
+    const raw = ((clientX - rect.left) / rect.width) * 100;
+    const nextValue = Math.max(0, Math.min(100, raw));
+    setDragProgress(nextValue);
+
+    if (nextValue >= 92) {
+      setDragProgress(100);
       await handleConfirm();
     }
   };
@@ -65,77 +74,127 @@ export function UpgradeRecommendationModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[95] flex items-end justify-center bg-slate-950/70 p-3 backdrop-blur-sm sm:items-center sm:p-6">
-      <section className="w-full max-w-xl rounded-3xl border border-white/40 bg-white p-5 text-black shadow-[0_30px_90px_rgba(3,9,32,0.55)]">
+    <div className="fixed inset-0 z-[95] flex items-end justify-center bg-slate-950/72 p-3 backdrop-blur-md sm:items-center sm:p-6">
+      <section className="w-full max-w-xl rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-5 text-[color:var(--color-text)] shadow-[0_30px_90px_rgba(3,9,32,0.55)] sm:p-6">
         {isSuccess ? (
           <div className="space-y-5 text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] text-black shadow-[0_12px_30px_rgba(167,112,239,0.5)]">
               <Sparkles className="h-7 w-7" />
             </div>
-            <p className="text-lg font-semibold">Listo. Ya estás en {formatMode(nextMode)}.</p>
+            <p className="text-lg font-semibold">
+              {t('dashboard.upgradeCta.success', { nextMode: formatMode(nextMode) })}
+            </p>
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-900"
+              className="w-full rounded-2xl bg-[color:var(--color-text)] px-4 py-3 text-sm font-semibold text-[color:var(--color-surface)] transition hover:opacity-90"
             >
-              Vamos por ello
+              {t('dashboard.upgradeCta.finalAction')}
             </button>
           </div>
         ) : (
           <>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-black/70">UPGRADE DISPONIBLE</p>
-            <h2 className="mt-1 text-2xl font-semibold">Pasá de {formatMode(currentMode)} a {formatMode(nextMode)}</h2>
-            <p className="mt-2 text-sm text-black/75">
-              Tu progreso indica que ya estás listo para este cambio. Al hacer el upgrade, tus tareas van a evaluarse con el nuevo modo de juego.
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-subtle)]">{t('dashboard.upgradeCta.modalEyebrow')}</p>
+            <h2 className="mt-1 text-2xl font-semibold leading-tight">
+              {t('dashboard.upgradeCta.modalTitle', {
+                currentMode: formatMode(currentMode),
+                nextMode: formatMode(nextMode),
+              })}
+            </h2>
+            <p className="mt-2 text-sm text-[color:var(--color-text-muted)]">{t('dashboard.upgradeCta.modalBody')}</p>
+
+            <div className="mt-5 rounded-2xl border border-black/10 bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] p-4 text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+              <div
+                ref={railRef}
+                className="relative h-24 rounded-xl border border-black/15 bg-white/20 px-2"
+                onPointerMove={(event) => {
+                  if (!isDragging) return;
+                  void updateDragFromClientX(event.clientX);
+                }}
+                onPointerUp={() => {
+                  setIsDragging(false);
+                  if (!isSuccess && dragProgress < 92) {
+                    setDragProgress(0);
+                  }
+                }}
+                onPointerLeave={() => {
+                  if (!isDragging || isSuccess) return;
+                  setIsDragging(false);
+                  if (dragProgress < 92) {
+                    setDragProgress(0);
+                  }
+                }}
+              >
+                <div className="pointer-events-none absolute inset-y-0 left-[4.5rem] right-[4.5rem] flex items-center justify-center">
+                  <span className="text-3xl font-bold text-black/75" aria-hidden="true">→</span>
+                </div>
+
+                {nextMeta ? (
+                  <div className="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1">
+                    <img
+                      src={nextMeta.avatarSrc}
+                      alt={nextMeta.avatarAlt[language]}
+                      className="h-14 w-14 rounded-xl border border-black/10 object-cover shadow-[0_10px_22px_rgba(15,23,42,0.28)]"
+                    />
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em]">{formatMode(nextMode)}</p>
+                  </div>
+                ) : null}
+
+                {currentMeta ? (
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    className="absolute top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1 rounded-xl p-0.5 transition enabled:cursor-grab active:cursor-grabbing"
+                    style={{ left: `calc(${dragProgress}% * 0.68)` }}
+                    onPointerDown={(event) => {
+                      setIsDragging(true);
+                      event.currentTarget.setPointerCapture(event.pointerId);
+                    }}
+                    onPointerMove={(event) => {
+                      if (!isDragging) return;
+                      void updateDragFromClientX(event.clientX);
+                    }}
+                    onPointerUp={(event) => {
+                      event.currentTarget.releasePointerCapture(event.pointerId);
+                      setIsDragging(false);
+                      if (!isSuccess && dragProgress < 92) {
+                        setDragProgress(0);
+                      }
+                    }}
+                    aria-label={t('dashboard.upgradeCta.dragHint')}
+                  >
+                    <img
+                      src={currentMeta.avatarSrc}
+                      alt={currentMeta.avatarAlt[language]}
+                      className="h-14 w-14 rounded-xl border border-black/10 object-cover shadow-[0_10px_22px_rgba(15,23,42,0.28)]"
+                    />
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em]">{formatMode(currentMode)}</p>
+                  </button>
+                ) : null}
+              </div>
+            </div>
+
+            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--color-text-subtle)]">
+              {t('dashboard.upgradeCta.dragHint')}
             </p>
-
-            <div className="mt-4 flex items-center justify-between rounded-2xl border border-black/10 bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] p-4">
-              <div className="flex flex-col items-center gap-2">
-                {currentMeta ? <img src={currentMeta.avatarSrc} alt={currentMeta.avatarAlt.es} className="h-16 w-16 rounded-xl object-cover" /> : null}
-                <p className="text-xs font-semibold">{formatMode(currentMode)}</p>
-              </div>
-              <span className="text-lg font-bold" aria-hidden="true">→</span>
-              <div className="flex flex-col items-center gap-2">
-                {nextMeta ? <img src={nextMeta.avatarSrc} alt={nextMeta.avatarAlt.es} className="h-16 w-16 rounded-xl object-cover" /> : null}
-                <p className="text-xs font-semibold">{formatMode(nextMode)}</p>
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/60">Deslizá para confirmar el upgrade</p>
-              <div className="rounded-full border border-black/15 bg-black/5 p-2">
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={slideValue}
-                  onChange={(event) => {
-                    void handleSlideChange(Number(event.target.value));
-                  }}
-                  disabled={isSubmitting}
-                  className="progress-fill--typing h-10 w-full cursor-pointer accent-black"
-                  aria-label="Deslizá para confirmar el upgrade"
-                />
-              </div>
-            </div>
 
             <button
               type="button"
               onClick={onOpenAllModes}
-              className="mt-3 text-xs font-medium underline decoration-black/40 underline-offset-4"
+              className="mt-3 text-sm font-medium text-[color:var(--color-text)] underline decoration-[color:var(--color-text-muted)]/60 underline-offset-4"
             >
-              Ver todos los modos
+              {t('dashboard.upgradeCta.viewAllModes')}
             </button>
 
             <div className="mt-4 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full border border-black/20 px-4 py-2 text-sm font-medium"
+                className="rounded-full border border-[color:var(--color-border-strong)] px-4 py-2 text-sm font-medium text-[color:var(--color-text)]"
               >
-                Cerrar
+                {t('dashboard.upgradeCta.close')}
               </button>
-              {isSubmitting ? <span className="text-sm font-medium">Actualizando...</span> : null}
+              {isSubmitting ? <span className="text-sm font-medium text-[color:var(--color-text-muted)]">{t('dashboard.upgradeCta.updating')}</span> : null}
             </div>
           </>
         )}
