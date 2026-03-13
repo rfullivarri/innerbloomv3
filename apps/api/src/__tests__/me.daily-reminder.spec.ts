@@ -12,6 +12,8 @@ const { mockQuery, mockVerifyToken, mockGetAuthService } = vi.hoisted(() => ({
 
 vi.mock('../db.js', () => ({
   pool: { query: (...args: unknown[]) => mockQuery(...args) },
+  withClient: async <T>(callback: (client: { query: (...args: unknown[]) => unknown }) => Promise<T>) =>
+    callback({ query: (...args: unknown[]) => mockQuery(...args) }),
   dbReady: Promise.resolve(),
   runWithDbContext: (_context: string, callback: () => unknown) => callback(),
 }));
@@ -237,7 +239,34 @@ describe('PUT /api/me/daily-reminder', () => {
       .mockResolvedValueOnce({ rows: [{ exists: true }] })
       .mockResolvedValueOnce({ rows: [existing] })
       .mockResolvedValueOnce({ rows: [updated] })
-      .mockResolvedValueOnce({ rowCount: 1 });
+      .mockResolvedValueOnce({ rowCount: 1 })
+      .mockResolvedValueOnce({ rowCount: 1 })
+      .mockResolvedValueOnce({ rowCount: 1 })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            user_id: verifiedUser.id,
+            onboarding_session_id: null,
+            version: 1,
+            state: 'in_progress',
+            onboarding_started_at: null,
+            game_mode_selected_at: null,
+            moderation_selected_at: null,
+            tasks_generated_at: null,
+            first_task_edited_at: null,
+            returned_to_dashboard_after_first_edit_at: null,
+            moderation_modal_shown_at: null,
+            moderation_modal_resolved_at: null,
+            first_daily_quest_prompted_at: null,
+            first_daily_quest_completed_at: null,
+            daily_quest_scheduled_at: null,
+            onboarding_completed_at: null,
+            source: {},
+            created_at: new Date('2024-12-01T00:00:00Z'),
+            updated_at: new Date('2024-12-03T00:00:00Z'),
+          },
+        ],
+      });
 
     const response = await request(app)
       .put('/api/me/daily-reminder')
