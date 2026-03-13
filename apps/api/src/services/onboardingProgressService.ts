@@ -104,6 +104,48 @@ function toProgress(row: ProgressRow): OnboardingProgress {
   };
 }
 
+function parseTimestamp(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? null : timestamp;
+}
+
+function hasImpossibleReturnedDashboardTimestamp(progress: Pick<OnboardingProgress, 'first_task_edited_at' | 'returned_to_dashboard_after_first_edit_at'>): boolean {
+  const returnedTimestamp = parseTimestamp(progress.returned_to_dashboard_after_first_edit_at);
+  if (!returnedTimestamp) return false;
+
+  const firstEditTimestamp = parseTimestamp(progress.first_task_edited_at);
+  if (!firstEditTimestamp) return true;
+
+  return returnedTimestamp < firstEditTimestamp;
+}
+
+async function sanitizeImpossibleReturnedDashboardTimestamp(
+  client: PoolClient,
+  userId: string,
+  progress: OnboardingProgress,
+): Promise<OnboardingProgress> {
+  if (!hasImpossibleReturnedDashboardTimestamp(progress)) {
+    return progress;
+  }
+
+  await client.query(
+    `UPDATE user_onboarding_progress
+        SET returned_to_dashboard_after_first_edit_at = NULL,
+            source = source || jsonb_build_object('returned_dashboard_timestamp_sanitized', true, 'returned_dashboard_timestamp_sanitized_at', now()),
+            updated_at = now()
+      WHERE user_id = $1`,
+    [userId],
+  );
+
+  const sanitized = await readProgressWithClient(client, userId);
+  if (!sanitized) {
+    throw new Error('Failed to read onboarding progress after sanitization');
+  }
+
+  return sanitized;
+}
+
 async function readProgressWithClient(client: PoolClient, userId: string): Promise<OnboardingProgress | null> {
   const result = await client.query<ProgressRow>(SELECT_PROGRESS_SQL, [userId]);
   const row = result.rows[0];
@@ -152,7 +194,9 @@ function computeState(progress: Partial<OnboardingProgress>): OnboardingProgress
 export async function getOnboardingProgress(userId: string): Promise<OnboardingProgress> {
   return withClient(async (client) => {
     let progress = await readProgressWithClient(client, userId);
-    if (progress) return progress;
+    if (progress) {
+      return sanitizeImpossibleReturnedDashboardTimestamp(client, userId, progress);
+    }
 
     const derived = await deriveProgress(client, userId);
     await client.query(ENSURE_BASE_ROW_SQL, [userId]);
@@ -190,7 +234,7 @@ export async function getOnboardingProgress(userId: string): Promise<OnboardingP
       throw new Error('Failed to initialize onboarding progress');
     }
 
-    return progress;
+    return sanitizeImpossibleReturnedDashboardTimestamp(client, userId, progress);
   });
 }
 
@@ -209,6 +253,18 @@ export async function markOnboardingProgressStepWithClient(
   options: { onboardingSessionId?: string | null; source?: Record<string, unknown> } = {},
 ): Promise<OnboardingProgress> {
   await client.query(ENSURE_BASE_ROW_SQL, [userId]);
+
+  if (step === 'returned_to_dashboard_after_first_edit') {
+    const existing = await readProgressWithClient(client, userId);
+    if (!existing?.first_task_edited_at) {
+      if (!existing) {
+        throw new Error('Failed to read onboarding progress before returned dashboard step');
+      }
+
+      return existing;
+    }
+  }
+
   const column = STEP_COLUMN_MAP[step];
 
   await client.query(
@@ -231,7 +287,7 @@ export async function markOnboardingProgressStepWithClient(
 
   const progress = await readProgressWithClient(client, userId);
   if (!progress) throw new Error('Failed to read onboarding progress after step update');
-  return progress;
+  return sanitizeImpossibleReturnedDashboardTimestamp(client, userId, progress);
 }
 
 export async function reconcileOnboardingProgressFromClient(
@@ -248,8 +304,14 @@ export async function reconcileOnboardingProgressFromClient(
 
   return withClient(async (client) => {
     await client.query(ENSURE_BASE_ROW_SQL, [userId]);
+    const existing = await readProgressWithClient(client, userId);
+    const canSetReturnedAfterEdit = Boolean(existing?.first_task_edited_at || flags.first_task_edited);
 
     for (const step of enabledSteps) {
+      if (step === 'returned_to_dashboard_after_first_edit' && !canSetReturnedAfterEdit) {
+        continue;
+      }
+
       const column = STEP_COLUMN_MAP[step];
       await client.query(
         `UPDATE user_onboarding_progress
@@ -268,9 +330,11 @@ export async function reconcileOnboardingProgressFromClient(
       throw new Error('Failed to reconcile onboarding progress');
     }
 
+    const sanitized = await sanitizeImpossibleReturnedDashboardTimestamp(client, userId, progress);
+
     return {
-      ...progress,
-      state: computeState(progress),
+      ...sanitized,
+      state: computeState(sanitized),
     };
   });
 }
