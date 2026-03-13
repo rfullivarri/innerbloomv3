@@ -484,7 +484,7 @@ export default function DashboardV3Page() {
   }, [moderation, resolveModerationSuggestion, selectedModerationSuggestions]);
 
   const handleOpenDaily = useCallback(() => {
-    if (!dailyQuestReadiness.canShowDailyQuestPopup) {
+    if (!dailyQuestReadiness.canOpenDailyQuest) {
       return;
     }
 
@@ -494,7 +494,7 @@ export default function DashboardV3Page() {
 
     dailyQuestModalRef.current?.open();
   }, [
-    dailyQuestReadiness.canShowDailyQuestPopup,
+    dailyQuestReadiness.canOpenDailyQuest,
     markReturnedToDashboard,
     shouldShowDashboardDot,
   ]);
@@ -510,8 +510,10 @@ export default function DashboardV3Page() {
       >[0],
     ) => {
       feedbackNotifications.handleDailyQuestResult(response);
+      dailyQuestReadiness.reload();
+      reload();
     },
-    [feedbackNotifications],
+    [dailyQuestReadiness, feedbackNotifications, reload],
   );
 
   const handleFeedbackPopupCta = useCallback(() => {
@@ -524,7 +526,7 @@ export default function DashboardV3Page() {
     if (
       !backendUserId ||
       hasAutoOpenedDailyQuestRef.current ||
-      !dailyQuestReadiness.canShowDailyQuestPopup
+      !dailyQuestReadiness.canAutoOpenDailyQuestPopup
     ) {
       return;
     }
@@ -556,7 +558,7 @@ export default function DashboardV3Page() {
     dailyQuestModalRef.current?.open();
   }, [
     backendUserId,
-    dailyQuestReadiness.canShowDailyQuestPopup,
+    dailyQuestReadiness.canAutoOpenDailyQuestPopup,
     location.hash,
     location.search,
   ]);
@@ -662,7 +664,7 @@ export default function DashboardV3Page() {
         <DailyQuestModal
           ref={dailyQuestModalRef}
           enabled={Boolean(backendUserId)}
-          canAutoOpen={dailyQuestReadiness.canShowDailyQuestPopup}
+          canAutoOpen={dailyQuestReadiness.canAutoOpenDailyQuestPopup}
           returnFocusRef={dailyButtonRef}
           onComplete={handleDailyQuestComplete}
         />

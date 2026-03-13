@@ -31,7 +31,9 @@ describe('useDailyQuestReadiness', () => {
     expect(result.current.hasTasks).toBe(false);
     expect(result.current.firstTasksConfirmed).toBe(false);
     expect(result.current.completedFirstDailyQuest).toBe(false);
+    expect(result.current.canOpenDailyQuest).toBe(false);
     expect(result.current.canShowDailyQuestPopup).toBe(false);
+    expect(result.current.canAutoOpenDailyQuestPopup).toBe(false);
     expect(result.current.showOnboardingGuidance).toBe(true);
     expect(mockGetUserJourney).not.toHaveBeenCalled();
   });
@@ -56,8 +58,33 @@ describe('useDailyQuestReadiness', () => {
     expect(result.current.hasTasks).toBe(true);
     expect(result.current.firstTasksConfirmed).toBe(false);
     expect(result.current.completedFirstDailyQuest).toBe(false);
+    expect(result.current.canOpenDailyQuest).toBe(false);
     expect(result.current.canShowDailyQuestPopup).toBe(false);
+    expect(result.current.canAutoOpenDailyQuestPopup).toBe(false);
     expect(result.current.showOnboardingGuidance).toBe(true);
+  });
+
+
+  it('allows manual Daily Quest but blocks auto-open until first completion', async () => {
+    mockGetUserTasks.mockResolvedValueOnce([
+      { id: 'task-1', title: 'Tarea', isActive: true },
+    ]);
+    mockGetUserJourney.mockResolvedValueOnce({
+      first_date_log: null,
+      days_of_journey: 0,
+      quantity_daily_logs: 0,
+      first_programmed: false,
+      first_tasks_confirmed: true,
+      completed_first_daily_quest: false,
+    });
+
+    const { result } = renderHook(() => useDailyQuestReadiness('user-1'));
+
+    await waitFor(() => expect(result.current.journeyStatus).toBe('success'));
+
+    expect(result.current.canOpenDailyQuest).toBe(true);
+    expect(result.current.canShowDailyQuestPopup).toBe(true);
+    expect(result.current.canAutoOpenDailyQuestPopup).toBe(false);
   });
 
   it('is ready when user has tasks and confirmed base', async () => {
@@ -80,7 +107,9 @@ describe('useDailyQuestReadiness', () => {
     expect(result.current.hasTasks).toBe(true);
     expect(result.current.firstTasksConfirmed).toBe(true);
     expect(result.current.completedFirstDailyQuest).toBe(true);
+    expect(result.current.canOpenDailyQuest).toBe(true);
     expect(result.current.canShowDailyQuestPopup).toBe(true);
+    expect(result.current.canAutoOpenDailyQuestPopup).toBe(true);
     expect(result.current.showOnboardingGuidance).toBe(false);
   });
 });
