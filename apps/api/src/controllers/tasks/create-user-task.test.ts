@@ -38,6 +38,10 @@ vi.mock('../../middlewares/require-active-subscription.js', () => ({
   requireActiveSubscription: (_req: unknown, _res: unknown, next: (error?: unknown) => void) => next(),
 }));
 
+vi.mock('../../services/onboardingProgressService.js', () => ({
+  markOnboardingProgressStep: vi.fn().mockResolvedValue(undefined),
+}));
+
 import app from '../../app.js';
 
 const userId = '11111111-2222-3333-4444-555555555555';

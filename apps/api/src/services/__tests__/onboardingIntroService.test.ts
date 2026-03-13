@@ -25,6 +25,10 @@ vi.mock('../../db.js', () => ({
     withClientSpy(callback),
 }));
 
+vi.mock('../../services/onboardingProgressService.js', () => ({
+  markOnboardingProgressStep: vi.fn().mockResolvedValue(undefined),
+}));
+
 type Expectation = {
   match: (sql: string) => boolean;
   handle: (sql: string, params: unknown[] | undefined) => unknown;

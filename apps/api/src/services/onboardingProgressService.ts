@@ -1,5 +1,5 @@
 import type { PoolClient } from 'pg';
-import { pool, withClient } from '../db.js';
+import { withClient } from '../db.js';
 import { getJourneyGenerationState } from './journeyGenerationStateService.js';
 
 export type OnboardingProgressState = 'in_progress' | 'completed';
