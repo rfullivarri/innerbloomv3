@@ -8,6 +8,10 @@ const { mockQuery, mockVerifyToken, mockWithClient, mockClientQuery } = vi.hoist
   mockClientQuery: vi.fn(),
 }));
 
+vi.mock('../services/onboardingProgressService.js', () => ({
+  markOnboardingProgressStep: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('../db.js', () => ({
   pool: { query: mockQuery },
   dbReady: Promise.resolve(),

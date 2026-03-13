@@ -8,6 +8,8 @@ interface AlertsProps {
   showOnboardingGuidance?: boolean;
   onScheduleClick?: () => void;
   suppressJourneyPreparing?: boolean;
+  showFirstDailyQuestCta?: boolean;
+  onOpenFirstDailyQuest?: () => void;
 }
 
 function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean {
@@ -22,6 +24,8 @@ export function Alerts({
   showOnboardingGuidance,
   onScheduleClick,
   suppressJourneyPreparing = false,
+  showFirstDailyQuestCta = false,
+  onOpenFirstDailyQuest,
 }: AlertsProps) {
   const {
     hasTasks,
@@ -108,7 +112,7 @@ export function Alerts({
         </div>
       )}
 
-      {!showJourneyPreparing && hasTasks && firstTasksConfirmed && !completedFirstDailyQuest && (
+      {!showJourneyPreparing && hasTasks && firstTasksConfirmed && !completedFirstDailyQuest && showFirstDailyQuestCta && (
         <div className="rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4 text-sm text-sky-100">
           <div className="flex items-start gap-3">
             <span className="mt-1 inline-flex h-2.5 w-2.5 flex-none rounded-full bg-sky-300" aria-hidden />
@@ -118,6 +122,15 @@ export function Alerts({
                 Completá tu primer check-in diario para activar tu progreso y tus rachas.
               </p>
             </div>
+            {onOpenFirstDailyQuest ? (
+              <button
+                type="button"
+                onClick={onOpenFirstDailyQuest}
+                className="ib-chip-solid ml-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold transition"
+              >
+                Realizar Daily Quest
+              </button>
+            ) : null}
           </div>
         </div>
       )}

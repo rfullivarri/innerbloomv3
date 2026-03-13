@@ -13,6 +13,7 @@ import {
   type SubmitDailyQuestInput,
   type SubmitDailyQuestLogger,
 } from '../services/dailyQuestService.js';
+import { markOnboardingProgressStep } from '../services/onboardingProgressService.js';
 
 const router = Router();
 
@@ -123,6 +124,9 @@ router.post(
 
     try {
       const result = await submitDailyQuest(user.id, payload, { requestId: reqId, log });
+      await markOnboardingProgressStep(user.id, 'first_daily_quest_completed', {
+        source: { trigger: 'daily_quest_submit' },
+      });
 
       log('info', 'Daily quest submit succeeded', {
         userId: user.id,

@@ -3,6 +3,7 @@ import type { AsyncHandler } from '../../lib/async-handler.js';
 import { uuidSchema } from '../../lib/validation.js';
 import { ensureUserExists } from '../users/shared.js';
 import { updateUserTaskRow, type UpdateUserTaskPayload } from '../../services/user-tasks.service.js';
+import { markOnboardingProgressStep } from '../../services/onboardingProgressService.js';
 
 const paramsSchema = z.object({
   id: uuidSchema,
@@ -53,6 +54,9 @@ export const updateUserTask: AsyncHandler = async (req, res) => {
   await ensureUserExists(id);
 
   const task = await updateUserTaskRow(id, taskId, body);
+  await markOnboardingProgressStep(id, 'first_task_edited', {
+    source: { trigger: 'task_update' },
+  });
 
   res.json({ task });
 };

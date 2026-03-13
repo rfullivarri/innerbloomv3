@@ -191,6 +191,8 @@ export default function DemoDashboardPage() {
           onOpenReminderScheduler={() => undefined}
           onOpenModerationEdit={() => undefined}
           onProfileRefresh={() => undefined}
+          shouldShowFirstDailyQuestCta={false}
+          onOpenDailyQuest={() => dailyQuestModalRef.current?.open()}
         />
       </main>
     </div>

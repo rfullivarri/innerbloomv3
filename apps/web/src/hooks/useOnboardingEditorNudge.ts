@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useOnboardingProgress } from './useOnboardingProgress';
 
 type UseOnboardingEditorNudgeOptions = {
   completedFirstDailyQuest?: boolean;
@@ -9,81 +10,60 @@ type OnboardingEditorNudge = {
   hasReturnedToDashboardAfterEdit: boolean;
   shouldShowInlineNotice: boolean;
   shouldShowDashboardDot: boolean;
-  markFirstEditDone: () => boolean;
-  markReturnedToDashboard: () => void;
+  markFirstEditDone: () => Promise<boolean>;
+  markReturnedToDashboard: () => Promise<void>;
 };
 
 const FIRST_EDIT_DONE_KEY = 'ib.onboarding.taskEditorFirstEditDone';
 const RETURNED_DASHBOARD_KEY = 'ib.onboarding.hasReturnedToDashboardAfterEdit';
 
-function readFlag(key: string): boolean {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  return window.localStorage.getItem(key) === '1';
-}
-
 function writeFlag(key: string, value: boolean) {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
+  if (typeof window === 'undefined') return;
   if (value) {
     window.localStorage.setItem(key, '1');
     return;
   }
-
   window.localStorage.removeItem(key);
 }
 
 export function useOnboardingEditorNudge(options: UseOnboardingEditorNudgeOptions = {}): OnboardingEditorNudge {
   const completedFirstDailyQuest = Boolean(options.completedFirstDailyQuest);
-  const [firstEditDone, setFirstEditDone] = useState<boolean>(() => readFlag(FIRST_EDIT_DONE_KEY));
-  const [hasReturnedToDashboardAfterEdit, setHasReturnedToDashboardAfterEdit] = useState<boolean>(() =>
-    readFlag(RETURNED_DASHBOARD_KEY),
-  );
+  const { progress, markStep } = useOnboardingProgress();
+  const [firstEditDone, setFirstEditDone] = useState(false);
+  const [hasReturnedToDashboardAfterEdit, setHasReturnedToDashboardAfterEdit] = useState(false);
 
   useEffect(() => {
-    if (!completedFirstDailyQuest) {
-      return;
-    }
+    setFirstEditDone(Boolean(progress?.first_task_edited_at));
+    setHasReturnedToDashboardAfterEdit(Boolean(progress?.returned_to_dashboard_after_first_edit_at));
+  }, [progress?.first_task_edited_at, progress?.returned_to_dashboard_after_first_edit_at]);
 
-    writeFlag(RETURNED_DASHBOARD_KEY, true);
-    setHasReturnedToDashboardAfterEdit(true);
-  }, [completedFirstDailyQuest]);
-
-  const markFirstEditDone = useCallback(() => {
-    if (firstEditDone) {
-      return false;
-    }
-
+  const markFirstEditDone = useCallback(async () => {
+    if (firstEditDone) return false;
     writeFlag(FIRST_EDIT_DONE_KEY, true);
     setFirstEditDone(true);
+    await markStep('first_task_edited', { trigger: 'editor_first_edit_ui' });
     return true;
-  }, [firstEditDone]);
+  }, [firstEditDone, markStep]);
 
-  const markReturnedToDashboard = useCallback(() => {
-    if (hasReturnedToDashboardAfterEdit) {
-      return;
-    }
-
+  const markReturnedToDashboard = useCallback(async () => {
+    if (hasReturnedToDashboardAfterEdit) return;
     writeFlag(RETURNED_DASHBOARD_KEY, true);
     setHasReturnedToDashboardAfterEdit(true);
-  }, [hasReturnedToDashboardAfterEdit]);
+    await markStep('returned_to_dashboard_after_first_edit', {
+      trigger: 'editor_return_dashboard',
+    });
+  }, [hasReturnedToDashboardAfterEdit, markStep]);
 
   const shouldShowInlineNotice = useMemo(
     () => firstEditDone && !hasReturnedToDashboardAfterEdit && !completedFirstDailyQuest,
     [completedFirstDailyQuest, firstEditDone, hasReturnedToDashboardAfterEdit],
   );
 
-  const shouldShowDashboardDot = shouldShowInlineNotice;
-
   return {
     firstEditDone,
     hasReturnedToDashboardAfterEdit,
     shouldShowInlineNotice,
-    shouldShowDashboardDot,
+    shouldShowDashboardDot: shouldShowInlineNotice,
     markFirstEditDone,
     markReturnedToDashboard,
   };

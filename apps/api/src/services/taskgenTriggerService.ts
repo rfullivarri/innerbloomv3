@@ -14,6 +14,7 @@ import {
 } from './taskgenTraceService.js';
 import { notifyTasksReadyEmail } from './tasksReadyEmailService.js';
 import { upsertJourneyGenerationState } from './journeyGenerationStateService.js';
+import { markOnboardingProgressStep } from './onboardingProgressService.js';
 
 type TriggerInput = {
   userId: string;
@@ -377,6 +378,9 @@ async function runTaskGeneration(args: {
 
   if (result.status === 'ok') {
     await upsertJourneyGenerationState(args.userId, 'completed', { correlationId: args.correlationId });
+    await markOnboardingProgressStep(args.userId, 'tasks_generated', {
+      source: { trigger: 'task_generation_completed', correlation_id: args.correlationId },
+    });
   } else {
     await upsertJourneyGenerationState(args.userId, 'failed', {
       correlationId: args.correlationId,

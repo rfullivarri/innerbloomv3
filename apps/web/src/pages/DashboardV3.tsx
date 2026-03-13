@@ -87,6 +87,7 @@ import {
 } from "../lib/journeyGeneration";
 import { StandaloneSplash } from "../components/pwa/StandaloneSplash";
 import { useOnboardingEditorNudge } from "../hooks/useOnboardingEditorNudge";
+import { useOnboardingProgress } from '../hooks/useOnboardingProgress';
 import { useModerationWidget } from "../hooks/useModerationWidget";
 import type { ModerationTrackerType } from "../lib/api";
 import { ModerationWidget as ModerationStatusWidget } from "../components/moderation/ModerationWidget";
@@ -367,6 +368,7 @@ export default function DashboardV3Page() {
   const [journeyReadyOpen, setJourneyReadyOpen] = useState(false);
   const generationKeyRef = useRef<string | null>(null);
 
+  const onboardingProgress = useOnboardingProgress();
   const onboardingEditorNudge = useOnboardingEditorNudge({
     completedFirstDailyQuest: dailyQuestReadiness.completedFirstDailyQuest,
   });
@@ -377,8 +379,36 @@ export default function DashboardV3Page() {
     markReturnedToDashboard,
   } = onboardingEditorNudge;
 
+  const shouldShowFirstDailyQuestCta =
+    dailyQuestReadiness.firstTasksConfirmed &&
+    !dailyQuestReadiness.completedFirstDailyQuest &&
+    hasReturnedToDashboardAfterEdit &&
+    (!hasModerationOnboardingIntent || moderationSuggestionResolved);
+
 
   useEffect(() => {
+    if (activeSection.key !== 'dashboard') {
+      return;
+    }
+
+    if (!firstEditDone || hasReturnedToDashboardAfterEdit) {
+      return;
+    }
+
+    void markReturnedToDashboard();
+  }, [
+    activeSection.key,
+    firstEditDone,
+    hasReturnedToDashboardAfterEdit,
+    markReturnedToDashboard,
+  ]);
+
+  useEffect(() => {
+    if (onboardingProgress.progress?.moderation_selected_at && !hasModerationOnboardingIntent) {
+      setHasModerationOnboardingIntent(true);
+      return;
+    }
+
     if (!hasModerationOnboardingIntent) {
       const fallbackFromProfile = hasModerationBodyFocus(
         profile,
@@ -392,6 +422,7 @@ export default function DashboardV3Page() {
     dailyQuestReadiness.journey,
     hasModerationOnboardingIntent,
     profile,
+    onboardingProgress.progress?.moderation_selected_at,
   ]);
 
   useEffect(() => {
@@ -411,6 +442,7 @@ export default function DashboardV3Page() {
         return;
       }
 
+      void onboardingProgress.markStep('moderation_modal_shown', { trigger: 'dashboard_moderation_modal_open' });
       setIsModerationSuggestionOpen(true);
       return;
     }
@@ -429,12 +461,13 @@ export default function DashboardV3Page() {
   ]);
 
   const resolveModerationSuggestion = useCallback(() => {
+    void onboardingProgress.markStep('moderation_modal_resolved', { trigger: 'dashboard_moderation_modal_resolved' });
     writeModerationSuggestionResolvedFlag(true);
     writeModerationOnboardingIntentFlag(false);
     setHasModerationOnboardingIntent(false);
     setModerationSuggestionResolved(true);
     setIsModerationSuggestionOpen(false);
-  }, []);
+  }, [onboardingProgress]);
 
   const handleToggleModerationSuggestion = useCallback(
     (type: ModerationTrackerType) => {
@@ -488,15 +521,9 @@ export default function DashboardV3Page() {
       return;
     }
 
-    if (shouldShowDashboardDot) {
-      markReturnedToDashboard();
-    }
-
     dailyQuestModalRef.current?.open();
   }, [
     dailyQuestReadiness.canOpenDailyQuest,
-    markReturnedToDashboard,
-    shouldShowDashboardDot,
   ]);
 
   const handleOpenReminderScheduler = useCallback(() => {
@@ -521,6 +548,14 @@ export default function DashboardV3Page() {
       window.location.reload();
     }
   }, []);
+
+  useEffect(() => {
+    if (!backendUserId || !shouldShowFirstDailyQuestCta) {
+      return;
+    }
+
+    void onboardingProgress.markStep('first_daily_quest_prompted', { trigger: 'dashboard_daily_quest_cta_shown' });
+  }, [backendUserId, onboardingProgress, shouldShowFirstDailyQuestCta]);
 
   useEffect(() => {
     if (
@@ -730,6 +765,8 @@ export default function DashboardV3Page() {
                       journeyReadyOpen={journeyReadyOpen}
                       onOpenModerationEdit={() => setIsModerationEditOpen(true)}
                       onProfileRefresh={reload}
+                      shouldShowFirstDailyQuestCta={shouldShowFirstDailyQuestCta}
+                      onOpenDailyQuest={handleOpenDaily}
                     />
                   }
                 />
@@ -854,6 +891,8 @@ interface DashboardOverviewProps {
   journeyReadyOpen?: boolean;
   onOpenModerationEdit: () => void;
   onProfileRefresh: () => void;
+  shouldShowFirstDailyQuestCta: boolean;
+  onOpenDailyQuest: () => void;
 }
 
 export function DashboardOverview({
@@ -867,6 +906,8 @@ export function DashboardOverview({
   journeyReadyOpen = false,
   onOpenModerationEdit,
   onProfileRefresh,
+  shouldShowFirstDailyQuestCta,
+  onOpenDailyQuest,
 }: DashboardOverviewProps) {
   const handleScheduleClick = useCallback(() => {
     onOpenReminderScheduler();
@@ -933,6 +974,8 @@ export function DashboardOverview({
             showOnboardingGuidance={showOnboardingGuidance}
             onScheduleClick={handleScheduleClick}
             suppressJourneyPreparing={journeyReadyOpen}
+            showFirstDailyQuestCta={shouldShowFirstDailyQuestCta}
+            onOpenFirstDailyQuest={onOpenDailyQuest}
           />
         </div>
 

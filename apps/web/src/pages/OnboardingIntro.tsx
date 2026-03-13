@@ -4,7 +4,7 @@ import { IntroJourney } from '../onboarding/IntroJourney';
 import { type JourneyPayload } from '../onboarding/payload';
 import { JourneyGeneratingScreen } from '../onboarding/screens/JourneyGeneratingScreen';
 import { OnboardingProvider } from '../onboarding/state';
-import { ApiError, apiAuthorizedFetch, buildApiUrl } from '../lib/api';
+import { ApiError, apiAuthorizedFetch, buildApiUrl, markOnboardingProgress } from '../lib/api';
 import { setJourneyGenerationPending } from '../lib/journeyGeneration';
 import { emitOnboardingEvent } from '../lib/telemetry';
 import { resolveOnboardingLanguage } from '../onboarding/i18n';
@@ -65,12 +65,15 @@ export default function OnboardingIntroPage() {
           xpTotal: payload.xp.total,
         });
 
+        const hasModerationIntent = hasModerationSelection(payload.data.foundations.body);
         if (typeof window !== 'undefined') {
           window.localStorage.setItem(POSTLOGIN_LANGUAGE_STORAGE_KEY, language);
           window.localStorage.setItem('innerbloom.postlogin.language.source', 'locale');
-          writeModerationOnboardingIntentFlag(
-            hasModerationSelection(payload.data.foundations.body),
-          );
+          writeModerationOnboardingIntentFlag(hasModerationIntent);
+        }
+
+        if (hasModerationIntent) {
+          void markOnboardingProgress('moderation_selected', { trigger: 'onboarding_intro_client' });
         }
 
         setJourneyGenerationPending({

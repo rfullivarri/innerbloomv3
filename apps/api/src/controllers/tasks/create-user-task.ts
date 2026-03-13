@@ -5,6 +5,7 @@ import type { AsyncHandler } from '../../lib/async-handler.js';
 import { uuidSchema } from '../../lib/validation.js';
 import { HttpError } from '../../lib/http-error.js';
 import { ensureUserExists } from '../users/shared.js';
+import { markOnboardingProgressStep } from '../../services/onboardingProgressService.js';
 
 const paramsSchema = z.object({
   id: uuidSchema,
@@ -214,6 +215,10 @@ export const createUserTask: AsyncHandler = async (req, res) => {
         AND first_tasks_confirmed = FALSE`,
     [id],
   );
+
+  await markOnboardingProgressStep(id, 'first_task_edited', {
+    source: { trigger: 'task_create' },
+  });
 
   res.status(201).json({
     task: {
