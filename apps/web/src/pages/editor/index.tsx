@@ -414,12 +414,12 @@ export default function TaskEditorPage() {
       !dailyQuestReadiness.completedFirstDailyQuest &&
       markFirstEditDone();
 
-    setPageToast({
-      type: 'success',
-      text: isFirstOnboardingEdit
-        ? t('editor.toast.edit.firstQuestReady')
-        : t('editor.toast.edit.saved'),
-    });
+    if (!isFirstOnboardingEdit) {
+      setPageToast({
+        type: 'success',
+        text: t('editor.toast.edit.saved'),
+      });
+    }
 
     handleCloseEdit();
     window.setTimeout(() => {
@@ -473,13 +473,16 @@ export default function TaskEditorPage() {
                   </div>
                 )}
                 {shouldShowInlineNotice && (
-                  <div className="overflow-hidden rounded-md bg-[linear-gradient(90deg,#7C3AED_0%,#8B5CF6_100%)] px-2.5 py-1.5 text-[11px] leading-4 text-white shadow-[0_8px_18px_rgba(124,58,237,0.35)]">
-                    <Link
-                      to={getDashboardSectionConfig('dashboard', location.pathname, language).to}
-                      className="block overflow-hidden text-ellipsis whitespace-nowrap text-white hover:text-white/95"
-                    >
-                      {t('editor.onboarding.nudge')} <span className="font-semibold">→</span>
-                    </Link>
+                  <div className="rounded-2xl border border-[color:color-mix(in_srgb,var(--color-accent-secondary)_55%,white)] bg-[linear-gradient(110deg,color-mix(in_srgb,var(--color-accent-secondary)_36%,#1e1b4b)_0%,color-mix(in_srgb,var(--color-accent-secondary)_58%,#2e1065)_100%)] px-3 py-2.5 text-white shadow-[0_14px_30px_color-mix(in_srgb,var(--color-accent-secondary)_36%,transparent)] md:px-4">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-xs leading-snug text-white/95 md:text-sm">{t('editor.onboarding.banner.message')}</p>
+                      <Link
+                        to={getDashboardSectionConfig('dashboard', location.pathname, language).to}
+                        className="inline-flex shrink-0 items-center justify-center rounded-full border border-white/25 bg-white/15 px-3 py-1.5 text-xs font-semibold tracking-wide text-white transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                      >
+                        {t('editor.onboarding.banner.cta')} <span className="ml-1.5" aria-hidden>→</span>
+                      </Link>
+                    </div>
                   </div>
                 )}
 

@@ -28,6 +28,11 @@ export const editorTranslations = {
     es: 'Listo. Volvé al Dashboard para tu primer Daily Quest',
     en: 'Done. Go back to Dashboard for your first Daily Quest',
   },
+  'editor.onboarding.banner.message': {
+    es: 'Ya editaste tu primera tarea. Volvé al Dashboard para seguir con el onboarding o quedate editando si querés.',
+    en: 'You edited your first task. Go back to Dashboard to continue onboarding, or keep editing if you want.',
+  },
+  'editor.onboarding.banner.cta': { es: 'Volver al Dashboard', en: 'Back to Dashboard' },
   'editor.empty.noTasks': {
     es: 'Todavía no tienes tareas. Usa el botón para comenzar cuando esté listo.',
     en: "You don't have tasks yet. Use the button to get started when you're ready.",

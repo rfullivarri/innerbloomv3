@@ -78,6 +78,11 @@ export function ModerationOnboardingSuggestion({
               ? 'One tap per day. You mark it in your Daily Quest.'
               : 'Un toque por día. Lo marcás en tu Daily Quest.'}
           </p>
+          <p className="text-xs font-medium tracking-wide text-[color:color-mix(in_srgb,var(--color-accent-secondary)_72%,white)]">
+            {language === 'en'
+              ? 'All trackers are selected by default. Tap to unselect any of them.'
+              : 'Todos los trackers están seleccionados por defecto. Tocá para desmarcar cualquiera.'}
+          </p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3">
@@ -90,17 +95,24 @@ export function ModerationOnboardingSuggestion({
                 onClick={() => onToggle(chip.type)}
                 title={chip.subtitle}
                 className={[
-                  'group rounded-2xl border p-4 text-left transition',
+                  'group rounded-2xl border p-4 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:color-mix(in_srgb,var(--color-accent-secondary)_75%,white)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent',
                   isSelected
-                    ? 'border-sky-300/90 bg-sky-400/15 shadow-[0_12px_24px_rgba(56,189,248,0.22)]'
-                    : 'border-white/12 bg-white/5 hover:border-white/40 hover:bg-white/10',
+                    ? 'border-[color:color-mix(in_srgb,var(--color-accent-secondary)_70%,white)] bg-[color:color-mix(in_srgb,var(--color-accent-secondary)_26%,var(--color-surface)_74%)] text-white shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent-secondary)_34%,transparent),0_16px_30px_color-mix(in_srgb,var(--color-accent-secondary)_35%,transparent)]'
+                    : 'border-white/20 bg-[color:rgba(15,23,42,0.22)] text-white/88 hover:border-[color:color-mix(in_srgb,var(--color-accent-secondary)_45%,white)] hover:bg-[color:color-mix(in_srgb,var(--color-accent-secondary)_14%,var(--color-surface)_86%)] active:scale-[0.995] active:border-[color:color-mix(in_srgb,var(--color-accent-secondary)_62%,white)]',
                 ].join(' ')}
                 aria-pressed={isSelected}
               >
                 <div className="mb-4 flex items-start justify-between text-white/90">
                   {trackerIcons[chip.type]}
-                  <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-xs font-semibold tracking-wide text-white/80">
-                    —d
+                  <span
+                    className={[
+                      'rounded-full border px-2 py-0.5 text-xs font-semibold tracking-wide transition-colors',
+                      isSelected
+                        ? 'border-[color:color-mix(in_srgb,var(--color-accent-secondary)_58%,white)] bg-[color:color-mix(in_srgb,var(--color-accent-secondary)_42%,transparent)] text-white'
+                        : 'border-white/20 bg-white/5 text-white/80',
+                    ].join(' ')}
+                  >
+                    {isSelected ? (language === 'en' ? 'active' : 'activo') : language === 'en' ? 'off' : 'pausado'}
                   </span>
                 </div>
                 <p className="text-lg font-semibold">{chip.title}</p>
@@ -123,7 +135,7 @@ export function ModerationOnboardingSuggestion({
             type="button"
             onClick={onActivate}
             disabled={isSubmitting || selected.length === 0}
-            className="rounded-full bg-sky-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-45"
+            className="rounded-full bg-[color:var(--color-accent-secondary)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_color-mix(in_srgb,var(--color-accent-secondary)_40%,transparent)] transition hover:bg-[color:color-mix(in_srgb,var(--color-accent-secondary)_82%,white)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:color-mix(in_srgb,var(--color-accent-secondary)_70%,white)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
           >
             {isSubmitting ? (language === 'en' ? 'Activating...' : 'Activando...') : language === 'en' ? 'Activate' : 'Activar'}
           </button>

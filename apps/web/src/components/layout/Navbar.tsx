@@ -77,10 +77,10 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
                 {section.showPulseDot ? (
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute -right-1 top-0.5 h-2.5 w-2.5 rounded-full bg-violet-500"
+                    className="pointer-events-none absolute -right-1.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-[color:var(--color-accent-secondary)]"
                     style={{
-                      boxShadow: '0 0 6px rgba(255,255,255,0.6), 0 0 10px rgba(139,92,246,0.8)',
-                      animation: 'ibOnboardingPulse 1.4s ease-in-out infinite',
+                      boxShadow: '0 0 0 3px color-mix(in srgb,var(--color-accent-secondary) 22%, transparent), 0 0 12px color-mix(in srgb,var(--color-accent-secondary) 88%, transparent), 0 0 20px color-mix(in srgb,var(--color-accent-secondary) 48%, transparent)',
+                      animation: 'ibOnboardingPulse 1.2s ease-in-out infinite',
                     }}
                   />
                 ) : null}
