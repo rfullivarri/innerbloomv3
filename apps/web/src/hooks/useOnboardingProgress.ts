@@ -27,11 +27,13 @@ export function useOnboardingProgress() {
       try {
         if (!didReconcileRef.current && typeof window !== 'undefined') {
           didReconcileRef.current = true;
+          const firstTaskEditedLegacy = window.localStorage.getItem(LEGACY_KEYS.firstEditDone) === '1';
+          const returnedDashboardLegacy = window.localStorage.getItem(LEGACY_KEYS.returnedDashboard) === '1';
+
           const flags: Partial<Record<OnboardingProgressStep, boolean>> = {
             moderation_selected: window.localStorage.getItem(LEGACY_KEYS.moderationSelected) === '1',
-            first_task_edited: window.localStorage.getItem(LEGACY_KEYS.firstEditDone) === '1',
-            returned_to_dashboard_after_first_edit:
-              window.localStorage.getItem(LEGACY_KEYS.returnedDashboard) === '1',
+            first_task_edited: firstTaskEditedLegacy,
+            returned_to_dashboard_after_first_edit: firstTaskEditedLegacy && returnedDashboardLegacy,
             moderation_modal_resolved: window.localStorage.getItem(LEGACY_KEYS.moderationResolved) === '1',
           };
 
