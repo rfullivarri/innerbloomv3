@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from "framer-motion";
 import {
   forwardRef,
   type MouseEvent,
@@ -8,11 +8,11 @@ import {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { createPortal } from 'react-dom';
-import type { RefObject } from 'react';
-import { DailyReminderSettings } from '../settings/DailyReminderSettings';
-import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+} from "react";
+import { createPortal } from "react-dom";
+import type { RefObject } from "react";
+import { DailyReminderSettings } from "../settings/DailyReminderSettings";
+import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
 
 export type ReminderSchedulerDialogHandle = {
   open: () => void;
@@ -33,7 +33,10 @@ export const ReminderSchedulerDialog = forwardRef<
   const [isMounted, setIsMounted] = useState(false);
   const [portalNode, setPortalNode] = useState<Element | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-  const titleId = useMemo(() => `reminder-dialog-${Math.random().toString(36).slice(2, 8)}`, []);
+  const titleId = useMemo(
+    () => `reminder-dialog-${Math.random().toString(36).slice(2, 8)}`,
+    [],
+  );
 
   const open = useCallback(() => {
     if (!enabled) {
@@ -63,20 +66,20 @@ export const ReminderSchedulerDialog = forwardRef<
       return;
     }
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         event.preventDefault();
         close();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, close]);
 
@@ -129,13 +132,13 @@ export const ReminderSchedulerDialog = forwardRef<
                   id={titleId}
                   className="reminder-scheduler-dialog__eyebrow font-display text-[1.05rem] font-semibold uppercase tracking-[0.22em] text-text"
                 >
-                  {t('dashboard.reminderScheduler.eyebrow')}
+                  {t("dashboard.reminderScheduler.eyebrow")}
                 </h2>
                 <p className="reminder-scheduler-dialog__title mt-1 font-display text-2xl font-semibold text-text">
-                  {t('dashboard.reminderScheduler.title')}
+                  {t("dashboard.reminderScheduler.title")}
                 </p>
                 <p className="reminder-scheduler-dialog__description mt-1 text-sm text-text-muted">
-                  {t('dashboard.reminderScheduler.description')}
+                  {t("dashboard.reminderScheduler.description")}
                 </p>
               </div>
               <button
@@ -143,7 +146,7 @@ export const ReminderSchedulerDialog = forwardRef<
                 type="button"
                 onClick={close}
                 className="reminder-scheduler-dialog__close-button rounded-full border border-white/20 bg-white/10 p-2 text-white/80 transition hover:border-white/40 hover:bg-white/20"
-                aria-label={t('dashboard.reminderScheduler.closeAria')}
+                aria-label={t("dashboard.reminderScheduler.closeAria")}
               >
                 <svg
                   aria-hidden="true"
@@ -159,7 +162,7 @@ export const ReminderSchedulerDialog = forwardRef<
               </button>
             </div>
             <div className="flex-1 overflow-y-auto pr-1">
-              <DailyReminderSettings />
+              <DailyReminderSettings onSaveSuccess={close} />
             </div>
           </motion.div>
         </motion.div>

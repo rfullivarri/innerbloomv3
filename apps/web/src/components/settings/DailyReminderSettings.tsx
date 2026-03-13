@@ -1,21 +1,27 @@
-import { FormEvent, useEffect, useId, useMemo, useState } from 'react';
-import { useRequest } from '../../hooks/useRequest';
+import { FormEvent, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useRequest } from "../../hooks/useRequest";
 import {
   DailyReminderSettingsResponse,
   UpdateDailyReminderSettingsPayload,
   getDailyReminderSettings,
   updateDailyReminderSettings,
-} from '../../lib/api';
-import { TimezoneOption, getTimezoneCatalog, resolveDefaultTimezone } from '../../lib/timezones';
-import { Skeleton } from '../common/Skeleton';
-import { ToastBanner } from '../common/ToastBanner';
-import { TimezoneCombobox } from '../common/TimezoneCombobox';
+} from "../../lib/api";
+import {
+  TimezoneOption,
+  getTimezoneCatalog,
+  resolveDefaultTimezone,
+} from "../../lib/timezones";
+import { Skeleton } from "../common/Skeleton";
+import { ToastBanner } from "../common/ToastBanner";
+import { TimezoneCombobox } from "../common/TimezoneCombobox";
 
-const DEFAULT_TIME = '09:00';
-const LOAD_ERROR_MESSAGE = 'No pudimos cargar tus recordatorios.';
-const LOAD_STALE_MESSAGE = 'No pudimos refrescar tus recordatorios. Mostramos tu último estado guardado.';
-const SAVE_ERROR_MESSAGE = 'No pudimos guardar tus recordatorios. Intentá nuevamente.';
-const SAVE_SUCCESS_MESSAGE = 'Guardamos tus recordatorios.';
+const DEFAULT_TIME = "09:00";
+const LOAD_ERROR_MESSAGE = "No pudimos cargar tus recordatorios.";
+const LOAD_STALE_MESSAGE =
+  "No pudimos refrescar tus recordatorios. Mostramos tu último estado guardado.";
+const SAVE_ERROR_MESSAGE =
+  "No pudimos guardar tus recordatorios. Intentá nuevamente.";
+const SAVE_SUCCESS_MESSAGE = "Guardamos tus recordatorios.";
 const TIME_OPTIONS = buildTimeOptions();
 
 type ReminderFormState = {
@@ -24,13 +30,17 @@ type ReminderFormState = {
   timezone: string;
 };
 
-type SubmitStatus = 'idle' | 'saving' | 'success' | 'error';
+type SubmitStatus = "idle" | "saving" | "success" | "error";
+
+interface DailyReminderSettingsProps {
+  onSaveSuccess?: () => void;
+}
 
 function buildTimeOptions(): string[] {
   const options: string[] = [];
   for (let hour = 0; hour < 24; hour += 1) {
     for (const minute of [0, 30]) {
-      const value = `${String(hour).padStart(2, '0')}:${minute === 0 ? '00' : '30'}`;
+      const value = `${String(hour).padStart(2, "0")}:${minute === 0 ? "00" : "30"}`;
       options.push(value);
     }
   }
@@ -41,34 +51,49 @@ function normalizeLocalTime(value?: string | null): string {
   if (!value) {
     return DEFAULT_TIME;
   }
-  const [hoursRaw, minutesRaw] = value.split(':');
+  const [hoursRaw, minutesRaw] = value.split(":");
   const hours = Math.min(23, Math.max(0, Number(hoursRaw ?? 0)));
-  const minutes = Number(minutesRaw ?? 0) >= 30 ? '30' : '00';
-  return `${String(hours).padStart(2, '0')}:${minutes}`;
+  const minutes = Number(minutesRaw ?? 0) >= 30 ? "30" : "00";
+  return `${String(hours).padStart(2, "0")}:${minutes}`;
 }
 
 function normalizeReminderResponse(
   response: DailyReminderSettingsResponse | null,
   fallbackTimezone: string,
 ): ReminderFormState {
-  const timezone = response?.timezone ?? response?.timeZone ?? response?.time_zone ?? fallbackTimezone;
-  const localTime = normalizeLocalTime(response?.local_time ?? response?.localTime);
-  const status = typeof response?.status === 'string' ? response.status.toLowerCase() : null;
-  const enabledFromStatus = status === 'active' || status === 'enabled';
-  const enabled = typeof response?.enabled === 'boolean' ? response.enabled : enabledFromStatus;
+  const timezone =
+    response?.timezone ??
+    response?.timeZone ??
+    response?.time_zone ??
+    fallbackTimezone;
+  const localTime = normalizeLocalTime(
+    response?.local_time ?? response?.localTime,
+  );
+  const status =
+    typeof response?.status === "string" ? response.status.toLowerCase() : null;
+  const enabledFromStatus = status === "active" || status === "enabled";
+  const enabled =
+    typeof response?.enabled === "boolean"
+      ? response.enabled
+      : enabledFromStatus;
 
   return {
     enabled,
     localTime,
-    timezone: typeof timezone === 'string' && timezone.trim() ? timezone : fallbackTimezone,
+    timezone:
+      typeof timezone === "string" && timezone.trim()
+        ? timezone
+        : fallbackTimezone,
   };
 }
 
 function combine(...classes: Array<string | null | false | undefined>): string {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
-export function DailyReminderSettings() {
+export function DailyReminderSettings({
+  onSaveSuccess,
+}: DailyReminderSettingsProps) {
   const defaultTimezone = useMemo(() => resolveDefaultTimezone(), []);
   const timeFieldId = useId();
   const timezoneFieldId = useId();
@@ -77,14 +102,22 @@ export function DailyReminderSettings() {
     localTime: DEFAULT_TIME,
     timezone: defaultTimezone,
   });
-  const [initialState, setInitialState] = useState<ReminderFormState | null>(null);
-  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle');
+  const [initialState, setInitialState] = useState<ReminderFormState | null>(
+    null,
+  );
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const { data, status, error, reload } = useRequest(getDailyReminderSettings, []);
-  const [timezoneCatalog] = useState<TimezoneOption[]>(() => getTimezoneCatalog());
+  const closeTimeoutRef = useRef<number | null>(null);
+  const { data, status, error, reload } = useRequest(
+    getDailyReminderSettings,
+    [],
+  );
+  const [timezoneCatalog] = useState<TimezoneOption[]>(() =>
+    getTimezoneCatalog(),
+  );
 
   useEffect(() => {
-    if (status !== 'success') {
+    if (status !== "success") {
       return;
     }
     const normalized = normalizeReminderResponse(data, defaultTimezone);
@@ -93,18 +126,27 @@ export function DailyReminderSettings() {
   }, [status, data, defaultTimezone]);
 
   useEffect(() => {
-    if (submitStatus !== 'success') {
+    if (submitStatus !== "success") {
       return;
     }
     const timeoutId = window.setTimeout(() => {
-      setSubmitStatus('idle');
+      setSubmitStatus("idle");
     }, 3200);
     return () => window.clearTimeout(timeoutId);
   }, [submitStatus]);
 
-  const isInitialLoading = (status === 'idle' || status === 'loading') && !data && !error;
-  const hasBlockingError = status === 'error' && !data;
-  const isSaving = submitStatus === 'saving';
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current !== null) {
+        window.clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const isInitialLoading =
+    (status === "idle" || status === "loading") && !data && !error;
+  const hasBlockingError = status === "error" && !data;
+  const isSaving = submitStatus === "saving";
   const canSubmit =
     !isInitialLoading &&
     !isSaving &&
@@ -113,7 +155,9 @@ export function DailyReminderSettings() {
       initialState.localTime !== formState.localTime ||
       initialState.timezone !== formState.timezone);
   // This copy mirrors the ON/OFF state so the modal stays channel-agnostic.
-  const toggleLabel = formState.enabled ? 'Daily Quest activa' : 'Daily Quest pausada';
+  const toggleLabel = formState.enabled
+    ? "Daily Quest activa"
+    : "Daily Quest pausada";
 
   const handleToggle = () => {
     if (isInitialLoading || isSaving) {
@@ -127,10 +171,15 @@ export function DailyReminderSettings() {
     if (!canSubmit) {
       return;
     }
-    setSubmitStatus('saving');
+    setSubmitStatus("saving");
     setSubmitError(null);
+    if (closeTimeoutRef.current !== null) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
     try {
-      const status: UpdateDailyReminderSettingsPayload['status'] = formState.enabled ? 'active' : 'paused';
+      const status: UpdateDailyReminderSettingsPayload["status"] =
+        formState.enabled ? "active" : "paused";
       const payload: UpdateDailyReminderSettingsPayload = {
         status,
         local_time: formState.localTime || DEFAULT_TIME,
@@ -140,12 +189,21 @@ export function DailyReminderSettings() {
       const normalized = normalizeReminderResponse(response, defaultTimezone);
       setFormState(normalized);
       setInitialState(normalized);
-      setSubmitStatus('success');
+      setSubmitStatus("success");
+      if (closeTimeoutRef.current !== null) {
+        window.clearTimeout(closeTimeoutRef.current);
+      }
+      closeTimeoutRef.current = window.setTimeout(() => {
+        onSaveSuccess?.();
+        closeTimeoutRef.current = null;
+      }, 1500);
     } catch (submitException) {
-      console.error('Failed to update reminder settings', submitException);
-      setSubmitStatus('error');
+      console.error("Failed to update reminder settings", submitException);
+      setSubmitStatus("error");
       const friendlyMessage =
-        submitException instanceof Error && submitException.message ? submitException.message : SAVE_ERROR_MESSAGE;
+        submitException instanceof Error && submitException.message
+          ? submitException.message
+          : SAVE_ERROR_MESSAGE;
       setSubmitError(friendlyMessage);
     }
   };
@@ -186,7 +244,9 @@ export function DailyReminderSettings() {
     >
       <div className="reminder-scheduler-form__toggle-card rounded-2xl border border-white/10 bg-white/5 p-5">
         <div className="flex items-center justify-between gap-4">
-          <p className="reminder-scheduler-form__toggle-label text-sm font-semibold text-white">{toggleLabel}</p>
+          <p className="reminder-scheduler-form__toggle-label text-sm font-semibold text-white">
+            {toggleLabel}
+          </p>
           <button
             type="button"
             role="switch"
@@ -195,37 +255,46 @@ export function DailyReminderSettings() {
             onClick={handleToggle}
             disabled={isSaving}
             className={combine(
-              'reminder-scheduler-form__switch-track relative inline-flex h-7 w-14 shrink-0 items-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
+              "reminder-scheduler-form__switch-track relative inline-flex h-7 w-14 shrink-0 items-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
               formState.enabled
-                ? 'reminder-scheduler-form__switch-track--enabled border-emerald-300/60 bg-emerald-400/30'
-                : 'reminder-scheduler-form__switch-track--disabled border-white/15 bg-white/5',
-              (isSaving || isInitialLoading) && 'cursor-not-allowed opacity-60',
+                ? "reminder-scheduler-form__switch-track--enabled border-emerald-300/60 bg-emerald-400/30"
+                : "reminder-scheduler-form__switch-track--disabled border-white/15 bg-white/5",
+              (isSaving || isInitialLoading) && "cursor-not-allowed opacity-60",
             )}
           >
             <span
               className={combine(
-                'reminder-scheduler-form__switch-thumb inline-block h-5 w-5 rounded-full bg-white shadow transition',
+                "reminder-scheduler-form__switch-thumb inline-block h-5 w-5 rounded-full bg-white shadow transition",
                 formState.enabled
-                  ? 'reminder-scheduler-form__switch-thumb--enabled translate-x-7 bg-emerald-100'
-                  : 'reminder-scheduler-form__switch-thumb--disabled translate-x-2',
+                  ? "reminder-scheduler-form__switch-thumb--enabled translate-x-7 bg-emerald-100"
+                  : "reminder-scheduler-form__switch-thumb--disabled translate-x-2",
               )}
             />
           </button>
         </div>
       </div>
 
-      {submitStatus === 'error' && submitError ? (
+      {submitStatus === "error" && submitError ? (
         <ToastBanner tone="error" message={submitError || SAVE_ERROR_MESSAGE} />
       ) : null}
-      {submitStatus === 'success' ? <ToastBanner tone="success" message={SAVE_SUCCESS_MESSAGE} /> : null}
+      {submitStatus === "success" ? (
+        <ToastBanner tone="success" message={SAVE_SUCCESS_MESSAGE} />
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2 text-sm" htmlFor={timeFieldId}>
-          <span className="reminder-scheduler-form__field-label block text-xs uppercase tracking-[0.3em] text-text-subtle">Hora local</span>
+          <span className="reminder-scheduler-form__field-label block text-xs uppercase tracking-[0.3em] text-text-subtle">
+            Hora local
+          </span>
           <select
             id={timeFieldId}
             value={formState.localTime}
-            onChange={(event) => setFormState((previous) => ({ ...previous, localTime: event.target.value }))}
+            onChange={(event) =>
+              setFormState((previous) => ({
+                ...previous,
+                localTime: event.target.value,
+              }))
+            }
             disabled={isSaving}
             className="reminder-scheduler-form__control w-full rounded-2xl border border-white/10 bg-surface px-4 py-3 text-base text-white outline-none transition focus:border-white/40"
           >
@@ -238,34 +307,40 @@ export function DailyReminderSettings() {
         </label>
 
         <label className="space-y-2 text-sm" htmlFor={timezoneFieldId}>
-          <span className="reminder-scheduler-form__field-label block text-xs uppercase tracking-[0.3em] text-text-subtle">Zona horaria</span>
+          <span className="reminder-scheduler-form__field-label block text-xs uppercase tracking-[0.3em] text-text-subtle">
+            Zona horaria
+          </span>
           <TimezoneCombobox
             id={timezoneFieldId}
             value={formState.timezone}
             options={timezoneCatalog}
             disabled={isSaving}
-            onChange={(timezone) => setFormState((previous) => ({ ...previous, timezone }))}
+            onChange={(timezone) =>
+              setFormState((previous) => ({ ...previous, timezone }))
+            }
           />
         </label>
       </div>
 
-      {status === 'error' && data ? (
+      {status === "error" && data ? (
         <ToastBanner tone="error" message={LOAD_STALE_MESSAGE} />
       ) : null}
 
       <div className="reminder-scheduler-form__footer flex flex-wrap items-center justify-between gap-4 border-t border-white/5 pt-4 text-sm text-text-subtle">
-        <p className="reminder-scheduler-form__footer-note">Los cambios se aplican solo cuando presionás guardar.</p>
+        <p className="reminder-scheduler-form__footer-note">
+          Los cambios se aplican solo cuando presionás guardar.
+        </p>
         <button
           type="submit"
           disabled={!canSubmit}
           className={combine(
-            'reminder-scheduler-form__save-button inline-flex items-center rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
+            "reminder-scheduler-form__save-button inline-flex items-center rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
             canSubmit
-              ? 'reminder-scheduler-form__save-button--enabled border-fuchsia-200/70 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-300 text-white shadow-[0_12px_36px_rgba(217,70,239,0.34)] hover:from-fuchsia-400 hover:via-pink-500 hover:to-amber-200'
-              : 'reminder-scheduler-form__save-button--disabled cursor-not-allowed border-white/10 bg-white/5 text-text-subtle',
+              ? "reminder-scheduler-form__save-button--enabled border-fuchsia-200/70 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-300 text-white shadow-[0_12px_36px_rgba(217,70,239,0.34)] hover:from-fuchsia-400 hover:via-pink-500 hover:to-amber-200"
+              : "reminder-scheduler-form__save-button--disabled cursor-not-allowed border-white/10 bg-white/5 text-text-subtle",
           )}
         >
-          {isSaving ? 'Guardando…' : 'Guardar'}
+          {isSaving ? "Guardando…" : "Guardar"}
         </button>
       </div>
     </form>
