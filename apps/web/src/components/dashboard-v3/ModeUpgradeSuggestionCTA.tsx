@@ -1,5 +1,5 @@
 import { Sparkles } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   acceptGameModeUpgradeSuggestion,
   dismissGameModeUpgradeSuggestion,
@@ -28,6 +28,7 @@ export function ModeUpgradeSuggestionCTA({
 }: ModeUpgradeSuggestionCTAProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
   const { t } = usePostLoginLanguage();
 
   const isVisible = useMemo(() => {
@@ -47,6 +48,11 @@ export function ModeUpgradeSuggestionCTA({
   }
 
   const handleAccept = async () => {
+    if (submitLockRef.current) {
+      return;
+    }
+
+    submitLockRef.current = true;
     setIsSubmitting(true);
     try {
       const response = await acceptGameModeUpgradeSuggestion();
@@ -57,10 +63,16 @@ export function ModeUpgradeSuggestionCTA({
       throw error;
     } finally {
       setIsSubmitting(false);
+      submitLockRef.current = false;
     }
   };
 
   const handleDismiss = async () => {
+    if (submitLockRef.current) {
+      return;
+    }
+
+    submitLockRef.current = true;
     setIsSubmitting(true);
     try {
       const response = await dismissGameModeUpgradeSuggestion();
@@ -69,6 +81,7 @@ export function ModeUpgradeSuggestionCTA({
       console.error('Failed to dismiss mode upgrade suggestion', error);
     } finally {
       setIsSubmitting(false);
+      submitLockRef.current = false;
     }
   };
 

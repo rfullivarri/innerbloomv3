@@ -1,5 +1,5 @@
 import { Sparkles } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
 import { normalizeGameModeValue } from '../../lib/gameMode';
@@ -46,6 +46,8 @@ export function UpgradeRecommendationModal({
   const railRef = useRef<HTMLDivElement | null>(null);
   const handleRef = useRef<HTMLButtonElement | null>(null);
 
+  const confirmInFlightRef = useRef(false);
+
   const currentMeta = useMemo(() => resolveModeMeta(currentMode), [currentMode]);
   const nextMeta = useMemo(() => resolveModeMeta(nextMode), [nextMode]);
   const nextModeChip = useMemo(() => buildGameModeChip(nextMode), [nextMode]);
@@ -56,13 +58,23 @@ export function UpgradeRecommendationModal({
       setIsSuccess(false);
       setIsDragging(false);
       setActivePointerId(null);
+      confirmInFlightRef.current = false;
     }
   }, [open]);
 
-  const handleConfirm = async () => {
-    await onConfirm();
-    setIsSuccess(true);
-  };
+  const handleConfirm = useCallback(async () => {
+    if (confirmInFlightRef.current || isSubmitting || isSuccess) {
+      return;
+    }
+
+    confirmInFlightRef.current = true;
+    try {
+      await onConfirm();
+      setIsSuccess(true);
+    } finally {
+      confirmInFlightRef.current = false;
+    }
+  }, [isSubmitting, isSuccess, onConfirm]);
 
   const resolveProgressFromClientX = (clientX: number) => {
     if (!railRef.current) {
