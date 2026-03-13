@@ -377,6 +377,12 @@ export function GuidedDemoOverlay({
   }, [isCompactMobile, step.id, step.tooltipPlacement, targetRect, viewport.height, viewport.width]);
 
   const isLast = stepIndex === steps.length - 1;
+  const walkthroughButtonSizeClass = isCompactMobile
+    ? 'min-h-8 px-3 py-1.5 text-[11px]'
+    : 'min-h-9 px-4 py-2 text-xs';
+  const secondaryButtonClass = `inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 disabled:opacity-40 ${walkthroughButtonSizeClass}`;
+  const primaryButtonClass = `ib-primary-button min-h-0 px-4 py-2 font-semibold uppercase tracking-[0.16em] focus-visible:ring-offset-slate-900 ${walkthroughButtonSizeClass}`;
+  const tertiaryButtonClass = `ml-auto inline-flex items-center justify-center rounded-full border border-transparent font-semibold uppercase tracking-[0.14em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-subtle)] hover:bg-[color:var(--color-overlay-1)] hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${walkthroughButtonSizeClass}`;
 
   return (
     <div className={`pointer-events-none fixed inset-0 ${isDailyQuestStep ? 'z-[10020]' : 'z-[120]'}`}>
@@ -455,7 +461,7 @@ export function GuidedDemoOverlay({
             type="button"
             onClick={() => setStepIndex((current) => Math.max(0, current - 1))}
             disabled={stepIndex === 0}
-            className={`rounded-lg border border-white/20 font-semibold uppercase tracking-[0.12em] disabled:opacity-40 ${isCompactMobile ? 'px-2.5 py-1.5 text-[11px]' : 'px-3 py-2 text-xs'}`}
+            className={secondaryButtonClass}
           >
             {language === 'es' ? 'Anterior' : 'Back'}
           </button>
@@ -463,7 +469,7 @@ export function GuidedDemoOverlay({
             <button
               type="button"
               onClick={() => setStepIndex((current) => Math.min(steps.length - 1, current + 1))}
-              className={`rounded-lg bg-cyan-300 font-semibold uppercase tracking-[0.12em] text-slate-950 ${isCompactMobile ? 'px-2.5 py-1.5 text-[11px]' : 'px-3 py-2 text-xs'}`}
+              className={primaryButtonClass}
             >
               {language === 'es' ? 'Siguiente' : 'Next'}
             </button>
@@ -475,7 +481,7 @@ export function GuidedDemoOverlay({
                   onCompleted();
                   onFinish();
                 }}
-                className={`rounded-lg bg-cyan-300 font-semibold uppercase tracking-[0.12em] text-slate-950 ${isCompactMobile ? 'px-2.5 py-1.5 text-[11px]' : 'px-3 py-2 text-xs'}`}
+                className={primaryButtonClass}
               >
                 {finalActionLabel?.[language] ?? (language === 'es' ? 'Finalizar' : 'Finish')}
               </button>
@@ -488,7 +494,7 @@ export function GuidedDemoOverlay({
                 onSkip(step.id, stepIndex);
                 onFinish();
               }}
-              className={`ml-auto rounded-lg font-semibold uppercase tracking-[0.12em] text-slate-300 hover:bg-white/10 ${isCompactMobile ? 'px-2 py-1.5 text-[11px]' : 'px-3 py-2 text-xs'}`}
+              className={tertiaryButtonClass}
             >
               {language === 'es' ? 'Saltar' : 'Skip'}
             </button>
