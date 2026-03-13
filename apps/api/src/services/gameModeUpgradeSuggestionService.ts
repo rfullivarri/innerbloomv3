@@ -1,5 +1,6 @@
 import { pool } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
+import { getActiveForcedGameModeUpgradeCtaOverride } from './gameModeUpgradeCtaOverrideService.js';
 import { getRollingModeUpgradeAnalysis } from './modeUpgradeAnalysisService.js';
 import { changeUserGameMode, resolveGameModeByCode } from './userGameModeChangeService.js';
 
@@ -40,6 +41,7 @@ export type GameModeUpgradeSuggestion = {
   dismissed_at: string | null;
   cta_enabled: boolean;
   cta_active_until: string | null;
+  debug_forced_cta: boolean;
 };
 
 function computeCtaWindow(createdAt: string | null): string | null {
@@ -134,6 +136,7 @@ async function upsertSuggestionState(client: typeof pool, params: {
 
 export async function getGameModeUpgradeSuggestion(userId: string): Promise<GameModeUpgradeSuggestion> {
   const user = await getUserCurrentMode(pool, userId);
+  const forcedOverride = await getActiveForcedGameModeUpgradeCtaOverride(userId);
 
   if (!user.game_mode_id || !user.current_mode) {
     return {
@@ -148,6 +151,39 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
       dismissed_at: null,
       cta_enabled: false,
       cta_active_until: null,
+      debug_forced_cta: false,
+    };
+  }
+
+  if (forcedOverride) {
+    const forcedCurrentMode = forcedOverride.forced_current_mode ?? user.current_mode;
+    const forcedNextModeCode = forcedOverride.forced_next_mode ?? resolveNextGameModeCode(forcedCurrentMode);
+    const forcedNextMode = forcedNextModeCode ? await resolveGameModeByCode(pool, forcedNextModeCode) : null;
+    const canSuggest = Boolean(forcedNextMode);
+    const suggestionState = await upsertSuggestionState(pool, {
+      userId,
+      periodKey: 'debug_forced',
+      currentGameModeId: user.game_mode_id,
+      suggestedGameModeId: canSuggest ? (forcedNextMode?.game_mode_id ?? null) : null,
+      eligibleForUpgrade: canSuggest,
+    });
+
+    const ctaActiveUntil = forcedOverride.expires_at;
+    const ctaEnabled = Boolean(canSuggest) && (!ctaActiveUntil || Date.parse(ctaActiveUntil) > Date.now());
+
+    return {
+      current_mode: forcedCurrentMode,
+      suggested_mode: canSuggest ? (forcedNextMode?.code ?? null) : null,
+      period_key: 'debug_forced',
+      eligible_for_upgrade: canSuggest,
+      tasks_total_evaluated: 0,
+      tasks_meeting_goal: 0,
+      task_pass_rate: 0,
+      accepted_at: suggestionState.accepted_at,
+      dismissed_at: suggestionState.dismissed_at,
+      cta_enabled: ctaEnabled,
+      cta_active_until: ctaActiveUntil,
+      debug_forced_cta: true,
     };
   }
 
@@ -167,6 +203,7 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
       dismissed_at: null,
       cta_enabled: false,
       cta_active_until: null,
+      debug_forced_cta: false,
     };
   }
 
@@ -203,6 +240,7 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
     dismissed_at: suggestionState.dismissed_at,
     cta_enabled: ctaEnabled,
     cta_active_until: ctaActiveUntil,
+    debug_forced_cta: false,
   };
 }
 

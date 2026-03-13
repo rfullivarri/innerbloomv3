@@ -3,6 +3,7 @@ import type {
   AdminInsights,
   AdminLogRow,
   AdminModeUpgradeAnalysis,
+  AdminModeUpgradeCtaOverride,
   AdminTaskSummaryRow,
   AdminUser,
   AdminUserSubscriptionResponse,
@@ -15,6 +16,9 @@ import {
   fetchAdminTaskStats,
   fetchAdminUserSubscription,
   fetchAdminModeUpgradeAnalysis,
+  fetchAdminModeUpgradeCtaOverride,
+  upsertAdminModeUpgradeCtaOverride,
+  clearAdminModeUpgradeCtaOverride,
   runAdminModeUpgradeAnalysis,
   runAdminMonthlyReview,
   changeAdminUserGameMode,
@@ -83,6 +87,16 @@ export function AdminLayout() {
   const [modeUpgradeAnalysis, setModeUpgradeAnalysis] = useState<AdminModeUpgradeAnalysis | null>(null);
   const [loadingModeUpgradeAnalysis, setLoadingModeUpgradeAnalysis] = useState(false);
   const [modeUpgradeAnalysisError, setModeUpgradeAnalysisError] = useState<string | null>(null);
+  const [modeUpgradeCtaOverride, setModeUpgradeCtaOverride] = useState<AdminModeUpgradeCtaOverride | null>(null);
+  const [modeUpgradeCtaOverrideEnabled, setModeUpgradeCtaOverrideEnabled] = useState(false);
+  const [modeUpgradeCtaOverrideCurrentMode, setModeUpgradeCtaOverrideCurrentMode] = useState<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'>('LOW');
+  const [modeUpgradeCtaOverrideNextMode, setModeUpgradeCtaOverrideNextMode] = useState<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'>('CHILL');
+  const [modeUpgradeCtaOverrideExpiresAt, setModeUpgradeCtaOverrideExpiresAt] = useState('');
+  const [modeUpgradeCtaOverrideLoading, setModeUpgradeCtaOverrideLoading] = useState(false);
+  const [modeUpgradeCtaOverrideSaving, setModeUpgradeCtaOverrideSaving] = useState(false);
+  const [modeUpgradeCtaOverrideClearing, setModeUpgradeCtaOverrideClearing] = useState(false);
+  const [modeUpgradeCtaOverrideMessage, setModeUpgradeCtaOverrideMessage] = useState<string | null>(null);
+  const [modeUpgradeCtaOverrideError, setModeUpgradeCtaOverrideError] = useState<string | null>(null);
   const [runningMonthlyReview, setRunningMonthlyReview] = useState(false);
   const [monthlyReviewMessage, setMonthlyReviewMessage] = useState<string | null>(null);
   const [monthlyReviewError, setMonthlyReviewError] = useState<string | null>(null);
@@ -236,6 +250,13 @@ export function AdminLayout() {
     setSubscriptionActionMessage(null);
     setModeUpgradeAnalysis(null);
     setModeUpgradeAnalysisError(null);
+    setModeUpgradeCtaOverride(null);
+    setModeUpgradeCtaOverrideEnabled(false);
+    setModeUpgradeCtaOverrideCurrentMode('LOW');
+    setModeUpgradeCtaOverrideNextMode('CHILL');
+    setModeUpgradeCtaOverrideExpiresAt('');
+    setModeUpgradeCtaOverrideMessage(null);
+    setModeUpgradeCtaOverrideError(null);
     setMonthlyReviewMessage(null);
     setMonthlyReviewError(null);
     setManualModeMessage(null);
@@ -305,6 +326,45 @@ export function AdminLayout() {
       .finally(() => {
         if (!cancelled) {
           setLoadingModeUpgradeAnalysis(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedUser]);
+
+  useEffect(() => {
+    if (!selectedUser) {
+      setModeUpgradeCtaOverride(null);
+      return;
+    }
+
+    let cancelled = false;
+    setModeUpgradeCtaOverrideLoading(true);
+    setModeUpgradeCtaOverrideError(null);
+
+    fetchAdminModeUpgradeCtaOverride(selectedUser.id)
+      .then((data) => {
+        if (cancelled) {
+          return;
+        }
+        setModeUpgradeCtaOverride(data.item);
+        setModeUpgradeCtaOverrideEnabled(Boolean(data.item?.enabled));
+        setModeUpgradeCtaOverrideCurrentMode(((data.item?.forced_current_mode ?? 'LOW') as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'));
+        setModeUpgradeCtaOverrideNextMode(((data.item?.forced_next_mode ?? 'CHILL') as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'));
+        setModeUpgradeCtaOverrideExpiresAt(data.item?.expires_at ? data.item.expires_at.slice(0, 16) : '');
+      })
+      .catch((error: unknown) => {
+        console.error('[admin] failed to fetch mode upgrade CTA override', error);
+        if (!cancelled) {
+          setModeUpgradeCtaOverride(null);
+          setModeUpgradeCtaOverrideError('No se pudo cargar el override de Upgrade CTA.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setModeUpgradeCtaOverrideLoading(false);
         }
       });
 
@@ -386,6 +446,58 @@ export function AdminLayout() {
     }
   }, [selectedUser]);
 
+
+
+  const handleApplyModeUpgradeCtaOverride = useCallback(async () => {
+    if (!selectedUser) {
+      return;
+    }
+
+    setModeUpgradeCtaOverrideSaving(true);
+    setModeUpgradeCtaOverrideError(null);
+    setModeUpgradeCtaOverrideMessage(null);
+
+    try {
+      const response = await upsertAdminModeUpgradeCtaOverride(selectedUser.id, {
+        enabled: modeUpgradeCtaOverrideEnabled,
+        forcedCurrentMode: modeUpgradeCtaOverrideCurrentMode,
+        forcedNextMode: modeUpgradeCtaOverrideNextMode,
+        expiresAt: modeUpgradeCtaOverrideExpiresAt ? new Date(modeUpgradeCtaOverrideExpiresAt).toISOString() : null,
+      });
+      setModeUpgradeCtaOverride(response.item);
+      setModeUpgradeCtaOverrideMessage('Forced CTA aplicado.');
+    } catch (error) {
+      console.error('[admin] failed to save mode upgrade CTA override', error);
+      setModeUpgradeCtaOverrideError('No se pudo guardar el override de Upgrade CTA.');
+    } finally {
+      setModeUpgradeCtaOverrideSaving(false);
+    }
+  }, [selectedUser, modeUpgradeCtaOverrideEnabled, modeUpgradeCtaOverrideCurrentMode, modeUpgradeCtaOverrideNextMode, modeUpgradeCtaOverrideExpiresAt]);
+
+  const handleClearModeUpgradeCtaOverride = useCallback(async () => {
+    if (!selectedUser) {
+      return;
+    }
+
+    setModeUpgradeCtaOverrideClearing(true);
+    setModeUpgradeCtaOverrideError(null);
+    setModeUpgradeCtaOverrideMessage(null);
+
+    try {
+      await clearAdminModeUpgradeCtaOverride(selectedUser.id);
+      setModeUpgradeCtaOverride(null);
+      setModeUpgradeCtaOverrideEnabled(false);
+      setModeUpgradeCtaOverrideCurrentMode('LOW');
+      setModeUpgradeCtaOverrideNextMode('CHILL');
+      setModeUpgradeCtaOverrideExpiresAt('');
+      setModeUpgradeCtaOverrideMessage('Forced CTA limpiado.');
+    } catch (error) {
+      console.error('[admin] failed to clear mode upgrade CTA override', error);
+      setModeUpgradeCtaOverrideError('No se pudo limpiar el override de Upgrade CTA.');
+    } finally {
+      setModeUpgradeCtaOverrideClearing(false);
+    }
+  }, [selectedUser]);
 
   const handleRunMonthlyReview = useCallback(async () => {
     if (!selectedUser) {
@@ -873,6 +985,50 @@ export function AdminLayout() {
                 >
                   {changingMode ? 'Changing…' : 'Apply Manual Mode Change'}
                 </button>
+              </div>
+
+              <div className="rounded-lg border border-cyan-700/40 bg-slate-900/40 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-cyan-200">DEBUG CTA OVERRIDE</p>
+                  {modeUpgradeCtaOverrideLoading ? <span className="text-[11px] text-cyan-300/80">Cargando…</span> : null}
+                </div>
+                <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-4 md:items-end">
+                  <label className="flex items-center gap-2 text-xs text-cyan-100">
+                    <input
+                      type="checkbox"
+                      checked={modeUpgradeCtaOverrideEnabled}
+                      onChange={(event) => setModeUpgradeCtaOverrideEnabled(event.target.checked)}
+                    />
+                    Force Upgrade CTA
+                  </label>
+                  <label className="flex flex-col gap-1 text-[11px] uppercase tracking-[0.12em] text-cyan-300">
+                    Current
+                    <select value={modeUpgradeCtaOverrideCurrentMode} onChange={(event) => setModeUpgradeCtaOverrideCurrentMode(event.target.value as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE')} className="rounded-md border border-cyan-700/50 bg-slate-900/70 px-2 py-1 text-xs normal-case tracking-normal text-slate-100">
+                      <option value="LOW">LOW</option><option value="CHILL">CHILL</option><option value="FLOW">FLOW</option><option value="EVOLVE">EVOLVE</option>
+                    </select>
+                  </label>
+                  <label className="flex flex-col gap-1 text-[11px] uppercase tracking-[0.12em] text-cyan-300">
+                    Next
+                    <select value={modeUpgradeCtaOverrideNextMode} onChange={(event) => setModeUpgradeCtaOverrideNextMode(event.target.value as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE')} className="rounded-md border border-cyan-700/50 bg-slate-900/70 px-2 py-1 text-xs normal-case tracking-normal text-slate-100">
+                      <option value="LOW">LOW</option><option value="CHILL">CHILL</option><option value="FLOW">FLOW</option><option value="EVOLVE">EVOLVE</option>
+                    </select>
+                  </label>
+                  <label className="flex flex-col gap-1 text-[11px] uppercase tracking-[0.12em] text-cyan-300">
+                    Expires (optional)
+                    <input type="datetime-local" value={modeUpgradeCtaOverrideExpiresAt} onChange={(event) => setModeUpgradeCtaOverrideExpiresAt(event.target.value)} className="rounded-md border border-cyan-700/50 bg-slate-900/70 px-2 py-1 text-xs normal-case tracking-normal text-slate-100" />
+                  </label>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <button type="button" onClick={handleApplyModeUpgradeCtaOverride} disabled={modeUpgradeCtaOverrideSaving || !selectedUser} className="inline-flex items-center justify-center rounded-md border border-cyan-700/60 bg-cyan-900/30 px-3 py-1.5 text-xs font-semibold text-cyan-100 hover:border-cyan-400/60 disabled:cursor-not-allowed disabled:opacity-60">
+                    {modeUpgradeCtaOverrideSaving ? 'Applying…' : 'Apply Forced CTA'}
+                  </button>
+                  <button type="button" onClick={handleClearModeUpgradeCtaOverride} disabled={modeUpgradeCtaOverrideClearing || !selectedUser} className="inline-flex items-center justify-center rounded-md border border-cyan-700/60 bg-slate-900/40 px-3 py-1.5 text-xs font-semibold text-cyan-100 hover:border-cyan-400/60 disabled:cursor-not-allowed disabled:opacity-60">
+                    {modeUpgradeCtaOverrideClearing ? 'Clearing…' : 'Clear Forced CTA'}
+                  </button>
+                  {modeUpgradeCtaOverride?.enabled ? <span className="text-[11px] text-emerald-300">Active</span> : <span className="text-[11px] text-cyan-300/80">Inactive</span>}
+                </div>
+                {modeUpgradeCtaOverrideMessage ? <p className="mt-1 text-xs font-semibold text-emerald-300">{modeUpgradeCtaOverrideMessage}</p> : null}
+                {modeUpgradeCtaOverrideError ? <p className="mt-1 text-xs font-semibold text-rose-300">{modeUpgradeCtaOverrideError}</p> : null}
               </div>
 
               {loadingModeUpgradeAnalysis ? <p className="text-xs text-cyan-200">Cargando análisis…</p> : null}

@@ -33,6 +33,9 @@ import {
   postAdminRunMonthlyReview,
   postAdminUserManualGameModeChange,
   postAdminRunModeUpgradeAnalysis,
+  getAdminUserModeUpgradeCtaOverride,
+  putAdminUserModeUpgradeCtaOverride,
+  deleteAdminUserModeUpgradeCtaOverride,
 } from './admin.handlers.js';
 import { requireAdmin } from './admin.middleware.js';
 
@@ -65,6 +68,9 @@ adminRouter.post('/task-difficulty-calibration/run', postAdminRunTaskDifficultyC
 adminRouter.post('/mode-upgrade-aggregation/run', postAdminRunModeUpgradeAggregation);
 adminRouter.post('/user/:userId/run-monthly-review', postAdminRunMonthlyReview);
 adminRouter.post('/user/:userId/mode-upgrade-analysis/run', postAdminRunModeUpgradeAnalysis);
+adminRouter.get('/user/:userId/mode-upgrade-cta-override', getAdminUserModeUpgradeCtaOverride);
+adminRouter.put('/user/:userId/mode-upgrade-cta-override', putAdminUserModeUpgradeCtaOverride);
+adminRouter.delete('/user/:userId/mode-upgrade-cta-override', deleteAdminUserModeUpgradeCtaOverride);
 adminRouter.post('/user/:userId/game-mode', postAdminUserManualGameModeChange);
 adminRouter.get('/feedback/definitions', getAdminFeedbackDefinitions);
 adminRouter.patch('/feedback/definitions/:id', patchAdminFeedbackDefinition);
