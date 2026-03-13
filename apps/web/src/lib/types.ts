@@ -206,6 +206,18 @@ export type AdminModeUpgradeTask = {
   meets_goal: boolean;
 };
 
+
+
+export type AdminModeUpgradeCtaOverride = {
+  user_id: string;
+  enabled: boolean;
+  forced_current_mode: string | null;
+  forced_next_mode: string | null;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type AdminModeUpgradeAnalysis = {
   has_analysis: boolean;
   analysis_window_days: number;

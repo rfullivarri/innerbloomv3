@@ -21,6 +21,7 @@ import {
   taskDifficultyCalibrationRunBodySchema,
   modeUpgradeAggregationRunBodySchema,
   adminManualGameModeChangeBodySchema,
+  adminModeUpgradeCtaOverrideUpsertBodySchema,
 } from './admin.schemas.js';
 import {
   exportUserLogsCsv,
@@ -46,6 +47,9 @@ import {
   getUserModeUpgradeAnalysis,
   updateUserSubscriptionFromAdmin,
   adminChangeUserGameMode,
+  clearUserModeUpgradeCtaOverride,
+  getUserModeUpgradeCtaOverride,
+  setUserModeUpgradeCtaOverride,
 } from './admin.service.js';
 import {
   getTaskgenEventsByCorrelation,
@@ -303,6 +307,32 @@ export const postAdminRunModeUpgradeAggregation = asyncHandler(async (req: Reque
 export const getAdminUserModeUpgradeAnalysis = asyncHandler(async (req: Request, res: Response) => {
   const { userId } = userIdParamSchema.parse(req.params);
   const result = await getUserModeUpgradeAnalysis(userId);
+  res.json(result);
+});
+
+
+export const getAdminUserModeUpgradeCtaOverride = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const item = await getUserModeUpgradeCtaOverride(userId);
+  res.json({ item });
+});
+
+export const putAdminUserModeUpgradeCtaOverride = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const body = adminModeUpgradeCtaOverrideUpsertBodySchema.parse(req.body ?? {});
+  const item = await setUserModeUpgradeCtaOverride({
+    userId,
+    enabled: body.enabled,
+    forcedCurrentMode: body.forcedCurrentMode,
+    forcedNextMode: body.forcedNextMode,
+    expiresAt: body.expiresAt ?? null,
+  });
+  res.json({ ok: true, item });
+});
+
+export const deleteAdminUserModeUpgradeCtaOverride = asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = userIdParamSchema.parse(req.params);
+  const result = await clearUserModeUpgradeCtaOverride(userId);
   res.json(result);
 });
 

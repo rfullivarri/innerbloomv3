@@ -147,6 +147,17 @@ export const taskDifficultyCalibrationRunBodySchema = z.object({
   mode: z.enum(['baseline']).default('baseline'),
 });
 
+
+
+const modeCodeSchema = z.enum(['LOW', 'CHILL', 'FLOW', 'EVOLVE']);
+
+export const adminModeUpgradeCtaOverrideUpsertBodySchema = z.object({
+  enabled: z.boolean().default(true),
+  forcedCurrentMode: modeCodeSchema,
+  forcedNextMode: modeCodeSchema,
+  expiresAt: z.string().datetime().nullable().optional(),
+});
+
 export const modeUpgradeAggregationRunBodySchema = z.object({
   userId: z.string().uuid({ message: 'Invalid user id' }).optional(),
   period_key: z
@@ -240,6 +251,7 @@ export type TaskgenTraceGlobalQuery = z.infer<typeof taskgenTraceGlobalQuerySche
 export type AdminManualGameModeChangeBody = z.infer<typeof adminManualGameModeChangeBodySchema>;
 export type TaskDifficultyCalibrationRunBody = z.infer<typeof taskDifficultyCalibrationRunBodySchema>;
 export type ModeUpgradeAggregationRunBody = z.infer<typeof modeUpgradeAggregationRunBodySchema>;
+export type AdminModeUpgradeCtaOverrideUpsertBody = z.infer<typeof adminModeUpgradeCtaOverrideUpsertBodySchema>;
 export type ReminderSendBody = z.infer<typeof reminderSendBodySchema>;
 export type AdminSubscriptionUpdateBody = z.infer<typeof adminSubscriptionUpdateBodySchema>;
 export type SubscriptionNotificationsTriggerBody = z.infer<typeof subscriptionNotificationsTriggerBodySchema>;

@@ -5,6 +5,7 @@ import type {
   AdminTaskRow,
   AdminTaskSummaryRow,
   AdminModeUpgradeAnalysis,
+  AdminModeUpgradeCtaOverride,
   AdminUser,
   AdminUserSubscriptionResponse,
   SubscriptionStatus,
@@ -178,6 +179,65 @@ export async function updateAdminUserSubscription(
 
 export async function fetchAdminModeUpgradeAnalysis(userId: string) {
   return apiAuthorizedGet<AdminModeUpgradeAnalysis>(`/admin/user/${encodeURIComponent(userId)}/mode-upgrade-analysis`);
+}
+
+
+export async function fetchAdminModeUpgradeCtaOverride(userId: string) {
+  return apiAuthorizedGet<{ item: AdminModeUpgradeCtaOverride | null }>(`/admin/user/${encodeURIComponent(userId)}/mode-upgrade-cta-override`);
+}
+
+export async function upsertAdminModeUpgradeCtaOverride(
+  userId: string,
+  payload: {
+    enabled: boolean;
+    forcedCurrentMode: 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
+    forcedNextMode: 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
+    expiresAt?: string | null;
+  },
+) {
+  const url = buildApiUrl(`/admin/user/${encodeURIComponent(userId)}/mode-upgrade-cta-override`);
+  const response = await apiAuthorizedFetch(url, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response.json() as Promise<{ ok: boolean; item: AdminModeUpgradeCtaOverride }>;
+}
+
+export async function clearAdminModeUpgradeCtaOverride(userId: string) {
+  const url = buildApiUrl(`/admin/user/${encodeURIComponent(userId)}/mode-upgrade-cta-override`);
+  const response = await apiAuthorizedFetch(url, {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response.json() as Promise<{ ok: boolean }>;
 }
 
 export async function runAdminMonthlyReview(userId: string) {

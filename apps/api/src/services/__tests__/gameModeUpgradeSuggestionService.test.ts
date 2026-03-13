@@ -76,6 +76,10 @@ describe('gameModeUpgradeSuggestionService', () => {
         handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 11, current_mode: 'LOW' }] }),
       },
       {
+        match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'),
+        handle: () => ({ rows: [] }),
+      },
+      {
         match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
         handle: (_sql, params) => {
           expect(params).toEqual(['CHILL']);
@@ -94,6 +98,7 @@ describe('gameModeUpgradeSuggestionService', () => {
     const result = await getGameModeUpgradeSuggestion('u1');
 
     expect(result).toMatchObject({
+      debug_forced_cta: false,
       current_mode: 'LOW',
       suggested_mode: 'CHILL',
       period_key: 'rolling_2025-01-31',
@@ -119,9 +124,14 @@ describe('gameModeUpgradeSuggestionService', () => {
         match: (sql) => sql.includes('FROM users u'),
         handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 12, current_mode: 'CHILL' }] }),
       },
+      {
+        match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'),
+        handle: () => ({ rows: [] }),
+      },
     ]);
 
     const result = await getGameModeUpgradeSuggestion('u1');
+    expect(result.debug_forced_cta).toBe(false);
     expect(result.eligible_for_upgrade).toBe(false);
     expect(result.suggested_mode).toBeNull();
     expect(mockQuery.mock.calls.some(([sql]) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'))).toBe(false);
@@ -143,6 +153,10 @@ describe('gameModeUpgradeSuggestionService', () => {
         handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 14, current_mode: 'EVOLVE' }] }),
       },
       {
+        match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'),
+        handle: () => ({ rows: [] }),
+      },
+      {
         match: (sql) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'),
         handle: (_sql, params) => {
           expect(params?.[3]).toBe(null);
@@ -153,6 +167,81 @@ describe('gameModeUpgradeSuggestionService', () => {
 
     const result = await getGameModeUpgradeSuggestion('u1');
     expect(result.suggested_mode).toBeNull();
+  });
+
+
+  it('returns forced CTA when debug override is active', async () => {
+    queueExpectations([
+      {
+        match: (sql) => sql.includes('FROM users u'),
+        handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 11, current_mode: 'LOW' }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'),
+        handle: () => ({ rows: [{ user_id: 'u1', enabled: true, forced_current_mode: 'CHILL', forced_next_mode: 'FLOW', expires_at: null, created_at: '2026-03-13T00:00:00.000Z', updated_at: '2026-03-13T00:00:00.000Z' }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
+        handle: (_sql, params) => {
+          expect(params).toEqual(['FLOW']);
+          return { rows: [{ game_mode_id: 13, code: 'FLOW' }] };
+        },
+      },
+      {
+        match: (sql) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'),
+        handle: (_sql, params) => {
+          expect(params?.[1]).toBe('debug_forced');
+          return { rows: [{ accepted_at: null, dismissed_at: null, created_at: null }] };
+        },
+      },
+    ]);
+
+    const result = await getGameModeUpgradeSuggestion('u1');
+
+    expect(result).toMatchObject({
+      debug_forced_cta: true,
+      current_mode: 'CHILL',
+      suggested_mode: 'FLOW',
+      period_key: 'debug_forced',
+      eligible_for_upgrade: true,
+      cta_enabled: true,
+    });
+    expect(mockRollingAnalysis).not.toHaveBeenCalled();
+  });
+
+  it('falls back to rolling eligibility when debug override is absent', async () => {
+    mockRollingAnalysis.mockResolvedValueOnce({
+      has_analysis: true,
+      analysis_end: '2025-01-31',
+      eligible_for_upgrade: true,
+      tasks_total_evaluated: 10,
+      tasks_meeting_goal: 8,
+      task_pass_rate: 0.8,
+    });
+
+    queueExpectations([
+      {
+        match: (sql) => sql.includes('FROM users u'),
+        handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 11, current_mode: 'LOW' }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'),
+        handle: () => ({ rows: [] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
+        handle: () => ({ rows: [{ game_mode_id: 12, code: 'CHILL' }] }),
+      },
+      {
+        match: (sql) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'),
+        handle: () => ({ rows: [{ accepted_at: null, dismissed_at: null }] }),
+      },
+    ]);
+
+    const result = await getGameModeUpgradeSuggestion('u1');
+
+    expect(result.debug_forced_cta).toBe(false);
+    expect(result.period_key).toBe('rolling_2025-01-31');
   });
 
   it('accept updates user mode and records acceptance for current period', async () => {
@@ -170,6 +259,10 @@ describe('gameModeUpgradeSuggestionService', () => {
       {
         match: (sql) => sql.includes('FROM users u'),
         handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 11, current_mode: 'LOW' }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'),
+        handle: () => ({ rows: [] }),
       },
       {
         match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
@@ -224,11 +317,13 @@ describe('gameModeUpgradeSuggestionService', () => {
 
     queueExpectations([
       { match: (sql) => sql.includes('FROM users u'), handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 11, current_mode: 'LOW' }] }) },
+      { match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'), handle: () => ({ rows: [] }) },
       { match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'), handle: () => ({ rows: [{ game_mode_id: 12, code: 'CHILL' }] }) },
       { match: (sql) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'), handle: () => ({ rows: [{ accepted_at: null, dismissed_at: null }] }) },
       { match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'), handle: () => ({ rows: [{ game_mode_id: 11, code: 'LOW' }] }) },
       { match: (sql) => sql.includes('UPDATE user_game_mode_upgrade_suggestions'), handle: () => ({ rows: [{ dismissed_at: '2026-03-11T01:00:00.000Z' }] }) },
       { match: (sql) => sql.includes('FROM users u'), handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 11, current_mode: 'LOW' }] }) },
+      { match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'), handle: () => ({ rows: [] }) },
       { match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'), handle: () => ({ rows: [{ game_mode_id: 12, code: 'CHILL' }] }) },
       { match: (sql) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'), handle: () => ({ rows: [{ accepted_at: null, dismissed_at: '2026-03-11T01:00:00.000Z' }] }) },
     ]);

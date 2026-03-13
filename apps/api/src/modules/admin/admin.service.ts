@@ -10,6 +10,11 @@ import { getEmailProvider } from '../../services/email/index.js';
 import { sendTasksReadyEmailPreview } from '../../services/tasksReadyEmailService.js';
 import { runSubscriptionNotificationsJob } from '../../services/subscriptionNotificationsJob.js';
 import { getRollingModeUpgradeAnalysis } from '../../services/modeUpgradeAnalysisService.js';
+import {
+  clearGameModeUpgradeCtaOverride,
+  getGameModeUpgradeCtaOverride,
+  upsertGameModeUpgradeCtaOverride,
+} from '../../services/gameModeUpgradeCtaOverrideService.js';
 import { changeUserGameMode, resolveGameModeByCode, resolveGameModeById } from '../../services/userGameModeChangeService.js';
 import {
   listFeedbackDefinitionRows,
@@ -279,6 +284,16 @@ type FeedbackUserHistory = {
 type EmotionRow = {
   date: string | Date;
   emotion: string | null;
+};
+
+export type AdminModeUpgradeCtaOverride = {
+  user_id: string;
+  enabled: boolean;
+  forced_current_mode: string | null;
+  forced_next_mode: string | null;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type AdminModeUpgradeAnalysis = {
@@ -1430,6 +1445,33 @@ export async function getUserTaskStats(userId: string, query: TaskStatsQuery): P
 
 export async function getUserModeUpgradeAnalysis(userId: string): Promise<AdminModeUpgradeAnalysis> {
   return getRollingModeUpgradeAnalysis(userId);
+}
+
+
+export async function getUserModeUpgradeCtaOverride(userId: string): Promise<AdminModeUpgradeCtaOverride | null> {
+  const override = await getGameModeUpgradeCtaOverride(userId);
+  return override;
+}
+
+export async function setUserModeUpgradeCtaOverride(input: {
+  userId: string;
+  enabled: boolean;
+  forcedCurrentMode: 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
+  forcedNextMode: 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
+  expiresAt: string | null;
+}): Promise<AdminModeUpgradeCtaOverride> {
+  return upsertGameModeUpgradeCtaOverride({
+    userId: input.userId,
+    enabled: input.enabled,
+    forcedCurrentMode: input.forcedCurrentMode,
+    forcedNextMode: input.forcedNextMode,
+    expiresAt: input.expiresAt,
+  });
+}
+
+export async function clearUserModeUpgradeCtaOverride(userId: string): Promise<{ ok: true }> {
+  await clearGameModeUpgradeCtaOverride(userId);
+  return { ok: true };
 }
 
 export async function adminChangeUserGameMode(input: {
