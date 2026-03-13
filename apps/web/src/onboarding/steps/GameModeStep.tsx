@@ -101,13 +101,13 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
       };
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-      <div className="glass-card onboarding-surface-base mx-auto max-w-4xl rounded-3xl p-4 sm:p-6">
+      <div className="glass-card onboarding-surface-base mx-auto flex max-h-[calc(100vh-12rem)] max-h-[calc(100dvh-12rem)] max-w-4xl flex-col overflow-hidden rounded-3xl p-4 sm:p-6 md:max-h-none">
         <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
           <p className="text-xs uppercase tracking-[0.2em] text-white/50">{copy.step}</p>
           <h2 className="text-3xl font-semibold text-white">{copy.title}</h2>
           <p className="text-sm text-white/70">{copy.subtitle}</p>
         </header>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="mt-6 grid min-h-0 flex-1 gap-4 overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch] md:grid-cols-2">
           {MODE_ORDER.map((mode) => {
             const content = MODE_CARD_CONTENT[mode];
             const isActive = selected === mode;
