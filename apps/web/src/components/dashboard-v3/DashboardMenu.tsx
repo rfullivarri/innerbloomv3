@@ -704,15 +704,15 @@ export function DashboardMenu({
                     <button
                       type="button"
                       onClick={handleOpenGameMode}
-                      className={`${menuRowClassName} ${hasActiveUpgradeCta ? "border border-black/20 bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] text-black shadow-[0_12px_26px_rgba(167,112,239,0.28)]" : ""}`}
+                      className={`${menuRowClassName} ${hasActiveUpgradeCta ? "border border-black/15 bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] text-black shadow-[0_12px_26px_rgba(167,112,239,0.32)] dark:border-white/15 dark:text-black" : ""}`}
                     >
                       <MenuIcon>
                         <circle cx="12" cy="12" r="8" />
                         <path d="m12 7 3 3-3 3-3-3 3-3Z" />
                       </MenuIcon>
                       <div className="flex flex-1 items-center gap-2">
-                        <span>{hasActiveUpgradeCta ? 'Upgrade disponible' : t('dashboard.menu.changeGameMode')}</span>
-                        {hasActiveUpgradeCta ? <span className="rounded-full border border-black/20 bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] px-2 py-0.5 text-[10px] font-bold uppercase text-black shadow-[0_8px_20px_rgba(167,112,239,0.35)]">7d</span> : null}
+                        <span>{hasActiveUpgradeCta ? t('dashboard.menu.upgradeAvailable') : t('dashboard.menu.changeGameMode')}</span>
+                        {hasActiveUpgradeCta ? <span className="rounded-full border border-black/20 bg-white/35 px-2 py-0.5 text-[10px] font-bold uppercase text-black shadow-[0_8px_20px_rgba(167,112,239,0.35)] backdrop-blur-sm">7d</span> : null}
                       </div>
                       <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow')} />
                     </button>
