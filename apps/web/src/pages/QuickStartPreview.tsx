@@ -4,12 +4,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { resolveOnboardingLanguage } from '../onboarding/i18n';
 import type { OnboardingLanguage } from '../onboarding/constants';
 import type { GameMode } from '../onboarding/state';
+import { GameModeStep } from '../onboarding/steps/GameModeStep';
 import { HUD } from '../onboarding/ui/HUD';
 import { NavButtons } from '../onboarding/ui/NavButtons';
 import { SelectableCheck } from '../onboarding/ui/SelectableCheck';
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
-type Step = 'branch' | 'body' | 'mind' | 'soul' | 'moderation' | 'setup';
+type Step = 'game-mode' | 'branch' | 'body' | 'mind' | 'soul' | 'moderation' | 'setup';
 type ModerationOption = 'sugar' | 'tobacco' | 'alcohol';
 
 interface Task {
@@ -32,7 +33,8 @@ interface Translations {
   quickStartHint: string;
   inPreview: string;
   comingSoon: string;
-  gameMode: string;
+  gameModeGateTitle: string;
+  gameModeGateSubtitle: string;
   continue: string;
   back: string;
   pillarTitles: Record<Pillar, string>;
@@ -59,6 +61,27 @@ interface Translations {
   tasks: Record<Pillar, Task[]>;
 }
 
+
+
+interface QuickStartPreviewDraft {
+  selectedGameMode: GameMode;
+  onboardingPath: 'quick_start';
+  selectedTasksByPillar: Record<Pillar, string[]>;
+  selectedTraitsByPillar: Record<Pillar, string[]>;
+  editableTaskValues: Record<string, string>;
+  selectedModerations: ModerationOption[];
+  language: OnboardingLanguage;
+  gpSummaryPreview: {
+    byPillar: Record<Pillar, number>;
+    total: number;
+  };
+  balanceBonusPreview: {
+    active: boolean;
+    multiplier: number;
+  };
+  completedSteps: Partial<Record<Step, boolean>>;
+}
+
 const MODE_MINIMUMS: Record<GameMode, number> = {
   LOW: 1,
   CHILL: 2,
@@ -78,7 +101,8 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     quickStartHint: 'Armar tu base rápida en Body, Mind y Soul.',
     inPreview: 'Preview',
     comingSoon: 'Próximamente',
-    gameMode: 'Game Mode para simular mínimos',
+    gameModeGateTitle: 'Primero elegí tu Game Mode',
+    gameModeGateSubtitle: 'Usamos la misma pantalla real del onboarding para mantener consistencia.',
     continue: 'Continuar',
     back: 'Volver',
     pillarTitles: {
@@ -148,7 +172,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
         { id: 'VITALIDAD', trait: 'VITALIDAD', text: 'Voy a empezar el día con una rutina activadora de', inputAfter: 'minutos' },
         { id: 'POSTURA', trait: 'POSTURA', text: 'Voy a dedicar', inputAfter: 'minutos a cuidar mi postura o ergonomía' },
         { id: 'MOVILIDAD', trait: 'MOVILIDAD', text: 'Voy a hacer movilidad o estiramientos durante', inputAfter: 'minutos' },
-        { id: 'MODERACION', trait: 'MODERACION', text: 'Quiero trabajar mi moderación y revisar mis consumos o excesos' },
+        { id: 'MODERACION', trait: 'MODERACION', text: 'Quiero mejorar mi relación con ciertos consumos o excesos' },
       ],
       Mind: [
         { id: 'ENFOQUE', trait: 'ENFOQUE', text: 'Voy a trabajar con foco profundo durante', inputAfter: 'minutos' },
@@ -187,7 +211,8 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     quickStartHint: 'Build your base quickly across Body, Mind, and Soul.',
     inPreview: 'Preview',
     comingSoon: 'Coming soon',
-    gameMode: 'Game Mode to simulate minimums',
+    gameModeGateTitle: 'First, choose your Game Mode',
+    gameModeGateSubtitle: 'This preview reuses the same real Game Mode screen from onboarding.',
     continue: 'Continue',
     back: 'Back',
     pillarTitles: {
@@ -248,46 +273,46 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     ],
     tasks: {
       Body: [
-        { id: 'ENERGY', trait: 'ENERGY', text: 'I will walk for', inputAfter: 'minutes' },
-        { id: 'NUTRITION', trait: 'NUTRITION', text: 'I will have', inputAfter: 'balanced meal(s) per day' },
-        { id: 'SLEEP', trait: 'SLEEP', text: 'I will sleep at least', inputAfter: 'hours per night' },
-        { id: 'RECOVERY', trait: 'RECOVERY', text: 'I will take', inputAfter: 'recovery break(s) during the day' },
-        { id: 'HYDRATION', trait: 'HYDRATION', text: 'I will drink', inputAfter: 'glass(es) of water per day' },
-        { id: 'HYGIENE', trait: 'HYGIENE', text: 'I will complete my personal hygiene routine', inputAfter: 'time(s) per day' },
-        { id: 'VITALITY', trait: 'VITALITY', text: 'I will start the day with an activation routine of', inputAfter: 'minutes' },
-        { id: 'POSTURE', trait: 'POSTURE', text: 'I will spend', inputAfter: 'minutes taking care of posture or ergonomics' },
-        { id: 'MOBILITY', trait: 'MOBILITY', text: 'I will do mobility or stretching for', inputAfter: 'minutes' },
-        { id: 'MODERATION', trait: 'MODERATION', text: 'I want to work on moderation and review my consumption habits or excesses' },
+        { id: 'ENERGIA', trait: 'ENERGY', text: 'I will walk for', inputAfter: 'minutes' },
+        { id: 'NUTRICION', trait: 'NUTRITION', text: 'I will have', inputAfter: 'balanced meal(s) per day' },
+        { id: 'SUENO', trait: 'SLEEP', text: 'I will sleep at least', inputAfter: 'hours per night' },
+        { id: 'RECUPERACION', trait: 'RECOVERY', text: 'I will take', inputAfter: 'recovery break(s) during the day' },
+        { id: 'HIDRATACION', trait: 'HYDRATION', text: 'I will drink', inputAfter: 'glass(es) of water per day' },
+        { id: 'HIGIENE', trait: 'HYGIENE', text: 'I will complete my personal hygiene routine', inputAfter: 'time(s) per day' },
+        { id: 'VITALIDAD', trait: 'VITALITY', text: 'I will start the day with an energizing routine of', inputAfter: 'minutes' },
+        { id: 'POSTURA', trait: 'POSTURE', text: 'I will spend', inputAfter: 'minutes taking care of my posture or ergonomics' },
+        { id: 'MOVILIDAD', trait: 'MOBILITY', text: 'I will do mobility or stretching for', inputAfter: 'minutes' },
+        { id: 'MODERACION', trait: 'MODERATION', text: 'I want to improve my relationship with certain habits, consumptions, or excesses' },
       ],
       Mind: [
-        { id: 'FOCUS', trait: 'FOCUS', text: 'I will do deep focus work for', inputAfter: 'minutes' },
-        { id: 'LEARNING', trait: 'LEARNING', text: 'I will read, study, or learn for', inputAfter: 'minutes' },
-        { id: 'CREATIVITY', trait: 'CREATIVITY', text: 'I will spend', inputAfter: 'minutes creating, writing, or ideating' },
-        { id: 'MANAGEMENT', trait: 'MANAGEMENT', text: 'I will take', inputAfter: 'minutes to breathe, slow down, or regulate' },
-        { id: 'SELF_CONTROL', trait: 'SELF_CONTROL', text: 'I will pay attention to my impulsive actions' },
-        { id: 'RESILIENCE', trait: 'RESILIENCE', text: 'I will do something that challenges me and pushes me out of my comfort zone' },
-        { id: 'ORDER', trait: 'ORDER', text: 'I will organize my space, tasks, or mind for', inputAfter: 'minutes' },
-        { id: 'PROJECTION', trait: 'PROJECTION', text: 'I will move a personal or professional goal forward for', inputAfter: 'minutes' },
-        { id: 'FINANCES', trait: 'FINANCES', text: 'I will review my spending, savings, or budget for', inputAfter: 'minutes' },
-        { id: 'AGILITY', trait: 'AGILITY', text: 'I will train my memory or mental agility for', inputAfter: 'minutes' },
+        { id: 'ENFOQUE', trait: 'FOCUS', text: 'I will do deep focus work for', inputAfter: 'minutes' },
+        { id: 'APRENDIZAJE', trait: 'LEARNING', text: 'I will read, study, or learn for', inputAfter: 'minutes' },
+        { id: 'CREATIVIDAD', trait: 'CREATIVITY', text: 'I will spend', inputAfter: 'minutes creating, writing, or ideating' },
+        { id: 'GESTION', trait: 'MANAGEMENT', text: 'I will take', inputAfter: 'minutes to breathe, slow down, or self-regulate' },
+        { id: 'AUTOCONTROL', trait: 'SELF_CONTROL', text: 'I will pay attention to my impulsive actions' },
+        { id: 'RESILIENCIA', trait: 'RESILIENCE', text: 'I will do something that challenges me and pushes me out of my comfort zone' },
+        { id: 'ORDEN', trait: 'ORDER', text: 'I will organize my space, tasks, or mind for', inputAfter: 'minutes' },
+        { id: 'PROYECCION', trait: 'PROJECTION', text: 'I will move a personal or professional goal forward for', inputAfter: 'minutes' },
+        { id: 'FINANZAS', trait: 'FINANCES', text: 'I will review my spending, savings, or budget for', inputAfter: 'minutes' },
+        { id: 'AGILIDAD', trait: 'AGILITY', text: 'I will train my memory or mental agility for', inputAfter: 'minutes' },
       ],
       Soul: [
-        { id: 'CONNECTION', trait: 'CONNECTION', text: 'I will talk with', inputAfter: 'person(s) with real presence' },
-        { id: 'SPIRITUALITY', trait: 'SPIRITUALITY', text: 'I will spend', inputAfter: 'minutes meditating, praying, or reconnecting with myself' },
-        { id: 'PURPOSE', trait: 'PURPOSE', text: 'I will spend', inputAfter: 'minutes on an action aligned with my purpose' },
-        { id: 'VALUES', trait: 'VALUES', text: 'I will make', inputAfter: 'decision(s) aligned with my values' },
-        { id: 'ALTRUISM', trait: 'ALTRUISM', text: 'I will do', inputAfter: 'gesture(s) to help or contribute to others' },
-        { id: 'INSIGHT', trait: 'INSIGHT', text: 'I will write or reflect for', inputAfter: 'minutes about how I feel' },
-        { id: 'GRATITUDE', trait: 'GRATITUDE', text: 'I will log', inputAfter: 'thing(s) I feel grateful for' },
-        { id: 'NATURE', trait: 'NATURE', text: 'I will spend', inputAfter: 'minutes outdoors or in contact with nature' },
-        { id: 'JOY', trait: 'JOY', text: 'I will spend', inputAfter: 'minutes playing, laughing, or enjoying without guilt' },
-        { id: 'SELF_ESTEEM', trait: 'SELF_ESTEEM', text: 'I will make time to take care of myself', helper: 'Ex: nails, hair, beard, grooming' },
+        { id: 'CONEXION', trait: 'CONNECTION', text: 'I will talk with', inputAfter: 'person(s) with real presence' },
+        { id: 'ESPIRITUALIDAD', trait: 'SPIRITUALITY', text: 'I will spend', inputAfter: 'minutes meditating, praying, or reconnecting with myself' },
+        { id: 'PROPOSITO', trait: 'PURPOSE', text: 'I will spend', inputAfter: 'minutes on an action aligned with my purpose' },
+        { id: 'VALORES', trait: 'VALUES', text: 'I will make', inputAfter: 'decision(s) aligned with my values' },
+        { id: 'ALTRUISMO', trait: 'ALTRUISM', text: 'I will do', inputAfter: 'gesture(s) to help or contribute to others' },
+        { id: 'INSIGHT', trait: 'INSIGHT', text: 'I will write or reflect for', inputAfter: 'minutes on how I feel' },
+        { id: 'GRATITUD', trait: 'GRATITUDE', text: 'I will log', inputAfter: 'thing(s) I feel grateful for' },
+        { id: 'NATURALEZA', trait: 'NATURE', text: 'I will spend', inputAfter: 'minutes outdoors or in contact with nature' },
+        { id: 'GOZO', trait: 'JOY', text: 'I will spend', inputAfter: 'minutes playing, laughing, or enjoying life without guilt' },
+        { id: 'AUTOESTIMA', trait: 'SELF_ESTEEM', text: 'I will make time to take care of myself', helper: 'Ex: nails, hair, beard, grooming' },
       ],
     },
   },
 };
 
-const STEP_ORDER: Step[] = ['branch', 'body', 'mind', 'soul', 'moderation', 'setup'];
+const STEP_ORDER: Step[] = ['game-mode', 'branch', 'body', 'mind', 'soul', 'moderation', 'setup'];
 
 function getDefaultLanguage(searchParams: URLSearchParams): OnboardingLanguage {
   const lang = searchParams.get('lang');
@@ -365,7 +390,7 @@ export default function QuickStartPreviewPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [language, setLanguage] = useState<OnboardingLanguage>(() => getDefaultLanguage(searchParams));
-  const [step, setStep] = useState<Step>('branch');
+  const [step, setStep] = useState<Step>('game-mode');
   const [gameMode, setGameMode] = useState<GameMode>('CHILL');
   const [selectedByPillar, setSelectedByPillar] = useState<Record<Pillar, string[]>>({ Body: [], Mind: [], Soul: [] });
   const [inputsByTask, setInputsByTask] = useState<Record<string, string>>({});
@@ -392,13 +417,46 @@ export default function QuickStartPreviewPage() {
   const totalGp = balancedBonusActive ? Math.ceil(baseTotalGp * 1.5) : baseTotalGp;
 
   const visibleRoute = useMemo(
-    () => buildVisibleRoute(selectedByPillar.Body.includes('MODERACION') || selectedByPillar.Body.includes('MODERATION')),
+    () => buildVisibleRoute(selectedByPillar.Body.includes('MODERACION')),
     [selectedByPillar.Body],
   );
 
   const currentStepIndex = Math.max(0, visibleRoute.indexOf(step));
   const currentPillar = step === 'body' ? 'Body' : step === 'mind' ? 'Mind' : step === 'soul' ? 'Soul' : null;
   const currentPillarGp = currentPillar ? selectedByPillar[currentPillar].length * 3 : 0;
+
+
+  const quickStartDraft = useMemo<QuickStartPreviewDraft>(() => {
+    const selectedTraitsByPillar = (Object.keys(selectedByPillar) as Pillar[]).reduce<Record<Pillar, string[]>>((acc, pillar) => {
+      const taskById = new Map(copy.tasks[pillar].map((task) => [task.id, task.trait]));
+      acc[pillar] = selectedByPillar[pillar].map((id) => taskById.get(id)).filter((trait): trait is string => Boolean(trait));
+      return acc;
+    }, { Body: [], Mind: [], Soul: [] });
+
+    const completedSteps: Partial<Record<Step, boolean>> = {};
+    visibleRoute.forEach((routeStep, index) => {
+      completedSteps[routeStep] = index <= currentStepIndex;
+    });
+
+    return {
+      selectedGameMode: gameMode,
+      onboardingPath: 'quick_start',
+      selectedTasksByPillar: selectedByPillar,
+      selectedTraitsByPillar,
+      editableTaskValues: inputsByTask,
+      selectedModerations: (Object.keys(moderationPrefs) as ModerationOption[]).filter((option) => moderationPrefs[option]),
+      language,
+      gpSummaryPreview: {
+        byPillar: { Body: selectedCounts.Body * 3, Mind: selectedCounts.Mind * 3, Soul: selectedCounts.Soul * 3 },
+        total: totalGp,
+      },
+      balanceBonusPreview: {
+        active: balancedBonusActive,
+        multiplier: balancedBonusActive ? 1.5 : 1,
+      },
+      completedSteps,
+    };
+  }, [balancedBonusActive, copy.tasks, currentStepIndex, gameMode, inputsByTask, language, moderationPrefs, selectedByPillar, selectedCounts.Body, selectedCounts.Mind, selectedCounts.Soul, totalGp, visibleRoute]);
 
   useEffect(() => {
     if (step === 'setup') {
@@ -429,6 +487,11 @@ export default function QuickStartPreviewPage() {
   };
 
   const goNext = () => {
+    if (step === 'game-mode') {
+      setStep('branch');
+      return;
+    }
+
     if (step === 'branch') {
       setStep('body');
       return;
@@ -539,6 +602,8 @@ export default function QuickStartPreviewPage() {
       />
 
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4">
+        {/* Preview-only payload shape for future DB wiring. No SQL persistence in this iteration. */}
+        <pre className="hidden" aria-hidden>{JSON.stringify(quickStartDraft, null, 2)}</pre>
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.28em] text-white/55">Innerbloom</p>
@@ -550,6 +615,20 @@ export default function QuickStartPreviewPage() {
             <button type="button" onClick={() => handleLanguageChange('en')} className={`rounded-full border px-3 py-1 text-xs ${language === 'en' ? 'border-sky-300/60 bg-sky-400/20' : 'border-white/20 bg-white/8'}`}>EN</button>
           </div>
         </div>
+
+
+        {step === 'game-mode' ? (
+          <section className="mx-auto w-full max-w-4xl">
+            <p className="mb-2 text-xs text-white/65">{copy.gameModeGateTitle}</p>
+            <p className="mb-5 text-xs text-white/50">{copy.gameModeGateSubtitle}</p>
+            <GameModeStep
+              language={language}
+              selected={gameMode}
+              onSelect={setGameMode}
+              onConfirm={goNext}
+            />
+          </section>
+        ) : null}
 
         {step === 'branch' ? (
           <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
@@ -570,23 +649,6 @@ export default function QuickStartPreviewPage() {
               </button>
             </div>
 
-            <div className="mt-6">
-              <p className="mb-2 text-xs uppercase tracking-[0.18em] text-white/55">{copy.gameMode}</p>
-              <div className="flex flex-wrap gap-2">
-                {(Object.keys(MODE_MINIMUMS) as GameMode[]).map((mode) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => setGameMode(mode)}
-                    className={`rounded-full border px-3 py-1.5 text-xs ${
-                      gameMode === mode ? 'border-violet-300/60 bg-violet-400/20 text-white' : 'border-white/20 bg-white/8 text-white/75'
-                    }`}
-                  >
-                    {copy.modeLabels[mode]} · min {MODE_MINIMUMS[mode]}
-                  </button>
-                ))}
-              </div>
-            </div>
           </section>
         ) : null}
 
