@@ -118,7 +118,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     minRule: (min) => `Mínimo: ${min} tareas`,
     suggestedRule: 'Sugerido: 9 a 12',
     minimumRequired: 'Necesitás seleccionar el mínimo para continuar.',
-    traitLabel: 'Trait',
+    traitLabel: 'Rasgo',
     taskHelpLabel: 'Abrir ideas rápidas de la tarea',
     minutesPlaceholder: 'min',
     countPlaceholder: 'n',
@@ -511,13 +511,14 @@ function InlineTaskRow({
   }, [selected]);
 
   return (
-    <div className="relative">
+    <div className={`relative ${selected ? 'pb-1 pt-2' : ''}`}>
       {selected ? (
-        <div className="pointer-events-none absolute -inset-x-1 -bottom-1 -top-1 rounded-[1.25rem] border border-violet-300/35 bg-violet-500/20" aria-hidden>
-          <div className="h-7 rounded-t-[1.25rem] border-b border-violet-200/25 bg-violet-300/35 px-4">
-            <p className="flex h-full items-center text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-50/90">
+        <div className="pointer-events-none absolute inset-0 rounded-[1.15rem] border border-violet-200/45 bg-violet-400/28 px-4 pt-2.5" aria-hidden>
+          <div className="flex h-full flex-col justify-between pb-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-violet-50/90">
               {copy.traitLabel}: {task.trait}
             </p>
+            <span className="h-0.5 w-full rounded-full bg-violet-100/15" />
           </div>
         </div>
       ) : null}
@@ -534,7 +535,7 @@ function InlineTaskRow({
         role="button"
         tabIndex={0}
         data-selected={selected ? 'true' : undefined}
-        className="relative z-10 w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-left text-white/85 transition hover:border-white/30 hover:bg-white/10 data-[selected=true]:border-violet-200/55 data-[selected=true]:bg-violet-400/15"
+        className="relative z-10 w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-left text-white/85 transition hover:border-white/30 hover:bg-white/10 data-[selected=true]:mt-4 data-[selected=true]:border-violet-100/70 data-[selected=true]:bg-violet-500/22"
       >
         <div className="flex items-start gap-3">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-2 pr-6 text-sm leading-relaxed sm:text-base">
@@ -562,18 +563,22 @@ function InlineTaskRow({
                 event.stopPropagation();
                 setShowSuggestions((prev) => !prev);
               }}
-              className="relative z-20 mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full border border-violet-200/45 bg-violet-400/20 text-[11px] text-violet-50 transition hover:bg-violet-300/30"
+              className="relative z-20 mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md border border-violet-200/45 bg-violet-400/20 text-violet-50 transition hover:bg-violet-300/30"
               aria-label={copy.taskHelpLabel}
               aria-expanded={showSuggestions}
             >
-              ✦
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden>
+                <path d="M9 18h6" />
+                <path d="M10 22h4" />
+                <path d="M8.5 14.3a6 6 0 1 1 7 0c-.7.53-1.17 1.35-1.3 2.2l-.08.5h-4.24l-.08-.5a3.5 3.5 0 0 0-1.3-2.2Z" />
+              </svg>
             </button>
           ) : null}
         </div>
       </motion.div>
 
       {selected && task.suggestions?.length && showSuggestions ? (
-        <div className="absolute right-3 top-[calc(100%+0.35rem)] z-30 w-[min(18.5rem,calc(100%-1.5rem))] rounded-xl border border-violet-200/35 bg-[#2b2f6a]/95 p-3 text-xs text-violet-50 shadow-[0_10px_30px_rgba(43,25,96,0.45)] backdrop-blur">
+        <div className="absolute right-3 bottom-[calc(100%+0.35rem)] z-30 w-[min(18.5rem,calc(100%-1.5rem))] rounded-xl border border-violet-200/35 bg-[#2b2f6a]/95 p-3 text-xs text-violet-50 shadow-[0_10px_30px_rgba(43,25,96,0.45)] backdrop-blur">
           <ul className="space-y-1.5">
             {task.suggestions.map((suggestion) => (
               <li key={suggestion} className="leading-relaxed">• {suggestion}</li>
@@ -736,15 +741,15 @@ export default function QuickStartPreviewPage() {
           <p className="text-xs uppercase tracking-[0.25em] text-white/55">{copy.inPreview}</p>
           <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{copy.pillarTitles[currentPillar]}</h1>
           <p className="mt-2 text-sm text-white/70">{copy.pillarSubtitles[currentPillar]}</p>
-          <div className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-xl border border-violet-200/30 bg-violet-400/10 px-3 py-2 text-xs font-medium text-violet-50/95">
+          <div className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-lg border border-violet-100/35 bg-violet-300/18 px-3.5 py-2 text-xs font-semibold text-violet-50/95 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
             <span>{copy.minRule(minimum)}</span>
-            <span className="text-violet-200/70">·</span>
+            <span className="text-violet-100/60">·</span>
             <span>{copy.suggestedRule}</span>
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             <span
-              className={`rounded-xl border px-3.5 py-1.5 text-[0.72rem] sm:text-xs ${
-                balancedBonusActive ? 'border-violet-200/45 bg-violet-300/25 text-violet-50' : 'border-violet-200/30 bg-violet-400/12 text-violet-100/90'
+              className={`inline-flex rounded-lg border px-4 py-2 text-[0.72rem] font-medium sm:text-xs ${
+                balancedBonusActive ? 'border-cyan-200/45 bg-cyan-300/12 text-cyan-50' : 'border-sky-200/40 bg-sky-300/10 text-sky-100/95'
               }`}
             >
               {balancedBonusActive ? copy.bonusReady : copy.bonusPending}
