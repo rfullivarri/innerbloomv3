@@ -92,24 +92,24 @@ const MODE_MINIMUMS: Record<GameMode, number> = {
 
 const COPY: Record<OnboardingLanguage, Translations> = {
   es: {
-    title: 'Quick Start Preview',
+    title: 'Vista previa de Inicio rápido',
     subtitle: 'Prototipo visual aislado del onboarding productivo.',
     forkTitle: '¿Cómo querés arrancar hoy?',
     forkSubtitle: 'Estamos probando una nueva variante. Tu onboarding real no cambia.',
-    personalGuide: 'Personal Guide',
+    personalGuide: 'Guía personal',
     personalGuideHint: 'Camino guiado y más personalizado, con el acompañamiento completo.',
-    quickStart: 'Quick Start',
+    quickStart: 'Inicio rápido',
     quickStartHint: 'Camino más rápido y autodirigido para arrancar hoy con tu base.',
-    inPreview: 'Preview',
+    inPreview: 'Vista previa',
     comingSoon: 'Próximamente',
-    gameModeGateTitle: 'Primero elegí tu Game Mode',
+    gameModeGateTitle: 'Primero elegí tu modo de juego',
     gameModeGateSubtitle: 'Usamos la misma pantalla real del onboarding para mantener consistencia.',
     continue: 'Continuar',
     back: 'Volver',
     pillarTitles: {
-      Body: 'Quick Start · Cuerpo 🫀',
-      Mind: 'Quick Start · Mente 🧠',
-      Soul: 'Quick Start · Alma 🏵️',
+      Body: 'Inicio rápido · Cuerpo 🫀',
+      Mind: 'Inicio rápido · Mente 🧠',
+      Soul: 'Inicio rápido · Alma 🏵️',
     },
     pillarSubtitles: {
       Body: 'Elegí 10 tareas visibles y activá las que querés sostener.',
@@ -127,11 +127,11 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     moderationSubtitle: 'Elegí qué querés observar con más consciencia.',
     moderationHint: 'Sin juicios: solo seguimiento para encontrar balance.',
     moderationFlex: 'También podés manejar tolerancias flexibles (por ejemplo, fines de semana).',
-    setupTitle: 'Configurando tu Quick Start',
+    setupTitle: 'Configurando tu Inicio rápido',
     setupSubtitle: 'Estamos aplicando tu selección y reutilizando el flujo real del onboarding.',
-    setupDone: 'Setup listo para conectar con demo guiada.',
+    setupDone: 'Configuración lista para conectar con demo guiada.',
     bonusReady: 'Balanceado: estás sumando x1.5 GP',
-    bonusPending: 'Balanceá Body, Mind y Soul para sumar x1.5 GP',
+    bonusPending: 'Balanceá Cuerpo, Mente y Alma para sumar x1.5 GP',
     modeLabels: {
       LOW: 'Low',
       CHILL: 'Chill',
@@ -156,11 +156,11 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       },
     },
     setupSteps: [
-      'Aplicando tu Game Mode',
-      'Equilibrando Body, Mind and Soul',
+      'Aplicando tu modo de juego',
+      'Equilibrando Cuerpo, Mente y Alma',
       'Preparando tu plan inicial',
       'Activando tu plan',
-      'Dejando listo tu Quick Start',
+      'Dejando listo tu Inicio rápido',
     ],
     tasks: {
       Body: [
@@ -543,20 +543,22 @@ function InlineTaskRow({
     }
   }, [selected]);
 
-  const modeStyle = MODE_SOFT_STYLES[mode];
 
   return (
-    <div className={`relative ${selected ? 'pt-1.5' : ''}`}>
+    <div className={`relative ${selected ? 'pt-1' : ''}`}>
       {selected ? (
         <div
-          className="pointer-events-none absolute inset-x-2 bottom-0.5 top-0 rounded-[1.05rem] border"
+          className="pointer-events-none absolute inset-x-3 bottom-1.5 top-0.5 rounded-[1.05rem]"
           style={{
-            borderColor: 'color-mix(in srgb, #a78bfa 30%, transparent)',
-            background: 'linear-gradient(180deg, rgba(167,139,250,0.16), rgba(139,92,246,0.08))',
-            boxShadow: '0 10px 24px rgba(76, 29, 149, 0.18)',
+            background: 'linear-gradient(180deg, rgba(167,139,250,0.1), rgba(139,92,246,0.05))',
+            boxShadow: '0 6px 16px rgba(22, 18, 45, 0.18), inset 0 0 0 1px rgba(196, 181, 253, 0.18)',
           }}
           aria-hidden
-        />
+        >
+          <span className="absolute left-4 top-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-100/65">
+            {copy.traitLabel}: {task.trait}
+          </span>
+        </div>
       ) : null}
 
       <motion.div
@@ -571,12 +573,12 @@ function InlineTaskRow({
         role="button"
         tabIndex={0}
         data-selected={selected ? 'true' : undefined}
-        className="onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 shadow-[0_14px_32px_rgba(8,12,28,0.2)] transition hover:border-white/30 hover:bg-white/[0.12] data-[selected=true]:mt-1.5"
+        className="onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 shadow-[0_12px_24px_rgba(8,12,28,0.18)] transition hover:border-white/30 hover:bg-white/[0.12] data-[selected=true]:mt-1"
         style={selected
           ? {
-              borderColor: 'color-mix(in srgb, #ffffff 28%, transparent)',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08))',
-              boxShadow: '0 16px 32px rgba(8,12,28,0.22), 0 0 0 1px rgba(255,255,255,0.07)',
+              borderColor: 'color-mix(in srgb, #ffffff 18%, transparent)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.07))',
+              boxShadow: '0 14px 28px rgba(8,12,28,0.2)',
             }
           : undefined}
       >
@@ -789,21 +791,21 @@ export default function QuickStartPreviewPage() {
           <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{copy.pillarTitles[currentPillar]}</h1>
           <p className="mt-2 text-sm text-white/70">{copy.pillarSubtitles[currentPillar]}</p>
           <div
-            className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-semibold text-violet-50/95 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
+            className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-semibold text-violet-50/95"
             style={{
-              borderColor: modeStyle.border,
-              background: `linear-gradient(135deg, ${modeStyle.tint}, color-mix(in srgb, ${modeStyle.tint} 36%, rgba(139,92,246,0.12)))`,
-              boxShadow: `0 10px 22px ${modeStyle.glow}`,
+              borderColor: `color-mix(in srgb, ${modeStyle.border} 80%, transparent)`,
+              background: `linear-gradient(135deg, ${modeStyle.tint}, color-mix(in srgb, ${modeStyle.tint} 28%, rgba(139,92,246,0.08)))`,
+              boxShadow: `0 8px 18px ${modeStyle.glow}`,
             }}
           >
             <span>{copy.minRule(minimum)}</span>
             <span className="text-violet-100/60">·</span>
             <span>{copy.suggestedRule}</span>
           </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+          <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
             <span
-              className={`inline-flex rounded-lg border px-4 py-2 text-[0.72rem] font-medium sm:text-xs ${
-                balancedBonusActive ? 'border-cyan-200/45 bg-cyan-300/12 text-cyan-50' : 'border-sky-200/40 bg-sky-300/10 text-sky-100/95'
+              className={`inline-flex rounded-lg border px-3.5 py-1.5 text-[0.68rem] font-medium sm:text-[0.72rem] ${
+                balancedBonusActive ? 'border-cyan-200/30 bg-cyan-300/8 text-cyan-100/90' : 'border-sky-200/28 bg-sky-300/8 text-sky-100/85'
               }`}
             >
               {balancedBonusActive ? copy.bonusReady : copy.bonusPending}
