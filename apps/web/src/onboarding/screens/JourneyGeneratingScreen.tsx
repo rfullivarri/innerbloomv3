@@ -47,6 +47,7 @@ export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, o
 
   const bullets = useMemo(() => [...copy.bullets, `${copy.modeLabel}: ${gameMode}`], [gameMode, language]);
   const [visibleBullets, setVisibleBullets] = useState(1);
+  const isSequenceComplete = visibleBullets >= bullets.length + 1;
 
   useEffect(() => {
     let isMounted = true;
@@ -146,7 +147,7 @@ export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, o
 
           <li
             className={`flex items-start gap-3 text-sm text-white transition-all duration-500 sm:text-base ${
-              visibleBullets >= bullets.length + 1 ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+              isSequenceComplete ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
             } drop-shadow-[0_0_10px_rgba(165,180,252,0.5)]`}
           >
             <span className="mt-2 h-2.5 w-2.5 rounded-full bg-sky-300" aria-hidden />
@@ -161,7 +162,13 @@ export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, o
         </ul>
 
         <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-white/10" aria-hidden>
-          <div className="journey-generating-screen__progress h-full w-1/3 rounded-full bg-gradient-to-r from-violet-300/70 via-indigo-300/80 to-violet-300/70" />
+          <div
+            className={`h-full rounded-full bg-gradient-to-r from-violet-300/70 via-indigo-300/80 to-violet-300/70 transition-all duration-700 ${
+              isSequenceComplete
+                ? 'w-full journey-generating-screen__progress-complete'
+                : 'w-1/3 journey-generating-screen__progress-animated'
+            }`}
+          />
         </div>
 
         <p className="mt-8 text-sm text-slate-300 sm:text-base">
@@ -188,9 +195,13 @@ export function JourneyGeneratingScreen({ gameMode, language, onGoToDashboard, o
           filter: drop-shadow(0 0 14px rgba(129, 140, 248, 0.6));
         }
 
-        .journey-generating-screen__progress {
+        .journey-generating-screen__progress-animated {
           animation: journey-progress 2.4s ease-in-out infinite;
           transform-origin: left;
+        }
+
+        .journey-generating-screen__progress-complete {
+          transform: translateX(0);
         }
 
         @keyframes journey-line-draw {
