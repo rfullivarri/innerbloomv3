@@ -93,6 +93,10 @@ describe('gameModeUpgradeSuggestionService', () => {
           return { rows: [{ accepted_at: null, dismissed_at: null }] };
         },
       },
+      {
+        match: (sql) => sql.includes('SELECT accepted_at') && sql.includes('accepted_at IS NOT NULL'),
+        handle: () => ({ rows: [] }),
+      },
     ]);
 
     const result = await getGameModeUpgradeSuggestion('u1');
@@ -162,6 +166,10 @@ describe('gameModeUpgradeSuggestionService', () => {
           expect(params?.[3]).toBe(null);
           return { rows: [{ accepted_at: null, dismissed_at: null }] };
         },
+      },
+      {
+        match: (sql) => sql.includes('SELECT accepted_at') && sql.includes('accepted_at IS NOT NULL'),
+        handle: () => ({ rows: [] }),
       },
     ]);
 
@@ -273,6 +281,10 @@ describe('gameModeUpgradeSuggestionService', () => {
         match: (sql) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'),
         handle: () => ({ rows: [{ accepted_at: null, dismissed_at: null }] }),
       },
+      {
+        match: (sql) => sql.includes('SELECT accepted_at') && sql.includes('accepted_at IS NOT NULL'),
+        handle: () => ({ rows: [] }),
+      },
     ]);
 
     const result = await getGameModeUpgradeSuggestion('u1');
@@ -310,6 +322,10 @@ describe('gameModeUpgradeSuggestionService', () => {
         handle: () => ({ rows: [{ accepted_at: null, dismissed_at: null }] }),
       },
       {
+        match: (sql) => sql.includes('SELECT accepted_at') && sql.includes('accepted_at IS NOT NULL'),
+        handle: () => ({ rows: [] }),
+      },
+      {
         match: (sql) => sql.includes('FROM user_game_mode_upgrade_suggestions s'),
         handle: () => ({
           rows: [{ period_key: 'rolling_2025-01-31', eligible_for_upgrade: true, accepted_at: null, dismissed_at: null, current_mode: 'LOW', suggested_mode: 'CHILL' }],
@@ -342,6 +358,36 @@ describe('gameModeUpgradeSuggestionService', () => {
     expect(result.accepted_at).toBe('2026-03-11T00:00:00.000Z');
   });
 
+
+  it('keeps accepted_at visible for a period after real upgrade changed current mode', async () => {
+    mockRollingAnalysis.mockResolvedValueOnce({
+      has_analysis: true,
+      analysis_end: '2025-01-31',
+      eligible_for_upgrade: true,
+      tasks_total_evaluated: 10,
+      tasks_meeting_goal: 8,
+      task_pass_rate: 0.8,
+    });
+
+    queueExpectations([
+      { match: (sql) => sql.includes('FROM users u'), handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 12, current_mode: 'CHILL' }] }) },
+      { match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'), handle: () => ({ rows: [] }) },
+      { match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'), handle: () => ({ rows: [{ game_mode_id: 13, code: 'FLOW' }] }) },
+      { match: (sql) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'), handle: () => ({ rows: [{ accepted_at: null, dismissed_at: null, created_at: '2026-03-13T00:00:00.000Z' }] }) },
+      {
+        match: (sql) => sql.includes('SELECT accepted_at') && sql.includes('accepted_at IS NOT NULL'),
+        handle: (_sql, params) => {
+          expect(params).toEqual(['u1', 'rolling_2025-01-31']);
+          return { rows: [{ accepted_at: '2026-03-11T00:00:00.000Z' }] };
+        },
+      },
+    ]);
+
+    const result = await getGameModeUpgradeSuggestion('u1');
+    expect(result.accepted_at).toBe('2026-03-11T00:00:00.000Z');
+    expect(result.cta_enabled).toBe(false);
+  });
+
   it('dismiss is idempotent and keeps dismissed_at for the same period', async () => {
     mockRollingAnalysis.mockResolvedValue({
       has_analysis: true,
@@ -357,12 +403,14 @@ describe('gameModeUpgradeSuggestionService', () => {
       { match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'), handle: () => ({ rows: [] }) },
       { match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'), handle: () => ({ rows: [{ game_mode_id: 12, code: 'CHILL' }] }) },
       { match: (sql) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'), handle: () => ({ rows: [{ accepted_at: null, dismissed_at: null }] }) },
+      { match: (sql) => sql.includes('SELECT accepted_at') && sql.includes('accepted_at IS NOT NULL'), handle: () => ({ rows: [] }) },
       { match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'), handle: () => ({ rows: [{ game_mode_id: 11, code: 'LOW' }] }) },
       { match: (sql) => sql.includes('UPDATE user_game_mode_upgrade_suggestions'), handle: () => ({ rows: [{ dismissed_at: '2026-03-11T01:00:00.000Z' }] }) },
       { match: (sql) => sql.includes('FROM users u'), handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 11, current_mode: 'LOW' }] }) },
       { match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'), handle: () => ({ rows: [] }) },
       { match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'), handle: () => ({ rows: [{ game_mode_id: 12, code: 'CHILL' }] }) },
       { match: (sql) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'), handle: () => ({ rows: [{ accepted_at: null, dismissed_at: '2026-03-11T01:00:00.000Z' }] }) },
+      { match: (sql) => sql.includes('SELECT accepted_at') && sql.includes('accepted_at IS NOT NULL'), handle: () => ({ rows: [] }) },
     ]);
 
     const dismissed = await dismissGameModeUpgradeSuggestion('u1');

@@ -228,11 +228,14 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
     eligibleForUpgrade,
   });
 
+  const periodAcceptedAt = await getAcceptedAtForPeriod(pool, userId, periodKey);
+  const effectiveAcceptedAt = suggestionState.accepted_at ?? periodAcceptedAt;
+
   const ctaActiveUntil = computeCtaWindow(suggestionState.created_at);
   const ctaEnabled = isCtaEnabled({
     eligibleForUpgrade,
     suggestedMode: canSuggest ? (nextMode?.code ?? null) : null,
-    acceptedAt: suggestionState.accepted_at,
+    acceptedAt: effectiveAcceptedAt,
     ctaActiveUntil,
   });
 
@@ -244,7 +247,7 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
     tasks_total_evaluated: analysis.tasks_total_evaluated,
     tasks_meeting_goal: analysis.tasks_meeting_goal,
     task_pass_rate: analysis.task_pass_rate,
-    accepted_at: suggestionState.accepted_at,
+    accepted_at: effectiveAcceptedAt,
     dismissed_at: suggestionState.dismissed_at,
     cta_enabled: ctaEnabled,
     cta_active_until: ctaActiveUntil,
@@ -275,6 +278,25 @@ async function getLatestSuggestionForCurrentMode(client: typeof pool, userId: st
   );
 
   return result.rows[0] ?? null;
+}
+
+async function getAcceptedAtForPeriod(
+  client: typeof pool,
+  userId: string,
+  periodKey: string,
+): Promise<string | null> {
+  const result = await client.query<{ accepted_at: string | null }>(
+    `SELECT accepted_at
+       FROM user_game_mode_upgrade_suggestions
+      WHERE user_id = $1::uuid
+        AND period_key = $2
+        AND accepted_at IS NOT NULL
+      ORDER BY accepted_at DESC
+      LIMIT 1`,
+    [userId, periodKey],
+  );
+
+  return result.rows[0]?.accepted_at ?? null;
 }
 
 export async function acceptGameModeUpgradeSuggestion(userId: string): Promise<GameModeUpgradeSuggestion> {
