@@ -7,7 +7,6 @@ import type { GameMode } from '../onboarding/state';
 import { GameModeStep } from '../onboarding/steps/GameModeStep';
 import { HUD } from '../onboarding/ui/HUD';
 import { NavButtons } from '../onboarding/ui/NavButtons';
-import { SelectableCheck } from '../onboarding/ui/SelectableCheck';
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
 type Step = 'game-mode' | 'branch' | 'body' | 'mind' | 'soul' | 'moderation' | 'setup';
@@ -41,9 +40,10 @@ interface Translations {
   pillarTitles: Record<Pillar, string>;
   pillarSubtitles: Record<Pillar, string>;
   minRule: (min: number) => string;
+  suggestedRule: string;
   minimumRequired: string;
   traitLabel: string;
-  suggestionsLabel: string;
+  taskHelpLabel: string;
   minutesPlaceholder: string;
   countPlaceholder: string;
   moderationTitle: string;
@@ -55,8 +55,6 @@ interface Translations {
   setupDone: string;
   bonusReady: string;
   bonusPending: string;
-  totalGp: string;
-  currentPillarGp: string;
   modeLabels: Record<GameMode, string>;
   moderationCards: Record<ModerationOption, { title: string; description: string; icon: string }>;
   setupSteps: string[];
@@ -98,9 +96,9 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     forkTitle: '¿Cómo querés arrancar hoy?',
     forkSubtitle: 'Estamos probando una nueva variante. Tu onboarding real no cambia.',
     personalGuide: 'Personal Guide',
-    personalGuideHint: 'Mantener camino guiado tradicional.',
+    personalGuideHint: 'Camino guiado y más personalizado, con el acompañamiento completo.',
     quickStart: 'Quick Start',
-    quickStartHint: 'Armar tu base rápida en Body, Mind y Soul.',
+    quickStartHint: 'Camino más rápido y autodirigido para arrancar hoy con tu base.',
     inPreview: 'Preview',
     comingSoon: 'Próximamente',
     gameModeGateTitle: 'Primero elegí tu Game Mode',
@@ -117,10 +115,11 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       Mind: 'Ajustá tu foco mental sin salir del ritmo del onboarding actual.',
       Soul: 'Definí hábitos que te ayuden a mantener centro y conexión.',
     },
-    minRule: (min) => `Mínimo por pilar para este modo: ${min}`,
+    minRule: (min) => `Mínimo: ${min} tareas`,
+    suggestedRule: 'Sugerido: 9 a 12',
     minimumRequired: 'Necesitás seleccionar el mínimo para continuar.',
     traitLabel: 'Trait',
-    suggestionsLabel: 'Ideas rápidas',
+    taskHelpLabel: 'Abrir ideas rápidas de la tarea',
     minutesPlaceholder: 'min',
     countPlaceholder: 'n',
     moderationTitle: 'Moderación',
@@ -128,12 +127,10 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     moderationHint: 'Sin juicios: solo seguimiento para encontrar balance.',
     moderationFlex: 'También podés manejar tolerancias flexibles (por ejemplo, fines de semana).',
     setupTitle: 'Configurando tu Quick Start',
-    setupSubtitle: 'Solo preview visual. Más adelante se conectará con la lógica real.',
+    setupSubtitle: 'Estamos aplicando tu selección y reutilizando el flujo real del onboarding.',
     setupDone: 'Setup listo para conectar con demo guiada.',
-    bonusReady: 'Bonus balanceado x1.5 activo',
-    bonusPending: 'Balanceá Body, Mind y Soul para activar x1.5',
-    totalGp: 'GP total',
-    currentPillarGp: 'GP del pilar',
+    bonusReady: 'Balanceado: estás sumando x1.5 GP',
+    bonusPending: 'Balanceá Body, Mind y Soul para sumar x1.5 GP',
     modeLabels: {
       LOW: 'Low',
       CHILL: 'Chill',
@@ -161,7 +158,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       'Aplicando tu Game Mode',
       'Equilibrando Body, Mind and Soul',
       'Preparando tu plan inicial',
-      'Activando tu suscripción Free',
+      'Activando tu plan',
       'Dejando listo tu Quick Start',
     ],
     tasks: {
@@ -289,9 +286,9 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     forkTitle: 'How do you want to start today?',
     forkSubtitle: 'This is a new preview variant. Your real onboarding stays untouched.',
     personalGuide: 'Personal Guide',
-    personalGuideHint: 'Keep the guided traditional path.',
+    personalGuideHint: 'Guided and more personalized path with full onboarding support.',
     quickStart: 'Quick Start',
-    quickStartHint: 'Build your base quickly across Body, Mind, and Soul.',
+    quickStartHint: 'A faster, self-directed path to set your base today.',
     inPreview: 'Preview',
     comingSoon: 'Coming soon',
     gameModeGateTitle: 'First, choose your Game Mode',
@@ -308,10 +305,11 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       Mind: 'Tune your mental focus while keeping the current onboarding feel.',
       Soul: 'Choose habits that support connection and inner alignment.',
     },
-    minRule: (min) => `Minimum required per pillar for this mode: ${min}`,
+    minRule: (min) => `Minimum: ${min} tasks`,
+    suggestedRule: 'Suggested: 9 to 12',
     minimumRequired: 'You need to select the minimum to continue.',
     traitLabel: 'Trait',
-    suggestionsLabel: 'Quick ideas',
+    taskHelpLabel: 'Open quick ideas for this task',
     minutesPlaceholder: 'min',
     countPlaceholder: 'qty',
     moderationTitle: 'Moderation',
@@ -319,12 +317,10 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     moderationHint: 'No judgment: only tracking to find your own balance.',
     moderationFlex: 'You can also use flexible tolerance settings (for example, weekends).',
     setupTitle: 'Configuring your Quick Start',
-    setupSubtitle: 'UI-only preview. Real logic will be connected in a later phase.',
+    setupSubtitle: 'Applying your selection with the same calibration feel used in onboarding.',
     setupDone: 'Setup ready to connect with guided demo.',
-    bonusReady: 'Balanced bonus x1.5 active',
-    bonusPending: 'Balance Body, Mind, and Soul to activate x1.5',
-    totalGp: 'Total GP',
-    currentPillarGp: 'Pillar GP',
+    bonusReady: 'Balanced: you are earning x1.5 GP',
+    bonusPending: 'Balance Body, Mind, and Soul to earn x1.5 GP',
     modeLabels: {
       LOW: 'Low',
       CHILL: 'Chill',
@@ -352,7 +348,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       'Applying your Game Mode',
       'Balancing Body, Mind and Soul',
       'Preparing your initial plan',
-      'Activating your Free subscription',
+      'Activating your plan',
       'Finalizing your Quick Start setup',
     ],
     tasks: {
@@ -515,68 +511,77 @@ function InlineTaskRow({
   }, [selected]);
 
   return (
-    <motion.button
-      type="button"
-      whileTap={{ scale: 0.98 }}
-      onClick={onToggle}
-      data-selected={selected ? 'true' : undefined}
-      className="w-full overflow-hidden rounded-2xl border border-white/15 bg-white/5 text-left text-white/85 transition hover:border-white/30 hover:bg-white/10 data-[selected=true]:border-sky-300/55 data-[selected=true]:bg-sky-400/12"
-    >
+    <div className="relative">
       {selected ? (
-        <div className="h-7 border-b border-violet-200/30 bg-violet-300/30 px-4">
-          <p className="flex h-full items-center text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-50/90">
-            {copy.traitLabel}: {task.trait}
-          </p>
+        <div className="pointer-events-none absolute -inset-x-1 -bottom-1 -top-1 rounded-[1.25rem] border border-violet-300/35 bg-violet-500/20" aria-hidden>
+          <div className="h-7 rounded-t-[1.25rem] border-b border-violet-200/25 bg-violet-300/35 px-4">
+            <p className="flex h-full items-center text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-50/90">
+              {copy.traitLabel}: {task.trait}
+            </p>
+          </div>
         </div>
       ) : null}
 
-      <div className="flex items-start gap-3 px-4 py-3.5">
-        <SelectableCheck
-          selected={selected}
-          toneClassName="data-[selected=true]:border-transparent data-[selected=true]:bg-sky-400 data-[selected=true]:text-slate-900"
-        />
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-2 text-sm leading-relaxed sm:text-base">
-          {task.inputBefore ? <span>{task.inputBefore}</span> : null}
-          <span>{task.text}</span>
-          {hasInput ? (
-            <input
-              value={inputValue}
-              disabled={!selected}
-              inputMode="numeric"
-              onClick={(event) => event.stopPropagation()}
-              onChange={(event) => onInputChange(event.target.value)}
-              className="h-6 w-12 rounded-md border border-white/20 bg-white/8 px-1.5 text-center text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70 disabled:opacity-40 sm:h-7 sm:w-14"
-              placeholder={copy.countPlaceholder}
-            />
-          ) : null}
-          {task.inputAfter ? <span>{task.inputAfter}</span> : null}
-          {task.helper ? <span className="w-full text-xs text-white/55">{task.helper}</span> : null}
+      <motion.div
+        whileTap={{ scale: 0.985 }}
+        onClick={onToggle}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onToggle();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        data-selected={selected ? 'true' : undefined}
+        className="relative z-10 w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-left text-white/85 transition hover:border-white/30 hover:bg-white/10 data-[selected=true]:border-violet-200/55 data-[selected=true]:bg-violet-400/15"
+      >
+        <div className="flex items-start gap-3">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-2 pr-6 text-sm leading-relaxed sm:text-base">
+            {task.inputBefore ? <span>{task.inputBefore}</span> : null}
+            <span>{task.text}</span>
+            {hasInput ? (
+              <input
+                value={inputValue}
+                disabled={!selected}
+                inputMode="numeric"
+                onClick={(event) => event.stopPropagation()}
+                onChange={(event) => onInputChange(event.target.value)}
+                className="h-6 w-12 rounded-md border border-violet-200/30 bg-violet-100/5 px-1.5 text-center text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 disabled:opacity-40 sm:h-7 sm:w-14"
+                placeholder={copy.countPlaceholder}
+              />
+            ) : null}
+            {task.inputAfter ? <span>{task.inputAfter}</span> : null}
+            {task.helper ? <span className="w-full text-xs text-white/55">{task.helper}</span> : null}
+          </div>
+
           {selected && task.suggestions?.length ? (
-            <div className="w-full">
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setShowSuggestions((prev) => !prev);
-                }}
-                className="inline-flex items-center gap-1 rounded-full border border-violet-200/35 bg-violet-300/20 px-2.5 py-1 text-[11px] font-medium text-violet-50"
-              >
-                💡 {copy.suggestionsLabel}
-              </button>
-              {showSuggestions ? (
-                <div className="mt-2 rounded-xl border border-violet-200/25 bg-violet-500/15 p-2.5 text-xs text-violet-50/95">
-                  <ul className="space-y-1">
-                    {task.suggestions.map((suggestion) => (
-                      <li key={suggestion} className="leading-relaxed">• {suggestion}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </div>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                setShowSuggestions((prev) => !prev);
+              }}
+              className="relative z-20 mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full border border-violet-200/45 bg-violet-400/20 text-[11px] text-violet-50 transition hover:bg-violet-300/30"
+              aria-label={copy.taskHelpLabel}
+              aria-expanded={showSuggestions}
+            >
+              ✦
+            </button>
           ) : null}
         </div>
-      </div>
-    </motion.button>
+      </motion.div>
+
+      {selected && task.suggestions?.length && showSuggestions ? (
+        <div className="absolute right-3 top-[calc(100%+0.35rem)] z-30 w-[min(18.5rem,calc(100%-1.5rem))] rounded-xl border border-violet-200/35 bg-[#2b2f6a]/95 p-3 text-xs text-violet-50 shadow-[0_10px_30px_rgba(43,25,96,0.45)] backdrop-blur">
+          <ul className="space-y-1.5">
+            {task.suggestions.map((suggestion) => (
+              <li key={suggestion} className="leading-relaxed">• {suggestion}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -617,8 +622,6 @@ export default function QuickStartPreviewPage() {
 
   const currentStepIndex = Math.max(0, visibleRoute.indexOf(step));
   const currentPillar = step === 'body' ? 'Body' : step === 'mind' ? 'Mind' : step === 'soul' ? 'Soul' : null;
-  const currentPillarGp = currentPillar ? selectedByPillar[currentPillar].length * 3 : 0;
-
 
   const quickStartDraft = useMemo<QuickStartPreviewDraft>(() => {
     const selectedTraitsByPillar = (Object.keys(selectedByPillar) as Pillar[]).reduce<Record<Pillar, string[]>>((acc, pillar) => {
@@ -733,17 +736,15 @@ export default function QuickStartPreviewPage() {
           <p className="text-xs uppercase tracking-[0.25em] text-white/55">{copy.inPreview}</p>
           <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{copy.pillarTitles[currentPillar]}</h1>
           <p className="mt-2 text-sm text-white/70">{copy.pillarSubtitles[currentPillar]}</p>
-          <p className="mt-2 text-xs text-white/55">{copy.minRule(minimum)}</p>
+          <div className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-xl border border-violet-200/30 bg-violet-400/10 px-3 py-2 text-xs font-medium text-violet-50/95">
+            <span>{copy.minRule(minimum)}</span>
+            <span className="text-violet-200/70">·</span>
+            <span>{copy.suggestedRule}</span>
+          </div>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-full border border-white/20 bg-white/6 px-3 py-1 text-white/80">
-              {copy.currentPillarGp}: {currentPillarGp}
-            </span>
-            <span className="rounded-full border border-white/20 bg-white/6 px-3 py-1 text-white/80">
-              {copy.totalGp}: {totalGp}
-            </span>
             <span
-              className={`rounded-full border px-3 py-1 ${
-                balancedBonusActive ? 'border-emerald-300/40 bg-emerald-400/20 text-emerald-100' : 'border-white/20 bg-white/6 text-white/70'
+              className={`rounded-xl border px-3.5 py-1.5 text-[0.72rem] sm:text-xs ${
+                balancedBonusActive ? 'border-violet-200/45 bg-violet-300/25 text-violet-50' : 'border-violet-200/30 bg-violet-400/12 text-violet-100/90'
               }`}
             >
               {balancedBonusActive ? copy.bonusReady : copy.bonusPending}
@@ -805,8 +806,8 @@ export default function QuickStartPreviewPage() {
             <p className="text-xs text-white/55">{copy.subtitle}</p>
           </div>
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => handleLanguageChange('es')} className={`rounded-full border px-3 py-1 text-xs ${language === 'es' ? 'border-sky-300/60 bg-sky-400/20' : 'border-white/20 bg-white/8'}`}>ES</button>
-            <button type="button" onClick={() => handleLanguageChange('en')} className={`rounded-full border px-3 py-1 text-xs ${language === 'en' ? 'border-sky-300/60 bg-sky-400/20' : 'border-white/20 bg-white/8'}`}>EN</button>
+            <button type="button" onClick={() => handleLanguageChange('es')} className={`rounded-full border px-3 py-1 text-xs ${language === 'es' ? 'border-violet-200/60 bg-violet-400/20' : 'border-white/20 bg-white/8'}`}>ES</button>
+            <button type="button" onClick={() => handleLanguageChange('en')} className={`rounded-full border px-3 py-1 text-xs ${language === 'en' ? 'border-violet-200/60 bg-violet-400/20' : 'border-white/20 bg-white/8'}`}>EN</button>
           </div>
         </div>
 
@@ -830,16 +831,16 @@ export default function QuickStartPreviewPage() {
             <p className="mt-2 text-sm text-white/70">{copy.forkSubtitle}</p>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <article className="rounded-2xl border border-white/20 bg-white/6 p-4">
-                <p className="text-sm font-semibold text-white">{copy.personalGuide}</p>
+              <article className="rounded-2xl border border-violet-200/25 bg-violet-400/10 p-4">
+                <p className="flex items-center gap-2 text-sm font-semibold text-white"><span aria-hidden>✨</span>{copy.personalGuide}</p>
                 <p className="mt-1 text-xs text-white/65">{copy.personalGuideHint}</p>
                 <span className="mt-3 inline-flex rounded-full border border-white/20 bg-white/8 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-white/65">{copy.comingSoon}</span>
               </article>
 
-              <button type="button" onClick={goNext} className="rounded-2xl border border-sky-300/40 bg-sky-400/15 p-4 text-left transition hover:bg-sky-400/20">
-                <p className="text-sm font-semibold text-white">{copy.quickStart}</p>
+              <button type="button" onClick={goNext} className="rounded-2xl border border-violet-200/45 bg-violet-500/20 p-4 text-left transition hover:bg-violet-400/25">
+                <p className="flex items-center gap-2 text-sm font-semibold text-white"><span aria-hidden>⚡</span>{copy.quickStart}</p>
                 <p className="mt-1 text-xs text-white/65">{copy.quickStartHint}</p>
-                <span className="mt-3 inline-flex rounded-full border border-sky-300/40 bg-sky-300/20 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-sky-100">{copy.inPreview}</span>
+                <span className="mt-3 inline-flex rounded-full border border-violet-200/35 bg-violet-300/20 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-violet-100">{copy.inPreview}</span>
               </button>
             </div>
 
@@ -862,13 +863,13 @@ export default function QuickStartPreviewPage() {
                     key={option}
                     type="button"
                     onClick={() => setModerationPrefs((prev) => ({ ...prev, [option]: !prev[option] }))}
-                    className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition ${enabled ? 'border-sky-300/50 bg-sky-400/15' : 'border-white/20 bg-white/6'}`}
+                    className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition ${enabled ? 'border-violet-200/45 bg-violet-400/18' : 'border-white/20 bg-white/6'}`}
                   >
                     <div>
                       <p className="text-sm font-semibold text-white">{card.icon} {card.title}</p>
                       <p className="mt-1 text-xs text-white/65">{card.description}</p>
                     </div>
-                    <span className={`h-5 w-10 rounded-full p-0.5 ${enabled ? 'bg-sky-300/70' : 'bg-white/20'}`}>
+                    <span className={`h-5 w-10 rounded-full p-0.5 ${enabled ? 'bg-violet-300/70' : 'bg-white/20'}`}>
                       <span className={`block h-4 w-4 rounded-full bg-white transition ${enabled ? 'translate-x-5' : ''}`} />
                     </span>
                   </button>
@@ -888,21 +889,45 @@ export default function QuickStartPreviewPage() {
               {copy.setupSteps.map((setupStep, index) => {
                 const isVisible = index < setupProgress;
                 const complete = setupProgress >= copy.setupSteps.length;
+                const isPlanStep = index === 3;
                 return (
                   <li key={setupStep} className={`flex items-center gap-3 text-sm transition ${isVisible ? 'opacity-100' : 'opacity-35'}`}>
-                    <span className={`h-2.5 w-2.5 rounded-full ${isVisible ? 'bg-sky-300' : 'bg-white/25'} ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
-                    <span>{setupStep}</span>
+                    <span className={`h-2.5 w-2.5 rounded-full ${isVisible ? 'bg-violet-300' : 'bg-white/25'} ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
+                    <span>
+                      {setupStep}
+                      {isPlanStep ? (
+                        <span className="ml-2 inline-flex rounded-full border border-emerald-300/35 bg-emerald-400/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-100 align-middle">
+                          FREE
+                        </span>
+                      ) : null}
+                    </span>
                   </li>
                 );
               })}
             </ul>
             <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-white/15">
               <div
-                className={`h-full bg-gradient-to-r from-violet-300/80 via-indigo-300/85 to-sky-300/80 transition-all duration-700 ${
-                  setupProgress >= copy.setupSteps.length ? 'w-full' : 'w-1/3 animate-pulse'
+                className={`h-full bg-gradient-to-r from-violet-300/80 via-indigo-300/85 to-violet-300/80 transition-all duration-700 ${
+                  setupProgress >= copy.setupSteps.length ? 'w-full quick-start-setup__progress-complete' : 'w-1/3 quick-start-setup__progress-animated'
                 }`}
               />
             </div>
+            <style>{`
+              .quick-start-setup__progress-animated {
+                animation: quick-start-progress 2.3s ease-in-out infinite;
+                transform-origin: left;
+              }
+
+              @keyframes quick-start-progress {
+                0% {
+                  transform: translateX(-112%);
+                }
+
+                100% {
+                  transform: translateX(318%);
+                }
+              }
+            `}</style>
             {setupProgress >= copy.setupSteps.length ? <p className="mt-4 text-sm text-emerald-100">{copy.setupDone}</p> : null}
             <NavButtons
               language={language}
