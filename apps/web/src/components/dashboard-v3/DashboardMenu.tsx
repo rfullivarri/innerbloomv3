@@ -253,6 +253,7 @@ export function DashboardMenu({
     };
   }, [isOpen]);
 
+
   useEffect(() => {
     if (!toast) {
       return;
@@ -276,8 +277,9 @@ export function DashboardMenu({
   }, [onQuickAccessClick]);
 
   const handleTriggerClick = useCallback(() => {
+    void modeUpgradeSuggestionRequest.reload();
     setIsOpen(true);
-  }, []);
+  }, [modeUpgradeSuggestionRequest]);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
@@ -324,7 +326,8 @@ export function DashboardMenu({
     modeUpgradeSuggestion?.eligible_for_upgrade &&
       modeUpgradeSuggestion?.cta_enabled &&
       modeUpgradeSuggestion?.suggested_mode &&
-      !modeUpgradeSuggestion?.accepted_at,
+      !modeUpgradeSuggestion?.accepted_at &&
+      !modeUpgradeSuggestion?.dismissed_at,
   );
   const selectedOrCurrentMode = selectedMode ?? normalizedCurrentMode;
   const modeJumpIsDemanding = useMemo(
