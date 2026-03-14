@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { resolveOnboardingLanguage } from '../onboarding/i18n';
 import type { OnboardingLanguage } from '../onboarding/constants';
 import type { GameMode } from '../onboarding/state';
-import { GAME_MODE_META } from '../lib/gameModeMeta';
 import { GameModeStep } from '../onboarding/steps/GameModeStep';
 import { HUD } from '../onboarding/ui/HUD';
 import { NavButtons } from '../onboarding/ui/NavButtons';
@@ -107,9 +106,9 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     continue: 'Continuar',
     back: 'Volver',
     pillarTitles: {
-      Body: 'Quick Start · Cuerpo 🫀',
-      Mind: 'Quick Start · Mente 🧠',
-      Soul: 'Quick Start · Alma 🏵️',
+      Body: 'Quick Start · Body',
+      Mind: 'Quick Start · Mind',
+      Soul: 'Quick Start · Soul',
     },
     pillarSubtitles: {
       Body: 'Elegí 10 tareas visibles y activá las que querés sostener.',
@@ -297,9 +296,9 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     continue: 'Continue',
     back: 'Back',
     pillarTitles: {
-      Body: 'Quick Start · Body 🫀',
-      Mind: 'Quick Start · Mind 🧠',
-      Soul: 'Quick Start · Soul 🏵️',
+      Body: 'Quick Start · Body',
+      Mind: 'Quick Start · Mind',
+      Soul: 'Quick Start · Soul',
     },
     pillarSubtitles: {
       Body: 'Review all 10 tasks and activate what you want to sustain.',
@@ -475,33 +474,26 @@ const COPY: Record<OnboardingLanguage, Translations> = {
 
 const STEP_ORDER: Step[] = ['game-mode', 'branch', 'body', 'mind', 'soul', 'moderation', 'setup'];
 
-const MODE_ACCENT: Record<GameMode, string> = {
-  LOW: GAME_MODE_META.Low.accentColor,
-  CHILL: GAME_MODE_META.Chill.accentColor,
-  FLOW: GAME_MODE_META.Flow.accentColor,
-  EVOLVE: GAME_MODE_META.Evolve.accentColor,
-};
-
 const MODE_SOFT_STYLES: Record<GameMode, { tint: string; border: string; glow: string }> = {
   LOW: {
-    tint: `color-mix(in srgb, ${MODE_ACCENT.LOW} 20%, transparent)`,
-    border: `color-mix(in srgb, ${MODE_ACCENT.LOW} 40%, transparent)`,
-    glow: `color-mix(in srgb, ${MODE_ACCENT.LOW} 22%, transparent)`,
+    tint: 'rgba(248, 113, 113, 0.2)',
+    border: 'rgba(248, 113, 113, 0.45)',
+    glow: 'rgba(248, 113, 113, 0.14)',
   },
   CHILL: {
-    tint: `color-mix(in srgb, ${MODE_ACCENT.CHILL} 18%, transparent)`,
-    border: `color-mix(in srgb, ${MODE_ACCENT.CHILL} 38%, transparent)`,
-    glow: `color-mix(in srgb, ${MODE_ACCENT.CHILL} 20%, transparent)`,
+    tint: 'rgba(74, 222, 128, 0.18)',
+    border: 'rgba(74, 222, 128, 0.42)',
+    glow: 'rgba(74, 222, 128, 0.12)',
   },
   FLOW: {
-    tint: `color-mix(in srgb, ${MODE_ACCENT.FLOW} 20%, transparent)`,
-    border: `color-mix(in srgb, ${MODE_ACCENT.FLOW} 42%, transparent)`,
-    glow: `color-mix(in srgb, ${MODE_ACCENT.FLOW} 22%, transparent)`,
+    tint: 'rgba(56, 189, 248, 0.2)',
+    border: 'rgba(56, 189, 248, 0.44)',
+    glow: 'rgba(56, 189, 248, 0.13)',
   },
   EVOLVE: {
-    tint: `color-mix(in srgb, ${MODE_ACCENT.EVOLVE} 22%, transparent)`,
-    border: `color-mix(in srgb, ${MODE_ACCENT.EVOLVE} 42%, transparent)`,
-    glow: `color-mix(in srgb, ${MODE_ACCENT.EVOLVE} 24%, transparent)`,
+    tint: 'rgba(167, 139, 250, 0.2)',
+    border: 'rgba(167, 139, 250, 0.44)',
+    glow: 'rgba(167, 139, 250, 0.14)',
   },
 };
 
@@ -546,17 +538,24 @@ function InlineTaskRow({
   const modeStyle = MODE_SOFT_STYLES[mode];
 
   return (
-    <div className={`relative ${selected ? 'pt-1.5' : ''}`}>
+    <div className={`relative ${selected ? 'pb-1 pt-2' : ''}`}>
       {selected ? (
         <div
-          className="pointer-events-none absolute inset-x-2 bottom-0.5 top-0 rounded-[1.05rem] border"
+          className="pointer-events-none absolute inset-0 rounded-[1.15rem] px-4 pt-1.5"
           style={{
-            borderColor: 'color-mix(in srgb, #a78bfa 30%, transparent)',
-            background: 'linear-gradient(180deg, rgba(167,139,250,0.16), rgba(139,92,246,0.08))',
-            boxShadow: '0 10px 24px rgba(76, 29, 149, 0.18)',
+            border: `1px solid ${modeStyle.border}`,
+            background: `linear-gradient(180deg, ${modeStyle.tint}, color-mix(in srgb, ${modeStyle.tint} 20%, transparent))`,
+            boxShadow: `0 16px 36px ${modeStyle.glow}`,
           }}
           aria-hidden
-        />
+        >
+          <div className="flex h-full flex-col justify-between pb-3">
+            <p className="pt-0.5 text-[10px] font-semibold uppercase leading-none tracking-[0.22em] text-white/88">
+              {copy.traitLabel}: {task.trait}
+            </p>
+            <span className="h-0.5 w-full rounded-full" style={{ backgroundColor: modeStyle.border }} />
+          </div>
+        </div>
       ) : null}
 
       <motion.div
@@ -571,12 +570,12 @@ function InlineTaskRow({
         role="button"
         tabIndex={0}
         data-selected={selected ? 'true' : undefined}
-        className="onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 shadow-[0_14px_32px_rgba(8,12,28,0.2)] transition hover:border-white/30 hover:bg-white/[0.12] data-[selected=true]:mt-1.5"
+        className="onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 shadow-[0_14px_32px_rgba(8,12,28,0.2)] transition hover:border-white/30 hover:bg-white/[0.12] data-[selected=true]:mt-4"
         style={selected
           ? {
-              borderColor: 'color-mix(in srgb, #ffffff 28%, transparent)',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08))',
-              boxShadow: '0 16px 32px rgba(8,12,28,0.22), 0 0 0 1px rgba(255,255,255,0.07)',
+              borderColor: modeStyle.border,
+              background: `linear-gradient(180deg, rgba(255,255,255,0.12), color-mix(in srgb, ${modeStyle.tint} 40%, rgba(255,255,255,0.06)))`,
+              boxShadow: `0 18px 40px rgba(8,12,28,0.24), 0 0 0 1px color-mix(in srgb, ${modeStyle.border} 56%, transparent)`,
             }
           : undefined}
       >
@@ -606,7 +605,8 @@ function InlineTaskRow({
                 event.stopPropagation();
                 setShowSuggestions((prev) => !prev);
               }}
-              className="relative z-20 mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md border border-violet-200/45 bg-violet-300/18 text-white/90 transition"
+              className="relative z-20 mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md border text-white/90 transition"
+              style={{ borderColor: modeStyle.border, backgroundColor: modeStyle.tint }}
               aria-label={copy.taskHelpLabel}
               aria-expanded={showSuggestions}
             >
@@ -623,7 +623,7 @@ function InlineTaskRow({
       {selected && task.suggestions?.length && showSuggestions ? (
         <div
           className="absolute right-3 bottom-[calc(100%+0.35rem)] z-30 w-[min(18.5rem,calc(100%-1.5rem))] rounded-xl border p-3 text-xs text-white/92 shadow-[0_10px_30px_rgba(43,25,96,0.45)] backdrop-blur"
-          style={{ borderColor: 'rgba(196, 181, 253, 0.42)', backgroundColor: 'rgba(17, 24, 39, 0.93)' }}
+          style={{ borderColor: modeStyle.border, backgroundColor: 'rgba(17, 24, 39, 0.93)' }}
         >
           <ul className="space-y-1.5">
             {task.suggestions.map((suggestion) => (
@@ -780,7 +780,6 @@ export default function QuickStartPreviewPage() {
     }
 
     const tasks = copy.tasks[currentPillar];
-    const modeStyle = MODE_SOFT_STYLES[gameMode];
 
     return (
       <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
@@ -788,14 +787,7 @@ export default function QuickStartPreviewPage() {
           <p className="text-xs uppercase tracking-[0.25em] text-white/55">{copy.inPreview}</p>
           <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{copy.pillarTitles[currentPillar]}</h1>
           <p className="mt-2 text-sm text-white/70">{copy.pillarSubtitles[currentPillar]}</p>
-          <div
-            className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-semibold text-violet-50/95 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
-            style={{
-              borderColor: modeStyle.border,
-              background: `linear-gradient(135deg, ${modeStyle.tint}, color-mix(in srgb, ${modeStyle.tint} 36%, rgba(139,92,246,0.12)))`,
-              boxShadow: `0 10px 22px ${modeStyle.glow}`,
-            }}
-          >
+          <div className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-lg border border-violet-100/35 bg-violet-300/18 px-3.5 py-2 text-xs font-semibold text-violet-50/95 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
             <span>{copy.minRule(minimum)}</span>
             <span className="text-violet-100/60">·</span>
             <span>{copy.suggestedRule}</span>
@@ -989,23 +981,13 @@ export default function QuickStartPreviewPage() {
               }
             `}</style>
             {setupProgress >= copy.setupSteps.length ? <p className="mt-4 text-sm text-emerald-100">{copy.setupDone}</p> : null}
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <motion.button
-                type="button"
-                onClick={() => navigate('/')}
-                whileTap={{ scale: 0.97 }}
-                className="order-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-[#cf8bf3]/30 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cf8bf3]/60 sm:order-2"
-              >
-                {language === 'en' ? 'Finish preview' : 'Finalizar preview'}
-              </motion.button>
-              <button
-                type="button"
-                onClick={goBack}
-                className="order-2 inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2 text-sm font-medium text-white/80 transition hover:border-white/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 sm:order-1"
-              >
-                ← {copy.back}
-              </button>
-            </div>
+            <NavButtons
+              language={language}
+              onBack={goBack}
+              onConfirm={() => navigate('/')}
+              backLabel={copy.back}
+              confirmLabel={language === 'en' ? 'Finish preview' : 'Finalizar preview'}
+            />
           </section>
         ) : null}
       </div>
