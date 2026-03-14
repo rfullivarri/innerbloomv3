@@ -474,6 +474,29 @@ const COPY: Record<OnboardingLanguage, Translations> = {
 
 const STEP_ORDER: Step[] = ['game-mode', 'branch', 'body', 'mind', 'soul', 'moderation', 'setup'];
 
+const MODE_SOFT_STYLES: Record<GameMode, { tint: string; border: string; glow: string }> = {
+  LOW: {
+    tint: 'rgba(248, 113, 113, 0.2)',
+    border: 'rgba(248, 113, 113, 0.45)',
+    glow: 'rgba(248, 113, 113, 0.14)',
+  },
+  CHILL: {
+    tint: 'rgba(74, 222, 128, 0.18)',
+    border: 'rgba(74, 222, 128, 0.42)',
+    glow: 'rgba(74, 222, 128, 0.12)',
+  },
+  FLOW: {
+    tint: 'rgba(56, 189, 248, 0.2)',
+    border: 'rgba(56, 189, 248, 0.44)',
+    glow: 'rgba(56, 189, 248, 0.13)',
+  },
+  EVOLVE: {
+    tint: 'rgba(167, 139, 250, 0.2)',
+    border: 'rgba(167, 139, 250, 0.44)',
+    glow: 'rgba(167, 139, 250, 0.14)',
+  },
+};
+
 function getDefaultLanguage(searchParams: URLSearchParams): OnboardingLanguage {
   const lang = searchParams.get('lang');
   if (lang === 'es' || lang === 'en') {
@@ -493,6 +516,7 @@ function InlineTaskRow({
   onToggle,
   onInputChange,
   copy,
+  mode,
 }: {
   task: Task;
   selected: boolean;
@@ -500,6 +524,7 @@ function InlineTaskRow({
   onToggle: () => void;
   onInputChange: (value: string) => void;
   copy: Translations;
+  mode: GameMode;
 }) {
   const hasInput = Boolean(task.inputAfter || task.inputBefore);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -510,15 +535,25 @@ function InlineTaskRow({
     }
   }, [selected]);
 
+  const modeStyle = MODE_SOFT_STYLES[mode];
+
   return (
     <div className={`relative ${selected ? 'pb-1 pt-2' : ''}`}>
       {selected ? (
-        <div className="pointer-events-none absolute inset-0 rounded-[1.15rem] border border-violet-200/45 bg-violet-400/28 px-4 pt-2.5" aria-hidden>
+        <div
+          className="pointer-events-none absolute inset-0 rounded-[1.15rem] px-4 pt-1.5"
+          style={{
+            border: `1px solid ${modeStyle.border}`,
+            background: `linear-gradient(180deg, ${modeStyle.tint}, color-mix(in srgb, ${modeStyle.tint} 20%, transparent))`,
+            boxShadow: `0 16px 36px ${modeStyle.glow}`,
+          }}
+          aria-hidden
+        >
           <div className="flex h-full flex-col justify-between pb-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-violet-50/90">
+            <p className="pt-0.5 text-[10px] font-semibold uppercase leading-none tracking-[0.22em] text-white/88">
               {copy.traitLabel}: {task.trait}
             </p>
-            <span className="h-0.5 w-full rounded-full bg-violet-100/15" />
+            <span className="h-0.5 w-full rounded-full" style={{ backgroundColor: modeStyle.border }} />
           </div>
         </div>
       ) : null}
@@ -535,7 +570,14 @@ function InlineTaskRow({
         role="button"
         tabIndex={0}
         data-selected={selected ? 'true' : undefined}
-        className="relative z-10 w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-left text-white/85 transition hover:border-white/30 hover:bg-white/10 data-[selected=true]:mt-4 data-[selected=true]:border-violet-100/70 data-[selected=true]:bg-violet-500/22"
+        className="onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 shadow-[0_14px_32px_rgba(8,12,28,0.2)] transition hover:border-white/30 hover:bg-white/[0.12] data-[selected=true]:mt-4"
+        style={selected
+          ? {
+              borderColor: modeStyle.border,
+              background: `linear-gradient(180deg, rgba(255,255,255,0.12), color-mix(in srgb, ${modeStyle.tint} 40%, rgba(255,255,255,0.06)))`,
+              boxShadow: `0 18px 40px rgba(8,12,28,0.24), 0 0 0 1px color-mix(in srgb, ${modeStyle.border} 56%, transparent)`,
+            }
+          : undefined}
       >
         <div className="flex items-start gap-3">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-2 pr-6 text-sm leading-relaxed sm:text-base">
@@ -563,7 +605,8 @@ function InlineTaskRow({
                 event.stopPropagation();
                 setShowSuggestions((prev) => !prev);
               }}
-              className="relative z-20 mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md border border-violet-200/45 bg-violet-400/20 text-violet-50 transition hover:bg-violet-300/30"
+              className="relative z-20 mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md border text-white/90 transition"
+              style={{ borderColor: modeStyle.border, backgroundColor: modeStyle.tint }}
               aria-label={copy.taskHelpLabel}
               aria-expanded={showSuggestions}
             >
@@ -578,7 +621,10 @@ function InlineTaskRow({
       </motion.div>
 
       {selected && task.suggestions?.length && showSuggestions ? (
-        <div className="absolute right-3 bottom-[calc(100%+0.35rem)] z-30 w-[min(18.5rem,calc(100%-1.5rem))] rounded-xl border border-violet-200/35 bg-[#2b2f6a]/95 p-3 text-xs text-violet-50 shadow-[0_10px_30px_rgba(43,25,96,0.45)] backdrop-blur">
+        <div
+          className="absolute right-3 bottom-[calc(100%+0.35rem)] z-30 w-[min(18.5rem,calc(100%-1.5rem))] rounded-xl border p-3 text-xs text-white/92 shadow-[0_10px_30px_rgba(43,25,96,0.45)] backdrop-blur"
+          style={{ borderColor: modeStyle.border, backgroundColor: 'rgba(17, 24, 39, 0.93)' }}
+        >
           <ul className="space-y-1.5">
             {task.suggestions.map((suggestion) => (
               <li key={suggestion} className="leading-relaxed">• {suggestion}</li>
@@ -771,6 +817,7 @@ export default function QuickStartPreviewPage() {
                   setInputsByTask((prev) => ({ ...prev, [`${currentPillar}-${task.id}`]: value }));
                 }}
                 copy={copy}
+                mode={gameMode}
               />
             );
           })}
