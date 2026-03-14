@@ -20,6 +20,7 @@ interface Task {
   inputBefore?: string;
   inputAfter?: string;
   helper?: string;
+  suggestions?: string[];
 }
 
 interface Translations {
@@ -42,6 +43,7 @@ interface Translations {
   minRule: (min: number) => string;
   minimumRequired: string;
   traitLabel: string;
+  suggestionsLabel: string;
   minutesPlaceholder: string;
   countPlaceholder: string;
   moderationTitle: string;
@@ -118,6 +120,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     minRule: (min) => `Mínimo por pilar para este modo: ${min}`,
     minimumRequired: 'Necesitás seleccionar el mínimo para continuar.',
     traitLabel: 'Trait',
+    suggestionsLabel: 'Ideas rápidas',
     minutesPlaceholder: 'min',
     countPlaceholder: 'n',
     moderationTitle: 'Moderación',
@@ -163,40 +166,120 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     ],
     tasks: {
       Body: [
-        { id: 'ENERGIA', trait: 'ENERGIA', text: 'Voy a caminar durante', inputAfter: 'minutos' },
-        { id: 'NUTRICION', trait: 'NUTRICION', text: 'Voy a hacer', inputAfter: 'comida(s) equilibrada(s) al día' },
-        { id: 'SUENO', trait: 'SUENO', text: 'Voy a dormir al menos', inputAfter: 'horas por noche' },
-        { id: 'RECUPERACION', trait: 'RECUPERACION', text: 'Voy a hacer', inputAfter: 'pausa(s) de recuperación durante el día' },
-        { id: 'HIDRATACION', trait: 'HIDRATACION', text: 'Voy a tomar', inputAfter: 'vaso(s) de agua al día' },
-        { id: 'HIGIENE', trait: 'HIGIENE', text: 'Voy a completar mi rutina de higiene personal', inputAfter: 'vez/veces al día' },
-        { id: 'VITALIDAD', trait: 'VITALIDAD', text: 'Voy a empezar el día con una rutina activadora de', inputAfter: 'minutos' },
-        { id: 'POSTURA', trait: 'POSTURA', text: 'Voy a dedicar', inputAfter: 'minutos a cuidar mi postura o ergonomía' },
-        { id: 'MOVILIDAD', trait: 'MOVILIDAD', text: 'Voy a hacer movilidad o estiramientos durante', inputAfter: 'minutos' },
-        { id: 'MODERACION', trait: 'MODERACION', text: 'Quiero mejorar mi relación con ciertos consumos o excesos' },
+        { id: 'ENERGIA', trait: 'ENERGIA', text: 'Caminar durante', inputAfter: 'minutos' },
+        { id: 'NUTRICION', trait: 'NUTRICION', text: 'Hacer', inputAfter: 'comida(s) equilibrada(s) al día' },
+        { id: 'SUENO', trait: 'SUENO', text: 'Dormir al menos', inputAfter: 'horas por noche' },
+        {
+          id: 'RECUPERACION',
+          trait: 'RECUPERACION',
+          text: 'Hacer una pausa de recuperación durante el día',
+          suggestions: ['frenar unos minutos', 'cerrar los ojos', 'respirar', 'bajar estímulos', 'estirar un poco'],
+        },
+        { id: 'HIDRATACION', trait: 'HIDRATACION', text: 'Tomar', inputAfter: 'vaso(s) de agua al día' },
+        {
+          id: 'HIGIENE',
+          trait: 'HIGIENE',
+          text: 'Completar mi rutina de higiene personal',
+          suggestions: ['lavarme la cara', 'bañarme', 'lavarme los dientes', 'ponerme crema', 'ordenar mi cuidado básico'],
+        },
+        {
+          id: 'VITALIDAD',
+          trait: 'VITALIDAD',
+          text: 'Empezar el día con una rutina activadora',
+          suggestions: ['abrir la ventana', 'mover el cuerpo', 'tomar agua', 'estirarme', 'evitar arrancar con el móvil'],
+        },
+        {
+          id: 'POSTURA',
+          trait: 'POSTURA',
+          text: 'Cuidar mi postura o ergonomía',
+          suggestions: ['sentarme mejor', 'ajustar la pantalla', 'apoyar bien la espalda', 'cambiar de posición', 'revisar cómo trabajo'],
+        },
+        { id: 'MOVILIDAD', trait: 'MOVILIDAD', text: 'Hacer movilidad o estiramientos durante', inputAfter: 'minutos' },
+        { id: 'MODERACION', trait: 'MODERACION', text: 'Mejorar mi relación con ciertos consumos o excesos' },
       ],
       Mind: [
-        { id: 'ENFOQUE', trait: 'ENFOQUE', text: 'Voy a trabajar con foco profundo durante', inputAfter: 'minutos' },
-        { id: 'APRENDIZAJE', trait: 'APRENDIZAJE', text: 'Voy a leer, estudiar o aprender durante', inputAfter: 'minutos' },
-        { id: 'CREATIVIDAD', trait: 'CREATIVIDAD', text: 'Voy a dedicar', inputAfter: 'minutos a crear, escribir o idear' },
-        { id: 'GESTION', trait: 'GESTION', text: 'Voy a tomarme', inputAfter: 'minutos para respirar, bajar revoluciones o regularme' },
-        { id: 'AUTOCONTROL', trait: 'AUTOCONTROL', text: 'Voy a prestar atención a mis acciones impulsivas' },
-        { id: 'RESILIENCIA', trait: 'RESILIENCIA', text: 'Voy a hacer algo que me desafíe o me saque de mi zona de confort' },
-        { id: 'ORDEN', trait: 'ORDEN', text: 'Voy a ordenar mi espacio, mis tareas o mi mente durante', inputAfter: 'minutos' },
-        { id: 'PROYECCION', trait: 'PROYECCION', text: 'Voy a avanzar una meta personal o profesional durante', inputAfter: 'minutos' },
-        { id: 'FINANZAS', trait: 'FINANZAS', text: 'Voy a revisar mis gastos, ahorro o presupuesto durante', inputAfter: 'minutos' },
-        { id: 'AGILIDAD', trait: 'AGILIDAD', text: 'Voy a entrenar mi memoria o agilidad mental durante', inputAfter: 'minutos' },
+        { id: 'ENFOQUE', trait: 'ENFOQUE', text: 'Trabajar con foco profundo durante', inputAfter: 'minutos' },
+        { id: 'APRENDIZAJE', trait: 'APRENDIZAJE', text: 'Leer, estudiar o aprender durante', inputAfter: 'minutos' },
+        { id: 'CREATIVIDAD', trait: 'CREATIVIDAD', text: 'Dedicar', inputAfter: 'minutos a crear, escribir o idear' },
+        {
+          id: 'GESTION',
+          trait: 'GESTION',
+          text: 'Tomarme un momento para respirar, bajar revoluciones o regularme',
+          suggestions: ['respirar profundo', 'salir del ruido', 'pausar', 'soltar tensión', 'bajar ansiedad'],
+        },
+        {
+          id: 'AUTOCONTROL',
+          trait: 'AUTOCONTROL',
+          text: 'Prestar atención a mis acciones impulsivas',
+          suggestions: ['notar cuándo reacciono rápido', 'observar impulsos', 'frenar antes de responder', 'detectar automatismos'],
+        },
+        {
+          id: 'RESILIENCIA',
+          trait: 'RESILIENCIA',
+          text: 'Hacer algo que me desafíe o me saque de mi zona de confort',
+          suggestions: ['iniciar una conversación difícil', 'probar algo nuevo', 'hacer algo que vengo evitando', 'sostener una incomodidad útil'],
+        },
+        {
+          id: 'ORDEN',
+          trait: 'ORDEN',
+          text: 'Ordenar mi espacio, mis tareas o mi mente',
+          suggestions: ['ordenar el escritorio', 'vaciar pendientes mentales', 'limpiar una superficie', 'reorganizar tareas', 'poner algo en su lugar'],
+        },
+        {
+          id: 'PROYECCION',
+          trait: 'PROYECCION',
+          text: 'Dar un paso hacia una meta personal o profesional',
+          suggestions: ['enviar un mensaje importante', 'avanzar una idea', 'actualizar CV o portfolio', 'terminar una tarea clave', 'mover una meta un paso'],
+        },
+        {
+          id: 'FINANZAS',
+          trait: 'FINANZAS',
+          text: 'Revisar mis gastos, ahorro o presupuesto',
+          suggestions: ['mirar movimientos', 'registrar gastos', 'revisar presupuesto', 'controlar suscripciones', 'ver cuánto ahorré'],
+        },
+        { id: 'AGILIDAD', trait: 'AGILIDAD', text: 'Entrenar mi memoria o agilidad mental durante', inputAfter: 'minutos' },
       ],
       Soul: [
-        { id: 'CONEXION', trait: 'CONEXION', text: 'Voy a hablar con', inputAfter: 'persona(s) con presencia real' },
-        { id: 'ESPIRITUALIDAD', trait: 'ESPIRITUALIDAD', text: 'Voy a dedicar', inputAfter: 'minutos a meditar, rezar o conectar conmigo' },
-        { id: 'PROPOSITO', trait: 'PROPOSITO', text: 'Voy a dedicar', inputAfter: 'minutos a una acción alineada con mi propósito' },
-        { id: 'VALORES', trait: 'VALORES', text: 'Voy a tomar', inputAfter: 'decisión(es) alineada(s) con mis valores' },
-        { id: 'ALTRUISMO', trait: 'ALTRUISMO', text: 'Voy a hacer', inputAfter: 'gesto(s) de ayuda o aporte a otros' },
-        { id: 'INSIGHT', trait: 'INSIGHT', text: 'Voy a escribir o reflexionar durante', inputAfter: 'minutos sobre cómo me siento' },
-        { id: 'GRATITUD', trait: 'GRATITUD', text: 'Voy a registrar', inputAfter: 'cosa(s) por las que siento gratitud' },
-        { id: 'NATURALEZA', trait: 'NATURALEZA', text: 'Voy a pasar', inputAfter: 'minutos al aire libre o en contacto con la naturaleza' },
-        { id: 'GOZO', trait: 'GOZO', text: 'Voy a dedicar', inputAfter: 'minutos a jugar, reír o disfrutar sin culpa' },
-        { id: 'AUTOESTIMA', trait: 'AUTOESTIMA', text: 'Voy a tomarme tiempo para cuidar de mí', helper: 'Ej.: uñas, pelo, barba, peinarme' },
+        { id: 'CONEXION', trait: 'CONEXION', text: 'Hablar con', inputAfter: 'persona(s) con presencia real' },
+        { id: 'ESPIRITUALIDAD', trait: 'ESPIRITUALIDAD', text: 'Dedicar', inputAfter: 'minutos a meditar, rezar o conectar conmigo' },
+        {
+          id: 'PROPOSITO',
+          trait: 'PROPOSITO',
+          text: 'Hacer una acción alineada con mi propósito',
+          suggestions: ['avanzar algo importante', 'elegir con intención', 'hacer algo que tenga sentido para mí', 'dedicar tiempo a lo que valoro'],
+        },
+        {
+          id: 'VALORES',
+          trait: 'VALORES',
+          text: 'Tomar una decisión alineada con mis valores',
+          suggestions: ['decir que no a algo que no va conmigo', 'elegir con coherencia', 'actuar como quiero ser', 'sostener un criterio importante'],
+        },
+        {
+          id: 'ALTRUISMO',
+          trait: 'ALTRUISMO',
+          text: 'Hacer un gesto de ayuda o aporte a otros',
+          suggestions: ['ayudar a alguien', 'escribir a alguien que lo necesite', 'compartir algo útil', 'colaborar', 'acompañar'],
+        },
+        {
+          id: 'INSIGHT',
+          trait: 'INSIGHT',
+          text: 'Reflexionar sobre cómo me siento',
+          suggestions: ['notar cómo me sentí hoy', 'identificar qué necesito', 'observar qué me afectó', 'darme un momento para escucharme'],
+        },
+        { id: 'GRATITUD', trait: 'GRATITUD', text: 'Registrar', inputAfter: 'cosa(s) por las que siento gratitud' },
+        {
+          id: 'NATURALEZA',
+          trait: 'NATURALEZA',
+          text: 'Conectar con la naturaleza',
+          suggestions: ['salir a tomar aire', 'mirar el cielo', 'caminar entre árboles', 'sentarme al sol', 'conectar con algo natural'],
+        },
+        { id: 'GOZO', trait: 'GOZO', text: 'Dedicar', inputAfter: 'minutos a jugar, reír o disfrutar sin culpa' },
+        {
+          id: 'AUTOESTIMA',
+          trait: 'AUTOESTIMA',
+          text: 'Tomarme tiempo para cuidar de mí',
+          suggestions: ['cortarme las uñas', 'peinarme', 'arreglarme el pelo', 'cuidarme la barba', 'vestirme con más cariño', 'hacer algo que me haga bien'],
+        },
       ],
     },
   },
@@ -228,6 +311,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     minRule: (min) => `Minimum required per pillar for this mode: ${min}`,
     minimumRequired: 'You need to select the minimum to continue.',
     traitLabel: 'Trait',
+    suggestionsLabel: 'Quick ideas',
     minutesPlaceholder: 'min',
     countPlaceholder: 'qty',
     moderationTitle: 'Moderation',
@@ -273,40 +357,120 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     ],
     tasks: {
       Body: [
-        { id: 'ENERGIA', trait: 'ENERGY', text: 'I will walk for', inputAfter: 'minutes' },
-        { id: 'NUTRICION', trait: 'NUTRITION', text: 'I will have', inputAfter: 'balanced meal(s) per day' },
-        { id: 'SUENO', trait: 'SLEEP', text: 'I will sleep at least', inputAfter: 'hours per night' },
-        { id: 'RECUPERACION', trait: 'RECOVERY', text: 'I will take', inputAfter: 'recovery break(s) during the day' },
-        { id: 'HIDRATACION', trait: 'HYDRATION', text: 'I will drink', inputAfter: 'glass(es) of water per day' },
-        { id: 'HIGIENE', trait: 'HYGIENE', text: 'I will complete my personal hygiene routine', inputAfter: 'time(s) per day' },
-        { id: 'VITALIDAD', trait: 'VITALITY', text: 'I will start the day with an energizing routine of', inputAfter: 'minutes' },
-        { id: 'POSTURA', trait: 'POSTURE', text: 'I will spend', inputAfter: 'minutes taking care of my posture or ergonomics' },
-        { id: 'MOVILIDAD', trait: 'MOBILITY', text: 'I will do mobility or stretching for', inputAfter: 'minutes' },
-        { id: 'MODERACION', trait: 'MODERATION', text: 'I want to improve my relationship with certain habits, consumptions, or excesses' },
+        { id: 'ENERGIA', trait: 'ENERGY', text: 'Walk for', inputAfter: 'minutes' },
+        { id: 'NUTRICION', trait: 'NUTRITION', text: 'Have', inputAfter: 'balanced meal(s) per day' },
+        { id: 'SUENO', trait: 'SLEEP', text: 'Sleep at least', inputAfter: 'hours per night' },
+        {
+          id: 'RECUPERACION',
+          trait: 'RECOVERY',
+          text: 'Take a recovery break during the day',
+          suggestions: ['pause for a few minutes', 'close your eyes', 'breathe slowly', 'lower stimulation', 'do a quick stretch'],
+        },
+        { id: 'HIDRATACION', trait: 'HYDRATION', text: 'Drink', inputAfter: 'glass(es) of water per day' },
+        {
+          id: 'HIGIENE',
+          trait: 'HYGIENE',
+          text: 'Complete my personal hygiene routine',
+          suggestions: ['wash my face', 'take a shower', 'brush my teeth', 'apply moisturizer', 'reset my basic self-care'],
+        },
+        {
+          id: 'VITALIDAD',
+          trait: 'VITALITY',
+          text: 'Start the day with an activating routine',
+          suggestions: ['open the window', 'move my body', 'drink water', 'do a quick stretch', 'avoid starting with my phone'],
+        },
+        {
+          id: 'POSTURA',
+          trait: 'POSTURE',
+          text: 'Take care of my posture or ergonomics',
+          suggestions: ['sit better', 'adjust screen height', 'support my lower back', 'change position', 'check how I am working'],
+        },
+        { id: 'MOVILIDAD', trait: 'MOBILITY', text: 'Do mobility or stretching for', inputAfter: 'minutes' },
+        { id: 'MODERACION', trait: 'MODERATION', text: 'Improve my relationship with certain consumptions or excesses' },
       ],
       Mind: [
-        { id: 'ENFOQUE', trait: 'FOCUS', text: 'I will do deep focus work for', inputAfter: 'minutes' },
-        { id: 'APRENDIZAJE', trait: 'LEARNING', text: 'I will read, study, or learn for', inputAfter: 'minutes' },
-        { id: 'CREATIVIDAD', trait: 'CREATIVITY', text: 'I will spend', inputAfter: 'minutes creating, writing, or ideating' },
-        { id: 'GESTION', trait: 'MANAGEMENT', text: 'I will take', inputAfter: 'minutes to breathe, slow down, or self-regulate' },
-        { id: 'AUTOCONTROL', trait: 'SELF_CONTROL', text: 'I will pay attention to my impulsive actions' },
-        { id: 'RESILIENCIA', trait: 'RESILIENCE', text: 'I will do something that challenges me and pushes me out of my comfort zone' },
-        { id: 'ORDEN', trait: 'ORDER', text: 'I will organize my space, tasks, or mind for', inputAfter: 'minutes' },
-        { id: 'PROYECCION', trait: 'PROJECTION', text: 'I will move a personal or professional goal forward for', inputAfter: 'minutes' },
-        { id: 'FINANZAS', trait: 'FINANCES', text: 'I will review my spending, savings, or budget for', inputAfter: 'minutes' },
-        { id: 'AGILIDAD', trait: 'AGILITY', text: 'I will train my memory or mental agility for', inputAfter: 'minutes' },
+        { id: 'ENFOQUE', trait: 'FOCUS', text: 'Do deep focus work for', inputAfter: 'minutes' },
+        { id: 'APRENDIZAJE', trait: 'LEARNING', text: 'Read, study, or learn for', inputAfter: 'minutes' },
+        { id: 'CREATIVIDAD', trait: 'CREATIVITY', text: 'Spend', inputAfter: 'minutes creating, writing, or ideating' },
+        {
+          id: 'GESTION',
+          trait: 'MANAGEMENT',
+          text: 'Take a moment to breathe, slow down, or self-regulate',
+          suggestions: ['take a deep breath', 'step away from noise', 'pause briefly', 'release tension', 'lower anxiety'],
+        },
+        {
+          id: 'AUTOCONTROL',
+          trait: 'SELF_CONTROL',
+          text: 'Notice my impulsive actions',
+          suggestions: ['notice fast reactions', 'observe impulses', 'pause before responding', 'spot automatic patterns'],
+        },
+        {
+          id: 'RESILIENCIA',
+          trait: 'RESILIENCE',
+          text: 'Do something that challenges me outside my comfort zone',
+          suggestions: ['start a hard conversation', 'try something new', 'do something I have been avoiding', 'hold useful discomfort'],
+        },
+        {
+          id: 'ORDEN',
+          trait: 'ORDER',
+          text: 'Organize my space, tasks, or mind',
+          suggestions: ['tidy my desk', 'empty mental clutter', 'clean one surface', 'reorder priorities', 'put one thing back in place'],
+        },
+        {
+          id: 'PROYECCION',
+          trait: 'PROJECTION',
+          text: 'Take one step toward a personal or professional goal',
+          suggestions: ['send one important message', 'move one idea forward', 'update CV or portfolio', 'finish one key task', 'advance one goal by one step'],
+        },
+        {
+          id: 'FINANZAS',
+          trait: 'FINANCES',
+          text: 'Review my spending, savings, or budget',
+          suggestions: ['check recent movements', 'log expenses', 'review my budget', 'audit subscriptions', 'check how much I saved'],
+        },
+        { id: 'AGILIDAD', trait: 'AGILITY', text: 'Train my memory or mental agility for', inputAfter: 'minutes' },
       ],
       Soul: [
-        { id: 'CONEXION', trait: 'CONNECTION', text: 'I will talk with', inputAfter: 'person(s) with real presence' },
-        { id: 'ESPIRITUALIDAD', trait: 'SPIRITUALITY', text: 'I will spend', inputAfter: 'minutes meditating, praying, or reconnecting with myself' },
-        { id: 'PROPOSITO', trait: 'PURPOSE', text: 'I will spend', inputAfter: 'minutes on an action aligned with my purpose' },
-        { id: 'VALORES', trait: 'VALUES', text: 'I will make', inputAfter: 'decision(s) aligned with my values' },
-        { id: 'ALTRUISMO', trait: 'ALTRUISM', text: 'I will do', inputAfter: 'gesture(s) to help or contribute to others' },
-        { id: 'INSIGHT', trait: 'INSIGHT', text: 'I will write or reflect for', inputAfter: 'minutes on how I feel' },
-        { id: 'GRATITUD', trait: 'GRATITUDE', text: 'I will log', inputAfter: 'thing(s) I feel grateful for' },
-        { id: 'NATURALEZA', trait: 'NATURE', text: 'I will spend', inputAfter: 'minutes outdoors or in contact with nature' },
-        { id: 'GOZO', trait: 'JOY', text: 'I will spend', inputAfter: 'minutes playing, laughing, or enjoying life without guilt' },
-        { id: 'AUTOESTIMA', trait: 'SELF_ESTEEM', text: 'I will make time to take care of myself', helper: 'Ex: nails, hair, beard, grooming' },
+        { id: 'CONEXION', trait: 'CONNECTION', text: 'Talk with', inputAfter: 'person(s) with real presence' },
+        { id: 'ESPIRITUALIDAD', trait: 'SPIRITUALITY', text: 'Spend', inputAfter: 'minutes meditating, praying, or reconnecting with myself' },
+        {
+          id: 'PROPOSITO',
+          trait: 'PURPOSE',
+          text: 'Take one action aligned with my purpose',
+          suggestions: ['move something meaningful', 'choose with intention', 'do something that truly matters to me', 'make time for what I value'],
+        },
+        {
+          id: 'VALORES',
+          trait: 'VALUES',
+          text: 'Make a decision aligned with my values',
+          suggestions: ['say no to something that does not fit me', 'choose with integrity', 'act like the person I want to be', 'hold one important boundary'],
+        },
+        {
+          id: 'ALTRUISMO',
+          trait: 'ALTRUISM',
+          text: 'Do one helpful gesture for someone else',
+          suggestions: ['help someone', 'message someone who may need support', 'share something useful', 'collaborate', 'be present for someone'],
+        },
+        {
+          id: 'INSIGHT',
+          trait: 'INSIGHT',
+          text: 'Reflect on how I feel',
+          suggestions: ['notice how I felt today', 'identify what I need', 'observe what affected me', 'give myself a moment to listen inward'],
+        },
+        { id: 'GRATITUD', trait: 'GRATITUDE', text: 'Log', inputAfter: 'thing(s) I feel grateful for' },
+        {
+          id: 'NATURALEZA',
+          trait: 'NATURE',
+          text: 'Connect with nature',
+          suggestions: ['go out for fresh air', 'look at the sky', 'walk near trees', 'sit under sunlight', 'connect with something natural'],
+        },
+        { id: 'GOZO', trait: 'JOY', text: 'Spend', inputAfter: 'minutes playing, laughing, or enjoying without guilt' },
+        {
+          id: 'AUTOESTIMA',
+          trait: 'SELF_ESTEEM',
+          text: 'Take time to care for myself',
+          suggestions: ['trim my nails', 'comb my hair', 'style my hair', 'groom my beard', 'dress with more care', 'do something that makes me feel good'],
+        },
       ],
     },
   },
@@ -342,6 +506,13 @@ function InlineTaskRow({
   copy: Translations;
 }) {
   const hasInput = Boolean(task.inputAfter || task.inputBefore);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  useEffect(() => {
+    if (!selected) {
+      setShowSuggestions(false);
+    }
+  }, [selected]);
 
   return (
     <motion.button
@@ -351,7 +522,15 @@ function InlineTaskRow({
       data-selected={selected ? 'true' : undefined}
       className="w-full overflow-hidden rounded-2xl border border-white/15 bg-white/5 text-left text-white/85 transition hover:border-white/30 hover:bg-white/10 data-[selected=true]:border-sky-300/55 data-[selected=true]:bg-sky-400/12"
     >
-      <div className="flex items-start gap-3 px-4 py-4">
+      {selected ? (
+        <div className="h-7 border-b border-violet-200/30 bg-violet-300/30 px-4">
+          <p className="flex h-full items-center text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-50/90">
+            {copy.traitLabel}: {task.trait}
+          </p>
+        </div>
+      ) : null}
+
+      <div className="flex items-start gap-3 px-4 py-3.5">
         <SelectableCheck
           selected={selected}
           toneClassName="data-[selected=true]:border-transparent data-[selected=true]:bg-sky-400 data-[selected=true]:text-slate-900"
@@ -366,22 +545,37 @@ function InlineTaskRow({
               inputMode="numeric"
               onClick={(event) => event.stopPropagation()}
               onChange={(event) => onInputChange(event.target.value)}
-              className="h-8 w-16 rounded-lg border border-white/20 bg-white/8 px-2 text-center text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70 disabled:opacity-40"
+              className="h-6 w-12 rounded-md border border-white/20 bg-white/8 px-1.5 text-center text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70 disabled:opacity-40 sm:h-7 sm:w-14"
               placeholder={copy.countPlaceholder}
             />
           ) : null}
           {task.inputAfter ? <span>{task.inputAfter}</span> : null}
           {task.helper ? <span className="w-full text-xs text-white/55">{task.helper}</span> : null}
+          {selected && task.suggestions?.length ? (
+            <div className="w-full">
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setShowSuggestions((prev) => !prev);
+                }}
+                className="inline-flex items-center gap-1 rounded-full border border-violet-200/35 bg-violet-300/20 px-2.5 py-1 text-[11px] font-medium text-violet-50"
+              >
+                💡 {copy.suggestionsLabel}
+              </button>
+              {showSuggestions ? (
+                <div className="mt-2 rounded-xl border border-violet-200/25 bg-violet-500/15 p-2.5 text-xs text-violet-50/95">
+                  <ul className="space-y-1">
+                    {task.suggestions.map((suggestion) => (
+                      <li key={suggestion} className="leading-relaxed">• {suggestion}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
-
-      {selected ? (
-        <div className="border-t border-white/12 bg-white/8 px-4 py-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-100/85">
-            {copy.traitLabel}: {task.trait}
-          </p>
-        </div>
-      ) : null}
     </motion.button>
   );
 }
