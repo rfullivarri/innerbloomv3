@@ -545,17 +545,18 @@ function InlineTaskRow({
 
 
   return (
-    <div className={`relative ${selected ? 'pt-1' : ''}`}>
+    <div className={`relative ${selected ? 'pt-2' : ''}`}>
       {selected ? (
         <div
-          className="pointer-events-none absolute inset-x-3 bottom-1.5 top-0.5 rounded-[1.05rem]"
+          className="onboarding-surface-inner pointer-events-none absolute inset-x-0 top-0 h-6 rounded-2xl"
           style={{
-            background: 'linear-gradient(180deg, rgba(167,139,250,0.1), rgba(139,92,246,0.05))',
-            boxShadow: '0 6px 16px rgba(22, 18, 45, 0.18), inset 0 0 0 1px rgba(196, 181, 253, 0.18)',
+            borderColor: 'var(--onboarding-glass-border-soft)',
+            background: 'linear-gradient(180deg, color-mix(in srgb, var(--onboarding-glass-surface-inner) 88%, rgba(167,139,250,0.2)), var(--onboarding-glass-surface-inner))',
+            boxShadow: '0 10px 24px rgba(8, 12, 28, 0.24)',
           }}
           aria-hidden
         >
-          <span className="absolute left-4 top-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-100/65">
+          <span className="absolute left-4 top-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-100/80">
             {copy.traitLabel}: {task.trait}
           </span>
         </div>
@@ -573,17 +574,17 @@ function InlineTaskRow({
         role="button"
         tabIndex={0}
         data-selected={selected ? 'true' : undefined}
-        className="onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 shadow-[0_12px_24px_rgba(8,12,28,0.18)] transition hover:border-white/30 hover:bg-white/[0.12] data-[selected=true]:mt-1"
+        className="onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 shadow-[0_12px_24px_rgba(8,12,28,0.18)] transition hover:border-white/30 hover:bg-white/[0.12] data-[selected=true]:mt-1.5"
         style={selected
           ? {
-              borderColor: 'color-mix(in srgb, #ffffff 18%, transparent)',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.07))',
-              boxShadow: '0 14px 28px rgba(8,12,28,0.2)',
+              borderColor: 'var(--onboarding-glass-border)',
+              background: 'linear-gradient(180deg, color-mix(in srgb, var(--onboarding-glass-surface-base) 92%, rgba(255,255,255,0.18)), color-mix(in srgb, var(--onboarding-glass-surface-base) 82%, rgba(255,255,255,0.1)))',
+              boxShadow: 'var(--onboarding-glass-shadow)',
             }
           : undefined}
       >
-        <div className="flex items-start gap-3">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-2 pr-6 text-sm leading-relaxed sm:text-base">
+        <div className="flex items-center gap-2.5">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-2 text-sm leading-relaxed sm:text-base">
             {task.inputBefore ? <span>{task.inputBefore}</span> : null}
             <span>{task.text}</span>
             {hasInput ? (
@@ -608,7 +609,7 @@ function InlineTaskRow({
                 event.stopPropagation();
                 setShowSuggestions((prev) => !prev);
               }}
-              className="relative z-20 mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md border border-violet-200/45 bg-violet-300/18 text-white/90 transition"
+              className="relative z-20 ml-auto inline-flex h-5 w-5 shrink-0 items-center justify-center self-start rounded-md border border-violet-200/45 bg-violet-300/18 text-white/90 transition"
               aria-label={copy.taskHelpLabel}
               aria-expanded={showSuggestions}
             >
