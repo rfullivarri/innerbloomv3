@@ -3172,8 +3172,10 @@
 }
 
 .missions-market-card__back-label {
+  margin: 0;
   font-size: clamp(0.64rem, 1.8vw, 0.75rem);
   font-weight: 600;
+  line-height: 1.1;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(148, 163, 184, 0.78);
