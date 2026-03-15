@@ -119,7 +119,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     minRule: (min) => `Mínimo: ${min} tareas`,
     suggestedRule: 'Sugerido: 9 a 12',
     minimumRequired: 'Necesitás seleccionar el mínimo para continuar.',
-    traitLabel: 'Rasgo',
+    traitLabel: 'RASGO',
     taskHelpLabel: 'Abrir ideas rápidas de la tarea',
     minutesPlaceholder: 'min',
     countPlaceholder: 'n',
@@ -309,7 +309,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     minRule: (min) => `Minimum: ${min} tasks`,
     suggestedRule: 'Suggested: 9 to 12',
     minimumRequired: 'You need to select the minimum to continue.',
-    traitLabel: 'Trait',
+    traitLabel: 'TRAIT',
     taskHelpLabel: 'Open quick ideas for this task',
     minutesPlaceholder: 'min',
     countPlaceholder: 'qty',
@@ -536,6 +536,16 @@ function InlineTaskRow({
 }) {
   const hasInput = Boolean(task.inputAfter || task.inputBefore);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const selectedFrontStyle = {
+    borderColor: 'var(--onboarding-glass-border)',
+    background: 'color-mix(in srgb, var(--color-accent-primary) 66%, var(--color-surface-elevated) 34%)',
+    boxShadow: 'var(--onboarding-glass-shadow)',
+  };
+  const selectedBackStyle = {
+    borderColor: 'color-mix(in srgb, var(--color-accent-secondary) 46%, var(--onboarding-glass-border-soft))',
+    background: 'color-mix(in srgb, var(--color-accent-secondary) 58%, var(--color-surface-elevated) 42%)',
+    boxShadow: '0 10px 22px color-mix(in srgb, var(--color-accent-secondary) 36%, rgba(8,12,28,0.64))',
+  };
 
   useEffect(() => {
     if (!selected) {
@@ -545,18 +555,14 @@ function InlineTaskRow({
 
 
   return (
-    <div className={`relative ${selected ? 'pt-2' : ''}`}>
+    <div className={`relative ${selected ? 'pt-1' : ''}`}>
       {selected ? (
         <div
-          className="onboarding-surface-inner pointer-events-none absolute inset-x-0 top-0 h-6 rounded-2xl"
-          style={{
-            borderColor: 'var(--onboarding-glass-border-soft)',
-            background: 'linear-gradient(180deg, color-mix(in srgb, var(--onboarding-glass-surface-inner) 88%, rgba(167,139,250,0.2)), var(--onboarding-glass-surface-inner))',
-            boxShadow: '0 10px 24px rgba(8, 12, 28, 0.24)',
-          }}
+          className="pointer-events-none absolute inset-0 -translate-y-[10%] rounded-2xl border px-4 py-3.5"
+          style={selectedBackStyle}
           aria-hidden
         >
-          <span className="absolute left-4 top-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-100/80">
+          <span className="absolute left-4 top-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-100/90 sm:top-2.5">
             {copy.traitLabel}: {task.trait}
           </span>
         </div>
@@ -574,14 +580,8 @@ function InlineTaskRow({
         role="button"
         tabIndex={0}
         data-selected={selected ? 'true' : undefined}
-        className="onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 shadow-[0_12px_24px_rgba(8,12,28,0.18)] transition hover:border-white/30 hover:bg-white/[0.12] data-[selected=true]:mt-1.5"
-        style={selected
-          ? {
-              borderColor: 'var(--onboarding-glass-border)',
-              background: 'linear-gradient(180deg, color-mix(in srgb, var(--onboarding-glass-surface-base) 92%, rgba(255,255,255,0.18)), color-mix(in srgb, var(--onboarding-glass-surface-base) 82%, rgba(255,255,255,0.1)))',
-              boxShadow: 'var(--onboarding-glass-shadow)',
-            }
-          : undefined}
+        className="onboarding-surface-inner relative z-10 w-full rounded-2xl border px-4 py-3.5 text-left text-white/85 shadow-[0_12px_24px_rgba(8,12,28,0.18)] transition hover:border-white/30 hover:bg-white/[0.12]"
+        style={selected ? selectedFrontStyle : undefined}
       >
         <div className="flex items-center gap-2.5">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-2 text-sm leading-relaxed sm:text-base">
