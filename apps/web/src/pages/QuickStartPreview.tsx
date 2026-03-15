@@ -804,16 +804,16 @@ export default function QuickStartPreviewPage() {
           <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{copy.pillarTitles[currentPillar]}</h1>
           <p className="mt-2 text-sm text-white/70">{copy.pillarSubtitles[currentPillar]}</p>
           <div
-            className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-semibold text-violet-50/95"
+            className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold text-violet-50/95"
             style={{
-              borderColor: `color-mix(in srgb, ${modeStyle.border} 80%, transparent)`,
-              background: `linear-gradient(135deg, ${modeStyle.tint}, color-mix(in srgb, ${modeStyle.tint} 28%, rgba(139,92,246,0.08)))`,
-              boxShadow: `0 8px 18px ${modeStyle.glow}`,
+              borderColor: `color-mix(in srgb, ${modeStyle.border} 92%, rgba(255,255,255,0.14))`,
+              background: `linear-gradient(135deg, color-mix(in srgb, ${modeStyle.tint} 90%, rgba(10,14,30,0.72)), color-mix(in srgb, ${modeStyle.tint} 66%, rgba(10,14,30,0.58)))`,
+              boxShadow: `0 8px 20px ${modeStyle.glow}`,
             }}
           >
-            <span>{copy.minRule(minimum)}</span>
-            <span className="text-violet-100/60">·</span>
-            <span>{copy.suggestedRule}</span>
+            <span className="whitespace-nowrap">{copy.minRule(minimum)}</span>
+            <span className="text-violet-100/60" aria-hidden>·</span>
+            <span className="whitespace-nowrap">{copy.suggestedRule}</span>
           </div>
           <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
             <span
