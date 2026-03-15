@@ -537,14 +537,14 @@ function InlineTaskRow({
   const hasInput = Boolean(task.inputAfter || task.inputBefore);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const selectedFrontStyle = {
-    borderColor: 'var(--onboarding-glass-border)',
-    background: 'color-mix(in srgb, var(--color-accent-primary) 66%, var(--color-surface-elevated) 34%)',
-    boxShadow: 'var(--onboarding-glass-shadow)',
+    borderColor: 'color-mix(in srgb, var(--color-accent-secondary) 42%, var(--onboarding-glass-border))',
+    background: 'color-mix(in srgb, var(--color-surface-elevated) 82%, var(--color-accent-secondary) 18%)',
+    boxShadow: '0 18px 40px color-mix(in srgb, var(--color-surface-elevated) 56%, rgba(8,12,28,0.66))',
   };
   const selectedBackStyle = {
-    borderColor: 'color-mix(in srgb, var(--color-accent-secondary) 46%, var(--onboarding-glass-border-soft))',
-    background: 'color-mix(in srgb, var(--color-accent-secondary) 58%, var(--color-surface-elevated) 42%)',
-    boxShadow: '0 10px 22px color-mix(in srgb, var(--color-accent-secondary) 36%, rgba(8,12,28,0.64))',
+    borderColor: 'color-mix(in srgb, var(--color-accent-secondary) 54%, var(--onboarding-glass-border-soft))',
+    background: 'color-mix(in srgb, var(--color-accent-secondary) 62%, var(--color-surface-elevated) 38%)',
+    boxShadow: '0 12px 24px color-mix(in srgb, var(--color-accent-secondary) 40%, rgba(8,12,28,0.64))',
   };
 
   useEffect(() => {
@@ -555,14 +555,14 @@ function InlineTaskRow({
 
 
   return (
-    <div className={`relative ${selected ? 'pt-1' : ''}`}>
+    <div className={`relative ${selected ? 'pt-2.5' : ''}`}>
       {selected ? (
         <div
-          className="pointer-events-none absolute inset-0 -translate-y-[10%] rounded-2xl border px-4 py-3.5"
+          className="pointer-events-none absolute inset-0 -translate-y-[14%] rounded-2xl border px-4 pt-2 pb-3.5"
           style={selectedBackStyle}
           aria-hidden
         >
-          <span className="absolute left-4 top-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-100/90 sm:top-2.5">
+          <span className="block text-[10px] font-semibold uppercase leading-none tracking-[0.16em] text-violet-100/90">
             {copy.traitLabel}: {task.trait}
           </span>
         </div>
