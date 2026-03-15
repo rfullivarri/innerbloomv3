@@ -29,8 +29,12 @@ interface Translations {
   forkTitle: string;
   forkSubtitle: string;
   personalGuide: string;
+  personalGuidePrimary: string;
+  personalGuideTime: string;
   personalGuideHint: string;
   quickStart: string;
+  quickStartPrimary: string;
+  quickStartTime: string;
   quickStartHint: string;
   inPreview: string;
   comingSoon: string;
@@ -97,8 +101,12 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     forkTitle: '¿Cómo querés arrancar hoy?',
     forkSubtitle: 'Estamos probando una nueva variante. Tu onboarding real no cambia.',
     personalGuide: 'Guía personal',
+    personalGuidePrimary: 'Respondé un breve cuestionario y la IA genera tu sistema.',
+    personalGuideTime: '3–4 minutos',
     personalGuideHint: 'Camino guiado y más personalizado, con el acompañamiento completo.',
     quickStart: 'Inicio rápido',
+    quickStartPrimary: 'Empezá con tareas recomendadas listas para usar.',
+    quickStartTime: 'Menos de 1 minuto',
     quickStartHint: 'Camino más rápido y autodirigido para arrancar hoy con tu base.',
     inPreview: 'Vista previa',
     comingSoon: 'Próximamente',
@@ -287,9 +295,13 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     forkTitle: 'How do you want to start today?',
     forkSubtitle: 'This is a new preview variant. Your real onboarding stays untouched.',
     personalGuide: 'Personal Guide',
-    personalGuideHint: 'Guided and more personalized path with full onboarding support.',
+    personalGuidePrimary: 'Answer a short questionnaire and AI builds your system.',
+    personalGuideTime: '3–4 minutes',
+    personalGuideHint: 'A more guided and personalized path with full support.',
     quickStart: 'Quick Start',
-    quickStartHint: 'A faster, self-directed path to set your base today.',
+    quickStartPrimary: 'Start with recommended tasks ready to use.',
+    quickStartTime: 'Less than 1 minute',
+    quickStartHint: 'A faster, self-directed path to get started today.',
     inPreview: 'Preview',
     comingSoon: 'Coming soon',
     gameModeGateTitle: 'First, choose your Game Mode',
@@ -896,12 +908,16 @@ export default function QuickStartPreviewPage() {
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <article className="rounded-2xl border border-violet-200/25 bg-violet-400/10 p-4">
                 <p className="flex items-center gap-2 text-sm font-semibold text-white"><span aria-hidden>✨</span>{copy.personalGuide}</p>
+                <p className="mt-1 text-sm text-white/90">{copy.personalGuidePrimary}</p>
+                <p className="mt-1 text-[0.7rem] uppercase tracking-[0.14em] text-white/60">{copy.personalGuideTime}</p>
                 <p className="mt-1 text-xs text-white/65">{copy.personalGuideHint}</p>
                 <span className="mt-3 inline-flex rounded-full border border-white/20 bg-white/8 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-white/65">{copy.comingSoon}</span>
               </article>
 
               <button type="button" onClick={goNext} className="rounded-2xl border border-violet-200/45 bg-violet-500/20 p-4 text-left transition hover:bg-violet-400/25">
                 <p className="flex items-center gap-2 text-sm font-semibold text-white"><span aria-hidden>⚡</span>{copy.quickStart}</p>
+                <p className="mt-1 text-sm text-white/90">{copy.quickStartPrimary}</p>
+                <p className="mt-1 text-[0.7rem] uppercase tracking-[0.14em] text-white/60">{copy.quickStartTime}</p>
                 <p className="mt-1 text-xs text-white/65">{copy.quickStartHint}</p>
                 <span className="mt-3 inline-flex rounded-full border border-violet-200/35 bg-violet-300/20 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-violet-100">{copy.inPreview}</span>
               </button>
