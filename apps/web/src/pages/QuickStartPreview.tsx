@@ -555,10 +555,10 @@ function InlineTaskRow({
 
 
   return (
-    <div className={`relative ${selected ? 'pt-5 pb-2' : ''}`}>
+    <div className={`relative ${selected ? 'pt-4 pb-1' : ''}`}>
       {selected ? (
         <div
-          className="pointer-events-none absolute inset-0 rounded-2xl border px-4 pt-3 pb-4"
+          className="pointer-events-none absolute inset-x-0 top-0 bottom-1 rounded-2xl border px-4 pt-1.5 pb-3"
           style={selectedBackStyle}
           aria-hidden
         >
