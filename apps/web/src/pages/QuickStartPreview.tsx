@@ -101,12 +101,12 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     forkTitle: '¿Cómo querés arrancar hoy?',
     forkSubtitle: 'Estamos probando una nueva variante. Tu onboarding real no cambia.',
     personalGuide: 'Guía personal',
-    personalGuidePrimary: 'Respondé un breve cuestionario y la IA genera tu sistema.',
-    personalGuideTime: '3–4 minutos',
+    personalGuidePrimary: 'Respondé un cuestionario y la IA arma tu sistema.',
+    personalGuideTime: '3–4 min',
     personalGuideHint: 'Camino guiado y más personalizado, con el acompañamiento completo.',
     quickStart: 'Inicio rápido',
-    quickStartPrimary: 'Empezá con tareas recomendadas listas para usar.',
-    quickStartTime: 'Menos de 1 minuto',
+    quickStartPrimary: 'Empezá con tareas recomendadas.',
+    quickStartTime: '< 1 min',
     quickStartHint: 'Camino más rápido y autodirigido para arrancar hoy con tu base.',
     inPreview: 'Vista previa',
     comingSoon: 'Próximamente',
@@ -294,14 +294,14 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     subtitle: 'Isolated visual prototype from the production onboarding.',
     forkTitle: 'How do you want to start today?',
     forkSubtitle: 'This is a new preview variant. Your real onboarding stays untouched.',
-    personalGuide: 'Personal Guide',
-    personalGuidePrimary: 'Answer a short questionnaire and AI builds your system.',
-    personalGuideTime: '3–4 minutes',
-    personalGuideHint: 'A more guided and personalized path with full support.',
-    quickStart: 'Quick Start',
-    quickStartPrimary: 'Start with recommended tasks ready to use.',
-    quickStartTime: 'Less than 1 minute',
-    quickStartHint: 'A faster, self-directed path to get started today.',
+    personalGuide: 'Personal guide',
+    personalGuidePrimary: 'Answer a questionnaire and AI builds your system.',
+    personalGuideTime: '3–4 min',
+    personalGuideHint: 'A more guided and personalized path, with full support along the way.',
+    quickStart: 'Quick start',
+    quickStartPrimary: 'Start with recommended tasks.',
+    quickStartTime: '< 1 min',
+    quickStartHint: 'A faster, self-directed path to get started today with your base.',
     inPreview: 'Preview',
     comingSoon: 'Coming soon',
     gameModeGateTitle: 'First, choose your Game Mode',
@@ -905,21 +905,35 @@ export default function QuickStartPreviewPage() {
             <h1 className="text-2xl font-semibold text-white sm:text-3xl">{copy.forkTitle}</h1>
             <p className="mt-2 text-sm text-white/70">{copy.forkSubtitle}</p>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <article className="rounded-2xl border border-violet-200/25 bg-violet-400/10 p-4">
-                <p className="flex items-center gap-2 text-sm font-semibold text-white"><span aria-hidden>✨</span>{copy.personalGuide}</p>
-                <p className="mt-1 text-sm text-white/90">{copy.personalGuidePrimary}</p>
-                <p className="mt-1 text-[0.7rem] uppercase tracking-[0.14em] text-white/60">{copy.personalGuideTime}</p>
-                <p className="mt-1 text-xs text-white/65">{copy.personalGuideHint}</p>
-                <span className="mt-3 inline-flex rounded-full border border-white/20 bg-white/8 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-white/65">{copy.comingSoon}</span>
+            <div className="mt-6 grid gap-3.5 sm:grid-cols-2">
+              <article className="rounded-2xl border border-violet-200/25 bg-violet-400/10 p-4 sm:p-5">
+                <p className="flex items-center gap-2 text-lg font-semibold leading-tight text-white">
+                  <span aria-hidden className="text-base">✨</span>
+                  {copy.personalGuide}
+                </p>
+                <p className="mt-2 text-base leading-snug text-white/90">{copy.personalGuidePrimary}</p>
+                <p className="mt-3">
+                  <span className="inline-flex rounded-full border border-white/20 bg-white/8 px-2.5 py-1 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-white/75">
+                    {copy.personalGuideTime}
+                  </span>
+                </p>
+                <p className="mt-3 text-xs leading-relaxed text-white/58">{copy.personalGuideHint}</p>
+                <span className="mt-5 inline-flex rounded-full border border-white/20 bg-white/8 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-white/65">{copy.comingSoon}</span>
               </article>
 
-              <button type="button" onClick={goNext} className="rounded-2xl border border-violet-200/45 bg-violet-500/20 p-4 text-left transition hover:bg-violet-400/25">
-                <p className="flex items-center gap-2 text-sm font-semibold text-white"><span aria-hidden>⚡</span>{copy.quickStart}</p>
-                <p className="mt-1 text-sm text-white/90">{copy.quickStartPrimary}</p>
-                <p className="mt-1 text-[0.7rem] uppercase tracking-[0.14em] text-white/60">{copy.quickStartTime}</p>
-                <p className="mt-1 text-xs text-white/65">{copy.quickStartHint}</p>
-                <span className="mt-3 inline-flex rounded-full border border-violet-200/35 bg-violet-300/20 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-violet-100">{copy.inPreview}</span>
+              <button type="button" onClick={goNext} className="rounded-2xl border border-violet-200/45 bg-violet-500/20 p-4 text-left transition hover:bg-violet-400/25 sm:p-5">
+                <p className="flex items-center gap-2 text-lg font-semibold leading-tight text-white">
+                  <span aria-hidden className="text-base">⚡</span>
+                  {copy.quickStart}
+                </p>
+                <p className="mt-2 text-base leading-snug text-white/90">{copy.quickStartPrimary}</p>
+                <p className="mt-3">
+                  <span className="inline-flex rounded-full border border-violet-200/35 bg-violet-300/18 px-2.5 py-1 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-violet-100">
+                    {copy.quickStartTime}
+                  </span>
+                </p>
+                <p className="mt-3 text-xs leading-relaxed text-white/58">{copy.quickStartHint}</p>
+                <span className="mt-5 inline-flex rounded-full border border-violet-200/35 bg-violet-300/20 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-violet-100">{copy.inPreview}</span>
               </button>
             </div>
 
