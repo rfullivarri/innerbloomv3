@@ -1,0 +1,102 @@
+{
+  "info": {
+    "name": "Innerbloom API (Initial)",
+    "description": "Colección inicial generada desde rutas activas en apps/api.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" },
+    { "key": "bearerToken", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "taskId", "value": "" },
+    { "key": "missionId", "value": "" },
+    { "key": "cronSecret", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "00 Health",
+      "item": [
+        { "name": "GET _health", "request": { "method": "GET", "url": "{{baseUrl}}/_health" } },
+        { "name": "GET health/db", "request": { "method": "GET", "url": "{{baseUrl}}/health/db" } }
+      ]
+    },
+    {
+      "name": "01 Auth & Me",
+      "item": [
+        { "name": "GET users/me", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/users/me" } },
+        { "name": "GET users/me/subscription", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/users/me/subscription" } },
+        { "name": "GET me/daily-reminder", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/me/daily-reminder" } },
+        { "name": "PUT me/timezone", "request": { "method": "PUT", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"},{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"timezone\": \"America/Argentina/Buenos_Aires\"\n}"}, "url": "{{baseUrl}}/me/timezone" } }
+      ]
+    },
+    {
+      "name": "02 User Dashboard",
+      "item": [
+        { "name": "GET users/:id/summary/today", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/users/{{userId}}/summary/today" } },
+        { "name": "GET users/:id/tasks", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/users/{{userId}}/tasks" } },
+        { "name": "GET users/:id/weekly-wrapped/latest", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/users/{{userId}}/weekly-wrapped/latest" } }
+      ]
+    },
+    {
+      "name": "03 Onboarding",
+      "item": [
+        { "name": "GET onboarding/progress", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/onboarding/progress" } },
+        { "name": "POST onboarding/progress/mark", "request": { "method": "POST", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"},{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"step\": \"onboarding_started\"\n}"}, "url": "{{baseUrl}}/onboarding/progress/mark" } }
+      ]
+    },
+    {
+      "name": "04 Daily Quest",
+      "item": [
+        { "name": "GET daily-quest/definition", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/daily-quest/definition" } },
+        { "name": "POST daily-quest/submit", "request": { "method": "POST", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"},{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"emotion_id\": 1,\n  \"tasks_done\": [{\"task_id\": \"{{taskId}}\"}],\n  \"notes\": \"test\"\n}"}, "url": "{{baseUrl}}/daily-quest/submit" } }
+      ]
+    },
+    {
+      "name": "05 Missions",
+      "item": [
+        { "name": "GET missions/board", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/missions/board" } },
+        { "name": "POST missions/select", "request": { "method": "POST", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"},{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"slot\": \"main\",\n  \"missionId\": \"{{missionId}}\"\n}"}, "url": "{{baseUrl}}/missions/select" } }
+      ]
+    },
+    {
+      "name": "06 Tasks Insights",
+      "item": [
+        { "name": "GET tasks/:taskId/insights", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/tasks/{{taskId}}/insights" } },
+        { "name": "GET tasks/:taskId/recalibrations", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/tasks/{{taskId}}/recalibrations?limit=3" } }
+      ]
+    },
+    {
+      "name": "07 Moderation",
+      "item": [
+        { "name": "GET moderation", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/moderation" } }
+      ]
+    },
+    {
+      "name": "08 Billing",
+      "item": [
+        { "name": "GET billing/plans", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/billing/plans" } },
+        { "name": "POST billing/checkout-session", "request": { "method": "POST", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"},{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{}"}, "url": "{{baseUrl}}/billing/checkout-session" } }
+      ]
+    },
+    {
+      "name": "09 Admin",
+      "item": [
+        { "name": "GET admin/me", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/admin/me" } },
+        { "name": "GET admin/users", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{bearerToken}}"}], "url": "{{baseUrl}}/admin/users" } }
+      ]
+    },
+    {
+      "name": "10 Internal Cron",
+      "item": [
+        { "name": "POST internal/cron/daily-reminders", "request": { "method": "POST", "header": [{"key":"x-cron-secret","value":"{{cronSecret}}"}], "url": "{{baseUrl}}/internal/cron/daily-reminders" } }
+      ]
+    },
+    {
+      "name": "11 Webhooks",
+      "item": [
+        { "name": "GET webhooks/clerk/health", "request": { "method": "GET", "url": "{{baseUrl}}/webhooks/clerk/health" } },
+        { "name": "POST webhooks/stripe", "request": { "method": "POST", "header": [{"key":"stripe-signature","value":"{{stripeSignature}}"},{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{}"}, "url": "{{baseUrl}}/webhooks/stripe" } }
+      ]
+    }
+  ]
+}
