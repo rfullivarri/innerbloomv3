@@ -6,6 +6,7 @@ import type { OnboardingLanguage } from '../onboarding/constants';
 import type { GameMode } from '../onboarding/state';
 import { GAME_MODE_META } from '../lib/gameModeMeta';
 import { apiAuthorizedFetch, getCurrentUserProfile, markOnboardingProgress } from '../lib/api';
+import { setJourneyGenerationPending } from '../lib/journeyGeneration';
 import { GameModeStep } from '../onboarding/steps/GameModeStep';
 import { HUD } from '../onboarding/ui/HUD';
 import { NavButtons } from '../onboarding/ui/NavButtons';
@@ -816,7 +817,7 @@ export default function QuickStartPreviewPage() {
             pillar_code: pillar.toUpperCase(),
             trait_code: (task?.trait ?? taskId).toUpperCase(),
             input_value: inputValue || undefined,
-            metadata: { task_id: taskId, onboarding_path: 'quick_start' },
+            metadata: { task_id: taskId },
           };
         }),
       );
@@ -877,7 +878,13 @@ export default function QuickStartPreviewPage() {
 
       if (visibleRoute.includes('moderation')) {
         await markOnboardingProgress('moderation_modal_shown', { trigger: 'quick_start' });
+        await markOnboardingProgress('moderation_modal_resolved', { trigger: 'quick_start' });
       }
+
+      setJourneyGenerationPending({
+        clerkUserId: user.clerk_user_id,
+        gameMode,
+      });
 
       navigate('/dashboard-v3');
     } finally {

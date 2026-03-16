@@ -27,6 +27,15 @@ vi.mock('../../db.js', () => ({
 
 vi.mock('../../services/onboardingProgressService.js', () => ({
   markOnboardingProgressStepWithClient: vi.fn().mockResolvedValue(undefined),
+  markOnboardingProgressStep: vi.fn().mockResolvedValue(undefined),
+}));
+
+const { updateModerationConfigMock } = vi.hoisted(() => ({
+  updateModerationConfigMock: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('../../services/moderationService.js', () => ({
+  updateModerationConfig: updateModerationConfigMock,
 }));
 
 type Expectation = {
@@ -87,6 +96,8 @@ beforeEach(() => {
   mockClient.query.mockReset();
   withClientSpy.mockReset();
   withClientSpy.mockImplementation(async (callback) => callback(mockClient));
+  updateModerationConfigMock.mockReset();
+  updateModerationConfigMock.mockResolvedValue(undefined);
   delete process.env.WEB_PUBLIC_BASE_URL;
 });
 
@@ -401,6 +412,71 @@ describe('submitOnboardingIntro', () => {
       metadata: { sessionId: 'session-1', onboardingPath: 'traditional', quickStart: null },
     });
     expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes quick start submissions through quick-start metadata and moderation setup', async () => {
+    const payload: OnboardingIntroPayload = {
+      ...basePayload,
+      meta: {
+        ...basePayload.meta,
+        onboarding_path: 'quick_start',
+      },
+      data: {
+        ...basePayload.data,
+        quick_start: {
+          selected_moderations: ['sugar', 'alcohol'],
+          manual_task_candidates: [
+            {
+              task: 'Caminar',
+              pillar_code: 'BODY',
+              trait_code: 'ENERGIA',
+              input_value: '15 min',
+            },
+          ],
+        },
+      },
+    };
+
+    const expectations = createSubmitExpectations({
+      xpBonusRowCounts: [1, 1, 1],
+      payload,
+    });
+
+    mockClient.query.mockImplementation(async (sql, params) => {
+      const expectation = expectations.shift();
+      expect(expectation, `Unexpected query: ${sql}`).toBeDefined();
+      expect(expectation?.match(sql)).toBe(true);
+      return expectation!.handle(sql, params);
+    });
+
+    const deps = createDeps();
+    const result = await submitOnboardingIntro('user_123', payload, deps);
+
+    expect(result.taskgenCorrelationId).toBe('corr-123');
+    expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledWith({
+      userId: 'user-1',
+      mode: 'flow',
+      origin: 'onboarding:intro:quick_start',
+      metadata: {
+        sessionId: 'session-1',
+        onboardingPath: 'quick_start',
+        quickStart: payload.data.quick_start,
+      },
+    });
+
+    expect(updateModerationConfigMock).toHaveBeenCalledTimes(2);
+    expect(updateModerationConfigMock).toHaveBeenNthCalledWith(
+      1,
+      'user-1',
+      'sugar',
+      expect.objectContaining({ isEnabled: true, isPaused: false, notLoggedToleranceDays: 2 }),
+    );
+    expect(updateModerationConfigMock).toHaveBeenNthCalledWith(
+      2,
+      'user-1',
+      'alcohol',
+      expect.objectContaining({ isEnabled: true, isPaused: false, notLoggedToleranceDays: 2 }),
+    );
   });
 });
 
