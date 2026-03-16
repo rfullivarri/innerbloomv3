@@ -294,7 +294,7 @@ describe('triggerTaskGenerationForUser', () => {
         buildMessages: () => [],
         buildPromptPreview: () => '',
         callOpenAI: vi.fn(),
-        validateTasks: (payload: { tasks: Array<{ difficulty_code: string }> }) => {
+        validateTasks: (payload: { tasks: { difficulty_code: string }[] }) => {
           const allowed = new Set(['EASY', 'MED', 'HARD']);
           const invalid = payload.tasks
             .map((task) => task.difficulty_code)

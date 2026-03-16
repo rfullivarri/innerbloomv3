@@ -463,7 +463,7 @@ function includesAnyToken(value: string, tokens: readonly string[]): boolean {
 }
 
 function pickDifficultyCodeByTokens(
-  difficulties: Array<{ code: string; name?: string | null }>,
+  difficulties: { code: string; name?: string | null }[],
   tokens: readonly string[],
   reserved: Set<string>,
 ): string | undefined {
