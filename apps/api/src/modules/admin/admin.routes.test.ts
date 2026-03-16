@@ -770,18 +770,18 @@ describe('Admin routes', () => {
       current_mode: 'FLOW',
       next_mode: 'EVOLVE',
       tasks_total_evaluated: 2,
-      tasks_meeting_goal: 1,
+      tasks_meeting_goal: 0,
       threshold: 0.8,
-      missing_tasks: 1,
+      missing_tasks: 2,
       eligible_for_upgrade: false,
       cta_enabled: false,
     });
-    expect(response.body.task_pass_rate).toBeCloseTo(0.5, 4);
+    expect(response.body.task_pass_rate).toBeCloseTo(0, 4);
     expect(response.body.tasks).toHaveLength(2);
     expect(response.body.tasks[0]).toMatchObject({
       task_id: 'task-1',
       actual_count: 22,
-      meets_goal: true,
+      meets_goal: false,
     });
   });
 
