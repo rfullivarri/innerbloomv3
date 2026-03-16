@@ -131,7 +131,14 @@ export default function App() {
         <Route path="/premium-timeline" element={<PremiumTimelineDemoPage />} />
         <Route path="/demo" element={<DemoDashboardPage />} />
         <Route path="/intro-journey" element={<OnboardingIntroPage />} />
-        <Route path="/labs/quick-start" element={<QuickStartPreviewPage />} />
+        <Route
+          path="/labs/quick-start"
+          element={(
+            <RequireUser>
+              <QuickStartPreviewPage />
+            </RequireUser>
+          )}
+        />
         <Route
           path="/login/*"
           element={

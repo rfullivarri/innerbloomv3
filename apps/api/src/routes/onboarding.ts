@@ -139,6 +139,14 @@ router.get(
       ? await getJourneyReadyModalSeenAt(user.id, generationKey)
       : null;
 
+    console.info('[onboarding-status]', {
+      event: 'quick_start generation status result',
+      userId: user.id,
+      status: state?.status ?? null,
+      correlationId: state?.correlationId ?? null,
+      failureReason: state?.failureReason ?? null,
+    });
+
     res.json({
       ok: true,
       state: state
