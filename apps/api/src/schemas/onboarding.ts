@@ -34,6 +34,26 @@ const foundationsSchema = z.object({
   mindOpen: z.string(),
 });
 
+const quickStartManualTaskCandidateSchema = z.object({
+  task: z.string().min(1),
+  pillar_code: z.string().min(1),
+  trait_code: z.string().min(1),
+  input_value: z.string().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const quickStartDataSchema = z.object({
+  selected_moderations: z.array(z.enum(['alcohol', 'tobacco', 'sugar'])).default([]),
+  manual_task_candidates: z.array(quickStartManualTaskCandidateSchema).default([]),
+  selected_tasks_by_pillar: z
+    .object({
+      body: z.array(z.string()).default([]),
+      mind: z.array(z.string()).default([]),
+      soul: z.array(z.string()).default([]),
+    })
+    .optional(),
+});
+
 const modes = ['LOW', 'CHILL', 'FLOW', 'EVOLVE'] as const;
 
 export const onboardingIntroSchema = z.object({
@@ -52,6 +72,7 @@ export const onboardingIntroSchema = z.object({
     flow: flowSchema,
     evolve: evolveSchema,
     foundations: foundationsSchema,
+    quick_start: quickStartDataSchema.optional(),
   }),
   xp: z.object({
     total: z.coerce.number().min(0),
@@ -66,6 +87,7 @@ export const onboardingIntroSchema = z.object({
       device: z.string(),
       version: z.string(),
       user_id: z.string().min(1),
+      onboarding_path: z.enum(['traditional', 'quick_start']).optional(),
     })
     .catchall(z.unknown()),
 });

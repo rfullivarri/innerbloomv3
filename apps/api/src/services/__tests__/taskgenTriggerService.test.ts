@@ -192,4 +192,136 @@ describe('triggerTaskGenerationForUser', () => {
     expect(openaiRequest).toBeDefined();
     expect(openaiRequest?.data?.paramFilter).toBe('off');
   });
+
+  it('routes quick start manual candidates through validate/store without OpenAI', async () => {
+    const queryMock = vi.fn(async (sql: string) => {
+      if (sql === 'BEGIN' || sql === 'COMMIT') {
+        return {};
+      }
+
+      if (sql.startsWith('SELECT task_id FROM tasks WHERE tasks_group_id')) {
+        return { rows: [], rowCount: 0 };
+      }
+
+      if (sql.startsWith('INSERT INTO tasks')) {
+        return { rowCount: 1 };
+      }
+
+      if (sql.includes('INSERT INTO user_journey_generation_state')) {
+        return { rowCount: 1 };
+      }
+
+      if (sql.includes('INSERT INTO user_onboarding_progress')) {
+        return { rowCount: 1 };
+      }
+
+      if (sql.includes('UPDATE user_onboarding_progress')) {
+        return { rowCount: 1 };
+      }
+
+      if (sql.includes('FROM user_onboarding_progress')) {
+        return {
+          rows: [{
+            user_id: 'user-123',
+            onboarding_session_id: null,
+            version: 1,
+            state: 'in_progress',
+            onboarding_started_at: null,
+            game_mode_selected_at: null,
+            moderation_selected_at: null,
+            tasks_generated_at: new Date().toISOString(),
+            first_task_edited_at: null,
+            returned_to_dashboard_after_first_edit_at: null,
+            moderation_modal_shown_at: null,
+            moderation_modal_resolved_at: null,
+            first_daily_quest_prompted_at: null,
+            first_daily_quest_completed_at: null,
+            daily_quest_scheduled_at: null,
+            onboarding_completed_at: null,
+            source: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }],
+          rowCount: 1,
+        };
+      }
+
+      throw new Error(`Unexpected query: ${sql}`);
+    });
+
+    vi.doMock('../../db.js', () => ({
+      withClient: (callback: (client: { query: typeof queryMock }) => Promise<unknown>) =>
+        callback({ query: queryMock }),
+    }));
+
+    vi.doMock('../debugTaskgenService.js', async () => {
+      const actual = await vi.importActual<typeof import('../debugTaskgenService.js')>('../debugTaskgenService.js');
+
+      const baseDeps = {
+        getContext: async () => ({
+          user: {
+            user_id: 'user-123',
+            tasks_group_id: 'group-1',
+            email_primary: null,
+            email: null,
+            first_name: null,
+            full_name: null,
+            timezone: null,
+          },
+          catalogs: {
+            catalogPillars: '',
+            catalogTraits: '',
+            catalogStats: '',
+            catalogDifficulty: '',
+            pillarCodes: new Set(['BODY']),
+            traitsByCode: new Map([['ENERGIA', { trait_id: 1, pillar_id: 1, code: 'ENERGIA' }]]),
+            pillarById: new Map([[1, { pillar_id: 1, code: 'BODY' }]]),
+            statCodes: new Set(['BODY']),
+            difficultyCodes: new Set(['EASY']),
+            difficultiesByCode: new Map([['EASY', { difficulty_id: 1, code: 'EASY', xp_base: 10 }]]),
+            pillarsByCode: new Map([['BODY', { pillar_id: 1, code: 'BODY' }]]),
+          },
+          gameModesByCode: new Map(),
+        }),
+        resolveMode: () => 'chill' as const,
+        loadPrompt: async () => ({ path: 'prompt.json', prompt: { messages: [], response_format: { type: 'json_object' } } }),
+        parseOverride: async () => ({ prompt: { messages: [] }, source: 'override' }),
+        buildPlaceholders: () => ({ USER_ID: 'user-123', TASKS_GROUP_ID: 'group-1' }),
+        buildMessages: () => [],
+        buildPromptPreview: () => '',
+        callOpenAI: vi.fn(),
+        validateTasks: () => ({ valid: true, errors: [] as string[] }),
+        storeTasks: async () => undefined,
+      };
+
+      return {
+        __esModule: true,
+        ...actual,
+        createDefaultDebugTaskgenDeps: () => baseDeps,
+      };
+    });
+
+    const { triggerTaskGenerationForUser } = await import('../taskgenTriggerService.js');
+
+    triggerTaskGenerationForUser({
+      userId: 'user-123',
+      mode: 'CHILL',
+      origin: 'test',
+      metadata: {
+        onboardingPath: 'quick_start',
+        quickStart: {
+          manual_task_candidates: [
+            { task: 'Caminar durante', pillar_code: 'body', trait_code: 'energia', input_value: '15 min' },
+          ],
+        },
+      },
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const insertCalls = queryMock.mock.calls.filter(([sql]) => sql.startsWith('INSERT INTO tasks'));
+    expect(insertCalls).toHaveLength(1);
+    expect(insertCalls[0]?.[1]?.[3]).toBe('Caminar durante 15 min');
+  });
 });

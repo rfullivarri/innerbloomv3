@@ -5,6 +5,7 @@ import { resolveOnboardingLanguage } from '../onboarding/i18n';
 import type { OnboardingLanguage } from '../onboarding/constants';
 import type { GameMode } from '../onboarding/state';
 import { GAME_MODE_META } from '../lib/gameModeMeta';
+import { apiAuthorizedFetch, getCurrentUserProfile, markOnboardingProgress } from '../lib/api';
 import { GameModeStep } from '../onboarding/steps/GameModeStep';
 import { HUD } from '../onboarding/ui/HUD';
 import { NavButtons } from '../onboarding/ui/NavButtons';
@@ -665,6 +666,7 @@ export default function QuickStartPreviewPage() {
     alcohol: false,
   });
   const [setupProgress, setSetupProgress] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const copy = COPY[language];
 
   const minimum = MODE_MINIMUMS[gameMode];
@@ -787,6 +789,100 @@ export default function QuickStartPreviewPage() {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set('lang', lang);
     setSearchParams(nextParams, { replace: true });
+  };
+
+  const submitQuickStart = async () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const user = await getCurrentUserProfile();
+      const taskMap = (Object.keys(copy.tasks) as Pillar[]).reduce<Map<string, Task>>((map, pillar) => {
+        for (const task of copy.tasks[pillar]) {
+          map.set(`${pillar}-${task.id}`, task);
+        }
+        return map;
+      }, new Map());
+
+      const manualCandidates = (Object.keys(selectedByPillar) as Pillar[]).flatMap((pillar) =>
+        selectedByPillar[pillar].map((taskId) => {
+          const key = `${pillar}-${taskId}`;
+          const task = taskMap.get(key);
+          const inputValue = (inputsByTask[key] ?? '').trim();
+          return {
+            task: task?.text ?? taskId,
+            pillar_code: pillar.toUpperCase(),
+            trait_code: (task?.trait ?? taskId).toUpperCase(),
+            input_value: inputValue || undefined,
+            metadata: { task_id: taskId, onboarding_path: 'quick_start' },
+          };
+        }),
+      );
+
+      const foundations = {
+        body: selectedByPillar.Body,
+        mind: selectedByPillar.Mind,
+        soul: selectedByPillar.Soul,
+        bodyOpen: '',
+        mindOpen: '',
+        soulOpen: '',
+      };
+
+      const response = await apiAuthorizedFetch('/onboarding/intro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ts: new Date().toISOString(),
+          client_id: crypto.randomUUID(),
+          email: (user.email_primary ?? `${user.clerk_user_id}@innerbloom.local`).toLowerCase(),
+          mode: gameMode,
+          data: {
+            low: { body: [], soul: [], mind: [], note: '' },
+            chill: { oneThing: '', motiv: [] },
+            flow: { goal: '', imped: [] },
+            evolve: { goal: '', trade: [], att: '' },
+            foundations,
+            quick_start: {
+              selected_moderations: (Object.keys(moderationPrefs) as ModerationOption[]).filter((option) => moderationPrefs[option]),
+              selected_tasks_by_pillar: {
+                body: selectedByPillar.Body,
+                mind: selectedByPillar.Mind,
+                soul: selectedByPillar.Soul,
+              },
+              manual_task_candidates: manualCandidates,
+            },
+          },
+          xp: {
+            total: totalGp,
+            Body: selectedCounts.Body * 3,
+            Mind: selectedCounts.Mind * 3,
+            Soul: selectedCounts.Soul * 3,
+          },
+          meta: {
+            tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+            lang: language,
+            device: /mobi|android/i.test(window.navigator.userAgent) ? 'mobile' : 'desktop',
+            version: 'quick-start-v1',
+            user_id: user.clerk_user_id,
+            onboarding_path: 'quick_start',
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('No se pudo guardar Quick Start');
+      }
+
+      if (visibleRoute.includes('moderation')) {
+        await markOnboardingProgress('moderation_modal_shown', { trigger: 'quick_start' });
+      }
+
+      navigate('/dashboard-v3');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const quickStartBody = () => {
@@ -1025,11 +1121,14 @@ export default function QuickStartPreviewPage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <motion.button
                 type="button"
-                onClick={() => navigate('/')}
+                onClick={submitQuickStart}
                 whileTap={{ scale: 0.97 }}
                 className="order-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-[#cf8bf3]/30 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cf8bf3]/60 sm:order-2"
+                disabled={isSubmitting}
               >
-                {language === 'en' ? 'Finish preview' : 'Finalizar preview'}
+                {isSubmitting
+                  ? language === 'en' ? 'Saving...' : 'Guardando...'
+                  : language === 'en' ? 'Finish quick start' : 'Finalizar inicio rápido'}
               </motion.button>
               <button
                 type="button"

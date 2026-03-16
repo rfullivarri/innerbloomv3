@@ -320,7 +320,7 @@ describe('submitOnboardingIntro', () => {
       userId: 'user-1',
       mode: 'flow',
       origin: 'onboarding:intro',
-      metadata: { sessionId: 'session-1' },
+      metadata: { sessionId: 'session-1', onboardingPath: 'traditional', quickStart: null },
     });
     expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledTimes(1);
   });
@@ -352,7 +352,7 @@ describe('submitOnboardingIntro', () => {
       userId: 'user-1',
       mode: 'flow',
       origin: 'onboarding:intro',
-      metadata: { sessionId: 'session-1' },
+      metadata: { sessionId: 'session-1', onboardingPath: 'traditional', quickStart: null },
     });
     expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledTimes(1);
   });
@@ -398,7 +398,7 @@ describe('submitOnboardingIntro', () => {
       userId: 'user-1',
       mode: 'flow',
       origin: 'onboarding:intro',
-      metadata: { sessionId: 'session-1' },
+      metadata: { sessionId: 'session-1', onboardingPath: 'traditional', quickStart: null },
     });
     expect(deps.triggerTaskGenerationForUser).toHaveBeenCalledTimes(1);
   });

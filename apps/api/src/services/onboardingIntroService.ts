@@ -4,12 +4,13 @@ import { HttpError } from '../lib/http-error.js';
 import type { OnboardingIntroPayload } from '../schemas/onboarding.js';
 import { triggerTaskGenerationForUser } from './taskgenTriggerService.js';
 import { upsertJourneyGenerationStateWithClient } from './journeyGenerationStateService.js';
-import { markOnboardingProgressStepWithClient } from './onboardingProgressService.js';
+import { markOnboardingProgressStep, markOnboardingProgressStepWithClient } from './onboardingProgressService.js';
 import {
   changeUserGameMode,
   resolveGameModeByCode,
   resolveGameModeImageUrl,
 } from './userGameModeChangeService.js';
+import { updateModerationConfig, type TrackerType } from './moderationService.js';
 
 export function resolveModeImageUrl(mode: OnboardingIntroPayload['mode']): string | null {
   return resolveGameModeImageUrl(mode);
@@ -235,23 +236,34 @@ export async function submitOnboardingIntro(
 
       await upsertFreeTrialSubscription(client, userId);
       await upsertJourneyGenerationStateWithClient(client, userId, 'pending');
+      const onboardingPath = resolveOnboardingPath(payload);
+      const progressTrigger = onboardingPath === 'quick_start' ? 'quick_start' : 'onboarding_intro_submit';
+
       await markOnboardingProgressStepWithClient(client, userId, 'onboarding_started', {
         onboardingSessionId: sessionId,
-        source: { trigger: 'onboarding_intro_submit' },
+        source: { trigger: progressTrigger },
       });
       await markOnboardingProgressStepWithClient(client, userId, 'game_mode_selected', {
         onboardingSessionId: sessionId,
-        source: { trigger: 'onboarding_intro_submit' },
+        source: { trigger: progressTrigger },
       });
 
       await client.query('COMMIT');
 
       const normalizedMode = payload.mode.toLowerCase() as NormalizedMode;
+      if (onboardingPath === 'quick_start') {
+        await applyQuickStartModerations(userId, payload, sessionId);
+      }
+
       const correlationId = deps.triggerTaskGenerationForUser({
         userId,
         mode: normalizedMode,
-        origin: 'onboarding:intro',
-        metadata: { sessionId },
+        origin: onboardingPath === 'quick_start' ? 'onboarding:intro:quick_start' : 'onboarding:intro',
+        metadata: {
+          sessionId,
+          onboardingPath,
+          quickStart: payload.data.quick_start ?? null,
+        },
       });
 
       return { sessionId, awarded, userId, mode: normalizedMode, taskgenCorrelationId: correlationId };
@@ -259,6 +271,42 @@ export async function submitOnboardingIntro(
       await client.query('ROLLBACK');
       throw error;
     }
+  });
+}
+
+function resolveOnboardingPath(payload: OnboardingIntroPayload): 'quick_start' | 'traditional' {
+  return payload.meta.onboarding_path === 'quick_start' ? 'quick_start' : 'traditional';
+}
+
+async function applyQuickStartModerations(
+  userId: string,
+  payload: OnboardingIntroPayload,
+  onboardingSessionId: string,
+): Promise<void> {
+  const selected = payload.data.quick_start?.selected_moderations ?? [];
+  const trackerTypes = selected.filter((value): value is TrackerType =>
+    value === 'alcohol' || value === 'tobacco' || value === 'sugar',
+  );
+
+  if (trackerTypes.length === 0) {
+    return;
+  }
+
+  for (const type of trackerTypes) {
+    await updateModerationConfig(userId, type, {
+      isEnabled: true,
+      isPaused: false,
+      notLoggedToleranceDays: 2,
+    });
+  }
+
+  await markOnboardingProgressStep(userId, 'moderation_selected', {
+    onboardingSessionId,
+    source: { trigger: 'quick_start' },
+  });
+  await markOnboardingProgressStep(userId, 'moderation_modal_resolved', {
+    onboardingSessionId,
+    source: { trigger: 'quick_start' },
   });
 }
 
