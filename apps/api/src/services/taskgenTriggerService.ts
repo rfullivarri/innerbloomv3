@@ -48,6 +48,9 @@ type QuickStartManualCandidate = {
   metadata?: Record<string, unknown>;
 };
 
+type EngineDifficultyCode = 'EASY' | 'MEDIUM' | 'HARD';
+type QuickStartDifficultyMap = Record<EngineDifficultyCode, string>;
+
 const LOG_PREFIX = '[taskgen-trigger]';
 const OPENAI_MISCONFIGURED_MESSAGE = 'OPENAI_API_KEY is not configured';
 const PREVIEW_LIMIT = 180;
@@ -446,6 +449,78 @@ function isQuickStartManualGeneration(metadata: Record<string, unknown> | undefi
   return Array.isArray(manualCandidates) && manualCandidates.length > 0;
 }
 
+function normalizeDifficultyToken(value: string | null | undefined): string {
+  return (value ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function includesAnyToken(value: string, tokens: readonly string[]): boolean {
+  return tokens.some((token) => value.includes(token));
+}
+
+function pickDifficultyCodeByTokens(
+  difficulties: { code: string; name?: string | null }[],
+  tokens: readonly string[],
+  reserved: Set<string>,
+): string | undefined {
+  for (const difficulty of difficulties) {
+    if (reserved.has(difficulty.code)) {
+      continue;
+    }
+    const normalized = `${normalizeDifficultyToken(difficulty.code)} ${normalizeDifficultyToken(difficulty.name)}`.trim();
+    if (includesAnyToken(normalized, tokens)) {
+      return difficulty.code;
+    }
+  }
+  return undefined;
+}
+
+function buildQuickStartDifficultyMap(context: Awaited<ReturnType<DebugTaskgenDeps['getContext']>>): QuickStartDifficultyMap {
+  const difficultyRows = Array.from(context.catalogs.difficultiesByCode.values());
+  if (difficultyRows.length === 0) {
+    throw new Error('cat_difficulty catalog is empty; cannot map quick start difficulty codes');
+  }
+
+  const ordered = [...difficultyRows].sort((a, b) => {
+    const xpA = Number.isFinite(a.xp_base) ? Number(a.xp_base) : Number.POSITIVE_INFINITY;
+    const xpB = Number.isFinite(b.xp_base) ? Number(b.xp_base) : Number.POSITIVE_INFINITY;
+    if (xpA !== xpB) {
+      return xpA - xpB;
+    }
+    return a.difficulty_id - b.difficulty_id;
+  });
+
+  const reserved = new Set<string>();
+  const easy = pickDifficultyCodeByTokens(ordered, ['easy', 'facil', 'baja', 'low', 'light'], reserved) ?? ordered[0]?.code;
+  if (easy) {
+    reserved.add(easy);
+  }
+  const hard = pickDifficultyCodeByTokens(ordered, ['hard', 'dificil', 'alta', 'high', 'intense'], reserved)
+    ?? ordered[ordered.length - 1]?.code;
+  if (hard) {
+    reserved.add(hard);
+  }
+  const middleIndex = Math.floor((ordered.length - 1) / 2);
+  const medium = pickDifficultyCodeByTokens(ordered, ['medium', 'med', 'normal', 'moderate'], reserved)
+    ?? ordered[middleIndex]?.code
+    ?? easy
+    ?? hard;
+
+  if (!easy || !medium || !hard) {
+    throw new Error('Unable to resolve quick start difficulty mapping from cat_difficulty');
+  }
+
+  return {
+    EASY: easy,
+    MEDIUM: medium,
+    HARD: hard,
+  };
+}
+
 async function runQuickStartManualTaskGeneration(args: {
   correlationId: string;
   userId: string;
@@ -519,6 +594,12 @@ async function runQuickStartManualTaskGeneration(args: {
     seed: `${args.userId}:${args.correlationId}`,
   });
 
+  const difficultyMap = buildQuickStartDifficultyMap(context);
+  const mappedTasks = tasks.map((task) => ({
+    ...task,
+    difficulty_code: difficultyMap[task.difficulty_code as EngineDifficultyCode],
+  }));
+
   emitEvent({
     level: 'info',
     event: 'VALIDATION_OK',
@@ -528,8 +609,9 @@ async function runQuickStartManualTaskGeneration(args: {
     origin: args.origin,
     data: {
       stage: 'quick_start difficulty assigned',
-      count: tasks.length,
-      byDifficulty: tasks.reduce<Record<string, number>>((acc, task) => {
+      count: mappedTasks.length,
+      difficultyMap,
+      byDifficulty: mappedTasks.reduce<Record<string, number>>((acc, task) => {
         acc[task.difficulty_code] = (acc[task.difficulty_code] ?? 0) + 1;
         return acc;
       }, {}),
@@ -538,7 +620,7 @@ async function runQuickStartManualTaskGeneration(args: {
   const payload = {
     user_id: context.user.user_id,
     tasks_group_id: context.user.tasks_group_id ?? 'N/A',
-    tasks,
+    tasks: mappedTasks,
   };
   const placeholders = deps.buildPlaceholders(context);
   const validation = deps.validateTasks(payload, context.catalogs, placeholders, undefined);
@@ -555,7 +637,7 @@ async function runQuickStartManualTaskGeneration(args: {
       userId: args.userId,
       mode: args.mode,
       origin: args.origin,
-      data: { stage: 'quick_start validate fail', errors: validation.errors, taskCount: tasks.length },
+      data: { stage: 'quick_start validate fail', errors: validation.errors, taskCount: mappedTasks.length },
     });
     return;
   }
@@ -567,13 +649,13 @@ async function runQuickStartManualTaskGeneration(args: {
     userId: args.userId,
     mode: args.mode,
     origin: args.origin,
-    data: { stage: 'quick_start validate ok', taskCount: tasks.length },
+    data: { stage: 'quick_start validate ok', taskCount: mappedTasks.length },
   });
 
   const outcome = await storeTasksWithIdempotency({
     user: context.user,
     catalogs: context.catalogs,
-    tasks,
+    tasks: mappedTasks,
     correlationId: args.correlationId,
     origin: args.origin,
     mode: args.mode,
