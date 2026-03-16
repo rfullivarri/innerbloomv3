@@ -36,6 +36,14 @@ type StoreOutcome = {
   reason: 'existing_active_tasks' | 'no_tasks' | 'inserted';
 };
 
+type QuickStartManualCandidate = {
+  task: string;
+  pillar_code: string;
+  trait_code: string;
+  input_value?: string;
+  metadata?: Record<string, unknown>;
+};
+
 const LOG_PREFIX = '[taskgen-trigger]';
 const OPENAI_MISCONFIGURED_MESSAGE = 'OPENAI_API_KEY is not configured';
 const PREVIEW_LIMIT = 180;
@@ -343,6 +351,11 @@ async function runTaskGeneration(args: {
   origin: string;
   metadata?: Record<string, unknown>;
 }) {
+  if (isQuickStartManualGeneration(args.metadata)) {
+    await runQuickStartManualTaskGeneration(args);
+    return;
+  }
+
   await upsertJourneyGenerationState(args.userId, 'running', { correlationId: args.correlationId });
 
   emitEvent({
@@ -404,6 +417,115 @@ async function runTaskGeneration(args: {
       error: result.error ?? null,
     },
   });
+}
+
+function isQuickStartManualGeneration(metadata: Record<string, unknown> | undefined): boolean {
+  if (!metadata || metadata.onboardingPath !== 'quick_start') {
+    return false;
+  }
+
+  const quickStartData = metadata.quickStart;
+  if (!quickStartData || typeof quickStartData !== 'object') {
+    return false;
+  }
+
+  const manualCandidates = (quickStartData as { manual_task_candidates?: unknown }).manual_task_candidates;
+  return Array.isArray(manualCandidates) && manualCandidates.length > 0;
+}
+
+function normalizeQuickStartManualTasks(
+  candidates: QuickStartManualCandidate[],
+): Parameters<DebugTaskgenDeps['storeTasks']>[0]['tasks'] {
+  return candidates
+    .map((candidate) => {
+      const pillarCode = candidate.pillar_code.trim().toUpperCase();
+      const traitCode = candidate.trait_code.trim().toUpperCase();
+      const baseTask = candidate.task.trim();
+      const inputValue = candidate.input_value?.trim();
+
+      if (!pillarCode || !traitCode || !baseTask) {
+        return null;
+      }
+
+      return {
+        task: inputValue ? `${baseTask} ${inputValue}`.trim() : baseTask,
+        pillar_code: pillarCode,
+        trait_code: traitCode,
+        stat_code: pillarCode,
+        // Prompt 2 hook: replace this temporary adapter with Difficulty Balance Engine output.
+        difficulty_code: 'EASY',
+        friction_score: 0,
+        friction_tier: 'quick_start',
+      };
+    })
+    .filter((task): task is NonNullable<typeof task> => task !== null);
+}
+
+async function runQuickStartManualTaskGeneration(args: {
+  correlationId: string;
+  userId: string;
+  mode: Mode | undefined;
+  origin: string;
+  metadata?: Record<string, unknown>;
+}) {
+  await upsertJourneyGenerationState(args.userId, 'running', { correlationId: args.correlationId });
+
+  const deps = createDefaultDebugTaskgenDeps();
+  const context = await deps.getContext(args.userId);
+
+  const quickStartData = (args.metadata?.quickStart ?? {}) as {
+    manual_task_candidates?: QuickStartManualCandidate[];
+  };
+  const manualCandidates = Array.isArray(quickStartData.manual_task_candidates)
+    ? quickStartData.manual_task_candidates
+    : [];
+
+  const tasks = normalizeQuickStartManualTasks(manualCandidates);
+  const payload = {
+    user_id: context.user.user_id,
+    tasks_group_id: context.user.tasks_group_id ?? 'N/A',
+    tasks,
+  };
+  const placeholders = deps.buildPlaceholders(context);
+  const validation = deps.validateTasks(payload, context.catalogs, placeholders, undefined);
+
+  if (!validation.valid) {
+    await upsertJourneyGenerationState(args.userId, 'failed', {
+      correlationId: args.correlationId,
+      failureReason: validation.errors.join('; '),
+    });
+    emitEvent({
+      level: 'warn',
+      event: 'VALIDATION_FAILED',
+      correlationId: args.correlationId,
+      userId: args.userId,
+      mode: args.mode,
+      origin: args.origin,
+      data: { errors: validation.errors, taskCount: tasks.length },
+    });
+    return;
+  }
+
+  const outcome = await storeTasksWithIdempotency({
+    user: context.user,
+    catalogs: context.catalogs,
+    tasks,
+    correlationId: args.correlationId,
+    origin: args.origin,
+    mode: args.mode,
+  });
+
+  if (outcome.reason === 'inserted') {
+    await upsertJourneyGenerationState(args.userId, 'completed', { correlationId: args.correlationId });
+    await markOnboardingProgressStep(args.userId, 'tasks_generated', {
+      source: { trigger: 'quick_start', correlation_id: args.correlationId },
+    });
+  } else {
+    await upsertJourneyGenerationState(args.userId, 'failed', {
+      correlationId: args.correlationId,
+      failureReason: outcome.reason,
+    });
+  }
 }
 
 export function triggerTaskGenerationForUser(input: TriggerInput): string {
