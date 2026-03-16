@@ -229,7 +229,7 @@ export function assignBalancedDifficultiesByPillar<T extends { pillar_code: stri
   tasks: readonly T[];
   gameMode: GameMode;
   seed?: string;
-}): Array<T & { difficulty_code: DifficultyCode }> {
+}): (T & { difficulty_code: DifficultyCode })[] {
   const grouped: Record<PillarCode, T[]> = { BODY: [], MIND: [], SOUL: [] };
   for (const task of input.tasks) {
     const pillar = task.pillar_code.trim().toUpperCase() as PillarCode;
@@ -245,7 +245,7 @@ export function assignBalancedDifficultiesByPillar<T extends { pillar_code: stri
     nSoul: grouped.SOUL.length,
   });
 
-  const output: Array<T & { difficulty_code: DifficultyCode }> = [];
+  const output: (T & { difficulty_code: DifficultyCode })[] = [];
 
   for (const pillar of PILLARS) {
     const seedKey = input.seed ? `${input.seed}:${pillar}` : `${Date.now()}:${pillar}`;
@@ -270,4 +270,3 @@ export function normalizeGameModeForDifficultyEngine(mode: string | null | undef
   }
   return 'FLOW';
 }
-
