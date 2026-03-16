@@ -277,10 +277,10 @@ describe('triggerTaskGenerationForUser', () => {
             traitsByCode: new Map([['ENERGIA', { trait_id: 1, pillar_id: 1, code: 'ENERGIA' }]]),
             pillarById: new Map([[1, { pillar_id: 1, code: 'BODY' }]]),
             statCodes: new Set(['ENERGIA']),
-            difficultyCodes: new Set(['EASY', 'MEDIUM', 'HARD']),
+            difficultyCodes: new Set(['EASY', 'MED', 'HARD']),
             difficultiesByCode: new Map([
               ['EASY', { difficulty_id: 1, code: 'EASY', xp_base: 10 }],
-              ['MEDIUM', { difficulty_id: 2, code: 'MEDIUM', xp_base: 30 }],
+              ['MED', { difficulty_id: 2, code: 'MED', xp_base: 30 }],
               ['HARD', { difficulty_id: 3, code: 'HARD', xp_base: 70 }],
             ]),
             pillarsByCode: new Map([['BODY', { pillar_id: 1, code: 'BODY' }]]),
@@ -294,7 +294,18 @@ describe('triggerTaskGenerationForUser', () => {
         buildMessages: () => [],
         buildPromptPreview: () => '',
         callOpenAI: vi.fn(),
-        validateTasks: () => ({ valid: true, errors: [] as string[] }),
+        validateTasks: (payload: { tasks: Array<{ difficulty_code: string }> }) => {
+          const allowed = new Set(['EASY', 'MED', 'HARD']);
+          const invalid = payload.tasks
+            .map((task) => task.difficulty_code)
+            .filter((code) => !allowed.has(code));
+
+          if (invalid.length > 0) {
+            return { valid: false, errors: invalid.map((code) => `Invalid difficulty_code: ${code}`) };
+          }
+
+          return { valid: true, errors: [] as string[] };
+        },
         storeTasks: async () => undefined,
       };
 
