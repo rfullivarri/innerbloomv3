@@ -15,6 +15,10 @@ import {
 import { notifyTasksReadyEmail } from './tasksReadyEmailService.js';
 import { upsertJourneyGenerationState } from './journeyGenerationStateService.js';
 import { markOnboardingProgressStep } from './onboardingProgressService.js';
+import {
+  assignBalancedDifficultiesByPillar,
+  normalizeGameModeForDifficultyEngine,
+} from './difficultyBalanceEngine.js';
 
 type TriggerInput = {
   userId: string;
@@ -435,8 +439,9 @@ function isQuickStartManualGeneration(metadata: Record<string, unknown> | undefi
 
 function normalizeQuickStartManualTasks(
   candidates: QuickStartManualCandidate[],
+  args: { gameMode: string | null | undefined; seed: string },
 ): Parameters<DebugTaskgenDeps['storeTasks']>[0]['tasks'] {
-  return candidates
+  const normalized = candidates
     .map((candidate) => {
       const pillarCode = candidate.pillar_code.trim().toUpperCase();
       const traitCode = candidate.trait_code.trim().toUpperCase();
@@ -452,13 +457,17 @@ function normalizeQuickStartManualTasks(
         pillar_code: pillarCode,
         trait_code: traitCode,
         stat_code: pillarCode,
-        // Prompt 2 hook: replace this temporary adapter with Difficulty Balance Engine output.
-        difficulty_code: 'EASY',
         friction_score: 0,
         friction_tier: 'quick_start',
       };
     })
     .filter((task): task is NonNullable<typeof task> => task !== null);
+
+  return assignBalancedDifficultiesByPillar({
+    tasks: normalized,
+    gameMode: normalizeGameModeForDifficultyEngine(args.gameMode),
+    seed: args.seed,
+  });
 }
 
 async function runQuickStartManualTaskGeneration(args: {
@@ -480,7 +489,11 @@ async function runQuickStartManualTaskGeneration(args: {
     ? quickStartData.manual_task_candidates
     : [];
 
-  const tasks = normalizeQuickStartManualTasks(manualCandidates);
+  const gameModeCode = context.gameMode?.code ?? args.mode ?? null;
+  const tasks = normalizeQuickStartManualTasks(manualCandidates, {
+    gameMode: gameModeCode,
+    seed: `${args.userId}:${args.correlationId}`,
+  });
   const payload = {
     user_id: context.user.user_id,
     tasks_group_id: context.user.tasks_group_id ?? 'N/A',

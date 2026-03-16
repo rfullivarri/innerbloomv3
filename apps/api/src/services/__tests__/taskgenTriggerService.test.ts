@@ -277,8 +277,12 @@ describe('triggerTaskGenerationForUser', () => {
             traitsByCode: new Map([['ENERGIA', { trait_id: 1, pillar_id: 1, code: 'ENERGIA' }]]),
             pillarById: new Map([[1, { pillar_id: 1, code: 'BODY' }]]),
             statCodes: new Set(['BODY']),
-            difficultyCodes: new Set(['EASY']),
-            difficultiesByCode: new Map([['EASY', { difficulty_id: 1, code: 'EASY', xp_base: 10 }]]),
+            difficultyCodes: new Set(['EASY', 'MEDIUM', 'HARD']),
+            difficultiesByCode: new Map([
+              ['EASY', { difficulty_id: 1, code: 'EASY', xp_base: 10 }],
+              ['MEDIUM', { difficulty_id: 2, code: 'MEDIUM', xp_base: 30 }],
+              ['HARD', { difficulty_id: 3, code: 'HARD', xp_base: 70 }],
+            ]),
             pillarsByCode: new Map([['BODY', { pillar_id: 1, code: 'BODY' }]]),
           },
           gameModesByCode: new Map(),
@@ -323,5 +327,6 @@ describe('triggerTaskGenerationForUser', () => {
     const insertCalls = queryMock.mock.calls.filter(([sql]) => sql.startsWith('INSERT INTO tasks'));
     expect(insertCalls).toHaveLength(1);
     expect(insertCalls[0]?.[1]?.[3]).toBe('Caminar durante 15 min');
+    expect([1, 2, 3]).toContain(insertCalls[0]?.[1]?.[6]);
   });
 });
