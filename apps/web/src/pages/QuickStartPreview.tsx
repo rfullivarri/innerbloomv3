@@ -695,7 +695,7 @@ export default function QuickStartPreviewPage() {
   const quickStartDraft = useMemo<QuickStartPreviewDraft>(() => {
     const selectedTraitsByPillar = (Object.keys(selectedByPillar) as Pillar[]).reduce<Record<Pillar, string[]>>((acc, pillar) => {
       const taskById = new Map(copy.tasks[pillar].map((task) => [task.id, task.trait]));
-      acc[pillar] = selectedByPillar[pillar].map((id) => taskById.get(id)).filter((trait): trait is string => Boolean(trait));
+      acc[pillar] = selectedByPillar[pillar].map((id) => taskById.get(id) ?? id).filter((trait): trait is string => Boolean(trait));
       return acc;
     }, { Body: [], Mind: [], Soul: [] });
 
@@ -797,6 +797,15 @@ export default function QuickStartPreviewPage() {
       return;
     }
 
+    console.info('[quick_start]', {
+      event: 'quick_start submit started',
+      step,
+      gameMode,
+      selectedCounts,
+      balancedBonusActive,
+      totalGp,
+    });
+
     setIsSubmitting(true);
     try {
       const user = await getCurrentUserProfile();
@@ -815,7 +824,7 @@ export default function QuickStartPreviewPage() {
           return {
             task: task?.text ?? taskId,
             pillar_code: pillar.toUpperCase(),
-            trait_code: (task?.trait ?? taskId).toUpperCase(),
+            trait_code: taskId.toUpperCase(),
             input_value: inputValue || undefined,
             metadata: { task_id: taskId },
           };
@@ -830,6 +839,21 @@ export default function QuickStartPreviewPage() {
         mindOpen: '',
         soulOpen: '',
       };
+
+      console.info('[quick_start]', {
+        event: 'quick_start intro payload summary',
+        onboardingPath: 'quick_start',
+        gameMode,
+        manualCandidates: manualCandidates.length,
+        selectedTasksByPillar: {
+          body: selectedByPillar.Body.length,
+          mind: selectedByPillar.Mind.length,
+          soul: selectedByPillar.Soul.length,
+        },
+        moderationSelected: (Object.keys(moderationPrefs) as ModerationOption[]).filter((option) => moderationPrefs[option]).length,
+        balancedBonusActive,
+        balanceBonusMultiplier: balancedBonusActive ? 1.5 : 1,
+      });
 
       const response = await apiAuthorizedFetch('/onboarding/intro', {
         method: 'POST',
@@ -875,6 +899,19 @@ export default function QuickStartPreviewPage() {
       if (!response.ok) {
         throw new Error('No se pudo guardar Quick Start');
       }
+
+      const introJson = (await response.json()) as {
+        ok?: boolean;
+        session_id?: string;
+        taskgen_correlation_id?: string | null;
+      };
+
+      console.info('[quick_start]', {
+        event: 'quick_start intro accepted',
+        ok: introJson.ok ?? null,
+        sessionId: introJson.session_id ?? null,
+        taskgenCorrelationId: introJson.taskgen_correlation_id ?? null,
+      });
 
       if (visibleRoute.includes('moderation')) {
         await markOnboardingProgress('moderation_modal_shown', { trigger: 'quick_start' });

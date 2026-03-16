@@ -252,6 +252,13 @@ export async function submitOnboardingIntro(
 
       const normalizedMode = payload.mode.toLowerCase() as NormalizedMode;
       if (onboardingPath === 'quick_start') {
+        console.info('[onboarding-intro]', {
+          event: 'quick_start intro accepted',
+          userId,
+          sessionId,
+          mode: payload.mode,
+          manualCandidates: payload.data.quick_start?.manual_task_candidates?.length ?? 0,
+        });
         await applyQuickStartModerations(userId, payload, sessionId);
       }
 
@@ -265,6 +272,15 @@ export async function submitOnboardingIntro(
           quickStart: payload.data.quick_start ?? null,
         },
       });
+
+      if (onboardingPath === 'quick_start') {
+        console.info('[onboarding-intro]', {
+          event: 'quick_start taskgen triggered',
+          userId,
+          sessionId,
+          correlationId,
+        });
+      }
 
       return { sessionId, awarded, userId, mode: normalizedMode, taskgenCorrelationId: correlationId };
     } catch (error) {
