@@ -11,7 +11,7 @@ describe('triggerTaskGenerationForUser', () => {
         task: 'Drink water',
         pillar_code: 'BODY',
         trait_code: 'HYDRATION',
-        stat_code: 'BODY',
+        stat_code: 'HYDRATION',
         difficulty_code: 'EASY',
         friction_score: 1,
         friction_tier: 'low',
@@ -276,7 +276,7 @@ describe('triggerTaskGenerationForUser', () => {
             pillarCodes: new Set(['BODY']),
             traitsByCode: new Map([['ENERGIA', { trait_id: 1, pillar_id: 1, code: 'ENERGIA' }]]),
             pillarById: new Map([[1, { pillar_id: 1, code: 'BODY' }]]),
-            statCodes: new Set(['BODY']),
+            statCodes: new Set(['ENERGIA']),
             difficultyCodes: new Set(['EASY', 'MEDIUM', 'HARD']),
             difficultiesByCode: new Map([
               ['EASY', { difficulty_id: 1, code: 'EASY', xp_base: 10 }],

@@ -496,7 +496,7 @@ async function runQuickStartManualTaskGeneration(args: {
         task: inputValue ? `${baseTask} ${inputValue}`.trim() : baseTask,
         pillar_code: pillarCode,
         trait_code: traitCode,
-        stat_code: pillarCode,
+        stat_code: traitCode,
         friction_score: 0,
         friction_tier: 'quick_start',
       };
