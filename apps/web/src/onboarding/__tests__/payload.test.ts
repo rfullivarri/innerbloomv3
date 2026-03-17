@@ -34,6 +34,7 @@ describe('buildPayload onboarding_path', () => {
 
     vi.unstubAllGlobals();
   });
+<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
 
   it('serializes quick_start payload details when quick_start path is chosen', () => {
     vi.stubGlobal('window', {
@@ -80,3 +81,7 @@ describe('buildPayload onboarding_path', () => {
     vi.unstubAllGlobals();
   });
 });
+=======
+});
+
+>>>>>>> main
