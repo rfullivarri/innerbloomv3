@@ -48,6 +48,16 @@ type QuickStartManualCandidate = {
   metadata?: Record<string, unknown>;
 };
 
+function getStringFromMetadata(metadata: Record<string, unknown> | undefined, key: string): string | undefined {
+  const value = metadata?.[key];
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 type EngineDifficultyCode = 'EASY' | 'MEDIUM' | 'HARD';
 type QuickStartDifficultyMap = Record<EngineDifficultyCode, string>;
 
@@ -562,13 +572,27 @@ async function runQuickStartManualTaskGeneration(args: {
       const traitCode = candidate.trait_code.trim().toUpperCase();
       const baseTask = candidate.task.trim();
       const inputValue = candidate.input_value?.trim();
+      const taskPrefix = getStringFromMetadata(candidate.metadata, 'task_prefix');
+      const taskInputBefore = getStringFromMetadata(candidate.metadata, 'task_input_before');
+      const taskInputAfter = getStringFromMetadata(candidate.metadata, 'task_input_after');
 
       if (!pillarCode || !traitCode || !baseTask) {
         return null;
       }
 
+      let resolvedTask = baseTask;
+
+      if (inputValue) {
+        const composed = [taskPrefix ?? baseTask, taskInputBefore, inputValue, taskInputAfter]
+          .filter((part): part is string => Boolean(part && part.trim().length > 0))
+          .join(' ')
+          .trim();
+
+        resolvedTask = composed.length > 0 ? composed : `${baseTask} ${inputValue}`.trim();
+      }
+
       return {
-        task: inputValue ? `${baseTask} ${inputValue}`.trim() : baseTask,
+        task: resolvedTask,
         pillar_code: pillarCode,
         trait_code: traitCode,
         stat_code: traitCode,

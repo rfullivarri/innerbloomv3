@@ -326,7 +326,13 @@ describe('triggerTaskGenerationForUser', () => {
         onboardingPath: 'quick_start',
         quickStart: {
           manual_task_candidates: [
-            { task: 'Caminar durante', pillar_code: 'body', trait_code: 'energia', input_value: '15 min' },
+            {
+              task: 'Caminar durante',
+              pillar_code: 'body',
+              trait_code: 'energia',
+              input_value: '15',
+              metadata: { task_prefix: 'Caminar durante', task_input_after: 'minutos' },
+            },
           ],
         },
       },
@@ -337,7 +343,7 @@ describe('triggerTaskGenerationForUser', () => {
 
     const insertCalls = queryMock.mock.calls.filter(([sql]) => sql.startsWith('INSERT INTO tasks'));
     expect(insertCalls).toHaveLength(1);
-    expect(insertCalls[0]?.[1]?.[3]).toBe('Caminar durante 15 min');
+    expect(insertCalls[0]?.[1]?.[3]).toBe('Caminar durante 15 minutos');
     expect([1, 2, 3]).toContain(insertCalls[0]?.[1]?.[6]);
   });
 });
