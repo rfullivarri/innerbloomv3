@@ -12,9 +12,10 @@ import { GameModeStep } from '../onboarding/steps/GameModeStep';
 import { GpExplainerOverlay } from '../onboarding/ui/GpExplainerOverlay';
 import { HUD } from '../onboarding/ui/HUD';
 import { NavButtons } from '../onboarding/ui/NavButtons';
+import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../components/common/GameModeChip';
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
-type Step = 'game-mode' | 'branch' | 'body' | 'mind' | 'soul' | 'moderation' | 'setup';
+type Step = 'game-mode' | 'branch' | 'body' | 'mind' | 'soul' | 'moderation' | 'summary' | 'setup';
 type ModerationOption = 'sugar' | 'tobacco' | 'alcohol';
 
 interface Task {
@@ -63,6 +64,19 @@ interface Translations {
   setupSubtitle: string;
   setupBridgeHint: string;
   setupDone: string;
+  setupCta: string;
+  quickSummary: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    gameMode: string;
+    pillars: string;
+    xp: string;
+    baseHint: string;
+    selectedTasks: string;
+    total: string;
+    start: string;
+  };
   bonusReady: string;
   bonusPending: string;
   modeLabels: Record<GameMode, string>;
@@ -144,6 +158,19 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     setupSubtitle: 'Estamos aplicando tu selección y reutilizando el flujo real del onboarding.',
     setupBridgeHint: 'Después entrarás a la demo guiada para explorar cómo está estructurado Innerbloom. Puedes saltarla cuando quieras.',
     setupDone: 'Configuración lista para conectar con demo guiada.',
+    setupCta: 'Ir a la demo',
+    quickSummary: {
+      eyebrow: 'Resumen',
+      title: 'Tu base inicial',
+      subtitle: 'Versión compacta antes de activar tu Journey.',
+      gameMode: 'Modo de juego',
+      pillars: 'Pilares',
+      xp: 'GP (Puntos de Crecimiento)',
+      baseHint: 'Esta configuración será tu base inicial para arrancar y ajustarla luego.',
+      selectedTasks: 'Tareas seleccionadas',
+      total: 'Total',
+      start: 'Comienza tu Journey',
+    },
     bonusReady: 'Balanceado: estás sumando x1.5 GP',
     bonusPending: 'Balanceá Cuerpo, Mente y Alma para sumar x1.5 GP',
     modeLabels: {
@@ -339,6 +366,19 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     setupSubtitle: 'Applying your selection with the same calibration feel used in onboarding.',
     setupBridgeHint: 'Next, you\'ll enter the guided demo to explore how Innerbloom is structured. You can skip it anytime.',
     setupDone: 'Setup ready to connect with guided demo.',
+    setupCta: 'Go to guided demo',
+    quickSummary: {
+      eyebrow: 'Summary',
+      title: 'Your initial base',
+      subtitle: 'Compact review before activating your Journey.',
+      gameMode: 'Game mode',
+      pillars: 'Pillars',
+      xp: 'GP (Growth Points)',
+      baseHint: 'This setup will be your initial base so you can start and adjust later.',
+      selectedTasks: 'Selected tasks',
+      total: 'Total',
+      start: 'Start your Journey',
+    },
     bonusReady: 'Balanced: you are earning x1.5 GP',
     bonusPending: 'Balance Body, Mind, and Soul to earn x1.5 GP',
     modeLabels: {
@@ -492,7 +532,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
   },
 };
 
-const STEP_ORDER: Step[] = ['game-mode', 'branch', 'body', 'mind', 'soul', 'moderation', 'setup'];
+const STEP_ORDER: Step[] = ['game-mode', 'branch', 'body', 'mind', 'soul', 'moderation', 'summary', 'setup'];
 
 const MODE_ACCENT: Record<GameMode, string> = {
   LOW: GAME_MODE_META.Low.accentColor,
@@ -689,6 +729,8 @@ export default function QuickStartPreviewPage() {
   });
   const [setupProgress, setSetupProgress] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitCompleted, setSubmitCompleted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [showGrowthPointsModal, setShowGrowthPointsModal] = useState(false);
   const [pendingGrowthPointsModal, setPendingGrowthPointsModal] = useState(false);
   const copy = COPY[language];
@@ -846,6 +888,7 @@ export default function QuickStartPreviewPage() {
     });
 
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       const user = await getCurrentUserProfile();
       const taskMap = (Object.keys(copy.tasks) as Pillar[]).reduce<Map<string, Task>>((map, pillar) => {
@@ -966,11 +1009,24 @@ export default function QuickStartPreviewPage() {
         clerkUserId: user.clerk_user_id,
         gameMode,
       });
-
-      navigate(buildDemoUrl({ language, source: 'onboarding', mode: 'onboarding' }));
+      setSubmitCompleted(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'No se pudo guardar Quick Start');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSummaryConfirm = () => {
+    setStep('setup');
+    void submitQuickStart();
+  };
+
+  const openGuidedDemo = () => {
+    if (!submitCompleted) {
+      return;
+    }
+    navigate(buildDemoUrl({ language, source: 'onboarding', mode: 'onboarding' }));
   };
 
   const quickStartBody = () => {
@@ -1045,20 +1101,23 @@ export default function QuickStartPreviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#000c40] pb-12 pt-28 text-white sm:pt-32">
-      <HUD
-        language={language}
-        mode={gameMode}
-        stepIndex={currentStepIndex}
-        totalSteps={visibleRoute.length}
-        xp={{ Body: selectedCounts.Body * 3, Mind: selectedCounts.Mind * 3, Soul: selectedCounts.Soul * 3, total: totalGp }}
-        onExit={() => navigate('/')}
-      />
+    <div className={`min-h-screen bg-[#000c40] text-white ${step === 'setup' ? '' : 'pb-12 pt-28 sm:pt-32'}`}>
+      {step !== 'setup' ? (
+        <HUD
+          language={language}
+          mode={gameMode}
+          stepIndex={currentStepIndex}
+          totalSteps={visibleRoute.length}
+          xp={{ Body: selectedCounts.Body * 3, Mind: selectedCounts.Mind * 3, Soul: selectedCounts.Soul * 3, total: totalGp }}
+          onExit={() => navigate('/')}
+        />
+      ) : null}
 
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4">
+      <div className={`mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 ${step === 'setup' ? 'py-10' : ''}`}>
         {/* Preview-only payload shape for future DB wiring. No SQL persistence in this iteration. */}
         <pre className="hidden" aria-hidden>{JSON.stringify(quickStartDraft, null, 2)}</pre>
-        <div className="flex items-center justify-between gap-3">
+        {step !== 'setup' ? (
+          <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.28em] text-white/55">Innerbloom</p>
             <h2 className="text-lg font-semibold text-white">{copy.title}</h2>
@@ -1068,7 +1127,8 @@ export default function QuickStartPreviewPage() {
             <button type="button" onClick={() => handleLanguageChange('es')} className={`rounded-full border px-3 py-1 text-xs ${language === 'es' ? 'border-violet-200/60 bg-violet-400/20' : 'border-white/20 bg-white/8'}`}>ES</button>
             <button type="button" onClick={() => handleLanguageChange('en')} className={`rounded-full border px-3 py-1 text-xs ${language === 'en' ? 'border-violet-200/60 bg-violet-400/20' : 'border-white/20 bg-white/8'}`}>EN</button>
           </div>
-        </div>
+          </div>
+        ) : null}
 
 
         {step === 'game-mode' ? (
@@ -1158,8 +1218,77 @@ export default function QuickStartPreviewPage() {
           </section>
         ) : null}
 
+        {step === 'summary' ? (
+          <section className="glass-card onboarding-surface-base mx-auto w-full max-w-5xl rounded-3xl p-6 sm:p-8">
+            <header className="flex flex-col gap-2 border-b border-white/5 pb-4">
+              <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.quickSummary.eyebrow}</p>
+              <h2 className="text-3xl font-semibold text-white">{copy.quickSummary.title}</h2>
+              <p className="text-sm text-white/70">{copy.quickSummary.subtitle}</p>
+            </header>
+            <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
+              <div className="space-y-5">
+                <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                  <header className="border-b border-white/5 pb-3">
+                    <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.quickSummary.gameMode}</p>
+                  </header>
+                  <div className="mt-4">
+                    <span className="inline-flex origin-left scale-75">
+                      <SharedGameModeChip {...buildGameModeChip(gameMode)} />
+                    </span>
+                  </div>
+                </section>
+                <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                  <header className="border-b border-white/5 pb-3">
+                    <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.quickSummary.pillars}</p>
+                  </header>
+                  <div className="mt-4 space-y-3">
+                    {(['Body', 'Mind', 'Soul'] as Pillar[]).map((pillar) => (
+                      <div key={pillar} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                        <p className="text-sm font-semibold text-white">{copy.pillarTitles[pillar].replace('Inicio rápido · ', '').replace('Quick Start · ', '')}</p>
+                        <p className="mt-1 text-xs text-white/70">{copy.quickSummary.selectedTasks}: {selectedByPillar[pillar].length}</p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {quickStartDraft.selectedTraitsByPillar[pillar].length > 0
+                            ? quickStartDraft.selectedTraitsByPillar[pillar].map((trait) => (
+                              <span key={`${pillar}-${trait}`} className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/90">
+                                {trait}
+                              </span>
+                            ))
+                            : <span className="text-xs text-white/50">—</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </div>
+              <aside className="space-y-5">
+                <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                  <header className="border-b border-white/5 pb-3">
+                    <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.quickSummary.xp}</p>
+                  </header>
+                  <div className="mt-4 space-y-2 text-sm text-white/85">
+                    <p><span className="font-semibold text-white">Body 🫀:</span> {selectedCounts.Body * 3} GP</p>
+                    <p><span className="font-semibold text-white">Mind 🧠:</span> {selectedCounts.Mind * 3} GP</p>
+                    <p><span className="font-semibold text-white">Soul 🏵️:</span> {selectedCounts.Soul * 3} GP</p>
+                    <p className="mt-3 text-base font-semibold text-white">{copy.quickSummary.total}: {totalGp} GP</p>
+                    <p className="text-xs text-white/60">{copy.quickSummary.baseHint}</p>
+                  </div>
+                </section>
+              </aside>
+            </div>
+            <NavButtons
+              language={language}
+              onBack={goBack}
+              onConfirm={handleSummaryConfirm}
+              backLabel={copy.back}
+              confirmLabel={copy.quickSummary.start}
+              disabled={isSubmitting}
+              loading={isSubmitting}
+            />
+          </section>
+        ) : null}
+
         {step === 'setup' ? (
-          <section className="relative mx-auto w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0a133d]/85 p-5 shadow-[0_0_45px_rgba(79,70,229,0.22)] backdrop-blur-xl sm:p-8">
+          <section className="relative mx-auto mt-5 w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0a133d]/85 p-5 shadow-[0_0_45px_rgba(79,70,229,0.22)] backdrop-blur-xl sm:p-8">
             <div className="mb-5 flex items-center justify-center gap-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.36em] text-white/65 sm:text-xs">
               <span>Innerbloom</span>
               <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.8em] w-auto" />
@@ -1211,26 +1340,20 @@ export default function QuickStartPreviewPage() {
             `}</style>
             <p className="mt-4 text-sm text-slate-300">{copy.setupBridgeHint}</p>
             {setupProgress >= setupSteps.length ? <p className="mt-3 text-sm text-emerald-100">{copy.setupDone}</p> : null}
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
               <motion.button
                 type="button"
-                onClick={submitQuickStart}
+                onClick={openGuidedDemo}
                 whileTap={{ scale: 0.97 }}
                 className="order-1 inline-flex items-center justify-center rounded-full border border-violet-300/45 bg-violet-500 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(76,29,149,0.3)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_14px_28px_rgba(76,29,149,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 sm:order-2"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !submitCompleted}
               >
                 {isSubmitting
                   ? language === 'en' ? 'Saving...' : 'Guardando...'
-                  : language === 'en' ? 'Finish quick start' : 'Finalizar inicio rápido'}
+                  : copy.setupCta}
               </motion.button>
-              <button
-                type="button"
-                onClick={goBack}
-                className="order-2 inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2 text-sm font-medium text-white/80 transition hover:border-white/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 sm:order-1"
-              >
-                ← {copy.back}
-              </button>
             </div>
+            {submitError ? <p className="mt-4 text-sm text-rose-200">{submitError}</p> : null}
           </section>
         ) : null}
       </div>
