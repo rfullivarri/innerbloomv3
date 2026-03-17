@@ -9,6 +9,7 @@ import { apiAuthorizedFetch, getCurrentUserProfile, markOnboardingProgress } fro
 import { setJourneyGenerationPending } from '../lib/journeyGeneration';
 import { buildDemoUrl } from '../lib/demoEntry';
 import { GameModeStep } from '../onboarding/steps/GameModeStep';
+import { GpExplainerOverlay } from '../onboarding/ui/GpExplainerOverlay';
 import { HUD } from '../onboarding/ui/HUD';
 import { NavButtons } from '../onboarding/ui/NavButtons';
 
@@ -60,6 +61,7 @@ interface Translations {
   moderationFlex: string;
   setupTitle: string;
   setupSubtitle: string;
+  setupBridgeHint: string;
   setupDone: string;
   bonusReady: string;
   bonusPending: string;
@@ -140,6 +142,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     moderationFlex: 'También podés manejar tolerancias flexibles (por ejemplo, fines de semana).',
     setupTitle: 'Configurando tu Inicio rápido',
     setupSubtitle: 'Estamos aplicando tu selección y reutilizando el flujo real del onboarding.',
+    setupBridgeHint: 'Después entrarás a la demo guiada para explorar cómo está estructurado Innerbloom. Puedes saltarla cuando quieras.',
     setupDone: 'Configuración lista para conectar con demo guiada.',
     bonusReady: 'Balanceado: estás sumando x1.5 GP',
     bonusPending: 'Balanceá Cuerpo, Mente y Alma para sumar x1.5 GP',
@@ -167,11 +170,11 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       },
     },
     setupSteps: [
-      'Aplicando tu modo de juego',
       'Equilibrando Cuerpo, Mente y Alma',
+      'Calibrando la dificultad de tus tareas',
       'Preparando tu plan inicial',
+      'Activando tu modo de juego: {mode}',
       'Activando tu plan',
-      'Dejando listo tu Inicio rápido',
     ],
     tasks: {
       Body: [
@@ -334,6 +337,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     moderationFlex: 'You can also use flexible tolerance settings (for example, weekends).',
     setupTitle: 'Configuring your Quick Start',
     setupSubtitle: 'Applying your selection with the same calibration feel used in onboarding.',
+    setupBridgeHint: 'Next, you\'ll enter the guided demo to explore how Innerbloom is structured. You can skip it anytime.',
     setupDone: 'Setup ready to connect with guided demo.',
     bonusReady: 'Balanced: you are earning x1.5 GP',
     bonusPending: 'Balance Body, Mind, and Soul to earn x1.5 GP',
@@ -361,11 +365,11 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       },
     },
     setupSteps: [
-      'Applying your Game Mode',
       'Balancing Body, Mind and Soul',
+      'Calibrating your task difficulty',
       'Preparing your initial plan',
+      'Activating your Game Mode: {mode}',
       'Activating your plan',
-      'Finalizing your Quick Start setup',
     ],
     tasks: {
       Body: [
@@ -669,9 +673,14 @@ export default function QuickStartPreviewPage() {
   });
   const [setupProgress, setSetupProgress] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showGrowthPointsModal, setShowGrowthPointsModal] = useState(false);
   const copy = COPY[language];
 
   const minimum = MODE_MINIMUMS[gameMode];
+  const setupSteps = useMemo(
+    () => copy.setupSteps.map((setupStep) => setupStep.replace('{mode}', copy.modeLabels[gameMode])),
+    [copy.modeLabels, copy.setupSteps, gameMode],
+  );
   const selectedCounts = {
     Body: selectedByPillar.Body.length,
     Mind: selectedByPillar.Mind.length,
@@ -730,7 +739,7 @@ export default function QuickStartPreviewPage() {
       setSetupProgress(1);
       const timer = window.setInterval(() => {
         setSetupProgress((prev) => {
-          if (prev >= copy.setupSteps.length) {
+          if (prev >= setupSteps.length) {
             window.clearInterval(timer);
             return prev;
           }
@@ -742,7 +751,7 @@ export default function QuickStartPreviewPage() {
     }
 
     return undefined;
-  }, [copy.setupSteps.length, step]);
+  }, [setupSteps.length, step]);
 
   const handleToggleTask = (pillar: Pillar, taskId: string) => {
     setSelectedByPillar((prev) => {
@@ -760,7 +769,7 @@ export default function QuickStartPreviewPage() {
     }
 
     if (step === 'branch') {
-      setStep('body');
+      setShowGrowthPointsModal(true);
       return;
     }
 
@@ -1121,14 +1130,18 @@ export default function QuickStartPreviewPage() {
         ) : null}
 
         {step === 'setup' ? (
-          <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
-            <h1 className="text-2xl font-semibold text-white sm:text-3xl">{copy.setupTitle}</h1>
-            <p className="mt-2 text-sm text-white/70">{copy.setupSubtitle}</p>
+          <section className="relative mx-auto w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0a133d]/85 p-5 shadow-[0_0_45px_rgba(79,70,229,0.22)] backdrop-blur-xl sm:p-8">
+            <div className="mb-5 flex items-center justify-center gap-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.36em] text-white/65 sm:text-xs">
+              <span>Innerbloom</span>
+              <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-[1.8em] w-auto" />
+            </div>
+            <h1 className="text-balance text-2xl font-semibold text-white sm:text-3xl">{copy.setupTitle}</h1>
+            <p className="mt-2 text-sm text-slate-300">{copy.setupSubtitle}</p>
             <ul className="mt-6 space-y-3">
-              {copy.setupSteps.map((setupStep, index) => {
+              {setupSteps.map((setupStep, index) => {
                 const isVisible = index < setupProgress;
-                const complete = setupProgress >= copy.setupSteps.length;
-                const isPlanStep = index === 3;
+                const complete = setupProgress >= setupSteps.length;
+                const isPlanStep = index === setupSteps.length - 1;
                 return (
                   <li key={setupStep} className={`flex items-center gap-3 text-sm transition ${isVisible ? 'opacity-100' : 'opacity-35'}`}>
                     <span className={`h-2.5 w-2.5 rounded-full ${isVisible ? 'bg-violet-300' : 'bg-white/25'} ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
@@ -1147,7 +1160,7 @@ export default function QuickStartPreviewPage() {
             <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-white/15">
               <div
                 className={`h-full bg-gradient-to-r from-violet-300/80 via-indigo-300/85 to-violet-300/80 transition-all duration-700 ${
-                  setupProgress >= copy.setupSteps.length ? 'w-full quick-start-setup__progress-complete' : 'w-1/3 quick-start-setup__progress-animated'
+                  setupProgress >= setupSteps.length ? 'w-full quick-start-setup__progress-complete' : 'w-1/3 quick-start-setup__progress-animated'
                 }`}
               />
             </div>
@@ -1167,13 +1180,14 @@ export default function QuickStartPreviewPage() {
                 }
               }
             `}</style>
-            {setupProgress >= copy.setupSteps.length ? <p className="mt-4 text-sm text-emerald-100">{copy.setupDone}</p> : null}
+            <p className="mt-4 text-sm text-slate-300">{copy.setupBridgeHint}</p>
+            {setupProgress >= setupSteps.length ? <p className="mt-3 text-sm text-emerald-100">{copy.setupDone}</p> : null}
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <motion.button
                 type="button"
                 onClick={submitQuickStart}
                 whileTap={{ scale: 0.97 }}
-                className="order-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-[#cf8bf3]/30 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cf8bf3]/60 sm:order-2"
+                className="order-1 inline-flex items-center justify-center rounded-full border border-violet-300/45 bg-violet-500 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(76,29,149,0.3)] transition duration-200 hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-[0_14px_28px_rgba(76,29,149,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 sm:order-2"
                 disabled={isSubmitting}
               >
                 {isSubmitting
@@ -1191,6 +1205,16 @@ export default function QuickStartPreviewPage() {
           </section>
         ) : null}
       </div>
+
+      {showGrowthPointsModal ? (
+        <GpExplainerOverlay
+          language={language}
+          onClose={() => {
+            setShowGrowthPointsModal(false);
+            setStep('body');
+          }}
+        />
+      ) : null}
     </div>
   );
 }
