@@ -10,10 +10,12 @@ import { ChecklistStep } from './steps/ChecklistStep';
 import { ChoiceStep } from './steps/ChoiceStep';
 import { GameModeStep } from './steps/GameModeStep';
 import { OpenTextStep } from './steps/OpenTextStep';
+import { PathSelectStep } from './steps/PathSelectStep';
 import { SummaryStep } from './steps/SummaryStep';
 import { GpExplainerOverlay } from './ui/GpExplainerOverlay';
 import { HUD } from './ui/HUD';
 import { Snack } from './ui/Snack';
+import { resolveFirstQuestionStep } from './firstQuestionStep';
 
 interface IntroJourneyProps {
   language?: OnboardingLanguage;
@@ -44,8 +46,9 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
     awardChecklist,
     awardOpen,
     reset,
+    setOnboardingPath,
   } = useOnboarding();
-  const { route, currentStepIndex, answers, xp, awardedChecklists, awardedOpen } = state;
+  const { route, currentStepIndex, answers, xp, awardedChecklists, awardedOpen, onboardingPath } = state;
   const labels = getFormLabels(language);
   const stepId = route[currentStepIndex] ?? 'clerk-gate';
   const totalSteps = route.length;
@@ -57,7 +60,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   const [shouldAutoAdvance, setShouldAutoAdvance] = useState(false);
   const [isGpExplainerOpen, setIsGpExplainerOpen] = useState(false);
   const [hasDismissedGpExplainer, setHasDismissedGpExplainer] = useState(false);
-  const firstQuestionStep = route[2] ?? null;
+  const firstQuestionStep = resolveFirstQuestionStep(answers.mode, onboardingPath);
 
   useEffect(() => {
     if (!hasRecordedSession.current && authLoaded) {
@@ -217,7 +220,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   };
 
   const handleFinish = async () => {
-    const payload = buildPayload(answers, xp);
+    const payload = buildPayload(answers, xp, onboardingPath);
     await onFinish?.(payload);
   };
 
@@ -252,6 +255,17 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
               goNext();
             }}
             onBack={() => goToStep('clerk-gate')}
+          />
+        );
+      case 'path-select':
+        return (
+          <PathSelectStep
+            language={language}
+            onBack={() => goToStep('mode-select')}
+            onSelectTraditional={() => {
+              setOnboardingPath('traditional');
+              goNext();
+            }}
           />
         );
       case 'low-body':

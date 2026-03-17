@@ -1,4 +1,5 @@
 import type { Answers, XP } from './state';
+import type { OnboardingPath } from './state';
 
 const CLIENT_ID_KEY = 'gj_client_id';
 
@@ -43,7 +44,7 @@ function normalizeEmail(value: string) {
   return (value || '').trim().toLowerCase();
 }
 
-function resolveMeta(userId: string) {
+function resolveMeta(userId: string, onboardingPath: OnboardingPath | null = null) {
   const meta = {
     tz: '',
     lang: '',
@@ -73,6 +74,7 @@ function resolveMeta(userId: string) {
     device,
     version: 'forms-intro-react',
     user_id: userId || '',
+    onboarding_path: onboardingPath ?? undefined,
   };
 }
 
@@ -94,10 +96,10 @@ export interface JourneyPayload {
   meta: ReturnType<typeof resolveMeta>;
 }
 
-export function buildPayload(answers: Answers, xp: XP): JourneyPayload {
+export function buildPayload(answers: Answers, xp: XP, onboardingPath: OnboardingPath | null = null): JourneyPayload {
   const clientId = resolveClientId();
   const email = normalizeEmail(answers.email);
-  const meta = resolveMeta(answers.user_id);
+  const meta = resolveMeta(answers.user_id, onboardingPath);
   const roundedBodyXp = Math.round(Number(xp.Body || 0));
   const roundedMindXp = Math.round(Number(xp.Mind || 0));
   const roundedSoulXp = Math.round(Number(xp.Soul || 0));
