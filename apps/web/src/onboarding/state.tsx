@@ -123,7 +123,6 @@ export interface OnboardingState {
 
 const BASE_ROUTE: StepId[] = ['clerk-gate', 'mode-select'];
 const BASE_MODE_ROUTE: StepId[] = [...BASE_ROUTE, 'path-select'];
-<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
 
 function buildQuickStartRoute(includeModeration: boolean): StepId[] {
   return [
@@ -139,8 +138,6 @@ function buildQuickStartRoute(includeModeration: boolean): StepId[] {
 function hasQuickStartModerationSelection(answers: Answers): boolean {
   return answers.quickStart.selectedTasksByPillar.Body.includes('MODERACION');
 }
-=======
->>>>>>> main
 
 export const initialXP: XP = { Body: 0, Mind: 0, Soul: 0, total: 0 };
 
@@ -197,15 +194,14 @@ const initialState: OnboardingState = {
   tokenProvider: null,
 };
 
-<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
 export function computeRouteForMode(
   mode: GameMode | null,
   onboardingPath: OnboardingPath | null = null,
   quickStartIncludeModeration = false,
 ): StepId[] {
-=======
+
 export function computeRouteForMode(mode: GameMode | null, onboardingPath: OnboardingPath | null = null): StepId[] {
->>>>>>> main
+
   if (!mode) {
     return BASE_ROUTE;
   }
@@ -215,11 +211,11 @@ export function computeRouteForMode(mode: GameMode | null, onboardingPath: Onboa
   }
 
   if (onboardingPath === 'quick_start') {
-<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
+
     return buildQuickStartRoute(quickStartIncludeModeration);
-=======
+
     return BASE_MODE_ROUTE;
->>>>>>> main
+
   }
 
   const modeRoute = MODE_ROUTES[mode];
@@ -276,12 +272,10 @@ interface OnboardingContextValue {
   state: OnboardingState;
   setMode: (mode: GameMode) => void;
   setOnboardingPath: (path: OnboardingPath) => void;
-<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
   toggleQuickStartTask: (pillar: Pillar, taskId: string) => void;
   setQuickStartTaskInput: (taskKey: string, value: string) => void;
   toggleQuickStartModeration: (value: 'sugar' | 'tobacco' | 'alcohol') => void;
-=======
->>>>>>> main
+
   goNext: () => void;
   goPrevious: () => void;
   goToStep: (step: StepId) => void;
@@ -353,7 +347,6 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       const nextAnswers = cloneAnswers(prev.answers);
       nextAnswers.mode = mode;
       const nextRoute = computeRouteForMode(mode, null);
-<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
 
       return {
         ...prev,
@@ -408,8 +401,6 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       const nextRoute = computeRouteForMode(prev.answers.mode, 'quick_start', hasQuickStartModerationSelection(nextAnswers));
       const currentStepId = prev.route[prev.currentStepIndex];
       const nextIndex = currentStepId ? Math.max(0, nextRoute.indexOf(currentStepId)) : prev.currentStepIndex;
-=======
->>>>>>> main
 
       return {
         ...prev,
@@ -733,12 +724,11 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       state,
       setMode,
       setOnboardingPath,
-<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
+
       toggleQuickStartTask,
       setQuickStartTaskInput,
       toggleQuickStartModeration,
-=======
->>>>>>> main
+
       goNext,
       goPrevious,
       goToStep,
@@ -755,12 +745,10 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       state,
       setMode,
       setOnboardingPath,
-<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
+
       toggleQuickStartTask,
       setQuickStartTaskInput,
       toggleQuickStartModeration,
-=======
->>>>>>> main
       goNext,
       goPrevious,
       goToStep,
