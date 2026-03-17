@@ -52,4 +52,31 @@ describe('computeRouteForMode', () => {
     expect(flowRoute).toContain('summary');
     expect(flowRoute.slice(0, 3)).toEqual(['clerk-gate', 'mode-select', 'path-select']);
   });
+
+  it('builds quick start route without moderation step by default', () => {
+    const flowRoute = computeRouteForMode('FLOW', 'quick_start');
+    expect(flowRoute).toEqual([
+      'clerk-gate',
+      'mode-select',
+      'path-select',
+      'quick-start-body',
+      'quick-start-mind',
+      'quick-start-soul',
+      'quick-start-summary',
+    ]);
+  });
+
+  it('builds quick start route with moderation step when selected in body', () => {
+    const flowRoute = computeRouteForMode('FLOW', 'quick_start', true);
+    expect(flowRoute).toEqual([
+      'clerk-gate',
+      'mode-select',
+      'path-select',
+      'quick-start-body',
+      'quick-start-mind',
+      'quick-start-soul',
+      'quick-start-moderation',
+      'quick-start-summary',
+    ]);
+  });
 });

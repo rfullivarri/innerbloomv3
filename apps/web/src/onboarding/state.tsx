@@ -101,6 +101,11 @@ export interface Answers {
     soulOpen: string;
     mindOpen: string;
   };
+  quickStart: {
+    selectedTasksByPillar: Record<Pillar, string[]>;
+    editableTaskValues: Record<string, string>;
+    selectedModerations: Array<'sugar' | 'tobacco' | 'alcohol'>;
+  };
 }
 
 export type TokenProvider = (() => Promise<string | null>) | null;
@@ -118,6 +123,24 @@ export interface OnboardingState {
 
 const BASE_ROUTE: StepId[] = ['clerk-gate', 'mode-select'];
 const BASE_MODE_ROUTE: StepId[] = [...BASE_ROUTE, 'path-select'];
+<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
+
+function buildQuickStartRoute(includeModeration: boolean): StepId[] {
+  return [
+    ...BASE_MODE_ROUTE,
+    'quick-start-body',
+    'quick-start-mind',
+    'quick-start-soul',
+    ...(includeModeration ? (['quick-start-moderation'] as const) : []),
+    'quick-start-summary',
+  ];
+}
+
+function hasQuickStartModerationSelection(answers: Answers): boolean {
+  return answers.quickStart.selectedTasksByPillar.Body.includes('MODERACION');
+}
+=======
+>>>>>>> main
 
 export const initialXP: XP = { Body: 0, Mind: 0, Soul: 0, total: 0 };
 
@@ -152,6 +175,15 @@ export const initialAnswers: Answers = {
     soulOpen: '',
     mindOpen: '',
   },
+  quickStart: {
+    selectedTasksByPillar: {
+      Body: [],
+      Mind: [],
+      Soul: [],
+    },
+    editableTaskValues: {},
+    selectedModerations: [],
+  },
 };
 
 const initialState: OnboardingState = {
@@ -165,7 +197,15 @@ const initialState: OnboardingState = {
   tokenProvider: null,
 };
 
+<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
+export function computeRouteForMode(
+  mode: GameMode | null,
+  onboardingPath: OnboardingPath | null = null,
+  quickStartIncludeModeration = false,
+): StepId[] {
+=======
 export function computeRouteForMode(mode: GameMode | null, onboardingPath: OnboardingPath | null = null): StepId[] {
+>>>>>>> main
   if (!mode) {
     return BASE_ROUTE;
   }
@@ -175,7 +215,11 @@ export function computeRouteForMode(mode: GameMode | null, onboardingPath: Onboa
   }
 
   if (onboardingPath === 'quick_start') {
+<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
+    return buildQuickStartRoute(quickStartIncludeModeration);
+=======
     return BASE_MODE_ROUTE;
+>>>>>>> main
   }
 
   const modeRoute = MODE_ROUTES[mode];
@@ -232,6 +276,12 @@ interface OnboardingContextValue {
   state: OnboardingState;
   setMode: (mode: GameMode) => void;
   setOnboardingPath: (path: OnboardingPath) => void;
+<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
+  toggleQuickStartTask: (pillar: Pillar, taskId: string) => void;
+  setQuickStartTaskInput: (taskKey: string, value: string) => void;
+  toggleQuickStartModeration: (value: 'sugar' | 'tobacco' | 'alcohol') => void;
+=======
+>>>>>>> main
   goNext: () => void;
   goPrevious: () => void;
   goToStep: (step: StepId) => void;
@@ -279,6 +329,15 @@ function cloneAnswers(value: Answers): Answers {
       soulOpen: value.foundations.soulOpen,
       mindOpen: value.foundations.mindOpen,
     },
+    quickStart: {
+      selectedTasksByPillar: {
+        Body: [...value.quickStart.selectedTasksByPillar.Body],
+        Mind: [...value.quickStart.selectedTasksByPillar.Mind],
+        Soul: [...value.quickStart.selectedTasksByPillar.Soul],
+      },
+      editableTaskValues: { ...value.quickStart.editableTaskValues },
+      selectedModerations: [...value.quickStart.selectedModerations],
+    },
   };
 }
 
@@ -294,12 +353,97 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       const nextAnswers = cloneAnswers(prev.answers);
       nextAnswers.mode = mode;
       const nextRoute = computeRouteForMode(mode, null);
+<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
 
       return {
         ...prev,
         answers: nextAnswers,
         onboardingPath: null,
         route: nextRoute,
+      };
+    });
+  }, []);
+
+  const setOnboardingPath = useCallback((path: OnboardingPath) => {
+    setState((prev) => {
+      if (!prev.answers.mode) {
+        return prev;
+      }
+
+      if (prev.onboardingPath === path) {
+        return prev;
+      }
+
+      const nextRoute = computeRouteForMode(prev.answers.mode, path, hasQuickStartModerationSelection(prev.answers));
+      const currentStepId = prev.route[prev.currentStepIndex];
+      const nextIndex = currentStepId ? Math.max(0, nextRoute.indexOf(currentStepId)) : prev.currentStepIndex;
+
+      return {
+        ...prev,
+        onboardingPath: path,
+        route: nextRoute,
+        currentStepIndex: nextIndex,
+      };
+    });
+  }, []);
+
+  const toggleQuickStartTask = useCallback((pillar: Pillar, taskId: string) => {
+    setState((prev) => {
+      const nextAnswers = cloneAnswers(prev.answers);
+      const current = nextAnswers.quickStart.selectedTasksByPillar[pillar];
+      nextAnswers.quickStart.selectedTasksByPillar[pillar] = current.includes(taskId)
+        ? current.filter((item) => item !== taskId)
+        : [...current, taskId];
+
+      const shouldRebuildQuickStartRoute =
+        prev.onboardingPath === 'quick_start' && pillar === 'Body' && taskId === 'MODERACION';
+
+      if (!shouldRebuildQuickStartRoute || !prev.answers.mode) {
+        return {
+          ...prev,
+          answers: nextAnswers,
+        };
+      }
+
+      const nextRoute = computeRouteForMode(prev.answers.mode, 'quick_start', hasQuickStartModerationSelection(nextAnswers));
+      const currentStepId = prev.route[prev.currentStepIndex];
+      const nextIndex = currentStepId ? Math.max(0, nextRoute.indexOf(currentStepId)) : prev.currentStepIndex;
+=======
+>>>>>>> main
+
+      return {
+        ...prev,
+        answers: nextAnswers,
+        onboardingPath: null,
+        route: nextRoute,
+        currentStepIndex: nextIndex,
+      };
+    });
+  }, []);
+
+  const setQuickStartTaskInput = useCallback((taskKey: string, value: string) => {
+    setState((prev) => {
+      const nextAnswers = cloneAnswers(prev.answers);
+      nextAnswers.quickStart.editableTaskValues[taskKey] = value;
+
+      return {
+        ...prev,
+        answers: nextAnswers,
+      };
+    });
+  }, []);
+
+  const toggleQuickStartModeration = useCallback((value: 'sugar' | 'tobacco' | 'alcohol') => {
+    setState((prev) => {
+      const nextAnswers = cloneAnswers(prev.answers);
+      const current = nextAnswers.quickStart.selectedModerations;
+      nextAnswers.quickStart.selectedModerations = current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value];
+
+      return {
+        ...prev,
+        answers: nextAnswers,
       };
     });
   }, []);
@@ -589,6 +733,12 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       state,
       setMode,
       setOnboardingPath,
+<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
+      toggleQuickStartTask,
+      setQuickStartTaskInput,
+      toggleQuickStartModeration,
+=======
+>>>>>>> main
       goNext,
       goPrevious,
       goToStep,
@@ -605,6 +755,12 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       state,
       setMode,
       setOnboardingPath,
+<<<<<<< codex/plan-for-integrating-quick-start-into-onboarding-b6fu9p
+      toggleQuickStartTask,
+      setQuickStartTaskInput,
+      toggleQuickStartModeration,
+=======
+>>>>>>> main
       goNext,
       goPrevious,
       goToStep,

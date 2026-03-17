@@ -11,11 +11,15 @@ import { ChoiceStep } from './steps/ChoiceStep';
 import { GameModeStep } from './steps/GameModeStep';
 import { OpenTextStep } from './steps/OpenTextStep';
 import { PathSelectStep } from './steps/PathSelectStep';
+import { QuickStartTasksStep } from './steps/QuickStartTasksStep';
+import { QuickStartModerationStep } from './steps/QuickStartModerationStep';
+import { QuickStartSummaryStep } from './steps/QuickStartSummaryStep';
 import { SummaryStep } from './steps/SummaryStep';
 import { GpExplainerOverlay } from './ui/GpExplainerOverlay';
 import { HUD } from './ui/HUD';
 import { Snack } from './ui/Snack';
 import { resolveFirstQuestionStep } from './firstQuestionStep';
+import { QUICK_START_MINIMUMS, QUICK_START_TASKS, computeQuickStartGp } from './quickStart';
 
 interface IntroJourneyProps {
   language?: OnboardingLanguage;
@@ -47,6 +51,9 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
     awardOpen,
     reset,
     setOnboardingPath,
+    toggleQuickStartTask,
+    setQuickStartTaskInput,
+    toggleQuickStartModeration,
   } = useOnboarding();
   const { route, currentStepIndex, answers, xp, awardedChecklists, awardedOpen, onboardingPath } = state;
   const labels = getFormLabels(language);
@@ -61,6 +68,8 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   const [isGpExplainerOpen, setIsGpExplainerOpen] = useState(false);
   const [hasDismissedGpExplainer, setHasDismissedGpExplainer] = useState(false);
   const firstQuestionStep = resolveFirstQuestionStep(answers.mode, onboardingPath);
+  const quickStartGp = computeQuickStartGp(answers.quickStart.selectedTasksByPillar);
+  const hudXp = onboardingPath === 'quick_start' ? quickStartGp.xp : xp;
 
   useEffect(() => {
     if (!hasRecordedSession.current && authLoaded) {
@@ -220,7 +229,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   };
 
   const handleFinish = async () => {
-    const payload = buildPayload(answers, xp, onboardingPath);
+    const payload = buildPayload(answers, onboardingPath === 'quick_start' ? quickStartGp.xp : xp, onboardingPath);
     await onFinish?.(payload);
   };
 
@@ -266,6 +275,80 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
               setOnboardingPath('traditional');
               goNext();
             }}
+            onSelectQuickStart={() => {
+              setOnboardingPath('quick_start');
+              goNext();
+            }}
+          />
+        );
+      case 'quick-start-body':
+        return (
+          <QuickStartTasksStep
+            language={language}
+            pillar="Body"
+            gameMode={answers.mode ?? 'CHILL'}
+            tasks={QUICK_START_TASKS[language].Body}
+            selectedIds={answers.quickStart.selectedTasksByPillar.Body}
+            inputValues={answers.quickStart.editableTaskValues}
+            minimum={QUICK_START_MINIMUMS[answers.mode ?? 'CHILL']}
+            onToggleTask={(taskId) => toggleQuickStartTask('Body', taskId)}
+            onInputChange={(taskId, value) => setQuickStartTaskInput(`Body-${taskId}`, value)}
+            onBack={goPrevious}
+            onConfirm={goNext}
+          />
+        );
+      case 'quick-start-mind':
+        return (
+          <QuickStartTasksStep
+            language={language}
+            pillar="Mind"
+            gameMode={answers.mode ?? 'CHILL'}
+            tasks={QUICK_START_TASKS[language].Mind}
+            selectedIds={answers.quickStart.selectedTasksByPillar.Mind}
+            inputValues={answers.quickStart.editableTaskValues}
+            minimum={QUICK_START_MINIMUMS[answers.mode ?? 'CHILL']}
+            onToggleTask={(taskId) => toggleQuickStartTask('Mind', taskId)}
+            onInputChange={(taskId, value) => setQuickStartTaskInput(`Mind-${taskId}`, value)}
+            onBack={goPrevious}
+            onConfirm={goNext}
+          />
+        );
+      case 'quick-start-soul':
+        return (
+          <QuickStartTasksStep
+            language={language}
+            pillar="Soul"
+            gameMode={answers.mode ?? 'CHILL'}
+            tasks={QUICK_START_TASKS[language].Soul}
+            selectedIds={answers.quickStart.selectedTasksByPillar.Soul}
+            inputValues={answers.quickStart.editableTaskValues}
+            minimum={QUICK_START_MINIMUMS[answers.mode ?? 'CHILL']}
+            onToggleTask={(taskId) => toggleQuickStartTask('Soul', taskId)}
+            onInputChange={(taskId, value) => setQuickStartTaskInput(`Soul-${taskId}`, value)}
+            onBack={goPrevious}
+            onConfirm={goNext}
+          />
+        );
+      case 'quick-start-moderation':
+        return (
+          <QuickStartModerationStep
+            language={language}
+            selectedModerations={answers.quickStart.selectedModerations}
+            onToggle={toggleQuickStartModeration}
+            onBack={goPrevious}
+            onConfirm={goNext}
+          />
+        );
+      case 'quick-start-summary':
+        return (
+          <QuickStartSummaryStep
+            language={language}
+            gameMode={answers.mode ?? 'CHILL'}
+            selectedByPillar={answers.quickStart.selectedTasksByPillar}
+            xp={quickStartGp.xp}
+            onBack={goPrevious}
+            onConfirm={handleFinish}
+            loading={isSubmitting}
           />
         );
       case 'low-body':
@@ -522,7 +605,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
         mode={answers.mode}
         stepIndex={currentStepIndex}
         totalSteps={totalSteps}
-        xp={xp}
+        xp={hudXp}
         onRestart={handleRestart}
         onExit={handleExit}
         highlighted={isGpExplainerOpen}

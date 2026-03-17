@@ -4,10 +4,11 @@ import type { OnboardingLanguage } from '../constants';
 interface PathSelectStepProps {
   language?: OnboardingLanguage;
   onSelectTraditional: () => void;
+  onSelectQuickStart: () => void;
   onBack: () => void;
 }
 
-export function PathSelectStep({ language = 'es', onSelectTraditional, onBack }: PathSelectStepProps) {
+export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQuickStart, onBack }: PathSelectStepProps) {
   const copy = language === 'en'
     ? {
         step: 'Step 2 · Choose your path',
@@ -17,9 +18,9 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onBack }:
         personalDescription: 'Answer the complete onboarding and get your customized plan.',
         personalDuration: '3-4 min',
         quickTitle: 'Quick Start',
-        quickDescription: 'A faster path with curated tasks. We are integrating it now.',
+        quickDescription: 'A faster path with curated tasks and a compact setup.',
         quickDuration: '< 1 min',
-        quickLabel: 'Coming soon',
+        quickLabel: 'Fast path',
         back: 'Back',
         continuePersonal: 'Continue with Personal guide',
       }
@@ -31,9 +32,9 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onBack }:
         personalDescription: 'Respondé el onboarding completo y obtené tu plan personalizado.',
         personalDuration: '3-4 min',
         quickTitle: 'Inicio rápido',
-        quickDescription: 'Un camino más veloz con tareas curadas. Lo estamos integrando.',
+        quickDescription: 'Un camino más veloz con tareas curadas y setup compacto.',
         quickDuration: '< 1 min',
-        quickLabel: 'Próximamente',
+        quickLabel: 'Camino rápido',
         back: 'Volver',
         continuePersonal: 'Continuar con Guía personal',
       };
@@ -65,7 +66,7 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onBack }:
           </span>
         </button>
 
-        <article className="rounded-2xl border border-white/20 bg-white/8 p-4 text-left sm:p-5">
+        <button type="button" onClick={onSelectQuickStart} className="rounded-2xl border border-white/20 bg-white/8 p-4 text-left transition hover:bg-white/12 sm:p-5">
           <p className="flex items-center gap-2 text-lg font-semibold leading-tight text-white/90">
             <span aria-hidden className="text-base">⚡</span>
             {copy.quickTitle}
@@ -77,7 +78,7 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onBack }:
           <span className="mt-4 inline-flex rounded-full border border-white/20 bg-white/8 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-white/65">
             {copy.quickLabel}
           </span>
-        </article>
+        </button>
       </div>
 
       <div className="mt-6 flex items-center justify-between gap-3">
@@ -99,4 +100,3 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onBack }:
     </motion.section>
   );
 }
-

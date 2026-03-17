@@ -51,6 +51,7 @@ function resolveMeta(userId: string, onboardingPath: OnboardingPath | null = nul
     device: 'desktop',
     version: 'forms-intro-react',
     user_id: userId || '',
+    onboarding_path: onboardingPath ?? undefined,
   } as const;
 
   if (typeof window === 'undefined') {
@@ -84,6 +85,20 @@ interface JourneyPayloadData {
   flow: Answers['flow'];
   evolve: Answers['evolve'];
   foundations: Answers['foundations'];
+  quick_start?: {
+    selected_moderations: Answers['quickStart']['selectedModerations'];
+    manual_task_candidates: Array<{
+      task: string;
+      pillar_code: string;
+      trait_code: string;
+      input_value?: string;
+    }>;
+    selected_tasks_by_pillar: {
+      body: string[];
+      mind: string[];
+      soul: string[];
+    };
+  };
 }
 
 export interface JourneyPayload {
@@ -108,6 +123,20 @@ export function buildPayload(answers: Answers, xp: XP, onboardingPath: Onboardin
     roundedBodyXp + roundedMindXp + roundedSoulXp !== roundedTotalXp
       ? roundedBodyXp + roundedMindXp + roundedSoulXp
       : roundedTotalXp;
+
+  const quickStartManualCandidates = (['Body', 'Mind', 'Soul'] as const).flatMap((pillar) =>
+    answers.quickStart.selectedTasksByPillar[pillar].map((taskId) => {
+      const inputValue = answers.quickStart.editableTaskValues[`${pillar}-${taskId}`]?.trim();
+      return {
+        task: taskId,
+        pillar_code: pillar.toUpperCase(),
+        trait_code: taskId.toUpperCase(),
+        input_value: inputValue || undefined,
+      };
+    }),
+  );
+
+  const isQuickStart = onboardingPath === 'quick_start';
 
   return {
     ts: new Date().toISOString(),
@@ -135,13 +164,26 @@ export function buildPayload(answers: Answers, xp: XP, onboardingPath: Onboardin
         att: answers.evolve.att || '',
       },
       foundations: {
-        body: [...answers.foundations.body],
-        soul: [...answers.foundations.soul],
-        mind: [...answers.foundations.mind],
+        body: isQuickStart ? [...answers.quickStart.selectedTasksByPillar.Body] : [...answers.foundations.body],
+        soul: isQuickStart ? [...answers.quickStart.selectedTasksByPillar.Soul] : [...answers.foundations.soul],
+        mind: isQuickStart ? [...answers.quickStart.selectedTasksByPillar.Mind] : [...answers.foundations.mind],
         bodyOpen: answers.foundations.bodyOpen || '',
         soulOpen: answers.foundations.soulOpen || '',
         mindOpen: answers.foundations.mindOpen || '',
       },
+      ...(isQuickStart
+        ? {
+            quick_start: {
+              selected_moderations: [...answers.quickStart.selectedModerations],
+              manual_task_candidates: quickStartManualCandidates,
+              selected_tasks_by_pillar: {
+                body: [...answers.quickStart.selectedTasksByPillar.Body],
+                mind: [...answers.quickStart.selectedTasksByPillar.Mind],
+                soul: [...answers.quickStart.selectedTasksByPillar.Soul],
+              },
+            },
+          }
+        : {}),
     },
     xp: {
       total: totalXp,
