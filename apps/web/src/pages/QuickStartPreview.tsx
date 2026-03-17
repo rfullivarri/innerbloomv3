@@ -7,6 +7,7 @@ import type { GameMode } from '../onboarding/state';
 import { GAME_MODE_META } from '../lib/gameModeMeta';
 import { apiAuthorizedFetch, getCurrentUserProfile, markOnboardingProgress } from '../lib/api';
 import { setJourneyGenerationPending } from '../lib/journeyGeneration';
+import { buildDemoUrl } from '../lib/demoEntry';
 import { GameModeStep } from '../onboarding/steps/GameModeStep';
 import { HUD } from '../onboarding/ui/HUD';
 import { NavButtons } from '../onboarding/ui/NavButtons';
@@ -826,7 +827,12 @@ export default function QuickStartPreviewPage() {
             pillar_code: pillar.toUpperCase(),
             trait_code: taskId.toUpperCase(),
             input_value: inputValue || undefined,
-            metadata: { task_id: taskId },
+            metadata: {
+              task_id: taskId,
+              task_prefix: task?.text,
+              task_input_before: task?.inputBefore,
+              task_input_after: task?.inputAfter,
+            },
           };
         }),
       );
@@ -923,7 +929,7 @@ export default function QuickStartPreviewPage() {
         gameMode,
       });
 
-      navigate('/dashboard-v3');
+      navigate(buildDemoUrl({ language, source: 'onboarding', mode: 'onboarding' }));
     } finally {
       setIsSubmitting(false);
     }
