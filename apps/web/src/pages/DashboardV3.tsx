@@ -385,8 +385,11 @@ export default function DashboardV3Page() {
   );
   const [journeyReadyOpen, setJourneyReadyOpen] = useState(false);
   const generationKeyRef = useRef<string | null>(null);
+  const firstDailyQuestPromptInFlightRef = useRef(false);
+  const firstDailyQuestPromptMarkedRef = useRef(false);
 
   const onboardingProgress = useOnboardingProgress();
+  const { markStep } = onboardingProgress;
   const onboardingEditorNudge = useOnboardingEditorNudge({
     completedFirstDailyQuest: dailyQuestReadiness.completedFirstDailyQuest,
   });
@@ -402,6 +405,8 @@ export default function DashboardV3Page() {
     !dailyQuestReadiness.completedFirstDailyQuest &&
     hasReturnedToDashboardAfterEdit &&
     (!hasModerationOnboardingIntent || moderationSuggestionResolved);
+  const firstDailyQuestPromptedAt =
+    onboardingProgress.progress?.first_daily_quest_prompted_at ?? null;
 
 
   useEffect(() => {
@@ -568,12 +573,41 @@ export default function DashboardV3Page() {
   }, []);
 
   useEffect(() => {
-    if (!backendUserId || !shouldShowFirstDailyQuestCta) {
+    if (firstDailyQuestPromptedAt) {
+      firstDailyQuestPromptMarkedRef.current = true;
+    }
+  }, [firstDailyQuestPromptedAt]);
+
+  useEffect(() => {
+    if (
+      !backendUserId ||
+      !shouldShowFirstDailyQuestCta ||
+      firstDailyQuestPromptedAt ||
+      firstDailyQuestPromptInFlightRef.current ||
+      firstDailyQuestPromptMarkedRef.current
+    ) {
       return;
     }
 
-    void onboardingProgress.markStep('first_daily_quest_prompted', { trigger: 'dashboard_daily_quest_cta_shown' });
-  }, [backendUserId, onboardingProgress, shouldShowFirstDailyQuestCta]);
+    firstDailyQuestPromptInFlightRef.current = true;
+    void markStep('first_daily_quest_prompted', {
+      trigger: 'dashboard_daily_quest_cta_shown',
+    })
+      .then(() => {
+        firstDailyQuestPromptMarkedRef.current = true;
+      })
+      .catch((error) => {
+        console.error('Failed to mark first_daily_quest_prompted step', error);
+      })
+      .finally(() => {
+        firstDailyQuestPromptInFlightRef.current = false;
+      });
+  }, [
+    backendUserId,
+    firstDailyQuestPromptedAt,
+    markStep,
+    shouldShowFirstDailyQuestCta,
+  ]);
 
   useEffect(() => {
     if (
