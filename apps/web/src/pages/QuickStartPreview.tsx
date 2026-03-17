@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { resolveOnboardingLanguage } from '../onboarding/i18n';
@@ -174,7 +174,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       'Calibrando la dificultad de tus tareas',
       'Preparando tu plan inicial',
       'Activando tu modo de juego: {mode}',
-      'Activando tu plan',
+      'Activando tu plan – 2 meses incluidos',
     ],
     tasks: {
       Body: [
@@ -369,7 +369,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       'Calibrating your task difficulty',
       'Preparing your initial plan',
       'Activating your Game Mode: {mode}',
-      'Activating your plan',
+      'Activating your plan – 2 months included',
     ],
     tasks: {
       Body: [
@@ -555,6 +555,7 @@ function InlineTaskRow({
 }) {
   const hasInput = Boolean(task.inputAfter || task.inputBefore);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const rowRef = useRef<HTMLDivElement | null>(null);
   const selectedFrontStyle = {
     borderColor: 'color-mix(in srgb, var(--color-accent-secondary) 42%, var(--onboarding-glass-border))',
     background: 'color-mix(in srgb, var(--color-surface-elevated) 82%, var(--color-accent-secondary) 18%)',
@@ -572,9 +573,24 @@ function InlineTaskRow({
     }
   }, [selected]);
 
+  useEffect(() => {
+    if (!showSuggestions) {
+      return undefined;
+    }
+
+    const handleOutsidePointer = (event: PointerEvent) => {
+      if (!rowRef.current?.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handleOutsidePointer);
+    return () => document.removeEventListener('pointerdown', handleOutsidePointer);
+  }, [showSuggestions]);
+
 
   return (
-    <div className={`relative ${selected ? 'pt-4 pb-1' : ''}`}>
+    <div ref={rowRef} className={`relative ${selected ? 'pt-4 pb-1' : ''}`}>
       {selected ? (
         <div
           className="pointer-events-none absolute inset-x-0 top-0 bottom-1 rounded-2xl border px-4 pt-1.5 pb-3"
@@ -674,6 +690,7 @@ export default function QuickStartPreviewPage() {
   const [setupProgress, setSetupProgress] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showGrowthPointsModal, setShowGrowthPointsModal] = useState(false);
+  const [pendingGrowthPointsModal, setPendingGrowthPointsModal] = useState(false);
   const copy = COPY[language];
 
   const minimum = MODE_MINIMUMS[gameMode];
@@ -735,6 +752,17 @@ export default function QuickStartPreviewPage() {
   }, [balancedBonusActive, copy.tasks, currentStepIndex, gameMode, inputsByTask, language, moderationPrefs, selectedByPillar, selectedCounts.Body, selectedCounts.Mind, selectedCounts.Soul, totalGp, visibleRoute]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [step]);
+
+  useEffect(() => {
+    if (step === 'body' && pendingGrowthPointsModal) {
+      setShowGrowthPointsModal(true);
+      setPendingGrowthPointsModal(false);
+    }
+  }, [pendingGrowthPointsModal, step]);
+
+  useEffect(() => {
     if (step === 'setup') {
       setSetupProgress(1);
       const timer = window.setInterval(() => {
@@ -769,7 +797,8 @@ export default function QuickStartPreviewPage() {
     }
 
     if (step === 'branch') {
-      setShowGrowthPointsModal(true);
+      setStep('body');
+      setPendingGrowthPointsModal(true);
       return;
     }
 
@@ -1211,7 +1240,6 @@ export default function QuickStartPreviewPage() {
           language={language}
           onClose={() => {
             setShowGrowthPointsModal(false);
-            setStep('body');
           }}
         />
       ) : null}
