@@ -69,8 +69,11 @@ interface Translations {
     eyebrow: string;
     title: string;
     subtitle: string;
+    baseData: string;
     gameMode: string;
+    state: string;
     pillars: string;
+    selectedTraits: string;
     xp: string;
     baseHint: string;
     selectedTasks: string;
@@ -163,8 +166,11 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       eyebrow: 'Resumen',
       title: 'Tu base inicial',
       subtitle: 'Versión compacta antes de activar tu Journey.',
+      baseData: 'Base data',
       gameMode: 'Modo de juego',
+      state: 'Estado',
       pillars: 'Pilares',
+      selectedTraits: 'Rasgos de tus tareas seleccionadas:',
       xp: 'GP (Puntos de Crecimiento)',
       baseHint: 'Esta configuración será tu base inicial para arrancar y ajustarla luego.',
       selectedTasks: 'Tareas seleccionadas',
@@ -371,8 +377,11 @@ const COPY: Record<OnboardingLanguage, Translations> = {
       eyebrow: 'Summary',
       title: 'Your initial base',
       subtitle: 'Compact review before activating your Journey.',
+      baseData: 'Base data',
       gameMode: 'Game mode',
+      state: 'State',
       pillars: 'Pillars',
+      selectedTraits: 'Traits from your selected tasks:',
       xp: 'GP (Growth Points)',
       baseHint: 'This setup will be your initial base so you can start and adjust later.',
       selectedTasks: 'Selected tasks',
@@ -534,6 +543,14 @@ const COPY: Record<OnboardingLanguage, Translations> = {
 
 const STEP_ORDER: Step[] = ['game-mode', 'branch', 'body', 'mind', 'soul', 'moderation', 'summary', 'setup'];
 
+
+const GAME_MODE_META_KEY: Record<GameMode, keyof typeof GAME_MODE_META> = {
+  LOW: 'Low',
+  CHILL: 'Chill',
+  FLOW: 'Flow',
+  EVOLVE: 'Evolve',
+};
+
 const MODE_ACCENT: Record<GameMode, string> = {
   LOW: GAME_MODE_META.Low.accentColor,
   CHILL: GAME_MODE_META.Chill.accentColor,
@@ -630,7 +647,7 @@ function InlineTaskRow({
 
 
   return (
-    <div ref={rowRef} className={`relative ${selected ? 'pt-4 pb-1' : ''}`}>
+    <div ref={rowRef} className={`relative ${selected ? 'pt-5 pb-1' : ''}`}>
       {selected ? (
         <div
           className="pointer-events-none absolute inset-x-0 top-0 bottom-1 rounded-2xl border px-4 pt-1.5 pb-3"
@@ -1229,12 +1246,19 @@ export default function QuickStartPreviewPage() {
               <div className="space-y-5">
                 <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
                   <header className="border-b border-white/5 pb-3">
-                    <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.quickSummary.gameMode}</p>
+                    <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.quickSummary.baseData}</p>
                   </header>
-                  <div className="mt-4">
-                    <span className="inline-flex origin-left scale-75">
-                      <SharedGameModeChip {...buildGameModeChip(gameMode)} />
-                    </span>
+                  <div className="mt-4 space-y-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-white/50">{copy.quickSummary.gameMode}</p>
+                      <span className="mt-2 inline-flex origin-left scale-75">
+                        <SharedGameModeChip {...buildGameModeChip(gameMode)} />
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-white/50">{copy.quickSummary.state}</p>
+                      <p className="mt-1 text-sm text-white/80">{GAME_MODE_META[GAME_MODE_META_KEY[gameMode]].state[language]}</p>
+                    </div>
                   </div>
                 </section>
                 <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
@@ -1242,6 +1266,7 @@ export default function QuickStartPreviewPage() {
                     <p className="text-xs uppercase tracking-[0.35em] text-white/50">{copy.quickSummary.pillars}</p>
                   </header>
                   <div className="mt-4 space-y-3">
+                    <p className="text-sm text-white/70">{copy.quickSummary.selectedTraits}</p>
                     {(['Body', 'Mind', 'Soul'] as Pillar[]).map((pillar) => (
                       <div key={pillar} className="rounded-xl border border-white/10 bg-white/5 p-3">
                         <p className="text-sm font-semibold text-white">{copy.pillarTitles[pillar].replace('Inicio rápido · ', '').replace('Quick Start · ', '')}</p>
