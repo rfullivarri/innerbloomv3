@@ -42,9 +42,14 @@ describe('computeRouteForMode', () => {
     expect(computeRouteForMode(null)).toEqual(['clerk-gate', 'mode-select']);
   });
 
+  it('inserts path-select after mode selection when path is not chosen yet', () => {
+    expect(computeRouteForMode('FLOW')).toEqual(['clerk-gate', 'mode-select', 'path-select']);
+  });
+
   it('includes mode specific steps', () => {
-    const flowRoute = computeRouteForMode('FLOW');
+    const flowRoute = computeRouteForMode('FLOW', 'traditional');
     expect(flowRoute).toContain('flow-goal');
     expect(flowRoute).toContain('summary');
+    expect(flowRoute.slice(0, 3)).toEqual(['clerk-gate', 'mode-select', 'path-select']);
   });
 });

@@ -6,6 +6,7 @@ export type Pillar = 'Body' | 'Mind' | 'Soul';
 export type StepId =
   | 'clerk-gate'
   | 'mode-select'
+  | 'path-select'
   | 'low-body'
   | 'low-soul'
   | 'low-mind'
@@ -17,14 +18,22 @@ export type StepId =
   | 'evolve-goal'
   | 'evolve-trade'
   | 'evolve-att'
+  | 'quick-start-body'
+  | 'quick-start-mind'
+  | 'quick-start-soul'
+  | 'quick-start-moderation'
+  | 'quick-start-summary'
   | 'foundations-body'
   | 'foundations-soul'
   | 'foundations-mind'
   | 'summary';
 
+export type OnboardingPath = 'traditional' | 'quick_start';
+
 const ALL_STEPS: StepId[] = [
   'clerk-gate',
   'mode-select',
+  'path-select',
   'low-body',
   'low-soul',
   'low-mind',
@@ -36,6 +45,11 @@ const ALL_STEPS: StepId[] = [
   'evolve-goal',
   'evolve-trade',
   'evolve-att',
+  'quick-start-body',
+  'quick-start-mind',
+  'quick-start-soul',
+  'quick-start-moderation',
+  'quick-start-summary',
   'foundations-body',
   'foundations-soul',
   'foundations-mind',
@@ -94,6 +108,7 @@ export type TokenProvider = (() => Promise<string | null>) | null;
 export interface OnboardingState {
   route: StepId[];
   currentStepIndex: number;
+  onboardingPath: OnboardingPath | null;
   answers: Answers;
   xp: XP;
   awardedChecklists: Record<StepId, boolean>;
@@ -102,6 +117,7 @@ export interface OnboardingState {
 }
 
 const BASE_ROUTE: StepId[] = ['clerk-gate', 'mode-select'];
+const BASE_MODE_ROUTE: StepId[] = [...BASE_ROUTE, 'path-select'];
 
 export const initialXP: XP = { Body: 0, Mind: 0, Soul: 0, total: 0 };
 
@@ -141,6 +157,7 @@ export const initialAnswers: Answers = {
 const initialState: OnboardingState = {
   route: [...BASE_ROUTE],
   currentStepIndex: 0,
+  onboardingPath: null,
   answers: cloneAnswers(initialAnswers),
   xp: { ...initialXP },
   awardedChecklists: createStepRecord(),
@@ -148,13 +165,21 @@ const initialState: OnboardingState = {
   tokenProvider: null,
 };
 
-export function computeRouteForMode(mode: GameMode | null): StepId[] {
+export function computeRouteForMode(mode: GameMode | null, onboardingPath: OnboardingPath | null = null): StepId[] {
   if (!mode) {
     return BASE_ROUTE;
   }
 
+  if (!onboardingPath) {
+    return BASE_MODE_ROUTE;
+  }
+
+  if (onboardingPath === 'quick_start') {
+    return BASE_MODE_ROUTE;
+  }
+
   const modeRoute = MODE_ROUTES[mode];
-  return [...BASE_ROUTE, ...modeRoute];
+  return [...BASE_MODE_ROUTE, ...modeRoute];
 }
 
 export function applyChecklistSelection(
@@ -206,6 +231,7 @@ export function distributeXp(base: XP, amount: number, pillar: Pillar | 'ALL'): 
 interface OnboardingContextValue {
   state: OnboardingState;
   setMode: (mode: GameMode) => void;
+  setOnboardingPath: (path: OnboardingPath) => void;
   goNext: () => void;
   goPrevious: () => void;
   goToStep: (step: StepId) => void;
@@ -267,12 +293,36 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
       const nextAnswers = cloneAnswers(prev.answers);
       nextAnswers.mode = mode;
-      const nextRoute = computeRouteForMode(mode);
+      const nextRoute = computeRouteForMode(mode, null);
 
       return {
         ...prev,
         answers: nextAnswers,
+        onboardingPath: null,
         route: nextRoute,
+      };
+    });
+  }, []);
+
+  const setOnboardingPath = useCallback((path: OnboardingPath) => {
+    setState((prev) => {
+      if (!prev.answers.mode) {
+        return prev;
+      }
+
+      if (prev.onboardingPath === path) {
+        return prev;
+      }
+
+      const nextRoute = computeRouteForMode(prev.answers.mode, path);
+      const currentStepId = prev.route[prev.currentStepIndex];
+      const nextIndex = currentStepId ? Math.max(0, nextRoute.indexOf(currentStepId)) : prev.currentStepIndex;
+
+      return {
+        ...prev,
+        onboardingPath: path,
+        route: nextRoute,
+        currentStepIndex: nextIndex,
       };
     });
   }, []);
@@ -525,6 +575,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     setState({
       route: [...BASE_ROUTE],
       currentStepIndex: 0,
+      onboardingPath: null,
       answers: cloneAnswers(initialAnswers),
       xp: { ...initialXP },
       awardedChecklists: createStepRecord(),
@@ -537,6 +588,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     () => ({
       state,
       setMode,
+      setOnboardingPath,
       goNext,
       goPrevious,
       goToStep,
@@ -552,6 +604,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     [
       state,
       setMode,
+      setOnboardingPath,
       goNext,
       goPrevious,
       goToStep,
