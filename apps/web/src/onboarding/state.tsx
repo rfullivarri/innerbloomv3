@@ -199,9 +199,6 @@ export function computeRouteForMode(
   onboardingPath: OnboardingPath | null = null,
   quickStartIncludeModeration = false,
 ): StepId[] {
-
-export function computeRouteForMode(mode: GameMode | null, onboardingPath: OnboardingPath | null = null): StepId[] {
-
   if (!mode) {
     return BASE_ROUTE;
   }
@@ -211,11 +208,7 @@ export function computeRouteForMode(mode: GameMode | null, onboardingPath: Onboa
   }
 
   if (onboardingPath === 'quick_start') {
-
     return buildQuickStartRoute(quickStartIncludeModeration);
-
-    return BASE_MODE_ROUTE;
-
   }
 
   const modeRoute = MODE_ROUTES[mode];
@@ -405,7 +398,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       return {
         ...prev,
         answers: nextAnswers,
-        onboardingPath: null,
+        onboardingPath: 'quick_start',
         route: nextRoute,
         currentStepIndex: nextIndex,
       };
@@ -435,29 +428,6 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       return {
         ...prev,
         answers: nextAnswers,
-      };
-    });
-  }, []);
-
-  const setOnboardingPath = useCallback((path: OnboardingPath) => {
-    setState((prev) => {
-      if (!prev.answers.mode) {
-        return prev;
-      }
-
-      if (prev.onboardingPath === path) {
-        return prev;
-      }
-
-      const nextRoute = computeRouteForMode(prev.answers.mode, path);
-      const currentStepId = prev.route[prev.currentStepIndex];
-      const nextIndex = currentStepId ? Math.max(0, nextRoute.indexOf(currentStepId)) : prev.currentStepIndex;
-
-      return {
-        ...prev,
-        onboardingPath: path,
-        route: nextRoute,
-        currentStepIndex: nextIndex,
       };
     });
   }, []);
