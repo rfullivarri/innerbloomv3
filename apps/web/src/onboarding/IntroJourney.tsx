@@ -11,9 +11,7 @@ import { ChoiceStep } from './steps/ChoiceStep';
 import { GameModeStep } from './steps/GameModeStep';
 import { OpenTextStep } from './steps/OpenTextStep';
 import { PathSelectStep } from './steps/PathSelectStep';
-import { QuickStartTasksStep } from './steps/QuickStartTasksStep';
-import { QuickStartModerationStep } from './steps/QuickStartModerationStep';
-import { QuickStartSummaryStep } from './steps/QuickStartSummaryStep';
+import { IntegratedQuickStartFlow } from './IntegratedQuickStartFlow';
 import { SummaryStep } from './steps/SummaryStep';
 import { GpExplainerOverlay } from './ui/GpExplainerOverlay';
 import { HUD } from './ui/HUD';
@@ -70,6 +68,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   const firstQuestionStep = resolveFirstQuestionStep(answers.mode, onboardingPath);
   const quickStartGp = computeQuickStartGp(answers.quickStart.selectedTasksByPillar);
   const hudXp = onboardingPath === 'quick_start' ? quickStartGp.xp : xp;
+  const isQuickStartFlowActive = onboardingPath === 'quick_start' && stepId.startsWith('quick-start');
 
   useEffect(() => {
     if (!hasRecordedSession.current && authLoaded) {
@@ -279,81 +278,6 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
               setOnboardingPath('quick_start');
               goNext();
             }}
-          />
-        );
-      case 'quick-start-body':
-        return (
-          <QuickStartTasksStep
-            language={language}
-            pillar="Body"
-            gameMode={answers.mode ?? 'CHILL'}
-            tasks={QUICK_START_TASKS[language].Body}
-            selectedIds={answers.quickStart.selectedTasksByPillar.Body}
-            inputValues={answers.quickStart.editableTaskValues}
-            minimum={QUICK_START_MINIMUMS[answers.mode ?? 'CHILL']}
-            onToggleTask={(taskId) => toggleQuickStartTask('Body', taskId)}
-            onInputChange={(taskId, value) => setQuickStartTaskInput(`Body-${taskId}`, value)}
-            balancedBonusActive={quickStartGp.balancedBonusActive}
-            onBack={goPrevious}
-            onConfirm={goNext}
-          />
-        );
-      case 'quick-start-mind':
-        return (
-          <QuickStartTasksStep
-            language={language}
-            pillar="Mind"
-            gameMode={answers.mode ?? 'CHILL'}
-            tasks={QUICK_START_TASKS[language].Mind}
-            selectedIds={answers.quickStart.selectedTasksByPillar.Mind}
-            inputValues={answers.quickStart.editableTaskValues}
-            minimum={QUICK_START_MINIMUMS[answers.mode ?? 'CHILL']}
-            onToggleTask={(taskId) => toggleQuickStartTask('Mind', taskId)}
-            onInputChange={(taskId, value) => setQuickStartTaskInput(`Mind-${taskId}`, value)}
-            balancedBonusActive={quickStartGp.balancedBonusActive}
-            onBack={goPrevious}
-            onConfirm={goNext}
-          />
-        );
-      case 'quick-start-soul':
-        return (
-          <QuickStartTasksStep
-            language={language}
-            pillar="Soul"
-            gameMode={answers.mode ?? 'CHILL'}
-            tasks={QUICK_START_TASKS[language].Soul}
-            selectedIds={answers.quickStart.selectedTasksByPillar.Soul}
-            inputValues={answers.quickStart.editableTaskValues}
-            minimum={QUICK_START_MINIMUMS[answers.mode ?? 'CHILL']}
-            onToggleTask={(taskId) => toggleQuickStartTask('Soul', taskId)}
-            onInputChange={(taskId, value) => setQuickStartTaskInput(`Soul-${taskId}`, value)}
-            balancedBonusActive={quickStartGp.balancedBonusActive}
-            onBack={goPrevious}
-            onConfirm={goNext}
-          />
-        );
-      case 'quick-start-moderation':
-        return (
-          <QuickStartModerationStep
-            language={language}
-            selectedModerations={answers.quickStart.selectedModerations}
-            onToggle={toggleQuickStartModeration}
-            onBack={goPrevious}
-            onConfirm={goNext}
-          />
-        );
-      case 'quick-start-summary':
-        return (
-          <QuickStartSummaryStep
-            language={language}
-            gameMode={answers.mode ?? 'CHILL'}
-            selectedByPillar={answers.quickStart.selectedTasksByPillar}
-            tasksByPillar={QUICK_START_TASKS[language]}
-            xp={quickStartGp.xp}
-            onBack={goPrevious}
-            onConfirm={handleFinish}
-            loading={isSubmitting}
-            submitError={submitError}
           />
         );
       case 'low-body':
@@ -602,6 +526,18 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
         return null;
     }
   };
+
+  if (isQuickStartFlowActive) {
+    return (
+      <IntegratedQuickStartFlow
+        language={language}
+        gameMode={answers.mode ?? 'CHILL'}
+        onBackToPathSelect={() => goToStep('path-select')}
+        onExit={handleExit}
+        onRestart={handleRestart}
+      />
+    );
+  }
 
   return (
     <div className="onboarding-force-white relative flex min-h-screen min-h-dvh flex-col overflow-hidden bg-[#000c40] pb-16">
