@@ -21,7 +21,7 @@ export function QuickStartGeneratingScreen({
         title: 'Configuring your Quick Start',
         subtitle: 'We are applying your selection and reusing the real onboarding flow.',
         bridgeHint: "Next, you'll enter the guided demo to explore how Innerbloom is structured. You can skip it anytime.",
-        done: 'Setup ready to connect with guided demo.',
+        done: '',
         cta: 'Go to guided demo',
         saving: 'Saving your Quick Start…',
       }
@@ -29,7 +29,7 @@ export function QuickStartGeneratingScreen({
         title: 'Configurando tu Inicio rápido',
         subtitle: 'Estamos aplicando tu selección y reutilizando el flujo real del onboarding.',
         bridgeHint: 'Después entrarás a la demo guiada para explorar cómo está estructurado Innerbloom. Puedes saltarla cuando quieras.',
-        done: 'Configuración lista para conectar con demo guiada.',
+        done: '',
         cta: 'Ir a demo guiada',
         saving: 'Guardando tu Quick Start…',
       };
@@ -54,7 +54,7 @@ export function QuickStartGeneratingScreen({
   }, [steps.length]);
 
   return (
-    <div className="min-h-screen bg-[#000c40] px-4 py-10 text-white">
+    <div className="min-h-screen min-h-dvh overflow-y-auto bg-[#000c40] px-4 py-10 text-white">
       <section className="relative mx-auto mt-5 w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0a133d]/85 p-5 shadow-[0_0_45px_rgba(79,70,229,0.22)] backdrop-blur-xl sm:p-8">
         <div className="mb-5 flex items-center justify-center gap-2 text-center text-[0.68rem] font-semibold uppercase tracking-[0.36em] text-white/65 sm:text-xs">
           <span>Innerbloom</span>
