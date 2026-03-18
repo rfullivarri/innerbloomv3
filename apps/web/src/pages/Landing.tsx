@@ -6,7 +6,6 @@ import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLand
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
-import { usePageMeta } from '../lib/seo';
 import { buildOnboardingPath } from '../onboarding/i18n';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 import './Landing.css';
@@ -383,19 +382,6 @@ export default function LandingPage() {
     setManualLanguage(nextLanguage);
   };
 
-  usePageMeta({
-    title: 'Innerbloom',
-    description: 'Obsérvate por primera vez en tercera persona y toma el control de tus acciones y hábitos.',
-    image: 'https://innerbloomjourney.org/og/neneOGP.png',
-    imageAlt: 'Innerbloom',
-    ogImageSecureUrl: 'https://innerbloomjourney.org/og/neneOGP.png',
-    ogImageType: 'image/png',
-    ogImageWidth: '1200',
-    ogImageHeight: '630',
-    twitterImage: 'https://innerbloomjourney.org/og/neneOGP.png',
-    url: 'https://innerbloomjourney.org/'
-  });
-
   useEffect(() => {
     if (paused || testimonialCount <= 1) {
       return;
@@ -659,7 +645,7 @@ export default function LandingPage() {
             </div>
             <div className="hero-media">
               <img
-                src="https://i.ibb.co/Gv7WTT7h/Whats-App-Image-2025-08-31-at-03-52-15.jpg"
+                src="/nene.png"
                 alt={copy.hero.alt}
                 className="hero-img"
                 width={1200}
