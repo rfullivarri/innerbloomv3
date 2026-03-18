@@ -21,6 +21,7 @@ import BillingSuccessPage from './pages/BillingSuccess';
 import BillingCancelPage from './pages/BillingCancel';
 import DemoDashboardPage from './pages/DemoDashboard';
 import QuickStartPreviewPage from './pages/QuickStartPreview';
+import LabsDemoModeSelectPage from './pages/LabsDemoModeSelect';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -130,6 +131,7 @@ export default function App() {
         <Route path="/landing-v2" element={<LandingV2Page />} />
         <Route path="/premium-timeline" element={<PremiumTimelineDemoPage />} />
         <Route path="/demo" element={<DemoDashboardPage />} />
+        <Route path="/labs/demo-mode-select" element={<LabsDemoModeSelectPage />} />
         <Route path="/intro-journey" element={<OnboardingIntroPage />} />
         <Route
           path="/labs/quick-start"
