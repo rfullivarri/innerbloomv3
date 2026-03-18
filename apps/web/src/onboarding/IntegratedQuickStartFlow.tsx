@@ -117,7 +117,7 @@ const MODE_MINIMUMS: Record<GameMode, number> = {
 const COPY: Record<OnboardingLanguage, Translations> = {
   es: {
     title: 'Inicio rápido',
-    subtitle: 'Configurá tu base inicial con el flujo rápido integrado al onboarding.',
+    subtitle: '',
     forkTitle: '¿Cómo querés arrancar hoy?',
     forkSubtitle: 'Elegí el camino que mejor se adapta a cómo querés empezar hoy.',
     personalGuide: 'Guía personal',
@@ -135,9 +135,9 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     continue: 'Continuar',
     back: 'Volver',
     pillarTitles: {
-      Body: 'Inicio rápido · Cuerpo 🫀',
-      Mind: 'Inicio rápido · Mente 🧠',
-      Soul: 'Inicio rápido · Alma 🏵️',
+      Body: 'Cuerpo 🫀',
+      Mind: 'Mente 🧠',
+      Soul: 'Alma 🏵️',
     },
     pillarSubtitles: {
       Body: 'Elegí 10 tareas visibles y activá las que querés sostener.',
@@ -346,9 +346,9 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     continue: 'Continue',
     back: 'Back',
     pillarTitles: {
-      Body: 'Quick Start · Body 🫀',
-      Mind: 'Quick Start · Mind 🧠',
-      Soul: 'Quick Start · Soul 🏵️',
+      Body: 'Body 🫀',
+      Mind: 'Mind 🧠',
+      Soul: 'Soul 🏵️',
     },
     pillarSubtitles: {
       Body: 'Review all 10 tasks and activate what you want to sustain.',
@@ -819,6 +819,17 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
   }, [pendingGrowthPointsModal, step]);
 
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    if (showGrowthPointsModal) {
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showGrowthPointsModal]);
+
+  useEffect(() => {
     if (step === 'setup') {
       setSetupProgress(1);
       const timer = window.setInterval(() => {
@@ -1038,8 +1049,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
     return (
       <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
         <header className="mb-5 border-b border-white/10 pb-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-white/55">{copy.inPreview}</p>
-          <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{copy.pillarTitles[currentPillar]}</h1>
+          <h1 className="text-2xl font-semibold text-white sm:text-3xl">{copy.pillarTitles[currentPillar]}</h1>
           <p className="mt-2 text-sm text-white/70">{copy.pillarSubtitles[currentPillar]}</p>
           <div
             className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold text-violet-50/95"
@@ -1099,7 +1109,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
   };
 
   return (
-    <div className={`min-h-screen min-h-dvh overflow-y-auto bg-[#000c40] text-white ${step === 'setup' ? '' : 'pb-12 pt-28 sm:pt-32'}`}>
+    <div className={`min-h-screen min-h-dvh bg-[#000c40] text-white ${step === 'setup' ? '' : 'pb-12 pt-28 sm:pt-32'}`}>
       {step !== 'setup' ? (
         <HUD
           language={language}
@@ -1115,14 +1125,6 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
       <div className={`mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 ${step === 'setup' ? 'py-10' : 'pb-[calc(env(safe-area-inset-bottom)+1.5rem)]'}`}>
         {/* Payload shape kept aligned with the real Quick Start flow. No SQL persistence in this iteration. */}
         <pre className="hidden" aria-hidden>{JSON.stringify(quickStartDraft, null, 2)}</pre>
-        {step !== 'setup' ? (
-          <div>
-            <p className="text-xs uppercase tracking-[0.28em] text-white/55">Innerbloom</p>
-            <h2 className="text-lg font-semibold text-white">{copy.title}</h2>
-            <p className="text-xs text-white/55">{copy.subtitle}</p>
-          </div>
-        ) : null}
-
         {step === 'body' || step === 'mind' || step === 'soul' ? quickStartBody() : null}
 
         {step === 'moderation' ? (
@@ -1191,7 +1193,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
                     <p className="text-sm text-white/70">{copy.quickSummary.selectedTraits}</p>
                     {(['Body', 'Mind', 'Soul'] as Pillar[]).map((pillar) => (
                       <div key={pillar} className="rounded-xl border border-white/10 bg-white/5 p-3">
-                        <p className="text-sm font-semibold text-white">{copy.pillarTitles[pillar].replace('Inicio rápido · ', '').replace('Quick Start · ', '')}</p>
+                        <p className="text-sm font-semibold text-white">{copy.pillarTitles[pillar]}</p>
                         <p className="mt-1 text-xs text-white/70">{copy.quickSummary.selectedTasks}: {selectedByPillar[pillar].length}</p>
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {quickStartDraft.selectedTraitsByPillar[pillar].length > 0
