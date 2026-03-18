@@ -272,31 +272,56 @@ export default function DashboardV3Page() {
     }
 
     let isMounted = true;
+    let timer: number | null = null;
 
-    const syncFromBackend = async () => {
+    const clearPollingTimer = () => {
+      if (timer !== null) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+    };
+
+    const syncFromBackend = async (): Promise<boolean> => {
       try {
         const payload = await getJourneyGenerationStatus();
         if (!isMounted) {
-          return;
+          return false;
         }
 
         syncJourneyGenerationFromServer({
           clerkUserId,
           state: payload.state,
         });
+
+        return (
+          payload.state?.status === "pending" ||
+          payload.state?.status === "running"
+        );
       } catch (error) {
         console.warn("Failed to sync journey generation state", error);
+        return true;
       }
     };
 
-    void syncFromBackend();
-    const timer = window.setInterval(() => {
-      void syncFromBackend();
-    }, 7000);
+    void (async () => {
+      const shouldContinuePolling = await syncFromBackend();
+
+      if (!isMounted || !shouldContinuePolling) {
+        return;
+      }
+
+      timer = window.setInterval(() => {
+        void syncFromBackend().then((shouldKeepPolling) => {
+          if (!shouldKeepPolling) {
+            clearPollingTimer();
+          }
+        });
+      }, 7000);
+    })();
 
     return () => {
       isMounted = false;
-      window.clearInterval(timer);
+      clearPollingTimer();
     };
   }, [clerkUserId]);
 
