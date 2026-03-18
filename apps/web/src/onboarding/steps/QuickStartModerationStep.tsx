@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import type { OnboardingLanguage } from '../constants';
 import { NavButtons } from '../ui/NavButtons';
 import type { ModerationOption } from '../quickStart';
@@ -11,48 +10,81 @@ interface QuickStartModerationStepProps {
   onConfirm: () => void;
 }
 
-const OPTIONS: Array<{ id: ModerationOption; icon: string; es: string; en: string }> = [
-  { id: 'sugar', icon: '🍬', es: 'Azúcar', en: 'Sugar' },
-  { id: 'tobacco', icon: '🚭', es: 'Tabaco', en: 'Tobacco' },
-  { id: 'alcohol', icon: '🍷', es: 'Alcohol', en: 'Alcohol' },
-];
+const OPTIONS: Record<ModerationOption, { icon: string; es: { title: string; description: string }; en: { title: string; description: string } }> = {
+  sugar: {
+    icon: '🍬',
+    es: {
+      title: 'Azúcar',
+      description: 'Registrar cuándo aparece antojo o exceso para mejorar decisiones.',
+    },
+    en: {
+      title: 'Sugar',
+      description: 'Track cravings and excess moments to improve decisions.',
+    },
+  },
+  tobacco: {
+    icon: '🚭',
+    es: {
+      title: 'Tabaco',
+      description: 'Seguir consumo y contexto para recortar de forma sostenible.',
+    },
+    en: {
+      title: 'Tobacco',
+      description: 'Track usage and context to reduce sustainably.',
+    },
+  },
+  alcohol: {
+    icon: '🍷',
+    es: {
+      title: 'Alcohol',
+      description: 'Observar frecuencia y momentos para mantener equilibrio.',
+    },
+    en: {
+      title: 'Alcohol',
+      description: 'Observe frequency and moments to keep balance.',
+    },
+  },
+};
 
 export function QuickStartModerationStep({ language = 'es', selectedModerations, onToggle, onBack, onConfirm }: QuickStartModerationStepProps) {
   const copy = language === 'en'
     ? {
         title: 'Moderation',
         subtitle: 'Choose what you want to track with more awareness.',
+        hint: 'No judgment: only tracking to find your own balance.',
+        flex: 'You can also use flexible tolerance settings (for example, weekends).',
         continue: 'Continue',
         back: 'Back',
       }
     : {
         title: 'Moderación',
         subtitle: 'Elegí qué querés observar con más consciencia.',
+        hint: 'Sin juicios: solo seguimiento para encontrar balance.',
+        flex: 'También podés manejar tolerancias flexibles (por ejemplo, fines de semana).',
         continue: 'Continuar',
         back: 'Volver',
       };
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7"
-    >
-      <h2 className="text-2xl font-semibold text-white sm:text-3xl">{copy.title}</h2>
+    <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
+      <h1 className="text-2xl font-semibold text-white sm:text-3xl">{copy.title}</h1>
       <p className="mt-2 text-sm text-white/70">{copy.subtitle}</p>
-
+      <p className="mt-2 text-xs text-white/55">{copy.hint}</p>
       <div className="mt-5 space-y-3">
-        {OPTIONS.map((option) => {
-          const enabled = selectedModerations.includes(option.id);
+        {(Object.keys(OPTIONS) as ModerationOption[]).map((option) => {
+          const card = OPTIONS[option][language];
+          const enabled = selectedModerations.includes(option);
           return (
             <button
-              key={option.id}
+              key={option}
               type="button"
-              onClick={() => onToggle(option.id)}
-              className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition ${enabled ? 'border-violet-200/45 bg-violet-400/18' : 'border-white/20 bg-white/6'}`}
+              onClick={() => onToggle(option)}
+              className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition ${enabled ? 'border-violet-200/45 bg-violet-400/18' : 'border-white/20 bg-white/6'}`}
             >
-              <span className="text-sm font-semibold text-white">{option.icon} {language === 'en' ? option.en : option.es}</span>
+              <div>
+                <p className="text-sm font-semibold text-white">{OPTIONS[option].icon} {card.title}</p>
+                <p className="mt-1 text-xs text-white/65">{card.description}</p>
+              </div>
               <span className={`h-5 w-10 rounded-full p-0.5 ${enabled ? 'bg-violet-300/70' : 'bg-white/20'}`}>
                 <span className={`block h-4 w-4 rounded-full bg-white transition ${enabled ? 'translate-x-5' : ''}`} />
               </span>
@@ -60,8 +92,8 @@ export function QuickStartModerationStep({ language = 'es', selectedModerations,
           );
         })}
       </div>
-
+      <p className="mt-4 text-xs text-white/65">{copy.flex}</p>
       <NavButtons language={language} onBack={onBack} onConfirm={onConfirm} backLabel={copy.back} confirmLabel={copy.continue} />
-    </motion.section>
+    </section>
   );
 }

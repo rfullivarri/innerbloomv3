@@ -9,6 +9,8 @@ export interface QuickStartTask {
   text: string;
   inputBefore?: string;
   inputAfter?: string;
+  helper?: string;
+  suggestions?: string[];
 }
 
 export const QUICK_START_MINIMUMS: Record<GameMode, number> = {
@@ -24,11 +26,31 @@ export const QUICK_START_TASKS: Record<OnboardingLanguage, Record<Pillar, QuickS
       { id: 'ENERGIA', trait: 'ENERGIA', text: 'Caminar durante', inputAfter: 'minutos' },
       { id: 'NUTRICION', trait: 'NUTRICION', text: 'Hacer', inputAfter: 'comida(s) equilibrada(s) al día' },
       { id: 'SUENO', trait: 'SUENO', text: 'Dormir al menos', inputAfter: 'horas por noche' },
-      { id: 'RECUPERACION', trait: 'RECUPERACION', text: 'Hacer una pausa de recuperación durante el día' },
+      {
+        id: 'RECUPERACION',
+        trait: 'RECUPERACION',
+        text: 'Hacer una pausa de recuperación durante el día',
+        suggestions: ['frenar unos minutos', 'cerrar los ojos', 'respirar', 'bajar estímulos', 'estirar un poco'],
+      },
       { id: 'HIDRATACION', trait: 'HIDRATACION', text: 'Tomar', inputAfter: 'vaso(s) de agua al día' },
-      { id: 'HIGIENE', trait: 'HIGIENE', text: 'Completar mi rutina de higiene personal' },
-      { id: 'VITALIDAD', trait: 'VITALIDAD', text: 'Empezar el día con una rutina activadora' },
-      { id: 'POSTURA', trait: 'POSTURA', text: 'Cuidar mi postura o ergonomía' },
+      {
+        id: 'HIGIENE',
+        trait: 'HIGIENE',
+        text: 'Completar mi rutina de higiene personal',
+        suggestions: ['lavarme la cara', 'bañarme', 'lavarme los dientes', 'ponerme crema', 'ordenar mi cuidado básico'],
+      },
+      {
+        id: 'VITALIDAD',
+        trait: 'VITALIDAD',
+        text: 'Empezar el día con una rutina activadora',
+        suggestions: ['abrir la ventana', 'mover el cuerpo', 'tomar agua', 'estirarme', 'evitar arrancar con el móvil'],
+      },
+      {
+        id: 'POSTURA',
+        trait: 'POSTURA',
+        text: 'Cuidar mi postura o ergonomía',
+        suggestions: ['sentarme mejor', 'ajustar la pantalla', 'apoyar bien la espalda', 'cambiar de posición', 'revisar cómo trabajo'],
+      },
       { id: 'MOVILIDAD', trait: 'MOVILIDAD', text: 'Hacer movilidad o estiramientos durante', inputAfter: 'minutos' },
       { id: 'MODERACION', trait: 'MODERACION', text: 'Mejorar mi relación con ciertos consumos o excesos' },
     ],
@@ -36,25 +58,85 @@ export const QUICK_START_TASKS: Record<OnboardingLanguage, Record<Pillar, QuickS
       { id: 'ENFOQUE', trait: 'ENFOQUE', text: 'Trabajar con foco profundo durante', inputAfter: 'minutos' },
       { id: 'APRENDIZAJE', trait: 'APRENDIZAJE', text: 'Leer, estudiar o aprender durante', inputAfter: 'minutos' },
       { id: 'CREATIVIDAD', trait: 'CREATIVIDAD', text: 'Dedicar', inputAfter: 'minutos a crear, escribir o idear' },
-      { id: 'GESTION', trait: 'GESTION', text: 'Tomarme un momento para respirar, bajar revoluciones o regularme' },
-      { id: 'AUTOCONTROL', trait: 'AUTOCONTROL', text: 'Prestar atención a mis acciones impulsivas' },
-      { id: 'RESILIENCIA', trait: 'RESILIENCIA', text: 'Entrenar cómo reacciono ante frustraciones o cambios' },
-      { id: 'ORDEN', trait: 'ORDEN', text: 'Ordenar mis tareas, espacio o prioridades' },
-      { id: 'PROYECCION', trait: 'PROYECCION', text: 'Dar un paso hacia una meta personal o profesional' },
-      { id: 'FINANZAS', trait: 'FINANZAS', text: 'Revisar mis gastos, ahorro o presupuesto' },
-      { id: 'AGILIDAD', trait: 'AGILIDAD', text: 'Entrenar memoria o agilidad mental durante', inputAfter: 'minutos' },
+      {
+        id: 'GESTION',
+        trait: 'GESTION',
+        text: 'Tomarme un momento para respirar, bajar revoluciones o regularme',
+        suggestions: ['respirar profundo', 'salir del ruido', 'pausar', 'soltar tensión', 'bajar ansiedad'],
+      },
+      {
+        id: 'AUTOCONTROL',
+        trait: 'AUTOCONTROL',
+        text: 'Prestar atención a mis acciones impulsivas',
+        suggestions: ['notar cuándo reacciono rápido', 'observar impulsos', 'frenar antes de responder', 'detectar automatismos'],
+      },
+      {
+        id: 'RESILIENCIA',
+        trait: 'RESILIENCIA',
+        text: 'Hacer algo que me desafíe o me saque de mi zona de confort',
+        suggestions: ['iniciar una conversación difícil', 'probar algo nuevo', 'hacer algo que vengo evitando', 'sostener una incomodidad útil'],
+      },
+      {
+        id: 'ORDEN',
+        trait: 'ORDEN',
+        text: 'Ordenar mi espacio, mis tareas o mi mente',
+        suggestions: ['ordenar el escritorio', 'vaciar pendientes mentales', 'limpiar una superficie', 'reorganizar tareas', 'poner algo en su lugar'],
+      },
+      {
+        id: 'PROYECCION',
+        trait: 'PROYECCION',
+        text: 'Dar un paso hacia una meta personal o profesional',
+        suggestions: ['enviar un mensaje importante', 'avanzar una idea', 'actualizar CV o portfolio', 'terminar una tarea clave', 'mover una meta un paso'],
+      },
+      {
+        id: 'FINANZAS',
+        trait: 'FINANZAS',
+        text: 'Revisar mis gastos, ahorro o presupuesto',
+        suggestions: ['mirar movimientos', 'registrar gastos', 'revisar presupuesto', 'controlar suscripciones', 'ver cuánto ahorré'],
+      },
+      { id: 'AGILIDAD', trait: 'AGILIDAD', text: 'Entrenar mi memoria o agilidad mental durante', inputAfter: 'minutos' },
     ],
     Soul: [
-      { id: 'CONEXION', trait: 'CONEXION', text: 'Hablar con', inputAfter: 'persona(s) desde presencia real' },
-      { id: 'ESPIRITUALIDAD', trait: 'ESPIRITUALIDAD', text: 'Dedicar', inputAfter: 'minutos a meditar, orar o reconectar conmigo' },
-      { id: 'PROPOSITO', trait: 'PROPOSITO', text: 'Hacer una acción alineada con mi propósito' },
-      { id: 'VALORES', trait: 'VALORES', text: 'Tomar una decisión alineada con mis valores' },
-      { id: 'ALTRUISMO', trait: 'ALTRUISMO', text: 'Hacer un gesto de ayuda por otra persona' },
-      { id: 'INSIGHT', trait: 'INSIGHT', text: 'Reflexionar sobre cómo me siento' },
-      { id: 'GRATITUD', trait: 'GRATITUD', text: 'Anotar', inputAfter: 'cosa(s) por las que agradezco hoy' },
-      { id: 'NATURALEZA', trait: 'NATURALEZA', text: 'Conectar con la naturaleza' },
+      { id: 'CONEXION', trait: 'CONEXION', text: 'Hablar con', inputAfter: 'persona(s) con presencia real' },
+      { id: 'ESPIRITUALIDAD', trait: 'ESPIRITUALIDAD', text: 'Dedicar', inputAfter: 'minutos a meditar, rezar o conectar conmigo' },
+      {
+        id: 'PROPOSITO',
+        trait: 'PROPOSITO',
+        text: 'Hacer una acción alineada con mi propósito',
+        suggestions: ['avanzar algo importante', 'elegir con intención', 'hacer algo que tenga sentido para mí', 'dedicar tiempo a lo que valoro'],
+      },
+      {
+        id: 'VALORES',
+        trait: 'VALORES',
+        text: 'Tomar una decisión alineada con mis valores',
+        suggestions: ['decir que no a algo que no va conmigo', 'elegir con coherencia', 'actuar como quiero ser', 'sostener un criterio importante'],
+      },
+      {
+        id: 'ALTRUISMO',
+        trait: 'ALTRUISMO',
+        text: 'Hacer un gesto de ayuda o aporte a otros',
+        suggestions: ['ayudar a alguien', 'escribir a alguien que lo necesite', 'compartir algo útil', 'colaborar', 'acompañar'],
+      },
+      {
+        id: 'INSIGHT',
+        trait: 'INSIGHT',
+        text: 'Reflexionar sobre cómo me siento',
+        suggestions: ['notar cómo me sentí hoy', 'identificar qué necesito', 'observar qué me afectó', 'darme un momento para escucharme'],
+      },
+      { id: 'GRATITUD', trait: 'GRATITUD', text: 'Registrar', inputAfter: 'cosa(s) por las que siento gratitud' },
+      {
+        id: 'NATURALEZA',
+        trait: 'NATURALEZA',
+        text: 'Conectar con la naturaleza',
+        suggestions: ['salir a tomar aire', 'mirar el cielo', 'caminar entre árboles', 'sentarme al sol', 'conectar con algo natural'],
+      },
       { id: 'GOZO', trait: 'GOZO', text: 'Dedicar', inputAfter: 'minutos a jugar, reír o disfrutar sin culpa' },
-      { id: 'AUTOESTIMA', trait: 'AUTOESTIMA', text: 'Tomarme tiempo para cuidar de mí' },
+      {
+        id: 'AUTOESTIMA',
+        trait: 'AUTOESTIMA',
+        text: 'Tomarme tiempo para cuidar de mí',
+        suggestions: ['cortarme las uñas', 'peinarme', 'arreglarme el pelo', 'cuidarme la barba', 'vestirme con más cariño', 'hacer algo que me haga bien'],
+      },
     ],
   },
   en: {
