@@ -5,11 +5,15 @@ type Props = {
   language: DemoLanguage;
   steps?: GuidedStep[];
   finalActionLabel?: Record<DemoLanguage, string>;
+  finalPrimaryActionLabel?: Record<DemoLanguage, string>;
+  finalSecondaryActionLabel?: Record<DemoLanguage, string>;
   onFinish: () => void;
   onSkip: (stepId: string, stepIndex: number) => void;
   onStepViewed: (stepId: string, stepIndex: number) => void;
   onStepChange?: (stepId: string, stepIndex: number) => void;
   onCompleted: () => void;
+  onFinalPrimaryAction?: () => void;
+  onFinalSecondaryAction?: () => void;
 };
 
 type Rect = { top: number; left: number; width: number; height: number };
@@ -119,11 +123,15 @@ export function GuidedDemoOverlay({
   language,
   steps = DEMO_GUIDED_STEPS,
   finalActionLabel,
+  finalPrimaryActionLabel,
+  finalSecondaryActionLabel,
   onFinish,
   onSkip,
   onStepViewed,
   onStepChange,
   onCompleted,
+  onFinalPrimaryAction,
+  onFinalSecondaryAction,
 }: Props) {
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
@@ -377,12 +385,14 @@ export function GuidedDemoOverlay({
   }, [isCompactMobile, step.id, step.tooltipPlacement, targetRect, viewport.height, viewport.width]);
 
   const isLast = stepIndex === steps.length - 1;
-  const finalPrimaryLabel = step.id === 'tour-end'
-    ? (language === 'es' ? 'Comenzar mi Journey' : 'Start my Journey')
-    : finalActionLabel?.[language] ?? (language === 'es' ? 'Finalizar' : 'Finish');
-  const finalSecondaryLabel = step.id === 'tour-end'
-    ? (language === 'es' ? 'Seguir explorando' : 'Keep exploring')
-    : (language === 'es' ? 'Anterior' : 'Back');
+  const finalPrimaryLabel = finalPrimaryActionLabel?.[language]
+    ?? (step.id === 'tour-end'
+      ? (language === 'es' ? 'Comenzar mi Journey' : 'Start my Journey')
+      : finalActionLabel?.[language] ?? (language === 'es' ? 'Finalizar' : 'Finish'));
+  const finalSecondaryLabel = finalSecondaryActionLabel?.[language]
+    ?? (step.id === 'tour-end'
+      ? (language === 'es' ? 'Seguir explorando' : 'Keep exploring')
+      : (language === 'es' ? 'Anterior' : 'Back'));
   const walkthroughButtonSizeClass = isCompactMobile
     ? 'min-h-8 px-3 py-1.5 text-[11px]'
     : 'min-h-9 px-4 py-2 text-xs';
@@ -463,14 +473,16 @@ export function GuidedDemoOverlay({
         </p>
 
         <div className={`flex flex-wrap items-center ${isCompactMobile ? 'mt-3 gap-1.5' : 'mt-4 gap-2'}`}>
-          <button
-            type="button"
-            onClick={() => setStepIndex((current) => Math.max(0, current - 1))}
-            disabled={stepIndex === 0}
-            className={secondaryButtonClass}
-          >
-            {isLast ? finalSecondaryLabel : (language === 'es' ? 'Anterior' : 'Back')}
-          </button>
+          {!isLast ? (
+            <button
+              type="button"
+              onClick={() => setStepIndex((current) => Math.max(0, current - 1))}
+              disabled={stepIndex === 0}
+              className={secondaryButtonClass}
+            >
+              {language === 'es' ? 'Anterior' : 'Back'}
+            </button>
+          ) : null}
           {!isLast ? (
             <button
               type="button"
@@ -484,6 +496,23 @@ export function GuidedDemoOverlay({
               <button
                 type="button"
                 onClick={() => {
+                  if (onFinalSecondaryAction) {
+                    onFinalSecondaryAction();
+                    return;
+                  }
+                  setStepIndex((current) => Math.max(0, current - 1));
+                }}
+                className={secondaryButtonClass}
+              >
+                {finalSecondaryLabel}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onFinalPrimaryAction) {
+                    onFinalPrimaryAction();
+                    return;
+                  }
                   onCompleted();
                   onFinish();
                 }}

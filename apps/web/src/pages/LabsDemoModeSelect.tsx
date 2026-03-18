@@ -2,9 +2,10 @@ import { useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { OFFICIAL_DESIGN_TOKENS } from '../content/officialDesignTokens';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
-import { buildDemoUrl } from '../lib/demoEntry';
+import { buildDemoModeSelectUrl, buildDemoUrl, type DemoEntrySource } from '../lib/demoEntry';
 import { resolveAuthLanguage } from '../lib/authLanguage';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
+import { usePageMeta } from '../lib/seo';
 import {
   getLabsGameModeLabel,
   LABS_DEMO_MODE_SELECT_COPY,
@@ -12,9 +13,17 @@ import {
   LABS_GAME_MODES,
 } from '../config/labsGameModes';
 
-export default function LabsDemoModeSelectPage() {
+const DEMO_MODE_SELECT_OG_IMAGE = 'https://innerbloomjourney.org/og/neneOGP.png';
+
+type DemoModeSelectPageProps = {
+  legacyLabsPath?: boolean;
+};
+
+export default function LabsDemoModeSelectPage({ legacyLabsPath = false }: DemoModeSelectPageProps) {
   const { language, syncLocaleLanguage } = usePostLoginLanguage();
   const location = useLocation();
+  const sourceParam = new URLSearchParams(location.search).get('source');
+  const source: DemoEntrySource = sourceParam === 'selector' || sourceParam === 'labs' ? sourceParam : 'landing';
   const copy = LABS_DEMO_MODE_SELECT_COPY[language];
   const purpleAfternoon = OFFICIAL_DESIGN_TOKENS.gradients.find((gradient) => gradient.name === 'purple_afternoon');
   const landingBackground = purpleAfternoon
@@ -27,13 +36,30 @@ export default function LabsDemoModeSelectPage() {
     syncLocaleLanguage(resolveAuthLanguage(location.search));
   }, [location.search, syncLocaleLanguage]);
 
+  usePageMeta({
+    title: language === 'es' ? 'Innerbloom Demo · Elige tu Game Mode' : 'Innerbloom Demo · Choose your game mode',
+    description:
+      language === 'es'
+        ? 'Explora la demo oficial de Innerbloom. Elige LOW, CHILL, FLOW o EVOLVE y entra a la experiencia guiada en tu idioma.'
+        : 'Explore the official Innerbloom demo. Choose LOW, CHILL, FLOW, or EVOLVE and enter the guided experience in your language.',
+    image: DEMO_MODE_SELECT_OG_IMAGE,
+    imageAlt: language === 'es' ? 'Preview oficial de la demo de Innerbloom' : 'Official Innerbloom demo preview',
+    ogImageSecureUrl: DEMO_MODE_SELECT_OG_IMAGE,
+    ogImageType: 'image/png',
+    ogImageWidth: '1200',
+    ogImageHeight: '630',
+    twitterImage: DEMO_MODE_SELECT_OG_IMAGE,
+    twitterImageAlt: language === 'es' ? 'Preview oficial de la demo de Innerbloom' : 'Official Innerbloom demo preview',
+    url: buildDemoModeSelectUrl({ language, source, legacyLabsPath }),
+  });
+
   const cards = useMemo(
     () => LABS_GAME_MODE_ORDER.map((modeId) => ({
       ...LABS_GAME_MODES[modeId],
       label: getLabsGameModeLabel(modeId, language),
-      href: buildDemoUrl({ language, source: 'labs', mode: modeId }),
+      href: buildDemoUrl({ language, source: legacyLabsPath ? 'labs' : 'selector', mode: modeId }),
     })),
-    [language],
+    [language, legacyLabsPath],
   );
 
   return (

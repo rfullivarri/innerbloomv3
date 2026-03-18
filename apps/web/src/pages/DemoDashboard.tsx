@@ -11,11 +11,14 @@ import { setDashboardDemoModeEnabled } from '../lib/demoMode';
 import { GuidedDemoOverlay } from '../components/demo/GuidedDemoOverlay';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { buildGuidedSteps } from '../config/demoGuidedTour';
-import { resolveDemoEntryContext } from '../lib/demoEntry';
+import { buildDemoModeSelectUrl, resolveDemoEntryContext } from '../lib/demoEntry';
 import { getLabsGameModeConfig } from '../config/labsGameModes';
 import { DASHBOARD_PATH } from '../config/auth';
+import { usePageMeta } from '../lib/seo';
 
 const DEMO_USER_ID = 'demo-public-user';
+
+const DEMO_SHARE_IMAGE = 'https://innerbloomjourney.org/og/neneOGP.png';
 
 const DAILY_QUEST_STEP_IDS = new Set([
   'daily-quest-intro',
@@ -44,6 +47,23 @@ export default function DemoDashboardPage() {
     return normalized.replace(/\/+$/, '') || '/dashboard-v3';
   }, []);
 
+  usePageMeta({
+    title: language === 'es' ? 'Innerbloom Demo guiada' : 'Innerbloom Guided Demo',
+    description:
+      language === 'es'
+        ? 'Explora el dashboard demo de Innerbloom y luego empieza tu onboarding real en /intro-journey.'
+        : 'Explore the Innerbloom demo dashboard and then start your real onboarding at /intro-journey.',
+    image: DEMO_SHARE_IMAGE,
+    imageAlt: language === 'es' ? 'Preview de la demo guiada de Innerbloom' : 'Innerbloom guided demo preview',
+    ogImageSecureUrl: DEMO_SHARE_IMAGE,
+    ogImageType: 'image/png',
+    ogImageWidth: '1200',
+    ogImageHeight: '630',
+    twitterImage: DEMO_SHARE_IMAGE,
+    twitterImageAlt: language === 'es' ? 'Preview de la demo guiada de Innerbloom' : 'Innerbloom guided demo preview',
+    url: `/demo${location.search}`,
+  });
+
   const handleDemoExit = useCallback(() => {
     emitDemoEvent('demo_exited', { from: '/demo', source: demoContext.source, mode: demoContext.mode });
 
@@ -52,8 +72,18 @@ export default function DemoDashboardPage() {
       return;
     }
 
-    navigate(demoContext.source === 'labs' ? '/labs/demo-mode-select' : '/');
-  }, [dashboardPath, demoContext.fromOnboarding, demoContext.mode, demoContext.source, navigate, userId]);
+    if (demoContext.source === 'labs') {
+      navigate(buildDemoModeSelectUrl({ language: demoContext.language, source: 'labs', legacyLabsPath: true }));
+      return;
+    }
+
+    if (demoContext.source === 'selector') {
+      navigate(buildDemoModeSelectUrl({ language: demoContext.language, source: 'selector' }));
+      return;
+    }
+
+    navigate(`/?lang=${demoContext.language}`);
+  }, [dashboardPath, demoContext.fromOnboarding, demoContext.language, demoContext.mode, demoContext.source, navigate, userId]);
 
   useEffect(() => {
     if (language !== demoContext.language) {
@@ -139,7 +169,13 @@ export default function DemoDashboardPage() {
               Daily Quest
             </button>
             <Link
-              to={demoContext.fromOnboarding ? dashboardPath : demoContext.source === 'labs' ? '/labs/demo-mode-select' : '/'}
+              to={demoContext.fromOnboarding
+                ? dashboardPath
+                : demoContext.source === 'labs'
+                  ? buildDemoModeSelectUrl({ language: demoContext.language, source: 'labs', legacyLabsPath: true })
+                  : demoContext.source === 'selector'
+                    ? buildDemoModeSelectUrl({ language: demoContext.language, source: 'selector' })
+                    : '/'}
               onClick={(event) => {
                 event.preventDefault();
                 handleDemoExit();
@@ -157,6 +193,8 @@ export default function DemoDashboardPage() {
           language={language}
           steps={guidedSteps}
           finalActionLabel={demoContext.fromOnboarding ? { es: 'Ir al dashboard', en: 'Go to dashboard' } : undefined}
+          finalPrimaryActionLabel={!demoContext.fromOnboarding ? { es: 'Empezar onboarding', en: 'Start onboarding' } : undefined}
+          finalSecondaryActionLabel={!demoContext.fromOnboarding ? { es: 'Seguir explorando', en: 'Keep exploring' } : undefined}
           onFinish={() => {
             if (demoContext.fromOnboarding) {
               handleDemoExit();
@@ -169,6 +207,15 @@ export default function DemoDashboardPage() {
           onStepViewed={(stepId, stepIndex) => emitDemoEvent('demo_step_viewed', { stepId, stepIndex })}
           onStepChange={handleStepChange}
           onCompleted={handleGuidedCompleted}
+          onFinalPrimaryAction={!demoContext.fromOnboarding ? () => {
+            handleGuidedCompleted();
+            navigate('/intro-journey');
+          } : undefined}
+          onFinalSecondaryAction={!demoContext.fromOnboarding ? () => {
+            setShowGuidedTour(false);
+            dailyQuestModalRef.current?.close();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } : undefined}
         />
       ) : null}
 

@@ -1,10 +1,10 @@
 import { coerceGameMode, normalizeGameModeValue, type GameMode } from './gameMode';
 import { resolveLabsGameModeId, type LabsGameModeId } from '../config/labsGameModes';
 
-export type DemoEntrySource = 'landing' | 'onboarding' | 'internal' | 'labs';
+export type DemoEntrySource = 'landing' | 'onboarding' | 'internal' | 'labs' | 'selector';
 export type DemoAccessMode = 'public' | 'onboarding';
 
-const VALID_SOURCES = new Set<DemoEntrySource>(['landing', 'onboarding', 'internal', 'labs']);
+const VALID_SOURCES = new Set<DemoEntrySource>(['landing', 'onboarding', 'internal', 'labs', 'selector']);
 const VALID_ACCESS_MODES = new Set<DemoAccessMode>(['public', 'onboarding']);
 
 interface BuildDemoUrlOptions {
@@ -14,6 +14,12 @@ interface BuildDemoUrlOptions {
   mode?: LabsGameModeId | DemoAccessMode;
 }
 
+interface BuildDemoModeSelectUrlOptions {
+  language: 'es' | 'en';
+  source?: DemoEntrySource;
+  legacyLabsPath?: boolean;
+}
+
 export interface DemoEntryContext {
   language: 'es' | 'en';
   source: DemoEntrySource;
@@ -21,6 +27,16 @@ export interface DemoEntryContext {
   mode: LabsGameModeId;
   gameMode: GameMode;
   fromOnboarding: boolean;
+}
+
+
+export function buildDemoModeSelectUrl({ language, source = 'landing', legacyLabsPath = false }: BuildDemoModeSelectUrlOptions): string {
+  const params = new URLSearchParams({ lang: language });
+  if (source !== 'landing') {
+    params.set('source', source);
+  }
+  const pathname = legacyLabsPath ? '/labs/demo-mode-select' : '/demo-mode-select';
+  return `${pathname}?${params.toString()}`;
 }
 
 export function buildDemoUrl({ language, source = 'landing', entryMode = 'public', mode }: BuildDemoUrlOptions): string {
