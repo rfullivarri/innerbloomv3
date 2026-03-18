@@ -377,6 +377,12 @@ export function GuidedDemoOverlay({
   }, [isCompactMobile, step.id, step.tooltipPlacement, targetRect, viewport.height, viewport.width]);
 
   const isLast = stepIndex === steps.length - 1;
+  const finalPrimaryLabel = step.id === 'tour-end'
+    ? (language === 'es' ? 'Comenzar mi Journey' : 'Start my Journey')
+    : finalActionLabel?.[language] ?? (language === 'es' ? 'Finalizar' : 'Finish');
+  const finalSecondaryLabel = step.id === 'tour-end'
+    ? (language === 'es' ? 'Seguir explorando' : 'Keep exploring')
+    : (language === 'es' ? 'Anterior' : 'Back');
   const walkthroughButtonSizeClass = isCompactMobile
     ? 'min-h-8 px-3 py-1.5 text-[11px]'
     : 'min-h-9 px-4 py-2 text-xs';
@@ -463,7 +469,7 @@ export function GuidedDemoOverlay({
             disabled={stepIndex === 0}
             className={secondaryButtonClass}
           >
-            {language === 'es' ? 'Anterior' : 'Back'}
+            {isLast ? finalSecondaryLabel : (language === 'es' ? 'Anterior' : 'Back')}
           </button>
           {!isLast ? (
             <button
@@ -483,7 +489,7 @@ export function GuidedDemoOverlay({
                 }}
                 className={primaryButtonClass}
               >
-                {finalActionLabel?.[language] ?? (language === 'es' ? 'Finalizar' : 'Finish')}
+                {finalPrimaryLabel}
               </button>
             </>
           )}

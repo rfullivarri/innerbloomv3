@@ -14,12 +14,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: '[data-demo-anchor="overall-progress"]',
     tooltipPlacement: 'bottom',
     title: {
-      es: 'Progreso general',
-      en: 'Overall progress',
+      es: 'Tu progreso',
+      en: 'Your progress',
     },
     body: {
-      es: 'Aquí ves tu GP total, tu Level y la barra hacia el siguiente nivel. Cada día consistente suma GP, y eso se convierte en crecimiento visible en tu progreso.',
-      en: 'Here you can see your total GP, your Level, and the bar to your next level. Daily consistency adds GP, and that turns into visible growth over time.',
+      es: 'Aquí ves tu GP, tu Level y cuánto te falta para subir. Cada acción suma y hace visible tu avance.',
+      en: 'See your GP, your Level, and how far you are from the next one. Each action adds up and makes your progress visible.',
     },
   },
   {
@@ -27,12 +27,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: '[data-demo-anchor="streaks-top"]',
     tooltipPlacement: 'left',
     title: {
-      es: 'Streaks · parte superior',
-      en: 'Streaks · top section',
+      es: 'Tus mejores streaks',
+      en: 'Your top streaks',
     },
     body: {
-      es: 'Aquí navegas por pilares (Body/Mind/Soul) y ves Top Streaks. Esta parte resume tus rachas más fuertes y te ayuda a comparar en qué dimensión vienes más consistente.',
-      en: 'Here you switch across pillars (Body/Mind/Soul) and review Top Streaks. This section summarizes your strongest streaks and helps compare where your consistency is strongest.',
+      es: 'Cambia entre Body, Mind y Soul para ver dónde vienes más constante. Aquí aparecen tus rachas más fuertes.',
+      en: 'Switch between Body, Mind, and Soul to see where you’ve been most consistent. Your strongest streaks appear here.',
     },
   },
   {
@@ -40,12 +40,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: '[data-demo-anchor="streaks-bottom"]',
     tooltipPlacement: 'left',
     title: {
-      es: 'Streaks · parte inferior',
-      en: 'Streaks · bottom section',
+      es: 'Todas tus tareas',
+      en: 'All your tasks',
     },
     body: {
-      es: 'En esta zona ajustas el scope (Week/Month/3M), revisas All Tasks y su progreso detallado con mini actividad por tarea. Es la vista granular para seguimiento fino.',
-      en: 'In this area you switch scope (Week/Month/3M), inspect All Tasks, and track per-task progress with mini activity bars. This is the granular tracking view.',
+      es: 'Aquí ves el detalle por tarea y puedes cambiar el período: Week, Month o 3M. Sirve para detectar qué estás sosteniendo y qué no.',
+      en: 'See the detail for each task and switch the time range: Week, Month, or 3M. It helps you spot what you’re maintaining and what you’re not.',
     },
   },
   {
@@ -53,12 +53,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: '[data-demo-anchor="balance"]',
     tooltipPlacement: 'bottom',
     title: {
-      es: 'Equilibrio',
-      en: 'Balance',
+      es: 'Tu balance',
+      en: 'Your balance',
     },
     body: {
-      es: 'Este radar muestra cómo se distribuye tu GP entre pilares y qué pilar predomina. Puedes interactuarlo para entender si tu crecimiento está balanceado o dominado por una dimensión.',
-      en: 'This radar chart shows how your GP is distributed across pillars and which one dominates. You can interact with it to see if your growth is balanced or led by one dimension.',
+      es: 'Este gráfico muestra cómo se reparte tu progreso entre Body, Mind y Soul. Así ves si estás creciendo de forma equilibrada o cargada a un lado.',
+      en: 'This chart shows how your progress is split across Body, Mind, and Soul. It helps you see whether your growth is balanced or leaning to one side.',
     },
   },
   {
@@ -66,12 +66,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: '[data-demo-anchor="emotion-chart"]',
     tooltipPlacement: 'top',
     title: {
-      es: 'Emotion Chart',
-      en: 'Emotion Chart',
+      es: 'Tus emociones en el tiempo',
+      en: 'Your emotions over time',
     },
     body: {
-      es: 'Aquí tienes tu grilla histórica de emociones, con leyenda por colores, período analizado y emoción más frecuente. Te ayuda a detectar patrones emocionales a lo largo del tiempo.',
-      en: 'This is your historical emotion grid, with color legend, analyzed period, and most frequent emotion. It helps you detect emotional patterns over time.',
+      es: 'Aquí ves tu historial emocional por colores. Te ayuda a detectar patrones y entender cómo te has sentido en los últimos días.',
+      en: 'See your emotional history by color. It helps you spot patterns and understand how you’ve been feeling over the last days.',
     },
   },
   {
@@ -79,12 +79,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: '[data-demo-anchor="daily-energy"]',
     tooltipPlacement: 'right',
     title: {
-      es: 'Daily Energy',
-      en: 'Daily Energy',
+      es: 'Tu energía diaria',
+      en: 'Your daily energy',
     },
     body: {
-      es: 'HP, Mood y Focus reflejan tu energía diaria (HP→Body, Mood→Soul, Focus→Mind). Las actividades cargan energía, se drena con el tiempo, y mantenerla alta sostiene hábitos y constancia.',
-      en: 'HP, Mood, and Focus reflect your daily energy (HP→Body, Mood→Soul, Focus→Mind). Activities recharge it, it drains over time, and keeping it high supports habits and consistency.',
+      es: 'HP, Mood y Focus muestran cómo estás hoy en Body, Soul y Mind. Si tu energía está bien, es más fácil sostener tus hábitos.',
+      en: 'HP, Mood, and Focus show how you are today in Body, Soul, and Mind. When your energy is solid, habits are easier to sustain.',
     },
   },
   {
@@ -92,12 +92,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: '[data-demo-anchor="info-dot"]',
     tooltipPlacement: 'left',
     title: {
-      es: 'Info Dots',
-      en: 'Info Dots',
+      es: 'Ayudas rápidas',
+      en: 'Quick help',
     },
     body: {
-      es: 'Cada sección importante tiene un info dot como este. Ahí puedes revisar qué significa cada bloque y cómo leer cada card. Si tienes dudas, vuelve a consultar ese botón.',
-      en: 'Each key section has an info dot like this one. Use it to understand what each block means and how to read each card. If you have doubts, return to this button anytime.',
+      es: 'Verás estos info dots en secciones clave. Tócalos cuando quieras entender qué significa cada bloque.',
+      en: 'You’ll see these info dots in key sections. Tap them anytime to understand what each block means.',
     },
   },
   {
@@ -105,12 +105,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: '[data-demo-anchor="daily-quest-intro"]',
     tooltipPlacement: 'bottom',
     title: {
-      es: 'Daily Quest · retrospectiva y emoción',
-      en: 'Daily Quest · retrospective and emotion',
+      es: 'Daily Quest',
+      en: 'Daily Quest',
     },
     body: {
-      es: 'Daily Quest es una retrospectiva de ayer: no cargas lo que harás hoy, registras lo que lograste. El primer paso obligatorio es elegir la emoción predominante (Innerbloom trabaja con 7 emociones base).',
-      en: 'Daily Quest is a retrospective for yesterday: you are not planning today, you are logging what you achieved. The required first step is selecting your dominant emotion (Innerbloom uses 7 core emotions).',
+      es: 'Esto no es una planificación: es una retrospectiva de ayer. Primero eliges la emoción principal con la que cerraste el día.',
+      en: 'This is not planning: it’s a look back at yesterday. First, you choose the main emotion you ended the day with.',
     },
   },
   {
@@ -118,12 +118,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: '[data-demo-anchor="daily-quest-moderation-content"]',
     tooltipPlacement: 'top',
     title: {
-      es: 'Daily Quest · moderación',
-      en: 'Daily Quest · moderation',
+      es: 'Moderación',
+      en: 'Moderation',
     },
     body: {
-      es: 'Si tienes widgets de moderación activos (como alcohol, tabaco o azúcar), aquí registras si cumpliste o no. Esta sección refleja tus objetivos diarios de moderación.',
-      en: 'If you have moderation widgets active (such as alcohol, tobacco, or sugar), you log compliance here. This section reflects your daily moderation goals.',
+      es: 'Si activaste objetivos como alcohol, tabaco o azúcar, aquí registras si los cumpliste ayer.',
+      en: 'If you activated goals like alcohol, tobacco, or sugar, this is where you log whether you met them yesterday.',
     },
   },
   {
@@ -131,12 +131,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: '[data-demo-anchor="daily-quest-tasks"]',
     tooltipPlacement: 'top',
     title: {
-      es: 'Daily Quest · tareas por pilar',
-      en: 'Daily Quest · tasks by pillar',
+      es: 'Tareas por pilar',
+      en: 'Tasks by pillar',
     },
     body: {
-      es: 'Las tareas se organizan por pilares (Body / Mind / Soul). Aquí marcas qué completaste ayer, y eso conecta con tu progreso, energía, constancia y evolución en el sistema.',
-      en: 'Tasks are organized by pillars (Body / Mind / Soul). Here you mark what you completed yesterday, connecting directly to your progress, energy, consistency, and system evolution.',
+      es: 'Aquí marcas qué tareas completaste ayer en Body, Mind y Soul. Eso impacta tu progreso, energía y constancia.',
+      en: 'Here you mark which tasks you completed yesterday in Body, Mind, and Soul. That impacts your progress, energy, and consistency.',
     },
   },
   {
@@ -144,12 +144,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: '[data-demo-anchor="daily-quest-footer"]',
     tooltipPlacement: 'top',
     title: {
-      es: 'Daily Quest · cierre',
-      en: 'Daily Quest · close-out',
+      es: 'Cierre del día',
+      en: 'End of day',
     },
     body: {
-      es: 'En el footer ves el resumen final: GP ganados en la retrospectiva y botón Confirmar para cerrar la Daily Quest del día.',
-      en: 'In the footer you see the final summary: GP gained from the retrospective and the Confirm button to close that day’s Daily Quest.',
+      es: 'Aquí ves el resumen final, los GP ganados y el botón para confirmar tu Daily Quest.',
+      en: 'Here you see the final summary, the GP earned, and the button to confirm your Daily Quest.',
     },
   },
   {
@@ -157,12 +157,12 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     targetSelector: null,
     tooltipPlacement: 'auto',
     title: {
-      es: 'Explora por tu cuenta',
-      en: 'Explore by yourself',
+      es: 'Empieza tu Journey',
+      en: 'Start your Journey',
     },
     body: {
-      es: 'Listo. Ahora puedes explorar el dashboard libremente, interactuar con las cards, usar los info dots para más detalle y salir de la demo con la X cuando quieras.',
-      en: 'You are all set. Explore the dashboard freely, interact with the cards, use info dots for deeper details, and exit demo with the X anytime.',
+      es: 'Ya viste lo esencial. Ahora entra y comienza a usar Innerbloom de verdad, con tu primer paso dentro del dashboard.',
+      en: 'You’ve seen the essentials. Now step in and start using Innerbloom for real, beginning with your first step inside the dashboard.',
     },
   },
 ];
@@ -172,12 +172,12 @@ export const ONBOARDING_DEMO_END_STEP: GuidedStep = {
   targetSelector: null,
   tooltipPlacement: 'auto',
   title: {
-    es: 'Tu demo guiada terminó',
-    en: 'Your guided demo is complete',
+    es: 'Ya estás listo',
+    en: 'You’re ready',
   },
   body: {
-    es: '¡Buen comienzo! Tus primeras tareas ya están listas (o casi listas). Ahora entra a tu dashboard para iniciar tu Journey y avanzar con tu primer Daily Quest.',
-    en: 'Great start! Your first tasks are ready (or almost ready). Now jump into your dashboard to begin your Journey and move forward with your first Daily Quest.',
+    es: 'Tus primeras tareas ya están preparadas. Entra al dashboard y empieza tu Journey con tu primera Daily Quest.',
+    en: 'Your first tasks are ready. Go to your dashboard and start your Journey with your first Daily Quest.',
   },
 };
 
