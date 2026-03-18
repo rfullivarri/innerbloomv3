@@ -199,3 +199,54 @@ export function computeQuickStartGp(selectedByPillar: Record<Pillar, string[]>) 
     },
   };
 }
+
+
+export interface QuickStartManualTaskCandidate {
+  task: string;
+  pillar_code: string;
+  trait_code: string;
+  input_value?: string;
+  metadata: {
+    task_id: string;
+    task_prefix: string;
+    task_input_before?: string;
+    task_input_after?: string;
+  };
+}
+
+export const QUICK_START_MODE_SOFT_STYLES: Record<GameMode, { tint: string; border: string; glow: string }> = {
+  LOW: { tint: 'rgba(125, 211, 252, 0.34)', border: 'rgba(125, 211, 252, 0.56)', glow: 'rgba(56, 189, 248, 0.18)' },
+  CHILL: { tint: 'rgba(167, 139, 250, 0.32)', border: 'rgba(196, 181, 253, 0.55)', glow: 'rgba(139, 92, 246, 0.2)' },
+  FLOW: { tint: 'rgba(244, 114, 182, 0.3)', border: 'rgba(251, 182, 206, 0.58)', glow: 'rgba(236, 72, 153, 0.2)' },
+  EVOLVE: { tint: 'rgba(52, 211, 153, 0.28)', border: 'rgba(167, 243, 208, 0.55)', glow: 'rgba(16, 185, 129, 0.2)' },
+};
+
+export function buildQuickStartManualCandidates(args: {
+  language: OnboardingLanguage;
+  selectedTasksByPillar: Record<Pillar, string[]>;
+  editableTaskValues: Record<string, string>;
+}): QuickStartManualTaskCandidate[] {
+  return (['Body', 'Mind', 'Soul'] as const).flatMap((pillar) => {
+    const taskMap = new Map(QUICK_START_TASKS[args.language][pillar].map((task) => [task.id, task]));
+    return args.selectedTasksByPillar[pillar].flatMap((taskId) => {
+      const task = taskMap.get(taskId);
+      if (!task) {
+        return [];
+      }
+
+      const inputValue = args.editableTaskValues[`${pillar}-${taskId}`]?.trim();
+      return [{
+        task: task.text,
+        pillar_code: pillar.toUpperCase(),
+        trait_code: task.trait.toUpperCase(),
+        input_value: inputValue || undefined,
+        metadata: {
+          task_id: task.id,
+          task_prefix: task.text,
+          task_input_before: task.inputBefore,
+          task_input_after: task.inputAfter,
+        },
+      }];
+    });
+  });
+}

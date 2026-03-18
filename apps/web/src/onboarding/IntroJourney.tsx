@@ -353,6 +353,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
             onBack={goPrevious}
             onConfirm={handleFinish}
             loading={isSubmitting}
+            submitError={submitError}
           />
         );
       case 'low-body':

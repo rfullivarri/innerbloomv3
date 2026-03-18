@@ -75,6 +75,24 @@ describe('buildPayload onboarding_path', () => {
     expect(payload.data.quick_start?.selected_moderations).toEqual(['sugar']);
     expect(payload.data.quick_start?.selected_tasks_by_pillar.body).toContain('MODERACION');
     expect(payload.data.foundations.body).toContain('MODERACION');
+    expect(payload.data.quick_start?.manual_task_candidates).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        task: 'Caminar durante',
+        pillar_code: 'BODY',
+        trait_code: 'ENERGIA',
+        input_value: '20',
+        metadata: expect.objectContaining({
+          task_id: 'ENERGIA',
+          task_prefix: 'Caminar durante',
+          task_input_after: 'minutos',
+        }),
+      }),
+      expect.objectContaining({
+        task: 'Mejorar mi relación con ciertos consumos o excesos',
+        pillar_code: 'BODY',
+        trait_code: 'MODERACION',
+      }),
+    ]));
 
     vi.unstubAllGlobals();
   });

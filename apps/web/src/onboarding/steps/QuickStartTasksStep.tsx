@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import type { OnboardingLanguage } from '../constants';
 import { NavButtons } from '../ui/NavButtons';
 import type { GameMode, Pillar } from '../state';
-import type { QuickStartTask } from '../quickStart';
+import { QUICK_START_MODE_SOFT_STYLES, type QuickStartTask } from '../quickStart';
 
 interface QuickStartTasksStepProps {
   language?: OnboardingLanguage;
@@ -212,6 +212,7 @@ export function QuickStartTasksStep({
       };
 
   const canContinue = selectedIds.length >= minimum;
+  const modeStyle = QUICK_START_MODE_SOFT_STYLES[gameMode];
 
   return (
     <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
@@ -222,10 +223,9 @@ export function QuickStartTasksStep({
         <div
           className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold text-violet-50/95"
           style={{
-            borderColor: 'color-mix(in srgb, var(--color-accent-secondary) 52%, rgba(255,255,255,0.14))',
-            background:
-              'linear-gradient(135deg, color-mix(in srgb, var(--color-accent-secondary) 28%, rgba(10,14,30,0.72)), color-mix(in srgb, var(--color-accent-secondary) 18%, rgba(10,14,30,0.58)))',
-            boxShadow: '0 8px 20px color-mix(in srgb, var(--color-accent-secondary) 26%, transparent)',
+            borderColor: `color-mix(in srgb, ${modeStyle.border} 92%, rgba(255,255,255,0.14))`,
+            background: `linear-gradient(135deg, color-mix(in srgb, ${modeStyle.tint} 90%, rgba(10,14,30,0.72)), color-mix(in srgb, ${modeStyle.tint} 66%, rgba(10,14,30,0.58)))`,
+            boxShadow: `0 8px 20px ${modeStyle.glow}`,
           }}
         >
           <span className="whitespace-nowrap">{copy.minRule}</span>
