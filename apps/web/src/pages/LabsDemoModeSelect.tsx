@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { OFFICIAL_DESIGN_TOKENS } from '../content/officialDesignTokens';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 import { buildDemoUrl } from '../lib/demoEntry';
 import {
@@ -12,6 +13,12 @@ import {
 export default function LabsDemoModeSelectPage() {
   const { language } = usePostLoginLanguage();
   const copy = LABS_DEMO_MODE_SELECT_COPY[language];
+  const purpleAfternoon = OFFICIAL_DESIGN_TOKENS.gradients.find((gradient) => gradient.name === 'purple_afternoon');
+  const landingBackground = purpleAfternoon
+    ? {
+        backgroundImage: `linear-gradient(${purpleAfternoon.angle}, ${purpleAfternoon.stops[0]}, ${purpleAfternoon.stops[1]})`,
+      }
+    : undefined;
   const cards = useMemo(
     () => LABS_GAME_MODE_ORDER.map((modeId) => ({
       ...LABS_GAME_MODES[modeId],
@@ -22,7 +29,10 @@ export default function LabsDemoModeSelectPage() {
   );
 
   return (
-    <main className="min-h-screen bg-[color:var(--color-bg)] text-[color:var(--color-text)]">
+    <main
+      className="min-h-screen text-[color:var(--color-text)]"
+      style={landingBackground}
+    >
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-8 sm:px-6">
         <section className="relative isolate overflow-hidden rounded-[2rem] border border-white/14 bg-[linear-gradient(145deg,rgba(255,255,255,0.12),rgba(167,123,245,0.11)_45%,rgba(72,43,126,0.08))] px-5 py-6 shadow-[0_26px_68px_rgba(26,12,52,0.28),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-[18px] sm:px-6 sm:py-7">
           <div className="pointer-events-none absolute inset-x-4 -top-6 h-28 rounded-full bg-[radial-gradient(circle,rgba(176,122,255,0.28),rgba(176,122,255,0.08)_55%,transparent_76%)] blur-2xl" />
