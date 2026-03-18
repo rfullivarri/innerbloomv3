@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { AUTH_LOGIN_MAX_WIDTH, getGradientButtonClass } from '../../lib/clerkAppearance';
+import { getGradientButtonClass } from '../../lib/clerkAppearance';
+import { BrandWordmark } from './BrandWordmark';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -36,14 +37,7 @@ export function AuthLayout({
             ) : null}
 
             <div className="flex items-center justify-center text-xs font-semibold uppercase tracking-[0.4em] text-white/60 sm:text-sm">
-              <span className="flex items-center gap-1">
-                <span>Innerbloom</span>
-                <img
-                  src="/IB-COLOR-LOGO.png"
-                  alt="Innerbloom logo"
-                  className="h-[2em] w-auto"
-                />
-              </span>
+              <BrandWordmark className="gap-1" textClassName="tracking-[0.4em]" iconClassName="h-[2em]" />
             </div>
 
             <div className="space-y-4 text-balance text-center">
