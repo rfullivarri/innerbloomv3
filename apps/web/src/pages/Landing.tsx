@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/clerk-react';
 import { OFFICIAL_DESIGN_TOKENS, OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
+import { buildDemoModeSelectUrl } from '../lib/demoEntry';
 import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
 import { buildOnboardingPath } from '../onboarding/i18n';
@@ -632,7 +633,7 @@ export default function LandingPage() {
                     <Link className={`${buttonClasses()} journey-cta`} to={buildOnboardingPath(language)}>
                       {copy.auth.startJourney}
                     </Link>
-                    <Link className="hero-demo-cta" to={`/demo?lang=${language}`}>
+                    <Link className="hero-demo-cta" to={buildDemoModeSelectUrl({ language, source: 'landing' })}>
                       <span className="hero-demo-cta-icon" aria-hidden>
                         ▶
                       </span>
@@ -784,7 +785,7 @@ export default function LandingPage() {
               <AdaptiveText as="h2" className="demo-title">{copy.demo.title}</AdaptiveText>
               <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
               <div className="demo-actions">
-                <Link className={buttonClasses()} to={`/demo?lang=${language}`}>
+                <Link className={buttonClasses()} to={buildDemoModeSelectUrl({ language, source: 'landing' })}>
                   {copy.demo.cta}
                 </Link>
               </div>
