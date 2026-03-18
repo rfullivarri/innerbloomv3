@@ -116,10 +116,10 @@ const MODE_MINIMUMS: Record<GameMode, number> = {
 
 const COPY: Record<OnboardingLanguage, Translations> = {
   es: {
-    title: 'Vista previa de Inicio rápido',
-    subtitle: 'Prototipo visual aislado del onboarding productivo.',
+    title: 'Inicio rápido',
+    subtitle: 'Configurá tu base inicial con el flujo rápido integrado al onboarding.',
     forkTitle: '¿Cómo querés arrancar hoy?',
-    forkSubtitle: 'Estamos probando una nueva variante. Tu onboarding real no cambia.',
+    forkSubtitle: 'Elegí el camino que mejor se adapta a cómo querés empezar hoy.',
     personalGuide: 'Guía personal',
     personalGuidePrimary: 'Respondé un cuestionario y la IA arma tu sistema.',
     personalGuideTime: '3–4 min',
@@ -128,7 +128,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     quickStartPrimary: 'Empezá con tareas recomendadas.',
     quickStartTime: '< 1 min',
     quickStartHint: 'Camino más rápido y autodirigido para arrancar hoy con tu base.',
-    inPreview: 'Vista previa',
+    inPreview: 'Quick Start',
     comingSoon: 'Próximamente',
     gameModeGateTitle: 'Primero elegí tu modo de juego',
     gameModeGateSubtitle: 'Usamos la misma pantalla real del onboarding para mantener consistencia.',
@@ -158,7 +158,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     setupTitle: 'Configurando tu Inicio rápido',
     setupSubtitle: 'Estamos aplicando tu selección y reutilizando el flujo real del onboarding.',
     setupBridgeHint: 'Después entrarás a la demo guiada para explorar cómo está estructurado Innerbloom. Puedes saltarla cuando quieras.',
-    setupDone: 'Configuración lista para conectar con demo guiada.',
+    setupDone: '',
     setupCta: 'Ir a la demo',
     quickSummary: {
       eyebrow: 'Resumen',
@@ -327,10 +327,10 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     },
   },
   en: {
-    title: 'Quick Start Preview',
-    subtitle: 'Isolated visual prototype from the production onboarding.',
+    title: 'Quick Start',
+    subtitle: 'Set up your initial base with the integrated fast onboarding flow.',
     forkTitle: 'How do you want to start today?',
-    forkSubtitle: 'This is a new preview variant. Your real onboarding stays untouched.',
+    forkSubtitle: 'Choose the path that best matches how you want to start today.',
     personalGuide: 'Personal guide',
     personalGuidePrimary: 'Answer a questionnaire and AI builds your system.',
     personalGuideTime: '3–4 min',
@@ -339,10 +339,10 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     quickStartPrimary: 'Start with recommended tasks.',
     quickStartTime: '< 1 min',
     quickStartHint: 'A faster, self-directed path to get started today with your base.',
-    inPreview: 'Preview',
+    inPreview: 'Quick Start',
     comingSoon: 'Coming soon',
     gameModeGateTitle: 'First, choose your Game Mode',
-    gameModeGateSubtitle: 'This preview reuses the same real Game Mode screen from onboarding.',
+    gameModeGateSubtitle: 'This step reuses the same real Game Mode screen from onboarding.',
     continue: 'Continue',
     back: 'Back',
     pillarTitles: {
@@ -369,7 +369,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     setupTitle: 'Configuring your Quick Start',
     setupSubtitle: 'Applying your selection with the same calibration feel used in onboarding.',
     setupBridgeHint: 'Next, you\'ll enter the guided demo to explore how Innerbloom is structured. You can skip it anytime.',
-    setupDone: 'Setup ready to connect with guided demo.',
+    setupDone: '',
     setupCta: 'Go to guided demo',
     quickSummary: {
       eyebrow: 'Summary',
@@ -1099,7 +1099,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
   };
 
   return (
-    <div className={`min-h-screen bg-[#000c40] text-white ${step === 'setup' ? '' : 'pb-12 pt-28 sm:pt-32'}`}>
+    <div className={`min-h-screen min-h-dvh overflow-y-auto bg-[#000c40] text-white ${step === 'setup' ? '' : 'pb-12 pt-28 sm:pt-32'}`}>
       {step !== 'setup' ? (
         <HUD
           language={language}
@@ -1112,8 +1112,8 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
         />
       ) : null}
 
-      <div className={`mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 ${step === 'setup' ? 'py-10' : ''}`}>
-        {/* Preview-only payload shape for future DB wiring. No SQL persistence in this iteration. */}
+      <div className={`mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 ${step === 'setup' ? 'py-10' : 'pb-[calc(env(safe-area-inset-bottom)+1.5rem)]'}`}>
+        {/* Payload shape kept aligned with the real Quick Start flow. No SQL persistence in this iteration. */}
         <pre className="hidden" aria-hidden>{JSON.stringify(quickStartDraft, null, 2)}</pre>
         {step !== 'setup' ? (
           <div>
