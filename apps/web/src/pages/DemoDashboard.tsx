@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
@@ -12,6 +12,7 @@ import { GuidedDemoOverlay } from '../components/demo/GuidedDemoOverlay';
 import { DailyQuestModal, type DailyQuestModalHandle } from '../components/DailyQuestModal';
 import { buildGuidedSteps } from '../config/demoGuidedTour';
 import { resolveDemoEntryContext } from '../lib/demoEntry';
+import { getLabsGameModeConfig } from '../config/labsGameModes';
 import { DASHBOARD_PATH } from '../config/auth';
 
 const DEMO_USER_ID = 'demo-public-user';
@@ -35,6 +36,7 @@ export default function DemoDashboardPage() {
   const dailyQuestModalRef = useRef<DailyQuestModalHandle | null>(null);
 
   const guidedSteps = useMemo(() => buildGuidedSteps(demoContext.fromOnboarding), [demoContext.fromOnboarding]);
+  const selectedModeConfig = useMemo(() => getLabsGameModeConfig(demoContext.mode), [demoContext.mode]);
 
   const dashboardPath = useMemo(() => {
     const raw = DASHBOARD_PATH || '/dashboard-v3';
@@ -50,7 +52,7 @@ export default function DemoDashboardPage() {
       return;
     }
 
-    navigate('/');
+    navigate(demoContext.source === 'labs' ? '/labs/demo-mode-select' : '/');
   }, [dashboardPath, demoContext.fromOnboarding, demoContext.mode, demoContext.source, navigate, userId]);
 
   useEffect(() => {
@@ -137,7 +139,7 @@ export default function DemoDashboardPage() {
               Daily Quest
             </button>
             <Link
-              to={demoContext.fromOnboarding ? dashboardPath : '/'}
+              to={demoContext.fromOnboarding ? dashboardPath : demoContext.source === 'labs' ? '/labs/demo-mode-select' : '/'}
               onClick={(event) => {
                 event.preventDefault();
                 handleDemoExit();
@@ -180,10 +182,11 @@ export default function DemoDashboardPage() {
         className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8"
         data-demo-source={demoContext.source}
         data-demo-mode={demoContext.mode}
+        style={{ '--demo-mode-accent': selectedModeConfig.accentColor } as CSSProperties}
       >
         <DashboardOverview
           userId={DEMO_USER_ID}
-          gameMode="flow"
+          gameMode={demoContext.gameMode}
           weeklyTarget={3}
           isJourneyGenerating={false}
           showOnboardingGuidance={false}
