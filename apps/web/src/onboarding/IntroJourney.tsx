@@ -293,6 +293,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
             minimum={QUICK_START_MINIMUMS[answers.mode ?? 'CHILL']}
             onToggleTask={(taskId) => toggleQuickStartTask('Body', taskId)}
             onInputChange={(taskId, value) => setQuickStartTaskInput(`Body-${taskId}`, value)}
+            balancedBonusActive={quickStartGp.balancedBonusActive}
             onBack={goPrevious}
             onConfirm={goNext}
           />
@@ -309,6 +310,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
             minimum={QUICK_START_MINIMUMS[answers.mode ?? 'CHILL']}
             onToggleTask={(taskId) => toggleQuickStartTask('Mind', taskId)}
             onInputChange={(taskId, value) => setQuickStartTaskInput(`Mind-${taskId}`, value)}
+            balancedBonusActive={quickStartGp.balancedBonusActive}
             onBack={goPrevious}
             onConfirm={goNext}
           />
@@ -325,6 +327,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
             minimum={QUICK_START_MINIMUMS[answers.mode ?? 'CHILL']}
             onToggleTask={(taskId) => toggleQuickStartTask('Soul', taskId)}
             onInputChange={(taskId, value) => setQuickStartTaskInput(`Soul-${taskId}`, value)}
+            balancedBonusActive={quickStartGp.balancedBonusActive}
             onBack={goPrevious}
             onConfirm={goNext}
           />
@@ -345,6 +348,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
             language={language}
             gameMode={answers.mode ?? 'CHILL'}
             selectedByPillar={answers.quickStart.selectedTasksByPillar}
+            tasksByPillar={QUICK_START_TASKS[language]}
             xp={quickStartGp.xp}
             onBack={goPrevious}
             onConfirm={handleFinish}
