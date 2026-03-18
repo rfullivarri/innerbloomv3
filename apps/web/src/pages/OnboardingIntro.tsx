@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { IntroJourney } from '../onboarding/IntroJourney';
 import { type JourneyPayload } from '../onboarding/payload';
 import { JourneyGeneratingScreen } from '../onboarding/screens/JourneyGeneratingScreen';
+import { QuickStartGeneratingScreen } from '../onboarding/screens/QuickStartGeneratingScreen';
 import { OnboardingProvider } from '../onboarding/state';
 import { ApiError, apiAuthorizedFetch, buildApiUrl, markOnboardingProgress } from '../lib/api';
 import { setJourneyGenerationPending } from '../lib/journeyGeneration';
@@ -33,6 +34,7 @@ export default function OnboardingIntroPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [generationMode, setGenerationMode] = useState<string | null>(null);
+  const [generationPath, setGenerationPath] = useState<'traditional' | 'quick_start' | null>(null);
 
   const handleFinish = useCallback(
     async (payload: JourneyPayload) => {
@@ -81,6 +83,7 @@ export default function OnboardingIntroPage() {
           gameMode: payload.mode,
         });
         setGenerationMode(payload.mode);
+        setGenerationPath(payload.meta.onboarding_path ?? 'traditional');
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Error inesperado';
         const prefix = language === 'en' ? 'We could not save your onboarding.' : 'No pudimos guardar tu onboarding.';
@@ -94,6 +97,18 @@ export default function OnboardingIntroPage() {
   );
 
   if (generationMode) {
+    if (generationPath === 'quick_start') {
+      return (
+        <QuickStartGeneratingScreen
+          language={language}
+          isSubmitting={isSubmitting}
+          submitCompleted={!isSubmitting}
+          submitError={submitError}
+          onOpenGuidedDemo={() => navigate(buildDemoUrl({ language, source: 'onboarding', mode: 'onboarding' }))}
+        />
+      );
+    }
+
     return (
       <JourneyGeneratingScreen
         gameMode={generationMode}

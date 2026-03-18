@@ -14,6 +14,7 @@ interface QuickStartSummaryStepProps {
   onBack: () => void;
   onConfirm: () => void;
   loading?: boolean;
+  submitError?: string | null;
 }
 
 const MODE_KEY: Record<GameMode, keyof typeof GAME_MODE_META> = {
@@ -32,6 +33,7 @@ export function QuickStartSummaryStep({
   onBack,
   onConfirm,
   loading = false,
+  submitError = null,
 }: QuickStartSummaryStepProps) {
   const copy = language === 'en'
     ? {
@@ -148,6 +150,7 @@ export function QuickStartSummaryStep({
         disabled={loading}
         loading={loading}
       />
+      {submitError ? <p className="mt-4 text-sm text-rose-200">{submitError}</p> : null}
     </section>
   );
 }

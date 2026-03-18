@@ -1,5 +1,6 @@
 import type { Answers, XP } from './state';
 import type { OnboardingPath } from './state';
+import { buildQuickStartManualCandidates } from './quickStart';
 
 const CLIENT_ID_KEY = 'gj_client_id';
 
@@ -124,17 +125,11 @@ export function buildPayload(answers: Answers, xp: XP, onboardingPath: Onboardin
       ? roundedBodyXp + roundedMindXp + roundedSoulXp
       : roundedTotalXp;
 
-  const quickStartManualCandidates = (['Body', 'Mind', 'Soul'] as const).flatMap((pillar) =>
-    answers.quickStart.selectedTasksByPillar[pillar].map((taskId) => {
-      const inputValue = answers.quickStart.editableTaskValues[`${pillar}-${taskId}`]?.trim();
-      return {
-        task: taskId,
-        pillar_code: pillar.toUpperCase(),
-        trait_code: taskId.toUpperCase(),
-        input_value: inputValue || undefined,
-      };
-    }),
-  );
+  const quickStartManualCandidates = buildQuickStartManualCandidates({
+    language: meta.lang.startsWith('en') ? 'en' : 'es',
+    selectedTasksByPillar: answers.quickStart.selectedTasksByPillar,
+    editableTaskValues: answers.quickStart.editableTaskValues,
+  });
 
   const isQuickStart = onboardingPath === 'quick_start';
 
