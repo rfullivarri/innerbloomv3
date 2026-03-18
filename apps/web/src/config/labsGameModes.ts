@@ -53,8 +53,8 @@ export const LABS_DEMO_MODE_SELECT_COPY: Record<Language, { badge: string; title
   },
   en: {
     badge: 'Labs demo',
-    title: 'Choose the demo that fits your current rhythm',
-    subtitle: 'See how Innerbloom would look based on your energy and how you actually move forward.',
+    title: 'Choose the demo that best fits your current rhythm',
+    subtitle: 'See how Innerbloom would look based on your energy and the way you actually move forward.',
   },
 };
 
