@@ -1,48 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   getOnboardingProgress,
   markOnboardingProgress,
-  reconcileOnboardingProgressClient,
   type OnboardingProgress,
   type OnboardingProgressStep,
 } from '../lib/api';
 
-const LEGACY_KEYS = {
-  moderationSelected: 'ib.onboarding.moderationSelected',
-  firstEditDone: 'ib.onboarding.taskEditorFirstEditDone',
-  returnedDashboard: 'ib.onboarding.hasReturnedToDashboardAfterEdit',
-  moderationResolved: 'ib.onboarding.moderationSuggestionResolved',
-} as const;
-
 export function useOnboardingProgress() {
   const [progress, setProgress] = useState<OnboardingProgress | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const didReconcileRef = useRef(false);
-
   useEffect(() => {
     let cancelled = false;
 
     const load = async () => {
       setStatus('loading');
       try {
-        if (!didReconcileRef.current && typeof window !== 'undefined') {
-          didReconcileRef.current = true;
-          const firstTaskEditedLegacy = window.localStorage.getItem(LEGACY_KEYS.firstEditDone) === '1';
-          const returnedDashboardLegacy = window.localStorage.getItem(LEGACY_KEYS.returnedDashboard) === '1';
-
-          const flags: Partial<Record<OnboardingProgressStep, boolean>> = {
-            moderation_selected: window.localStorage.getItem(LEGACY_KEYS.moderationSelected) === '1',
-            first_task_edited: firstTaskEditedLegacy,
-            returned_to_dashboard_after_first_edit: firstTaskEditedLegacy && returnedDashboardLegacy,
-            moderation_modal_resolved: window.localStorage.getItem(LEGACY_KEYS.moderationResolved) === '1',
-          };
-
-          const reconciled = await reconcileOnboardingProgressClient(flags);
-          if (!cancelled) {
-            setProgress(reconciled.progress);
-          }
-        }
-
         const response = await getOnboardingProgress();
         if (!cancelled) {
           setProgress(response.progress);

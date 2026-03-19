@@ -1,4 +1,10 @@
-const MODERATION_INTENT_KEY = 'ib.onboarding.moderationSelected';
+import {
+  readOnboardingOverlayFlag,
+  type OnboardingOverlayScope,
+  writeOnboardingOverlayFlag,
+} from './onboardingOverlayStorage';
+
+const LEGACY_MODERATION_INTENT_KEY = 'ib.onboarding.moderationSelected';
 
 function normalizeText(value: string): string {
   return value
@@ -20,24 +26,41 @@ export function hasModerationSelection(values: string[]): boolean {
   });
 }
 
-export function readModerationOnboardingIntentFlag(): boolean {
+export function readLegacyModerationOnboardingIntentFlag(): boolean {
   if (typeof window === 'undefined') {
     return false;
   }
 
-  return window.localStorage.getItem(MODERATION_INTENT_KEY) === '1';
+  return window.localStorage.getItem(LEGACY_MODERATION_INTENT_KEY) === '1';
 }
 
-export function writeModerationOnboardingIntentFlag(value: boolean) {
+export function writeLegacyModerationOnboardingIntentFlag(value: boolean) {
   if (typeof window === 'undefined') {
     return;
   }
 
   if (value) {
-    window.localStorage.setItem(MODERATION_INTENT_KEY, '1');
+    window.localStorage.setItem(LEGACY_MODERATION_INTENT_KEY, '1');
     return;
   }
 
-  window.localStorage.removeItem(MODERATION_INTENT_KEY);
+  window.localStorage.removeItem(LEGACY_MODERATION_INTENT_KEY);
+}
+
+export function readModerationOnboardingIntentFlag(scope?: OnboardingOverlayScope | null): boolean {
+  if (scope) {
+    return readOnboardingOverlayFlag(scope, 'moderationSelected');
+  }
+
+  return readLegacyModerationOnboardingIntentFlag();
+}
+
+export function writeModerationOnboardingIntentFlag(value: boolean, scope?: OnboardingOverlayScope | null) {
+  if (scope) {
+    writeOnboardingOverlayFlag(scope, 'moderationSelected', value);
+    return;
+  }
+
+  writeLegacyModerationOnboardingIntentFlag(value);
 }
 
