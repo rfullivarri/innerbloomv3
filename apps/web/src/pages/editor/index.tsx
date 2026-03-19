@@ -423,6 +423,7 @@ export default function TaskEditorPage() {
   }, []);
 
   const handleEditSuccess = useCallback(() => {
+    // Keep the existing trigger timing so the shared nudge can hydrate from the current journey overlay immediately.
     const isFirstOnboardingEdit =
       !dailyQuestReadiness.completedFirstDailyQuest && !firstEditDone;
 
