@@ -15,6 +15,7 @@ import {
   hasModerationSelection,
   writeModerationOnboardingIntentFlag,
 } from '../lib/moderationOnboarding';
+import { type OnboardingOverlayScope } from '../lib/onboardingOverlayStorage';
 
 async function parseErrorMessage(response: Response) {
   const payload = await response.json().catch(() => ({}));
@@ -26,6 +27,20 @@ async function parseErrorMessage(response: Response) {
   }
 
   return response.statusText || 'Error desconocido';
+}
+
+function buildOverlayScope(userId: string, onboardingSessionId: string | null | undefined): OnboardingOverlayScope | null {
+  const normalizedUserId = userId.trim();
+  const normalizedSessionId = onboardingSessionId?.trim();
+
+  if (!normalizedUserId || !normalizedSessionId) {
+    return null;
+  }
+
+  return {
+    userId: normalizedUserId,
+    onboardingSessionId: normalizedSessionId,
+  };
 }
 
 export default function OnboardingIntroPage() {
@@ -59,7 +74,11 @@ export default function OnboardingIntroPage() {
           throw new ApiError(introResponse.status, { message }, buildApiUrl('/onboarding/intro'));
         }
 
-        await introResponse.json().catch(() => ({}));
+        const introJson = (await introResponse.json().catch(() => ({}))) as {
+          ok?: boolean;
+          session_id?: string;
+          taskgen_correlation_id?: string | null;
+        };
 
         emitOnboardingEvent('onboarding_completed', {
           mode: payload.mode,
@@ -68,10 +87,11 @@ export default function OnboardingIntroPage() {
         });
 
         const hasModerationIntent = hasModerationSelection(payload.data.foundations.body);
+        const overlayScope = buildOverlayScope(payload.meta.user_id, introJson.session_id);
         if (typeof window !== 'undefined') {
           window.localStorage.setItem(POSTLOGIN_LANGUAGE_STORAGE_KEY, language);
           window.localStorage.setItem('innerbloom.postlogin.language.source', 'locale');
-          writeModerationOnboardingIntentFlag(hasModerationIntent);
+          writeModerationOnboardingIntentFlag(hasModerationIntent, overlayScope);
         }
 
         if (hasModerationIntent) {
