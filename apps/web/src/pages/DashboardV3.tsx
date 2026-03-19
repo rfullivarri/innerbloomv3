@@ -102,9 +102,9 @@ import {
   clearOnboardingOverlayScopeIfChanged,
   readOnboardingOverlayFlag,
   resetActiveOnboardingOverlayScope,
-  type OnboardingOverlayScope,
   writeOnboardingOverlayFlag,
 } from "../lib/onboardingOverlayStorage";
+import { buildOnboardingOverlayScope } from "../lib/onboardingOverlayScope";
 
 function hasModerationBodyFocus(
   profile: CurrentUserProfile | null | undefined,
@@ -155,23 +155,6 @@ function hasModerationBodyFocus(
       normalized === "moderacion"
     );
   });
-}
-
-function buildOverlayScope(progress: {
-  user_id: string;
-  onboarding_session_id: string | null;
-} | null): OnboardingOverlayScope | null {
-  const userId = progress?.user_id?.trim();
-  const onboardingSessionId = progress?.onboarding_session_id?.trim();
-
-  if (!userId || !onboardingSessionId) {
-    return null;
-  }
-
-  return {
-    userId,
-    onboardingSessionId,
-  };
 }
 
 export default function DashboardV3Page() {
@@ -413,7 +396,7 @@ export default function DashboardV3Page() {
 
   const onboardingProgress = useOnboardingProgress();
   const { markStep } = onboardingProgress;
-  const overlayScope = buildOverlayScope(onboardingProgress.progress);
+  const overlayScope = buildOnboardingOverlayScope(onboardingProgress.progress);
   const onboardingEditorNudge = useOnboardingEditorNudge({
     completedFirstDailyQuest: dailyQuestReadiness.completedFirstDailyQuest,
   });

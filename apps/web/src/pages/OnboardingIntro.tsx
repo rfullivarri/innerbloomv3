@@ -15,7 +15,7 @@ import {
   hasModerationSelection,
   writeModerationOnboardingIntentFlag,
 } from '../lib/moderationOnboarding';
-import { type OnboardingOverlayScope } from '../lib/onboardingOverlayStorage';
+import { buildOnboardingOverlayScope } from '../lib/onboardingOverlayScope';
 
 async function parseErrorMessage(response: Response) {
   const payload = await response.json().catch(() => ({}));
@@ -27,20 +27,6 @@ async function parseErrorMessage(response: Response) {
   }
 
   return response.statusText || 'Error desconocido';
-}
-
-function buildOverlayScope(userId: string, onboardingSessionId: string | null | undefined): OnboardingOverlayScope | null {
-  const normalizedUserId = userId.trim();
-  const normalizedSessionId = onboardingSessionId?.trim();
-
-  if (!normalizedUserId || !normalizedSessionId) {
-    return null;
-  }
-
-  return {
-    userId: normalizedUserId,
-    onboardingSessionId: normalizedSessionId,
-  };
 }
 
 export default function OnboardingIntroPage() {
@@ -87,7 +73,10 @@ export default function OnboardingIntroPage() {
         });
 
         const hasModerationIntent = hasModerationSelection(payload.data.foundations.body);
-        const overlayScope = buildOverlayScope(payload.meta.user_id, introJson.session_id);
+        const overlayScope = buildOnboardingOverlayScope({
+          user_id: payload.meta.user_id,
+          onboarding_session_id: introJson.session_id ?? null,
+        });
         if (typeof window !== 'undefined') {
           window.localStorage.setItem(POSTLOGIN_LANGUAGE_STORAGE_KEY, language);
           window.localStorage.setItem('innerbloom.postlogin.language.source', 'locale');
