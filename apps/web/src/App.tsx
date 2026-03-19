@@ -134,6 +134,7 @@ export default function App() {
         <Route path="/demo" element={<DemoDashboardPage />} />
         <Route path="/demo-mode-select" element={<DemoModeSelectPage />} />
         <Route path="/labs/demo-mode-select" element={<LabsDemoModeSelectPage legacyLabsPath />} />
+        <Route path="/onboarding" element={<OnboardingIntroPage />} />
         <Route path="/intro-journey" element={<OnboardingIntroPage />} />
         <Route
           path="/labs/quick-start"
