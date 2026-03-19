@@ -435,6 +435,7 @@ export default function DashboardV3Page() {
 
 
   useEffect(() => {
+    // Preserve the existing return-to-dashboard behavior, now scoped to the current onboarding journey overlay.
     if (activeSection.key !== 'dashboard') {
       return;
     }
