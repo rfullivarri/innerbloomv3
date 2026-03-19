@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOnboardingProgress } from './useOnboardingProgress';
+import {
+  readOnboardingOverlayFlag,
+  type OnboardingOverlayScope,
+  writeOnboardingOverlayFlag,
+} from '../lib/onboardingOverlayStorage';
 
 type UseOnboardingEditorNudgeOptions = {
   completedFirstDailyQuest?: boolean;
@@ -14,45 +19,68 @@ type OnboardingEditorNudge = {
   markReturnedToDashboard: () => Promise<void>;
 };
 
-const FIRST_EDIT_DONE_KEY = 'ib.onboarding.taskEditorFirstEditDone';
-const RETURNED_DASHBOARD_KEY = 'ib.onboarding.hasReturnedToDashboardAfterEdit';
+function buildOverlayScope(progress: {
+  user_id: string;
+  onboarding_session_id: string | null;
+} | null): OnboardingOverlayScope | null {
+  const userId = progress?.user_id?.trim();
+  const onboardingSessionId = progress?.onboarding_session_id?.trim();
 
-function writeFlag(key: string, value: boolean) {
-  if (typeof window === 'undefined') return;
-  if (value) {
-    window.localStorage.setItem(key, '1');
-    return;
+  if (!userId || !onboardingSessionId) {
+    return null;
   }
-  window.localStorage.removeItem(key);
+
+  return {
+    userId,
+    onboardingSessionId,
+  };
 }
 
 export function useOnboardingEditorNudge(options: UseOnboardingEditorNudgeOptions = {}): OnboardingEditorNudge {
   const completedFirstDailyQuest = Boolean(options.completedFirstDailyQuest);
   const { progress, markStep } = useOnboardingProgress();
-  const [firstEditDone, setFirstEditDone] = useState(false);
-  const [hasReturnedToDashboardAfterEdit, setHasReturnedToDashboardAfterEdit] = useState(false);
+  const overlayScope = useMemo(() => buildOverlayScope(progress), [progress]);
+  const [firstEditDoneOverlay, setFirstEditDoneOverlay] = useState(false);
+  const [returnedToDashboardOverlay, setReturnedToDashboardOverlay] = useState(false);
 
   useEffect(() => {
-    setFirstEditDone(Boolean(progress?.first_task_edited_at));
-    setHasReturnedToDashboardAfterEdit(Boolean(progress?.returned_to_dashboard_after_first_edit_at));
-  }, [progress?.first_task_edited_at, progress?.returned_to_dashboard_after_first_edit_at]);
+    const backendFirstEditDone = Boolean(progress?.first_task_edited_at);
+    const backendReturnedToDashboard = Boolean(progress?.returned_to_dashboard_after_first_edit_at);
+
+    setFirstEditDoneOverlay(
+      backendFirstEditDone || readOnboardingOverlayFlag(overlayScope, 'taskEditorFirstEditDone'),
+    );
+    setReturnedToDashboardOverlay(
+      backendReturnedToDashboard || readOnboardingOverlayFlag(overlayScope, 'hasReturnedToDashboardAfterEdit'),
+    );
+  }, [
+    overlayScope,
+    progress?.first_task_edited_at,
+    progress?.returned_to_dashboard_after_first_edit_at,
+  ]);
+
+  const firstEditDone = Boolean(progress?.first_task_edited_at) || firstEditDoneOverlay;
+  const hasReturnedToDashboardAfterEdit =
+    Boolean(progress?.returned_to_dashboard_after_first_edit_at) || returnedToDashboardOverlay;
 
   const markFirstEditDone = useCallback(async () => {
     if (firstEditDone) return false;
-    writeFlag(FIRST_EDIT_DONE_KEY, true);
-    setFirstEditDone(true);
+
+    writeOnboardingOverlayFlag(overlayScope, 'taskEditorFirstEditDone', true);
+    setFirstEditDoneOverlay(true);
     await markStep('first_task_edited', { trigger: 'editor_first_edit_ui' });
     return true;
-  }, [firstEditDone, markStep]);
+  }, [firstEditDone, markStep, overlayScope]);
 
   const markReturnedToDashboard = useCallback(async () => {
     if (hasReturnedToDashboardAfterEdit) return;
-    writeFlag(RETURNED_DASHBOARD_KEY, true);
-    setHasReturnedToDashboardAfterEdit(true);
+
+    writeOnboardingOverlayFlag(overlayScope, 'hasReturnedToDashboardAfterEdit', true);
+    setReturnedToDashboardOverlay(true);
     await markStep('returned_to_dashboard_after_first_edit', {
       trigger: 'editor_return_dashboard',
     });
-  }, [hasReturnedToDashboardAfterEdit, markStep]);
+  }, [hasReturnedToDashboardAfterEdit, markStep, overlayScope]);
 
   const shouldShowInlineNotice = useMemo(
     () => firstEditDone && !hasReturnedToDashboardAfterEdit && !completedFirstDailyQuest,
