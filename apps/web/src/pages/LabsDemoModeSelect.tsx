@@ -13,7 +13,7 @@ import {
   LABS_GAME_MODES,
 } from '../config/labsGameModes';
 
-const DEMO_MODE_SELECT_OG_IMAGE = 'https://innerbloomjourney.org/og/neneOGP.png';
+const DEMO_MODE_SELECT_OG_IMAGE = '/og/IBOG1.jpg';
 
 type DemoModeSelectPageProps = {
   legacyLabsPath?: boolean;
