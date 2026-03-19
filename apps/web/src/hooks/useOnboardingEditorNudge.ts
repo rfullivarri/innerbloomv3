@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOnboardingProgress } from './useOnboardingProgress';
 import {
   readOnboardingOverlayFlag,
-  type OnboardingOverlayScope,
   writeOnboardingOverlayFlag,
 } from '../lib/onboardingOverlayStorage';
+import { buildOnboardingOverlayScope } from '../lib/onboardingOverlayScope';
 
 type UseOnboardingEditorNudgeOptions = {
   completedFirstDailyQuest?: boolean;
@@ -19,27 +19,10 @@ type OnboardingEditorNudge = {
   markReturnedToDashboard: () => Promise<void>;
 };
 
-function buildOverlayScope(progress: {
-  user_id: string;
-  onboarding_session_id: string | null;
-} | null): OnboardingOverlayScope | null {
-  const userId = progress?.user_id?.trim();
-  const onboardingSessionId = progress?.onboarding_session_id?.trim();
-
-  if (!userId || !onboardingSessionId) {
-    return null;
-  }
-
-  return {
-    userId,
-    onboardingSessionId,
-  };
-}
-
 export function useOnboardingEditorNudge(options: UseOnboardingEditorNudgeOptions = {}): OnboardingEditorNudge {
   const completedFirstDailyQuest = Boolean(options.completedFirstDailyQuest);
   const { progress, markStep } = useOnboardingProgress();
-  const overlayScope = useMemo(() => buildOverlayScope(progress), [progress]);
+  const overlayScope = useMemo(() => buildOnboardingOverlayScope(progress), [progress]);
   const [firstEditDoneOverlay, setFirstEditDoneOverlay] = useState(false);
   const [returnedToDashboardOverlay, setReturnedToDashboardOverlay] = useState(false);
 
