@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { OFFICIAL_DESIGN_TOKENS } from '../content/officialDesignTokens';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
-import { buildDemoModeSelectUrl, buildDemoUrl, type DemoEntrySource } from '../lib/demoEntry';
+import { buildDemoUrl, getDemoModeSelectPath, type DemoEntrySource } from '../lib/demoEntry';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { usePageMeta } from '../lib/seo';
@@ -46,12 +46,12 @@ export default function LabsDemoModeSelectPage({ legacyLabsPath = false }: DemoM
     image: DEMO_MODE_SELECT_OG_IMAGE,
     imageAlt: language === 'es' ? 'Preview oficial de la demo de Innerbloom' : 'Official Innerbloom demo preview',
     ogImageSecureUrl: DEMO_MODE_SELECT_OG_IMAGE,
-    ogImageType: 'image/png',
+    ogImageType: 'image/jpeg',
     ogImageWidth: '1200',
     ogImageHeight: '630',
     twitterImage: DEMO_MODE_SELECT_OG_IMAGE,
     twitterImageAlt: language === 'es' ? 'Preview oficial de la demo de Innerbloom' : 'Official Innerbloom demo preview',
-    url: buildDemoModeSelectUrl({ language, source, legacyLabsPath }),
+    url: getDemoModeSelectPath(legacyLabsPath),
   });
 
   const cards = useMemo(

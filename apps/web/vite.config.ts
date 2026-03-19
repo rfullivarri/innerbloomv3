@@ -53,6 +53,7 @@ export default defineConfig({
       input: {
         main: fileURLToPath(new URL('./index.html', import.meta.url)),
         login: fileURLToPath(new URL('./login/index.html', import.meta.url)),
+        demoModeSelect: fileURLToPath(new URL('./demo-mode-select/index.html', import.meta.url)),
       },
     },
   },

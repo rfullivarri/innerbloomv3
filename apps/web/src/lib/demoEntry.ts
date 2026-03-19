@@ -20,6 +20,10 @@ interface BuildDemoModeSelectUrlOptions {
   legacyLabsPath?: boolean;
 }
 
+export function getDemoModeSelectPath(legacyLabsPath = false): string {
+  return legacyLabsPath ? '/labs/demo-mode-select' : '/demo-mode-select';
+}
+
 export interface DemoEntryContext {
   language: 'es' | 'en';
   source: DemoEntrySource;
@@ -35,8 +39,7 @@ export function buildDemoModeSelectUrl({ language, source = 'landing', legacyLab
   if (source !== 'landing') {
     params.set('source', source);
   }
-  const pathname = legacyLabsPath ? '/labs/demo-mode-select' : '/demo-mode-select';
-  return `${pathname}?${params.toString()}`;
+  return `${getDemoModeSelectPath(legacyLabsPath)}?${params.toString()}`;
 }
 
 export function buildDemoUrl({ language, source = 'landing', entryMode = 'public', mode }: BuildDemoUrlOptions): string {

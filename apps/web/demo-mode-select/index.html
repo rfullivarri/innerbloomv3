@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/IB-COLOR-LOGO.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#000c40" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Innerbloom" />
+    <link rel="apple-touch-icon" href="/IB-COLOR-LOGO.png" />
+    <meta
+      name="description"
+      content="Explora la demo oficial de Innerbloom y elige LOW, CHILL, FLOW o EVOLVE para entrar a la experiencia guiada."
+    />
+    <link rel="canonical" href="https://innerbloomjourney.org/demo-mode-select" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Innerbloom" />
+    <meta property="og:title" content="Innerbloom Demo · Elige tu Game Mode" />
+    <meta
+      property="og:description"
+      content="Explora la demo oficial de Innerbloom y elige LOW, CHILL, FLOW o EVOLVE para entrar a la experiencia guiada."
+    />
+    <meta property="og:url" content="https://innerbloomjourney.org/demo-mode-select" />
+    <meta property="og:image" content="https://innerbloomjourney.org/og/IBOG1.jpg" />
+    <meta property="og:image:secure_url" content="https://innerbloomjourney.org/og/IBOG1.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Preview oficial de la demo de Innerbloom" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Innerbloom Demo · Elige tu Game Mode" />
+    <meta
+      name="twitter:description"
+      content="Explora la demo oficial de Innerbloom y elige LOW, CHILL, FLOW o EVOLVE para entrar a la experiencia guiada."
+    />
+    <meta name="twitter:image" content="https://innerbloomjourney.org/og/IBOG1.jpg" />
+    <meta name="twitter:image:alt" content="Preview oficial de la demo de Innerbloom" />
+    <title>Innerbloom Demo · Elige tu Game Mode</title>
+    <script>
+      (function () {
+        var key = 'ib:gradient';
+        var defaults = { angle: '135deg', a: '#525252', b: '#3D72B4' };
+        var map = {
+          curiosity: { a: '#525252', b: '#3D72B4' },
+          endless: { a: '#43CEA2', b: '#185A9D' },
+          amethyst: { a: '#9D50BB', b: '#6E48AA' },
+          dirty: { a: '#B993D6', b: '#8CA6DB' }
+        };
+
+        try {
+          var saved = window.localStorage.getItem(key);
+          var parsed = saved ? JSON.parse(saved) : null;
+          var gradient = parsed && map[parsed.id] ? map[parsed.id] : defaults;
+          var angle = parsed && typeof parsed.angle === 'string' ? parsed.angle : defaults.angle;
+          var root = document.documentElement;
+          root.style.setProperty('--bg-angle', angle);
+          root.style.setProperty('--bg-a', gradient.a);
+          root.style.setProperty('--bg-b', gradient.b);
+        } catch (_error) {
+          var fallbackRoot = document.documentElement;
+          fallbackRoot.style.setProperty('--bg-angle', defaults.angle);
+          fallbackRoot.style.setProperty('--bg-a', defaults.a);
+          fallbackRoot.style.setProperty('--bg-b', defaults.b);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
