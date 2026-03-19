@@ -4,6 +4,12 @@ import { OFFICIAL_DESIGN_TOKENS } from '../content/officialDesignTokens';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 import { buildDemoUrl, getDemoModeSelectPath, type DemoEntrySource } from '../lib/demoEntry';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
+import {
+  DEMO_MODE_SELECT_OG_IMAGE_HEIGHT,
+  DEMO_MODE_SELECT_OG_IMAGE_PATH,
+  DEMO_MODE_SELECT_OG_IMAGE_TYPE,
+  DEMO_MODE_SELECT_OG_IMAGE_WIDTH,
+} from '../lib/demoModeSelectSeo';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { usePageMeta } from '../lib/seo';
 import {
@@ -12,8 +18,6 @@ import {
   LABS_GAME_MODE_ORDER,
   LABS_GAME_MODES,
 } from '../config/labsGameModes';
-
-const DEMO_MODE_SELECT_OG_IMAGE = '/og/IBOG1.jpg';
 
 type DemoModeSelectPageProps = {
   legacyLabsPath?: boolean;
@@ -43,13 +47,13 @@ export default function LabsDemoModeSelectPage({ legacyLabsPath = false }: DemoM
       language === 'es'
         ? 'Explora la demo oficial de Innerbloom. Elige LOW, CHILL, FLOW o EVOLVE y entra a la experiencia guiada en tu idioma.'
         : 'Explore the official Innerbloom demo. Choose LOW, CHILL, FLOW, or EVOLVE and enter the guided experience in your language.',
-    image: DEMO_MODE_SELECT_OG_IMAGE,
+    image: DEMO_MODE_SELECT_OG_IMAGE_PATH,
     imageAlt: language === 'es' ? 'Preview oficial de la demo de Innerbloom' : 'Official Innerbloom demo preview',
-    ogImageSecureUrl: DEMO_MODE_SELECT_OG_IMAGE,
-    ogImageType: 'image/jpeg',
-    ogImageWidth: '1200',
-    ogImageHeight: '630',
-    twitterImage: DEMO_MODE_SELECT_OG_IMAGE,
+    ogImageSecureUrl: DEMO_MODE_SELECT_OG_IMAGE_PATH,
+    ogImageType: DEMO_MODE_SELECT_OG_IMAGE_TYPE,
+    ogImageWidth: DEMO_MODE_SELECT_OG_IMAGE_WIDTH,
+    ogImageHeight: DEMO_MODE_SELECT_OG_IMAGE_HEIGHT,
+    twitterImage: DEMO_MODE_SELECT_OG_IMAGE_PATH,
     twitterImageAlt: language === 'es' ? 'Preview oficial de la demo de Innerbloom' : 'Official Innerbloom demo preview',
     url: getDemoModeSelectPath(legacyLabsPath),
   });
