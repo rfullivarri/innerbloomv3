@@ -60,7 +60,7 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
         create: 'Creá tu cuenta Innerbloom',
       };
 
-  const currentUrl = useMemo(() => (typeof window !== 'undefined' ? window.location.href : '/intro-journey'), []);
+  const currentUrl = useMemo(() => (typeof window !== 'undefined' ? window.location.href : '/onboarding'), []);
   const userEmail = user?.primaryEmailAddress?.emailAddress ?? '';
   const userId = user?.id ?? '';
 
