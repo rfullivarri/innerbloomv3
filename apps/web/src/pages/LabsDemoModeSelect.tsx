@@ -109,7 +109,7 @@ export default function LabsDemoModeSelectPage({ legacyLabsPath = false }: DemoM
             </div>
           </div>
 
-          <div className="relative mt-4 grid flex-1 auto-rows-fr grid-cols-2 gap-2.5 sm:mt-5 sm:gap-3 md:mt-5 md:gap-3.5 lg:mt-6 lg:grid-cols-4 lg:gap-3.5 xl:gap-4">
+          <div className="relative mt-4 grid grid-cols-2 items-start gap-2.5 self-center sm:mt-5 sm:gap-3 md:mt-5 md:gap-3.5 lg:mt-6 lg:grid-cols-4 lg:gap-3.5 xl:gap-4">
             {cards.map((card) => (
               <Link
                 key={card.id}
