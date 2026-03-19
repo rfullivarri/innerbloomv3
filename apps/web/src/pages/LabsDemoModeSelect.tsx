@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { OFFICIAL_DESIGN_TOKENS } from '../content/officialDesignTokens';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 import { buildDemoModeSelectUrl, buildDemoUrl, type DemoEntrySource } from '../lib/demoEntry';
-import { resolveAuthLanguage } from '../lib/authLanguage';
+import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { usePageMeta } from '../lib/seo';
 import {
@@ -64,12 +64,7 @@ export default function LabsDemoModeSelectPage({ legacyLabsPath = false }: DemoM
   );
 
   const handleClose = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-      return;
-    }
-
-    navigate('/');
+    navigate(buildLocalizedAuthPath('/', language));
   };
 
   return (
