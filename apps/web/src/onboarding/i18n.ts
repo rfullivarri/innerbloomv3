@@ -30,5 +30,5 @@ export function resolveOnboardingLanguage(search: string): OnboardingLanguage {
 }
 
 export function buildOnboardingPath(language: OnboardingLanguage): string {
-  return `/intro-journey?lang=${language}`;
+  return `/onboarding?lang=${language}`;
 }

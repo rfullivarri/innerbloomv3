@@ -11,10 +11,18 @@ import { emitOnboardingEvent } from '../lib/telemetry';
 import { resolveOnboardingLanguage } from '../onboarding/i18n';
 import { POSTLOGIN_LANGUAGE_STORAGE_KEY } from '../i18n/postLoginLanguage';
 import { buildDemoUrl } from '../lib/demoEntry';
+import { usePageMeta } from '../lib/seo';
 import {
   hasModerationSelection,
   writeModerationOnboardingIntentFlag,
 } from '../lib/moderationOnboarding';
+import {
+  ONBOARDING_CANONICAL_URL,
+  ONBOARDING_OG_IMAGE_HEIGHT,
+  ONBOARDING_OG_IMAGE_TYPE,
+  ONBOARDING_OG_IMAGE_URL,
+  ONBOARDING_OG_IMAGE_WIDTH,
+} from '../lib/onboardingSeo';
 import { buildOnboardingOverlayScope } from '../lib/onboardingOverlayScope';
 
 async function parseErrorMessage(response: Response) {
@@ -36,6 +44,29 @@ export default function OnboardingIntroPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [generationMode, setGenerationMode] = useState<string | null>(null);
   const [generationPath, setGenerationPath] = useState<'traditional' | 'quick_start' | null>(null);
+
+  usePageMeta({
+    title: language === 'en' ? 'Innerbloom Onboarding · Build your base' : 'Innerbloom Onboarding · Crea tu base',
+    description:
+      language === 'en'
+        ? 'Start your Innerbloom onboarding and build your personalized AI foundation in under 3 minutes.'
+        : 'Inicia tu onboarding de Innerbloom y crea tu base personalizada con IA en menos de 3 minutos.',
+    image: ONBOARDING_OG_IMAGE_URL,
+    imageAlt:
+      language === 'en'
+        ? 'Official preview of the Innerbloom onboarding'
+        : 'Preview oficial del onboarding de Innerbloom',
+    ogImageSecureUrl: ONBOARDING_OG_IMAGE_URL,
+    ogImageType: ONBOARDING_OG_IMAGE_TYPE,
+    ogImageWidth: ONBOARDING_OG_IMAGE_WIDTH,
+    ogImageHeight: ONBOARDING_OG_IMAGE_HEIGHT,
+    twitterImage: ONBOARDING_OG_IMAGE_URL,
+    twitterImageAlt:
+      language === 'en'
+        ? 'Official preview of the Innerbloom onboarding'
+        : 'Preview oficial del onboarding de Innerbloom',
+    url: ONBOARDING_CANONICAL_URL
+  });
 
   const handleFinish = useCallback(
     async (payload: JourneyPayload) => {
