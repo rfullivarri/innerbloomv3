@@ -157,7 +157,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
     moderationFlex: 'También podés manejar tolerancias flexibles (por ejemplo, fines de semana).',
     setupTitle: 'Configurando tu Inicio rápido',
     setupSubtitle: 'Estamos aplicando tu selección y reutilizando el flujo real del onboarding.',
-    setupBridgeHint: 'Después entrarás a la demo guiada para explorar cómo está estructurado Innerbloom. Puedes saltarla cuando quieras.',
+    setupBridgeHint: 'Continúa hacia la demo guiada para conocer más de Innerbloom. Puedes saltarla cuando quieras.',
     setupDone: '',
     setupCta: 'Ir a la demo',
     quickSummary: {
@@ -1245,13 +1245,15 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
             <h1 className="text-balance text-2xl font-semibold text-white sm:text-3xl">{copy.setupTitle}</h1>
             <p className="mt-2 text-sm text-slate-300">{copy.setupSubtitle}</p>
             <ul className="mt-6 space-y-3">
-              {setupSteps.map((setupStep, index) => {
-                const isVisible = index < setupProgress;
+              {setupSteps.slice(0, setupProgress).map((setupStep, index) => {
                 const complete = setupProgress >= setupSteps.length;
                 const isPlanStep = index === setupSteps.length - 1;
                 return (
-                  <li key={setupStep} className={`flex items-center gap-3 text-sm transition ${isVisible ? 'opacity-100' : 'opacity-35'}`}>
-                    <span className={`h-2.5 w-2.5 rounded-full ${isVisible ? 'bg-violet-300' : 'bg-white/25'} ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
+                  <li
+                    key={setupStep}
+                    className="flex items-center gap-3 text-sm text-slate-100/90 transition-all duration-500"
+                  >
+                    <span className={`h-2.5 w-2.5 rounded-full bg-violet-300 ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
                     <span>
                       {setupStep}
                       {isPlanStep ? (

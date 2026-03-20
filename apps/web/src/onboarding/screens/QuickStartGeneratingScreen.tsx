@@ -28,7 +28,7 @@ export function QuickStartGeneratingScreen({
     : {
         title: 'Configurando tu Inicio rápido',
         subtitle: 'Estamos aplicando tu selección y reutilizando el flujo real del onboarding.',
-        bridgeHint: 'Después entrarás a la demo guiada para explorar cómo está estructurado Innerbloom. Puedes saltarla cuando quieras.',
+        bridgeHint: 'Continúa hacia la demo guiada para conocer más de Innerbloom. Puedes saltarla cuando quieras.',
         done: '',
         cta: 'Ir a demo guiada',
         saving: 'Guardando tu Quick Start…',
@@ -63,13 +63,12 @@ export function QuickStartGeneratingScreen({
         <h1 className="text-balance text-2xl font-semibold text-white sm:text-3xl">{copy.title}</h1>
         <p className="mt-2 text-sm text-slate-300">{copy.subtitle}</p>
         <ul className="mt-6 space-y-3">
-          {steps.map((setupStep, index) => {
-            const isVisible = index < setupProgress;
+          {steps.slice(0, setupProgress).map((setupStep, index) => {
             const complete = setupProgress >= steps.length;
             const isPlanStep = index === steps.length - 1;
             return (
-              <li key={setupStep} className={`flex items-center gap-3 text-sm transition ${isVisible ? 'opacity-100' : 'opacity-35'}`}>
-                <span className={`h-2.5 w-2.5 rounded-full ${isVisible ? 'bg-violet-300' : 'bg-white/25'} ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
+              <li key={setupStep} className="flex items-center gap-3 text-sm text-slate-100/90 transition-all duration-500">
+                <span className={`h-2.5 w-2.5 rounded-full bg-violet-300 ${!complete && index === setupProgress - 1 ? 'animate-pulse' : ''}`} />
                 <span>
                   {setupStep}
                   {isPlanStep ? <span className="ml-2 inline-flex rounded-full border border-emerald-300/35 bg-emerald-400/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-100 align-middle">FREE</span> : null}
