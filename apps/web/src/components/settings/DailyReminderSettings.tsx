@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useId, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useId, useMemo, useState } from "react";
 import { useRequest } from "../../hooks/useRequest";
 import {
   DailyReminderSettingsResponse,
@@ -33,7 +33,7 @@ type ReminderFormState = {
 type SubmitStatus = "idle" | "saving" | "success" | "error";
 
 interface DailyReminderSettingsProps {
-  onSaveSuccess?: () => void;
+  onSaveSuccess?: (response: DailyReminderSettingsResponse) => void;
 }
 
 function buildTimeOptions(): string[] {
@@ -107,7 +107,6 @@ export function DailyReminderSettings({
   );
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const closeTimeoutRef = useRef<number | null>(null);
   const { data, status, error, reload } = useRequest(
     getDailyReminderSettings,
     [],
@@ -134,14 +133,6 @@ export function DailyReminderSettings({
     }, 3200);
     return () => window.clearTimeout(timeoutId);
   }, [submitStatus]);
-
-  useEffect(() => {
-    return () => {
-      if (closeTimeoutRef.current !== null) {
-        window.clearTimeout(closeTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const isInitialLoading =
     (status === "idle" || status === "loading") && !data && !error;
@@ -173,10 +164,6 @@ export function DailyReminderSettings({
     }
     setSubmitStatus("saving");
     setSubmitError(null);
-    if (closeTimeoutRef.current !== null) {
-      window.clearTimeout(closeTimeoutRef.current);
-      closeTimeoutRef.current = null;
-    }
     try {
       const status: UpdateDailyReminderSettingsPayload["status"] =
         formState.enabled ? "active" : "paused";
@@ -190,13 +177,7 @@ export function DailyReminderSettings({
       setFormState(normalized);
       setInitialState(normalized);
       setSubmitStatus("success");
-      if (closeTimeoutRef.current !== null) {
-        window.clearTimeout(closeTimeoutRef.current);
-      }
-      closeTimeoutRef.current = window.setTimeout(() => {
-        onSaveSuccess?.();
-        closeTimeoutRef.current = null;
-      }, 1500);
+      onSaveSuccess?.(response);
     } catch (submitException) {
       console.error("Failed to update reminder settings", submitException);
       setSubmitStatus("error");

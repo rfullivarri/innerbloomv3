@@ -24,6 +24,7 @@ import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 import { Navbar } from "../components/layout/Navbar";
 import { MobileBottomNav } from "../components/layout/MobileBottomNav";
 import { Alerts } from "../components/dashboard-v3/Alerts";
+import { OnboardingCompletionBanner } from "../components/dashboard-v3/OnboardingCompletionBanner";
 import { EnergyCard } from "../components/dashboard-v3/EnergyCard";
 import { DailyCultivationSection } from "../components/dashboard-v3/DailyCultivationSection";
 import { MissionsSection } from "../components/dashboard-v3/MissionsSection";
@@ -77,7 +78,10 @@ import {
 } from "../components/dashboard-v3/ReminderSchedulerDialog";
 import { NotificationPopup } from "../components/feedback/NotificationPopup";
 import { useFeedbackNotifications } from "../hooks/useFeedbackNotifications";
-import { useDailyQuestReadiness } from "../hooks/useDailyQuestReadiness";
+import {
+  useDailyQuestReadiness,
+  type DailyQuestReadiness,
+} from "../hooks/useDailyQuestReadiness";
 import { useWeeklyWrapped } from "../hooks/useWeeklyWrapped";
 import { WeeklyWrappedModal } from "../components/feedback/WeeklyWrappedModal";
 import { useAppMode } from "../hooks/useAppMode";
@@ -390,6 +394,7 @@ export default function DashboardV3Page() {
     { enabled: Boolean(backendUserId) },
   );
   const [journeyReadyOpen, setJourneyReadyOpen] = useState(false);
+  const [showOnboardingCompletionBanner, setShowOnboardingCompletionBanner] = useState(false);
   const generationKeyRef = useRef<string | null>(null);
   const firstDailyQuestPromptInFlightRef = useRef(false);
   const firstDailyQuestPromptMarkedRef = useRef(false);
@@ -609,6 +614,27 @@ export default function DashboardV3Page() {
     reminderSchedulerDialogRef.current?.open();
   }, []);
 
+  const handleReminderScheduled = useCallback(async () => {
+    setShowOnboardingCompletionBanner(true);
+    await Promise.all([
+      onboardingProgress.reload(),
+      dailyQuestReadiness.reload(),
+      reload(),
+    ]);
+  }, [dailyQuestReadiness, onboardingProgress, reload]);
+
+  useEffect(() => {
+    if (!showOnboardingCompletionBanner) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setShowOnboardingCompletionBanner(false);
+    }, 3800);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [showOnboardingCompletionBanner]);
+
   const handleDailyQuestComplete = useCallback(
     (
       response: Parameters<
@@ -814,6 +840,7 @@ export default function DashboardV3Page() {
         <ReminderSchedulerDialog
           ref={reminderSchedulerDialogRef}
           enabled={Boolean(backendUserId)}
+          onScheduled={handleReminderScheduled}
         />
         {feedbackNotifications.activePopup ? (
           <NotificationPopup
@@ -865,6 +892,7 @@ export default function DashboardV3Page() {
                       gameMode={gameMode}
                       weeklyTarget={profile?.weekly_target ?? null}
                       isJourneyGenerating={isJourneyGenerating}
+                      dailyQuestReadiness={dailyQuestReadiness}
                       showOnboardingGuidance={
                         dailyQuestReadiness.showOnboardingGuidance
                       }
@@ -875,6 +903,7 @@ export default function DashboardV3Page() {
                       onProfileRefresh={reload}
                       shouldShowFirstDailyQuestCta={shouldShowFirstDailyQuestCta}
                       onOpenDailyQuest={handleOpenDaily}
+                      showOnboardingCompletionBanner={showOnboardingCompletionBanner}
                     />
                   }
                 />
@@ -993,6 +1022,7 @@ interface DashboardOverviewProps {
   gameMode: GameMode | string | null;
   weeklyTarget: number | null;
   isJourneyGenerating: boolean;
+  dailyQuestReadiness: DailyQuestReadiness;
   showOnboardingGuidance: boolean;
   section: DashboardSectionConfig;
   onOpenReminderScheduler: () => void;
@@ -1001,6 +1031,7 @@ interface DashboardOverviewProps {
   onProfileRefresh: () => void;
   shouldShowFirstDailyQuestCta: boolean;
   onOpenDailyQuest: () => void;
+  showOnboardingCompletionBanner: boolean;
 }
 
 export function DashboardOverview({
@@ -1008,6 +1039,7 @@ export function DashboardOverview({
   gameMode,
   weeklyTarget,
   isJourneyGenerating,
+  dailyQuestReadiness,
   showOnboardingGuidance,
   section,
   onOpenReminderScheduler,
@@ -1016,6 +1048,7 @@ export function DashboardOverview({
   onProfileRefresh,
   shouldShowFirstDailyQuestCta,
   onOpenDailyQuest,
+  showOnboardingCompletionBanner,
 }: DashboardOverviewProps) {
   const handleScheduleClick = useCallback(() => {
     onOpenReminderScheduler();
@@ -1070,6 +1103,7 @@ export function DashboardOverview({
       />
       <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="order-1 space-y-4 lg:col-span-12">
+          <OnboardingCompletionBanner visible={showOnboardingCompletionBanner} />
           <ModeUpgradeSuggestionCTA
             suggestion={modeUpgradeSuggestion}
             isLoading={modeUpgradeSuggestionRequest.status === "loading"}
@@ -1077,8 +1111,13 @@ export function DashboardOverview({
             onUpgradeAccepted={onProfileRefresh}
           />
           <Alerts
-            userId={userId}
-            isJourneyGenerating={isJourneyGenerating}
+            hasTasks={dailyQuestReadiness.hasTasks}
+            firstTasksConfirmed={dailyQuestReadiness.firstTasksConfirmed}
+            completedFirstDailyQuest={dailyQuestReadiness.completedFirstDailyQuest}
+            showJourneyPreparing={dailyQuestReadiness.showJourneyPreparing}
+            tasksStatus={dailyQuestReadiness.tasksStatus}
+            journeyStatus={dailyQuestReadiness.journeyStatus}
+            journey={dailyQuestReadiness.journey}
             showOnboardingGuidance={showOnboardingGuidance}
             onScheduleClick={handleScheduleClick}
             suppressJourneyPreparing={journeyReadyOpen}

@@ -1,10 +1,15 @@
 import { Link } from 'react-router-dom';
-import { useDailyQuestReadiness } from '../../hooks/useDailyQuestReadiness';
+import type { AsyncStatus } from '../../hooks/useRequest';
 import type { UserJourneySummary } from '../../lib/api';
 
 interface AlertsProps {
-  userId: string;
-  isJourneyGenerating?: boolean;
+  hasTasks: boolean;
+  firstTasksConfirmed: boolean;
+  completedFirstDailyQuest: boolean;
+  showJourneyPreparing: boolean;
+  tasksStatus: AsyncStatus;
+  journeyStatus: AsyncStatus;
+  journey: UserJourneySummary | null;
   showOnboardingGuidance?: boolean;
   onScheduleClick?: () => void;
   suppressJourneyPreparing?: boolean;
@@ -19,24 +24,19 @@ function shouldShowSchedulerWarning(journey: UserJourneySummary | null): boolean
 }
 
 export function Alerts({
-  userId,
-  isJourneyGenerating = false,
+  hasTasks,
+  firstTasksConfirmed,
+  completedFirstDailyQuest,
+  showJourneyPreparing,
+  tasksStatus,
+  journeyStatus,
+  journey,
   showOnboardingGuidance,
   onScheduleClick,
   suppressJourneyPreparing = false,
   showFirstDailyQuestCta = false,
   onOpenFirstDailyQuest,
 }: AlertsProps) {
-  const {
-    hasTasks,
-    firstTasksConfirmed,
-    completedFirstDailyQuest,
-    showJourneyPreparing,
-    tasksStatus,
-    journeyStatus,
-    journey,
-  } = useDailyQuestReadiness(userId, { isJourneyGenerating });
-
   const showScheduler =
     hasTasks &&
     firstTasksConfirmed &&
