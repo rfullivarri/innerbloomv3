@@ -3,6 +3,7 @@ import { useAuth } from '@clerk/clerk-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
 import { DashboardOverview } from './DashboardV3';
+import type { DailyQuestReadiness } from '../hooks/useDailyQuestReadiness';
 import { getDashboardSectionConfig } from './dashboardSections';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 import { useThemePreference } from '../theme/ThemePreferenceProvider';
@@ -20,6 +21,28 @@ import { usePageMeta } from '../lib/seo';
 const DEMO_USER_ID = 'demo-public-user';
 
 const DEMO_SHARE_IMAGE = 'https://innerbloomjourney.org/og/neneOGP.png';
+
+const DEMO_DAILY_QUEST_READINESS: DailyQuestReadiness = {
+  hasTasks: true,
+  firstTasksConfirmed: true,
+  completedFirstDailyQuest: true,
+  canOpenDailyQuest: true,
+  canShowDailyQuestPopup: true,
+  canAutoOpenDailyQuestPopup: false,
+  showOnboardingGuidance: false,
+  showJourneyPreparing: false,
+  tasksStatus: 'success',
+  journeyStatus: 'success',
+  journey: {
+    first_date_log: null,
+    days_of_journey: 0,
+    quantity_daily_logs: 0,
+    first_programmed: true,
+    first_tasks_confirmed: true,
+    completed_first_daily_quest: true,
+  },
+  reload: () => undefined,
+};
 
 const DAILY_QUEST_STEP_IDS = new Set([
   'daily-quest-intro',
@@ -223,6 +246,7 @@ export default function DemoDashboardPage() {
           gameMode={demoContext.gameMode}
           weeklyTarget={3}
           isJourneyGenerating={false}
+          dailyQuestReadiness={DEMO_DAILY_QUEST_READINESS}
           showOnboardingGuidance={false}
           section={overviewSection}
           onOpenReminderScheduler={() => undefined}
@@ -230,6 +254,7 @@ export default function DemoDashboardPage() {
           onProfileRefresh={() => undefined}
           shouldShowFirstDailyQuestCta={false}
           onOpenDailyQuest={() => dailyQuestModalRef.current?.open()}
+          showOnboardingCompletionBanner={false}
         />
       </main>
     </div>

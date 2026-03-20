@@ -83,7 +83,7 @@ describe("DailyReminderSettings", () => {
     await screen.findByText(/guardamos tus recordatorios/i);
   });
 
-  it("calls onSaveSuccess after the success toast delay", async () => {
+  it("calls onSaveSuccess immediately after a successful save", async () => {
     const onSaveSuccess = vi.fn();
     const user = userEvent.setup();
     mockedGet.mockResolvedValue({
@@ -110,14 +110,10 @@ describe("DailyReminderSettings", () => {
     await user.click(submitButton);
 
     await screen.findByText(/guardamos tus recordatorios/i);
-    expect(onSaveSuccess).not.toHaveBeenCalled();
-
-    await waitFor(() => expect(onSaveSuccess).toHaveBeenCalledTimes(1), {
-      timeout: 2500,
-    });
+    await waitFor(() => expect(onSaveSuccess).toHaveBeenCalledTimes(1));
   });
 
-  it("clears delayed onSaveSuccess when unmounted", async () => {
+  it("does not call onSaveSuccess when save fails", async () => {
     const onSaveSuccess = vi.fn();
     const user = userEvent.setup();
     mockedGet.mockResolvedValue({
@@ -125,30 +121,19 @@ describe("DailyReminderSettings", () => {
       timezone: "America/Bogota",
       status: "active",
     });
-    mockedUpdate.mockResolvedValue({
-      local_time: "10:00",
-      timezone: "America/Argentina/Buenos_Aires",
-      status: "paused",
-    });
+    mockedUpdate.mockRejectedValue(new Error("boom"));
 
-    const { unmount } = render(
-      <DailyReminderSettings onSaveSuccess={onSaveSuccess} />,
-    );
+    render(<DailyReminderSettings onSaveSuccess={onSaveSuccess} />);
 
     const switchControl = await screen.findByRole("switch", {
       name: /daily quest/i,
     });
-    const timeSelect = screen.getByLabelText(/hora local/i);
-    await user.selectOptions(timeSelect, "10:00");
     await user.click(switchControl);
 
     const submitButton = screen.getByRole("button", { name: /guardar/i });
     await user.click(submitButton);
-    await screen.findByText(/guardamos tus recordatorios/i);
 
-    unmount();
-
-    await new Promise((resolve) => setTimeout(resolve, 1700));
+    await screen.findByText(/boom/i);
     expect(onSaveSuccess).not.toHaveBeenCalled();
   });
 

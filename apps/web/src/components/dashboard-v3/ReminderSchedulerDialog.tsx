@@ -22,12 +22,13 @@ export type ReminderSchedulerDialogHandle = {
 interface ReminderSchedulerDialogProps {
   enabled?: boolean;
   returnFocusRef?: RefObject<HTMLElement | null>;
+  onScheduled?: () => void | Promise<void>;
 }
 
 export const ReminderSchedulerDialog = forwardRef<
   ReminderSchedulerDialogHandle,
   ReminderSchedulerDialogProps
->(function ReminderSchedulerDialog({ enabled = true, returnFocusRef }, ref) {
+>(function ReminderSchedulerDialog({ enabled = true, returnFocusRef, onScheduled }, ref) {
   const { t } = usePostLoginLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -162,7 +163,10 @@ export const ReminderSchedulerDialog = forwardRef<
               </button>
             </div>
             <div className="flex-1 overflow-y-auto pr-1">
-              <DailyReminderSettings onSaveSuccess={close} />
+              <DailyReminderSettings onSaveSuccess={() => {
+                close();
+                void onScheduled?.();
+              }} />
             </div>
           </motion.div>
         </motion.div>
