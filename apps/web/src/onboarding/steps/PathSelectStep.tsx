@@ -60,16 +60,18 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
     }
   };
 
-  const getCardClasses = (isSelected: boolean, variant: PathOption) => {
+  const baseCardClasses =
+    'glass-card onboarding-surface-inner onboarding-glass-border-soft border-white/20 bg-white/[0.08] shadow-[0_24px_64px_rgba(15,23,42,0.24),0_8px_24px_rgba(129,140,248,0.12)] hover:border-white/35 hover:bg-white/[0.11] focus-visible:border-white/40 focus-visible:ring-2 focus-visible:ring-sky-300/70';
+
+  const selectedCardClasses =
+    'border-white/80 bg-white/[0.12] ring-2 ring-sky-300/75 shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_0_24px_rgba(34,211,238,0.24),0_0_44px_rgba(139,92,246,0.22)] focus-visible:ring-4 focus-visible:ring-sky-200/90';
+
+  const getCardClasses = (isSelected: boolean) => {
     if (isSelected) {
-      return variant === 'quick_start'
-        ? 'border-white/80 bg-white/[0.12] ring-2 ring-sky-300/75 shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_0_24px_rgba(34,211,238,0.24),0_0_44px_rgba(139,92,246,0.22)] focus-visible:ring-4 focus-visible:ring-sky-200/90'
-        : 'border-violet-200/70 bg-violet-500/20 ring-2 ring-violet-300/55 shadow-[0_0_0_1px_rgba(196,181,253,0.18),0_0_24px_rgba(167,139,250,0.22)] focus-visible:ring-4 focus-visible:ring-violet-200/80';
+      return `${baseCardClasses} ${selectedCardClasses}`;
     }
 
-    return variant === 'quick_start'
-      ? 'border-white/20 bg-white/8 hover:border-white/35 hover:bg-white/12 focus-visible:border-white/40 focus-visible:ring-2 focus-visible:ring-sky-300/70'
-      : 'border-white/18 bg-white/[0.06] hover:border-violet-200/35 hover:bg-violet-400/10 focus-visible:border-violet-200/40 focus-visible:ring-2 focus-visible:ring-violet-300/60';
+    return baseCardClasses;
   };
 
   return (
@@ -91,8 +93,8 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
           aria-label={`${copy.personalTitle}${selectedPath === 'traditional' ? copy.selectedSuffix : ''}`}
           data-selected={selectedPath === 'traditional' ? 'true' : 'false'}
           className={[
-            'rounded-2xl p-4 text-left transition-all duration-200 focus-visible:outline-none sm:p-5',
-            getCardClasses(selectedPath === 'traditional', 'traditional'),
+            'rounded-2xl border p-4 text-left transition-all duration-200 focus-visible:outline-none sm:p-5',
+            getCardClasses(selectedPath === 'traditional'),
           ].join(' ')}
         >
           <p className="flex items-center gap-2 text-lg font-semibold leading-tight text-white">
@@ -112,15 +114,15 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
           aria-label={`${copy.quickTitle}${selectedPath === 'quick_start' ? copy.selectedSuffix : ''}`}
           data-selected={selectedPath === 'quick_start' ? 'true' : 'false'}
           className={[
-            'rounded-2xl p-4 text-left transition-all duration-200 focus-visible:outline-none sm:p-5',
-            getCardClasses(selectedPath === 'quick_start', 'quick_start'),
+            'rounded-2xl border p-4 text-left transition-all duration-200 focus-visible:outline-none sm:p-5',
+            getCardClasses(selectedPath === 'quick_start'),
           ].join(' ')}
         >
-          <p className="flex items-center gap-2 text-lg font-semibold leading-tight text-white/90">
+          <p className="flex items-center gap-2 text-lg font-semibold leading-tight text-white">
             <span aria-hidden className="text-base">⚡</span>
             {copy.quickTitle}
           </p>
-          <p className="mt-2 text-base leading-snug text-white/75">{copy.quickDescription}</p>
+          <p className="mt-2 text-base leading-snug text-white/90">{copy.quickDescription}</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="inline-flex rounded-full border border-white/20 bg-white/8 px-2.5 py-1 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-white/75">
               {copy.quickDuration}
