@@ -1,5 +1,9 @@
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import type { OnboardingLanguage } from '../constants';
+import { NavButtons } from '../ui/NavButtons';
+
+type PathOption = 'traditional' | 'quick_start';
 
 interface PathSelectStepProps {
   language?: OnboardingLanguage;
@@ -9,6 +13,8 @@ interface PathSelectStepProps {
 }
 
 export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQuickStart, onBack }: PathSelectStepProps) {
+  const [selectedPath, setSelectedPath] = useState<PathOption | null>(null);
+
   const copy = language === 'en'
     ? {
         step: 'Step 2 · Choose your path',
@@ -22,7 +28,9 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
         quickDuration: '< 1 min',
         quickLabel: 'Fast path',
         back: 'Back',
-        continuePersonal: 'Continue with Personal guide',
+        continue: 'Continue',
+        selectPath: 'Select a path to continue',
+        selectedSuffix: ' selected',
       }
     : {
         step: 'Paso 2 · Elegí tu camino',
@@ -36,8 +44,33 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
         quickDuration: '< 1 min',
         quickLabel: 'Camino rápido',
         back: 'Volver',
-        continuePersonal: 'Continuar con Guía personal',
+        continue: 'Continuar',
+        selectPath: 'Elegí un camino para continuar',
+        selectedSuffix: ' seleccionado',
       };
+
+  const handleConfirm = () => {
+    if (selectedPath === 'traditional') {
+      onSelectTraditional();
+      return;
+    }
+
+    if (selectedPath === 'quick_start') {
+      onSelectQuickStart();
+    }
+  };
+
+  const getCardClasses = (isSelected: boolean, variant: PathOption) => {
+    if (isSelected) {
+      return variant === 'quick_start'
+        ? 'border-white/80 bg-white/[0.12] ring-2 ring-sky-300/75 shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_0_24px_rgba(34,211,238,0.24),0_0_44px_rgba(139,92,246,0.22)] focus-visible:ring-4 focus-visible:ring-sky-200/90'
+        : 'border-violet-200/70 bg-violet-500/20 ring-2 ring-violet-300/55 shadow-[0_0_0_1px_rgba(196,181,253,0.18),0_0_24px_rgba(167,139,250,0.22)] focus-visible:ring-4 focus-visible:ring-violet-200/80';
+    }
+
+    return variant === 'quick_start'
+      ? 'border-white/20 bg-white/8 hover:border-white/35 hover:bg-white/12 focus-visible:border-white/40 focus-visible:ring-2 focus-visible:ring-sky-300/70'
+      : 'border-white/18 bg-white/[0.06] hover:border-violet-200/35 hover:bg-violet-400/10 focus-visible:border-violet-200/40 focus-visible:ring-2 focus-visible:ring-violet-300/60';
+  };
 
   return (
     <motion.section
@@ -53,8 +86,14 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
       <div className="mt-6 grid gap-3.5 sm:grid-cols-2">
         <button
           type="button"
-          onClick={onSelectTraditional}
-          className="rounded-2xl border border-violet-200/45 bg-violet-500/20 p-4 text-left transition hover:bg-violet-400/25 sm:p-5"
+          onClick={() => setSelectedPath('traditional')}
+          aria-pressed={selectedPath === 'traditional'}
+          aria-label={`${copy.personalTitle}${selectedPath === 'traditional' ? copy.selectedSuffix : ''}`}
+          data-selected={selectedPath === 'traditional' ? 'true' : 'false'}
+          className={[
+            'rounded-2xl p-4 text-left transition-all duration-200 focus-visible:outline-none sm:p-5',
+            getCardClasses(selectedPath === 'traditional', 'traditional'),
+          ].join(' ')}
         >
           <p className="flex items-center gap-2 text-lg font-semibold leading-tight text-white">
             <span aria-hidden className="text-base">✨</span>
@@ -66,37 +105,42 @@ export function PathSelectStep({ language = 'es', onSelectTraditional, onSelectQ
           </span>
         </button>
 
-        <button type="button" onClick={onSelectQuickStart} className="rounded-2xl border border-white/20 bg-white/8 p-4 text-left transition hover:bg-white/12 sm:p-5">
+        <button
+          type="button"
+          onClick={() => setSelectedPath('quick_start')}
+          aria-pressed={selectedPath === 'quick_start'}
+          aria-label={`${copy.quickTitle}${selectedPath === 'quick_start' ? copy.selectedSuffix : ''}`}
+          data-selected={selectedPath === 'quick_start' ? 'true' : 'false'}
+          className={[
+            'rounded-2xl p-4 text-left transition-all duration-200 focus-visible:outline-none sm:p-5',
+            getCardClasses(selectedPath === 'quick_start', 'quick_start'),
+          ].join(' ')}
+        >
           <p className="flex items-center gap-2 text-lg font-semibold leading-tight text-white/90">
             <span aria-hidden className="text-base">⚡</span>
             {copy.quickTitle}
           </p>
           <p className="mt-2 text-base leading-snug text-white/75">{copy.quickDescription}</p>
-          <span className="mt-4 inline-flex rounded-full border border-white/20 bg-white/8 px-2.5 py-1 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-white/75">
-            {copy.quickDuration}
-          </span>
-          <span className="mt-4 inline-flex rounded-full border border-white/20 bg-white/8 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-white/65">
-            {copy.quickLabel}
-          </span>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="inline-flex rounded-full border border-white/20 bg-white/8 px-2.5 py-1 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-white/75">
+              {copy.quickDuration}
+            </span>
+            <span className="inline-flex rounded-full border border-sky-200/20 bg-sky-300/10 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-sky-100/80">
+              {copy.quickLabel}
+            </span>
+          </div>
         </button>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/8 px-5 py-2 text-sm font-medium text-white/80 transition hover:text-white"
-        >
-          {copy.back}
-        </button>
-        <button
-          type="button"
-          onClick={onSelectTraditional}
-          className="inline-flex items-center justify-center rounded-full bg-violet-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-violet-400"
-        >
-          {copy.continuePersonal}
-        </button>
-      </div>
+      <NavButtons
+        language={language}
+        onBack={onBack}
+        onConfirm={handleConfirm}
+        confirmLabel={copy.continue}
+        backLabel={copy.back}
+        disabled={!selectedPath}
+      />
+      {!selectedPath ? <p className="mt-3 text-right text-xs text-white/45">{copy.selectPath}</p> : null}
     </motion.section>
   );
 }
