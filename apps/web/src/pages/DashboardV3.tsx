@@ -98,9 +98,13 @@ import {
   readModerationOnboardingIntentFlag,
   writeModerationOnboardingIntentFlag,
 } from "../lib/moderationOnboarding";
-
-const MODERATION_SUGGESTION_RESOLVED_KEY =
-  "ib.onboarding.moderationSuggestionResolved";
+import {
+  clearOnboardingOverlayScopeIfChanged,
+  readOnboardingOverlayFlag,
+  resetActiveOnboardingOverlayScope,
+  writeOnboardingOverlayFlag,
+} from "../lib/onboardingOverlayStorage";
+import { buildOnboardingOverlayScope } from "../lib/onboardingOverlayScope";
 
 function hasModerationBodyFocus(
   profile: CurrentUserProfile | null | undefined,
@@ -151,29 +155,6 @@ function hasModerationBodyFocus(
       normalized === "moderacion"
     );
   });
-}
-
-function readModerationSuggestionResolvedFlag(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  return (
-    window.localStorage.getItem(MODERATION_SUGGESTION_RESOLVED_KEY) === "1"
-  );
-}
-
-function writeModerationSuggestionResolvedFlag(value: boolean) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  if (value) {
-    window.localStorage.setItem(MODERATION_SUGGESTION_RESOLVED_KEY, "1");
-    return;
-  }
-
-  window.localStorage.removeItem(MODERATION_SUGGESTION_RESOLVED_KEY);
 }
 
 export default function DashboardV3Page() {
@@ -239,11 +220,11 @@ export default function DashboardV3Page() {
   const moderation = useModerationWidget();
   const [isModerationEditOpen, setIsModerationEditOpen] = useState(false);
   const [moderationSuggestionResolved, setModerationSuggestionResolved] =
-    useState(() => readModerationSuggestionResolvedFlag());
+    useState(false);
   const [isModerationSuggestionOpen, setIsModerationSuggestionOpen] =
     useState(false);
   const [hasModerationOnboardingIntent, setHasModerationOnboardingIntent] =
-    useState(() => readModerationOnboardingIntentFlag());
+    useState(false);
   const [selectedModerationSuggestions, setSelectedModerationSuggestions] =
     useState<ModerationTrackerType[]>(["alcohol", "tobacco", "sugar"]);
   const [
@@ -415,6 +396,7 @@ export default function DashboardV3Page() {
 
   const onboardingProgress = useOnboardingProgress();
   const { markStep } = onboardingProgress;
+  const overlayScope = buildOnboardingOverlayScope(onboardingProgress.progress);
   const onboardingEditorNudge = useOnboardingEditorNudge({
     completedFirstDailyQuest: dailyQuestReadiness.completedFirstDailyQuest,
   });
@@ -424,6 +406,62 @@ export default function DashboardV3Page() {
     shouldShowDashboardDot,
     markReturnedToDashboard,
   } = onboardingEditorNudge;
+
+  useEffect(() => {
+    clearOnboardingOverlayScopeIfChanged(overlayScope);
+  }, [overlayScope]);
+
+  useEffect(() => {
+    const backendHasModerationIntent = Boolean(
+      onboardingProgress.progress?.moderation_selected_at,
+    );
+    const fallbackFromProfile = hasModerationBodyFocus(
+      profile,
+      dailyQuestReadiness.journey,
+    );
+    const overlayHasModerationIntent =
+      readModerationOnboardingIntentFlag(overlayScope);
+
+    setHasModerationOnboardingIntent(
+      backendHasModerationIntent ||
+        fallbackFromProfile ||
+        overlayHasModerationIntent,
+    );
+  }, [
+    dailyQuestReadiness.journey,
+    onboardingProgress.progress?.moderation_selected_at,
+    overlayScope,
+    profile,
+  ]);
+
+  useEffect(() => {
+    const backendResolved = Boolean(
+      onboardingProgress.progress?.moderation_modal_resolved_at,
+    );
+    const overlayResolved = readOnboardingOverlayFlag(
+      overlayScope,
+      "moderationSuggestionResolved",
+    );
+
+    setModerationSuggestionResolved(backendResolved || overlayResolved);
+  }, [
+    onboardingProgress.progress?.moderation_modal_resolved_at,
+    overlayScope,
+  ]);
+
+  useEffect(() => {
+    if (!onboardingProgress.progress?.daily_quest_scheduled_at) {
+      return;
+    }
+
+    resetActiveOnboardingOverlayScope(overlayScope);
+    setHasModerationOnboardingIntent(false);
+    setModerationSuggestionResolved(false);
+    setIsModerationSuggestionOpen(false);
+  }, [
+    onboardingProgress.progress?.daily_quest_scheduled_at,
+    overlayScope,
+  ]);
 
   const shouldShowFirstDailyQuestCta =
     dailyQuestReadiness.firstTasksConfirmed &&
@@ -453,28 +491,6 @@ export default function DashboardV3Page() {
   ]);
 
   useEffect(() => {
-    if (onboardingProgress.progress?.moderation_selected_at && !hasModerationOnboardingIntent) {
-      setHasModerationOnboardingIntent(true);
-      return;
-    }
-
-    if (!hasModerationOnboardingIntent) {
-      const fallbackFromProfile = hasModerationBodyFocus(
-        profile,
-        dailyQuestReadiness.journey,
-      );
-      if (fallbackFromProfile) {
-        setHasModerationOnboardingIntent(true);
-      }
-    }
-  }, [
-    dailyQuestReadiness.journey,
-    hasModerationOnboardingIntent,
-    profile,
-    onboardingProgress.progress?.moderation_selected_at,
-  ]);
-
-  useEffect(() => {
     const shouldShowModerationSuggestion =
       dailyQuestReadiness.firstTasksConfirmed &&
       !dailyQuestReadiness.completedFirstDailyQuest &&
@@ -484,14 +500,22 @@ export default function DashboardV3Page() {
 
     if (shouldShowModerationSuggestion) {
       if (moderation.enabledTypes.length > 0) {
-        writeModerationSuggestionResolvedFlag(true);
-        writeModerationOnboardingIntentFlag(false);
+        writeOnboardingOverlayFlag(
+          overlayScope,
+          "moderationSuggestionResolved",
+          true,
+        );
+        writeModerationOnboardingIntentFlag(false, overlayScope);
         setHasModerationOnboardingIntent(false);
         setModerationSuggestionResolved(true);
         return;
       }
 
-      void onboardingProgress.markStep('moderation_modal_shown', { trigger: 'dashboard_moderation_modal_open' });
+      if (!onboardingProgress.progress?.moderation_modal_shown_at) {
+        void onboardingProgress.markStep("moderation_modal_shown", {
+          trigger: "dashboard_moderation_modal_open",
+        });
+      }
       setIsModerationSuggestionOpen(true);
       return;
     }
@@ -507,16 +531,22 @@ export default function DashboardV3Page() {
     moderation.enabledTypes.length,
     moderation.isLoading,
     moderationSuggestionResolved,
+    onboardingProgress,
+    overlayScope,
   ]);
 
   const resolveModerationSuggestion = useCallback(() => {
-    void onboardingProgress.markStep('moderation_modal_resolved', { trigger: 'dashboard_moderation_modal_resolved' });
-    writeModerationSuggestionResolvedFlag(true);
-    writeModerationOnboardingIntentFlag(false);
+    writeOnboardingOverlayFlag(overlayScope, "moderationSuggestionResolved", true);
+    writeModerationOnboardingIntentFlag(false, overlayScope);
     setHasModerationOnboardingIntent(false);
     setModerationSuggestionResolved(true);
     setIsModerationSuggestionOpen(false);
-  }, [onboardingProgress]);
+    if (!onboardingProgress.progress?.moderation_modal_resolved_at) {
+      void onboardingProgress.markStep("moderation_modal_resolved", {
+        trigger: "dashboard_moderation_modal_resolved",
+      });
+    }
+  }, [onboardingProgress, overlayScope]);
 
   const handleToggleModerationSuggestion = useCallback(
     (type: ModerationTrackerType) => {

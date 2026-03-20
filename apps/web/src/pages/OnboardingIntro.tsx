@@ -23,6 +23,7 @@ import {
   ONBOARDING_OG_IMAGE_URL,
   ONBOARDING_OG_IMAGE_WIDTH,
 } from '../lib/onboardingSeo';
+import { buildOnboardingOverlayScope } from '../lib/onboardingOverlayScope';
 
 async function parseErrorMessage(response: Response) {
   const payload = await response.json().catch(() => ({}));
@@ -90,7 +91,11 @@ export default function OnboardingIntroPage() {
           throw new ApiError(introResponse.status, { message }, buildApiUrl('/onboarding/intro'));
         }
 
-        await introResponse.json().catch(() => ({}));
+        const introJson = (await introResponse.json().catch(() => ({}))) as {
+          ok?: boolean;
+          session_id?: string;
+          taskgen_correlation_id?: string | null;
+        };
 
         emitOnboardingEvent('onboarding_completed', {
           mode: payload.mode,
@@ -99,10 +104,14 @@ export default function OnboardingIntroPage() {
         });
 
         const hasModerationIntent = hasModerationSelection(payload.data.foundations.body);
+        const overlayScope = buildOnboardingOverlayScope({
+          user_id: payload.meta.user_id,
+          onboarding_session_id: introJson.session_id ?? null,
+        });
         if (typeof window !== 'undefined') {
           window.localStorage.setItem(POSTLOGIN_LANGUAGE_STORAGE_KEY, language);
           window.localStorage.setItem('innerbloom.postlogin.language.source', 'locale');
-          writeModerationOnboardingIntentFlag(hasModerationIntent);
+          writeModerationOnboardingIntentFlag(hasModerationIntent, overlayScope);
         }
 
         if (hasModerationIntent) {
