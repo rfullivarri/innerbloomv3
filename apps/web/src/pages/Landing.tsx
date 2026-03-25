@@ -928,6 +928,20 @@ export default function LandingPage() {
             </>
           )}
           <a href="#faq">{copy.footer.faq}</a>
+          <a
+            className="footer-community-link"
+            href="https://www.reddit.com/r/getdisciplined/comments/1s3di4u/discussion_i_started_building_a_habit_system/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M20.6 13.4a2.4 2.4 0 0 0-3.95-2.66 9.2 9.2 0 0 0-4.2-1.1l.72-3.38 2.36.5a1.8 1.8 0 1 0 .3-1.1l-3.06-.66a.56.56 0 0 0-.66.43l-.86 4.02a9.33 9.33 0 0 0-4.45 1.13 2.4 2.4 0 1 0-1.32 4.4q-.03.3-.03.63c0 3.04 3.05 5.5 6.81 5.5s6.8-2.46 6.8-5.5q0-.3-.03-.58a2.4 2.4 0 0 0 1.57-2.23Zm-11.82 1.2a1.13 1.13 0 1 1 0-2.26 1.13 1.13 0 0 1 0 2.26Zm6.46 3.1c-.8.78-2.34 1.04-3.23 1.04s-2.43-.26-3.23-1.04a.56.56 0 1 1 .78-.8c.47.46 1.56.72 2.45.72s1.98-.26 2.45-.72a.56.56 0 1 1 .78.8Zm-.03-3.1a1.13 1.13 0 1 1 0-2.26 1.13 1.13 0 0 1 0 2.26Z"
+                fill="currentColor"
+              />
+            </svg>
+            <span>Join the discussion on Reddit</span>
+          </a>
         </nav>
       </footer>
     </div>
