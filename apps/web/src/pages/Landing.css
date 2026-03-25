@@ -1220,6 +1220,39 @@
   color: #120a1c;
 }
 
+.landing .footer-community-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.landing .footer-community-link svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.82;
+  flex: 0 0 auto;
+}
+
+.landing .footer-community-link span {
+  line-height: 1.1;
+}
+
+.landing .footer-community-link:hover {
+  color: #120a1c;
+  border-color: color-mix(in srgb, currentColor 28%, transparent);
+  background: color-mix(in srgb, currentColor 5%, transparent);
+}
+
+.landing .footer-community-link:focus-visible {
+  outline: 2px solid #120a1c;
+  outline-offset: 2px;
+}
+
 @keyframes meshFloat {
   0% {
     background-position: 10% 10%, 88% 14%, 12% 86%, 84% 80%;
