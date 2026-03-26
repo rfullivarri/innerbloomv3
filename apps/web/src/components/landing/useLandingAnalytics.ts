@@ -2,7 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { type AnalyticsConsentStatus } from '../../lib/cookieConsent';
 import { ensureGa4Initialized, sendGaEvent } from '../../lib/ga4';
 
-const LANDING_GA4_MEASUREMENT_ID = (import.meta.env.VITE_GA4_MEASUREMENT_ID ?? '').trim();
+const LANDING_GA4_MEASUREMENT_ID = (
+  import.meta.env.VITE_GA4_MEASUREMENT_ID
+  ?? import.meta.env.VITE_GA_MEASUREMENT_ID
+  ?? ''
+).trim();
+const LANDING_GA4_MEASUREMENT_ID_SOURCE = import.meta.env.VITE_GA4_MEASUREMENT_ID
+  ? 'VITE_GA4_MEASUREMENT_ID'
+  : import.meta.env.VITE_GA_MEASUREMENT_ID
+    ? 'VITE_GA_MEASUREMENT_ID'
+    : 'unset';
 let missingMeasurementIdWarningShown = false;
 
 function buildPageLocation(pathname: string, search: string, hash: string): string {
@@ -30,7 +39,14 @@ export function useLandingAnalytics({
   const trackedScrollMilestones = useRef<Set<number>>(new Set());
 
   useEffect(() => {
+    console.info('[landing][ga4-debug] analytics init effect', {
+      consent,
+      measurementIdSource: LANDING_GA4_MEASUREMENT_ID_SOURCE,
+      measurementId: LANDING_GA4_MEASUREMENT_ID,
+    });
+
     if (consent !== 'accepted') {
+      console.info('[landing][ga4-debug] analytics init effect blocked: consent is not accepted', { consent });
       setIsReady(false);
       trackedScrollMilestones.current.clear();
       return;
@@ -41,15 +57,20 @@ export function useLandingAnalytics({
         missingMeasurementIdWarningShown = true;
         console.warn('[landing] VITE_GA4_MEASUREMENT_ID is not configured. GA4 will stay disabled.');
       }
+      console.info('[landing][ga4-debug] analytics init effect blocked: empty measurement id');
       setIsReady(false);
       return;
     }
 
     let cancelled = false;
 
+    console.info('[landing][ga4-debug] calling ensureGa4Initialized', {
+      measurementId: LANDING_GA4_MEASUREMENT_ID,
+    });
     void ensureGa4Initialized(LANDING_GA4_MEASUREMENT_ID)
       .then(() => {
         if (!cancelled) {
+          console.info('[landing][ga4-debug] ensureGa4Initialized resolved, setting isReady=true');
           setIsReady(true);
         }
       })
@@ -64,15 +85,22 @@ export function useLandingAnalytics({
 
   useEffect(() => {
     if (!isReady || consent !== 'accepted') {
+      console.info('[landing][ga4-debug] page_view effect blocked', {
+        isReady,
+        consent,
+      });
       return;
     }
 
-    sendGaEvent('page_view', {
+    const pageViewPayload = {
       page_title: document.title,
       page_path: pathname,
       page_location: buildPageLocation(pathname, search, hash),
       language,
-    });
+    };
+
+    console.info('[landing][ga4-debug] page_view effect sending', pageViewPayload);
+    sendGaEvent('page_view', pageViewPayload);
   }, [consent, hash, isReady, language, pathname, search]);
 
   useEffect(() => {
