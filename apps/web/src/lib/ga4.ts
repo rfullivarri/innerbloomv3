@@ -33,8 +33,17 @@ function loadGaScript(measurementId: string): Promise<void> {
   }
 
   if (existing) {
+    const readyState = (existing as HTMLScriptElement & { readyState?: string }).readyState;
+    if (readyState === 'complete' || readyState === 'loaded') {
+      existing.dataset.loaded = 'true';
+      return Promise.resolve();
+    }
+
     return new Promise((resolve, reject) => {
-      existing.addEventListener('load', () => resolve(), { once: true });
+      existing.addEventListener('load', () => {
+        existing.dataset.loaded = 'true';
+        resolve();
+      }, { once: true });
       existing.addEventListener('error', () => reject(new Error('Failed to load GA4 script.')), { once: true });
     });
   }
@@ -72,7 +81,13 @@ export async function ensureGa4Initialized(measurementId: string): Promise<void>
     gaBootstrapPromise = loadGaScript(measurementId);
   }
 
-  await gaBootstrapPromise;
+  try {
+    await gaBootstrapPromise;
+  } catch (error) {
+    gaBootstrapPromise = null;
+    gaScriptLoaded = false;
+    throw error;
+  }
   gaScriptLoaded = true;
 
   if (gaConfiguredForId === measurementId) {
