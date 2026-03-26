@@ -930,7 +930,7 @@ export default function LandingPage() {
           <a href="#faq">{copy.footer.faq}</a>
           <a
             className="footer-community-link"
-            href="https://www.reddit.com/r/getdisciplined/comments/1s3di4u/discussion_i_started_building_a_habit_system/"
+            href="https://www.reddit.com/r/InnerbloomJourney/"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -940,7 +940,7 @@ export default function LandingPage() {
                 fill="currentColor"
               />
             </svg>
-            <span>Join the discussion on Reddit</span>
+            <span>Join our subreddit</span>
           </a>
         </nav>
       </footer>
