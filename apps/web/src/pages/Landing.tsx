@@ -346,8 +346,11 @@ export default function LandingPage() {
   const [activeModeIndex, setActiveModeIndex] = useState(0);
   const [isModesInView, setIsModesInView] = useState(false);
   const [hasModeInteracted, setHasModeInteracted] = useState(false);
-  const [analyticsConsent, setAnalyticsConsent] = useState(() => readCookieConsentState().analytics);
-  const [isCookiePanelOpen, setIsCookiePanelOpen] = useState(() => readCookieConsentState().analytics === 'unset');
+  const initialCookieConsentStateRef = useRef(readCookieConsentState());
+  const [analyticsConsent, setAnalyticsConsent] = useState(() => initialCookieConsentStateRef.current.analytics);
+  const [isCookiePanelOpen, setIsCookiePanelOpen] = useState(
+    () => initialCookieConsentStateRef.current.analytics === 'unset'
+  );
   const modesSectionRef = useRef<HTMLElement | null>(null);
   const modeThumbTouchStartXRef = useRef<number | null>(null);
 
@@ -372,6 +375,10 @@ export default function LandingPage() {
   const modeFrequency = frequencyByMode[language][activeMode.id];
   const modeStateLabel = language === 'es' ? 'Estado' : 'State';
   const modeObjectiveLabel = language === 'es' ? 'Objetivo' : 'Objective';
+
+  useEffect(() => {
+    console.info('[landing][ga4-debug] cookie consent read on load', initialCookieConsentStateRef.current);
+  }, []);
 
   useEffect(() => {
     window.localStorage.setItem(LANDING_GRADIENT_STORAGE_KEY, gradientId);
@@ -563,6 +570,10 @@ export default function LandingPage() {
 
   const handleAnalyticsConsent = (nextDecision: 'accepted' | 'rejected') => {
     const nextState = persistCookieConsentState(nextDecision);
+    console.info('[landing][ga4-debug] cookie consent updated', {
+      nextDecision,
+      persistedState: nextState,
+    });
     setAnalyticsConsent(nextState.analytics);
     setIsCookiePanelOpen(false);
   };
