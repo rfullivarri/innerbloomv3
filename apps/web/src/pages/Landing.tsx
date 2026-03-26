@@ -7,8 +7,11 @@ import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage
 import { buildDemoModeSelectUrl } from '../lib/demoEntry';
 import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
+import { CookieConsentBanner } from '../components/landing/CookieConsentBanner';
+import { useLandingAnalytics } from '../components/landing/useLandingAnalytics';
 import { buildOnboardingPath } from '../onboarding/i18n';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
+import { persistCookieConsentState, readCookieConsentState } from '../lib/cookieConsent';
 import './Landing.css';
 
 type LandingGradientOption = {
@@ -343,6 +346,8 @@ export default function LandingPage() {
   const [activeModeIndex, setActiveModeIndex] = useState(0);
   const [isModesInView, setIsModesInView] = useState(false);
   const [hasModeInteracted, setHasModeInteracted] = useState(false);
+  const [analyticsConsent, setAnalyticsConsent] = useState(() => readCookieConsentState().analytics);
+  const [isCookiePanelOpen, setIsCookiePanelOpen] = useState(() => readCookieConsentState().analytics === 'unset');
   const modesSectionRef = useRef<HTMLElement | null>(null);
   const modeThumbTouchStartXRef = useRef<number | null>(null);
 
@@ -377,6 +382,14 @@ export default function LandingPage() {
     setLanguage(resolvedLanguage);
     syncLocaleLanguage(resolvedLanguage);
   }, [location.search, syncLocaleLanguage]);
+
+  useLandingAnalytics({
+    consent: analyticsConsent,
+    language,
+    pathname: location.pathname,
+    search: location.search,
+    hash: location.hash,
+  });
 
   const handleLanguageChange = (nextLanguage: Language) => {
     setLanguage(nextLanguage);
@@ -548,6 +561,12 @@ export default function LandingPage() {
     }))
   };
 
+  const handleAnalyticsConsent = (nextDecision: 'accepted' | 'rejected') => {
+    const nextState = persistCookieConsentState(nextDecision);
+    setAnalyticsConsent(nextState.analytics);
+    setIsCookiePanelOpen(false);
+  };
+
 
   return (
     <div className="landing" style={landingStyle}>
@@ -630,10 +649,14 @@ export default function LandingPage() {
                   </Link>
                 ) : (
                   <>
-                    <Link className={`${buttonClasses()} journey-cta`} to={buildOnboardingPath(language)}>
+                    <Link className={`${buttonClasses()} journey-cta`} data-analytics-cta="hero_start_journey" to={buildOnboardingPath(language)}>
                       {copy.auth.startJourney}
                     </Link>
-                    <Link className="hero-demo-cta" to={buildDemoModeSelectUrl({ language, source: 'landing' })}>
+                    <Link
+                      className="hero-demo-cta"
+                      data-analytics-cta="hero_guided_demo"
+                      to={buildDemoModeSelectUrl({ language, source: 'landing' })}
+                    >
                       <span className="hero-demo-cta-icon" aria-hidden>
                         ▶
                       </span>
@@ -785,7 +808,11 @@ export default function LandingPage() {
               <AdaptiveText as="h2" className="demo-title">{copy.demo.title}</AdaptiveText>
               <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
               <div className="demo-actions">
-                <Link className={buttonClasses()} to={buildDemoModeSelectUrl({ language, source: 'landing' })}>
+                <Link
+                  className={buttonClasses()}
+                  data-analytics-cta="feature_guided_demo"
+                  to={buildDemoModeSelectUrl({ language, source: 'landing' })}
+                >
                   {copy.demo.cta}
                 </Link>
               </div>
@@ -906,7 +933,11 @@ export default function LandingPage() {
                 </Link>
               ) : (
                 <>
-                  <Link className={`${buttonClasses()} journey-cta`} to={buildOnboardingPath(language)}>
+                  <Link
+                    className={`${buttonClasses()} journey-cta`}
+                    data-analytics-cta="footer_start_journey"
+                    to={buildOnboardingPath(language)}
+                  >
                     {copy.auth.startJourney}
                   </Link>
                 </>
@@ -928,6 +959,13 @@ export default function LandingPage() {
             </>
           )}
           <a href="#faq">{copy.footer.faq}</a>
+          <button
+            type="button"
+            className="footer-cookies-link"
+            onClick={() => setIsCookiePanelOpen(true)}
+          >
+            {language === 'es' ? 'Cookies' : 'Cookies'}
+          </button>
           <a
             className="footer-community-link"
             href="https://www.reddit.com/r/InnerbloomJourney/"
@@ -944,6 +982,14 @@ export default function LandingPage() {
           </a>
         </nav>
       </footer>
+      <CookieConsentBanner
+        language={language}
+        isOpen={isCookiePanelOpen}
+        hasDecision={analyticsConsent !== 'unset'}
+        onAccept={() => handleAnalyticsConsent('accepted')}
+        onReject={() => handleAnalyticsConsent('rejected')}
+        onClose={() => setIsCookiePanelOpen(false)}
+      />
     </div>
   );
 }
