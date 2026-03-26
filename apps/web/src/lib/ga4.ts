@@ -11,6 +11,7 @@ const GA_SCRIPT_ID = 'innerbloom-ga4-script';
 
 let gaBootstrapPromise: Promise<void> | null = null;
 let gaConfiguredForId: string | null = null;
+let gaScriptLoaded = false;
 
 function getOrCreateGtag(): GtagCommand {
   window.dataLayer = window.dataLayer ?? [];
@@ -61,19 +62,23 @@ export async function ensureGa4Initialized(measurementId: string): Promise<void>
     return;
   }
 
+  const gtag = getOrCreateGtag();
+
+  if (!gaConfiguredForId) {
+    gtag('js', new Date());
+  }
+
   if (!gaBootstrapPromise) {
     gaBootstrapPromise = loadGaScript(measurementId);
   }
 
   await gaBootstrapPromise;
-
-  const gtag = getOrCreateGtag();
+  gaScriptLoaded = true;
 
   if (gaConfiguredForId === measurementId) {
     return;
   }
 
-  gtag('js', new Date());
   gtag('config', measurementId, {
     send_page_view: false,
     anonymize_ip: true,
@@ -83,7 +88,12 @@ export async function ensureGa4Initialized(measurementId: string): Promise<void>
 }
 
 export function sendGaEvent(eventName: string, params: Record<string, unknown> = {}): void {
-  if (typeof window === 'undefined' || typeof window.gtag !== 'function') {
+  if (
+    typeof window === 'undefined'
+    || typeof window.gtag !== 'function'
+    || !gaScriptLoaded
+    || !gaConfiguredForId
+  ) {
     return;
   }
 
