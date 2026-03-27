@@ -1249,7 +1249,7 @@
 .landing .visible-progress-scene {
   position: absolute;
   inset: -36px -74px -58px -68px;
-  transform: translate(10px, 12px) scale(0.84);
+  transform: translate(34px, 30px) scale(0.84);
   transform-origin: top left;
   background:
     radial-gradient(
@@ -2328,7 +2328,7 @@
 
   .landing .visible-progress-scene {
     inset: -28px -52px -46px -48px;
-    transform: translate(8px, 10px) scale(0.82);
+    transform: translate(24px, 22px) scale(0.82);
   }
 
   .landing .visible-scene-region--balance {
