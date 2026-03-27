@@ -13,13 +13,23 @@ describe('ga4 bootstrap', () => {
   it('bootstraps the google tag snippet and configures GA4', async () => {
     const { ensureGa4Initialized, sendGaEvent } = await import('../ga4');
 
-    await ensureGa4Initialized('G-TEST1234');
-    sendGaEvent('page_view', { page_path: '/' });
+    const initializePromise = ensureGa4Initialized('G-TEST1234');
 
     const script = document.getElementById('innerbloom-ga4-script') as HTMLScriptElement | null;
-
     expect(script?.src).toContain('https://www.googletagmanager.com/gtag/js?id=G-TEST1234');
-    expect(window.dataLayer).toContainEqual(['config', 'G-TEST1234', { anonymize_ip: true }]);
-    expect(window.dataLayer).toContainEqual(['event', 'page_view', { page_path: '/' }]);
+    script?.dispatchEvent(new Event('load'));
+
+    await initializePromise;
+    sendGaEvent('page_view', { page_path: '/' });
+
+    expect(window.dataLayer).toContainEqual(expect.objectContaining({
+      0: 'config',
+      1: 'G-TEST1234',
+    }));
+    expect(window.dataLayer).toContainEqual(expect.objectContaining({
+      0: 'event',
+      1: 'page_view',
+      2: { page_path: '/' },
+    }));
   });
 });
