@@ -1133,7 +1133,7 @@
 
 .landing .visible-progress-scene {
   position: absolute;
-  inset: -48px -92px -72px -84px;
+  inset: -30px -68px -52px -62px;
   background:
     radial-gradient(90% 65% at 16% 18%, rgba(76, 120, 223, 0.18), transparent 70%),
     radial-gradient(55% 45% at 80% 20%, rgba(85, 208, 255, 0.11), transparent 78%),
@@ -1146,26 +1146,26 @@
 }
 
 .landing .visible-scene-region--balance {
-  left: -66px;
-  top: -26px;
-  width: 52%;
-  height: 57%;
+  left: -44px;
+  top: -12px;
+  width: 49%;
+  height: 54%;
   padding: 24px 24px 16px;
 }
 
 .landing .visible-scene-region--emotion {
-  left: -52px;
-  bottom: -50px;
-  width: 54%;
-  height: 47%;
+  left: -34px;
+  bottom: -34px;
+  width: 51%;
+  height: 44%;
   padding: 16px 18px 14px;
 }
 
 .landing .visible-scene-region--streaks {
-  right: -30px;
-  top: -18px;
-  width: 62%;
-  height: 104%;
+  right: -14px;
+  top: -6px;
+  width: 59%;
+  height: 99%;
   padding: 18px 22px 22px;
   display: grid;
   align-content: start;
@@ -2096,25 +2096,25 @@
   }
 
   .landing .visible-progress-scene {
-    inset: -36px -56px -56px -56px;
+    inset: -24px -44px -42px -42px;
   }
 
   .landing .visible-scene-region--balance {
-    width: 56%;
-    height: 52%;
-    left: -72px;
+    width: 53%;
+    height: 50%;
+    left: -58px;
   }
 
   .landing .visible-scene-region--emotion {
-    width: 58%;
-    height: 42%;
-    left: -60px;
+    width: 55%;
+    height: 40%;
+    left: -46px;
   }
 
   .landing .visible-scene-region--streaks {
-    width: 64%;
-    height: 102%;
-    right: -36px;
+    width: 62%;
+    height: 98%;
+    right: -24px;
   }
 
   .landing .demo-bridge {
