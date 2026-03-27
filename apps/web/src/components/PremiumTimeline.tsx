@@ -359,11 +359,7 @@ export default function PremiumTimeline({
 
   return (
     <section
-      className={[
-        'relative mx-auto w-full max-w-6xl px-4 py-10 text-white md:px-6',
-        compact ? 'py-6' : 'py-10 md:py-14',
-        className,
-      ]
+      className={['premium-timeline relative mx-auto w-full max-w-6xl px-4 text-white md:px-6', compact ? 'py-6' : 'py-10 md:py-14', className]
         .filter(Boolean)
         .join(' ')}
       aria-label="Timeline premium"
@@ -463,16 +459,16 @@ export default function PremiumTimeline({
                   transition={
                     reducedMotion ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: index * 0.04 }
                   }
-                  className="relative z-10 ml-12 w-[calc(100%-3rem)] rounded-3xl border border-white/15 bg-white/[0.06] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] backdrop-blur-[10px] md:ml-0 md:w-full md:p-7"
+                  className="premium-timeline-card relative z-10 ml-12 w-[calc(100%-3rem)] p-4 md:ml-0 md:w-full md:p-7"
                   style={{ maxWidth: cardMaxWidth }}
                 >
                   {step.badge ? (
-                    <span className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-[9px] py-[3px] text-[9px] font-medium tracking-[0.18em] text-white/85">
+                    <span className="premium-timeline-badge mb-3 inline-flex px-[9px] py-[3px] text-[9px] font-medium tracking-[0.18em]">
                       {step.badge}
                     </span>
                   ) : null}
-                  <h3 className="text-xl font-semibold leading-tight text-white md:text-2xl">{step.title}</h3>
-                  <ul className="mt-3 space-y-2 text-base leading-relaxed text-slate-200/90 md:text-lg">
+                  <h3 className="premium-timeline-title text-xl font-semibold leading-tight md:text-2xl">{step.title}</h3>
+                  <ul className="premium-timeline-bullets mt-3 space-y-2 text-base leading-relaxed md:text-lg">
                     {step.bullets.map((bullet) => (
                       <li key={`${step.title}-${bullet}`} className="list-none">
                         • {bullet}
@@ -484,7 +480,7 @@ export default function PremiumTimeline({
                       {step.chips.map((chip) => (
                         <li
                           key={`${step.title}-${chip}`}
-                          className="inline-flex rounded-full border border-white/20 bg-white/10 px-2 py-[3px] text-[8px] font-medium uppercase tracking-[0.06em] text-white/80"
+                          className="premium-timeline-chip inline-flex px-2 py-[3px] text-[8px] font-medium uppercase tracking-[0.06em]"
                         >
                           {chip}
                         </li>
@@ -507,22 +503,22 @@ export default function PremiumTimeline({
                 opacity: 1,
                 scale: 1,
                 borderColor: 'rgba(255,255,255,0.2)',
-                boxShadow: '0 18px 38px rgba(15, 10, 26, 0.24)',
+                boxShadow: '0 14px 34px rgba(24, 18, 47, 0.24)',
               }
               : {
                 opacity: [0.94, 1],
-                scale: [1, 1.03, 1],
-                borderColor: ['rgba(255,255,255,0.2)', 'rgba(170, 228, 255, 0.72)', 'rgba(176, 232, 255, 0.9)'],
+                scale: [1, 1.02, 1],
+                borderColor: ['rgba(255,255,255,0.2)', 'rgba(170, 228, 255, 0.62)', 'rgba(176, 232, 255, 0.72)'],
                 boxShadow: [
-                  '0 18px 38px rgba(15, 10, 26, 0.24)',
-                  '0 0 0 1px rgba(184, 236, 255, 0.52), 0 0 42px rgba(126, 211, 255, 0.5), inset 0 0 56px rgba(173, 137, 255, 0.2)',
-                  '0 0 0 1px rgba(184, 236, 255, 0.46), 0 0 34px rgba(126, 211, 255, 0.42), inset 0 0 46px rgba(173, 137, 255, 0.16)',
+                  '0 14px 34px rgba(24, 18, 47, 0.24)',
+                  '0 0 0 1px rgba(184, 236, 255, 0.4), 0 0 28px rgba(126, 211, 255, 0.32), inset 0 0 40px rgba(173, 137, 255, 0.14)',
+                  '0 0 0 1px rgba(184, 236, 255, 0.32), 0 0 24px rgba(126, 211, 255, 0.26), inset 0 0 34px rgba(173, 137, 255, 0.12)',
                 ],
               }
           }
           transition={reducedMotion ? { duration: 0 } : { duration: 0.7, ease: 'easeOut', times: [0, 0.62, 1] }}
           className={[
-            'timeline-closing-card relative z-10 ml-12 mt-10 w-[calc(100%-3rem)] max-w-[860px] rounded-[28px] border bg-white/[0.08] px-4 py-4 text-left text-base leading-relaxed text-slate-100/90 backdrop-blur-[10px] md:ml-[96px] md:mt-14 md:w-auto md:px-7 md:py-5 md:text-lg',
+            'timeline-closing-card premium-timeline-closing relative z-10 ml-12 mt-10 w-[calc(100%-3rem)] max-w-[860px] px-4 py-4 text-left text-base leading-relaxed md:ml-[96px] md:mt-14 md:w-auto md:px-7 md:py-5 md:text-lg',
             isComplete && !reducedMotion ? 'completed text-white' : '',
           ].filter(Boolean).join(' ')}
           style={{

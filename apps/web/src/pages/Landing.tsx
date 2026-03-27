@@ -715,6 +715,7 @@ export default function LandingPage() {
 
         <section className="truth-problem section-pad reveal-on-scroll" id="why">
           <div className="container narrow truth-problem-shell">
+            <p className="truth-problem-kicker">{language === 'es' ? 'EL PROBLEMA REAL' : 'THE REAL PROBLEM'}</p>
             <AdaptiveText as="h2" className="truth-problem-title">{copy.problem.title}</AdaptiveText>
             <AdaptiveText as="p" className="section-sub truth-problem-body">{copy.problem.body}</AdaptiveText>
           </div>
