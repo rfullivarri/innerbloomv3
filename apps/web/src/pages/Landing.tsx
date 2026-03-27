@@ -392,10 +392,7 @@ export default function LandingPage() {
 
   useLandingAnalytics({
     consent: analyticsConsent,
-    language,
     pathname: location.pathname,
-    search: location.search,
-    hash: location.hash,
   });
 
   const handleLanguageChange = (nextLanguage: Language) => {

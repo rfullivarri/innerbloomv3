@@ -14,26 +14,12 @@ const LANDING_GA4_MEASUREMENT_ID_SOURCE = import.meta.env.VITE_GA4_MEASUREMENT_I
     : 'unset';
 let missingMeasurementIdWarningShown = false;
 
-function buildPageLocation(pathname: string, search: string, hash: string): string {
-  if (typeof window === 'undefined') {
-    return pathname;
-  }
-
-  return `${window.location.origin}${pathname}${search}${hash}`;
-}
-
 export function useLandingAnalytics({
   consent,
-  language,
   pathname,
-  search,
-  hash,
 }: {
   consent: AnalyticsConsentStatus;
-  language: string;
   pathname: string;
-  search: string;
-  hash: string;
 }) {
   const [isReady, setIsReady] = useState(false);
   const trackedScrollMilestones = useRef<Set<number>>(new Set());
@@ -82,27 +68,6 @@ export function useLandingAnalytics({
       cancelled = true;
     };
   }, [consent]);
-
-  useEffect(() => {
-    if (!isReady || consent !== 'accepted') {
-      console.info('[landing][ga4-debug] page_view effect blocked', {
-        isReady,
-        consent,
-      });
-      return;
-    }
-
-    const pageViewPayload = {
-      page_title: document.title,
-      page_path: pathname,
-      page_location: buildPageLocation(pathname, search, hash),
-      language,
-    };
-
-    console.info('[landing][ga4-debug] page_view effect sending', pageViewPayload);
-    sendGaEvent('page_view', pageViewPayload);
-  }, [consent, hash, isReady, language, pathname, search]);
-
   useEffect(() => {
     if (!isReady || consent !== 'accepted') {
       return;
