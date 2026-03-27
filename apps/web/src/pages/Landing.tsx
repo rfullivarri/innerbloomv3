@@ -248,6 +248,15 @@ function splitPillarCopy(copy: string, language: Language) {
   return { definition, examples };
 }
 
+const EMOTION_GRID_PATTERN: Array<'calm' | 'happy' | 'focus' | 'stress' | 'neutral'> = [
+  'calm', 'calm', 'focus', 'happy', 'happy', 'focus', 'calm', 'neutral', 'happy', 'focus', 'calm', 'calm', 'happy', 'stress', 'focus', 'calm',
+  'focus', 'happy', 'happy', 'calm', 'neutral', 'focus', 'happy', 'calm', 'focus', 'stress', 'happy', 'calm', 'neutral', 'focus', 'happy', 'calm',
+  'calm', 'focus', 'neutral', 'happy', 'stress', 'focus', 'calm', 'happy', 'focus', 'calm', 'calm', 'happy', 'neutral', 'focus', 'stress', 'calm',
+  'happy', 'neutral', 'focus', 'calm', 'calm', 'happy', 'focus', 'stress', 'calm', 'neutral', 'focus', 'happy', 'calm', 'focus', 'neutral', 'happy',
+  'focus', 'calm', 'happy', 'neutral', 'stress', 'focus', 'happy', 'calm', 'focus', 'neutral', 'happy', 'calm', 'stress', 'focus', 'calm', 'happy',
+  'calm', 'happy', 'focus', 'neutral', 'happy', 'calm', 'focus', 'stress', 'happy', 'focus', 'calm', 'neutral', 'focus', 'happy', 'calm', 'focus',
+];
+
 function LanguageDropdown({ value, onChange }: { value: Language; onChange: (language: Language) => void }) {
   const options: { code: Language; label: string }[] = [
     { code: 'en', label: 'EN' },
@@ -743,13 +752,23 @@ export default function LandingPage() {
                       <span className="visible-canvas-info">i</span>
                     </div>
                     <div className="visible-radar-shell">
+                      <div className="visible-radar-rim">
+                        <span className="visible-radar-segment visible-radar-segment--body" />
+                        <span className="visible-radar-segment visible-radar-segment--mind" />
+                        <span className="visible-radar-segment visible-radar-segment--soul" />
+                      </div>
                       <div className="visible-radar-ring visible-radar-ring--lg" />
                       <div className="visible-radar-ring visible-radar-ring--md" />
                       <div className="visible-radar-ring visible-radar-ring--sm" />
                       <div className="visible-radar-axis visible-radar-axis--a" />
                       <div className="visible-radar-axis visible-radar-axis--b" />
                       <div className="visible-radar-axis visible-radar-axis--c" />
+                      <div className="visible-radar-spoke visible-radar-spoke--a" />
+                      <div className="visible-radar-spoke visible-radar-spoke--b" />
+                      <div className="visible-radar-spoke visible-radar-spoke--c" />
                       <div className="visible-radar-polygon" />
+                      <div className="visible-radar-polygon visible-radar-polygon--inner" />
+                      <span className="visible-radar-core" />
                     </div>
                     <div className="visible-radar-pillars">
                       <span>ALMA 32%</span>
@@ -771,10 +790,10 @@ export default function LandingPage() {
                       <span>Foco</span>
                     </div>
                     <div className="visible-emotion-grid">
-                      {Array.from({ length: 96 }).map((_, index) => (
+                      {EMOTION_GRID_PATTERN.map((emotion, index) => (
                         <span
                           key={`emotion-cell-${index}`}
-                          className="visible-emotion-cell"
+                          className={`visible-emotion-cell visible-emotion-cell--${emotion}`}
                           style={{ '--emotion-order': index } as CSSProperties}
                         />
                       ))}
