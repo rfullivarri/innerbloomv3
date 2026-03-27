@@ -12,6 +12,7 @@ export interface NavbarSection {
 
 type NavbarProps = {
   onDailyClick?: () => void;
+  onSectionClick?: (section: NavbarSection) => void;
   dailyButtonRef?: RefObject<HTMLButtonElement | null>;
   title?: string;
   sections?: NavbarSection[];
@@ -23,7 +24,7 @@ function combine(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
 
-export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot, planSlot }: NavbarProps) {
+export function Navbar({ onDailyClick, onSectionClick, dailyButtonRef, title, sections, menuSlot, planSlot }: NavbarProps) {
   const { userId } = useAuth();
   const { user } = useUser();
 
@@ -60,6 +61,7 @@ export function Navbar({ onDailyClick, dailyButtonRef, title, sections, menuSlot
                 to={section.to}
                 end={section.end}
                 onClick={() => {
+                  onSectionClick?.(section);
                   if (section.key === 'dquest' && onDailyClick) {
                     onDailyClick();
                   }

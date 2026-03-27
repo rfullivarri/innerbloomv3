@@ -12,6 +12,7 @@ const GA4_MEASUREMENT_ID = (
 
 const AUTH_SURFACE_STORAGE_KEY = 'ib:ga4:last-auth-surface';
 const AUTH_SURFACE_UNKNOWN = 'unknown';
+type AuthenticatedView = 'dashboard_home' | 'missions' | 'dquest' | 'rewards' | 'editor';
 
 function isAuthLoginPath(pathname: string): boolean {
   return pathname === '/login' || pathname.startsWith('/login/');
@@ -55,6 +56,45 @@ function writeLastAuthSurface(surface: 'login' | 'sign_up'): void {
   window.sessionStorage.setItem(AUTH_SURFACE_STORAGE_KEY, surface);
 }
 
+function resolveAuthenticatedView(pathname: string, dashboardBasePath: string): AuthenticatedView | null {
+  if (pathname === '/editor' || pathname.startsWith('/editor/')) {
+    return 'editor';
+  }
+
+  if (pathname === dashboardBasePath) {
+    return 'dashboard_home';
+  }
+
+  if (!pathname.startsWith(`${dashboardBasePath}/`)) {
+    return null;
+  }
+
+  const suffix = pathname.slice(dashboardBasePath.length + 1);
+
+  if (suffix === 'rewards' || suffix.startsWith('rewards/')) {
+    return 'rewards';
+  }
+
+  if (
+    suffix === 'misiones'
+    || suffix.startsWith('misiones/')
+    || suffix === 'missions'
+    || suffix.startsWith('missions/')
+    || suffix === 'missions-v2'
+    || suffix.startsWith('missions-v2/')
+    || suffix === 'missions-v3'
+    || suffix.startsWith('missions-v3/')
+  ) {
+    return 'missions';
+  }
+
+  if (suffix === 'dquest' || suffix.startsWith('dquest/')) {
+    return 'dquest';
+  }
+
+  return null;
+}
+
 export function useGa4FunnelTracking({ dashboardBasePath }: { dashboardBasePath: string }) {
   const location = useLocation();
   const { isLoaded, userId } = useAuth();
@@ -62,6 +102,7 @@ export function useGa4FunnelTracking({ dashboardBasePath }: { dashboardBasePath:
   const trackedAuthPageViewsRef = useRef<Set<string>>(new Set());
   const trackedAuthStartedRef = useRef<Set<string>>(new Set());
   const trackedDashboardViewRef = useRef(false);
+  const previousAuthenticatedViewRef = useRef<AuthenticatedView | null>(null);
   const previousUserIdRef = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
@@ -161,4 +202,25 @@ export function useGa4FunnelTracking({ dashboardBasePath }: { dashboardBasePath:
       is_first_dashboard_view: true,
     });
   }, [dashboardBasePath, isReady, location.pathname]);
+
+  useEffect(() => {
+    if (!isReady || !isLoaded || !userId) {
+      return;
+    }
+
+    const currentView = resolveAuthenticatedView(location.pathname, dashboardBasePath);
+    if (!currentView) {
+      return;
+    }
+
+    const previousView = previousAuthenticatedViewRef.current;
+    previousAuthenticatedViewRef.current = currentView;
+
+    sendGaEvent('app_section_view', {
+      section_name: currentView,
+      previous_section: previousView ?? 'none',
+      page_path: location.pathname,
+      is_authenticated: true,
+    });
+  }, [dashboardBasePath, isLoaded, isReady, location.pathname, userId]);
 }
