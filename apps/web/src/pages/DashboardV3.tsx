@@ -85,6 +85,7 @@ import {
 import { useWeeklyWrapped } from "../hooks/useWeeklyWrapped";
 import { WeeklyWrappedModal } from "../components/feedback/WeeklyWrappedModal";
 import { useAppMode } from "../hooks/useAppMode";
+import { sendGaEvent } from "../lib/ga4";
 import {
   isJourneyGenerationPending,
   syncJourneyGenerationFromServer,
@@ -611,8 +612,37 @@ export default function DashboardV3Page() {
   ]);
 
   const handleOpenReminderScheduler = useCallback(() => {
+    sendGaEvent("app_section_view", {
+      section_name: "scheduler",
+      previous_section: activeSection.key,
+      page_path: location.pathname,
+      entry_point: "dashboard",
+      is_authenticated: true,
+    });
     reminderSchedulerDialogRef.current?.open();
-  }, []);
+  }, [activeSection.key, location.pathname]);
+
+  const handleMainMenuNavigation = useCallback(
+    ({
+      destinationSection,
+      destinationPath,
+      menuLocation,
+    }: {
+      destinationSection: string;
+      destinationPath: string;
+      menuLocation: "desktop" | "mobile";
+    }) => {
+      sendGaEvent("app_menu_navigation", {
+        source_section: activeSection.key,
+        destination_section: destinationSection,
+        destination_path: destinationPath,
+        menu_location: menuLocation,
+        page_path: location.pathname,
+        is_authenticated: true,
+      });
+    },
+    [activeSection.key, location.pathname],
+  );
 
   const handleReminderScheduled = useCallback(async () => {
     setShowOnboardingCompletionBanner(true);
@@ -809,6 +839,13 @@ export default function DashboardV3Page() {
               showPulseDot:
                 section.key === "dashboard" && shouldShowDashboardDot,
             }))}
+            onSectionClick={(section) => {
+              handleMainMenuNavigation({
+                destinationSection: section.key,
+                destinationPath: section.to,
+                menuLocation: "desktop",
+              });
+            }}
             menuSlot={
               <DashboardMenu
                 currentGameMode={gameMode}
@@ -1005,7 +1042,17 @@ export default function DashboardV3Page() {
                 to: section.to,
                 icon: <Icon className="h-4 w-4" />,
                 end: section.end,
-                onClick: section.key === "dquest" ? handleOpenDaily : undefined,
+                onClick: () => {
+                  handleMainMenuNavigation({
+                    destinationSection: section.key,
+                    destinationPath: section.to,
+                    menuLocation: "mobile",
+                  });
+
+                  if (section.key === "dquest") {
+                    handleOpenDaily();
+                  }
+                },
                 showPulseDot:
                   section.key === "dashboard" && shouldShowDashboardDot,
               };
@@ -1050,9 +1097,25 @@ export function DashboardOverview({
   onOpenDailyQuest,
   showOnboardingCompletionBanner,
 }: DashboardOverviewProps) {
+  const trackedPanelInteractionsRef = useRef<Set<"balance" | "streaks">>(
+    new Set(),
+  );
   const handleScheduleClick = useCallback(() => {
     onOpenReminderScheduler();
   }, [onOpenReminderScheduler]);
+  const trackPanelInteraction = useCallback((panelName: "balance" | "streaks") => {
+    if (trackedPanelInteractionsRef.current.has(panelName)) {
+      return;
+    }
+
+    trackedPanelInteractionsRef.current.add(panelName);
+    sendGaEvent("app_panel_interaction", {
+      panel_name: panelName,
+      interaction_type: "click",
+      page_section: "dashboard_home",
+      is_authenticated: true,
+    });
+  }, []);
 
   const moderationRequest = useRequest(() => getModerationState(), [userId], {
     enabled: Boolean(userId),
@@ -1148,7 +1211,12 @@ export function DashboardOverview({
               onEdit={onOpenModerationEdit}
             />
           </div>
-          <div data-demo-anchor="balance">
+          <div
+            data-demo-anchor="balance"
+            onClickCapture={() => {
+              trackPanelInteraction("balance");
+            }}
+          >
             <RadarChartCard userId={userId} />
           </div>
           <div data-demo-anchor="emotion-chart">
@@ -1159,7 +1227,12 @@ export function DashboardOverview({
 
         <div className="order-4 space-y-4 md:space-y-5 lg:order-4 lg:col-span-4">
           {FEATURE_STREAKS_PANEL_V1 && <LegacyStreaksPanel userId={userId} />}
-          <div data-demo-anchor="streaks">
+          <div
+            data-demo-anchor="streaks"
+            onClickCapture={() => {
+              trackPanelInteraction("streaks");
+            }}
+          >
             <StreaksPanel
               userId={userId}
               gameMode={gameMode}
