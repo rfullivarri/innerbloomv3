@@ -472,6 +472,10 @@
   padding: clamp(78px, 8.8vw, 116px) 0 clamp(58px, 6.9vw, 90px);
 }
 
+.landing .truth-problem-section {
+  display: grid;
+}
+
 .landing .truth-problem-shell {
   position: relative;
   isolation: isolate;
@@ -508,18 +512,14 @@
 }
 
 .landing .truth-problem-kicker {
-  margin: 0 auto 14px;
-  width: fit-content;
-  border-radius: 999px;
-  border: 1px solid rgba(210, 226, 255, 0.3);
-  background: rgba(184, 206, 255, 0.08);
-  color: rgba(225, 236, 255, 0.85);
-  padding: 5px 12px;
-  font-size: 0.66rem;
+  margin: 0 auto 18px;
+  font-size: 0.72rem;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  color: rgba(186, 201, 229, 0.88);
+  text-align: center;
 }
 
 .landing .truth-problem-title {
