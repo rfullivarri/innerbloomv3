@@ -728,9 +728,88 @@ export default function LandingPage() {
 
         <section className="feature-showcase section-pad reveal-on-scroll" id="demo">
           <div className="container narrow">
+            <div className="visible-progress-top">
+              <div className="visible-progress-copy">
+                <AdaptiveText as="h2" className="demo-title">{copy.demo.title}</AdaptiveText>
+                <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
+              </div>
+
+              <div className="visible-progress-module" aria-hidden>
+                <div className="visible-progress-left-stack">
+                  <article className="visible-progress-fragment visible-progress-fragment--radar">
+                    <p className="visible-progress-fragment-kicker">Balance</p>
+                    <div className="visible-radar-shell">
+                      <div className="visible-radar-ring visible-radar-ring--lg" />
+                      <div className="visible-radar-ring visible-radar-ring--md" />
+                      <div className="visible-radar-ring visible-radar-ring--sm" />
+                      <div className="visible-radar-axis visible-radar-axis--a" />
+                      <div className="visible-radar-axis visible-radar-axis--b" />
+                      <div className="visible-radar-axis visible-radar-axis--c" />
+                      <div className="visible-radar-polygon" />
+                    </div>
+                    <div className="visible-radar-pillars">
+                      <span>Body</span>
+                      <span>Mind</span>
+                      <span>Soul</span>
+                    </div>
+                  </article>
+
+                  <article className="visible-progress-fragment visible-progress-fragment--emotion">
+                    <div className="visible-progress-fragment-head">
+                      <p className="visible-progress-fragment-kicker">Emotion chart</p>
+                      <span className="visible-progress-fragment-meta">6M</span>
+                    </div>
+                    <div className="visible-emotion-grid">
+                      {Array.from({ length: 42 }).map((_, index) => (
+                        <span
+                          key={`emotion-cell-${index}`}
+                          className="visible-emotion-cell"
+                          style={{ '--emotion-order': index } as CSSProperties}
+                        />
+                      ))}
+                    </div>
+                    <div className="visible-emotion-legend">
+                      <span className="visible-emotion-legend-dot visible-emotion-legend-dot--calm" />
+                      <span className="visible-emotion-legend-dot visible-emotion-legend-dot--focus" />
+                      <span className="visible-emotion-legend-dot visible-emotion-legend-dot--sad" />
+                    </div>
+                  </article>
+                </div>
+
+                <article className="visible-progress-fragment visible-progress-fragment--streaks">
+                  <div className="visible-progress-fragment-head">
+                    <p className="visible-progress-fragment-kicker">Streak panel</p>
+                    <span className="visible-progress-fragment-meta">Semana</span>
+                  </div>
+                  <div className="visible-streak-pillars" role="tablist" aria-label="Pilares">
+                    <span className="is-active">Body</span>
+                    <span>Mind</span>
+                    <span>Soul</span>
+                  </div>
+                  <div className="visible-streak-row">
+                    <div className="visible-streak-row-head">
+                      <p>Caminar 20m</p>
+                      <span>4/6</span>
+                    </div>
+                    <div className="visible-streak-bar">
+                      <span className="visible-streak-fill visible-streak-fill--first" />
+                    </div>
+                  </div>
+                  <div className="visible-streak-row">
+                    <div className="visible-streak-row-head">
+                      <p>Respirar 5m</p>
+                      <span>5/7</span>
+                    </div>
+                    <div className="visible-streak-bar">
+                      <span className="visible-streak-fill visible-streak-fill--second" />
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+
             <div className="demo-bridge">
-              <AdaptiveText as="h2" className="demo-title">{copy.demo.title}</AdaptiveText>
-              <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
+              <p className="demo-bridge-copy">{copy.demo.banner}</p>
               <div className="demo-actions">
                 <Link
                   className={buttonClasses()}
