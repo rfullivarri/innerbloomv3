@@ -29,7 +29,7 @@ export type LandingCopy = {
   modes: { title: string; intro: string; items: Mode[] };
   how: { kicker: string; title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
   featureShowcase: { kicker: string; title: string; intro: string; items: FeatureShowcaseItem[] };
-  demo: { title: string; text: string; points: string[] };
+  demo: { title: string; text: string; cta: string };
   testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
   pricing: {
     title: string;
@@ -204,16 +204,12 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     demo: {
-      title: 'Progreso visible, no solo registros',
-      text: 'Innerbloom hace visible tu crecimiento a través de tu constancia semanal, tu reflexión emocional y la forma en que tu journey evoluciona con el tiempo.',
-      points: [
-        'Observa tu constancia por semanas',
-        'Registra tu estado emocional',
-        'Detecta patrones que sí te funcionan'
-      ]
+      title: 'Progreso visible, no solo checkmarks',
+      text: 'Haz seguimiento de tus semanas, registra tu estado emocional y revisa patrones para entender qué sí te funciona en el largo plazo.',
+      cta: 'Ver cómo funciona'
     },
     testimonials: {
-      title: 'Testimonios',
+      title: 'Testimonials',
       intro: 'Historias de personas que recuperaron consistencia y construyeron hábitos que sí lograron sostener.',
       items: [
         { quote: '“Por primera vez sostuve hábitos varias semanas. Tener tareas diarias claras me ordenó.”', author: 'Lucía • Diseñadora' },
@@ -277,7 +273,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       startJourney: 'Empieza mi Journey',
       guidedDemo: 'Ver cómo funciona'
     },
-    footer: { copyright: '©️ Gamification Journey', faq: 'Preguntas frecuentes' }
+    footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
   },
   en: {
     navLinks: [],
@@ -439,11 +435,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     demo: {
       title: 'Visible progress, not just checkmarks',
       text: 'Follow your weeks, reflect on your emotional patterns, and see what truly helps your habits stick over time.',
-      points: [
-        'Track your weekly consistency',
-        'Log your emotional state',
-        'Detect patterns that actually work for you'
-      ]
+      cta: 'See how it works'
     },
     testimonials: {
       title: 'Testimonials',

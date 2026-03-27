@@ -137,49 +137,49 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
     closingLine: 'Innerbloom convierte tu ritmo real en hábitos que se sostienen en el tiempo.',
     steps: [
       {
-        title: 'Empieza pequeño, no perfecto ✨',
-        badge: 'ONBOARDING PERSONALIZADO',
+        title: 'Start small, not perfect ✨',
+        badge: 'PERSONALIZED ONBOARDING',
         bullets: [
           'Comienza desde tu capacidad actual con una base simple y sostenible.',
           'El objetivo es que puedas sostener el proceso desde la primera semana.',
         ],
-        chips: ['ONBOARDING · BASE REALISTA'],
+        chips: ['ONBOARDING · REALISTIC BASE'],
       },
       {
-        title: 'Crece con ciclos reales ⚖️',
-        badge: 'RITMO SEMANAL',
+        title: 'Grow through real cycles ⚖️',
+        badge: 'WEEKLY RHYTHM',
         bullets: [
           'Sigue tu consistencia por semanas, no por un solo día bueno o malo.',
           'Registra tu estado emocional y detecta patrones que afectan tus hábitos.',
         ],
-        chips: ['CONSTANCIA SEMANAL · REFLEXIÓN EMOCIONAL'],
+        chips: ['WEEKLY CONSISTENCY · EMOTIONAL REFLECTION'],
       },
       {
-        title: 'Calibra con perspectiva 📅📈',
-        badge: 'CALIBRACIÓN MENSUAL',
+        title: 'Calibrate with perspective 📅📈',
+        badge: 'MONTHLY CALIBRATION',
         bullets: [
           'Revisa tu progreso en ciclos mensuales para ajustar el ritmo con criterio.',
           'No se trata de exigirte más: se trata de sostener mejor.',
         ],
-        chips: ['REVISIÓN DE PATRONES · AJUSTE SOSTENIBLE'],
+        chips: ['PATTERN REVIEW · SUSTAINABLE ADJUSTMENT'],
       },
       {
-        title: 'Construye progreso visible 🌱',
-        badge: 'HISTORIAL DE CRECIMIENTO',
+        title: 'Build visible progress 🌱',
+        badge: 'GROWTH HISTORY',
         bullets: [
           'Mira cómo evoluciona tu constancia y qué hábitos ya ganaron estabilidad.',
-          'Tu historial te muestra crecimiento real, no solo registros aislados.',
+          'Tu historial te muestra crecimiento real, no solo checkmarks aislados.',
         ],
-        chips: ['CRECIMIENTO VISIBLE · HÁBITOS CONSOLIDADOS'],
+        chips: ['VISIBLE GROWTH · HABITS EARNED'],
       },
       {
-        title: 'Florece en hábitos duraderos 🌸',
-        badge: 'HÁBITOS DURADEROS',
+        title: 'Bloom into lasting habits 🌸',
+        badge: 'LASTING HABITS',
         bullets: [
           'Con el tiempo, los hábitos estables se convierten en parte de tu base personal.',
           'Ahí es donde el progreso deja de ser intención y se vuelve parte de ti.',
         ],
-        chips: ['HABIT BLOOMED · RUTINA ESTABLE'],
+        chips: ['HABIT BLOOMED · STABLE ROUTINE'],
       },
     ],
   },
@@ -704,9 +704,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="why problem-truth section-pad reveal-on-scroll" id="why">
+        <section className="why section-pad reveal-on-scroll" id="why">
           <div className="container narrow">
-            <p className="problem-kicker">{language === 'es' ? 'LA VERDAD DEL PROCESO' : 'THE REALITY CHECK'}</p>
             <AdaptiveText as="h2">{copy.problem.title}</AdaptiveText>
             <AdaptiveText as="p" className="section-sub">{copy.problem.body}</AdaptiveText>
           </div>
@@ -732,12 +731,15 @@ export default function LandingPage() {
             <div className="demo-bridge">
               <AdaptiveText as="h2" className="demo-title">{copy.demo.title}</AdaptiveText>
               <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
-              <div className="demo-points" role="list" aria-label={language === 'es' ? 'Ejes de progreso visible' : 'Visible progress pillars'}>
-                {copy.demo.points.map((point) => (
-                  <article key={point} className="demo-point" role="listitem">
-                    <p>{point}</p>
-                  </article>
-                ))}
+              <div className="demo-actions">
+                <Link
+                  className={buttonClasses()}
+                  data-analytics-cta="guided_demo"
+                  data-analytics-location="feature"
+                  to={buildDemoModeSelectUrl({ language, source: 'landing' })}
+                >
+                  {copy.demo.cta}
+                </Link>
               </div>
             </div>
           </div>
