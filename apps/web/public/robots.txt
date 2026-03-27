@@ -1,9 +1,16 @@
 User-agent: *
-Allow: /ai
-Allow: /ai/
-Allow: /ai.json
-Allow: /llms.txt
-Disallow: /_debug/
+Allow: /
+
+Disallow: /login
+Disallow: /sign-up
+Disallow: /signup
+Disallow: /dashboard
+Disallow: /dashboard-v3
+Disallow: /admin
 Disallow: /api/
+Disallow: /_debug/
+Disallow: /_dev/
+Disallow: /billing/
+Disallow: /labs/
 
 Sitemap: https://innerbloomjourney.org/sitemap.xml
