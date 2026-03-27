@@ -26,10 +26,6 @@ function isReactNativeWebView(): boolean {
         return true;
       }
 
-      const userAgent = navigator.userAgent?.toLowerCase?.();
-      if (userAgent?.includes('expo')) {
-        return true;
-      }
     }
 
     return (

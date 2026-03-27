@@ -30,12 +30,11 @@
 ## Servicios/apps detectados
 - `apps/api`: backend HTTP (Express) con rutas REST + webhooks + cron internos.
 - `apps/web`: frontend web (consume API).
-- `apps/mobile`: app móvil (sin exposición de endpoints propios en este repo).
 - `packages/*`: librerías/contratos internos (no API HTTP pública).
 
 ## Qué expone endpoints HTTP
 - **Sí expone**: `apps/api`.
-- **No API pública propia**: `apps/web`, `apps/mobile`, `packages/*`.
+- **No API pública propia**: `apps/web`, `packages/*`.
 
 ## API “real” para Postman
 - Base recomendada: `{{baseUrl}}/api`.
