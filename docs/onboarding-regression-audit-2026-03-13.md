@@ -139,8 +139,6 @@ Causas probables:
 - `apps/api/src/controllers/tasks/create-user-task.ts`
 
 ### Mobile app shell
-- `apps/mobile/components/native-tab-bar.tsx`
-- `apps/mobile/constants/routes.ts`
 
 ---
 
