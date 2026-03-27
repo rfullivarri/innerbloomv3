@@ -474,6 +474,8 @@
 
 .landing .truth-problem-section {
   display: grid;
+  justify-items: center;
+  gap: clamp(12px, 1.7vw, 20px);
 }
 
 .landing .truth-problem-shell {
@@ -524,19 +526,30 @@
 
 .landing .truth-problem-title {
   max-width: 21ch;
-  margin: 0 auto 12px;
+  margin: 0 auto;
   font-size: clamp(1.88rem, 1.55vw + 1.38rem, 2.68rem);
   line-height: 1.15;
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
+.landing .truth-problem-title--outside {
+  max-width: 19ch;
+  margin-bottom: clamp(4px, 1vw, 12px);
+  font-size: clamp(1.78rem, 1.35vw + 1.34rem, 2.36rem);
+}
+
+.landing .truth-problem-shell--body-only {
+  width: min(100%, 780px);
+  padding: clamp(16px, 2.1vw, 24px) clamp(20px, 2.8vw, 30px) clamp(14px, 1.9vw, 22px);
+}
+
 .landing .section-sub.truth-problem-body {
   margin: 0 auto;
-  max-width: min(58ch, 94%);
+  max-width: min(52ch, 92%);
   color: color-mix(in srgb, var(--ink) 88%, #e6dcff 12%);
-  font-size: clamp(0.98rem, 0.3vw + 0.92rem, 1.12rem);
-  line-height: 1.64;
+  font-size: clamp(0.96rem, 0.26vw + 0.9rem, 1.06rem);
+  line-height: 1.58;
   text-wrap: pretty;
 }
 
