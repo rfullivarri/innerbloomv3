@@ -29,7 +29,7 @@ export type LandingCopy = {
   modes: { title: string; intro: string; items: Mode[] };
   how: { kicker: string; title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
   featureShowcase: { kicker: string; title: string; intro: string; items: FeatureShowcaseItem[] };
-  demo: { title: string; text: string; cta: string };
+  demo: { title: string; text: string; banner: string; cta: string };
   testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
   pricing: {
     title: string;
@@ -204,9 +204,10 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     demo: {
-      title: 'Progreso visible, no solo checkmarks',
-      text: 'Haz seguimiento de tus semanas, registra tu estado emocional y revisa patrones para entender qué sí te funciona en el largo plazo.',
-      cta: 'Ver cómo funciona'
+      title: 'Progreso visible, no solo registros',
+      text: 'Innerbloom hace visible tu constancia, tu patrón emocional y tu balance para que el progreso no se sienta abstracto.',
+      banner: 'Explora cómo se ve tu crecimiento dentro de Innerbloom',
+      cta: 'Explorar demo'
     },
     testimonials: {
       title: 'Testimonials',
@@ -434,8 +435,9 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     demo: {
       title: 'Visible progress, not just checkmarks',
-      text: 'Follow your weeks, reflect on your emotional patterns, and see what truly helps your habits stick over time.',
-      cta: 'See how it works'
+      text: 'Innerbloom makes your consistency, emotional pattern, and balance visible so progress feels concrete.',
+      banner: 'Explore how your growth looks inside Innerbloom',
+      cta: 'Explore demo'
     },
     testimonials: {
       title: 'Testimonials',
