@@ -52,8 +52,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Construye hábitos que respeten tu',
       titleHighlight: 'ritmo de vida real',
       subtitle:
-        'La mayoría de apps de hábitos asumen que te sientes igual cada día. No es así. Innerbloom te ayuda a crear hábitos duraderos con ritmo semanal, calibración mensual, reflexión emocional y progreso visible.',
-      note: 'Empieza en minutos. Crece con ciclos reales.',
+        'La mayoría de las apps de hábitos asumen que te sientes igual cada día, pero la vida real no funciona así. Innerbloom te ayuda a construir hábitos duraderos con ritmo semanal, calibración mensual, reflexión emocional y progreso visible.',
+      note: 'Empieza en minutos. Crece a través de ciclos reales.',
       alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
     },
     problem: {
@@ -65,7 +65,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       title: 'Una forma simple de crecer en equilibrio',
       intro:
         'Innerbloom organiza tus hábitos en Body, Mind y Soul para que tu crecimiento no sea unidimensional.',
-      highlightLeadIn: 'Mírate con perspectiva y elegí tu próximo paso.',
+      highlightLeadIn: 'Mírate con perspectiva y elige tu próximo paso.',
       highlight: 'Tus hábitos crean dirección cuando sostienes ritmo, reflexión y constancia.',
       items: [
         {
@@ -87,7 +87,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     modes: {
       title: 'Elige el ritmo que encaje con tu temporada',
-      intro: 'No todas las personas pueden construir al mismo ritmo. Los modos de Innerbloom ajustan intensidad y carga según tu capacidad actual, desde recomponer tu base hasta avanzar con más intención.',
+      intro: 'No todas las personas pueden construir al mismo ritmo. Los modos de Innerbloom ajustan la intensidad y la carga según tu capacidad actual, desde recomponer tu base hasta avanzar con más intención.',
       items: [
         {
           id: 'low',
@@ -281,7 +281,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Build habits that respect your',
       titleHighlight: 'real-life rhythm',
       subtitle:
-        'Most habit apps assume you feel the same every day. You don’t. Innerbloom helps you build lasting habits through weekly rhythm, monthly calibration, emotional reflection, and visible progress.',
+        'Most habit apps assume you feel the same every day, but real life does not work that way. Innerbloom helps you build lasting habits through weekly rhythm, monthly calibration, emotional reflection, and visible progress.',
       note: 'Start in minutes. Grow through real cycles.',
       alt: 'Kid looking at a violet energy sphere in the night sky — Gamification Journey'
     },
