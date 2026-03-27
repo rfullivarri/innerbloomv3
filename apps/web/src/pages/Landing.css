@@ -436,6 +436,47 @@
   margin: 0 0 24px;
 }
 
+.landing .truth-problem {
+  position: relative;
+  padding: clamp(92px, 11vw, 148px) 0 clamp(64px, 8vw, 108px);
+}
+
+.landing .truth-problem-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.landing .truth-problem-shell::before {
+  content: '';
+  position: absolute;
+  inset: -40px min(-4vw, -20px) -18px;
+  z-index: -1;
+  border-radius: 44px;
+  background:
+    radial-gradient(120% 135% at 14% 24%, rgba(196, 181, 253, 0.24), transparent 58%),
+    radial-gradient(112% 125% at 84% 76%, rgba(125, 211, 252, 0.18), transparent 60%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
+  filter: blur(0.2px);
+}
+
+.landing .truth-problem-title {
+  max-width: 18ch;
+  margin: 0 auto 20px;
+  font-size: clamp(2.4rem, 2.35vw + 1.58rem, 4rem);
+  line-height: 1.08;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+.landing .section-sub.truth-problem-body {
+  margin: 0 auto;
+  max-width: min(64ch, 92%);
+  color: color-mix(in srgb, var(--ink) 88%, #cbd5f5 12%);
+  font-size: clamp(1.05rem, 0.5vw + 0.95rem, 1.35rem);
+  line-height: 1.68;
+  text-wrap: pretty;
+}
+
 .landing .section-sub.highlight {
   margin: 44px auto 0;
   max-width: min(100%, 920px);
