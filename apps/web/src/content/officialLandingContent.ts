@@ -24,6 +24,7 @@ export type LandingCopy = {
     note: string;
     alt: string;
   };
+  problem: { title: string; body: string };
   pillars: { title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { title: string; intro: string; items: Mode[] };
   how: { kicker: string; title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
@@ -48,71 +49,76 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   es: {
     navLinks: [],
     hero: {
-      titleLead: 'Construye hábitos con un sistema',
-      titleHighlight: 'que se adapta a tu energía',
+      titleLead: 'Construye hábitos que respeten tu',
+      titleHighlight: 'ritmo de vida real',
       subtitle:
-        'Un sistema de hábitos gamificado que se adapta a tu energía, refleja tus emociones y recompensa tu progreso.',
-      note: 'En menos de 3 minutos obtienes un punto de partida personalizado según tu energía, tus prioridades y tu ritmo actual.',
+        'La mayoría de apps de hábitos asumen que te sientes igual cada día. No es así. Innerbloom te ayuda a crear hábitos duraderos con ritmo semanal, calibración mensual, reflexión emocional y progreso visible.',
+      note: 'Empieza en minutos. Crece con ciclos reales.',
       alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
     },
+    problem: {
+      title: 'La mayoría de apps de hábitos fallan cuando la vida real pasa',
+      body:
+        'Hay días con foco y días con agotamiento. Hay semanas fluidas y semanas más pesadas. Muchas apps tratan todos esos momentos igual. Innerbloom no.'
+    },
     pillars: {
-      title: 'Nuestros pilares centrales',
+      title: 'Una forma simple de crecer en equilibrio',
       intro:
-        'Innerbloom te ayuda a construir equilibrio a través de tres pilares centrales: Body, Mind y Soul. Cada uno sostiene un tipo distinto de energía que necesitas para mantener constancia, sentirte alineado y crecer de forma realista.',
+        'Innerbloom organiza tus hábitos en Body, Mind y Soul para que tu crecimiento no sea unidimensional.',
       highlightLeadIn: 'Mírate con perspectiva y elegí tu próximo paso.',
-      highlight: 'Tus hábitos crean dirección. Tu conciencia emocional te ayuda a sostenerla.',
+      highlight: 'Tus hábitos crean dirección cuando sostienes ritmo, reflexión y constancia.',
       items: [
         {
           emoji: '🫀',
           title: 'Body',
-          copy: 'Construye energía física estable con hábitos simples y sostenibles que acompañan tu ritmo diario. Tareas sugeridas: • Camina 20 minutos • Duerme 7 horas'
+          copy: 'Cuida energía, movimiento y recuperación con hábitos realistas para sostenerte semana a semana. Tareas sugeridas: • Camina 20 minutos • Duerme 7 horas'
         },
         {
           emoji: '🧠',
           title: 'Mind',
-          copy: 'Entrena foco y claridad mental con hábitos que te ayudan a pensar mejor, decidir mejor y mantener el rumbo. Tareas sugeridas: • Lee 10 páginas • Planifica 3 prioridades'
+          copy: 'Entrena foco, claridad y aprendizaje con hábitos que te ayuden a mantener dirección sin rigidez. Tareas sugeridas: • Lee 10 páginas • Planifica 3 prioridades'
         },
         {
           emoji: '🏵️',
           title: 'Soul',
-          copy: 'Reconecta con tus emociones y tu equilibrio interno a través de hábitos que aportan calma, sentido y conciencia emocional. Tareas sugeridas: • Respira 5 minutos • Escribe 3 gratitudes'
+          copy: 'Cultiva calma, sentido y conexión emocional con prácticas simples que te ayuden a sostener el proceso. Tareas sugeridas: • Respira 5 minutos • Escribe 3 gratitudes'
         }
       ]
     },
     modes: {
-      title: 'Elige el modo que mejor se adapta a tu energía hoy',
-      intro: 'Tu plan no debería exigirte lo mismo todos los días. Innerbloom adapta tu experiencia a través de cuatro game modes según cómo te sientes, para que puedas seguir avanzando sin culpa ni sobrecarga.',
+      title: 'Elige el ritmo que encaje con tu temporada',
+      intro: 'No todas las personas pueden construir al mismo ritmo. Los modos de Innerbloom ajustan intensidad y carga según tu capacidad actual, desde recomponer tu base hasta avanzar con más intención.',
       items: [
         {
           id: 'low',
           title: '🪫 LOW MOOD',
-          state: 'sin energía, abrumado.',
-          goal: 'activar tu mínimo vital con tareas pequeñas y sostenibles.'
+          state: 'sin energía, sobrecargado.',
+          goal: 'reconstruir tu base con hábitos mínimos, claros y sostenibles.'
         },
         {
           id: 'chill',
           title: '🍃 CHILL MOOD',
           state: 'relajado y estable.',
-          goal: 'sostener el bienestar con rutinas suaves, equilibradas y alcanzables en la vida real.'
+          goal: 'mantener una constancia suave y equilibrada cuando necesitas estabilidad.'
         },
         {
           id: 'flow',
           title: '🌊 FLOW MOOD',
           state: 'enfocado y en movimiento.',
-          goal: 'aprovechar el impulso con un plan alineado a metas concretas.'
+          goal: 'aprovechar el impulso con una carga sostenible y dirección clara.'
         },
         {
           id: 'evolve',
           title: '🧬 EVOLVE MOOD',
           state: 'ambicioso y determinado.',
-          goal: 'sostener un ritmo desafiante con estructura y tareas diarias claras.'
+          goal: 'subir intensidad con estructura, sin romper la consistencia que ya construiste.'
         }
       ]
     },
     how: {
       kicker: 'THE INNERBLOOM JOURNEY',
-      title: 'Start, Grow & Bloom',
-      intro: 'Del primer paso a hábitos que perduran.',
+      title: 'Start, Grow and Bloom',
+      intro: 'Un sistema de hábitos para empezar sin presión, sostener constancia en ciclos reales y convertir progreso en hábitos que de verdad puedes mantener.',
       actionLabel: 'Acción',
       outcomeLabel: 'Resultado',
       steps: [
@@ -198,13 +204,13 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     demo: {
-      title: 'Demo',
-      text: 'Explora Innerbloom con nuestra demo guiada.',
-      cta: 'Explorar demo'
+      title: 'Progreso visible, no solo checkmarks',
+      text: 'Haz seguimiento de tus semanas, registra tu estado emocional y revisa patrones para entender qué sí te funciona en el largo plazo.',
+      cta: 'Ver cómo funciona'
     },
     testimonials: {
       title: 'Testimonials',
-      intro: 'Lo que dice la gente después de empezar su journey.',
+      intro: 'Historias de personas que recuperaron consistencia y construyeron hábitos que sí lograron sostener.',
       items: [
         { quote: '“Por primera vez sostuve hábitos varias semanas. Tener tareas diarias claras me ordenó.”', author: 'Lucía • Diseñadora' },
         { quote: '“Registrar mi emoción diaria cambió mi mirada. Ahora ajusto tareas según mi energía real.”', author: 'Diego • Dev' },
@@ -216,7 +222,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     pricing: {
       title: 'Planes y precios',
-      intro: 'Elige el plan que mejor se ajusta a tu ritmo actual.',
+      intro: 'Elige el plan que mejor encaja con tu ritmo actual y tu crecimiento a largo plazo.',
       trialHighlight: 'Todos los planes empiezan con una prueba gratuita de 2 meses. Una forma segura de empezar, explorar el sistema y ver qué te funciona.',
       taxNote: 'Precios finales para cliente (impuestos incluidos).',
       actionLabel: 'Empezar con este plan',
@@ -231,136 +237,117 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       title: 'Preguntas frecuentes',
       items: [
         {
-          question: '¿Necesito mucha disciplina para empezar?',
-          answer: 'No. Si estás con poca energía, empezás en Low con micro hábitos para activar el mínimo vital. La gestión de hábitos se adapta a tu ritmo.'
-        },
-        { question: '¿Puedo cambiar de modo de juego?', answer: 'Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento y tu energía diaria.' },
-        {
-          question: '¿Dónde veo mi progreso?',
-          answer: 'En tu archivo y en el Dashboard: ves tus tareas, tu seguimiento de hábitos, tu registro emocional (mood tracking) y tu equilibrio general.'
+          question: '¿Innerbloom es solo un habit tracker?',
+          answer: 'No. Te ayuda a construir hábitos con una estructura semanal, revisión mensual y reflexión emocional para que el progreso sea sostenible.'
         },
         {
-          question: '¿Qué pasa si dejo de registrar?',
-          answer: 'No perdés progreso. Retomás cuando quieras y ajustamos el plan a tu energía actual para recuperar constancia.'
+          question: '¿Cómo se diferencia de otras apps de hábitos?',
+          answer: 'En vez de exigir perfección diaria, Innerbloom trabaja con ritmo semanal, calibración mensual y ajustes según tus ciclos reales.'
         },
         {
-          question: '¿Innerbloom es un habit tracker o un planificador diario?',
-          answer:
-            'Ambas cosas. Funciona como habit tracker (seguimiento de hábitos) y como planificador diario liviano: convertís tu energía del día en acciones simples y sostenibles.'
+          question: '¿Cómo funcionan los modos?',
+          answer: 'Funcionan como ajustes de ritmo e intensidad. Puedes moverte entre Low, Chill, Flow y Evolve según tu capacidad de la semana.'
         },
         {
-          question: '¿Cómo funciona el registro emocional (mood tracking)?',
-          answer:
-            'Registrás tu emoción/estado en segundos. Ese registro emocional diario ayuda a que las sugerencias y el ritmo del plan se mantengan alineados con cómo estás.'
+          question: '¿Qué significan Body, Mind y Soul?',
+          answer: 'Son tres pilares para equilibrar crecimiento: Body (energía y cuidado), Mind (foco y claridad), Soul (calma, sentido y conexión).'
         },
         {
-          question: '¿Qué son los micro hábitos y por qué ayudan?',
-          answer:
-            'Son acciones pequeñas y realistas (2–10 min) que reducen fricción y aumentan constancia. Son ideales para construir hábitos sostenibles sin saturarte.'
+          question: '¿Cómo se ve el progreso en el tiempo?',
+          answer: 'Ves consistencia semanal, revisas patrones emocionales y reconoces qué hábitos realmente se volvieron parte de tu base.'
         },
         {
-          question: '¿Innerbloom es una app de productividad o de bienestar?',
-          answer:
-            'Está enfocada en bienestar emocional y hábitos sostenibles, pero naturalmente mejora tu productividad al darte foco, estructura y seguimiento diario.'
-        },
-        {
-          question: '¿Cómo se adapta la dificultad de los hábitos con el tiempo?',
-          answer:
-            'Innerbloom está diseñado para evolucionar con tu constancia. A medida que cambia tu rendimiento, el sistema puede ajustar la dificultad de las tareas para que tu plan siga siendo realista, equilibrado y lo bastante desafiante como para impulsar tu crecimiento sin sobrecargarte.'
-        },
-        {
-          question: '¿Qué pasa cuando un hábito se vuelve estable?',
-          answer:
-            'Cuando un hábito se mantiene con constancia a lo largo del tiempo, Innerbloom puede reconocerlo como parte de tu base. Esto te ayuda a ver qué rutinas ya no son solo una intención, sino hábitos reales que has empezado a sostener.'
-        },
-        {
-          question: '¿Puede cambiar mi game mode a medida que progreso?',
-          answer:
-            'Sí. A medida que tu ritmo se vuelve más estable, Innerbloom puede sugerirte un modo superior que encaje mejor con tu capacidad actual. La idea es ayudarte a crecer en el momento correcto, no empujarte antes de que estés listo.'
+          question: '¿Qué pasa si tengo una mala semana o dejo de registrar?',
+          answer: 'No pierdes tu proceso. Retomas desde tu ritmo actual, revisas el patrón semanal y vuelves a construir sin culpa.'
         }
       ]
     },
     next: {
-      title: 'Listo para empezar',
-      intro: 'Empieza con claridad. Crece a tu ritmo.'
+      title: 'Construye hábitos que crezcan contigo',
+      intro: 'Empieza tu ritmo con Innerbloom.'
     },
     auth: {
       dashboard: 'Ir al dashboard',
       signup: 'Crear cuenta',
       login: 'Iniciar sesión',
       startJourney: 'Empieza mi Journey',
-      guidedDemo: 'Ver demo guiada'
+      guidedDemo: 'Ver cómo funciona'
     },
     footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
   },
   en: {
     navLinks: [],
     hero: {
-      titleLead: 'Build habits with a system',
-      titleHighlight: 'that adapts to your energy',
+      titleLead: 'Build habits that respect your',
+      titleHighlight: 'real-life rhythm',
       subtitle:
-        'A gamified habit system that adapts to your energy, reflects your emotions, and rewards your progress.',
-      note: 'In under 3 minutes, you get a personalized starting point built around your energy, priorities, and current rhythm.',
+        'Most habit apps assume you feel the same every day. You don’t. Innerbloom helps you build lasting habits through weekly rhythm, monthly calibration, emotional reflection, and visible progress.',
+      note: 'Start in minutes. Grow through real cycles.',
       alt: 'Kid looking at a violet energy sphere in the night sky — Gamification Journey'
     },
+    problem: {
+      title: 'Most habit apps break when real life happens',
+      body:
+        'Some days you feel focused. Some days you feel drained. Some weeks flow easily. Others feel heavier. Most habit apps treat all those moments the same. Innerbloom doesn’t.'
+    },
     pillars: {
-      title: 'Our core pillars',
+      title: 'A simple way to grow in balance',
       intro:
-        'Innerbloom helps you build balance across three core pillars: Body, Mind, and Soul. Each one supports a different kind of energy you need to stay consistent, feel aligned, and grow in a realistic way.',
+        'Innerbloom organizes your habits across Body, Mind, and Soul so growth does not become one-dimensional.',
       highlightLeadIn: 'Pause, zoom out, and choose your next move.',
-      highlight: 'Your habits create direction. Your emotional awareness helps you sustain it.',
+      highlight: 'Habits become lasting when rhythm, reflection, and consistency work together.',
       items: [
         {
           emoji: '🫀',
           title: 'Body',
-          copy: 'Build steady physical energy through simple, sustainable habits that support your daily rhythm. Suggested tasks: • Walk 20 minutes • Sleep 7 hours'
+          copy: 'Support your energy, movement, and care through realistic habits you can sustain week after week. Suggested tasks: • Walk 20 minutes • Sleep 7 hours'
         },
         {
           emoji: '🧠',
           title: 'Mind',
-          copy: 'Train focus and mental clarity through habits that help you think better, decide better, and stay on track. Suggested tasks: • Read 10 pages • Plan 3 priorities'
+          copy: 'Build focus, clarity, and learning with habits that help you move forward without rigid pressure. Suggested tasks: • Read 10 pages • Plan 3 priorities'
         },
         {
           emoji: '🏵️',
           title: 'Soul',
-          copy: 'Reconnect with your emotions and inner balance through habits that bring calm, meaning, and emotional awareness. Suggested tasks: • Breathe 5 minutes • Write 3 gratitudes'
+          copy: 'Nurture meaning, calm, and connection with simple emotional practices that support your consistency. Suggested tasks: • Breathe 5 minutes • Write 3 gratitudes'
         }
       ]
     },
     modes: {
-      title: 'Choose the mode that fits your energy today',
-      intro: 'Your plan should not demand the same from you every day. Innerbloom adapts your experience through four game modes based on how you feel, so you can keep moving without guilt or overload.',
+      title: 'Choose the pace that fits your season',
+      intro: 'Not everyone can build at the same speed. Innerbloom modes match your current capacity, from rebuilding your base to pushing further with intention.',
       items: [
         {
           id: 'low',
           title: '🪫 LOW MOOD',
           state: 'low energy, overwhelmed.',
-          goal: 'activate your vital minimum with small, sustainable actions.'
+          goal: 'rebuild your baseline with the smallest sustainable actions.'
         },
         {
           id: 'chill',
           title: '🍃 CHILL MOOD',
           state: 'relaxed and stable.',
-          goal: 'sustain well-being through smooth, balanced routines that feel achievable in real life.'
+          goal: 'maintain steady consistency with balanced routines that feel light and doable.'
         },
         {
           id: 'flow',
           title: '🌊 FLOW MOOD',
           state: 'focused and moving.',
-          goal: 'leverage momentum with a plan aligned to concrete goals.'
+          goal: 'use your momentum with a clear plan and sustainable intensity.'
         },
         {
           id: 'evolve',
           title: '🧬 EVOLVE MOOD',
           state: 'ambitious and determined.',
-          goal: 'maintain a challenging rhythm with structure and clear daily tasks.'
+          goal: 'increase challenge with structure while protecting the consistency you already built.'
         }
       ]
     },
     how: {
       kicker: 'THE INNERBLOOM JOURNEY',
-      title: 'Start, Grow & Bloom',
-      intro: 'From first step to lasting habits.',
+      title: 'Start, Grow and Bloom',
+      intro: 'A habit system designed to help you begin without pressure, stay consistent through real-life cycles, and turn progress into habits you can actually keep.',
       actionLabel: 'Action',
       outcomeLabel: 'Outcome',
       steps: [
@@ -446,13 +433,13 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     demo: {
-      title: 'Demo',
-      text: 'Explore Innerbloom through our guided demo.',
-      cta: 'Start Demo'
+      title: 'Visible progress, not just checkmarks',
+      text: 'Follow your weeks, reflect on your emotional patterns, and see what truly helps your habits stick over time.',
+      cta: 'See how it works'
     },
     testimonials: {
       title: 'Testimonials',
-      intro: 'What people say after starting their journey.',
+      intro: 'What people say after building sustainable consistency with Innerbloom.',
       items: [
         { quote: '“First time I kept habits for weeks. Clear daily tasks helped me stay on track.”', author: 'Lucía • Designer' },
         { quote: '“Logging my daily emotion changed how I plan. Now I adjust tasks to real energy.”', author: 'Diego • Dev' },
@@ -464,7 +451,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     pricing: {
       title: 'Plans & pricing',
-      intro: 'Choose the plan that best fits your current pace.',
+      intro: 'Choose the plan that best supports your current rhythm and long-term growth.',
       trialHighlight: 'All plans start with a 2-month free trial. A safe way to start, explore the system, and see what works for you.',
       taxNote: 'Final customer prices (taxes included).',
       actionLabel: 'Start with this plan',
@@ -479,66 +466,41 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       title: 'Frequently asked questions',
       items: [
         {
-          question: 'Do I need strong discipline to start?',
-          answer: 'No. If your energy is low, start in Low with micro-habits to build momentum. Habit tracking adapts to your pace.'
+          question: 'Is Innerbloom just a habit tracker?',
+          answer: 'No. It is a habit growth system built around weekly rhythm, monthly calibration, emotional reflection, and visible progress.'
         },
         {
-          question: 'Can I switch game modes?',
-          answer: 'Yes. Switch between Low, Chill, Flow, and Evolve depending on your season and daily energy.'
+          question: 'How is it different from other habit apps?',
+          answer: 'Most habit apps push daily perfection. Innerbloom helps you stay consistent through real-life cycles and recover after harder weeks.'
         },
         {
-          question: 'Where can I see my progress?',
-          answer: 'In your archive and Dashboard: tasks, habit tracking, mood tracking, and your overall balance.'
+          question: 'How do the modes work?',
+          answer: 'Modes are pace and intensity settings. You can move across Low, Chill, Flow, and Evolve based on your current capacity.'
         },
         {
-          question: 'What if I stop tracking for a while?',
-          answer: 'You don’t lose progress. Come back anytime and the plan adjusts to your current energy so you can rebuild consistency.'
+          question: 'What do Body, Mind, and Soul mean?',
+          answer: 'They are three practical growth pillars: Body (energy and care), Mind (focus and clarity), and Soul (meaning, calm, and connection).'
         },
         {
-          question: 'Is Innerbloom a habit tracker or a daily planner?',
-          answer:
-            'Both. It works as a habit tracker and a lightweight daily planner—turning daily energy into simple, sustainable actions.'
+          question: 'How does progress work over time?',
+          answer: 'You track weekly consistency, review emotional patterns, and see when habits become stable enough to feel truly yours.'
         },
         {
-          question: 'How does mood tracking work?',
-          answer: 'Log your mood/state in seconds. Daily mood logging helps recommendations stay aligned with how you feel.'
-        },
-        {
-          question: 'What are micro-habits and why do they work?',
-          answer: 'Small, realistic actions (2–10 min) that reduce friction and build consistency—without burnout.'
-        },
-        {
-          question: 'Is Innerbloom a productivity app or a wellbeing app?',
-          answer:
-            'It’s built for emotional wellbeing and sustainable habits, while naturally improving focus and daily consistency.'
-        },
-        {
-          question: 'How does habit difficulty adapt over time?',
-          answer:
-            'Innerbloom is designed to evolve with your consistency. As your performance changes, the system can adjust task difficulty so your plan stays realistic, balanced, and challenging enough to support growth without overload.'
-        },
-        {
-          question: 'What happens when a habit becomes stable?',
-          answer:
-            'When a habit becomes consistent over time, Innerbloom can recognize it as part of your foundation. This helps you see which routines are no longer just intentions, but real habits you have started to sustain.'
-        },
-        {
-          question: 'Can my game mode change as I progress?',
-          answer:
-            'Yes. As your rhythm becomes more stable, Innerbloom can suggest a higher mode that better matches your current capacity. The idea is to help you grow at the right moment, not to push you before you are ready.'
+          question: 'What if I have a hard week or stop tracking?',
+          answer: 'You do not lose your process. Resume from your current rhythm, review the pattern, and rebuild consistency without guilt.'
         }
       ]
     },
     next: {
-      title: 'Ready to start',
-      intro: 'Start with clarity. Grow at your pace.'
+      title: 'Build habits that grow with you',
+      intro: 'Start your rhythm with Innerbloom.'
     },
     auth: {
       dashboard: 'Go to dashboard',
       signup: 'Create account',
       login: 'Log in',
       startJourney: 'Start my Journey',
-      guidedDemo: 'Watch guided demo'
+      guidedDemo: 'See how it works'
     },
     footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
   }
