@@ -627,10 +627,20 @@ export default function LandingPage() {
             </Link>
           ) : (
             <>
-              <Link className={`${buttonClasses('ghost')} nav-auth-button`} to={buildLocalizedAuthPath('/sign-up', language)}>
+              <Link
+                className={`${buttonClasses('ghost')} nav-auth-button`}
+                data-analytics-cta="create_account"
+                data-analytics-location="nav"
+                to={buildLocalizedAuthPath('/sign-up', language)}
+              >
                 {copy.auth.signup}
               </Link>
-              <Link className={`${buttonClasses()} nav-auth-button`} to={buildLocalizedAuthPath('/login', language)}>
+              <Link
+                className={`${buttonClasses()} nav-auth-button`}
+                data-analytics-cta="login"
+                data-analytics-location="nav"
+                to={buildLocalizedAuthPath('/login', language)}
+              >
                 {copy.auth.login}
               </Link>
             </>
@@ -657,12 +667,18 @@ export default function LandingPage() {
                   </Link>
                 ) : (
                   <>
-                    <Link className={`${buttonClasses()} journey-cta`} data-analytics-cta="hero_start_journey" to={buildOnboardingPath(language)}>
+                    <Link
+                      className={`${buttonClasses()} journey-cta`}
+                      data-analytics-cta="start_journey"
+                      data-analytics-location="hero"
+                      to={buildOnboardingPath(language)}
+                    >
                       {copy.auth.startJourney}
                     </Link>
                     <Link
                       className="hero-demo-cta"
-                      data-analytics-cta="hero_guided_demo"
+                      data-analytics-cta="guided_demo"
+                      data-analytics-location="hero"
                       to={buildDemoModeSelectUrl({ language, source: 'landing' })}
                     >
                       <span className="hero-demo-cta-icon" aria-hidden>
@@ -818,7 +834,8 @@ export default function LandingPage() {
               <div className="demo-actions">
                 <Link
                   className={buttonClasses()}
-                  data-analytics-cta="feature_guided_demo"
+                  data-analytics-cta="guided_demo"
+                  data-analytics-location="feature"
                   to={buildDemoModeSelectUrl({ language, source: 'landing' })}
                 >
                   {copy.demo.cta}
@@ -943,7 +960,8 @@ export default function LandingPage() {
                 <>
                   <Link
                     className={`${buttonClasses()} journey-cta`}
-                    data-analytics-cta="footer_start_journey"
+                    data-analytics-cta="start_journey"
+                    data-analytics-location="footer"
                     to={buildOnboardingPath(language)}
                   >
                     {copy.auth.startJourney}
@@ -962,8 +980,12 @@ export default function LandingPage() {
             <Link to="/dashboard">Dashboard</Link>
           ) : (
             <>
-              <Link to={buildLocalizedAuthPath('/login', language)}>{copy.auth.login}</Link>
-              <Link to={buildLocalizedAuthPath('/sign-up', language)}>{copy.auth.signup}</Link>
+              <Link data-analytics-cta="login" data-analytics-location="footer" to={buildLocalizedAuthPath('/login', language)}>
+                {copy.auth.login}
+              </Link>
+              <Link data-analytics-cta="create_account" data-analytics-location="footer" to={buildLocalizedAuthPath('/sign-up', language)}>
+                {copy.auth.signup}
+              </Link>
             </>
           )}
           <a href="#faq">{copy.footer.faq}</a>
@@ -976,6 +998,8 @@ export default function LandingPage() {
           </button>
           <a
             className="footer-community-link"
+            data-analytics-cta="join_subreddit"
+            data-analytics-location="footer"
             href="https://www.reddit.com/r/InnerbloomJourney/"
             target="_blank"
             rel="noopener noreferrer"
