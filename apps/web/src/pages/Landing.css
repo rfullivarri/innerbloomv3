@@ -430,41 +430,6 @@
   text-align: center;
 }
 
-.landing .problem-truth {
-  padding-top: clamp(92px, 12vw, 132px);
-}
-
-.landing .problem-truth .container {
-  max-width: 860px;
-  padding: clamp(26px, 4.2vw, 38px) clamp(20px, 3.4vw, 34px);
-  border-radius: 28px;
-  border: 1px solid rgba(191, 219, 254, 0.26);
-  background: linear-gradient(140deg, rgba(19, 31, 57, 0.62), rgba(13, 21, 42, 0.38));
-  box-shadow: 0 18px 44px rgba(9, 15, 30, 0.36);
-}
-
-.landing .problem-kicker {
-  margin: 0 0 10px;
-  text-align: center;
-  font-size: 0.74rem;
-  letter-spacing: 0.18em;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: rgba(173, 204, 255, 0.86);
-}
-
-.landing .problem-truth h2 {
-  max-width: 26ch;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.landing .problem-truth .section-sub {
-  max-width: 62ch;
-  margin: 0 auto;
-  color: rgba(221, 232, 250, 0.9);
-}
-
 .landing .section-sub {
   text-align: center;
   color: var(--muted);
@@ -968,10 +933,12 @@
   position: relative;
   isolation: isolate;
   margin: 0 auto;
-  width: min(100%, 920px);
+  width: min(100%, 980px);
   padding: clamp(20px, 2.8vw, 30px) clamp(20px, 3.2vw, 38px);
   display: grid;
-  gap: clamp(14px, 2vw, 18px);
+  grid-template-columns: minmax(110px, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(14px, 2.2vw, 30px);
 }
 
 .landing .demo-bridge::before {
@@ -1007,39 +974,20 @@
 }
 
 .landing .demo-title {
-  font-size: clamp(1.65rem, 2.4vw, 2.2rem);
-  line-height: 1.1;
-  text-align: left;
+  font-size: clamp(1.7rem, 2.9vw, 2.3rem);
+  line-height: 1;
 }
 
 .landing .demo-sub {
   margin: 0;
-  max-width: 70ch;
+  max-width: 40ch;
   color: rgba(236, 228, 255, 0.92);
   text-align: left;
 }
 
-.landing .demo-points {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.landing .demo-point {
-  border: 1px solid rgba(209, 189, 255, 0.28);
-  background: linear-gradient(140deg, rgba(43, 29, 76, 0.32), rgba(28, 22, 54, 0.2));
-  border-radius: 16px;
-  padding: 12px 14px;
-  min-height: 88px;
+.landing .demo-actions {
   display: flex;
-  align-items: center;
-}
-
-.landing .demo-point p {
-  margin: 0;
-  color: rgba(241, 231, 255, 0.96);
-  line-height: 1.45;
-  font-weight: 560;
+  justify-content: flex-end;
 }
 
 
@@ -1522,7 +1470,9 @@
 
   .landing .demo-bridge {
     width: min(100%, 860px);
+    grid-template-columns: minmax(96px, auto) minmax(0, 1fr) auto;
     padding: clamp(18px, 2.8vw, 24px) clamp(18px, 3.2vw, 30px);
+    gap: clamp(12px, 1.8vw, 20px);
   }
 
   .landing .demo-title {
@@ -1547,10 +1497,6 @@
   .landing .timeline-card {
     padding: 14px 15px;
   }
-
-  .landing .demo-points {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 640px) {
@@ -1570,12 +1516,9 @@
     max-width: 32ch;
   }
 
-  .landing .demo-points {
-    grid-template-columns: 1fr;
-  }
-
-  .landing .demo-point {
-    min-height: auto;
+  .landing .demo-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .landing .demo-bridge::before,
