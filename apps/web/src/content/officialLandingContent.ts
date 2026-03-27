@@ -116,38 +116,38 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     how: {
-      kicker: 'THE INNERBLOOM JOURNEY',
+      kicker: 'EL JOURNEY DE INNERBLOOM',
       title: 'Start, Grow and Bloom',
       intro: 'Empieza realista, avanza por semanas, calibra por mes y construye hábitos que sí perduran.',
       actionLabel: 'Acción',
       outcomeLabel: 'Resultado',
       steps: [
         {
-          title: 'Start small, not perfect ✨',
+          title: 'Empieza pequeño, no perfecto ✨',
           action: 'Empieza desde tu capacidad actual con una base simple y sostenible.',
           outcome: 'Sostener importa más que empezar fuerte.',
           copy: 'Empieza desde tu capacidad actual con una base simple y sostenible. Sostener importa más que empezar fuerte.'
         },
         {
-          title: 'Grow through real cycles ⚖️',
+          title: 'Crece en ciclos reales ⚖️',
           action: 'Mira tus semanas, no un solo día.',
           outcome: 'Registra tu estado emocional y detecta patrones.',
           copy: 'Mira tus semanas, no un solo día. Registra tu estado emocional y detecta patrones.'
         },
         {
-          title: 'Calibrate with perspective 📅',
+          title: 'Calibra con perspectiva 📅',
           action: 'Revisa tu progreso por ciclos mensuales.',
           outcome: 'Ajusta el ritmo sin romper la constancia.',
           copy: 'Revisa tu progreso por ciclos mensuales. Ajusta el ritmo sin romper la constancia.'
         },
         {
-          title: 'Make progress visible 🌱',
+          title: 'Haz visible tu progreso 🌱',
           action: 'Haz visible tu evolución en constancia, emoción y balance.',
           outcome: 'Así entiendes mejor lo que sí te funciona.',
           copy: 'Haz visible tu evolución en constancia, emoción y balance. Así entiendes mejor lo que sí te funciona.'
         },
         {
-          title: 'Bloom into lasting habits 🌸',
+          title: 'Florece en hábitos duraderos 🌸',
           action: 'Con el tiempo, los hábitos estables pasan a formar parte de tu base.',
           outcome: 'Ahí el progreso deja de sentirse temporal.',
           copy: 'Con el tiempo, los hábitos estables pasan a formar parte de tu base. Ahí el progreso deja de sentirse temporal.'
