@@ -4,6 +4,7 @@ type NavLink = { href: string; label: string };
 type Pillar = { emoji: string; title: string; copy: string };
 type Mode = { id: 'low' | 'chill' | 'flow' | 'evolve'; title: string; state: string; goal: string };
 type HowStep = { title: string; action: string; outcome: string; copy: string };
+type HowItWorksStep = { title: string; body: string };
 type FeatureShowcaseItem = { title: string; description: string; previewLabel: string; previewValue: string; previewMeta: string };
 type Testimonial = { quote: string; author: string };
 type Faq = { question: string; answer: string };
@@ -27,6 +28,16 @@ export type LandingCopy = {
   problem: { title: string; body: string };
   pillars: { title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { title: string; intro: string; items: Mode[] };
+  visibleProgress: {
+    title: string;
+    subtitle: string;
+    highlights: Array<{ title: string; body: string }>;
+  };
+  howItWorks: {
+    title: string;
+    intro: string;
+    steps: HowItWorksStep[];
+  };
   how: { kicker: string; title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
   featureShowcase: { kicker: string; title: string; intro: string; items: FeatureShowcaseItem[] };
   demo: { title: string; text: string; points: string[] };
@@ -112,6 +123,47 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
           title: '🧬 EVOLVE MOOD',
           state: 'ambicioso y determinado.',
           goal: 'subir intensidad con estructura, sin romper la consistencia que ya construiste.'
+        }
+      ]
+    },
+    visibleProgress: {
+      title: 'Mira tu crecimiento, no solo tus checkmarks',
+      subtitle:
+        'Innerbloom hace visible tu progreso con dashboard, reflexión emocional y un avatar que evoluciona contigo, para que crecer se sienta comprensible y no solo registrable.',
+      highlights: [
+        {
+          title: 'Patrón emocional',
+          body: 'Registra cómo te sentiste y entiende qué estados favorecen tu constancia.'
+        },
+        {
+          title: 'Progreso semanal visible',
+          body: 'Observa tu consistencia acumulada por semanas, no solo por días sueltos.'
+        },
+        {
+          title: 'Identidad que evoluciona',
+          body: 'Tu journey y tu avatar reflejan cambios reales a medida que sostienes hábitos.'
+        }
+      ]
+    },
+    howItWorks: {
+      title: 'Cómo funciona',
+      intro: 'Un sistema construido con ritmo semanal, calibración mensual y hábitos que se fortalecen con el tiempo.',
+      steps: [
+        {
+          title: 'Empieza desde tu ritmo actual',
+          body: 'Elige un modo y construye una base de hábitos que de verdad puedas sostener.'
+        },
+        {
+          title: 'Sigue tus semanas, no solo tus días',
+          body: 'Innerbloom te ayuda a mantener conexión con tu rutina haciendo visible tu emoción y tu consistencia.'
+        },
+        {
+          title: 'Revisa el patrón, no un día malo',
+          body: 'Al cerrar un ciclo, el sistema interpreta tu consistencia semanal y calibra la dificultad de forma mensual.'
+        },
+        {
+          title: 'Conserva lo que realmente construiste',
+          body: 'Cuando tus hábitos se fortalecen, el progreso deja de sentirse temporal y pasa a tu historial real de crecimiento.'
         }
       ]
     },
@@ -345,6 +397,47 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
           title: '🧬 EVOLVE MOOD',
           state: 'ambitious and determined.',
           goal: 'increase challenge with structure while protecting the consistency you already built.'
+        }
+      ]
+    },
+    visibleProgress: {
+      title: 'See your growth, not just your checkmarks',
+      subtitle:
+        'Innerbloom makes progress visible through your dashboard, your emotional reflection, and your evolving avatar—so growth feels easier to understand, not just easier to log.',
+      highlights: [
+        {
+          title: 'Track emotional patterns',
+          body: 'Log how you feel and understand which emotional states support consistency.'
+        },
+        {
+          title: 'See consistency over time',
+          body: 'Read your progress through weekly accumulation, not isolated daily wins or misses.'
+        },
+        {
+          title: 'Watch your journey take shape',
+          body: 'Your avatar and journey visuals evolve as your habits become more stable.'
+        }
+      ]
+    },
+    howItWorks: {
+      title: 'How it works',
+      intro: 'A system built around weekly rhythm, monthly calibration, and habits that grow stronger over time.',
+      steps: [
+        {
+          title: 'Start from your current rhythm',
+          body: 'Choose a mode and build a habit base you can actually sustain.'
+        },
+        {
+          title: 'Follow your weeks, not just your days',
+          body: 'Innerbloom helps you stay connected to your routine while making emotions and consistency visible.'
+        },
+        {
+          title: 'Review the pattern, not one bad day',
+          body: 'After a full cycle, the system reads your weekly consistency and calibrates difficulty monthly.'
+        },
+        {
+          title: 'Keep what you’ve truly built',
+          body: 'As habits grow stronger, your progress stops feeling temporary and becomes part of your personal growth history.'
         }
       ]
     },

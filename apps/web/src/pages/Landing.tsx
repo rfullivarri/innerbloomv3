@@ -5,7 +5,6 @@ import { OFFICIAL_DESIGN_TOKENS, OFFICIAL_LANDING_CSS_VARIABLES } from '../conte
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { buildDemoModeSelectUrl } from '../lib/demoEntry';
-import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
 import { CookieConsentBanner } from '../components/landing/CookieConsentBanner';
 import { useLandingAnalytics } from '../components/landing/useLandingAnalytics';
@@ -129,111 +128,6 @@ const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => butt
 const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
   es: 'Tareas sugeridas:',
   en: 'Suggested tasks:'
-};
-
-const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: string; steps: TimelineStep[] }> = {
-  es: {
-    title: 'Start, Grow and Bloom',
-    closingLine: 'Innerbloom convierte tu ritmo real en hábitos que se sostienen en el tiempo.',
-    steps: [
-      {
-        title: 'Empieza pequeño, no perfecto ✨',
-        badge: 'ONBOARDING PERSONALIZADO',
-        bullets: [
-          'Comienza desde tu capacidad actual con una base simple y sostenible.',
-          'El objetivo es que puedas sostener el proceso desde la primera semana.',
-        ],
-        chips: ['ONBOARDING · BASE REALISTA'],
-      },
-      {
-        title: 'Crece con ciclos reales ⚖️',
-        badge: 'RITMO SEMANAL',
-        bullets: [
-          'Sigue tu consistencia por semanas, no por un solo día bueno o malo.',
-          'Registra tu estado emocional y detecta patrones que afectan tus hábitos.',
-        ],
-        chips: ['CONSTANCIA SEMANAL · REFLEXIÓN EMOCIONAL'],
-      },
-      {
-        title: 'Calibra con perspectiva 📅📈',
-        badge: 'CALIBRACIÓN MENSUAL',
-        bullets: [
-          'Revisa tu progreso en ciclos mensuales para ajustar el ritmo con criterio.',
-          'No se trata de exigirte más: se trata de sostener mejor.',
-        ],
-        chips: ['REVISIÓN DE PATRONES · AJUSTE SOSTENIBLE'],
-      },
-      {
-        title: 'Construye progreso visible 🌱',
-        badge: 'HISTORIAL DE CRECIMIENTO',
-        bullets: [
-          'Mira cómo evoluciona tu constancia y qué hábitos ya ganaron estabilidad.',
-          'Tu historial te muestra crecimiento real, no solo registros aislados.',
-        ],
-        chips: ['CRECIMIENTO VISIBLE · HÁBITOS CONSOLIDADOS'],
-      },
-      {
-        title: 'Florece en hábitos duraderos 🌸',
-        badge: 'HÁBITOS DURADEROS',
-        bullets: [
-          'Con el tiempo, los hábitos estables se convierten en parte de tu base personal.',
-          'Ahí es donde el progreso deja de ser intención y se vuelve parte de ti.',
-        ],
-        chips: ['HABIT BLOOMED · RUTINA ESTABLE'],
-      },
-    ],
-  },
-  en: {
-    title: 'Start, Grow and Bloom',
-    closingLine: 'Innerbloom turns your real-life rhythm into habits you can sustain.',
-    steps: [
-      {
-        title: 'Start small, not perfect ✨',
-        badge: 'PERSONALIZED ONBOARDING',
-        bullets: [
-          'Begin from your current capacity with a realistic foundation you can keep.',
-          'The goal is to sustain consistency from your first week.',
-        ],
-        chips: ['ONBOARDING · REALISTIC BASE'],
-      },
-      {
-        title: 'Grow through real cycles ⚖️',
-        badge: 'WEEKLY RHYTHM',
-        bullets: [
-          'Track consistency by week, not by one perfect or difficult day.',
-          'Reflect on emotional patterns that shape your habit consistency.',
-        ],
-        chips: ['WEEKLY CONSISTENCY · EMOTIONAL REFLECTION'],
-      },
-      {
-        title: 'Calibrate with perspective 📅📈',
-        badge: 'MONTHLY CALIBRATION',
-        bullets: [
-          'Review your pattern in monthly cycles so your plan stays realistic.',
-          'Calibration is about sustaining progress, not forcing intensity.',
-        ],
-        chips: ['PATTERN REVIEW · SUSTAINABLE ADJUSTMENT'],
-      },
-      {
-        title: 'Build visible progress 🌱',
-        badge: 'GROWTH HISTORY',
-        bullets: [
-          'See your consistency history and notice which habits are becoming stable.',
-          'Your progress becomes visible as something earned over time.',
-        ],
-        chips: ['VISIBLE GROWTH · HABITS EARNED'],
-      },
-      {
-        title: 'Bloom into habits that last 🌸',
-        badge: 'LASTING HABITS',
-        bullets: [
-          'When a habit becomes stable over time, Innerbloom can recognize it as part of your foundation.',
-          'Habit Bloomed marks the moment consistency becomes lasting change.',
-        ],
-        chips: ['HABIT BLOOMED · STABLE ROUTINE'],
-      },
-    ],
-  },
 };
 
 function splitPillarCopy(copy: string, language: Language) {
@@ -712,32 +606,57 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="how section-pad reveal-on-scroll" id="how">
-          <div className="container narrow">
-            <div className="how-heading">
-              <p className="how-kicker">{copy.how.kicker}</p>
-              <AdaptiveText as="h2">{copy.how.title}</AdaptiveText>
-              <AdaptiveText as="p" className="section-sub how-intro">{copy.how.intro}</AdaptiveText>
-            </div>
-            <PremiumTimeline
-              steps={PREMIUM_TIMELINE_COPY[language].steps}
-              closingLine={PREMIUM_TIMELINE_COPY[language].closingLine}
-              className="mt-2"
-            />
-          </div>
-        </section>
-
-        <section className="feature-showcase section-pad reveal-on-scroll" id="demo">
-          <div className="container narrow">
-            <div className="demo-bridge">
-              <AdaptiveText as="h2" className="demo-title">{copy.demo.title}</AdaptiveText>
-              <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
-              <div className="demo-points" role="list" aria-label={language === 'es' ? 'Ejes de progreso visible' : 'Visible progress pillars'}>
-                {copy.demo.points.map((point) => (
-                  <article key={point} className="demo-point" role="listitem">
-                    <p>{point}</p>
-                  </article>
-                ))}
+        <section className="visible-progress section-pad reveal-on-scroll" id="visible-progress">
+          <div className="container">
+            <div className="visible-progress-grid">
+              <div className="visible-progress-copy">
+                <AdaptiveText as="h2">{copy.visibleProgress.title}</AdaptiveText>
+                <AdaptiveText as="p" className="section-sub">{copy.visibleProgress.subtitle}</AdaptiveText>
+                <div
+                  className="visible-progress-points"
+                  role="list"
+                  aria-label={language === 'es' ? 'Pilares de progreso visible' : 'Visible progress pillars'}
+                >
+                  {copy.visibleProgress.highlights.map((highlight, index) => (
+                    <article
+                      key={highlight.title}
+                      className="visible-point fade-item"
+                      role="listitem"
+                      style={{ '--delay': `${index * 90}ms` } as CSSProperties}
+                    >
+                      <h3>{highlight.title}</h3>
+                      <p>{highlight.body}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+              <div className="visible-progress-visual" aria-hidden>
+                <div className="progress-stage">
+                  <div className="progress-stage-header">
+                    <span>{language === 'es' ? 'Ritmo semanal' : 'Weekly rhythm'}</span>
+                    <strong>+18%</strong>
+                  </div>
+                  <div className="progress-bars">
+                    {[62, 78, 71, 86, 92].map((value, index) => (
+                      <span key={value} style={{ '--value': `${value}%`, '--delay': `${index * 70}ms` } as CSSProperties} />
+                    ))}
+                  </div>
+                  <div className="progress-reflection">
+                    <p>{language === 'es' ? 'Registro emocional' : 'Emotional reflection'}</p>
+                    <div className="reflection-orbs">
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                  </div>
+                </div>
+                <div className="progress-avatar-rail">
+                  <img src="/LowMood.jpg" alt="" />
+                  <span className="progress-avatar-arrow">→</span>
+                  <img src="/FlowMood.jpg" alt="" />
+                  <span className="progress-avatar-arrow">→</span>
+                  <img src="/Evolve-Mood.jpg" alt="" />
+                </div>
               </div>
             </div>
           </div>
@@ -847,6 +766,24 @@ export default function LandingPage() {
                 </div>
               </article>
             </div>
+          </div>
+        </section>
+
+        <section className="how-it-works section-pad reveal-on-scroll" id="how">
+          <div className="container">
+            <div className="how-heading">
+              <AdaptiveText as="h2">{copy.howItWorks.title}</AdaptiveText>
+              <AdaptiveText as="p" className="section-sub how-intro">{copy.howItWorks.intro}</AdaptiveText>
+            </div>
+            <ol className="how-steps">
+              {copy.howItWorks.steps.map((step, index) => (
+                <li key={step.title} className="how-step fade-item" style={{ '--delay': `${index * 100}ms` } as CSSProperties}>
+                  <span className="how-step-index">{index + 1}</span>
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 
