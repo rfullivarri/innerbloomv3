@@ -23,6 +23,7 @@ import DemoDashboardPage from './pages/DemoDashboard';
 import QuickStartPreviewPage from './pages/QuickStartPreview';
 import LabsDemoModeSelectPage from './pages/LabsDemoModeSelect';
 import DemoModeSelectPage from './pages/DemoModeSelect';
+import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -122,6 +123,7 @@ export default function App() {
   const dashboardAliases = ['/dashboard', '/dashboard-v3'].filter(
     (alias) => alias !== trimmedDashboardPath,
   );
+  useGa4FunnelTracking({ dashboardBasePath: trimmedDashboardPath });
 
   return (
     <div className="min-h-screen bg-transparent">

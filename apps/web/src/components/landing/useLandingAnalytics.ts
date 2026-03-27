@@ -117,13 +117,19 @@ export function useLandingAnalytics({
       }
 
       const ctaName = element.dataset.analyticsCta;
+      const ctaLocation = element.dataset.analyticsLocation;
+      const destination = element.getAttribute('href') ?? element.dataset.analyticsDestination ?? '';
+      const isOutbound = /^https?:\/\//i.test(destination);
 
       if (!ctaName) {
         return;
       }
 
-      sendGaEvent('click', {
-        cta_name: ctaName,
+      sendGaEvent('landing_cta_clicked', {
+        cta_id: ctaName,
+        ...(ctaLocation ? { cta_location: ctaLocation } : {}),
+        ...(destination ? { destination } : {}),
+        outbound: isOutbound,
         page_path: pathname,
       });
     };
