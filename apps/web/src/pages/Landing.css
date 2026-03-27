@@ -1113,6 +1113,7 @@
   isolation: isolate;
   border-radius: var(--landing-glass-radius-lg);
   padding: clamp(9px, 1.2vw, 14px);
+  height: clamp(460px, 49vw, 560px);
   min-height: clamp(460px, 49vw, 560px);
   display: block;
   background: linear-gradient(152deg, rgba(247, 249, 255, 0.18), rgba(218, 224, 255, 0.1));
@@ -2090,6 +2091,7 @@
 
 @media (max-width: 640px) {
   .landing .visible-progress-module {
+    height: 500px;
     min-height: 500px;
   }
 
