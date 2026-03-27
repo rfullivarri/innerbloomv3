@@ -133,95 +133,95 @@ const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
 
 const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: string; steps: TimelineStep[] }> = {
   es: {
-    title: 'Start, Grow & Bloom',
-    closingLine: 'Innerbloom convierte tu energía y tus emociones en un sistema adaptativo de crecimiento.',
+    title: 'Start, Grow and Bloom',
+    closingLine: 'Innerbloom convierte tu ritmo real en hábitos que se sostienen en el tiempo.',
     steps: [
       {
-        title: 'Empieza con claridad ✨',
+        title: 'Start small, not perfect ✨',
         badge: 'PERSONALIZED ONBOARDING',
         bullets: [
-          'Elige tu game mode y responde unas pocas preguntas sobre tu energía, tus prioridades y tu momento actual.',
-          'Innerbloom usa eso para darte un punto de partida que realmente puedas sostener.',
+          'Comienza desde tu capacidad actual con una base simple y sostenible.',
+          'El objetivo es que puedas sostener el proceso desde la primera semana.',
         ],
-        chips: ['ONBOARDING · DAILY ENERGY'],
+        chips: ['ONBOARDING · REALISTIC BASE'],
       },
       {
-        title: 'Empieza con tu primer plan equilibrado ⚖️',
-        badge: 'BALANCED PLAN',
+        title: 'Grow through real cycles ⚖️',
+        badge: 'WEEKLY RHYTHM',
         bullets: [
-          'Recibe un plan realista en Body, Mind y Soul, con micro-hábitos simples adaptados a tu ritmo.',
-          'El objetivo no es la intensidad. Es una constancia que puedas sostener.',
+          'Sigue tu consistencia por semanas, no por un solo día bueno o malo.',
+          'Registra tu estado emocional y detecta patrones que afectan tus hábitos.',
         ],
-        chips: ['MICRO-HABITS · DAILY ROUTINE'],
+        chips: ['WEEKLY CONSISTENCY · EMOTIONAL REFLECTION'],
       },
       {
-        title: 'Crece con progreso diario 📅📈',
-        badge: 'VISIBLE PROGRESS',
+        title: 'Calibrate with perspective 📅📈',
+        badge: 'MONTHLY CALIBRATION',
         bullets: [
-          'Completa micro-hábitos, registra cómo te sientes y convierte tu emoción diaria en progreso visible.',
-          'Descubre qué te ayuda a mantener la constancia.',
+          'Revisa tu progreso en ciclos mensuales para ajustar el ritmo con criterio.',
+          'No se trata de exigirte más: se trata de sostener mejor.',
         ],
-        chips: ['HABIT TRACKING · EMOTION TRACKING'],
+        chips: ['PATTERN REVIEW · SUSTAINABLE ADJUSTMENT'],
       },
       {
-        title: 'Crece con un sistema que se adapta 🌱',
-        badge: 'ADAPTIVE SYSTEM',
+        title: 'Build visible progress 🌱',
+        badge: 'GROWTH HISTORY',
         bullets: [
-          'A medida que cambia tu constancia, Innerbloom ajusta el desafío para que tu plan siga siendo realista.',
-          'Growth Calibration y Next Mode te ayudan a avanzar en el momento adecuado.',
+          'Mira cómo evoluciona tu constancia y qué hábitos ya ganaron estabilidad.',
+          'Tu historial te muestra crecimiento real, no solo checkmarks aislados.',
         ],
-        chips: ['GROWTH CALIBRATION · NEXT MODE'],
+        chips: ['VISIBLE GROWTH · HABITS EARNED'],
       },
       {
-        title: 'Florece en hábitos que perduran 🌸',
+        title: 'Bloom into lasting habits 🌸',
         badge: 'LASTING HABITS',
         bullets: [
-          'Cuando un hábito se vuelve estable con el tiempo, Innerbloom puede reconocerlo como parte de tu base.',
-          'Habit Bloomed marca el momento en que la constancia se convierte en cambio duradero.',
+          'Con el tiempo, los hábitos estables se convierten en parte de tu base personal.',
+          'Ahí es donde el progreso deja de ser intención y se vuelve parte de ti.',
         ],
         chips: ['HABIT BLOOMED · STABLE ROUTINE'],
       },
     ],
   },
   en: {
-    title: 'Start, Grow & Bloom',
-    closingLine: 'Innerbloom turns your energy and emotions into an adaptive system for growth.',
+    title: 'Start, Grow and Bloom',
+    closingLine: 'Innerbloom turns your real-life rhythm into habits you can sustain.',
     steps: [
       {
-        title: 'Start with clarity ✨',
+        title: 'Start small, not perfect ✨',
         badge: 'PERSONALIZED ONBOARDING',
         bullets: [
-          'Choose your game mode and answer a few quick questions about your energy, priorities, and current moment.',
-          'Innerbloom uses that to create a starting point you can actually sustain.',
+          'Begin from your current capacity with a realistic foundation you can keep.',
+          'The goal is to sustain consistency from your first week.',
         ],
-        chips: ['ONBOARDING · DAILY ENERGY'],
+        chips: ['ONBOARDING · REALISTIC BASE'],
       },
       {
-        title: 'Start with your first balanced plan ⚖️',
-        badge: 'BALANCED PLAN',
+        title: 'Grow through real cycles ⚖️',
+        badge: 'WEEKLY RHYTHM',
         bullets: [
-          'Get a realistic plan across Body, Mind, and Soul, built around simple micro-habits that match your pace.',
-          'The goal is not intensity. It is consistency you can keep.',
+          'Track consistency by week, not by one perfect or difficult day.',
+          'Reflect on emotional patterns that shape your habit consistency.',
         ],
-        chips: ['MICRO-HABITS · DAILY ROUTINE'],
+        chips: ['WEEKLY CONSISTENCY · EMOTIONAL REFLECTION'],
       },
       {
-        title: 'Grow with daily progress 📅📈',
-        badge: 'VISIBLE PROGRESS',
+        title: 'Calibrate with perspective 📅📈',
+        badge: 'MONTHLY CALIBRATION',
         bullets: [
-          'Complete small habits, log how you feel, and turn daily emotion into visible progress.',
-          'See what helps you stay consistent.',
+          'Review your pattern in monthly cycles so your plan stays realistic.',
+          'Calibration is about sustaining progress, not forcing intensity.',
         ],
-        chips: ['HABIT TRACKING · EMOTION TRACKING'],
+        chips: ['PATTERN REVIEW · SUSTAINABLE ADJUSTMENT'],
       },
       {
-        title: 'Grow with a system that adapts 🌱',
-        badge: 'ADAPTIVE SYSTEM',
+        title: 'Build visible progress 🌱',
+        badge: 'GROWTH HISTORY',
         bullets: [
-          'As your consistency changes, Innerbloom adjusts the challenge to keep your plan realistic.',
-          'Growth Calibration and Next Mode help you move forward at the right time.',
+          'See your consistency history and notice which habits are becoming stable.',
+          'Your progress becomes visible as something earned over time.',
         ],
-        chips: ['GROWTH CALIBRATION · NEXT MODE'],
+        chips: ['VISIBLE GROWTH · HABITS EARNED'],
       },
       {
         title: 'Bloom into habits that last 🌸',
@@ -706,6 +706,47 @@ export default function LandingPage() {
 
         <section className="why section-pad reveal-on-scroll" id="why">
           <div className="container narrow">
+            <AdaptiveText as="h2">{copy.problem.title}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub">{copy.problem.body}</AdaptiveText>
+          </div>
+        </section>
+
+        <section className="how section-pad reveal-on-scroll" id="how">
+          <div className="container narrow">
+            <div className="how-heading">
+              <p className="how-kicker">{copy.how.kicker}</p>
+              <AdaptiveText as="h2">{copy.how.title}</AdaptiveText>
+              <AdaptiveText as="p" className="section-sub how-intro">{copy.how.intro}</AdaptiveText>
+            </div>
+            <PremiumTimeline
+              steps={PREMIUM_TIMELINE_COPY[language].steps}
+              closingLine={PREMIUM_TIMELINE_COPY[language].closingLine}
+              className="mt-2"
+            />
+          </div>
+        </section>
+
+        <section className="feature-showcase section-pad reveal-on-scroll" id="demo">
+          <div className="container narrow">
+            <div className="demo-bridge">
+              <AdaptiveText as="h2" className="demo-title">{copy.demo.title}</AdaptiveText>
+              <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
+              <div className="demo-actions">
+                <Link
+                  className={buttonClasses()}
+                  data-analytics-cta="guided_demo"
+                  data-analytics-location="feature"
+                  to={buildDemoModeSelectUrl({ language, source: 'landing' })}
+                >
+                  {copy.demo.cta}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="why section-pad reveal-on-scroll" id="pillars">
+          <div className="container narrow">
             <AdaptiveText as="h2" className="pillars-title">{copy.pillars.title}</AdaptiveText>
             <AdaptiveText as="p" className="section-sub pillars-intro">{copy.pillars.intro}</AdaptiveText>
             <div className="cards grid-3">
@@ -811,40 +852,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="how section-pad reveal-on-scroll" id="how">
-          <div className="container narrow">
-            <div className="how-heading">
-              <p className="how-kicker">{copy.how.kicker}</p>
-              <AdaptiveText as="h2">{copy.how.title}</AdaptiveText>
-              <AdaptiveText as="p" className="section-sub how-intro">{copy.how.intro}</AdaptiveText>
-            </div>
-            <PremiumTimeline
-              steps={PREMIUM_TIMELINE_COPY[language].steps}
-              closingLine={PREMIUM_TIMELINE_COPY[language].closingLine}
-              className="mt-2"
-            />
-          </div>
-        </section>
-
-        <section className="feature-showcase section-pad reveal-on-scroll" id="demo">
-          <div className="container narrow">
-            <div className="demo-bridge">
-              <AdaptiveText as="h2" className="demo-title">{copy.demo.title}</AdaptiveText>
-              <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
-              <div className="demo-actions">
-                <Link
-                  className={buttonClasses()}
-                  data-analytics-cta="guided_demo"
-                  data-analytics-location="feature"
-                  to={buildDemoModeSelectUrl({ language, source: 'landing' })}
-                >
-                  {copy.demo.cta}
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section className="testimonials section-pad reveal-on-scroll" id="testimonials">
           <div className="container">
             <AdaptiveText as="h2">{copy.testimonials.title}</AdaptiveText>
@@ -912,6 +919,18 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section className="faq section-pad reveal-on-scroll" id="faq">
+          <div className="container narrow">
+            <AdaptiveText as="h2">{copy.faq.title}</AdaptiveText>
+            {copy.faq.items.map((faq) => (
+              <details key={faq.question}>
+                <summary>{faq.question}</summary>
+                <p>{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+
         <section className="pricing section-pad reveal-on-scroll" id="pricing">
           <div className="container">
             <AdaptiveText as="h2">{copy.pricing.title}</AdaptiveText>
@@ -932,18 +951,6 @@ export default function LandingPage() {
                 </article>
               ))}
             </div>
-          </div>
-        </section>
-
-        <section className="faq section-pad reveal-on-scroll" id="faq">
-          <div className="container narrow">
-            <AdaptiveText as="h2">{copy.faq.title}</AdaptiveText>
-            {copy.faq.items.map((faq) => (
-              <details key={faq.question}>
-                <summary>{faq.question}</summary>
-                <p>{faq.answer}</p>
-              </details>
-            ))}
           </div>
         </section>
 
