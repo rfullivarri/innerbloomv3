@@ -49,17 +49,17 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   es: {
     navLinks: [],
     hero: {
-      titleLead: 'Construye hábitos que respeten tu',
-      titleHighlight: 'ritmo de vida real',
+      titleLead: 'La mayoría de los sistemas de hábitos fallan por una razón simple:',
+      titleHighlight: 'esperan que te sientas igual siempre.',
       subtitle:
-        'La mayoría de las apps de hábitos asumen que te sientes igual cada día, pero la vida real no funciona así. Innerbloom te ayuda a construir hábitos duraderos con ritmo semanal, calibración mensual, reflexión emocional y progreso visible.',
-      note: 'Empieza en minutos. Crece a través de ciclos reales.',
+        'Innerbloom es un sistema de hábitos adaptado a la vida real. Tu energía cambia, tu estado influye y tu progreso debería seguir contando.',
+      note: 'Empieza desde tu nivel real y crece en ciclos semanales.',
       alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
     },
     problem: {
-      title: 'La mayoría de las apps de hábitos fallan cuando la vida real pasa',
+      title: 'El problema real no sos vos.',
       body:
-        'Hay días con foco y días con agotamiento. Hay semanas fluidas y semanas más pesadas. Muchas apps tratan todos esos momentos igual. Innerbloom no.'
+        'La mayoría de las apps de hábitos están construidas sobre una suposición falsa: que vas a tener la misma energía, el mismo foco, la misma motivación y la misma disciplina siempre. Pero la vida no funciona así. Hay etapas en las que puedes avanzar más. Hay etapas en las que necesitas una base más simple. Hay semanas más claras. Y semanas más pesadas. Cuando el sistema no reconoce eso, no solo pierdes constancia. También empiezas a sentir que el problema eres tú.'
     },
     pillars: {
       title: 'Una forma simple de crecer en equilibrio',
@@ -116,9 +116,9 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     how: {
-      kicker: 'EL JOURNEY DE INNERBLOOM',
-      title: 'Start, Grow and Bloom',
-      intro: 'Empieza realista, avanza por semanas, calibra por mes y construye hábitos que sí perduran.',
+      kicker: 'EL SISTEMA DE INNERBLOOM',
+      title: 'Cómo funciona Innerbloom',
+      intro: 'Empieza desde tu nivel real, avanza en ciclos semanales, recalibra con el tiempo y construye hábitos que sí perduran.',
       actionLabel: 'Acción',
       outcomeLabel: 'Resultado',
       steps: [
@@ -204,8 +204,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     demo: {
-      title: 'Progreso visible, no solo registros',
-      text: 'Innerbloom hace visible tu constancia semanal, tu patrón emocional y tu balance para que el progreso se entienda y no se sienta abstracto.',
+      title: 'Haz visible el progreso que estás construyendo.',
+      text: 'Innerbloom no solo te ayuda a completar tareas. Te ayuda a ver cómo evoluciona tu constancia, cómo se fortalecen tus hábitos y cuándo un esfuerzo repetido ya se convirtió en algo duradero. Porque progresar no debería sentirse como todo o nada. Debería sentirse visible, honesto y real.',
       banner: 'Explora cómo se ve tu crecimiento dentro de Innerbloom',
       cta: 'Explorar demo'
     },
@@ -271,25 +271,25 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       dashboard: 'Ir al dashboard',
       signup: 'Crear cuenta',
       login: 'Iniciar sesión',
-      startJourney: 'Empieza mi Journey',
-      guidedDemo: 'Ver cómo funciona'
+      startJourney: 'Empieza tu Journey',
+      guidedDemo: 'Ver demo guiada'
     },
     footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
   },
   en: {
     navLinks: [],
     hero: {
-      titleLead: 'Build habits that respect your',
-      titleHighlight: 'real-life rhythm',
+      titleLead: 'Most habit systems fail for one simple reason:',
+      titleHighlight: 'they expect you to feel the same all the time.',
       subtitle:
-        'Most habit apps assume you feel the same every day, but real life does not work that way. Innerbloom helps you build lasting habits through weekly rhythm, monthly calibration, emotional reflection, and visible progress.',
-      note: 'Start in minutes. Grow through real cycles.',
+        'Innerbloom is a habit system built for real life. Your energy changes, your state matters, and your progress should still count.',
+      note: 'Start from your real level and grow through weekly cycles.',
       alt: 'Kid looking at a violet energy sphere in the night sky — Gamification Journey'
     },
     problem: {
-      title: 'Most habit apps break when real life happens',
+      title: 'The real problem isn’t you.',
       body:
-        'Some days feel focused. Some days feel heavy. Some weeks flow easily. Others don’t. Most habit apps treat all those moments the same. Innerbloom doesn’t.'
+        'Most habit apps are built on a false assumption: that you’ll have the same energy, focus, motivation, and discipline all the time. But life doesn’t work like that. Some phases give you more room to push. Others require a simpler base. Some weeks feel clear. Others feel heavier. When the system doesn’t account for that, you don’t just lose consistency. You start believing you’re the problem.'
     },
     pillars: {
       title: 'A simple way to grow in balance',
@@ -346,9 +346,9 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     how: {
-      kicker: 'THE INNERBLOOM JOURNEY',
-      title: 'Start, Grow and Bloom',
-      intro: 'Start realistic, move weekly, calibrate monthly, and build habits that last.',
+      kicker: 'THE INNERBLOOM SYSTEM',
+      title: 'How Innerbloom works',
+      intro: 'Start from your real level, move through weekly cycles, recalibrate over time, and build habits that actually last.',
       actionLabel: 'Action',
       outcomeLabel: 'Outcome',
       steps: [
@@ -434,8 +434,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       ]
     },
     demo: {
-      title: 'Visible progress, not just checkmarks',
-      text: 'Innerbloom makes your consistency, emotional pattern, and balance visible so progress feels concrete.',
+      title: 'Make the progress you’re building visible.',
+      text: 'Innerbloom doesn’t just help you complete tasks. It helps you see how your consistency evolves, how your habits strengthen, and when repeated effort becomes something lasting. Because progress shouldn’t feel all-or-nothing. It should feel visible, honest, and real.',
       banner: 'Explore how your growth looks inside Innerbloom',
       cta: 'Explore demo'
     },
@@ -501,8 +501,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       dashboard: 'Go to dashboard',
       signup: 'Create account',
       login: 'Log in',
-      startJourney: 'Start my Journey',
-      guidedDemo: 'See how it works'
+      startJourney: 'Start your Journey',
+      guidedDemo: 'See guided demo'
     },
     footer: { copyright: '©️ Gamification Journey', faq: 'FAQ' }
   }
