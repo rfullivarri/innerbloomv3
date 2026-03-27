@@ -720,8 +720,11 @@ export default function LandingPage() {
               {language === 'es' ? 'EL PROBLEMA REAL' : 'THE REAL PROBLEM'}
             </p>
 
-            <div className="truth-problem-shell">
-              <AdaptiveText as="h2" className="truth-problem-title">{copy.problem.title}</AdaptiveText>
+            <AdaptiveText as="h2" className="truth-problem-title truth-problem-title--outside">
+              {copy.problem.title}
+            </AdaptiveText>
+
+            <div className="truth-problem-shell truth-problem-shell--body-only">
               <AdaptiveText as="p" className="section-sub truth-problem-body">{copy.problem.body}</AdaptiveText>
             </div>
           </div>
