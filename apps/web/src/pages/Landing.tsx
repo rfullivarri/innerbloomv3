@@ -735,9 +735,13 @@ export default function LandingPage() {
               </div>
 
               <div className="visible-progress-module" aria-hidden>
-                <div className="visible-progress-left-stack">
-                  <article className="visible-progress-fragment visible-progress-fragment--radar">
-                    <p className="visible-progress-fragment-kicker">Balance</p>
+                <div className="visible-progress-zone visible-progress-zone--radar">
+                  <div className="visible-progress-canvas visible-progress-canvas--radar">
+                    <div className="visible-canvas-header">
+                      <p className="visible-canvas-title">BALANCE</p>
+                      <span className="visible-canvas-chip">Predominio Body</span>
+                      <span className="visible-canvas-info">i</span>
+                    </div>
                     <div className="visible-radar-shell">
                       <div className="visible-radar-ring visible-radar-ring--lg" />
                       <div className="visible-radar-ring visible-radar-ring--md" />
@@ -748,19 +752,26 @@ export default function LandingPage() {
                       <div className="visible-radar-polygon" />
                     </div>
                     <div className="visible-radar-pillars">
-                      <span>Body</span>
-                      <span>Mind</span>
-                      <span>Soul</span>
+                      <span>ALMA 32%</span>
+                      <span>CUERPO 45%</span>
+                      <span>MENTE 23%</span>
                     </div>
-                  </article>
+                  </div>
+                </div>
 
-                  <article className="visible-progress-fragment visible-progress-fragment--emotion">
-                    <div className="visible-progress-fragment-head">
-                      <p className="visible-progress-fragment-kicker">Emotion chart</p>
-                      <span className="visible-progress-fragment-meta">6M</span>
+                <div className="visible-progress-zone visible-progress-zone--emotion">
+                  <div className="visible-progress-canvas visible-progress-canvas--emotion">
+                    <div className="visible-canvas-header visible-canvas-header--emotion">
+                      <p className="visible-canvas-title">EMOTION CHART</p>
+                      <span className="visible-canvas-info">i</span>
+                    </div>
+                    <div className="visible-emotion-legend">
+                      <span>Calma</span>
+                      <span className="visible-emotion-pill">Felicidad</span>
+                      <span>Foco</span>
                     </div>
                     <div className="visible-emotion-grid">
-                      {Array.from({ length: 42 }).map((_, index) => (
+                      {Array.from({ length: 96 }).map((_, index) => (
                         <span
                           key={`emotion-cell-${index}`}
                           className="visible-emotion-cell"
@@ -768,43 +779,59 @@ export default function LandingPage() {
                         />
                       ))}
                     </div>
-                    <div className="visible-emotion-legend">
-                      <span className="visible-emotion-legend-dot visible-emotion-legend-dot--calm" />
-                      <span className="visible-emotion-legend-dot visible-emotion-legend-dot--focus" />
-                      <span className="visible-emotion-legend-dot visible-emotion-legend-dot--sad" />
-                    </div>
-                  </article>
+                  </div>
                 </div>
 
-                <article className="visible-progress-fragment visible-progress-fragment--streaks">
-                  <div className="visible-progress-fragment-head">
-                    <p className="visible-progress-fragment-kicker">Streak panel</p>
-                    <span className="visible-progress-fragment-meta">Semana</span>
-                  </div>
-                  <div className="visible-streak-pillars" role="tablist" aria-label="Pilares">
-                    <span className="is-active">Body</span>
-                    <span>Mind</span>
-                    <span>Soul</span>
-                  </div>
-                  <div className="visible-streak-row">
-                    <div className="visible-streak-row-head">
-                      <p>Caminar 20m</p>
-                      <span>4/6</span>
+                <div className="visible-progress-zone visible-progress-zone--streaks">
+                  <div className="visible-progress-canvas visible-progress-canvas--streaks">
+                    <div className="visible-canvas-header visible-canvas-header--streaks">
+                      <p className="visible-canvas-title">STREAKS</p>
+                      <span className="visible-canvas-info">i</span>
+                      <span className="visible-canvas-chip visible-canvas-chip--flow">FLOW · 3M</span>
                     </div>
-                    <div className="visible-streak-bar">
-                      <span className="visible-streak-fill visible-streak-fill--first" />
+                    <div className="visible-streak-pillars" role="tablist" aria-label="Pilares">
+                      <span className="is-active">🫀 BODY</span>
+                      <span>🧠 MIND</span>
+                      <span>🏵️ SOUL</span>
+                    </div>
+                    <p className="visible-streak-heading">Top streaks</p>
+                    <div className="visible-streak-row">
+                      <div className="visible-streak-row-head">
+                        <p>Minoxidil noche</p>
+                        <span>5/3</span>
+                      </div>
+                      <p className="visible-streak-row-meta">Recuperación</p>
+                      <div className="visible-streak-bar">
+                        <span className="visible-streak-fill visible-streak-fill--first" />
+                      </div>
+                    </div>
+                    <div className="visible-streak-row">
+                      <div className="visible-streak-row-head">
+                        <p>Ayuno hasta las 14hs</p>
+                        <span>5/3</span>
+                      </div>
+                      <p className="visible-streak-row-meta">Nutrición</p>
+                      <div className="visible-streak-bar">
+                        <span className="visible-streak-fill visible-streak-fill--second" />
+                      </div>
+                    </div>
+                    <div className="visible-streak-row">
+                      <div className="visible-streak-row-head">
+                        <p>Dormir 8hs</p>
+                        <span>4/3</span>
+                      </div>
+                      <p className="visible-streak-row-meta">Sueño</p>
+                      <div className="visible-streak-bar">
+                        <span className="visible-streak-fill visible-streak-fill--third" />
+                      </div>
+                    </div>
+                    <div className="visible-streak-periods">
+                      <span>SEM</span>
+                      <span className="is-active">MES</span>
+                      <span>3M</span>
                     </div>
                   </div>
-                  <div className="visible-streak-row">
-                    <div className="visible-streak-row-head">
-                      <p>Respirar 5m</p>
-                      <span>5/7</span>
-                    </div>
-                    <div className="visible-streak-bar">
-                      <span className="visible-streak-fill visible-streak-fill--second" />
-                    </div>
-                  </div>
-                </article>
+                </div>
               </div>
             </div>
 

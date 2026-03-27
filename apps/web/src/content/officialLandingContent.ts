@@ -205,7 +205,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     demo: {
       title: 'Progreso visible, no solo registros',
-      text: 'Innerbloom hace visible tu constancia, tu patrón emocional y tu balance para que el progreso no se sienta abstracto.',
+      text: 'Innerbloom hace visible tu constancia semanal, tu patrón emocional y tu balance para que el progreso se entienda y no se sienta abstracto.',
       banner: 'Explora cómo se ve tu crecimiento dentro de Innerbloom',
       cta: 'Explorar demo'
     },

@@ -1001,232 +1001,319 @@
 
 .landing .visible-progress-top {
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
-  align-items: center;
-  gap: clamp(18px, 2.5vw, 34px);
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  align-items: start;
+  gap: clamp(20px, 2.8vw, 36px);
 }
 
 .landing .visible-progress-copy {
   display: grid;
-  gap: 12px;
+  gap: 14px;
+  align-content: start;
+  padding-top: clamp(2px, 0.8vw, 12px);
 }
 
 .landing .visible-progress-module {
   position: relative;
   isolation: isolate;
-  border-radius: 32px;
+  border-radius: 34px;
   padding: clamp(14px, 1.8vw, 20px);
+  min-height: clamp(460px, 49vw, 560px);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.03fr);
-  gap: 12px;
+  grid-template-columns: 47% 53%;
+  grid-template-rows: 53% 47%;
+  gap: 14px;
   background:
-    radial-gradient(circle at 16% 16%, rgba(156, 126, 255, 0.2), transparent 58%),
-    radial-gradient(circle at 84% 84%, rgba(93, 212, 255, 0.16), transparent 52%),
-    linear-gradient(145deg, rgba(24, 18, 52, 0.88), rgba(16, 26, 47, 0.9));
-  border: 1px solid rgba(229, 213, 255, 0.24);
+    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0) 48%),
+    radial-gradient(circle at 82% 18%, rgba(189, 156, 255, 0.36), rgba(189, 156, 255, 0) 52%),
+    radial-gradient(circle at 72% 78%, rgba(129, 212, 250, 0.26), rgba(129, 212, 250, 0) 55%),
+    linear-gradient(145deg, rgba(233, 230, 255, 0.36), rgba(215, 227, 255, 0.2));
+  border: 1px solid rgba(248, 246, 255, 0.75);
   box-shadow:
-    0 28px 64px rgba(16, 10, 32, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
-}
-
-.landing .visible-progress-left-stack {
-  display: grid;
-  grid-template-rows: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 12px;
-}
-
-.landing .visible-progress-fragment {
-  position: relative;
-  border-radius: 22px;
-  border: 1px solid rgba(199, 180, 248, 0.3);
-  background: linear-gradient(145deg, rgba(22, 30, 56, 0.86), rgba(19, 26, 44, 0.84));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 26px 60px rgba(69, 47, 135, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
   overflow: hidden;
 }
 
-.landing .visible-progress-fragment--radar {
-  padding: 12px 14px 8px;
+.landing .visible-progress-module::after {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  pointer-events: none;
 }
 
-.landing .visible-progress-fragment-kicker {
-  margin: 0;
-  font-size: 0.69rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: rgba(229, 219, 255, 0.82);
-  font-weight: 700;
-}
-
-.landing .visible-radar-shell {
+.landing .visible-progress-zone {
   position: relative;
-  margin: 10px auto 2px;
-  width: min(170px, 100%);
-  aspect-ratio: 1 / 1;
+  border-radius: 26px;
+  overflow: hidden;
+  background: linear-gradient(140deg, rgba(15, 22, 53, 0.96), rgba(11, 18, 42, 0.97));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 16px 34px rgba(16, 9, 38, 0.3);
 }
 
-.landing .visible-radar-ring {
+.landing .visible-progress-zone--radar {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.landing .visible-progress-zone--emotion {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.landing .visible-progress-zone--streaks {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.landing .visible-progress-canvas {
   position: absolute;
-  inset: 50%;
-  border: 1px solid rgba(167, 139, 250, 0.45);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
 }
 
-.landing .visible-radar-ring--lg { width: 100%; height: 100%; }
-.landing .visible-radar-ring--md { width: 68%; height: 68%; }
-.landing .visible-radar-ring--sm { width: 36%; height: 36%; }
-
-.landing .visible-radar-axis {
-  position: absolute;
-  inset: 50%;
-  width: 1px;
-  height: 92%;
-  background: linear-gradient(to bottom, rgba(167, 139, 250, 0), rgba(167, 139, 250, 0.45), rgba(167, 139, 250, 0));
-  transform-origin: center;
+.landing .visible-progress-canvas--radar {
+  inset: -26px -24px -28px -20px;
+  padding: 22px;
 }
 
-.landing .visible-radar-axis--a { transform: translate(-50%, -50%) rotate(0deg); }
-.landing .visible-radar-axis--b { transform: translate(-50%, -50%) rotate(60deg); }
-.landing .visible-radar-axis--c { transform: translate(-50%, -50%) rotate(120deg); }
-
-.landing .visible-radar-polygon {
-  position: absolute;
-  inset: 16%;
-  clip-path: polygon(50% 0%, 92% 31%, 84% 82%, 50% 100%, 14% 74%, 10% 28%);
-  background: linear-gradient(165deg, rgba(93, 212, 255, 0.4), rgba(167, 139, 250, 0.26));
-  border: 1px solid rgba(167, 139, 250, 0.6);
-  filter: drop-shadow(0 0 16px rgba(124, 58, 237, 0.3));
-  animation: landingRadarPulse 6s ease-in-out infinite;
+.landing .visible-progress-canvas--emotion {
+  inset: -12px -10px -44px -10px;
+  padding: 20px 18px;
 }
 
-.landing .visible-radar-pillars {
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-  margin-top: -4px;
-}
-
-.landing .visible-radar-pillars span {
-  font-size: 0.68rem;
-  color: rgba(236, 228, 255, 0.88);
-}
-
-.landing .visible-progress-fragment--emotion {
-  padding: 12px 14px;
-  display: grid;
-  gap: 10px;
-}
-
-.landing .visible-progress-fragment-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 6px;
-}
-
-.landing .visible-progress-fragment-meta {
-  font-size: 0.66rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(186, 212, 255, 0.72);
-}
-
-.landing .visible-emotion-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 5px;
-}
-
-.landing .visible-emotion-cell {
-  height: 12px;
-  border-radius: 4px;
-  background: rgba(107, 114, 128, 0.34);
-  border: 1px solid rgba(186, 212, 255, 0.12);
-  animation: landingEmotionPop 5.8s ease-in-out infinite;
-  animation-delay: calc(var(--emotion-order, 0) * 40ms);
-}
-
-.landing .visible-emotion-cell:nth-child(4n + 1) { background: rgba(46, 204, 113, 0.68); }
-.landing .visible-emotion-cell:nth-child(4n + 2) { background: rgba(241, 196, 15, 0.58); }
-.landing .visible-emotion-cell:nth-child(4n + 3) { background: rgba(155, 89, 182, 0.62); }
-.landing .visible-emotion-cell:nth-child(4n) { background: rgba(231, 76, 60, 0.48); }
-
-.landing .visible-emotion-legend {
-  display: inline-flex;
-  gap: 7px;
-}
-
-.landing .visible-emotion-legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  box-shadow: 0 0 8px currentColor;
-}
-
-.landing .visible-emotion-legend-dot--calm { color: #2ECC71; background: currentColor; }
-.landing .visible-emotion-legend-dot--focus { color: #9B59B6; background: currentColor; }
-.landing .visible-emotion-legend-dot--sad { color: #E74C3C; background: currentColor; }
-
-.landing .visible-progress-fragment--streaks {
-  padding: 14px;
+.landing .visible-progress-canvas--streaks {
+  inset: -8px -42px -22px -10px;
+  padding: 18px;
   display: grid;
   align-content: start;
   gap: 12px;
 }
 
+.landing .visible-canvas-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.landing .visible-canvas-header--emotion {
+  margin-bottom: 12px;
+}
+
+.landing .visible-canvas-header--streaks {
+  margin-bottom: 8px;
+}
+
+.landing .visible-canvas-title {
+  margin: 0;
+  font-size: clamp(0.92rem, 0.75vw + 0.52rem, 1.24rem);
+  letter-spacing: 0.22em;
+  font-weight: 500;
+  color: rgba(237, 243, 255, 0.95);
+}
+
+.landing .visible-canvas-chip {
+  margin-left: auto;
+  border-radius: 999px;
+  padding: 5px 14px;
+  border: 1px solid rgba(135, 223, 255, 0.48);
+  background: linear-gradient(135deg, rgba(58, 188, 255, 0.34), rgba(115, 134, 255, 0.34));
+  color: rgba(232, 247, 255, 0.95);
+  font-size: 0.71rem;
+  font-weight: 700;
+}
+
+.landing .visible-canvas-chip--flow {
+  font-size: 0.68rem;
+  padding: 5px 12px;
+  margin-left: 0;
+}
+
+.landing .visible-canvas-info {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(121, 136, 255, 0.72);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(214, 224, 255, 0.9);
+  font-size: 1.08rem;
+  line-height: 1;
+}
+
+.landing .visible-radar-shell {
+  position: relative;
+  margin: 6px auto 0;
+  width: min(290px, 100%);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(90, 144, 251, 0.22), rgba(90, 144, 251, 0) 68%);
+}
+
+.landing .visible-radar-ring {
+  position: absolute;
+  inset: 50%;
+  border: 1px solid rgba(150, 168, 214, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.landing .visible-radar-ring--lg { width: 100%; height: 100%; }
+.landing .visible-radar-ring--md { width: 72%; height: 72%; }
+.landing .visible-radar-ring--sm { width: 42%; height: 42%; }
+
+.landing .visible-radar-axis {
+  position: absolute;
+  inset: 50%;
+  width: 1px;
+  height: 95%;
+  background: linear-gradient(to bottom, rgba(167, 188, 232, 0), rgba(167, 188, 232, 0.42), rgba(167, 188, 232, 0));
+  transform-origin: center;
+}
+
+.landing .visible-radar-axis--a { transform: translate(-50%, -50%) rotate(0deg); }
+.landing .visible-radar-axis--b { transform: translate(-50%, -50%) rotate(62deg); }
+.landing .visible-radar-axis--c { transform: translate(-50%, -50%) rotate(122deg); }
+
+.landing .visible-radar-polygon {
+  position: absolute;
+  inset: 13%;
+  clip-path: polygon(50% 3%, 76% 18%, 81% 39%, 66% 51%, 73% 82%, 48% 67%, 30% 74%, 19% 53%, 7% 41%, 28% 34%, 26% 18%);
+  background: linear-gradient(160deg, rgba(197, 208, 233, 0.48), rgba(164, 132, 255, 0.38));
+  border: 1px solid rgba(221, 233, 255, 0.58);
+  filter: drop-shadow(0 0 18px rgba(125, 120, 255, 0.36));
+  animation: landingRadarPulse 6.2s ease-in-out infinite;
+}
+
+.landing .visible-radar-pillars {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -2px;
+  gap: 6px;
+}
+
+.landing .visible-radar-pillars span {
+  font-size: 0.75rem;
+  color: rgba(226, 236, 255, 0.9);
+  letter-spacing: 0.08em;
+}
+
+.landing .visible-emotion-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: rgba(231, 237, 255, 0.88);
+  font-size: 0.86rem;
+}
+
+.landing .visible-emotion-pill {
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: rgba(239, 191, 26, 0.9);
+  color: rgba(18, 24, 56, 0.92);
+  font-weight: 700;
+}
+
+.landing .visible-emotion-grid {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 5px;
+  padding: 10px;
+  border-radius: 24px;
+  background: rgba(16, 26, 56, 0.74);
+  border: 1px solid rgba(140, 157, 209, 0.24);
+}
+
+.landing .visible-emotion-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  background: rgba(98, 104, 122, 0.62);
+  border: 1px solid rgba(202, 216, 255, 0.13);
+  animation: landingEmotionPop 5.8s ease-in-out infinite;
+  animation-delay: calc(var(--emotion-order, 0) * 22ms);
+}
+
+.landing .visible-emotion-cell:nth-child(5n + 1) { background: rgba(46, 204, 113, 0.8); }
+.landing .visible-emotion-cell:nth-child(5n + 2) { background: rgba(241, 196, 15, 0.88); }
+.landing .visible-emotion-cell:nth-child(5n + 3) { background: rgba(155, 89, 182, 0.85); }
+.landing .visible-emotion-cell:nth-child(5n + 4) { background: rgba(231, 76, 60, 0.72); }
+
 .landing .visible-streak-pillars {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  padding: 4px;
+  gap: 8px;
+  padding: 7px;
   border-radius: 999px;
-  border: 1px solid rgba(186, 212, 255, 0.2);
-  background: rgba(14, 20, 39, 0.64);
+  border: 1px solid rgba(158, 176, 220, 0.3);
+  background: rgba(22, 30, 62, 0.92);
 }
 
 .landing .visible-streak-pillars span {
   border-radius: 999px;
   text-align: center;
-  font-size: 0.66rem;
+  font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 5px 0;
+  padding: 7px 2px;
   color: rgba(216, 226, 255, 0.74);
+  font-weight: 700;
 }
 
 .landing .visible-streak-pillars span.is-active {
-  background: linear-gradient(125deg, rgba(167, 139, 250, 0.48), rgba(93, 212, 255, 0.36));
-  border: 1px solid rgba(216, 199, 255, 0.55);
-  color: #f7f2ff;
+  background: rgba(250, 252, 255, 0.92);
+  color: rgba(18, 27, 56, 0.94);
+}
+
+.landing .visible-streak-heading {
+  margin: 2px 0 6px;
+  color: rgba(233, 241, 255, 0.96);
+  font-size: clamp(1.02rem, 1.04vw + 0.62rem, 1.56rem);
+  letter-spacing: 0.14em;
 }
 
 .landing .visible-streak-row {
   display: grid;
-  gap: 6px;
+  gap: 7px;
+  border-radius: 24px;
+  padding: 12px;
+  background: rgba(52, 55, 107, 0.9);
+  border: 1px solid rgba(156, 122, 239, 0.48);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .landing .visible-streak-row-head {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  align-items: center;
+  gap: 10px;
+  align-items: baseline;
 }
 
 .landing .visible-streak-row-head p {
   margin: 0;
-  font-size: 0.77rem;
-  color: rgba(234, 241, 255, 0.92);
+  font-size: 0.9rem;
+  color: rgba(242, 246, 255, 0.96);
 }
 
 .landing .visible-streak-row-head span {
-  font-size: 0.72rem;
-  color: rgba(186, 212, 255, 0.82);
+  font-size: 0.86rem;
+  color: rgba(227, 236, 255, 0.9);
+}
+
+.landing .visible-streak-row-meta {
+  margin: 0;
+  color: rgba(193, 206, 237, 0.82);
+  font-size: 0.82rem;
 }
 
 .landing .visible-streak-bar {
-  height: 9px;
+  height: 13px;
   border-radius: 999px;
-  background: rgba(142, 160, 204, 0.22);
+  background: rgba(184, 199, 236, 0.2);
   overflow: hidden;
 }
 
@@ -1234,13 +1321,13 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(120, 200, 255, 0.9), rgba(167, 139, 250, 0.95));
-  box-shadow: 0 0 10px rgba(127, 156, 255, 0.4);
+  background: linear-gradient(90deg, rgba(167, 139, 250, 0.92), rgba(223, 117, 236, 0.95), rgba(129, 212, 250, 0.92));
+  box-shadow: 0 0 14px rgba(167, 139, 250, 0.38);
   transform-origin: left center;
 }
 
 .landing .visible-streak-fill--first {
-  width: 68%;
+  width: 78%;
   animation: landingBarPulse 5.3s ease-in-out infinite;
 }
 
@@ -1249,12 +1336,41 @@
   animation: landingBarPulse 6.1s ease-in-out infinite 180ms;
 }
 
+.landing .visible-streak-fill--third {
+  width: 64%;
+  animation: landingBarPulse 5.7s ease-in-out infinite 240ms;
+}
+
+.landing .visible-streak-periods {
+  margin-top: 2px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(145, 162, 208, 0.32);
+  padding: 6px;
+}
+
+.landing .visible-streak-periods span {
+  text-align: center;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  color: rgba(210, 221, 248, 0.86);
+  border-radius: 999px;
+  padding: 6px 0;
+}
+
+.landing .visible-streak-periods span.is-active {
+  background: rgba(250, 250, 252, 0.94);
+  color: rgba(21, 32, 64, 0.94);
+}
+
 .landing .demo-bridge {
   position: relative;
   isolation: isolate;
-  margin: 0 auto;
+  margin: 2px auto 0;
   width: min(100%, 980px);
-  padding: clamp(14px, 1.8vw, 18px) clamp(16px, 2.2vw, 24px);
+  padding: clamp(13px, 1.6vw, 17px) clamp(15px, 2vw, 22px);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -1264,13 +1380,13 @@
 .landing .demo-bridge::before {
   content: '';
   position: absolute;
-  inset: clamp(-14px, -1.8vw, -8px) clamp(4px, 1vw, 12px) clamp(-16px, -1.8vw, -8px);
+  inset: -7px 4px -8px;
   z-index: -2;
-  border-radius: 32px;
+  border-radius: 26px;
   background:
-    radial-gradient(circle at 50% 52%, rgba(176, 122, 255, 0.3), rgba(176, 122, 255, 0.08) 54%, transparent 74%),
-    radial-gradient(circle at 80% 56%, rgba(126, 95, 255, 0.18), transparent 64%);
-  filter: blur(14px);
+    radial-gradient(circle at 20% 50%, rgba(212, 162, 255, 0.28), rgba(212, 162, 255, 0.06) 54%, transparent 72%),
+    radial-gradient(circle at 80% 50%, rgba(130, 210, 255, 0.2), transparent 62%);
+  filter: blur(11px);
 }
 
 .landing .demo-bridge::after {
@@ -1278,34 +1394,32 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  border-radius: 32px;
-  background:
-    radial-gradient(circle at 14% 20%, rgba(255, 255, 255, 0.12), transparent 58%),
-    radial-gradient(circle at 84% 80%, rgba(186, 161, 255, 0.08), transparent 56%),
-    linear-gradient(140deg, rgba(167, 123, 245, 0.08), rgba(72, 43, 126, 0.05));
-  border: 1px solid rgba(232, 218, 255, 0.18);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(245, 235, 255, 0.16), rgba(211, 231, 255, 0.12));
+  border: 1px solid rgba(238, 246, 255, 0.44);
   box-shadow:
-    0 26px 68px rgba(26, 12, 52, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 18px 42px rgba(60, 34, 118, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .landing .demo-title {
-  font-size: clamp(2rem, 3.2vw, 2.7rem);
-  line-height: 1.05;
+  font-size: clamp(2.3rem, 3.2vw, 3.1rem);
+  line-height: 1.03;
   margin: 0;
 }
 
 .landing .demo-sub {
   margin: 0;
-  max-width: 40ch;
-  color: rgba(236, 228, 255, 0.92);
+  max-width: 34ch;
+  color: rgba(236, 242, 255, 0.94);
   text-align: left;
+  font-size: clamp(1rem, 0.58vw + 0.82rem, 1.16rem);
 }
 
 .landing .demo-bridge-copy {
   margin: 0;
-  font-size: 0.95rem;
-  color: rgba(232, 220, 255, 0.92);
+  font-size: 0.93rem;
+  color: rgba(236, 243, 255, 0.95);
 }
 
 .landing .demo-actions {
@@ -1314,20 +1428,19 @@
 }
 
 @keyframes landingRadarPulse {
-  0%, 100% { transform: scale(0.97); opacity: 0.78; }
+  0%, 100% { transform: scale(0.975); opacity: 0.8; }
   50% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes landingEmotionPop {
-  0%, 100% { opacity: 0.68; transform: scale(0.96); }
+  0%, 100% { opacity: 0.74; transform: scale(0.96); }
   40% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes landingBarPulse {
   0%, 100% { filter: brightness(0.95); }
-  45% { filter: brightness(1.12); }
+  45% { filter: brightness(1.13); }
 }
-
 
 .landing .timeline-micro {
   display: grid;
@@ -1811,17 +1924,17 @@
   }
 
   .landing .visible-progress-copy {
-    text-align: center;
-    justify-items: center;
+    text-align: left;
+    justify-items: start;
   }
 
   .landing .visible-progress-module {
-    width: min(100%, 760px);
+    width: min(100%, 780px);
     margin: 0 auto;
   }
 
   .landing .demo-sub {
-    text-align: center;
+    text-align: left;
   }
 
   .landing .demo-bridge {
@@ -1858,6 +1971,32 @@
 @media (max-width: 640px) {
   .landing .visible-progress-module {
     grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    min-height: auto;
+  }
+
+  .landing .visible-progress-zone--radar,
+  .landing .visible-progress-zone--emotion,
+  .landing .visible-progress-zone--streaks {
+    grid-column: 1;
+    grid-row: auto;
+    min-height: 220px;
+  }
+
+  .landing .visible-progress-zone--streaks {
+    min-height: 430px;
+  }
+
+  .landing .visible-progress-canvas--radar {
+    inset: -24px -28px -20px -20px;
+  }
+
+  .landing .visible-progress-canvas--emotion {
+    inset: -10px -14px -34px -12px;
+  }
+
+  .landing .visible-progress-canvas--streaks {
+    inset: -8px -24px -16px -10px;
   }
 
   .landing .demo-bridge {
