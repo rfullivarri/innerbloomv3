@@ -249,12 +249,12 @@ function splitPillarCopy(copy: string, language: Language) {
 }
 
 const EMOTION_GRID_PATTERN: Array<'calm' | 'happy' | 'focus' | 'stress' | 'neutral'> = [
-  'calm', 'calm', 'focus', 'happy', 'happy', 'focus', 'calm', 'neutral', 'happy', 'focus', 'calm', 'calm', 'happy', 'stress', 'focus', 'calm',
-  'focus', 'happy', 'happy', 'calm', 'neutral', 'focus', 'happy', 'calm', 'focus', 'stress', 'happy', 'calm', 'neutral', 'focus', 'happy', 'calm',
-  'calm', 'focus', 'neutral', 'happy', 'stress', 'focus', 'calm', 'happy', 'focus', 'calm', 'calm', 'happy', 'neutral', 'focus', 'stress', 'calm',
-  'happy', 'neutral', 'focus', 'calm', 'calm', 'happy', 'focus', 'stress', 'calm', 'neutral', 'focus', 'happy', 'calm', 'focus', 'neutral', 'happy',
-  'focus', 'calm', 'happy', 'neutral', 'stress', 'focus', 'happy', 'calm', 'focus', 'neutral', 'happy', 'calm', 'stress', 'focus', 'calm', 'happy',
-  'calm', 'happy', 'focus', 'neutral', 'happy', 'calm', 'focus', 'stress', 'happy', 'focus', 'calm', 'neutral', 'focus', 'happy', 'calm', 'focus',
+  'calm', 'happy', 'calm', 'neutral', 'focus', 'calm', 'happy', 'neutral', 'focus', 'calm', 'happy', 'focus', 'neutral', 'stress', 'neutral', 'calm',
+  'focus', 'calm', 'happy', 'calm', 'neutral', 'focus', 'calm', 'stress', 'happy', 'neutral', 'focus', 'focus', 'calm', 'happy', 'neutral', 'neutral',
+  'calm', 'focus', 'neutral', 'happy', 'calm', 'calm', 'focus', 'happy', 'neutral', 'stress', 'focus', 'calm', 'happy', 'neutral', 'focus', 'calm',
+  'focus', 'neutral', 'calm', 'happy', 'neutral', 'focus', 'stress', 'calm', 'focus', 'happy', 'neutral', 'calm', 'focus', 'neutral', 'calm', 'happy',
+  'neutral', 'calm', 'focus', 'stress', 'neutral', 'calm', 'happy', 'focus', 'neutral', 'focus', 'calm', 'happy', 'neutral', 'calm', 'focus', 'neutral',
+  'stress', 'calm', 'focus', 'happy', 'neutral', 'neutral', 'calm', 'focus', 'happy', 'neutral', 'calm', 'focus', 'neutral', 'calm', 'happy', 'neutral',
 ];
 
 function LanguageDropdown({ value, onChange }: { value: Language; onChange: (language: Language) => void }) {
@@ -744,110 +744,118 @@ export default function LandingPage() {
               </div>
 
               <div className="visible-progress-module" aria-hidden>
-                <div className="visible-progress-zone visible-progress-zone--radar">
-                  <div className="visible-progress-canvas visible-progress-canvas--radar">
-                    <div className="visible-canvas-header">
-                      <p className="visible-canvas-title">BALANCE</p>
-                      <span className="visible-canvas-chip">Predominio Body</span>
-                      <span className="visible-canvas-info">i</span>
-                    </div>
-                    <div className="visible-radar-shell">
-                      <div className="visible-radar-rim">
-                        <span className="visible-radar-segment visible-radar-segment--body" />
-                        <span className="visible-radar-segment visible-radar-segment--mind" />
-                        <span className="visible-radar-segment visible-radar-segment--soul" />
+                <div className="visible-progress-viewport">
+                  <div className="visible-progress-scene">
+                    <div className="visible-scene-fragment visible-scene-fragment--radar">
+                      <div className="visible-canvas-header">
+                        <p className="visible-canvas-title">BALANCE</p>
+                        <span className="visible-canvas-chip">Predominio Body</span>
+                        <span className="visible-canvas-info">i</span>
                       </div>
-                      <div className="visible-radar-ring visible-radar-ring--lg" />
-                      <div className="visible-radar-ring visible-radar-ring--md" />
-                      <div className="visible-radar-ring visible-radar-ring--sm" />
-                      <div className="visible-radar-axis visible-radar-axis--a" />
-                      <div className="visible-radar-axis visible-radar-axis--b" />
-                      <div className="visible-radar-axis visible-radar-axis--c" />
-                      <div className="visible-radar-spoke visible-radar-spoke--a" />
-                      <div className="visible-radar-spoke visible-radar-spoke--b" />
-                      <div className="visible-radar-spoke visible-radar-spoke--c" />
-                      <div className="visible-radar-polygon" />
-                      <div className="visible-radar-polygon visible-radar-polygon--inner" />
-                      <span className="visible-radar-core" />
+                      <div className="visible-radar-shell">
+                        <div className="visible-radar-rim">
+                          <span className="visible-radar-segment visible-radar-segment--body" />
+                          <span className="visible-radar-segment visible-radar-segment--mind" />
+                          <span className="visible-radar-segment visible-radar-segment--soul" />
+                        </div>
+                        <div className="visible-radar-ring visible-radar-ring--lg" />
+                        <div className="visible-radar-ring visible-radar-ring--md" />
+                        <div className="visible-radar-ring visible-radar-ring--sm" />
+                        <div className="visible-radar-axis visible-radar-axis--a" />
+                        <div className="visible-radar-axis visible-radar-axis--b" />
+                        <div className="visible-radar-axis visible-radar-axis--c" />
+                        <div className="visible-radar-spoke visible-radar-spoke--a" />
+                        <div className="visible-radar-spoke visible-radar-spoke--b" />
+                        <div className="visible-radar-spoke visible-radar-spoke--c" />
+                        <div className="visible-radar-polygon" />
+                        <div className="visible-radar-polygon visible-radar-polygon--inner" />
+                        <span className="visible-radar-core" />
+                        <span className="visible-radar-value visible-radar-value--one">777</span>
+                        <span className="visible-radar-value visible-radar-value--two">483</span>
+                        <span className="visible-radar-value visible-radar-value--three">517</span>
+                        <span className="visible-radar-value visible-radar-value--four">251</span>
+                      </div>
+                      <div className="visible-radar-pillars">
+                        <span>ALMA 32%</span>
+                        <span>CUERPO 45%</span>
+                        <span>MENTE 23%</span>
+                      </div>
                     </div>
-                    <div className="visible-radar-pillars">
-                      <span>ALMA 32%</span>
-                      <span>CUERPO 45%</span>
-                      <span>MENTE 23%</span>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="visible-progress-zone visible-progress-zone--emotion">
-                  <div className="visible-progress-canvas visible-progress-canvas--emotion">
-                    <div className="visible-canvas-header visible-canvas-header--emotion">
-                      <p className="visible-canvas-title">EMOTION CHART</p>
-                      <span className="visible-canvas-info">i</span>
+                    <div className="visible-scene-fragment visible-scene-fragment--emotion">
+                      <div className="visible-canvas-header visible-canvas-header--emotion">
+                        <p className="visible-canvas-title">EMOTION CHART</p>
+                        <span className="visible-canvas-info">i</span>
+                      </div>
+                      <div className="visible-emotion-legend">
+                        <span>Calma</span>
+                        <span className="visible-emotion-pill">Felicidad</span>
+                        <span>Foco</span>
+                      </div>
+                      <div className="visible-emotion-grid-months">
+                        <span>FEB</span>
+                        <span>MAR</span>
+                        <span>ABR</span>
+                        <span>MAY</span>
+                      </div>
+                      <div className="visible-emotion-grid">
+                        {EMOTION_GRID_PATTERN.map((emotion, index) => (
+                          <span
+                            key={`emotion-cell-${index}`}
+                            className={`visible-emotion-cell visible-emotion-cell--${emotion}`}
+                            style={{ '--emotion-order': index } as CSSProperties}
+                          />
+                        ))}
+                      </div>
                     </div>
-                    <div className="visible-emotion-legend">
-                      <span>Calma</span>
-                      <span className="visible-emotion-pill">Felicidad</span>
-                      <span>Foco</span>
-                    </div>
-                    <div className="visible-emotion-grid">
-                      {EMOTION_GRID_PATTERN.map((emotion, index) => (
-                        <span
-                          key={`emotion-cell-${index}`}
-                          className={`visible-emotion-cell visible-emotion-cell--${emotion}`}
-                          style={{ '--emotion-order': index } as CSSProperties}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
 
-                <div className="visible-progress-zone visible-progress-zone--streaks">
-                  <div className="visible-progress-canvas visible-progress-canvas--streaks">
-                    <div className="visible-canvas-header visible-canvas-header--streaks">
-                      <p className="visible-canvas-title">STREAKS</p>
-                      <span className="visible-canvas-info">i</span>
-                      <span className="visible-canvas-chip visible-canvas-chip--flow">FLOW · 3M</span>
-                    </div>
-                    <div className="visible-streak-pillars" role="tablist" aria-label="Pilares">
-                      <span className="is-active">🫀 BODY</span>
-                      <span>🧠 MIND</span>
-                      <span>🏵️ SOUL</span>
-                    </div>
-                    <p className="visible-streak-heading">Top streaks</p>
-                    <div className="visible-streak-row">
-                      <div className="visible-streak-row-head">
-                        <p>Minoxidil noche</p>
-                        <span>5/3</span>
+                    <div className="visible-scene-fragment visible-scene-fragment--streaks">
+                      <div className="visible-canvas-header visible-canvas-header--streaks">
+                        <p className="visible-canvas-title">STREAKS</p>
+                        <span className="visible-canvas-info">i</span>
+                        <span className="visible-canvas-chip visible-canvas-chip--flow">FLOW · 3M</span>
                       </div>
-                      <p className="visible-streak-row-meta">Recuperación</p>
-                      <div className="visible-streak-bar">
-                        <span className="visible-streak-fill visible-streak-fill--first" />
+                      <div className="visible-streak-pillars" role="tablist" aria-label="Pilares">
+                        <span className="is-active">🫀 BODY</span>
+                        <span>🧠 MIND</span>
+                        <span>🏵️ SOUL</span>
                       </div>
-                    </div>
-                    <div className="visible-streak-row">
-                      <div className="visible-streak-row-head">
-                        <p>Ayuno hasta las 14hs</p>
-                        <span>5/3</span>
+                      <p className="visible-streak-heading">Top streaks</p>
+                      <div className="visible-streak-row">
+                        <div className="visible-streak-row-head">
+                          <p>Minoxidil noche</p>
+                          <span>5/3</span>
+                        </div>
+                        <p className="visible-streak-row-meta">Recuperación</p>
+                        <div className="visible-streak-bar">
+                          <span className="visible-streak-fill visible-streak-fill--first" />
+                        </div>
                       </div>
-                      <p className="visible-streak-row-meta">Nutrición</p>
-                      <div className="visible-streak-bar">
-                        <span className="visible-streak-fill visible-streak-fill--second" />
+                      <div className="visible-streak-row">
+                        <div className="visible-streak-row-head">
+                          <p>Ayuno hasta las 14hs</p>
+                          <span>5/3</span>
+                        </div>
+                        <p className="visible-streak-row-meta">Nutrición</p>
+                        <div className="visible-streak-bar">
+                          <span className="visible-streak-fill visible-streak-fill--second" />
+                        </div>
                       </div>
-                    </div>
-                    <div className="visible-streak-row">
-                      <div className="visible-streak-row-head">
-                        <p>Dormir 8hs</p>
-                        <span>4/3</span>
+                      <div className="visible-streak-row">
+                        <div className="visible-streak-row-head">
+                          <p>Dormir 8hs</p>
+                          <span>4/3</span>
+                        </div>
+                        <p className="visible-streak-row-meta">Sueño</p>
+                        <div className="visible-streak-bar">
+                          <span className="visible-streak-fill visible-streak-fill--third" />
+                        </div>
                       </div>
-                      <p className="visible-streak-row-meta">Sueño</p>
-                      <div className="visible-streak-bar">
-                        <span className="visible-streak-fill visible-streak-fill--third" />
+                      <div className="visible-streak-periods">
+                        <span>SEM</span>
+                        <span className="is-active">MES</span>
+                        <span>3M</span>
                       </div>
-                    </div>
-                    <div className="visible-streak-periods">
-                      <span>SEM</span>
-                      <span className="is-active">MES</span>
-                      <span>3M</span>
                     </div>
                   </div>
                 </div>

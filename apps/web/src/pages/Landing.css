@@ -1071,12 +1071,9 @@
   position: relative;
   isolation: isolate;
   border-radius: var(--landing-glass-radius-lg);
-  padding: clamp(10px, 1.35vw, 16px);
+  padding: clamp(9px, 1.2vw, 14px);
   min-height: clamp(460px, 49vw, 560px);
-  display: grid;
-  grid-template-columns: 45% 55%;
-  grid-template-rows: 51% 49%;
-  gap: 10px;
+  display: block;
   background: linear-gradient(152deg, rgba(247, 249, 255, 0.18), rgba(218, 224, 255, 0.1));
   border: 1px solid rgba(240, 246, 255, 0.42);
   box-shadow: 0 28px 66px rgba(94, 86, 172, 0.2);
@@ -1087,60 +1084,61 @@
 .landing .visible-progress-module::after {
   content: '';
   position: absolute;
-  inset: 7px;
+  inset: 6px;
   border-radius: calc(var(--landing-glass-radius-lg) - 8px);
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   pointer-events: none;
 }
 
-.landing .visible-progress-zone {
+.landing .visible-progress-viewport {
   position: relative;
-  border-radius: 22px;
+  border-radius: 24px;
+  height: 100%;
   overflow: hidden;
-  background: linear-gradient(144deg, rgba(13, 19, 47, 0.96), rgba(11, 16, 41, 0.97));
+  background: linear-gradient(145deg, rgba(12, 18, 46, 0.97), rgba(11, 16, 40, 0.985));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 14px 30px rgba(16, 9, 38, 0.26);
 }
 
-.landing .visible-progress-zone--radar {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.landing .visible-progress-zone--emotion {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-.landing .visible-progress-zone--streaks {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-}
-
-.landing .visible-progress-canvas {
+.landing .visible-progress-scene {
   position: absolute;
+  inset: -22px -54px -38px -34px;
 }
 
-.landing .visible-progress-canvas--radar {
-  inset: -44px -34px -40px -34px;
+.landing .visible-scene-fragment {
+  position: absolute;
+  border-radius: 26px;
+  background: linear-gradient(146deg, rgba(15, 24, 59, 0.98), rgba(12, 20, 49, 0.99));
+  border: 1px solid rgba(112, 126, 196, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.landing .visible-scene-fragment--radar {
+  left: -12px;
+  top: -4px;
+  width: 48%;
+  height: 56%;
   padding: 22px 26px;
-  transform: translate(-6px, -6px);
 }
 
-.landing .visible-progress-canvas--emotion {
-  inset: -18px -26px -58px -14px;
+.landing .visible-scene-fragment--emotion {
+  left: -6px;
+  bottom: -16px;
+  width: 49%;
+  height: 44%;
   padding: 18px 22px;
-  transform: translate(-4px, -2px);
 }
 
-.landing .visible-progress-canvas--streaks {
-  inset: -16px -74px -46px -10px;
+.landing .visible-scene-fragment--streaks {
+  right: -4px;
+  top: -2px;
+  width: 59%;
+  height: 104%;
   padding: 18px 22px 22px;
   display: grid;
   align-content: start;
   gap: 12px;
-  transform: translate(2px, -2px);
 }
 
 .landing .visible-canvas-header {
@@ -1198,8 +1196,8 @@
 
 .landing .visible-radar-shell {
   position: relative;
-  margin: 2px auto 0;
-  width: min(324px, 110%);
+  margin: 4px auto 0;
+  width: min(354px, 122%);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: radial-gradient(circle at center, rgba(136, 170, 255, 0.26), rgba(90, 144, 251, 0) 70%);
@@ -1221,21 +1219,21 @@
 }
 
 .landing .visible-radar-segment--body {
-  border-top-color: rgba(111, 244, 182, 0.88);
-  border-right-color: rgba(111, 244, 182, 0.88);
-  transform: rotate(-8deg);
+  border-top-color: rgba(255, 206, 85, 0.9);
+  border-right-color: rgba(112, 231, 255, 0.9);
+  transform: rotate(-4deg);
 }
 
 .landing .visible-radar-segment--mind {
-  border-right-color: rgba(124, 168, 255, 0.88);
-  border-bottom-color: rgba(124, 168, 255, 0.88);
-  transform: rotate(108deg);
+  border-right-color: rgba(112, 231, 255, 0.88);
+  border-bottom-color: rgba(159, 139, 255, 0.9);
+  transform: rotate(114deg);
 }
 
 .landing .visible-radar-segment--soul {
-  border-bottom-color: rgba(228, 144, 248, 0.88);
-  border-left-color: rgba(228, 144, 248, 0.88);
-  transform: rotate(224deg);
+  border-bottom-color: rgba(159, 139, 255, 0.9);
+  border-left-color: rgba(255, 206, 85, 0.9);
+  transform: rotate(230deg);
 }
 
 .landing .visible-radar-ring {
@@ -1279,17 +1277,17 @@
 
 .landing .visible-radar-polygon {
   position: absolute;
-  inset: 16%;
-  clip-path: polygon(50% 0%, 72% 11%, 88% 29%, 84% 56%, 70% 78%, 50% 89%, 29% 78%, 16% 57%, 12% 31%, 28% 12%);
-  background: linear-gradient(165deg, rgba(203, 216, 246, 0.55), rgba(165, 139, 255, 0.38));
+  inset: 12%;
+  clip-path: polygon(50% 4%, 63% 24%, 76% 18%, 84% 38%, 66% 49%, 77% 71%, 60% 84%, 45% 62%, 33% 68%, 23% 53%, 28% 34%, 42% 32%);
+  background: linear-gradient(165deg, rgba(203, 216, 246, 0.58), rgba(165, 139, 255, 0.4));
   border: 1px solid rgba(224, 236, 255, 0.62);
   filter: drop-shadow(0 0 16px rgba(126, 120, 255, 0.36));
   animation: landingRadarPulse 6.2s ease-in-out infinite;
 }
 
 .landing .visible-radar-polygon--inner {
-  inset: 30%;
-  clip-path: polygon(50% 0%, 75% 15%, 83% 48%, 66% 76%, 34% 76%, 17% 48%, 25% 15%);
+  inset: 28%;
+  clip-path: polygon(50% 6%, 67% 20%, 77% 42%, 63% 65%, 40% 73%, 24% 49%, 30% 24%);
   background: linear-gradient(170deg, rgba(186, 203, 244, 0.52), rgba(138, 110, 242, 0.28));
   border-color: rgba(211, 226, 255, 0.52);
   animation-duration: 7.4s;
@@ -1320,6 +1318,18 @@
   letter-spacing: 0.08em;
 }
 
+.landing .visible-radar-value {
+  position: absolute;
+  color: rgba(209, 222, 251, 0.7);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+}
+
+.landing .visible-radar-value--one { top: 39%; left: -2%; }
+.landing .visible-radar-value--two { top: 12%; right: 26%; }
+.landing .visible-radar-value--three { bottom: 14%; right: 20%; }
+.landing .visible-radar-value--four { bottom: 45%; left: 22%; }
+
 .landing .visible-emotion-legend {
   display: flex;
   align-items: center;
@@ -1336,6 +1346,15 @@
   background: rgba(239, 191, 26, 0.9);
   color: rgba(18, 24, 56, 0.92);
   font-weight: 700;
+}
+
+.landing .visible-emotion-grid-months {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0 6px 7px;
+  color: rgba(185, 202, 236, 0.78);
+  letter-spacing: 0.06em;
+  font-size: 0.74rem;
 }
 
 .landing .visible-emotion-grid {
@@ -2086,33 +2105,26 @@
 
 @media (max-width: 640px) {
   .landing .visible-progress-module {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    min-height: auto;
+    min-height: 500px;
   }
 
-  .landing .visible-progress-zone--radar,
-  .landing .visible-progress-zone--emotion,
-  .landing .visible-progress-zone--streaks {
-    grid-column: 1;
-    grid-row: auto;
-    min-height: 220px;
+  .landing .visible-progress-scene {
+    inset: -18px -36px -30px -24px;
   }
 
-  .landing .visible-progress-zone--streaks {
-    min-height: 430px;
+  .landing .visible-scene-fragment--radar {
+    width: 52%;
+    height: 51%;
   }
 
-  .landing .visible-progress-canvas--radar {
-    inset: -24px -28px -20px -20px;
+  .landing .visible-scene-fragment--emotion {
+    width: 52%;
+    height: 40%;
   }
 
-  .landing .visible-progress-canvas--emotion {
-    inset: -10px -14px -34px -12px;
-  }
-
-  .landing .visible-progress-canvas--streaks {
-    inset: -8px -24px -16px -10px;
+  .landing .visible-scene-fragment--streaks {
+    width: 62%;
+    height: 102%;
   }
 
   .landing .demo-bridge {
