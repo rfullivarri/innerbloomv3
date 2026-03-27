@@ -689,7 +689,7 @@ export default function LandingPage() {
                   </>
                 )}
               </div>
-              <p className="tiny">{copy.hero.note}</p>
+              <p className="tiny hero-cta-note">{copy.hero.note}</p>
             </div>
             <div className="hero-media">
               <img

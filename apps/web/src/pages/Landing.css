@@ -324,6 +324,14 @@
   margin-top: 6px;
 }
 
+.landing .hero-cta-note {
+  width: fit-content;
+  margin: 8px auto 0;
+  text-align: center;
+  color: color-mix(in srgb, var(--muted) 88%, var(--ink) 12%);
+  font-weight: 500;
+}
+
 @property --conic-angle {
   syntax: '<angle>';
   inherits: false;
