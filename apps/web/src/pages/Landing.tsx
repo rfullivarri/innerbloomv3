@@ -756,30 +756,32 @@ export default function LandingPage() {
               <div className="visible-progress-module" aria-hidden>
                 <div className="visible-progress-viewport">
                   <div className="visible-progress-scene">
-                    <div className="visible-scene-region visible-scene-region--balance">
+                    <div className="visible-scene-region visible-scene-region--balance visible-scene-fragment visible-scene-fragment--radar">
                       <div className="visible-canvas-header">
                         <p className="visible-canvas-title">BALANCE</p>
                         <span className="visible-canvas-chip">Predominio Body</span>
                         <span className="visible-canvas-info">i</span>
                       </div>
-                      <div className="visible-balance-radar-wrap">
-                        <svg className="visible-balance-radar" viewBox="0 0 420 420" aria-hidden>
-                          <circle className="visible-balance-radar-glow" cx="210" cy="210" r="182" />
-                          <circle className="visible-balance-radar-ring visible-balance-radar-ring--outer" cx="210" cy="210" r="170" />
-                          <circle className="visible-balance-radar-ring" cx="210" cy="210" r="130" />
-                          <circle className="visible-balance-radar-ring" cx="210" cy="210" r="90" />
-                          <circle className="visible-balance-radar-ring" cx="210" cy="210" r="50" />
-                          <line className="visible-balance-radar-axis" x1="210" y1="36" x2="210" y2="384" />
-                          <line className="visible-balance-radar-axis" x1="48" y1="114" x2="372" y2="306" />
-                          <line className="visible-balance-radar-axis" x1="48" y1="306" x2="372" y2="114" />
-                          <polygon className="visible-balance-radar-shape visible-balance-radar-shape--outer" points="210,94 258,138 300,178 294,224 252,256 270,316 220,350 170,260 128,282 88,238 96,182 146,152" />
-                          <polygon className="visible-balance-radar-shape visible-balance-radar-shape--inner" points="210,140 246,168 268,202 250,232 222,248 228,282 206,302 182,250 154,258 130,226 136,194 172,170" />
-                          <circle className="visible-balance-radar-core" cx="210" cy="210" r="10" />
-                        </svg>
-                        <span className="visible-radar-value visible-radar-value--one">777</span>
-                        <span className="visible-radar-value visible-radar-value--two">483</span>
-                        <span className="visible-radar-value visible-radar-value--three">517</span>
-                        <span className="visible-radar-value visible-radar-value--four">251</span>
+                      <div className="visible-radar-shell">
+                        <div className="visible-balance-radar-wrap">
+                          <svg className="visible-balance-radar" viewBox="0 0 420 420" aria-hidden>
+                            <circle className="visible-balance-radar-glow" cx="210" cy="210" r="182" />
+                            <circle className="visible-balance-radar-ring visible-balance-radar-ring--outer" cx="210" cy="210" r="170" />
+                            <circle className="visible-balance-radar-ring" cx="210" cy="210" r="130" />
+                            <circle className="visible-balance-radar-ring" cx="210" cy="210" r="90" />
+                            <circle className="visible-balance-radar-ring" cx="210" cy="210" r="50" />
+                            <line className="visible-balance-radar-axis" x1="210" y1="36" x2="210" y2="384" />
+                            <line className="visible-balance-radar-axis" x1="48" y1="114" x2="372" y2="306" />
+                            <line className="visible-balance-radar-axis" x1="48" y1="306" x2="372" y2="114" />
+                            <polygon className="visible-balance-radar-shape visible-balance-radar-shape--outer" points="210,94 258,138 300,178 294,224 252,256 270,316 220,350 170,260 128,282 88,238 96,182 146,152" />
+                            <polygon className="visible-balance-radar-shape visible-balance-radar-shape--inner" points="210,140 246,168 268,202 250,232 222,248 228,282 206,302 182,250 154,258 130,226 136,194 172,170" />
+                            <circle className="visible-balance-radar-core" cx="210" cy="210" r="10" />
+                          </svg>
+                          <span className="visible-radar-value visible-radar-value--one">777</span>
+                          <span className="visible-radar-value visible-radar-value--two">483</span>
+                          <span className="visible-radar-value visible-radar-value--three">517</span>
+                          <span className="visible-radar-value visible-radar-value--four">251</span>
+                        </div>
                       </div>
                       <div className="visible-radar-pillars">
                         <span>ALMA 32%</span>
@@ -788,7 +790,7 @@ export default function LandingPage() {
                       </div>
                     </div>
 
-                    <div className="visible-scene-region visible-scene-region--emotion">
+                    <div className="visible-scene-region visible-scene-region--emotion visible-scene-fragment visible-scene-fragment--emotion">
                       <div className="visible-canvas-header visible-canvas-header--emotion">
                         <p className="visible-canvas-title">EMOTION CHART</p>
                         <span className="visible-canvas-info">i</span>
@@ -819,7 +821,7 @@ export default function LandingPage() {
                       </div>
                     </div>
 
-                    <div className="visible-scene-region visible-scene-region--streaks">
+                    <div className="visible-scene-region visible-scene-region--streaks visible-scene-fragment visible-scene-fragment--streaks">
                       <div className="visible-canvas-header visible-canvas-header--streaks">
                         <p className="visible-canvas-title">STREAKS</p>
                         <span className="visible-canvas-info">i</span>

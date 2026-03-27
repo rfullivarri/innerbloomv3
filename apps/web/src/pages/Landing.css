@@ -1133,7 +1133,9 @@
 
 .landing .visible-progress-scene {
   position: absolute;
-  inset: -30px -68px -52px -62px;
+  inset: -36px -74px -58px -68px;
+  transform: scale(0.84);
+  transform-origin: top left;
   background:
     radial-gradient(90% 65% at 16% 18%, rgba(76, 120, 223, 0.18), transparent 70%),
     radial-gradient(55% 45% at 80% 20%, rgba(85, 208, 255, 0.11), transparent 78%),
@@ -1174,6 +1176,26 @@
   background: linear-gradient(146deg, rgba(15, 24, 59, 0.98), rgba(12, 20, 49, 0.99));
   border: 1px solid rgba(112, 126, 196, 0.28);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.landing .visible-scene-fragment--radar {
+  transform: scale(0.92);
+  transform-origin: top left;
+}
+
+.landing .visible-scene-fragment--emotion {
+  transform: scale(0.9);
+  transform-origin: bottom left;
+}
+
+.landing .visible-scene-fragment--streaks {
+  transform: scale(0.93);
+  transform-origin: top right;
+}
+
+.landing .visible-radar-shell {
+  width: 92%;
+  margin: 0 auto;
 }
 
 .landing .visible-canvas-header {
@@ -1232,10 +1254,10 @@
 .landing .visible-balance-radar-wrap {
   position: relative;
   margin: -8px auto 0;
-  width: min(400px, 146%);
+  width: min(364px, 132%);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  transform: translateX(-24px);
+  transform: translateX(-16px);
 }
 
 .landing .visible-balance-radar {
@@ -2096,7 +2118,8 @@
   }
 
   .landing .visible-progress-scene {
-    inset: -24px -44px -42px -42px;
+    inset: -28px -52px -46px -48px;
+    transform: scale(0.82);
   }
 
   .landing .visible-scene-region--balance {
@@ -2115,6 +2138,22 @@
     width: 62%;
     height: 98%;
     right: -24px;
+  }
+
+  .landing .visible-scene-fragment--radar {
+    transform: scale(0.9);
+  }
+
+  .landing .visible-scene-fragment--emotion {
+    transform: scale(0.88);
+  }
+
+  .landing .visible-scene-fragment--streaks {
+    transform: scale(0.91);
+  }
+
+  .landing .visible-radar-shell {
+    width: 88%;
   }
 
   .landing .demo-bridge {
