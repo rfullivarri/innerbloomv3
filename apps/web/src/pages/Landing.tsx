@@ -248,13 +248,14 @@ function splitPillarCopy(copy: string, language: Language) {
   return { definition, examples };
 }
 
-const EMOTION_GRID_PATTERN: Array<'calm' | 'happy' | 'focus' | 'stress' | 'neutral'> = [
-  'calm', 'happy', 'calm', 'neutral', 'focus', 'calm', 'happy', 'neutral', 'focus', 'calm', 'happy', 'focus', 'neutral', 'stress', 'neutral', 'calm',
-  'focus', 'calm', 'happy', 'calm', 'neutral', 'focus', 'calm', 'stress', 'happy', 'neutral', 'focus', 'focus', 'calm', 'happy', 'neutral', 'neutral',
-  'calm', 'focus', 'neutral', 'happy', 'calm', 'calm', 'focus', 'happy', 'neutral', 'stress', 'focus', 'calm', 'happy', 'neutral', 'focus', 'calm',
-  'focus', 'neutral', 'calm', 'happy', 'neutral', 'focus', 'stress', 'calm', 'focus', 'happy', 'neutral', 'calm', 'focus', 'neutral', 'calm', 'happy',
-  'neutral', 'calm', 'focus', 'stress', 'neutral', 'calm', 'happy', 'focus', 'neutral', 'focus', 'calm', 'happy', 'neutral', 'calm', 'focus', 'neutral',
-  'stress', 'calm', 'focus', 'happy', 'neutral', 'neutral', 'calm', 'focus', 'happy', 'neutral', 'calm', 'focus', 'neutral', 'calm', 'happy', 'neutral',
+const EMOTION_HEATMAP_ROWS: Array<Array<'calm' | 'happy' | 'focus' | 'stress' | 'neutral'>> = [
+  ['calm', 'happy', 'calm', 'happy', 'neutral', 'calm', 'focus', 'calm', 'happy', 'calm', 'neutral', 'focus', 'calm', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
+  ['calm', 'focus', 'calm', 'neutral', 'happy', 'neutral', 'calm', 'focus', 'calm', 'happy', 'focus', 'stress', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
+  ['calm', 'focus', 'neutral', 'happy', 'happy', 'neutral', 'focus', 'calm', 'focus', 'calm', 'focus', 'stress', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
+  ['calm', 'focus', 'neutral', 'focus', 'neutral', 'neutral', 'focus', 'focus', 'focus', 'focus', 'calm', 'stress', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
+  ['focus', 'neutral', 'neutral', 'neutral', 'calm', 'happy', 'focus', 'neutral', 'focus', 'focus', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
+  ['focus', 'calm', 'neutral', 'calm', 'focus', 'neutral', 'focus', 'happy', 'focus', 'calm', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
+  ['calm', 'calm', 'neutral', 'neutral', 'focus', 'focus', 'happy', 'focus', 'calm', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral', 'neutral'],
 ];
 
 function LanguageDropdown({ value, onChange }: { value: Language; onChange: (language: Language) => void }) {
@@ -752,30 +753,26 @@ export default function LandingPage() {
               <div className="visible-progress-module" aria-hidden>
                 <div className="visible-progress-viewport">
                   <div className="visible-progress-scene">
-                    <div className="visible-scene-fragment visible-scene-fragment--radar">
+                    <div className="visible-scene-region visible-scene-region--balance">
                       <div className="visible-canvas-header">
                         <p className="visible-canvas-title">BALANCE</p>
                         <span className="visible-canvas-chip">Predominio Body</span>
                         <span className="visible-canvas-info">i</span>
                       </div>
-                      <div className="visible-radar-shell">
-                        <div className="visible-radar-rim">
-                          <span className="visible-radar-segment visible-radar-segment--body" />
-                          <span className="visible-radar-segment visible-radar-segment--mind" />
-                          <span className="visible-radar-segment visible-radar-segment--soul" />
-                        </div>
-                        <div className="visible-radar-ring visible-radar-ring--lg" />
-                        <div className="visible-radar-ring visible-radar-ring--md" />
-                        <div className="visible-radar-ring visible-radar-ring--sm" />
-                        <div className="visible-radar-axis visible-radar-axis--a" />
-                        <div className="visible-radar-axis visible-radar-axis--b" />
-                        <div className="visible-radar-axis visible-radar-axis--c" />
-                        <div className="visible-radar-spoke visible-radar-spoke--a" />
-                        <div className="visible-radar-spoke visible-radar-spoke--b" />
-                        <div className="visible-radar-spoke visible-radar-spoke--c" />
-                        <div className="visible-radar-polygon" />
-                        <div className="visible-radar-polygon visible-radar-polygon--inner" />
-                        <span className="visible-radar-core" />
+                      <div className="visible-balance-radar-wrap">
+                        <svg className="visible-balance-radar" viewBox="0 0 420 420" aria-hidden>
+                          <circle className="visible-balance-radar-glow" cx="210" cy="210" r="182" />
+                          <circle className="visible-balance-radar-ring visible-balance-radar-ring--outer" cx="210" cy="210" r="170" />
+                          <circle className="visible-balance-radar-ring" cx="210" cy="210" r="130" />
+                          <circle className="visible-balance-radar-ring" cx="210" cy="210" r="90" />
+                          <circle className="visible-balance-radar-ring" cx="210" cy="210" r="50" />
+                          <line className="visible-balance-radar-axis" x1="210" y1="36" x2="210" y2="384" />
+                          <line className="visible-balance-radar-axis" x1="48" y1="114" x2="372" y2="306" />
+                          <line className="visible-balance-radar-axis" x1="48" y1="306" x2="372" y2="114" />
+                          <polygon className="visible-balance-radar-shape visible-balance-radar-shape--outer" points="210,94 258,138 300,178 294,224 252,256 270,316 220,350 170,260 128,282 88,238 96,182 146,152" />
+                          <polygon className="visible-balance-radar-shape visible-balance-radar-shape--inner" points="210,140 246,168 268,202 250,232 222,248 228,282 206,302 182,250 154,258 130,226 136,194 172,170" />
+                          <circle className="visible-balance-radar-core" cx="210" cy="210" r="10" />
+                        </svg>
                         <span className="visible-radar-value visible-radar-value--one">777</span>
                         <span className="visible-radar-value visible-radar-value--two">483</span>
                         <span className="visible-radar-value visible-radar-value--three">517</span>
@@ -788,7 +785,7 @@ export default function LandingPage() {
                       </div>
                     </div>
 
-                    <div className="visible-scene-fragment visible-scene-fragment--emotion">
+                    <div className="visible-scene-region visible-scene-region--emotion">
                       <div className="visible-canvas-header visible-canvas-header--emotion">
                         <p className="visible-canvas-title">EMOTION CHART</p>
                         <span className="visible-canvas-info">i</span>
@@ -805,17 +802,21 @@ export default function LandingPage() {
                         <span>MAY</span>
                       </div>
                       <div className="visible-emotion-grid">
-                        {EMOTION_GRID_PATTERN.map((emotion, index) => (
-                          <span
-                            key={`emotion-cell-${index}`}
-                            className={`visible-emotion-cell visible-emotion-cell--${emotion}`}
-                            style={{ '--emotion-order': index } as CSSProperties}
-                          />
+                        {EMOTION_HEATMAP_ROWS.map((row, rowIndex) => (
+                          <div className="visible-emotion-grid-row" key={`emotion-row-${rowIndex}`}>
+                            {row.map((emotion, cellIndex) => (
+                              <span
+                                key={`emotion-cell-${rowIndex}-${cellIndex}`}
+                                className={`visible-emotion-cell visible-emotion-cell--${emotion}`}
+                                style={{ '--emotion-order': rowIndex * 19 + cellIndex } as CSSProperties}
+                              />
+                            ))}
+                          </div>
                         ))}
                       </div>
                     </div>
 
-                    <div className="visible-scene-fragment visible-scene-fragment--streaks">
+                    <div className="visible-scene-region visible-scene-region--streaks">
                       <div className="visible-canvas-header visible-canvas-header--streaks">
                         <p className="visible-canvas-title">STREAKS</p>
                         <span className="visible-canvas-info">i</span>

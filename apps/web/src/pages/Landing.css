@@ -1109,64 +1109,57 @@
   overflow: hidden;
 }
 
-.landing .visible-progress-module::after {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border-radius: calc(var(--landing-glass-radius-lg) - 8px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  pointer-events: none;
-}
-
 .landing .visible-progress-viewport {
   position: relative;
   border-radius: 24px;
   height: 100%;
   overflow: hidden;
   background: linear-gradient(145deg, rgba(12, 18, 46, 0.97), rgba(11, 16, 40, 0.985));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 14px 30px rgba(16, 9, 38, 0.26);
 }
 
 .landing .visible-progress-scene {
   position: absolute;
-  inset: -22px -54px -38px -34px;
+  inset: -48px -92px -72px -84px;
+  background:
+    radial-gradient(90% 65% at 16% 18%, rgba(76, 120, 223, 0.18), transparent 70%),
+    radial-gradient(55% 45% at 80% 20%, rgba(85, 208, 255, 0.11), transparent 78%),
+    linear-gradient(152deg, rgba(9, 16, 42, 0.98), rgba(9, 14, 37, 0.99));
 }
 
-.landing .visible-scene-fragment {
+.landing .visible-scene-region {
   position: absolute;
-  border-radius: 26px;
-  background: linear-gradient(146deg, rgba(15, 24, 59, 0.98), rgba(12, 20, 49, 0.99));
-  border: 1px solid rgba(112, 126, 196, 0.28);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: transparent;
 }
 
-.landing .visible-scene-fragment--radar {
-  left: -12px;
-  top: -4px;
-  width: 48%;
-  height: 56%;
-  padding: 22px 26px;
+.landing .visible-scene-region--balance {
+  left: -66px;
+  top: -26px;
+  width: 52%;
+  height: 57%;
+  padding: 24px 24px 16px;
 }
 
-.landing .visible-scene-fragment--emotion {
-  left: -6px;
-  bottom: -16px;
-  width: 49%;
-  height: 44%;
-  padding: 18px 22px;
+.landing .visible-scene-region--emotion {
+  left: -52px;
+  bottom: -50px;
+  width: 54%;
+  height: 47%;
+  padding: 16px 18px 14px;
 }
 
-.landing .visible-scene-fragment--streaks {
-  right: -4px;
-  top: -2px;
-  width: 59%;
+.landing .visible-scene-region--streaks {
+  right: -30px;
+  top: -18px;
+  width: 62%;
   height: 104%;
   padding: 18px 22px 22px;
   display: grid;
   align-content: start;
   gap: 12px;
+  border-radius: 28px;
+  background: linear-gradient(146deg, rgba(15, 24, 59, 0.98), rgba(12, 20, 49, 0.99));
+  border: 1px solid rgba(112, 126, 196, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .landing .visible-canvas-header {
@@ -1222,114 +1215,60 @@
   line-height: 1;
 }
 
-.landing .visible-radar-shell {
+.landing .visible-balance-radar-wrap {
   position: relative;
-  margin: 4px auto 0;
-  width: min(354px, 122%);
+  margin: -8px auto 0;
+  width: min(400px, 146%);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(136, 170, 255, 0.26), rgba(90, 144, 251, 0) 70%);
+  transform: translateX(-24px);
 }
 
-.landing .visible-radar-rim {
-  position: absolute;
-  inset: 4.5%;
-  border-radius: 50%;
-  pointer-events: none;
+.landing .visible-balance-radar {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
-.landing .visible-radar-segment {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 5px solid transparent;
-  filter: drop-shadow(0 0 10px rgba(137, 168, 255, 0.28));
+.landing .visible-balance-radar-glow {
+  fill: rgba(123, 156, 255, 0.2);
 }
 
-.landing .visible-radar-segment--body {
-  border-top-color: rgba(255, 206, 85, 0.9);
-  border-right-color: rgba(112, 231, 255, 0.9);
-  transform: rotate(-4deg);
+.landing .visible-balance-radar-ring {
+  fill: none;
+  stroke: rgba(164, 182, 228, 0.36);
+  stroke-width: 1.6;
 }
 
-.landing .visible-radar-segment--mind {
-  border-right-color: rgba(112, 231, 255, 0.88);
-  border-bottom-color: rgba(159, 139, 255, 0.9);
-  transform: rotate(114deg);
+.landing .visible-balance-radar-ring--outer {
+  stroke: rgba(117, 176, 255, 0.8);
+  stroke-width: 6.2;
+  stroke-linecap: round;
 }
 
-.landing .visible-radar-segment--soul {
-  border-bottom-color: rgba(159, 139, 255, 0.9);
-  border-left-color: rgba(255, 206, 85, 0.9);
-  transform: rotate(230deg);
+.landing .visible-balance-radar-axis {
+  stroke: rgba(173, 194, 232, 0.44);
+  stroke-width: 1.4;
 }
 
-.landing .visible-radar-ring {
-  position: absolute;
-  inset: 50%;
-  border: 1px solid rgba(160, 181, 230, 0.35);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.landing .visible-radar-ring--lg { width: 100%; height: 100%; }
-.landing .visible-radar-ring--md { width: 72%; height: 72%; }
-.landing .visible-radar-ring--sm { width: 42%; height: 42%; }
-
-.landing .visible-radar-axis {
-  position: absolute;
-  inset: 50%;
-  width: 1px;
-  height: 97%;
-  background: linear-gradient(to bottom, rgba(167, 188, 232, 0), rgba(167, 188, 232, 0.46), rgba(167, 188, 232, 0));
-  transform-origin: center;
-}
-
-.landing .visible-radar-axis--a { transform: translate(-50%, -50%) rotate(0deg); }
-.landing .visible-radar-axis--b { transform: translate(-50%, -50%) rotate(60deg); }
-.landing .visible-radar-axis--c { transform: translate(-50%, -50%) rotate(120deg); }
-
-.landing .visible-radar-spoke {
-  position: absolute;
-  inset: 50%;
-  width: 2px;
-  height: 70%;
-  border-radius: 999px;
-  background: linear-gradient(to bottom, rgba(193, 212, 255, 0.08), rgba(193, 212, 255, 0.48), rgba(193, 212, 255, 0.06));
-  transform-origin: top center;
-}
-
-.landing .visible-radar-spoke--a { transform: translate(-50%, -3%) rotate(16deg); }
-.landing .visible-radar-spoke--b { transform: translate(-50%, -2%) rotate(138deg); }
-.landing .visible-radar-spoke--c { transform: translate(-50%, -2%) rotate(260deg); }
-
-.landing .visible-radar-polygon {
-  position: absolute;
-  inset: 12%;
-  clip-path: polygon(50% 4%, 63% 24%, 76% 18%, 84% 38%, 66% 49%, 77% 71%, 60% 84%, 45% 62%, 33% 68%, 23% 53%, 28% 34%, 42% 32%);
-  background: linear-gradient(165deg, rgba(203, 216, 246, 0.58), rgba(165, 139, 255, 0.4));
-  border: 1px solid rgba(224, 236, 255, 0.62);
-  filter: drop-shadow(0 0 16px rgba(126, 120, 255, 0.36));
+.landing .visible-balance-radar-shape {
+  fill: rgba(199, 212, 244, 0.35);
+  stroke: rgba(225, 235, 255, 0.72);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 20px rgba(132, 149, 255, 0.28));
   animation: landingRadarPulse 6.2s ease-in-out infinite;
 }
 
-.landing .visible-radar-polygon--inner {
-  inset: 28%;
-  clip-path: polygon(50% 6%, 67% 20%, 77% 42%, 63% 65%, 40% 73%, 24% 49%, 30% 24%);
-  background: linear-gradient(170deg, rgba(186, 203, 244, 0.52), rgba(138, 110, 242, 0.28));
-  border-color: rgba(211, 226, 255, 0.52);
+.landing .visible-balance-radar-shape--inner {
+  fill: rgba(197, 213, 248, 0.2);
+  stroke: rgba(206, 222, 255, 0.54);
+  stroke-width: 2.4;
   animation-duration: 7.4s;
 }
 
-.landing .visible-radar-core {
-  position: absolute;
-  inset: 50%;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(236, 244, 255, 0.9);
-  box-shadow: 0 0 18px rgba(178, 192, 255, 0.6);
+.landing .visible-balance-radar-core {
+  fill: rgba(236, 244, 255, 0.95);
+  filter: drop-shadow(0 0 10px rgba(178, 192, 255, 0.68));
 }
 
 .landing .visible-radar-pillars {
@@ -1387,12 +1326,17 @@
 
 .landing .visible-emotion-grid {
   display: grid;
-  grid-template-columns: repeat(16, minmax(0, 1fr));
-  gap: 4px;
+  gap: 5px;
   padding: 10px 10px 14px;
   border-radius: 20px;
   background: linear-gradient(180deg, rgba(14, 25, 56, 0.82), rgba(11, 19, 43, 0.86));
   border: 1px solid rgba(157, 173, 221, 0.28);
+}
+
+.landing .visible-emotion-grid-row {
+  display: grid;
+  grid-template-columns: repeat(19, minmax(0, 1fr));
+  gap: 4px;
 }
 
 .landing .visible-emotion-cell {
@@ -1406,7 +1350,7 @@
 
 .landing .visible-emotion-cell--calm { background: rgba(75, 189, 138, 0.8); }
 .landing .visible-emotion-cell--happy { background: rgba(239, 194, 52, 0.88); }
-.landing .visible-emotion-cell--focus { background: rgba(137, 148, 255, 0.86); }
+.landing .visible-emotion-cell--focus { background: rgba(52, 208, 167, 0.82); }
 .landing .visible-emotion-cell--stress { background: rgba(225, 109, 132, 0.8); }
 .landing .visible-emotion-cell--neutral { background: rgba(110, 123, 161, 0.7); }
 
@@ -2137,22 +2081,25 @@
   }
 
   .landing .visible-progress-scene {
-    inset: -18px -36px -30px -24px;
+    inset: -36px -56px -56px -56px;
   }
 
-  .landing .visible-scene-fragment--radar {
-    width: 52%;
-    height: 51%;
+  .landing .visible-scene-region--balance {
+    width: 56%;
+    height: 52%;
+    left: -72px;
   }
 
-  .landing .visible-scene-fragment--emotion {
-    width: 52%;
-    height: 40%;
+  .landing .visible-scene-region--emotion {
+    width: 58%;
+    height: 42%;
+    left: -60px;
   }
 
-  .landing .visible-scene-fragment--streaks {
-    width: 62%;
+  .landing .visible-scene-region--streaks {
+    width: 64%;
     height: 102%;
+    right: -36px;
   }
 
   .landing .demo-bridge {
