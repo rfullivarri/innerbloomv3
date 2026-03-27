@@ -704,10 +704,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="why section-pad reveal-on-scroll" id="why">
-          <div className="container narrow">
-            <AdaptiveText as="h2">{copy.problem.title}</AdaptiveText>
-            <AdaptiveText as="p" className="section-sub">{copy.problem.body}</AdaptiveText>
+        <section className="truth-problem section-pad reveal-on-scroll" id="why">
+          <div className="container narrow truth-problem-shell">
+            <AdaptiveText as="h2" className="truth-problem-title">{copy.problem.title}</AdaptiveText>
+            <AdaptiveText as="p" className="section-sub truth-problem-body">{copy.problem.body}</AdaptiveText>
           </div>
         </section>
 

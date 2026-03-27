@@ -57,7 +57,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
     },
     problem: {
-      title: 'La mayoría de apps de hábitos fallan cuando la vida real pasa',
+      title: 'La mayoría de las apps de hábitos fallan cuando la vida real pasa',
       body:
         'Hay días con foco y días con agotamiento. Hay semanas fluidas y semanas más pesadas. Muchas apps tratan todos esos momentos igual. Innerbloom no.'
     },
@@ -288,7 +288,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     problem: {
       title: 'Most habit apps break when real life happens',
       body:
-        'Some days you feel focused. Some days you feel drained. Some weeks flow easily. Others feel heavier. Most habit apps treat all those moments the same. Innerbloom doesn’t.'
+        'Some days feel focused. Some days feel heavy. Some weeks flow easily. Others don’t. Most habit apps treat all those moments the same. Innerbloom doesn’t.'
     },
     pillars: {
       title: 'A simple way to grow in balance',
