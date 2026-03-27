@@ -1071,15 +1071,15 @@
   position: relative;
   isolation: isolate;
   border-radius: var(--landing-glass-radius-lg);
-  padding: clamp(14px, 1.8vw, 20px);
+  padding: clamp(10px, 1.35vw, 16px);
   min-height: clamp(460px, 49vw, 560px);
   display: grid;
-  grid-template-columns: 47% 53%;
-  grid-template-rows: 53% 47%;
-  gap: 14px;
-  background: var(--landing-glass-bg);
-  border: 1px solid var(--landing-glass-border);
-  box-shadow: var(--landing-glass-shadow);
+  grid-template-columns: 45% 55%;
+  grid-template-rows: 51% 49%;
+  gap: 10px;
+  background: linear-gradient(152deg, rgba(247, 249, 255, 0.18), rgba(218, 224, 255, 0.1));
+  border: 1px solid rgba(240, 246, 255, 0.42);
+  box-shadow: 0 28px 66px rgba(94, 86, 172, 0.2);
   backdrop-filter: blur(var(--landing-glass-blur));
   overflow: hidden;
 }
@@ -1087,20 +1087,20 @@
 .landing .visible-progress-module::after {
   content: '';
   position: absolute;
-  inset: 12px;
+  inset: 7px;
   border-radius: calc(var(--landing-glass-radius-lg) - 8px);
-  border: 1px solid rgba(246, 251, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   pointer-events: none;
 }
 
 .landing .visible-progress-zone {
   position: relative;
-  border-radius: 26px;
+  border-radius: 22px;
   overflow: hidden;
-  background: linear-gradient(140deg, rgba(15, 22, 53, 0.96), rgba(11, 18, 42, 0.97));
+  background: linear-gradient(144deg, rgba(13, 19, 47, 0.96), rgba(11, 16, 41, 0.97));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 16px 34px rgba(16, 9, 38, 0.3);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 30px rgba(16, 9, 38, 0.26);
 }
 
 .landing .visible-progress-zone--radar {
@@ -1123,21 +1123,24 @@
 }
 
 .landing .visible-progress-canvas--radar {
-  inset: -26px -24px -28px -20px;
-  padding: 22px;
+  inset: -44px -34px -40px -34px;
+  padding: 22px 26px;
+  transform: translate(-6px, -6px);
 }
 
 .landing .visible-progress-canvas--emotion {
-  inset: -12px -10px -44px -10px;
-  padding: 20px 18px;
+  inset: -18px -26px -58px -14px;
+  padding: 18px 22px;
+  transform: translate(-4px, -2px);
 }
 
 .landing .visible-progress-canvas--streaks {
-  inset: -8px -42px -22px -10px;
-  padding: 18px;
+  inset: -16px -74px -46px -10px;
+  padding: 18px 22px 22px;
   display: grid;
   align-content: start;
   gap: 12px;
+  transform: translate(2px, -2px);
 }
 
 .landing .visible-canvas-header {
@@ -1195,17 +1198,50 @@
 
 .landing .visible-radar-shell {
   position: relative;
-  margin: 6px auto 0;
-  width: min(290px, 100%);
+  margin: 2px auto 0;
+  width: min(324px, 110%);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(90, 144, 251, 0.22), rgba(90, 144, 251, 0) 68%);
+  background: radial-gradient(circle at center, rgba(136, 170, 255, 0.26), rgba(90, 144, 251, 0) 70%);
+}
+
+.landing .visible-radar-rim {
+  position: absolute;
+  inset: 4.5%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.landing .visible-radar-segment {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 5px solid transparent;
+  filter: drop-shadow(0 0 10px rgba(137, 168, 255, 0.28));
+}
+
+.landing .visible-radar-segment--body {
+  border-top-color: rgba(111, 244, 182, 0.88);
+  border-right-color: rgba(111, 244, 182, 0.88);
+  transform: rotate(-8deg);
+}
+
+.landing .visible-radar-segment--mind {
+  border-right-color: rgba(124, 168, 255, 0.88);
+  border-bottom-color: rgba(124, 168, 255, 0.88);
+  transform: rotate(108deg);
+}
+
+.landing .visible-radar-segment--soul {
+  border-bottom-color: rgba(228, 144, 248, 0.88);
+  border-left-color: rgba(228, 144, 248, 0.88);
+  transform: rotate(224deg);
 }
 
 .landing .visible-radar-ring {
   position: absolute;
   inset: 50%;
-  border: 1px solid rgba(150, 168, 214, 0.3);
+  border: 1px solid rgba(160, 181, 230, 0.35);
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
@@ -1218,30 +1254,64 @@
   position: absolute;
   inset: 50%;
   width: 1px;
-  height: 95%;
-  background: linear-gradient(to bottom, rgba(167, 188, 232, 0), rgba(167, 188, 232, 0.42), rgba(167, 188, 232, 0));
+  height: 97%;
+  background: linear-gradient(to bottom, rgba(167, 188, 232, 0), rgba(167, 188, 232, 0.46), rgba(167, 188, 232, 0));
   transform-origin: center;
 }
 
 .landing .visible-radar-axis--a { transform: translate(-50%, -50%) rotate(0deg); }
-.landing .visible-radar-axis--b { transform: translate(-50%, -50%) rotate(62deg); }
-.landing .visible-radar-axis--c { transform: translate(-50%, -50%) rotate(122deg); }
+.landing .visible-radar-axis--b { transform: translate(-50%, -50%) rotate(60deg); }
+.landing .visible-radar-axis--c { transform: translate(-50%, -50%) rotate(120deg); }
+
+.landing .visible-radar-spoke {
+  position: absolute;
+  inset: 50%;
+  width: 2px;
+  height: 70%;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, rgba(193, 212, 255, 0.08), rgba(193, 212, 255, 0.48), rgba(193, 212, 255, 0.06));
+  transform-origin: top center;
+}
+
+.landing .visible-radar-spoke--a { transform: translate(-50%, -3%) rotate(16deg); }
+.landing .visible-radar-spoke--b { transform: translate(-50%, -2%) rotate(138deg); }
+.landing .visible-radar-spoke--c { transform: translate(-50%, -2%) rotate(260deg); }
 
 .landing .visible-radar-polygon {
   position: absolute;
-  inset: 13%;
-  clip-path: polygon(50% 3%, 76% 18%, 81% 39%, 66% 51%, 73% 82%, 48% 67%, 30% 74%, 19% 53%, 7% 41%, 28% 34%, 26% 18%);
-  background: linear-gradient(160deg, rgba(197, 208, 233, 0.48), rgba(164, 132, 255, 0.38));
-  border: 1px solid rgba(221, 233, 255, 0.58);
-  filter: drop-shadow(0 0 18px rgba(125, 120, 255, 0.36));
+  inset: 16%;
+  clip-path: polygon(50% 0%, 72% 11%, 88% 29%, 84% 56%, 70% 78%, 50% 89%, 29% 78%, 16% 57%, 12% 31%, 28% 12%);
+  background: linear-gradient(165deg, rgba(203, 216, 246, 0.55), rgba(165, 139, 255, 0.38));
+  border: 1px solid rgba(224, 236, 255, 0.62);
+  filter: drop-shadow(0 0 16px rgba(126, 120, 255, 0.36));
   animation: landingRadarPulse 6.2s ease-in-out infinite;
+}
+
+.landing .visible-radar-polygon--inner {
+  inset: 30%;
+  clip-path: polygon(50% 0%, 75% 15%, 83% 48%, 66% 76%, 34% 76%, 17% 48%, 25% 15%);
+  background: linear-gradient(170deg, rgba(186, 203, 244, 0.52), rgba(138, 110, 242, 0.28));
+  border-color: rgba(211, 226, 255, 0.52);
+  animation-duration: 7.4s;
+}
+
+.landing .visible-radar-core {
+  position: absolute;
+  inset: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(236, 244, 255, 0.9);
+  box-shadow: 0 0 18px rgba(178, 192, 255, 0.6);
 }
 
 .landing .visible-radar-pillars {
   display: flex;
   justify-content: space-between;
-  margin-top: -2px;
+  margin-top: -8px;
   gap: 6px;
+  opacity: 0.92;
 }
 
 .landing .visible-radar-pillars span {
@@ -1253,10 +1323,11 @@
 .landing .visible-emotion-legend {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 10px;
   color: rgba(231, 237, 255, 0.88);
-  font-size: 0.86rem;
+  font-size: 0.8rem;
+  opacity: 0.9;
 }
 
 .landing .visible-emotion-pill {
@@ -1270,26 +1341,27 @@
 .landing .visible-emotion-grid {
   display: grid;
   grid-template-columns: repeat(16, minmax(0, 1fr));
-  gap: 5px;
-  padding: 10px;
-  border-radius: 24px;
-  background: rgba(16, 26, 56, 0.74);
-  border: 1px solid rgba(140, 157, 209, 0.24);
+  gap: 4px;
+  padding: 10px 10px 14px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(14, 25, 56, 0.82), rgba(11, 19, 43, 0.86));
+  border: 1px solid rgba(157, 173, 221, 0.28);
 }
 
 .landing .visible-emotion-cell {
   aspect-ratio: 1 / 1;
-  border-radius: 6px;
-  background: rgba(98, 104, 122, 0.62);
+  border-radius: 5px;
+  background: rgba(98, 104, 122, 0.58);
   border: 1px solid rgba(202, 216, 255, 0.13);
   animation: landingEmotionPop 5.8s ease-in-out infinite;
   animation-delay: calc(var(--emotion-order, 0) * 22ms);
 }
 
-.landing .visible-emotion-cell:nth-child(5n + 1) { background: rgba(46, 204, 113, 0.8); }
-.landing .visible-emotion-cell:nth-child(5n + 2) { background: rgba(241, 196, 15, 0.88); }
-.landing .visible-emotion-cell:nth-child(5n + 3) { background: rgba(155, 89, 182, 0.85); }
-.landing .visible-emotion-cell:nth-child(5n + 4) { background: rgba(231, 76, 60, 0.72); }
+.landing .visible-emotion-cell--calm { background: rgba(75, 189, 138, 0.8); }
+.landing .visible-emotion-cell--happy { background: rgba(239, 194, 52, 0.88); }
+.landing .visible-emotion-cell--focus { background: rgba(137, 148, 255, 0.86); }
+.landing .visible-emotion-cell--stress { background: rgba(225, 109, 132, 0.8); }
+.landing .visible-emotion-cell--neutral { background: rgba(110, 123, 161, 0.7); }
 
 .landing .visible-streak-pillars {
   display: grid;
@@ -1318,7 +1390,7 @@
 }
 
 .landing .visible-streak-heading {
-  margin: 2px 0 6px;
+  margin: 2px 0 4px;
   color: rgba(233, 241, 255, 0.96);
   font-size: clamp(1.02rem, 1.04vw + 0.62rem, 1.56rem);
   letter-spacing: 0.14em;
@@ -1326,11 +1398,11 @@
 
 .landing .visible-streak-row {
   display: grid;
-  gap: 7px;
-  border-radius: 24px;
-  padding: 12px;
-  background: rgba(52, 55, 107, 0.9);
-  border: 1px solid rgba(156, 122, 239, 0.48);
+  gap: 6px;
+  border-radius: 20px;
+  padding: 11px 12px;
+  background: rgba(55, 60, 114, 0.88);
+  border: 1px solid rgba(164, 133, 244, 0.44);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
