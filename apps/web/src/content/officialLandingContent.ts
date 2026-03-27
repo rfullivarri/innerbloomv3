@@ -118,39 +118,39 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     how: {
       kicker: 'THE INNERBLOOM JOURNEY',
       title: 'Start, Grow and Bloom',
-      intro: 'Un sistema de hábitos para empezar sin presión, sostener constancia en ciclos reales y convertir progreso en hábitos que de verdad puedes mantener.',
+      intro: 'Empieza realista, avanza por semanas, calibra por mes y construye hábitos que sí perduran.',
       actionLabel: 'Acción',
       outcomeLabel: 'Resultado',
       steps: [
         {
-          title: 'Empieza con claridad ✨',
-          action: 'Elige tu game mode y responde unas pocas preguntas sobre tu energía, tus prioridades y tu momento actual.',
-          outcome: 'Innerbloom usa eso para darte un punto de partida que realmente puedas sostener.',
-          copy: 'Elige tu game mode y responde unas pocas preguntas sobre tu energía, tus prioridades y tu momento actual. Innerbloom usa eso para darte un punto de partida que realmente puedas sostener.'
+          title: 'Start small, not perfect ✨',
+          action: 'Empieza desde tu capacidad actual con una base simple y sostenible.',
+          outcome: 'Sostener importa más que empezar fuerte.',
+          copy: 'Empieza desde tu capacidad actual con una base simple y sostenible. Sostener importa más que empezar fuerte.'
         },
         {
-          title: 'Empieza con tu primer plan equilibrado ⚖️',
-          action: 'Recibe un plan realista en Body, Mind y Soul, con micro-hábitos simples adaptados a tu ritmo.',
-          outcome: 'El objetivo no es la intensidad. Es una constancia que puedas sostener.',
-          copy: 'Recibe un plan realista en Body, Mind y Soul, con micro-hábitos simples adaptados a tu ritmo. El objetivo no es la intensidad. Es una constancia que puedas sostener.'
+          title: 'Grow through real cycles ⚖️',
+          action: 'Mira tus semanas, no un solo día.',
+          outcome: 'Registra tu estado emocional y detecta patrones.',
+          copy: 'Mira tus semanas, no un solo día. Registra tu estado emocional y detecta patrones.'
         },
         {
-          title: 'Crece con progreso diario 📅📈',
-          action: 'Completa micro-hábitos, registra cómo te sientes y convierte tu emoción diaria en progreso visible.',
-          outcome: 'Descubre qué te ayuda a mantener la constancia.',
-          copy: 'Completa micro-hábitos, registra cómo te sientes y convierte tu emoción diaria en progreso visible. Descubre qué te ayuda a mantener la constancia.'
+          title: 'Calibrate with perspective 📅',
+          action: 'Revisa tu progreso por ciclos mensuales.',
+          outcome: 'Ajusta el ritmo sin romper la constancia.',
+          copy: 'Revisa tu progreso por ciclos mensuales. Ajusta el ritmo sin romper la constancia.'
         },
         {
-          title: 'Crece con un sistema que se adapta 🌱',
-          action: 'A medida que cambia tu constancia, Innerbloom ajusta el desafío para que tu plan siga siendo realista.',
-          outcome: 'Growth Calibration y Next Mode te ayudan a avanzar en el momento adecuado.',
-          copy: 'A medida que cambia tu constancia, Innerbloom ajusta el desafío para que tu plan siga siendo realista. Growth Calibration y Next Mode te ayudan a avanzar en el momento adecuado.'
+          title: 'Make progress visible 🌱',
+          action: 'Haz visible tu evolución en constancia, emoción y balance.',
+          outcome: 'Así entiendes mejor lo que sí te funciona.',
+          copy: 'Haz visible tu evolución en constancia, emoción y balance. Así entiendes mejor lo que sí te funciona.'
         },
         {
-          title: 'Florece en hábitos que perduran 🌸',
-          action: 'Cuando un hábito se vuelve estable con el tiempo, Innerbloom puede reconocerlo como parte de tu base.',
-          outcome: 'Habit Bloomed marca el momento en que la constancia se convierte en cambio duradero.',
-          copy: 'Cuando un hábito se vuelve estable con el tiempo, Innerbloom puede reconocerlo como parte de tu base. Habit Bloomed marca el momento en que la constancia se convierte en cambio duradero.'
+          title: 'Bloom into lasting habits 🌸',
+          action: 'Con el tiempo, los hábitos estables pasan a formar parte de tu base.',
+          outcome: 'Ahí el progreso deja de sentirse temporal.',
+          copy: 'Con el tiempo, los hábitos estables pasan a formar parte de tu base. Ahí el progreso deja de sentirse temporal.'
         }
       ]
     },
@@ -347,39 +347,39 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     how: {
       kicker: 'THE INNERBLOOM JOURNEY',
       title: 'Start, Grow and Bloom',
-      intro: 'A habit system designed to help you begin without pressure, stay consistent through real-life cycles, and turn progress into habits you can actually keep.',
+      intro: 'Start realistic, move weekly, calibrate monthly, and build habits that last.',
       actionLabel: 'Action',
       outcomeLabel: 'Outcome',
       steps: [
         {
-          title: 'Start with clarity ✨',
-          action: 'Choose your game mode and answer a few quick questions about your energy, priorities, and current moment.',
-          outcome: 'Innerbloom uses that to create a starting point you can actually sustain.',
-          copy: 'Choose your game mode and answer a few quick questions about your energy, priorities, and current moment. Innerbloom uses that to create a starting point you can actually sustain.'
+          title: 'Start small, not perfect ✨',
+          action: 'Start from your current capacity with a simple, sustainable base.',
+          outcome: 'Consistency matters more than a strong start.',
+          copy: 'Start from your current capacity with a simple, sustainable base. Consistency matters more than a strong start.'
         },
         {
-          title: 'Start with your first balanced plan ⚖️',
-          action: 'Get a realistic plan across Body, Mind, and Soul, built around simple micro-habits that match your pace.',
-          outcome: 'The goal is not intensity. It is consistency you can keep.',
-          copy: 'Get a realistic plan across Body, Mind, and Soul, built around simple micro-habits that match your pace. The goal is not intensity. It is consistency you can keep.'
+          title: 'Grow through real cycles ⚖️',
+          action: 'Track your weeks, not one single day.',
+          outcome: 'Log your emotional state and spot patterns.',
+          copy: 'Track your weeks, not one single day. Log your emotional state and spot patterns.'
         },
         {
-          title: 'Grow with daily progress 📅📈',
-          action: 'Complete small habits, log how you feel, and turn daily emotion into visible progress.',
-          outcome: 'See what helps you stay consistent.',
-          copy: 'Complete small habits, log how you feel, and turn daily emotion into visible progress. See what helps you stay consistent.'
+          title: 'Calibrate with perspective 📅',
+          action: 'Review progress in monthly cycles.',
+          outcome: 'Adjust pace without breaking consistency.',
+          copy: 'Review progress in monthly cycles. Adjust pace without breaking consistency.'
         },
         {
-          title: 'Grow with a system that adapts 🌱',
-          action: 'As your consistency changes, Innerbloom adjusts the challenge to keep your plan realistic.',
-          outcome: 'Growth Calibration and Next Mode help you move forward at the right time.',
-          copy: 'As your consistency changes, Innerbloom adjusts the challenge to keep your plan realistic. Growth Calibration and Next Mode help you move forward at the right time.'
+          title: 'Make progress visible 🌱',
+          action: 'Make your progress visible across consistency, emotion, and balance.',
+          outcome: 'That clarity shows what truly works for you.',
+          copy: 'Make your progress visible across consistency, emotion, and balance. That clarity shows what truly works for you.'
         },
         {
-          title: 'Bloom into habits that last 🌸',
-          action: 'When a habit becomes stable over time, Innerbloom can recognize it as part of your foundation.',
-          outcome: 'Habit Bloomed marks the moment consistency becomes lasting change.',
-          copy: 'When a habit becomes stable over time, Innerbloom can recognize it as part of your foundation. Habit Bloomed marks the moment consistency becomes lasting change.'
+          title: 'Bloom into lasting habits 🌸',
+          action: 'Over time, stable habits become part of your foundation.',
+          outcome: 'That is when progress stops feeling temporary.',
+          copy: 'Over time, stable habits become part of your foundation. That is when progress stops feeling temporary.'
         }
       ]
     },
