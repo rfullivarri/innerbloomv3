@@ -1,13 +1,82 @@
+.premium-timeline {
+  --timeline-surface-radius: var(--landing-surface-radius-lg, 28px);
+  --timeline-surface-radius-sm: var(--landing-surface-radius-sm, 18px);
+  --timeline-surface-border: var(--landing-surface-border, rgba(236, 246, 255, 0.32));
+  --timeline-surface-bg: var(
+    --landing-surface-bg,
+    linear-gradient(145deg, rgba(245, 235, 255, 0.12), rgba(211, 231, 255, 0.09))
+  );
+  --timeline-surface-shadow: var(--landing-surface-shadow, 0 14px 34px rgba(24, 18, 47, 0.24));
+  --timeline-surface-glow: var(
+    --landing-surface-glow,
+    radial-gradient(circle at 20% 45%, rgba(212, 162, 255, 0.17), transparent 76%)
+  );
+}
+
+.premium-timeline-card {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--timeline-surface-radius);
+  border: 1px solid var(--timeline-surface-border);
+  background: var(--timeline-surface-bg);
+  color: rgba(240, 246, 255, 0.95);
+  box-shadow: var(--timeline-surface-shadow);
+  backdrop-filter: blur(11px);
+}
+
+.premium-timeline-card::before {
+  content: '';
+  position: absolute;
+  inset: -8px 2px -10px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--timeline-surface-glow);
+  filter: blur(10px);
+  opacity: 0.68;
+  pointer-events: none;
+}
+
+.premium-timeline-badge {
+  border-radius: 999px;
+  border: 1px solid rgba(217, 230, 255, 0.26);
+  background: rgba(175, 198, 246, 0.12);
+  color: rgba(232, 241, 255, 0.86);
+}
+
+.premium-timeline-title {
+  color: rgba(247, 250, 255, 0.98);
+}
+
+.premium-timeline-bullets {
+  color: rgba(223, 235, 255, 0.9);
+}
+
+.premium-timeline-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(214, 228, 255, 0.24);
+  background: rgba(181, 201, 248, 0.11);
+  color: rgba(227, 237, 255, 0.82);
+}
+
+.premium-timeline-closing {
+  border-radius: var(--timeline-surface-radius);
+  border: 1px solid var(--timeline-surface-border);
+  background: var(--timeline-surface-bg);
+  box-shadow: var(--timeline-surface-shadow);
+  backdrop-filter: blur(11px);
+  color: rgba(236, 244, 255, 0.92);
+}
+
 .timeline-closing-card {
   transition: border-color 320ms ease, box-shadow 320ms ease, color 320ms ease, background-color 320ms ease;
 }
 
 .timeline-closing-card.completed,
 .timeline-closing-card[data-completed='true'] {
-  border-color: rgba(176, 232, 255, 0.88);
+  border-color: rgba(176, 232, 255, 0.72);
   box-shadow:
-    0 0 0 1px rgba(184, 236, 255, 0.44),
-    0 0 34px rgba(126, 211, 255, 0.42),
-    inset 0 0 46px rgba(173, 137, 255, 0.16);
-  background-color: rgba(255, 255, 255, 0.13);
+    0 0 0 1px rgba(184, 236, 255, 0.32),
+    0 0 24px rgba(126, 211, 255, 0.26),
+    inset 0 0 34px rgba(173, 137, 255, 0.12);
+  background-color: rgba(255, 255, 255, 0.1);
 }
