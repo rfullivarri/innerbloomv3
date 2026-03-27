@@ -438,42 +438,63 @@
 
 .landing .truth-problem {
   position: relative;
-  padding: clamp(92px, 11vw, 148px) 0 clamp(64px, 8vw, 108px);
+  padding: clamp(90px, 10.5vw, 138px) 0 clamp(66px, 8vw, 106px);
 }
 
 .landing .truth-problem-shell {
   position: relative;
   isolation: isolate;
+  width: min(100%, 940px);
+  margin: 0 auto;
+  padding: clamp(30px, 3.2vw, 42px) clamp(24px, 3.6vw, 42px) clamp(26px, 3vw, 36px);
+  border-radius: clamp(30px, 4.2vw, 38px);
+  border: 1px solid rgba(233, 217, 255, 0.26);
+  background:
+    radial-gradient(115% 120% at 15% 16%, rgba(255, 255, 255, 0.14), transparent 58%),
+    linear-gradient(152deg, rgba(94, 60, 152, 0.3), rgba(40, 26, 68, 0.24) 55%, rgba(20, 14, 34, 0.32));
+  box-shadow:
+    0 22px 56px rgba(21, 10, 40, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .landing .truth-problem-shell::before {
   content: '';
   position: absolute;
-  inset: -40px min(-4vw, -20px) -18px;
+  inset: -32px -12px -16px;
   z-index: -1;
-  border-radius: 44px;
+  border-radius: inherit;
   background:
-    radial-gradient(120% 135% at 14% 24%, rgba(196, 181, 253, 0.24), transparent 58%),
-    radial-gradient(112% 125% at 84% 76%, rgba(125, 211, 252, 0.18), transparent 60%),
-    linear-gradient(120deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
-  filter: blur(0.2px);
+    radial-gradient(100% 110% at 12% 24%, rgba(187, 141, 255, 0.24), transparent 60%),
+    radial-gradient(96% 98% at 86% 86%, rgba(149, 112, 255, 0.2), transparent 62%);
+  filter: blur(14px);
+}
+
+.landing .truth-problem-shell::after {
+  content: '';
+  position: absolute;
+  top: clamp(16px, 2.2vw, 20px);
+  left: clamp(24px, 3.6vw, 42px);
+  width: clamp(84px, 10vw, 120px);
+  height: 1px;
+  background: linear-gradient(90deg, rgba(234, 215, 255, 0.66), rgba(234, 215, 255, 0));
+  opacity: 0.92;
 }
 
 .landing .truth-problem-title {
-  max-width: 18ch;
-  margin: 0 auto 20px;
-  font-size: clamp(2.4rem, 2.35vw + 1.58rem, 4rem);
-  line-height: 1.08;
-  letter-spacing: -0.022em;
+  max-width: 19ch;
+  margin: 0 auto 16px;
+  font-size: clamp(2.05rem, 1.95vw + 1.44rem, 3.28rem);
+  line-height: 1.13;
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
 .landing .section-sub.truth-problem-body {
   margin: 0 auto;
-  max-width: min(64ch, 92%);
-  color: color-mix(in srgb, var(--ink) 88%, #cbd5f5 12%);
-  font-size: clamp(1.05rem, 0.5vw + 0.95rem, 1.35rem);
-  line-height: 1.68;
+  max-width: min(60ch, 92%);
+  color: color-mix(in srgb, var(--ink) 90%, #e6dcff 10%);
+  font-size: clamp(1.01rem, 0.45vw + 0.94rem, 1.24rem);
+  line-height: 1.72;
   text-wrap: pretty;
 }
 
