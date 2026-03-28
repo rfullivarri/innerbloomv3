@@ -811,6 +811,11 @@ export default function LandingPage() {
                       </div>
                     </div>
 
+                    <div className="visible-scene-inner-contours" aria-hidden>
+                      <span className="visible-inner-contour visible-inner-contour--balance" />
+                      <span className="visible-inner-contour visible-inner-contour--emotion" />
+                    </div>
+
                     <div className="visible-scene-region visible-scene-region--streaks visible-scene-fragment visible-scene-fragment--streaks">
                       <div className="visible-canvas-header visible-canvas-header--streaks">
                         <p className="visible-canvas-title">STREAKS</p>
