@@ -49,17 +49,17 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   es: {
     navLinks: [],
     hero: {
-      titleLead: 'La mayoría de los sistemas de hábitos fallan',
-      titleHighlight: 'esperan que te sientas igual siempre.',
+      titleLead: 'Los sistemas de hábitos fallan',
+      titleHighlight: 'porque esperan que te sientas igual siempre.',
       subtitle:
         'Innerbloom es un sistema de hábitos adaptado a la vida real. Tu energía cambia, tu estado influye y tu progreso debería seguir contando.',
       note: 'Empieza desde tu nivel real y crece en ciclos semanales.',
       alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
     },
     problem: {
-      title: 'El problema real no sos vos.',
+      title: 'El problema no sos vos.',
       body:
-        'La mayoría de las apps de hábitos asumen una versión irreal de ti: misma energía • mismo foco • misma motivación • misma disciplina • siempre. Pero la vida cambia. Y cuando el sistema no lo reconoce, no solo pierdes constancia: empiezas a sentir que fallaste tú.'
+        'Las apps de hábitos suelen asumir una versión irreal de vos:\n\n- misma energía\n- mismo foco\n- misma motivación\n- misma disciplina\n\nsiempre\n\nPero la vida cambia.\nY cuando el sistema no lo reconoce, no solo pierdes constancia:\nempiezas a sentir que fallaste tú.'
     },
     pillars: {
       title: 'Una forma simple de crecer en equilibrio',
@@ -205,7 +205,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     demo: {
       title: 'Haz visible el progreso que estás construyendo.',
-      text: 'Innerbloom te ayuda a ver cómo tu constancia crece, cómo tus hábitos se fortalecen y cuándo el progreso ya es real. Porque avanzar no debería sentirse como todo o nada. Debería sentirse visible y honesto.',
+      text: 'Innerbloom te ayuda a ver cómo tu constancia crece y cuándo el progreso ya es real.\n\nPorque avanzar no debería sentirse como todo o nada.\nDebería sentirse visible y honesto.',
       banner: 'Explora cómo se ve tu crecimiento dentro de Innerbloom',
       cta: 'Explorar demo'
     },
@@ -279,17 +279,17 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   en: {
     navLinks: [],
     hero: {
-      titleLead: 'Most habit systems fail',
-      titleHighlight: 'they expect you to feel the same all the time.',
+      titleLead: 'Habit systems fail',
+      titleHighlight: 'because they expect you to feel the same all the time.',
       subtitle:
         'Innerbloom is a habit system built for real life. Your energy changes, your state matters, and your progress should still count.',
       note: 'Start from your real level and grow through weekly cycles.',
       alt: 'Kid looking at a violet energy sphere in the night sky — Gamification Journey'
     },
     problem: {
-      title: 'The real problem isn’t you.',
+      title: 'You’re not the problem.',
       body:
-        'Most habit apps assume an unrealistic version of you: same energy • same focus • same motivation • same discipline • all the time. But life changes. And when the system doesn’t account for that, you don’t just lose consistency: you start feeling like you failed.'
+        'Habit apps often assume an unrealistic version of you:\n\n- same energy\n- same focus\n- same motivation\n- same discipline\n\nall the time\n\nBut life changes.\nAnd when the system doesn’t account for that, you don’t just lose consistency:\nyou start feeling like you failed.'
     },
     pillars: {
       title: 'A simple way to grow in balance',
@@ -435,7 +435,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
     },
     demo: {
       title: 'Make the progress you’re building visible.',
-      text: 'Innerbloom helps you see how your consistency grows, how your habits get stronger, and when progress becomes real. Because moving forward shouldn’t feel all-or-nothing. It should feel visible and honest.',
+      text: 'Innerbloom helps you see how your consistency grows and when progress becomes real.\n\nBecause moving forward shouldn’t feel all-or-nothing.\nIt should feel visible and honest.',
       banner: 'Explore how your growth looks inside Innerbloom',
       cta: 'Explore demo'
     },
