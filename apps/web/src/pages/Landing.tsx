@@ -134,14 +134,14 @@ const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
 const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: string; steps: TimelineStep[] }> = {
   es: {
     title: 'Cómo funciona Innerbloom',
-    closingLine: 'No se trata de completar tareas sueltas. Se trata de construir hábitos duraderos.',
+    closingLine: 'Un hábito logrado no es una racha bonita. Es algo que ya forma parte de vos.',
     steps: [
       {
         title: 'Empieza realista, no perfecto ✨',
         badge: 'ONBOARDING PERSONALIZADO',
         bullets: [
           'Empieza desde tu capacidad actual con una base simple y sostenible.',
-          'Lo importante no es arrancar fuerte. Es arrancar de una forma que puedas sostener.',
+          'No importa arrancar fuerte. Importa arrancar de una forma que puedas sostener.',
           'Innerbloom te ayuda a empezar en el nivel correcto para ti.',
         ],
         chips: ['ONBOARDING · BASE REALISTA'],
@@ -151,7 +151,7 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         badge: 'CICLO SEMANAL',
         bullets: [
           'Mira tu progreso por semanas, no como un juicio aislado de un solo día.',
-          'Registra tu experiencia y empieza a detectar patrones en tu constancia.',
+          'Registra tu experiencia y detecta patrones en tu constancia.',
           'El objetivo es construir ritmo, no perseguir perfección.',
         ],
         chips: ['CICLO SEMANAL · PROGRESO Y PATRONES'],
@@ -161,7 +161,7 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         badge: 'RECALIBRACIÓN MENSUAL',
         bullets: [
           'Innerbloom revisa tu proceso y recalibra la dificultad con el tiempo.',
-          'Si un hábito se fortalece, el sistema puede ayudarte a subir de nivel.',
+          'Si un hábito se fortalece, el sistema te ayuda a subir de nivel.',
           'Si todavía necesita base, ajusta sin romper el proceso.',
         ],
         chips: ['RECALIBRACIÓN · DIFICULTAD Y EVOLUCIÓN'],
@@ -172,7 +172,7 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         bullets: [
           'Bloom no es solo seguir intentando. Es convertir constancia en algo real.',
           'Cuando un hábito ya está construido, Innerbloom te lo muestra como un logro tuyo.',
-          'No se trata de completar tareas sueltas. Se trata de construir hábitos duraderos.',
+          'No se trata de tareas sueltas. Se trata de hábitos duraderos.',
         ],
         chips: ['BLOOM · HÁBITOS QUE PERDURAN'],
       },
@@ -180,15 +180,15 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
   },
   en: {
     title: 'How Innerbloom works',
-    closingLine: 'This is not about isolated tasks. It’s about building lasting habits.',
+    closingLine: 'An achieved habit isn’t just a nice streak. It’s something that has become part of you.',
     steps: [
       {
         title: 'Start realistic, not perfect ✨',
         badge: 'PERSONALIZED ONBOARDING',
         bullets: [
           'Start from your current capacity with a simple, sustainable base.',
-          'What matters is not starting hard. It’s starting in a way you can keep.',
-          'Innerbloom helps you begin at the level that actually fits you.',
+          'Starting hard doesn’t matter. Starting in a way you can sustain does.',
+          'Innerbloom helps you begin at the level that fits you.',
         ],
         chips: ['ONBOARDING · REALISTIC BASE'],
       },
@@ -197,7 +197,7 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         badge: 'WEEKLY CYCLE',
         bullets: [
           'Look at your progress through weeks, not as a one-day verdict.',
-          'Track your experience and start noticing patterns in your consistency.',
+          'Track your experience and notice patterns in your consistency.',
           'The goal is to build rhythm, not chase perfection.',
         ],
         chips: ['WEEKLY CYCLE · PROGRESS AND PATTERNS'],
@@ -207,8 +207,8 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         badge: 'MONTHLY RECALIBRATION',
         bullets: [
           'Innerbloom reviews your process and recalibrates difficulty over time.',
-          'When a habit gets stronger, the system can help you level up.',
-          'When it still needs a base, it adjusts without breaking the process.',
+          'When a habit gets stronger, the system helps you level up.',
+          'If it still needs a base, it adjusts without breaking the process.',
         ],
         chips: ['RECALIBRATION · DIFFICULTY AND EVOLUTION'],
       },
@@ -216,9 +216,9 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         title: 'Bloom when the habit becomes yours 🏆',
         badge: 'ACHIEVED HABITS',
         bullets: [
-          'Bloom is not just about keeping at it. It’s about turning consistency into something real.',
+          'Bloom is not just about keeping at it. It’s turning consistency into something real.',
           'When a habit is truly built, Innerbloom shows it as something you’ve earned.',
-          'This is not about isolated tasks. It’s about building lasting habits.',
+          'This is not about isolated tasks. It’s about lasting habits.',
         ],
         chips: ['BLOOM · HABITS THAT LAST'],
       },
