@@ -1284,6 +1284,7 @@
   width: 49%;
   height: 48%;
   padding: 16px 18px 14px;
+  overflow: hidden;
 }
 
 .landing .visible-scene-region--streaks {
@@ -1413,6 +1414,12 @@
 
 .landing .visible-canvas-header--emotion {
   margin-bottom: 12px;
+  transform: translateX(-16px);
+  padding-right: 8px;
+}
+
+.landing .visible-canvas-header--emotion .visible-canvas-info {
+  margin-left: auto;
 }
 
 .landing .visible-canvas-header--streaks {
@@ -1467,7 +1474,7 @@
   width: min(364px, 132%);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  transform: translateX(-16px);
+  transform: translate(-16px, -15%);
 }
 
 .landing .visible-balance-radar {
@@ -1593,6 +1600,8 @@
     rgba(11, 19, 43, 0.86)
   );
   border: 1px solid rgba(157, 173, 221, 0.28);
+  transform: translateY(25%) scale(1.2);
+  transform-origin: top center;
 }
 
 .landing .visible-emotion-grid-row {

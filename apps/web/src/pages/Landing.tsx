@@ -751,7 +751,6 @@ export default function LandingPage() {
                       <div className="visible-canvas-header">
                         <p className="visible-canvas-title">BALANCE</p>
                         <span className="visible-canvas-chip">Predominio Body</span>
-                        <span className="visible-canvas-info">i</span>
                       </div>
                       <div className="visible-radar-shell">
                         <div className="visible-balance-radar-wrap">
