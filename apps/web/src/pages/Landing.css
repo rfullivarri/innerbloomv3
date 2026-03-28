@@ -1288,9 +1288,9 @@
 
 .landing .visible-scene-region--streaks {
   right: -20px;
-  top: 2px;
+  top: 16px;
   width: 59%;
-  height: 99%;
+  height: 96%;
   padding: 18px 22px 22px;
   display: grid;
   align-content: start;
@@ -1303,6 +1303,84 @@
   );
   border: 1px solid rgba(112, 126, 196, 0.28);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.landing .visible-scene-inner-contours {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.landing .visible-inner-contour {
+  position: absolute;
+  border: 1px solid rgba(112, 126, 196, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-radius: 28px;
+}
+
+.landing .visible-inner-contour::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1px solid rgba(226, 236, 255, 0.08);
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.landing .visible-inner-contour--balance {
+  left: -34px;
+  top: -10px;
+  width: 54%;
+  height: 54%;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  border-bottom-right-radius: 32px;
+  border-bottom-left-radius: 20px;
+  border-top-right-radius: 20px;
+  mask:
+    linear-gradient(#000 0 0) right / 30% 100% no-repeat,
+    linear-gradient(#000 0 0) bottom / 100% 38% no-repeat;
+  -webkit-mask:
+    linear-gradient(#000 0 0) right / 30% 100% no-repeat,
+    linear-gradient(#000 0 0) bottom / 100% 38% no-repeat;
+}
+
+.landing .visible-inner-contour--balance::after {
+  mask:
+    linear-gradient(#000 0 0) right / 24% 88% no-repeat,
+    linear-gradient(#000 0 0) bottom / 92% 30% no-repeat;
+  -webkit-mask:
+    linear-gradient(#000 0 0) right / 24% 88% no-repeat,
+    linear-gradient(#000 0 0) bottom / 92% 30% no-repeat;
+}
+
+.landing .visible-inner-contour--emotion {
+  left: -30px;
+  bottom: -26px;
+  width: 56%;
+  height: 44%;
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  border-top-right-radius: 32px;
+  border-bottom-right-radius: 22px;
+  border-top-left-radius: 18px;
+  mask:
+    linear-gradient(#000 0 0) top / 100% 44% no-repeat,
+    linear-gradient(#000 0 0) right / 34% 100% no-repeat;
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% 44% no-repeat,
+    linear-gradient(#000 0 0) right / 34% 100% no-repeat;
+}
+
+.landing .visible-inner-contour--emotion::after {
+  mask:
+    linear-gradient(#000 0 0) top / 90% 32% no-repeat,
+    linear-gradient(#000 0 0) right / 28% 88% no-repeat;
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 90% 32% no-repeat,
+    linear-gradient(#000 0 0) right / 28% 88% no-repeat;
 }
 
 .landing .visible-scene-fragment--radar {
@@ -2345,8 +2423,9 @@
 
   .landing .visible-scene-region--streaks {
     width: 62%;
-    height: 98%;
+    height: 95%;
     right: -28px;
+    top: 14px;
   }
 
   .landing .visible-scene-fragment--radar {
