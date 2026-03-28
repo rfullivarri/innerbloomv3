@@ -542,26 +542,57 @@
 
 .landing .truth-problem {
   position: relative;
-  isolation: isolate;
-  width: 100%;
-  padding: 140px 0;
-  background:
-    linear-gradient(180deg, rgba(24, 26, 63, 0.92) 0%, rgba(58, 61, 117, 0.78) 52%, rgba(28, 29, 69, 0.9) 100%);
-  overflow: hidden;
+  padding: clamp(78px, 8.8vw, 116px) 0 clamp(58px, 6.9vw, 90px);
 }
 
 .landing .truth-problem-section {
   display: grid;
-  justify-items: stretch;
-  gap: clamp(24px, 2.9vw, 40px);
-  max-width: 800px;
+  justify-items: center;
+  gap: clamp(12px, 1.7vw, 20px);
+}
+
+.landing .truth-problem-shell {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 900px);
   margin: 0 auto;
-  padding: 0 18px;
-  text-align: center;
+  padding: clamp(24px, 2.8vw, 34px) clamp(22px, 3.2vw, 36px)
+    clamp(22px, 2.7vw, 30px);
+  border-radius: var(--landing-surface-radius-lg);
+  border: 1px solid var(--landing-surface-border);
+  background: var(--landing-surface-bg);
+  backdrop-filter: blur(var(--landing-glass-blur));
+  box-shadow: var(--landing-surface-shadow);
+}
+
+.landing .truth-problem-shell::before {
+  content: "";
+  position: absolute;
+  inset: -18px -8px -10px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--landing-surface-glow);
+  filter: blur(10px);
+  opacity: 0.72;
+}
+
+.landing .truth-problem-shell::after {
+  content: "";
+  position: absolute;
+  top: clamp(14px, 1.9vw, 18px);
+  left: clamp(22px, 3.2vw, 36px);
+  width: clamp(68px, 8.5vw, 98px);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(234, 215, 255, 0.66),
+    rgba(234, 215, 255, 0)
+  );
+  opacity: 0.78;
 }
 
 .landing .truth-problem-kicker {
-  margin: 0;
+  margin: 0 auto 18px;
   font-size: 0.72rem;
   font-weight: 700;
   line-height: 1;
@@ -572,74 +603,33 @@
 }
 
 .landing .truth-problem-title {
-  margin: 0;
-  font-size: clamp(2.65rem, 4.8vw, 4.25rem);
-  font-weight: 650;
-  line-height: 1.1;
+  max-width: 21ch;
+  margin: 0 auto;
+  font-size: clamp(1.88rem, 1.55vw + 1.38rem, 2.68rem);
+  line-height: 1.15;
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
-.landing .truth-problem-energy-layer {
-  position: absolute;
-  inset: -14% -22%;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(52% 34% at 16% 34%, rgba(202, 179, 255, 0.1) 0%, rgba(202, 179, 255, 0) 100%),
-    radial-gradient(44% 34% at 85% 64%, rgba(153, 170, 255, 0.08) 0%, rgba(153, 170, 255, 0) 100%);
-  opacity: 0.1;
-  animation: truth-energy-shift 12s ease-in-out infinite alternate;
+.landing .truth-problem-title--outside {
+  max-width: 19ch;
+  margin-bottom: clamp(4px, 1vw, 12px);
+  font-size: clamp(1.78rem, 1.35vw + 1.34rem, 2.36rem);
 }
 
-.landing .truth-problem-narrative {
-  display: grid;
-  gap: clamp(24px, 3.5vw, 48px);
+.landing .truth-problem-shell--body-only {
+  width: min(100%, 780px);
+  padding: clamp(16px, 2.1vw, 24px) clamp(20px, 2.8vw, 30px)
+    clamp(14px, 1.9vw, 22px);
 }
 
-.landing .truth-problem-block {
-  margin: 0;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.landing .truth-problem-lead,
-.landing .truth-problem-closing,
-.landing .truth-problem-shift {
-  font-size: clamp(1.2rem, 0.8vw + 1rem, 1.72rem);
-  color: rgba(233, 235, 252, 0.94);
-}
-
-.landing .truth-problem-bullets {
-  display: grid;
-  gap: 14px;
-}
-
-.landing .truth-problem-bullet {
-  font-size: clamp(1.02rem, 0.5vw + 0.94rem, 1.3rem);
-  opacity: 0.66;
-}
-
-.landing .truth-problem-always {
-  margin: clamp(4px, 1.4vw, 14px) 0;
-  font-size: clamp(1.34rem, 0.72vw + 1.1rem, 1.9rem);
-  letter-spacing: 0.08em;
-  text-transform: lowercase;
-}
-
-.landing .truth-problem-shift {
-  opacity: 1;
-  transform: scale(1.05);
-  transform-origin: center;
-}
-
-@keyframes truth-energy-shift {
-  0% {
-    transform: translateX(-2%);
-  }
-  100% {
-    transform: translateX(2%);
-  }
+.landing .section-sub.truth-problem-body {
+  margin: 0 auto;
+  max-width: min(52ch, 92%);
+  color: color-mix(in srgb, var(--ink) 88%, #e6dcff 12%);
+  font-size: clamp(0.96rem, 0.26vw + 0.9rem, 1.06rem);
+  line-height: 1.58;
+  text-wrap: pretty;
 }
 
 .landing .section-sub.highlight {
