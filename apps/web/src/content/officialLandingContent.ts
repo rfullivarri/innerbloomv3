@@ -52,7 +52,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       titleLead: 'Los sistemas de hábitos fallan',
       titleHighlight: 'porque esperan que te sientas igual siempre.',
       subtitle:
-        'Innerbloom es un sistema de hábitos adaptado a la vida real. Tu energía cambia, tu estado influye y tu progreso debería seguir contando.',
+        'Innerbloom es un sistema de hábitos adaptado a la vida real. Tu energía cambia, tu estado de ánimo influye y tu progreso debería seguir contando.',
       note: 'Empieza desde tu nivel real y crece en ciclos semanales.',
       alt: 'Niño mirando una esfera de energía violeta en el cielo nocturno — Gamification Journey'
     },
