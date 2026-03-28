@@ -1280,17 +1280,17 @@
 
 .landing .visible-scene-region--emotion {
   left: -34px;
-  bottom: -36px;
+  bottom: -8px;
   width: 53%;
-  height: 46%;
+  height: 48%;
   padding: 16px 18px 14px;
 }
 
 .landing .visible-scene-region--streaks {
-  right: -20px;
-  top: 16px;
-  width: 59%;
-  height: 96%;
+  right: -24px;
+  top: 34px;
+  width: 64%;
+  height: 102%;
   padding: 18px 22px 22px;
   display: grid;
   align-content: start;
@@ -1358,9 +1358,9 @@
 
 .landing .visible-inner-contour--emotion {
   left: -30px;
-  bottom: -26px;
+  bottom: -8px;
   width: 54%;
-  height: 38%;
+  height: 42%;
   border-left-color: transparent;
   border-bottom-color: transparent;
   border-top-right-radius: 32px;
@@ -1394,7 +1394,7 @@
 }
 
 .landing .visible-scene-fragment--streaks {
-  transform: scale(0.93);
+  transform: scale(1);
   transform-origin: top right;
   z-index: 2;
 }
@@ -2418,15 +2418,16 @@
 
   .landing .visible-scene-region--emotion {
     width: 57%;
-    height: 42%;
+    height: 44%;
     left: -44px;
+    bottom: -4px;
   }
 
   .landing .visible-scene-region--streaks {
-    width: 62%;
-    height: 95%;
-    right: -28px;
-    top: 14px;
+    width: 66%;
+    height: 102%;
+    right: -30px;
+    top: 28px;
   }
 
   .landing .visible-scene-fragment--radar {
@@ -2438,7 +2439,7 @@
   }
 
   .landing .visible-scene-fragment--streaks {
-    transform: scale(0.91);
+    transform: scale(0.97);
   }
 
   .landing .visible-radar-shell {
