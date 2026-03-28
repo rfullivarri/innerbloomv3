@@ -1332,55 +1332,55 @@
 .landing .visible-inner-contour--balance {
   left: -34px;
   top: -10px;
-  width: 54%;
-  height: 54%;
+  width: 53%;
+  height: 46%;
   border-top-color: transparent;
   border-left-color: transparent;
   border-bottom-right-radius: 32px;
   border-bottom-left-radius: 20px;
   border-top-right-radius: 20px;
   mask:
-    linear-gradient(#000 0 0) right / 30% 100% no-repeat,
-    linear-gradient(#000 0 0) bottom / 100% 38% no-repeat;
+    linear-gradient(#000 0 0) right top / 30% 64% no-repeat,
+    linear-gradient(#000 0 0) left bottom / 100% 34% no-repeat;
   -webkit-mask:
-    linear-gradient(#000 0 0) right / 30% 100% no-repeat,
-    linear-gradient(#000 0 0) bottom / 100% 38% no-repeat;
+    linear-gradient(#000 0 0) right top / 30% 64% no-repeat,
+    linear-gradient(#000 0 0) left bottom / 100% 34% no-repeat;
 }
 
 .landing .visible-inner-contour--balance::after {
   mask:
-    linear-gradient(#000 0 0) right / 24% 88% no-repeat,
-    linear-gradient(#000 0 0) bottom / 92% 30% no-repeat;
+    linear-gradient(#000 0 0) right top / 24% 54% no-repeat,
+    linear-gradient(#000 0 0) left bottom / 92% 26% no-repeat;
   -webkit-mask:
-    linear-gradient(#000 0 0) right / 24% 88% no-repeat,
-    linear-gradient(#000 0 0) bottom / 92% 30% no-repeat;
+    linear-gradient(#000 0 0) right top / 24% 54% no-repeat,
+    linear-gradient(#000 0 0) left bottom / 92% 26% no-repeat;
 }
 
 .landing .visible-inner-contour--emotion {
   left: -30px;
   bottom: -26px;
-  width: 56%;
-  height: 44%;
+  width: 54%;
+  height: 38%;
   border-left-color: transparent;
   border-bottom-color: transparent;
   border-top-right-radius: 32px;
   border-bottom-right-radius: 22px;
   border-top-left-radius: 18px;
   mask:
-    linear-gradient(#000 0 0) top / 100% 44% no-repeat,
-    linear-gradient(#000 0 0) right / 34% 100% no-repeat;
+    linear-gradient(#000 0 0) left top / 100% 42% no-repeat,
+    linear-gradient(#000 0 0) right bottom / 32% 60% no-repeat;
   -webkit-mask:
-    linear-gradient(#000 0 0) top / 100% 44% no-repeat,
-    linear-gradient(#000 0 0) right / 34% 100% no-repeat;
+    linear-gradient(#000 0 0) left top / 100% 42% no-repeat,
+    linear-gradient(#000 0 0) right bottom / 32% 60% no-repeat;
 }
 
 .landing .visible-inner-contour--emotion::after {
   mask:
-    linear-gradient(#000 0 0) top / 90% 32% no-repeat,
-    linear-gradient(#000 0 0) right / 28% 88% no-repeat;
+    linear-gradient(#000 0 0) left top / 90% 30% no-repeat,
+    linear-gradient(#000 0 0) right bottom / 28% 52% no-repeat;
   -webkit-mask:
-    linear-gradient(#000 0 0) top / 90% 32% no-repeat,
-    linear-gradient(#000 0 0) right / 28% 88% no-repeat;
+    linear-gradient(#000 0 0) left top / 90% 30% no-repeat,
+    linear-gradient(#000 0 0) right bottom / 28% 52% no-repeat;
 }
 
 .landing .visible-scene-fragment--radar {
@@ -1396,6 +1396,7 @@
 .landing .visible-scene-fragment--streaks {
   transform: scale(0.93);
   transform-origin: top right;
+  z-index: 2;
 }
 
 .landing .visible-radar-shell {
