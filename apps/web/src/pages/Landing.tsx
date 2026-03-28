@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type TouchEvent } from 'react';
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type TouchEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { OFFICIAL_DESIGN_TOKENS, OFFICIAL_LANDING_CSS_VARIABLES } from '../content/officialDesignTokens';
@@ -137,42 +137,38 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
     closingLine: 'Un hábito logrado no es una racha bonita. Es algo que ya forma parte de vos.',
     steps: [
       {
-        title: 'Empieza realista, no perfecto ✨',
+        title: 'Empieza realista, no perfecto',
         badge: 'ONBOARDING PERSONALIZADO',
         bullets: [
-          'Empieza desde tu capacidad actual con una base simple y sostenible.',
-          'No importa arrancar fuerte. Importa arrancar de una forma que puedas sostener.',
-          'Innerbloom te ayuda a empezar en el nivel correcto para ti.',
+          '🟢 Empieza desde tu nivel real',
+          '🌱 Construye una base que puedas sostener',
         ],
         chips: ['ONBOARDING · BASE REALISTA'],
       },
       {
-        title: 'Crece en ciclos reales ⚖️',
+        title: 'Crece en ciclos reales',
         badge: 'CICLO SEMANAL',
         bullets: [
-          'Mira tu progreso por semanas, no como un juicio aislado de un solo día.',
-          'Registra tu experiencia y detecta patrones en tu constancia.',
-          'El objetivo es construir ritmo, no perseguir perfección.',
+          '📅 Mira semanas, no días aislados',
+          '🧭 Detecta patrones y construye ritmo',
         ],
         chips: ['CICLO SEMANAL · PROGRESO Y PATRONES'],
       },
       {
-        title: 'Ajusta el sistema a medida que tú creces 🌱',
+        title: 'Ajusta el sistema a medida que creces',
         badge: 'RECALIBRACIÓN MENSUAL',
         bullets: [
-          'Innerbloom revisa tu proceso y recalibra la dificultad con el tiempo.',
-          'Si un hábito se fortalece, el sistema te ayuda a subir de nivel.',
-          'Si todavía necesita base, ajusta sin romper el proceso.',
+          '🔄 Recalibra la dificultad con el tiempo',
+          '📈 Sube de nivel cuando tus hábitos se fortalecen',
         ],
         chips: ['RECALIBRACIÓN · DIFICULTAD Y EVOLUCIÓN'],
       },
       {
-        title: 'Florece cuando el hábito ya es tuyo 🏆',
+        title: 'Florece cuando el hábito ya es tuyo',
         badge: 'HÁBITOS LOGRADOS',
         bullets: [
-          'Bloom no es solo seguir intentando. Es convertir constancia en algo real.',
-          'Cuando un hábito ya está construido, Innerbloom te lo muestra como un logro tuyo.',
-          'No se trata de tareas sueltas. Se trata de hábitos duraderos.',
+          '🏆 Convierte constancia en hábitos duraderos',
+          '🌸 Mira tus hábitos logrados como logros tuyos',
         ],
         chips: ['BLOOM · HÁBITOS QUE PERDURAN'],
       },
@@ -183,48 +179,53 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
     closingLine: 'An achieved habit isn’t just a nice streak. It’s something that has become part of you.',
     steps: [
       {
-        title: 'Start realistic, not perfect ✨',
+        title: 'Start realistic, not perfect',
         badge: 'PERSONALIZED ONBOARDING',
         bullets: [
-          'Start from your current capacity with a simple, sustainable base.',
-          'Starting hard doesn’t matter. Starting in a way you can sustain does.',
-          'Innerbloom helps you begin at the level that fits you.',
+          '🟢 Start from your real level',
+          '🌱 Build a base you can sustain',
         ],
         chips: ['ONBOARDING · REALISTIC BASE'],
       },
       {
-        title: 'Grow through real cycles ⚖️',
+        title: 'Grow through real cycles',
         badge: 'WEEKLY CYCLE',
         bullets: [
-          'Look at your progress through weeks, not as a one-day verdict.',
-          'Track your experience and notice patterns in your consistency.',
-          'The goal is to build rhythm, not chase perfection.',
+          '📅 Look at weeks, not isolated days',
+          '🧭 Notice patterns and build rhythm',
         ],
         chips: ['WEEKLY CYCLE · PROGRESS AND PATTERNS'],
       },
       {
-        title: 'Adjust the system as you grow 🌱',
+        title: 'Adjust the system as you grow',
         badge: 'MONTHLY RECALIBRATION',
         bullets: [
-          'Innerbloom reviews your process and recalibrates difficulty over time.',
-          'When a habit gets stronger, the system helps you level up.',
-          'If it still needs a base, it adjusts without breaking the process.',
+          '🔄 Recalibrate difficulty over time',
+          '📈 Level up as your habits get stronger',
         ],
         chips: ['RECALIBRATION · DIFFICULTY AND EVOLUTION'],
       },
       {
-        title: 'Bloom when the habit becomes yours 🏆',
+        title: 'Bloom when the habit becomes yours',
         badge: 'ACHIEVED HABITS',
         bullets: [
-          'Bloom is not just about keeping at it. It’s turning consistency into something real.',
-          'When a habit is truly built, Innerbloom shows it as something you’ve earned.',
-          'This is not about isolated tasks. It’s about lasting habits.',
+          '🏆 Turn consistency into lasting habits',
+          '🌸 See achieved habits as real milestones',
         ],
         chips: ['BLOOM · HABITS THAT LAST'],
       },
     ],
   },
 };
+
+function renderMultilineText(text: string) {
+  return text.split('\n').map((line, index) => (
+    <Fragment key={`${line}-${index}`}>
+      {index > 0 ? <br /> : null}
+      {line}
+    </Fragment>
+  ));
+}
 
 function splitPillarCopy(copy: string, language: Language) {
   const examplesLabel = PILLAR_EXAMPLES_LABEL[language];
@@ -715,7 +716,7 @@ export default function LandingPage() {
             </AdaptiveText>
 
             <div className="truth-problem-shell truth-problem-shell--body-only">
-              <AdaptiveText as="p" className="section-sub truth-problem-body">{copy.problem.body}</AdaptiveText>
+              <AdaptiveText as="p" className="section-sub truth-problem-body">{renderMultilineText(copy.problem.body)}</AdaptiveText>
             </div>
           </div>
         </section>
@@ -740,7 +741,7 @@ export default function LandingPage() {
             <div className="visible-progress-top">
               <div className="visible-progress-copy">
                 <AdaptiveText as="h2" className="demo-title">{copy.demo.title}</AdaptiveText>
-                <AdaptiveText as="p" className="demo-sub">{copy.demo.text}</AdaptiveText>
+                <AdaptiveText as="p" className="demo-sub">{renderMultilineText(copy.demo.text)}</AdaptiveText>
               </div>
 
               <div className="visible-progress-module" aria-hidden>
