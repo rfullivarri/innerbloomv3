@@ -227,27 +227,6 @@ function renderMultilineText(text: string) {
   ));
 }
 
-function splitProblemNarrative(body: string) {
-  const lines = body
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  const lead = lines[0] ?? '';
-  const bulletLines = lines.filter((line) => line.startsWith('-'));
-  const bulletStartIndex = lines.findIndex((line) => line.startsWith('-'));
-  const bulletEndIndex = bulletLines.length > 0 ? bulletStartIndex + bulletLines.length - 1 : -1;
-  const alwaysLine = lines[bulletEndIndex + 1] ?? '';
-  const closingLines = lines.slice(bulletEndIndex + 2);
-
-  return {
-    lead,
-    bulletLines,
-    alwaysLine,
-    closingLines,
-  };
-}
-
 function splitPillarCopy(copy: string, language: Language) {
   const examplesLabel = PILLAR_EXAMPLES_LABEL[language];
   const [definitionPart, examplesPart] = copy.split(examplesLabel);
@@ -397,7 +376,6 @@ export default function LandingPage() {
   const modeFrequency = frequencyByMode[language][activeMode.id];
   const modeStateLabel = language === 'es' ? 'Estado' : 'State';
   const modeObjectiveLabel = language === 'es' ? 'Objetivo' : 'Objective';
-  const problemNarrative = splitProblemNarrative(copy.problem.body);
 
   useEffect(() => {
     console.info('[landing][ga4-debug] cookie consent read on load', initialCookieConsentStateRef.current);
@@ -728,60 +706,17 @@ export default function LandingPage() {
         </section>
 
         <section className="truth-problem section-pad reveal-on-scroll" id="why">
-          <div className="truth-problem-energy-layer" aria-hidden />
-          <div className="container truth-problem-section">
+          <div className="container narrow truth-problem-section">
             <p className="truth-problem-kicker">
               {language === 'es' ? 'EL PROBLEMA REAL' : 'THE REAL PROBLEM'}
             </p>
 
-            <AdaptiveText
-              as="h2"
-              className="truth-problem-title truth-problem-block fade-item"
-              style={{ '--delay': '0ms' } as CSSProperties}
-            >
+            <AdaptiveText as="h2" className="truth-problem-title truth-problem-title--outside">
               {copy.problem.title}
             </AdaptiveText>
 
-            <div className="truth-problem-narrative">
-              <AdaptiveText
-                as="p"
-                className="truth-problem-block truth-problem-lead fade-item"
-                style={{ '--delay': '240ms' } as CSSProperties}
-              >
-                {problemNarrative.lead}
-              </AdaptiveText>
-
-              <div className="truth-problem-bullets">
-                {problemNarrative.bulletLines.map((line, index) => (
-                  <AdaptiveText
-                    as="p"
-                    className="truth-problem-block truth-problem-bullet fade-item"
-                    key={`problem-bullet-${line}-${index}`}
-                    style={{ '--delay': `${420 + index * 80}ms` } as CSSProperties}
-                  >
-                    {line}
-                  </AdaptiveText>
-                ))}
-              </div>
-
-              <AdaptiveText
-                as="p"
-                className="truth-problem-block truth-problem-always fade-item"
-                style={{ '--delay': '760ms' } as CSSProperties}
-              >
-                {problemNarrative.alwaysLine}
-              </AdaptiveText>
-
-              {problemNarrative.closingLines.map((line, index) => (
-                <AdaptiveText
-                  as="p"
-                  className={`truth-problem-block fade-item ${index === 0 ? 'truth-problem-shift' : 'truth-problem-closing'}`}
-                  key={`problem-closing-${line}-${index}`}
-                  style={{ '--delay': `${1000 + index * 240}ms` } as CSSProperties}
-                >
-                  {line}
-                </AdaptiveText>
-              ))}
+            <div className="truth-problem-shell truth-problem-shell--body-only">
+              <AdaptiveText as="p" className="section-sub truth-problem-body">{renderMultilineText(copy.problem.body)}</AdaptiveText>
             </div>
           </div>
         </section>
