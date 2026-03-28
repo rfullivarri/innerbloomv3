@@ -1271,25 +1271,25 @@
 }
 
 .landing .visible-scene-region--balance {
-  left: -44px;
+  left: -52px;
   top: -12px;
-  width: 45%;
+  width: 42%;
   height: 54%;
   padding: 24px 24px 16px;
 }
 
 .landing .visible-scene-region--emotion {
-  left: -34px;
+  left: -44px;
   bottom: -8px;
-  width: 49%;
+  width: 46%;
   height: 48%;
   padding: 16px 18px 14px;
 }
 
 .landing .visible-scene-region--streaks {
-  right: -88px;
+  right: -132px;
   top: 34px;
-  width: 64%;
+  width: 62%;
   height: 102%;
   padding: 18px 22px 22px;
   display: grid;
@@ -1330,9 +1330,9 @@
 }
 
 .landing .visible-inner-contour--balance {
-  left: -34px;
+  left: -42px;
   top: -10px;
-  width: 48%;
+  width: 44%;
   height: 46%;
   border-top-color: transparent;
   border-left-color: transparent;
@@ -1357,9 +1357,9 @@
 }
 
 .landing .visible-inner-contour--emotion {
-  left: -30px;
+  left: -38px;
   bottom: -8px;
-  width: 50%;
+  width: 46%;
   height: 42%;
   border-left-color: transparent;
   border-bottom-color: transparent;
