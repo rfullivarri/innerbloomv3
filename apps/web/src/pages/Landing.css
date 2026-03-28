@@ -1273,7 +1273,7 @@
 .landing .visible-scene-region--balance {
   left: -44px;
   top: -12px;
-  width: 49%;
+  width: 45%;
   height: 54%;
   padding: 24px 24px 16px;
 }
@@ -1281,13 +1281,13 @@
 .landing .visible-scene-region--emotion {
   left: -34px;
   bottom: -8px;
-  width: 53%;
+  width: 49%;
   height: 48%;
   padding: 16px 18px 14px;
 }
 
 .landing .visible-scene-region--streaks {
-  right: -24px;
+  right: -88px;
   top: 34px;
   width: 64%;
   height: 102%;
@@ -1332,7 +1332,7 @@
 .landing .visible-inner-contour--balance {
   left: -34px;
   top: -10px;
-  width: 53%;
+  width: 48%;
   height: 46%;
   border-top-color: transparent;
   border-left-color: transparent;
@@ -1359,7 +1359,7 @@
 .landing .visible-inner-contour--emotion {
   left: -30px;
   bottom: -8px;
-  width: 54%;
+  width: 50%;
   height: 42%;
   border-left-color: transparent;
   border-bottom-color: transparent;
@@ -2411,13 +2411,13 @@
   }
 
   .landing .visible-scene-region--balance {
-    width: 53%;
+    width: 49%;
     height: 50%;
     left: -58px;
   }
 
   .landing .visible-scene-region--emotion {
-    width: 57%;
+    width: 52%;
     height: 44%;
     left: -44px;
     bottom: -4px;
@@ -2426,7 +2426,7 @@
   .landing .visible-scene-region--streaks {
     width: 66%;
     height: 102%;
-    right: -30px;
+    right: -86px;
     top: 28px;
   }
 
