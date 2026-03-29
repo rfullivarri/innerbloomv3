@@ -781,11 +781,9 @@ export default function LandingPage() {
                     </div>
 
                     <div className="visible-scene-region visible-scene-region--emotion visible-scene-fragment visible-scene-fragment--emotion">
-                      <div className="visible-emotion-header-wrap">
-                        <div className="visible-canvas-header visible-canvas-header--emotion">
-                          <p className="visible-canvas-title">EMOTION CHART</p>
-                          <span className="visible-canvas-info">i</span>
-                        </div>
+                      <div className="visible-canvas-header visible-canvas-header--emotion">
+                        <p className="visible-canvas-title">EMOTION CHART</p>
+                        <span className="visible-canvas-info">i</span>
                       </div>
                       <div className="visible-emotion-legend">
                         <span>Calma</span>
