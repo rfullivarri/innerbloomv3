@@ -1413,13 +1413,18 @@
 }
 
 .landing .visible-canvas-header--emotion {
+  position: relative;
   margin-bottom: 12px;
   transform: translateX(-16px);
   padding-right: 8px;
 }
 
 .landing .visible-canvas-header--emotion .visible-canvas-info {
-  margin-left: auto;
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  left: auto;
+  margin-left: 0;
 }
 
 .landing .visible-canvas-header--streaks {
@@ -1456,8 +1461,6 @@
 }
 
 .landing .visible-canvas-info {
-  top: 10px;
-  left: 8px;
   width: 30px;
   height: 30px;
   border-radius: 999px;
