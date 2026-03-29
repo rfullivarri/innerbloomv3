@@ -49,8 +49,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   es: {
     navLinks: [],
     hero: {
-      titleLead: 'Los sistemas de hábitos fallan',
-      titleHighlight: 'porque esperan que te sientas igual siempre.',
+      titleLead: 'Las apps de hábitos fallan',
+      titleHighlight: 'porque no cambian contigo.',
       subtitle:
         'Innerbloom es una app de hábitos adaptativa que ajusta tu plan según tu capacidad real. Empieza desde donde estás, avanza en ciclos semanales y recalibra con el tiempo para ayudarte a construir hábitos que sí perduran.',
       note: 'Empieza desde tu nivel real y avanza semana a semana.',
@@ -284,8 +284,8 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
   en: {
     navLinks: [],
     hero: {
-      titleLead: 'Habit systems fail',
-      titleHighlight: 'because they expect you to feel the same all the time.',
+      titleLead: 'Habit apps fail',
+      titleHighlight: 'because they don’t change with you.',
       subtitle:
         'Innerbloom is an adaptive habit app that adjusts your plan to your real capacity. Start from where you are, move through weekly cycles, and recalibrate over time so you can build habits that actually last.',
       note: 'Start from your real level and move forward week by week.',
