@@ -1,11 +1,82 @@
-import { Capacitor } from '@capacitor/core';
+type CapacitorPluginListenerHandle = {
+  remove: () => Promise<void> | void;
+};
+
+type CapacitorAppPlugin = {
+  getLaunchUrl: () => Promise<{ url?: string } | undefined>;
+  addListener: (
+    eventName: 'appUrlOpen',
+    listener: ({ url }: { url: string }) => void,
+  ) => Promise<CapacitorPluginListenerHandle>;
+};
+
+type CapacitorBrowserPlugin = {
+  open: (options: { url: string }) => Promise<void>;
+};
+
+type CapacitorKeyboardPlugin = {
+  setResizeMode: (options: { mode: 'native' | 'body' | 'ionic' | 'none' }) => Promise<void>;
+  setStyle: (options: { style: 'DARK' | 'LIGHT' | 'DEFAULT' }) => Promise<void>;
+  setAccessoryBarVisible: (options: { isVisible: boolean }) => Promise<void>;
+  setScroll: (options: { isDisabled: boolean }) => Promise<void>;
+};
+
+type CapacitorStatusBarPlugin = {
+  setStyle: (options: { style: 'DARK' | 'LIGHT' | 'DEFAULT' }) => Promise<void>;
+};
+
+type CapacitorGlobal = {
+  isNativePlatform?: () => boolean;
+  getPlatform?: () => string;
+  Plugins?: Record<string, unknown>;
+};
 
 export const CAPACITOR_APP_SCHEME = 'innerbloom';
 export const CAPACITOR_CALLBACK_HOST = 'callback';
 export const CAPACITOR_SIGNED_OUT_HOST = 'signed-out';
+export const CAPACITOR_STATUS_BAR_STYLE_DARK = 'DARK' as const;
+export const CAPACITOR_KEYBOARD_STYLE_DARK = 'DARK' as const;
+export const CAPACITOR_KEYBOARD_RESIZE_NATIVE = 'native' as const;
+
+function getCapacitorGlobal(): CapacitorGlobal | null {
+  const candidate = typeof window !== 'undefined'
+    ? (window as typeof window & { Capacitor?: CapacitorGlobal }).Capacitor
+    : (globalThis as typeof globalThis & { Capacitor?: CapacitorGlobal }).Capacitor;
+
+  return candidate ?? null;
+}
+
+function getCapacitorPlugin<T>(name: string): T | null {
+  const plugins = getCapacitorGlobal()?.Plugins;
+  if (!plugins || !(name in plugins)) {
+    return null;
+  }
+
+  return plugins[name] as T;
+}
+
+export function getCapacitorPlatform(): string {
+  return getCapacitorGlobal()?.getPlatform?.() ?? 'web';
+}
 
 export function isNativeCapacitorPlatform(): boolean {
-  return Capacitor.isNativePlatform();
+  return Boolean(getCapacitorGlobal()?.isNativePlatform?.());
+}
+
+export function getCapacitorAppPlugin(): CapacitorAppPlugin | null {
+  return getCapacitorPlugin<CapacitorAppPlugin>('App');
+}
+
+export function getCapacitorBrowserPlugin(): CapacitorBrowserPlugin | null {
+  return getCapacitorPlugin<CapacitorBrowserPlugin>('Browser');
+}
+
+export function getCapacitorKeyboardPlugin(): CapacitorKeyboardPlugin | null {
+  return getCapacitorPlugin<CapacitorKeyboardPlugin>('Keyboard');
+}
+
+export function getCapacitorStatusBarPlugin(): CapacitorStatusBarPlugin | null {
+  return getCapacitorPlugin<CapacitorStatusBarPlugin>('StatusBar');
 }
 
 export function normalizeAppUrlToPath(url: string): string | null {

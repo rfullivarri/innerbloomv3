@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
-import { App } from '@capacitor/app';
-import { Browser } from '@capacitor/browser';
-import { Capacitor } from '@capacitor/core';
-import { Keyboard, KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
-import { StatusBar, Style } from '@capacitor/status-bar';
 import { useNavigate } from 'react-router-dom';
 import {
+  CAPACITOR_KEYBOARD_RESIZE_NATIVE,
+  CAPACITOR_KEYBOARD_STYLE_DARK,
+  CAPACITOR_STATUS_BAR_STYLE_DARK,
+  getCapacitorAppPlugin,
+  getCapacitorBrowserPlugin,
+  getCapacitorKeyboardPlugin,
+  getCapacitorPlatform,
+  getCapacitorStatusBarPlugin,
   isNativeAuthCallbackUrl,
   isNativeCapacitorPlatform,
   normalizeAppUrlToPath,
@@ -40,7 +43,12 @@ function useExternalLinkBridge(enabled: boolean) {
     window.open = ((url?: string | URL, target?: string, features?: string) => {
       const href = typeof url === 'string' ? url : url?.toString() ?? '';
       if (href && shouldOpenExternalUrl(href)) {
-        void Browser.open({ url: new URL(href, window.location.href).toString() });
+        const browser = getCapacitorBrowserPlugin();
+        if (browser) {
+          void browser.open({ url: new URL(href, window.location.href).toString() });
+          return null;
+        }
+
         return null;
       }
 
@@ -64,7 +72,12 @@ function useExternalLinkBridge(enabled: boolean) {
       }
 
       event.preventDefault();
-      void Browser.open({ url: href });
+      const browser = getCapacitorBrowserPlugin();
+      if (!browser) {
+        return;
+      }
+
+      void browser.open({ url: href });
     };
 
     document.addEventListener('click', handleClick, true);
@@ -82,13 +95,16 @@ function useNativeChrome(enabled: boolean) {
       return;
     }
 
-    void StatusBar.setStyle({ style: Style.Dark });
-    void Keyboard.setResizeMode({ mode: KeyboardResize.Native });
-    void Keyboard.setStyle({ style: KeyboardStyle.Dark });
-    void Keyboard.setAccessoryBarVisible({ isVisible: false });
+    const statusBar = getCapacitorStatusBarPlugin();
+    const keyboard = getCapacitorKeyboardPlugin();
 
-    if (Capacitor.getPlatform() === 'ios') {
-      void Keyboard.setScroll({ isDisabled: false });
+    void statusBar?.setStyle({ style: CAPACITOR_STATUS_BAR_STYLE_DARK });
+    void keyboard?.setResizeMode({ mode: CAPACITOR_KEYBOARD_RESIZE_NATIVE });
+    void keyboard?.setStyle({ style: CAPACITOR_KEYBOARD_STYLE_DARK });
+    void keyboard?.setAccessoryBarVisible({ isVisible: false });
+
+    if (getCapacitorPlatform() === 'ios') {
+      void keyboard?.setScroll({ isDisabled: false });
     }
   }, [enabled]);
 }
@@ -98,6 +114,11 @@ function useDeepLinkNavigation(enabled: boolean) {
 
   useEffect(() => {
     if (!enabled) {
+      return;
+    }
+
+    const app = getCapacitorAppPlugin();
+    if (!app) {
       return;
     }
 
@@ -112,15 +133,15 @@ function useDeepLinkNavigation(enabled: boolean) {
       }
     };
 
-    void App.getLaunchUrl().then((launchUrl) => {
+    void app.getLaunchUrl().then((launchUrl) => {
       if (launchUrl?.url) {
         handleUrl(launchUrl.url);
       }
     });
 
-    let listenerHandle: Awaited<ReturnType<typeof App.addListener>> | null = null;
+    let listenerHandle: Awaited<ReturnType<typeof app.addListener>> | null = null;
 
-    void App.addListener('appUrlOpen', ({ url }) => {
+    void app.addListener('appUrlOpen', ({ url }) => {
       handleUrl(url);
     }).then((handle) => {
       listenerHandle = handle;
