@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import './LandingV2.css';
 import '../styles/panel-rachas.overrides.css';
-import { Card } from '../components/ui/Card';
 import { FluidGradientBackground } from '../components/ui/FluidGradientBackground';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
+import { VisibleProgressMock } from '../components/landing/VisibleProgressMock';
 import { buildOnboardingPath } from '../onboarding/i18n';
 
 type Language = 'en' | 'es';
@@ -397,8 +397,6 @@ const EMOTION_PREVIEW_PADDED_COLUMNS: EmotionPreviewColumn[] = [
 ];
 
 const EMOTION_PREVIEW_SUMMARY = { emotion: 'Motivación' as const, count: 6 };
-const EMOTION_PREVIEW_LEGEND: EmotionName[] = ['Calma', 'Felicidad', 'Motivación', 'Tristeza', 'Ansiedad', 'Frustración', 'Cansancio'];
-
 const ENERGY_PREVIEW = [
   { label: 'HP', percent: 76, delta: 8 },
   { label: 'Mood', percent: 64, delta: 3 },
@@ -410,20 +408,6 @@ const MISSION_PREVIEW_ITEMS = [
   { title: 'Reflexión nocturna', tag: 'Soul', reward: '+80 GP', status: { es: 'Checklist', en: 'Checklist' } },
   { title: 'Boss: Focus AM', tag: 'Mind', reward: '+160 GP', status: { es: '2/3 completado', en: '2/3 complete' } }
 ] as const;
-
-const TASKS_PREVIEW_ITEMS = [
-  { title: 'Dormir 8hs', tag: 'Sueño', progress: 2, total: 3 },
-  { title: 'Cena antes de las 22hs', tag: 'Nutrición', progress: 2, total: 3 },
-  { title: '10.000 pasos / Correr', tag: 'Movilidad', progress: 1, total: 3 }
-] as const;
-
-const AVATAR_MODES = [
-  { src: '/LowMood.jpg', label: 'Low' },
-  { src: '/Chill-Mood.jpg', label: 'Chill' },
-  { src: '/FlowMood.jpg', label: 'Flow' },
-  { src: '/Evolve-Mood.jpg', label: 'Evolve' }
-] as const;
-
 
 const MODE_VISUALS: Record<Language, Record<Mode['id'], ModeVisual>> = {
   en: {
@@ -757,144 +741,6 @@ function MissionsPreview({ compact = false, language = 'es' }: { compact?: boole
   );
 }
 
-function RadarChartPreview() {
-  return (
-    <div className="lv2-radar-chart">
-      <svg viewBox="-10 -10 220 220" role="img" aria-label="Radar chart preview">
-        <defs>
-          <linearGradient id="lv2-radar-fill" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#7dd3fc" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="#a78bfa" stopOpacity="0.45" />
-          </linearGradient>
-        </defs>
-        {[20, 40, 60, 80].map((radius) => (
-          <circle key={radius} cx="100" cy="100" r={radius} className="lv2-radar-ring" />
-        ))}
-        {Array.from({ length: 8 }).map((_, index) => {
-          const angle = (Math.PI * 2 * index) / 8 - Math.PI / 2;
-          return (
-            <line
-              key={index}
-              x1="100"
-              y1="100"
-              x2={100 + Math.cos(angle) * 80}
-              y2={100 + Math.sin(angle) * 80}
-              className="lv2-radar-axis"
-            />
-          );
-        })}
-        <polygon
-          points="100,36 134,64 158,100 138,136 100,150 70,132 46,100 70,66"
-          fill="url(#lv2-radar-fill)"
-          stroke="#93c5fd"
-          strokeWidth="2"
-        />
-        {[0, 1, 2, 3, 4, 5, 6, 7].map((index) => {
-          const angle = (Math.PI * 2 * index) / 8 - Math.PI / 2;
-          return <circle key={index} cx={100 + Math.cos(angle) * 64} cy={100 + Math.sin(angle) * 64} r="4" className="lv2-radar-node" />;
-        })}
-      </svg>
-    </div>
-  );
-}
-
-function EmotionChartPreview({ language = 'es' }: { language?: Language }) {
-  const gridStyle = {
-    '--column-count': EMOTION_PREVIEW_PADDED_COLUMNS.length,
-    '--cell': '10px',
-    '--cell-gap': '5px'
-  } as CSSProperties;
-
-  return (
-    <div className="lv2-emotion-card">
-      <div className="lv2-emotion-legend lv2-emotion-legend--dashboard">
-        {EMOTION_PREVIEW_LEGEND.map((emotion) => (
-          <span key={emotion} className="lv2-emotion-legend-item">
-            <span className="lv2-emotion-legend-swatch" style={{ backgroundColor: EMOTION_COLORS[emotion] }} />
-            <span>{emotion}</span>
-          </span>
-        ))}
-      </div>
-      <div className="lv2-emotion-heatmap" data-emotion-card="heatmap">
-        <div id="emotionChart">
-          <div className="emotion-chart-surface">
-            <div className="grid-box" style={gridStyle}>
-              <div className="emotion-grid--weekcols">
-                {EMOTION_PREVIEW_PADDED_COLUMNS.map((column, columnIndex) => (
-                  <div key={column.key} className="emotion-col" style={{ gridColumn: `${columnIndex + 1}` }}>
-                    {column.cells.map((cell, cellIndex) => (
-                      <div
-                        key={`${column.key}-${cellIndex}`}
-                        className="emotion-cell"
-                        style={{ backgroundColor: EMOTION_COLORS[cell] }}
-                        title={cell}
-                        aria-label={`${cell} • día ${cellIndex + 1}`}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StreaksPreview({ language = 'es' }: { language?: Language }) {
-  return (
-    <div className="lv2-streaks">
-      <div className="lv2-streaks-tabs">
-        <span className="active">🔥 Body</span>
-        <span>🧠 Mind</span>
-        <span>🏵️ Soul</span>
-      </div>
-      <div className="lv2-streaks-top">
-        <p className="lv2-streaks-label">
-          {language === 'es' ? 'Top streaks' : 'Top streaks'}
-          <span className="lv2-streaks-label-sub">
-            {language === 'es' ? '— días consecutivos sin cortar' : '— consecutive days without breaks'}
-          </span>
-        </p>
-        <p className="lv2-streaks-empty">
-          {language === 'es' ? 'Todavía no hay rachas destacadas.' : 'No highlighted streaks yet.'}
-        </p>
-      </div>
-      <TasksPreview language={language} />
-    </div>
-  );
-}
-
-function TasksPreview({ language = 'es' }: { language?: Language }) {
-  return (
-    <div className="lv2-tasks">
-      <div className="lv2-tasks-tabs">
-        <span>SEM</span>
-        <span className="active">MES</span>
-        <span>3M</span>
-      </div>
-      <p className="lv2-tasks-label">{language === 'es' ? 'Todas las tareas' : 'All tasks'}</p>
-      <div className="lv2-tasks-list">
-        {TASKS_PREVIEW_ITEMS.map((task) => (
-          <div key={task.title} className="lv2-task-item">
-            <div>
-              <p className="lv2-task-title">{task.title}</p>
-              <span className="lv2-task-tag">{task.tag}</span>
-            </div>
-            <div className="lv2-task-progress">
-              <span style={{ width: `${(task.progress / task.total) * 100}%` }} />
-              <p>
-                {task.progress}/{task.total}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function HighlightVisual({ visual, language }: { visual: Highlight['visual']; language: Language }) {
   if (visual === 'xp') return <DashboardXpVisual compact language={language} />;
   if (visual === 'energy') return <DailyEnergyPreview compact language={language} />;
@@ -923,7 +769,6 @@ export default function LandingV2Page() {
     () => (isSignedIn ? { label: 'Go to dashboard', to: '/dashboard' } : { label: copy.hero.cta, to: buildOnboardingPath(language) }),
     [copy.hero.cta, isSignedIn, language]
   );
-  const [avatarIndex, setAvatarIndex] = useState(0);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [activeModeIndex, setActiveModeIndex] = useState(0);
   const modesTrackId = useId();
@@ -933,14 +778,6 @@ export default function LandingV2Page() {
   const autoplayResumeTimeoutRef = useRef<number | null>(null);
   const isModesHoveredRef = useRef(false);
   const isModesInteractionPausedRef = useRef(false);
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setAvatarIndex((current) => (current + 1) % AVATAR_MODES.length);
-    }, 2600);
-
-    return () => window.clearInterval(intervalId);
-  }, []);
 
   useEffect(() => {
     document.documentElement.style.setProperty('color-scheme', theme);
@@ -1176,82 +1013,7 @@ export default function LandingV2Page() {
               </div>
               <div className="lv2-hero-dashboard">
                 <div className="lv2-dashboard-shell">
-                  <div className="lv2-dashboard-grid lv2-dashboard-grid--hero" aria-label="Demo del dashboard">
-                    <div className="lv2-dashboard-column">
-                      <Card
-                        className="lv2-dashboard-card lv2-dashboard-card--square"
-                        bodyClassName="lv2-dashboard-card-body"
-                        title={language === 'es' ? 'Progreso general' : 'Overall progress'}
-                        subtitle={language === 'es' ? 'Resumen de tu aventura' : 'Adventure summary'}
-                        rightSlot={
-                          <div className="lv2-dashboard-meta">
-                            <span className="lv2-card-chip">FLOW</span>
-                            <span className="lv2-info-dot" aria-hidden>
-                              i
-                            </span>
-                          </div>
-                        }
-                      >
-                        <DashboardXpVisual language={language} />
-                      </Card>
-                      <Card
-                        className="lv2-dashboard-card lv2-avatar-card"
-                        bodyClassName="lv2-dashboard-card-body"
-                        title={language === 'es' ? 'Tu avatar' : undefined}
-                      >
-                        <img
-                          className="lv2-avatar-image"
-                          src={AVATAR_MODES[avatarIndex].src}
-                          alt={`Avatar ${AVATAR_MODES[avatarIndex].label}`}
-                        />
-                      </Card>
-                    </div>
-                    <div className="lv2-dashboard-column">
-                      <Card
-                        className="lv2-dashboard-card lv2-dashboard-card--square lv2-dashboard-card--radar"
-                        bodyClassName="lv2-dashboard-card-body"
-                        title="Radar Chart"
-                        subtitle={language === 'es' ? 'GP · total acumulado' : 'GP · total accumulated'}
-                        rightSlot={
-                          <div className="lv2-dashboard-meta">
-                            <span className="lv2-card-chip lv2-card-chip--muted">
-                              {language === 'es' ? 'Rasgos clave' : 'Key traits'}
-                            </span>
-                            <span className="lv2-info-dot" aria-hidden>
-                              i
-                            </span>
-                          </div>
-                        }
-                      >
-                        <RadarChartPreview />
-                      </Card>
-                      <Card
-                        className="lv2-dashboard-card lv2-dashboard-card--emotion"
-                        bodyClassName="lv2-dashboard-card-body"
-                        title="💗 Emotion Chart"
-                        subtitle={language === 'es' ? 'Últimos 6 meses' : 'Last 6 months'}
-                      >
-                        <EmotionChartPreview language={language} />
-                      </Card>
-                    </div>
-                    <div className="lv2-dashboard-column">
-                      <Card
-                        className="lv2-dashboard-card lv2-dashboard-card--streaks"
-                        bodyClassName="lv2-dashboard-card-body"
-                        title="🔥 Streaks"
-                        rightSlot={
-                          <div className="lv2-dashboard-meta">
-                            <span className="lv2-card-chip lv2-card-chip--outline">FLOW · 3×/WEEK</span>
-                            <span className="lv2-info-dot" aria-hidden>
-                              i
-                            </span>
-                          </div>
-                        }
-                      >
-                        <StreaksPreview language={language} />
-                      </Card>
-                    </div>
-                  </div>
+                  <VisibleProgressMock language={language} />
                 </div>
               </div>
             </div>
