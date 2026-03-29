@@ -146,11 +146,11 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         chips: ['ONBOARDING · BASE REALISTA'],
       },
       {
-        title: 'Crece en ciclos reales',
+        title: 'Avanza en ciclos semanales',
         badge: 'CICLO SEMANAL',
         bullets: [
-          '📅 Mira semanas, no días aislados',
-          '🧭 Detecta patrones y construye ritmo',
+          '📅 Avanza por semanas, no por días sueltos',
+          '🧭 Detecta patrones reales y ajusta tu plan',
         ],
         chips: ['CICLO SEMANAL · PROGRESO Y PATRONES'],
       },
@@ -158,25 +158,25 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         title: 'Ajusta el sistema a medida que creces',
         badge: 'RECALIBRACIÓN MENSUAL',
         bullets: [
-          '🔄 Recalibra la dificultad con el tiempo',
-          '📈 Sube de nivel cuando tus hábitos se fortalecen',
+          '🔄 Recalibra la dificultad de tus tareas según tu evolución',
+          '📈 Te propone una intensidad mayor cuando tu constancia se fortalece',
         ],
         chips: ['RECALIBRACIÓN · DIFICULTAD Y EVOLUCIÓN'],
       },
       {
-        title: 'Florece cuando el hábito ya es tuyo',
+        title: 'Convierte constancia en hábitos reales',
         badge: 'HÁBITOS LOGRADOS',
         bullets: [
           '🏆 Convierte constancia en hábitos duraderos',
-          '🌸 Mira tus hábitos logrados como logros tuyos',
+          '🌿 Construye hábitos que sigan contigo más allá de una buena semana',
         ],
-        chips: ['BLOOM · HÁBITOS QUE PERDURAN'],
+        chips: ['HÁBITOS LOGRADOS · CONSOLIDACIÓN'],
       },
     ],
   },
   en: {
     title: 'How Innerbloom works',
-    closingLine: 'An achieved habit isn’t just a nice streak. It’s something that has become part of you.',
+    closingLine: 'An achieved habit isn’t just a pretty streak. It’s something that has become part of you.',
     steps: [
       {
         title: 'Start realistic, not perfect',
@@ -188,11 +188,11 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         chips: ['ONBOARDING · REALISTIC BASE'],
       },
       {
-        title: 'Grow through real cycles',
+        title: 'Move through weekly cycles',
         badge: 'WEEKLY CYCLE',
         bullets: [
-          '📅 Look at weeks, not isolated days',
-          '🧭 Notice patterns and build rhythm',
+          '📅 Move through weeks, not isolated days',
+          '🧭 Spot real patterns and adjust your plan',
         ],
         chips: ['WEEKLY CYCLE · PROGRESS AND PATTERNS'],
       },
@@ -200,19 +200,19 @@ const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: stri
         title: 'Adjust the system as you grow',
         badge: 'MONTHLY RECALIBRATION',
         bullets: [
-          '🔄 Recalibrate difficulty over time',
-          '📈 Level up as your habits get stronger',
+          '🔄 Recalibrate task difficulty as you evolve',
+          '📈 It suggests a higher intensity when your consistency gets stronger',
         ],
         chips: ['RECALIBRATION · DIFFICULTY AND EVOLUTION'],
       },
       {
-        title: 'Bloom when the habit becomes yours',
+        title: 'Turn consistency into real habits',
         badge: 'ACHIEVED HABITS',
         bullets: [
           '🏆 Turn consistency into lasting habits',
-          '🌸 See achieved habits as real milestones',
+          '🌿 Build habits that stay with you beyond one good week',
         ],
-        chips: ['BLOOM · HABITS THAT LAST'],
+        chips: ['ACHIEVED HABITS · CONSOLIDATION'],
       },
     ],
   },
