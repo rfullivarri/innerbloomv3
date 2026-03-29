@@ -1456,6 +1456,8 @@
 }
 
 .landing .visible-canvas-info {
+  top: 10px;
+  left: 8px;
   width: 30px;
   height: 30px;
   border-radius: 999px;
