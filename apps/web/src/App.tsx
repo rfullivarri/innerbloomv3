@@ -24,6 +24,9 @@ import QuickStartPreviewPage from './pages/QuickStartPreview';
 import LabsDemoModeSelectPage from './pages/LabsDemoModeSelect';
 import DemoModeSelectPage from './pages/DemoModeSelect';
 import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
+import { isNativeCapacitorPlatform } from './mobile/capacitor';
+import { MobileAppEntry } from './mobile/MobileAppEntry';
+import MobileBrowserAuthPage from './pages/MobileBrowserAuth';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -77,6 +80,7 @@ function ApiAuthBridge() {
 function RequireUser({ children }: { children: ReactElement }) {
   const { isLoaded, userId } = useAuth();
   const devBypass = DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV;
+  const unauthenticatedRedirectPath = isNativeCapacitorPlatform() ? '/' : '/login';
 
   if (devBypass) {
     return children;
@@ -87,7 +91,7 @@ function RequireUser({ children }: { children: ReactElement }) {
   }
 
   if (!userId) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={unauthenticatedRedirectPath} replace />;
   }
 
   return children;
@@ -114,12 +118,13 @@ function RedirectIfSignedIn({
 }
 
 export default function App() {
+  const isNativeApp = isNativeCapacitorPlatform();
   const enableTaskgen = String(import.meta.env.VITE_ENABLE_TASKGEN_TRIGGER ?? 'false').toLowerCase() === 'true';
   const rawDashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
   const normalizedDashboardPath = rawDashboardPath.startsWith('/') ? rawDashboardPath : `/${rawDashboardPath}`;
   const trimmedDashboardPath = normalizedDashboardPath.replace(/\/+$/, '') || DEFAULT_DASHBOARD_PATH;
   const dashboardRoutePath = `${trimmedDashboardPath}/*`;
-  const signedInRedirectPath = trimmedDashboardPath;
+  const signedInRedirectPath = isNativeApp ? '/' : trimmedDashboardPath;
   const dashboardAliases = ['/dashboard', '/dashboard-v3'].filter(
     (alias) => alias !== trimmedDashboardPath,
   );
@@ -130,7 +135,7 @@ export default function App() {
       <ApiAuthBridge />
       <DevBanner />
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={isNativeApp ? <MobileAppEntry /> : <LandingPage />} />
         <Route path="/landing-v2" element={<LandingV2Page />} />
         <Route path="/premium-timeline" element={<PremiumTimelineDemoPage />} />
         <Route path="/demo" element={<DemoDashboardPage />} />
@@ -162,6 +167,7 @@ export default function App() {
             </RedirectIfSignedIn>
           }
         />
+        <Route path="/mobile-auth" element={<MobileBrowserAuthPage />} />
         <Route
           path={dashboardRoutePath}
           element={

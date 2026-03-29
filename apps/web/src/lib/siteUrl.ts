@@ -1,3 +1,7 @@
+import { isNativeCapacitorPlatform } from '../mobile/capacitor';
+
+const DEFAULT_PRODUCTION_WEB_BASE_URL = 'https://innerbloomjourney.org';
+
 function normalizeBaseUrl(rawValue: string | undefined): string | null {
   if (!rawValue) {
     return null;
@@ -26,10 +30,14 @@ export function getWebBaseUrl(): string {
   }
 
   if (typeof window !== 'undefined') {
+    if (isNativeCapacitorPlatform()) {
+      return DEFAULT_PRODUCTION_WEB_BASE_URL;
+    }
+
     return window.location.origin;
   }
 
-  return 'http://localhost:5173';
+  return DEFAULT_PRODUCTION_WEB_BASE_URL;
 }
 
 export function buildWebAbsoluteUrl(path: string): string {

@@ -11,6 +11,7 @@ import { getClerkLocalization } from './lib/clerkLocalization';
 import { ThemePreferenceProvider } from './theme/ThemePreferenceProvider';
 import { applyStoredThemePreference } from './theme/themePreference';
 import { PostLoginLanguageProvider } from './i18n/postLoginLanguage';
+import { NativeMobileBridge } from './mobile/NativeMobileBridge';
 
 declare global {
   interface Window {
@@ -49,12 +50,34 @@ function LocalizedClerkProvider({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const authLanguage = resolveAuthLanguage(location.search);
   const clerkLocalization = getClerkLocalization(authLanguage);
+  const isMobileBridgeRoute = location.pathname === '/mobile-auth';
+  const mobileBridgeSearch = new URLSearchParams(location.search);
+  const mobileBridgeMode = mobileBridgeSearch.get('mode') === 'sign-up' ? 'sign-up' : 'sign-in';
+  const mobileBridgeReturnTo = mobileBridgeSearch.get('return_to');
+  const buildMobileBridgePath = (mode: 'sign-in' | 'sign-up') => {
+    const params = new URLSearchParams();
+    params.set('mode', mode);
+    if (mobileBridgeReturnTo) {
+      params.set('return_to', mobileBridgeReturnTo);
+    }
+    const query = params.toString();
+    return `/mobile-auth${query ? `?${query}` : ''}`;
+  };
+  const signInUrl = isMobileBridgeRoute ? buildMobileBridgePath('sign-in') : '/login';
+  const signUpUrl = isMobileBridgeRoute ? buildMobileBridgePath('sign-up') : '/sign-up';
+  const authBridgeRedirectUrl = isMobileBridgeRoute ? buildMobileBridgePath(mobileBridgeMode) : undefined;
 
   return (
     <ClerkProvider
       key={authLanguage}
       publishableKey={publishableKey}
       localization={clerkLocalization}
+      signInUrl={signInUrl}
+      signUpUrl={signUpUrl}
+      signInForceRedirectUrl={authBridgeRedirectUrl}
+      signUpForceRedirectUrl={authBridgeRedirectUrl}
+      signInFallbackRedirectUrl={authBridgeRedirectUrl}
+      signUpFallbackRedirectUrl={authBridgeRedirectUrl}
     >
       {children}
     </ClerkProvider>
@@ -67,6 +90,7 @@ createRoot(rootElement).render(
       <LocalizedClerkProvider>
         <PostLoginLanguageProvider>
           <ThemePreferenceProvider>
+            <NativeMobileBridge />
             <App />
           </ThemePreferenceProvider>
         </PostLoginLanguageProvider>
