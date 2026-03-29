@@ -5,7 +5,7 @@ import { OFFICIAL_DESIGN_TOKENS, OFFICIAL_LANDING_CSS_VARIABLES } from '../conte
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { buildDemoModeSelectUrl } from '../lib/demoEntry';
-import PremiumTimeline, { type TimelineStep } from '../components/PremiumTimeline';
+import PremiumTimeline from '../components/PremiumTimeline';
 import { AdaptiveText } from '../components/landing/AdaptiveText';
 import { CookieConsentBanner } from '../components/landing/CookieConsentBanner';
 import { useLandingAnalytics } from '../components/landing/useLandingAnalytics';
@@ -129,93 +129,6 @@ const buttonClasses = (variant: keyof typeof buttonVariants = 'primary') => butt
 const PILLAR_EXAMPLES_LABEL: Record<Language, string> = {
   es: 'Tareas sugeridas:',
   en: 'Suggested tasks:'
-};
-
-const PREMIUM_TIMELINE_COPY: Record<Language, { title: string; closingLine: string; steps: TimelineStep[] }> = {
-  es: {
-    title: 'Cómo funciona Innerbloom',
-    closingLine: 'Un hábito logrado no es una racha bonita. Es algo que ya forma parte de vos.',
-    steps: [
-      {
-        title: 'Empieza realista, no perfecto',
-        badge: 'ONBOARDING PERSONALIZADO',
-        bullets: [
-          '🟢 Empieza desde tu nivel real',
-          '🌱 Construye una base que puedas sostener',
-        ],
-        chips: ['ONBOARDING · BASE REALISTA'],
-      },
-      {
-        title: 'Avanza en ciclos semanales',
-        badge: 'CICLO SEMANAL',
-        bullets: [
-          '📅 Avanza por semanas, no por días sueltos',
-          '🧭 Detecta patrones reales y ajusta tu plan',
-        ],
-        chips: ['CICLO SEMANAL · PROGRESO Y PATRONES'],
-      },
-      {
-        title: 'Ajusta el sistema a medida que creces',
-        badge: 'RECALIBRACIÓN MENSUAL',
-        bullets: [
-          '🔄 Recalibra la dificultad de tus tareas según tu evolución',
-          '📈 Te propone una intensidad mayor cuando tu constancia se fortalece',
-        ],
-        chips: ['RECALIBRACIÓN · DIFICULTAD Y EVOLUCIÓN'],
-      },
-      {
-        title: 'Convierte constancia en hábitos reales',
-        badge: 'HÁBITOS LOGRADOS',
-        bullets: [
-          '🏆 Convierte constancia en hábitos duraderos',
-          '🌿 Construye hábitos que sigan contigo más allá de una buena semana',
-        ],
-        chips: ['HÁBITOS LOGRADOS · CONSOLIDACIÓN'],
-      },
-    ],
-  },
-  en: {
-    title: 'How Innerbloom works',
-    closingLine: 'An achieved habit isn’t just a pretty streak. It’s something that has become part of you.',
-    steps: [
-      {
-        title: 'Start realistic, not perfect',
-        badge: 'PERSONALIZED ONBOARDING',
-        bullets: [
-          '🟢 Start from your real level',
-          '🌱 Build a base you can sustain',
-        ],
-        chips: ['ONBOARDING · REALISTIC BASE'],
-      },
-      {
-        title: 'Move through weekly cycles',
-        badge: 'WEEKLY CYCLE',
-        bullets: [
-          '📅 Move through weeks, not isolated days',
-          '🧭 Spot real patterns and adjust your plan',
-        ],
-        chips: ['WEEKLY CYCLE · PROGRESS AND PATTERNS'],
-      },
-      {
-        title: 'Adjust the system as you grow',
-        badge: 'MONTHLY RECALIBRATION',
-        bullets: [
-          '🔄 Recalibrate task difficulty as you evolve',
-          '📈 It suggests a higher intensity when your consistency gets stronger',
-        ],
-        chips: ['RECALIBRATION · DIFFICULTY AND EVOLUTION'],
-      },
-      {
-        title: 'Turn consistency into real habits',
-        badge: 'ACHIEVED HABITS',
-        bullets: [
-          '🏆 Turn consistency into lasting habits',
-          '🌿 Build habits that stay with you beyond one good week',
-        ],
-        chips: ['ACHIEVED HABITS · CONSOLIDATION'],
-      },
-    ],
-  },
 };
 
 function renderMultilineText(text: string) {
@@ -729,8 +642,8 @@ export default function LandingPage() {
               <AdaptiveText as="p" className="section-sub how-intro">{copy.how.intro}</AdaptiveText>
             </div>
             <PremiumTimeline
-              steps={PREMIUM_TIMELINE_COPY[language].steps}
-              closingLine={PREMIUM_TIMELINE_COPY[language].closingLine}
+              steps={copy.how.steps}
+              closingLine={copy.how.closingLine}
               className="mt-2"
             />
           </div>

@@ -101,7 +101,7 @@ export function buildAiJson(versioning: BuildVersioning) {
     onboarding_narrative: es.how.steps.map((step, index) => ({
       step: index + 1,
       title: step.title,
-      experience: step.copy,
+      experience: step.bullets.join(' '),
       outcome:
         index === 0
           ? 'Entrás con dirección y un modo alineado a tu energía.'

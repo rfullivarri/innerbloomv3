@@ -3,7 +3,7 @@ export type Language = 'es' | 'en';
 type NavLink = { href: string; label: string };
 type Pillar = { emoji: string; title: string; copy: string };
 type Mode = { id: 'low' | 'chill' | 'flow' | 'evolve'; title: string; state: string; goal: string };
-type HowStep = { title: string; action: string; outcome: string; copy: string };
+type HowTimelineStep = { title: string; badge: string; bullets: string[]; chips: string[] };
 type FeatureShowcaseItem = { title: string; description: string; previewLabel: string; previewValue: string; previewMeta: string };
 type Testimonial = { quote: string; author: string };
 type Faq = { question: string; answer: string };
@@ -27,7 +27,7 @@ export type LandingCopy = {
   problem: { title: string; body: string };
   pillars: { title: string; intro: string; highlightLeadIn: string; highlight: string; items: Pillar[] };
   modes: { title: string; intro: string; items: Mode[] };
-  how: { kicker: string; title: string; intro: string; actionLabel: string; outcomeLabel: string; steps: HowStep[] };
+  how: { kicker: string; title: string; intro: string; closingLine: string; steps: HowTimelineStep[] };
   featureShowcase: { kicker: string; title: string; intro: string; items: FeatureShowcaseItem[] };
   demo: { title: string; text: string; banner: string; cta: string };
   testimonials: { title: string; intro: string; items: Testimonial[]; prev: string; next: string; groupLabel: string };
@@ -119,38 +119,43 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       kicker: 'EL SISTEMA DE INNERBLOOM',
       title: 'Cómo funciona Innerbloom',
       intro: 'Empieza desde tu nivel real, avanza en ciclos semanales, recalibra con el tiempo y construye hábitos que sí perduran.',
-      actionLabel: 'Acción',
-      outcomeLabel: 'Resultado',
+      closingLine: 'Un hábito logrado no es una racha bonita. Es algo que ya forma parte de vos.',
       steps: [
         {
-          title: 'Empieza pequeño, no perfecto ✨',
-          action: 'Empieza desde tu capacidad actual con una base simple y sostenible.',
-          outcome: 'Sostener importa más que empezar fuerte.',
-          copy: 'Empieza desde tu capacidad actual con una base simple y sostenible. Sostener importa más que empezar fuerte.'
+          title: 'Empieza realista, no perfecto',
+          badge: 'ONBOARDING PERSONALIZADO',
+          bullets: [
+            '🟢 Empieza desde tu nivel real',
+            '🌱 Construye una base que puedas sostener',
+          ],
+          chips: ['ONBOARDING · BASE REALISTA'],
         },
         {
-          title: 'Crece en ciclos reales ⚖️',
-          action: 'Mira tus semanas, no un solo día.',
-          outcome: 'Registra tu estado emocional y detecta patrones.',
-          copy: 'Mira tus semanas, no un solo día. Registra tu estado emocional y detecta patrones.'
+          title: 'Avanza en ciclos semanales',
+          badge: 'CICLO SEMANAL',
+          bullets: [
+            '📅 Avanza por semanas, no por días sueltos',
+            '🧭 Detecta patrones reales y ajusta tu plan',
+          ],
+          chips: ['CICLO SEMANAL · PROGRESO Y PATRONES'],
         },
         {
-          title: 'Calibra con perspectiva 📅',
-          action: 'Revisa tu progreso por ciclos mensuales.',
-          outcome: 'Ajusta el ritmo sin romper la constancia.',
-          copy: 'Revisa tu progreso por ciclos mensuales. Ajusta el ritmo sin romper la constancia.'
+          title: 'Ajusta el sistema a medida que creces',
+          badge: 'RECALIBRACIÓN MENSUAL',
+          bullets: [
+            '🔄 Recalibra la dificultad de tus tareas según tu evolución',
+            '📈 Te propone una intensidad mayor cuando tu constancia se fortalece',
+          ],
+          chips: ['RECALIBRACIÓN · DIFICULTAD Y EVOLUCIÓN'],
         },
         {
-          title: 'Haz visible tu progreso 🌱',
-          action: 'Haz visible tu evolución en constancia, emoción y balance.',
-          outcome: 'Así entiendes mejor lo que sí te funciona.',
-          copy: 'Haz visible tu evolución en constancia, emoción y balance. Así entiendes mejor lo que sí te funciona.'
-        },
-        {
-          title: 'Convierte constancia en hábitos reales 🌱',
-          action: 'Con el tiempo, los hábitos estables pasan a formar parte de tu base.',
-          outcome: 'Ahí el progreso deja de sentirse temporal.',
-          copy: 'Con el tiempo, los hábitos estables pasan a formar parte de tu base. Ahí el progreso deja de sentirse temporal.'
+          title: 'Convierte constancia en hábitos reales',
+          badge: 'HÁBITOS LOGRADOS',
+          bullets: [
+            '🏆 Convierte constancia en hábitos duraderos',
+            '🌿 Construye hábitos que sigan contigo más allá de una buena semana',
+          ],
+          chips: ['HÁBITOS LOGRADOS · CONSOLIDACIÓN'],
         }
       ]
     },
@@ -349,38 +354,43 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       kicker: 'THE INNERBLOOM SYSTEM',
       title: 'How Innerbloom works',
       intro: 'Start from your real level, move through weekly cycles, recalibrate over time, and build habits that actually last.',
-      actionLabel: 'Action',
-      outcomeLabel: 'Outcome',
+      closingLine: 'An achieved habit isn’t just a pretty streak. It’s something that has become part of you.',
       steps: [
         {
-          title: 'Start small, not perfect ✨',
-          action: 'Start from your current capacity with a simple, sustainable base.',
-          outcome: 'Consistency matters more than a strong start.',
-          copy: 'Start from your current capacity with a simple, sustainable base. Consistency matters more than a strong start.'
+          title: 'Start realistic, not perfect',
+          badge: 'PERSONALIZED ONBOARDING',
+          bullets: [
+            '🟢 Start from your real level',
+            '🌱 Build a base you can sustain',
+          ],
+          chips: ['ONBOARDING · REALISTIC BASE'],
         },
         {
-          title: 'Grow through real cycles ⚖️',
-          action: 'Track your weeks, not one single day.',
-          outcome: 'Log your emotional state and spot patterns.',
-          copy: 'Track your weeks, not one single day. Log your emotional state and spot patterns.'
+          title: 'Move through weekly cycles',
+          badge: 'WEEKLY CYCLE',
+          bullets: [
+            '📅 Move through weeks, not isolated days',
+            '🧭 Spot real patterns and adjust your plan',
+          ],
+          chips: ['WEEKLY CYCLE · PROGRESS AND PATTERNS'],
         },
         {
-          title: 'Calibrate with perspective 📅',
-          action: 'Review progress in monthly cycles.',
-          outcome: 'Adjust pace without breaking consistency.',
-          copy: 'Review progress in monthly cycles. Adjust pace without breaking consistency.'
+          title: 'Adjust the system as you grow',
+          badge: 'MONTHLY RECALIBRATION',
+          bullets: [
+            '🔄 Recalibrate task difficulty as you evolve',
+            '📈 It suggests a higher intensity when your consistency gets stronger',
+          ],
+          chips: ['RECALIBRATION · DIFFICULTY AND EVOLUTION'],
         },
         {
-          title: 'Make progress visible 🌱',
-          action: 'Make your progress visible across consistency, emotion, and balance.',
-          outcome: 'That clarity shows what truly works for you.',
-          copy: 'Make your progress visible across consistency, emotion, and balance. That clarity shows what truly works for you.'
-        },
-        {
-          title: 'Turn consistency into real habits 🌱',
-          action: 'Over time, stable habits become part of your foundation.',
-          outcome: 'That is when progress stops feeling temporary.',
-          copy: 'Over time, stable habits become part of your foundation. That is when progress stops feeling temporary.'
+          title: 'Turn consistency into real habits',
+          badge: 'ACHIEVED HABITS',
+          bullets: [
+            '🏆 Turn consistency into lasting habits',
+            '🌿 Build habits that stay with you beyond one good week',
+          ],
+          chips: ['ACHIEVED HABITS · CONSOLIDATION'],
         }
       ]
     },
