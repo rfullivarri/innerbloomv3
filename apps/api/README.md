@@ -38,6 +38,23 @@
 
 ## Database migrations
 
+## CORS allowlist
+
+The API keeps an explicit allowlist for browser origins. It does not use `*`.
+
+- Public web:
+  - `https://web-dev-dfa2.up.railway.app`
+  - `https://web-production-734a.up.railway.app`
+- Web development:
+  - `http://localhost:5173`
+  - `http://localhost`
+- Capacitor iOS runtime:
+  - `capacitor://localhost`
+
+`capacitor://localhost` is required because the iOS app runs its embedded WebView from that origin. Without explicitly allowlisting it, authenticated API calls such as `GET /api/users/me` fail in the native app even when the bearer token is valid.
+
+Use `CORS_ALLOWED_ORIGINS` only for additive env-specific origins that are not part of the default supported runtimes above.
+
 Run the idempotent SQL bundle locally (requires `DATABASE_URL`):
 
 ```bash

@@ -14,10 +14,27 @@ import clerkWebhookRouter from './webhooks/clerk.js';
 import stripeWebhookRouter from './webhooks/stripe.js';
 import { runWithDbContext } from './db.js';
 
-const defaultAllowedOrigins = [
+const WEB_PUBLIC_ALLOWED_ORIGINS = [
   'https://web-dev-dfa2.up.railway.app',
   'https://web-production-734a.up.railway.app',
+];
+
+const WEB_DEVELOPMENT_ALLOWED_ORIGINS = [
   'http://localhost:5173',
+  'http://localhost',
+];
+
+const CAPACITOR_RUNTIME_ALLOWED_ORIGINS = [
+  // Capacitor serves the embedded iOS WebView from this origin.
+  // It needs explicit CORS allowlisting so the native app can call the same API
+  // as the public web without opening the policy to arbitrary origins.
+  'capacitor://localhost',
+];
+
+const defaultAllowedOrigins = [
+  ...WEB_PUBLIC_ALLOWED_ORIGINS,
+  ...WEB_DEVELOPMENT_ALLOWED_ORIGINS,
+  ...CAPACITOR_RUNTIME_ALLOWED_ORIGINS,
 ];
 
 const envAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? '')
