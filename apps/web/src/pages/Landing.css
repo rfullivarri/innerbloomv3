@@ -1309,7 +1309,7 @@
 
 .landing .visible-scene-region--emotion {
   left: -17px;
-  bottom: -3px;
+  bottom: 0px;
   width: 47%;
   height: 40%;
   padding: 16px 14px 12px;
