@@ -1442,7 +1442,7 @@
 .landing .visible-scene-region--balance .visible-canvas-title {
   position: static;
   transform: none;
-  font-size: 1.72rem;
+  font-size: 1.68rem;
   letter-spacing: 0.18em;
   font-weight: 500;
 }
@@ -1464,7 +1464,7 @@
 
 .landing .visible-scene-region--balance .visible-canvas-chip {
   position: relative;
-  transform: translate(-10px, -2px);
+  transform: translate(-13px, -2px);
   margin-left: 0;
 }
 
