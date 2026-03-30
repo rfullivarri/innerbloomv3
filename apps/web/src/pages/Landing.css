@@ -1388,13 +1388,7 @@
 }
 
 .landing .visible-inner-contour--emotion {
-  left: -17px;
-  bottom: -24px;
-  width: 47%;
-  height: 45%;
-  border-top-right-radius: 32px;
-  border-bottom-right-radius: 22px;
-  border-top-left-radius: 18px;
+  display: none;
 }
 
 .landing .visible-inner-contour--emotion::after {
