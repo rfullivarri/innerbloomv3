@@ -1271,7 +1271,7 @@
 }
 
 .landing .visible-scene-region--balance {
-  left: -27px;
+  left: -23px;
   top: 15px;
   width: 45%;
   height: 54%;
@@ -1438,6 +1438,11 @@
   color: rgba(237, 243, 255, 0.95);
 }
 
+.landing .visible-scene-region--balance .visible-canvas-title {
+  position: relative;
+  transform: translate(23px, 0px);
+}
+
 .landing .visible-canvas-chip {
   margin-left: auto;
   border-radius: 999px;
@@ -1451,6 +1456,11 @@
   color: rgba(232, 247, 255, 0.95);
   font-size: 0.71rem;
   font-weight: 700;
+}
+
+.landing .visible-scene-region--balance .visible-canvas-chip {
+  position: relative;
+  transform: translate(23px, 0px);
 }
 
 .landing .visible-canvas-chip--flow {
