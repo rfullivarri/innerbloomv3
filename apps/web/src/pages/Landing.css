@@ -1414,13 +1414,13 @@
 
 .landing .visible-canvas-header--emotion {
   margin-bottom: 12px;
-  transform: translate(-16px, 24px);
+  transform: translate(-16px, 25px);
   padding-right: 8px;
 }
 
 .landing .visible-canvas-header--emotion .visible-canvas-info {
   position: absolute;
-  top: 37px;
+  top: 25px;
   right: -23px;
   left: auto;
   margin-left: 0;
