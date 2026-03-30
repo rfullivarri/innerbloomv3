@@ -1254,15 +1254,15 @@
   background:
     radial-gradient(
       90% 65% at 16% 18%,
-      rgba(76, 120, 223, 0.18),
+      rgba(88, 130, 228, 0.2),
       transparent 70%
     ),
     radial-gradient(
       55% 45% at 80% 20%,
-      rgba(85, 208, 255, 0.11),
+      rgba(98, 214, 255, 0.14),
       transparent 78%
     ),
-    linear-gradient(152deg, rgba(9, 16, 42, 0.98), rgba(9, 14, 37, 0.99));
+    linear-gradient(152deg, rgba(12, 20, 48, 0.98), rgba(12, 18, 42, 0.99));
 }
 
 .landing .visible-scene-region {
@@ -1568,6 +1568,10 @@
   margin-top: -8px;
   gap: 6px;
   opacity: 0.92;
+}
+
+.landing .visible-scene-region--balance .visible-radar-pillars {
+  display: none;
 }
 
 .landing .visible-radar-pillars span {
