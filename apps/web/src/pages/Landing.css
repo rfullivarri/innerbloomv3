@@ -1441,8 +1441,8 @@
 
 .landing .visible-scene-region--balance .visible-canvas-title {
   position: relative;
-  transform: translate(-10px, -2px);
-  font-size: 1.9rem;
+  transform: translate(-2px, -1px);
+  font-size: 1.65rem;
   line-height: 1;
 }
 
@@ -1463,17 +1463,17 @@
 
 .landing .visible-scene-region--balance .visible-canvas-chip {
   position: relative;
-  transform: translate(-14px, -2px);
+  transform: translate(-23px, -0px);
   margin-left: 0;
 }
 
 .landing .visible-scene-region--balance .visible-canvas-header {
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 4px;
-  padding-left: 6px;
-  padding-right: 6px;
+  padding-left: 2px;
+  padding-right: 0px;
 }
 
 .landing .visible-canvas-chip--flow {
