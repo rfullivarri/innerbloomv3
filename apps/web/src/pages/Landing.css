@@ -1440,11 +1440,10 @@
 }
 
 .landing .visible-scene-region--balance .visible-canvas-title {
-  position: static;
-  transform: none;
-  font-size: 1.68rem;
-  letter-spacing: 0.18em;
-  font-weight: 500;
+  position: relative;
+  transform: translate(-10px, -2px);
+  font-size: 1.9rem;
+  line-height: 1;
 }
 
 .landing .visible-canvas-chip {
@@ -1464,17 +1463,17 @@
 
 .landing .visible-scene-region--balance .visible-canvas-chip {
   position: relative;
-  transform: translate(-13px, -2px);
+  transform: translate(-14px, -2px);
   margin-left: 0;
 }
 
 .landing .visible-scene-region--balance .visible-canvas-header {
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 4px;
-  padding-left: 8px;
-  padding-right: 4px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 
 .landing .visible-canvas-chip--flow {
