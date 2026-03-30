@@ -1308,16 +1308,16 @@
 }
 
 .landing .visible-scene-region--emotion {
-  left: -34px;
-  bottom: -8px;
-  width: 49%;
-  height: 48%;
-  padding: 20px 16px 14px;
+  left: -30px;
+  bottom: -24px;
+  width: 47%;
+  height: 40%;
+  padding: 16px 14px 12px;
   isolation: isolate;
   overflow: hidden;
   display: grid;
   align-content: start;
-  gap: 8px;
+  gap: 6px;
   border-top-right-radius: 32px;
   border-bottom-right-radius: 22px;
   border-top-left-radius: 18px;
@@ -1388,10 +1388,10 @@
 }
 
 .landing .visible-inner-contour--emotion {
-  left: -34px;
-  bottom: -8px;
-  width: 49%;
-  height: 48%;
+  left: -30px;
+  bottom: -24px;
+  width: 47%;
+  height: 40%;
   border-top-right-radius: 32px;
   border-bottom-right-radius: 22px;
   border-top-left-radius: 18px;
@@ -1430,8 +1430,15 @@
 }
 
 .landing .visible-canvas-header--emotion {
-  margin-bottom: 2px;
+  margin-bottom: 1px;
   padding-right: 0;
+}
+
+.landing .visible-canvas-header--emotion .visible-canvas-title {
+  white-space: nowrap;
+  letter-spacing: 0.18em;
+  font-size: clamp(0.8rem, 0.65vw + 0.46rem, 1.04rem);
+  line-height: 1;
 }
 
 .landing .visible-canvas-header--emotion .visible-canvas-info {
@@ -1605,10 +1612,10 @@
 .landing .visible-emotion-legend {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 2px;
+  gap: 8px;
+  margin-bottom: 1px;
   color: rgba(231, 237, 255, 0.88);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   opacity: 0.9;
 }
 
@@ -1623,16 +1630,16 @@
 .landing .visible-emotion-grid-months {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  margin: 0 4px 2px;
+  margin: 0 2px 1px;
   color: rgba(185, 202, 236, 0.78);
   letter-spacing: 0.06em;
-  font-size: 0.74rem;
+  font-size: 0.68rem;
 }
 
 .landing .visible-emotion-grid {
   display: grid;
   gap: 6px;
-  padding: 10px 10px 12px;
+  padding: 8px 8px 10px;
   border-radius: 20px;
   background: linear-gradient(
     180deg,
@@ -2466,10 +2473,10 @@
   }
 
   .landing .visible-scene-region--emotion {
-    width: 52%;
-    height: 44%;
-    left: -44px;
-    bottom: -4px;
+    width: 50%;
+    height: 40%;
+    left: -38px;
+    bottom: -18px;
   }
 
   .landing .visible-scene-region--streaks {
