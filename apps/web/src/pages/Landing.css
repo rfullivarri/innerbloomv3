@@ -1872,7 +1872,7 @@
   margin: 0;
   max-width: 34ch;
   color: rgba(236, 242, 255, 0.94);
-  text-align: left;
+  text-align: center;
   font-size: clamp(1rem, 0.58vw + 0.82rem, 1.16rem);
 }
 
@@ -2431,8 +2431,8 @@
   }
 
   .landing .visible-progress-copy {
-    text-align: left;
-    justify-items: start;
+    text-align: center;
+    justify-items: center;
   }
 
   .landing .visible-progress-module {
@@ -2441,7 +2441,7 @@
   }
 
   .landing .demo-sub {
-    text-align: left;
+    text-align: center;
   }
 
   .landing .demo-bridge {
