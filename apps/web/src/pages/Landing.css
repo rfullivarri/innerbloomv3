@@ -1462,18 +1462,18 @@
 }
 
 .landing .visible-scene-region--balance .visible-canvas-chip {
-  position: relative;
-  transform: translate(-23px, -0px);
+  position: static;
+  transform: translate(0, -1px);
   margin-left: 0;
 }
 
 .landing .visible-scene-region--balance .visible-canvas-header {
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   margin-bottom: 4px;
-  padding-left: 2px;
-  padding-right: 0px;
+  padding-left: 6px;
+  padding-right: 0;
 }
 
 .landing .visible-canvas-chip--flow {
