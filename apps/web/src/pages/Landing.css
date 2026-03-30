@@ -1312,24 +1312,15 @@
   bottom: -8px;
   width: 49%;
   height: 48%;
-  padding: 16px 18px 14px;
+  padding: 20px 16px 14px;
   isolation: isolate;
   overflow: hidden;
-}
-
-.landing .visible-scene-region--emotion::before {
-  content: '';
-  position: absolute;
-  inset: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
   border-top-right-radius: 32px;
   border-bottom-right-radius: 22px;
   border-top-left-radius: 18px;
-  mask:
-    linear-gradient(#000 0 0) left top / 100% 42% no-repeat,
-    linear-gradient(#000 0 0) right bottom / 32% 60% no-repeat;
-  -webkit-mask:
-    linear-gradient(#000 0 0) left top / 100% 42% no-repeat,
-    linear-gradient(#000 0 0) right bottom / 32% 60% no-repeat;
   background:
     radial-gradient(
       128% 108% at 24% 10%,
@@ -1337,8 +1328,12 @@
       transparent 56%
     ),
     linear-gradient(156deg, rgba(19, 32, 79, 0.9), rgba(11, 22, 57, 0.95));
-  pointer-events: none;
-  z-index: 0;
+  border: 1px solid rgba(112, 126, 196, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.landing .visible-scene-region--emotion::before {
+  content: none;
 }
 
 .landing .visible-scene-region--streaks {
@@ -1393,30 +1388,17 @@
 }
 
 .landing .visible-inner-contour--emotion {
-  left: -30px;
+  left: -34px;
   bottom: -8px;
-  width: 50%;
-  height: 42%;
-  border-left-color: transparent;
-  border-bottom-color: transparent;
+  width: 49%;
+  height: 48%;
   border-top-right-radius: 32px;
   border-bottom-right-radius: 22px;
   border-top-left-radius: 18px;
-  mask:
-    linear-gradient(#000 0 0) left top / 100% 42% no-repeat,
-    linear-gradient(#000 0 0) right bottom / 32% 60% no-repeat;
-  -webkit-mask:
-    linear-gradient(#000 0 0) left top / 100% 42% no-repeat,
-    linear-gradient(#000 0 0) right bottom / 32% 60% no-repeat;
 }
 
 .landing .visible-inner-contour--emotion::after {
-  mask:
-    linear-gradient(#000 0 0) left top / 90% 30% no-repeat,
-    linear-gradient(#000 0 0) right bottom / 28% 52% no-repeat;
-  -webkit-mask:
-    linear-gradient(#000 0 0) left top / 90% 30% no-repeat,
-    linear-gradient(#000 0 0) right bottom / 28% 52% no-repeat;
+  content: none;
 }
 
 .landing .visible-scene-fragment--radar {
@@ -1448,17 +1430,12 @@
 }
 
 .landing .visible-canvas-header--emotion {
-  margin-bottom: 12px;
-  transform: translate(-7px, 29px);
-  padding-right: 8px;
+  margin-bottom: 2px;
+  padding-right: 0;
 }
 
 .landing .visible-canvas-header--emotion .visible-canvas-info {
-  position: absolute;
-  top: 13px;
-  right: -13px;
-  left: auto;
-  margin-left: 0;
+  margin-left: auto;
 }
 
 .landing .visible-canvas-header--streaks {
@@ -1626,12 +1603,10 @@
 }
 
 .landing .visible-emotion-legend {
-  position: relative;
-  top: 24px;
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 2px;
   color: rgba(231, 237, 255, 0.88);
   font-size: 0.8rem;
   opacity: 0.9;
@@ -1646,11 +1621,9 @@
 }
 
 .landing .visible-emotion-grid-months {
-  position: relative;
-  top: 24px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  margin: 0 6px 7px;
+  margin: 0 4px 2px;
   color: rgba(185, 202, 236, 0.78);
   letter-spacing: 0.06em;
   font-size: 0.74rem;
@@ -1659,7 +1632,7 @@
 .landing .visible-emotion-grid {
   display: grid;
   gap: 6px;
-  padding: 12px 12px 16px;
+  padding: 10px 10px 12px;
   border-radius: 20px;
   background: linear-gradient(
     180deg,
@@ -1667,8 +1640,7 @@
     rgba(11, 19, 43, 0.86)
   );
   border: 1px solid rgba(157, 173, 221, 0.28);
-  transform: translate(-13px, 25%) scale(1.23);
-  transform-origin: top center;
+  transform: none;
 }
 
 .landing .visible-emotion-grid-row {
