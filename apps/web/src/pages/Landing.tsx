@@ -661,7 +661,6 @@ export default function LandingPage() {
                 <div className="visible-progress-viewport">
                   <div className="visible-progress-scene">
                     <div className="visible-scene-region visible-scene-region--balance visible-scene-fragment visible-scene-fragment--radar">
-                      <span className="visible-inner-contour visible-inner-contour--balance" aria-hidden />
                       <div className="visible-canvas-header">
                         <p className="visible-canvas-title">BALANCE</p>
                         <span className="visible-canvas-chip">Predominio Body</span>
