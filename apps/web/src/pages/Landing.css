@@ -1309,9 +1309,9 @@
 
 .landing .visible-scene-region--emotion {
   left: -17px;
-  bottom: 0px;
+  bottom: -24px;
   width: 47%;
-  height: 40%;
+  height: 64%;
   padding: 16px 14px 12px;
   isolation: isolate;
   overflow: hidden;
@@ -1388,10 +1388,10 @@
 }
 
 .landing .visible-inner-contour--emotion {
-  left: -30px;
+  left: -17px;
   bottom: -24px;
   width: 47%;
-  height: 40%;
+  height: 64%;
   border-top-right-radius: 32px;
   border-bottom-right-radius: 22px;
   border-top-left-radius: 18px;
@@ -2474,9 +2474,16 @@
 
   .landing .visible-scene-region--emotion {
     width: 50%;
-    height: 40%;
+    height: 52%;
     left: -38px;
-    bottom: -18px;
+    bottom: -30px;
+  }
+
+  .landing .visible-inner-contour--emotion {
+    width: 50%;
+    height: 52%;
+    left: -38px;
+    bottom: -30px;
   }
 
   .landing .visible-scene-region--streaks {
