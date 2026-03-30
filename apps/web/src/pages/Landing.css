@@ -1608,7 +1608,7 @@
     rgba(11, 19, 43, 0.86)
   );
   border: 1px solid rgba(157, 173, 221, 0.28);
-  transform: translateY(-16px, 25%) scale(1.28);
+  transform: translateY(-13px, 25%) scale(1.28);
   transform-origin: top center;
 }
 
