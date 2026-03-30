@@ -1221,8 +1221,8 @@
   isolation: isolate;
   border-radius: var(--landing-glass-radius-lg);
   padding: clamp(9px, 1.2vw, 14px);
-  height: clamp(460px, 49vw, 560px);
-  min-height: clamp(460px, 49vw, 560px);
+  height: clamp(430px, 49vw, 560px);
+  min-height: clamp(430px, 49vw, 560px);
   display: block;
   background: linear-gradient(
     152deg,
