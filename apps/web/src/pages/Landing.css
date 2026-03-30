@@ -1331,10 +1331,10 @@
 }
 
 .landing .visible-inner-contour--balance {
-  left: -34px;
-  top: -10px;
-  width: 48%;
-  height: 46%;
+  left: -50px;
+  top: -58px;
+  width: 96%;
+  height: 92%;
   border-color: rgba(112, 126, 196, 0.28);
   border-bottom-right-radius: 32px;
   border-bottom-left-radius: 20px;
@@ -1342,6 +1342,13 @@
   border-top-left-radius: 30px;
   mask: none;
   -webkit-mask: none;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.landing .visible-scene-region--balance > :not(.visible-inner-contour--balance) {
+  position: relative;
+  z-index: 1;
 }
 
 .landing .visible-inner-contour--balance::after {
