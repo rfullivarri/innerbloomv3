@@ -1264,6 +1264,25 @@
   isolation: isolate;
 }
 
+.landing .visible-scene-region--balance::before {
+  content: '';
+  position: absolute;
+  inset: -9px 24px 11px -15px;
+  border-top-left-radius: 30px;
+  border-top-right-radius: 24px;
+  border-bottom-right-radius: 38px;
+  border-bottom-left-radius: 20px;
+  background:
+    radial-gradient(
+      130% 112% at 24% 12%,
+      rgba(126, 171, 255, 0.14),
+      transparent 56%
+    ),
+    linear-gradient(150deg, rgba(20, 33, 80, 0.9), rgba(12, 22, 58, 0.95));
+  pointer-events: none;
+  z-index: 0;
+}
+
 .landing .visible-scene-region--balance::after {
   content: '';
   position: absolute;
@@ -1283,13 +1302,43 @@
   z-index: 1;
 }
 
+.landing .visible-scene-region--emotion > * {
+  position: relative;
+  z-index: 1;
+}
+
 .landing .visible-scene-region--emotion {
   left: -34px;
   bottom: -8px;
   width: 49%;
   height: 48%;
   padding: 16px 18px 14px;
+  isolation: isolate;
   overflow: hidden;
+}
+
+.landing .visible-scene-region--emotion::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-top-right-radius: 32px;
+  border-bottom-right-radius: 22px;
+  border-top-left-radius: 18px;
+  mask:
+    linear-gradient(#000 0 0) left top / 100% 42% no-repeat,
+    linear-gradient(#000 0 0) right bottom / 32% 60% no-repeat;
+  -webkit-mask:
+    linear-gradient(#000 0 0) left top / 100% 42% no-repeat,
+    linear-gradient(#000 0 0) right bottom / 32% 60% no-repeat;
+  background:
+    radial-gradient(
+      128% 108% at 24% 10%,
+      rgba(126, 171, 255, 0.14),
+      transparent 56%
+    ),
+    linear-gradient(156deg, rgba(19, 32, 79, 0.9), rgba(11, 22, 57, 0.95));
+  pointer-events: none;
+  z-index: 0;
 }
 
 .landing .visible-scene-region--streaks {
