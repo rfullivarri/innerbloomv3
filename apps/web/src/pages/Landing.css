@@ -1239,11 +1239,7 @@
   border-radius: 24px;
   height: 100%;
   overflow: hidden;
-  background: linear-gradient(
-    145deg,
-    rgba(12, 18, 46, 0.97),
-    rgba(11, 16, 40, 0.985)
-  );
+  background: transparent;
 }
 
 .landing .visible-progress-scene {
@@ -1251,18 +1247,7 @@
   inset: -36px -74px -58px -68px;
   transform: translate(34px, 30px) scale(0.84);
   transform-origin: top left;
-  background:
-    radial-gradient(
-      90% 65% at 16% 18%,
-      rgba(88, 130, 228, 0.2),
-      transparent 70%
-    ),
-    radial-gradient(
-      55% 45% at 80% 20%,
-      rgba(98, 214, 255, 0.14),
-      transparent 78%
-    ),
-    linear-gradient(152deg, rgba(12, 20, 48, 0.98), rgba(12, 18, 42, 0.99));
+  background: transparent;
 }
 
 .landing .visible-scene-region {
