@@ -668,22 +668,42 @@ export default function LandingPage() {
                       <div className="visible-radar-shell">
                         <div className="visible-balance-radar-wrap">
                           <svg className="visible-balance-radar" viewBox="0 0 420 420" aria-hidden>
-                            <circle className="visible-balance-radar-glow" cx="210" cy="210" r="182" />
-                            <circle className="visible-balance-radar-ring visible-balance-radar-ring--outer" cx="210" cy="210" r="170" />
-                            <circle className="visible-balance-radar-ring" cx="210" cy="210" r="130" />
-                            <circle className="visible-balance-radar-ring" cx="210" cy="210" r="90" />
-                            <circle className="visible-balance-radar-ring" cx="210" cy="210" r="50" />
-                            <line className="visible-balance-radar-axis" x1="210" y1="36" x2="210" y2="384" />
-                            <line className="visible-balance-radar-axis" x1="48" y1="114" x2="372" y2="306" />
-                            <line className="visible-balance-radar-axis" x1="48" y1="306" x2="372" y2="114" />
-                            <polygon className="visible-balance-radar-shape visible-balance-radar-shape--outer" points="210,94 258,138 300,178 294,224 252,256 270,316 220,350 170,260 128,282 88,238 96,182 146,152" />
-                            <polygon className="visible-balance-radar-shape visible-balance-radar-shape--inner" points="210,140 246,168 268,202 250,232 222,248 228,282 206,302 182,250 154,258 130,226 136,194 172,170" />
-                            <circle className="visible-balance-radar-core" cx="210" cy="210" r="10" />
+                            <defs>
+                              <radialGradient id="visible-balance-radar-shape-fill" cx="42%" cy="32%" r="72%">
+                                <stop offset="0%" stopColor="rgba(243, 247, 255, 0.52)" />
+                                <stop offset="100%" stopColor="rgba(189, 205, 243, 0.18)" />
+                              </radialGradient>
+                              <radialGradient id="visible-balance-radar-inner-fill" cx="50%" cy="42%" r="68%">
+                                <stop offset="0%" stopColor="rgba(226, 236, 255, 0.3)" />
+                                <stop offset="100%" stopColor="rgba(179, 197, 240, 0.08)" />
+                              </radialGradient>
+                            </defs>
+                            <circle className="visible-balance-radar-glow" cx="210" cy="210" r="186" />
+                            <polygon className="visible-balance-radar-ring" points="210.0,40.0 295.0,62.8 357.2,125.0 380.0,210.0 357.2,295.0 295.0,357.2 210.0,380.0 125.0,357.2 62.8,295.0 40.0,210.0 62.8,125.0 125.0,62.8" />
+                            <polygon className="visible-balance-radar-ring" points="210.0,80.0 275.0,97.4 322.6,145.0 340.0,210.0 322.6,275.0 275.0,322.6 210.0,340.0 145.0,322.6 97.4,275.0 80.0,210.0 97.4,145.0 145.0,97.4" />
+                            <polygon className="visible-balance-radar-ring" points="210.0,118.0 256.0,130.3 289.7,164.0 302.0,210.0 289.7,256.0 256.0,289.7 210.0,302.0 164.0,289.7 130.3,256.0 118.0,210.0 130.3,164.0 164.0,130.3" />
+                            <polygon className="visible-balance-radar-ring" points="210.0,154.0 238.0,161.5 258.5,182.0 266.0,210.0 258.5,238.0 238.0,258.5 210.0,266.0 182.0,258.5 161.5,238.0 154.0,210.0 161.5,182.0 182.0,161.5" />
+                            <line className="visible-balance-radar-axis" x1="210" y1="40" x2="210" y2="380" />
+                            <line className="visible-balance-radar-axis" x1="295" y1="62.8" x2="125" y2="357.2" />
+                            <line className="visible-balance-radar-axis" x1="357.2" y1="125" x2="62.8" y2="295" />
+                            <line className="visible-balance-radar-axis" x1="380" y1="210" x2="40" y2="210" />
+                            <line className="visible-balance-radar-axis" x1="357.2" y1="295" x2="62.8" y2="125" />
+                            <line className="visible-balance-radar-axis" x1="295" y1="357.2" x2="125" y2="62.8" />
+                            <path className="visible-balance-radar-pillar visible-balance-radar-pillar--soul" d="M 323.1 344.8 A 176 176 0 0 1 50.5 284.4" />
+                            <path className="visible-balance-radar-pillar visible-balance-radar-pillar--mind" d="M 50.5 284.4 A 176 176 0 0 1 104.1 69.4" />
+                            <path className="visible-balance-radar-pillar visible-balance-radar-pillar--body" d="M 104.1 69.4 A 176 176 0 0 1 323.1 344.8" />
+                            <polygon className="visible-balance-radar-shape visible-balance-radar-shape--outer" points="210.0,144.3 264.4,115.8 321.9,145.4 309.7,210.0 284.6,253.1 280.8,332.7 210.0,280.3 170.3,278.7 159.0,239.5 40.0,210.0 133.4,165.8 157.9,119.7" />
+                            <polygon className="visible-balance-radar-shape visible-balance-radar-shape--inner" points="210.0,159.7 251.6,137.9 295.6,160.6 286.3,210.0 267.0,242.9 264.2,303.8 210.0,263.7 179.7,262.5 171.0,232.5 80.0,210.0 151.5,176.2 170.1,140.9" />
+                            <circle className="visible-balance-radar-core" cx="210" cy="210" r="9" />
+                            <text className="visible-balance-radar-value" x="28" y="208">777</text>
+                            <text className="visible-balance-radar-value" x="252" y="84">483</text>
+                            <text className="visible-balance-radar-value" x="286" y="336">517</text>
+                            <text className="visible-balance-radar-value" x="132" y="236">251</text>
+                            <text className="visible-balance-radar-value" x="141" y="122">456</text>
+                            <text className="visible-balance-radar-value" x="270" y="158">414</text>
+                            <text className="visible-balance-radar-value" x="288" y="192">378</text>
+                            <text className="visible-balance-radar-value" x="118" y="172">252</text>
                           </svg>
-                          <span className="visible-radar-value visible-radar-value--one">777</span>
-                          <span className="visible-radar-value visible-radar-value--two">483</span>
-                          <span className="visible-radar-value visible-radar-value--three">517</span>
-                          <span className="visible-radar-value visible-radar-value--four">251</span>
                         </div>
                       </div>
                       <div className="visible-radar-pillars">
