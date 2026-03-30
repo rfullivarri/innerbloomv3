@@ -1271,7 +1271,7 @@
 }
 
 .landing .visible-scene-region--balance {
-  left: -23px;
+  left: -13px;
   top: 15px;
   width: 45%;
   height: 54%;
@@ -1460,7 +1460,7 @@
 
 .landing .visible-scene-region--balance .visible-canvas-chip {
   position: relative;
-  transform: translate(23px, 0px);
+  transform: translate(32px, 0px);
 }
 
 .landing .visible-canvas-chip--flow {
