@@ -7,11 +7,12 @@ type CapacitorAppPlugin = {
   addListener: (
     eventName: 'appUrlOpen',
     listener: ({ url }: { url: string }) => void,
-  ) => Promise<CapacitorPluginListenerHandle>;
+  ) => CapacitorPluginListenerHandle | Promise<CapacitorPluginListenerHandle>;
 };
 
 type CapacitorBrowserPlugin = {
   open: (options: { url: string }) => Promise<void>;
+  close?: () => Promise<void>;
 };
 
 type CapacitorKeyboardPlugin = {

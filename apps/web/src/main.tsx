@@ -1,5 +1,4 @@
 import { StrictMode } from 'react';
-import { ClerkProvider } from '@clerk/clerk-react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, useLocation } from 'react-router-dom';
 import App from './App';
@@ -12,6 +11,8 @@ import { ThemePreferenceProvider } from './theme/ThemePreferenceProvider';
 import { applyStoredThemePreference } from './theme/themePreference';
 import { PostLoginLanguageProvider } from './i18n/postLoginLanguage';
 import { NativeMobileBridge } from './mobile/NativeMobileBridge';
+import { isNativeCapacitorPlatform } from './mobile/capacitor';
+import { RuntimeAuthProvider } from './auth/runtimeAuth';
 
 declare global {
   interface Window {
@@ -48,9 +49,11 @@ if (!publishableKey) {
 
 function LocalizedClerkProvider({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const isNativeApp = isNativeCapacitorPlatform();
   const authLanguage = resolveAuthLanguage(location.search);
   const clerkLocalization = getClerkLocalization(authLanguage);
   const isMobileBridgeRoute = location.pathname === '/mobile-auth';
+  const clerkEnabled = !isNativeApp || isMobileBridgeRoute;
   const mobileBridgeSearch = new URLSearchParams(location.search);
   const mobileBridgeMode = mobileBridgeSearch.get('mode') === 'sign-up' ? 'sign-up' : 'sign-in';
   const mobileBridgeReturnTo = mobileBridgeSearch.get('return_to');
@@ -68,10 +71,13 @@ function LocalizedClerkProvider({ children }: { children: React.ReactNode }) {
   const authBridgeRedirectUrl = isMobileBridgeRoute ? buildMobileBridgePath(mobileBridgeMode) : undefined;
 
   return (
-    <ClerkProvider
-      key={authLanguage}
+    <RuntimeAuthProvider
+      key={`${authLanguage}:${clerkEnabled ? 'clerk' : 'native-shell'}`}
+      clerkEnabled={clerkEnabled}
       publishableKey={publishableKey}
       localization={clerkLocalization}
+      standardBrowser={!isNativeApp}
+      touchSession={!isNativeApp}
       signInUrl={signInUrl}
       signUpUrl={signUpUrl}
       signInForceRedirectUrl={authBridgeRedirectUrl}
@@ -80,7 +86,7 @@ function LocalizedClerkProvider({ children }: { children: React.ReactNode }) {
       signUpFallbackRedirectUrl={authBridgeRedirectUrl}
     >
       {children}
-    </ClerkProvider>
+    </RuntimeAuthProvider>
   );
 }
 

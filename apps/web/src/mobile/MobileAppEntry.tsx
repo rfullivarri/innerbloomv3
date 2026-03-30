@@ -1,8 +1,12 @@
+import { useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../auth/runtimeAuth';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { useOnboardingProgress } from '../hooks/useOnboardingProgress';
+import { isNativeCapacitorPlatform } from './capacitor';
+import { useMobileAuthSession } from './mobileAuthSession';
+import type { OnboardingProgress } from '../lib/api';
 
 function MobileEntryShell({
   title,
@@ -83,13 +87,65 @@ function MobileWelcome() {
   );
 }
 
+function isNativeOnboardingCompleted(progress: OnboardingProgress | null | undefined): boolean {
+  if (!progress) {
+    return false;
+  }
+
+  return Boolean(
+    progress.state === 'completed' ||
+    progress.returned_to_dashboard_after_first_edit_at ||
+    progress.first_daily_quest_completed_at ||
+    progress.daily_quest_scheduled_at ||
+    progress.first_task_edited_at,
+  );
+}
+
 export function MobileAppEntry() {
   const { isLoaded, isSignedIn } = useAuth();
   const backendUser = useBackendUser();
   const onboarding = useOnboardingProgress();
+  const mobileAuthSession = useMobileAuthSession();
+  const isNativeApp = isNativeCapacitorPlatform();
+  const hasNativeCallbackSession = isNativeApp && Boolean(mobileAuthSession?.token);
+  const hasEffectiveSession = isSignedIn || hasNativeCallbackSession;
   const dashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
+  const onboardingSignals = {
+    state: onboarding.progress?.state ?? null,
+    returnedToDashboardAfterFirstEditAt: onboarding.progress?.returned_to_dashboard_after_first_edit_at ?? null,
+    firstDailyQuestCompletedAt: onboarding.progress?.first_daily_quest_completed_at ?? null,
+    dailyQuestScheduledAt: onboarding.progress?.daily_quest_scheduled_at ?? null,
+    firstTaskEditedAt: onboarding.progress?.first_task_edited_at ?? null,
+  };
+  const isOnboardingComplete = isNativeApp
+    ? isNativeOnboardingCompleted(onboarding.progress)
+    : onboarding.progress?.state === 'completed';
 
-  if (!isLoaded) {
+  useEffect(() => {
+    if (onboarding.status !== 'success') {
+      return;
+    }
+
+    const finalRoute = isOnboardingComplete ? dashboardPath : '/intro-journey';
+    console.info('[mobile-entry] onboarding routing decision', {
+      nativeDetected: isNativeApp,
+      onboardingState: onboardingSignals.state,
+      onboardingSignals,
+      finalRoute,
+    });
+  }, [
+    dashboardPath,
+    isNativeApp,
+    isOnboardingComplete,
+    onboarding.status,
+    onboardingSignals.dailyQuestScheduledAt,
+    onboardingSignals.firstDailyQuestCompletedAt,
+    onboardingSignals.firstTaskEditedAt,
+    onboardingSignals.returnedToDashboardAfterFirstEditAt,
+    onboardingSignals.state,
+  ]);
+
+  if (!isLoaded && !hasNativeCallbackSession) {
     return (
       <MobileEntryLoading
         title="Preparando Innerbloom"
@@ -98,7 +154,7 @@ export function MobileAppEntry() {
     );
   }
 
-  if (!isSignedIn) {
+  if (!hasEffectiveSession) {
     return <MobileWelcome />;
   }
 
@@ -142,7 +198,7 @@ export function MobileAppEntry() {
     );
   }
 
-  if (onboarding.progress?.state !== 'completed') {
+  if (!isOnboardingComplete) {
     return <Navigate to="/intro-journey" replace />;
   }
 

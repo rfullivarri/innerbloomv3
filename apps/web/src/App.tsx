@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, type ReactElement } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from './auth/runtimeAuth';
 import DashboardV3Page from './pages/DashboardV3';
 import TaskEditorPage from './pages/editor';
 import LoginPage from './pages/Login';
@@ -25,7 +25,9 @@ import LabsDemoModeSelectPage from './pages/LabsDemoModeSelect';
 import DemoModeSelectPage from './pages/DemoModeSelect';
 import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
+import { writeMobileDebug } from './mobile/mobileDebug';
 import { MobileAppEntry } from './mobile/MobileAppEntry';
+import { useMobileAuthSession } from './mobile/mobileAuthSession';
 import MobileBrowserAuthPage from './pages/MobileBrowserAuth';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
@@ -40,16 +42,50 @@ const CLERK_TOKEN_TEMPLATE = (() => {
 
 function ApiAuthBridge() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const mobileAuthSession = useMobileAuthSession();
+  const isNativeApp = isNativeCapacitorPlatform();
+
+  useEffect(() => () => {
+    setApiAuthTokenProvider(null);
+  }, []);
 
   useEffect(() => {
     if (DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV) {
       setApiAuthTokenProvider(async () => 'dev-token');
-      return () => {
-        setApiAuthTokenProvider(null);
-      };
+      return;
+    }
+
+    if (isNativeApp && mobileAuthSession?.token) {
+      writeMobileDebug('api-auth-provider', {
+        source: 'mobile-callback-token',
+        ready: true,
+        hasToken: true,
+        clerkUserId: mobileAuthSession.clerkUserId,
+      });
+      console.info('[API] auth provider source = mobile callback token', {
+        hasToken: true,
+        clerkUserId: mobileAuthSession.clerkUserId,
+      });
+
+      setApiAuthTokenProvider(async () => mobileAuthSession.token);
+      return;
     }
 
     if (!isLoaded || !isSignedIn) {
+      writeMobileDebug('api-auth-provider', {
+        source: 'none',
+        ready: false,
+        isNativeApp,
+        isLoaded,
+        isSignedIn,
+        hasMobileCallbackToken: Boolean(mobileAuthSession?.token),
+      });
+      console.info('[API] auth provider cleared', {
+        isNativeApp,
+        isLoaded,
+        isSignedIn,
+        hasMobileCallbackToken: Boolean(mobileAuthSession?.token),
+      });
       setApiAuthTokenProvider(null);
       return;
     }
@@ -67,30 +103,43 @@ function ApiAuthBridge() {
       }
     };
 
-    setApiAuthTokenProvider(provider);
+    console.info('[API] auth provider source = clerk', {
+      isNativeApp,
+      isLoaded,
+      isSignedIn,
+      usesTemplate: Boolean(CLERK_TOKEN_TEMPLATE),
+    });
+    writeMobileDebug('api-auth-provider', {
+      source: 'clerk',
+      ready: true,
+      isNativeApp,
+      isLoaded,
+      isSignedIn,
+      usesTemplate: Boolean(CLERK_TOKEN_TEMPLATE),
+    });
 
-    return () => {
-      setApiAuthTokenProvider(null);
-    };
-  }, [getToken, isLoaded, isSignedIn]);
+    setApiAuthTokenProvider(provider);
+  }, [getToken, isLoaded, isNativeApp, isSignedIn, mobileAuthSession?.clerkUserId, mobileAuthSession?.token]);
 
   return null;
 }
 
 function RequireUser({ children }: { children: ReactElement }) {
   const { isLoaded, userId } = useAuth();
+  const mobileAuthSession = useMobileAuthSession();
   const devBypass = DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV;
   const unauthenticatedRedirectPath = isNativeCapacitorPlatform() ? '/' : '/login';
+  const hasNativeSession = isNativeCapacitorPlatform() && Boolean(mobileAuthSession?.token);
 
   if (devBypass) {
     return children;
   }
 
-  if (!isLoaded) {
+  if (!isLoaded && !hasNativeSession) {
     return <div className="flex min-h-screen items-center justify-center text-text">Cargando…</div>;
   }
 
-  if (!userId) {
+  if (!userId && !hasNativeSession) {
     return <Navigate to={unauthenticatedRedirectPath} replace />;
   }
 
@@ -105,12 +154,14 @@ function RedirectIfSignedIn({
   redirectPath: string;
 }) {
   const { isLoaded, userId } = useAuth();
+  const mobileAuthSession = useMobileAuthSession();
+  const hasNativeSession = isNativeCapacitorPlatform() && Boolean(mobileAuthSession?.token);
 
-  if (!isLoaded) {
+  if (!isLoaded && !hasNativeSession) {
     return <div className="flex min-h-screen items-center justify-center text-text">Cargando…</div>;
   }
 
-  if (userId) {
+  if (userId || hasNativeSession) {
     return <Navigate to={redirectPath} replace />;
   }
 
