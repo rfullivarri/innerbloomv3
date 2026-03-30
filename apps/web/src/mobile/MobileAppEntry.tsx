@@ -101,6 +101,26 @@ function isNativeOnboardingCompleted(progress: OnboardingProgress | null | undef
   );
 }
 
+function resolveNativeEntryRoute({
+  authMode,
+  isOnboardingComplete,
+  dashboardPath,
+}: {
+  authMode: 'sign-in' | 'sign-up' | null;
+  isOnboardingComplete: boolean;
+  dashboardPath: string;
+}): string {
+  if (authMode === 'sign-in') {
+    return dashboardPath;
+  }
+
+  if (authMode === 'sign-up') {
+    return '/intro-journey';
+  }
+
+  return isOnboardingComplete ? dashboardPath : '/intro-journey';
+}
+
 export function MobileAppEntry() {
   const { isLoaded, isSignedIn } = useAuth();
   const backendUser = useBackendUser();
@@ -110,6 +130,7 @@ export function MobileAppEntry() {
   const hasNativeCallbackSession = isNativeApp && Boolean(mobileAuthSession?.token);
   const hasEffectiveSession = isSignedIn || hasNativeCallbackSession;
   const dashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
+  const nativeAuthMode = isNativeApp ? mobileAuthSession?.authMode ?? null : null;
   const onboardingSignals = {
     state: onboarding.progress?.state ?? null,
     returnedToDashboardAfterFirstEditAt: onboarding.progress?.returned_to_dashboard_after_first_edit_at ?? null,
@@ -120,15 +141,21 @@ export function MobileAppEntry() {
   const isOnboardingComplete = isNativeApp
     ? isNativeOnboardingCompleted(onboarding.progress)
     : onboarding.progress?.state === 'completed';
+  const finalRoute = isNativeApp
+    ? resolveNativeEntryRoute({
+        authMode: nativeAuthMode,
+        isOnboardingComplete,
+        dashboardPath,
+      })
+    : (isOnboardingComplete ? dashboardPath : '/intro-journey');
 
   useEffect(() => {
     if (onboarding.status !== 'success') {
       return;
     }
-
-    const finalRoute = isOnboardingComplete ? dashboardPath : '/intro-journey';
     console.info('[mobile-entry] onboarding routing decision', {
       nativeDetected: isNativeApp,
+      authMode: nativeAuthMode,
       onboardingState: onboardingSignals.state,
       onboardingSignals,
       finalRoute,
@@ -137,6 +164,7 @@ export function MobileAppEntry() {
     dashboardPath,
     isNativeApp,
     isOnboardingComplete,
+    nativeAuthMode,
     onboarding.status,
     onboardingSignals.dailyQuestScheduledAt,
     onboardingSignals.firstDailyQuestCompletedAt,
@@ -199,8 +227,10 @@ export function MobileAppEntry() {
   }
 
   if (!isOnboardingComplete) {
-    return <Navigate to="/intro-journey" replace />;
+    if (finalRoute === '/intro-journey') {
+      return <Navigate to="/intro-journey" replace />;
+    }
   }
 
-  return <Navigate to={dashboardPath} replace />;
+  return <Navigate to={finalRoute} replace />;
 }

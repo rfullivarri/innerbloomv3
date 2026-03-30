@@ -10,6 +10,7 @@ export type MobileAuthSession = {
   token: string;
   clerkUserId: string | null;
   email: string | null;
+  authMode: 'sign-in' | 'sign-up' | null;
   updatedAt: number;
 };
 
@@ -72,10 +73,19 @@ function getCallbackFingerprint(url: string): string | null {
     const token = parsed.searchParams.get('token')?.trim() ?? '';
     const userId = parsed.searchParams.get('user_id')?.trim() ?? '';
     const email = parsed.searchParams.get('email')?.trim() ?? '';
-    return hashString([parsed.protocol, parsed.hostname, token, userId, email].join('|'));
+    const authMode = parsed.searchParams.get('auth_mode')?.trim() ?? '';
+    return hashString([parsed.protocol, parsed.hostname, token, userId, email, authMode].join('|'));
   } catch {
     return null;
   }
+}
+
+function normalizeAuthMode(value: string | null | undefined): 'sign-in' | 'sign-up' | null {
+  if (value === 'sign-in' || value === 'sign-up') {
+    return value;
+  }
+
+  return null;
 }
 
 export function getMobileAuthSession(): MobileAuthSession | null {
@@ -98,6 +108,7 @@ export function getMobileAuthSession(): MobileAuthSession | null {
       token: parsed.token,
       clerkUserId: typeof parsed.clerkUserId === 'string' ? parsed.clerkUserId : null,
       email: typeof parsed.email === 'string' ? parsed.email : null,
+      authMode: normalizeAuthMode(parsed.authMode),
       updatedAt: typeof parsed.updatedAt === 'number' ? parsed.updatedAt : Date.now(),
     };
   } catch {
@@ -184,6 +195,7 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
       token,
       clerkUserId: parsed.searchParams.get('user_id')?.trim() || null,
       email: parsed.searchParams.get('email')?.trim() || null,
+      authMode: normalizeAuthMode(parsed.searchParams.get('auth_mode')?.trim()),
       updatedAt: Date.now(),
     });
     setStoredCallbackFingerprint(fingerprint);
@@ -192,12 +204,14 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
       hasToken: true,
       clerkUserId: session.clerkUserId,
       email: session.email,
+      authMode: session.authMode,
     });
     writeMobileDebug('mobile-auth-callback', {
       type: 'callback',
       hasToken: true,
       clerkUserId: session.clerkUserId,
       email: session.email,
+      authMode: session.authMode,
     });
 
     return {

@@ -47,9 +47,15 @@ function buildSignedOutUrl(search: string): string {
   return resolveReturnTo(search, CAPACITOR_SIGNED_OUT_HOST);
 }
 
-function buildRedirectUrl(baseUrl: string, user: ReturnType<typeof useUser>['user'], token: string): string {
+function buildRedirectUrl(
+  baseUrl: string,
+  user: ReturnType<typeof useUser>['user'],
+  token: string,
+  mode: 'sign-in' | 'sign-up',
+): string {
   const callbackUrl = new URL(baseUrl);
   callbackUrl.searchParams.set('token', token);
+  callbackUrl.searchParams.set('auth_mode', mode);
 
   if (user?.id) {
     callbackUrl.searchParams.set('user_id', user.id);
@@ -157,7 +163,7 @@ export default function MobileBrowserAuthPage() {
           throw new Error('Clerk no devolvió un token de sesión utilizable para mobile.');
         }
 
-        window.location.replace(buildRedirectUrl(callbackUrl, user, token));
+        window.location.replace(buildRedirectUrl(callbackUrl, user, token, mode));
       } catch (cause) {
         redirectStartedRef.current = false;
         const nextError = cause instanceof Error ? cause.message : String(cause);
