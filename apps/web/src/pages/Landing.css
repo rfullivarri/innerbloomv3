@@ -1463,14 +1463,16 @@
 
 .landing .visible-scene-region--balance .visible-canvas-chip {
   position: static;
-  transform: translate(0, -1px);
+  transform: translate(-10px, -1px);
   margin-left: 0;
+  padding: 4px 11px;
+  font-size: 0.73rem;
 }
 
 .landing .visible-scene-region--balance .visible-canvas-header {
   justify-content: flex-start;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 4px;
   padding-left: 6px;
   padding-right: 0;
