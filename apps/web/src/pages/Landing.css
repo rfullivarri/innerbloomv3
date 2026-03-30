@@ -1415,14 +1415,14 @@
 .landing .visible-canvas-header--emotion {
   position: relative;
   margin-bottom: 12px;
-  transform: translateX(-16px);
+  transform: translateX(-16px 24px);
   padding-right: 8px;
 }
 
 .landing .visible-canvas-header--emotion .visible-canvas-info {
   position: absolute;
-  top: 32px;
-  right: -23px;
+  top: 37px;
+  right: -25px;
   left: auto;
   margin-left: 0;
 }
@@ -1568,6 +1568,8 @@
 }
 
 .landing .visible-emotion-legend {
+  position: relative;
+  top: 24px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1586,6 +1588,8 @@
 }
 
 .landing .visible-emotion-grid-months {
+  position: relative;
+  top: 24px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   margin: 0 6px 7px;
