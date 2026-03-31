@@ -636,8 +636,14 @@ export default function DashboardV3Page() {
     [activeSection.key, location.pathname],
   );
 
-  const handleReminderScheduled = useCallback(async () => {
-    setShowOnboardingCompletionBanner(true);
+  const handleReminderScheduled = useCallback(async ({
+    wasFirstScheduleCompletion,
+  }: {
+    wasFirstScheduleCompletion: boolean;
+  }) => {
+    if (wasFirstScheduleCompletion) {
+      setShowOnboardingCompletionBanner(true);
+    }
     await Promise.all([
       onboardingProgress.reload(),
       dailyQuestReadiness.reload(),
@@ -652,7 +658,7 @@ export default function DashboardV3Page() {
 
     const timeoutId = window.setTimeout(() => {
       setShowOnboardingCompletionBanner(false);
-    }, 3800);
+    }, 7600);
 
     return () => window.clearTimeout(timeoutId);
   }, [showOnboardingCompletionBanner]);

@@ -56,11 +56,17 @@ type SerializedReminder = {
   localTime: string;
   last_sent_at: string | null;
   delivery_strategy: string;
+  was_first_schedule_completion: boolean;
+  wasFirstScheduleCompletion: boolean;
 };
 
 type LegacySchedulerStateRow = {
   scheduler_enabled: boolean | null;
   status_scheduler: string | null;
+};
+
+type LegacyFirstProgrammedStateRow = {
+  first_programmed: boolean | null;
 };
 
 export const getCurrentUserDailyReminderSettings: AsyncHandler = async (req, res) => {
@@ -94,6 +100,7 @@ export const updateCurrentUserDailyReminderSettings: AsyncHandler = async (req, 
     throw new HttpError(400, 'invalid_timezone', 'Unknown timezone');
   }
 
+  const legacySchedulerBeforeSave = await getLegacyFirstProgrammedState(authUser.id);
   const reminder = await persistReminder(authUser.id, channel, body, {
     localTime: normalizedLocalTime,
     timezone: normalizedTimezone,
@@ -113,11 +120,27 @@ export const updateCurrentUserDailyReminderSettings: AsyncHandler = async (req, 
     scheduler_enabled: body.status === 'active',
     status_scheduler: toLegacyStatus(body.status),
   };
+  const wasFirstScheduleCompletion =
+    body.status === 'active' && legacySchedulerBeforeSave.first_programmed !== true;
 
   // Keeping the serialized response in sync with the legacy columns ensures the
   // scheduler toggle always reflects what we persist in the users table.
-  return res.json(serializeReminder(reminder, channel, normalizedTimezone, legacyState));
+  return res.json(
+    serializeReminder(reminder, channel, normalizedTimezone, legacyState, {
+      wasFirstScheduleCompletion,
+    }),
+  );
 };
+
+async function getLegacyFirstProgrammedState(userId: string): Promise<LegacyFirstProgrammedStateRow> {
+  const result = await pool.query<LegacyFirstProgrammedStateRow>(
+    'SELECT first_programmed FROM users WHERE user_id = $1 LIMIT 1',
+    [userId],
+  );
+  return {
+    first_programmed: result.rows[0]?.first_programmed ?? null,
+  };
+}
 
 async function persistReminder(
   userId: string,
@@ -262,6 +285,9 @@ function serializeReminder(
   channel: ReminderChannel,
   fallbackTimezone: string,
   legacyState?: LegacySchedulerStateRow | null,
+  options?: {
+    wasFirstScheduleCompletion?: boolean;
+  },
 ): SerializedReminder {
   const normalizedLegacyStatus = normalizeLegacyStatus(legacyState?.status_scheduler);
   const normalizedReminderStatus = normalizeReminderStatus(reminder?.status);
@@ -284,6 +310,8 @@ function serializeReminder(
     localTime,
     last_sent_at: toIsoString(reminder?.last_sent_at),
     delivery_strategy: DELIVERY_STRATEGY,
+    was_first_schedule_completion: options?.wasFirstScheduleCompletion === true,
+    wasFirstScheduleCompletion: options?.wasFirstScheduleCompletion === true,
   };
 }
 
