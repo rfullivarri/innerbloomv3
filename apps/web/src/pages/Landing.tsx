@@ -57,6 +57,7 @@ const SHOW_GRADIENT_SELECTOR = false;
 type ModeVisual = {
   avatarVideo: string;
   avatarImage: string;
+  thumbImage: string;
   avatarAlt: string;
   avatarLabel: string;
 };
@@ -66,24 +67,28 @@ const MODE_VISUALS: Record<Language, Record<'low' | 'chill' | 'flow' | 'evolve',
     low: {
       avatarVideo: '/avatars/low-basic.mp4',
       avatarImage: '/LowMood.jpg',
+      thumbImage: '/LowVertical.png',
       avatarAlt: 'Low mode avatar with a resting facial expression.',
       avatarLabel: 'Aligned with your energy'
     },
     chill: {
       avatarVideo: '/avatars/chill-basic.mp4',
       avatarImage: '/Chill-Mood.jpg',
+      thumbImage: '/ChillVertical.png',
       avatarAlt: 'Chill mode avatar with a calm expression.',
       avatarLabel: 'Aligned with your energy'
     },
     flow: {
       avatarVideo: '/avatars/flow-basic.mp4',
       avatarImage: '/FlowMood.jpg',
+      thumbImage: '/FlowVertical.png',
       avatarAlt: 'Flow mode avatar in action with a focused expression.',
       avatarLabel: 'Aligned with your energy'
     },
     evolve: {
       avatarVideo: '/avatars/evolve-basic.mp4',
       avatarImage: '/Evolve-Mood.jpg',
+      thumbImage: '/EvolveVertical.png',
       avatarAlt: 'Evolve mode avatar with a determined expression.',
       avatarLabel: 'Aligned with your energy'
     }
@@ -92,24 +97,28 @@ const MODE_VISUALS: Record<Language, Record<'low' | 'chill' | 'flow' | 'evolve',
     low: {
       avatarVideo: '/avatars/low-basic.mp4',
       avatarImage: '/LowMood.jpg',
+      thumbImage: '/LowVertical.png',
       avatarAlt: 'Avatar del modo Low con expresión de descanso.',
       avatarLabel: 'Alineado a tu energía'
     },
     chill: {
       avatarVideo: '/avatars/chill-basic.mp4',
       avatarImage: '/Chill-Mood.jpg',
+      thumbImage: '/ChillVertical.png',
       avatarAlt: 'Avatar del modo Chill con expresión de calma.',
       avatarLabel: 'Alineado a tu energía'
     },
     flow: {
       avatarVideo: '/avatars/flow-basic.mp4',
       avatarImage: '/FlowMood.jpg',
+      thumbImage: '/FlowVertical.png',
       avatarAlt: 'Avatar del modo Flow en movimiento y enfocado.',
       avatarLabel: 'Alineado a tu energía'
     },
     evolve: {
       avatarVideo: '/avatars/evolve-basic.mp4',
       avatarImage: '/Evolve-Mood.jpg',
+      thumbImage: '/EvolveVertical.png',
       avatarAlt: 'Avatar del modo Evolve con expresión determinada.',
       avatarLabel: 'Alineado a tu energía'
     }
@@ -885,7 +894,7 @@ export default function LandingPage() {
                       onClick={() => handleModeSelect(index)}
                       onKeyDown={(event) => handleModeThumbKeyDown(event, index)}
                     >
-                      <img src={visual.avatarImage} alt="" aria-hidden />
+                      <img src={visual.thumbImage} alt="" aria-hidden />
                     </button>
                   );
                 })}
