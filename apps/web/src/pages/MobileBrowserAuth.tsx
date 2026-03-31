@@ -121,8 +121,10 @@ export default function MobileBrowserAuthPage() {
     return raw === 'sign-up' || raw === 'logout' ? raw : 'sign-in';
   }, [location.search]);
   const currentUrl = useMemo(
-    () => (typeof window !== 'undefined' ? window.location.href : '/mobile-auth'),
-    [],
+    () => (typeof window !== 'undefined'
+      ? window.location.href
+      : `/mobile-auth${location.search}${location.hash}`),
+    [location.hash, location.search],
   );
   const callbackUrl = useMemo(() => buildAppCallbackUrl(location.search), [location.search]);
   const signedOutUrl = useMemo(() => buildSignedOutUrl(location.search), [location.search]);
@@ -163,6 +165,12 @@ export default function MobileBrowserAuthPage() {
           throw new Error('Clerk no devolvió un token de sesión utilizable para mobile.');
         }
 
+        console.info('[mobile-auth] final resolved mode before callback', {
+          mode,
+          currentUrl,
+          callbackUrl,
+          userId: user?.id ?? null,
+        });
         window.location.replace(buildRedirectUrl(callbackUrl, user, token, mode));
       } catch (cause) {
         redirectStartedRef.current = false;
