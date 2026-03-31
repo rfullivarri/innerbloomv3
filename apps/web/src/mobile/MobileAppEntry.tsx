@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { useAuth } from '../auth/runtimeAuth';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 import { useBackendUser } from '../hooks/useBackendUser';
@@ -18,10 +19,12 @@ function MobileEntryShell({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center px-6 py-10 text-white">
+    <div className="flex min-h-screen items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)] pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] text-white">
       <div className="w-full max-w-md rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(36,59,112,0.96),rgba(20,29,72,0.98))] p-6 shadow-[0_24px_80px_rgba(7,14,40,0.44)] backdrop-blur-2xl">
         <div className="text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.4em] text-white/50">Innerbloom</p>
+          <div className="flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.4em] text-white/58">
+            <BrandWordmark className="gap-2" textClassName="tracking-[0.4em]" iconClassName="h-[1.8em]" />
+          </div>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">{title}</h1>
           <p className="mt-3 text-sm leading-6 text-white/72">{description}</p>
         </div>
@@ -55,7 +58,7 @@ function MobileEntryError({
       <button
         type="button"
         onClick={onRetry}
-        className="inline-flex w-full items-center justify-center rounded-full bg-[linear-gradient(135deg,#7c3aed,#8b5cf6,#ec4899)] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(124,58,237,0.4)] transition hover:brightness-110"
+        className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
       >
         Reintentar
       </button>
@@ -72,7 +75,7 @@ function MobileWelcome() {
       <div className="space-y-3">
         <Link
           to="/login"
-          className="inline-flex w-full items-center justify-center rounded-full bg-[linear-gradient(135deg,#7c3aed,#8b5cf6,#ec4899)] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(124,58,237,0.4)] transition hover:brightness-110"
+          className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
         >
           Iniciar sesión
         </Link>

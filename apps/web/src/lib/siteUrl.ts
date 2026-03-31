@@ -14,6 +14,9 @@ function normalizeBaseUrl(rawValue: string | undefined): string | null {
 
   try {
     const url = new URL(trimmed);
+    if (url.hostname === 'www.innerbloomjourney.org') {
+      url.hostname = 'innerbloomjourney.org';
+    }
     return url.origin;
   } catch {
     return null;

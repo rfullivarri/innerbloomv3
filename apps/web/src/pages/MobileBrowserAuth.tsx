@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { createAuthAppearance } from '../lib/clerkAppearance';
+import { buildWebAbsoluteUrl } from '../lib/siteUrl';
 import { CAPACITOR_APP_SCHEME, CAPACITOR_CALLBACK_HOST, CAPACITOR_SIGNED_OUT_HOST } from '../mobile/capacitor';
 
 type BrowserAuthMode = 'sign-in' | 'sign-up' | 'logout';
@@ -83,7 +84,7 @@ function buildRedirectUrl(
 }
 
 function buildModeUrl(language: string, mode: 'sign-in' | 'sign-up', search: string): string {
-  const url = new URL(buildLocalizedAuthPath('/mobile-auth', language), 'https://innerbloomjourney.org');
+  const url = new URL(buildWebAbsoluteUrl(buildLocalizedAuthPath('/mobile-auth', language)));
   const params = new URLSearchParams(search);
   url.searchParams.set('mode', mode);
   const returnTo = params.get('return_to')?.trim();
