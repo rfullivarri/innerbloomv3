@@ -1,16 +1,24 @@
 import { useEffect, useState } from 'react';
+import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
+import { buildWebAbsoluteUrl } from '../lib/siteUrl';
 import {
+  buildNativeAppUrl,
   CAPACITOR_CALLBACK_HOST,
   CAPACITOR_SIGNED_OUT_HOST,
   isNativeAuthCallbackUrl,
+  isNativeCapacitorPlatform,
+  openUrlInCapacitorBrowser,
 } from './capacitor';
 import { writeMobileDebug } from './mobileDebug';
+
+export type MobileAuthMode = 'sign-in' | 'sign-up' | 'refresh';
 
 export type MobileAuthSession = {
   token: string;
   clerkUserId: string | null;
   email: string | null;
-  authMode: 'sign-in' | 'sign-up' | null;
+  authMode: MobileAuthMode | null;
+  expiresAt: number | null;
   updatedAt: number;
 };
 
@@ -23,6 +31,10 @@ export type MobileAuthCallbackResolution =
 const MOBILE_AUTH_SESSION_STORAGE_KEY = 'innerbloom.mobile.auth-session.v1';
 const MOBILE_AUTH_SESSION_EVENT = 'innerbloom:mobile-auth-session-changed';
 const MOBILE_AUTH_CALLBACK_FINGERPRINT_STORAGE_KEY = 'innerbloom.mobile.auth-callback.last-fingerprint.v1';
+const MOBILE_AUTH_REFRESH_TIMEOUT_MS = 15_000;
+const MOBILE_AUTH_REFRESH_MIN_VALIDITY_MS = 90_000;
+
+let mobileAuthRefreshPromise: Promise<MobileAuthSession | null> | null = null;
 
 function canUseStorage(): boolean {
   return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
@@ -80,12 +92,146 @@ function getCallbackFingerprint(url: string): string | null {
   }
 }
 
-function normalizeAuthMode(value: string | null | undefined): 'sign-in' | 'sign-up' | null {
-  if (value === 'sign-in' || value === 'sign-up') {
+function normalizeAuthMode(value: string | null | undefined): MobileAuthMode | null {
+  if (value === 'sign-in' || value === 'sign-up' || value === 'refresh') {
     return value;
   }
 
   return null;
+}
+
+function decodeJwtExp(token: string): number | null {
+  const parts = token.split('.');
+  if (parts.length < 2 || !parts[1]) {
+    return null;
+  }
+
+  try {
+    const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padding = normalized.length % 4 === 0 ? '' : '='.repeat(4 - (normalized.length % 4));
+    const decoded = atob(`${normalized}${padding}`);
+    const payload = JSON.parse(decoded) as { exp?: number };
+    return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeSession(session: Partial<MobileAuthSession> & { token: string }): MobileAuthSession {
+  return {
+    token: session.token,
+    clerkUserId: typeof session.clerkUserId === 'string' ? session.clerkUserId : null,
+    email: typeof session.email === 'string' ? session.email : null,
+    authMode: normalizeAuthMode(session.authMode),
+    expiresAt: typeof session.expiresAt === 'number' ? session.expiresAt : decodeJwtExp(session.token),
+    updatedAt: typeof session.updatedAt === 'number' ? session.updatedAt : Date.now(),
+  };
+}
+
+export function isMobileAuthSessionExpiringSoon(
+  session: MobileAuthSession | null | undefined,
+  minValidityMs = MOBILE_AUTH_REFRESH_MIN_VALIDITY_MS,
+): boolean {
+  if (!session?.token) {
+    return false;
+  }
+
+  if (!session.expiresAt) {
+    return false;
+  }
+
+  return session.expiresAt - Date.now() <= minValidityMs;
+}
+
+function buildMobileAuthRefreshUrl(mode: MobileAuthMode): string {
+  const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
+  const params = new URLSearchParams();
+  params.set('mode', mode);
+  params.set('return_to', buildNativeAppUrl(CAPACITOR_CALLBACK_HOST));
+  return buildWebAbsoluteUrl(`${buildLocalizedAuthPath('/mobile-auth', language)}?${params.toString()}`);
+}
+
+function waitForMobileAuthSessionUpdate(previousUpdatedAt: number, timeoutMs: number): Promise<MobileAuthSession | null> {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve(null);
+      return;
+    }
+
+    const existing = getMobileAuthSession();
+    if (existing && existing.updatedAt > previousUpdatedAt) {
+      resolve(existing);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      window.removeEventListener(MOBILE_AUTH_SESSION_EVENT, handleRefresh);
+      resolve(getMobileAuthSession());
+    }, timeoutMs);
+
+    const handleRefresh = () => {
+      const next = getMobileAuthSession();
+      if (next && next.updatedAt > previousUpdatedAt) {
+        window.clearTimeout(timeoutId);
+        window.removeEventListener(MOBILE_AUTH_SESSION_EVENT, handleRefresh);
+        resolve(next);
+      }
+    };
+
+    window.addEventListener(MOBILE_AUTH_SESSION_EVENT, handleRefresh);
+  });
+}
+
+export async function ensureFreshMobileAuthSession(options?: {
+  force?: boolean;
+  reason?: string;
+  timeoutMs?: number;
+  minValidityMs?: number;
+}): Promise<MobileAuthSession | null> {
+  const session = getMobileAuthSession();
+  if (!isNativeCapacitorPlatform() || !session?.token) {
+    return session;
+  }
+
+  const force = options?.force ?? false;
+  const timeoutMs = options?.timeoutMs ?? MOBILE_AUTH_REFRESH_TIMEOUT_MS;
+  const minValidityMs = options?.minValidityMs ?? MOBILE_AUTH_REFRESH_MIN_VALIDITY_MS;
+
+  if (!force && !isMobileAuthSessionExpiringSoon(session, minValidityMs)) {
+    return session;
+  }
+
+  if (mobileAuthRefreshPromise) {
+    return mobileAuthRefreshPromise;
+  }
+
+  const refreshMode: MobileAuthMode = 'refresh';
+  const refreshUrl = buildMobileAuthRefreshUrl(refreshMode);
+  writeMobileDebug('mobile-auth-refresh', {
+    reason: options?.reason ?? 'unspecified',
+    force,
+    hasToken: true,
+    authMode: session.authMode,
+    expiresAt: session.expiresAt,
+    refreshMode,
+  });
+  console.info('[mobile-auth] refreshing callback token', {
+    reason: options?.reason ?? 'unspecified',
+    force,
+    authMode: session.authMode,
+    expiresAt: session.expiresAt,
+  });
+
+  mobileAuthRefreshPromise = (async () => {
+    try {
+      await openUrlInCapacitorBrowser(refreshUrl);
+      return await waitForMobileAuthSessionUpdate(session.updatedAt, timeoutMs);
+    } finally {
+      mobileAuthRefreshPromise = null;
+    }
+  })();
+
+  return mobileAuthRefreshPromise;
 }
 
 export function getMobileAuthSession(): MobileAuthSession | null {
@@ -104,13 +250,7 @@ export function getMobileAuthSession(): MobileAuthSession | null {
       return null;
     }
 
-    return {
-      token: parsed.token,
-      clerkUserId: typeof parsed.clerkUserId === 'string' ? parsed.clerkUserId : null,
-      email: typeof parsed.email === 'string' ? parsed.email : null,
-      authMode: normalizeAuthMode(parsed.authMode),
-      updatedAt: typeof parsed.updatedAt === 'number' ? parsed.updatedAt : Date.now(),
-    };
+    return normalizeSession({ ...parsed, token: parsed.token });
   } catch {
     return null;
   }
@@ -118,12 +258,13 @@ export function getMobileAuthSession(): MobileAuthSession | null {
 
 export function persistMobileAuthSession(session: MobileAuthSession): MobileAuthSession {
   if (!canUseStorage()) {
-    return session;
+    return normalizeSession(session);
   }
 
-  window.localStorage.setItem(MOBILE_AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
+  const normalized = normalizeSession(session);
+  window.localStorage.setItem(MOBILE_AUTH_SESSION_STORAGE_KEY, JSON.stringify(normalized));
   emitMobileAuthSessionChange();
-  return session;
+  return normalized;
 }
 
 export function clearMobileAuthSession(
@@ -209,6 +350,7 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
       clerkUserId: parsed.searchParams.get('user_id')?.trim() || null,
       email: parsed.searchParams.get('email')?.trim() || null,
       authMode: normalizeAuthMode(parsed.searchParams.get('auth_mode')?.trim()),
+      expiresAt: decodeJwtExp(token),
       updatedAt: Date.now(),
     });
     setStoredCallbackFingerprint(fingerprint);
@@ -218,6 +360,7 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
       clerkUserId: session.clerkUserId,
       email: session.email,
       authMode: session.authMode,
+      expiresAt: session.expiresAt,
     });
     writeMobileDebug('mobile-auth-callback', {
       type: 'callback',
@@ -225,6 +368,7 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
       clerkUserId: session.clerkUserId,
       email: session.email,
       authMode: session.authMode,
+      expiresAt: session.expiresAt,
     });
 
     return {

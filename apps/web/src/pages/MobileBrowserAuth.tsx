@@ -7,7 +7,7 @@ import { createAuthAppearance } from '../lib/clerkAppearance';
 import { buildWebAbsoluteUrl } from '../lib/siteUrl';
 import { CAPACITOR_APP_SCHEME, CAPACITOR_CALLBACK_HOST, CAPACITOR_SIGNED_OUT_HOST } from '../mobile/capacitor';
 
-type BrowserAuthMode = 'sign-in' | 'sign-up' | 'logout';
+type BrowserAuthMode = 'sign-in' | 'sign-up' | 'logout' | 'refresh';
 
 const authAppearance = createAuthAppearance({
   layout: {
@@ -52,7 +52,7 @@ function buildRedirectUrl(
   baseUrl: string,
   user: ReturnType<typeof useUser>['user'],
   token: string,
-  mode: 'sign-in' | 'sign-up',
+  mode: 'sign-in' | 'sign-up' | 'refresh',
 ): string {
   const callbackUrl = new URL(baseUrl);
   callbackUrl.searchParams.set('token', token);
@@ -122,7 +122,7 @@ export default function MobileBrowserAuthPage() {
   const mode = useMemo<BrowserAuthMode>(() => {
     const params = new URLSearchParams(location.search);
     const raw = params.get('mode');
-    return raw === 'sign-up' || raw === 'logout' ? raw : 'sign-in';
+    return raw === 'sign-up' || raw === 'logout' || raw === 'refresh' ? raw : 'sign-in';
   }, [location.search]);
   const currentUrl = useMemo(
     () => (typeof window !== 'undefined'
@@ -132,6 +132,48 @@ export default function MobileBrowserAuthPage() {
   );
   const callbackUrl = useMemo(() => buildAppCallbackUrl(location.search), [location.search]);
   const signedOutUrl = useMemo(() => buildSignedOutUrl(location.search), [location.search]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const viewport = document.querySelector('meta[name="viewport"]');
+    const previousViewport = viewport?.getAttribute('content') ?? null;
+    const mobileAuthViewport = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+    const style = document.createElement('style');
+    style.dataset.mobileAuthZoomFix = 'true';
+    style.textContent = `
+      html[data-mobile-auth='true'],
+      body[data-mobile-auth='true'] {
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body[data-mobile-auth='true'] input,
+      body[data-mobile-auth='true'] textarea,
+      body[data-mobile-auth='true'] select {
+        font-size: 16px !important;
+        transform: none !important;
+        zoom: 1 !important;
+      }
+    `;
+
+    document.documentElement.dataset.mobileAuth = 'true';
+    document.body.dataset.mobileAuth = 'true';
+    if (viewport) {
+      viewport.setAttribute('content', mobileAuthViewport);
+    }
+    document.head.appendChild(style);
+
+    return () => {
+      delete document.documentElement.dataset.mobileAuth;
+      delete document.body.dataset.mobileAuth;
+      style.remove();
+      if (viewport && previousViewport) {
+        viewport.setAttribute('content', previousViewport);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!isLoaded || redirectStartedRef.current) {
@@ -175,7 +217,7 @@ export default function MobileBrowserAuthPage() {
           callbackUrl,
           userId: user?.id ?? null,
         });
-        window.location.replace(buildRedirectUrl(callbackUrl, user, token, mode));
+        window.location.replace(buildRedirectUrl(callbackUrl, user, token, mode === 'refresh' ? 'refresh' : mode));
       } catch (cause) {
         redirectStartedRef.current = false;
         const nextError = cause instanceof Error ? cause.message : String(cause);
@@ -239,7 +281,9 @@ export default function MobileBrowserAuthPage() {
 
   return (
     <AuthLayout
-      title={mode === 'sign-up'
+      title={mode === 'refresh'
+        ? language === 'en' ? 'Restore your session' : 'Recuperar tu sesión'
+        : mode === 'sign-up'
         ? language === 'en' ? 'Create your account' : 'Crear tu cuenta'
         : language === 'en' ? 'Sign in' : 'Iniciar sesión'}
       secondaryActionLabel={language === 'en' ? 'Back to app' : 'Volver a la app'}

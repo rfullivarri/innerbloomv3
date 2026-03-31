@@ -114,6 +114,7 @@ function useNativeChrome(enabled: boolean) {
 function useDeepLinkNavigation(enabled: boolean) {
   const navigate = useNavigate();
   const lastHandledUrlRef = useRef<string | null>(null);
+  const lastClosedFingerprintRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!enabled) {
@@ -125,8 +126,12 @@ function useDeepLinkNavigation(enabled: boolean) {
       return;
     }
 
-    const handleUrl = async (url: string) => {
-      if (!url || lastHandledUrlRef.current === url) {
+    const handleUrl = async (url: string, source: 'launch' | 'event') => {
+      if (!url) {
+        return;
+      }
+
+      if (lastHandledUrlRef.current === url && source === 'event') {
         return;
       }
 
@@ -134,10 +139,29 @@ function useDeepLinkNavigation(enabled: boolean) {
 
       if (isNativeAuthCallbackUrl(url)) {
         const resolution = resolveMobileAuthSessionFromCallback(url);
-        await closeCapacitorBrowser();
-        if (resolution) {
-          console.info('[mobile-auth] bridge consumed callback', { type: resolution.type });
+        if (!resolution) {
+          return;
         }
+
+        if (resolution.type === 'duplicate' && source === 'launch') {
+          console.info('[mobile-auth] ignored duplicate launch callback', {
+            fingerprint: resolution.fingerprint,
+          });
+          return;
+        }
+
+        if (
+          resolution.type !== 'duplicate'
+          && lastClosedFingerprintRef.current !== resolution.fingerprint
+        ) {
+          lastClosedFingerprintRef.current = resolution.fingerprint;
+          await closeCapacitorBrowser();
+        }
+
+        console.info('[mobile-auth] bridge consumed callback', {
+          type: resolution.type,
+          source,
+        });
         navigate('/', { replace: true });
         return;
       }
@@ -150,14 +174,14 @@ function useDeepLinkNavigation(enabled: boolean) {
 
     void app.getLaunchUrl().then((launchUrl) => {
       if (launchUrl?.url) {
-        void handleUrl(launchUrl.url);
+        void handleUrl(launchUrl.url, 'launch');
       }
     });
 
     let listenerHandle: Awaited<ReturnType<typeof app.addListener>> | null = null;
 
     void Promise.resolve(app.addListener('appUrlOpen', ({ url }) => {
-      void handleUrl(url);
+      void handleUrl(url, 'event');
     })).then((handle) => {
       listenerHandle = handle;
     });

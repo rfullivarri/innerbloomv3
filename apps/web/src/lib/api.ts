@@ -2,7 +2,11 @@ import { apiLog, logApiDebug, logApiError } from './logger';
 import type { WeeklyWrappedPayload } from './weeklyWrapped';
 import { isDashboardDemoModeEnabled } from './demoMode';
 import { isNativeCapacitorPlatform } from '../mobile/capacitor';
-import { clearMobileAuthSession, getMobileAuthSession } from '../mobile/mobileAuthSession';
+import {
+  clearMobileAuthSession,
+  ensureFreshMobileAuthSession,
+  getMobileAuthSession,
+} from '../mobile/mobileAuthSession';
 import type {
   MissionsV2AbandonPayload,
   MissionsV2ActivatePayload,
@@ -98,6 +102,30 @@ function handleInvalidNativeMobileToken(status: number, body: any, url: string):
     causeName: typeof body?.details?.cause?.name === 'string' ? body.details.cause.name : null,
   });
   setApiAuthTokenProvider(null);
+}
+
+async function tryRefreshNativeMobileToken(url: string, body: any): Promise<boolean> {
+  if (!isNativeCapacitorPlatform() || !hasInvalidNativeMobileToken(body)) {
+    return false;
+  }
+
+  const session = getMobileAuthSession();
+  if (!session?.token) {
+    return false;
+  }
+
+  apiLog('[API] attempting native token refresh', {
+    url,
+    causeCode: typeof body?.details?.cause?.code === 'string' ? body.details.cause.code : null,
+  });
+
+  const refreshed = await ensureFreshMobileAuthSession({
+    force: true,
+    reason: 'api-401',
+    minValidityMs: 0,
+  });
+
+  return Boolean(refreshed?.token && refreshed.token !== session.token);
 }
 
 const DEV_USER_HEADER = 'X-Innerbloom-Demo-User';
@@ -205,14 +233,42 @@ async function loadDevBoard(userId: string | null): Promise<MissionsV2BoardRespo
 export async function apiRequest<T = unknown>(url: string, init?: RequestInit): Promise<T> {
   try {
     const requestInit = applyDevUserOverride(init);
-    const res = await fetch(url, requestInit);
+
+    const execute = async (): Promise<Response> => {
+      try {
+        const authToken = await resolveAuthToken();
+        return await fetch(url, applyAuthorization(requestInit, authToken));
+      } catch (error) {
+        if (error instanceof Error) {
+          apiLog('[API] auth token resolution failed', {
+            url,
+            error: error.message,
+          });
+        }
+        throw error;
+      }
+    };
+
+    let res = await execute();
 
     logApiDebug('API response received', { url, status: res.status });
 
     if (!res.ok) {
-      const body = await safeJson(res);
+      let body = await safeJson(res);
       const requestId =
         res.headers.get('x-railway-request-id') || res.headers.get('x-request-id') || undefined;
+
+      if (await tryRefreshNativeMobileToken(url, body)) {
+        res = await execute();
+        logApiDebug('API response received after native token refresh', { url, status: res.status });
+        if (res.ok) {
+          const json = (await res.json()) as T;
+          logApiDebug('API response parsed after native token refresh', { url, data: json });
+          return json;
+        }
+
+        body = await safeJson(res);
+      }
 
       handleInvalidNativeMobileToken(res.status, body, url);
 

@@ -13,7 +13,7 @@ import {
   isNativeCapacitorPlatform,
   openUrlInCapacitorBrowser,
 } from './capacitor';
-import { useMobileAuthSession } from './mobileAuthSession';
+import { useMobileAuthSession, type MobileAuthMode } from './mobileAuthSession';
 import type { OnboardingProgress } from '../lib/api';
 
 function MobileEntryShell({
@@ -152,7 +152,7 @@ function resolveNativeEntryRoute({
   isOnboardingComplete,
   dashboardPath,
 }: {
-  authMode: 'sign-in' | 'sign-up' | null;
+  authMode: MobileAuthMode | null;
   isOnboardingComplete: boolean;
   dashboardPath: string;
 }): string {
