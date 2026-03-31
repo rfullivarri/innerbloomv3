@@ -5,13 +5,11 @@ import { AuthLayout } from '../components/layout/AuthLayout';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { createAuthAppearance } from '../lib/clerkAppearance';
-import { buildWebAbsoluteUrl } from '../lib/siteUrl';
 import {
-  buildNativeAppUrl,
-  CAPACITOR_CALLBACK_HOST,
   isNativeCapacitorPlatform,
   openUrlInCapacitorBrowser,
 } from '../mobile/capacitor';
+import { buildNativeMobileAuthUrl } from '../mobile/mobileAuthSession';
 
 export default function SignUpPage() {
   const signUpContainerRef = useRef<HTMLDivElement | null>(null);
@@ -31,10 +29,7 @@ export default function SignUpPage() {
   });
 
   if (isNativeApp) {
-    const params = new URLSearchParams();
-    params.set('mode', 'sign-up');
-    params.set('return_to', buildNativeAppUrl(CAPACITOR_CALLBACK_HOST));
-    const mobileAuthUrl = buildWebAbsoluteUrl(`${buildLocalizedAuthPath('/mobile-auth', language)}?${params.toString()}`);
+    const mobileAuthUrl = buildNativeMobileAuthUrl('sign-up', language);
 
     return (
       <AuthLayout

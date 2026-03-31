@@ -6,13 +6,11 @@ import { DASHBOARD_PATH } from '../config/auth';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { createAuthAppearance } from '../lib/clerkAppearance';
 import { usePageMeta } from '../lib/seo';
-import { buildWebAbsoluteUrl } from '../lib/siteUrl';
 import {
-  buildNativeAppUrl,
-  CAPACITOR_CALLBACK_HOST,
   isNativeCapacitorPlatform,
   openUrlInCapacitorBrowser,
 } from '../mobile/capacitor';
+import { buildNativeMobileAuthUrl } from '../mobile/mobileAuthSession';
 
 export default function LoginPage() {
   const location = useLocation();
@@ -36,10 +34,7 @@ export default function LoginPage() {
   });
 
   if (isNativeApp) {
-    const params = new URLSearchParams();
-    params.set('mode', 'sign-in');
-    params.set('return_to', buildNativeAppUrl(CAPACITOR_CALLBACK_HOST));
-    const mobileAuthUrl = buildWebAbsoluteUrl(`${buildLocalizedAuthPath('/mobile-auth', language)}?${params.toString()}`);
+    const mobileAuthUrl = buildNativeMobileAuthUrl('sign-in', language);
 
     return (
       <AuthLayout

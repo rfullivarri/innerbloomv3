@@ -5,15 +5,9 @@ import { useAuth } from '../auth/runtimeAuth';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { useOnboardingProgress } from '../hooks/useOnboardingProgress';
-import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
-import { buildWebAbsoluteUrl } from '../lib/siteUrl';
-import {
-  buildNativeAppUrl,
-  CAPACITOR_CALLBACK_HOST,
-  isNativeCapacitorPlatform,
-  openUrlInCapacitorBrowser,
-} from './capacitor';
-import { useMobileAuthSession, type MobileAuthMode } from './mobileAuthSession';
+import { resolveAuthLanguage } from '../lib/authLanguage';
+import { isNativeCapacitorPlatform, openUrlInCapacitorBrowser } from './capacitor';
+import { buildNativeMobileAuthUrl, useMobileAuthSession, type MobileAuthMode } from './mobileAuthSession';
 import type { OnboardingProgress } from '../lib/api';
 
 function MobileEntryShell({
@@ -77,10 +71,7 @@ function MobileWelcome() {
   const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
 
   const openNativeAuth = async (mode: 'sign-in' | 'sign-up') => {
-    const params = new URLSearchParams();
-    params.set('mode', mode);
-    params.set('return_to', buildNativeAppUrl(CAPACITOR_CALLBACK_HOST));
-    const mobileAuthUrl = buildWebAbsoluteUrl(`${buildLocalizedAuthPath('/mobile-auth', language)}?${params.toString()}`);
+    const mobileAuthUrl = buildNativeMobileAuthUrl(mode, language);
     await openUrlInCapacitorBrowser(mobileAuthUrl);
   };
 

@@ -143,12 +143,15 @@ export function isMobileAuthSessionExpiringSoon(
   return session.expiresAt - Date.now() <= minValidityMs;
 }
 
-function buildMobileAuthRefreshUrl(mode: MobileAuthMode): string {
-  const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
-  const params = new URLSearchParams();
-  params.set('mode', mode);
-  params.set('return_to', buildNativeAppUrl(CAPACITOR_CALLBACK_HOST));
-  return buildWebAbsoluteUrl(`${buildLocalizedAuthPath('/mobile-auth', language)}?${params.toString()}`);
+export function buildNativeMobileAuthUrl(mode: MobileAuthMode, language?: string): string {
+  const resolvedLanguage =
+    language === 'es' || language === 'en'
+      ? language
+      : resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
+  const mobileAuthUrl = new URL(buildWebAbsoluteUrl(buildLocalizedAuthPath('/mobile-auth', resolvedLanguage)));
+  mobileAuthUrl.searchParams.set('mode', mode);
+  mobileAuthUrl.searchParams.set('return_to', buildNativeAppUrl(CAPACITOR_CALLBACK_HOST));
+  return mobileAuthUrl.toString();
 }
 
 function waitForMobileAuthSessionUpdate(previousUpdatedAt: number, timeoutMs: number): Promise<MobileAuthSession | null> {
@@ -206,7 +209,7 @@ export async function ensureFreshMobileAuthSession(options?: {
   }
 
   const refreshMode: MobileAuthMode = 'refresh';
-  const refreshUrl = buildMobileAuthRefreshUrl(refreshMode);
+  const refreshUrl = buildNativeMobileAuthUrl(refreshMode);
   writeMobileDebug('mobile-auth-refresh', {
     reason: options?.reason ?? 'unspecified',
     force,
