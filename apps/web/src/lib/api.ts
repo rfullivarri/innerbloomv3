@@ -2345,6 +2345,8 @@ export type DailyReminderSettingsResponse = {
   enabled?: boolean | null;
   last_sent_at?: string | null;
   delivery_strategy?: string | null;
+  was_first_schedule_completion?: boolean;
+  wasFirstScheduleCompletion?: boolean;
 };
 
 export type UpdateDailyReminderSettingsPayload = {
