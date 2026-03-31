@@ -2089,7 +2089,7 @@
 
 .landing .pricing .pricing-plan-name {
   font-size: 2rem;
-  line-height: 1.05;
+  line-height: 1.03;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--pricing-ink-label);
