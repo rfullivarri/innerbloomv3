@@ -2499,11 +2499,19 @@
     height: 50%;
   }
 
+  .landing .visible-scene-region--balance .visible-canvas-title {
+    font-size: 1.06rem;
+  }
+
+  .landing .visible-scene-region--emotion .visible-canvas-title {
+    font-size: 1rem;
+  }
+
   .landing .visible-scene-region--emotion {
     left: -17px;
     bottom: -24px;
     width: 47%;
-    height: 45%;
+    height: 52%;
   }
 
   .landing .visible-inner-contour--emotion {
@@ -2517,7 +2525,7 @@
     right: -88px;
     top: 34px;
     width: 64%;
-    height: 102%;
+    height: 108%;
   }
 
   .landing .visible-scene-fragment--radar {
