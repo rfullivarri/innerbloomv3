@@ -1,6 +1,8 @@
 import { apiLog, logApiDebug, logApiError } from './logger';
 import type { WeeklyWrappedPayload } from './weeklyWrapped';
 import { isDashboardDemoModeEnabled } from './demoMode';
+import { isNativeCapacitorPlatform } from '../mobile/capacitor';
+import { clearMobileAuthSession, getMobileAuthSession } from '../mobile/mobileAuthSession';
 import type {
   MissionsV2AbandonPayload,
   MissionsV2ActivatePayload,
@@ -56,6 +58,46 @@ async function safeJson(res: Response) {
   } catch {
     return null;
   }
+}
+
+function hasInvalidNativeMobileToken(body: any): boolean {
+  if (!body || typeof body !== 'object') {
+    return false;
+  }
+
+  const code = typeof body.code === 'string' ? body.code.trim().toLowerCase() : '';
+  const message = typeof body.message === 'string' ? body.message.trim().toLowerCase() : '';
+  const causeCode = typeof body.details?.cause?.code === 'string'
+    ? body.details.cause.code.trim().toUpperCase()
+    : '';
+
+  return (
+    code === 'unauthorized'
+    && (
+      causeCode === 'ERR_JWT_EXPIRED'
+      || causeCode === 'ERR_JWS_INVALID'
+      || message.includes('invalid authentication token')
+    )
+  );
+}
+
+function handleInvalidNativeMobileToken(status: number, body: any, url: string): void {
+  if (status !== 401 || !isNativeCapacitorPlatform()) {
+    return;
+  }
+
+  const session = getMobileAuthSession();
+  if (!session?.token || !hasInvalidNativeMobileToken(body)) {
+    return;
+  }
+
+  clearMobileAuthSession('expired-or-invalid-callback-token', {
+    url,
+    code: typeof body?.code === 'string' ? body.code : null,
+    causeCode: typeof body?.details?.cause?.code === 'string' ? body.details.cause.code : null,
+    causeName: typeof body?.details?.cause?.name === 'string' ? body.details.cause.name : null,
+  });
+  setApiAuthTokenProvider(null);
 }
 
 const DEV_USER_HEADER = 'X-Innerbloom-Demo-User';
@@ -171,6 +213,8 @@ export async function apiRequest<T = unknown>(url: string, init?: RequestInit): 
       const body = await safeJson(res);
       const requestId =
         res.headers.get('x-railway-request-id') || res.headers.get('x-request-id') || undefined;
+
+      handleInvalidNativeMobileToken(res.status, body, url);
 
       apiLog('[API] request failed', {
         url,

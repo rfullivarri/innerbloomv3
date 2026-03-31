@@ -126,12 +126,25 @@ export function persistMobileAuthSession(session: MobileAuthSession): MobileAuth
   return session;
 }
 
-export function clearMobileAuthSession(): void {
+export function clearMobileAuthSession(
+  reason?: string,
+  details?: Record<string, unknown>,
+): void {
   if (!canUseStorage()) {
     return;
   }
 
   window.localStorage.removeItem(MOBILE_AUTH_SESSION_STORAGE_KEY);
+  if (reason) {
+    writeMobileDebug('mobile-auth-session-cleared', {
+      reason,
+      ...(details ?? {}),
+    });
+    console.warn('[mobile-auth] cleared persisted session', {
+      reason,
+      ...(details ?? {}),
+    });
+  }
   emitMobileAuthSessionChange();
 }
 
