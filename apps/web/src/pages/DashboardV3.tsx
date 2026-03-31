@@ -18,9 +18,9 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
+import { apiAuthorizedFetch } from "../lib/api";
 import { Navbar } from "../components/layout/Navbar";
 import { MobileBottomNav } from "../components/layout/MobileBottomNav";
 import { Alerts } from "../components/dashboard-v3/Alerts";
@@ -163,7 +163,6 @@ function hasModerationBodyFocus(
 }
 
 export default function DashboardV3Page() {
-  const { getToken } = useAuth();
   const navigate = useNavigate();
   const { backendUserId, status, error, reload, clerkUserId, profile } =
     useBackendUser();
@@ -332,20 +331,13 @@ export default function DashboardV3Page() {
 
     const updateTimezone = async () => {
       try {
-        const token = await getToken();
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
         };
-
-        if (token) {
-          headers.Authorization = `Bearer ${token}`;
-        }
-
-        await fetch("/api/me/timezone", {
+        await apiAuthorizedFetch("/me/timezone", {
           method: "PUT",
           headers,
           body: JSON.stringify({ timezone }),
-          credentials: "include",
         });
       } catch (error) {
         console.warn("Failed to update user timezone", error);
@@ -362,7 +354,7 @@ export default function DashboardV3Page() {
     };
 
     void updateTimezone();
-  }, [clerkUserId, getToken]);
+  }, [clerkUserId]);
 
   if (!clerkUserId) {
     return null;

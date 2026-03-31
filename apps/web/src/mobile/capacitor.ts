@@ -118,6 +118,40 @@ export function isNativeAuthCallbackUrl(url: string): boolean {
   }
 }
 
+export function buildNativeAppUrl(host: string): string {
+  return `${CAPACITOR_APP_SCHEME}://${host}`;
+}
+
+export async function openUrlInCapacitorBrowser(url: string): Promise<void> {
+  const browser = getCapacitorBrowserPlugin();
+  if (browser) {
+    await browser.open({ url });
+    return;
+  }
+
+  if (typeof window !== 'undefined') {
+    window.location.assign(url);
+  }
+}
+
+export async function closeCapacitorBrowser(): Promise<void> {
+  const browser = getCapacitorBrowserPlugin();
+  if (!browser?.close) {
+    return;
+  }
+
+  try {
+    await browser.close();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (/No active window to close/i.test(message)) {
+      return;
+    }
+
+    console.warn('[mobile-auth] failed to close capacitor browser', { error });
+  }
+}
+
 export function shouldOpenExternalUrl(url: string): boolean {
   if (!url) {
     return false;

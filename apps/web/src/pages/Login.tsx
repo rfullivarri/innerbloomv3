@@ -5,10 +5,18 @@ import { DASHBOARD_PATH } from '../config/auth';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { createAuthAppearance } from '../lib/clerkAppearance';
 import { usePageMeta } from '../lib/seo';
+import { buildWebAbsoluteUrl } from '../lib/siteUrl';
+import {
+  buildNativeAppUrl,
+  CAPACITOR_CALLBACK_HOST,
+  isNativeCapacitorPlatform,
+  openUrlInCapacitorBrowser,
+} from '../mobile/capacitor';
 
 export default function LoginPage() {
   const location = useLocation();
   const language = resolveAuthLanguage(location.search);
+  const isNativeApp = isNativeCapacitorPlatform();
 
   usePageMeta({
     title: 'Innerbloom',
@@ -25,6 +33,36 @@ export default function LoginPage() {
     twitterImage: 'https://innerbloomjourney.org/og/neneOGP.png',
     url: 'https://innerbloomjourney.org/login'
   });
+
+  if (isNativeApp) {
+    const params = new URLSearchParams();
+    params.set('mode', 'sign-in');
+    params.set('return_to', buildNativeAppUrl(CAPACITOR_CALLBACK_HOST));
+    const mobileAuthUrl = buildWebAbsoluteUrl(`${buildLocalizedAuthPath('/mobile-auth', language)}?${params.toString()}`);
+
+    return (
+      <AuthLayout
+        title={language === 'en' ? 'Sign in' : 'Iniciar sesión'}
+        secondaryActionLabel={language === 'en' ? 'Back to app' : 'Volver a la app'}
+        secondaryActionHref="/"
+      >
+        <div className="mx-auto max-w-xl rounded-3xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-2xl">
+          <p className="text-sm leading-6 text-white/72">
+            {language === 'en'
+              ? 'Continue in the secure browser and return to Innerbloom with your active session.'
+              : 'Continúa en el navegador seguro y vuelve a Innerbloom con tu sesión activa.'}
+          </p>
+          <button
+            type="button"
+            onClick={() => void openUrlInCapacitorBrowser(mobileAuthUrl)}
+            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+          >
+            {language === 'en' ? 'Open secure login' : 'Abrir login seguro'}
+          </button>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout

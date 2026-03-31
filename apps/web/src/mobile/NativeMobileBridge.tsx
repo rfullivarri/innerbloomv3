@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CAPACITOR_KEYBOARD_RESIZE_NATIVE,
   CAPACITOR_KEYBOARD_STYLE_DARK,
   CAPACITOR_STATUS_BAR_STYLE_DARK,
+  closeCapacitorBrowser,
   getCapacitorAppPlugin,
   getCapacitorBrowserPlugin,
   getCapacitorKeyboardPlugin,
@@ -14,6 +15,7 @@ import {
   normalizeAppUrlToPath,
   shouldOpenExternalUrl,
 } from './capacitor';
+import { resolveMobileAuthSessionFromCallback } from './mobileAuthSession';
 
 function useNativeDocumentClass(enabled: boolean) {
   useEffect(() => {
@@ -111,6 +113,7 @@ function useNativeChrome(enabled: boolean) {
 
 function useDeepLinkNavigation(enabled: boolean) {
   const navigate = useNavigate();
+  const lastHandledUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!enabled) {
@@ -122,8 +125,20 @@ function useDeepLinkNavigation(enabled: boolean) {
       return;
     }
 
-    const handleUrl = (url: string) => {
+    const handleUrl = async (url: string) => {
+      if (!url || lastHandledUrlRef.current === url) {
+        return;
+      }
+
+      lastHandledUrlRef.current = url;
+
       if (isNativeAuthCallbackUrl(url)) {
+        const resolution = resolveMobileAuthSessionFromCallback(url);
+        await closeCapacitorBrowser();
+        if (resolution) {
+          console.info('[mobile-auth] bridge consumed callback', { type: resolution.type });
+        }
+        navigate('/', { replace: true });
         return;
       }
 
@@ -135,15 +150,15 @@ function useDeepLinkNavigation(enabled: boolean) {
 
     void app.getLaunchUrl().then((launchUrl) => {
       if (launchUrl?.url) {
-        handleUrl(launchUrl.url);
+        void handleUrl(launchUrl.url);
       }
     });
 
     let listenerHandle: Awaited<ReturnType<typeof app.addListener>> | null = null;
 
-    void app.addListener('appUrlOpen', ({ url }) => {
-      handleUrl(url);
-    }).then((handle) => {
+    void Promise.resolve(app.addListener('appUrlOpen', ({ url }) => {
+      void handleUrl(url);
+    })).then((handle) => {
       listenerHandle = handle;
     });
 

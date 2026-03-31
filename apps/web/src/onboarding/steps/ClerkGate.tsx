@@ -1,7 +1,17 @@
-import { SignIn, SignUp, useAuth, useUser } from '@clerk/clerk-react';
+import { SignIn, SignUp } from '@clerk/clerk-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
+import { useAuth, useUser } from '../../auth/runtimeAuth';
+import { buildLocalizedAuthPath } from '../../lib/authLanguage';
 import { createAuthAppearance } from '../../lib/clerkAppearance';
+import { buildWebAbsoluteUrl } from '../../lib/siteUrl';
+import {
+  buildNativeAppUrl,
+  CAPACITOR_CALLBACK_HOST,
+  isNativeCapacitorPlatform,
+  openUrlInCapacitorBrowser,
+} from '../../mobile/capacitor';
+import { useMobileAuthSession } from '../../mobile/mobileAuthSession';
 import type { OnboardingLanguage } from '../constants';
 import { useOnboarding } from '../state';
 
@@ -38,9 +48,14 @@ const clerkAppearance = createAuthAppearance({
 export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: ClerkGateProps) {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { user } = useUser();
+  const mobileAuthSession = useMobileAuthSession();
   const { syncClerkSession } = useOnboarding();
   const [tab, setTab] = useState<TabId>('sign-up');
   const [hasAutoAdvanced, setHasAutoAdvanced] = useState(false);
+  const isNativeApp = isNativeCapacitorPlatform();
+  const hasNativeSession = isNativeApp && Boolean(mobileAuthSession?.token);
+  const effectiveLoaded = isLoaded || hasNativeSession;
+  const effectiveSignedIn = isSignedIn || hasNativeSession;
   const tabOptions = TAB_OPTIONS[language];
   const copy = language === 'en'
     ? {
@@ -60,17 +75,26 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
         create: 'Creá tu cuenta Innerbloom',
       };
 
-  const currentUrl = useMemo(() => (typeof window !== 'undefined' ? window.location.href : '/onboarding'), []);
-  const userEmail = user?.primaryEmailAddress?.emailAddress ?? '';
-  const userId = user?.id ?? '';
+  const userEmail = user?.primaryEmailAddress?.emailAddress ?? mobileAuthSession?.email ?? '';
+  const userId = user?.id ?? mobileAuthSession?.clerkUserId ?? '';
+
+  const openNativeAuth = async (mode: 'sign-in' | 'sign-up') => {
+    const path = buildLocalizedAuthPath('/mobile-auth', language);
+    const params = new URLSearchParams();
+    params.set('mode', mode);
+    params.set('return_to', buildNativeAppUrl(CAPACITOR_CALLBACK_HOST));
+    await openUrlInCapacitorBrowser(buildWebAbsoluteUrl(`${path}?${params.toString()}`));
+  };
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn) {
+    if (!effectiveLoaded || !effectiveSignedIn) {
       return;
     }
 
     if (userEmail && userId) {
-      const provider = () => getToken();
+      const provider = hasNativeSession
+        ? async () => mobileAuthSession?.token ?? null
+        : () => getToken();
       syncClerkSession(userEmail, userId, provider);
 
       if (autoAdvance && !hasAutoAdvanced) {
@@ -78,9 +102,21 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
         onContinue();
       }
     }
-  }, [autoAdvance, getToken, hasAutoAdvanced, isLoaded, isSignedIn, onContinue, syncClerkSession, userEmail, userId]);
+  }, [
+    autoAdvance,
+    effectiveLoaded,
+    effectiveSignedIn,
+    getToken,
+    hasAutoAdvanced,
+    hasNativeSession,
+    mobileAuthSession?.token,
+    onContinue,
+    syncClerkSession,
+    userEmail,
+    userId,
+  ]);
 
-  if (!isLoaded) {
+  if (!effectiveLoaded) {
     return (
       <div className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-white/10 p-8 text-center text-white/70 backdrop-blur-2xl">
         {copy.loading}
@@ -88,7 +124,7 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
     );
   }
 
-  if (isSignedIn) {
+  if (effectiveSignedIn) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -105,6 +141,58 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
         >
           {copy.start}
         </button>
+      </motion.div>
+    );
+  }
+
+  if (isNativeApp) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.24, ease: 'easeOut' }}
+        className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl px-3 py-5 sm:p-6"
+      >
+        <div className="flex items-center justify-between border-b border-white/5 pb-4">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-white/50">{copy.step}</p>
+            <h2 className="text-2xl font-semibold text-white">{copy.create}</h2>
+          </div>
+        </div>
+        <div className="mt-4 flex gap-2 rounded-full bg-white/10 p-1 backdrop-blur">
+          {tabOptions.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => setTab(option.id)}
+              className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition ${
+                tab === option.id ? 'bg-white text-slate-900 shadow' : 'text-white/70 hover:text-white'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        <div className="mt-6 space-y-3 rounded-2xl bg-white/6 p-5 text-white/80">
+          <p className="text-sm leading-6">
+            {tab === 'sign-up'
+              ? language === 'en'
+                ? 'Create your account in the secure browser and return to the app to continue onboarding.'
+                : 'Crea tu cuenta en el navegador seguro y vuelve a la app para continuar el onboarding.'
+              : language === 'en'
+                ? 'Sign in in the secure browser and return to the app with your active session.'
+                : 'Inicia sesión en el navegador seguro y vuelve a la app con tu sesión activa.'}
+          </p>
+          <button
+            type="button"
+            onClick={() => void openNativeAuth(tab)}
+            className="inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-2 text-sm font-semibold text-slate-900 shadow-lg transition hover:bg-slate-100"
+          >
+            {tab === 'sign-up'
+              ? language === 'en' ? 'Create account' : 'Crear cuenta'
+              : language === 'en' ? 'Sign in' : 'Iniciar sesión'}
+          </button>
+        </div>
       </motion.div>
     );
   }

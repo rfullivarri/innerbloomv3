@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/runtimeAuth';
+import { isNativeCapacitorPlatform } from '../mobile/capacitor';
+import { useMobileAuthSession } from '../mobile/mobileAuthSession';
 import { STEP_XP, CHECKLIST_LIMITS, OPEN_TEXT_XP, getFormLabels, type OnboardingLanguage } from './constants';
 import { buildPayload } from './payload';
 import { useOnboarding } from './state';
@@ -60,6 +62,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   const isClerkGateStep = stepId === 'clerk-gate';
   const [snack, setSnack] = useState<string | null>(null);
   const { isLoaded: authLoaded, isSignedIn } = useAuth();
+  const mobileAuthSession = useMobileAuthSession();
   const navigate = useNavigate();
   const hasRecordedSession = useRef(false);
   const [shouldAutoAdvance, setShouldAutoAdvance] = useState(false);
@@ -69,13 +72,17 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   const quickStartGp = computeQuickStartGp(answers.quickStart.selectedTasksByPillar);
   const hudXp = onboardingPath === 'quick_start' ? quickStartGp.xp : xp;
   const isQuickStartFlowActive = onboardingPath === 'quick_start' && stepId.startsWith('quick-start');
+  const isNativeApp = isNativeCapacitorPlatform();
+  const hasNativeSession = isNativeApp && Boolean(mobileAuthSession?.token);
+  const hasEffectiveSession = isSignedIn || hasNativeSession;
+  const authReady = authLoaded || hasNativeSession;
 
   useEffect(() => {
-    if (!hasRecordedSession.current && authLoaded) {
+    if (!hasRecordedSession.current && authReady) {
       hasRecordedSession.current = true;
-      setShouldAutoAdvance(Boolean(isSignedIn));
+      setShouldAutoAdvance(Boolean(hasEffectiveSession));
     }
-  }, [authLoaded, isSignedIn]);
+  }, [authReady, hasEffectiveSession]);
 
   const showSnack = (amount?: number) => {
     if (!amount || amount <= 0) return;
@@ -234,7 +241,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
 
   const handleRestart = () => {
     reset();
-    setShouldAutoAdvance(Boolean(isSignedIn));
+    setShouldAutoAdvance(Boolean(hasEffectiveSession));
     setSnack(null);
   };
 

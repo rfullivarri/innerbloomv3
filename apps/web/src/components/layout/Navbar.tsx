@@ -1,4 +1,4 @@
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useAuth, useUser } from '../../auth/runtimeAuth';
 import { type ReactNode, type RefObject } from 'react';
 import { NavLink } from 'react-router-dom';
 

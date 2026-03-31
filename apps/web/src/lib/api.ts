@@ -337,7 +337,14 @@ function applyAuthorization(init: RequestInit | undefined, authToken: string): R
   };
 }
 
-const RAW_API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? '').trim();
+const BUILD_TARGET = String(import.meta.env.VITE_BUILD_TARGET ?? '').trim().toLowerCase();
+const PREFER_NATIVE_LOCAL_API =
+  BUILD_TARGET === 'native' || BUILD_TARGET === 'native-local' || BUILD_TARGET === 'capacitor';
+const RAW_API_BASE_URL = String(
+  (PREFER_NATIVE_LOCAL_API
+    ? import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE_URL
+    : import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL) ?? '',
+).trim();
 
 function isAbsoluteUrl(value: string): boolean {
   return /^https?:\/\//i.test(value) || value.startsWith('//');
@@ -473,9 +480,15 @@ function resolveApiBase(): string {
 export const API_BASE = resolveApiBase();
 
 console.info('[API] BASE =', API_BASE);
+console.info('[API] build target =', BUILD_TARGET || 'web');
 
 if (API_BASE) {
-  logApiDebug('API base URL configured', { raw: RAW_API_BASE_URL, normalized: API_BASE });
+  logApiDebug('API base URL configured', {
+    raw: RAW_API_BASE_URL,
+    normalized: API_BASE,
+    buildTarget: BUILD_TARGET || 'web',
+    preferNativeLocalApi: PREFER_NATIVE_LOCAL_API,
+  });
 }
 
 function ensureBase(): string {

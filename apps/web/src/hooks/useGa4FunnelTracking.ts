@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../auth/runtimeAuth';
 import { readCookieConsentState } from '../lib/cookieConsent';
 import { ensureGa4Initialized, sendGaEvent } from '../lib/ga4';
 

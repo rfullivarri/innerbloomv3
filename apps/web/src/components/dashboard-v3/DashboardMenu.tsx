@@ -1,4 +1,4 @@
-import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
+import { useAuth, useClerk, useUser } from "../../auth/runtimeAuth";
 import { AnimatePresence, motion } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";

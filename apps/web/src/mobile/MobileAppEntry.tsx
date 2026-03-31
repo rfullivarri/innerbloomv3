@@ -115,7 +115,7 @@ function resolveNativeEntryRoute({
   }
 
   if (authMode === 'sign-up') {
-    return '/intro-journey';
+    return isOnboardingComplete ? dashboardPath : '/intro-journey';
   }
 
   return isOnboardingComplete ? dashboardPath : '/intro-journey';

@@ -1,11 +1,13 @@
-import { useAuth } from '@clerk/clerk-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../auth/runtimeAuth';
 import {
   getCurrentUserProfile,
   isApiAuthTokenProviderReady,
   onApiAuthTokenProviderChange,
   type CurrentUserProfile,
 } from '../lib/api';
+import { isNativeCapacitorPlatform } from '../mobile/capacitor';
+import { useMobileAuthSession } from '../mobile/mobileAuthSession';
 import { useRequest, type AsyncStatus } from './useRequest';
 
 export type BackendUserState = {
@@ -19,6 +21,10 @@ export type BackendUserState = {
 
 export function useBackendUser(): BackendUserState {
   const { userId: clerkUserId, isSignedIn } = useAuth();
+  const mobileAuthSession = useMobileAuthSession();
+  const isNativeApp = isNativeCapacitorPlatform();
+  const hasNativeCallbackSession = isNativeApp && Boolean(mobileAuthSession?.token);
+  const effectiveClerkUserId = clerkUserId ?? mobileAuthSession?.clerkUserId ?? null;
   const [isAuthReady, setIsAuthReady] = useState(isApiAuthTokenProviderReady());
 
   useEffect(() => {
@@ -28,16 +34,17 @@ export function useBackendUser(): BackendUserState {
     });
   }, []);
 
-  const enabled = Boolean(isSignedIn && clerkUserId && isAuthReady);
+  const enabled = Boolean(isAuthReady && (isSignedIn || hasNativeCallbackSession));
 
   const requestFactory = useCallback(() => {
-    if (!clerkUserId) {
-      return Promise.reject<CurrentUserProfile>(new Error('Missing Clerk user ID'));
-    }
-
-    console.info('[API] /users/me signedIn:', isSignedIn, 'userId:', clerkUserId);
+    console.info('[API] /users/me auth context', {
+      isSignedIn,
+      isNativeApp,
+      hasNativeCallbackSession,
+      clerkUserId: effectiveClerkUserId,
+    });
     return getCurrentUserProfile();
-  }, [clerkUserId, isSignedIn]);
+  }, [effectiveClerkUserId, hasNativeCallbackSession, isNativeApp, isSignedIn]);
 
   const { data, status, error, reload } = useRequest(
     requestFactory,
@@ -51,13 +58,13 @@ export function useBackendUser(): BackendUserState {
 
   return useMemo(
     () => ({
-      clerkUserId: clerkUserId ?? null,
+      clerkUserId: effectiveClerkUserId,
       backendUserId,
       profile,
       status: normalizedStatus,
       error: enabled ? error : null,
       reload,
     }),
-    [backendUserId, clerkUserId, enabled, error, normalizedStatus, profile, reload],
+    [backendUserId, effectiveClerkUserId, enabled, error, normalizedStatus, profile, reload],
   );
 }
