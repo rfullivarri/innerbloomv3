@@ -12,6 +12,7 @@ import { usePostLoginLanguage } from "../../i18n/postLoginLanguage";
 import { useLongPress } from "../../hooks/useLongPress";
 import { useRequest } from "../../hooks/useRequest";
 import { useThemePreference } from "../../theme/ThemePreferenceProvider";
+import { isNativeCapacitorPlatform } from "../../mobile/capacitor";
 import {
   acceptGameModeUpgradeSuggestion,
   ApiError,
@@ -228,6 +229,7 @@ export function DashboardMenu({
     iosInstructionsOpen,
     closeIosInstructions,
   } = useQuickAccessInstall();
+  const isNativeApp = isNativeCapacitorPlatform();
 
   useEffect(() => {
     setPortalNode(document.body);
@@ -968,7 +970,7 @@ export function DashboardMenu({
                       </div>
                     </section>
 
-                  {isMobile ? (
+                  {isMobile && !isNativeApp ? (
                     <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-quickaccess-bg)] p-4">
                       <div className="mb-3 flex items-center gap-2 text-[color:var(--color-quickaccess-text)]">
                         <MenuIcon className="h-4 w-4 text-[color:var(--color-quickaccess-text)]">
@@ -1127,7 +1129,7 @@ export function DashboardMenu({
                   </MenuIcon>
                   <span>{t('dashboard.menu.signOut')}</span>
                 </button>
-                {iosInstructionsOpen && isIOS ? (
+                {iosInstructionsOpen && isIOS && !isNativeApp ? (
                   <div
                     role="dialog"
                     aria-modal="true"

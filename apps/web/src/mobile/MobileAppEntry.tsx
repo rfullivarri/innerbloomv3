@@ -1,11 +1,18 @@
 import { useEffect } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { useAuth } from '../auth/runtimeAuth';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 import { useBackendUser } from '../hooks/useBackendUser';
 import { useOnboardingProgress } from '../hooks/useOnboardingProgress';
-import { isNativeCapacitorPlatform } from './capacitor';
+import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
+import { buildWebAbsoluteUrl } from '../lib/siteUrl';
+import {
+  buildNativeAppUrl,
+  CAPACITOR_CALLBACK_HOST,
+  isNativeCapacitorPlatform,
+  openUrlInCapacitorBrowser,
+} from './capacitor';
 import { useMobileAuthSession } from './mobileAuthSession';
 import type { OnboardingProgress } from '../lib/api';
 
@@ -67,25 +74,35 @@ function MobileEntryError({
 }
 
 function MobileWelcome() {
+  const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
+
+  const openNativeAuth = async (mode: 'sign-in' | 'sign-up') => {
+    const params = new URLSearchParams();
+    params.set('mode', mode);
+    params.set('return_to', buildNativeAppUrl(CAPACITOR_CALLBACK_HOST));
+    const mobileAuthUrl = buildWebAbsoluteUrl(`${buildLocalizedAuthPath('/mobile-auth', language)}?${params.toString()}`);
+    await openUrlInCapacitorBrowser(mobileAuthUrl);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center px-5 pb-[calc(env(safe-area-inset-bottom,0px)+1.75rem)] pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] text-white">
-      <div className="flex min-h-[78vh] w-full max-w-md flex-col overflow-hidden rounded-[2.2rem] border border-white/14 bg-[linear-gradient(180deg,rgba(42,62,118,0.96),rgba(17,24,61,0.98))] shadow-[0_28px_90px_rgba(7,14,40,0.52)] backdrop-blur-2xl">
-        <div className="px-6 pt-6 text-center">
-          <div className="flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.38em] text-white/58">
-            <BrandWordmark className="gap-2.5" textClassName="tracking-[0.38em]" iconClassName="h-[1.95em]" />
+    <div className="flex min-h-screen items-center justify-center px-5 pb-[calc(env(safe-area-inset-bottom,0px)+1.75rem)] pt-[calc(env(safe-area-inset-top,0px)+1rem)] text-white">
+      <div className="flex min-h-[82vh] w-full max-w-md flex-col">
+        <div className="pt-3 text-center">
+          <div className="flex items-center justify-center text-[13px] font-semibold uppercase tracking-[0.42em] text-white/66">
+            <BrandWordmark className="gap-3" textClassName="tracking-[0.42em]" iconClassName="h-[2.45em]" />
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
-          <div className="rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="flex flex-1 flex-col px-1 pb-3 pt-6">
+          <div className="px-2">
             <img
               src="/og/neneOG4.jpg"
               alt="Innerbloom hero"
-              className="h-[34vh] min-h-[270px] w-full rounded-[1.5rem] object-cover object-center shadow-[0_18px_60px_rgba(15,23,42,0.34)]"
+              className="h-[37vh] min-h-[300px] w-full rounded-[1.75rem] object-cover object-center shadow-[0_24px_70px_rgba(15,23,42,0.38)]"
             />
           </div>
 
-          <div className="flex flex-1 flex-col justify-end pt-6">
+          <div className="flex flex-1 flex-col justify-end pt-7">
             <div className="space-y-3 text-center">
               <h1 className="text-[2rem] font-semibold tracking-tight text-white">Bienvenido</h1>
               <p className="mx-auto max-w-[18rem] text-sm leading-6 text-white/74">
@@ -93,19 +110,21 @@ function MobileWelcome() {
               </p>
             </div>
 
-            <div className="mt-7 space-y-3">
-              <Link
-                to="/login"
+            <div className="mt-8 space-y-3 px-2">
+              <button
+                type="button"
+                onClick={() => void openNativeAuth('sign-in')}
                 className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_20px_44px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
               >
                 Iniciar sesión
-              </Link>
-              <Link
-                to="/sign-up"
+              </button>
+              <button
+                type="button"
+                onClick={() => void openNativeAuth('sign-up')}
                 className="inline-flex w-full items-center justify-center rounded-full border border-white/18 bg-white/8 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-white/12"
               >
                 Crear cuenta
-              </Link>
+              </button>
             </div>
           </div>
         </div>
