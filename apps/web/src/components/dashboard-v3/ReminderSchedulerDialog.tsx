@@ -22,7 +22,7 @@ export type ReminderSchedulerDialogHandle = {
 interface ReminderSchedulerDialogProps {
   enabled?: boolean;
   returnFocusRef?: RefObject<HTMLElement | null>;
-  onScheduled?: () => void | Promise<void>;
+  onScheduled?: (metadata: { wasFirstScheduleCompletion: boolean }) => void | Promise<void>;
 }
 
 export const ReminderSchedulerDialog = forwardRef<
@@ -163,9 +163,12 @@ export const ReminderSchedulerDialog = forwardRef<
               </button>
             </div>
             <div className="flex-1 overflow-y-auto pr-1">
-              <DailyReminderSettings onSaveSuccess={() => {
+              <DailyReminderSettings onSaveSuccess={(response) => {
                 close();
-                void onScheduled?.();
+                const wasFirstScheduleCompletion =
+                  response.was_first_schedule_completion === true ||
+                  response.wasFirstScheduleCompletion === true;
+                void onScheduled?.({ wasFirstScheduleCompletion });
               }} />
             </div>
           </motion.div>

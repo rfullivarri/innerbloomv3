@@ -93,6 +93,8 @@ describe('GET /api/me/daily-reminder', () => {
       localTime: '08:30:00',
       last_sent_at: null,
       delivery_strategy: 'user_local_time',
+      was_first_schedule_completion: false,
+      wasFirstScheduleCompletion: false,
     });
     expect(mockQuery).toHaveBeenCalledTimes(1);
   });
@@ -118,6 +120,8 @@ describe('GET /api/me/daily-reminder', () => {
       localTime: '09:00:00',
       last_sent_at: null,
       delivery_strategy: 'user_local_time',
+      was_first_schedule_completion: false,
+      wasFirstScheduleCompletion: false,
     });
     expect(mockQuery).toHaveBeenNthCalledWith(2, expect.stringContaining('SELECT timezone'), [verifiedUser.id]);
   });
@@ -169,6 +173,7 @@ describe('PUT /api/me/daily-reminder', () => {
 
     mockQuery
       .mockResolvedValueOnce({ rows: [{ exists: true }] })
+      .mockResolvedValueOnce({ rows: [{ first_programmed: false }] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [created] })
       .mockResolvedValueOnce({ rowCount: 1 });
@@ -192,13 +197,18 @@ describe('PUT /api/me/daily-reminder', () => {
       localTime: '10:00:00',
       last_sent_at: null,
       delivery_strategy: 'user_local_time',
+      was_first_schedule_completion: false,
+      wasFirstScheduleCompletion: false,
     });
     expect(mockQuery).toHaveBeenNthCalledWith(1, VALIDATE_TIMEZONE_SQL, ['America/Bogota']);
-    expect(mockQuery).toHaveBeenNthCalledWith(2, expect.stringContaining('FROM user_daily_reminders'), [
+    expect(mockQuery).toHaveBeenNthCalledWith(2, expect.stringContaining('SELECT first_programmed FROM users'), [
+      verifiedUser.id,
+    ]);
+    expect(mockQuery).toHaveBeenNthCalledWith(3, expect.stringContaining('FROM user_daily_reminders'), [
       verifiedUser.id,
       'email',
     ]);
-    expect(mockQuery).toHaveBeenNthCalledWith(4, expect.stringContaining('UPDATE users'), [
+    expect(mockQuery).toHaveBeenNthCalledWith(5, expect.stringContaining('UPDATE users'), [
       verifiedUser.id,
       false,
       'email',
@@ -237,6 +247,7 @@ describe('PUT /api/me/daily-reminder', () => {
 
     mockQuery
       .mockResolvedValueOnce({ rows: [{ exists: true }] })
+      .mockResolvedValueOnce({ rows: [{ first_programmed: false }] })
       .mockResolvedValueOnce({ rows: [existing] })
       .mockResolvedValueOnce({ rows: [updated] })
       .mockResolvedValueOnce({ rowCount: 1 })
@@ -287,13 +298,18 @@ describe('PUT /api/me/daily-reminder', () => {
       localTime: '07:30:00',
       last_sent_at: null,
       delivery_strategy: 'user_local_time',
+      was_first_schedule_completion: true,
+      wasFirstScheduleCompletion: true,
     });
     expect(mockQuery).toHaveBeenNthCalledWith(1, VALIDATE_TIMEZONE_SQL, ['America/New_York']);
-    expect(mockQuery).toHaveBeenNthCalledWith(2, expect.stringContaining('FROM user_daily_reminders'), [
+    expect(mockQuery).toHaveBeenNthCalledWith(2, expect.stringContaining('SELECT first_programmed FROM users'), [
+      verifiedUser.id,
+    ]);
+    expect(mockQuery).toHaveBeenNthCalledWith(3, expect.stringContaining('FROM user_daily_reminders'), [
       verifiedUser.id,
       'email',
     ]);
-    expect(mockQuery).toHaveBeenNthCalledWith(4, expect.stringContaining('UPDATE users'), [
+    expect(mockQuery).toHaveBeenNthCalledWith(5, expect.stringContaining('UPDATE users'), [
       verifiedUser.id,
       true,
       'email',
