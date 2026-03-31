@@ -2476,19 +2476,20 @@
 
 @media (max-width: 640px) {
   .landing .visible-progress-module {
-    height: 484px;
-    min-height: 484px;
+    height: 468px;
+    min-height: 468px;
+    padding: 8px;
   }
 
   .landing .visible-scene-region--balance .visible-canvas-chip {
-    transform: translate(-10px, -1px);
-    padding: 3px 8px;
-    font-size: 0.64rem;
+    transform: translate(-4px, 1px);
+    padding: 2px 7px;
+    font-size: 0.62rem;
   }
 
   .landing .visible-progress-scene {
     inset: -36px -74px -58px -68px;
-    transform: translate(34px, 30px) scale(0.68);
+    transform: translate(30px, 22px) scale(0.72);
   }
 
   .landing .visible-scene-region--balance {
