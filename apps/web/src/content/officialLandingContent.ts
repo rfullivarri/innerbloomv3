@@ -235,7 +235,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       plans: [
         { id: 'FREE', name: 'FREE', price: '2 meses gratis', detail: 'La mejor forma de explorar Innerbloom sin compromiso inicial.' },
         { id: 'MONTH', name: 'MONTH', price: '4,99 EUR/mes', detail: 'Suscripción mensual para seguir construyendo constancia con total flexibilidad.' },
-        { id: 'SIX_MONTHS', name: 'SIX_MONTHS', price: '23 EUR', detail: 'Plan de 6 meses para una constancia más fuerte y mejor valor a lo largo del tiempo.' },
+        { id: 'SIX_MONTHS', name: '6 MESES', price: '23 EUR', detail: 'Plan de 6 meses para una constancia más fuerte y mejor valor a lo largo del tiempo.' },
         { id: 'YEAR', name: 'YEAR', price: '32 EUR', detail: 'Plan anual para un compromiso más profundo, crecimiento a largo plazo y mayor ahorro.' }
       ]
     },
@@ -470,7 +470,7 @@ export const OFFICIAL_LANDING_CONTENT: Record<Language, LandingCopy> = {
       plans: [
         { id: 'FREE', name: 'FREE', price: '2 months free', detail: 'Best to explore Innerbloom with zero upfront commitment.' },
         { id: 'MONTH', name: 'MONTH', price: '4.99 EUR/month', detail: 'Monthly subscription to keep building consistency with full flexibility.' },
-        { id: 'SIX_MONTHS', name: 'SIX_MONTHS', price: '23 EUR', detail: 'A 6-month plan for stronger consistency and better value over time.' },
+        { id: 'SIX_MONTHS', name: '6 MONTHS', price: '23 EUR', detail: 'A 6-month plan for stronger consistency and better value over time.' },
         { id: 'YEAR', name: 'YEAR', price: '32 EUR', detail: 'Annual plan for deeper commitment, long-term growth, and the best savings.' }
       ]
     },
