@@ -1998,10 +1998,25 @@
   border-color: transparent;
 }
 
+.landing .pricing {
+  --pricing-ink-strong: #1f1728;
+  --pricing-ink-body: rgba(31, 23, 40, 0.78);
+  --pricing-ink-label: rgba(31, 23, 40, 0.68);
+  --pricing-chip-ink: rgba(28, 18, 39, 0.94);
+}
+
+.landing .pricing h2 {
+  color: var(--pricing-ink-strong);
+}
+
+.landing .pricing .section-sub {
+  color: var(--pricing-ink-body);
+}
+
 .landing .pricing-trial-highlight {
   margin: 8px 0 8px;
   text-align: center;
-  color: rgba(244, 248, 255, 0.95);
+  color: var(--pricing-ink-body);
   font-size: 1rem;
   font-weight: 700;
 }
@@ -2009,7 +2024,7 @@
 .landing .pricing-tax-note {
   margin: -4px 0 20px;
   text-align: center;
-  color: rgba(216, 232, 255, 0.86);
+  color: var(--pricing-ink-label);
   font-size: 0.9rem;
 }
 
@@ -2045,7 +2060,7 @@
     color-mix(in srgb, var(--accent) 84%, #ffffff 16%),
     var(--accent-2)
   );
-  color: #fbf7ff;
+  color: var(--pricing-chip-ink);
   box-shadow:
     0 10px 24px color-mix(in srgb, var(--accent-2) 56%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.45);
@@ -2059,12 +2074,12 @@
   font-size: 1rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--pricing-ink-label);
 }
 
 .landing .pricing-plan-detail {
   margin-top: 1.3rem;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--pricing-ink-body);
   font-size: 1.18rem;
   line-height: 1.5;
 }
@@ -2075,7 +2090,7 @@
   font-size: 2.82rem;
   font-weight: 600;
   line-height: 1.1;
-  color: #fff;
+  color: var(--pricing-ink-strong);
 }
 
 .landing .faq details {
