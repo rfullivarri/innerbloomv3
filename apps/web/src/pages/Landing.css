@@ -1998,18 +1998,39 @@
   border-color: transparent;
 }
 
-.landing .pricing-trial-highlight {
+.landing .pricing {
+  --pricing-ink-strong: #1f1728;
+  --pricing-ink-body: rgba(31, 23, 40, 0.78);
+  --pricing-ink-label: rgba(31, 23, 40, 0.68);
+  --pricing-chip-ink: rgba(28, 18, 39, 0.94);
+  --pricing-card-border: rgba(113, 83, 139, 0.36);
+  --pricing-card-bg:
+    radial-gradient(120% 110% at 12% 16%, rgba(255, 255, 255, 0.28), transparent 58%),
+    linear-gradient(145deg, rgba(247, 233, 255, 0.26), rgba(214, 229, 255, 0.22));
+  --pricing-card-shadow:
+    0 16px 34px rgba(64, 34, 86, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.52);
+}
+
+.landing .pricing h2 {
+  color: var(--pricing-ink-strong);
+}
+
+.landing .pricing .section-sub {
+  color: var(--pricing-ink-body);
+}
+
+.landing .pricing .pricing-trial-highlight {
   margin: 8px 0 8px;
   text-align: center;
-  color: rgba(244, 248, 255, 0.95);
+  color: var(--pricing-ink-body);
   font-size: 1rem;
   font-weight: 700;
 }
 
-.landing .pricing-tax-note {
+.landing .pricing .pricing-tax-note {
   margin: -4px 0 20px;
   text-align: center;
-  color: rgba(216, 232, 255, 0.86);
+  color: var(--pricing-ink-label);
   font-size: 0.9rem;
 }
 
@@ -2019,21 +2040,25 @@
   gap: 14px;
 }
 
-.landing .pricing-card {
+.landing .pricing .pricing-card {
   position: relative;
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 0;
   min-height: 390px;
   border-radius: var(--landing-glass-radius-lg);
-  border: 1px solid var(--landing-glass-border);
-  background: var(--landing-glass-bg);
+  border: 1px solid var(--pricing-card-border);
+  background: var(--pricing-card-bg);
   backdrop-filter: blur(var(--landing-glass-blur));
-  box-shadow: var(--landing-glass-shadow);
+  box-shadow: var(--pricing-card-shadow);
   padding: 18.15px;
 }
 
-.landing .pricing-best-deal-chip {
+.landing .pricing .pricing-card::before {
+  opacity: 0.72;
+}
+
+.landing .pricing .pricing-best-deal-chip {
   position: absolute;
   top: 14px;
   right: 14px;
@@ -2045,7 +2070,7 @@
     color-mix(in srgb, var(--accent) 84%, #ffffff 16%),
     var(--accent-2)
   );
-  color: #fbf7ff;
+  color: var(--pricing-chip-ink);
   box-shadow:
     0 10px 24px color-mix(in srgb, var(--accent-2) 56%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.45);
@@ -2055,27 +2080,27 @@
   text-transform: uppercase;
 }
 
-.landing .pricing-plan-name {
+.landing .pricing .pricing-plan-name {
   font-size: 1rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--pricing-ink-label);
 }
 
-.landing .pricing-plan-detail {
+.landing .pricing .pricing-plan-detail {
   margin-top: 1.3rem;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--pricing-ink-body);
   font-size: 1.18rem;
   line-height: 1.5;
 }
 
-.landing .pricing-plan-price {
+.landing .pricing .pricing-plan-price {
   margin-top: 0;
   padding-top: 1.4rem;
   font-size: 2.82rem;
   font-weight: 600;
   line-height: 1.1;
-  color: #fff;
+  color: var(--pricing-ink-strong);
 }
 
 .landing .faq details {
