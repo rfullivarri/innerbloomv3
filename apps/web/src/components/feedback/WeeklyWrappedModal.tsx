@@ -275,7 +275,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
           type="button"
           onClick={onClose}
           className="ib-weekly-wrapped-close absolute right-5 top-5 z-20 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-50 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-400/30 hover:text-slate-950"
-          style={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}
+          style={{ top: 'calc(env(safe-area-inset-top, 0px) + 20px)' }}
         >
           {t('feedback.common.close')}
         </button>
@@ -398,7 +398,7 @@ function SectionShell({ children, index, entered, active = false, auraIndex = 0,
   const delay = `${ANIMATION_DELAY * index}ms`;
   const auraClasses = GRADIENT_RING_CLASSES[auraIndex % GRADIENT_RING_CLASSES.length];
   const safeAreaStyle = {
-    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 20px)',
+    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 32px)',
     paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
   };
 

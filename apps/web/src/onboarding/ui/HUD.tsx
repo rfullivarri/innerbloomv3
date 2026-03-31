@@ -100,7 +100,7 @@ export function HUD({ language = 'es', mode, stepIndex, totalSteps, xp, highligh
           : 'border-white/15'
       }`}
     >
-      <div className="mx-auto w-full max-w-4xl px-3 py-3 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] sm:px-4">
+      <div className="mx-auto w-full max-w-4xl px-3 py-3 pt-[calc(env(safe-area-inset-top,0px)+1rem)] sm:px-4">
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-3">
             {handleBrand ? (

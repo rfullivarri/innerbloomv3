@@ -35,7 +35,7 @@ const baseElements = {
   formField: 'flex flex-col gap-1.5',
   formFieldLabel: 'text-[11px] font-medium text-white/75 sm:text-xs',
   formFieldInput:
-    'rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 text-[15px] leading-6 text-white placeholder:text-white/40 shadow-[0_6px_20px_rgba(99,102,241,0.15)] focus:border-white/40 focus:outline-none focus-visible:ring-0',
+    'rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 text-base leading-6 text-white placeholder:text-white/40 shadow-[0_6px_20px_rgba(99,102,241,0.15)] focus:border-white/40 focus:outline-none focus-visible:ring-0',
   otpCodeFieldInput:
     'h-9 w-9 rounded-full border-2 border-white/55 bg-white/95 text-base font-semibold text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.3)] focus:border-white focus:shadow-[0_0_0_3px_rgba(255,255,255,0.25)] sm:h-11 sm:w-11 sm:text-lg',
   otpCodeFieldInputs: 'flex w-full items-center justify-center gap-2 overflow-hidden px-1 sm:gap-3',

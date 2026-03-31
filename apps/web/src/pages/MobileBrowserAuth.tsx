@@ -102,9 +102,12 @@ function RedirectingState({
   description: string;
 }) {
   return (
-    <div className="mx-auto max-w-xl rounded-3xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-2xl">
-      <h2 className="text-2xl font-semibold text-white">{title}</h2>
-      <p className="mt-3 text-sm leading-6 text-white/72">{description}</p>
+    <div className="mx-auto max-w-xl rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.05))] p-8 text-center text-white shadow-[0_28px_80px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/16 bg-[#7c3aed]/25 shadow-[0_0_0_1px_rgba(124,58,237,0.2)]">
+        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white" aria-hidden />
+      </div>
+      <h2 className="mt-5 text-[2rem] font-semibold leading-tight text-white">{title}</h2>
+      <p className="mt-3 text-sm leading-7 text-white/74">{description}</p>
     </div>
   );
 }

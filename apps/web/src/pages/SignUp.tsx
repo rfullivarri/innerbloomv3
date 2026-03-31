@@ -2,6 +2,7 @@ import { SignUp } from '@clerk/clerk-react';
 import { useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AuthLayout } from '../components/layout/AuthLayout';
+import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { createAuthAppearance } from '../lib/clerkAppearance';
 import { buildWebAbsoluteUrl } from '../lib/siteUrl';
@@ -41,8 +42,11 @@ export default function SignUpPage() {
         secondaryActionLabel={language === 'en' ? 'Back to app' : 'Volver a la app'}
         secondaryActionHref="/"
       >
-        <div className="mx-auto max-w-xl rounded-3xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-2xl">
-          <p className="text-sm leading-6 text-white/72">
+        <div className="mx-auto max-w-xl rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06))] p-8 text-center text-white shadow-[0_24px_70px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
+          <div className="flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.38em] text-white/56">
+            <BrandWordmark className="gap-2.5" textClassName="tracking-[0.38em]" iconClassName="h-[1.85em]" />
+          </div>
+          <p className="mt-6 text-sm leading-7 text-white/76">
             {language === 'en'
               ? 'Create your account in the secure browser and return to the app to continue onboarding.'
               : 'Crea tu cuenta en el navegador seguro y vuelve a la app para continuar el onboarding.'}
@@ -50,7 +54,7 @@ export default function SignUpPage() {
           <button
             type="button"
             onClick={() => void openUrlInCapacitorBrowser(mobileAuthUrl)}
-            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+            className="mt-7 inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(124,58,237,0.34)] transition hover:bg-[#8b5cf6]"
           >
             {language === 'en' ? 'Open secure sign up' : 'Abrir registro seguro'}
           </button>

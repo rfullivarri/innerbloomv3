@@ -1,6 +1,7 @@
 import { SignIn } from '@clerk/clerk-react';
 import { useLocation } from 'react-router-dom';
 import { AuthLayout } from '../components/layout/AuthLayout';
+import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { DASHBOARD_PATH } from '../config/auth';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import { createAuthAppearance } from '../lib/clerkAppearance';
@@ -46,8 +47,11 @@ export default function LoginPage() {
         secondaryActionLabel={language === 'en' ? 'Back to app' : 'Volver a la app'}
         secondaryActionHref="/"
       >
-        <div className="mx-auto max-w-xl rounded-3xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-2xl">
-          <p className="text-sm leading-6 text-white/72">
+        <div className="mx-auto max-w-xl rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06))] p-8 text-center text-white shadow-[0_24px_70px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
+          <div className="flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.38em] text-white/56">
+            <BrandWordmark className="gap-2.5" textClassName="tracking-[0.38em]" iconClassName="h-[1.85em]" />
+          </div>
+          <p className="mt-6 text-sm leading-7 text-white/76">
             {language === 'en'
               ? 'Continue in the secure browser and return to Innerbloom with your active session.'
               : 'Continúa en el navegador seguro y vuelve a Innerbloom con tu sesión activa.'}
@@ -55,7 +59,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => void openUrlInCapacitorBrowser(mobileAuthUrl)}
-            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+            className="mt-7 inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(124,58,237,0.34)] transition hover:bg-[#8b5cf6]"
           >
             {language === 'en' ? 'Open secure login' : 'Abrir login seguro'}
           </button>

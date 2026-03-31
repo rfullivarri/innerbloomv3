@@ -38,7 +38,7 @@ export function Navbar({ onDailyClick, onSectionClick, dailyButtonRef, title, se
   const hasSections = Boolean(sections && sections.length > 0);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] shadow-[var(--shadow-elev-1)] backdrop-blur-xl pt-[calc(env(safe-area-inset-top,0px)+0.2rem)]">
+    <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] shadow-[var(--shadow-elev-1)] backdrop-blur-xl pt-[calc(env(safe-area-inset-top,0px)+0.65rem)]">
       <div className="flex w-full flex-wrap items-center justify-between gap-2 px-3 py-3 sm:px-4 md:flex-nowrap md:px-8 md:py-4">
         <div className="flex flex-1 min-w-0 flex-wrap items-center justify-start gap-x-2 gap-y-1 text-left sm:gap-x-3 md:flex-row">
           <div className="min-w-0">
