@@ -1113,6 +1113,11 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                               </AnimatePresence>
                                             )}
                                             <div className="relative z-[2] flex items-start gap-3">
+                                              {task.achievement_seal_visible ? (
+                                                <span className="absolute -right-1 -top-2 rounded-full border border-amber-300/50 bg-amber-400/20 px-1.5 py-0.5 text-[10px]">
+                                                  🏅
+                                                </span>
+                                              ) : null}
                                               <motion.span
                                                 className={classNames(
                                                   'flex h-5 w-5 items-center justify-center rounded-full border text-[10px] transition-colors duration-200',
