@@ -30,6 +30,7 @@ import {
   patchAdminFeedbackUserState,
   postAdminRunTaskDifficultyCalibration,
   postAdminRunModeUpgradeAggregation,
+  postAdminRunHabitAchievementRetroactive,
   postAdminRunMonthlyReview,
   postAdminUserManualGameModeChange,
   postAdminRunModeUpgradeAnalysis,
@@ -66,6 +67,7 @@ adminRouter.get('/taskgen/trace/global', getTaskgenTraceGlobal);
 adminRouter.post('/taskgen/force-run', postTaskgenForceRun);
 adminRouter.post('/task-difficulty-calibration/run', postAdminRunTaskDifficultyCalibration);
 adminRouter.post('/mode-upgrade-aggregation/run', postAdminRunModeUpgradeAggregation);
+adminRouter.post('/habit-achievement/retroactive/run', postAdminRunHabitAchievementRetroactive);
 adminRouter.post('/user/:userId/run-monthly-review', postAdminRunMonthlyReview);
 adminRouter.post('/user/:userId/mode-upgrade-analysis/run', postAdminRunModeUpgradeAnalysis);
 adminRouter.get('/user/:userId/mode-upgrade-cta-override', getAdminUserModeUpgradeCtaOverride);

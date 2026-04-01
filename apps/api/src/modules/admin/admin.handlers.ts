@@ -20,6 +20,7 @@ import {
   adminSubscriptionUpdateBodySchema,
   taskDifficultyCalibrationRunBodySchema,
   modeUpgradeAggregationRunBodySchema,
+  habitAchievementRetroactiveRunBodySchema,
   adminManualGameModeChangeBodySchema,
   adminModeUpgradeCtaOverrideUpsertBodySchema,
 } from './admin.schemas.js';
@@ -62,6 +63,7 @@ import {
   runMonthlyTaskDifficultyCalibrationForUser,
 } from '../../services/taskDifficultyCalibrationService.js';
 import { runUserMonthlyModeUpgradeAggregation } from '../../services/modeUpgradeMonthlyAggregationService.js';
+import { runRetroactiveHabitAchievementDetection } from '../../services/habitAchievementService.js';
 
 const taskgenForceRunRequestSchema = z
   .object({
@@ -301,6 +303,20 @@ export const postAdminRunModeUpgradeAggregation = asyncHandler(async (req: Reque
     scope: result.scope,
     processed: result.processed,
     persisted: result.persisted,
+  });
+});
+
+export const postAdminRunHabitAchievementRetroactive = asyncHandler(async (req: Request, res: Response) => {
+  const body = habitAchievementRetroactiveRunBodySchema.parse(req.body ?? {});
+  const result = await runRetroactiveHabitAchievementDetection({
+    userId: body.userId,
+    now: new Date(),
+  });
+
+  res.json({
+    ok: true,
+    source: 'admin_retroactive_habit_achievement',
+    ...result,
   });
 });
 
