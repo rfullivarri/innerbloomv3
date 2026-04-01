@@ -6,6 +6,11 @@ import { pool } from '../db.js';
 import { parseWithValidation, uuidSchema } from '../lib/validation.js';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
 import { requireActiveSubscription } from '../middlewares/require-active-subscription.js';
+import {
+  applyHabitAchievementDecision,
+  getTaskHabitAchievementState,
+  toggleAchievedHabitTracking,
+} from '../services/habitAchievementService.js';
 
 const router = Router();
 
@@ -128,6 +133,14 @@ type TaskRecalibrationRow = {
 
 const recalibrationsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(24).default(3),
+});
+
+const habitAchievementDecisionSchema = z.object({
+  decision: z.enum(['maintain', 'store']),
+});
+
+const habitAchievementToggleSchema = z.object({
+  maintainEnabled: z.boolean(),
 });
 
 function normalizeMode(value: string | null | undefined): Mode {
@@ -418,6 +431,84 @@ router.get(
   }),
 );
 
+
+router.get(
+  '/tasks/:taskId/habit-achievement',
+  authMiddleware,
+  requireActiveSubscription,
+  asyncHandler(async (req, res) => {
+    const { taskId } = parseWithValidation(insightsParamsSchema, req.params);
+    const state = await getTaskHabitAchievementState(taskId, req.user?.id ?? '');
+
+    if (!state) {
+      throw new HttpError(404, 'not_found', 'Task not found');
+    }
+
+    res.json(state);
+  }),
+);
+
+router.post(
+  '/tasks/:taskId/habit-achievement/decision',
+  authMiddleware,
+  requireActiveSubscription,
+  asyncHandler(async (req, res) => {
+    const { taskId } = parseWithValidation(insightsParamsSchema, req.params);
+    const { decision } = parseWithValidation(habitAchievementDecisionSchema, req.body);
+    const ownerState = await getTaskHabitAchievementState(taskId, req.user?.id ?? '');
+
+    if (!ownerState) {
+      throw new HttpError(404, 'not_found', 'Task not found');
+    }
+
+    try {
+      await applyHabitAchievementDecision({
+        taskId,
+        userId: req.user?.id ?? '',
+        decision,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('pending')) {
+        throw new HttpError(409, 'invalid_state', error.message);
+      }
+      throw error;
+    }
+
+    const nextState = await getTaskHabitAchievementState(taskId, req.user?.id ?? '');
+    res.json(nextState);
+  }),
+);
+
+router.post(
+  '/tasks/:taskId/habit-achievement/toggle-maintained',
+  authMiddleware,
+  requireActiveSubscription,
+  asyncHandler(async (req, res) => {
+    const { taskId } = parseWithValidation(insightsParamsSchema, req.params);
+    const { maintainEnabled } = parseWithValidation(habitAchievementToggleSchema, req.body);
+    const ownerState = await getTaskHabitAchievementState(taskId, req.user?.id ?? '');
+
+    if (!ownerState) {
+      throw new HttpError(404, 'not_found', 'Task not found');
+    }
+
+    try {
+      await toggleAchievedHabitTracking({
+        taskId,
+        userId: req.user?.id ?? '',
+        maintainEnabled,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('toggle')) {
+        throw new HttpError(409, 'invalid_state', error.message);
+      }
+      throw error;
+    }
+
+    const nextState = await getTaskHabitAchievementState(taskId, req.user?.id ?? '');
+    res.json(nextState);
+  }),
+);
 
 router.get(
   '/tasks/:taskId/recalibrations/latest',
