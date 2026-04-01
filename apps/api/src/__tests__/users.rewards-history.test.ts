@@ -1,11 +1,19 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockQuery, mockVerifyToken, mockGetRewardsHistoryMonthlyWrapups } =
+const {
+  mockQuery,
+  mockVerifyToken,
+  mockGetRewardsHistoryMonthlyWrapups,
+  mockGetUserRewardsHabitAchievementsByPillar,
+  mockGetUserPendingHabitAchievementCount,
+} =
   vi.hoisted(() => ({
     mockQuery: vi.fn(),
     mockVerifyToken: vi.fn(),
     mockGetRewardsHistoryMonthlyWrapups: vi.fn(),
+    mockGetUserRewardsHabitAchievementsByPillar: vi.fn(),
+    mockGetUserPendingHabitAchievementCount: vi.fn(),
   }));
 
 vi.mock('../db.js', () => ({
@@ -27,6 +35,11 @@ vi.mock('../services/monthlyWrappedService.js', () => ({
   getRewardsHistoryMonthlyWrapups: mockGetRewardsHistoryMonthlyWrapups,
 }));
 
+vi.mock('../services/habitAchievementService.js', () => ({
+  getUserRewardsHabitAchievementsByPillar: mockGetUserRewardsHabitAchievementsByPillar,
+  getUserPendingHabitAchievementCount: mockGetUserPendingHabitAchievementCount,
+}));
+
 import app from '../app.js';
 
 const userId = '11111111-2222-3333-4444-555555555555';
@@ -36,6 +49,8 @@ describe('GET /api/users/:id/rewards/history', () => {
     mockQuery.mockReset();
     mockVerifyToken.mockReset();
     mockGetRewardsHistoryMonthlyWrapups.mockReset();
+    mockGetUserRewardsHabitAchievementsByPillar.mockReset();
+    mockGetUserPendingHabitAchievementCount.mockReset();
   });
 
   it('returns 401 when authentication is missing', async () => {
@@ -88,6 +103,28 @@ describe('GET /api/users/:id/rewards/history', () => {
         updatedAt: '2026-03-01T12:00:00.000Z',
       },
     ]);
+    mockGetUserRewardsHabitAchievementsByPillar.mockResolvedValue([
+      {
+        pillar: { id: 1, code: 'MIND', name: 'Mind' },
+        habits: [
+          {
+            id: 'habit-1',
+            task_id: 'task-1',
+            task_name: 'Meditate 10 min',
+            status: 'maintained',
+            achieved_at: '2026-03-01T00:00:00.000Z',
+            decision_made_at: '2026-03-02T00:00:00.000Z',
+            gp_before_achievement: 44,
+            gp_since_maintain: 7,
+            maintain_enabled: true,
+            pillar: { id: 1, code: 'MIND', name: 'Mind' },
+            trait: { id: 9, code: 'focus', name: 'Focus' },
+            seal: { visible: true },
+          },
+        ],
+      },
+    ]);
+    mockGetUserPendingHabitAchievementCount.mockResolvedValue(2);
 
     const response = await request(app)
       .get(`/api/users/${userId}/rewards/history`)
@@ -96,6 +133,12 @@ describe('GET /api/users/:id/rewards/history', () => {
     expect(response.status).toBe(200);
     expect(response.body.monthly_wrapups).toHaveLength(1);
     expect(response.body.monthly_wrapups[0].periodKey).toBe('2026-02');
+    expect(response.body.habit_achievements).toEqual({
+      pending_count: 2,
+      achieved_by_pillar: expect.any(Array),
+    });
     expect(mockGetRewardsHistoryMonthlyWrapups).toHaveBeenCalledWith(userId);
+    expect(mockGetUserRewardsHabitAchievementsByPillar).toHaveBeenCalledWith(userId);
+    expect(mockGetUserPendingHabitAchievementCount).toHaveBeenCalledWith(userId);
   });
 });
