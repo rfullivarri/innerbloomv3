@@ -1,6 +1,7 @@
 import { pool } from '../../db.js';
 import { HttpError } from '../../lib/http-error.js';
 import { type Pillar, type XpByDate } from './user-state-utils.js';
+import { buildActiveSurfaceTaskFilter } from '../../services/taskLifecyclePolicy.js';
 
 const DEFAULT_MODE_CODE = 'FLOW';
 const PILLAR_ID_TO_NAME: Record<number, Pillar> = {
@@ -66,9 +67,9 @@ export async function getXpBaseByPillar(userId: string): Promise<XpBaseByPillar>
     xp_base: string | number;
   }>(
     `SELECT t.pillar_id, SUM(t.xp_base) AS xp_base
-       FROM tasks t
+      FROM tasks t
       WHERE t.user_id = $1
-        AND t.active = TRUE
+        AND ${buildActiveSurfaceTaskFilter('t')}
    GROUP BY t.pillar_id`,
     [userId],
   );

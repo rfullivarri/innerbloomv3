@@ -1,5 +1,6 @@
 import { pool } from '../db.js';
 import { buildAndPersistMonthlyWrapped } from './monthlyWrappedService.js';
+import { buildModeUpgradeFilter } from './taskLifecyclePolicy.js';
 
 type AggregationOptions = {
   userId?: string;
@@ -115,9 +116,11 @@ export async function runUserMonthlyModeUpgradeAggregation(options: AggregationO
             COUNT(*)::int AS tasks_total_evaluated,
             SUM(CASE WHEN r.completion_rate >= 0.80 THEN 1 ELSE 0 END)::int AS tasks_meeting_goal
        FROM task_difficulty_recalibrations r
+       JOIN tasks t ON t.task_id = r.task_id
       WHERE r.source = 'cron'
         AND r.period_end >= $1::date
         AND r.period_end < $2::date
+        AND ${buildModeUpgradeFilter('t')}
         AND ($3::uuid IS NULL OR r.user_id = $3::uuid)
       GROUP BY r.user_id, r.game_mode_id`,
     [periodStart, nextPeriodStart, options.userId ?? null],

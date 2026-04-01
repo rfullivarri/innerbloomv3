@@ -3,6 +3,7 @@ import { pool } from '../../db.js';
 import type { AsyncHandler } from '../../lib/async-handler.js';
 import { paginationSchema, uuidSchema } from '../../lib/validation.js';
 import { ensureUserExists } from '../users/shared.js';
+import { buildActiveSurfaceTaskFilter } from '../../services/taskLifecyclePolicy.js';
 
 const paramsSchema = z.object({
   id: uuidSchema,
@@ -38,7 +39,7 @@ export const getUserTasks: AsyncHandler = async (req, res) => {
      JOIN users u ON u.user_id = t.user_id
      WHERE u.user_id = $1
        AND t.tasks_group_id = u.tasks_group_id
-       AND t.active = TRUE
+       AND ${buildActiveSurfaceTaskFilter('t')}
      ORDER BY t.created_at ASC
      LIMIT $2 OFFSET $3`,
     [id, finalLimit, finalOffset],

@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { pool } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
 
@@ -23,6 +24,7 @@ type TaskRow = {
   difficulty_id: number | string | null;
   xp_base: number | string | null;
   active: boolean;
+  lifecycle_status?: string | null;
   created_at: string;
   updated_at: string;
   completed_at?: string | null;
@@ -111,6 +113,14 @@ async function resolveXpBase(difficultyId: number | null | undefined): Promise<n
 }
 
 const emptyUpdateMessage = 'At least one property must be provided';
+const EDIT_CONTINUITY_DAYS = 35;
+
+function shouldCloneTaskOnEdit(createdAt: string, now: Date): boolean {
+  const created = new Date(createdAt);
+  const boundary = new Date(created.getTime());
+  boundary.setUTCDate(boundary.getUTCDate() + EDIT_CONTINUITY_DAYS);
+  return now.getTime() >= boundary.getTime();
+}
 
 export async function updateUserTaskRow(
   userId: string,
@@ -144,6 +154,7 @@ export async function updateUserTaskRow(
     'difficulty_id',
     'xp_base',
     'active',
+    'lifecycle_status',
     'created_at',
     'updated_at',
   ];
@@ -171,6 +182,98 @@ export async function updateUserTaskRow(
 
   if (!currentTask) {
     throw new HttpError(404, 'task_not_found', 'Task not found');
+  }
+
+  const shouldClone = shouldCloneTaskOnEdit(currentTask.created_at, new Date());
+  if (shouldClone) {
+    const nextTaskId = randomUUID();
+    const nextTitle = payload.title ?? currentTask.task;
+    const nextPillarId = 'pillar_id' in payload ? payload.pillar_id ?? null : currentTask.pillar_id;
+    const nextTraitId = 'trait_id' in payload ? payload.trait_id ?? null : currentTask.trait_id;
+    const nextDifficultyId = 'difficulty_id' in payload ? payload.difficulty_id ?? null : currentTask.difficulty_id;
+    const nextXpBase = 'difficulty_id' in payload
+      ? await resolveXpBase(payload.difficulty_id ?? null)
+      : Number(currentTask.xp_base ?? 0);
+    const nextActive = payload.is_active ?? true;
+    const nextLifecycleStatus = 'active';
+    const nextStatId = hasStatColumn
+      ? ('stat_id' in payload ? payload.stat_id ?? null : currentTask.stat_id ?? null)
+      : null;
+
+    await pool.query('BEGIN');
+    try {
+      const deactivateClauses = ['active = FALSE', 'updated_at = NOW()'];
+      if (hasArchivedColumn) {
+        deactivateClauses.unshift('archived_at = COALESCE(archived_at, NOW())');
+      }
+
+      await pool.query(
+        `UPDATE tasks
+            SET ${deactivateClauses.join(', ')}
+          WHERE task_id = $1
+            AND user_id = $2`,
+        [taskId, userId],
+      );
+
+      const insertColumns = [
+        'task_id',
+        'user_id',
+        'tasks_group_id',
+        'task',
+        'pillar_id',
+        'trait_id',
+      ];
+      const insertValues: (string | number | boolean | null)[] = [
+        nextTaskId,
+        userId,
+        currentTask.tasks_group_id,
+        nextTitle,
+        Number(nextPillarId ?? 0) || null,
+        Number(nextTraitId ?? 0) || null,
+      ];
+
+      if (hasStatColumn) {
+        insertColumns.push('stat_id');
+        insertValues.push(nextStatId == null ? null : Number(nextStatId));
+      }
+
+      insertColumns.push('difficulty_id', 'xp_base', 'active', 'lifecycle_status');
+      insertValues.push(nextDifficultyId == null ? null : Number(nextDifficultyId), nextXpBase, nextActive, nextLifecycleStatus);
+
+      const placeholders = insertColumns.map((_, idx) => `$${idx + 1}`).join(', ');
+      const insertResult = await pool.query<TaskRow>(
+        `INSERT INTO tasks (${insertColumns.join(', ')})
+         VALUES (${placeholders})
+         RETURNING ${returningColumns.join(', ')}`,
+        insertValues,
+      );
+
+      await pool.query('COMMIT');
+      const createdTask = insertResult.rows[0];
+      if (!createdTask) {
+        throw new HttpError(500, 'internal_error', 'Failed to clone task');
+      }
+
+      await pool.query(
+        `UPDATE users
+            SET first_tasks_confirmed = TRUE,
+                first_tasks_confirmed_at = COALESCE(first_tasks_confirmed_at, NOW()),
+                updated_at = NOW()
+          WHERE user_id = $1
+            AND first_tasks_confirmed = FALSE`,
+        [userId],
+      );
+
+      return {
+        ...createdTask,
+        stat_id: hasStatColumn ? createdTask.stat_id ?? null : null,
+        completed_at: hasCompletedColumn ? createdTask.completed_at ?? null : null,
+        archived_at: hasArchivedColumn ? createdTask.archived_at ?? null : null,
+      } satisfies TaskRow;
+    } catch (error) {
+      await pool.query('ROLLBACK');
+      throw error;
+    }
   }
 
   const updates: string[] = [];

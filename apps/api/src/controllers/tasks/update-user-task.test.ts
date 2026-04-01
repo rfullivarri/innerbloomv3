@@ -67,8 +67,8 @@ describe('PATCH /api/users/:id/tasks/:taskId', () => {
       difficulty_id: 1,
       xp_base: 10,
       active: true,
-      created_at: '2024-01-01T00:00:00.000Z',
-      updated_at: '2024-01-01T00:00:00.000Z',
+      created_at: '2026-03-20T00:00:00.000Z',
+      updated_at: '2026-03-20T00:00:00.000Z',
       completed_at: null,
       archived_at: null,
     };
@@ -79,7 +79,7 @@ describe('PATCH /api/users/:id/tasks/:taskId', () => {
       difficulty_id: 4,
       xp_base: 30,
       active: false,
-      updated_at: '2024-01-02T00:00:00.000Z',
+      updated_at: '2026-03-21T00:00:00.000Z',
     };
 
     mockQuery
@@ -183,8 +183,8 @@ describe('PATCH /api/users/:id/tasks/:taskId', () => {
       difficulty_id: 2,
       xp_base: 15,
       active: true,
-      created_at: '2024-01-01T00:00:00.000Z',
-      updated_at: '2024-01-01T00:00:00.000Z',
+      created_at: '2026-03-20T00:00:00.000Z',
+      updated_at: '2026-03-20T00:00:00.000Z',
       completed_at: null,
       archived_at: null,
     };
@@ -193,7 +193,7 @@ describe('PATCH /api/users/:id/tasks/:taskId', () => {
       ...existingRow,
       difficulty_id: 9,
       xp_base: 0,
-      updated_at: '2024-01-03T00:00:00.000Z',
+      updated_at: '2026-03-22T00:00:00.000Z',
     };
 
     mockQuery
@@ -242,8 +242,8 @@ describe('PATCH /api/users/:id/tasks/:taskId', () => {
       difficulty_id: null,
       xp_base: 0,
       active: true,
-      created_at: '2024-01-01T00:00:00.000Z',
-      updated_at: '2024-01-01T00:00:00.000Z',
+      created_at: '2026-03-20T00:00:00.000Z',
+      updated_at: '2026-03-20T00:00:00.000Z',
       completed_at: null,
       archived_at: null,
     };
@@ -251,7 +251,7 @@ describe('PATCH /api/users/:id/tasks/:taskId', () => {
     const updatedRow = {
       ...existingRow,
       active: false,
-      updated_at: '2024-01-04T00:00:00.000Z',
+      updated_at: '2026-03-23T00:00:00.000Z',
     };
 
     mockQuery
@@ -277,5 +277,66 @@ describe('PATCH /api/users/:id/tasks/:taskId', () => {
       expect.stringContaining('UPDATE tasks'),
       [false, taskId, userId],
     );
+  });
+
+  it('clones and deactivates old task for edits from week 6 onward', async () => {
+    mockVerifyToken.mockResolvedValueOnce({
+      id: userId,
+      clerkId: 'user_clone',
+      email: 'test@example.com',
+      isNew: false,
+    });
+    mockEnsureUserExists.mockResolvedValueOnce(undefined);
+
+    const existingRow = {
+      task_id: taskId,
+      user_id: userId,
+      tasks_group_id: 'group-4',
+      task: 'Old task',
+      pillar_id: 2,
+      trait_id: 3,
+      stat_id: 3,
+      difficulty_id: 2,
+      xp_base: 15,
+      active: true,
+      lifecycle_status: 'achievement_maintained',
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_at: '2026-01-01T00:00:00.000Z',
+      completed_at: null,
+      archived_at: null,
+    };
+
+    const clonedRow = {
+      ...existingRow,
+      task_id: 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff',
+      task: 'Edited task',
+      lifecycle_status: 'active',
+      active: true,
+    };
+
+    mockQuery
+      .mockResolvedValueOnce({
+        rows: [
+          { column_name: 'stat_id' },
+          { column_name: 'completed_at' },
+          { column_name: 'archived_at' },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [existingRow] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [clonedRow] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const response = await request(app)
+      .patch(`/api/users/${userId}/tasks/${taskId}`)
+      .set('Authorization', 'Bearer token')
+      .send({ title: 'Edited task' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.task.task_id).toBe(clonedRow.task_id);
+    expect(mockQuery.mock.calls.some(([sql]) => sql === 'BEGIN')).toBe(true);
+    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO tasks'), expect.any(Array));
   });
 });

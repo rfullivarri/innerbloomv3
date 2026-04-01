@@ -1,5 +1,6 @@
 import { pool } from '../db.js';
 import { resolveLifecycleFlags, type TaskLifecycleStatus } from './habitAchievementLifecycle.js';
+import { buildHabitAchievementFilter } from './taskLifecyclePolicy.js';
 
 type RecalibrationPeriodRow = {
   period_end: string;
@@ -19,6 +20,11 @@ type LatestAchievementRow = {
   task_habit_achievement_id: string;
   status: 'pending_decision' | 'maintained' | 'stored' | 'expired_pending';
   pending_expires_at: string | null;
+};
+
+type HabitAchievementCandidateRow = {
+  task_id: string;
+  user_id: string;
 };
 
 export type HabitAchievementThresholds = {
@@ -440,4 +446,58 @@ export async function toggleAchievedHabitTracking(params: {
     await pool.query('ROLLBACK');
     throw error;
   }
+}
+
+export type MonthlyHabitAchievementRun = {
+  expiredResolved: number;
+  evaluated: number;
+  pendingCreated: number;
+};
+
+export async function runMonthlyHabitAchievementDetection(params: {
+  periodStart: string;
+  nextPeriodStart: string;
+  now?: Date;
+  userId?: string;
+}): Promise<MonthlyHabitAchievementRun> {
+  const now = params.now ?? new Date();
+  const expiredResolved = await resolveExpiredPendingHabitAchievements(now);
+
+  const candidateResult = await pool.query<HabitAchievementCandidateRow>(
+    `SELECT DISTINCT r.task_id, r.user_id
+       FROM task_difficulty_recalibrations r
+       JOIN tasks t ON t.task_id = r.task_id
+      WHERE r.source = 'cron'
+        AND r.period_end >= $1::date
+        AND r.period_end < $2::date
+        AND ${buildHabitAchievementFilter('t')}
+        AND ($3::uuid IS NULL OR r.user_id = $3::uuid)`,
+    [params.periodStart, params.nextPeriodStart, params.userId ?? null],
+  );
+
+  let evaluated = 0;
+  let pendingCreated = 0;
+
+  for (const row of candidateResult.rows) {
+    const latest = await getLatestAchievement(row.task_id, row.user_id);
+    if (latest && latest.status !== 'expired_pending') {
+      continue;
+    }
+
+    const evaluation = await evaluateTaskHabitAchievement({ taskId: row.task_id });
+    evaluated += 1;
+    if (!evaluation.qualifies) {
+      continue;
+    }
+
+    await createPendingHabitAchievement({
+      taskId: row.task_id,
+      userId: row.user_id,
+      evaluation,
+      now,
+    });
+    pendingCreated += 1;
+  }
+
+  return { expiredResolved, evaluated, pendingCreated };
 }

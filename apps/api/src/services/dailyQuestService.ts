@@ -14,6 +14,7 @@ import {
   maybeGenerateWeeklyWrappedForDate,
   shouldGenerateWeeklyWrappedForSubmission,
 } from './weeklyWrappedService.js';
+import { buildActiveSurfaceTaskFilter } from './taskLifecyclePolicy.js';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const LEVEL_UP_NOTIFICATION_KEY = 'inapp_level_up_popup';
@@ -146,10 +147,12 @@ type TaskRow = {
   difficulty_code: string | null;
   xp_base: string | number | null;
   pillar_code: string;
+  lifecycle_status: string;
 };
 
 type InternalDailyQuestTask = DailyQuestTask & {
   pillar_code: string;
+  lifecycle_status: string;
 };
 
 type SubmissionTimestampRow = {
@@ -266,12 +269,13 @@ async function fetchGroupTasks(tasksGroupId: string): Promise<InternalDailyQuest
             t.difficulty_id,
             cd.code AS difficulty_code,
             t.xp_base,
-            cp.code AS pillar_code
+            cp.code AS pillar_code,
+            t.lifecycle_status
        FROM tasks t
        JOIN cat_pillar cp ON cp.pillar_id = t.pillar_id
   LEFT JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
       WHERE t.tasks_group_id = $1
-        AND t.active = TRUE
+        AND ${buildActiveSurfaceTaskFilter('t')}
    ORDER BY cp.pillar_id, t.created_at, t.task_id`,
     [tasksGroupId],
   );
@@ -284,6 +288,7 @@ async function fetchGroupTasks(tasksGroupId: string): Promise<InternalDailyQuest
     difficulty_id: row.difficulty_id,
     xp: Number(row.xp_base ?? 0),
     pillar_code: row.pillar_code ?? 'BODY',
+    lifecycle_status: row.lifecycle_status,
   }));
 }
 
@@ -704,6 +709,8 @@ export async function submitDailyQuest(
   });
 
   const completedTasks = selectedTaskIds;
+  const streakEligibleTaskIds = new Set(tasks.filter((task) => task.lifecycle_status === 'active').map((task) => task.task_id));
+  const streakEligibleCompletedTasks = completedTasks.filter((taskId) => streakEligibleTaskIds.has(taskId));
   const shouldLoadFeedback = process.env.NODE_ENV !== 'test';
 
   const [levelDefinitionRow, streakDefinitionRow] = shouldLoadFeedback
@@ -715,7 +722,7 @@ export async function submitDailyQuest(
 
   const shouldTrackLevel = isActiveInAppDefinition(levelDefinitionRow);
   const shouldTrackStreak =
-    isActiveInAppDefinition(streakDefinitionRow) && completedTasks.length > 0;
+    isActiveInAppDefinition(streakDefinitionRow) && streakEligibleCompletedTasks.length > 0;
 
   const levelSummaryBefore = shouldTrackLevel
     ? await loadUserLevelSummary(userId)
@@ -730,8 +737,8 @@ export async function submitDailyQuest(
     const maxThreshold = Math.max(...streakThresholds);
     const lookbackDays = Math.max(maxThreshold + 5, 30);
     [loggedToday, previousTaskStreaks] = await Promise.all([
-      loadTaskEntriesForDate(userId, completedTasks, date),
-      loadTaskStreakSnapshot(userId, completedTasks, date, lookbackDays),
+      loadTaskEntriesForDate(userId, streakEligibleCompletedTasks, date),
+      loadTaskStreakSnapshot(userId, streakEligibleCompletedTasks, date, lookbackDays),
     ]);
   }
 
@@ -858,7 +865,7 @@ export async function submitDailyQuest(
   }
 
   if (shouldTrackStreak) {
-    const tasksLoggedFirstTime = completedTasks.filter((taskId) => !loggedToday.has(taskId));
+    const tasksLoggedFirstTime = streakEligibleCompletedTasks.filter((taskId) => !loggedToday.has(taskId));
     const triggeredTasksByThreshold = new Map<number, StreakTask[]>();
 
     for (const taskId of tasksLoggedFirstTime) {
