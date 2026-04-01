@@ -12,7 +12,7 @@ const baseLayout = {
 const baseVariables = {
   colorPrimary: '#7c3aed',
   colorBackground: 'transparent',
-  colorInputBackground: 'rgba(255, 255, 255, 0.14)',
+  colorInputBackground: 'rgba(255, 255, 255, 0.1)',
   colorInputText: '#f8fafc',
   colorText: '#f8fafc',
   colorTextSecondary: 'rgba(226, 232, 240, 0.8)',
@@ -27,17 +27,17 @@ const baseElements = {
   rootBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto`,
   cardBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto flex justify-center`,
   card:
-    `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-4 overflow-hidden rounded-[24px] border border-transparent bg-transparent p-3 shadow-none backdrop-blur-0 sm:rounded-[28px] sm:p-4 md:p-5`,
+    `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-4 overflow-hidden rounded-[26px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.025))] p-3 shadow-[0_20px_50px_rgba(7,12,32,0.24)] backdrop-blur-[18px] sm:rounded-[30px] sm:p-4 md:p-5`,
   header: 'hidden',
   socialButtons: 'hidden',
   divider: 'hidden',
   form: 'flex flex-col gap-3 text-left',
   formField: 'flex flex-col gap-1.5',
-  formFieldLabel: 'text-[11px] font-medium text-white/75 sm:text-xs',
+  formFieldLabel: 'text-[11px] font-medium text-white/72 sm:text-xs',
   formFieldInput:
-    'rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 text-base leading-6 text-white placeholder:text-white/40 shadow-[0_6px_20px_rgba(99,102,241,0.15)] focus:border-white/40 focus:outline-none focus-visible:ring-0',
+    'rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.11),rgba(255,255,255,0.07))] px-3 py-2.5 text-base leading-6 text-white placeholder:text-white/36 shadow-[0_10px_28px_rgba(31,41,88,0.18)] focus:border-violet-300/45 focus:outline-none focus-visible:ring-0',
   otpCodeFieldInput:
-    'h-9 w-9 rounded-full border-2 border-white/55 bg-white/95 text-base font-semibold text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.3)] focus:border-white focus:shadow-[0_0_0_3px_rgba(255,255,255,0.25)] sm:h-11 sm:w-11 sm:text-lg',
+    'h-9 w-9 rounded-full border-2 border-violet-200/50 bg-white/95 text-base font-semibold text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.3)] focus:border-violet-300 focus:shadow-[0_0_0_3px_rgba(167,139,250,0.22)] sm:h-11 sm:w-11 sm:text-lg',
   otpCodeFieldInputs: 'flex w-full items-center justify-center gap-2 overflow-hidden px-1 sm:gap-3',
   formFieldInputShowPasswordButton: 'text-sm text-white/60 hover:text-white',
   formButtonPrimary:
@@ -45,11 +45,11 @@ const baseElements = {
     '!appearance-none !ring-0',
 
   footer:
-    'mt-2 w-full max-w-none rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(148,163,184,0.24),rgba(99,102,241,0.22))] !px-2 !py-1 shadow-[0_18px_40px_rgba(15,23,42,0.28)] backdrop-blur-md',
+    'mt-2 w-full max-w-none rounded-2xl border border-white/8 bg-[linear-gradient(135deg,rgba(122,138,196,0.2),rgba(108,63,197,0.2))] !px-2 !py-1 shadow-[0_18px_40px_rgba(9,16,40,0.24)] backdrop-blur-md',
 
   // 1) CONTENEDOR 1 (cl-footerAction__signIn): reducir alto y aumentar ancho
   footerAction:
-    '!flex !w-full !max-w-none items-center justify-start gap-1 rounded-xl border border-white/10 bg-white/5 !px-3 !py-1 text-[10px] !leading-[12px] text-white/60 backdrop-blur-sm',
+    '!flex !w-full !max-w-none items-center justify-start gap-1 rounded-xl border border-white/8 bg-white/[0.06] !px-3 !py-1 text-[10px] !leading-[12px] text-white/60 backdrop-blur-sm',
   footerActionText:
     '!whitespace-nowrap text-white/55',
   footerActionLink:
@@ -57,7 +57,7 @@ const baseElements = {
 
   // 2) CONTENEDOR 2 (“Secured by clerk”): reducir alto y aumentar ancho
   footerPages:
-    '!mt-1 !flex !w-full !max-w-none items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/5 !px-3 !py-1 text-[9px] !leading-[11px] text-white/45 backdrop-blur-sm',
+    '!mt-1 !flex !w-full !max-w-none items-center justify-center gap-1 rounded-xl border border-white/8 bg-white/[0.06] !px-3 !py-1 text-[9px] !leading-[11px] text-white/45 backdrop-blur-sm',
   footerPageLink:
     'inline-flex items-center gap-1 text-white/40 hover:text-white/60',
 
@@ -65,7 +65,7 @@ const baseElements = {
   footerTitle: 'hidden',
   footerSubtitle: 'hidden',
   formResendCodeLink: 'text-[7px] text-white hover:text-white/80',
-  identityPreview: 'rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl text-white/80',
+  identityPreview: 'rounded-2xl border border-white/10 bg-white/[0.08] backdrop-blur-xl text-white/80',
   identityPreviewTitle: 'text-white',
   identityPreviewSubtitle: 'text-white/70',
   identityPreviewEditButton: 'text-white hover:text-white/80',

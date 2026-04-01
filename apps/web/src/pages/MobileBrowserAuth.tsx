@@ -108,8 +108,8 @@ function RedirectingState({
   description: string;
 }) {
   return (
-    <div className="mx-auto max-w-xl rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.05))] p-8 text-center text-white shadow-[0_28px_80px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/16 bg-[#7c3aed]/25 shadow-[0_0_0_1px_rgba(124,58,237,0.2)]">
+    <div className="mx-auto max-w-xl rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(86,106,170,0.18),rgba(31,43,94,0.34))] p-8 text-center text-white shadow-[0_28px_80px_rgba(6,12,34,0.32)] backdrop-blur-2xl">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-violet-300/18 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.38),rgba(124,58,237,0.14))] shadow-[0_0_0_1px_rgba(139,92,246,0.16),0_8px_30px_rgba(91,33,182,0.22)]">
         <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white" aria-hidden />
       </div>
       <h2 className="mt-5 text-[2rem] font-semibold leading-tight text-white">{title}</h2>
