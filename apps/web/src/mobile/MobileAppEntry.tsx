@@ -187,6 +187,22 @@ export function MobileAppEntry() {
     : (isOnboardingComplete ? dashboardPath : '/intro-journey');
 
   useEffect(() => {
+    console.info('[mobile-entry] mounted', {
+      isNativeApp,
+      hasNativeCallbackSession,
+      authMode: nativeAuthMode,
+    });
+
+    return () => {
+      console.info('[mobile-entry] unmounted', {
+        isNativeApp,
+        hasNativeCallbackSession,
+        authMode: nativeAuthMode,
+      });
+    };
+  }, [hasNativeCallbackSession, isNativeApp, nativeAuthMode]);
+
+  useEffect(() => {
     if (onboarding.status !== 'success') {
       return;
     }

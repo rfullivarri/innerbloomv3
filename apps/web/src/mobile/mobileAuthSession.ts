@@ -32,7 +32,8 @@ const MOBILE_AUTH_SESSION_STORAGE_KEY = 'innerbloom.mobile.auth-session.v1';
 const MOBILE_AUTH_SESSION_EVENT = 'innerbloom:mobile-auth-session-changed';
 const MOBILE_AUTH_CALLBACK_FINGERPRINT_STORAGE_KEY = 'innerbloom.mobile.auth-callback.last-fingerprint.v1';
 const MOBILE_AUTH_REFRESH_TIMEOUT_MS = 15_000;
-const MOBILE_AUTH_REFRESH_MIN_VALIDITY_MS = 90_000;
+const MOBILE_AUTH_REFRESH_MIN_VALIDITY_MS = 10_000;
+const MOBILE_AUTH_REFRESH_COOLDOWN_MS = 10_000;
 
 let mobileAuthRefreshPromise: Promise<MobileAuthSession | null> | null = null;
 
@@ -199,8 +200,28 @@ export async function ensureFreshMobileAuthSession(options?: {
   const force = options?.force ?? false;
   const timeoutMs = options?.timeoutMs ?? MOBILE_AUTH_REFRESH_TIMEOUT_MS;
   const minValidityMs = options?.minValidityMs ?? MOBILE_AUTH_REFRESH_MIN_VALIDITY_MS;
+  const ageMs = Date.now() - session.updatedAt;
+  const inRefreshCooldown = ageMs < MOBILE_AUTH_REFRESH_COOLDOWN_MS;
 
   if (!force && !isMobileAuthSessionExpiringSoon(session, minValidityMs)) {
+    return session;
+  }
+
+  if (!force && inRefreshCooldown) {
+    writeMobileDebug('mobile-auth-refresh-skipped', {
+      reason: options?.reason ?? 'unspecified',
+      refreshCooldownMs: MOBILE_AUTH_REFRESH_COOLDOWN_MS,
+      ageMs,
+      authMode: session.authMode,
+      expiresAt: session.expiresAt,
+    });
+    console.info('[mobile-auth] skipped refresh during callback cooldown', {
+      reason: options?.reason ?? 'unspecified',
+      refreshCooldownMs: MOBILE_AUTH_REFRESH_COOLDOWN_MS,
+      ageMs,
+      authMode: session.authMode,
+      expiresAt: session.expiresAt,
+    });
     return session;
   }
 

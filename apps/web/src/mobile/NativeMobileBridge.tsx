@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 import {
   CAPACITOR_KEYBOARD_RESIZE_NATIVE,
   CAPACITOR_KEYBOARD_STYLE_DARK,
@@ -16,6 +17,39 @@ import {
   shouldOpenExternalUrl,
 } from './capacitor';
 import { resolveMobileAuthSessionFromCallback } from './mobileAuthSession';
+
+const MOBILE_AUTH_CONSUMED_LAUNCH_FINGERPRINT_KEY = 'innerbloom.mobile.auth.launch-consumed.v1';
+
+function getConsumedLaunchFingerprint(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const raw = window.sessionStorage.getItem(MOBILE_AUTH_CONSUMED_LAUNCH_FINGERPRINT_KEY);
+  return typeof raw === 'string' && raw.trim().length > 0 ? raw.trim() : null;
+}
+
+function setConsumedLaunchFingerprint(fingerprint: string): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.sessionStorage.setItem(MOBILE_AUTH_CONSUMED_LAUNCH_FINGERPRINT_KEY, fingerprint);
+}
+
+function resolveCallbackTargetPath(authMode: string | null | undefined): string {
+  const dashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
+
+  if (authMode === 'sign-in') {
+    return dashboardPath;
+  }
+
+  if (authMode === 'sign-up') {
+    return '/intro-journey';
+  }
+
+  return '/';
+}
 
 function useNativeDocumentClass(enabled: boolean) {
   useEffect(() => {
@@ -121,6 +155,8 @@ function useDeepLinkNavigation(enabled: boolean) {
       return;
     }
 
+    console.info('[mobile-auth] NativeMobileBridge mounted');
+
     const app = getCapacitorAppPlugin();
     if (!app) {
       return;
@@ -140,6 +176,15 @@ function useDeepLinkNavigation(enabled: boolean) {
       if (isNativeAuthCallbackUrl(url)) {
         const resolution = resolveMobileAuthSessionFromCallback(url);
         if (!resolution) {
+          console.info('[mobile-auth] callback ignored: no resolution', { source, url });
+          return;
+        }
+
+        const consumedLaunchFingerprint = getConsumedLaunchFingerprint();
+        if (source === 'launch' && consumedLaunchFingerprint === resolution.fingerprint) {
+          console.info('[mobile-auth] ignored already-consumed launch callback', {
+            fingerprint: resolution.fingerprint,
+          });
           return;
         }
 
@@ -147,6 +192,7 @@ function useDeepLinkNavigation(enabled: boolean) {
           console.info('[mobile-auth] ignored duplicate launch callback', {
             fingerprint: resolution.fingerprint,
           });
+          setConsumedLaunchFingerprint(resolution.fingerprint);
           return;
         }
 
@@ -158,11 +204,17 @@ function useDeepLinkNavigation(enabled: boolean) {
           await closeCapacitorBrowser();
         }
 
+        setConsumedLaunchFingerprint(resolution.fingerprint);
+        const nextPath = resolution.type === 'session'
+          ? resolveCallbackTargetPath(resolution.session.authMode)
+          : '/';
+
         console.info('[mobile-auth] bridge consumed callback', {
           type: resolution.type,
           source,
+          nextPath,
         });
-        navigate('/', { replace: true });
+        navigate(nextPath, { replace: true });
         return;
       }
 
@@ -172,7 +224,9 @@ function useDeepLinkNavigation(enabled: boolean) {
       }
     };
 
+    console.info('[mobile-auth] getLaunchUrl() requested');
     void app.getLaunchUrl().then((launchUrl) => {
+      console.info('[mobile-auth] getLaunchUrl() resolved', { url: launchUrl?.url ?? null });
       if (launchUrl?.url) {
         void handleUrl(launchUrl.url, 'launch');
       }
@@ -181,12 +235,14 @@ function useDeepLinkNavigation(enabled: boolean) {
     let listenerHandle: Awaited<ReturnType<typeof app.addListener>> | null = null;
 
     void Promise.resolve(app.addListener('appUrlOpen', ({ url }) => {
+      console.info('[mobile-auth] appUrlOpen', { url });
       void handleUrl(url, 'event');
     })).then((handle) => {
       listenerHandle = handle;
     });
 
     return () => {
+      console.info('[mobile-auth] NativeMobileBridge unmounted');
       void listenerHandle?.remove();
     };
   }, [enabled, navigate]);

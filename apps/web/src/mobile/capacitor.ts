@@ -125,11 +125,13 @@ export function buildNativeAppUrl(host: string): string {
 export async function openUrlInCapacitorBrowser(url: string): Promise<void> {
   const browser = getCapacitorBrowserPlugin();
   if (browser) {
+    console.info('[mobile-auth] Browser.open()', { url });
     await browser.open({ url });
     return;
   }
 
   if (typeof window !== 'undefined') {
+    console.info('[mobile-auth] window.location.assign()', { url });
     window.location.assign(url);
   }
 }
@@ -141,6 +143,7 @@ export async function closeCapacitorBrowser(): Promise<void> {
   }
 
   try {
+    console.info('[mobile-auth] Browser.close()');
     await browser.close();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

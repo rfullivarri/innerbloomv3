@@ -27,7 +27,7 @@ import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';
 import { MobileAppEntry } from './mobile/MobileAppEntry';
-import { ensureFreshMobileAuthSession, useMobileAuthSession } from './mobile/mobileAuthSession';
+import { useMobileAuthSession } from './mobile/mobileAuthSession';
 import MobileBrowserAuthPage from './pages/MobileBrowserAuth';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
@@ -67,12 +67,7 @@ function ApiAuthBridge() {
         clerkUserId: mobileAuthSession.clerkUserId,
       });
 
-      setApiAuthTokenProvider(async () => {
-        const freshSession = await ensureFreshMobileAuthSession({
-          reason: 'api-provider',
-        });
-        return freshSession?.token ?? mobileAuthSession.token;
-      });
+      setApiAuthTokenProvider(async () => mobileAuthSession.token);
       return;
     }
 
