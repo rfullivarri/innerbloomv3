@@ -13,6 +13,8 @@ import { useLongPress } from "../../hooks/useLongPress";
 import { useRequest } from "../../hooks/useRequest";
 import { useThemePreference } from "../../theme/ThemePreferenceProvider";
 import { isNativeCapacitorPlatform } from "../../mobile/capacitor";
+import { buildNativeMobileAuthUrl } from "../../mobile/mobileAuthSession";
+import { openUrlInCapacitorBrowser } from "../../mobile/capacitor";
 import {
   acceptGameModeUpgradeSuggestion,
   ApiError,
@@ -435,6 +437,11 @@ export function DashboardMenu({
 
   const handleSignOut = useCallback(async () => {
     handleClose();
+    if (isNativeCapacitorPlatform()) {
+      await openUrlInCapacitorBrowser(buildNativeMobileAuthUrl('logout'));
+      return;
+    }
+
     await signOut({ redirectUrl: "/" });
   }, [signOut, handleClose]);
 

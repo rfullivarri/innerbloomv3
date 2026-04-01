@@ -6,6 +6,7 @@ import {
   clearMobileAuthSession,
   ensureFreshMobileAuthSession,
   getMobileAuthSession,
+  getMobileAuthTokenFingerprint,
 } from '../mobile/mobileAuthSession';
 import type {
   MissionsV2AbandonPayload,
@@ -85,7 +86,12 @@ function hasInvalidNativeMobileToken(body: any): boolean {
   );
 }
 
-function handleInvalidNativeMobileToken(status: number, body: any, url: string): void {
+function handleInvalidNativeMobileToken(
+  status: number,
+  body: any,
+  url: string,
+  failedToken: string | null,
+): void {
   if (status !== 401 || !isNativeCapacitorPlatform()) {
     return;
   }
@@ -95,8 +101,29 @@ function handleInvalidNativeMobileToken(status: number, body: any, url: string):
     return;
   }
 
+  const failedTokenFingerprint = getMobileAuthTokenFingerprint(failedToken);
+  const currentTokenFingerprint = getMobileAuthTokenFingerprint(session.token);
+
+  apiLog('[API] native token invalidation check', {
+    url,
+    failedTokenFingerprint,
+    currentTokenFingerprint,
+    causeCode: typeof body?.details?.cause?.code === 'string' ? body.details.cause.code : null,
+  });
+
+  if (failedTokenFingerprint && currentTokenFingerprint && failedTokenFingerprint !== currentTokenFingerprint) {
+    apiLog('[API] skip clearing mobile session for stale failed token', {
+      url,
+      failedTokenFingerprint,
+      currentTokenFingerprint,
+    });
+    return;
+  }
+
   clearMobileAuthSession('expired-or-invalid-callback-token', {
     url,
+    failedTokenFingerprint,
+    currentTokenFingerprint,
     code: typeof body?.code === 'string' ? body.code : null,
     causeCode: typeof body?.details?.cause?.code === 'string' ? body.details.cause.code : null,
     causeName: typeof body?.details?.cause?.name === 'string' ? body.details.cause.name : null,
@@ -104,7 +131,7 @@ function handleInvalidNativeMobileToken(status: number, body: any, url: string):
   setApiAuthTokenProvider(null);
 }
 
-async function tryRefreshNativeMobileToken(url: string, body: any): Promise<boolean> {
+async function tryRefreshNativeMobileToken(url: string, body: any, failedToken: string | null): Promise<boolean> {
   if (!isNativeCapacitorPlatform() || !hasInvalidNativeMobileToken(body)) {
     return false;
   }
@@ -116,6 +143,7 @@ async function tryRefreshNativeMobileToken(url: string, body: any): Promise<bool
 
   apiLog('[API] attempting native token refresh', {
     url,
+    failedTokenFingerprint: getMobileAuthTokenFingerprint(failedToken),
     causeCode: typeof body?.details?.cause?.code === 'string' ? body.details.cause.code : null,
   });
 
@@ -234,10 +262,15 @@ export async function apiRequest<T = unknown>(url: string, init?: RequestInit): 
   try {
     const requestInit = applyDevUserOverride(init);
 
-    const execute = async (): Promise<Response> => {
+    const execute = async (): Promise<{ response: Response; authToken: string | null }> => {
       try {
         const authToken = await resolveAuthToken();
-        return await fetch(url, applyAuthorization(requestInit, authToken));
+        apiLog('[API] request started', {
+          url,
+          tokenFingerprint: getMobileAuthTokenFingerprint(authToken),
+        });
+        const response = await fetch(url, applyAuthorization(requestInit, authToken));
+        return { response, authToken };
       } catch (error) {
         if (error instanceof Error) {
           apiLog('[API] auth token resolution failed', {
@@ -249,7 +282,7 @@ export async function apiRequest<T = unknown>(url: string, init?: RequestInit): 
       }
     };
 
-    let res = await execute();
+    let { response: res, authToken: requestAuthToken } = await execute();
 
     logApiDebug('API response received', { url, status: res.status });
 
@@ -258,8 +291,15 @@ export async function apiRequest<T = unknown>(url: string, init?: RequestInit): 
       const requestId =
         res.headers.get('x-railway-request-id') || res.headers.get('x-request-id') || undefined;
 
-      if (await tryRefreshNativeMobileToken(url, body)) {
-        res = await execute();
+      apiLog('[API] request failed before refresh handling', {
+        url,
+        status: res.status,
+        tokenFingerprint: getMobileAuthTokenFingerprint(requestAuthToken),
+        causeCode: typeof body?.details?.cause?.code === 'string' ? body.details.cause.code : null,
+      });
+
+      if (await tryRefreshNativeMobileToken(url, body, requestAuthToken)) {
+        ({ response: res, authToken: requestAuthToken } = await execute());
         logApiDebug('API response received after native token refresh', { url, status: res.status });
         if (res.ok) {
           const json = (await res.json()) as T;
@@ -270,7 +310,7 @@ export async function apiRequest<T = unknown>(url: string, init?: RequestInit): 
         body = await safeJson(res);
       }
 
-      handleInvalidNativeMobileToken(res.status, body, url);
+      handleInvalidNativeMobileToken(res.status, body, url, requestAuthToken);
 
       apiLog('[API] request failed', {
         url,

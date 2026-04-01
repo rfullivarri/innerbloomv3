@@ -11,7 +11,7 @@ import {
 } from './capacitor';
 import { writeMobileDebug } from './mobileDebug';
 
-export type MobileAuthMode = 'sign-in' | 'sign-up' | 'refresh';
+export type MobileAuthMode = 'sign-in' | 'sign-up' | 'refresh' | 'logout';
 
 export type MobileAuthSession = {
   token: string;
@@ -76,6 +76,19 @@ function hashString(input: string): string {
   return (hash >>> 0).toString(16);
 }
 
+export function getMobileAuthTokenFingerprint(token: string | null | undefined): string | null {
+  if (typeof token !== 'string') {
+    return null;
+  }
+
+  const normalized = token.trim();
+  if (!normalized) {
+    return null;
+  }
+
+  return hashString(normalized);
+}
+
 function getCallbackFingerprint(url: string): string | null {
   if (!isNativeAuthCallbackUrl(url)) {
     return null;
@@ -94,7 +107,7 @@ function getCallbackFingerprint(url: string): string | null {
 }
 
 function normalizeAuthMode(value: string | null | undefined): MobileAuthMode | null {
-  if (value === 'sign-in' || value === 'sign-up' || value === 'refresh') {
+  if (value === 'sign-in' || value === 'sign-up' || value === 'refresh' || value === 'logout') {
     return value;
   }
 
@@ -151,7 +164,10 @@ export function buildNativeMobileAuthUrl(mode: MobileAuthMode, language?: string
       : resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
   const mobileAuthUrl = new URL(buildWebAbsoluteUrl(buildLocalizedAuthPath('/mobile-auth', resolvedLanguage)));
   mobileAuthUrl.searchParams.set('mode', mode);
-  mobileAuthUrl.searchParams.set('return_to', buildNativeAppUrl(CAPACITOR_CALLBACK_HOST));
+  mobileAuthUrl.searchParams.set(
+    'return_to',
+    buildNativeAppUrl(mode === 'logout' ? CAPACITOR_SIGNED_OUT_HOST : CAPACITOR_CALLBACK_HOST),
+  );
   return mobileAuthUrl.toString();
 }
 
@@ -287,6 +303,13 @@ export function persistMobileAuthSession(session: MobileAuthSession): MobileAuth
 
   const normalized = normalizeSession(session);
   window.localStorage.setItem(MOBILE_AUTH_SESSION_STORAGE_KEY, JSON.stringify(normalized));
+  console.info('[mobile-auth] persistMobileAuthSession()', {
+    at: Date.now(),
+    clerkUserId: normalized.clerkUserId,
+    authMode: normalized.authMode,
+    expiresAt: normalized.expiresAt,
+    tokenFingerprint: getMobileAuthTokenFingerprint(normalized.token),
+  });
   emitMobileAuthSessionChange();
   return normalized;
 }
@@ -347,7 +370,9 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
         type: 'signed-out',
         hasToken: false,
       });
-      console.info('[mobile-auth] cleared persisted session from signed-out callback');
+      console.info('[mobile-auth] cleared persisted session from signed-out callback', {
+        at: Date.now(),
+      });
       return {
         type: 'signed-out',
         fingerprint,
@@ -380,11 +405,13 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
     setStoredCallbackFingerprint(fingerprint);
 
     console.info('[mobile-auth] persisted callback session', {
+      at: Date.now(),
       hasToken: true,
       clerkUserId: session.clerkUserId,
       email: session.email,
       authMode: session.authMode,
       expiresAt: session.expiresAt,
+      tokenFingerprint: getMobileAuthTokenFingerprint(session.token),
     });
     writeMobileDebug('mobile-auth-callback', {
       type: 'callback',

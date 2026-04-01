@@ -213,8 +213,11 @@ function useDeepLinkNavigation(enabled: boolean) {
           type: resolution.type,
           source,
           nextPath,
+          at: Date.now(),
         });
+        console.info('[mobile-auth] navigate() start', { nextPath, at: Date.now() });
         navigate(nextPath, { replace: true });
+        console.info('[mobile-auth] navigate() end', { nextPath, at: Date.now() });
         return;
       }
 

@@ -125,13 +125,15 @@ export function buildNativeAppUrl(host: string): string {
 export async function openUrlInCapacitorBrowser(url: string): Promise<void> {
   const browser = getCapacitorBrowserPlugin();
   if (browser) {
-    console.info('[mobile-auth] Browser.open()', { url });
+    const startedAt = Date.now();
+    console.info('[mobile-auth] Browser.open() start', { url, startedAt });
     await browser.open({ url });
+    console.info('[mobile-auth] Browser.open() end', { url, finishedAt: Date.now() });
     return;
   }
 
   if (typeof window !== 'undefined') {
-    console.info('[mobile-auth] window.location.assign()', { url });
+    console.info('[mobile-auth] window.location.assign()', { url, at: Date.now() });
     window.location.assign(url);
   }
 }
@@ -143,8 +145,10 @@ export async function closeCapacitorBrowser(): Promise<void> {
   }
 
   try {
-    console.info('[mobile-auth] Browser.close()');
+    const startedAt = Date.now();
+    console.info('[mobile-auth] Browser.close() start', { startedAt });
     await browser.close();
+    console.info('[mobile-auth] Browser.close() end', { finishedAt: Date.now() });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (/No active window to close/i.test(message)) {

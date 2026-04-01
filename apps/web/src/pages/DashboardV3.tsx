@@ -205,6 +205,20 @@ export default function DashboardV3Page() {
   const [isJourneyGenerating, setIsJourneyGenerating] = useState(false);
 
   useEffect(() => {
+    console.info('[dashboard-v3] mounted', {
+      at: Date.now(),
+      pathname: location.pathname,
+    });
+
+    return () => {
+      console.info('[dashboard-v3] unmounted', {
+        at: Date.now(),
+        pathname: location.pathname,
+      });
+    };
+  }, [location.pathname]);
+
+  useEffect(() => {
     if (!location.state || typeof location.state !== "object") {
       return;
     }
