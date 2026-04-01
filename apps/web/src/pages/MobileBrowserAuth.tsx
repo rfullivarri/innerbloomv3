@@ -1,4 +1,4 @@
-import { SignIn, SignUp, useAuth, useUser } from '@clerk/clerk-react';
+import { SignIn, SignUp, useAuth, useClerk, useSession, useSignIn, useSignUp, useUser } from '@clerk/clerk-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AuthLayout } from '../components/layout/AuthLayout';
@@ -116,6 +116,10 @@ export default function MobileBrowserAuthPage() {
   const location = useLocation();
   const language = resolveAuthLanguage(location.search);
   const { isLoaded, isSignedIn, getToken, signOut } = useAuth();
+  const clerk = useClerk();
+  const { session } = useSession();
+  const { signIn } = useSignIn();
+  const { signUp } = useSignUp();
   const { user } = useUser();
   const [error, setError] = useState<string | null>(null);
   const redirectStartedRef = useRef(false);
@@ -132,6 +136,67 @@ export default function MobileBrowserAuthPage() {
   );
   const callbackUrl = useMemo(() => buildAppCallbackUrl(location.search), [location.search]);
   const signedOutUrl = useMemo(() => buildSignedOutUrl(location.search), [location.search]);
+  const returnTo = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('return_to')?.trim() ?? null;
+  }, [location.search]);
+  const createdSessionId = signIn?.createdSessionId ?? signUp?.createdSessionId ?? null;
+
+  useEffect(() => {
+    console.info('[mobile-auth-page] mounted', {
+      href: typeof window !== 'undefined' ? window.location.href : currentUrl,
+      search: typeof window !== 'undefined' ? window.location.search : location.search,
+      at: Date.now(),
+    });
+  }, [currentUrl, location.search]);
+
+  useEffect(() => {
+    console.info('[mobile-auth-page] parsed-params', {
+      mode,
+      returnTo,
+      lang: language,
+      at: Date.now(),
+    });
+  }, [language, mode, returnTo]);
+
+  useEffect(() => {
+    console.info('[mobile-auth-page] clerk-ready', {
+      isLoaded,
+      at: Date.now(),
+    });
+  }, [isLoaded]);
+
+  useEffect(() => {
+    console.info('[mobile-auth-page] auth-state', {
+      hasSession: !!session,
+      sessionId: session?.id ?? null,
+      userId: user?.id ?? null,
+      at: Date.now(),
+    });
+  }, [session, user?.id]);
+
+  useEffect(() => {
+    console.info('[mobile-auth-page] session-check-result', {
+      hasSession: !!session,
+      sessionId: session?.id ?? null,
+      userId: user?.id ?? null,
+      at: Date.now(),
+    });
+  }, [session, user?.id]);
+
+  useEffect(() => {
+    const status = mode === 'sign-up'
+      ? signUp?.status ?? null
+      : signIn?.status ?? null;
+
+    console.info('[mobile-auth-page] auth-finished', {
+      status,
+      createdSessionId: createdSessionId ?? null,
+      signInStatus: typeof signIn !== 'undefined' ? signIn?.status ?? null : null,
+      signUpStatus: typeof signUp !== 'undefined' ? signUp?.status ?? null : null,
+      at: Date.now(),
+    });
+  }, [createdSessionId, mode, signIn, signUp]);
 
   useEffect(() => {
     if (typeof document === 'undefined') {
@@ -200,31 +265,99 @@ export default function MobileBrowserAuthPage() {
     }
 
     if (!isSignedIn) {
-      return;
+      const hasCompletedSession = Boolean(session?.id || createdSessionId || user?.id);
+      if (!hasCompletedSession) {
+        return;
+      }
     }
 
     redirectStartedRef.current = true;
     void (async () => {
+      let resolvedCallbackUrl: string | null = null;
+
       try {
+        if (!session?.id && createdSessionId) {
+          await clerk.setActive({ session: createdSessionId });
+        }
+
         const token = await getToken();
         if (!token) {
+          console.error('[mobile-auth-page] clerk-session-missing', {
+            at: Date.now(),
+            mode,
+            createdSessionId,
+            sessionId: session?.id ?? null,
+            userId: user?.id ?? null,
+          });
           throw new Error('Clerk no devolvió un token de sesión utilizable para mobile.');
         }
 
-        console.info('[mobile-auth] final resolved mode before callback', {
-          mode,
-          currentUrl,
-          callbackUrl,
-          userId: user?.id ?? null,
+        try {
+          resolvedCallbackUrl = buildRedirectUrl(
+            callbackUrl,
+            user,
+            token,
+            mode === 'refresh' ? 'refresh' : mode,
+          );
+          console.info('[mobile-auth-page] callback-build', {
+            callbackUrl: resolvedCallbackUrl,
+            mode,
+            returnTo,
+            at: Date.now(),
+          });
+        } catch (cause) {
+          console.error('[mobile-auth-page] callback-build-failed', {
+            at: Date.now(),
+            mode,
+            returnTo,
+            error: cause instanceof Error ? cause.message : String(cause),
+          });
+          throw cause;
+        }
+
+        console.info('[mobile-auth-page] callback-navigate-start', {
+          callbackUrl: resolvedCallbackUrl,
+          at: Date.now(),
         });
-        window.location.replace(buildRedirectUrl(callbackUrl, user, token, mode === 'refresh' ? 'refresh' : mode));
+        window.location.replace(resolvedCallbackUrl);
+        window.setTimeout(() => {
+          console.error('[mobile-auth-page] redirect-blocked-or-not-attempted', {
+            at: Date.now(),
+            callbackUrl: resolvedCallbackUrl,
+            mode,
+            sessionId: session?.id ?? null,
+            createdSessionId,
+          });
+        }, 1500);
       } catch (cause) {
         redirectStartedRef.current = false;
         const nextError = cause instanceof Error ? cause.message : String(cause);
+        console.error('[mobile-auth-page] unexpected-error', {
+          at: Date.now(),
+          mode,
+          returnTo,
+          sessionId: session?.id ?? null,
+          createdSessionId,
+          userId: user?.id ?? null,
+          error: nextError,
+        });
         setError(nextError || 'No pudimos transferir la sesión de Clerk a la app.');
       }
     })();
-  }, [callbackUrl, getToken, isLoaded, isSignedIn, mode, signOut, signedOutUrl, user]);
+  }, [
+    callbackUrl,
+    clerk,
+    createdSessionId,
+    getToken,
+    isLoaded,
+    isSignedIn,
+    mode,
+    returnTo,
+    session?.id,
+    signOut,
+    signedOutUrl,
+    user,
+  ]);
 
   if (mode === 'logout') {
     return (
