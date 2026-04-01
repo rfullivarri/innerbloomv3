@@ -262,14 +262,37 @@ export default function MobileBrowserAuthPage() {
       void (async () => {
         try {
           if (isSignedIn) {
-            await signOut({ redirectUrl: signedOutUrl });
-            return;
+            await signOut();
           }
 
+          console.info('[mobile-auth-page] callback-navigate-start', {
+            callbackUrl: signedOutUrl,
+            at: Date.now(),
+          });
           window.location.replace(signedOutUrl);
+          window.setTimeout(() => {
+            console.error('[mobile-auth-page] redirect-blocked-or-not-attempted', {
+              at: Date.now(),
+              callbackUrl: signedOutUrl,
+              mode,
+              sessionId: session?.id ?? null,
+              createdSessionId,
+              handoff: isHandoffStep,
+            });
+          }, 1500);
         } catch (cause) {
           redirectStartedRef.current = false;
           const nextError = cause instanceof Error ? cause.message : String(cause);
+          console.error('[mobile-auth-page] unexpected-error', {
+            at: Date.now(),
+            mode,
+            returnTo,
+            sessionId: session?.id ?? null,
+            createdSessionId,
+            userId: user?.id ?? null,
+            handoff: isHandoffStep,
+            error: nextError,
+          });
           setError(nextError || 'No pudimos cerrar la sesión web.');
         }
       })();
