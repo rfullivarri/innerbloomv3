@@ -13,6 +13,18 @@ import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { resolveEmotionCopy } from '../../config/emotionMessages';
 import type { WeeklyWrappedPayload } from '../../lib/weeklyWrapped';
 
+const REWARDS_PILLAR_ORDER = [
+  { code: 'BODY', name: 'Body' },
+  { code: 'MIND', name: 'Mind' },
+  { code: 'SOUL', name: 'Soul' },
+] as const;
+
+const DEFAULT_PLACEHOLDER_SLOTS = 10;
+
+type AchievementShelfEntry =
+  | { kind: 'habit'; habit: HabitAchievementShelfItem }
+  | { kind: 'placeholder'; key: string; label: string };
+
 interface RewardsSectionProps {
   userId: string;
   onOpenWeeklyWrapped?: (record?: WeeklyWrappedRecord | null) => void;
@@ -132,27 +144,34 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
 }
 
 function MonthlyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRecord[]; onOpen?: (record?: WeeklyWrappedRecord | null) => void; language: 'es' | 'en' }) {
-  if (!items.length) return null;
   return (
     <div className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-indigo-500/15 via-fuchsia-500/10 to-sky-500/10 p-4">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Monthly Wrap-Up' : 'Monthly Wrap-Up'}</p>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        {items.map((item) => {
-          const weeklyEmotion = item.payload.emotions.weekly ?? item.payload.emotions.biweekly;
-          const emotionLabel = weeklyEmotion ? resolveEmotionCopy(language, weeklyEmotion.key).label : null;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onOpen?.(item)}
-              className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left"
-            >
-              <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{item.payload.weekRange.start} → {item.payload.weekRange.end}</p>
-              <p className="mt-1 text-sm font-semibold text-[color:var(--color-text)]">{emotionLabel ?? (language === 'es' ? 'Sin emoción dominante' : 'No dominant emotion')}</p>
-            </button>
-          );
-        })}
-      </div>
+      {items.length ? (
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {items.map((item) => {
+            const weeklyEmotion = item.payload.emotions.weekly ?? item.payload.emotions.biweekly;
+            const emotionLabel = weeklyEmotion ? resolveEmotionCopy(language, weeklyEmotion.key).label : null;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onOpen?.(item)}
+                className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left"
+              >
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{item.payload.weekRange.start} → {item.payload.weekRange.end}</p>
+                <p className="mt-1 text-sm font-semibold text-[color:var(--color-text)]">{emotionLabel ?? (language === 'es' ? 'Sin emoción dominante' : 'No dominant emotion')}</p>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+          {language === 'es'
+            ? 'Aún no tienes Wrap-Ups mensuales. Tus próximos resúmenes aparecerán aquí.'
+            : "You don't have monthly wrap-ups yet. Your next summaries will appear here."}
+        </div>
+      )}
     </div>
   );
 }
@@ -168,13 +187,53 @@ function AchievedShelf({
 }) {
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
   const [showBackFace, setShowBackFace] = useState(false);
+  const normalizedGroups = useMemo(() => {
+    const byCode = new Map(groups.map((group) => [group.pillar.code.toUpperCase(), group]));
+    return REWARDS_PILLAR_ORDER.map((pillar) => {
+      const existing = byCode.get(pillar.code);
+      const habits = existing?.habits ?? [];
+      const entries: AchievementShelfEntry[] = habits.map((habit) => ({ kind: 'habit', habit }));
+      const placeholdersNeeded = Math.max(0, DEFAULT_PLACEHOLDER_SLOTS - habits.length);
+      for (let index = 0; index < placeholdersNeeded; index += 1) {
+        entries.push({
+          kind: 'placeholder',
+          key: `${pillar.code}-placeholder-${index + 1}`,
+          label: `${pillar.code.slice(0, 1)}-${String(index + 1).padStart(2, '0')}`,
+        });
+      }
+      return {
+        pillar: existing?.pillar ?? { id: null, code: pillar.code, name: pillar.name },
+        entries,
+      };
+    });
+  }, [groups]);
+
+  const getSealBadge = (habit: HabitAchievementShelfItem) => {
+    const pillarCode = (habit.pillar ?? 'X').slice(0, 1).toUpperCase();
+    const traitCode = habit.trait?.code?.slice(0, 3).toUpperCase() ?? '---';
+    return `${pillarCode}-${traitCode}`;
+  };
+
   return (
     <div className="space-y-4">
-      {groups.map((group) => (
+      {normalizedGroups.map((group) => (
         <section key={group.pillar.code} className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{group.pillar.name}</p>
           <div className="flex gap-3 overflow-x-auto pb-1">
-            {group.habits.map((habit) => {
+            {group.entries.map((entry) => {
+              if (entry.kind === 'placeholder') {
+                return (
+                  <div key={entry.key} className="w-32 shrink-0 rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/60 p-3 text-left">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-dashed border-[color:var(--color-border-subtle)] text-[11px] font-semibold text-[color:var(--color-text-muted)]">
+                      {entry.label}
+                    </div>
+                    <p className="mt-2 text-xs font-medium text-[color:var(--color-text-muted)]">{language === 'es' ? 'Sello futuro' : 'Future seal'}</p>
+                    <p className="text-[11px] text-[color:var(--color-slate-400)]">{language === 'es' ? 'Espacio reservado' : 'Reserved slot'}</p>
+                  </div>
+                );
+              }
+
+              const { habit } = entry;
               const active = habit.id === activeHabitId;
               return (
                 <div key={habit.id} className="relative">
@@ -188,11 +247,17 @@ function AchievedShelf({
                       setActiveHabitId(habit.id);
                       setShowBackFace(false);
                     }}
-                    className={`w-40 shrink-0 rounded-2xl border p-3 text-left transition ${active ? 'scale-[1.02] border-amber-300/50 bg-amber-400/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]'}`}
+                    className={`w-32 shrink-0 rounded-2xl border p-3 text-left transition ${active ? 'scale-[1.02] border-amber-300/50 bg-amber-400/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]'}`}
                   >
-                    <p className="text-xl">🏅</p>
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[11px] font-semibold text-[color:var(--color-text-muted)]">
+                      {habit.seal.visible ? '🏅' : getSealBadge(habit)}
+                    </div>
                     <p className="mt-2 line-clamp-2 text-sm font-semibold text-[color:var(--color-text)]">{habit.taskName}</p>
-                    <p className="text-xs text-[color:var(--color-slate-400)]">{habit.status === 'maintained' ? (language === 'es' ? 'Mantenido' : 'Maintained') : (language === 'es' ? 'Guardado' : 'Stored')}</p>
+                    <p className="text-xs text-[color:var(--color-slate-400)]">{habit.status === 'maintained'
+                      ? (language === 'es' ? 'Mantenido' : 'Maintained')
+                      : habit.status === 'pending_decision'
+                        ? (language === 'es' ? 'Pendiente' : 'Pending')
+                        : (language === 'es' ? 'Guardado' : 'Stored')}</p>
                   </button>
                   {active && showBackFace ? (
                     <div className="absolute inset-0 z-10 rounded-2xl border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] p-3 text-xs">
