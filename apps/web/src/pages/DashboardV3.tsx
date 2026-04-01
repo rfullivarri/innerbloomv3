@@ -45,6 +45,7 @@ import {
   getGameModeUpgradeSuggestion,
   getJourneyGenerationStatus,
   getModerationState,
+  getRewardsHistory,
   getUserState,
   getUserTasks,
   markJourneyReadyModalSeen,
@@ -401,6 +402,12 @@ export default function DashboardV3Page() {
     { enabled: Boolean(backendUserId) },
   );
   const [journeyReadyOpen, setJourneyReadyOpen] = useState(false);
+  const [pendingHabitDecisionCount, setPendingHabitDecisionCount] = useState(0);
+  const rewardsHistoryRequest = useRequest(
+    () => getRewardsHistory(backendUserId ?? ""),
+    [backendUserId],
+    { enabled: Boolean(backendUserId) },
+  );
   const [showOnboardingCompletionBanner, setShowOnboardingCompletionBanner] = useState(false);
   const generationKeyRef = useRef<string | null>(null);
   const firstDailyQuestPromptInFlightRef = useRef(false);
@@ -849,7 +856,8 @@ export default function DashboardV3Page() {
             sections={sections.map((section) => ({
               ...section,
               showPulseDot:
-                section.key === "dashboard" && shouldShowDashboardDot,
+                (section.key === "dashboard" && shouldShowDashboardDot) ||
+                (section.key === "rewards" && pendingHabitDecisionCount > 0),
             }))}
             onSectionClick={(section) => {
               handleMainMenuNavigation({
@@ -1008,6 +1016,8 @@ export default function DashboardV3Page() {
                       userId={backendUserId}
                       section={rewardsSection}
                       weeklyWrapped={weeklyWrapped}
+                      rewardsHistoryData={rewardsHistoryRequest.data ?? undefined}
+                      onPendingHabitDecisionCountChange={setPendingHabitDecisionCount}
                     />
                   }
                 />
@@ -1066,7 +1076,8 @@ export default function DashboardV3Page() {
                   }
                 },
                 showPulseDot:
-                  section.key === "dashboard" && shouldShowDashboardDot,
+                  (section.key === "dashboard" && shouldShowDashboardDot) ||
+                  (section.key === "rewards" && pendingHabitDecisionCount > 0),
               };
             })}
           />
@@ -1472,10 +1483,14 @@ function RewardsView({
   userId,
   section,
   weeklyWrapped,
+  rewardsHistoryData,
+  onPendingHabitDecisionCountChange,
 }: {
   userId: string;
   section: DashboardSectionConfig;
   weeklyWrapped: ReturnType<typeof useWeeklyWrapped>;
+  rewardsHistoryData?: Awaited<ReturnType<typeof getRewardsHistory>>;
+  onPendingHabitDecisionCountChange?: (count: number) => void;
 }) {
   return (
     <div className="space-y-6">
@@ -1487,9 +1502,9 @@ function RewardsView({
       />
       <RewardsSection
         userId={userId}
-        weeklyWrappedCurrent={weeklyWrapped.latest}
-        weeklyWrappedPrevious={weeklyWrapped.previous}
+        initialData={rewardsHistoryData}
         onOpenWeeklyWrapped={weeklyWrapped.openModal}
+        onPendingCountChange={onPendingHabitDecisionCountChange}
       />
     </div>
   );

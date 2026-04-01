@@ -819,6 +819,52 @@ export type AchievementSummary = {
   achievements: Achievement[];
 };
 
+export type HabitAchievementShelfItem = {
+  id: string;
+  taskId: string;
+  taskName: string;
+  pillar: string | null;
+  trait: { id: string | null; code: string | null; name: string | null } | null;
+  seal: { visible: boolean };
+  status: 'maintained' | 'stored' | 'pending_decision';
+  achievedAt: string | null;
+  decisionMadeAt: string | null;
+  gpBeforeAchievement: number;
+  gpSinceMaintain: number;
+  maintainEnabled: boolean;
+};
+
+export type HabitAchievementPillarGroup = {
+  pillar: { id: string | null; code: string; name: string };
+  habits: HabitAchievementShelfItem[];
+};
+
+export type RewardsHistorySummary = {
+  monthlyWrapups: WeeklyWrappedRecord[];
+  habitAchievements: {
+    pendingCount: number;
+    achievedByPillar: HabitAchievementPillarGroup[];
+  };
+};
+
+export type TaskHabitAchievementState = {
+  task: {
+    id: string;
+    name: string | null;
+    lifecycleStatus: string | null;
+  };
+  achievement: {
+    exists: boolean;
+    status: 'not_achieved' | 'pending_decision' | 'maintained' | 'stored' | 'expired_pending';
+    achievedAt: string | null;
+    decisionMadeAt: string | null;
+    gpBeforeAchievement: number;
+    gpSinceMaintain: number;
+    maintainEnabled: boolean;
+    sealVisible: boolean;
+  };
+};
+
 function toNumber(value: unknown, fallback = 0): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -1008,6 +1054,111 @@ export async function getWeeklyWrappedPrevious(userId: string): Promise<WeeklyWr
   logShape('[weekly-wrapped] previous response', response);
   console.info('[weekly-wrapped] previous record resolved', { hasItem: Boolean(response.item) });
   return response.item ?? null;
+}
+
+type RawRewardsHistoryResponse = {
+  monthly_wrapups?: WeeklyWrappedRecord[];
+  habit_achievements?: {
+    pending_count?: number;
+    achieved_by_pillar?: Array<{
+      pillar?: { id?: string | number | null; code?: string | null; name?: string | null };
+      habits?: Array<Record<string, unknown>>;
+    }>;
+  };
+};
+
+function normalizeHabitAchievementShelfItem(raw: Record<string, unknown>): HabitAchievementShelfItem {
+  return {
+    id: pickString(raw.id) ?? `habit-${Math.random().toString(36).slice(2, 8)}`,
+    taskId: pickString(raw.task_id) ?? pickString(raw.taskId) ?? '',
+    taskName: pickString(raw.task_name) ?? pickString(raw.taskName) ?? 'Habit',
+    pillar: pickString(raw.pillar_code) ?? pickString((raw.pillar as Record<string, unknown> | undefined)?.code),
+    trait: raw.trait && isRecord(raw.trait)
+      ? {
+          id: pickString((raw.trait as Record<string, unknown>).id),
+          code: pickString((raw.trait as Record<string, unknown>).code),
+          name: pickString((raw.trait as Record<string, unknown>).name),
+        }
+      : null,
+    seal: { visible: Boolean((raw.seal as Record<string, unknown> | undefined)?.visible) },
+    status: (pickString(raw.status) as HabitAchievementShelfItem['status']) ?? 'stored',
+    achievedAt: pickString(raw.achieved_at) ?? pickString(raw.achievedAt),
+    decisionMadeAt: pickString(raw.decision_made_at) ?? pickString(raw.decisionMadeAt),
+    gpBeforeAchievement: Number(raw.gp_before_achievement ?? raw.gpBeforeAchievement ?? 0) || 0,
+    gpSinceMaintain: Number(raw.gp_since_maintain ?? raw.gpSinceMaintain ?? 0) || 0,
+    maintainEnabled: Boolean(raw.maintain_enabled ?? raw.maintainEnabled),
+  };
+}
+
+export async function getRewardsHistory(userId: string): Promise<RewardsHistorySummary> {
+  const response = await getAuthorizedJson<RawRewardsHistoryResponse>(`/users/${encodeURIComponent(userId)}/rewards/history`);
+  const pillarGroups = Array.isArray(response.habit_achievements?.achieved_by_pillar)
+    ? response.habit_achievements?.achieved_by_pillar ?? []
+    : [];
+
+  return {
+    monthlyWrapups: Array.isArray(response.monthly_wrapups) ? response.monthly_wrapups : [],
+    habitAchievements: {
+      pendingCount: Number(response.habit_achievements?.pending_count ?? 0) || 0,
+      achievedByPillar: pillarGroups.map((group) => ({
+        pillar: {
+          id: pickString(group.pillar?.id),
+          code: pickString(group.pillar?.code) ?? 'UNKNOWN',
+          name: pickString(group.pillar?.name) ?? 'Unknown',
+        },
+        habits: Array.isArray(group.habits) ? group.habits.filter(isRecord).map(normalizeHabitAchievementShelfItem) : [],
+      })),
+    },
+  };
+}
+
+export async function getTaskHabitAchievement(taskId: string): Promise<TaskHabitAchievementState> {
+  const response = await getAuthorizedJson<Record<string, unknown>>(`/tasks/${encodeURIComponent(taskId)}/habit-achievement`);
+  const task = (response.task as Record<string, unknown> | undefined) ?? {};
+  const achievement = (response.achievement as Record<string, unknown> | undefined) ?? {};
+  return {
+    task: {
+      id: pickString(task.id) ?? taskId,
+      name: pickString(task.name),
+      lifecycleStatus: pickString(task.lifecycle_status) ?? pickString(task.lifecycleStatus),
+    },
+    achievement: {
+      exists: Boolean(achievement.exists),
+      status: (pickString(achievement.status) as TaskHabitAchievementState['achievement']['status']) ?? 'not_achieved',
+      achievedAt: pickString(achievement.achieved_at) ?? pickString(achievement.achievedAt),
+      decisionMadeAt: pickString(achievement.decision_made_at) ?? pickString(achievement.decisionMadeAt),
+      gpBeforeAchievement: Number(achievement.gp_before_achievement ?? achievement.gpBeforeAchievement ?? 0) || 0,
+      gpSinceMaintain: Number(achievement.gp_since_maintain ?? achievement.gpSinceMaintain ?? 0) || 0,
+      maintainEnabled: Boolean(achievement.maintain_enabled ?? achievement.maintainEnabled),
+      sealVisible: Boolean((achievement.seal as Record<string, unknown> | undefined)?.visible ?? achievement.seal_visible),
+    },
+  };
+}
+
+export async function decideTaskHabitAchievement(taskId: string, decision: 'maintain' | 'store'): Promise<TaskHabitAchievementState> {
+  const response = await apiAuthorizedFetch(`/tasks/${encodeURIComponent(taskId)}/habit-achievement/decision`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ decision }),
+  });
+  if (!response.ok) {
+    const body = await safeJson(response);
+    throw new ApiError(response.status, body, `/api/tasks/${taskId}/habit-achievement/decision`);
+  }
+  return getTaskHabitAchievement(taskId);
+}
+
+export async function toggleTaskHabitAchievementMaintained(taskId: string, maintainEnabled: boolean): Promise<TaskHabitAchievementState> {
+  const response = await apiAuthorizedFetch(`/tasks/${encodeURIComponent(taskId)}/habit-achievement/toggle-maintained`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ maintainEnabled }),
+  });
+  if (!response.ok) {
+    const body = await safeJson(response);
+    throw new ApiError(response.status, body, `/api/tasks/${taskId}/habit-achievement/toggle-maintained`);
+  }
+  return getTaskHabitAchievement(taskId);
 }
 
 export type StreakSummary = {
@@ -2506,8 +2657,6 @@ export async function updateDailyReminderSettings(
   return response;
 }
 
-
-export type ModerationTrackerType = 'alcohol' | 'tobacco' | 'sugar';
 export type ModerationStatus = 'on_track' | 'off_track' | 'not_logged';
 
 export type ModerationTracker = {
@@ -2544,6 +2693,8 @@ export type DailyQuestTaskDefinition = {
   difficulty: string | null;
   difficulty_id: number | null;
   xp: number;
+  achievement_seal_visible?: boolean;
+  lifecycle_status?: string | null;
 };
 
 export type DailyQuestDefinitionResponse = DailyQuestStatusResponse & {
