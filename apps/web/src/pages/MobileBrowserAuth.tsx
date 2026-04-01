@@ -422,7 +422,7 @@ export default function MobileBrowserAuthPage() {
       <AuthLayout
         title={language === 'en' ? 'Preparing secure access' : 'Preparando acceso seguro'}
         secondaryActionLabel={language === 'en' ? 'Cancel' : 'Cancelar'}
-        secondaryActionHref={callbackUrl}
+        secondaryActionHref={signedOutUrl}
       >
         <RedirectingState
           title={language === 'en' ? 'Loading Clerk' : 'Cargando Clerk'}
@@ -453,14 +453,14 @@ export default function MobileBrowserAuthPage() {
   }
 
   return (
-    <AuthLayout
-      title={mode === 'refresh'
+      <AuthLayout
+        title={mode === 'refresh'
         ? language === 'en' ? 'Restore your session' : 'Recuperar tu sesión'
         : mode === 'sign-up'
         ? language === 'en' ? 'Create your account' : 'Crear tu cuenta'
         : language === 'en' ? 'Sign in' : 'Iniciar sesión'}
       secondaryActionLabel={language === 'en' ? 'Back to app' : 'Volver a la app'}
-      secondaryActionHref={callbackUrl}
+      secondaryActionHref={signedOutUrl}
     >
       {mode === 'sign-up' ? (
         <SignUp
