@@ -27,7 +27,7 @@ import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';
 import { MobileAppEntry } from './mobile/MobileAppEntry';
-import { useMobileAuthSession } from './mobile/mobileAuthSession';
+import { shouldForceNativeWelcome, useMobileAuthSession } from './mobile/mobileAuthSession';
 import MobileBrowserAuthPage from './pages/MobileBrowserAuth';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
@@ -44,6 +44,7 @@ function ApiAuthBridge() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const mobileAuthSession = useMobileAuthSession();
   const isNativeApp = isNativeCapacitorPlatform();
+  const forceNativeWelcome = isNativeApp && shouldForceNativeWelcome();
 
   useEffect(() => () => {
     setApiAuthTokenProvider(null);
@@ -52,6 +53,16 @@ function ApiAuthBridge() {
   useEffect(() => {
     if (DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV) {
       setApiAuthTokenProvider(async () => 'dev-token');
+      return;
+    }
+
+    if (forceNativeWelcome) {
+      writeMobileDebug('api-auth-provider', {
+        source: 'force-native-welcome',
+        ready: false,
+      });
+      console.info('[API] auth provider cleared by native welcome override');
+      setApiAuthTokenProvider(null);
       return;
     }
 
@@ -119,7 +130,7 @@ function ApiAuthBridge() {
     });
 
     setApiAuthTokenProvider(provider);
-  }, [getToken, isLoaded, isNativeApp, isSignedIn, mobileAuthSession?.clerkUserId, mobileAuthSession?.token]);
+  }, [forceNativeWelcome, getToken, isLoaded, isNativeApp, isSignedIn, mobileAuthSession?.clerkUserId, mobileAuthSession?.token]);
 
   return null;
 }
@@ -129,7 +140,7 @@ function RequireUser({ children }: { children: ReactElement }) {
   const mobileAuthSession = useMobileAuthSession();
   const devBypass = DEV_USER_SWITCH_ACTIVE && import.meta.env.DEV;
   const unauthenticatedRedirectPath = isNativeCapacitorPlatform() ? '/' : '/login';
-  const hasNativeSession = isNativeCapacitorPlatform() && Boolean(mobileAuthSession?.token);
+  const hasNativeSession = isNativeCapacitorPlatform() && Boolean(mobileAuthSession?.token) && !shouldForceNativeWelcome();
 
   if (devBypass) {
     return children;
@@ -155,7 +166,7 @@ function RedirectIfSignedIn({
 }) {
   const { isLoaded, userId } = useAuth();
   const mobileAuthSession = useMobileAuthSession();
-  const hasNativeSession = isNativeCapacitorPlatform() && Boolean(mobileAuthSession?.token);
+  const hasNativeSession = isNativeCapacitorPlatform() && Boolean(mobileAuthSession?.token) && !shouldForceNativeWelcome();
 
   if (!isLoaded && !hasNativeSession) {
     return <div className="flex min-h-screen items-center justify-center text-text">Cargando…</div>;

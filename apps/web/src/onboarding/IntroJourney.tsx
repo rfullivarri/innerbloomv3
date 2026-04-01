@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/runtimeAuth';
 import { isNativeCapacitorPlatform } from '../mobile/capacitor';
-import { useMobileAuthSession } from '../mobile/mobileAuthSession';
+import { clearMobileAuthSession, setForceNativeWelcome, useMobileAuthSession } from '../mobile/mobileAuthSession';
 import { STEP_XP, CHECKLIST_LIMITS, OPEN_TEXT_XP, getFormLabels, type OnboardingLanguage } from './constants';
 import { buildPayload } from './payload';
 import { useOnboarding } from './state';
@@ -247,7 +247,14 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
 
   const handleExit = () => {
     handleRestart();
-    navigate('/');
+    if (isNativeApp) {
+      setForceNativeWelcome(true);
+      clearMobileAuthSession('native-onboarding-exit', {
+        stepId,
+        authMode: mobileAuthSession?.authMode ?? null,
+      });
+    }
+    navigate('/', { replace: true });
   };
 
   const handleCloseGpExplainer = () => {

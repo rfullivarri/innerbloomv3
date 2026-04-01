@@ -31,6 +31,7 @@ export type MobileAuthCallbackResolution =
 const MOBILE_AUTH_SESSION_STORAGE_KEY = 'innerbloom.mobile.auth-session.v1';
 const MOBILE_AUTH_SESSION_EVENT = 'innerbloom:mobile-auth-session-changed';
 const MOBILE_AUTH_CALLBACK_FINGERPRINT_STORAGE_KEY = 'innerbloom.mobile.auth-callback.last-fingerprint.v1';
+const MOBILE_AUTH_FORCE_WELCOME_STORAGE_KEY = 'innerbloom.mobile.auth.force-welcome.v1';
 const MOBILE_AUTH_REFRESH_TIMEOUT_MS = 15_000;
 const MOBILE_AUTH_REFRESH_MIN_VALIDITY_MS = 10_000;
 const MOBILE_AUTH_REFRESH_COOLDOWN_MS = 10_000;
@@ -64,6 +65,27 @@ function setStoredCallbackFingerprint(fingerprint: string): void {
   }
 
   window.localStorage.setItem(MOBILE_AUTH_CALLBACK_FINGERPRINT_STORAGE_KEY, fingerprint);
+}
+
+export function shouldForceNativeWelcome(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.sessionStorage.getItem(MOBILE_AUTH_FORCE_WELCOME_STORAGE_KEY) === '1';
+}
+
+export function setForceNativeWelcome(enabled: boolean): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  if (enabled) {
+    window.sessionStorage.setItem(MOBILE_AUTH_FORCE_WELCOME_STORAGE_KEY, '1');
+    return;
+  }
+
+  window.sessionStorage.removeItem(MOBILE_AUTH_FORCE_WELCOME_STORAGE_KEY);
 }
 
 function hashString(input: string): string {
@@ -364,6 +386,7 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
     }
 
     if (parsed.hostname === CAPACITOR_SIGNED_OUT_HOST) {
+      setForceNativeWelcome(true);
       clearMobileAuthSession();
       setStoredCallbackFingerprint(fingerprint);
       writeMobileDebug('mobile-auth-callback', {
@@ -402,6 +425,7 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
       expiresAt: decodeJwtExp(token),
       updatedAt: Date.now(),
     });
+    setForceNativeWelcome(false);
     setStoredCallbackFingerprint(fingerprint);
 
     console.info('[mobile-auth] persisted callback session', {

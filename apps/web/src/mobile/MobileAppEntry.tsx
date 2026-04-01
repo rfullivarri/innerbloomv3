@@ -7,7 +7,13 @@ import { useBackendUser } from '../hooks/useBackendUser';
 import { useOnboardingProgress } from '../hooks/useOnboardingProgress';
 import { resolveAuthLanguage } from '../lib/authLanguage';
 import { isNativeCapacitorPlatform, openUrlInCapacitorBrowser } from './capacitor';
-import { buildNativeMobileAuthUrl, useMobileAuthSession, type MobileAuthMode } from './mobileAuthSession';
+import {
+  buildNativeMobileAuthUrl,
+  setForceNativeWelcome,
+  shouldForceNativeWelcome,
+  useMobileAuthSession,
+  type MobileAuthMode,
+} from './mobileAuthSession';
 import type { OnboardingProgress } from '../lib/api';
 
 function MobileEntryShell({
@@ -71,6 +77,7 @@ function MobileWelcome() {
   const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
 
   const openNativeAuth = async (mode: 'sign-in' | 'sign-up') => {
+    setForceNativeWelcome(false);
     const mobileAuthUrl = buildNativeMobileAuthUrl(mode, language);
     await openUrlInCapacitorBrowser(mobileAuthUrl);
   };
@@ -164,7 +171,8 @@ export function MobileAppEntry() {
   const onboarding = useOnboardingProgress();
   const mobileAuthSession = useMobileAuthSession();
   const isNativeApp = isNativeCapacitorPlatform();
-  const hasNativeCallbackSession = isNativeApp && Boolean(mobileAuthSession?.token);
+  const forceNativeWelcome = isNativeApp && shouldForceNativeWelcome();
+  const hasNativeCallbackSession = isNativeApp && Boolean(mobileAuthSession?.token) && !forceNativeWelcome;
   const hasEffectiveSession = isSignedIn || hasNativeCallbackSession;
   const dashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
   const nativeAuthMode = isNativeApp ? mobileAuthSession?.authMode ?? null : null;
