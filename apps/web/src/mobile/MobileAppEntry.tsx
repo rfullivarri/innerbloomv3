@@ -100,12 +100,12 @@ function MobileWelcome() {
             />
           </div>
 
-          <div className="flex flex-1 flex-col justify-end pt-7">
-            <div className="space-y-3 text-center">
+          <div className="flex flex-1 flex-col pt-7">
+            <div className="mt-10 text-center">
               <h1 className="text-[2.4rem] font-semibold tracking-tight text-white">Bienvenido</h1>
             </div>
 
-            <div className="mt-8 space-y-3 px-2">
+            <div className="mt-auto space-y-3 px-2 pt-10">
               <button
                 type="button"
                 onClick={() => void openNativeAuth('sign-in')}
