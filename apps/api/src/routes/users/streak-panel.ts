@@ -3,6 +3,7 @@ import { pool } from '../../db.js';
 import type { AsyncHandler } from '../../lib/async-handler.js';
 import { ensureUserExists } from '../../controllers/users/shared.js';
 import { parseWithValidation, uuidSchema } from '../../lib/validation.js';
+import { buildActiveSurfaceTaskFilter } from '../../services/taskLifecyclePolicy.js';
 
 const MODE_TIERS: Record<Mode, number> = {
   Low: 1,
@@ -27,6 +28,7 @@ type TaskRow = {
   xp_base: string | number | null;
   trait_name: string | null;
   trait_code: string | null;
+  lifecycle_status: string;
 };
 
 type LogRow = {
@@ -274,12 +276,13 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
             t.task,
             t.xp_base,
             ct.name AS trait_name,
-            ct.code AS trait_code
+            ct.code AS trait_code,
+            t.lifecycle_status
        FROM tasks t
        JOIN cat_pillar cp ON cp.pillar_id = t.pillar_id
   LEFT JOIN cat_trait ct ON ct.trait_id = t.trait_id
       WHERE t.user_id = $1
-        AND t.active = true
+        AND ${buildActiveSurfaceTaskFilter('t')}
         AND cp.code = $2
    ORDER BY t.task`,
     [id, PILLAR_CODES[pillar]],
@@ -302,6 +305,7 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
       stat,
       xpBase,
       normalizedSearch: `${normalizedName} ${normalizedStat} ${normalizedTrait}`.trim(),
+      lifecycleStatus: row.lifecycle_status,
     };
   });
 
@@ -398,7 +402,11 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
   });
 
   const topStreaks = tasks
-    .filter((task) => task.streakDays >= 2)
+    .filter(
+      (task) =>
+        task.streakDays >= 2 &&
+        (filteredDefinitions.find((candidate) => candidate.id === task.id)?.lifecycleStatus ?? 'active') === 'active',
+    )
     .sort((a, b) => b.streakDays - a.streakDays)
     .slice(0, 3)
     .map((task) => ({

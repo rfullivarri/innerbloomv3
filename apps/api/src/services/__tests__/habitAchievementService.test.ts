@@ -3,6 +3,7 @@ import {
   applyHabitAchievementDecision,
   createPendingHabitAchievement,
   evaluateHabitAchievementWindow,
+  runMonthlyHabitAchievementDetection,
   resolveExpiredPendingHabitAchievements,
   toggleAchievedHabitTracking,
 } from '../habitAchievementService.js';
@@ -165,5 +166,37 @@ describe('habitAchievementService lifecycle transitions', () => {
     expect(updateCalls).toHaveLength(2);
     expect(updateCalls[0]?.[1]).toEqual(expect.arrayContaining(['achievement-1', 'maintained']));
     expect(updateCalls[1]?.[1]).toEqual(expect.arrayContaining(['achievement-1', 'stored']));
+  });
+
+  it('runs monthly detection after aggregation window and creates pending records for qualified tasks', async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [{ task_id: 'task-1', user_id: 'user-1' }],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [
+          { period_end: '2026-03-31', expected_target: 20, completions_done: 18, completion_rate: 0.9 },
+          { period_end: '2026-02-28', expected_target: 20, completions_done: 16, completion_rate: 0.8 },
+          { period_end: '2026-01-31', expected_target: 20, completions_done: 14, completion_rate: 0.7 },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const result = await runMonthlyHabitAchievementDetection({
+      periodStart: '2026-03-01',
+      nextPeriodStart: '2026-04-01',
+      now: new Date('2026-04-01T00:00:00.000Z'),
+    });
+
+    expect(result).toEqual({
+      expiredResolved: 0,
+      evaluated: 1,
+      pendingCreated: 1,
+    });
   });
 });

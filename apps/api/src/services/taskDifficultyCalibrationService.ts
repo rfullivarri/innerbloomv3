@@ -1,4 +1,5 @@
 import { pool } from '../db.js';
+import { buildGrowthCalibrationFilter } from './taskLifecyclePolicy.js';
 
 const MS_IN_DAY = 24 * 60 * 60 * 1000;
 
@@ -148,9 +149,9 @@ async function runTaskDifficultyCalibrationEngine(options: RunCalibrationOptions
   const userFilterSql = options.userId ? 'AND t.user_id = $1::uuid' : '';
   const tasksResult = await pool.query<TaskCandidateRow>(
     `SELECT t.task_id, t.user_id, t.difficulty_id, t.created_at::text AS created_at, t.active, u.game_mode_id
-       FROM tasks t
+      FROM tasks t
        JOIN users u ON u.user_id = t.user_id
-      WHERE t.active = TRUE ${userFilterSql}`,
+      WHERE ${buildGrowthCalibrationFilter('t')} ${userFilterSql}`,
     options.userId ? [options.userId] : [],
   );
 

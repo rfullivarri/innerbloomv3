@@ -9,6 +9,7 @@ import {
 } from '../services/taskDifficultyCalibrationService.js';
 import { createRateLimitMiddleware } from '../middlewares/rate-limit.js';
 import { runUserMonthlyModeUpgradeAggregation } from '../services/modeUpgradeMonthlyAggregationService.js';
+import { runMonthlyHabitAchievementDetection } from '../services/habitAchievementService.js';
 
 const router = Router();
 
@@ -114,8 +115,21 @@ router.post(
       : await runMonthlyTaskDifficultyCalibration(now);
 
     const modeUpgradeAggregation = shouldBackfill ? null : await runUserMonthlyModeUpgradeAggregation({ now });
+    const habitAchievement = shouldBackfill || !modeUpgradeAggregation
+      ? null
+      : await runMonthlyHabitAchievementDetection({
+          now,
+          periodStart: modeUpgradeAggregation.periodStart,
+          nextPeriodStart: modeUpgradeAggregation.nextPeriodStart,
+        });
 
-    res.json({ ok: true, backfill: shouldBackfill, ...result, mode_upgrade_aggregation: modeUpgradeAggregation });
+    res.json({
+      ok: true,
+      backfill: shouldBackfill,
+      ...result,
+      mode_upgrade_aggregation: modeUpgradeAggregation,
+      habit_achievement: habitAchievement,
+    });
   }),
 );
 

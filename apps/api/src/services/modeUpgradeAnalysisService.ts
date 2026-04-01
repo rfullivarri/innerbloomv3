@@ -1,5 +1,6 @@
 import { pool } from '../db.js';
 import { HttpError } from '../lib/http-error.js';
+import { buildModeUpgradeFilter } from './taskLifecyclePolicy.js';
 
 const ANALYSIS_WINDOW_DAYS = 30;
 const GOAL_THRESHOLD = 0.8;
@@ -212,7 +213,7 @@ export async function getRollingModeUpgradeAnalysis(userId: string, now: Date = 
               t.created_at::text AS created_at
          FROM tasks t
         WHERE t.user_id = $1::uuid
-          AND t.active = TRUE
+          AND ${buildModeUpgradeFilter('t')}
         ORDER BY t.task ASC, t.task_id ASC`,
       [userId],
     ),
