@@ -1,6 +1,7 @@
 import { SignIn, SignUp } from '@clerk/clerk-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth, useUser } from '../../auth/runtimeAuth';
 import { buildLocalizedAuthPath } from '../../lib/authLanguage';
 import { createAuthAppearance } from '../../lib/clerkAppearance';
@@ -46,6 +47,7 @@ const clerkAppearance = createAuthAppearance({
 });
 
 export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: ClerkGateProps) {
+  const location = useLocation();
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { user } = useUser();
   const mobileAuthSession = useMobileAuthSession();
@@ -77,6 +79,15 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
 
   const userEmail = user?.primaryEmailAddress?.emailAddress ?? mobileAuthSession?.email ?? '';
   const userId = user?.id ?? mobileAuthSession?.clerkUserId ?? '';
+  const currentUrl = useMemo(() => {
+    const localizedFallbackPath = '/intro-journey';
+
+    if (typeof window === 'undefined') {
+      return localizedFallbackPath;
+    }
+
+    return `${location.pathname}${location.search}${location.hash}`;
+  }, [language, location.hash, location.pathname, location.search]);
 
   const openNativeAuth = async (mode: 'sign-in' | 'sign-up') => {
     const path = buildLocalizedAuthPath('/mobile-auth', language);
