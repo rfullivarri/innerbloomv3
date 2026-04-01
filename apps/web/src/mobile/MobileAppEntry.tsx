@@ -86,8 +86,8 @@ function MobileWelcome() {
     <div className="flex min-h-screen items-center justify-center px-5 pb-[calc(env(safe-area-inset-bottom,0px)+1.75rem)] pt-[calc(env(safe-area-inset-top,0px)+1rem)] text-white">
       <div className="flex min-h-[82vh] w-full max-w-md flex-col">
         <div className="pt-3 text-center">
-          <div className="flex items-center justify-center text-[13px] font-semibold uppercase tracking-[0.42em] text-white/66">
-            <BrandWordmark className="gap-3" textClassName="tracking-[0.42em]" iconClassName="h-[2.45em]" />
+          <div className="flex items-center justify-center text-[17px] font-semibold uppercase tracking-[0.42em] text-white/66">
+            <BrandWordmark className="gap-3.5" textClassName="tracking-[0.42em]" iconClassName="h-[3.2em]" />
           </div>
         </div>
 
@@ -102,10 +102,7 @@ function MobileWelcome() {
 
           <div className="flex flex-1 flex-col justify-end pt-7">
             <div className="space-y-3 text-center">
-              <h1 className="text-[2rem] font-semibold tracking-tight text-white">Bienvenido</h1>
-              <p className="mx-auto max-w-[18rem] text-sm leading-6 text-white/74">
-                Abre tu sesión de Innerbloom en navegador seguro y vuelve a la app con tu progreso intacto.
-              </p>
+              <h1 className="text-[2.4rem] font-semibold tracking-tight text-white">Bienvenido</h1>
             </div>
 
             <div className="mt-8 space-y-3 px-2">
