@@ -159,6 +159,22 @@ export async function closeCapacitorBrowser(): Promise<void> {
   }
 }
 
+export function scheduleCapacitorBrowserCloseRetries(delaysMs: number[] = [250, 900]): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  delaysMs.forEach((delayMs) => {
+    window.setTimeout(() => {
+      console.info('[mobile-auth] Browser.close() retry scheduled', {
+        delayMs,
+        at: Date.now(),
+      });
+      void closeCapacitorBrowser();
+    }, delayMs);
+  });
+}
+
 export function shouldOpenExternalUrl(url: string): boolean {
   if (!url) {
     return false;

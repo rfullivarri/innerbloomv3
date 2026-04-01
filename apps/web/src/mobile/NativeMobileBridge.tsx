@@ -14,6 +14,7 @@ import {
   isNativeAuthCallbackUrl,
   isNativeCapacitorPlatform,
   normalizeAppUrlToPath,
+  scheduleCapacitorBrowserCloseRetries,
   shouldOpenExternalUrl,
 } from './capacitor';
 import { resolveMobileAuthSessionFromCallback } from './mobileAuthSession';
@@ -202,6 +203,7 @@ function useDeepLinkNavigation(enabled: boolean) {
         ) {
           lastClosedFingerprintRef.current = resolution.fingerprint;
           await closeCapacitorBrowser();
+          scheduleCapacitorBrowserCloseRetries();
         }
 
         setConsumedLaunchFingerprint(resolution.fingerprint);

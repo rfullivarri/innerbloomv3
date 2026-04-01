@@ -105,6 +105,7 @@ function handleInvalidNativeMobileToken(
   const currentTokenFingerprint = getMobileAuthTokenFingerprint(session.token);
 
   apiLog('[API] native token invalidation check', {
+    at: Date.now(),
     url,
     failedTokenFingerprint,
     currentTokenFingerprint,
@@ -113,6 +114,7 @@ function handleInvalidNativeMobileToken(
 
   if (failedTokenFingerprint && currentTokenFingerprint && failedTokenFingerprint !== currentTokenFingerprint) {
     apiLog('[API] skip clearing mobile session for stale failed token', {
+      at: Date.now(),
       url,
       failedTokenFingerprint,
       currentTokenFingerprint,
@@ -120,6 +122,12 @@ function handleInvalidNativeMobileToken(
     return;
   }
 
+  apiLog('[API] clearing mobile session for failed token', {
+    at: Date.now(),
+    url,
+    failedTokenFingerprint,
+    currentTokenFingerprint,
+  });
   clearMobileAuthSession('expired-or-invalid-callback-token', {
     url,
     failedTokenFingerprint,
@@ -142,6 +150,7 @@ async function tryRefreshNativeMobileToken(url: string, body: any, failedToken: 
   }
 
   apiLog('[API] attempting native token refresh', {
+    at: Date.now(),
     url,
     failedTokenFingerprint: getMobileAuthTokenFingerprint(failedToken),
     causeCode: typeof body?.details?.cause?.code === 'string' ? body.details.cause.code : null,
@@ -153,7 +162,18 @@ async function tryRefreshNativeMobileToken(url: string, body: any, failedToken: 
     minValidityMs: 0,
   });
 
-  return Boolean(refreshed?.token && refreshed.token !== session.token);
+  const didRefresh = Boolean(refreshed?.token && refreshed.token !== session.token);
+
+  if (didRefresh) {
+    apiLog('[API] native token refresh succeeded', {
+      at: Date.now(),
+      url,
+      previousTokenFingerprint: getMobileAuthTokenFingerprint(session.token),
+      refreshedTokenFingerprint: getMobileAuthTokenFingerprint(refreshed?.token ?? null),
+    });
+  }
+
+  return didRefresh;
 }
 
 const DEV_USER_HEADER = 'X-Innerbloom-Demo-User';
@@ -266,6 +286,7 @@ export async function apiRequest<T = unknown>(url: string, init?: RequestInit): 
       try {
         const authToken = await resolveAuthToken();
         apiLog('[API] request started', {
+          at: Date.now(),
           url,
           tokenFingerprint: getMobileAuthTokenFingerprint(authToken),
         });
@@ -292,6 +313,7 @@ export async function apiRequest<T = unknown>(url: string, init?: RequestInit): 
         res.headers.get('x-railway-request-id') || res.headers.get('x-request-id') || undefined;
 
       apiLog('[API] request failed before refresh handling', {
+        at: Date.now(),
         url,
         status: res.status,
         tokenFingerprint: getMobileAuthTokenFingerprint(requestAuthToken),
