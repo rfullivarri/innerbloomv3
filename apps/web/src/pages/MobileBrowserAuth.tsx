@@ -94,6 +94,12 @@ function buildModeUrl(language: string, mode: 'sign-in' | 'sign-up', search: str
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
+function buildHandoffUrl(currentUrl: string): string {
+  const url = new URL(currentUrl);
+  url.searchParams.set('handoff', '1');
+  return url.toString();
+}
+
 function RedirectingState({
   title,
   description,
@@ -134,11 +140,16 @@ export default function MobileBrowserAuthPage() {
       : `/mobile-auth${location.search}${location.hash}`),
     [location.hash, location.search],
   );
+  const handoffUrl = useMemo(() => buildHandoffUrl(currentUrl), [currentUrl]);
   const callbackUrl = useMemo(() => buildAppCallbackUrl(location.search), [location.search]);
   const signedOutUrl = useMemo(() => buildSignedOutUrl(location.search), [location.search]);
   const returnTo = useMemo(() => {
     const params = new URLSearchParams(location.search);
     return params.get('return_to')?.trim() ?? null;
+  }, [location.search]);
+  const isHandoffStep = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('handoff') === '1';
   }, [location.search]);
   const createdSessionId = signIn?.createdSessionId ?? signUp?.createdSessionId ?? null;
 
@@ -154,10 +165,11 @@ export default function MobileBrowserAuthPage() {
     console.info('[mobile-auth-page] parsed-params', {
       mode,
       returnTo,
+      handoff: isHandoffStep,
       lang: language,
       at: Date.now(),
     });
-  }, [language, mode, returnTo]);
+  }, [isHandoffStep, language, mode, returnTo]);
 
   useEffect(() => {
     console.info('[mobile-auth-page] clerk-ready', {
@@ -288,6 +300,7 @@ export default function MobileBrowserAuthPage() {
             createdSessionId,
             sessionId: session?.id ?? null,
             userId: user?.id ?? null,
+            handoff: isHandoffStep,
           });
           throw new Error('Clerk no devolvió un token de sesión utilizable para mobile.');
         }
@@ -303,6 +316,7 @@ export default function MobileBrowserAuthPage() {
             callbackUrl: resolvedCallbackUrl,
             mode,
             returnTo,
+            handoff: isHandoffStep,
             at: Date.now(),
           });
         } catch (cause) {
@@ -327,6 +341,7 @@ export default function MobileBrowserAuthPage() {
             mode,
             sessionId: session?.id ?? null,
             createdSessionId,
+            handoff: isHandoffStep,
           });
         }, 1500);
       } catch (cause) {
@@ -339,6 +354,7 @@ export default function MobileBrowserAuthPage() {
           sessionId: session?.id ?? null,
           createdSessionId,
           userId: user?.id ?? null,
+          handoff: isHandoffStep,
           error: nextError,
         });
         setError(nextError || 'No pudimos transferir la sesión de Clerk a la app.');
@@ -353,6 +369,7 @@ export default function MobileBrowserAuthPage() {
     isSignedIn,
     mode,
     returnTo,
+    isHandoffStep,
     session?.id,
     signOut,
     signedOutUrl,
@@ -427,30 +444,30 @@ export default function MobileBrowserAuthPage() {
           appearance={authAppearance}
           routing="virtual"
           signInUrl={buildModeUrl(language, 'sign-in', location.search)}
-          fallbackRedirectUrl={currentUrl}
-          forceRedirectUrl={currentUrl}
+          fallbackRedirectUrl={handoffUrl}
+          forceRedirectUrl={handoffUrl}
           signInFallbackRedirectUrl={buildModeUrl(language, 'sign-in', location.search)}
           signInForceRedirectUrl={buildModeUrl(language, 'sign-in', location.search)}
-          signUpFallbackRedirectUrl={currentUrl}
-          signUpForceRedirectUrl={currentUrl}
-          redirectUrl={currentUrl}
-          afterSignUpUrl={currentUrl}
-          afterSignInUrl={currentUrl}
+          signUpFallbackRedirectUrl={handoffUrl}
+          signUpForceRedirectUrl={handoffUrl}
+          redirectUrl={handoffUrl}
+          afterSignUpUrl={handoffUrl}
+          afterSignInUrl={handoffUrl}
         />
       ) : (
         <SignIn
           appearance={authAppearance}
           routing="virtual"
           signUpUrl={buildModeUrl(language, 'sign-up', location.search)}
-          fallbackRedirectUrl={currentUrl}
-          forceRedirectUrl={currentUrl}
+          fallbackRedirectUrl={handoffUrl}
+          forceRedirectUrl={handoffUrl}
           signUpFallbackRedirectUrl={buildModeUrl(language, 'sign-up', location.search)}
           signUpForceRedirectUrl={buildModeUrl(language, 'sign-up', location.search)}
-          signInFallbackRedirectUrl={currentUrl}
-          signInForceRedirectUrl={currentUrl}
-          redirectUrl={currentUrl}
-          afterSignUpUrl={currentUrl}
-          afterSignInUrl={currentUrl}
+          signInFallbackRedirectUrl={handoffUrl}
+          signInForceRedirectUrl={handoffUrl}
+          redirectUrl={handoffUrl}
+          afterSignUpUrl={handoffUrl}
+          afterSignInUrl={handoffUrl}
         />
       )}
       {error ? <p className="mt-4 text-center text-sm text-rose-200">{error}</p> : null}
