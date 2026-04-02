@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { TaskgenPage } from '../admin/TaskgenPage';
 import { TaskgenTracePanel } from '../../components/admin/TaskgenTracePanel';
 
+const BTN_SECONDARY = 'admin2-btn admin2-btn--secondary';
+const BTN_GHOST = 'admin2-btn admin2-btn--ghost';
+
 export function AiTaskgenPage() {
   const [activeTab, setActiveTab] = useState<'trace' | 'monitor'>('trace');
   const [traceUser, setTraceUser] = useState('');
@@ -13,9 +16,9 @@ export function AiTaskgenPage() {
         <h2 className="mt-2 text-3xl font-semibold tracking-tight">Tracing + force-run como vista principal</h2>
       </header>
 
-      <div className="flex gap-2">
-        <button type="button" onClick={() => setActiveTab('trace')} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${activeTab === 'trace' ? 'border-[color:var(--admin-accent)]' : 'border-[color:var(--admin-border)]'}`}>Trace & Force Tool</button>
-        <button type="button" onClick={() => setActiveTab('monitor')} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${activeTab === 'monitor' ? 'border-[color:var(--admin-accent)]' : 'border-[color:var(--admin-border)]'}`}>Jobs Monitor (secundario)</button>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={() => setActiveTab('trace')} className={`${activeTab === 'trace' ? BTN_SECONDARY : BTN_GHOST}`}>Trace & Force Tool</button>
+        <button type="button" onClick={() => setActiveTab('monitor')} className={`${activeTab === 'monitor' ? BTN_SECONDARY : BTN_GHOST}`}>Jobs Monitor (secundario)</button>
       </div>
 
       {activeTab === 'trace' ? (

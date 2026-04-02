@@ -17,6 +17,21 @@
   --admin-layer-strong: color-mix(in srgb, var(--admin-surface) 96%, transparent);
   --admin-layer-muted: color-mix(in srgb, var(--admin-surface-muted) 94%, transparent);
   --admin-layer: color-mix(in srgb, var(--admin-surface) 90%, transparent);
+  --admin-btn-primary-bg: #2563eb;
+  --admin-btn-primary-text: #eff6ff;
+  --admin-btn-primary-border: #1d4ed8;
+  --admin-btn-secondary-bg: color-mix(in srgb, var(--admin-surface) 92%, #dbeafe 8%);
+  --admin-btn-secondary-text: #1e40af;
+  --admin-btn-secondary-border: #93c5fd;
+  --admin-btn-ghost-bg: transparent;
+  --admin-btn-ghost-text: var(--admin-text);
+  --admin-btn-ghost-border: var(--admin-border);
+  --admin-btn-success-bg: #065f46;
+  --admin-btn-success-text: #ecfdf5;
+  --admin-btn-success-border: #047857;
+  --admin-btn-danger-bg: #7f1d1d;
+  --admin-btn-danger-text: #fef2f2;
+  --admin-btn-danger-border: #b91c1c;
 }
 
 .admin2-theme[data-theme='dark'] {
@@ -30,4 +45,93 @@
   --admin-active-bg: #1f3a70;
   --admin-active-text: #dbeafe;
   --admin-accent: #7fb0ff;
+  --admin-btn-primary-bg: #2563eb;
+  --admin-btn-primary-text: #eff6ff;
+  --admin-btn-primary-border: #60a5fa;
+  --admin-btn-secondary-bg: #1f3a70;
+  --admin-btn-secondary-text: #dbeafe;
+  --admin-btn-secondary-border: #3b82f6;
+  --admin-btn-ghost-bg: transparent;
+  --admin-btn-ghost-text: #dbeafe;
+  --admin-btn-ghost-border: #3a4d70;
+  --admin-btn-success-bg: #14532d;
+  --admin-btn-success-text: #ecfdf5;
+  --admin-btn-success-border: #22c55e;
+  --admin-btn-danger-bg: #7f1d1d;
+  --admin-btn-danger-text: #fef2f2;
+  --admin-btn-danger-border: #ef4444;
+}
+
+.admin2-theme .admin2-btn {
+  border-radius: 0.65rem;
+  border: 1px solid var(--admin-btn-ghost-border);
+  background: var(--admin-btn-ghost-bg);
+  color: var(--admin-btn-ghost-text);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, opacity 140ms ease;
+}
+
+.admin2-theme .admin2-btn:hover {
+  border-color: var(--admin-accent);
+  background: var(--admin-hover);
+}
+
+.admin2-theme .admin2-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--admin-accent) 64%, transparent);
+  outline-offset: 1px;
+}
+
+.admin2-theme .admin2-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin2-theme .admin2-btn--primary {
+  background: var(--admin-btn-primary-bg);
+  color: var(--admin-btn-primary-text);
+  border-color: var(--admin-btn-primary-border);
+}
+
+.admin2-theme .admin2-btn--primary:hover {
+  background: color-mix(in srgb, var(--admin-btn-primary-bg) 88%, white);
+  border-color: color-mix(in srgb, var(--admin-btn-primary-border) 90%, white);
+}
+
+.admin2-theme .admin2-btn--secondary {
+  background: var(--admin-btn-secondary-bg);
+  color: var(--admin-btn-secondary-text);
+  border-color: var(--admin-btn-secondary-border);
+}
+
+.admin2-theme .admin2-btn--secondary:hover {
+  background: color-mix(in srgb, var(--admin-btn-secondary-bg) 85%, white);
+}
+
+.admin2-theme .admin2-btn--ghost {
+  background: var(--admin-btn-ghost-bg);
+  color: var(--admin-btn-ghost-text);
+  border-color: var(--admin-btn-ghost-border);
+}
+
+.admin2-theme .admin2-btn--success {
+  background: var(--admin-btn-success-bg);
+  color: var(--admin-btn-success-text);
+  border-color: var(--admin-btn-success-border);
+}
+
+.admin2-theme .admin2-btn--success:hover {
+  background: color-mix(in srgb, var(--admin-btn-success-bg) 85%, white);
+}
+
+.admin2-theme .admin2-btn--danger {
+  background: var(--admin-btn-danger-bg);
+  color: var(--admin-btn-danger-text);
+  border-color: var(--admin-btn-danger-border);
+}
+
+.admin2-theme .admin2-btn--danger:hover {
+  background: color-mix(in srgb, var(--admin-btn-danger-bg) 86%, white);
 }

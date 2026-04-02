@@ -6,6 +6,7 @@ type UserPickerProps = {
   onSelect: (user: AdminUser | null) => void;
   selectedUserId: string | null;
   compact?: boolean;
+  showSelectedSummary?: boolean;
 };
 
 type SearchState = {
@@ -13,7 +14,7 @@ type SearchState = {
   page: number;
 };
 
-export function UserPicker({ onSelect, selectedUserId, compact = false }: UserPickerProps) {
+export function UserPicker({ onSelect, selectedUserId, compact = false, showSelectedSummary = !compact }: UserPickerProps) {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [search, setSearch] = useState<SearchState>({ term: '', page: 1 });
   const [loading, setLoading] = useState(false);
@@ -54,19 +55,19 @@ export function UserPicker({ onSelect, selectedUserId, compact = false }: UserPi
 
   if (compact) {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <input
             value={search.term}
             onChange={(event) => setSearch({ term: event.target.value, page: 1 })}
             placeholder="Buscar por email o nombre…"
-            className="w-full min-w-0 flex-1 rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] px-3 py-1.5 text-sm"
+            className="w-full min-w-0 flex-1 rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] px-2.5 py-1.5 text-xs"
             aria-label="Buscar usuario"
           />
           <button
             type="button"
             onClick={() => setSearch((prev) => ({ ...prev }))}
-            className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs font-semibold hover:border-[color:var(--admin-accent)]"
+            className="admin2-btn admin2-btn--ghost"
           >
             Buscar
           </button>
@@ -76,7 +77,7 @@ export function UserPicker({ onSelect, selectedUserId, compact = false }: UserPi
           <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">{error}</p>
         ) : null}
 
-        <div className="max-h-64 overflow-y-auto rounded-lg border border-[color:var(--admin-border)]">
+        <div className="max-h-72 overflow-y-auto rounded-lg border border-[color:var(--admin-border)]">
           {loading && users.length === 0 ? <p className="px-3 py-2 text-xs text-[color:var(--admin-muted)]">Cargando…</p> : null}
           {users.map((user) => {
             const isActive = user.id === selectedUserId;
@@ -85,21 +86,21 @@ export function UserPicker({ onSelect, selectedUserId, compact = false }: UserPi
                 key={user.id}
                 type="button"
                 onClick={() => onSelect(user)}
-                className={`flex w-full items-center justify-between gap-3 border-b border-[color:var(--admin-border)] px-3 py-1.5 text-left text-xs last:border-b-0 ${
+                className={`flex w-full items-center justify-between gap-2 border-b border-[color:var(--admin-border)] px-2.5 py-1 text-left text-[11px] last:border-b-0 ${
                   isActive ? 'bg-[color:var(--admin-active-bg)] text-[color:var(--admin-active-text)]' : 'hover:bg-[color:var(--admin-hover)]'
                 }`}
               >
                 <span className="min-w-0 flex-1 truncate">{user.email ?? user.id}</span>
-                <span className="inline-flex rounded-full border border-[color:var(--admin-border)] px-2 py-0.5 text-[10px] uppercase">
+                <span className="inline-flex shrink-0 rounded-full border border-[color:var(--admin-border)] px-1.5 py-0.5 text-[9px] uppercase tracking-wide">
                   {user.gameMode ?? 'N/A'}
                 </span>
-                {isActive ? <span className="text-[10px] font-semibold uppercase">Seleccionado</span> : null}
+                {isActive ? <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wide">Seleccionado</span> : null}
               </button>
             );
           })}
         </div>
 
-        {selectedUser ? (
+        {showSelectedSummary && selectedUser ? (
           <div className="rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-hover)] px-3 py-1.5 text-xs">
             Seleccionado: <strong>{selectedUser.email ?? selectedUser.id}</strong>
           </div>

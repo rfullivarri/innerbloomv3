@@ -50,7 +50,11 @@ const DEFAULT_STREAK_AGGREGATE_TEMPLATE = '🔥 Tenés {{count}} tareas arriba d
 const DEFAULT_STREAK_EMOJI = '🔥';
 const DEFAULT_STREAK_THRESHOLD = 3;
 
-export function FeedbackManagerPage() {
+type FeedbackManagerPageProps = {
+  compactUserPicker?: boolean;
+};
+
+export function FeedbackManagerPage({ compactUserPicker = false }: FeedbackManagerPageProps) {
   const [activeTab, setActiveTab] = useState<TabId>('global');
 
   return (
@@ -88,7 +92,7 @@ export function FeedbackManagerPage() {
         <p className="px-4 pb-1 pt-3 text-xs text-slate-400">{TABS.find((tab) => tab.id === activeTab)?.helper}</p>
       </section>
 
-{activeTab === 'global' ? <GlobalNotificationsView /> : <UserNotificationsView />}
+{activeTab === 'global' ? <GlobalNotificationsView /> : <UserNotificationsView compactUserPicker={compactUserPicker} />}
     </div>
   );
 }
@@ -541,7 +545,7 @@ function GlobalNotificationsView() {
   );
 }
 
-function UserNotificationsView() {
+function UserNotificationsView({ compactUserPicker = false }: { compactUserPicker?: boolean }) {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [userState, setUserState] = useState<FeedbackUserStateResponse | null>(null);
   const [history, setHistory] = useState<FeedbackUserHistoryResponse | null>(null);
@@ -739,7 +743,7 @@ function UserNotificationsView() {
 
   return (
     <div className="min-w-0 space-y-5">
-      <section className="rounded-2xl border border-slate-800/70 bg-slate-900/50 p-5 shadow-inner shadow-slate-950/20">
+      <section className="rounded-2xl border border-slate-800/70 bg-slate-900/50 p-4 shadow-inner shadow-slate-950/20">
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Selección de usuario</p>
@@ -747,18 +751,13 @@ function UserNotificationsView() {
           </div>
           {banner ? <ToastBanner tone={banner.type} message={banner.text} /> : null}
         </header>
-        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(340px,420px),1fr] lg:items-start">
-          <UserPicker onSelect={handleUserSelect} selectedUserId={selectedUser?.id ?? null} />
-          <div className="rounded-xl border border-slate-800/60 bg-slate-900/60 px-4 py-3 text-xs text-slate-300">
-            {selectedUser ? (
-              <>
-                <p className="break-words font-semibold text-slate-100">{selectedUser.email ?? 'Sin email'}</p>
-                <p className="text-[11px] text-slate-500">user_id: {selectedUser.id}</p>
-              </>
-            ) : (
-              <p className="text-xs text-slate-500">Todavía no hay un usuario seleccionado.</p>
-            )}
-          </div>
+        <div className="mt-3 min-w-0">
+          <UserPicker
+            onSelect={handleUserSelect}
+            selectedUserId={selectedUser?.id ?? null}
+            compact={compactUserPicker}
+            showSelectedSummary={!compactUserPicker}
+          />
         </div>
       </section>
 
