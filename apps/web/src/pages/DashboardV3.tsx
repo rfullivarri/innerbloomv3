@@ -916,7 +916,8 @@ export default function DashboardV3Page() {
         {weeklyWrapped.isModalOpen && weeklyWrapped.activeRecord ? (
           <WeeklyWrappedModal
             payload={weeklyWrapped.activeRecord.payload}
-            onClose={weeklyWrapped.closeModal}
+            onDismiss={weeklyWrapped.closeModal}
+            onComplete={weeklyWrapped.completeModal}
           />
         ) : null}
         <JourneyReadyModal

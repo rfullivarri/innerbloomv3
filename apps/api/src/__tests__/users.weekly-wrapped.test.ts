@@ -1,12 +1,25 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockQuery, mockVerifyToken, mockGetRecentWrapped, mockMaybeGenerateWrapped } =
+const {
+  mockQuery,
+  mockVerifyToken,
+  mockGetRecentWrapped,
+  mockMaybeGenerateWrapped,
+  mockCountUnseenWeeklyWrapped,
+  mockFindPendingWeeklyWrappedId,
+  mockListSeenWeeklyWrappedIds,
+  mockMarkWeeklyWrappedSeen,
+} =
   vi.hoisted(() => ({
     mockQuery: vi.fn(),
     mockVerifyToken: vi.fn(),
     mockGetRecentWrapped: vi.fn(),
     mockMaybeGenerateWrapped: vi.fn(),
+    mockCountUnseenWeeklyWrapped: vi.fn(),
+    mockFindPendingWeeklyWrappedId: vi.fn(),
+    mockListSeenWeeklyWrappedIds: vi.fn(),
+    mockMarkWeeklyWrappedSeen: vi.fn(),
   }));
 
 vi.mock('../db.js', () => ({
@@ -29,6 +42,13 @@ vi.mock('../services/weeklyWrappedService.js', () => ({
   maybeGenerateWeeklyWrappedForDate: mockMaybeGenerateWrapped,
 }));
 
+vi.mock('../services/weeklyWrappedViewsService.js', () => ({
+  countUnseenWeeklyWrapped: mockCountUnseenWeeklyWrapped,
+  findPendingWeeklyWrappedId: mockFindPendingWeeklyWrappedId,
+  listSeenWeeklyWrappedIds: mockListSeenWeeklyWrappedIds,
+  markWeeklyWrappedSeen: mockMarkWeeklyWrappedSeen,
+}));
+
 import app from '../app.js';
 
 const userId = '11111111-2222-3333-4444-555555555555';
@@ -39,6 +59,12 @@ describe('GET /api/users/:id/weekly-wrapped/latest', () => {
     mockVerifyToken.mockReset();
     mockGetRecentWrapped.mockReset();
     mockMaybeGenerateWrapped.mockReset();
+    mockCountUnseenWeeklyWrapped.mockReset();
+    mockFindPendingWeeklyWrappedId.mockReset();
+    mockListSeenWeeklyWrappedIds.mockReset();
+    mockMarkWeeklyWrappedSeen.mockReset();
+    mockCountUnseenWeeklyWrapped.mockResolvedValue(0);
+    mockListSeenWeeklyWrappedIds.mockResolvedValue(new Set());
   });
 
   it('returns 401 when authentication is missing', async () => {
@@ -108,7 +134,9 @@ describe('GET /api/users/:id/weekly-wrapped/latest', () => {
           levelUp: { happened: false, currentLevel: 1, previousLevel: 1, xpGained: 120, forced: false },
           sections: [],
         },
+        seen: false,
       },
+      unseen_count: 0,
     });
     expect(mockGetRecentWrapped).toHaveBeenCalledWith(userId, 2);
     vi.useRealTimers();
@@ -155,6 +183,10 @@ describe('GET /api/users/:id/weekly-wrapped/previous', () => {
     mockVerifyToken.mockReset();
     mockGetRecentWrapped.mockReset();
     mockMaybeGenerateWrapped.mockReset();
+    mockCountUnseenWeeklyWrapped.mockReset();
+    mockListSeenWeeklyWrappedIds.mockReset();
+    mockCountUnseenWeeklyWrapped.mockResolvedValue(0);
+    mockListSeenWeeklyWrappedIds.mockResolvedValue(new Set());
   });
 
   it('returns the previous weekly wrapped entry when available', async () => {
@@ -251,5 +283,53 @@ describe('GET /api/users/:id/weekly-wrapped/previous', () => {
     expect(response.body.item?.id).toBe('wrap-previous');
     expect(mockGetRecentWrapped).toHaveBeenCalledWith(userId, 2);
     vi.useRealTimers();
+  });
+});
+
+describe('GET /api/users/:id/weekly-wrapped/pending and POST /seen', () => {
+  beforeEach(() => {
+    mockQuery.mockReset();
+    mockVerifyToken.mockReset();
+    mockGetRecentWrapped.mockReset();
+    mockFindPendingWeeklyWrappedId.mockReset();
+    mockCountUnseenWeeklyWrapped.mockReset();
+    mockMarkWeeklyWrappedSeen.mockReset();
+  });
+
+  it('returns unseen weekly wrapup as pending with unseen count', async () => {
+    mockVerifyToken.mockResolvedValue({ id: userId, clerkId: 'user_123', email: 'test@example.com', isNew: false });
+    mockQuery.mockResolvedValue({ rows: [{ user_id: userId }] });
+    mockGetRecentWrapped.mockResolvedValue([{ id: 'wrap-pending', userId, weekStart: '2024-10-07', weekEnd: '2024-10-13', payload: { mode: 'final' } }]);
+    mockFindPendingWeeklyWrappedId.mockResolvedValue('wrap-pending');
+    mockCountUnseenWeeklyWrapped.mockResolvedValue(2);
+
+    const response = await request(app)
+      .get(`/api/users/${userId}/weekly-wrapped/pending`)
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.item?.id).toBe('wrap-pending');
+    expect(response.body.item?.seen).toBe(false);
+    expect(response.body.unseen_count).toBe(2);
+  });
+
+  it('marking seen is idempotent and updates unseen count', async () => {
+    mockVerifyToken.mockResolvedValue({ id: userId, clerkId: 'user_123', email: 'test@example.com', isNew: false });
+    mockQuery.mockResolvedValue({ rows: [{ user_id: userId }] });
+    mockMarkWeeklyWrappedSeen.mockResolvedValue('2024-10-14T10:00:00.000Z');
+    mockCountUnseenWeeklyWrapped.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
+
+    const first = await request(app)
+      .post(`/api/users/${userId}/weekly-wrapped/123e4567-e89b-12d3-a456-426614174000/seen`)
+      .set('Authorization', 'Bearer token');
+    const second = await request(app)
+      .post(`/api/users/${userId}/weekly-wrapped/123e4567-e89b-12d3-a456-426614174000/seen`)
+      .set('Authorization', 'Bearer token');
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    expect(mockMarkWeeklyWrappedSeen).toHaveBeenCalledTimes(2);
+    expect(first.body.unseen_count).toBe(1);
+    expect(second.body.unseen_count).toBe(0);
   });
 });

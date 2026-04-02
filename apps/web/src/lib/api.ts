@@ -841,6 +841,7 @@ export type HabitAchievementPillarGroup = {
 
 export type RewardsHistorySummary = {
   weeklyWrapups: WeeklyWrappedRecord[];
+  weeklyUnseenCount: number;
   monthlyWrapups: WeeklyWrappedRecord[];
   habitAchievements: {
     pendingCount: number;
@@ -1057,8 +1058,30 @@ export async function getWeeklyWrappedPrevious(userId: string): Promise<WeeklyWr
   return response.item ?? null;
 }
 
+export async function getWeeklyWrappedPending(userId: string): Promise<{ item: WeeklyWrappedRecord | null; unseenCount: number }> {
+  const response = await getAuthorizedJson<{ item: WeeklyWrappedRecord | null; unseen_count?: number }>(
+    `/users/${encodeURIComponent(userId)}/weekly-wrapped/pending`,
+  );
+  return {
+    item: response.item ?? null,
+    unseenCount: Number(response.unseen_count ?? 0) || 0,
+  };
+}
+
+export async function markWeeklyWrappedSeen(userId: string, weeklyWrappedId: string): Promise<{ seenAt: string | null; unseenCount: number }> {
+  const response = await postAuthorizedJson<{ seen_at?: string | null; unseen_count?: number }>(
+    `/users/${encodeURIComponent(userId)}/weekly-wrapped/${encodeURIComponent(weeklyWrappedId)}/seen`,
+    {},
+  );
+  return {
+    seenAt: typeof response.seen_at === 'string' ? response.seen_at : null,
+    unseenCount: Number(response.unseen_count ?? 0) || 0,
+  };
+}
+
 type RawRewardsHistoryResponse = {
   weekly_wrapups?: WeeklyWrappedRecord[];
+  weekly_unseen_count?: number;
   monthly_wrapups?: WeeklyWrappedRecord[];
   habit_achievements?: {
     pending_count?: number;
@@ -1100,6 +1123,7 @@ export async function getRewardsHistory(userId: string): Promise<RewardsHistoryS
 
   return {
     weeklyWrapups: Array.isArray(response.weekly_wrapups) ? response.weekly_wrapups : [],
+    weeklyUnseenCount: Number(response.weekly_unseen_count ?? 0) || 0,
     monthlyWrapups: Array.isArray(response.monthly_wrapups) ? response.monthly_wrapups : [],
     habitAchievements: {
       pendingCount: Number(response.habit_achievements?.pending_count ?? 0) || 0,
@@ -1179,6 +1203,7 @@ export type WeeklyWrappedRecord = {
   payload: WeeklyWrappedPayload;
   createdAt: string;
   updatedAt: string;
+  seen?: boolean;
 };
 
 export async function getStreaks(userId: string): Promise<StreakSummary> {
