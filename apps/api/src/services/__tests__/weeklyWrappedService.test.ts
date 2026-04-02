@@ -26,12 +26,17 @@ import {
 const userId = '11111111-2222-3333-4444-555555555555';
 
 describe('resolveWeekRange', () => {
-  it('builds a 7-day window ending on the reference date', () => {
-    const referenceDate = '2024-10-14';
+  it('returns the previous closed calendar week (Mon-Sun) for a Monday reference', () => {
+    const referenceDate = '2024-10-14'; // Monday
 
     const range = resolveWeekRange(referenceDate);
 
-    expect(range).toEqual({ start: '2024-10-08', end: '2024-10-14' });
+    expect(range).toEqual({ start: '2024-10-07', end: '2024-10-13' });
+  });
+
+  it('returns the same previous closed week for any day in the current week', () => {
+    expect(resolveWeekRange('2024-10-16')).toEqual({ start: '2024-10-07', end: '2024-10-13' }); // Wednesday
+    expect(resolveWeekRange('2024-10-17')).toEqual({ start: '2024-10-07', end: '2024-10-13' }); // Thursday
   });
 });
 
@@ -79,32 +84,53 @@ describe('shouldGenerateWeeklyWrappedForSubmission', () => {
     mockFindWeeklyWrappedByRange.mockReset();
   });
 
-  it('triggers generation on the first submission of the week (Monday)', async () => {
+  it('generates on Monday using the previous closed week range', async () => {
     const referenceDate = '2024-10-14';
     mockFindWeeklyWrappedByRange.mockResolvedValue(null);
 
     const shouldGenerate = await shouldGenerateWeeklyWrappedForSubmission(userId, referenceDate);
 
     expect(shouldGenerate).toBe(true);
-    expect(mockFindWeeklyWrappedByRange).toHaveBeenCalledWith(userId, '2024-10-08', '2024-10-14');
+    expect(mockFindWeeklyWrappedByRange).toHaveBeenCalledWith(userId, '2024-10-07', '2024-10-13');
   });
 
-  it('triggers generation on the first submission even if Monday was not logged', async () => {
-    const referenceDate = '2024-10-15';
+  it('generates the same range on Wednesday when Monday/Tuesday were missed', async () => {
+    const referenceDate = '2024-10-16';
     mockFindWeeklyWrappedByRange.mockResolvedValue(null);
 
     const shouldGenerate = await shouldGenerateWeeklyWrappedForSubmission(userId, referenceDate);
 
     expect(shouldGenerate).toBe(true);
-    expect(mockFindWeeklyWrappedByRange).toHaveBeenCalledWith(userId, '2024-10-09', '2024-10-15');
+    expect(mockFindWeeklyWrappedByRange).toHaveBeenCalledWith(userId, '2024-10-07', '2024-10-13');
   });
 
-  it('does not regenerate within the same week when a submission already exists', async () => {
-    const referenceDate = '2024-10-16';
+  it('does not regenerate on Thursday when the same week range already exists', async () => {
+    const referenceDate = '2024-10-17';
     mockFindWeeklyWrappedByRange.mockResolvedValue({ id: 'wrapped-1' });
 
     const shouldGenerate = await shouldGenerateWeeklyWrappedForSubmission(userId, referenceDate);
 
     expect(shouldGenerate).toBe(false);
+    expect(mockFindWeeklyWrappedByRange).toHaveBeenCalledWith(userId, '2024-10-07', '2024-10-13');
+  });
+
+  it('keeps the same previous-week range through the end of the current week', async () => {
+    mockFindWeeklyWrappedByRange.mockResolvedValue(null);
+
+    await shouldGenerateWeeklyWrappedForSubmission(userId, '2024-10-18'); // Saturday
+    await shouldGenerateWeeklyWrappedForSubmission(userId, '2024-10-20'); // Sunday
+
+    expect(mockFindWeeklyWrappedByRange).toHaveBeenNthCalledWith(
+      1,
+      userId,
+      '2024-10-07',
+      '2024-10-13',
+    );
+    expect(mockFindWeeklyWrappedByRange).toHaveBeenNthCalledWith(
+      2,
+      userId,
+      '2024-10-07',
+      '2024-10-13',
+    );
   });
 });
