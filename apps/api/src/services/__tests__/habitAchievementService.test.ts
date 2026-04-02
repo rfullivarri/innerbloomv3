@@ -1,4 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+type QueryResult = { rows?: unknown[]; rowCount?: number };
+
+const { mockQuery, mockRunMonthlyBackfill } = vi.hoisted(() => ({
+  mockQuery: vi.fn<Promise<QueryResult>, [string, unknown[]?]>(),
+  mockRunMonthlyBackfill: vi.fn(async () => ({
+    scope: 'all_users' as const,
+    userId: null,
+    tasksConsidered: 0,
+    periodsInserted: 0,
+    periodsSkippedExisting: 0,
+    periodsSkippedMissingTarget: 0,
+  })),
+}));
+
+vi.mock('../../db.js', () => ({
+  pool: {
+    query: (sql: string, params?: unknown[]) => mockQuery(sql, params),
+  },
+}));
+
+vi.mock('../taskDifficultyCalibrationService.js', () => ({
+  runMonthlyTaskDifficultyCalibrationBackfill: (...args: unknown[]) => mockRunMonthlyBackfill(...args),
+}));
+
 import {
   applyHabitAchievementDecision,
   createPendingHabitAchievement,
@@ -11,20 +36,17 @@ import {
   getUserRetroactiveHabitAchievementDiagnostics,
 } from '../habitAchievementService.js';
 
-type QueryResult = { rows?: unknown[]; rowCount?: number };
-
-const { mockQuery } = vi.hoisted(() => ({
-  mockQuery: vi.fn<Promise<QueryResult>, [string, unknown[]?]>(),
-}));
-
-vi.mock('../../db.js', () => ({
-  pool: {
-    query: (sql: string, params?: unknown[]) => mockQuery(sql, params),
-  },
-}));
-
 beforeEach(() => {
   mockQuery.mockReset();
+  mockRunMonthlyBackfill.mockReset();
+  mockRunMonthlyBackfill.mockResolvedValue({
+    scope: 'all_users',
+    userId: null,
+    tasksConsidered: 0,
+    periodsInserted: 0,
+    periodsSkippedExisting: 0,
+    periodsSkippedMissingTarget: 0,
+  });
 });
 
 describe('habitAchievementService evaluation', () => {
@@ -269,10 +291,20 @@ describe('habitAchievementService lifecycle transitions', () => {
     const result = await runRetroactiveHabitAchievementDetection({
       now: new Date('2026-04-01T00:00:00.000Z'),
     });
+    expect(mockRunMonthlyBackfill).toHaveBeenCalledWith({
+      userId: undefined,
+      now: new Date('2026-04-01T00:00:00.000Z'),
+    });
 
     expect(result).toEqual({
       scope: 'all_users',
       userId: null,
+      backfill: {
+        tasksConsidered: 0,
+        periodsInserted: 0,
+        periodsSkippedExisting: 0,
+        periodsSkippedMissingTarget: 0,
+      },
       expiredResolved: 0,
       rawHistoricalCandidates: 3,
       droppedBySource: 1,
@@ -318,10 +350,20 @@ describe('habitAchievementService lifecycle transitions', () => {
       now: new Date('2026-04-01T00:00:00.000Z'),
       userId: '11111111-1111-4111-8111-111111111111',
     });
+    expect(mockRunMonthlyBackfill).toHaveBeenCalledWith({
+      userId: '11111111-1111-4111-8111-111111111111',
+      now: new Date('2026-04-01T00:00:00.000Z'),
+    });
 
     expect(result).toEqual({
       scope: 'single_user',
       userId: '11111111-1111-4111-8111-111111111111',
+      backfill: {
+        tasksConsidered: 0,
+        periodsInserted: 0,
+        periodsSkippedExisting: 0,
+        periodsSkippedMissingTarget: 0,
+      },
       expiredResolved: 0,
       rawHistoricalCandidates: 1,
       droppedBySource: 0,
@@ -336,7 +378,7 @@ describe('habitAchievementService lifecycle transitions', () => {
     });
   });
 
-  it('retroactive run evaluates historical admin_run-only candidates for backfill', async () => {
+  it('retroactive run drops admin_run-only candidates and requires true monthly sources', async () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({
@@ -344,23 +386,12 @@ describe('habitAchievementService lifecycle transitions', () => {
           {
             task_id: 'task-admin-history',
             user_id: 'user-1',
-            has_allowed_source_history: true,
+            has_allowed_source_history: false,
             current_active: true,
             current_excluded_from_habit_achievement: false,
           },
         ],
       })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({
-        rows: [
-          { period_end: '2026-03-31', expected_target: 20, completions_done: 18, completion_rate: 0.9 },
-          { period_end: '2026-02-28', expected_target: 20, completions_done: 16, completion_rate: 0.8 },
-          { period_end: '2026-01-31', expected_target: 20, completions_done: 14, completion_rate: 0.7 },
-        ],
-      })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] });
 
     const result = await runRetroactiveHabitAchievementDetection({
@@ -371,25 +402,24 @@ describe('habitAchievementService lifecycle transitions', () => {
     expect(result).toEqual({
       scope: 'single_user',
       userId: '11111111-1111-4111-8111-111111111111',
+      backfill: {
+        tasksConsidered: 0,
+        periodsInserted: 0,
+        periodsSkippedExisting: 0,
+        periodsSkippedMissingTarget: 0,
+      },
       expiredResolved: 0,
       rawHistoricalCandidates: 1,
-      droppedBySource: 0,
+      droppedBySource: 1,
       droppedByLifecycleCurrentState: 0,
-      candidatesConsidered: 1,
-      evaluated: 1,
-      qualified: 1,
-      pendingCreated: 1,
+      candidatesConsidered: 0,
+      evaluated: 0,
+      qualified: 0,
+      pendingCreated: 0,
       skipped: 0,
       ignored: 0,
       errors: 0,
     });
-
-    const evaluationCall = mockQuery.mock.calls.find((entry) =>
-      (entry[0] as string).includes('source = ANY($3::text[])'),
-    );
-    expect(evaluationCall?.[1]).toEqual(
-      expect.arrayContaining([expect.any(String), expect.any(Number), ['cron', 'admin_run']]),
-    );
   });
 
   it('returns all-zero processing counters only when there is no historical basis to consider', async () => {
@@ -405,6 +435,12 @@ describe('habitAchievementService lifecycle transitions', () => {
     expect(result).toEqual({
       scope: 'single_user',
       userId: '11111111-1111-4111-8111-111111111111',
+      backfill: {
+        tasksConsidered: 0,
+        periodsInserted: 0,
+        periodsSkippedExisting: 0,
+        periodsSkippedMissingTarget: 0,
+      },
       expiredResolved: 0,
       rawHistoricalCandidates: 0,
       droppedBySource: 0,
