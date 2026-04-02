@@ -11,7 +11,6 @@ import {
 } from '../../lib/api';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { resolveEmotionCopy } from '../../config/emotionMessages';
-import type { WeeklyWrappedPayload } from '../../lib/weeklyWrapped';
 
 const REWARDS_PILLAR_ORDER = [
   { code: 'BODY', name: 'Body' },
@@ -57,6 +56,7 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
     onPendingCountChange?.(pendingCount);
   }, [onPendingCountChange, pendingCount]);
 
+  const weeklyItems = effectiveData?.weeklyWrapups ?? [];
   const monthlyItems = effectiveData?.monthlyWrapups ?? [];
 
   const handleDecision = async (habit: HabitAchievementShelfItem, decision: 'maintain' | 'store') => {
@@ -79,7 +79,7 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
   return (
     <Card
       title="🎁 Rewards"
-      subtitle={language === 'es' ? 'Wrap-Up mensual + hábitos logrados' : 'Monthly wrap-up + achieved habits'}
+      subtitle={language === 'es' ? 'Wrap-Up semanal + mensual + hábitos logrados' : 'Weekly + monthly wrap-ups + achieved habits'}
       rightSlot={
         <button
           type="button"
@@ -115,6 +115,8 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
 
       {status === 'error' ? <p className="text-sm text-rose-200">{error?.message ?? 'Error loading rewards.'}</p> : null}
 
+      <WeeklyWrapupShelf items={weeklyItems} onOpen={onOpenWeeklyWrapped} language={language} />
+
       <MonthlyWrapupShelf items={monthlyItems} onOpen={onOpenWeeklyWrapped} language={language} />
 
       <AchievedShelf
@@ -144,9 +146,24 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
 }
 
 function MonthlyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRecord[]; onOpen?: (record?: WeeklyWrappedRecord | null) => void; language: 'es' | 'en' }) {
+  const monthlyCountdownDays = useMemo(() => getDaysUntilNextMonthWrapup(), []);
+  const growthCalibrationCountdownDays = useMemo(() => getDaysUntilNextGrowthCalibration(), []);
+
   return (
     <div className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-indigo-500/15 via-fuchsia-500/10 to-sky-500/10 p-4">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Monthly Wrap-Up' : 'Monthly Wrap-Up'}</p>
+      <div className="mt-3 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-xs text-[color:var(--color-text-muted)]">
+        <p>
+          {language === 'es'
+            ? `Faltan ${monthlyCountdownDays} día${monthlyCountdownDays === 1 ? '' : 's'} para el próximo Monthly Wrap-Up esperado.`
+            : `${monthlyCountdownDays} day${monthlyCountdownDays === 1 ? '' : 's'} until the next expected Monthly Wrap-Up.`}
+        </p>
+        <p className="mt-1">
+          {language === 'es'
+            ? `Próxima recalibración de Growth Calibration en ${growthCalibrationCountdownDays} día${growthCalibrationCountdownDays === 1 ? '' : 's'}.`
+            : `Next Growth Calibration recalibration in ${growthCalibrationCountdownDays} day${growthCalibrationCountdownDays === 1 ? '' : 's'}.`}
+        </p>
+      </div>
       {items.length ? (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {items.map((item) => {
@@ -174,6 +191,50 @@ function MonthlyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedR
       )}
     </div>
   );
+}
+
+function WeeklyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRecord[]; onOpen?: (record?: WeeklyWrappedRecord | null) => void; language: 'es' | 'en' }) {
+  return (
+    <div className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-emerald-500/15 via-cyan-500/10 to-indigo-500/10 p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Weekly Wrap-Up' : 'Weekly Wrap-Up'}</p>
+      {items.length ? (
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {items.map((item) => {
+            const weeklyEmotion = item.payload.emotions.weekly ?? item.payload.emotions.biweekly;
+            const emotionLabel = weeklyEmotion ? resolveEmotionCopy(language, weeklyEmotion.key).label : null;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onOpen?.(item)}
+                className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left"
+              >
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{item.weekStart} → {item.weekEnd}</p>
+                <p className="mt-1 text-sm font-semibold text-[color:var(--color-text)]">{emotionLabel ?? (language === 'es' ? 'Sin emoción dominante' : 'No dominant emotion')}</p>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+          {language === 'es'
+            ? 'Aún no tienes Weekly Wrap-Ups. Tus próximos resúmenes semanales aparecerán aquí.'
+            : "You don't have weekly wrap-ups yet. Your next weekly summaries will appear here."}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function getDaysUntilNextMonthWrapup(referenceDate = new Date()): number {
+  const nowUtc = new Date(Date.UTC(referenceDate.getUTCFullYear(), referenceDate.getUTCMonth(), referenceDate.getUTCDate()));
+  const nextMonthStart = new Date(Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth() + 1, 1));
+  const diffMs = nextMonthStart.getTime() - nowUtc.getTime();
+  return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+}
+
+function getDaysUntilNextGrowthCalibration(referenceDate = new Date()): number {
+  return getDaysUntilNextMonthWrapup(referenceDate);
 }
 
 function AchievedShelf({
