@@ -72,7 +72,13 @@ function buildParams(filters: TaskgenFilterState): TaskgenJobsParams {
   return params;
 }
 
-export function TaskgenUserPage() {
+export function TaskgenUserPage({
+  baseTaskgenPath = '/admin/taskgen',
+  baseUserPath = '/admin/users',
+}: {
+  baseTaskgenPath?: string;
+  baseUserPath?: string;
+} = {}) {
   const params = useParams<{ userId: string }>();
   const userId = params.userId ?? null;
 
@@ -315,14 +321,14 @@ export function TaskgenUserPage() {
   }, [filters, hasMore]);
 
   if (!userId || !filters) {
-    return <Navigate to="/admin/taskgen" replace />;
+    return <Navigate to={baseTaskgenPath} replace />;
   }
 
   return (
     <div className="flex flex-col gap-6 px-4 py-6 text-slate-100">
       <header className="space-y-3">
         <div className="flex items-center gap-3 text-sm text-slate-400">
-          <Link to="/admin/taskgen" className="text-sky-300 hover:text-sky-100">
+          <Link to={baseTaskgenPath} className="text-sky-300 hover:text-sky-100">
             ← Volver al monitor general
           </Link>
         </div>
@@ -397,6 +403,7 @@ export function TaskgenUserPage() {
         onRetry={handleRetry}
         onCopyCorrelation={handleCopyCorrelation}
         retryingJobId={retryingJobId}
+        userTaskgenPathBase={baseUserPath}
       />
 
       <JobLogsDrawer job={selectedJob} logs={jobLogs} loading={loadingLogs} error={logsError} onClose={() => setSelectedJob(null)} />

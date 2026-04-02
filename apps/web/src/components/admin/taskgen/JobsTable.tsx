@@ -21,6 +21,7 @@ type JobsTableProps = {
   onViewLogs: (job: TaskgenJob) => void;
   onRetry?: (job: TaskgenJob) => void;
   onCopyCorrelation?: (job: TaskgenJob) => void;
+  userTaskgenPathBase?: string;
 };
 
 function formatDateTime(value: string | null | undefined): string {
@@ -109,6 +110,7 @@ export function JobsTable({
   onViewLogs,
   onRetry,
   onCopyCorrelation,
+  userTaskgenPathBase = '/admin/users',
 }: JobsTableProps) {
 
   const emptyState = useMemo(() => {
@@ -145,7 +147,7 @@ export function JobsTable({
       </div>
       <div className="flex flex-col gap-1">
         <Link
-          to={`/admin/users/${encodeURIComponent(job.userId)}/taskgen`}
+          to={`${userTaskgenPathBase}/${encodeURIComponent(job.userId)}/taskgen`}
           className="font-medium text-sky-200 hover:text-sky-100"
         >
           {job.userEmail ?? job.userId}
