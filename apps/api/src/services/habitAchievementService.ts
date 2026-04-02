@@ -27,6 +27,12 @@ type HabitAchievementCandidateRow = {
   user_id: string;
 };
 
+type RetroactiveHabitAchievementCandidateRow = HabitAchievementCandidateRow & {
+  has_cron_history: boolean;
+  current_active: boolean | null;
+  current_excluded_from_habit_achievement: boolean | null;
+};
+
 type RewardsHabitRow = {
   task_habit_achievement_id: string;
   task_id: string;
@@ -719,6 +725,10 @@ export type RetroactiveHabitAchievementRun = {
   scope: 'single_user' | 'all_users';
   userId: string | null;
   expiredResolved: number;
+  rawHistoricalCandidates: number;
+  droppedBySource: number;
+  droppedByLifecycleCurrentState: number;
+  candidatesConsidered: number;
   evaluated: number;
   qualified: number;
   pendingCreated: number;
@@ -782,15 +792,34 @@ export async function runRetroactiveHabitAchievementDetection(params: {
   const now = params.now ?? new Date();
   const expiredResolved = await resolveExpiredPendingHabitAchievements(now);
 
-  const candidateResult = await pool.query<HabitAchievementCandidateRow>(
-    `SELECT DISTINCT r.task_id, r.user_id
-       FROM task_difficulty_recalibrations r
-       JOIN tasks t ON t.task_id = r.task_id
-      WHERE r.source = 'cron'
-        AND ${buildHabitAchievementFilter('t')}
-        AND ($1::uuid IS NULL OR r.user_id = $1::uuid)`,
+  const candidateResult = await pool.query<RetroactiveHabitAchievementCandidateRow>(
+    `WITH raw_candidates AS (
+       SELECT DISTINCT r.task_id, r.user_id
+         FROM task_difficulty_recalibrations r
+        WHERE ($1::uuid IS NULL OR r.user_id = $1::uuid)
+     )
+     SELECT rc.task_id,
+            rc.user_id,
+            EXISTS (
+              SELECT 1
+                FROM task_difficulty_recalibrations rs
+               WHERE rs.task_id = rc.task_id
+                 AND rs.user_id = rc.user_id
+                 AND rs.source = 'cron'
+            ) AS has_cron_history,
+            t.active AS current_active,
+            t.excluded_from_habit_achievement AS current_excluded_from_habit_achievement
+       FROM raw_candidates rc
+  LEFT JOIN tasks t ON t.task_id = rc.task_id`,
     [params.userId ?? null],
   );
+
+  const rawHistoricalCandidates = candidateResult.rows.length;
+  const droppedBySource = candidateResult.rows.filter((row) => !row.has_cron_history).length;
+  const droppedByLifecycleCurrentState = candidateResult.rows.filter(
+    (row) => row.current_active !== true || row.current_excluded_from_habit_achievement === true,
+  ).length;
+  const candidates = candidateResult.rows.filter((row) => row.has_cron_history);
 
   let evaluated = 0;
   let qualified = 0;
@@ -799,7 +828,7 @@ export async function runRetroactiveHabitAchievementDetection(params: {
   let ignored = 0;
   let errors = 0;
 
-  for (const row of candidateResult.rows) {
+  for (const row of candidates) {
     try {
       const latest = await getLatestAchievement(row.task_id, row.user_id);
       if (latest && latest.status !== 'expired_pending') {
@@ -831,6 +860,10 @@ export async function runRetroactiveHabitAchievementDetection(params: {
     scope: params.userId ? 'single_user' : 'all_users',
     userId: params.userId ?? null,
     expiredResolved,
+    rawHistoricalCandidates,
+    droppedBySource,
+    droppedByLifecycleCurrentState,
+    candidatesConsidered: candidates.length,
     evaluated,
     qualified,
     pendingCreated,

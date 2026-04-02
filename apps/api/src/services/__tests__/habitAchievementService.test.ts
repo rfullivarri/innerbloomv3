@@ -206,9 +206,27 @@ describe('habitAchievementService lifecycle transitions', () => {
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({
         rows: [
-          { task_id: 'task-1', user_id: 'user-1' },
-          { task_id: 'task-2', user_id: 'user-1' },
-          { task_id: 'task-3', user_id: 'user-1' },
+          {
+            task_id: 'task-1',
+            user_id: 'user-1',
+            has_cron_history: true,
+            current_active: true,
+            current_excluded_from_habit_achievement: false,
+          },
+          {
+            task_id: 'task-2',
+            user_id: 'user-1',
+            has_cron_history: true,
+            current_active: true,
+            current_excluded_from_habit_achievement: false,
+          },
+          {
+            task_id: 'task-3',
+            user_id: 'user-1',
+            has_cron_history: false,
+            current_active: true,
+            current_excluded_from_habit_achievement: false,
+          },
         ],
       })
       .mockResolvedValueOnce({ rows: [] })
@@ -243,11 +261,91 @@ describe('habitAchievementService lifecycle transitions', () => {
       scope: 'all_users',
       userId: null,
       expiredResolved: 0,
-      evaluated: 2,
+      rawHistoricalCandidates: 3,
+      droppedBySource: 1,
+      droppedByLifecycleCurrentState: 0,
+      candidatesConsidered: 2,
+      evaluated: 1,
       qualified: 1,
       pendingCreated: 1,
       skipped: 1,
-      ignored: 1,
+      ignored: 0,
+      errors: 0,
+    });
+  });
+
+  it('retroactive run evaluates historical cron candidates even when current task state is inactive/excluded', async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: 'task-historical',
+            user_id: 'user-1',
+            has_cron_history: true,
+            current_active: false,
+            current_excluded_from_habit_achievement: true,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [
+          { period_end: '2026-03-31', expected_target: 20, completions_done: 18, completion_rate: 0.9 },
+          { period_end: '2026-02-28', expected_target: 20, completions_done: 16, completion_rate: 0.8 },
+          { period_end: '2026-01-31', expected_target: 20, completions_done: 14, completion_rate: 0.7 },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const result = await runRetroactiveHabitAchievementDetection({
+      now: new Date('2026-04-01T00:00:00.000Z'),
+      userId: '11111111-1111-4111-8111-111111111111',
+    });
+
+    expect(result).toEqual({
+      scope: 'single_user',
+      userId: '11111111-1111-4111-8111-111111111111',
+      expiredResolved: 0,
+      rawHistoricalCandidates: 1,
+      droppedBySource: 0,
+      droppedByLifecycleCurrentState: 1,
+      candidatesConsidered: 1,
+      evaluated: 1,
+      qualified: 1,
+      pendingCreated: 1,
+      skipped: 0,
+      ignored: 0,
+      errors: 0,
+    });
+  });
+
+  it('returns all-zero processing counters only when there is no historical basis to consider', async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const result = await runRetroactiveHabitAchievementDetection({
+      now: new Date('2026-04-01T00:00:00.000Z'),
+      userId: '11111111-1111-4111-8111-111111111111',
+    });
+
+    expect(result).toEqual({
+      scope: 'single_user',
+      userId: '11111111-1111-4111-8111-111111111111',
+      expiredResolved: 0,
+      rawHistoricalCandidates: 0,
+      droppedBySource: 0,
+      droppedByLifecycleCurrentState: 0,
+      candidatesConsidered: 0,
+      evaluated: 0,
+      qualified: 0,
+      pendingCreated: 0,
+      skipped: 0,
+      ignored: 0,
       errors: 0,
     });
   });
