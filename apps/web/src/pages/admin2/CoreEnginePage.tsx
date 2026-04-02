@@ -8,6 +8,7 @@ import type {
 import {
   changeAdminUserGameMode,
   clearAdminModeUpgradeCtaOverride,
+  fetchAdminHabitAchievementDiagnostics,
   fetchAdminModeUpgradeAnalysis,
   fetchAdminModeUpgradeCtaOverride,
   runAdminHabitAchievementRetroactive,
@@ -16,6 +17,7 @@ import {
   runAdminTaskDifficultyCalibration,
   upsertAdminModeUpgradeCtaOverride,
 } from '../../lib/adminApi';
+import type { AdminHabitAchievementDiagnosticsRow } from '../../lib/types';
 
 const BTN_PRIMARY = 'admin2-btn admin2-btn--primary';
 const BTN_SECONDARY = 'admin2-btn admin2-btn--secondary';
@@ -34,6 +36,10 @@ export function CoreEnginePage() {
   const [runningHabit, setRunningHabit] = useState(false);
   const [habitResult, setHabitResult] = useState<Awaited<ReturnType<typeof runAdminHabitAchievementRetroactive>> | null>(null);
   const [habitError, setHabitError] = useState<string | null>(null);
+  const [habitDiagnostics, setHabitDiagnostics] = useState<AdminHabitAchievementDiagnosticsRow[]>([]);
+  const [habitDiagnosticsGeneratedAt, setHabitDiagnosticsGeneratedAt] = useState<string | null>(null);
+  const [loadingHabitDiagnostics, setLoadingHabitDiagnostics] = useState(false);
+  const [habitDiagnosticsError, setHabitDiagnosticsError] = useState<string | null>(null);
 
   const [analysis, setAnalysis] = useState<AdminModeUpgradeAnalysis | null>(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
@@ -118,13 +124,47 @@ export function CoreEnginePage() {
       setRunningHabit(true);
       setHabitError(null);
       setHabitResult(await runAdminHabitAchievementRetroactive({ userId: habitRunAllUsers ? undefined : selectedUser?.id }));
+      if (!habitRunAllUsers && selectedUser) {
+        setLoadingHabitDiagnostics(true);
+        setHabitDiagnosticsError(null);
+        const diagnostics = await fetchAdminHabitAchievementDiagnostics(selectedUser.id);
+        setHabitDiagnostics(diagnostics.rows);
+        setHabitDiagnosticsGeneratedAt(diagnostics.generatedAt);
+      }
     } catch (error) {
       console.error(error);
       setHabitError('No se pudo ejecutar Habit Achievement Retroactive.');
+      setHabitDiagnosticsError('No se pudo cargar diagnóstico por tarea.');
     } finally {
       setRunningHabit(false);
+      setLoadingHabitDiagnostics(false);
     }
   }, [habitRunAllUsers, selectedUser]);
+
+  const loadHabitDiagnostics = useCallback(async () => {
+    if (!selectedUser) {
+      setHabitDiagnostics([]);
+      setHabitDiagnosticsGeneratedAt(null);
+      setHabitDiagnosticsError(null);
+      return;
+    }
+    try {
+      setLoadingHabitDiagnostics(true);
+      setHabitDiagnosticsError(null);
+      const diagnostics = await fetchAdminHabitAchievementDiagnostics(selectedUser.id);
+      setHabitDiagnostics(diagnostics.rows);
+      setHabitDiagnosticsGeneratedAt(diagnostics.generatedAt);
+    } catch (error) {
+      console.error(error);
+      setHabitDiagnosticsError('No se pudo cargar diagnóstico por tarea.');
+    } finally {
+      setLoadingHabitDiagnostics(false);
+    }
+  }, [selectedUser]);
+
+  useEffect(() => {
+    void loadHabitDiagnostics();
+  }, [loadHabitDiagnostics]);
 
   const runMonthly = useCallback(async () => {
     if (!selectedUser) return;
@@ -256,8 +296,68 @@ export function CoreEnginePage() {
             </div> : null}
             {habitError ? <p className="mt-2 text-xs text-red-300">{habitError}</p> : null}
             <button type="button" onClick={() => void runHabit()} disabled={runningHabit || (!selectedUser && !habitRunAllUsers)} className={`mt-3 ${BTN_PRIMARY}`}>{runningHabit ? 'Running…' : 'Run Habit Achievement Retroactive'}</button>
+            <button type="button" onClick={() => void loadHabitDiagnostics()} disabled={!selectedUser || loadingHabitDiagnostics} className={`mt-2 ${BTN_GHOST}`}>
+              {loadingHabitDiagnostics ? 'Loading diagnostics…' : 'Reload diagnostics table'}
+            </button>
           </article>
         </div>
+
+        <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h3 className="font-semibold">Habit Achievement Diagnostics</h3>
+              <p className="text-xs text-[color:var(--admin-muted)]">Vista por tarea para detectar qué regla rompe la calificación.</p>
+            </div>
+            {habitDiagnosticsGeneratedAt ? (
+              <p className="text-[11px] text-[color:var(--admin-muted)]">updated {new Date(habitDiagnosticsGeneratedAt).toLocaleString()}</p>
+            ) : null}
+          </div>
+          {!selectedUser ? <p className="mt-2 text-xs text-[color:var(--admin-muted)]">Selecciona usuario para ver diagnóstico.</p> : null}
+          {habitDiagnosticsError ? <p className="mt-2 text-xs text-red-300">{habitDiagnosticsError}</p> : null}
+          {selectedUser ? (
+            <div className="mt-3 max-h-80 overflow-auto rounded-lg border border-[color:var(--admin-border)]">
+              <table className="min-w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-[color:var(--admin-border)]">
+                    <th className="px-2 py-1">Task</th>
+                    <th className="px-2 py-1">Qualifies</th>
+                    <th className="px-2 py-1">3M Consecutive</th>
+                    <th className="px-2 py-1">Aggregate</th>
+                    <th className="px-2 py-1">Goal Months</th>
+                    <th className="px-2 py-1">2/3 ≥ 80%</th>
+                    <th className="px-2 py-1">Any &lt; 50%</th>
+                    <th className="px-2 py-1">Months Eval</th>
+                    <th className="px-2 py-1">Detected End</th>
+                    <th className="px-2 py-1">Final Reason</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {habitDiagnostics.map((row) => (
+                    <tr key={row.taskId} className="border-b border-[color:var(--admin-border)]">
+                      <td className="px-2 py-1">{row.taskName}</td>
+                      <td className="px-2 py-1">{row.qualifiesOverall ? '✅' : '❌'}</td>
+                      <td className="px-2 py-1">{row.consecutiveWindowPass ? '✅' : '❌'}</td>
+                      <td className="px-2 py-1">{Math.round(row.aggregateCompletionRate * 100)}%</td>
+                      <td className="px-2 py-1">{row.monthsMeetingGoal}/{row.windowMonths}</td>
+                      <td className="px-2 py-1">{row.twoOfThreeMonthsPass ? '✅' : '❌'}</td>
+                      <td className="px-2 py-1">{row.anyMonthBelowFloor ? 'yes' : 'no'}</td>
+                      <td className="px-2 py-1">{row.monthsEvaluated}/{row.windowMonths}</td>
+                      <td className="px-2 py-1">{row.detectedPeriodEnd ?? '—'}</td>
+                      <td className="px-2 py-1">{row.dominantReason}</td>
+                    </tr>
+                  ))}
+                  {habitDiagnostics.length === 0 ? (
+                    <tr>
+                      <td className="px-2 py-2 text-[color:var(--admin-muted)]" colSpan={10}>
+                        {loadingHabitDiagnostics ? 'Loading…' : 'No diagnostic rows for selected user.'}
+                      </td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </article>
 
         <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
           <h3 className="font-semibold">Mode Upgrade Analysis</h3>

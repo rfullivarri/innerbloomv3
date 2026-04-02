@@ -748,6 +748,33 @@ export type RetroactiveHabitAchievementRun = {
   errors: number;
 };
 
+export type HabitAchievementDiagnosticsRow = {
+  taskId: string;
+  taskName: string;
+  qualifiesOverall: boolean;
+  consecutiveWindowPass: boolean;
+  aggregateCompletionRate: number;
+  monthsMeetingGoal: number;
+  minimumMonthsMeetingGoal: number;
+  twoOfThreeMonthsPass: boolean;
+  anyMonthBelowFloor: boolean;
+  monthsEvaluated: number;
+  windowMonths: number;
+  dominantReason:
+    | HabitAchievementEvaluation['reason']
+    | 'already_has_active_achievement_record'
+    | 'qualifies';
+  detectedPeriodEnd: string | null;
+  latestAchievementStatus: LatestAchievementRow['status'] | null;
+};
+
+export type HabitAchievementDiagnosticsReport = {
+  userId: string;
+  generatedAt: string;
+  thresholds: HabitAchievementThresholds;
+  rows: HabitAchievementDiagnosticsRow[];
+};
+
 export async function runMonthlyHabitAchievementDetection(params: {
   periodStart: string;
   nextPeriodStart: string;
@@ -884,5 +911,126 @@ export async function runRetroactiveHabitAchievementDetection(params: {
     skipped,
     ignored,
     errors,
+  };
+}
+
+export async function getUserRetroactiveHabitAchievementDiagnostics(params: {
+  userId: string;
+  thresholds?: Partial<HabitAchievementThresholds>;
+}): Promise<HabitAchievementDiagnosticsReport> {
+  const config = { ...DEFAULT_HABIT_ACHIEVEMENT_THRESHOLDS, ...params.thresholds };
+  const maxPeriods = config.windowMonths + 1;
+
+  const taskResult = await pool.query<{ task_id: string; task_name: string }>(
+    `SELECT DISTINCT r.task_id,
+            COALESCE(t.task, '(task deleted)') AS task_name
+       FROM task_difficulty_recalibrations r
+  LEFT JOIN tasks t ON t.task_id = r.task_id
+      WHERE r.user_id = $1::uuid
+        AND r.source = ANY($2::text[])
+      ORDER BY task_name ASC`,
+    [params.userId, [...RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES]],
+  );
+
+  const taskIds = taskResult.rows.map((row) => row.task_id);
+  if (taskIds.length === 0) {
+    return {
+      userId: params.userId,
+      generatedAt: new Date().toISOString(),
+      thresholds: config,
+      rows: [],
+    };
+  }
+
+  const periodRows = await pool.query<
+    RecalibrationPeriodRow & {
+      task_id: string;
+    }
+  >(
+    `SELECT ranked.task_id,
+            ranked.period_end::text AS period_end,
+            ranked.expected_target,
+            ranked.completions_done,
+            ranked.completion_rate
+       FROM (
+         SELECT r.task_id,
+                r.period_end,
+                r.expected_target,
+                r.completions_done,
+                r.completion_rate,
+                ROW_NUMBER() OVER (PARTITION BY r.task_id ORDER BY r.period_end DESC) AS rn
+           FROM task_difficulty_recalibrations r
+          WHERE r.user_id = $1::uuid
+            AND r.task_id = ANY($2::uuid[])
+            AND r.source = ANY($3::text[])
+       ) ranked
+      WHERE ranked.rn <= $4
+      ORDER BY ranked.task_id, ranked.period_end DESC`,
+    [params.userId, taskIds, [...RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES], maxPeriods],
+  );
+
+  const latestAchievementResult = await pool.query<{ task_id: string; status: LatestAchievementRow['status'] }>(
+    `SELECT DISTINCT ON (ha.task_id)
+            ha.task_id,
+            ha.status
+       FROM task_habit_achievements ha
+      WHERE ha.user_id = $1::uuid
+        AND ha.task_id = ANY($2::uuid[])
+      ORDER BY ha.task_id, ha.detected_at DESC`,
+    [params.userId, taskIds],
+  );
+
+  const latestStatusByTask = new Map(latestAchievementResult.rows.map((row) => [row.task_id, row.status]));
+  const periodsByTask = new Map<string, RecalibrationPeriodRow[]>();
+  for (const row of periodRows.rows) {
+    const current = periodsByTask.get(row.task_id) ?? [];
+    current.push({
+      period_end: row.period_end,
+      expected_target: row.expected_target,
+      completions_done: row.completions_done,
+      completion_rate: row.completion_rate,
+    });
+    periodsByTask.set(row.task_id, current);
+  }
+
+  const rows: HabitAchievementDiagnosticsRow[] = taskResult.rows.map((task) => {
+    const periods = periodsByTask.get(task.task_id) ?? [];
+    const sorted = [...periods].sort((a, b) => new Date(b.period_end).getTime() - new Date(a.period_end).getTime());
+    const window = sorted.slice(0, config.windowMonths);
+    const hasFullWindow = window.length >= config.windowMonths;
+    const consecutiveWindowPass = hasFullWindow && isConsecutiveMonthlyWindow(window.map((row) => row.period_end));
+    const evaluation = evaluateHabitAchievementWindow(periods, config);
+    const latestStatus = latestStatusByTask.get(task.task_id) ?? null;
+    const hasActiveAchievementRecord = latestStatus !== null && latestStatus !== 'expired_pending';
+
+    const dominantReason: HabitAchievementDiagnosticsRow['dominantReason'] = evaluation.reason
+      ? evaluation.reason
+      : hasActiveAchievementRecord
+        ? 'already_has_active_achievement_record'
+        : 'qualifies';
+
+    return {
+      taskId: task.task_id,
+      taskName: task.task_name,
+      qualifiesOverall: evaluation.qualifies,
+      consecutiveWindowPass,
+      aggregateCompletionRate: evaluation.aggregatedCompletionRate,
+      monthsMeetingGoal: evaluation.monthsMeetingGoal,
+      minimumMonthsMeetingGoal: config.minimumMonthsMeetingGoal,
+      twoOfThreeMonthsPass: evaluation.monthsMeetingGoal >= config.minimumMonthsMeetingGoal,
+      anyMonthBelowFloor: evaluation.monthsBelowFloor > 0,
+      monthsEvaluated: evaluation.monthsEvaluated,
+      windowMonths: config.windowMonths,
+      dominantReason,
+      detectedPeriodEnd: evaluation.detectedPeriodEnd,
+      latestAchievementStatus: latestStatus,
+    };
+  });
+
+  return {
+    userId: params.userId,
+    generatedAt: new Date().toISOString(),
+    thresholds: config,
+    rows,
   };
 }

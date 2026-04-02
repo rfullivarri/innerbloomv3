@@ -7,6 +7,7 @@ import type {
   AdminModeUpgradeAnalysis,
   AdminModeUpgradeCtaOverride,
   AdminHabitAchievementRetroactiveRunResponse,
+  AdminHabitAchievementDiagnosticsResponse,
   AdminUser,
   AdminUserSubscriptionResponse,
   SubscriptionStatus,
@@ -511,4 +512,11 @@ export async function runAdminHabitAchievementRetroactive(payload: { userId?: st
   }
 
   return response.json() as Promise<AdminHabitAchievementRetroactiveRunResponse>;
+}
+
+export async function fetchAdminHabitAchievementDiagnostics(userId: string) {
+  return apiAuthorizedGet<AdminHabitAchievementDiagnosticsResponse>(
+    '/admin/habit-achievement/retroactive/diagnostics',
+    { userId },
+  );
 }

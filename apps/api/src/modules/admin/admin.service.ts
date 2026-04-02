@@ -11,6 +11,10 @@ import { sendTasksReadyEmailPreview } from '../../services/tasksReadyEmailServic
 import { runSubscriptionNotificationsJob } from '../../services/subscriptionNotificationsJob.js';
 import { getRollingModeUpgradeAnalysis } from '../../services/modeUpgradeAnalysisService.js';
 import {
+  getUserRetroactiveHabitAchievementDiagnostics,
+  type HabitAchievementDiagnosticsReport,
+} from '../../services/habitAchievementService.js';
+import {
   clearGameModeUpgradeCtaOverride,
   getGameModeUpgradeCtaOverride,
   upsertGameModeUpgradeCtaOverride,
@@ -329,6 +333,8 @@ export type AdminModeUpgradeAnalysis = {
     }[];
   }[];
 };
+
+export type AdminHabitAchievementDiagnostics = HabitAchievementDiagnosticsReport;
 
 type TaskgenJobRow = {
   id: string;
@@ -1445,6 +1451,10 @@ export async function getUserTaskStats(userId: string, query: TaskStatsQuery): P
 
 export async function getUserModeUpgradeAnalysis(userId: string): Promise<AdminModeUpgradeAnalysis> {
   return getRollingModeUpgradeAnalysis(userId);
+}
+
+export async function getUserHabitAchievementDiagnostics(userId: string): Promise<AdminHabitAchievementDiagnostics> {
+  return getUserRetroactiveHabitAchievementDiagnostics({ userId });
 }
 
 
