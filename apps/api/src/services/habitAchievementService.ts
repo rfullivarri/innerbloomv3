@@ -31,6 +31,7 @@ type RetroactiveHabitAchievementCandidateRow = HabitAchievementCandidateRow & {
   has_allowed_source_history: boolean;
   current_active: boolean | null;
   current_excluded_from_habit_achievement: boolean | null;
+  current_task_name: string | null;
 };
 
 type HabitAchievementSource = 'cron' | 'admin_run';
@@ -161,6 +162,17 @@ export type HabitAchievementEvaluation = {
   monthsBelowFloor: number;
   detectedPeriodEnd: string | null;
 };
+
+type HabitAchievementFailureReason = Exclude<HabitAchievementEvaluation['reason'], null>;
+
+const HABIT_ACHIEVEMENT_FAILURE_REASONS: readonly HabitAchievementFailureReason[] = [
+  'insufficient_periods',
+  'non_consecutive_periods',
+  'expected_target_zero',
+  'aggregate_below_threshold',
+  'insufficient_goal_months',
+  'month_below_floor',
+];
 
 function addDays(date: Date, days: number): Date {
   const copy = new Date(date.getTime());
@@ -746,6 +758,17 @@ export type RetroactiveHabitAchievementRun = {
   skipped: number;
   ignored: number;
   errors: number;
+  ignoredByEvaluationReason: Record<HabitAchievementFailureReason, number>;
+  ignoredEvaluationPreview: Array<{
+    taskId: string;
+    taskName: string | null;
+    failureReason: HabitAchievementFailureReason;
+    monthsEvaluated: number;
+    aggregatedCompletionRate: number;
+    monthsMeetingGoal: number;
+    monthsBelowFloor: number;
+    detectedPeriodEnd: string | null;
+  }>;
 };
 
 export async function runMonthlyHabitAchievementDetection(params: {
@@ -819,7 +842,8 @@ export async function runRetroactiveHabitAchievementDetection(params: {
                  AND rs.source = ANY($2::text[])
             ) AS has_allowed_source_history,
             t.active AS current_active,
-            t.excluded_from_habit_achievement AS current_excluded_from_habit_achievement
+            t.excluded_from_habit_achievement AS current_excluded_from_habit_achievement,
+            t.task AS current_task_name
        FROM raw_candidates rc
   LEFT JOIN tasks t ON t.task_id = rc.task_id`,
     [params.userId ?? null, [...RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES]],
@@ -838,6 +862,11 @@ export async function runRetroactiveHabitAchievementDetection(params: {
   let skipped = 0;
   let ignored = 0;
   let errors = 0;
+  const ignoredByEvaluationReason = Object.fromEntries(
+    HABIT_ACHIEVEMENT_FAILURE_REASONS.map((reason) => [reason, 0]),
+  ) as Record<HabitAchievementFailureReason, number>;
+  const ignoredEvaluationPreview: RetroactiveHabitAchievementRun['ignoredEvaluationPreview'] = [];
+  const previewLimit = 8;
 
   for (const row of candidates) {
     try {
@@ -854,6 +883,21 @@ export async function runRetroactiveHabitAchievementDetection(params: {
       evaluated += 1;
       if (!evaluation.qualifies) {
         ignored += 1;
+        if (evaluation.reason) {
+          ignoredByEvaluationReason[evaluation.reason] += 1;
+          if (ignoredEvaluationPreview.length < previewLimit) {
+            ignoredEvaluationPreview.push({
+              taskId: row.task_id,
+              taskName: row.current_task_name,
+              failureReason: evaluation.reason,
+              monthsEvaluated: evaluation.monthsEvaluated,
+              aggregatedCompletionRate: evaluation.aggregatedCompletionRate,
+              monthsMeetingGoal: evaluation.monthsMeetingGoal,
+              monthsBelowFloor: evaluation.monthsBelowFloor,
+              detectedPeriodEnd: evaluation.detectedPeriodEnd,
+            });
+          }
+        }
         continue;
       }
 
@@ -884,5 +928,7 @@ export async function runRetroactiveHabitAchievementDetection(params: {
     skipped,
     ignored,
     errors,
+    ignoredByEvaluationReason,
+    ignoredEvaluationPreview,
   };
 }
