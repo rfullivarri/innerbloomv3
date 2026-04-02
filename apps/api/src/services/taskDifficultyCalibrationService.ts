@@ -115,7 +115,7 @@ export type TaskDifficultyCalibrationRun = {
   errors: { taskId: string; reason: string }[];
 };
 
-type CalibrationRunSource = 'cron' | 'admin_run';
+type CalibrationRunSource = 'cron' | 'admin_run' | 'admin_monthly_backfill';
 
 type RunCalibrationOptions = {
   now?: Date;
@@ -338,6 +338,190 @@ export async function runMonthlyTaskDifficultyCalibrationForUser(options: {
 
 export async function runTaskDifficultyCalibrationBackfill(now: Date = new Date()): Promise<TaskDifficultyCalibrationRun> {
   return runTaskDifficultyCalibrationEngine({ now, source: 'admin_run', windowDays: 90, dedupeByDay: true, mode: 'baseline' });
+}
+
+function startOfMonth(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+}
+
+function endOfMonth(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
+}
+
+type BackfillTaskRow = {
+  task_id: string;
+  user_id: string;
+  created_at: string;
+  difficulty_id: number | null;
+  game_mode_id: number | null;
+};
+
+type ExistingPeriodRow = {
+  period_end: string;
+};
+
+type GameModeEventRow = {
+  game_mode_id: number;
+  weekly_target: number | string | null;
+  effective_at: string;
+};
+
+type WeeklyTargetFallbackRow = {
+  weekly_target: number | string | null;
+};
+
+type MonthlyRecalibrationBackfillRun = {
+  scope: 'single_user' | 'all_users';
+  userId: string | null;
+  tasksConsidered: number;
+  periodsInserted: number;
+  periodsSkippedExisting: number;
+  periodsSkippedMissingTarget: number;
+};
+
+export async function runMonthlyTaskDifficultyCalibrationBackfill(options: {
+  userId?: string;
+  now?: Date;
+}): Promise<MonthlyRecalibrationBackfillRun> {
+  const now = options.now ?? new Date();
+  const previousMonthEnd = endOfPreviousMonth(now);
+  const userFilterSql = options.userId ? 'AND t.user_id = $1::uuid' : '';
+  const tasksResult = await pool.query<BackfillTaskRow>(
+    `SELECT t.task_id,
+            t.user_id,
+            t.created_at::text AS created_at,
+            t.difficulty_id,
+            u.game_mode_id
+       FROM tasks t
+       JOIN users u ON u.user_id = t.user_id
+      WHERE t.deleted_at IS NULL ${userFilterSql}`,
+    options.userId ? [options.userId] : [],
+  );
+
+  let periodsInserted = 0;
+  let periodsSkippedExisting = 0;
+  let periodsSkippedMissingTarget = 0;
+
+  for (const task of tasksResult.rows) {
+    if (task.difficulty_id == null) {
+      continue;
+    }
+
+    const eligibilityDate = addDays(parseDateOnly(task.created_at), 30);
+    if (eligibilityDate > previousMonthEnd) {
+      continue;
+    }
+
+    const existingResult = await pool.query<ExistingPeriodRow>(
+      `SELECT period_end::text AS period_end
+         FROM task_difficulty_recalibrations
+        WHERE task_id = $1::uuid
+          AND source = ANY($2::text[])`,
+      [task.task_id, ['cron', 'admin_monthly_backfill']],
+    );
+    const existingPeriodEnds = new Set(existingResult.rows.map((row) => row.period_end.slice(0, 10)));
+
+    const gameModeHistoryResult = await pool.query<GameModeEventRow>(
+      `SELECT h.game_mode_id,
+              gm.weekly_target,
+              h.effective_at::text AS effective_at
+         FROM user_game_mode_history h
+    LEFT JOIN cat_game_mode gm ON gm.game_mode_id = h.game_mode_id
+        WHERE h.user_id = $1::uuid
+        ORDER BY h.effective_at ASC`,
+      [task.user_id],
+    );
+    const modeEvents = gameModeHistoryResult.rows.map((row) => ({
+      gameModeId: Number(row.game_mode_id),
+      weeklyTarget: Number(row.weekly_target ?? 0),
+      effectiveAt: row.effective_at,
+    }));
+
+    let cursor = startOfMonth(eligibilityDate);
+    while (cursor <= previousMonthEnd) {
+      const monthEnd = endOfMonth(cursor);
+      const periodStart = cursor.getTime() === startOfMonth(eligibilityDate).getTime()
+        ? eligibilityDate
+        : cursor;
+      const periodEnd = monthEnd > previousMonthEnd ? previousMonthEnd : monthEnd;
+      const periodEndText = formatDate(periodEnd);
+      const periodStartText = formatDate(periodStart);
+
+      if (existingPeriodEnds.has(periodEndText)) {
+        periodsSkippedExisting += 1;
+      } else {
+        const selectedMode = resolveWeeklyTarget(modeEvents, periodEndText);
+        const fallbackWeeklyTargetResult =
+          selectedMode == null && task.game_mode_id != null
+            ? await pool.query<WeeklyTargetFallbackRow>('SELECT weekly_target FROM cat_game_mode WHERE game_mode_id = $1', [
+                task.game_mode_id,
+              ])
+            : null;
+
+        const usedGameModeId = selectedMode?.gameModeId ?? task.game_mode_id;
+        const weeklyTarget = Number(selectedMode?.weeklyTarget ?? fallbackWeeklyTargetResult?.rows[0]?.weekly_target ?? 0);
+
+        if (!usedGameModeId || !Number.isFinite(weeklyTarget) || weeklyTarget <= 0) {
+          periodsSkippedMissingTarget += 1;
+        } else {
+          const completionsResult = await pool.query<CompletionRow>(
+            `SELECT COALESCE(SUM(quantity), 0) AS completed
+               FROM daily_log
+              WHERE task_id = $1::uuid
+                AND user_id = $2::uuid
+                AND date BETWEEN $3::date AND $4::date`,
+            [task.task_id, task.user_id, periodStartText, periodEndText],
+          );
+          const completions = Number(completionsResult.rows[0]?.completed ?? 0);
+          const daysInPeriod = Math.max(1, Math.floor((periodEnd.getTime() - periodStart.getTime()) / MS_IN_DAY) + 1);
+          const expectedTarget = (weeklyTarget * daysInPeriod) / 7;
+          const completionRate = expectedTarget > 0 ? completions / expectedTarget : 0;
+
+          await pool.query(
+            `INSERT INTO task_difficulty_recalibrations (
+              task_id,
+              user_id,
+              period_start,
+              period_end,
+              game_mode_id,
+              expected_target,
+              completions_done,
+              completion_rate,
+              previous_difficulty_id,
+              new_difficulty_id,
+              action,
+              source,
+              analyzed_at
+            ) VALUES ($1::uuid, $2::uuid, $3::date, $4::date, $5, $6, $7, $8, $9, $10, 'keep', 'admin_monthly_backfill', NOW())`,
+            [
+              task.task_id,
+              task.user_id,
+              periodStartText,
+              periodEndText,
+              usedGameModeId,
+              expectedTarget,
+              completions,
+              completionRate,
+              task.difficulty_id,
+              task.difficulty_id,
+            ],
+          );
+          periodsInserted += 1;
+        }
+      }
+
+      cursor = startOfMonth(new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 1)));
+    }
+  }
+
+  return {
+    scope: options.userId ? 'single_user' : 'all_users',
+    userId: options.userId ?? null,
+    tasksConsidered: tasksResult.rows.length,
+    periodsInserted,
+    periodsSkippedExisting,
+    periodsSkippedMissingTarget,
+  };
 }
 
 export async function runAdminTaskDifficultyCalibration(options: {

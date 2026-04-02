@@ -242,6 +242,12 @@ export type AdminHabitAchievementRetroactiveRunResponse = {
   source: 'admin_retroactive_habit_achievement';
   scope: 'single_user' | 'all_users';
   userId: string | null;
+  backfill: {
+    tasksConsidered: number;
+    periodsInserted: number;
+    periodsSkippedExisting: number;
+    periodsSkippedMissingTarget: number;
+  };
   expiredResolved: number;
   evaluated: number;
   qualified: number;

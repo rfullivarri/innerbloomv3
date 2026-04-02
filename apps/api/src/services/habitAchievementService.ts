@@ -1,6 +1,7 @@
 import { pool } from '../db.js';
 import { resolveLifecycleFlags, type TaskLifecycleStatus } from './habitAchievementLifecycle.js';
 import { buildHabitAchievementFilter } from './taskLifecyclePolicy.js';
+import { runMonthlyTaskDifficultyCalibrationBackfill } from './taskDifficultyCalibrationService.js';
 
 type RecalibrationPeriodRow = {
   period_end: string;
@@ -33,10 +34,10 @@ type RetroactiveHabitAchievementCandidateRow = HabitAchievementCandidateRow & {
   current_excluded_from_habit_achievement: boolean | null;
 };
 
-type HabitAchievementSource = 'cron' | 'admin_run';
+type HabitAchievementSource = 'cron' | 'admin_run' | 'admin_monthly_backfill';
 
 const MONTHLY_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = ['cron'];
-const RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = ['cron', 'admin_run'];
+const RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = ['cron', 'admin_monthly_backfill'];
 
 type RewardsHabitRow = {
   task_habit_achievement_id: string;
@@ -735,6 +736,12 @@ export type MonthlyHabitAchievementRun = {
 export type RetroactiveHabitAchievementRun = {
   scope: 'single_user' | 'all_users';
   userId: string | null;
+  backfill: {
+    tasksConsidered: number;
+    periodsInserted: number;
+    periodsSkippedExisting: number;
+    periodsSkippedMissingTarget: number;
+  };
   expiredResolved: number;
   rawHistoricalCandidates: number;
   droppedBySource: number;
@@ -828,6 +835,7 @@ export async function runRetroactiveHabitAchievementDetection(params: {
   userId?: string;
 }): Promise<RetroactiveHabitAchievementRun> {
   const now = params.now ?? new Date();
+  const backfill = await runMonthlyTaskDifficultyCalibrationBackfill({ userId: params.userId, now });
   const expiredResolved = await resolveExpiredPendingHabitAchievements(now);
 
   const candidateResult = await pool.query<RetroactiveHabitAchievementCandidateRow>(
@@ -900,6 +908,12 @@ export async function runRetroactiveHabitAchievementDetection(params: {
   return {
     scope: params.userId ? 'single_user' : 'all_users',
     userId: params.userId ?? null,
+    backfill: {
+      tasksConsidered: backfill.tasksConsidered,
+      periodsInserted: backfill.periodsInserted,
+      periodsSkippedExisting: backfill.periodsSkippedExisting,
+      periodsSkippedMissingTarget: backfill.periodsSkippedMissingTarget,
+    },
     expiredResolved,
     rawHistoricalCandidates,
     droppedBySource,
