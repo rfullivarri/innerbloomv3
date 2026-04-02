@@ -16,6 +16,7 @@ const {
   mockResolveModeByCode,
   mockResolveModeById,
   mockChangeUserGameMode,
+  mockRunRetroactiveHabitAchievement,
 } = vi.hoisted(() => ({
   mockQuery: vi.fn<(sql: string, params?: unknown[]) => Promise<{ rows: QueryRow[] }>>(),
   authMiddlewareMock: (req: Request, _res: Response, next: NextFunction) => {
@@ -67,6 +68,17 @@ const {
     image_url: '/Evolve-Mood.jpg',
     avatar_url: '/Evolve-Mood.jpg',
   })),
+  mockRunRetroactiveHabitAchievement: vi.fn(async () => ({
+    scope: 'all_users',
+    userId: null,
+    expiredResolved: 0,
+    evaluated: 3,
+    qualified: 2,
+    pendingCreated: 2,
+    skipped: 1,
+    ignored: 1,
+    errors: 0,
+  })),
 }));
 
 vi.mock('../../db.js', () => ({
@@ -114,6 +126,10 @@ vi.mock('../../services/taskDifficultyCalibrationService.js', () => ({
   runMonthlyTaskDifficultyCalibrationForUser: (...args: unknown[]) => mockRunMonthlyCalibrationForUser(...args),
 }));
 
+vi.mock('../../services/habitAchievementService.js', () => ({
+  runRetroactiveHabitAchievementDetection: (...args: unknown[]) => mockRunRetroactiveHabitAchievement(...args),
+}));
+
 import app from '../../app.js';
 
 describe('Admin routes', () => {
@@ -127,6 +143,7 @@ describe('Admin routes', () => {
     mockResolveModeByCode.mockClear();
     mockResolveModeById.mockClear();
     mockChangeUserGameMode.mockClear();
+    mockRunRetroactiveHabitAchievement.mockClear();
     mockTrigger.mockReturnValue('corr-force');
     clearTaskgenEvents();
     mockQuery.mockImplementation(async (sql: string) => {
@@ -881,6 +898,30 @@ describe('Admin routes', () => {
     expect(mockRunModeUpgradeAggregation).toHaveBeenCalledWith({
       userId: '00000000-0000-4000-8000-000000000001',
       periodKey: '2026-01',
+    });
+  });
+
+  it('runs retroactive habit achievement detection for all users', async () => {
+    const response = await request(app)
+      .post('/api/admin/habit-achievement/retroactive/run')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      ok: true,
+      source: 'admin_retroactive_habit_achievement',
+      scope: 'all_users',
+      userId: null,
+      evaluated: 3,
+      qualified: 2,
+      pendingCreated: 2,
+      skipped: 1,
+      ignored: 1,
+      errors: 0,
+    });
+    expect(mockRunRetroactiveHabitAchievement).toHaveBeenCalledWith({
+      userId: undefined,
+      now: expect.any(Date),
     });
   });
 });

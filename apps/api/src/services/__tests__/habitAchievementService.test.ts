@@ -3,6 +3,7 @@ import {
   applyHabitAchievementDecision,
   createPendingHabitAchievement,
   evaluateHabitAchievementWindow,
+  runRetroactiveHabitAchievementDetection,
   runMonthlyHabitAchievementDetection,
   resolveExpiredPendingHabitAchievements,
   toggleAchievedHabitTracking,
@@ -197,6 +198,57 @@ describe('habitAchievementService lifecycle transitions', () => {
       expiredResolved: 0,
       evaluated: 1,
       pendingCreated: 1,
+    });
+  });
+
+  it('runs retroactive detection with admin summary counters', async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [
+          { task_id: 'task-1', user_id: 'user-1' },
+          { task_id: 'task-2', user_id: 'user-1' },
+          { task_id: 'task-3', user_id: 'user-1' },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [
+          { period_end: '2026-03-31', expected_target: 20, completions_done: 18, completion_rate: 0.9 },
+          { period_end: '2026-02-28', expected_target: 20, completions_done: 16, completion_rate: 0.8 },
+          { period_end: '2026-01-31', expected_target: 20, completions_done: 14, completion_rate: 0.7 },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [{ task_habit_achievement_id: 'achievement-existing', status: 'maintained', pending_expires_at: null }],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [
+          { period_end: '2026-03-31', expected_target: 20, completions_done: 2, completion_rate: 0.1 },
+          { period_end: '2026-02-28', expected_target: 20, completions_done: 1, completion_rate: 0.05 },
+          { period_end: '2026-01-31', expected_target: 20, completions_done: 0, completion_rate: 0.0 },
+        ],
+      });
+
+    const result = await runRetroactiveHabitAchievementDetection({
+      now: new Date('2026-04-01T00:00:00.000Z'),
+    });
+
+    expect(result).toEqual({
+      scope: 'all_users',
+      userId: null,
+      expiredResolved: 0,
+      evaluated: 2,
+      qualified: 1,
+      pendingCreated: 1,
+      skipped: 1,
+      ignored: 1,
+      errors: 0,
     });
   });
 });

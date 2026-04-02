@@ -715,6 +715,18 @@ export type MonthlyHabitAchievementRun = {
   pendingCreated: number;
 };
 
+export type RetroactiveHabitAchievementRun = {
+  scope: 'single_user' | 'all_users';
+  userId: string | null;
+  expiredResolved: number;
+  evaluated: number;
+  qualified: number;
+  pendingCreated: number;
+  skipped: number;
+  ignored: number;
+  errors: number;
+};
+
 export async function runMonthlyHabitAchievementDetection(params: {
   periodStart: string;
   nextPeriodStart: string;
@@ -761,4 +773,69 @@ export async function runMonthlyHabitAchievementDetection(params: {
   }
 
   return { expiredResolved, evaluated, pendingCreated };
+}
+
+export async function runRetroactiveHabitAchievementDetection(params: {
+  now?: Date;
+  userId?: string;
+}): Promise<RetroactiveHabitAchievementRun> {
+  const now = params.now ?? new Date();
+  const expiredResolved = await resolveExpiredPendingHabitAchievements(now);
+
+  const candidateResult = await pool.query<HabitAchievementCandidateRow>(
+    `SELECT DISTINCT r.task_id, r.user_id
+       FROM task_difficulty_recalibrations r
+       JOIN tasks t ON t.task_id = r.task_id
+      WHERE r.source = 'cron'
+        AND ${buildHabitAchievementFilter('t')}
+        AND ($1::uuid IS NULL OR r.user_id = $1::uuid)`,
+    [params.userId ?? null],
+  );
+
+  let evaluated = 0;
+  let qualified = 0;
+  let pendingCreated = 0;
+  let skipped = 0;
+  let ignored = 0;
+  let errors = 0;
+
+  for (const row of candidateResult.rows) {
+    try {
+      const latest = await getLatestAchievement(row.task_id, row.user_id);
+      if (latest && latest.status !== 'expired_pending') {
+        skipped += 1;
+        continue;
+      }
+
+      const evaluation = await evaluateTaskHabitAchievement({ taskId: row.task_id });
+      evaluated += 1;
+      if (!evaluation.qualifies) {
+        ignored += 1;
+        continue;
+      }
+
+      qualified += 1;
+      await createPendingHabitAchievement({
+        taskId: row.task_id,
+        userId: row.user_id,
+        evaluation,
+        now,
+      });
+      pendingCreated += 1;
+    } catch {
+      errors += 1;
+    }
+  }
+
+  return {
+    scope: params.userId ? 'single_user' : 'all_users',
+    userId: params.userId ?? null,
+    expiredResolved,
+    evaluated,
+    qualified,
+    pendingCreated,
+    skipped,
+    ignored,
+    errors,
+  };
 }
