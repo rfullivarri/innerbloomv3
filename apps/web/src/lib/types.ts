@@ -250,3 +250,44 @@ export type AdminHabitAchievementRetroactiveRunResponse = {
   ignored: number;
   errors: number;
 };
+
+export type AdminHabitAchievementDiagnosticsReason =
+  | 'insufficient_periods'
+  | 'non_consecutive_periods'
+  | 'expected_target_zero'
+  | 'aggregate_below_threshold'
+  | 'insufficient_goal_months'
+  | 'month_below_floor'
+  | 'already_has_active_achievement_record'
+  | 'qualifies';
+
+export type AdminHabitAchievementDiagnosticsRow = {
+  taskId: string;
+  taskName: string;
+  qualifiesOverall: boolean;
+  consecutiveWindowPass: boolean;
+  aggregateCompletionRate: number;
+  monthsMeetingGoal: number;
+  minimumMonthsMeetingGoal: number;
+  twoOfThreeMonthsPass: boolean;
+  anyMonthBelowFloor: boolean;
+  monthsEvaluated: number;
+  windowMonths: number;
+  dominantReason: AdminHabitAchievementDiagnosticsReason;
+  detectedPeriodEnd: string | null;
+  latestAchievementStatus: 'pending_decision' | 'maintained' | 'stored' | 'expired_pending' | null;
+};
+
+export type AdminHabitAchievementDiagnosticsResponse = {
+  userId: string;
+  generatedAt: string;
+  thresholds: {
+    aggregateThreshold: number;
+    monthlyGoalThreshold: number;
+    minimumMonthsMeetingGoal: number;
+    floorThreshold: number;
+    windowMonths: number;
+    pendingDays: number;
+  };
+  rows: AdminHabitAchievementDiagnosticsRow[];
+};

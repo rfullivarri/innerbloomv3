@@ -8,6 +8,7 @@ import {
   runMonthlyHabitAchievementDetection,
   resolveExpiredPendingHabitAchievements,
   toggleAchievedHabitTracking,
+  getUserRetroactiveHabitAchievementDiagnostics,
 } from '../habitAchievementService.js';
 
 type QueryResult = { rows?: unknown[]; rowCount?: number };
@@ -416,5 +417,49 @@ describe('habitAchievementService lifecycle transitions', () => {
       ignored: 0,
       errors: 0,
     });
+  });
+
+  it('builds per-task diagnostics for admin breakdown table', async () => {
+    mockQuery
+      .mockResolvedValueOnce({
+        rows: [
+          { task_id: 'task-1', task_name: 'Meditate' },
+          { task_id: 'task-2', task_name: 'Walk' },
+        ],
+      })
+      .mockResolvedValueOnce({
+        rows: [
+          { task_id: 'task-1', period_end: '2026-03-31', expected_target: 20, completions_done: 18, completion_rate: 0.9 },
+          { task_id: 'task-1', period_end: '2026-02-28', expected_target: 20, completions_done: 16, completion_rate: 0.8 },
+          { task_id: 'task-1', period_end: '2026-01-31', expected_target: 20, completions_done: 14, completion_rate: 0.7 },
+          { task_id: 'task-2', period_end: '2026-03-31', expected_target: 20, completions_done: 8, completion_rate: 0.4 },
+          { task_id: 'task-2', period_end: '2026-02-28', expected_target: 20, completions_done: 16, completion_rate: 0.8 },
+          { task_id: 'task-2', period_end: '2026-01-31', expected_target: 20, completions_done: 16, completion_rate: 0.8 },
+        ],
+      })
+      .mockResolvedValueOnce({
+        rows: [{ task_id: 'task-1', status: 'maintained' }],
+      });
+
+    const report = await getUserRetroactiveHabitAchievementDiagnostics({
+      userId: '11111111-1111-4111-8111-111111111111',
+    });
+
+    expect(report.rows).toHaveLength(2);
+    expect(report.rows[0]).toEqual(
+      expect.objectContaining({
+        taskId: 'task-1',
+        qualifiesOverall: true,
+        dominantReason: 'already_has_active_achievement_record',
+      }),
+    );
+    expect(report.rows[1]).toEqual(
+      expect.objectContaining({
+        taskId: 'task-2',
+        qualifiesOverall: false,
+        anyMonthBelowFloor: true,
+        dominantReason: 'month_below_floor',
+      }),
+    );
   });
 });

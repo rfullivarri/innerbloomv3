@@ -171,6 +171,10 @@ export const habitAchievementRetroactiveRunBodySchema = z.object({
   userId: z.string().uuid({ message: 'Invalid user id' }).optional(),
 });
 
+export const habitAchievementDiagnosticsQuerySchema = z.object({
+  userId: z.string().uuid({ message: 'Invalid user id' }),
+});
+
 export const reminderSendBodySchema = z.object({
   channel: z.literal('email').optional().default('email'),
 });
@@ -256,6 +260,7 @@ export type AdminManualGameModeChangeBody = z.infer<typeof adminManualGameModeCh
 export type TaskDifficultyCalibrationRunBody = z.infer<typeof taskDifficultyCalibrationRunBodySchema>;
 export type ModeUpgradeAggregationRunBody = z.infer<typeof modeUpgradeAggregationRunBodySchema>;
 export type HabitAchievementRetroactiveRunBody = z.infer<typeof habitAchievementRetroactiveRunBodySchema>;
+export type HabitAchievementDiagnosticsQuery = z.infer<typeof habitAchievementDiagnosticsQuerySchema>;
 export type AdminModeUpgradeCtaOverrideUpsertBody = z.infer<typeof adminModeUpgradeCtaOverrideUpsertBodySchema>;
 export type ReminderSendBody = z.infer<typeof reminderSendBodySchema>;
 export type AdminSubscriptionUpdateBody = z.infer<typeof adminSubscriptionUpdateBodySchema>;

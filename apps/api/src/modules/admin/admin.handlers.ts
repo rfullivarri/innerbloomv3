@@ -21,6 +21,7 @@ import {
   taskDifficultyCalibrationRunBodySchema,
   modeUpgradeAggregationRunBodySchema,
   habitAchievementRetroactiveRunBodySchema,
+  habitAchievementDiagnosticsQuerySchema,
   adminManualGameModeChangeBodySchema,
   adminModeUpgradeCtaOverrideUpsertBodySchema,
 } from './admin.schemas.js';
@@ -51,6 +52,7 @@ import {
   clearUserModeUpgradeCtaOverride,
   getUserModeUpgradeCtaOverride,
   setUserModeUpgradeCtaOverride,
+  getUserHabitAchievementDiagnostics,
 } from './admin.service.js';
 import {
   getTaskgenEventsByCorrelation,
@@ -318,6 +320,12 @@ export const postAdminRunHabitAchievementRetroactive = asyncHandler(async (req: 
     source: 'admin_retroactive_habit_achievement',
     ...result,
   });
+});
+
+export const getAdminHabitAchievementDiagnostics = asyncHandler(async (req: Request, res: Response) => {
+  const query = habitAchievementDiagnosticsQuerySchema.parse(req.query);
+  const diagnostics = await getUserHabitAchievementDiagnostics(query.userId);
+  res.json(diagnostics);
 });
 
 export const getAdminUserModeUpgradeAnalysis = asyncHandler(async (req: Request, res: Response) => {
