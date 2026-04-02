@@ -822,7 +822,7 @@ export async function runRetroactiveHabitAchievementDetection(params: {
         now,
       });
       pendingCreated += 1;
-    } catch (_error) {
+    } catch {
       errors += 1;
     }
   }
