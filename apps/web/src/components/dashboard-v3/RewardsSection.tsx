@@ -6,6 +6,7 @@ import {
   getRewardsHistory,
   toggleTaskHabitAchievementMaintained,
   type HabitAchievementShelfItem,
+  type MonthlyWrappedRecord,
   type RewardsHistorySummary,
   type WeeklyWrappedRecord,
 } from '../../lib/api';
@@ -117,7 +118,7 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
 
       <WeeklyWrapupShelf items={weeklyItems} onOpen={onOpenWeeklyWrapped} language={language} />
 
-      <MonthlyWrapupShelf items={monthlyItems} onOpen={onOpenWeeklyWrapped} language={language} />
+      <MonthlyWrapupShelf items={monthlyItems} language={language} />
 
       <AchievedShelf
         language={language}
@@ -145,42 +146,31 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
   );
 }
 
-function MonthlyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRecord[]; onOpen?: (record?: WeeklyWrappedRecord | null) => void; language: 'es' | 'en' }) {
+function MonthlyWrapupShelf({ items, language }: { items: MonthlyWrappedRecord[]; language: 'es' | 'en' }) {
   const monthlyCountdownDays = useMemo(() => getDaysUntilNextMonthWrapup(), []);
-  const growthCalibrationCountdownDays = useMemo(() => getDaysUntilNextGrowthCalibration(), []);
+  const compactItems = useMemo(() => items.slice(0, 2), [items]);
+  const latest = compactItems[0] ?? null;
+  const previous = compactItems[1] ?? null;
 
   return (
     <div className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-indigo-500/15 via-fuchsia-500/10 to-sky-500/10 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Monthly Wrap-Up' : 'Monthly Wrap-Up'}</p>
-      <div className="mt-3 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-xs text-[color:var(--color-text-muted)]">
-        <p>
-          {language === 'es'
-            ? `Faltan ${monthlyCountdownDays} día${monthlyCountdownDays === 1 ? '' : 's'} para el próximo Monthly Wrap-Up esperado.`
-            : `${monthlyCountdownDays} day${monthlyCountdownDays === 1 ? '' : 's'} until the next expected Monthly Wrap-Up.`}
-        </p>
-        <p className="mt-1">
-          {language === 'es'
-            ? `Próxima recalibración de Growth Calibration en ${growthCalibrationCountdownDays} día${growthCalibrationCountdownDays === 1 ? '' : 's'}.`
-            : `Next Growth Calibration recalibration in ${growthCalibrationCountdownDays} day${growthCalibrationCountdownDays === 1 ? '' : 's'}.`}
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Monthly Wrap-Up' : 'Monthly Wrap-Up'}</p>
+        <CountdownBadge days={monthlyCountdownDays} label={language === 'es' ? 'Próximo month en' : 'Next month in'} />
       </div>
-      {items.length ? (
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {items.map((item) => {
-            const weeklyEmotion = item.payload.emotions.weekly ?? item.payload.emotions.biweekly;
-            const emotionLabel = weeklyEmotion ? resolveEmotionCopy(language, weeklyEmotion.key).label : null;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onOpen?.(item)}
-                className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left"
-              >
-                <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{item.payload.weekRange.start} → {item.payload.weekRange.end}</p>
-                <p className="mt-1 text-sm font-semibold text-[color:var(--color-text)]">{emotionLabel ?? (language === 'es' ? 'Sin emoción dominante' : 'No dominant emotion')}</p>
-              </button>
-            );
-          })}
+      {latest ? (
+        <div className="mt-3 space-y-2">
+          <div className="w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{latest.periodKey}</p>
+            <p className="mt-1 text-sm font-semibold text-[color:var(--color-text)]">{language === 'es' ? 'Resumen mensual más reciente' : 'Most recent monthly summary'}</p>
+            <CompletionDots completionDays={latest.completionDays ?? []} range={resolveMonthRange(latest.periodKey)} language={language} />
+          </div>
+          {previous ? (
+            <div className="w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/70 p-3 text-left">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{previous.periodKey}</p>
+              <p className="mt-1 text-xs font-semibold text-[color:var(--color-text-muted)]">{language === 'es' ? 'Periodo anterior' : 'Previous period'}</p>
+            </div>
+          ) : null}
         </div>
       ) : (
         <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
@@ -194,12 +184,17 @@ function MonthlyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedR
 }
 
 function WeeklyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRecord[]; onOpen?: (record?: WeeklyWrappedRecord | null) => void; language: 'es' | 'en' }) {
+  const weeklyCountdownDays = useMemo(() => getDaysUntilNextWeeklyWrapup(), []);
+  const compactItems = useMemo(() => items.slice(0, 2), [items]);
   return (
     <div className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-emerald-500/15 via-cyan-500/10 to-indigo-500/10 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Weekly Wrap-Up' : 'Weekly Wrap-Up'}</p>
-      {items.length ? (
+      <div className="flex items-start justify-between gap-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Weekly Wrap-Up' : 'Weekly Wrap-Up'}</p>
+        <CountdownBadge days={weeklyCountdownDays} label={language === 'es' ? 'Próximo weekly en' : 'Next weekly in'} />
+      </div>
+      {compactItems.length ? (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {items.map((item) => {
+          {compactItems.map((item) => {
             const weeklyEmotion = item.payload.emotions.weekly ?? item.payload.emotions.biweekly;
             const emotionLabel = weeklyEmotion ? resolveEmotionCopy(language, weeklyEmotion.key).label : null;
             return (
@@ -211,6 +206,7 @@ function WeeklyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRe
               >
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{item.weekStart} → {item.weekEnd}</p>
                 <p className="mt-1 text-sm font-semibold text-[color:var(--color-text)]">{emotionLabel ?? (language === 'es' ? 'Sin emoción dominante' : 'No dominant emotion')}</p>
+                <CompletionDots completionDays={item.completionDays ?? []} range={{ start: item.weekStart, end: item.weekEnd }} language={language} />
               </button>
             );
           })}
@@ -226,15 +222,82 @@ function WeeklyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRe
   );
 }
 
+function CountdownBadge({ days, label }: { days: number; label: string }) {
+  return (
+    <div className="rounded-xl border border-sky-400/60 bg-sky-500/15 px-3 py-2 text-right">
+      <p className="text-lg font-black leading-none text-sky-400">{days}</p>
+      <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-text-muted)]">{label}</p>
+    </div>
+  );
+}
+
+function CompletionDots({
+  completionDays,
+  range,
+  language,
+}: {
+  completionDays: string[];
+  range: { start: string; end: string };
+  language: 'es' | 'en';
+}) {
+  const dayLabels = language === 'es' ? ['L', 'M', 'X', 'J', 'V', 'S', 'D'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const completed = useMemo(() => new Set(completionDays), [completionDays]);
+  const weekDates = useMemo(() => getWeekDatesFromRange(range), [range.end, range.start]);
+  return (
+    <div className="mt-3 flex items-center gap-1.5">
+      {weekDates.map((dateKey, index) => {
+        const isDone = completed.has(dateKey);
+        return (
+          <div key={`${dateKey}-${index}`} className={`flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-semibold ${isDone ? 'border-sky-300/70 bg-sky-400/30 text-sky-50' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]'}`}>
+            {dayLabels[index]}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function getWeekDatesFromRange(range: { start: string; end: string }): string[] {
+  const start = new Date(`${range.start}T00:00:00Z`);
+  if (Number.isNaN(start.getTime())) {
+    return [];
+  }
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(start);
+    date.setUTCDate(start.getUTCDate() + index);
+    return date.toISOString().slice(0, 10);
+  });
+}
+
+function resolveMonthRange(periodKey: string): { start: string; end: string } {
+  const [yearRaw, monthRaw] = periodKey.split('-');
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  if (!Number.isFinite(year) || !Number.isFinite(month)) {
+    return { start: periodKey, end: periodKey };
+  }
+  const monthStart = new Date(Date.UTC(year, month - 1, 1));
+  const monthEnd = new Date(Date.UTC(year, month, 0));
+  const rangeStart = new Date(monthEnd);
+  rangeStart.setUTCDate(monthEnd.getUTCDate() - 6);
+  if (rangeStart < monthStart) {
+    return { start: monthStart.toISOString().slice(0, 10), end: monthEnd.toISOString().slice(0, 10) };
+  }
+  return { start: rangeStart.toISOString().slice(0, 10), end: monthEnd.toISOString().slice(0, 10) };
+}
+
+function getDaysUntilNextWeeklyWrapup(referenceDate = new Date()): number {
+  const nowUtc = new Date(Date.UTC(referenceDate.getUTCFullYear(), referenceDate.getUTCMonth(), referenceDate.getUTCDate()));
+  const dayOfWeek = nowUtc.getUTCDay();
+  const daysToNextMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+  return Math.max(0, daysToNextMonday);
+}
+
 function getDaysUntilNextMonthWrapup(referenceDate = new Date()): number {
   const nowUtc = new Date(Date.UTC(referenceDate.getUTCFullYear(), referenceDate.getUTCMonth(), referenceDate.getUTCDate()));
   const nextMonthStart = new Date(Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth() + 1, 1));
   const diffMs = nextMonthStart.getTime() - nowUtc.getTime();
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-}
-
-function getDaysUntilNextGrowthCalibration(referenceDate = new Date()): number {
-  return getDaysUntilNextMonthWrapup(referenceDate);
 }
 
 function AchievedShelf({

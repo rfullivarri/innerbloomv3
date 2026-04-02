@@ -69,6 +69,12 @@ describe('GET /api/users/:id/rewards/history', () => {
     mockGetUserPendingHabitAchievementCount.mockReset();
     mockCountUnseenWeeklyWrapped.mockReset();
     mockListSeenWeeklyWrappedIds.mockReset();
+    mockQuery.mockImplementation((sql: string) => {
+      if (sql.includes('FROM users')) {
+        return Promise.resolve({ rows: [{ user_id: userId }], rowCount: 1 });
+      }
+      return Promise.resolve({ rows: [], rowCount: 0 });
+    });
     mockCountUnseenWeeklyWrapped.mockResolvedValue(0);
     mockListSeenWeeklyWrappedIds.mockResolvedValue(new Set());
   });
@@ -91,7 +97,6 @@ describe('GET /api/users/:id/rewards/history', () => {
       isNew: false,
     });
 
-    mockQuery.mockResolvedValue({ rows: [{ user_id: userId }], rowCount: 1 });
     mockGetRecentWeeklyWrapped.mockResolvedValue([
       {
         id: 'weekly-1',
@@ -174,7 +179,7 @@ describe('GET /api/users/:id/rewards/history', () => {
       pending_count: 2,
       achieved_by_pillar: expect.any(Array),
     });
-    expect(mockGetRecentWeeklyWrapped).toHaveBeenCalledWith(userId, 4);
+    expect(mockGetRecentWeeklyWrapped).toHaveBeenCalledWith(userId, 2);
     expect(mockGetRewardsHistoryMonthlyWrapups).toHaveBeenCalledWith(userId);
     expect(mockGetUserRewardsHabitAchievementsByPillar).toHaveBeenCalledWith(userId);
     expect(mockGetUserPendingHabitAchievementCount).toHaveBeenCalledWith(userId);
