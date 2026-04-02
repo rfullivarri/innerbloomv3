@@ -26,6 +26,34 @@ type CapacitorStatusBarPlugin = {
   setStyle: (options: { style: 'DARK' | 'LIGHT' | 'DEFAULT' }) => Promise<void>;
 };
 
+type CapacitorLocalNotificationPermissionState = 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied';
+
+type CapacitorLocalNotificationsPlugin = {
+  checkPermissions: () => Promise<{ display: CapacitorLocalNotificationPermissionState }>;
+  requestPermissions: () => Promise<{ display: CapacitorLocalNotificationPermissionState }>;
+  schedule: (options: {
+    notifications: Array<{
+      id: number;
+      title: string;
+      body?: string;
+      schedule?: {
+        on?: {
+          hour?: number;
+          minute?: number;
+          second?: number;
+        };
+        allowWhileIdle?: boolean;
+      };
+      extra?: Record<string, unknown>;
+    }>;
+  }) => Promise<unknown>;
+  cancel: (options: { notifications: Array<{ id: number }> }) => Promise<unknown>;
+  addListener: (
+    eventName: 'localNotificationActionPerformed',
+    listener: (event: { notification?: { extra?: Record<string, unknown> } }) => void,
+  ) => CapacitorPluginListenerHandle | Promise<CapacitorPluginListenerHandle>;
+};
+
 type CapacitorGlobal = {
   isNativePlatform?: () => boolean;
   getPlatform?: () => string;
@@ -78,6 +106,10 @@ export function getCapacitorKeyboardPlugin(): CapacitorKeyboardPlugin | null {
 
 export function getCapacitorStatusBarPlugin(): CapacitorStatusBarPlugin | null {
   return getCapacitorPlugin<CapacitorStatusBarPlugin>('StatusBar');
+}
+
+export function getCapacitorLocalNotificationsPlugin(): CapacitorLocalNotificationsPlugin | null {
+  return getCapacitorPlugin<CapacitorLocalNotificationsPlugin>('LocalNotifications');
 }
 
 export function normalizeAppUrlToPath(url: string): string | null {

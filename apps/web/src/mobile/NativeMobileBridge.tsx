@@ -9,6 +9,7 @@ import {
   getCapacitorAppPlugin,
   getCapacitorBrowserPlugin,
   getCapacitorKeyboardPlugin,
+  getCapacitorLocalNotificationsPlugin,
   getCapacitorPlatform,
   getCapacitorStatusBarPlugin,
   isNativeAuthCallbackUrl,
@@ -17,6 +18,7 @@ import {
   scheduleCapacitorBrowserCloseRetries,
   shouldOpenExternalUrl,
 } from './capacitor';
+import { DAILY_REMINDER_NOTIFICATION_TARGET_PATH } from './localNotifications';
 import { resolveMobileAuthSessionFromCallback } from './mobileAuthSession';
 
 const MOBILE_AUTH_CONSUMED_LAUNCH_FINGERPRINT_KEY = 'innerbloom.mobile.auth.launch-consumed.v1';
@@ -238,6 +240,9 @@ function useDeepLinkNavigation(enabled: boolean) {
     });
 
     let listenerHandle: Awaited<ReturnType<typeof app.addListener>> | null = null;
+    let localNotificationHandle:
+      | Awaited<ReturnType<NonNullable<ReturnType<typeof getCapacitorLocalNotificationsPlugin>>['addListener']>>
+      | null = null;
 
     void Promise.resolve(app.addListener('appUrlOpen', ({ url }) => {
       console.info('[mobile-auth] appUrlOpen', { url });
@@ -246,9 +251,26 @@ function useDeepLinkNavigation(enabled: boolean) {
       listenerHandle = handle;
     });
 
+    const localNotifications = getCapacitorLocalNotificationsPlugin();
+    if (localNotifications) {
+      void Promise.resolve(
+        localNotifications.addListener('localNotificationActionPerformed', (event) => {
+          const rawTarget = event.notification?.extra?.targetPath;
+          const nextPath = typeof rawTarget === 'string' && rawTarget.trim().length > 0
+            ? rawTarget
+            : DAILY_REMINDER_NOTIFICATION_TARGET_PATH;
+          console.info('[mobile-reminder] local notification action', { nextPath, at: Date.now() });
+          navigate(nextPath, { replace: false });
+        }),
+      ).then((handle) => {
+        localNotificationHandle = handle;
+      });
+    }
+
     return () => {
       console.info('[mobile-auth] NativeMobileBridge unmounted');
       void listenerHandle?.remove();
+      void localNotificationHandle?.remove();
     };
   }, [enabled, navigate]);
 }

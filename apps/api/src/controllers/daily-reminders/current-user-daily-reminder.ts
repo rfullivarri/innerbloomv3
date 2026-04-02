@@ -16,7 +16,7 @@ const DEFAULT_LOCAL_TIME = '09:00:00';
 const DEFAULT_TIMEZONE = 'UTC';
 const DEFAULT_STATUS = 'paused';
 const DELIVERY_STRATEGY = 'user_local_time';
-const SUPPORTED_CHANNELS = new Set(['email']);
+const SUPPORTED_CHANNELS = new Set(['email', 'notification']);
 const SELECT_USER_TIMEZONE_SQL = 'SELECT timezone FROM users WHERE user_id = $1 LIMIT 1';
 const LEGACY_TIMESTAMP_ANCHOR = { year: 2000, month: 1, day: 1 };
 const UPDATE_LEGACY_SCHEDULER_SQL = `
@@ -39,7 +39,7 @@ const updateBodySchema = z.object({
   timezone: z.string().min(1),
 });
 
-type ReminderChannel = 'email';
+type ReminderChannel = 'email' | 'notification';
 
 type UpdateBody = z.infer<typeof updateBodySchema>;
 
@@ -116,10 +116,12 @@ export const updateCurrentUserDailyReminderSettings: AsyncHandler = async (req, 
     });
   }
 
-  const legacyState: LegacySchedulerStateRow = {
-    scheduler_enabled: body.status === 'active',
-    status_scheduler: toLegacyStatus(body.status),
-  };
+  const legacyState: LegacySchedulerStateRow | null = channel === 'email'
+    ? {
+        scheduler_enabled: body.status === 'active',
+        status_scheduler: toLegacyStatus(body.status),
+      }
+    : null;
   const wasFirstScheduleCompletion =
     body.status === 'active' && legacySchedulerBeforeSave.first_programmed !== true;
 
@@ -157,13 +159,15 @@ async function persistReminder(
       localTime: overrides.localTime,
     });
 
-    await syncLegacySchedulerColumns({
-      userId,
-      channel,
-      localTime: overrides.localTime,
-      timezone: overrides.timezone,
-      status: body.status,
-    });
+    if (channel === 'email') {
+      await syncLegacySchedulerColumns({
+        userId,
+        channel,
+        localTime: overrides.localTime,
+        timezone: overrides.timezone,
+        status: body.status,
+      });
+    }
 
     return updated;
   }
@@ -176,13 +180,15 @@ async function persistReminder(
     localTime: overrides.localTime,
   });
 
-  await syncLegacySchedulerColumns({
-    userId,
-    channel,
-    localTime: overrides.localTime,
-    timezone: overrides.timezone,
-    status: body.status,
-  });
+  if (channel === 'email') {
+    await syncLegacySchedulerColumns({
+      userId,
+      channel,
+      localTime: overrides.localTime,
+      timezone: overrides.timezone,
+      status: body.status,
+    });
+  }
 
   return created;
 }

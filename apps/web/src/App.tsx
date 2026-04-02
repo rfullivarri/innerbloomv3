@@ -13,6 +13,7 @@ import AdminRoute from './routes/admin';
 import Admin2Route from './routes/admin2';
 import { DevBanner } from './components/layout/DevBanner';
 import { DEV_USER_SWITCH_ACTIVE, setApiAuthTokenProvider } from './lib/api';
+import { getDailyReminderSettings } from './lib/api';
 import OnboardingIntroPage from './pages/OnboardingIntro';
 import PricingPage from './pages/Pricing';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
@@ -28,6 +29,7 @@ import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';
 import { MobileAppEntry } from './mobile/MobileAppEntry';
+import { cancelNativeDailyReminderNotification, syncNativeDailyReminderNotification } from './mobile/localNotifications';
 import { shouldForceNativeWelcome, useMobileAuthSession } from './mobile/mobileAuthSession';
 import MobileBrowserAuthPage from './pages/MobileBrowserAuth';
 
@@ -136,6 +138,44 @@ function ApiAuthBridge() {
   return null;
 }
 
+function NativeDailyReminderSyncBridge() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const mobileAuthSession = useMobileAuthSession();
+  const isNativeApp = isNativeCapacitorPlatform();
+  const forceNativeWelcome = isNativeApp && shouldForceNativeWelcome();
+
+  useEffect(() => {
+    if (!isNativeApp) {
+      return;
+    }
+
+    let cancelled = false;
+    const hasSession = Boolean(mobileAuthSession?.token) || (isLoaded && isSignedIn);
+
+    void (async () => {
+      if (!hasSession || forceNativeWelcome) {
+        await cancelNativeDailyReminderNotification();
+        return;
+      }
+
+      try {
+        const reminder = await getDailyReminderSettings('notification');
+        if (!cancelled) {
+          await syncNativeDailyReminderNotification(reminder);
+        }
+      } catch (error) {
+        console.warn('[mobile-reminder] failed to sync local notification from backend', { error });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [forceNativeWelcome, isLoaded, isNativeApp, isSignedIn, mobileAuthSession?.token]);
+
+  return null;
+}
+
 function RequireUser({ children }: { children: ReactElement }) {
   const { isLoaded, userId } = useAuth();
   const mobileAuthSession = useMobileAuthSession();
@@ -196,6 +236,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-transparent">
       <ApiAuthBridge />
+      <NativeDailyReminderSyncBridge />
       <DevBanner />
       <Routes>
         <Route path="/" element={isNativeApp ? <MobileAppEntry /> : <LandingPage />} />

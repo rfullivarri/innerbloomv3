@@ -2680,13 +2680,15 @@ export type DailyReminderSettingsResponse = {
   wasFirstScheduleCompletion?: boolean;
 };
 
+export type DailyReminderChannel = 'email' | 'notification';
+
 export type UpdateDailyReminderSettingsPayload = {
   status: 'active' | 'paused';
   local_time: string;
   timezone: string;
 };
 
-const DAILY_REMINDER_CHANNEL = 'email';
+const DAILY_REMINDER_CHANNEL: DailyReminderChannel = 'email';
 
 export async function getDailyReminderSettings(
   channel = DAILY_REMINDER_CHANNEL,

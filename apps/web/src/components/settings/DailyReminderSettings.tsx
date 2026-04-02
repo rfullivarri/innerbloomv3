@@ -11,6 +11,11 @@ import {
   getTimezoneCatalog,
   resolveDefaultTimezone,
 } from "../../lib/timezones";
+import { isNativeCapacitorPlatform } from "../../mobile/capacitor";
+import {
+  ensureNativeDailyReminderNotificationPermissions,
+  syncNativeDailyReminderNotification,
+} from "../../mobile/localNotifications";
 import { Skeleton } from "../common/Skeleton";
 import { ToastBanner } from "../common/ToastBanner";
 import { TimezoneCombobox } from "../common/TimezoneCombobox";
@@ -24,10 +29,18 @@ const SAVE_ERROR_MESSAGE =
 const SAVE_SUCCESS_MESSAGE = "Guardamos tus recordatorios.";
 const TIME_OPTIONS = buildTimeOptions();
 
+type DeliveryMode = "email" | "notification" | "email_and_notification";
+
 type ReminderFormState = {
   enabled: boolean;
   localTime: string;
   timezone: string;
+  deliveryMode: DeliveryMode;
+};
+
+type ReminderLoadResult = {
+  email: DailyReminderSettingsResponse | null;
+  notification: DailyReminderSettingsResponse | null;
 };
 
 type SubmitStatus = "idle" | "saving" | "success" | "error";
@@ -60,7 +73,7 @@ function normalizeLocalTime(value?: string | null): string {
 function normalizeReminderResponse(
   response: DailyReminderSettingsResponse | null,
   fallbackTimezone: string,
-): ReminderFormState {
+): Omit<ReminderFormState, "deliveryMode"> {
   const timezone =
     response?.timezone ??
     response?.timeZone ??
@@ -87,6 +100,56 @@ function normalizeReminderResponse(
   };
 }
 
+function isReminderResponseEnabled(response: DailyReminderSettingsResponse | null): boolean {
+  if (!response) {
+    return false;
+  }
+
+  if (typeof response.enabled === "boolean") {
+    return response.enabled;
+  }
+
+  return response.status === "active";
+}
+
+function deriveDeliveryMode(loadResult: ReminderLoadResult): DeliveryMode {
+  const emailEnabled = isReminderResponseEnabled(loadResult.email);
+  const notificationEnabled = isReminderResponseEnabled(loadResult.notification);
+
+  if (emailEnabled && notificationEnabled) {
+    return "email_and_notification";
+  }
+
+  if (notificationEnabled) {
+    return "notification";
+  }
+
+  return "email";
+}
+
+function normalizeReminderLoadResult(
+  loadResult: ReminderLoadResult,
+  fallbackTimezone: string,
+): ReminderFormState {
+  const emailState = normalizeReminderResponse(loadResult.email, fallbackTimezone);
+  const notificationState = normalizeReminderResponse(loadResult.notification, fallbackTimezone);
+  const deliveryMode = deriveDeliveryMode(loadResult);
+  const enabled = emailState.enabled || notificationState.enabled;
+  const preferredState =
+    deliveryMode === "notification"
+      ? notificationState
+      : emailState.enabled || loadResult.email
+        ? emailState
+        : notificationState;
+
+  return {
+    enabled,
+    localTime: preferredState.localTime,
+    timezone: preferredState.timezone,
+    deliveryMode,
+  };
+}
+
 function combine(...classes: Array<string | null | false | undefined>): string {
   return classes.filter(Boolean).join(" ");
 }
@@ -94,6 +157,7 @@ function combine(...classes: Array<string | null | false | undefined>): string {
 export function DailyReminderSettings({
   onSaveSuccess,
 }: DailyReminderSettingsProps) {
+  const isNativeApp = isNativeCapacitorPlatform();
   const defaultTimezone = useMemo(() => resolveDefaultTimezone(), []);
   const timeFieldId = useId();
   const timezoneFieldId = useId();
@@ -101,6 +165,7 @@ export function DailyReminderSettings({
     enabled: false,
     localTime: DEFAULT_TIME,
     timezone: defaultTimezone,
+    deliveryMode: "email",
   });
   const [initialState, setInitialState] = useState<ReminderFormState | null>(
     null,
@@ -108,18 +173,29 @@ export function DailyReminderSettings({
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const { data, status, error, reload } = useRequest(
-    getDailyReminderSettings,
-    [],
+    async (): Promise<ReminderLoadResult> => {
+      if (isNativeApp) {
+        const [email, notification] = await Promise.all([
+          getDailyReminderSettings("email"),
+          getDailyReminderSettings("notification"),
+        ]);
+        return { email, notification };
+      }
+
+      const email = await getDailyReminderSettings("email");
+      return { email, notification: null };
+    },
+    [isNativeApp],
   );
   const [timezoneCatalog] = useState<TimezoneOption[]>(() =>
     getTimezoneCatalog(),
   );
 
   useEffect(() => {
-    if (status !== "success") {
+    if (status !== "success" || !data) {
       return;
     }
-    const normalized = normalizeReminderResponse(data, defaultTimezone);
+    const normalized = normalizeReminderLoadResult(data, defaultTimezone);
     setFormState(normalized);
     setInitialState(normalized);
   }, [status, data, defaultTimezone]);
@@ -144,8 +220,8 @@ export function DailyReminderSettings({
     initialState !== null &&
     (initialState.enabled !== formState.enabled ||
       initialState.localTime !== formState.localTime ||
-      initialState.timezone !== formState.timezone);
-  // This copy mirrors the ON/OFF state so the modal stays channel-agnostic.
+      initialState.timezone !== formState.timezone ||
+      initialState.deliveryMode !== formState.deliveryMode);
   const toggleLabel = formState.enabled
     ? "Daily Quest activa"
     : "Daily Quest pausada";
@@ -172,8 +248,80 @@ export function DailyReminderSettings({
         local_time: formState.localTime || DEFAULT_TIME,
         timezone: formState.timezone || defaultTimezone,
       };
-      const response = await updateDailyReminderSettings(payload);
-      const normalized = normalizeReminderResponse(response, defaultTimezone);
+      const wantsEmail =
+        formState.deliveryMode === "email" ||
+        formState.deliveryMode === "email_and_notification";
+      const wantsNotification =
+        formState.deliveryMode === "notification" ||
+        formState.deliveryMode === "email_and_notification";
+
+      if (isNativeApp && formState.enabled && wantsNotification) {
+        const permission = await ensureNativeDailyReminderNotificationPermissions();
+        if (!permission.granted) {
+          throw new Error("Necesitamos permiso para enviarte notificaciones en este dispositivo.");
+        }
+      }
+
+      let response: DailyReminderSettingsResponse;
+      let normalized: ReminderFormState;
+
+      if (isNativeApp) {
+        const [emailResponse, notificationResponse] = await Promise.all([
+          updateDailyReminderSettings(
+            {
+              ...payload,
+              status: formState.enabled && wantsEmail ? "active" : "paused",
+            },
+            "email",
+          ),
+          updateDailyReminderSettings(
+            {
+              ...payload,
+              status: formState.enabled && wantsNotification ? "active" : "paused",
+            },
+            "notification",
+          ),
+        ]);
+
+        await syncNativeDailyReminderNotification(
+          {
+            ...notificationResponse,
+            status: formState.enabled && wantsNotification ? "active" : "paused",
+            enabled: formState.enabled && wantsNotification,
+            local_time: payload.local_time,
+            timezone: payload.timezone,
+          },
+          { requestPermissions: false },
+        );
+
+        normalized = normalizeReminderLoadResult(
+          {
+            email: emailResponse,
+            notification: notificationResponse,
+          },
+          defaultTimezone,
+        );
+
+        const wasFirstScheduleCompletion =
+          emailResponse.was_first_schedule_completion === true ||
+          emailResponse.wasFirstScheduleCompletion === true ||
+          notificationResponse.was_first_schedule_completion === true ||
+          notificationResponse.wasFirstScheduleCompletion === true;
+
+        response = {
+          ...emailResponse,
+          channel: wantsNotification && !wantsEmail ? "notification" : "email",
+          was_first_schedule_completion: wasFirstScheduleCompletion,
+          wasFirstScheduleCompletion: wasFirstScheduleCompletion,
+        };
+      } else {
+        response = await updateDailyReminderSettings(payload);
+        normalized = {
+          ...normalizeReminderResponse(response, defaultTimezone),
+          deliveryMode: "email",
+        };
+      }
+
       setFormState(normalized);
       setInitialState(normalized);
       setSubmitStatus("success");
@@ -194,6 +342,7 @@ export function DailyReminderSettings({
       <div className="space-y-4">
         <Skeleton className="h-5 w-40" />
         <Skeleton className="h-16 w-full" />
+        {isNativeApp ? <Skeleton className="h-16 w-full" /> : null}
         <Skeleton className="h-14 w-full" />
         <Skeleton className="h-14 w-full" />
       </div>
@@ -255,6 +404,45 @@ export function DailyReminderSettings({
         </div>
       </div>
 
+      {isNativeApp ? (
+        <div className="space-y-3">
+          <span className="reminder-scheduler-form__field-label block text-xs uppercase tracking-[0.3em] text-text-subtle">
+            Canal
+          </span>
+          <div className="grid gap-2 md:grid-cols-3">
+            {[
+              { id: "email", label: "Email" },
+              { id: "notification", label: "Notificación" },
+              { id: "email_and_notification", label: "Email + notificación" },
+            ].map((option) => {
+              const active = formState.deliveryMode === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  disabled={isSaving}
+                  onClick={() =>
+                    setFormState((previous) => ({
+                      ...previous,
+                      deliveryMode: option.id as DeliveryMode,
+                    }))
+                  }
+                  className={combine(
+                    "rounded-2xl border px-4 py-3 text-sm font-semibold transition",
+                    active
+                      ? "border-fuchsia-300/70 bg-fuchsia-500/20 text-white shadow-[0_12px_32px_rgba(192,132,252,0.22)]"
+                      : "border-white/10 bg-white/5 text-white/70 hover:border-white/25 hover:bg-white/10 hover:text-white",
+                    isSaving && "cursor-not-allowed opacity-60",
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
       {submitStatus === "error" && submitError ? (
         <ToastBanner tone="error" message={submitError || SAVE_ERROR_MESSAGE} />
       ) : null}
@@ -309,7 +497,9 @@ export function DailyReminderSettings({
 
       <div className="reminder-scheduler-form__footer flex flex-wrap items-center justify-between gap-4 border-t border-white/5 pt-4 text-sm text-text-subtle">
         <p className="reminder-scheduler-form__footer-note">
-          Los cambios se aplican solo cuando presionás guardar.
+          {isNativeApp
+            ? "En la app nativa podés combinar email y notificación local. Los cambios se aplican al guardar."
+            : "Los cambios se aplican solo cuando presionás guardar."}
         </p>
         <button
           type="submit"

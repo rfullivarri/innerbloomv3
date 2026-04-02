@@ -125,6 +125,33 @@ describe('GET /api/me/daily-reminder', () => {
     });
     expect(mockQuery).toHaveBeenNthCalledWith(2, expect.stringContaining('SELECT timezone'), [verifiedUser.id]);
   });
+
+  it('supports the notification channel', async () => {
+    const reminder: ReminderRow = {
+      user_daily_reminder_id: 'rem-push',
+      user_id: verifiedUser.id,
+      channel: 'notification',
+      status: 'active',
+      timezone: 'Europe/Madrid',
+      local_time: '20:00:00',
+      last_sent_at: null,
+      created_at: new Date('2024-12-01T00:00:00Z'),
+      updated_at: new Date('2024-12-02T00:00:00Z'),
+    };
+
+    mockQuery.mockResolvedValueOnce({ rows: [reminder] });
+
+    const response = await request(app)
+      .get('/api/me/daily-reminder?channel=notification')
+      .set('Authorization', 'Bearer token');
+
+    expect(response.status).toBe(200);
+    expect(response.body.channel).toBe('notification');
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining('FROM user_daily_reminders'),
+      [verifiedUser.id, 'notification'],
+    );
+  });
 });
 
 describe('PUT /api/me/daily-reminder', () => {
@@ -323,5 +350,69 @@ describe('PUT /api/me/daily-reminder', () => {
       'ACTIVE',
       true,
     ]);
+  });
+
+  it('updates a notification reminder without mutating legacy email scheduler columns', async () => {
+    const existing: ReminderRow = {
+      user_daily_reminder_id: 'notification-rem',
+      user_id: verifiedUser.id,
+      channel: 'notification',
+      status: 'paused',
+      timezone: 'UTC',
+      local_time: '09:00:00',
+      last_sent_at: null,
+      created_at: new Date('2024-12-01T00:00:00Z'),
+      updated_at: new Date('2024-12-02T00:00:00Z'),
+    };
+
+    const updated: ReminderRow = {
+      ...existing,
+      status: 'active',
+      timezone: 'Europe/Madrid',
+      local_time: '08:30:00',
+      updated_at: new Date('2024-12-03T00:00:00Z'),
+    };
+
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ exists: true }] })
+      .mockResolvedValueOnce({ rows: [{ first_programmed: false }] })
+      .mockResolvedValueOnce({ rows: [existing] })
+      .mockResolvedValueOnce({ rows: [updated] })
+      .mockResolvedValueOnce({ rowCount: 1 })
+      .mockResolvedValueOnce({ rowCount: 1 })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            user_id: verifiedUser.id,
+            onboarding_session_id: null,
+            version: 1,
+            state: 'in_progress',
+            onboarding_started_at: null,
+            game_mode_selected_at: null,
+            moderation_selected_at: null,
+            tasks_generated_at: null,
+            first_task_edited_at: null,
+            returned_to_dashboard_after_first_edit_at: null,
+            moderation_modal_shown_at: null,
+            moderation_modal_resolved_at: null,
+            first_daily_quest_prompted_at: null,
+            first_daily_quest_completed_at: null,
+            daily_quest_scheduled_at: null,
+            onboarding_completed_at: null,
+            source: {},
+            created_at: new Date('2024-12-01T00:00:00Z'),
+            updated_at: new Date('2024-12-03T00:00:00Z'),
+          },
+        ],
+      });
+
+    const response = await request(app)
+      .put('/api/me/daily-reminder?channel=notification')
+      .set('Authorization', 'Bearer token')
+      .send({ status: 'active', timezone: 'Europe/Madrid', local_time: '08:30' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.channel).toBe('notification');
+    expect(mockQuery).not.toHaveBeenCalledWith(expect.stringContaining('UPDATE users'), expect.anything());
   });
 });
