@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Card } from '../ui/Card';
 import { useRequest } from '../../hooks/useRequest';
@@ -18,6 +18,7 @@ import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 import { TaskInsightsModal } from './StreakTaskInsightsModal';
 import { DashboardMeta, DashboardTitle } from './DashboardTypography';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+import { HABIT_ACHIEVEMENT_UPDATED_EVENT } from '../../lib/habitAchievementEvents';
 
 export const FEATURE_STREAKS_PANEL_V1 = false;
 
@@ -263,6 +264,9 @@ type DisplayTask = {
   id: string;
   name: string;
   stat?: string;
+  difficultyLabel?: string | null;
+  achievementSealVisible?: boolean;
+  lifecycleStatus?: string | null;
   weeklyDone: number;
   weeklyGoal: number;
   streakDays: number;
@@ -443,6 +447,9 @@ function buildDisplayTask(
     id: fallback.id,
     name: fallback.name,
     stat: fallback.stat,
+    difficultyLabel: task?.difficultyLabel ?? null,
+    achievementSealVisible: Boolean(task?.achievementSealVisible),
+    lifecycleStatus: task?.lifecycleStatus ?? null,
     weeklyDone,
     weeklyGoal,
     streakDays: fallback.streakDays ?? 0,
@@ -509,8 +516,19 @@ function TaskItem({
     >
       <div className="flex flex-wrap items-start gap-2">
         <div className="min-w-0 flex-1 space-y-0.5">
-          <div className="truncate text-sm font-medium leading-tight text-[color:var(--color-slate-200)] md:text-base" title={item.name}>
-            {item.name}
+          <div className="flex items-center gap-1.5">
+            <div className="truncate text-sm font-medium leading-tight text-[color:var(--color-slate-200)] md:text-base" title={item.name}>
+              {item.name}
+            </div>
+            {item.achievementSealVisible && (
+              <span
+                className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-amber-300/45 bg-amber-400/20 text-[11px]"
+                aria-label="Achieved habit seal"
+                title="Achieved habit"
+              >
+                🏅
+              </span>
+            )}
           </div>
           {item.stat && (
             <p className="truncate text-xs text-[color:var(--color-slate-400)]" title={item.stat}>
@@ -639,7 +657,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
     return defaultTier;
   }, [normalizedMode, weeklyTarget]);
 
-  const { data, status, error } = useRequest<StreakPanelResponse>(
+  const { data, status, error, reload } = useRequest<StreakPanelResponse>(
     () =>
       getUserStreakPanel(userId, {
         pillar,
@@ -649,6 +667,16 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
     [userId, pillar, normalizedMode, range],
     { enabled: PANEL_ENABLED },
   );
+
+  useEffect(() => {
+    const handler = () => {
+      reload();
+    };
+    window.addEventListener(HABIT_ACHIEVEMENT_UPDATED_EVENT, handler);
+    return () => {
+      window.removeEventListener(HABIT_ACHIEVEMENT_UPDATED_EVENT, handler);
+    };
+  }, [reload]);
 
   if (!PANEL_ENABLED) {
     return null;
@@ -779,6 +807,10 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
         id: base.id,
         name: base.name,
         stat: base.stat ?? '',
+        difficultyLabel: base.difficultyLabel ?? null,
+        achievementSealVisible: Boolean(base.achievementSealVisible),
+        lifecycleStatus: base.lifecycleStatus ?? null,
+        xp: base.metrics.week.xp > 0 ? base.metrics.week.xp : null,
         monthCount: base.metrics.month.count,
         monthXp: base.metrics.month.xp,
       };
@@ -790,6 +822,9 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
         id: inDisplay.id,
         name: inDisplay.name,
         stat: inDisplay.stat ?? '',
+        difficultyLabel: inDisplay.difficultyLabel ?? null,
+        achievementSealVisible: Boolean(inDisplay.achievementSealVisible),
+        lifecycleStatus: inDisplay.lifecycleStatus ?? null,
         monthCount: inDisplay.scopeCount,
         monthXp: inDisplay.scopeXp,
       };

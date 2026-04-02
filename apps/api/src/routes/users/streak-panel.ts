@@ -26,9 +26,12 @@ type TaskRow = {
   task_id: string;
   task: string;
   xp_base: string | number | null;
+  difficulty_name: string | null;
+  difficulty_code: string | null;
   trait_name: string | null;
   trait_code: string | null;
   lifecycle_status: string;
+  achievement_seal_visible: boolean | null;
 };
 
 type LogRow = {
@@ -272,14 +275,18 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
   const logsTo = formatDate(addDays(overallEndExclusive, -1));
 
   const taskResult = await pool.query<TaskRow>(
-    `SELECT t.task_id,
+      `SELECT t.task_id,
             t.task,
             t.xp_base,
+            cd.name AS difficulty_name,
+            cd.code AS difficulty_code,
             ct.name AS trait_name,
             ct.code AS trait_code,
-            t.lifecycle_status
+            t.lifecycle_status,
+            t.achievement_seal_visible
        FROM tasks t
        JOIN cat_pillar cp ON cp.pillar_id = t.pillar_id
+ LEFT JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
   LEFT JOIN cat_trait ct ON ct.trait_id = t.trait_id
       WHERE t.user_id = $1
         AND ${buildActiveSurfaceTaskFilter('t')}
@@ -303,9 +310,11 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
       id: row.task_id,
       name,
       stat,
+      difficultyLabel: row.difficulty_name ?? row.difficulty_code ?? null,
       xpBase,
       normalizedSearch: `${normalizedName} ${normalizedStat} ${normalizedTrait}`.trim(),
       lifecycleStatus: row.lifecycle_status,
+      achievementSealVisible: Boolean(row.achievement_seal_visible),
     };
   });
 
@@ -380,6 +389,9 @@ export const getUserStreakPanel: AsyncHandler = async (req, res) => {
       id: task.id,
       name: task.name,
       stat: task.stat || '—',
+      difficultyLabel: task.difficultyLabel,
+      lifecycleStatus: task.lifecycleStatus,
+      achievementSealVisible: task.achievementSealVisible,
       weekDone: weekCount,
       streakDays,
       metrics: {

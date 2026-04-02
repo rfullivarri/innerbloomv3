@@ -526,6 +526,10 @@ export function TaskInsightsModal({
   const difficultyLabel =
     (activeTask as { difficultyLabel?: string | null })?.difficultyLabel ??
     (activeTask as { difficulty?: string | null })?.difficulty;
+  const achievementSealVisible = Boolean((activeTask as { achievementSealVisible?: boolean })?.achievementSealVisible);
+  const lifecycleStatus = (activeTask as { lifecycleStatus?: string | null })?.lifecycleStatus ?? null;
+  const taskXp = (activeTask as { xp?: number | null })?.xp ?? monthXp / Math.max(monthTotal, 1);
+  const isMaintainedHabit = lifecycleStatus === 'achievement_maintained';
   const recalibration = data?.recalibration ?? null;
   const recalibrationHistory = (recalibration?.history ?? []).slice(0, 3);
   const recalibrationLatest = recalibration?.latest ?? recalibrationHistory[0] ?? null;
@@ -610,8 +614,26 @@ export function TaskInsightsModal({
           <div className="space-y-1">
             <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.title')}</p>
             <h3 className="text-lg font-semibold leading-tight text-[color:var(--color-text)] md:text-xl">{activeTask?.name ?? t('dashboard.streakTaskInsights.taskFallback')}</h3>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {activeTask?.stat && <p className="text-sm text-[color:var(--color-slate-400)]">{activeTask.stat}</p>}
+              {achievementSealVisible && (
+                <span className="inline-flex items-center rounded-full border border-amber-300/45 bg-amber-400/20 px-2 py-0.5 text-[11px] font-semibold text-amber-100">
+                  🏅 Achieved
+                </span>
+              )}
+              {difficultyLabel && (
+                <span className="inline-flex items-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-0.5 text-[11px] font-semibold text-[color:var(--color-slate-100)]">
+                  Dificultad: {difficultyLabel}
+                </span>
+              )}
+              <span className="inline-flex items-center rounded-full border border-violet-300/35 bg-violet-500/15 px-2 py-0.5 text-[11px] font-semibold text-violet-100">
+                GP por check: +{Math.max(0, Math.round(taskXp))}
+              </span>
+              {isMaintainedHabit && (
+                <span className="inline-flex items-center rounded-full border border-emerald-300/35 bg-emerald-400/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-100">
+                  Hábito mantenido
+                </span>
+              )}
               <RecalibrationTrendIndicator
                 latest={recalibrationLatest}
                 eligible={isRecalibrationEligible}

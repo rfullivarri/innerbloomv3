@@ -25,6 +25,7 @@ import {
   type SubmitDailyQuestResponse,
 } from '../lib/api';
 import { useHoldToClose } from '../hooks/useHoldToClose';
+import { HABIT_ACHIEVEMENT_UPDATED_EVENT } from '../lib/habitAchievementEvents';
 import { useRequest } from '../hooks/useRequest';
 import { ModerationWidget } from './moderation/ModerationWidget';
 
@@ -356,13 +357,24 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
   const currentDate = status?.date;
 
-  const { data: definition, status: definitionState } = useRequest(
+  const { data: definition, status: definitionState, reload: reloadDefinition } = useRequest(
     () => getDailyQuestDefinition({ date: currentDate }),
     [currentDate, enabled],
     { enabled: Boolean(enabled && currentDate) },
   );
 
   const moderationRequest = useRequest(() => getModerationState(), [isOpen], { enabled: isOpen });
+
+  useEffect(() => {
+    const handleAchievementUpdated = () => {
+      reloadStatus();
+      reloadDefinition();
+    };
+    window.addEventListener(HABIT_ACHIEVEMENT_UPDATED_EVENT, handleAchievementUpdated);
+    return () => {
+      window.removeEventListener(HABIT_ACHIEVEMENT_UPDATED_EVENT, handleAchievementUpdated);
+    };
+  }, [reloadDefinition, reloadStatus]);
 
   useEffect(() => {
     setModerationState(moderationRequest.data);

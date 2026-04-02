@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { Card } from '../ui/Card';
 import { useRequest } from '../../hooks/useRequest';
 import {
@@ -11,6 +13,7 @@ import {
   type WeeklyWrappedRecord,
 } from '../../lib/api';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+import { emitHabitAchievementUpdated } from '../../lib/habitAchievementEvents';
 
 const REWARDS_PILLAR_ORDER = [
   { code: 'BODY', name: 'Body' },
@@ -37,6 +40,7 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
   const [decisionIndex, setDecisionIndex] = useState(0);
   const [celebrating, setCelebrating] = useState<null | HabitAchievementShelfItem[]>(null);
   const [educationBannerVisible, setEducationBannerVisible] = useState(false);
+  const [isTransitioningDecision, setIsTransitioningDecision] = useState(false);
 
   const { data, status, error, reload } = useRequest(() => getRewardsHistory(userId), [userId], {
     enabled: Boolean(userId),
@@ -66,6 +70,7 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
 
   const handleDecision = async (habit: HabitAchievementShelfItem, decision: 'maintain' | 'store') => {
     await decideTaskHabitAchievement(habit.taskId, decision);
+    emitHabitAchievementUpdated();
     const isLast = decisionIndex >= pendingItems.length - 1;
     if (isLast) {
       setCelebrating([...pendingItems]);
@@ -76,7 +81,11 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
         setCelebrating(null);
       }, 2200);
     } else {
-      setDecisionIndex((value) => value + 1);
+      setIsTransitioningDecision(true);
+      window.setTimeout(() => {
+        setDecisionIndex((value) => value + 1);
+        setIsTransitioningDecision(false);
+      }, 180);
     }
     await reload();
   };
@@ -152,6 +161,7 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
           currentIndex={decisionIndex}
           total={pendingItems.length}
           habit={pendingItems[decisionIndex]}
+          transitioning={isTransitioningDecision}
           onClose={() => setIsDecisionOpen(false)}
           onMaintain={() => handleDecision(pendingItems[decisionIndex], 'maintain')}
           onStore={() => handleDecision(pendingItems[decisionIndex], 'store')}
@@ -458,6 +468,7 @@ function DecisionModal({
   language,
   total,
   currentIndex,
+  transitioning,
   onClose,
   onMaintain,
   onStore,
@@ -466,13 +477,27 @@ function DecisionModal({
   language: 'es' | 'en';
   total: number;
   currentIndex: number;
+  transitioning: boolean;
   onClose: () => void;
   onMaintain: () => void;
   onStore: () => void;
 }) {
-  return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/80 p-4" onClick={onClose}>
-      <div className="w-full max-w-3xl rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-surface)] p-4 sm:p-6" onClick={(event) => event.stopPropagation()}>
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
+    <div className="fixed inset-0 z-[240] flex items-center justify-center bg-slate-950/85 p-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]" onClick={onClose}>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={habit.id}
+          initial={{ opacity: 0, y: 16, scale: 0.98 }}
+          animate={{ opacity: transitioning ? 0.55 : 1, y: 0, scale: transitioning ? 0.985 : 1 }}
+          exit={{ opacity: 0, y: -12, scale: 0.98 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="w-full max-w-3xl rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-surface)] p-4 sm:p-6"
+          onClick={(event) => event.stopPropagation()}
+        >
         <div className="mb-4 flex items-center justify-between">
           <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Hábito logrado' : 'Achieved habit'} {currentIndex + 1}/{total}</p>
           <button type="button" onClick={onClose} className="rounded-full border border-[color:var(--color-border-subtle)] px-2 py-1 text-xs">✕</button>
@@ -498,8 +523,10 @@ function DecisionModal({
             <button type="button" onClick={onStore} className="mt-3 w-full rounded-full border border-violet-300/50 bg-violet-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">{language === 'es' ? 'Guardar en logros' : 'Store in achievements'}</button>
           </div>
         </div>
-      </div>
-    </div>
+        </motion.div>
+      </AnimatePresence>
+    </div>,
+    document.body,
   );
 }
 
