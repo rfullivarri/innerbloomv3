@@ -8,6 +8,8 @@ const {
   mockGetRewardsHistoryMonthlyWrapups,
   mockGetUserRewardsHabitAchievementsByPillar,
   mockGetUserPendingHabitAchievementCount,
+  mockCountUnseenWeeklyWrapped,
+  mockListSeenWeeklyWrappedIds,
 } =
   vi.hoisted(() => ({
     mockQuery: vi.fn(),
@@ -16,6 +18,8 @@ const {
     mockGetRewardsHistoryMonthlyWrapups: vi.fn(),
     mockGetUserRewardsHabitAchievementsByPillar: vi.fn(),
     mockGetUserPendingHabitAchievementCount: vi.fn(),
+    mockCountUnseenWeeklyWrapped: vi.fn(),
+    mockListSeenWeeklyWrappedIds: vi.fn(),
   }));
 
 vi.mock('../db.js', () => ({
@@ -46,6 +50,11 @@ vi.mock('../services/habitAchievementService.js', () => ({
   getUserPendingHabitAchievementCount: mockGetUserPendingHabitAchievementCount,
 }));
 
+vi.mock('../services/weeklyWrappedViewsService.js', () => ({
+  countUnseenWeeklyWrapped: mockCountUnseenWeeklyWrapped,
+  listSeenWeeklyWrappedIds: mockListSeenWeeklyWrappedIds,
+}));
+
 import app from '../app.js';
 
 const userId = '11111111-2222-3333-4444-555555555555';
@@ -58,6 +67,10 @@ describe('GET /api/users/:id/rewards/history', () => {
     mockGetRewardsHistoryMonthlyWrapups.mockReset();
     mockGetUserRewardsHabitAchievementsByPillar.mockReset();
     mockGetUserPendingHabitAchievementCount.mockReset();
+    mockCountUnseenWeeklyWrapped.mockReset();
+    mockListSeenWeeklyWrappedIds.mockReset();
+    mockCountUnseenWeeklyWrapped.mockResolvedValue(0);
+    mockListSeenWeeklyWrappedIds.mockResolvedValue(new Set());
   });
 
   it('returns 401 when authentication is missing', async () => {
@@ -143,6 +156,8 @@ describe('GET /api/users/:id/rewards/history', () => {
       },
     ]);
     mockGetUserPendingHabitAchievementCount.mockResolvedValue(2);
+    mockCountUnseenWeeklyWrapped.mockResolvedValue(1);
+    mockListSeenWeeklyWrappedIds.mockResolvedValue(new Set(['weekly-1']));
 
     const response = await request(app)
       .get(`/api/users/${userId}/rewards/history`)
@@ -151,6 +166,8 @@ describe('GET /api/users/:id/rewards/history', () => {
     expect(response.status).toBe(200);
     expect(response.body.weekly_wrapups).toHaveLength(1);
     expect(response.body.weekly_wrapups[0].id).toBe('weekly-1');
+    expect(response.body.weekly_wrapups[0].seen).toBe(true);
+    expect(response.body.weekly_unseen_count).toBe(1);
     expect(response.body.monthly_wrapups).toHaveLength(1);
     expect(response.body.monthly_wrapups[0].periodKey).toBe('2026-02');
     expect(response.body.habit_achievements).toEqual({

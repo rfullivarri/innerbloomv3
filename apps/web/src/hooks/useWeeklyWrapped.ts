@@ -1,106 +1,67 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { WeeklyWrappedRecord } from '../lib/api';
-import { getWeeklyWrappedLatest, getWeeklyWrappedPrevious } from '../lib/api';
+import { getWeeklyWrappedLatest, getWeeklyWrappedPending, getWeeklyWrappedPrevious, markWeeklyWrappedSeen } from '../lib/api';
 import { useRequest } from './useRequest';
-
-function toUtcDateKey(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
-function parseDateKey(dateKey: string): Date {
-  const parsed = new Date(`${dateKey}T00:00:00Z`);
-  parsed.setUTCHours(0, 0, 0, 0);
-  return parsed;
-}
-
-function getStartOfWeekUtc(date: Date): Date {
-  const copy = new Date(date);
-  copy.setUTCHours(0, 0, 0, 0);
-  const dayOfWeek = copy.getUTCDay();
-  const daysSinceMonday = (dayOfWeek + 6) % 7;
-  copy.setUTCDate(copy.getUTCDate() - daysSinceMonday);
-  return copy;
-}
-
-function isSameUtcWeek(dateKey: string, reference: Date): boolean {
-  const referenceStart = getStartOfWeekUtc(reference);
-  const targetStart = getStartOfWeekUtc(parseDateKey(dateKey));
-  return referenceStart.getTime() === targetStart.getTime();
-}
-
-function buildSeenKey(weekStartKey: string): string {
-  return `weekly-wrapped-seen:${weekStartKey}`;
-}
 
 export function useWeeklyWrapped(userId: string | null | undefined) {
   const { data, status, reload } = useRequest(async () => {
-    if (!userId) return { latest: null, previous: null } as {
-      latest: WeeklyWrappedRecord | null;
-      previous: WeeklyWrappedRecord | null;
-    };
-    console.info('[weekly-wrapped] loading records for user', { userId });
-    const [latest, previous] = await Promise.all([
+    if (!userId) {
+      return { latest: null, previous: null, pending: null, unseenCount: 0 } as {
+        latest: WeeklyWrappedRecord | null;
+        previous: WeeklyWrappedRecord | null;
+        pending: WeeklyWrappedRecord | null;
+        unseenCount: number;
+      };
+    }
+
+    const [latest, previous, pendingResponse] = await Promise.all([
       getWeeklyWrappedLatest(userId),
       getWeeklyWrappedPrevious(userId),
+      getWeeklyWrappedPending(userId),
     ]);
-    console.info('[weekly-wrapped] records loaded', {
-      userId,
-      latestWeek: latest?.weekEnd,
-      previousWeek: previous?.weekEnd,
-    });
-    return { latest, previous };
+
+    return {
+      latest,
+      previous,
+      pending: pendingResponse.item,
+      unseenCount: pendingResponse.unseenCount,
+    };
   }, [userId], { enabled: Boolean(userId) });
 
-  const latestWeekEnd = data?.latest?.weekEnd ?? null;
-  const latestWeekStart = useMemo(() => {
-    return latestWeekEnd ? toUtcDateKey(getStartOfWeekUtc(parseDateKey(latestWeekEnd))) : null;
-  }, [latestWeekEnd]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [activeRecord, setActiveRecord] = useState<WeeklyWrappedRecord | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
 
   useEffect(() => {
-    if (!data?.latest || !latestWeekStart || typeof window === 'undefined') {
+    const pending = data?.pending ?? null;
+    if (!pending) {
       setModalOpen(false);
-      setActiveRecord(null);
       return;
     }
 
-    if (!isSameUtcWeek(data.latest.weekEnd, new Date())) {
-      setModalOpen(false);
-      setActiveRecord(null);
-      return;
-    }
-
-    try {
-      const key = buildSeenKey(latestWeekStart);
-      const hasSeen = window.localStorage.getItem(key) === 'true';
-      if (!hasSeen) {
-        setActiveRecord(data.latest);
-        setModalOpen(true);
-        window.localStorage.setItem(key, 'true');
-      }
-    } catch {
-      setActiveRecord(data.latest);
-      setModalOpen(true);
-    }
-  }, [data?.latest, latestWeekStart]);
-
-  const markSeen = useCallback(() => {
-    if (latestWeekStart && typeof window !== 'undefined') {
-      try {
-        window.localStorage.setItem(buildSeenKey(latestWeekStart), 'true');
-      } catch {
-        // ignore storage errors
-      }
-    }
-  }, [latestWeekStart]);
+    setActiveRecord(pending);
+    setModalOpen(true);
+  }, [data?.pending?.id]);
 
   const closeModal = useCallback(() => {
-    if (activeRecord?.weekEnd === latestWeekEnd) {
-      markSeen();
-    }
     setModalOpen(false);
-  }, [activeRecord?.weekEnd, latestWeekEnd, markSeen]);
+  }, []);
+
+  const completeModal = useCallback(async () => {
+    if (!userId || !activeRecord) {
+      setModalOpen(false);
+      return;
+    }
+
+    setIsCompleting(true);
+    try {
+      await markWeeklyWrappedSeen(userId, activeRecord.id);
+      setModalOpen(false);
+      await reload();
+    } finally {
+      setIsCompleting(false);
+    }
+  }, [activeRecord, reload, userId]);
 
   const openModal = useCallback(
     (record?: WeeklyWrappedRecord | null) => {
@@ -118,12 +79,15 @@ export function useWeeklyWrapped(userId: string | null | undefined) {
   return {
     latest,
     previous,
+    pending: data?.pending ?? null,
+    unseenCount: data?.unseenCount ?? 0,
     status,
     reload,
     activeRecord,
     isModalOpen,
+    isCompleting,
     closeModal,
+    completeModal,
     openModal,
-    markSeen,
   } as const;
 }

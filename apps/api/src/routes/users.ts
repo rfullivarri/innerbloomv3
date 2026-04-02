@@ -13,7 +13,9 @@ import { getUserStateTimeseries } from '../controllers/users/get-user-state-time
 import { getUserTotalXp } from '../controllers/users/get-user-total-xp.js';
 import {
   getUserWeeklyWrappedLatest,
+  getUserWeeklyWrappedPending,
   getUserWeeklyWrappedPrevious,
+  markUserWeeklyWrappedSeen,
 } from '../controllers/users/weekly-wrapped.js';
 import { updateUserTask } from '../controllers/tasks/update-user-task.js';
 import { getUserRewardsHistory } from '../controllers/users/rewards-history.js';
@@ -52,6 +54,8 @@ userScopedRoutes.get('/state/timeseries', asyncHandler(getUserStateTimeseries));
 userScopedRoutes.get('/summary/today', asyncHandler(getUserSummaryToday));
 userScopedRoutes.get('/weekly-wrapped/latest', asyncHandler(getUserWeeklyWrappedLatest));
 userScopedRoutes.get('/weekly-wrapped/previous', asyncHandler(getUserWeeklyWrappedPrevious));
+userScopedRoutes.get('/weekly-wrapped/pending', asyncHandler(getUserWeeklyWrappedPending));
+userScopedRoutes.post('/weekly-wrapped/:weeklyWrappedId/seen', asyncHandler(markUserWeeklyWrappedSeen));
 userScopedRoutes.get('/rewards/history', asyncHandler(getUserRewardsHistory));
 userScopedRoutes.use('/missions/v2', missionsV2Router);
 

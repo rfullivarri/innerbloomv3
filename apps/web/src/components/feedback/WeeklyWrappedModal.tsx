@@ -77,7 +77,8 @@ type SectionBadge = {
 
 type WeeklyWrappedModalProps = {
   payload: WeeklyWrappedPayload;
-  onClose: () => void;
+  onDismiss: () => void;
+  onComplete: () => void;
 };
 
 const GRADIENT_RING_CLASSES = [
@@ -98,7 +99,7 @@ const ENERGY_GRADIENT_BY_METRIC: Record<'HP' | 'MOOD' | 'FOCUS', string> = {
   FOCUS: 'from-indigo-200 via-violet-300 to-purple-400',
 };
 
-export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps) {
+export function WeeklyWrappedModal({ payload, onDismiss, onComplete }: WeeklyWrappedModalProps) {
   const { language, t } = usePostLoginLanguage();
   const [entered, setEntered] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -262,7 +263,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
       role="dialog"
       aria-modal
     >
-      <div className="absolute inset-0" onClick={onClose} aria-hidden />
+      <div className="absolute inset-0" onClick={onDismiss} aria-hidden />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-16 left-6 h-64 w-64 animate-[spin_22s_linear_infinite] bg-[radial-gradient(circle_at_center,_rgba(99,179,237,0.18),_transparent_55%)] blur-2xl" />
@@ -273,7 +274,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
       <div className="relative z-10 flex h-[100dvh] w-full flex-col">
         <button
           type="button"
-          onClick={onClose}
+          onClick={onDismiss}
           className="ib-weekly-wrapped-close absolute right-5 top-5 z-20 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-50 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-400/30 hover:text-slate-950"
           style={{ top: 'calc(env(safe-area-inset-top, 0px) + 20px)' }}
         >
@@ -365,7 +366,7 @@ export function WeeklyWrappedModal({ payload, onClose }: WeeklyWrappedModalProps
             <ClosingBlock
               message={sectionsByKey.closing?.body ?? t('feedback.weeklyWrapped.closing.message')}
               accent={sectionsByKey.closing?.accent ?? t('feedback.weeklyWrapped.closing.accent')}
-              onClose={onClose}
+              onComplete={onComplete}
               entered={entered}
               index={closingIndex}
               active={activeIndex === closingIndex}
@@ -1179,7 +1180,7 @@ function EmotionHighlightBlock({ emotionHighlight, entered, index, active, regis
 type ClosingBlockProps = {
   message: string;
   accent: string;
-  onClose: () => void;
+  onComplete: () => void;
   entered: boolean;
   index: number;
   active?: boolean;
@@ -1187,7 +1188,7 @@ type ClosingBlockProps = {
   t: (key: string, params?: Record<string, string | number>) => string;
 };
 
-function ClosingBlock({ message, accent, onClose, entered, index, active, registerSectionRef, t }: ClosingBlockProps) {
+function ClosingBlock({ message, accent, onComplete, entered, index, active, registerSectionRef, t }: ClosingBlockProps) {
   const slideLabel = t('feedback.weeklyWrapped.closing.slideLabel');
   return (
     <SectionShell
@@ -1207,14 +1208,14 @@ function ClosingBlock({ message, accent, onClose, entered, index, active, regist
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
           <button
             type="button"
-            onClick={onClose}
+            onClick={onComplete}
             className="w-full min-w-[220px] rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 px-6 py-3 text-base font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 sm:w-auto"
           >
             {t('feedback.weeklyWrapped.closing.goToDailyQuest')}
           </button>
           <button
             type="button"
-            onClick={onClose}
+            onClick={onComplete}
             className="w-full min-w-[220px] rounded-full border border-white/25 bg-white/10 px-6 py-3 text-base font-semibold text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300/50 hover:bg-emerald-400/20 hover:text-slate-950 sm:w-auto"
           >
             {t('feedback.common.close')}
