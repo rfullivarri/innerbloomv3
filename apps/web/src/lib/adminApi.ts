@@ -6,6 +6,7 @@ import type {
   AdminTaskSummaryRow,
   AdminModeUpgradeAnalysis,
   AdminModeUpgradeCtaOverride,
+  AdminHabitAchievementRetroactiveRunResponse,
   AdminUser,
   AdminUserSubscriptionResponse,
   SubscriptionStatus,
@@ -484,4 +485,30 @@ export async function runAdminTaskDifficultyCalibration(payload: {
   }
 
   return response.json() as Promise<AdminTaskDifficultyCalibrationRunResponse>;
+}
+
+export async function runAdminHabitAchievementRetroactive(payload: { userId?: string }) {
+  const url = buildApiUrl('/admin/habit-achievement/retroactive/run');
+  const response = await apiAuthorizedFetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      userId: payload.userId,
+    }),
+  });
+
+  if (!response.ok) {
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    throw new ApiError(response.status, body, url);
+  }
+
+  return response.json() as Promise<AdminHabitAchievementRetroactiveRunResponse>;
 }
