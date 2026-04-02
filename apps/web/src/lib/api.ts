@@ -139,14 +139,14 @@ function handleInvalidNativeMobileToken(
   setApiAuthTokenProvider(null);
 }
 
-async function tryRefreshNativeMobileToken(url: string, body: any, failedToken: string | null): Promise<boolean> {
+async function tryRefreshNativeMobileToken(url: string, body: any, failedToken: string | null): Promise<string | null> {
   if (!isNativeCapacitorPlatform() || !hasInvalidNativeMobileToken(body)) {
-    return false;
+    return null;
   }
 
   const session = getMobileAuthSession();
   if (!session?.token) {
-    return false;
+    return null;
   }
 
   apiLog('[API] attempting native token refresh', {
@@ -173,7 +173,7 @@ async function tryRefreshNativeMobileToken(url: string, body: any, failedToken: 
     });
   }
 
-  return didRefresh;
+  return didRefresh ? refreshed?.token ?? null : null;
 }
 
 const DEV_USER_HEADER = 'X-Innerbloom-Demo-User';
@@ -282,9 +282,11 @@ export async function apiRequest<T = unknown>(url: string, init?: RequestInit): 
   try {
     const requestInit = applyDevUserOverride(init);
 
-    const execute = async (): Promise<{ response: Response; authToken: string | null }> => {
+    const execute = async (
+      overrideAuthToken?: string | null,
+    ): Promise<{ response: Response; authToken: string | null }> => {
       try {
-        const authToken = await resolveAuthToken();
+        const authToken = overrideAuthToken ?? await resolveAuthToken();
         apiLog('[API] request started', {
           at: Date.now(),
           url,
@@ -320,8 +322,9 @@ export async function apiRequest<T = unknown>(url: string, init?: RequestInit): 
         causeCode: typeof body?.details?.cause?.code === 'string' ? body.details.cause.code : null,
       });
 
-      if (await tryRefreshNativeMobileToken(url, body, requestAuthToken)) {
-        ({ response: res, authToken: requestAuthToken } = await execute());
+      const refreshedToken = await tryRefreshNativeMobileToken(url, body, requestAuthToken);
+      if (refreshedToken) {
+        ({ response: res, authToken: requestAuthToken } = await execute(refreshedToken));
         logApiDebug('API response received after native token refresh', { url, status: res.status });
         if (res.ok) {
           const json = (await res.json()) as T;
@@ -489,9 +492,7 @@ async function resolveAuthToken(): Promise<string> {
 
 function applyAuthorization(init: RequestInit | undefined, authToken: string): RequestInit {
   const headers = new Headers(init?.headers ?? {});
-  if (!headers.has('Authorization')) {
-    headers.set('Authorization', `Bearer ${authToken}`);
-  }
+  headers.set('Authorization', `Bearer ${authToken}`);
 
   return {
     ...(init ?? {}),
