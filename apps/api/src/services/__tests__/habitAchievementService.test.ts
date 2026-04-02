@@ -283,6 +283,15 @@ describe('habitAchievementService lifecycle transitions', () => {
       skipped: 1,
       ignored: 0,
       errors: 0,
+      ignoredByEvaluationReason: {
+        insufficient_periods: 0,
+        non_consecutive_periods: 0,
+        expected_target_zero: 0,
+        aggregate_below_threshold: 0,
+        insufficient_goal_months: 0,
+        month_below_floor: 0,
+      },
+      ignoredEvaluationPreview: [],
     });
   });
 
@@ -332,6 +341,15 @@ describe('habitAchievementService lifecycle transitions', () => {
       skipped: 0,
       ignored: 0,
       errors: 0,
+      ignoredByEvaluationReason: {
+        insufficient_periods: 0,
+        non_consecutive_periods: 0,
+        expected_target_zero: 0,
+        aggregate_below_threshold: 0,
+        insufficient_goal_months: 0,
+        month_below_floor: 0,
+      },
+      ignoredEvaluationPreview: [],
     });
   });
 
@@ -381,6 +399,15 @@ describe('habitAchievementService lifecycle transitions', () => {
       skipped: 0,
       ignored: 0,
       errors: 0,
+      ignoredByEvaluationReason: {
+        insufficient_periods: 0,
+        non_consecutive_periods: 0,
+        expected_target_zero: 0,
+        aggregate_below_threshold: 0,
+        insufficient_goal_months: 0,
+        month_below_floor: 0,
+      },
+      ignoredEvaluationPreview: [],
     });
 
     const evaluationCall = mockQuery.mock.calls.find((entry) =>
@@ -415,6 +442,91 @@ describe('habitAchievementService lifecycle transitions', () => {
       skipped: 0,
       ignored: 0,
       errors: 0,
+      ignoredByEvaluationReason: {
+        insufficient_periods: 0,
+        non_consecutive_periods: 0,
+        expected_target_zero: 0,
+        aggregate_below_threshold: 0,
+        insufficient_goal_months: 0,
+        month_below_floor: 0,
+      },
+      ignoredEvaluationPreview: [],
     });
+  });
+
+  it('collects ignored evaluation diagnostics with reason breakdown and preview', async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: 'task-floor',
+            user_id: 'user-1',
+            has_allowed_source_history: true,
+            current_active: true,
+            current_excluded_from_habit_achievement: false,
+            current_task_name: 'Sleep early',
+          },
+          {
+            task_id: 'task-goal',
+            user_id: 'user-1',
+            has_allowed_source_history: true,
+            current_active: true,
+            current_excluded_from_habit_achievement: false,
+            current_task_name: 'Read',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [
+          { period_end: '2026-03-31', expected_target: 10, completions_done: 10, completion_rate: 1.0 },
+          { period_end: '2026-02-28', expected_target: 10, completions_done: 8, completion_rate: 0.8 },
+          { period_end: '2026-01-31', expected_target: 10, completions_done: 3, completion_rate: 0.3 },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [
+          { period_end: '2026-03-31', expected_target: 100, completions_done: 100, completion_rate: 1.0 },
+          { period_end: '2026-02-28', expected_target: 10, completions_done: 7.9, completion_rate: 0.79 },
+          { period_end: '2026-01-31', expected_target: 10, completions_done: 7.9, completion_rate: 0.79 },
+        ],
+      });
+
+    const result = await runRetroactiveHabitAchievementDetection({
+      now: new Date('2026-04-01T00:00:00.000Z'),
+      userId: '11111111-1111-4111-8111-111111111111',
+    });
+
+    expect(result.ignored).toBe(2);
+    expect(result.ignoredByEvaluationReason).toEqual({
+      insufficient_periods: 0,
+      non_consecutive_periods: 0,
+      expected_target_zero: 0,
+      aggregate_below_threshold: 0,
+      insufficient_goal_months: 1,
+      month_below_floor: 1,
+    });
+    expect(result.ignoredEvaluationPreview).toEqual([
+      expect.objectContaining({
+        taskId: 'task-floor',
+        taskName: 'Sleep early',
+        failureReason: 'month_below_floor',
+        monthsEvaluated: 3,
+        monthsMeetingGoal: 2,
+        monthsBelowFloor: 1,
+        detectedPeriodEnd: '2026-03-31',
+      }),
+      expect.objectContaining({
+        taskId: 'task-goal',
+        taskName: 'Read',
+        failureReason: 'insufficient_goal_months',
+        monthsEvaluated: 3,
+        monthsMeetingGoal: 1,
+        monthsBelowFloor: 0,
+        detectedPeriodEnd: '2026-03-31',
+      }),
+    ]);
   });
 });
