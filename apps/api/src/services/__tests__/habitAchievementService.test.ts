@@ -3,6 +3,7 @@ import {
   applyHabitAchievementDecision,
   createPendingHabitAchievement,
   evaluateHabitAchievementWindow,
+  evaluateTaskHabitAchievement,
   runRetroactiveHabitAchievementDetection,
   runMonthlyHabitAchievementDetection,
   resolveExpiredPendingHabitAchievements,
@@ -61,6 +62,17 @@ describe('habitAchievementService evaluation', () => {
     );
 
     expect(result.qualifies).toBe(true);
+  });
+
+  it('keeps monthly source policy strict to cron by default', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    await evaluateTaskHabitAchievement({ taskId: 'task-1' });
+
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining('source = ANY($3::text[])'),
+      expect.arrayContaining(['task-1', expect.any(Number), ['cron']]),
+    );
   });
 });
 
@@ -209,21 +221,21 @@ describe('habitAchievementService lifecycle transitions', () => {
           {
             task_id: 'task-1',
             user_id: 'user-1',
-            has_cron_history: true,
+            has_allowed_source_history: true,
             current_active: true,
             current_excluded_from_habit_achievement: false,
           },
           {
             task_id: 'task-2',
             user_id: 'user-1',
-            has_cron_history: true,
+            has_allowed_source_history: true,
             current_active: true,
             current_excluded_from_habit_achievement: false,
           },
           {
             task_id: 'task-3',
             user_id: 'user-1',
-            has_cron_history: false,
+            has_allowed_source_history: false,
             current_active: true,
             current_excluded_from_habit_achievement: false,
           },
@@ -282,7 +294,7 @@ describe('habitAchievementService lifecycle transitions', () => {
           {
             task_id: 'task-historical',
             user_id: 'user-1',
-            has_cron_history: true,
+            has_allowed_source_history: true,
             current_active: false,
             current_excluded_from_habit_achievement: true,
           },
@@ -321,6 +333,62 @@ describe('habitAchievementService lifecycle transitions', () => {
       ignored: 0,
       errors: 0,
     });
+  });
+
+  it('retroactive run evaluates historical admin_run-only candidates for backfill', async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            task_id: 'task-admin-history',
+            user_id: 'user-1',
+            has_allowed_source_history: true,
+            current_active: true,
+            current_excluded_from_habit_achievement: false,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({
+        rows: [
+          { period_end: '2026-03-31', expected_target: 20, completions_done: 18, completion_rate: 0.9 },
+          { period_end: '2026-02-28', expected_target: 20, completions_done: 16, completion_rate: 0.8 },
+          { period_end: '2026-01-31', expected_target: 20, completions_done: 14, completion_rate: 0.7 },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const result = await runRetroactiveHabitAchievementDetection({
+      now: new Date('2026-04-01T00:00:00.000Z'),
+      userId: '11111111-1111-4111-8111-111111111111',
+    });
+
+    expect(result).toEqual({
+      scope: 'single_user',
+      userId: '11111111-1111-4111-8111-111111111111',
+      expiredResolved: 0,
+      rawHistoricalCandidates: 1,
+      droppedBySource: 0,
+      droppedByLifecycleCurrentState: 0,
+      candidatesConsidered: 1,
+      evaluated: 1,
+      qualified: 1,
+      pendingCreated: 1,
+      skipped: 0,
+      ignored: 0,
+      errors: 0,
+    });
+
+    const evaluationCall = mockQuery.mock.calls.find((entry) =>
+      (entry[0] as string).includes('source = ANY($3::text[])'),
+    );
+    expect(evaluationCall?.[1]).toEqual(
+      expect.arrayContaining([expect.any(String), expect.any(Number), ['cron', 'admin_run']]),
+    );
   });
 
   it('returns all-zero processing counters only when there is no historical basis to consider', async () => {

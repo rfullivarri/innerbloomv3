@@ -28,10 +28,15 @@ type HabitAchievementCandidateRow = {
 };
 
 type RetroactiveHabitAchievementCandidateRow = HabitAchievementCandidateRow & {
-  has_cron_history: boolean;
+  has_allowed_source_history: boolean;
   current_active: boolean | null;
   current_excluded_from_habit_achievement: boolean | null;
 };
+
+type HabitAchievementSource = 'cron' | 'admin_run';
+
+const MONTHLY_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = ['cron'];
+const RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = ['cron', 'admin_run'];
 
 type RewardsHabitRow = {
   task_habit_achievement_id: string;
@@ -328,8 +333,10 @@ async function applyTaskLifecycle(taskId: string, status: TaskLifecycleStatus, p
 
 export async function evaluateTaskHabitAchievement(params: {
   taskId: string;
+  allowedSources?: readonly HabitAchievementSource[];
   thresholds?: Partial<HabitAchievementThresholds>;
 }): Promise<HabitAchievementEvaluation> {
+  const allowedSources = params.allowedSources ?? MONTHLY_HABIT_ACHIEVEMENT_SOURCES;
   const rowsResult = await pool.query<RecalibrationPeriodRow>(
     `SELECT period_end::text AS period_end,
             expected_target,
@@ -337,10 +344,14 @@ export async function evaluateTaskHabitAchievement(params: {
             completion_rate
        FROM task_difficulty_recalibrations
       WHERE task_id = $1::uuid
-        AND source = 'cron'
+        AND source = ANY($3::text[])
       ORDER BY period_end DESC
       LIMIT $2`,
-    [params.taskId, (params.thresholds?.windowMonths ?? DEFAULT_HABIT_ACHIEVEMENT_THRESHOLDS.windowMonths) + 1],
+    [
+      params.taskId,
+      (params.thresholds?.windowMonths ?? DEFAULT_HABIT_ACHIEVEMENT_THRESHOLDS.windowMonths) + 1,
+      [...allowedSources],
+    ],
   );
 
   return evaluateHabitAchievementWindow(rowsResult.rows, params.thresholds);
@@ -805,21 +816,21 @@ export async function runRetroactiveHabitAchievementDetection(params: {
                 FROM task_difficulty_recalibrations rs
                WHERE rs.task_id = rc.task_id
                  AND rs.user_id = rc.user_id
-                 AND rs.source = 'cron'
-            ) AS has_cron_history,
+                 AND rs.source = ANY($2::text[])
+            ) AS has_allowed_source_history,
             t.active AS current_active,
             t.excluded_from_habit_achievement AS current_excluded_from_habit_achievement
        FROM raw_candidates rc
   LEFT JOIN tasks t ON t.task_id = rc.task_id`,
-    [params.userId ?? null],
+    [params.userId ?? null, [...RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES]],
   );
 
   const rawHistoricalCandidates = candidateResult.rows.length;
-  const droppedBySource = candidateResult.rows.filter((row) => !row.has_cron_history).length;
+  const droppedBySource = candidateResult.rows.filter((row) => !row.has_allowed_source_history).length;
   const droppedByLifecycleCurrentState = candidateResult.rows.filter(
     (row) => row.current_active !== true || row.current_excluded_from_habit_achievement === true,
   ).length;
-  const candidates = candidateResult.rows.filter((row) => row.has_cron_history);
+  const candidates = candidateResult.rows.filter((row) => row.has_allowed_source_history);
 
   let evaluated = 0;
   let qualified = 0;
@@ -836,7 +847,10 @@ export async function runRetroactiveHabitAchievementDetection(params: {
         continue;
       }
 
-      const evaluation = await evaluateTaskHabitAchievement({ taskId: row.task_id });
+      const evaluation = await evaluateTaskHabitAchievement({
+        taskId: row.task_id,
+        allowedSources: RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES,
+      });
       evaluated += 1;
       if (!evaluation.qualifies) {
         ignored += 1;
