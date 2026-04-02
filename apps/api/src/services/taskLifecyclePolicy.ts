@@ -1,7 +1,7 @@
-export const ACTIVE_SURFACE_LIFECYCLE_STATUSES = ['active', 'achievement_maintained'] as const;
+export const ACTIVE_SURFACE_LIFECYCLE_STATUSES = ['active', 'achievement_pending', 'achievement_maintained'] as const;
 
 export function buildActiveSurfaceTaskFilter(alias: string): string {
-  return `${alias}.active = TRUE AND ${alias}.lifecycle_status = ANY('{active,achievement_maintained}'::text[])`;
+  return `${alias}.active = TRUE AND ${alias}.lifecycle_status = ANY('{active,achievement_pending,achievement_maintained}'::text[])`;
 }
 
 export function buildGrowthCalibrationFilter(alias: string): string {

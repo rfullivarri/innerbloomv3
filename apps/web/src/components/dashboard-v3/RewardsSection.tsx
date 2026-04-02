@@ -55,6 +55,11 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
   useEffect(() => {
     onPendingCountChange?.(pendingCount);
   }, [onPendingCountChange, pendingCount]);
+  useEffect(() => {
+    if (decisionIndex >= pendingItems.length) {
+      setDecisionIndex(0);
+    }
+  }, [decisionIndex, pendingItems.length]);
 
   const weeklyItems = effectiveData?.weeklyWrapups ?? [];
   const monthlyItems = effectiveData?.monthlyWrapups ?? [];
@@ -76,6 +81,17 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
     await reload();
   };
 
+  const handleOpenPendingDecision = async () => {
+    if (pendingItems.length > 0) {
+      setDecisionIndex(0);
+      setIsDecisionOpen(true);
+      return;
+    }
+    await reload();
+    setDecisionIndex(0);
+    setIsDecisionOpen(true);
+  };
+
   return (
     <Card
       title="🎁 Rewards"
@@ -95,7 +111,9 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
       {pendingCount > 0 ? (
         <button
           type="button"
-          onClick={() => setIsDecisionOpen(true)}
+          onClick={() => {
+            void handleOpenPendingDecision();
+          }}
           className="ib-card-contour-shadow w-full rounded-2xl border border-amber-300/50 bg-gradient-to-r from-amber-400/15 via-orange-400/10 to-fuchsia-500/10 p-4 text-left"
         >
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-100">{language === 'es' ? 'Pendiente' : 'Pending'}</p>

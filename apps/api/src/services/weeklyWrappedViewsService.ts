@@ -2,6 +2,7 @@ import type { Pool, PoolClient } from 'pg';
 import { pool } from '../db.js';
 
 const TABLE_NAME = 'weekly_wrapped_views';
+const DEFAULT_AUTO_OPEN_LOOKBACK_DAYS = 21;
 const VALID_CLOSED_WEEK_SQL = `
   ww.week_start + INTERVAL '6 days' = ww.week_end
   AND EXTRACT(ISODOW FROM ww.week_start) = 1
@@ -78,9 +79,12 @@ export async function listSeenWeeklyWrappedIds(
 
 export async function findPendingWeeklyWrappedId(
   userId: string,
+  options: { autoOpenLookbackDays?: number; now?: Date } = {},
   client: Pool | PoolClient = pool,
 ): Promise<string | null> {
   await ensureTable(client);
+  const now = options.now ?? new Date();
+  const autoOpenLookbackDays = Math.max(0, Math.floor(options.autoOpenLookbackDays ?? DEFAULT_AUTO_OPEN_LOOKBACK_DAYS));
 
   const result = await client.query<{ weekly_wrapped_id: string }>(
     `SELECT ww.weekly_wrapped_id
@@ -90,10 +94,11 @@ export async function findPendingWeeklyWrappedId(
         AND views.weekly_wrapped_id = ww.weekly_wrapped_id
       WHERE ww.user_id = $1
         AND ${VALID_CLOSED_WEEK_SQL}
+        AND ww.week_end >= ($2::timestamptz - make_interval(days => $3))::date
         AND views.weekly_wrapped_id IS NULL
    ORDER BY ww.week_end DESC
       LIMIT 1`,
-    [userId],
+    [userId, now.toISOString(), autoOpenLookbackDays],
   );
 
   return result.rows[0]?.weekly_wrapped_id ?? null;
