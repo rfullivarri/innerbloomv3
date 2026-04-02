@@ -62,7 +62,7 @@ function buildParams(filters: TaskgenFilterState): TaskgenJobsParams {
   return params;
 }
 
-export function TaskgenPage() {
+export function TaskgenPage({ baseUserPath = '/admin/users' }: { baseUserPath?: string } = {}) {
   const [filters, setFilters] = useState<TaskgenFilterState>(DEFAULT_FILTERS);
   const [refreshToken, setRefreshToken] = useState(0);
   const [jobs, setJobs] = useState<TaskgenJob[]>([]);
@@ -262,6 +262,7 @@ export function TaskgenPage() {
         onRetry={handleRetry}
         onCopyCorrelation={handleCopyCorrelation}
         retryingJobId={retryingJobId}
+        userTaskgenPathBase={baseUserPath}
       />
 
       <JobLogsDrawer job={selectedJob} logs={jobLogs} loading={loadingLogs} error={logsError} onClose={() => setSelectedJob(null)} />

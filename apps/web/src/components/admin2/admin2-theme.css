@@ -1,0 +1,33 @@
+.admin2-theme {
+  --admin-bg: #f3f6fb;
+  --admin-surface: #ffffff;
+  --admin-surface-muted: #f7f9fc;
+  --admin-border: #dce5f1;
+  --admin-text: #111827;
+  --admin-muted: #4b5563;
+  --admin-hover: #eaf0f8;
+  --admin-active-bg: #dbeafe;
+  --admin-active-text: #1d4ed8;
+  --admin-accent: #2563eb;
+  --admin-border-strong: color-mix(in srgb, var(--admin-border) 96%, transparent);
+  --admin-border-soft: color-mix(in srgb, var(--admin-border) 78%, transparent);
+  --admin-text-strong: var(--admin-text);
+  --admin-text-soft: color-mix(in srgb, var(--admin-text) 80%, white);
+  --admin-text-subtle: color-mix(in srgb, var(--admin-muted) 84%, white);
+  --admin-layer-strong: color-mix(in srgb, var(--admin-surface) 96%, transparent);
+  --admin-layer-muted: color-mix(in srgb, var(--admin-surface-muted) 94%, transparent);
+  --admin-layer: color-mix(in srgb, var(--admin-surface) 90%, transparent);
+}
+
+.admin2-theme[data-theme='dark'] {
+  --admin-bg: #0b1220;
+  --admin-surface: #111b2e;
+  --admin-surface-muted: #17243a;
+  --admin-border: #2a3a56;
+  --admin-text: #e5edf8;
+  --admin-muted: #9fb1cc;
+  --admin-hover: #22314e;
+  --admin-active-bg: #1f3a70;
+  --admin-active-text: #dbeafe;
+  --admin-accent: #7fb0ff;
+}

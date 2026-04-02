@@ -10,6 +10,7 @@ import SignUpPage from './pages/SignUp';
 import DebugAiTaskgenPage from './pages/DebugAiTaskgen';
 import DevMissionsPage from './pages/DevMissionsPage';
 import AdminRoute from './routes/admin';
+import Admin2Route from './routes/admin2';
 import { DevBanner } from './components/layout/DevBanner';
 import { DEV_USER_SWITCH_ACTIVE, setApiAuthTokenProvider } from './lib/api';
 import OnboardingIntroPage from './pages/OnboardingIntro';
@@ -300,6 +301,14 @@ export default function App() {
           element={
             <RequireUser>
               <AdminRoute />
+            </RequireUser>
+          }
+        />
+        <Route
+          path="/admin2/*"
+          element={
+            <RequireUser>
+              <Admin2Route />
             </RequireUser>
           }
         />
