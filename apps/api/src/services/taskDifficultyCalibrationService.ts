@@ -394,7 +394,7 @@ export async function runMonthlyTaskDifficultyCalibrationBackfill(options: {
             u.game_mode_id
        FROM tasks t
        JOIN users u ON u.user_id = t.user_id
-      WHERE t.deleted_at IS NULL ${userFilterSql}`,
+      WHERE u.deleted_at IS NULL ${userFilterSql}`,
     options.userId ? [options.userId] : [],
   );
 
