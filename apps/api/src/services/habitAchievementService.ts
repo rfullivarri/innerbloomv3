@@ -42,7 +42,7 @@ const RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] =
 type RewardsHabitRow = {
   task_habit_achievement_id: string;
   task_id: string;
-  status: 'maintained' | 'stored';
+  status: 'pending_decision' | 'maintained' | 'stored';
   detected_at: string;
   decision_made_at: string | null;
   gp_generated_until_achievement: number | string | null;
@@ -86,7 +86,7 @@ export type HabitAchievementShelfItem = {
   id: string;
   task_id: string;
   task_name: string;
-  status: 'maintained' | 'stored';
+  status: 'pending_decision' | 'maintained' | 'stored';
   achieved_at: string;
   decision_made_at: string | null;
   gp_before_achievement: number;
@@ -552,7 +552,7 @@ export async function toggleAchievedHabitTracking(params: {
   }
 }
 
-export async function getUserRewardsHabitAchievementsByPillar(userId: string): Promise<HabitAchievementShelfGroup[]> {
+export async function getUserRewardsHabitAchievementsByPillar(userId: string, now: Date = new Date()): Promise<HabitAchievementShelfGroup[]> {
   const result = await pool.query<RewardsHabitRow>(
     `WITH latest AS (
        SELECT DISTINCT ON (ha.task_id)
@@ -565,7 +565,10 @@ export async function getUserRewardsHabitAchievementsByPillar(userId: string): P
               ha.gp_generated_since_maintain
          FROM task_habit_achievements ha
         WHERE ha.user_id = $1::uuid
-          AND ha.status IN ('maintained', 'stored')
+          AND (
+            ha.status IN ('maintained', 'stored')
+            OR (ha.status = 'pending_decision' AND ha.pending_expires_at > $2::timestamptz)
+          )
         ORDER BY ha.task_id, ha.detected_at DESC
      )
      SELECT latest.task_habit_achievement_id,
@@ -588,7 +591,7 @@ export async function getUserRewardsHabitAchievementsByPillar(userId: string): P
   LEFT JOIN cat_pillar cp ON cp.pillar_id = t.pillar_id
   LEFT JOIN cat_trait ct ON ct.trait_id = t.trait_id
       ORDER BY cp.code NULLS LAST, t.task ASC`,
-    [userId],
+    [userId, now.toISOString()],
   );
 
   const grouped = new Map<string, HabitAchievementShelfGroup>();

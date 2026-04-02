@@ -6,7 +6,7 @@ vi.mock('../../db.js', () => ({
   pool: { query: mockQuery },
 }));
 
-import { markWeeklyWrappedSeen } from '../weeklyWrappedViewsService.js';
+import { findPendingWeeklyWrappedId, markWeeklyWrappedSeen } from '../weeklyWrappedViewsService.js';
 
 describe('weeklyWrappedViewsService', () => {
   beforeEach(() => {
@@ -34,5 +34,22 @@ describe('weeklyWrappedViewsService', () => {
 
     expect(seenAt).toBe('2026-04-01T09:00:00.000Z');
     expect(mockQuery).toHaveBeenCalledTimes(3);
+  });
+
+  it('limits auto-open pending selection to a recent lookback window', async () => {
+    mockQuery
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ rows: [{ weekly_wrapped_id: 'recent-pending' }] });
+
+    const pendingId = await findPendingWeeklyWrappedId(
+      '11111111-2222-3333-4444-555555555555',
+      { now: new Date('2026-04-02T00:00:00.000Z'), autoOpenLookbackDays: 21 },
+    );
+
+    expect(pendingId).toBe('recent-pending');
+    expect(mockQuery).toHaveBeenLastCalledWith(
+      expect.stringContaining("ww.week_end >= ($2::timestamptz - make_interval(days => $3))::date"),
+      ['11111111-2222-3333-4444-555555555555', '2026-04-02T00:00:00.000Z', 21],
+    );
   });
 });
