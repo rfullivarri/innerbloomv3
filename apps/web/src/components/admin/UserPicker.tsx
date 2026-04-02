@@ -5,6 +5,7 @@ import type { AdminUser } from '../../lib/types';
 type UserPickerProps = {
   onSelect: (user: AdminUser | null) => void;
   selectedUserId: string | null;
+  compact?: boolean;
 };
 
 type SearchState = {
@@ -12,7 +13,7 @@ type SearchState = {
   page: number;
 };
 
-export function UserPicker({ onSelect, selectedUserId }: UserPickerProps) {
+export function UserPicker({ onSelect, selectedUserId, compact = false }: UserPickerProps) {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [search, setSearch] = useState<SearchState>({ term: '', page: 1 });
   const [loading, setLoading] = useState(false);
@@ -23,7 +24,7 @@ export function UserPicker({ onSelect, selectedUserId }: UserPickerProps) {
     setLoading(true);
     setError(null);
 
-    searchAdminUsers({ query: search.term || undefined, page: search.page, pageSize: 10 })
+    searchAdminUsers({ query: search.term || undefined, page: search.page, pageSize: compact ? 25 : 10 })
       .then((data) => {
         if (!cancelled) {
           setUsers(data.items);
@@ -44,12 +45,68 @@ export function UserPicker({ onSelect, selectedUserId }: UserPickerProps) {
     return () => {
       cancelled = true;
     };
-  }, [search.page, search.term]);
+  }, [compact, search.page, search.term]);
 
   const selectedUser = useMemo(
     () => users.find((user) => user.id === selectedUserId) ?? null,
     [selectedUserId, users],
   );
+
+  if (compact) {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            value={search.term}
+            onChange={(event) => setSearch({ term: event.target.value, page: 1 })}
+            placeholder="Buscar por email o nombre…"
+            className="w-full min-w-0 flex-1 rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-bg)] px-3 py-1.5 text-sm"
+            aria-label="Buscar usuario"
+          />
+          <button
+            type="button"
+            onClick={() => setSearch((prev) => ({ ...prev }))}
+            className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs font-semibold hover:border-[color:var(--admin-accent)]"
+          >
+            Buscar
+          </button>
+        </div>
+
+        {error ? (
+          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">{error}</p>
+        ) : null}
+
+        <div className="max-h-64 overflow-y-auto rounded-lg border border-[color:var(--admin-border)]">
+          {loading && users.length === 0 ? <p className="px-3 py-2 text-xs text-[color:var(--admin-muted)]">Cargando…</p> : null}
+          {users.map((user) => {
+            const isActive = user.id === selectedUserId;
+            return (
+              <button
+                key={user.id}
+                type="button"
+                onClick={() => onSelect(user)}
+                className={`flex w-full items-center justify-between gap-3 border-b border-[color:var(--admin-border)] px-3 py-1.5 text-left text-xs last:border-b-0 ${
+                  isActive ? 'bg-[color:var(--admin-active-bg)] text-[color:var(--admin-active-text)]' : 'hover:bg-[color:var(--admin-hover)]'
+                }`}
+              >
+                <span className="min-w-0 flex-1 truncate">{user.email ?? user.id}</span>
+                <span className="inline-flex rounded-full border border-[color:var(--admin-border)] px-2 py-0.5 text-[10px] uppercase">
+                  {user.gameMode ?? 'N/A'}
+                </span>
+                {isActive ? <span className="text-[10px] font-semibold uppercase">Seleccionado</span> : null}
+              </button>
+            );
+          })}
+        </div>
+
+        {selectedUser ? (
+          <div className="rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-hover)] px-3 py-1.5 text-xs">
+            Seleccionado: <strong>{selectedUser.email ?? selectedUser.id}</strong>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-sm">

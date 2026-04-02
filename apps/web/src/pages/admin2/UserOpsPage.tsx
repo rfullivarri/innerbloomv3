@@ -1,158 +1,184 @@
-import { useEffect, useState } from 'react';
-import type { AdminTaskSummaryRow, AdminUser, AdminUserSubscriptionResponse } from '../../lib/types';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { AdminLogRow, AdminTaskSummaryRow, AdminUser, AdminUserSubscriptionResponse, SubscriptionStatus } from '../../lib/types';
 import { UserPicker } from '../../components/admin/UserPicker';
+import { FiltersBar, type AdminFilters } from '../../components/admin/FiltersBar';
+import { AdminDataTable } from '../../components/admin/AdminDataTable';
 import { AdminTaskSummaryTable } from '../../components/admin/AdminTaskSummaryTable';
+import { TaskgenTracePanel } from '../../components/admin/TaskgenTracePanel';
 import {
   exportAdminLogsCsv,
+  fetchAdminLogs,
   fetchAdminTaskStats,
   fetchAdminUserSubscription,
+  sendAdminDailyReminder,
+  sendAdminTasksReadyEmail,
   updateAdminUserSubscription,
 } from '../../lib/adminApi';
+
+const DEFAULT_FILTERS: AdminFilters = { from: undefined, to: undefined, q: '', page: 1, pageSize: 10 };
 
 export function UserOpsPage() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [subscription, setSubscription] = useState<AdminUserSubscriptionResponse | null>(null);
   const [taskStats, setTaskStats] = useState<AdminTaskSummaryRow[]>([]);
+  const [logs, setLogs] = useState<{ items: AdminLogRow[]; page: number; pageSize: number; total: number }>({ items: [], page: 1, pageSize: 10, total: 0 });
+  const [filters, setFilters] = useState<AdminFilters>(DEFAULT_FILTERS);
+  const [activeTab, setActiveTab] = useState<'logs' | 'taskTotals' | 'taskgen'>('logs');
   const [loading, setLoading] = useState(false);
+  const [updatingSubscription, setUpdatingSubscription] = useState(false);
+  const [sendingReminder, setSendingReminder] = useState(false);
+  const [sendingTasksReady, setSendingTasksReady] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadUserOps = useCallback(async () => {
     if (!selectedUser) {
       setSubscription(null);
       setTaskStats([]);
+      setLogs({ items: [], page: 1, pageSize: 10, total: 0 });
       return;
     }
-
-    let cancelled = false;
-
     setLoading(true);
     setError(null);
-
-    Promise.all([
-      fetchAdminUserSubscription(selectedUser.id),
-      fetchAdminTaskStats(selectedUser.id),
-    ])
-      .then(([subscriptionData, stats]) => {
-        if (!cancelled) {
-          setSubscription(subscriptionData);
-          setTaskStats(stats);
-        }
-      })
-      .catch((loadError) => {
-        console.error('[admin2][user-ops] failed to load user ops data', loadError);
-        if (!cancelled) {
-          setError('No se pudieron cargar operaciones de usuario.');
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedUser]);
-
-  const handleExportCsv = async () => {
-    if (!selectedUser) {
-      return;
-    }
-
     try {
+      const [subscriptionData, taskStatsData, logsData] = await Promise.all([
+        fetchAdminUserSubscription(selectedUser.id),
+        fetchAdminTaskStats(selectedUser.id, { from: filters.from, to: filters.to, q: filters.q || undefined }),
+        fetchAdminLogs(selectedUser.id, { from: filters.from, to: filters.to, q: filters.q, page: filters.page, pageSize: filters.pageSize }),
+      ]);
+      setSubscription(subscriptionData);
+      setTaskStats(taskStatsData);
+      setLogs({ items: logsData.items, page: logsData.page, pageSize: logsData.pageSize, total: logsData.total });
+    } catch (loadError) {
+      console.error(loadError);
+      setError('No se pudieron cargar operaciones del usuario.');
+    } finally {
+      setLoading(false);
+    }
+  }, [filters.from, filters.page, filters.pageSize, filters.q, filters.to, selectedUser]);
+
+  useEffect(() => {
+    void loadUserOps();
+  }, [loadUserOps]);
+
+  const updateSubscription = useCallback(async (payload: { planCode: string; status?: SubscriptionStatus; successMessage: string }) => {
+    if (!selectedUser) return;
+    try {
+      setUpdatingSubscription(true);
       setMessage(null);
       setError(null);
-      const csv = await exportAdminLogsCsv(selectedUser.id);
+      await updateAdminUserSubscription(selectedUser.id, { planCode: payload.planCode, status: payload.status });
+      setSubscription(await fetchAdminUserSubscription(selectedUser.id));
+      setMessage(payload.successMessage);
+    } catch (subscriptionError) {
+      console.error(subscriptionError);
+      setError('No se pudo actualizar suscripción.');
+    } finally {
+      setUpdatingSubscription(false);
+    }
+  }, [selectedUser]);
+
+  const handleExportCsv = useCallback(async () => {
+    if (!selectedUser) return;
+    try {
+      setMessage(null);
+      const csv = await exportAdminLogsCsv(selectedUser.id, { from: filters.from, to: filters.to, q: filters.q });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `admin-logs-${selectedUser.id}.csv`;
+      link.download = `admin2-logs-${selectedUser.id}.csv`;
       link.click();
       URL.revokeObjectURL(url);
       setMessage('CSV exportado.');
-    } catch (exportError) {
-      console.error('[admin2][user-ops] csv export failed', exportError);
+    } catch (csvError) {
+      console.error(csvError);
       setError('No se pudo exportar CSV.');
     }
-  };
+  }, [filters.from, filters.q, filters.to, selectedUser]);
 
-  const handleForceActive = async () => {
-    if (!selectedUser || !subscription?.availablePlans.length) {
-      return;
-    }
-
+  const handleReminder = useCallback(async () => {
+    if (!selectedUser) return;
+    setSendingReminder(true);
     try {
-      setMessage(null);
-      setError(null);
-      await updateAdminUserSubscription(selectedUser.id, {
-        planCode: subscription.availablePlans[0].planCode,
-        status: 'active',
-      });
-      const refreshed = await fetchAdminUserSubscription(selectedUser.id);
-      setSubscription(refreshed);
-      setMessage('Suscripción actualizada a active.');
-    } catch (updateError) {
-      console.error('[admin2][user-ops] subscription update failed', updateError);
-      setError('No se pudo actualizar suscripción.');
+      const response = await sendAdminDailyReminder(selectedUser.id);
+      setMessage(`Recordatorio enviado a ${response.recipient}.`);
+    } catch (reminderError) {
+      console.error(reminderError);
+      setError('No se pudo enviar recordatorio.');
+    } finally {
+      setSendingReminder(false);
     }
-  };
+  }, [selectedUser]);
+
+  const handleTasksReady = useCallback(async () => {
+    if (!selectedUser) return;
+    setSendingTasksReady(true);
+    try {
+      const response = await sendAdminTasksReadyEmail(selectedUser.id);
+      setMessage(`Correo AI enviado a ${response.recipient}.`);
+    } catch (emailError) {
+      console.error(emailError);
+      setError('No se pudo enviar correo AI.');
+    } finally {
+      setSendingTasksReady(false);
+    }
+  }, [selectedUser]);
+
+  const currentSubscription = subscription?.subscription;
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
-      <header className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">User Ops</p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight">Operaciones manuales por usuario</h2>
+      <header className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">User Ops v2</p>
+        <h2 className="mt-1 text-2xl font-semibold tracking-tight">Suscripción, SUPERUSER, CSV, logs y task totals</h2>
       </header>
 
-      <section className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
-        <UserPicker selectedUserId={selectedUser?.id ?? null} onSelect={setSelectedUser} />
+      <section className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
+        <UserPicker compact selectedUserId={selectedUser?.id ?? null} onSelect={(user) => { setSelectedUser(user); setFilters(DEFAULT_FILTERS); }} />
       </section>
 
-      {!selectedUser ? <p className="text-sm text-[color:var(--admin-muted)]">Selecciona un usuario para comenzar.</p> : null}
-
       {selectedUser ? (
-        <>
-          <section className="grid gap-4 lg:grid-cols-2">
-            <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
-              <h3 className="text-lg font-semibold">Suscripción</h3>
-              <p className="mt-2 text-sm text-[color:var(--admin-muted)]">
-                Estado actual: {subscription?.subscription?.status ?? 'sin registro'}
-              </p>
-              <button
-                type="button"
-                onClick={handleForceActive}
-                disabled={loading || !subscription?.availablePlans.length}
-                className="mt-4 rounded-xl border border-[color:var(--admin-border)] px-4 py-2 text-sm font-semibold hover:border-[color:var(--admin-accent)] disabled:opacity-60"
-              >
-                Forzar ACTIVE
-              </button>
-            </article>
-            <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
-              <h3 className="text-lg font-semibold">Export & logs</h3>
-              <p className="mt-2 text-sm text-[color:var(--admin-muted)]">Exporta historial de logs del usuario a CSV.</p>
-              <button
-                type="button"
-                onClick={handleExportCsv}
-                disabled={loading}
-                className="mt-4 rounded-xl border border-[color:var(--admin-border)] px-4 py-2 text-sm font-semibold hover:border-[color:var(--admin-accent)] disabled:opacity-60"
-              >
-                Export CSV
-              </button>
-            </article>
-          </section>
+        <section className="grid gap-4 lg:grid-cols-2">
+          <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
+            <h3 className="font-semibold">Subscription & Admin Actions</h3>
+            <p className="mt-1 text-xs text-[color:var(--admin-muted)]">Control operativo real: plan actual, cambios manuales y SUPERUSER visible.</p>
+            <div className="mt-2 space-y-1 text-xs">
+              <p>Plan actual: <strong>{currentSubscription?.planCode ?? 'sin registro'}</strong></p>
+              <p>Status: <strong>{currentSubscription?.status ?? 'sin registro'}</strong></p>
+              <p>SUPERUSER: <strong>{currentSubscription?.isSuperuser ? 'sí' : 'no'}</strong></p>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button type="button" onClick={() => void updateSubscription({ planCode: 'SUPERUSER', status: 'active', successMessage: 'Usuario actualizado a SUPERUSER.' })} disabled={updatingSubscription || loading} className="rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/20 px-3 py-1.5 text-xs font-semibold">Hacer SUPERUSER</button>
+              {subscription?.availablePlans.filter((plan) => plan.active).map((plan) => (
+                <button key={plan.planCode} type="button" onClick={() => void updateSubscription({ planCode: plan.planCode, status: 'active', successMessage: `Plan actualizado a ${plan.planCode}.` })} disabled={updatingSubscription || loading} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs">Set {plan.planCode}</button>
+              ))}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button type="button" onClick={() => void handleReminder()} disabled={sendingReminder} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs">{sendingReminder ? 'Enviando…' : 'Probar recordatorio'}</button>
+              <button type="button" onClick={() => void handleTasksReady()} disabled={sendingTasksReady} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs">{sendingTasksReady ? 'Enviando…' : 'Probar correo AI'}</button>
+              <button type="button" onClick={() => void handleExportCsv()} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs">Export CSV</button>
+            </div>
+          </article>
 
-          <section className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
-            <h3 className="mb-4 text-lg font-semibold">Task totals</h3>
-            <AdminTaskSummaryTable rows={taskStats} loading={loading} />
-          </section>
-        </>
-      ) : null}
+          <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
+            <div className="mb-3 flex flex-wrap gap-2 text-xs">
+              <button type="button" onClick={() => setActiveTab('logs')} className={`rounded-lg border px-3 py-1 ${activeTab === 'logs' ? 'border-[color:var(--admin-accent)]' : 'border-[color:var(--admin-border)]'}`}>Logs</button>
+              <button type="button" onClick={() => setActiveTab('taskTotals')} className={`rounded-lg border px-3 py-1 ${activeTab === 'taskTotals' ? 'border-[color:var(--admin-accent)]' : 'border-[color:var(--admin-border)]'}`}>Task totals</button>
+              <button type="button" onClick={() => setActiveTab('taskgen')} className={`rounded-lg border px-3 py-1 ${activeTab === 'taskgen' ? 'border-[color:var(--admin-accent)]' : 'border-[color:var(--admin-border)]'}`}>TaskGen traces</button>
+            </div>
+            {activeTab !== 'taskgen' ? <FiltersBar filters={filters} onChange={setFilters} onExport={handleExportCsv} showExport={activeTab === 'logs'} showPageSize={activeTab === 'logs'} /> : null}
+            <div className="mt-3 max-h-[28rem] overflow-auto">
+              {activeTab === 'logs' ? <AdminDataTable rows={logs.items} loading={loading} page={logs.page} pageSize={logs.pageSize} total={logs.total} onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))} onPageSizeChange={(pageSize) => setFilters((prev) => ({ ...prev, pageSize }))} /> : null}
+              {activeTab === 'taskTotals' ? <AdminTaskSummaryTable rows={taskStats} loading={loading} /> : null}
+              {activeTab === 'taskgen' ? <TaskgenTracePanel selectedUserId={selectedUser.id} /> : null}
+            </div>
+          </article>
+        </section>
+      ) : <p className="text-sm text-[color:var(--admin-muted)]">Selecciona un usuario para operar.</p>}
 
-      {message ? <p className="rounded-xl bg-emerald-500/10 px-4 py-3 text-sm">{message}</p> : null}
-      {error ? <p className="rounded-xl bg-red-500/10 px-4 py-3 text-sm">{error}</p> : null}
+      {message ? <p className="rounded-xl bg-emerald-500/10 px-4 py-2 text-sm">{message}</p> : null}
+      {error ? <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm">{error}</p> : null}
     </div>
   );
 }
