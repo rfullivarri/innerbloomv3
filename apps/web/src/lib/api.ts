@@ -840,6 +840,7 @@ export type HabitAchievementPillarGroup = {
 };
 
 export type RewardsHistorySummary = {
+  weeklyWrapups: WeeklyWrappedRecord[];
   monthlyWrapups: WeeklyWrappedRecord[];
   habitAchievements: {
     pendingCount: number;
@@ -1057,6 +1058,7 @@ export async function getWeeklyWrappedPrevious(userId: string): Promise<WeeklyWr
 }
 
 type RawRewardsHistoryResponse = {
+  weekly_wrapups?: WeeklyWrappedRecord[];
   monthly_wrapups?: WeeklyWrappedRecord[];
   habit_achievements?: {
     pending_count?: number;
@@ -1097,6 +1099,7 @@ export async function getRewardsHistory(userId: string): Promise<RewardsHistoryS
     : [];
 
   return {
+    weeklyWrapups: Array.isArray(response.weekly_wrapups) ? response.weekly_wrapups : [],
     monthlyWrapups: Array.isArray(response.monthly_wrapups) ? response.monthly_wrapups : [],
     habitAchievements: {
       pendingCount: Number(response.habit_achievements?.pending_count ?? 0) || 0,

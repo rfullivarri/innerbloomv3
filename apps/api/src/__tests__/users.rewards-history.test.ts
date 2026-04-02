@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const {
   mockQuery,
   mockVerifyToken,
+  mockGetRecentWeeklyWrapped,
   mockGetRewardsHistoryMonthlyWrapups,
   mockGetUserRewardsHabitAchievementsByPillar,
   mockGetUserPendingHabitAchievementCount,
@@ -11,6 +12,7 @@ const {
   vi.hoisted(() => ({
     mockQuery: vi.fn(),
     mockVerifyToken: vi.fn(),
+    mockGetRecentWeeklyWrapped: vi.fn(),
     mockGetRewardsHistoryMonthlyWrapups: vi.fn(),
     mockGetUserRewardsHabitAchievementsByPillar: vi.fn(),
     mockGetUserPendingHabitAchievementCount: vi.fn(),
@@ -35,6 +37,10 @@ vi.mock('../services/monthlyWrappedService.js', () => ({
   getRewardsHistoryMonthlyWrapups: mockGetRewardsHistoryMonthlyWrapups,
 }));
 
+vi.mock('../services/weeklyWrappedService.js', () => ({
+  getRecentWeeklyWrapped: mockGetRecentWeeklyWrapped,
+}));
+
 vi.mock('../services/habitAchievementService.js', () => ({
   getUserRewardsHabitAchievementsByPillar: mockGetUserRewardsHabitAchievementsByPillar,
   getUserPendingHabitAchievementCount: mockGetUserPendingHabitAchievementCount,
@@ -48,6 +54,7 @@ describe('GET /api/users/:id/rewards/history', () => {
   beforeEach(() => {
     mockQuery.mockReset();
     mockVerifyToken.mockReset();
+    mockGetRecentWeeklyWrapped.mockReset();
     mockGetRewardsHistoryMonthlyWrapups.mockReset();
     mockGetUserRewardsHabitAchievementsByPillar.mockReset();
     mockGetUserPendingHabitAchievementCount.mockReset();
@@ -72,6 +79,17 @@ describe('GET /api/users/:id/rewards/history', () => {
     });
 
     mockQuery.mockResolvedValue({ rows: [{ user_id: userId }], rowCount: 1 });
+    mockGetRecentWeeklyWrapped.mockResolvedValue([
+      {
+        id: 'weekly-1',
+        userId,
+        weekStart: '2026-03-16',
+        weekEnd: '2026-03-22',
+        payload: { summary: { dominantPillar: 'Mind' } },
+        createdAt: '2026-03-23T00:00:00.000Z',
+        updatedAt: '2026-03-23T00:00:00.000Z',
+      },
+    ]);
     mockGetRewardsHistoryMonthlyWrapups.mockResolvedValue([
       {
         id: 'monthly-1',
@@ -131,12 +149,15 @@ describe('GET /api/users/:id/rewards/history', () => {
       .set('Authorization', 'Bearer token');
 
     expect(response.status).toBe(200);
+    expect(response.body.weekly_wrapups).toHaveLength(1);
+    expect(response.body.weekly_wrapups[0].id).toBe('weekly-1');
     expect(response.body.monthly_wrapups).toHaveLength(1);
     expect(response.body.monthly_wrapups[0].periodKey).toBe('2026-02');
     expect(response.body.habit_achievements).toEqual({
       pending_count: 2,
       achieved_by_pillar: expect.any(Array),
     });
+    expect(mockGetRecentWeeklyWrapped).toHaveBeenCalledWith(userId, 4);
     expect(mockGetRewardsHistoryMonthlyWrapups).toHaveBeenCalledWith(userId);
     expect(mockGetUserRewardsHabitAchievementsByPillar).toHaveBeenCalledWith(userId);
     expect(mockGetUserPendingHabitAchievementCount).toHaveBeenCalledWith(userId);
