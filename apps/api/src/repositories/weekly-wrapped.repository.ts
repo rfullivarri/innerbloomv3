@@ -32,6 +32,11 @@ async function ensureWeeklyWrappedReady(): Promise<void> {
       `);
 
       await pool.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS weekly_wrapped_user_range_uidx
+          ON weekly_wrapped (user_id, week_start, week_end);
+      `);
+
+      await pool.query(`
         CREATE INDEX IF NOT EXISTS weekly_wrapped_user_week_idx
           ON weekly_wrapped (user_id, week_end DESC);
       `);
@@ -111,7 +116,7 @@ export async function insertWeeklyWrapped(input: {
        payload,
        summary
      ) VALUES ($1, $2, $3, $4::jsonb, $5::jsonb)
-     ON CONFLICT (user_id, week_end) DO UPDATE SET
+     ON CONFLICT (user_id, week_start, week_end) DO UPDATE SET
        payload = EXCLUDED.payload,
        summary = EXCLUDED.summary,
        updated_at = now()

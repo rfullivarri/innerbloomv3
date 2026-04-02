@@ -204,10 +204,13 @@ const WEEKLY_WRAPPED_DEBUG_USERS = new Set(
 );
 
 export function resolveWeekRange(referenceDate: string): { start: string; end: string } {
-  const parsed = parseDate(referenceDate);
-  const end = startOfDay(parsed);
-  const start = daysAgoFrom(end, 6);
-  return { start: toDateKey(start), end: toDateKey(end) };
+  const parsed = startOfDay(parseDate(referenceDate));
+  const dayOfWeek = parsed.getUTCDay();
+  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const currentWeekMonday = daysAgoFrom(parsed, daysSinceMonday);
+  const previousWeekMonday = daysAgoFrom(currentWeekMonday, 7);
+  const previousWeekSunday = daysAgoFrom(currentWeekMonday, 1);
+  return { start: toDateKey(previousWeekMonday), end: toDateKey(previousWeekSunday) };
 }
 
 export async function shouldGenerateWeeklyWrappedForSubmission(
@@ -328,7 +331,7 @@ export async function runWeeklyWrappedJob(now: Date): Promise<{
         skipped += 1;
         continue;
       }
-      await maybeGenerateWeeklyWrappedForDate(userId, end);
+      await maybeGenerateWeeklyWrappedForDate(userId, todayKey);
       created += 1;
     } catch (error) {
       errors.push({
