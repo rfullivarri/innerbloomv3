@@ -142,7 +142,7 @@ describe('GET /api/users/:id/weekly-wrapped/latest', () => {
     vi.useRealTimers();
   });
 
-  it('returns the most recent entry when the current week is missing', async () => {
+  it('returns the previous weekly wrapped entry when available', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-10-20T12:00:00Z'));
     mockVerifyToken.mockResolvedValue({
@@ -251,7 +251,7 @@ describe('GET /api/users/:id/weekly-wrapped/previous', () => {
     vi.useRealTimers();
   });
 
-  it('returns the most recent entry when the current week is missing', async () => {
+  it('returns null when there is no previous closed week entry', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-10-20T12:00:00Z'));
     mockVerifyToken.mockResolvedValue({
@@ -280,7 +280,7 @@ describe('GET /api/users/:id/weekly-wrapped/previous', () => {
       .set('Authorization', 'Bearer token');
 
     expect(response.status).toBe(200);
-    expect(response.body.item?.id).toBe('wrap-previous');
+    expect(response.body.item).toBeNull();
     expect(mockGetRecentWrapped).toHaveBeenCalledWith(userId, 2);
     vi.useRealTimers();
   });

@@ -2,6 +2,12 @@ import type { Pool, PoolClient } from 'pg';
 import { pool } from '../db.js';
 
 const TABLE_NAME = 'weekly_wrapped_views';
+const VALID_CLOSED_WEEK_SQL = `
+  ww.week_start + INTERVAL '6 days' = ww.week_end
+  AND EXTRACT(ISODOW FROM ww.week_start) = 1
+  AND EXTRACT(ISODOW FROM ww.week_end) = 7
+  AND ww.week_end < date_trunc('week', timezone('UTC', now()))::date
+`;
 
 async function ensureTable(client: Pool | PoolClient = pool): Promise<void> {
   await client.query(`
@@ -83,6 +89,7 @@ export async function findPendingWeeklyWrappedId(
          ON views.user_id = ww.user_id
         AND views.weekly_wrapped_id = ww.weekly_wrapped_id
       WHERE ww.user_id = $1
+        AND ${VALID_CLOSED_WEEK_SQL}
         AND views.weekly_wrapped_id IS NULL
    ORDER BY ww.week_end DESC
       LIMIT 1`,
@@ -102,6 +109,7 @@ export async function countUnseenWeeklyWrapped(userId: string, client: Pool | Po
          ON views.user_id = ww.user_id
         AND views.weekly_wrapped_id = ww.weekly_wrapped_id
       WHERE ww.user_id = $1
+        AND ${VALID_CLOSED_WEEK_SQL}
         AND views.weekly_wrapped_id IS NULL`,
     [userId],
   );
