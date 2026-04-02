@@ -11,7 +11,6 @@ import {
   type WeeklyWrappedRecord,
 } from '../../lib/api';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
-import { resolveEmotionCopy } from '../../config/emotionMessages';
 
 const REWARDS_PILLAR_ORDER = [
   { code: 'BODY', name: 'Body' },
@@ -156,7 +155,7 @@ function MonthlyWrapupShelf({ items, language }: { items: MonthlyWrappedRecord[]
     <div className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-indigo-500/15 via-fuchsia-500/10 to-sky-500/10 p-4">
       <div className="flex items-start justify-between gap-4">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Monthly Wrap-Up' : 'Monthly Wrap-Up'}</p>
-        <CountdownBadge days={monthlyCountdownDays} label={language === 'es' ? 'Próximo month en' : 'Next month in'} />
+        <InlineCountdown days={monthlyCountdownDays} language={language} />
       </div>
       {latest ? (
         <div className="mt-3 space-y-2">
@@ -190,13 +189,13 @@ function WeeklyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRe
     <div className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-emerald-500/15 via-cyan-500/10 to-indigo-500/10 p-4">
       <div className="flex items-start justify-between gap-4">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Weekly Wrap-Up' : 'Weekly Wrap-Up'}</p>
-        <CountdownBadge days={weeklyCountdownDays} label={language === 'es' ? 'Próximo weekly en' : 'Next weekly in'} />
+        <InlineCountdown days={weeklyCountdownDays} language={language} />
       </div>
       {compactItems.length ? (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {compactItems.map((item) => {
             const weeklyEmotion = item.payload.emotions.weekly ?? item.payload.emotions.biweekly;
-            const emotionLabel = weeklyEmotion ? resolveEmotionCopy(language, weeklyEmotion.key).label : null;
+            const dominantPillar = item.payload.summary.pillarDominant;
             return (
               <button
                 key={item.id}
@@ -205,7 +204,12 @@ function WeeklyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRe
                 className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left"
               >
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{item.weekStart} → {item.weekEnd}</p>
-                <p className="mt-1 text-sm font-semibold text-[color:var(--color-text)]">{emotionLabel ?? (language === 'es' ? 'Sin emoción dominante' : 'No dominant emotion')}</p>
+                <div className="mt-2 flex min-h-6 items-center gap-2">
+                  <EmotionDot color={weeklyEmotion?.color} />
+                  <span className="text-base leading-none" aria-label={language === 'es' ? 'Pilar dominante en GP' : 'Dominant pillar by GP'}>
+                    {resolvePillarEmoji(dominantPillar)}
+                  </span>
+                </div>
                 <CompletionDots completionDays={item.completionDays ?? []} range={{ start: item.weekStart, end: item.weekEnd }} language={language} />
               </button>
             );
@@ -222,13 +226,33 @@ function WeeklyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRe
   );
 }
 
-function CountdownBadge({ days, label }: { days: number; label: string }) {
+function InlineCountdown({ days, language }: { days: number; language: 'es' | 'en' }) {
   return (
-    <div className="rounded-xl border border-sky-400/60 bg-sky-500/15 px-3 py-2 text-right">
-      <p className="text-lg font-black leading-none text-sky-400">{days}</p>
-      <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-text-muted)]">{label}</p>
-    </div>
+    <p className="whitespace-nowrap text-right text-xs font-semibold tracking-[0.03em] text-white/90 [text-shadow:0_0_10px_rgba(255,255,255,0.25)]">
+      {language === 'es' ? 'Próximo en ' : 'Next in '}
+      <span className="text-lg font-black leading-none text-white [text-shadow:0_0_18px_rgba(255,255,255,0.45)]">{days}d</span>
+    </p>
   );
+}
+
+function EmotionDot({ color }: { color?: string }) {
+  const dotColor = color && color.trim().length ? color : 'rgba(255,255,255,0.45)';
+  return (
+    <span
+      className="inline-flex h-3 w-3 shrink-0 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+      style={{ backgroundColor: dotColor }}
+      aria-label="dominant-emotion-dot"
+    />
+  );
+}
+
+function resolvePillarEmoji(pillar: string | null | undefined): string {
+  if (!pillar) return '•';
+  const normalized = pillar.toString().trim().toUpperCase();
+  if (normalized === 'BODY' || normalized === 'CUERPO') return '🫀';
+  if (normalized === 'MIND' || normalized === 'MENTE') return '🧠';
+  if (normalized === 'SOUL' || normalized === 'ALMA') return '🏵️';
+  return '•';
 }
 
 function CompletionDots({
