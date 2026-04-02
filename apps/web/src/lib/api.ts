@@ -2235,6 +2235,9 @@ export type StreakPanelTask = {
   id: string;
   name: string;
   stat: string;
+  difficultyLabel?: string | null;
+  achievementSealVisible?: boolean;
+  lifecycleStatus?: string | null;
   weekDone: number;
   streakDays: number;
   metrics: {
@@ -2250,7 +2253,16 @@ export type StreakPanelResponse = {
 };
 
 export type TaskInsightsResponse = {
-  task: { id: string; name: string; stat: string | null; description: string | null };
+  task: {
+    id: string;
+    name: string;
+    stat: string | null;
+    description: string | null;
+    difficultyLabel?: string | null;
+    achievementSealVisible?: boolean;
+    lifecycleStatus?: string | null;
+    xp?: number | null;
+  };
   month: { totalCount: number; totalXp?: number; days: Array<{ date: string; count: number }> };
   weeks: {
     weeklyGoal: number;

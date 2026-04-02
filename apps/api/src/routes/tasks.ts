@@ -61,8 +61,12 @@ type InsightsTaskRow = {
   user_id: string;
   task: string;
   xp_base: number | string | null;
+  difficulty_name: string | null;
+  difficulty_code: string | null;
   trait_name: string | null;
   trait_code: string | null;
+  lifecycle_status: string | null;
+  achievement_seal_visible: boolean | null;
   timezone: string | null;
   today: string | null;
 };
@@ -77,6 +81,10 @@ type InsightsResponse = {
     id: string;
     name: string;
     stat: string | null;
+    difficultyLabel: string | null;
+    lifecycleStatus: string | null;
+    achievementSealVisible: boolean;
+    xp: number;
     description: null;
   };
   month: {
@@ -272,12 +280,17 @@ router.get(
               t.user_id,
               t.task,
               t.xp_base,
+              cd.name AS difficulty_name,
+              cd.code AS difficulty_code,
               ct.name AS trait_name,
               ct.code AS trait_code,
+              t.lifecycle_status,
+              t.achievement_seal_visible,
               u.timezone,
               timezone(COALESCE(u.timezone, 'UTC'), now())::date::text AS today
          FROM tasks t
          JOIN users u ON u.user_id = t.user_id
+    LEFT JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
     LEFT JOIN cat_trait ct ON ct.trait_id = t.trait_id
         WHERE t.task_id = $1
           AND t.active = TRUE
@@ -369,6 +382,10 @@ router.get(
         id: taskRow.task_id,
         name: taskRow.task,
         stat: taskRow.trait_name ?? taskRow.trait_code ?? null,
+        difficultyLabel: taskRow.difficulty_name ?? taskRow.difficulty_code ?? null,
+        lifecycleStatus: taskRow.lifecycle_status,
+        achievementSealVisible: Boolean(taskRow.achievement_seal_visible),
+        xp: Number(taskRow.xp_base ?? 0) || 0,
         description: null,
       },
       month: {
