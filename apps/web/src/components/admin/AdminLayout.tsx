@@ -26,6 +26,7 @@ import {
   sendAdminTasksReadyEmail,
   updateAdminUserSubscription,
   runAdminTaskDifficultyCalibration,
+  runAdminHabitAchievementRetroactive,
   type AdminTaskDifficultyCalibrationRunResponse,
 } from '../../lib/adminApi';
 import { ApiError } from '../../lib/api';
@@ -113,6 +114,20 @@ export function AdminLayout() {
   const [calibrationResult, setCalibrationResult] = useState<AdminTaskDifficultyCalibrationRunResponse | null>(null);
   const [calibrationError, setCalibrationError] = useState<string | null>(null);
   const calibrationErrorsPreview = calibrationResult?.errors.slice(0, 5) ?? [];
+  const [habitAchievementRunAllUsers, setHabitAchievementRunAllUsers] = useState(false);
+  const [runningHabitAchievement, setRunningHabitAchievement] = useState(false);
+  const [habitAchievementResult, setHabitAchievementResult] = useState<{
+    scope: 'single_user' | 'all_users';
+    userId: string | null;
+    expiredResolved: number;
+    evaluated: number;
+    qualified: number;
+    pendingCreated: number;
+    skipped: number;
+    ignored: number;
+    errors: number;
+  } | null>(null);
+  const [habitAchievementError, setHabitAchievementError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedUser) {
@@ -264,6 +279,9 @@ export function AdminLayout() {
     setCalibrationResult(null);
     setCalibrationError(null);
     setCalibrationRunAllUsers(false);
+    setHabitAchievementRunAllUsers(false);
+    setHabitAchievementResult(null);
+    setHabitAchievementError(null);
   }, []);
 
 
@@ -631,6 +649,61 @@ export function AdminLayout() {
     }
   }, [calibrationMode, calibrationRunAllUsers, calibrationWindowDays, selectedUser]);
 
+  const handleRunHabitAchievementRetroactive = useCallback(async () => {
+    if (!selectedUser && !habitAchievementRunAllUsers) {
+      return;
+    }
+
+    setRunningHabitAchievement(true);
+    setHabitAchievementError(null);
+
+    try {
+      const response = await runAdminHabitAchievementRetroactive({
+        userId: habitAchievementRunAllUsers ? undefined : selectedUser?.id,
+      });
+      setHabitAchievementResult({
+        scope: response.scope,
+        userId: response.userId,
+        expiredResolved: response.expiredResolved,
+        evaluated: response.evaluated,
+        qualified: response.qualified,
+        pendingCreated: response.pendingCreated,
+        skipped: response.skipped,
+        ignored: response.ignored,
+        errors: response.errors,
+      });
+    } catch (error) {
+      console.error('[admin] failed to run habit achievement retroactive detection', error);
+      setHabitAchievementResult(null);
+      if (error instanceof ApiError) {
+        const detail =
+          typeof error.body?.message === 'string'
+            ? error.body.message
+            : typeof error.body?.error === 'string'
+              ? error.body.error
+              : null;
+        setHabitAchievementError(detail ? `No se pudo ejecutar Habit Achievement: ${detail}` : `No se pudo ejecutar Habit Achievement (HTTP ${error.status}).`);
+      } else {
+        setHabitAchievementError('No se pudo ejecutar Habit Achievement.');
+      }
+    } finally {
+      setRunningHabitAchievement(false);
+    }
+  }, [habitAchievementRunAllUsers, selectedUser]);
+
+  const nextMonthlyCycleHelper = useMemo(() => {
+    const now = new Date();
+    const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+    const diffMs = Math.max(0, next.getTime() - now.getTime());
+    const totalHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const days = Math.floor(totalHours / 24);
+    const hours = totalHours % 24;
+    return {
+      nextIsoDate: next.toISOString().slice(0, 10),
+      countdown: `${days}d ${hours}h`,
+    };
+  }, []);
+
   const handleExport = useCallback(async () => {
     if (!selectedUser) return;
 
@@ -840,6 +913,9 @@ export function AdminLayout() {
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">Task Difficulty Calibration</p>
                 <p className="text-sm text-emerald-100/90">Ejecuta el motor mensual de calibración en modo manual (BACKFILL / ADMIN_RUN).</p>
+                <p className="text-xs text-emerald-200/90">
+                  Próxima ventana mensual estimada: <strong>{nextMonthlyCycleHelper.nextIsoDate}</strong> (UTC) · faltan aprox. <strong>{nextMonthlyCycleHelper.countdown}</strong>.
+                </p>
               </div>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
@@ -912,6 +988,48 @@ export function AdminLayout() {
                 }`}
               >
                 {runningCalibration ? 'Running…' : 'Run Difficulty Calibration'}
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-3 rounded-xl border border-violet-700/40 bg-violet-900/10 p-4 text-sm text-violet-100">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-300">HABIT ACHIEVEMENT (RETROACTIVE)</p>
+                <p className="text-sm text-violet-100/90">Ejecuta la detección retroactiva para marcar hábitos calificados como achievement_pending.</p>
+                <p className="text-xs text-violet-200/90">
+                  Corre sobre datos mensuales persistidos y usa el mismo corte mensual (UTC: próximo ciclo {nextMonthlyCycleHelper.nextIsoDate}, faltan aprox. {nextMonthlyCycleHelper.countdown}).
+                </p>
+              </div>
+              <label className="flex items-center gap-2 text-sm text-violet-100">
+                <input
+                  type="checkbox"
+                  checked={habitAchievementRunAllUsers}
+                  onChange={(event) => setHabitAchievementRunAllUsers(event.target.checked)}
+                />
+                Correr para todos los usuarios
+              </label>
+              {!habitAchievementRunAllUsers && selectedUser ? (
+                <p className="text-xs text-violet-200">Scope actual: userId {selectedUser.id}</p>
+              ) : null}
+              {habitAchievementError ? <p className="text-xs font-semibold text-rose-300">{habitAchievementError}</p> : null}
+              {habitAchievementResult ? (
+                <div className="rounded-md border border-violet-700/50 bg-slate-900/50 p-3 text-xs text-violet-100">
+                  <p>Scope: <strong>{habitAchievementResult.scope}</strong> · User: <strong>{habitAchievementResult.userId ?? 'all_users'}</strong></p>
+                  <p>Evaluated: <strong>{habitAchievementResult.evaluated}</strong> · Qualified: <strong>{habitAchievementResult.qualified}</strong></p>
+                  <p>Pending created: <strong>{habitAchievementResult.pendingCreated}</strong> · Expired resolved: <strong>{habitAchievementResult.expiredResolved}</strong></p>
+                  <p>Skipped: <strong>{habitAchievementResult.skipped}</strong> · Ignored: <strong>{habitAchievementResult.ignored}</strong> · Errors: <strong>{habitAchievementResult.errors}</strong></p>
+                </div>
+              ) : null}
+              <button
+                type="button"
+                onClick={handleRunHabitAchievementRetroactive}
+                disabled={runningHabitAchievement || (!selectedUser && !habitAchievementRunAllUsers)}
+                className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                  runningHabitAchievement
+                    ? 'cursor-not-allowed border border-slate-700/60 bg-slate-800 text-slate-400'
+                    : 'border border-violet-700/60 bg-violet-900/30 text-violet-100 hover:border-violet-400/60 hover:text-violet-50'
+                }`}
+              >
+                {runningHabitAchievement ? 'Running…' : 'Run Habit Achievement Retroactive'}
               </button>
             </div>
 

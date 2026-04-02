@@ -236,3 +236,17 @@ export type AdminModeUpgradeAnalysis = {
   cta_enabled: boolean;
   tasks: AdminModeUpgradeTask[];
 };
+
+export type AdminHabitAchievementRetroactiveRunResponse = {
+  ok: boolean;
+  source: 'admin_retroactive_habit_achievement';
+  scope: 'single_user' | 'all_users';
+  userId: string | null;
+  expiredResolved: number;
+  evaluated: number;
+  qualified: number;
+  pendingCreated: number;
+  skipped: number;
+  ignored: number;
+  errors: number;
+};
