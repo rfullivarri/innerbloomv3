@@ -17,6 +17,11 @@ import {
   upsertAdminModeUpgradeCtaOverride,
 } from '../../lib/adminApi';
 
+const BTN_PRIMARY = 'admin2-btn admin2-btn--primary';
+const BTN_SECONDARY = 'admin2-btn admin2-btn--secondary';
+const BTN_GHOST = 'admin2-btn admin2-btn--ghost';
+const BTN_DANGER = 'admin2-btn admin2-btn--danger';
+
 export function CoreEnginePage() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [calibrationWindowDays, setCalibrationWindowDays] = useState(90);
@@ -218,8 +223,9 @@ export function CoreEnginePage() {
         <UserPicker compact selectedUserId={selectedUser?.id ?? null} onSelect={setSelectedUser} />
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-3">
-        <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
+      <section className="flex flex-col gap-4">
+        <div className="grid gap-4 xl:grid-cols-2">
+          <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
           <h3 className="font-semibold">Growth Calibration</h3>
           <p className="text-xs text-[color:var(--admin-muted)]">Recalibra dificultad usando ventana histórica y ajuste baseline.</p>
           <div className="mt-2 space-y-2 text-xs">
@@ -234,15 +240,31 @@ export function CoreEnginePage() {
             <p>errors {calibrationResult.errors.length}</p>
           </div> : null}
           {calibrationError ? <p className="mt-2 text-xs text-red-300">{calibrationError}</p> : null}
-          <button type="button" onClick={() => void runCalibration()} disabled={runningCalibration || (!selectedUser && !calibrationRunAllUsers)} className="mt-3 rounded-lg border border-[color:var(--admin-border)] px-3 py-2 text-xs font-semibold disabled:opacity-50">{runningCalibration ? 'Running…' : 'Run Calibration'}</button>
-        </article>
+          <button type="button" onClick={() => void runCalibration()} disabled={runningCalibration || (!selectedUser && !calibrationRunAllUsers)} className={`mt-3 ${BTN_PRIMARY}`}>{runningCalibration ? 'Running…' : 'Run Calibration'}</button>
+          </article>
 
-        <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm xl:col-span-2">
+          <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
+            <h3 className="font-semibold">Habit Achievement</h3>
+            <p className="text-xs text-[color:var(--admin-muted)]">Detección retroactiva para crear pendings y resolver expirados.</p>
+            <div className="mt-2 space-y-2 text-xs">
+              <p>scope: <strong>{habitRunAllUsers ? 'all_users' : selectedUser?.id ?? 'sin selección'}</strong></p>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={habitRunAllUsers} onChange={(e) => setHabitRunAllUsers(e.target.checked)} /> correr para todos</label>
+            </div>
+            {habitResult ? <div className="mt-2 rounded-lg border border-[color:var(--admin-border)] p-2 text-xs">
+              <p>pendingCreated {habitResult.pendingCreated} · qualified {habitResult.qualified} · evaluated {habitResult.evaluated}</p>
+              <p>skipped {habitResult.skipped} · ignored {habitResult.ignored} · expiredResolved {habitResult.expiredResolved} · errors {habitResult.errors}</p>
+            </div> : null}
+            {habitError ? <p className="mt-2 text-xs text-red-300">{habitError}</p> : null}
+            <button type="button" onClick={() => void runHabit()} disabled={runningHabit || (!selectedUser && !habitRunAllUsers)} className={`mt-3 ${BTN_PRIMARY}`}>{runningHabit ? 'Running…' : 'Run Habit Achievement Retroactive'}</button>
+          </article>
+        </div>
+
+        <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
           <h3 className="font-semibold">Mode Upgrade Analysis</h3>
           <p className="text-xs text-[color:var(--admin-muted)]">Distingue análisis real vs forced/admin override y permite conmutar entre ambos.</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            <button type="button" onClick={() => void runMonthly()} disabled={!selectedUser || runningMonthly} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs">{runningMonthly ? 'Running…' : 'Run Monthly Analysis'}</button>
-            <button type="button" onClick={() => void runRolling()} disabled={!selectedUser || runningRolling} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs">{runningRolling ? 'Running…' : 'Recompute Rolling Analysis'}</button>
+            <button type="button" onClick={() => void runMonthly()} disabled={!selectedUser || runningMonthly} className={BTN_SECONDARY}>{runningMonthly ? 'Running…' : 'Run Monthly Analysis'}</button>
+            <button type="button" onClick={() => void runRolling()} disabled={!selectedUser || runningRolling} className={BTN_GHOST}>{runningRolling ? 'Running…' : 'Recompute Rolling Analysis'}</button>
           </div>
           {analysisLoading ? <p className="mt-2 text-xs">Cargando análisis…</p> : null}
           {analysis ? <div className="mt-3 grid gap-2 text-xs md:grid-cols-3">
@@ -264,32 +286,17 @@ export function CoreEnginePage() {
             <select value={ctaNextMode} onChange={(e) => setCtaNextMode(e.target.value as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE')} className="rounded border border-[color:var(--admin-border)] bg-transparent px-2 py-1"><option>LOW</option><option>CHILL</option><option>FLOW</option><option>EVOLVE</option></select>
             <input type="datetime-local" value={ctaExpiresAt} onChange={(e) => setCtaExpiresAt(e.target.value)} className="rounded border border-[color:var(--admin-border)] bg-transparent px-2 py-1" />
             <div className="md:col-span-4 flex flex-wrap gap-2">
-              <button type="button" onClick={() => void applyManualMode()} disabled={!selectedUser || changingMode} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5">{changingMode ? 'Changing…' : 'Apply Manual Mode Change'}</button>
+              <button type="button" onClick={() => void applyManualMode()} disabled={!selectedUser || changingMode} className={BTN_SECONDARY}>{changingMode ? 'Changing…' : 'Apply Manual Mode Change'}</button>
               <select value={manualModeTarget} onChange={(e) => setManualModeTarget(e.target.value as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE')} className="rounded border border-[color:var(--admin-border)] bg-transparent px-2 py-1"><option>LOW</option><option>CHILL</option><option>FLOW</option><option>EVOLVE</option></select>
-              <input value={manualModeReason} onChange={(e) => setManualModeReason(e.target.value)} className="min-w-52 rounded border border-[color:var(--admin-border)] bg-transparent px-2 py-1" />
-              <button type="button" onClick={() => void applyCta()} disabled={!selectedUser || ctaSaving} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5">{ctaSaving ? 'Applying…' : 'Apply Forced CTA'}</button>
-              <button type="button" onClick={() => void clearCta()} disabled={!selectedUser || ctaClearing} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5">{ctaClearing ? 'Clearing…' : 'Clear Forced CTA'}</button>
+              <input value={manualModeReason} onChange={(e) => setManualModeReason(e.target.value)} className="min-w-52 flex-1 rounded border border-[color:var(--admin-border)] bg-transparent px-2 py-1" />
+              <button type="button" onClick={() => void applyCta()} disabled={!selectedUser || ctaSaving} className={BTN_PRIMARY}>{ctaSaving ? 'Applying…' : 'Apply Forced CTA'}</button>
+              <button type="button" onClick={() => void clearCta()} disabled={!selectedUser || ctaClearing} className={BTN_DANGER}>{ctaClearing ? 'Clearing…' : 'Clear Forced CTA'}</button>
               <span className="text-[11px]">override actual: <strong>{ctaLoading ? 'cargando…' : ctaOverride?.enabled ? 'enabled' : 'disabled'}</strong></span>
             </div>
           </div>
           {analysisError ? <p className="mt-2 text-xs text-red-300">{analysisError}</p> : null}
           {manualModeMessage ? <p className="mt-1 text-xs text-emerald-300">{manualModeMessage}</p> : null}
           {ctaMessage ? <p className="mt-1 text-xs text-[color:var(--admin-muted)]">{ctaMessage}</p> : null}
-        </article>
-
-        <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
-          <h3 className="font-semibold">Habit Achievement</h3>
-          <p className="text-xs text-[color:var(--admin-muted)]">Detección retroactiva para crear pendings y resolver expirados.</p>
-          <div className="mt-2 space-y-2 text-xs">
-            <p>scope: <strong>{habitRunAllUsers ? 'all_users' : selectedUser?.id ?? 'sin selección'}</strong></p>
-            <label className="flex items-center gap-2"><input type="checkbox" checked={habitRunAllUsers} onChange={(e) => setHabitRunAllUsers(e.target.checked)} /> correr para todos</label>
-          </div>
-          {habitResult ? <div className="mt-2 rounded-lg border border-[color:var(--admin-border)] p-2 text-xs">
-            <p>pendingCreated {habitResult.pendingCreated} · qualified {habitResult.qualified} · evaluated {habitResult.evaluated}</p>
-            <p>skipped {habitResult.skipped} · ignored {habitResult.ignored} · expiredResolved {habitResult.expiredResolved} · errors {habitResult.errors}</p>
-          </div> : null}
-          {habitError ? <p className="mt-2 text-xs text-red-300">{habitError}</p> : null}
-          <button type="button" onClick={() => void runHabit()} disabled={runningHabit || (!selectedUser && !habitRunAllUsers)} className="mt-3 rounded-lg border border-[color:var(--admin-border)] px-3 py-2 text-xs font-semibold disabled:opacity-50">{runningHabit ? 'Running…' : 'Run Habit Achievement Retroactive'}</button>
         </article>
       </section>
 

@@ -48,14 +48,14 @@ export function Admin2Shell() {
         <button
           type="button"
           onClick={toggleTheme}
-          className="mt-4 rounded-xl border border-[color:var(--admin-border)] px-3 py-2 text-sm font-medium text-[color:var(--admin-muted)] hover:border-[color:var(--admin-accent)] hover:text-[color:var(--admin-text)]"
+          className="admin2-btn admin2-btn--ghost mt-4 text-sm"
         >
           Tema: {theme === 'dark' ? 'Dark' : 'Light'}
         </button>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <nav className="flex items-center gap-2 overflow-x-auto border-b border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-4 py-3 lg:hidden">
+        <nav className="flex flex-wrap items-center gap-2 border-b border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-3 py-3 lg:hidden">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
@@ -69,6 +69,13 @@ export function Admin2Shell() {
               {item.label}
             </NavLink>
           ))}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="admin2-btn admin2-btn--ghost ml-auto"
+          >
+            {theme === 'dark' ? 'Dark' : 'Light'}
+          </button>
         </nav>
 
         <main className="min-w-0 flex-1 overflow-y-auto p-4 md:p-6">

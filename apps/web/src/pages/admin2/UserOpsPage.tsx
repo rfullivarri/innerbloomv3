@@ -16,6 +16,10 @@ import {
 } from '../../lib/adminApi';
 
 const DEFAULT_FILTERS: AdminFilters = { from: undefined, to: undefined, q: '', page: 1, pageSize: 10 };
+const BTN_PRIMARY = 'admin2-btn admin2-btn--primary';
+const BTN_SECONDARY = 'admin2-btn admin2-btn--secondary';
+const BTN_GHOST = 'admin2-btn admin2-btn--ghost';
+const BTN_SUCCESS = 'admin2-btn admin2-btn--success';
 
 export function UserOpsPage() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
@@ -139,7 +143,7 @@ export function UserOpsPage() {
       </section>
 
       {selectedUser ? (
-        <section className="grid gap-4 lg:grid-cols-2">
+        <section className="flex flex-col gap-4">
           <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
             <h3 className="font-semibold">Subscription & Admin Actions</h3>
             <p className="mt-1 text-xs text-[color:var(--admin-muted)]">Control operativo real: plan actual, cambios manuales y SUPERUSER visible.</p>
@@ -149,23 +153,23 @@ export function UserOpsPage() {
               <p>SUPERUSER: <strong>{currentSubscription?.isSuperuser ? 'sí' : 'no'}</strong></p>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" onClick={() => void updateSubscription({ planCode: 'SUPERUSER', status: 'active', successMessage: 'Usuario actualizado a SUPERUSER.' })} disabled={updatingSubscription || loading} className="rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/20 px-3 py-1.5 text-xs font-semibold">Hacer SUPERUSER</button>
+              <button type="button" onClick={() => void updateSubscription({ planCode: 'SUPERUSER', status: 'active', successMessage: 'Usuario actualizado a SUPERUSER.' })} disabled={updatingSubscription || loading} className={BTN_PRIMARY}>Hacer SUPERUSER</button>
               {subscription?.availablePlans.filter((plan) => plan.active).map((plan) => (
-                <button key={plan.planCode} type="button" onClick={() => void updateSubscription({ planCode: plan.planCode, status: 'active', successMessage: `Plan actualizado a ${plan.planCode}.` })} disabled={updatingSubscription || loading} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs">Set {plan.planCode}</button>
+                <button key={plan.planCode} type="button" onClick={() => void updateSubscription({ planCode: plan.planCode, status: 'active', successMessage: `Plan actualizado a ${plan.planCode}.` })} disabled={updatingSubscription || loading} className={BTN_SECONDARY}>Set {plan.planCode}</button>
               ))}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" onClick={() => void handleReminder()} disabled={sendingReminder} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs">{sendingReminder ? 'Enviando…' : 'Probar recordatorio'}</button>
-              <button type="button" onClick={() => void handleTasksReady()} disabled={sendingTasksReady} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs">{sendingTasksReady ? 'Enviando…' : 'Probar correo AI'}</button>
-              <button type="button" onClick={() => void handleExportCsv()} className="rounded-lg border border-[color:var(--admin-border)] px-3 py-1.5 text-xs">Export CSV</button>
+              <button type="button" onClick={() => void handleReminder()} disabled={sendingReminder} className={BTN_GHOST}>{sendingReminder ? 'Enviando…' : 'Probar recordatorio'}</button>
+              <button type="button" onClick={() => void handleTasksReady()} disabled={sendingTasksReady} className={BTN_GHOST}>{sendingTasksReady ? 'Enviando…' : 'Probar correo AI'}</button>
+              <button type="button" onClick={() => void handleExportCsv()} className={BTN_SUCCESS}>Export CSV</button>
             </div>
           </article>
 
           <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
             <div className="mb-3 flex flex-wrap gap-2 text-xs">
-              <button type="button" onClick={() => setActiveTab('logs')} className={`rounded-lg border px-3 py-1 ${activeTab === 'logs' ? 'border-[color:var(--admin-accent)]' : 'border-[color:var(--admin-border)]'}`}>Logs</button>
-              <button type="button" onClick={() => setActiveTab('taskTotals')} className={`rounded-lg border px-3 py-1 ${activeTab === 'taskTotals' ? 'border-[color:var(--admin-accent)]' : 'border-[color:var(--admin-border)]'}`}>Task totals</button>
-              <button type="button" onClick={() => setActiveTab('taskgen')} className={`rounded-lg border px-3 py-1 ${activeTab === 'taskgen' ? 'border-[color:var(--admin-accent)]' : 'border-[color:var(--admin-border)]'}`}>TaskGen traces</button>
+              <button type="button" onClick={() => setActiveTab('logs')} className={`${activeTab === 'logs' ? BTN_SECONDARY : BTN_GHOST}`}>Logs</button>
+              <button type="button" onClick={() => setActiveTab('taskTotals')} className={`${activeTab === 'taskTotals' ? BTN_SECONDARY : BTN_GHOST}`}>Task totals</button>
+              <button type="button" onClick={() => setActiveTab('taskgen')} className={`${activeTab === 'taskgen' ? BTN_SECONDARY : BTN_GHOST}`}>TaskGen traces</button>
             </div>
             {activeTab !== 'taskgen' ? <FiltersBar filters={filters} onChange={setFilters} onExport={handleExportCsv} showExport={activeTab === 'logs'} showPageSize={activeTab === 'logs'} /> : null}
             <div className="mt-3 max-h-[28rem] overflow-auto">
