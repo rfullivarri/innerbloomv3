@@ -842,7 +842,7 @@ export type HabitAchievementPillarGroup = {
 export type RewardsHistorySummary = {
   weeklyWrapups: WeeklyWrappedRecord[];
   weeklyUnseenCount: number;
-  monthlyWrapups: WeeklyWrappedRecord[];
+  monthlyWrapups: MonthlyWrappedRecord[];
   habitAchievements: {
     pendingCount: number;
     achievedByPillar: HabitAchievementPillarGroup[];
@@ -1082,7 +1082,7 @@ export async function markWeeklyWrappedSeen(userId: string, weeklyWrappedId: str
 type RawRewardsHistoryResponse = {
   weekly_wrapups?: WeeklyWrappedRecord[];
   weekly_unseen_count?: number;
-  monthly_wrapups?: WeeklyWrappedRecord[];
+  monthly_wrapups?: MonthlyWrappedRecord[];
   habit_achievements?: {
     pending_count?: number;
     achieved_by_pillar?: Array<{
@@ -1204,6 +1204,18 @@ export type WeeklyWrappedRecord = {
   createdAt: string;
   updatedAt: string;
   seen?: boolean;
+  completionDays?: string[];
+};
+
+export type MonthlyWrappedRecord = {
+  id: string;
+  userId: string;
+  periodKey: string;
+  payload: Record<string, unknown>;
+  summary: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+  completionDays?: string[];
 };
 
 export async function getStreaks(userId: string): Promise<StreakSummary> {
