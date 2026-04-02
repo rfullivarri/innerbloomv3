@@ -718,6 +718,28 @@ async function getAuthorizedJson<T>(
   return getJson<T>(path, params, authedInit);
 }
 
+async function postAuthorizedJson<T>(
+  path: string,
+  body?: unknown,
+  init: RequestInit = {},
+): Promise<T> {
+  const headers = new Headers(init.headers ?? {});
+  if (!headers.has('Accept')) {
+    headers.set('Accept', 'application/json');
+  }
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  const url = buildUrl(path);
+  return apiRequest<T>(url, {
+    ...init,
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body ?? {}),
+  });
+}
+
 export async function apiAuthorizedGet<T>(
   path: string,
   params?: Record<string, string | number | undefined>,

@@ -268,11 +268,18 @@ function CompletionDots({
   const completed = useMemo(() => new Set(completionDays), [completionDays]);
   const weekDates = useMemo(() => getWeekDatesFromRange(range), [range.end, range.start]);
   return (
-    <div className="mt-3 flex items-center gap-1.5">
+    <div className="mt-3 flex w-full items-center justify-center gap-1.5">
       {weekDates.map((dateKey, index) => {
         const isDone = completed.has(dateKey);
         return (
-          <div key={`${dateKey}-${index}`} className={`flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-semibold ${isDone ? 'border-sky-300/70 bg-sky-400/30 text-sky-50' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]'}`}>
+          <div
+            key={`${dateKey}-${index}`}
+            className={`flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-semibold ${
+              isDone
+                ? 'border-white/60 bg-white/15 text-white shadow-[0_0_12px_rgba(255,255,255,0.26)]'
+                : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]'
+            }`}
+          >
             {dayLabels[index]}
           </div>
         );

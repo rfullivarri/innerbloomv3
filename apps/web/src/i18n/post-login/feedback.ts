@@ -155,5 +155,5 @@ export const feedbackTranslations = {
     en: 'We keep building: Daily Quest returns tomorrow.',
   },
   'feedback.weeklyWrapped.closing.accent': { es: 'Mañana hay más', en: 'More tomorrow' },
-  'feedback.weeklyWrapped.closing.goToDailyQuest': { es: 'Ir al Daily Quest', en: 'Go to Daily Quest' },
+  'feedback.weeklyWrapped.closing.viewAchievements': { es: 'Ver Logros', en: 'View Achievements' },
 } satisfies PostLoginTranslations;

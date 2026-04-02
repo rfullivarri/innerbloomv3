@@ -13,6 +13,12 @@ export type WeeklyWrappedRow = {
 };
 
 let readyPromise: Promise<void> | null = null;
+const VALID_CLOSED_WEEK_SQL = `
+  week_start + INTERVAL '6 days' = week_end
+  AND EXTRACT(ISODOW FROM week_start) = 1
+  AND EXTRACT(ISODOW FROM week_end) = 7
+  AND week_end < date_trunc('week', timezone('UTC', now()))::date
+`;
 
 async function ensureWeeklyWrappedReady(): Promise<void> {
   if (!readyPromise) {
@@ -137,6 +143,7 @@ export async function listRecentWeeklyWrapped(
     `SELECT *
        FROM weekly_wrapped
       WHERE user_id = $1
+        AND ${VALID_CLOSED_WEEK_SQL}
    ORDER BY week_end DESC
       LIMIT $2`,
     [userId, limit],

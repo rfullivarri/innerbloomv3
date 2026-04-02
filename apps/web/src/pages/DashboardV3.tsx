@@ -703,6 +703,16 @@ export default function DashboardV3Page() {
     }
   }, []);
 
+  const handleWeeklyWrappedViewRewards = useCallback(async () => {
+    await weeklyWrapped.completeModal();
+    handleMainMenuNavigation({
+      destinationSection: "rewards",
+      destinationPath: rewardsSection.to,
+      menuLocation: "desktop",
+    });
+    navigate(rewardsSection.to);
+  }, [handleMainMenuNavigation, navigate, rewardsSection.to, weeklyWrapped.completeModal]);
+
   useEffect(() => {
     if (firstDailyQuestPromptedAt) {
       firstDailyQuestPromptMarkedRef.current = true;
@@ -918,6 +928,7 @@ export default function DashboardV3Page() {
             payload={weeklyWrapped.activeRecord.payload}
             onDismiss={weeklyWrapped.closeModal}
             onComplete={weeklyWrapped.completeModal}
+            onViewRewards={handleWeeklyWrappedViewRewards}
           />
         ) : null}
         <JourneyReadyModal
