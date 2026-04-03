@@ -848,7 +848,7 @@ export type HabitAchievementShelfItem = {
   pillar: string | null;
   trait: { id: string | null; code: string | null; name: string | null } | null;
   seal: { visible: boolean };
-  status: 'maintained' | 'stored' | 'pending_decision';
+  status: 'not_achieved' | 'maintained' | 'stored' | 'pending_decision';
   achievedAt: string | null;
   decisionMadeAt: string | null;
   gpBeforeAchievement: number;
@@ -1128,7 +1128,7 @@ function normalizeHabitAchievementShelfItem(raw: Record<string, unknown>): Habit
         }
       : null,
     seal: { visible: Boolean((raw.seal as Record<string, unknown> | undefined)?.visible) },
-    status: (pickString(raw.status) as HabitAchievementShelfItem['status']) ?? 'stored',
+    status: (pickString(raw.status) as HabitAchievementShelfItem['status']) ?? 'not_achieved',
     achievedAt: pickString(raw.achieved_at) ?? pickString(raw.achievedAt),
     decisionMadeAt: pickString(raw.decision_made_at) ?? pickString(raw.decisionMadeAt),
     gpBeforeAchievement: Number(raw.gp_before_achievement ?? raw.gpBeforeAchievement ?? 0) || 0,

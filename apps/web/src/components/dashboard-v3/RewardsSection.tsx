@@ -21,12 +21,6 @@ const REWARDS_PILLAR_ORDER = [
   { code: 'SOUL', name: 'Soul' },
 ] as const;
 
-const DEFAULT_PLACEHOLDER_SLOTS = 10;
-
-type AchievementShelfEntry =
-  | { kind: 'habit'; habit: HabitAchievementShelfItem }
-  | { kind: 'placeholder'; key: string; label: string };
-
 interface RewardsSectionProps {
   userId: string;
   onOpenWeeklyWrapped?: (record?: WeeklyWrappedRecord | null) => void;
@@ -380,19 +374,9 @@ function AchievedShelf({
     const byCode = new Map(groups.map((group) => [group.pillar.code.toUpperCase(), group]));
     return REWARDS_PILLAR_ORDER.map((pillar) => {
       const existing = byCode.get(pillar.code);
-      const habits = existing?.habits ?? [];
-      const entries: AchievementShelfEntry[] = habits.map((habit) => ({ kind: 'habit', habit }));
-      const placeholdersNeeded = Math.max(0, DEFAULT_PLACEHOLDER_SLOTS - habits.length);
-      for (let index = 0; index < placeholdersNeeded; index += 1) {
-        entries.push({
-          kind: 'placeholder',
-          key: `${pillar.code}-placeholder-${index + 1}`,
-          label: `${pillar.code.slice(0, 1)}-${String(index + 1).padStart(2, '0')}`,
-        });
-      }
       return {
         pillar: existing?.pillar ?? { id: null, code: pillar.code, name: pillar.name },
-        entries,
+        habits: existing?.habits ?? [],
       };
     });
   }, [groups]);
@@ -400,10 +384,8 @@ function AchievedShelf({
   const habitsById = useMemo(() => {
     const map = new Map<string, HabitAchievementShelfItem>();
     normalizedGroups.forEach((group) => {
-      group.entries.forEach((entry) => {
-        if (entry.kind === 'habit') {
-          map.set(entry.habit.id, entry.habit);
-        }
+      group.habits.forEach((habit) => {
+        map.set(habit.id, habit);
       });
     });
     return map;
@@ -428,21 +410,26 @@ function AchievedShelf({
         <section key={group.pillar.code} className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{resolvePillarHeader(group.pillar, language)}</p>
           <div className="flex gap-3 overflow-x-auto pb-1">
-            {group.entries.map((entry) => {
-              if (entry.kind === 'placeholder') {
+            {group.habits.map((habit) => {
+              const isAchieved = habit.status !== 'not_achieved';
+              const active = habit.id === activeHabitId;
+              const traitCode = habit.trait?.code?.slice(0, 3).toUpperCase() ?? '---';
+              const slotLabel = `${(habit.pillar ?? group.pillar.code ?? 'X').slice(0, 1).toUpperCase()}-${traitCode}`;
+
+              if (!isAchieved) {
                 return (
-                  <div key={entry.key} className="w-32 shrink-0 rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/60 p-3 text-left">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-dashed border-[color:var(--color-border-subtle)] text-[11px] font-semibold text-[color:var(--color-text-muted)]">
-                      {entry.label}
+                  <div
+                    key={habit.id}
+                    className="flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 py-4 text-center opacity-80"
+                  >
+                    <div className="flex h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20 items-center justify-center rounded-full border border-dashed border-[color:var(--color-border-subtle)] bg-transparent text-xs font-semibold tracking-[0.12em] text-[color:var(--color-text-dim)]">
+                      {slotLabel}
                     </div>
-                    <p className="mt-2 text-xs font-medium text-[color:var(--color-text-muted)]">{language === 'es' ? 'Sello futuro' : 'Future seal'}</p>
-                    <p className="text-[11px] text-[color:var(--color-slate-400)]">{language === 'es' ? 'Espacio reservado' : 'Reserved slot'}</p>
+                    <p className="mt-3 w-full truncate text-sm font-semibold text-[color:var(--color-text-muted)]">{habit.taskName}</p>
                   </div>
                 );
               }
 
-              const { habit } = entry;
-              const active = habit.id === activeHabitId;
               return (
                 <button
                   key={habit.id}
@@ -460,6 +447,11 @@ function AchievedShelf({
                 </button>
               );
             })}
+            {group.habits.length === 0 ? (
+              <p className="py-6 text-sm text-[color:var(--color-text-muted)]">
+                {language === 'es' ? 'Sin tareas seguidas en este pilar todavía.' : 'No tracked tasks in this pillar yet.'}
+              </p>
+            ) : null}
           </div>
         </section>
       ))}
