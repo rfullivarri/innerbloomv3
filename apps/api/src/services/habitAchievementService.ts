@@ -351,6 +351,31 @@ async function getTaskGpTotalUntilDate(params: { taskId: string; userId: string;
   return Number(result.rows[0]?.gp_total ?? 0);
 }
 
+async function backfillMissingGpSnapshotsForUser(userId: string): Promise<void> {
+  await pool.query(
+    `WITH missing AS (
+       SELECT ha.task_habit_achievement_id,
+              COALESCE(SUM(COALESCE(t.xp_base, cd.xp_base, 0) * GREATEST(dl.quantity, 1)), 0)::int AS gp_total
+         FROM task_habit_achievements ha
+         JOIN tasks t ON t.task_id = ha.task_id
+    LEFT JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
+    LEFT JOIN daily_log dl
+           ON dl.user_id = ha.user_id
+          AND dl.task_id = ha.task_id
+          AND dl.date <= ha.detected_at::date
+        WHERE ha.user_id = $1::uuid
+          AND COALESCE(ha.gp_generated_until_achievement, 0) = 0
+        GROUP BY ha.task_habit_achievement_id
+     )
+     UPDATE task_habit_achievements ha
+        SET gp_generated_until_achievement = missing.gp_total,
+            updated_at = NOW()
+       FROM missing
+      WHERE ha.task_habit_achievement_id = missing.task_habit_achievement_id`,
+    [userId],
+  );
+}
+
 export async function evaluateTaskHabitAchievement(params: {
   taskId: string;
   allowedSources?: readonly HabitAchievementSource[];
@@ -580,6 +605,7 @@ export async function toggleAchievedHabitTracking(params: {
 }
 
 export async function getUserRewardsHabitAchievementsByPillar(userId: string, now: Date = new Date()): Promise<HabitAchievementShelfGroup[]> {
+  await backfillMissingGpSnapshotsForUser(userId);
   const result = await pool.query<RewardsHabitRow>(
     `WITH latest AS (
        SELECT DISTINCT ON (ha.task_id)
@@ -678,6 +704,7 @@ export async function getUserPendingHabitAchievementCount(userId: string, now: D
 }
 
 export async function getTaskHabitAchievementState(taskId: string, userId: string): Promise<TaskHabitAchievementState | null> {
+  await backfillMissingGpSnapshotsForUser(userId);
   const result = await pool.query<TaskAchievementStateRow>(
     `SELECT t.task_id,
             t.task AS task_name,
