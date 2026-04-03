@@ -91,10 +91,10 @@ function buildDashboardSections(basePath: string, language: PostLoginLanguage = 
     },
     rewards: {
       key: 'rewards',
-      label: 'Rewards',
+      label: 'Logros',
       to: joinDashboardPath(basePath, 'rewards'),
-      pageTitle: 'Rewards',
-      eyebrow: 'Rewards',
+      pageTitle: 'Logros',
+      eyebrow: 'Logros',
       contentTitle: t('dashboard.section.rewards.subtitle'),
       description: t('dashboard.section.rewards.description'),
       icon: (props) => <Sparkles {...props} />,
