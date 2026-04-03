@@ -14,6 +14,7 @@ import {
 } from '../../lib/api';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { emitHabitAchievementUpdated } from '../../lib/habitAchievementEvents';
+import { HabitAchievementSeal } from './HabitAchievementSeal';
 
 const REWARDS_PILLAR_ORDER = [
   { code: 'BODY', name: 'Body' },
@@ -422,9 +423,20 @@ function AchievedShelf({
                     key={habit.id}
                     className="flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 py-4 text-center opacity-80"
                   >
-                    <div className="flex h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20 items-center justify-center rounded-full border border-dashed border-[color:var(--color-border-subtle)] bg-transparent text-xs font-semibold tracking-[0.12em] text-[color:var(--color-text-dim)]">
-                      {slotLabel}
-                    </div>
+                    <HabitAchievementSeal
+                      pillar={habit.pillar ?? group.pillar.code}
+                      traitCode={habit.trait?.code}
+                      traitName={habit.trait?.name}
+                      alt={`${habit.taskName} seal`}
+                      disabled
+                      className="flex h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20 items-center justify-center overflow-hidden rounded-full border border-dashed border-[color:var(--color-border-subtle)] bg-transparent"
+                      imgClassName="h-full w-full object-cover"
+                      fallback={(
+                        <div className="flex h-full w-full items-center justify-center text-xs font-semibold tracking-[0.12em] text-[color:var(--color-text-dim)]">
+                          {slotLabel}
+                        </div>
+                      )}
+                    />
                     <p className="mt-3 w-full truncate text-sm font-semibold text-[color:var(--color-text-muted)]">{habit.taskName}</p>
                   </div>
                 );
@@ -440,9 +452,19 @@ function AchievedShelf({
                   }}
                   className={`flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded-2xl border px-3 py-4 text-center transition ${active ? 'border-violet-300/60 bg-violet-500/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]'}`}
                 >
-                  <div className="flex h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-3xl shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
-                    {habit.seal.visible ? '🏅' : getSealBadge(habit)}
-                  </div>
+                  <HabitAchievementSeal
+                    pillar={habit.pillar ?? group.pillar.code}
+                    traitCode={habit.trait?.code}
+                    traitName={habit.trait?.name}
+                    alt={`${habit.taskName} seal`}
+                    className="flex h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20 items-center justify-center overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-[0_10px_30px_rgba(0,0,0,0.22)]"
+                    imgClassName="h-full w-full object-cover"
+                    fallback={(
+                      <span className="text-3xl leading-none">
+                        {habit.seal.visible ? '🏅' : getSealBadge(habit)}
+                      </span>
+                    )}
+                  />
                   <p className="mt-3 w-full truncate text-sm font-semibold text-[color:var(--color-text)]">{habit.taskName}</p>
                 </button>
               );
@@ -530,7 +552,15 @@ function AchievementFocusOverlay({
           {!showBackFace ? (
             <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
               <div className="flex h-[75%] max-h-72 min-h-56 w-[75%] max-w-72 min-w-56 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-7xl shadow-[0_20px_50px_rgba(0,0,0,0.24)] sm:text-8xl">
-                <span className="leading-none">{habit.seal.visible ? '🏅' : '✨'}</span>
+                <HabitAchievementSeal
+                  pillar={habit.pillar}
+                  traitCode={habit.trait?.code}
+                  traitName={habit.trait?.name}
+                  alt={`${habit.taskName} seal`}
+                  className="h-full w-full overflow-hidden rounded-full"
+                  imgClassName="h-full w-full object-cover"
+                  fallback={<span className="leading-none">{habit.seal.visible ? '🏅' : '✨'}</span>}
+                />
               </div>
               <p className="text-base font-semibold text-[color:var(--color-text-strong)] sm:text-lg">{habit.taskName}</p>
               <p className="text-sm text-[color:var(--color-text-muted)]">
