@@ -102,6 +102,7 @@ describe('habitAchievementService evaluation', () => {
 describe('habitAchievementService lifecycle transitions', () => {
   it('persists pending expiration when creating pending achievement', async () => {
     mockQuery
+      .mockResolvedValueOnce({ rows: [{ gp_total: 48 }] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
@@ -218,6 +219,7 @@ describe('habitAchievementService lifecycle transitions', () => {
           { period_end: '2026-01-31', expected_target: 20, completions_done: 14, completion_rate: 0.7 },
         ],
       })
+      .mockResolvedValueOnce({ rows: [{ gp_total: 48 }] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
@@ -272,6 +274,7 @@ describe('habitAchievementService lifecycle transitions', () => {
           { period_end: '2026-01-31', expected_target: 20, completions_done: 14, completion_rate: 0.7 },
         ],
       })
+      .mockResolvedValueOnce({ rows: [{ gp_total: 48 }] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
@@ -341,6 +344,7 @@ describe('habitAchievementService lifecycle transitions', () => {
           { period_end: '2026-01-31', expected_target: 20, completions_done: 14, completion_rate: 0.7 },
         ],
       })
+      .mockResolvedValueOnce({ rows: [{ gp_total: 48 }] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
