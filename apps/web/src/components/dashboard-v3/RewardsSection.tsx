@@ -134,11 +134,11 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
         <div className="rounded-2xl border border-emerald-300/40 bg-emerald-400/10 p-4 text-sm text-emerald-100">
           {language === 'es'
             ? 'Tus hábitos logrados ahora viven en Logros. Puedes mantenerlos o guardarlos desde los estantes.'
-            : 'Your achieved habits now live in Logros. You can maintain or store them from the shelves.'}
+            : 'Your achieved habits now live in Achievements. You can maintain or store them from the shelves.'}
         </div>
       ) : null}
 
-      {status === 'error' ? <p className="text-sm text-rose-200">{error?.message ?? 'Error loading Logros.'}</p> : null}
+      {status === 'error' ? <p className="text-sm text-rose-200">{error?.message ?? (language === 'es' ? 'Error al cargar Logros.' : 'Error loading Achievements.')}</p> : null}
 
       <AchievedShelf
         language={language}
@@ -524,22 +524,27 @@ function AchievementFocusOverlay({
         <button
           type="button"
           onClick={onFlip}
-          className="ib-card-contour-shadow w-full rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-5 text-left"
+          className="ib-card-contour-shadow flex h-[min(78vh,34rem)] w-full flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-5 text-left"
         >
           {!showBackFace ? (
-            <>
-              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-xl">
-                {habit.seal.visible ? '🏅' : '✨'}
+            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+              <div className="flex h-[75%] max-h-72 min-h-56 w-[75%] max-w-72 min-w-56 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-7xl shadow-[0_20px_50px_rgba(0,0,0,0.24)] sm:text-8xl">
+                <span className="leading-none">{habit.seal.visible ? '🏅' : '✨'}</span>
               </div>
-              <p className="mt-4 text-base font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
-              <p className="mt-1 text-sm text-[color:var(--color-text-muted)]">
+              <p className="text-base font-semibold text-[color:var(--color-text-strong)] sm:text-lg">{habit.taskName}</p>
+              <p className="text-sm text-[color:var(--color-text-muted)]">
                 {language === 'es' ? 'Toque nuevamente para ver el reverso' : 'Tap again to view the back side'}
               </p>
-            </>
+            </div>
           ) : (
-            <>
-              <p className="text-sm font-semibold text-[color:var(--color-text)]">{language === 'es' ? 'Logrado' : 'Achieved'}: {habit.achievedAt?.slice(0, 10) ?? '—'}</p>
-              <p className="mt-2 text-sm text-[color:var(--color-text-muted)]">GP: {habit.gpBeforeAchievement}{habit.gpSinceMaintain > 0 ? ` (+${habit.gpSinceMaintain})` : ''}</p>
+            <div className="flex h-full flex-col justify-center">
+              <p className="text-sm font-semibold text-[color:var(--color-text)]">
+                {language === 'es' ? 'Logrado el' : 'Achieved on'}: {habit.achievedAt?.slice(0, 10) ?? '—'}
+              </p>
+              <p className="mt-2 text-sm text-[color:var(--color-text-muted)]">
+                {language === 'es' ? 'GP acumulado al lograrlo' : 'GP earned before achievement'}: {habit.gpBeforeAchievement}
+                {habit.gpSinceMaintain > 0 ? ` (+${habit.gpSinceMaintain})` : ''}
+              </p>
               <label className="mt-4 flex items-center gap-2 text-sm text-[color:var(--color-text)]">
                 <input type="checkbox" checked={habit.maintainEnabled} onChange={(event) => void onToggleMaintained(habit, event.currentTarget.checked)} />
                 {language === 'es' ? 'Mantener activo' : 'Keep maintained'}
@@ -547,7 +552,7 @@ function AchievementFocusOverlay({
               <p className="mt-3 text-xs text-[color:var(--color-text-dim)]">
                 {language === 'es' ? 'Toque nuevamente para volver al frente' : 'Tap again to return to the front'}
               </p>
-            </>
+            </div>
           )}
         </button>
       </div>
@@ -607,13 +612,13 @@ function DecisionModal({
             <button type="button" onClick={onMaintain} className="mt-3 w-full rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">{language === 'es' ? 'Mantener hábito' : 'Maintain habit'}</button>
           </div>
           <div className="rounded-2xl border border-violet-300/40 bg-violet-500/10 p-4">
-            <p className="font-semibold">{language === 'es' ? 'Guardar en Logros' : 'Store in Logros'}</p>
+            <p className="font-semibold">{language === 'es' ? 'Guardar en Logros' : 'Store in Achievements'}</p>
             <ul className="mt-2 space-y-1 text-sm text-[color:var(--color-text-muted)]">
               <li>• {language === 'es' ? 'Sale de seguimiento activo' : 'Leaves active tracking'}</li>
               <li>• {language === 'es' ? 'Permanece en la estantería' : 'Stays in shelf forever'}</li>
               <li>• {language === 'es' ? 'Sin generación de GP' : 'No GP generation'}</li>
             </ul>
-            <button type="button" onClick={onStore} className="mt-3 w-full rounded-full border border-violet-300/50 bg-violet-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">{language === 'es' ? 'Guardar en Logros' : 'Store in Logros'}</button>
+            <button type="button" onClick={onStore} className="mt-3 w-full rounded-full border border-violet-300/50 bg-violet-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">{language === 'es' ? 'Guardar en Logros' : 'Store in Achievements'}</button>
           </div>
         </div>
         </motion.div>
@@ -633,7 +638,7 @@ function CelebrationOverlay({ habits, language, onSkip }: { habits: HabitAchieve
           <div key={habit.id} className="rounded-full border border-amber-300/40 bg-amber-400/10 px-4 py-2 text-white">🏅 {habit.taskName}</div>
         ))}
       </div>
-      <p className="text-xs text-[color:var(--color-slate-300)]">{language === 'es' ? 'Tus sellos ahora viven en tus estantes de Logros' : 'Your seals now live in your Logros shelves'}</p>
+      <p className="text-xs text-[color:var(--color-slate-300)]">{language === 'es' ? 'Tus sellos ahora viven en tus estantes de Logros' : 'Your seals now live in your Achievement Shelves'}</p>
     </div>
   );
 }

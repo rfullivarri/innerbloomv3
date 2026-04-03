@@ -10,6 +10,10 @@ type RecalibrationPeriodRow = {
   completion_rate: number | string;
 };
 
+type GpSnapshotRow = {
+  gp_total: number | string | null;
+};
+
 type PendingAchievementRow = {
   task_habit_achievement_id: string;
   task_id: string;
@@ -332,6 +336,21 @@ async function applyTaskLifecycle(taskId: string, status: TaskLifecycleStatus, p
   );
 }
 
+async function getTaskGpTotalUntilDate(params: { taskId: string; userId: string; until: Date }): Promise<number> {
+  const result = await pool.query<GpSnapshotRow>(
+    `SELECT COALESCE(SUM(COALESCE(t.xp_base, cd.xp_base, 0) * GREATEST(dl.quantity, 1)), 0)::int AS gp_total
+       FROM daily_log dl
+       JOIN tasks t ON t.task_id = dl.task_id
+  LEFT JOIN cat_difficulty cd ON cd.difficulty_id = t.difficulty_id
+      WHERE dl.user_id = $1::uuid
+        AND dl.task_id = $2::uuid
+        AND dl.date <= $3::date`,
+    [params.userId, params.taskId, params.until.toISOString()],
+  );
+
+  return Number(result.rows[0]?.gp_total ?? 0);
+}
+
 export async function evaluateTaskHabitAchievement(params: {
   taskId: string;
   allowedSources?: readonly HabitAchievementSource[];
@@ -372,6 +391,11 @@ export async function createPendingHabitAchievement(params: {
   const config = { ...DEFAULT_HABIT_ACHIEVEMENT_THRESHOLDS, ...params.thresholds };
   const now = params.now ?? new Date();
   const pendingExpiresAt = addDays(now, config.pendingDays);
+  const gpGeneratedUntilAchievement = await getTaskGpTotalUntilDate({
+    taskId: params.taskId,
+    userId: params.userId,
+    until: now,
+  });
 
   await pool.query('BEGIN');
   try {
@@ -389,7 +413,8 @@ export async function createPendingHabitAchievement(params: {
         aggregated_completion_rate,
         months_evaluated,
         months_meeting_goal,
-        months_below_floor
+        months_below_floor,
+        gp_generated_until_achievement
       ) VALUES (
         $1::uuid,
         $2::uuid,
@@ -403,7 +428,8 @@ export async function createPendingHabitAchievement(params: {
         $9,
         $10,
         $11,
-        $12
+        $12,
+        $13
       )`,
       [
         params.taskId,
@@ -418,6 +444,7 @@ export async function createPendingHabitAchievement(params: {
         params.evaluation.monthsEvaluated,
         params.evaluation.monthsMeetingGoal,
         params.evaluation.monthsBelowFloor,
+        gpGeneratedUntilAchievement,
       ],
     );
 
