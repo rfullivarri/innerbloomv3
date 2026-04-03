@@ -443,13 +443,13 @@ function AchievedShelf({
                     setActiveHabitId(habit.id);
                     setShowBackFace(false);
                   }}
-                  className={`w-32 shrink-0 rounded-2xl border p-3 text-left transition ${active ? 'border-violet-300/60 bg-violet-500/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]'}`}
+                  className={`flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded-2xl border px-3 py-4 text-center transition ${active ? 'border-violet-300/60 bg-violet-500/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]'}`}
                 >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[11px] font-semibold text-[color:var(--color-text-muted)]">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-3xl shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
                     {habit.seal.visible ? '🏅' : getSealBadge(habit)}
                   </div>
-                  <p className="mt-2 line-clamp-2 text-sm font-semibold text-[color:var(--color-text)]">{habit.taskName}</p>
-                  <p className="text-xs text-[color:var(--color-slate-400)]">{habit.status === 'maintained'
+                  <p className="mt-3 line-clamp-2 text-sm font-semibold text-[color:var(--color-text)]">{habit.taskName}</p>
+                  <p className="mt-1 text-[11px] text-[color:var(--color-slate-400)]">{habit.status === 'maintained'
                     ? (language === 'es' ? 'Mantenido' : 'Maintained')
                     : habit.status === 'pending_decision'
                       ? (language === 'es' ? 'Pendiente' : 'Pending')
@@ -527,7 +527,7 @@ function AchievementFocusOverlay({
           className="ib-card-contour-shadow flex h-[min(78vh,34rem)] w-full flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-5 text-left"
         >
           {!showBackFace ? (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+            <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
               <div className="flex h-[75%] max-h-72 min-h-56 w-[75%] max-w-72 min-w-56 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-7xl shadow-[0_20px_50px_rgba(0,0,0,0.24)] sm:text-8xl">
                 <span className="leading-none">{habit.seal.visible ? '🏅' : '✨'}</span>
               </div>
@@ -537,19 +537,32 @@ function AchievementFocusOverlay({
               </p>
             </div>
           ) : (
-            <div className="flex h-full flex-col justify-center">
-              <p className="text-sm font-semibold text-[color:var(--color-text)]">
-                {language === 'es' ? 'Logrado el' : 'Achieved on'}: {habit.achievedAt?.slice(0, 10) ?? '—'}
+            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+              <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
+              <p className="text-xs text-[color:var(--color-text-muted)]">
+                {language === 'es' ? 'Logrado el' : 'Achieved on'} {habit.achievedAt?.slice(0, 10) ?? '—'}
               </p>
-              <p className="mt-2 text-sm text-[color:var(--color-text-muted)]">
-                {language === 'es' ? 'GP acumulado al lograrlo' : 'GP earned before achievement'}: {habit.gpBeforeAchievement}
-                {habit.gpSinceMaintain > 0 ? ` (+${habit.gpSinceMaintain})` : ''}
+              <p className="text-base font-semibold text-[color:var(--color-text)]">
+                GP: {habit.gpBeforeAchievement}
               </p>
-              <label className="mt-4 flex items-center gap-2 text-sm text-[color:var(--color-text)]">
-                <input type="checkbox" checked={habit.maintainEnabled} onChange={(event) => void onToggleMaintained(habit, event.currentTarget.checked)} />
-                {language === 'es' ? 'Mantener activo' : 'Keep maintained'}
+              <label className="mt-1 flex items-center gap-3 text-sm text-[color:var(--color-text)]">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={habit.maintainEnabled}
+                  aria-label={language === 'es' ? 'Mantener activo' : 'Keep maintained'}
+                  onClick={() => void onToggleMaintained(habit, !habit.maintainEnabled)}
+                  className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border transition-colors duration-300 ${habit.maintainEnabled
+                    ? 'border-emerald-300/70 bg-emerald-500/80'
+                    : 'border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-3)]'}`}
+                >
+                  <span
+                    className={`block h-6 w-6 rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.35)] transition-transform duration-300 ${habit.maintainEnabled ? 'translate-x-7' : 'translate-x-1'}`}
+                  />
+                </button>
+                <span>{language === 'es' ? 'Mantener activo' : 'Keep maintained'}</span>
               </label>
-              <p className="mt-3 text-xs text-[color:var(--color-text-dim)]">
+              <p className="text-xs text-[color:var(--color-text-dim)]">
                 {language === 'es' ? 'Toque nuevamente para volver al frente' : 'Tap again to return to the front'}
               </p>
             </div>
