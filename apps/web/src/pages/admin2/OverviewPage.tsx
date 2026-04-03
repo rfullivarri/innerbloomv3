@@ -18,7 +18,7 @@ const SECTIONS = [
   },
   {
     title: 'AI TaskGen',
-    description: 'Monitor de jobs, KPIs, retry, correlation id y tracing en un único lugar.',
+    description: 'Monitorea jobs, KPIs y reintentos desde un único panel operativo.',
     to: '/admin/ai-taskgen',
   },
   {
@@ -35,7 +35,7 @@ export function OverviewPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">Overview</p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight">Panel de administración</h2>
         <p className="mt-3 max-w-3xl text-sm text-[color:var(--admin-muted)]">
-          Accede rápido a las áreas clave para control de producto, operaciones de usuarios, notificaciones y herramientas técnicas.
+          Accede rápido a las áreas clave para operar producto, usuarios, notificaciones y herramientas avanzadas.
         </p>
       </header>
 
