@@ -457,11 +457,6 @@ function AchievedShelf({
                     {habit.seal.visible ? '🏅' : getSealBadge(habit)}
                   </div>
                   <p className="mt-3 w-full truncate text-sm font-semibold text-[color:var(--color-text)]">{habit.taskName}</p>
-                  <p className="mt-1 text-[11px] text-[color:var(--color-slate-400)]">{habit.status === 'maintained'
-                    ? (language === 'es' ? 'Mantenido' : 'Maintained')
-                    : habit.status === 'pending_decision'
-                      ? (language === 'es' ? 'Pendiente' : 'Pending')
-                      : (language === 'es' ? 'Guardado' : 'Stored')}</p>
                 </button>
               );
             })}
