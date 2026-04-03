@@ -1506,12 +1506,7 @@ function RewardsView({
 }) {
   return (
     <div className="space-y-6">
-      <SectionHeader
-        eyebrow={section.eyebrow}
-        title={section.contentTitle}
-        description={section.description}
-        pageTitle={section.pageTitle}
-      />
+      <h1 className="sr-only">{section.pageTitle}</h1>
       <RewardsSection
         userId={userId}
         initialData={rewardsHistoryData}

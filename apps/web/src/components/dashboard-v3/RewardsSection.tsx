@@ -103,8 +103,6 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
 
   return (
     <Card
-      title="🎁 Rewards"
-      subtitle={language === 'es' ? 'Wrap-Up semanal + mensual + hábitos logrados' : 'Weekly + monthly wrap-ups + achieved habits'}
       rightSlot={
         <button
           type="button"
@@ -135,16 +133,12 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
       {educationBannerVisible ? (
         <div className="rounded-2xl border border-emerald-300/40 bg-emerald-400/10 p-4 text-sm text-emerald-100">
           {language === 'es'
-            ? 'Tus hábitos logrados están en Rewards. Puedes mantenerlos o guardarlos desde la estantería.'
-            : 'Your achieved habits now live in Rewards. You can maintain or store them from the shelf.'}
+            ? 'Tus hábitos logrados ahora viven en Logros. Puedes mantenerlos o guardarlos desde los estantes.'
+            : 'Your achieved habits now live in Logros. You can maintain or store them from the shelves.'}
         </div>
       ) : null}
 
-      {status === 'error' ? <p className="text-sm text-rose-200">{error?.message ?? 'Error loading rewards.'}</p> : null}
-
-      <WeeklyWrapupShelf items={weeklyItems} onOpen={onOpenWeeklyWrapped} language={language} />
-
-      <MonthlyWrapupShelf items={monthlyItems} language={language} />
+      {status === 'error' ? <p className="text-sm text-rose-200">{error?.message ?? 'Error loading Logros.'}</p> : null}
 
       <AchievedShelf
         language={language}
@@ -154,6 +148,10 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
           await reload();
         }}
       />
+
+      <WeeklyWrapupShelf items={weeklyItems} onOpen={onOpenWeeklyWrapped} language={language} />
+
+      <MonthlyWrapupShelf items={monthlyItems} language={language} />
 
       {isDecisionOpen && pendingItems[decisionIndex] ? (
         <DecisionModal
@@ -256,9 +254,9 @@ function WeeklyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRe
 
 function InlineCountdown({ days, language }: { days: number; language: 'es' | 'en' }) {
   return (
-    <p className="whitespace-nowrap text-right text-xs font-semibold tracking-[0.03em] text-white/90 [text-shadow:0_0_10px_rgba(255,255,255,0.25)]">
+    <p className="whitespace-nowrap text-right text-xs font-semibold tracking-[0.03em] text-[color:var(--color-text-dim)]">
       {language === 'es' ? 'Próximo en ' : 'Next in '}
-      <span className="text-lg font-black leading-none text-white [text-shadow:0_0_18px_rgba(255,255,255,0.45)]">{days}d</span>
+      <span className="text-lg font-black leading-none text-[color:var(--color-text-strong)]">{days}d</span>
     </p>
   );
 }
@@ -304,7 +302,7 @@ function CompletionDots({
             key={`${dateKey}-${index}`}
             className={`flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-semibold ${
               isDone
-                ? 'border-white/60 bg-white/15 text-white shadow-[0_0_12px_rgba(255,255,255,0.26)]'
+                ? 'border-[#d8b4fe] bg-[#e9d5ff] text-[#7c3aed] shadow-sm dark:border-violet-300/50 dark:bg-violet-500/45 dark:text-violet-100'
                 : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-muted)]'
             }`}
           >
@@ -391,6 +389,20 @@ function AchievedShelf({
     });
   }, [groups]);
 
+  const habitsById = useMemo(() => {
+    const map = new Map<string, HabitAchievementShelfItem>();
+    normalizedGroups.forEach((group) => {
+      group.entries.forEach((entry) => {
+        if (entry.kind === 'habit') {
+          map.set(entry.habit.id, entry.habit);
+        }
+      });
+    });
+    return map;
+  }, [normalizedGroups]);
+
+  const activeHabit = activeHabitId ? habitsById.get(activeHabitId) ?? null : null;
+
   const getSealBadge = (habit: HabitAchievementShelfItem) => {
     const pillarCode = (habit.pillar ?? 'X').slice(0, 1).toUpperCase();
     const traitCode = habit.trait?.code?.slice(0, 3).toUpperCase() ?? '---';
@@ -399,6 +411,11 @@ function AchievedShelf({
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold text-[color:var(--color-text-strong)]">
+          {language === 'es' ? 'Estantes de Logros' : 'Achievement Shelves'}
+        </h2>
+      </div>
       {normalizedGroups.map((group) => (
         <section key={group.pillar.code} className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{group.pillar.name}</p>
@@ -419,47 +436,123 @@ function AchievedShelf({
               const { habit } = entry;
               const active = habit.id === activeHabitId;
               return (
-                <div key={habit.id} className="relative">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (active) {
-                        setShowBackFace((v) => !v);
-                        return;
-                      }
-                      setActiveHabitId(habit.id);
-                      setShowBackFace(false);
-                    }}
-                    className={`w-32 shrink-0 rounded-2xl border p-3 text-left transition ${active ? 'scale-[1.02] border-amber-300/50 bg-amber-400/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]'}`}
-                  >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[11px] font-semibold text-[color:var(--color-text-muted)]">
-                      {habit.seal.visible ? '🏅' : getSealBadge(habit)}
-                    </div>
-                    <p className="mt-2 line-clamp-2 text-sm font-semibold text-[color:var(--color-text)]">{habit.taskName}</p>
-                    <p className="text-xs text-[color:var(--color-slate-400)]">{habit.status === 'maintained'
-                      ? (language === 'es' ? 'Mantenido' : 'Maintained')
-                      : habit.status === 'pending_decision'
-                        ? (language === 'es' ? 'Pendiente' : 'Pending')
-                        : (language === 'es' ? 'Guardado' : 'Stored')}</p>
-                  </button>
-                  {active && showBackFace ? (
-                    <div className="absolute inset-0 z-10 rounded-2xl border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] p-3 text-xs">
-                      <p className="font-semibold text-[color:var(--color-text)]">{language === 'es' ? 'Logrado' : 'Achieved'}: {habit.achievedAt?.slice(0, 10) ?? '—'}</p>
-                      <p className="mt-1 text-[color:var(--color-slate-400)]">GP: {habit.gpBeforeAchievement}{habit.gpSinceMaintain > 0 ? ` (+${habit.gpSinceMaintain})` : ''}</p>
-                      <label className="mt-2 flex items-center gap-2 text-[color:var(--color-text)]">
-                        <input type="checkbox" checked={habit.maintainEnabled} onChange={(event) => void onToggleMaintained(habit, event.currentTarget.checked)} />
-                        {language === 'es' ? 'Mantener activo' : 'Keep maintained'}
-                      </label>
-                    </div>
-                  ) : null}
-                </div>
+                <button
+                  key={habit.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveHabitId(habit.id);
+                    setShowBackFace(false);
+                  }}
+                  className={`w-32 shrink-0 rounded-2xl border p-3 text-left transition ${active ? 'border-violet-300/60 bg-violet-500/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]'}`}
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[11px] font-semibold text-[color:var(--color-text-muted)]">
+                    {habit.seal.visible ? '🏅' : getSealBadge(habit)}
+                  </div>
+                  <p className="mt-2 line-clamp-2 text-sm font-semibold text-[color:var(--color-text)]">{habit.taskName}</p>
+                  <p className="text-xs text-[color:var(--color-slate-400)]">{habit.status === 'maintained'
+                    ? (language === 'es' ? 'Mantenido' : 'Maintained')
+                    : habit.status === 'pending_decision'
+                      ? (language === 'es' ? 'Pendiente' : 'Pending')
+                      : (language === 'es' ? 'Guardado' : 'Stored')}</p>
+                </button>
               );
             })}
           </div>
         </section>
       ))}
-      {activeHabitId ? <button type="button" onClick={() => { setActiveHabitId(null); setShowBackFace(false); }} className="text-xs text-[color:var(--color-text-muted)]">{language === 'es' ? 'Tocar para cerrar detalle' : 'Tap to close detail'}</button> : null}
+
+      <AchievementFocusOverlay
+        habit={activeHabit}
+        language={language}
+        showBackFace={showBackFace}
+        onFlip={() => setShowBackFace((current) => !current)}
+        onClose={() => {
+          setActiveHabitId(null);
+          setShowBackFace(false);
+        }}
+        onToggleMaintained={onToggleMaintained}
+      />
     </div>
+  );
+}
+
+function AchievementFocusOverlay({
+  habit,
+  language,
+  showBackFace,
+  onFlip,
+  onClose,
+  onToggleMaintained,
+}: {
+  habit: HabitAchievementShelfItem | null;
+  language: 'es' | 'en';
+  showBackFace: boolean;
+  onFlip: () => void;
+  onClose: () => void;
+  onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
+}) {
+  useEffect(() => {
+    if (!habit) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [habit, onClose]);
+
+  if (!habit || typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
+    <div className="fixed inset-0 z-[230] flex items-center justify-center bg-slate-950/70 p-4" onClick={onClose}>
+      <div className="relative w-full max-w-sm" onClick={(event) => event.stopPropagation()}>
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute -top-3 right-0 z-10 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] px-2 py-1 text-xs text-[color:var(--color-text)]"
+          aria-label={language === 'es' ? 'Cerrar logro activo' : 'Close active achievement'}
+        >
+          ✕
+        </button>
+        <button
+          type="button"
+          onClick={onFlip}
+          className="ib-card-contour-shadow w-full rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-5 text-left"
+        >
+          {!showBackFace ? (
+            <>
+              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-xl">
+                {habit.seal.visible ? '🏅' : '✨'}
+              </div>
+              <p className="mt-4 text-base font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
+              <p className="mt-1 text-sm text-[color:var(--color-text-muted)]">
+                {language === 'es' ? 'Toque nuevamente para ver el reverso' : 'Tap again to view the back side'}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-semibold text-[color:var(--color-text)]">{language === 'es' ? 'Logrado' : 'Achieved'}: {habit.achievedAt?.slice(0, 10) ?? '—'}</p>
+              <p className="mt-2 text-sm text-[color:var(--color-text-muted)]">GP: {habit.gpBeforeAchievement}{habit.gpSinceMaintain > 0 ? ` (+${habit.gpSinceMaintain})` : ''}</p>
+              <label className="mt-4 flex items-center gap-2 text-sm text-[color:var(--color-text)]">
+                <input type="checkbox" checked={habit.maintainEnabled} onChange={(event) => void onToggleMaintained(habit, event.currentTarget.checked)} />
+                {language === 'es' ? 'Mantener activo' : 'Keep maintained'}
+              </label>
+              <p className="mt-3 text-xs text-[color:var(--color-text-dim)]">
+                {language === 'es' ? 'Toque nuevamente para volver al frente' : 'Tap again to return to the front'}
+              </p>
+            </>
+          )}
+        </button>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -514,13 +607,13 @@ function DecisionModal({
             <button type="button" onClick={onMaintain} className="mt-3 w-full rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">{language === 'es' ? 'Mantener hábito' : 'Maintain habit'}</button>
           </div>
           <div className="rounded-2xl border border-violet-300/40 bg-violet-500/10 p-4">
-            <p className="font-semibold">{language === 'es' ? 'Guardar en logros' : 'Store in achievements'}</p>
+            <p className="font-semibold">{language === 'es' ? 'Guardar en Logros' : 'Store in Logros'}</p>
             <ul className="mt-2 space-y-1 text-sm text-[color:var(--color-text-muted)]">
               <li>• {language === 'es' ? 'Sale de seguimiento activo' : 'Leaves active tracking'}</li>
               <li>• {language === 'es' ? 'Permanece en la estantería' : 'Stays in shelf forever'}</li>
               <li>• {language === 'es' ? 'Sin generación de GP' : 'No GP generation'}</li>
             </ul>
-            <button type="button" onClick={onStore} className="mt-3 w-full rounded-full border border-violet-300/50 bg-violet-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">{language === 'es' ? 'Guardar en logros' : 'Store in achievements'}</button>
+            <button type="button" onClick={onStore} className="mt-3 w-full rounded-full border border-violet-300/50 bg-violet-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">{language === 'es' ? 'Guardar en Logros' : 'Store in Logros'}</button>
           </div>
         </div>
         </motion.div>
@@ -540,7 +633,7 @@ function CelebrationOverlay({ habits, language, onSkip }: { habits: HabitAchieve
           <div key={habit.id} className="rounded-full border border-amber-300/40 bg-amber-400/10 px-4 py-2 text-white">🏅 {habit.taskName}</div>
         ))}
       </div>
-      <p className="text-xs text-[color:var(--color-slate-300)]">{language === 'es' ? 'Tus sellos ahora viven en la estantería de Rewards' : 'Your seals now live in your Rewards shelf'}</p>
+      <p className="text-xs text-[color:var(--color-slate-300)]">{language === 'es' ? 'Tus sellos ahora viven en tus estantes de Logros' : 'Your seals now live in your Logros shelves'}</p>
     </div>
   );
 }
