@@ -91,7 +91,7 @@ export function UserOpsPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `admin2-logs-${selectedUser.id}.csv`;
+      link.download = `admin-logs-${selectedUser.id}.csv`;
       link.click();
       URL.revokeObjectURL(url);
       setMessage('CSV exportado.');
@@ -134,7 +134,7 @@ export function UserOpsPage() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
       <header className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">User Ops v2</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">User Ops</p>
         <h2 className="mt-1 text-2xl font-semibold tracking-tight">Suscripción, SUPERUSER, CSV, logs y task totals</h2>
       </header>
 

@@ -12,7 +12,7 @@ export function AiTaskgenPage() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
       <header className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">AI TaskGen v2</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">AI TaskGen</p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight">Tracing + force-run como vista principal</h2>
       </header>
 
@@ -35,7 +35,7 @@ export function AiTaskgenPage() {
           <TaskgenTracePanel selectedUserId={traceUser || undefined} />
         </section>
       ) : (
-        <TaskgenPage baseUserPath="/admin2/users" />
+        <TaskgenPage baseUserPath="/admin/users" />
       )}
     </div>
   );
