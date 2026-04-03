@@ -265,6 +265,7 @@ type DisplayTask = {
   name: string;
   stat?: string;
   difficultyLabel?: string | null;
+  latestRecalibrationAction?: 'up' | 'keep' | 'down' | null;
   achievementSealVisible?: boolean;
   lifecycleStatus?: string | null;
   weeklyDone: number;
@@ -432,6 +433,14 @@ function buildHistory(task: StreakPanelTask | undefined, range: StreakPanelRange
   return { values, labels, totals };
 }
 
+function normalizeRecalibrationAction(value: string | null | undefined): DisplayTask['latestRecalibrationAction'] {
+  const normalized = (value ?? '').trim().toLowerCase();
+  if (normalized === 'up' || normalized === 'keep' || normalized === 'down') {
+    return normalized;
+  }
+  return null;
+}
+
 function buildDisplayTask(
   task: StreakPanelTask | undefined,
   fallback: { id: string; name: string; stat?: string; weekDone: number; streakDays: number },
@@ -448,6 +457,10 @@ function buildDisplayTask(
     name: fallback.name,
     stat: fallback.stat,
     difficultyLabel: task?.difficultyLabel ?? null,
+    latestRecalibrationAction: normalizeRecalibrationAction(
+      (task as { latestRecalibrationAction?: string | null })?.latestRecalibrationAction ??
+        (task as { recalibration?: { latest?: { action?: string | null } | null } | null })?.recalibration?.latest?.action,
+    ),
     achievementSealVisible: Boolean(task?.achievementSealVisible),
     lifecycleStatus: task?.lifecycleStatus ?? null,
     weeklyDone,
@@ -458,6 +471,13 @@ function buildDisplayTask(
     history,
     highlight,
   } satisfies DisplayTask;
+}
+
+function getRecalibrationArrow(action: DisplayTask['latestRecalibrationAction']): string {
+  if (action === 'up') return '↑';
+  if (action === 'down') return '↓';
+  if (action === 'keep') return '→';
+  return '';
 }
 
 function TaskItem({
@@ -522,7 +542,7 @@ function TaskItem({
             </div>
             {item.achievementSealVisible && (
               <span
-                className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-amber-300/45 bg-amber-400/20 text-[11px]"
+                className="inline-flex h-4 w-4 shrink-0 items-center justify-center text-[12px] leading-none"
                 aria-label="Achieved habit seal"
                 title="Achieved habit"
               >
@@ -530,9 +550,15 @@ function TaskItem({
               </span>
             )}
           </div>
-          {item.stat && (
-            <p className="truncate text-xs text-[color:var(--color-slate-400)]" title={item.stat}>
+          {(item.stat || item.difficultyLabel) && (
+            <p
+              className="truncate text-xs text-[color:var(--color-slate-400)]"
+              title={[item.stat, item.difficultyLabel, getRecalibrationArrow(item.latestRecalibrationAction)].filter(Boolean).join(' · ')}
+            >
               {item.stat}
+              {item.stat && item.difficultyLabel ? ' · ' : ''}
+              {item.difficultyLabel}
+              {item.difficultyLabel && getRecalibrationArrow(item.latestRecalibrationAction) ? ` ${getRecalibrationArrow(item.latestRecalibrationAction)}` : ''}
             </p>
           )}
         </div>

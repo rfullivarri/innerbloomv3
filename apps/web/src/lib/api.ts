@@ -2236,8 +2236,14 @@ export type StreakPanelTask = {
   name: string;
   stat: string;
   difficultyLabel?: string | null;
+  latestRecalibrationAction?: 'up' | 'keep' | 'down' | null;
   achievementSealVisible?: boolean;
   lifecycleStatus?: string | null;
+  recalibration?: {
+    latest?: {
+      action?: string | null;
+    } | null;
+  } | null;
   weekDone: number;
   streakDays: number;
   metrics: {
