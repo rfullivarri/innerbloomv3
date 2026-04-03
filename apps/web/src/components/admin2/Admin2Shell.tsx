@@ -9,12 +9,12 @@ import { TaskgenUserPage } from '../../pages/admin/TaskgenUserPage';
 import { useAdmin2Theme } from './Admin2ThemeProvider';
 
 const NAV_ITEMS = [
-  { to: '/admin2', label: 'Overview', end: true },
-  { to: '/admin2/core-engine', label: 'Core Engine' },
-  { to: '/admin2/user-ops', label: 'User Ops' },
-  { to: '/admin2/notifications', label: 'Notifications' },
-  { to: '/admin2/ai-taskgen', label: 'AI TaskGen' },
-  { to: '/admin2/advanced', label: 'Advanced' },
+  { to: '/admin/core-engine', label: 'Core Engine' },
+  { to: '/admin/user-ops', label: 'User Ops' },
+  { to: '/admin/notifications', label: 'Notifications' },
+  { to: '/admin/ai-taskgen', label: 'AI TaskGen' },
+  { to: '/admin/advanced', label: 'Advanced' },
+  { to: '/admin/overview', label: 'Overview' },
 ];
 
 export function Admin2Shell() {
@@ -25,15 +25,14 @@ export function Admin2Shell() {
       <aside className="hidden w-72 shrink-0 flex-col border-r border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-4 py-5 lg:flex">
         <div className="mb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--admin-muted)]">Innerbloom</p>
-          <h1 className="text-xl font-semibold tracking-tight">Admin 2.0</h1>
-          <p className="mt-1 text-sm text-[color:var(--admin-muted)]">Operación unificada y diseño experimental.</p>
+          <h1 className="text-xl font-semibold tracking-tight">Admin</h1>
+          <p className="mt-1 text-sm text-[color:var(--admin-muted)]">Panel operativo interno.</p>
         </div>
         <nav className="flex flex-1 flex-col gap-1">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.end}
               className={({ isActive }) => [
                 'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
                 isActive
@@ -60,7 +59,6 @@ export function Admin2Shell() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.end}
               className={({ isActive }) => [
                 'whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold',
                 isActive ? 'bg-[color:var(--admin-active-bg)] text-[color:var(--admin-active-text)]' : 'bg-[color:var(--admin-hover)] text-[color:var(--admin-text)]',
@@ -80,7 +78,8 @@ export function Admin2Shell() {
 
         <main className="min-w-0 flex-1 overflow-y-auto p-4 md:p-6">
           <Routes>
-            <Route index element={<OverviewPage />} />
+            <Route index element={<Navigate to="core-engine" replace />} />
+            <Route path="overview" element={<OverviewPage />} />
             <Route path="core-engine" element={<CoreEnginePage />} />
             <Route path="user-ops" element={<UserOpsPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
@@ -88,7 +87,7 @@ export function Admin2Shell() {
             <Route path="advanced" element={<AdvancedPage />} />
             <Route
               path="users/:userId/taskgen"
-              element={<TaskgenUserPage baseTaskgenPath="/admin2/ai-taskgen" baseUserPath="/admin2/users" />}
+              element={<TaskgenUserPage baseTaskgenPath="/admin/ai-taskgen" baseUserPath="/admin/users" />}
             />
             <Route path="*" element={<Navigate to="." replace />} />
           </Routes>

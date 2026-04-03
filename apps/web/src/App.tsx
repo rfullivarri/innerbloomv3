@@ -9,7 +9,6 @@ import LandingV2Page from './pages/LandingV2';
 import SignUpPage from './pages/SignUp';
 import DebugAiTaskgenPage from './pages/DebugAiTaskgen';
 import DevMissionsPage from './pages/DevMissionsPage';
-import AdminRoute from './routes/admin';
 import Admin2Route from './routes/admin2';
 import { DevBanner } from './components/layout/DevBanner';
 import { DEV_USER_SWITCH_ACTIVE, setApiAuthTokenProvider } from './lib/api';
@@ -341,7 +340,7 @@ export default function App() {
           path="/admin/*"
           element={
             <RequireUser>
-              <AdminRoute />
+              <Admin2Route />
             </RequireUser>
           }
         />
@@ -349,7 +348,7 @@ export default function App() {
           path="/admin2/*"
           element={
             <RequireUser>
-              <Admin2Route />
+              <AdminAliasRedirect from="/admin2" to="/admin" />
             </RequireUser>
           }
         />
@@ -375,4 +374,17 @@ function DashboardAliasRedirect({ from, to }: { from: string; to: string }) {
   const search = location.search || '';
   const hash = location.hash || '';
   return <Navigate to={`${target}${search}${hash}`} replace />;
+}
+
+function AdminAliasRedirect({ from, to }: { from: string; to: string }) {
+  const location = useLocation();
+  const pathname = location.pathname;
+  let suffix = pathname.startsWith(from) ? pathname.slice(from.length) : '';
+  if (suffix === '/') {
+    suffix = '';
+  }
+
+  const normalizedSuffix = suffix.startsWith('/') ? suffix : suffix ? `/${suffix}` : '';
+  const target = `${to}${normalizedSuffix}` || to;
+  return <Navigate to={`${target}${location.search}${location.hash}`} replace />;
 }
