@@ -7,7 +7,7 @@ import { computeWeeklyHabitHealth, getHabitHealth } from '../../lib/habitHealth'
 export { getHabitHealth } from '../../lib/habitHealth';
 import { useRequest } from '../../hooks/useRequest';
 import type { GameMode } from '../../lib/gameMode';
-import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+import { usePostLoginLanguage, type PostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 function cx(...values: Array<string | false | null | undefined>): string {
   return values.filter(Boolean).join(' ');
@@ -54,19 +54,22 @@ function normalizeRecalibrationAction(value: string | null | undefined): Recalib
   return 'none';
 }
 
-function formatCompactDate(value: string | null | undefined): string {
+function formatCompactDate(value: string | null | undefined, locale: PostLoginLanguage): string {
   if (!value) return '';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return '';
-  return new Intl.DateTimeFormat('es-AR', { month: 'short', day: 'numeric' }).format(parsed);
+  return new Intl.DateTimeFormat(locale === 'es' ? 'es-AR' : 'en-US', { month: 'short', day: 'numeric' }).format(parsed);
 }
 
-function formatPeriodLabel(record: RecalibrationRecord): string {
-  if (record.periodLabel?.trim()) return record.periodLabel.trim();
-  const start = formatCompactDate(record.periodStart);
-  const end = formatCompactDate(record.periodEnd);
-  if (start && end) return `${start} – ${end}`;
-  return start || end || 'Período reciente';
+function formatPeriodLabel(record: RecalibrationRecord, locale: PostLoginLanguage): string {
+  const periodValue = record.periodStart ?? record.periodEnd ?? record.recalibratedAt ?? null;
+  if (periodValue) {
+    const parsed = new Date(periodValue);
+    if (!Number.isNaN(parsed.getTime())) {
+      return new Intl.DateTimeFormat(locale === 'es' ? 'es-AR' : 'en-US', { month: 'long' }).format(parsed);
+    }
+  }
+  return locale === 'es' ? 'Mes reciente' : 'Recent month';
 }
 
 function RecalibrationTrendIndicator({
@@ -91,9 +94,9 @@ function RecalibrationTrendIndicator({
   const action = normalizeRecalibrationAction(latest?.action);
 
   const config: Record<Exclude<RecalibrationAction, 'none'>, { icon: string; tone: string }> = {
-    down: { icon: '↗', tone: 'text-emerald-900 border-emerald-400/50 bg-emerald-300/10' },
-    keep: { icon: '→', tone: 'text-amber-900 border-amber-400/50 bg-amber-300' },
-    up: { icon: '↘', tone: 'text-rose-900 border-rose-400/50 bg-rose-300/10' },
+    down: { icon: '↓', tone: 'text-emerald-950 border-emerald-600 bg-emerald-500' },
+    keep: { icon: '•', tone: 'text-amber-950 border-amber-500 bg-amber-400' },
+    up: { icon: '↑', tone: 'text-rose-950 border-rose-600 bg-rose-500' },
   };
 
   const fallback = !latest || action === 'none' || !eligible;
@@ -140,28 +143,6 @@ function RecalibrationTrendIndicator({
 }
 
 
-function DifficultyInsight({
-  difficultyLabel,
-  habitHealthLevel,
-}: {
-  difficultyLabel: string;
-  habitHealthLevel: HabitHealthLevel;
-}) {
-  const normalized = difficultyLabel.toLowerCase();
-  const isHard = normalized.includes('difícil') || normalized.includes('dificil') || normalized.includes('hard');
-  const isEasy = normalized.includes('fácil') || normalized.includes('facil') || normalized.includes('easy');
-
-  if (isHard && habitHealthLevel === 'strong') {
-    return <p className="text-xs text-[color:var(--color-slate-200)]">Se comporta como un hábito estable. Podría considerarse menos difícil.</p>;
-  }
-
-  if (isEasy && habitHealthLevel === 'weak') {
-    return <p className="text-xs text-[color:var(--color-slate-200)]">Está marcada como fácil, pero te cuesta sostenerla.</p>;
-  }
-
-  return null;
-}
-
 function useEscToClose(enabled: boolean, onClose: () => void) {
   useEffect(() => {
     if (!enabled) return;
@@ -196,7 +177,6 @@ function WeeklyCompletionDonut({
   currentStreak,
   bestStreak,
   completionRate,
-  difficultyLabel,
   weeksSample,
   referenceDate,
   progressAriaLabel,
@@ -206,7 +186,6 @@ function WeeklyCompletionDonut({
   currentStreak: number;
   bestStreak: number;
   completionRate: number;
-  difficultyLabel?: string | null;
   weeksSample?: number | null;
   referenceDate?: Date;
   progressAriaLabel: string;
@@ -290,13 +269,6 @@ function WeeklyCompletionDonut({
           )}
         </div>
 
-        {difficultyLabel && (
-          <div className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2 text-left text-[color:var(--color-slate-100)]">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">Dificultad actual</p>
-            <p className="text-sm font-semibold text-[color:var(--color-text)]">{difficultyLabel}</p>
-            <DifficultyInsight difficultyLabel={difficultyLabel} habitHealthLevel={habitHealth.level} />
-          </div>
-        )}
       </div>
     </div>
   );
@@ -472,7 +444,7 @@ export function TaskInsightsModal({
   fallbackTask,
   referenceDate,
 }: TaskInsightsModalProps) {
-  const { t } = usePostLoginLanguage();
+  const { t, language } = usePostLoginLanguage();
   const containerRef = useRef<HTMLDivElement | null>(null);
   useEscToClose(Boolean(taskId), onClose);
 
@@ -528,7 +500,6 @@ export function TaskInsightsModal({
     (activeTask as { difficulty?: string | null })?.difficulty;
   const achievementSealVisible = Boolean((activeTask as { achievementSealVisible?: boolean })?.achievementSealVisible);
   const lifecycleStatus = (activeTask as { lifecycleStatus?: string | null })?.lifecycleStatus ?? null;
-  const taskXp = (activeTask as { xp?: number | null })?.xp ?? monthXp / Math.max(monthTotal, 1);
   const isMaintainedHabit = lifecycleStatus === 'achievement_maintained';
   const recalibration = data?.recalibration ?? null;
   const recalibrationHistory = (recalibration?.history ?? []).slice(0, 3);
@@ -617,30 +588,32 @@ export function TaskInsightsModal({
             <div className="flex flex-wrap items-center gap-2">
               {activeTask?.stat && <p className="text-sm text-[color:var(--color-slate-400)]">{activeTask.stat}</p>}
               {achievementSealVisible && (
-                <span className="inline-flex items-center rounded-full border border-amber-300/45 bg-amber-400/20 px-2 py-0.5 text-[11px] font-semibold text-amber-100">
+                <span className="inline-flex items-center rounded-full border border-amber-500 bg-amber-500 px-2 py-0.5 text-[11px] font-semibold text-amber-950">
                   🏅 Achieved
                 </span>
               )}
               {difficultyLabel && (
-                <span className="inline-flex items-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-0.5 text-[11px] font-semibold text-[color:var(--color-slate-100)]">
-                  Dificultad: {difficultyLabel}
+                <span className="inline-flex items-center rounded-full border border-sky-600 bg-sky-600 px-2 py-0.5 text-[11px] font-semibold text-white">
+                  {language === 'es' ? 'Dificultad' : 'Difficulty'}: {difficultyLabel}
                 </span>
               )}
-              <span className="inline-flex items-center rounded-full border border-violet-300/35 bg-violet-500/15 px-2 py-0.5 text-[11px] font-semibold text-violet-100">
-                GP por check: +{Math.max(0, Math.round(taskXp))}
-              </span>
-              {isMaintainedHabit && (
-                <span className="inline-flex items-center rounded-full border border-emerald-300/35 bg-emerald-400/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-100">
-                  Hábito mantenido
-                </span>
-              )}
-              <RecalibrationTrendIndicator
+              <div className="ml-auto flex items-center gap-2">
+                {isMaintainedHabit && (
+                  <span className="inline-flex items-center rounded-full border border-emerald-600 bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white/95">
+                    {language === 'es' ? 'Hábito mantenido' : 'Maintained habit'}
+                  </span>
+                )}
+                <RecalibrationTrendIndicator
                 latest={recalibrationLatest}
                 eligible={isRecalibrationEligible}
                 tooltipLabel={
                   isRecalibrationEligible && recalibrationLatest
-                    ? 'La flecha muestra el ajuste del último período vs el objetivo: ↗ bajó dificultad, → se mantuvo, ↘ subió dificultad.'
-                    : 'Aún no hay recalibraciones. Se activan cuando hay historial suficiente del período anterior.'
+                    ? language === 'es'
+                      ? 'Indicador del último ajuste: ↑ subió, • se mantuvo, ↓ bajó.'
+                      : 'Latest adjustment indicator: ↑ increased, • stayed, ↓ decreased.'
+                    : language === 'es'
+                      ? 'Aún no hay recalibraciones. Se activan cuando hay historial suficiente del período anterior.'
+                      : 'No recalibrations yet. They appear once enough prior period history is available.'
                 }
                 tooltipOpen={isRecalibrationTooltipOpen}
                 onToggleTooltip={() => setIsRecalibrationTooltipOpen((prev) => !prev)}
@@ -648,6 +621,7 @@ export function TaskInsightsModal({
                 onCloseTooltip={() => setIsRecalibrationTooltipOpen(false)}
                 tooltipId={recalibrationTooltipId}
               />
+              </div>
             </div>
             {activeTask && 'description' in activeTask && activeTask.description && (
               <p className="text-sm text-[color:var(--color-slate-300)]">{activeTask.description}</p>
@@ -737,7 +711,6 @@ export function TaskInsightsModal({
                   currentStreak={stats.currentStreak}
                   bestStreak={stats.bestStreak}
                   completionRate={stats.completionRate}
-                  difficultyLabel={difficultyLabel}
                   weeksSample={weeksSample}
                   referenceDate={referenceDate}
                   progressAriaLabel={t('dashboard.streakTaskInsights.weeklyProgressAria')}
@@ -750,7 +723,7 @@ export function TaskInsightsModal({
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">Ajustes de dificultad</p>
                 {recalibrationLatest?.recalibratedAt && (
-                  <span className="text-[11px] text-[color:var(--color-slate-400)]">Último: {formatCompactDate(recalibrationLatest.recalibratedAt)}</span>
+                  <span className="text-[11px] text-[color:var(--color-slate-400)]">Último: {formatCompactDate(recalibrationLatest.recalibratedAt, language)}</span>
                 )}
               </div>
               {status === 'loading' && <div className="mt-2 h-16 animate-pulse rounded-xl bg-[color:var(--color-overlay-2)]" aria-hidden />}
@@ -760,18 +733,22 @@ export function TaskInsightsModal({
                     const action = normalizeRecalibrationAction(record.action);
                     const actionTone =
                       action === 'down'
-                        ? 'text-emerald-200 border-emerald-300/35 bg-emerald-300/10'
+                        ? 'text-emerald-950 border-emerald-600 bg-emerald-500'
                         : action === 'up'
-                          ? 'text-rose-200 border-rose-300/35 bg-rose-300/10'
-                          : 'text-amber-950 border-amber-500/70 bg-amber-400';
-                    const actionLabel = action === 'down' ? '↗ Bajó dificultad' : action === 'up' ? '↘ Subió dificultad' : '→ Se mantuvo';
+                          ? 'text-rose-950 border-rose-600 bg-rose-500'
+                          : 'text-amber-950 border-amber-500 bg-amber-400';
+                    const actionLabel = action === 'down'
+                      ? (language === 'es' ? '↓ Bajó dificultad' : '↓ Difficulty decreased')
+                      : action === 'up'
+                        ? (language === 'es' ? '↑ Subió dificultad' : '↑ Difficulty increased')
+                        : (language === 'es' ? '• Se mantuvo' : '• Stayed the same');
                     const expected = Number(record.expectedTarget ?? 0);
                     const completions = Number(record.completions ?? 0);
 
                     return (
-                      <li key={`${record.periodStart ?? 'period'}-${index}`} className="flex items-center justify-between gap-2 rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-1.5">
+                      <li key={`${record.periodStart ?? 'period'}-${index}`} className="flex items-center justify-between gap-2 rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-2">
                         <div>
-                          <p className="text-xs font-semibold text-[color:var(--color-slate-100)]">{formatPeriodLabel(record)}</p>
+                          <p className="text-xs font-semibold text-[color:var(--color-slate-100)]">{formatPeriodLabel(record, language)}</p>
                           <p className="text-[11px] text-[color:var(--color-slate-400)]">{completions}/{expected > 0 ? expected : '—'}</p>
                         </div>
                         <span className={cx('inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold', actionTone)}>{actionLabel}</span>
