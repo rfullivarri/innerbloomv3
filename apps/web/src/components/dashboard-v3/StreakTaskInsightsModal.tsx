@@ -94,9 +94,9 @@ function RecalibrationTrendIndicator({
   const action = normalizeRecalibrationAction(latest?.action);
 
   const config: Record<Exclude<RecalibrationAction, 'none'>, { icon: string; tone: string }> = {
-    down: { icon: '↓', tone: 'text-emerald-950 border-emerald-600 bg-emerald-500' },
-    keep: { icon: '•', tone: 'text-amber-950 border-amber-500 bg-amber-400' },
-    up: { icon: '↑', tone: 'text-rose-950 border-rose-600 bg-rose-500' },
+    down: { icon: '↓', tone: 'border-emerald-500/70 bg-emerald-300 text-emerald-950 dark:border-emerald-400/60 dark:bg-emerald-500 dark:text-emerald-950' },
+    keep: { icon: '•', tone: 'border-amber-500/70 bg-amber-300 text-amber-950 dark:border-amber-400/60 dark:bg-amber-400 dark:text-amber-950' },
+    up: { icon: '↑', tone: 'border-rose-500/70 bg-rose-300 text-rose-950 dark:border-rose-400/60 dark:bg-rose-500 dark:text-rose-950' },
   };
 
   const fallback = !latest || action === 'none' || !eligible;
@@ -499,8 +499,6 @@ export function TaskInsightsModal({
     (activeTask as { difficultyLabel?: string | null })?.difficultyLabel ??
     (activeTask as { difficulty?: string | null })?.difficulty;
   const achievementSealVisible = Boolean((activeTask as { achievementSealVisible?: boolean })?.achievementSealVisible);
-  const lifecycleStatus = (activeTask as { lifecycleStatus?: string | null })?.lifecycleStatus ?? null;
-  const isMaintainedHabit = lifecycleStatus === 'achievement_maintained';
   const recalibration = data?.recalibration ?? null;
   const recalibrationHistory = (recalibration?.history ?? []).slice(0, 3);
   const recalibrationLatest = recalibration?.latest ?? recalibrationHistory[0] ?? null;
@@ -593,24 +591,19 @@ export function TaskInsightsModal({
                 </span>
               )}
               {difficultyLabel && (
-                <span className="inline-flex items-center rounded-full border border-sky-600 bg-sky-600 px-2 py-0.5 text-[11px] font-semibold text-white">
+                <span className="inline-flex items-center rounded-full border border-violet-200/80 bg-violet-100/90 px-2 py-0.5 text-[11px] font-medium text-violet-700 dark:border-white/30 dark:bg-white/10 dark:text-white/85">
                   {language === 'es' ? 'Dificultad' : 'Difficulty'}: {difficultyLabel}
                 </span>
               )}
               <div className="ml-auto flex items-center gap-2">
-                {isMaintainedHabit && (
-                  <span className="inline-flex items-center rounded-full border border-emerald-600 bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white/95">
-                    {language === 'es' ? 'Hábito mantenido' : 'Maintained habit'}
-                  </span>
-                )}
                 <RecalibrationTrendIndicator
                 latest={recalibrationLatest}
                 eligible={isRecalibrationEligible}
                 tooltipLabel={
                   isRecalibrationEligible && recalibrationLatest
                     ? language === 'es'
-                      ? 'Indicador del último ajuste: ↑ subió, • se mantuvo, ↓ bajó.'
-                      : 'Latest adjustment indicator: ↑ increased, • stayed, ↓ decreased.'
+                      ? 'Última recalibración: ↑ subió dificultad, • se mantuvo, ↓ bajó dificultad.'
+                      : 'Latest recalibration: ↑ difficulty went up, • stayed the same, ↓ difficulty went down.'
                     : language === 'es'
                       ? 'Aún no hay recalibraciones. Se activan cuando hay historial suficiente del período anterior.'
                       : 'No recalibrations yet. They appear once enough prior period history is available.'

@@ -281,6 +281,14 @@ function resolvePillarEmoji(pillar: string | null | undefined): string {
   return '•';
 }
 
+function resolvePillarHeader(pillar: { code?: string | null; name?: string | null }, language: 'es' | 'en'): string {
+  const code = (pillar.code ?? '').trim().toUpperCase();
+  if (code === 'BODY') return `${language === 'es' ? 'Cuerpo' : 'Body'} 🫀`;
+  if (code === 'MIND') return `${language === 'es' ? 'Mente' : 'Mind'} 🧠`;
+  if (code === 'SOUL') return `${language === 'es' ? 'Alma' : 'Soul'} 🏵️`;
+  return `${pillar.name ?? 'Pillar'} ${resolvePillarEmoji(pillar.code)}`;
+}
+
 function CompletionDots({
   completionDays,
   range,
@@ -418,7 +426,7 @@ function AchievedShelf({
       </div>
       {normalizedGroups.map((group) => (
         <section key={group.pillar.code} className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{group.pillar.name}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{resolvePillarHeader(group.pillar, language)}</p>
           <div className="flex gap-3 overflow-x-auto pb-1">
             {group.entries.map((entry) => {
               if (entry.kind === 'placeholder') {
@@ -445,10 +453,10 @@ function AchievedShelf({
                   }}
                   className={`flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded-2xl border px-3 py-4 text-center transition ${active ? 'border-violet-300/60 bg-violet-500/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]'}`}
                 >
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-3xl shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
+                  <div className="flex h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-3xl shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
                     {habit.seal.visible ? '🏅' : getSealBadge(habit)}
                   </div>
-                  <p className="mt-3 line-clamp-2 text-sm font-semibold text-[color:var(--color-text)]">{habit.taskName}</p>
+                  <p className="mt-3 w-full truncate text-sm font-semibold text-[color:var(--color-text)]">{habit.taskName}</p>
                   <p className="mt-1 text-[11px] text-[color:var(--color-slate-400)]">{habit.status === 'maintained'
                     ? (language === 'es' ? 'Mantenido' : 'Maintained')
                     : habit.status === 'pending_decision'
@@ -510,6 +518,12 @@ function AchievementFocusOverlay({
     return null;
   }
 
+  const backFaceTrait =
+    habit.trait?.name?.trim() ||
+    habit.trait?.code?.trim() ||
+    habit.pillar?.trim() ||
+    (language === 'es' ? 'Sin rasgo' : 'No trait');
+
   return createPortal(
     <div className="fixed inset-0 z-[230] flex items-center justify-center bg-slate-950/70 p-4" onClick={onClose}>
       <div className="relative w-full max-w-sm" onClick={(event) => event.stopPropagation()}>
@@ -539,6 +553,7 @@ function AchievementFocusOverlay({
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
               <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
+              <p className="text-sm text-[color:var(--color-text-muted)]">{backFaceTrait}</p>
               <p className="text-xs text-[color:var(--color-text-muted)]">
                 {language === 'es' ? 'Logrado el' : 'Achieved on'} {habit.achievedAt?.slice(0, 10) ?? '—'}
               </p>
