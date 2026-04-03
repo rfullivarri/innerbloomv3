@@ -44,13 +44,7 @@ const MONTHLY_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = ['c
 const RETROACTIVE_HABIT_ACHIEVEMENT_SOURCES: readonly HabitAchievementSource[] = ['cron', 'admin_monthly_backfill'];
 
 type RewardsHabitRow = {
-  task_habit_achievement_id: string;
   task_id: string;
-  status: 'pending_decision' | 'maintained' | 'stored';
-  detected_at: string;
-  decision_made_at: string | null;
-  gp_generated_until_achievement: number | string | null;
-  gp_generated_since_maintain: number | string | null;
   task_name: string | null;
   pillar_id: number | string | null;
   pillar_code: string | null;
@@ -59,6 +53,12 @@ type RewardsHabitRow = {
   trait_code: string | null;
   trait_name: string | null;
   achievement_seal_visible: boolean | null;
+  task_habit_achievement_id: string | null;
+  status: 'pending_decision' | 'maintained' | 'stored' | null;
+  detected_at: string | null;
+  decision_made_at: string | null;
+  gp_generated_until_achievement: number | string | null;
+  gp_generated_since_maintain: number | string | null;
 };
 
 type PendingCountRow = {
@@ -90,8 +90,8 @@ export type HabitAchievementShelfItem = {
   id: string;
   task_id: string;
   task_name: string;
-  status: 'pending_decision' | 'maintained' | 'stored';
-  achieved_at: string;
+  status: 'not_achieved' | 'pending_decision' | 'maintained' | 'stored';
+  achieved_at: string | null;
   decision_made_at: string | null;
   gp_before_achievement: number;
   gp_since_maintain: number;
@@ -607,30 +607,7 @@ export async function toggleAchievedHabitTracking(params: {
 export async function getUserRewardsHabitAchievementsByPillar(userId: string, now: Date = new Date()): Promise<HabitAchievementShelfGroup[]> {
   await backfillMissingGpSnapshotsForUser(userId);
   const result = await pool.query<RewardsHabitRow>(
-    `WITH latest AS (
-       SELECT DISTINCT ON (ha.task_id)
-              ha.task_habit_achievement_id,
-              ha.task_id,
-              ha.status,
-              ha.detected_at::text,
-              ha.decision_made_at::text,
-              ha.gp_generated_until_achievement,
-              ha.gp_generated_since_maintain
-         FROM task_habit_achievements ha
-        WHERE ha.user_id = $1::uuid
-          AND (
-            ha.status IN ('maintained', 'stored')
-            OR (ha.status = 'pending_decision' AND ha.pending_expires_at > $2::timestamptz)
-          )
-        ORDER BY ha.task_id, ha.detected_at DESC
-     )
-     SELECT latest.task_habit_achievement_id,
-            latest.task_id,
-            latest.status,
-            latest.detected_at,
-            latest.decision_made_at,
-            latest.gp_generated_until_achievement,
-            latest.gp_generated_since_maintain,
+    `SELECT t.task_id,
             t.task AS task_name,
             cp.pillar_id,
             cp.code AS pillar_code,
@@ -638,12 +615,38 @@ export async function getUserRewardsHabitAchievementsByPillar(userId: string, no
             ct.trait_id,
             ct.code AS trait_code,
             ct.name AS trait_name,
-            t.achievement_seal_visible
-       FROM latest
-       JOIN tasks t ON t.task_id = latest.task_id
+            t.achievement_seal_visible,
+            ha.task_habit_achievement_id,
+            ha.status,
+            ha.detected_at::text,
+            ha.decision_made_at::text,
+            ha.gp_generated_until_achievement,
+            ha.gp_generated_since_maintain
+       FROM tasks t
   LEFT JOIN cat_pillar cp ON cp.pillar_id = t.pillar_id
   LEFT JOIN cat_trait ct ON ct.trait_id = t.trait_id
-      ORDER BY cp.code NULLS LAST, t.task ASC`,
+  LEFT JOIN LATERAL (
+            SELECT latest.task_habit_achievement_id,
+                   latest.status,
+                   latest.detected_at,
+                   latest.decision_made_at,
+                   latest.gp_generated_until_achievement,
+                   latest.gp_generated_since_maintain
+              FROM task_habit_achievements latest
+             WHERE latest.task_id = t.task_id
+               AND (
+                 latest.status IN ('maintained', 'stored')
+                 OR (latest.status = 'pending_decision' AND latest.pending_expires_at > $2::timestamptz)
+               )
+             ORDER BY latest.detected_at DESC
+             LIMIT 1
+            ) ha ON TRUE
+      WHERE t.user_id = $1::uuid
+        AND (
+          t.active = TRUE
+          OR t.lifecycle_status IN ('achievement_pending', 'achievement_maintained', 'achievement_stored')
+        )
+      ORDER BY cp.code NULLS LAST, t.created_at ASC, t.task ASC`,
     [userId, now.toISOString()],
   );
 
@@ -665,11 +668,11 @@ export async function getUserRewardsHabitAchievementsByPillar(userId: string, no
     }
 
     grouped.get(groupKey)?.habits.push({
-      id: row.task_habit_achievement_id,
+      id: row.task_habit_achievement_id ?? `task-${row.task_id}`,
       task_id: row.task_id,
       task_name: row.task_name ?? 'Task',
-      status: row.status,
-      achieved_at: row.detected_at,
+      status: row.status ?? 'not_achieved',
+      achieved_at: row.detected_at ?? null,
       decision_made_at: row.decision_made_at,
       gp_before_achievement: Number(row.gp_generated_until_achievement ?? 0),
       gp_since_maintain: Number(row.gp_generated_since_maintain ?? 0),
