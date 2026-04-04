@@ -29,6 +29,10 @@ vi.mock('../../../hooks/useRequest', () => ({
   useRequest: mockUseRequest,
 }));
 
+vi.mock('../../../i18n/postLoginLanguage', () => ({
+  usePostLoginLanguage: () => ({ language: 'es' as const, t: (key: string) => key }),
+}));
+
 vi.mock('../../../lib/api', async () => {
   const actual = await vi.importActual<typeof import('../../../lib/api')>('../../../lib/api');
   return {
@@ -51,6 +55,38 @@ describe('getHabitHealth', () => {
 });
 
 describe('TaskInsightsModal', () => {
+  test('renderiza el chip de dificultad sin prefijo y localizado', async () => {
+    const insightsWithDifficulty: TaskInsightsResponse = {
+      ...mockInsights,
+      task: {
+        ...mockInsights.task,
+        difficultyLabel: 'medium',
+      },
+    };
+
+    mockUseRequest.mockReturnValueOnce({
+      data: insightsWithDifficulty,
+      error: null,
+      status: 'success',
+      reload: vi.fn(),
+    });
+
+    render(
+      <TaskInsightsModal
+        taskId="task-123"
+        weeklyGoal={3}
+        mode="Flow"
+        range="week"
+        onClose={() => {}}
+        fallbackTask={{ id: 'task-123', name: 'Nueva tarea', stat: 'Metric' }}
+      />,
+    );
+
+    expect(await screen.findByText('Media')).toBeInTheDocument();
+    expect(screen.queryByText(/Dificultad:/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Difficulty:/i)).not.toBeInTheDocument();
+  });
+
   test('muestra el chip de hábito fuerte cuando el endpoint reporta 83% en 12 semanas', async () => {
     render(
       <TaskInsightsModal
