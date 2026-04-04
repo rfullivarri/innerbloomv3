@@ -75,6 +75,24 @@ function formatPeriodLabel(record: RecalibrationRecord, locale: PostLoginLanguag
   return locale === 'es' ? 'Mes reciente' : 'Recent month';
 }
 
+function localizeDifficultyChipLabel(
+  difficulty: string | null | undefined,
+  locale: PostLoginLanguage,
+): string | null {
+  const normalized = (difficulty ?? '').trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+
+  const labels = {
+    easy: locale === 'es' ? 'Fácil' : 'Easy',
+    medium: locale === 'es' ? 'Media' : 'Medium',
+    hard: locale === 'es' ? 'Difícil' : 'Hard',
+  } as const;
+
+  return labels[normalized as keyof typeof labels] ?? difficulty?.trim() ?? null;
+}
+
 function RecalibrationTrendIndicator({
   latest,
   eligible,
@@ -501,6 +519,7 @@ export function TaskInsightsModal({
   const difficultyLabel =
     (activeTask as { difficultyLabel?: string | null })?.difficultyLabel ??
     (activeTask as { difficulty?: string | null })?.difficulty;
+  const difficultyChipLabel = localizeDifficultyChipLabel(difficultyLabel, language);
   const achievementSealVisible = Boolean((activeTask as { achievementSealVisible?: boolean })?.achievementSealVisible);
   const recalibration = data?.recalibration ?? null;
   const recalibrationHistory = (recalibration?.history ?? []).slice(0, 3);
@@ -593,9 +612,9 @@ export function TaskInsightsModal({
                   🏅 Achieved
                 </span>
               )}
-              {difficultyLabel && (
+              {difficultyChipLabel && (
                 <span className="inline-flex items-center rounded-full border border-violet-200/80 bg-violet-100/90 px-2 py-0.5 text-[11px] font-medium text-violet-700 dark:border-white/30 dark:bg-white/10 dark:text-white/85">
-                  {language === 'es' ? 'Dificultad' : 'Difficulty'}: {difficultyLabel}
+                  {difficultyChipLabel}
                 </span>
               )}
               <div className="ml-auto flex items-center gap-2">
