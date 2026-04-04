@@ -11,6 +11,7 @@ describe('taskDifficultyCalibrationService', () => {
     const ordered = [1, 2, 3];
 
     expect(decideDifficultyChange(0.81, 2, ordered).newDifficultyId).toBe(1);
+    expect(decideDifficultyChange(0.8, 2, ordered).newDifficultyId).toBe(1);
     expect(decideDifficultyChange(0.6, 2, ordered).newDifficultyId).toBe(2);
     expect(decideDifficultyChange(0.49, 2, ordered).newDifficultyId).toBe(3);
 

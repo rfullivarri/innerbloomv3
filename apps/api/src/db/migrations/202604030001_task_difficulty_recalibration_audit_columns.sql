@@ -6,7 +6,7 @@ ADD COLUMN IF NOT EXISTS clamp_reason text;
 
 UPDATE task_difficulty_recalibrations
    SET rule_matched = CASE
-     WHEN completion_rate > 0.8 THEN 'rate_gt_80'
+     WHEN completion_rate >= 0.8 THEN 'rate_gt_80'
      WHEN completion_rate < 0.5 THEN 'rate_lt_50'
      ELSE 'rate_50_79'
    END
@@ -14,7 +14,7 @@ UPDATE task_difficulty_recalibrations
 
 UPDATE task_difficulty_recalibrations
    SET reason = CASE
-     WHEN completion_rate > 0.8 THEN 'Historical row migrated: completion rate above 80%, system suggested decreasing difficulty by one level.'
+     WHEN completion_rate >= 0.8 THEN 'Historical row migrated: completion rate at or above 80%, system suggested decreasing difficulty by one level.'
      WHEN completion_rate < 0.5 THEN 'Historical row migrated: completion rate below 50%, system suggested increasing difficulty by one level.'
      ELSE 'Historical row migrated: completion rate between 50% and 79%, difficulty kept.'
    END

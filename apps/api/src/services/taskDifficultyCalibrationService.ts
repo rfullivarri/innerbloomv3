@@ -19,6 +19,15 @@ type LastAdminRunRow = { task_difficulty_recalibration_id: string };
 
 type CalibrationAction = 'up' | 'keep' | 'down';
 type CalibrationRule = 'rate_gt_80' | 'rate_50_79' | 'rate_lt_50';
+type ModeResolution = {
+  status: 'resolved';
+  gameModeId: number;
+  weeklyTarget: number;
+  source: 'historical' | 'current_mode_fallback';
+} | {
+  status: 'skipped';
+  reason: 'missing_historical_game_mode_context' | 'invalid_weekly_target_for_game_mode_context';
+};
 
 export type DecisionResult = {
   suggestedAction: CalibrationAction;
@@ -39,8 +48,8 @@ export function decideDifficultyChange(
   const index = orderedDifficultyIds.indexOf(currentDifficultyId);
   const safeIndex = index >= 0 ? index : 0;
 
-  const suggestedAction: CalibrationAction = completionRate > 0.8 ? 'down' : completionRate < 0.5 ? 'up' : 'keep';
-  const ruleMatched: CalibrationRule = completionRate > 0.8 ? 'rate_gt_80' : completionRate < 0.5 ? 'rate_lt_50' : 'rate_50_79';
+  const suggestedAction: CalibrationAction = completionRate >= 0.8 ? 'down' : completionRate < 0.5 ? 'up' : 'keep';
+  const ruleMatched: CalibrationRule = completionRate >= 0.8 ? 'rate_gt_80' : completionRate < 0.5 ? 'rate_lt_50' : 'rate_50_79';
 
   let newIndex = safeIndex;
   if (suggestedAction === 'up') {
@@ -69,9 +78,9 @@ export function decideDifficultyChange(
       return `Completion rate ${completionPercent} was below 50%, difficulty increased by one level.`;
     }
     if (clampApplied) {
-      return `Completion rate ${completionPercent} was above 80%, attempted decrease but already at min difficulty, clamped.`;
+      return `Completion rate ${completionPercent} was at or above 80%, attempted decrease but already at min difficulty, clamped.`;
     }
-    return `Completion rate ${completionPercent} was above 80%, difficulty decreased by one level.`;
+    return `Completion rate ${completionPercent} was at or above 80%, difficulty decreased by one level.`;
   })();
 
   return { suggestedAction, finalAction, newDifficultyId, completionRate, ruleMatched, clampApplied, clampReason, reason };
@@ -132,6 +141,70 @@ export function resolveWeeklyTarget(events: { gameModeId: number; weeklyTarget: 
   }
   valid.sort((a, b) => new Date(b.effectiveAt).getTime() - new Date(a.effectiveAt).getTime());
   return { gameModeId: valid[0].gameModeId, weeklyTarget: valid[0].weeklyTarget };
+}
+
+function isHistoricalPeriod(periodEnd: string, now: Date): boolean {
+  return parseDateOnly(periodEnd).getTime() < parseDateOnly(formatDate(now)).getTime();
+}
+
+async function resolveModeForPeriod(params: {
+  userId: string;
+  periodEnd: string;
+  currentGameModeId: number | null;
+  allowCurrentModeFallback: boolean;
+}): Promise<ModeResolution> {
+  const gameModeResult = await pool.query<GameModeHistoryRow>(
+    `SELECT h.game_mode_id, gm.weekly_target
+       FROM user_game_mode_history h
+  LEFT JOIN cat_game_mode gm ON gm.game_mode_id = h.game_mode_id
+      WHERE h.user_id = $1
+        AND h.effective_at <= ($2::date + interval '1 day' - interval '1 second')
+      ORDER BY h.effective_at DESC
+      LIMIT 1`,
+    [params.userId, params.periodEnd],
+  );
+  const selectedMode = gameModeResult.rows[0];
+  if (selectedMode) {
+    const weeklyTarget = Number(selectedMode.weekly_target ?? 0);
+    if (Number.isFinite(weeklyTarget) && weeklyTarget > 0) {
+      return {
+        status: 'resolved',
+        gameModeId: selectedMode.game_mode_id,
+        weeklyTarget,
+        source: 'historical',
+      };
+    }
+    return {
+      status: 'skipped',
+      reason: 'invalid_weekly_target_for_game_mode_context',
+    };
+  }
+
+  if (!params.allowCurrentModeFallback || params.currentGameModeId == null) {
+    return {
+      status: 'skipped',
+      reason: 'missing_historical_game_mode_context',
+    };
+  }
+
+  const fallbackModeResult = await pool.query<{ weekly_target: number | string | null }>(
+    'SELECT weekly_target FROM cat_game_mode WHERE game_mode_id = $1',
+    [params.currentGameModeId],
+  );
+  const weeklyTarget = Number(fallbackModeResult.rows[0]?.weekly_target ?? 0);
+  if (!Number.isFinite(weeklyTarget) || weeklyTarget <= 0) {
+    return {
+      status: 'skipped',
+      reason: 'invalid_weekly_target_for_game_mode_context',
+    };
+  }
+
+  return {
+    status: 'resolved',
+    gameModeId: params.currentGameModeId,
+    weeklyTarget,
+    source: 'current_mode_fallback',
+  };
 }
 
 export type TaskDifficultyCalibrationRun = {
@@ -245,33 +318,20 @@ async function runTaskDifficultyCalibrationEngine(options: RunCalibrationOptions
 
       result.evaluated += 1;
 
-      const gameModeResult = await pool.query<GameModeHistoryRow>(
-        `SELECT h.game_mode_id, gm.weekly_target
-           FROM user_game_mode_history h
-      LEFT JOIN cat_game_mode gm ON gm.game_mode_id = h.game_mode_id
-          WHERE h.user_id = $1
-            AND h.effective_at <= ($2::date + interval '1 day' - interval '1 second')
-          ORDER BY h.effective_at DESC
-          LIMIT 1`,
-        [task.user_id, period.end],
-      );
+      const modeResolution = await resolveModeForPeriod({
+        userId: task.user_id,
+        periodEnd: period.end,
+        currentGameModeId: task.game_mode_id,
+        allowCurrentModeFallback: !isHistoricalPeriod(period.end, now),
+      });
 
-      const selectedMode = gameModeResult.rows[0];
-      const fallbackGameModeId = task.game_mode_id;
-      const fallbackModeResult =
-        selectedMode == null && fallbackGameModeId != null
-          ? await pool.query<{ weekly_target: number | string | null }>('SELECT weekly_target FROM cat_game_mode WHERE game_mode_id = $1', [
-              fallbackGameModeId,
-            ])
-          : null;
-
-      const usedGameModeId = selectedMode?.game_mode_id ?? fallbackGameModeId;
-      const weeklyTarget = Number(selectedMode?.weekly_target ?? fallbackModeResult?.rows[0]?.weekly_target ?? 0);
-
-      if (!usedGameModeId || !Number.isFinite(weeklyTarget) || weeklyTarget <= 0) {
+      if (modeResolution.status === 'skipped') {
         result.skipped += 1;
+        result.errors.push({ taskId: task.task_id, reason: modeResolution.reason });
         continue;
       }
+      const usedGameModeId = modeResolution.gameModeId;
+      const weeklyTarget = modeResolution.weeklyTarget;
 
       const completionsResult = await pool.query<CompletionRow>(
         `SELECT COALESCE(SUM(quantity), 0) AS completed
@@ -403,10 +463,6 @@ type GameModeEventRow = {
   effective_at: string;
 };
 
-type WeeklyTargetFallbackRow = {
-  weekly_target: number | string | null;
-};
-
 type MonthlyRecalibrationBackfillRun = {
   scope: 'single_user' | 'all_users';
   userId: string | null;
@@ -488,17 +544,15 @@ export async function runMonthlyTaskDifficultyCalibrationBackfill(options: {
         periodsSkippedExisting += 1;
       } else {
         const selectedMode = resolveWeeklyTarget(modeEvents, periodEndText);
-        const fallbackWeeklyTargetResult =
-          selectedMode == null && task.game_mode_id != null
-            ? await pool.query<WeeklyTargetFallbackRow>('SELECT weekly_target FROM cat_game_mode WHERE game_mode_id = $1', [
-                task.game_mode_id,
-              ])
-            : null;
+        if (!selectedMode) {
+          periodsSkippedMissingTarget += 1;
+          continue;
+        }
 
-        const usedGameModeId = selectedMode?.gameModeId ?? task.game_mode_id;
-        const weeklyTarget = Number(selectedMode?.weeklyTarget ?? fallbackWeeklyTargetResult?.rows[0]?.weekly_target ?? 0);
+        const usedGameModeId = selectedMode.gameModeId;
+        const weeklyTarget = Number(selectedMode.weeklyTarget ?? 0);
 
-        if (!usedGameModeId || !Number.isFinite(weeklyTarget) || weeklyTarget <= 0) {
+        if (!Number.isFinite(weeklyTarget) || weeklyTarget <= 0) {
           periodsSkippedMissingTarget += 1;
         } else {
           const completionsResult = await pool.query<CompletionRow>(

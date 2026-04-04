@@ -45,4 +45,46 @@ describe('runMonthlyTaskDifficultyCalibrationBackfill', () => {
     expect(firstSql).toContain('AND t.user_id = $1::uuid');
     expect(firstParams).toEqual(['00000000-0000-4000-8000-000000000001']);
   });
+
+  it('skips historical periods when historical game mode context is missing', async () => {
+    mockQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes('FROM tasks t') && sql.includes('WHERE u.deleted_at IS NULL')) {
+        return {
+          rows: [
+            {
+              task_id: 'task-1',
+              user_id: 'user-1',
+              created_at: '2025-01-01T00:00:00.000Z',
+              difficulty_id: 2,
+              game_mode_id: 3,
+            },
+          ],
+        };
+      }
+
+      if (sql.includes('FROM task_difficulty_recalibrations')) {
+        return { rows: [] };
+      }
+
+      if (sql.includes('FROM user_game_mode_history h')) {
+        return { rows: [] };
+      }
+
+      if (sql.includes('INSERT INTO task_difficulty_recalibrations')) {
+        return { rows: [] };
+      }
+
+      throw new Error(`Unexpected SQL: ${sql}`);
+    });
+
+    const result = await runMonthlyTaskDifficultyCalibrationBackfill({
+      now: new Date('2026-04-02T00:00:00.000Z'),
+    });
+
+    expect(result.periodsInserted).toBe(0);
+    expect(result.periodsSkippedMissingTarget).toBeGreaterThan(0);
+    expect(
+      mockQuery.mock.calls.some(([sql]) => String(sql).includes('SELECT weekly_target FROM cat_game_mode WHERE game_mode_id = $1')),
+    ).toBe(false);
+  });
 });
