@@ -31,10 +31,11 @@ describe('taskDifficultyCalibrationService', () => {
     expect(selected).toEqual({ gameModeId: 2, weeklyTarget: 5 });
   });
 
-  it('excludes tasks younger than 30 days and paused tasks; supports late first window', () => {
+  it('supports first-month eligibility and preserves monthly cadence afterwards', () => {
     const now = new Date('2026-03-15T00:00:00Z');
 
-    expect(isTaskEligibleForCalibration({ now, createdAt: '2026-02-20T00:00:00Z', active: true })).toBe(false);
+    expect(isTaskEligibleForCalibration({ now, createdAt: '2026-03-03T00:00:00Z', active: true })).toBe(false);
+    expect(isTaskEligibleForCalibration({ now, createdAt: '2026-02-20T00:00:00Z', active: true })).toBe(true);
     expect(isTaskEligibleForCalibration({ now, createdAt: '2026-01-01T00:00:00Z', active: false })).toBe(false);
 
     expect(
@@ -43,7 +44,7 @@ describe('taskDifficultyCalibrationService', () => {
         createdAt: '2026-02-20T00:00:00Z',
         lastPeriodEnd: null,
       }),
-    ).toBeNull();
+    ).toEqual({ start: '2026-02-20', end: '2026-02-28', kind: 'early_first_month' });
 
     expect(
       buildAnalysisPeriod({
@@ -51,6 +52,14 @@ describe('taskDifficultyCalibrationService', () => {
         createdAt: '2026-01-01T00:00:00Z',
         lastPeriodEnd: null,
       }),
-    ).toEqual({ start: '2026-01-31', end: '2026-02-28' });
+    ).toEqual({ start: '2026-01-01', end: '2026-01-31', kind: 'early_first_month' });
+
+    expect(
+      buildAnalysisPeriod({
+        now,
+        createdAt: '2026-01-01T00:00:00Z',
+        lastPeriodEnd: '2026-01-31',
+      }),
+    ).toEqual({ start: '2026-02-01', end: '2026-02-28', kind: 'monthly_standard' });
   });
 });

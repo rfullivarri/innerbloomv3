@@ -105,32 +105,40 @@ function endOfPreviousMonth(now: Date): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0));
 }
 
+function endOfMonth(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
+}
 
+type AnalysisPeriodKind = 'early_first_month' | 'monthly_standard';
+type AnalysisPeriod = { start: string; end: string; kind: AnalysisPeriodKind };
 
 export function isTaskEligibleForCalibration(params: { now: Date; createdAt: string; active: boolean }): boolean {
   if (!params.active) {
     return false;
   }
 
-  const eligibilityDate = addDays(parseDateOnly(params.createdAt), 30);
+  const firstCalibrationBoundary = endOfMonth(parseDateOnly(params.createdAt));
   const previousMonthEnd = endOfPreviousMonth(params.now);
-  return eligibilityDate <= previousMonthEnd;
+  return firstCalibrationBoundary <= previousMonthEnd;
 }
-export function buildAnalysisPeriod(params: { now: Date; createdAt: string; lastPeriodEnd: string | null }): { start: string; end: string } | null {
-  const eligibilityDate = addDays(parseDateOnly(params.createdAt), 30);
+export function buildAnalysisPeriod(params: { now: Date; createdAt: string; lastPeriodEnd: string | null }): AnalysisPeriod | null {
+  const createdDate = parseDateOnly(params.createdAt);
+  const firstCalibrationEnd = endOfMonth(createdDate);
   const previousMonthEnd = endOfPreviousMonth(params.now);
-  if (eligibilityDate > previousMonthEnd) {
+  if (firstCalibrationEnd > previousMonthEnd) {
     return null;
   }
 
-  const fromLast = params.lastPeriodEnd ? addDays(parseDateOnly(params.lastPeriodEnd), 1) : null;
-  const startDate = fromLast && fromLast > eligibilityDate ? fromLast : eligibilityDate;
+  if (!params.lastPeriodEnd) {
+    return { start: formatDate(createdDate), end: formatDate(firstCalibrationEnd), kind: 'early_first_month' };
+  }
 
+  const startDate = addDays(parseDateOnly(params.lastPeriodEnd), 1);
   if (startDate > previousMonthEnd) {
     return null;
   }
 
-  return { start: formatDate(startDate), end: formatDate(previousMonthEnd) };
+  return { start: formatDate(startDate), end: formatDate(previousMonthEnd), kind: 'monthly_standard' };
 }
 
 export function resolveWeeklyTarget(events: { gameModeId: number; weeklyTarget: number; effectiveAt: string }[], periodEnd: string): { gameModeId: number; weeklyTarget: number } | null {
@@ -287,6 +295,7 @@ async function runTaskDifficultyCalibrationEngine(options: RunCalibrationOptions
         ? {
             start: formatDate(addDays(new Date(now.toISOString().slice(0, 10)), -Math.max(1, windowDays) + 1)),
             end: formatDate(new Date(now.toISOString().slice(0, 10))),
+            kind: 'monthly_standard' as const,
           }
         : buildAnalysisPeriod({
             now,
@@ -349,6 +358,9 @@ async function runTaskDifficultyCalibrationEngine(options: RunCalibrationOptions
 
       const decision = decideDifficultyChange(completionRate, task.difficulty_id, orderedDifficultyIds);
       result.actionBreakdown[decision.finalAction] += 1;
+      const periodTaggedReason = source === 'admin_run'
+        ? decision.reason
+        : `[period_kind=${period.kind}] ${decision.reason}`;
 
       if (decision.newDifficultyId !== task.difficulty_id) {
         await pool.query(
@@ -395,7 +407,7 @@ async function runTaskDifficultyCalibrationEngine(options: RunCalibrationOptions
           decision.newDifficultyId,
           decision.finalAction,
           decision.ruleMatched,
-          decision.reason,
+          periodTaggedReason,
           decision.clampApplied,
           decision.clampReason,
           source,
@@ -439,10 +451,6 @@ export async function runTaskDifficultyCalibrationBackfill(now: Date = new Date(
 
 function startOfMonth(date: Date): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
-}
-
-function endOfMonth(date: Date): Date {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
 }
 
 type BackfillTaskRow = {
