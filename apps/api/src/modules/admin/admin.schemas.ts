@@ -41,6 +41,11 @@ export const tasksQuerySchema = z.object({
 });
 
 export const taskStatsQuerySchema = logFiltersSchema.omit({ sort: true }).extend({});
+export const taskDifficultyCalibrationAuditQuerySchema = z.object({
+  userId: z.string().uuid({ message: 'Invalid user id' }).optional(),
+  taskId: z.string().uuid({ message: 'Invalid task id' }).optional(),
+  limit: z.coerce.number().int().min(1).max(500).default(100),
+});
 
 const optionalNumericId = z.union([z.coerce.number().int().positive(), z.null()]).optional();
 
@@ -251,6 +256,7 @@ export type LogsQuery = z.infer<typeof logsQuerySchema>;
 export type InsightQuery = z.infer<typeof insightQuerySchema>;
 export type TasksQuery = z.infer<typeof tasksQuerySchema>;
 export type TaskStatsQuery = z.infer<typeof taskStatsQuerySchema>;
+export type TaskDifficultyCalibrationAuditQuery = z.infer<typeof taskDifficultyCalibrationAuditQuerySchema>;
 export type UpdateTaskBody = z.infer<typeof updateTaskBodySchema>;
 export type TaskgenJobsQuery = z.infer<typeof taskgenJobsQuerySchema>;
 export type TaskgenForceRunBody = z.infer<typeof taskgenForceRunBodySchema>;

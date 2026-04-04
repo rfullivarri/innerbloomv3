@@ -18,12 +18,17 @@ type LastCalibrationRow = { period_end: string };
 type LastAdminRunRow = { task_difficulty_recalibration_id: string };
 
 type CalibrationAction = 'up' | 'keep' | 'down';
+type CalibrationRule = 'rate_gt_80' | 'rate_50_79' | 'rate_lt_50';
 
 export type DecisionResult = {
   suggestedAction: CalibrationAction;
   finalAction: CalibrationAction;
   newDifficultyId: number;
   completionRate: number;
+  ruleMatched: CalibrationRule;
+  clampApplied: boolean;
+  clampReason: string | null;
+  reason: string;
 };
 
 export function decideDifficultyChange(
@@ -35,6 +40,7 @@ export function decideDifficultyChange(
   const safeIndex = index >= 0 ? index : 0;
 
   const suggestedAction: CalibrationAction = completionRate > 0.8 ? 'down' : completionRate < 0.5 ? 'up' : 'keep';
+  const ruleMatched: CalibrationRule = completionRate > 0.8 ? 'rate_gt_80' : completionRate < 0.5 ? 'rate_lt_50' : 'rate_50_79';
 
   let newIndex = safeIndex;
   if (suggestedAction === 'up') {
@@ -45,8 +51,30 @@ export function decideDifficultyChange(
 
   const newDifficultyId = orderedDifficultyIds[newIndex] ?? currentDifficultyId;
   const finalAction: CalibrationAction = newDifficultyId > currentDifficultyId ? 'up' : newDifficultyId < currentDifficultyId ? 'down' : 'keep';
+  const clampApplied = suggestedAction !== 'keep' && finalAction === 'keep';
+  const clampReason = clampApplied
+    ? suggestedAction === 'down'
+      ? 'attempted_decrease_at_min_difficulty'
+      : 'attempted_increase_at_max_difficulty'
+    : null;
+  const completionPercent = `${(completionRate * 100).toFixed(1)}%`;
+  const reason = (() => {
+    if (ruleMatched === 'rate_50_79') {
+      return `Completion rate ${completionPercent} stayed between 50% and 79%, difficulty kept.`;
+    }
+    if (ruleMatched === 'rate_lt_50') {
+      if (clampApplied) {
+        return `Completion rate ${completionPercent} was below 50%, attempted increase but already at max difficulty, clamped.`;
+      }
+      return `Completion rate ${completionPercent} was below 50%, difficulty increased by one level.`;
+    }
+    if (clampApplied) {
+      return `Completion rate ${completionPercent} was above 80%, attempted decrease but already at min difficulty, clamped.`;
+    }
+    return `Completion rate ${completionPercent} was above 80%, difficulty decreased by one level.`;
+  })();
 
-  return { suggestedAction, finalAction, newDifficultyId, completionRate };
+  return { suggestedAction, finalAction, newDifficultyId, completionRate, ruleMatched, clampApplied, clampReason, reason };
 }
 
 function parseDateOnly(value: string): Date {
@@ -222,9 +250,10 @@ async function runTaskDifficultyCalibrationEngine(options: RunCalibrationOptions
            FROM user_game_mode_history h
       LEFT JOIN cat_game_mode gm ON gm.game_mode_id = h.game_mode_id
           WHERE h.user_id = $1
+            AND h.effective_at <= ($2::date + interval '1 day' - interval '1 second')
           ORDER BY h.effective_at DESC
           LIMIT 1`,
-        [task.user_id],
+        [task.user_id, period.end],
       );
 
       const selectedMode = gameModeResult.rows[0];
@@ -286,9 +315,13 @@ async function runTaskDifficultyCalibrationEngine(options: RunCalibrationOptions
           previous_difficulty_id,
           new_difficulty_id,
           action,
+          rule_matched,
+          reason,
+          clamp_applied,
+          clamp_reason,
           source,
           analyzed_at
-        ) VALUES ($1, $2, $3::date, $4::date, $5, $6, $7, $8, $9, $10, $11, $12, NOW())`,
+        ) VALUES ($1, $2, $3::date, $4::date, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW())`,
         [
           task.task_id,
           task.user_id,
@@ -301,6 +334,10 @@ async function runTaskDifficultyCalibrationEngine(options: RunCalibrationOptions
           task.difficulty_id,
           decision.newDifficultyId,
           decision.finalAction,
+          decision.ruleMatched,
+          decision.reason,
+          decision.clampApplied,
+          decision.clampReason,
           source,
         ],
       );
@@ -490,9 +527,13 @@ export async function runMonthlyTaskDifficultyCalibrationBackfill(options: {
               previous_difficulty_id,
               new_difficulty_id,
               action,
+              rule_matched,
+              reason,
+              clamp_applied,
+              clamp_reason,
               source,
               analyzed_at
-            ) VALUES ($1::uuid, $2::uuid, $3::date, $4::date, $5, $6, $7, $8, $9, $10, 'keep', 'admin_monthly_backfill', NOW())`,
+            ) VALUES ($1::uuid, $2::uuid, $3::date, $4::date, $5, $6, $7, $8, $9, $10, 'keep', 'rate_50_79', 'Monthly backfill snapshot: historical period imported without changing current task difficulty.', FALSE, NULL, 'admin_monthly_backfill', NOW())`,
             [
               task.task_id,
               task.user_id,

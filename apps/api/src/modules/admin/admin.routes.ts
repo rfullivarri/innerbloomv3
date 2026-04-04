@@ -6,6 +6,7 @@ import {
   getAdminUserInsights,
   getAdminUserLogs,
   getAdminUserTaskStats,
+  getAdminTaskDifficultyCalibrationAudit,
   getAdminUserModeUpgradeAnalysis,
   getAdminUserTasks,
   getAdminUsers,
@@ -67,6 +68,7 @@ adminRouter.get('/taskgen/trace/by-correlation/:id', getTaskgenTraceByCorrelatio
 adminRouter.get('/taskgen/trace/global', getTaskgenTraceGlobal);
 adminRouter.post('/taskgen/force-run', postTaskgenForceRun);
 adminRouter.post('/task-difficulty-calibration/run', postAdminRunTaskDifficultyCalibration);
+adminRouter.get('/task-difficulty-calibration/audit', getAdminTaskDifficultyCalibrationAudit);
 adminRouter.post('/mode-upgrade-aggregation/run', postAdminRunModeUpgradeAggregation);
 adminRouter.post('/habit-achievement/retroactive/run', postAdminRunHabitAchievementRetroactive);
 adminRouter.get('/habit-achievement/retroactive/diagnostics', getAdminHabitAchievementDiagnostics);

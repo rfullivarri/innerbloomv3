@@ -8,6 +8,7 @@ import {
   insightQuerySchema,
   tasksQuerySchema,
   taskStatsQuerySchema,
+  taskDifficultyCalibrationAuditQuerySchema,
   updateTaskBodySchema,
   taskgenJobsQuerySchema,
   taskgenTraceQuerySchema,
@@ -31,6 +32,7 @@ import {
   getUserLogs,
   getUserTaskStats,
   getUserTasks,
+  getTaskDifficultyCalibrationAudit,
   listUsers,
   updateUserTask,
   listTaskgenJobs,
@@ -134,6 +136,12 @@ export const getAdminUserTaskStats = asyncHandler(async (req: Request, res: Resp
   const { userId } = userIdParamSchema.parse(req.params);
   const query = taskStatsQuerySchema.parse(req.query);
   const result = await getUserTaskStats(userId, query);
+  res.json(result);
+});
+
+export const getAdminTaskDifficultyCalibrationAudit = asyncHandler(async (req: Request, res: Response) => {
+  const query = taskDifficultyCalibrationAuditQuerySchema.parse(req.query);
+  const result = await getTaskDifficultyCalibrationAudit(query);
   res.json(result);
 });
 
