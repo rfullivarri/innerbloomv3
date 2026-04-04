@@ -2287,6 +2287,10 @@ export type TaskInsightsResponse = {
       expectedTarget?: number | null;
       completions?: number | null;
       completionRate?: number | null;
+      ruleMatched?: string | null;
+      reason?: string | null;
+      clampApplied?: boolean | null;
+      clampReason?: string | null;
       recalibratedAt?: string | null;
     } | null;
     history?: Array<{
@@ -2297,6 +2301,10 @@ export type TaskInsightsResponse = {
       expectedTarget?: number | null;
       completions?: number | null;
       completionRate?: number | null;
+      ruleMatched?: string | null;
+      reason?: string | null;
+      clampApplied?: boolean | null;
+      clampReason?: string | null;
       recalibratedAt?: string | null;
     }>;
     eligible?: boolean | null;

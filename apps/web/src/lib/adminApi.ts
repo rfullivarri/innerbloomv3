@@ -456,6 +456,38 @@ export type AdminTaskDifficultyCalibrationRunResponse = {
   errors: { taskId: string; reason: string }[];
 };
 
+export type AdminTaskDifficultyCalibrationAuditRow = {
+  taskDifficultyRecalibrationId: string;
+  userId: string;
+  userEmail: string | null;
+  taskId: string;
+  taskTitle: string;
+  pillar: string | null;
+  periodStart: string;
+  periodEnd: string;
+  evaluationMonthLabel: string;
+  difficultyBefore: string | null;
+  difficultyAfter: string | null;
+  gameModeUsed: string | null;
+  expectedTarget: number;
+  actualCompletions: number;
+  completionRate: number;
+  completionRatePct: number;
+  ruleMatched: string;
+  result: 'increased' | 'kept' | 'decreased';
+  reason: string;
+  clampApplied: boolean;
+  clampReason: string | null;
+  source: string;
+  evaluatedAt: string;
+  createdAt: string;
+};
+
+export type AdminTaskDifficultyCalibrationAuditResponse = {
+  items: AdminTaskDifficultyCalibrationAuditRow[];
+  total: number;
+};
+
 export async function runAdminTaskDifficultyCalibration(payload: {
   userId?: string;
   windowDays?: number;
@@ -486,6 +518,18 @@ export async function runAdminTaskDifficultyCalibration(payload: {
   }
 
   return response.json() as Promise<AdminTaskDifficultyCalibrationRunResponse>;
+}
+
+export async function fetchAdminTaskDifficultyCalibrationAudit(params: {
+  userId?: string;
+  taskId?: string;
+  limit?: number;
+}) {
+  return apiAuthorizedGet<AdminTaskDifficultyCalibrationAuditResponse>('/admin/task-difficulty-calibration/audit', {
+    userId: params.userId,
+    taskId: params.taskId,
+    limit: params.limit ?? 100,
+  });
 }
 
 export async function runAdminHabitAchievementRetroactive(payload: { userId?: string }) {

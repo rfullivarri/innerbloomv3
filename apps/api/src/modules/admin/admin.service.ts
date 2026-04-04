@@ -31,6 +31,7 @@ import {
   type ListUsersQuery,
   type LogsQuery,
   type TaskStatsQuery,
+  type TaskDifficultyCalibrationAuditQuery,
   type TasksQuery,
   type UpdateTaskBody,
   type TaskgenJobsQuery,
@@ -120,6 +121,33 @@ type AdminTask = {
   weeklyTarget: number | null;
   createdAt: string;
   archived: boolean;
+};
+
+export type AdminTaskDifficultyCalibrationAuditRow = {
+  taskDifficultyRecalibrationId: string;
+  userId: string;
+  userEmail: string | null;
+  taskId: string;
+  taskTitle: string;
+  pillar: string | null;
+  periodStart: string;
+  periodEnd: string;
+  evaluationMonthLabel: string;
+  difficultyBefore: string | null;
+  difficultyAfter: string | null;
+  gameModeUsed: string | null;
+  expectedTarget: number;
+  actualCompletions: number;
+  completionRate: number;
+  completionRatePct: number;
+  ruleMatched: string;
+  result: 'increased' | 'kept' | 'decreased';
+  reason: string;
+  clampApplied: boolean;
+  clampReason: string | null;
+  source: string;
+  evaluatedAt: string;
+  createdAt: string;
 };
 
 type AdminTaskStat = {
@@ -1590,6 +1618,130 @@ export async function getUserTasks(
     page: 1,
     pageSize: items.length || 1,
     total: items.length,
+  };
+}
+
+type TaskDifficultyCalibrationAuditDbRow = {
+  task_difficulty_recalibration_id: string;
+  user_id: string;
+  user_email: string | null;
+  task_id: string;
+  task_title: string | null;
+  pillar_name: string | null;
+  period_start: string;
+  period_end: string;
+  difficulty_before: string | null;
+  difficulty_after: string | null;
+  game_mode_used: string | null;
+  expected_target: number | string;
+  actual_completions: number | string;
+  completion_rate: number | string;
+  rule_matched: string;
+  action: 'up' | 'keep' | 'down';
+  reason: string;
+  clamp_applied: boolean;
+  clamp_reason: string | null;
+  source: string;
+  analyzed_at: string;
+  created_at: string;
+};
+
+export async function getTaskDifficultyCalibrationAudit(
+  query: TaskDifficultyCalibrationAuditQuery,
+): Promise<{ items: AdminTaskDifficultyCalibrationAuditRow[]; total: number }> {
+  const filters: string[] = [];
+  const params: unknown[] = [];
+
+  if (query.userId) {
+    params.push(query.userId);
+    filters.push(`r.user_id = $${params.length}::uuid`);
+  }
+
+  if (query.taskId) {
+    params.push(query.taskId);
+    filters.push(`r.task_id = $${params.length}::uuid`);
+  }
+
+  const where = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
+  params.push(query.limit);
+
+  const rowsResult = await pool.query<TaskDifficultyCalibrationAuditDbRow>(
+    `SELECT r.task_difficulty_recalibration_id,
+            r.user_id,
+            u.email_primary AS user_email,
+            r.task_id,
+            t.task AS task_title,
+            cp.name AS pillar_name,
+            r.period_start::text,
+            r.period_end::text,
+            cdb.code AS difficulty_before,
+            cda.code AS difficulty_after,
+            gm.code AS game_mode_used,
+            r.expected_target,
+            r.completions_done AS actual_completions,
+            r.completion_rate,
+            r.rule_matched,
+            r.action,
+            r.reason,
+            r.clamp_applied,
+            r.clamp_reason,
+            r.source,
+            r.analyzed_at::text,
+            r.created_at::text
+       FROM task_difficulty_recalibrations r
+  LEFT JOIN users u ON u.user_id = r.user_id
+  LEFT JOIN tasks t ON t.task_id = r.task_id
+  LEFT JOIN cat_pillar cp ON cp.pillar_id = t.pillar_id
+  LEFT JOIN cat_difficulty cdb ON cdb.difficulty_id = r.previous_difficulty_id
+  LEFT JOIN cat_difficulty cda ON cda.difficulty_id = r.new_difficulty_id
+  LEFT JOIN cat_game_mode gm ON gm.game_mode_id = r.game_mode_id
+      ${where}
+   ORDER BY r.analyzed_at DESC
+      LIMIT $${params.length}`,
+    params,
+  );
+
+  const countParams = params.slice(0, params.length - 1);
+  const countResult = await pool.query<{ total: number | string }>(
+    `SELECT COUNT(*) AS total
+       FROM task_difficulty_recalibrations r
+      ${where}`,
+    countParams,
+  );
+
+  const items = rowsResult.rows.map<AdminTaskDifficultyCalibrationAuditRow>((row) => {
+    const completionRate = Number(row.completion_rate ?? 0);
+    return {
+      taskDifficultyRecalibrationId: row.task_difficulty_recalibration_id,
+      userId: row.user_id,
+      userEmail: row.user_email,
+      taskId: row.task_id,
+      taskTitle: row.task_title ?? 'Untitled task',
+      pillar: row.pillar_name,
+      periodStart: row.period_start,
+      periodEnd: row.period_end,
+      evaluationMonthLabel: row.period_end.slice(0, 7),
+      difficultyBefore: row.difficulty_before,
+      difficultyAfter: row.difficulty_after,
+      gameModeUsed: row.game_mode_used,
+      expectedTarget: Number(row.expected_target ?? 0),
+      actualCompletions: Number(row.actual_completions ?? 0),
+      completionRate,
+      completionRatePct: Number.isFinite(completionRate) ? completionRate * 100 : 0,
+      ruleMatched: row.rule_matched,
+      result: row.action === 'up' ? 'increased' : row.action === 'down' ? 'decreased' : 'kept',
+      reason: row.reason,
+      clampApplied: Boolean(row.clamp_applied),
+      clampReason: row.clamp_reason,
+      source: row.source,
+      evaluatedAt: row.analyzed_at,
+      createdAt: row.created_at,
+    };
+  });
+
+  return {
+    items,
+    total: Number(countResult.rows[0]?.total ?? 0),
   };
 }
 

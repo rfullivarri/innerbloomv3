@@ -108,6 +108,10 @@ type InsightsResponse = {
       expectedTarget: number;
       completions: number;
       completionRate: number;
+      ruleMatched: string;
+      reason: string;
+      clampApplied: boolean;
+      clampReason: string | null;
       recalibratedAt: string;
     } | null;
     history: {
@@ -118,6 +122,10 @@ type InsightsResponse = {
       expectedTarget: number;
       completions: number;
       completionRate: number;
+      ruleMatched: string;
+      reason: string;
+      clampApplied: boolean;
+      clampReason: string | null;
       recalibratedAt: string;
     }[];
     eligible: boolean;
@@ -136,6 +144,10 @@ type TaskRecalibrationRow = {
   previous_difficulty_id: number;
   new_difficulty_id: number;
   action: 'up' | 'keep' | 'down';
+  rule_matched: 'rate_gt_80' | 'rate_50_79' | 'rate_lt_50';
+  reason: string;
+  clamp_applied: boolean;
+  clamp_reason: string | null;
   analyzed_at: string;
 };
 
@@ -260,6 +272,10 @@ function mapRecalibrationRecord(row: TaskRecalibrationRow): InsightsResponse['re
     expectedTarget: Number.isFinite(expectedTarget) ? expectedTarget : 0,
     completions: Number.isFinite(completions) ? completions : 0,
     completionRate: Number.isFinite(completionRate) ? completionRate : 0,
+    ruleMatched: row.rule_matched,
+    reason: row.reason,
+    clampApplied: Boolean(row.clamp_applied),
+    clampReason: row.clamp_reason,
     recalibratedAt: row.analyzed_at,
   };
 }
@@ -418,6 +434,10 @@ router.get(
               previous_difficulty_id,
               new_difficulty_id,
               action,
+              rule_matched,
+              reason,
+              clamp_applied,
+              clamp_reason,
               analyzed_at::text
          FROM task_difficulty_recalibrations
         WHERE task_id = $1
@@ -554,6 +574,10 @@ router.get(
               previous_difficulty_id,
               new_difficulty_id,
               action,
+              rule_matched,
+              reason,
+              clamp_applied,
+              clamp_reason,
               analyzed_at::text
          FROM task_difficulty_recalibrations
         WHERE task_id = $1
@@ -594,6 +618,10 @@ router.get(
               previous_difficulty_id,
               new_difficulty_id,
               action,
+              rule_matched,
+              reason,
+              clamp_applied,
+              clamp_reason,
               analyzed_at::text
          FROM task_difficulty_recalibrations
         WHERE task_id = $1
