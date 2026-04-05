@@ -116,6 +116,11 @@ export function AdminLayout() {
   const [calibrationResult, setCalibrationResult] = useState<AdminTaskDifficultyCalibrationRunResponse | null>(null);
   const [calibrationError, setCalibrationError] = useState<string | null>(null);
   const [calibrationAuditRows, setCalibrationAuditRows] = useState<AdminTaskDifficultyCalibrationAuditRow[]>([]);
+  const [calibrationAuditSummary, setCalibrationAuditSummary] = useState<{ down: number; keep: number; up: number }>({
+    down: 0,
+    keep: 0,
+    up: 0,
+  });
   const [loadingCalibrationAudit, setLoadingCalibrationAudit] = useState(false);
   const [calibrationAuditError, setCalibrationAuditError] = useState<string | null>(null);
   const calibrationErrorsPreview = calibrationResult?.errors.slice(0, 5) ?? [];
@@ -639,8 +644,10 @@ export function AdminLayout() {
       const audit = await fetchAdminTaskDifficultyCalibrationAudit({
         userId: calibrationRunAllUsers ? undefined : selectedUser?.id,
         limit: 100,
+        latestPerTask: !calibrationRunAllUsers,
       });
       setCalibrationAuditRows(audit.items);
+      setCalibrationAuditSummary(audit.summary);
     } catch (error) {
       console.error('[admin] failed to run task difficulty calibration', error);
       setCalibrationResult(null);
@@ -667,8 +674,10 @@ export function AdminLayout() {
       const audit = await fetchAdminTaskDifficultyCalibrationAudit({
         userId: calibrationRunAllUsers ? undefined : selectedUser?.id,
         limit: 100,
+        latestPerTask: !calibrationRunAllUsers,
       });
       setCalibrationAuditRows(audit.items);
+      setCalibrationAuditSummary(audit.summary);
     } catch (error) {
       if (error instanceof ApiError) {
         setCalibrationAuditError(`No se pudo cargar la auditoría (HTTP ${error.status}).`);
@@ -678,6 +687,47 @@ export function AdminLayout() {
     } finally {
       setLoadingCalibrationAudit(false);
     }
+  }, [calibrationRunAllUsers, selectedUser]);
+
+  useEffect(() => {
+    if (!selectedUser || calibrationRunAllUsers) {
+      setCalibrationAuditRows([]);
+      setCalibrationAuditSummary({ down: 0, keep: 0, up: 0 });
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingCalibrationAudit(true);
+    setCalibrationAuditError(null);
+
+    fetchAdminTaskDifficultyCalibrationAudit({
+      userId: selectedUser.id,
+      limit: 100,
+      latestPerTask: true,
+    })
+      .then((audit) => {
+        if (cancelled) return;
+        setCalibrationAuditRows(audit.items);
+        setCalibrationAuditSummary(audit.summary);
+      })
+      .catch((error: unknown) => {
+        console.error('[admin] failed to fetch calibration audit rows for selected user', error);
+        if (cancelled) return;
+        if (error instanceof ApiError) {
+          setCalibrationAuditError(`No se pudo cargar la auditoría (HTTP ${error.status}).`);
+        } else {
+          setCalibrationAuditError('No se pudo cargar la auditoría de calibración.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingCalibrationAudit(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [calibrationRunAllUsers, selectedUser]);
 
   const handleRunHabitAchievementRetroactive = useCallback(async () => {
@@ -1012,7 +1062,7 @@ export function AdminLayout() {
                 <button
                   type="button"
                   onClick={handleLoadCalibrationAudit}
-                  disabled={loadingCalibrationAudit}
+                  disabled={loadingCalibrationAudit || (!selectedUser && !calibrationRunAllUsers)}
                   className={`inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                     loadingCalibrationAudit
                       ? 'cursor-not-allowed border border-slate-700/60 bg-slate-800 text-slate-400'
@@ -1021,35 +1071,40 @@ export function AdminLayout() {
                 >
                   {loadingCalibrationAudit ? 'Cargando auditoría…' : 'Cargar auditoría'}
                 </button>
-                <span className="text-xs text-emerald-200/90">Últimas 100 evaluaciones {calibrationRunAllUsers ? '(global)' : '(usuario seleccionado)'}</span>
+                <span className="text-xs text-emerald-200/90">Últimas 100 evaluaciones {calibrationRunAllUsers ? '(global)' : '(usuario seleccionado, latest por task)'}</span>
               </div>
               {calibrationAuditError ? <p className="text-xs font-semibold text-rose-300">{calibrationAuditError}</p> : null}
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="rounded-md border border-rose-700/40 bg-rose-900/20 px-2 py-1 text-rose-100">down: <strong>{calibrationAuditSummary.down}</strong></div>
+                <div className="rounded-md border border-slate-700/60 bg-slate-900/40 px-2 py-1 text-slate-100">keep: <strong>{calibrationAuditSummary.keep}</strong></div>
+                <div className="rounded-md border border-emerald-700/40 bg-emerald-900/20 px-2 py-1 text-emerald-100">up: <strong>{calibrationAuditSummary.up}</strong></div>
+              </div>
               {calibrationAuditRows.length > 0 ? (
                 <div className="overflow-x-auto rounded-lg border border-emerald-700/40 bg-slate-950/40">
-                  <table className="min-w-[1500px] divide-y divide-emerald-700/30 text-xs text-emerald-100">
+                  <table className="min-w-[1700px] divide-y divide-emerald-700/30 text-xs text-emerald-100">
                     <thead className="bg-emerald-900/20 text-[11px] uppercase tracking-[0.12em] text-emerald-200">
                       <tr>
-                        <th className="px-2 py-2 text-left">User</th><th className="px-2 py-2 text-left">Task</th><th className="px-2 py-2 text-left">Pillar</th>
-                        <th className="px-2 py-2 text-left">Periodo</th><th className="px-2 py-2 text-left">Mes</th><th className="px-2 py-2 text-left">Diff</th>
-                        <th className="px-2 py-2 text-left">Mode</th><th className="px-2 py-2 text-left">Actual/Expected</th><th className="px-2 py-2 text-left">Rate</th>
-                        <th className="px-2 py-2 text-left">Rule</th><th className="px-2 py-2 text-left">Resultado</th><th className="px-2 py-2 text-left">Clamp</th>
-                        <th className="px-2 py-2 text-left">Razón</th><th className="px-2 py-2 text-left">Evaluated</th>
+                        <th className="px-2 py-2 text-left">Task name</th><th className="px-2 py-2 text-left">Pillar</th><th className="px-2 py-2 text-left">Analyzed period</th>
+                        <th className="px-2 py-2 text-left">Game mode used</th><th className="px-2 py-2 text-left">Completions</th><th className="px-2 py-2 text-left">Expected target</th>
+                        <th className="px-2 py-2 text-left">Completion rate %</th><th className="px-2 py-2 text-left">Previous difficulty</th><th className="px-2 py-2 text-left">New difficulty</th>
+                        <th className="px-2 py-2 text-left">Final action</th><th className="px-2 py-2 text-left">Matched rule</th><th className="px-2 py-2 text-left">Clamp applied</th>
+                        <th className="px-2 py-2 text-left">Reason</th><th className="px-2 py-2 text-left">Evaluated at</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-emerald-900/20">
                       {calibrationAuditRows.map((row) => (
                         <tr key={row.taskDifficultyRecalibrationId}>
-                          <td className="px-2 py-2">{row.userEmail ?? row.userId}</td>
                           <td className="px-2 py-2"><div className="font-semibold">{row.taskTitle}</div><div className="text-[10px] text-emerald-300/80">{row.taskId}</div></td>
                           <td className="px-2 py-2">{row.pillar ?? '—'}</td>
                           <td className="px-2 py-2">{row.periodStart} → {row.periodEnd}</td>
-                          <td className="px-2 py-2">{row.evaluationMonthLabel}</td>
-                          <td className="px-2 py-2">{row.difficultyBefore ?? '—'} → {row.difficultyAfter ?? '—'}</td>
                           <td className="px-2 py-2">{row.gameModeUsed ?? '—'}</td>
-                          <td className="px-2 py-2">{row.actualCompletions}/{row.expectedTarget.toFixed(2)}</td>
+                          <td className="px-2 py-2">{row.actualCompletions}</td>
+                          <td className="px-2 py-2">{row.expectedTarget.toFixed(2)}</td>
                           <td className="px-2 py-2">{row.completionRatePct.toFixed(1)}%</td>
+                          <td className="px-2 py-2">{row.difficultyBefore ?? '—'}</td>
+                          <td className="px-2 py-2">{row.difficultyAfter ?? '—'}</td>
+                          <td className="px-2 py-2">{row.finalAction}</td>
                           <td className="px-2 py-2">{row.ruleMatched}</td>
-                          <td className="px-2 py-2">{row.result}</td>
                           <td className="px-2 py-2">{row.clampApplied ? `yes${row.clampReason ? ` (${row.clampReason})` : ''}` : 'no'}</td>
                           <td className="px-2 py-2">{row.reason}</td>
                           <td className="px-2 py-2">{new Date(row.evaluatedAt).toISOString()}</td>

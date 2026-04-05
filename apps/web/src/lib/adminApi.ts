@@ -474,6 +474,7 @@ export type AdminTaskDifficultyCalibrationAuditRow = {
   completionRate: number;
   completionRatePct: number;
   ruleMatched: string;
+  finalAction: 'up' | 'keep' | 'down';
   result: 'increased' | 'kept' | 'decreased';
   reason: string;
   clampApplied: boolean;
@@ -486,6 +487,7 @@ export type AdminTaskDifficultyCalibrationAuditRow = {
 export type AdminTaskDifficultyCalibrationAuditResponse = {
   items: AdminTaskDifficultyCalibrationAuditRow[];
   total: number;
+  summary: { down: number; keep: number; up: number };
 };
 
 export async function runAdminTaskDifficultyCalibration(payload: {
@@ -524,11 +526,13 @@ export async function fetchAdminTaskDifficultyCalibrationAudit(params: {
   userId?: string;
   taskId?: string;
   limit?: number;
+  latestPerTask?: boolean;
 }) {
   return apiAuthorizedGet<AdminTaskDifficultyCalibrationAuditResponse>('/admin/task-difficulty-calibration/audit', {
     userId: params.userId,
     taskId: params.taskId,
     limit: params.limit ?? 100,
+    latestPerTask: params.latestPerTask ? 'true' : 'false',
   });
 }
 
