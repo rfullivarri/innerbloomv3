@@ -45,6 +45,7 @@ export const taskDifficultyCalibrationAuditQuerySchema = z.object({
   userId: z.string().uuid({ message: 'Invalid user id' }).optional(),
   taskId: z.string().uuid({ message: 'Invalid task id' }).optional(),
   limit: z.coerce.number().int().min(1).max(500).default(100),
+  latestPerTask: z.coerce.boolean().default(false),
 });
 
 const optionalNumericId = z.union([z.coerce.number().int().positive(), z.null()]).optional();

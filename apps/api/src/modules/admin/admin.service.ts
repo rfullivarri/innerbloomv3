@@ -141,6 +141,7 @@ export type AdminTaskDifficultyCalibrationAuditRow = {
   completionRate: number;
   completionRatePct: number;
   ruleMatched: string;
+  finalAction: 'up' | 'keep' | 'down';
   result: 'increased' | 'kept' | 'decreased';
   reason: string;
   clampApplied: boolean;
@@ -148,6 +149,12 @@ export type AdminTaskDifficultyCalibrationAuditRow = {
   source: string;
   evaluatedAt: string;
   createdAt: string;
+};
+
+type AdminTaskDifficultyCalibrationAuditSummary = {
+  down: number;
+  keep: number;
+  up: number;
 };
 
 type AdminTaskStat = {
@@ -1648,7 +1655,11 @@ type TaskDifficultyCalibrationAuditDbRow = {
 
 export async function getTaskDifficultyCalibrationAudit(
   query: TaskDifficultyCalibrationAuditQuery,
-): Promise<{ items: AdminTaskDifficultyCalibrationAuditRow[]; total: number }> {
+): Promise<{
+  items: AdminTaskDifficultyCalibrationAuditRow[];
+  total: number;
+  summary: AdminTaskDifficultyCalibrationAuditSummary;
+}> {
   const filters: string[] = [];
   const params: unknown[] = [];
 
@@ -1665,8 +1676,49 @@ export async function getTaskDifficultyCalibrationAudit(
   const where = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
   params.push(query.limit);
 
-  const rowsResult = await pool.query<TaskDifficultyCalibrationAuditDbRow>(
-    `SELECT r.task_difficulty_recalibration_id,
+  const latestPerTaskSql = query.latestPerTask
+    ? `WITH ranked_recalibrations AS (
+         SELECT r.*,
+                ROW_NUMBER() OVER (
+                  PARTITION BY r.user_id, r.task_id
+                  ORDER BY r.analyzed_at DESC, r.created_at DESC, r.task_difficulty_recalibration_id DESC
+                ) AS rn
+           FROM task_difficulty_recalibrations r
+          ${where}
+       )
+       SELECT r.task_difficulty_recalibration_id,
+              r.user_id,
+              u.email_primary AS user_email,
+              r.task_id,
+              t.task AS task_title,
+              cp.name AS pillar_name,
+              r.period_start::text,
+              r.period_end::text,
+              cdb.code AS difficulty_before,
+              cda.code AS difficulty_after,
+              gm.code AS game_mode_used,
+              r.expected_target,
+              r.completions_done AS actual_completions,
+              r.completion_rate,
+              r.rule_matched,
+              r.action,
+              r.reason,
+              r.clamp_applied,
+              r.clamp_reason,
+              r.source,
+              r.analyzed_at::text,
+              r.created_at::text
+         FROM ranked_recalibrations r
+    LEFT JOIN users u ON u.user_id = r.user_id
+    LEFT JOIN tasks t ON t.task_id = r.task_id
+    LEFT JOIN cat_pillar cp ON cp.pillar_id = t.pillar_id
+    LEFT JOIN cat_difficulty cdb ON cdb.difficulty_id = r.previous_difficulty_id
+    LEFT JOIN cat_difficulty cda ON cda.difficulty_id = r.new_difficulty_id
+    LEFT JOIN cat_game_mode gm ON gm.game_mode_id = r.game_mode_id
+        WHERE r.rn = 1
+     ORDER BY r.analyzed_at DESC
+        LIMIT $${params.length}`
+    : `SELECT r.task_difficulty_recalibration_id,
             r.user_id,
             u.email_primary AS user_email,
             r.task_id,
@@ -1697,17 +1749,31 @@ export async function getTaskDifficultyCalibrationAudit(
   LEFT JOIN cat_game_mode gm ON gm.game_mode_id = r.game_mode_id
       ${where}
    ORDER BY r.analyzed_at DESC
-      LIMIT $${params.length}`,
+      LIMIT $${params.length}`;
+
+  const rowsResult = await pool.query<TaskDifficultyCalibrationAuditDbRow>(
+    latestPerTaskSql,
     params,
   );
 
   const countParams = params.slice(0, params.length - 1);
-  const countResult = await pool.query<{ total: number | string }>(
-    `SELECT COUNT(*) AS total
-       FROM task_difficulty_recalibrations r
-      ${where}`,
-    countParams,
-  );
+  const countResult = query.latestPerTask
+    ? await pool.query<{ total: number | string }>(
+        `SELECT COUNT(*) AS total
+           FROM (
+             SELECT 1
+               FROM task_difficulty_recalibrations r
+              ${where}
+           GROUP BY r.user_id, r.task_id
+           ) grouped`,
+        countParams,
+      )
+    : await pool.query<{ total: number | string }>(
+        `SELECT COUNT(*) AS total
+           FROM task_difficulty_recalibrations r
+          ${where}`,
+        countParams,
+      );
 
   const items = rowsResult.rows.map<AdminTaskDifficultyCalibrationAuditRow>((row) => {
     const completionRate = Number(row.completion_rate ?? 0);
@@ -1729,6 +1795,7 @@ export async function getTaskDifficultyCalibrationAudit(
       completionRate,
       completionRatePct: Number.isFinite(completionRate) ? completionRate * 100 : 0,
       ruleMatched: row.rule_matched,
+      finalAction: row.action,
       result: row.action === 'up' ? 'increased' : row.action === 'down' ? 'decreased' : 'kept',
       reason: row.reason,
       clampApplied: Boolean(row.clamp_applied),
@@ -1742,6 +1809,15 @@ export async function getTaskDifficultyCalibrationAudit(
   return {
     items,
     total: Number(countResult.rows[0]?.total ?? 0),
+    summary: items.reduce<AdminTaskDifficultyCalibrationAuditSummary>(
+      (acc, item) => {
+        if (item.result === 'decreased') acc.down += 1;
+        if (item.result === 'kept') acc.keep += 1;
+        if (item.result === 'increased') acc.up += 1;
+        return acc;
+      },
+      { down: 0, keep: 0, up: 0 },
+    ),
   };
 }
 
