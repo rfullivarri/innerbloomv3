@@ -617,8 +617,7 @@ export function TaskInsightsModal({
                   {difficultyChipLabel}
                 </span>
               )}
-              <div className="ml-auto flex items-center gap-2">
-                <RecalibrationTrendIndicator
+              <RecalibrationTrendIndicator
                 latest={recalibrationLatest}
                 eligible={isRecalibrationEligible}
                 tooltipLabel={
@@ -636,7 +635,6 @@ export function TaskInsightsModal({
                 onCloseTooltip={() => setIsRecalibrationTooltipOpen(false)}
                 tooltipId={recalibrationTooltipId}
               />
-              </div>
             </div>
             {activeTask && 'description' in activeTask && activeTask.description && (
               <p className="text-sm text-[color:var(--color-slate-300)]">{activeTask.description}</p>
