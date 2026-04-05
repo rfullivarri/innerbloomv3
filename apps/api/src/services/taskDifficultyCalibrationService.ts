@@ -554,62 +554,61 @@ export async function runMonthlyTaskDifficultyCalibrationBackfill(options: {
         const selectedMode = resolveWeeklyTarget(modeEvents, periodEndText);
         if (!selectedMode) {
           periodsSkippedMissingTarget += 1;
-          continue;
-        }
-
-        const usedGameModeId = selectedMode.gameModeId;
-        const weeklyTarget = Number(selectedMode.weeklyTarget ?? 0);
-
-        if (!Number.isFinite(weeklyTarget) || weeklyTarget <= 0) {
-          periodsSkippedMissingTarget += 1;
         } else {
-          const completionsResult = await pool.query<CompletionRow>(
-            `SELECT COALESCE(SUM(quantity), 0) AS completed
-               FROM daily_log
-              WHERE task_id = $1::uuid
-                AND user_id = $2::uuid
-                AND date BETWEEN $3::date AND $4::date`,
-            [task.task_id, task.user_id, periodStartText, periodEndText],
-          );
-          const completions = Number(completionsResult.rows[0]?.completed ?? 0);
-          const daysInPeriod = Math.max(1, Math.floor((periodEnd.getTime() - periodStart.getTime()) / MS_IN_DAY) + 1);
-          const expectedTarget = (weeklyTarget * daysInPeriod) / 7;
-          const completionRate = expectedTarget > 0 ? completions / expectedTarget : 0;
+          const usedGameModeId = selectedMode.gameModeId;
+          const weeklyTarget = Number(selectedMode.weeklyTarget ?? 0);
 
-          await pool.query(
-            `INSERT INTO task_difficulty_recalibrations (
-              task_id,
-              user_id,
-              period_start,
-              period_end,
-              game_mode_id,
-              expected_target,
-              completions_done,
-              completion_rate,
-              previous_difficulty_id,
-              new_difficulty_id,
-              action,
-              rule_matched,
-              reason,
-              clamp_applied,
-              clamp_reason,
-              source,
-              analyzed_at
-            ) VALUES ($1::uuid, $2::uuid, $3::date, $4::date, $5, $6, $7, $8, $9, $10, 'keep', 'rate_50_79', 'Monthly backfill snapshot: historical period imported without changing current task difficulty.', FALSE, NULL, 'admin_monthly_backfill', NOW())`,
-            [
-              task.task_id,
-              task.user_id,
-              periodStartText,
-              periodEndText,
-              usedGameModeId,
-              expectedTarget,
-              completions,
-              completionRate,
-              task.difficulty_id,
-              task.difficulty_id,
-            ],
-          );
-          periodsInserted += 1;
+          if (!Number.isFinite(weeklyTarget) || weeklyTarget <= 0) {
+            periodsSkippedMissingTarget += 1;
+          } else {
+            const completionsResult = await pool.query<CompletionRow>(
+              `SELECT COALESCE(SUM(quantity), 0) AS completed
+                 FROM daily_log
+                WHERE task_id = $1::uuid
+                  AND user_id = $2::uuid
+                  AND date BETWEEN $3::date AND $4::date`,
+              [task.task_id, task.user_id, periodStartText, periodEndText],
+            );
+            const completions = Number(completionsResult.rows[0]?.completed ?? 0);
+            const daysInPeriod = Math.max(1, Math.floor((periodEnd.getTime() - periodStart.getTime()) / MS_IN_DAY) + 1);
+            const expectedTarget = (weeklyTarget * daysInPeriod) / 7;
+            const completionRate = expectedTarget > 0 ? completions / expectedTarget : 0;
+
+            await pool.query(
+              `INSERT INTO task_difficulty_recalibrations (
+                task_id,
+                user_id,
+                period_start,
+                period_end,
+                game_mode_id,
+                expected_target,
+                completions_done,
+                completion_rate,
+                previous_difficulty_id,
+                new_difficulty_id,
+                action,
+                rule_matched,
+                reason,
+                clamp_applied,
+                clamp_reason,
+                source,
+                analyzed_at
+              ) VALUES ($1::uuid, $2::uuid, $3::date, $4::date, $5, $6, $7, $8, $9, $10, 'keep', 'rate_50_79', 'Monthly backfill snapshot: historical period imported without changing current task difficulty.', FALSE, NULL, 'admin_monthly_backfill', NOW())`,
+              [
+                task.task_id,
+                task.user_id,
+                periodStartText,
+                periodEndText,
+                usedGameModeId,
+                expectedTarget,
+                completions,
+                completionRate,
+                task.difficulty_id,
+                task.difficulty_id,
+              ],
+            );
+            periodsInserted += 1;
+          }
         }
       }
 
