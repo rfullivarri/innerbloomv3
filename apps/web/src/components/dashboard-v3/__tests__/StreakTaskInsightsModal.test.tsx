@@ -174,4 +174,72 @@ describe('TaskInsightsModal', () => {
     expect(await screen.findByText('Hábito fuerte')).toBeInTheDocument();
     expect(screen.getByText('83%')).toBeInTheDocument();
   });
+
+  test('muestra chips compactos y limpia el prefijo migrado en razones históricas', async () => {
+    const insightsWithRecalibration: TaskInsightsResponse = {
+      ...mockInsights,
+      recalibration: {
+        eligible: true,
+        latest: {
+          action: 'down',
+          periodStart: '2026-02-01',
+          expectedTarget: 10,
+          completions: 9,
+          completionRate: 0.9,
+          reason: 'Historical row migrated: completion rate above 80%, system suggested decreasing difficulty by one level.',
+          recalibratedAt: '2026-03-01T00:00:00.000Z',
+        },
+        history: [
+          {
+            action: 'down',
+            periodStart: '2026-02-01',
+            expectedTarget: 10,
+            completions: 9,
+            completionRate: 0.9,
+            reason: 'Historical row migrated: completion rate above 80%, system suggested decreasing difficulty by one level.',
+          },
+          {
+            action: 'keep',
+            periodStart: '2026-01-01',
+            expectedTarget: 8,
+            completions: 5,
+            completionRate: 0.62,
+            reason: 'Historical row migrated: completion rate between 50% and 79%, difficulty kept.',
+          },
+          {
+            action: 'up',
+            periodStart: '2025-12-01',
+            expectedTarget: 8,
+            completions: 3,
+            completionRate: 0.37,
+            reason: 'Historical row migrated: completion rate below 50%, system suggested increasing difficulty by one level.',
+          },
+        ],
+      },
+    };
+
+    mockUseRequest.mockReturnValueOnce({
+      data: insightsWithRecalibration,
+      error: null,
+      status: 'success',
+      reload: vi.fn(),
+    });
+
+    render(
+      <TaskInsightsModal
+        taskId="task-123"
+        weeklyGoal={3}
+        mode="Flow"
+        range="week"
+        onClose={() => {}}
+        fallbackTask={{ id: 'task-123', name: 'Nueva tarea', stat: 'Metric' }}
+      />,
+    );
+
+    expect(await screen.findByText('↓ Decreased')).toBeInTheDocument();
+    expect(screen.getByText('• Kept')).toBeInTheDocument();
+    expect(screen.getByText('↑ Increased')).toBeInTheDocument();
+    expect(screen.queryByText(/Historical row migrated:/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/completion rate above 80%/i)).toBeInTheDocument();
+  });
 });
