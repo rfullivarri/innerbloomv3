@@ -75,6 +75,11 @@ function formatPeriodLabel(record: RecalibrationRecord, locale: PostLoginLanguag
   return locale === 'es' ? 'Mes reciente' : 'Recent month';
 }
 
+function sanitizeRecalibrationReason(reason: string | null | undefined): string {
+  if (!reason) return '';
+  return reason.replace(/^Historical row migrated:\s*/i, '').trim();
+}
+
 function localizeDifficultyChipLabel(
   difficulty: string | null | undefined,
   locale: PostLoginLanguage,
@@ -753,26 +758,32 @@ export function TaskInsightsModal({
                           ? 'text-rose-950 border-rose-600 bg-rose-500'
                           : 'text-amber-950 border-amber-500 bg-amber-400';
                     const actionLabel = action === 'down'
-                      ? (language === 'es' ? '↓ Bajó dificultad' : '↓ Difficulty decreased')
+                      ? '↓ Decreased'
                       : action === 'up'
-                        ? (language === 'es' ? '↑ Subió dificultad' : '↑ Difficulty increased')
-                        : (language === 'es' ? '• Se mantuvo' : '• Stayed the same');
+                        ? '↑ Increased'
+                        : '• Kept';
                     const expected = Number(record.expectedTarget ?? 0);
                     const completions = Number(record.completions ?? 0);
                     const completionRatePct = Number(record.completionRate ?? 0) * 100;
                     const completionSummary = `${completions}/${expected > 0 ? numberFormatter.format(expected) : '—'} · ${Number.isFinite(completionRatePct) ? completionRatePct.toFixed(1) : '0.0'}%`;
-                    const reasonLabel = record.reason?.trim()
-                      ? record.reason
+                    const sanitizedReason = sanitizeRecalibrationReason(record.reason);
+                    const reasonLabel = sanitizedReason
+                      ? sanitizedReason
                       : (language === 'es' ? 'Sin razón detallada disponible.' : 'No detailed reason available.');
 
                     return (
-                      <li key={`${record.periodStart ?? 'period'}-${index}`} className="flex items-center justify-between gap-2 rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2 py-2">
-                        <div>
-                          <p className="text-xs font-semibold text-[color:var(--color-slate-100)]">{formatPeriodLabel(record, language)}</p>
-                          <p className="text-[11px] text-[color:var(--color-slate-400)]">{completionSummary}</p>
-                          <p className="text-[10px] text-[color:var(--color-slate-500)]">{reasonLabel}</p>
+                      <li
+                        key={`${record.periodStart ?? 'period'}-${index}`}
+                        className="flex flex-col items-start gap-1.5 rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2.5 py-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-semibold leading-tight text-[color:var(--color-slate-100)]">{formatPeriodLabel(record, language)}</p>
+                          <p className="mt-0.5 text-[10px] leading-tight text-[color:var(--color-slate-400)]">{completionSummary}</p>
+                          <p className="mt-1 text-[10px] leading-snug text-[color:var(--color-slate-500)]">{reasonLabel}</p>
                         </div>
-                        <span className={cx('inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold', actionTone)}>{actionLabel}</span>
+                        <span className={cx('inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold leading-none sm:mt-0.5', actionTone)}>
+                          {actionLabel}
+                        </span>
                       </li>
                     );
                   })}
