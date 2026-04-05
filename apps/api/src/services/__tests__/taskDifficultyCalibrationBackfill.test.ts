@@ -82,9 +82,64 @@ describe('runMonthlyTaskDifficultyCalibrationBackfill', () => {
     });
 
     expect(result.periodsInserted).toBe(0);
-    expect(result.periodsSkippedMissingTarget).toBeGreaterThan(0);
+    expect(result.periodsSkippedMissingTarget).toBe(15);
     expect(
       mockQuery.mock.calls.some(([sql]) => String(sql).includes('SELECT weekly_target FROM cat_game_mode WHERE game_mode_id = $1')),
     ).toBe(false);
+  });
+
+  it('advances month-by-month when historical mode is missing for early periods', async () => {
+    const insertedPeriodEnds: string[] = [];
+
+    mockQuery.mockImplementation(async (sql: string, params?: unknown[]) => {
+      if (sql.includes('FROM tasks t') && sql.includes('WHERE u.deleted_at IS NULL')) {
+        return {
+          rows: [
+            {
+              task_id: 'task-1',
+              user_id: 'user-1',
+              created_at: '2025-01-01T00:00:00.000Z',
+              difficulty_id: 2,
+              game_mode_id: 3,
+            },
+          ],
+        };
+      }
+
+      if (sql.includes('FROM task_difficulty_recalibrations')) {
+        return { rows: [] };
+      }
+
+      if (sql.includes('FROM user_game_mode_history h')) {
+        return {
+          rows: [
+            {
+              game_mode_id: 3,
+              weekly_target: 7,
+              effective_at: '2025-03-01T00:00:00.000Z',
+            },
+          ],
+        };
+      }
+
+      if (sql.includes('FROM daily_log')) {
+        return { rows: [{ completed: 0 }] };
+      }
+
+      if (sql.includes('INSERT INTO task_difficulty_recalibrations')) {
+        insertedPeriodEnds.push(String(params?.[3]));
+        return { rows: [] };
+      }
+
+      throw new Error(`Unexpected SQL: ${sql}`);
+    });
+
+    const result = await runMonthlyTaskDifficultyCalibrationBackfill({
+      now: new Date('2025-05-15T00:00:00.000Z'),
+    });
+
+    expect(result.periodsSkippedMissingTarget).toBe(2);
+    expect(result.periodsInserted).toBe(2);
+    expect(insertedPeriodEnds).toEqual(['2025-03-31', '2025-04-30']);
   });
 });
