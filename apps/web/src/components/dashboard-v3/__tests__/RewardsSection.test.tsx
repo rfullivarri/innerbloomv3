@@ -1,0 +1,133 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import type { RewardsHistorySummary, TaskInsightsResponse } from '../../../lib/api';
+import { RewardsSection } from '../RewardsSection';
+
+const getRewardsHistoryMock = vi.fn();
+const getTaskInsightsMock = vi.fn();
+const toggleTaskHabitAchievementMaintainedMock = vi.fn();
+const decideTaskHabitAchievementMock = vi.fn();
+
+vi.mock('../../../i18n/postLoginLanguage', () => ({
+  usePostLoginLanguage: () => ({ language: 'en' as const }),
+}));
+
+vi.mock('../../../lib/api', async () => {
+  const actual = await vi.importActual<typeof import('../../../lib/api')>('../../../lib/api');
+  return {
+    ...actual,
+    getRewardsHistory: (...args: unknown[]) => getRewardsHistoryMock(...args),
+    getTaskInsights: (...args: unknown[]) => getTaskInsightsMock(...args),
+    toggleTaskHabitAchievementMaintained: (...args: unknown[]) => toggleTaskHabitAchievementMaintainedMock(...args),
+    decideTaskHabitAchievement: (...args: unknown[]) => decideTaskHabitAchievementMock(...args),
+  };
+});
+
+const initialData: RewardsHistorySummary = {
+  weeklyWrapups: [],
+  weeklyUnseenCount: 0,
+  monthlyWrapups: [],
+  habitAchievements: {
+    pendingCount: 0,
+    achievedByPillar: [
+      {
+        pillar: { id: 'pillar-body', code: 'BODY', name: 'Body' },
+        habits: [
+          {
+            id: 'habit-achieved',
+            taskId: 'task-achieved',
+            taskName: 'Hydrate',
+            pillar: 'BODY',
+            trait: { id: 'trait-res', code: 'RES', name: 'Resilience' },
+            seal: { visible: true },
+            status: 'maintained',
+            achievedAt: '2026-03-30T00:00:00.000Z',
+            decisionMadeAt: '2026-03-31T00:00:00.000Z',
+            gpBeforeAchievement: 1220,
+            gpSinceMaintain: 35,
+            maintainEnabled: true,
+          },
+          {
+            id: 'habit-preview',
+            taskId: 'task-preview',
+            taskName: 'Read 10 pages',
+            pillar: 'BODY',
+            trait: { id: 'trait-foc', code: 'FOC', name: 'Focus' },
+            seal: { visible: false },
+            status: 'not_achieved',
+            achievedAt: null,
+            decisionMadeAt: null,
+            gpBeforeAchievement: 0,
+            gpSinceMaintain: 0,
+            maintainEnabled: false,
+          },
+        ],
+      },
+    ],
+  },
+};
+
+const insightsResponse: TaskInsightsResponse = {
+  task: { id: 'task-preview', name: 'Read 10 pages', stat: 'Focus', description: null },
+  month: { totalCount: 4, totalXp: 120, days: [] },
+  weeks: {
+    weeklyGoal: 4,
+    completionRate: 0.5,
+    weeksSample: 8,
+    currentStreak: 1,
+    bestStreak: 2,
+    timeline: [],
+  },
+  previewAchievement: {
+    score: 74,
+    status: 'building',
+    consolidationStrength: 66,
+    windowProximity: {
+      slots: [
+        { id: 'm1', label: 'M1', state: 'valid' },
+        { id: 'm2', label: 'M2', state: 'pending' },
+        { id: 'm3', label: 'M3', state: 'locked' },
+      ],
+    },
+    recentMonths: [
+      { month: '2026-01', value: 52, state: 'building' },
+      { month: '2026-02', value: 63, state: 'building' },
+      { month: '2026-03', value: 74, state: 'building' },
+    ],
+  },
+  recalibration: { history: [], eligible: false },
+};
+
+describe('RewardsSection achieved shelf overlays', () => {
+  it('makes non-achieved tasks clickable and opens preview overlay with preview achievement card', async () => {
+    getRewardsHistoryMock.mockResolvedValue(initialData);
+    getTaskInsightsMock.mockResolvedValue(insightsResponse);
+
+    render(<RewardsSection userId="user-123" initialData={initialData} />);
+
+    expect(getTaskInsightsMock).not.toHaveBeenCalled();
+
+    const previewButton = screen.getByRole('button', { name: /Read 10 pages/i });
+    fireEvent.click(previewButton);
+
+    expect(await screen.findByText('Seal path')).toBeInTheDocument();
+    expect(await screen.findByLabelText('preview achievement score 74')).toBeInTheDocument();
+    await waitFor(() => expect(getTaskInsightsMock).toHaveBeenCalledWith('task-preview'));
+  });
+
+  it('keeps achieved-task focus overlay behavior', async () => {
+    getRewardsHistoryMock.mockResolvedValue(initialData);
+    getTaskInsightsMock.mockResolvedValue(insightsResponse);
+
+    render(<RewardsSection userId="user-123" initialData={initialData} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Hydrate/i }));
+
+    expect(await screen.findByText('Tap again to view the back side')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Tap again to view the back side/i }));
+
+    expect(await screen.findByText('Keep maintained')).toBeInTheDocument();
+    expect(toggleTaskHabitAchievementMaintainedMock).not.toHaveBeenCalled();
+  });
+});

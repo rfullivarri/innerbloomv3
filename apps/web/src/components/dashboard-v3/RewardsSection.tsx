@@ -5,6 +5,7 @@ import { Card } from '../ui/Card';
 import { useRequest } from '../../hooks/useRequest';
 import {
   decideTaskHabitAchievement,
+  getTaskInsights,
   getRewardsHistory,
   toggleTaskHabitAchievementMaintained,
   type HabitAchievementShelfItem,
@@ -15,6 +16,7 @@ import {
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { emitHabitAchievementUpdated } from '../../lib/habitAchievementEvents';
 import { HabitAchievementSeal } from './HabitAchievementSeal';
+import { PreviewAchievementCard } from './PreviewAchievementCard';
 
 const REWARDS_PILLAR_ORDER = [
   { code: 'BODY', name: 'Body' },
@@ -370,6 +372,7 @@ function AchievedShelf({
   onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
 }) {
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
+  const [previewHabit, setPreviewHabit] = useState<HabitAchievementShelfItem | null>(null);
   const [showBackFace, setShowBackFace] = useState(false);
   const normalizedGroups = useMemo(() => {
     const byCode = new Map(groups.map((group) => [group.pillar.code.toUpperCase(), group]));
@@ -419,9 +422,11 @@ function AchievedShelf({
 
               if (!isAchieved) {
                 return (
-                  <div
+                  <button
                     key={habit.id}
-                    className="flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 py-4 text-center opacity-80"
+                    type="button"
+                    onClick={() => setPreviewHabit(habit)}
+                    className="flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 py-4 text-center opacity-80 transition hover:border-[color:var(--color-border-strong)] hover:opacity-100"
                   >
                     <HabitAchievementSeal
                       pillar={habit.pillar ?? group.pillar.code}
@@ -438,7 +443,7 @@ function AchievedShelf({
                       )}
                     />
                     <p className="mt-3 w-full truncate text-sm font-semibold text-[color:var(--color-text-muted)]">{habit.taskName}</p>
-                  </div>
+                  </button>
                 );
               }
 
@@ -489,7 +494,94 @@ function AchievedShelf({
         }}
         onToggleMaintained={onToggleMaintained}
       />
+
+      <NotAchievedPreviewOverlay
+        habit={previewHabit}
+        language={language}
+        onClose={() => setPreviewHabit(null)}
+      />
     </div>
+  );
+}
+
+function NotAchievedPreviewOverlay({
+  habit,
+  language,
+  onClose,
+}: {
+  habit: HabitAchievementShelfItem | null;
+  language: 'es' | 'en';
+  onClose: () => void;
+}) {
+  const taskId = habit?.taskId;
+  const { data, status, error } = useRequest(
+    () => getTaskInsights(taskId ?? ''),
+    [taskId],
+    { enabled: Boolean(taskId) },
+  );
+
+  useEffect(() => {
+    if (!habit) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [habit, onClose]);
+
+  if (!habit || typeof document === 'undefined') {
+    return null;
+  }
+
+  const previewAchievement = data?.previewAchievement ?? null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[230] flex items-end justify-center bg-slate-950/70 p-4 sm:items-center" onClick={onClose}>
+      <div className="relative w-full max-w-sm rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-4" onClick={(event) => event.stopPropagation()}>
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] px-2 py-1 text-xs text-[color:var(--color-text)]"
+          aria-label={language === 'es' ? 'Cerrar vista de sello' : 'Close seal preview'}
+        >
+          ✕
+        </button>
+        <div className="pr-9">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">
+            {language === 'es' ? 'Ruta del sello' : 'Seal path'}
+          </p>
+          <h3 className="mt-1 text-base font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</h3>
+        </div>
+
+        <div className="mt-4">
+          {status === 'loading' ? (
+            <div className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+              {language === 'es' ? 'Cargando vista previa del logro…' : 'Loading achievement preview…'}
+            </div>
+          ) : null}
+          {status === 'error' ? (
+            <div className="rounded-2xl border border-rose-400/40 bg-rose-500/10 p-4 text-sm text-rose-100">
+              {error?.message ?? (language === 'es' ? 'No pudimos cargar el estado del sello.' : "Couldn't load seal state.")}
+            </div>
+          ) : null}
+          {status === 'success' && previewAchievement ? (
+            <PreviewAchievementCard previewAchievement={previewAchievement} language={language} />
+          ) : null}
+          {status === 'success' && !previewAchievement ? (
+            <div className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+              {language === 'es' ? 'Sigue registrando esta tarea para desbloquear el sello.' : 'Keep logging this task to unlock the seal.'}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
