@@ -104,7 +104,7 @@ export function computePreviewAchievementFromRates(params: {
   completionsDoneSoFar: number;
   expectedTargetMonthEnd: number;
   projectedCompletionsMonthEnd: number;
-  recentClosedMonths: Array<{ periodKey: string; completionRate: number; expectedTarget: number; completionsDone: number }>;
+  recentClosedMonths: { periodKey: string; completionRate: number; expectedTarget: number; completionsDone: number }[];
 }): PreviewAchievement {
   const currentMonthMomentumScore = clamp01To100(
     0.45 * normalizeMonthlyRateToScore(params.completionRateSoFar) +
@@ -118,7 +118,7 @@ export function computePreviewAchievementFromRates(params: {
   const m1 = params.recentClosedMonths[0] ?? null;
   const currentRate = params.projectedMonthEndRate;
 
-  const candidateRates: Array<number | null> = [m2?.completionRate ?? null, m1?.completionRate ?? null, currentRate];
+  const candidateRates: (number | null)[] = [m2?.completionRate ?? null, m1?.completionRate ?? null, currentRate];
   const slots: SlotValue[] = candidateRates.map((rate, index) => {
     if (rate == null) return 'empty';
     const isProjected = index === 2;
