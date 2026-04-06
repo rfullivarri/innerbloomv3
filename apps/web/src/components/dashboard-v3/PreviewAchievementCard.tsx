@@ -117,8 +117,6 @@ export function PreviewAchievementCard({
   const recentMonths = normalizeRecentMonths(previewAchievement.recentMonths);
   const orderedRecentMonths = recentMonths;
   const lastThreeStart = Math.max(0, orderedRecentMonths.length - 3);
-  const olderMonths = orderedRecentMonths.slice(0, lastThreeStart);
-  const sealWindowMonths = orderedRecentMonths.slice(lastThreeStart);
 
   const ring = useMemo(() => {
     const radius = 47;
@@ -191,42 +189,50 @@ export function PreviewAchievementCard({
       <div className="mt-3 space-y-2">
         {orderedRecentMonths.length > 0 && (
           <div className="rounded-xl border border-white/10 bg-[color:var(--color-overlay-2)] px-2 py-2">
-            <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
-              {language === 'es' ? 'Historial reciente' : 'Recent history'}
-            </p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
+                {language === 'es' ? 'Historial reciente' : 'Recent history'}
+              </p>
+              <details className="group relative" data-testid="timeline-legend">
+                <summary
+                  className="inline-flex h-4 w-4 cursor-pointer list-none items-center justify-center rounded-full border border-white/25 text-[10px] leading-none text-[color:var(--color-slate-300)] transition-colors hover:text-white"
+                  aria-label={language === 'es' ? 'Leyenda de historial' : 'History legend'}
+                >
+                  i
+                </summary>
+                <div className="pointer-events-none absolute left-0 top-5 z-10 hidden min-w-[10rem] rounded-md border border-white/15 bg-[color:var(--color-overlay-2)] p-2 text-[10px] leading-snug text-[color:var(--color-slate-200)] shadow-xl group-open:block group-hover:block">
+                  <p>{language === 'es' ? '✓ = mes fuerte' : '✓ = strong month'}</p>
+                  <p>{language === 'es' ? '• = en construcción' : '• = building'}</p>
+                  <p>{language === 'es' ? '✕ = mes débil' : '✕ = weak month'}</p>
+                  <p>{language === 'es' ? '~ = mes actual proyectado' : '~ = projected current month'}</p>
+                </div>
+              </details>
+            </div>
             <p className="mb-2 text-[10px] text-[color:var(--color-slate-400)]" data-testid="timeline-window-subtitle">
               {language === 'es' ? 'Los últimos 3 meses cuentan para el sello' : 'The last 3 months count toward the seal'}
             </p>
-            <div className="flex items-start gap-2 overflow-x-auto pb-1" data-testid="recent-timeline">
-              {olderMonths.map((entry) => (
-                <div key={`${entry.key}-${entry.value ?? 0}`} data-testid="recent-month-item" className="flex min-w-[2.5rem] flex-col items-center gap-1">
+            <div className="overflow-x-auto pb-1" data-testid="recent-timeline">
+              <div className="flex w-max min-w-full items-start gap-2 md:justify-between md:gap-3">
+                {orderedRecentMonths.map((entry, index) => (
                   <div
-                    data-testid="recent-month-node"
+                    key={`${entry.key}-${entry.value ?? 0}`}
+                    data-testid="recent-month-item"
                     className={cx(
-                      'inline-flex h-9 w-9 items-center justify-center rounded-full border text-[11px] font-semibold shadow-inner sm:h-10 sm:w-10',
-                      getMonthTone(entry.state),
+                      'relative flex min-w-[2.5rem] flex-col items-center gap-1',
+                      index >= lastThreeStart && 'px-0.5',
                     )}
-                    aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
-                    data-month-symbol={getMonthSymbol(entry.state)}
                   >
-                    {getMonthSymbol(entry.state)}
-                  </div>
-                  <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
-                    {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
-                  </span>
-                </div>
-              ))}
-
-              <div
-                className="flex items-start gap-2 rounded-2xl border border-white/15 bg-white/5 px-2.5 py-1.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
-                data-testid="seal-window-group"
-              >
-                {sealWindowMonths.map((entry) => (
-                  <div key={`${entry.key}-${entry.value ?? 0}`} data-testid="recent-month-item" className="flex min-w-[2.5rem] flex-col items-center gap-1">
+                    {index === lastThreeStart && (
+                      <div
+                        className="pointer-events-none absolute -inset-x-2 -inset-y-1 rounded-2xl border border-white/15 bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
+                        data-testid="seal-window-group"
+                        aria-hidden
+                      />
+                    )}
                     <div
                       data-testid="recent-month-node"
                       className={cx(
-                        'inline-flex h-9 w-9 items-center justify-center rounded-full border text-[11px] font-semibold shadow-inner sm:h-10 sm:w-10',
+                        'relative inline-flex h-9 w-9 items-center justify-center rounded-full border text-base font-bold leading-none shadow-inner sm:h-10 sm:w-10',
                         getMonthTone(entry.state),
                       )}
                       aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
