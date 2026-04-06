@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 import {
@@ -168,6 +168,11 @@ function useDeepLinkNavigation(enabled: boolean) {
   const navigate = useNavigate();
   const lastHandledUrlRef = useRef<string | null>(null);
   const lastClosedFingerprintRef = useRef<string | null>(null);
+  const hasInitializedLaunchUrlRef = useRef(false);
+
+  const navigateTo = useEffectEvent((to: string, replace = true) => {
+    navigate(to, { replace });
+  });
 
   useEffect(() => {
     if (!enabled) {
@@ -247,24 +252,27 @@ function useDeepLinkNavigation(enabled: boolean) {
         }
 
         console.info('[mobile-auth] navigate() start', { nextPath, at: Date.now() });
-        navigate(nextPath, { replace: true });
+        navigateTo(nextPath, true);
         console.info('[mobile-auth] navigate() end', { nextPath, at: Date.now() });
         return;
       }
 
       const nextPath = normalizeAppUrlToPath(url);
       if (nextPath) {
-        navigate(nextPath, { replace: true });
+        navigateTo(nextPath, true);
       }
     };
 
-    console.info('[mobile-auth] getLaunchUrl() requested');
-    void app.getLaunchUrl().then((launchUrl) => {
-      console.info('[mobile-auth] getLaunchUrl() resolved', { url: launchUrl?.url ?? null });
-      if (launchUrl?.url) {
-        void handleUrl(launchUrl.url, 'launch');
-      }
-    });
+    if (!hasInitializedLaunchUrlRef.current) {
+      hasInitializedLaunchUrlRef.current = true;
+      console.info('[mobile-auth] getLaunchUrl() requested');
+      void app.getLaunchUrl().then((launchUrl) => {
+        console.info('[mobile-auth] getLaunchUrl() resolved', { url: launchUrl?.url ?? null });
+        if (launchUrl?.url) {
+          void handleUrl(launchUrl.url, 'launch');
+        }
+      });
+    }
 
     let listenerHandle: Awaited<ReturnType<typeof app.addListener>> | null = null;
     let localNotificationHandle:
@@ -287,7 +295,7 @@ function useDeepLinkNavigation(enabled: boolean) {
             ? rawTarget
             : DAILY_REMINDER_NOTIFICATION_TARGET_PATH;
           console.info('[mobile-reminder] local notification action', { nextPath, at: Date.now() });
-          navigate(nextPath, { replace: false });
+          navigateTo(nextPath, false);
         }),
       ).then((handle) => {
         localNotificationHandle = handle;
@@ -299,7 +307,7 @@ function useDeepLinkNavigation(enabled: boolean) {
       void listenerHandle?.remove();
       void localNotificationHandle?.remove();
     };
-  }, [enabled, navigate]);
+  }, [enabled, navigateTo]);
 }
 
 export function NativeMobileBridge() {
