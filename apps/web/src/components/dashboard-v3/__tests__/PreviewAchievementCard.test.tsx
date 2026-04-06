@@ -11,16 +11,12 @@ function renderCard(overrides: Partial<PreviewAchievement> = {}) {
     status: 'building',
     consolidationStrength: 66,
     windowProximity: {
-      slots: [
-        { id: 'm1', label: 'M1', state: 'valid' },
-        { id: 'm2', label: 'M2', state: 'pending' },
-        { id: 'm3', label: 'M3', state: 'locked' },
-      ],
+      slots: ['valid', 'projected_floor_only', 'empty'],
     },
     recentMonths: [
-      { month: '2026-01', value: 42, state: 'weak' },
-      { month: '2026-02', value: 61, state: 'building' },
-      { month: '2026-03', value: 72, state: 'strong' },
+      { periodKey: '2026-01', value: 42, state: 'weak' },
+      { periodKey: '2026-02', value: 61, state: 'building' },
+      { periodKey: '2026-03', value: 72, state: 'strong' },
     ],
     ...overrides,
   };
@@ -55,11 +51,7 @@ describe('PreviewAchievementCard', () => {
   test('renders 3-slot window indicator with semantic symbols and explanatory label', () => {
     renderCard({
       windowProximity: {
-        slots: [
-          { id: 'm1', label: 'M1', state: 'valid' },
-          { id: 'm2', label: 'M2', state: 'projected_floor_only' },
-          { id: 'm3', label: 'M3', state: 'empty' },
-        ],
+        slots: ['valid', 'projected_floor_only', 'empty'],
       },
     });
     const slots = screen.getAllByTestId('window-slot');
@@ -76,10 +68,10 @@ describe('PreviewAchievementCard', () => {
   test('renders recent month timeline as state chips with visible month labels', () => {
     renderCard({
       recentMonths: [
-        { month: '2026-01', value: 89, state: 'strong' },
-        { month: '2026-02', value: 42, state: 'weak' },
-        { month: '2026-03', value: 0, state: 'bad' },
-        { month: '2026-04', value: 65, state: 'projected_valid' },
+        { periodKey: '2026-01', value: 89, state: 'strong' },
+        { periodKey: '2026-02', value: 42, state: 'weak' },
+        { periodKey: '2026-03', value: 0, state: 'bad' },
+        { periodKey: '2026-04', value: 65, state: 'projected_valid' },
       ],
     });
     const months = screen.getAllByTestId('recent-month-item');
@@ -98,10 +90,10 @@ describe('PreviewAchievementCard', () => {
   test('renders recent history in chronological order so current stays on the right', () => {
     renderCard({
       recentMonths: [
-        { month: '2026-04', value: 65, state: 'projected_valid' },
-        { month: '2026-01', value: 89, state: 'strong' },
-        { month: '2026-03', value: 0, state: 'bad' },
-        { month: '2026-02', value: 42, state: 'weak' },
+        { periodKey: '2026-04', value: 65, state: 'projected_valid' },
+        { periodKey: '2026-01', value: 89, state: 'strong' },
+        { periodKey: '2026-03', value: 0, state: 'bad' },
+        { periodKey: '2026-02', value: 42, state: 'weak' },
       ],
     });
 
@@ -117,5 +109,33 @@ describe('PreviewAchievementCard', () => {
   test('renders helper bridge copy to explain seal progression', () => {
     renderCard();
     expect(screen.getByTestId('seal-bridge-copy')).toHaveTextContent('La ventana usa 3 meses seguidos para indicar si el sello está cerca.');
+  });
+
+  test('does not crash when recent month item is missing periodKey/month', () => {
+    renderCard({
+      recentMonths: [
+        { periodKey: '2026-04', value: 65, state: 'projected_valid' },
+        { value: 22, state: 'building' },
+      ],
+    });
+
+    expect(screen.getAllByTestId('recent-month-item')).toHaveLength(2);
+    expect(screen.getByText('Sin mes')).toBeInTheDocument();
+  });
+
+  test('renders fallback labels with partial preview payload', () => {
+    renderCard({
+      windowProximity: {
+        slots: ['valid', { id: 'slot-b', state: null }, 'projected_invalid'],
+      },
+      recentMonths: [
+        { month: '2026-02', state: 'building' },
+        { state: null },
+      ],
+    });
+
+    const monthLabels = screen.getAllByTestId('recent-month-label').map((node) => node.textContent);
+    expect(monthLabels).toEqual(['feb', 'Sin mes']);
+    expect(screen.getAllByTestId('window-slot')).toHaveLength(3);
   });
 });
