@@ -48,10 +48,11 @@ describe('PreviewAchievementCard', () => {
     renderCard({ score: 88 });
     expect(screen.getByLabelText('preview achievement score 88')).toBeInTheDocument();
     expect(screen.getByText('88')).toBeInTheDocument();
-    expect(screen.getByTestId('score-affordance')).toHaveTextContent('fuerza actual');
+    expect(screen.getByTestId('score-affordance')).toHaveTextContent('Score');
+    expect(screen.getByTestId('score-affordance')).toHaveTextContent('fuerza actual del hábito');
   });
 
-  test('renders 3-slot window indicator with semantic symbols', () => {
+  test('renders 3-slot window indicator with semantic symbols and explanatory label', () => {
     renderCard({
       windowProximity: {
         slots: [
@@ -63,12 +64,16 @@ describe('PreviewAchievementCard', () => {
     });
     const slots = screen.getAllByTestId('window-slot');
     expect(slots).toHaveLength(3);
+    expect(screen.getByTestId('active-window-label')).toHaveTextContent('3 meses que cuentan');
+    expect(screen.getByText('M1')).toBeInTheDocument();
+    expect(screen.getByText('M2')).toBeInTheDocument();
+    expect(screen.getByText('Actual')).toBeInTheDocument();
     expect(slots[0]).toHaveAttribute('data-slot-symbol', '✓');
     expect(slots[1]).toHaveAttribute('data-slot-symbol', '~');
     expect(slots[2]).toHaveAttribute('data-slot-symbol', '○');
   });
 
-  test('renders recent month timeline as state chips', () => {
+  test('renders recent month timeline as state chips with visible month labels', () => {
     renderCard({
       recentMonths: [
         { month: '2026-01', value: 89, state: 'strong' },
@@ -85,5 +90,12 @@ describe('PreviewAchievementCard', () => {
     expect(within(months[3]).getByText('~')).toBeInTheDocument();
     expect(within(months[0]).getByText('ene')).toBeInTheDocument();
     expect(within(months[3]).getByText('abr')).toBeInTheDocument();
+    expect(within(months[3]).getByText('Actual')).toBeInTheDocument();
+    expect(screen.getAllByTestId('recent-month-label')).toHaveLength(4);
+  });
+
+  test('renders helper bridge copy to explain seal progression', () => {
+    renderCard();
+    expect(screen.getByTestId('seal-bridge-copy')).toHaveTextContent('El sello se logra al completar una ventana válida de 3 meses.');
   });
 });
