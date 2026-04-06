@@ -108,7 +108,12 @@ export function PreviewAchievementCard({
   const score = Math.max(0, Math.min(100, Math.round(Number(previewAchievement.score ?? 0))));
   const slots = previewAchievement.windowProximity?.slots ?? [];
   const recentMonths = previewAchievement.recentMonths ?? [];
-  const slotPositionLabels = language === 'es' ? ['M1', 'M2', 'Actual'] : ['M1', 'M2', 'Current'];
+  const slotPositionLabels = language === 'es' ? ['Mes 1', 'Mes 2', 'Actual'] : ['Month 1', 'Month 2', 'Current'];
+
+  const orderedSlots = slots.slice(0, 3);
+  const orderedRecentMonths = [...recentMonths]
+    .sort((a, b) => a.month.localeCompare(b.month))
+    .slice(-4);
 
   const ring = useMemo(() => {
     const radius = 47;
@@ -181,21 +186,23 @@ export function PreviewAchievementCard({
       <div className="mt-3 space-y-2">
         <div className="rounded-xl border border-white/10 bg-[color:var(--color-overlay-2)] px-2 py-2">
           <div className="mb-1 flex items-center justify-between gap-2">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--color-slate-400)]">3M</p>
+            <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--color-slate-300)]" data-testid="seal-window-title">
+              {language === 'es' ? 'Ventana al sello' : 'Seal window'}
+            </p>
             <p className="text-[10px] text-[color:var(--color-slate-400)]" data-testid="active-window-label">
-              {language === 'es' ? '3 meses que cuentan' : '3 months that count'}
+              {language === 'es' ? '3 meses consecutivos' : '3 consecutive months'}
             </p>
           </div>
           <div className="flex items-center gap-1.5">
-            {slots.slice(0, 3).map((slot, index) => (
+            {orderedSlots.map((slot, index) => (
               <div key={slot.id ?? `slot-${index}`} className="flex min-w-0 flex-1 items-center gap-1">
                 {index > 0 ? <span aria-hidden className="h-px flex-1 bg-white/15" /> : null}
                 <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-[9px] text-[color:var(--color-slate-400)]">{slotPositionLabels[index] ?? `M${index + 1}`}</span>
+                  <span className="text-[9px] text-[color:var(--color-slate-300)]" data-testid="seal-window-slot-label">{slotPositionLabels[index] ?? `M${index + 1}`}</span>
                   <span
                     data-testid="window-slot"
                     className={cx(
-                      'inline-flex h-6 min-w-[2rem] items-center justify-center rounded-full border px-2 text-[11px] font-semibold',
+                      'inline-flex h-7 min-w-[3.15rem] items-center justify-center rounded-md border px-2 text-[11px] font-semibold shadow-inner',
                       getSlotTone(slot.state),
                     )}
                     aria-label={slot.label ?? `slot-${index + 1}`}
@@ -209,13 +216,13 @@ export function PreviewAchievementCard({
           </div>
         </div>
 
-        {recentMonths.length > 0 && (
+        {orderedRecentMonths.length > 0 && (
           <div className="rounded-xl border border-white/10 bg-[color:var(--color-overlay-2)] px-2 py-2">
             <p className="mb-1 text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
-              {language === 'es' ? 'Meses recientes' : 'Recent months'}
+              {language === 'es' ? 'Historial reciente' : 'Recent history'}
             </p>
             <div className="flex items-end justify-between gap-1.5">
-              {recentMonths.slice(-4).map((entry) => {
+              {orderedRecentMonths.map((entry) => {
                 return (
                   <div key={`${entry.month}-${entry.value ?? 0}`} data-testid="recent-month-item" className="flex min-w-0 flex-1 flex-col items-center gap-1">
                     <div
@@ -242,8 +249,8 @@ export function PreviewAchievementCard({
         )}
         <p className="px-0.5 text-[10px] text-[color:var(--color-slate-400)]" data-testid="seal-bridge-copy">
           {language === 'es'
-            ? 'El sello se logra al completar una ventana válida de 3 meses.'
-            : 'The seal is earned by completing a valid 3-month window.'}
+            ? 'La ventana usa 3 meses seguidos para indicar si el sello está cerca.'
+            : 'The window uses 3 consecutive months to determine if the seal is close.'}
         </p>
       </div>
     </section>

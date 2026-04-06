@@ -64,10 +64,10 @@ describe('PreviewAchievementCard', () => {
     });
     const slots = screen.getAllByTestId('window-slot');
     expect(slots).toHaveLength(3);
-    expect(screen.getByTestId('active-window-label')).toHaveTextContent('3 meses que cuentan');
-    expect(screen.getByText('M1')).toBeInTheDocument();
-    expect(screen.getByText('M2')).toBeInTheDocument();
-    expect(screen.getByText('Actual')).toBeInTheDocument();
+    expect(screen.getByTestId('seal-window-title')).toHaveTextContent('Ventana al sello');
+    expect(screen.getByTestId('active-window-label')).toHaveTextContent('3 meses consecutivos');
+    const slotLabels = screen.getAllByTestId('seal-window-slot-label');
+    expect(slotLabels.map((label) => label.textContent)).toEqual(['Mes 1', 'Mes 2', 'Actual']);
     expect(slots[0]).toHaveAttribute('data-slot-symbol', '✓');
     expect(slots[1]).toHaveAttribute('data-slot-symbol', '~');
     expect(slots[2]).toHaveAttribute('data-slot-symbol', '○');
@@ -94,8 +94,28 @@ describe('PreviewAchievementCard', () => {
     expect(screen.getAllByTestId('recent-month-label')).toHaveLength(4);
   });
 
+
+  test('renders recent history in chronological order so current stays on the right', () => {
+    renderCard({
+      recentMonths: [
+        { month: '2026-04', value: 65, state: 'projected_valid' },
+        { month: '2026-01', value: 89, state: 'strong' },
+        { month: '2026-03', value: 0, state: 'bad' },
+        { month: '2026-02', value: 42, state: 'weak' },
+      ],
+    });
+
+    expect(screen.getByText('Historial reciente')).toBeInTheDocument();
+
+    const labels = screen.getAllByTestId('recent-month-label').map((label) => label.textContent);
+    expect(labels).toEqual(['ene', 'feb', 'mar', 'abr']);
+
+    const months = screen.getAllByTestId('recent-month-item');
+    expect(within(months[3]).getByText('Actual')).toBeInTheDocument();
+  });
+
   test('renders helper bridge copy to explain seal progression', () => {
     renderCard();
-    expect(screen.getByTestId('seal-bridge-copy')).toHaveTextContent('El sello se logra al completar una ventana válida de 3 meses.');
+    expect(screen.getByTestId('seal-bridge-copy')).toHaveTextContent('La ventana usa 3 meses seguidos para indicar si el sello está cerca.');
   });
 });
