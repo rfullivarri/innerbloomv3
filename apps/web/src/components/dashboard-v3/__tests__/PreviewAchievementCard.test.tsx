@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { PreviewAchievementCard } from '../PreviewAchievementCard';
 import type { TaskInsightsResponse } from '../../../lib/api';
@@ -96,11 +96,11 @@ describe('PreviewAchievementCard', () => {
     });
 
     const groupedWindow = screen.getByTestId('seal-window-group');
-    const groupedItems = within(groupedWindow).getAllByTestId('recent-month-item');
-    const groupedLabels = within(groupedWindow).getAllByTestId('recent-month-label').map((label) => label.textContent);
+    expect(groupedWindow.className).toContain('rounded-2xl');
 
-    expect(groupedItems).toHaveLength(3);
-    expect(groupedLabels).toEqual(['feb', 'mar', 'abr']);
+    const labels = screen.getAllByTestId('recent-month-label').map((label) => label.textContent);
+    expect(labels).toEqual(['nov', 'dic', 'ene', 'feb', 'mar', 'abr']);
+    expect(labels.slice(-3)).toEqual(['feb', 'mar', 'abr']);
   });
 
   test('renders recent history in chronological order so current stays on the right', () => {
@@ -139,7 +139,31 @@ describe('PreviewAchievementCard', () => {
     const groupedWindow = screen.getByTestId('seal-window-group');
     expect(groupedWindow.className).toContain('rounded-2xl');
     expect(groupedWindow.className).toContain('bg-white/5');
+    const nodes = screen.getAllByTestId('recent-month-node');
+    nodes.forEach((node) => {
+      expect(node.className).toContain('text-base');
+      expect(node.className).toContain('leading-none');
+    });
     expect(screen.queryByText('Actual')).not.toBeInTheDocument();
+  });
+
+  test('renders compact legend and explains intermediate yellow/building state', () => {
+    renderCard({
+      recentMonths: [
+        { periodKey: '2026-01', value: 80, state: 'strong' },
+        { periodKey: '2026-02', value: 70, state: 'building' },
+        { periodKey: '2026-03', value: 55, state: 'floor_only' },
+      ],
+    });
+
+    const legend = screen.getByTestId('timeline-legend');
+    expect(legend).toBeInTheDocument();
+
+    fireEvent.click(within(legend).getByText('i'));
+    expect(screen.getByText('✓ = mes fuerte')).toBeInTheDocument();
+    expect(screen.getByText('• = en construcción')).toBeInTheDocument();
+    expect(screen.getByText('✕ = mes débil')).toBeInTheDocument();
+    expect(screen.getByText('~ = mes actual proyectado')).toBeInTheDocument();
   });
 
   test('does not crash when recent month item is missing periodKey/month', () => {
