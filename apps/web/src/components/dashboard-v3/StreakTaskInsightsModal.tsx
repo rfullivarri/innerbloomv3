@@ -19,8 +19,6 @@ type TaskSummary = Pick<StreakPanelTask, 'id' | 'name' | 'stat'> & {
   monthXp?: number;
 };
 
-const numberFormatter = new Intl.NumberFormat('es-AR');
-
 type TaskInsightsModalProps = {
   taskId: string | null;
   weeklyGoal: number;
@@ -48,6 +46,7 @@ type RecalibrationRecord = {
   clampReason?: string | null;
   recalibratedAt?: string | null;
 };
+type Translate = (key: string, params?: Record<string, string | number>) => string;
 
 function normalizeRecalibrationAction(value: string | null | undefined): RecalibrationAction {
   const normalized = (value ?? '').trim().toLowerCase();
@@ -64,7 +63,7 @@ function formatCompactDate(value: string | null | undefined, locale: PostLoginLa
   return new Intl.DateTimeFormat(locale === 'es' ? 'es-AR' : 'en-US', { month: 'short', day: 'numeric' }).format(parsed);
 }
 
-function formatPeriodLabel(record: RecalibrationRecord, locale: PostLoginLanguage): string {
+function formatPeriodLabel(record: RecalibrationRecord, locale: PostLoginLanguage, t: Translate): string {
   const periodValue = record.periodStart ?? record.periodEnd ?? record.recalibratedAt ?? null;
   if (periodValue) {
     const parsed = new Date(periodValue);
@@ -72,12 +71,36 @@ function formatPeriodLabel(record: RecalibrationRecord, locale: PostLoginLanguag
       return new Intl.DateTimeFormat(locale === 'es' ? 'es-AR' : 'en-US', { month: 'long' }).format(parsed);
     }
   }
-  return locale === 'es' ? 'Mes reciente' : 'Recent month';
+  return t('dashboard.streakTaskInsights.recalibration.recentMonth');
 }
 
 function sanitizeRecalibrationReason(reason: string | null | undefined): string {
   if (!reason) return '';
   return reason.replace(/^Historical row migrated:\s*/i, '').trim();
+}
+
+function getRecalibrationReasonLabel(reason: string | null | undefined, locale: PostLoginLanguage, t: Translate): string {
+  const sanitized = sanitizeRecalibrationReason(reason);
+  if (!sanitized) {
+    return t('dashboard.streakTaskInsights.recalibration.reasonFallback');
+  }
+  const normalized = sanitized.toLowerCase().replace(/[.!]+$/g, '').trim();
+  if (normalized.includes('completion rate above 80%') && normalized.includes('decreasing difficulty')) {
+    return t('dashboard.streakTaskInsights.recalibration.reason.highCompletion');
+  }
+  if (normalized.includes('completion rate between 50% and 79%') && normalized.includes('difficulty kept')) {
+    return t('dashboard.streakTaskInsights.recalibration.reason.mediumCompletion');
+  }
+  if (normalized.includes('completion rate below 50%') && normalized.includes('increasing difficulty')) {
+    return t('dashboard.streakTaskInsights.recalibration.reason.lowCompletion');
+  }
+  return locale === 'es' ? t('dashboard.streakTaskInsights.recalibration.reasonUnknown') : sanitized;
+}
+
+function getRecalibrationActionLabel(action: RecalibrationAction, t: Translate): string {
+  if (action === 'down') return t('dashboard.streakTaskInsights.recalibration.action.down');
+  if (action === 'up') return t('dashboard.streakTaskInsights.recalibration.action.up');
+  return t('dashboard.streakTaskInsights.recalibration.action.keep');
 }
 
 function localizeDifficultyChipLabel(
@@ -188,8 +211,8 @@ function formatDateLabel(value: string): string {
   return Number.isFinite(day) ? String(day) : value;
 }
 
-function formatWeekdayLabel(date: Date): string {
-  return new Intl.DateTimeFormat('es-AR', { weekday: 'narrow' }).format(date).toUpperCase();
+function formatWeekdayLabel(date: Date, locale: PostLoginLanguage): string {
+  return new Intl.DateTimeFormat(locale === 'es' ? 'es-AR' : 'en-US', { weekday: 'narrow' }).format(date).toUpperCase();
 }
 
 function parseIsoDate(date: string): Date {
@@ -206,6 +229,8 @@ function WeeklyCompletionDonut({
   weeksSample,
   referenceDate,
   progressAriaLabel,
+  t,
+  language,
 }: {
   timeline: TaskInsightsResponse['weeks']['timeline'];
   weeklyGoal: number;
@@ -215,6 +240,8 @@ function WeeklyCompletionDonut({
   weeksSample?: number | null;
   referenceDate?: Date;
   progressAriaLabel: string;
+  t: Translate;
+  language: PostLoginLanguage;
 }) {
   const today = useMemo(() => referenceDate ?? new Date(), [referenceDate]);
   const parsedWeeksSample = Number(weeksSample);
@@ -223,6 +250,7 @@ function WeeklyCompletionDonut({
     completionRate,
     weeksSample: parsedWeeksSample,
     referenceDate: today,
+    locale: language,
   });
 
   const healthStyles: Record<HabitHealthLevel, string> = {
@@ -232,7 +260,7 @@ function WeeklyCompletionDonut({
   };
 
   if (!timeline.length) {
-    return <p className="text-sm text-[color:var(--color-slate-400)]">Aún no registramos semanas para esta tarea.</p>;
+    return <p className="text-sm text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.weeklyProgress.empty')}</p>;
   }
 
   const radius = 50;
@@ -281,17 +309,19 @@ function WeeklyCompletionDonut({
       <div className="flex-1 space-y-2 text-center text-xs text-[color:var(--color-slate-300)] sm:text-left">
         <div className="space-y-1">
           <span className={cx('inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold', healthStyles[habitHealth.level])}>
-            {habitHealth.label}
+            {t(`dashboard.streakTaskInsights.habitHealth.${habitHealth.level}`)}
           </span>
-          <p className="text-xs text-[color:var(--color-slate-200)]">Meta cumplida {completedWeeks} de {totalWeeks} semanas.</p>
+          <p className="text-xs text-[color:var(--color-slate-200)]">
+            {t('dashboard.streakTaskInsights.weeklyProgress.goalReached', { completed: completedWeeks, total: totalWeeks })}
+          </p>
         </div>
 
         <div className="space-y-0.5 text-[color:var(--color-slate-100)]">
           {currentStreak === bestStreak && bestStreak > 0 && (
-            <p className="text-xs text-emerald-100">Estás empatando tu récord.</p>
+            <p className="text-xs text-emerald-100">{t('dashboard.streakTaskInsights.streak.tieRecord')}</p>
           )}
           {currentStreak + 1 === bestStreak && (
-            <p className="text-xs text-amber-100">Estás a 1 semana de superar tu récord.</p>
+            <p className="text-xs text-amber-100">{t('dashboard.streakTaskInsights.streak.oneAway')}</p>
           )}
         </div>
 
@@ -300,11 +330,11 @@ function WeeklyCompletionDonut({
   );
 }
 
-function MonthMiniChart({ days }: { days: Array<{ date: string; count: number }> }) {
+function MonthMiniChart({ days, t }: { days: Array<{ date: string; count: number }>; t: Translate }) {
   const maxCount = useMemo(() => days.reduce((max, day) => Math.max(max, day.count), 0) || 1, [days]);
 
   if (!days.length) {
-    return <p className="text-sm text-[color:var(--color-slate-400)]">Sin registros en este mes.</p>;
+    return <p className="text-sm text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.activity.empty.month')}</p>;
   }
 
   return (
@@ -329,7 +359,7 @@ function MonthMiniChart({ days }: { days: Array<{ date: string; count: number }>
           );
         })}
       </div>
-      <p className="text-[11px] text-[color:var(--color-slate-400)]">Actividad diaria del mes (scroll horizontal para ver todos los días).</p>
+      <p className="text-[11px] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.activity.caption.month')}</p>
     </div>
   );
 }
@@ -337,9 +367,13 @@ function MonthMiniChart({ days }: { days: Array<{ date: string; count: number }>
 function WeekMiniChart({
   days,
   referenceDate,
+  t,
+  language,
 }: {
   days: Array<{ date: string; count: number }>;
   referenceDate?: Date;
+  t: Translate;
+  language: PostLoginLanguage;
 }) {
   const weekEnd = useMemo(() => referenceDate ?? new Date(), [referenceDate]);
   const weekStart = useMemo(() => {
@@ -362,16 +396,16 @@ function WeekMiniChart({
       current.setDate(weekStart.getDate() + index);
       const key = current.toISOString().slice(0, 10);
       return {
-        label: formatWeekdayLabel(current),
+        label: formatWeekdayLabel(current, language),
         count: countsByDay.get(key) ?? 0,
       };
     });
-  }, [countsByDay, weekStart]);
+  }, [countsByDay, language, weekStart]);
 
   const maxCount = useMemo(() => timeline.reduce((max, day) => Math.max(max, day.count), 0) || 1, [timeline]);
 
   if (!timeline.some((day) => day.count > 0)) {
-    return <p className="text-sm text-[color:var(--color-slate-400)]">Sin registros en esta semana.</p>;
+    return <p className="text-sm text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.activity.empty.week')}</p>;
   }
 
   return (
@@ -396,7 +430,7 @@ function WeekMiniChart({
           );
         })}
       </div>
-      <p className="text-[11px] text-[color:var(--color-slate-400)]">Actividad diaria de la semana en curso.</p>
+      <p className="text-[11px] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.activity.caption.week')}</p>
     </div>
   );
 }
@@ -404,9 +438,13 @@ function WeekMiniChart({
 function QuarterMiniChart({
   timeline,
   referenceDate,
+  language,
+  t,
 }: {
   timeline: TaskInsightsResponse['weeks']['timeline'];
   referenceDate?: Date;
+  language: PostLoginLanguage;
+  t: Translate;
 }) {
   const today = useMemo(() => referenceDate ?? new Date(), [referenceDate]);
   const quarterStart = useMemo(() => {
@@ -424,7 +462,7 @@ function QuarterMiniChart({
   const maxCount = useMemo(() => recentWeeks.reduce((max, week) => Math.max(max, week.count), 0) || 1, [recentWeeks]);
 
   if (!recentWeeks.length) {
-    return <p className="text-sm text-[color:var(--color-slate-400)]">Sin registros en los últimos 3 meses.</p>;
+    return <p className="text-sm text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.activity.empty.quarter')}</p>;
   }
 
   return (
@@ -434,7 +472,7 @@ function QuarterMiniChart({
           const ratio = Math.min(1, Math.max(0, week.count / maxCount));
           const height = 12 + ratio * 52;
           const weekEnd = parseIsoDate(week.weekEnd);
-          const label = new Intl.DateTimeFormat('es-AR', { month: 'short', day: 'numeric' }).format(weekEnd);
+          const label = new Intl.DateTimeFormat(language === 'es' ? 'es-AR' : 'en-US', { month: 'short', day: 'numeric' }).format(weekEnd);
           return (
             <div
               key={`${week.weekStart}-${week.weekEnd}-${index}`}
@@ -456,7 +494,7 @@ function QuarterMiniChart({
           );
         })}
       </div>
-      <p className="text-[11px] text-[color:var(--color-slate-400)]">Semanas de los últimos 3 meses (verde = objetivo cumplido).</p>
+      <p className="text-[11px] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.activity.caption.quarter')}</p>
     </div>
   );
 }
@@ -471,6 +509,7 @@ export function TaskInsightsModal({
   referenceDate,
 }: TaskInsightsModalProps) {
   const { t, language } = usePostLoginLanguage();
+  const numberFormatter = useMemo(() => new Intl.NumberFormat(language === 'es' ? 'es-AR' : 'en-US'), [language]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   useEscToClose(Boolean(taskId), onClose);
 
@@ -614,7 +653,7 @@ export function TaskInsightsModal({
               {activeTask?.stat && <p className="text-sm text-[color:var(--color-slate-400)]">{activeTask.stat}</p>}
               {achievementSealVisible && (
                 <span className="inline-flex items-center rounded-full border border-amber-500 bg-amber-500 px-2 py-0.5 text-[11px] font-semibold text-amber-950">
-                  🏅 Achieved
+                  {t('dashboard.streakTaskInsights.achievementSeal')}
                 </span>
               )}
               {difficultyChipLabel && (
@@ -627,12 +666,8 @@ export function TaskInsightsModal({
                 eligible={isRecalibrationEligible}
                 tooltipLabel={
                   isRecalibrationEligible && recalibrationLatest
-                    ? language === 'es'
-                      ? 'Última recalibración: ↑ subió dificultad, • se mantuvo, ↓ bajó dificultad.'
-                      : 'Latest recalibration: ↑ difficulty went up, • stayed the same, ↓ difficulty went down.'
-                    : language === 'es'
-                      ? 'Aún no hay recalibraciones. Se activan cuando hay historial suficiente del período anterior.'
-                      : 'No recalibrations yet. They appear once enough prior period history is available.'
+                    ? t('dashboard.streakTaskInsights.recalibration.tooltip.latest')
+                    : t('dashboard.streakTaskInsights.recalibration.tooltip.empty')
                 }
                 tooltipOpen={isRecalibrationTooltipOpen}
                 onToggleTooltip={() => setIsRecalibrationTooltipOpen((prev) => !prev)}
@@ -703,11 +738,11 @@ export function TaskInsightsModal({
               </div>
               {status === 'loading' && <div className="mt-3 h-24 animate-pulse rounded-xl bg-[color:var(--color-overlay-2)]" aria-hidden />}
               {status === 'success' && activityScope === 'week' && (
-                <WeekMiniChart days={monthDays} referenceDate={referenceDate} />
+                <WeekMiniChart days={monthDays} referenceDate={referenceDate} t={t} language={language} />
               )}
-              {status === 'success' && activityScope === 'month' && <MonthMiniChart days={monthDays} />}
+              {status === 'success' && activityScope === 'month' && <MonthMiniChart days={monthDays} t={t} />}
               {status === 'success' && activityScope === 'quarter' && (
-                <QuarterMiniChart timeline={timeline} referenceDate={referenceDate} />
+                <QuarterMiniChart timeline={timeline} referenceDate={referenceDate} language={language} t={t} />
               )}
             </div>
 
@@ -720,7 +755,7 @@ export function TaskInsightsModal({
                 <div className="mt-3 h-36 animate-pulse rounded-xl bg-[color:var(--color-overlay-2)]" aria-hidden />
               )}
               {status === 'error' && (
-                <p className="mt-2 text-sm text-rose-300">No pudimos cargar la serie semanal: {error?.message}</p>
+                <p className="mt-2 text-sm text-rose-300">{t('dashboard.streakTaskInsights.weeklyProgress.error', { message: error?.message ?? '—' })}</p>
               )}
               {status === 'success' && (
                 <WeeklyCompletionDonut
@@ -732,6 +767,8 @@ export function TaskInsightsModal({
                   weeksSample={weeksSample}
                   referenceDate={referenceDate}
                   progressAriaLabel={t('dashboard.streakTaskInsights.weeklyProgressAria')}
+                  t={t}
+                  language={language}
                 />
               )}
             </div>
@@ -739,9 +776,11 @@ export function TaskInsightsModal({
 
             <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">Ajustes de dificultad</p>
+                <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">{t('dashboard.streakTaskInsights.recalibration.title')}</p>
                 {recalibrationLatest?.recalibratedAt && (
-                  <span className="text-[11px] text-[color:var(--color-slate-400)]">Último: {formatCompactDate(recalibrationLatest.recalibratedAt, language)}</span>
+                  <span className="text-[11px] text-[color:var(--color-slate-400)]">
+                    {t('dashboard.streakTaskInsights.recalibration.latest', { date: formatCompactDate(recalibrationLatest.recalibratedAt, language) })}
+                  </span>
                 )}
               </div>
               {status === 'loading' && <div className="mt-2 h-16 animate-pulse rounded-xl bg-[color:var(--color-overlay-2)]" aria-hidden />}
@@ -755,19 +794,16 @@ export function TaskInsightsModal({
                         : action === 'up'
                           ? 'text-rose-950 border-rose-600 bg-rose-500'
                           : 'text-amber-950 border-amber-500 bg-amber-400';
-                    const actionLabel = action === 'down'
-                      ? '↓ Decreased'
-                      : action === 'up'
-                        ? '↑ Increased'
-                        : '• Kept';
+                    const actionLabel = getRecalibrationActionLabel(action, t);
                     const expected = Number(record.expectedTarget ?? 0);
                     const completions = Number(record.completions ?? 0);
                     const completionRatePct = Number(record.completionRate ?? 0) * 100;
-                    const completionSummary = `${completions}/${expected > 0 ? numberFormatter.format(expected) : '—'} · ${Number.isFinite(completionRatePct) ? completionRatePct.toFixed(1) : '0.0'}%`;
-                    const sanitizedReason = sanitizeRecalibrationReason(record.reason);
-                    const reasonLabel = sanitizedReason
-                      ? sanitizedReason
-                      : (language === 'es' ? 'Sin razón detallada disponible.' : 'No detailed reason available.');
+                    const completionSummary = t('dashboard.streakTaskInsights.recalibration.summary', {
+                      completions,
+                      expected: expected > 0 ? numberFormatter.format(expected) : '—',
+                      rate: Number.isFinite(completionRatePct) ? completionRatePct.toFixed(1) : '0.0',
+                    });
+                    const reasonLabel = getRecalibrationReasonLabel(record.reason, language, t);
 
                     return (
                       <li
@@ -775,7 +811,7 @@ export function TaskInsightsModal({
                         className="flex flex-col items-start gap-1.5 rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-2.5 py-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3"
                       >
                         <div className="min-w-0">
-                          <p className="text-[11px] font-semibold leading-tight text-[color:var(--color-slate-100)]">{formatPeriodLabel(record, language)}</p>
+                          <p className="text-[11px] font-semibold leading-tight text-[color:var(--color-slate-100)]">{formatPeriodLabel(record, language, t)}</p>
                           <p className="mt-0.5 text-[10px] leading-tight text-[color:var(--color-slate-400)]">{completionSummary}</p>
                           <p className="mt-1 text-[10px] leading-snug text-[color:var(--color-slate-500)]">{reasonLabel}</p>
                         </div>
@@ -788,7 +824,7 @@ export function TaskInsightsModal({
                 </ul>
               )}
               {status === 'success' && recalibrationHistory.length === 0 && (
-                <p className="mt-2 text-xs text-[color:var(--color-slate-400)]">Aún no hay recalibraciones.</p>
+                <p className="mt-2 text-xs text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.recalibration.empty')}</p>
               )}
             </div>
 
@@ -796,12 +832,12 @@ export function TaskInsightsModal({
               <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.currentStreak')}</p>
                 <p className="mt-1 text-3xl font-semibold text-[color:var(--color-text)]">🔥 {stats.currentStreak}</p>
-                <p className="text-xs text-[color:var(--color-slate-400)]">semanas seguidas</p>
+                <p className="text-xs text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.streak.weeksInRow')}</p>
               </div>
               <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.bestStreak')}</p>
                 <p className="mt-1 text-3xl font-semibold text-[color:var(--color-text)]">{stats.bestStreak}</p>
-                <p className="text-xs text-[color:var(--color-slate-400)]">máxima racha lograda</p>
+                <p className="text-xs text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.streak.bestLabel')}</p>
               </div>
             </div>
           </div>
