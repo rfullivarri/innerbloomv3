@@ -41,6 +41,10 @@ function monthLabel(value: string, language: PostLoginLanguage): string {
   return new Intl.DateTimeFormat(language === 'es' ? 'es-AR' : 'en-US', { month: 'short' }).format(parsed);
 }
 
+function isProjectedState(state: string | null | undefined): boolean {
+  return String(state ?? '').toLowerCase().startsWith('projected');
+}
+
 function getSlotTone(slotState: string | null | undefined): string {
   const normalized = String(slotState ?? '').toLowerCase();
   if (normalized === 'achieved' || normalized === 'valid' || normalized === 'projected_valid') {
@@ -104,6 +108,7 @@ export function PreviewAchievementCard({
   const score = Math.max(0, Math.min(100, Math.round(Number(previewAchievement.score ?? 0))));
   const slots = previewAchievement.windowProximity?.slots ?? [];
   const recentMonths = previewAchievement.recentMonths ?? [];
+  const slotPositionLabels = language === 'es' ? ['M1', 'M2', 'Actual'] : ['M1', 'M2', 'Current'];
 
   const ring = useMemo(() => {
     const radius = 47;
@@ -157,10 +162,14 @@ export function PreviewAchievementCard({
             </text>
           </svg>
           <p className="mt-1 inline-flex items-center gap-1 text-[10px] text-[color:var(--color-slate-400)]" data-testid="score-affordance">
-            <span>{language === 'es' ? 'fuerza actual' : 'current strength'}</span>
+            <span className="font-semibold uppercase tracking-[0.12em] text-[color:var(--color-slate-300)]">
+              {language === 'es' ? 'Score' : 'Score'}
+            </span>
+            <span aria-hidden>·</span>
+            <span>{language === 'es' ? 'fuerza actual del hábito' : 'current habit strength'}</span>
             <span
               aria-label={language === 'es' ? 'Qué significa este score' : 'What this score means'}
-              title={language === 'es' ? 'Score de fuerza del hábito actual.' : 'Current habit strength score.'}
+              title={language === 'es' ? 'Mide la fuerza actual del hábito.' : 'Shows current habit strength.'}
               className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/30 text-[9px]"
             >
               i
@@ -173,23 +182,28 @@ export function PreviewAchievementCard({
         <div className="rounded-xl border border-white/10 bg-[color:var(--color-overlay-2)] px-2 py-2">
           <div className="mb-1 flex items-center justify-between gap-2">
             <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--color-slate-400)]">3M</p>
-            <p className="text-[10px] text-[color:var(--color-slate-400)]">{language === 'es' ? 'ventana activa' : 'active window'}</p>
+            <p className="text-[10px] text-[color:var(--color-slate-400)]" data-testid="active-window-label">
+              {language === 'es' ? '3 meses que cuentan' : '3 months that count'}
+            </p>
           </div>
           <div className="flex items-center gap-1.5">
             {slots.slice(0, 3).map((slot, index) => (
               <div key={slot.id ?? `slot-${index}`} className="flex min-w-0 flex-1 items-center gap-1">
                 {index > 0 ? <span aria-hidden className="h-px flex-1 bg-white/15" /> : null}
-                <span
-                  data-testid="window-slot"
-                  className={cx(
-                    'inline-flex h-6 min-w-[2rem] items-center justify-center rounded-full border px-2 text-[11px] font-semibold',
-                    getSlotTone(slot.state),
-                  )}
-                  aria-label={slot.label ?? `slot-${index + 1}`}
-                  data-slot-symbol={getSlotSymbol(slot.state)}
-                >
-                  {getSlotSymbol(slot.state)}
-                </span>
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="text-[9px] text-[color:var(--color-slate-400)]">{slotPositionLabels[index] ?? `M${index + 1}`}</span>
+                  <span
+                    data-testid="window-slot"
+                    className={cx(
+                      'inline-flex h-6 min-w-[2rem] items-center justify-center rounded-full border px-2 text-[11px] font-semibold',
+                      getSlotTone(slot.state),
+                    )}
+                    aria-label={slot.label ?? `slot-${index + 1}`}
+                    data-slot-symbol={getSlotSymbol(slot.state)}
+                  >
+                    {getSlotSymbol(slot.state)}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
@@ -214,13 +228,23 @@ export function PreviewAchievementCard({
                     >
                       {getMonthSymbol(entry.state)}
                     </div>
-                    <span className="text-[10px] text-[color:var(--color-slate-400)]">{monthLabel(entry.month, language)}</span>
+                    <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
+                      {monthLabel(entry.month, language)}
+                    </span>
+                    {isProjectedState(entry.state) ? (
+                      <span className="text-[9px] text-[color:var(--color-sky-200)]">{language === 'es' ? 'Actual' : 'Current'}</span>
+                    ) : null}
                   </div>
                 );
               })}
             </div>
           </div>
         )}
+        <p className="px-0.5 text-[10px] text-[color:var(--color-slate-400)]" data-testid="seal-bridge-copy">
+          {language === 'es'
+            ? 'El sello se logra al completar una ventana válida de 3 meses.'
+            : 'The seal is earned by completing a valid 3-month window.'}
+        </p>
       </div>
     </section>
   );
