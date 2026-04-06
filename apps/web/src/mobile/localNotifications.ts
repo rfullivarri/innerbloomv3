@@ -2,6 +2,7 @@ import type { DailyReminderSettingsResponse } from '../lib/api';
 import { getCapacitorLocalNotificationsPlugin, isNativeCapacitorPlatform } from './capacitor';
 
 export const DAILY_REMINDER_NOTIFICATION_ID = 41001;
+export const DAILY_REMINDER_TEST_NOTIFICATION_ID = 41002;
 export const DAILY_REMINDER_NOTIFICATION_TARGET_PATH = '/dashboard-v3?dailyQuest=1';
 
 type DailyReminderNotificationPermissionResult = {
@@ -60,6 +61,44 @@ export async function cancelNativeDailyReminderNotification(): Promise<void> {
 
   await plugin.cancel({
     notifications: [{ id: DAILY_REMINDER_NOTIFICATION_ID }],
+  });
+}
+
+export async function sendNativeDailyReminderTestNotification(): Promise<void> {
+  if (!isNativeCapacitorPlatform()) {
+    return;
+  }
+
+  const plugin = getCapacitorLocalNotificationsPlugin();
+  if (!plugin) {
+    return;
+  }
+
+  const permissions = await ensureNativeDailyReminderNotificationPermissions();
+  if (!permissions.granted) {
+    throw new Error('Necesitamos permiso para enviarte notificaciones en este dispositivo.');
+  }
+
+  await plugin.cancel({
+    notifications: [{ id: DAILY_REMINDER_TEST_NOTIFICATION_ID }],
+  });
+
+  await plugin.schedule({
+    notifications: [
+      {
+        id: DAILY_REMINDER_TEST_NOTIFICATION_ID,
+        title: 'Innerbloom',
+        body: 'Prueba local: tu Daily Quest ya puede recordarte.',
+        schedule: {
+          at: new Date(Date.now() + 10_000),
+          allowWhileIdle: true,
+        },
+        extra: {
+          targetPath: DAILY_REMINDER_NOTIFICATION_TARGET_PATH,
+          kind: 'daily-reminder-test',
+        },
+      },
+    ],
   });
 }
 

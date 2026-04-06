@@ -37,6 +37,7 @@ type CapacitorLocalNotificationsPlugin = {
       title: string;
       body?: string;
       schedule?: {
+        at?: Date;
         on?: {
           hour?: number;
           minute?: number;

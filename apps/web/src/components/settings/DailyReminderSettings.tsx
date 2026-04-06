@@ -14,6 +14,7 @@ import {
 import { isNativeCapacitorPlatform } from "../../mobile/capacitor";
 import {
   ensureNativeDailyReminderNotificationPermissions,
+  sendNativeDailyReminderTestNotification,
   syncNativeDailyReminderNotification,
 } from "../../mobile/localNotifications";
 import { Skeleton } from "../common/Skeleton";
@@ -44,6 +45,7 @@ type ReminderLoadResult = {
 };
 
 type SubmitStatus = "idle" | "saving" | "success" | "error";
+type TestNotificationStatus = "idle" | "sending" | "success" | "error";
 
 interface DailyReminderSettingsProps {
   onSaveSuccess?: (response: DailyReminderSettingsResponse) => void;
@@ -172,6 +174,9 @@ export function DailyReminderSettings({
   );
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [testNotificationStatus, setTestNotificationStatus] =
+    useState<TestNotificationStatus>("idle");
+  const [testNotificationError, setTestNotificationError] = useState<string | null>(null);
   const { data, status, error, reload } = useRequest(
     async (): Promise<ReminderLoadResult> => {
       if (isNativeApp) {
@@ -210,10 +215,23 @@ export function DailyReminderSettings({
     return () => window.clearTimeout(timeoutId);
   }, [submitStatus]);
 
+  useEffect(() => {
+    if (testNotificationStatus !== "success") {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setTestNotificationStatus("idle");
+    }, 3200);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [testNotificationStatus]);
+
   const isInitialLoading =
     (status === "idle" || status === "loading") && !data && !error;
   const hasBlockingError = status === "error" && !data;
   const isSaving = submitStatus === "saving";
+  const isSendingTestNotification = testNotificationStatus === "sending";
   const canSubmit =
     !isInitialLoading &&
     !isSaving &&
@@ -337,6 +355,28 @@ export function DailyReminderSettings({
     }
   };
 
+  const handleSendTestNotification = async () => {
+    if (!isNativeApp || isInitialLoading || isSaving || isSendingTestNotification) {
+      return;
+    }
+
+    setTestNotificationStatus("sending");
+    setTestNotificationError(null);
+
+    try {
+      await sendNativeDailyReminderTestNotification();
+      setTestNotificationStatus("success");
+    } catch (testException) {
+      console.error("Failed to send test notification", testException);
+      setTestNotificationStatus("error");
+      setTestNotificationError(
+        testException instanceof Error && testException.message
+          ? testException.message
+          : "No pudimos enviar la notificación de prueba.",
+      );
+    }
+  };
+
   if (isInitialLoading) {
     return (
       <div className="space-y-4">
@@ -449,6 +489,15 @@ export function DailyReminderSettings({
       {submitStatus === "success" ? (
         <ToastBanner tone="success" message={SAVE_SUCCESS_MESSAGE} />
       ) : null}
+      {isNativeApp && testNotificationStatus === "error" && testNotificationError ? (
+        <ToastBanner tone="error" message={testNotificationError} />
+      ) : null}
+      {isNativeApp && testNotificationStatus === "success" ? (
+        <ToastBanner
+          tone="success"
+          message="Enviamos una notificación de prueba. Debería aparecer en 10 segundos."
+        />
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2 text-sm" htmlFor={timeFieldId}>
@@ -501,18 +550,35 @@ export function DailyReminderSettings({
             ? "En la app nativa podés combinar email y notificación local. Los cambios se aplican al guardar."
             : "Los cambios se aplican solo cuando presionás guardar."}
         </p>
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className={combine(
-            "reminder-scheduler-form__save-button inline-flex items-center rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
-            canSubmit
-              ? "reminder-scheduler-form__save-button--enabled border-fuchsia-200/70 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-300 text-white shadow-[0_12px_36px_rgba(217,70,239,0.34)] hover:from-fuchsia-400 hover:via-pink-500 hover:to-amber-200"
-              : "reminder-scheduler-form__save-button--disabled cursor-not-allowed border-white/10 bg-white/5 text-text-subtle",
-          )}
-        >
-          {isSaving ? "Guardando…" : "Guardar"}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {isNativeApp ? (
+            <button
+              type="button"
+              disabled={isSendingTestNotification || isSaving}
+              onClick={handleSendTestNotification}
+              className={combine(
+                "inline-flex items-center rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                isSendingTestNotification || isSaving
+                  ? "cursor-not-allowed border-white/10 bg-white/5 text-text-subtle"
+                  : "border-cyan-200/60 bg-cyan-400/10 text-cyan-100 hover:border-cyan-200/90 hover:bg-cyan-400/20",
+              )}
+            >
+              {isSendingTestNotification ? "Probando…" : "Probar notificación"}
+            </button>
+          ) : null}
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className={combine(
+              "reminder-scheduler-form__save-button inline-flex items-center rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+              canSubmit
+                ? "reminder-scheduler-form__save-button--enabled border-fuchsia-200/70 bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-300 text-white shadow-[0_12px_36px_rgba(217,70,239,0.34)] hover:from-fuchsia-400 hover:via-pink-500 hover:to-amber-200"
+                : "reminder-scheduler-form__save-button--disabled cursor-not-allowed border-white/10 bg-white/5 text-text-subtle",
+            )}
+          >
+            {isSaving ? "Guardando…" : "Guardar"}
+          </button>
+        </div>
       </div>
     </form>
   );
