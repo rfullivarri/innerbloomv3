@@ -2278,6 +2278,23 @@ export type TaskInsightsResponse = {
     bestStreak: number;
     timeline: Array<{ weekStart: string; weekEnd: string; count: number; hit: boolean }>;
   };
+  previewAchievement?: {
+    score: number;
+    status: 'fragile' | 'building' | 'strong' | string;
+    consolidationStrength?: number | null;
+    windowProximity?: {
+      slots: Array<{
+        id?: string | null;
+        label?: string | null;
+        state?: 'locked' | 'pending' | 'valid' | 'achieved' | string | null;
+      }>;
+    } | null;
+    recentMonths?: Array<{
+      month: string;
+      value?: number | null;
+      state?: 'weak' | 'building' | 'strong' | 'locked' | 'valid' | string | null;
+    }>;
+  } | null;
   recalibration?: {
     latest?: {
       action?: string | null;
@@ -2370,6 +2387,23 @@ export async function getTaskInsights(
           { weekStart: '2026-02-09', weekEnd: '2026-02-15', count: 3, hit: true },
           { weekStart: '2026-02-16', weekEnd: '2026-02-22', count: 1, hit: false },
           { weekStart: '2026-02-23', weekEnd: '2026-03-01', count: 3, hit: true },
+        ],
+      },
+      previewAchievement: {
+        score: 74,
+        status: 'building',
+        consolidationStrength: 66,
+        windowProximity: {
+          slots: [
+            { id: 'm1', label: 'M1', state: 'valid' },
+            { id: 'm2', label: 'M2', state: 'pending' },
+            { id: 'm3', label: 'M3', state: 'locked' },
+          ],
+        },
+        recentMonths: [
+          { month: '2025-12', value: 42, state: 'weak' },
+          { month: '2026-01', value: 61, state: 'building' },
+          { month: '2026-02', value: 74, state: 'building' },
         ],
       },
       recalibration: { eligible: true },

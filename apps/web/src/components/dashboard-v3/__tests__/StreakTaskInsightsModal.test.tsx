@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 
 import type { TaskInsightsResponse } from '../../../lib/api';
-import { TaskInsightsModal, getHabitHealth } from '../StreakTaskInsightsModal';
+import { TaskInsightsModal } from '../StreakTaskInsightsModal';
 
 const translations: Record<string, { es: string; en: string }> = {
   'dashboard.streakTaskInsights.recalibration.action.down': { es: '↓ Disminuyó', en: '↓ Decreased' },
@@ -71,6 +71,23 @@ const mockInsights = vi.hoisted<TaskInsightsResponse>(() => ({
       hit: index < 10,
     })),
   },
+  previewAchievement: {
+    score: 82,
+    status: 'strong',
+    consolidationStrength: 80,
+    windowProximity: {
+      slots: [
+        { id: 'm1', label: 'M1', state: 'valid' },
+        { id: 'm2', label: 'M2', state: 'pending' },
+        { id: 'm3', label: 'M3', state: 'locked' },
+      ],
+    },
+    recentMonths: [
+      { month: '2025-12', value: 43, state: 'weak' },
+      { month: '2026-01', value: 63, state: 'building' },
+      { month: '2026-02', value: 82, state: 'strong' },
+    ],
+  },
 }));
 
 const mockUseRequest = vi.hoisted(() =>
@@ -94,20 +111,6 @@ vi.mock('../../../lib/api', async () => {
     ...actual,
     getTaskInsights: vi.fn(async () => mockInsights),
   };
-});
-
-describe('getHabitHealth', () => {
-  test('devuelve nivel + label localizado por idioma', () => {
-    expect(getHabitHealth(100, 3)).toEqual({ level: 'strong', label: 'Hábito fuerte' });
-    expect(getHabitHealth(100, 3, 'en')).toEqual({ level: 'strong', label: 'Strong habit' });
-  });
-
-  test('clasifica correctamente hábitos débiles, en construcción y fuertes', () => {
-    expect(getHabitHealth(40, 8)).toEqual({ level: 'weak', label: 'Hábito frágil' });
-    expect(getHabitHealth(55, 6)).toEqual({ level: 'medium', label: 'Hábito en construcción' });
-    expect(getHabitHealth(79, 5)).toEqual({ level: 'medium', label: 'Hábito en construcción' });
-    expect(getHabitHealth(80, 12)).toEqual({ level: 'strong', label: 'Hábito fuerte' });
-  });
 });
 
 describe('TaskInsightsModal i18n', () => {
@@ -221,6 +224,7 @@ describe('TaskInsightsModal i18n', () => {
       task: { ...mockInsights.task, achievementSealVisible: false },
       month: { totalCount: 0, days: [] },
       weeks: { ...mockInsights.weeks, timeline: [] },
+      previewAchievement: null,
       recalibration: {
         eligible: true,
         history: [

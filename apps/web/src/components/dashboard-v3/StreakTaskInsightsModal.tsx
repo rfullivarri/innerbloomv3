@@ -2,12 +2,11 @@ import { createPortal } from 'react-dom';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { StreakPanelRange, StreakPanelTask } from '../../lib/api';
 import { getTaskInsights, type TaskInsightsResponse } from '../../lib/api';
-import { computeWeeklyHabitHealth, getHabitHealth } from '../../lib/habitHealth';
-
-export { getHabitHealth } from '../../lib/habitHealth';
+import { computeWeeklyHabitHealth } from '../../lib/habitHealth';
 import { useRequest } from '../../hooks/useRequest';
 import type { GameMode } from '../../lib/gameMode';
 import { usePostLoginLanguage, type PostLoginLanguage } from '../../i18n/postLoginLanguage';
+import { PreviewAchievementCard } from './PreviewAchievementCard';
 
 function cx(...values: Array<string | false | null | undefined>): string {
   return values.filter(Boolean).join(' ');
@@ -611,6 +610,7 @@ export function TaskInsightsModal({
     const filtered = timeline.filter((week) => parseIsoDate(week.weekEnd) >= start);
     return filtered.slice(-13);
   }, [referenceDate, timeline]);
+  const previewAchievement = data?.previewAchievement ?? null;
 
   const activityTotals = useMemo(() => {
     if (activityScope === 'week') {
@@ -746,18 +746,23 @@ export function TaskInsightsModal({
               )}
             </div>
 
-            <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">{t('dashboard.streakTaskInsights.weeklyProgress')}</p>
-                <span className="text-xs text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.goal', { goal: weeklyGoal })}</span>
+            {status === 'loading' && (
+              <div className="h-36 animate-pulse rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)]" aria-hidden />
+            )}
+            {status === 'error' && (
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
+                <p className="text-sm text-rose-300">{t('dashboard.streakTaskInsights.weeklyProgress.error', { message: error?.message ?? '—' })}</p>
               </div>
-              {status === 'loading' && (
-                <div className="mt-3 h-36 animate-pulse rounded-xl bg-[color:var(--color-overlay-2)]" aria-hidden />
-              )}
-              {status === 'error' && (
-                <p className="mt-2 text-sm text-rose-300">{t('dashboard.streakTaskInsights.weeklyProgress.error', { message: error?.message ?? '—' })}</p>
-              )}
-              {status === 'success' && (
+            )}
+            {status === 'success' && previewAchievement && (
+              <PreviewAchievementCard previewAchievement={previewAchievement} language={language} />
+            )}
+            {status === 'success' && !previewAchievement && (
+              <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-[color:var(--color-slate-100)]">{t('dashboard.streakTaskInsights.weeklyProgress')}</p>
+                  <span className="text-xs text-[color:var(--color-slate-400)]">{t('dashboard.streakTaskInsights.goal', { goal: weeklyGoal })}</span>
+                </div>
                 <WeeklyCompletionDonut
                   timeline={timeline}
                   weeklyGoal={weeklyGoal}
@@ -770,8 +775,8 @@ export function TaskInsightsModal({
                   t={t}
                   language={language}
                 />
-              )}
-            </div>
+              </div>
+            )}
 
 
             <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
