@@ -8,7 +8,6 @@ function cx(...values: Array<string | false | null | undefined>): string {
 
 type PreviewAchievement = NonNullable<TaskInsightsResponse['previewAchievement']>;
 type RecentMonthInput = NonNullable<PreviewAchievement['recentMonths']>[number];
-type SlotInput = NonNullable<NonNullable<PreviewAchievement['windowProximity']>['slots']>[number];
 
 type NormalizedRecentMonth = {
   key: string;
@@ -16,12 +15,6 @@ type NormalizedRecentMonth = {
   periodKey: string | null;
   state: string | null | undefined;
   value?: number | null;
-};
-
-type NormalizedWindowSlot = {
-  key: string;
-  state: string | null | undefined;
-  label: string | null;
 };
 
 const statusConfig = {
@@ -83,49 +76,11 @@ function normalizeRecentMonths(recentMonths: PreviewAchievement['recentMonths'])
     .map(normalizeRecentMonthEntry)
     .filter((entry): entry is NormalizedRecentMonth => entry != null)
     .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
-    .slice(-4);
-}
-
-function normalizeWindowSlotEntry(slot: SlotInput, index: number): NormalizedWindowSlot {
-  if (typeof slot === 'string') {
-    return {
-      key: `slot-${index}`,
-      state: slot,
-      label: null,
-    };
-  }
-
-  return {
-    key: slot.id ?? `slot-${index}`,
-    state: slot.state,
-    label: slot.label ?? null,
-  };
-}
-
-function normalizeWindowSlots(slots: PreviewAchievement['windowProximity'] extends null ? never : NonNullable<PreviewAchievement['windowProximity']>['slots']): NormalizedWindowSlot[] {
-  const list = Array.isArray(slots) ? slots : [];
-  return list.map((slot, index) => normalizeWindowSlotEntry(slot, index)).slice(0, 3);
+    .slice(-7);
 }
 
 function isProjectedState(state: string | null | undefined): boolean {
   return String(state ?? '').toLowerCase().startsWith('projected');
-}
-
-function getSlotTone(slotState: string | null | undefined): string {
-  const normalized = String(slotState ?? '').toLowerCase();
-  if (normalized === 'achieved' || normalized === 'valid' || normalized === 'projected_valid') {
-    return 'border-emerald-200 bg-emerald-300/90 text-emerald-950';
-  }
-  if (normalized === 'floor_only' || normalized === 'building' || normalized === 'pending') {
-    return 'border-amber-200 bg-amber-300/85 text-amber-950';
-  }
-  if (normalized === 'projected_floor_only' || normalized === 'projected_pending') {
-    return 'border-amber-100/80 bg-amber-200/45 text-amber-100';
-  }
-  if (normalized === 'projected_invalid' || normalized === 'invalid' || normalized === 'locked') {
-    return 'border-rose-200/70 bg-rose-300/45 text-rose-50';
-  }
-  return 'border-white/20 bg-white/10 text-[color:var(--color-slate-300)]';
 }
 
 function getMonthTone(state: string | null | undefined): string {
@@ -143,15 +98,6 @@ function getMonthTone(state: string | null | undefined): string {
     return 'border-rose-200/80 bg-rose-300/80 text-rose-950';
   }
   return 'border-white/20 bg-white/10 text-[color:var(--color-slate-300)]';
-}
-
-function getSlotSymbol(slotState: string | null | undefined): string {
-  const normalized = String(slotState ?? '').toLowerCase();
-  if (normalized === 'achieved' || normalized === 'valid') return '✓';
-  if (normalized === 'projected_valid' || normalized === 'projected_floor_only' || normalized === 'projected_pending') return '~';
-  if (normalized === 'floor_only' || normalized === 'building' || normalized === 'pending') return '•';
-  if (normalized === 'invalid' || normalized === 'projected_invalid' || normalized === 'locked') return '✕';
-  return '○';
 }
 
 function getMonthSymbol(monthState: string | null | undefined): string {
@@ -172,12 +118,11 @@ export function PreviewAchievementCard({
 }) {
   const tone = getStatusTone(previewAchievement.status);
   const score = Math.max(0, Math.min(100, Math.round(Number(previewAchievement.score ?? 0))));
-  const slots = normalizeWindowSlots(previewAchievement.windowProximity?.slots ?? []);
   const recentMonths = normalizeRecentMonths(previewAchievement.recentMonths);
-  const slotPositionLabels = language === 'es' ? ['Mes 1', 'Mes 2', 'Actual'] : ['Month 1', 'Month 2', 'Current'];
-
-  const orderedSlots = slots;
   const orderedRecentMonths = recentMonths;
+  const lastThreeStart = Math.max(0, orderedRecentMonths.length - 3);
+  const olderMonths = orderedRecentMonths.slice(0, lastThreeStart);
+  const sealWindowMonths = orderedRecentMonths.slice(lastThreeStart);
 
   const ring = useMemo(() => {
     const radius = 47;
@@ -248,50 +193,47 @@ export function PreviewAchievementCard({
       </div>
 
       <div className="mt-3 space-y-2">
-        <div className="rounded-xl border border-white/10 bg-[color:var(--color-overlay-2)] px-2 py-2">
-          <div className="mb-1 flex items-center justify-between gap-2">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--color-slate-300)]" data-testid="seal-window-title">
-              {language === 'es' ? 'Ventana al sello' : 'Seal window'}
-            </p>
-            <p className="text-[10px] text-[color:var(--color-slate-400)]" data-testid="active-window-label">
-              {language === 'es' ? '3 meses consecutivos' : '3 consecutive months'}
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            {orderedSlots.map((slot, index) => (
-              <div key={slot.key} className="flex min-w-0 flex-1 items-center gap-1">
-                {index > 0 ? <span aria-hidden className="h-px flex-1 bg-white/15" /> : null}
-                <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-[9px] text-[color:var(--color-slate-300)]" data-testid="seal-window-slot-label">{slotPositionLabels[index] ?? `M${index + 1}`}</span>
-                  <span
-                    data-testid="window-slot"
-                    className={cx(
-                      'inline-flex h-7 min-w-[3.15rem] items-center justify-center rounded-md border px-2 text-[11px] font-semibold shadow-inner',
-                      getSlotTone(slot.state),
-                    )}
-                    aria-label={slot.label ?? `slot-${index + 1}`}
-                    data-slot-symbol={getSlotSymbol(slot.state)}
-                  >
-                    {getSlotSymbol(slot.state)}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {orderedRecentMonths.length > 0 && (
           <div className="rounded-xl border border-white/10 bg-[color:var(--color-overlay-2)] px-2 py-2">
-            <p className="mb-1 text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
+            <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
               {language === 'es' ? 'Historial reciente' : 'Recent history'}
             </p>
-            <div className="flex items-end justify-between gap-1.5">
-              {orderedRecentMonths.map((entry) => {
-                return (
-                  <div key={`${entry.key}-${entry.value ?? 0}`} data-testid="recent-month-item" className="flex min-w-0 flex-1 flex-col items-center gap-1">
+            <p className="mb-2 text-[10px] text-[color:var(--color-slate-400)]" data-testid="timeline-window-subtitle">
+              {language === 'es' ? 'Los últimos 3 meses cuentan para el sello' : 'The last 3 months count toward the seal'}
+            </p>
+            <div className="flex items-start gap-1.5 overflow-x-auto pb-1" data-testid="recent-timeline">
+              {olderMonths.map((entry) => (
+                <div key={`${entry.key}-${entry.value ?? 0}`} data-testid="recent-month-item" className="flex min-w-[2.5rem] flex-col items-center gap-1">
+                  <div
+                    data-testid="recent-month-node"
+                    className={cx(
+                      'inline-flex h-9 w-9 items-center justify-center rounded-full border text-[11px] font-semibold shadow-inner',
+                      getMonthTone(entry.state),
+                    )}
+                    aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
+                    data-month-symbol={getMonthSymbol(entry.state)}
+                  >
+                    {getMonthSymbol(entry.state)}
+                  </div>
+                  <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
+                    {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
+                  </span>
+                  <span className="min-h-3 text-[9px] text-[color:var(--color-slate-400)]">
+                    {isProjectedState(entry.state) ? (language === 'es' ? 'Actual' : 'Current') : '\u00A0'}
+                  </span>
+                </div>
+              ))}
+
+              <div
+                className="flex items-start gap-1.5 rounded-full border border-white/20 bg-white/5 px-1.5 py-1"
+                data-testid="seal-window-group"
+              >
+                {sealWindowMonths.map((entry) => (
+                  <div key={`${entry.key}-${entry.value ?? 0}`} data-testid="recent-month-item" className="flex min-w-[2.5rem] flex-col items-center gap-1">
                     <div
+                      data-testid="recent-month-node"
                       className={cx(
-                        'inline-flex h-8 w-full items-center justify-center rounded-lg border text-[11px] font-semibold',
+                        'inline-flex h-9 w-9 items-center justify-center rounded-full border text-[11px] font-semibold shadow-inner',
                         getMonthTone(entry.state),
                       )}
                       aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
@@ -302,20 +244,15 @@ export function PreviewAchievementCard({
                     <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
                       {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
                     </span>
-                    {isProjectedState(entry.state) ? (
-                      <span className="text-[9px] text-[color:var(--color-sky-200)]">{language === 'es' ? 'Actual' : 'Current'}</span>
-                    ) : null}
+                    <span className={cx('min-h-3 text-[9px]', isProjectedState(entry.state) ? 'text-[color:var(--color-sky-200)]' : 'text-[color:var(--color-slate-400)]')}>
+                      {isProjectedState(entry.state) ? (language === 'es' ? 'Actual' : 'Current') : '\u00A0'}
+                    </span>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
           </div>
         )}
-        <p className="px-0.5 text-[10px] text-[color:var(--color-slate-400)]" data-testid="seal-bridge-copy">
-          {language === 'es'
-            ? 'La ventana usa 3 meses seguidos para indicar si el sello está cerca.'
-            : 'The window uses 3 consecutive months to determine if the seal is close.'}
-        </p>
       </div>
     </section>
   );

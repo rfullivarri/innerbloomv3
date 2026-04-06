@@ -48,24 +48,15 @@ describe('PreviewAchievementCard', () => {
     expect(screen.getByTestId('score-affordance')).toHaveTextContent('fuerza actual del hábito');
   });
 
-  test('renders 3-slot window indicator with semantic symbols and explanatory label', () => {
-    renderCard({
-      windowProximity: {
-        slots: ['valid', 'projected_floor_only', 'empty'],
-      },
-    });
-    const slots = screen.getAllByTestId('window-slot');
-    expect(slots).toHaveLength(3);
-    expect(screen.getByTestId('seal-window-title')).toHaveTextContent('Ventana al sello');
-    expect(screen.getByTestId('active-window-label')).toHaveTextContent('3 meses consecutivos');
-    const slotLabels = screen.getAllByTestId('seal-window-slot-label');
-    expect(slotLabels.map((label) => label.textContent)).toEqual(['Mes 1', 'Mes 2', 'Actual']);
-    expect(slots[0]).toHaveAttribute('data-slot-symbol', '✓');
-    expect(slots[1]).toHaveAttribute('data-slot-symbol', '~');
-    expect(slots[2]).toHaveAttribute('data-slot-symbol', '○');
+  test('does not render a separate seal-window chart and uses unified timeline guidance copy', () => {
+    renderCard();
+    expect(screen.queryByText('Ventana al sello')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('seal-window-title')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('active-window-label')).not.toBeInTheDocument();
+    expect(screen.getByTestId('timeline-window-subtitle')).toHaveTextContent('Los últimos 3 meses cuentan para el sello');
   });
 
-  test('renders recent month timeline as state chips with visible month labels', () => {
+  test('renders recent month timeline as circular nodes with visible labels and current marker', () => {
     renderCard({
       recentMonths: [
         { periodKey: '2026-01', value: 89, state: 'strong' },
@@ -76,6 +67,11 @@ describe('PreviewAchievementCard', () => {
     });
     const months = screen.getAllByTestId('recent-month-item');
     expect(months).toHaveLength(4);
+    const nodes = screen.getAllByTestId('recent-month-node');
+    expect(nodes).toHaveLength(4);
+    nodes.forEach((node) => {
+      expect(node.className).toContain('rounded-full');
+    });
     expect(within(months[0]).getByText('✓')).toBeInTheDocument();
     expect(within(months[1]).getByText('•')).toBeInTheDocument();
     expect(within(months[2]).getByText('✕')).toBeInTheDocument();
@@ -86,6 +82,25 @@ describe('PreviewAchievementCard', () => {
     expect(screen.getAllByTestId('recent-month-label')).toHaveLength(4);
   });
 
+  test('highlights the last 3 months in a single grouped window within the same timeline', () => {
+    renderCard({
+      recentMonths: [
+        { periodKey: '2025-11', value: 25, state: 'invalid' },
+        { periodKey: '2025-12', value: 59, state: 'building' },
+        { periodKey: '2026-01', value: 89, state: 'strong' },
+        { periodKey: '2026-02', value: 42, state: 'weak' },
+        { periodKey: '2026-03', value: 0, state: 'bad' },
+        { periodKey: '2026-04', value: 65, state: 'projected_valid' },
+      ],
+    });
+
+    const groupedWindow = screen.getByTestId('seal-window-group');
+    const groupedItems = within(groupedWindow).getAllByTestId('recent-month-item');
+    const groupedLabels = within(groupedWindow).getAllByTestId('recent-month-label').map((label) => label.textContent);
+
+    expect(groupedItems).toHaveLength(3);
+    expect(groupedLabels).toEqual(['feb', 'mar', 'abr']);
+  });
 
   test('renders recent history in chronological order so current stays on the right', () => {
     renderCard({
@@ -106,9 +121,22 @@ describe('PreviewAchievementCard', () => {
     expect(within(months[3]).getByText('Actual')).toBeInTheDocument();
   });
 
-  test('renders helper bridge copy to explain seal progression', () => {
-    renderCard();
-    expect(screen.getByTestId('seal-bridge-copy')).toHaveTextContent('La ventana usa 3 meses seguidos para indicar si el sello está cerca.');
+  test('keeps current month aligned with all nodes in the same timeline row', () => {
+    renderCard({
+      recentMonths: [
+        { periodKey: '2026-01', value: 80, state: 'strong' },
+        { periodKey: '2026-02', value: 70, state: 'building' },
+        { periodKey: '2026-03', value: 55, state: 'floor_only' },
+        { periodKey: '2026-04', value: 63, state: 'projected_valid' },
+      ],
+    });
+    const timeline = screen.getByTestId('recent-timeline');
+    const items = within(timeline).getAllByTestId('recent-month-item');
+    items.forEach((item) => {
+      expect(item.className).toContain('flex-col');
+      expect(item.className).toContain('items-center');
+    });
+    expect(within(items[3]).getByText('Actual')).toBeInTheDocument();
   });
 
   test('does not crash when recent month item is missing periodKey/month', () => {
@@ -136,6 +164,6 @@ describe('PreviewAchievementCard', () => {
 
     const monthLabels = screen.getAllByTestId('recent-month-label').map((node) => node.textContent);
     expect(monthLabels).toEqual(['feb', 'Sin mes']);
-    expect(screen.getAllByTestId('window-slot')).toHaveLength(3);
+    expect(screen.getByTestId('timeline-window-subtitle')).toBeInTheDocument();
   });
 });
