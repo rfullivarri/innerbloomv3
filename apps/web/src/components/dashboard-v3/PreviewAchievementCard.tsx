@@ -79,10 +79,6 @@ function normalizeRecentMonths(recentMonths: PreviewAchievement['recentMonths'])
     .slice(-7);
 }
 
-function isProjectedState(state: string | null | undefined): boolean {
-  return String(state ?? '').toLowerCase().startsWith('projected');
-}
-
 function getMonthTone(state: string | null | undefined): string {
   const normalized = String(state ?? '').toLowerCase();
   if (normalized === 'strong' || normalized === 'valid' || normalized === 'achieved') {
@@ -201,13 +197,13 @@ export function PreviewAchievementCard({
             <p className="mb-2 text-[10px] text-[color:var(--color-slate-400)]" data-testid="timeline-window-subtitle">
               {language === 'es' ? 'Los últimos 3 meses cuentan para el sello' : 'The last 3 months count toward the seal'}
             </p>
-            <div className="flex items-start gap-1.5 overflow-x-auto pb-1" data-testid="recent-timeline">
+            <div className="flex items-start gap-2 overflow-x-auto pb-1" data-testid="recent-timeline">
               {olderMonths.map((entry) => (
                 <div key={`${entry.key}-${entry.value ?? 0}`} data-testid="recent-month-item" className="flex min-w-[2.5rem] flex-col items-center gap-1">
                   <div
                     data-testid="recent-month-node"
                     className={cx(
-                      'inline-flex h-9 w-9 items-center justify-center rounded-full border text-[11px] font-semibold shadow-inner',
+                      'inline-flex h-9 w-9 items-center justify-center rounded-full border text-[11px] font-semibold shadow-inner sm:h-10 sm:w-10',
                       getMonthTone(entry.state),
                     )}
                     aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
@@ -218,14 +214,11 @@ export function PreviewAchievementCard({
                   <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
                     {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
                   </span>
-                  <span className="min-h-3 text-[9px] text-[color:var(--color-slate-400)]">
-                    {isProjectedState(entry.state) ? (language === 'es' ? 'Actual' : 'Current') : '\u00A0'}
-                  </span>
                 </div>
               ))}
 
               <div
-                className="flex items-start gap-1.5 rounded-full border border-white/20 bg-white/5 px-1.5 py-1"
+                className="flex items-start gap-2 rounded-2xl border border-white/15 bg-white/5 px-2.5 py-1.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
                 data-testid="seal-window-group"
               >
                 {sealWindowMonths.map((entry) => (
@@ -233,7 +226,7 @@ export function PreviewAchievementCard({
                     <div
                       data-testid="recent-month-node"
                       className={cx(
-                        'inline-flex h-9 w-9 items-center justify-center rounded-full border text-[11px] font-semibold shadow-inner',
+                        'inline-flex h-9 w-9 items-center justify-center rounded-full border text-[11px] font-semibold shadow-inner sm:h-10 sm:w-10',
                         getMonthTone(entry.state),
                       )}
                       aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
@@ -243,9 +236,6 @@ export function PreviewAchievementCard({
                     </div>
                     <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
                       {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
-                    </span>
-                    <span className={cx('min-h-3 text-[9px]', isProjectedState(entry.state) ? 'text-[color:var(--color-sky-200)]' : 'text-[color:var(--color-slate-400)]')}>
-                      {isProjectedState(entry.state) ? (language === 'es' ? 'Actual' : 'Current') : '\u00A0'}
                     </span>
                   </div>
                 ))}
