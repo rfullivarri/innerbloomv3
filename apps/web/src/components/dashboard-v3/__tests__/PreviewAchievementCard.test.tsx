@@ -56,7 +56,7 @@ describe('PreviewAchievementCard', () => {
     expect(screen.getByTestId('timeline-window-subtitle')).toHaveTextContent('Los últimos 3 meses cuentan para el sello');
   });
 
-  test('renders recent month timeline as circular nodes with visible labels and current marker', () => {
+  test('renders recent month timeline as circular nodes with visible labels and no current text marker', () => {
     renderCard({
       recentMonths: [
         { periodKey: '2026-01', value: 89, state: 'strong' },
@@ -78,7 +78,8 @@ describe('PreviewAchievementCard', () => {
     expect(within(months[3]).getByText('~')).toBeInTheDocument();
     expect(within(months[0]).getByText('ene')).toBeInTheDocument();
     expect(within(months[3]).getByText('abr')).toBeInTheDocument();
-    expect(within(months[3]).getByText('Actual')).toBeInTheDocument();
+    expect(screen.queryByText('Actual')).not.toBeInTheDocument();
+    expect(screen.queryByText('Current')).not.toBeInTheDocument();
     expect(screen.getAllByTestId('recent-month-label')).toHaveLength(4);
   });
 
@@ -116,12 +117,11 @@ describe('PreviewAchievementCard', () => {
 
     const labels = screen.getAllByTestId('recent-month-label').map((label) => label.textContent);
     expect(labels).toEqual(['ene', 'feb', 'mar', 'abr']);
-
-    const months = screen.getAllByTestId('recent-month-item');
-    expect(within(months[3]).getByText('Actual')).toBeInTheDocument();
+    expect(screen.queryByText('Actual')).not.toBeInTheDocument();
+    expect(screen.queryByText('Current')).not.toBeInTheDocument();
   });
 
-  test('keeps current month aligned with all nodes in the same timeline row', () => {
+  test('keeps month nodes aligned with a background grouped window for the last 3 months', () => {
     renderCard({
       recentMonths: [
         { periodKey: '2026-01', value: 80, state: 'strong' },
@@ -136,7 +136,10 @@ describe('PreviewAchievementCard', () => {
       expect(item.className).toContain('flex-col');
       expect(item.className).toContain('items-center');
     });
-    expect(within(items[3]).getByText('Actual')).toBeInTheDocument();
+    const groupedWindow = screen.getByTestId('seal-window-group');
+    expect(groupedWindow.className).toContain('rounded-2xl');
+    expect(groupedWindow.className).toContain('bg-white/5');
+    expect(screen.queryByText('Actual')).not.toBeInTheDocument();
   });
 
   test('does not crash when recent month item is missing periodKey/month', () => {
