@@ -11,6 +11,7 @@ import {
   getTaskHabitAchievementState,
   toggleAchievedHabitTracking,
 } from '../services/habitAchievementService.js';
+import { getTaskPreviewAchievement, type PreviewAchievement } from '../services/previewAchievementService.js';
 
 const router = Router();
 
@@ -99,6 +100,7 @@ type InsightsResponse = {
     bestStreak: number;
     timeline: { weekStart: string; weekEnd: string; count: number; hit: boolean }[];
   };
+  previewAchievement: PreviewAchievement;
   recalibration: {
     latest: {
       action: 'up' | 'keep' | 'down';
@@ -416,6 +418,11 @@ router.get(
         bestStreak: streaks.best,
         timeline,
       },
+      previewAchievement: await getTaskPreviewAchievement({
+        taskId,
+        userId: ownerId,
+        today,
+      }),
       recalibration: {
         latest: null,
         history: [],
