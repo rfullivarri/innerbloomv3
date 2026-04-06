@@ -2283,14 +2283,25 @@ export type TaskInsightsResponse = {
     status: 'fragile' | 'building' | 'strong' | string;
     consolidationStrength?: number | null;
     windowProximity?: {
-      slots: Array<{
-        id?: string | null;
-        label?: string | null;
-        state?: 'locked' | 'pending' | 'valid' | 'achieved' | string | null;
-      }>;
+      slots: Array<
+        | 'valid'
+        | 'floor_only'
+        | 'invalid'
+        | 'projected_valid'
+        | 'projected_floor_only'
+        | 'projected_invalid'
+        | 'empty'
+        | string
+        | {
+            id?: string | null;
+            label?: string | null;
+            state?: 'locked' | 'pending' | 'valid' | 'achieved' | string | null;
+          }
+      >;
     } | null;
     recentMonths?: Array<{
-      month: string;
+      periodKey?: string | null;
+      month?: string | null;
       value?: number | null;
       state?: 'weak' | 'building' | 'strong' | 'locked' | 'valid' | string | null;
     }>;
@@ -2394,16 +2405,12 @@ export async function getTaskInsights(
         status: 'building',
         consolidationStrength: 66,
         windowProximity: {
-          slots: [
-            { id: 'm1', label: 'M1', state: 'valid' },
-            { id: 'm2', label: 'M2', state: 'pending' },
-            { id: 'm3', label: 'M3', state: 'locked' },
-          ],
+          slots: ['valid', 'floor_only', 'projected_invalid'],
         },
         recentMonths: [
-          { month: '2025-12', value: 42, state: 'weak' },
-          { month: '2026-01', value: 61, state: 'building' },
-          { month: '2026-02', value: 74, state: 'building' },
+          { periodKey: '2025-12', value: 42, state: 'weak' },
+          { periodKey: '2026-01', value: 61, state: 'building' },
+          { periodKey: '2026-02', value: 74, state: 'building' },
         ],
       },
       recalibration: { eligible: true },

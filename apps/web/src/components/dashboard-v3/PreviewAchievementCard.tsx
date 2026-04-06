@@ -7,6 +7,22 @@ function cx(...values: Array<string | false | null | undefined>): string {
 }
 
 type PreviewAchievement = NonNullable<TaskInsightsResponse['previewAchievement']>;
+type RecentMonthInput = NonNullable<PreviewAchievement['recentMonths']>[number];
+type SlotInput = NonNullable<NonNullable<PreviewAchievement['windowProximity']>['slots']>[number];
+
+type NormalizedRecentMonth = {
+  key: string;
+  sortKey: string;
+  periodKey: string | null;
+  state: string | null | undefined;
+  value?: number | null;
+};
+
+type NormalizedWindowSlot = {
+  key: string;
+  state: string | null | undefined;
+  label: string | null;
+};
 
 const statusConfig = {
   fragile: {
@@ -39,6 +55,56 @@ function monthLabel(value: string, language: PostLoginLanguage): string {
     return value;
   }
   return new Intl.DateTimeFormat(language === 'es' ? 'es-AR' : 'en-US', { month: 'short' }).format(parsed);
+}
+
+function asPeriodKey(value: unknown): string | null {
+  const text = typeof value === 'string' ? value.trim() : '';
+  return /^\d{4}-\d{2}$/.test(text) ? text : null;
+}
+
+function normalizeRecentMonthEntry(entry: RecentMonthInput, index: number): NormalizedRecentMonth | null {
+  if (!entry || typeof entry !== 'object') return null;
+
+  const periodKey = asPeriodKey(entry.periodKey) ?? asPeriodKey(entry.month);
+  const sortKey = periodKey ?? `zzzz-${String(index).padStart(2, '0')}`;
+
+  return {
+    key: periodKey ?? `unknown-${index}`,
+    sortKey,
+    periodKey,
+    state: entry.state,
+    value: entry.value ?? null,
+  };
+}
+
+function normalizeRecentMonths(recentMonths: PreviewAchievement['recentMonths']): NormalizedRecentMonth[] {
+  const list = Array.isArray(recentMonths) ? recentMonths : [];
+  return list
+    .map(normalizeRecentMonthEntry)
+    .filter((entry): entry is NormalizedRecentMonth => entry != null)
+    .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
+    .slice(-4);
+}
+
+function normalizeWindowSlotEntry(slot: SlotInput, index: number): NormalizedWindowSlot {
+  if (typeof slot === 'string') {
+    return {
+      key: `slot-${index}`,
+      state: slot,
+      label: null,
+    };
+  }
+
+  return {
+    key: slot.id ?? `slot-${index}`,
+    state: slot.state,
+    label: slot.label ?? null,
+  };
+}
+
+function normalizeWindowSlots(slots: PreviewAchievement['windowProximity'] extends null ? never : NonNullable<PreviewAchievement['windowProximity']>['slots']): NormalizedWindowSlot[] {
+  const list = Array.isArray(slots) ? slots : [];
+  return list.map((slot, index) => normalizeWindowSlotEntry(slot, index)).slice(0, 3);
 }
 
 function isProjectedState(state: string | null | undefined): boolean {
@@ -106,14 +172,12 @@ export function PreviewAchievementCard({
 }) {
   const tone = getStatusTone(previewAchievement.status);
   const score = Math.max(0, Math.min(100, Math.round(Number(previewAchievement.score ?? 0))));
-  const slots = previewAchievement.windowProximity?.slots ?? [];
-  const recentMonths = previewAchievement.recentMonths ?? [];
+  const slots = normalizeWindowSlots(previewAchievement.windowProximity?.slots ?? []);
+  const recentMonths = normalizeRecentMonths(previewAchievement.recentMonths);
   const slotPositionLabels = language === 'es' ? ['Mes 1', 'Mes 2', 'Actual'] : ['Month 1', 'Month 2', 'Current'];
 
-  const orderedSlots = slots.slice(0, 3);
-  const orderedRecentMonths = [...recentMonths]
-    .sort((a, b) => a.month.localeCompare(b.month))
-    .slice(-4);
+  const orderedSlots = slots;
+  const orderedRecentMonths = recentMonths;
 
   const ring = useMemo(() => {
     const radius = 47;
@@ -195,7 +259,7 @@ export function PreviewAchievementCard({
           </div>
           <div className="flex items-center gap-1.5">
             {orderedSlots.map((slot, index) => (
-              <div key={slot.id ?? `slot-${index}`} className="flex min-w-0 flex-1 items-center gap-1">
+              <div key={slot.key} className="flex min-w-0 flex-1 items-center gap-1">
                 {index > 0 ? <span aria-hidden className="h-px flex-1 bg-white/15" /> : null}
                 <div className="flex flex-col items-center gap-0.5">
                   <span className="text-[9px] text-[color:var(--color-slate-300)]" data-testid="seal-window-slot-label">{slotPositionLabels[index] ?? `M${index + 1}`}</span>
@@ -224,19 +288,19 @@ export function PreviewAchievementCard({
             <div className="flex items-end justify-between gap-1.5">
               {orderedRecentMonths.map((entry) => {
                 return (
-                  <div key={`${entry.month}-${entry.value ?? 0}`} data-testid="recent-month-item" className="flex min-w-0 flex-1 flex-col items-center gap-1">
+                  <div key={`${entry.key}-${entry.value ?? 0}`} data-testid="recent-month-item" className="flex min-w-0 flex-1 flex-col items-center gap-1">
                     <div
                       className={cx(
                         'inline-flex h-8 w-full items-center justify-center rounded-lg border text-[11px] font-semibold',
                         getMonthTone(entry.state),
                       )}
-                      aria-label={`${entry.month}-${entry.state ?? 'unknown'}`}
+                      aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
                       data-month-symbol={getMonthSymbol(entry.state)}
                     >
                       {getMonthSymbol(entry.state)}
                     </div>
                     <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
-                      {monthLabel(entry.month, language)}
+                      {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
                     </span>
                     {isProjectedState(entry.state) ? (
                       <span className="text-[9px] text-[color:var(--color-sky-200)]">{language === 'es' ? 'Actual' : 'Current'}</span>
