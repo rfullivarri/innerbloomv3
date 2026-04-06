@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
 import {
@@ -169,10 +169,11 @@ function useDeepLinkNavigation(enabled: boolean) {
   const lastHandledUrlRef = useRef<string | null>(null);
   const lastClosedFingerprintRef = useRef<string | null>(null);
   const hasInitializedLaunchUrlRef = useRef(false);
+  const navigateRef = useRef(navigate);
 
-  const navigateTo = useEffectEvent((to: string, replace = true) => {
-    navigate(to, { replace });
-  });
+  useEffect(() => {
+    navigateRef.current = navigate;
+  }, [navigate]);
 
   useEffect(() => {
     if (!enabled) {
@@ -252,14 +253,14 @@ function useDeepLinkNavigation(enabled: boolean) {
         }
 
         console.info('[mobile-auth] navigate() start', { nextPath, at: Date.now() });
-        navigateTo(nextPath, true);
+        navigateRef.current(nextPath, { replace: true });
         console.info('[mobile-auth] navigate() end', { nextPath, at: Date.now() });
         return;
       }
 
       const nextPath = normalizeAppUrlToPath(url);
       if (nextPath) {
-        navigateTo(nextPath, true);
+        navigateRef.current(nextPath, { replace: true });
       }
     };
 
@@ -295,7 +296,7 @@ function useDeepLinkNavigation(enabled: boolean) {
             ? rawTarget
             : DAILY_REMINDER_NOTIFICATION_TARGET_PATH;
           console.info('[mobile-reminder] local notification action', { nextPath, at: Date.now() });
-          navigateTo(nextPath, false);
+          navigateRef.current(nextPath, { replace: false });
         }),
       ).then((handle) => {
         localNotificationHandle = handle;
@@ -307,7 +308,7 @@ function useDeepLinkNavigation(enabled: boolean) {
       void listenerHandle?.remove();
       void localNotificationHandle?.remove();
     };
-  }, [enabled, navigateTo]);
+  }, [enabled]);
 }
 
 export function NativeMobileBridge() {
