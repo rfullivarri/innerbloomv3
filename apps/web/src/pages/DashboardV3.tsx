@@ -751,11 +751,7 @@ export default function DashboardV3Page() {
   ]);
 
   useEffect(() => {
-    if (
-      !backendUserId ||
-      hasAutoOpenedDailyQuestRef.current ||
-      !dailyQuestReadiness.canAutoOpenDailyQuestPopup
-    ) {
+    if (!backendUserId || hasAutoOpenedDailyQuestRef.current) {
       return;
     }
 
@@ -782,11 +778,15 @@ export default function DashboardV3Page() {
       return;
     }
 
+    if (!dailyQuestReadiness.canOpenDailyQuest) {
+      return;
+    }
+
     hasAutoOpenedDailyQuestRef.current = true;
     dailyQuestModalRef.current?.open();
   }, [
     backendUserId,
-    dailyQuestReadiness.canAutoOpenDailyQuestPopup,
+    dailyQuestReadiness.canOpenDailyQuest,
     location.hash,
     location.search,
   ]);

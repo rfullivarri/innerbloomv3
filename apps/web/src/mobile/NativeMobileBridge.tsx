@@ -40,7 +40,19 @@ function setConsumedLaunchFingerprint(fingerprint: string): void {
   window.sessionStorage.setItem(MOBILE_AUTH_CONSUMED_LAUNCH_FINGERPRINT_KEY, fingerprint);
 }
 
-function resolveCallbackTargetPath(authMode: string | null | undefined): string {
+function getCurrentAppPath(): string {
+  if (typeof window === 'undefined') {
+    return '/';
+  }
+
+  const { pathname, search, hash } = window.location;
+  return `${pathname || '/'}${search || ''}${hash || ''}`;
+}
+
+function resolveCallbackTargetPath(
+  authMode: string | null | undefined,
+  currentPath: string,
+): string {
   const dashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
 
   if (authMode === 'sign-in') {
@@ -49,6 +61,10 @@ function resolveCallbackTargetPath(authMode: string | null | undefined): string 
 
   if (authMode === 'sign-up') {
     return '/intro-journey';
+  }
+
+  if (authMode === 'refresh') {
+    return currentPath || dashboardPath;
   }
 
   return '/';
@@ -209,16 +225,27 @@ function useDeepLinkNavigation(enabled: boolean) {
         }
 
         setConsumedLaunchFingerprint(resolution.fingerprint);
+        const currentPath = getCurrentAppPath();
         const nextPath = resolution.type === 'session'
-          ? resolveCallbackTargetPath(resolution.session.authMode)
+          ? resolveCallbackTargetPath(resolution.session.authMode, currentPath)
           : '/';
 
         console.info('[mobile-auth] bridge consumed callback', {
           type: resolution.type,
           source,
           nextPath,
+          currentPath,
           at: Date.now(),
         });
+
+        if (nextPath === currentPath) {
+          console.info('[mobile-auth] refresh callback preserved current route', {
+            nextPath,
+            at: Date.now(),
+          });
+          return;
+        }
+
         console.info('[mobile-auth] navigate() start', { nextPath, at: Date.now() });
         navigate(nextPath, { replace: true });
         console.info('[mobile-auth] navigate() end', { nextPath, at: Date.now() });

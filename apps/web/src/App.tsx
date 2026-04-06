@@ -29,7 +29,12 @@ import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';
 import { MobileAppEntry } from './mobile/MobileAppEntry';
 import { cancelNativeDailyReminderNotification, syncNativeDailyReminderNotification } from './mobile/localNotifications';
-import { shouldForceNativeWelcome, useMobileAuthSession } from './mobile/mobileAuthSession';
+import {
+  ensureFreshMobileAuthSession,
+  getMobileAuthSession,
+  shouldForceNativeWelcome,
+  useMobileAuthSession,
+} from './mobile/mobileAuthSession';
 import MobileBrowserAuthPage from './pages/MobileBrowserAuth';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
@@ -80,7 +85,23 @@ function ApiAuthBridge() {
         clerkUserId: mobileAuthSession.clerkUserId,
       });
 
-      setApiAuthTokenProvider(async () => mobileAuthSession.token);
+      setApiAuthTokenProvider(async () => {
+        const refreshed = await ensureFreshMobileAuthSession({
+          reason: 'api-auth-provider',
+          minValidityMs: 5_000,
+        });
+
+        const latestToken =
+          refreshed?.token ??
+          getMobileAuthSession()?.token ??
+          mobileAuthSession.token;
+
+        if (!latestToken) {
+          throw new Error('Missing native mobile auth token for API request.');
+        }
+
+        return latestToken;
+      });
       return;
     }
 
