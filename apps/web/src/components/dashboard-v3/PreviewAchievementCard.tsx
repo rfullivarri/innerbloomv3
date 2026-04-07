@@ -127,11 +127,13 @@ function getMonthMetric(value: number | null | undefined): string {
 }
 
 function RecentMonthNode({ entry, language }: MonthNodeProps) {
+  const isProjected = entry.projected;
+  const monthSymbol = getMonthSymbol(entry.state);
   return (
     <div
       key={`${entry.key}-${entry.value ?? 0}`}
       data-testid="recent-month-item"
-      className="flex h-[4.75rem] min-w-[3.1rem] shrink-0 flex-col items-center gap-0.5 py-0.5 sm:h-[5rem] sm:min-w-[3.35rem]"
+      className="flex h-[5.2rem] min-w-[3.1rem] shrink-0 flex-col items-center gap-0.5 py-0.5 sm:h-[5.45rem] sm:min-w-[3.35rem]"
     >
       <div
         data-testid="recent-month-node"
@@ -140,9 +142,16 @@ function RecentMonthNode({ entry, language }: MonthNodeProps) {
           getMonthTone(entry.state),
         )}
         aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
-        data-month-symbol={getMonthSymbol(entry.state)}
+        data-month-symbol={monthSymbol}
       >
-        {getMonthSymbol(entry.state)}
+        {isProjected ? (
+          <span
+            aria-hidden
+            className="inline-flex h-4 w-4 animate-[spin_3.6s_linear_infinite] rounded-full border border-white/15 border-t-white/80 border-r-white/45 sm:h-[1.05rem] sm:w-[1.05rem]"
+          />
+        ) : (
+          monthSymbol
+        )}
       </div>
       <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
         {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
@@ -153,6 +162,11 @@ function RecentMonthNode({ entry, language }: MonthNodeProps) {
       >
         {getMonthMetric(entry.value)}
       </span>
+      {isProjected && (
+        <span className="text-[9px] leading-none text-[color:var(--color-slate-400)]">
+          {language === 'es' ? 'proyectado' : 'projected'}
+        </span>
+      )}
     </div>
   );
 }
@@ -166,7 +180,7 @@ export function PreviewAchievementCard({
 }) {
   const tone = getStatusTone(previewAchievement.status);
   const score = Math.max(0, Math.min(100, Math.round(Number(previewAchievement.score ?? 0))));
-  const scoreLabel = language === 'es' ? 'Puntaje' : 'Score';
+  const scoreLabel = 'Score';
   const recentMonths = normalizeRecentMonths(previewAchievement.recentMonths);
   const orderedRecentMonths = recentMonths;
   const lastThreeStart = Math.max(0, orderedRecentMonths.length - 3);
@@ -187,6 +201,7 @@ export function PreviewAchievementCard({
   const [isScoreTooltipOpen, setIsScoreTooltipOpen] = useState(false);
   const scoreTooltipId = useId();
   const scoreTooltipRef = useRef<HTMLDivElement | null>(null);
+  const scoreMarkerTop = `${Math.max(0, Math.min(100, 100 - score))}%`;
 
   useEffect(() => {
     if (!isScoreTooltipOpen) return;
@@ -227,38 +242,60 @@ export function PreviewAchievementCard({
         </span>
 
         <div className="flex shrink-0 flex-col items-center" data-testid="score-block">
-          <svg
-            className="h-32 w-32 sm:h-36 sm:w-36"
-            viewBox="0 0 120 120"
-            role="img"
-            aria-label={`preview achievement score ${score}`}
-            data-testid="score-donut"
-          >
-            <circle
-              cx="60"
-              cy="60"
-              r={ring.radius}
-              strokeWidth={11}
-              className="fill-none stroke-[color:var(--color-border-subtle)]"
-            />
-            <circle
-              cx="60"
-              cy="60"
-              r={ring.radius}
-              strokeWidth={11}
-              strokeDasharray={`${ring.circumference} ${ring.circumference}`}
-              strokeDashoffset={ring.offset}
-              className={cx('fill-none transition-[stroke-dashoffset] duration-500 ease-out', tone.ring)}
-              strokeLinecap="round"
-              transform="rotate(-90 60 60)"
-            />
-            <text x="60" y="56" textAnchor="middle" dominantBaseline="middle" className="fill-[color:var(--color-text)] text-[26px] font-semibold">
-              {score}
-            </text>
-            <text x="60" y="74" textAnchor="middle" dominantBaseline="middle" className="fill-[color:var(--color-slate-400)] text-[10px] uppercase tracking-[0.14em]">
-              {scoreLabel}
-            </text>
-          </svg>
+          <div className="flex items-center gap-4 sm:gap-5">
+            <svg
+              className="h-32 w-32 sm:h-36 sm:w-36"
+              viewBox="0 0 120 120"
+              role="img"
+              aria-label={`preview achievement score ${score}`}
+              data-testid="score-donut"
+            >
+              <circle
+                cx="60"
+                cy="60"
+                r={ring.radius}
+                strokeWidth={11}
+                className="fill-none stroke-[color:var(--color-border-subtle)]"
+              />
+              <circle
+                cx="60"
+                cy="60"
+                r={ring.radius}
+                strokeWidth={11}
+                strokeDasharray={`${ring.circumference} ${ring.circumference}`}
+                strokeDashoffset={ring.offset}
+                className={cx('fill-none transition-[stroke-dashoffset] duration-500 ease-out', tone.ring)}
+                strokeLinecap="round"
+                transform="rotate(-90 60 60)"
+              />
+              <text x="60" y="56" textAnchor="middle" dominantBaseline="middle" className="fill-[color:var(--color-text)] text-[26px] font-semibold">
+                {score}
+              </text>
+              <text x="60" y="74" textAnchor="middle" dominantBaseline="middle" className="fill-[color:var(--color-slate-400)] text-[10px] uppercase tracking-[0.14em]">
+                {scoreLabel}
+              </text>
+            </svg>
+            <div className="relative flex h-32 items-center pr-8 sm:h-36">
+              <div
+                className="relative h-full w-3 rounded-full border border-white/15 bg-[linear-gradient(to_top,rgba(253,164,175,0.6)_0%,rgba(252,211,77,0.55)_55%,rgba(110,231,183,0.6)_100%)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
+                data-testid="score-range-rail"
+              >
+                <span className="absolute left-1/2 top-[50%] h-px w-[18px] -translate-x-1/2 -translate-y-1/2 bg-white/30" />
+                <span className="absolute left-1/2 top-[20%] h-px w-[18px] -translate-x-1/2 -translate-y-1/2 bg-white/35" />
+                <span className="absolute left-1/2 top-0 h-px w-[18px] -translate-x-1/2 bg-white/40" />
+                <span className="absolute left-1/2 bottom-0 h-px w-[18px] -translate-x-1/2 bg-white/20" />
+              </div>
+              <span className="absolute right-0 top-0 text-[9px] text-[color:var(--color-slate-400)]">100</span>
+              <span className="absolute right-0 top-[20%] -translate-y-1/2 text-[9px] text-[color:var(--color-slate-400)]">80</span>
+              <span className="absolute right-0 top-[50%] -translate-y-1/2 text-[9px] text-[color:var(--color-slate-400)]">50</span>
+              <span className="absolute right-0 bottom-0 text-[9px] text-[color:var(--color-slate-500)]">0</span>
+              <span
+                className="pointer-events-none absolute -left-4 h-px w-4 bg-white/80 transition-all duration-500 ease-out"
+                style={{ top: scoreMarkerTop }}
+                aria-hidden
+              />
+            </div>
+          </div>
           <div
             className="relative mt-1 inline-flex items-center gap-1 text-[10px] text-[color:var(--color-slate-400)]"
             data-testid="score-affordance"
@@ -285,8 +322,8 @@ export function PreviewAchievementCard({
                 className="absolute left-1/2 top-6 z-10 w-52 -translate-x-1/2 rounded-lg border border-white/20 bg-[color:var(--color-overlay-1)]/95 p-2 text-[10px] leading-snug text-[color:var(--color-slate-100)] shadow-xl backdrop-blur-sm"
               >
                 {language === 'es'
-                  ? 'Resume tu progreso reciente: constancia, cumplimiento y tendencia.'
-                  : 'Summarizes your recent progress: consistency, completion, and trend.'}
+                  ? 'El Score resume cómo viene hoy tu hábito con base en constancia reciente, cumplimiento de la ventana actual y tendencia.'
+                  : 'Score summarizes how your habit is doing today based on recent consistency, completion in the current window, and trend.'}
               </div>
             )}
           </div>
@@ -312,7 +349,7 @@ export function PreviewAchievementCard({
                   <p>{language === 'es' ? '✓ = mes fuerte' : '✓ = strong month'}</p>
                   <p>{language === 'es' ? '• = en construcción' : '• = building'}</p>
                   <p>{language === 'es' ? '✕ = mes débil' : '✕ = weak month'}</p>
-                  <p>{language === 'es' ? '~ = proyectado al ritmo actual' : '~ = projected at current pace'}</p>
+                  <p>{language === 'es' ? '↻ = mes proyectado en curso' : '↻ = projected month in progress'}</p>
                 </div>
               </details>
             </div>
@@ -335,6 +372,11 @@ export function PreviewAchievementCard({
                     data-window-start={lastThreeStart}
                     data-window-end={lastThreeEnd - 1}
                   >
+                    <div className="mb-1.5 rounded-[9px] border border-white/10 bg-[linear-gradient(90deg,rgba(125,211,252,0.12),rgba(255,255,255,0.04))] px-2 py-1">
+                      <p className="text-[9px] uppercase tracking-[0.11em] text-[color:var(--color-slate-300)]">
+                        {language === 'es' ? 'Foto actual' : 'Current snapshot'}
+                      </p>
+                    </div>
                     <div className="flex items-end gap-1 md:gap-1.5" data-testid="seal-window-track">
                       {groupedMonths.map((entry) => (
                         <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
