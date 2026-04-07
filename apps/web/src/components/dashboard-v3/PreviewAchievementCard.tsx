@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { TaskInsightsResponse } from '../../lib/api';
 import type { PostLoginLanguage } from '../../i18n/postLoginLanguage';
 
@@ -166,6 +166,7 @@ export function PreviewAchievementCard({
 }) {
   const tone = getStatusTone(previewAchievement.status);
   const score = Math.max(0, Math.min(100, Math.round(Number(previewAchievement.score ?? 0))));
+  const scoreLabel = language === 'es' ? 'Puntaje' : 'Score';
   const recentMonths = normalizeRecentMonths(previewAchievement.recentMonths);
   const orderedRecentMonths = recentMonths;
   const lastThreeStart = Math.max(0, orderedRecentMonths.length - 3);
@@ -183,13 +184,35 @@ export function PreviewAchievementCard({
     return { radius, circumference, offset };
   }, [score]);
 
+  const [isScoreTooltipOpen, setIsScoreTooltipOpen] = useState(false);
+  const scoreTooltipId = useId();
+  const scoreTooltipRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!isScoreTooltipOpen) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!scoreTooltipRef.current?.contains(target)) {
+        setIsScoreTooltipOpen(false);
+      }
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsScoreTooltipOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isScoreTooltipOpen]);
+
   return (
     <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
-      <div className="flex flex-col gap-3 md:grid md:grid-cols-[1fr_auto_1fr] md:items-start">
-        <div className="space-y-2 md:col-start-1">
-          <span className={cx('inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold', tone.chip)}>
-            {tone.label[language]}
-          </span>
+      <div className="flex flex-col items-center gap-2">
+        <div className="space-y-2 text-center">
           <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
             {language === 'es' ? 'Desarrollo del hábito' : 'Habit development'}
           </p>
@@ -199,8 +222,11 @@ export function PreviewAchievementCard({
             </p>
           )}
         </div>
+        <span className={cx('inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold', tone.chip)}>
+          {tone.label[language]}
+        </span>
 
-        <div className="flex shrink-0 flex-col items-center md:col-start-2 md:justify-self-center" data-testid="score-block">
+        <div className="flex shrink-0 flex-col items-center" data-testid="score-block">
           <svg
             className="h-32 w-32 sm:h-36 sm:w-36"
             viewBox="0 0 120 120"
@@ -230,28 +256,41 @@ export function PreviewAchievementCard({
               {score}
             </text>
             <text x="60" y="74" textAnchor="middle" dominantBaseline="middle" className="fill-[color:var(--color-slate-400)] text-[10px] uppercase tracking-[0.14em]">
-              {language === 'es' ? 'score' : 'score'}
+              {scoreLabel}
             </text>
           </svg>
-          <p className="mt-1 inline-flex items-center gap-1 text-[10px] text-[color:var(--color-slate-400)]" data-testid="score-affordance">
+          <div
+            className="relative mt-1 inline-flex items-center gap-1 text-[10px] text-[color:var(--color-slate-400)]"
+            data-testid="score-affordance"
+            ref={scoreTooltipRef}
+          >
             <span className="font-semibold uppercase tracking-[0.12em] text-[color:var(--color-slate-300)]">
-              {language === 'es' ? 'Score' : 'Score'}
+              {scoreLabel}
             </span>
-            <span
+            <button
+              type="button"
+              onClick={() => setIsScoreTooltipOpen((prev) => !prev)}
+              onFocus={() => setIsScoreTooltipOpen(true)}
               aria-label={language === 'es' ? 'Qué significa este score' : 'What this score means'}
-              title={
-                language === 'es'
-                  ? 'Resume constancia, cumplimiento reciente y tendencia.'
-                  : 'Summarizes consistency, recent completion, and trend.'
-              }
               className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/40 bg-white/20 text-[9px] font-semibold text-white shadow-sm"
               data-testid="score-info-dot"
+              aria-describedby={isScoreTooltipOpen ? scoreTooltipId : undefined}
             >
               i
-            </span>
-          </p>
+            </button>
+            {isScoreTooltipOpen && (
+              <div
+                id={scoreTooltipId}
+                role="tooltip"
+                className="absolute left-1/2 top-6 z-10 w-52 -translate-x-1/2 rounded-lg border border-white/20 bg-[color:var(--color-overlay-1)]/95 p-2 text-[10px] leading-snug text-[color:var(--color-slate-100)] shadow-xl backdrop-blur-sm"
+              >
+                {language === 'es'
+                  ? 'Resume tu progreso reciente: constancia, cumplimiento y tendencia.'
+                  : 'Summarizes your recent progress: consistency, completion, and trend.'}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="hidden md:block" aria-hidden />
       </div>
 
       <div className="mt-3 space-y-2">

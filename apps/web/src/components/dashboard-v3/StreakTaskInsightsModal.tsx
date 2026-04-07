@@ -169,7 +169,7 @@ function RecalibrationTrendIndicator({
         onMouseEnter={onOpenTooltip}
         onMouseLeave={onCloseTooltip}
         className={cx(
-          'inline-flex h-8 w-8 items-center justify-center rounded-full border text-base font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50',
+          'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/50',
           fallback ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] text-[color:var(--color-slate-300)]' : config[action].tone,
         )}
         aria-label={tooltipLabel}
@@ -181,7 +181,7 @@ function RecalibrationTrendIndicator({
         <div
           id={tooltipId}
           role="tooltip"
-          className="absolute left-0 top-10 z-20 w-64 max-w-[calc(100vw-3rem)] rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] p-2 text-xs text-[color:var(--color-slate-200)] shadow-xl"
+          className="absolute left-0 top-8 z-20 w-64 max-w-[calc(100vw-3rem)] rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] p-2 text-xs text-[color:var(--color-slate-200)] shadow-xl"
         >
           {tooltipLabel}
         </div>
