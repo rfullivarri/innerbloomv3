@@ -126,13 +126,6 @@ function getMonthMetric(value: number | null | undefined): string {
   return `${Math.max(0, Math.min(100, Math.round(normalized)))}%`;
 }
 
-function getMonthValueLabel(entry: NormalizedRecentMonth, language: PostLoginLanguage): string {
-  if (entry.closed) {
-    return language === 'es' ? 'logrado del objetivo mensual' : 'achieved of monthly target';
-  }
-  return language === 'es' ? 'proyectado al ritmo actual' : 'projected at current pace';
-}
-
 function RecentMonthNode({ entry, language }: MonthNodeProps) {
   return (
     <div
@@ -180,12 +173,8 @@ export function PreviewAchievementCard({
   const hasGroupedWindow = orderedRecentMonths.length >= 3;
   const leadingMonths = hasGroupedWindow ? orderedRecentMonths.slice(0, lastThreeStart) : orderedRecentMonths;
   const groupedMonths = hasGroupedWindow ? orderedRecentMonths.slice(lastThreeStart, lastThreeEnd) : [];
-  const isEarlyProjection =
-    Number(previewAchievement.currentMonth?.expectedTargetSoFar ?? 0) <= 2 ||
-    Number(previewAchievement.currentMonth?.completionsDoneSoFar ?? 0) <= 1;
   const shouldCenterRecentTimeline = orderedRecentMonths.length <= 5;
   const shouldUseOverflowTrack = orderedRecentMonths.length > 5;
-  const projectedMonth = orderedRecentMonths.findLast((entry) => entry.projected) ?? null;
 
   const ring = useMemo(() => {
     const radius = 47;
@@ -202,7 +191,7 @@ export function PreviewAchievementCard({
             {tone.label[language]}
           </span>
           <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
-            {language === 'es' ? 'Camino al sello' : 'Seal path'}
+            {language === 'es' ? 'Desarrollo del hábito' : 'Habit development'}
           </p>
           {previewAchievement.consolidationStrength != null && (
             <p className="text-[11px] text-[color:var(--color-slate-300)]">
@@ -213,7 +202,7 @@ export function PreviewAchievementCard({
 
         <div className="flex shrink-0 flex-col items-center md:col-start-2 md:justify-self-center" data-testid="score-block">
           <svg
-            className="h-24 w-24 sm:h-28 sm:w-28"
+            className="h-32 w-32 sm:h-36 sm:w-36"
             viewBox="0 0 120 120"
             role="img"
             aria-label={`preview achievement score ${score}`}
@@ -248,11 +237,13 @@ export function PreviewAchievementCard({
             <span className="font-semibold uppercase tracking-[0.12em] text-[color:var(--color-slate-300)]">
               {language === 'es' ? 'Score' : 'Score'}
             </span>
-            <span aria-hidden>·</span>
-            <span>{language === 'es' ? 'fuerza actual del hábito' : 'current habit strength'}</span>
             <span
               aria-label={language === 'es' ? 'Qué significa este score' : 'What this score means'}
-              title={language === 'es' ? 'Mide la fuerza actual del hábito.' : 'Shows current habit strength.'}
+              title={
+                language === 'es'
+                  ? 'Resume constancia, cumplimiento reciente y tendencia.'
+                  : 'Summarizes consistency, recent completion, and trend.'
+              }
               className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/40 bg-white/20 text-[9px] font-semibold text-white shadow-sm"
               data-testid="score-info-dot"
             >
@@ -265,7 +256,7 @@ export function PreviewAchievementCard({
 
       <div className="mt-3 space-y-2">
         {orderedRecentMonths.length > 0 && (
-          <div className="rounded-xl border border-white/10 bg-[color:var(--color-overlay-2)] px-2 py-2">
+          <div className="px-0 py-0">
             <div className="flex items-center gap-1.5">
               <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
                 {language === 'es' ? 'Historial reciente' : 'Recent history'}
@@ -314,12 +305,6 @@ export function PreviewAchievementCard({
                 )}
               </div>
             </div>
-            {projectedMonth && (
-              <p className="text-[9px] leading-none text-[color:var(--color-slate-400)]" data-testid="recent-timeline-projection-note">
-                {getMonthSymbol(projectedMonth.state)} {getMonthValueLabel(projectedMonth, language)}
-                {isEarlyProjection ? ` · ${language === 'es' ? 'estimación temprana' : 'early estimate'}` : ''}
-              </p>
-            )}
           </div>
         )}
       </div>
