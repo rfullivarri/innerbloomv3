@@ -2300,10 +2300,26 @@ export type TaskInsightsResponse = {
       >;
     } | null;
     recentMonths?: Array<{
+      closed?: boolean | null;
       periodKey?: string | null;
       month?: string | null;
       value?: number | null;
-      state?: 'weak' | 'building' | 'strong' | 'locked' | 'valid' | string | null;
+      completionRate?: number | null;
+      projectedCompletionRate?: number | null;
+      state?:
+        | 'weak'
+        | 'building'
+        | 'strong'
+        | 'locked'
+        | 'valid'
+        | 'floor_only'
+        | 'invalid'
+        | 'projected_valid'
+        | 'projected_floor_only'
+        | 'projected_invalid'
+        | 'no_data'
+        | string
+        | null;
     }>;
   } | null;
   recalibration?: {

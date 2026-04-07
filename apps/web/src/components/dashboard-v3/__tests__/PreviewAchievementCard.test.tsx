@@ -14,9 +14,9 @@ function renderCard(overrides: Partial<PreviewAchievement> = {}) {
       slots: ['valid', 'projected_floor_only', 'empty'],
     },
     recentMonths: [
-      { periodKey: '2026-01', value: 42, state: 'weak' },
-      { periodKey: '2026-02', value: 61, state: 'building' },
-      { periodKey: '2026-03', value: 72, state: 'strong' },
+      { periodKey: '2026-01', closed: true, completionRate: 0.42, state: 'invalid' },
+      { periodKey: '2026-02', closed: true, completionRate: 0.61, state: 'floor_only' },
+      { periodKey: '2026-03', closed: true, completionRate: 0.72, state: 'valid' },
     ],
     ...overrides,
   };
@@ -60,10 +60,10 @@ describe('PreviewAchievementCard', () => {
   test('renders recent month timeline as circular nodes with visible labels and compact progress text', () => {
     renderCard({
       recentMonths: [
-        { periodKey: '2026-01', value: 89, state: 'strong' },
-        { periodKey: '2026-02', value: 42, state: 'weak' },
-        { periodKey: '2026-03', value: 0, state: 'bad' },
-        { periodKey: '2026-04', value: 65, state: 'projected_valid' },
+        { periodKey: '2026-01', closed: true, completionRate: 0.89, state: 'valid' },
+        { periodKey: '2026-02', closed: true, completionRate: 0.42, state: 'weak' },
+        { periodKey: '2026-03', closed: true, completionRate: 0, state: 'bad' },
+        { periodKey: '2026-04', closed: false, completionRate: 0.53, projectedCompletionRate: 0.65, state: 'projected_valid' },
       ],
     });
     const months = screen.getAllByTestId('recent-month-item');
@@ -81,6 +81,7 @@ describe('PreviewAchievementCard', () => {
     expect(within(months[3]).getByText('abr')).toBeInTheDocument();
     const progress = screen.getAllByTestId('recent-month-progress').map((node) => node.textContent);
     expect(progress).toEqual(['89%', '42%', '0%', '65%']);
+    expect(screen.getByTestId('recent-month-projected-hint')).toHaveTextContent('proyectado');
     expect(screen.queryByText('Actual')).not.toBeInTheDocument();
     expect(screen.queryByText('Current')).not.toBeInTheDocument();
     expect(screen.getAllByTestId('recent-month-label')).toHaveLength(4);
@@ -89,12 +90,12 @@ describe('PreviewAchievementCard', () => {
   test('highlights the last 3 months in a grouped window that spans the intended 3-month range', () => {
     renderCard({
       recentMonths: [
-        { periodKey: '2025-11', value: 25, state: 'invalid' },
-        { periodKey: '2025-12', value: 59, state: 'building' },
-        { periodKey: '2026-01', value: 89, state: 'strong' },
-        { periodKey: '2026-02', value: 42, state: 'weak' },
-        { periodKey: '2026-03', value: 0, state: 'bad' },
-        { periodKey: '2026-04', value: 65, state: 'projected_valid' },
+        { periodKey: '2025-11', closed: true, completionRate: 0.25, state: 'invalid' },
+        { periodKey: '2025-12', closed: true, completionRate: 0.59, state: 'building' },
+        { periodKey: '2026-01', closed: true, completionRate: 0.89, state: 'strong' },
+        { periodKey: '2026-02', closed: true, completionRate: 0.42, state: 'weak' },
+        { periodKey: '2026-03', closed: true, completionRate: 0, state: 'bad' },
+        { periodKey: '2026-04', closed: false, projectedCompletionRate: 0.65, state: 'projected_valid' },
       ],
     });
 
@@ -114,10 +115,10 @@ describe('PreviewAchievementCard', () => {
   test('renders recent history in chronological order so current stays on the right', () => {
     renderCard({
       recentMonths: [
-        { periodKey: '2026-04', value: 65, state: 'projected_valid' },
-        { periodKey: '2026-01', value: 89, state: 'strong' },
-        { periodKey: '2026-03', value: 0, state: 'bad' },
-        { periodKey: '2026-02', value: 42, state: 'weak' },
+        { periodKey: '2026-04', closed: false, projectedCompletionRate: 0.65, state: 'projected_valid' },
+        { periodKey: '2026-01', closed: true, completionRate: 0.89, state: 'strong' },
+        { periodKey: '2026-03', closed: true, completionRate: 0, state: 'bad' },
+        { periodKey: '2026-02', closed: true, completionRate: 0.42, state: 'weak' },
       ],
     });
 
@@ -132,10 +133,10 @@ describe('PreviewAchievementCard', () => {
   test('keeps month nodes aligned with a grouped wrapper for the last 3 months', () => {
     renderCard({
       recentMonths: [
-        { periodKey: '2026-01', value: 80, state: 'strong' },
-        { periodKey: '2026-02', value: 70, state: 'building' },
-        { periodKey: '2026-03', value: 55, state: 'floor_only' },
-        { periodKey: '2026-04', value: 63, state: 'projected_valid' },
+        { periodKey: '2026-01', closed: true, completionRate: 0.8, state: 'strong' },
+        { periodKey: '2026-02', closed: true, completionRate: 0.7, state: 'building' },
+        { periodKey: '2026-03', closed: true, completionRate: 0.55, state: 'floor_only' },
+        { periodKey: '2026-04', closed: false, projectedCompletionRate: 0.63, state: 'projected_valid' },
       ],
     });
     const timeline = screen.getByTestId('recent-timeline');
@@ -162,9 +163,9 @@ describe('PreviewAchievementCard', () => {
   test('renders compact legend and explains intermediate yellow/building state', () => {
     renderCard({
       recentMonths: [
-        { periodKey: '2026-01', value: 80, state: 'strong' },
-        { periodKey: '2026-02', value: 70, state: 'building' },
-        { periodKey: '2026-03', value: 55, state: 'floor_only' },
+        { periodKey: '2026-01', closed: true, completionRate: 0.8, state: 'strong' },
+        { periodKey: '2026-02', closed: true, completionRate: 0.7, state: 'building' },
+        { periodKey: '2026-03', closed: true, completionRate: 0.55, state: 'floor_only' },
       ],
     });
 
@@ -182,7 +183,7 @@ describe('PreviewAchievementCard', () => {
   test('does not crash when recent month item is missing periodKey/month', () => {
     renderCard({
       recentMonths: [
-        { periodKey: '2026-04', value: 65, state: 'projected_valid' },
+        { periodKey: '2026-04', closed: false, projectedCompletionRate: 0.65, state: 'projected_valid' },
         { value: 22, state: 'building' },
       ],
     });
@@ -197,7 +198,7 @@ describe('PreviewAchievementCard', () => {
         slots: ['valid', { id: 'slot-b', state: null }, 'projected_invalid'],
       },
       recentMonths: [
-        { month: '2026-02', state: 'building' },
+        { month: '2026-02', closed: true, completionRate: 0.61, state: 'building' },
         { state: null },
       ],
     });
@@ -205,15 +206,15 @@ describe('PreviewAchievementCard', () => {
     const monthLabels = screen.getAllByTestId('recent-month-label').map((node) => node.textContent);
     expect(monthLabels).toEqual(['feb', 'Sin mes']);
     const progress = screen.getAllByTestId('recent-month-progress').map((node) => node.textContent);
-    expect(progress).toEqual(['--', '--']);
+    expect(progress).toEqual(['61%', '--']);
     expect(screen.getByTestId('timeline-window-subtitle')).toBeInTheDocument();
   });
 
   test('does not render grouped last-3 wrapper when there are fewer than 3 months', () => {
     renderCard({
       recentMonths: [
-        { periodKey: '2026-03', value: 60, state: 'building' },
-        { periodKey: '2026-04', value: 72, state: 'projected_valid' },
+        { periodKey: '2026-03', closed: true, completionRate: 0.6, state: 'building' },
+        { periodKey: '2026-04', closed: false, projectedCompletionRate: 0.72, state: 'projected_valid' },
       ],
     });
 
