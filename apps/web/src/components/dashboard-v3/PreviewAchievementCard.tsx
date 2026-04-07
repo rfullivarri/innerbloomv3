@@ -14,7 +14,9 @@ type NormalizedRecentMonth = {
   sortKey: string;
   periodKey: string | null;
   state: string | null | undefined;
+  closed: boolean;
   value?: number | null;
+  projected: boolean;
 };
 
 type MonthNodeProps = {
@@ -65,13 +67,21 @@ function normalizeRecentMonthEntry(entry: RecentMonthInput, index: number): Norm
 
   const periodKey = asPeriodKey(entry.periodKey) ?? asPeriodKey(entry.month);
   const sortKey = periodKey ?? `zzzz-${String(index).padStart(2, '0')}`;
+  const closed = entry.closed === true;
+  const projectedValue = typeof entry.projectedCompletionRate === 'number' ? entry.projectedCompletionRate : null;
+  const completionValue = typeof entry.completionRate === 'number' ? entry.completionRate : null;
+  const legacyValue = typeof entry.value === 'number' ? entry.value : null;
+  const value = closed ? (completionValue ?? legacyValue) : (projectedValue ?? completionValue ?? legacyValue);
+  const projected = !closed && projectedValue != null;
 
   return {
     key: periodKey ?? `unknown-${index}`,
     sortKey,
     periodKey,
     state: entry.state,
-    value: entry.value ?? null,
+    closed,
+    value,
+    projected,
   };
 }
 
@@ -112,7 +122,8 @@ function getMonthSymbol(monthState: string | null | undefined): string {
 
 function getMonthMetric(value: number | null | undefined): string {
   if (typeof value !== 'number' || Number.isNaN(value)) return '--';
-  return `${Math.max(0, Math.min(100, Math.round(value)))}%`;
+  const normalized = value <= 1 ? value * 100 : value;
+  return `${Math.max(0, Math.min(100, Math.round(normalized)))}%`;
 }
 
 function RecentMonthNode({ entry, language }: MonthNodeProps) {
@@ -142,6 +153,11 @@ function RecentMonthNode({ entry, language }: MonthNodeProps) {
       >
         {getMonthMetric(entry.value)}
       </span>
+      {entry.projected && (
+        <span className="text-[9px] leading-none text-[color:var(--color-slate-400)]" data-testid="recent-month-projected-hint">
+          {language === 'es' ? 'proyectado' : 'projected'}
+        </span>
+      )}
     </div>
   );
 }
