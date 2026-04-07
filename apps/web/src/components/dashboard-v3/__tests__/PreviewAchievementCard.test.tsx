@@ -54,7 +54,7 @@ describe('PreviewAchievementCard', () => {
     expect(screen.queryByText('Ventana al sello')).not.toBeInTheDocument();
     expect(screen.queryByTestId('seal-window-title')).not.toBeInTheDocument();
     expect(screen.queryByTestId('active-window-label')).not.toBeInTheDocument();
-    expect(screen.getByTestId('timeline-window-subtitle')).toHaveTextContent('Los últimos 3 meses cuentan para el sello');
+    expect(screen.getByTestId('timeline-window-subtitle')).toHaveTextContent('Cerrados = logrado mensual · actual = proyectado al ritmo actual');
   });
 
   test('renders recent month timeline as circular nodes with visible labels and compact progress text', () => {
@@ -72,6 +72,7 @@ describe('PreviewAchievementCard', () => {
     expect(nodes).toHaveLength(4);
     nodes.forEach((node) => {
       expect(node.className).toContain('rounded-full');
+      expect(node.className).not.toContain(' border ');
     });
     expect(within(months[0]).getByText('✓')).toBeInTheDocument();
     expect(within(months[1]).getByText('•')).toBeInTheDocument();
@@ -81,7 +82,12 @@ describe('PreviewAchievementCard', () => {
     expect(within(months[3]).getByText('abr')).toBeInTheDocument();
     const progress = screen.getAllByTestId('recent-month-progress').map((node) => node.textContent);
     expect(progress).toEqual(['89%', '42%', '0%', '65%']);
-    expect(screen.getByTestId('recent-month-projected-hint')).toHaveTextContent('proyectado');
+    const valueLabels = screen.getAllByTestId('recent-month-value-label').map((node) => ({
+      text: node.textContent,
+      invisible: node.className.includes('invisible'),
+    }));
+    expect(valueLabels.slice(0, 3).every((entry) => entry.invisible)).toBe(true);
+    expect(valueLabels[3]?.text).toContain('proyectado al ritmo actual');
     expect(screen.queryByText('Actual')).not.toBeInTheDocument();
     expect(screen.queryByText('Current')).not.toBeInTheDocument();
     expect(screen.getAllByTestId('recent-month-label')).toHaveLength(4);
@@ -177,7 +183,7 @@ describe('PreviewAchievementCard', () => {
     expect(screen.getByText('✓ = mes fuerte')).toBeInTheDocument();
     expect(screen.getByText('• = en construcción')).toBeInTheDocument();
     expect(screen.getByText('✕ = mes débil')).toBeInTheDocument();
-    expect(screen.getByText('~ = mes actual proyectado')).toBeInTheDocument();
+    expect(screen.getByText('~ = proyectado al ritmo actual')).toBeInTheDocument();
   });
 
   test('does not crash when recent month item is missing periodKey/month', () => {
@@ -221,6 +227,44 @@ describe('PreviewAchievementCard', () => {
     expect(screen.queryByTestId('seal-window-group')).not.toBeInTheDocument();
     expect(screen.getAllByTestId('recent-month-item')).toHaveLength(2);
     expect(screen.getAllByTestId('recent-month-progress').map((node) => node.textContent)).toEqual(['60%', '72%']);
+  });
+
+
+  test('shows early projection hint when current month data is still sparse', () => {
+    renderCard({
+      currentMonth: {
+        expectedTargetSoFar: 1,
+        completionsDoneSoFar: 0,
+      },
+      recentMonths: [
+        { periodKey: '2026-02', closed: true, completionRate: 0.61, state: 'building' },
+        { periodKey: '2026-03', closed: true, completionRate: 0.72, state: 'valid' },
+        { periodKey: '2026-04', closed: false, projectedCompletionRate: 0.19, state: 'projected_invalid' },
+      ],
+    });
+
+    expect(screen.getByTestId('recent-month-early-projection-hint')).toHaveTextContent('estimación temprana');
+  });
+
+  test('renders at most 7 recent months and keeps grouped last-3 window', () => {
+    renderCard({
+      recentMonths: [
+        { periodKey: '2025-09', closed: true, completionRate: 0.2, state: 'invalid' },
+        { periodKey: '2025-10', closed: true, completionRate: 0.3, state: 'invalid' },
+        { periodKey: '2025-11', closed: true, completionRate: 0.4, state: 'floor_only' },
+        { periodKey: '2025-12', closed: true, completionRate: 0.5, state: 'floor_only' },
+        { periodKey: '2026-01', closed: true, completionRate: 0.6, state: 'building' },
+        { periodKey: '2026-02', closed: true, completionRate: 0.7, state: 'valid' },
+        { periodKey: '2026-03', closed: true, completionRate: 0.8, state: 'strong' },
+        { periodKey: '2026-04', closed: false, projectedCompletionRate: 0.9, state: 'projected_valid' },
+      ],
+    });
+
+    const labels = screen.getAllByTestId('recent-month-label').map((label) => label.textContent);
+    expect(labels).toHaveLength(7);
+    expect(labels).toEqual(['oct', 'nov', 'dic', 'ene', 'feb', 'mar', 'abr']);
+    expect(screen.getByTestId('recent-timeline').className).toContain('overflow-x-auto');
+    expect(screen.getByTestId('seal-window-group')).toBeInTheDocument();
   });
 
   test('uses centered desktop layout classes for score balance', () => {
