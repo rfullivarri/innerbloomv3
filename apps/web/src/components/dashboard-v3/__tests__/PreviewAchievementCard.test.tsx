@@ -49,12 +49,12 @@ describe('PreviewAchievementCard', () => {
     expect(screen.getByTestId('score-info-dot').className).toContain('bg-white/20');
   });
 
-  test('does not render a separate seal-window chart and uses unified timeline guidance copy', () => {
+  test('does not render a separate seal-window chart or timeline guidance copy', () => {
     renderCard();
     expect(screen.queryByText('Ventana al sello')).not.toBeInTheDocument();
     expect(screen.queryByTestId('seal-window-title')).not.toBeInTheDocument();
     expect(screen.queryByTestId('active-window-label')).not.toBeInTheDocument();
-    expect(screen.getByTestId('timeline-window-subtitle')).toHaveTextContent('Cerrados = logrado mensual · actual = proyectado al ritmo actual');
+    expect(screen.queryByText('Cerrados = logrado mensual · actual = proyectado al ritmo actual')).not.toBeInTheDocument();
   });
 
   test('renders recent month timeline as circular nodes with visible labels and compact progress text', () => {
@@ -213,7 +213,61 @@ describe('PreviewAchievementCard', () => {
     expect(monthLabels).toEqual(['feb', 'Sin mes']);
     const progress = screen.getAllByTestId('recent-month-progress').map((node) => node.textContent);
     expect(progress).toEqual(['61%', '--']);
-    expect(screen.getByTestId('timeline-window-subtitle')).toBeInTheDocument();
+    expect(screen.queryByText('Cerrados = logrado mensual · actual = proyectado al ritmo actual')).not.toBeInTheDocument();
+  });
+
+
+  test('centers a single month in the timeline track', () => {
+    renderCard({
+      recentMonths: [{ periodKey: '2026-04', closed: false, projectedCompletionRate: 0.72, state: 'projected_valid' }],
+    });
+
+    expect(screen.getByTestId('recent-timeline-track').className).toContain('justify-center');
+    expect(screen.getAllByTestId('recent-month-item')).toHaveLength(1);
+  });
+
+  test('centers two months in the timeline track', () => {
+    renderCard({
+      recentMonths: [
+        { periodKey: '2026-03', closed: true, completionRate: 0.61, state: 'building' },
+        { periodKey: '2026-04', closed: false, projectedCompletionRate: 0.72, state: 'projected_valid' },
+      ],
+    });
+
+    expect(screen.getByTestId('recent-timeline-track').className).toContain('justify-center');
+    expect(screen.queryByTestId('seal-window-group')).not.toBeInTheDocument();
+  });
+
+  test('short month lists use full-width track instead of forced overflow sizing', () => {
+    renderCard({
+      recentMonths: [
+        { periodKey: '2026-01', closed: true, completionRate: 0.8, state: 'strong' },
+        { periodKey: '2026-02', closed: true, completionRate: 0.7, state: 'building' },
+        { periodKey: '2026-03', closed: true, completionRate: 0.55, state: 'floor_only' },
+        { periodKey: '2026-04', closed: false, projectedCompletionRate: 0.63, state: 'projected_valid' },
+      ],
+    });
+
+    const track = screen.getByTestId('recent-timeline-track');
+    expect(track.className).toContain('w-full');
+    expect(track.className).not.toContain('min-w-max');
+  });
+
+  test('allows overflow fallback for longer month lists', () => {
+    renderCard({
+      recentMonths: [
+        { periodKey: '2025-10', closed: true, completionRate: 0.3, state: 'invalid' },
+        { periodKey: '2025-11', closed: true, completionRate: 0.4, state: 'floor_only' },
+        { periodKey: '2025-12', closed: true, completionRate: 0.5, state: 'floor_only' },
+        { periodKey: '2026-01', closed: true, completionRate: 0.6, state: 'building' },
+        { periodKey: '2026-02', closed: true, completionRate: 0.7, state: 'valid' },
+        { periodKey: '2026-03', closed: true, completionRate: 0.8, state: 'strong' },
+        { periodKey: '2026-04', closed: false, projectedCompletionRate: 0.9, state: 'projected_valid' },
+      ],
+    });
+
+    expect(screen.getByTestId('recent-timeline').className).toContain('overflow-x-auto');
+    expect(screen.getByTestId('recent-timeline-track').className).toContain('min-w-max');
   });
 
   test('does not render grouped last-3 wrapper when there are fewer than 3 months', () => {
@@ -264,6 +318,7 @@ describe('PreviewAchievementCard', () => {
     expect(labels).toHaveLength(7);
     expect(labels).toEqual(['oct', 'nov', 'dic', 'ene', 'feb', 'mar', 'abr']);
     expect(screen.getByTestId('recent-timeline').className).toContain('overflow-x-auto');
+    expect(screen.getByTestId('recent-timeline-track').className).toContain('min-w-max');
     expect(screen.getByTestId('seal-window-group')).toBeInTheDocument();
   });
 
