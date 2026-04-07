@@ -92,7 +92,7 @@ function normalizeRecentMonths(recentMonths: PreviewAchievement['recentMonths'])
     .map(normalizeRecentMonthEntry)
     .filter((entry): entry is NormalizedRecentMonth => entry != null)
     .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
-    .slice(-7);
+    .slice(-8);
 }
 
 function getMonthTone(state: string | null | undefined): string {
@@ -141,7 +141,7 @@ function RecentMonthNode({ entry, language, isEarlyProjection }: MonthNodeProps)
     <div
       key={`${entry.key}-${entry.value ?? 0}`}
       data-testid="recent-month-item"
-      className="flex h-[6.05rem] min-w-[5.75rem] shrink-0 flex-col items-center gap-1 py-1"
+      className="flex h-[5.85rem] min-w-[4.15rem] shrink-0 flex-col items-center gap-0.5 py-1"
     >
       <div
         data-testid="recent-month-node"
@@ -200,8 +200,8 @@ export function PreviewAchievementCard({
   const isEarlyProjection =
     Number(previewAchievement.currentMonth?.expectedTargetSoFar ?? 0) <= 2 ||
     Number(previewAchievement.currentMonth?.completionsDoneSoFar ?? 0) <= 1;
-  const shouldCenterRecentTimeline = orderedRecentMonths.length <= 2;
-  const shouldUseOverflowTrack = orderedRecentMonths.length > 5;
+  const shouldCenterRecentTimeline = orderedRecentMonths.length <= 4;
+  const shouldUseOverflowTrack = orderedRecentMonths.length > 6;
 
   const ring = useMemo(() => {
     const radius = 47;
@@ -228,7 +228,13 @@ export function PreviewAchievementCard({
         </div>
 
         <div className="flex shrink-0 flex-col items-center md:col-start-2 md:justify-self-center" data-testid="score-block">
-          <svg className="h-20 w-20 sm:h-24 sm:w-24" viewBox="0 0 120 120" role="img" aria-label={`preview achievement score ${score}`}>
+          <svg
+            className="h-24 w-24 sm:h-28 sm:w-28"
+            viewBox="0 0 120 120"
+            role="img"
+            aria-label={`preview achievement score ${score}`}
+            data-testid="score-donut"
+          >
             <circle
               cx="60"
               cy="60"
@@ -247,7 +253,7 @@ export function PreviewAchievementCard({
               strokeLinecap="round"
               transform="rotate(-90 60 60)"
             />
-            <text x="60" y="56" textAnchor="middle" dominantBaseline="middle" className="fill-[color:var(--color-text)] text-[24px] font-semibold">
+            <text x="60" y="56" textAnchor="middle" dominantBaseline="middle" className="fill-[color:var(--color-text)] text-[26px] font-semibold">
               {score}
             </text>
             <text x="60" y="74" textAnchor="middle" dominantBaseline="middle" className="fill-[color:var(--color-slate-400)] text-[10px] uppercase tracking-[0.14em]">
@@ -299,7 +305,7 @@ export function PreviewAchievementCard({
             <div className="w-full overflow-x-auto pb-1" data-testid="recent-timeline">
               <div
                 className={cx(
-                  'flex items-end gap-2 md:gap-3',
+                  'flex items-end gap-1.5 md:gap-2',
                   shouldCenterRecentTimeline ? 'justify-center' : 'justify-start',
                   shouldUseOverflowTrack ? 'min-w-max' : 'w-full',
                 )}
@@ -310,12 +316,12 @@ export function PreviewAchievementCard({
                 ))}
                 {hasGroupedWindow && (
                   <div
-                    className="rounded-2xl border border-white/15 bg-white/5 px-1.5 py-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:px-2"
+                    className="rounded-2xl border border-white/15 bg-white/5 px-1 py-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:px-1.5"
                     data-testid="seal-window-group"
                     data-window-start={lastThreeStart}
                     data-window-end={lastThreeEnd - 1}
                   >
-                    <div className="flex items-end gap-2 md:gap-3" data-testid="seal-window-track">
+                    <div className="flex items-end gap-1.5 md:gap-2" data-testid="seal-window-track">
                       {groupedMonths.map((entry) => (
                         <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} isEarlyProjection={isEarlyProjection} />
                       ))}
