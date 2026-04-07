@@ -200,6 +200,8 @@ export function PreviewAchievementCard({
   const isEarlyProjection =
     Number(previewAchievement.currentMonth?.expectedTargetSoFar ?? 0) <= 2 ||
     Number(previewAchievement.currentMonth?.completionsDoneSoFar ?? 0) <= 1;
+  const shouldCenterRecentTimeline = orderedRecentMonths.length <= 2;
+  const shouldUseOverflowTrack = orderedRecentMonths.length > 5;
 
   const ring = useMemo(() => {
     const radius = 47;
@@ -294,11 +296,15 @@ export function PreviewAchievementCard({
                 </div>
               </details>
             </div>
-            <p className="mb-2 text-[10px] text-[color:var(--color-slate-400)]" data-testid="timeline-window-subtitle">
-              {language === 'es' ? 'Cerrados = logrado mensual · actual = proyectado al ritmo actual' : 'Closed = monthly achieved · current = projected at current pace'}
-            </p>
-            <div className="overflow-x-auto pb-1" data-testid="recent-timeline">
-              <div className="flex w-max min-w-full items-end gap-2 md:gap-3">
+            <div className="w-full overflow-x-auto pb-1" data-testid="recent-timeline">
+              <div
+                className={cx(
+                  'flex items-end gap-2 md:gap-3',
+                  shouldCenterRecentTimeline ? 'justify-center' : 'justify-start',
+                  shouldUseOverflowTrack ? 'min-w-max' : 'w-full',
+                )}
+                data-testid="recent-timeline-track"
+              >
                 {leadingMonths.map((entry) => (
                   <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} isEarlyProjection={isEarlyProjection} />
                 ))}
@@ -309,7 +315,7 @@ export function PreviewAchievementCard({
                     data-window-start={lastThreeStart}
                     data-window-end={lastThreeEnd - 1}
                   >
-                    <div className="flex items-end gap-2 md:gap-3">
+                    <div className="flex items-end gap-2 md:gap-3" data-testid="seal-window-track">
                       {groupedMonths.map((entry) => (
                         <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} isEarlyProjection={isEarlyProjection} />
                       ))}
