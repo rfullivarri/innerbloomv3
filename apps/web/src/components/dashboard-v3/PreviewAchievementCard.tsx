@@ -147,7 +147,7 @@ function RecentMonthNode({ entry, language }: MonthNodeProps) {
         {isProjected ? (
           <span
             aria-hidden
-            className="inline-flex h-4 w-4 animate-[spin_3.6s_linear_infinite] rounded-full border border-white/15 border-t-white/80 border-r-white/45 sm:h-[1.05rem] sm:w-[1.05rem]"
+            className="inline-flex h-3.5 w-3.5 animate-[spin_4.8s_linear_infinite] rounded-full border border-white/12 border-t-white/70 border-r-white/35 sm:h-[0.9rem] sm:w-[0.9rem]"
           />
         ) : (
           monthSymbol
@@ -162,11 +162,6 @@ function RecentMonthNode({ entry, language }: MonthNodeProps) {
       >
         {getMonthMetric(entry.value)}
       </span>
-      {isProjected && (
-        <span className="text-[9px] leading-none text-[color:var(--color-slate-400)]">
-          {language === 'es' ? 'proyectado' : 'projected'}
-        </span>
-      )}
     </div>
   );
 }
@@ -202,6 +197,8 @@ export function PreviewAchievementCard({
   const scoreTooltipId = useId();
   const scoreTooltipRef = useRef<HTMLDivElement | null>(null);
   const scoreMarkerTop = `${Math.max(0, Math.min(100, 100 - score))}%`;
+  const groupedProjectedMonth = groupedMonths.find((entry) => entry.projected);
+  const windowTitle = language === 'es' ? 'Ventana vigente' : 'Current window';
 
   useEffect(() => {
     if (!isScoreTooltipOpen) return;
@@ -275,25 +272,41 @@ export function PreviewAchievementCard({
                 {scoreLabel}
               </text>
             </svg>
-            <div className="relative flex h-32 items-center pr-8 sm:h-36">
+            <div className="relative flex h-32 items-center sm:h-36" data-testid="score-range-rail">
               <div
-                className="relative h-full w-3 rounded-full border border-white/15 bg-[linear-gradient(to_top,rgba(253,164,175,0.6)_0%,rgba(252,211,77,0.55)_55%,rgba(110,231,183,0.6)_100%)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
-                data-testid="score-range-rail"
+                className="relative h-full w-[6.25rem] rounded-2xl border border-white/15 bg-[color:var(--color-overlay-1)]/70 px-2 py-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]"
               >
-                <span className="absolute left-1/2 top-[50%] h-px w-[18px] -translate-x-1/2 -translate-y-1/2 bg-white/30" />
-                <span className="absolute left-1/2 top-[20%] h-px w-[18px] -translate-x-1/2 -translate-y-1/2 bg-white/35" />
-                <span className="absolute left-1/2 top-0 h-px w-[18px] -translate-x-1/2 bg-white/40" />
-                <span className="absolute left-1/2 bottom-0 h-px w-[18px] -translate-x-1/2 bg-white/20" />
+                <div className="absolute bottom-1 left-2 top-1 w-3 overflow-hidden rounded-full border border-white/20 bg-[color:var(--color-overlay-1)]/50">
+                  <div className="absolute inset-x-0 top-0 h-[20%] bg-emerald-300/70" />
+                  <div className="absolute inset-x-0 top-[20%] h-[30%] bg-amber-300/75" />
+                  <div className="absolute inset-x-0 bottom-0 h-[50%] bg-rose-300/75" />
+                  <span className="absolute inset-x-0 top-[20%] h-px bg-white/30" />
+                  <span className="absolute inset-x-0 top-[50%] h-px bg-white/30" />
+                  <span
+                    className="pointer-events-none absolute inset-x-0 h-px bg-white/90 transition-all duration-500 ease-out"
+                    style={{ top: scoreMarkerTop }}
+                    aria-hidden
+                  />
+                </div>
+                <span className="absolute left-6 top-0 text-[8px] text-[color:var(--color-slate-400)]">100</span>
+                <span className="absolute left-6 top-[20%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-400)]">80</span>
+                <span className="absolute left-6 top-[50%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">50</span>
+                <span className="absolute left-6 bottom-0 text-[8px] text-[color:var(--color-slate-500)]">0</span>
+                <span className="absolute right-2 top-[10%] -translate-y-1/2 text-[8px] font-medium text-emerald-200">
+                  {language === 'es' ? 'fuerte' : 'strong'}
+                </span>
+                <span className="absolute right-2 top-[35%] -translate-y-1/2 text-[8px] font-medium text-amber-200">
+                  {language === 'es' ? 'en construcción' : 'building'}
+                </span>
+                <span className="absolute right-2 top-[75%] -translate-y-1/2 text-[8px] font-medium text-rose-200">
+                  {language === 'es' ? 'frágil' : 'fragile'}
+                </span>
+                <span
+                  className="pointer-events-none absolute left-[0.95rem] h-1.5 w-1.5 -translate-x-1/2 rounded-full border border-white/80 bg-[color:var(--color-overlay-1)] shadow-[0_0_0_2px_rgba(255,255,255,0.18)] transition-all duration-500 ease-out"
+                  style={{ top: scoreMarkerTop }}
+                  aria-hidden
+                />
               </div>
-              <span className="absolute right-0 top-0 text-[9px] text-[color:var(--color-slate-400)]">100</span>
-              <span className="absolute right-0 top-[20%] -translate-y-1/2 text-[9px] text-[color:var(--color-slate-400)]">80</span>
-              <span className="absolute right-0 top-[50%] -translate-y-1/2 text-[9px] text-[color:var(--color-slate-400)]">50</span>
-              <span className="absolute right-0 bottom-0 text-[9px] text-[color:var(--color-slate-500)]">0</span>
-              <span
-                className="pointer-events-none absolute -left-4 h-px w-4 bg-white/80 transition-all duration-500 ease-out"
-                style={{ top: scoreMarkerTop }}
-                aria-hidden
-              />
             </div>
           </div>
           <div
@@ -367,20 +380,29 @@ export function PreviewAchievementCard({
                 ))}
                 {hasGroupedWindow && (
                   <div
-                    className="rounded-xl border border-white/15 bg-white/5 px-0.5 py-0.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:px-1"
+                    className="relative rounded-[1.15rem] border border-white/20 bg-[linear-gradient(180deg,rgba(59,130,246,0.22),rgba(15,23,42,0.48))] px-0.5 py-0.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] md:px-1"
                     data-testid="seal-window-group"
                     data-window-start={lastThreeStart}
                     data-window-end={lastThreeEnd - 1}
                   >
-                    <div className="mb-1.5 rounded-[9px] border border-white/10 bg-[linear-gradient(90deg,rgba(125,211,252,0.12),rgba(255,255,255,0.04))] px-2 py-1">
-                      <p className="text-[9px] uppercase tracking-[0.11em] text-[color:var(--color-slate-300)]">
-                        {language === 'es' ? 'Foto actual' : 'Current snapshot'}
+                    <div className="rounded-t-[1rem] border border-white/25 bg-[linear-gradient(90deg,rgba(96,165,250,0.72),rgba(59,130,246,0.7))] px-2 py-1">
+                      <p className="text-center text-[9px] uppercase tracking-[0.11em] text-white/90">
+                        {windowTitle}
                       </p>
                     </div>
-                    <div className="flex items-end gap-1 md:gap-1.5" data-testid="seal-window-track">
-                      {groupedMonths.map((entry) => (
-                        <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
-                      ))}
+                    <div className="relative rounded-b-[1rem] border border-t-0 border-white/20 bg-[linear-gradient(180deg,rgba(30,64,175,0.62),rgba(29,78,216,0.52))] px-1.5 pb-3 pt-2">
+                      <div className="flex items-end gap-1 md:gap-1.5" data-testid="seal-window-track">
+                        {groupedMonths.map((entry) => (
+                          <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
+                        ))}
+                      </div>
+                      {groupedProjectedMonth && (
+                        <div className="pointer-events-none absolute -bottom-4 right-1 rounded-b-[0.85rem] rounded-t-[0.2rem] border border-white/25 bg-[color:var(--color-overlay-1)]/80 px-2 py-0.5">
+                          <span className="text-[9px] leading-none text-[color:var(--color-slate-300)]">
+                            {language === 'es' ? 'proyectado' : 'projected'}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
