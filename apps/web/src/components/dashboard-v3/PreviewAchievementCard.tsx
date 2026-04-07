@@ -117,6 +117,7 @@ export function PreviewAchievementCard({
   const recentMonths = normalizeRecentMonths(previewAchievement.recentMonths);
   const orderedRecentMonths = recentMonths;
   const lastThreeStart = Math.max(0, orderedRecentMonths.length - 3);
+  const lastThreeEnd = Math.min(orderedRecentMonths.length, lastThreeStart + 3);
 
   const ring = useMemo(() => {
     const radius = 47;
@@ -127,8 +128,8 @@ export function PreviewAchievementCard({
 
   return (
     <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-2">
+      <div className="flex flex-col gap-3 md:grid md:grid-cols-[1fr_auto_1fr] md:items-start">
+        <div className="space-y-2 md:col-start-1">
           <span className={cx('inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold', tone.chip)}>
             {tone.label[language]}
           </span>
@@ -142,7 +143,7 @@ export function PreviewAchievementCard({
           )}
         </div>
 
-        <div className="flex shrink-0 flex-col items-center">
+        <div className="flex shrink-0 flex-col items-center md:col-start-2 md:justify-self-center" data-testid="score-block">
           <svg className="h-20 w-20 sm:h-24 sm:w-24" viewBox="0 0 120 120" role="img" aria-label={`preview achievement score ${score}`}>
             <circle
               cx="60"
@@ -178,12 +179,14 @@ export function PreviewAchievementCard({
             <span
               aria-label={language === 'es' ? 'Qué significa este score' : 'What this score means'}
               title={language === 'es' ? 'Mide la fuerza actual del hábito.' : 'Shows current habit strength.'}
-              className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/30 text-[9px]"
+              className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/40 bg-white/20 text-[9px] font-semibold text-white shadow-sm"
+              data-testid="score-info-dot"
             >
               i
             </span>
           </p>
         </div>
+        <div className="hidden md:block" aria-hidden />
       </div>
 
       <div className="mt-3 space-y-2">
@@ -195,12 +198,13 @@ export function PreviewAchievementCard({
               </p>
               <details className="group relative" data-testid="timeline-legend">
                 <summary
-                  className="inline-flex h-4 w-4 cursor-pointer list-none items-center justify-center rounded-full border border-white/25 text-[10px] leading-none text-[color:var(--color-slate-300)] transition-colors hover:text-white"
+                  className="inline-flex h-4 w-4 cursor-pointer list-none items-center justify-center rounded-full border border-white/40 bg-white/20 text-[10px] font-semibold leading-none text-white shadow-sm transition-colors hover:bg-white/30"
                   aria-label={language === 'es' ? 'Leyenda de historial' : 'History legend'}
+                  data-testid="timeline-legend-trigger"
                 >
                   i
                 </summary>
-                <div className="pointer-events-none absolute left-0 top-5 z-10 hidden min-w-[10rem] rounded-md border border-white/15 bg-[color:var(--color-overlay-2)] p-2 text-[10px] leading-snug text-[color:var(--color-slate-200)] shadow-xl group-open:block group-hover:block">
+                <div className="pointer-events-none absolute left-0 top-6 z-10 hidden min-w-[11rem] rounded-lg border border-white/20 bg-[color:var(--color-overlay-1)]/95 p-2 text-[10px] leading-snug text-[color:var(--color-slate-100)] shadow-xl backdrop-blur-sm group-open:block group-hover:block">
                   <p>{language === 'es' ? '✓ = mes fuerte' : '✓ = strong month'}</p>
                   <p>{language === 'es' ? '• = en construcción' : '• = building'}</p>
                   <p>{language === 'es' ? '✕ = mes débil' : '✕ = weak month'}</p>
@@ -212,23 +216,26 @@ export function PreviewAchievementCard({
               {language === 'es' ? 'Los últimos 3 meses cuentan para el sello' : 'The last 3 months count toward the seal'}
             </p>
             <div className="overflow-x-auto pb-1" data-testid="recent-timeline">
-              <div className="flex w-max min-w-full items-start gap-2 md:justify-between md:gap-3">
+              <div className="relative grid w-max min-w-full grid-flow-col auto-cols-[minmax(2.75rem,1fr)] items-start gap-2 md:gap-3">
+                {orderedRecentMonths.length >= 3 && (
+                  <div
+                    className="pointer-events-none z-0 row-start-1 row-end-2 rounded-2xl border border-white/15 bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
+                    data-testid="seal-window-group"
+                    data-window-start={lastThreeStart}
+                    data-window-end={lastThreeEnd - 1}
+                    style={{ gridColumn: `${lastThreeStart + 1} / ${lastThreeEnd + 1}` }}
+                    aria-hidden
+                  />
+                )}
                 {orderedRecentMonths.map((entry, index) => (
                   <div
                     key={`${entry.key}-${entry.value ?? 0}`}
                     data-testid="recent-month-item"
                     className={cx(
-                      'relative flex min-w-[2.5rem] flex-col items-center gap-1',
+                      'relative z-10 flex min-w-[2.5rem] flex-col items-center gap-1 py-1',
                       index >= lastThreeStart && 'px-0.5',
                     )}
                   >
-                    {index === lastThreeStart && (
-                      <div
-                        className="pointer-events-none absolute -inset-x-2 -inset-y-1 rounded-2xl border border-white/15 bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
-                        data-testid="seal-window-group"
-                        aria-hidden
-                      />
-                    )}
                     <div
                       data-testid="recent-month-node"
                       className={cx(
@@ -242,6 +249,12 @@ export function PreviewAchievementCard({
                     </div>
                     <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
                       {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
+                    </span>
+                    <span
+                      className="text-[9px] font-medium leading-none text-[color:var(--color-slate-400)]"
+                      data-testid="recent-month-progress"
+                    >
+                      {entry.value == null ? '--' : `${Math.max(0, Math.min(100, Math.round(entry.value)))}%`}
                     </span>
                   </div>
                 ))}
