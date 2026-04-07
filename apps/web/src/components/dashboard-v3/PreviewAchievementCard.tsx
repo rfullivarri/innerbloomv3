@@ -17,6 +17,11 @@ type NormalizedRecentMonth = {
   value?: number | null;
 };
 
+type MonthNodeProps = {
+  entry: NormalizedRecentMonth;
+  language: PostLoginLanguage;
+};
+
 const statusConfig = {
   fragile: {
     label: { es: 'Hábito frágil', en: 'Fragile habit' },
@@ -105,6 +110,42 @@ function getMonthSymbol(monthState: string | null | undefined): string {
   return '○';
 }
 
+function getMonthMetric(value: number | null | undefined): string {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '--';
+  return `${Math.max(0, Math.min(100, Math.round(value)))}%`;
+}
+
+function RecentMonthNode({ entry, language }: MonthNodeProps) {
+  return (
+    <div
+      key={`${entry.key}-${entry.value ?? 0}`}
+      data-testid="recent-month-item"
+      className="flex min-w-[2.5rem] shrink-0 flex-col items-center gap-1 py-1"
+    >
+      <div
+        data-testid="recent-month-node"
+        className={cx(
+          'relative inline-flex h-9 w-9 items-center justify-center rounded-full border text-base font-bold leading-none shadow-inner sm:h-10 sm:w-10',
+          getMonthTone(entry.state),
+        )}
+        aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
+        data-month-symbol={getMonthSymbol(entry.state)}
+      >
+        {getMonthSymbol(entry.state)}
+      </div>
+      <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
+        {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
+      </span>
+      <span
+        className="text-[10px] font-semibold leading-none text-[color:var(--color-slate-300)]"
+        data-testid="recent-month-progress"
+      >
+        {getMonthMetric(entry.value)}
+      </span>
+    </div>
+  );
+}
+
 export function PreviewAchievementCard({
   previewAchievement,
   language,
@@ -118,6 +159,9 @@ export function PreviewAchievementCard({
   const orderedRecentMonths = recentMonths;
   const lastThreeStart = Math.max(0, orderedRecentMonths.length - 3);
   const lastThreeEnd = Math.min(orderedRecentMonths.length, lastThreeStart + 3);
+  const hasGroupedWindow = orderedRecentMonths.length >= 3;
+  const leadingMonths = hasGroupedWindow ? orderedRecentMonths.slice(0, lastThreeStart) : orderedRecentMonths;
+  const groupedMonths = hasGroupedWindow ? orderedRecentMonths.slice(lastThreeStart, lastThreeEnd) : [];
 
   const ring = useMemo(() => {
     const radius = 47;
@@ -216,48 +260,24 @@ export function PreviewAchievementCard({
               {language === 'es' ? 'Los últimos 3 meses cuentan para el sello' : 'The last 3 months count toward the seal'}
             </p>
             <div className="overflow-x-auto pb-1" data-testid="recent-timeline">
-              <div className="relative grid w-max min-w-full grid-flow-col auto-cols-[minmax(2.75rem,1fr)] items-start gap-2 md:gap-3">
-                {orderedRecentMonths.length >= 3 && (
+              <div className="flex w-max min-w-full items-start gap-2 md:gap-3">
+                {leadingMonths.map((entry) => (
+                  <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
+                ))}
+                {hasGroupedWindow && (
                   <div
-                    className="pointer-events-none z-0 row-start-1 row-end-2 rounded-2xl border border-white/15 bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
+                    className="rounded-2xl border border-white/15 bg-white/5 px-1.5 py-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:px-2"
                     data-testid="seal-window-group"
                     data-window-start={lastThreeStart}
                     data-window-end={lastThreeEnd - 1}
-                    style={{ gridColumn: `${lastThreeStart + 1} / ${lastThreeEnd + 1}` }}
-                    aria-hidden
-                  />
-                )}
-                {orderedRecentMonths.map((entry, index) => (
-                  <div
-                    key={`${entry.key}-${entry.value ?? 0}`}
-                    data-testid="recent-month-item"
-                    className={cx(
-                      'relative z-10 flex min-w-[2.5rem] flex-col items-center gap-1 py-1',
-                      index >= lastThreeStart && 'px-0.5',
-                    )}
                   >
-                    <div
-                      data-testid="recent-month-node"
-                      className={cx(
-                        'relative inline-flex h-9 w-9 items-center justify-center rounded-full border text-base font-bold leading-none shadow-inner sm:h-10 sm:w-10',
-                        getMonthTone(entry.state),
-                      )}
-                      aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
-                      data-month-symbol={getMonthSymbol(entry.state)}
-                    >
-                      {getMonthSymbol(entry.state)}
+                    <div className="flex items-start gap-2 md:gap-3">
+                      {groupedMonths.map((entry) => (
+                        <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
+                      ))}
                     </div>
-                    <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
-                      {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
-                    </span>
-                    <span
-                      className="text-[9px] font-medium leading-none text-[color:var(--color-slate-400)]"
-                      data-testid="recent-month-progress"
-                    >
-                      {entry.value == null ? '--' : `${Math.max(0, Math.min(100, Math.round(entry.value)))}%`}
-                    </span>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
