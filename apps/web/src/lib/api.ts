@@ -2299,6 +2299,15 @@ export type TaskInsightsResponse = {
           }
       >;
     } | null;
+    currentMonth?: {
+      periodKey?: string | null;
+      completionRateSoFar?: number | null;
+      projectedMonthEndRate?: number | null;
+      expectedTargetSoFar?: number | null;
+      completionsDoneSoFar?: number | null;
+      expectedTargetMonthEnd?: number | null;
+      projectedCompletionsMonthEnd?: number | null;
+    } | null;
     recentMonths?: Array<{
       closed?: boolean | null;
       periodKey?: string | null;

@@ -22,6 +22,7 @@ type NormalizedRecentMonth = {
 type MonthNodeProps = {
   entry: NormalizedRecentMonth;
   language: PostLoginLanguage;
+  isEarlyProjection: boolean;
 };
 
 const statusConfig = {
@@ -97,18 +98,18 @@ function normalizeRecentMonths(recentMonths: PreviewAchievement['recentMonths'])
 function getMonthTone(state: string | null | undefined): string {
   const normalized = String(state ?? '').toLowerCase();
   if (normalized === 'strong' || normalized === 'valid' || normalized === 'achieved') {
-    return 'border-emerald-200/80 bg-emerald-300/90 text-emerald-950';
+    return 'bg-emerald-300/90 text-emerald-950';
   }
   if (normalized === 'building' || normalized === 'pending' || normalized === 'weak' || normalized === 'floor_only') {
-    return 'border-amber-200/80 bg-amber-300/85 text-amber-950';
+    return 'bg-amber-300/85 text-amber-950';
   }
   if (normalized.startsWith('projected')) {
-    return 'border-sky-200/70 bg-sky-300/35 text-sky-100';
+    return 'bg-sky-300/35 text-sky-100';
   }
   if (normalized === 'invalid' || normalized === 'bad' || normalized === 'locked') {
-    return 'border-rose-200/80 bg-rose-300/80 text-rose-950';
+    return 'bg-rose-300/80 text-rose-950';
   }
-  return 'border-white/20 bg-white/10 text-[color:var(--color-slate-300)]';
+  return 'bg-white/10 text-[color:var(--color-slate-300)]';
 }
 
 function getMonthSymbol(monthState: string | null | undefined): string {
@@ -126,17 +127,26 @@ function getMonthMetric(value: number | null | undefined): string {
   return `${Math.max(0, Math.min(100, Math.round(normalized)))}%`;
 }
 
-function RecentMonthNode({ entry, language }: MonthNodeProps) {
+function getMonthValueLabel(entry: NormalizedRecentMonth, language: PostLoginLanguage): string {
+  if (entry.closed) {
+    return language === 'es' ? 'logrado del objetivo mensual' : 'achieved of monthly target';
+  }
+  return language === 'es' ? 'proyectado al ritmo actual' : 'projected at current pace';
+}
+
+function RecentMonthNode({ entry, language, isEarlyProjection }: MonthNodeProps) {
+  const isProjectedMonth = entry.projected;
+
   return (
     <div
       key={`${entry.key}-${entry.value ?? 0}`}
       data-testid="recent-month-item"
-      className="flex min-w-[2.5rem] shrink-0 flex-col items-center gap-1 py-1"
+      className="flex h-[6.05rem] min-w-[5.75rem] shrink-0 flex-col items-center gap-1 py-1"
     >
       <div
         data-testid="recent-month-node"
         className={cx(
-          'relative inline-flex h-9 w-9 items-center justify-center rounded-full border text-base font-bold leading-none shadow-inner sm:h-10 sm:w-10',
+          'relative inline-flex h-9 w-9 items-center justify-center rounded-full text-base font-bold leading-none shadow-[0_6px_16px_rgba(5,10,35,0.35)] sm:h-10 sm:w-10',
           getMonthTone(entry.state),
         )}
         aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
@@ -153,9 +163,18 @@ function RecentMonthNode({ entry, language }: MonthNodeProps) {
       >
         {getMonthMetric(entry.value)}
       </span>
-      {entry.projected && (
-        <span className="text-[9px] leading-none text-[color:var(--color-slate-400)]" data-testid="recent-month-projected-hint">
-          {language === 'es' ? 'proyectado' : 'projected'}
+      <span
+        className={cx(
+          'text-[9px] leading-none text-[color:var(--color-slate-400)]',
+          !isProjectedMonth && 'invisible',
+        )}
+        data-testid="recent-month-value-label"
+      >
+        {isProjectedMonth ? getMonthValueLabel(entry, language) : language === 'es' ? 'logrado del objetivo mensual' : 'achieved of monthly target'}
+      </span>
+      {isProjectedMonth && isEarlyProjection && (
+        <span className="text-[9px] leading-none text-[color:var(--color-slate-400)]" data-testid="recent-month-early-projection-hint">
+          {language === 'es' ? 'estimación temprana' : 'early estimate'}
         </span>
       )}
     </div>
@@ -178,6 +197,9 @@ export function PreviewAchievementCard({
   const hasGroupedWindow = orderedRecentMonths.length >= 3;
   const leadingMonths = hasGroupedWindow ? orderedRecentMonths.slice(0, lastThreeStart) : orderedRecentMonths;
   const groupedMonths = hasGroupedWindow ? orderedRecentMonths.slice(lastThreeStart, lastThreeEnd) : [];
+  const isEarlyProjection =
+    Number(previewAchievement.currentMonth?.expectedTargetSoFar ?? 0) <= 2 ||
+    Number(previewAchievement.currentMonth?.completionsDoneSoFar ?? 0) <= 1;
 
   const ring = useMemo(() => {
     const radius = 47;
@@ -268,17 +290,17 @@ export function PreviewAchievementCard({
                   <p>{language === 'es' ? '✓ = mes fuerte' : '✓ = strong month'}</p>
                   <p>{language === 'es' ? '• = en construcción' : '• = building'}</p>
                   <p>{language === 'es' ? '✕ = mes débil' : '✕ = weak month'}</p>
-                  <p>{language === 'es' ? '~ = mes actual proyectado' : '~ = projected current month'}</p>
+                  <p>{language === 'es' ? '~ = proyectado al ritmo actual' : '~ = projected at current pace'}</p>
                 </div>
               </details>
             </div>
             <p className="mb-2 text-[10px] text-[color:var(--color-slate-400)]" data-testid="timeline-window-subtitle">
-              {language === 'es' ? 'Los últimos 3 meses cuentan para el sello' : 'The last 3 months count toward the seal'}
+              {language === 'es' ? 'Cerrados = logrado mensual · actual = proyectado al ritmo actual' : 'Closed = monthly achieved · current = projected at current pace'}
             </p>
             <div className="overflow-x-auto pb-1" data-testid="recent-timeline">
-              <div className="flex w-max min-w-full items-start gap-2 md:gap-3">
+              <div className="flex w-max min-w-full items-end gap-2 md:gap-3">
                 {leadingMonths.map((entry) => (
-                  <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
+                  <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} isEarlyProjection={isEarlyProjection} />
                 ))}
                 {hasGroupedWindow && (
                   <div
@@ -287,9 +309,9 @@ export function PreviewAchievementCard({
                     data-window-start={lastThreeStart}
                     data-window-end={lastThreeEnd - 1}
                   >
-                    <div className="flex items-start gap-2 md:gap-3">
+                    <div className="flex items-end gap-2 md:gap-3">
                       {groupedMonths.map((entry) => (
-                        <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
+                        <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} isEarlyProjection={isEarlyProjection} />
                       ))}
                     </div>
                   </div>
