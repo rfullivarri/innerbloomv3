@@ -46,6 +46,7 @@ describe('PreviewAchievementCard', () => {
     expect(screen.getByText('88')).toBeInTheDocument();
     expect(screen.getByTestId('score-affordance')).toHaveTextContent('Score');
     expect(screen.getByTestId('score-affordance')).toHaveTextContent('fuerza actual del hábito');
+    expect(screen.getByTestId('score-info-dot').className).toContain('bg-white/20');
   });
 
   test('does not render a separate seal-window chart and uses unified timeline guidance copy', () => {
@@ -56,7 +57,7 @@ describe('PreviewAchievementCard', () => {
     expect(screen.getByTestId('timeline-window-subtitle')).toHaveTextContent('Los últimos 3 meses cuentan para el sello');
   });
 
-  test('renders recent month timeline as circular nodes with visible labels and no current text marker', () => {
+  test('renders recent month timeline as circular nodes with visible labels and compact progress text', () => {
     renderCard({
       recentMonths: [
         { periodKey: '2026-01', value: 89, state: 'strong' },
@@ -78,12 +79,14 @@ describe('PreviewAchievementCard', () => {
     expect(within(months[3]).getByText('~')).toBeInTheDocument();
     expect(within(months[0]).getByText('ene')).toBeInTheDocument();
     expect(within(months[3]).getByText('abr')).toBeInTheDocument();
+    const progress = screen.getAllByTestId('recent-month-progress').map((node) => node.textContent);
+    expect(progress).toEqual(['89%', '42%', '0%', '65%']);
     expect(screen.queryByText('Actual')).not.toBeInTheDocument();
     expect(screen.queryByText('Current')).not.toBeInTheDocument();
     expect(screen.getAllByTestId('recent-month-label')).toHaveLength(4);
   });
 
-  test('highlights the last 3 months in a single grouped window within the same timeline', () => {
+  test('highlights the last 3 months in a grouped window that spans the intended 3-month range', () => {
     renderCard({
       recentMonths: [
         { periodKey: '2025-11', value: 25, state: 'invalid' },
@@ -97,6 +100,8 @@ describe('PreviewAchievementCard', () => {
 
     const groupedWindow = screen.getByTestId('seal-window-group');
     expect(groupedWindow.className).toContain('rounded-2xl');
+    expect(groupedWindow).toHaveAttribute('data-window-start', '3');
+    expect(groupedWindow).toHaveAttribute('data-window-end', '5');
 
     const labels = screen.getAllByTestId('recent-month-label').map((label) => label.textContent);
     expect(labels).toEqual(['nov', 'dic', 'ene', 'feb', 'mar', 'abr']);
@@ -139,6 +144,8 @@ describe('PreviewAchievementCard', () => {
     const groupedWindow = screen.getByTestId('seal-window-group');
     expect(groupedWindow.className).toContain('rounded-2xl');
     expect(groupedWindow.className).toContain('bg-white/5');
+    expect(groupedWindow).toHaveAttribute('data-window-start', '1');
+    expect(groupedWindow).toHaveAttribute('data-window-end', '3');
     const nodes = screen.getAllByTestId('recent-month-node');
     nodes.forEach((node) => {
       expect(node.className).toContain('text-base');
@@ -158,6 +165,7 @@ describe('PreviewAchievementCard', () => {
 
     const legend = screen.getByTestId('timeline-legend');
     expect(legend).toBeInTheDocument();
+    expect(screen.getByTestId('timeline-legend-trigger').className).toContain('bg-white/20');
 
     fireEvent.click(within(legend).getByText('i'));
     expect(screen.getByText('✓ = mes fuerte')).toBeInTheDocument();
@@ -191,6 +199,14 @@ describe('PreviewAchievementCard', () => {
 
     const monthLabels = screen.getAllByTestId('recent-month-label').map((node) => node.textContent);
     expect(monthLabels).toEqual(['feb', 'Sin mes']);
+    const progress = screen.getAllByTestId('recent-month-progress').map((node) => node.textContent);
+    expect(progress).toEqual(['--', '--']);
     expect(screen.getByTestId('timeline-window-subtitle')).toBeInTheDocument();
+  });
+
+  test('uses centered desktop layout classes for score balance', () => {
+    renderCard();
+    expect(screen.getByTestId('score-block').className).toContain('md:col-start-2');
+    expect(screen.getByTestId('score-block').className).toContain('md:justify-self-center');
   });
 });
