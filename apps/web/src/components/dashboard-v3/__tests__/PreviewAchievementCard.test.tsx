@@ -84,12 +84,8 @@ describe('PreviewAchievementCard', () => {
     expect(within(months[3]).getByText('abr')).toBeInTheDocument();
     const progress = screen.getAllByTestId('recent-month-progress').map((node) => node.textContent);
     expect(progress).toEqual(['89%', '42%', '0%', '65%']);
-    const valueLabels = screen.getAllByTestId('recent-month-value-label').map((node) => ({
-      text: node.textContent,
-      invisible: node.className.includes('invisible'),
-    }));
-    expect(valueLabels.slice(0, 3).every((entry) => entry.invisible)).toBe(true);
-    expect(valueLabels[3]?.text).toContain('proyectado al ritmo actual');
+    expect(screen.queryByTestId('recent-month-value-label')).not.toBeInTheDocument();
+    expect(screen.getByTestId('recent-timeline-projection-note')).toHaveTextContent('~ proyectado al ritmo actual');
     expect(screen.queryByText('Actual')).not.toBeInTheDocument();
     expect(screen.queryByText('Current')).not.toBeInTheDocument();
     expect(screen.getAllByTestId('recent-month-label')).toHaveLength(4);
@@ -108,7 +104,7 @@ describe('PreviewAchievementCard', () => {
     });
 
     const groupedWindow = screen.getByTestId('seal-window-group');
-    expect(groupedWindow.className).toContain('rounded-2xl');
+    expect(groupedWindow.className).toContain('rounded-xl');
     expect(groupedWindow.className).not.toContain('pointer-events-none');
     expect(groupedWindow).toHaveAttribute('data-window-start', '3');
     expect(groupedWindow).toHaveAttribute('data-window-end', '5');
@@ -154,7 +150,7 @@ describe('PreviewAchievementCard', () => {
       expect(item.className).toContain('items-center');
     });
     const groupedWindow = screen.getByTestId('seal-window-group');
-    expect(groupedWindow.className).toContain('rounded-2xl');
+    expect(groupedWindow.className).toContain('rounded-xl');
     expect(groupedWindow.className).toContain('bg-white/5');
     expect(groupedWindow.className).not.toContain('pointer-events-none');
     expect(groupedWindow).toHaveAttribute('data-window-start', '1');
@@ -162,7 +158,7 @@ describe('PreviewAchievementCard', () => {
     expect(within(groupedWindow).getAllByTestId('recent-month-item')).toHaveLength(3);
     const nodes = screen.getAllByTestId('recent-month-node');
     nodes.forEach((node) => {
-      expect(node.className).toContain('text-base');
+      expect(node.className).toContain('text-sm');
       expect(node.className).toContain('leading-none');
     });
     expect(screen.queryByText('Actual')).not.toBeInTheDocument();
@@ -226,6 +222,7 @@ describe('PreviewAchievementCard', () => {
 
     expect(screen.getByTestId('recent-timeline-track').className).toContain('justify-center');
     expect(screen.getByTestId('recent-timeline-track').className).toContain('w-full');
+    expect(screen.getByTestId('recent-timeline-track').className).not.toContain('min-w-max');
     expect(screen.getAllByTestId('recent-month-item')).toHaveLength(1);
   });
 
@@ -239,6 +236,7 @@ describe('PreviewAchievementCard', () => {
 
     expect(screen.getByTestId('recent-timeline-track').className).toContain('justify-center');
     expect(screen.getByTestId('recent-timeline-track').className).toContain('w-full');
+    expect(screen.getByTestId('recent-timeline-track').className).not.toContain('min-w-max');
     expect(screen.queryByTestId('seal-window-group')).not.toBeInTheDocument();
   });
 
@@ -304,7 +302,7 @@ describe('PreviewAchievementCard', () => {
   });
 
 
-  test('shows early projection hint when current month data is still sparse', () => {
+  test('shows early projection hint in compact projection note when current month data is still sparse', () => {
     renderCard({
       currentMonth: {
         expectedTargetSoFar: 1,
@@ -317,7 +315,7 @@ describe('PreviewAchievementCard', () => {
       ],
     });
 
-    expect(screen.getByTestId('recent-month-early-projection-hint')).toHaveTextContent('estimación temprana');
+    expect(screen.getByTestId('recent-timeline-projection-note')).toHaveTextContent('estimación temprana');
   });
 
   test('renders at most 8 recent months and keeps the most recent months', () => {
@@ -341,6 +339,19 @@ describe('PreviewAchievementCard', () => {
     expect(screen.getByTestId('recent-timeline').className).toContain('overflow-x-auto');
     expect(screen.getByTestId('recent-timeline-track').className).toContain('min-w-max');
     expect(screen.getByTestId('seal-window-group')).toBeInTheDocument();
+  });
+
+  test('renders projection copy only once outside month nodes when projected month exists', () => {
+    renderCard({
+      recentMonths: [
+        { periodKey: '2026-02', closed: true, completionRate: 0.61, state: 'building' },
+        { periodKey: '2026-03', closed: true, completionRate: 0.72, state: 'valid' },
+        { periodKey: '2026-04', closed: false, projectedCompletionRate: 0.19, state: 'projected_invalid' },
+      ],
+    });
+
+    expect(screen.getByTestId('recent-timeline-projection-note')).toHaveTextContent('~ proyectado al ritmo actual');
+    expect(screen.queryByTestId('recent-month-value-label')).not.toBeInTheDocument();
   });
 
   test('uses centered desktop layout classes for score balance', () => {
