@@ -100,8 +100,11 @@ describe('PreviewAchievementCard', () => {
 
     const groupedWindow = screen.getByTestId('seal-window-group');
     expect(groupedWindow.className).toContain('rounded-2xl');
+    expect(groupedWindow.className).not.toContain('pointer-events-none');
     expect(groupedWindow).toHaveAttribute('data-window-start', '3');
     expect(groupedWindow).toHaveAttribute('data-window-end', '5');
+    expect(groupedWindow.getAttribute('style')).toBeNull();
+    expect(within(groupedWindow).getAllByTestId('recent-month-item')).toHaveLength(3);
 
     const labels = screen.getAllByTestId('recent-month-label').map((label) => label.textContent);
     expect(labels).toEqual(['nov', 'dic', 'ene', 'feb', 'mar', 'abr']);
@@ -126,7 +129,7 @@ describe('PreviewAchievementCard', () => {
     expect(screen.queryByText('Current')).not.toBeInTheDocument();
   });
 
-  test('keeps month nodes aligned with a background grouped window for the last 3 months', () => {
+  test('keeps month nodes aligned with a grouped wrapper for the last 3 months', () => {
     renderCard({
       recentMonths: [
         { periodKey: '2026-01', value: 80, state: 'strong' },
@@ -144,8 +147,10 @@ describe('PreviewAchievementCard', () => {
     const groupedWindow = screen.getByTestId('seal-window-group');
     expect(groupedWindow.className).toContain('rounded-2xl');
     expect(groupedWindow.className).toContain('bg-white/5');
+    expect(groupedWindow.className).not.toContain('pointer-events-none');
     expect(groupedWindow).toHaveAttribute('data-window-start', '1');
     expect(groupedWindow).toHaveAttribute('data-window-end', '3');
+    expect(within(groupedWindow).getAllByTestId('recent-month-item')).toHaveLength(3);
     const nodes = screen.getAllByTestId('recent-month-node');
     nodes.forEach((node) => {
       expect(node.className).toContain('text-base');
@@ -202,6 +207,19 @@ describe('PreviewAchievementCard', () => {
     const progress = screen.getAllByTestId('recent-month-progress').map((node) => node.textContent);
     expect(progress).toEqual(['--', '--']);
     expect(screen.getByTestId('timeline-window-subtitle')).toBeInTheDocument();
+  });
+
+  test('does not render grouped last-3 wrapper when there are fewer than 3 months', () => {
+    renderCard({
+      recentMonths: [
+        { periodKey: '2026-03', value: 60, state: 'building' },
+        { periodKey: '2026-04', value: 72, state: 'projected_valid' },
+      ],
+    });
+
+    expect(screen.queryByTestId('seal-window-group')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('recent-month-item')).toHaveLength(2);
+    expect(screen.getAllByTestId('recent-month-progress').map((node) => node.textContent)).toEqual(['60%', '72%']);
   });
 
   test('uses centered desktop layout classes for score balance', () => {
