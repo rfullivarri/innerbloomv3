@@ -194,12 +194,11 @@ export function PreviewAchievementCard({
   }, [score]);
 
   const [isScoreTooltipOpen, setIsScoreTooltipOpen] = useState(false);
-  const [activeRangeLabel, setActiveRangeLabel] = useState<'strong' | 'building' | 'fragile' | null>(null);
   const scoreTooltipId = useId();
   const scoreTooltipRef = useRef<HTMLDivElement | null>(null);
   const scoreMarkerTop = `${Math.max(0, Math.min(100, 100 - score))}%`;
   const groupedProjectedMonth = groupedMonths.find((entry) => entry.projected);
-  const windowTitle = language === 'es' ? 'Estado actual' : 'Current state';
+  const windowTitle = language === 'es' ? 'Ventana activa' : 'Active window';
   const rangeLabels = {
     strong: language === 'es' ? 'fuerte' : 'strong',
     building: language === 'es' ? 'en construcción' : 'building',
@@ -279,60 +278,42 @@ export function PreviewAchievementCard({
               </text>
             </svg>
             <div className="relative flex h-32 items-center sm:h-36" data-testid="score-range-rail">
-              <div className="relative h-full w-[3.35rem]">
-                <div className="absolute bottom-1 left-4 top-1 w-3 overflow-hidden rounded-full border border-white/24 bg-[color:var(--color-overlay-1)]/45">
+              <div className="relative h-full w-[7.25rem]">
+                <div className="absolute bottom-1 left-5 top-1 w-3 overflow-hidden rounded-full border border-white/24 bg-[color:var(--color-overlay-1)]/45">
                   <button
                     type="button"
-                    onMouseEnter={() => setActiveRangeLabel('strong')}
-                    onMouseLeave={() => setActiveRangeLabel(null)}
-                    onFocus={() => setActiveRangeLabel('strong')}
-                    onBlur={() => setActiveRangeLabel(null)}
-                    onClick={() => setActiveRangeLabel((prev) => (prev === 'strong' ? null : 'strong'))}
                     className="absolute inset-x-0 top-0 h-[20%] bg-emerald-300/95 focus:outline-none"
                     aria-label={rangeLabels.strong}
                   />
                   <button
                     type="button"
-                    onMouseEnter={() => setActiveRangeLabel('building')}
-                    onMouseLeave={() => setActiveRangeLabel(null)}
-                    onFocus={() => setActiveRangeLabel('building')}
-                    onBlur={() => setActiveRangeLabel(null)}
-                    onClick={() => setActiveRangeLabel((prev) => (prev === 'building' ? null : 'building'))}
                     className="absolute inset-x-0 top-[20%] h-[30%] bg-amber-300/95 focus:outline-none"
                     aria-label={rangeLabels.building}
                   />
                   <button
                     type="button"
-                    onMouseEnter={() => setActiveRangeLabel('fragile')}
-                    onMouseLeave={() => setActiveRangeLabel(null)}
-                    onFocus={() => setActiveRangeLabel('fragile')}
-                    onBlur={() => setActiveRangeLabel(null)}
-                    onClick={() => setActiveRangeLabel((prev) => (prev === 'fragile' ? null : 'fragile'))}
                     className="absolute inset-x-0 bottom-0 h-[50%] bg-rose-300/95 focus:outline-none"
                     aria-label={rangeLabels.fragile}
                   />
                   <span className="absolute inset-x-0 top-[20%] h-px bg-white/35" />
                   <span className="absolute inset-x-0 top-[50%] h-px bg-white/35" />
                   <span
-                    className="pointer-events-none absolute inset-x-0 h-px bg-white/90 transition-all duration-500 ease-out"
+                    className="pointer-events-none absolute inset-x-0 h-0.5 bg-white shadow-[0_0_0_1px_rgba(10,14,26,0.45)] transition-all duration-500 ease-out"
                     style={{ top: scoreMarkerTop }}
                     aria-hidden
                   />
                 </div>
-                <span className="absolute left-8 top-0 text-[8px] text-[color:var(--color-slate-400)]">100</span>
-                <span className="absolute left-8 top-[20%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">80</span>
-                <span className="absolute left-8 top-[50%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">50</span>
-                <span className="absolute left-8 bottom-0 text-[8px] text-[color:var(--color-slate-500)]">0</span>
-                <span
-                  className="pointer-events-none absolute left-[1.1rem] h-1.5 w-1.5 -translate-x-1/2 rounded-full border border-white/80 bg-[color:var(--color-overlay-1)] shadow-[0_0_0_2px_rgba(255,255,255,0.18)] transition-all duration-500 ease-out"
-                  style={{ top: scoreMarkerTop }}
-                  aria-hidden
-                />
-                {activeRangeLabel && (
-                  <span className="absolute -right-5 top-1/2 -translate-y-1/2 rounded-md border border-white/15 bg-[color:var(--color-overlay-1)]/85 px-1.5 py-0.5 text-[9px] font-medium text-[color:var(--color-slate-200)] shadow-sm">
-                    {rangeLabels[activeRangeLabel]}
-                  </span>
-                )}
+                <span className="absolute left-0 top-0 text-[8px] text-[color:var(--color-slate-400)]">100</span>
+                <span className="absolute left-0 top-[20%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">80</span>
+                <span className="absolute left-0 top-[50%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">50</span>
+                <span className="absolute left-0 bottom-0 text-[8px] text-[color:var(--color-slate-500)]">0</span>
+                <span className="absolute right-0 top-0 text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">{rangeLabels.strong}</span>
+                <span className="absolute right-0 top-[50%] -translate-y-1/2 text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                  {rangeLabels.building}
+                </span>
+                <span className="absolute right-0 bottom-0 text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                  {rangeLabels.fragile}
+                </span>
               </div>
             </div>
           </div>
@@ -375,7 +356,7 @@ export function PreviewAchievementCard({
           <div className="px-0 py-0">
             <div className="flex items-center gap-1.5">
               <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
-                {language === 'es' ? 'Historial reciente' : 'Recent history'}
+                {language === 'es' ? 'Resultado últimos meses' : 'Last months result'}
               </p>
               <details className="group relative" data-testid="timeline-legend">
                 <summary
@@ -407,29 +388,22 @@ export function PreviewAchievementCard({
                 ))}
                 {hasGroupedWindow && (
                   <div
-                    className="relative rounded-[1.15rem] border border-white/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(10,14,26,0.62))] px-0.5 py-0.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:px-1"
+                    className="flex flex-col items-center px-0.5 py-0.5 md:px-1"
                     data-testid="seal-window-group"
                     data-window-start={lastThreeStart}
                     data-window-end={lastThreeEnd - 1}
                   >
-                    <div className="rounded-t-[1rem] border border-white/20 bg-[color:var(--color-overlay-2)]/70 px-2 py-1">
-                      <p className="text-center text-[9px] uppercase tracking-[0.11em] text-[color:var(--color-slate-200)]">
-                        {windowTitle}
-                      </p>
+                    <p className="text-center text-[9px] uppercase tracking-[0.11em] text-[color:var(--color-slate-200)]">{windowTitle}</p>
+                    <div className="flex items-end gap-1 md:gap-1.5" data-testid="seal-window-track">
+                      {groupedMonths.map((entry) => (
+                        <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
+                      ))}
                     </div>
-                    <div className="relative rounded-b-[1rem] border border-t-0 border-white/16 bg-[color:var(--color-overlay-1)]/68 px-1.5 pb-3 pt-2">
-                      <div className="flex items-end gap-1 md:gap-1.5" data-testid="seal-window-track">
-                        {groupedMonths.map((entry) => (
-                          <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
-                        ))}
-                      </div>
-                      <span className="pointer-events-none absolute -bottom-1 right-4 h-1.5 w-7 rounded-b-[0.75rem] border-b border-x border-white/15 bg-[color:var(--color-overlay-1)]/72" />
-                      {groupedProjectedMonth && (
-                        <span className="pointer-events-none absolute -bottom-4 right-1 text-[9px] leading-none text-[color:var(--color-slate-400)]">
-                          {language === 'es' ? 'proyectado' : 'projected'}
-                        </span>
-                      )}
-                    </div>
+                    {groupedProjectedMonth && (
+                      <span className="pointer-events-none -mt-0.5 text-[9px] leading-none text-[color:var(--color-slate-400)]">
+                        {language === 'es' ? 'proyectado' : 'projected'}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
