@@ -245,41 +245,65 @@ export function PreviewAchievementCard({
 
         <div className="mx-auto flex shrink-0 flex-col items-center" data-testid="score-block">
           <div className="flex items-center justify-center gap-3.5 sm:gap-4.5">
-            <svg
-              className="h-32 w-32 sm:h-36 sm:w-36"
-              viewBox="0 0 120 120"
-              role="img"
-              aria-label={`preview achievement score ${score}`}
-              data-testid="score-donut"
-            >
-              <circle
-                cx="60"
-                cy="60"
-                r={ring.radius}
-                strokeWidth={11}
-                className="fill-none stroke-[color:var(--color-border-subtle)]"
-              />
-              <circle
-                cx="60"
-                cy="60"
-                r={ring.radius}
-                strokeWidth={11}
-                strokeDasharray={`${ring.circumference} ${ring.circumference}`}
-                strokeDashoffset={ring.offset}
-                className={cx('fill-none transition-[stroke-dashoffset] duration-500 ease-out', tone.ring)}
-                strokeLinecap="round"
-                transform="rotate(-90 60 60)"
-              />
-              <text x="60" y="56" textAnchor="middle" dominantBaseline="middle" className="fill-[color:var(--color-text)] text-[26px] font-semibold">
-                {score}
-              </text>
-              <text x="60" y="74" textAnchor="middle" dominantBaseline="middle" className="fill-[color:var(--color-slate-400)] text-[10px] uppercase tracking-[0.14em]">
-                {scoreLabel}
-              </text>
-            </svg>
+            <div className="relative" ref={scoreTooltipRef} data-testid="score-affordance">
+              <svg
+                className="h-32 w-32 sm:h-36 sm:w-36"
+                viewBox="0 0 120 120"
+                role="img"
+                aria-label={`preview achievement score ${score}`}
+                data-testid="score-donut"
+              >
+                <circle
+                  cx="60"
+                  cy="60"
+                  r={ring.radius}
+                  strokeWidth={11}
+                  className="fill-none stroke-[color:var(--color-border-subtle)]"
+                />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r={ring.radius}
+                  strokeWidth={11}
+                  strokeDasharray={`${ring.circumference} ${ring.circumference}`}
+                  strokeDashoffset={ring.offset}
+                  className={cx('fill-none transition-[stroke-dashoffset] duration-500 ease-out', tone.ring)}
+                  strokeLinecap="round"
+                  transform="rotate(-90 60 60)"
+                />
+                <text x="60" y="56" textAnchor="middle" dominantBaseline="middle" className="fill-[color:var(--color-text)] text-[26px] font-semibold">
+                  {score}
+                </text>
+              </svg>
+              <div className="absolute left-1/2 top-[58%] inline-flex -translate-x-1/2 items-center gap-1 text-[10px] text-[color:var(--color-slate-400)]">
+                <span className="font-semibold uppercase tracking-[0.12em] text-[color:var(--color-slate-300)]">{scoreLabel}</span>
+                <button
+                  type="button"
+                  onClick={() => setIsScoreTooltipOpen((prev) => !prev)}
+                  onFocus={() => setIsScoreTooltipOpen(true)}
+                  aria-label={language === 'es' ? 'Qué significa este score' : 'What this score means'}
+                  className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/45 bg-white/30 text-[9px] font-semibold text-white shadow-[0_6px_18px_rgba(8,12,24,0.35)] backdrop-blur-md"
+                  data-testid="score-info-dot"
+                  aria-describedby={isScoreTooltipOpen ? scoreTooltipId : undefined}
+                >
+                  i
+                </button>
+              </div>
+              {isScoreTooltipOpen && (
+                <div
+                  id={scoreTooltipId}
+                  role="tooltip"
+                  className="absolute left-1/2 top-[74%] z-10 w-52 -translate-x-1/2 rounded-lg border border-white/35 bg-[rgba(8,12,24,0.96)] p-2 text-[10px] leading-snug text-[color:var(--color-slate-100)] shadow-2xl backdrop-blur-xl"
+                >
+                  {language === 'es'
+                    ? 'El Score resume cómo viene hoy tu hábito con base en constancia reciente, cumplimiento de la ventana actual y tendencia.'
+                    : 'Score summarizes how your habit is doing today based on recent consistency, completion in the current window, and trend.'}
+                </div>
+              )}
+            </div>
             <div className="relative flex h-32 items-center sm:h-36" data-testid="score-range-rail">
-              <div className="relative h-full w-[5.9rem]">
-                <div className="absolute bottom-1 left-3.5 top-1 w-3 overflow-hidden rounded-full border border-white/24 bg-[color:var(--color-overlay-1)]/45">
+              <div className="relative h-full w-[9rem]">
+                <div className="absolute bottom-1 left-3.5 top-1 w-3 overflow-hidden rounded-full bg-[color:var(--color-overlay-1)]/45">
                   <button
                     type="button"
                     className="absolute inset-x-0 top-0 h-[20%] bg-emerald-300/95 focus:outline-none"
@@ -307,46 +331,17 @@ export function PreviewAchievementCard({
                 <span className="absolute left-0 top-[20%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">80</span>
                 <span className="absolute left-0 top-[50%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">50</span>
                 <span className="absolute left-0 bottom-0 text-[8px] text-[color:var(--color-slate-500)]">0</span>
-                <span className="absolute right-0 top-[2%] text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">{rangeLabels.strong}</span>
-                <span className="absolute right-0 top-[50%] -translate-y-1/2 text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className="absolute left-[7.1rem] top-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                  {rangeLabels.strong}
+                </span>
+                <span className="absolute left-[7.1rem] top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
                   {rangeLabels.building}
                 </span>
-                <span className="absolute right-0 bottom-[2%] text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className="absolute left-[7.1rem] bottom-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
                   {rangeLabels.fragile}
                 </span>
               </div>
             </div>
-          </div>
-          <div
-            className="relative mt-1 inline-flex items-center gap-1 text-[10px] text-[color:var(--color-slate-400)]"
-            data-testid="score-affordance"
-            ref={scoreTooltipRef}
-          >
-            <span className="font-semibold uppercase tracking-[0.12em] text-[color:var(--color-slate-300)]">
-              {scoreLabel}
-            </span>
-            <button
-              type="button"
-              onClick={() => setIsScoreTooltipOpen((prev) => !prev)}
-              onFocus={() => setIsScoreTooltipOpen(true)}
-              aria-label={language === 'es' ? 'Qué significa este score' : 'What this score means'}
-              className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/40 bg-white/20 text-[9px] font-semibold text-white shadow-sm"
-              data-testid="score-info-dot"
-              aria-describedby={isScoreTooltipOpen ? scoreTooltipId : undefined}
-            >
-              i
-            </button>
-            {isScoreTooltipOpen && (
-              <div
-                id={scoreTooltipId}
-                role="tooltip"
-                className="absolute left-1/2 top-6 z-10 w-52 -translate-x-1/2 rounded-lg border border-white/20 bg-[color:var(--color-overlay-1)]/95 p-2 text-[10px] leading-snug text-[color:var(--color-slate-100)] shadow-xl backdrop-blur-sm"
-              >
-                {language === 'es'
-                  ? 'El Score resume cómo viene hoy tu hábito con base en constancia reciente, cumplimiento de la ventana actual y tendencia.'
-                  : 'Score summarizes how your habit is doing today based on recent consistency, completion in the current window, and trend.'}
-              </div>
-            )}
           </div>
         </div>
       </div>
