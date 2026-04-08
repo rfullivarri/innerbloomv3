@@ -41,6 +41,7 @@ interface RewardsSectionProps {
     sealPath?: string;
     achievementFront?: string;
     achievementBack?: string;
+    achievementCard?: string;
     weekly?: string;
     monthly?: string;
   };
@@ -503,6 +504,7 @@ function AchievedShelf({
   const resolvedAchievedTaskId = demoAnchors?.achievedCardTaskId;
   const resolvedBlockedTaskId = demoAnchors?.blockedCardTaskId;
   const isShelfFocusStep = demoStepId === 'logros-shelves';
+  const isDemoExperience = Boolean(demoStepId);
 
   const focusBlockedShelfCard = useCallback(() => {
     const target = document.querySelector('[data-demo-anchor="logros-blocked-card"]') as HTMLElement | null;
@@ -584,22 +586,42 @@ function AchievedShelf({
           {language === 'es' ? 'Estantes de Logros' : 'Achievement Shelves'}
         </h2>
       </div>
-      <div
-        data-demo-anchor="logros-shelves-pillars"
-        className={`grid grid-cols-3 gap-2 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2.5 transition ${isShelfFocusStep ? 'ring-1 ring-[color:var(--color-accent-primary)]/35' : ''}`}
-      >
-        {normalizedGroups.map((group) => (
-          <div key={`${group.pillar.code}-pill`} className="rounded-xl border border-[color:var(--color-border-subtle)]/80 bg-[color:var(--color-overlay-1)]/80 px-2 py-2 text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-dim)]">
-              {resolvePillarHeader(group.pillar, language).split(' ')[0]}
-            </p>
+      {isShelfFocusStep ? (
+        <div
+          data-demo-anchor="logros-shelves-pillars"
+          className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/95 p-3 shadow-[0_16px_32px_rgba(0,0,0,0.2)] ring-1 ring-[color:var(--color-accent-primary)]/35"
+        >
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+            {normalizedGroups.map((group) => (
+              <div
+                key={`${group.pillar.code}-demo-column`}
+                className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-2.5"
+              >
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-dim)]">
+                  {resolvePillarHeader(group.pillar, language)}
+                </p>
+                <div className="mt-2.5 space-y-1.5">
+                  {group.habits.slice(0, 3).map((habit) => (
+                    <div
+                      key={`${habit.id}-demo-mini`}
+                      className="flex items-center gap-2 rounded-lg border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/75 px-2 py-1.5"
+                    >
+                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] text-[10px]">
+                        {habit.status === 'not_achieved' ? '○' : '✓'}
+                      </span>
+                      <p className="truncate text-xs font-medium text-[color:var(--color-text)]">{habit.taskName}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ) : null}
       {normalizedGroups.map((group) => (
         <section key={group.pillar.code} className={`space-y-2 transition ${isShelfFocusStep ? 'space-y-1.5' : ''}`}>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{resolvePillarHeader(group.pillar, language)}</p>
-          <div className={`ib-rewards-shelf-scroll flex overflow-x-auto pb-1 transition ${isShelfFocusStep ? 'gap-2.5' : 'gap-3'}`}>
+          <div className={`ib-rewards-shelf-scroll flex overflow-x-auto pb-1 transition ${isShelfFocusStep ? 'gap-2.5' : 'gap-3'} ${isDemoExperience ? 'pt-0.5' : ''}`}>
             {group.habits.map((habit) => {
               const isAchieved = habit.status !== 'not_achieved';
               const active = habit.id === activeHabitId;
@@ -746,7 +768,7 @@ function NotAchievedPreviewOverlay({
 
   return createPortal(
     <div className="fixed inset-0 z-[230] flex items-end justify-center bg-slate-950/70 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center" data-achievement-overlay="seal-path" onClick={onClose}>
-      <div className="relative w-full max-w-sm overflow-y-auto rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-4 max-h-[calc(100vh-2rem)]" onClick={(event) => event.stopPropagation()}>
+      <div className="relative w-full max-w-sm overflow-y-auto rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-4 max-h-[calc(100vh-2rem)]" onClick={(event) => event.stopPropagation()} data-demo-anchor={demoAnchors?.sealPath}>
         <button
           type="button"
           onClick={onClose}
@@ -756,7 +778,7 @@ function NotAchievedPreviewOverlay({
         >
           ✕
         </button>
-        <div className="pr-9" data-demo-anchor={demoAnchors?.sealPath}>
+        <div className="pr-9">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">
             {language === 'es' ? 'Ruta del sello' : 'Seal path'}
           </p>
@@ -849,6 +871,7 @@ function AchievementFocusOverlay({
           type="button"
           onClick={onFlip}
           data-achievement-action="flip-card"
+          data-demo-anchor={demoAnchors?.achievementCard}
           className="ib-card-contour-shadow flex h-[min(82vh,34rem)] min-h-[24rem] w-full flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-5 text-left"
         >
           {!showBackFace ? (

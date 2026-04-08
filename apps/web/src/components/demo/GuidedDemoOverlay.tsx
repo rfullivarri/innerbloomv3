@@ -69,6 +69,14 @@ const LABS_LOGROS_MODAL_STEP_IDS = new Set([
   'logros-seal-scale',
   'logros-seal-months',
 ]);
+const LABS_LOGROS_PINNED_TOP_STEP_IDS = new Set([
+  'logros-seal-path',
+  'logros-seal-concept',
+  'logros-monthly',
+]);
+const LABS_LOGROS_PINNED_BOTTOM_STEP_IDS = new Set([
+  'logros-achievement-back',
+]);
 
 type Placement = 'top' | 'right' | 'bottom' | 'left';
 type WalkthroughMode = 'dashboard' | 'daily-quest-modal';
@@ -342,7 +350,10 @@ export function GuidedDemoOverlay({
       const defaultMobileTop = viewport.height - mobileTooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP;
       const lowerMobileTop = viewport.height - mobileTooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP_LOWER;
       const modalTop = Math.max(VIEWPORT_PADDING + 8, viewport.height * 0.06);
-      const mobileTop = isLogrosModalStep
+      const shouldPinTop = LABS_LOGROS_PINNED_TOP_STEP_IDS.has(step.id);
+      const mobileTop = LABS_LOGROS_PINNED_BOTTOM_STEP_IDS.has(step.id)
+        ? clamp(defaultMobileTop, VIEWPORT_PADDING, defaultMobileTop)
+        : ((isLogrosModalStep && shouldPinTop) || step.id === 'logros-monthly')
         ? modalTop
         : step.id === DAILY_QUEST_FOOTER_STEP_ID
         ? clamp(Math.max(VIEWPORT_PADDING + 24, targetRect.top - mobileTooltipHeight - 24), VIEWPORT_PADDING, defaultMobileTop)
@@ -455,14 +466,20 @@ export function GuidedDemoOverlay({
       ) : null}
 
       <aside
-        className={`pointer-events-auto absolute rounded-2xl border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-elevated)] text-[color:var(--color-text)] shadow-2xl ${isCompactMobile ? 'p-3' : 'p-4'} ${isIntroModalStep ? 'max-w-md text-center' : ''}`}
+        className={`pointer-events-auto absolute rounded-2xl border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-elevated)] text-[color:var(--color-text)] shadow-2xl ${isCompactMobile ? 'p-3' : 'p-4'} ${isIntroModalStep ? 'max-w-lg overflow-hidden border-white/20 bg-[#0a133d]/92 text-center text-white shadow-[0_0_45px_rgba(79,70,229,0.22)] backdrop-blur-xl' : ''}`}
         style={tooltipStyle}
       >
         {isIntroModalStep ? (
-          <div className="mb-2.5 flex justify-center">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-xl">
-              🏵️
-            </span>
+          <div className="mb-5 space-y-4">
+            <div className="flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.34em] text-white/70 sm:text-xs">
+              <span>Innerbloom</span>
+              <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-6 w-auto" />
+            </div>
+            <div className="flex justify-center">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/35 bg-white/12 text-2xl shadow-[0_10px_24px_rgba(79,70,229,0.32)]">
+                🌸
+              </span>
+            </div>
           </div>
         ) : null}
         {isCompactMobile && !isIntroModalStep ? (
@@ -495,8 +512,8 @@ export function GuidedDemoOverlay({
             </button>
           </div>
         ) : null}
-        {!isCompactMobile || isIntroModalStep ? <h3 className="text-lg font-semibold">{step.title[language]}</h3> : null}
-        <p className={`${isCompactMobile ? 'mt-1.5 text-[13px] leading-snug' : 'mt-2 text-sm leading-relaxed'} text-[color:var(--color-text)]`}>
+        {!isCompactMobile || isIntroModalStep ? <h3 className={`text-lg font-semibold ${isIntroModalStep ? 'text-3xl sm:text-4xl' : ''}`}>{step.title[language]}</h3> : null}
+        <p className={`${isCompactMobile ? 'mt-1.5 text-[13px] leading-snug' : 'mt-2 text-sm leading-relaxed'} ${isIntroModalStep ? 'mx-auto max-w-md text-slate-200 sm:text-base' : 'text-[color:var(--color-text)]'}`}>
           {step.body[language]}
         </p>
 

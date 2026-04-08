@@ -13,6 +13,7 @@ const DEMO_ANCHORS = {
   sealPath: 'logros-seal-path',
   achievementFront: 'logros-achievement-front',
   achievementBack: 'logros-achievement-back',
+  achievementCard: 'logros-achievement-card',
   weekly: 'logros-weekly',
   monthly: 'logros-monthly',
 } as const;
