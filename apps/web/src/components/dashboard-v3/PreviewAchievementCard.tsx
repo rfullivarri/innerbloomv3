@@ -133,7 +133,7 @@ function RecentMonthNode({ entry, language }: MonthNodeProps) {
     <div
       key={`${entry.key}-${entry.value ?? 0}`}
       data-testid="recent-month-item"
-      className="flex h-[5.35rem] w-[3.35rem] shrink-0 flex-col items-center gap-0.5 py-0.5 sm:h-[5.55rem] sm:w-[3.55rem]"
+      className="flex h-[4.75rem] w-[3.35rem] shrink-0 flex-col items-center gap-0 py-0 sm:h-[4.95rem] sm:w-[3.55rem]"
     >
       <div
         data-testid="recent-month-node"
@@ -384,7 +384,7 @@ export function PreviewAchievementCard({
                 {hasGroupedWindow && (
                   <div className="flex flex-col items-center">
                     <div
-                      className="flex flex-col items-center rounded-xl border border-[color:var(--color-border-soft)] px-1.5 pb-0.5 pt-1 md:px-2"
+                      className="flex flex-col items-center rounded-xl border border-[color:var(--color-border-soft)] px-1.5 pb-0 pt-0.5 md:px-2"
                       data-testid="seal-window-group"
                       data-window-start={lastThreeStart}
                       data-window-end={lastThreeEnd - 1}
