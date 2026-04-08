@@ -133,7 +133,7 @@ function RecentMonthNode({ entry, language }: MonthNodeProps) {
     <div
       key={`${entry.key}-${entry.value ?? 0}`}
       data-testid="recent-month-item"
-      className="flex h-[5.2rem] min-w-[3.1rem] shrink-0 flex-col items-center gap-0.5 py-0.5 sm:h-[5.45rem] sm:min-w-[3.35rem]"
+      className="flex h-[5.35rem] w-[3.35rem] shrink-0 flex-col items-center gap-0.5 py-0.5 sm:h-[5.55rem] sm:w-[3.55rem]"
     >
       <div
         data-testid="recent-month-node"
@@ -147,7 +147,7 @@ function RecentMonthNode({ entry, language }: MonthNodeProps) {
         {isProjected ? (
           <span
             aria-hidden
-            className="inline-flex h-3.5 w-3.5 animate-[spin_4.8s_linear_infinite] rounded-full border border-white/12 border-t-white/70 border-r-white/35 sm:h-[0.9rem] sm:w-[0.9rem]"
+            className="inline-flex h-3.5 w-3.5 animate-[spin_4.8s_linear_infinite] rounded-full border-[1.5px] border-white/14 border-t-white/80 border-r-white/45 sm:h-[0.95rem] sm:w-[0.95rem]"
           />
         ) : (
           monthSymbol
@@ -229,8 +229,8 @@ export function PreviewAchievementCard({
   return (
     <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
       <div className="flex flex-col items-center gap-2">
-        <div className="space-y-2 text-center">
-          <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
+        <div className="w-full space-y-2 text-left">
+          <p className="text-sm font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]">
             {language === 'es' ? 'Desarrollo del hábito' : 'Habit development'}
           </p>
           {previewAchievement.consolidationStrength != null && (
@@ -243,8 +243,8 @@ export function PreviewAchievementCard({
           {tone.label[language]}
         </span>
 
-        <div className="flex shrink-0 flex-col items-center" data-testid="score-block">
-          <div className="flex items-center gap-4 sm:gap-5">
+        <div className="mx-auto flex shrink-0 flex-col items-center" data-testid="score-block">
+          <div className="flex items-center justify-center gap-3.5 sm:gap-4.5">
             <svg
               className="h-32 w-32 sm:h-36 sm:w-36"
               viewBox="0 0 120 120"
@@ -278,8 +278,8 @@ export function PreviewAchievementCard({
               </text>
             </svg>
             <div className="relative flex h-32 items-center sm:h-36" data-testid="score-range-rail">
-              <div className="relative h-full w-[7.25rem]">
-                <div className="absolute bottom-1 left-5 top-1 w-3 overflow-hidden rounded-full border border-white/24 bg-[color:var(--color-overlay-1)]/45">
+              <div className="relative h-full w-[5.9rem]">
+                <div className="absolute bottom-1 left-3.5 top-1 w-3 overflow-hidden rounded-full border border-white/24 bg-[color:var(--color-overlay-1)]/45">
                   <button
                     type="button"
                     className="absolute inset-x-0 top-0 h-[20%] bg-emerald-300/95 focus:outline-none"
@@ -307,11 +307,11 @@ export function PreviewAchievementCard({
                 <span className="absolute left-0 top-[20%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">80</span>
                 <span className="absolute left-0 top-[50%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">50</span>
                 <span className="absolute left-0 bottom-0 text-[8px] text-[color:var(--color-slate-500)]">0</span>
-                <span className="absolute right-0 top-0 text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">{rangeLabels.strong}</span>
+                <span className="absolute right-0 top-[2%] text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">{rangeLabels.strong}</span>
                 <span className="absolute right-0 top-[50%] -translate-y-1/2 text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
                   {rangeLabels.building}
                 </span>
-                <span className="absolute right-0 bottom-0 text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className="absolute right-0 bottom-[2%] text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
                   {rangeLabels.fragile}
                 </span>
               </div>
@@ -355,7 +355,7 @@ export function PreviewAchievementCard({
         {orderedRecentMonths.length > 0 && (
           <div className="px-0 py-0">
             <div className="flex items-center gap-1.5">
-              <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">
+              <p className="text-sm font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]">
                 {language === 'es' ? 'Resultado últimos meses' : 'Last months result'}
               </p>
               <details className="group relative" data-testid="timeline-legend">
@@ -387,22 +387,31 @@ export function PreviewAchievementCard({
                   <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
                 ))}
                 {hasGroupedWindow && (
-                  <div
-                    className="flex flex-col items-center px-0.5 py-0.5 md:px-1"
-                    data-testid="seal-window-group"
-                    data-window-start={lastThreeStart}
-                    data-window-end={lastThreeEnd - 1}
-                  >
-                    <p className="text-center text-[9px] uppercase tracking-[0.11em] text-[color:var(--color-slate-200)]">{windowTitle}</p>
-                    <div className="flex items-end gap-1 md:gap-1.5" data-testid="seal-window-track">
-                      {groupedMonths.map((entry) => (
-                        <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
-                      ))}
+                  <div className="flex flex-col items-center">
+                    <div
+                      className="flex flex-col items-center rounded-xl border border-[color:var(--color-border-soft)] px-1.5 py-1 md:px-2"
+                      data-testid="seal-window-group"
+                      data-window-start={lastThreeStart}
+                      data-window-end={lastThreeEnd - 1}
+                    >
+                      <p className="text-center text-sm font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]">{windowTitle}</p>
+                      <div className="flex items-end gap-1 md:gap-1.5" data-testid="seal-window-track">
+                        {groupedMonths.map((entry) => (
+                          <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
+                        ))}
+                      </div>
                     </div>
                     {groupedProjectedMonth && (
-                      <span className="pointer-events-none -mt-0.5 text-[9px] leading-none text-[color:var(--color-slate-400)]">
-                        {language === 'es' ? 'proyectado' : 'projected'}
-                      </span>
+                      <div className="mt-0.5 flex items-start gap-1 md:gap-1.5" data-testid="projected-month-label-row">
+                        {groupedMonths.map((entry) => (
+                          <span
+                            key={`${entry.key}-projected-indicator`}
+                            className="pointer-events-none w-[3.35rem] text-center text-[9px] leading-none text-[color:var(--color-slate-400)] sm:w-[3.55rem]"
+                          >
+                            {entry.projected ? (language === 'es' ? 'proyectado' : 'projected') : '\u00A0'}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
                 )}
