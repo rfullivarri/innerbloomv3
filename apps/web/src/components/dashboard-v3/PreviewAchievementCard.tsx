@@ -244,8 +244,8 @@ export function PreviewAchievementCard({
         </span>
 
         <div className="mx-auto flex shrink-0 flex-col items-center" data-testid="score-block">
-          <div className="flex items-center justify-center gap-3.5 sm:gap-4.5">
-            <div className="relative" ref={scoreTooltipRef} data-testid="score-affordance">
+          <div className="flex items-center justify-center gap-2.5 sm:gap-3.5">
+            <div className="relative" ref={scoreTooltipRef}>
               <svg
                 className="h-32 w-32 sm:h-36 sm:w-36"
                 viewBox="0 0 120 120"
@@ -282,7 +282,7 @@ export function PreviewAchievementCard({
                   onClick={() => setIsScoreTooltipOpen((prev) => !prev)}
                   onFocus={() => setIsScoreTooltipOpen(true)}
                   aria-label={language === 'es' ? 'Qué significa este score' : 'What this score means'}
-                  className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/45 bg-white/30 text-[9px] font-semibold text-white shadow-[0_6px_18px_rgba(8,12,24,0.35)] backdrop-blur-md"
+                  className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/65 bg-[rgba(14,20,40,0.88)] text-[9px] font-semibold text-white shadow-[0_8px_20px_rgba(8,12,24,0.55)] backdrop-blur-xl"
                   data-testid="score-info-dot"
                   aria-describedby={isScoreTooltipOpen ? scoreTooltipId : undefined}
                 >
@@ -293,7 +293,7 @@ export function PreviewAchievementCard({
                 <div
                   id={scoreTooltipId}
                   role="tooltip"
-                  className="absolute left-1/2 top-[74%] z-10 w-52 -translate-x-1/2 rounded-lg border border-white/35 bg-[rgba(8,12,24,0.96)] p-2 text-[10px] leading-snug text-[color:var(--color-slate-100)] shadow-2xl backdrop-blur-xl"
+                  className="absolute left-1/2 top-[74%] z-10 w-52 max-w-[88vw] -translate-x-1/2 rounded-lg border border-white/45 bg-[rgba(8,12,24,0.985)] p-2 text-[10px] leading-snug text-[color:var(--color-slate-100)] shadow-2xl backdrop-blur-2xl"
                 >
                   {language === 'es'
                     ? 'El Score resume cómo viene hoy tu hábito con base en constancia reciente, cumplimiento de la ventana actual y tendencia.'
@@ -302,8 +302,8 @@ export function PreviewAchievementCard({
               )}
             </div>
             <div className="relative flex h-32 items-center sm:h-36" data-testid="score-range-rail">
-              <div className="relative h-full w-[9rem]">
-                <div className="absolute bottom-1 left-3.5 top-1 w-3 overflow-hidden rounded-full bg-[color:var(--color-overlay-1)]/45">
+              <div className="relative h-full w-[5.9rem]">
+                <div className="absolute bottom-1 left-2.5 top-1 w-3 overflow-hidden rounded-full">
                   <button
                     type="button"
                     className="absolute inset-x-0 top-0 h-[20%] bg-emerald-300/95 focus:outline-none"
@@ -331,13 +331,13 @@ export function PreviewAchievementCard({
                 <span className="absolute left-0 top-[20%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">80</span>
                 <span className="absolute left-0 top-[50%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">50</span>
                 <span className="absolute left-0 bottom-0 text-[8px] text-[color:var(--color-slate-500)]">0</span>
-                <span className="absolute left-[7.1rem] top-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className="absolute left-[4rem] top-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
                   {rangeLabels.strong}
                 </span>
-                <span className="absolute left-[7.1rem] top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className="absolute left-[4rem] top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
                   {rangeLabels.building}
                 </span>
-                <span className="absolute left-[7.1rem] bottom-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className="absolute left-[4rem] bottom-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
                   {rangeLabels.fragile}
                 </span>
               </div>
@@ -382,7 +382,7 @@ export function PreviewAchievementCard({
                   <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
                 ))}
                 {hasGroupedWindow && (
-                  <div className="relative flex flex-col items-center pb-3">
+                  <div className="flex flex-col items-center">
                     <div
                       className="flex flex-col items-center rounded-xl border border-[color:var(--color-border-soft)] px-1.5 pb-0.5 pt-1 md:px-2"
                       data-testid="seal-window-group"
@@ -397,16 +397,14 @@ export function PreviewAchievementCard({
                       </div>
                     </div>
                     {groupedProjectedMonth && (
-                      <div
-                        className="pointer-events-none absolute bottom-0 left-1/2 flex -translate-x-1/2 items-start gap-1 md:gap-1.5"
-                        data-testid="projected-month-label-row"
-                      >
-                        {groupedMonths.map((entry) => (
-                          <span
-                            key={`${entry.key}-projected-indicator`}
-                            className="w-[3.35rem] text-center text-[9px] leading-none text-[color:var(--color-slate-400)] sm:w-[3.55rem]"
-                          >
-                            {entry.projected ? (language === 'es' ? 'proyectado' : 'projected') : '\u00A0'}
+                      <div className="mt-1 flex items-start gap-1 md:gap-1.5" data-testid="projected-month-label-row">
+                        {groupedMonths.map((entry, index) => (
+                          <span key={`${entry.key}-projected-indicator`} className="w-[3.35rem] text-center text-[9px] leading-none text-[color:var(--color-slate-400)] sm:w-[3.55rem]">
+                            {entry.projected && index === groupedMonths.length - 1
+                              ? language === 'es'
+                                ? 'proyectado'
+                                : 'projected'
+                              : '\u00A0'}
                           </span>
                         ))}
                       </div>
