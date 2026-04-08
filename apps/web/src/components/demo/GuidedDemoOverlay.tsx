@@ -60,6 +60,15 @@ const DAILY_QUEST_STEP_IDS = new Set([
   'daily-quest-tasks',
   'daily-quest-footer',
 ]);
+const LABS_LOGROS_MODAL_STEP_IDS = new Set([
+  'logros-achievement-front',
+  'logros-achievement-back',
+  'logros-seal-path',
+  'logros-seal-concept',
+  'logros-seal-score',
+  'logros-seal-scale',
+  'logros-seal-months',
+]);
 
 type Placement = 'top' | 'right' | 'bottom' | 'left';
 type WalkthroughMode = 'dashboard' | 'daily-quest-modal';
@@ -137,8 +146,10 @@ export function GuidedDemoOverlay({
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
   const step = steps[stepIndex];
+  const isIntroModalStep = step.presentation === 'intro-modal';
   const walkthroughMode = getWalkthroughMode(step.id);
   const isDailyQuestStep = walkthroughMode === 'daily-quest-modal';
+  const isLogrosModalStep = LABS_LOGROS_MODAL_STEP_IDS.has(step.id);
   const isCompactMobile = viewport.width <= 390 || viewport.height <= 740;
 
   useEffect(() => {
@@ -270,6 +281,11 @@ export function GuidedDemoOverlay({
         return;
       }
 
+      if (step.id.startsWith('logros-')) {
+        target.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
+        await waitForLayoutSettle(1);
+      }
+
       await alignDashboardStepMobile(target);
     };
 
@@ -313,7 +329,7 @@ export function GuidedDemoOverlay({
     const width = Math.min(viewport.width - 24, 360);
     const isMobile = viewport.width < 768;
     const mobileTooltipHeight = isCompactMobile ? TOOLTIP_HEIGHT_MOBILE_COMPACT : TOOLTIP_HEIGHT_MOBILE;
-    if (!targetRect) {
+    if (!targetRect || isIntroModalStep) {
       return {
         top: '50%',
         left: '50%',
@@ -325,7 +341,10 @@ export function GuidedDemoOverlay({
     if (isMobile) {
       const defaultMobileTop = viewport.height - mobileTooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP;
       const lowerMobileTop = viewport.height - mobileTooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP_LOWER;
-      const mobileTop = step.id === DAILY_QUEST_FOOTER_STEP_ID
+      const modalTop = Math.max(VIEWPORT_PADDING + 8, viewport.height * 0.06);
+      const mobileTop = isLogrosModalStep
+        ? modalTop
+        : step.id === DAILY_QUEST_FOOTER_STEP_ID
         ? clamp(Math.max(VIEWPORT_PADDING + 24, targetRect.top - mobileTooltipHeight - 24), VIEWPORT_PADDING, defaultMobileTop)
         : clamp(lowerMobileTop, VIEWPORT_PADDING, lowerMobileTop);
       return {
@@ -382,7 +401,7 @@ export function GuidedDemoOverlay({
       left: best?.left ?? VIEWPORT_PADDING,
       width,
     };
-  }, [isCompactMobile, step.id, step.tooltipPlacement, targetRect, viewport.height, viewport.width]);
+  }, [isCompactMobile, isIntroModalStep, isLogrosModalStep, step.id, step.tooltipPlacement, targetRect, viewport.height, viewport.width]);
 
   const isLast = stepIndex === steps.length - 1;
   const finalPrimaryLabel = finalPrimaryActionLabel?.[language]
@@ -396,21 +415,23 @@ export function GuidedDemoOverlay({
   const walkthroughButtonSizeClass = isCompactMobile
     ? 'min-h-8 px-3 py-1.5 text-[11px]'
     : 'min-h-9 px-4 py-2 text-xs';
-  const secondaryButtonClass = `inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 disabled:opacity-40 ${walkthroughButtonSizeClass}`;
-  const primaryButtonClass = `ib-primary-button !min-h-0 !px-4 !py-2 !font-semibold !text-xs !uppercase !tracking-[0.16em] focus-visible:ring-offset-slate-900 ${walkthroughButtonSizeClass}`;
-  const tertiaryButtonClass = `ml-auto inline-flex items-center justify-center rounded-full border border-transparent font-semibold uppercase tracking-[0.14em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-subtle)] hover:bg-[color:var(--color-overlay-1)] hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${walkthroughButtonSizeClass}`;
+  const secondaryButtonClass = `inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text)] transition hover:border-[color:var(--color-text)]/55 hover:bg-[color:var(--color-overlay-1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] disabled:opacity-40 ${walkthroughButtonSizeClass}`;
+  const primaryButtonClass = `ib-primary-button !min-h-0 !px-4 !py-2 !font-semibold !text-xs !uppercase !tracking-[0.16em] focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${walkthroughButtonSizeClass}`;
+  const tertiaryButtonClass = `ml-auto inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-subtle)]/70 font-semibold uppercase tracking-[0.14em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-1)] hover:text-[color:var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-elevated)] ${walkthroughButtonSizeClass}`;
+  const overlayZClass = isDailyQuestStep ? 'z-[10020]' : 'z-[520]';
+  const overlayMaskClass = 'bg-slate-950/80 backdrop-blur-[7px]';
 
   return (
-    <div className={`pointer-events-none fixed inset-0 ${isDailyQuestStep ? 'z-[10020]' : 'z-[120]'}`}>
+    <div className={`pointer-events-none fixed inset-0 ${overlayZClass}`}>
       {targetRect ? (
         <>
-          <div className="absolute left-0 right-0 top-0 bg-slate-950/86 backdrop-blur-[6px]" style={{ height: targetRect.top }} />
+          <div className={`absolute left-0 right-0 top-0 ${overlayMaskClass}`} style={{ height: targetRect.top }} />
           <div
-            className="absolute left-0 bg-slate-950/86 backdrop-blur-[6px]"
+            className={`absolute left-0 ${overlayMaskClass}`}
             style={{ top: targetRect.top, width: targetRect.left, height: targetRect.height }}
           />
           <div
-            className="absolute right-0 bg-slate-950/86 backdrop-blur-[6px]"
+            className={`absolute right-0 ${overlayMaskClass}`}
             style={{
               top: targetRect.top,
               width: Math.max(0, viewport.width - (targetRect.left + targetRect.width)),
@@ -418,57 +439,64 @@ export function GuidedDemoOverlay({
             }}
           />
           <div
-            className="absolute bottom-0 left-0 right-0 bg-slate-950/86 backdrop-blur-[6px]"
+            className={`absolute bottom-0 left-0 right-0 ${overlayMaskClass}`}
             style={{ top: targetRect.top + targetRect.height }}
           />
         </>
       ) : (
-        <div className="absolute inset-0 bg-slate-950/86 backdrop-blur-[6px]" />
+        <div className={`absolute inset-0 ${overlayMaskClass}`} />
       )}
 
       {targetRect ? (
         <div
-          className="absolute rounded-2xl border border-cyan-200/90 bg-white/[0.025] shadow-[0_0_0_2px_rgba(34,211,238,0.55),0_0_34px_rgba(34,211,238,0.22),0_20px_45px_rgba(0,0,0,0.45)] transition-all"
+          className="absolute rounded-2xl border border-[color:var(--color-accent-primary)]/90 bg-white/[0.025] shadow-[0_0_0_2px_rgba(56,189,248,0.58),0_0_34px_rgba(56,189,248,0.28),0_20px_45px_rgba(0,0,0,0.45)] transition-all"
           style={{ top: targetRect.top, left: targetRect.left, width: targetRect.width, height: targetRect.height }}
         />
       ) : null}
 
       <aside
-        className={`pointer-events-auto absolute rounded-2xl border border-white/15 bg-slate-900/95 text-slate-100 shadow-2xl ${isCompactMobile ? 'p-3' : 'p-4'}`}
+        className={`pointer-events-auto absolute rounded-2xl border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-elevated)] text-[color:var(--color-text)] shadow-2xl ${isCompactMobile ? 'p-3' : 'p-4'} ${isIntroModalStep ? 'max-w-md text-center' : ''}`}
         style={tooltipStyle}
       >
-        {isCompactMobile ? (
+        {isIntroModalStep ? (
+          <div className="mb-2.5 flex justify-center">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-xl">
+              🏵️
+            </span>
+          </div>
+        ) : null}
+        {isCompactMobile && !isIntroModalStep ? (
           <div className="mb-1.5 flex items-start justify-between gap-2">
             <h3 className="text-sm font-semibold leading-tight">
-              <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-300">
+              <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[color:var(--color-text-dim)]">
                 {stepIndex + 1}/{steps.length} ·
               </span>
               {step.title[language]}
             </h3>
             <button
               type="button"
-              className="rounded-md p-1.5 text-base leading-none text-slate-300 hover:bg-white/10 hover:text-slate-100"
+              className="rounded-md p-1.5 text-base leading-none text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-1)] hover:text-[color:var(--color-text)]"
               onClick={onFinish}
               aria-label={language === 'es' ? 'Cerrar recorrido' : 'Close walkthrough'}
             >
               ×
             </button>
           </div>
-        ) : (
-          <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.16em] text-slate-300">
+        ) : !isIntroModalStep ? (
+          <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.16em] text-[color:var(--color-text-dim)]">
             <span>{stepIndex + 1}/{steps.length}</span>
             <button
               type="button"
-              className="rounded-md p-1.5 text-base leading-none text-slate-300 hover:bg-white/10 hover:text-slate-100"
+              className="rounded-md p-1.5 text-base leading-none text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-1)] hover:text-[color:var(--color-text)]"
               onClick={onFinish}
               aria-label={language === 'es' ? 'Cerrar recorrido' : 'Close walkthrough'}
             >
               ×
             </button>
           </div>
-        )}
-        {!isCompactMobile ? <h3 className="text-lg font-semibold">{step.title[language]}</h3> : null}
-        <p className={`${isCompactMobile ? 'mt-1.5 text-[13px] leading-snug' : 'mt-2 text-sm leading-relaxed'} text-slate-200`}>
+        ) : null}
+        {!isCompactMobile || isIntroModalStep ? <h3 className="text-lg font-semibold">{step.title[language]}</h3> : null}
+        <p className={`${isCompactMobile ? 'mt-1.5 text-[13px] leading-snug' : 'mt-2 text-sm leading-relaxed'} text-[color:var(--color-text)]`}>
           {step.body[language]}
         </p>
 

@@ -19,6 +19,7 @@ const DEMO_ANCHORS = {
 
 export default function LabsLogrosDemoPage() {
   const [showGuidedTour, setShowGuidedTour] = useState(true);
+  const [activeStepId, setActiveStepId] = useState<string | null>(LABS_LOGROS_GUIDED_STEPS[0]?.id ?? null);
   const demoControlsRef = useRef<RewardsSectionDemoControls | null>(null);
   const rememberDemoControls = useCallback((controls: RewardsSectionDemoControls) => {
     demoControlsRef.current = controls;
@@ -36,7 +37,13 @@ export default function LabsLogrosDemoPage() {
   );
 
   const handleStepChange = useCallback((stepId: string) => {
+    setActiveStepId(stepId);
     const controls = demoControlsRef.current;
+
+    if (stepId === 'logros-shelves') {
+      controls?.focusBlockedShelfCard();
+      return;
+    }
 
     if (stepId === 'logros-achievement-front') {
       controls?.closeAllOverlays();
@@ -55,6 +62,12 @@ export default function LabsLogrosDemoPage() {
       return;
     }
 
+    if (stepId === 'logros-blocked-card') {
+      controls?.closeAllOverlays();
+      controls?.focusBlockedShelfCard();
+      return;
+    }
+
     if (stepId.startsWith('logros-seal-')) {
       controls?.openBlockedCard();
       return;
@@ -66,7 +79,7 @@ export default function LabsLogrosDemoPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-transparent" data-light-scope="dashboard-v3">
+    <div className="min-h-screen bg-transparent" data-light-scope="dashboard-v3" data-labs-logros-step={activeStepId ?? undefined}>
       <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] px-3 py-3 backdrop-blur-xl md:px-6">
         <p className="text-[0.62rem] uppercase tracking-[0.3em] text-[color:var(--color-text-subtle)] md:text-xs">LABS</p>
         <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl">Logros</h1>
@@ -91,6 +104,7 @@ export default function LabsLogrosDemoPage() {
           userId=""
           initialData={demoLogrosData}
           demoConfig={demoConfig}
+          demoStepId={activeStepId}
         />
       </main>
     </div>
