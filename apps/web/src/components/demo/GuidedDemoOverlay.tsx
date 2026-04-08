@@ -70,13 +70,23 @@ const LABS_LOGROS_MODAL_STEP_IDS = new Set([
   'logros-seal-months',
 ]);
 const LABS_LOGROS_PINNED_TOP_STEP_IDS = new Set([
+  'logros-achievement-front',
+  'logros-achievement-back',
   'logros-seal-path',
   'logros-seal-concept',
+  'logros-seal-score',
+  'logros-seal-scale',
+  'logros-seal-months',
   'logros-monthly',
 ]);
-const LABS_LOGROS_PINNED_BOTTOM_STEP_IDS = new Set([
-  'logros-achievement-back',
-]);
+const LABS_LOGROS_MOBILE_TOP_RATIO_BY_STEP: Record<string, number> = {
+  'logros-achievement-front': 0.04,
+  'logros-achievement-back': 0.04,
+  'logros-seal-score': 0.04,
+  'logros-seal-scale': 0.04,
+  'logros-seal-months': 0.04,
+  'logros-monthly': 0.06,
+};
 
 type Placement = 'top' | 'right' | 'bottom' | 'left';
 type WalkthroughMode = 'dashboard' | 'daily-quest-modal';
@@ -351,8 +361,12 @@ export function GuidedDemoOverlay({
       const lowerMobileTop = viewport.height - mobileTooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP_LOWER;
       const modalTop = Math.max(VIEWPORT_PADDING + 8, viewport.height * 0.06);
       const shouldPinTop = LABS_LOGROS_PINNED_TOP_STEP_IDS.has(step.id);
-      const mobileTop = LABS_LOGROS_PINNED_BOTTOM_STEP_IDS.has(step.id)
-        ? clamp(defaultMobileTop, VIEWPORT_PADDING, defaultMobileTop)
+      const stepSpecificTopRatio = LABS_LOGROS_MOBILE_TOP_RATIO_BY_STEP[step.id];
+      const stepSpecificTop = stepSpecificTopRatio != null
+        ? Math.max(VIEWPORT_PADDING + 8, viewport.height * stepSpecificTopRatio)
+        : null;
+      const mobileTop = stepSpecificTop != null
+        ? stepSpecificTop
         : ((isLogrosModalStep && shouldPinTop) || step.id === 'logros-monthly')
         ? modalTop
         : step.id === DAILY_QUEST_FOOTER_STEP_ID
@@ -471,14 +485,8 @@ export function GuidedDemoOverlay({
       >
         {isIntroModalStep ? (
           <div className="mb-5 space-y-4">
-            <div className="flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.34em] text-white/70 sm:text-xs">
+            <div className="flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.34em] text-white/70 sm:text-xs">
               <span>Innerbloom</span>
-              <img src="/IB-COLOR-LOGO.png" alt="Innerbloom logo" className="h-6 w-auto" />
-            </div>
-            <div className="flex justify-center">
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/35 bg-white/12 text-2xl shadow-[0_10px_24px_rgba(79,70,229,0.32)]">
-                🌸
-              </span>
             </div>
           </div>
         ) : null}
@@ -512,7 +520,11 @@ export function GuidedDemoOverlay({
             </button>
           </div>
         ) : null}
-        {!isCompactMobile || isIntroModalStep ? <h3 className={`text-lg font-semibold ${isIntroModalStep ? 'text-3xl sm:text-4xl' : ''}`}>{step.title[language]}</h3> : null}
+        {!isCompactMobile || isIntroModalStep ? (
+          <h3 className={`text-lg font-semibold ${isIntroModalStep ? 'text-4xl font-extrabold tracking-tight text-white sm:text-5xl' : ''}`}>
+            {step.title[language]}
+          </h3>
+        ) : null}
         <p className={`${isCompactMobile ? 'mt-1.5 text-[13px] leading-snug' : 'mt-2 text-sm leading-relaxed'} ${isIntroModalStep ? 'mx-auto max-w-md text-slate-200 sm:text-base' : 'text-[color:var(--color-text)]'}`}>
           {step.body[language]}
         </p>

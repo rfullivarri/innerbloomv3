@@ -53,7 +53,7 @@ export default function LabsLogrosDemoPage() {
     }
 
     if (stepId === 'logros-achievement-back') {
-      controls?.flipAchievementCard();
+      controls?.ensureAchievementBackFace();
       return;
     }
 

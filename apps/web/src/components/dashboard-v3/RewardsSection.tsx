@@ -61,6 +61,7 @@ export type RewardsSectionDemoControls = {
   openBlockedCard: () => void;
   focusBlockedShelfCard: () => void;
   flipAchievementCard: () => void;
+  ensureAchievementBackFace: () => void;
   closeAchievementOverlay: () => void;
   closeSealPathOverlay: () => void;
   closeAllOverlays: () => void;
@@ -560,6 +561,16 @@ function AchievedShelf({
           setShowBackFace(true);
         }, 80);
       },
+      ensureAchievementBackFace: () => {
+        if (activeHabitId) {
+          setShowBackFace(true);
+          return;
+        }
+        openAchievedCard();
+        window.setTimeout(() => {
+          setShowBackFace(true);
+        }, 80);
+      },
       closeAchievementOverlay: () => {
         setActiveHabitId(null);
         setShowBackFace(false);
@@ -591,28 +602,15 @@ function AchievedShelf({
           data-demo-anchor="logros-shelves-pillars"
           className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/95 p-3 shadow-[0_16px_32px_rgba(0,0,0,0.2)] ring-1 ring-[color:var(--color-accent-primary)]/35"
         >
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2">
             {normalizedGroups.map((group) => (
               <div
                 key={`${group.pillar.code}-demo-column`}
-                className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-2.5"
+                className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2 py-3 text-center"
               >
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-dim)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text)]">
                   {resolvePillarHeader(group.pillar, language)}
                 </p>
-                <div className="mt-2.5 space-y-1.5">
-                  {group.habits.slice(0, 3).map((habit) => (
-                    <div
-                      key={`${habit.id}-demo-mini`}
-                      className="flex items-center gap-2 rounded-lg border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/75 px-2 py-1.5"
-                    >
-                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] text-[10px]">
-                        {habit.status === 'not_achieved' ? '○' : '✓'}
-                      </span>
-                      <p className="truncate text-xs font-medium text-[color:var(--color-text)]">{habit.taskName}</p>
-                    </div>
-                  ))}
-                </div>
               </div>
             ))}
           </div>
