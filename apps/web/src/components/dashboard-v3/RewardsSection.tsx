@@ -7,6 +7,7 @@ import {
   decideTaskHabitAchievement,
   getTaskInsights,
   getRewardsHistory,
+  type TaskInsightsResponse,
   toggleTaskHabitAchievementMaintained,
   type HabitAchievementShelfItem,
   type MonthlyWrappedRecord,
@@ -29,9 +30,31 @@ interface RewardsSectionProps {
   onOpenWeeklyWrapped?: (record?: WeeklyWrappedRecord | null) => void;
   initialData?: RewardsHistorySummary;
   onPendingCountChange?: (count: number) => void;
+  disableRemote?: boolean;
+  mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
+  demoAnchors?: {
+    shelves?: string;
+    achievedCard?: string;
+    achievedCardTaskId?: string;
+    blockedCard?: string;
+    blockedCardTaskId?: string;
+    sealPath?: string;
+    achievementFront?: string;
+    achievementBack?: string;
+    weekly?: string;
+    monthly?: string;
+  };
 }
 
-export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPendingCountChange }: RewardsSectionProps) {
+export function RewardsSection({
+  userId,
+  onOpenWeeklyWrapped,
+  initialData,
+  onPendingCountChange,
+  disableRemote = false,
+  mockPreviewAchievementByTaskId,
+  demoAnchors,
+}: RewardsSectionProps) {
   const { language } = usePostLoginLanguage();
   const [isDecisionOpen, setIsDecisionOpen] = useState(false);
   const [decisionIndex, setDecisionIndex] = useState(0);
@@ -40,7 +63,7 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
   const [isTransitioningDecision, setIsTransitioningDecision] = useState(false);
 
   const { data, status, error, reload } = useRequest(() => getRewardsHistory(userId), [userId], {
-    enabled: Boolean(userId),
+    enabled: !disableRemote && Boolean(userId),
   });
   const effectiveData = data ?? initialData;
 
@@ -66,6 +89,9 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
   const monthlyItems = effectiveData?.monthlyWrapups ?? [];
 
   const handleDecision = async (habit: HabitAchievementShelfItem, decision: 'maintain' | 'store') => {
+    if (disableRemote) {
+      return;
+    }
     await decideTaskHabitAchievement(habit.taskId, decision);
     emitHabitAchievementUpdated();
     const isLast = decisionIndex >= pendingItems.length - 1;
@@ -88,6 +114,9 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
   };
 
   const handleOpenPendingDecision = async () => {
+    if (disableRemote) {
+      return;
+    }
     if (pendingItems.length > 0) {
       setDecisionIndex(0);
       setIsDecisionOpen(true);
@@ -100,7 +129,7 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
 
   return (
     <Card
-      rightSlot={
+      rightSlot={!disableRemote ? (
         <button
           type="button"
           onClick={reload}
@@ -109,10 +138,10 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
         >
           {language === 'es' ? 'Actualizar' : 'Refresh'}
         </button>
-      }
+      ) : undefined}
       bodyClassName="gap-5"
     >
-      {pendingCount > 0 ? (
+      {!disableRemote && pendingCount > 0 ? (
         <button
           type="button"
           onClick={() => {
@@ -127,7 +156,7 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
         </button>
       ) : null}
 
-      {educationBannerVisible ? (
+      {!disableRemote && educationBannerVisible ? (
         <div className="rounded-2xl border border-emerald-300/40 bg-emerald-400/10 p-4 text-sm text-emerald-100">
           {language === 'es'
             ? 'Tus hábitos logrados ahora viven en Logros. Puedes mantenerlos o guardarlos desde los estantes.'
@@ -140,17 +169,23 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
       <AchievedShelf
         language={language}
         groups={effectiveData?.habitAchievements.achievedByPillar ?? []}
+        demoAnchors={demoAnchors}
+        disableRemote={disableRemote}
+        mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
         onToggleMaintained={async (habit, enabled) => {
+          if (disableRemote) {
+            return;
+          }
           await toggleTaskHabitAchievementMaintained(habit.taskId, enabled);
           await reload();
         }}
       />
 
-      <WeeklyWrapupShelf items={weeklyItems} onOpen={onOpenWeeklyWrapped} language={language} />
+      <WeeklyWrapupShelf items={weeklyItems} onOpen={onOpenWeeklyWrapped} language={language} anchor={demoAnchors?.weekly} />
 
-      <MonthlyWrapupShelf items={monthlyItems} language={language} />
+      <MonthlyWrapupShelf items={monthlyItems} language={language} anchor={demoAnchors?.monthly} />
 
-      {isDecisionOpen && pendingItems[decisionIndex] ? (
+      {!disableRemote && isDecisionOpen && pendingItems[decisionIndex] ? (
         <DecisionModal
           language={language}
           currentIndex={decisionIndex}
@@ -163,19 +198,19 @@ export function RewardsSection({ userId, onOpenWeeklyWrapped, initialData, onPen
         />
       ) : null}
 
-      {celebrating ? <CelebrationOverlay language={language} habits={celebrating} onSkip={() => setCelebrating(null)} /> : null}
+      {!disableRemote && celebrating ? <CelebrationOverlay language={language} habits={celebrating} onSkip={() => setCelebrating(null)} /> : null}
     </Card>
   );
 }
 
-function MonthlyWrapupShelf({ items, language }: { items: MonthlyWrappedRecord[]; language: 'es' | 'en' }) {
+function MonthlyWrapupShelf({ items, language, anchor }: { items: MonthlyWrappedRecord[]; language: 'es' | 'en'; anchor?: string }) {
   const monthlyCountdownDays = useMemo(() => getDaysUntilNextMonthWrapup(), []);
   const compactItems = useMemo(() => items.slice(0, 2), [items]);
   const latest = compactItems[0] ?? null;
   const previous = compactItems[1] ?? null;
 
   return (
-    <div className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-indigo-500/15 via-fuchsia-500/10 to-sky-500/10 p-4">
+    <div data-demo-anchor={anchor} className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-indigo-500/15 via-fuchsia-500/10 to-sky-500/10 p-4">
       <div className="flex items-start justify-between gap-4">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Monthly Wrap-Up' : 'Monthly Wrap-Up'}</p>
         <InlineCountdown days={monthlyCountdownDays} language={language} />
@@ -205,11 +240,11 @@ function MonthlyWrapupShelf({ items, language }: { items: MonthlyWrappedRecord[]
   );
 }
 
-function WeeklyWrapupShelf({ items, onOpen, language }: { items: WeeklyWrappedRecord[]; onOpen?: (record?: WeeklyWrappedRecord | null) => void; language: 'es' | 'en' }) {
+function WeeklyWrapupShelf({ items, onOpen, language, anchor }: { items: WeeklyWrappedRecord[]; onOpen?: (record?: WeeklyWrappedRecord | null) => void; language: 'es' | 'en'; anchor?: string }) {
   const weeklyCountdownDays = useMemo(() => getDaysUntilNextWeeklyWrapup(), []);
   const compactItems = useMemo(() => items.slice(0, 2), [items]);
   return (
-    <div className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-emerald-500/15 via-cyan-500/10 to-indigo-500/10 p-4">
+    <div data-demo-anchor={anchor} className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-emerald-500/15 via-cyan-500/10 to-indigo-500/10 p-4">
       <div className="flex items-start justify-between gap-4">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Weekly Wrap-Up' : 'Weekly Wrap-Up'}</p>
         <InlineCountdown days={weeklyCountdownDays} language={language} />
@@ -366,10 +401,16 @@ function AchievedShelf({
   groups,
   language,
   onToggleMaintained,
+  disableRemote,
+  mockPreviewAchievementByTaskId,
+  demoAnchors,
 }: {
   groups: RewardsHistorySummary['habitAchievements']['achievedByPillar'];
   language: 'es' | 'en';
   onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
+  disableRemote: boolean;
+  mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
+  demoAnchors?: RewardsSectionProps['demoAnchors'];
 }) {
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
   const [previewHabit, setPreviewHabit] = useState<HabitAchievementShelfItem | null>(null);
@@ -404,7 +445,7 @@ function AchievedShelf({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-demo-anchor={demoAnchors?.shelves}>
       <div>
         <h2 className="text-lg font-semibold text-[color:var(--color-text-strong)]">
           {language === 'es' ? 'Estantes de Logros' : 'Achievement Shelves'}
@@ -421,10 +462,12 @@ function AchievedShelf({
               const slotLabel = `${(habit.pillar ?? group.pillar.code ?? 'X').slice(0, 1).toUpperCase()}-${traitCode}`;
 
               if (!isAchieved) {
+                const blockedAnchor = demoAnchors?.blockedCardTaskId === habit.taskId ? demoAnchors?.blockedCard : undefined;
                 return (
                   <button
                     key={habit.id}
                     type="button"
+                    data-demo-anchor={blockedAnchor}
                     onClick={() => setPreviewHabit(habit)}
                     className="flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 py-4 text-center opacity-80 transition hover:border-[color:var(--color-border-strong)] hover:opacity-100"
                   >
@@ -447,10 +490,12 @@ function AchievedShelf({
                 );
               }
 
+              const achievedAnchor = demoAnchors?.achievedCardTaskId === habit.taskId ? demoAnchors?.achievedCard : undefined;
               return (
                 <button
                   key={habit.id}
                   type="button"
+                  data-demo-anchor={achievedAnchor}
                   onClick={() => {
                     setActiveHabitId(habit.id);
                     setShowBackFace(false);
@@ -487,6 +532,8 @@ function AchievedShelf({
         habit={activeHabit}
         language={language}
         showBackFace={showBackFace}
+        disableRemote={disableRemote}
+        demoAnchors={demoAnchors}
         onFlip={() => setShowBackFace((current) => !current)}
         onClose={() => {
           setActiveHabitId(null);
@@ -498,6 +545,9 @@ function AchievedShelf({
       <NotAchievedPreviewOverlay
         habit={previewHabit}
         language={language}
+        disableRemote={disableRemote}
+        mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
+        demoAnchors={demoAnchors}
         onClose={() => setPreviewHabit(null)}
       />
     </div>
@@ -507,17 +557,24 @@ function AchievedShelf({
 function NotAchievedPreviewOverlay({
   habit,
   language,
+  disableRemote,
+  mockPreviewAchievementByTaskId,
+  demoAnchors,
   onClose,
 }: {
   habit: HabitAchievementShelfItem | null;
   language: 'es' | 'en';
+  disableRemote: boolean;
+  mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
+  demoAnchors?: RewardsSectionProps['demoAnchors'];
   onClose: () => void;
 }) {
   const taskId = habit?.taskId;
+  const mockPreviewAchievement = taskId ? mockPreviewAchievementByTaskId?.[taskId] : null;
   const { data, status, error } = useRequest(
     () => getTaskInsights(taskId ?? ''),
     [taskId],
-    { enabled: Boolean(taskId) },
+    { enabled: Boolean(taskId) && !disableRemote && !mockPreviewAchievement },
   );
 
   useEffect(() => {
@@ -539,7 +596,8 @@ function NotAchievedPreviewOverlay({
     return null;
   }
 
-  const previewAchievement = data?.previewAchievement ?? null;
+  const previewAchievement = mockPreviewAchievement ?? data?.previewAchievement ?? null;
+  const isLocalPreview = Boolean(mockPreviewAchievement);
 
   return createPortal(
     <div className="fixed inset-0 z-[230] flex items-end justify-center bg-slate-950/70 p-4 sm:items-center" onClick={onClose}>
@@ -552,7 +610,7 @@ function NotAchievedPreviewOverlay({
         >
           ✕
         </button>
-        <div className="pr-9">
+        <div className="pr-9" data-demo-anchor={demoAnchors?.sealPath}>
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">
             {language === 'es' ? 'Ruta del sello' : 'Seal path'}
           </p>
@@ -560,7 +618,7 @@ function NotAchievedPreviewOverlay({
         </div>
 
         <div className="mt-4">
-          {status === 'loading' ? (
+          {status === 'loading' && !isLocalPreview ? (
             <div className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
               {language === 'es' ? 'Cargando vista previa del logro…' : 'Loading achievement preview…'}
             </div>
@@ -570,10 +628,10 @@ function NotAchievedPreviewOverlay({
               {error?.message ?? (language === 'es' ? 'No pudimos cargar el estado del sello.' : "Couldn't load seal state.")}
             </div>
           ) : null}
-          {status === 'success' && previewAchievement ? (
+          {(status === 'success' || isLocalPreview) && previewAchievement ? (
             <PreviewAchievementCard previewAchievement={previewAchievement} language={language} />
           ) : null}
-          {status === 'success' && !previewAchievement ? (
+          {(status === 'success' || isLocalPreview) && !previewAchievement ? (
             <div className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
               {language === 'es' ? 'Sigue registrando esta tarea para desbloquear el sello.' : 'Keep logging this task to unlock the seal.'}
             </div>
@@ -589,6 +647,8 @@ function AchievementFocusOverlay({
   habit,
   language,
   showBackFace,
+  disableRemote,
+  demoAnchors,
   onFlip,
   onClose,
   onToggleMaintained,
@@ -596,6 +656,8 @@ function AchievementFocusOverlay({
   habit: HabitAchievementShelfItem | null;
   language: 'es' | 'en';
   showBackFace: boolean;
+  disableRemote: boolean;
+  demoAnchors?: RewardsSectionProps['demoAnchors'];
   onFlip: () => void;
   onClose: () => void;
   onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
@@ -642,7 +704,7 @@ function AchievementFocusOverlay({
           className="ib-card-contour-shadow flex h-[min(78vh,34rem)] w-full flex-col rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] p-5 text-left"
         >
           {!showBackFace ? (
-            <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+            <div className="flex h-full flex-col items-center justify-center gap-4 text-center" data-demo-anchor={demoAnchors?.achievementFront}>
               <div className="flex h-[75%] max-h-72 min-h-56 w-[75%] max-w-72 min-w-56 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-7xl shadow-[0_20px_50px_rgba(0,0,0,0.24)] sm:text-8xl">
                 <HabitAchievementSeal
                   pillar={habit.pillar}
@@ -660,7 +722,7 @@ function AchievementFocusOverlay({
               </p>
             </div>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+            <div className="flex h-full flex-col items-center justify-center gap-3 text-center" data-demo-anchor={demoAnchors?.achievementBack}>
               <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
               <p className="text-sm text-[color:var(--color-text-muted)]">{backFaceTrait}</p>
               <p className="text-xs text-[color:var(--color-text-muted)]">
@@ -675,6 +737,7 @@ function AchievementFocusOverlay({
                   role="switch"
                   aria-checked={habit.maintainEnabled}
                   aria-label={language === 'es' ? 'Mantener activo' : 'Keep maintained'}
+                  disabled={disableRemote}
                   onClick={() => void onToggleMaintained(habit, !habit.maintainEnabled)}
                   className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border transition-colors duration-300 ${habit.maintainEnabled
                     ? 'border-emerald-300/70 bg-emerald-500/80'

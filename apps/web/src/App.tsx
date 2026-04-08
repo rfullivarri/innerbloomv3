@@ -24,6 +24,7 @@ import DemoDashboardPage from './pages/DemoDashboard';
 import QuickStartPreviewPage from './pages/QuickStartPreview';
 import LabsDemoModeSelectPage from './pages/LabsDemoModeSelect';
 import DemoModeSelectPage from './pages/DemoModeSelect';
+import LabsLogrosDemoPage from './pages/LabsLogrosDemo';
 import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';
@@ -265,6 +266,7 @@ export default function App() {
         <Route path="/demo" element={<DemoDashboardPage />} />
         <Route path="/demo-mode-select" element={<DemoModeSelectPage />} />
         <Route path="/labs/demo-mode-select" element={<LabsDemoModeSelectPage legacyLabsPath />} />
+        <Route path="/labs/logros" element={<LabsLogrosDemoPage />} />
         <Route path="/onboarding" element={<OnboardingIntroPage />} />
         <Route path="/intro-journey" element={<OnboardingIntroPage />} />
         <Route
