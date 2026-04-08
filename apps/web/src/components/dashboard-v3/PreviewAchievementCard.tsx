@@ -239,12 +239,11 @@ export function PreviewAchievementCard({
             </p>
           )}
         </div>
-        <span className={cx('inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold', tone.chip)}>
-          {tone.label[language]}
-        </span>
-
-        <div className="mx-auto flex shrink-0 flex-col items-center" data-testid="score-block" data-tour-anchor="achievement-preview-score">
-          <div className="flex items-center justify-center gap-2.5 sm:gap-3.5">
+        <div className="mx-auto flex shrink-0 flex-col items-center" data-tour-anchor="achievement-preview-overview">
+          <span className={cx('inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold', tone.chip)}>
+            {tone.label[language]}
+          </span>
+          <div className="mt-2 flex items-center justify-center gap-2.5 sm:gap-3.5" data-testid="score-block" data-tour-anchor="achievement-preview-score">
             <div className="relative" ref={scoreTooltipRef}>
               <svg
                 className="h-32 w-32 sm:h-36 sm:w-36"
@@ -388,6 +387,7 @@ export function PreviewAchievementCard({
                       data-testid="seal-window-group"
                       data-window-start={lastThreeStart}
                       data-window-end={lastThreeEnd - 1}
+                      data-tour-anchor="achievement-preview-active-window"
                     >
                       <p className="text-center text-sm font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]">{windowTitle}</p>
                       <div className="flex items-end gap-1 md:gap-1.5" data-testid="seal-window-track">

@@ -15,7 +15,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   {
     id: 'logros-shelves',
     targetSelector: '[data-demo-anchor="logros-shelves-pillars"]',
-    tooltipPlacement: 'bottom',
+    tooltipPlacement: 'top',
     title: { es: 'Estantes de Logros', en: 'Achievement shelves' },
     body: {
       es: 'Se divide en Cuerpo, Mente y Alma. Cada tarea puede convertirse en un sello: algunas ya están logradas y otras siguen en camino.',
@@ -44,8 +44,8 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-achievement-back',
-    targetSelector: '[data-demo-anchor="logros-achievement-back"]',
-    tooltipPlacement: 'top',
+    targetSelector: '[data-demo-anchor="logros-achievement-card"]',
+    tooltipPlacement: 'right',
     title: { es: 'Reverso del logro', en: 'Achievement back side' },
     body: {
       es: 'Aquí ves fecha de logro, rasgo asociado, GP de referencia y el control de mantener activo.',
@@ -65,7 +65,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   {
     id: 'logros-seal-path',
     targetSelector: '[data-demo-anchor="logros-seal-path"]',
-    tooltipPlacement: 'bottom',
+    tooltipPlacement: 'top',
     title: { es: 'Ruta del sello', en: 'Seal path' },
     body: {
       es: 'Abrimos automáticamente la ruta del sello para ver cómo evoluciona un hábito bloqueado.',
@@ -84,7 +84,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-seal-score',
-    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-tour-anchor="achievement-preview-score"]',
+    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-tour-anchor="achievement-preview-overview"]',
     tooltipPlacement: 'left',
     title: { es: 'Score', en: 'Score' },
     body: {
@@ -98,7 +98,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
     tooltipPlacement: 'top',
     title: { es: 'Escala de solidez', en: 'Strength scale' },
     body: {
-      es: 'Frágil / en construcción / fuerte muestra el nivel actual de solidez según consistencia acumulada, no por un día aislado.',
+      es: 'Esta escala muestra el nivel de solidez del hábito (frágil / en construcción / fuerte) según consistencia acumulada, no por un día aislado.',
       en: 'Fragile / building / strong shows current strength based on accumulated consistency, not a single day.',
     },
   },
@@ -108,7 +108,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
     tooltipPlacement: 'top',
     title: { es: 'Últimos meses', en: 'Recent months' },
     body: {
-      es: 'Aquí se ve si mes a mes alcanzaste el umbral necesario. Importa sostener varios meses buenos, no solo uno.',
+      es: 'Aquí se ve el resultado de los últimos meses y la Ventana Activa que sí cuenta para consolidar el hábito. Importa sostener varios meses buenos, no solo uno.',
       en: 'Here you see whether each month reached the required threshold. Sustaining several good months matters more than one.',
     },
   },
