@@ -1,6 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { GuidedDemoOverlay } from '../components/demo/GuidedDemoOverlay';
-import { RewardsSection } from '../components/dashboard-v3/RewardsSection';
+import { RewardsSection, type RewardsSectionDemoControls } from '../components/dashboard-v3/RewardsSection';
 import { LABS_LOGROS_GUIDED_STEPS } from '../config/labsLogrosGuidedTour';
 import { demoLogrosData, demoLogrosPreviewByTaskId } from '../data/demoLogrosData';
 
@@ -17,57 +17,51 @@ const DEMO_ANCHORS = {
   monthly: 'logros-monthly',
 } as const;
 
-function clickAnchor(anchor: string) {
-  const target = document.querySelector(`[data-demo-anchor="${anchor}"]`) as HTMLElement | null;
-  target?.click();
-}
-
-function closeOverlays() {
-  const closeButtons = Array.from(document.querySelectorAll('button[aria-label*="Cerrar"], button[aria-label*="Close"]')) as HTMLElement[];
-  closeButtons.forEach((button) => button.click());
-}
-
 export default function LabsLogrosDemoPage() {
   const [showGuidedTour, setShowGuidedTour] = useState(true);
+  const demoControlsRef = useRef<RewardsSectionDemoControls | null>(null);
+  const rememberDemoControls = useCallback((controls: RewardsSectionDemoControls) => {
+    demoControlsRef.current = controls;
+  }, []);
+  const demoConfig = useMemo(
+    () => ({
+      disableRemote: true,
+      mockPreviewAchievementByTaskId: demoLogrosPreviewByTaskId,
+      anchors: DEMO_ANCHORS,
+      controls: {
+        onReady: rememberDemoControls,
+      },
+    }),
+    [rememberDemoControls],
+  );
 
   const handleStepChange = useCallback((stepId: string) => {
+    const controls = demoControlsRef.current;
+
     if (stepId === 'logros-achievement-front') {
-      closeOverlays();
-      clickAnchor(DEMO_ANCHORS.achievedCard);
+      controls?.closeAllOverlays();
+      controls?.openAchievedCard();
       return;
     }
 
     if (stepId === 'logros-achievement-back') {
-      const front = document.querySelector('[data-demo-anchor="logros-achievement-front"]') as HTMLElement | null;
-      if (front) {
-        front.click();
-      } else {
-        clickAnchor(DEMO_ANCHORS.achievedCard);
-        window.setTimeout(() => {
-          const frontNext = document.querySelector('[data-demo-anchor="logros-achievement-front"]') as HTMLElement | null;
-          frontNext?.click();
-        }, 120);
-      }
+      controls?.flipAchievementCard();
       return;
     }
 
     if (stepId === 'logros-seal-path' || stepId === 'logros-seal-concept') {
-      closeOverlays();
-      clickAnchor(DEMO_ANCHORS.blockedCard);
+      controls?.closeAllOverlays();
+      controls?.openBlockedCard();
       return;
     }
 
     if (stepId.startsWith('logros-seal-')) {
-      const openSealPath = document.querySelector('[data-demo-anchor="logros-seal-path"]');
-      if (!openSealPath) {
-        closeOverlays();
-        clickAnchor(DEMO_ANCHORS.blockedCard);
-      }
+      controls?.openBlockedCard();
       return;
     }
 
     if (stepId === 'logros-weekly' || stepId === 'logros-monthly' || stepId === 'logros-end') {
-      closeOverlays();
+      controls?.closeAllOverlays();
     }
   }, []);
 
@@ -96,9 +90,7 @@ export default function LabsLogrosDemoPage() {
         <RewardsSection
           userId=""
           initialData={demoLogrosData}
-          disableRemote
-          mockPreviewAchievementByTaskId={demoLogrosPreviewByTaskId}
-          demoAnchors={DEMO_ANCHORS}
+          demoConfig={demoConfig}
         />
       </main>
     </div>
