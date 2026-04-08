@@ -387,9 +387,9 @@ export function PreviewAchievementCard({
                   <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
                 ))}
                 {hasGroupedWindow && (
-                  <div className="flex flex-col items-center">
+                  <div className="relative flex flex-col items-center pb-3">
                     <div
-                      className="flex flex-col items-center rounded-xl border border-[color:var(--color-border-soft)] px-1.5 py-1 md:px-2"
+                      className="flex flex-col items-center rounded-xl border border-[color:var(--color-border-soft)] px-1.5 pb-0.5 pt-1 md:px-2"
                       data-testid="seal-window-group"
                       data-window-start={lastThreeStart}
                       data-window-end={lastThreeEnd - 1}
@@ -402,11 +402,14 @@ export function PreviewAchievementCard({
                       </div>
                     </div>
                     {groupedProjectedMonth && (
-                      <div className="mt-0.5 flex items-start gap-1 md:gap-1.5" data-testid="projected-month-label-row">
+                      <div
+                        className="pointer-events-none absolute bottom-0 left-1/2 flex -translate-x-1/2 items-start gap-1 md:gap-1.5"
+                        data-testid="projected-month-label-row"
+                      >
                         {groupedMonths.map((entry) => (
                           <span
                             key={`${entry.key}-projected-indicator`}
-                            className="pointer-events-none w-[3.35rem] text-center text-[9px] leading-none text-[color:var(--color-slate-400)] sm:w-[3.55rem]"
+                            className="w-[3.35rem] text-center text-[9px] leading-none text-[color:var(--color-slate-400)] sm:w-[3.55rem]"
                           >
                             {entry.projected ? (language === 'es' ? 'proyectado' : 'projected') : '\u00A0'}
                           </span>
