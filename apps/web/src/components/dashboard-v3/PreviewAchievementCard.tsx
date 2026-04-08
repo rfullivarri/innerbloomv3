@@ -243,7 +243,7 @@ export function PreviewAchievementCard({
           {tone.label[language]}
         </span>
 
-        <div className="mx-auto flex shrink-0 flex-col items-center" data-testid="score-block">
+        <div className="mx-auto flex shrink-0 flex-col items-center" data-testid="score-block" data-tour-anchor="achievement-preview-score">
           <div className="flex items-center justify-center gap-2.5 sm:gap-3.5">
             <div className="relative" ref={scoreTooltipRef}>
               <svg
@@ -301,7 +301,7 @@ export function PreviewAchievementCard({
                 </div>
               )}
             </div>
-            <div className="relative flex h-32 items-center sm:h-36" data-testid="score-range-rail">
+            <div className="relative flex h-32 items-center sm:h-36" data-testid="score-range-rail" data-tour-anchor="achievement-preview-scale">
               <div className="relative h-full w-[5.35rem]">
                 <div className="absolute bottom-1 left-2.5 top-1 w-3 overflow-hidden rounded-full">
                   <button
@@ -369,7 +369,7 @@ export function PreviewAchievementCard({
                 </div>
               </details>
             </div>
-            <div className="w-full overflow-x-auto pb-1" data-testid="recent-timeline">
+            <div className="w-full overflow-x-auto pb-1" data-testid="recent-timeline" data-tour-anchor="achievement-preview-months">
               <div
                 className={cx(
                   'flex items-end gap-1 md:gap-1.5',

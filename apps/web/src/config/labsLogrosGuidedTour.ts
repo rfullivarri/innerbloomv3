@@ -83,7 +83,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-seal-score',
-    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-testid="score-block"]',
+    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-tour-anchor="achievement-preview-score"]',
     tooltipPlacement: 'left',
     title: { es: 'Score', en: 'Score' },
     body: {
@@ -93,7 +93,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-seal-scale',
-    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-testid="score-range-rail"]',
+    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-tour-anchor="achievement-preview-scale"]',
     tooltipPlacement: 'top',
     title: { es: 'Escala de solidez', en: 'Strength scale' },
     body: {
@@ -103,7 +103,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-seal-months',
-    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-testid="recent-timeline"]',
+    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-tour-anchor="achievement-preview-months"]',
     tooltipPlacement: 'top',
     title: { es: 'Últimos meses', en: 'Recent months' },
     body: {
