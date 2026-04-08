@@ -302,7 +302,7 @@ export function PreviewAchievementCard({
               )}
             </div>
             <div className="relative flex h-32 items-center sm:h-36" data-testid="score-range-rail">
-              <div className="relative h-full w-[5.9rem]">
+              <div className="relative h-full w-[5.35rem]">
                 <div className="absolute bottom-1 left-2.5 top-1 w-3 overflow-hidden rounded-full">
                   <button
                     type="button"
@@ -331,13 +331,13 @@ export function PreviewAchievementCard({
                 <span className="absolute left-0 top-[20%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">80</span>
                 <span className="absolute left-0 top-[50%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">50</span>
                 <span className="absolute left-0 bottom-0 text-[8px] text-[color:var(--color-slate-500)]">0</span>
-                <span className="absolute left-[4rem] top-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className="absolute left-[3.44rem] top-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
                   {rangeLabels.strong}
                 </span>
-                <span className="absolute left-[4rem] top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className="absolute left-[3.44rem] top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
                   {rangeLabels.building}
                 </span>
-                <span className="absolute left-[4rem] bottom-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className="absolute left-[3.44rem] bottom-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
                   {rangeLabels.fragile}
                 </span>
               </div>
