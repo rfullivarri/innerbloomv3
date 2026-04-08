@@ -52,11 +52,13 @@ interface RewardsSectionProps {
       onReady?: (controls: RewardsSectionDemoControls) => void;
     };
   };
+  demoStepId?: string | null;
 }
 
 export type RewardsSectionDemoControls = {
   openAchievedCard: () => void;
   openBlockedCard: () => void;
+  focusBlockedShelfCard: () => void;
   flipAchievementCard: () => void;
   closeAchievementOverlay: () => void;
   closeSealPathOverlay: () => void;
@@ -72,6 +74,7 @@ export function RewardsSection({
   mockPreviewAchievementByTaskId,
   demoAnchors,
   demoConfig,
+  demoStepId,
 }: RewardsSectionProps) {
   const { language } = usePostLoginLanguage();
   const resolvedDisableRemote = demoConfig?.disableRemote ?? disableRemote;
@@ -192,6 +195,7 @@ export function RewardsSection({
         language={language}
         groups={effectiveData?.habitAchievements.achievedByPillar ?? []}
         demoAnchors={resolvedDemoAnchors}
+        demoStepId={demoStepId}
         disableRemote={resolvedDisableRemote}
         mockPreviewAchievementByTaskId={resolvedMockPreviewAchievementByTaskId}
         onDemoControlsReady={demoConfig?.controls?.onReady}
@@ -460,6 +464,7 @@ function AchievedShelf({
   mockPreviewAchievementByTaskId,
   demoAnchors,
   onDemoControlsReady,
+  demoStepId,
 }: {
   groups: RewardsHistorySummary['habitAchievements']['achievedByPillar'];
   language: 'es' | 'en';
@@ -468,6 +473,7 @@ function AchievedShelf({
   mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
   demoAnchors?: RewardsSectionProps['demoAnchors'];
   onDemoControlsReady?: (controls: RewardsSectionDemoControls) => void;
+  demoStepId?: string | null;
 }) {
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
   const [previewHabit, setPreviewHabit] = useState<HabitAchievementShelfItem | null>(null);
@@ -496,6 +502,22 @@ function AchievedShelf({
   const activeHabit = activeHabitId ? habitsById.get(activeHabitId) ?? null : null;
   const resolvedAchievedTaskId = demoAnchors?.achievedCardTaskId;
   const resolvedBlockedTaskId = demoAnchors?.blockedCardTaskId;
+  const isShelfFocusStep = demoStepId === 'logros-shelves';
+
+  const focusBlockedShelfCard = useCallback(() => {
+    const target = document.querySelector('[data-demo-anchor="logros-blocked-card"]') as HTMLElement | null;
+    if (!target) {
+      return;
+    }
+
+    target.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'center' });
+    const horizontalContainer = target.closest('.ib-rewards-shelf-scroll') as HTMLElement | null;
+    if (horizontalContainer) {
+      const itemLeft = target.offsetLeft;
+      const centeredLeft = itemLeft - (horizontalContainer.clientWidth - target.clientWidth) / 2;
+      horizontalContainer.scrollTo({ left: Math.max(0, centeredLeft), behavior: 'auto' });
+    }
+  }, []);
 
   const openAchievedCard = useCallback(() => {
     const target = normalizedGroups
@@ -525,6 +547,7 @@ function AchievedShelf({
     onDemoControlsReady?.({
       openAchievedCard,
       openBlockedCard,
+      focusBlockedShelfCard,
       flipAchievementCard: () => {
         if (activeHabitId) {
           setShowBackFace((current) => !current);
@@ -546,7 +569,7 @@ function AchievedShelf({
         setPreviewHabit(null);
       },
     });
-  }, [activeHabitId, onDemoControlsReady, openAchievedCard, openBlockedCard]);
+  }, [activeHabitId, focusBlockedShelfCard, onDemoControlsReady, openAchievedCard, openBlockedCard]);
 
   const getSealBadge = (habit: HabitAchievementShelfItem) => {
     const pillarCode = (habit.pillar ?? 'X').slice(0, 1).toUpperCase();
@@ -561,10 +584,22 @@ function AchievedShelf({
           {language === 'es' ? 'Estantes de Logros' : 'Achievement Shelves'}
         </h2>
       </div>
+      <div
+        data-demo-anchor="logros-shelves-pillars"
+        className={`grid grid-cols-3 gap-2 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2.5 transition ${isShelfFocusStep ? 'ring-1 ring-[color:var(--color-accent-primary)]/35' : ''}`}
+      >
+        {normalizedGroups.map((group) => (
+          <div key={`${group.pillar.code}-pill`} className="rounded-xl border border-[color:var(--color-border-subtle)]/80 bg-[color:var(--color-overlay-1)]/80 px-2 py-2 text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-dim)]">
+              {resolvePillarHeader(group.pillar, language).split(' ')[0]}
+            </p>
+          </div>
+        ))}
+      </div>
       {normalizedGroups.map((group) => (
-        <section key={group.pillar.code} className="space-y-2">
+        <section key={group.pillar.code} className={`space-y-2 transition ${isShelfFocusStep ? 'space-y-1.5' : ''}`}>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{resolvePillarHeader(group.pillar, language)}</p>
-          <div className="flex gap-3 overflow-x-auto pb-1">
+          <div className={`ib-rewards-shelf-scroll flex overflow-x-auto pb-1 transition ${isShelfFocusStep ? 'gap-2.5' : 'gap-3'}`}>
             {group.habits.map((habit) => {
               const isAchieved = habit.status !== 'not_achieved';
               const active = habit.id === activeHabitId;
@@ -579,7 +614,7 @@ function AchievedShelf({
                     type="button"
                     data-demo-anchor={blockedAnchor}
                     onClick={() => setPreviewHabit(habit)}
-                    className="flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 py-4 text-center opacity-80 transition hover:border-[color:var(--color-border-strong)] hover:opacity-100"
+                    className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 text-center opacity-80 transition hover:border-[color:var(--color-border-strong)] hover:opacity-100 ${isShelfFocusStep ? 'h-32 w-24 py-3' : 'h-40 w-32 py-4'}`}
                   >
                     <HabitAchievementSeal
                       pillar={habit.pillar ?? group.pillar.code}
@@ -587,7 +622,7 @@ function AchievedShelf({
                       traitName={habit.trait?.name}
                       alt={`${habit.taskName} seal`}
                       disabled
-                      className="flex h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20 items-center justify-center overflow-hidden rounded-full border border-dashed border-[color:var(--color-border-subtle)] bg-transparent"
+                    className={`flex items-center justify-center overflow-hidden rounded-full border border-dashed border-[color:var(--color-border-subtle)] bg-transparent ${isShelfFocusStep ? 'h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16' : 'h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20'}`}
                       imgClassName="h-full w-full object-cover"
                       fallback={(
                         <div className="flex h-full w-full items-center justify-center text-xs font-semibold tracking-[0.12em] text-[color:var(--color-text-dim)]">
@@ -595,7 +630,7 @@ function AchievedShelf({
                         </div>
                       )}
                     />
-                    <p className="mt-3 w-full truncate text-sm font-semibold text-[color:var(--color-text-muted)]">{habit.taskName}</p>
+                    <p className={`mt-2 w-full truncate font-semibold text-[color:var(--color-text-muted)] ${isShelfFocusStep ? 'text-xs' : 'text-sm'}`}>{habit.taskName}</p>
                   </button>
                 );
               }
@@ -610,14 +645,14 @@ function AchievedShelf({
                     setActiveHabitId(habit.id);
                     setShowBackFace(false);
                   }}
-                  className={`flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded-2xl border px-3 py-4 text-center transition ${active ? 'border-violet-300/60 bg-violet-500/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]'}`}
+                  className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border px-3 text-center transition ${isShelfFocusStep ? 'h-32 w-24 py-3' : 'h-40 w-32 py-4'} ${active ? 'border-violet-300/60 bg-violet-500/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]'}`}
                 >
                   <HabitAchievementSeal
                     pillar={habit.pillar ?? group.pillar.code}
                     traitCode={habit.trait?.code}
                     traitName={habit.trait?.name}
                     alt={`${habit.taskName} seal`}
-                    className="flex h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20 items-center justify-center overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-[0_10px_30px_rgba(0,0,0,0.22)]"
+                    className={`flex items-center justify-center overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-[0_10px_30px_rgba(0,0,0,0.22)] ${isShelfFocusStep ? 'h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16' : 'h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20'}`}
                     imgClassName="h-full w-full object-cover"
                     fallback={(
                       <span className="text-3xl leading-none">
@@ -625,7 +660,7 @@ function AchievedShelf({
                       </span>
                     )}
                   />
-                  <p className="mt-3 w-full truncate text-sm font-semibold text-[color:var(--color-text)]">{habit.taskName}</p>
+                  <p className={`mt-2 w-full truncate font-semibold text-[color:var(--color-text)] ${isShelfFocusStep ? 'text-xs' : 'text-sm'}`}>{habit.taskName}</p>
                 </button>
               );
             })}

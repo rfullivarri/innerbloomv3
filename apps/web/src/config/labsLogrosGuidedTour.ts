@@ -3,8 +3,9 @@ import type { GuidedStep } from './demoGuidedTour';
 export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   {
     id: 'logros-intro',
-    targetSelector: '[data-demo-anchor="logros-intro"]',
-    tooltipPlacement: 'bottom',
+    targetSelector: null,
+    tooltipPlacement: 'auto',
+    presentation: 'intro-modal',
     title: { es: 'Logros', en: 'Achievements' },
     body: {
       es: 'Aquí ves hábitos que ya lograste, y el progreso repetido que te acerca a consolidar los próximos.',
@@ -13,7 +14,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-shelves',
-    targetSelector: '[data-demo-anchor="logros-shelves"]',
+    targetSelector: '[data-demo-anchor="logros-shelves-pillars"]',
     tooltipPlacement: 'bottom',
     title: { es: 'Estantes de Logros', en: 'Achievement shelves' },
     body: {
@@ -34,7 +35,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   {
     id: 'logros-achievement-front',
     targetSelector: '[data-demo-anchor="logros-achievement-front"]',
-    tooltipPlacement: 'bottom',
+    tooltipPlacement: 'top',
     title: { es: 'Vista frontal', en: 'Front face' },
     body: {
       es: 'Esta carta se abre automáticamente para mostrarte el sello logrado en grande.',
@@ -44,7 +45,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   {
     id: 'logros-achievement-back',
     targetSelector: '[data-demo-anchor="logros-achievement-back"]',
-    tooltipPlacement: 'bottom',
+    tooltipPlacement: 'top',
     title: { es: 'Reverso del logro', en: 'Achievement back side' },
     body: {
       es: 'Aquí ves fecha de logro, rasgo asociado, GP de referencia y el control de mantener activo.',
