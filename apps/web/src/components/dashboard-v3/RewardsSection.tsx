@@ -89,6 +89,7 @@ export function RewardsSection({
   const [celebrating, setCelebrating] = useState<null | HabitAchievementShelfItem[]>(null);
   const [educationBannerVisible, setEducationBannerVisible] = useState(false);
   const [isTransitioningDecision, setIsTransitioningDecision] = useState(false);
+  const [isGrowthCalibrationModalOpen, setIsGrowthCalibrationModalOpen] = useState(false);
 
   const { data, status, error, reload } = useRequest(() => getRewardsHistory(userId), [userId], {
     enabled: !resolvedDisableRemote && Boolean(userId),
@@ -115,6 +116,12 @@ export function RewardsSection({
 
   const weeklyItems = effectiveData?.weeklyWrapups ?? [];
   const monthlyItems = effectiveData?.monthlyWrapups ?? [];
+  const growthCalibration = effectiveData?.growthCalibration ?? {
+    countdownDays: getDaysUntilNextMonthWrapup(),
+    latestPeriodLabel: null,
+    summary: { up: 0, keep: 0, down: 0, total: 0 },
+    latestResults: [],
+  };
 
   const handleDecision = async (habit: HabitAchievementShelfItem, decision: 'maintain' | 'store') => {
     if (resolvedDisableRemote) {
@@ -214,6 +221,12 @@ export function RewardsSection({
         }}
       />
 
+      <GrowthCalibrationShelf
+        language={language}
+        growthCalibration={growthCalibration}
+        onOpenResults={() => setIsGrowthCalibrationModalOpen(true)}
+      />
+
       <WeeklyWrapupShelf items={weeklyItems} onOpen={onOpenWeeklyWrapped} language={language} anchor={resolvedDemoAnchors?.weekly} />
 
       <MonthlyWrapupShelf items={monthlyItems} language={language} anchor={resolvedDemoAnchors?.monthly} />
@@ -232,7 +245,65 @@ export function RewardsSection({
       ) : null}
 
       {!resolvedDisableRemote && celebrating ? <CelebrationOverlay language={language} habits={celebrating} onSkip={() => setCelebrating(null)} /> : null}
+
+      <GrowthCalibrationResultsModal
+        language={language}
+        isOpen={isGrowthCalibrationModalOpen}
+        growthCalibration={growthCalibration}
+        onClose={() => setIsGrowthCalibrationModalOpen(false)}
+      />
     </Card>
+  );
+}
+
+function GrowthCalibrationShelf({
+  language,
+  growthCalibration,
+  onOpenResults,
+}: {
+  language: 'es' | 'en';
+  growthCalibration: RewardsHistorySummary['growthCalibration'];
+  onOpenResults: () => void;
+}) {
+  const hasResults = growthCalibration.latestResults.length > 0;
+  return (
+    <div className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-rose-500/15 via-fuchsia-500/10 to-amber-500/10 p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">Growth Calibration Results</p>
+          <p className="mt-1 text-xs text-[color:var(--color-text-muted)]">
+            {language === 'es' ? 'Últimos ajustes automáticos de dificultad' : 'Latest automatic difficulty adjustments'}
+          </p>
+        </div>
+        <InlineCountdown days={growthCalibration.countdownDays} language={language} />
+      </div>
+
+      {hasResults ? (
+        <div className="mt-3 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3">
+          <p className="text-sm font-semibold text-[color:var(--color-text)]">
+            <span className="text-rose-300">↑ {growthCalibration.summary.up}</span>
+            <span className="mx-2 text-amber-300">• {growthCalibration.summary.keep}</span>
+            <span className="text-emerald-300">↓ {growthCalibration.summary.down}</span>
+          </p>
+          {growthCalibration.latestPeriodLabel ? (
+            <p className="mt-1 text-xs uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">{growthCalibration.latestPeriodLabel}</p>
+          ) : null}
+          <button
+            type="button"
+            onClick={onOpenResults}
+            className="mt-3 inline-flex rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-3 py-1.5 text-xs font-semibold text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)]"
+          >
+            {language === 'es' ? 'Ver resultados' : 'View results'}
+          </button>
+        </div>
+      ) : (
+        <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+          {language === 'es'
+            ? 'Todavía no hay resultados de Growth Calibration. Tus próximos ajustes aparecerán aquí.'
+            : 'There are no Growth Calibration results yet. Your next adjustments will appear here.'}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -323,6 +394,113 @@ function InlineCountdown({ days, language }: { days: number; language: 'es' | 'e
       {language === 'es' ? 'Próximo en ' : 'Next in '}
       <span className="text-lg font-black leading-none text-[color:var(--color-text-strong)]">{days}d</span>
     </p>
+  );
+}
+
+function GrowthCalibrationResultsModal({
+  language,
+  isOpen,
+  growthCalibration,
+  onClose,
+}: {
+  language: 'es' | 'en';
+  isOpen: boolean;
+  growthCalibration: RewardsHistorySummary['growthCalibration'];
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen || typeof document === 'undefined') {
+    return null;
+  }
+
+  const resultTone: Record<'up' | 'keep' | 'down', string> = {
+    up: 'text-rose-300',
+    keep: 'text-amber-300',
+    down: 'text-emerald-300',
+  };
+  const resultSymbol: Record<'up' | 'keep' | 'down', string> = {
+    up: '↑',
+    keep: '•',
+    down: '↓',
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 z-[240] flex items-end justify-center bg-slate-950/75 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center" onClick={onClose}>
+      <div
+        className="w-full max-w-4xl overflow-hidden rounded-3xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-surface-elevated)] shadow-[0_24px_70px_rgba(0,0,0,0.45)]"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-[color:var(--color-border-subtle)] px-4 py-3 sm:px-5">
+          <div>
+            <p className="text-sm font-semibold text-[color:var(--color-text-strong)]">
+              {language === 'es' ? 'Resultados de Growth Calibration' : 'Growth Calibration Results'}
+            </p>
+            {growthCalibration.latestPeriodLabel ? (
+              <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-slate-400)]">{growthCalibration.latestPeriodLabel}</p>
+            ) : null}
+          </div>
+          <button type="button" onClick={onClose} className="rounded-full border border-[color:var(--color-border-subtle)] px-2 py-1 text-xs">✕</button>
+        </div>
+
+        <div className="max-h-[70vh] overflow-auto p-3 sm:p-4">
+          {growthCalibration.latestResults.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+              {language === 'es'
+                ? 'Todavía no hay resultados de Growth Calibration. Tus próximos ajustes aparecerán aquí.'
+                : 'There are no Growth Calibration results yet. Your next adjustments will appear here.'}
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-xs">
+                <thead className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-text-dim)]">
+                  <tr>
+                    <th className="px-2 py-2">{language === 'es' ? 'Tarea' : 'Task'}</th>
+                    <th className="px-2 py-2">{language === 'es' ? 'Resultado' : 'Result'}</th>
+                    <th className="px-2 py-2">{language === 'es' ? 'Progreso' : 'Progress'}</th>
+                    <th className="px-2 py-2">{language === 'es' ? 'Tasa' : 'Rate'}</th>
+                    <th className="px-2 py-2">{language === 'es' ? 'Detalle' : 'Detail'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {growthCalibration.latestResults.map((row) => (
+                    <tr key={`${row.taskId}-${row.evaluatedAt}`} className="border-t border-[color:var(--color-border-subtle)] align-top">
+                      <td className="px-2 py-2">
+                        <p className="font-semibold text-[color:var(--color-text)]">{row.taskTitle}</p>
+                        {(row.difficultyBefore || row.difficultyAfter) ? (
+                          <p className="mt-0.5 text-[11px] text-[color:var(--color-text-muted)]">{row.difficultyBefore ?? '—'} → {row.difficultyAfter ?? '—'}</p>
+                        ) : null}
+                      </td>
+                      <td className={`px-2 py-2 text-base font-bold ${resultTone[row.finalAction]}`}>{resultSymbol[row.finalAction]}</td>
+                      <td className="px-2 py-2 text-[color:var(--color-text)]">{row.actualCompletions} / {row.expectedTarget}</td>
+                      <td className="px-2 py-2 text-[color:var(--color-text)]">{Math.round(row.completionRatePct)}%</td>
+                      <td className="px-2 py-2 text-[color:var(--color-text)]">
+                        <p>{row.reason}</p>
+                        {row.clampApplied && row.clampReason ? (
+                          <p className="mt-1 text-[11px] text-[color:var(--color-text-muted)]">{row.clampReason}</p>
+                        ) : null}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }
 

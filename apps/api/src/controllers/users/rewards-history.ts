@@ -13,6 +13,24 @@ import { countUnseenWeeklyWrapped, listSeenWeeklyWrappedIds } from '../../servic
 const paramsSchema = z.object({ id: z.string().uuid() });
 
 type DateRange = { start: string; end: string };
+type GrowthCalibrationAction = 'up' | 'keep' | 'down';
+
+type GrowthCalibrationDbRow = {
+  task_id: string;
+  task_title: string | null;
+  pillar_name: string | null;
+  difficulty_before: string | null;
+  difficulty_after: string | null;
+  expected_target: number | string;
+  actual_completions: number | string;
+  completion_rate: number | string;
+  action: GrowthCalibrationAction;
+  reason: string;
+  clamp_applied: boolean;
+  clamp_reason: string | null;
+  evaluated_at: string;
+  evaluation_month_label: string;
+};
 
 async function listCompletionDays(userId: string, range: DateRange): Promise<string[]> {
   const result = await pool.query<{ day_key: string }>(
@@ -43,15 +61,61 @@ function resolveMonthRange(periodKey: string): DateRange | null {
   };
 }
 
+function getDaysUntilNextMonthWrapup(referenceDate = new Date()): number {
+  const nowUtc = new Date(Date.UTC(referenceDate.getUTCFullYear(), referenceDate.getUTCMonth(), referenceDate.getUTCDate()));
+  const nextMonthStart = new Date(Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth() + 1, 1));
+  const diffMs = nextMonthStart.getTime() - nowUtc.getTime();
+  return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+}
+
+async function listLatestGrowthCalibrationResults(userId: string): Promise<GrowthCalibrationDbRow[]> {
+  const result = await pool.query<GrowthCalibrationDbRow>(
+    `WITH ranked_recalibrations AS (
+       SELECT r.*,
+              ROW_NUMBER() OVER (
+                PARTITION BY r.task_id
+                ORDER BY r.analyzed_at DESC, r.created_at DESC, r.task_difficulty_recalibration_id DESC
+              ) AS rn
+         FROM task_difficulty_recalibrations r
+        WHERE r.user_id = $1::uuid
+     )
+     SELECT r.task_id,
+            t.task AS task_title,
+            cp.name AS pillar_name,
+            cdb.code AS difficulty_before,
+            cda.code AS difficulty_after,
+            r.expected_target,
+            r.completions_done AS actual_completions,
+            r.completion_rate,
+            r.action,
+            r.reason,
+            r.clamp_applied,
+            r.clamp_reason,
+            r.analyzed_at::text AS evaluated_at,
+            r.period_end::text AS evaluation_month_label
+       FROM ranked_recalibrations r
+  LEFT JOIN tasks t ON t.task_id = r.task_id
+  LEFT JOIN cat_pillar cp ON cp.pillar_id = t.pillar_id
+  LEFT JOIN cat_difficulty cdb ON cdb.difficulty_id = r.previous_difficulty_id
+  LEFT JOIN cat_difficulty cda ON cda.difficulty_id = r.new_difficulty_id
+      WHERE r.rn = 1
+   ORDER BY r.analyzed_at DESC, r.created_at DESC`,
+    [userId],
+  );
+
+  return result.rows;
+}
+
 export const getUserRewardsHistory: AsyncHandler = async (req, res) => {
   const { id } = paramsSchema.parse(req.params);
   await ensureUserExists(id);
-  const [weeklyWrapups, monthlyWrapups, achievedByPillar, pendingCount, unseenCount] = await Promise.all([
+  const [weeklyWrapups, monthlyWrapups, achievedByPillar, pendingCount, unseenCount, growthCalibrationRows] = await Promise.all([
     getRecentWeeklyWrapped(id, 2),
     getRewardsHistoryMonthlyWrapups(id),
     getUserRewardsHabitAchievementsByPillar(id),
     getUserPendingHabitAchievementCount(id),
     countUnseenWeeklyWrapped(id),
+    listLatestGrowthCalibrationResults(id),
   ]);
   const seenIds = await listSeenWeeklyWrappedIds(id, weeklyWrapups.map((entry) => entry.id));
   const weeklyCompletionDaysById = new Map(
@@ -68,6 +132,16 @@ export const getUserRewardsHistory: AsyncHandler = async (req, res) => {
       }),
     ),
   );
+  const growthSummary = growthCalibrationRows.reduce(
+    (acc, row) => {
+      if (row.action === 'up') acc.up += 1;
+      if (row.action === 'keep') acc.keep += 1;
+      if (row.action === 'down') acc.down += 1;
+      acc.total += 1;
+      return acc;
+    },
+    { up: 0, keep: 0, down: 0, total: 0 },
+  );
 
   res.json({
     weekly_wrapups: weeklyWrapups.map((entry) => ({
@@ -83,6 +157,31 @@ export const getUserRewardsHistory: AsyncHandler = async (req, res) => {
     habit_achievements: {
       pending_count: pendingCount,
       achieved_by_pillar: achievedByPillar,
+    },
+    growth_calibration: {
+      countdown_days: getDaysUntilNextMonthWrapup(new Date()),
+      latest_period_label: growthCalibrationRows[0]?.evaluation_month_label ?? null,
+      summary: growthSummary,
+      latest_results: growthCalibrationRows.map((row) => {
+        const completionRate = Number(row.completion_rate ?? 0);
+        return {
+          taskId: row.task_id,
+          taskTitle: row.task_title ?? 'Untitled task',
+          pillar: row.pillar_name,
+          difficultyBefore: row.difficulty_before,
+          difficultyAfter: row.difficulty_after,
+          expectedTarget: Number(row.expected_target ?? 0),
+          actualCompletions: Number(row.actual_completions ?? 0),
+          completionRatePct: Number.isFinite(completionRate) ? completionRate * 100 : 0,
+          finalAction: row.action,
+          result: row.action === 'up' ? 'increased' : row.action === 'down' ? 'decreased' : 'kept',
+          reason: row.reason,
+          clampApplied: Boolean(row.clamp_applied),
+          clampReason: row.clamp_reason,
+          evaluatedAt: row.evaluated_at,
+          evaluationMonthLabel: row.evaluation_month_label,
+        };
+      }),
     },
   });
 };
