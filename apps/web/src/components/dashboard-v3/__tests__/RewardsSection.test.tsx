@@ -27,6 +27,64 @@ const initialData: RewardsHistorySummary = {
   weeklyWrapups: [],
   weeklyUnseenCount: 0,
   monthlyWrapups: [],
+  growthCalibration: {
+    countdownDays: 15,
+    latestPeriodLabel: '2026-03',
+    summary: { up: 1, keep: 1, down: 1, total: 3 },
+    latestResults: [
+      {
+        taskId: 'task-up',
+        taskTitle: 'Hydrate',
+        pillar: 'Body',
+        difficultyBefore: 'easy',
+        difficultyAfter: 'normal',
+        expectedTarget: 5,
+        actualCompletions: 6,
+        completionRatePct: 120,
+        finalAction: 'up',
+        result: 'increased',
+        reason: 'High completion consistency',
+        clampApplied: false,
+        clampReason: null,
+        evaluatedAt: '2026-04-01T00:00:00.000Z',
+        evaluationMonthLabel: '2026-03',
+      },
+      {
+        taskId: 'task-keep',
+        taskTitle: 'Read 10 pages',
+        pillar: 'Mind',
+        difficultyBefore: 'normal',
+        difficultyAfter: 'normal',
+        expectedTarget: 4,
+        actualCompletions: 4,
+        completionRatePct: 100,
+        finalAction: 'keep',
+        result: 'kept',
+        reason: 'Target met',
+        clampApplied: false,
+        clampReason: null,
+        evaluatedAt: '2026-04-01T00:00:00.000Z',
+        evaluationMonthLabel: '2026-03',
+      },
+      {
+        taskId: 'task-down',
+        taskTitle: 'Meditate',
+        pillar: 'Soul',
+        difficultyBefore: 'hard',
+        difficultyAfter: 'normal',
+        expectedTarget: 5,
+        actualCompletions: 2,
+        completionRatePct: 40,
+        finalAction: 'down',
+        result: 'decreased',
+        reason: 'Low completion rate',
+        clampApplied: true,
+        clampReason: 'Guardrail: floor reached',
+        evaluatedAt: '2026-04-01T00:00:00.000Z',
+        evaluationMonthLabel: '2026-03',
+      },
+    ],
+  },
   habitAchievements: {
     pendingCount: 0,
     achievedByPillar: [
@@ -99,6 +157,52 @@ const insightsResponse: TaskInsightsResponse = {
 };
 
 describe('RewardsSection achieved shelf overlays', () => {
+  it('renders growth calibration block with summary when data exists', async () => {
+    getRewardsHistoryMock.mockResolvedValue(initialData);
+    getTaskInsightsMock.mockResolvedValue(insightsResponse);
+
+    render(<RewardsSection userId="user-123" initialData={initialData} />);
+
+    expect(screen.getByText('Growth Calibration Results')).toBeInTheDocument();
+    expect(screen.getByText('↑ 1')).toBeInTheDocument();
+    expect(screen.getByText('• 1')).toBeInTheDocument();
+    expect(screen.getByText('↓ 1')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'View results' })).toBeInTheDocument();
+  });
+
+  it('renders growth calibration empty state when there are no results', async () => {
+    const emptyGrowthData: RewardsHistorySummary = {
+      ...initialData,
+      growthCalibration: {
+        countdownDays: 12,
+        latestPeriodLabel: null,
+        summary: { up: 0, keep: 0, down: 0, total: 0 },
+        latestResults: [],
+      },
+    };
+    getRewardsHistoryMock.mockResolvedValue(emptyGrowthData);
+
+    render(<RewardsSection userId="user-123" initialData={emptyGrowthData} />);
+
+    expect(screen.getByText('There are no Growth Calibration results yet. Your next adjustments will appear here.')).toBeInTheDocument();
+  });
+
+  it('opens growth calibration modal and renders up/keep/down rows', async () => {
+    getRewardsHistoryMock.mockResolvedValue(initialData);
+    getTaskInsightsMock.mockResolvedValue(insightsResponse);
+
+    render(<RewardsSection userId="user-123" initialData={initialData} />);
+    fireEvent.click(screen.getByRole('button', { name: 'View results' }));
+
+    expect(await screen.findByText('Task')).toBeInTheDocument();
+    expect(screen.getAllByText('Hydrate').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Read 10 pages').length).toBeGreaterThan(0);
+    expect(screen.getByText('Meditate')).toBeInTheDocument();
+    expect(screen.getAllByText('↑').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('•').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('↓').length).toBeGreaterThan(0);
+  });
+
   it('makes non-achieved tasks clickable and opens preview overlay with preview achievement card', async () => {
     getRewardsHistoryMock.mockResolvedValue(initialData);
     getTaskInsightsMock.mockResolvedValue(insightsResponse);

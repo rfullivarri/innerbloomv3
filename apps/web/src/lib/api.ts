@@ -918,10 +918,41 @@ export type RewardsHistorySummary = {
   weeklyWrapups: WeeklyWrappedRecord[];
   weeklyUnseenCount: number;
   monthlyWrapups: MonthlyWrappedRecord[];
+  growthCalibration: RewardsGrowthCalibrationSummary;
   habitAchievements: {
     pendingCount: number;
     achievedByPillar: HabitAchievementPillarGroup[];
   };
+};
+
+export type RewardsGrowthCalibrationRow = {
+  taskId: string;
+  taskTitle: string;
+  pillar: string | null;
+  difficultyBefore: string | null;
+  difficultyAfter: string | null;
+  expectedTarget: number;
+  actualCompletions: number;
+  completionRatePct: number;
+  finalAction: 'up' | 'keep' | 'down';
+  result: 'increased' | 'kept' | 'decreased';
+  reason: string;
+  clampApplied: boolean;
+  clampReason: string | null;
+  evaluatedAt: string;
+  evaluationMonthLabel: string;
+};
+
+export type RewardsGrowthCalibrationSummary = {
+  countdownDays: number;
+  latestPeriodLabel: string | null;
+  summary: {
+    up: number;
+    keep: number;
+    down: number;
+    total: number;
+  };
+  latestResults: RewardsGrowthCalibrationRow[];
 };
 
 export type TaskHabitAchievementState = {
@@ -1165,6 +1196,17 @@ type RawRewardsHistoryResponse = {
       habits?: Array<Record<string, unknown>>;
     }>;
   };
+  growth_calibration?: {
+    countdown_days?: number;
+    latest_period_label?: string | null;
+    summary?: {
+      up?: number;
+      keep?: number;
+      down?: number;
+      total?: number;
+    };
+    latest_results?: Array<Record<string, unknown>>;
+  };
 };
 
 function normalizeHabitAchievementShelfItem(raw: Record<string, unknown>): HabitAchievementShelfItem {
@@ -1200,6 +1242,35 @@ export async function getRewardsHistory(userId: string): Promise<RewardsHistoryS
     weeklyWrapups: Array.isArray(response.weekly_wrapups) ? response.weekly_wrapups : [],
     weeklyUnseenCount: Number(response.weekly_unseen_count ?? 0) || 0,
     monthlyWrapups: Array.isArray(response.monthly_wrapups) ? response.monthly_wrapups : [],
+    growthCalibration: {
+      countdownDays: Number(response.growth_calibration?.countdown_days ?? 0) || 0,
+      latestPeriodLabel: pickString(response.growth_calibration?.latest_period_label),
+      summary: {
+        up: Number(response.growth_calibration?.summary?.up ?? 0) || 0,
+        keep: Number(response.growth_calibration?.summary?.keep ?? 0) || 0,
+        down: Number(response.growth_calibration?.summary?.down ?? 0) || 0,
+        total: Number(response.growth_calibration?.summary?.total ?? 0) || 0,
+      },
+      latestResults: Array.isArray(response.growth_calibration?.latest_results)
+        ? response.growth_calibration?.latest_results.filter(isRecord).map((row) => ({
+            taskId: pickString(row.taskId) ?? '',
+            taskTitle: pickString(row.taskTitle) ?? 'Untitled task',
+            pillar: pickString(row.pillar),
+            difficultyBefore: pickString(row.difficultyBefore),
+            difficultyAfter: pickString(row.difficultyAfter),
+            expectedTarget: Number(row.expectedTarget ?? 0) || 0,
+            actualCompletions: Number(row.actualCompletions ?? 0) || 0,
+            completionRatePct: Number(row.completionRatePct ?? 0) || 0,
+            finalAction: (pickString(row.finalAction) as RewardsGrowthCalibrationRow['finalAction']) ?? 'keep',
+            result: (pickString(row.result) as RewardsGrowthCalibrationRow['result']) ?? 'kept',
+            reason: pickString(row.reason) ?? '',
+            clampApplied: Boolean(row.clampApplied),
+            clampReason: pickString(row.clampReason),
+            evaluatedAt: pickString(row.evaluatedAt) ?? '',
+            evaluationMonthLabel: pickString(row.evaluationMonthLabel) ?? '',
+          }))
+        : [],
+    },
     habitAchievements: {
       pendingCount: Number(response.habit_achievements?.pending_count ?? 0) || 0,
       achievedByPillar: pillarGroups.map((group) => ({
