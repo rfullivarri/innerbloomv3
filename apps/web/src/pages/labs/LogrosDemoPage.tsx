@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { GuidedDemoOverlay } from '../components/demo/GuidedDemoOverlay';
-import { RewardsSection, type RewardsSectionDemoControls } from '../components/dashboard-v3/RewardsSection';
-import { LABS_LOGROS_GUIDED_STEPS } from '../config/labsLogrosGuidedTour';
-import { demoLogrosData, demoLogrosPreviewByTaskId } from '../data/demoLogrosData';
+import { GuidedDemoOverlay } from '../../components/demo/GuidedDemoOverlay';
+import { RewardsSection, type RewardsSectionDemoControls } from '../../components/dashboard-v3/RewardsSection';
+import { LABS_LOGROS_GUIDED_STEPS } from '../../config/labsLogrosGuidedTour';
+import { demoLogrosData, demoLogrosPreviewByTaskId } from '../../data/demoLogrosData';
 
 const DEMO_ANCHORS = {
   shelves: 'logros-shelves',

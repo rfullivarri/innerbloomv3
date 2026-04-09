@@ -24,7 +24,7 @@ import DemoDashboardPage from './pages/DemoDashboard';
 import QuickStartPreviewPage from './pages/QuickStartPreview';
 import LabsDemoModeSelectPage from './pages/LabsDemoModeSelect';
 import DemoModeSelectPage from './pages/DemoModeSelect';
-import LabsLogrosDemoPage from './pages/LabsLogrosDemo';
+import LabsLogrosDemoPage from './pages/labs/LogrosDemoPage';
 import { useGa4FunnelTracking } from './hooks/useGa4FunnelTracking';
 import { isNativeCapacitorPlatform } from './mobile/capacitor';
 import { writeMobileDebug } from './mobile/mobileDebug';

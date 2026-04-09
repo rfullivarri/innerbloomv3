@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
+import { Sparkles } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { useRequest } from '../../hooks/useRequest';
 import {
@@ -157,14 +158,25 @@ export function RewardsSection({
   return (
     <Card
       rightSlot={!resolvedDisableRemote ? (
-        <button
-          type="button"
-          onClick={reload}
-          disabled={status === 'loading'}
-          className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)] disabled:opacity-60"
-        >
-          {language === 'es' ? 'Actualizar' : 'Refresh'}
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href="/labs/logros"
+            title={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
+            aria-label={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
+            className="inline-flex items-center gap-1.5 rounded-full border border-violet-300/45 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-100 transition hover:border-violet-200/70 hover:bg-violet-500/16 hover:text-white"
+          >
+            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>{language === 'es' ? 'Ver guía' : 'View guide'}</span>
+          </a>
+          <button
+            type="button"
+            onClick={reload}
+            disabled={status === 'loading'}
+            className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)] disabled:opacity-60"
+          >
+            {language === 'es' ? 'Actualizar' : 'Refresh'}
+          </button>
+        </div>
       ) : undefined}
       bodyClassName="gap-5"
     >
