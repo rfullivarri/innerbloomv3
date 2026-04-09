@@ -347,7 +347,7 @@ export function PreviewAchievementCard({
 
       <div className="mt-3 space-y-2">
         {orderedRecentMonths.length > 0 && (
-          <div className="px-0 py-0">
+          <div className="px-0 py-0" data-tour-anchor="achievement-preview-months-section">
             <div className="flex items-center gap-1.5">
               <p className="text-sm font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]">
                 {language === 'es' ? 'Resultado últimos meses' : 'Last months result'}
