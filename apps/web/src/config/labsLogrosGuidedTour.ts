@@ -104,7 +104,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-seal-months',
-    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-tour-anchor="achievement-preview-months"]',
+    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-tour-anchor="achievement-preview-months-section"]',
     tooltipPlacement: 'top',
     title: { es: 'Últimos meses', en: 'Recent months' },
     body: {

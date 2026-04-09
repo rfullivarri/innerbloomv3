@@ -168,14 +168,6 @@ export function RewardsSection({
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             <span>{language === 'es' ? 'Ver guía' : 'View guide'}</span>
           </a>
-          <button
-            type="button"
-            onClick={reload}
-            disabled={status === 'loading'}
-            className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-muted)] transition hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)] disabled:opacity-60"
-          >
-            {language === 'es' ? 'Actualizar' : 'Refresh'}
-          </button>
         </div>
       ) : undefined}
       bodyClassName="gap-5"

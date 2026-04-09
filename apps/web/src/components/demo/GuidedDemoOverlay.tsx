@@ -52,6 +52,7 @@ const MOBILE_DAILY_QUEST_STEP_FOCUS_OFFSET: Record<string, number> = {
 const STEP_FRAME_PADDING: Record<string, number> = {
   'overall-progress': 12,
   'daily-quest-moderation': 12,
+  'logros-seal-months': 16,
 };
 
 const DAILY_QUEST_STEP_IDS = new Set([
