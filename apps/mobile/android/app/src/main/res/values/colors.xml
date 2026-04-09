@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#000C40</color>
+    <color name="colorPrimaryDark">#000C40</color>
+    <color name="colorAccent">#566AA7</color>
+    <color name="systemBarBackground">#0B1535</color>
+    <color name="appBackgroundTop">#0B1535</color>
+    <color name="appBackgroundBottom">#0B1535</color>
+</resources>

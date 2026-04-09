@@ -3,6 +3,8 @@ import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage
 import { buildWebAbsoluteUrl } from '../lib/siteUrl';
 import {
   buildNativeAppUrl,
+  CAPACITOR_APP_SCHEME,
+  CAPACITOR_APP_HOST,
   CAPACITOR_CALLBACK_HOST,
   CAPACITOR_SIGNED_OUT_HOST,
   isNativeAuthCallbackUrl,
@@ -111,21 +113,92 @@ export function getMobileAuthTokenFingerprint(token: string | null | undefined):
   return hashString(normalized);
 }
 
-function getCallbackFingerprint(url: string): string | null {
-  if (!isNativeAuthCallbackUrl(url)) {
+function describeNativeCallback(url: string): Record<string, unknown> {
+  try {
+    const parsed = new URL(url);
+    return {
+      protocol: parsed.protocol,
+      hostname: parsed.hostname,
+      pathname: parsed.pathname,
+      hasToken: Boolean(parsed.searchParams.get('token')?.trim()),
+      authMode: parsed.searchParams.get('auth_mode')?.trim() ?? null,
+      userId: parsed.searchParams.get('user_id')?.trim() ?? null,
+    };
+  } catch (error) {
+    return {
+      parseError: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+type ParsedNativeCallback = {
+  normalizedUrl: string;
+  callbackType: 'callback' | 'signed-out';
+  authorityAndPath: string;
+  params: URLSearchParams;
+};
+
+function parseNativeCallbackUrl(url: string): ParsedNativeCallback | null {
+  const normalizedUrl = typeof url === 'string' ? url.trim() : '';
+  if (!isNativeAuthCallbackUrl(normalizedUrl)) {
     return null;
   }
 
-  try {
-    const parsed = new URL(url);
-    const token = parsed.searchParams.get('token')?.trim() ?? '';
-    const userId = parsed.searchParams.get('user_id')?.trim() ?? '';
-    const email = parsed.searchParams.get('email')?.trim() ?? '';
-    const authMode = parsed.searchParams.get('auth_mode')?.trim() ?? '';
-    return hashString([parsed.protocol, parsed.hostname, token, userId, email, authMode].join('|'));
-  } catch {
+  let rest = normalizedUrl;
+  const schemePrefix = `${buildNativeAppUrl('')}`.replace(/\/$/, '');
+  if (rest.startsWith(`${CAPACITOR_APP_SCHEME}://`)) {
+    rest = rest.slice(`${CAPACITOR_APP_SCHEME}://`.length);
+  } else if (rest.startsWith(schemePrefix)) {
+    rest = rest.slice(schemePrefix.length);
+  }
+
+  const [authorityAndPathRaw, queryAndHash = ''] = rest.split('?', 2);
+  const authorityAndPath = authorityAndPathRaw.replace(/\/+$/, '');
+  const query = queryAndHash.split('#', 1)[0] ?? '';
+
+  let callbackType: 'callback' | 'signed-out' | null = null;
+  if (
+    authorityAndPath === CAPACITOR_CALLBACK_HOST
+    || authorityAndPath === `${CAPACITOR_APP_HOST}/${CAPACITOR_CALLBACK_HOST}`
+  ) {
+    callbackType = 'callback';
+  } else if (
+    authorityAndPath === CAPACITOR_SIGNED_OUT_HOST
+    || authorityAndPath === `${CAPACITOR_APP_HOST}/${CAPACITOR_SIGNED_OUT_HOST}`
+  ) {
+    callbackType = 'signed-out';
+  }
+
+  if (!callbackType) {
     return null;
   }
+
+  return {
+    normalizedUrl,
+    callbackType,
+    authorityAndPath,
+    params: new URLSearchParams(query),
+  };
+}
+
+function getCallbackFingerprint(url: string): string | null {
+  const parsed = parseNativeCallbackUrl(url);
+  if (!parsed) {
+    return null;
+  }
+
+  const token = parsed.params.get('token')?.trim() ?? '';
+  const userId = parsed.params.get('user_id')?.trim() ?? '';
+  const email = parsed.params.get('email')?.trim() ?? '';
+  const authMode = parsed.params.get('auth_mode')?.trim() ?? '';
+  return hashString([
+    CAPACITOR_APP_SCHEME,
+    parsed.authorityAndPath,
+    token,
+    userId,
+    email,
+    authMode,
+  ].join('|'));
 }
 
 function normalizeAuthMode(value: string | null | undefined): MobileAuthMode | null {
@@ -359,25 +432,47 @@ export function clearMobileAuthSession(
 }
 
 export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCallbackResolution {
-  if (!isNativeAuthCallbackUrl(url)) {
+  const normalizedUrl = typeof url === 'string' ? url.trim() : '';
+  if (!isNativeAuthCallbackUrl(normalizedUrl)) {
+    console.info('[mobile-auth] callback rejected before resolution', {
+      reason: 'not-native-auth-callback',
+      url: normalizedUrl,
+    });
     return null;
   }
 
   try {
-    const parsed = new URL(url);
-    const fingerprint = getCallbackFingerprint(url);
+    const parsed = parseNativeCallbackUrl(normalizedUrl);
+    const callbackType = parsed?.callbackType ?? null;
+    const fingerprint = getCallbackFingerprint(normalizedUrl);
+    const storedFingerprint = getStoredCallbackFingerprint();
 
-    if (!fingerprint) {
+    console.info('[mobile-auth] resolving callback', {
+      ...describeNativeCallback(normalizedUrl),
+      authorityAndPath: parsed?.authorityAndPath ?? null,
+      callbackType,
+      fingerprint,
+      storedFingerprint,
+    });
+
+    if (!callbackType || !fingerprint) {
+      console.warn('[mobile-auth] callback resolution failed', {
+        reason: !callbackType ? 'missing-callback-type' : 'missing-fingerprint',
+        ...describeNativeCallback(normalizedUrl),
+        callbackType,
+        fingerprint,
+        storedFingerprint,
+      });
       return null;
     }
 
-    if (getStoredCallbackFingerprint() === fingerprint) {
+    if (storedFingerprint === fingerprint) {
       writeMobileDebug('mobile-auth-callback', {
         type: 'duplicate',
-        hasToken: Boolean(parsed.searchParams.get('token')?.trim()),
+        hasToken: Boolean(parsed?.params.get('token')?.trim()),
       });
       console.info('[mobile-auth] ignored duplicate callback', {
-        type: parsed.hostname,
+        type: callbackType,
       });
       return {
         type: 'duplicate',
@@ -385,7 +480,7 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
       };
     }
 
-    if (parsed.hostname === CAPACITOR_SIGNED_OUT_HOST) {
+    if (callbackType === 'signed-out') {
       setForceNativeWelcome(true);
       clearMobileAuthSession();
       setStoredCallbackFingerprint(fingerprint);
@@ -402,26 +497,22 @@ export function resolveMobileAuthSessionFromCallback(url: string): MobileAuthCal
       };
     }
 
-    if (parsed.hostname !== CAPACITOR_CALLBACK_HOST) {
-      return null;
-    }
-
-    const token = parsed.searchParams.get('token')?.trim();
+    const token = parsed?.params.get('token')?.trim();
     if (!token) {
       writeMobileDebug('mobile-auth-callback', {
         type: 'callback-missing-token',
         hasToken: false,
-        url,
+        url: normalizedUrl,
       });
-      console.warn('[mobile-auth] callback received without token', { url });
+      console.warn('[mobile-auth] callback received without token', { url: normalizedUrl });
       return null;
     }
 
     const session = persistMobileAuthSession({
       token,
-      clerkUserId: parsed.searchParams.get('user_id')?.trim() || null,
-      email: parsed.searchParams.get('email')?.trim() || null,
-      authMode: normalizeAuthMode(parsed.searchParams.get('auth_mode')?.trim()),
+      clerkUserId: parsed?.params.get('user_id')?.trim() || null,
+      email: parsed?.params.get('email')?.trim() || null,
+      authMode: normalizeAuthMode(parsed?.params.get('auth_mode')?.trim()),
       expiresAt: decodeJwtExp(token),
       updatedAt: Date.now(),
     });

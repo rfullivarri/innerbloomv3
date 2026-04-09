@@ -10,3 +10,8 @@ coverage
 .env
 .env.*
 !.env.example
+
+# Android release signing
+*.jks
+*.keystore
+apps/mobile/android/keystore.properties

@@ -1,7 +1,7 @@
 import { apiLog, logApiDebug, logApiError } from './logger';
 import type { WeeklyWrappedPayload } from './weeklyWrapped';
 import { isDashboardDemoModeEnabled } from './demoMode';
-import { isNativeCapacitorPlatform } from '../mobile/capacitor';
+import { getCapacitorHttpPlugin, isNativeCapacitorPlatform } from '../mobile/capacitor';
 import {
   clearMobileAuthSession,
   ensureFreshMobileAuthSession,
@@ -63,6 +63,59 @@ async function safeJson(res: Response) {
   } catch {
     return null;
   }
+}
+
+function headersToObject(headersInit?: HeadersInit): Record<string, string> {
+  const headers = new Headers(headersInit ?? {});
+  return Object.fromEntries(headers.entries());
+}
+
+function parseRequestBody(body: BodyInit | null | undefined, contentType: string | null): unknown {
+  if (typeof body !== 'string') {
+    return body ?? undefined;
+  }
+
+  if (contentType?.toLowerCase().includes('application/json')) {
+    try {
+      return JSON.parse(body);
+    } catch {
+      return body;
+    }
+  }
+
+  return body;
+}
+
+async function performNativeCapacitorRequest(url: string, init: RequestInit = {}): Promise<Response> {
+  const http = getCapacitorHttpPlugin();
+  if (!http) {
+    throw new Error('CapacitorHttp plugin is not available.');
+  }
+
+  const headersObject = headersToObject(init.headers);
+  const contentType = headersObject['content-type'] ?? headersObject['Content-Type'] ?? null;
+  const response = await http.request({
+    url,
+    method: init.method ?? 'GET',
+    headers: headersObject,
+    data: parseRequestBody(init.body, contentType),
+    responseType: 'text',
+  });
+
+  const responseHeaders = new Headers(response.headers ?? {});
+  const responseBody = typeof response.data === 'string' ? response.data : JSON.stringify(response.data ?? null);
+  return new Response(responseBody, {
+    status: response.status,
+    headers: responseHeaders,
+  });
+}
+
+async function performApiRequest(url: string, init: RequestInit = {}): Promise<Response> {
+  if (isNativeCapacitorPlatform() && /^https?:\/\//i.test(url)) {
+    return performNativeCapacitorRequest(url, init);
+  }
+
+  return fetch(url, init);
 }
 
 function hasInvalidNativeMobileToken(body: any): boolean {
@@ -290,7 +343,7 @@ export async function apiRequest<T = unknown>(url: string, init?: RequestInit): 
           url,
           tokenFingerprint: getMobileAuthTokenFingerprint(authToken),
         });
-        const response = await fetch(url, applyAuthorization(requestInit, authToken));
+        const response = await performApiRequest(url, applyAuthorization(requestInit, authToken));
         return { response, authToken };
       } catch (error) {
         if (error instanceof Error) {
@@ -752,7 +805,7 @@ export async function apiAuthorizedFetch(path: string, init: RequestInit = {}): 
   const token = await resolveAuthToken();
   const authedInit = applyAuthorization(init, token);
   const url = resolveApiUrl(path);
-  return fetch(url, authedInit);
+  return performApiRequest(url, authedInit);
 }
 
 export type ModerationTrackerType = 'alcohol' | 'tobacco' | 'sugar';
@@ -2299,36 +2352,11 @@ export type TaskInsightsResponse = {
           }
       >;
     } | null;
-    currentMonth?: {
-      periodKey?: string | null;
-      completionRateSoFar?: number | null;
-      projectedMonthEndRate?: number | null;
-      expectedTargetSoFar?: number | null;
-      completionsDoneSoFar?: number | null;
-      expectedTargetMonthEnd?: number | null;
-      projectedCompletionsMonthEnd?: number | null;
-    } | null;
     recentMonths?: Array<{
-      closed?: boolean | null;
       periodKey?: string | null;
       month?: string | null;
       value?: number | null;
-      completionRate?: number | null;
-      projectedCompletionRate?: number | null;
-      state?:
-        | 'weak'
-        | 'building'
-        | 'strong'
-        | 'locked'
-        | 'valid'
-        | 'floor_only'
-        | 'invalid'
-        | 'projected_valid'
-        | 'projected_floor_only'
-        | 'projected_invalid'
-        | 'no_data'
-        | string
-        | null;
+      state?: 'weak' | 'building' | 'strong' | 'locked' | 'valid' | string | null;
     }>;
   } | null;
   recalibration?: {
