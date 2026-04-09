@@ -65,23 +65,23 @@
     },
     {
       "feature": "🪫 LOW MOOD",
-      "what_it_does": "Modo pensado para cuando estás sin energía, abrumado.",
-      "why_it_matters": "activar tu mínimo vital con tareas pequeñas y sostenibles."
+      "what_it_does": "Modo pensado para cuando estás sin energía, sobrecargado.",
+      "why_it_matters": "reconstruir tu base con la menor carga posible y hábitos fáciles de sostener."
     },
     {
       "feature": "🍃 CHILL MOOD",
       "what_it_does": "Modo pensado para cuando estás relajado y estable.",
-      "why_it_matters": "sostener bienestar con rutinas suaves y balanceadas."
+      "why_it_matters": "mantener una constancia ligera y estable con una frecuencia que se sienta posible."
     },
     {
       "feature": "🌊 FLOW MOOD",
       "what_it_does": "Modo pensado para cuando estás enfocado y en movimiento.",
-      "why_it_matters": "aprovechar el impulso con un plan alineado a metas concretas."
+      "why_it_matters": "aprovechar tu impulso con una intensidad sostenible y dirección clara."
     },
     {
       "feature": "🧬 EVOLVE MOOD",
       "what_it_does": "Modo pensado para cuando estás ambicioso y determinado.",
-      "why_it_matters": "sostener un ritmo desafiante con estructura y tareas diarias claras."
+      "why_it_matters": "subir la intensidad con más estructura sin romper la consistencia que ya construiste."
     },
     {
       "feature": "Daily Quest + registro emocional",
@@ -102,67 +102,53 @@
   "onboarding_narrative": [
     {
       "step": 1,
-      "title": "Comienzas con un diagnóstico breve",
-      "experience": "Respondes unas preguntas sobre energía, prioridades y momento actual (2–3 min). Un punto de partida claro + tu primer plan personalizado.",
+      "title": "Empieza realista, no perfecto",
+      "experience": "🟢 Empieza desde tu nivel real 🌱 Construye una base que puedas sostener",
       "outcome": "Entrás con dirección y un modo alineado a tu energía."
     },
     {
       "step": 2,
-      "title": "Recibes un plan en 3 pilares",
-      "experience": "Revisas tareas sugeridas en Cuerpo, Mente y Alma. Una rutina equilibrada, concreta y fácil de sostener.",
+      "title": "Avanza en ciclos semanales",
+      "experience": "📅 Avanza por semanas, no por días sueltos 🧭 Detecta patrones reales y ajusta tu plan",
       "outcome": "Salís con una base concreta para comenzar hoy."
     },
     {
       "step": 3,
-      "title": "Lo adaptas a tu realidad",
-      "experience": "Editas, cambias o descartas tareas; eliges modo y avatar según cómo estés hoy. Un plan realmente tuyo (la IA propone, tú decides).",
+      "title": "Ajusta el sistema a medida que creces",
+      "experience": "🔄 Recalibra la dificultad de tus tareas según tu evolución 📈 Te propone una intensidad mayor cuando tu constancia se fortalece",
       "outcome": "Convertís tu día en aprendizaje práctico y señal accionable."
     },
     {
       "step": 4,
-      "title": "Lo aplicas en pocos minutos al día",
-      "experience": "Completas microacciones diarias (3–5 min) con enfoque simple y realista. Constancia sin saturarte y progreso visible semana a semana.",
-      "outcome": "Visualizás progreso acumulado y próximos desafíos."
-    },
-    {
-      "step": 5,
-      "title": "Registras cómo te sientes y recalibras",
-      "experience": "Registras tu emoción y estado diario en segundos. Recomendaciones ajustadas a tu momento + continuidad del proceso.",
+      "title": "Convierte constancia en hábitos reales",
+      "experience": "🏆 Convierte constancia en hábitos duraderos 🌿 Construye hábitos que sigan contigo más allá de una buena semana",
       "outcome": "Visualizás progreso acumulado y próximos desafíos."
     }
   ],
   "objections_faq": [
     {
-      "objection": "¿Necesito mucha disciplina para empezar?",
-      "answer": "No. Si estás con poca energía, empezás en Low con micro hábitos para activar el mínimo vital. La gestión de hábitos se adapta a tu ritmo."
+      "objection": "¿Innerbloom es solo un habit tracker?",
+      "answer": "No. Es una app de hábitos adaptativa que trabaja con ritmo semanal, recalibración en el tiempo y progreso visible para ayudarte a construir hábitos que sí perduran."
     },
     {
-      "objection": "¿Puedo cambiar de modo de juego?",
-      "answer": "Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento y tu energía diaria."
+      "objection": "¿Cómo se diferencia de otras apps de hábitos?",
+      "answer": "En vez de exigir perfección diaria, Innerbloom ajusta tu plan a tu capacidad real y te ayuda a sostener el progreso incluso cuando la vida cambia."
     },
     {
-      "objection": "¿Dónde veo mi progreso?",
-      "answer": "En tu archivo y en el Dashboard: ves tus tareas, tu seguimiento de hábitos, tu registro emocional (mood tracking) y tu equilibrio general."
+      "objection": "¿Cómo funcionan los ritmos?",
+      "answer": "Funcionan como niveles de intensidad semanal. Puedes empezar con una frecuencia más liviana y avanzar hacia una carga mayor a medida que tu constancia se fortalece."
     },
     {
-      "objection": "¿Qué pasa si dejo de registrar?",
-      "answer": "No perdés progreso. Retomás cuando quieras y ajustamos el plan a tu energía actual para recuperar constancia."
+      "objection": "¿Qué significan Body, Mind y Soul?",
+      "answer": "Son tres pilares para que tu progreso no dependa solo de una dimensión: Body trabaja energía y cuidado, Mind trabaja foco y claridad, y Soul trabaja calma, sentido y vínculos."
     },
     {
-      "objection": "¿Innerbloom es un habit tracker o un planificador diario?",
-      "answer": "Ambas cosas. Funciona como habit tracker (seguimiento de hábitos) y como planificador diario liviano: convertís tu energía del día en acciones simples y sostenibles."
+      "objection": "¿Cómo se ve el progreso en el tiempo?",
+      "answer": "Ves patrones, constancia y evolución para reconocer qué hábitos se están volviendo parte real de tu vida."
     },
     {
-      "objection": "¿Cómo funciona el registro emocional (mood tracking)?",
-      "answer": "Registrás tu emoción/estado en segundos. Ese registro emocional diario ayuda a que las sugerencias y el ritmo del plan se mantengan alineados con cómo estás."
-    },
-    {
-      "objection": "¿Qué son los micro hábitos y por qué ayudan?",
-      "answer": "Son acciones pequeñas y realistas (2–10 min) que reducen fricción y aumentan constancia. Son ideales para construir hábitos sostenibles sin saturarte."
-    },
-    {
-      "objection": "¿Innerbloom es una app de productividad o de bienestar?",
-      "answer": "Está enfocada en bienestar emocional y hábitos sostenibles, pero naturalmente mejora tu productividad al darte foco, estructura y seguimiento diario."
+      "objection": "¿Qué pasa si tengo una mala semana o dejo de registrar?",
+      "answer": "No pierdes tu proceso. Retomas desde tu capacidad actual, ajustas el plan y sigues construyendo sin sentir que vuelves a empezar de cero."
     }
   ],
   "design_dossier": {
@@ -216,8 +202,8 @@
     "llms": "https://innerbloom.org/llms.txt"
   },
   "versioning": {
-    "version": "0cdde29",
-    "lastUpdated": "2026-03-01T17:37:40.378Z"
+    "version": "3edfe320",
+    "lastUpdated": "2026-04-07T21:18:25.581Z"
   },
   "design_tokens": {
     "palette": {
@@ -262,7 +248,8 @@
     },
     "shadows": {
       "card": "0 18px 40px rgba(0,0,0,0.35)",
-      "onboardingGlass": "0 26px 80px rgba(12, 18, 38, 0.24)"
+      "onboardingGlass": "0 26px 80px rgba(12, 18, 38, 0.24)",
+      "IB_SURFACE_CARD_LIGHT": "0 6px 20px rgba(15, 23, 42, 0.3)"
     },
     "gradients": [
       {

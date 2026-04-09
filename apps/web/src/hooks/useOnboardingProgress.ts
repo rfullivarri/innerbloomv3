@@ -6,10 +6,21 @@ import {
   type OnboardingProgressStep,
 } from '../lib/api';
 
-export function useOnboardingProgress() {
+type UseOnboardingProgressOptions = {
+  enabled?: boolean;
+};
+
+export function useOnboardingProgress(options: UseOnboardingProgressOptions = {}) {
   const [progress, setProgress] = useState<OnboardingProgress | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const enabled = options.enabled ?? true;
+
   useEffect(() => {
+    if (!enabled) {
+      setStatus('idle');
+      return;
+    }
+
     let cancelled = false;
 
     const load = async () => {
@@ -32,7 +43,7 @@ export function useOnboardingProgress() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [enabled]);
 
   const markStep = async (step: OnboardingProgressStep, source?: Record<string, unknown>) => {
     const response = await markOnboardingProgress(step, source);

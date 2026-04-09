@@ -15,6 +15,24 @@ type CapacitorBrowserPlugin = {
   close?: () => Promise<void>;
 };
 
+type CapacitorHttpPlugin = {
+  request: (options: {
+    url: string;
+    method?: string;
+    headers?: Record<string, string>;
+    params?: Record<string, string>;
+    data?: unknown;
+    responseType?: 'arraybuffer' | 'blob' | 'document' | 'json' | 'text';
+    connectTimeout?: number;
+    readTimeout?: number;
+  }) => Promise<{
+    data: unknown;
+    headers?: Record<string, string>;
+    status: number;
+    url?: string;
+  }>;
+};
+
 type CapacitorKeyboardPlugin = {
   setResizeMode: (options: { mode: 'native' | 'body' | 'ionic' | 'none' }) => Promise<void>;
   setStyle: (options: { style: 'DARK' | 'LIGHT' | 'DEFAULT' }) => Promise<void>;
@@ -62,11 +80,21 @@ type CapacitorGlobal = {
 };
 
 export const CAPACITOR_APP_SCHEME = 'innerbloom';
+export const CAPACITOR_APP_HOST = 'localhost';
 export const CAPACITOR_CALLBACK_HOST = 'callback';
 export const CAPACITOR_SIGNED_OUT_HOST = 'signed-out';
 export const CAPACITOR_STATUS_BAR_STYLE_DARK = 'DARK' as const;
 export const CAPACITOR_KEYBOARD_STYLE_DARK = 'DARK' as const;
 export const CAPACITOR_KEYBOARD_RESIZE_NATIVE = 'native' as const;
+
+function buildNativeCallbackPrefixes(): string[] {
+  return [
+    `${CAPACITOR_APP_SCHEME}://${CAPACITOR_APP_HOST}/${CAPACITOR_CALLBACK_HOST}`,
+    `${CAPACITOR_APP_SCHEME}://${CAPACITOR_APP_HOST}/${CAPACITOR_SIGNED_OUT_HOST}`,
+    `${CAPACITOR_APP_SCHEME}://${CAPACITOR_CALLBACK_HOST}`,
+    `${CAPACITOR_APP_SCHEME}://${CAPACITOR_SIGNED_OUT_HOST}`,
+  ];
+}
 
 function getCapacitorGlobal(): CapacitorGlobal | null {
   const candidate = typeof window !== 'undefined'
@@ -101,6 +129,10 @@ export function getCapacitorBrowserPlugin(): CapacitorBrowserPlugin | null {
   return getCapacitorPlugin<CapacitorBrowserPlugin>('Browser');
 }
 
+export function getCapacitorHttpPlugin(): CapacitorHttpPlugin | null {
+  return getCapacitorPlugin<CapacitorHttpPlugin>('CapacitorHttp');
+}
+
 export function getCapacitorKeyboardPlugin(): CapacitorKeyboardPlugin | null {
   return getCapacitorPlugin<CapacitorKeyboardPlugin>('Keyboard');
 }
@@ -122,6 +154,11 @@ export function normalizeAppUrlToPath(url: string): string | null {
     const parsed = new URL(url);
 
     if (parsed.protocol === `${CAPACITOR_APP_SCHEME}:`) {
+      if (parsed.hostname === CAPACITOR_APP_HOST) {
+        const pathname = parsed.pathname.startsWith('/') ? parsed.pathname : `/${parsed.pathname}`;
+        return `${pathname}${parsed.search}${parsed.hash}` || '/';
+      }
+
       const hostPath = parsed.hostname ? `/${parsed.hostname}` : '';
       const pathname = parsed.pathname === '/' ? '' : parsed.pathname;
       const combined = `${hostPath}${pathname}${parsed.search}${parsed.hash}` || '/';
@@ -139,20 +176,38 @@ export function isNativeAuthCallbackUrl(url: string): boolean {
     return false;
   }
 
+  const normalized = url.trim();
+  if (!normalized) {
+    return false;
+  }
+
+  if (buildNativeCallbackPrefixes().some((prefix) => normalized.startsWith(prefix))) {
+    return true;
+  }
+
   try {
-    const parsed = new URL(url);
+    const parsed = new URL(normalized);
     if (parsed.protocol !== `${CAPACITOR_APP_SCHEME}:`) {
       return false;
     }
 
-    return parsed.hostname === CAPACITOR_CALLBACK_HOST || parsed.hostname === CAPACITOR_SIGNED_OUT_HOST;
+    if (parsed.hostname === CAPACITOR_CALLBACK_HOST || parsed.hostname === CAPACITOR_SIGNED_OUT_HOST) {
+      return true;
+    }
+
+    if (parsed.hostname === CAPACITOR_APP_HOST) {
+      return parsed.pathname === `/${CAPACITOR_CALLBACK_HOST}`
+        || parsed.pathname === `/${CAPACITOR_SIGNED_OUT_HOST}`;
+    }
+
+    return false;
   } catch {
     return false;
   }
 }
 
 export function buildNativeAppUrl(host: string): string {
-  return `${CAPACITOR_APP_SCHEME}://${host}`;
+  return `${CAPACITOR_APP_SCHEME}://${CAPACITOR_APP_HOST}/${host}`;
 }
 
 export async function openUrlInCapacitorBrowser(url: string): Promise<void> {

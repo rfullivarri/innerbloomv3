@@ -165,12 +165,13 @@ function resolveNativeEntryRoute({
 export function MobileAppEntry() {
   const { isLoaded, isSignedIn } = useAuth();
   const backendUser = useBackendUser();
-  const onboarding = useOnboardingProgress();
   const mobileAuthSession = useMobileAuthSession();
   const isNativeApp = isNativeCapacitorPlatform();
   const forceNativeWelcome = isNativeApp && shouldForceNativeWelcome();
   const hasNativeCallbackSession = isNativeApp && Boolean(mobileAuthSession?.token) && !forceNativeWelcome;
   const hasEffectiveSession = isSignedIn || hasNativeCallbackSession;
+  const shouldLoadOnboarding = hasEffectiveSession && backendUser.status === 'success';
+  const onboarding = useOnboardingProgress({ enabled: shouldLoadOnboarding });
   const dashboardPath = DASHBOARD_PATH || DEFAULT_DASHBOARD_PATH;
   const nativeAuthMode = isNativeApp ? mobileAuthSession?.authMode ?? null : null;
   const onboardingSignals = {
