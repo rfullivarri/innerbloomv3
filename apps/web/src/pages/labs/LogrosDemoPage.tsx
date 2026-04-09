@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { GuidedDemoOverlay } from '../../components/demo/GuidedDemoOverlay';
 import { RewardsSection, type RewardsSectionDemoControls } from '../../components/dashboard-v3/RewardsSection';
 import { LABS_LOGROS_GUIDED_STEPS } from '../../config/labsLogrosGuidedTour';
@@ -82,8 +83,19 @@ export default function LabsLogrosDemoPage() {
   return (
     <div className="min-h-screen bg-transparent" data-light-scope="dashboard-v3" data-labs-logros-step={activeStepId ?? undefined}>
       <header className="sticky top-0 z-40 border-b border-[color:var(--glass-border)] bg-[image:var(--glass-bg)] px-3 py-3 backdrop-blur-xl md:px-6">
-        <p className="text-[0.62rem] uppercase tracking-[0.3em] text-[color:var(--color-text-subtle)] md:text-xs">LABS</p>
-        <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl">Logros</h1>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-text-subtle)] md:text-xs">Innerbloom</p>
+            <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl">Logros</h1>
+          </div>
+          <Link
+            to="/dashboard-v3/rewards"
+            aria-label="Cerrar demo de Logros y volver al dashboard"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--glass-border)] bg-[color:var(--color-surface-soft)] text-lg font-semibold leading-none text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-surface-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]"
+          >
+            <span aria-hidden>×</span>
+          </Link>
+        </div>
       </header>
 
       {showGuidedTour ? (
