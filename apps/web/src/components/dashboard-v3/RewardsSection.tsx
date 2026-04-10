@@ -208,8 +208,8 @@ export function RewardsSection({
             aria-label={language === 'es' ? 'Modo de visualización de logros' : 'Achievement view mode'}
           >
             {([
-              { id: 'shelves', label: language === 'es' ? 'Estantes' : 'Shelves' },
               { id: 'carousel', label: language === 'es' ? 'Carrusel' : 'Carousel' },
+              { id: 'shelves', label: language === 'es' ? 'Estantes' : 'Shelves' },
             ] as const).map((option) => {
               const isSelected = achievementsViewMode === option.id;
               return (
@@ -222,8 +222,8 @@ export function RewardsSection({
                   onClick={() => handleChangeAchievementsViewMode(option.id)}
                   className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                     isSelected
-                      ? 'bg-violet-500/30 text-violet-50'
-                      : 'text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]'
+                      ? 'border border-violet-300/70 bg-violet-500/85 text-white shadow-[0_6px_18px_rgba(124,58,237,0.35)] dark:border-violet-300/55 dark:bg-violet-500/35 dark:text-violet-50'
+                      : 'text-[color:var(--color-text-muted)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]'
                   }`}
                 >
                   {option.label}
@@ -913,7 +913,7 @@ function AchievedShelf({
     <div className="space-y-4" data-demo-anchor={demoAnchors?.shelves}>
       <div>
         <h2 className="text-lg font-semibold text-[color:var(--color-text-strong)]">
-          {language === 'es' ? 'Estantes de Logros' : 'Achievement Shelves'}
+          {language === 'es' ? 'Logros' : 'Achievements'}
         </h2>
       </div>
       {!isCarouselView && isShelfFocusStep ? (
@@ -938,7 +938,7 @@ function AchievedShelf({
       {isCarouselView ? (
         <div className="space-y-3">
           <div
-            className="inline-flex w-full rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-1"
+            className="inline-flex w-full rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-1 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-border-subtle)_62%,transparent)]"
             role="tablist"
             aria-label={language === 'es' ? 'Seleccionar pilar' : 'Select pillar'}
           >
@@ -953,8 +953,8 @@ function AchievedShelf({
                   onClick={() => setActivePillarCode(pillar.code)}
                   className={`flex-1 rounded-full px-2 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${
                     isSelected
-                      ? 'bg-violet-500/30 text-violet-50'
-                      : 'text-[color:var(--color-text-dim)] hover:text-[color:var(--color-text)]'
+                      ? 'border border-violet-300/70 bg-violet-500/85 text-white shadow-[0_6px_18px_rgba(124,58,237,0.35)] dark:border-violet-300/55 dark:bg-violet-500/35 dark:text-violet-50'
+                      : 'text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]'
                   }`}
                 >
                   {pillarChipLabels[pillar.code]}
@@ -981,14 +981,14 @@ function AchievedShelf({
                       onClick={() => toggleCarouselCardFlip(habit.id)}
                       className={`ib-card-contour-shadow relative min-h-[23rem] w-[78%] shrink-0 snap-center rounded-3xl border p-5 text-left transition sm:w-[22rem] ${
                         isAchieved
-                          ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)]'
-                          : 'border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/70'
+                          ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] shadow-[0_16px_30px_rgba(2,8,23,0.14)] dark:shadow-[0_16px_30px_rgba(2,8,23,0.34)]'
+                          : 'border-dashed border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-1)]/82 shadow-[0_12px_24px_rgba(2,8,23,0.1)] dark:border-[color:var(--color-border-subtle)] dark:shadow-[0_12px_24px_rgba(2,8,23,0.22)]'
                       }`}
                     >
                       {!isFlipped ? (
                         <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
                           {!isAchieved ? (
-                            <span className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-text-dim)]">
+                            <span className="rounded-full border border-amber-300/55 bg-amber-200/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-900 dark:border-[color:var(--color-border-subtle)] dark:bg-[color:var(--color-overlay-1)] dark:text-[color:var(--color-text-dim)]">
                               {language === 'es' ? 'Bloqueado' : 'Locked'}
                             </span>
                           ) : null}
@@ -1029,11 +1029,13 @@ function AchievedShelf({
                               </p>
                             </>
                           ) : (
-                            <p className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-sm text-[color:var(--color-text-muted)]">
-                              {language === 'es'
-                                ? 'Sigue registrándolo para desbloquear este sello.'
-                                : 'Keep tracking it to unlock this seal.'}
-                            </p>
+                            <LockedAchievementHabitDevelopment
+                              habit={habit}
+                              language={language}
+                              disableRemote={disableRemote}
+                              mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
+                              loadOnVisible={isFlipped}
+                            />
                           )}
                           <p className="text-xs text-[color:var(--color-text-dim)]">
                             {language === 'es' ? 'Toca nuevamente para volver al frente' : 'Tap again to return to front'}
@@ -1049,7 +1051,7 @@ function AchievedShelf({
                   type="button"
                   onClick={() => scrollCarouselToIndex(activeCarouselIndex - 1)}
                   disabled={activeCarouselIndex <= 0}
-                  className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] disabled:opacity-50"
+                  className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] shadow-[0_6px_14px_rgba(15,23,42,0.08)] transition hover:bg-[color:var(--color-overlay-2)] disabled:opacity-50"
                 >
                   {language === 'es' ? 'Anterior' : 'Previous'}
                 </button>
@@ -1060,7 +1062,7 @@ function AchievedShelf({
                   type="button"
                   onClick={() => scrollCarouselToIndex(activeCarouselIndex + 1)}
                   disabled={activeCarouselIndex >= activePillarHabits.length - 1}
-                  className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] disabled:opacity-50"
+                  className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] shadow-[0_6px_14px_rgba(15,23,42,0.08)] transition hover:bg-[color:var(--color-overlay-2)] disabled:opacity-50"
                 >
                   {language === 'es' ? 'Siguiente' : 'Next'}
                 </button>
@@ -1179,6 +1181,64 @@ function AchievedShelf({
       ) : null}
     </div>
   );
+}
+
+function LockedAchievementHabitDevelopment({
+  habit,
+  language,
+  disableRemote,
+  mockPreviewAchievementByTaskId,
+  loadOnVisible,
+}: {
+  habit: HabitAchievementShelfItem;
+  language: 'es' | 'en';
+  disableRemote: boolean;
+  mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
+  loadOnVisible: boolean;
+}) {
+  const taskId = habit.taskId;
+  const mockPreviewAchievement = mockPreviewAchievementByTaskId?.[taskId] ?? null;
+  const { data, status, error } = useRequest(
+    () => getTaskInsights(taskId),
+    [taskId],
+    { enabled: loadOnVisible && !disableRemote && !mockPreviewAchievement },
+  );
+  const previewAchievement = mockPreviewAchievement ?? data?.previewAchievement ?? null;
+  const showLoading = loadOnVisible && status === 'loading' && !mockPreviewAchievement;
+  const showError = loadOnVisible && status === 'error';
+  const showEmpty = loadOnVisible && !showLoading && !showError && !previewAchievement;
+
+  if (showLoading) {
+    return (
+      <p className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-sm text-[color:var(--color-text-muted)]">
+        {language === 'es' ? 'Cargando desarrollo del hábito…' : 'Loading habit development…'}
+      </p>
+    );
+  }
+
+  if (showError) {
+    return (
+      <p className="rounded-2xl border border-rose-400/40 bg-rose-500/10 p-3 text-sm text-rose-100">
+        {error?.message ?? (language === 'es' ? 'No pudimos cargar el desarrollo del hábito.' : "We couldn't load habit development.")}
+      </p>
+    );
+  }
+
+  if (previewAchievement) {
+    return <PreviewAchievementCard previewAchievement={previewAchievement} language={language} />;
+  }
+
+  if (showEmpty) {
+    return (
+      <p className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-sm text-[color:var(--color-text-muted)]">
+        {language === 'es'
+          ? 'Aún no hay datos suficientes de desarrollo del hábito para esta tarea.'
+          : 'There is not enough habit development data for this task yet.'}
+      </p>
+    );
+  }
+
+  return null;
 }
 
 function NotAchievedPreviewOverlay({
