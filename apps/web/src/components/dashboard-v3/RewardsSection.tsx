@@ -1040,34 +1040,40 @@ function AchievedShelf({
                               : 'Tap to see more'}
                           </p>
                         </div>
-                      ) : (
+                      ) : isAchieved ? (
                         <div className="flex h-full flex-col gap-3 overflow-hidden">
-                          <p className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--color-text-dim)]">
-                            {isAchieved ? (language === 'es' ? 'Logro desbloqueado' : 'Achievement unlocked') : (language === 'es' ? 'Logro bloqueado' : 'Achievement locked')}
+                          <AchievedHabitBackContent
+                            habit={habit}
+                            language={language}
+                            disableRemote={disableRemote}
+                            maintainPendingHabitId={maintainPendingHabitId}
+                            onToggleMaintainedWithPending={handleToggleMaintained}
+                          />
+                          <p className="mt-auto text-xs text-[color:var(--color-text-dim)]">
+                            {language === 'es' ? 'Toca otra vez para volver al frente' : 'Tap again to return to front'}
                           </p>
-                          <h3 className="text-lg font-semibold leading-tight text-[color:var(--color-text-strong)]">{habit.taskName}</h3>
-                          <p className="text-sm leading-tight text-[color:var(--color-text-muted)]">
-                            {habit.trait?.name || habit.trait?.code || (language === 'es' ? 'Sin rasgo visible' : 'No visible trait')}
-                          </p>
-                          {isAchieved ? (
-                            <AchievedHabitBackContent
-                              habit={habit}
-                              language={language}
-                              disableRemote={disableRemote}
-                              maintainPendingHabitId={maintainPendingHabitId}
-                              onToggleMaintainedWithPending={handleToggleMaintained}
-                            />
-                          ) : (
+                        </div>
+                      ) : (
+                        <div className="flex h-full flex-col gap-2 overflow-hidden">
+                          <div className="space-y-1">
+                            <p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-text-dim)]">
+                              {language === 'es' ? 'Logro bloqueado' : 'Achievement locked'}
+                            </p>
+                            <h3 className="truncate text-base font-semibold leading-tight text-[color:var(--color-text-strong)]">{habit.taskName}</h3>
+                            <p className="truncate text-xs leading-tight text-[color:var(--color-text-muted)]">
+                              {habit.trait?.name || habit.trait?.code || (language === 'es' ? 'Sin rasgo visible' : 'No visible trait')}
+                            </p>
+                          </div>
+                          <div className="min-h-0 flex-1">
                             <LockedAchievementHabitDevelopment
                               habit={habit}
                               language={language}
                               disableRemote={disableRemote}
                               mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
                               loadOnVisible={isFlipped}
-                              constrained
                             />
-                          )}
-                          <p className="mt-auto text-xs text-[color:var(--color-text-dim)]">
+                          </div>
+                          <p className="text-[11px] text-[color:var(--color-text-dim)]">
                             {language === 'es' ? 'Toca otra vez para volver al frente' : 'Tap again to return to front'}
                           </p>
                         </div>
@@ -1220,14 +1226,12 @@ function LockedAchievementHabitDevelopment({
   disableRemote,
   mockPreviewAchievementByTaskId,
   loadOnVisible,
-  constrained = false,
 }: {
   habit: HabitAchievementShelfItem;
   language: 'es' | 'en';
   disableRemote: boolean;
   mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
   loadOnVisible: boolean;
-  constrained?: boolean;
 }) {
   const taskId = habit.taskId;
   const mockPreviewAchievement = mockPreviewAchievementByTaskId?.[taskId] ?? null;
@@ -1258,7 +1262,7 @@ function LockedAchievementHabitDevelopment({
 
   if (previewAchievement) {
     return (
-      <div className={constrained ? 'min-h-0 flex-1 overflow-y-auto pr-1' : ''}>
+      <div className="min-h-0 flex-1">
         <PreviewAchievementCard previewAchievement={previewAchievement} language={language} />
       </div>
     );
