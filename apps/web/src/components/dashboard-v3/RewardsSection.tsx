@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { Sparkles } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { useRequest } from '../../hooks/useRequest';
+import { useCarouselSelection } from '../../hooks/useCarouselSelection';
 import {
   decideTaskHabitAchievement,
   getTaskInsights,
@@ -17,6 +18,7 @@ import {
 } from '../../lib/api';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { emitHabitAchievementUpdated } from '../../lib/habitAchievementEvents';
+import { subscribeToMediaQuery } from '../../lib/mediaQuery';
 import { HabitAchievementSeal } from './HabitAchievementSeal';
 import { PreviewAchievementCard } from './PreviewAchievementCard';
 
@@ -25,6 +27,10 @@ const REWARDS_PILLAR_ORDER = [
   { code: 'MIND', name: 'Mind' },
   { code: 'SOUL', name: 'Soul' },
 ] as const;
+
+type AchievementViewMode = 'shelves' | 'carousel';
+
+const REWARDS_VIEW_MODE_STORAGE_KEY = 'ib.rewards.achievementsViewMode';
 
 interface RewardsSectionProps {
   userId: string;
@@ -90,6 +96,25 @@ export function RewardsSection({
   const [educationBannerVisible, setEducationBannerVisible] = useState(false);
   const [isTransitioningDecision, setIsTransitioningDecision] = useState(false);
   const [isGrowthCalibrationModalOpen, setIsGrowthCalibrationModalOpen] = useState(false);
+  const [achievementsViewMode, setAchievementsViewMode] = useState<AchievementViewMode>('shelves');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const savedMode = window.localStorage.getItem(REWARDS_VIEW_MODE_STORAGE_KEY);
+    if (savedMode === 'carousel' || savedMode === 'shelves') {
+      setAchievementsViewMode(savedMode);
+    }
+  }, []);
+
+  const handleChangeAchievementsViewMode = useCallback((nextMode: AchievementViewMode) => {
+    setAchievementsViewMode(nextMode);
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.localStorage.setItem(REWARDS_VIEW_MODE_STORAGE_KEY, nextMode);
+  }, []);
 
   const { data, status, error, reload } = useRequest(() => getRewardsHistory(userId), [userId], {
     enabled: !resolvedDisableRemote && Boolean(userId),
@@ -164,19 +189,50 @@ export function RewardsSection({
 
   return (
     <Card
-      rightSlot={!resolvedDisableRemote ? (
+      rightSlot={(
         <div className="flex items-center gap-2">
-          <a
-            href="/labs/logros"
-            title={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
-            aria-label={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
-            className="inline-flex items-center gap-1.5 rounded-full border border-violet-300/45 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-100 transition hover:border-violet-200/70 hover:bg-violet-500/16 hover:text-white"
+          {!resolvedDisableRemote ? (
+            <a
+              href="/labs/logros"
+              title={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
+              aria-label={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
+              className="inline-flex items-center gap-1.5 rounded-full border border-violet-300/45 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-100 transition hover:border-violet-200/70 hover:bg-violet-500/16 hover:text-white"
+            >
+              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{language === 'es' ? 'Ver guía' : 'View guide'}</span>
+            </a>
+          ) : null}
+          <div
+            className="inline-flex items-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-0.5"
+            role="tablist"
+            aria-label={language === 'es' ? 'Modo de visualización de logros' : 'Achievement view mode'}
           >
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>{language === 'es' ? 'Ver guía' : 'View guide'}</span>
-          </a>
+            {([
+              { id: 'shelves', label: language === 'es' ? 'Estantes' : 'Shelves' },
+              { id: 'carousel', label: language === 'es' ? 'Carrusel' : 'Carousel' },
+            ] as const).map((option) => {
+              const isSelected = achievementsViewMode === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  tabIndex={isSelected ? 0 : -1}
+                  onClick={() => handleChangeAchievementsViewMode(option.id)}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                    isSelected
+                      ? 'bg-violet-500/30 text-violet-50'
+                      : 'text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      ) : undefined}
+      )}
       bodyClassName="gap-5"
     >
       {!resolvedDisableRemote && pendingCount > 0 ? (
@@ -209,6 +265,7 @@ export function RewardsSection({
         groups={effectiveData?.habitAchievements.achievedByPillar ?? []}
         demoAnchors={resolvedDemoAnchors}
         demoStepId={demoStepId}
+        viewMode={achievementsViewMode}
         disableRemote={resolvedDisableRemote}
         mockPreviewAchievementByTaskId={resolvedMockPreviewAchievementByTaskId}
         onDemoControlsReady={demoConfig?.controls?.onReady}
@@ -640,9 +697,28 @@ function useDailyWrapupCountdown(getter: (referenceDate?: Date) => number): numb
   return days;
 }
 
+function usePrefersReducedMotion(): boolean {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setPrefersReducedMotion(mediaQuery.matches);
+    update();
+
+    return subscribeToMediaQuery(mediaQuery, update);
+  }, []);
+
+  return prefersReducedMotion;
+}
+
 function AchievedShelf({
   groups,
   language,
+  viewMode,
   onToggleMaintained,
   disableRemote,
   mockPreviewAchievementByTaskId,
@@ -652,6 +728,7 @@ function AchievedShelf({
 }: {
   groups: RewardsHistorySummary['habitAchievements']['achievedByPillar'];
   language: 'es' | 'en';
+  viewMode: AchievementViewMode;
   onToggleMaintained: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
   disableRemote: boolean;
   mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
@@ -662,6 +739,9 @@ function AchievedShelf({
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
   const [previewHabit, setPreviewHabit] = useState<HabitAchievementShelfItem | null>(null);
   const [showBackFace, setShowBackFace] = useState(false);
+  const [activePillarCode, setActivePillarCode] = useState<(typeof REWARDS_PILLAR_ORDER)[number]['code']>(REWARDS_PILLAR_ORDER[0].code);
+  const [flippedCardByHabitId, setFlippedCardByHabitId] = useState<Record<string, boolean>>({});
+  const prefersReducedMotion = usePrefersReducedMotion();
   const normalizedGroups = useMemo(() => {
     const byCode = new Map(groups.map((group) => [group.pillar.code.toUpperCase(), group]));
     return REWARDS_PILLAR_ORDER.map((pillar) => {
@@ -684,10 +764,39 @@ function AchievedShelf({
   }, [normalizedGroups]);
 
   const activeHabit = activeHabitId ? habitsById.get(activeHabitId) ?? null : null;
+  const activePillarHabits = useMemo(() => {
+    const group = normalizedGroups.find((entry) => entry.pillar.code.toUpperCase() === activePillarCode);
+    return group?.habits ?? [];
+  }, [activePillarCode, normalizedGroups]);
+  const {
+    activeIndex: activeCarouselIndex,
+    setActiveIndex: setActiveCarouselIndex,
+    trackRef: carouselTrackRef,
+    handleTrackScroll: handleCarouselTrackScroll,
+  } = useCarouselSelection<HTMLDivElement>({
+    itemAttribute: 'data-achievement-carousel-index',
+    initialIndex: 0,
+  });
   const resolvedAchievedTaskId = demoAnchors?.achievedCardTaskId;
   const resolvedBlockedTaskId = demoAnchors?.blockedCardTaskId;
   const isShelfFocusStep = demoStepId === 'logros-shelves';
   const isDemoExperience = Boolean(demoStepId);
+
+  useEffect(() => {
+    if (viewMode !== 'shelves') {
+      setActiveHabitId(null);
+      setPreviewHabit(null);
+      setShowBackFace(false);
+    }
+  }, [viewMode]);
+
+  useEffect(() => {
+    setFlippedCardByHabitId({});
+    setActiveCarouselIndex(0);
+    if (carouselTrackRef.current) {
+      carouselTrackRef.current.scrollTo({ left: 0, behavior: 'auto' });
+    }
+  }, [activePillarCode, carouselTrackRef, setActiveCarouselIndex]);
 
   const focusBlockedShelfCard = useCallback(() => {
     const target = document.querySelector('[data-demo-anchor="logros-blocked-card"]') as HTMLElement | null;
@@ -772,6 +881,34 @@ function AchievedShelf({
     return `${pillarCode}-${traitCode}`;
   };
 
+  const scrollCarouselToIndex = useCallback((targetIndex: number) => {
+    const track = carouselTrackRef.current;
+    if (!track) {
+      return;
+    }
+    const clampedIndex = Math.max(0, Math.min(targetIndex, Math.max(activePillarHabits.length - 1, 0)));
+    const targetCard = track.querySelector<HTMLElement>(`[data-achievement-carousel-index="${clampedIndex}"]`);
+    if (!targetCard) {
+      return;
+    }
+    targetCard.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
+    setActiveCarouselIndex(clampedIndex);
+  }, [activePillarHabits.length, carouselTrackRef, prefersReducedMotion, setActiveCarouselIndex]);
+
+  const toggleCarouselCardFlip = useCallback((habitId: string) => {
+    setFlippedCardByHabitId((current) => ({
+      ...current,
+      [habitId]: !current[habitId],
+    }));
+  }, []);
+
+  const isCarouselView = viewMode === 'carousel';
+  const pillarChipLabels: Record<(typeof REWARDS_PILLAR_ORDER)[number]['code'], string> = {
+    BODY: language === 'es' ? 'Cuerpo' : 'Body',
+    MIND: language === 'es' ? 'Mente' : 'Mind',
+    SOUL: language === 'es' ? 'Alma' : 'Soul',
+  };
+
   return (
     <div className="space-y-4" data-demo-anchor={demoAnchors?.shelves}>
       <div>
@@ -779,7 +916,7 @@ function AchievedShelf({
           {language === 'es' ? 'Estantes de Logros' : 'Achievement Shelves'}
         </h2>
       </div>
-      {isShelfFocusStep ? (
+      {!isCarouselView && isShelfFocusStep ? (
         <div
           data-demo-anchor="logros-shelves-pillars"
           className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/95 p-3 shadow-[0_16px_32px_rgba(0,0,0,0.2)] ring-1 ring-[color:var(--color-accent-primary)]/35"
@@ -798,105 +935,248 @@ function AchievedShelf({
           </div>
         </div>
       ) : null}
-      {normalizedGroups.map((group) => (
-        <section key={group.pillar.code} className={`space-y-2 transition ${isShelfFocusStep ? 'space-y-1.5' : ''}`}>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{resolvePillarHeader(group.pillar, language)}</p>
-          <div className={`ib-rewards-shelf-scroll flex overflow-x-auto pb-1 transition ${isShelfFocusStep ? 'gap-2.5' : 'gap-3'} ${isDemoExperience ? 'pt-0.5' : ''}`}>
-            {group.habits.map((habit) => {
-              const isAchieved = habit.status !== 'not_achieved';
-              const active = habit.id === activeHabitId;
-              const traitCode = habit.trait?.code?.slice(0, 3).toUpperCase() ?? '---';
-              const slotLabel = `${(habit.pillar ?? group.pillar.code ?? 'X').slice(0, 1).toUpperCase()}-${traitCode}`;
+      {isCarouselView ? (
+        <div className="space-y-3">
+          <div
+            className="inline-flex w-full rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-1"
+            role="tablist"
+            aria-label={language === 'es' ? 'Seleccionar pilar' : 'Select pillar'}
+          >
+            {REWARDS_PILLAR_ORDER.map((pillar) => {
+              const isSelected = activePillarCode === pillar.code;
+              return (
+                <button
+                  key={pillar.code}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setActivePillarCode(pillar.code)}
+                  className={`flex-1 rounded-full px-2 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${
+                    isSelected
+                      ? 'bg-violet-500/30 text-violet-50'
+                      : 'text-[color:var(--color-text-dim)] hover:text-[color:var(--color-text)]'
+                  }`}
+                >
+                  {pillarChipLabels[pillar.code]}
+                </button>
+              );
+            })}
+          </div>
+          {activePillarHabits.length > 0 ? (
+            <>
+              <div
+                ref={carouselTrackRef}
+                onScroll={handleCarouselTrackScroll}
+                className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-1 pb-1"
+              >
+                {activePillarHabits.map((habit, index) => {
+                  const isFlipped = Boolean(flippedCardByHabitId[habit.id]);
+                  const isAchieved = habit.status !== 'not_achieved';
+                  const slotLabel = getSealBadge(habit);
+                  return (
+                    <button
+                      key={habit.id}
+                      type="button"
+                      data-achievement-carousel-index={index}
+                      onClick={() => toggleCarouselCardFlip(habit.id)}
+                      className={`ib-card-contour-shadow relative min-h-[23rem] w-[78%] shrink-0 snap-center rounded-3xl border p-5 text-left transition sm:w-[22rem] ${
+                        isAchieved
+                          ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)]'
+                          : 'border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/70'
+                      }`}
+                    >
+                      {!isFlipped ? (
+                        <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+                          {!isAchieved ? (
+                            <span className="rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-text-dim)]">
+                              {language === 'es' ? 'Bloqueado' : 'Locked'}
+                            </span>
+                          ) : null}
+                          <HabitAchievementSeal
+                            pillar={habit.pillar ?? activePillarCode}
+                            traitCode={habit.trait?.code}
+                            traitName={habit.trait?.name}
+                            alt={`${habit.taskName} seal`}
+                            disabled={!isAchieved}
+                            className={`h-44 min-h-44 w-44 min-w-44 overflow-hidden rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] shadow-[0_20px_50px_rgba(0,0,0,0.24)] ${isAchieved ? '' : 'opacity-55'}`}
+                            imgClassName="h-full w-full object-cover"
+                            fallback={(
+                              <span className="text-5xl font-semibold leading-none text-[color:var(--color-text-muted)]">
+                                {isAchieved ? (habit.seal.visible ? '🏅' : slotLabel) : slotLabel}
+                              </span>
+                            )}
+                          />
+                          <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
+                          <p className="text-sm text-[color:var(--color-text-muted)]">
+                            {language === 'es'
+                              ? 'Toca para ver más'
+                              : 'Tap to see more'}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="flex h-full flex-col justify-center gap-3">
+                          <p className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--color-text-dim)]">
+                            {isAchieved ? (language === 'es' ? 'Logro desbloqueado' : 'Achievement unlocked') : (language === 'es' ? 'Logro bloqueado' : 'Achievement locked')}
+                          </p>
+                          <h3 className="text-xl font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</h3>
+                          <p className="text-sm text-[color:var(--color-text-muted)]">
+                            {habit.trait?.name || habit.trait?.code || (language === 'es' ? 'Sin rasgo visible' : 'No visible trait')}
+                          </p>
+                          {isAchieved ? (
+                            <>
+                              <p className="text-sm text-[color:var(--color-text)]">
+                                {language === 'es' ? 'Logrado el' : 'Achieved on'} {habit.achievedAt?.slice(0, 10) ?? '—'}
+                              </p>
+                            </>
+                          ) : (
+                            <p className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-sm text-[color:var(--color-text-muted)]">
+                              {language === 'es'
+                                ? 'Sigue registrándolo para desbloquear este sello.'
+                                : 'Keep tracking it to unlock this seal.'}
+                            </p>
+                          )}
+                          <p className="text-xs text-[color:var(--color-text-dim)]">
+                            {language === 'es' ? 'Toca nuevamente para volver al frente' : 'Tap again to return to front'}
+                          </p>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => scrollCarouselToIndex(activeCarouselIndex - 1)}
+                  disabled={activeCarouselIndex <= 0}
+                  className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] disabled:opacity-50"
+                >
+                  {language === 'es' ? 'Anterior' : 'Previous'}
+                </button>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text-dim)]">
+                  {Math.min(activeCarouselIndex + 1, activePillarHabits.length)} / {activePillarHabits.length}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => scrollCarouselToIndex(activeCarouselIndex + 1)}
+                  disabled={activeCarouselIndex >= activePillarHabits.length - 1}
+                  className="rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)] disabled:opacity-50"
+                >
+                  {language === 'es' ? 'Siguiente' : 'Next'}
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
+              {language === 'es' ? 'Sin tareas seguidas en este pilar todavía.' : 'No tracked tasks in this pillar yet.'}
+            </p>
+          )}
+        </div>
+      ) : (
+        normalizedGroups.map((group) => (
+          <section key={group.pillar.code} className={`space-y-2 transition ${isShelfFocusStep ? 'space-y-1.5' : ''}`}>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{resolvePillarHeader(group.pillar, language)}</p>
+            <div className={`ib-rewards-shelf-scroll flex overflow-x-auto pb-1 transition ${isShelfFocusStep ? 'gap-2.5' : 'gap-3'} ${isDemoExperience ? 'pt-0.5' : ''}`}>
+              {group.habits.map((habit) => {
+                const isAchieved = habit.status !== 'not_achieved';
+                const active = habit.id === activeHabitId;
+                const traitCode = habit.trait?.code?.slice(0, 3).toUpperCase() ?? '---';
+                const slotLabel = `${(habit.pillar ?? group.pillar.code ?? 'X').slice(0, 1).toUpperCase()}-${traitCode}`;
 
-              if (!isAchieved) {
-                const blockedAnchor = demoAnchors?.blockedCardTaskId === habit.taskId ? demoAnchors?.blockedCard : undefined;
+                if (!isAchieved) {
+                  const blockedAnchor = demoAnchors?.blockedCardTaskId === habit.taskId ? demoAnchors?.blockedCard : undefined;
+                  return (
+                    <button
+                      key={habit.id}
+                      type="button"
+                      data-demo-anchor={blockedAnchor}
+                      onClick={() => setPreviewHabit(habit)}
+                      className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 text-center opacity-80 transition hover:border-[color:var(--color-border-strong)] hover:opacity-100 ${isShelfFocusStep ? 'h-32 w-24 py-3' : 'h-40 w-32 py-4'}`}
+                    >
+                      <HabitAchievementSeal
+                        pillar={habit.pillar ?? group.pillar.code}
+                        traitCode={habit.trait?.code}
+                        traitName={habit.trait?.name}
+                        alt={`${habit.taskName} seal`}
+                        disabled
+                        className={`flex items-center justify-center overflow-hidden rounded-full border border-dashed border-[color:var(--color-border-subtle)] bg-transparent ${isShelfFocusStep ? 'h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16' : 'h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20'}`}
+                        imgClassName="h-full w-full object-cover"
+                        fallback={(
+                          <div className="flex h-full w-full items-center justify-center text-xs font-semibold tracking-[0.12em] text-[color:var(--color-text-dim)]">
+                            {slotLabel}
+                          </div>
+                        )}
+                      />
+                      <p className={`mt-2 w-full truncate font-semibold text-[color:var(--color-text-muted)] ${isShelfFocusStep ? 'text-xs' : 'text-sm'}`}>{habit.taskName}</p>
+                    </button>
+                  );
+                }
+
+                const achievedAnchor = demoAnchors?.achievedCardTaskId === habit.taskId ? demoAnchors?.achievedCard : undefined;
                 return (
                   <button
                     key={habit.id}
                     type="button"
-                    data-demo-anchor={blockedAnchor}
-                    onClick={() => setPreviewHabit(habit)}
-                    className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)]/55 px-3 text-center opacity-80 transition hover:border-[color:var(--color-border-strong)] hover:opacity-100 ${isShelfFocusStep ? 'h-32 w-24 py-3' : 'h-40 w-32 py-4'}`}
+                    data-demo-anchor={achievedAnchor}
+                    onClick={() => {
+                      setActiveHabitId(habit.id);
+                      setShowBackFace(false);
+                    }}
+                    className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border px-3 text-center transition ${isShelfFocusStep ? 'h-32 w-24 py-3' : 'h-40 w-32 py-4'} ${active ? 'border-violet-300/60 bg-violet-500/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]'}`}
                   >
                     <HabitAchievementSeal
                       pillar={habit.pillar ?? group.pillar.code}
                       traitCode={habit.trait?.code}
                       traitName={habit.trait?.name}
                       alt={`${habit.taskName} seal`}
-                      disabled
-                    className={`flex items-center justify-center overflow-hidden rounded-full border border-dashed border-[color:var(--color-border-subtle)] bg-transparent ${isShelfFocusStep ? 'h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16' : 'h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20'}`}
+                      className={`flex items-center justify-center overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-[0_10px_30px_rgba(0,0,0,0.22)] ${isShelfFocusStep ? 'h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16' : 'h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20'}`}
                       imgClassName="h-full w-full object-cover"
                       fallback={(
-                        <div className="flex h-full w-full items-center justify-center text-xs font-semibold tracking-[0.12em] text-[color:var(--color-text-dim)]">
-                          {slotLabel}
-                        </div>
+                        <span className="text-3xl leading-none">
+                          {habit.seal.visible ? '🏅' : getSealBadge(habit)}
+                        </span>
                       )}
                     />
-                    <p className={`mt-2 w-full truncate font-semibold text-[color:var(--color-text-muted)] ${isShelfFocusStep ? 'text-xs' : 'text-sm'}`}>{habit.taskName}</p>
+                    <p className={`mt-2 w-full truncate font-semibold text-[color:var(--color-text)] ${isShelfFocusStep ? 'text-xs' : 'text-sm'}`}>{habit.taskName}</p>
                   </button>
                 );
-              }
+              })}
+              {group.habits.length === 0 ? (
+                <p className="py-6 text-sm text-[color:var(--color-text-muted)]">
+                  {language === 'es' ? 'Sin tareas seguidas en este pilar todavía.' : 'No tracked tasks in this pillar yet.'}
+                </p>
+              ) : null}
+            </div>
+          </section>
+        ))
+      )}
 
-              const achievedAnchor = demoAnchors?.achievedCardTaskId === habit.taskId ? demoAnchors?.achievedCard : undefined;
-              return (
-                <button
-                  key={habit.id}
-                  type="button"
-                  data-demo-anchor={achievedAnchor}
-                  onClick={() => {
-                    setActiveHabitId(habit.id);
-                    setShowBackFace(false);
-                  }}
-                  className={`flex shrink-0 flex-col items-center justify-center rounded-2xl border px-3 text-center transition ${isShelfFocusStep ? 'h-32 w-24 py-3' : 'h-40 w-32 py-4'} ${active ? 'border-violet-300/60 bg-violet-500/10' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:border-[color:var(--color-border-strong)]'}`}
-                >
-                  <HabitAchievementSeal
-                    pillar={habit.pillar ?? group.pillar.code}
-                    traitCode={habit.trait?.code}
-                    traitName={habit.trait?.name}
-                    alt={`${habit.taskName} seal`}
-                    className={`flex items-center justify-center overflow-hidden rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-[0_10px_30px_rgba(0,0,0,0.22)] ${isShelfFocusStep ? 'h-16 min-h-16 w-16 min-w-16 max-h-16 max-w-16' : 'h-20 min-h-20 w-20 min-w-20 max-h-20 max-w-20'}`}
-                    imgClassName="h-full w-full object-cover"
-                    fallback={(
-                      <span className="text-3xl leading-none">
-                        {habit.seal.visible ? '🏅' : getSealBadge(habit)}
-                      </span>
-                    )}
-                  />
-                  <p className={`mt-2 w-full truncate font-semibold text-[color:var(--color-text)] ${isShelfFocusStep ? 'text-xs' : 'text-sm'}`}>{habit.taskName}</p>
-                </button>
-              );
-            })}
-            {group.habits.length === 0 ? (
-              <p className="py-6 text-sm text-[color:var(--color-text-muted)]">
-                {language === 'es' ? 'Sin tareas seguidas en este pilar todavía.' : 'No tracked tasks in this pillar yet.'}
-              </p>
-            ) : null}
-          </div>
-        </section>
-      ))}
+      {!isCarouselView ? (
+        <>
+          <AchievementFocusOverlay
+            habit={activeHabit}
+            language={language}
+            showBackFace={showBackFace}
+            disableRemote={disableRemote}
+            demoAnchors={demoAnchors}
+            onFlip={() => setShowBackFace((current) => !current)}
+            onClose={() => {
+              setActiveHabitId(null);
+              setShowBackFace(false);
+            }}
+            onToggleMaintained={onToggleMaintained}
+          />
 
-      <AchievementFocusOverlay
-        habit={activeHabit}
-        language={language}
-        showBackFace={showBackFace}
-        disableRemote={disableRemote}
-        demoAnchors={demoAnchors}
-        onFlip={() => setShowBackFace((current) => !current)}
-        onClose={() => {
-          setActiveHabitId(null);
-          setShowBackFace(false);
-        }}
-        onToggleMaintained={onToggleMaintained}
-      />
-
-      <NotAchievedPreviewOverlay
-        habit={previewHabit}
-        language={language}
-        disableRemote={disableRemote}
-        mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
-        demoAnchors={demoAnchors}
-        onClose={() => setPreviewHabit(null)}
-      />
+          <NotAchievedPreviewOverlay
+            habit={previewHabit}
+            language={language}
+            disableRemote={disableRemote}
+            mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
+            demoAnchors={demoAnchors}
+            onClose={() => setPreviewHabit(null)}
+          />
+        </>
+      ) : null}
     </div>
   );
 }
