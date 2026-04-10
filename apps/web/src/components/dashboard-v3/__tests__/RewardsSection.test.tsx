@@ -8,6 +8,20 @@ const getTaskInsightsMock = vi.fn();
 const toggleTaskHabitAchievementMaintainedMock = vi.fn();
 const decideTaskHabitAchievementMock = vi.fn();
 
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+
 vi.mock('../../../i18n/postLoginLanguage', () => ({
   usePostLoginLanguage: () => ({ language: 'en' as const }),
 }));
@@ -233,5 +247,19 @@ describe('RewardsSection achieved shelf overlays', () => {
 
     expect(await screen.findByText('Keep maintained')).toBeInTheDocument();
     expect(toggleTaskHabitAchievementMaintainedMock).not.toHaveBeenCalled();
+  });
+
+  it('shows habit development on the back of locked carousel cards', async () => {
+    getRewardsHistoryMock.mockResolvedValue(initialData);
+    getTaskInsightsMock.mockResolvedValue(insightsResponse);
+
+    render(<RewardsSection userId="user-123" initialData={initialData} />);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Carousel' }));
+    fireEvent.click(screen.getByRole('button', { name: /Read 10 pages/i }));
+
+    expect(await screen.findByText('Habit development')).toBeInTheDocument();
+    expect(await screen.findByLabelText('preview achievement score 74')).toBeInTheDocument();
+    await waitFor(() => expect(getTaskInsightsMock).toHaveBeenCalledWith('task-preview'));
   });
 });
