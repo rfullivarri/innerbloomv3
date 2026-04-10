@@ -1006,7 +1006,7 @@ function AchievedShelf({
                       type="button"
                       data-achievement-carousel-index={index}
                       onClick={() => handleCarouselCardClick(habit.id, index)}
-                      className={`ib-card-contour-shadow relative h-[23rem] w-[78%] shrink-0 snap-center overflow-hidden rounded-3xl border p-5 text-left transition sm:w-[22rem] ${
+                      className={`ib-card-contour-shadow relative h-[27.5rem] w-[86%] shrink-0 snap-center overflow-hidden rounded-3xl border p-3.5 text-left transition sm:h-[23rem] sm:w-[22rem] sm:p-5 ${
                         isAchieved
                           ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] shadow-[0_16px_30px_rgba(2,8,23,0.14)] dark:shadow-[0_16px_30px_rgba(2,8,23,0.34)]'
                           : 'border-dashed border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-1)]/82 shadow-[0_12px_24px_rgba(2,8,23,0.1)] dark:border-[color:var(--color-border-subtle)] dark:shadow-[0_12px_24px_rgba(2,8,23,0.22)]'
@@ -1054,15 +1054,12 @@ function AchievedShelf({
                           </p>
                         </div>
                       ) : (
-                        <div className="flex h-full flex-col gap-2 overflow-hidden">
-                          <div className="space-y-1">
+                        <div className="flex h-full flex-col gap-1 overflow-hidden">
+                          <div className="space-y-0.5">
                             <p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-text-dim)]">
                               {language === 'es' ? 'Logro bloqueado' : 'Achievement locked'}
                             </p>
-                            <h3 className="truncate text-base font-semibold leading-tight text-[color:var(--color-text-strong)]">{habit.taskName}</h3>
-                            <p className="truncate text-xs leading-tight text-[color:var(--color-text-muted)]">
-                              {habit.trait?.name || habit.trait?.code || (language === 'es' ? 'Sin rasgo visible' : 'No visible trait')}
-                            </p>
+                            <h3 className="truncate text-[15px] font-semibold leading-[1.2] text-[color:var(--color-text-strong)]">{habit.taskName}</h3>
                           </div>
                           <div className="min-h-0 flex-1">
                             <LockedAchievementHabitDevelopment
@@ -1073,9 +1070,6 @@ function AchievedShelf({
                               loadOnVisible={isFlipped}
                             />
                           </div>
-                          <p className="text-[11px] text-[color:var(--color-text-dim)]">
-                            {language === 'es' ? 'Toca otra vez para volver al frente' : 'Tap again to return to front'}
-                          </p>
                         </div>
                       )}
                     </button>
@@ -1262,7 +1256,7 @@ function LockedAchievementHabitDevelopment({
 
   if (previewAchievement) {
     return (
-      <div className="min-h-0 flex-1">
+      <div className="h-full min-h-0 flex-1">
         <PreviewAchievementCard previewAchievement={previewAchievement} language={language} />
       </div>
     );
@@ -1487,7 +1481,7 @@ function AchievedHabitBackContent({
 }) {
   const traitLabel = habit.trait?.name || habit.trait?.code || (language === 'es' ? 'Sin rasgo visible' : 'No visible trait');
   return (
-    <div className={`flex w-full flex-col gap-2 ${centerAligned ? 'items-center text-center' : ''}`}>
+    <div className={`flex w-full flex-col gap-1.5 ${centerAligned ? 'items-center text-center' : ''}`}>
       <p className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--color-text-dim)]">
         {language === 'es' ? 'Logro desbloqueado' : 'Achievement unlocked'}
       </p>
@@ -1502,7 +1496,7 @@ function AchievedHabitBackContent({
       <p className="text-xs text-[color:var(--color-text-muted)]">
         {language === 'es' ? 'GP desde mantener activo' : 'GP since keep maintained'}: {habit.gpSinceMaintain}
       </p>
-      <div className={`mt-1 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-2 ${centerAligned ? 'w-full max-w-sm' : ''}`}>
+      <div className={`mt-0.5 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-2.5 py-1.5 ${centerAligned ? 'w-full max-w-sm' : ''}`}>
         <MaintainToggleRow
           language={language}
           checked={habit.maintainEnabled}
