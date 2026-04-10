@@ -589,53 +589,6 @@ function resolvePillarHeader(pillar: { code?: string | null; name?: string | nul
   return `${pillar.name ?? 'Pillar'} ${resolvePillarEmoji(pillar.code)}`;
 }
 
-function getAchievementStatusLabel(status: string | null | undefined, language: 'es' | 'en'): string {
-  const normalized = String(status ?? '').trim().toLowerCase();
-  if (normalized === 'strong') return language === 'es' ? 'fuerte' : 'strong';
-  if (normalized === 'building') return language === 'es' ? 'en construcción' : 'building';
-  return language === 'es' ? 'frágil' : 'fragile';
-}
-
-function formatActiveWindowSummary(
-  slots: NonNullable<NonNullable<TaskInsightsResponse['previewAchievement']>['windowProximity']>['slots'],
-  language: 'es' | 'en',
-): string {
-  if (!Array.isArray(slots) || slots.length === 0) {
-    return language === 'es' ? 'Sin datos' : 'No data';
-  }
-  const validCount = slots.filter((slot) => {
-    if (typeof slot === 'object' && slot && 'state' in slot) {
-      const state = String(slot.state ?? '').toLowerCase();
-      return state === 'valid' || state === 'achieved';
-    }
-    const raw = String(slot ?? '').toLowerCase();
-    return raw === 'valid' || raw === 'projected_valid';
-  }).length;
-  return language === 'es'
-    ? `${validCount}/${slots.length} válidos`
-    : `${validCount}/${slots.length} valid`;
-}
-
-function getCompactMonthTone(state: string | null | undefined): string {
-  const normalized = String(state ?? '').toLowerCase();
-  if (normalized === 'strong' || normalized === 'valid' || normalized === 'achieved') return 'bg-emerald-300/85 text-emerald-950';
-  if (normalized === 'building' || normalized === 'weak' || normalized === 'floor_only') return 'bg-amber-300/85 text-amber-950';
-  if (normalized === 'locked' || normalized === 'invalid') return 'bg-rose-300/80 text-rose-950';
-  return 'bg-[color:var(--color-overlay-3)] text-[color:var(--color-text-muted)]';
-}
-
-function resolveCompactMonthLabel(periodKey: string | null | undefined, language: 'es' | 'en'): string {
-  const value = (periodKey ?? '').trim();
-  if (!/^\d{4}-\d{2}$/.test(value)) {
-    return language === 'es' ? 'N/A' : 'N/A';
-  }
-  const parsed = new Date(`${value}-01T00:00:00.000Z`);
-  if (Number.isNaN(parsed.getTime())) {
-    return value.slice(5, 7);
-  }
-  return new Intl.DateTimeFormat(language === 'es' ? 'es-AR' : 'en-US', { month: 'short' }).format(parsed);
-}
-
 function CompletionDots({
   completionDays,
   range,
@@ -787,7 +740,7 @@ function AchievedShelf({
   const [previewHabit, setPreviewHabit] = useState<HabitAchievementShelfItem | null>(null);
   const [showBackFace, setShowBackFace] = useState(false);
   const [activePillarCode, setActivePillarCode] = useState<(typeof REWARDS_PILLAR_ORDER)[number]['code']>(REWARDS_PILLAR_ORDER[0].code);
-  const [flippedCardByHabitId, setFlippedCardByHabitId] = useState<Record<string, boolean>>({});
+  const [flippedCarouselHabitId, setFlippedCarouselHabitId] = useState<string | null>(null);
   const [maintainPendingHabitId, setMaintainPendingHabitId] = useState<string | null>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const normalizedGroups = useMemo(() => {
@@ -839,12 +792,22 @@ function AchievedShelf({
   }, [viewMode]);
 
   useEffect(() => {
-    setFlippedCardByHabitId({});
+    setFlippedCarouselHabitId(null);
     setActiveCarouselIndex(0);
     if (carouselTrackRef.current) {
       carouselTrackRef.current.scrollTo({ left: 0, behavior: 'auto' });
     }
   }, [activePillarCode, carouselTrackRef, setActiveCarouselIndex]);
+
+  useEffect(() => {
+    if (!flippedCarouselHabitId) {
+      return;
+    }
+    const flippedIndex = activePillarHabits.findIndex((habit) => habit.id === flippedCarouselHabitId);
+    if (flippedIndex !== activeCarouselIndex) {
+      setFlippedCarouselHabitId(null);
+    }
+  }, [activeCarouselIndex, activePillarHabits, flippedCarouselHabitId]);
 
   const focusBlockedShelfCard = useCallback(() => {
     const target = document.querySelector('[data-demo-anchor="logros-blocked-card"]') as HTMLElement | null;
@@ -939,16 +902,23 @@ function AchievedShelf({
     if (!targetCard) {
       return;
     }
-    targetCard.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
+    if (typeof targetCard.scrollIntoView === 'function') {
+      targetCard.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
+    }
     setActiveCarouselIndex(clampedIndex);
   }, [activePillarHabits.length, carouselTrackRef, prefersReducedMotion, setActiveCarouselIndex]);
 
-  const toggleCarouselCardFlip = useCallback((habitId: string) => {
-    setFlippedCardByHabitId((current) => ({
-      ...current,
-      [habitId]: !current[habitId],
-    }));
-  }, []);
+  const handleCarouselCardClick = useCallback((habitId: string, index: number) => {
+    if (index !== activeCarouselIndex) {
+      setFlippedCarouselHabitId(null);
+      scrollCarouselToIndex(index);
+      window.setTimeout(() => {
+        setFlippedCarouselHabitId((current) => (current === habitId ? null : habitId));
+      }, prefersReducedMotion ? 0 : 120);
+      return;
+    }
+    setFlippedCarouselHabitId((current) => (current === habitId ? null : habitId));
+  }, [activeCarouselIndex, prefersReducedMotion, scrollCarouselToIndex]);
 
   const handleToggleMaintained = useCallback(async (habit: HabitAchievementShelfItem, enabled: boolean) => {
     setMaintainPendingHabitId(habit.id);
@@ -1027,7 +997,7 @@ function AchievedShelf({
                 className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-1 pb-1"
               >
                 {activePillarHabits.map((habit, index) => {
-                  const isFlipped = Boolean(flippedCardByHabitId[habit.id]);
+                  const isFlipped = flippedCarouselHabitId === habit.id && activeCarouselIndex === index;
                   const isAchieved = habit.status !== 'not_achieved';
                   const slotLabel = getSealBadge(habit);
                   return (
@@ -1035,7 +1005,7 @@ function AchievedShelf({
                       key={habit.id}
                       type="button"
                       data-achievement-carousel-index={index}
-                      onClick={() => toggleCarouselCardFlip(habit.id)}
+                      onClick={() => handleCarouselCardClick(habit.id, index)}
                       className={`ib-card-contour-shadow relative h-[23rem] w-[78%] shrink-0 snap-center overflow-hidden rounded-3xl border p-5 text-left transition sm:w-[22rem] ${
                         isAchieved
                           ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] shadow-[0_16px_30px_rgba(2,8,23,0.14)] dark:shadow-[0_16px_30px_rgba(2,8,23,0.34)]'
@@ -1080,21 +1050,13 @@ function AchievedShelf({
                             {habit.trait?.name || habit.trait?.code || (language === 'es' ? 'Sin rasgo visible' : 'No visible trait')}
                           </p>
                           {isAchieved ? (
-                            <>
-                              <p className="text-sm text-[color:var(--color-text)]">
-                                {language === 'es' ? 'Logrado el' : 'Achieved on'} {habit.achievedAt?.slice(0, 10) ?? '—'}
-                              </p>
-                              <div className="mt-1 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-2">
-                                <MaintainToggleRow
-                                  language={language}
-                                  checked={habit.maintainEnabled}
-                                  disabled={disableRemote || maintainPendingHabitId === habit.id}
-                                  onToggle={() => {
-                                    void handleToggleMaintained(habit, !habit.maintainEnabled);
-                                  }}
-                                />
-                              </div>
-                            </>
+                            <AchievedHabitBackContent
+                              habit={habit}
+                              language={language}
+                              disableRemote={disableRemote}
+                              maintainPendingHabitId={maintainPendingHabitId}
+                              onToggleMaintainedWithPending={handleToggleMaintained}
+                            />
                           ) : (
                             <LockedAchievementHabitDevelopment
                               habit={habit}
@@ -1102,6 +1064,7 @@ function AchievedShelf({
                               disableRemote={disableRemote}
                               mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
                               loadOnVisible={isFlipped}
+                              constrained
                             />
                           )}
                           <p className="mt-auto text-xs text-[color:var(--color-text-dim)]">
@@ -1257,12 +1220,14 @@ function LockedAchievementHabitDevelopment({
   disableRemote,
   mockPreviewAchievementByTaskId,
   loadOnVisible,
+  constrained = false,
 }: {
   habit: HabitAchievementShelfItem;
   language: 'es' | 'en';
   disableRemote: boolean;
   mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
   loadOnVisible: boolean;
+  constrained?: boolean;
 }) {
   const taskId = habit.taskId;
   const mockPreviewAchievement = mockPreviewAchievementByTaskId?.[taskId] ?? null;
@@ -1275,11 +1240,6 @@ function LockedAchievementHabitDevelopment({
   const showLoading = loadOnVisible && status === 'loading' && !mockPreviewAchievement;
   const showError = loadOnVisible && status === 'error';
   const showEmpty = loadOnVisible && !showLoading && !showError && !previewAchievement;
-  const compactRecentMonths = (previewAchievement?.recentMonths ?? []).slice(-4);
-  const scoreValue = previewAchievement ? Math.max(0, Math.min(100, Math.round(Number(previewAchievement.score ?? 0)))) : 0;
-  const statusLabel = getAchievementStatusLabel(previewAchievement?.status, language);
-  const activeWindowSlots = previewAchievement?.windowProximity?.slots ?? [];
-
   if (showLoading) {
     return (
       <p className="rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2.5 text-xs text-[color:var(--color-text-muted)]">
@@ -1298,30 +1258,8 @@ function LockedAchievementHabitDevelopment({
 
   if (previewAchievement) {
     return (
-      <div className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-2.5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-text-dim)]">
-          {language === 'es' ? 'Desarrollo del hábito' : 'Habit development'}
-        </p>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <StatPill label="Score" value={`${scoreValue}%`} />
-          <StatPill label={language === 'es' ? 'Estado' : 'Status'} value={statusLabel} />
-        </div>
-        <div className="mt-2 rounded-lg border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-2 py-1.5">
-          <p className="text-[10px] uppercase tracking-[0.1em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Ventana activa' : 'Active window'}</p>
-          <p className="mt-0.5 text-xs text-[color:var(--color-text)]">{formatActiveWindowSummary(activeWindowSlots, language)}</p>
-        </div>
-        <div className="mt-2 rounded-lg border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-2 py-1.5">
-          <p className="text-[10px] uppercase tracking-[0.1em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Últimos meses' : 'Recent months'}</p>
-          <div className="mt-1 flex gap-1 overflow-hidden">
-            {compactRecentMonths.length > 0 ? compactRecentMonths.map((month, index) => (
-              <span key={`${month.periodKey ?? month.month ?? 'month'}-${index}`} className={`inline-flex min-w-0 flex-1 items-center justify-center rounded-md px-1 py-1 text-[10px] font-semibold ${getCompactMonthTone(month.state)}`}>
-                {resolveCompactMonthLabel(month.periodKey ?? month.month, language)}
-              </span>
-            )) : (
-              <span className="text-[11px] text-[color:var(--color-text-muted)]">{language === 'es' ? 'Sin datos todavía' : 'No data yet'}</span>
-            )}
-          </div>
-        </div>
+      <div className={constrained ? 'min-h-0 flex-1 overflow-y-auto pr-1' : ''}>
+        <PreviewAchievementCard previewAchievement={previewAchievement} language={language} />
       </div>
     );
   }
@@ -1337,15 +1275,6 @@ function LockedAchievementHabitDevelopment({
   }
 
   return null;
-}
-
-function StatPill({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-2 py-1.5">
-      <p className="text-[10px] uppercase tracking-[0.1em] text-[color:var(--color-text-dim)]">{label}</p>
-      <p className="truncate text-xs font-semibold text-[color:var(--color-text)]">{value}</p>
-    </div>
-  );
 }
 
 function NotAchievedPreviewOverlay({
@@ -1478,12 +1407,6 @@ function AchievementFocusOverlay({
     return null;
   }
 
-  const backFaceTrait =
-    habit.trait?.name?.trim() ||
-    habit.trait?.code?.trim() ||
-    habit.pillar?.trim() ||
-    (language === 'es' ? 'Sin rasgo' : 'No trait');
-
   return createPortal(
     <div className="fixed inset-0 z-[230] flex items-end justify-center bg-slate-950/70 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center" data-achievement-overlay="focus-card" onClick={onClose}>
       <div className="relative w-full max-w-sm" onClick={(event) => event.stopPropagation()}>
@@ -1523,18 +1446,13 @@ function AchievementFocusOverlay({
             </div>
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-3 text-center" data-demo-anchor={demoAnchors?.achievementBack}>
-              <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
-              <p className="text-sm text-[color:var(--color-text-muted)]">{backFaceTrait}</p>
-              <p className="text-xs text-[color:var(--color-text-muted)]">
-                {language === 'es' ? 'Logrado el' : 'Achieved on'} {habit.achievedAt?.slice(0, 10) ?? '—'}
-              </p>
-              <MaintainToggleRow
+              <AchievedHabitBackContent
+                habit={habit}
                 language={language}
-                checked={habit.maintainEnabled}
-                disabled={disableRemote || maintainPendingHabitId === habit.id}
-                onToggle={() => {
-                  void onToggleMaintainedWithPending(habit, !habit.maintainEnabled);
-                }}
+                disableRemote={disableRemote}
+                maintainPendingHabitId={maintainPendingHabitId}
+                onToggleMaintainedWithPending={onToggleMaintainedWithPending}
+                centerAligned
               />
               <p className="text-xs text-[color:var(--color-text-dim)]">
                 {language === 'es' ? 'Toque nuevamente para volver al frente' : 'Tap again to return to the front'}
@@ -1545,6 +1463,52 @@ function AchievementFocusOverlay({
       </div>
     </div>,
     document.body,
+  );
+}
+
+function AchievedHabitBackContent({
+  habit,
+  language,
+  disableRemote,
+  maintainPendingHabitId,
+  onToggleMaintainedWithPending,
+  centerAligned = false,
+}: {
+  habit: HabitAchievementShelfItem;
+  language: 'es' | 'en';
+  disableRemote: boolean;
+  maintainPendingHabitId: string | null;
+  onToggleMaintainedWithPending: (habit: HabitAchievementShelfItem, enabled: boolean) => Promise<void>;
+  centerAligned?: boolean;
+}) {
+  const traitLabel = habit.trait?.name || habit.trait?.code || (language === 'es' ? 'Sin rasgo visible' : 'No visible trait');
+  return (
+    <div className={`flex w-full flex-col gap-2 ${centerAligned ? 'items-center text-center' : ''}`}>
+      <p className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--color-text-dim)]">
+        {language === 'es' ? 'Logro desbloqueado' : 'Achievement unlocked'}
+      </p>
+      <p className="text-lg font-semibold leading-tight text-[color:var(--color-text-strong)]">{habit.taskName}</p>
+      <p className="text-sm leading-tight text-[color:var(--color-text-muted)]">{traitLabel}</p>
+      <p className="text-xs text-[color:var(--color-text-muted)]">
+        {language === 'es' ? 'Logrado el' : 'Achieved on'} {habit.achievedAt?.slice(0, 10) ?? '—'}
+      </p>
+      <p className="text-xs text-[color:var(--color-text-muted)]">
+        {language === 'es' ? 'GP antes del logro' : 'GP before achievement'}: {habit.gpBeforeAchievement}
+      </p>
+      <p className="text-xs text-[color:var(--color-text-muted)]">
+        {language === 'es' ? 'GP desde mantener activo' : 'GP since keep maintained'}: {habit.gpSinceMaintain}
+      </p>
+      <div className={`mt-1 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-2 ${centerAligned ? 'w-full max-w-sm' : ''}`}>
+        <MaintainToggleRow
+          language={language}
+          checked={habit.maintainEnabled}
+          disabled={disableRemote || maintainPendingHabitId === habit.id}
+          onToggle={() => {
+            void onToggleMaintainedWithPending(habit, !habit.maintainEnabled);
+          }}
+        />
+      </div>
+    </div>
   );
 }
 
