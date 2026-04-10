@@ -173,6 +173,11 @@
 
   :root[data-theme='light'] {
     color-scheme: light;
+    --color-dashboard-light-bg:
+      radial-gradient(120% 85% at 10% -12%, rgba(248, 194, 218, 0.35) 0%, rgba(248, 194, 218, 0) 58%),
+      radial-gradient(92% 78% at 86% -6%, rgba(233, 210, 255, 0.32) 0%, rgba(233, 210, 255, 0) 62%),
+      radial-gradient(108% 82% at 52% 115%, rgba(248, 224, 183, 0.22) 0%, rgba(248, 224, 183, 0) 65%),
+      linear-gradient(180deg, #fcf7f2 0%, #f9f6ff 46%, #f5f9ff 100%);
     --color-surface: #f8fafc;
     --color-surface-muted: #f1f5f9;
     --color-surface-elevated: #ffffff;
@@ -272,7 +277,7 @@
   }
 
   :root[data-theme='light'] body {
-    background-image: linear-gradient(180deg, #f8fafc 0%, #f8fafc 100%);
+    background-image: var(--color-dashboard-light-bg);
   }
 
 
@@ -4591,6 +4596,16 @@
   :root[data-theme='light'] [data-light-scope='dashboard-v3'] {
     --color-slate-900-95: rgba(255, 255, 255, 0.96);
     --color-slate-950-80: rgba(241, 245, 255, 0.82);
+    background-image: var(--color-dashboard-light-bg);
+    background-attachment: fixed;
+  }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .ib-card-contour-shadow {
+    box-shadow: 0 12px 28px rgba(148, 116, 178, 0.1), 0 3px 10px rgba(15, 23, 42, 0.05);
+  }
+
+  :root[data-theme='light'] [data-light-scope='dashboard-v3'] .rounded-2xl.border {
+    border-color: color-mix(in srgb, var(--color-border-subtle) 82%, #f1dbe9 18%);
   }
 
   :root[data-theme='light'] [data-light-scope='editor'] {
