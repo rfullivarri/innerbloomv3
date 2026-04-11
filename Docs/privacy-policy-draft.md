@@ -2,7 +2,7 @@
 
 Estado: borrador operativo basado en el comportamiento y los datos visibles en el repo. Requiere revisión final antes de publicarse.
 
-Última actualización sugerida: 2026-04-08
+Última actualización sugerida: 2026-04-11
 
 ## 1. Overview
 
@@ -21,7 +21,11 @@ App / service domain used in the product:
 
 Contact email:
 
-- Pending final support email from owner
+- Privacy: `privacy@innerbloomjourney.org`
+- Support: `support@innerbloomjourney.org` recommended, pending final confirmation as the public support inbox
+- Notifications / transactional sender: `notifications@innerbloomjourney.org`
+
+Email receiving for `innerbloomjourney.org` is currently configured through Resend Receiving.
 
 ## 3. Information we may collect
 
@@ -64,6 +68,7 @@ This information is used to keep the service working, diagnose issues, and impro
 - Reminder preferences
 - Local notification settings
 - Email delivery metadata where reminder or transactional email features are enabled
+- Inbound privacy/support emails received through the configured domain inbox
 
 This information is used to deliver reminders and service-related communications.
 
@@ -106,6 +111,7 @@ Based on the current architecture, Innerbloom may rely on third-party service pr
 - authentication
 - infrastructure and hosting
 - email delivery
+- inbound email receiving
 - analytics, if enabled
 
 Data should only be shared with service providers to the extent necessary to operate, secure, and improve the service.
@@ -149,13 +155,17 @@ If service providers process data outside the user’s country, the final policy
 
 Privacy contact email:
 
-- Pending
+- `privacy@innerbloomjourney.org`
+
+Support contact email:
+
+- `support@innerbloomjourney.org` recommended; confirm before publishing.
 
 ## 14. Final review items before publishing
 
-- Confirm support/privacy email
+- Confirm whether `support@innerbloomjourney.org` will be published as support contact
 - Confirm whether GA4 is enabled in production
-- Confirm whether reminder emails are active in production
+- Confirm whether reminder emails are active in production through `notifications@innerbloomjourney.org`
 - Confirm whether any additional processors are used
 - Add a real legal entity name if applicable
 - Add jurisdiction-specific wording if needed

@@ -12,6 +12,9 @@ Estado revisado sobre el repo local el 2026-04-08.
 - App icon 1024x1024 presente en `Assets.xcassets/AppIcon.appiconset`.
 - Recordatorios locales iOS funcionando vía `@capacitor/local-notifications`.
 - Backend de producción corregido para iOS apuntando a `https://apiv2.innerbloomjourney.org`.
+- Correo de privacidad definido: `privacy@innerbloomjourney.org`.
+- Receiving email del dominio `innerbloomjourney.org` verificado en Resend.
+- Remitente de emails automáticos definido: `notifications@innerbloomjourney.org`.
 
 ## Riesgos o huecos que siguen abiertos
 
@@ -19,8 +22,9 @@ Estado revisado sobre el repo local el 2026-04-08.
 
 - No encontré un flujo visible de **eliminación de cuenta** en la app ni en el código web/mobile.
   - Si la app permite crear cuenta, Apple suele exigir que también permita solicitar o ejecutar la eliminación de cuenta dentro de la app.
-- No encontré una **Privacy Policy pública** dentro del repo lista para enlazar.
-- No encontré una **Support URL pública** lista para App Store Connect.
+- No hay todavía una **Privacy Policy pública publicada** lista para enlazar en App Store Connect.
+- No hay todavía una **Support URL pública** lista para App Store Connect.
+- Queda pendiente confirmar si `support@innerbloomjourney.org` será el correo público de soporte.
 
 ### Riesgos de producto/UX antes de publicar
 
@@ -69,6 +73,12 @@ Estado revisado sobre el repo local el 2026-04-08.
 5. Confirmar si la cuenta puede eliminarse dentro de la app.
 6. Confirmar el `bundle id` final y el `Team` de firma.
 
+## Contactos sugeridos para App Store Connect
+
+- Privacy contact: `privacy@innerbloomjourney.org`
+- Support contact recomendado: `support@innerbloomjourney.org`
+- Transactional/reminder sender: `notifications@innerbloomjourney.org`
+
 ## Comandos útiles
 
 ```bash
@@ -82,4 +92,3 @@ En Xcode:
 1. `Shift + Cmd + K`
 2. `Cmd + R` para probar
 3. `Product > Archive` para generar el archive de release
-

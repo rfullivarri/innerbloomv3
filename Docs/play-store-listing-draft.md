@@ -77,8 +77,11 @@ Mi recomendación:
 
 ## Datos de contacto que faltan
 
-- Support email: pendiente
-- Website: `https://innerbloomjourney.org` o el dominio definitivo que quieras usar
+- Support email: `support@innerbloomjourney.org` recomendado, pendiente de confirmar si se usará como contacto público
+- Privacy email: `privacy@innerbloomjourney.org`
+- Transactional/reminder sender: `notifications@innerbloomjourney.org`
+- Email receiving: Resend Receiving verificado para `innerbloomjourney.org`
+- Website: `https://innerbloomjourney.org`
 - Privacy policy URL: pendiente de publicar
 
 ## Assets que vas a necesitar para Play Console

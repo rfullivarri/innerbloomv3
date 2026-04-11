@@ -31,6 +31,8 @@ Estado: borrador técnico para ayudarte a completar Google Play Data Safety. No 
 
 - local notifications Android
 - soporte backend para reminder emails
+- Resend para envío de emails automáticos desde `notifications@innerbloomjourney.org`
+- Resend Receiving verificado para recibir emails del dominio, incluyendo `privacy@innerbloomjourney.org`
 
 ### Analítica
 
@@ -112,10 +114,16 @@ Según la implementación actual, los usos más probables son:
 ## Preguntas que todavía hay que cerrar
 
 1. ¿GA4 queda activo en producción o no?
-2. ¿Vas a mandar emails de reminder o solo notificaciones locales?
+2. ¿Vas a mandar emails de reminder en producción usando `notifications@innerbloomjourney.org`, o solo notificaciones locales?
 3. ¿Vas a usar compras/suscripciones nativas Android ahora o más adelante?
 4. ¿Querés que la app se posicione como wellness/habit app o querés evitar cualquier framing cercano a “health”?
 5. ¿Hay algún proveedor extra fuera del repo actual?
+
+## Contactos ya definidos para documentación
+
+- Privacy contact: `privacy@innerbloomjourney.org`
+- Support contact recomendado: `support@innerbloomjourney.org`, pendiente de confirmar como contacto público
+- Transactional/reminder sender: `notifications@innerbloomjourney.org`
 
 ## Mi recomendación operativa
 

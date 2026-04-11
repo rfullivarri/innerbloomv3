@@ -7,6 +7,9 @@ Estado de este checklist: borrador operativo para preparar la primera subida a G
 - App ID Android: `org.innerbloom.app`
 - Nombre de app Android: `Innerbloom`
 - URL scheme nativo: `innerbloom`
+- Correo de privacidad: `privacy@innerbloomjourney.org`
+- Receiving email del dominio: activo y verificado en Resend para `innerbloomjourney.org`
+- Remitente operativo de emails automáticos: `notifications@innerbloomjourney.org`
 - Login nativo con Clerk: funcionando
 - Deep link de callback móvil: funcionando
 - API Android por transporte nativo: funcionando
@@ -38,7 +41,7 @@ Archivos clave:
 - Descripción corta
 - Descripción completa
 - Categoría de app
-- Correo de soporte
+- Correo de soporte / privacidad
 - URL de privacy policy publicada
 - Capturas de pantalla Android
 - Icono 512x512 final para Play Console
@@ -61,13 +64,13 @@ Archivos clave:
 
 - Abrir la cuenta de Google Play Console
 - Elegir si la cuenta será `personal` o `organization`
-- Proveer correo de soporte definitivo
+- Confirmar si `support@innerbloomjourney.org` se usará como soporte público
 - Proveer URL pública definitiva para privacy policy
 - Decidir si querés publicar una página de Terms of Service también
 - Crear o aprobar credenciales de review para Google si las piden
 - Confirmar si habrá:
   - analytics en producción
-  - emails transaccionales
+  - emails transaccionales por Resend (`notifications@innerbloomjourney.org`)
   - reminders push o solo local notifications
   - compras o suscripciones nativas Android
 
@@ -109,6 +112,7 @@ app/build/outputs/bundle/release/app-release.aab
 - Si la cuenta de Play es personal y es nueva, Google puede exigir closed testing antes de producción
 - El package name `org.innerbloom.app` conviene tratarlo como definitivo
 - El texto legal que preparé en este repo es un borrador operativo, no asesoría legal
+- `privacy@innerbloomjourney.org` ya puede usarse como contacto de privacidad porque Resend Receiving está verificado para el dominio
 
 ## 7. Referencias oficiales
 
