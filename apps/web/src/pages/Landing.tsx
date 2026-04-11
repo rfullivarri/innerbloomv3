@@ -1077,6 +1077,9 @@ export default function LandingPage() {
             </>
           )}
           <a href="#faq">{copy.footer.faq}</a>
+          <Link to="/privacy">Privacy</Link>
+          <Link to="/terms">Terms</Link>
+          <Link to="/support">Support</Link>
           <button
             type="button"
             className="footer-cookies-link"
