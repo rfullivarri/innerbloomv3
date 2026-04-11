@@ -8,11 +8,11 @@ By creating an account, accessing, or using Innerbloom, you agree to these Terms
 
 > Before publishing, replace this placeholder wherever it appears:
 >
-> **[FULL LEGAL NAME OF THE OPERATOR]**
+> Ramiro Fernandez de Ulllivarri
 
 ## 1. Operator
 
-Innerbloom is operated by **[FULL LEGAL NAME OF THE OPERATOR]**, an individual based in Spain.
+Innerbloom is operated by Ramiro Fernandez de Ulllivarri, an individual based in Spain.
 
 Contact:
 
