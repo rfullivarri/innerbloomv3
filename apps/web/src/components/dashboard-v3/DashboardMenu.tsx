@@ -13,13 +13,20 @@ import { useLongPress } from "../../hooks/useLongPress";
 import { useRequest } from "../../hooks/useRequest";
 import { useThemePreference } from "../../theme/ThemePreferenceProvider";
 import { isNativeCapacitorPlatform } from "../../mobile/capacitor";
-import { buildNativeMobileAuthUrl } from "../../mobile/mobileAuthSession";
+import {
+  buildNativeMobileAuthUrl,
+  clearMobileAuthSession,
+  setForceNativeWelcome,
+} from "../../mobile/mobileAuthSession";
 import { openUrlInCapacitorBrowser } from "../../mobile/capacitor";
+import { cancelNativeDailyReminderNotification } from "../../mobile/localNotifications";
 import {
   acceptGameModeUpgradeSuggestion,
   ApiError,
   changeCurrentUserGameMode,
+  deleteCurrentAccount,
   getGameModeUpgradeSuggestion,
+  setApiAuthTokenProvider,
   type ModerationTrackerConfig,
   type ModerationTrackerType,
 } from "../../lib/api";
@@ -211,6 +218,10 @@ export function DashboardMenu({
   const [isSavingMode, setIsSavingMode] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isUpgradeSubmitting, setIsUpgradeSubmitting] = useState(false);
+  const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
+  const [deleteAccountConfirmation, setDeleteAccountConfirmation] = useState("");
+  const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const modeUpgradeSuggestionRequest = useRequest(() => getGameModeUpgradeSuggestion(), [], {
     enabled: true,
@@ -292,6 +303,9 @@ export function DashboardMenu({
     setActivePanel("main");
     setPendingConfirmMode(null);
     setIsGameModeOpen(false);
+    setIsDeleteAccountOpen(false);
+    setDeleteAccountConfirmation("");
+    setDeleteAccountError(null);
     requestAnimationFrame(() => {
       triggerRef.current?.focus({ preventScroll: true });
     });
@@ -444,6 +458,68 @@ export function DashboardMenu({
 
     await signOut({ redirectUrl: "/" });
   }, [signOut, handleClose]);
+
+  const deleteAccountKeyword = language === "en" ? "DELETE" : "ELIMINAR";
+  const canConfirmAccountDeletion =
+    deleteAccountConfirmation.trim().toUpperCase() === deleteAccountKeyword;
+
+  const handleOpenDeleteAccount = useCallback(() => {
+    setDeleteAccountConfirmation("");
+    setDeleteAccountError(null);
+    setIsDeleteAccountOpen(true);
+  }, []);
+
+  const handleCloseDeleteAccount = useCallback(() => {
+    if (isDeletingAccount) {
+      return;
+    }
+
+    setIsDeleteAccountOpen(false);
+    setDeleteAccountConfirmation("");
+    setDeleteAccountError(null);
+  }, [isDeletingAccount]);
+
+  const handleConfirmDeleteAccount = useCallback(async () => {
+    if (!canConfirmAccountDeletion || isDeletingAccount) {
+      return;
+    }
+
+    setIsDeletingAccount(true);
+    setDeleteAccountError(null);
+
+    try {
+      await deleteCurrentAccount();
+
+      if (isNativeCapacitorPlatform()) {
+        await cancelNativeDailyReminderNotification();
+        clearMobileAuthSession("account-deleted");
+        setForceNativeWelcome(true);
+        setApiAuthTokenProvider(null);
+        handleClose();
+        navigate("/", { replace: true });
+        return;
+      }
+
+      try {
+        await signOut({ redirectUrl: "/" });
+      } catch (error) {
+        console.warn("[dashboard-menu] Clerk signOut failed after account deletion", error);
+        window.location.assign("/");
+      }
+    } catch (error) {
+      console.error("[dashboard-menu] failed to delete account", error);
+      setDeleteAccountError(buildModerationSaveErrorMessage(error, t("dashboard.menu.deleteAccountError")));
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  }, [
+    canConfirmAccountDeletion,
+    handleClose,
+    isDeletingAccount,
+    navigate,
+    signOut,
+    t,
+  ]);
 
   const handleGoToSubscription = useCallback(() => {
     handleClose();
@@ -1124,6 +1200,91 @@ export function DashboardMenu({
                 ) : null}
 
 
+                {isDeleteAccountOpen ? (
+                  <div className="absolute inset-0 z-30 flex items-end bg-black/55 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] backdrop-blur-sm md:items-center">
+                    <div
+                      role="alertdialog"
+                      aria-modal="true"
+                      aria-label={t("dashboard.menu.deleteAccountTitle")}
+                      className="w-full rounded-3xl border border-rose-300/30 bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-rose-300">
+                            {t("dashboard.menu.deleteAccountEyebrow")}
+                          </p>
+                          <h3 className="mt-1 text-lg font-semibold text-[color:var(--color-text)]">
+                            {t("dashboard.menu.deleteAccountTitle")}
+                          </h3>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCloseDeleteAccount}
+                          disabled={isDeletingAccount}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] disabled:opacity-50"
+                          aria-label={t("dashboard.menu.cancel")}
+                        >
+                          <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)]">
+                            <path d="M6 6l12 12M18 6 6 18" />
+                          </MenuIcon>
+                        </button>
+                      </div>
+
+                      <p className="mt-3 text-sm leading-6 text-[color:var(--color-text-dim)]">
+                        {t("dashboard.menu.deleteAccountBody")}
+                      </p>
+                      <ul className="mt-3 space-y-2 text-xs leading-5 text-[color:var(--color-text-faint)]">
+                        <li>{t("dashboard.menu.deleteAccountDeletesProfile")}</li>
+                        <li>{t("dashboard.menu.deleteAccountDeletesProgress")}</li>
+                        <li>{t("dashboard.menu.deleteAccountDeletesClerk")}</li>
+                      </ul>
+
+                      <label className="mt-4 block text-left">
+                        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text-faint)]">
+                          {t("dashboard.menu.deleteAccountConfirmLabel", { keyword: deleteAccountKeyword })}
+                        </span>
+                        <input
+                          value={deleteAccountConfirmation}
+                          onChange={(event) => setDeleteAccountConfirmation(event.target.value)}
+                          disabled={isDeletingAccount}
+                          autoCapitalize="characters"
+                          autoComplete="off"
+                          spellCheck={false}
+                          className="mt-2 h-12 w-full rounded-2xl border border-rose-300/25 bg-rose-950/20 px-4 text-sm font-semibold uppercase tracking-[0.12em] text-white outline-none transition placeholder:text-white/25 focus:border-rose-200/60 focus:ring-2 focus:ring-rose-400/20 disabled:opacity-60"
+                          placeholder={deleteAccountKeyword}
+                        />
+                      </label>
+
+                      {deleteAccountError ? (
+                        <p className="mt-3 rounded-2xl border border-rose-300/30 bg-rose-500/10 px-3 py-2 text-xs leading-5 text-rose-100">
+                          {deleteAccountError}
+                        </p>
+                      ) : null}
+
+                      <div className="mt-4 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCloseDeleteAccount}
+                          disabled={isDeletingAccount}
+                          className="flex-1 rounded-2xl border border-[color:var(--color-border-subtle)] px-3 py-3 text-sm font-semibold text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] disabled:opacity-60"
+                        >
+                          {t("dashboard.menu.cancel")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleConfirmDeleteAccount()}
+                          disabled={!canConfirmAccountDeletion || isDeletingAccount}
+                          className="flex-1 rounded-2xl border border-rose-300/30 bg-rose-500/20 px-3 py-3 text-sm font-semibold text-rose-100 transition hover:bg-rose-500/30 disabled:cursor-not-allowed disabled:opacity-45"
+                        >
+                          {isDeletingAccount
+                            ? t("dashboard.menu.deleteAccountDeleting")
+                            : t("dashboard.menu.deleteAccountConfirm")}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
                 <button
                   type="button"
                   onClick={handleSignOut}
@@ -1135,6 +1296,19 @@ export function DashboardMenu({
                     <path d="M21 12H9" />
                   </MenuIcon>
                   <span>{t('dashboard.menu.signOut')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleOpenDeleteAccount}
+                  className="mt-2 flex h-10 w-full items-center gap-3 rounded-2xl px-4 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/10 hover:text-rose-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+                >
+                  <MenuIcon className="h-5 w-5 text-rose-300">
+                    <path d="M3 6h18" />
+                    <path d="M8 6V4h8v2" />
+                    <path d="M19 6l-1 14H6L5 6" />
+                    <path d="M10 11v5M14 11v5" />
+                  </MenuIcon>
+                  <span>{t("dashboard.menu.deleteAccount")}</span>
                 </button>
                 {iosInstructionsOpen && isIOS && !isNativeApp ? (
                   <div
