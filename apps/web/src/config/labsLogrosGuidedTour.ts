@@ -14,9 +14,9 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-shelves',
-    targetSelector: '[data-demo-anchor="logros-shelves-pillars"]',
+    targetSelector: '[data-demo-anchor="logros-carousel-structure"]',
     tooltipPlacement: 'top',
-    title: { es: 'Estantes de Logros', en: 'Achievement shelves' },
+    title: { es: 'Estructura en carrusel', en: 'Carousel structure' },
     body: {
       es: 'Se divide en Cuerpo, Mente y Alma. Cada tarea puede convertirse en un sello: algunas ya están logradas y otras siguen en camino.',
       en: 'It is divided into Body, Mind, and Soul. Every task can become a seal: some are achieved and others are still in progress.',
@@ -34,7 +34,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-achievement-front',
-    targetSelector: '[data-demo-anchor="logros-achievement-front"]',
+    targetSelector: '[data-demo-anchor="logros-achieved-card-front"]',
     tooltipPlacement: 'top',
     title: { es: 'Vista frontal', en: 'Front face' },
     body: {
@@ -44,7 +44,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-achievement-back',
-    targetSelector: '[data-demo-anchor="logros-achievement-card"]',
+    targetSelector: '[data-demo-anchor="logros-achieved-card-back"]',
     tooltipPlacement: 'right',
     title: { es: 'Reverso del logro', en: 'Achievement back side' },
     body: {
@@ -64,7 +64,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-seal-path',
-    targetSelector: '[data-demo-anchor="logros-seal-path"]',
+    targetSelector: '[data-demo-anchor="logros-blocked-card-back"]',
     tooltipPlacement: 'top',
     title: { es: 'Ruta del sello', en: 'Seal path' },
     body: {
@@ -74,7 +74,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-seal-concept',
-    targetSelector: '[data-demo-anchor="logros-seal-path"]',
+    targetSelector: '[data-demo-anchor="logros-blocked-card-back"]',
     tooltipPlacement: 'top',
     title: { es: 'Cómo se consolida', en: 'How consolidation works' },
     body: {
@@ -84,7 +84,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-seal-score',
-    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-tour-anchor="achievement-preview-overview"]',
+    targetSelector: '[data-demo-anchor="logros-blocked-card-back"] [data-tour-anchor="achievement-preview-overview"]',
     tooltipPlacement: 'left',
     title: { es: 'Score', en: 'Score' },
     body: {
@@ -94,7 +94,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-seal-scale',
-    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-tour-anchor="achievement-preview-scale"]',
+    targetSelector: '[data-demo-anchor="logros-blocked-card-back"] [data-tour-anchor="achievement-preview-scale"]',
     tooltipPlacement: 'top',
     title: { es: 'Escala de solidez', en: 'Strength scale' },
     body: {
@@ -104,7 +104,7 @@ export const LABS_LOGROS_GUIDED_STEPS: GuidedStep[] = [
   },
   {
     id: 'logros-seal-months',
-    targetSelector: '[data-demo-anchor="logros-seal-path"] [data-tour-anchor="achievement-preview-months-section"]',
+    targetSelector: '[data-demo-anchor="logros-blocked-card-back"] [data-tour-anchor="achievement-preview-months-section"]',
     tooltipPlacement: 'top',
     title: { es: 'Últimos meses', en: 'Recent months' },
     body: {
