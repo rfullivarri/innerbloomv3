@@ -15,6 +15,9 @@ Estado de este checklist: borrador operativo para preparar la primera subida a G
 - API Android por transporte nativo: funcionando
 - Icono Android: actualizado para parecerse al de iOS
 - `compileSdk` / `targetSdk`: 36
+- Flujo autenticado de eliminación de cuenta: implementado en el menú del Dashboard, debajo de cerrar sesión, con acción destructiva en rojo
+- API de eliminación de cuenta: `DELETE /api/account`
+- URL pública de instrucciones de eliminación de cuenta: `https://innerbloomjourney.org/account-deletion`
 
 Archivos clave:
 
@@ -22,6 +25,9 @@ Archivos clave:
 - `/Users/ramirofernandezdeullivarri/Documents/GitHub/innerbloomv3/apps/mobile/android/app/src/main/AndroidManifest.xml`
 - `/Users/ramirofernandezdeullivarri/Documents/GitHub/innerbloomv3/apps/mobile/android/app/src/main/res/values/strings.xml`
 - `/Users/ramirofernandezdeullivarri/Documents/GitHub/innerbloomv3/apps/mobile/capacitor.config.ts`
+- `/Users/ramirofernandezdeullivarri/Documents/GitHub/innerbloomv3/apps/api/src/routes/account.ts`
+- `/Users/ramirofernandezdeullivarri/Documents/GitHub/innerbloomv3/apps/web/src/pages/AccountDeletion.tsx`
+- `/Users/ramirofernandezdeullivarri/Documents/GitHub/innerbloomv3/apps/web/src/components/dashboard-v3/DashboardMenu.tsx`
 
 ## 2. Lo que todavía falta cerrar antes de publicar
 
@@ -34,6 +40,7 @@ Archivos clave:
   - `versionName` puede seguir formato semántico simple como `1.0.0`, `1.0.1`, etc.
 - Confirmar que no haya texto provisional en onboarding, pricing o pantallas internas
 - Revisar si la app necesita pantalla/flujo especial para usuarios sin datos iniciales
+- Confirmar que `CLERK_SECRET_KEY` esté configurada en producción para que `DELETE /api/account` pueda borrar también el usuario en Clerk
 
 ### Contenido de Play Console
 
@@ -43,6 +50,7 @@ Archivos clave:
 - Categoría de app
 - Correo de soporte / privacidad
 - URL de privacy policy publicada
+- URL de eliminación de datos/cuenta: `https://innerbloomjourney.org/account-deletion`
 - Capturas de pantalla Android
 - Icono 512x512 final para Play Console
 - Feature graphic opcional pero recomendable
@@ -68,6 +76,7 @@ Archivos clave:
 - Proveer URL pública definitiva para privacy policy
 - Decidir si querés publicar una página de Terms of Service también
 - Crear o aprobar credenciales de review para Google si las piden
+- Confirmar si `support@innerbloomjourney.org` se crea como alias/inbox real o si soporte usará `privacy@innerbloomjourney.org` temporalmente
 - Confirmar si habrá:
   - analytics en producción
   - emails transaccionales por Resend (`notifications@innerbloomjourney.org`)
@@ -113,6 +122,7 @@ app/build/outputs/bundle/release/app-release.aab
 - El package name `org.innerbloom.app` conviene tratarlo como definitivo
 - El texto legal que preparé en este repo es un borrador operativo, no asesoría legal
 - `privacy@innerbloomjourney.org` ya puede usarse como contacto de privacidad porque Resend Receiving está verificado para el dominio
+- La eliminación de cuenta es irreversible en V1: borra datos propios en Neon y elimina el usuario de Clerk; si compras/suscripciones nativas se activan en el futuro, habrá que actualizar el flujo y la documentación
 
 ## 7. Referencias oficiales
 

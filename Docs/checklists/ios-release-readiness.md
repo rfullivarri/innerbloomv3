@@ -15,16 +15,18 @@ Estado revisado sobre el repo local el 2026-04-08.
 - Correo de privacidad definido: `privacy@innerbloomjourney.org`.
 - Receiving email del dominio `innerbloomjourney.org` verificado en Resend.
 - Remitente de emails automáticos definido: `notifications@innerbloomjourney.org`.
+- Flujo de eliminación de cuenta implementado dentro de la app, en el menú del Dashboard, debajo de cerrar sesión.
+- Página pública de instrucciones de eliminación de cuenta: `https://innerbloomjourney.org/account-deletion`.
+- API de eliminación de cuenta implementada: `DELETE /api/account`, con borrado de datos en Neon y eliminación del usuario en Clerk.
 
 ## Riesgos o huecos que siguen abiertos
 
 ### Bloqueadores probables de App Review
 
-- No encontré un flujo visible de **eliminación de cuenta** en la app ni en el código web/mobile.
-  - Si la app permite crear cuenta, Apple suele exigir que también permita solicitar o ejecutar la eliminación de cuenta dentro de la app.
 - No hay todavía una **Privacy Policy pública publicada** lista para enlazar en App Store Connect.
 - No hay todavía una **Support URL pública** lista para App Store Connect.
 - Queda pendiente confirmar si `support@innerbloomjourney.org` será el correo público de soporte.
+- Confirmar que `CLERK_SECRET_KEY` esté configurada en producción para que el borrado de cuenta elimine también el usuario de Clerk.
 
 ### Riesgos de producto/UX antes de publicar
 
@@ -43,6 +45,7 @@ Estado revisado sobre el repo local el 2026-04-08.
 - Privacy nutrition labels.
 - Support URL.
 - Privacy Policy URL.
+- Account deletion URL: `https://innerbloomjourney.org/account-deletion`.
 - Marketing URL opcional.
 - Screenshots obligatorios para iPhone.
 - Descripción corta y larga.
@@ -63,6 +66,7 @@ Estado revisado sobre el repo local el 2026-04-08.
 2. Crear o confirmar el registro de la app en App Store Connect.
 3. Subir:
    - Privacy Policy URL
+   - Account deletion URL
    - Support URL
    - screenshots
    - descripción
@@ -70,8 +74,7 @@ Estado revisado sobre el repo local el 2026-04-08.
 4. Decidir si la monetización iOS va por:
    - Stripe web
    - In-App Purchase
-5. Confirmar si la cuenta puede eliminarse dentro de la app.
-6. Confirmar el `bundle id` final y el `Team` de firma.
+5. Confirmar el `bundle id` final y el `Team` de firma.
 
 ## Contactos sugeridos para App Store Connect
 
