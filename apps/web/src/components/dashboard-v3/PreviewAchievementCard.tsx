@@ -22,6 +22,7 @@ type NormalizedRecentMonth = {
 type MonthNodeProps = {
   entry: NormalizedRecentMonth;
   language: PostLoginLanguage;
+  compact?: boolean;
 };
 
 const statusConfig = {
@@ -126,19 +127,24 @@ function getMonthMetric(value: number | null | undefined): string {
   return `${Math.max(0, Math.min(100, Math.round(normalized)))}%`;
 }
 
-function RecentMonthNode({ entry, language }: MonthNodeProps) {
+function RecentMonthNode({ entry, language, compact = false }: MonthNodeProps) {
   const isProjected = entry.projected;
   const monthSymbol = getMonthSymbol(entry.state);
   return (
     <div
       key={`${entry.key}-${entry.value ?? 0}`}
       data-testid="recent-month-item"
-      className="flex h-[4.35rem] w-[3.35rem] shrink-0 flex-col items-center gap-0 py-0 sm:h-[4.55rem] sm:w-[3.55rem]"
+      className={cx(
+        'flex shrink-0 flex-col items-center gap-0 py-0',
+        compact ? 'h-[3.25rem] w-[2.5rem] sm:h-[3.45rem] sm:w-[2.75rem]' : 'h-[4.35rem] w-[3.35rem] sm:h-[4.55rem] sm:w-[3.55rem]',
+      )}
     >
       <div
         data-testid="recent-month-node"
         className={cx(
-          'relative inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold leading-none shadow-[0_6px_16px_rgba(5,10,35,0.35)] sm:h-9 sm:w-9 sm:text-base',
+          compact
+            ? 'relative inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold leading-none shadow-[0_6px_16px_rgba(5,10,35,0.35)] sm:h-7 sm:w-7 sm:text-sm'
+            : 'relative inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold leading-none shadow-[0_6px_16px_rgba(5,10,35,0.35)] sm:h-9 sm:w-9 sm:text-base',
           getMonthTone(entry.state),
         )}
         aria-label={`${entry.periodKey ?? 'unknown'}-${entry.state ?? 'unknown'}`}
@@ -153,11 +159,11 @@ function RecentMonthNode({ entry, language }: MonthNodeProps) {
           monthSymbol
         )}
       </div>
-      <span className="text-[10px] text-[color:var(--color-slate-300)]" data-testid="recent-month-label">
+      <span className={cx('text-[color:var(--color-slate-300)]', compact ? 'text-[9px]' : 'text-[10px]')} data-testid="recent-month-label">
         {entry.periodKey ? monthLabel(entry.periodKey, language) : language === 'es' ? 'Sin mes' : 'No month'}
       </span>
       <span
-        className="text-[10px] font-semibold leading-none text-[color:var(--color-slate-300)]"
+        className={cx('font-semibold leading-none text-[color:var(--color-slate-300)]', compact ? 'text-[9px]' : 'text-[10px]')}
         data-testid="recent-month-progress"
       >
         {getMonthMetric(entry.value)}
@@ -169,10 +175,13 @@ function RecentMonthNode({ entry, language }: MonthNodeProps) {
 export function PreviewAchievementCard({
   previewAchievement,
   language,
+  size = 'default',
 }: {
   previewAchievement: PreviewAchievement;
   language: PostLoginLanguage;
+  size?: 'default' | 'compact';
 }) {
+  const isCompact = size === 'compact';
   const tone = getStatusTone(previewAchievement.status);
   const score = Math.max(0, Math.min(100, Math.round(Number(previewAchievement.score ?? 0))));
   const scoreLabel = 'Score';
@@ -227,10 +236,10 @@ export function PreviewAchievementCard({
   }, [isScoreTooltipOpen]);
 
   return (
-    <section className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 shadow-inner">
-      <div className="flex flex-col items-center gap-2">
+    <section className={cx('rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-inner', isCompact ? 'p-2.5' : 'p-3')}>
+      <div className={cx('flex flex-col items-center', isCompact ? 'gap-1.5' : 'gap-2')}>
         <div className="w-full space-y-2 text-left">
-          <p className="text-sm font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]">
+          <p className={cx('font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]', isCompact ? 'text-[13px]' : 'text-sm')}>
             {language === 'es' ? 'Desarrollo del hábito' : 'Habit development'}
           </p>
           {previewAchievement.consolidationStrength != null && (
@@ -240,13 +249,13 @@ export function PreviewAchievementCard({
           )}
         </div>
         <div className="mx-auto flex shrink-0 flex-col items-center" data-tour-anchor="achievement-preview-overview">
-          <span className={cx('inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold', tone.chip)}>
+          <span className={cx('inline-flex items-center rounded-full font-semibold', isCompact ? 'px-2.5 py-0.5 text-[11px]' : 'px-3 py-1 text-xs', tone.chip)}>
             {tone.label[language]}
           </span>
-          <div className="mt-2 flex items-center justify-center gap-2.5 sm:gap-3.5" data-testid="score-block" data-tour-anchor="achievement-preview-score">
+          <div className={cx('mt-2 flex items-center justify-center', isCompact ? 'gap-1.5 sm:gap-2.5' : 'gap-2.5 sm:gap-3.5')} data-testid="score-block" data-tour-anchor="achievement-preview-score">
             <div className="relative" ref={scoreTooltipRef}>
               <svg
-                className="h-32 w-32 sm:h-36 sm:w-36"
+                className={isCompact ? 'h-24 w-24 sm:h-28 sm:w-28' : 'h-32 w-32 sm:h-36 sm:w-36'}
                 viewBox="0 0 120 120"
                 role="img"
                 aria-label={`preview achievement score ${score}`}
@@ -300,8 +309,8 @@ export function PreviewAchievementCard({
                 </div>
               )}
             </div>
-            <div className="relative flex h-32 items-center sm:h-36" data-testid="score-range-rail" data-tour-anchor="achievement-preview-scale">
-              <div className="relative h-full w-[5.35rem]">
+            <div className={cx('relative flex items-center', isCompact ? 'h-24 sm:h-28' : 'h-32 sm:h-36')} data-testid="score-range-rail" data-tour-anchor="achievement-preview-scale">
+              <div className={cx('relative h-full', isCompact ? 'w-[4.1rem]' : 'w-[5.35rem]')}>
                 <div className="absolute bottom-1 left-2.5 top-1 w-3 overflow-hidden rounded-full">
                   <button
                     type="button"
@@ -330,13 +339,13 @@ export function PreviewAchievementCard({
                 <span className="absolute left-0 top-[20%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">80</span>
                 <span className="absolute left-0 top-[50%] -translate-y-1/2 text-[8px] text-[color:var(--color-slate-300)]">50</span>
                 <span className="absolute left-0 bottom-0 text-[8px] text-[color:var(--color-slate-500)]">0</span>
-                <span className="absolute left-[3.44rem] top-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className={cx('absolute top-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.95rem]' : 'left-[3.44rem]')}>
                   {rangeLabels.strong}
                 </span>
-                <span className="absolute left-[3.44rem] top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className={cx('absolute top-[50%] -translate-y-1/2 text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.95rem]' : 'left-[3.44rem]')}>
                   {rangeLabels.building}
                 </span>
-                <span className="absolute left-[3.44rem] bottom-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]">
+                <span className={cx('absolute bottom-[2%] text-left text-[9px] font-medium leading-none text-[color:var(--color-slate-300)]', isCompact ? 'left-[2.95rem]' : 'left-[3.44rem]')}>
                   {rangeLabels.fragile}
                 </span>
               </div>
@@ -345,11 +354,11 @@ export function PreviewAchievementCard({
         </div>
       </div>
 
-      <div className="mt-3 space-y-2">
+      <div className={cx(isCompact ? 'mt-2.5 space-y-1.5' : 'mt-3 space-y-2')}>
         {orderedRecentMonths.length > 0 && (
           <div className="px-0 py-0" data-tour-anchor="achievement-preview-months-section">
             <div className="flex items-center gap-1.5">
-              <p className="text-sm font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]">
+              <p className={cx('font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]', isCompact ? 'text-[13px]' : 'text-sm')}>
                 {language === 'es' ? 'Resultado últimos meses' : 'Last months result'}
               </p>
               <details className="group relative" data-testid="timeline-legend">
@@ -378,28 +387,28 @@ export function PreviewAchievementCard({
                 data-testid="recent-timeline-track"
               >
                 {leadingMonths.map((entry) => (
-                  <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
+                  <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} compact={isCompact} />
                 ))}
                 {hasGroupedWindow && (
                   <div className="flex flex-col items-center">
                     <div
-                      className="flex flex-col items-center rounded-xl border border-[color:var(--color-border-soft)] px-1.5 pb-0 pt-0.3 md:px-2"
+                      className={cx('flex flex-col items-center rounded-xl border border-[color:var(--color-border-soft)] pb-0', isCompact ? 'px-1 pt-0.5 md:px-1.5' : 'px-1.5 pt-0.3 md:px-2')}
                       data-testid="seal-window-group"
                       data-window-start={lastThreeStart}
                       data-window-end={lastThreeEnd - 1}
                       data-tour-anchor="achievement-preview-active-window"
                     >
-                      <p className="text-center text-sm font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]">{windowTitle}</p>
+                      <p className={cx('text-center font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]', isCompact ? 'text-[12px]' : 'text-sm')}>{windowTitle}</p>
                       <div className="flex items-end gap-1 md:gap-1.5" data-testid="seal-window-track">
                         {groupedMonths.map((entry) => (
-                          <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} />
+                          <RecentMonthNode key={`${entry.key}-${entry.value ?? 0}`} entry={entry} language={language} compact={isCompact} />
                         ))}
                       </div>
                     </div>
                     {groupedProjectedMonth && (
                       <div className="mt-1 flex items-start gap-1 md:gap-1.5" data-testid="projected-month-label-row">
                         {groupedMonths.map((entry, index) => (
-                          <span key={`${entry.key}-projected-indicator`} className="w-[3.35rem] text-center text-[9px] leading-none text-[color:var(--color-slate-400)] sm:w-[3.55rem]">
+                          <span key={`${entry.key}-projected-indicator`} className={cx('text-center text-[9px] leading-none text-[color:var(--color-slate-400)]', isCompact ? 'w-[2.5rem] sm:w-[2.75rem]' : 'w-[3.35rem] sm:w-[3.55rem]')}>
                             {entry.projected && index === groupedMonths.length - 1
                               ? language === 'es'
                                 ? 'proyectado'

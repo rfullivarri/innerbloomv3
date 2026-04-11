@@ -71,13 +71,6 @@ const LABS_LOGROS_MODAL_STEP_IDS = new Set([
   'logros-seal-months',
 ]);
 const LABS_LOGROS_PINNED_TOP_STEP_IDS = new Set([
-  'logros-achievement-front',
-  'logros-achievement-back',
-  'logros-seal-path',
-  'logros-seal-concept',
-  'logros-seal-score',
-  'logros-seal-scale',
-  'logros-seal-months',
   'logros-monthly',
 ]);
 const LABS_LOGROS_MOBILE_TOP_RATIO_BY_STEP: Record<string, number> = {
@@ -362,11 +355,16 @@ export function GuidedDemoOverlay({
       const lowerMobileTop = viewport.height - mobileTooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP_LOWER;
       const modalTop = Math.max(VIEWPORT_PADDING + 8, viewport.height * 0.06);
       const shouldPinTop = LABS_LOGROS_PINNED_TOP_STEP_IDS.has(step.id);
+      const preferredMobilePlacement = step.mobileTooltipPlacement ?? 'auto';
       const stepSpecificTopRatio = LABS_LOGROS_MOBILE_TOP_RATIO_BY_STEP[step.id];
       const stepSpecificTop = stepSpecificTopRatio != null
         ? Math.max(VIEWPORT_PADDING + 8, viewport.height * stepSpecificTopRatio)
         : null;
-      const mobileTop = stepSpecificTop != null
+      const mobileTop = preferredMobilePlacement === 'bottom'
+        ? clamp(lowerMobileTop, VIEWPORT_PADDING, lowerMobileTop)
+        : preferredMobilePlacement === 'top'
+        ? (stepSpecificTop ?? modalTop)
+        : stepSpecificTop != null
         ? stepSpecificTop
         : ((isLogrosModalStep && shouldPinTop) || step.id === 'logros-monthly')
         ? modalTop

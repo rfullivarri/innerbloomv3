@@ -56,12 +56,6 @@ export default function LabsLogrosDemoPage() {
       return;
     }
 
-    if (stepId === 'logros-achieved-card') {
-      controls?.selectPillar('BODY');
-      controls?.focusCarouselCard(DEMO_ANCHORS.achievedCardTaskId);
-      return;
-    }
-
     if (stepId === 'logros-achievement-front') {
       controls?.closeAllOverlays();
       controls?.openAchievedCard();

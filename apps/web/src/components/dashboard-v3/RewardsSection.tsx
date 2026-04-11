@@ -812,6 +812,7 @@ function AchievedShelf({
   const resolvedBlockedTaskId = demoAnchors?.blockedCardTaskId;
   const isShelfFocusStep = demoStepId === 'logros-shelves';
   const isDemoExperience = Boolean(demoStepId);
+  const useCompactLockedPreview = demoStepId?.startsWith('logros-') ?? false;
   const isCarouselView = viewMode === 'carousel';
 
   useEffect(() => {
@@ -1253,6 +1254,7 @@ function AchievedShelf({
                               disableRemote={disableRemote}
                               mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
                               loadOnVisible={isFlipped}
+                              compact={useCompactLockedPreview}
                             />
                           </div>
                         </div>
@@ -1391,6 +1393,7 @@ function AchievedShelf({
             disableRemote={disableRemote}
             mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
             demoAnchors={demoAnchors}
+            compact={useCompactLockedPreview}
             onClose={() => setPreviewHabit(null)}
           />
         </>
@@ -1405,12 +1408,14 @@ function LockedAchievementHabitDevelopment({
   disableRemote,
   mockPreviewAchievementByTaskId,
   loadOnVisible,
+  compact = false,
 }: {
   habit: HabitAchievementShelfItem;
   language: 'es' | 'en';
   disableRemote: boolean;
   mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
   loadOnVisible: boolean;
+  compact?: boolean;
 }) {
   const taskId = habit.taskId;
   const mockPreviewAchievement = mockPreviewAchievementByTaskId?.[taskId] ?? null;
@@ -1442,7 +1447,7 @@ function LockedAchievementHabitDevelopment({
   if (previewAchievement) {
     return (
       <div className="h-full min-h-0 flex-1">
-        <PreviewAchievementCard previewAchievement={previewAchievement} language={language} />
+        <PreviewAchievementCard previewAchievement={previewAchievement} language={language} size={compact ? 'compact' : 'default'} />
       </div>
     );
   }
@@ -1466,6 +1471,7 @@ function NotAchievedPreviewOverlay({
   disableRemote,
   mockPreviewAchievementByTaskId,
   demoAnchors,
+  compact = false,
   onClose,
 }: {
   habit: HabitAchievementShelfItem | null;
@@ -1473,6 +1479,7 @@ function NotAchievedPreviewOverlay({
   disableRemote: boolean;
   mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
   demoAnchors?: RewardsSectionProps['demoAnchors'];
+  compact?: boolean;
   onClose: () => void;
 }) {
   const taskId = habit?.taskId;
@@ -1536,7 +1543,7 @@ function NotAchievedPreviewOverlay({
             </div>
           ) : null}
           {(status === 'success' || isLocalPreview) && previewAchievement ? (
-            <PreviewAchievementCard previewAchievement={previewAchievement} language={language} />
+            <PreviewAchievementCard previewAchievement={previewAchievement} language={language} size={compact ? 'compact' : 'default'} />
           ) : null}
           {(status === 'success' || isLocalPreview) && !previewAchievement ? (
             <div className="rounded-2xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
