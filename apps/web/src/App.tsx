@@ -37,6 +37,9 @@ import {
   useMobileAuthSession,
 } from './mobile/mobileAuthSession';
 import MobileBrowserAuthPage from './pages/MobileBrowserAuth';
+import PrivacyPage from './pages/legal/PrivacyPage';
+import TermsPage from './pages/legal/TermsPage';
+import SupportPage from './pages/legal/SupportPage';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -294,6 +297,9 @@ export default function App() {
           }
         />
         <Route path="/mobile-auth" element={<MobileBrowserAuthPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/support" element={<SupportPage />} />
         <Route
           path={dashboardRoutePath}
           element={
