@@ -38,6 +38,17 @@ Estado: borrador técnico para ayudarte a completar Google Play Data Safety. No 
 
 - soporte para GA4 en web
 - telemetría interna de eventos de producto
+- si GA4 queda activo en producción, los datos deben tratarse como anonimizados o desasociados del usuario eliminado cuando técnicamente sea posible
+
+### Eliminación de cuenta
+
+- flujo autenticado dentro de la app
+- página pública de instrucciones: `https://innerbloomjourney.org/account-deletion`
+- endpoint backend: `DELETE /api/account`
+- borrado inmediato de datos propios en Neon
+- eliminación del usuario de autenticación en Clerk
+- sin período de gracia ni recuperación en V1
+- compras/suscripciones nativas: no activas actualmente
 
 ### No encontré uso evidente de
 
@@ -55,12 +66,15 @@ Estado: borrador técnico para ayudarte a completar Google Play Data Safety. No 
 - Name
   - Sí, probable
   - Motivo: cuenta y perfil
+  - Eliminación: disponible desde la app y documentada públicamente
 - Email address
   - Sí, probable
   - Motivo: cuenta, autenticación, recordatorios/comunicación
+  - Eliminación: disponible desde la app y documentada públicamente
 - User IDs
   - Sí, probable
   - Motivo: autenticación y asociación de cuenta
+  - Eliminación: se borra el usuario de Clerk y los registros de aplicación asociados
 
 ### Health and fitness
 
@@ -124,6 +138,7 @@ Según la implementación actual, los usos más probables son:
 - Privacy contact: `privacy@innerbloomjourney.org`
 - Support contact recomendado: `support@innerbloomjourney.org`, pendiente de confirmar como contacto público
 - Transactional/reminder sender: `notifications@innerbloomjourney.org`
+- Account deletion instructions: `https://innerbloomjourney.org/account-deletion`
 
 ## Mi recomendación operativa
 
@@ -131,5 +146,6 @@ Antes de completar el formulario final de Google Play:
 
 1. Confirmar providers reales de producción
 2. Confirmar qué datos viajan efectivamente
-3. Responder el formulario con este documento al lado
-4. Guardar screenshots o notas de la configuración por si Google pide aclaración
+3. Declarar que la eliminación de cuenta está disponible dentro de la app y enlazar la página pública de instrucciones
+4. Responder el formulario con este documento al lado
+5. Guardar screenshots o notas de la configuración por si Google pide aclaración

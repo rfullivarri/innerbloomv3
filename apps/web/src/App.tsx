@@ -40,6 +40,7 @@ import MobileBrowserAuthPage from './pages/MobileBrowserAuth';
 import PrivacyPage from './pages/legal/PrivacyPage';
 import TermsPage from './pages/legal/TermsPage';
 import SupportPage from './pages/legal/SupportPage';
+import AccountDeletionPage from './pages/AccountDeletion';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -300,6 +301,7 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/account-deletion" element={<AccountDeletionPage />} />
         <Route
           path={dashboardRoutePath}
           element={

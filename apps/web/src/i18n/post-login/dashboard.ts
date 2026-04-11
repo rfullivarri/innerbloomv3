@@ -79,6 +79,35 @@ export const dashboardTranslations = {
   'dashboard.menu.quickAccessActive': { es: 'Acceso rápido activo', en: 'Quick access active' },
   'dashboard.menu.quickAccessAdd': { es: 'Añadir acceso rápido', en: 'Add quick access' },
   'dashboard.menu.signOut': { es: 'Cerrar sesión', en: 'Sign out' },
+  'dashboard.menu.deleteAccount': { es: 'Eliminar cuenta', en: 'Delete account' },
+  'dashboard.menu.deleteAccountEyebrow': { es: 'Acción irreversible', en: 'Irreversible action' },
+  'dashboard.menu.deleteAccountTitle': { es: 'Eliminar cuenta', en: 'Delete account' },
+  'dashboard.menu.deleteAccountBody': {
+    es: 'Esta acción elimina tu cuenta de forma permanente. No vas a poder recuperar tu perfil ni tu progreso después de confirmar.',
+    en: 'This permanently deletes your account. You will not be able to recover your profile or progress after confirming.',
+  },
+  'dashboard.menu.deleteAccountDeletesProfile': {
+    es: 'Se elimina tu perfil, email y datos personales asociados.',
+    en: 'Your profile, email, and associated personal data are deleted.',
+  },
+  'dashboard.menu.deleteAccountDeletesProgress': {
+    es: 'Se eliminan progreso, tareas, registros, emociones, recordatorios y preferencias.',
+    en: 'Progress, tasks, logs, emotions, reminders, and preferences are deleted.',
+  },
+  'dashboard.menu.deleteAccountDeletesClerk': {
+    es: 'También se elimina tu usuario de autenticación.',
+    en: 'Your authentication user is also deleted.',
+  },
+  'dashboard.menu.deleteAccountConfirmLabel': {
+    es: 'Escribí {{keyword}} para confirmar',
+    en: 'Type {{keyword}} to confirm',
+  },
+  'dashboard.menu.deleteAccountConfirm': { es: 'Eliminar definitivamente', en: 'Delete permanently' },
+  'dashboard.menu.deleteAccountDeleting': { es: 'Eliminando…', en: 'Deleting…' },
+  'dashboard.menu.deleteAccountError': {
+    es: 'No se pudo eliminar la cuenta. Revisá tu conexión e intentá otra vez.',
+    en: 'Could not delete the account. Check your connection and try again.',
+  },
   'dashboard.upgradeCta.closeAria': { es: 'Cerrar upgrade', en: 'Close upgrade' },
   'dashboard.upgradeCta.bannerTitle': { es: 'Estás listo para el siguiente nivel', en: 'You are ready for the next level' },
   'dashboard.upgradeCta.bannerBody': {

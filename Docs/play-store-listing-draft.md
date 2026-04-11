@@ -83,6 +83,21 @@ Mi recomendación:
 - Email receiving: Resend Receiving verificado para `innerbloomjourney.org`
 - Website: `https://innerbloomjourney.org`
 - Privacy policy URL: pendiente de publicar
+- Account/data deletion URL: `https://innerbloomjourney.org/account-deletion`
+
+## Eliminación de cuenta / datos
+
+Para Play Console, usar:
+
+- Data deletion URL: `https://innerbloomjourney.org/account-deletion`
+
+Resumen operativo:
+
+- La eliminación se inicia dentro de la app, después de iniciar sesión.
+- La opción está en el menú del Dashboard, debajo de cerrar sesión, como acción roja.
+- El usuario debe confirmar la acción irreversible escribiendo la palabra requerida.
+- La eliminación borra los datos de la app en Neon y elimina el usuario de Clerk.
+- No hay recuperación de cuenta en V1.
 
 ## Assets que vas a necesitar para Play Console
 

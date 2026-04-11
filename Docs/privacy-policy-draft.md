@@ -127,11 +127,38 @@ Personal information should be retained only for as long as needed to:
 
 Exact retention windows still need to be defined.
 
-## 9. Security
+## 9. Account deletion
+
+Users can delete their Innerbloom account from inside the app after signing in.
+
+Public instructions are available at:
+
+- `https://innerbloomjourney.org/account-deletion`
+
+Current deletion flow:
+
+1. Sign in with the account to be deleted.
+2. Open the personal menu in the Dashboard.
+3. Select the red account deletion option below sign out.
+4. Confirm the irreversible deletion by typing the required confirmation word.
+
+When account deletion is confirmed, Innerbloom deletes the user's account data from the application database and deletes the authentication user in Clerk. The current implementation is intended to delete:
+
+- account profile data stored by Innerbloom
+- onboarding and rhythm data
+- task, mission, progress, daily log, emotion log, and weekly summary records
+- reminder preferences and notification state records
+- the Clerk authentication user
+
+Deletion is immediate and irreversible in the current product version. Innerbloom does not currently offer account recovery after deletion.
+
+If analytics are enabled in production, analytics data should be treated as de-identified or no longer associated with the deleted account where technically possible. If native purchases or subscriptions are added in the future, this section must be updated to describe any billing-related retention or cancellation requirements.
+
+## 10. Security
 
 Innerbloom uses authenticated access flows and HTTPS-based network requests. No privacy policy should promise absolute security; the final version should state that reasonable technical and organizational safeguards are used.
 
-## 10. User rights
+## 11. User rights
 
 Depending on location, users may have rights to:
 
@@ -143,15 +170,15 @@ Depending on location, users may have rights to:
 
 The final policy should include the contact channel to exercise those rights.
 
-## 11. Children
+## 12. Children
 
 The final policy should state the intended minimum age and whether the service is directed to children. That age threshold is still pending confirmation.
 
-## 12. International transfers
+## 13. International transfers
 
 If service providers process data outside the user’s country, the final policy should disclose that and describe the applicable safeguards.
 
-## 13. Contact
+## 14. Contact
 
 Privacy contact email:
 
@@ -161,7 +188,11 @@ Support contact email:
 
 - `support@innerbloomjourney.org` recommended; confirm before publishing.
 
-## 14. Final review items before publishing
+Account deletion instructions:
+
+- `https://innerbloomjourney.org/account-deletion`
+
+## 15. Final review items before publishing
 
 - Confirm whether `support@innerbloomjourney.org` will be published as support contact
 - Confirm whether GA4 is enabled in production
@@ -169,7 +200,8 @@ Support contact email:
 - Confirm whether any additional processors are used
 - Add a real legal entity name if applicable
 - Add jurisdiction-specific wording if needed
+- Confirm whether App Store / Play Store require any additional retention disclosure if paid subscriptions are enabled later
 
-## 15. Important note
+## 16. Important note
 
 This file is a product-informed draft, not legal advice. It should be reviewed before being published as the final privacy policy linked in Google Play.

@@ -808,6 +808,20 @@ export async function apiAuthorizedFetch(path: string, init: RequestInit = {}): 
   return performApiRequest(url, authedInit);
 }
 
+export type DeleteAccountResponse = {
+  ok: true;
+  deleted: Record<string, number>;
+};
+
+export async function deleteCurrentAccount(): Promise<DeleteAccountResponse> {
+  return apiRequest<DeleteAccountResponse>(buildUrl('/account'), {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+}
+
 export type ModerationTrackerType = 'alcohol' | 'tobacco' | 'sugar';
 
 export type ModerationTrackerConfig = {
