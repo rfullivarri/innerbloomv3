@@ -4,6 +4,7 @@ export type GuidedStep = {
   id: string;
   targetSelector: string | null;
   tooltipPlacement?: 'top' | 'right' | 'bottom' | 'left' | 'auto';
+  mobileTooltipPlacement?: 'top' | 'bottom' | 'auto';
   presentation?: 'default' | 'intro-modal';
   title: Record<DemoLanguage, string>;
   body: Record<DemoLanguage, string>;
