@@ -994,7 +994,7 @@ function AchievedShelf({
               <div
                 ref={carouselTrackRef}
                 onScroll={handleCarouselTrackScroll}
-                className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-1 pb-1 sm:gap-3 sm:px-2 lg:gap-3.5 lg:px-3"
+                className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-1 pb-1 sm:gap-3 sm:px-2 lg:gap-4 lg:px-4 xl:px-5"
               >
                 {activePillarHabits.map((habit, index) => {
                   const isFlipped = flippedCarouselHabitId === habit.id && activeCarouselIndex === index;
@@ -1006,7 +1006,7 @@ function AchievedShelf({
                       type="button"
                       data-achievement-carousel-index={index}
                       onClick={() => handleCarouselCardClick(habit.id, index)}
-                      className={`ib-card-contour-shadow relative h-[27.5rem] w-[86%] shrink-0 snap-center overflow-hidden rounded-3xl border p-3.5 text-left transition sm:h-[24rem] sm:w-[22.5rem] sm:p-4 lg:h-[26rem] lg:w-[24.5rem] lg:p-5 ${
+                      className={`ib-card-contour-shadow relative h-[27.5rem] w-[86%] shrink-0 snap-center overflow-hidden rounded-3xl border p-3.5 text-left transition sm:h-[24rem] sm:w-[22.5rem] sm:p-4 lg:h-[29rem] lg:w-[calc((100%-2rem)/3)] lg:max-w-[25rem] lg:snap-start lg:p-5 xl:h-[30rem] ${
                         isAchieved
                           ? 'border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-elevated)] shadow-[0_16px_30px_rgba(2,8,23,0.14)] dark:shadow-[0_16px_30px_rgba(2,8,23,0.34)]'
                           : 'border-dashed border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-1)]/82 shadow-[0_12px_24px_rgba(2,8,23,0.1)] dark:border-[color:var(--color-border-subtle)] dark:shadow-[0_12px_24px_rgba(2,8,23,0.22)]'
