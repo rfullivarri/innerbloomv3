@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { GuidedDemoOverlay } from '../../components/demo/GuidedDemoOverlay';
 import { RewardsSection, type RewardsSectionDemoControls } from '../../components/dashboard-v3/RewardsSection';
 import { LABS_LOGROS_GUIDED_STEPS } from '../../config/labsLogrosGuidedTour';
-import { demoLogrosData, demoLogrosPreviewByTaskId } from '../../data/demoLogrosData';
+import { getDemoLogrosData, getDemoLogrosPreviewByTaskId } from '../../data/demoLogrosData';
+import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 
 const DEMO_ANCHORS = {
   shelves: 'logros-shelves',
@@ -27,6 +28,7 @@ const DEMO_ANCHORS = {
 } as const;
 
 export default function LabsLogrosDemoPage() {
+  const { language } = usePostLoginLanguage();
   const [showGuidedTour, setShowGuidedTour] = useState(true);
   const [activeStepId, setActiveStepId] = useState<string | null>(LABS_LOGROS_GUIDED_STEPS[0]?.id ?? null);
   const demoControlsRef = useRef<RewardsSectionDemoControls | null>(null);
@@ -37,13 +39,13 @@ export default function LabsLogrosDemoPage() {
     () => ({
       disableRemote: true,
       forceAchievementsViewMode: 'carousel' as const,
-      mockPreviewAchievementByTaskId: demoLogrosPreviewByTaskId,
+      mockPreviewAchievementByTaskId: getDemoLogrosPreviewByTaskId(language),
       anchors: DEMO_ANCHORS,
       controls: {
         onReady: rememberDemoControls,
       },
     }),
-    [rememberDemoControls],
+    [language, rememberDemoControls],
   );
 
   const handleStepChange = useCallback((stepId: string) => {
@@ -95,11 +97,11 @@ export default function LabsLogrosDemoPage() {
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[0.62rem] uppercase tracking-[0.22em] text-[color:var(--color-text-subtle)] md:text-xs">Innerbloom</p>
-            <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl">Logros</h1>
+            <h1 className="font-display text-[1.05rem] font-semibold text-[color:var(--color-text)] md:text-xl">{language === 'es' ? 'Logros' : 'Achievements'}</h1>
           </div>
           <Link
             to="/dashboard-v3/rewards"
-            aria-label="Cerrar demo de Logros y volver al dashboard"
+            aria-label={language === 'es' ? 'Cerrar demo de Logros y volver al dashboard' : 'Close Achievements demo and return to dashboard'}
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--glass-border)] bg-[color:var(--color-surface-soft)] text-lg font-semibold leading-none text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-surface-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]"
           >
             <span aria-hidden>×</span>
@@ -109,7 +111,7 @@ export default function LabsLogrosDemoPage() {
 
       {showGuidedTour ? (
         <GuidedDemoOverlay
-          language="es"
+          language={language}
           steps={LABS_LOGROS_GUIDED_STEPS}
           onFinish={() => setShowGuidedTour(false)}
           onSkip={() => setShowGuidedTour(false)}
@@ -124,7 +126,7 @@ export default function LabsLogrosDemoPage() {
       <main className="mx-auto w-full max-w-4xl px-3 py-4 md:px-5 md:py-6" data-demo-anchor="logros-intro">
         <RewardsSection
           userId=""
-          initialData={demoLogrosData}
+          initialData={getDemoLogrosData(language)}
           demoConfig={demoConfig}
           demoStepId={activeStepId}
         />
