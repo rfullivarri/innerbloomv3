@@ -21,6 +21,12 @@ import { emitHabitAchievementUpdated } from '../../lib/habitAchievementEvents';
 import { subscribeToMediaQuery } from '../../lib/mediaQuery';
 import { HabitAchievementSeal } from './HabitAchievementSeal';
 import { PreviewAchievementCard } from './PreviewAchievementCard';
+import {
+  DASHBOARD_SEGMENTED_BUTTON_ACTIVE,
+  DASHBOARD_SEGMENTED_BUTTON_BASE,
+  DASHBOARD_SEGMENTED_BUTTON_INACTIVE,
+  DASHBOARD_SEGMENTED_GROUP_BASE,
+} from './segmentedControlStyles';
 
 const REWARDS_PILLAR_ORDER = [
   { code: 'BODY', name: 'Body' },
@@ -196,7 +202,7 @@ export function RewardsSection({
               href="/labs/logros"
               title={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
               aria-label={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
-              className="inline-flex items-center gap-1.5 rounded-full border border-violet-300/45 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-100 transition hover:border-violet-200/70 hover:bg-violet-500/16 hover:text-white"
+              className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/55 bg-violet-100/95 px-2.5 py-1 text-xs font-semibold text-violet-700 shadow-[0_4px_12px_rgba(124,58,237,0.16)] transition hover:border-violet-500/60 hover:bg-violet-200/90 hover:text-violet-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:cursor-not-allowed disabled:opacity-45 dark:border-violet-300/50 dark:bg-violet-500/14 dark:text-violet-100 dark:shadow-[0_4px_12px_rgba(124,58,237,0.26)] dark:hover:border-violet-200/75 dark:hover:bg-violet-500/24 dark:hover:text-white"
             >
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               <span>{language === 'es' ? 'Ver guía' : 'View guide'}</span>
@@ -965,7 +971,7 @@ function AchievedShelf({
       {isCarouselView ? (
         <div className="space-y-3">
           <div
-            className="inline-flex w-full rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-1 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-border-subtle)_62%,transparent)]"
+            className={DASHBOARD_SEGMENTED_GROUP_BASE}
             role="tablist"
             aria-label={language === 'es' ? 'Seleccionar pilar' : 'Select pillar'}
           >
@@ -978,10 +984,10 @@ function AchievedShelf({
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => setActivePillarCode(pillar.code)}
-                  className={`flex-1 rounded-full px-2 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${
+                  className={`${DASHBOARD_SEGMENTED_BUTTON_BASE} px-2 py-1.5 tracking-[0.14em] ${
                     isSelected
-                      ? 'border border-violet-300/70 bg-violet-500/85 text-white shadow-[0_6px_18px_rgba(124,58,237,0.35)] dark:border-violet-300/55 dark:bg-violet-500/35 dark:text-violet-50'
-                      : 'text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]'
+                      ? DASHBOARD_SEGMENTED_BUTTON_ACTIVE
+                      : DASHBOARD_SEGMENTED_BUTTON_INACTIVE
                   }`}
                 >
                   {pillarChipLabels[pillar.code]}
@@ -1013,32 +1019,36 @@ function AchievedShelf({
                       }`}
                     >
                       {!isFlipped ? (
-                        <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+                        <div className="relative flex h-full flex-col text-center">
                           {!isAchieved ? (
-                            <span className="rounded-full border border-amber-300/55 bg-amber-200/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-900 dark:border-[color:var(--color-border-subtle)] dark:bg-[color:var(--color-overlay-1)] dark:text-[color:var(--color-text-dim)]">
+                            <span className="absolute right-0 top-0 z-20 rounded-full border border-amber-300/65 bg-amber-200/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-900 shadow-[0_8px_18px_rgba(180,83,9,0.24)] dark:border-amber-300/35 dark:bg-[color:var(--color-overlay-1)] dark:text-[color:var(--color-text-dim)]">
                               {language === 'es' ? 'Bloqueado' : 'Locked'}
                             </span>
                           ) : null}
-                          <HabitAchievementSeal
-                            pillar={habit.pillar ?? activePillarCode}
-                            traitCode={habit.trait?.code}
-                            traitName={habit.trait?.name}
-                            alt={`${habit.taskName} seal`}
-                            disabled={!isAchieved}
-                            className={`h-44 min-h-44 w-44 min-w-44 overflow-hidden rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] shadow-[0_20px_50px_rgba(0,0,0,0.24)] ${isAchieved ? '' : 'opacity-55'}`}
-                            imgClassName="h-full w-full object-cover"
-                            fallback={(
-                              <span className="text-5xl font-semibold leading-none text-[color:var(--color-text-muted)]">
-                                {isAchieved ? (habit.seal.visible ? '🏅' : slotLabel) : slotLabel}
-                              </span>
-                            )}
-                          />
-                          <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
-                          <p className="text-sm text-[color:var(--color-text-muted)]">
-                            {language === 'es'
-                              ? 'Toca para ver más'
-                              : 'Tap to see more'}
-                          </p>
+                          <div className="flex min-h-0 flex-1 items-start justify-center pt-1 sm:pt-2">
+                            <HabitAchievementSeal
+                              pillar={habit.pillar ?? activePillarCode}
+                              traitCode={habit.trait?.code}
+                              traitName={habit.trait?.name}
+                              alt={`${habit.taskName} seal`}
+                              disabled={!isAchieved}
+                              className={`h-[17rem] min-h-[17rem] w-[17rem] min-w-[17rem] overflow-hidden rounded-[2rem] border border-transparent bg-transparent shadow-none sm:h-[15.5rem] sm:min-h-[15.5rem] sm:w-[15.5rem] sm:min-w-[15.5rem] lg:h-[16.8rem] lg:min-h-[16.8rem] lg:w-[16.8rem] lg:min-w-[16.8rem] ${isAchieved ? '' : 'opacity-55'}`}
+                              imgClassName="h-full w-full object-contain drop-shadow-[0_22px_26px_rgba(15,23,42,0.22)]"
+                              fallback={(
+                                <span className="text-6xl font-semibold leading-none text-[color:var(--color-text-muted)] sm:text-7xl">
+                                  {isAchieved ? (habit.seal.visible ? '🏅' : slotLabel) : slotLabel}
+                                </span>
+                              )}
+                            />
+                          </div>
+                          <div className="mt-auto space-y-1.5 pb-1">
+                            <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
+                            <p className="text-sm text-[color:var(--color-text-muted)]">
+                              {language === 'es'
+                                ? 'Toca para ver más'
+                                : 'Tap to see more'}
+                            </p>
+                          </div>
                         </div>
                       ) : isAchieved ? (
                         <div className="flex h-full flex-col gap-3 overflow-hidden">

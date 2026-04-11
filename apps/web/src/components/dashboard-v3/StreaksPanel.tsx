@@ -19,6 +19,12 @@ import { TaskInsightsModal } from './StreakTaskInsightsModal';
 import { DashboardMeta, DashboardTitle } from './DashboardTypography';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { HABIT_ACHIEVEMENT_UPDATED_EVENT } from '../../lib/habitAchievementEvents';
+import {
+  DASHBOARD_SEGMENTED_BUTTON_ACTIVE,
+  DASHBOARD_SEGMENTED_BUTTON_BASE,
+  DASHBOARD_SEGMENTED_BUTTON_INACTIVE,
+  DASHBOARD_SEGMENTED_GROUP_BASE,
+} from './segmentedControlStyles';
 
 export const FEATURE_STREAKS_PANEL_V1 = false;
 
@@ -330,12 +336,6 @@ const MODE_CHIP_STYLES: Record<Mode, { glowPrimary: string; glowSecondary: strin
       'ib-streak-mode-chip__inner ib-streak-mode-chip__inner--evolve gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]',
   },
 };
-
-const TAB_BUTTON_BASE =
-  'flex-1 inline-flex items-center justify-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 md:text-xs';
-
-const TAB_GROUP_BASE =
-  'inline-flex w-full items-center justify-between gap-1 rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-1 shadow-[var(--shadow-elev-1)]';
 
 function normalizeMode(mode?: string | null): Mode {
   return normalizeGameModeValue(mode) ?? 'Flow';
@@ -904,30 +904,30 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
         <div className="flex flex-col gap-4">
           <div data-demo-anchor="streaks-top" className="space-y-4">
             <div className="flex items-center justify-center">
-            <div className={cx(TAB_GROUP_BASE, 'max-w-[320px]')}>
-              {PILLAR_TABS.map((tab) => {
-                const isActive = pillar === tab.value;
-                return (
-                  <button
-                    key={tab.value}
-                    type="button"
-                    onClick={() => setPillar(tab.value)}
-                    className={cx(
-                      TAB_BUTTON_BASE,
-                      'leading-none',
-                      isActive
-                        ? 'ib-streak-pill-tab-active border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)] dark:border-white/90 dark:bg-white dark:text-black'
-                        : 'border-transparent bg-transparent text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]',
-                    )}
-                    aria-pressed={isActive}
-                  >
-                    <span aria-hidden>{tab.icon}</span>
-                    {tab.label}
-                  </button>
-                );
-              })}
+              <div className={cx(DASHBOARD_SEGMENTED_GROUP_BASE, 'max-w-[320px]')}>
+                {PILLAR_TABS.map((tab) => {
+                  const isActive = pillar === tab.value;
+                  return (
+                    <button
+                      key={tab.value}
+                      type="button"
+                      onClick={() => setPillar(tab.value)}
+                      className={cx(
+                        DASHBOARD_SEGMENTED_BUTTON_BASE,
+                        'leading-none',
+                        isActive
+                          ? DASHBOARD_SEGMENTED_BUTTON_ACTIVE
+                          : DASHBOARD_SEGMENTED_BUTTON_INACTIVE,
+                      )}
+                      aria-pressed={isActive}
+                    >
+                      <span aria-hidden>{tab.icon}</span>
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
           {isError && (
             <p className="text-sm text-rose-300">
@@ -978,7 +978,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
               placement="top"
               className="flex flex-wrap items-center justify-center gap-2"
             >
-              <div className={cx(TAB_GROUP_BASE, 'max-w-[220px]')}>
+              <div className={cx(DASHBOARD_SEGMENTED_GROUP_BASE, 'max-w-[220px]')}>
                 {rangeTabs.map((tab) => {
                   const isActive = range === tab.value;
                   return (
@@ -987,11 +987,11 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
                       type="button"
                       onClick={() => setRange(tab.value)}
                       className={cx(
-                        TAB_BUTTON_BASE,
+                        DASHBOARD_SEGMENTED_BUTTON_BASE,
                         'leading-none',
                         isActive
-                          ? 'ib-streak-pill-tab-active border-[color:var(--color-border-soft)] bg-[color:var(--color-surface)] text-[color:var(--color-accent-primary)] shadow-[var(--shadow-elev-1)] dark:border-white/90 dark:bg-white dark:text-black'
-                          : 'border-transparent bg-transparent text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text)]',
+                          ? DASHBOARD_SEGMENTED_BUTTON_ACTIVE
+                          : DASHBOARD_SEGMENTED_BUTTON_INACTIVE,
                       )}
                       aria-pressed={isActive}
                     >
