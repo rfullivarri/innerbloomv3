@@ -8,11 +8,11 @@ This Privacy Policy explains what information we collect, how we use it, when we
 
 > Before publishing, replace this placeholder wherever it appears:
 >
-> **[FULL LEGAL NAME OF THE OPERATOR]**
+> Ramiro Fernandez de Ulllivarri
 
 ## 1. Who operates Innerbloom
 
-Innerbloom is operated by **[FULL LEGAL NAME OF THE OPERATOR]**, an individual based in Spain.
+Innerbloom is operated by Ramiro Fernandez de Ulllivarri, an individual based in Spain.
 
 Service name: **Innerbloom**
 
