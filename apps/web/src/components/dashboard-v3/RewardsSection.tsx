@@ -202,7 +202,7 @@ export function RewardsSection({
               href="/labs/logros"
               title={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
               aria-label={language === 'es' ? 'Ver demo guiada de Logros' : 'View guided Achievements demo'}
-              className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/55 bg-violet-100/95 px-2.5 py-1 text-xs font-semibold text-violet-700 shadow-[0_4px_12px_rgba(124,58,237,0.16)] transition hover:border-violet-500/60 hover:bg-violet-200/90 hover:text-violet-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:cursor-not-allowed disabled:opacity-45 dark:border-violet-300/50 dark:bg-violet-500/14 dark:text-violet-100 dark:shadow-[0_4px_12px_rgba(124,58,237,0.26)] dark:hover:border-violet-200/75 dark:hover:bg-violet-500/24 dark:hover:text-white"
+              className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/55 bg-violet-100/95 px-2.5 py-1 text-xs font-semibold text-violet-700 shadow-[0_4px_12px_rgba(124,58,237,0.16)] transition hover:border-violet-500/60 hover:bg-violet-200/90 hover:text-violet-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:cursor-not-allowed disabled:opacity-45 dark:border-violet-300/55 dark:bg-violet-500/35 dark:text-violet-50 dark:shadow-[0_6px_18px_rgba(124,58,237,0.35)] dark:hover:border-violet-200/80 dark:hover:bg-violet-500/45 dark:hover:text-white dark:focus-visible:outline-violet-200"
             >
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               <span>{language === 'es' ? 'Ver guía' : 'View guide'}</span>
