@@ -47,10 +47,17 @@ interface RewardsSectionProps {
   mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
   demoAnchors?: {
     shelves?: string;
+    carouselStructure?: string;
+    pillarSelector?: string;
+    carouselTrack?: string;
     achievedCard?: string;
     achievedCardTaskId?: string;
+    achievedCardFront?: string;
+    achievedCardBack?: string;
     blockedCard?: string;
     blockedCardTaskId?: string;
+    blockedCardFront?: string;
+    blockedCardBack?: string;
     sealPath?: string;
     achievementFront?: string;
     achievementBack?: string;
@@ -60,6 +67,7 @@ interface RewardsSectionProps {
   };
   demoConfig?: {
     disableRemote?: boolean;
+    forceAchievementsViewMode?: AchievementViewMode;
     mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
     anchors?: RewardsSectionProps['demoAnchors'];
     controls?: {
@@ -70,8 +78,11 @@ interface RewardsSectionProps {
 }
 
 export type RewardsSectionDemoControls = {
+  selectPillar: (pillarCode: 'BODY' | 'MIND' | 'SOUL') => void;
+  focusCarouselCard: (taskId: string) => void;
   openAchievedCard: () => void;
   openBlockedCard: () => void;
+  focusBlockedCarouselCard: () => void;
   focusBlockedShelfCard: () => void;
   flipAchievementCard: () => void;
   ensureAchievementBackFace: () => void;
@@ -93,6 +104,7 @@ export function RewardsSection({
 }: RewardsSectionProps) {
   const { language } = usePostLoginLanguage();
   const resolvedDisableRemote = demoConfig?.disableRemote ?? disableRemote;
+  const forcedAchievementsViewMode = demoConfig?.forceAchievementsViewMode;
   const resolvedMockPreviewAchievementByTaskId = demoConfig?.mockPreviewAchievementByTaskId ?? mockPreviewAchievementByTaskId;
   const resolvedDemoAnchors = demoConfig?.anchors ?? demoAnchors;
 
@@ -105,6 +117,10 @@ export function RewardsSection({
   const [achievementsViewMode, setAchievementsViewMode] = useState<AchievementViewMode>('shelves');
 
   useEffect(() => {
+    if (forcedAchievementsViewMode) {
+      setAchievementsViewMode(forcedAchievementsViewMode);
+      return;
+    }
     if (typeof window === 'undefined') {
       return;
     }
@@ -112,15 +128,19 @@ export function RewardsSection({
     if (savedMode === 'carousel' || savedMode === 'shelves') {
       setAchievementsViewMode(savedMode);
     }
-  }, []);
+  }, [forcedAchievementsViewMode]);
 
   const handleChangeAchievementsViewMode = useCallback((nextMode: AchievementViewMode) => {
+    if (forcedAchievementsViewMode) {
+      setAchievementsViewMode(forcedAchievementsViewMode);
+      return;
+    }
     setAchievementsViewMode(nextMode);
     if (typeof window === 'undefined') {
       return;
     }
     window.localStorage.setItem(REWARDS_VIEW_MODE_STORAGE_KEY, nextMode);
-  }, []);
+  }, [forcedAchievementsViewMode]);
 
   const { data, status, error, reload } = useRequest(() => getRewardsHistory(userId), [userId], {
     enabled: !resolvedDisableRemote && Boolean(userId),
@@ -217,6 +237,9 @@ export function RewardsSection({
               { id: 'carousel', label: language === 'es' ? 'Carrusel' : 'Carousel' },
               { id: 'shelves', label: language === 'es' ? 'Estantes' : 'Shelves' },
             ] as const).map((option) => {
+              if (forcedAchievementsViewMode && option.id !== forcedAchievementsViewMode) {
+                return null;
+              }
               const isSelected = achievementsViewMode === option.id;
               return (
                 <button
@@ -226,6 +249,7 @@ export function RewardsSection({
                   aria-selected={isSelected}
                   tabIndex={isSelected ? 0 : -1}
                   onClick={() => handleChangeAchievementsViewMode(option.id)}
+                  disabled={Boolean(forcedAchievementsViewMode)}
                   className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                     isSelected
                       ? 'border border-violet-300/70 bg-violet-500/85 text-white shadow-[0_6px_18px_rgba(124,58,237,0.35)] dark:border-violet-300/55 dark:bg-violet-500/35 dark:text-violet-50'
@@ -788,6 +812,7 @@ function AchievedShelf({
   const resolvedBlockedTaskId = demoAnchors?.blockedCardTaskId;
   const isShelfFocusStep = demoStepId === 'logros-shelves';
   const isDemoExperience = Boolean(demoStepId);
+  const isCarouselView = viewMode === 'carousel';
 
   useEffect(() => {
     if (viewMode !== 'shelves') {
@@ -830,7 +855,59 @@ function AchievedShelf({
     }
   }, []);
 
+  const scrollCarouselToIndex = useCallback((targetIndex: number) => {
+    const track = carouselTrackRef.current;
+    if (!track) {
+      return;
+    }
+    const clampedIndex = Math.max(0, Math.min(targetIndex, Math.max(activePillarHabits.length - 1, 0)));
+    const targetCard = track.querySelector<HTMLElement>(`[data-achievement-carousel-index="${clampedIndex}"]`);
+    if (!targetCard) {
+      return;
+    }
+    if (typeof targetCard.scrollIntoView === 'function') {
+      targetCard.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
+    }
+    setActiveCarouselIndex(clampedIndex);
+  }, [activePillarHabits.length, carouselTrackRef, prefersReducedMotion, setActiveCarouselIndex]);
+
+  const resolveHabitLocationByTaskId = useCallback((taskId: string) => {
+    for (const group of normalizedGroups) {
+      const habitIndex = group.habits.findIndex((habit) => habit.taskId === taskId);
+      if (habitIndex >= 0) {
+        return {
+          pillarCode: (group.pillar.code?.toUpperCase() ?? 'BODY') as (typeof REWARDS_PILLAR_ORDER)[number]['code'],
+          index: habitIndex,
+          habit: group.habits[habitIndex],
+        };
+      }
+    }
+    return null;
+  }, [normalizedGroups]);
+
+  const focusCarouselCardByTaskId = useCallback((taskId: string) => {
+    const location = resolveHabitLocationByTaskId(taskId);
+    if (!location) {
+      return;
+    }
+    setActiveHabitId(null);
+    setPreviewHabit(null);
+    setShowBackFace(false);
+    setFlippedCarouselHabitId(null);
+    setActivePillarCode(location.pillarCode);
+    window.setTimeout(() => {
+      scrollCarouselToIndex(location.index);
+    }, 40);
+  }, [resolveHabitLocationByTaskId, scrollCarouselToIndex]);
+
   const openAchievedCard = useCallback(() => {
+    if (isCarouselView) {
+      if (!resolvedAchievedTaskId) {
+        return;
+      }
+      focusCarouselCardByTaskId(resolvedAchievedTaskId);
+      return;
+    }
     const target = normalizedGroups
       .flatMap((group) => group.habits)
       .find((habit) => habit.taskId === resolvedAchievedTaskId && habit.status !== 'not_achieved');
@@ -840,9 +917,30 @@ function AchievedShelf({
     setPreviewHabit(null);
     setShowBackFace(false);
     setActiveHabitId(target.id);
-  }, [normalizedGroups, resolvedAchievedTaskId]);
+  }, [focusCarouselCardByTaskId, isCarouselView, normalizedGroups, resolvedAchievedTaskId]);
 
   const openBlockedCard = useCallback(() => {
+    if (isCarouselView) {
+      if (!resolvedBlockedTaskId) {
+        return;
+      }
+      const location = resolveHabitLocationByTaskId(resolvedBlockedTaskId);
+      if (!location) {
+        return;
+      }
+      setActiveHabitId(null);
+      setShowBackFace(false);
+      setPreviewHabit(null);
+      setFlippedCarouselHabitId(null);
+      setActivePillarCode(location.pillarCode);
+      window.setTimeout(() => {
+        scrollCarouselToIndex(location.index);
+        window.setTimeout(() => {
+          setFlippedCarouselHabitId(location.habit.id);
+        }, prefersReducedMotion ? 0 : 120);
+      }, 40);
+      return;
+    }
     const target = normalizedGroups
       .flatMap((group) => group.habits)
       .find((habit) => habit.taskId === resolvedBlockedTaskId && habit.status === 'not_achieved');
@@ -852,14 +950,55 @@ function AchievedShelf({
     setActiveHabitId(null);
     setShowBackFace(false);
     setPreviewHabit(target);
-  }, [normalizedGroups, resolvedBlockedTaskId]);
+  }, [
+    isCarouselView,
+    normalizedGroups,
+    prefersReducedMotion,
+    resolveHabitLocationByTaskId,
+    resolvedBlockedTaskId,
+    scrollCarouselToIndex,
+  ]);
 
   useEffect(() => {
     onDemoControlsReady?.({
+      selectPillar: (pillarCode) => {
+        setActiveHabitId(null);
+        setPreviewHabit(null);
+        setShowBackFace(false);
+        setFlippedCarouselHabitId(null);
+        setActivePillarCode(pillarCode);
+        window.setTimeout(() => {
+          scrollCarouselToIndex(0);
+        }, 40);
+      },
+      focusCarouselCard: (taskId) => {
+        focusCarouselCardByTaskId(taskId);
+      },
       openAchievedCard,
       openBlockedCard,
+      focusBlockedCarouselCard: () => {
+        if (!resolvedBlockedTaskId) {
+          return;
+        }
+        focusCarouselCardByTaskId(resolvedBlockedTaskId);
+      },
       focusBlockedShelfCard,
       flipAchievementCard: () => {
+        if (isCarouselView) {
+          if (!resolvedAchievedTaskId) {
+            return;
+          }
+          const location = resolveHabitLocationByTaskId(resolvedAchievedTaskId);
+          if (!location) {
+            return;
+          }
+          setActivePillarCode(location.pillarCode);
+          scrollCarouselToIndex(location.index);
+          window.setTimeout(() => {
+            setFlippedCarouselHabitId((current) => (current === location.habit.id ? null : location.habit.id));
+          }, prefersReducedMotion ? 0 : 120);
+          return;
+        }
         if (activeHabitId) {
           setShowBackFace((current) => !current);
           return;
@@ -870,6 +1009,21 @@ function AchievedShelf({
         }, 80);
       },
       ensureAchievementBackFace: () => {
+        if (isCarouselView) {
+          if (!resolvedAchievedTaskId) {
+            return;
+          }
+          const location = resolveHabitLocationByTaskId(resolvedAchievedTaskId);
+          if (!location) {
+            return;
+          }
+          setActivePillarCode(location.pillarCode);
+          scrollCarouselToIndex(location.index);
+          window.setTimeout(() => {
+            setFlippedCarouselHabitId(location.habit.id);
+          }, prefersReducedMotion ? 0 : 120);
+          return;
+        }
         if (activeHabitId) {
           setShowBackFace(true);
           return;
@@ -888,31 +1042,29 @@ function AchievedShelf({
         setActiveHabitId(null);
         setShowBackFace(false);
         setPreviewHabit(null);
+        setFlippedCarouselHabitId(null);
       },
     });
-  }, [activeHabitId, focusBlockedShelfCard, onDemoControlsReady, openAchievedCard, openBlockedCard]);
+  }, [
+    activeHabitId,
+    focusBlockedShelfCard,
+    focusCarouselCardByTaskId,
+    isCarouselView,
+    onDemoControlsReady,
+    openAchievedCard,
+    openBlockedCard,
+    prefersReducedMotion,
+    resolveHabitLocationByTaskId,
+    resolvedAchievedTaskId,
+    resolvedBlockedTaskId,
+    scrollCarouselToIndex,
+  ]);
 
   const getSealBadge = (habit: HabitAchievementShelfItem) => {
     const pillarCode = (habit.pillar ?? 'X').slice(0, 1).toUpperCase();
     const traitCode = habit.trait?.code?.slice(0, 3).toUpperCase() ?? '---';
     return `${pillarCode}-${traitCode}`;
   };
-
-  const scrollCarouselToIndex = useCallback((targetIndex: number) => {
-    const track = carouselTrackRef.current;
-    if (!track) {
-      return;
-    }
-    const clampedIndex = Math.max(0, Math.min(targetIndex, Math.max(activePillarHabits.length - 1, 0)));
-    const targetCard = track.querySelector<HTMLElement>(`[data-achievement-carousel-index="${clampedIndex}"]`);
-    if (!targetCard) {
-      return;
-    }
-    if (typeof targetCard.scrollIntoView === 'function') {
-      targetCard.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
-    }
-    setActiveCarouselIndex(clampedIndex);
-  }, [activePillarHabits.length, carouselTrackRef, prefersReducedMotion, setActiveCarouselIndex]);
 
   const handleCarouselCardClick = useCallback((habitId: string, index: number) => {
     if (index !== activeCarouselIndex) {
@@ -935,7 +1087,6 @@ function AchievedShelf({
     }
   }, [onToggleMaintained]);
 
-  const isCarouselView = viewMode === 'carousel';
   const pillarChipLabels: Record<(typeof REWARDS_PILLAR_ORDER)[number]['code'], string> = {
     BODY: language === 'es' ? 'Cuerpo' : 'Body',
     MIND: language === 'es' ? 'Mente' : 'Mind',
@@ -969,11 +1120,12 @@ function AchievedShelf({
         </div>
       ) : null}
       {isCarouselView ? (
-        <div className="space-y-3">
+        <div className="space-y-3" data-demo-anchor={demoAnchors?.carouselStructure}>
           <div
             className={DASHBOARD_SEGMENTED_GROUP_BASE}
             role="tablist"
             aria-label={language === 'es' ? 'Seleccionar pilar' : 'Select pillar'}
+            data-demo-anchor={demoAnchors?.pillarSelector}
           >
             {REWARDS_PILLAR_ORDER.map((pillar) => {
               const isSelected = activePillarCode === pillar.code;
@@ -1001,6 +1153,7 @@ function AchievedShelf({
                 ref={carouselTrackRef}
                 onScroll={handleCarouselTrackScroll}
                 className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-1 pb-1 sm:gap-3 sm:px-2 lg:gap-4 lg:px-4 xl:px-5"
+                data-demo-anchor={demoAnchors?.carouselTrack}
               >
                 {activePillarHabits.map((habit, index) => {
                   const isFlipped = flippedCarouselHabitId === habit.id && activeCarouselIndex === index;
@@ -1011,6 +1164,13 @@ function AchievedShelf({
                       key={habit.id}
                       type="button"
                       data-achievement-carousel-index={index}
+                      data-demo-anchor={
+                        demoAnchors?.achievedCardTaskId === habit.taskId
+                          ? demoAnchors?.achievedCard
+                          : demoAnchors?.blockedCardTaskId === habit.taskId
+                            ? demoAnchors?.blockedCard
+                            : undefined
+                      }
                       onClick={() => handleCarouselCardClick(habit.id, index)}
                       className={`ib-card-contour-shadow relative h-[27.5rem] w-[86%] shrink-0 snap-center overflow-hidden rounded-3xl border p-3.5 text-left transition sm:h-[24rem] sm:w-[22.5rem] sm:p-4 lg:h-[29rem] lg:w-[calc((100%-2rem)/3)] lg:max-w-[25rem] lg:snap-start lg:p-5 xl:h-[30rem] ${
                         isAchieved
@@ -1019,7 +1179,16 @@ function AchievedShelf({
                       }`}
                     >
                       {!isFlipped ? (
-                        <div className="relative flex h-full flex-col text-center">
+                        <div
+                          className="relative flex h-full flex-col text-center"
+                          data-demo-anchor={
+                            demoAnchors?.achievedCardTaskId === habit.taskId
+                              ? demoAnchors?.achievedCardFront
+                              : demoAnchors?.blockedCardTaskId === habit.taskId
+                                ? demoAnchors?.blockedCardFront
+                                : undefined
+                          }
+                        >
                           {!isAchieved ? (
                             <span className="absolute right-0 top-0 z-20 rounded-full border border-amber-300/65 bg-amber-200/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-900 shadow-[0_8px_18px_rgba(180,83,9,0.24)] dark:border-amber-300/35 dark:bg-[color:var(--color-overlay-1)] dark:text-[color:var(--color-text-dim)]">
                               {language === 'es' ? 'Bloqueado' : 'Locked'}
@@ -1051,7 +1220,10 @@ function AchievedShelf({
                           </div>
                         </div>
                       ) : isAchieved ? (
-                        <div className="flex h-full flex-col gap-3 overflow-hidden">
+                        <div
+                          className="flex h-full flex-col gap-3 overflow-hidden"
+                          data-demo-anchor={demoAnchors?.achievedCardBack}
+                        >
                           <AchievedHabitBackContent
                             habit={habit}
                             language={language}
@@ -1064,7 +1236,10 @@ function AchievedShelf({
                           </p>
                         </div>
                       ) : (
-                        <div className="flex h-full flex-col gap-1 overflow-hidden sm:gap-0.5">
+                        <div
+                          className="flex h-full flex-col gap-1 overflow-hidden sm:gap-0.5"
+                          data-demo-anchor={demoAnchors?.blockedCardBack}
+                        >
                           <div className="space-y-0.5 sm:space-y-0">
                             <p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-text-dim)]">
                               {language === 'es' ? 'Logro bloqueado' : 'Achievement locked'}

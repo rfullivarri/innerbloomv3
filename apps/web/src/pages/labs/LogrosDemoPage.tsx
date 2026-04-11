@@ -7,10 +7,17 @@ import { demoLogrosData, demoLogrosPreviewByTaskId } from '../../data/demoLogros
 
 const DEMO_ANCHORS = {
   shelves: 'logros-shelves',
+  carouselStructure: 'logros-carousel-structure',
+  pillarSelector: 'logros-pillar-selector',
+  carouselTrack: 'logros-carousel-track',
   achievedCard: 'logros-achieved-card',
   achievedCardTaskId: 'task-dinner-before-22',
+  achievedCardFront: 'logros-achieved-card-front',
+  achievedCardBack: 'logros-achieved-card-back',
   blockedCard: 'logros-blocked-card',
   blockedCardTaskId: 'task-gym',
+  blockedCardFront: 'logros-blocked-card-front',
+  blockedCardBack: 'logros-blocked-card-back',
   sealPath: 'logros-seal-path',
   achievementFront: 'logros-achievement-front',
   achievementBack: 'logros-achievement-back',
@@ -29,6 +36,7 @@ export default function LabsLogrosDemoPage() {
   const demoConfig = useMemo(
     () => ({
       disableRemote: true,
+      forceAchievementsViewMode: 'carousel' as const,
       mockPreviewAchievementByTaskId: demoLogrosPreviewByTaskId,
       anchors: DEMO_ANCHORS,
       controls: {
@@ -43,7 +51,14 @@ export default function LabsLogrosDemoPage() {
     const controls = demoControlsRef.current;
 
     if (stepId === 'logros-shelves') {
-      controls?.focusBlockedShelfCard();
+      controls?.selectPillar('BODY');
+      controls?.focusCarouselCard(DEMO_ANCHORS.achievedCardTaskId);
+      return;
+    }
+
+    if (stepId === 'logros-achieved-card') {
+      controls?.selectPillar('BODY');
+      controls?.focusCarouselCard(DEMO_ANCHORS.achievedCardTaskId);
       return;
     }
 
@@ -66,7 +81,7 @@ export default function LabsLogrosDemoPage() {
 
     if (stepId === 'logros-blocked-card') {
       controls?.closeAllOverlays();
-      controls?.focusBlockedShelfCard();
+      controls?.focusBlockedCarouselCard();
       return;
     }
 
