@@ -2,6 +2,10 @@ import type { Theme } from '@clerk/types';
 
 // Keep auth widgets fluid across breakpoints so desktop side margins match the tighter mobile framing.
 export const AUTH_LOGIN_MAX_WIDTH = 'max-w-full';
+export const AUTH_STACK_CLASS = 'mx-auto w-full max-w-xl space-y-3';
+export const AUTH_DIVIDER_CLASS =
+  'flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/45';
+export const AUTH_CLERK_FORM_SHELL_CLASS = 'mx-auto w-full min-w-0 max-w-full px-1 sm:px-0';
 
 const baseLayout = {
   logoPlacement: 'none' as const,
@@ -27,7 +31,7 @@ const baseElements = {
   rootBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto`,
   cardBox: `w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} mx-auto flex justify-center`,
   card:
-    `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-4 overflow-hidden rounded-[26px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.025))] p-3 shadow-[0_20px_50px_rgba(7,12,32,0.24)] backdrop-blur-[18px] sm:rounded-[30px] sm:p-4 md:p-5`,
+    `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-3 overflow-hidden rounded-[26px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.025))] p-3 shadow-[0_20px_50px_rgba(7,12,32,0.24)] backdrop-blur-[18px] sm:rounded-[30px] sm:p-4 md:p-5`,
   header: 'hidden',
   socialButtons: 'hidden',
   socialButtonsBlockButton: 'hidden',
@@ -50,11 +54,11 @@ const baseElements = {
     '!appearance-none !ring-0',
 
   footer:
-    'mt-2 w-full max-w-none rounded-2xl bg-[linear-gradient(135deg,rgba(122,138,196,0.2),rgba(108,63,197,0.2))] !px-2 !py-1 shadow-[0_18px_40px_rgba(9,16,40,0.24)] backdrop-blur-md',
+    'mt-1 w-full max-w-none rounded-xl bg-[linear-gradient(135deg,rgba(122,138,196,0.14),rgba(108,63,197,0.12))] !px-2 !py-1 shadow-[0_10px_26px_rgba(9,16,40,0.16)] backdrop-blur-md',
 
   // 1) CONTENEDOR 1 (cl-footerAction__signIn): reducir alto y aumentar ancho
   footerAction:
-    '!flex !w-full !max-w-none items-center justify-start gap-1 rounded-xl bg-white/[0.06] !px-3 !py-1 text-[10px] !leading-[12px] text-white/60 backdrop-blur-sm',
+    '!flex !w-full !max-w-none items-center justify-start gap-1 rounded-lg bg-white/[0.045] !px-2.5 !py-1 text-[10px] !leading-[12px] text-white/58 backdrop-blur-sm',
   footerActionText:
     '!whitespace-nowrap text-white/55',
   footerActionLink:
@@ -62,7 +66,7 @@ const baseElements = {
 
   // 2) CONTENEDOR 2 (“Secured by clerk”): reducir alto y aumentar ancho
   footerPages:
-    '!mt-1 !flex !w-full !max-w-none items-center justify-center gap-1 rounded-xl bg-white/[0.06] !px-3 !py-1 text-[9px] !leading-[11px] text-white/45 backdrop-blur-sm',
+    '!mt-1 !flex !w-full !max-w-none items-center justify-center gap-1 rounded-lg bg-white/[0.04] !px-2.5 !py-1 text-[9px] !leading-[11px] text-white/40 backdrop-blur-sm',
   footerPageLink:
     'inline-flex items-center gap-1 text-white/40 hover:text-white/60',
 

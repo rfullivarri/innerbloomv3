@@ -5,7 +5,12 @@ import { AuthLayout } from '../components/layout/AuthLayout';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { DASHBOARD_PATH } from '../config/auth';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
-import { createAuthAppearance } from '../lib/clerkAppearance';
+import {
+  AUTH_CLERK_FORM_SHELL_CLASS,
+  AUTH_DIVIDER_CLASS,
+  AUTH_STACK_CLASS,
+  createAuthAppearance,
+} from '../lib/clerkAppearance';
 import { usePageMeta } from '../lib/seo';
 import {
   isNativeCapacitorPlatform,
@@ -70,25 +75,27 @@ export default function LoginPage() {
       secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
       secondaryActionHref={`/?lang=${language}`}
     >
-      <div className="mx-auto w-full max-w-xl space-y-4">
+      <div className={AUTH_STACK_CLASS}>
         <GoogleOAuthButton language={language} mode="sign-in" redirectUrlComplete={`${location.pathname}${location.search}${location.hash}`} />
-        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/45">
+        <div className={AUTH_DIVIDER_CLASS}>
           <span className="h-px flex-1 bg-white/12" aria-hidden />
           <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
           <span className="h-px flex-1 bg-white/12" aria-hidden />
         </div>
-        <SignIn
-          appearance={createAuthAppearance({
-            elements: {
-              footerActionText: 'text-white/50',
-              footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4'
-            }
-          })}
-          routing="path"
-          path="/login"
-          signUpUrl={buildLocalizedAuthPath('/sign-up', language)}
-          fallbackRedirectUrl={DASHBOARD_PATH}
-        />
+        <div className={AUTH_CLERK_FORM_SHELL_CLASS}>
+          <SignIn
+            appearance={createAuthAppearance({
+              elements: {
+                footerActionText: 'text-white/50',
+                footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4'
+              }
+            })}
+            routing="path"
+            path="/login"
+            signUpUrl={buildLocalizedAuthPath('/sign-up', language)}
+            fallbackRedirectUrl={DASHBOARD_PATH}
+          />
+        </div>
       </div>
     </AuthLayout>
   );

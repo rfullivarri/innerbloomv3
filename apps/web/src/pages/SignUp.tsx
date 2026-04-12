@@ -5,7 +5,12 @@ import { GoogleOAuthButton } from '../components/auth/GoogleOAuthButton';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
-import { createAuthAppearance } from '../lib/clerkAppearance';
+import {
+  AUTH_CLERK_FORM_SHELL_CLASS,
+  AUTH_DIVIDER_CLASS,
+  AUTH_STACK_CLASS,
+  createAuthAppearance,
+} from '../lib/clerkAppearance';
 import {
   isNativeCapacitorPlatform,
   openUrlInCapacitorBrowser,
@@ -65,16 +70,16 @@ export default function SignUpPage() {
       secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
       secondaryActionHref={`/?lang=${language}`}
     >
-      <div className="mx-auto w-full max-w-xl space-y-4">
+      <div className={AUTH_STACK_CLASS}>
         <GoogleOAuthButton language={language} mode="sign-up" redirectUrlComplete={`${location.pathname}${location.search}${location.hash}`} />
-        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/45">
+        <div className={AUTH_DIVIDER_CLASS}>
           <span className="h-px flex-1 bg-white/12" aria-hidden />
           <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
           <span className="h-px flex-1 bg-white/12" aria-hidden />
         </div>
         <div
           ref={signUpContainerRef}
-          className="mx-auto w-full min-w-0 max-w-full px-1 sm:px-0"
+          className={AUTH_CLERK_FORM_SHELL_CLASS}
         >
           <SignUp
             appearance={appearance}

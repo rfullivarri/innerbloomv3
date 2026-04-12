@@ -5,7 +5,11 @@ import { useLocation } from 'react-router-dom';
 import { GoogleOAuthButton } from '../../components/auth/GoogleOAuthButton';
 import { useAuth, useUser } from '../../auth/runtimeAuth';
 import { buildLocalizedAuthPath } from '../../lib/authLanguage';
-import { createAuthAppearance } from '../../lib/clerkAppearance';
+import {
+  AUTH_CLERK_FORM_SHELL_CLASS,
+  AUTH_DIVIDER_CLASS,
+  createAuthAppearance,
+} from '../../lib/clerkAppearance';
 import { buildWebAbsoluteUrl } from '../../lib/siteUrl';
 import {
   buildNativeAppUrl,
@@ -236,13 +240,13 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
           </button>
         ))}
       </div>
-      <div className="mt-6 space-y-4">
+      <div className="mt-6 space-y-3">
         <GoogleOAuthButton
           language={language}
           mode={tab}
           redirectUrlComplete={currentUrl}
         />
-        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/45">
+        <div className={AUTH_DIVIDER_CLASS}>
           <span className="h-px flex-1 bg-white/12" aria-hidden />
           <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
           <span className="h-px flex-1 bg-white/12" aria-hidden />
@@ -255,15 +259,17 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="onboarding-surface-ghost rounded-2xl px-0 py-4 sm:px-4 sm:py-6"
+              className="onboarding-surface-ghost rounded-2xl px-0 pt-2 pb-3 sm:px-4 sm:pt-3 sm:pb-4"
             >
-              <SignUp
-                appearance={clerkAppearance}
-                routing="virtual"
-                signInUrl={currentUrl}
-                fallbackRedirectUrl={currentUrl}
-                forceRedirectUrl={currentUrl}
-              />
+              <div className={AUTH_CLERK_FORM_SHELL_CLASS}>
+                <SignUp
+                  appearance={clerkAppearance}
+                  routing="virtual"
+                  signInUrl={currentUrl}
+                  fallbackRedirectUrl={currentUrl}
+                  forceRedirectUrl={currentUrl}
+                />
+              </div>
             </motion.div>
           ) : (
             <motion.div
@@ -272,15 +278,17 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="onboarding-surface-ghost rounded-2xl px-0 py-4 sm:px-4 sm:py-6"
+              className="onboarding-surface-ghost rounded-2xl px-0 pt-2 pb-3 sm:px-4 sm:pt-3 sm:pb-4"
             >
-              <SignIn
-                appearance={clerkAppearance}
-                routing="virtual"
-                signUpUrl={currentUrl}
-                fallbackRedirectUrl={currentUrl}
-                forceRedirectUrl={currentUrl}
-              />
+              <div className={AUTH_CLERK_FORM_SHELL_CLASS}>
+                <SignIn
+                  appearance={clerkAppearance}
+                  routing="virtual"
+                  signUpUrl={currentUrl}
+                  fallbackRedirectUrl={currentUrl}
+                  forceRedirectUrl={currentUrl}
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
