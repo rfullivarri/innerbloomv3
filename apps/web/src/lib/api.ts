@@ -2483,7 +2483,6 @@ export async function getUserStreakPanel(
 ): Promise<StreakPanelResponse> {
   if (isDashboardDemoModeEnabled()) {
     const tasks: StreakPanelTask[] = [
-      { id: 'task-minoxidil', name: 'Minoxidil noche', stat: 'Recuperación', weekDone: 3, streakDays: 20, metrics: { week: { count: 3, xp: 120 }, month: { count: 24, xp: 960, weeks: [5, 6, 6, 7] }, qtr: { count: 61, xp: 2440, weeks: [5, 6, 6, 7, 5, 4], weekTotals: [5, 6, 6, 7, 5, 4] } } },
       { id: 'task-correr', name: '10.000 pasos / Correr', stat: 'Movilidad', weekDone: 2, streakDays: 4, metrics: { week: { count: 2, xp: 110 }, month: { count: 11, xp: 560, weeks: [2, 4, 3, 2] }, qtr: { count: 31, xp: 1540, weeks: [2, 4, 3, 2, 5, 3], weekTotals: [2, 4, 3, 2, 5, 3] } } },
       { id: 'task-no-dulces', name: 'No dulces', stat: 'Nutrición', weekDone: 0, streakDays: 0, metrics: { week: { count: 0, xp: 0 }, month: { count: 3, xp: 130, weeks: [0, 1, 1, 1] }, qtr: { count: 9, xp: 390, weeks: [0, 1, 1, 1, 2, 4], weekTotals: [0, 1, 1, 1, 2, 4] } } },
       { id: 'task-gym', name: 'gym', stat: 'Energía', weekDone: 0, streakDays: 0, metrics: { week: { count: 0, xp: 0 }, month: { count: 5, xp: 250, weeks: [1, 2, 1, 1] }, qtr: { count: 14, xp: 700, weeks: [1, 2, 1, 1, 4, 5], weekTotals: [1, 2, 1, 1, 4, 5] } } },
@@ -2492,9 +2491,9 @@ export async function getUserStreakPanel(
       { id: 'task-cena', name: 'Cena antes de las 22hs', stat: 'Nutrición', weekDone: 2, streakDays: 2, metrics: { week: { count: 2, xp: 90 }, month: { count: 8, xp: 360, weeks: [2, 2, 2, 2] }, qtr: { count: 22, xp: 990, weeks: [2, 2, 2, 2, 7, 7], weekTotals: [2, 2, 2, 2, 7, 7] } } },
     ];
     const topStreaks = tasks
-      .filter((entry) => (params.pillar === 'Body' ? true : params.pillar === 'Mind' ? entry.id === 'task-pantallas' : entry.id === 'task-minoxidil'))
+      .filter((entry) => (params.pillar === 'Body' ? true : params.pillar === 'Mind' ? entry.id === 'task-pantallas' : entry.id === 'task-no-dulces'))
       .sort((a, b) => b.streakDays - a.streakDays)
-      .slice(0, 3)
+      .slice(0, 2)
       .map((entry) => ({ id: entry.id, name: entry.name, stat: entry.stat, weekDone: entry.weekDone, streakDays: entry.streakDays }));
     return { topStreaks, tasks };
   }

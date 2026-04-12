@@ -41,6 +41,7 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     id: 'streaks-bottom',
     targetSelector: '[data-demo-anchor="streaks-bottom"]',
     tooltipPlacement: 'left',
+    mobileTooltipPlacement: 'top',
     title: {
       es: 'Todas tus tareas',
       en: 'All your tasks',
@@ -132,6 +133,7 @@ export const DEMO_GUIDED_STEPS: GuidedStep[] = [
     id: 'daily-quest-tasks',
     targetSelector: '[data-demo-anchor="daily-quest-tasks"]',
     tooltipPlacement: 'top',
+    mobileTooltipPlacement: 'top',
     title: {
       es: 'Tareas por pilar',
       en: 'Tasks by pillar',
