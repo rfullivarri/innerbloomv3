@@ -354,7 +354,7 @@ function GrowthCalibrationShelf({
 }) {
   const hasResults = growthCalibration.latestResults.length > 0;
   return (
-    <div className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-rose-500/15 via-fuchsia-500/10 to-amber-500/10 p-4">
+    <div className="ib-card-contour-shadow ib-light-elevated-surface ib-light-elevated-surface--rose rounded-2xl p-4">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">Growth Calibration Results</p>
@@ -401,7 +401,7 @@ function MonthlyWrapupShelf({ items, language, anchor }: { items: MonthlyWrapped
   const previous = compactItems[1] ?? null;
 
   return (
-    <div data-demo-anchor={anchor} className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-indigo-500/15 via-fuchsia-500/10 to-sky-500/10 p-4">
+    <div data-demo-anchor={anchor} className="ib-card-contour-shadow ib-light-elevated-surface ib-light-elevated-surface--indigo rounded-2xl p-4">
       <div className="flex items-start justify-between gap-4">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Monthly Wrap-Up' : 'Monthly Wrap-Up'}</p>
         <InlineCountdown days={monthlyCountdownDays} language={language} />
@@ -435,7 +435,7 @@ function WeeklyWrapupShelf({ items, onOpen, language, anchor }: { items: WeeklyW
   const weeklyCountdownDays = useDailyWrapupCountdown(getDaysUntilNextWeeklyWrapup);
   const compactItems = useMemo(() => items.slice(0, 2), [items]);
   return (
-    <div data-demo-anchor={anchor} className="ib-card-contour-shadow rounded-2xl border border-[color:var(--color-border-subtle)] bg-gradient-to-br from-emerald-500/15 via-cyan-500/10 to-indigo-500/10 p-4">
+    <div data-demo-anchor={anchor} className="ib-card-contour-shadow ib-light-elevated-surface ib-light-elevated-surface--emerald rounded-2xl p-4">
       <div className="flex items-start justify-between gap-4">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Weekly Wrap-Up' : 'Weekly Wrap-Up'}</p>
         <InlineCountdown days={weeklyCountdownDays} language={language} />
