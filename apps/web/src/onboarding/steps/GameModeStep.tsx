@@ -25,9 +25,9 @@ const MODE_ORDER: GameMode[] = ['LOW', 'CHILL', 'FLOW', 'EVOLVE'];
 export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, onBack }: GameModeStepProps) {
   const copy = language === 'en'
     ? {
-        step: 'Step 1 · Choose your mode',
-        title: 'How do you want to play today?',
-        subtitle: 'Choose the mode that best represents your current state.',
+        step: 'Step 1 · Choose your rhythm',
+        title: 'What is your rhythm today?',
+        subtitle: 'Choose the weekly intensity that best adapts to you.',
         selected: 'Selected',
         state: 'State',
         objective: 'Objective',
@@ -36,9 +36,9 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
         selectedSuffix: ' selected',
       }
     : {
-        step: 'Paso 1 · Elegí tu modo',
-        title: '¿Cómo querés jugar hoy?',
-        subtitle: 'Elegí el modo que mejor representa tu estado actual.',
+        step: 'Paso 1 · Elegí tu ritmo',
+        title: '¿Cuál es tu ritmo hoy?',
+        subtitle: 'Elegí la intensidad semanal que mejor se adapta a vos.',
         selected: 'Seleccionado',
         state: 'Estado',
         objective: 'Objetivo',
