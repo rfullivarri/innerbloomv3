@@ -1,6 +1,7 @@
 import { SignUp } from '@clerk/clerk-react';
 import { useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import { GoogleOAuthButton } from '../components/auth/GoogleOAuthButton';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
@@ -64,18 +65,26 @@ export default function SignUpPage() {
       secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
       secondaryActionHref={`/?lang=${language}`}
     >
-      <div
-        ref={signUpContainerRef}
-        className="mx-auto w-full min-w-0 max-w-full px-1 sm:px-0"
-      >
-        <SignUp
-          appearance={appearance}
-          routing="path"
-          path="/sign-up"
-          signInUrl={buildLocalizedAuthPath('/login', language)}
-          // post-signup must continue onboarding
-          fallbackRedirectUrl="/intro-journey"
-        />
+      <div className="mx-auto w-full max-w-xl space-y-4">
+        <GoogleOAuthButton language={language} mode="sign-up" redirectUrlComplete={`${location.pathname}${location.search}${location.hash}`} />
+        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/45">
+          <span className="h-px flex-1 bg-white/12" aria-hidden />
+          <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
+          <span className="h-px flex-1 bg-white/12" aria-hidden />
+        </div>
+        <div
+          ref={signUpContainerRef}
+          className="mx-auto w-full min-w-0 max-w-full px-1 sm:px-0"
+        >
+          <SignUp
+            appearance={appearance}
+            routing="path"
+            path="/sign-up"
+            signInUrl={buildLocalizedAuthPath('/login', language)}
+            // post-signup must continue onboarding
+            fallbackRedirectUrl="/intro-journey"
+          />
+        </div>
       </div>
     </AuthLayout>
   );

@@ -2,6 +2,7 @@ import { SignIn, SignUp } from '@clerk/clerk-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { GoogleOAuthButton } from '../../components/auth/GoogleOAuthButton';
 import { useAuth, useUser } from '../../auth/runtimeAuth';
 import { buildLocalizedAuthPath } from '../../lib/authLanguage';
 import { createAuthAppearance } from '../../lib/clerkAppearance';
@@ -235,7 +236,17 @@ export function ClerkGate({ language = 'es', onContinue, autoAdvance = false }: 
           </button>
         ))}
       </div>
-      <div className="mt-6">
+      <div className="mt-6 space-y-4">
+        <GoogleOAuthButton
+          language={language}
+          mode={tab}
+          redirectUrlComplete={currentUrl}
+        />
+        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/45">
+          <span className="h-px flex-1 bg-white/12" aria-hidden />
+          <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
+          <span className="h-px flex-1 bg-white/12" aria-hidden />
+        </div>
         <AnimatePresence mode="wait" initial={false} presenceAffectsLayout={false}>
           {tab === 'sign-up' ? (
             <motion.div

@@ -1,5 +1,6 @@
 import { SignIn } from '@clerk/clerk-react';
 import { useLocation } from 'react-router-dom';
+import { GoogleOAuthButton } from '../components/auth/GoogleOAuthButton';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { DASHBOARD_PATH } from '../config/auth';
@@ -69,18 +70,26 @@ export default function LoginPage() {
       secondaryActionLabel={language === 'en' ? 'Back to home' : 'Volver al inicio'}
       secondaryActionHref={`/?lang=${language}`}
     >
-      <SignIn
-        appearance={createAuthAppearance({
-          elements: {
-            footerActionText: 'text-white/50',
-            footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4'
-          }
-        })}
-        routing="path"
-        path="/login"
-        signUpUrl={buildLocalizedAuthPath('/sign-up', language)}
-        fallbackRedirectUrl={DASHBOARD_PATH}
-      />
+      <div className="mx-auto w-full max-w-xl space-y-4">
+        <GoogleOAuthButton language={language} mode="sign-in" redirectUrlComplete={`${location.pathname}${location.search}${location.hash}`} />
+        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/45">
+          <span className="h-px flex-1 bg-white/12" aria-hidden />
+          <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
+          <span className="h-px flex-1 bg-white/12" aria-hidden />
+        </div>
+        <SignIn
+          appearance={createAuthAppearance({
+            elements: {
+              footerActionText: 'text-white/50',
+              footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4'
+            }
+          })}
+          routing="path"
+          path="/login"
+          signUpUrl={buildLocalizedAuthPath('/sign-up', language)}
+          fallbackRedirectUrl={DASHBOARD_PATH}
+        />
+      </div>
     </AuthLayout>
   );
 }

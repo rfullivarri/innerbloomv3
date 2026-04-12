@@ -41,6 +41,7 @@ import PrivacyPage from './pages/legal/PrivacyPage';
 import TermsPage from './pages/legal/TermsPage';
 import SupportPage from './pages/legal/SupportPage';
 import AccountDeletionPage from './pages/AccountDeletion';
+import SsoCallbackPage from './pages/SsoCallback';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -298,6 +299,7 @@ export default function App() {
           }
         />
         <Route path="/mobile-auth" element={<MobileBrowserAuthPage />} />
+        <Route path="/sso-callback" element={<SsoCallbackPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/support" element={<SupportPage />} />
