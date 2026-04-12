@@ -30,8 +30,13 @@ const baseElements = {
     `mx-auto flex w-full min-w-0 ${AUTH_LOGIN_MAX_WIDTH} flex-col gap-4 overflow-hidden rounded-[26px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.025))] p-3 shadow-[0_20px_50px_rgba(7,12,32,0.24)] backdrop-blur-[18px] sm:rounded-[30px] sm:p-4 md:p-5`,
   header: 'hidden',
   socialButtons: 'hidden',
+  socialButtonsBlockButton: 'hidden',
+  socialButtonsProviderIcon: 'hidden',
+  dividerRow: 'hidden !my-0 !py-0 !h-0 !min-h-0',
+  dividerLine: 'hidden',
+  dividerText: 'hidden',
   divider: 'hidden',
-  form: 'flex flex-col gap-3 text-left',
+  form: 'mt-0 pt-0 flex flex-col gap-3 text-left',
   formField: 'flex flex-col gap-1.5',
   formFieldLabel: 'text-[11px] font-medium text-white/72 sm:text-xs',
   formFieldInput:
@@ -45,11 +50,11 @@ const baseElements = {
     '!appearance-none !ring-0',
 
   footer:
-    'mt-2 w-full max-w-none rounded-2xl border border-white/8 bg-[linear-gradient(135deg,rgba(122,138,196,0.2),rgba(108,63,197,0.2))] !px-2 !py-1 shadow-[0_18px_40px_rgba(9,16,40,0.24)] backdrop-blur-md',
+    'mt-2 w-full max-w-none rounded-2xl bg-[linear-gradient(135deg,rgba(122,138,196,0.2),rgba(108,63,197,0.2))] !px-2 !py-1 shadow-[0_18px_40px_rgba(9,16,40,0.24)] backdrop-blur-md',
 
   // 1) CONTENEDOR 1 (cl-footerAction__signIn): reducir alto y aumentar ancho
   footerAction:
-    '!flex !w-full !max-w-none items-center justify-start gap-1 rounded-xl border border-white/8 bg-white/[0.06] !px-3 !py-1 text-[10px] !leading-[12px] text-white/60 backdrop-blur-sm',
+    '!flex !w-full !max-w-none items-center justify-start gap-1 rounded-xl bg-white/[0.06] !px-3 !py-1 text-[10px] !leading-[12px] text-white/60 backdrop-blur-sm',
   footerActionText:
     '!whitespace-nowrap text-white/55',
   footerActionLink:
@@ -57,7 +62,7 @@ const baseElements = {
 
   // 2) CONTENEDOR 2 (“Secured by clerk”): reducir alto y aumentar ancho
   footerPages:
-    '!mt-1 !flex !w-full !max-w-none items-center justify-center gap-1 rounded-xl border border-white/8 bg-white/[0.06] !px-3 !py-1 text-[9px] !leading-[11px] text-white/45 backdrop-blur-sm',
+    '!mt-1 !flex !w-full !max-w-none items-center justify-center gap-1 rounded-xl bg-white/[0.06] !px-3 !py-1 text-[9px] !leading-[11px] text-white/45 backdrop-blur-sm',
   footerPageLink:
     'inline-flex items-center gap-1 text-white/40 hover:text-white/60',
 
