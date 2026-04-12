@@ -155,9 +155,6 @@ export function Alerts({
               </button>
             )}
           </div>
-          <p className="mt-2 text-xs text-indigo-100/70">
-            Configurá tu recordatorio desde el scheduler que está más abajo en el dashboard.
-          </p>
         </div>
       )}
     </div>

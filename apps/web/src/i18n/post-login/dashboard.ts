@@ -86,18 +86,6 @@ export const dashboardTranslations = {
     es: 'Esta acción elimina tu cuenta de forma permanente. No vas a poder recuperar tu perfil ni tu progreso después de confirmar.',
     en: 'This permanently deletes your account. You will not be able to recover your profile or progress after confirming.',
   },
-  'dashboard.menu.deleteAccountDeletesProfile': {
-    es: 'Se elimina tu perfil, email y datos personales asociados.',
-    en: 'Your profile, email, and associated personal data are deleted.',
-  },
-  'dashboard.menu.deleteAccountDeletesProgress': {
-    es: 'Se eliminan progreso, tareas, registros, emociones, recordatorios y preferencias.',
-    en: 'Progress, tasks, logs, emotions, reminders, and preferences are deleted.',
-  },
-  'dashboard.menu.deleteAccountDeletesClerk': {
-    es: 'También se elimina tu usuario de autenticación.',
-    en: 'Your authentication user is also deleted.',
-  },
   'dashboard.menu.deleteAccountConfirmLabel': {
     es: 'Escribí {{keyword}} para confirmar',
     en: 'Type {{keyword}} to confirm',

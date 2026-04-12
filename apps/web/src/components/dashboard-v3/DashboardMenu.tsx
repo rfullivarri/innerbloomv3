@@ -1238,11 +1238,6 @@ export function DashboardMenu({
                       <p className="mt-3 text-sm leading-6 text-[color:var(--color-text-dim)]">
                         {t("dashboard.menu.deleteAccountBody")}
                       </p>
-                      <ul className="mt-3 space-y-2 text-xs leading-5 text-[color:var(--color-text-faint)]">
-                        <li>{t("dashboard.menu.deleteAccountDeletesProfile")}</li>
-                        <li>{t("dashboard.menu.deleteAccountDeletesProgress")}</li>
-                        <li>{t("dashboard.menu.deleteAccountDeletesClerk")}</li>
-                      </ul>
 
                       <label className="mt-4 block text-left">
                         <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-text-faint)]">

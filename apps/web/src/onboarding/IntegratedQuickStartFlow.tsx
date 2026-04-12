@@ -1147,8 +1147,8 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
                       <p className="text-sm font-semibold text-white">{card.icon} {card.title}</p>
                       <p className="mt-1 text-xs text-white/65">{card.description}</p>
                     </div>
-                    <span className={`h-5 w-10 rounded-full p-0.5 ${enabled ? 'bg-violet-300/70' : 'bg-white/20'}`}>
-                      <span className={`block h-4 w-4 rounded-full bg-white transition ${enabled ? 'translate-x-5' : ''}`} />
+                    <span className={`inline-flex h-5 w-10 shrink-0 items-center overflow-hidden rounded-full p-0.5 ${enabled ? 'bg-violet-300/70' : 'bg-white/20'}`}>
+                      <span className={`block h-4 w-4 shrink-0 rounded-full bg-white transition-transform ${enabled ? 'translate-x-[1.125rem]' : ''}`} />
                     </span>
                   </button>
                 );
