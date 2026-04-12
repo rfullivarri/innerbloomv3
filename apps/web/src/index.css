@@ -174,10 +174,10 @@
   :root[data-theme='light'] {
     color-scheme: light;
     --color-dashboard-light-bg:
-      radial-gradient(120% 85% at 10% -12%, rgba(248, 194, 218, 0.35) 0%, rgba(248, 194, 218, 0) 58%),
-      radial-gradient(92% 78% at 86% -6%, rgba(233, 210, 255, 0.32) 0%, rgba(233, 210, 255, 0) 62%),
-      radial-gradient(108% 82% at 52% 115%, rgba(248, 224, 183, 0.22) 0%, rgba(248, 224, 183, 0) 65%),
-      linear-gradient(180deg, #fcf7f2 0%, #f9f6ff 46%, #f5f9ff 100%);
+      radial-gradient(118% 86% at 10% -12%, rgba(248, 194, 218, 0.44) 0%, rgba(248, 194, 218, 0) 61%),
+      radial-gradient(94% 80% at 86% -4%, rgba(233, 210, 255, 0.4) 0%, rgba(233, 210, 255, 0) 64%),
+      radial-gradient(114% 86% at 52% 114%, rgba(248, 224, 183, 0.28) 0%, rgba(248, 224, 183, 0) 67%),
+      linear-gradient(180deg, #fdf8f4 0%, #f8f4ff 48%, #f3f8ff 100%);
     --color-surface: #f8fafc;
     --color-surface-muted: #f1f5f9;
     --color-surface-elevated: #ffffff;
@@ -236,20 +236,30 @@
     --color-quickaccess-cta-disabled-text: rgba(67, 56, 202, 0.58);
     --color-card-gradient: linear-gradient(180deg, #ffffff, #ffffff);
     --color-card-highlight-gradient: linear-gradient(180deg, #ffffff, #f8faff);
-    --color-card-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    --color-card-shadow:
+      0 12px 26px rgba(15, 23, 42, 0.1),
+      0 26px 58px rgba(196, 181, 253, 0.16);
     --color-glass-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.94));
     --color-glow-soft: rgba(248, 250, 255, 0.9);
-    --shadow-elev-1: 0 8px 20px rgba(15, 23, 42, 0.08);
-    --shadow-elev-2: 0 16px 40px rgba(15, 23, 42, 0.1);
-    --IB_SURFACE_CARD_LIGHT: 0 6px 20px rgba(15, 23, 42, 0.3);
-    --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 255, 0.94));
-    --glass-border: rgba(148, 163, 184, 0.28);
+    --shadow-elev-1:
+      0 10px 24px rgba(15, 23, 42, 0.09),
+      0 24px 56px rgba(191, 219, 254, 0.17);
+    --shadow-elev-2:
+      0 20px 48px rgba(15, 23, 42, 0.14),
+      0 36px 88px rgba(196, 181, 253, 0.24);
+    --IB_SURFACE_CARD_LIGHT:
+      0 8px 18px rgba(15, 23, 42, 0.07),
+      0 22px 44px rgba(191, 219, 254, 0.14);
+    --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 249, 255, 0.95));
+    --glass-border: rgba(148, 163, 184, 0.24);
     --onboarding-glass-surface-base: rgba(255, 255, 255, 0.92);
     --onboarding-glass-surface-inner: rgba(255, 255, 255, 0.85);
     --onboarding-glass-surface-ghost: rgba(248, 250, 255, 0.76);
     --onboarding-glass-border: rgba(148, 163, 184, 0.24);
     --onboarding-glass-border-soft: rgba(148, 163, 184, 0.2);
-    --onboarding-glass-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    --onboarding-glass-shadow:
+      0 12px 30px rgba(15, 23, 42, 0.1),
+      0 26px 58px rgba(196, 181, 253, 0.16);
     --color-ios-quick-access-modal-surface: #ffffff;
     --color-ios-quick-access-modal-border: var(--color-border-soft);
     --color-ios-quick-access-modal-text: var(--color-text-strong);
@@ -482,10 +492,46 @@
   }
 
   .glass-card {
-    @apply backdrop-blur-2xl;
     background: var(--color-glass-surface);
     border: 1px solid var(--color-border-subtle);
     box-shadow: var(--color-card-shadow);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  :root[data-theme='dark'] .glass-card {
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  .ib-light-elevated-surface {
+    background: var(--color-overlay-1);
+    border: 1px solid var(--color-border-subtle);
+    box-shadow: var(--IB_SURFACE_CARD_LIGHT);
+  }
+
+  :root[data-theme='light'] .ib-light-elevated-surface--rose {
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, #f43f5e 10%, var(--color-surface-elevated) 90%),
+      color-mix(in srgb, #f59e0b 8%, var(--color-surface-elevated) 92%)
+    );
+  }
+
+  :root[data-theme='light'] .ib-light-elevated-surface--indigo {
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, #6366f1 9%, var(--color-surface-elevated) 91%),
+      color-mix(in srgb, #0ea5e9 8%, var(--color-surface-elevated) 92%)
+    );
+  }
+
+  :root[data-theme='light'] .ib-light-elevated-surface--emerald {
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, #10b981 9%, var(--color-surface-elevated) 91%),
+      color-mix(in srgb, #6366f1 8%, var(--color-surface-elevated) 92%)
+    );
   }
 
   .onboarding-surface-base {
