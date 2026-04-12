@@ -36,9 +36,10 @@ Estado: borrador técnico para ayudarte a completar Google Play Data Safety. No 
 
 ### Analítica
 
-- soporte para GA4 en web
+- soporte para GA4 en web, activado solo después de consentimiento de cookies analíticas
+- GA4 en app nativa: no debe tratarse como activo hasta implementar un consentimiento in-app explícito
 - telemetría interna de eventos de producto
-- si GA4 queda activo en producción, los datos deben tratarse como anonimizados o desasociados del usuario eliminado cuando técnicamente sea posible
+- si GA4 queda activo en producción mobile, los datos deben tratarse como anonimizados o desasociados del usuario eliminado cuando técnicamente sea posible
 
 ### Eliminación de cuenta
 
@@ -47,6 +48,7 @@ Estado: borrador técnico para ayudarte a completar Google Play Data Safety. No 
 - endpoint backend: `DELETE /api/account`
 - borrado inmediato de datos propios en Neon
 - eliminación del usuario de autenticación en Clerk
+- probado por el owner con usuarios reales de prueba
 - sin período de gracia ni recuperación en V1
 - compras/suscripciones nativas: no activas actualmente
 
@@ -127,16 +129,16 @@ Según la implementación actual, los usos más probables son:
 
 ## Preguntas que todavía hay que cerrar
 
-1. ¿GA4 queda activo en producción o no?
-2. ¿Vas a mandar emails de reminder en producción usando `notifications@innerbloomjourney.org`, o solo notificaciones locales?
-3. ¿Vas a usar compras/suscripciones nativas Android ahora o más adelante?
+1. ¿Querés activar GA4 dentro de las apps nativas en V1 o dejarlo solo para web por ahora?
+2. Si GA4 mobile se activa, hay que implementar antes un consentimiento in-app opcional y declararlo en Play Console.
+3. ¿Vas a mandar emails de reminder en producción usando `notifications@innerbloomjourney.org`, o solo notificaciones locales?
 4. ¿Querés que la app se posicione como wellness/habit app o querés evitar cualquier framing cercano a “health”?
 5. ¿Hay algún proveedor extra fuera del repo actual?
 
 ## Contactos ya definidos para documentación
 
 - Privacy contact: `privacy@innerbloomjourney.org`
-- Support contact recomendado: `support@innerbloomjourney.org`, pendiente de confirmar como contacto público
+- Support contact: `support@innerbloomjourney.org`
 - Transactional/reminder sender: `notifications@innerbloomjourney.org`
 - Account deletion instructions: `https://innerbloomjourney.org/account-deletion`
 
@@ -147,5 +149,7 @@ Antes de completar el formulario final de Google Play:
 1. Confirmar providers reales de producción
 2. Confirmar qué datos viajan efectivamente
 3. Declarar que la eliminación de cuenta está disponible dentro de la app y enlazar la página pública de instrucciones
-4. Responder el formulario con este documento al lado
-5. Guardar screenshots o notas de la configuración por si Google pide aclaración
+4. Si GA4 queda solo en web, declarar analytics web en privacy policy y no marcar mobile analytics como activo por la app
+5. Si GA4 queda activo también en mobile, agregar consentimiento in-app antes de enviar a review y declararlo en Data Safety
+6. Responder el formulario con este documento al lado
+7. Guardar screenshots o notas de la configuración por si Google pide aclaración

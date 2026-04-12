@@ -2,7 +2,7 @@
 
 Estado: borrador operativo basado en el comportamiento y los datos visibles en el repo. Requiere revisión final antes de publicarse.
 
-Última actualización sugerida: 2026-04-11
+Última actualización sugerida: 2026-04-12
 
 ## 1. Overview
 
@@ -22,7 +22,7 @@ App / service domain used in the product:
 Contact email:
 
 - Privacy: `privacy@innerbloomjourney.org`
-- Support: `support@innerbloomjourney.org` recommended, pending final confirmation as the public support inbox
+- Support: `support@innerbloomjourney.org`
 - Notifications / transactional sender: `notifications@innerbloomjourney.org`
 
 Email receiving for `innerbloomjourney.org` is currently configured through Resend Receiving.
@@ -95,7 +95,12 @@ Depending on the user’s jurisdiction, processing may be based on one or more o
 
 ## 6. Analytics and cookies
 
-The web experience includes support for analytics consent storage and Google Analytics 4 initialization. Analytics should only be treated as active in the final policy if they are actually enabled in production.
+The web experience includes support for analytics consent storage and Google Analytics 4 initialization.
+
+Current production assumption:
+
+- GA4 web: active only after website cookie analytics consent.
+- GA4 native mobile: not active until a dedicated in-app analytics consent flow exists.
 
 If analytics are enabled, Innerbloom should disclose:
 
@@ -186,7 +191,7 @@ Privacy contact email:
 
 Support contact email:
 
-- `support@innerbloomjourney.org` recommended; confirm before publishing.
+- `support@innerbloomjourney.org`
 
 Account deletion instructions:
 
@@ -194,8 +199,8 @@ Account deletion instructions:
 
 ## 15. Final review items before publishing
 
-- Confirm whether `support@innerbloomjourney.org` will be published as support contact
-- Confirm whether GA4 is enabled in production
+- `support@innerbloomjourney.org` is confirmed as the public support contact
+- Confirm whether GA4 should be enabled inside native apps after adding in-app consent
 - Confirm whether reminder emails are active in production through `notifications@innerbloomjourney.org`
 - Confirm whether any additional processors are used
 - Add a real legal entity name if applicable

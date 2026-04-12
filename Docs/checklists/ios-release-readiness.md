@@ -1,6 +1,6 @@
 # iOS Release Readiness
 
-Estado revisado sobre el repo local el 2026-04-08.
+Estado revisado sobre `main` el 2026-04-12.
 
 ## Lo que ya quedó preparado en el repo
 
@@ -18,23 +18,22 @@ Estado revisado sobre el repo local el 2026-04-08.
 - Flujo de eliminación de cuenta implementado dentro de la app, en el menú del Dashboard, debajo de cerrar sesión.
 - Página pública de instrucciones de eliminación de cuenta: `https://innerbloomjourney.org/account-deletion`.
 - API de eliminación de cuenta implementada: `DELETE /api/account`, con borrado de datos en Neon y eliminación del usuario en Clerk.
+- Eliminación de cuenta probada por el owner con usuarios reales de prueba.
+- Pricing/suscripción ocultos por flags para la primera release.
+- Botón de prueba de notificación oculto en producción.
 
 ## Riesgos o huecos que siguen abiertos
 
 ### Bloqueadores probables de App Review
 
-- No hay todavía una **Privacy Policy pública publicada** lista para enlazar en App Store Connect.
-- No hay todavía una **Support URL pública** lista para App Store Connect.
-- Queda pendiente confirmar si `support@innerbloomjourney.org` será el correo público de soporte.
-- Confirmar que `CLERK_SECRET_KEY` esté configurada en producción para que el borrado de cuenta elimine también el usuario de Clerk.
+- Subir screenshots obligatorios para iPhone.
+- Completar Privacy Nutrition Labels con los datos reales usados por la app.
+- Si GA4 se activa dentro de iOS, implementar antes consentimiento in-app opcional y declararlo en App Privacy.
 
 ### Riesgos de producto/UX antes de publicar
 
-- La sesión mobile sigue dependiendo de un token de callback muy efímero.
-  - El síntoma visible es el refresh/reautenticación al navegar entre secciones si el token ya expiró.
-  - Esto no bloquea una build técnica, pero sí es un riesgo fuerte de UX antes de App Store.
-- El botón de prueba de notificación fue útil para QA.
-  - Antes de release conviene ocultarlo detrás de un flag de debug o retirarlo del build de producción.
+- GA4 web ya respeta consentimiento de cookies; la app nativa todavía no tiene consentimiento propio de analytics.
+- Si se quiere medir analytics mobile en V1, agregar un prompt/toggle de consentimiento antes de cargar GA4.
 
 ## Qué revisar en App Store Connect
 
@@ -50,12 +49,12 @@ Estado revisado sobre el repo local el 2026-04-08.
 - Screenshots obligatorios para iPhone.
 - Descripción corta y larga.
 - Keywords.
-- Información de suscripción si se venden planes pagos dentro de iOS.
+- Información de suscripción solo si se reactivan planes pagos dentro de iOS.
 
 ## Qué revisar en producto/backend antes de submission
 
-- Verificar si iOS usará Stripe web checkout o In-App Purchase.
-  - Si se vende contenido/funcionalidad digital consumida dentro de la app, Apple puede exigir IAP.
+- Verificar monetización más adelante.
+  - Para V1, pricing/suscripción queda oculto y todos los usuarios entran como FREE salvo cambios manuales de admin.
 - Confirmar que login, logout, deep links y notificaciones funcionan sin rebotes visuales severos.
 - Confirmar que Daily Quest abre en el destino correcto al tocar una notificación.
 - Confirmar que el reminder real diario funciona con la app cerrada y bloqueada.
@@ -71,15 +70,13 @@ Estado revisado sobre el repo local el 2026-04-08.
    - screenshots
    - descripción
    - keywords
-4. Decidir si la monetización iOS va por:
-   - Stripe web
-   - In-App Purchase
-5. Confirmar el `bundle id` final y el `Team` de firma.
+4. Confirmar el `bundle id` final y el `Team` de firma.
+5. Decidir GA4 mobile: desactivado por ahora o activado con consentimiento in-app.
 
 ## Contactos sugeridos para App Store Connect
 
 - Privacy contact: `privacy@innerbloomjourney.org`
-- Support contact recomendado: `support@innerbloomjourney.org`
+- Support contact: `support@innerbloomjourney.org`
 - Transactional/reminder sender: `notifications@innerbloomjourney.org`
 
 ## Comandos útiles

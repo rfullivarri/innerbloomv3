@@ -39,7 +39,8 @@ These points were treated as confirmed when preparing the documents:
 - governing law for Terms: **Spain**
 - privacy contact: **privacy@innerbloomjourney.org**
 - support contact: **support@innerbloomjourney.org**
-- GA4 on web: **yes**
+- GA4 on web: **yes, behind website cookie consent**
+- GA4 in native apps: **not active until an in-app analytics consent flow exists**
 - reminder / transactional emails in production: **yes**
 - ads: **no**
 - push notifications: **yes**
@@ -65,6 +66,21 @@ Suggested text:
 
 > I agree to the Terms of Service and acknowledge the Privacy Policy.
 
+### Account deletion
+
+- authenticated account deletion in the app: **done**
+- public account deletion instructions: **done**
+- owner-tested with real test users: **confirmed**
+- deletion behavior: immediate and irreversible in V1
+- database deletion: Neon application rows are deleted through `DELETE /api/account`
+- authentication deletion: Clerk user is deleted through the backend Clerk Admin integration
+
+### Analytics consent
+
+- website cookie consent: **implemented**
+- native in-app analytics consent: **not implemented yet**
+- native GA4 recommendation: keep GA4 disabled in native builds until a non-blocking in-app consent prompt/toggle exists
+
 ## 6. Store-facing use
 
 These URLs are intended to be used for:
@@ -82,7 +98,8 @@ For this B1 release, prioritize:
 1. verify the four public pages are deployed and accessible without auth
 2. use those URLs in App Store Connect and Play Console
 3. verify account deletion in production with a real test account
-4. then implement in-product consent flow if required for a later hardening pass
+4. keep pricing/subscription UI hidden until monetization is ready
+5. implement native analytics consent before declaring mobile GA4 as active in App Store / Play Console
 
 ---
 

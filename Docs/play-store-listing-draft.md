@@ -75,14 +75,14 @@ Mi recomendación:
 - `Health & Fitness` si vas a enfatizar hábitos, bienestar, energía y emociones
 - `Productivity` solo si querés posicionarla más como herramienta de foco/tareas
 
-## Datos de contacto que faltan
+## Datos de contacto confirmados
 
-- Support email: `support@innerbloomjourney.org` recomendado, pendiente de confirmar si se usará como contacto público
+- Support email: `support@innerbloomjourney.org`
 - Privacy email: `privacy@innerbloomjourney.org`
 - Transactional/reminder sender: `notifications@innerbloomjourney.org`
 - Email receiving: Resend Receiving verificado para `innerbloomjourney.org`
 - Website: `https://innerbloomjourney.org`
-- Privacy policy URL: pendiente de publicar
+- Privacy policy URL: `https://innerbloomjourney.org/privacy`
 - Account/data deletion URL: `https://innerbloomjourney.org/account-deletion`
 
 ## Eliminación de cuenta / datos

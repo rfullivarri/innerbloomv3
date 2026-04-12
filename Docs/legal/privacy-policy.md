@@ -1,6 +1,6 @@
 # Innerbloom Privacy Policy
 
-**Last updated:** 2026-04-11
+**Last updated:** 2026-04-12
 
 Innerbloom (“**Innerbloom**,” “**we**,” “**us**,” or “**our**”) provides an adaptive habit-building experience that helps users organize routines, complete guided daily actions, track progress, and reflect on emotional patterns over time.
 
@@ -107,6 +107,8 @@ Innerbloom uses **Google Analytics 4 (GA4)** on the web experience.
 
 Where required by law, analytics are activated only after the user gives consent through the website’s cookie settings flow. Users can later change that choice through the website’s cookie controls, where available.
 
+Innerbloom does not currently activate GA4 inside the native mobile apps unless a dedicated in-app analytics consent flow is implemented and the user allows optional analytics.
+
 Innerbloom does **not** serve third-party advertising in the product at this stage.
 
 ## 6. Notifications
@@ -139,7 +141,7 @@ Based on the current product setup, Innerbloom may rely on third-party providers
 - **Clerk** for authentication
 - **Resend** for email delivery and related email operations
 - hosting and infrastructure providers used to run the product
-- **Google Analytics 4** for analytics on the web experience
+- **Google Analytics 4** for analytics on the web experience, subject to consent where required
 - payment providers, if subscriptions or billing features are enabled
 
 This list may change over time as the service evolves.

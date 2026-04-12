@@ -18,6 +18,8 @@ Estado de este checklist: borrador operativo para preparar la primera subida a G
 - Flujo autenticado de eliminación de cuenta: implementado en el menú del Dashboard, debajo de cerrar sesión, con acción destructiva en rojo
 - API de eliminación de cuenta: `DELETE /api/account`
 - URL pública de instrucciones de eliminación de cuenta: `https://innerbloomjourney.org/account-deletion`
+- Eliminación de cuenta probada por el owner con usuarios reales de prueba
+- Pricing/suscripción ocultos por flags para la primera release
 
 Archivos clave:
 
@@ -40,7 +42,8 @@ Archivos clave:
   - `versionName` puede seguir formato semántico simple como `1.0.0`, `1.0.1`, etc.
 - Confirmar que no haya texto provisional en onboarding, pricing o pantallas internas
 - Revisar si la app necesita pantalla/flujo especial para usuarios sin datos iniciales
-- Confirmar que `CLERK_SECRET_KEY` esté configurada en producción para que `DELETE /api/account` pueda borrar también el usuario en Clerk
+- `CLERK_SECRET_KEY` en producción: confirmado por pruebas reales de eliminación
+- Si se decide activar GA4 dentro de Android, implementar primero consentimiento in-app opcional
 
 ### Contenido de Play Console
 
@@ -72,25 +75,22 @@ Archivos clave:
 
 - Abrir la cuenta de Google Play Console
 - Elegir si la cuenta será `personal` o `organization`
-- Confirmar si `support@innerbloomjourney.org` se usará como soporte público
-- Proveer URL pública definitiva para privacy policy
-- Decidir si querés publicar una página de Terms of Service también
+- Usar `support@innerbloomjourney.org` como soporte público
+- Usar las URLs públicas ya publicadas para privacy, terms, support y account deletion
 - Crear o aprobar credenciales de review para Google si las piden
-- Confirmar si `support@innerbloomjourney.org` se crea como alias/inbox real o si soporte usará `privacy@innerbloomjourney.org` temporalmente
 - Confirmar si habrá:
-  - analytics en producción
+  - GA4 también dentro de la app nativa, o solo web por ahora
   - emails transaccionales por Resend (`notifications@innerbloomjourney.org`)
   - reminders push o solo local notifications
-  - compras o suscripciones nativas Android
+  - compras o suscripciones nativas Android más adelante
 
 ## 4. Lo que conviene hacer primero
 
 1. Cerrar firma de release Android
 2. Generar primer `.aab`
-3. Publicar privacy policy en una URL real
-4. Completar store listing
-5. Subir a `Internal testing`
-6. Recién después pasar a `Closed testing` o `Production`
+3. Completar store listing con URLs legales ya publicadas
+4. Subir a `Internal testing`
+5. Recién después pasar a `Closed testing` o `Production`
 
 ## 5. Comandos que te van a hacer falta para release
 
@@ -122,7 +122,9 @@ app/build/outputs/bundle/release/app-release.aab
 - El package name `org.innerbloom.app` conviene tratarlo como definitivo
 - El texto legal que preparé en este repo es un borrador operativo, no asesoría legal
 - `privacy@innerbloomjourney.org` ya puede usarse como contacto de privacidad porque Resend Receiving está verificado para el dominio
+- `support@innerbloomjourney.org` queda confirmado como contacto público de soporte
 - La eliminación de cuenta es irreversible en V1: borra datos propios en Neon y elimina el usuario de Clerk; si compras/suscripciones nativas se activan en el futuro, habrá que actualizar el flujo y la documentación
+- GA4 mobile no debe activarse silenciosamente: si se habilita dentro de la app, agregar consentimiento in-app antes de completar Data Safety
 
 ## 7. Referencias oficiales
 
