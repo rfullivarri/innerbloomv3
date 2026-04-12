@@ -1300,7 +1300,7 @@ export function DashboardMenu({
                 <button
                   type="button"
                   onClick={handleOpenDeleteAccount}
-                  className="mt-2 flex h-10 w-full items-center gap-3 rounded-2xl px-4 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/10 hover:text-rose-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+                  className="mt-2 flex h-10 w-full items-center gap-3 rounded-2xl px-4 text-sm font-normal text-rose-300 transition hover:bg-rose-500/10 hover:text-rose-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
                 >
                   <MenuIcon className="h-5 w-5 text-rose-300">
                     <path d="M3 6h18" />
