@@ -12,6 +12,7 @@ import { useLandingAnalytics } from '../components/landing/useLandingAnalytics';
 import { buildOnboardingPath } from '../onboarding/i18n';
 import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 import { persistCookieConsentState, readCookieConsentState } from '../lib/cookieConsent';
+import { SHOW_LANDING_PRICING } from '../config/releaseFlags';
 import './Landing.css';
 
 type LandingGradientOption = {
@@ -1012,28 +1013,30 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="pricing section-pad reveal-on-scroll" id="pricing">
-          <div className="container">
-            <AdaptiveText as="h2">{copy.pricing.title}</AdaptiveText>
-            <AdaptiveText as="p" className="section-sub">{copy.pricing.intro}</AdaptiveText>
-            <p className="pricing-trial-highlight">{copy.pricing.trialHighlight}</p>
-            <p className="pricing-tax-note">{copy.pricing.taxNote}</p>
-            <div className="pricing-grid">
-              {copy.pricing.plans.map((plan, index) => (
-                <article
-                  className="card pricing-card fade-item"
-                  key={plan.id}
-                  style={{ '--delay': `${index * 90}ms` } as CSSProperties}
-                >
-                  {plan.id === 'YEAR' ? <span className="pricing-best-deal-chip">best deal</span> : null}
-                  <p className="pricing-plan-name">{plan.name}</p>
-                  <p className="pricing-plan-detail">{plan.detail}</p>
-                  <p className="pricing-plan-price">{plan.price}</p>
-                </article>
-              ))}
+        {SHOW_LANDING_PRICING ? (
+          <section className="pricing section-pad reveal-on-scroll" id="pricing">
+            <div className="container">
+              <AdaptiveText as="h2">{copy.pricing.title}</AdaptiveText>
+              <AdaptiveText as="p" className="section-sub">{copy.pricing.intro}</AdaptiveText>
+              <p className="pricing-trial-highlight">{copy.pricing.trialHighlight}</p>
+              <p className="pricing-tax-note">{copy.pricing.taxNote}</p>
+              <div className="pricing-grid">
+                {copy.pricing.plans.map((plan, index) => (
+                  <article
+                    className="card pricing-card fade-item"
+                    key={plan.id}
+                    style={{ '--delay': `${index * 90}ms` } as CSSProperties}
+                  >
+                    {plan.id === 'YEAR' ? <span className="pricing-best-deal-chip">best deal</span> : null}
+                    <p className="pricing-plan-name">{plan.name}</p>
+                    <p className="pricing-plan-detail">{plan.detail}</p>
+                    <p className="pricing-plan-price">{plan.price}</p>
+                  </article>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
         <section className="next section-pad reveal-on-scroll">
           <div className="container narrow center">

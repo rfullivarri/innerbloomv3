@@ -87,6 +87,7 @@ import { useWeeklyWrapped } from "../hooks/useWeeklyWrapped";
 import { WeeklyWrappedModal } from "../components/feedback/WeeklyWrappedModal";
 import { useAppMode } from "../hooks/useAppMode";
 import { sendGaEvent } from "../lib/ga4";
+import { SHOW_BILLING_UI } from "../config/releaseFlags";
 import {
   isJourneyGenerationPending,
   syncJourneyGenerationFromServer,
@@ -394,7 +395,7 @@ export default function DashboardV3Page() {
   const { data: subscription } = useRequest(
     () => getCurrentUserSubscription(),
     [backendUserId],
-    { enabled: Boolean(backendUserId) },
+    { enabled: SHOW_BILLING_UI && Boolean(backendUserId) },
   );
   const { data: generatedTasks } = useRequest(
     () => getUserTasks(backendUserId!),
@@ -894,7 +895,7 @@ export default function DashboardV3Page() {
                 }}
               />
             }
-            planSlot={<PlanChip subscription={subscription ?? null} />}
+            planSlot={SHOW_BILLING_UI ? <PlanChip subscription={subscription ?? null} /> : null}
           />
         )}
         <DailyQuestModal

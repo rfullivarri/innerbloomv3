@@ -9,13 +9,14 @@ This checklist is the operational reference for publishing Innerbloom’s legal 
 - `Docs/legal/support.md`
 - `Docs/legal/legal-publishing-checklist.md`
 
-## 2. Public pages to publish on the landing website
+## 2. Public pages published on the landing website
 
-These documents should be exposed as public website routes:
+These documents are exposed as public website routes:
 
 - `/privacy`
 - `/terms`
 - `/support`
+- `/account-deletion`
 
 ## 3. Required manual replacement before publishing
 
@@ -44,17 +45,17 @@ These points were treated as confirmed when preparing the documents:
 - push notifications: **yes**
 - local notifications: **yes**
 
-## 5. What still needs implementation in the product/site
+## 5. Product/site implementation status
 
 ### Website / landing
 
-- create public pages for `/privacy`, `/terms`, and `/support`
-- add footer links to those pages in the landing
-- optionally add those URLs to the public sitemap
+- public pages for `/privacy`, `/terms`, `/support`, and `/account-deletion`: **done**
+- footer links to `/privacy`, `/terms`, and `/support`: **done**
+- public sitemap entries for legal/support/account deletion pages: **done**
 
 ### Product / onboarding
 
-Recommended next step after publishing the pages:
+Recommended next step after the first store-ready release:
 
 - add a required acceptance checkbox at sign-up or onboarding start
 - link to `/terms` and `/privacy`
@@ -71,16 +72,17 @@ These URLs are intended to be used for:
 - Apple App Store Connect Privacy Policy URL
 - Apple Support URL
 - Google Play Privacy Policy URL
+- Google Play data deletion URL
 - general reviewer-facing public legal/support references
 
 ## 7. Practical recommendation
 
 For this B1 release, prioritize:
 
-1. publish the three public web pages
-2. verify they are publicly accessible without auth
-3. use those URLs in App Store Connect and Play Console
-4. then implement in-product consent flow
+1. verify the four public pages are deployed and accessible without auth
+2. use those URLs in App Store Connect and Play Console
+3. verify account deletion in production with a real test account
+4. then implement in-product consent flow if required for a later hardening pass
 
 ---
 

@@ -42,6 +42,7 @@ import TermsPage from './pages/legal/TermsPage';
 import SupportPage from './pages/legal/SupportPage';
 import AccountDeletionPage from './pages/AccountDeletion';
 import SsoCallbackPage from './pages/SsoCallback';
+import { SHOW_BILLING_UI } from './config/releaseFlags';
 
 const CLERK_TOKEN_TEMPLATE = (() => {
   const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
@@ -319,14 +320,16 @@ export default function App() {
             element={<DashboardAliasRedirect from={alias} to={trimmedDashboardPath} />}
           />
         ))}
-        <Route
-          path="/pricing"
-          element={
-            <RequireUser>
-              <PricingPage />
-            </RequireUser>
-          }
-        />
+        {SHOW_BILLING_UI ? (
+          <Route
+            path="/pricing"
+            element={
+              <RequireUser>
+                <PricingPage />
+              </RequireUser>
+            }
+          />
+        ) : null}
         <Route
           path="/editor"
           element={
@@ -335,40 +338,40 @@ export default function App() {
             </RequireUser>
           }
         />
-        <Route
-          path="/subscription"
-          element={
-            <RequireUser>
-              <SubscriptionPage />
-            </RequireUser>
-          }
-        />
-        <Route
-          path="/settings/billing"
-          element={
-            <RequireUser>
-              <SubscriptionPage />
-            </RequireUser>
-          }
-        />
-        <Route
-          path="/premium"
-          element={
-            <RequireUser>
-              <SubscriptionPage />
-            </RequireUser>
-          }
-        />
-        <Route path="/billing/success" element={<BillingSuccessPage />} />
-        <Route path="/billing/cancel" element={<BillingCancelPage />} />
-        <Route
-          path="/pricing"
-          element={
-            <RequireUser>
-              <PricingPage />
-            </RequireUser>
-          }
-        />
+        {SHOW_BILLING_UI ? (
+          <>
+            <Route
+              path="/subscription"
+              element={
+                <RequireUser>
+                  <SubscriptionPage />
+                </RequireUser>
+              }
+            />
+            <Route
+              path="/settings/billing"
+              element={
+                <RequireUser>
+                  <SubscriptionPage />
+                </RequireUser>
+              }
+            />
+            <Route
+              path="/premium"
+              element={
+                <RequireUser>
+                  <SubscriptionPage />
+                </RequireUser>
+              }
+            />
+          </>
+        ) : null}
+        {SHOW_BILLING_UI ? (
+          <>
+            <Route path="/billing/success" element={<BillingSuccessPage />} />
+            <Route path="/billing/cancel" element={<BillingCancelPage />} />
+          </>
+        ) : null}
         <Route
           path="/admin/*"
           element={

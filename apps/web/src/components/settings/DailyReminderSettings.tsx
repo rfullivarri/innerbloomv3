@@ -17,6 +17,7 @@ import {
   sendNativeDailyReminderTestNotification,
   syncNativeDailyReminderNotification,
 } from "../../mobile/localNotifications";
+import { SHOW_NATIVE_TEST_NOTIFICATION } from "../../config/releaseFlags";
 import { Skeleton } from "../common/Skeleton";
 import { ToastBanner } from "../common/ToastBanner";
 import { TimezoneCombobox } from "../common/TimezoneCombobox";
@@ -232,6 +233,7 @@ export function DailyReminderSettings({
   const hasBlockingError = status === "error" && !data;
   const isSaving = submitStatus === "saving";
   const isSendingTestNotification = testNotificationStatus === "sending";
+  const shouldShowNativeTestNotification = isNativeApp && SHOW_NATIVE_TEST_NOTIFICATION;
   const canSubmit =
     !isInitialLoading &&
     !isSaving &&
@@ -489,10 +491,10 @@ export function DailyReminderSettings({
       {submitStatus === "success" ? (
         <ToastBanner tone="success" message={SAVE_SUCCESS_MESSAGE} />
       ) : null}
-      {isNativeApp && testNotificationStatus === "error" && testNotificationError ? (
+      {shouldShowNativeTestNotification && testNotificationStatus === "error" && testNotificationError ? (
         <ToastBanner tone="error" message={testNotificationError} />
       ) : null}
-      {isNativeApp && testNotificationStatus === "success" ? (
+      {shouldShowNativeTestNotification && testNotificationStatus === "success" ? (
         <ToastBanner
           tone="success"
           message="Enviamos una notificación de prueba. Debería aparecer en 10 segundos."
@@ -551,7 +553,7 @@ export function DailyReminderSettings({
             : "Los cambios se aplican solo cuando presionás guardar."}
         </p>
         <div className="flex flex-wrap items-center gap-3">
-          {isNativeApp ? (
+          {shouldShowNativeTestNotification ? (
             <button
               type="button"
               disabled={isSendingTestNotification || isSaving}

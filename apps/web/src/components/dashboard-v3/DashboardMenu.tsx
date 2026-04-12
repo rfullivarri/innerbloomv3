@@ -20,6 +20,7 @@ import {
 } from "../../mobile/mobileAuthSession";
 import { openUrlInCapacitorBrowser } from "../../mobile/capacitor";
 import { cancelNativeDailyReminderNotification } from "../../mobile/localNotifications";
+import { SHOW_BILLING_UI } from "../../config/releaseFlags";
 import {
   acceptGameModeUpgradeSuggestion,
   ApiError,
@@ -816,58 +817,62 @@ export function DashboardMenu({
                       </MenuIcon>
                       <span className="flex-1">{t('dashboard.menu.reminder')}</span>
                     </button>
-                      <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
-                      <button
-                        type="button"
-                        onClick={() => setIsPlansOpen((current) => !current)}
-                        className={menuRowClassName}
-                        aria-expanded={isPlansOpen}
-                        aria-controls="menu-planes"
-                      >
-                        <MenuIcon>
-                          <rect x="3" y="5" width="18" height="14" rx="2" />
-                          <path d="M3 10h18" />
-                        </MenuIcon>
-                        <span className="flex-1">{t('dashboard.menu.plans')}</span>
-                        <MenuIcon
-                          className={`h-4 w-4 text-[color:var(--color-text-faint)] transition ${isPlansOpen ? "rotate-180" : ""}`}
-                        >
-                          <path d="m6 9 6 6 6-6" />
-                        </MenuIcon>
-                      </button>
-                    {isPlansOpen ? (
-                      <div
-                        id="menu-planes"
-                        className="-mt-1 mb-1 space-y-1 px-3 pb-2 pl-11"
-                      >
+                    {SHOW_BILLING_UI ? (
+                      <>
+                        <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
                         <button
                           type="button"
-                          onClick={handleGoToSubscription}
-                          className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
+                          onClick={() => setIsPlansOpen((current) => !current)}
+                          className={menuRowClassName}
+                          aria-expanded={isPlansOpen}
+                          aria-controls="menu-planes"
                         >
-                          <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
-                            <path d="M12 3a4 4 0 0 0-4 4v2" />
-                            <path d="M8 12v-1a4 4 0 1 1 8 0v1" />
-                            <rect x="5" y="12" width="14" height="9" rx="2" />
+                          <MenuIcon>
+                            <rect x="3" y="5" width="18" height="14" rx="2" />
+                            <path d="M3 10h18" />
                           </MenuIcon>
-                          {t('dashboard.menu.subscription')}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleGoToPricing}
-                          className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
-                        >
-                          <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
-                            <path d="M6 19V9" />
-                            <path d="M12 19V5" />
-                            <path d="M18 19v-7" />
-                            <path d="M4 19h16" />
+                          <span className="flex-1">{t('dashboard.menu.plans')}</span>
+                          <MenuIcon
+                            className={`h-4 w-4 text-[color:var(--color-text-faint)] transition ${isPlansOpen ? "rotate-180" : ""}`}
+                          >
+                            <path d="m6 9 6 6 6-6" />
                           </MenuIcon>
-                          Pricing
                         </button>
-                      </div>
+                        {isPlansOpen ? (
+                          <div
+                            id="menu-planes"
+                            className="-mt-1 mb-1 space-y-1 px-3 pb-2 pl-11"
+                          >
+                            <button
+                              type="button"
+                              onClick={handleGoToSubscription}
+                              className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
+                            >
+                              <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
+                                <path d="M12 3a4 4 0 0 0-4 4v2" />
+                                <path d="M8 12v-1a4 4 0 1 1 8 0v1" />
+                                <rect x="5" y="12" width="14" height="9" rx="2" />
+                              </MenuIcon>
+                              {t('dashboard.menu.subscription')}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleGoToPricing}
+                              className="flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)]"
+                            >
+                              <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
+                                <path d="M6 19V9" />
+                                <path d="M12 19V5" />
+                                <path d="M18 19v-7" />
+                                <path d="M4 19h16" />
+                              </MenuIcon>
+                              Pricing
+                            </button>
+                          </div>
+                        ) : null}
+                      </>
                     ) : null}
-                      <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
+                    <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
                       <button
                         type="button"
                         onClick={() => setActivePanel("widgets")}
