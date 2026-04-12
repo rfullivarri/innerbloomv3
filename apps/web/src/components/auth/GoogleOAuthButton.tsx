@@ -67,31 +67,28 @@ export function GoogleOAuthButton({
       onClick={() => void handleClick()}
       disabled={isDisabled}
       className={
-        `flex h-12 w-full items-center justify-center gap-3 rounded-full border border-white/20 ` +
-        `bg-white/95 px-4 text-sm font-semibold text-slate-900 shadow-[0_14px_34px_rgba(15,23,42,0.24)] ` +
-        `transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-70 ${className}`
+        `group inline-flex h-12 w-full items-center justify-center gap-3 rounded-full border border-slate-200/90 ` +
+        `bg-white px-4 text-sm font-semibold leading-none text-slate-800 shadow-[0_14px_34px_rgba(15,23,42,0.2)] ` +
+        `transition-[background-color,box-shadow,border-color,color] duration-150 ` +
+        `hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:shadow-[0_14px_34px_rgba(15,23,42,0.24)] ` +
+        `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ` +
+        `disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-600 disabled:shadow-[0_8px_20px_rgba(15,23,42,0.16)] ${className}`
       }
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true" role="img" className="h-5 w-5" focusable="false">
+      <svg
+        viewBox="0 0 48 48"
+        aria-hidden="true"
+        role="img"
+        className="h-[18px] w-[18px] shrink-0"
+        focusable="false"
+      >
         <title>{copy.iconLabel}</title>
-        <path
-          fill="#EA4335"
-          d="M12 10.2v3.9h5.4c-.2 1.2-1.4 3.5-5.4 3.5-3.2 0-5.9-2.7-5.9-6s2.6-6 5.9-6c1.8 0 3 .8 3.7 1.4l2.5-2.4C16.7 2.9 14.6 2 12 2 6.9 2 2.8 6.1 2.8 11.2S6.9 20.4 12 20.4c6.9 0 8.6-4.8 8.6-7.3 0-.5 0-.9-.1-1.3H12Z"
-        />
-        <path
-          fill="#34A853"
-          d="M2.8 11.2c0 1.6.6 3.1 1.6 4.2l3-2.4c-.2-.5-.4-1.1-.4-1.8s.1-1.2.4-1.8l-3-2.4c-1 1.1-1.6 2.6-1.6 4.2Z"
-        />
-        <path
-          fill="#FBBC05"
-          d="M12 20.4c2.6 0 4.8-.9 6.4-2.5l-3-2.5c-.8.6-1.9 1-3.4 1-2.5 0-4.6-1.7-5.4-4l-3 2.3c1.5 3 4.6 5.1 8.4 5.1Z"
-        />
-        <path
-          fill="#4285F4"
-          d="M18.4 17.9c1.8-1.6 2.9-4 2.9-6.7 0-.5 0-.9-.1-1.3H12v3.9h5.3c-.3 1.4-1.1 2.9-2.9 4.1l3 2.4Z"
-        />
+        <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.655 32.657 29.239 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.153 7.959 3.041l5.657-5.657C34.053 6.053 29.281 4 24 4 12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20c0-1.341-.138-2.65-.389-3.917Z" />
+        <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.153 7.959 3.041l5.657-5.657C34.053 6.053 29.281 4 24 4 16.318 4 9.656 8.337 6.306 14.691Z" />
+        <path fill="#4CAF50" d="M24 44c5.179 0 9.868-1.977 13.409-5.192l-6.19-5.238C29.146 35.091 26.715 36 24 36c-5.218 0-9.621-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44Z" />
+        <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.091 5.571l.003-.002 6.19 5.238C36.971 39.202 44 34 44 24c0-1.341-.138-2.65-.389-3.917Z" />
       </svg>
-      <span>{isRedirecting ? copy.loading : copy.cta}</span>
+      <span className="text-current">{isRedirecting ? copy.loading : copy.cta}</span>
     </button>
   );
 }
