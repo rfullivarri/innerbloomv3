@@ -166,7 +166,7 @@ function hasModerationBodyFocus(
 
 export default function DashboardV3Page() {
   const navigate = useNavigate();
-  const { backendUserId, status, error, reload, clerkUserId, profile } =
+  const { backendUserId, status, error, reload, clerkUserId, profile, avatarProfile } =
     useBackendUser();
   const location = useLocation();
   const { language } = usePostLoginLanguage();
@@ -1229,7 +1229,7 @@ export function DashboardOverview({
           <div data-demo-anchor="overall-progress">
             <MetricHeader userId={userId} gameMode={gameMode} />
           </div>
-          <ProfileCard gameMode={gameMode} />
+          <ProfileCard gameMode={gameMode} avatarProfile={avatarProfile} />
           <div data-demo-anchor="daily-energy">
             <EnergyCard userId={userId} gameMode={gameMode} />
           </div>

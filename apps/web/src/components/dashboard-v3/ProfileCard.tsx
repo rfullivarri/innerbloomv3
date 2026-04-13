@@ -1,27 +1,26 @@
 import { CardSection } from '../ui/Card';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
+import { resolveAvatarMedia, type AvatarProfile } from '../../lib/avatarProfile';
 
 interface ProfileCardProps {
   gameMode: GameMode | string | null;
+  avatarProfile: AvatarProfile | null;
 }
 
-const MODE_VIDEO_BY_GAME_MODE: Record<GameMode, string> = {
-  Low: '/avatars/low-basic.mp4',
-  Chill: '/avatars/chill-basic.mp4',
-  Flow: '/avatars/flow-basic.mp4',
-  Evolve: '/avatars/evolve-basic.mp4',
-};
-
-export function ProfileCard({ gameMode }: ProfileCardProps) {
+export function ProfileCard({ gameMode, avatarProfile }: ProfileCardProps) {
   const normalizedGameMode = normalizeGameModeValue(gameMode);
-  const videoSrc = MODE_VIDEO_BY_GAME_MODE[normalizedGameMode ?? 'Flow'];
+  const media = resolveAvatarMedia(avatarProfile, {
+    rhythm: normalizedGameMode,
+    surface: 'profile-card',
+  });
+  const videoSrc = media.videoUrl ?? '/avatars/flow-basic.mp4';
 
   return (
     <CardSection aria-label="Perfil">
       <div className="aspect-[5/6] w-full">
         <video
           src={videoSrc}
-          aria-label={`Avatar animado modo ${normalizedGameMode ?? 'Flow'}`}
+          aria-label={media.alt}
           className="h-full w-full rounded-ib-md object-cover shadow-lg"
           autoPlay
           loop
