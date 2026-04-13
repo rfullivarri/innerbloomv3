@@ -2657,6 +2657,7 @@ export async function getUserTotalXp(userId: string): Promise<UserTotalXpRespons
 export type OnboardingProgressStep =
   | 'onboarding_started'
   | 'game_mode_selected'
+  | 'avatar_selected'
   | 'moderation_selected'
   | 'tasks_generated'
   | 'first_task_edited'
@@ -2675,6 +2676,7 @@ export type OnboardingProgress = {
   state: 'in_progress' | 'completed';
   onboarding_started_at: string | null;
   game_mode_selected_at: string | null;
+  avatar_selected_at: string | null;
   moderation_selected_at: string | null;
   tasks_generated_at: string | null;
   first_task_edited_at: string | null;

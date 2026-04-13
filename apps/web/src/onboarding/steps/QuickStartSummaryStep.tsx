@@ -4,10 +4,13 @@ import type { GameMode, Pillar } from '../state';
 import type { QuickStartTask } from '../quickStart';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
 import { buildGameModeChip, GameModeChip } from '../../components/common/GameModeChip';
+import { buildAvatarPreviewProfile, getAvatarOptionById } from '../../lib/avatarCatalog';
+import { resolveAvatarMedia } from '../../lib/avatarProfile';
 
 interface QuickStartSummaryStepProps {
   language?: OnboardingLanguage;
   gameMode: GameMode;
+  selectedAvatarId: number | null;
   selectedByPillar: Record<Pillar, string[]>;
   tasksByPillar: Record<Pillar, QuickStartTask[]>;
   xp: { Body: number; Mind: number; Soul: number; total: number };
@@ -27,6 +30,7 @@ const MODE_KEY: Record<GameMode, keyof typeof GAME_MODE_META> = {
 export function QuickStartSummaryStep({
   language = 'es',
   gameMode,
+  selectedAvatarId,
   selectedByPillar,
   tasksByPillar,
   xp,
@@ -74,6 +78,9 @@ export function QuickStartSummaryStep({
     acc[pillar] = selectedByPillar[pillar].map((id) => map.get(id) ?? id);
     return acc;
   }, { Body: [], Mind: [], Soul: [] });
+  const avatarOption = getAvatarOptionById(selectedAvatarId);
+  const avatarProfile = avatarOption ? buildAvatarPreviewProfile(avatarOption) : null;
+  const avatarMedia = resolveAvatarMedia(avatarProfile, { rhythm: gameMode, surface: 'onboarding' });
 
   return (
     <section className="glass-card onboarding-surface-base mx-auto w-full max-w-5xl rounded-3xl p-6 sm:p-8">
@@ -90,10 +97,17 @@ export function QuickStartSummaryStep({
             </header>
             <div className="mt-4 space-y-3">
               <div>
-                <p className="text-xs uppercase tracking-wide text-white/50">{copy.gameMode}</p>
-                <span className="mt-2 inline-flex origin-left scale-75">
-                  <GameModeChip {...buildGameModeChip(gameMode)} />
+                      <p className="text-xs uppercase tracking-wide text-white/50">{copy.gameMode}</p>
+                      <span className="mt-2 inline-flex origin-left scale-75">
+                  <GameModeChip {...buildGameModeChip(gameMode, { avatarProfile })} />
                 </span>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-white/50">Avatar</p>
+                <p className="mt-1 inline-flex items-center gap-2 text-sm text-white/80">
+                  <span>{avatarOption?.name ?? '—'}</span>
+                  {avatarOption ? <img src={avatarMedia.imageUrl ?? '/FlowMood.jpg'} alt={avatarMedia.alt} className="h-7 w-7 rounded-full border border-white/20 object-cover" /> : null}
+                </p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-white/50">{copy.state}</p>

@@ -35,6 +35,7 @@ import {
 import { resolveAvatarMedia, resolveAvatarTheme, type AvatarProfile } from "../../lib/avatarProfile";
 import { normalizeGameModeValue, type GameMode } from "../../lib/gameMode";
 import { GAME_MODE_META, GAME_MODE_ORDER, type LocalizedLanguage } from "../../lib/gameModeMeta";
+import { AVATAR_OPTIONS, resolveAvatarOption } from "../../lib/avatarCatalog";
 import type { ResolvedTheme } from "../../theme/themePreference";
 import {
   forwardRef,
@@ -66,47 +67,14 @@ interface DashboardMenuProps {
   };
 }
 
-type MenuAvatarOption = {
-  avatarId: number;
-  code: "LEGACY_LOW" | "LEGACY_CHILL" | "LEGACY_FLOW" | "LEGACY_EVOLVE";
-  name: string;
-  accent: string;
-};
-
-const MENU_AVATAR_OPTIONS: MenuAvatarOption[] = [
-  { avatarId: 1, code: "LEGACY_LOW", name: "Legacy Low", accent: "#58CC02" },
-  { avatarId: 2, code: "LEGACY_CHILL", name: "Legacy Chill", accent: "#00C2FF" },
-  { avatarId: 3, code: "LEGACY_FLOW", name: "Legacy Flow", accent: "#A855F7" },
-  { avatarId: 4, code: "LEGACY_EVOLVE", name: "Legacy Evolve", accent: "#FF6A00" },
-];
-
-const AVATAR_FALLBACK_BY_MODE: Record<GameMode, MenuAvatarOption["code"]> = {
-  Low: "LEGACY_LOW",
-  Chill: "LEGACY_CHILL",
-  Flow: "LEGACY_FLOW",
-  Evolve: "LEGACY_EVOLVE",
-};
+type MenuAvatarOption = (typeof AVATAR_OPTIONS)[number];
+const MENU_AVATAR_OPTIONS: MenuAvatarOption[] = AVATAR_OPTIONS;
 
 export function resolveMenuAvatarSelection(
   avatarProfile: AvatarProfile | null,
   currentMode: GameMode | null,
 ): MenuAvatarOption {
-  if (typeof avatarProfile?.avatarId === "number") {
-    const byId = MENU_AVATAR_OPTIONS.find((option) => option.avatarId === avatarProfile.avatarId);
-    if (byId) {
-      return byId;
-    }
-  }
-
-  if (typeof avatarProfile?.avatarCode === "string") {
-    const byCode = MENU_AVATAR_OPTIONS.find((option) => option.code === avatarProfile.avatarCode);
-    if (byCode) {
-      return byCode;
-    }
-  }
-
-  const fallbackCode = AVATAR_FALLBACK_BY_MODE[currentMode ?? "Chill"];
-  return MENU_AVATAR_OPTIONS.find((option) => option.code === fallbackCode) ?? MENU_AVATAR_OPTIONS[1];
+  return resolveAvatarOption(avatarProfile, currentMode);
 }
 
 

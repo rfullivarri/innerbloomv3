@@ -228,6 +228,7 @@ describe('triggerTaskGenerationForUser', () => {
             state: 'in_progress',
             onboarding_started_at: null,
             game_mode_selected_at: null,
+            avatar_selected_at: null,
             moderation_selected_at: null,
             tasks_generated_at: new Date().toISOString(),
             first_task_edited_at: null,

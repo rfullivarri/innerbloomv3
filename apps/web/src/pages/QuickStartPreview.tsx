@@ -5,17 +5,20 @@ import { resolveOnboardingLanguage } from '../onboarding/i18n';
 import type { OnboardingLanguage } from '../onboarding/constants';
 import type { GameMode } from '../onboarding/state';
 import { GAME_MODE_META } from '../lib/gameModeMeta';
-import { apiAuthorizedFetch, getCurrentUserProfile, markOnboardingProgress } from '../lib/api';
+import { apiAuthorizedFetch, changeCurrentUserAvatar, getCurrentUserProfile, markOnboardingProgress } from '../lib/api';
 import { setJourneyGenerationPending } from '../lib/journeyGeneration';
 import { buildDemoUrl } from '../lib/demoEntry';
 import { GameModeStep } from '../onboarding/steps/GameModeStep';
+import { AvatarStep } from '../onboarding/steps/AvatarStep';
 import { GpExplainerOverlay } from '../onboarding/ui/GpExplainerOverlay';
 import { HUD } from '../onboarding/ui/HUD';
 import { NavButtons } from '../onboarding/ui/NavButtons';
 import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../components/common/GameModeChip';
+import { buildAvatarPreviewProfile, getAvatarOptionById } from '../lib/avatarCatalog';
+import { resolveAvatarMedia } from '../lib/avatarProfile';
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
-type Step = 'game-mode' | 'branch' | 'body' | 'mind' | 'soul' | 'moderation' | 'summary' | 'setup';
+type Step = 'game-mode' | 'avatar' | 'branch' | 'body' | 'mind' | 'soul' | 'moderation' | 'summary' | 'setup';
 type ModerationOption = 'sugar' | 'tobacco' | 'alcohol';
 
 interface Task {
@@ -541,7 +544,7 @@ const COPY: Record<OnboardingLanguage, Translations> = {
   },
 };
 
-const STEP_ORDER: Step[] = ['game-mode', 'branch', 'body', 'mind', 'soul', 'moderation', 'summary', 'setup'];
+const STEP_ORDER: Step[] = ['game-mode', 'avatar', 'branch', 'body', 'mind', 'soul', 'moderation', 'summary', 'setup'];
 
 
 const GAME_MODE_META_KEY: Record<GameMode, keyof typeof GAME_MODE_META> = {
@@ -737,6 +740,8 @@ export default function QuickStartPreviewPage() {
   const [language, setLanguage] = useState<OnboardingLanguage>(() => getDefaultLanguage(searchParams));
   const [step, setStep] = useState<Step>('game-mode');
   const [gameMode, setGameMode] = useState<GameMode>('CHILL');
+  const [avatarId, setAvatarId] = useState<number | null>(null);
+  const [avatarStepError, setAvatarStepError] = useState<string | null>(null);
   const [selectedByPillar, setSelectedByPillar] = useState<Record<Pillar, string[]>>({ Body: [], Mind: [], Soul: [] });
   const [inputsByTask, setInputsByTask] = useState<Record<string, string>>({});
   const [moderationPrefs, setModerationPrefs] = useState<Record<ModerationOption, boolean>>({
@@ -751,6 +756,9 @@ export default function QuickStartPreviewPage() {
   const [showGrowthPointsModal, setShowGrowthPointsModal] = useState(false);
   const [pendingGrowthPointsModal, setPendingGrowthPointsModal] = useState(false);
   const copy = COPY[language];
+  const selectedAvatarOption = getAvatarOptionById(avatarId);
+  const selectedAvatarProfile = selectedAvatarOption ? buildAvatarPreviewProfile(selectedAvatarOption) : null;
+  const selectedAvatarMedia = resolveAvatarMedia(selectedAvatarProfile, { rhythm: gameMode, surface: 'onboarding' });
 
   const minimum = MODE_MINIMUMS[gameMode];
   const setupSteps = useMemo(
@@ -851,6 +859,11 @@ export default function QuickStartPreviewPage() {
 
   const goNext = () => {
     if (step === 'game-mode') {
+      setStep('avatar');
+      return;
+    }
+
+    if (step === 'avatar') {
       setStep('branch');
       return;
     }
@@ -1160,6 +1173,34 @@ export default function QuickStartPreviewPage() {
             />
           </section>
         ) : null}
+        {step === 'avatar' ? (
+          <section className="mx-auto w-full max-w-4xl">
+            <AvatarStep
+              language={language}
+              rhythm={gameMode}
+              selectedAvatarId={avatarId}
+              onSelectAvatar={(value) => {
+                setAvatarId(value);
+                setAvatarStepError(null);
+              }}
+              onBack={goBack}
+              onConfirm={() => {
+                if (!avatarId) return;
+                void (async () => {
+                  try {
+                    await changeCurrentUserAvatar(avatarId);
+                    await markOnboardingProgress('avatar_selected', { trigger: 'quick_start_preview' });
+                    goNext();
+                  } catch (error) {
+                    console.error('[quick_start_preview] avatar select failed', error);
+                    setAvatarStepError(language === 'en' ? 'Could not save avatar. Try again.' : 'No pudimos guardar tu avatar. Intentá de nuevo.');
+                  }
+                })();
+              }}
+            />
+            {avatarStepError ? <p className="mt-2 text-center text-sm text-rose-200">{avatarStepError}</p> : null}
+          </section>
+        ) : null}
 
         {step === 'branch' ? (
           <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
@@ -1252,8 +1293,15 @@ export default function QuickStartPreviewPage() {
                     <div>
                       <p className="text-xs uppercase tracking-wide text-white/50">{copy.quickSummary.gameMode}</p>
                       <span className="mt-2 inline-flex origin-left scale-75">
-                        <SharedGameModeChip {...buildGameModeChip(gameMode)} />
+                        <SharedGameModeChip {...buildGameModeChip(gameMode, { avatarProfile: selectedAvatarProfile })} />
                       </span>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-white/50">Avatar</p>
+                      <p className="mt-1 inline-flex items-center gap-2 text-sm text-white/80">
+                        <span>{selectedAvatarOption?.name ?? '—'}</span>
+                        {selectedAvatarOption ? <img src={selectedAvatarMedia.imageUrl ?? '/FlowMood.jpg'} alt={selectedAvatarMedia.alt} className="h-7 w-7 rounded-full border border-white/20 object-cover" /> : null}
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs uppercase tracking-wide text-white/50">{copy.quickSummary.state}</p>

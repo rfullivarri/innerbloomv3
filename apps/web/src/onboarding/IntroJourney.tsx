@@ -13,6 +13,7 @@ import { ChoiceStep } from './steps/ChoiceStep';
 import { GameModeStep } from './steps/GameModeStep';
 import { OpenTextStep } from './steps/OpenTextStep';
 import { PathSelectStep } from './steps/PathSelectStep';
+import { AvatarStep } from './steps/AvatarStep';
 import { IntegratedQuickStartFlow } from './IntegratedQuickStartFlow';
 import { SummaryStep } from './steps/SummaryStep';
 import { GpExplainerOverlay } from './ui/GpExplainerOverlay';
@@ -20,6 +21,7 @@ import { HUD } from './ui/HUD';
 import { Snack } from './ui/Snack';
 import { resolveFirstQuestionStep } from './firstQuestionStep';
 import { QUICK_START_MINIMUMS, QUICK_START_TASKS, computeQuickStartGp } from './quickStart';
+import { changeCurrentUserAvatar, markOnboardingProgress } from '../lib/api';
 
 interface IntroJourneyProps {
   language?: OnboardingLanguage;
@@ -41,6 +43,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   const {
     state,
     setMode,
+    setAvatarId,
     goNext,
     goPrevious,
     goToStep,
@@ -68,6 +71,8 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   const [shouldAutoAdvance, setShouldAutoAdvance] = useState(false);
   const [isGpExplainerOpen, setIsGpExplainerOpen] = useState(false);
   const [hasDismissedGpExplainer, setHasDismissedGpExplainer] = useState(false);
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
+  const [avatarStepError, setAvatarStepError] = useState<string | null>(null);
   const firstQuestionStep = resolveFirstQuestionStep(answers.mode, onboardingPath);
   const quickStartGp = computeQuickStartGp(answers.quickStart.selectedTasksByPillar);
   const hudXp = onboardingPath === 'quick_start' ? quickStartGp.xp : xp;
@@ -197,6 +202,12 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
     };
   }, [isGpExplainerOpen]);
 
+  useEffect(() => {
+    if (stepId !== 'avatar-select' && answers.mode && answers.avatarId == null) {
+      console.warn('[onboarding] missing avatar selection after rhythm step', { stepId, mode: answers.mode });
+    }
+  }, [answers.avatarId, answers.mode, stepId]);
+
   const handleChecklistConfirm = (target: StepId) => {
     const hadChecklist = awardedChecklists[target];
     awardChecklist(target);
@@ -283,7 +294,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
         return (
           <PathSelectStep
             language={language}
-            onBack={() => goToStep('mode-select')}
+            onBack={() => goToStep('avatar-select')}
             onSelectTraditional={() => {
               setOnboardingPath('traditional');
               goNext();
@@ -293,6 +304,40 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
               goNext();
             }}
           />
+        );
+      case 'avatar-select':
+        return (
+          <>
+            <AvatarStep
+              language={language}
+              rhythm={answers.mode}
+              selectedAvatarId={answers.avatarId}
+              onSelectAvatar={(avatarId) => {
+                setAvatarId(avatarId);
+                setAvatarStepError(null);
+              }}
+              onBack={() => goToStep('mode-select')}
+              onConfirm={() => {
+                if (!answers.avatarId || isSavingAvatar) return;
+                const selectedAvatarId = answers.avatarId;
+                void (async () => {
+                  try {
+                    setIsSavingAvatar(true);
+                    setAvatarStepError(null);
+                    await changeCurrentUserAvatar(selectedAvatarId);
+                    await markOnboardingProgress('avatar_selected', { trigger: 'intro_journey' });
+                    goNext();
+                  } catch (error) {
+                    console.error('[onboarding] avatar select failed', error);
+                    setAvatarStepError(language === 'en' ? 'Could not save avatar. Try again.' : 'No pudimos guardar tu avatar. Intentá de nuevo.');
+                  } finally {
+                    setIsSavingAvatar(false);
+                  }
+                })();
+              }}
+            />
+            {avatarStepError ? <p className="text-center text-sm text-rose-200">{avatarStepError}</p> : null}
+          </>
         );
       case 'low-body':
         return (
@@ -529,6 +574,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
           <SummaryStep
             language={language}
             answers={answers}
+            selectedAvatarId={answers.avatarId}
             xp={xp}
             onBack={goPrevious}
             onFinish={handleFinish}
@@ -546,6 +592,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
       <IntegratedQuickStartFlow
         language={language}
         gameMode={answers.mode ?? 'CHILL'}
+        avatarId={answers.avatarId}
         onBackToPathSelect={() => goToStep('path-select')}
         onExit={handleExit}
         onRestart={handleRestart}

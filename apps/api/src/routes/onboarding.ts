@@ -24,6 +24,7 @@ const router = Router();
 const validSteps = new Set<OnboardingProgressStep>([
   'onboarding_started',
   'game_mode_selected',
+  'avatar_selected',
   'moderation_selected',
   'tasks_generated',
   'first_task_edited',

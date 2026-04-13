@@ -11,6 +11,8 @@ import { GpExplainerOverlay } from './ui/GpExplainerOverlay';
 import { HUD } from './ui/HUD';
 import { NavButtons } from './ui/NavButtons';
 import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../components/common/GameModeChip';
+import { buildAvatarPreviewProfile, getAvatarOptionById } from '../lib/avatarCatalog';
+import { resolveAvatarMedia } from '../lib/avatarProfile';
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
 type Step = 'body' | 'mind' | 'soul' | 'moderation' | 'summary' | 'setup';
@@ -724,12 +726,13 @@ function InlineTaskRow({
 interface IntegratedQuickStartFlowProps {
   language?: OnboardingLanguage;
   gameMode: GameMode;
+  avatarId: number | null;
   onBackToPathSelect: () => void;
   onExit: () => void;
   onRestart: () => void;
 }
 
-export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gameMode: initialGameMode, onBackToPathSelect, onExit, onRestart }: IntegratedQuickStartFlowProps) {
+export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gameMode: initialGameMode, avatarId, onBackToPathSelect, onExit, onRestart }: IntegratedQuickStartFlowProps) {
   const navigate = useNavigate();
   const language = initialLanguage;
   const [step, setStep] = useState<Step>('body');
@@ -748,6 +751,9 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
   const [showGrowthPointsModal, setShowGrowthPointsModal] = useState(false);
   const [pendingGrowthPointsModal, setPendingGrowthPointsModal] = useState(true);
   const copy = COPY[language];
+  const selectedAvatarOption = getAvatarOptionById(avatarId);
+  const selectedAvatarProfile = selectedAvatarOption ? buildAvatarPreviewProfile(selectedAvatarOption) : null;
+  const selectedAvatarMedia = resolveAvatarMedia(selectedAvatarProfile, { rhythm: gameMode, surface: 'onboarding' });
 
   const minimum = MODE_MINIMUMS[gameMode];
   const setupSteps = useMemo(
@@ -1176,8 +1182,15 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
                     <div>
                       <p className="text-xs uppercase tracking-wide text-white/50">{copy.quickSummary.gameMode}</p>
                       <span className="mt-2 inline-flex origin-left scale-75">
-                        <SharedGameModeChip {...buildGameModeChip(gameMode)} />
+                        <SharedGameModeChip {...buildGameModeChip(gameMode, { avatarProfile: selectedAvatarProfile })} />
                       </span>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-white/50">Avatar</p>
+                      <p className="mt-1 inline-flex items-center gap-2 text-sm text-white/80">
+                        <span>{selectedAvatarOption?.name ?? '—'}</span>
+                        {selectedAvatarOption ? <img src={selectedAvatarMedia.imageUrl ?? '/FlowMood.jpg'} alt={selectedAvatarMedia.alt} className="h-7 w-7 rounded-full border border-white/20 object-cover" /> : null}
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs uppercase tracking-wide text-white/50">{copy.quickSummary.state}</p>
