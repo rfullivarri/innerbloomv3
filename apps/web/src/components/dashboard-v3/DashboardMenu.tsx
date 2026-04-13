@@ -35,7 +35,7 @@ import {
 import { resolveAvatarMedia, resolveAvatarTheme, type AvatarProfile } from "../../lib/avatarProfile";
 import { normalizeGameModeValue, type GameMode } from "../../lib/gameMode";
 import { GAME_MODE_META, GAME_MODE_ORDER, type LocalizedLanguage } from "../../lib/gameModeMeta";
-import { AVATAR_OPTIONS, resolveAvatarOption } from "../../lib/avatarCatalog";
+import { AVATAR_OPTIONS, resolveAvatarOption, resolveTemporaryLegacyAvatarPreviewImage } from "../../lib/avatarCatalog";
 import type { ResolvedTheme } from "../../theme/themePreference";
 import {
   forwardRef,
@@ -1342,6 +1342,7 @@ export function DashboardMenu({
                                 rhythm: normalizedCurrentMode,
                                 surface: "dashboard-menu",
                               });
+                              const previewImageUrl = resolveTemporaryLegacyAvatarPreviewImage(avatarOption) ?? avatarMedia.imageUrl ?? "/FlowMood.jpg";
                               return (
                                 <button
                                   key={avatarOption.avatarId}
@@ -1357,7 +1358,7 @@ export function DashboardMenu({
                                       </span>
                                     </div>
                                     <img
-                                      src={avatarMedia.imageUrl ?? "/FlowMood.jpg"}
+                                      src={previewImageUrl}
                                       alt={avatarMedia.alt}
                                       className="h-20 w-full rounded-xl border border-white/10 object-cover"
                                       loading="lazy"
