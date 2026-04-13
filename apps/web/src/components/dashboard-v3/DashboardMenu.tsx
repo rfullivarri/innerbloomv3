@@ -32,7 +32,7 @@ import {
   type ModerationTrackerConfig,
   type ModerationTrackerType,
 } from "../../lib/api";
-import { resolveAvatarMedia, resolveAvatarTheme, type AvatarProfile } from "../../lib/avatarProfile";
+import type { AvatarProfile } from "../../lib/avatarProfile";
 import { normalizeGameModeValue, type GameMode } from "../../lib/gameMode";
 import { GAME_MODE_META, GAME_MODE_ORDER, type LocalizedLanguage } from "../../lib/gameModeMeta";
 import { AVATAR_OPTIONS, resolveAvatarOption, resolveTemporaryLegacyAvatarPreviewImage } from "../../lib/avatarCatalog";
@@ -74,6 +74,18 @@ export function resolveMenuAvatarSelection(
   avatarProfile: AvatarProfile | null,
 ): MenuAvatarOption {
   return resolveAvatarOption(avatarProfile);
+}
+
+export function resolveMenuAvatarTheme(avatarProfile: AvatarProfile | null): { accent: string; chip: MenuAvatarOption["chip"] } {
+  const selectedAvatar = resolveMenuAvatarSelection(avatarProfile);
+  return {
+    accent: selectedAvatar.accent,
+    chip: selectedAvatar.chip,
+  };
+}
+
+export function resolveMenuAvatarPreviewImage(avatarOption: MenuAvatarOption): string {
+  return resolveTemporaryLegacyAvatarPreviewImage(avatarOption) ?? "/FlowMood.jpg";
 }
 
 
@@ -383,7 +395,7 @@ export function DashboardMenu({
     () => isDemandingModeJump(normalizedCurrentMode, selectedOrCurrentMode),
     [normalizedCurrentMode, selectedOrCurrentMode],
   );
-  const currentAvatarTheme = useMemo(() => resolveAvatarTheme(currentAvatarProfile), [currentAvatarProfile]);
+  const currentAvatarTheme = useMemo(() => resolveMenuAvatarTheme(currentAvatarProfile), [currentAvatarProfile]);
 
   const menuRowClassName =
     "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40";
@@ -1329,20 +1341,7 @@ export function DashboardMenu({
                             {MENU_AVATAR_OPTIONS.map((avatarOption) => {
                               const isSelected = selectedOrCurrentAvatarId === avatarOption.avatarId;
                               const isCurrent = currentAvatarSelection.avatarId === avatarOption.avatarId;
-                              const previewProfile: AvatarProfile = {
-                                avatarId: avatarOption.avatarId,
-                                avatarCode: avatarOption.code,
-                                avatarName: avatarOption.name,
-                                theme: { accent: avatarOption.accent, chip: "aqua" },
-                                isLegacyFallback: false,
-                                fallbackReason: "none",
-                                assetPayload: null,
-                              };
-                              const avatarMedia = resolveAvatarMedia(previewProfile, {
-                                rhythm: normalizedCurrentMode,
-                                surface: "dashboard-menu",
-                              });
-                              const previewImageUrl = resolveTemporaryLegacyAvatarPreviewImage(avatarOption) ?? avatarMedia.imageUrl ?? "/FlowMood.jpg";
+                              const previewImageUrl = resolveMenuAvatarPreviewImage(avatarOption);
                               return (
                                 <button
                                   key={avatarOption.avatarId}
@@ -1359,7 +1358,7 @@ export function DashboardMenu({
                                     </div>
                                     <img
                                       src={previewImageUrl}
-                                      alt={avatarMedia.alt}
+                                      alt={`${avatarOption.name} avatar preview`}
                                       className="h-20 w-full rounded-xl border border-white/10 object-cover"
                                       loading="lazy"
                                     />

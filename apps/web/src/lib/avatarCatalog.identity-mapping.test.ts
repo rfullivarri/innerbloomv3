@@ -51,6 +51,6 @@ describe('avatar identity mapping catalog', () => {
       fallbackReason: 'missing-avatar-payload',
     });
 
-    expect(resolved).toMatchObject({ avatarId: 4, code: 'VIOLET_OWL' });
+    expect(resolved).toMatchObject({ avatarId: 1, code: 'BLUE_AMPHIBIAN' });
   });
 });

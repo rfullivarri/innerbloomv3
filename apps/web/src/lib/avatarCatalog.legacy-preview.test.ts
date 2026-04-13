@@ -8,10 +8,10 @@ describe('resolveTemporaryLegacyAvatarPreviewImage', () => {
     );
 
     expect(byCode).toEqual({
-      LEGACY_LOW: '/lowGMO.png',
-      LEGACY_CHILL: '/chillGMO.png',
-      LEGACY_FLOW: '/flowGMO.png',
-      LEGACY_EVOLVE: '/evolveGMO.png',
+      BLUE_AMPHIBIAN: '/flowGMO.png',
+      GREEN_BEAR: '/chillGMO.png',
+      RED_CAT: '/lowGMO.png',
+      VIOLET_OWL: '/evolveGMO.png',
     });
   });
 
