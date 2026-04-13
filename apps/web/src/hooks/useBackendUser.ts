@@ -6,6 +6,7 @@ import {
   onApiAuthTokenProviderChange,
   type CurrentUserProfile,
 } from '../lib/api';
+import { resolveAvatarProfile, type AvatarProfile } from '../lib/avatarProfile';
 import { isNativeCapacitorPlatform } from '../mobile/capacitor';
 import { useMobileAuthSession } from '../mobile/mobileAuthSession';
 import { useRequest, type AsyncStatus } from './useRequest';
@@ -14,6 +15,7 @@ export type BackendUserState = {
   clerkUserId: string | null;
   backendUserId: string | null;
   profile: CurrentUserProfile | null;
+  avatarProfile: AvatarProfile | null;
   status: AsyncStatus;
   error: Error | null;
   reload: () => void;
@@ -54,6 +56,7 @@ export function useBackendUser(): BackendUserState {
 
   const normalizedStatus: AsyncStatus = enabled ? status : 'loading';
   const profile = enabled && status === 'success' ? data : null;
+  const avatarProfile = resolveAvatarProfile(profile);
   const backendUserId = profile?.user_id ?? null;
 
   return useMemo(
@@ -61,10 +64,11 @@ export function useBackendUser(): BackendUserState {
       clerkUserId: effectiveClerkUserId,
       backendUserId,
       profile,
+      avatarProfile,
       status: normalizedStatus,
       error: enabled ? error : null,
       reload,
     }),
-    [backendUserId, effectiveClerkUserId, enabled, error, normalizedStatus, profile, reload],
+    [avatarProfile, backendUserId, effectiveClerkUserId, enabled, error, normalizedStatus, profile, reload],
   );
 }
