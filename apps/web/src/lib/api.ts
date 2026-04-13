@@ -2579,6 +2579,10 @@ export type CurrentUserProfile = {
   image_url: string | null;
   game_mode: string | null;
   weekly_target: number | null;
+  avatar_id: number | null;
+  avatar_code: string | null;
+  avatar_name: string | null;
+  avatar_theme_tokens: Record<string, unknown> | null;
   timezone: string | null;
   locale: string | null;
   created_at: string;

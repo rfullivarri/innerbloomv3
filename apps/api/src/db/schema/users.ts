@@ -10,6 +10,7 @@ export const users = pgTable(
     fullName: text('full_name'),
     imageUrl: text('image_url'),
     gameModeId: integer('game_mode_id'),
+    avatarId: integer('avatar_id'),
     timezone: text('timezone').notNull().default('UTC'),
     tasksGroupId: uuid('tasks_group_id').defaultRandom().notNull(),
     firstDateLog: date('first_date_log'),
