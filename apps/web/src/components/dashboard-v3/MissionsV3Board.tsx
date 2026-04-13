@@ -43,6 +43,8 @@ import {
 import { FEATURE_MISSIONS_V2 } from '../../lib/featureFlags';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 import { subscribeToMediaQuery } from '../../lib/mediaQuery';
+import type { AvatarProfile } from '../../lib/avatarProfile';
+import { resolveMissionsArt } from './missionsVisualResolver';
 import 'swiper/css';
 import 'swiper/css/effect-cards';
 
@@ -256,9 +258,6 @@ type MissionCardStyle = CSSProperties & {
 
 type MarketProposalTransition = 'forward' | 'backward' | null;
 
-const DEFAULT_MISSION_ART_MODE: GameMode = 'Flow';
-
-
 type PrimaryAction = {
   key: string;
   label: string;
@@ -267,42 +266,15 @@ type PrimaryAction = {
   tone: 'primary' | 'neutral';
 };
 
-const MISSION_ART_BY_SLOT_AND_MODE: Record<MissionArtSlot, Record<GameMode, string>> = {
-  main: {
-    Flow: '/missions/missions_main_flow.png',
-    Chill: '/missions/missions_main_chill.png',
-    Low: '/missions/missions_main_low.png',
-    Evolve: '/missions/missions_main_evolve.png',
+function buildMissionCardStyle(
+  slot: MissionArtSlot,
+  options: {
+    avatarProfile?: AvatarProfile | null;
+    rhythm?: string | null;
   },
-  hunt: {
-    Flow: '/missions/missions_hunt_flow.png',
-    Chill: '/missions/missions_hunt_chill.png',
-    Low: '/missions/missions_hunt_low.png',
-    Evolve: '/missions/missions_hunt_evolve.png',
-  },
-  skill: {
-    Flow: '/missions/missions_skill_flow.png',
-    Chill: '/missions/missions_skill_chill.png',
-    Low: '/missions/missions_skill_low.png',
-    Evolve: '/missions/missions_skill_evolve.png',
-  },
-  boss: {
-    Flow: '/missions/missions_boss_flow.png',
-    Chill: '/missions/missions_boss_chill.png',
-    Low: '/missions/missions_boss_low.png',
-    Evolve: '/missions/missions_boss_evolve.png',
-  },
-};
-
-function getMissionArt(slot: MissionArtSlot, gameMode: GameMode | null): string {
-  const normalizedMode = gameMode ?? DEFAULT_MISSION_ART_MODE;
-  const artByMode = MISSION_ART_BY_SLOT_AND_MODE[slot];
-  return artByMode?.[normalizedMode] ?? artByMode[DEFAULT_MISSION_ART_MODE];
-}
-
-function buildMissionCardStyle(slot: MissionArtSlot, gameMode: GameMode | null): MissionCardStyle {
+): MissionCardStyle {
   return {
-    '--missions-card-art': `url(${getMissionArt(slot, gameMode)})`,
+    '--missions-card-art': `url(${resolveMissionsArt(slot, options)})`,
     '--missions-card-art-opacity': slot === 'boss' ? '0.55' : '0.7',
   };
 }
@@ -1079,9 +1051,11 @@ function ActiveMissionCard({
 export function MissionsV3Board({
   userId,
   gameMode,
+  avatarProfile,
 }: {
   userId: string;
   gameMode?: GameMode | string | null;
+  avatarProfile?: AvatarProfile | null;
 }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -1876,7 +1850,10 @@ export function MissionsV3Board({
     }
 
     const shield = parseShieldLabel(board.boss.countdown.label) ?? { current: 6, max: 6 };
-    const bossCardStyle = buildMissionCardStyle('boss', normalizedGameMode);
+    const bossCardStyle = buildMissionCardStyle('boss', {
+      avatarProfile,
+      rhythm: normalizedGameMode,
+    });
 
     return (
       <Card
@@ -2781,7 +2758,10 @@ export function MissionsV3Board({
       const canActivate = Boolean(slotState && !slotState.mission && slotState.state === 'idle');
       const isFlipped = Boolean(flippedMarketCards[cardKey]);
       const isActiveCard = index === activeMarketIndex;
-      const coverSrc = getMissionArt(slot, normalizedGameMode);
+      const coverSrc = resolveMissionsArt(slot, {
+        avatarProfile,
+        rhythm: normalizedGameMode,
+      });
       const activeProposalIndex = activeMarketProposalBySlot[slot] ?? 0;
       const proposalList = proposals;
       const totalProposals = proposalList.length;
@@ -3492,7 +3472,10 @@ export function MissionsV3Board({
     const resolvedPrimaryAction = primaryAction!;
 
     const slotCardStyle: MissionCardStyle = {
-      ...buildMissionCardStyle(slot.slot, normalizedGameMode),
+      ...buildMissionCardStyle(slot.slot, {
+        avatarProfile,
+        rhythm: normalizedGameMode,
+      }),
       ...(viewMode === 'active'
         ? {
             '--missions-card-art': 'none',
