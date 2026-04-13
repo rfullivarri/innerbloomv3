@@ -130,7 +130,7 @@ const localizedInfoTips: Record<InfoKey, LocalizedInfoTip> = {
     es: {
       title: '¿Cómo leer “Rachas”?',
       bullets: [
-        '🟣 Barra lila: progreso de la **semana actual** vs objetivo (**N×/sem** según el game mode).',
+        '🟣 Barra lila: progreso de la **semana actual** vs objetivo (**N×/sem** según tu ritmo).',
         '✅ **✓×N** y **+GP**: totales en el **scope** seleccionado (Sem, Mes, 3M).',
         '🔥 **Racha diaria**: días consecutivos sin cortar.',
         '🟩 Mini barras verdes (Top-3): semanas del **mes actual** vs objetivo.',
@@ -141,7 +141,7 @@ const localizedInfoTips: Record<InfoKey, LocalizedInfoTip> = {
     en: {
       title: 'How to read “Streaks”?',
       bullets: [
-        '🟣 Purple bar: progress for the **current week** vs target (**N×/week** based on game mode).',
+        '🟣 Purple bar: progress for the **current week** vs target (**N×/week** based on your rhythm).',
         '✅ **✓×N** and **+GP**: totals in the selected **scope** (Week, Month, 3M).',
         '🔥 **Daily streak**: consecutive days without breaks.',
         '🟩 Green mini bars (Top-3): weeks in the **current month** vs target.',

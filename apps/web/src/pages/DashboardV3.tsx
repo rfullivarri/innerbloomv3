@@ -1661,7 +1661,7 @@ function DashboardFallback() {
 
           <LegacyCard
             title="Perfil"
-            subtitle="Foto y game mode"
+            subtitle="Foto y ritmo"
             className="min-h-[180px]"
           >
             <div className="flex items-center gap-3">
