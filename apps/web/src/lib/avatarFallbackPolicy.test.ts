@@ -30,15 +30,29 @@ describe('avatar fallback policy', () => {
     const lowFallback = resolveAvatarProfile(makeProfile({ game_mode: 'Low' }));
     const evolveFallback = resolveAvatarProfile(makeProfile({ game_mode: 'Evolve' }));
 
-    expect(lowFallback?.avatarCode).toBe('LEGACY_CHILL');
-    expect(evolveFallback?.avatarCode).toBe('LEGACY_CHILL');
+    expect(lowFallback?.avatarCode).toBe('BLUE_AMPHIBIAN');
+    expect(evolveFallback?.avatarCode).toBe('BLUE_AMPHIBIAN');
     expect(lowFallback?.fallbackReason).toBe('missing-avatar-payload');
     expect(evolveFallback?.fallbackReason).toBe('missing-avatar-payload');
   });
 
   it('uses deterministic default avatar option when resolver input is empty', () => {
     const resolved = resolveAvatarOption(null);
+    expect(resolved.avatarId).toBe(1);
+    expect(resolved.code).toBe('BLUE_AMPHIBIAN');
+  });
+
+  it('maps legacy avatar codes to the new identity catalog safely', () => {
+    const resolved = resolveAvatarOption({
+      avatarId: null,
+      avatarCode: 'LEGACY_LOW',
+      avatarName: 'Legacy Low',
+      theme: { accent: '#58CC02', chip: 'leaf' },
+      isLegacyFallback: true,
+      fallbackReason: 'missing-avatar-payload',
+    });
+
     expect(resolved.avatarId).toBe(2);
-    expect(resolved.code).toBe('LEGACY_CHILL');
+    expect(resolved.code).toBe('GREEN_BEAR');
   });
 });

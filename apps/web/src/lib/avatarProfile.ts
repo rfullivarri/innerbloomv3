@@ -61,9 +61,9 @@ const LEGACY_MEDIA_BY_RHYTHM: Record<AvatarRhythm, AvatarMedia> = {
 };
 
 const DEFAULT_AVATAR_FALLBACK: DefaultAvatarFallback = {
-  avatarId: 2,
-  avatarCode: 'LEGACY_CHILL',
-  avatarName: 'Legacy Chill',
+  avatarId: 1,
+  avatarCode: 'BLUE_AMPHIBIAN',
+  avatarName: 'Blue Amphibian',
   theme: { accent: '#00C2FF', chip: 'aqua' },
   media: LEGACY_MEDIA_BY_RHYTHM,
 };
