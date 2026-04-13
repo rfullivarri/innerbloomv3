@@ -34,7 +34,7 @@ import {
 } from "../../lib/api";
 import { resolveAvatarMedia, resolveAvatarTheme, type AvatarProfile } from "../../lib/avatarProfile";
 import { normalizeGameModeValue, type GameMode } from "../../lib/gameMode";
-import { GAME_MODE_META, GAME_MODE_ORDER } from "../../lib/gameModeMeta";
+import { GAME_MODE_META, GAME_MODE_ORDER, type LocalizedLanguage } from "../../lib/gameModeMeta";
 import type { ResolvedTheme } from "../../theme/themePreference";
 import {
   forwardRef,
@@ -132,6 +132,26 @@ export function getWidgetsRefreshingOverlayClass(theme: ResolvedTheme): string {
   return theme === "light"
     ? "bg-[color:var(--color-overlay-3)]"
     : "bg-[color:var(--color-slate-950-80)]";
+}
+
+type RhythmCardContent = {
+  mode: GameMode;
+  intensity: string;
+  heading: string;
+  state: string;
+  objective: string;
+};
+
+export function getRhythmCardContent(mode: GameMode, language: LocalizedLanguage): RhythmCardContent {
+  const content = GAME_MODE_META[mode];
+  const intensity = content.frequency[language];
+  return {
+    mode,
+    intensity,
+    heading: `${mode.toUpperCase()} · ${intensity}`,
+    state: content.state[language],
+    objective: content.objective[language],
+  };
 }
 
 function MenuIcon({
@@ -1226,7 +1246,7 @@ export function DashboardMenu({
                             {GAME_MODE_ORDER.map((mode) => {
                               const isSelected = (selectedOrCurrentMode ?? 'Flow') === mode;
                               const isCurrent = (normalizedCurrentMode ?? 'Flow') === mode;
-                              const content = GAME_MODE_META[mode];
+                              const content = getRhythmCardContent(mode, language);
                               return (
                                 <button
                                   key={mode}
@@ -1236,9 +1256,9 @@ export function DashboardMenu({
                                 >
                                   <div className="ml-2 space-y-2">
                                     <div className="flex items-center justify-between gap-2">
-                                      <p className="text-sm font-semibold text-[color:var(--color-text)]">{mode}</p>
+                                      <p className="text-sm font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text)]">{mode}</p>
                                       <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text-dim)]">
-                                        {content.frequency[language]}
+                                        {content.intensity}
                                       </span>
                                     </div>
                                     <div
@@ -1248,14 +1268,20 @@ export function DashboardMenu({
                                       }}
                                       aria-hidden="true"
                                     >
-                                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-text)]">
-                                        {mode} · {content.frequency[language]}
-                                      </p>
+                                      <div className="space-y-1">
+                                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-[color:var(--color-text-dim)]">
+                                          {t('dashboard.menu.weeklyIntensity')}
+                                        </p>
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-text)]">
+                                          {content.heading}
+                                        </p>
+                                      </div>
                                     </div>
-                                    <p className="line-clamp-2 text-[11px] text-[color:var(--color-text-dim)]">{content.objective[language]}</p>
+                                    <p className="line-clamp-1 text-[11px] text-[color:var(--color-text-dim)]">{content.state}</p>
+                                    <p className="line-clamp-2 text-[11px] text-[color:var(--color-text-dim)]">{content.objective}</p>
                                     {isCurrent ? (
                                       <span className="inline-flex rounded-full border border-emerald-300/40 bg-emerald-400/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
-                                        {t('dashboard.menu.currentGameMode')}
+                                        {t('dashboard.menu.currentRhythm')}
                                       </span>
                                     ) : null}
                                   </div>
