@@ -72,9 +72,8 @@ const MENU_AVATAR_OPTIONS: MenuAvatarOption[] = AVATAR_OPTIONS;
 
 export function resolveMenuAvatarSelection(
   avatarProfile: AvatarProfile | null,
-  currentMode: GameMode | null,
 ): MenuAvatarOption {
-  return resolveAvatarOption(avatarProfile, currentMode);
+  return resolveAvatarOption(avatarProfile);
 }
 
 
@@ -376,8 +375,8 @@ export function DashboardMenu({
   );
   const selectedOrCurrentMode = selectedMode ?? normalizedCurrentMode;
   const currentAvatarSelection = useMemo(
-    () => resolveMenuAvatarSelection(currentAvatarProfile, normalizedCurrentMode),
-    [currentAvatarProfile, normalizedCurrentMode],
+    () => resolveMenuAvatarSelection(currentAvatarProfile),
+    [currentAvatarProfile],
   );
   const selectedOrCurrentAvatarId = selectedAvatarId ?? currentAvatarSelection.avatarId;
   const modeJumpIsDemanding = useMemo(
@@ -1335,7 +1334,8 @@ export function DashboardMenu({
                                 avatarCode: avatarOption.code,
                                 avatarName: avatarOption.name,
                                 theme: { accent: avatarOption.accent, chip: "aqua" },
-                                isLegacyFallback: true,
+                                isLegacyFallback: false,
+                                fallbackReason: "none",
                               };
                               const avatarMedia = resolveAvatarMedia(previewProfile, {
                                 rhythm: normalizedCurrentMode,

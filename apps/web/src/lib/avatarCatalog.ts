@@ -1,5 +1,4 @@
 import type { AvatarProfile } from './avatarProfile';
-import type { GameMode } from './gameMode';
 
 export type AvatarOption = {
   avatarId: number;
@@ -16,12 +15,7 @@ export const AVATAR_OPTIONS: AvatarOption[] = [
   { avatarId: 4, code: 'LEGACY_EVOLVE', name: 'Legacy Evolve', accent: '#FF6A00', chip: 'ember' },
 ];
 
-const AVATAR_FALLBACK_BY_MODE: Record<GameMode, AvatarOption['code']> = {
-  Low: 'LEGACY_LOW',
-  Chill: 'LEGACY_CHILL',
-  Flow: 'LEGACY_FLOW',
-  Evolve: 'LEGACY_EVOLVE',
-};
+const DEFAULT_AVATAR_OPTION: AvatarOption = AVATAR_OPTIONS[1];
 
 export function getAvatarOptionById(avatarId: number | null | undefined): AvatarOption | null {
   if (typeof avatarId !== 'number') return null;
@@ -30,7 +24,6 @@ export function getAvatarOptionById(avatarId: number | null | undefined): Avatar
 
 export function resolveAvatarOption(
   avatarProfile: AvatarProfile | null,
-  currentMode: GameMode | null,
 ): AvatarOption {
   if (typeof avatarProfile?.avatarId === 'number') {
     const byId = getAvatarOptionById(avatarProfile.avatarId);
@@ -42,8 +35,7 @@ export function resolveAvatarOption(
     if (byCode) return byCode;
   }
 
-  const fallbackCode = AVATAR_FALLBACK_BY_MODE[currentMode ?? 'Chill'];
-  return AVATAR_OPTIONS.find((option) => option.code === fallbackCode) ?? AVATAR_OPTIONS[1];
+  return DEFAULT_AVATAR_OPTION;
 }
 
 export function buildAvatarPreviewProfile(option: AvatarOption): AvatarProfile {
@@ -53,5 +45,6 @@ export function buildAvatarPreviewProfile(option: AvatarOption): AvatarProfile {
     avatarName: option.name,
     theme: { accent: option.accent, chip: option.chip },
     isLegacyFallback: false,
+    fallbackReason: 'none',
   };
 }

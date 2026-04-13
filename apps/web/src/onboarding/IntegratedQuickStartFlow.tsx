@@ -12,7 +12,7 @@ import { HUD } from './ui/HUD';
 import { NavButtons } from './ui/NavButtons';
 import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../components/common/GameModeChip';
 import { buildAvatarPreviewProfile, getAvatarOptionById } from '../lib/avatarCatalog';
-import { resolveAvatarMedia } from '../lib/avatarProfile';
+import { resolveAvatarMedia, resolveAvatarTheme, type AvatarThemeTokens } from '../lib/avatarProfile';
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
 type Step = 'body' | 'mind' | 'soul' | 'moderation' | 'summary' | 'setup';
@@ -551,35 +551,21 @@ const GAME_MODE_META_KEY: Record<GameMode, keyof typeof GAME_MODE_META> = {
   EVOLVE: 'Evolve',
 };
 
-const MODE_ACCENT: Record<GameMode, string> = {
-  LOW: GAME_MODE_META.Low.accentColor,
-  CHILL: GAME_MODE_META.Chill.accentColor,
-  FLOW: GAME_MODE_META.Flow.accentColor,
-  EVOLVE: GAME_MODE_META.Evolve.accentColor,
+const MODE_SOFT_STYLES: Record<GameMode, { tint: string; border: string; glow: string }> = {
+  LOW: { tint: 'color-mix(in srgb, var(--color-accent-secondary) 20%, transparent)', border: 'color-mix(in srgb, var(--color-accent-secondary) 40%, transparent)', glow: 'color-mix(in srgb, var(--color-accent-secondary) 22%, transparent)' },
+  CHILL: { tint: 'color-mix(in srgb, var(--color-accent-secondary) 20%, transparent)', border: 'color-mix(in srgb, var(--color-accent-secondary) 40%, transparent)', glow: 'color-mix(in srgb, var(--color-accent-secondary) 22%, transparent)' },
+  FLOW: { tint: 'color-mix(in srgb, var(--color-accent-secondary) 20%, transparent)', border: 'color-mix(in srgb, var(--color-accent-secondary) 40%, transparent)', glow: 'color-mix(in srgb, var(--color-accent-secondary) 22%, transparent)' },
+  EVOLVE: { tint: 'color-mix(in srgb, var(--color-accent-secondary) 20%, transparent)', border: 'color-mix(in srgb, var(--color-accent-secondary) 40%, transparent)', glow: 'color-mix(in srgb, var(--color-accent-secondary) 22%, transparent)' },
 };
 
-const MODE_SOFT_STYLES: Record<GameMode, { tint: string; border: string; glow: string }> = {
-  LOW: {
-    tint: `color-mix(in srgb, ${MODE_ACCENT.LOW} 20%, transparent)`,
-    border: `color-mix(in srgb, ${MODE_ACCENT.LOW} 40%, transparent)`,
-    glow: `color-mix(in srgb, ${MODE_ACCENT.LOW} 22%, transparent)`,
-  },
-  CHILL: {
-    tint: `color-mix(in srgb, ${MODE_ACCENT.CHILL} 18%, transparent)`,
-    border: `color-mix(in srgb, ${MODE_ACCENT.CHILL} 38%, transparent)`,
-    glow: `color-mix(in srgb, ${MODE_ACCENT.CHILL} 20%, transparent)`,
-  },
-  FLOW: {
-    tint: `color-mix(in srgb, ${MODE_ACCENT.FLOW} 20%, transparent)`,
-    border: `color-mix(in srgb, ${MODE_ACCENT.FLOW} 42%, transparent)`,
-    glow: `color-mix(in srgb, ${MODE_ACCENT.FLOW} 22%, transparent)`,
-  },
-  EVOLVE: {
-    tint: `color-mix(in srgb, ${MODE_ACCENT.EVOLVE} 22%, transparent)`,
-    border: `color-mix(in srgb, ${MODE_ACCENT.EVOLVE} 42%, transparent)`,
-    glow: `color-mix(in srgb, ${MODE_ACCENT.EVOLVE} 24%, transparent)`,
-  },
-};
+function buildAvatarSoftStyles(theme: AvatarThemeTokens | null): { tint: string; border: string; glow: string } {
+  const accent = theme?.accent ?? 'var(--color-accent-secondary)';
+  return {
+    tint: `color-mix(in srgb, ${accent} 20%, transparent)`,
+    border: `color-mix(in srgb, ${accent} 40%, transparent)`,
+    glow: `color-mix(in srgb, ${accent} 22%, transparent)`,
+  };
+}
 
 function buildVisibleRoute(includeModeration: boolean): Step[] {
   return includeModeration ? STEP_ORDER : STEP_ORDER.filter((step) => step !== 'moderation');
@@ -753,6 +739,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
   const copy = COPY[language];
   const selectedAvatarOption = getAvatarOptionById(avatarId);
   const selectedAvatarProfile = selectedAvatarOption ? buildAvatarPreviewProfile(selectedAvatarOption) : null;
+  const selectedAvatarTheme = resolveAvatarTheme(selectedAvatarProfile);
   const selectedAvatarMedia = resolveAvatarMedia(selectedAvatarProfile, { rhythm: gameMode, surface: 'onboarding' });
 
   const minimum = MODE_MINIMUMS[gameMode];
@@ -1050,7 +1037,7 @@ export function IntegratedQuickStartFlow({ language: initialLanguage = 'es', gam
     }
 
     const tasks = copy.tasks[currentPillar];
-    const modeStyle = MODE_SOFT_STYLES[gameMode];
+    const modeStyle = selectedAvatarProfile ? buildAvatarSoftStyles(selectedAvatarTheme) : MODE_SOFT_STYLES[gameMode];
 
     return (
       <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
