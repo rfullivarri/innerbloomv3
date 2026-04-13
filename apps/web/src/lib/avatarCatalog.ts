@@ -46,5 +46,6 @@ export function buildAvatarPreviewProfile(option: AvatarOption): AvatarProfile {
     theme: { accent: option.accent, chip: option.chip },
     isLegacyFallback: false,
     fallbackReason: 'none',
+    assetPayload: null,
   };
 }

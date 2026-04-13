@@ -11,6 +11,7 @@ describe("resolveMenuAvatarSelection", () => {
       theme: { accent: "#00C2FF", chip: "aqua" },
       isLegacyFallback: false,
       fallbackReason: "none",
+      assetPayload: null,
     } satisfies AvatarProfile;
 
     expect(resolveMenuAvatarSelection(profile)).toMatchObject({
@@ -27,6 +28,7 @@ describe("resolveMenuAvatarSelection", () => {
       theme: { accent: "#FF6A00", chip: "ember" },
       isLegacyFallback: true,
       fallbackReason: "missing-avatar-payload",
+      assetPayload: null,
     } satisfies AvatarProfile;
 
     expect(resolveMenuAvatarSelection(profile)).toMatchObject({

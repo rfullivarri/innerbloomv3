@@ -2583,6 +2583,12 @@ export type CurrentUserProfile = {
   avatar_code: string | null;
   avatar_name: string | null;
   avatar_theme_tokens: Record<string, unknown> | null;
+  avatar_assets?: {
+    base_image_url?: string | null;
+    rhythm_placeholders?: Partial<Record<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE', string | null>> | null;
+    matrix_images?: Partial<Record<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE', string | null>> | null;
+    matrix_motion?: Partial<Record<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE', string | null>> | null;
+  } | null;
   timezone: string | null;
   locale: string | null;
   created_at: string;
