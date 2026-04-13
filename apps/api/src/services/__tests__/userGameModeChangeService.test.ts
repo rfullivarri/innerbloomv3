@@ -13,7 +13,7 @@ describe('userGameModeChangeService', () => {
     delete process.env.WEB_PUBLIC_BASE_URL;
   });
 
-  it('updates game mode and keeps avatar/image parity', async () => {
+  it('updates only game mode without mutating avatar/image fields', async () => {
     const query = vi
       .fn()
       .mockResolvedValueOnce({ rows: [{ user_id: 'u1', game_mode_id: 12, image_url: '/Chill-Mood.jpg', avatar_url: '/Chill-Mood.jpg' }] });
@@ -33,8 +33,12 @@ describe('userGameModeChangeService', () => {
     });
 
     expect(query).toHaveBeenCalledTimes(1);
-    expect(query.mock.calls[0]?.[0]).toContain('SET game_mode_id = $2');
-    expect(query.mock.calls[0]?.[1]).toEqual(['u1', 12, '/Chill-Mood.jpg', 11]);
+    const sql = String(query.mock.calls[0]?.[0] ?? '');
+    const setClause = sql.split('WHERE')[0] ?? '';
+    expect(setClause).toContain('SET game_mode_id = $2');
+    expect(setClause).not.toContain('image_url =');
+    expect(setClause).not.toContain('avatar_url =');
+    expect(query.mock.calls[0]?.[1]).toEqual(['u1', 12, 11]);
   });
 
   it('throws conflict when optimistic condition no longer matches', async () => {

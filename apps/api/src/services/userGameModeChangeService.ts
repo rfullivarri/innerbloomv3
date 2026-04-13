@@ -88,21 +88,17 @@ export async function changeUserGameMode(client: QueryClient, input: {
   nextModeCode: string;
   expectedCurrentGameModeId?: number | null;
 }): Promise<UpdatedUserModeRow> {
-  const imageUrl = resolveGameModeImageUrl(input.nextModeCode);
-
-  if (!imageUrl) {
-    throw new HttpError(500, 'missing_mode_image', 'Missing mood image for game mode');
-  }
+  // Keep nextModeCode in the signature for API compatibility with existing call sites.
+  // Rhythm (game_mode) writes must not mutate visual identity fields.
+  void input.nextModeCode;
 
   const updateResult = await client.query<UpdatedUserModeRow>(
     `UPDATE users
-        SET game_mode_id = $2,
-            image_url = $3,
-            avatar_url = $3
+        SET game_mode_id = $2
       WHERE user_id = $1::uuid
-        AND ($4::int IS NULL OR game_mode_id = $4)
+        AND ($3::int IS NULL OR game_mode_id = $3)
     RETURNING user_id, game_mode_id, image_url, avatar_url`,
-    [input.userId, input.nextGameModeId, imageUrl, input.expectedCurrentGameModeId ?? null],
+    [input.userId, input.nextGameModeId, input.expectedCurrentGameModeId ?? null],
   );
 
   const updatedRow = updateResult.rows[0];
