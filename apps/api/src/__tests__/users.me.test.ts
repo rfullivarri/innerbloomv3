@@ -8,6 +8,7 @@ const { mockQuery, mockVerifyToken } = vi.hoisted(() => ({
 
 vi.mock('../db.js', () => ({
   pool: { query: mockQuery },
+  withClient: async (callback: (client: { query: typeof mockQuery }) => unknown) => callback({ query: mockQuery }),
   dbReady: Promise.resolve(),
   runWithDbContext: (_context: string, callback: () => unknown) => callback(),
 }));
@@ -165,5 +166,55 @@ describe('GET /api/users/me', () => {
     });
     expect(mockQuery).not.toHaveBeenCalled();
     expect(mockVerifyToken).not.toHaveBeenCalled();
+  });
+});
+
+describe('PUT /api/users/me/avatar', () => {
+  beforeEach(() => {
+    mockQuery.mockReset();
+    mockVerifyToken.mockReset();
+    mockVerifyToken.mockResolvedValue({
+      id: 'user-row-id',
+      clerkId: 'user_456',
+      email: 'test@example.com',
+      isNew: false,
+    });
+  });
+
+  it('updates avatar without changing game mode', async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ avatar_id: 4 }] })
+      .mockResolvedValueOnce({
+        rows: [{
+          user_id: 'user-row-id',
+          avatar_id: 4,
+          game_mode_id: 13,
+          image_url: 'https://example.com/avatar.png',
+          avatar_url: 'https://example.com/avatar.png',
+        }],
+      });
+
+    const response = await request(app)
+      .put('/api/users/me/avatar')
+      .set('Authorization', 'Bearer token')
+      .send({ avatar_id: 4 });
+
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+    expect(response.body.user).toMatchObject({
+      user_id: 'user-row-id',
+      avatar_id: 4,
+      game_mode_id: 13,
+    });
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('FROM cat_avatar'),
+      [4],
+    );
+    expect(mockQuery).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('SET avatar_id = $2'),
+      ['user-row-id', 4],
+    );
   });
 });

@@ -275,10 +275,13 @@ function createSubmitExpectations(options: {
     {
       match: (sql) => {
         const normalized = sql.toLowerCase();
-        return normalized.includes('set game_mode_id = $2') && normalized.includes('avatar_url = $3');
+        const setClause = normalized.split('where')[0] ?? '';
+        return setClause.includes('set game_mode_id = $2')
+          && !setClause.includes('image_url =')
+          && !setClause.includes('avatar_url =');
       },
       handle: (_sql, params) => {
-        expect(params).toEqual([userId, gameModeId, expectedImageUrl, null]);
+        expect(params).toEqual([userId, gameModeId, null]);
         return { rows: [{ user_id: userId, game_mode_id: gameModeId, image_url: expectedImageUrl, avatar_url: expectedImageUrl }] };
       },
     },

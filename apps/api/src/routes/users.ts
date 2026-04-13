@@ -21,9 +21,12 @@ import { updateUserTask } from '../controllers/tasks/update-user-task.js';
 import { getUserRewardsHistory } from '../controllers/users/rewards-history.js';
 import { deleteUserTask } from '../controllers/tasks/delete-user-task.js';
 import { asyncHandler } from '../lib/async-handler.js';
+import { HttpError } from '../lib/http-error.js';
 import { authMiddleware } from '../middlewares/auth-middleware.js';
 import { ownUserGuard } from '../middlewares/own-user-guard.js';
 import { requireActiveSubscription } from '../middlewares/require-active-subscription.js';
+import { withClient } from '../db.js';
+import { resolveAvatarById, updateUserAvatar } from '../services/userAvatarUpdateService.js';
 
 import { getUserStreakPanel } from './users/streak-panel.js';
 import { getUserDailyEnergy } from './users/daily-energy.js';
@@ -60,6 +63,32 @@ userScopedRoutes.get('/rewards/history', asyncHandler(getUserRewardsHistory));
 userScopedRoutes.use('/missions/v2', missionsV2Router);
 
 router.get('/users/me', authMiddleware, asyncHandler(getCurrentUser));
+router.put('/users/me/avatar', authMiddleware, asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    throw new HttpError(401, 'unauthorized', 'Authentication required');
+  }
+
+  const avatarIdRaw = req.body?.avatar_id;
+  const avatarId =
+    typeof avatarIdRaw === 'number' && Number.isInteger(avatarIdRaw)
+      ? avatarIdRaw
+      : Number.parseInt(String(avatarIdRaw ?? ''), 10);
+
+  if (!Number.isInteger(avatarId) || avatarId <= 0) {
+    throw new HttpError(400, 'invalid_avatar_id', 'avatar_id must be a positive integer');
+  }
+
+  const updated = await withClient(async (client) => {
+    await resolveAvatarById(client, avatarId);
+    return updateUserAvatar(client, {
+      userId: user.id,
+      avatarId,
+    });
+  });
+
+  res.json({ ok: true, user: updated });
+}));
 router.get('/users/me/subscription', authMiddleware, asyncHandler(getUserSubscription));
 router.use('/users/:id', authMiddleware, ownUserGuard, requireActiveSubscription, userScopedRoutes);
 
