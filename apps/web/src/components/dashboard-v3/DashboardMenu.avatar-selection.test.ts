@@ -6,8 +6,8 @@ describe("resolveMenuAvatarSelection", () => {
   it("prefers avatar_id from /users/me payload", () => {
     const profile = {
       avatarId: 3,
-      avatarCode: "LEGACY_CHILL",
-      avatarName: "Legacy Chill",
+      avatarCode: "BLUE_AMPHIBIAN",
+      avatarName: "Blue Amphibian",
       theme: { accent: "#00C2FF", chip: "aqua" },
       isLegacyFallback: false,
       fallbackReason: "none",
@@ -16,7 +16,7 @@ describe("resolveMenuAvatarSelection", () => {
 
     expect(resolveMenuAvatarSelection(profile)).toMatchObject({
       avatarId: 3,
-      code: "LEGACY_FLOW",
+      code: "RED_CAT",
     });
   });
 
@@ -24,7 +24,7 @@ describe("resolveMenuAvatarSelection", () => {
     const profile = {
       avatarId: null,
       avatarCode: "LEGACY_EVOLVE",
-      avatarName: "Legacy Evolve",
+      avatarName: "Legacy Evolve (compat)",
       theme: { accent: "#FF6A00", chip: "ember" },
       isLegacyFallback: true,
       fallbackReason: "missing-avatar-payload",
@@ -32,15 +32,15 @@ describe("resolveMenuAvatarSelection", () => {
     } satisfies AvatarProfile;
 
     expect(resolveMenuAvatarSelection(profile)).toMatchObject({
-      avatarId: 4,
-      code: "LEGACY_EVOLVE",
+      avatarId: 3,
+      code: "RED_CAT",
     });
   });
 
   it("uses explicit default avatar fallback when avatar data is missing", () => {
     expect(resolveMenuAvatarSelection(null)).toMatchObject({
-      avatarId: 2,
-      code: "LEGACY_CHILL",
+      avatarId: 1,
+      code: "BLUE_AMPHIBIAN",
     });
   });
 });

@@ -9,10 +9,10 @@ export const SELECT_USER_SQL = `SELECT u.user_id,
        u.image_url,
        gm.code AS game_mode,
        gm.weekly_target AS weekly_target,
-       COALESCE(u.avatar_id, gm_avatar.avatar_id) AS avatar_id,
-       COALESCE(a.code, gm_avatar.code) AS avatar_code,
-       COALESCE(a.name, gm_avatar.name) AS avatar_name,
-       COALESCE(a.theme_tokens, gm_avatar.theme_tokens, '{}'::jsonb) AS avatar_theme_tokens,
+       COALESCE(u.avatar_id, fallback_avatar.avatar_id) AS avatar_id,
+       COALESCE(a.code, fallback_avatar.code) AS avatar_code,
+       COALESCE(a.name, fallback_avatar.name) AS avatar_name,
+       COALESCE(a.theme_tokens, fallback_avatar.theme_tokens, '{}'::jsonb) AS avatar_theme_tokens,
        u.timezone,
        NULL::text AS locale,
        u.created_at,
@@ -23,14 +23,8 @@ export const SELECT_USER_SQL = `SELECT u.user_id,
          ON gm.game_mode_id = u.game_mode_id
   LEFT JOIN cat_avatar a
          ON a.avatar_id = u.avatar_id
-  LEFT JOIN cat_avatar gm_avatar
-         ON gm_avatar.code = CASE gm.code
-           WHEN 'LOW' THEN 'LEGACY_LOW'
-           WHEN 'CHILL' THEN 'LEGACY_CHILL'
-           WHEN 'FLOW' THEN 'LEGACY_FLOW'
-           WHEN 'EVOLVE' THEN 'LEGACY_EVOLVE'
-           ELSE 'LEGACY_CHILL'
-         END
+  LEFT JOIN cat_avatar fallback_avatar
+         ON fallback_avatar.code = 'BLUE_AMPHIBIAN'
  WHERE u.user_id = $1
  LIMIT 1`;
 
