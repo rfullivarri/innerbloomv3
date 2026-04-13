@@ -48,11 +48,21 @@ function buildSignedOutUrl(search: string): string {
   return resolveReturnTo(search, CAPACITOR_SIGNED_OUT_HOST);
 }
 
-function buildRedirectUrl(
+type MobileCallbackLegacyOptions = {
+  includeLegacyImageUrl: boolean;
+};
+
+export function shouldIncludeLegacyProfileImage(search: string): boolean {
+  const params = new URLSearchParams(search);
+  return params.get('legacy_profile_image') === '1';
+}
+
+export function buildRedirectUrl(
   baseUrl: string,
   user: ReturnType<typeof useUser>['user'],
   token: string,
   mode: 'sign-in' | 'sign-up' | 'refresh',
+  options: MobileCallbackLegacyOptions,
 ): string {
   const callbackUrl = new URL(baseUrl);
   callbackUrl.searchParams.set('token', token);
@@ -68,7 +78,10 @@ function buildRedirectUrl(
     callbackUrl.searchParams.set('full_name', user.fullName);
   }
   if (user?.imageUrl) {
-    callbackUrl.searchParams.set('image_url', user.imageUrl);
+    callbackUrl.searchParams.set('clerk_image_url', user.imageUrl);
+    if (options.includeLegacyImageUrl) {
+      callbackUrl.searchParams.set('image_url', user.imageUrl);
+    }
   }
   if (user?.firstName) {
     callbackUrl.searchParams.set('first_name', user.firstName);
@@ -151,6 +164,10 @@ export default function MobileBrowserAuthPage() {
     const params = new URLSearchParams(location.search);
     return params.get('handoff') === '1';
   }, [location.search]);
+  const includeLegacyImageUrl = useMemo(
+    () => shouldIncludeLegacyProfileImage(location.search),
+    [location.search],
+  );
   const createdSessionId = signIn?.createdSessionId ?? signUp?.createdSessionId ?? null;
 
   useEffect(() => {
@@ -334,6 +351,7 @@ export default function MobileBrowserAuthPage() {
             user,
             token,
             mode === 'refresh' ? 'refresh' : mode,
+            { includeLegacyImageUrl },
           );
           console.info('[mobile-auth-page] callback-build', {
             callbackUrl: resolvedCallbackUrl,
@@ -393,6 +411,7 @@ export default function MobileBrowserAuthPage() {
     mode,
     returnTo,
     isHandoffStep,
+    includeLegacyImageUrl,
     session?.id,
     signOut,
     signedOutUrl,
