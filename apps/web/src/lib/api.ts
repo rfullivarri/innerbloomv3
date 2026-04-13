@@ -2861,6 +2861,35 @@ export async function changeCurrentUserGameMode(mode: 'LOW' | 'CHILL' | 'FLOW' |
   return (await response.json()) as GameModeChangeResponse;
 }
 
+type AvatarChangeResponse = {
+  ok: boolean;
+  user: {
+    user_id: string;
+    avatar_id: number;
+    game_mode_id: number | null;
+    image_url: string | null;
+    avatar_url: string | null;
+  };
+};
+
+export async function changeCurrentUserAvatar(avatarId: number): Promise<AvatarChangeResponse> {
+  const response = await apiAuthorizedFetch('/users/me/avatar', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ avatar_id: avatarId }),
+  });
+
+  if (!response.ok) {
+    const body = await safeJson(response);
+    throw new ApiError(response.status, body, '/users/me/avatar');
+  }
+
+  return (await response.json()) as AvatarChangeResponse;
+}
+
 
 export async function getUserJourney(userId: string): Promise<UserJourneySummary> {
   if (isDashboardDemoModeEnabled()) {

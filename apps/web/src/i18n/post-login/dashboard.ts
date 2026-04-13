@@ -48,6 +48,7 @@ export const dashboardTranslations = {
   'dashboard.menu.reminder': { es: 'Recordatorio', en: 'Reminder' },
   'dashboard.menu.gameMode': { es: 'Ritmo', en: 'Rhythm' },
   'dashboard.menu.changeGameMode': { es: 'Cambiar ritmo', en: 'Change rhythm' },
+  'dashboard.menu.changeAvatar': { es: 'Cambiar avatar', en: 'Change Avatar' },
   'dashboard.menu.upgradeAvailable': { es: 'Upgrade disponible', en: 'Upgrade available' },
   'dashboard.menu.chooseGameMode': { es: 'Elegí tu ritmo', en: 'Choose your rhythm' },
   'dashboard.menu.gameModeDemandingWarning': {
@@ -56,12 +57,20 @@ export const dashboardTranslations = {
   },
   'dashboard.menu.confirmChange': { es: 'Confirmar cambio', en: 'Confirm change' },
   'dashboard.menu.currentGameMode': { es: 'Modo actual', en: 'Current mode' },
+  'dashboard.menu.currentAvatar': { es: 'Avatar actual', en: 'Current avatar' },
   'dashboard.menu.gameModeConfirmPrompt': { es: '¿Confirmas cambiar tu ritmo a {{mode}}?', en: 'Do you want to change your rhythm to {{mode}}?' },
+  'dashboard.menu.avatarConfirmPrompt': { es: '¿Confirmas cambiar tu avatar?', en: 'Do you want to change your avatar?' },
   'dashboard.menu.gameModeSaving': { es: 'Guardando…', en: 'Saving…' },
+  'dashboard.menu.avatarSaving': { es: 'Guardando…', en: 'Saving…' },
   'dashboard.menu.gameModeUpdated': { es: 'Ritmo actualizado.', en: 'Rhythm updated.' },
+  'dashboard.menu.avatarUpdated': { es: 'Avatar actualizado.', en: 'Avatar updated.' },
   'dashboard.menu.gameModeSaveError': {
     es: 'No se pudo cambiar el ritmo. Revisá tu conexión e intentá de nuevo.',
     en: 'Could not change rhythm. Check your connection and try again.',
+  },
+  'dashboard.menu.avatarSaveError': {
+    es: 'No se pudo cambiar el avatar. Revisá tu conexión e intentá de nuevo.',
+    en: 'Could not change avatar. Check your connection and try again.',
   },
   'dashboard.menu.cancel': { es: 'Cancelar', en: 'Cancel' },
   'dashboard.menu.plans': { es: 'Planes', en: 'Plans' },

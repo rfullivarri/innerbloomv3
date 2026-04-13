@@ -24,6 +24,7 @@ import { SHOW_BILLING_UI } from "../../config/releaseFlags";
 import {
   acceptGameModeUpgradeSuggestion,
   ApiError,
+  changeCurrentUserAvatar,
   changeCurrentUserGameMode,
   deleteCurrentAccount,
   getGameModeUpgradeSuggestion,
@@ -31,6 +32,7 @@ import {
   type ModerationTrackerConfig,
   type ModerationTrackerType,
 } from "../../lib/api";
+import type { AvatarProfile } from "../../lib/avatarProfile";
 import { normalizeGameModeValue, type GameMode } from "../../lib/gameMode";
 import { GAME_MODE_META, GAME_MODE_ORDER } from "../../lib/gameModeMeta";
 import type { ResolvedTheme } from "../../theme/themePreference";
@@ -49,6 +51,7 @@ type MenuPanel = "main" | "widgets";
 
 interface DashboardMenuProps {
   currentGameMode: GameMode | string | null;
+  currentAvatarProfile: AvatarProfile | null;
   onGameModeChanged: () => Promise<void> | void;
   onOpenScheduler?: () => void;
   moderation: {
@@ -61,6 +64,49 @@ interface DashboardMenuProps {
     ) => Promise<void>;
     onOpenEdit: () => void;
   };
+}
+
+type MenuAvatarOption = {
+  avatarId: number;
+  code: "LEGACY_LOW" | "LEGACY_CHILL" | "LEGACY_FLOW" | "LEGACY_EVOLVE";
+  name: string;
+  previewMode: GameMode;
+};
+
+const MENU_AVATAR_OPTIONS: MenuAvatarOption[] = [
+  { avatarId: 1, code: "LEGACY_LOW", name: "Legacy Low", previewMode: "Low" },
+  { avatarId: 2, code: "LEGACY_CHILL", name: "Legacy Chill", previewMode: "Chill" },
+  { avatarId: 3, code: "LEGACY_FLOW", name: "Legacy Flow", previewMode: "Flow" },
+  { avatarId: 4, code: "LEGACY_EVOLVE", name: "Legacy Evolve", previewMode: "Evolve" },
+];
+
+const AVATAR_FALLBACK_BY_MODE: Record<GameMode, MenuAvatarOption["code"]> = {
+  Low: "LEGACY_LOW",
+  Chill: "LEGACY_CHILL",
+  Flow: "LEGACY_FLOW",
+  Evolve: "LEGACY_EVOLVE",
+};
+
+export function resolveMenuAvatarSelection(
+  avatarProfile: AvatarProfile | null,
+  currentMode: GameMode | null,
+): MenuAvatarOption {
+  if (typeof avatarProfile?.avatarId === "number") {
+    const byId = MENU_AVATAR_OPTIONS.find((option) => option.avatarId === avatarProfile.avatarId);
+    if (byId) {
+      return byId;
+    }
+  }
+
+  if (typeof avatarProfile?.avatarCode === "string") {
+    const byCode = MENU_AVATAR_OPTIONS.find((option) => option.code === avatarProfile.avatarCode);
+    if (byCode) {
+      return byCode;
+    }
+  }
+
+  const fallbackCode = AVATAR_FALLBACK_BY_MODE[currentMode ?? "Chill"];
+  return MENU_AVATAR_OPTIONS.find((option) => option.code === fallbackCode) ?? MENU_AVATAR_OPTIONS[1];
 }
 
 
@@ -195,6 +241,7 @@ function buildModerationSaveErrorMessage(error: unknown, fallback: string): stri
 
 export function DashboardMenu({
   currentGameMode,
+  currentAvatarProfile,
   onGameModeChanged,
   onOpenScheduler,
   moderation,
@@ -215,8 +262,11 @@ export function DashboardMenu({
   const [isModerationOpen, setIsModerationOpen] = useState(true);
   const [activePanel, setActivePanel] = useState<MenuPanel>("main");
   const [isGameModeOpen, setIsGameModeOpen] = useState(false);
+  const [isAvatarOpen, setIsAvatarOpen] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
+  const [selectedAvatarId, setSelectedAvatarId] = useState<number | null>(null);
   const [isSavingMode, setIsSavingMode] = useState(false);
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isUpgradeSubmitting, setIsUpgradeSubmitting] = useState(false);
   const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
@@ -228,6 +278,7 @@ export function DashboardMenu({
     enabled: true,
   });
   const [gameModeError, setGameModeError] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
   const [pendingConfirmMode, setPendingConfirmMode] = useState<GameMode | null>(null);
   const [trackerOverrides, setTrackerOverrides] = useState<
     Partial<Record<ModerationTrackerType, boolean>>
@@ -304,6 +355,9 @@ export function DashboardMenu({
     setActivePanel("main");
     setPendingConfirmMode(null);
     setIsGameModeOpen(false);
+    setIsAvatarOpen(false);
+    setSelectedAvatarId(null);
+    setAvatarError(null);
     setIsDeleteAccountOpen(false);
     setDeleteAccountConfirmation("");
     setDeleteAccountError(null);
@@ -349,6 +403,11 @@ export function DashboardMenu({
       !modeUpgradeSuggestion?.dismissed_at,
   );
   const selectedOrCurrentMode = selectedMode ?? normalizedCurrentMode;
+  const currentAvatarSelection = useMemo(
+    () => resolveMenuAvatarSelection(currentAvatarProfile, normalizedCurrentMode),
+    [currentAvatarProfile, normalizedCurrentMode],
+  );
+  const selectedOrCurrentAvatarId = selectedAvatarId ?? currentAvatarSelection.avatarId;
   const modeJumpIsDemanding = useMemo(
     () => isDemandingModeJump(normalizedCurrentMode, selectedOrCurrentMode),
     [normalizedCurrentMode, selectedOrCurrentMode],
@@ -393,6 +452,21 @@ export function DashboardMenu({
     setGameModeError(null);
   }, [isSavingMode]);
 
+  const handleOpenAvatar = useCallback(() => {
+    setSelectedAvatarId(currentAvatarSelection.avatarId);
+    setAvatarError(null);
+    setIsAvatarOpen(true);
+  }, [currentAvatarSelection.avatarId]);
+
+  const handleCloseAvatar = useCallback(() => {
+    if (isSavingAvatar) {
+      return;
+    }
+    setIsAvatarOpen(false);
+    setSelectedAvatarId(null);
+    setAvatarError(null);
+  }, [isSavingAvatar]);
+
   const handleConfirmGameMode = useCallback(async () => {
     if (!pendingConfirmMode || isSavingMode) {
       return;
@@ -419,6 +493,32 @@ export function DashboardMenu({
       setIsSavingMode(false);
     }
   }, [handleClose, isSavingMode, onGameModeChanged, pendingConfirmMode, setToast, t]);
+
+  const handleConfirmAvatar = useCallback(async () => {
+    if (!selectedOrCurrentAvatarId || isSavingAvatar) {
+      return;
+    }
+
+    setIsSavingAvatar(true);
+    setAvatarError(null);
+
+    try {
+      await changeCurrentUserAvatar(selectedOrCurrentAvatarId);
+      await onGameModeChanged();
+      setIsAvatarOpen(false);
+      setSelectedAvatarId(null);
+      setToast({
+        tone: "success",
+        message: t("dashboard.menu.avatarUpdated"),
+      });
+      handleClose();
+    } catch (error) {
+      console.error("[dashboard-menu] failed to change avatar", error);
+      setAvatarError(buildModerationSaveErrorMessage(error, t("dashboard.menu.avatarSaveError")));
+    } finally {
+      setIsSavingAvatar(false);
+    }
+  }, [handleClose, isSavingAvatar, onGameModeChanged, selectedOrCurrentAvatarId, setToast, t]);
 
 
   const handleSelectGameMode = useCallback((mode: GameMode) => {
@@ -804,6 +904,21 @@ export function DashboardMenu({
                         {hasActiveUpgradeCta ? <span className="rounded-full border border-black/20 bg-white/35 px-2 py-0.5 text-[10px] font-bold uppercase text-black shadow-[0_8px_20px_rgba(167,112,239,0.35)] backdrop-blur-sm">7d</span> : null}
                       </div>
                       <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow')} />
+                    </button>
+                    <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
+                    <button
+                      type="button"
+                      onClick={handleOpenAvatar}
+                      className={menuRowClassName}
+                    >
+                      <MenuIcon>
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 20c2.5-4 13.5-4 16 0" />
+                      </MenuIcon>
+                      <span className="flex-1">{t("dashboard.menu.changeAvatar")}</span>
+                      <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text-dim)]">
+                        {currentAvatarSelection.name}
+                      </span>
                     </button>
                     <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
                     <button
@@ -1198,6 +1313,104 @@ export function DashboardMenu({
                               </div>
                             </div>
                           ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {isAvatarOpen ? (
+                  <div className="absolute inset-0 z-20 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center">
+                    <div
+                      className="flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
+                      style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)' }}
+                    >
+                      <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-text-faint)]">{t("dashboard.menu.avatarAlt")}</p>
+                          <h3 className="text-base font-semibold text-[color:var(--color-text)]">{t("dashboard.menu.changeAvatar")}</h3>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCloseAvatar}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)]"
+                          aria-label={t('dashboard.nav.closeMenu')}
+                        >
+                          <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)]">
+                            <path d="M6 6l12 12M18 6 6 18" />
+                          </MenuIcon>
+                        </button>
+                      </div>
+
+                      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 [-webkit-overflow-scrolling:touch]">
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                            {MENU_AVATAR_OPTIONS.map((avatarOption) => {
+                              const isSelected = selectedOrCurrentAvatarId === avatarOption.avatarId;
+                              const isCurrent = currentAvatarSelection.avatarId === avatarOption.avatarId;
+                              const modeMeta = GAME_MODE_META[toMetaModeKey(avatarOption.previewMode)];
+                              return (
+                                <button
+                                  key={avatarOption.avatarId}
+                                  type="button"
+                                  onClick={() => setSelectedAvatarId(avatarOption.avatarId)}
+                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(125,211,252,0.65),0_0_20px_rgba(56,189,248,0.2)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
+                                >
+                                  <span className="absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: modeMeta.accentColor }} aria-hidden />
+                                  <div className="ml-2 space-y-2">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <p className="text-sm font-semibold text-[color:var(--color-text)]">{avatarOption.name}</p>
+                                      <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text-dim)]">
+                                        {avatarOption.previewMode}
+                                      </span>
+                                    </div>
+                                    <img
+                                      src={modeMeta.avatarSrc}
+                                      alt={modeMeta.avatarAlt[language]}
+                                      className="h-20 w-full rounded-xl border border-white/10 object-cover"
+                                      style={{ objectPosition: getModeBannerObjectPosition(avatarOption.previewMode) }}
+                                      loading="lazy"
+                                    />
+                                    {isCurrent ? (
+                                      <span className="inline-flex rounded-full border border-emerald-300/40 bg-emerald-400/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+                                        {t("dashboard.menu.currentAvatar")}
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {avatarError ? (
+                            <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+                              {avatarError}
+                            </p>
+                          ) : null}
+
+                          <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] p-3">
+                            <p className="text-sm text-[color:var(--color-text)]">
+                              {t("dashboard.menu.avatarConfirmPrompt")}
+                            </p>
+                            <div className="mt-3 flex gap-2">
+                              <button
+                                type="button"
+                                onClick={handleCloseAvatar}
+                                className="flex-1 rounded-xl border border-[color:var(--color-border-subtle)] px-3 py-2 text-sm text-[color:var(--color-text-dim)]"
+                                disabled={isSavingAvatar}
+                              >
+                                {t('dashboard.menu.cancel')}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void handleConfirmAvatar()}
+                                className="flex-1 rounded-xl border border-[color:var(--color-accent-primary)] bg-[color:var(--color-accent-primary)]/20 px-3 py-2 text-sm font-semibold text-[color:var(--color-text)] disabled:opacity-60"
+                                disabled={isSavingAvatar}
+                              >
+                                {isSavingAvatar ? t("dashboard.menu.avatarSaving") : t("dashboard.menu.confirmChange")}
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

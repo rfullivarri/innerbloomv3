@@ -38,6 +38,7 @@ import {
   StreaksPanel,
 } from "../components/dashboard-v3/StreaksPanel";
 import { useBackendUser } from "../hooks/useBackendUser";
+import type { AvatarProfile } from "../lib/avatarProfile";
 import { useRequest } from "../hooks/useRequest";
 import { DevErrorBoundary } from "../components/DevErrorBoundary";
 import {
@@ -880,6 +881,7 @@ export default function DashboardV3Page() {
             menuSlot={
               <DashboardMenu
                 currentGameMode={gameMode}
+                currentAvatarProfile={avatarProfile}
                 onGameModeChanged={reload}
                 onOpenScheduler={handleOpenReminderScheduler}
                 moderation={{
@@ -960,6 +962,7 @@ export default function DashboardV3Page() {
                     <DashboardOverview
                       userId={backendUserId}
                       gameMode={gameMode}
+                      avatarProfile={avatarProfile}
                       weeklyTarget={profile?.weekly_target ?? null}
                       isJourneyGenerating={isJourneyGenerating}
                       dailyQuestReadiness={dailyQuestReadiness}
@@ -1103,6 +1106,7 @@ export default function DashboardV3Page() {
 interface DashboardOverviewProps {
   userId: string;
   gameMode: GameMode | string | null;
+  avatarProfile: AvatarProfile | null;
   weeklyTarget: number | null;
   isJourneyGenerating: boolean;
   dailyQuestReadiness: DailyQuestReadiness;
@@ -1120,6 +1124,7 @@ interface DashboardOverviewProps {
 export function DashboardOverview({
   userId,
   gameMode,
+  avatarProfile,
   weeklyTarget,
   isJourneyGenerating,
   dailyQuestReadiness,
