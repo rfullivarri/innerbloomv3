@@ -42,7 +42,7 @@ export default function LabsDemoModeSelectPage({ legacyLabsPath = false }: DemoM
   }, [location.search, syncLocaleLanguage]);
 
   usePageMeta({
-    title: language === 'es' ? 'Innerbloom Demo · Elige tu Game Mode' : 'Innerbloom Demo · Choose your game mode',
+    title: language === 'es' ? 'Innerbloom Demo · Elige tu ritmo' : 'Innerbloom Demo · Choose your rhythm',
     description:
       language === 'es'
         ? 'Explora la demo oficial de Innerbloom. Elige LOW, CHILL, FLOW o EVOLVE y entra a la experiencia guiada en tu idioma.'
