@@ -6,6 +6,7 @@ export type Pillar = 'Body' | 'Mind' | 'Soul';
 export type StepId =
   | 'clerk-gate'
   | 'mode-select'
+  | 'avatar-select'
   | 'path-select'
   | 'low-body'
   | 'low-soul'
@@ -33,6 +34,7 @@ export type OnboardingPath = 'traditional' | 'quick_start';
 const ALL_STEPS: StepId[] = [
   'clerk-gate',
   'mode-select',
+  'avatar-select',
   'path-select',
   'low-body',
   'low-soul',
@@ -74,6 +76,7 @@ export interface Answers {
   user_id: string;
   email: string;
   mode: GameMode | null;
+  avatarId: number | null;
   low: {
     body: string[];
     soul: string[];
@@ -122,7 +125,7 @@ export interface OnboardingState {
 }
 
 const BASE_ROUTE: StepId[] = ['clerk-gate', 'mode-select'];
-const BASE_MODE_ROUTE: StepId[] = [...BASE_ROUTE, 'path-select'];
+const BASE_MODE_ROUTE: StepId[] = [...BASE_ROUTE, 'avatar-select', 'path-select'];
 
 function buildQuickStartRoute(includeModeration: boolean): StepId[] {
   return [
@@ -145,6 +148,7 @@ export const initialAnswers: Answers = {
   user_id: '',
   email: '',
   mode: null,
+  avatarId: null,
   low: {
     body: [],
     soul: [],
@@ -264,6 +268,7 @@ export function distributeXp(base: XP, amount: number, pillar: Pillar | 'ALL'): 
 interface OnboardingContextValue {
   state: OnboardingState;
   setMode: (mode: GameMode) => void;
+  setAvatarId: (avatarId: number) => void;
   setOnboardingPath: (path: OnboardingPath) => void;
   toggleQuickStartTask: (pillar: Pillar, taskId: string) => void;
   setQuickStartTaskInput: (taskKey: string, value: string) => void;
@@ -289,6 +294,7 @@ function cloneAnswers(value: Answers): Answers {
     user_id: value.user_id,
     email: value.email,
     mode: value.mode,
+    avatarId: value.avatarId,
     low: {
       body: [...value.low.body],
       soul: [...value.low.soul],
@@ -346,6 +352,21 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         answers: nextAnswers,
         onboardingPath: null,
         route: nextRoute,
+      };
+    });
+  }, []);
+
+  const setAvatarId = useCallback((avatarId: number) => {
+    setState((prev) => {
+      const nextAnswers: Answers = { ...prev.answers, avatarId };
+      const nextRoute = computeRouteForMode(nextAnswers.mode, prev.onboardingPath, hasQuickStartModerationSelection(nextAnswers));
+      const currentStep = prev.route[prev.currentStepIndex] ?? nextRoute[0];
+      const nextIndex = Math.max(0, nextRoute.indexOf(currentStep));
+      return {
+        ...prev,
+        answers: nextAnswers,
+        route: nextRoute,
+        currentStepIndex: nextIndex >= 0 ? nextIndex : 0,
       };
     });
   }, []);
@@ -693,6 +714,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     () => ({
       state,
       setMode,
+      setAvatarId,
       setOnboardingPath,
 
       toggleQuickStartTask,

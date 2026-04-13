@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import type { GameMode } from '../state';
 import type { OnboardingLanguage } from '../constants';
-import { getBannerObjectPosition } from '../utils/bannerObjectPosition';
 import { NavButtons } from '../ui/NavButtons';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
 
@@ -58,7 +57,6 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
           {MODE_ORDER.map((mode) => {
             const content = MODE_CARD_CONTENT[mode];
             const isActive = selected === mode;
-            const bannerObjectPosition = getBannerObjectPosition(mode);
 
             return (
               <motion.button
@@ -87,12 +85,7 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
                     .join(' ')}
                   aria-hidden
                 />
-                <span
-                  className="absolute inset-y-0 left-0 z-10 w-[6px] rounded-l-3xl"
-                  aria-hidden
-                  style={{ backgroundColor: content.accentColor }}
-                />
-                <span className="relative z-10 ml-4 flex h-full w-full flex-col gap-3">
+                <span className="relative z-10 flex h-full w-full flex-col gap-3">
                   <span className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
                     <span className="flex items-center gap-2">
                       <span className="text-xs font-semibold tracking-[0.12em] text-white/95 sm:text-sm">{content.title}</span>
@@ -113,14 +106,8 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
                     <span className="mt-1 block text-[0.79rem] leading-[1.35] text-white/75 sm:text-[0.83rem]">{content.state[language]}</span>
                   </span>
 
-                  <span className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
-                    <img
-                      src={content.avatarSrc}
-                      alt={content.avatarAlt[language]}
-                      className="h-[110px] w-full object-cover sm:h-[124px]"
-                      style={{ objectPosition: bannerObjectPosition }}
-                      loading="lazy"
-                    />
+                  <span className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs uppercase tracking-[0.1em] text-white/60">
+                    {language === 'en' ? 'Rhythm intensity' : 'Intensidad del ritmo'} · {content.frequency[language]}
                   </span>
 
                   <span className="h-px w-full bg-white/10" aria-hidden />

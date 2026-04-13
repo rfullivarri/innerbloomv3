@@ -5,10 +5,13 @@ import type { Answers, GameMode, XP } from '../state';
 import { MODE_CARD_CONTENT } from './GameModeStep';
 import { NavButtons } from '../ui/NavButtons';
 import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../../components/common/GameModeChip';
+import { buildAvatarPreviewProfile, getAvatarOptionById } from '../../lib/avatarCatalog';
+import { resolveAvatarMedia } from '../../lib/avatarProfile';
 
 interface SummaryStepProps {
   language?: OnboardingLanguage;
   answers: Answers;
+  selectedAvatarId: number | null;
   xp: XP;
   onBack?: () => void;
   onFinish: () => Promise<void> | void;
@@ -81,12 +84,16 @@ function renderWithGp(text: string): ReactNode {
   ));
 }
 
-function ModeChip({ mode }: { mode: GameMode | null }) {
+function ModeChip({ mode, selectedAvatarId }: { mode: GameMode | null; selectedAvatarId: number | null }) {
   if (!mode) {
     return <span className="text-white/70">—</span>;
   }
 
-  const chipStyle = buildGameModeChip(mode);
+  const avatarOption = getAvatarOptionById(selectedAvatarId);
+  const chipStyle = buildGameModeChip(
+    mode,
+    { avatarProfile: avatarOption ? buildAvatarPreviewProfile(avatarOption) : null },
+  );
   return (
     <span className="inline-flex origin-left scale-75">
       <SharedGameModeChip {...chipStyle} />
@@ -165,6 +172,7 @@ function ChillMotivations({ values, language = 'es' }: { values: readonly string
 export function SummaryStep({
   language = 'es',
   answers,
+  selectedAvatarId,
   xp,
   onBack,
   onFinish,
@@ -179,6 +187,7 @@ export function SummaryStep({
         baseData: 'Base data',
         email: 'Email',
         gameMode: 'Game mode',
+        avatar: 'Avatar',
         state: 'State',
         lowSubtitle: 'Your plan to restore energy',
         body: 'Body',
@@ -211,6 +220,7 @@ export function SummaryStep({
         baseData: 'Datos base',
         email: 'Email',
         gameMode: 'Modo de juego',
+        avatar: 'Avatar',
         state: 'Estado',
         lowSubtitle: 'Tu plan para recuperar energía',
         body: 'Cuerpo',
@@ -237,6 +247,9 @@ export function SummaryStep({
         start: 'Comienza tu Journey',
       };
   const { mode } = answers;
+  const avatarOption = getAvatarOptionById(selectedAvatarId);
+  const avatarProfile = avatarOption ? buildAvatarPreviewProfile(avatarOption) : null;
+  const avatarMedia = resolveAvatarMedia(avatarProfile, { rhythm: mode, surface: 'onboarding' });
   const isDisabled = isSubmitting;
 
   const bodyTraits = answers.foundations.body.map(extractTrait);
@@ -255,7 +268,16 @@ export function SummaryStep({
           <div className="space-y-5">
             <SummarySection title={copy.baseData}>
               <TextRow label={copy.email} value={answers.email} />
-              <TextRow label={copy.gameMode} value={<ModeChip mode={mode} />} />
+              <TextRow label={copy.gameMode} value={<ModeChip mode={mode} selectedAvatarId={selectedAvatarId} />} />
+              <TextRow
+                label={copy.avatar}
+                value={avatarOption ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span>{avatarOption.name}</span>
+                    <img src={avatarMedia.imageUrl ?? '/FlowMood.jpg'} alt={avatarMedia.alt} className="h-7 w-7 rounded-full border border-white/20 object-cover" />
+                  </span>
+                ) : '—'}
+              />
               <TextRow label={copy.state} value={getModeState(mode, language)} />
             </SummarySection>
             {mode === 'LOW' ? (

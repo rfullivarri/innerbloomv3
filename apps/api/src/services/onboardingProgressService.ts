@@ -11,6 +11,7 @@ export type OnboardingProgress = {
   state: OnboardingProgressState;
   onboarding_started_at: string | null;
   game_mode_selected_at: string | null;
+  avatar_selected_at: string | null;
   moderation_selected_at: string | null;
   tasks_generated_at: string | null;
   first_task_edited_at: string | null;
@@ -31,6 +32,7 @@ type ProgressRow = Omit<OnboardingProgress, 'source'> & { source: unknown };
 const STEP_COLUMN_MAP = {
   onboarding_started: 'onboarding_started_at',
   game_mode_selected: 'game_mode_selected_at',
+  avatar_selected: 'avatar_selected_at',
   moderation_selected: 'moderation_selected_at',
   tasks_generated: 'tasks_generated_at',
   first_task_edited: 'first_task_edited_at',
@@ -53,6 +55,7 @@ SELECT
   state,
   onboarding_started_at,
   game_mode_selected_at,
+  avatar_selected_at,
   moderation_selected_at,
   tasks_generated_at,
   first_task_edited_at,
@@ -88,6 +91,7 @@ function toProgress(row: ProgressRow): OnboardingProgress {
     ...row,
     onboarding_started_at: toIso(row.onboarding_started_at),
     game_mode_selected_at: toIso(row.game_mode_selected_at),
+    avatar_selected_at: toIso(row.avatar_selected_at),
     moderation_selected_at: toIso(row.moderation_selected_at),
     tasks_generated_at: toIso(row.tasks_generated_at),
     first_task_edited_at: toIso(row.first_task_edited_at),
@@ -157,6 +161,7 @@ async function deriveProgress(client: PoolClient, userId: string): Promise<Parti
     onboarding_session_id: string | null;
     onboarding_started_at: Date | string | null;
     game_mode_selected_at: Date | string | null;
+    avatar_selected_at: Date | string | null;
     moderation_selected_at: Date | string | null;
     first_task_edited_at: Date | string | null;
     first_daily_quest_completed_at: Date | string | null;
@@ -166,6 +171,7 @@ async function deriveProgress(client: PoolClient, userId: string): Promise<Parti
       (SELECT os.onboarding_session_id FROM onboarding_session os WHERE os.user_id = $1 ORDER BY os.updated_at DESC NULLS LAST, os.created_at DESC NULLS LAST LIMIT 1) AS onboarding_session_id,
       (SELECT os.created_at FROM onboarding_session os WHERE os.user_id = $1 ORDER BY os.updated_at DESC NULLS LAST, os.created_at DESC NULLS LAST LIMIT 1) AS onboarding_started_at,
       (SELECT os.updated_at FROM onboarding_session os WHERE os.user_id = $1 ORDER BY os.updated_at DESC NULLS LAST, os.created_at DESC NULLS LAST LIMIT 1) AS game_mode_selected_at,
+      NULL::timestamptz AS avatar_selected_at,
       (SELECT MIN(mt.updated_at) FROM moderation_trackers mt WHERE mt.user_id = $1 AND mt.is_enabled = true) AS moderation_selected_at,
       (SELECT MIN(t.updated_at) FROM tasks t WHERE t.user_id = $1) AS first_task_edited_at,
       (SELECT MIN(dl.date)::timestamp AT TIME ZONE 'UTC' FROM daily_log dl WHERE dl.user_id = $1) AS first_daily_quest_completed_at,
@@ -179,6 +185,7 @@ async function deriveProgress(client: PoolClient, userId: string): Promise<Parti
     onboarding_session_id: row?.onboarding_session_id ?? null,
     onboarding_started_at: toIso(row?.onboarding_started_at),
     game_mode_selected_at: toIso(row?.game_mode_selected_at),
+    avatar_selected_at: toIso(row?.avatar_selected_at),
     moderation_selected_at: toIso(row?.moderation_selected_at),
     tasks_generated_at: generation?.status === 'completed' ? generation.completedAt : null,
     first_task_edited_at: toIso(row?.first_task_edited_at),
@@ -205,13 +212,14 @@ export async function getOnboardingProgress(userId: string): Promise<OnboardingP
           SET onboarding_session_id = COALESCE(onboarding_session_id, $2),
               onboarding_started_at = COALESCE(onboarding_started_at, $3),
               game_mode_selected_at = COALESCE(game_mode_selected_at, $4),
-              moderation_selected_at = COALESCE(moderation_selected_at, $5),
-              tasks_generated_at = COALESCE(tasks_generated_at, $6),
-              first_task_edited_at = COALESCE(first_task_edited_at, $7),
-              first_daily_quest_completed_at = COALESCE(first_daily_quest_completed_at, $8),
-              daily_quest_scheduled_at = COALESCE(daily_quest_scheduled_at, $9),
-              state = CASE WHEN COALESCE(onboarding_completed_at, $10) IS NOT NULL THEN 'completed' ELSE state END,
-              onboarding_completed_at = COALESCE(onboarding_completed_at, $10),
+              avatar_selected_at = COALESCE(avatar_selected_at, $5),
+              moderation_selected_at = COALESCE(moderation_selected_at, $6),
+              tasks_generated_at = COALESCE(tasks_generated_at, $7),
+              first_task_edited_at = COALESCE(first_task_edited_at, $8),
+              first_daily_quest_completed_at = COALESCE(first_daily_quest_completed_at, $9),
+              daily_quest_scheduled_at = COALESCE(daily_quest_scheduled_at, $10),
+              state = CASE WHEN COALESCE(onboarding_completed_at, $11) IS NOT NULL THEN 'completed' ELSE state END,
+              onboarding_completed_at = COALESCE(onboarding_completed_at, $11),
               source = source || jsonb_build_object('derived', true, 'derived_at', now()),
               updated_at = now()
         WHERE user_id = $1`,
@@ -220,6 +228,7 @@ export async function getOnboardingProgress(userId: string): Promise<OnboardingP
         derived.onboarding_session_id ?? null,
         derived.onboarding_started_at ?? null,
         derived.game_mode_selected_at ?? null,
+        derived.avatar_selected_at ?? null,
         derived.moderation_selected_at ?? null,
         derived.tasks_generated_at ?? null,
         derived.first_task_edited_at ?? null,

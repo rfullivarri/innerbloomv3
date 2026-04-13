@@ -8,6 +8,7 @@ const { state, withClientSpy } = vi.hoisted(() => {
     state: 'in_progress' | 'completed';
     onboarding_started_at: string | null;
     game_mode_selected_at: string | null;
+    avatar_selected_at: string | null;
     moderation_selected_at: string | null;
     tasks_generated_at: string | null;
     first_task_edited_at: string | null;
@@ -42,6 +43,7 @@ const { state, withClientSpy } = vi.hoisted(() => {
       state: 'in_progress',
       onboarding_started_at: null,
       game_mode_selected_at: null,
+      avatar_selected_at: null,
       moderation_selected_at: null,
       tasks_generated_at: null,
       first_task_edited_at: null,
@@ -89,6 +91,13 @@ const { state, withClientSpy } = vi.hoisted(() => {
     if (sql.includes('SET returned_to_dashboard_after_first_edit_at = COALESCE(returned_to_dashboard_after_first_edit_at, now())')) {
       const row = ensureRow(params[0] as string);
       row.returned_to_dashboard_after_first_edit_at ??= nowIso();
+      row.updated_at = nowIso();
+      return { rowCount: 1, rows: [] };
+    }
+
+    if (sql.includes('SET avatar_selected_at = COALESCE(avatar_selected_at, now())')) {
+      const row = ensureRow(params[0] as string);
+      row.avatar_selected_at ??= nowIso();
       row.updated_at = nowIso();
       return { rowCount: 1, rows: [] };
     }
@@ -149,5 +158,11 @@ describe('onboardingProgressService temporal guards', () => {
 
     expect(progress.first_task_edited_at).toBe('2026-03-13T18:59:35.000Z');
     expect(progress.returned_to_dashboard_after_first_edit_at).toBeNull();
+  });
+
+  it('marks avatar_selected milestone additively', async () => {
+    const progress = await markOnboardingProgressStep('user-d', 'avatar_selected');
+    expect(progress.avatar_selected_at).not.toBeNull();
+    expect(progress.game_mode_selected_at).toBeNull();
   });
 });
