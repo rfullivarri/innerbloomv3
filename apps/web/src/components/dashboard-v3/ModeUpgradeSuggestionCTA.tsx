@@ -133,6 +133,7 @@ export function ModeUpgradeSuggestionCTA({
         open={isOpen}
         currentMode={suggestion.current_mode}
         nextMode={suggestion.suggested_mode}
+        avatarProfile={null}
         isSubmitting={isSubmitting}
         onConfirm={handleAccept}
         onClose={() => setIsOpen(false)}

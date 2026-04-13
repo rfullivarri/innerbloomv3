@@ -13,21 +13,32 @@ export function ProfileCard({ gameMode, avatarProfile }: ProfileCardProps) {
     rhythm: normalizedGameMode,
     surface: 'profile-card',
   });
-  const videoSrc = media.videoUrl ?? '/avatars/flow-basic.mp4';
+  const videoSrc = media.videoUrl;
+  const imageFallback = media.imageUrl ?? '/FlowMood.jpg';
 
   return (
     <CardSection aria-label="Perfil">
       <div className="aspect-[5/6] w-full">
-        <video
-          src={videoSrc}
-          aria-label={media.alt}
-          className="h-full w-full rounded-ib-md object-cover shadow-lg"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-        />
+        {videoSrc ? (
+          <video
+            src={videoSrc}
+            poster={imageFallback}
+            aria-label={media.alt}
+            className="h-full w-full rounded-ib-md object-cover shadow-lg"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+          />
+        ) : (
+          <img
+            src={imageFallback}
+            alt={media.alt}
+            className="h-full w-full rounded-ib-md object-cover shadow-lg"
+            loading="lazy"
+          />
+        )}
       </div>
     </CardSection>
   );
