@@ -19,6 +19,7 @@ import { TaskInsightsModal } from './StreakTaskInsightsModal';
 import { DashboardMeta, DashboardTitle } from './DashboardTypography';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { HABIT_ACHIEVEMENT_UPDATED_EVENT } from '../../lib/habitAchievementEvents';
+import { resolveAvatarTheme, type AvatarProfile } from '../../lib/avatarProfile';
 import {
   DASHBOARD_SEGMENTED_BUTTON_ACTIVE,
   DASHBOARD_SEGMENTED_BUTTON_BASE,
@@ -257,6 +258,7 @@ interface StreaksPanelProps {
   userId: string;
   gameMode?: string | null;
   weeklyTarget?: number | null;
+  avatarProfile?: AvatarProfile | null;
   forceLoadingTasks?: boolean;
 }
 
@@ -291,51 +293,46 @@ type GlowChipProps = {
   children: ReactNode;
   className?: string;
   innerClassName?: string;
+  style?: CSSProperties;
 };
 
-function GlowChip({ glowPrimary, glowSecondary, children, className, innerClassName }: GlowChipProps) {
-  const style = {
+function GlowChip({ glowPrimary, glowSecondary, children, className, innerClassName, style }: GlowChipProps) {
+  const chipStyle = {
     '--glow-primary': glowPrimary,
     '--glow-secondary': glowSecondary,
+    ...style,
   } as CSSProperties;
 
   return (
-    <span className={cx('glow-chip inline-flex', className)} style={style}>
+    <span className={cx('glow-chip inline-flex', className)} style={chipStyle}>
       <span className={cx('relative z-[1] inline-flex items-center', innerClassName)}>{children}</span>
     </span>
   );
 }
 
-const MODE_CHIP_STYLES: Record<Mode, { glowPrimary: string; glowSecondary: string; className: string; innerClassName: string }> = {
-  Low: {
-    glowPrimary: 'rgba(248, 113, 113, 0.65)',
-    glowSecondary: 'rgba(239, 68, 68, 0.35)',
-    className: 'ib-streak-mode-chip ib-streak-mode-chip--low',
-    innerClassName:
-      'ib-streak-mode-chip__inner ib-streak-mode-chip__inner--low gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]',
-  },
-  Chill: {
-    glowPrimary: 'rgba(74, 222, 128, 0.6)',
-    glowSecondary: 'rgba(34, 197, 94, 0.3)',
-    className: 'ib-streak-mode-chip ib-streak-mode-chip--chill',
-    innerClassName:
-      'ib-streak-mode-chip__inner ib-streak-mode-chip__inner--chill gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]',
-  },
-  Flow: {
-    glowPrimary: 'rgba(96, 165, 250, 0.6)',
-    glowSecondary: 'rgba(59, 130, 246, 0.35)',
-    className: 'ib-streak-mode-chip ib-streak-mode-chip--flow',
-    innerClassName:
-      'ib-streak-mode-chip__inner ib-streak-mode-chip__inner--flow gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]',
-  },
-  Evolve: {
-    glowPrimary: 'rgba(167, 139, 250, 0.65)',
-    glowSecondary: 'rgba(139, 92, 246, 0.35)',
-    className: 'ib-streak-mode-chip ib-streak-mode-chip--evolve',
-    innerClassName:
-      'ib-streak-mode-chip__inner ib-streak-mode-chip__inner--evolve gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]',
-  },
-};
+function hexToRgba(hex: string, alpha: number): string {
+  const normalized = hex.replace('#', '').trim();
+  const expanded = normalized.length === 3
+    ? normalized.split('').map((chunk) => `${chunk}${chunk}`).join('')
+    : normalized;
+  if (!/^[0-9a-fA-F]{6}$/.test(expanded)) {
+    return `rgba(139, 92, 246, ${alpha})`;
+  }
+  const int = Number.parseInt(expanded, 16);
+  const r = (int >> 16) & 255;
+  const g = (int >> 8) & 255;
+  const b = int & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+export function buildStreakModeChipVisual(avatarProfile?: AvatarProfile | null) {
+  const avatarTheme = resolveAvatarTheme(avatarProfile ?? null);
+  return {
+    accent: avatarTheme.accent,
+    glowPrimary: hexToRgba(avatarTheme.accent, 0.66),
+    glowSecondary: hexToRgba(avatarTheme.accent, 0.36),
+  };
+}
 
 function normalizeMode(mode?: string | null): Mode {
   return normalizeGameModeValue(mode) ?? 'Flow';
@@ -668,7 +665,7 @@ function TaskItem({
   );
 }
 
-export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks = false }: StreaksPanelProps) {
+export function StreaksPanel({ userId, gameMode, weeklyTarget, avatarProfile, forceLoadingTasks = false }: StreaksPanelProps) {
   const { t, language } = usePostLoginLanguage();
   const [pillar, setPillar] = useState<Pillar>('Body');
   const [range, setRange] = useState<StreakPanelRange>('month');
@@ -880,7 +877,17 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
           : tab.label,
   }));
   const daysConsecutiveText = (days: string) => t('dashboard.streaks.daysConsecutiveSr', { days });
-  const modeChip = MODE_CHIP_STYLES[normalizedMode];
+  const modeChipVisual = buildStreakModeChipVisual(avatarProfile);
+  const modeChip = {
+    className: 'ib-streak-mode-chip',
+    glowPrimary: modeChipVisual.glowPrimary,
+    glowSecondary: modeChipVisual.glowSecondary,
+    innerClassName:
+      'ib-streak-mode-chip__inner gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]',
+  };
+  const modeChipStyle = {
+    '--ib-chip-accent': modeChipVisual.accent,
+  } as CSSProperties;
 
   return (
     <>
@@ -895,6 +902,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, forceLoadingTasks
               glowPrimary={modeChip.glowPrimary}
               glowSecondary={modeChip.glowSecondary}
               innerClassName={modeChip.innerClassName}
+              style={modeChipStyle}
             >
               {modeLabel}
             </GlowChip>

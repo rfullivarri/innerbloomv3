@@ -1,69 +1,59 @@
+import type { CSSProperties } from 'react';
+import { resolveAvatarTheme, type AvatarProfile } from '../../lib/avatarProfile';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 
 interface GameModeChipStyle {
   label: string;
-  backgroundClass: string;
-  glowClass: string;
   animate: boolean;
+  style: CSSProperties;
 }
 
-const GAME_MODE_STYLES: Record<GameMode, GameModeChipStyle> = {
-  Flow: {
-    label: 'FLOW',
-    backgroundClass: 'bg-gradient-to-r from-sky-500/25 via-indigo-500/30 to-purple-500/25 text-[color:var(--color-text)]',
-    glowClass: 'bg-sky-400/40',
-    animate: true,
-  },
-  Chill: {
-    label: 'CHILL',
-    backgroundClass: 'bg-gradient-to-r from-emerald-400/25 via-teal-400/30 to-cyan-400/25 text-[color:var(--color-text)] dark:from-emerald-500/60 dark:via-teal-500/65 dark:to-cyan-500/55 dark:text-emerald-50',
-    glowClass: 'bg-emerald-400/40 dark:bg-emerald-400/60',
-    animate: true,
-  },
-  Evolve: {
-    label: 'EVOLVE',
-    backgroundClass: 'bg-gradient-to-r from-fuchsia-400/25 via-rose-400/30 to-amber-300/25 text-[color:var(--color-text)]',
-    glowClass: 'bg-fuchsia-400/40',
-    animate: true,
-  },
-  Low: {
-    label: 'LOW',
-    backgroundClass: 'bg-gradient-to-r from-rose-500/30 via-red-500/35 to-orange-500/30 text-[color:var(--color-text)]',
-    glowClass: 'bg-rose-500/40',
-    animate: true,
-  },
+const GAME_MODE_LABELS: Record<GameMode, string> = {
+  Flow: 'FLOW',
+  Chill: 'CHILL',
+  Evolve: 'EVOLVE',
+  Low: 'LOW',
 };
 
 const DEFAULT_CHIP_STYLE: GameModeChipStyle = {
   label: 'Modo sin definir',
-  backgroundClass: 'bg-white/10 text-[color:var(--color-text)]',
-  glowClass: 'bg-slate-400/20',
   animate: false,
+  style: {},
 };
 
-export function buildGameModeChip(mode?: string | null): GameModeChipStyle {
+export function buildGameModeChip(
+  mode?: string | null,
+  options?: { avatarProfile?: AvatarProfile | null },
+): GameModeChipStyle {
+  const theme = resolveAvatarTheme(options?.avatarProfile ?? null);
+  const style = {
+    '--ib-chip-accent': theme.accent,
+  } as CSSProperties;
+
   if (!mode) {
-    return DEFAULT_CHIP_STYLE;
+    return { ...DEFAULT_CHIP_STYLE, style };
   }
 
   const normalized = normalizeGameModeValue(mode);
   if (!normalized) {
-    return DEFAULT_CHIP_STYLE;
+    return { ...DEFAULT_CHIP_STYLE, style };
   }
 
-  return GAME_MODE_STYLES[normalized] ?? DEFAULT_CHIP_STYLE;
+  return {
+    label: GAME_MODE_LABELS[normalized] ?? DEFAULT_CHIP_STYLE.label,
+    animate: true,
+    style,
+  };
 }
 
-export function GameModeChip({ label, backgroundClass, glowClass, animate }: GameModeChipStyle) {
+export function GameModeChip({ label, animate, style }: GameModeChipStyle) {
   return (
-    <span className="relative inline-flex items-center">
+    <span className="ib-game-mode-chip relative inline-flex items-center" style={style}>
       <span
-        className={`absolute -inset-[2px] rounded-full blur-md ${glowClass} ${animate ? 'animate-pulse' : ''}`}
+        className={`ib-game-mode-chip__glow absolute -inset-[2px] rounded-full blur-md ${animate ? 'animate-pulse' : ''}`}
         aria-hidden
       />
-      <span
-        className={`relative inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-[0.26rem] text-[10px] font-semibold uppercase tracking-[0.2em] shadow-[0_0_18px_rgba(15,23,42,0.3)] backdrop-blur ${backgroundClass}`}
-      >
+      <span className="ib-game-mode-chip__inner relative inline-flex items-center gap-2 rounded-full border px-3 py-[0.26rem] text-[10px] font-semibold uppercase tracking-[0.2em] backdrop-blur">
         <span className="h-[0.32rem] w-[0.32rem] rounded-full bg-white/80" />
         {label}
       </span>

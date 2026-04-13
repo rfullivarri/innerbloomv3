@@ -1232,7 +1232,7 @@ export function DashboardOverview({
 
         <div className="order-2 space-y-4 md:space-y-5 lg:order-2 lg:col-span-4">
           <div data-demo-anchor="overall-progress">
-            <MetricHeader userId={userId} gameMode={gameMode} />
+            <MetricHeader userId={userId} gameMode={gameMode} avatarProfile={avatarProfile} />
           </div>
           <ProfileCard gameMode={gameMode} avatarProfile={avatarProfile} />
           <div data-demo-anchor="daily-energy">
@@ -1278,6 +1278,7 @@ export function DashboardOverview({
               userId={userId}
               gameMode={gameMode}
               weeklyTarget={weeklyTarget}
+              avatarProfile={avatarProfile}
               forceLoadingTasks={isJourneyGenerating}
             />
           </div>
