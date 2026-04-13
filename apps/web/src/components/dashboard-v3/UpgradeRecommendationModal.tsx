@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { resolveAvatarTheme, type AvatarProfile } from '../../lib/avatarProfile';
 import { normalizeGameModeValue } from '../../lib/gameMode';
+import { GAME_MODE_META, type LocalizedLanguage } from '../../lib/gameModeMeta';
 import { buildGameModeChip, GameModeChip } from '../common/GameModeChip';
 
 interface UpgradeRecommendationModalProps {
@@ -20,8 +21,18 @@ const DRAG_COMPLETE_THRESHOLD = 0.9;
 const DRAG_HANDLE_SIZE = 56;
 
 function formatMode(mode: string | null): string {
-  if (!mode) return 'MODO';
+  if (!mode) return 'RHYTHM';
   return mode.trim().toUpperCase();
+}
+
+function buildRhythmIntensityLabel(mode: string | null, language: LocalizedLanguage): string {
+  const normalized = normalizeGameModeValue(mode);
+  if (!normalized) {
+    return language === 'es' ? 'Ritmo · —' : 'Rhythm · —';
+  }
+
+  const frequency = GAME_MODE_META[normalized].frequency[language];
+  return `${normalized} · ${frequency}`;
 }
 
 export function UpgradeRecommendationModal({
@@ -34,7 +45,7 @@ export function UpgradeRecommendationModal({
   onClose,
   onOpenAllModes,
 }: UpgradeRecommendationModalProps) {
-  const { t } = usePostLoginLanguage();
+  const { t, language } = usePostLoginLanguage();
   const [dragProgress, setDragProgress] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -48,6 +59,8 @@ export function UpgradeRecommendationModal({
   const nextRhythm = useMemo(() => normalizeGameModeValue(nextMode), [nextMode]);
   const avatarTheme = useMemo(() => resolveAvatarTheme(avatarProfile), [avatarProfile]);
   const nextModeChip = useMemo(() => buildGameModeChip(nextMode), [nextMode]);
+  const currentRhythmLabel = useMemo(() => buildRhythmIntensityLabel(currentMode, language), [currentMode, language]);
+  const nextRhythmLabel = useMemo(() => buildRhythmIntensityLabel(nextMode, language), [nextMode, language]);
 
   useEffect(() => {
     if (!open) {
@@ -184,9 +197,9 @@ export function UpgradeRecommendationModal({
                       className="flex h-14 w-14 items-center justify-center rounded-xl border border-black/10 bg-white/75 text-[10px] font-bold uppercase tracking-[0.14em] shadow-[0_10px_22px_rgba(15,23,42,0.28)]"
                       aria-hidden="true"
                     >
-                      NEXT
+                      {t('dashboard.upgradeCta.nextTag')}
                     </div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em]">{formatMode(nextMode)}</p>
+                    <p className="text-center text-[11px] font-semibold tracking-[0.02em]">{nextRhythmLabel}</p>
                   </div>
                 ) : null}
 
@@ -223,9 +236,9 @@ export function UpgradeRecommendationModal({
                       style={{ backgroundColor: avatarTheme.accent }}
                       aria-hidden="true"
                     >
-                      NOW
+                      {t('dashboard.upgradeCta.nowTag')}
                     </div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em]">{formatMode(currentMode)}</p>
+                    <p className="text-center text-[11px] font-semibold tracking-[0.02em]">{currentRhythmLabel}</p>
                   </button>
                 ) : null}
               </div>

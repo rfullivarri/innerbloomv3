@@ -16,7 +16,7 @@ interface ModeUpgradeSuggestionCTAProps {
 }
 
 function formatModeLabel(mode: string | null): string {
-  if (!mode) return 'MODO';
+  if (!mode) return 'RHYTHM';
   return mode.trim().toUpperCase();
 }
 
