@@ -52,7 +52,7 @@ describe('avatar fallback policy', () => {
       fallbackReason: 'missing-avatar-payload',
     });
 
-    expect(resolved.avatarId).toBe(2);
-    expect(resolved.code).toBe('GREEN_BEAR');
+    expect(resolved.avatarId).toBe(3);
+    expect(resolved.code).toBe('RED_CAT');
   });
 });

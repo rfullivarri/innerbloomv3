@@ -16,10 +16,10 @@ export const AVATAR_OPTIONS: AvatarOption[] = [
 ];
 
 const LEGACY_CODE_ALIASES: Record<string, AvatarOption['code']> = {
-  LEGACY_CHILL: 'BLUE_AMPHIBIAN',
-  LEGACY_LOW: 'GREEN_BEAR',
-  LEGACY_EVOLVE: 'RED_CAT',
-  LEGACY_FLOW: 'VIOLET_OWL',
+  LEGACY_LOW: 'RED_CAT',
+  LEGACY_CHILL: 'GREEN_BEAR',
+  LEGACY_FLOW: 'BLUE_AMPHIBIAN',
+  LEGACY_EVOLVE: 'VIOLET_OWL',
 };
 
 const DEFAULT_AVATAR_OPTION: AvatarOption = AVATAR_OPTIONS[0];
@@ -28,10 +28,10 @@ const DEFAULT_AVATAR_OPTION: AvatarOption = AVATAR_OPTIONS[0];
 // Temporary dashboard Change Avatar previews.
 // TODO(rhythm-avatar-decoupling): replace legacy GMO images with final per-avatar assets.
 const TEMP_LEGACY_AVATAR_PREVIEW_BY_CODE: Record<AvatarOption['code'], string> = {
-  LEGACY_LOW: '/lowGMO.png',
-  LEGACY_CHILL: '/chillGMO.png',
-  LEGACY_FLOW: '/flowGMO.png',
-  LEGACY_EVOLVE: '/evolveGMO.png',
+  BLUE_AMPHIBIAN: '/flowGMO.png',
+  GREEN_BEAR: '/chillGMO.png',
+  RED_CAT: '/lowGMO.png',
+  VIOLET_OWL: '/evolveGMO.png',
 };
 
 export function resolveTemporaryLegacyAvatarPreviewImage(option: AvatarOption): string {
