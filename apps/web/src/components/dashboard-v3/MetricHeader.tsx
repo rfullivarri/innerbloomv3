@@ -7,10 +7,12 @@ import { formatGp } from '../../lib/points';
 import { GameModeChip, buildGameModeChip } from '../common/GameModeChip';
 import { DashboardMeta } from './DashboardTypography';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
+import type { AvatarProfile } from '../../lib/avatarProfile';
 
 interface MetricHeaderProps {
   userId: string;
   gameMode?: string | null;
+  avatarProfile?: AvatarProfile | null;
 }
 
 type XpProgressData = {
@@ -26,7 +28,7 @@ function formatInteger(value: number) {
   return NUMBER_FORMATTER.format(Math.max(0, Math.round(value)));
 }
 
-export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
+export function MetricHeader({ userId, gameMode, avatarProfile }: MetricHeaderProps) {
   const { t } = usePostLoginLanguage();
 
   const { data, status } = useRequest<XpProgressData>(async () => {
@@ -67,7 +69,10 @@ export function MetricHeader({ userId, gameMode }: MetricHeaderProps) {
     : '';
   const levelLabel = showContent ? formatInteger(data.currentLevel) : '—';
   const totalXpLabel = showContent ? formatInteger(data.xpTotal) : '—';
-  const chipStyle = useMemo(() => buildGameModeChip(gameMode), [gameMode]);
+  const chipStyle = useMemo(
+    () => buildGameModeChip(gameMode, { avatarProfile }),
+    [avatarProfile, gameMode],
+  );
 
   const subtitle = useMemo(() => {
     if (showError) {

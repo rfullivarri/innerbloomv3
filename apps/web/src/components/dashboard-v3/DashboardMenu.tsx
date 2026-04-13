@@ -903,7 +903,7 @@ export function DashboardMenu({
                         <span>{hasActiveUpgradeCta ? t('dashboard.menu.upgradeAvailable') : t('dashboard.menu.changeGameMode')}</span>
                         {hasActiveUpgradeCta ? <span className="rounded-full border border-black/20 bg-white/35 px-2 py-0.5 text-[10px] font-bold uppercase text-black shadow-[0_8px_20px_rgba(167,112,239,0.35)] backdrop-blur-sm">7d</span> : null}
                       </div>
-                      <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow')} />
+                      <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow', { avatarProfile: currentAvatarProfile })} />
                     </button>
                     <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
                     <button

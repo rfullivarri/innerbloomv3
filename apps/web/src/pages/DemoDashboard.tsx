@@ -244,6 +244,7 @@ export default function DemoDashboardPage() {
         <DashboardOverview
           userId={DEMO_USER_ID}
           gameMode={demoContext.gameMode}
+          avatarProfile={null}
           weeklyTarget={3}
           isJourneyGenerating={false}
           dailyQuestReadiness={DEMO_DAILY_QUEST_READINESS}
