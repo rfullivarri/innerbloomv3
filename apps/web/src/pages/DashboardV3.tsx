@@ -1004,6 +1004,7 @@ export default function DashboardV3Page() {
                     <MissionsV2Route
                       userId={backendUserId}
                       gameMode={gameMode}
+                      avatarProfile={avatarProfile}
                     />
                   }
                 />
@@ -1013,6 +1014,7 @@ export default function DashboardV3Page() {
                     <MissionsV2Route
                       userId={backendUserId}
                       gameMode={gameMode}
+                      avatarProfile={avatarProfile}
                     />
                   }
                 />
@@ -1022,6 +1024,7 @@ export default function DashboardV3Page() {
                     <MissionsV3Route
                       userId={backendUserId}
                       gameMode={gameMode}
+                      avatarProfile={avatarProfile}
                     />
                   }
                 />
@@ -1409,23 +1412,27 @@ function DailyQuestView({
 function MissionsV2Route({
   userId,
   gameMode,
+  avatarProfile,
 }: {
   userId: string;
   gameMode: GameMode | string | null;
+  avatarProfile: AvatarProfile | null;
 }) {
   if (!FEATURE_MISSIONS_V2) {
     return <Navigate to=".." replace />;
   }
 
-  return <MissionsV2View userId={userId} gameMode={gameMode} />;
+  return <MissionsV2View userId={userId} gameMode={gameMode} avatarProfile={avatarProfile} />;
 }
 
 function MissionsV2View({
   userId,
   gameMode,
+  avatarProfile,
 }: {
   userId: string;
   gameMode: GameMode | string | null;
+  avatarProfile: AvatarProfile | null;
 }) {
   const [showWip, setShowWip] = useState(true);
   const navigate = useNavigate();
@@ -1433,7 +1440,7 @@ function MissionsV2View({
   return (
     <div className="relative space-y-6">
       <h1 className="sr-only">Misiones</h1>
-      <MissionsV2Board userId={userId} gameMode={gameMode} />
+      <MissionsV2Board userId={userId} gameMode={gameMode} avatarProfile={avatarProfile} />
       {showWip ? (
         <div className="fixed inset-0 z-20 bg-slate-950/90 px-4 py-6 sm:px-8 sm:py-10">
           <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center text-center">
@@ -1472,28 +1479,32 @@ function MissionsV2View({
 function MissionsV3Route({
   userId,
   gameMode,
+  avatarProfile,
 }: {
   userId: string;
   gameMode: GameMode | string | null;
+  avatarProfile: AvatarProfile | null;
 }) {
   if (!FEATURE_MISSIONS_V2) {
     return <Navigate to=".." replace />;
   }
 
-  return <MissionsV3View userId={userId} gameMode={gameMode} />;
+  return <MissionsV3View userId={userId} gameMode={gameMode} avatarProfile={avatarProfile} />;
 }
 
 function MissionsV3View({
   userId,
   gameMode,
+  avatarProfile,
 }: {
   userId: string;
   gameMode: GameMode | string | null;
+  avatarProfile: AvatarProfile | null;
 }) {
   return (
     <div className="space-y-6">
       <h1 className="sr-only">Misiones v3</h1>
-      <MissionsV3Board userId={userId} gameMode={gameMode} />
+      <MissionsV3Board userId={userId} gameMode={gameMode} avatarProfile={avatarProfile} />
     </div>
   );
 }
