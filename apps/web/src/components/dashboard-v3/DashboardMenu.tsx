@@ -1336,6 +1336,7 @@ export function DashboardMenu({
                                 theme: { accent: avatarOption.accent, chip: "aqua" },
                                 isLegacyFallback: false,
                                 fallbackReason: "none",
+                                assetPayload: null,
                               };
                               const avatarMedia = resolveAvatarMedia(previewProfile, {
                                 rhythm: normalizedCurrentMode,

@@ -1,4 +1,9 @@
 import type { CurrentUserProfile } from './api';
+import {
+  resolveAssetPathByTier,
+  resolveSurfaceAssetTier,
+  type AvatarAssetPayload,
+} from './avatarAssetContract';
 
 export type AvatarRhythm = 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
 
@@ -23,6 +28,7 @@ export type AvatarProfile = {
   theme: AvatarThemeTokens;
   isLegacyFallback: boolean;
   fallbackReason: 'none' | 'missing-avatar-payload';
+  assetPayload: AvatarAssetPayload | null;
 };
 
 type DefaultAvatarFallback = {
@@ -94,6 +100,10 @@ function normalizeThemeTokens(raw: Record<string, unknown> | null): AvatarThemeT
   return { accent, chip };
 }
 
+function resolveAssetPayload(profile: CurrentUserProfile): AvatarAssetPayload | null {
+  return profile.avatar_assets ?? null;
+}
+
 export function resolveAvatarProfile(profile: CurrentUserProfile | null): AvatarProfile | null {
   if (!profile) {
     return null;
@@ -112,11 +122,26 @@ export function resolveAvatarProfile(profile: CurrentUserProfile | null): Avatar
     theme: apiTheme ?? DEFAULT_AVATAR_FALLBACK.theme,
     isLegacyFallback: shouldFallbackIdentity,
     fallbackReason: shouldFallbackIdentity ? 'missing-avatar-payload' : 'none',
+    assetPayload: resolveAssetPayload(profile),
   };
 }
 
 export function resolveAvatarTheme(profile: AvatarProfile | null): AvatarThemeTokens {
   return profile?.theme ?? DEFAULT_AVATAR_FALLBACK.theme;
+}
+
+function resolveImageForSurface(profile: AvatarProfile | null, rhythm: AvatarRhythm): string | null {
+  if (!profile) {
+    return null;
+  }
+
+  const tier = resolveSurfaceAssetTier('dashboard-profile-rich');
+  return resolveAssetPathByTier({
+    avatarCode: profile.avatarCode,
+    rhythm,
+    tier,
+    apiAssets: profile.assetPayload,
+  });
 }
 
 export function resolveAvatarMedia(
@@ -133,12 +158,12 @@ export function resolveAvatarMedia(
     return fallbackMedia;
   }
 
-  // Phase-safe behavior: until avatar asset catalogs are wired into API,
-  // always return deterministic placeholder-safe media keyed by rhythm.
-  // This keeps visual reads centralized while avoiding hard asset dependency.
+  const resolvedImage = resolveImageForSurface(profile, rhythm);
+
   return {
     ...fallbackMedia,
+    imageUrl: resolvedImage ?? fallbackMedia.imageUrl,
     alt: `${profile.avatarName} expression for ${rhythm.toLowerCase()} rhythm`,
-    isPlaceholder: profile.isLegacyFallback,
+    isPlaceholder: profile.isLegacyFallback || Boolean(profile.assetPayload == null),
   };
 }
