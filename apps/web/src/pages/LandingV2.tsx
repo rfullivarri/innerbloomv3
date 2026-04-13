@@ -67,7 +67,7 @@ const t = {
     nav: [
       { href: '#hero', label: 'Overview' },
       { href: '#highlights', label: 'Dashboards' },
-      { href: '#modes', label: 'Modes' },
+      { href: '#modes', label: 'Rhythms' },
       { href: '#pillars', label: 'Pillars' },
       { href: '#testimonials', label: 'Testimonials' },
       { href: '#faq', label: 'FAQ' }
@@ -111,36 +111,36 @@ const t = {
       ] satisfies Highlight[]
     },
     modes: {
-      title: 'Choose the mode that fits your energy today',
-      description: 'Swap modes to match your energy. The system adapts to keep you moving.',
+      title: 'Choose the rhythm that fits your energy today',
+      description: 'Adjust your rhythm to match your energy. The system adapts to keep you moving.',
       items: [
         {
           id: 'low',
           title: '🪫 Low',
           benefit: 'Designed to protect momentum on low-energy days by lowering friction and preserving self-trust.',
           bullets: ['1–2 minute tasks', 'Recovery-first', 'Zero-guilt rest'],
-          cta: 'Try Low mode'
+          cta: 'Try Low rhythm'
         },
         {
           id: 'chill',
           title: '🍃 Chill',
           benefit: 'Built to stabilize consistency with gentle structure, so progress feels sustainable instead of demanding.',
           bullets: ['Light planning', 'Evening reflection', 'Gentle streaks'],
-          cta: 'Try Chill mode'
+          cta: 'Try Chill rhythm'
         },
         {
           id: 'flow',
           title: '🌊 Flow',
           benefit: 'Optimized for focused windows to channel momentum into meaningful progress before attention fades.',
           bullets: ['Goal-linked tasks', 'Focus timers', 'Progress tags'],
-          cta: 'Try Flow mode'
+          cta: 'Try Flow rhythm'
         },
         {
           id: 'evolve',
           title: '🧬 Evolve',
           benefit: 'Created for high-drive phases to convert ambition into repeatable systems that scale your identity.',
           bullets: ['Atomic habits', 'GP ladders', 'Weekly challenges'],
-          cta: 'Try Evolve mode'
+          cta: 'Try Evolve rhythm'
         }
       ] satisfies Mode[]
     },
@@ -185,8 +185,8 @@ const t = {
           a: 'No. Start in Low so we keep actions tiny while you regain momentum.'
         },
         {
-          q: 'Can I switch modes?',
-          a: 'Yes. Swap between Low, Chill, Flow and Evolve whenever you need.'
+          q: 'Can I switch rhythms?',
+          a: 'Yes. Switch between Low, Chill, Flow, and Evolve whenever you need.'
         },
         {
           q: 'Where do I see my metrics?',
@@ -210,7 +210,7 @@ const t = {
     nav: [
       { href: '#hero', label: 'Overview' },
       { href: '#highlights', label: 'Producto' },
-      { href: '#modes', label: 'Modos' },
+      { href: '#modes', label: 'Ritmos' },
       { href: '#pillars', label: 'Pilares' },
       { href: '#testimonials', label: 'Testimonios' },
       { href: '#faq', label: 'FAQ' }
@@ -254,7 +254,7 @@ const t = {
       ] satisfies Highlight[]
     },
     modes: {
-      title: 'Elige el modo que mejor se adapta a tu energía hoy',
+      title: 'Elige el ritmo que mejor se adapta a tu energía hoy',
       description: 'Cambia según tu momento. El sistema se adapta a tu energía.',
       items: [
         {
@@ -262,28 +262,28 @@ const t = {
           title: '🪫 Low',
           benefit: 'Diseñado para sostener el progreso en días de baja energía, reduciendo fricción y culpa.',
           bullets: ['Tareas de 1–2 minutos', 'Recuperación primero', 'Descanso sin culpa'],
-          cta: 'Activar modo Low'
+          cta: 'Activar ritmo Low'
         },
         {
           id: 'chill',
           title: '🍃 Chill',
           benefit: 'Pensado para mantener constancia con una estructura suave que protege tu bienestar.',
           bullets: ['Plan liviano', 'Reflexión nocturna', 'Rachas suaves'],
-          cta: 'Activar modo Chill'
+          cta: 'Activar ritmo Chill'
         },
         {
           id: 'flow',
           title: '🌊 Flow',
           benefit: 'Optimizado para ventanas de foco, canalizando impulso en avances concretos y medibles.',
           bullets: ['Tareas ligadas a metas', 'Timers de foco', 'Tags de progreso'],
-          cta: 'Activar modo Flow'
+          cta: 'Activar ritmo Flow'
         },
         {
           id: 'evolve',
           title: '🧬 Evolve',
           benefit: 'Creado para etapas de alta ambición, transformando intensidad en sistemas sostenibles.',
           bullets: ['Hábitos atómicos', 'Escalera de GP', 'Retos semanales'],
-          cta: 'Activar modo Evolve'
+          cta: 'Activar ritmo Evolve'
         }
       ] satisfies Mode[]
     },
@@ -332,7 +332,7 @@ const t = {
           a: 'No. Si estás con poca energía, empezás en Low para activar el mínimo vital. El sistema ajusta el ritmo.'
         },
         {
-          q: '¿Puedo cambiar de modo?',
+          q: '¿Puedo cambiar de ritmo?',
           a: 'Sí. Podés cambiar entre Low, Chill, Flow y Evolve según tu momento.'
         },
         {
@@ -414,25 +414,25 @@ const MODE_VISUALS: Record<Language, Record<Mode['id'], ModeVisual>> = {
     low: {
       avatarVideo: '/avatars/low-basic.mp4',
       avatarImage: '/LowMood.jpg',
-      avatarAlt: 'Low mode avatar with a resting facial expression.',
+      avatarAlt: 'Low rhythm avatar with a resting facial expression.',
       avatarLabel: 'Aligned with your state'
     },
     chill: {
       avatarVideo: '/avatars/chill-basic.mp4',
       avatarImage: '/Chill-Mood.jpg',
-      avatarAlt: 'Chill mode avatar with a calm expression.',
+      avatarAlt: 'Chill rhythm avatar with a calm expression.',
       avatarLabel: 'Aligned with your state'
     },
     flow: {
       avatarVideo: '/avatars/flow-basic.mp4',
       avatarImage: '/FlowMood.jpg',
-      avatarAlt: 'Flow mode avatar in action with a focused expression.',
+      avatarAlt: 'Flow rhythm avatar in action with a focused expression.',
       avatarLabel: 'Aligned with your state'
     },
     evolve: {
       avatarVideo: '/avatars/evolve-basic.mp4',
       avatarImage: '/Evolve-Mood.jpg',
-      avatarAlt: 'Evolve mode avatar with a determined expression.',
+      avatarAlt: 'Evolve rhythm avatar with a determined expression.',
       avatarLabel: 'Aligned with your state'
     }
   },
@@ -440,25 +440,25 @@ const MODE_VISUALS: Record<Language, Record<Mode['id'], ModeVisual>> = {
     low: {
       avatarVideo: '/avatars/low-basic.mp4',
       avatarImage: '/LowMood.jpg',
-      avatarAlt: 'Avatar del modo Low con expresión de descanso.',
+      avatarAlt: 'Avatar del ritmo Low con expresión de descanso.',
       avatarLabel: 'Alineado a tu energía'
     },
     chill: {
       avatarVideo: '/avatars/chill-basic.mp4',
       avatarImage: '/Chill-Mood.jpg',
-      avatarAlt: 'Avatar del modo Chill con expresión de calma.',
+      avatarAlt: 'Avatar del ritmo Chill con expresión de calma.',
       avatarLabel: 'Alineado a tu energía'
     },
     flow: {
       avatarVideo: '/avatars/flow-basic.mp4',
       avatarImage: '/FlowMood.jpg',
-      avatarAlt: 'Avatar del modo Flow en movimiento y enfocado.',
+      avatarAlt: 'Avatar del ritmo Flow en movimiento y enfocado.',
       avatarLabel: 'Alineado a tu energía'
     },
     evolve: {
       avatarVideo: '/avatars/evolve-basic.mp4',
       avatarImage: '/Evolve-Mood.jpg',
-      avatarAlt: 'Avatar del modo Evolve con expresión determinada.',
+      avatarAlt: 'Avatar del ritmo Evolve con expresión determinada.',
       avatarLabel: 'Alineado a tu energía'
     }
   }
@@ -1106,7 +1106,7 @@ export default function LandingV2Page() {
               ref={modesTrackRef}
               className="lv2-modes-mobile-track"
               role="list"
-              aria-label={language === 'es' ? 'Selector mobile de modos de juego' : 'Mobile game mode selector'}
+              aria-label={language === 'es' ? 'Selector mobile de ritmos' : 'Mobile rhythm selector'}
             >
               {copy.modes.items.map((mode, index) => {
                 const visual = MODE_VISUALS[language][mode.id];
@@ -1149,7 +1149,7 @@ export default function LandingV2Page() {
               })}
             </div>
 
-            <div className="lv2-modes-thumbs" role="tablist" aria-label={language === 'es' ? 'Elegir modo' : 'Choose mode'}>
+            <div className="lv2-modes-thumbs" role="tablist" aria-label={language === 'es' ? 'Elegir ritmo' : 'Choose rhythm'}>
               {copy.modes.items.map((mode, index) => (
                 <button
                   key={mode.id}
@@ -1164,7 +1164,7 @@ export default function LandingV2Page() {
               ))}
             </div>
 
-            <div className="lv2-modes-dots" role="tablist" aria-label={language === 'es' ? 'Modo activo' : 'Active mode'}>
+            <div className="lv2-modes-dots" role="tablist" aria-label={language === 'es' ? 'Ritmo activo' : 'Active rhythm'}>
               {copy.modes.items.map((mode, index) => (
                 <button
                   key={mode.id}
