@@ -22,11 +22,13 @@ export type AvatarProfile = {
   avatarName: string;
   theme: AvatarThemeTokens;
   isLegacyFallback: boolean;
+  fallbackReason: 'none' | 'missing-avatar-payload';
 };
 
-type LegacyAvatarFallback = {
+type DefaultAvatarFallback = {
   avatarCode: string;
   avatarName: string;
+  avatarId: number;
   theme: AvatarThemeTokens;
   media: Record<AvatarRhythm, AvatarMedia>;
 };
@@ -58,35 +60,15 @@ const LEGACY_MEDIA_BY_RHYTHM: Record<AvatarRhythm, AvatarMedia> = {
   },
 };
 
-const LEGACY_AVATAR_FALLBACK_BY_GAME_MODE: Record<AvatarRhythm, LegacyAvatarFallback> = {
-  LOW: {
-    avatarCode: 'LEGACY_LOW',
-    avatarName: 'Legacy Low',
-    theme: { accent: '#58CC02', chip: 'leaf' },
-    media: LEGACY_MEDIA_BY_RHYTHM,
-  },
-  CHILL: {
-    avatarCode: 'LEGACY_CHILL',
-    avatarName: 'Legacy Chill',
-    theme: { accent: '#00C2FF', chip: 'aqua' },
-    media: LEGACY_MEDIA_BY_RHYTHM,
-  },
-  FLOW: {
-    avatarCode: 'LEGACY_FLOW',
-    avatarName: 'Legacy Flow',
-    theme: { accent: '#A855F7', chip: 'violet' },
-    media: LEGACY_MEDIA_BY_RHYTHM,
-  },
-  EVOLVE: {
-    avatarCode: 'LEGACY_EVOLVE',
-    avatarName: 'Legacy Evolve',
-    theme: { accent: '#FF6A00', chip: 'ember' },
-    media: LEGACY_MEDIA_BY_RHYTHM,
-  },
+const DEFAULT_AVATAR_FALLBACK: DefaultAvatarFallback = {
+  avatarId: 2,
+  avatarCode: 'LEGACY_CHILL',
+  avatarName: 'Legacy Chill',
+  theme: { accent: '#00C2FF', chip: 'aqua' },
+  media: LEGACY_MEDIA_BY_RHYTHM,
 };
 
 const DEFAULT_RHYTHM: AvatarRhythm = 'FLOW';
-const DEFAULT_LEGACY_AVATAR = LEGACY_AVATAR_FALLBACK_BY_GAME_MODE.CHILL;
 
 function normalizeRhythm(value: string | null | undefined): AvatarRhythm {
   const normalized = (value ?? '').trim().toUpperCase();
@@ -117,21 +99,24 @@ export function resolveAvatarProfile(profile: CurrentUserProfile | null): Avatar
     return null;
   }
 
-  const modeKey = normalizeRhythm(profile.game_mode);
-  const legacyFallback = LEGACY_AVATAR_FALLBACK_BY_GAME_MODE[modeKey] ?? DEFAULT_LEGACY_AVATAR;
+  const hasAvatarCode = typeof profile.avatar_code === 'string' && profile.avatar_code.trim().length > 0;
+  const hasAvatarName = typeof profile.avatar_name === 'string' && profile.avatar_name.trim().length > 0;
+  const hasAvatarId = typeof profile.avatar_id === 'number';
+  const shouldFallbackIdentity = !hasAvatarCode && !hasAvatarId;
   const apiTheme = normalizeThemeTokens(profile.avatar_theme_tokens);
 
   return {
-    avatarId: profile.avatar_id,
-    avatarCode: profile.avatar_code ?? legacyFallback.avatarCode,
-    avatarName: profile.avatar_name ?? legacyFallback.avatarName,
-    theme: apiTheme ?? legacyFallback.theme,
-    isLegacyFallback: profile.avatar_id == null,
+    avatarId: hasAvatarId ? profile.avatar_id : DEFAULT_AVATAR_FALLBACK.avatarId,
+    avatarCode: hasAvatarCode ? profile.avatar_code!.trim() : DEFAULT_AVATAR_FALLBACK.avatarCode,
+    avatarName: hasAvatarName ? profile.avatar_name!.trim() : DEFAULT_AVATAR_FALLBACK.avatarName,
+    theme: apiTheme ?? DEFAULT_AVATAR_FALLBACK.theme,
+    isLegacyFallback: shouldFallbackIdentity,
+    fallbackReason: shouldFallbackIdentity ? 'missing-avatar-payload' : 'none',
   };
 }
 
 export function resolveAvatarTheme(profile: AvatarProfile | null): AvatarThemeTokens {
-  return profile?.theme ?? DEFAULT_LEGACY_AVATAR.theme;
+  return profile?.theme ?? DEFAULT_AVATAR_FALLBACK.theme;
 }
 
 export function resolveAvatarMedia(
@@ -156,9 +141,4 @@ export function resolveAvatarMedia(
     alt: `${profile.avatarName} expression for ${rhythm.toLowerCase()} rhythm`,
     isPlaceholder: profile.isLegacyFallback,
   };
-}
-
-export function resolveLegacyAvatarFallback(gameMode: string | null | undefined): LegacyAvatarFallback {
-  const rhythm = normalizeRhythm(gameMode);
-  return LEGACY_AVATAR_FALLBACK_BY_GAME_MODE[rhythm] ?? DEFAULT_LEGACY_AVATAR;
 }

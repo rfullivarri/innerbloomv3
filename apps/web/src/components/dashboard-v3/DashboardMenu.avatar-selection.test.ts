@@ -10,9 +10,10 @@ describe("resolveMenuAvatarSelection", () => {
       avatarName: "Legacy Chill",
       theme: { accent: "#00C2FF", chip: "aqua" },
       isLegacyFallback: false,
+      fallbackReason: "none",
     } satisfies AvatarProfile;
 
-    expect(resolveMenuAvatarSelection(profile, "Low")).toMatchObject({
+    expect(resolveMenuAvatarSelection(profile)).toMatchObject({
       avatarId: 3,
       code: "LEGACY_FLOW",
     });
@@ -25,16 +26,17 @@ describe("resolveMenuAvatarSelection", () => {
       avatarName: "Legacy Evolve",
       theme: { accent: "#FF6A00", chip: "ember" },
       isLegacyFallback: true,
+      fallbackReason: "missing-avatar-payload",
     } satisfies AvatarProfile;
 
-    expect(resolveMenuAvatarSelection(profile, "Low")).toMatchObject({
+    expect(resolveMenuAvatarSelection(profile)).toMatchObject({
       avatarId: 4,
       code: "LEGACY_EVOLVE",
     });
   });
 
-  it("uses rhythm fallback when avatar data is missing", () => {
-    expect(resolveMenuAvatarSelection(null, "Chill")).toMatchObject({
+  it("uses explicit default avatar fallback when avatar data is missing", () => {
+    expect(resolveMenuAvatarSelection(null)).toMatchObject({
       avatarId: 2,
       code: "LEGACY_CHILL",
     });

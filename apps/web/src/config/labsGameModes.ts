@@ -1,5 +1,4 @@
 import { OFFICIAL_LANDING_CONTENT, type Language } from '../content/officialLandingContent';
-import { GAME_MODE_META } from '../lib/gameModeMeta';
 import type { GameMode } from '../lib/gameMode';
 
 export type LabsGameModeId = 'low' | 'chill' | 'flow' | 'evolve';
@@ -18,28 +17,28 @@ export const LABS_GAME_MODES: Record<LabsGameModeId, LabsGameModeConfig> = {
     gameMode: 'Low',
     image: '/LowVertical.png',
     loop: '/avatars/low-basic.mp4',
-    accentColor: GAME_MODE_META.Low.accentColor,
+    accentColor: 'var(--color-accent-secondary)',
   },
   chill: {
     id: 'chill',
     gameMode: 'Chill',
     image: '/ChillVertical.png',
     loop: '/avatars/chill-basic.mp4',
-    accentColor: GAME_MODE_META.Chill.accentColor,
+    accentColor: 'var(--color-accent-secondary)',
   },
   flow: {
     id: 'flow',
     gameMode: 'Flow',
     image: '/FlowVertical.png',
     loop: '/avatars/flow-basic.mp4',
-    accentColor: GAME_MODE_META.Flow.accentColor,
+    accentColor: 'var(--color-accent-secondary)',
   },
   evolve: {
     id: 'evolve',
     gameMode: 'Evolve',
     image: '/EvolveVertical.png',
     loop: '/avatars/evolve-basic.mp4',
-    accentColor: GAME_MODE_META.Evolve.accentColor,
+    accentColor: 'var(--color-accent-secondary)',
   },
 };
 
@@ -75,4 +74,3 @@ export function getLabsGameModeConfig(modeId: string | null | undefined): LabsGa
   const resolvedId = resolveLabsGameModeId(modeId);
   return LABS_GAME_MODES[resolvedId];
 }
-
