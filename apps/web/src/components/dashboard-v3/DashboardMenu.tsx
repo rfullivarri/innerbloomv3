@@ -32,7 +32,7 @@ import {
   type ModerationTrackerConfig,
   type ModerationTrackerType,
 } from "../../lib/api";
-import type { AvatarProfile } from "../../lib/avatarProfile";
+import { resolveAvatarMedia, resolveAvatarTheme, type AvatarProfile } from "../../lib/avatarProfile";
 import { normalizeGameModeValue, type GameMode } from "../../lib/gameMode";
 import { GAME_MODE_META, GAME_MODE_ORDER } from "../../lib/gameModeMeta";
 import type { ResolvedTheme } from "../../theme/themePreference";
@@ -70,14 +70,14 @@ type MenuAvatarOption = {
   avatarId: number;
   code: "LEGACY_LOW" | "LEGACY_CHILL" | "LEGACY_FLOW" | "LEGACY_EVOLVE";
   name: string;
-  previewMode: GameMode;
+  accent: string;
 };
 
 const MENU_AVATAR_OPTIONS: MenuAvatarOption[] = [
-  { avatarId: 1, code: "LEGACY_LOW", name: "Legacy Low", previewMode: "Low" },
-  { avatarId: 2, code: "LEGACY_CHILL", name: "Legacy Chill", previewMode: "Chill" },
-  { avatarId: 3, code: "LEGACY_FLOW", name: "Legacy Flow", previewMode: "Flow" },
-  { avatarId: 4, code: "LEGACY_EVOLVE", name: "Legacy Evolve", previewMode: "Evolve" },
+  { avatarId: 1, code: "LEGACY_LOW", name: "Legacy Low", accent: "#58CC02" },
+  { avatarId: 2, code: "LEGACY_CHILL", name: "Legacy Chill", accent: "#00C2FF" },
+  { avatarId: 3, code: "LEGACY_FLOW", name: "Legacy Flow", accent: "#A855F7" },
+  { avatarId: 4, code: "LEGACY_EVOLVE", name: "Legacy Evolve", accent: "#FF6A00" },
 ];
 
 const AVATAR_FALLBACK_BY_MODE: Record<GameMode, MenuAvatarOption["code"]> = {
@@ -128,22 +128,6 @@ export function isDemandingModeJump(currentMode: GameMode | null, selectedMode: 
 }
 
 
-function toMetaModeKey(mode: GameMode): keyof typeof GAME_MODE_META {
-  if (mode === "Low") return "Low";
-  if (mode === "Chill") return "Chill";
-  if (mode === "Flow") return "Flow";
-  return "Evolve";
-}
-
-function getModeBannerObjectPosition(mode: GameMode): string {
-  const positions: Record<GameMode, string> = {
-    Low: '65% 45%',
-    Chill: '60% 45%',
-    Flow: '70% 45%',
-    Evolve: '65% 50%',
-  };
-  return positions[mode];
-}
 export function getWidgetsRefreshingOverlayClass(theme: ResolvedTheme): string {
   return theme === "light"
     ? "bg-[color:var(--color-overlay-3)]"
@@ -412,6 +396,7 @@ export function DashboardMenu({
     () => isDemandingModeJump(normalizedCurrentMode, selectedOrCurrentMode),
     [normalizedCurrentMode, selectedOrCurrentMode],
   );
+  const currentAvatarTheme = useMemo(() => resolveAvatarTheme(currentAvatarProfile), [currentAvatarProfile]);
 
   const menuRowClassName =
     "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40";
@@ -1241,7 +1226,7 @@ export function DashboardMenu({
                             {GAME_MODE_ORDER.map((mode) => {
                               const isSelected = (selectedOrCurrentMode ?? 'Flow') === mode;
                               const isCurrent = (normalizedCurrentMode ?? 'Flow') === mode;
-                              const content = GAME_MODE_META[toMetaModeKey(mode)];
+                              const content = GAME_MODE_META[mode];
                               return (
                                 <button
                                   key={mode}
@@ -1249,7 +1234,6 @@ export function DashboardMenu({
                                   onClick={() => handleSelectGameMode(mode)}
                                   className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(125,211,252,0.65),0_0_20px_rgba(56,189,248,0.2)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
                                 >
-                                  <span className="absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: content.accentColor }} aria-hidden />
                                   <div className="ml-2 space-y-2">
                                     <div className="flex items-center justify-between gap-2">
                                       <p className="text-sm font-semibold text-[color:var(--color-text)]">{mode}</p>
@@ -1257,13 +1241,17 @@ export function DashboardMenu({
                                         {content.frequency[language]}
                                       </span>
                                     </div>
-                                    <img
-                                      src={content.avatarSrc}
-                                      alt={content.avatarAlt[language]}
-                                      className="h-20 w-full rounded-xl border border-white/10 object-cover"
-                                      style={{ objectPosition: getModeBannerObjectPosition(mode) }}
-                                      loading="lazy"
-                                    />
+                                    <div
+                                      className="flex h-20 w-full items-center justify-center rounded-xl border border-white/10 px-3 text-center"
+                                      style={{
+                                        background: `linear-gradient(135deg, ${currentAvatarTheme.accent}33, ${currentAvatarTheme.accent}11)`,
+                                      }}
+                                      aria-hidden="true"
+                                    >
+                                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-text)]">
+                                        {mode} · {content.frequency[language]}
+                                      </p>
+                                    </div>
                                     <p className="line-clamp-2 text-[11px] text-[color:var(--color-text-dim)]">{content.objective[language]}</p>
                                     {isCurrent ? (
                                       <span className="inline-flex rounded-full border border-emerald-300/40 bg-emerald-400/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
@@ -1348,7 +1336,17 @@ export function DashboardMenu({
                             {MENU_AVATAR_OPTIONS.map((avatarOption) => {
                               const isSelected = selectedOrCurrentAvatarId === avatarOption.avatarId;
                               const isCurrent = currentAvatarSelection.avatarId === avatarOption.avatarId;
-                              const modeMeta = GAME_MODE_META[toMetaModeKey(avatarOption.previewMode)];
+                              const previewProfile: AvatarProfile = {
+                                avatarId: avatarOption.avatarId,
+                                avatarCode: avatarOption.code,
+                                avatarName: avatarOption.name,
+                                theme: { accent: avatarOption.accent, chip: "aqua" },
+                                isLegacyFallback: true,
+                              };
+                              const avatarMedia = resolveAvatarMedia(previewProfile, {
+                                rhythm: normalizedCurrentMode,
+                                surface: "dashboard-menu",
+                              });
                               return (
                                 <button
                                   key={avatarOption.avatarId}
@@ -1356,19 +1354,17 @@ export function DashboardMenu({
                                   onClick={() => setSelectedAvatarId(avatarOption.avatarId)}
                                   className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(125,211,252,0.65),0_0_20px_rgba(56,189,248,0.2)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
                                 >
-                                  <span className="absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: modeMeta.accentColor }} aria-hidden />
                                   <div className="ml-2 space-y-2">
                                     <div className="flex items-center justify-between gap-2">
                                       <p className="text-sm font-semibold text-[color:var(--color-text)]">{avatarOption.name}</p>
                                       <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text-dim)]">
-                                        {avatarOption.previewMode}
+                                        {normalizedCurrentMode ?? "Chill"}
                                       </span>
                                     </div>
                                     <img
-                                      src={modeMeta.avatarSrc}
-                                      alt={modeMeta.avatarAlt[language]}
+                                      src={avatarMedia.imageUrl ?? "/FlowMood.jpg"}
+                                      alt={avatarMedia.alt}
                                       className="h-20 w-full rounded-xl border border-white/10 object-cover"
-                                      style={{ objectPosition: getModeBannerObjectPosition(avatarOption.previewMode) }}
                                       loading="lazy"
                                     />
                                     {isCurrent ? (
@@ -1628,6 +1624,7 @@ export function DashboardMenu({
                   open={isUpgradeModalOpen && hasActiveUpgradeCta}
                   currentMode={modeUpgradeSuggestion?.current_mode ?? null}
                   nextMode={modeUpgradeSuggestion?.suggested_mode ?? null}
+                  avatarProfile={currentAvatarProfile}
                   isSubmitting={isUpgradeSubmitting}
                   onConfirm={handleAcceptUpgrade}
                   onClose={() => setIsUpgradeModalOpen(false)}

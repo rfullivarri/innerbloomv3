@@ -1,7 +1,7 @@
 import { Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
-import { GAME_MODE_META } from '../../lib/gameModeMeta';
+import { resolveAvatarTheme, type AvatarProfile } from '../../lib/avatarProfile';
 import { normalizeGameModeValue } from '../../lib/gameMode';
 import { buildGameModeChip, GameModeChip } from '../common/GameModeChip';
 
@@ -9,6 +9,7 @@ interface UpgradeRecommendationModalProps {
   open: boolean;
   currentMode: string | null;
   nextMode: string | null;
+  avatarProfile: AvatarProfile | null;
   isSubmitting: boolean;
   onConfirm: () => Promise<void>;
   onClose: () => void;
@@ -23,22 +24,17 @@ function formatMode(mode: string | null): string {
   return mode.trim().toUpperCase();
 }
 
-function resolveModeMeta(mode: string | null) {
-  const normalized = normalizeGameModeValue(mode);
-  if (!normalized) return null;
-  return GAME_MODE_META[normalized];
-}
-
 export function UpgradeRecommendationModal({
   open,
   currentMode,
   nextMode,
+  avatarProfile,
   isSubmitting,
   onConfirm,
   onClose,
   onOpenAllModes,
 }: UpgradeRecommendationModalProps) {
-  const { t, language } = usePostLoginLanguage();
+  const { t } = usePostLoginLanguage();
   const [dragProgress, setDragProgress] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -48,8 +44,9 @@ export function UpgradeRecommendationModal({
 
   const confirmInFlightRef = useRef(false);
 
-  const currentMeta = useMemo(() => resolveModeMeta(currentMode), [currentMode]);
-  const nextMeta = useMemo(() => resolveModeMeta(nextMode), [nextMode]);
+  const currentRhythm = useMemo(() => normalizeGameModeValue(currentMode), [currentMode]);
+  const nextRhythm = useMemo(() => normalizeGameModeValue(nextMode), [nextMode]);
+  const avatarTheme = useMemo(() => resolveAvatarTheme(avatarProfile), [avatarProfile]);
   const nextModeChip = useMemo(() => buildGameModeChip(nextMode), [nextMode]);
 
   useEffect(() => {
@@ -181,19 +178,19 @@ export function UpgradeRecommendationModal({
                   <span className="text-3xl font-bold text-black/75" aria-hidden="true">→</span>
                 </div>
 
-                {nextMeta ? (
+                {nextRhythm ? (
                   <div className="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 flex-col items-center gap-1">
-                    <img
-                      src={nextMeta.avatarSrc}
-                      alt={nextMeta.avatarAlt[language]}
-                      draggable={false}
-                      className="h-14 w-14 rounded-xl border border-black/10 object-cover shadow-[0_10px_22px_rgba(15,23,42,0.28)] select-none"
-                    />
+                    <div
+                      className="flex h-14 w-14 items-center justify-center rounded-xl border border-black/10 bg-white/75 text-[10px] font-bold uppercase tracking-[0.14em] shadow-[0_10px_22px_rgba(15,23,42,0.28)]"
+                      aria-hidden="true"
+                    >
+                      NEXT
+                    </div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.08em]">{formatMode(nextMode)}</p>
                   </div>
                 ) : null}
 
-                {currentMeta ? (
+                {currentRhythm ? (
                   <button
                     ref={handleRef}
                     type="button"
@@ -221,12 +218,13 @@ export function UpgradeRecommendationModal({
                     }}
                     aria-label={t('dashboard.upgradeCta.dragHint')}
                   >
-                    <img
-                      src={currentMeta.avatarSrc}
-                      alt={currentMeta.avatarAlt[language]}
-                      draggable={false}
-                      className="h-14 w-14 rounded-xl border border-black/10 object-cover shadow-[0_10px_22px_rgba(15,23,42,0.28)] select-none"
-                    />
+                    <div
+                      className="flex h-14 w-14 items-center justify-center rounded-xl border border-black/10 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_10px_22px_rgba(15,23,42,0.28)]"
+                      style={{ backgroundColor: avatarTheme.accent }}
+                      aria-hidden="true"
+                    >
+                      NOW
+                    </div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.08em]">{formatMode(currentMode)}</p>
                   </button>
                 ) : null}
