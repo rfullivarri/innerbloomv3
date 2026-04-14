@@ -156,8 +156,14 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
   }
 
   if (forcedOverride) {
-    const forcedNextModeCode = forcedOverride.forced_next_mode ?? resolveNextGameModeCode(user.current_mode);
-    const forcedNextMode = forcedNextModeCode ? await resolveGameModeByCode(pool, forcedNextModeCode) : null;
+    const expectedNextModeCode = resolveNextGameModeCode(user.current_mode);
+    const forcedNextModeCode = (forcedOverride.forced_next_mode ?? '').trim().toUpperCase();
+    const validForcedNextModeCode = expectedNextModeCode && forcedNextModeCode === expectedNextModeCode
+      ? forcedNextModeCode
+      : null;
+    const forcedNextMode = validForcedNextModeCode
+      ? await resolveGameModeByCode(pool, validForcedNextModeCode)
+      : null;
     const canSuggest = Boolean(forcedNextMode);
     const suggestionState = await upsertSuggestionState(pool, {
       userId,
@@ -298,11 +304,20 @@ export async function acceptGameModeUpgradeSuggestion(userId: string): Promise<G
       throw new HttpError(409, 'upgrade_suggestion_not_eligible', 'Upgrade suggestion is not eligible');
     }
 
-    const currentMode = await resolveGameModeByCode(pool, suggestion.current_mode);
+    const userCurrentMode = await getUserCurrentMode(pool, userId);
+    if (!userCurrentMode.game_mode_id || !userCurrentMode.current_mode) {
+      throw new HttpError(409, 'upgrade_suggestion_stale', 'Upgrade suggestion is stale');
+    }
+
+    const expectedSuggestedMode = resolveNextGameModeCode(userCurrentMode.current_mode);
+    if (!expectedSuggestedMode || expectedSuggestedMode !== suggestion.suggested_mode) {
+      throw new HttpError(409, 'upgrade_suggestion_stale', 'Upgrade suggestion is stale');
+    }
+
     const suggestionState = await getSuggestionStateForPeriod(pool, {
       userId,
       periodKey: suggestion.period_key,
-      currentGameModeId: currentMode.game_mode_id,
+      currentGameModeId: userCurrentMode.game_mode_id,
     });
 
     if (!suggestionState) {
@@ -321,7 +336,7 @@ export async function acceptGameModeUpgradeSuggestion(userId: string): Promise<G
         userId,
         nextGameModeId: nextMode.game_mode_id,
         nextModeCode: nextMode.code,
-        expectedCurrentGameModeId: currentMode.game_mode_id,
+        expectedCurrentGameModeId: userCurrentMode.game_mode_id,
       });
     } catch (error) {
       if (error instanceof HttpError && error.code === 'game_mode_change_conflict') {
@@ -340,7 +355,7 @@ export async function acceptGameModeUpgradeSuggestion(userId: string): Promise<G
           AND period_key = $2
           AND current_game_mode_id = $3
       RETURNING accepted_at`,
-      [userId, suggestion.period_key, currentMode.game_mode_id],
+      [userId, suggestion.period_key, userCurrentMode.game_mode_id],
     );
 
     await pool.query('COMMIT');

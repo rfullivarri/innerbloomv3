@@ -135,3 +135,11 @@ High risk = user-facing drift likely, broad blast radius, or inconsistent identi
 ## Quick conclusion
 
 Decoupling foundation exists, but **mode-derived visual assumptions remain widespread in frontend render paths**. The next safest sequence is dashboard controls/chips → missions → onboarding primary flows → cross-platform callback identity → metadata/demo cleanup.
+
+
+## Update 2026-04-14 (resolved in this phase)
+
+- ✅ `UpgradeRecommendationModal.tsx` no longer uses avatar-driven accents/chips for rhythm upgrade visuals.
+- ✅ `DashboardMenu.tsx` and banner CTA now open the same rhythm-only modal contract and share the same neutral placeholder model for current/next rhythm visuals.
+- ✅ Forced CTA rule was hardened: admin override controls CTA visibility and only allows the next sequential valid rhythm from the user's real current mode (LOW→CHILL, CHILL→FLOW, FLOW→EVOLVE, EVOLVE→none).
+- ✅ Accept path now validates against the user's real current mode to avoid stale/invalid forced combinations and prevent 409 conflicts caused by fake forced current state.
