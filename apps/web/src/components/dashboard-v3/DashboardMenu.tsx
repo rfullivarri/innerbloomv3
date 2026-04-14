@@ -858,12 +858,11 @@ export function DashboardMenu({
                         onClick={handleOpenProfile}
                         className={`${menuRowClassName} h-14`}
                       >
-                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-faint)]">
-                        <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
-                          <path d="M20 21a8 8 0 0 0-16 0" />
-                          <circle cx="12" cy="8" r="4" />
-                        </MenuIcon>
-                      </span>
+                      <img
+                        src={currentAvatarPreviewImage}
+                        alt={t('dashboard.menu.avatarAlt')}
+                        className="h-9 w-9 rounded-full border border-[color:var(--color-border-soft)] object-cover"
+                      />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-[color:var(--color-text)]">
                           {user?.fullName || user?.username || t('dashboard.menu.profileFallback')}
@@ -874,11 +873,6 @@ export function DashboardMenu({
                           </p>
                         ) : null}
                       </div>
-                      <img
-                        src={currentAvatarPreviewImage}
-                        alt={t('dashboard.menu.avatarAlt')}
-                        className="h-9 w-9 rounded-full border border-[color:var(--color-border-soft)] object-cover"
-                      />
                       </button>
                     </section>
 
@@ -897,7 +891,9 @@ export function DashboardMenu({
                         <span>{hasActiveUpgradeCta ? t('dashboard.menu.upgradeAvailable') : t('dashboard.menu.changeGameMode')}</span>
                         {hasActiveUpgradeCta ? <span className="rounded-full border border-black/20 bg-white/35 px-2 py-0.5 text-[10px] font-bold uppercase text-black shadow-[0_8px_20px_rgba(167,112,239,0.35)] backdrop-blur-sm">7d</span> : null}
                       </div>
-                      <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow', { avatarProfile: currentAvatarProfile })} />
+                      <span className="[&_.ib-game-mode-chip__glow]:opacity-10 [&_.ib-game-mode-chip__glow]:blur-[3px] [&_.ib-game-mode-chip__inner]:gap-1 [&_.ib-game-mode-chip__inner]:px-[0.56rem] [&_.ib-game-mode-chip__inner]:py-[0.18rem] [&_.ib-game-mode-chip__inner]:text-[8px] [&_.ib-game-mode-chip__inner]:tracking-[0.16em] [&_.ib-game-mode-chip__inner_span:first-child]:h-1 [&_.ib-game-mode-chip__inner_span:first-child]:w-1">
+                        <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow', { avatarProfile: currentAvatarProfile })} />
+                      </span>
                     </button>
                     <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
                     <button
