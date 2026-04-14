@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 const SECTIONS = [
   {
     title: 'Core Engine',
-    description: 'Growth Calibration + Mode Upgrade Analysis + Habit Achievement en una sola operación.',
+    description: 'Growth Calibration + Rhythm Upgrade Suggestion Analysis + Habit Achievement en una sola operación.',
     to: '/admin/core-engine',
   },
   {

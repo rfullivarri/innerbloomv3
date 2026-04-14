@@ -132,7 +132,10 @@ export const dashboardTranslations = {
   'dashboard.upgradeCta.viewAllModes': { es: 'Ver todos los ritmos', en: 'View all rhythms' },
   'dashboard.upgradeCta.success': { es: 'Nuevo ritmo activado: {{nextMode}}', en: 'New rhythm activated: {{nextMode}}' },
   'dashboard.upgradeCta.successSubtitle': { es: 'Tu intensidad semanal ya se actualizó.', en: 'Your weekly intensity has been updated.' },
-  'dashboard.upgradeCta.welcomeToast': { es: 'Bienvenido a tu nuevo ritmo {{nextMode}}', en: 'Welcome to your new rhythm {{nextMode}}' },
+  'dashboard.upgradeCta.welcomeToast': {
+    es: 'Bienvenido a tu nuevo ritmo de intensidad {{nextMode}}',
+    en: 'Welcome to your new {{nextMode}} intensity rhythm',
+  },
   'dashboard.upgradeCta.finalAction': { es: 'Seguir con mi Journey', en: 'Continue my journey' },
   'dashboard.upgradeCta.close': { es: 'Cerrar', en: 'Close' },
   'dashboard.upgradeCta.updating': { es: 'Actualizando...', en: 'Updating...' },

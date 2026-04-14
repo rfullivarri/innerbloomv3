@@ -97,7 +97,7 @@ export function CoreEnginePage() {
       setCtaExpiresAt(ctaRes.item?.expires_at ? ctaRes.item.expires_at.slice(0, 16) : '');
     } catch (error) {
       console.error('[admin2][core-engine] failed to load mode data', error);
-      setAnalysisError('No se pudo cargar el análisis/override de mode upgrade.');
+      setAnalysisError('No se pudo cargar el análisis/override de Rhythm Upgrade Suggestion.');
     } finally {
       setAnalysisLoading(false);
       setCtaLoading(false);
@@ -268,7 +268,7 @@ export function CoreEnginePage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
       <header className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--admin-muted)]">Core Engine v2</p>
-        <h2 className="mt-1 text-2xl font-semibold tracking-tight">Growth Calibration · Mode Upgrade Analysis · Habit Achievement</h2>
+        <h2 className="mt-1 text-2xl font-semibold tracking-tight">Growth Calibration · Rhythm Upgrade Suggestion Analysis · Habit Achievement</h2>
       </header>
 
       <section className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4">
@@ -372,7 +372,7 @@ export function CoreEnginePage() {
         </article>
 
         <article className="rounded-2xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 text-sm">
-          <h3 className="font-semibold">Mode Upgrade Analysis</h3>
+          <h3 className="font-semibold">Rhythm Upgrade Suggestion Analysis</h3>
           <p className="text-xs text-[color:var(--admin-muted)]">Distingue análisis real vs forced/admin override y permite conmutar entre ambos.</p>
           <div className="mt-2 flex flex-wrap gap-2">
             <button type="button" onClick={() => void runMonthly()} disabled={!selectedUser || runningMonthly} className={BTN_SECONDARY}>{runningMonthly ? 'Running…' : 'Run Monthly Analysis'}</button>

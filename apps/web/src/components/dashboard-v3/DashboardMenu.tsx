@@ -54,6 +54,7 @@ interface DashboardMenuProps {
   currentGameMode: GameMode | string | null;
   currentAvatarProfile: AvatarProfile | null;
   onGameModeChanged: () => Promise<void> | void;
+  onUpgradeAccepted?: (nextMode: string | null) => void;
   onOpenScheduler?: () => void;
   moderation: {
     configs: Record<ModerationTrackerType, ModerationTrackerConfig> | null;
@@ -226,6 +227,7 @@ export function DashboardMenu({
   currentGameMode,
   currentAvatarProfile,
   onGameModeChanged,
+  onUpgradeAccepted,
   onOpenScheduler,
   moderation,
 }: DashboardMenuProps) {
@@ -532,20 +534,27 @@ export function DashboardMenu({
 
     setIsUpgradeSubmitting(true);
     try {
-      const response = await acceptGameModeUpgradeSuggestion();
+      await acceptGameModeUpgradeSuggestion();
       await onGameModeChanged();
       await modeUpgradeSuggestionRequest.reload();
-      setToast({
-        tone: 'success',
-        message: t('dashboard.upgradeCta.welcomeToast', { nextMode: (response.suggestion.suggested_mode ?? '').toUpperCase() || 'RHYTHM' }),
-      });
     } catch (error) {
       console.error('[dashboard-menu] failed to accept game mode upgrade', error);
       throw error;
     } finally {
       setIsUpgradeSubmitting(false);
     }
-  }, [isUpgradeSubmitting, modeUpgradeSuggestionRequest, onGameModeChanged, setToast, t]);
+  }, [isUpgradeSubmitting, modeUpgradeSuggestionRequest, onGameModeChanged]);
+
+  const handleUpgradeAcceptedSuccess = useCallback(
+    (acceptedMode: string | null) => {
+      const fallbackMode = modeUpgradeSuggestion?.suggested_mode ?? null;
+      const modeLabel = (acceptedMode ?? fallbackMode ?? "RHYTHM").trim().toUpperCase();
+      setIsUpgradeModalOpen(false);
+      handleClose();
+      onUpgradeAccepted?.(modeLabel);
+    },
+    [handleClose, modeUpgradeSuggestion?.suggested_mode, onUpgradeAccepted],
+  );
 
   const handleSignOut = useCallback(async () => {
     handleClose();
@@ -1683,6 +1692,7 @@ export function DashboardMenu({
                   nextMode={modeUpgradeSuggestion?.suggested_mode ?? null}
                   isSubmitting={isUpgradeSubmitting}
                   onConfirm={handleAcceptUpgrade}
+                  onAcceptedSuccess={handleUpgradeAcceptedSuccess}
                   onClose={() => setIsUpgradeModalOpen(false)}
                   onOpenAllModes={() => {
                     setIsUpgradeModalOpen(false);
