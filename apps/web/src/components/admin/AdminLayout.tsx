@@ -359,7 +359,7 @@ export function AdminLayout() {
         console.error('[admin] failed to fetch mode upgrade analysis', error);
         if (!cancelled) {
           setModeUpgradeAnalysis(null);
-          setModeUpgradeAnalysisError('No se pudo cargar el análisis de mode upgrade.');
+          setModeUpgradeAnalysisError('No se pudo cargar el análisis de Rhythm Upgrade Suggestion.');
         }
       })
       .finally(() => {
@@ -396,7 +396,7 @@ export function AdminLayout() {
         console.error('[admin] failed to fetch mode upgrade CTA override', error);
         if (!cancelled) {
           setModeUpgradeCtaOverride(null);
-          setModeUpgradeCtaOverrideError('No se pudo cargar el override de Upgrade CTA.');
+          setModeUpgradeCtaOverrideError('No se pudo cargar el override de Rhythm Upgrade Suggestion CTA.');
         }
       })
       .finally(() => {
@@ -507,7 +507,7 @@ export function AdminLayout() {
       setModeUpgradeCtaOverrideMessage('Forced CTA aplicado.');
     } catch (error) {
       console.error('[admin] failed to save mode upgrade CTA override', error);
-      setModeUpgradeCtaOverrideError('No se pudo guardar el override de Upgrade CTA.');
+      setModeUpgradeCtaOverrideError('No se pudo guardar el override de Rhythm Upgrade Suggestion CTA.');
     } finally {
       setModeUpgradeCtaOverrideSaving(false);
     }
@@ -530,7 +530,7 @@ export function AdminLayout() {
       setModeUpgradeCtaOverrideMessage('Forced CTA limpiado.');
     } catch (error) {
       console.error('[admin] failed to clear mode upgrade CTA override', error);
-      setModeUpgradeCtaOverrideError('No se pudo limpiar el override de Upgrade CTA.');
+      setModeUpgradeCtaOverrideError('No se pudo limpiar el override de Rhythm Upgrade Suggestion CTA.');
     } finally {
       setModeUpgradeCtaOverrideClearing(false);
     }
@@ -1182,8 +1182,8 @@ export function AdminLayout() {
             <div className="flex flex-col gap-4 rounded-xl border border-cyan-700/40 bg-cyan-900/10 p-4 text-sm text-cyan-100">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">MODE UPGRADE ANALYSIS</p>
-                  <p className="text-sm text-cyan-100/90">Inspección read-only del review mensual y elegibilidad de upgrade.</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">RHYTHM UPGRADE SUGGESTION ANALYSIS</p>
+                  <p className="text-sm text-cyan-100/90">Inspección read-only del review mensual y elegibilidad de la sugerencia de upgrade.</p>
                   {monthlyReviewMessage ? <p className="text-xs font-semibold text-emerald-300">{monthlyReviewMessage}</p> : null}
                   {monthlyReviewError ? <p className="text-xs font-semibold text-rose-300">{monthlyReviewError}</p> : null}
                   {modeUpgradeAnalysisError ? <p className="text-xs font-semibold text-rose-300">{modeUpgradeAnalysisError}</p> : null}
@@ -1200,7 +1200,7 @@ export function AdminLayout() {
                       : 'border border-cyan-700/60 bg-cyan-900/30 text-cyan-100 hover:border-cyan-400/60 hover:text-cyan-50'
                   }`}
                 >
-                  {runningMonthlyReview ? 'Running…' : 'Run Monthly Analysis'}
+                  {runningMonthlyReview ? 'Running…' : 'Run Monthly Rhythm Upgrade Suggestion Analysis'}
                 </button>
                 <button
                   type="button"
@@ -1212,7 +1212,7 @@ export function AdminLayout() {
                       : 'border border-cyan-700/60 bg-cyan-500/10 text-cyan-100 hover:border-cyan-500/80 hover:text-cyan-50'
                   }`}
                 >
-                  {runningRollingAnalysis ? 'Running…' : 'Recompute Rolling 30d Analysis'}
+                  {runningRollingAnalysis ? 'Running…' : 'Recompute Rolling Rhythm Upgrade Suggestion Analysis'}
                 </button>
               </div>
               <div className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,220px)_1fr_auto] md:items-end">
@@ -1263,7 +1263,7 @@ export function AdminLayout() {
                       checked={modeUpgradeCtaOverrideEnabled}
                       onChange={(event) => setModeUpgradeCtaOverrideEnabled(event.target.checked)}
                     />
-                    Force Upgrade CTA
+                    Force Rhythm Upgrade Suggestion CTA
                   </label>
                   <p className="rounded-md border border-cyan-700/50 bg-slate-900/70 px-2 py-1 text-xs normal-case tracking-normal text-slate-100">
                     Current real: <strong>{modeUpgradeCurrentMode ?? '—'}</strong>

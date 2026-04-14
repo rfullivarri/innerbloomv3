@@ -102,6 +102,7 @@ import { ModerationWidget as ModerationStatusWidget } from "../components/modera
 import { ModerationEditSheet } from "../components/dashboard-v3/ModerationEditSheet";
 import { ModerationOnboardingSuggestion } from "../components/dashboard-v3/ModerationOnboardingSuggestion";
 import { ModeUpgradeSuggestionCTA } from "../components/dashboard-v3/ModeUpgradeSuggestionCTA";
+import { ToastBanner } from "../components/common/ToastBanner";
 import {
   readModerationOnboardingIntentFlag,
   writeModerationOnboardingIntentFlag,
@@ -170,7 +171,9 @@ export default function DashboardV3Page() {
   const { backendUserId, status, error, reload, clerkUserId, profile, avatarProfile } =
     useBackendUser();
   const location = useLocation();
-  const { language } = usePostLoginLanguage();
+  const { language, t } = usePostLoginLanguage();
+  const [upgradeWelcomeBanner, setUpgradeWelcomeBanner] = useState<string | null>(null);
+  const upgradeWelcomeTimeoutRef = useRef<number | null>(null);
   const sections = getDashboardSections(location.pathname, language);
   const activeSection = getActiveSection(location.pathname, sections, language);
   const overviewSection = getDashboardSectionConfig(
@@ -206,6 +209,34 @@ export default function DashboardV3Page() {
   const weeklyWrapped = useWeeklyWrapped(backendUserId);
   const isAppMode = useAppMode();
   const [isJourneyGenerating, setIsJourneyGenerating] = useState(false);
+
+  const handleUpgradeAccepted = useCallback((nextMode: string | null) => {
+    const modeLabel = (nextMode ?? "RHYTHM").trim().toUpperCase();
+    setUpgradeWelcomeBanner(t("dashboard.upgradeCta.welcomeToast", { nextMode: modeLabel }));
+    void reload();
+  }, [reload, t]);
+
+  useEffect(() => {
+    if (!upgradeWelcomeBanner) {
+      return;
+    }
+
+    if (upgradeWelcomeTimeoutRef.current) {
+      window.clearTimeout(upgradeWelcomeTimeoutRef.current);
+    }
+
+    upgradeWelcomeTimeoutRef.current = window.setTimeout(() => {
+      setUpgradeWelcomeBanner(null);
+      upgradeWelcomeTimeoutRef.current = null;
+    }, 8000);
+
+    return () => {
+      if (upgradeWelcomeTimeoutRef.current) {
+        window.clearTimeout(upgradeWelcomeTimeoutRef.current);
+        upgradeWelcomeTimeoutRef.current = null;
+      }
+    };
+  }, [upgradeWelcomeBanner]);
 
   useEffect(() => {
     console.info('[dashboard-v3] mounted', {
@@ -883,6 +914,7 @@ export default function DashboardV3Page() {
                 currentGameMode={gameMode}
                 currentAvatarProfile={avatarProfile}
                 onGameModeChanged={reload}
+                onUpgradeAccepted={handleUpgradeAccepted}
                 onOpenScheduler={handleOpenReminderScheduler}
                 moderation={{
                   configs: moderation.configs,
@@ -945,6 +977,13 @@ export default function DashboardV3Page() {
         />
         <main className="flex-1 pb-24 md:pb-0" data-light-scope="dashboard-v3">
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
+            {upgradeWelcomeBanner ? (
+              <ToastBanner
+                tone="success"
+                message={upgradeWelcomeBanner}
+                className="mb-4 border-black/15 bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] text-black shadow-[0_14px_30px_rgba(167,112,239,0.35)]"
+              />
+            ) : null}
             {isLoadingProfile && <ProfileSkeleton />}
 
             {failedToLoadProfile && !isLoadingProfile && (
@@ -973,10 +1012,10 @@ export default function DashboardV3Page() {
                       onOpenReminderScheduler={handleOpenReminderScheduler}
                       journeyReadyOpen={journeyReadyOpen}
                       onOpenModerationEdit={() => setIsModerationEditOpen(true)}
-                      onProfileRefresh={reload}
                       shouldShowFirstDailyQuestCta={shouldShowFirstDailyQuestCta}
                       onOpenDailyQuest={handleOpenDaily}
                       showOnboardingCompletionBanner={showOnboardingCompletionBanner}
+                      onUpgradeAccepted={handleUpgradeAccepted}
                     />
                   }
                 />
@@ -1118,10 +1157,10 @@ interface DashboardOverviewProps {
   onOpenReminderScheduler: () => void;
   journeyReadyOpen?: boolean;
   onOpenModerationEdit: () => void;
-  onProfileRefresh: () => void;
   shouldShowFirstDailyQuestCta: boolean;
   onOpenDailyQuest: () => void;
   showOnboardingCompletionBanner: boolean;
+  onUpgradeAccepted: (nextMode: string | null) => void;
 }
 
 export function DashboardOverview({
@@ -1136,10 +1175,10 @@ export function DashboardOverview({
   onOpenReminderScheduler,
   journeyReadyOpen = false,
   onOpenModerationEdit,
-  onProfileRefresh,
   shouldShowFirstDailyQuestCta,
   onOpenDailyQuest,
   showOnboardingCompletionBanner,
+  onUpgradeAccepted,
 }: DashboardOverviewProps) {
   const trackedPanelInteractionsRef = useRef<Set<"balance" | "streaks">>(
     new Set(),
@@ -1215,7 +1254,7 @@ export function DashboardOverview({
             suggestion={modeUpgradeSuggestion}
             isLoading={modeUpgradeSuggestionRequest.status === "loading"}
             onSuggestionChange={setModeUpgradeSuggestion}
-            onUpgradeAccepted={onProfileRefresh}
+            onUpgradeAccepted={onUpgradeAccepted}
           />
           <Alerts
             hasTasks={dailyQuestReadiness.hasTasks}

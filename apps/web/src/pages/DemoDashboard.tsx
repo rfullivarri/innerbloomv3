@@ -252,10 +252,10 @@ export default function DemoDashboardPage() {
           section={overviewSection}
           onOpenReminderScheduler={() => undefined}
           onOpenModerationEdit={() => undefined}
-          onProfileRefresh={() => undefined}
           shouldShowFirstDailyQuestCta={false}
           onOpenDailyQuest={() => dailyQuestModalRef.current?.open()}
           showOnboardingCompletionBanner={false}
+          onUpgradeAccepted={() => undefined}
         />
       </main>
     </div>

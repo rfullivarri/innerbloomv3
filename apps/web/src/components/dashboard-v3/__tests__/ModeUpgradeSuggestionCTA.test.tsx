@@ -64,7 +64,7 @@ const baseSuggestion = {
 };
 
 describe('ModeUpgradeSuggestionCTA', () => {
-  it('prevents duplicate accept submissions and shows welcome toast', async () => {
+  it('prevents duplicate accept submissions and emits accepted mode once modal confirms success', async () => {
     acceptMock.mockResolvedValue({ ok: true, suggestion: { ...baseSuggestion, accepted_at: '2026-01-01T00:00:00Z' } });
     const onUpgradeAccepted = vi.fn();
     const onSuggestionChange = vi.fn();
@@ -81,8 +81,7 @@ describe('ModeUpgradeSuggestionCTA', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Trigger confirm' }));
 
     await waitFor(() => expect(acceptMock).toHaveBeenCalledTimes(1));
-    expect(onUpgradeAccepted).toHaveBeenCalledWith('evolve');
+    expect(onUpgradeAccepted).toHaveBeenCalledWith('EVOLVE');
     expect(onSuggestionChange).toHaveBeenCalledTimes(1);
-    expect(screen.getByText('Bienvenido a tu nuevo ritmo EVOLVE')).toBeInTheDocument();
   });
 });
