@@ -245,6 +245,7 @@ export function DashboardMenu({
   const [isModerationOpen, setIsModerationOpen] = useState(true);
   const [activePanel, setActivePanel] = useState<MenuPanel>("main");
   const [isGameModeOpen, setIsGameModeOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAvatarOpen, setIsAvatarOpen] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
   const [selectedAvatarId, setSelectedAvatarId] = useState<number | null>(null);
@@ -337,6 +338,7 @@ export function DashboardMenu({
     setIsModerationOpen(true);
     setActivePanel("main");
     setPendingConfirmMode(null);
+    setIsProfileOpen(false);
     setIsGameModeOpen(false);
     setIsAvatarOpen(false);
     setSelectedAvatarId(null);
@@ -403,11 +405,18 @@ export function DashboardMenu({
     "ib-card-contour-shadow relative z-10 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)]";
 
   const handleOpenProfile = useCallback(() => {
+    setIsProfileOpen(true);
+  }, []);
+
+  const handleCloseProfile = useCallback(() => {
+    setIsProfileOpen(false);
+  }, []);
+
+  const handleOpenClerkSettings = useCallback(() => {
     if (typeof openUserProfile === "function") {
       openUserProfile();
     }
-    handleClose();
-  }, [openUserProfile, handleClose]);
+  }, [openUserProfile]);
 
   const handleOpenScheduler = useCallback(() => {
     handleClose();
@@ -629,18 +638,10 @@ export function DashboardMenu({
     [handleClose],
   );
 
-  const initials = useMemo(() => {
-    if (!user) {
-      return "";
-    }
-    if (user.firstName || user.lastName) {
-      return `${user.firstName?.charAt(0) ?? ""}${user.lastName?.charAt(0) ?? ""}`.toUpperCase();
-    }
-    if (user.primaryEmailAddress?.emailAddress) {
-      return user.primaryEmailAddress.emailAddress.slice(0, 2).toUpperCase();
-    }
-    return "";
-  }, [user]);
+  const currentAvatarPreviewImage = useMemo(
+    () => resolveMenuAvatarPreviewImage(currentAvatarSelection),
+    [currentAvatarSelection],
+  );
 
 
   const trackerLabels: Record<ModerationTrackerType, string> = useMemo(() => ({
@@ -848,17 +849,12 @@ export function DashboardMenu({
                         onClick={handleOpenProfile}
                         className={`${menuRowClassName} h-14`}
                       >
-                      {user?.imageUrl ? (
-                        <img
-                          src={user.imageUrl}
-                          alt={t('dashboard.menu.avatarAlt')}
-                          className="h-9 w-9 rounded-xl border border-[color:var(--color-border-soft)] object-cover"
-                        />
-                      ) : (
-                        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-xs font-semibold uppercase text-[color:var(--color-text-dim)]">
-                          {initials || "UX"}
-                        </span>
-                      )}
+                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-faint)]">
+                        <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
+                          <path d="M20 21a8 8 0 0 0-16 0" />
+                          <circle cx="12" cy="8" r="4" />
+                        </MenuIcon>
+                      </span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-[color:var(--color-text)]">
                           {user?.fullName || user?.username || t('dashboard.menu.profileFallback')}
@@ -869,10 +865,11 @@ export function DashboardMenu({
                           </p>
                         ) : null}
                       </div>
-                      <MenuIcon className="h-4 w-4 text-[color:var(--color-text-faint)]">
-                        <path d="M20 21a8 8 0 0 0-16 0" />
-                        <circle cx="12" cy="8" r="4" />
-                      </MenuIcon>
+                      <img
+                        src={currentAvatarPreviewImage}
+                        alt={t('dashboard.menu.avatarAlt')}
+                        className="h-9 w-9 rounded-full border border-[color:var(--color-border-soft)] object-cover"
+                      />
                       </button>
                     </section>
 
@@ -892,21 +889,6 @@ export function DashboardMenu({
                         {hasActiveUpgradeCta ? <span className="rounded-full border border-black/20 bg-white/35 px-2 py-0.5 text-[10px] font-bold uppercase text-black shadow-[0_8px_20px_rgba(167,112,239,0.35)] backdrop-blur-sm">7d</span> : null}
                       </div>
                       <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow', { avatarProfile: currentAvatarProfile })} />
-                    </button>
-                    <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
-                    <button
-                      type="button"
-                      onClick={handleOpenAvatar}
-                      className={menuRowClassName}
-                    >
-                      <MenuIcon>
-                        <circle cx="12" cy="8" r="4" />
-                        <path d="M4 20c2.5-4 13.5-4 16 0" />
-                      </MenuIcon>
-                      <span className="flex-1">{t("dashboard.menu.changeAvatar")}</span>
-                      <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text-dim)]">
-                        {currentAvatarSelection.name}
-                      </span>
                     </button>
                     <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
                     <button
@@ -1200,6 +1182,95 @@ export function DashboardMenu({
                   </div>
                 </div>
 
+                {isProfileOpen ? (
+                  <div className="absolute inset-0 z-20 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center">
+                    <div
+                      className="flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
+                      style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)' }}
+                    >
+                      <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-text-faint)]">{t("dashboard.nav.menu")}</p>
+                          <h3 className="text-base font-semibold text-[color:var(--color-text)]">{t("dashboard.nav.personalSpace")}</h3>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCloseProfile}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)]"
+                          aria-label={t('dashboard.nav.closeMenu')}
+                        >
+                          <MenuIcon className="h-4 w-4 text-[color:var(--color-text-dim)]">
+                            <path d="M6 6l12 12M18 6 6 18" />
+                          </MenuIcon>
+                        </button>
+                      </div>
+
+                      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 [-webkit-overflow-scrolling:touch]">
+                        <div className="space-y-3">
+                          <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] p-4 text-center">
+                            <img
+                              src={currentAvatarPreviewImage}
+                              alt={t('dashboard.menu.avatarAlt')}
+                              className="mx-auto h-20 w-20 rounded-full border border-[color:var(--color-border-soft)] object-cover"
+                            />
+                            <p className="mt-3 text-base font-semibold text-[color:var(--color-text)]">
+                              {user?.fullName || user?.username || t('dashboard.menu.profileFallback')}
+                            </p>
+                            {user?.primaryEmailAddress?.emailAddress ? (
+                              <p className="mt-1 text-sm text-[color:var(--color-text-dim)]">
+                                {user.primaryEmailAddress.emailAddress}
+                              </p>
+                            ) : null}
+                          </div>
+
+                          <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] px-2 py-1">
+                            <button
+                              type="button"
+                              onClick={handleOpenAvatar}
+                              className={menuRowClassName}
+                            >
+                              <MenuIcon>
+                                <circle cx="12" cy="8" r="4" />
+                                <path d="M4 20c2.5-4 13.5-4 16 0" />
+                              </MenuIcon>
+                              <span className="flex-1">{t("dashboard.menu.changeAvatar")}</span>
+                              <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text-dim)]">
+                                {currentAvatarSelection.name}
+                              </span>
+                            </button>
+                            <div className="mx-3 h-px bg-[color:var(--color-border-subtle)]/80" aria-hidden />
+                            <button
+                              type="button"
+                              onClick={handleOpenClerkSettings}
+                              className={menuRowClassName}
+                            >
+                              <MenuIcon>
+                                <rect x="4" y="3" width="16" height="18" rx="2" />
+                                <path d="M9 11h6M9 15h6M9 7h6" />
+                              </MenuIcon>
+                              <span className="flex-1">Clerk settings</span>
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={handleOpenDeleteAccount}
+                            className="mt-1 flex h-11 w-full items-center gap-3 rounded-2xl px-4 text-sm font-normal text-rose-300 transition hover:bg-rose-500/10 hover:text-rose-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+                          >
+                            <MenuIcon className="h-5 w-5 text-rose-300">
+                              <path d="M3 6h18" />
+                              <path d="M8 6V4h8v2" />
+                              <path d="M19 6l-1 14H6L5 6" />
+                              <path d="M10 11v5M14 11v5" />
+                            </MenuIcon>
+                            <span>{t("dashboard.menu.deleteAccount")}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
                 {isGameModeOpen ? (
                   <div className="absolute inset-0 z-20 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center">
                     <div
@@ -1317,7 +1388,7 @@ export function DashboardMenu({
                 ) : null}
 
                 {isAvatarOpen ? (
-                  <div className="absolute inset-0 z-20 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center">
+                  <div className="absolute inset-0 z-30 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center">
                     <div
                       className="flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
                       style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)' }}
@@ -1414,7 +1485,7 @@ export function DashboardMenu({
 
 
                 {isDeleteAccountOpen ? (
-                  <div className="absolute inset-0 z-30 flex items-end bg-black/55 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] backdrop-blur-sm md:items-center">
+                  <div className="absolute inset-0 z-40 flex items-end bg-black/55 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] backdrop-blur-sm md:items-center">
                     <div
                       role="alertdialog"
                       aria-modal="true"
@@ -1504,19 +1575,6 @@ export function DashboardMenu({
                     <path d="M21 12H9" />
                   </MenuIcon>
                   <span>{t('dashboard.menu.signOut')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleOpenDeleteAccount}
-                  className="mt-2 flex h-10 w-full items-center gap-3 rounded-2xl px-4 text-sm font-normal text-rose-300 transition hover:bg-rose-500/10 hover:text-rose-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
-                >
-                  <MenuIcon className="h-5 w-5 text-rose-300">
-                    <path d="M3 6h18" />
-                    <path d="M8 6V4h8v2" />
-                    <path d="M19 6l-1 14H6L5 6" />
-                    <path d="M10 11v5M14 11v5" />
-                  </MenuIcon>
-                  <span>{t("dashboard.menu.deleteAccount")}</span>
                 </button>
                 {iosInstructionsOpen && isIOS && !isNativeApp ? (
                   <div
