@@ -1,5 +1,6 @@
 import type { OnboardingLanguage } from './constants';
 import type { GameMode, Pillar } from './state';
+import { ONBOARDING_RHYTHM_THEME } from './utils/onboardingRhythmTheme';
 
 export type ModerationOption = 'sugar' | 'tobacco' | 'alcohol';
 
@@ -215,10 +216,10 @@ export interface QuickStartManualTaskCandidate {
 }
 
 export const QUICK_START_MODE_SOFT_STYLES: Record<GameMode, { tint: string; border: string; glow: string }> = {
-  LOW: { tint: 'rgba(125, 211, 252, 0.34)', border: 'rgba(125, 211, 252, 0.56)', glow: 'rgba(56, 189, 248, 0.18)' },
-  CHILL: { tint: 'rgba(167, 139, 250, 0.32)', border: 'rgba(196, 181, 253, 0.55)', glow: 'rgba(139, 92, 246, 0.2)' },
-  FLOW: { tint: 'rgba(244, 114, 182, 0.3)', border: 'rgba(251, 182, 206, 0.58)', glow: 'rgba(236, 72, 153, 0.2)' },
-  EVOLVE: { tint: 'rgba(52, 211, 153, 0.28)', border: 'rgba(167, 243, 208, 0.55)', glow: 'rgba(16, 185, 129, 0.2)' },
+  LOW: { tint: ONBOARDING_RHYTHM_THEME.LOW.softTint, border: ONBOARDING_RHYTHM_THEME.LOW.border, glow: ONBOARDING_RHYTHM_THEME.LOW.glow },
+  CHILL: { tint: ONBOARDING_RHYTHM_THEME.CHILL.softTint, border: ONBOARDING_RHYTHM_THEME.CHILL.border, glow: ONBOARDING_RHYTHM_THEME.CHILL.glow },
+  FLOW: { tint: ONBOARDING_RHYTHM_THEME.FLOW.softTint, border: ONBOARDING_RHYTHM_THEME.FLOW.border, glow: ONBOARDING_RHYTHM_THEME.FLOW.glow },
+  EVOLVE: { tint: ONBOARDING_RHYTHM_THEME.EVOLVE.softTint, border: ONBOARDING_RHYTHM_THEME.EVOLVE.border, glow: ONBOARDING_RHYTHM_THEME.EVOLVE.glow },
 };
 
 export function buildQuickStartManualCandidates(args: {

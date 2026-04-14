@@ -35,7 +35,7 @@ import {
 import type { AvatarProfile } from "../../lib/avatarProfile";
 import { normalizeGameModeValue, type GameMode } from "../../lib/gameMode";
 import { GAME_MODE_META, GAME_MODE_ORDER, type LocalizedLanguage } from "../../lib/gameModeMeta";
-import { AVATAR_OPTIONS, resolveAvatarOption, resolveTemporaryLegacyAvatarPreviewImage } from "../../lib/avatarCatalog";
+import { AVATAR_OPTIONS, resolveAvatarOption, resolveAvatarPickerPreviewImage } from "../../lib/avatarCatalog";
 import type { ResolvedTheme } from "../../theme/themePreference";
 import {
   forwardRef,
@@ -85,7 +85,7 @@ export function resolveMenuAvatarTheme(avatarProfile: AvatarProfile | null): { a
 }
 
 export function resolveMenuAvatarPreviewImage(avatarOption: MenuAvatarOption): string {
-  return resolveTemporaryLegacyAvatarPreviewImage(avatarOption) ?? "/FlowMood.jpg";
+  return resolveAvatarPickerPreviewImage(avatarOption) ?? "/FlowMood.jpg";
 }
 
 

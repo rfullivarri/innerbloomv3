@@ -4,8 +4,7 @@ import type { GameMode, Pillar } from '../state';
 import type { QuickStartTask } from '../quickStart';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
 import { buildGameModeChip, GameModeChip } from '../../components/common/GameModeChip';
-import { buildAvatarPreviewProfile, getAvatarOptionById } from '../../lib/avatarCatalog';
-import { resolveAvatarMedia } from '../../lib/avatarProfile';
+import { buildAvatarPreviewProfile, getAvatarOptionById, resolveAvatarPickerPreviewImage } from '../../lib/avatarCatalog';
 
 interface QuickStartSummaryStepProps {
   language?: OnboardingLanguage;
@@ -80,7 +79,7 @@ export function QuickStartSummaryStep({
   }, { Body: [], Mind: [], Soul: [] });
   const avatarOption = getAvatarOptionById(selectedAvatarId);
   const avatarProfile = avatarOption ? buildAvatarPreviewProfile(avatarOption) : null;
-  const avatarMedia = resolveAvatarMedia(avatarProfile, { rhythm: gameMode, surface: 'onboarding' });
+  const avatarPreviewImage = avatarOption ? resolveAvatarPickerPreviewImage(avatarOption) : null;
 
   return (
     <section className="glass-card onboarding-surface-base mx-auto w-full max-w-5xl rounded-3xl p-6 sm:p-8">
@@ -106,7 +105,7 @@ export function QuickStartSummaryStep({
                 <p className="text-xs uppercase tracking-wide text-white/50">Avatar</p>
                 <p className="mt-1 inline-flex items-center gap-2 text-sm text-white/80">
                   <span>{avatarOption?.name ?? '—'}</span>
-                  {avatarOption ? <img src={avatarMedia.imageUrl ?? '/FlowMood.jpg'} alt={avatarMedia.alt} className="h-7 w-7 rounded-full border border-white/20 object-cover" /> : null}
+                  {avatarOption ? <img src={avatarPreviewImage ?? '/FlowMood.jpg'} alt={avatarOption.name} className="h-7 w-7 rounded-full border border-white/20 object-cover" /> : null}
                 </p>
               </div>
               <div>

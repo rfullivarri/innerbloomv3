@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import type { OnboardingLanguage } from '../constants';
 import type { GameMode, XP } from '../state';
 import { GpProgressBar } from './GpProgressBar';
+import { getOnboardingRhythmTheme } from '../utils/onboardingRhythmTheme';
 
 interface HUDProps {
   language?: OnboardingLanguage;
@@ -16,27 +17,11 @@ interface HUDProps {
   onBrandClick?: () => void;
 }
 
-const MODE_BADGE_META: Record<GameMode, { label: string; accent: string; dot: string }> = {
-  LOW: {
-    label: 'Low Mood',
-    accent: 'rgba(248, 113, 113, 0.45)',
-    dot: 'rgba(248, 113, 113, 0.96)',
-  },
-  CHILL: {
-    label: 'Chill Mood',
-    accent: 'rgba(74, 222, 128, 0.4)',
-    dot: 'rgba(74, 222, 128, 0.95)',
-  },
-  FLOW: {
-    label: 'Flow Mood',
-    accent: 'rgba(56, 189, 248, 0.42)',
-    dot: 'rgba(56, 189, 248, 0.95)',
-  },
-  EVOLVE: {
-    label: 'Evolve Mood',
-    accent: 'rgba(167, 139, 250, 0.44)',
-    dot: 'rgba(167, 139, 250, 0.96)',
-  },
+const MODE_BADGE_LABELS: Record<GameMode, string> = {
+  LOW: 'Low Mood',
+  CHILL: 'Chill Mood',
+  FLOW: 'Flow Mood',
+  EVOLVE: 'Evolve Mood',
 };
 
 type PillarKey = 'Body' | 'Mind' | 'Soul';
@@ -52,16 +37,16 @@ function ModeBadge({ mode }: { mode: GameMode | null }) {
     return null;
   }
 
-  const meta = MODE_BADGE_META[mode];
-  const style = { '--chip-accent': meta.accent } as CSSProperties;
+  const theme = getOnboardingRhythmTheme(mode);
+  const style = { '--chip-accent': theme.badgeAccent } as CSSProperties;
 
   return (
     <span
       className="onboarding-mode-chip inline-flex items-center gap-2 px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/85 shadow-[0_0_18px_rgba(8,12,24,0.5)] ring-1 ring-white/10"
       style={style}
     >
-      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: meta.dot }} />
-      {meta.label}
+      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: theme.badgeDot }} />
+      {MODE_BADGE_LABELS[mode]}
     </span>
   );
 }

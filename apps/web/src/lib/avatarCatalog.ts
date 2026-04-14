@@ -38,6 +38,10 @@ export function resolveTemporaryLegacyAvatarPreviewImage(option: AvatarOption): 
   return TEMP_LEGACY_AVATAR_PREVIEW_BY_CODE[option.code];
 }
 
+export function resolveAvatarPickerPreviewImage(option: AvatarOption): string {
+  return resolveTemporaryLegacyAvatarPreviewImage(option);
+}
+
 export function getAvatarOptionById(avatarId: number | null | undefined): AvatarOption | null {
   if (typeof avatarId !== 'number') return null;
   return AVATAR_OPTIONS.find((option) => option.avatarId === avatarId) ?? null;

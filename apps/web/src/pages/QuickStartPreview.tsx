@@ -14,8 +14,8 @@ import { GpExplainerOverlay } from '../onboarding/ui/GpExplainerOverlay';
 import { HUD } from '../onboarding/ui/HUD';
 import { NavButtons } from '../onboarding/ui/NavButtons';
 import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../components/common/GameModeChip';
-import { buildAvatarPreviewProfile, getAvatarOptionById } from '../lib/avatarCatalog';
-import { resolveAvatarMedia, resolveAvatarTheme, type AvatarThemeTokens } from '../lib/avatarProfile';
+import { buildAvatarPreviewProfile, getAvatarOptionById, resolveAvatarPickerPreviewImage } from '../lib/avatarCatalog';
+import { getOnboardingRhythmTheme } from '../onboarding/utils/onboardingRhythmTheme';
 
 type Pillar = 'Body' | 'Mind' | 'Soul';
 type Step = 'game-mode' | 'avatar' | 'branch' | 'body' | 'mind' | 'soul' | 'moderation' | 'summary' | 'setup';
@@ -554,22 +554,6 @@ const GAME_MODE_META_KEY: Record<GameMode, keyof typeof GAME_MODE_META> = {
   EVOLVE: 'Evolve',
 };
 
-const MODE_SOFT_STYLES: Record<GameMode, { tint: string; border: string; glow: string }> = {
-  LOW: { tint: 'color-mix(in srgb, var(--color-accent-secondary) 20%, transparent)', border: 'color-mix(in srgb, var(--color-accent-secondary) 40%, transparent)', glow: 'color-mix(in srgb, var(--color-accent-secondary) 22%, transparent)' },
-  CHILL: { tint: 'color-mix(in srgb, var(--color-accent-secondary) 20%, transparent)', border: 'color-mix(in srgb, var(--color-accent-secondary) 40%, transparent)', glow: 'color-mix(in srgb, var(--color-accent-secondary) 22%, transparent)' },
-  FLOW: { tint: 'color-mix(in srgb, var(--color-accent-secondary) 20%, transparent)', border: 'color-mix(in srgb, var(--color-accent-secondary) 40%, transparent)', glow: 'color-mix(in srgb, var(--color-accent-secondary) 22%, transparent)' },
-  EVOLVE: { tint: 'color-mix(in srgb, var(--color-accent-secondary) 20%, transparent)', border: 'color-mix(in srgb, var(--color-accent-secondary) 40%, transparent)', glow: 'color-mix(in srgb, var(--color-accent-secondary) 22%, transparent)' },
-};
-
-function buildAvatarSoftStyles(theme: AvatarThemeTokens | null): { tint: string; border: string; glow: string } {
-  const accent = theme?.accent ?? 'var(--color-accent-secondary)';
-  return {
-    tint: `color-mix(in srgb, ${accent} 20%, transparent)`,
-    border: `color-mix(in srgb, ${accent} 40%, transparent)`,
-    glow: `color-mix(in srgb, ${accent} 22%, transparent)`,
-  };
-}
-
 function getDefaultLanguage(searchParams: URLSearchParams): OnboardingLanguage {
   const lang = searchParams.get('lang');
   if (lang === 'es' || lang === 'en') {
@@ -744,8 +728,7 @@ export default function QuickStartPreviewPage() {
   const copy = COPY[language];
   const selectedAvatarOption = getAvatarOptionById(avatarId);
   const selectedAvatarProfile = selectedAvatarOption ? buildAvatarPreviewProfile(selectedAvatarOption) : null;
-  const selectedAvatarTheme = resolveAvatarTheme(selectedAvatarProfile);
-  const selectedAvatarMedia = resolveAvatarMedia(selectedAvatarProfile, { rhythm: gameMode, surface: 'onboarding' });
+  const selectedAvatarPreviewImage = selectedAvatarOption ? resolveAvatarPickerPreviewImage(selectedAvatarOption) : null;
 
   const minimum = MODE_MINIMUMS[gameMode];
   const setupSteps = useMemo(
@@ -1052,7 +1035,8 @@ export default function QuickStartPreviewPage() {
     }
 
     const tasks = copy.tasks[currentPillar];
-    const modeStyle = selectedAvatarProfile ? buildAvatarSoftStyles(selectedAvatarTheme) : MODE_SOFT_STYLES[gameMode];
+    const rhythmTheme = getOnboardingRhythmTheme(gameMode);
+    const modeStyle = { tint: rhythmTheme.softTint, border: rhythmTheme.border, glow: rhythmTheme.glow };
 
     return (
       <section className="onboarding-surface-base mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
@@ -1287,7 +1271,7 @@ export default function QuickStartPreviewPage() {
                       <p className="text-xs uppercase tracking-wide text-white/50">Avatar</p>
                       <p className="mt-1 inline-flex items-center gap-2 text-sm text-white/80">
                         <span>{selectedAvatarOption?.name ?? '—'}</span>
-                        {selectedAvatarOption ? <img src={selectedAvatarMedia.imageUrl ?? '/FlowMood.jpg'} alt={selectedAvatarMedia.alt} className="h-7 w-7 rounded-full border border-white/20 object-cover" /> : null}
+                        {selectedAvatarOption ? <img src={selectedAvatarPreviewImage ?? '/FlowMood.jpg'} alt={selectedAvatarOption.name} className="h-7 w-7 rounded-full border border-white/20 object-cover" /> : null}
                       </p>
                     </div>
                     <div>
