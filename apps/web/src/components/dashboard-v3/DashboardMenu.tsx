@@ -296,7 +296,7 @@ export function DashboardMenu({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        setIsOpen(false);
+        handleEscapeDismiss();
       }
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -304,7 +304,7 @@ export function DashboardMenu({
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen]);
+  }, [handleEscapeDismiss, isOpen]);
 
 
   useEffect(() => {
@@ -646,6 +646,44 @@ export function DashboardMenu({
     },
     [handleClose],
   );
+
+  const handleLayerOverlayClick = useCallback(
+    (event: MouseEvent<HTMLDivElement>, onClose: () => void) => {
+      if (event.target === event.currentTarget) {
+        onClose();
+      }
+    },
+    [],
+  );
+
+  function handleEscapeDismiss() {
+    if (isDeleteAccountOpen) {
+      handleCloseDeleteAccount();
+      return;
+    }
+
+    if (isAvatarOpen) {
+      handleCloseAvatar();
+      return;
+    }
+
+    if (isGameModeOpen) {
+      handleCloseGameMode();
+      return;
+    }
+
+    if (isProfileOpen) {
+      handleCloseProfile();
+      return;
+    }
+
+    if (isUpgradeModalOpen) {
+      setIsUpgradeModalOpen(false);
+      return;
+    }
+
+    handleClose();
+  }
 
   const currentAvatarPreviewImage = useMemo(
     () => resolveMenuAvatarPreviewImage(currentAvatarSelection),
@@ -1188,7 +1226,10 @@ export function DashboardMenu({
                 </div>
 
                 {isProfileOpen ? (
-                  <div className="absolute inset-0 z-20 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center">
+                  <div
+                    className="absolute inset-0 z-20 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center"
+                    onClick={(event) => handleLayerOverlayClick(event, handleCloseProfile)}
+                  >
                     <div
                       className="flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
                       style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)' }}
@@ -1277,7 +1318,10 @@ export function DashboardMenu({
                 ) : null}
 
                 {isGameModeOpen ? (
-                  <div className="absolute inset-0 z-20 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center">
+                  <div
+                    className="absolute inset-0 z-20 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center"
+                    onClick={(event) => handleLayerOverlayClick(event, handleCloseGameMode)}
+                  >
                     <div
                       className="flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
                       style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)' }}
@@ -1393,7 +1437,10 @@ export function DashboardMenu({
                 ) : null}
 
                 {isAvatarOpen ? (
-                  <div className="absolute inset-0 z-30 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center">
+                  <div
+                    className="absolute inset-0 z-30 flex items-end bg-black/40 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] md:items-center"
+                    onClick={(event) => handleLayerOverlayClick(event, handleCloseAvatar)}
+                  >
                     <div
                       className="flex w-full min-h-0 max-h-[92vh] flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-95)] p-4 shadow-2xl"
                       style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)' }}
@@ -1490,7 +1537,10 @@ export function DashboardMenu({
 
 
                 {isDeleteAccountOpen ? (
-                  <div className="absolute inset-0 z-40 flex items-end bg-black/55 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] backdrop-blur-sm md:items-center">
+                  <div
+                    className="absolute inset-0 z-40 flex items-end bg-black/55 p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] backdrop-blur-sm md:items-center"
+                    onClick={(event) => handleLayerOverlayClick(event, handleCloseDeleteAccount)}
+                  >
                     <div
                       role="alertdialog"
                       aria-modal="true"
