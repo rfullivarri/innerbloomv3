@@ -404,7 +404,7 @@ export function DashboardMenu({
   const menuRowClassName =
     "flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40";
   const menuCardClassName =
-    "ib-card-contour-shadow relative z-10 rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)]";
+    "ib-card-contour-shadow relative z-10 rounded-2xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)]";
 
   const handleOpenProfile = useCallback(() => {
     setIsProfileOpen(true);
@@ -829,7 +829,7 @@ export function DashboardMenu({
                       <div
                         role="radiogroup"
                         aria-label={t('dashboard.language.title')}
-                        className="inline-flex items-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-15)] p-1"
+                        className="inline-flex items-center rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-2)] p-1 dark:border-[color:var(--color-border-soft)] dark:bg-[color:var(--color-slate-900-15)]"
                       >
                         {([
                           { value: "es", label: "ES" },
@@ -847,8 +847,8 @@ export function DashboardMenu({
                               onClick={() => setManualLanguage(option.value)}
                               className={`min-w-[3rem] rounded-full px-3 py-1.5 text-xs font-semibold tracking-[0.18em] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40 ${
                                 isActive
-                                  ? "border border-white/35 bg-[color:var(--color-surface)] text-[color:var(--color-text-strong)]"
-                                  : "border border-transparent text-[color:var(--color-text-faint)] hover:text-[color:var(--color-text)]"
+                                  ? "border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] text-[color:var(--color-text-strong)] dark:border-white/35"
+                                  : "border border-[color:var(--color-border-subtle)]/70 text-[color:var(--color-text-dim)] hover:border-[color:var(--color-border-soft)] hover:text-[color:var(--color-text)] dark:border-transparent dark:text-[color:var(--color-text-faint)]"
                               }`}
                             >
                               {option.label}
@@ -861,7 +861,7 @@ export function DashboardMenu({
                         type="button"
                         onClick={handleThemeCycle}
                         aria-label={`${t('dashboard.theme.appearance')}: ${themeToggleLabel}`}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-slate-900-15)] text-[color:var(--color-text-dim)] transition hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-strong)] bg-[color:var(--color-overlay-2)] text-[color:var(--color-text-dim)] transition hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-overlay-3)] hover:text-[color:var(--color-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-primary)]/40 dark:border-[color:var(--color-border-soft)] dark:bg-[color:var(--color-slate-900-15)] dark:hover:bg-[color:var(--color-overlay-2)]"
                       >
                         {theme === "dark" ? (
                           <svg
@@ -906,7 +906,7 @@ export function DashboardMenu({
                           {user?.fullName || user?.username || t('dashboard.menu.profileFallback')}
                         </p>
                         {user?.primaryEmailAddress?.emailAddress ? (
-                          <p className="truncate text-xs text-text-muted">
+                          <p className="truncate text-xs text-[color:var(--color-text-dim)] dark:text-text-muted">
                             {user.primaryEmailAddress.emailAddress}
                           </p>
                         ) : null}
@@ -929,7 +929,7 @@ export function DashboardMenu({
                         <span>{hasActiveUpgradeCta ? t('dashboard.menu.upgradeAvailable') : t('dashboard.menu.changeGameMode')}</span>
                         {hasActiveUpgradeCta ? <span className="rounded-full border border-black/20 bg-white/35 px-2 py-0.5 text-[10px] font-bold uppercase text-black shadow-[0_8px_20px_rgba(167,112,239,0.35)] backdrop-blur-sm">7d</span> : null}
                       </div>
-                      <span className="[&_.ib-game-mode-chip__glow]:opacity-10 [&_.ib-game-mode-chip__glow]:blur-[3px] [&_.ib-game-mode-chip__inner]:gap-1 [&_.ib-game-mode-chip__inner]:px-[0.56rem] [&_.ib-game-mode-chip__inner]:py-[0.18rem] [&_.ib-game-mode-chip__inner]:text-[8px] [&_.ib-game-mode-chip__inner]:tracking-[0.16em] [&_.ib-game-mode-chip__inner_span:first-child]:h-1 [&_.ib-game-mode-chip__inner_span:first-child]:w-1">
+                      <span className="[&_.ib-game-mode-chip__glow]:opacity-10 [&_.ib-game-mode-chip__glow]:blur-[3px] [&_.ib-game-mode-chip__inner]:gap-0.5 [&_.ib-game-mode-chip__inner]:px-[0.4rem] [&_.ib-game-mode-chip__inner]:py-[0.12rem] [&_.ib-game-mode-chip__inner]:text-[7px] [&_.ib-game-mode-chip__inner]:tracking-[0.12em] [&_.ib-game-mode-chip__inner_span:first-child]:h-0.5 [&_.ib-game-mode-chip__inner_span:first-child]:w-0.5">
                         <GameModeChip {...buildGameModeChip(normalizedCurrentMode ?? 'Flow', { avatarProfile: currentAvatarProfile })} />
                       </span>
                     </button>
