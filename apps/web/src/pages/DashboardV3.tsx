@@ -981,7 +981,7 @@ export default function DashboardV3Page() {
               <ToastBanner
                 tone="success"
                 message={upgradeWelcomeBanner}
-                className="mb-4 border-black/15 bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] text-black shadow-[0_14px_30px_rgba(167,112,239,0.35)]"
+                className="mb-4 border-black/15 bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] font-display text-base font-semibold leading-[1.3] tracking-[-0.01em] text-[#121212] shadow-[0_14px_30px_rgba(167,112,239,0.35)]"
               />
             ) : null}
             {isLoadingProfile && <ProfileSkeleton />}
