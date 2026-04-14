@@ -1,10 +1,9 @@
 import { Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
-import type { AvatarProfile } from '../../lib/avatarProfile';
+import { resolveAvatarTheme, type AvatarProfile } from '../../lib/avatarProfile';
 import { normalizeGameModeValue } from '../../lib/gameMode';
 import { GAME_MODE_META, type LocalizedLanguage } from '../../lib/gameModeMeta';
-import { resolveRhythmTheme } from '../../lib/rhythmTheme';
 import { buildGameModeChip, GameModeChip } from '../common/GameModeChip';
 
 interface UpgradeRecommendationModalProps {
@@ -58,7 +57,7 @@ export function UpgradeRecommendationModal({
 
   const currentRhythm = useMemo(() => normalizeGameModeValue(currentMode), [currentMode]);
   const nextRhythm = useMemo(() => normalizeGameModeValue(nextMode), [nextMode]);
-  const currentRhythmTheme = useMemo(() => resolveRhythmTheme(currentMode), [currentMode]);
+  const avatarTheme = useMemo(() => resolveAvatarTheme(avatarProfile), [avatarProfile]);
   const nextModeChip = useMemo(
     () => buildGameModeChip(nextMode, { avatarProfile }),
     [avatarProfile, nextMode],
@@ -237,7 +236,7 @@ export function UpgradeRecommendationModal({
                   >
                     <div
                       className="flex h-14 w-14 items-center justify-center rounded-xl border border-black/10 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_10px_22px_rgba(15,23,42,0.28)]"
-                      style={{ backgroundColor: currentRhythmTheme.accent }}
+                      style={{ backgroundColor: avatarTheme.accent }}
                       aria-hidden="true"
                     >
                       {t('dashboard.upgradeCta.nowTag')}
