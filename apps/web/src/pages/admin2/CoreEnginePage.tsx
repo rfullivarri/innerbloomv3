@@ -23,6 +23,20 @@ const BTN_PRIMARY = 'admin2-btn admin2-btn--primary';
 const BTN_SECONDARY = 'admin2-btn admin2-btn--secondary';
 const BTN_GHOST = 'admin2-btn admin2-btn--ghost';
 const BTN_DANGER = 'admin2-btn admin2-btn--danger';
+const NEXT_MODE_BY_CODE: Record<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE', 'CHILL' | 'FLOW' | 'EVOLVE' | null> = {
+  LOW: 'CHILL',
+  CHILL: 'FLOW',
+  FLOW: 'EVOLVE',
+  EVOLVE: null,
+};
+
+function normalizeMode(value: string | null | undefined): 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE' | null {
+  const normalized = (value ?? '').trim().toUpperCase();
+  if (normalized === 'LOW' || normalized === 'CHILL' || normalized === 'FLOW' || normalized === 'EVOLVE') {
+    return normalized;
+  }
+  return null;
+}
 
 export function CoreEnginePage() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
@@ -54,8 +68,6 @@ export function CoreEnginePage() {
 
   const [ctaOverride, setCtaOverride] = useState<AdminModeUpgradeCtaOverride | null>(null);
   const [ctaEnabled, setCtaEnabled] = useState(false);
-  const [ctaCurrentMode, setCtaCurrentMode] = useState<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'>('LOW');
-  const [ctaNextMode, setCtaNextMode] = useState<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'>('CHILL');
   const [ctaExpiresAt, setCtaExpiresAt] = useState('');
   const [ctaLoading, setCtaLoading] = useState(false);
   const [ctaSaving, setCtaSaving] = useState(false);
@@ -82,8 +94,6 @@ export function CoreEnginePage() {
       setAnalysis(analysisRes);
       setCtaOverride(ctaRes.item);
       setCtaEnabled(Boolean(ctaRes.item?.enabled));
-      setCtaCurrentMode((ctaRes.item?.forced_current_mode as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE') ?? 'LOW');
-      setCtaNextMode((ctaRes.item?.forced_next_mode as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE') ?? 'CHILL');
       setCtaExpiresAt(ctaRes.item?.expires_at ? ctaRes.item.expires_at.slice(0, 16) : '');
     } catch (error) {
       console.error('[admin2][core-engine] failed to load mode data', error);
@@ -215,15 +225,17 @@ export function CoreEnginePage() {
     }
   }, [loadModeData, manualModeReason, manualModeTarget, selectedUser]);
 
+  const resolvedCurrentMode = normalizeMode(analysis?.current_mode ?? selectedUser?.gameMode ?? null);
+  const resolvedNextMode = resolvedCurrentMode ? NEXT_MODE_BY_CODE[resolvedCurrentMode] : null;
+  const canApplyForcedCta = Boolean(selectedUser && resolvedCurrentMode && resolvedNextMode);
+
   const applyCta = useCallback(async () => {
-    if (!selectedUser) return;
+    if (!selectedUser || !resolvedNextMode) return;
     try {
       setCtaSaving(true);
       setCtaMessage(null);
       const response = await upsertAdminModeUpgradeCtaOverride(selectedUser.id, {
         enabled: ctaEnabled,
-        forcedCurrentMode: ctaCurrentMode,
-        forcedNextMode: ctaNextMode,
         expiresAt: ctaExpiresAt ? new Date(ctaExpiresAt).toISOString() : null,
       });
       setCtaOverride(response.item);
@@ -234,7 +246,7 @@ export function CoreEnginePage() {
     } finally {
       setCtaSaving(false);
     }
-  }, [ctaCurrentMode, ctaEnabled, ctaExpiresAt, ctaNextMode, selectedUser]);
+  }, [ctaEnabled, ctaExpiresAt, resolvedNextMode, selectedUser]);
 
   const clearCta = useCallback(async () => {
     if (!selectedUser) return;
@@ -382,16 +394,17 @@ export function CoreEnginePage() {
 
           <div className="mt-3 grid gap-2 rounded-lg border border-[color:var(--admin-border)] p-2 text-xs md:grid-cols-4">
             <label className="flex items-center gap-2"><input type="checkbox" checked={ctaEnabled} onChange={(e) => setCtaEnabled(e.target.checked)} /> Forced CTA</label>
-            <select value={ctaCurrentMode} onChange={(e) => setCtaCurrentMode(e.target.value as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE')} className="rounded border border-[color:var(--admin-border)] bg-transparent px-2 py-1"><option>LOW</option><option>CHILL</option><option>FLOW</option><option>EVOLVE</option></select>
-            <select value={ctaNextMode} onChange={(e) => setCtaNextMode(e.target.value as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE')} className="rounded border border-[color:var(--admin-border)] bg-transparent px-2 py-1"><option>LOW</option><option>CHILL</option><option>FLOW</option><option>EVOLVE</option></select>
+            <p className="rounded border border-[color:var(--admin-border)] px-2 py-1">Current real: <strong>{resolvedCurrentMode ?? '—'}</strong></p>
+            <p className="rounded border border-[color:var(--admin-border)] px-2 py-1">Next valid: <strong>{resolvedNextMode ?? 'No upgrade'}</strong></p>
             <input type="datetime-local" value={ctaExpiresAt} onChange={(e) => setCtaExpiresAt(e.target.value)} className="rounded border border-[color:var(--admin-border)] bg-transparent px-2 py-1" />
             <div className="md:col-span-4 flex flex-wrap gap-2">
               <button type="button" onClick={() => void applyManualMode()} disabled={!selectedUser || changingMode} className={BTN_SECONDARY}>{changingMode ? 'Changing…' : 'Apply Manual Mode Change'}</button>
               <select value={manualModeTarget} onChange={(e) => setManualModeTarget(e.target.value as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE')} className="rounded border border-[color:var(--admin-border)] bg-transparent px-2 py-1"><option>LOW</option><option>CHILL</option><option>FLOW</option><option>EVOLVE</option></select>
               <input value={manualModeReason} onChange={(e) => setManualModeReason(e.target.value)} className="min-w-52 flex-1 rounded border border-[color:var(--admin-border)] bg-transparent px-2 py-1" />
-              <button type="button" onClick={() => void applyCta()} disabled={!selectedUser || ctaSaving} className={BTN_PRIMARY}>{ctaSaving ? 'Applying…' : 'Apply Forced CTA'}</button>
+              <button type="button" onClick={() => void applyCta()} disabled={!canApplyForcedCta || ctaSaving} className={BTN_PRIMARY}>{ctaSaving ? 'Applying…' : 'Apply Forced CTA'}</button>
               <button type="button" onClick={() => void clearCta()} disabled={!selectedUser || ctaClearing} className={BTN_DANGER}>{ctaClearing ? 'Clearing…' : 'Clear Forced CTA'}</button>
               <span className="text-[11px]">override actual: <strong>{ctaLoading ? 'cargando…' : ctaOverride?.enabled ? 'enabled' : 'disabled'}</strong></span>
+              {!resolvedNextMode ? <span className="text-[11px] text-amber-300">Current mode is EVOLVE: forced CTA is disabled.</span> : null}
             </div>
           </div>
           {analysisError ? <p className="mt-2 text-xs text-red-300">{analysisError}</p> : null}

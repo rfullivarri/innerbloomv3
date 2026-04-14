@@ -18,14 +18,6 @@ type UserModeRow = {
 };
 
 
-type SuggestionRow = {
-  period_key: string;
-  eligible_for_upgrade: boolean;
-  accepted_at: string | null;
-  dismissed_at: string | null;
-  current_mode: string;
-  suggested_mode: string | null;
-};
 
 const CTA_ACTIVE_WINDOW_DAYS = 7;
 
@@ -164,8 +156,7 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
   }
 
   if (forcedOverride) {
-    const forcedCurrentMode = forcedOverride.forced_current_mode ?? user.current_mode;
-    const forcedNextModeCode = forcedOverride.forced_next_mode ?? resolveNextGameModeCode(forcedCurrentMode);
+    const forcedNextModeCode = forcedOverride.forced_next_mode ?? resolveNextGameModeCode(user.current_mode);
     const forcedNextMode = forcedNextModeCode ? await resolveGameModeByCode(pool, forcedNextModeCode) : null;
     const canSuggest = Boolean(forcedNextMode);
     const suggestionState = await upsertSuggestionState(pool, {
@@ -180,7 +171,7 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
     const ctaEnabled = Boolean(canSuggest) && (!ctaActiveUntil || Date.parse(ctaActiveUntil) > Date.now());
 
     return {
-      current_mode: forcedCurrentMode,
+      current_mode: user.current_mode,
       suggested_mode: canSuggest ? (forcedNextMode?.code ?? null) : null,
       period_key: 'debug_forced',
       eligible_for_upgrade: canSuggest,
@@ -255,26 +246,20 @@ export async function getGameModeUpgradeSuggestion(userId: string): Promise<Game
   };
 }
 
-async function getLatestSuggestionForCurrentMode(client: typeof pool, userId: string): Promise<SuggestionRow | null> {
-  const result = await client.query<SuggestionRow>(
-    `SELECT s.period_key,
-            s.eligible_for_upgrade,
-            s.accepted_at,
-            s.dismissed_at,
-            gm_current.code AS current_mode,
-            gm_suggested.code AS suggested_mode
-       FROM user_game_mode_upgrade_suggestions s
- INNER JOIN cat_game_mode gm_current ON gm_current.game_mode_id = s.current_game_mode_id
-  LEFT JOIN cat_game_mode gm_suggested ON gm_suggested.game_mode_id = s.suggested_game_mode_id
-      WHERE s.user_id = $1::uuid
-        AND s.current_game_mode_id = (
-          SELECT game_mode_id
-            FROM users
-           WHERE user_id = $1::uuid
-        )
-      ORDER BY s.period_key DESC, s.created_at DESC
-      LIMIT 1`,
-    [userId],
+async function getSuggestionStateForPeriod(client: typeof pool, params: {
+  userId: string;
+  periodKey: string;
+  currentGameModeId: number;
+}): Promise<{ accepted_at: string | null } | null> {
+  const result = await client.query<{ accepted_at: string | null }>(
+    `SELECT accepted_at
+       FROM user_game_mode_upgrade_suggestions
+      WHERE user_id = $1::uuid
+        AND period_key = $2
+        AND current_game_mode_id = $3
+      LIMIT 1
+      FOR UPDATE`,
+    [params.userId, params.periodKey, params.currentGameModeId],
   );
 
   return result.rows[0] ?? null;
@@ -313,19 +298,23 @@ export async function acceptGameModeUpgradeSuggestion(userId: string): Promise<G
       throw new HttpError(409, 'upgrade_suggestion_not_eligible', 'Upgrade suggestion is not eligible');
     }
 
-    const latestSuggestion = await getLatestSuggestionForCurrentMode(pool, userId);
+    const currentMode = await resolveGameModeByCode(pool, suggestion.current_mode);
+    const suggestionState = await getSuggestionStateForPeriod(pool, {
+      userId,
+      periodKey: suggestion.period_key,
+      currentGameModeId: currentMode.game_mode_id,
+    });
 
-    if (!latestSuggestion || latestSuggestion.period_key !== suggestion.period_key) {
+    if (!suggestionState) {
       throw new HttpError(409, 'upgrade_suggestion_stale', 'Upgrade suggestion is stale');
     }
 
-    if (latestSuggestion.accepted_at) {
+    if (suggestionState.accepted_at) {
       await pool.query('COMMIT');
       return suggestion;
     }
 
     const nextMode = await resolveGameModeByCode(pool, suggestion.suggested_mode);
-    const currentMode = await resolveGameModeByCode(pool, suggestion.current_mode);
 
     try {
       await changeUserGameMode(pool, {

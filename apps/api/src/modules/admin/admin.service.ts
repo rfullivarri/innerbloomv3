@@ -1501,15 +1501,39 @@ export async function getUserModeUpgradeCtaOverride(userId: string): Promise<Adm
 export async function setUserModeUpgradeCtaOverride(input: {
   userId: string;
   enabled: boolean;
-  forcedCurrentMode: 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
-  forcedNextMode: 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
   expiresAt: string | null;
 }): Promise<AdminModeUpgradeCtaOverride> {
+  const currentModeResult = await pool.query<{ code: string | null }>(
+    `SELECT gm.code
+       FROM users u
+  LEFT JOIN cat_game_mode gm ON gm.game_mode_id = u.game_mode_id
+      WHERE u.user_id = $1::uuid
+      LIMIT 1`,
+    [input.userId],
+  );
+
+  if (!currentModeResult.rows.length) {
+    throw new HttpError(404, 'user_not_found', 'User not found');
+  }
+
+  const currentMode = (currentModeResult.rows[0]?.code ?? '').trim().toUpperCase();
+  const forcedNextMode = currentMode === 'LOW'
+    ? 'CHILL'
+    : currentMode === 'CHILL'
+      ? 'FLOW'
+      : currentMode === 'FLOW'
+        ? 'EVOLVE'
+        : null;
+
+  if (!forcedNextMode) {
+    throw new HttpError(409, 'mode_upgrade_override_unavailable', 'No forced upgrade CTA is available for current mode');
+  }
+
   return upsertGameModeUpgradeCtaOverride({
     userId: input.userId,
     enabled: input.enabled,
-    forcedCurrentMode: input.forcedCurrentMode,
-    forcedNextMode: input.forcedNextMode,
+    forcedCurrentMode: null,
+    forcedNextMode,
     expiresAt: input.expiresAt,
   });
 }
