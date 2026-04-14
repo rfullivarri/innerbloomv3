@@ -2,9 +2,7 @@ import { motion } from 'framer-motion';
 import type { OnboardingLanguage } from '../constants';
 import type { GameMode } from '../state';
 import { NavButtons } from '../ui/NavButtons';
-import { AVATAR_OPTIONS } from '../../lib/avatarCatalog';
-import { resolveAvatarMedia } from '../../lib/avatarProfile';
-import { buildAvatarPreviewProfile } from '../../lib/avatarCatalog';
+import { AVATAR_OPTIONS, resolveAvatarPickerPreviewImage } from '../../lib/avatarCatalog';
 
 interface AvatarStepProps {
   language?: OnboardingLanguage;
@@ -17,7 +15,6 @@ interface AvatarStepProps {
 
 export function AvatarStep({
   language = 'es',
-  rhythm,
   selectedAvatarId,
   onSelectAvatar,
   onConfirm,
@@ -52,8 +49,7 @@ export function AvatarStep({
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {AVATAR_OPTIONS.map((option) => {
             const isActive = selectedAvatarId === option.avatarId;
-            const previewProfile = buildAvatarPreviewProfile(option);
-            const media = resolveAvatarMedia(previewProfile, { rhythm, surface: 'onboarding' });
+            const previewImageUrl = resolveAvatarPickerPreviewImage(option);
             return (
               <button
                 key={option.avatarId}
@@ -71,7 +67,7 @@ export function AvatarStep({
                   ) : null}
                 </div>
                 <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-white/5">
-                  <img src={media.imageUrl ?? '/FlowMood.jpg'} alt={media.alt} className="h-28 w-full object-cover" loading="lazy" />
+                  <img src={previewImageUrl ?? '/FlowMood.jpg'} alt={option.name} className="h-28 w-full object-cover" loading="lazy" />
                 </div>
               </button>
             );

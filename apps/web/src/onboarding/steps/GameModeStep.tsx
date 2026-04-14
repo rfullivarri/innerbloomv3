@@ -3,6 +3,7 @@ import type { GameMode } from '../state';
 import type { OnboardingLanguage } from '../constants';
 import { NavButtons } from '../ui/NavButtons';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
+import { getOnboardingRhythmTheme } from '../utils/onboardingRhythmTheme';
 
 interface GameModeStepProps {
   language?: OnboardingLanguage;
@@ -57,6 +58,7 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
           {MODE_ORDER.map((mode) => {
             const content = MODE_CARD_CONTENT[mode];
             const isActive = selected === mode;
+            const modeTheme = getOnboardingRhythmTheme(mode);
 
             return (
               <motion.button
@@ -70,19 +72,27 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
                 className={[
                   'glass-card onboarding-surface-inner onboarding-glass-border-soft relative flex h-full overflow-hidden rounded-3xl border px-5 py-[1.35rem] text-left transition-all duration-250 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80',
                   isActive
-                    ? 'border-white/80 bg-white/[0.11] ring-2 ring-sky-300/85 shadow-[0_0_0_1px_rgba(255,255,255,0.28),0_0_28px_rgba(34,211,238,0.38),0_0_52px_rgba(139,92,246,0.34)] -translate-y-0.5 scale-[1.01] focus-visible:ring-4 focus-visible:ring-cyan-200/95'
+                    ? 'border-white/80 bg-white/[0.11] ring-2 -translate-y-0.5 scale-[1.01] focus-visible:ring-4'
                     : 'hover:border-white/30 hover:bg-white/[0.07] focus-visible:border-white/45 focus-visible:ring-sky-300/70',
                 ]
                   .filter(Boolean)
                   .join(' ')}
+                style={isActive ? {
+                  boxShadow: `0 0 0 1px rgba(255,255,255,0.28),0 0 28px ${modeTheme.glow},0 0 52px ${modeTheme.softTint}`,
+                  borderColor: modeTheme.border,
+                  background: `color-mix(in srgb, ${modeTheme.softTint} 48%, rgba(255,255,255,0.11))`,
+                } : undefined}
               >
                 <span
                   className={[
-                    'pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_25%_15%,rgba(34,211,238,0.22)_0%,rgba(59,130,246,0.12)_35%,rgba(139,92,246,0.22)_70%,transparent_100%)] transition-all duration-250 ease-out',
+                    'pointer-events-none absolute inset-0 rounded-3xl transition-all duration-250 ease-out',
                     isActive ? 'opacity-100' : 'opacity-0',
                   ]
                     .filter(Boolean)
                     .join(' ')}
+                  style={{
+                    background: `radial-gradient(circle at 25% 15%, color-mix(in srgb, ${modeTheme.accent} 32%, transparent) 0%, color-mix(in srgb, ${modeTheme.accent} 20%, transparent) 35%, color-mix(in srgb, ${modeTheme.accent} 28%, transparent) 70%, transparent 100%)`,
+                  }}
                   aria-hidden
                 />
                 <span className="relative z-10 flex h-full w-full flex-col gap-3">

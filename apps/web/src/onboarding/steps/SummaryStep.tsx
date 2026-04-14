@@ -5,8 +5,7 @@ import type { Answers, GameMode, XP } from '../state';
 import { MODE_CARD_CONTENT } from './GameModeStep';
 import { NavButtons } from '../ui/NavButtons';
 import { GameModeChip as SharedGameModeChip, buildGameModeChip } from '../../components/common/GameModeChip';
-import { buildAvatarPreviewProfile, getAvatarOptionById } from '../../lib/avatarCatalog';
-import { resolveAvatarMedia } from '../../lib/avatarProfile';
+import { buildAvatarPreviewProfile, getAvatarOptionById, resolveAvatarPickerPreviewImage } from '../../lib/avatarCatalog';
 
 interface SummaryStepProps {
   language?: OnboardingLanguage;
@@ -249,7 +248,7 @@ export function SummaryStep({
   const { mode } = answers;
   const avatarOption = getAvatarOptionById(selectedAvatarId);
   const avatarProfile = avatarOption ? buildAvatarPreviewProfile(avatarOption) : null;
-  const avatarMedia = resolveAvatarMedia(avatarProfile, { rhythm: mode, surface: 'onboarding' });
+  const avatarPreviewImage = avatarOption ? resolveAvatarPickerPreviewImage(avatarOption) : null;
   const isDisabled = isSubmitting;
 
   const bodyTraits = answers.foundations.body.map(extractTrait);
@@ -274,7 +273,7 @@ export function SummaryStep({
                 value={avatarOption ? (
                   <span className="inline-flex items-center gap-2">
                     <span>{avatarOption.name}</span>
-                    <img src={avatarMedia.imageUrl ?? '/FlowMood.jpg'} alt={avatarMedia.alt} className="h-7 w-7 rounded-full border border-white/20 object-cover" />
+                    <img src={avatarPreviewImage ?? '/FlowMood.jpg'} alt={avatarOption.name} className="h-7 w-7 rounded-full border border-white/20 object-cover" />
                   </span>
                 ) : '—'}
               />
