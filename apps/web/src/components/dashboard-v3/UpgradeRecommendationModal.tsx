@@ -58,7 +58,10 @@ export function UpgradeRecommendationModal({
   const currentRhythm = useMemo(() => normalizeGameModeValue(currentMode), [currentMode]);
   const nextRhythm = useMemo(() => normalizeGameModeValue(nextMode), [nextMode]);
   const avatarTheme = useMemo(() => resolveAvatarTheme(avatarProfile), [avatarProfile]);
-  const nextModeChip = useMemo(() => buildGameModeChip(nextMode), [nextMode]);
+  const nextModeChip = useMemo(
+    () => buildGameModeChip(nextMode, { avatarProfile }),
+    [avatarProfile, nextMode],
+  );
   const currentRhythmLabel = useMemo(() => buildRhythmIntensityLabel(currentMode, language), [currentMode, language]);
   const nextRhythmLabel = useMemo(() => buildRhythmIntensityLabel(nextMode, language), [nextMode, language]);
 
