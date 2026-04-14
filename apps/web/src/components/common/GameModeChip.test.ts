@@ -26,7 +26,7 @@ function makeProfile(overrides: Partial<CurrentUserProfile>): CurrentUserProfile
 }
 
 describe('buildGameModeChip', () => {
-  it('keeps rhythm label content while using avatar accent styling', () => {
+  it('keeps rhythm label content and uses onboarding rhythm color mapping even when avatar differs', () => {
     const avatarProfile = resolveAvatarProfile(
       makeProfile({
         game_mode: 'Flow',
@@ -40,11 +40,18 @@ describe('buildGameModeChip', () => {
     const chip = buildGameModeChip('Flow', { avatarProfile });
 
     expect(chip.label).toBe('FLOW');
-    expect(chip.style).toMatchObject({ '--ib-chip-accent': '#EF4444' });
+    expect(chip.style).toMatchObject({ '--ib-chip-accent': 'rgb(56, 189, 248)' });
   });
 
-  it('uses safe legacy fallback accent when avatar is missing', () => {
-    const chip = buildGameModeChip('Flow');
-    expect(chip.style).toMatchObject({ '--ib-chip-accent': '#00C2FF' });
+  it('falls back safely to FLOW rhythm accent when mode is missing', () => {
+    const chip = buildGameModeChip('');
+    expect(chip.style).toMatchObject({ '--ib-chip-accent': 'rgb(56, 189, 248)' });
+  });
+
+  it('maps every rhythm to the onboarding source-of-truth palette', () => {
+    expect(buildGameModeChip('Low').style).toMatchObject({ '--ib-chip-accent': 'rgb(248, 113, 113)' });
+    expect(buildGameModeChip('Chill').style).toMatchObject({ '--ib-chip-accent': 'rgb(74, 222, 128)' });
+    expect(buildGameModeChip('Flow').style).toMatchObject({ '--ib-chip-accent': 'rgb(56, 189, 248)' });
+    expect(buildGameModeChip('Evolve').style).toMatchObject({ '--ib-chip-accent': 'rgb(167, 139, 250)' });
   });
 });
