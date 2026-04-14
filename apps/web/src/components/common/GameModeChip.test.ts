@@ -33,18 +33,18 @@ describe('buildGameModeChip', () => {
         avatar_id: 99,
         avatar_code: 'RED_CAT',
         avatar_name: 'Red Cat',
-        avatar_theme_tokens: { accent: '#ef4444', chip: 'ember' },
+        avatar_theme_tokens: { accent: '#F87171', chip: 'ember' },
       }),
     );
 
     const chip = buildGameModeChip('Flow', { avatarProfile });
 
     expect(chip.label).toBe('FLOW');
-    expect(chip.style).toMatchObject({ '--ib-chip-accent': '#EF4444' });
+    expect(chip.style).toMatchObject({ '--ib-chip-accent': '#F87171' });
   });
 
   it('uses safe legacy fallback accent when avatar is missing', () => {
     const chip = buildGameModeChip('Flow');
-    expect(chip.style).toMatchObject({ '--ib-chip-accent': '#00C2FF' });
+    expect(chip.style).toMatchObject({ '--ib-chip-accent': '#38BDF8' });
   });
 });

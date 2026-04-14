@@ -19,7 +19,8 @@ import { TaskInsightsModal } from './StreakTaskInsightsModal';
 import { DashboardMeta, DashboardTitle } from './DashboardTypography';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { HABIT_ACHIEVEMENT_UPDATED_EVENT } from '../../lib/habitAchievementEvents';
-import { resolveAvatarTheme, type AvatarProfile } from '../../lib/avatarProfile';
+import { type AvatarProfile } from '../../lib/avatarProfile';
+import { resolveAvatarChipColor } from '../../lib/avatarChipPalette';
 import {
   DASHBOARD_SEGMENTED_BUTTON_ACTIVE,
   DASHBOARD_SEGMENTED_BUTTON_BASE,
@@ -326,11 +327,11 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 export function buildStreakModeChipVisual(avatarProfile?: AvatarProfile | null) {
-  const avatarTheme = resolveAvatarTheme(avatarProfile ?? null);
+  const chipColor = resolveAvatarChipColor(avatarProfile ?? null);
   return {
-    accent: avatarTheme.accent,
-    glowPrimary: hexToRgba(avatarTheme.accent, 0.66),
-    glowSecondary: hexToRgba(avatarTheme.accent, 0.36),
+    accent: chipColor,
+    glowPrimary: hexToRgba(chipColor, 0.66),
+    glowSecondary: hexToRgba(chipColor, 0.36),
   };
 }
 

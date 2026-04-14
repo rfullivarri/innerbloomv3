@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
-import { resolveAvatarTheme, type AvatarProfile } from '../../lib/avatarProfile';
+import { type AvatarProfile } from '../../lib/avatarProfile';
+import { resolveAvatarChipColor } from '../../lib/avatarChipPalette';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
 
 interface GameModeChipStyle {
@@ -25,9 +26,9 @@ export function buildGameModeChip(
   mode?: string | null,
   options?: { avatarProfile?: AvatarProfile | null },
 ): GameModeChipStyle {
-  const theme = resolveAvatarTheme(options?.avatarProfile ?? null);
+  const chipColor = resolveAvatarChipColor(options?.avatarProfile ?? null);
   const style = {
-    '--ib-chip-accent': theme.accent,
+    '--ib-chip-accent': chipColor,
   } as CSSProperties;
 
   if (!mode) {
