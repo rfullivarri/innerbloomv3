@@ -33,19 +33,19 @@ describe('buildStreakModeChipVisual', () => {
         avatar_id: 7,
         avatar_code: 'RED_CAT',
         avatar_name: 'Red Cat',
-        avatar_theme_tokens: { accent: '#ef4444', chip: 'ember' },
+        avatar_theme_tokens: { accent: '#F87171', chip: 'ember' },
       }),
     );
 
     const visual = buildStreakModeChipVisual(avatarProfile);
 
-    expect(visual.accent).toBe('#ef4444');
-    expect(visual.glowPrimary).toContain('239, 68, 68');
-    expect(visual.glowSecondary).toContain('239, 68, 68');
+    expect(visual.accent).toBe('#F87171');
+    expect(visual.glowPrimary).toContain('248, 113, 113');
+    expect(visual.glowSecondary).toContain('248, 113, 113');
   });
 
   it('falls back safely when avatar profile is unavailable', () => {
     const visual = buildStreakModeChipVisual(null);
-    expect(visual.accent).toBe('#00C2FF');
+    expect(visual.accent).toBe('#38BDF8');
   });
 });
