@@ -81,7 +81,13 @@ export async function upsertGameModeUpgradeCtaOverride(input: {
       expires_at = EXCLUDED.expires_at,
       updated_at = NOW()
     RETURNING user_id, enabled, forced_current_mode, forced_next_mode, expires_at, created_at, updated_at`,
-    [input.userId, input.enabled, input.forcedCurrentMode, input.forcedNextMode, input.expiresAt],
+    [
+      input.userId,
+      input.enabled,
+      null,
+      input.forcedNextMode ? input.forcedNextMode.trim().toUpperCase() : null,
+      input.expiresAt,
+    ],
   );
 
   return result.rows[0];

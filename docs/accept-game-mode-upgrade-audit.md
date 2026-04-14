@@ -7,8 +7,8 @@
 - **History is persisted automatically by DB trigger**: when `users.game_mode_id` changes, trigger `trg_users_game_mode_history` inserts a row in `user_game_mode_history` with `effective_at = NOW()`.
 - There are currently **two write paths that change mode**:
   1) onboarding intro service (`submitOnboardingIntro`) updates `users.game_mode_id` **and** `image_url`/`avatar_url`.
-  2) upgrade-accept service (`acceptGameModeUpgradeSuggestion`) updates only `users.game_mode_id` (plus `updated_at`) and marks suggestion `accepted_at`.
-- **Upgrade accept already preserves history** (via trigger), but currently **does not synchronize avatar/image URL fields** as onboarding does.
+  2) upgrade-accept service (`acceptGameModeUpgradeSuggestion`) updates only `users.game_mode_id` (plus `updated_at`) and marks suggestion `accepted_at` (avatar fields unchanged by design).
+- **Upgrade accept already preserves history** (via trigger) and intentionally **only mutates `users.game_mode_id`** (plus suggestion acceptance state).
 - **XP/GP/Level are unchanged on accept** in current code (accept path only updates mode + suggestion state). Onboarding is different and can insert onboarding XP bonuses.
 - **Task difficulty is unchanged on accept** in current code (no task updates in accept path).
 
@@ -68,7 +68,7 @@ Within one DB transaction (`BEGIN ... COMMIT`), onboarding:
 
 ### Implication for Accept Upgrade
 - Reusing onboarding wholesale is **not safe** (it would drag unrelated onboarding side effects).
-- But the **mode+avatar write shape** used by onboarding is the visual-consistency baseline.
+- Accept upgrade is intentionally rhythm-only: it must not mutate avatar/image_url/avatar_url.
 
 ---
 

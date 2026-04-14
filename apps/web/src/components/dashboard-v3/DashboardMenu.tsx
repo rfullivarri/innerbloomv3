@@ -523,16 +523,20 @@ export function DashboardMenu({
 
     setIsUpgradeSubmitting(true);
     try {
-      await acceptGameModeUpgradeSuggestion();
+      const response = await acceptGameModeUpgradeSuggestion();
       await onGameModeChanged();
       await modeUpgradeSuggestionRequest.reload();
+      setToast({
+        tone: 'success',
+        message: t('dashboard.upgradeCta.welcomeToast', { nextMode: (response.suggestion.suggested_mode ?? '').toUpperCase() || 'RHYTHM' }),
+      });
     } catch (error) {
       console.error('[dashboard-menu] failed to accept game mode upgrade', error);
       throw error;
     } finally {
       setIsUpgradeSubmitting(false);
     }
-  }, [isUpgradeSubmitting, modeUpgradeSuggestionRequest, onGameModeChanged]);
+  }, [isUpgradeSubmitting, modeUpgradeSuggestionRequest, onGameModeChanged, setToast, t]);
 
   const handleSignOut = useCallback(async () => {
     handleClose();
@@ -1619,7 +1623,6 @@ export function DashboardMenu({
                   open={isUpgradeModalOpen && hasActiveUpgradeCta}
                   currentMode={modeUpgradeSuggestion?.current_mode ?? null}
                   nextMode={modeUpgradeSuggestion?.suggested_mode ?? null}
-                  avatarProfile={currentAvatarProfile}
                   isSubmitting={isUpgradeSubmitting}
                   onConfirm={handleAcceptUpgrade}
                   onClose={() => setIsUpgradeModalOpen(false)}

@@ -1,5 +1,5 @@
 import { Sparkles } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   acceptGameModeUpgradeSuggestion,
   dismissGameModeUpgradeSuggestion,
@@ -7,12 +7,13 @@ import {
 } from '../../lib/api';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { UpgradeRecommendationModal } from './UpgradeRecommendationModal';
+import { ToastBanner } from '../common/ToastBanner';
 
 interface ModeUpgradeSuggestionCTAProps {
   suggestion: GameModeUpgradeSuggestion | null;
   isLoading?: boolean;
   onSuggestionChange?: (next: GameModeUpgradeSuggestion) => void;
-  onUpgradeAccepted?: () => void;
+  onUpgradeAccepted?: (nextMode: string | null) => void;
 }
 
 function formatModeLabel(mode: string | null): string {
@@ -29,6 +30,8 @@ export function ModeUpgradeSuggestionCTA({
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitLockRef = useRef(false);
+  const [welcomeToast, setWelcomeToast] = useState<string | null>(null);
+  const toastTimeoutRef = useRef<number | null>(null);
   const { t } = usePostLoginLanguage();
 
   const isVisible = useMemo(() => {
@@ -42,6 +45,29 @@ export function ModeUpgradeSuggestionCTA({
         !suggestion.dismissed_at,
     );
   }, [suggestion]);
+
+
+  useEffect(() => {
+    if (!welcomeToast) {
+      return;
+    }
+
+    if (toastTimeoutRef.current) {
+      window.clearTimeout(toastTimeoutRef.current);
+    }
+
+    toastTimeoutRef.current = window.setTimeout(() => {
+      setWelcomeToast(null);
+      toastTimeoutRef.current = null;
+    }, 2500);
+
+    return () => {
+      if (toastTimeoutRef.current) {
+        window.clearTimeout(toastTimeoutRef.current);
+        toastTimeoutRef.current = null;
+      }
+    };
+  }, [welcomeToast]);
 
   if (isLoading || !isVisible || !suggestion) {
     return null;
@@ -57,7 +83,7 @@ export function ModeUpgradeSuggestionCTA({
     try {
       const response = await acceptGameModeUpgradeSuggestion();
       onSuggestionChange?.(response.suggestion);
-      onUpgradeAccepted?.();
+      onUpgradeAccepted?.(response.suggestion.suggested_mode ?? null);
     } catch (error) {
       console.error('Failed to accept mode upgrade suggestion', error);
       throw error;
@@ -128,14 +154,24 @@ export function ModeUpgradeSuggestionCTA({
           </div>
         </div>
       </div>
+      {welcomeToast ? (
+        <ToastBanner
+          tone="success"
+          message={welcomeToast}
+          className="mt-3 border-white/40 bg-white/18 text-black shadow-[0_12px_28px_rgba(15,23,42,0.18)]"
+        />
+      ) : null}
 
       <UpgradeRecommendationModal
         open={isOpen}
         currentMode={suggestion.current_mode}
         nextMode={suggestion.suggested_mode}
-        avatarProfile={null}
         isSubmitting={isSubmitting}
         onConfirm={handleAccept}
+        onAcceptedSuccess={(acceptedMode) => {
+          const modeLabel = formatModeLabel(acceptedMode ?? suggestion.suggested_mode);
+          setWelcomeToast(t('dashboard.upgradeCta.welcomeToast', { nextMode: modeLabel }));
+        }}
         onClose={() => setIsOpen(false)}
         onOpenAllModes={() => setIsOpen(false)}
       />

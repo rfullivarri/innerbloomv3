@@ -186,13 +186,13 @@ describe('gameModeUpgradeSuggestionService', () => {
       },
       {
         match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'),
-        handle: () => ({ rows: [{ user_id: 'u1', enabled: true, forced_current_mode: 'CHILL', forced_next_mode: 'FLOW', expires_at: null, created_at: '2026-03-13T00:00:00.000Z', updated_at: '2026-03-13T00:00:00.000Z' }] }),
+        handle: () => ({ rows: [{ user_id: 'u1', enabled: true, forced_current_mode: 'CHILL', forced_next_mode: 'CHILL', expires_at: null, created_at: '2026-03-13T00:00:00.000Z', updated_at: '2026-03-13T00:00:00.000Z' }] }),
       },
       {
         match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
         handle: (_sql, params) => {
-          expect(params).toEqual(['FLOW']);
-          return { rows: [{ game_mode_id: 13, code: 'FLOW' }] };
+          expect(params).toEqual(['CHILL']);
+          return { rows: [{ game_mode_id: 12, code: 'CHILL' }] };
         },
       },
       {
@@ -209,7 +209,7 @@ describe('gameModeUpgradeSuggestionService', () => {
     expect(result).toMatchObject({
       debug_forced_cta: true,
       current_mode: 'LOW',
-      suggested_mode: 'FLOW',
+      suggested_mode: 'CHILL',
       period_key: 'debug_forced',
       eligible_for_upgrade: true,
       cta_enabled: true,
@@ -217,7 +217,8 @@ describe('gameModeUpgradeSuggestionService', () => {
     expect(mockRollingAnalysis).not.toHaveBeenCalled();
   });
 
-  it('resets accepted_at and dismissed_at when debug forced CTA is reapplied', async () => {
+
+  it('disables forced CTA when override next mode is not sequential for the real user mode', async () => {
     queueExpectations([
       {
         match: (sql) => sql.includes('FROM users u'),
@@ -228,10 +229,37 @@ describe('gameModeUpgradeSuggestionService', () => {
         handle: () => ({ rows: [{ user_id: 'u1', enabled: true, forced_current_mode: 'CHILL', forced_next_mode: 'FLOW', expires_at: null, created_at: '2026-03-13T00:00:00.000Z', updated_at: '2026-03-13T00:00:00.000Z' }] }),
       },
       {
+        match: (sql) => sql.includes('INSERT INTO user_game_mode_upgrade_suggestions'),
+        handle: (_sql, params) => {
+          expect(params?.[3]).toBe(null);
+          expect(params?.[4]).toBe(false);
+          return { rows: [{ accepted_at: null, dismissed_at: null, created_at: null }] };
+        },
+      },
+    ]);
+
+    const result = await getGameModeUpgradeSuggestion('u1');
+    expect(result.debug_forced_cta).toBe(true);
+    expect(result.suggested_mode).toBeNull();
+    expect(result.eligible_for_upgrade).toBe(false);
+    expect(result.cta_enabled).toBe(false);
+  });
+
+  it('resets accepted_at and dismissed_at when debug forced CTA is reapplied', async () => {
+    queueExpectations([
+      {
+        match: (sql) => sql.includes('FROM users u'),
+        handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 11, current_mode: 'LOW' }] }),
+      },
+      {
+        match: (sql) => sql.includes('FROM user_game_mode_upgrade_cta_overrides') && sql.includes('enabled = TRUE'),
+        handle: () => ({ rows: [{ user_id: 'u1', enabled: true, forced_current_mode: 'CHILL', forced_next_mode: 'CHILL', expires_at: null, created_at: '2026-03-13T00:00:00.000Z', updated_at: '2026-03-13T00:00:00.000Z' }] }),
+      },
+      {
         match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
         handle: (_sql, params) => {
-          expect(params).toEqual(['FLOW']);
-          return { rows: [{ game_mode_id: 13, code: 'FLOW' }] };
+          expect(params).toEqual(['CHILL']);
+          return { rows: [{ game_mode_id: 12, code: 'CHILL' }] };
         },
       },
       {
@@ -326,8 +354,8 @@ describe('gameModeUpgradeSuggestionService', () => {
         handle: () => ({ rows: [] }),
       },
       {
-        match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
-        handle: (_sql, params) => ({ rows: [{ game_mode_id: params?.[0] === 'LOW' ? 11 : 12, code: String(params?.[0]) }] }),
+        match: (sql) => sql.includes('FROM users u'),
+        handle: () => ({ rows: [{ user_id: 'u1', game_mode_id: 11, current_mode: 'LOW' }] }),
       },
       {
         match: (sql) => sql.includes('SELECT accepted_at') && sql.includes('FOR UPDATE'),

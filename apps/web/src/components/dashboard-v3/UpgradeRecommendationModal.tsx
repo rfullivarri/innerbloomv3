@@ -1,49 +1,52 @@
 import { Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
-import { resolveAvatarTheme, type AvatarProfile } from '../../lib/avatarProfile';
 import { normalizeGameModeValue } from '../../lib/gameMode';
-import { GAME_MODE_META, type LocalizedLanguage } from '../../lib/gameModeMeta';
-import { buildGameModeChip, GameModeChip } from '../common/GameModeChip';
+import { resolveRhythmUpgradeVisual } from '../../lib/rhythmUpgradeVisual';
 
 interface UpgradeRecommendationModalProps {
   open: boolean;
   currentMode: string | null;
   nextMode: string | null;
-  avatarProfile: AvatarProfile | null;
   isSubmitting: boolean;
   onConfirm: () => Promise<void>;
   onClose: () => void;
   onOpenAllModes: () => void;
+  onAcceptedSuccess?: (nextMode: string | null) => void;
 }
 
 const DRAG_COMPLETE_THRESHOLD = 0.9;
 const DRAG_HANDLE_SIZE = 56;
+const SUCCESS_AUTO_CLOSE_MS = 850;
 
 function formatMode(mode: string | null): string {
   if (!mode) return 'RHYTHM';
   return mode.trim().toUpperCase();
 }
 
-function buildRhythmIntensityLabel(mode: string | null, language: LocalizedLanguage): string {
-  const normalized = normalizeGameModeValue(mode);
-  if (!normalized) {
-    return language === 'es' ? 'Ritmo · —' : 'Rhythm · —';
+function RhythmVisualSlot({ alt, imageUrl }: { alt: string; imageUrl: string | null }) {
+  if (imageUrl) {
+    return <img src={imageUrl} alt={alt} className="h-10 w-10 rounded-lg object-cover" />;
   }
 
-  const frequency = GAME_MODE_META[normalized].frequency[language];
-  return `${normalized} · ${frequency}`;
+  return (
+    <div
+      className="h-10 w-10 rounded-lg border border-black/10 bg-white/55"
+      aria-label={alt}
+      role="img"
+    />
+  );
 }
 
 export function UpgradeRecommendationModal({
   open,
   currentMode,
   nextMode,
-  avatarProfile,
   isSubmitting,
   onConfirm,
   onClose,
   onOpenAllModes,
+  onAcceptedSuccess,
 }: UpgradeRecommendationModalProps) {
   const { t, language } = usePostLoginLanguage();
   const [dragProgress, setDragProgress] = useState(0);
@@ -52,18 +55,14 @@ export function UpgradeRecommendationModal({
   const [activePointerId, setActivePointerId] = useState<number | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
   const handleRef = useRef<HTMLButtonElement | null>(null);
+  const successTimeoutRef = useRef<number | null>(null);
 
   const confirmInFlightRef = useRef(false);
 
   const currentRhythm = useMemo(() => normalizeGameModeValue(currentMode), [currentMode]);
   const nextRhythm = useMemo(() => normalizeGameModeValue(nextMode), [nextMode]);
-  const avatarTheme = useMemo(() => resolveAvatarTheme(avatarProfile), [avatarProfile]);
-  const nextModeChip = useMemo(
-    () => buildGameModeChip(nextMode, { avatarProfile }),
-    [avatarProfile, nextMode],
-  );
-  const currentRhythmLabel = useMemo(() => buildRhythmIntensityLabel(currentMode, language), [currentMode, language]);
-  const nextRhythmLabel = useMemo(() => buildRhythmIntensityLabel(nextMode, language), [nextMode, language]);
+  const currentVisual = useMemo(() => resolveRhythmUpgradeVisual(currentMode, language), [currentMode, language]);
+  const nextVisual = useMemo(() => resolveRhythmUpgradeVisual(nextMode, language), [nextMode, language]);
 
   useEffect(() => {
     if (!open) {
@@ -72,6 +71,10 @@ export function UpgradeRecommendationModal({
       setIsDragging(false);
       setActivePointerId(null);
       confirmInFlightRef.current = false;
+      if (successTimeoutRef.current) {
+        window.clearTimeout(successTimeoutRef.current);
+        successTimeoutRef.current = null;
+      }
     }
   }, [open]);
 
@@ -84,10 +87,17 @@ export function UpgradeRecommendationModal({
     try {
       await onConfirm();
       setIsSuccess(true);
+      if (successTimeoutRef.current) {
+        window.clearTimeout(successTimeoutRef.current);
+      }
+      successTimeoutRef.current = window.setTimeout(() => {
+        onAcceptedSuccess?.(nextRhythm ?? null);
+        onClose();
+      }, SUCCESS_AUTO_CLOSE_MS);
     } finally {
       confirmInFlightRef.current = false;
     }
-  }, [isSubmitting, isSuccess, onConfirm]);
+  }, [isSubmitting, isSuccess, onConfirm, onAcceptedSuccess, onClose, nextRhythm]);
 
   const resolveProgressFromClientX = (clientX: number) => {
     if (!railRef.current) {
@@ -136,22 +146,10 @@ export function UpgradeRecommendationModal({
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] text-black shadow-[0_12px_30px_rgba(167,112,239,0.5)]">
               <Sparkles className="h-7 w-7" />
             </div>
-            {nextMode ? (
-              <div className="flex justify-center">
-                <GameModeChip {...nextModeChip} />
-              </div>
-            ) : null}
             <p className="text-lg font-semibold">
               {t('dashboard.upgradeCta.success', { nextMode: formatMode(nextMode) })}
             </p>
             <p className="text-sm text-[color:var(--color-text-muted)]">{t('dashboard.upgradeCta.successSubtitle')}</p>
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full rounded-2xl bg-[color:var(--color-text)] px-4 py-3 text-sm font-semibold text-[color:var(--color-surface)] transition hover:opacity-90"
-            >
-              {t('dashboard.upgradeCta.finalAction')}
-            </button>
           </div>
         ) : (
           <>
@@ -202,7 +200,8 @@ export function UpgradeRecommendationModal({
                     >
                       {t('dashboard.upgradeCta.nextTag')}
                     </div>
-                    <p className="text-center text-[11px] font-semibold tracking-[0.02em]">{nextRhythmLabel}</p>
+                    <RhythmVisualSlot alt={nextVisual.alt} imageUrl={nextVisual.imageUrl} />
+                    <p className="text-center text-[11px] font-semibold tracking-[0.02em]">{nextVisual.label}</p>
                   </div>
                 ) : null}
 
@@ -235,13 +234,13 @@ export function UpgradeRecommendationModal({
                     aria-label={t('dashboard.upgradeCta.dragHint')}
                   >
                     <div
-                      className="flex h-14 w-14 items-center justify-center rounded-xl border border-black/10 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_10px_22px_rgba(15,23,42,0.28)]"
-                      style={{ backgroundColor: avatarTheme.accent }}
+                      className="flex h-14 w-14 items-center justify-center rounded-xl border border-black/10 bg-black/65 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_10px_22px_rgba(15,23,42,0.28)]"
                       aria-hidden="true"
                     >
                       {t('dashboard.upgradeCta.nowTag')}
                     </div>
-                    <p className="text-center text-[11px] font-semibold tracking-[0.02em]">{currentRhythmLabel}</p>
+                    <RhythmVisualSlot alt={currentVisual.alt} imageUrl={currentVisual.imageUrl} />
+                    <p className="text-center text-[11px] font-semibold tracking-[0.02em]">{currentVisual.label}</p>
                   </button>
                 ) : null}
               </div>
@@ -259,11 +258,11 @@ export function UpgradeRecommendationModal({
               {t('dashboard.upgradeCta.viewAllModes')}
             </button>
 
-            <div className="mt-4 flex items-center justify-end gap-2">
+            <div className="mt-5 flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full border border-[color:var(--color-border-strong)] px-4 py-2 text-sm font-medium text-[color:var(--color-text)]"
+                className="inline-flex items-center rounded-full border border-[color:var(--color-border-soft)] px-4 py-2 text-sm font-semibold text-[color:var(--color-text)] transition hover:bg-[color:var(--color-overlay-1)]"
               >
                 {t('dashboard.upgradeCta.close')}
               </button>

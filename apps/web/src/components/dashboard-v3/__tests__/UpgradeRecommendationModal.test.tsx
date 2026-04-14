@@ -22,13 +22,12 @@ vi.mock('../../../i18n/postLoginLanguage', () => ({
 }));
 
 describe('UpgradeRecommendationModal', () => {
-  it('renders rhythm-first current and next intensity labels', () => {
+  it('renders rhythm visuals with neutral placeholders and no avatar accent style', () => {
     render(
       <UpgradeRecommendationModal
         open
         currentMode="flow"
         nextMode="evolve"
-        avatarProfile={null}
         isSubmitting={false}
         onConfirm={async () => {}}
         onClose={() => {}}
@@ -40,5 +39,9 @@ describe('UpgradeRecommendationModal', () => {
     expect(screen.getByText('NEXT')).toBeInTheDocument();
     expect(screen.getByText('Flow · 3x/week')).toBeInTheDocument();
     expect(screen.getByText('Evolve · 4x/week')).toBeInTheDocument();
+    expect(screen.getAllByRole('img', { name: /Rhythm/i })).toHaveLength(2);
+
+    const nowTag = screen.getByText('NOW').closest('div');
+    expect(nowTag?.getAttribute('style')).toBeNull();
   });
 });
