@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
-import { resolveAvatarTheme, type AvatarProfile } from '../../lib/avatarProfile';
 import { normalizeGameModeValue, type GameMode } from '../../lib/gameMode';
+import { resolveRhythmTheme } from '../../lib/rhythmTheme';
 
 interface GameModeChipStyle {
   label: string;
@@ -23,11 +23,11 @@ const DEFAULT_CHIP_STYLE: GameModeChipStyle = {
 
 export function buildGameModeChip(
   mode?: string | null,
-  options?: { avatarProfile?: AvatarProfile | null },
+  _options?: { avatarProfile?: unknown | null },
 ): GameModeChipStyle {
-  const theme = resolveAvatarTheme(options?.avatarProfile ?? null);
+  const rhythmTheme = resolveRhythmTheme(mode);
   const style = {
-    '--ib-chip-accent': theme.accent,
+    '--ib-chip-accent': rhythmTheme.accent,
   } as CSSProperties;
 
   if (!mode) {
