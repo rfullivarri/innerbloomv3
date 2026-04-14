@@ -155,12 +155,8 @@ export const taskDifficultyCalibrationRunBodySchema = z.object({
 
 
 
-const modeCodeSchema = z.enum(['LOW', 'CHILL', 'FLOW', 'EVOLVE']);
-
 export const adminModeUpgradeCtaOverrideUpsertBodySchema = z.object({
   enabled: z.boolean().default(true),
-  forcedCurrentMode: modeCodeSchema,
-  forcedNextMode: modeCodeSchema,
   expiresAt: z.string().datetime().nullable().optional(),
 });
 

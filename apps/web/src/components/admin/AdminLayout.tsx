@@ -55,6 +55,21 @@ const SUBSCRIPTION_STATUS_LABELS: Record<SubscriptionStatus, string> = {
   expired: 'Expirada',
 };
 
+const NEXT_MODE_BY_CODE: Record<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE', 'CHILL' | 'FLOW' | 'EVOLVE' | null> = {
+  LOW: 'CHILL',
+  CHILL: 'FLOW',
+  FLOW: 'EVOLVE',
+  EVOLVE: null,
+};
+
+function normalizeMode(value: string | null | undefined): 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE' | null {
+  const normalized = (value ?? '').trim().toUpperCase();
+  if (normalized === 'LOW' || normalized === 'CHILL' || normalized === 'FLOW' || normalized === 'EVOLVE') {
+    return normalized;
+  }
+  return null;
+}
+
 type LogsState = {
   items: AdminLogRow[];
   page: number;
@@ -92,8 +107,6 @@ export function AdminLayout() {
   const [modeUpgradeAnalysisError, setModeUpgradeAnalysisError] = useState<string | null>(null);
   const [modeUpgradeCtaOverride, setModeUpgradeCtaOverride] = useState<AdminModeUpgradeCtaOverride | null>(null);
   const [modeUpgradeCtaOverrideEnabled, setModeUpgradeCtaOverrideEnabled] = useState(false);
-  const [modeUpgradeCtaOverrideCurrentMode, setModeUpgradeCtaOverrideCurrentMode] = useState<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'>('LOW');
-  const [modeUpgradeCtaOverrideNextMode, setModeUpgradeCtaOverrideNextMode] = useState<'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'>('CHILL');
   const [modeUpgradeCtaOverrideExpiresAt, setModeUpgradeCtaOverrideExpiresAt] = useState('');
   const [modeUpgradeCtaOverrideLoading, setModeUpgradeCtaOverrideLoading] = useState(false);
   const [modeUpgradeCtaOverrideSaving, setModeUpgradeCtaOverrideSaving] = useState(false);
@@ -277,8 +290,6 @@ export function AdminLayout() {
     setModeUpgradeAnalysisError(null);
     setModeUpgradeCtaOverride(null);
     setModeUpgradeCtaOverrideEnabled(false);
-    setModeUpgradeCtaOverrideCurrentMode('LOW');
-    setModeUpgradeCtaOverrideNextMode('CHILL');
     setModeUpgradeCtaOverrideExpiresAt('');
     setModeUpgradeCtaOverrideMessage(null);
     setModeUpgradeCtaOverrideError(null);
@@ -379,8 +390,6 @@ export function AdminLayout() {
         }
         setModeUpgradeCtaOverride(data.item);
         setModeUpgradeCtaOverrideEnabled(Boolean(data.item?.enabled));
-        setModeUpgradeCtaOverrideCurrentMode(((data.item?.forced_current_mode ?? 'LOW') as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'));
-        setModeUpgradeCtaOverrideNextMode(((data.item?.forced_next_mode ?? 'CHILL') as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE'));
         setModeUpgradeCtaOverrideExpiresAt(data.item?.expires_at ? data.item.expires_at.slice(0, 16) : '');
       })
       .catch((error: unknown) => {
@@ -400,6 +409,10 @@ export function AdminLayout() {
       cancelled = true;
     };
   }, [selectedUser]);
+
+  const modeUpgradeCurrentMode = normalizeMode(modeUpgradeAnalysis?.current_mode ?? selectedUser?.gameMode ?? null);
+  const modeUpgradeNextMode = modeUpgradeCurrentMode ? NEXT_MODE_BY_CODE[modeUpgradeCurrentMode] : null;
+  const canApplyModeUpgradeCta = Boolean(selectedUser && modeUpgradeCurrentMode && modeUpgradeNextMode);
 
   const handleUpdateSubscription = useCallback(
     async (payload: { planCode: string; status?: SubscriptionStatus; successMessage: string }) => {
@@ -488,8 +501,6 @@ export function AdminLayout() {
     try {
       const response = await upsertAdminModeUpgradeCtaOverride(selectedUser.id, {
         enabled: modeUpgradeCtaOverrideEnabled,
-        forcedCurrentMode: modeUpgradeCtaOverrideCurrentMode,
-        forcedNextMode: modeUpgradeCtaOverrideNextMode,
         expiresAt: modeUpgradeCtaOverrideExpiresAt ? new Date(modeUpgradeCtaOverrideExpiresAt).toISOString() : null,
       });
       setModeUpgradeCtaOverride(response.item);
@@ -500,7 +511,7 @@ export function AdminLayout() {
     } finally {
       setModeUpgradeCtaOverrideSaving(false);
     }
-  }, [selectedUser, modeUpgradeCtaOverrideEnabled, modeUpgradeCtaOverrideCurrentMode, modeUpgradeCtaOverrideNextMode, modeUpgradeCtaOverrideExpiresAt]);
+  }, [selectedUser, modeUpgradeCtaOverrideEnabled, modeUpgradeCtaOverrideExpiresAt]);
 
   const handleClearModeUpgradeCtaOverride = useCallback(async () => {
     if (!selectedUser) {
@@ -515,8 +526,6 @@ export function AdminLayout() {
       await clearAdminModeUpgradeCtaOverride(selectedUser.id);
       setModeUpgradeCtaOverride(null);
       setModeUpgradeCtaOverrideEnabled(false);
-      setModeUpgradeCtaOverrideCurrentMode('LOW');
-      setModeUpgradeCtaOverrideNextMode('CHILL');
       setModeUpgradeCtaOverrideExpiresAt('');
       setModeUpgradeCtaOverrideMessage('Forced CTA limpiado.');
     } catch (error) {
@@ -1256,31 +1265,26 @@ export function AdminLayout() {
                     />
                     Force Upgrade CTA
                   </label>
-                  <label className="flex flex-col gap-1 text-[11px] uppercase tracking-[0.12em] text-cyan-300">
-                    Current
-                    <select value={modeUpgradeCtaOverrideCurrentMode} onChange={(event) => setModeUpgradeCtaOverrideCurrentMode(event.target.value as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE')} className="rounded-md border border-cyan-700/50 bg-slate-900/70 px-2 py-1 text-xs normal-case tracking-normal text-slate-100">
-                      <option value="LOW">LOW</option><option value="CHILL">CHILL</option><option value="FLOW">FLOW</option><option value="EVOLVE">EVOLVE</option>
-                    </select>
-                  </label>
-                  <label className="flex flex-col gap-1 text-[11px] uppercase tracking-[0.12em] text-cyan-300">
-                    Next
-                    <select value={modeUpgradeCtaOverrideNextMode} onChange={(event) => setModeUpgradeCtaOverrideNextMode(event.target.value as 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE')} className="rounded-md border border-cyan-700/50 bg-slate-900/70 px-2 py-1 text-xs normal-case tracking-normal text-slate-100">
-                      <option value="LOW">LOW</option><option value="CHILL">CHILL</option><option value="FLOW">FLOW</option><option value="EVOLVE">EVOLVE</option>
-                    </select>
-                  </label>
+                  <p className="rounded-md border border-cyan-700/50 bg-slate-900/70 px-2 py-1 text-xs normal-case tracking-normal text-slate-100">
+                    Current real: <strong>{modeUpgradeCurrentMode ?? '—'}</strong>
+                  </p>
+                  <p className="rounded-md border border-cyan-700/50 bg-slate-900/70 px-2 py-1 text-xs normal-case tracking-normal text-slate-100">
+                    Next valid: <strong>{modeUpgradeNextMode ?? 'No upgrade'}</strong>
+                  </p>
                   <label className="flex flex-col gap-1 text-[11px] uppercase tracking-[0.12em] text-cyan-300">
                     Expires (optional)
                     <input type="datetime-local" value={modeUpgradeCtaOverrideExpiresAt} onChange={(event) => setModeUpgradeCtaOverrideExpiresAt(event.target.value)} className="rounded-md border border-cyan-700/50 bg-slate-900/70 px-2 py-1 text-xs normal-case tracking-normal text-slate-100" />
                   </label>
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <button type="button" onClick={handleApplyModeUpgradeCtaOverride} disabled={modeUpgradeCtaOverrideSaving || !selectedUser} className="inline-flex items-center justify-center rounded-md border border-cyan-700/60 bg-cyan-900/30 px-3 py-1.5 text-xs font-semibold text-cyan-100 hover:border-cyan-400/60 disabled:cursor-not-allowed disabled:opacity-60">
+                  <button type="button" onClick={handleApplyModeUpgradeCtaOverride} disabled={modeUpgradeCtaOverrideSaving || !canApplyModeUpgradeCta} className="inline-flex items-center justify-center rounded-md border border-cyan-700/60 bg-cyan-900/30 px-3 py-1.5 text-xs font-semibold text-cyan-100 hover:border-cyan-400/60 disabled:cursor-not-allowed disabled:opacity-60">
                     {modeUpgradeCtaOverrideSaving ? 'Applying…' : 'Apply Forced CTA'}
                   </button>
                   <button type="button" onClick={handleClearModeUpgradeCtaOverride} disabled={modeUpgradeCtaOverrideClearing || !selectedUser} className="inline-flex items-center justify-center rounded-md border border-cyan-700/60 bg-slate-900/40 px-3 py-1.5 text-xs font-semibold text-cyan-100 hover:border-cyan-400/60 disabled:cursor-not-allowed disabled:opacity-60">
                     {modeUpgradeCtaOverrideClearing ? 'Clearing…' : 'Clear Forced CTA'}
                   </button>
                   {modeUpgradeCtaOverride?.enabled ? <span className="text-[11px] text-emerald-300">Active</span> : <span className="text-[11px] text-cyan-300/80">Inactive</span>}
+                  {!modeUpgradeNextMode ? <span className="text-[11px] text-amber-300">Current mode is EVOLVE: forced CTA is disabled.</span> : null}
                 </div>
                 {modeUpgradeCtaOverrideMessage ? <p className="mt-1 text-xs font-semibold text-emerald-300">{modeUpgradeCtaOverrideMessage}</p> : null}
                 {modeUpgradeCtaOverrideError ? <p className="mt-1 text-xs font-semibold text-rose-300">{modeUpgradeCtaOverrideError}</p> : null}

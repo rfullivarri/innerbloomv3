@@ -192,8 +192,6 @@ export async function upsertAdminModeUpgradeCtaOverride(
   userId: string,
   payload: {
     enabled: boolean;
-    forcedCurrentMode: 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
-    forcedNextMode: 'LOW' | 'CHILL' | 'FLOW' | 'EVOLVE';
     expiresAt?: string | null;
   },
 ) {

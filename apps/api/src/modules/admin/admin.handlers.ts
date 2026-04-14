@@ -355,8 +355,6 @@ export const putAdminUserModeUpgradeCtaOverride = asyncHandler(async (req: Reque
   const item = await setUserModeUpgradeCtaOverride({
     userId,
     enabled: body.enabled,
-    forcedCurrentMode: body.forcedCurrentMode,
-    forcedNextMode: body.forcedNextMode,
     expiresAt: body.expiresAt ?? null,
   });
   res.json({ ok: true, item });

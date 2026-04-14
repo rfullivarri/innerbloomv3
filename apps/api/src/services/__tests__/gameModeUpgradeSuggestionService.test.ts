@@ -208,7 +208,7 @@ describe('gameModeUpgradeSuggestionService', () => {
 
     expect(result).toMatchObject({
       debug_forced_cta: true,
-      current_mode: 'CHILL',
+      current_mode: 'LOW',
       suggested_mode: 'FLOW',
       period_key: 'debug_forced',
       eligible_for_upgrade: true,
@@ -326,14 +326,15 @@ describe('gameModeUpgradeSuggestionService', () => {
         handle: () => ({ rows: [] }),
       },
       {
-        match: (sql) => sql.includes('FROM user_game_mode_upgrade_suggestions s'),
-        handle: () => ({
-          rows: [{ period_key: 'rolling_2025-01-31', eligible_for_upgrade: true, accepted_at: null, dismissed_at: null, current_mode: 'LOW', suggested_mode: 'CHILL' }],
-        }),
+        match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
+        handle: (_sql, params) => ({ rows: [{ game_mode_id: params?.[0] === 'LOW' ? 11 : 12, code: String(params?.[0]) }] }),
       },
       {
-        match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
-        handle: (_sql, params) => ({ rows: [{ game_mode_id: params?.[0] === 'CHILL' ? 12 : 11, code: String(params?.[0]) }] }),
+        match: (sql) => sql.includes('SELECT accepted_at') && sql.includes('FOR UPDATE'),
+        handle: (_sql, params) => {
+          expect(params).toEqual(['u1', 'rolling_2025-01-31', 11]);
+          return { rows: [{ accepted_at: null }] };
+        },
       },
       {
         match: (sql) => sql.includes('FROM cat_game_mode') && sql.includes('WHERE code = $1'),
