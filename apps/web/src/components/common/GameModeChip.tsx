@@ -49,9 +49,12 @@ export function buildGameModeChip(
 
 export function GameModeChip({ label, animate, style }: GameModeChipStyle) {
   return (
-    <span className="ib-game-mode-chip relative inline-flex items-center" style={style}>
+    <span
+      className={`ib-game-mode-chip relative inline-flex items-center ${animate ? 'ib-game-mode-chip--animated' : ''}`}
+      style={style}
+    >
       <span
-        className={`ib-game-mode-chip__glow absolute -inset-[2px] rounded-full blur-md ${animate ? 'animate-pulse' : ''}`}
+        className="ib-game-mode-chip__glow absolute rounded-full"
         aria-hidden
       />
       <span className="ib-game-mode-chip__inner relative inline-flex items-center gap-2 rounded-full border px-3 py-[0.26rem] text-[10px] font-semibold uppercase tracking-[0.2em] backdrop-blur">

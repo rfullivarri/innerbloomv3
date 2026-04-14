@@ -5133,7 +5133,10 @@
   }
 
   .ib-game-mode-chip__glow {
+    inset: -2px;
     background: color-mix(in srgb, var(--ib-chip-accent) 45%, transparent);
+    filter: blur(10px);
+    opacity: 0.6;
   }
 
   .ib-game-mode-chip__inner {
@@ -5149,8 +5152,47 @@
       inset 0 0 0 1px color-mix(in srgb, var(--ib-chip-accent) 28%, rgba(255, 255, 255, 0.32));
   }
 
+  .ib-game-mode-chip--animated .ib-game-mode-chip__glow {
+    animation: ib-game-mode-chip-pulse 2.8s ease-in-out infinite;
+  }
+
   :root[data-theme='light'] .ib-game-mode-chip__inner {
     color: color-mix(in srgb, var(--ib-chip-accent) 72%, #0f172a);
+  }
+
+  :root[data-theme='dark'] .ib-game-mode-chip__glow {
+    inset: -1px;
+    background: color-mix(in srgb, var(--ib-chip-accent) 28%, transparent);
+    filter: blur(5px);
+    opacity: 0.32;
+  }
+
+  :root[data-theme='dark'] .ib-game-mode-chip__inner {
+    box-shadow:
+      0 0 7px color-mix(in srgb, var(--ib-chip-accent) 12%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, var(--ib-chip-accent) 22%, rgba(255, 255, 255, 0.24));
+  }
+
+  :root[data-theme='dark'] .ib-game-mode-chip--animated .ib-game-mode-chip__glow {
+    animation: ib-game-mode-chip-pulse 5.2s ease-out infinite;
+  }
+
+  @keyframes ib-game-mode-chip-pulse {
+    0%,
+    100% {
+      opacity: var(--ib-chip-glow-opacity-start, 0.55);
+      transform: scale(1);
+    }
+    50% {
+      opacity: var(--ib-chip-glow-opacity-end, 0.7);
+      transform: scale(var(--ib-chip-glow-scale, 1.035));
+    }
+  }
+
+  :root[data-theme='dark'] .ib-game-mode-chip {
+    --ib-chip-glow-opacity-start: 0.28;
+    --ib-chip-glow-opacity-end: 0.36;
+    --ib-chip-glow-scale: 1.01;
   }
 
   .ib-streak-mode-chip {
