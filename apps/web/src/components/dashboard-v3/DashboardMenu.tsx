@@ -1355,7 +1355,7 @@ export function DashboardMenu({
                                   key={mode}
                                   type="button"
                                   onClick={() => handleSelectGameMode(mode)}
-                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(125,211,252,0.65),0_0_20px_rgba(56,189,248,0.2)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
+                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(167,112,239,0.58),0_0_20px_rgba(139,92,246,0.22)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
                                 >
                                   <div className="ml-2 space-y-2">
                                     <div className="flex items-center justify-between gap-2">
@@ -1474,7 +1474,7 @@ export function DashboardMenu({
                                   key={avatarOption.avatarId}
                                   type="button"
                                   onClick={() => setSelectedAvatarId(avatarOption.avatarId)}
-                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(125,211,252,0.65),0_0_20px_rgba(56,189,248,0.2)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
+                                  className={`relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition ${isSelected ? 'border-[color:var(--color-accent-primary)] bg-[color:var(--color-overlay-3)] shadow-[0_0_0_1px_rgba(167,112,239,0.58),0_0_20px_rgba(139,92,246,0.22)]' : 'border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] hover:bg-[color:var(--color-overlay-2)]'}`}
                                 >
                                   <div className="ml-2 space-y-2">
                                     <div className="flex items-center justify-between gap-2">
