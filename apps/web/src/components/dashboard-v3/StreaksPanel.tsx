@@ -19,14 +19,13 @@ import { TaskInsightsModal } from './StreakTaskInsightsModal';
 import { DashboardMeta, DashboardTitle } from './DashboardTypography';
 import { usePostLoginLanguage } from '../../i18n/postLoginLanguage';
 import { HABIT_ACHIEVEMENT_UPDATED_EVENT } from '../../lib/habitAchievementEvents';
-import type { AvatarProfile } from '../../lib/avatarProfile';
+import { resolveAvatarTheme, type AvatarProfile } from '../../lib/avatarProfile';
 import {
   DASHBOARD_SEGMENTED_BUTTON_ACTIVE,
   DASHBOARD_SEGMENTED_BUTTON_BASE,
   DASHBOARD_SEGMENTED_BUTTON_INACTIVE,
   DASHBOARD_SEGMENTED_GROUP_BASE,
 } from './segmentedControlStyles';
-import { resolveRhythmTheme } from '../../lib/rhythmTheme';
 
 export const FEATURE_STREAKS_PANEL_V1 = false;
 
@@ -311,12 +310,27 @@ function GlowChip({ glowPrimary, glowSecondary, children, className, innerClassN
   );
 }
 
-export function buildStreakModeChipVisual(mode?: string | null) {
-  const rhythmTheme = resolveRhythmTheme(mode);
+function hexToRgba(hex: string, alpha: number): string {
+  const normalized = hex.replace('#', '').trim();
+  const expanded = normalized.length === 3
+    ? normalized.split('').map((chunk) => `${chunk}${chunk}`).join('')
+    : normalized;
+  if (!/^[0-9a-fA-F]{6}$/.test(expanded)) {
+    return `rgba(139, 92, 246, ${alpha})`;
+  }
+  const int = Number.parseInt(expanded, 16);
+  const r = (int >> 16) & 255;
+  const g = (int >> 8) & 255;
+  const b = int & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+export function buildStreakModeChipVisual(avatarProfile?: AvatarProfile | null) {
+  const avatarTheme = resolveAvatarTheme(avatarProfile ?? null);
   return {
-    accent: rhythmTheme.accent,
-    glowPrimary: rhythmTheme.glow,
-    glowSecondary: rhythmTheme.softTint,
+    accent: avatarTheme.accent,
+    glowPrimary: hexToRgba(avatarTheme.accent, 0.66),
+    glowSecondary: hexToRgba(avatarTheme.accent, 0.36),
   };
 }
 
@@ -651,7 +665,7 @@ function TaskItem({
   );
 }
 
-export function StreaksPanel({ userId, gameMode, weeklyTarget, avatarProfile: _avatarProfile, forceLoadingTasks = false }: StreaksPanelProps) {
+export function StreaksPanel({ userId, gameMode, weeklyTarget, avatarProfile, forceLoadingTasks = false }: StreaksPanelProps) {
   const { t, language } = usePostLoginLanguage();
   const [pillar, setPillar] = useState<Pillar>('Body');
   const [range, setRange] = useState<StreakPanelRange>('month');
@@ -863,7 +877,7 @@ export function StreaksPanel({ userId, gameMode, weeklyTarget, avatarProfile: _a
           : tab.label,
   }));
   const daysConsecutiveText = (days: string) => t('dashboard.streaks.daysConsecutiveSr', { days });
-  const modeChipVisual = buildStreakModeChipVisual(normalizedMode);
+  const modeChipVisual = buildStreakModeChipVisual(avatarProfile);
   const modeChip = {
     className: 'ib-streak-mode-chip',
     glowPrimary: modeChipVisual.glowPrimary,

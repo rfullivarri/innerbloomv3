@@ -1,24 +1,51 @@
 import { describe, expect, it } from 'vitest';
 import { buildStreakModeChipVisual } from './StreaksPanel';
+import { resolveAvatarProfile } from '../../lib/avatarProfile';
+import type { CurrentUserProfile } from '../../lib/api';
+
+function makeProfile(overrides: Partial<CurrentUserProfile>): CurrentUserProfile {
+  return {
+    user_id: 'user-1',
+    clerk_user_id: 'clerk-1',
+    email_primary: 'test@example.com',
+    full_name: 'Test User',
+    image_url: null,
+    game_mode: 'Flow',
+    weekly_target: 3,
+    avatar_id: null,
+    avatar_code: null,
+    avatar_name: null,
+    avatar_theme_tokens: null,
+    timezone: 'UTC',
+    locale: 'en',
+    created_at: '2026-04-13T00:00:00.000Z',
+    updated_at: '2026-04-13T00:00:00.000Z',
+    deleted_at: null,
+    ...overrides,
+  };
+}
 
 describe('buildStreakModeChipVisual', () => {
-  it('uses onboarding rhythm accent for FLOW', () => {
-    const visual = buildStreakModeChipVisual('Flow');
+  it('uses avatar theme accent regardless of rhythm content', () => {
+    const avatarProfile = resolveAvatarProfile(
+      makeProfile({
+        game_mode: 'Flow',
+        avatar_id: 7,
+        avatar_code: 'RED_CAT',
+        avatar_name: 'Red Cat',
+        avatar_theme_tokens: { accent: '#ef4444', chip: 'ember' },
+      }),
+    );
 
-    expect(visual.accent).toBe('rgb(56, 189, 248)');
-    expect(visual.glowPrimary).toBe('rgba(56, 189, 248, 0.32)');
-    expect(visual.glowSecondary).toBe('rgba(56, 189, 248, 0.2)');
+    const visual = buildStreakModeChipVisual(avatarProfile);
+
+    expect(visual.accent).toBe('#ef4444');
+    expect(visual.glowPrimary).toContain('239, 68, 68');
+    expect(visual.glowSecondary).toContain('239, 68, 68');
   });
 
-  it('maps all rhythm modes to onboarding source-of-truth accents', () => {
-    expect(buildStreakModeChipVisual('Low').accent).toBe('rgb(248, 113, 113)');
-    expect(buildStreakModeChipVisual('Chill').accent).toBe('rgb(74, 222, 128)');
-    expect(buildStreakModeChipVisual('Flow').accent).toBe('rgb(56, 189, 248)');
-    expect(buildStreakModeChipVisual('Evolve').accent).toBe('rgb(167, 139, 250)');
-  });
-
-  it('falls back safely to FLOW rhythm when mode is unavailable', () => {
+  it('falls back safely when avatar profile is unavailable', () => {
     const visual = buildStreakModeChipVisual(null);
-    expect(visual.accent).toBe('rgb(56, 189, 248)');
+    expect(visual.accent).toBe('#00C2FF');
   });
 });
