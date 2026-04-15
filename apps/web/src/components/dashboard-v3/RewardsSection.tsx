@@ -36,8 +36,6 @@ const REWARDS_PILLAR_ORDER = [
 
 type AchievementViewMode = 'shelves' | 'carousel';
 
-const REWARDS_VIEW_MODE_STORAGE_KEY = 'ib.rewards.achievementsViewMode';
-
 interface RewardsSectionProps {
   userId: string;
   onOpenWeeklyWrapped?: (record?: WeeklyWrappedRecord | null) => void;
@@ -114,33 +112,7 @@ export function RewardsSection({
   const [educationBannerVisible, setEducationBannerVisible] = useState(false);
   const [isTransitioningDecision, setIsTransitioningDecision] = useState(false);
   const [isGrowthCalibrationModalOpen, setIsGrowthCalibrationModalOpen] = useState(false);
-  const [achievementsViewMode, setAchievementsViewMode] = useState<AchievementViewMode>('shelves');
-
-  useEffect(() => {
-    if (forcedAchievementsViewMode) {
-      setAchievementsViewMode(forcedAchievementsViewMode);
-      return;
-    }
-    if (typeof window === 'undefined') {
-      return;
-    }
-    const savedMode = window.localStorage.getItem(REWARDS_VIEW_MODE_STORAGE_KEY);
-    if (savedMode === 'carousel' || savedMode === 'shelves') {
-      setAchievementsViewMode(savedMode);
-    }
-  }, [forcedAchievementsViewMode]);
-
-  const handleChangeAchievementsViewMode = useCallback((nextMode: AchievementViewMode) => {
-    if (forcedAchievementsViewMode) {
-      setAchievementsViewMode(forcedAchievementsViewMode);
-      return;
-    }
-    setAchievementsViewMode(nextMode);
-    if (typeof window === 'undefined') {
-      return;
-    }
-    window.localStorage.setItem(REWARDS_VIEW_MODE_STORAGE_KEY, nextMode);
-  }, [forcedAchievementsViewMode]);
+  const achievementsViewMode: AchievementViewMode = forcedAchievementsViewMode ?? 'carousel';
 
   const { data, status, error, reload } = useRequest(() => getRewardsHistory(userId), [userId], {
     enabled: !resolvedDisableRemote && Boolean(userId),
@@ -228,39 +200,6 @@ export function RewardsSection({
               <span>{language === 'es' ? 'Ver guía' : 'View guide'}</span>
             </a>
           ) : null}
-          <div
-            className="inline-flex items-center rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-1)] p-0.5"
-            role="tablist"
-            aria-label={language === 'es' ? 'Modo de visualización de logros' : 'Achievement view mode'}
-          >
-            {([
-              { id: 'carousel', label: language === 'es' ? 'Carrusel' : 'Carousel' },
-              { id: 'shelves', label: language === 'es' ? 'Estantes' : 'Shelves' },
-            ] as const).map((option) => {
-              if (forcedAchievementsViewMode && option.id !== forcedAchievementsViewMode) {
-                return null;
-              }
-              const isSelected = achievementsViewMode === option.id;
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={isSelected}
-                  tabIndex={isSelected ? 0 : -1}
-                  onClick={() => handleChangeAchievementsViewMode(option.id)}
-                  disabled={Boolean(forcedAchievementsViewMode)}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                    isSelected
-                      ? 'border border-violet-300/70 bg-violet-500/85 text-white shadow-[0_6px_18px_rgba(124,58,237,0.35)] dark:border-violet-300/55 dark:bg-violet-500/35 dark:text-violet-50'
-                      : 'text-[color:var(--color-text-muted)] hover:bg-[color:var(--color-overlay-2)] hover:text-[color:var(--color-text)]'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
         </div>
       )}
       bodyClassName="gap-5"
@@ -366,23 +305,20 @@ function GrowthCalibrationShelf({
       </div>
 
       {hasResults ? (
-        <div className="mt-3 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3">
-          <p className="text-sm font-semibold text-[color:var(--color-text)]">
+        <button
+          type="button"
+          onClick={onOpenResults}
+          className="mt-3 w-full rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left transition hover:border-[color:var(--color-border-soft)] hover:bg-[color:var(--color-overlay-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
+        >
+          <p className="text-lg font-bold tracking-[0.02em] text-[color:var(--color-text)] sm:text-xl">
             <span className="text-rose-300">↑ {growthCalibration.summary.up}</span>
-            <span className="mx-2 text-amber-300">• {growthCalibration.summary.keep}</span>
+            <span className="mx-3 text-amber-300">• {growthCalibration.summary.keep}</span>
             <span className="text-emerald-300">↓ {growthCalibration.summary.down}</span>
           </p>
           {growthCalibration.latestPeriodLabel ? (
-            <p className="mt-1 text-xs uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">{growthCalibration.latestPeriodLabel}</p>
+            <p className="mt-1.5 text-xs uppercase tracking-[0.12em] text-[color:var(--color-slate-400)]">{growthCalibration.latestPeriodLabel}</p>
           ) : null}
-          <button
-            type="button"
-            onClick={onOpenResults}
-            className="mt-3 inline-flex rounded-full border border-[color:var(--color-border-soft)] bg-[color:var(--color-overlay-2)] px-3 py-1.5 text-xs font-semibold text-[color:var(--color-text)] transition hover:border-[color:var(--color-border-strong)]"
-          >
-            {language === 'es' ? 'Ver resultados' : 'View results'}
-          </button>
-        </div>
+        </button>
       ) : (
         <div className="mt-3 rounded-xl border border-dashed border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-4 text-sm text-[color:var(--color-text-muted)]">
           {language === 'es'
@@ -453,13 +389,18 @@ function WeeklyWrapupShelf({ items, onOpen, language, anchor }: { items: WeeklyW
                 className="rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] p-3 text-left"
               >
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{item.weekStart} → {item.weekEnd}</p>
-                <div className="mt-2 flex min-h-6 items-center gap-2">
+                <div className="mt-2 flex min-h-6 items-center gap-2.5">
                   <EmotionDot color={weeklyEmotion?.color} />
-                  <span className="text-base leading-none" aria-label={language === 'es' ? 'Pilar dominante en GP' : 'Dominant pillar by GP'}>
+                  <span className="text-[1.3rem] leading-none" aria-label={language === 'es' ? 'Pilar dominante en GP' : 'Dominant pillar by GP'}>
                     {resolvePillarEmoji(dominantPillar)}
                   </span>
+                  <CompletionDots
+                    completionDays={item.completionDays ?? []}
+                    range={{ start: item.weekStart, end: item.weekEnd }}
+                    language={language}
+                    inline
+                  />
                 </div>
-                <CompletionDots completionDays={item.completionDays ?? []} range={{ start: item.weekStart, end: item.weekEnd }} language={language} />
               </button>
             );
           })}
@@ -595,7 +536,7 @@ function EmotionDot({ color }: { color?: string }) {
   const dotColor = color && color.trim().length ? color : 'rgba(255,255,255,0.45)';
   return (
     <span
-      className="inline-flex h-3 w-3 shrink-0 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+      className="inline-flex h-4 w-4 shrink-0 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.2)]"
       style={{ backgroundColor: dotColor }}
       aria-label="dominant-emotion-dot"
     />
@@ -623,16 +564,18 @@ function CompletionDots({
   completionDays,
   range,
   language,
+  inline = false,
 }: {
   completionDays: string[];
   range: { start: string; end: string };
   language: 'es' | 'en';
+  inline?: boolean;
 }) {
   const dayLabels = language === 'es' ? ['L', 'M', 'X', 'J', 'V', 'S', 'D'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   const completed = useMemo(() => new Set(completionDays), [completionDays]);
   const weekDates = useMemo(() => getWeekDatesFromRange(range), [range.end, range.start]);
   return (
-    <div className="mt-3 flex w-full items-center justify-center gap-1.5">
+    <div className={`flex items-center justify-center gap-1.5 ${inline ? 'w-auto mt-0 min-w-0 flex-1 justify-start' : 'mt-3 w-full'}`}>
       {weekDates.map((dateKey, index) => {
         const isDone = completed.has(dateKey);
         return (
@@ -1093,6 +1036,11 @@ function AchievedShelf({
     MIND: language === 'es' ? 'Mente' : 'Mind',
     SOUL: language === 'es' ? 'Alma' : 'Soul',
   };
+  const pillarChipIcons: Record<(typeof REWARDS_PILLAR_ORDER)[number]['code'], string> = {
+    BODY: '🫀',
+    MIND: '🧠',
+    SOUL: '🏵️',
+  };
 
   return (
     <div className="space-y-4" data-demo-anchor={demoAnchors?.shelves}>
@@ -1137,13 +1085,16 @@ function AchievedShelf({
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => setActivePillarCode(pillar.code)}
-                  className={`${DASHBOARD_SEGMENTED_BUTTON_BASE} px-2 py-1.5 tracking-[0.14em] ${
+                  className={`${DASHBOARD_SEGMENTED_BUTTON_BASE} px-2 py-1.5 ${
                     isSelected
                       ? DASHBOARD_SEGMENTED_BUTTON_ACTIVE
                       : DASHBOARD_SEGMENTED_BUTTON_INACTIVE
                   }`}
                 >
-                  {pillarChipLabels[pillar.code]}
+                  <span className="inline-flex items-center gap-1.5">
+                    <span aria-hidden>{pillarChipIcons[pillar.code]}</span>
+                    <span>{pillarChipLabels[pillar.code]}</span>
+                  </span>
                 </button>
               );
             })}
@@ -1211,8 +1162,11 @@ function AchievedShelf({
                               )}
                             />
                           </div>
-                          <div className="mt-auto space-y-1.5 pb-1">
+                          <div className="mt-auto space-y-1 pb-2">
                             <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
+                            <p className="line-clamp-1 text-xs text-[color:var(--color-text-muted)]/90">
+                              {habit.trait?.name ?? (language === 'es' ? 'Rasgo en progreso' : 'Trait in progress')}
+                            </p>
                             <p className="text-sm text-[color:var(--color-text-muted)]">
                               {language === 'es'
                                 ? 'Toca para ver más'
@@ -1255,6 +1209,7 @@ function AchievedShelf({
                               mockPreviewAchievementByTaskId={mockPreviewAchievementByTaskId}
                               loadOnVisible={isFlipped}
                               compact={useCompactLockedPreview}
+                              embedded
                             />
                           </div>
                         </div>
@@ -1409,6 +1364,7 @@ function LockedAchievementHabitDevelopment({
   mockPreviewAchievementByTaskId,
   loadOnVisible,
   compact = false,
+  embedded = false,
 }: {
   habit: HabitAchievementShelfItem;
   language: 'es' | 'en';
@@ -1416,6 +1372,7 @@ function LockedAchievementHabitDevelopment({
   mockPreviewAchievementByTaskId?: Record<string, NonNullable<TaskInsightsResponse['previewAchievement']>>;
   loadOnVisible: boolean;
   compact?: boolean;
+  embedded?: boolean;
 }) {
   const taskId = habit.taskId;
   const mockPreviewAchievement = mockPreviewAchievementByTaskId?.[taskId] ?? null;
@@ -1447,7 +1404,12 @@ function LockedAchievementHabitDevelopment({
   if (previewAchievement) {
     return (
       <div className="h-full min-h-0 flex-1">
-        <PreviewAchievementCard previewAchievement={previewAchievement} language={language} size={compact ? 'compact' : 'default'} />
+        <PreviewAchievementCard
+          previewAchievement={previewAchievement}
+          language={language}
+          size={compact ? 'compact' : 'default'}
+          surface={embedded ? 'ghost' : 'default'}
+        />
       </div>
     );
   }

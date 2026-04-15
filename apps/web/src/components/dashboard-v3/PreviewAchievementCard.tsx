@@ -176,12 +176,15 @@ export function PreviewAchievementCard({
   previewAchievement,
   language,
   size = 'default',
+  surface = 'default',
 }: {
   previewAchievement: PreviewAchievement;
   language: PostLoginLanguage;
   size?: 'default' | 'compact';
+  surface?: 'default' | 'ghost';
 }) {
   const isCompact = size === 'compact';
+  const isGhostSurface = surface === 'ghost';
   const tone = getStatusTone(previewAchievement.status);
   const score = Math.max(0, Math.min(100, Math.round(Number(previewAchievement.score ?? 0))));
   const scoreLabel = 'Score';
@@ -236,7 +239,13 @@ export function PreviewAchievementCard({
   }, [isScoreTooltipOpen]);
 
   return (
-    <section className={cx('rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-inner', isCompact ? 'p-2.5' : 'p-3')}>
+    <section
+      className={cx(
+        'rounded-2xl',
+        isGhostSurface ? 'border-transparent bg-transparent shadow-none' : 'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-inner',
+        isCompact ? 'p-2.5' : 'p-3',
+      )}
+    >
       <div className={cx('flex flex-col items-center', isCompact ? 'gap-1.5' : 'gap-2')}>
         <div className="w-full space-y-2 text-left">
           <p className={cx('font-semibold uppercase tracking-[0.08em] text-[color:var(--color-slate-100)]', isCompact ? 'text-[13px]' : 'text-sm')}>
