@@ -12,7 +12,7 @@ export function GpProgressBar({ progress, totalGp, className }: GpProgressBarPro
     <div className={className ? `flex items-center gap-3 ${className}` : 'flex items-center gap-3'}>
       <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-white/10">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-sky-400 to-violet-500 progress-fill--typing"
+          className="h-full rounded-full bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b] progress-fill--typing"
           style={{ width: `${safeProgress}%` }}
         />
       </div>

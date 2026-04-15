@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import type { GameMode } from '../state';
 import type { OnboardingLanguage } from '../constants';
-import { NavButtons } from '../ui/NavButtons';
 import { GAME_MODE_META } from '../../lib/gameModeMeta';
 import { getOnboardingRhythmTheme } from '../utils/onboardingRhythmTheme';
 
@@ -9,7 +8,6 @@ interface GameModeStepProps {
   language?: OnboardingLanguage;
   selected: GameMode | null;
   onSelect: (mode: GameMode) => void;
-  onConfirm: () => void;
   onBack?: () => void;
 }
 
@@ -22,7 +20,7 @@ export const MODE_CARD_CONTENT = {
 
 const MODE_ORDER: GameMode[] = ['LOW', 'CHILL', 'FLOW', 'EVOLVE'];
 
-export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, onBack }: GameModeStepProps) {
+export function GameModeStep({ language = 'es', selected, onSelect, onBack }: GameModeStepProps) {
   const copy = language === 'en'
     ? {
         step: 'Step 1 · Choose your rhythm',
@@ -31,8 +29,7 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
         selected: 'Selected',
         state: 'State',
         objective: 'Objective',
-        enterMode: 'Enter mode',
-        selectMode: 'Select a mode',
+        back: 'Back',
         selectedSuffix: ' selected',
       }
     : {
@@ -42,10 +39,10 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
         selected: 'Seleccionado',
         state: 'Estado',
         objective: 'Objetivo',
-        enterMode: 'Entrar al modo',
-        selectMode: 'Seleccioná un modo',
+        back: 'Volver',
         selectedSuffix: ' seleccionado',
       };
+
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
       <div className="glass-card onboarding-surface-base mx-auto max-w-4xl rounded-3xl p-4 sm:p-6">
@@ -73,7 +70,7 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
                   'glass-card onboarding-surface-inner onboarding-glass-border-soft relative flex h-full overflow-hidden rounded-3xl border px-5 py-[1.35rem] text-left transition-all duration-250 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/80',
                   isActive
                     ? 'border-white/80 bg-white/[0.11] ring-2 -translate-y-0.5 scale-[1.01] focus-visible:ring-4'
-                    : 'hover:border-white/30 hover:bg-white/[0.07] focus-visible:border-white/45 focus-visible:ring-sky-300/70',
+                    : 'hover:border-white/30 hover:bg-white/[0.07] focus-visible:border-white/45 focus-visible:ring-[#cf8bf3]/70',
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -100,7 +97,7 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
                     <span className="flex items-center gap-2">
                       <span className="text-xs font-semibold tracking-[0.12em] text-white/95 sm:text-sm">{content.title}</span>
                       {isActive ? (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/80 bg-emerald-300/95 px-2 py-0.5 text-[0.58rem] font-semibold uppercase tracking-[0.08em] text-slate-950 shadow-[0_0_14px_rgba(110,231,183,0.42)] sm:text-[0.62rem]">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-[#eed9ff]/80 bg-[#e9d5ff]/90 px-2 py-0.5 text-[0.58rem] font-semibold uppercase tracking-[0.08em] text-[#240f43] shadow-[0_0_14px_rgba(207,139,243,0.42)] sm:text-[0.62rem]">
                           <span aria-hidden>✓</span>
                           {copy.selected}
                         </span>
@@ -131,14 +128,18 @@ export function GameModeStep({ language = 'es', selected, onSelect, onConfirm, o
             );
           })}
         </div>
-        <NavButtons
-          language={language}
-          showBack={Boolean(onBack)}
-          onBack={onBack}
-          onConfirm={onConfirm}
-          confirmLabel={selected ? copy.enterMode : copy.selectMode}
-          disabled={!selected}
-        />
+
+        {onBack ? (
+          <div className="mt-8 flex justify-start">
+            <button
+              type="button"
+              onClick={onBack}
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2 text-sm font-medium text-white/80 transition hover:border-white/30 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cf8bf3]/60"
+            >
+              ← {copy.back}
+            </button>
+          </div>
+        ) : null}
       </div>
     </motion.div>
   );

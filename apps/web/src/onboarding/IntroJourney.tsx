@@ -282,9 +282,8 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
           <GameModeStep
             language={language}
             selected={answers.mode}
-            onSelect={(mode: GameMode) => setMode(mode)}
-            onConfirm={() => {
-              if (!answers.mode) return;
+            onSelect={(mode: GameMode) => {
+              setMode(mode);
               goNext();
             }}
             onBack={() => goToStep('clerk-gate')}
@@ -312,19 +311,15 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
               language={language}
               rhythm={answers.mode}
               selectedAvatarId={answers.avatarId}
+              isSaving={isSavingAvatar}
               onSelectAvatar={(avatarId) => {
+                if (isSavingAvatar) return;
                 setAvatarId(avatarId);
                 setAvatarStepError(null);
-              }}
-              onBack={() => goToStep('mode-select')}
-              onConfirm={() => {
-                if (!answers.avatarId || isSavingAvatar) return;
-                const selectedAvatarId = answers.avatarId;
                 void (async () => {
                   try {
                     setIsSavingAvatar(true);
-                    setAvatarStepError(null);
-                    await changeCurrentUserAvatar(selectedAvatarId);
+                    await changeCurrentUserAvatar(avatarId);
                     await markOnboardingProgress('avatar_selected', { trigger: 'intro_journey' });
                     goNext();
                   } catch (error) {
@@ -335,6 +330,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
                   }
                 })();
               }}
+              onBack={() => goToStep('mode-select')}
             />
             {avatarStepError ? <p className="text-center text-sm text-rose-200">{avatarStepError}</p> : null}
           </>
