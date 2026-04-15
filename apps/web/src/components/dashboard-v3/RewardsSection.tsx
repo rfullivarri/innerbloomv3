@@ -339,7 +339,7 @@ function MonthlyWrapupShelf({ items, language, anchor }: { items: MonthlyWrapped
   return (
     <div data-demo-anchor={anchor} className="ib-card-contour-shadow ib-light-elevated-surface ib-light-elevated-surface--indigo rounded-2xl p-4">
       <div className="flex items-start justify-between gap-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Monthly Wrap-Up' : 'Monthly Wrap-Up'}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Monthly Wrapped' : 'Monthly Wrapped'}</p>
         <InlineCountdown days={monthlyCountdownDays} language={language} />
       </div>
       {latest ? (
@@ -373,7 +373,7 @@ function WeeklyWrapupShelf({ items, onOpen, language, anchor }: { items: WeeklyW
   return (
     <div data-demo-anchor={anchor} className="ib-card-contour-shadow ib-light-elevated-surface ib-light-elevated-surface--emerald rounded-2xl p-4">
       <div className="flex items-start justify-between gap-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Weekly Wrap-Up' : 'Weekly Wrap-Up'}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-text-dim)]">{language === 'es' ? 'Weekly Wrapped' : 'Weekly Wrapped'}</p>
         <InlineCountdown days={weeklyCountdownDays} language={language} />
       </div>
       {compactItems.length ? (
@@ -1164,10 +1164,10 @@ function AchievedShelf({
                           </div>
                           <div className="mt-auto space-y-1 pb-2">
                             <p className="text-lg font-semibold text-[color:var(--color-text-strong)]">{habit.taskName}</p>
-                            <p className="line-clamp-1 text-xs text-[color:var(--color-text-muted)]/90">
+                            <p className="line-clamp-1 text-sm font-medium text-[color:var(--color-text)]/95">
                               {habit.trait?.name ?? (language === 'es' ? 'Rasgo en progreso' : 'Trait in progress')}
                             </p>
-                            <p className="text-sm text-[color:var(--color-text-muted)]">
+                            <p className="text-[11px] text-[color:var(--color-text-muted)]/75">
                               {language === 'es'
                                 ? 'Toca para ver más'
                                 : 'Tap to see more'}
