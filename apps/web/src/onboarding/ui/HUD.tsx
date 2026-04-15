@@ -42,10 +42,9 @@ function ModeBadge({ mode }: { mode: GameMode | null }) {
 
   return (
     <span
-      className="onboarding-mode-chip inline-flex items-center gap-2 px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/85 shadow-[0_0_18px_rgba(8,12,24,0.5)] ring-1 ring-white/10"
+      className="onboarding-mode-chip inline-flex items-center px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/85 shadow-[0_0_18px_rgba(8,12,24,0.5)] ring-1 ring-white/10"
       style={style}
     >
-      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: theme.badgeDot }} />
       {MODE_BADGE_LABELS[mode]}
     </span>
   );
@@ -63,7 +62,7 @@ function MiniPillarBar({ icon, value }: { icon: string; value: number }) {
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
             transition={{ duration: 0.24, ease: 'easeOut' }}
-            className="h-full rounded-full bg-gradient-to-r from-sky-400 via-violet-400 to-fuchsia-400"
+            className="h-full rounded-full bg-gradient-to-r from-[#a770ef] via-[#cf8bf3] to-[#fdb99b]"
           />
         </div>
         <span className="shrink-0 font-semibold text-white/80">{Math.round(value)} GP</span>

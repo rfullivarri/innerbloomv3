@@ -712,6 +712,7 @@ export default function QuickStartPreviewPage() {
   const [gameMode, setGameMode] = useState<GameMode>('CHILL');
   const [avatarId, setAvatarId] = useState<number | null>(null);
   const [avatarStepError, setAvatarStepError] = useState<string | null>(null);
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
   const [selectedByPillar, setSelectedByPillar] = useState<Record<Pillar, string[]>>({ Body: [], Mind: [], Soul: [] });
   const [inputsByTask, setInputsByTask] = useState<Record<string, string>>({});
   const [moderationPrefs, setModerationPrefs] = useState<Record<ModerationOption, boolean>>({
@@ -1139,8 +1140,10 @@ export default function QuickStartPreviewPage() {
             <GameModeStep
               language={language}
               selected={gameMode}
-              onSelect={setGameMode}
-              onConfirm={goNext}
+              onSelect={(mode) => {
+                setGameMode(mode);
+                goNext();
+              }}
             />
           </section>
         ) : null}
@@ -1150,24 +1153,26 @@ export default function QuickStartPreviewPage() {
               language={language}
               rhythm={gameMode}
               selectedAvatarId={avatarId}
+              isSaving={isSavingAvatar}
               onSelectAvatar={(value) => {
+                if (isSavingAvatar) return;
                 setAvatarId(value);
                 setAvatarStepError(null);
-              }}
-              onBack={goBack}
-              onConfirm={() => {
-                if (!avatarId) return;
                 void (async () => {
                   try {
-                    await changeCurrentUserAvatar(avatarId);
+                    setIsSavingAvatar(true);
+                    await changeCurrentUserAvatar(value);
                     await markOnboardingProgress('avatar_selected', { trigger: 'quick_start_preview' });
                     goNext();
                   } catch (error) {
                     console.error('[quick_start_preview] avatar select failed', error);
                     setAvatarStepError(language === 'en' ? 'Could not save avatar. Try again.' : 'No pudimos guardar tu avatar. Intentá de nuevo.');
+                  } finally {
+                    setIsSavingAvatar(false);
                   }
                 })();
               }}
+              onBack={goBack}
             />
             {avatarStepError ? <p className="mt-2 text-center text-sm text-rose-200">{avatarStepError}</p> : null}
           </section>
