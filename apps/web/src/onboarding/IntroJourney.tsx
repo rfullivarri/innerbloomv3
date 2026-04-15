@@ -597,7 +597,7 @@ export function IntroJourney({ language = 'es', onFinish, isSubmitting = false, 
   }
 
   return (
-    <div className="onboarding-force-white relative flex min-h-screen min-h-dvh flex-col overflow-hidden bg-[#000c40] pb-16">
+    <div className="onboarding-force-white relative flex min-h-screen min-h-dvh flex-col overflow-x-hidden bg-[#000c40] pb-16">
       <HUD
         language={language}
         mode={answers.mode}
