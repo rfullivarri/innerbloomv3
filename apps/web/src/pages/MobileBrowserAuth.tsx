@@ -138,11 +138,12 @@ export default function MobileBrowserAuthPage() {
   const { isLoaded, isSignedIn, getToken, signOut } = useAuth();
   const clerk = useClerk();
   const { session } = useSession();
-  const { signIn } = useSignIn();
-  const { signUp } = useSignUp();
+  const { isLoaded: signInLoaded, signIn } = useSignIn();
+  const { isLoaded: signUpLoaded, signUp } = useSignUp();
   const { user } = useUser();
   const [error, setError] = useState<string | null>(null);
   const redirectStartedRef = useRef(false);
+  const googleRedirectStartedRef = useRef(false);
   const mode = useMemo<BrowserAuthMode>(() => {
     const params = new URLSearchParams(location.search);
     const raw = params.get('mode');
@@ -169,6 +170,10 @@ export default function MobileBrowserAuthPage() {
     () => shouldIncludeLegacyProfileImage(location.search),
     [location.search],
   );
+  const shouldStartGoogleOAuth = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('provider') === 'google';
+  }, [location.search]);
   const createdSessionId = signIn?.createdSessionId ?? signUp?.createdSessionId ?? null;
 
   useEffect(() => {
@@ -269,6 +274,52 @@ export default function MobileBrowserAuthPage() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!shouldStartGoogleOAuth || googleRedirectStartedRef.current || isSignedIn || createdSessionId) {
+      return;
+    }
+
+    const oauthMode = mode === 'sign-up' ? 'sign-up' : 'sign-in';
+    const resourceReady = oauthMode === 'sign-up' ? signUpLoaded && signUp : signInLoaded && signIn;
+    if (!isLoaded || !resourceReady) {
+      return;
+    }
+
+    googleRedirectStartedRef.current = true;
+    const resource = oauthMode === 'sign-up' ? signUp : signIn;
+    void resource
+      ?.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: handoffUrl,
+      })
+      .catch((cause) => {
+        googleRedirectStartedRef.current = false;
+        console.error('[mobile-auth-page] google-oauth-start-failed', {
+          at: Date.now(),
+          mode,
+          error: cause instanceof Error ? cause.message : String(cause),
+        });
+        setError(
+          language === 'en'
+            ? 'We could not start Google sign-in. Please try again.'
+            : 'No pudimos iniciar sesión con Google. Intentá de nuevo.',
+        );
+      });
+  }, [
+    createdSessionId,
+    handoffUrl,
+    isLoaded,
+    isSignedIn,
+    language,
+    mode,
+    shouldStartGoogleOAuth,
+    signIn,
+    signInLoaded,
+    signUp,
+    signUpLoaded,
+  ]);
 
   useEffect(() => {
     if (!isLoaded || redirectStartedRef.current) {
@@ -491,16 +542,25 @@ export default function MobileBrowserAuthPage() {
       secondaryActionHref={signedOutUrl}
     >
       <div className={AUTH_STACK_CLASS}>
-        <GoogleOAuthButton
-          language={language}
-          mode={mode === 'sign-up' ? 'sign-up' : 'sign-in'}
-          redirectUrlComplete={handoffUrl}
-        />
-        <div className={AUTH_DIVIDER_CLASS}>
-          <span className="h-px flex-1 bg-white/12" aria-hidden />
-          <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
-          <span className="h-px flex-1 bg-white/12" aria-hidden />
-        </div>
+        {shouldStartGoogleOAuth ? (
+          <RedirectingState
+            title={language === 'en' ? 'Opening Google' : 'Abriendo Google'}
+            description={language === 'en' ? 'Continue with your Google account.' : 'Continuá con tu cuenta de Google.'}
+          />
+        ) : (
+          <>
+            <GoogleOAuthButton
+              language={language}
+              mode={mode === 'sign-up' ? 'sign-up' : 'sign-in'}
+              redirectUrlComplete={handoffUrl}
+            />
+            <div className={AUTH_DIVIDER_CLASS}>
+              <span className="h-px flex-1 bg-white/12" aria-hidden />
+              <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
+              <span className="h-px flex-1 bg-white/12" aria-hidden />
+            </div>
+          </>
+        )}
         {mode === 'sign-up' ? (
           <SignUp
             appearance={authAppearance}

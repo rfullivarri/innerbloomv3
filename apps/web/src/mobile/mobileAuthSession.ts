@@ -252,7 +252,13 @@ export function isMobileAuthSessionExpiringSoon(
   return session.expiresAt - Date.now() <= minValidityMs;
 }
 
-export function buildNativeMobileAuthUrl(mode: MobileAuthMode, language?: string): string {
+export function buildNativeMobileAuthUrl(
+  mode: MobileAuthMode,
+  language?: string,
+  options?: {
+    provider?: 'google';
+  },
+): string {
   const resolvedLanguage =
     language === 'es' || language === 'en'
       ? language
@@ -263,6 +269,9 @@ export function buildNativeMobileAuthUrl(mode: MobileAuthMode, language?: string
     'return_to',
     buildNativeAppUrl(mode === 'logout' ? CAPACITOR_SIGNED_OUT_HOST : CAPACITOR_CALLBACK_HOST),
   );
+  if (options?.provider === 'google') {
+    mobileAuthUrl.searchParams.set('provider', 'google');
+  }
   return mobileAuthUrl.toString();
 }
 
