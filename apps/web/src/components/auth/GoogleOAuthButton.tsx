@@ -43,12 +43,18 @@ export function GoogleOAuthButton({
 
     try {
       if (mode === 'sign-up') {
+        if (!signUp) {
+          throw new Error('Clerk sign-up resource is not ready');
+        }
         await signUp.authenticateWithRedirect({
           strategy: 'oauth_google',
           redirectUrl: SSO_CALLBACK_PATH,
           redirectUrlComplete,
         });
       } else {
+        if (!signIn) {
+          throw new Error('Clerk sign-in resource is not ready');
+        }
         await signIn.authenticateWithRedirect({
           strategy: 'oauth_google',
           redirectUrl: SSO_CALLBACK_PATH,

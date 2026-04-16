@@ -29,6 +29,6 @@ export function resolveAuthLanguage(search: string): AuthLanguage {
   return 'es';
 }
 
-export function buildLocalizedAuthPath(path: '/' | '/login' | '/sign-up', language: AuthLanguage): string {
+export function buildLocalizedAuthPath(path: '/' | '/login' | '/sign-up' | '/mobile-auth', language: AuthLanguage): string {
   return `${path}?lang=${language}`;
 }

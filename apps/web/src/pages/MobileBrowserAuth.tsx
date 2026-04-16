@@ -1,9 +1,10 @@
 import { SignIn, SignUp, useAuth, useClerk, useSession, useSignIn, useSignUp, useUser } from '@clerk/clerk-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { GoogleOAuthButton } from '../components/auth/GoogleOAuthButton';
 import { AuthLayout } from '../components/layout/AuthLayout';
-import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
-import { createAuthAppearance } from '../lib/clerkAppearance';
+import { buildLocalizedAuthPath, resolveAuthLanguage, type AuthLanguage } from '../lib/authLanguage';
+import { AUTH_DIVIDER_CLASS, AUTH_STACK_CLASS, createAuthAppearance } from '../lib/clerkAppearance';
 import { buildWebAbsoluteUrl } from '../lib/siteUrl';
 import { CAPACITOR_APP_SCHEME, CAPACITOR_CALLBACK_HOST, CAPACITOR_SIGNED_OUT_HOST } from '../mobile/capacitor';
 
@@ -96,7 +97,7 @@ export function buildRedirectUrl(
   return callbackUrl.toString();
 }
 
-function buildModeUrl(language: string, mode: 'sign-in' | 'sign-up', search: string): string {
+function buildModeUrl(language: AuthLanguage, mode: 'sign-in' | 'sign-up', search: string): string {
   const url = new URL(buildWebAbsoluteUrl(buildLocalizedAuthPath('/mobile-auth', language)));
   const params = new URLSearchParams(search);
   url.searchParams.set('mode', mode);
@@ -472,47 +473,63 @@ export default function MobileBrowserAuthPage() {
   }
 
   return (
-      <AuthLayout
-        title={mode === 'refresh'
-        ? language === 'en' ? 'Restore your session' : 'Recuperar tu sesión'
-        : mode === 'sign-up'
-        ? language === 'en' ? 'Create your account' : 'Crear tu cuenta'
-        : language === 'en' ? 'Sign in' : 'Iniciar sesión'}
+    <AuthLayout
+      title={
+        mode === 'refresh'
+          ? language === 'en'
+            ? 'Restore your session'
+            : 'Recuperar tu sesión'
+          : mode === 'sign-up'
+            ? language === 'en'
+              ? 'Create your account'
+              : 'Crear tu cuenta'
+            : language === 'en'
+              ? 'Sign in'
+              : 'Iniciar sesión'
+      }
       secondaryActionLabel={language === 'en' ? 'Back to app' : 'Volver a la app'}
       secondaryActionHref={signedOutUrl}
     >
-      {mode === 'sign-up' ? (
-        <SignUp
-          appearance={authAppearance}
-          routing="virtual"
-          signInUrl={buildModeUrl(language, 'sign-in', location.search)}
-          fallbackRedirectUrl={handoffUrl}
-          forceRedirectUrl={handoffUrl}
-          signInFallbackRedirectUrl={buildModeUrl(language, 'sign-in', location.search)}
-          signInForceRedirectUrl={buildModeUrl(language, 'sign-in', location.search)}
-          signUpFallbackRedirectUrl={handoffUrl}
-          signUpForceRedirectUrl={handoffUrl}
-          redirectUrl={handoffUrl}
-          afterSignUpUrl={handoffUrl}
-          afterSignInUrl={handoffUrl}
+      <div className={AUTH_STACK_CLASS}>
+        <GoogleOAuthButton
+          language={language}
+          mode={mode === 'sign-up' ? 'sign-up' : 'sign-in'}
+          redirectUrlComplete={handoffUrl}
         />
-      ) : (
-        <SignIn
-          appearance={authAppearance}
-          routing="virtual"
-          signUpUrl={buildModeUrl(language, 'sign-up', location.search)}
-          fallbackRedirectUrl={handoffUrl}
-          forceRedirectUrl={handoffUrl}
-          signUpFallbackRedirectUrl={buildModeUrl(language, 'sign-up', location.search)}
-          signUpForceRedirectUrl={buildModeUrl(language, 'sign-up', location.search)}
-          signInFallbackRedirectUrl={handoffUrl}
-          signInForceRedirectUrl={handoffUrl}
-          redirectUrl={handoffUrl}
-          afterSignUpUrl={handoffUrl}
-          afterSignInUrl={handoffUrl}
-        />
-      )}
-      {error ? <p className="mt-4 text-center text-sm text-rose-200">{error}</p> : null}
+        <div className={AUTH_DIVIDER_CLASS}>
+          <span className="h-px flex-1 bg-white/12" aria-hidden />
+          <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
+          <span className="h-px flex-1 bg-white/12" aria-hidden />
+        </div>
+        {mode === 'sign-up' ? (
+          <SignUp
+            appearance={authAppearance}
+            routing="virtual"
+            signInUrl={buildModeUrl(language, 'sign-in', location.search)}
+            fallbackRedirectUrl={handoffUrl}
+            forceRedirectUrl={handoffUrl}
+            signInFallbackRedirectUrl={buildModeUrl(language, 'sign-in', location.search)}
+            signInForceRedirectUrl={buildModeUrl(language, 'sign-in', location.search)}
+            redirectUrl={handoffUrl}
+            afterSignUpUrl={handoffUrl}
+            afterSignInUrl={handoffUrl}
+          />
+        ) : (
+          <SignIn
+            appearance={authAppearance}
+            routing="virtual"
+            signUpUrl={buildModeUrl(language, 'sign-up', location.search)}
+            fallbackRedirectUrl={handoffUrl}
+            forceRedirectUrl={handoffUrl}
+            signUpFallbackRedirectUrl={buildModeUrl(language, 'sign-up', location.search)}
+            signUpForceRedirectUrl={buildModeUrl(language, 'sign-up', location.search)}
+            redirectUrl={handoffUrl}
+            afterSignUpUrl={handoffUrl}
+            afterSignInUrl={handoffUrl}
+          />
+        )}
+        {error ? <p className="mt-4 text-center text-sm text-rose-200">{error}</p> : null}
+      </div>
     </AuthLayout>
   );
 }
