@@ -26,12 +26,23 @@ export function GoogleOAuthButton({
   const isDisabled = !isLoaded || isRedirecting;
 
   const copy = useMemo(
-    () => ({
-      cta: language === 'en' ? 'Continue with Google' : 'Continuar con Google',
-      loading: language === 'en' ? 'Connecting to Google…' : 'Conectando con Google…',
-      iconLabel: language === 'en' ? 'Google logo' : 'Logo de Google',
-    }),
-    [language],
+    () => {
+      const isSignUp = mode === 'sign-up';
+
+      return {
+        cta:
+          language === 'en'
+            ? isSignUp
+              ? 'Sign up with Google'
+              : 'Log in with Google'
+            : isSignUp
+              ? 'Crear cuenta con Google'
+              : 'Iniciar sesión con Google',
+        loading: language === 'en' ? 'Connecting to Google…' : 'Conectando con Google…',
+        iconLabel: language === 'en' ? 'Google logo' : 'Logo de Google',
+      };
+    },
+    [language, mode],
   );
 
   const handleClick = useCallback(async () => {
