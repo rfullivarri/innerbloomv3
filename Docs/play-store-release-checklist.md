@@ -23,6 +23,9 @@ Estado de este checklist: auditoría operativa sobre `main` revisada el 2026-04-
 - Build web nativa y `cap sync android`: verificados el 2026-04-16
 - `bundleRelease`: compila correctamente el 2026-04-16
 - Sourcemaps desactivados para build nativo para no empaquetar `.js.map` en el AAB
+- Upload keystore local creada el 2026-04-16 en `apps/mobile/android/keys/innerbloom-release.jks` (ignorada por Git)
+- `keystore.properties` local creado el 2026-04-16 (ignorado por Git)
+- AAB release firmado generado y verificado el 2026-04-16
 
 Archivos clave:
 
@@ -38,9 +41,9 @@ Archivos clave:
 
 ### Código / build
 
-- Configurar firma de release (`keystore`) para Android
-- Generar `AAB` firmado de release con upload key real
-- El AAB actual se puede generar pero está **unsigned** porque no existe `keystore.properties` local
+- Guardar backup seguro de `apps/mobile/android/keys/innerbloom-release.jks`
+- Guardar backup seguro de `apps/mobile/android/keystore.properties`
+- Generar nuevo `AAB` firmado para cada release final que se vaya a subir
 - Definir estrategia de versionado:
   - `versionCode` debe subir en cada release
   - `versionName` puede seguir formato semántico simple como `1.0.0`, `1.0.1`, etc.
@@ -49,7 +52,7 @@ Archivos clave:
 - Revisar si la app necesita pantalla/flujo especial para usuarios sin datos iniciales
 - `CLERK_SECRET_KEY` en producción: confirmado por pruebas reales de eliminación
 - Si se decide activar GA4 dentro de Android, implementar primero consentimiento in-app opcional
-- Revisar tamaño del AAB: el bundle actual queda cerca de 129 MB por assets multimedia incluidos en `public/`
+- Revisar tamaño del AAB: el bundle actual queda cerca de 113 MB por assets multimedia incluidos en `public/`
 
 ### Contenido de Play Console
 
@@ -92,12 +95,11 @@ Archivos clave:
 
 ## 4. Lo que conviene hacer primero
 
-1. Cerrar firma de release Android
-2. Generar primer `.aab` firmado
-3. Preparar screenshots y feature graphic
-4. Completar store listing con URLs legales ya publicadas
-5. Subir a `Internal testing`
-6. Recién después pasar a `Closed testing` o `Production`
+1. Guardar backup seguro de la keystore y `keystore.properties`
+2. Preparar screenshots y feature graphic
+3. Completar store listing con URLs legales ya publicadas
+4. Subir el AAB firmado a `Internal testing`
+5. Recién después pasar a `Closed testing` o `Production`
 
 Si la cuenta Google Play es personal nueva, seguir el plan de testers en:
 
@@ -135,12 +137,12 @@ export PATH="$JAVA_HOME/bin:$PATH"
 jarsigner -verify -verbose -certs apps/mobile/android/app/build/outputs/bundle/release/app-release.aab
 ```
 
-Si devuelve `jar is unsigned`, todavía no sirve para subir a Play.
+Si devuelve `jar verified`, el AAB está firmado. Las advertencias de certificado self-signed son normales para una upload key Android.
 
 ## 6. Riesgos que no conviene ignorar
 
 - La primera publicación no debería salir desde `debug`; tiene que ser `release` firmado
-- Un AAB que compila pero está unsigned no alcanza para Play; falta upload key / Play App Signing
+- El AAB firmado actual se puede subir a Play, pero la keystore local tiene que preservarse con backup
 - Si la cuenta de Play es personal y es nueva, Google puede exigir closed testing antes de producción
 - El package name `org.innerbloom.app` conviene tratarlo como definitivo
 - El texto legal que preparé en este repo es un borrador operativo, no asesoría legal
