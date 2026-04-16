@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 import { generateAiArtifacts } from './src/content/aiBuild';
 
 const useMockClerk = process.env.MOCK_CLERK === 'true';
+const isNativeBuild = process.env.VITE_BUILD_TARGET === 'native';
 
 export default defineConfig({
   plugins: [
@@ -48,7 +49,7 @@ export default defineConfig({
     ]
   },
   build: {
-    sourcemap: true,
+    sourcemap: !isNativeBuild,
     rollupOptions: {
       input: {
         main: fileURLToPath(new URL('./index.html', import.meta.url)),
