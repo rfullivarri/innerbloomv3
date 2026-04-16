@@ -99,6 +99,10 @@ Archivos clave:
 5. Subir a `Internal testing`
 6. Recién después pasar a `Closed testing` o `Production`
 
+Si la cuenta Google Play es personal nueva, seguir el plan de testers en:
+
+- `/Users/ramirofernandezdeullivarri/Documents/GitHub/innerbloomv3/Docs/play-store-closed-testing-plan.md`
+
 ## 5. Comandos que te van a hacer falta para release
 
 Generar build web nativa y sincronizar:
