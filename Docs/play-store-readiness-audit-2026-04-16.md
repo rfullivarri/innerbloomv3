@@ -33,8 +33,8 @@ La app ya compila como Android release bundle y las piezas funcionales principal
 - `pnpm --filter @innerbloom/mobile exec cap sync android`: OK.
 - `./gradlew :app:bundleRelease`: OK.
 - Source maps desactivados para build nativo.
-- Upload keystore local creada.
-- `keystore.properties` local creado.
+- Upload keystore creada y movida fuera del repo para backup seguro.
+- `keystore.properties` creado y movido fuera del repo para backup seguro.
 - AAB release firmado generado y verificado.
 
 ## Hallazgos técnicos de la auditoría
@@ -65,8 +65,8 @@ El AAB es grande principalmente por assets multimedia empaquetados desde `apps/w
 
 ### Bloqueadores
 
-1. Guardar backup seguro de `apps/mobile/android/keys/innerbloom-release.jks`.
-2. Guardar backup seguro de `apps/mobile/android/keystore.properties`.
+1. Mantener backup seguro de `innerbloom-release.jks`.
+2. Mantener backup seguro de `keystore.properties`.
 3. Terminar verificación de cuenta Google Play Console.
 4. Crear app en Play Console con package `org.innerbloom.app`.
 5. Completar App access con cuenta de prueba o instrucciones.
@@ -88,7 +88,7 @@ El AAB es grande principalmente por assets multimedia empaquetados desde `apps/w
 
 ## Dificultad estimada
 
-- Firma/AAB real: completado localmente. Riesgo restante: guardar backup seguro del keystore porque perderlo complica futuras actualizaciones.
+- Firma/AAB real: completado localmente. Riesgo restante: preservar backup seguro del keystore porque perderlo complica futuras actualizaciones.
 - Store listing: baja/media. Ya hay textos, faltan carga y ajustes finales.
 - Screenshots/feature graphic: media. No es complejo, pero requiere screenshots buenos y consistentes.
 - Data Safety: media/alta. No es código, pero hay que ser preciso porque Google responsabiliza al developer por declaraciones incorrectas.
@@ -97,7 +97,7 @@ El AAB es grande principalmente por assets multimedia empaquetados desde `apps/w
 
 ## Próximos pasos recomendados
 
-1. Guardar backup seguro del keystore y `keystore.properties`.
+1. Mantener backup seguro del keystore y `keystore.properties`.
 2. Preparar carpeta de assets de Play Store con screenshots, icono 512 y feature graphic.
 3. Hacer QA sobre build release firmado.
 4. Terminar verificación de cuenta Play Console.

@@ -23,8 +23,8 @@ Estado de este checklist: auditoría operativa sobre `main` revisada el 2026-04-
 - Build web nativa y `cap sync android`: verificados el 2026-04-16
 - `bundleRelease`: compila correctamente el 2026-04-16
 - Sourcemaps desactivados para build nativo para no empaquetar `.js.map` en el AAB
-- Upload keystore local creada el 2026-04-16 en `apps/mobile/android/keys/innerbloom-release.jks` (ignorada por Git)
-- `keystore.properties` local creado el 2026-04-16 (ignorado por Git)
+- Upload keystore creada el 2026-04-16 y movida fuera del repo para backup seguro
+- `keystore.properties` creado el 2026-04-16 y movido fuera del repo para backup seguro
 - AAB release firmado generado y verificado el 2026-04-16
 
 Archivos clave:
@@ -41,8 +41,9 @@ Archivos clave:
 
 ### Código / build
 
-- Guardar backup seguro de `apps/mobile/android/keys/innerbloom-release.jks`
-- Guardar backup seguro de `apps/mobile/android/keystore.properties`
+- Mantener backup seguro de `innerbloom-release.jks`
+- Mantener backup seguro de `keystore.properties`
+- Para firmar una nueva release, restaurar temporalmente `keystore.properties` en `apps/mobile/android/` y apuntar `storeFile` al path real del `.jks`
 - Generar nuevo `AAB` firmado para cada release final que se vaya a subir
 - Definir estrategia de versionado:
   - `versionCode` debe subir en cada release
@@ -95,7 +96,7 @@ Archivos clave:
 
 ## 4. Lo que conviene hacer primero
 
-1. Guardar backup seguro de la keystore y `keystore.properties`
+1. Mantener backup seguro de la keystore y `keystore.properties`
 2. Preparar screenshots y feature graphic
 3. Completar store listing con URLs legales ya publicadas
 4. Subir el AAB firmado a `Internal testing`
@@ -121,6 +122,14 @@ Build release cuando exista firma configurada:
 cd /Users/ramirofernandezdeullivarri/Documents/GitHub/innerbloomv3/apps/mobile/android
 ./gradlew bundleRelease
 ```
+
+Para que ese comando firme la release, tiene que existir localmente:
+
+```text
+/Users/ramirofernandezdeullivarri/Documents/GitHub/innerbloomv3/apps/mobile/android/keystore.properties
+```
+
+Ese archivo no se sube a Git. Puede apuntar a una keystore fuera del repo.
 
 Salida esperada:
 
