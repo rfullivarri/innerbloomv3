@@ -6,6 +6,28 @@ function isSupportedLanguage(language: string | null): language is AuthLanguage 
   return language === 'es' || language === 'en';
 }
 
+function resolveBrowserLanguage(): AuthLanguage | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const languages = window.navigator.languages?.length
+    ? window.navigator.languages
+    : [window.navigator.language];
+
+  for (const language of languages) {
+    const normalized = language.toLowerCase();
+    if (normalized.startsWith('en')) {
+      return 'en';
+    }
+    if (normalized.startsWith('es')) {
+      return 'es';
+    }
+  }
+
+  return null;
+}
+
 export function resolveAuthLanguage(search: string): AuthLanguage {
   if (typeof URLSearchParams !== 'undefined') {
     const params = new URLSearchParams(search);
@@ -26,7 +48,7 @@ export function resolveAuthLanguage(search: string): AuthLanguage {
     }
   }
 
-  return 'es';
+  return resolveBrowserLanguage() ?? 'es';
 }
 
 export function buildLocalizedAuthPath(path: '/' | '/login' | '/sign-up' | '/mobile-auth', language: AuthLanguage): string {
