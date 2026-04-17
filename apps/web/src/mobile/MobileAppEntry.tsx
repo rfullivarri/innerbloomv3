@@ -75,6 +75,19 @@ function MobileEntryError({
 
 function MobileWelcome() {
   const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
+  const copy = language === 'en'
+    ? {
+        title: 'Welcome',
+        googleSignIn: 'Log in with Google',
+        signIn: 'Log in',
+        signUp: 'Create account',
+      }
+    : {
+        title: 'Bienvenido',
+        googleSignIn: 'Iniciar sesión con Google',
+        signIn: 'Iniciar sesión',
+        signUp: 'Crear cuenta',
+      };
 
   const openNativeAuth = async (mode: 'sign-in' | 'sign-up') => {
     setForceNativeWelcome(false);
@@ -108,7 +121,7 @@ function MobileWelcome() {
 
           <div className="flex flex-1 flex-col pt-7">
             <div className="mt-10 text-center">
-              <h1 className="text-[2.4rem] font-semibold tracking-tight text-white">Bienvenido</h1>
+              <h1 className="text-[2.4rem] font-semibold tracking-tight text-white">{copy.title}</h1>
             </div>
 
             <div className="mt-auto space-y-3 px-2 pt-10">
@@ -129,21 +142,21 @@ function MobileWelcome() {
                   <path fill="#4CAF50" d="M24 44c5.179 0 9.868-1.977 13.409-5.192l-6.19-5.238C29.146 35.091 26.715 36 24 36c-5.218 0-9.621-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44Z" />
                   <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.091 5.571l.003-.002 6.19 5.238C36.971 39.202 44 34 44 24c0-1.341-.138-2.65-.389-3.917Z" />
                 </svg>
-                Iniciar sesión con Google
+                {copy.googleSignIn}
               </button>
               <button
                 type="button"
                 onClick={() => void openNativeAuth('sign-in')}
                 className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_20px_44px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
               >
-                Iniciar sesión
+                {copy.signIn}
               </button>
               <button
                 type="button"
                 onClick={() => void openNativeAuth('sign-up')}
                 className="inline-flex w-full items-center justify-center rounded-full border border-white/18 bg-white/8 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-white/12"
               >
-                Crear cuenta
+                {copy.signUp}
               </button>
             </div>
           </div>
