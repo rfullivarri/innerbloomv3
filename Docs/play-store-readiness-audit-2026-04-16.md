@@ -36,6 +36,7 @@ La app ya compila como Android release bundle y las piezas funcionales principal
 - Upload keystore creada y movida fuera del repo para backup seguro.
 - `keystore.properties` creado y movido fuera del repo para backup seguro.
 - AAB release firmado generado y verificado.
+- Cuenta Google Play Console personal verificada/lista para crear la primera aplicación el 2026-04-17.
 
 ## Hallazgos técnicos de la auditoría
 
@@ -67,16 +68,15 @@ El AAB es grande principalmente por assets multimedia empaquetados desde `apps/w
 
 1. Mantener backup seguro de `innerbloom-release.jks`.
 2. Mantener backup seguro de `keystore.properties`.
-3. Terminar verificación de cuenta Google Play Console.
-4. Crear app en Play Console con package `org.innerbloom.app`.
-5. Completar App access con cuenta de prueba o instrucciones.
-6. Completar Data Safety.
-7. Completar Content Rating.
-8. Completar Target audience / Families.
-9. Subir screenshots Android.
-10. Subir Play icon 512x512.
-11. Subir feature graphic 1024x500.
-12. Subir AAB firmado a Internal testing.
+3. Crear app en Play Console con package `org.innerbloom.app`.
+4. Completar App access con cuenta de prueba o instrucciones.
+5. Completar Data Safety.
+6. Completar Content Rating.
+7. Completar Target audience / Families.
+8. Subir screenshots Android.
+9. Subir Play icon 512x512.
+10. Subir feature graphic 1024x500.
+11. Subir AAB firmado a Internal testing.
 
 ### Decisiones pendientes
 
@@ -100,7 +100,7 @@ El AAB es grande principalmente por assets multimedia empaquetados desde `apps/w
 1. Mantener backup seguro del keystore y `keystore.properties`.
 2. Preparar carpeta de assets de Play Store con screenshots, icono 512 y feature graphic.
 3. Hacer QA sobre build release firmado.
-4. Terminar verificación de cuenta Play Console.
+4. Crear la app en Play Console.
 5. Cargar app, metadata y AAB en Internal testing.
 6. Completar Data Safety usando `Docs/data-safety-draft.md`.
 7. Completar Content Rating y App Access.

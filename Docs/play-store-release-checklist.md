@@ -26,6 +26,8 @@ Estado de este checklist: auditoría operativa sobre `main` revisada el 2026-04-
 - Upload keystore creada el 2026-04-16 y movida fuera del repo para backup seguro
 - `keystore.properties` creado el 2026-04-16 y movido fuera del repo para backup seguro
 - AAB release firmado generado y verificado el 2026-04-16
+- Cuenta Google Play Console personal verificada/lista para crear la primera aplicación el 2026-04-17
+- Play Console ya muestra acción `Crear aplicación`
 
 Archivos clave:
 
@@ -83,7 +85,7 @@ Archivos clave:
 
 ## 3. Lo que depende solo de vos
 
-- Abrir la cuenta de Google Play Console
+- Cuenta Google Play Console personal: creada y verificada el 2026-04-17
 - Elegir si la cuenta será `personal` o `organization`
 - Usar `support@innerbloomjourney.org` como soporte público
 - Usar las URLs públicas ya publicadas para privacy, terms, support y account deletion
@@ -97,10 +99,11 @@ Archivos clave:
 ## 4. Lo que conviene hacer primero
 
 1. Mantener backup seguro de la keystore y `keystore.properties`
-2. Preparar screenshots y feature graphic
-3. Completar store listing con URLs legales ya publicadas
-4. Subir el AAB firmado a `Internal testing`
-5. Recién después pasar a `Closed testing` o `Production`
+2. Crear la app en Play Console con package `org.innerbloom.app`
+3. Preparar/completar screenshots y feature graphic
+4. Completar store listing con URLs legales ya publicadas
+5. Subir el AAB firmado a `Internal testing`
+6. Recién después pasar a `Closed testing` o `Production`
 
 Si la cuenta Google Play es personal nueva, seguir el plan de testers en:
 
