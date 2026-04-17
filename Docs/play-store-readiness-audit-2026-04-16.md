@@ -19,6 +19,7 @@ La app ya compila como Android release bundle y las piezas funcionales principal
 - Deep links nativos `innerbloom://...` configurados.
 - Login móvil con Clerk probado y funcionando.
 - API mobile contra `https://apiv2.innerbloomjourney.org`.
+- El handoff móvil de Clerk ya puede pedir un JWT template vía `VITE_CLERK_TOKEN_TEMPLATE`.
 - Eliminación de cuenta implementada y probada por el owner.
 - Página pública de eliminación: `https://innerbloomjourney.org/account-deletion`.
 - Privacy policy pública: `https://innerbloomjourney.org/privacy`.
@@ -77,11 +78,13 @@ El AAB es grande principalmente por assets multimedia empaquetados desde `apps/w
 9. Subir Play icon 512x512.
 10. Subir feature graphic 1024x500.
 11. Subir AAB firmado a Internal testing.
+12. Crear/configurar JWT template de Clerk para mobile si se quiere evitar refresh visible cada minuto.
 
 ### Decisiones pendientes
 
 - Categoría: recomendación actual `Health & Fitness`; alternativa `Productivity`.
 - GA4 mobile: recomendación para V1, dejarlo apagado hasta consentimiento in-app.
+- Token mobile: recomendación actual `innerbloom_mobile_api` con lifetime inicial de 1 hora.
 - Emails de reminder: confirmar si se activan en producción o solo quedan disponibles técnicamente.
 - Cuenta Play personal vs organización.
 - Si la cuenta Play es personal nueva, asumir closed testing con 12 testers durante 14 días antes de producción.
@@ -102,9 +105,10 @@ El AAB es grande principalmente por assets multimedia empaquetados desde `apps/w
 3. Hacer QA sobre build release firmado.
 4. Crear la app en Play Console.
 5. Cargar app, metadata y AAB en Internal testing.
-6. Completar Data Safety usando `Docs/data-safety-draft.md`.
-7. Completar Content Rating y App Access.
-8. Si corresponde, lanzar closed testing con 12 testers durante 14 días.
+6. Configurar JWT template de Clerk y `VITE_CLERK_TOKEN_TEMPLATE` en el deployment web.
+7. Completar Data Safety usando `Docs/data-safety-draft.md`.
+8. Completar Content Rating y App Access.
+9. Si corresponde, lanzar closed testing con 12 testers durante 14 días.
 
 ## Referencias oficiales
 

@@ -15,7 +15,7 @@ import { DEV_USER_SWITCH_ACTIVE, setApiAuthTokenProvider } from './lib/api';
 import { getDailyReminderSettings } from './lib/api';
 import OnboardingIntroPage from './pages/OnboardingIntro';
 import PricingPage from './pages/Pricing';
-import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
+import { CLERK_TOKEN_TEMPLATE, DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from './config/auth';
 import SubscriptionPage from './pages/Subscription';
 import PremiumTimelineDemoPage from './pages/PremiumTimelineDemo';
 import BillingSuccessPage from './pages/BillingSuccess';
@@ -43,16 +43,6 @@ import SupportPage from './pages/legal/SupportPage';
 import AccountDeletionPage from './pages/AccountDeletion';
 import SsoCallbackPage from './pages/SsoCallback';
 import { SHOW_BILLING_UI } from './config/releaseFlags';
-
-const CLERK_TOKEN_TEMPLATE = (() => {
-  const raw = import.meta.env.VITE_CLERK_TOKEN_TEMPLATE;
-  if (typeof raw !== 'string') {
-    return null;
-  }
-
-  const trimmed = raw.trim();
-  return trimmed.length > 0 ? trimmed : null;
-})();
 
 function ApiAuthBridge() {
   const { isLoaded, isSignedIn, getToken } = useAuth();

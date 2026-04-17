@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CLERK_TOKEN_TEMPLATE } from '../../config/auth';
 import { buildRedirectUrl, shouldIncludeLegacyProfileImage } from '../MobileBrowserAuth';
 
 describe('MobileBrowserAuth callback URL hardening', () => {
@@ -37,5 +38,9 @@ describe('MobileBrowserAuth callback URL hardening', () => {
     expect(shouldIncludeLegacyProfileImage('?legacy_profile_image=1')).toBe(true);
     expect(shouldIncludeLegacyProfileImage('?legacy_profile_image=0')).toBe(false);
     expect(shouldIncludeLegacyProfileImage('')).toBe(false);
+  });
+
+  it('uses the shared Clerk token template configuration', () => {
+    expect(CLERK_TOKEN_TEMPLATE).toBeNull();
   });
 });

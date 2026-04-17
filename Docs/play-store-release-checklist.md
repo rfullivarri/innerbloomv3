@@ -23,6 +23,7 @@ Estado de este checklist: auditoría operativa sobre `main` revisada el 2026-04-
 - Build web nativa y `cap sync android`: verificados el 2026-04-16
 - `bundleRelease`: compila correctamente el 2026-04-16
 - Sourcemaps desactivados para build nativo para no empaquetar `.js.map` en el AAB
+- `/mobile-auth` usa `VITE_CLERK_TOKEN_TEMPLATE` cuando está configurado, para evitar tokens móviles de 60 segundos y reducir flashes de refresh en la app nativa
 - Upload keystore creada el 2026-04-16 y movida fuera del repo para backup seguro
 - `keystore.properties` creado el 2026-04-16 y movido fuera del repo para backup seguro
 - AAB release firmado generado y verificado el 2026-04-16
@@ -54,6 +55,10 @@ Archivos clave:
 - Confirmar que no haya texto provisional en onboarding, pricing o pantallas internas
 - Revisar si la app necesita pantalla/flujo especial para usuarios sin datos iniciales
 - `CLERK_SECRET_KEY` en producción: confirmado por pruebas reales de eliminación
+- Crear en Clerk un JWT template para mobile y configurar `VITE_CLERK_TOKEN_TEMPLATE` en el deployment web antes del próximo build/deploy público
+  - Recomendación V1: template `innerbloom_mobile_api`
+  - Lifetime recomendado: `3600` segundos para empezar, así el token dura 1 hora en vez de 60 segundos
+  - Debe mantener compatibilidad con el backend actual: mismo issuer/JWKS de Clerk y, si se usa audience en producción, el `aud` debe coincidir con `CLERK_JWT_AUDIENCE`
 - Si se decide activar GA4 dentro de Android, implementar primero consentimiento in-app opcional
 - Revisar tamaño del AAB: el bundle actual queda cerca de 113 MB por assets multimedia incluidos en `public/`
 
@@ -158,6 +163,7 @@ Si devuelve `jar verified`, el AAB está firmado. Las advertencias de certificad
 - Si la cuenta de Play es personal y es nueva, Google puede exigir closed testing antes de producción
 - El package name `org.innerbloom.app` conviene tratarlo como definitivo
 - El texto legal que preparé en este repo es un borrador operativo, no asesoría legal
+- Sin JWT template, Clerk emite tokens de sesión de aproximadamente 60 segundos; eso obliga a abrir el Browser para refresh y causa el flash visible en Android
 - `privacy@innerbloomjourney.org` ya puede usarse como contacto de privacidad porque Resend Receiving está verificado para el dominio
 - `support@innerbloomjourney.org` queda confirmado como contacto público de soporte
 - La eliminación de cuenta es irreversible en V1: borra datos propios en Neon y elimina el usuario de Clerk; si compras/suscripciones nativas se activan en el futuro, habrá que actualizar el flujo y la documentación

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { GoogleOAuthButton } from '../components/auth/GoogleOAuthButton';
 import { AuthLayout } from '../components/layout/AuthLayout';
+import { CLERK_TOKEN_TEMPLATE } from '../config/auth';
 import { buildLocalizedAuthPath, resolveAuthLanguage, type AuthLanguage } from '../lib/authLanguage';
 import { AUTH_DIVIDER_CLASS, AUTH_STACK_CLASS, createAuthAppearance } from '../lib/clerkAppearance';
 import { buildWebAbsoluteUrl } from '../lib/siteUrl';
@@ -384,7 +385,9 @@ export default function MobileBrowserAuthPage() {
           await clerk.setActive({ session: createdSessionId });
         }
 
-        const token = await getToken();
+        const token = CLERK_TOKEN_TEMPLATE
+          ? await getToken({ template: CLERK_TOKEN_TEMPLATE })
+          : await getToken();
         if (!token) {
           console.error('[mobile-auth-page] clerk-session-missing', {
             at: Date.now(),
