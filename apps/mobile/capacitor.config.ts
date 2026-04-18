@@ -8,6 +8,8 @@ const config: CapacitorConfig = {
     scheme: 'innerbloom',
   },
   server: {
+    hostname: 'innerbloomjourney.org',
+    androidScheme: 'https',
     iosScheme: 'capacitor',
   },
 };

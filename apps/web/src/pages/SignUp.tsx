@@ -3,7 +3,6 @@ import { useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { GoogleOAuthButton } from '../components/auth/GoogleOAuthButton';
 import { AuthLayout } from '../components/layout/AuthLayout';
-import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import {
   AUTH_CLERK_FORM_SHELL_CLASS,
@@ -35,7 +34,7 @@ export default function SignUpPage() {
   });
 
   if (isNativeApp) {
-    const mobileAuthUrl = buildNativeMobileAuthUrl('sign-up', language);
+    const googleAuthUrl = buildNativeMobileAuthUrl('sign-up', language, { provider: 'google' });
 
     return (
       <AuthLayout
@@ -43,22 +42,43 @@ export default function SignUpPage() {
         secondaryActionLabel={language === 'en' ? 'Back to app' : 'Volver a la app'}
         secondaryActionHref="/"
       >
-        <div className="mx-auto max-w-xl rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06))] p-8 text-center text-white shadow-[0_24px_70px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
-          <div className="flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.38em] text-white/56">
-            <BrandWordmark className="gap-2.5" textClassName="tracking-[0.38em]" iconClassName="h-[1.85em]" />
-          </div>
-          <p className="mt-6 text-sm leading-7 text-white/76">
-            {language === 'en'
-              ? 'Create your account in the secure browser and return to the app to continue onboarding.'
-              : 'Crea tu cuenta en el navegador seguro y vuelve a la app para continuar el onboarding.'}
-          </p>
+        <div className={AUTH_STACK_CLASS}>
           <button
             type="button"
-            onClick={() => void openUrlInCapacitorBrowser(mobileAuthUrl)}
-            className="mt-7 inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(124,58,237,0.34)] transition hover:bg-[#8b5cf6]"
+            onClick={() => void openUrlInCapacitorBrowser(googleAuthUrl)}
+            className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-full border border-slate-200/90 bg-white px-4 text-sm font-semibold leading-none text-slate-900 shadow-[0_14px_34px_rgba(15,23,42,0.2)] transition hover:bg-slate-50"
           >
-            {language === 'en' ? 'Open secure sign up' : 'Abrir registro seguro'}
+            <svg
+              viewBox="0 0 48 48"
+              aria-hidden="true"
+              role="img"
+              className="h-[18px] w-[18px] shrink-0"
+              focusable="false"
+            >
+              <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.655 32.657 29.239 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.153 7.959 3.041l5.657-5.657C34.053 6.053 29.281 4 24 4 12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20c0-1.341-.138-2.65-.389-3.917Z" />
+              <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.153 7.959 3.041l5.657-5.657C34.053 6.053 29.281 4 24 4 16.318 4 9.656 8.337 6.306 14.691Z" />
+              <path fill="#4CAF50" d="M24 44c5.179 0 9.868-1.977 13.409-5.192l-6.19-5.238C29.146 35.091 26.715 36 24 36c-5.218 0-9.621-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44Z" />
+              <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.091 5.571l.003-.002 6.19 5.238C36.971 39.202 44 34 44 24c0-1.341-.138-2.65-.389-3.917Z" />
+            </svg>
+            {language === 'en' ? 'Sign up with Google' : 'Crear cuenta con Google'}
           </button>
+          <div className={AUTH_DIVIDER_CLASS}>
+            <span className="h-px flex-1 bg-white/12" aria-hidden />
+            <span>{language === 'en' ? 'or continue with email' : 'o continúa con email'}</span>
+            <span className="h-px flex-1 bg-white/12" aria-hidden />
+          </div>
+          <div
+            ref={signUpContainerRef}
+            className={AUTH_CLERK_FORM_SHELL_CLASS}
+          >
+            <SignUp
+              appearance={appearance}
+              routing="path"
+              path="/sign-up"
+              signInUrl={buildLocalizedAuthPath('/login', language)}
+              fallbackRedirectUrl="/intro-journey"
+            />
+          </div>
         </div>
       </AuthLayout>
     );

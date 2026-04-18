@@ -53,7 +53,7 @@ function LocalizedClerkProvider({ children }: { children: React.ReactNode }) {
   const authLanguage = resolveAuthLanguage(location.search);
   const clerkLocalization = getClerkLocalization(authLanguage);
   const isMobileBridgeRoute = location.pathname === '/mobile-auth';
-  const clerkEnabled = !isNativeApp || isMobileBridgeRoute;
+  const clerkEnabled = true;
   const mobileBridgeSearch = new URLSearchParams(location.search);
   const mobileBridgeMode = mobileBridgeSearch.get('mode') === 'sign-up' ? 'sign-up' : 'sign-in';
   const mobileBridgeReturnTo = mobileBridgeSearch.get('return_to');
@@ -77,7 +77,7 @@ function LocalizedClerkProvider({ children }: { children: React.ReactNode }) {
       publishableKey={publishableKey}
       localization={clerkLocalization}
       standardBrowser={!isNativeApp}
-      touchSession={!isNativeApp}
+      touchSession
       signInUrl={signInUrl}
       signUpUrl={signUpUrl}
       signInForceRedirectUrl={authBridgeRedirectUrl}

@@ -14,11 +14,9 @@ import { useRequest } from "../../hooks/useRequest";
 import { useThemePreference } from "../../theme/ThemePreferenceProvider";
 import { isNativeCapacitorPlatform } from "../../mobile/capacitor";
 import {
-  buildNativeMobileAuthUrl,
   clearMobileAuthSession,
   setForceNativeWelcome,
 } from "../../mobile/mobileAuthSession";
-import { openUrlInCapacitorBrowser } from "../../mobile/capacitor";
 import { cancelNativeDailyReminderNotification } from "../../mobile/localNotifications";
 import { SHOW_BILLING_UI } from "../../config/releaseFlags";
 import {
@@ -559,12 +557,21 @@ export function DashboardMenu({
   const handleSignOut = useCallback(async () => {
     handleClose();
     if (isNativeCapacitorPlatform()) {
-      await openUrlInCapacitorBrowser(buildNativeMobileAuthUrl('logout'));
+      await cancelNativeDailyReminderNotification();
+      clearMobileAuthSession("manual-sign-out");
+      setForceNativeWelcome(true);
+      setApiAuthTokenProvider(null);
+      try {
+        await signOut();
+      } catch (error) {
+        console.warn("[dashboard-menu] Clerk signOut failed during native logout", error);
+      }
+      navigate("/", { replace: true });
       return;
     }
 
     await signOut({ redirectUrl: "/" });
-  }, [signOut, handleClose]);
+  }, [signOut, handleClose, navigate]);
 
   const deleteAccountKeyword = language === "en" ? "DELETE" : "ELIMINAR";
   const canConfirmAccountDeletion =
