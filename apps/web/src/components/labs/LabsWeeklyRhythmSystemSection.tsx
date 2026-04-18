@@ -1,39 +1,42 @@
+const INNERBLOOM_PREMIUM_GRADIENT =
+  'linear-gradient(90deg, rgba(164, 109, 255, 0.98) 0%, rgba(204, 141, 255, 0.97) 52%, rgba(246, 187, 164, 0.96) 100%)';
+
 const RHYTHM_CARDS = [
   {
     id: 'low',
     name: 'LOW',
     frequency: '1× / week',
-    state: 'Low energy, overloaded, or returning after a break.',
-    purpose: 'Rebuild your base with minimum load and protect consistency.',
-    examples: ['2 core habits', 'Recovery priority', 'Simple wins'],
-    intensity: 25,
+    micro: 'Lower load',
+    pills: ['Core habits', 'Recovery', 'Simple wins'],
+    intensity: 24,
+    density: 'Minimal structure',
   },
   {
     id: 'chill',
     name: 'CHILL',
     frequency: '2× / week',
-    state: 'Stable enough to move, but still protecting bandwidth.',
-    purpose: 'Keep momentum light with a realistic and steady pace.',
-    examples: ['3–4 weekly actions', 'Balanced focus', 'No pressure spikes'],
-    intensity: 45,
+    micro: 'Steady pace',
+    pills: ['Balanced', 'Light momentum', 'No overload'],
+    intensity: 46,
+    density: 'Balanced cadence',
   },
   {
     id: 'flow',
     name: 'FLOW',
     frequency: '3× / week',
-    state: 'Focused and ready for a sustainable push.',
-    purpose: 'Drive meaningful progress while keeping your rhythm sustainable.',
-    examples: ['Priority blocks', 'Focused execution', 'Weekly review'],
-    intensity: 70,
+    micro: 'Focused push',
+    pills: ['Priority blocks', 'Execution', 'Momentum'],
+    intensity: 72,
+    density: 'Higher cadence',
   },
   {
     id: 'evolve',
     name: 'EVOLVE',
     frequency: '4× / week',
-    state: 'High intent and ready for more structure this week.',
-    purpose: 'Increase load with more structure while protecting balance.',
-    examples: ['Structured plan', 'Higher load', 'Consistency guardrails'],
-    intensity: 90,
+    micro: 'More structure',
+    pills: ['Higher load', 'Guardrails', 'Progression'],
+    intensity: 93,
+    density: 'Structured intensity',
   },
 ] as const;
 
@@ -50,11 +53,10 @@ export function LabsWeeklyRhythmSystemSection() {
         <header className="max-w-3xl space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Weekly rhythm system</p>
           <h2 id="labs-weekly-rhythm-title" className="text-3xl font-semibold tracking-[-0.03em] text-white md:text-4xl">
-            Choose the weekly rhythm you can sustain today
+            Pick the intensity you can sustain this week
           </h2>
           <p className="max-w-2xl text-sm leading-relaxed text-white/80 md:text-base">
-            Your rhythm defines how intense your plan should feel this week — from rebuilding your base to moving forward with
-            more structure and consistency.
+            Four weekly rhythm levels. Fast scan. Low to high load.
           </p>
         </header>
 
@@ -62,41 +64,48 @@ export function LabsWeeklyRhythmSystemSection() {
           {RHYTHM_CARDS.map((card) => (
             <article
               key={card.id}
-              className="group flex h-full flex-col rounded-3xl border border-white/14 bg-[linear-gradient(168deg,rgba(255,255,255,0.08),rgba(15,12,34,0.22))] p-4 shadow-[0_14px_34px_rgba(17,10,37,0.22),inset_0_1px_0_rgba(255,255,255,0.14)] transition duration-200 hover:-translate-y-0.5 hover:border-white/20 md:p-5"
+              className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-white/14 bg-[linear-gradient(168deg,rgba(255,255,255,0.085),rgba(15,12,34,0.26))] p-4 shadow-[0_14px_34px_rgba(17,10,37,0.22),inset_0_1px_0_rgba(255,255,255,0.14)] transition duration-200 hover:-translate-y-0.5 hover:border-white/20 md:p-5"
             >
-              <div className="mb-4 flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-white/65">Rhythm</p>
-                  <h3 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-white">{card.name}</h3>
+              <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-[linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.56),rgba(255,255,255,0))] opacity-70" />
+
+              <div className="space-y-1">
+                <p className="text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white/56">Rhythm</p>
+                <h3 className="text-[1.55rem] font-semibold tracking-[-0.03em] text-white">{card.name}</h3>
+                <p className="text-[0.73rem] font-semibold uppercase tracking-[0.16em] text-white/78">{card.frequency}</p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="overflow-hidden rounded-full border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.05))] p-[3px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.28)]">
+                  <div className="relative h-[0.68rem] rounded-full bg-[linear-gradient(180deg,rgba(18,22,59,0.8),rgba(13,16,42,0.85))] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+                    <div
+                      className="absolute inset-y-[1px] left-[1px] rounded-full shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_0_14px_rgba(201,150,255,0.42),0_0_26px_rgba(246,187,164,0.24)]"
+                      style={{
+                        width: `calc(${card.intensity}% - 2px)`,
+                        backgroundImage: INNERBLOOM_PREMIUM_GRADIENT,
+                      }}
+                    >
+                      <div className="h-full rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,0.42),rgba(255,255,255,0)_75%)]" />
+                    </div>
+                  </div>
                 </div>
-                <span className="rounded-full border border-white/16 bg-white/8 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/86">
-                  {card.frequency}
-                </span>
-              </div>
-
-              <div className="mb-4 rounded-2xl border border-white/10 bg-white/6 p-3">
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white/60">Weekly load</p>
-                <div className="mt-2 h-2 rounded-full bg-white/12">
-                  <div className="h-full rounded-full bg-[linear-gradient(90deg,rgba(191,146,255,0.9),rgba(118,209,255,0.95))]" style={{ width: `${card.intensity}%` }} />
+                <div className="flex items-center justify-between text-[0.62rem] uppercase tracking-[0.16em] text-white/52">
+                  <span>Low</span>
+                  <span>High</span>
                 </div>
               </div>
 
-              <div className="space-y-3 text-sm text-white/84">
-                <p>
-                  <span className="font-medium text-white">State:</span> {card.state}
-                </p>
-                <p>
-                  <span className="font-medium text-white">This week is for:</span> {card.purpose}
-                </p>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-white/88">{card.micro}</p>
+                <p className="text-[0.67rem] font-medium uppercase tracking-[0.14em] text-white/58">{card.density}</p>
               </div>
 
-              <ul className="mt-4 flex flex-wrap gap-2">
-                {card.examples.map((example) => (
+              <ul className="mt-auto flex flex-wrap gap-1.5">
+                {card.pills.map((pill) => (
                   <li
-                    key={example}
-                    className="rounded-full border border-white/12 bg-white/[0.08] px-2.5 py-1 text-[0.68rem] font-medium tracking-[0.01em] text-white/86"
+                    key={pill}
+                    className="rounded-full border border-white/12 bg-white/[0.09] px-2.5 py-1 text-[0.64rem] font-medium uppercase tracking-[0.05em] text-white/86"
                   >
-                    {example}
+                    {pill}
                   </li>
                 ))}
               </ul>
@@ -104,8 +113,8 @@ export function LabsWeeklyRhythmSystemSection() {
           ))}
         </div>
 
-        <p className="text-xs leading-relaxed text-white/68 md:text-sm">
-          Rhythm shapes your weekly plan intensity. Avatar identity belongs to a separate product layer.
+        <p className="text-xs leading-relaxed text-white/66 md:text-sm">
+          Rhythm = weekly intensity. No avatars, no mood storytelling.
         </p>
       </div>
     </section>
