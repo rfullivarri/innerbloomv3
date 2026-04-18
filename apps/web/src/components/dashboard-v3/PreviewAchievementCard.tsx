@@ -241,9 +241,9 @@ export function PreviewAchievementCard({
   return (
     <section
       className={cx(
-        'rounded-2xl',
+        'overflow-visible rounded-2xl',
         isGhostSurface ? 'border-transparent bg-transparent shadow-none' : 'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] shadow-inner',
-        isCompact ? 'p-2.5' : 'p-3',
+        isCompact ? 'p-2.5 pb-4' : 'p-3 pb-4',
       )}
     >
       <div className={cx('flex flex-col items-center', isCompact ? 'gap-1.5' : 'gap-2')}>
@@ -386,7 +386,7 @@ export function PreviewAchievementCard({
                 </div>
               </details>
             </div>
-            <div className="w-full overflow-x-auto pb-1" data-testid="recent-timeline" data-tour-anchor="achievement-preview-months">
+            <div className="w-full overflow-x-auto pb-4" data-testid="recent-timeline" data-tour-anchor="achievement-preview-months">
               <div
                 className={cx(
                   'flex items-end gap-1 md:gap-1.5',
@@ -401,7 +401,7 @@ export function PreviewAchievementCard({
                 {hasGroupedWindow && (
                   <div className="flex flex-col items-center">
                     <div
-                      className={cx('flex flex-col items-center rounded-xl border border-[color:var(--color-border-soft)] pb-0', isCompact ? 'px-1 pt-0.5 md:px-1.5' : 'px-1.5 pt-0.3 md:px-2')}
+                      className={cx('flex flex-col items-center rounded-xl border border-[color:var(--color-border-soft)] pb-2', isCompact ? 'px-1 pt-0.5 md:px-1.5' : 'px-1.5 pt-0.3 md:px-2')}
                       data-testid="seal-window-group"
                       data-window-start={lastThreeStart}
                       data-window-end={lastThreeEnd - 1}

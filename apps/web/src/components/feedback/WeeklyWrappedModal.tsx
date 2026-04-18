@@ -264,7 +264,7 @@ export function WeeklyWrappedModal({ payload, onDismiss, onComplete, onViewRewar
   // Fondo animado global aplicado al wrapper fijo que envuelve todas las slides del Weekly Wrapped (desktop y mobile usan este contenedor).
   return (
     <div
-      className="ib-weekly-wrapped-modal fixed inset-0 z-50 flex overflow-hidden bg-slate-950/95 backdrop-blur weekly-wrapped-animated-bg"
+      className="ib-weekly-wrapped-modal fixed inset-0 z-[260] flex overflow-hidden bg-slate-950/95 backdrop-blur weekly-wrapped-animated-bg"
       role="dialog"
       aria-modal
     >

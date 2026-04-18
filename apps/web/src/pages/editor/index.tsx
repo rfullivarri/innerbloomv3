@@ -475,7 +475,7 @@ export default function TaskEditorPage() {
             showPulseDot: section.key === 'dashboard' && shouldShowDashboardDot,
           }))}
         />
-        <main className="flex-1 pb-24 md:pb-0" data-light-scope="editor">
+        <main className="flex-1 pb-[calc(env(safe-area-inset-bottom,0px)+10.25rem)] md:pb-0" data-light-scope="editor">
           <div ref={editorTopRef} className="scroll-mt-24" />
           <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-5 md:py-6 lg:px-6 lg:py-8">
             <SectionHeader section={taskEditorSection} />
@@ -569,14 +569,16 @@ export default function TaskEditorPage() {
             })}
           />
         )}
-        <button
-          type="button"
-          onClick={handleCreateClick}
-          className="fixed bottom-24 right-4 z-30 inline-flex items-center gap-2 rounded-full bg-violet-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(139,92,246,0.45)] transition hover:bg-violet-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 md:bottom-10 md:right-8"
-        >
-          <span aria-hidden className="text-lg leading-none">＋</span>
-          {t('editor.button.newTask')}
-        </button>
+        {!showCreateModal && taskToEdit == null && (
+          <button
+            type="button"
+            onClick={handleCreateClick}
+            className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+9.25rem)] right-4 z-40 inline-flex items-center gap-1.5 rounded-full bg-violet-500 px-3.5 py-2 text-[0.72rem] font-semibold text-white shadow-[0_10px_26px_rgba(139,92,246,0.42)] transition hover:bg-violet-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 md:bottom-10 md:right-8 md:gap-2 md:px-5 md:py-3 md:text-sm"
+          >
+            <span aria-hidden className="text-sm leading-none md:text-lg">＋</span>
+            {t('editor.button.newTask')}
+          </button>
+        )}
         <CreateTaskModal
           open={showCreateModal}
           onClose={() => setShowCreateModal(false)}
@@ -1533,7 +1535,6 @@ function CreateTaskModal({
   const activeLocale = language === 'es' ? 'es' : 'en';
   const [selectedPillarId, setSelectedPillarId] = useState('');
   const [selectedTraitId, setSelectedTraitId] = useState('');
-  const [selectedStatId, setSelectedStatId] = useState('');
   const [title, setTitle] = useState('');
   const [difficultyId, setDifficultyId] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -1558,12 +1559,6 @@ function CreateTaskModal({
     reload: reloadTraits,
   } = useTraits(open ? selectedPillarId : null);
   const {
-    data: stats,
-    isLoading: isLoadingStats,
-    error: statsError,
-    reload: reloadStats,
-  } = useStats(open ? selectedTraitId : null);
-  const {
     data: difficulties,
     isLoading: isLoadingDifficulties,
     error: difficultiesError,
@@ -1578,7 +1573,6 @@ function CreateTaskModal({
     if (!open) {
       setSelectedPillarId('');
       setSelectedTraitId('');
-      setSelectedStatId('');
       setTitle('');
       setDifficultyId('');
       setErrors({});
@@ -1614,15 +1608,8 @@ function CreateTaskModal({
 
   useEffect(() => {
     setSelectedTraitId('');
-    setSelectedStatId('');
     clearError('trait');
-    clearError('stat');
   }, [selectedPillarId, clearError]);
-
-  useEffect(() => {
-    setSelectedStatId('');
-    clearError('stat');
-  }, [selectedTraitId, clearError]);
 
   const sortedPillars = useMemo(() => {
     return [...pillars].sort((a, b) => a.name.localeCompare(b.name, activeLocale, { sensitivity: 'base' }));
@@ -1631,10 +1618,6 @@ function CreateTaskModal({
   const filteredTraits = useMemo(() => {
     return traits.filter((trait) => trait.pillarId === selectedPillarId);
   }, [traits, selectedPillarId]);
-
-  const filteredStats = useMemo(() => {
-    return stats.filter((stat) => stat.traitId === selectedTraitId);
-  }, [stats, selectedTraitId]);
 
   const sortedDifficulties = useMemo(() => {
     return [...difficulties].sort((a, b) => a.name.localeCompare(b.name, activeLocale, { sensitivity: 'base' }));
@@ -1672,13 +1655,12 @@ function CreateTaskModal({
         title: title.trim(),
         pillarId: selectedPillarId,
         traitId: selectedTraitId,
-        statId: selectedStatId || null,
+        statId: null,
         difficultyId: difficultyId || null,
       });
       setToast({ type: 'success', text: t('editor.toast.create.success') });
       setTitle('');
       setDifficultyId('');
-      setSelectedStatId('');
       setErrors({});
     } catch (error) {
       const message = error instanceof Error ? error.message : t('editor.toast.create.error');
@@ -1802,45 +1784,6 @@ function CreateTaskModal({
                 )}
               </div>
 
-              <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{t('editor.modal.create.step3')}</p>
-                <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('editor.modal.create.selectStatLabel')}</span>
-                  <select
-                    value={selectedStatId}
-                    onChange={(event) => setSelectedStatId(event.target.value)}
-                    className="w-full appearance-none rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-4 py-2.5 text-sm ios-touch-input text-[color:var(--color-slate-100)] focus:border-[color:var(--color-border-soft)] focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed"
-                    disabled={!selectedTraitId || isLoadingStats}
-                  >
-                    <option value="" className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                      {selectedTraitId ? t('editor.modal.create.selectStatPlaceholder') : t('editor.modal.create.selectTraitFirst')}
-                    </option>
-                    {filteredStats.map((stat) => (
-                      <option key={stat.id} value={stat.id} className="bg-slate-900 text-[color:var(--color-slate-100)]">
-                        {stat.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                {isLoadingStats && (
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.stats')}</p>
-                )}
-                {statsError && (
-                  <div className="space-y-1 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
-                    <p>{t('editor.error.stats.load')}</p>
-                    <button
-                      type="button"
-                      onClick={reloadStats}
-                      className="font-semibold text-rose-200 underline decoration-dotted"
-                    >
-                      {t('editor.button.retry')}
-                    </button>
-                  </div>
-                )}
-                {selectedTraitId && !isLoadingStats && filteredStats.length === 0 && !statsError && (
-                  <p className="text-xs text-[color:var(--color-slate-400)]">{t('editor.empty.noStats')}</p>
-                )}
-              </div>
             </section>
 
             <section className="space-y-4">
@@ -1914,7 +1857,8 @@ function CreateTaskModal({
               <button
                 type="submit"
                 disabled={isSubmitDisabled}
-                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_rgba(79,70,229,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[#121212] transition disabled:cursor-not-allowed disabled:opacity-60"
+                style={{ background: 'var(--gradient-innerbloom)', boxShadow: 'var(--shadow-innerbloom-cta)' }}
               >
                 {isSubmitting ? t('editor.button.creating') : t('editor.button.createTask')}
               </button>

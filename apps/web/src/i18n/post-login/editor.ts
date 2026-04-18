@@ -68,8 +68,8 @@ export const editorTranslations = {
   'editor.modal.create.badge': { es: 'Nueva tarea', en: 'New task' },
   'editor.modal.create.title': { es: 'Crear tarea personalizada', en: 'Create custom task' },
   'editor.modal.create.description': {
-    es: 'Define el pilar, rasgo y stat para desbloquear campos específicos de tu misión.',
-    en: 'Set pillar, trait, and stat to unlock mission-specific fields.',
+    es: 'Define el pilar y rasgo para desbloquear campos específicos de tu misión.',
+    en: 'Set pillar and trait to unlock mission-specific fields.',
   },
   'editor.modal.create.step1': { es: 'Paso 1 · Pilar', en: 'Step 1 · Pillar' },
   'editor.modal.create.step2': { es: 'Paso 2 · Rasgo', en: 'Step 2 · Trait' },
