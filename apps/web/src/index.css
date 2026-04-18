@@ -48,6 +48,22 @@
     --color-slate-400: #94a3b8;
     --color-slate-900-95: rgba(15, 23, 42, 0.95);
     --color-slate-950-80: rgba(2, 6, 23, 0.8);
+    --color-innerbloom-gradient-start: #a770ef;
+    --color-innerbloom-gradient-mid: #cf8bf3;
+    --color-innerbloom-gradient-end: #fdb99b;
+    --gradient-innerbloom: linear-gradient(
+      90deg,
+      var(--color-innerbloom-gradient-start) 0%,
+      var(--color-innerbloom-gradient-mid) 52%,
+      var(--color-innerbloom-gradient-end) 100%
+    );
+    --gradient-innerbloom-soft: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-innerbloom-gradient-start) 22%, transparent) 0%,
+      color-mix(in srgb, var(--color-innerbloom-gradient-mid) 24%, transparent) 52%,
+      color-mix(in srgb, var(--color-innerbloom-gradient-end) 20%, transparent) 100%
+    );
+    --shadow-innerbloom-cta: 0 12px 28px rgba(207, 139, 243, 0.28);
     --color-widget-menu-heading: var(--color-text);
     --color-widget-menu-label: var(--color-text-muted);
     --color-widget-menu-item-title: var(--color-text);

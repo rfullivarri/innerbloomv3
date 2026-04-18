@@ -40,6 +40,12 @@ export const OFFICIAL_DESIGN_TOKENS = {
   },
   gradients: [
     {
+      name: 'innerbloom',
+      type: 'linear',
+      angle: '90deg',
+      stops: ['#a770ef 0%', '#cf8bf3 52%', '#fdb99b 100%']
+    },
+    {
       name: 'landing_background_core',
       type: 'multi-layer',
       angle: '140deg',
