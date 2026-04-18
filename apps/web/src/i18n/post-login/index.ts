@@ -6,6 +6,7 @@ import { feedbackTranslations } from './feedback';
 import { missionsTranslations } from './missions';
 import { pricingTranslations } from './pricing';
 import { subscriptionTranslations } from './subscription';
+import { dailyQuestTranslations } from './dailyQuest';
 import type { PostLoginTranslations } from './types';
 
 const postLoginTranslations: PostLoginTranslations = {
@@ -16,6 +17,7 @@ const postLoginTranslations: PostLoginTranslations = {
   ...subscriptionTranslations,
   ...feedbackTranslations,
   ...a11yTranslations,
+  ...dailyQuestTranslations,
 };
 
 export type PostLoginTranslationKey = keyof typeof postLoginTranslations;

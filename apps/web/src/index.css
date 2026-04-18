@@ -5128,6 +5128,10 @@
     box-shadow: 0 10px 24px rgba(249, 115, 22, 0.38);
   }
 
+  [data-light-scope='daily-quest'] .ib-daily-quest-innerbloom-gradient {
+    background-image: var(--gradient-innerbloom);
+  }
+
   :root[data-theme='light'] .ib-chip-solid {
     border: 1px solid #d8b4fe;
     background: #e9d5ff;
