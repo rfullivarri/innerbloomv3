@@ -1514,14 +1514,11 @@ export function DashboardMenu({
                           ) : null}
 
                           <div className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-2)] p-3">
-                            <p className="text-sm text-[color:var(--color-text)]">
-                              {t("dashboard.menu.avatarConfirmPrompt")}
-                            </p>
-                            <div className="mt-3 flex gap-2">
+                            <div className="flex flex-col gap-3">
                               <button
                                 type="button"
                                 onClick={handleCloseAvatar}
-                                className="flex-1 rounded-xl border border-[color:var(--color-border-subtle)] px-3 py-2 text-sm text-[color:var(--color-text-dim)]"
+                                className="inline-flex w-full items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-200)] transition hover:border-[color:var(--color-border-soft)] hover:text-[color:var(--color-text)] disabled:cursor-not-allowed disabled:opacity-60"
                                 disabled={isSavingAvatar}
                               >
                                 {t('dashboard.menu.cancel')}
@@ -1529,7 +1526,8 @@ export function DashboardMenu({
                               <button
                                 type="button"
                                 onClick={() => void handleConfirmAvatar()}
-                                className="flex-1 rounded-xl border border-[color:var(--color-accent-primary)] bg-[color:var(--color-accent-primary)]/20 px-3 py-2 text-sm font-semibold text-[color:var(--color-text)] disabled:opacity-60"
+                                className="inline-flex w-full items-center justify-center rounded-full px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-[#121212] transition disabled:cursor-not-allowed disabled:opacity-60"
+                                style={{ background: 'var(--gradient-innerbloom)', boxShadow: 'var(--shadow-innerbloom-cta)' }}
                                 disabled={isSavingAvatar}
                               >
                                 {isSavingAvatar ? t("dashboard.menu.avatarSaving") : t("dashboard.menu.confirmChange")}

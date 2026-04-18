@@ -1696,10 +1696,9 @@ function CreateTaskModal({
             </header>
 
             <section className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{t('editor.modal.create.step1')}</p>
-                <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('editor.modal.create.selectPillarLabel')}</span>
+                <div className="flex flex-col gap-2">
                   <select
                     value={selectedPillarId}
                     onChange={(event) => {
@@ -1718,7 +1717,7 @@ function CreateTaskModal({
                       </option>
                     ))}
                   </select>
-                </label>
+                </div>
                 {isLoadingPillars && (
                   <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.pillars')}</p>
                 )}
@@ -1740,10 +1739,9 @@ function CreateTaskModal({
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{t('editor.modal.create.step2')}</p>
-                <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-slate-400)]">{t('editor.modal.create.selectTraitLabel')}</span>
+                <div className="flex flex-col gap-2">
                   <select
                     value={selectedTraitId}
                     onChange={(event) => {
@@ -1762,7 +1760,7 @@ function CreateTaskModal({
                       </option>
                     ))}
                   </select>
-                </label>
+                </div>
                 {isLoadingTraits && (
                   <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{t('editor.loading.traits')}</p>
                 )}

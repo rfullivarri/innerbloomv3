@@ -5068,6 +5068,36 @@
     background: #eef2f7;
     color: var(--scheduler-text);
   }
+
+  :root[data-theme='dark'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__time-select {
+    color: #f8fafc;
+    background-color: #16213b;
+    -webkit-text-fill-color: #f8fafc;
+    color-scheme: dark;
+  }
+
+  :root[data-theme='dark'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__time-select option,
+  :root[data-theme='dark'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__time-option {
+    color: #f8fafc;
+    background-color: #111c33;
+    -webkit-text-fill-color: #f8fafc;
+  }
+
+  @supports (-webkit-touch-callout: none) {
+    :root[data-theme='dark'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__time-select {
+      color: #ffffff;
+      background-color: #0f1b33;
+      -webkit-text-fill-color: #ffffff;
+      color-scheme: dark;
+    }
+
+    :root[data-theme='dark'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__time-select option,
+    :root[data-theme='dark'] [data-light-scope='reminder-scheduler'] .reminder-scheduler-form__time-option {
+      color: #ffffff;
+      background-color: #101a2f;
+      -webkit-text-fill-color: #ffffff;
+    }
+  }
   :root[data-theme='light'] [data-light-scope='daily-quest'] {
     color: var(--color-text);
     box-shadow: 0 24px 52px rgba(15, 23, 42, 0.12);
