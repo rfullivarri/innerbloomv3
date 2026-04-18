@@ -2,7 +2,6 @@ import { SignIn } from '@clerk/clerk-react';
 import { useLocation } from 'react-router-dom';
 import { GoogleOAuthButton } from '../components/auth/GoogleOAuthButton';
 import { AuthLayout } from '../components/layout/AuthLayout';
-import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { DASHBOARD_PATH } from '../config/auth';
 import { buildLocalizedAuthPath, resolveAuthLanguage } from '../lib/authLanguage';
 import {
@@ -14,9 +13,7 @@ import {
 import { usePageMeta } from '../lib/seo';
 import {
   isNativeCapacitorPlatform,
-  openUrlInCapacitorBrowser,
 } from '../mobile/capacitor';
-import { buildNativeMobileAuthUrl } from '../mobile/mobileAuthSession';
 
 export default function LoginPage() {
   const location = useLocation();
@@ -40,30 +37,27 @@ export default function LoginPage() {
   });
 
   if (isNativeApp) {
-    const mobileAuthUrl = buildNativeMobileAuthUrl('sign-in', language);
-
     return (
       <AuthLayout
         title={language === 'en' ? 'Sign in' : 'Iniciar sesión'}
         secondaryActionLabel={language === 'en' ? 'Back to app' : 'Volver a la app'}
         secondaryActionHref="/"
       >
-        <div className="mx-auto max-w-xl rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06))] p-8 text-center text-white shadow-[0_24px_70px_rgba(15,23,42,0.28)] backdrop-blur-2xl">
-          <div className="flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.38em] text-white/56">
-            <BrandWordmark className="gap-2.5" textClassName="tracking-[0.38em]" iconClassName="h-[1.85em]" />
+        <div className={AUTH_STACK_CLASS}>
+          <div className={AUTH_CLERK_FORM_SHELL_CLASS}>
+            <SignIn
+              appearance={createAuthAppearance({
+                elements: {
+                  footerActionText: 'text-white/50',
+                  footerActionLink: 'font-semibold text-white/70 hover:text-white underline-offset-4'
+                }
+              })}
+              routing="path"
+              path="/login"
+              signUpUrl={buildLocalizedAuthPath('/sign-up', language)}
+              fallbackRedirectUrl="/"
+            />
           </div>
-          <p className="mt-6 text-sm leading-7 text-white/76">
-            {language === 'en'
-              ? 'Continue in the secure browser and return to Innerbloom with your active session.'
-              : 'Continúa en el navegador seguro y vuelve a Innerbloom con tu sesión activa.'}
-          </p>
-          <button
-            type="button"
-            onClick={() => void openUrlInCapacitorBrowser(mobileAuthUrl)}
-            className="mt-7 inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(124,58,237,0.34)] transition hover:bg-[#8b5cf6]"
-          >
-            {language === 'en' ? 'Open secure login' : 'Abrir login seguro'}
-          </button>
         </div>
       </AuthLayout>
     );

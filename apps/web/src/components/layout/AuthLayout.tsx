@@ -31,19 +31,20 @@ export function AuthLayout({
         <div className="absolute inset-x-0 top-0 h-44 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent)]" />
       </div>
 
+      {secondaryActionLabel && secondaryActionHref ? (
+        <a
+          href={secondaryActionHref}
+          className="absolute left-4 top-[calc(env(safe-area-inset-top,0px)+0.45rem)] z-20 inline-flex items-center justify-center gap-2 rounded-full px-1 py-1 text-sm font-semibold text-white/62 transition-colors duration-200 hover:text-white sm:left-6 lg:left-8"
+        >
+          <span aria-hidden="true" className="text-base leading-none">←</span>
+          {secondaryActionLabel}
+        </a>
+      ) : null}
+
       <div className="relative z-10 mx-auto flex w-full min-w-0 max-w-md flex-col items-center gap-6 pt-5 text-center sm:gap-7">
         <div className="flex items-center justify-center text-[17px] font-semibold uppercase tracking-[0.42em] text-white/66">
           <BrandWordmark className="gap-3.5" textClassName="tracking-[0.42em]" iconClassName="h-[3.2em]" />
         </div>
-
-        {secondaryActionLabel && secondaryActionHref ? (
-          <a
-            href={secondaryActionHref}
-            className="inline-flex w-full items-center justify-center rounded-full border border-white/12 bg-white/[0.045] px-4 py-2.5 text-sm font-semibold text-white/72 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-200 hover:border-white/25 hover:bg-white/[0.08] hover:text-white sm:px-5"
-          >
-            {secondaryActionLabel}
-          </a>
-        ) : null}
 
         <div className="w-full space-y-3 text-balance text-center">
           {typeof title === 'string' ? (

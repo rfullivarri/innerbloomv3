@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { BrandWordmark } from '../components/layout/BrandWordmark';
 import { useAuth } from '../auth/runtimeAuth';
 import { DASHBOARD_PATH, DEFAULT_DASHBOARD_PATH } from '../config/auth';
@@ -74,6 +74,7 @@ function MobileEntryError({
 }
 
 function MobileWelcome() {
+  const navigate = useNavigate();
   const language = resolveAuthLanguage(typeof window !== 'undefined' ? window.location.search : '');
   const copy = language === 'en'
     ? {
@@ -89,10 +90,9 @@ function MobileWelcome() {
         signUp: 'Crear cuenta',
       };
 
-  const openNativeAuth = async (mode: 'sign-in' | 'sign-up') => {
+  const openEmbeddedAuth = (mode: 'sign-in' | 'sign-up') => {
     setForceNativeWelcome(false);
-    const mobileAuthUrl = buildNativeMobileAuthUrl(mode, language);
-    await openUrlInCapacitorBrowser(mobileAuthUrl);
+    navigate(mode === 'sign-up' ? `/sign-up?lang=${language}` : `/login?lang=${language}`);
   };
 
   const openNativeGoogleAuth = async () => {
@@ -102,33 +102,40 @@ function MobileWelcome() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-5 pb-[calc(env(safe-area-inset-bottom,0px)+1.75rem)] pt-[calc(env(safe-area-inset-top,0px)+1rem)] text-white">
-      <div className="flex min-h-[82vh] w-full max-w-md flex-col">
-        <div className="pt-3 text-center">
-          <div className="flex items-center justify-center text-[17px] font-semibold uppercase tracking-[0.42em] text-white/66">
+    <div className="flex h-dvh max-h-dvh min-h-dvh items-center justify-center overflow-hidden px-5 pb-[calc(env(safe-area-inset-bottom,0px)+0.85rem)] pt-[calc(env(safe-area-inset-top,0px)+0.65rem)] text-white">
+      <div className="flex h-full w-full max-w-md flex-col">
+        <div className="shrink-0 pt-[clamp(0.25rem,1.1dvh,0.75rem)] text-center">
+          <div className="flex items-center justify-center text-[clamp(0.82rem,2.1dvh,1.06rem)] font-semibold uppercase tracking-[0.42em] text-white/66">
             <BrandWordmark className="gap-3.5" textClassName="tracking-[0.42em]" iconClassName="h-[3.2em]" />
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col px-1 pb-3 pt-6">
-          <div className="px-2">
+        <div className="flex min-h-0 flex-1 flex-col px-1 pb-[clamp(0.25rem,1.2dvh,0.75rem)] pt-[clamp(1rem,3dvh,1.5rem)]">
+          <div className="min-h-0 shrink px-2">
             <img
               src="/og/neneOG4.jpg"
               alt="Innerbloom hero"
-              className="h-[37vh] min-h-[300px] w-full rounded-[1.75rem] object-cover object-center shadow-[0_24px_70px_rgba(15,23,42,0.38)]"
+              className="h-[min(34dvh,300px)] min-h-[210px] w-full rounded-[1.65rem] object-cover object-center shadow-[0_24px_70px_rgba(15,23,42,0.38)]"
             />
           </div>
 
-          <div className="flex flex-1 flex-col pt-7">
-            <div className="mt-10 text-center">
-              <h1 className="text-[2.4rem] font-semibold tracking-tight text-white">{copy.title}</h1>
+          <div className="flex min-h-0 flex-1 flex-col pt-[clamp(1rem,3.2dvh,1.75rem)]">
+            <div className="text-center">
+              <h1 className="text-[clamp(2rem,5.2dvh,2.4rem)] font-semibold tracking-tight text-white">{copy.title}</h1>
             </div>
 
-            <div className="mt-auto space-y-3 px-2 pt-10">
+            <div className="mt-auto space-y-[clamp(0.55rem,1.5dvh,0.75rem)] px-2 pt-[clamp(1rem,4dvh,2.5rem)]">
+              <button
+                type="button"
+                onClick={() => openEmbeddedAuth('sign-up')}
+                className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-[clamp(0.75rem,1.8dvh,0.875rem)] text-sm font-semibold text-white shadow-[0_20px_44px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
+              >
+                {copy.signUp}
+              </button>
               <button
                 type="button"
                 onClick={() => void openNativeGoogleAuth()}
-                className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-slate-200/90 bg-white px-5 py-3.5 text-sm font-semibold text-slate-900 shadow-[0_20px_44px_rgba(15,23,42,0.22)] transition hover:bg-slate-50"
+                className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-slate-200/90 bg-white px-5 py-[clamp(0.75rem,1.8dvh,0.875rem)] text-sm font-semibold text-slate-900 shadow-[0_20px_44px_rgba(15,23,42,0.22)] transition hover:bg-slate-50"
               >
                 <svg
                   viewBox="0 0 48 48"
@@ -146,17 +153,10 @@ function MobileWelcome() {
               </button>
               <button
                 type="button"
-                onClick={() => void openNativeAuth('sign-in')}
-                className="inline-flex w-full items-center justify-center rounded-full bg-[#7c3aed] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_20px_44px_rgba(124,58,237,0.35)] transition hover:bg-[#8b5cf6]"
+                onClick={() => openEmbeddedAuth('sign-in')}
+                className="inline-flex w-full items-center justify-center rounded-full border border-white/18 bg-white/8 px-5 py-[clamp(0.75rem,1.8dvh,0.875rem)] text-sm font-semibold text-white transition hover:bg-white/12"
               >
                 {copy.signIn}
-              </button>
-              <button
-                type="button"
-                onClick={() => void openNativeAuth('sign-up')}
-                className="inline-flex w-full items-center justify-center rounded-full border border-white/18 bg-white/8 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-white/12"
-              >
-                {copy.signUp}
               </button>
             </div>
           </div>
