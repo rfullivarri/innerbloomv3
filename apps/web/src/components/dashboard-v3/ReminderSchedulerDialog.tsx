@@ -127,7 +127,7 @@ export const ReminderSchedulerDialog = forwardRef<
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 64 }}
           >
-            <div className="mb-4 flex items-start justify-between gap-4">
+            <div className="mb-3 flex items-start justify-between gap-4">
               <div>
                 <h2
                   id={titleId}
@@ -135,10 +135,7 @@ export const ReminderSchedulerDialog = forwardRef<
                 >
                   {t("dashboard.reminderScheduler.eyebrow")}
                 </h2>
-                <p className="reminder-scheduler-dialog__title mt-1 font-display text-2xl font-semibold text-text">
-                  {t("dashboard.reminderScheduler.title")}
-                </p>
-                <p className="reminder-scheduler-dialog__description mt-1 text-sm text-text-muted">
+                <p className="reminder-scheduler-dialog__description mt-2 text-sm text-text-muted">
                   {t("dashboard.reminderScheduler.description")}
                 </p>
               </div>
