@@ -1,22 +1,37 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createRef } from 'react';
+import { createRef, type ReactElement } from 'react';
 import { DailyQuestModal, type DailyQuestModalHandle } from './DailyQuestModal';
+import { PostLoginLanguageProvider } from '../i18n/postLoginLanguage';
 
-const { mockGetStatus, mockGetDefinition, mockSubmit } = vi.hoisted(() => ({
+const {
+  mockGetStatus,
+  mockGetDefinition,
+  mockSubmit,
+  mockGetModerationState,
+  mockUpdateModerationStatus,
+} = vi.hoisted(() => ({
   mockGetStatus: vi.fn(),
   mockGetDefinition: vi.fn(),
   mockSubmit: vi.fn(),
+  mockGetModerationState: vi.fn(),
+  mockUpdateModerationStatus: vi.fn(),
 }));
 
 vi.mock('../lib/api', () => ({
   getDailyQuestStatus: (...args: unknown[]) => mockGetStatus(...args),
   getDailyQuestDefinition: (...args: unknown[]) => mockGetDefinition(...args),
   submitDailyQuest: (...args: unknown[]) => mockSubmit(...args),
+  getModerationState: (...args: unknown[]) => mockGetModerationState(...args),
+  updateModerationStatus: (...args: unknown[]) => mockUpdateModerationStatus(...args),
 }));
 
 describe('DailyQuestModal', () => {
+  function renderWithLanguageProvider(ui: ReactElement) {
+    return render(<PostLoginLanguageProvider>{ui}</PostLoginLanguageProvider>);
+  }
+
   const baseDefinition = {
     date: '2024-03-10',
     submitted: false,
@@ -59,13 +74,16 @@ describe('DailyQuestModal', () => {
     mockGetStatus.mockReset();
     mockGetDefinition.mockReset();
     mockSubmit.mockReset();
+    mockGetModerationState.mockReset();
+    mockUpdateModerationStatus.mockReset();
+    mockGetModerationState.mockResolvedValue({ dayKey: null, sugar: null, alcohol: null, tobacco: null });
   });
 
   it('does not render the modal when the quest is already submitted', async () => {
     mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: true, submitted_at: '2024-03-10T12:00:00Z' });
     mockGetDefinition.mockResolvedValue(baseDefinition);
 
-    render(<DailyQuestModal enabled />);
+    renderWithLanguageProvider(<DailyQuestModal enabled />);
 
     await waitFor(() => {
       expect(mockGetStatus).toHaveBeenCalled();
@@ -78,7 +96,7 @@ describe('DailyQuestModal', () => {
     mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
     mockGetDefinition.mockResolvedValue(baseDefinition);
 
-    render(<DailyQuestModal enabled canAutoOpen={false} />);
+    renderWithLanguageProvider(<DailyQuestModal enabled canAutoOpen={false} />);
 
     await waitFor(() => {
       expect(mockGetStatus).toHaveBeenCalled();
@@ -91,7 +109,7 @@ describe('DailyQuestModal', () => {
     mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
     mockGetDefinition.mockResolvedValue(baseDefinition);
 
-    render(<DailyQuestModal enabled canAutoOpen />);
+    renderWithLanguageProvider(<DailyQuestModal enabled canAutoOpen />);
 
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -102,7 +120,7 @@ describe('DailyQuestModal', () => {
     mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
     mockGetDefinition.mockResolvedValue(baseDefinition);
 
-    render(<DailyQuestModal enabled />);
+    renderWithLanguageProvider(<DailyQuestModal enabled />);
 
     const user = userEvent.setup();
 
@@ -122,7 +140,7 @@ describe('DailyQuestModal', () => {
     mockGetStatus.mockResolvedValue({ date: '2024-03-10', submitted: false, submitted_at: null });
     mockGetDefinition.mockResolvedValue(baseDefinition);
 
-    render(<DailyQuestModal enabled />);
+    renderWithLanguageProvider(<DailyQuestModal enabled />);
 
     const user = userEvent.setup();
 
@@ -158,7 +176,7 @@ describe('DailyQuestModal', () => {
       streaks: { daily: 1, weekly: 1 },
     });
 
-    render(<DailyQuestModal enabled />);
+    renderWithLanguageProvider(<DailyQuestModal enabled />);
 
     const user = userEvent.setup();
 
@@ -166,7 +184,7 @@ describe('DailyQuestModal', () => {
 
     await user.click(screen.getByRole('button', { name: /calma/i }));
     await user.click(screen.getByText('Estiramientos'));
-    await user.click(screen.getByRole('button', { name: /registrar daily quest/i }));
+    await user.click(screen.getByRole('button', { name: /submit daily quest/i }));
 
     await waitFor(() => {
       expect(mockSubmit).toHaveBeenCalledWith({
@@ -177,9 +195,9 @@ describe('DailyQuestModal', () => {
       });
     });
 
-    await screen.findByRole('button', { name: /mantené presionado/i }, { timeout: 4000 });
+    await screen.findByRole('button', { name: /press and hold/i }, { timeout: 4000 });
 
-    expect(screen.getByText('Mantené presionado 2 segundos para cerrar')).toBeInTheDocument();
+    expect(screen.getByText('Press and hold for 2 seconds to close')).toBeInTheDocument();
     expect(screen.getByText('+10 GP')).toBeInTheDocument();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
@@ -188,7 +206,7 @@ describe('DailyQuestModal', () => {
     });
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /mantené presionado/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /press and hold/i })).toBeInTheDocument();
   }, 15000);
 
   it('locks body scroll while the modal is open and restores it on close', async () => {
@@ -196,13 +214,13 @@ describe('DailyQuestModal', () => {
     mockGetDefinition.mockResolvedValue(baseDefinition);
 
     const user = userEvent.setup();
-    render(<DailyQuestModal enabled />);
+    renderWithLanguageProvider(<DailyQuestModal enabled />);
 
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
 
     expect(document.body.style.overflow).toBe('hidden');
 
-    await user.click(screen.getByRole('button', { name: /más tarde/i }));
+    await user.click(screen.getByRole('button', { name: /later/i }));
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     await waitFor(() => expect(document.body.style.overflow).not.toBe('hidden'));
@@ -213,7 +231,7 @@ describe('DailyQuestModal', () => {
     mockGetDefinition.mockResolvedValue(baseDefinition);
 
     const user = userEvent.setup();
-    render(<DailyQuestModal enabled />);
+    renderWithLanguageProvider(<DailyQuestModal enabled />);
 
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
 
@@ -230,7 +248,7 @@ describe('DailyQuestModal', () => {
     const triggerRef = createRef<HTMLButtonElement>();
     const user = userEvent.setup();
 
-    render(
+    renderWithLanguageProvider(
       <>
         <button ref={triggerRef}>Daily</button>
         <DailyQuestModal enabled returnFocusRef={triggerRef} />
@@ -239,7 +257,7 @@ describe('DailyQuestModal', () => {
 
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
 
-    await user.click(screen.getByLabelText(/cerrar daily quest/i));
+    await user.click(screen.getByLabelText(/close daily quest/i));
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(document.activeElement).toBe(triggerRef.current);
@@ -252,11 +270,11 @@ describe('DailyQuestModal', () => {
     const modalRef = createRef<DailyQuestModalHandle>();
     const user = userEvent.setup();
 
-    render(<DailyQuestModal ref={modalRef} enabled />);
+    renderWithLanguageProvider(<DailyQuestModal ref={modalRef} enabled />);
 
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
 
-    await user.click(screen.getByRole('button', { name: /más tarde/i }));
+    await user.click(screen.getByRole('button', { name: /later/i }));
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 

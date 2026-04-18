@@ -28,6 +28,7 @@ import { useHoldToClose } from '../hooks/useHoldToClose';
 import { HABIT_ACHIEVEMENT_UPDATED_EVENT } from '../lib/habitAchievementEvents';
 import { useRequest } from '../hooks/useRequest';
 import { ModerationWidget } from './moderation/ModerationWidget';
+import { usePostLoginLanguage } from '../i18n/postLoginLanguage';
 
 type ToastTone = 'success' | 'error';
 
@@ -78,10 +79,10 @@ const CELEBRATION_PANEL_DURATION_MS = 1800;
 
 const DEFAULT_HOLD_TO_CLOSE_DURATION_MS = 2000;
 
-const CELEBRATION_MESSAGES = [
-  'Registro guardado. ¡Arrancaste con todo! 💥 Seguimos sumando GP hoy.',
-  'Listo el diario de ayer. ¡Hoy más fuerte! 💪✨',
-  '¡Bien! Emoción registrada y tareas checkeadas. 🚀 A por el día.',
+const CELEBRATION_MESSAGE_KEYS = [
+  'dailyQuest.celebration.message.1',
+  'dailyQuest.celebration.message.2',
+  'dailyQuest.celebration.message.3',
 ] as const;
 
 const CONFETTI_COLORS = ['#38bdf8', '#a855f7', '#fbbf24', '#34d399', '#f97316'];
@@ -157,8 +158,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   calm: {
     chipInactive:
       'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-sky-400/90 via-sky-500/80 to-indigo-400/80 text-white ring-1 ring-sky-300/60',
+    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(56,189,248,0.45)]',
     checkBackground: 'bg-sky-500/20',
     checkBorder: 'border-sky-300/60',
@@ -168,8 +168,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   happy: {
     chipInactive:
       'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-amber-300/90 via-orange-400/80 to-rose-400/80 text-white ring-1 ring-amber-200/60',
+    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(251,191,36,0.45)]',
     checkBackground: 'bg-amber-500/20',
     checkBorder: 'border-amber-300/60',
@@ -179,8 +178,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   motivation: {
     chipInactive:
       'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-violet-400/90 via-fuchsia-500/80 to-purple-500/80 text-white ring-1 ring-violet-300/60',
+    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(139,92,246,0.45)]',
     checkBackground: 'bg-violet-500/20',
     checkBorder: 'border-violet-300/60',
@@ -190,8 +188,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   sad: {
     chipInactive:
       'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-indigo-400/90 via-blue-500/80 to-slate-500/80 text-white ring-1 ring-indigo-300/60',
+    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(99,102,241,0.45)]',
     checkBackground: 'bg-indigo-500/20',
     checkBorder: 'border-indigo-300/60',
@@ -201,8 +198,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   anxiety: {
     chipInactive:
       'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-rose-400/90 via-pink-500/80 to-red-400/80 text-white ring-1 ring-rose-300/60',
+    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(244,63,94,0.45)]',
     checkBackground: 'bg-rose-500/20',
     checkBorder: 'border-rose-300/60',
@@ -212,8 +208,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   frustration: {
     chipInactive:
       'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-orange-400/90 via-amber-400/80 to-red-400/80 text-white ring-1 ring-orange-300/60',
+    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(249,115,22,0.45)]',
     checkBackground: 'bg-orange-500/20',
     checkBorder: 'border-orange-300/60',
@@ -223,8 +218,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
   tired: {
     chipInactive:
       'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-    chipActive:
-      'bg-gradient-to-r from-violet-400/90 via-purple-500/80 to-slate-500/80 text-white ring-1 ring-violet-300/60',
+    chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
     chipShadow: 'shadow-[0_12px_32px_rgba(139,92,246,0.45)]',
     checkBackground: 'bg-violet-500/20',
     checkBorder: 'border-violet-300/60',
@@ -236,8 +230,7 @@ const EMOTION_THEME_MAP: Record<string, EmotionTheme> = {
 const DEFAULT_EMOTION_THEME: EmotionTheme = {
   chipInactive:
     'border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-[color:var(--color-text-dim)] hover:bg-[color:var(--color-overlay-2)]',
-  chipActive:
-    'bg-gradient-to-r from-indigo-400/90 via-fuchsia-500/80 to-amber-300/80 text-white ring-1 ring-indigo-300/60',
+  chipActive: 'ib-daily-quest-innerbloom-gradient text-white ring-1 ring-white/35',
   chipShadow: 'shadow-[0_12px_32px_rgba(99,102,241,0.45)]',
   checkBackground: 'bg-primary/20',
   checkBorder: 'border-primary/60',
@@ -309,11 +302,54 @@ function CheckIcon({ active }: { active: boolean }) {
   );
 }
 
+function getLocalizedPillarLabel(t: (key: string) => string, pillarCode: string): string {
+  if (pillarCode === 'BODY') {
+    return `🫀 ${t('dailyQuest.pillars.body')}`;
+  }
+  if (pillarCode === 'MIND') {
+    return `🧠 ${t('dailyQuest.pillars.mind')}`;
+  }
+  if (pillarCode === 'SOUL') {
+    return `🏵️ ${t('dailyQuest.pillars.soul')}`;
+  }
+  return pillarCode;
+}
+
+function getLocalizedDifficultyLabel(
+  t: (key: string) => string,
+  difficulty: string | null | undefined,
+): string | null {
+  const normalized = (difficulty ?? '').trim().toUpperCase();
+  if (!normalized) {
+    return null;
+  }
+  if (normalized === 'EASY') {
+    return t('dailyQuest.difficulty.easy');
+  }
+  if (normalized === 'MEDIUM' || normalized === 'MED') {
+    return t('dailyQuest.difficulty.medium');
+  }
+  if (normalized === 'HARD') {
+    return t('dailyQuest.difficulty.hard');
+  }
+  return null;
+}
+
+function formatTaskMeta(
+  t: (key: string) => string,
+  difficulty: string | null | undefined,
+  xp: number,
+): string {
+  const difficultyLabel = getLocalizedDifficultyLabel(t, difficulty);
+  return difficultyLabel ? `${difficultyLabel} · ${xp} GP` : `${xp} GP`;
+}
+
 export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModalProps>(
   function DailyQuestModal(
     { enabled = false, canAutoOpen = true, returnFocusRef, onComplete }: DailyQuestModalProps,
     ref,
   ) {
+  const { t } = usePostLoginLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isManualOpen, setIsManualOpen] = useState(false);
   const [snoozed, setSnoozed] = useState(false);
@@ -796,7 +832,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
     }
 
     if (selectedEmotion == null) {
-      pushToast('Elegí una emoción para continuar.', 'error');
+      pushToast(t('dailyQuest.toast.selectEmotionRequired'), 'error');
       return;
     }
 
@@ -828,8 +864,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
         action?: ToastAction;
       } = {};
       const celebrationId = Date.now();
-      const celebrationMessage =
-        CELEBRATION_MESSAGES[Math.floor(Math.random() * CELEBRATION_MESSAGES.length)];
+      const celebrationMessage = t(
+        CELEBRATION_MESSAGE_KEYS[Math.floor(Math.random() * CELEBRATION_MESSAGE_KEYS.length)],
+      );
       setSuccessCelebration({
         id: celebrationId,
         message: celebrationMessage,
@@ -841,7 +878,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       onComplete?.(response);
       resetCelebrationHold();
       setIsCelebrationHoldReady(false);
-      setSrAnnouncement('Registro guardado con éxito.');
+      setSrAnnouncement(t('dailyQuest.toast.savedSuccess'));
       if (successCelebrationTimeoutRef.current) {
         clearTimeout(successCelebrationTimeoutRef.current);
       }
@@ -861,13 +898,13 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
       setPendingSubmission(null);
       shouldRestoreFocusRef.current = false;
       setIsOpen(true);
-      pushToast('No pudimos guardar tu Daily Quest. Intentá nuevamente.', 'error');
+      pushToast(t('dailyQuest.toast.saveError'), 'error');
     }
   };
 
   const handleSnooze = () => {
     closeModal({ snooze: true });
-    pushToast('Recordatorio pospuesto. Volvé cuando quieras completar tu Daily Quest.', 'success');
+    pushToast(t('dailyQuest.toast.snoozedReminder'), 'success');
   };
 
   const isLoadingStatus = statusRequestState === 'loading' || statusRequestState === 'idle';
@@ -930,13 +967,12 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1.5">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/70">Daily Quest</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/70">{t('dailyQuest.header.kicker')}</p>
                         <h2 id="daily-quest-title" className="text-lg font-semibold text-[color:var(--color-text)] md:text-xl">
-                          ☀️ Retrospectiva
+                          ☀️ {t('dailyQuest.header.title')}
                         </h2>
                         <p className="text-[11px] text-[color:var(--color-text-muted)] md:text-xs">
-                          Registrá cómo te sentiste ayer, elegí la emoción que predominó y marcá las tareas logradas.
-                          ¡Seguí sumando GP y rachas!
+                          {t('dailyQuest.header.description')}
                         </p>
                       </div>
                       <button
@@ -944,7 +980,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                         type="button"
                         className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-sm text-white/80 transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                         onClick={handleSnooze}
-                        aria-label="Cerrar Daily Quest"
+                        aria-label={t('dailyQuest.closeAria')}
                       >
                         ✕
                       </button>
@@ -969,9 +1005,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                         <>
                           <section className="flex flex-col gap-2" data-demo-anchor="daily-quest-emotion-block">
                             <h3 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-dim)]">
-                              ¿Qué sentimiento prevaleció más el día de ayer?
+                              {t('dailyQuest.emotion.question')}
                             </h3>
-                            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Emociones disponibles">
+                            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('dailyQuest.emotion.availableAria')}>
                               {definition.emotionOptions.map((option) => {
                                 const isActive = selectedEmotion === option.emotion_id;
                                 const theme = emotionThemeById.get(option.emotion_id) ?? DEFAULT_EMOTION_THEME;
@@ -1009,7 +1045,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           />
 
                           <section className="flex flex-col gap-4" data-demo-anchor="daily-quest-tasks">
-                            <h3 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-muted)]">Checklist del día</h3>
+                            <h3 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-muted)]">{t('dailyQuest.checklist.title')}</h3>
                             <div className="flex flex-col">
                               {definition.pillars.map((pillar, index) => {
                                 const fallbackTheme = resolvePillarTheme(pillar.pillar_code);
@@ -1022,15 +1058,9 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                         headingMarginClass,
                                       )}
                                     >
-                                      {pillar.pillar_code === 'BODY'
-                                        ? '🫀 Cuerpo (BODY)'
-                                        : pillar.pillar_code === 'MIND'
-                                        ? '🧠 Mente (MIND)'
-                                        : pillar.pillar_code === 'SOUL'
-                                        ? '🏵️ Alma (SOUL)'
-                                        : pillar.pillar_code}
+                                      {getLocalizedPillarLabel(t, pillar.pillar_code)}
                                     </h4>
-                                    <span className="mt-2 h-1.5 w-16 rounded-full bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300" />
+                                    <span className="ib-daily-quest-innerbloom-gradient mt-2 h-1.5 w-16 rounded-full" />
                                     <div className="mt-3 flex flex-col gap-2">
                                       {pillar.tasks.map((task) => {
                                         const isSelected = selectedTasks.includes(task.task_id);
@@ -1080,7 +1110,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                                     }}
                                                     className="ib-chip-solid ib-chip-solid--warning pointer-events-none absolute right-3 top-3 rounded-lg px-2 py-1 text-[11px] font-semibold"
                                                   >
-                                                    HARD · +{task.xp} GP
+                                                    {getLocalizedDifficultyLabel(t, 'HARD') ?? 'Hard'} · +{task.xp} GP
                                                   </motion.div>
                                                 ))}
                                               </AnimatePresence>
@@ -1146,7 +1176,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                               <div className="space-y-1">
                                                 <p className="font-medium text-[color:var(--color-text)]">{task.name}</p>
                                                 <p className="text-xs text-[color:var(--color-text-faint)]">
-                                                  {task.difficulty ? `Dificultad ${task.difficulty}` : 'Dificultad desconocida'} · {task.xp} GP
+                                                  {formatTaskMeta(t, task.difficulty, task.xp)}
                                                 </p>
                                               </div>
                                             </div>
@@ -1168,13 +1198,13 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
 
                           <section className="flex flex-col gap-2">
                             <label htmlFor="daily-quest-notes" className="text-sm font-semibold uppercase tracking-wide text-[color:var(--color-text-dim)]">
-                              Notas opcionales
+                              {t('dailyQuest.notes.label')}
                             </label>
                             <textarea
                               id="daily-quest-notes"
                               value={notes}
                               onChange={(event) => setNotes(event.target.value)}
-                              placeholder="¿Algo que quieras destacar de tu día?"
+                              placeholder={t('dailyQuest.notes.placeholder')}
                               className="min-h-[96px] resize-y rounded-2xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] px-3 py-3 text-sm text-[color:var(--color-text)] placeholder:text-[color:var(--color-text-subtle)] focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
                             />
                           </section>
@@ -1190,9 +1220,8 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <div className="relative text-white">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-faint)]">Experiencia ganada</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-faint)]">{t('dailyQuest.footer.gpLabel')}</p>
                         <p className="mt-1 text-2xl font-bold md:text-3xl">
-                          GP:{' '}
                           <span
                             data-testid="xp-counter"
                             className="ib-daily-quest-gp-value text-amber-200 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]"
@@ -1221,27 +1250,27 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           onClick={handleSnooze}
                           className="h-10 rounded-xl border border-[color:var(--color-border-subtle)] bg-[color:var(--color-overlay-1)] text-sm font-medium text-[color:var(--color-text-dim)] transition hover:bg-[color:var(--color-overlay-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:h-11 md:px-6"
                         >
-                          Más tarde
+                          {t('dailyQuest.actions.later')}
                         </button>
                         <button
                           type="button"
                           onClick={handleSubmit}
                           disabled={isConfirmDisabled}
                           aria-describedby={showEmotionHelper ? helperTextId : undefined}
-                          aria-label="Registrar Daily Quest"
+                          aria-label={t('dailyQuest.actions.confirmAria')}
                           className={classNames(
-                            'inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-400 via-fuchsia-500 to-amber-300 text-sm font-semibold text-white shadow-[0_12px_40px_rgba(99,102,241,0.35)] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-60 md:h-11 md:px-6',
-                            !isConfirmDisabled && 'hover:from-indigo-300 hover:via-fuchsia-500 hover:to-amber-200',
+                            'ib-daily-quest-innerbloom-gradient inline-flex h-10 items-center justify-center rounded-xl text-sm font-semibold text-white shadow-[var(--shadow-innerbloom-cta)] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-60 md:h-11 md:px-6',
+                            !isConfirmDisabled && 'brightness-100 hover:brightness-110',
                             isSubmitting && 'cursor-wait',
                           )}
                         >
-                          {isSubmitting ? 'Guardando…' : 'Confirmar'}
+                          {isSubmitting ? t('dailyQuest.actions.saving') : t('dailyQuest.actions.confirm')}
                         </button>
                       </div>
                     </div>
                     {showEmotionHelper && (
                       <p id={helperTextId} className="text-[11px] text-rose-200/80 md:text-right">
-                        Seleccioná una emoción para confirmar.
+                        {t('dailyQuest.helper.selectEmotion')}
                       </p>
                     )}
                   </motion.footer>
@@ -1304,7 +1333,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                           {isCelebrationHoldReady && (
                             <div className="mt-1 flex w-full flex-col items-center gap-2 text-[12px] text-white/80" id="daily-quest-celebration-hold-instructions">
                               <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[color:var(--color-text-dim)]">
-                                Mantené presionado 2 segundos para cerrar
+                                {t('dailyQuest.celebration.holdInstruction')}
                               </span>
                               <motion.button
                                 type="button"
@@ -1347,7 +1376,7 @@ export const DailyQuestModal = forwardRef<DailyQuestModalHandle, DailyQuestModal
                                   }}
                                   transition={{ duration: 0.18, ease: 'easeOut' }}
                                 />
-                                <span className="relative z-10">Mantené presionado</span>
+                                <span className="relative z-10">{t('dailyQuest.celebration.holdButton')}</span>
                               </motion.button>
                               <div className="h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-[color:var(--color-overlay-3)]">
                                 <motion.div
