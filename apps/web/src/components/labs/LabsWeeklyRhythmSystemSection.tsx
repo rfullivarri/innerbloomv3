@@ -1,44 +1,38 @@
 const INNERBLOOM_PREMIUM_GRADIENT =
   'linear-gradient(90deg, rgba(164, 109, 255, 0.98) 0%, rgba(204, 141, 255, 0.97) 52%, rgba(246, 187, 164, 0.96) 100%)';
 
-const WEEK_TICKS = 7;
-
 const RHYTHM_CARDS = [
   {
     id: 'low',
     name: 'LOW',
     frequency: '1× / week',
     micro: 'Lower load',
-    support: 'Keeps the system alive when capacity is limited.',
-    activeDays: 1,
-    chips: ['3 core actions', 'Low structure'],
+    intensity: 26,
+    chips: ['BASE REBUILD', 'LIGHTEST LOAD'],
   },
   {
     id: 'chill',
     name: 'CHILL',
     frequency: '2× / week',
     micro: 'Steady pace',
-    support: 'Balanced rhythm for consistency without overload.',
-    activeDays: 2,
-    chips: ['5 core actions', 'Light structure'],
+    intensity: 48,
+    chips: ['STEADY CONSISTENCY', 'LIGHT CADENCE'],
   },
   {
     id: 'flow',
     name: 'FLOW',
     frequency: '3× / week',
     micro: 'Focused push',
-    support: 'Higher cadence with room to recover and adapt.',
-    activeDays: 3,
-    chips: ['7 core actions', 'Guided structure'],
+    intensity: 72,
+    chips: ['CLEAR DIRECTION', 'SUSTAINABLE PUSH'],
   },
   {
     id: 'evolve',
     name: 'EVOLVE',
     frequency: '4× / week',
     micro: 'More structure',
-    support: 'More committed weekly load with tighter planning.',
-    activeDays: 4,
-    chips: ['9 core actions', 'High structure'],
+    intensity: 92,
+    chips: ['HIGHER STRUCTURE', 'MORE INTENSITY'],
   },
 ] as const;
 
@@ -54,80 +48,56 @@ export function LabsWeeklyRhythmSystemSection() {
         <header className="max-w-3xl space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Weekly rhythm system</p>
           <h2 id="labs-weekly-rhythm-title" className="text-3xl font-semibold tracking-[-0.03em] text-white md:text-4xl">
-            Pick the intensity you can sustain this week
+            Pick the intensity you can sustain
           </h2>
           <p className="max-w-2xl text-sm leading-relaxed text-white/80 md:text-base">
-            Four rhythms, one weekly logic: the more active days you can sustain, the higher your intensity.
+            Four rhythms, one weekly logic.
           </p>
         </header>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {RHYTHM_CARDS.map((card) => {
-            const progress = (card.activeDays / WEEK_TICKS) * 100;
-
-            return (
-              <article
-                key={card.id}
-                className="group relative flex h-full flex-col gap-4 rounded-3xl border border-white/14 bg-[linear-gradient(168deg,rgba(255,255,255,0.08),rgba(15,12,34,0.22))] p-5 shadow-[0_14px_34px_rgba(17,10,37,0.2),inset_0_1px_0_rgba(255,255,255,0.14)] transition duration-200 hover:-translate-y-0.5 hover:border-white/20"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <p className="text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white/56">Rhythm</p>
-                    <h3 className="text-[1.55rem] font-semibold tracking-[-0.03em] text-white">{card.name}</h3>
-                  </div>
-                  <span className="inline-flex items-center rounded-full border border-white/16 bg-white/[0.08] px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.15em] text-white/90">
-                    {card.frequency}
-                  </span>
-                </div>
-
-                <div className="space-y-2.5">
-                  <div className="h-[0.38rem] overflow-hidden rounded-full bg-white/[0.08]">
-                    <div
-                      className="h-full rounded-full shadow-[0_0_12px_rgba(201,150,255,0.34)]"
-                      style={{ width: `${progress}%`, backgroundImage: INNERBLOOM_PREMIUM_GRADIENT }}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-7 gap-1.5" aria-label={`${card.activeDays} active days out of 7`}>
-                    {Array.from({ length: WEEK_TICKS }).map((_, index) => {
-                      const isActive = index < card.activeDays;
-                      return (
-                        <span
-                          key={`${card.id}-tick-${index}`}
-                          className={`h-1.5 rounded-full ${
-                            isActive ? 'shadow-[0_0_8px_rgba(201,150,255,0.38)]' : 'bg-white/[0.14]'
-                          }`}
-                          style={isActive ? { backgroundImage: INNERBLOOM_PREMIUM_GRADIENT } : undefined}
-                          aria-hidden
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-
+          {RHYTHM_CARDS.map((card) => (
+            <article
+              key={card.id}
+              className="group relative flex h-full flex-col gap-5 rounded-3xl border border-white/14 bg-[linear-gradient(168deg,rgba(255,255,255,0.08),rgba(15,12,34,0.22))] p-5 shadow-[0_14px_34px_rgba(17,10,37,0.2),inset_0_1px_0_rgba(255,255,255,0.14)] transition duration-200 hover:-translate-y-0.5 hover:border-white/20"
+            >
+              <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-white/90">{card.micro}</p>
-                  <p className="text-xs leading-relaxed text-white/66">{card.support}</p>
+                  <p className="text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white/56">Rhythm</p>
+                  <h3 className="text-[1.55rem] font-semibold tracking-[-0.03em] text-white">{card.name}</h3>
                 </div>
+                <span className="inline-flex items-center rounded-full border border-[#f0ddff]/28 bg-[linear-gradient(140deg,rgba(206,146,255,0.28),rgba(255,255,255,0.08))] px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.15em] text-[#f3e6ff] shadow-[0_6px_16px_rgba(162,96,245,0.24)]">
+                  {card.frequency}
+                </span>
+              </div>
 
-                <ul className="mt-auto flex flex-wrap gap-1.5">
-                  {card.chips.map((chip) => (
-                    <li
-                      key={chip}
-                      className="rounded-full border border-white/12 bg-white/[0.08] px-2.5 py-1 text-[0.64rem] font-medium uppercase tracking-[0.05em] text-white/86"
-                    >
-                      {chip}
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            );
-          })}
+              <div
+                className="h-[1.14rem] overflow-hidden rounded-full bg-white/[0.07]"
+                aria-label={`${card.name} intensity ${card.intensity}%`}
+              >
+                <div
+                  className="h-full rounded-full shadow-[0_0_16px_rgba(201,150,255,0.36)]"
+                  style={{ width: `${card.intensity}%`, backgroundImage: INNERBLOOM_PREMIUM_GRADIENT }}
+                />
+              </div>
+
+              <p className="text-sm font-medium text-white/90">{card.micro}</p>
+
+              <ul className="mt-auto flex flex-wrap gap-1.5">
+                {card.chips.map((chip) => (
+                  <li
+                    key={chip}
+                    className="rounded-full border border-[#f0ddff]/16 bg-[linear-gradient(140deg,rgba(177,121,255,0.2),rgba(255,255,255,0.06))] px-2.5 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-[#f2e4ff]"
+                  >
+                    {chip}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
         </div>
 
-        <p className="text-xs leading-relaxed text-white/66 md:text-sm">
-          Rhythm = weekly intensity linked to sustainable frequency.
-        </p>
+        <p className="text-xs leading-relaxed text-white/66 md:text-sm">Rhythm = weekly intensity linked to sustainable frequency.</p>
       </div>
     </section>
   );
